@@ -1,0 +1,710 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"on_",
+				"on_message"
+			],
+			[
+				"li",
+				"link_to"
+			],
+			[
+				"refe",
+				"reference_url"
+			],
+			[
+				"from",
+				"from_year"
+			],
+			[
+				"pro",
+				"production_year_from"
+			],
+			[
+				"produ",
+				"production_year_from"
+			],
+			[
+				"producti",
+				"production_year_to"
+			],
+			[
+				"tr",
+				"translate_tabs_to_spaces"
+			],
+			[
+				"suc",
+				"success"
+			],
+			[
+				"picture_i",
+				"picture_index"
+			],
+			[
+				"fil",
+				"filter_html"
+			],
+			[
+				"de",
+				"desc"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "lib/WebIrc.pm",
+			"settings":
+			{
+				"buffer_size": 536,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/WebIrc/Core.pm",
+			"settings":
+			{
+				"buffer_size": 84,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/LESS-build/LESS.sublime-build",
+	"command_palette":
+	{
+		"height": 375.0,
+		"selected_items":
+		[
+			[
+				"list",
+				"Package Control: List Packages"
+			],
+			[
+				"git:",
+				"Git: Toggle Annotations"
+			],
+			[
+				"package c",
+				"Package Control: Discover Packages"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"push",
+				"Git: Push"
+			],
+			[
+				"commi",
+				"Git: Quick Commit"
+			],
+			[
+				"commit",
+				"Git: Commit"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"contr",
+				"Package Control: Discover Packages"
+			],
+			[
+				"control",
+				"Package Control: List Packages"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"pret",
+				"Pretty JSON: Reformat (Pretty Print) JSON"
+			],
+			[
+				"pretty",
+				"Pretty JSON: Reformat (Pretty Print) JSON"
+			],
+			[
+				"rein",
+				"Indentation: Reindent Lines"
+			],
+			[
+				"json",
+				"Set Syntax: JSON"
+			],
+			[
+				"contro",
+				"Package Control: Install Package"
+			],
+			[
+				"random",
+				"Random Message: Insert Random Message"
+			],
+			[
+				"stack",
+				"Stackoverflow: Search Selection"
+			],
+			[
+				"log",
+				"Git: Log All"
+			],
+			[
+				"pull",
+				"Git: Pull"
+			],
+			[
+				"Snippet: ",
+				"Snippet: SET"
+			],
+			[
+				"Mojo",
+				"Set Syntax: Mojolicious Embedded Perl"
+			],
+			[
+				"github",
+				"GitHub: Private Gist from Selection"
+			],
+			[
+				"diff",
+				"Git: Diff Current File"
+			],
+			[
+				"contrl",
+				"Package Control: List Packages"
+			],
+			[
+				"package control",
+				"Package Control: List Packages"
+			],
+			[
+				"stat",
+				"Git: Status"
+			],
+			[
+				"git",
+				"Package Control: Install Package"
+			],
+			[
+				"Discover",
+				"Package Control: Discover Packages"
+			],
+			[
+				"List",
+				"Package Control: List Packages"
+			],
+			[
+				":w",
+				":w - Save"
+			]
+		],
+		"width": 588.0
+	},
+	"console":
+	{
+		"height": 138.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": true,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/marcus/Source/mojo-redis/README.pod",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/User/BufferScroll.sublime-settings",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/BufferScroll/BufferScroll.sublime-settings",
+		"/Users/marcus/Source/web_irc/lib/WebIrc.pm",
+		"/Users/marcus/Source/dimu3/dimu_branded/lib/DimuBranded/Artifact/OslobilderPresenter.pm",
+		"/Users/marcus/Source/dimu3/lib/Dimu3/Artifact.pm",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/Default/Default (OSX).sublime-keymap",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/SideBarGit/SideBarGit.sublime-settings",
+		"/Users/marcus/Source/ticket_system/.gitignore",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/Users/marcus/Source/ticket_system/public/css/style.less",
+		"/Users/marcus/Source/ticket_system/public/css/style.css",
+		"/Users/marcus/Source/dimu3/dimu3.staging.conf",
+		"/Users/marcus/Source/dimu3/templates/inc/featured.tt",
+		"/Users/marcus/Source/dimu3/templates/frontpage/set_featured.html.tt",
+		"/Users/marcus/Source/dimu3/templates/frontpage/index.html.tt",
+		"/Users/marcus/Source/dimu3/public/js/dimu3.js",
+		"/Users/marcus/Source/dimu3/templates/inc/tags.tt",
+		"/Users/marcus/Source/dimu3/vendor/dimucore/lib/DimuCore/WS/Feedback.pm",
+		"/Users/marcus/Source/dimu3/lib/Dimu3/Folder.pm",
+		"/Users/marcus/Source/dimu3/lib/Dimu3/ThumbnailCreator.pm",
+		"/Users/marcus/Source/dimu3/vendor/dimucore/lib/DimuCore/Artifact/Presenter.pm",
+		"/Users/marcus/Source/dimu3/lib/Dimu3/CommentProcessor.pm",
+		"/Users/marcus/.zshrc",
+		"/Users/marcus/.codeintel/config",
+		"/Users/marcus/Source/dimu3/lib/Dimu3/Frontpage.pm",
+		"/Users/marcus/Source/dimu3/templates/artifact/artifact.tt",
+		"/Users/marcus/Source/dimu3/templates/artifact/view.html.tt",
+		"/Users/marcus/Source/dimu3/templates/folder/list.html.tt",
+		"/Users/marcus/Source/dimu3/templates/folder/view.html.tt",
+		"/Users/marcus/Source/dimu3/lib/Dimu3.pm",
+		"/Users/marcus/Source/dimu3/dimu3.conf",
+		"/Users/marcus/Source/Quoted/quoted/views/script.str",
+		"/Users/marcus/Source/Quoted/docs/FAQ.txt",
+		"/Users/marcus/Source/Quoted/quoted.rb",
+		"/Users/marcus/Source/Quoted/Gemfile",
+		"/Users/marcus/Source/Quoted/extensions/chrome/quotedby.js",
+		"/Users/marcus/Source/Quoted/quoted/views/ipad_bookmarklet.slim",
+		"/Users/marcus/Source/TVGuide/meetv-web5/lib/MeeTV/Web5/templates/films/right.html.tt",
+		"/Users/marcus/Source/TVGuide/meetv-web5/lib/MeeTV/Web5.pm",
+		"/Users/marcus/Source/TVGuide/meetv-web5/lib/MeeTV/Web5/Events.pm",
+		"/Users/marcus/Source/TVGuide/meetv-ws-client/lib/MeeTV/WS/Client/ResultSet.pm",
+		"/Users/marcus/Source/TVGuide/meetv-ws-client/lib/MeeTV/WS/Client/Result/Event.pm",
+		"/Users/marcus/Source/TVGuide/meetv-web5/lib/MeeTV/Web5/Channels.pm",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/Default/Global.sublime-settings",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/User/Global.sublime-settings",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/Default/Base File.sublime-settings",
+		"/Users/marcus/Library/Application Support/Sublime Text 2/Packages/User/Base File.sublime-settings"
+	],
+	"find":
+	{
+		"height": 33.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"f5",
+			"reload",
+			"Redis",
+			"Mojo",
+			"references",
+			"Referanser",
+			"json",
+			"Tilleggsinformasjon",
+			"Tillegsinformasjon",
+			"title",
+			".reference",
+			"reference",
+			"referen",
+			"from_year",
+			"build_event",
+			"build_time",
+			"build_timespan",
+			"collage",
+			"physical_description_material_comment",
+			"KORO",
+			"KORK",
+			"KORO",
+			"prepare_ioloop",
+			"time",
+			".icon",
+			"EDITOR",
+			"EDTOR",
+			"resize_image",
+			"Thubm",
+			"usertag",
+			"->write",
+			"write",
+			"img",
+			"folder",
+			"regenerate_",
+			"owner",
+			"encode",
+			"post",
+			"indexSensitive",
+			"indexSe",
+			"featured",
+			"frontpage",
+			"indexses",
+			"featuredtrii",
+			"picture_in",
+			"picture_index",
+			"template",
+			"version",
+			"bookmarklet",
+			"token",
+			"selection",
+			"script",
+			"bookmarklet",
+			"quote",
+			"manifest",
+			"ignored",
+			"short",
+			"short_desc"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "lib/WebIrc.pm",
+					"settings":
+					{
+						"buffer_size": 536,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								129,
+								129
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Perl/Perl.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "lib/WebIrc/Core.pm",
+					"settings":
+					{
+						"buffer_size": 84,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								77,
+								77
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Perl/Perl.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 32.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"core",
+				"lib/WebIrc/Core.pm"
+			],
+			[
+				"i",
+				"lib/WebIrc.pm"
+			],
+			[
+				"readme.pod",
+				"README.pod"
+			],
+			[
+				"redis.pm",
+				"lib/Mojo/Redis.pm"
+			],
+			[
+				"packa",
+				"package.json"
+			],
+			[
+				"webir",
+				"lib/WebIrc.pm"
+			],
+			[
+				"",
+				"lib/WebIrc.pm"
+			],
+			[
+				"ex",
+				"lib/WebIrc/Example.pm"
+			],
+			[
+				"irc.pm",
+				"lib/WebIrc.pm"
+			],
+			[
+				"prsenter",
+				"vendor/dimucore/lib/DimuCore/Artifact/Presenter.pm"
+			],
+			[
+				"art",
+				"templates/artifact/artifact.tt"
+			],
+			[
+				"presenter",
+				"vendor/dimucore/lib/DimuCore/Artifact/Presenter.pm"
+			],
+			[
+				"artifact",
+				"dimu_branded/lib/DimuBranded/Artifact.pm"
+			],
+			[
+				"dimu",
+				"dimu3.conf"
+			],
+			[
+				".conf",
+				"dimu3.production.conf.sample"
+			],
+			[
+				"artifac",
+				"vendor/dimucore/lib/DimuCore/Artifact.pm"
+			],
+			[
+				"artifa",
+				"lib/Dimu3/Artifact.pm"
+			],
+			[
+				"owners",
+				"data/dimu-test/db/owners/owners.json"
+			],
+			[
+				"gitig",
+				".gitignore"
+			],
+			[
+				"style",
+				"public/css/style.css"
+			],
+			[
+				"less",
+				"public/css/style.less"
+			],
+			[
+				"html.ep",
+				"templates/event/frontpage.html.ep"
+			],
+			[
+				"presenter.pm",
+				"vendor/dimucore/lib/DimuCore/Artifact/Presenter.pm"
+			],
+			[
+				"commentpro",
+				"lib/Dimu3/CommentProcessor.pm"
+			],
+			[
+				"folder",
+				"lib/Dimu3/Folder.pm"
+			],
+			[
+				"thumb",
+				"lib/Dimu3/ThumbnailCreator.pm"
+			],
+			[
+				"thumb.pm",
+				"lib/Dimu3/ThumbnailCreator.pm"
+			],
+			[
+				"list",
+				"templates/folder/list.html.tt"
+			],
+			[
+				"view.",
+				"templates/folder/view.html.tt"
+			],
+			[
+				"feedback",
+				"vendor/dimucore/lib/DimuCore/WS/Feedback.pm"
+			],
+			[
+				"dimu3.pm",
+				"lib/Dimu3.pm"
+			],
+			[
+				"tag",
+				"templates/inc/tags.tt"
+			],
+			[
+				"dimu3.js",
+				"public/js/dimu3.js"
+			],
+			[
+				"front",
+				"lib/Dimu3/Frontpage.pm"
+			],
+			[
+				"feature",
+				"templates/frontpage/set_featured.html.tt"
+			],
+			[
+				"featu",
+				"templates/inc/featured.tt"
+			],
+			[
+				"test.tt",
+				"templates/folder/list.html.tt"
+			],
+			[
+				"inde",
+				"templates/frontpage/index.html.tt"
+			],
+			[
+				"dimu3.",
+				"dimu3.conf"
+			],
+			[
+				"stagin",
+				"dimu3.staging.conf"
+			],
+			[
+				"quoted.js",
+				"extensions/chrome/quotedby.js"
+			],
+			[
+				"script",
+				"quoted/views/script.str"
+			],
+			[
+				"faq",
+				"docs/FAQ.txt"
+			],
+			[
+				"bookm",
+				"quoted/views/ipad_bookmarklet.slim"
+			],
+			[
+				"manife",
+				"extensions/chrome/manifest.json"
+			],
+			[
+				"quote",
+				"quoted.rb"
+			],
+			[
+				"right",
+				"lib/MeeTV/Web5/templates/films/right.html.tt"
+			],
+			[
+				"event",
+				"lib/MeeTV/WS/Client/Result/Event.pm"
+			],
+			[
+				"results",
+				"lib/MeeTV/WS/Client/ResultSet.pm"
+			],
+			[
+				"chan",
+				"lib/MeeTV/Web5/Channels.pm"
+			],
+			[
+				"web5",
+				"lib/MeeTV/Web5.pm"
+			],
+			[
+				"events",
+				"lib/MeeTV/Web5/Events.pm"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+			[
+				"",
+				"/Users/marcus/Source/dimu3/dimu3.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}

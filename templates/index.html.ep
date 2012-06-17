@@ -1,0 +1,4 @@
+<h1>irchotel - <%= config('name')%></h1>
+
+<p>We
+<p>Log in</p>
