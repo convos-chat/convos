@@ -1,8 +1,19 @@
 package WebIrc::Core::Connection;
 
 use Mojo::Base -base;
+use Net::Async::IRC;
+use IO::Async::Loop::Mojo;
+
 
 has 'redis';
+has 'irc' => sub {
+  my $loop = IO::Async::Loop::Mojo->new();
+  my $irc=Net::Async::IRC->new(on_message_text=>sub {
+      my ($this,$message,$hints)=@_;
+    });
+  $loop->add($irc);
+  return $irc;
+};
 
 # Stored config
 has 'id';
@@ -40,9 +51,21 @@ sub load {
 }
 
 sub connect {
-  Mojo::IOLoop->client({
-
-    })
+  my $self=shift;
+  return if $self->irc->is_loggedin;
+  $self->irc->login(
+    nick      => $self->nick,
+    host      => $self->host,
+    service   => ( $self->port || 6667 ),
+    pass      => $self->password,
+    on_login  => sub {
+      my $irc=shift;
+      $irc->join()
+    },
+    on_error  => sub {
+      my ($msg) =@_;
+    # FIXME: handle errors here
+  });
 }
 
 sub disconnect {
