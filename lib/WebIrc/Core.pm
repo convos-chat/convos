@@ -18,7 +18,7 @@ sub start {
 
 sub connections {
   my ($self,$cb) = @_;
-  $self->redis->smembers(
+  $self->redis->smembers('connections',
     sub {
       my ($redis, $res) = @_;
       my @connections = map {
@@ -27,7 +27,7 @@ sub connections {
         $conn->load($_);
       } @$res;
       $cb->(@connections);
-  },'connections');
+  });
 }
 
 1;
