@@ -19,6 +19,10 @@ sub startup {
   # Normal route to controller
   $r->route('/')->to(template => 'index');
   $r->route('/login')->to('user#login');
+  my $c=$r->bridge('/c')->to('user#auth')
+  $r->route('/login')->to('user#login');
+  $r->route('/register')->to('user#register');
+  $c->route('/:channel')->to('client#view');
   $self->core->start;
 }
 
