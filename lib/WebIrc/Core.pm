@@ -30,4 +30,12 @@ sub connections {
   });
 }
 
+sub login {
+  my ($self,@cred)=@_;
+}
+
+sub register {
+  my ($self,%user)=@_;
+}
+
 1;
