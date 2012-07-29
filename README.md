@@ -15,7 +15,8 @@ The goal of WiRC is to make a great multi-user IRC Proxy, that also provides a e
 * Facebook Connect for registration/Avatars.
 * Useful Archive search/viewer
 
-## Design principles 
-* Keep the JS simple and managable
+## Architecture principles 
+* Keep the JS simple and manageable
 * Use Redis to manage state / publish subscribe
 * Archive logs in plain text format, use ack to search them.
+* Bootstrap-based user interface
