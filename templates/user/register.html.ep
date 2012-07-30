@@ -1,0 +1,9 @@
+<h1 class="page-header">Connect your Facebook account with Wirc</h1>
+<p>
+  Wirc is an app that allows you to interact with friends and colleges.
+</p>
+<div class="fb-login-button">
+  %= link_to oauth_connect_url(), class => 'fb_button fb_button_medium', begin
+    <span class="fb_button_text">Register with Facebook</span>
+  % end
+</div>

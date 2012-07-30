@@ -1,0 +1,13 @@
+.jumbotron { text-align: center }
+.jumbotron { padding: 36px 0 }
+.jumbotron h1 { font-size: 50px; line-height: 90px }
+.jumbotron p { font-size: 30px; margin: 40px }
+.jumbotron .btn { font-size: 20px }
+
+ul.inline-list { overflow: hidden; height: auto }
+ul.inline-list li { float: left; margin-right: 20px }
+.footer .inline-list { margin-top: 40px; padding-top: 20px; border-top: 1px solid #aaa }
+.footer .powered-by,
+.footer .powered-by a { font-size: 11px; color: #888 }
+
+#container { margin: 50px 0 }

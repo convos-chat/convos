@@ -1,4 +1,46 @@
-<h1>irchotel - <%= config('name')%></h1>
+<header class="jumbotron">
+  <div class="inner">
+    <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
+    <p>
+      Interact with friends and/or colleges.
+    </p>
+    <p class="download-info">
+      %= link_to oauth_connect_url, class => 'btn btn-primary btn-large', begin
+        Login
+      % end
+      or
+      %= link_to 'register', class => 'btn btn-success btn-large', begin
+        Register
+      % end
+    </p>
+  </div>
+</header>
 
-<p>We
-<p>Log in</p>
+<div class="row">
+  <div class="span6">
+    <h2>What is so cool about Wirc?</h2>
+    <p>
+      Ever wanted to log into an IRC channel from your phone, table, or computer
+      and never log out? Keep track of what is going on and search through your
+      history from the beginning of time on any device?
+    </p>
+  </div>
+  <div class="span6">
+    <h2>How does Wirc work anywhere?</h2>
+    <p>
+      Wirc is a web application, built on top of Twitter's
+      <%= link_to 'bootstrap', 'http://twitter.github.com/bootstrap/' %>,
+      so on top of its responsive design concepts we build application
+      that work anywhere.
+    </p>
+  </div>
+</div>
+<div class="row">
+  <div class="span6">
+    <h2>Always online?</h2>
+    <p>
+      An IRC proxy will keep you online and record everything that is going
+      on, so the next time you log on you can browse through the history.
+    </p>
+  </div>
+</div>
