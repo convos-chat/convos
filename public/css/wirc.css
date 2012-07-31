@@ -11,3 +11,17 @@ ul.inline-list li { float: left; margin-right: 20px }
 .footer .powered-by a { font-size: 11px; color: #888 }
 
 #container { margin: 50px 0 }
+
+#chat input.search-query { width: 800px }
+#chat ul {
+  width: 800px;
+  height: 300px;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}

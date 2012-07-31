@@ -30,19 +30,19 @@ sub startup {
     logged_in => 0,
   );
 
-  # Router
-  my $r = $self->routes;
-
   # Normal route to controller
+  my $r = $self->routes;
   $r->get('/')->to(template => 'index');
   $r->get('/register')->to(template => 'user/register');
   $r->post('/register')->to('user#register');
-  my $c=$r->bridge('/c')->to('user#auth');
-  $c->route('/:server/:channel')->to('client#view');
-  $c->websocket('/socket')->to('client#socket');
+
+  my $c=$r->bridge('/'); #->to('user#auth'); # disabling auth for now
+  $c->route('/*server/*target')->to('client#view');
   $c->route('/archive')->to('archive#list');
   $c->route('/archive/search')->to('archive#search');
-  $c->route('/archive/:server/:channel')->to('archive#view');
+  $c->route('/archive/*server/*target')->to('archive#view');
+
+  $c->websocket('/socket')->to('client#socket');
 
   # add NO_REDIS since batman is just going to do bootstrap now,
   # and Mojo::Redis seem to eat 100% cpu when the backend server

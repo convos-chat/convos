@@ -1,0 +1,11 @@
+<h1 class="page-header"><%= link_to $target, 'servertarget' %> on <%= param 'server' %></h1>
+<div id="chat">
+  <ul class="unstyled">
+    <li>Connecting to chat. Please wait...</li>
+  </ul>
+  %= form_for '', class => 'form-search', begin
+    <input type="text" class="input-medium search-query" placeholder="Enter a message and press enter to chat">
+    <button type="submit" class="btn">Send</button>
+  % end
+</div>
+
