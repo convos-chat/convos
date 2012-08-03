@@ -1,11 +1,34 @@
-<h1 class="page-header"><%= link_to $target, 'servertarget' %> on <%= param 'server' %></h1>
-<div id="chat">
-  <ul class="unstyled">
-    <li>Connecting to chat. Please wait...</li>
-  </ul>
-  %= form_for '', class => 'form-search', begin
-    <input type="text" class="input-medium search-query" placeholder="Enter a message and press enter to chat">
-    <button type="submit" class="btn">Send</button>
-  % end
+% page_header link_to($target, 'servertarget') .' on '. $server;
+<div class="row" ng-controller="IrcClient">
+  <div id="targets" class="span2">
+    <ul class="nav nav-pills nav-stacked nav-with-actions">
+      <li ng-repeat="target in targets" class="{{target.className}}">
+        <i class="icon-cog"></i>
+        <a href="target://{{target.name}}">{{target.name}}</a>
+      </li>
+      <li>
+        <i class="icon-info-sign" title="Enter a channel name or nick and press enter to create new chat"></i>
+        <form ng-submit="changeTarget()" id="changeTarget">
+          <input type="text" ng-model="channel_or_nick" class="span2" placeholder="#channel or nick">
+        </form>
+      </li>
+    </ul>
+  </div>
+  <div id="chat" class="span10">
+    <ul class="unstyled">
+      <li ng-repeat="message in messages">
+        <span class="nick">
+          <i class="{{message.className}}"></i>
+          <a href="target://{{message.sender}}">{{message.sender}}</a>
+        </span>
+        {{message.text}}
+      </li>
+    </ul>
+    <form ng-submit="sendMessage()">
+      <input type="text" class="span10" ng-model="message" placeholder="Write a message and press enter to chat">
+    </form>
+  </div>
+  <div id="statusbar" class="offset2 span10">
+    {{nick_list.length}} person(s) in chat room.
+  </div>
 </div>
-

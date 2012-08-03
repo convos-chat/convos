@@ -64,10 +64,11 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $c=$r->bridge('/'); #->to('user#auth'); # disabling auth for now
-  $c->route('/*server/*target')->to('client#view');
+  $c->route('/*server/:target')->to('client#view')->name('client_view');
+  $c->route('/chat')->to('client#goto_view');
   $c->route('/archive')->to('archive#list');
   $c->route('/archive/search')->to('archive#search');
-  $c->route('/archive/*server/*target')->to('archive#view');
+  $c->route('/archive/*server/:target')->to('archive#view');
 
   $c->websocket('/socket')->to('client#socket');
 

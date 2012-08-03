@@ -10,11 +10,29 @@ ul.inline-list li { float: left; margin-right: 20px }
 .footer .powered-by,
 .footer .powered-by a { font-size: 11px; color: #888 }
 
+.nav.nav-with-actions > li { position: relative }
+.nav.nav-with-actions > li > a:hover { text-decoration: underline }
+.nav.nav-with-actions > li.active > i { color: #fff }
+.nav.nav-with-actions > li.active > i:hover { color: #ddf }
+.nav.nav-with-actions > li > i {
+  font-size: 18px;
+  position: absolute;
+  top: 9px;
+  right: 3px;
+  cursor: pointer;
+}
+.nav.nav-with-actions > li > i.icon-info-sign { cursor: help }
+
+/*
+ * not sure why font awesome does not do this... bug?
+ */
+i[class^="icon-"], i[class*=" icon-"] {
+  background-image: none;
+}
+
 #container { margin: 50px 0 }
 
-#chat input.search-query { width: 800px }
 #chat ul {
-  width: 800px;
   height: 300px;
   padding: 4px;
   border: 1px solid #ccc;
@@ -24,4 +42,17 @@ ul.inline-list li { float: left; margin-right: 20px }
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+#chat ul i[class^="icon-"], #chat ul i[class*=" icon-"] { position: relative; top: 2px }
+#chat ul .nick { color: #08C; display: block }
+
+#statusbar {
+  font-size: 0.9em;
+  color: #555;
+  border-top: 1px solid #aaa;
+}
+
+@media (max-width: 767px) {
+  #container { margin: 0 }
 }
