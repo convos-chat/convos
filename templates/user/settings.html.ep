@@ -1,0 +1,25 @@
+<h1 class="page-header">Settings</h1>
+%= form_for 'account', method => 'post', class => 'form-horizontal', begin
+  <div class="control-group">
+    <label class="control-label" for="nickname">Preferred nick name</label>
+    <div class="controls">
+      <input type="text" name="nickname" id="nickname">
+      <p class="help-block">
+        This will be the name that other people on IRC will see you as.
+      </p>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="gravatar_email">Gravatar email</label>
+    <div class="controls">
+      <input type="text" name="gravatar_email" id="gravatar_email">
+      <p class="help-block">
+        Register on <%= link_to 'http://gravatar.com' %> to get an avatar
+        in chat.
+      </p>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save settings</button>
+  </div>
+% end
