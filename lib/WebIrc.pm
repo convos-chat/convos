@@ -6,7 +6,63 @@ WebIrc - IRC client on web
 
 =head1 SYNOPSIS
 
+=head2 Production
+
+  hypnotoad script/web_irc
+
+=head2 Development
+
+  NO_REDIS=1 morbo script/web_irc 
+
 =head1 DESCRIPTION
+
+L<WebIrc> is a web frontend for IRC with additional features such as:
+
+=over 4
+
+=item Avatars
+
+The chat contains profile pictures which can be retrieved from Facebook
+or from gravatar.com.
+
+=item Include external resources
+
+Links to images and video will be displayed inline. No need to click on
+the link to view the data.
+
+=item Always online
+
+The backend server will keep you logged in and logs all the activity
+in your archive.
+
+=item Archive
+
+All chats will be logged and indexed, which allow you to search in
+earlier conversations.
+
+=back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<WebIrc::Archive>
+
+Mojolicious controller for IRC logs.
+
+=item L<WebIrc::Client>
+
+Mojolicious controller for IRC chat.
+
+=item L<WebIrc::User>
+
+Mojolicious controller for user data.
+
+=item L<WebIrc::Core>
+
+Backend functionality.
+
+=back
 
 =cut
 
@@ -34,7 +90,7 @@ has 'core'       => sub { WebIrc::Core->new(redis=>shift->connection)};
 # is this formatting done by a human or tidy..?
 has 'archive'    => sub {
   my $self = shift;
-  WebIrc::Core::Archive->new(  shift->config->{archive} ||
+  WebIrc::Core::Archive->new(  $self->config->{archive} ||
   $self->path_to('archive')) };
 
 =head1 METHODS
@@ -113,7 +169,7 @@ sub add_helpers {
   $self->helper(page_header => sub {
     $_[0]->stash('page_header', $_[1]) if @_ == 2;
     $_[0]->stash('title', Mojo::DOM->new($_[1])->all_text) if @_ == 2 and not $self->stash('title');
-    $_[0]->stash('page_header') // 'Wirc';
+    $_[0]->stash('page_header') // $self->config->{'name'};
   });
 }
 

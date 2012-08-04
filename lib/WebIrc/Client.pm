@@ -2,7 +2,7 @@ package WebIrc::Client;
 
 =head1 NAME
 
-WebIrc::Client
+WebIrc::Client - Mojolicious controller for IRC chat
 
 =cut
 
@@ -12,6 +12,9 @@ use Mojo::Base 'Mojolicious::Controller';
 =head1 METHODS
 
 =head2 goto_view
+
+Used to jump from C</chat> to C</:server/:target> using session
+information.
 
 =cut
 
@@ -25,6 +28,8 @@ sub goto_view {
 }
 
 =head2 view
+
+Will serve JSON data used to render the main IRC client information.
 
 =cut
 
@@ -46,9 +51,13 @@ sub _view_json {
     $self->render_json($data);
   }
 
-  # TODO
+  # TODO Retrieve data from backend
   $self->render_json({});
 }
+
+=head1 COPYRIGHT
+
+See L<WebIrc>.
 
 =head1 AUTHOR
 
