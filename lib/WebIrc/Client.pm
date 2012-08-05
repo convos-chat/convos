@@ -6,25 +6,30 @@ WebIrc::Client - Mojolicious controller for IRC chat
 
 =cut
 
-use feature 'state';
 use Mojo::Base 'Mojolicious::Controller';
+
+my $dummy_json = $ENV{'NO_REDIS'} ? eval do { local $/; readline DATA } : {};
 
 =head1 METHODS
 
-=head2 goto_view
+=head2 layout
 
-Used to jump from C</chat> to C</:server/:target> using session
-information.
+Used to render the main IRC client layout.
+Can serve both HTML and JSON.
 
 =cut
 
-sub goto_view {
+sub layout {
   my $self = shift;
 
-  $self->redirect_to(client_view => {
-    target => $self->session->{'target'} || '#mojo',
-    server => $self->session->{'server'} || 'irc.perl.org',
-  });
+  $self->stash(logged_in => 1); # TODO: Remove this once login logic is written
+  $self->respond_to(
+    html => sub {},
+    json => sub {
+      my $self = shift;
+      $self->render_json($dummy_json);
+    },
+  );
 }
 
 =head2 view
@@ -36,23 +41,7 @@ Will serve JSON data used to render the main IRC client information.
 sub view {
   my $self = shift;
 
-  $self->stash(logged_in => 1); # TODO: Remove this once login logic is written
-  $self->respond_to(
-    html => sub {},
-    json => \&_view_json,
-  );
-}
-
-sub _view_json {
-  my $self = shift;
-
-  if($ENV{'NO_REDIS'}) {
-    state $data = eval do { local $/; readline DATA } or warn $@;
-    $self->render_json($data);
-  }
-
-  # TODO Retrieve data from backend
-  $self->render_json({});
+  $self->render_json($dummy_json);
 }
 
 =head1 COPYRIGHT
@@ -71,20 +60,25 @@ Marcus Ramberg
 __DATA__
 {
 nick => 'test123',
-targets => [
+servers => [
   {
-    name => '#mojo',
-    className => 'active',
-  },
-  {
-    name => '#wirc',
-    className => '',
+    name => 'irc.perl.org',
+    targets => [
+      {
+        name => '#mojo',
+        className => 'active',
+      },
+      {
+        name => '#wirc',
+        className => '',
+      },
+    ],
   },
 ],
 messages => [
   {
     text => 'Connecting to #mojo...',
-    sender => '[server]',
+    sender => '&irc.perl.org',
     className => 'icon-comment',
   }
 ],

@@ -2674,7 +2674,8 @@ input[type="submit"].btn.btn-mini {
   margin-bottom: 18px;
   list-style: none;
 }
-.nav > li > a {
+.nav > li > a,
+.nav > li > .btn-group > a {
   display: block;
 }
 .nav > li > a:hover {
@@ -2711,7 +2712,9 @@ input[type="submit"].btn.btn-mini {
   padding: 3px 15px;
 }
 .nav-list > .active > a,
-.nav-list > .active > a:hover {
+.nav-list > .active > a:hover,
+.nav-list > .active > .btn-group > a,
+.nav-list > .active > .btn-group > a:hover {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
   background-color: #0088cc;

@@ -1,0 +1,49 @@
+<div class="row" ng-controller="IrcClient">
+  <div id="targets" class="span2">
+    <ul class="nav nav-list">
+      <li ng-repeat="server in servers" class="nav-header">
+        <div class="btn-group">
+          <a href="goto://{{server.name}}" ng-click="changeTarget(server.name, '')">{{server.name}}</a>
+          <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <li><a href="join://{{server.name}}" ng-click="join()"><i class="icon-plus"></i> Join channel</a></li>
+            <li><a href="disconnect://{{server.name}}" ng-click="disconnect()"><i class="icon-signout"></i> Disconnect</a></li>
+          </ul>
+        </div>
+        <ul class="unstyled nav nav-list">
+          <li ng-repeat="target in server.targets" class="{{target.className}}">
+            <div class="btn-group">
+              <a href="goto://{{server.name}}/{{target.name}}" ng-click="changeTarget(server.name, target.name)">{{target.name}}</a>
+              <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                <li><a href="info://{{server.name}}/{{target.name}}" ng-click="infoTarget()"><i class="icon-info-sign"></i> Information</a></li>
+                <li><a href="search://{{server.name}}/{{target.name}}" ng-click="searchTarget()"><i class="icon-comments"></i> Search archive</a></li>
+                <li><a href="close://{{server.name}}/{{target.name}}" ng-click="closeTarget()"><i class="icon-signout"></i> Close</a></li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div id="chat" class="span10">
+    <form ng-submit="changeTitle()">
+      <input type="text" class="span10" ng-model="title" placeholder="No title" readonly="readonly">
+    </form>
+    <ul class="unstyled">
+      <li ng-repeat="message in messages">
+        <span class="nick">
+          <i class="{{message.className}}"></i>
+          <a href="goto://{{message.server}}/{{message.sender}}" ng-click="changeTarget(message.server, message.sender)">{{message.sender}}</a>
+        </span>
+        {{message.text}}
+      </li>
+    </ul>
+    <form ng-submit="sendMessage()">
+      <input type="text" class="span10" ng-model="message" placeholder="Write a message and press enter to chat">
+    </form>
+  </div>
+  <div id="statusbar" class="offset2 span10">
+    {{nick_list.length}} person(s) in chat room.
+  </div>
+</div>

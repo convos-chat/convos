@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html ng-app>
   <head><title><%= title %></title>
-    <link rel="stylesheet/less" type="text/css" href="/bootstrap/less/bootstrap.less">
-    <link rel="stylesheet/less" type="text/css" href="/bootstrap/less/responsive.less">
+    %= stylesheet '/css/bootstrap.css';
     %= stylesheet '/css/font-awesome.css';
     %= stylesheet '/css/font-awesome-ie7.css';
     %= stylesheet '/css/wirc.css';
     %= javascript '/js/jquery.js';
     %= javascript '/bootstrap/js/less-1.3.0.min.js';
+    %= javascript '/bootstrap/js/bootstrap-dropdown.js';
+    %= javascript '/bootstrap/js/bootstrap-typeahead.js';
     %= javascript '/js/angular.min.js';
     %= javascript '/js/wirc.js';
   </head>

@@ -10,18 +10,15 @@ ul.inline-list li { float: left; margin-right: 20px }
 .footer .powered-by,
 .footer .powered-by a { font-size: 11px; color: #888 }
 
-.nav.nav-with-actions > li { position: relative }
-.nav.nav-with-actions > li > a:hover { text-decoration: underline }
-.nav.nav-with-actions > li.active > i { color: #fff }
-.nav.nav-with-actions > li.active > i:hover { color: #ddf }
-.nav.nav-with-actions > li > i {
-  font-size: 18px;
-  position: absolute;
-  top: 9px;
-  right: 3px;
-  cursor: pointer;
-}
-.nav.nav-with-actions > li > i.icon-info-sign { cursor: help }
+#targets button.choose-target { display: none }
+#targets .nav-list { padding: 0 }
+#targets .nav li { position: relative }
+#targets > .nav > li > .btn-group > a { color: #999 }
+#targets > .nav > li.active > .btn-group > a { color: #eee }
+#targets .nav li { text-transform: none }
+#targets .btn-group > a { margin: 1px 0; padding: 1px 0 1px 24px; }
+#targets .btn-group button { position: absolute; top: 1px; left: 1px }
+#chat form { margin: 0 }
 
 /*
  * not sure why font awesome does not do this... bug?
@@ -55,4 +52,6 @@ i[class^="icon-"], i[class*=" icon-"] {
 
 @media (max-width: 767px) {
   #container { margin: 0 }
+  #targets ul { display: none }
+  #targets button.choose-target { display: block }
 }
