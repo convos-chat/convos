@@ -1,6 +1,5 @@
 package WebIrc::Core::Connection;
 
-
 =head1 NAME
 
 WebIrc::Core::Connection - Represents a connection to an IRC server
@@ -25,6 +24,7 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
 
 use Mojo::Base -base;
 use IRC::Utils qw/decode_irc/;
+use Parse::IRC;
 use Carp qw/croak/;
 
 my @keys=qw/nick user host port password ssl/;
@@ -96,6 +96,14 @@ IRC server nickname.
 
 has 'nick';
 
+=head2 channels
+
+IRC channels to join on connect
+
+=cut
+
+has 'channels';
+
 =head2 stream
 
 Holds a L<Mojo::IOLoop::Stream> object?
@@ -128,7 +136,11 @@ sub load {
     foreach my $key (@keys) {
       $self->$key(shift @$res);
     }
-    $cb->($self);
+    $redis->smembers("connection:$id:channels",sub {
+      my ($redis,$channels)=@_;
+      $self->channels($channels);
+      $cb->($self);
+    });
   });
   return $self;
 }
@@ -144,7 +156,6 @@ Will login to the L</irc> server.
 sub connect {
   my $self=shift;
   $self->load(sub {
-    warn "Gonna connect to ".$self->host;
     Mojo::IOLoop->singleton->client(
       address=>$self->host,
       port=>$self->port, sub {
@@ -156,13 +167,36 @@ sub connect {
           my ($stream,$chunk)=@_;
           $buffer .= $chunk;
           while( $buffer =~ s/^([^\r\n]+)\r\n//s) {
-            warn decode_irc($1);
+            my $message=parse_irc($1);
+            given($message->{command}) {
+              when('001') {
+                for my $channel (@{$self->channels}) {
+                  $stream->write('JOIN '.$channel."\r\n");
+                }
+              }
+              when('PRIVMSG') {
+                $self->add_message($message);
+              }
+              when('PING') {
+                $stream->write('PONG '.$message->{params}->[0].'\n\r');
+              }
+            }
+            warn $message->{raw_line};
           }
         });
         $stream->write('NICK '.$self->nick."\r\n");
         $stream->write('USER '.$self->user." 8 * :WiRC IRC Proxy\r\n");
-        })
+      })
     });
+}
+
+sub add_message {
+  my ($self,$message)=@_;
+  $self->redis->rpush('connection:'.$self->id.':msg:'.$message->{params}->[0],$message->{params}->[1]);
+  unless($message->{params}->[0] =~ /^\#/x) {
+    $self->redis->sadd('connection:'.$self->id.':conversations',$message->{params}->[0]);
+    $self->redis->publish('connection:'.$self->id.':messages',$self->json);
+  }
 }
 
 =head2 disconnect

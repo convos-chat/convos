@@ -53,6 +53,7 @@ sub connections {
   $self->redis->smembers('connections',
     sub {
       my ($redis, $res) = @_;
+      warn "Starting ".@$res.' connections';
       $cb->(map {
         WebIrc::Core::Connection->new(redis => $self->redis,id=>$_);
       } @$res);
