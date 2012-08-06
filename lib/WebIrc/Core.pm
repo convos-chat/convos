@@ -51,8 +51,8 @@ TODO
 sub connections {
   my ($self,$cb) = @_;
   $self->redis->smembers('connections',
-    my ($redis, $res) = @_;
     sub {
+    my ($redis, $res) = @_;
       $self->redis->multi(sub {
         my ($redis) = @_;
         my @connections = map {
