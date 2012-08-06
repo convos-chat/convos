@@ -53,13 +53,10 @@ sub connections {
   $self->redis->smembers('connections',
     sub {
       my ($redis, $res) = @_;
-      my @connections = map {
-        my $conn = WebIrc::Core::Connection->new(redis => $self->redis);
-        #
-        $conn->load($_);
-      } @$res;
-      $cb->(@connections);
-  });
+      $cb->(map {
+        WebIrc::Core::Connection->new(redis => $self->redis,id=>$_);
+      } @$res);
+   });
 }
 
 =head2 login

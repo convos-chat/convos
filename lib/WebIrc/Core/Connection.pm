@@ -1,5 +1,6 @@
 package WebIrc::Core::Connection;
 
+
 =head1 NAME
 
 WebIrc::Core::Connection - Represents a connection to an IRC server
@@ -23,10 +24,10 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
 =cut
 
 use Mojo::Base -base;
-use Net::Async::IRC;
-use IO::Async::Loop::Mojo;
+use IRC::Utils qw/decode_irc/;
+use Carp qw/croak/;
 
-my @keys=qw/user host port password ssl/;
+my @keys=qw/nick user host port password ssl/;
 
 =head1 ATTRIBUTES
 
@@ -37,21 +38,6 @@ Holds a L<Mojo::Redis> object.
 =cut
 
 has 'redis';
-
-=head2 irc
-
-Holds a L<Net::Async::IRC> object.
-
-=cut
-
-has 'irc' => sub {
-  my $loop = IO::Async::Loop::Mojo->new();
-  my $irc=Net::Async::IRC->new(on_message_text=>sub {
-      my ($this,$message,$hints)=@_;
-    });
-  $loop->add($irc);
-  return $irc;
-};
 
 =head2 id
 
@@ -64,7 +50,7 @@ has 'id';
 
 =head2 user
 
-What is this? Is it realname?
+IRC username
 
 =cut
 
@@ -128,30 +114,21 @@ has 'stream';
 Loads config from L</redis> and populates the L</ATTRIBUTES>
 L</user>, L</host>, L</port>, L</password> and L</ssl>.
 
-Will be called in blocking mode if C<CODE> is not present.
-
-TODO: Can we remove blocking mode?
-
 =cut
 
+use Data::Dumper;
 sub load {
-  my ($self,$id,$cb)=@_;
+  my ($self,$cb)=@_;
+  return $cb->($self) if $self->{_loaded}++;
   my $delay;
-  if(!$cb) {
-    $delay=Mojo::IOLoop->delay;
-    $delay->start;
-  }
-  $self->id($id);
-  $self->redis->mget([ map { "connection:$id:$_" } @keys], sub {
+  my $id=$self->id || croak "Cannot load connection without id";
+  my @req= map { "connection:$id:$_" } @keys ;
+  $self->redis->mget(@req, sub {
     my ($redis,$res)=@_;
     foreach my $key (@keys) {
-      $self->$key(pop @$res);
+      $self->$key(shift @$res);
     }
-    if ($delay) {
-      $delay->end;
-    } else {
-      $cb->($self);
-    }
+    $cb->($self);
   });
   return $self;
 }
@@ -166,20 +143,26 @@ Will login to the L</irc> server.
 
 sub connect {
   my $self=shift;
-  return if $self->irc->is_loggedin;
-  $self->irc->login(
-    nick      => $self->nick,
-    host      => $self->host,
-    service   => ( $self->port || 6667 ),
-    pass      => $self->password,
-    on_login  => sub {
-      my $irc=shift;
-      $irc->join()
-    },
-    on_error  => sub {
-      my ($msg) =@_;
-    # FIXME: handle errors here
-  });
+  $self->load(sub {
+    warn "Gonna connect to ".$self->host;
+    Mojo::IOLoop->singleton->client(
+      address=>$self->host,
+      port=>$self->port, sub {
+        my ($loop,$err,$stream)=@_;
+        $stream->timeout(300);
+        $self->stream($stream);
+        my $buffer='';
+        $stream->on( read => sub {
+          my ($stream,$chunk)=@_;
+          $buffer .= $chunk;
+          while( $buffer =~ s/^([^\r\n]+)\r\n//s) {
+            warn decode_irc($1);
+          }
+        });
+        $stream->write('NICK '.$self->nick."\r\n");
+        $stream->write('USER '.$self->user." 8 * :WiRC IRC Proxy\r\n");
+        })
+    });
 }
 
 =head2 disconnect
