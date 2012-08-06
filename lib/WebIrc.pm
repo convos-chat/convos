@@ -120,8 +120,8 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $c=$r->bridge('/'); #->to('user#auth'); # disabling auth for now
-  $c->route('/*server/:target')->to('client#view');
-  $c->route('/chat')->to('client#layout');
+  $c->route('/setup')->to('client#setup');
+  $c->route('/*server/:target')->to('client#view')->name('view');
   $c->get('/settings')->to(template => 'user/settings')->name('settings');
   $c->post('/settings')->to('user#settings');
   $c->route('/archive')->to('archive#list');

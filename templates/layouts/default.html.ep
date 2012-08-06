@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app>
+<html>
   <head><title><%= title %></title>
     %= stylesheet '/css/bootstrap.css';
     %= stylesheet '/css/font-awesome.css';
@@ -9,7 +9,6 @@
     %= javascript '/bootstrap/js/less-1.3.0.min.js';
     %= javascript '/bootstrap/js/bootstrap-dropdown.js';
     %= javascript '/bootstrap/js/bootstrap-typeahead.js';
-    %= javascript '/js/angular.min.js';
     %= javascript '/js/wirc.js';
   </head>
   <body>

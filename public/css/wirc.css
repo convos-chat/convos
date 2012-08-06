@@ -10,14 +10,10 @@ ul.inline-list li { float: left; margin-right: 20px }
 .footer .powered-by,
 .footer .powered-by a { font-size: 11px; color: #888 }
 
-#targets button.choose-target { display: none }
 #targets .nav-list { padding: 0 }
 #targets .nav li { position: relative }
-#targets > .nav > li > .btn-group > a { color: #999 }
-#targets > .nav > li.active > .btn-group > a { color: #eee }
-#targets .nav li { text-transform: none }
-#targets .btn-group > a { margin: 1px 0; padding: 1px 0 1px 24px; }
-#targets .btn-group button { position: absolute; top: 1px; left: 1px }
+#targets .btn-group > button { position: absolute; top: 1px; left: 1px }
+#targets .btn-group > a { display: block; margin: 1px 0; padding: 1px 0 1px 24px; }
 #chat form { margin: 0 }
 
 /*
@@ -52,6 +48,4 @@ i[class^="icon-"], i[class*=" icon-"] {
 
 @media (max-width: 767px) {
   #container { margin: 0 }
-  #targets ul { display: none }
-  #targets button.choose-target { display: block }
 }
