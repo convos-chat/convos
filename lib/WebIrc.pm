@@ -87,11 +87,11 @@ Holds a L<WebIrc::Core> object.
 has 'connection' => sub { Mojo::Redis->new(server=>'127.0.0.1:6379') };
 has 'core'       => sub { WebIrc::Core->new(redis=>shift->connection)};
 
-# is this formatting done by a human or tidy..?
 has 'archive'    => sub {
   my $self = shift;
   WebIrc::Core::Archive->new(  $self->config->{archive} ||
-  $self->path_to('archive')) };
+    $self->path_to('archive'));
+};
 
 =head1 METHODS
 
