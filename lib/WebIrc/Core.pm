@@ -51,15 +51,20 @@ TODO
 sub connections {
   my ($self,$cb) = @_;
   $self->redis->smembers('connections',
+    my ($redis, $res) = @_;
     sub {
-      my ($redis, $res) = @_;
-      my @connections = map {
-        my $conn = WebIrc::Core::Connection->new(redis => $self->redis);
-        #
-        $conn->load($_);
-      } @$res;
-      $cb->(@connections);
-  });
+      $self->redis->multi(sub {
+        my ($redis) = @_;
+        my @connections = map {
+          my $conn = WebIrc::Core::Connection->new(redis => $self->redis);
+          $conn->load($_);
+        } @$res;
+        $self->redis->exec(sub {
+          my $redis=@_;
+          $cb->(@connections);
+          });
+        });
+      });
 }
 
 =head2 login

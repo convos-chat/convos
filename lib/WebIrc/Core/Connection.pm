@@ -137,19 +137,13 @@ TODO: Can we remove blocking mode?
 sub load {
   my ($self,$id,$cb)=@_;
   my $delay;
-  if(!$cb) {
-    $delay=Mojo::IOLoop->delay;
-    $delay->start;
-  }
   $self->id($id);
   $self->redis->mget([ map { "connection:$id:$_" } @keys], sub {
     my ($redis,$res)=@_;
     foreach my $key (@keys) {
       $self->$key(pop @$res);
     }
-    if ($delay) {
-      $delay->end;
-    } else {
+    if($cb) {
       $cb->($self);
     }
   });
