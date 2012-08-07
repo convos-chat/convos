@@ -36,6 +36,7 @@ sub start {
   my $self = shift;
   $self->redis->del('connections:connected');
   $self->connections(sub {
+    warn sprintf "[core] Starting %s connection(s)\n", int @_ if WebIrc::Core::Connection::DEBUG;
     for my $conn (@_) {
       $conn->connect;
     }
@@ -44,7 +45,7 @@ sub start {
 
 =head2 connections
 
-TODO
+Initializes the list of connections from Redis
 
 =cut
 
@@ -53,12 +54,30 @@ sub connections {
   $self->redis->smembers('connections',
     sub {
       my ($redis, $res) = @_;
-      warn sprintf "[core] Starting %s connection(s)\n", int @$res if WebIrc::Core::Connection::DEBUG;
       $cb->(map {
         WebIrc::Core::Connection->new(redis => $self->redis,id=>$_);
       } @$res);
    });
 }
+
+=head2 add_connection %conn
+
+Add a new connection to redis. Will create a new connection id and
+set all the keys in the %connection hash
+
+=cut
+
+sub add_connection {
+  my ($self,$uid,%conn)=@_;
+  $self->redis->incr('connnections:id',sub {
+    my ($redis,$res)=@_;
+    for my $key (keys %conn) {
+      $self->redis->set('connection:'.$res.':'.$conn{$key});
+    }
+  });
+}
+
+
 
 =head2 login
 
