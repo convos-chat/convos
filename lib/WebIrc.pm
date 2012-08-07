@@ -12,7 +12,7 @@ WebIrc - IRC client on web
 
 =head2 Development
 
-  NO_REDIS=1 morbo script/web_irc 
+  morbo script/web_irc
 
 =head1 DESCRIPTION
 
@@ -130,10 +130,7 @@ sub startup {
 
   $c->websocket('/socket')->to('client#socket');
 
-  # add NO_REDIS since batman is just going to do bootstrap now,
-  # and Mojo::Redis seem to eat 100% cpu when the backend server
-  # is not there...
-  $self->core->start unless $ENV{'NO_REDIS'};
+  $self->core->start;
 }
 
 =head2 add_helpers

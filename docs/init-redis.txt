@@ -1,0 +1,8 @@
+$ redis-cli
+sadd connections 1
+set connection:1:user $username
+set connection:1:nick $nickname
+set connection:1:host $server
+set connection:1:port $port
+set connection:1:password $password
+set connection:1:ssl 0

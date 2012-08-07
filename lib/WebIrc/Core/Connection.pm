@@ -26,6 +26,7 @@ use Mojo::Base -base;
 use IRC::Utils qw/decode_irc/;
 use Parse::IRC;
 use Carp qw/croak/;
+use constant DEBUG => $ENV{'WEBIRC_CONNECTION_DEBUG'} // 1; # default to true while developing
 
 my @keys=qw/nick user host port password ssl/;
 
@@ -181,7 +182,7 @@ sub connect {
                 $stream->write('PONG '.$message->{params}->[0].'\n\r');
               }
             }
-            warn $message->{raw_line};
+            warn sprintf "[connection:%s] %s\n", $self->id, $message->{raw_line} if DEBUG;
           }
         });
         $stream->write('NICK '.$self->nick."\r\n");
