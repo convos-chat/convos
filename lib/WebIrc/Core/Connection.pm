@@ -156,7 +156,20 @@ Will login to the L</irc> server.
 
 sub connect {
   my $self=shift;
+
   $self->load(sub {
+    for my $attr (@keys) {
+      unless(defined $self->$attr) {
+        warn sprintf "[connection:%s] Attribute '%s' is missing from config\n", $self->id, $attr;
+        $self->add_message({
+          prefix => 'internal',
+          command => 'PRIVMSG',
+          params => [ internal => "Attribute '$attr' is missing from config" ],
+        });
+        return;
+      }
+    }
+
     Mojo::IOLoop->singleton->client(
       address=>$self->host,
       port=>$self->port, sub {
@@ -196,7 +209,7 @@ sub add_message {
   $self->redis->rpush('connection:'.$self->id.':msg:'.$message->{params}->[0],$message->{params}->[1]);
   unless($message->{params}->[0] =~ /^\#/x) {
     $self->redis->sadd('connection:'.$self->id.':conversations',$message->{params}->[0]);
-    $self->redis->publish('connection:'.$self->id.':messages',$self->json);
+    #$self->redis->publish('connection:'.$self->id.':messages',$self->json); <-- $self->json?
   }
 }
 
