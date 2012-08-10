@@ -1,4 +1,4 @@
-package WebIrc::Core::Connection;
+  package WebIrc::Core::Connection;
 
 =head1 NAME
 
@@ -23,12 +23,15 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
 =cut
 
 use Mojo::Base -base;
+use Mojo::JSON;
 use IRC::Utils qw/decode_irc/;
 use Parse::IRC;
 use Carp qw/croak/;
 use constant DEBUG => $ENV{'WEBIRC_CONNECTION_DEBUG'} // 1; # default to true while developing
 
 my @keys=qw/nick user host port password ssl/;
+
+my $JSON = Mojo::JSON->new();
 
 =head1 ATTRIBUTES
 
@@ -182,7 +185,7 @@ sub connect {
             $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'}) if $message->{'command'} =~ /^\d+$/;
             my $method = 'irc_' .lc $message->{'command'};
             if($self->can($method)) {
-              $self->$method($message->{'params'}, $message);
+              $self->$method($message);
             }
             elsif(DEBUG) {
               warn sprintf "[connection:%s] ! Cannot handle (%s)\n", $self->id, $method if DEBUG;
@@ -196,32 +199,33 @@ sub connect {
 }
 
 sub irc_privmsg {
-  my($self, $params) = @_;
-  $self->add_message(privmsg => $params);
+  my($self, $message) = @_;
+  $self->add_message(privmsg => $message);
+  warn Dumper($message);
 }
 
 sub irc_mode {
-  my($self, $params) = @_;
-  $self->redis->sadd(join(':', 'connection', $self->id, 'mode', $params->[0]), $params->[1]);
+  my($self, $message) = @_;
+  $self->redis->sadd(join(':', 'connection', $self->id, 'mode', $message->{params}->[0]), $message->{params}->[1]);
 }
 
 sub irc_notice {
-  my($self, $params) = @_;
-  $self->add_message(notice => $params);
+  my($self, $message) = @_;
+  $self->add_message(notice => $message);
 }
 
 sub irc_err_nicknameinuse { # 433
-  my($self, $params) = @_;
+  my($self, $message) = @_;
 
   $self->nick($self->nick . '_');
   $self->write(NICK => $self->nick);
 }
 
 sub irc_rpl_welcome { # 001
-  my($self, $params) = @_;
+  my($self, $message) = @_;
 
-  $self->nick($params->[0]);
-  $self->redis->set(join(':', 'connection', $self->id, 'nick'), $params->[0]);
+  $self->nick($message->{params}->[0]);
+  $self->redis->set(join(':', 'connection', $self->id, 'nick'), $message->{params}->[0]);
 
   for my $channel (@{$self->channels}) {
     $self->write(JOIN => $channel);
@@ -229,8 +233,8 @@ sub irc_rpl_welcome { # 001
 }
 
 sub irc_ping {
-  my($self, $params) = @_;
-  $self->write(PONG => $params->[0]);
+  my($self, $message) = @_;
+  $self->write(PONG => $message->{params}->[0]);
 }
 
 sub irc_rpl_yourhost {} # :Tampa.FL.US.Undernet.org 002 batman__ :Your host is Tampa.FL.US.Undernet.org, running version u2.10.12.14
@@ -247,25 +251,25 @@ sub irc_rpl_motd {} # :Tampa.FL.US.Undernet.org 372 batman__ :The message of the
 sub irc_rpl_endofmotd {} # :Tampa.FL.US.Undernet.org 376 batman__ :End of /MOTD command.
 
 sub irc_error {
-  my($self, $params) = @_;
+  my($self, $message) = @_;
 
-  if($params->[0] =~ /Closing Link/) {
+  if($message->{params}->[0] =~ /Closing Link/) {
     $self->stream->close;
     $self->connect;
   }
 }
 
 sub add_message {
-  my ($self, $type, $params)=@_;
+  my ($self, $type, $message)=@_;
 
   $self->redis->rpush(
-    join(':', 'connection', $self->id, 'msg', $params->[0]),
-    join(':', $type, time, $params->[1]),
+    join(':', 'connection', $self->id, 'msg', $message->{params}->[0]),
+    join(':', $type, time, $message->{params}->[1]),
   );
 
-  unless($params->[0] =~ /^\#/x) {
-    $self->redis->sadd(join(':', 'connection', $self->id, 'conversations'), $params->[0]);
-    #$self->redis->publish('connection:'.$self->id.':messages',$self->json); <-- $self->json?
+  unless($message->{params}->[0] =~ /^\#/x) {
+    $self->redis->sadd(join(':', 'connection', $self->id, 'conversations'), $message->{params}->[0]);
+    $self->redis->publish('connection:'.$self->id.':messages',$JSON->encode({ $type => $message }));
   }
 }
 
