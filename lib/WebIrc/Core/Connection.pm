@@ -1,4 +1,4 @@
-  package WebIrc::Core::Connection;
+package WebIrc::Core::Connection;
 
 =head1 NAME
 
