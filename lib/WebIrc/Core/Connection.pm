@@ -158,14 +158,17 @@ sub connect {
   my $self=shift;
 
   $self->load(sub {
-    for my $attr (@keys) {
+    for my $attr (qw/ nick user host /) {
       unless(defined $self->$attr) {
-        warn sprintf "[connection:%s] Attribute '%s' is missing from config\n", $self->id, $attr;
-        $self->add_message({
-          prefix => 'internal',
-          command => 'PRIVMSG',
-          params => [ internal => "Attribute '$attr' is missing from config" ],
-        });
+        warn sprintf "[connection:%s] : Attribute '%s' is missing from config\n", $self->id, $attr;
+        $self->add_message(
+          {
+            prefix => 'internal',
+            command => 'PRIVMSG',
+          }, [
+            internal => "Attribute '$attr' is missing from config"
+          ],
+        );
         return;
       }
     }
@@ -180,35 +183,90 @@ sub connect {
         $stream->on( read => sub {
           my ($stream,$chunk)=@_;
           $buffer .= $chunk;
-          while( $buffer =~ s/^([^\r\n]+)\r\n//s) {
+          while($buffer =~ s/^([^\r\n]+)\r\n//s) {
+            warn sprintf "[connection:%s] > %s\n", $self->id, $1 if DEBUG;
             my $message=parse_irc($1);
-            given($message->{command}) {
-              when('001') {
-                for my $channel (@{$self->channels}) {
-                  $stream->write('JOIN '.$channel."\r\n");
-                }
-              }
-              when('PRIVMSG') {
-                $self->add_message($message);
-              }
-              when('PING') {
-                $stream->write('PONG '.$message->{params}->[0].'\n\r');
-              }
+            $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'}) if $message->{'command'} =~ /^\d+$/;
+            my $method = 'irc_' .lc $message->{'command'};
+            if($self->can($method)) {
+              $self->$method($message, $message->{'params'});
             }
-            warn sprintf "[connection:%s] %s\n", $self->id, $message->{raw_line} if DEBUG;
+            elsif(DEBUG) {
+              warn sprintf "[connection:%s] ! Cannot handle (%s)\n", $self->id, $method if DEBUG;
+            }
           }
         });
-        $stream->write('NICK '.$self->nick."\r\n");
-        $stream->write('USER '.$self->user." 8 * :WiRC IRC Proxy\r\n");
-      })
+        $self->write(NICK => $self->nick);
+        $self->write(USER => $self->user, 8, '*', ':WiRC IRC Proxy');
+      });
     });
 }
 
+sub irc_privmsg {
+  my($self, $message, $params) = @_;
+  $self->add_message($message, $params);
+}
+
+sub irc_mode {
+  my($self, $message, $params) = @_;
+  $self->redis->sadd(
+    join(':', 'connection', $self->id, 'mode', $params->[0]),
+    $message->{params}[1]
+  );
+}
+
+sub irc_notice {
+  my($self, $message, $params) = @_;
+  $self->add_message($message, $params);
+}
+
+sub irc_err_nicknameinuse { # 433
+  my($self, $message, $params) = @_;
+
+  $self->nick($self->nick . '_');
+  $self->write(NICK => $self->nick);
+}
+
+sub irc_rpl_welcome { # 001
+  my($self, $message, $params) = @_;
+
+  $self->nick($params->[0]);
+  $self->redis->set(join(':', 'connection', $self->id, 'nick'), $params->[0]);
+
+  for my $channel (@{$self->channels}) {
+    $self->write(JOIN => $channel);
+  }
+}
+
+sub irc_ping {
+  my($self, $message, $params) = @_;
+  $self->write(PONG => $params->[0]);
+}
+
+sub irc_rpl_yourhost {} # :Tampa.FL.US.Undernet.org 002 batman__ :Your host is Tampa.FL.US.Undernet.org, running version u2.10.12.14
+sub irc_rpl_created {} # :Tampa.FL.US.Undernet.org 003 batman__ :This server was created Thu Jun 21 2012 at 01:26:15 UTC
+sub irc_rpl_myinfo {} # :Tampa.FL.US.Undernet.org 004 batman__ Tampa.FL.US.Undernet.org u2.10.12.14 dioswkgx biklmnopstvrDR bklov
+sub irc_rpl_isupport {} # :Tampa.FL.US.Undernet.org 005 batman__ WHOX WALLCHOPS WALLVOICES USERIP CPRIVMSG CNOTICE SILENCE=25 MODES=6 MAXCHANNELS=20 MAXBANS=50 NICKLEN=12 :are supported by this server
+sub irc_rpl_luserclient {} # :Tampa.FL.US.Undernet.org 251 batman__ :There are 3400 users and 46913 invisible on 18 servers
+sub irc_rpl_luserop {} # :Tampa.FL.US.Undernet.org 252 batman__ 19 :operator(s) online
+sub irc_rpl_luserunknown {} # :Tampa.FL.US.Undernet.org 253 batman__ 305 :unknown connection(s)
+sub irc_rpl_luserchannels {} # :Tampa.FL.US.Undernet.org 254 batman__ 13700 :channels formed
+sub irc_rpl_luserme {} # :Tampa.FL.US.Undernet.org 255 batman__ :I have 12000 clients and 1 servers
+sub irc_rpl_motdstart {} # :Tampa.FL.US.Undernet.org 375 batman__ :- Tampa.FL.US.Undernet.org Message of the Day - 
+sub irc_rpl_motd {} # :Tampa.FL.US.Undernet.org 372 batman__ :The message of the day was last changed: 2007-5-24 17:42
+sub irc_rpl_endofmotd {} # :Tampa.FL.US.Undernet.org 376 batman__ :End of /MOTD command.
+
 sub add_message {
-  my ($self,$message)=@_;
-  $self->redis->rpush('connection:'.$self->id.':msg:'.$message->{params}->[0],$message->{params}->[1]);
-  unless($message->{params}->[0] =~ /^\#/x) {
-    $self->redis->sadd('connection:'.$self->id.':conversations',$message->{params}->[0]);
+  my ($self, $message, $params)=@_;
+  my $type = lc $message->{'command'};
+
+  $self->redis->rpush(
+    join(':', 'connection', $self->id, 'msg', $params->[0]),
+    join(':', $type, time, $params->[1]),
+  );
+
+  unless($params->[0] =~ /^\#/x) {
+    $self->redis->sadd(join(':', 'connection', $self->id, 'conversations'), $params->[0]);
     #$self->redis->publish('connection:'.$self->id.':messages',$self->json); <-- $self->json?
   }
 }
@@ -221,8 +279,23 @@ Will disconnect from the L</irc> server.
 
 sub disconnect {
   my $self = shift;
-  $self->stream->write('QUIT');
+  $self->write('QUIT');
   $self->stream->close;
+}
+
+=head2 write
+
+  $self->write(@str);
+
+C<@str> will be concatinated with " " and "\r\n" will be appended.
+
+=cut
+
+sub write {
+  my $self = shift;
+  my $buf = join ' ', @_;
+  warn sprintf "[connection:%s] < %s\n", $self->id, $buf if DEBUG;
+  $self->stream->write("$buf\r\n");
 }
 
 =head1 COPYRIGHT
