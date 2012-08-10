@@ -201,7 +201,6 @@ sub connect {
 sub irc_privmsg {
   my($self, $message) = @_;
   $self->add_message(privmsg => $message);
-  warn Dumper($message);
 }
 
 sub irc_mode {
