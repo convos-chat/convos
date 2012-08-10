@@ -161,14 +161,7 @@ sub connect {
     for my $attr (qw/ nick user host /) {
       unless(defined $self->$attr) {
         warn sprintf "[connection:%s] : Attribute '%s' is missing from config\n", $self->id, $attr;
-        $self->add_message(
-          {
-            prefix => 'internal',
-            command => 'PRIVMSG',
-          }, [
-            internal => "Attribute '$attr' is missing from config"
-          ],
-        );
+        $self->add_message(internal => [ $self->nick => "Attribute '$attr' is missing from config" ]);
         return;
       }
     }
@@ -189,7 +182,7 @@ sub connect {
             $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'}) if $message->{'command'} =~ /^\d+$/;
             my $method = 'irc_' .lc $message->{'command'};
             if($self->can($method)) {
-              $self->$method($message, $message->{'params'});
+              $self->$method($message->{'params'}, $message);
             }
             elsif(DEBUG) {
               warn sprintf "[connection:%s] ! Cannot handle (%s)\n", $self->id, $method if DEBUG;
@@ -203,32 +196,29 @@ sub connect {
 }
 
 sub irc_privmsg {
-  my($self, $message, $params) = @_;
-  $self->add_message($message, $params);
+  my($self, $params) = @_;
+  $self->add_message(privmsg => $params);
 }
 
 sub irc_mode {
-  my($self, $message, $params) = @_;
-  $self->redis->sadd(
-    join(':', 'connection', $self->id, 'mode', $params->[0]),
-    $message->{params}[1]
-  );
+  my($self, $params) = @_;
+  $self->redis->sadd(join(':', 'connection', $self->id, 'mode', $params->[0]), $params->[1]);
 }
 
 sub irc_notice {
-  my($self, $message, $params) = @_;
-  $self->add_message($message, $params);
+  my($self, $params) = @_;
+  $self->add_message(notice => $params);
 }
 
 sub irc_err_nicknameinuse { # 433
-  my($self, $message, $params) = @_;
+  my($self, $params) = @_;
 
   $self->nick($self->nick . '_');
   $self->write(NICK => $self->nick);
 }
 
 sub irc_rpl_welcome { # 001
-  my($self, $message, $params) = @_;
+  my($self, $params) = @_;
 
   $self->nick($params->[0]);
   $self->redis->set(join(':', 'connection', $self->id, 'nick'), $params->[0]);
@@ -239,7 +229,7 @@ sub irc_rpl_welcome { # 001
 }
 
 sub irc_ping {
-  my($self, $message, $params) = @_;
+  my($self, $params) = @_;
   $self->write(PONG => $params->[0]);
 }
 
@@ -256,9 +246,17 @@ sub irc_rpl_motdstart {} # :Tampa.FL.US.Undernet.org 375 batman__ :- Tampa.FL.US
 sub irc_rpl_motd {} # :Tampa.FL.US.Undernet.org 372 batman__ :The message of the day was last changed: 2007-5-24 17:42
 sub irc_rpl_endofmotd {} # :Tampa.FL.US.Undernet.org 376 batman__ :End of /MOTD command.
 
+sub irc_error {
+  my($self, $params) = @_;
+
+  if($params->[0] =~ /Closing Link/) {
+    $self->stream->close;
+    $self->connect;
+  }
+}
+
 sub add_message {
-  my ($self, $message, $params)=@_;
-  my $type = lc $message->{'command'};
+  my ($self, $type, $params)=@_;
 
   $self->redis->rpush(
     join(':', 'connection', $self->id, 'msg', $params->[0]),
