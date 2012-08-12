@@ -24,23 +24,14 @@ TODO
 
 has 'redis';
 
+has 'current_connections';
 
-=head2 connections
+=head2 current_connections
 
-List of Connections, defaults to being fetched from Redis
+Current connections, defaults to being fetched from Redis
 
 =cut
 
-has connections => sub {
-  my ($self,$cb) = @_;
-  $self->redis->smembers('connections',
-    sub {
-      my ($redis, $res) = @_;
-      $cb->(map {
-        WebIrc::Core::Connection->new(redis => $self->redis,id=>$_);
-      } @$res);
-   });
-}
 
 
 =head1 METHODS
@@ -62,7 +53,23 @@ sub start {
   })
 }
 
+=head2 connections 
 
+Connection list. Will fetch from redis or cache in current_connections
+
+=cut 
+
+sub connections {
+  my ($self,$cb) = @_;
+  return $cb->($self->current_connections) if $self->current_connections;
+  $self->redis->smembers('connections',
+    sub {
+      my ($redis, $res) = @_;
+      $cb->($self->current_connections(
+        [map { WebIrc::Core::Connection->new(redis => $self->redis,id=>$_); } @$res]
+        ));
+   });
+}
 
 =head2 add_connection %conn
 
