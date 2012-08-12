@@ -220,7 +220,7 @@ sub connect {
           );
           $self->write(NICK => $self->nick);
           $self->write(USER => $self->user, 8, '*', ':WiRC IRC Proxy');
-          $self->subscribe_id($self->redis->subscribe('connection:'.$self->id.":messages",sub {
+          $self->subscribe_id($self->redis->subscribe('connection:'.$self->id.":to_server",sub {
             my ($redis,$res)=@_;
             $self->write(@$res);
           }));
@@ -328,7 +328,7 @@ sub add_message {
     $self->redis->sadd(join(':', 'connection', $self->id, 'conversations'),
       $message->{params}->[0]);
     $self->redis->publish(
-      'connection:' . $self->id . ':messages',
+      'connection:' . $self->id . ':from_server',
       $JSON->encode({$type => $message})
     );
   }
