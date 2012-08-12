@@ -70,8 +70,14 @@ sub socket {
   $self->on(message => sub {
     $log->debug("Got message from client: $_[1]");
     my $self = shift;
-    my $data = $JSON->decode(shift);
+    # my $data = $JSON->decode(shift);
     # TODO: Use $data->{'command'};
+  });
+  $self->redis->subscribe('connection:1:from_server',sub {
+    my ($redis,$message)=@_;
+    if($message->[0] eq 'message') {
+      $self->send($message->[1]);
+    }
   });
 }
 
