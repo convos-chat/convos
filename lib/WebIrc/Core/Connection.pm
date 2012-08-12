@@ -54,6 +54,14 @@ L</load>.
 
 has 'id';
 
+=head2 subscribe_id
+
+id of messages subscription
+
+=cut
+
+has 'subscribe_id';
+
 =head2 user
 
 IRC username
@@ -112,7 +120,7 @@ has 'channels';
 
 =head2 stream
 
-Holds a L<Mojo::IOLoop::Stream> object?
+Holds a L<Mojo::IOLoop::Stream> object
 
 =cut
 
@@ -212,6 +220,10 @@ sub connect {
           );
           $self->write(NICK => $self->nick);
           $self->write(USER => $self->user, 8, '*', ':WiRC IRC Proxy');
+          $self->subscribe_id($self->redis->subscribe('connection:'.$self->id.":messages",sub {
+            my ($redis,$res)=@_;
+            $self->write(@$res);
+          }));
         }
       );
     }
