@@ -24,15 +24,13 @@ TODO
 
 has 'redis';
 
-has 'current_connections';
-
 =head2 current_connections
 
 Current connections, defaults to being fetched from Redis
 
 =cut
 
-
+has 'current_connections';
 
 =head1 METHODS
 
@@ -46,8 +44,9 @@ sub start {
   my $self = shift;
   $self->redis->del('connections:connected');
   $self->connections(sub {
-    warn sprintf "[core] Starting %s connection(s)\n", int @_ if WebIrc::Core::Connection::DEBUG;
-    for my $conn (@_) {
+    my $connections = shift;
+    warn sprintf "[core] Starting %s connection(s)\n", int @$connections if WebIrc::Core::Connection::DEBUG;
+    for my $conn (@$connections) {
       $conn->connect;
     }
   })
@@ -65,10 +64,10 @@ sub connections {
   $self->redis->smembers('connections',
     sub {
       my ($redis, $res) = @_;
-      $cb->($self->current_connections(
-        [map { WebIrc::Core::Connection->new(redis => $self->redis,id=>$_); } @$res]
-        ));
-   });
+      my $connnections = [ map { WebIrc::Core::Connection->new(redis => $self->redis,id=>$_) } @$res ];
+      $self->current_connections($connnections);
+      $cb->($connnections);
+    });
 }
 
 =head2 add_connection %conn

@@ -72,7 +72,7 @@ use Mojo::Redis;
 
 =head1 ATTRIBUTES
 
-=head2 connection
+=head2 redis
 
 Holds a L<Mojo::Redis> object.
 
@@ -84,10 +84,9 @@ Holds a L<WebIrc::Core> object.
 
 =cut
 
-has 'connection' => sub { Mojo::Redis->new(server=>'127.0.0.1:6379') };
-has 'core'       => sub { WebIrc::Core->new(redis=>shift->connection)};
-
-has 'archive'    => sub {
+has redis => sub { Mojo::Redis->new(server=>'127.0.0.1:6379') };
+has core => sub { WebIrc::Core->new(redis=>shift->redis)};
+has archive => sub {
   my $self = shift;
   WebIrc::Core::Archive->new(  $self->config->{archive} ||
     $self->path_to('archive'));

@@ -222,7 +222,7 @@ sub connect {
           $self->write(USER => $self->user, 8, '*', ':WiRC IRC Proxy');
           $self->subscribe_id($self->redis->subscribe('connection:'.$self->id.":to_server",sub {
             my ($redis,$res)=@_;
-            $self->write(@$res);
+            $self->write($_) for @$res;
           }));
         }
       );
@@ -324,13 +324,13 @@ sub add_message {
     join(':', $type, time, $message->{params}->[1]),
   );
   $self->redis->publish(
-    'connection:' . $self->id . ':from_server',
-    $JSON->encode({$type => $message})
+    join(':', 'connection', $self->id, 'from_server'),
+    $message->{'raw_line'},
+  );
 
   unless ($message->{params}->[0] =~ /^\#/x) { # not a channel
     $self->redis->sadd(join(':', 'connection', $self->id, 'conversations'),
       $message->{params}->[0]);
-    );
   }
 }
 

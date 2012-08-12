@@ -24,9 +24,13 @@ var BASEURL = window.location.href;
       var data = typeof e.data == 'object' ? e.data : $.parseJSON(e.data);
       var $li = $('#messages li:first').clone();
 
+      // TODO: Need to populate the other channels if data.params[0]
+      // is not the current channel/user? This can be useful to add (n)
+      // unread messages as status to the channel/user list
+
       $li.find('span.sender:first > a').text(data.sender);
       $li.find('span.sender:first > a').attr('href', data.sender); // TODO
-      $li.find('span.message:first').text(data.message);
+      $li.find('span.message:first').text(data.params[1]);
       $('#messages').append($li);
     };
     chat.end = function() {

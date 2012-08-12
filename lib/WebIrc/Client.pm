@@ -8,6 +8,7 @@ WebIrc::Client - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
+use Parse::IRC;
 
 my $JSON = Mojo::JSON->new;
 my $dummy_json = eval do { local $/; readline DATA };
@@ -60,6 +61,8 @@ TODO
 sub socket {
   my $self = shift;
   my $log = $self->app->log;
+  my $redis = $self->app->redis;
+  my $pubsub_key = 'connection:1:from_server'; # TODO: Make dynamic
 
   # try to avoid inactivity timeout
   Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
@@ -70,13 +73,39 @@ sub socket {
   $self->on(message => sub {
     $log->debug("Got message from client: $_[1]");
     my $self = shift;
-    # my $data = $JSON->decode(shift);
-    # TODO: Use $data->{'command'};
+    my $data = $JSON->decode(shift) or return;
+    my $irc_message;
+
+    if($data->{'command'} =~ m!^/(\w+)\s+(.*)!) {
+      $irc_message = sprintf '%s %s', uc($1), $2;
+    }
+    elsif($data->{'target'}) {
+      $irc_message = sprintf 'PRIVMSG %s :%s', $data->{'target'}, $data->{'command'};
+    }
+    else {
+      $log->error("Cannot send PRIVMSG without target");
+      return;
+    }
+
+    $redis->publish($pubsub_key, $irc_message);
   });
-  $self->redis->subscribe('connection:1:from_server',sub {
-    my ($redis,$message)=@_;
-    if($message->[0] eq 'message') {
-      $self->send($message->[1]);
+  $redis->subscribe($pubsub_key, sub {
+    my ($redis,$res)=@_;
+    for my $message (@$res) {
+      # Getting this:
+      # Got message from server: subscribe
+      # Is this meant to get through? Not sure if "subscribe" and friends
+      # are really useful to the end user of Mojo::Redis:
+      # subscribe
+      # connection:1:from_server
+      # 1
+      $log->debug("Got message from server: $message");
+      $message = parse_irc($message);
+      delete $message->{'raw_line'} or next;
+      $message->{'prefix'} //= '&server'; # TODO: Is this correct?
+      $message->{'sender'} = ($message->{'prefix'} =~ /^([^!]+)/)[0] || $message->{'prefix'};
+      $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'}) if $message->{'command'} =~ /^\d+$/;
+      $self->send($JSON->encode($message));
     }
   });
 }
