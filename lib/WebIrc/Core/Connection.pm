@@ -130,8 +130,6 @@ L</user>, L</host>, L</port>, L</password> and L</ssl>.
 
 =cut
 
-use Data::Dumper;
-
 sub load {
   my ($self, $cb) = @_;
   return $cb->($self) if $self->{_loaded}++;

@@ -24,6 +24,25 @@ TODO
 
 has 'redis';
 
+
+=head2 connections
+
+List of Connections, defaults to being fetched from Redis
+
+=cut
+
+has connections => sub {
+  my ($self,$cb) = @_;
+  $self->redis->smembers('connections',
+    sub {
+      my ($redis, $res) = @_;
+      $cb->(map {
+        WebIrc::Core::Connection->new(redis => $self->redis,id=>$_);
+      } @$res);
+   });
+}
+
+
 =head1 METHODS
 
 =head2 start
@@ -43,22 +62,7 @@ sub start {
   })
 }
 
-=head2 connections
 
-Initializes the list of connections from Redis
-
-=cut
-
-sub connections {
-  my ($self,$cb) = @_;
-  $self->redis->smembers('connections',
-    sub {
-      my ($redis, $res) = @_;
-      $cb->(map {
-        WebIrc::Core::Connection->new(redis => $self->redis,id=>$_);
-      } @$res);
-   });
-}
 
 =head2 add_connection %conn
 
@@ -71,6 +75,7 @@ sub add_connection {
   my ($self,$uid,%conn)=@_;
   $self->redis->incr('connnections:id',sub {
     my ($redis,$res)=@_;
+    $self->redis->sadd('connections',$res);
     for my $key (keys %conn) {
       $self->redis->set('connection:'.$res.':'.$conn{$key});
     }
