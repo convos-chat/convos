@@ -323,13 +323,13 @@ sub add_message {
     join(':', 'connection', $self->id, 'msg', $message->{params}->[0]),
     join(':', $type, time, $message->{params}->[1]),
   );
+  $self->redis->publish(
+    'connection:' . $self->id . ':from_server',
+    $JSON->encode({$type => $message})
 
-  unless ($message->{params}->[0] =~ /^\#/x) {
+  unless ($message->{params}->[0] =~ /^\#/x) { # not a channel
     $self->redis->sadd(join(':', 'connection', $self->id, 'conversations'),
       $message->{params}->[0]);
-    $self->redis->publish(
-      'connection:' . $self->id . ':from_server',
-      $JSON->encode({$type => $message})
     );
   }
 }
