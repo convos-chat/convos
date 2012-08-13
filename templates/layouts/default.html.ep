@@ -15,7 +15,7 @@
   <div id="container">
     <div id="navbar" class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
+        <div class="container-fluid">
           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -38,22 +38,8 @@
         </div>
       </div>
     </div>
-    <div class="container">
+    <div class="container-fluid">
       %= content
-      <footer class="footer">
-        <ul class="unstyled inline-list">
-          <li><%= link_to 'About', 'index' %></li>
-          <li><%= link_to 'Terms', 'terms' %></li>
-          <li><%= link_to 'Privacy', 'privacy' %></li>
-          <li><%= link_to '@wirc', 'http://twitter.com/wirc' %></li>
-          <li><span class="copyright">© 2012 <%= link_to 'Nordaaker', 'http://nordaaker.com' %></span></li>
-        </ul>
-        <div class="powered-by">
-          Wirc is powered by
-          <%= link_to 'Perl', 'http://perl.org' %> and
-          <%= link_to 'Mojolicious', 'http://mojolicio.us' %>.
-        </div>
-      </footer>
     </div>
   </div>
   </body>

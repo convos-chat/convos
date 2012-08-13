@@ -43,7 +43,7 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
-has 'redis';
+has redis => sub { Mojo::Redis->new };
 
 =head2 id
 
@@ -52,7 +52,7 @@ L</load>.
 
 =cut
 
-has 'id';
+has id => 0;
 
 =head2 subscribe_id
 
@@ -60,7 +60,7 @@ id of messages subscription
 
 =cut
 
-has 'subscribe_id';
+has subscribe_id => 0;
 
 =head2 user
 
@@ -68,7 +68,7 @@ IRC username
 
 =cut
 
-has 'user';
+has user => '';
 
 =head2 host
 
@@ -76,7 +76,8 @@ IRC server hostname.
 
 =cut
 
-has 'host';
+has host => '';
+has _real_host => '';
 
 =head2 port
 
@@ -84,7 +85,7 @@ IRC server port. Defaults to 6667.
 
 =cut
 
-has 'port' => 6667;
+has port => 6667;
 
 =head2 password
 
@@ -92,7 +93,7 @@ IRC server password.
 
 =cut
 
-has 'password';
+has password => '';
 
 =head2 ssl
 
@@ -100,7 +101,7 @@ True if SSL should be used to connect to the IRC server.
 
 =cut
 
-has 'ssl' => sub {0};
+has ssl => 0;
 
 =head2 nick
 
@@ -108,7 +109,7 @@ IRC server nickname.
 
 =cut
 
-has 'nick';
+has nick => '';
 
 =head2 channels
 
@@ -116,7 +117,7 @@ IRC channels to join on connect
 
 =cut
 
-has 'channels';
+has channels => sub { [] };
 
 =head2 stream
 
@@ -124,7 +125,7 @@ Holds a L<Mojo::IOLoop::Stream> object
 
 =cut
 
-has 'stream';
+has stream => sub { Mojo::IOLoop::Stream->new };
 
 =head1 METHODS
 
@@ -182,8 +183,7 @@ sub connect {
           warn sprintf
             "[connection:%s] : Attribute '%s' is missing from config\n",
             $self->id, $attr;
-          $self->add_message(internal =>
-              [$self->nick => "Attribute '$attr' is missing from config"]);
+          $self->add_server_message({ params => ["", "Attribute '$attr' is missing from config"] });
           return;
         }
       }
@@ -203,6 +203,7 @@ sub connect {
               while ($buffer =~ s/^([^\r\n]+)\r\n//s) {
                 warn sprintf "[connection:%s] > %s\n", $self->id, $1 if DEBUG;
                 my $message = parse_irc($1);
+                $self->redis->publish(join(':', 'connection', $self->id, 'from_server'), $1);
                 $message->{'command'} =
                   IRC::Utils::numeric_to_name($message->{'command'})
                   if $message->{'command'} =~ /^\d+$/;
@@ -230,22 +231,43 @@ sub connect {
   );
 }
 
+=head2 irc_privmsg
+
+=cut
+
 sub irc_privmsg {
   my ($self, $message) = @_;
-  $self->add_message(privmsg => $message);
+  $self->add_message($message);
 }
 
+=head2 irc_mode
+
+Example message:
+
+:batman__!~jhthorsen@ti0034a380-dhcp0392.bb.online.no MODE batman__ :+i
+
+=cut
+
 sub irc_mode {
-  my ($self, $message) = @_;
-  $self->redis->sadd(
-    join(':', 'connection', $self->id, 'mode', $message->{params}->[0]),
-    $message->{params}->[1]);
 }
+
+=head2 irc_notice
+
+Example message:
+
+:Zurich.CH.EU.Undernet.Org NOTICE batman__ :on 1 ca 1(4) ft 10(10)
+
+=cut
 
 sub irc_notice {
   my ($self, $message) = @_;
-  $self->add_message(notice => $message);
+
+  $self->add_server_message($message);
 }
+
+=head2 irc_err_nicknameinuse
+
+=cut
 
 sub irc_err_nicknameinuse {    # 433
   my ($self, $message) = @_;
@@ -254,61 +276,189 @@ sub irc_err_nicknameinuse {    # 433
   $self->write(NICK => $self->nick);
 }
 
-sub irc_rpl_welcome {          # 001
+=head2 irc_rpl_welcome
+
+Example message:
+
+:Zurich.CH.EU.Undernet.Org 001 somenick :Welcome to the UnderNet IRC Network, somenick
+
+=cut
+
+sub irc_rpl_welcome {
   my ($self, $message) = @_;
 
-  $self->nick($message->{params}->[0]);
-  $self->redis->set(join(':', 'connection', $self->id, 'nick'),
-    $message->{params}->[0]);
+  $self->_real_host($message->{prefix});
+  $self->add_server_message($message);
 
   for my $channel (@{$self->channels}) {
     $self->write(JOIN => $channel);
   }
 }
 
+=head2 irc_ping
+
+Example message:
+
+PING :2687237629
+
+=cut
+
 sub irc_ping {
   my ($self, $message) = @_;
   $self->write(PONG => $message->{params}->[0]);
 }
 
+=head2 irc_rpl_yourhost
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 002 somenick :Your host is Tampa.FL.US.Undernet.org, running version u2.10.12.14
+
+=cut
+
 sub irc_rpl_yourhost {
-} # :Tampa.FL.US.Undernet.org 002 batman__ :Your host is Tampa.FL.US.Undernet.org, running version u2.10.12.14
+  $_[0]->add_server_message($_[1]);
+}
+
+=head2 irc_rpl_created
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 003 somenick :This server was created Thu Jun 21 2012 at 01:26:15 UTC
+
+=cut
 
 sub irc_rpl_created {
-} # :Tampa.FL.US.Undernet.org 003 batman__ :This server was created Thu Jun 21 2012 at 01:26:15 UTC
+  $_[0]->add_server_message($_[1]);
+}
+
+=head2 irc_rpl_myinfo
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 004 somenick Tampa.FL.US.Undernet.org u2.10.12.14 dioswkgx biklmnopstvrDR bklov
+
+=cut
 
 sub irc_rpl_myinfo {
-} # :Tampa.FL.US.Undernet.org 004 batman__ Tampa.FL.US.Undernet.org u2.10.12.14 dioswkgx biklmnopstvrDR bklov
+  my($self, $message) = @_;
+  my @keys = qw/ nick servername version available_user_modes available_channel_modes /;
+
+  $self->nick($message->{params}[0]);
+
+  for my $v (@{ $message->{params} }) {
+    $self->redis->set(join(':', 'connection', $self->id, shift @keys), $v);
+  }
+}
+
+=head2 irc_rpl_isupport
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 005 somenick WHOX WALLCHOPS WALLVOICES USERIP CPRIVMSG CNOTICE SILENCE=25 MODES=6 MAXCHANNELS=20 MAXBANS=50 NICKLEN=12 :are supported by this server
+
+=cut
 
 sub irc_rpl_isupport {
-} # :Tampa.FL.US.Undernet.org 005 batman__ WHOX WALLCHOPS WALLVOICES USERIP CPRIVMSG CNOTICE SILENCE=25 MODES=6 MAXCHANNELS=20 MAXBANS=50 NICKLEN=12 :are supported by this server
+}
+
+=head2 irc_rpl_luserclient
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 251 somenick :There are 3400 users and 46913 invisible on 18 servers
+
+=cut
 
 sub irc_rpl_luserclient {
-} # :Tampa.FL.US.Undernet.org 251 batman__ :There are 3400 users and 46913 invisible on 18 servers
+}
+
+=head2 irc_rpl_luserop
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 252 somenick 19 :operator(s) online
+
+=cut
 
 sub irc_rpl_luserop {
-}    # :Tampa.FL.US.Undernet.org 252 batman__ 19 :operator(s) online
+}
+
+=head2 irc_rpl_luserunknown
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 253 somenick 305 :unknown connection(s)
+
+=cut
 
 sub irc_rpl_luserunknown {
-}    # :Tampa.FL.US.Undernet.org 253 batman__ 305 :unknown connection(s)
+}
+
+=head2 irc_rpl_luserchannels
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 254 somenick 13700 :channels formed
+
+=cut
 
 sub irc_rpl_luserchannels {
-}    # :Tampa.FL.US.Undernet.org 254 batman__ 13700 :channels formed
+}
+
+=head2 irc_rpl_luserme
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 255 somenick :I have 12000 clients and 1 servers
+
+=cut
 
 sub irc_rpl_luserme {
-} # :Tampa.FL.US.Undernet.org 255 batman__ :I have 12000 clients and 1 servers
+}
+
+=head2 irc_rpl_motdstart
+
+:Tampa.FL.US.Undernet.org 375 somenick :- Tampa.FL.US.Undernet.org Message of the Day -
+
+=cut
 
 sub irc_rpl_motdstart {
-} # :Tampa.FL.US.Undernet.org 375 batman__ :- Tampa.FL.US.Undernet.org Message of the Day -
+  $_[0]->add_server_message($_[1]);
+}
+
+=head2 irc_rpl_motd
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 372 somenick :The message of the day was last changed: 2007-5-24 17:42
+
+=cut
 
 sub irc_rpl_motd {
-} # :Tampa.FL.US.Undernet.org 372 batman__ :The message of the day was last changed: 2007-5-24 17:42
+  $_[0]->add_server_message($_[1]);
+}
+
+=head2 irc_rpl_endofmotd
+
+Example message:
+
+:Tampa.FL.US.Undernet.org 376 somenick :End of /MOTD command.
+
+=cut
 
 sub irc_rpl_endofmotd {
-}    # :Tampa.FL.US.Undernet.org 376 batman__ :End of /MOTD command.
+  $_[0]->add_server_message($_[1]);
+}
+
+=head2 irc_error
+
+=cut
 
 sub irc_error {
   my ($self, $message) = @_;
+
+  $self->add_server_message($message);
 
   if ($message->{params}->[0] =~ /Closing Link/) {
     $self->stream->close;
@@ -316,16 +466,43 @@ sub irc_error {
   }
 }
 
+=head2 add_server_message
+
+  $bool = $self->add_server_message(\%message);
+
+Will look at L<%message> and add it to the database as a server message
+if it looks like one. Returns true if the message was added to redis.
+
+=cut
+
+sub add_server_message {
+  my($self, $message) = @_;
+
+  if(!$message->{prefix} or $message->{prefix} eq $self->_real_host) {
+    $self->redis->rpush(
+      join(':', 'connection', $self->id, 'msg', 'server'),
+      join(':', time, $message->{params}[1]),
+    );
+    return 1;
+  }
+
+  return;
+}
+
+=head2 add_message
+
+  $self->add_message(\%message);
+
+Will add a private message to the database.
+
+=cut
+
 sub add_message {
-  my ($self, $type, $message) = @_;
+  my ($self, $message) = @_;
 
   $self->redis->rpush(
     join(':', 'connection', $self->id, 'msg', $message->{params}->[0]),
-    join(':', $type, time, $message->{params}->[1]),
-  );
-  $self->redis->publish(
-    join(':', 'connection', $self->id, 'from_server'),
-    $message->{'raw_line'},
+    join(':', time, $message->{params}->[1]),
   );
 
   unless ($message->{params}->[0] =~ /^\#/x) { # not a channel

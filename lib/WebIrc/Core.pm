@@ -42,6 +42,7 @@ TODO
 
 sub start {
   my $self = shift;
+  return if $ENV{'SKIP_CONNECT'};
   $self->redis->del('connections:connected');
   $self->connections(sub {
     my $connections = shift;

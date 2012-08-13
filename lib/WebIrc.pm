@@ -120,11 +120,19 @@ sub startup {
 
   my $c=$r->bridge('/'); #->to('user#auth'); # disabling auth for now
   $c->route('/setup')->to('client#setup');
-  $c->route('/*server/:target')->to('client#view')->name('view');
   $c->get('/settings')->to(template => 'user/settings')->name('settings');
   $c->post('/settings')->to('user#settings');
+
+  $c->route('/chat/*server')->to('client#view')->name('view');
+  $c->route('/disconnect/*server')->to('client#disconnect')->name('disconnect');
+  $c->route('/join/*server')->to('client#join')->name('join');
+
+  $c->route('/chat/*server/:target')->to('client#view')->name('view');
+  $c->route('/close/*server/:target')->to('client#close')->name('close');
+
   $c->route('/archive')->to('archive#list');
   $c->route('/archive/search')->to('archive#search');
+  $c->route('/archive/*server/:target')->to('archive#view');
   $c->route('/archive/*server/:target')->to('archive#view');
 
   $c->websocket('/socket')->to('client#socket');

@@ -11,7 +11,6 @@ use Mojo::JSON;
 use Parse::IRC;
 
 my $JSON = Mojo::JSON->new;
-my $dummy_json = eval do { local $/; readline DATA };
 
 =head1 METHODS
 
@@ -39,17 +38,50 @@ Can serve both HTML and JSON.
 
 sub view {
   my $self = shift;
+  my $redis = $self->app->redis;
+  my $connections = {};
+  my $chat_title = $self->stash('target') || $self->stash('server');
 
+  $self->render_later;
+  $self->stash(connections => $connections);
+  $self->stash(chat_title => $chat_title);
   $self->stash(logged_in => 1); # TODO: Remove this once login logic is written
-  $self->respond_to(
-    json => sub {
-      my $self = shift;
-      $self->render_json($dummy_json);
-    },
-    any => sub {
-      $self->stash($_ => $dummy_json->{$_}) for keys %$dummy_json;
-    },
-  );
+  $self->stash(messages => [{
+    sender => $chat_title,
+    message => 'Connecting...',
+  }]);
+
+  # TODO: Should probably be "user:x:connections" instead of connections?
+  $redis->smembers(connections => sub {
+    my($redis, $connection_ids) = @_;
+
+    if(@$connection_ids == 0) {
+      return $self->redirect_to('setup');
+    }
+
+    for my $id (@$connection_ids) {
+      my @info = map { "connection:$id:$_" } qw/ host user nick /;
+
+      $redis->mget(@info, sub {
+        my($redis, $info) = @_;
+
+        $connections->{$info->[0]}{id} = shift @$connection_ids;
+        $connections->{$info->[0]}{user} = $info->[1];
+        $connections->{$info->[0]}{nick} = $info->[2];
+        $connections->{$info->[0]}{active} = $info->[0] eq $chat_title ? 1 : 0;
+        @$connection_ids and return;
+        $redis->lrange("connection:$id:msg:server", -50, -1, sub {
+          $self->stash(messages => [
+            map {
+              my($time, $message) = split /:/, $_, 2;
+              +{ timestamp => $time, message => $message };
+            } @{ $_[1] || [] }
+          ]);
+          $self->render;
+        });
+      });
+    }
+  });
 }
 
 =head2 socket
@@ -76,14 +108,17 @@ sub socket {
     my $data = $JSON->decode(shift) or return;
     my $irc_message;
 
-    if($data->{'command'} =~ m!^/(\w+)\s+(.*)!) {
+    if($data->{command} =~ m!^/(\w+)\s+(.*)!) {
       $irc_message = sprintf '%s %s', uc($1), $2;
     }
-    elsif($data->{'target'}) {
-      $irc_message = sprintf 'PRIVMSG %s :%s', $data->{'target'}, $data->{'command'};
+    elsif($data->{target}) {
+      $irc_message = sprintf 'PRIVMSG %s :%s', $data->{target}, $data->{command};
     }
     else {
-      $log->error("Cannot send PRIVMSG without target");
+      $self->send($JSON->encode({
+        sender => "ERROR",
+        params => ["", "Cannot send PRIVMSG without target"],
+      }));
       return;
     }
 
@@ -101,10 +136,10 @@ sub socket {
       # 1
       $log->debug("Got message from server: $message");
       $message = parse_irc($message);
-      delete $message->{'raw_line'} or next;
-      $message->{'prefix'} //= '&server'; # TODO: Is this correct?
-      $message->{'sender'} = ($message->{'prefix'} =~ /^([^!]+)/)[0] || $message->{'prefix'};
-      $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'}) if $message->{'command'} =~ /^\d+$/;
+      delete $message->{raw_line} or next;
+      $message->{prefix} //= $self->param('server'); # TODO: Is this correct?
+      $message->{sender} = ($message->{prefix} =~ /^([^!]+)/)[0] || $message->{prefix};
+      $message->{command} = IRC::Utils::numeric_to_name($message->{command}) if $message->{command} =~ /^\d+$/;
       $self->send($JSON->encode($message));
     }
   });
@@ -123,32 +158,3 @@ Marcus Ramberg
 =cut
 
 1;
-__DATA__
-{
-nick => 'test123',
-servers => [
-  {
-    name => 'irc.perl.org',
-    targets => [
-      {
-        name => '#mojo',
-      },
-      {
-        name => '#wirc',
-      },
-    ],
-  },
-],
-messages => [
-  {
-    message => 'Connecting to #mojo...',
-    sender => '&irc.perl.org',
-  }
-],
-nick_list => [
-  {
-    name => 'batman',
-    mode => '',
-  }
-],
-};

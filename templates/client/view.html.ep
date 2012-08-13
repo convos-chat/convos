@@ -1,27 +1,28 @@
 % page_header link_to(param('target'), 'view') .' on ' .param('server');
-<div class="row">
+<div class="row-fluid">
   <div id="targets" class="span2">
     <ul class="nav nav-list">
-      % for my $server (@$servers) {
-      <li class="nav-header">
+      % for my $server (sort keys %$connections) {
+        % my $info = $connections->{$server};
+      <li class="nav-header <%= $info->{'active'} ? 'active' : '' %>">
         <div class="btn-group">
-          %= link_to $server->{'name'}, 'view', { target => '', server => $server->{'name'} }
+          %= link_to $server, 'view', { server => $server, target => '' }
           <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li><%= link_to 'join', begin %><i class="icon-plus"></i> Join channel</a><% end %></li>
-            <li><%= link_to 'disconnect', begin %><i class="icon-signout"></i> Disconnect</a><% end %></li>
+            <li><%= link_to 'join', { server => $server }, begin %><i class="icon-plus"></i> Join channel</a><% end %></li>
+            <li><%= link_to 'disconnect', { server => $server }, begin %><i class="icon-signout"></i> Disconnect</a><% end %></li>
           </ul>
         </div>
       </li>
-        % for my $target (@{ $server->{'targets'} || [] }) {
-      <li class="<%= $target->{'name'} eq param('target') ? 'active' : '' %>">
+        % for my $target (@{ $info->{'targets'} || [] }) {
+      <li class="<%= $target->{'active'} ? 'active' : '' %>">
         <div class="btn-group">
-          %= link_to $target->{'name'}, 'view', { target => $target->{'name'}, server => $server->{'name'} }
+          %= link_to $target->{'name'}, 'view', { target => $target->{'name'}, server => $server }
           <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li><a href="info://{{server.name}}/{{target.name}}"><i class="icon-info-sign"></i> Information</a></li>
-            <li><a href="search://{{server.name}}/{{target.name}}"><i class="icon-comments"></i> Search archive</a></li>
-            <li><a href="close://{{server.name}}/{{target.name}}"><i class="icon-signout"></i> Close</a></li>
+            <li><%= link_to 'information', { target => $target->{'name'}, server => $server }, begin %><i class="icon-info-sign"></i> Information<% end %></li>
+            <li><%= link_to 'search', { target => $target->{'name'}, server => $server }, begin %><i class="icon-comments"></i> Search<% end %></li>
+            <li><%= link_to 'close', { target => $target->{'name'}, server => $server }, begin %><i class="icon-signout"></i> Close<% end %></li>
           </ul>
         </div>
       </li>
@@ -31,24 +32,27 @@
   </div>
   <div id="chat" class="span10">
     %= form_for 'change_title', id => 'change_title', begin
-      %= text_field 'title', class => 'span10'
+      %= text_field 'title', $chat_title, class => 'span12'
     % end
     <ul class="unstyled" id="messages">
       % for my $message (@$messages) {
       <li>
         <span class="sender">
           <i class="icon-comment"></i>
-          %= link_to $message->{'sender'}, 'view', $message
+          %= link_to $chat_title, 'view', { server => $server, target => param('target') || '' };
         </span>
         <span class="message"><%= $message->{'message'} %></span>
       </li>
       % }
     </ul>
     %= form_for 'send', method => 'post', id => 'message', begin
-      %= text_field 'message', class => 'span10'
+      %= text_field 'message', class => 'span12'
     % end
   </div>
-  <div id="statusbar" class="offset2 span10">
+</div>
+<div class="row-fluid">
+  <div class="span2">&nbsp;<!-- offset2 --></div>
+  <div id="statusbar" class="span10">
     1 person(s) in chat room.
   </div>
 </div>

@@ -13,6 +13,7 @@ var BASEURL = window.location.href;
     BASEURL = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
 
     window.console && console.log('Connecting to ' + BASEURL.replace(/^http/, 'ws') + '/socket ...');
+    var $messages = $('#messages');
     var chat = new WebSocket(BASEURL.replace(/^http/, 'ws') + '/socket');
     var ui = {
       $input: $('#message input[type="text"]'),
@@ -20,18 +21,29 @@ var BASEURL = window.location.href;
       history: []
     };
 
+    $messages.scrollTop($messages.get(0).scrollHeight - $messages.height());
+
     chat.onmessage = function(e) {
       var data = typeof e.data == 'object' ? e.data : $.parseJSON(e.data);
-      var $li = $('#messages li:first').clone();
+      var $li = $messages.find('li:first').clone();
 
       // TODO: Need to populate the other channels if data.params[0]
       // is not the current channel/user? This can be useful to add (n)
       // unread messages as status to the channel/user list
 
-      $li.find('span.sender:first > a').text(data.sender);
-      $li.find('span.sender:first > a').attr('href', data.sender); // TODO
+      if(data.sender == 'ERROR') {
+        $li.find('span.sender:first').replaceWith(
+          '<i class="icon-exclamation-sign"></i> Error:'
+        );
+      }
+      else {
+        $li.find('span.sender:first > a').text(data.sender);
+        $li.find('span.sender:first > a').attr('href', data.sender); // TODO
+      }
+
       $li.find('span.message:first').text(data.params[1]);
-      $('#messages').append($li);
+      $messages.append($li);
+      $messages.scrollTop($messages.get(0).scrollHeight - $messages.height());
     };
     chat.end = function() {
         ui.print({ sender: '&client', message: 'Disconnected. <a href="">Reconnect?</a>' });
