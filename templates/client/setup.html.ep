@@ -1,12 +1,13 @@
 % title 'Initial setup';
-%= form_for 'setup', class => 'form-horizontal';
+<%= include('inc/alert') %>
+%= form_for 'setup', class => 'form-horizontal', method=>'post';
 <h1 class="page-header">Initial setup</h1>
 <form class="form-horizontal">
   <div class="control-group">
     <label class="control-label" for="host">Nick</label>
     <div class="controls">
       %= text_field 'host', session('login') // '', id => 'host';
-      <p class="help-block">Add ":port" unless you want to use default port 6667</p>
+      <p class="help-block">Handle to operate under</p>
     </div>
   </div>
  <div class="control-group">

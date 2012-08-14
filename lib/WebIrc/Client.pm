@@ -21,16 +21,22 @@ my $JSON = Mojo::JSON->new;
 sub setup {
   my $self = shift;
 
-  if($self->param('host') and $self->param('channel')) {
+  if($self->param('host') and $self->param('channels'), and $self->param('nick')) {
     $self->core->add_connection($self->session('uid'),{
-      nick => $self->param('nick'),
-      host => $self->param('host'),
-      }),sub {
+      nick     => $self->param('nick'),
+      host     => $self->param('host'),
+      user     => $self->session('login'),
+      channels => $self->param('channels'),
+      }),$self->parallol(sub {
+        my $cid=shift;
         $self->redirect_to('view',
           server => $self->param('server'),
           target => $self->param('target'),
         );
     });
+  }
+  else {
+    $self->stash('messsage' => 'Please fill in all the fields to continue');
   }
 }
 

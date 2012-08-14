@@ -83,6 +83,9 @@ sub add_connection {
   $self->redis->incr('connnections:id',sub {
     my ($redis,$res)=@_;
     $self->redis->sadd('connections',$res);
+    for my $channel (split(/\s+/,delete $conn->{channels})) {
+      $self->redis->sadd('connection:'.$res.':channels',$channel);
+    }
     for my $key (keys %$conn) {
       $self->redis->set('connection:'.$res.':'.$conn->{$key});
     }
