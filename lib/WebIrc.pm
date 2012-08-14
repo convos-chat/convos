@@ -123,17 +123,16 @@ sub startup {
   $c->get('/settings')->to(template => 'user/settings')->name('settings');
   $c->post('/settings')->to('user#settings');
 
-  $c->route('/chat/*server')->to('client#view')->name('view');
-  $c->route('/disconnect/*server')->to('client#disconnect')->name('disconnect');
-  $c->route('/join/*server')->to('client#join')->name('join');
-
-  $c->route('/chat/*server/:target')->to('client#view')->name('view');
-  $c->route('/close/*server/:target')->to('client#close')->name('close');
+  $c->route('/chat/#server')->to('client#view');
+  $c->route('/chat/#server/:target')->to('client#view')->name('view');
+  $c->route('/close/#server/:target')->to('client#close')->name('irc_close');
+  $c->route('/disconnect/*server')->to('client#disconnect')->name('irc_disconnect');
+  $c->route('/join/*server')->to('client#join')->name('irc_join');
 
   $c->route('/archive')->to('archive#list');
   $c->route('/archive/search')->to('archive#search');
-  $c->route('/archive/*server/:target')->to('archive#view');
-  $c->route('/archive/*server/:target')->to('archive#view');
+  $c->route('/archive/:server/:target')->to('archive#view');
+  $c->route('/archive/:server/:target')->to('archive#view');
 
   $c->websocket('/socket')->to('client#socket');
 
@@ -155,6 +154,10 @@ since Jan Henning forgot to pass on the correct arguments.
 
 Used to set/retrieve the page header used by C<layout/default.html.ep>
 
+=item redis_then
+
+Used to call L<Mojo::Redis/execute> multiple times.
+
 =back
 
 =cut
@@ -174,6 +177,22 @@ sub add_helpers {
     $_[0]->stash('page_header', $_[1]) if @_ == 2;
     $_[0]->stash('title', Mojo::DOM->new($_[1])->all_text) if @_ == 2 and not $self->stash('title');
     $_[0]->stash('page_header') // $self->config->{'name'};
+  });
+
+  $self->helper(redis_then => sub {
+    my($c, @cb) = @_;
+    my $redis = $c->app->redis;
+    my $wrapper;
+
+    Scalar::Util::weaken $c;
+    $wrapper = sub {
+      my $redis = shift;
+      my $cb = shift @cb;
+      my @next = $cb->(@_);
+      $redis->execute(shift(@next), [@next], $wrapper) if @next and @cb;
+    };
+
+    $redis->$wrapper;
   });
 }
 

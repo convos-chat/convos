@@ -14,7 +14,7 @@ ul.inline-list li { float: left; margin-right: 20px }
 #targets .nav li { position: relative }
 #targets .btn-group > button { position: absolute; top: 1px; left: 1px }
 #targets .btn-group > a { display: block; margin: 1px 0; padding: 1px 0 1px 24px; overflow: hidden }
-#chat form { margin: 0 }
+form.no-margins { margin: 0 }
 
 /*
  * not sure why font awesome does not do this... bug?
@@ -25,7 +25,7 @@ i[class^="icon-"], i[class*=" icon-"] {
 
 #container { margin-top: 50px }
 
-#chat ul {
+#messages {
   height: 300px;
   padding: 4px;
   border: 1px solid #ccc;
@@ -38,8 +38,11 @@ i[class^="icon-"], i[class*=" icon-"] {
   overflow: auto;
 }
 
-#chat ul i[class^="icon-"], #chat ul i[class*=" icon-"] { position: relative; top: 2px }
-#chat ul .nick { color: #08C; display: block }
+#messages li { font-family: monospace; position: relative }
+#messages li i[class^="icon-"],
+#messages li i[class*=" icon-"] { position: relative; top: 2px }
+#messages li .message { display: block }
+#messages li .timestamp { position: absolute; top: 0; right: 0; text-align: right; opacity: 0.8 }
 
 #statusbar {
   font-size: 0.9em;

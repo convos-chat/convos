@@ -13,6 +13,8 @@ var BASEURL = window.location.href;
     BASEURL = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
 
     window.console && console.log('Connecting to ' + BASEURL.replace(/^http/, 'ws') + '/socket ...');
+    var server = unescape(window.location.href.split('/')[4] || '');
+    var target = unescape(window.location.href.split('/')[5] || '');
     var $messages = $('#messages');
     var chat = new WebSocket(BASEURL.replace(/^http/, 'ws') + '/socket');
     var ui = {
@@ -25,24 +27,31 @@ var BASEURL = window.location.href;
 
     chat.onmessage = function(e) {
       var data = typeof e.data == 'object' ? e.data : $.parseJSON(e.data);
-      var $li = $messages.find('li:first').clone();
+      var $previous = $messages.find('li .sender').eq(-1).parent();
+      var $next = $('<li></li>');
 
       // TODO: Need to populate the other channels if data.params[0]
       // is not the current channel/user? This can be useful to add (n)
       // unread messages as status to the channel/user list
 
-      if(data.sender == 'ERROR') {
-        $li.find('span.sender:first').replaceWith(
-          '<i class="icon-exclamation-sign"></i> Error:'
-        );
+      if(data.error) {
+        $next.append('<i class="icon-exclamation-sign"></i> Error: ' + data.error);
+      }
+      else if(data.joined) {
+        console.log(data);
+      }
+      else if($previous.find('.sender a').text() == data.sender) {
+        $next.append('<span class="message">' + data.message + '</span>');
       }
       else {
-        $li.find('span.sender:first > a').text(data.sender);
-        $li.find('span.sender:first > a').attr('href', data.sender); // TODO
+        var $sender = $previous.find('.sender').clone();
+        $sender.find('a').attr({ href: BASEURL + '/chat/' + data.sender }).text(data.sender);
+        $next.append($sender);
+        $next.append('<span class="timestamp">' + data.timestamp + '</span>');
+        $next.append('<span class="message" title="' + data.timestamp + '">' + data.message + '</span>');
       }
 
-      $li.find('span.message:first').text(data.params[1]);
-      $messages.append($li);
+      $messages.append($next);
       $messages.scrollTop($messages.get(0).scrollHeight - $messages.height());
     };
     chat.end = function() {
@@ -54,11 +63,11 @@ var BASEURL = window.location.href;
     ui.$input.parents('form').submit(function() {
       try {
         // TODO: Figure out if JSON.stringify() works in other browsers than chrome
-        chat.send(JSON.stringify({ command: ui.$input.val() }));
+        chat.send(JSON.stringify({ command: ui.$input.val(), target: target }));
         window.console && console.log('send: ' + ui.$input.val());
       } catch(e) {
         window.console && console.log('Could not send to websocket: ' + e);
-        chat.onmessage({ data: { sender: 'internal', message: e } });
+        chat.onmessage({ data: { error: e } });
       };
       ui.$input.val('');
       return false;

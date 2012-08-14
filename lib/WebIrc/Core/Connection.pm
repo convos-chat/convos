@@ -127,6 +127,10 @@ Holds a L<Mojo::IOLoop::Stream> object
 
 has stream => sub { Mojo::IOLoop::Stream->new };
 
+# used to create redis keys
+has _publish_key => sub { shift->{_key} .':from_server' };
+sub _key { join ':', shift->{_key}, @_ }
+
 =head1 METHODS
 
 =head2 load
@@ -144,6 +148,7 @@ sub load {
   return $cb->($self) if $self->{_loaded}++;
   my $delay;
   my $id = $self->id || croak "Cannot load connection without id";
+  $self->{_key} = join ':', 'connection', $id;
   my @req = map {"connection:$id:$_"} @keys;
   $self->redis->mget(
     @req,
@@ -203,7 +208,6 @@ sub connect {
               while ($buffer =~ s/^([^\r\n]+)\r\n//s) {
                 warn sprintf "[connection:%s] > %s\n", $self->id, $1 if DEBUG;
                 my $message = parse_irc($1);
-                $self->redis->publish(join(':', 'connection', $self->id, 'from_server'), $1);
                 $message->{'command'} =
                   IRC::Utils::numeric_to_name($message->{'command'})
                   if $message->{'command'} =~ /^\d+$/;
@@ -221,10 +225,10 @@ sub connect {
           );
           $self->write(NICK => $self->nick);
           $self->write(USER => $self->user, 8, '*', ':WiRC IRC Proxy');
-          $self->subscribe_id($self->redis->subscribe('connection:'.$self->id.":to_server",sub {
+          $self->subscribe_id($self->redis->subscribe($self->_key('to_server'), sub {
             my ($redis,$res)=@_;
             $self->write($_) for @$res;
-          }));
+          })) unless $self->subscribe_id;
         }
       );
     }
@@ -244,7 +248,7 @@ sub irc_privmsg {
 
 Example message:
 
-:batman__!~jhthorsen@ti0034a380-dhcp0392.bb.online.no MODE batman__ :+i
+:somenick!~someuser@ti0034a380-dhcp0392.bb.online.no MODE somenick :+i
 
 =cut
 
@@ -255,7 +259,7 @@ sub irc_mode {
 
 Example message:
 
-:Zurich.CH.EU.Undernet.Org NOTICE batman__ :on 1 ca 1(4) ft 10(10)
+:Zurich.CH.EU.Undernet.Org NOTICE somenick :on 1 ca 1(4) ft 10(10)
 
 =cut
 
@@ -342,12 +346,12 @@ Example message:
 
 sub irc_rpl_myinfo {
   my($self, $message) = @_;
-  my @keys = qw/ nick servername version available_user_modes available_channel_modes /;
+  my @keys = qw/ nick real_host version available_user_modes available_channel_modes /;
 
   $self->nick($message->{params}[0]);
 
-  for my $v (@{ $message->{params} }) {
-    $self->redis->set(join(':', 'connection', $self->id, shift @keys), $v);
+  while(my $key = shift @keys) {
+    $self->redis->set($self->_key($key), shift @{ $message->{params} });
   }
 }
 
@@ -451,7 +455,54 @@ sub irc_rpl_endofmotd {
   $_[0]->add_server_message($_[1]);
 }
 
+=head irc_join
+
+Example message:
+
+:somenick!~someuser@148.122.202.168 JOIN #html
+
+=cut
+
+sub irc_join {
+  my($self, $message) = @_;
+
+  $self->redis->publish($self->_publish_key, $JSON->encode({
+    joined => $message->{params}[0],
+    timestamp => time,
+  }));
+}
+
+=head2 irc_rpl_namreply
+
+Example message:
+
+:Budapest.Hu.Eu.Undernet.org 353 somenick = #html :somenick Indig0 Wildblue @HTML @CSS @Luch1an @Steaua_ Indig0_ Pilum @fade
+
+=cut
+
+sub irc_rpl_namreply {
+  my($self, $message) = @_;
+  my @nicks = split /\s+/, $message->{params}[3]; # 3 = +nick0 @nick1, nick2
+
+  $self->redis->sadd($self->_key('names', $message->{params}[2]), @nicks);
+}
+
+=head2 irc_rpl_endofnames
+
+Example message:
+
+:Budapest.Hu.Eu.Undernet.org 366 somenick #html :End of /NAMES list.
+
+=cut
+
+sub irc_rpl_endofnames {
+}
+
 =head2 irc_error
+
+Example message:
+
+ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connection class is full - try again later or try another server)
 
 =cut
 
@@ -460,7 +511,8 @@ sub irc_error {
 
   $self->add_server_message($message);
 
-  if ($message->{params}->[0] =~ /Closing Link/) {
+  if ($message->{raw_line} =~ /Closing Link/i) {
+    warn sprintf "[connection:%s] ! Closing link (reconnect)\n",
     $self->stream->close;
     $self->connect;
   }
@@ -477,12 +529,19 @@ if it looks like one. Returns true if the message was added to redis.
 
 sub add_server_message {
   my($self, $message) = @_;
+  my $time = time;
 
   if(!$message->{prefix} or $message->{prefix} eq $self->_real_host) {
     $self->redis->rpush(
-      join(':', 'connection', $self->id, 'msg', 'server'),
-      join(':', time, $message->{params}[1]),
+      $self->_key('msg', $self->host),
+      join("\0", $time, $self->host, $message->{params}[1] || $message->{params}[0]), # 1 = normal, 0 = error
     );
+    $self->redis->publish($self->_publish_key, $JSON->encode({
+      timestamp => $time,
+      sender => $self->host,
+      message => $message->{params}[1] || $message->{params}[0], # 1 = normal, 0 = error
+      server => $self->host,
+    }));
     return 1;
   }
 
@@ -499,15 +558,22 @@ Will add a private message to the database.
 
 sub add_message {
   my ($self, $message) = @_;
+  my $time = time;
 
   $self->redis->rpush(
-    join(':', 'connection', $self->id, 'msg', $message->{params}->[0]),
-    join(':', time, $message->{params}->[1]),
+    $self->_key('msg', $message->{params}[0]), 
+    join("\0", $time, $message->{prefix}, $message->{params}[1]),
   );
+  $self->redis->publish($self->_publish_key, $JSON->encode({
+    timestamp => $time,
+    server => $self->host,
+    sender => $message->{prefix},
+    target => $message->{params}[0],
+    message => $message->{params}[1],
+  }));
 
   unless ($message->{params}->[0] =~ /^\#/x) { # not a channel
-    $self->redis->sadd(join(':', 'connection', $self->id, 'conversations'),
-      $message->{params}->[0]);
+    $self->redis->sadd($self->_key('conversations') => $message->{params}->[0]);
   }
 }
 
