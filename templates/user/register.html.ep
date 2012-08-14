@@ -1,9 +1,19 @@
-<h1 class="page-header">Connect your Facebook account with Wirc</h1>
+<h1 class="page-header">Register a new acccount to use wirc</h1>
 <p>
-  Wirc is an app that allows you to interact with friends and colleges.
+  Wirc is an app that allows you to interact with friends and colleagues.
 </p>
-<div class="fb-login-button">
-  %= link_to oauth_connect_url(), class => 'fb_button fb_button_medium', begin
-    <span class="fb_button_text">Register with Facebook</span>
-  % end
+%if(stash('message')) {
+<div class="alert">
+  <button class="close" data-dismiss="alert">×</button>
+  <strong>Oops!</strong> <%= stash('message') %>
 </div>
+%}
+<form class="well" method="post">
+  <label>Username</label>
+  <input type="text" name="login" class="span3" placeholder="Type something…" value="<%=param('login')%>">
+  <span class="help-block">Choose something that's simple to remember. Your IRC handle for instance</span>
+  <label>Password</label>
+  <input type="password" name="password" class="span3" value="<%=param('password')%>">
+
+  <button type="submit" class="btn">Submit</button>
+</form>

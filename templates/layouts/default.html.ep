@@ -32,7 +32,7 @@
               <li><%= link_to 'Settings', 'settings' %></li>
               <li><%= link_to 'Logout', 'logout' %></li>
             % } else {
-              <li><%= link_to 'Login', oauth_connect_url %></li>
+              <li><%= link_to 'Login', 'login' %></li>
               <li><%= link_to 'Register', 'register' %></li>
             % }
             </ul>

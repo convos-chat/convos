@@ -103,9 +103,8 @@ This method will run once at server start
 sub startup {
   my $self = shift;
   my $config = $self->plugin('Config');
-
-  $self->plugin(OAuth2 => $config->{'OAuth2'});
-
+  $self->plugin('Parallol');
+  
   $self->add_helpers($config);
   $self->defaults(
     layout => 'default',
@@ -115,10 +114,12 @@ sub startup {
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to(template => 'index');
+  $r->get('/login')->to(template => 'user/login');
+  $r->post('/login')->to('user#login');
   $r->get('/register')->to(template => 'user/register');
   $r->post('/register')->to('user#register');
 
-  my $c=$r->bridge('/'); #->to('user#auth'); # disabling auth for now
+  my $c=$r->bridge('/')->to('user#auth'); 
   $c->route('/setup')->to('client#setup');
   $c->get('/settings')->to(template => 'user/settings')->name('settings');
   $c->post('/settings')->to('user#settings');
@@ -145,10 +146,6 @@ Will add thease helpers:
 
 =over 4
 
-=item oauth_connect_url
-
-This is a modification of L<Mojolicious::Plugin::OAuth2/get_authorize_url>
-since Jan Henning forgot to pass on the correct arguments.
 
 =item page_header
 
@@ -165,13 +162,6 @@ Used to call L<Mojo::Redis/execute> multiple times.
 sub add_helpers {
   my($self, $config) = @_;
 
-  $self->helper(oauth_connect_url => sub {
-    my($c, $use_current) = @_;
-    $c->get_authorize_url(facebook => (
-      $use_current ? () : (redirect_uri => $c->url_for('/account')->to_abs->to_string),
-      scope => $config->{'OAuth2'}{'facebook'}{'scope'},
-    ));
-  });
 
   $self->helper(page_header => sub {
     $_[0]->stash('page_header', $_[1]) if @_ == 2;
@@ -194,6 +184,7 @@ sub add_helpers {
 
     $redis->$wrapper;
   });
+|  $self->helper(redis => sub { $self->redis });
 }
 
 =head1 COPYRIGHT
