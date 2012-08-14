@@ -79,13 +79,14 @@ set all the keys in the %connection hash
 =cut
 
 sub add_connection {
-  my ($self,$uid,%conn)=@_;
+  my ($self,$uid,$conn,$cb)=@_;
   $self->redis->incr('connnections:id',sub {
     my ($redis,$res)=@_;
     $self->redis->sadd('connections',$res);
-    for my $key (keys %conn) {
-      $self->redis->set('connection:'.$res.':'.$conn{$key});
+    for my $key (keys %$conn) {
+      $self->redis->set('connection:'.$res.':'.$conn->{$key});
     }
+    $self->cb($res);
   });
 }
 

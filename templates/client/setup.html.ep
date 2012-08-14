@@ -3,17 +3,25 @@
 <h1 class="page-header">Initial setup</h1>
 <form class="form-horizontal">
   <div class="control-group">
-    <label class="control-label" for="server">Server</label>
+    <label class="control-label" for="host">Nick</label>
     <div class="controls">
-      %= text_field 'server', config->{'default_server'} // '', id => 'server';
+      %= text_field 'host', session('login') // '', id => 'host';
       <p class="help-block">Add ":port" unless you want to use default port 6667</p>
     </div>
   </div>
+ <div class="control-group">
+   <label class="control-label" for="host">Server</label>
+   <div class="controls">
+     %= text_field 'host', config->{'default_server'} // '', id => 'host';
+     <p class="help-block">Add ":port" unless you want to use default port 6667</p>
+   </div>
+ </div>
+ 
   <div class="control-group">
     <label class="control-label" for="target">Target</label>
     <div class="controls">
       %= text_field 'target', config->{'default_target'} // '', id => 'target';
-      <p class="help-block">Channel or nick you want to talk to in server.</p>
+      <p class="help-block">Channel(s) to join on the server. Space separated.</p>
     </div>
   </div>
   <div class="form-actions">

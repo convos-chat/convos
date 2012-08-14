@@ -21,11 +21,16 @@ my $JSON = Mojo::JSON->new;
 sub setup {
   my $self = shift;
 
-  if($self->param('server') and $self->param('target')) {
-    $self->redirect_to('view',
-      server => $self->param('server'),
-      target => $self->param('target'),
-    );
+  if($self->param('host') and $self->param('channel')) {
+    $self->core->add_connection($self->session('uid'),{
+      nick => $self->param('nick'),
+      host => $self->param('host'),
+      }),sub {
+        $self->redirect_to('view',
+          server => $self->param('server'),
+          target => $self->param('target'),
+        );
+    });
   }
 }
 

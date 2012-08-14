@@ -40,6 +40,7 @@ sub login {
       warn "Testing $digest";
       if(crypt($self->param('password'),$digest) eq $digest) {
         $self->session('uid' => $uid);
+        $self->session('login' => $self->param('login'));
         $self->redirect_to('/setup');
       }
       else { $self->stash(message=>'Invalid username/password.'); }
@@ -68,6 +69,7 @@ sub register {
               crypt($self->param('password'),
                 join('', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64])));
             $self->session(uid=>$uid);
+            $self->session('login' => $self->param('login'));
             $self->redirect_to('/setup');
           }));
         }

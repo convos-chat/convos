@@ -184,7 +184,7 @@ sub add_helpers {
 
     $redis->$wrapper;
   });
-|  $self->helper(redis => sub { $self->redis });
+  $self->helper(redis => sub { $self->redis });
 }
 
 =head1 COPYRIGHT
