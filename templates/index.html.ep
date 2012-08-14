@@ -5,7 +5,7 @@
       Interact with friends and/or colleges.
     </p>
     <p class="download-info">
-      %= link_to oauth_connect_url, class => 'btn btn-primary btn-large', begin
+      %= link_to 'login', class => 'btn btn-primary btn-large', begin
         Login
       % end
       or
