@@ -1,4 +1,20 @@
 % page_header param('target') ? link_to(param('target'), 'view') .' on ' .param('server') : param('server');
+
+<script type="text/html" id="tmpl_li_error">
+  <li>
+    <i class="icon-exclamation-sign"></i> Error: <%%= error %>
+  </li>
+</script>
+<script type="text/html" id="tmpl_li_message">
+  <li>
+    <%% if(sender) { %>
+    <span class="sender"><i class="icon-comment"></i><a href="<%%= href %>"><%%= sender %></a></span>
+    <span class="timestamp"><%%= timestamp %></span>
+    <%% } %>
+    <span class="message" title="<%%= timestamp %>"><%%= message %></span>
+  </li>
+</script>
+
 <div class="row-fluid">
   <div class="span2">
     <ul id="targets" class="nav nav-list">

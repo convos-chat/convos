@@ -9,6 +9,8 @@
     %= javascript '/bootstrap/js/less-1.3.0.min.js';
     %= javascript '/bootstrap/js/bootstrap-dropdown.js';
     %= javascript '/bootstrap/js/bootstrap-typeahead.js';
+    %= javascript '/js/template.js';
+    %= javascript '/js/structure.min.js';
     %= javascript '/js/wirc.js';
   </head>
   <body>
