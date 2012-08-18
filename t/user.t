@@ -29,5 +29,10 @@ $t->post_form_ok('/register' => { login => 'foobar', password => 'barbar' })
   ->status_is('302');
 $t->post_form_ok('/login' => { login => 'foobar', password => 'barbar' })
   ->status_is('302');
+$t->post_form_ok('/register' => { login => 'foobar', password => 'barbar', email => 'marcus@iusethis.com',secret => crypt('marcus@iusethis.com'.$t->app->secret,1) })
+  ->status_is('200')
+  ->element_exists('.alert');
+$t->post_form_ok('/register' => { login => 'barbar', password => 'barbar' })
+  ->status_is('404', 'Second user needs an invite code');
 
 done_testing;
