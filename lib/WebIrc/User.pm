@@ -31,21 +31,24 @@ Authenticate local user
 
 sub login {
   my $self=shift;
-  $self->redis->get('user:'.$self->param('login').':uid',$self->parallol(sub {
-    my ($redis,$uid)=@_;
-    warn("uid $uid");
-    return $self->stash( message=>"Invalid username/password" ) unless  $uid && $uid =~ /\d+/;
-    $redis->get('user:'.$self->param('login').':digest', $self->parallol(sub {
-      my ($redis,$digest)=@_;
-      warn "Testing $digest";
+  $self->render_later;
+  Mojo::IOLoop->delay(sub {
+    my $delay=shift;
+    $self->redis->get('user:'.$self->param('login').':uid',$delay->begin);
+    }, sub {
+      my ($delay,$uid)=@_;
+      return $self->render( message=>"Invalid username/password" ) unless  $uid && $uid =~ /\d+/;
+      $self->stash(uid=>$uid);
+      $self->redis->get('user:'.$self->param('login').':digest', $delay->begin);
+    }, sub {
+      my($delay,$digest)=@_;
       if(crypt($self->param('password'),$digest) eq $digest) {
-        $self->session('uid' => $uid);
+        $self->session('uid' => $self->stash('uid'));
         $self->session('login' => $self->param('login'));
         $self->redirect_to('/setup');
       }
-      else { $self->stash(message=>'Invalid username/password.'); }
-    }));
-  }));
+      else { $self->render(message=>'Invalid username/password.'); }
+    });
 }
 
 =head2 register
@@ -57,35 +60,49 @@ See L</login>.
 sub register {
   my $self=shift;
 
-  if($self->param('login') =~ m/^[\w]{4,15}$/) {
-    $self->stash(message=>'Username must consist of letters and numbers and be 4-15 characters long');
-    return;
+  unless($self->param('login') =~ m/^[\w]{4,15}$/) {
+    return $self->render(message=>'Username must consist of letters and numbers and be 4-15 characters long');
   }
-  if($self->param('password') and 5 < length $self->param('password')){
-    $self->stash('message'=>'The password must be at least 6 characters long');
-    return;
+  if($self->param('password') and length $self->param('password') < 5){
+    return $self->render('message'=>'The password must be at least 6 characters long');
   }
-
+  my $admin=0;
   $self->render_later;
-  $self->redis->get('user:'.$self->param('login').':uid',$self->parallol(sub {
-    my ($redis,$uid)=@_;
-
-    if($uid) {
-      $self->stash(message=>'This username is taken');
-      return;
+  Mojo::IOLoop->delay(sub {
+    my $delay=shift;
+    $self->redis->get('user:uids',$delay->begin);
+  },
+  sub { # Check invitation unless first user, or make admin.
+    my ($delay,$uids)=@_;
+    if($uids && $self->param('secret')||''  ne 
+      crypt($self->param('email').$self->app->secret,$self->param('secret'))) {
+        return $self->render_not_found;
     }
+    if($uids) {
+      return $self->redis->get('user:'.$self->param('login').':uid',$delay->begin);
+    }
+    $admin++;
+    $delay->begin->();
+  }, sub {  # Get uid unless user exists
+    my ($delay,$uid)=@_;
+    return $self->render(message=>'This username is taken') if $uid;
+    $self->redis->incr('user:uids',$delay->begin);
+  }, sub { # Create user
+    my ($delay,$uid)=@_;
+    $self->redis->set('user:'.$self->param('login').':uid',$uid,$delay->begin);
+    $self->redis->set('user:'.$self->param('login').':digest', crypt($self->param('password'),
+          join('', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64])),$delay->begin);
+      $self->session(uid=>$uid,login => $self->param('login'));
+  }, sub {
+    my ($delay)=@_;
+    $self->redirect_to('/setup');
+  });
+}
 
-    $redis->incr('user:uids',$self->parallol(sub {
-      my ($redis,$uid)=@_;
-      $redis->set('user:'.$self->param('login').':uid',$uid);
-      $redis->set('user:'.$self->param('login').':digest',
-        crypt($self->param('password'),
-          join('', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64])));
-      $self->session(uid=>$uid);
-      $self->session(login => $self->param('login'));
-      $self->redirect_to('/setup');
-    }));
-  }));
+sub logout {
+  my $self=shift;
+  $self->session(uid=>undef,login=>undef);
+  $self->redirect_to('/');
 }
 
 =head1 COPYRIGHT
