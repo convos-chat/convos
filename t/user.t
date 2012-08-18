@@ -22,8 +22,12 @@ my $delay=Mojo::IOLoop->delay(sub {
   my $delay=shift;
 });
 $delay->wait;
-$t->post_form_ok('/login' => { login => 'foo', password => 'bar' })
+$t->post_form_ok('/login' => { login => 'foobar', password => 'barbar' })
   ->status_is('200')
   ->element_exists('.alert');
+$t->post_form_ok('/register' => { login => 'foobar', password => 'barbar' })
+  ->status_is('301');
+$t->post_form_ok('/login' => { login => 'foobar', password => 'barbar' })
+  ->status_is('301');
 
 done_testing;
