@@ -74,8 +74,8 @@ sub register {
   },
   sub { # Check invitation unless first user, or make admin.
     my ($delay,$uids)=@_;
-    if($uids && $self->param('secret')||''  ne 
-      crypt($self->param('email').$self->app->secret,$self->param('secret'))) {
+    if($uids && ($self->param('secret')||''  ne 
+      crypt($self->param('email').$self->app->secret,$self->param('secret')))) {
         return $self->render_not_found;
     }
     if($uids) {

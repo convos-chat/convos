@@ -26,8 +26,8 @@ $t->post_form_ok('/login' => { login => 'foobar', password => 'barbar' })
   ->status_is('200')
   ->element_exists('.alert');
 $t->post_form_ok('/register' => { login => 'foobar', password => 'barbar' })
-  ->status_is('301');
+  ->status_is('302');
 $t->post_form_ok('/login' => { login => 'foobar', password => 'barbar' })
-  ->status_is('301');
+  ->status_is('302');
 
 done_testing;
