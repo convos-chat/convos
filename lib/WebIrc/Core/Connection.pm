@@ -193,7 +193,7 @@ sub connect {
         }
       }
 
-      Mojo::IOLoop->singleton->client(
+      Mojo::IOLoop->client(
         address => $self->host,
         port    => $self->port,
         sub {
