@@ -152,12 +152,6 @@ Will add thease helpers:
 
 Used to set/retrieve the page header used by C<layout/default.html.ep>
 
-=item redis_then
-
-Used to call L<Mojo::Redis/execute> multiple times.
-
-=back
-
 =cut
 
 sub add_helpers {
@@ -170,22 +164,12 @@ sub add_helpers {
     $_[0]->stash('page_header') // $self->config->{'name'};
   });
 
-  $self->helper(redis_then => sub {
-    my($c, @cb) = @_;
-    my $redis = $c->app->redis;
-    my $wrapper;
-
-    Scalar::Util::weaken $c;
-    $wrapper = sub {
-      my $redis = shift;
-      my $cb = shift @cb;
-      my @next = $cb->(@_);
-      $redis->execute(shift(@next), [@next], $wrapper) if @next and @cb;
-    };
-
-    $redis->$wrapper;
-  });
   $self->helper(redis => sub { $self->redis });
+  $self->helper(steps => sub {
+    my ($self,@steps)=$_;
+    $self->render_later();
+    Mojo::IOLoop->steps(@steps);
+  });
 }
 
 =head1 COPYRIGHT

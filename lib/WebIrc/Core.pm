@@ -71,6 +71,18 @@ sub connections {
     });
 }
 
+=head2 start_connection $id,$cb
+
+Start a single connection by connection id.
+
+=cut
+
+sub start_connection {
+  my ($self,$cid,$cb)=@_;
+  my $conn=WebIrc::Core::Connection->new(redis=>$self->redis,id=>$cid);
+  $conn->start;
+}
+
 =head2 add_connection %conn
 
 Add a new connection to redis. Will create a new connection id and
@@ -83,6 +95,7 @@ sub add_connection {
   $self->redis->incr('connnections:id',sub {
     my ($redis,$res)=@_;
     $self->redis->sadd('connections',$res);
+    $self->redis->sadd("user:$uid:connections",$res);
     for my $channel (split(/\s+/,delete $conn->{channels})) {
       $self->redis->sadd('connection:'.$res.':channels',$channel);
     }

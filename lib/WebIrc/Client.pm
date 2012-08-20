@@ -22,21 +22,25 @@ sub setup {
   my $self = shift;
 
   if($self->param('host') and $self->param('channels'), and $self->param('nick')) {
-    $self->core->add_connection($self->session('uid'),{
-      nick     => $self->param('nick'),
-      host     => $self->param('host'),
-      user     => $self->session('login'),
-      channels => $self->param('channels'),
-      }),$self->parallol(sub {
-        my $cid=shift;
-        $self->redirect_to('view',
-          server => $self->param('server'),
-          target => $self->param('target'),
-        );
+    $self->steps(sub {
+      my $delay=shift;
+      $self->core->add_connection($self->session('uid'),{
+        nick     => $self->param('nick'),
+        host     => $self->param('host'),
+        user     => $self->session('login'),
+        channels => $self->param('channels'),
+      },delay->begin);
+    }, sub {
+      my ($delay,$cid)=@_;
+      $self->core->start_connection($cid);
+      $self->redirect_to('view',
+        server => $self->param('server'),
+        target => $self->param('target'),
+      );
     });
   }
   else {
-    $self->stash('messsage' => 'Please fill in all the fields to continue');
+    $self->render('messsage' => 'Please fill in all the fields to continue');
   }
 }
 
@@ -59,31 +63,33 @@ sub view {
   $self->stash(logged_in => 1); # TODO: Remove this once login logic is written
   $self->stash(messages => []);
 
-  # TODO: Should probably be "user:x:connections" instead of connections?
-  $redis->smembers(connections => sub {
+  $redis->smembers('user:'.$self->session('uid').':connections' => sub {
     my($redis, $connection_ids) = @_;
 
     # need to redirect to setup if no servers has been configured
-    if(@$connection_ids == 0) {
+    unless(@$connection_ids) {
       return $self->redirect_to('setup');
     }
 
     for my $id (@$connection_ids) {
       my($server, $msg_id);
-      $self->redis_then(
-        sub { return mget => map { "connection:$id:$_" } qw/ host user nick / },
-        sub {
-          my($info) = @_;
+      $self->steps(
+        sub { 
+          my $delay=shift;
+          $self->redis(mget => map { "connection:$id:$_" } qw/ host user nick /, $delay->begin);
+        }, sub {
+          my($delay,$info) = @_;
           $server = $info->[0];
           $msg_id = $connection_ids->[0] if $server eq $self->stash('server');
           $connections->{$server}{id} = shift @$connection_ids;
-          $connections->{$server}{user} = $info->[1];
+          # TODO: could this be a single line with a hash slice?
+	  $connections->{$server}{user} = $info->[1];
           $connections->{$server}{nick} = $info->[2];
           $connections->{$server}{active} = $info->[0] eq $msg_name ? 1 : 0;
-          return smembers => "connection:$id:channels";
+          $self->redis(smembers => "connection:$id:channels",$delay->begin);
         },
         sub {
-          my($channels) = @_;
+          my($delay,$channels) = @_;
           $connections->{$server}{targets} = [
             map {
               +{
@@ -92,12 +98,12 @@ sub view {
               };
             } @$channels
           ];
-          return lrange => "connection:$msg_id:msg:$msg_name", -50, -1 if $msg_id;
+          return $self->redis(lrange => "connection:$msg_id:msg:$msg_name", -50, -1,$delay->next)
+            if $msg_id;
           $self->render;
-          return;
         },
         sub {
-          my($messages) = @_;
+          my($delay,$messages) = @_;
           if(@$messages) {
             $self->stash(messages => [
               map {
