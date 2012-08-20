@@ -4,9 +4,9 @@
 <h1 class="page-header">Initial setup</h1>
 <form class="form-horizontal">
   <div class="control-group">
-    <label class="control-label" for="host">Nick</label>
+    <label class="control-label" for="nick">Nick</label>
     <div class="controls">
-      %= text_field 'host', session('login') // '', id => 'host';
+      %= text_field 'nick', session('login') // '', id => 'nick';
       <p class="help-block">Handle to operate under</p>
     </div>
   </div>
