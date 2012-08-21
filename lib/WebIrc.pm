@@ -168,7 +168,7 @@ sub add_helpers {
   $self->helper(steps => sub {
     my ($self,@steps)=$_;
     $self->render_later();
-    Mojo::IOLoop->steps(@steps);
+    Mojo::IOLoop->delay(@steps);
   });
 }
 
