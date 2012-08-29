@@ -105,9 +105,8 @@ This method will run once at server start
 sub startup {
   my $self = shift;
   my $config = $self->plugin('Config');
-  $self->secret(Mojo::JSON->new->encode($config));
-  $self->plugin('Parallol');
-  
+
+  $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->add_helpers($config);
   $self->defaults(
     layout => 'default',
