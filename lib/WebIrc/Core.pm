@@ -106,8 +106,6 @@ sub add_connection {
   });
 }
 
-
-
 =head2 login
 
 TODO
@@ -122,8 +120,8 @@ sub login {
       $self->redis->get('user:'.$params{login}.':uid',$delay->begin);
     }, sub {
       my($delay, $uid) = @_;
-      warn "Got the uid: $uid" if DEBUG;
       return $params{on_error}->() unless  $uid && $uid =~ /\d+/;
+      warn "Got the uid: $uid" if DEBUG;
       $self->redis->get("user:$uid:digest", $delay->begin);
     }, sub {
       my($delay,$digest)=@_;

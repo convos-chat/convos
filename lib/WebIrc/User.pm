@@ -33,6 +33,12 @@ Authenticate local user
 sub login {
   my $self=shift;
 
+  if($self->param('register')) {
+    $self->stash(template => 'user/register');
+    $self->register;
+    return;
+  }
+
   $self->render_later;
   $self->app->core->login(
     login => scalar $self->param('login'),
