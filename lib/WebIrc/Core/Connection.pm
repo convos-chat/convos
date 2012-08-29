@@ -212,7 +212,7 @@ sub connect {
                 warn sprintf "[connection:%s] > %s\n", $self->id, $1 if DEBUG;
                 my $message = parse_irc($1);
                 if($message->{'command'} =~ /^\d+$/) {
-                    warn sprintf "[connection:%s] : Translating %s\n", $$message->{'command'} if DEBUG;
+                    warn sprintf "[connection:%s] : Translating %s\n", $self->id, $message->{'command'} if DEBUG;
                     $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'});
                 }
                 my $method = 'irc_' . lc $message->{'command'};
@@ -542,7 +542,7 @@ sub add_server_message {
   my $time = time;
 
   if(!$message->{prefix} or $message->{prefix} eq $self->_real_host) {
-    $self->redis->rpush( 
+    $self->redis->rpush(
       $self->_key('msg'),
       join("\0", $time, $self->host, $message->{params}[1] || $message->{params}[0]), # 1 = normal, 0 = error
     );
