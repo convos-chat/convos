@@ -5,7 +5,7 @@ use Test::Mojo;
 my $t=Test::Mojo->new('WebIrc');
 
 $t->app->redis->on(error => sub {
-  ok(0,"Oops:".$redis->error);
+  ok(0,"Oops:".$t->app->redis->error);
   done_testing;
 });
 
