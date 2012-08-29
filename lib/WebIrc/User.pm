@@ -35,14 +35,14 @@ sub login {
 
   $self->render_later;
   $self->app->core->login(
-    login=> $self->param('login'), 
-    password=> $self->param('password'), 
-    on_success=>sub {
+    login => scalar $self->param('login'),
+    password => scalar $self->param('password'),
+    on_success => sub {
       my $uid=shift;
       $self->session('uid' => $uid);
       $self->session('login' => $self->param('login'));
       $self->redirect_to('/setup');
-    }, 
+    },
     on_error =>sub {
       $self->render(message=>'Invalid username/password.');
     });
@@ -103,7 +103,7 @@ sub register {
     $self->session(uid=>$uid,login => $self->param('login'));
     $self->redis->execute(
       [ set => 'user:'.$self->param('login').':uid', $uid ],
-      [ set => 'user:'.$self->param('login').':digest', $digest ],
+      [ set => 'user:'.$uid.':digest', $digest ],
       $delay->begin,
     );
   }, sub {

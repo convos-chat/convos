@@ -11,8 +11,8 @@ TODO
 =cut
 
 use Mojo::Base -base;
-
 use WebIrc::Core::Connection;
+use constant DEBUG => $ENV{'WEBIRC_CONNECTION_DEBUG'} // 1;
 
 =head1 ATTRIBUTES
 
@@ -46,7 +46,7 @@ sub start {
   $self->redis->del('connections:connected');
   $self->connections(sub {
     my $connections = shift;
-    warn sprintf "[core] Starting %s connection(s)\n", int @$connections if WebIrc::Core::Connection::DEBUG;
+    warn sprintf "[core] Starting %s connection(s)\n", int @$connections if DEBUG;
     for my $conn (@$connections) {
       $conn->connect;
     }
@@ -118,14 +118,13 @@ sub login {
   my ($self,%params)=@_;
   my $uid;
   Mojo::IOLoop->delay(sub {
-    my $delay=shift;
-    $self->redis->get('user:'.$params{login}.':uid',$delay->begin);
-    }, sub {
       my $delay=shift;
-      $uid=shift;
-      warn("Got the uid: $uid");
+      $self->redis->get('user:'.$params{login}.':uid',$delay->begin);
+    }, sub {
+      my($delay, $uid) = @_;
+      warn "Got the uid: $uid" if DEBUG;
       return $params{on_error}->() unless  $uid && $uid =~ /\d+/;
-      $self->redis->get('user:'.$params{login}.':digest', $delay->begin);
+      $self->redis->get("user:$uid:digest", $delay->begin);
     }, sub {
       my($delay,$digest)=@_;
       if(crypt($params{password},$digest) eq $digest) {

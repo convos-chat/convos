@@ -83,6 +83,7 @@ sub view {
       return $self->redirect_to('setup');
     }
 
+    $self->logf(debug => '[view] Connecting to %s', $connection_ids) if DEBUG;
     for my $id (@$connection_ids) {
       my($server, $msg_id);
       Mojo::IOLoop->delay(
@@ -95,7 +96,7 @@ sub view {
           $msg_id = $connection_ids->[0] if $server eq $self->stash('server');
           $connections->{$server}{id} = shift @$connection_ids;
           # TODO: could this be a single line with a hash slice?
-	  $connections->{$server}{user} = $info->[1];
+          $connections->{$server}{user} = $info->[1];
           $connections->{$server}{nick} = $info->[2];
           $connections->{$server}{active} = $info->[0] eq $msg_name ? 1 : 0;
           $self->redis(smembers => "connection:$id:channels",$delay->begin);
