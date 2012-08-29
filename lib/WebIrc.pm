@@ -123,7 +123,8 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $private_r=$r->bridge('/')->to('user#auth');
-  $private_r->route('/setup')->to('client#setup');
+  $private_r->get('/setup')->to(template => 'client/setup')->name('setup');
+  $private_r->post('/setup')->to('client#setup');
   $private_r->get('/settings')->to(template => 'user/settings')->name('settings');
   $private_r->post('/settings')->to('user#settings');
 
@@ -201,11 +202,6 @@ sub add_helpers {
     );
   });
   $self->helper(redis => sub { $self->redis });
-  $self->helper(steps => sub {
-    my ($self,@steps)=$_;
-    $self->render_later();
-    Mojo::IOLoop->delay(@steps);
-  });
 }
 
 =head1 COPYRIGHT

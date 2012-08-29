@@ -7,7 +7,7 @@ WebIrc::User - Mojolicious controller for user data
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use constant WIRC_DEBUG => 1;
+use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 =head1 METHODS
 
@@ -59,7 +59,7 @@ sub register {
   my $admin=0;
 
   if($self->session('uid')) {
-    $self->logf(debug => '[reg] Already logged in') if WIRC_DEBUG;
+    $self->logf(debug => '[reg] Already logged in') if DEBUG;
     $self->redirect_to('/setup');
     return;
   }
@@ -71,10 +71,10 @@ sub register {
   },
   sub { # Check invitation unless first user, or make admin.
     my ($delay,$uids)=@_;
-    $self->logf(debug => '[reg] Got uids %s', $uids) if WIRC_DEBUG;
+    $self->logf(debug => '[reg] Got uids %s', $uids) if DEBUG;
 
     if($self->_got_invalid_register_params($uids)) {
-      $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if WIRC_DEBUG;
+      $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
       $self->render;
       return;
     }
@@ -84,7 +84,7 @@ sub register {
     }
     else {
       $admin++;
-      $self->logf(debug => '[reg] First login == admin') if WIRC_DEBUG;
+      $self->logf(debug => '[reg] First login == admin') if DEBUG;
       $delay->begin->();
     }
   }, sub {  # Get uid unless user exists
@@ -99,7 +99,7 @@ sub register {
   }, sub { # Create user
     my ($delay,$uid)=@_;
     my $digest = crypt $self->param('password'), join '', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
-    $self->logf(debug => '[reg] New user uid=%s, login=%s', $uid, $self->param('login')) if WIRC_DEBUG;
+    $self->logf(debug => '[reg] New user uid=%s, login=%s', $uid, $self->param('login')) if DEBUG;
     $self->session(uid=>$uid,login => $self->param('login'));
     $self->redis->execute(
       [ set => 'user:'.$self->param('login').':uid', $uid ],
@@ -120,9 +120,9 @@ sub _got_invalid_register_params {
 
   if($secret_required) {
     my $secret = $self->param('secret') || 'some-weird-secret-which-should-never-be-generated';
-    $self->logf(debug => '[reg] Validating invite code %s', $secret) if WIRC_DEBUG;
+    $self->logf(debug => '[reg] Validating invite code %s', $secret) if DEBUG;
     if($secret ne crypt $email.$self->app->secret, $secret) {
-      $self->logf(debug => '[reg] Invalid invite code.') if WIRC_DEBUG;
+      $self->logf(debug => '[reg] Invalid invite code.') if DEBUG;
       $self->stash(message => 'Invalid invite code.');
       return 1;
     }

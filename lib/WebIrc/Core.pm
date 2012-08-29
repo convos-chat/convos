@@ -53,11 +53,11 @@ sub start {
   })
 }
 
-=head2 connections 
+=head2 connections
 
 Connection list. Will fetch from redis or cache in current_connections
 
-=cut 
+=cut
 
 sub connections {
   my ($self,$cb) = @_;
@@ -71,16 +71,16 @@ sub connections {
     });
 }
 
-=head2 start_connection $id,$cb
+=head2 start_connection $cid
 
 Start a single connection by connection id.
 
 =cut
 
 sub start_connection {
-  my ($self,$cid,$cb)=@_;
+  my ($self,$cid)=@_;
   my $conn=WebIrc::Core::Connection->new(redis=>$self->redis,id=>$cid);
-  $conn->start;
+  $conn->connect;
 }
 
 =head2 add_connection %conn
@@ -102,7 +102,7 @@ sub add_connection {
     for my $key (keys %$conn) {
       $self->redis->set('connection:'.$res.':'.$conn->{$key});
     }
-    $self->cb($res);
+    $self->$cb($res);
   });
 }
 

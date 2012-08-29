@@ -9,6 +9,7 @@ WebIrc::Client - Mojolicious controller for IRC chat
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
 use Parse::IRC;
+use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $JSON = Mojo::JSON->new;
 
@@ -20,28 +21,39 @@ my $JSON = Mojo::JSON->new;
 
 sub setup {
   my $self = shift;
+  my $target = $self->param('channels');
 
-  if($self->param('host') and $self->param('channels'), and $self->param('nick')) {
-    $self->steps(sub {
-      my $delay=shift;
-      $self->core->add_connection($self->session('uid'),{
-        nick     => $self->param('nick'),
-        host     => $self->param('host'),
-        user     => $self->session('login'),
-        channels => $self->param('channels'),
-      },delay->begin);
-    }, sub {
-      my ($delay,$cid)=@_;
-      $self->core->start_connection($cid);
-      $self->redirect_to('view',
-        server => $self->param('server'),
-        target => $self->param('target'),
-      );
-    });
+  $self->_got_invalid_setup_params and return;
+  $self->render_later;
+  Mojo::IOLoop->delay(sub {
+    my $delay=shift;
+    $self->app->core->add_connection($self->session('uid'),{
+      nick     => scalar $self->param('nick'),
+      host     => scalar $self->param('host'),
+      user     => scalar $self->session('login'),
+      channels => scalar $self->param('channels'),
+    },$delay->begin);
+  }, sub {
+    my ($delay,$cid)=@_;
+    $self->logf(debug => '[setup] cid=%s', $cid) if DEBUG;
+    $self->app->core->start_connection($cid);
+    $self->redirect_to('view',
+      server => scalar $self->param('host'),
+      target => ($target =~ /^(\#\S+)/)[0],
+    );
+  });
+}
+
+sub _got_invalid_setup_params {
+  my $self = shift;
+  my $errors = $self->stash('errors');
+
+  for my $name (qw/ nick host channels /) {
+    next if $self->param($name);
+    $errors->{$name} = "You need to fill out %s.";
   }
-  else {
-    $self->render('messsage' => 'Please fill in all the fields to continue');
-  }
+
+  return keys %$errors;
 }
 
 =head2 view
@@ -73,8 +85,8 @@ sub view {
 
     for my $id (@$connection_ids) {
       my($server, $msg_id);
-      $self->steps(
-        sub { 
+      Mojo::IOLoop->delay(
+        sub {
           my $delay=shift;
           $self->redis(mget => map { "connection:$id:$_" } qw/ host user nick /, $delay->begin);
         }, sub {

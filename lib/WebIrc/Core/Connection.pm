@@ -129,7 +129,8 @@ has stream => sub { Mojo::IOLoop::Stream->new };
 
 # used to create redis keys
 has _publish_key => sub { shift->{_key} .':from_server' };
-sub _key { join ':', shift->{_key}, @_ }
+has _key_prefix => sub { join ':', 'connection', $_[0]->id };
+sub _key { join ':', shift->_key_prefix, @_ }
 
 =head1 METHODS
 
@@ -148,7 +149,6 @@ sub load {
   return $cb->($self) if $self->{_loaded}++;
   my $delay;
   my $id = $self->id || croak "Cannot load connection without id";
-  $self->{_key} = join ':', 'connection', $id;
   my @req = map {"connection:$id:$_"} @keys;
   $self->redis->mget(
     @req,
@@ -567,7 +567,7 @@ sub add_message {
   my $time = time;
 
   $self->redis->rpush(
-    $self->_key('msg', $message->{params}[0]), 
+    $self->_key('msg', $message->{params}[0]),
     join("\0", $time, $message->{prefix}, $message->{params}[1]),
   );
   $self->redis->publish($self->_publish_key, $JSON->encode({
