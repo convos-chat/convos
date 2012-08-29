@@ -201,6 +201,7 @@ sub connect {
           $stream->timeout(300);
           $self->stream($stream);
           my $buffer = '';
+          $self->redis->del($self->_key('msg'));
           $stream->on(
             read => sub {
               my ($stream, $chunk) = @_;
@@ -538,8 +539,8 @@ sub add_server_message {
   my $time = time;
 
   if(!$message->{prefix} or $message->{prefix} eq $self->_real_host) {
-    $self->redis->rpush(
-      $self->_key('msg', $self->host),
+    $self->redis->rpush( 
+      $self->_key('msg'),
       join("\0", $time, $self->host, $message->{params}[1] || $message->{params}[0]), # 1 = normal, 0 = error
     );
     $self->redis->publish($self->_publish_key, $JSON->encode({
