@@ -117,10 +117,11 @@ Structure.registerModule('Wirc.Chat', {
   }
 }); // End Wirc.Chat
 
-  jQuery(document).ready(function() {
-    BASEURL = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
-    if($('#messages')) Wirc.Chat.start($);
-  });
+jQuery(document).ready(function() {
+  BASEURL = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
+  if($('#messages').length) Wirc.Chat.start($);
+});
+
 })(jQuery);
 
 BASEURL = window.location.href;

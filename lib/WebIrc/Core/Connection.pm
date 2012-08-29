@@ -155,7 +155,8 @@ sub load {
     sub {
       my ($redis, $res) = @_;
       foreach my $key (@keys) {
-        $self->$key(shift @$res);
+        my $val = shift @$res;
+        $self->$key($val) if defined $val;
       }
       $redis->smembers(
         "connection:$id:channels",
@@ -193,6 +194,7 @@ sub connect {
         }
       }
 
+      warn sprintf "[connection:%s] : %s:%s\n", $self->id, $self->host, $self->port if DEBUG;
       Mojo::IOLoop->client(
         address => $self->host,
         port    => $self->port,
@@ -209,9 +211,10 @@ sub connect {
               while ($buffer =~ s/^([^\r\n]+)\r\n//s) {
                 warn sprintf "[connection:%s] > %s\n", $self->id, $1 if DEBUG;
                 my $message = parse_irc($1);
-                $message->{'command'} =
-                  IRC::Utils::numeric_to_name($message->{'command'})
-                  if $message->{'command'} =~ /^\d+$/;
+                if($message->{'command'} =~ /^\d+$/) {
+                    warn sprintf "[connection:%s] : Translating %s\n", $$message->{'command'} if DEBUG;
+                    $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'});
+                }
                 my $method = 'irc_' . lc $message->{'command'};
                 if ($self->can($method)) {
                   $self->$method($message);

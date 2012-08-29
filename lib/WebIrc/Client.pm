@@ -48,9 +48,10 @@ sub view {
       Mojo::IOLoop->delay(
         sub {
           my $delay=shift;
-          $self->redis(mget => map { "connection:$id:$_" } qw/ host user nick /, $delay->begin);
+          $self->redis->mget((map { "connection:$id:$_" } qw/ host user nick /), $delay->begin);
         }, sub {
           my($delay,$info) = @_;
+          $self->logf(debug => '[view] Got connnection info for %s: %s', $id, $info) if DEBUG;
           $server = $info->[0];
           $msg_id = $connection_ids->[0] if $server eq $self->stash('server');
           $connections->{$server}{id} = shift @$connection_ids;
@@ -58,7 +59,7 @@ sub view {
           $connections->{$server}{user} = $info->[1];
           $connections->{$server}{nick} = $info->[2];
           $connections->{$server}{active} = $info->[0] eq $msg_name ? 1 : 0;
-          $self->redis(smembers => "connection:$id:channels",$delay->begin);
+          $self->redis->smembers("connection:$id:channels",$delay->begin);
         },
         sub {
           my($delay,$channels) = @_;
@@ -70,9 +71,8 @@ sub view {
               };
             } @$channels
           ];
-          return $self->redis(lrange => "connection:$msg_id:msg:$msg_name", -50, -1,$delay->next)
-            if $msg_id;
-          $self->render;
+          $self->render unless $msg_id;
+          $self->redis->lrange("connection:$msg_id:msg:$msg_name", -50, -1, $delay->begin);
         },
         sub {
           my($delay,$messages) = @_;

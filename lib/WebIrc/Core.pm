@@ -93,16 +93,22 @@ set all the keys in the %connection hash
 sub add_connection {
   my ($self,$uid,$conn,$cb)=@_;
   $self->redis->incr('connnections:id',sub {
-    my ($redis,$res)=@_;
-    $self->redis->sadd('connections',$res);
-    $self->redis->sadd("user:$uid:connections",$res);
-    for my $channel (split(/\s+/,delete $conn->{channels})) {
-      $self->redis->sadd('connection:'.$res.':channels',$channel);
-    }
-    for my $key (keys %$conn) {
-      $self->redis->set('connection:'.$res.':'.$conn->{$key});
-    }
-    $self->$cb($res);
+    my ($redis,$connection_id)=@_;
+    $self->redis->execute(
+      [ sadd => "connections", $connection_id ],
+      [ sadd => "user:$uid:connections", $connection_id ],
+      (
+        map {
+          [ sadd => "connection:$connection_id:channels", $_ ];
+        } split /\s+/,delete $conn->{channels}
+      ),
+      (
+        map {
+          [ set => "connection:$connection_id:$_", $conn->{$_} ],
+        } keys %$conn
+      ),
+    );
+    $self->$cb($connection_id);
   });
 }
 
