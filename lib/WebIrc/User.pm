@@ -31,6 +31,7 @@ Authenticate local user
 
 sub login {
   my $self=shift;
+
   $self->render_later;
   $self->app->core->login(
     login=> $self->param('login'), 
@@ -58,8 +59,8 @@ sub register {
   unless($self->param('login') =~ m/^[\w]{4,15}$/) {
     return $self->render(message=>'Username must consist of letters and numbers and be 4-15 characters long');
   }
-  if($self->param('password') and length $self->param('password') < 5){
-    return $self->render('message'=>'The password must be at least 6 characters long');
+  if($self->param('password') and length $self->param('password') < 6){
+    return $self->render(message=>'The password must be at least 6 characters long');
   }
   my $admin=0;
   $self->render_later;
@@ -69,7 +70,7 @@ sub register {
   },
   sub { # Check invitation unless first user, or make admin.
     my ($delay,$uids)=@_;
-    if($uids && ($self->param('secret')  ne 
+    if($uids && ($self->param('secret')  ne
       crypt($self->param('email').$self->app->secret,$self->param('secret')))) {
         return $self->render_not_found;
     }
