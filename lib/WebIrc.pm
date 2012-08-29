@@ -68,6 +68,7 @@ Backend functionality.
 
 use Mojo::Base 'Mojolicious';
 use WebIrc::Core;
+use WebIrc::Proxy;
 use Mojo::Redis;
 
 =head1 ATTRIBUTES
@@ -91,6 +92,7 @@ has archive => sub {
   WebIrc::Core::Archive->new(  $self->config->{archive} ||
     $self->path_to('archive'));
 };
+has proxy => sub { WebIrc::Proxy->new( core=> shift->core ) };
 
 =head1 METHODS
 
@@ -139,6 +141,7 @@ sub startup {
   $c->websocket('/socket')->to('client#socket');
 
   $self->core->start;
+  $self->proxy->start;
 }
 
 =head2 add_helpers

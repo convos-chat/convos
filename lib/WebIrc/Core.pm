@@ -115,7 +115,25 @@ TODO
 =cut
 
 sub login {
-  my ($self,@cred)=@_;
+  my ($self,%params)=@_;
+  my $uid;
+  Mojo::IOLoop->delay(sub {
+    my $delay=shift;
+    $self->redis->get('user:'.$params{login}.':uid',$delay->begin);
+    }, sub {
+      my $delay=shift;
+      $uid=shift;
+      warn("Got the uid: $uid");
+      return $params{on_error}->() unless  $uid && $uid =~ /\d+/;
+      $self->redis->get('user:'.$params{login}.':digest', $delay->begin);
+    }, sub {
+      my($delay,$digest)=@_;
+      if(crypt($params{password},$digest) eq $digest) {
+        warn("Got the uid: $uid");
+        $params{on_success}->($uid);
+      }
+      else { $params{on_error}->() }
+    });
 }
 
 =head2 register

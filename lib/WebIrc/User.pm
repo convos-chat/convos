@@ -32,22 +32,17 @@ Authenticate local user
 sub login {
   my $self=shift;
   $self->render_later;
-  Mojo::IOLoop->delay(sub {
-    my $delay=shift;
-    $self->redis->get('user:'.$self->param('login').':uid',$delay->begin);
-    }, sub {
-      my ($delay,$uid)=@_;
-      return $self->render( message=>"Invalid username/password" ) unless  $uid && $uid =~ /\d+/;
-      $self->stash(uid=>$uid);
-      $self->redis->get('user:'.$self->param('login').':digest', $delay->begin);
-    }, sub {
-      my($delay,$digest)=@_;
-      if(crypt($self->param('password'),$digest) eq $digest) {
-        $self->session('uid' => $self->stash('uid'));
-        $self->session('login' => $self->param('login'));
-        $self->redirect_to('/setup');
-      }
-      else { $self->render(message=>'Invalid username/password.'); }
+  $self->app->core->login(
+    login=> $self->param('login'), 
+    password=> $self->param('password'), 
+    on_success=>sub {
+      my $uid=shift;
+      $self->session('uid' => $uid);
+      $self->session('login' => $self->param('login'));
+      $self->redirect_to('/setup');
+    }, 
+    on_error =>sub {
+      $self->render(message=>'Invalid username/password.');
     });
 }
 
