@@ -117,27 +117,33 @@ sub startup {
   my $r = $self->routes;
   $r->get('/')->to(template => 'index');
   $r->get('/login')->to(template => 'user/login');
+  $r->get('/logout')->to('user#logout');
   $r->post('/login')->to('user#login');
   $r->get('/register')->to(template => 'user/register');
   $r->post('/register')->to('user#register');
 
-  my $c=$r->bridge('/')->to('user#auth'); 
-  $c->route('/setup')->to('client#setup');
-  $c->get('/settings')->to(template => 'user/settings')->name('settings');
-  $c->post('/settings')->to('user#settings');
+  my $private_r=$r->bridge('/')->to('user#auth');
+  $private_r->route('/setup')->to('client#setup');
+  $private_r->get('/settings')->to(template => 'user/settings')->name('settings');
+  $private_r->post('/settings')->to('user#settings');
 
-  $c->route('/chat/#server')->to('client#view');
-  $c->route('/chat/#server/:target')->to('client#view')->name('view');
-  $c->route('/close/#server/:target')->to('client#close')->name('irc_close');
-  $c->route('/disconnect/*server')->to('client#disconnect')->name('irc_disconnect');
-  $c->route('/join/*server')->to('client#join')->name('irc_join');
+  $private_r->route('/chat/#server')->to('client#view');
+  $private_r->route('/chat/#server/:target')->to('client#view')->name('view');
+  $private_r->route('/close/#server/:target')->to('client#close')->name('irc_close');
+  $private_r->route('/disconnect/*server')->to('client#disconnect')->name('irc_disconnect');
+  $private_r->route('/join/*server')->to('client#join')->name('irc_join');
 
-  $c->route('/archive')->to('archive#list');
-  $c->route('/archive/search')->to('archive#search');
-  $c->route('/archive/:server/:target')->to('archive#view');
-  $c->route('/archive/:server/:target')->to('archive#view');
+  $private_r->route('/archive')->to('archive#list');
+  $private_r->route('/archive/search')->to('archive#search');
+  $private_r->route('/archive/:server/:target')->to('archive#view');
+  $private_r->route('/archive/:server/:target')->to('archive#view');
 
-  $c->websocket('/socket')->to('client#socket');
+  $private_r->websocket('/socket')->to('client#socket');
+
+  $self->hook(before_dispatch => sub {
+    my $c = shift;
+    $c->stash(errors => {}); # this need to be set up each time, since it's a ref
+  });
 
   $self->core->start;
   $self->proxy->start;
@@ -182,7 +188,18 @@ sub add_helpers {
     $_[0]->stash('title', Mojo::DOM->new($_[1])->all_text) if @_ == 2 and not $self->stash('title');
     $_[0]->stash('page_header') // $self->config->{'name'};
   });
-
+  $self->helper(form_block => sub {
+    my $content = pop;
+    my($c, $field, %args) = @_;
+    my $error = $c->stash('errors')->{$field} // '';
+    my $classes = $args{class} ||= [];
+    push @$classes, 'error' if $error;
+    $c->tag(div =>
+      class => join(' ', @$classes),
+      title => $error,
+      $content
+    );
+  });
   $self->helper(redis => sub { $self->redis });
   $self->helper(steps => sub {
     my ($self,@steps)=$_;

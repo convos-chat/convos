@@ -3,22 +3,24 @@
         <h1 class="page-header">Login to wirc</h1>
         <p>It feels like I've seen you before.</p>
         %= include('inc/alert');
-        <form class="form-horizontal">
+        %= form_for 'login', method => 'post', class => 'form-horizontal', begin
             <div class="control-group">
-                <label class="control-label" for="username">Username</label>
+            %= form_block login => class => ['control-group'], begin
+                <label class="control-label" for="login">Username</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge" id="username" name="username">
+                    %= text_field 'login', id => 'login', class => 'span3'
                 </div>
-            </div>
-            <div class="control-group">
+            % end
+            %= form_block password => class => ['control-group'], begin
                 <label class="control-label" for="password">Password</label>
                 <div class="controls">
-                    <input type="password" class="input-xlarge" id="password" name="password">
+                    %= password_field 'password', id => 'password', class => 'span3'
                 </div>
-            </div>
+            % end
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" name="register" value="1" class="btn">Register</button>
             </div>
-        </form>
+        % end
     </div>
 </div>
