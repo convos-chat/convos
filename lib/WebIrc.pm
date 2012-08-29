@@ -123,8 +123,8 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $private_r=$r->bridge('/')->to('user#auth');
-  $private_r->get('/setup')->to(template => 'client/setup')->name('setup');
-  $private_r->post('/setup')->to('client#setup');
+  $private_r->get('/setup')->to(template => 'user/setup')->name('setup');
+  $private_r->post('/setup')->to('user#setup');
   $private_r->get('/settings')->to(template => 'user/settings')->name('settings');
   $private_r->post('/settings')->to('user#settings');
 

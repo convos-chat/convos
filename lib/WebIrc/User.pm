@@ -151,10 +151,59 @@ sub _got_invalid_register_params {
   return keys %$errors;
 }
 
+=head2 logout
+
+Will delete data from session.
+
+=cut
+
 sub logout {
   my $self=shift;
   $self->session(uid=>undef,login=>undef);
   $self->redirect_to('/');
+}
+
+=head2 setup
+
+Used to setup connections.
+
+=cut
+
+sub setup {
+  my $self = shift;
+  my $target = $self->param('channels');
+
+  $self->_got_invalid_setup_params and return;
+  $self->render_later;
+  Mojo::IOLoop->delay(sub {
+    my $delay=shift;
+    $self->app->core->add_connection($self->session('uid'),{
+      nick     => scalar $self->param('nick'),
+      host     => scalar $self->param('host'),
+      user     => scalar $self->session('login'),
+      channels => scalar $self->param('channels'),
+    },$delay->begin);
+  }, sub {
+    my ($delay,$cid)=@_;
+    $self->logf(debug => '[setup] cid=%s', $cid) if DEBUG;
+    $self->app->core->start_connection($cid);
+    $self->redirect_to('view',
+      server => scalar $self->param('host'),
+      target => ($target =~ /^(\#\S+)/)[0],
+    );
+  });
+}
+
+sub _got_invalid_setup_params {
+  my $self = shift;
+  my $errors = $self->stash('errors');
+
+  for my $name (qw/ nick host channels /) {
+    next if $self->param($name);
+    $errors->{$name} = "You need to fill out %s.";
+  }
+
+  return keys %$errors;
 }
 
 =head1 COPYRIGHT

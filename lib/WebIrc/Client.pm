@@ -15,47 +15,6 @@ my $JSON = Mojo::JSON->new;
 
 =head1 METHODS
 
-=head2 setup
-
-=cut
-
-sub setup {
-  my $self = shift;
-  my $target = $self->param('channels');
-
-  $self->_got_invalid_setup_params and return;
-  $self->render_later;
-  Mojo::IOLoop->delay(sub {
-    my $delay=shift;
-    $self->app->core->add_connection($self->session('uid'),{
-      nick     => scalar $self->param('nick'),
-      host     => scalar $self->param('host'),
-      user     => scalar $self->session('login'),
-      channels => scalar $self->param('channels'),
-    },$delay->begin);
-  }, sub {
-    my ($delay,$cid)=@_;
-    $self->logf(debug => '[setup] cid=%s', $cid) if DEBUG;
-    $self->app->core->start_connection($cid);
-    $self->redirect_to('view',
-      server => scalar $self->param('host'),
-      target => ($target =~ /^(\#\S+)/)[0],
-    );
-  });
-}
-
-sub _got_invalid_setup_params {
-  my $self = shift;
-  my $errors = $self->stash('errors');
-
-  for my $name (qw/ nick host channels /) {
-    next if $self->param($name);
-    $errors->{$name} = "You need to fill out %s.";
-  }
-
-  return keys %$errors;
-}
-
 =head2 view
 
 Used to render the main IRC client view.
