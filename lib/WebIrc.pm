@@ -160,7 +160,24 @@ Used to set/retrieve the page header used by C<layout/default.html.ep>
 sub add_helpers {
   my($self, $config) = @_;
 
+  $self->helper(logf => sub {
+    use Data::Dumper;
+    my($c, $level, $format, @args) = @_;
+    local $Data::Dumper::Maxdepth = 2;
+    local $Data::Dumper::Indent = 0;
+    local $Data::Dumper::Terse = 1;
 
+    for my $arg (@args) {
+      if(ref($arg) =~ /^\w+$/) {
+        $arg = Dumper($arg);
+      }
+      elsif(!defined $arg) {
+        $arg = '__UNDEF__';
+      }
+    }
+
+    $self->log->$level(sprintf $format, @args);
+  });
   $self->helper(page_header => sub {
     $_[0]->stash('page_header', $_[1]) if @_ == 2;
     $_[0]->stash('title', Mojo::DOM->new($_[1])->all_text) if @_ == 2 and not $self->stash('title');
