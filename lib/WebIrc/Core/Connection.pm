@@ -266,7 +266,13 @@ Example message:
 sub irc_notice {
   my ($self, $message) = @_;
 
-  $self->add_server_message($message);
+  # NOTICE AUTH :*** Ident broken or disabled, to continue to connect you must type /QUOTE PASS 21105
+  if($message->{'params'}[0] =~ m!/Ident broken.*QUOTE PASS (\S+)!) {
+    $self->write(QUOTE => PASS => $1);
+  }
+  else {
+    $self->add_server_message($message);
+  }
 }
 
 =head2 irc_err_nicknameinuse
