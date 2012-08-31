@@ -29,9 +29,9 @@ use Parse::IRC;
 use Carp qw/croak/;
 
 # default to true while developing
-use constant DEBUG => $ENV{'WEBIRC_CONNECTION_DEBUG'} // 1;
+use constant DEBUG => $ENV{'WIRC_DEBUG'} // 1;
 
-my @keys = qw/nick user host port password ssl/;
+my @keys = qw/nick user host password ssl/;
 
 my $JSON = Mojo::JSON->new();
 
@@ -78,14 +78,6 @@ IRC server hostname.
 
 has host => '';
 has _real_host => '';
-
-=head2 port
-
-IRC server port. Defaults to 6667.
-
-=cut
-
-has port => 6667;
 
 =head2 password
 
@@ -140,7 +132,7 @@ sub _key { join ':', shift->_key_prefix, @_ }
   $self = $self->load($id);
 
 Loads config from L</redis> and populates the L</ATTRIBUTES>
-L</user>, L</host>, L</port>, L</password> and L</ssl>.
+L</user>, L</host>, L</password> and L</ssl>.
 
 =cut
 
@@ -181,23 +173,12 @@ Will login to the L</irc> server.
 
 sub connect {
   my $self = shift;
+  my($host, $port) = split /:/, $self->host;
 
   $self->load(
     sub {
-      for my $attr (qw/ nick user host /) {
-        unless (defined $self->$attr) {
-          warn sprintf
-            "[connection:%s] : Attribute '%s' is missing from config\n",
-            $self->id, $attr;
-          $self->add_server_message({ params => ["", "Attribute '$attr' is missing from config"] });
-          return;
-        }
-      }
-
-      warn sprintf "[connection:%s] : %s:%s\n", $self->id, $self->host, $self->port if DEBUG;
-      Mojo::IOLoop->client(
-        address => $self->host,
-        port    => $self->port,
+      warn sprintf "[connection:%s] : %s\n", $self->id, $self->host if DEBUG;
+      Mojo::IOLoop->client(address => $host, port => $port || 6667,
         sub {
           my ($loop, $err, $stream) = @_;
           $stream->timeout(300);

@@ -106,7 +106,9 @@ sub startup {
   my $self = shift;
   my $config = $self->plugin('Config');
 
+  $self->plugin('UrlWith');
   $self->secret($config->{secret} || die '"secret" is required in config file');
+  $self->sessions->default_expiration(86400 * 30);
   $self->add_helpers($config);
   $self->defaults(
     layout => 'default',
@@ -154,12 +156,35 @@ sub startup {
 
 Will add thease helpers:
 
-=over 4
+=head3 form_block
 
+  %= form_block $name, class => [$str, ...] begin
+  ...
+  % end
 
-=item page_header
+The code above will create this markup:
+
+  <div class="@$class" title="$error">
+    ...
+  </div>
+
+In addition, <@$class> will contain "error" if C<$error> can be fetched from the
+stash hash C<errors>, using C<$name> as key.
+
+=head3 logf
+
+  $c->logf($level => $format, @args);
+  $c->logf(debug => 'yay %s', \%data);
+
+Used to log more complex datastructures and to prevent logging C<undef>.
+
+=head3 page_header
 
 Used to set/retrieve the page header used by C<layout/default.html.ep>
+
+=head3 redis
+
+Returns a L<Mojo::Redis> object.
 
 =cut
 

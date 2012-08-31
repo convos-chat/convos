@@ -12,7 +12,7 @@ TODO
 
 use Mojo::Base -base;
 use WebIrc::Core::Connection;
-use constant DEBUG => $ENV{'WEBIRC_CONNECTION_DEBUG'} // 1;
+use constant DEBUG => $ENV{'WIRC_DEBUG'} // 1;
 
 =head1 ATTRIBUTES
 
@@ -43,7 +43,6 @@ TODO
 sub start {
   my $self = shift;
   return if $ENV{'SKIP_CONNECT'};
-  $self->redis->del('connections:connected');
   $self->connections(sub {
     my $connections = shift;
     warn sprintf "[core] Starting %s connection(s)\n", int @$connections if DEBUG;
