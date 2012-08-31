@@ -113,29 +113,40 @@ sub add_connection {
 
 =head2 login
 
-TODO
+  $self->login({ login => $str, password => $str }, $callback);
+
+Will call callback after authenticating the user. C<$callback> will receive
+either:
+
+  $callback->($self, $uid); # success
+  $callback->($self, undef, $error); # on error
 
 =cut
 
 sub login {
-  my ($self,%params)=@_;
+  my($self, $params, $cb)=@_;
   my $uid;
-  Mojo::IOLoop->delay(sub {
-      my $delay=shift;
-      $self->redis->get('user:'.$params{login}.':uid',$delay->begin);
+
+  Mojo::IOLoop->delay(
+    sub {
+      $self->redis->get('user:'.$params->{login}.':uid',$_[0]->begin);
     }, sub {
-      my($delay, $uid) = @_;
-      return $params{on_error}->() unless  $uid && $uid =~ /\d+/;
-      warn "Got the uid: $uid" if DEBUG;
+      my $delay = shift;
+      $uid = shift;
+      return $self->$cb($uid, shift) unless $uid && $uid =~ /\d+/;
+      warn "[core] Got the uid: $uid" if DEBUG;
       $self->redis->get("user:$uid:digest", $delay->begin);
     }, sub {
       my($delay,$digest)=@_;
-      if(crypt($params{password},$digest) eq $digest) {
-        warn("Got the uid: $uid");
-        $params{on_success}->($uid);
+      if(crypt($params->{password},$digest) eq $digest) {
+        warn "[core] User $uid has valid password" if DEBUG;
+        $self->$cb($uid);
       }
-      else { $params{on_error}->() }
-    });
+      else {
+        $self->$cb(undef, 'Could not verify digest');
+      }
+    }
+  );
 }
 
 =head2 register

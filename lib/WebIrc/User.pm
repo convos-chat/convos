@@ -41,17 +41,17 @@ sub login {
 
   $self->render_later;
   $self->app->core->login(
-    login => scalar $self->param('login'),
-    password => scalar $self->param('password'),
-    on_success => sub {
-      my $uid=shift;
-      $self->session('uid' => $uid);
-      $self->session('login' => $self->param('login'));
-      $self->redirect_to('/setup');
+    {
+      login => scalar $self->param('login'),
+      password => scalar $self->param('password'),
     },
-    on_error =>sub {
-      $self->render(message=>'Invalid username/password.');
-    });
+    sub {
+      my($core, $uid, $error) = @_;
+      return $self->render(message => 'Invalid username/password.') unless $uid;
+      $self->session(uid => $uid, login => $self->param('login'));
+      $self->redirect_to('/settings');
+    },
+  );
 }
 
 =head2 register

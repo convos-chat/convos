@@ -33,19 +33,20 @@ sub start {
                 );
               }
               $self->core->login(
-                login      => $credentials{USER},
-                password   => $credentials{PASSWORD},
-                on_success => sub {
-                  $uid = shift;
-                  $stream->write(
-                    ":wirc.pl NOTICE AUTH :*** AUTHENTICATED\r\n");
-                  $self->redis('')
-
+                {
+                  login      => $credentials{USER},
+                  password   => $credentials{PASSWORD},
                 },
-                on_error => sub {
-                  $stream->write(":wirc.pl NOTICE AUTH :*** REJECTED\r\n");
-                  return $stream->stop;
-                }
+                sub {
+                  my($core, $uid, $error) = @_;
+                  if($uid) {
+                    $stream->write(":wirc.pl NOTICE AUTH :*** AUTHENTICATED\r\n");
+                  }
+                  else {
+                    $stream->write(":wirc.pl NOTICE AUTH :*** REJECTED\r\n");
+                    $stream->stop;
+                  }
+                },
               );
             }
           }
