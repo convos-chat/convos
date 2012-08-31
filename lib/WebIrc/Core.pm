@@ -18,59 +18,36 @@ use constant DEBUG => $ENV{'WIRC_DEBUG'} // 1;
 
 =head2 redis
 
-TODO
+Holds a L<Mojo::Redis> object.
 
 =cut
 
-has 'redis';
-
-=head2 current_connections
-
-Current connections, defaults to being fetched from Redis
-
-=cut
-
-has 'current_connections';
+has redis => sub { Mojo::Redis->new };
+has _connections => sub { +{} };
 
 =head1 METHODS
 
 =head2 start
 
-TODO
+Will fetch connection information from the database and try to connect to them.
 
 =cut
 
 sub start {
   my $self = shift;
-  return if $ENV{'SKIP_CONNECT'};
-  $self->connections(sub {
-    my $connections = shift;
-    warn sprintf "[core] Starting %s connection(s)\n", int @$connections if DEBUG;
-    for my $conn (@$connections) {
+
+  $self->redis->smembers('connections', sub {
+    my ($redis, $cids) = @_;
+    warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
+    for my $cid (@$cids) {
+      my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+      $self->_connections->{$cid} = $conn;
       $conn->connect;
     }
-  })
+  });
 }
 
-=head2 connections
-
-Connection list. Will fetch from redis or cache in current_connections
-
-=cut
-
-sub connections {
-  my ($self,$cb) = @_;
-  return $cb->($self->current_connections) if $self->current_connections;
-  $self->redis->smembers('connections',
-    sub {
-      my ($redis, $res) = @_;
-      my $connnections = [ map { WebIrc::Core::Connection->new(redis => $self->redis,id=>$_) } @$res ];
-      $self->current_connections($connnections);
-      $cb->($connnections);
-    });
-}
-
-=head2 start_connection $cid
+=head2 start_connection
 
 Start a single connection by connection id.
 
@@ -78,8 +55,8 @@ Start a single connection by connection id.
 
 sub start_connection {
   my ($self,$cid)=@_;
-  my $conn=WebIrc::Core::Connection->new(redis=>$self->redis,id=>$cid);
-  $conn->connect;
+  return unless my $conn = $self->_connections->{$cid};
+  return $conn->connect;
 }
 
 =head2 add_connection
@@ -106,23 +83,24 @@ sub add_connection {
   }
 
   return $self->$cb(undef, \%errors) if keys %errors;
-  return $self->redis->incr('connnections:id',sub {
-    my ($redis,$connection_id)=@_;
+  return $self->redis->incr('connections:id',sub {
+    my ($redis,$cid) = @_;
 
+    $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
     $self->redis->execute(
-      [ sadd => "connections", $connection_id ],
-      [ sadd => "user:$uid:connections", $connection_id ],
+      [ sadd => "connections", $cid ],
+      [ sadd => "user:$uid:connections", $cid ],
       (
         map {
-          [ sadd => "connection:$connection_id:channels", $_ ];
+          [ sadd => "connection:$cid:channels", $_ ];
         } split /\s+/,delete $conn->{channels}
       ),
       (
         map {
-          [ set => "connection:$connection_id:$_", $conn->{$_} ],
+          [ set => "connection:$cid:$_", $conn->{$_} ],
         } keys %$conn
       ),
-      sub { $self->$cb($connection_id) },
+      sub { $self->$cb($cid) },
     );
   });
 }
@@ -163,16 +141,6 @@ sub login {
       }
     }
   );
-}
-
-=head2 register
-
-TODO
-
-=cut
-
-sub register {
-  my ($self,%user)=@_;
 }
 
 =head1 COPYRIGHT

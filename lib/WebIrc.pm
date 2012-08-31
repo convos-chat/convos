@@ -146,8 +146,8 @@ sub startup {
     $c->stash(errors => {}); # this need to be set up each time, since it's a ref
   });
 
-  $self->core->start;
-  $self->proxy->start;
+  $self->core->start unless $ENV{'SKIP_CONNECT'};
+  $self->proxy->start unless $ENV{'SKIP_CONNECT'};
 }
 
 =head2 add_helpers

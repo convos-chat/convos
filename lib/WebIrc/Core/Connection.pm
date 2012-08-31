@@ -27,6 +27,7 @@ use Mojo::JSON;
 use IRC::Utils qw/decode_irc/;
 use Parse::IRC;
 use Carp qw/croak/;
+use constant STARTING => 's'; # doesn't really matter what this contains
 
 # default to true while developing
 use constant DEBUG => $ENV{'WIRC_DEBUG'} // 1;
@@ -111,18 +112,11 @@ IRC channels to join on connect
 
 has channels => sub { [] };
 
-=head2 stream
-
-Holds a L<Mojo::IOLoop::Stream> object
-
-=cut
-
-has stream => sub { Mojo::IOLoop::Stream->new };
-
 # used to create redis keys
 has _publish_key => sub { shift->{_key} .':from_server' };
 has _key_prefix => sub { join ':', 'connection', $_[0]->id };
 sub _key { join ':', shift->_key_prefix, @_ }
+has _stream => undef;
 
 =head1 METHODS
 
@@ -139,27 +133,23 @@ L</user>, L</host>, L</password> and L</ssl>.
 sub load {
   my ($self, $cb) = @_;
   return $cb->($self) if $self->{_loaded}++;
-  my $delay;
   my $id = $self->id || croak "Cannot load connection without id";
   my @req = map {"connection:$id:$_"} @keys;
-  $self->redis->mget(
-    @req,
-    sub {
-      my ($redis, $res) = @_;
-      foreach my $key (@keys) {
-        my $val = shift @$res;
-        $self->$key($val) if defined $val;
-      }
-      $redis->smembers(
-        "connection:$id:channels",
-        sub {
-          my ($redis, $channels) = @_;
-          $self->channels($channels);
-          $cb->($self);
-        }
-      );
+  $self->redis->mget(@req, sub {
+    my ($redis, $res) = @_;
+    foreach my $key (@keys) {
+      my $val = shift @$res;
+      $self->$key($val) if defined $val;
     }
-  );
+    $redis->smembers(
+      "connection:$id:channels",
+      sub {
+        my ($redis, $channels) = @_;
+        $self->channels($channels);
+        $cb->($self);
+      }
+    );
+  });
   return $self;
 }
 
@@ -167,7 +157,7 @@ sub load {
 
   $self->connect;
 
-Will login to the L</irc> server.
+Will login to the IRC L</<host>.
 
 =cut
 
@@ -175,49 +165,47 @@ sub connect {
   my $self = shift;
   my($host, $port) = split /:/, $self->host;
 
-  $self->load(
-    sub {
-      warn sprintf "[connection:%s] : %s\n", $self->id, $self->host if DEBUG;
-      Mojo::IOLoop->client(address => $host, port => $port || 6667,
-        sub {
-          my ($loop, $err, $stream) = @_;
-          $stream->timeout(300);
-          $self->stream($stream);
-          my $buffer = '';
-          $self->redis->del($self->_key('msg'));
-          $stream->on(
-            read => sub {
-              my ($stream, $chunk) = @_;
-              $buffer .= $chunk;
-              while ($buffer =~ s/^([^\r\n]+)\r\n//s) {
-                warn sprintf "[connection:%s] > %s\n", $self->id, $1 if DEBUG;
-                my $message = parse_irc($1);
-                if($message->{'command'} =~ /^\d+$/) {
-                    warn sprintf "[connection:%s] : Translating %s\n", $self->id, $message->{'command'} if DEBUG;
-                    $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'});
-                }
-                my $method = 'irc_' . lc $message->{'command'};
-                if ($self->can($method)) {
-                  $self->$method($message);
-                }
-                elsif (DEBUG) {
-                  warn sprintf "[connection:%s] ! Cannot handle (%s)\n",
-                    $self->id, $method
-                    if DEBUG;
-                }
-              }
-            }
-          );
-          $self->write(NICK => $self->nick);
-          $self->write(USER => $self->user, 8, '*', ':WiRC IRC Proxy');
-          $self->subscribe_id($self->redis->subscribe($self->_key('to_server'), sub {
-            my ($redis,$res)=@_;
-            $self->write($_) for @$res;
-          })) unless $self->subscribe_id;
+  return $self if $self->_stream;
+  $self->_stream(STARTING);
+  $self->load(sub {
+    warn sprintf "[connection:%s] : %s\n", $self->id, $self->host if DEBUG;
+    Mojo::IOLoop->client(address => $host, port => $port || 6667, sub {
+      my ($loop, $err, $stream) = @_;
+      my $buffer = '';
+      $stream->timeout(300);
+      $stream->on(read => sub {
+        my ($stream, $chunk) = @_;
+        $buffer .= $chunk;
+        while ($buffer =~ s/^([^\r\n]+)\r\n//s) {
+          warn sprintf "[connection:%s] > %s\n", $self->id, $1 if DEBUG;
+          my $message = parse_irc($1);
+          if($message->{'command'} =~ /^\d+$/) {
+              warn sprintf "[connection:%s] : Translating %s\n", $self->id, $message->{'command'} if DEBUG;
+              $message->{'command'} = IRC::Utils::numeric_to_name($message->{'command'});
+          }
+          my $method = 'irc_' . lc $message->{'command'};
+          if ($self->can($method)) {
+            $self->$method($message);
+          }
+          elsif (DEBUG) {
+            warn sprintf "[connection:%s] ! Cannot handle (%s)\n",
+              $self->id, $method
+              if DEBUG;
+          }
         }
-      );
-    }
-  );
+      });
+      $self->_stream($stream);
+      $self->write(NICK => $self->nick);
+      $self->write(USER => $self->user, 8, '*', ':WiRC IRC Proxy');
+      $self->redis->del($self->_key('msg')); # want to load in new server messages
+      $self->subscribe_id($self->redis->subscribe($self->_key('to_server'), sub {
+        my ($redis,$res)=@_;
+        $self->write($_) for @$res;
+      })) unless $self->subscribe_id;
+    });
+  });
+
+  return $self;
 }
 
 =head2 irc_privmsg
@@ -504,7 +492,7 @@ sub irc_error {
 
   if ($message->{raw_line} =~ /Closing Link/i) {
     warn sprintf "[connection:%s] ! Closing link (reconnect)\n",
-    $self->stream->close;
+    $self->_stream->close;
     $self->connect;
   }
 }
@@ -577,7 +565,7 @@ Will disconnect from the L</irc> server.
 sub disconnect {
   my $self = shift;
   $self->write('QUIT');
-  $self->stream->close;
+  $self->_stream->close;
 }
 
 =head2 write
@@ -592,7 +580,7 @@ sub write {
   my $self = shift;
   my $buf = join ' ', @_;
   warn sprintf "[connection:%s] < %s\n", $self->id, $buf if DEBUG;
-  $self->stream->write("$buf\r\n");
+  $self->_stream->write("$buf\r\n");
 }
 
 =head1 COPYRIGHT
