@@ -5,6 +5,7 @@
     %= stylesheet '/css/font-awesome.css';
     %= stylesheet '/css/font-awesome-ie7.css';
     %= stylesheet '/css/wirc.css';
+    %= stylesheet '/show-hide.css';
     %= javascript '/js/jquery.js';
     %= javascript '/bootstrap/js/less-1.3.0.min.js';
     %= javascript '/bootstrap/js/bootstrap-dropdown.js';
@@ -26,15 +27,12 @@
           <span class="brand"><%== page_header %></span>
           <div class="nav-collapse collapse">
             <ul class="nav main-menu pull-right">
-            % if($logged_in) {
-              <li><%= link_to 'Chat', 'chat' %></li>
-              <li><%= link_to 'Archive', 'archive' %></li>
-              <li><%= link_to 'Settings', 'settings' %></li>
-              <li><%= link_to 'Logout', 'logout' %></li>
-            % } else {
-              <li><%= link_to 'Login', 'login' %></li>
-              <li><%= link_to 'Register', 'register' %></li>
-            % }
+              <li class="visible-if-user"><%= link_to 'Chat', 'chat' %></li>
+              <li class="visible-if-user"><%= link_to 'Archive', 'archive' %></li>
+              <li class="visible-if-user"><%= link_to 'Settings', 'settings' %></li>
+              <li class="visible-if-user"><%= link_to 'Logout', 'logout' %></li>
+              <li class="visible-no-user"><%= link_to 'Login', 'login' %></li>
+              <li class="visible-no-user"><%= link_to 'Register', 'register' %></li>
             </ul>
           </div>
         </div>

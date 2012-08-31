@@ -118,6 +118,7 @@ sub startup {
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to(template => 'index');
+  $r->get('/show-hide', [format => 'css'])->to(template => 'show-hide');
   $r->get('/login')->to(template => 'user/login');
   $r->get('/logout')->to('user#logout');
   $r->post('/login')->to('user#login');
