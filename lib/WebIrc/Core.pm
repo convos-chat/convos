@@ -82,7 +82,14 @@ sub start_connection {
   $conn->connect;
 }
 
-=head2 add_connection %conn
+=head2 add_connection
+
+    $self->add_connection($uid, {
+      host => $str, # irc_server[:port]
+      nick => $str,
+      user => $str,
+      channels => $str, # '#foo #bar ...'
+    }, $callback);
 
 Add a new connection to redis. Will create a new connection id and
 set all the keys in the %connection hash
@@ -91,8 +98,17 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my ($self,$uid,$conn,$cb)=@_;
-  $self->redis->incr('connnections:id',sub {
+  my %errors;
+
+  for my $name (qw/ host nick user /) {
+    next if $conn->{$name};
+    $errors{$name} = "$name is required.";
+  }
+
+  return $self->$cb(undef, \%errors) if keys %errors;
+  return $self->redis->incr('connnections:id',sub {
     my ($redis,$connection_id)=@_;
+
     $self->redis->execute(
       [ sadd => "connections", $connection_id ],
       [ sadd => "user:$uid:connections", $connection_id ],
@@ -106,8 +122,8 @@ sub add_connection {
           [ set => "connection:$connection_id:$_", $conn->{$_} ],
         } keys %$conn
       ),
+      sub { $self->$cb($connection_id) },
     );
-    $self->$cb($connection_id);
   });
 }
 

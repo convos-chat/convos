@@ -66,7 +66,7 @@ sub register {
 
   if($self->session('uid')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
-    $self->redirect_to('/setup');
+    $self->redirect_to('/settings');
     return;
   }
 
@@ -104,17 +104,19 @@ sub register {
     }
   }, sub { # Create user
     my ($delay,$uid)=@_;
+    my $login = $self->param('login');
     my $digest = crypt $self->param('password'), join '', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
     $self->logf(debug => '[reg] New user uid=%s, login=%s', $uid, $self->param('login')) if DEBUG;
     $self->session(uid=>$uid,login => $self->param('login'));
     $self->redis->execute(
-      [ set => 'user:'.$self->param('login').':uid', $uid ],
-      [ set => 'user:'.$uid.':digest', $digest ],
+      [ set => "user:$login:uid", $uid ],
+      [ set => "user:$uid:digest", $digest ],
+      [ set => "user:$uid:email", scalar $self->param('email') ],
       $delay->begin,
     );
   }, sub {
     my ($delay)=@_;
-    $self->redirect_to('/setup');
+    $self->redirect_to('/settings');
   });
 }
 
@@ -163,47 +165,137 @@ sub logout {
   $self->redirect_to('/');
 }
 
-=head2 setup
+=head2 settings
 
-Used to setup connections.
+Used to retrieve, save and update connection information.
 
 =cut
 
-sub setup {
+sub settings {
   my $self = shift;
-  my $target = $self->param('channels');
+  my $uid = $self->session('uid');
+  my $action = $self->param('action') || '';
+  my(@actions, $cids, @connections, @clients);
 
-  $self->_got_invalid_setup_params and return;
-  $self->render_later;
-  Mojo::IOLoop->delay(sub {
-    my $delay=shift;
-    $self->app->core->add_connection($self->session('uid'),{
-      nick     => scalar $self->param('nick'),
-      host     => scalar $self->param('host'),
-      user     => scalar $self->session('login'),
-      channels => scalar $self->param('channels'),
-    },$delay->begin);
-  }, sub {
-    my ($delay,$cid)=@_;
-    $self->logf(debug => '[setup] cid=%s', $cid) if DEBUG;
-    $self->app->core->start_connection($cid);
-    $self->redirect_to('view',
-      server => scalar $self->param('host'),
-      target => ($target =~ /^(\#\S+)/)[0],
-    );
-  });
-}
+  $self->stash(connections => \@connections);
+  $self->stash(clients => \@clients);
 
-sub _got_invalid_setup_params {
-  my $self = shift;
-  my $errors = $self->stash('errors');
-
-  for my $name (qw/ nick host channels /) {
-    next if $self->param($name);
-    $errors->{$name} = "You need to fill out %s.";
+  if($self->req->method eq 'POST') {
+    push @actions, $action eq 'delete'        ? $self->_delete_connection
+                 : $self->param('connection') ? $self->_update_connection
+                 :                              $self->_add_connection;
+  }
+  if($action eq 'connect') {
+    push @actions, sub {
+      $self->redirect_to(view =>
+        host => $self->param('host'),
+        target => ($self->param('channels') =~ /(\S+)/)[0] || '',
+      );
+    };
   }
 
-  return keys %$errors;
+  my $last = sub {
+    push @connections, { id => 0, %{ $self->app->config->{'default_connection'} }, nick => $self->session('login') };
+    $self->param(connection => $connections[0]{id}) unless defined $self->param('connection');
+    $self->render;
+  };
+
+  $self->render_later;
+  Mojo::IOLoop->delay(
+    @actions,
+    sub { # get connections
+      $self->redis->smembers("user:$uid:connections", $_[0]->begin);
+    },
+    sub { # get connection data
+      $cids = $_[1];
+      $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
+      return $last->() unless $cids and @$cids;
+      $self->redis->execute(
+        (map {
+          my $cid = $_;
+          [ mget => map { "connection:$cid:$_" } qw/ host user nick channels/ ],
+        } @$cids),
+        $_[0]->begin
+      );
+    },
+    sub { # convert connections to data structures
+      my $delay = shift;
+      $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
+      for my $data (@_) {
+        push @$data, shift @$cids;
+        push @connections, { map { $_ => shift @$data } qw/ host user nick channels id / };
+      }
+      $last->();
+    },
+  );
+}
+
+sub _add_connection {
+  my $self = shift;
+
+  sub {
+   $self->app->core->add_connection($self->session('uid'), {
+      host => scalar $self->param('host'),
+      nick => scalar $self->param('nick'),
+      user => scalar $self->session('login'),
+      channels => scalar $self->param('channels'),
+    }, $_[0]->begin);
+  },
+  sub {
+    my ($delay,$cid,$cname)=@_;
+    unless($cid) {
+      $self->stash(errors => $cname); # cname is a hash-ref if $cid is undef
+      $self->render;
+      return;
+    }
+    $self->param(connection => $cid);
+    $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
+    $self->app->core->start_connection($cid);
+    $delay->begin->();
+  },
+}
+
+sub _update_connection {
+  my $self = shift;
+  my $cid = $self->param('connection');
+  # TODO: Should probably use some kind of $core->update_connection() to
+  # actually update nick, user ++ as well
+  sub {
+    $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
+    $self->redis->mset(
+      "connection:$cid:host" => $self->param('host') || '',
+      "connection:$cid:user" => $self->param('user') || '',
+      "connection:$cid:nick" => $self->param('nick') || '',
+      "connection:$cid:channels" => $self->param('channels') || '',
+      $_[0]->begin,
+    );
+  },
+}
+
+sub _delete_connection {
+  my $self = shift;
+  my $uid = $self->session('uid');
+  my $cid = $self->param('connection');
+
+  $self->param(connection => 0);
+
+  sub {
+    $self->redis->srem("user:$uid:connections", $cid, $_[0]->begin);
+  },
+  sub {
+    my($delay, $removed) = @_;
+    return $_[0]->begin->() unless $removed;
+    $self->redis->execute([ keys => "connection:$cid:*" ], $_[0]->begin);
+  },
+  sub {
+    # TODO: Also disconnect from irc server in core
+    my($delay, $keys) = @_;
+    $self->redis->execute(
+      [ del => @$keys ],
+      [ srem => "connections", $cid ],
+      $delay->begin,
+    );
+  }
 }
 
 =head1 COPYRIGHT

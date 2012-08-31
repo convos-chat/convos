@@ -58,7 +58,7 @@
           % $sender = $message->{sender};
         <span class="sender">
           <i class="icon-comment"></i>
-          %= link_to $message->{sender}, 'view', { server => $server, target => param('target') || '' };
+          %= link_to $message->{sender}, 'view', { server => $host, target => param('target') || '' };
         </span>
         <span class="timestamp"><%= localtime $message->{timestamp} %></span>
         % }

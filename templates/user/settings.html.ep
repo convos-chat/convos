@@ -1,25 +1,55 @@
-<h1 class="page-header">Settings</h1>
-%= form_for 'account', method => 'post', class => 'form-horizontal', begin
-  <div class="control-group">
-    <label class="control-label" for="nickname">Preferred nick name</label>
-    <div class="controls">
-      <input type="text" name="nickname" id="nickname">
-      <p class="help-block">
-        This will be the name that other people on IRC will see you as.
-      </p>
-    </div>
+<div class="row">
+  <div class="offset1 span10">
+    <h1 class="page-header">Settings</h1>
+    <div class="tabbable tabs-left connection-tab-container">
+      <ul class="nav nav-tabs span3">
+        <li class="nav-header">Connections</li>
+      % for my $conn (@$connections) {
+        <li class="<%= $conn->{id} eq param('connection') ? 'active' : '' %>">
+          %= link_with +($conn->{id} ? $conn->{host} : 'Add connection...'), { connection => $conn->{id} }
+        </li>
+      % }
+      </ul>
+      <div class="tab-content">
+      % for my $conn (@$connections) {
+        <div class="tab-pane<%= $conn->{id} eq param('connection') ? ' active' : '' %>" id="connection_<%= $conn->{id} %>">
+          %= include('inc/alert')
+          %= form_for 'settings', class => 'form-horizontal', method=>'post', begin
+          %= form_block host => class => ['control-group'], begin
+            <label class="control-label" for="host">Server</label>
+            <div class="controls">
+              %= text_field 'host', $conn->{host}, id => 'host'
+              %= hidden_field connection => $conn->{id};
+              <p class="help-block">Add ":port" unless you want to use default port 6667.</p>
+            </div>
+          % end
+          %= form_block nick => class => ['control-group'], begin
+            <label class="control-label" for="nick">Nick</label>
+            <div class="controls">
+              %= text_field 'nick', $conn->{nick}, id => 'nick'
+              <p class="help-block">Handle to operate under.</p>
+            </div>
+          % end
+          %= form_block channels => class => ['control-group'], begin
+            <label class="control-label" for="channels">Channel</label>
+            <div class="controls">
+              %= text_field 'channels', $conn->{channels}, id => 'channels'
+              <p class="help-block">You can specify more channels by separating them with space.</p>
+            </div>
+          % end
+          <div class="form-actions">
+          % if($conn->{id}) {
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-success" name="action" value="connect">Connect</button>
+            <button type="submit" class="btn btn-danger" name="action" value="delete">Delete</button>
+          % } else {
+            <button type="submit" class="btn btn-primary">Add</button>
+          % }
+          </div>
+        % end
+        </div><!-- end #connection_xxx -->
+      % }
+      </div>
+    </div><!-- end #connections -->
   </div>
-  <div class="control-group">
-    <label class="control-label" for="gravatar_email">Gravatar email</label>
-    <div class="controls">
-      <input type="text" name="gravatar_email" id="gravatar_email">
-      <p class="help-block">
-        Register on <%= link_to 'http://gravatar.com' %> to get an avatar
-        in chat.
-      </p>
-    </div>
-  </div>
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Save settings</button>
-  </div>
-% end
+</div>

@@ -125,21 +125,18 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $private_r=$r->bridge('/')->to('user#auth');
-  $private_r->get('/setup')->to(template => 'user/setup')->name('setup');
-  $private_r->post('/setup')->to('user#setup');
-  $private_r->get('/settings')->to(template => 'user/settings')->name('settings');
-  $private_r->post('/settings')->to('user#settings');
+  $private_r->route('/settings')->to('user#settings')->name('settings');
 
-  $private_r->route('/chat/#server')->to('client#view');
-  $private_r->route('/chat/#server/:target')->to('client#view')->name('view');
-  $private_r->route('/close/#server/:target')->to('client#close')->name('irc_close');
-  $private_r->route('/disconnect/*server')->to('client#disconnect')->name('irc_disconnect');
-  $private_r->route('/join/*server')->to('client#join')->name('irc_join');
+  $private_r->route('/chat/#host')->to('client#view');
+  $private_r->route('/chat/#host/:target')->to('client#view')->name('view');
+  $private_r->route('/close/#host/:target')->to('client#close')->name('irc_close');
+  $private_r->route('/disconnect/*host')->to('client#disconnect')->name('irc_disconnect');
+  $private_r->route('/join/*host')->to('client#join')->name('irc_join');
 
   $private_r->route('/archive')->to('archive#list');
   $private_r->route('/archive/search')->to('archive#search');
-  $private_r->route('/archive/:server/:target')->to('archive#view');
-  $private_r->route('/archive/:server/:target')->to('archive#view');
+  $private_r->route('/archive/:host/:target')->to('archive#view');
+  $private_r->route('/archive/:host/:target')->to('archive#view');
 
   $private_r->websocket('/socket')->to('client#socket');
 

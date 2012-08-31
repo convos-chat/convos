@@ -50,6 +50,23 @@ i[class^="icon-"], i[class*=" icon-"] {
   border-top: 1px solid #aaa;
 }
 
+.connection-tab-container .nav {
+  margin-right: -1px;
+  position: relative;
+  z-index: 2;
+}
+
+.connection-tab-container .tab-content {
+  border-left: 1px solid #ccc;
+  padding-right: 19px;
+  position: relative;
+  z-index: 1;
+}
+
+.connection-tab-container .nav a {
+  cursor: pointer; /* not sure why this does not work */
+}
+
 @media (max-width: 767px) {
   #container { margin: 0 }
 }
