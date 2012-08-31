@@ -200,7 +200,11 @@ sub connect {
       $self->redis->del($self->_key('msg')); # want to load in new server messages
       $self->subscribe_id($self->redis->subscribe($self->_key('to_server'), sub {
         my ($redis,$res)=@_;
-        $self->write($_) for @$res;
+        # This also writes the elements below, which I'm not sure is the idea.
+        # 0: subscribe
+        # 1: connection:13:to_server
+        # 2: 1
+        #$self->write($_) for @$res;
       })) unless $self->subscribe_id;
     });
   });

@@ -235,10 +235,10 @@ sub _add_connection {
 
   sub {
    $self->app->core->add_connection($self->session('uid'), {
-      host => scalar $self->param('host'),
-      nick => scalar $self->param('nick'),
-      user => scalar $self->session('login'),
-      channels => scalar $self->param('channels'),
+      host => $self->param('host') || '',
+      nick => $self->param('nick') || '',
+      user => $self->param('user') || $self->session('login'),
+      channels => $self->param('channels') || '',
     }, $_[0]->begin);
   },
   sub {
@@ -264,7 +264,7 @@ sub _update_connection {
     $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
     $self->redis->mset(
       "connection:$cid:host" => $self->param('host') || '',
-      "connection:$cid:user" => $self->param('user') || '',
+      "connection:$cid:user" => $self->param('user') || $self->session('login'),
       "connection:$cid:nick" => $self->param('nick') || '',
       "connection:$cid:channels" => $self->param('channels') || '',
       $_[0]->begin,
