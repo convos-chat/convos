@@ -438,7 +438,7 @@ sub irc_rpl_endofmotd {
   $_[0]->add_server_message($_[1]);
 }
 
-=head irc_join
+=head2 irc_join
 
 Example message:
 

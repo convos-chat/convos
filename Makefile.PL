@@ -9,7 +9,7 @@ WriteMakefile(
     'Mojolicious' => '3.13',
    #'Mojo::Redis' => '0.09', # https://github.com/marcusramberg/mojo-redis
     'IRC::Utils' => '0.12',
-    'Mojolicious::Plugin::UrlWith' => 0.0501;
+    'Mojolicious::Plugin::UrlWith' => 0.0501,
     'Parse::IRC' => '1.18',
   },
   test      => {TESTS => 't/*.t'}
