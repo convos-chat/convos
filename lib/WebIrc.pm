@@ -83,6 +83,10 @@ Holds a L<WebIrc::Core> object.
 
 =head2 archive
 
+=head2 proxy
+
+Proxy manager
+
 =cut
 
 has redis => sub { Mojo::Redis->new(server=>'127.0.0.1:6379') };

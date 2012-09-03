@@ -62,3 +62,43 @@ sub start {
 }
 
 1;
+
+=head1 NAME
+
+WebIrc::Proxy - Proxy manager
+
+=head1 SYNOPSIS
+
+  my $proxy=WebIrc::Proxy->new(core=>$core);
+  $proxy->start;
+
+=head1 DESCRIPTION
+
+L<WebIrc::Proxy> is responsible for dealing with native clients, allowing 
+them to connect and communicate with the IRC servers.
+
+=head2 ATTRIBUTES
+
+=over 4
+
+=item port
+
+Port for the service to listen to. Defaults to 6667.
+
+=item core
+
+WebIrc Core class.
+
+=back
+
+=head2 METHODS
+
+=over 4
+
+=item start
+
+Set up the listening port.
+
+=back
+
+=cut
