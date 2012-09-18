@@ -221,6 +221,7 @@ use Parse::IRC;
 use Scalar::Util 'weaken';
 use constant CONNECTING      => 'connecting';
 use constant IRC_CLIENT_NAME => ':WiRC IRC Proxy';
+use constant DEBUG           => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
 my @DEFAULT_EVENTS = qw/ ping notice /;
 
@@ -288,17 +289,20 @@ sub connect {
       $stream->on(
         close => sub {
           $self->emit('close');
+          warn "Mojo::IRC::close\n" if DEBUG;
           delete $self->{_stream};
         }
       );
       $stream->on(
         error => sub {
+          warn "Mojo::IRC::error($_[1])\n" if DEBUG;
           $self->emit(error => {params => [$_[1]], command => 'MOJO_ERROR'});
           delete $self->{_stream};
         }
       );
       $stream->on(
         read => sub {
+          #warn "Mojo::IRC::read($_[1])\n" if DEBUG;
           $buffer .= $_[1];
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
@@ -375,6 +379,7 @@ with " " and "\r\n" will be appended.
 sub write {
   my $self = shift;
   my $buf = join ' ', @_;
+  warn "Mojo::IRC::write($buf)\n" if DEBUG;
   $self->{_stream}->write("$buf\r\n");
 }
 
