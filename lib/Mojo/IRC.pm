@@ -13,7 +13,7 @@ Mojo::IRC - IRC Client for the Mojo IOLoop
             );
 
   $irc->on(join => sub {
-    my($self, $message) = @_;
+      my($self, $message) = @_;
     warn "yay! i joined $message->{params}[0]";
   });
 
@@ -217,7 +217,7 @@ The latter will look like this:
 use Mojo::Base 'Mojo::EventEmitter';
 use Parse::IRC;
 use Scalar::Util 'weaken';
-use constant CONNECTING => 'connecting';
+use constant CONNECTING      => 'connecting';
 use constant IRC_CLIENT_NAME => ':WiRC IRC Proxy';
 
 my @DEFAULT_EVENTS = qw/ ping notice /;
@@ -261,10 +261,10 @@ success.
 =cut
 
 sub connect {
-  my($self, $callback) = @_;
-  my($host, $port) = split /:/, $self->host;
+  my ($self, $callback) = @_;
+  my ($host, $port) = split /:/, $self->host;
 
-  if($self->{_stream}) {
+  if ($self->{_stream}) {
     return $self->$callback(ref $self->{_stream} ? undef : $self->{_stream});
   }
 
@@ -272,41 +272,51 @@ sub connect {
   $self->register_default_event_handlers;
 
   weaken $self;
-  Mojo::IOLoop->client(address => $host, port => $port || 6667, sub {
-    my($loop, $err, $stream) = @_;
-    my($method, $message);
-    my $buffer = '';
+  Mojo::IOLoop->client(
+    address => $host,
+    port    => $port || 6667,
+    sub {
+      my ($loop, $err, $stream) = @_;
+      my ($method, $message);
+      my $buffer = '';
 
-    $err and return $self->$callback($err);
+      $err and return $self->$callback($err);
 
-    $stream->timeout(0); # never time out
-    $stream->on(close => sub {
-      $self->emit('close');
-      delete $self->{_stream};
-    });
-    $stream->on(error => sub {
-      $self->emit(error => { params => [$_[1]], command => 'MOJO_ERROR' });
-      delete $self->{_stream};
-    });
-    $stream->on(read => sub {
-      $buffer .= $_[1];
-
-      while($buffer =~ s/^([^\r\n]+)\r\n//s) {
-        $message = parse_irc($1);
-
-        if($message->{command} =~ /^\d+$/) {
-          $message->{command} = IRC::Utils::numeric_to_name($message->{command});
+      $stream->timeout(0);    # never time out
+      $stream->on(
+        close => sub {
+          $self->emit('close');
+          delete $self->{_stream};
         }
+      );
+      $stream->on(
+        error => sub {
+          $self->emit(error => {params => [$_[1]], command => 'MOJO_ERROR'});
+          delete $self->{_stream};
+        }
+      );
+      $stream->on(
+        read => sub {
+          $buffer .= $_[1];
 
-        $self->safe_emit($message->{command}, $message);
-      }
-    }); # end on(read)
+          while ($buffer =~ s/^([^\r\n]+)\r\n//s) {
+            $message = parse_irc($1);
 
-    $self->{_stream} = $stream;
-    $self->write(NICK => $self->nick);
-    $self->write(USER => $self->user, 8, '*', IRC_CLIENT_NAME);
-    $self->$callback(undef);
-  }); # end client()
+            if ($message->{command} =~ /^\d+$/) {
+              $message->{command} = IRC::Utils::numeric_to_name($message->{command});
+            }
+
+            $self->safe_emit($message->{command}, $message);
+          }
+        }
+      );    # end on(read)
+
+      $self->{_stream} = $stream;
+      $self->write(NICK => $self->nick);
+      $self->write(USER => $self->user, 8, '*', IRC_CLIENT_NAME);
+      $self->$callback(undef);
+    }
+  );        # end client()
 }
 
 =head2 disconnect
@@ -318,7 +328,7 @@ Will disconnect form the server.
 =cut
 
 sub disconnect {
-  my($self, $cb) = @_;
+  my ($self, $cb) = @_;
 
   # already disconnected
   return $self->$cb unless $self->{_stream};
@@ -375,10 +385,10 @@ broken...QUOTE PASS...".
 =cut
 
 sub irc_notice {
-  my($self, $message) = @_;
+  my ($self, $message) = @_;
 
   # NOTICE AUTH :*** Ident broken or disabled, to continue to connect you must type /QUOTE PASS 21105
-  if($message->{'params'}[0] =~ m!/Ident broken.*QUOTE PASS (\S+)!) {
+  if ($message->{'params'}[0] =~ m!/Ident broken.*QUOTE PASS (\S+)!) {
     $self->write(QUOTE => PASS => $1);
   }
 }
@@ -390,7 +400,7 @@ Responds to the server with "PONG ...".
 =cut
 
 sub irc_ping {
-  my($self, $message) = @_;
+  my ($self, $message) = @_;
   $self->write(PONG => $message->{params}->[0]);
 }
 
@@ -402,7 +412,7 @@ added. The new nick will be stored in L</nick>.
 =cut
 
 sub irc_err_nicknameinuse {
-  my($self, $message) = @_;
+  my ($self, $message) = @_;
 
   $self->nick($self->nick . '_');
   $self->write(NICK => $self->nick);
