@@ -22,7 +22,7 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
 
 =cut
 
-use Mojo::Base -base;
+use Mojo::Base 'Mojo::IRC';
 use Mojo::JSON;
 use IRC::Utils qw/decode_irc/;
 use Parse::IRC;
@@ -63,52 +63,6 @@ id of messages subscription
 
 has subscribe_id => 0;
 
-=head2 user
-
-IRC username
-
-=cut
-
-has user => '';
-
-=head2 host
-
-IRC server hostname.
-
-=cut
-
-has host => '';
-has _real_host => '';
-
-=head2 password
-
-IRC server password.
-
-=cut
-
-has password => '';
-
-=head2 ssl
-
-True if SSL should be used to connect to the IRC server.
-
-=cut
-
-has ssl => 0;
-
-=head2 nick
-
-IRC server nickname.
-
-=cut
-
-has nick => '';
-
-=head2 channels
-
-IRC channels to join on connect
-
-=cut
 
 has channels => sub { [] };
 

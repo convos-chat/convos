@@ -1,6 +1,8 @@
 use Test::More;
 use Mojo::IOLoop;
 
+
+
 use_ok('WebIrc::Proxy');
 my $proxy=WebIrc::Proxy->new;
 isa_ok($proxy,'WebIrc::Proxy');
