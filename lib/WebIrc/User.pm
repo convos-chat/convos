@@ -33,6 +33,7 @@ Authenticate local user
 sub login {
   my $self=shift;
 
+  warn("Doing it");
   if($self->param('register')) {
     $self->stash(template => 'user/register');
     $self->register;
@@ -199,14 +200,16 @@ sub settings {
     $self->param(connection => $connections[0]{id}) unless defined $self->param('connection');
     $self->render;
   };
-
+  warn "Here";
   $self->render_later;
   Mojo::IOLoop->delay(
     @actions,
     sub { # get connections
+      warn "Here";
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
     sub { # get connection data
+      warn "There";
       $cids = $_[1];
       $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
       return $last->() unless $cids and @$cids;

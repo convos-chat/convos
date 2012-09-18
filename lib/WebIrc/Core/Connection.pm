@@ -56,7 +56,7 @@ use Carp qw/ croak /;
 use constant DEBUG => $ENV{'WIRC_DEBUG'} // 1;
 
 my $JSON = Mojo::JSON->new;
-my @keys = qw/ nick user host password ssl /;
+my @keys = qw/ nick user host /;
 
 =head1 ATTRIBUTES
 
@@ -143,9 +143,6 @@ sub connect {
   my ($self, $cb) = @_;
   my $id = $self->id or croak "Cannot load connection without id";
   my @req = map {"connection:$id:$_"} @keys;
-
-  $self->{_irc} and return $self->{_irc}->$cb;
-  $self->{_irc} = 1;
 
   $self->redis->execute(
     [mget     => @req],

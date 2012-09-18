@@ -1,17 +1,24 @@
 use Test::More;
-
 use Test::Mojo;
+
+use strict;
+use warnings;
+use Carp qw/confess/;
 
 my $t=Test::Mojo->new('WebIrc');
 
 $t->app->redis->on(error => sub {
-  ok(0,"Oops:".$t->app->redis->error);
+  my ($redis,$error)=@_;
+  ok(0,"An error occured:".$error);
+  Carp::cluck('I am an error');
   done_testing;
+  exit;
 });
 
 $t->get_ok('/login')->status_is('200')->element_exists_not('.alert');
+warn("Done with login test");
 $t->get_ok('/register')->status_is('200')->element_exists_not('.error');
-
+warn("OH NOES");
 my $delay=Mojo::IOLoop->delay(sub {
   my $delay=shift;
   $t->app->redis->select(11,$delay->begin);
