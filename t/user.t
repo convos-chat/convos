@@ -10,7 +10,6 @@ my $t=Test::Mojo->new('WebIrc');
 $t->app->redis->on(error => sub {
   my ($redis,$error)=@_;
   ok(0,"An error occured:".$error);
-  Carp::cluck('I am an error');
   done_testing;
   exit;
 });

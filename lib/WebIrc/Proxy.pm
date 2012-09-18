@@ -29,18 +29,27 @@ sub start {
             if ($credentials{USER} && $credentials{NICK}) {
               if (!$credentials{PASS}) {
                 $stream->write(
-                  "wirc.pl AUTH :*** You need to send your password. Try /quote PASS <username>:<password>\r\n"
+                  "wirc.pl AUTH :*** You need to send your password. Try /quote PASS <connection>:<password>\r\n"
                 );
+                return;
               }
+              my ($pass,$cid)=split(':',$credentials{PASSWORD});
               $self->core->login(
                 {
                   login      => $credentials{USER},
-                  password   => $credentials{PASSWORD},
+                  password   => $pass,
                 },
                 sub {
                   my($core, $uid, $error) = @_;
                   if($uid) {
                     $stream->write(":wirc.pl NOTICE AUTH :*** AUTHENTICATED\r\n");
+                    $core->redis->smembers("connection:$cid:channels", sub {
+                        my ($redis,@channels)=@_;
+                        foreach my $channel (@channels) {
+                          warn "$channel";
+                        }
+                      }
+                    );
                   }
                   else {
                     $stream->write(":wirc.pl NOTICE AUTH :*** REJECTED\r\n");

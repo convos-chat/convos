@@ -120,7 +120,7 @@ has _irc => sub {
 };
 
 # used to create redis keys
-has _publish_key => sub { shift->{_key} . ':from_server' };
+has _publish_key => sub { 'connection:'.shift->id .':from_server' };
 has _key_prefix => sub { join ':', 'connection', $_[0]->id };
 sub _key { join ':', shift->_key_prefix, @_ }
 
@@ -179,16 +179,16 @@ sub add_server_message {
   if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
     $self->redis->rpush(
       $self->_key('msg'),
-      join("\0", $time, $self->host, $message->{params}[1] || $message->{params}[0]),    # 1 = normal, 0 = error
+      join("\0", $time, $self->_irc->host, $message->{params}[1] || $message->{params}[0]),    # 1 = normal, 0 = error
     );
     $self->redis->publish(
       $self->_publish_key,
       $JSON->encode(
         {
           timestamp => $time,
-          sender    => $self->host,
+          sender    => $self->_irc->host,
           message   => $message->{params}[1] || $message->{params}[0],                   # 1 = normal, 0 = error
-          server    => $self->host,
+          server    => $self->_irc->host,
         }
       )
     );
@@ -318,9 +318,10 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 =cut
 
+use Data::Dumper;
 sub irc_error {
   my ($self, $message) = @_;
-
+  warn Data::Dumper::Dumper($message);
   if ($message->{raw_line} =~ /Closing Link/i) {
     warn sprintf "[connection:%s] ! Closing link (reconnect)\n", $self->_irc->disconnect(
       sub {
