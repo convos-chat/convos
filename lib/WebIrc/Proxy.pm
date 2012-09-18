@@ -33,7 +33,8 @@ sub start {
                 );
                 return;
               }
-              my ($pass,$cid)=split(':',$credentials{PASSWORD});
+              my ($pass,$cid)=split(':',$credentials{PASS});
+              warn "Trying $pass";
               $self->core->login(
                 {
                   login      => $credentials{USER},

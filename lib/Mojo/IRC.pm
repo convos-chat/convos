@@ -42,25 +42,23 @@ TODO:
 
 =head1 EVENTS
 
-=head2 close
+=head2 irc_close
 
   $self->$callback;
 
 Called when the client has closed the connection.
 
+=head2 irc_error
+
+This event is used by IRC errors
+
 =head2 error
 
-This event is used by both IRC errors and L<Mojo::IOLoop::Stream> errors.
-The latter will look like this:
+Internal errors in the mojo ioloop
 
-  $self->$callback({
-    params => [$err],
-    command => 'MOJO_ERROR',
-  });
+=head2 irc_err_nicknameinuse
 
-=head2 err_nicknameinuse
-
-=head2 join
+=head2 irc_join
 
   $self->$callback({
     params => ['#html'],
@@ -69,7 +67,7 @@ The latter will look like this:
     prefix => 'somenick!~someuser@1.2.3.4'
   });
 
-=head2 mode
+=head2 irc_mode
 
   $self->$callback({
     params => ['somenick', '+i'],
@@ -78,7 +76,7 @@ The latter will look like this:
     prefix => 'somenick!~someuser@hostname.com'
   });
 
-=head2 notice
+=head2 irc_notice
 
   $self->$callback({
     params => ['somenick', 'on 1 ca 1(4) ft 10(10)'],
@@ -87,7 +85,7 @@ The latter will look like this:
     prefix => 'Zurich.CH.EU.Undernet.Org',
   });
 
-=head2 ping
+=head2 irc_ping
 
   $self->$callback({
     params => [2687237629],
@@ -95,9 +93,9 @@ The latter will look like this:
     command => 'PING',
   })
 
-=head2 privmsg
+=head2 irc_privmsg
 
-=head2 rpl_created
+=head2 irc_rpl_created
 
   $self->$callback({
     params => ['somenick', 'This server was created Thu Jun 21 2012 at 01:26:15 UTC'],
@@ -107,9 +105,9 @@ The latter will look like this:
 
   });
 
-=head2 rpl_endofmotd
+=head2 irc_rpl_endofmotd
 
-=head2 rpl_endofnames
+=head2 irc_rpl_endofnames
 
   $self->$callback({
     params => ['somenick', '#channel', 'End of /NAMES list.'],
@@ -118,7 +116,7 @@ The latter will look like this:
     prefix => 'Budapest.Hu.Eu.Undernet.org'
   });
 
-=head2 rpl_isupport
+=head2 irc_rpl_isupport
 
   $self->$callback({
     params => ['somenick', 'WHOX', 'WALLCHOPS', 'WALLVOICES', 'USERIP', 'CPRIVMSG', 'CNOTICE', 'SILENCE=25', 'MODES=6', 'MAXCHANNELS=20', 'MAXBANS=50', 'NICKLEN=12', 'are supported by this server'],
@@ -127,7 +125,7 @@ The latter will look like this:
     prefix => 'Tampa.FL.US.Undernet.org'
   })
 
-=head2 rpl_luserchannels
+=head2 irc_rpl_luserchannels
 
   $self->$callback({
     params => ['somenick', '13700', 'channels formed'],
@@ -136,7 +134,7 @@ The latter will look like this:
     prefix => 'Tampa.FL.US.Undernet.org'
   })
 
-=head2 rpl_luserclient
+=head2 irc_rpl_luserclient
 
   $self->$callback({
     params => ['somenick', 'There are 3400 users and 46913 invisible on 18 servers'],
@@ -154,7 +152,7 @@ The latter will look like this:
     prefix => 'Tampa.FL.US.Undernet.org'
   });
 
-=head2 rpl_luserop
+=head2 irc_rpl_luserop
 
   $self->$callback({
     params => ['somenick', '19', 'operator(s) online'],
@@ -163,7 +161,7 @@ The latter will look like this:
     prefix => 'Tampa.FL.US.Undernet.org'
   });
 
-=head2 rpl_luserunknown
+=head2 irc_rpl_luserunknown
 
   $self->$callback({
     params => ['somenick', '305', 'unknown connection(s)'],
@@ -172,11 +170,11 @@ The latter will look like this:
     prefix => 'Tampa.FL.US.Undernet.org'
   })
 
-=head2 rpl_motd
+=head2 irc_rpl_motd
 
-=head2 rpl_motdstart
+=head2 irc_rpl_motdstart
 
-=head2 rpl_myinfo
+=head2 irc_rpl_myinfo
 
   $self->$callback({
     params => ['somenick', 'Tampa.FL.US.Undernet.org', 'u2.10.12.14', 'dioswkgx', 'biklmnopstvrDR', 'bklov'],
@@ -185,7 +183,7 @@ The latter will look like this:
     prefix => 'Tampa.FL.US.Undernet.org',
   })
 
-=head2 rpl_namreply
+=head2 irc_rpl_namreply
 
   $self->$callback({
     params => ['somenick', '=', '#html', 'somenick Indig0 Wildblue @HTML @CSS @Luch1an @Steaua_ Indig0_ Pilum @fade'],
@@ -194,7 +192,7 @@ The latter will look like this:
     prefix => 'Budapest.Hu.Eu.Undernet.org'
   })
 
-=head2 rpl_welcome
+=head2 irc_rpl_welcome
 
   $self->$callback({
     params => ['somenick', 'Welcome to the UnderNet IRC Network, somenick'],
@@ -203,7 +201,7 @@ The latter will look like this:
     prefix => 'Zurich.CH.EU.Undernet.Org'
   })
 
-=head2 rpl_yourhost
+=head2 irc_rpl_yourhost
 
   $self->$callback({
     params => ['somenick', 'Your host is Tampa.FL.US.Undernet.org, running version u2.10.12.14'],
@@ -223,7 +221,7 @@ use constant CONNECTING      => 'connecting';
 use constant IRC_CLIENT_NAME => ':WiRC IRC Proxy';
 use constant DEBUG           => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
-my @DEFAULT_EVENTS = qw/ ping notice /;
+my @DEFAULT_EVENTS = qw/ irc_ping irc_notice /;
 
 =head1 ATTRIBUTES
 
@@ -295,11 +293,12 @@ sub connect {
       );
       $stream->on(
         error => sub {
-          warn "Mojo::IRC::error($_[1])\n" if DEBUG;
-          $self->emit(error => {params => [$_[1]], command => 'MOJO_ERROR'});
+          return if !$self;
+          $self->emit(error => $_[1]);
           delete $self->{_stream};
         }
       );
+      use Data::Dumper;
       $stream->on(
         read => sub {
           #warn "Mojo::IRC::read($_[1])\n" if DEBUG;
@@ -307,13 +306,14 @@ sub connect {
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
             $message = parse_irc($1);
+            warn Data::Dumper::Dumper($message);
             $method = $message->{command} || '';
 
             if ($method =~ /^\d+$/) {
               $method = IRC::Utils::numeric_to_name($method);
             }
 
-            $self->emit_safe(lc $method => $message);
+            $self->emit_safe(lc 'irc_'.$method => $message);
           }
         }
       );
@@ -343,6 +343,8 @@ sub disconnect {
   # TODO: Figure out how this really works:
   # I think ->close will kill the connection at once and never fire the close
   # event...
+  # I think you are right:
+  # Event "irc_error" failed: Can't call method "once" on an undefined value at script/../lib/Mojo/IRC.pm line 345.
   $self->write('QUIT');
   $self->{_stream}->close;
   $self->{_stream}->once(close => $cb);
@@ -363,7 +365,7 @@ sub register_default_event_handlers {
   weaken $self;
   for my $event (@DEFAULT_EVENTS) {
     next if $self->has_subscribers($event);
-    $self->on($event => $self->can("irc_$event"));
+    $self->on($event => $self->can($event));
   }
 }
 

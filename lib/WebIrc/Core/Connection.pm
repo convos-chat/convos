@@ -93,9 +93,9 @@ The actual IRC server connected to. Will be set by L</irc_rpl_welcome>.
 
 has real_host => '';
 
-my @ADD_MESSAGE_EVENTS        = qw/ privmsg /;
-my @ADD_SERVER_MESSAGE_EVENTS = qw/ rpl_yourhost rpl_motdstart rpl_motd rpl_endofmotd rpl_welcome error /;
-my @OTHER_EVENTS              = qw/ rpl_welcome rpl_myinfo join rpl_namreply error /;
+my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
+my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome /;
+my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_rpl_namreply irc_error /;
 
 has _irc => sub {
   my $self = shift;
@@ -112,7 +112,7 @@ has _irc => sub {
     $irc->on($event => sub { $self->add_server_message($_[1]) });
   }
   for my $event (@OTHER_EVENTS) {
-    my $method = "irc_$event";
+    my $method = "$event";
     $irc->on($event => sub { $self->$method($_[1]) });
   }
 
@@ -274,7 +274,7 @@ sub irc_rpl_myinfo {
   my ($self, $message) = @_;
   my @keys = qw/ nick real_host version available_user_modes available_channel_modes /;
 
-  $self->nick($message->{params}[0]);
+  $self->_irc->nick($message->{params}[0]);
 
   while (my $key = shift @keys) {
     $self->redis->set($self->_key($key), shift @{$message->{params}});
@@ -318,10 +318,9 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 =cut
 
-use Data::Dumper;
 sub irc_error {
   my ($self, $message) = @_;
-  warn Data::Dumper::Dumper($message);
+  #warn Data::Dumper::Dumper($message);
   if ($message->{raw_line} =~ /Closing Link/i) {
     warn sprintf "[connection:%s] ! Closing link (reconnect)\n", $self->_irc->disconnect(
       sub {
@@ -329,6 +328,10 @@ sub irc_error {
       }
     );
   }
+}
+
+sub error {
+  warn "Handle ".@_;
 }
 
 =head1 COPYRIGHT
