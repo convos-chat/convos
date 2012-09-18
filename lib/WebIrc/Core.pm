@@ -42,7 +42,7 @@ sub start {
     for my $cid (@$cids) {
       my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
       $self->_connections->{$cid} = $conn;
-      $conn->connect;
+      $conn->connect(sub {});
     }
   });
 }
