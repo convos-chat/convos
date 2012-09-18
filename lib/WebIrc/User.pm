@@ -144,10 +144,10 @@ sub _got_invalid_register_params {
     $errors->{email} = 'Invalid email.';
   }
 
-  if(2 != grep { $_ } @passwords or $passwords[0] ne $passwords[1]) {
+  if((grep { $_ } @passwords) != 2 or $passwords[0] ne $passwords[1]) {
     $errors->{password} = 'You need to enter the same password twice.';
   }
-  elsif(6 < length $passwords[0]) {
+  elsif(length($passwords[0]) < 6) {
     $errors->{password} = 'The password must be at least 6 characters long';
   }
 
