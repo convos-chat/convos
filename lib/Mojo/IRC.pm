@@ -215,6 +215,8 @@ The latter will look like this:
 =cut
 
 use Mojo::Base 'Mojo::EventEmitter';
+use Mojo::IOLoop;
+use IRC::Utils;
 use Parse::IRC;
 use Scalar::Util 'weaken';
 use constant CONNECTING      => 'connecting';
@@ -299,24 +301,25 @@ sub connect {
         read => sub {
           $buffer .= $_[1];
 
-          while ($buffer =~ s/^([^\r\n]+)\r\n//s) {
+          while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
             $message = parse_irc($1);
+            $method = $message->{command} || '';
 
-            if ($message->{command} =~ /^\d+$/) {
-              $message->{command} = IRC::Utils::numeric_to_name($message->{command});
+            if ($method =~ /^\d+$/) {
+              $method = IRC::Utils::numeric_to_name($method);
             }
 
-            $self->safe_emit($message->{command}, $message);
+            $self->emit_safe(lc $method => $message);
           }
         }
-      );    # end on(read)
+      );
 
       $self->{_stream} = $stream;
       $self->write(NICK => $self->nick);
       $self->write(USER => $self->user, 8, '*', IRC_CLIENT_NAME);
       $self->$callback(undef);
     }
-  );        # end client()
+  );
 }
 
 =head2 disconnect
