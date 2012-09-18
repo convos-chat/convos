@@ -93,13 +93,13 @@ The actual IRC server connected to. Will be set by L</irc_rpl_welcome>.
 
 has real_host => '';
 
-my @ADD_MESSAGE_EVENTS = qw/ privmsg /;
+my @ADD_MESSAGE_EVENTS        = qw/ privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/ rpl_yourhost rpl_motdstart rpl_motd rpl_endofmotd rpl_welcome error /;
-my @OTHER_EVENTS = qw/ rpl_welcome rpl_myinfo join rpl_namreply error /;
+my @OTHER_EVENTS              = qw/ rpl_welcome rpl_myinfo join rpl_namreply error /;
 
 has _irc => sub {
   my $self = shift;
-  my $irc = Mojo::IRC->new;
+  my $irc  = Mojo::IRC->new;
 
   weaken $self;
   $irc->register_default_event_handlers;
@@ -120,7 +120,7 @@ has _irc => sub {
 };
 
 # used to create redis keys
-has _publish_key => sub { shift->{_key} .':from_server' };
+has _publish_key => sub { shift->{_key} . ':from_server' };
 has _key_prefix => sub { join ':', 'connection', $_[0]->id };
 sub _key { join ':', shift->_key_prefix, @_ }
 
@@ -140,18 +140,18 @@ is set in L</channels> and used by L</irc_rpl_welcome>.
 =cut
 
 sub connect {
-  my($self, $cb) = @_;
+  my ($self, $cb) = @_;
   my $id = $self->id or croak "Cannot load connection without id";
-  my @req = map { "connection:$id:$_" } @keys;
+  my @req = map {"connection:$id:$_"} @keys;
 
   $self->{_irc} and return $self->{_irc}->$cb;
   $self->{_irc} = 1;
 
   $self->redis->execute(
-    [ mget => @req ],
-    [ smembers => "connection:$id:channels" ],
+    [mget     => @req],
+    [smembers => "connection:$id:channels"],
     sub {
-      my($redis, $attrs, $channels) = @_;
+      my ($redis, $attrs, $channels) = @_;
 
       foreach my $key (@keys) {
         my $val = shift @$attrs;
@@ -176,20 +176,25 @@ if it looks like one. Returns true if the message was added to redis.
 =cut
 
 sub add_server_message {
-  my($self, $message) = @_;
+  my ($self, $message) = @_;
   my $time = time;
 
-  if(!$message->{prefix} or $message->{prefix} eq $self->real_host) {
+  if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
     $self->redis->rpush(
       $self->_key('msg'),
-      join("\0", $time, $self->host, $message->{params}[1] || $message->{params}[0]), # 1 = normal, 0 = error
+      join("\0", $time, $self->host, $message->{params}[1] || $message->{params}[0]),    # 1 = normal, 0 = error
     );
-    $self->redis->publish($self->_publish_key, $JSON->encode({
-      timestamp => $time,
-      sender => $self->host,
-      message => $message->{params}[1] || $message->{params}[0], # 1 = normal, 0 = error
-      server => $self->host,
-    }));
+    $self->redis->publish(
+      $self->_publish_key,
+      $JSON->encode(
+        {
+          timestamp => $time,
+          sender    => $self->host,
+          message   => $message->{params}[1] || $message->{params}[0],                   # 1 = normal, 0 = error
+          server    => $self->host,
+        }
+      )
+    );
     return 1;
   }
 
@@ -212,15 +217,20 @@ sub add_message {
     $self->_key('msg', $message->{params}[0]),
     join("\0", $time, $message->{prefix}, $message->{params}[1]),
   );
-  $self->redis->publish($self->_publish_key, $JSON->encode({
-    timestamp => $time,
-    server => $self->host,
-    sender => $message->{prefix},
-    target => $message->{params}[0],
-    message => $message->{params}[1],
-  }));
+  $self->redis->publish(
+    $self->_publish_key,
+    $JSON->encode(
+      {
+        timestamp => $time,
+        server    => $self->host,
+        sender    => $message->{prefix},
+        target    => $message->{params}[0],
+        message   => $message->{params}[1],
+      }
+    )
+  );
 
-  unless ($message->{params}->[0] =~ /^\#/x) { # not a channel
+  unless ($message->{params}->[0] =~ /^\#/x) {    # not a channel
     $self->redis->sadd($self->_key('conversations') => $message->{params}->[0]);
   }
 }
@@ -232,7 +242,7 @@ Will disconnect from the L</irc> server.
 =cut
 
 sub disconnect {
-  $_[0]->_irc->disconnect($_[1] || sub {});
+  $_[0]->_irc->disconnect($_[1] || sub { });
 }
 
 =head1 EVENT HANDLERS
@@ -264,13 +274,13 @@ Example message:
 =cut
 
 sub irc_rpl_myinfo {
-  my($self, $message) = @_;
+  my ($self, $message) = @_;
   my @keys = qw/ nick real_host version available_user_modes available_channel_modes /;
 
   $self->nick($message->{params}[0]);
 
-  while(my $key = shift @keys) {
-    $self->redis->set($self->_key($key), shift @{ $message->{params} });
+  while (my $key = shift @keys) {
+    $self->redis->set($self->_key($key), shift @{$message->{params}});
   }
 }
 
@@ -283,12 +293,9 @@ Example message:
 =cut
 
 sub irc_join {
-  my($self, $message) = @_;
+  my ($self, $message) = @_;
 
-  $self->redis->publish($self->_publish_key, $JSON->encode({
-    joined => $message->{params}[0],
-    timestamp => time,
-  }));
+  $self->redis->publish($self->_publish_key, $JSON->encode({joined => $message->{params}[0], timestamp => time,}));
 }
 
 =head2 irc_rpl_namreply
@@ -300,8 +307,8 @@ Example message:
 =cut
 
 sub irc_rpl_namreply {
-  my($self, $message) = @_;
-  my @nicks = split /\s+/, $message->{params}[3]; # 3 = +nick0 @nick1, nick2
+  my ($self, $message) = @_;
+  my @nicks = split /\s+/, $message->{params}[3];    # 3 = +nick0 @nick1, nick2
 
   $self->redis->sadd($self->_key('names', $message->{params}[2]), @nicks);
 }
@@ -318,8 +325,11 @@ sub irc_error {
   my ($self, $message) = @_;
 
   if ($message->{raw_line} =~ /Closing Link/i) {
-    warn sprintf "[connection:%s] ! Closing link (reconnect)\n",
-    $self->_irc->disconnect(sub { $self->connect(sub {}) })
+    warn sprintf "[connection:%s] ! Closing link (reconnect)\n", $self->_irc->disconnect(
+      sub {
+        $self->connect(sub { });
+      }
+    );
   }
 }
 
