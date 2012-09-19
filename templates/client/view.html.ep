@@ -1,4 +1,4 @@
-% page_header param('target') ? link_to(param('target'), 'view') .' on ' .param('server') : param('server');
+% title 'Chat';
 
 <script type="text/html" id="tmpl_li_error">
   <li>
@@ -18,27 +18,26 @@
 <div class="row-fluid">
   <div class="span2">
     <ul id="targets" class="nav nav-list">
-      % for my $server (sort keys %$connections) {
-        % my $info = $connections->{$server};
-      <li class="nav-header <%= $info->{active} ? 'active' : '' %>">
+      % for my $c (@$connections) {
+      <li class="nav-header <%= $c->{id} eq $active ? 'active' : '' %>">
         <div class="btn-group">
-          %= link_to $server, 'view', { server => $server, target => '' }
+          %= link_to $c->{host}, 'view', { server => $c->{host}, target => '' }
           <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li><%= link_to 'join', { server => $server }, begin %><i class="icon-plus"></i> Join channel</a><% end %></li>
-            <li><%= link_to 'disconnect', { server => $server }, begin %><i class="icon-signout"></i> Disconnect</a><% end %></li>
+            <li><%= link_to 'join', { server => $c->{host} }, begin %><i class="icon-plus"></i> Join channel</a><% end %></li>
+            <li><%= link_to 'disconnect', { server => $c->{host} }, begin %><i class="icon-signout"></i> Disconnect</a><% end %></li>
           </ul>
         </div>
       </li>
-        % for my $target (@{ $info->{targets} || [] }) {
-      <li class="<%= $target->{active} ? 'active' : '' %>">
+        % for my $channel (@{ $c->{channels} }) {
+      <li class="<%= $channel eq $active ? 'active' : '' %>">
         <div class="btn-group">
-          %= link_to $target->{name}, 'view', { target => $target->{name}, server => $server }
+          %= link_to $channel, 'view', { target => $channel, server => $c->{host} }
           <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li><%= link_to 'information', { target => $target->{name}, server => $server }, begin %><i class="icon-info-sign"></i> Information<% end %></li>
-            <li><%= link_to 'search', { target => $target->{name}, server => $server }, begin %><i class="icon-comments"></i> Search<% end %></li>
-            <li><%= link_to 'close', { target => $target->{name}, server => $server }, begin %><i class="icon-signout"></i> Close<% end %></li>
+            <li><%= link_to 'information', { target => $channel, server => $c->{host} }, begin %><i class="icon-info-sign"></i> Information<% end %></li>
+            <li><%= link_to 'search', { target => $channel, server => $c->{host} }, begin %><i class="icon-comments"></i> Search<% end %></li>
+            <li><%= link_to 'close', { target => $channel, server => $c->{host} }, begin %><i class="icon-signout"></i> Close<% end %></li>
           </ul>
         </div>
       </li>
@@ -48,17 +47,17 @@
   </div>
   <div class="span10">
     %= form_for 'change_title', id => 'change_title', class => 'no-margins', begin
-      %= text_field 'title', $chat_title, class => 'span12'
+      %= text_field 'title', '', class => 'span12'
     % end
     <ul class="unstyled" id="messages">
       % my $sender = '';
-      % for my $message (@$messages) {
+      % for my $message (@$conversation) {
       <li>
         % if($sender ne $message->{sender}) {
           % $sender = $message->{sender};
         <span class="sender">
           <i class="icon-comment"></i>
-          %= link_to $message->{sender}, 'view', { server => $host, target => param('target') || '' };
+          %= link_to $message->{sender}, 'view', {};
         </span>
         <span class="timestamp"><%= localtime $message->{timestamp} %></span>
         % }

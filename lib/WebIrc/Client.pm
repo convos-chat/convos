@@ -8,7 +8,7 @@ WebIrc::Client - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
-use Parse::IRC;
+use List::MoreUtils qw/ zip /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $JSON = Mojo::JSON->new;
@@ -23,7 +23,49 @@ Used to render the main IRC client view.
 
 sub view {
     my $self = shift;
-    # TODO
+    my $uid = $self->session('uid');
+    my @keys = qw/ channels nick host /;
+    my($connections, $active, $cid, $cname);
+
+    $self->render_later;
+    Mojo::IOLoop->delay(
+      sub {
+        $self->redis->smembers("user:$uid:connections", $_[0]->begin);
+      },
+      sub {
+        $connections = $_[1] || [];
+        $self->redis->execute(
+          (map { [ hmget => "connection:$_" => @keys ] } @$connections),
+          $_[0]->begin,
+        );
+      },
+      sub {
+        my($delay, @info) = @_;
+
+        for my $info (@info) {
+          $info = { zip @keys, @$info };
+          $info->{channels} = [ split /,/, $info->{channels} ];
+          $info->{id} = shift @$connections;
+        }
+
+        @info = sort { $a->{host} cmp $b->{host} } @info;
+        $self->stash(connections => \@info);
+
+        for(@info) {
+          $cname ||= $_->{channels}[0];
+          $cid = $_->{id};
+          $cname and last;
+        }
+
+        $active ||= $cname || $cid;
+        $self->redis->lrange("connection:$cid:msg:$cname", -50, -1, $delay->begin);
+      },
+      sub {
+        $self->stash(conversation => $_[1]);
+        $self->stash(active => $active);
+        $self->render;
+      }
+    );
 }
 
 =head2 socket

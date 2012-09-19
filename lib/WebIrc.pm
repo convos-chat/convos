@@ -137,8 +137,7 @@ sub startup {
   my $private_r=$r->bridge('/')->to('user#auth');
   $private_r->route('/settings')->to('user#settings')->name('settings');
 
-  $private_r->route('/chat/#host')->to('client#view');
-  $private_r->route('/chat/#host/:target')->to('client#view')->name('view');
+  $private_r->route('/chat')->to('client#view');
   $private_r->route('/close/#host/:target')->to('client#close')->name('irc_close');
   $private_r->route('/disconnect/*host')->to('client#disconnect')->name('irc_disconnect');
   $private_r->route('/join/*host')->to('client#join')->name('irc_join');

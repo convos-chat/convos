@@ -39,11 +39,10 @@
           % end
           <div class="form-actions">
           % if($conn->{id}) {
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button type="submit" class="btn btn-success" name="action" value="connect">Connect</button>
-            <button type="submit" class="btn btn-danger" name="action" value="delete">Delete</button>
+            <button type="submit" class="btn btn-info">Save</button>
+            <button type="submit" class="btn" name="action" value="delete">Delete</button>
           % } else {
-            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="submit" class="btn btn-info">Add</button>
           % }
           </div>
         % end
