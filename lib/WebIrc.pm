@@ -89,7 +89,12 @@ Proxy manager
 
 =cut
 
-has redis => sub { Mojo::Redis->new(server=>'127.0.0.1:6379') };
+has redis => sub {
+  my $log = $_[0]->app->log;
+  my $redis = Mojo::Redis->new(server=>'127.0.0.1:6379');
+  $redis->on(error => sub { $log->error('[REDIS ERROR] ' .$_[1]) });
+  $redis;
+};
 has core => sub { WebIrc::Core->new(redis=>shift->redis)};
 has archive => sub {
   my $self = shift;
@@ -150,8 +155,8 @@ sub startup {
     $c->stash(errors => {}); # this need to be set up each time, since it's a ref
   });
 
-  $self->core->start unless $ENV{'SKIP_CONNECT'};
-  $self->proxy->start unless $ENV{'SKIP_CONNECT'};
+  $self->core->start unless $ENV{SKIP_CONNECT};
+  $self->proxy->start unless $ENV{DISABLE_PROXY};
 }
 
 =head2 add_helpers
@@ -214,7 +219,7 @@ sub add_helpers {
   $self->helper(page_header => sub {
     $_[0]->stash('page_header', $_[1]) if @_ == 2;
     $_[0]->stash('title', Mojo::DOM->new($_[1])->all_text) if @_ == 2 and not $self->stash('title');
-    $_[0]->stash('page_header') // $self->config->{'name'};
+    $_[0]->stash('page_header') // $self->config->{name};
   });
   $self->helper(form_block => sub {
     my $content = pop;

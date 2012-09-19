@@ -56,7 +56,7 @@ Start a single connection by connection id.
 sub start_connection {
   my ($self,$cid)=@_;
   return unless my $conn = $self->_connections->{$cid};
-  return $conn->connect;
+  return $conn->connect(sub {});
 }
 
 =head2 add_connection

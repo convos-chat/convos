@@ -330,6 +330,12 @@ sub irc_error {
   }
 }
 
+=head2 error
+
+TODO
+
+=cut
+
 sub error {
   warn "Handle ".@_;
 }
