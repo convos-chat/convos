@@ -217,9 +217,7 @@ use Mojo::IOLoop;
 use IRC::Utils;
 use Parse::IRC;
 use Scalar::Util 'weaken';
-use constant CONNECTING      => 'connecting';
-use constant IRC_CLIENT_NAME => ':WiRC IRC Proxy';
-use constant DEBUG           => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
+use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
 my @DEFAULT_EVENTS = qw/ irc_ping irc_notice /;
 
@@ -249,6 +247,14 @@ IRC server hostname.
 
 has host => '';
 
+=head2 name
+
+The name of this IRC client. Defaults to "Mojo IRC".
+
+=cut
+
+has name => 'Mojo IRC';
+
 =head1 METHODS
 
 =head2 connect
@@ -269,7 +275,6 @@ sub connect {
     return $self->$callback(ref $self->{_stream} ? undef : $self->{_stream});
   }
 
-  $self->{_stream} = CONNECTING;
   $self->register_default_event_handlers;
 
   weaken $self;
@@ -298,7 +303,6 @@ sub connect {
           delete $self->{_stream};
         }
       );
-      use Data::Dumper;
       $stream->on(
         read => sub {
           #warn "Mojo::IRC::read($_[1])\n" if DEBUG;
@@ -306,7 +310,6 @@ sub connect {
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
             $message = parse_irc($1);
-            warn Data::Dumper::Dumper($message);
             $method = $message->{command} || '';
 
             if ($method =~ /^\d+$/) {
@@ -320,7 +323,7 @@ sub connect {
 
       $self->{_stream} = $stream;
       $self->write(NICK => $self->nick);
-      $self->write(USER => $self->user, 8, '*', IRC_CLIENT_NAME);
+      $self->write(USER => $self->user, 8, '*', ':'.$self->name);
       $self->$callback(undef);
     }
   );

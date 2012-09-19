@@ -29,7 +29,7 @@ Mojo::IOLoop->server(
               host => $ENV{IRC_HOST} || "localhost:$port",
             );
 
-  $irc->on(join => sub {
+  $irc->on(irc_join => sub {
     my($self, $message) = @_;
 
     is_deeply $message->{params}, ['#mojo'], 'got join #mojo event';
@@ -37,13 +37,13 @@ Mojo::IOLoop->server(
     is $got{rpl_motdstart}, 1, '1 motdstart event';
     is $got{rpl_motd}, 18, '18 motd events';
     is $got{rpl_endofmotd}, 1, '1 endofmotd event';
-    is $read, "NICK test123\r\nUSER my name 8 * :WiRC IRC Proxy\r\nJOIN #mojo\r\n", 'nick, user and join got sent';
+    is $read, "NICK test123\r\nUSER my name 8 * :Mojo IRC\r\nJOIN #mojo\r\n", 'nick, user and join got sent';
     Mojo::IOLoop->stop;
   });
 
-  $irc->on(rpl_motdstart => sub { $got{rpl_motdstart}++ });
-  $irc->on(rpl_motd => sub { $got{rpl_motd}++ });
-  $irc->on(rpl_endofmotd => sub { $got{rpl_endofmotd}++ });
+  $irc->on(irc_rpl_motdstart => sub { $got{rpl_motdstart}++ });
+  $irc->on(irc_rpl_motd => sub { $got{rpl_motd}++ });
+  $irc->on(irc_rpl_endofmotd => sub { $got{rpl_endofmotd}++ });
 
   $irc->connect(sub {
     my($irc, $err) = @_;
