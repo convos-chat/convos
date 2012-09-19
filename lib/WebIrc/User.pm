@@ -86,7 +86,7 @@ sub register {
     }
 
     if($uids) {
-      $self->redis->get('user:'.$self->param('login').':uid',$delay->begin);
+      $self->redis->get("user:@{[$self->param('login')]}:uid", $delay->begin);
     }
     else {
       $admin++;
@@ -110,8 +110,7 @@ sub register {
     $self->session(uid=>$uid,login => $self->param('login'));
     $self->redis->execute(
       [ set => "user:$login:uid", $uid ],
-      [ set => "user:$uid:digest", $digest ],
-      [ set => "user:$uid:email", scalar $self->param('email') ],
+      [ hmset => "user:$uid", digest => $digest, email => scalar $self->param('email') ],
       $delay->begin,
     );
   }, sub {
@@ -210,19 +209,16 @@ sub settings {
       $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
       return $last->() unless $cids and @$cids;
       $self->redis->execute(
-        (map {
-          my $cid = $_;
-          [ mget => map { "connection:$cid:$_" } qw/ host user nick channels/ ],
-        } @$cids),
+        (map { [ hgetall => "connection:$_" ] } @$cids),
         $_[0]->begin
       );
     },
     sub { # convert connections to data structures
       my $delay = shift;
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
-      for my $data (@_) {
-        push @$data, shift @$cids;
-        push @connections, { map { $_ => shift @$data } qw/ host user nick channels id / };
+      for my $info (@_) {
+        $info->{id} = shift @$cids;
+        push @connections, $info;
       }
       $last->();
     },
@@ -259,13 +255,13 @@ sub _update_connection {
   my $cid = $self->param('connection');
   # TODO: Should probably use some kind of $core->update_connection() to
   # actually update nick, user ++ as well
+
+  $self->param(user => $self->session('login')) unless $self->param('user');
+
   sub {
     $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
-    $self->redis->mset(
-      "connection:$cid:host" => $self->param('host') || '',
-      "connection:$cid:user" => $self->param('user') || $self->session('login'),
-      "connection:$cid:nick" => $self->param('nick') || '',
-      "connection:$cid:channels" => $self->param('channels') || '',
+    $self->redis->execute(
+      [ hmset => "connection:$cid", map { $_, scalar $self->param($_) } qw/ host user nick channels / ],
       $_[0]->begin,
     );
   },

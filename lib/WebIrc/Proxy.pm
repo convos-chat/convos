@@ -44,6 +44,7 @@ sub start {
                   my($core, $uid, $error) = @_;
                   if($uid) {
                     $stream->write(":wirc.pl NOTICE AUTH :*** AUTHENTICATED\r\n");
+                    # TODO: Should channels be a set or a string?
                     $core->redis->smembers("connection:$cid:channels", sub {
                         my ($redis,@channels)=@_;
                         foreach my $channel (@channels) {

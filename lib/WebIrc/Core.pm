@@ -65,7 +65,7 @@ sub start_connection {
       host => $str, # irc_server[:port]
       nick => $str,
       user => $str,
-      channels => $str, # '#foo #bar ...'
+      channels => $str, # '#foo #bar, ...'
     }, $callback);
 
 Add a new connection to redis. Will create a new connection id and
@@ -82,6 +82,8 @@ sub add_connection {
     $errors{$name} = "$name is required.";
   }
 
+  $conn->{channels} =~ s/[\s,]+/,/g;
+
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->incr('connections:id',sub {
     my ($redis,$cid) = @_;
@@ -90,16 +92,7 @@ sub add_connection {
     $self->redis->execute(
       [ sadd => "connections", $cid ],
       [ sadd => "user:$uid:connections", $cid ],
-      (
-        map {
-          [ sadd => "connection:$cid:channels", $_ ];
-        } split /\s+/,delete $conn->{channels}
-      ),
-      (
-        map {
-          [ set => "connection:$cid:$_", $conn->{$_} ],
-        } keys %$conn
-      ),
+      [ hmset => "connection:$cid", %$conn ],
       sub { $self->$cb($cid) },
     );
   });
@@ -123,13 +116,13 @@ sub login {
 
   Mojo::IOLoop->delay(
     sub {
-      $self->redis->get('user:'.$params->{login}.':uid',$_[0]->begin);
+      $self->redis->get("user:$params->{login}:uid",$_[0]->begin);
     }, sub {
       my $delay = shift;
       $uid = shift;
       return $self->$cb($uid, shift) unless $uid && $uid =~ /\d+/;
       warn "[core] Got the uid: $uid" if DEBUG;
-      $self->redis->get("user:$uid:digest", $delay->begin);
+      $self->redis->hget("user:$uid", "digest", $delay->begin);
     }, sub {
       my($delay,$digest)=@_;
       if(crypt($params->{password},$digest) eq $digest) {

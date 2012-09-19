@@ -83,7 +83,7 @@ server by L</connect>.
 
 =cut
 
-has channels => sub { [] };
+has channels => '';
 
 =head2 real_host
 
@@ -119,11 +119,6 @@ has _irc => sub {
   $irc;
 };
 
-# used to create redis keys
-has _publish_key => sub { 'connection:'.shift->id .':from_server' };
-has _key_prefix => sub { join ':', 'connection', $_[0]->id };
-sub _key { join ':', shift->_key_prefix, @_ }
-
 =head1 METHODS
 
 =head2 connect
@@ -142,20 +137,16 @@ is set in L</channels> and used by L</irc_rpl_welcome>.
 sub connect {
   my ($self, $cb) = @_;
   my $id = $self->id or croak "Cannot load connection without id";
-  my @req = map {"connection:$id:$_"} @keys;
 
   $self->redis->execute(
-    [mget     => @req],
-    [smembers => "connection:$id:channels"],
+    [hgetall  => "connection:$id"],
     sub {
-      my ($redis, $attrs, $channels) = @_;
+      my ($redis, $attrs) = @_;
 
-      foreach my $key (@keys) {
-        my $val = shift @$attrs;
-        $self->_irc->$key($val) if defined $val;
-      }
-
-      $self->channels($channels || []);
+      $self->channels($attrs->{channels});
+      $self->_irc->host($attrs->{host});
+      $self->_irc->nick($attrs->{nick});
+      $self->_irc->user($attrs->{user});
       $self->_irc->connect($cb);
     }
   );
@@ -178,20 +169,15 @@ sub add_server_message {
 
   if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
     $self->redis->rpush(
-      $self->_key('msg'),
+      "connection:@{[$self->id]}:msg",
       join("\0", $time, $self->_irc->host, $message->{params}[1] || $message->{params}[0]),    # 1 = normal, 0 = error
     );
-    $self->redis->publish(
-      $self->_publish_key,
-      $JSON->encode(
-        {
-          timestamp => $time,
-          sender    => $self->_irc->host,
-          message   => $message->{params}[1] || $message->{params}[0],                   # 1 = normal, 0 = error
-          server    => $self->_irc->host,
-        }
-      )
-    );
+    $self->_publish({
+        timestamp => $time,
+        sender    => $self->_irc->host,
+        message   => $message->{params}[1] || $message->{params}[0],                   # 1 = normal, 0 = error
+        server    => $self->_irc->host,
+    });
     return 1;
   }
 
@@ -211,24 +197,19 @@ sub add_message {
   my $time = time;
 
   $self->redis->rpush(
-    $self->_key('msg', $message->{params}[0]),
+    "connection:@{[$self->id]}:msg:$message->{params}[0]",
     join("\0", $time, $message->{prefix}, $message->{params}[1]),
   );
-  $self->redis->publish(
-    $self->_publish_key,
-    $JSON->encode(
-      {
-        timestamp => $time,
-        server    => $self->host,
-        sender    => $message->{prefix},
-        target    => $message->{params}[0],
-        message   => $message->{params}[1],
-      }
-    )
-  );
+  $self->redis->_publish({
+    timestamp => $time,
+    server    => $self->host,
+    sender    => $message->{prefix},
+    target    => $message->{params}[0],
+    message   => $message->{params}[1],
+  });
 
   unless ($message->{params}->[0] =~ /^\#/x) {    # not a channel
-    $self->redis->sadd($self->_key('conversations') => $message->{params}->[0]);
+    $self->redis->sadd("connection:@{[$self->id]}:conversations", $message->{params}[0]);
   }
 }
 
@@ -257,7 +238,7 @@ sub irc_rpl_welcome {
 
   $self->real_host($message->{prefix});
 
-  for my $channel (@{$self->channels}) {
+  for my $channel (split /,/, $self->channels) {
     $self->_irc->write(JOIN => $channel);
   }
 }
@@ -273,12 +254,10 @@ Example message:
 sub irc_rpl_myinfo {
   my ($self, $message) = @_;
   my @keys = qw/ nick real_host version available_user_modes available_channel_modes /;
+  my $i = 0;
 
   $self->_irc->nick($message->{params}[0]);
-
-  while (my $key = shift @keys) {
-    $self->redis->set($self->_key($key), shift @{$message->{params}});
-  }
+  $self->redis->hmset("connection:@{[$self->id]}", map { $_, $message->{params}[$i++] // '' } @keys);
 }
 
 =head2 irc_join
@@ -292,7 +271,7 @@ Example message:
 sub irc_join {
   my ($self, $message) = @_;
 
-  $self->redis->publish($self->_publish_key, $JSON->encode({joined => $message->{params}[0], timestamp => time,}));
+  $self->_publish({joined => $message->{params}[0], timestamp => time});
 }
 
 =head2 irc_rpl_namreply
@@ -307,7 +286,7 @@ sub irc_rpl_namreply {
   my ($self, $message) = @_;
   my @nicks = split /\s+/, $message->{params}[3];    # 3 = +nick0 @nick1, nick2
 
-  $self->redis->sadd($self->_key('names', $message->{params}[2]), @nicks);
+  $self->redis->sadd("connection:@{[$self->id]}:$message->{params}[2]", @nicks);
 }
 
 =head2 irc_error
@@ -338,6 +317,12 @@ TODO
 
 sub error {
   warn "Handle ".@_;
+}
+
+sub _publish {
+  my($self, $data) = @_;
+
+  $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
 }
 
 =head1 COPYRIGHT

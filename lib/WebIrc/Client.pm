@@ -22,73 +22,8 @@ Used to render the main IRC client view.
 =cut
 
 sub view {
-  my $self = shift;
-  my $redis = $self->app->redis;
-  my $connections = {};
-  my $msg_name = $self->stash('target') || $self->stash('server');
-  my $target = $self->stash('target') || '';
-
-  $self->render_later;
-  $self->stash(connections => $connections);
-  $self->stash(chat_title => $msg_name);
-  $self->stash(logged_in => 1); # TODO: Remove this once login logic is written
-  $self->stash(messages => []);
-
-  $redis->smembers('user:'.$self->session('uid').':connections' => sub {
-    my($redis, $connection_ids) = @_;
-
-    # need to redirect to setup if no servers has been configured
-    unless(@$connection_ids) {
-      return $self->redirect_to('setup');
-    }
-
-    $self->logf(debug => '[view] Connecting to %s', $connection_ids) if DEBUG;
-    for my $id (@$connection_ids) {
-      my($server, $msg_id);
-      Mojo::IOLoop->delay(
-        sub {
-          my $delay=shift;
-          $self->redis->mget((map { "connection:$id:$_" } qw/ host user nick /), $delay->begin);
-        }, sub {
-          my($delay,$info) = @_;
-          $self->logf(debug => '[view] Got connnection info for %s: %s', $id, $info) if DEBUG;
-          $server = $info->[0];
-          $msg_id = $connection_ids->[0] if $server eq $self->stash('server');
-          $connections->{$server}{id} = shift @$connection_ids;
-          # TODO: could this be a single line with a hash slice?
-          $connections->{$server}{user} = $info->[1];
-          $connections->{$server}{nick} = $info->[2];
-          $connections->{$server}{active} = $info->[0] eq $msg_name ? 1 : 0;
-          $self->redis->smembers("connection:$id:channels",$delay->begin);
-        },
-        sub {
-          my($delay,$channels) = @_;
-          $connections->{$server}{targets} = [
-            map {
-              +{
-                name => $_,
-                active => $target eq $_ ? 1 : 0,
-              };
-            } @$channels
-          ];
-          $self->render unless $msg_id;
-          $self->redis->lrange("connection:$msg_id:msg:$msg_name", -50, -1, $delay->begin);
-        },
-        sub {
-          my($delay,$messages) = @_;
-          if(@$messages) {
-            $self->stash(messages => [
-              map {
-                my($timestamp, $sender, $message) = split /\0/, $_, 3;
-                +{ timestamp => $timestamp, sender => $sender, message => $message };
-              } @$messages
-            ]);
-          }
-          $self->render unless @$connection_ids;
-        },
-      );
-    }
-  });
+    my $self = shift;
+    # TODO
 }
 
 =head2 socket
