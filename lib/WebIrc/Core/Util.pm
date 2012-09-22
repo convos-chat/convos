@@ -38,6 +38,7 @@ sub pack_irc {
 
 sub unpack_irc {
     my($timestamp, $raw_line) = unpack 'Na*', $_[0];
+    utf8::decode($raw_line);
     my $message = Parse::IRC::parse_irc($raw_line);
     $message->{timestamp} = $timestamp;
     $message;
