@@ -96,7 +96,7 @@ sub socket {
   $self->on(message => sub {
     $self->logf(debug => '[ws] < %s', $_[1]);
     my ($self,$message) = @_;
-    $message;
+    utf8::encode($message);
     my $data = $JSON->decode($message) || {};
     my $cid = $data->{cid}; # TODO: report invalid message?
     if(!$cid) {
@@ -147,7 +147,8 @@ sub _subscribe_to_server_messages {
     my ($redis,$res)=@_;
     for my $message (@$res) {
       #$self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-      $self->send($message) if $message =~ /^\{/; # only pass on json - skip internal redis messages
+      utf8::decode($message);
+      $self->send({text=>$message}) if $message =~ /^\{/; # only pass on json - skip internal redis messages
     }
   });
 }

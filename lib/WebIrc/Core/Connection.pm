@@ -154,6 +154,7 @@ sub connect {
         for(@{ $_[1] }) {
           next unless /^[A-Z]+/; # avoid "0: subscribe", "1: ...", ...
           $self->_irc->write($_);
+          utf8::encode($_);
           my $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $_);
           $self->add_message($msg);
         }
