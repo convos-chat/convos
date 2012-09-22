@@ -26,7 +26,7 @@ sub view {
     my $self = shift;
     my $uid = $self->session('uid');
     my @keys = qw/ channels nick host /;
-    my($connections, $active, $cid, $cname);
+    my $connections;
 
     $self->render_later;
     Mojo::IOLoop->delay(
@@ -42,6 +42,7 @@ sub view {
       },
       sub {
         my($delay, @info) = @_;
+        my($cid, $cname);
 
         for my $info (@info) {
           $info = { zip @keys, @$info };
@@ -50,15 +51,12 @@ sub view {
         }
 
         @info = sort { $a->{host} cmp $b->{host} } @info;
+        $cid = $info[0]{id};
+        $cname = $info[0]{channels}[0];
+
         $self->stash(connections => \@info);
-
-        for(@info) {
-          $cname ||= $_->{channels}[0];
-          $cid = $_->{id};
-          $cname and last;
-        }
-
-        $active ||= $cname || $cid;
+        $self->stash(nick => $info[0]{nick});
+        $self->stash(active => $cname);
         $self->stash(connection_id => $cid);
         $self->stash(conversation_name => $cname);
         $self->redis->lrange("connection:$cid:$cname:msg", -50, -1, $delay->begin);
@@ -69,7 +67,6 @@ sub view {
         $_ = unpack_irc $_ for @$conversation;
 
         $self->stash(conversation => $conversation);
-        $self->stash(active => $active);
         $self->render;
       }
     );
@@ -103,7 +100,7 @@ sub socket {
       $self->logf(debug => "Invalid message:\n".$message. "\nerr:".$JSON->error);
       return;
     }
-    
+
     if($allowed{$cid}) {
       $self->_handle_socket_data($cid => $data);
     }
@@ -127,12 +124,17 @@ sub _handle_socket_data {
     if($data->{cmd} =~ s!^/(\w+)\s+(\S*)!!) {
       my($one, $two) = ($1, $2);
       given($one) {
-        when('msg') { $data->{cmd} = "PRIVMSG :$two" .$data->{cmd} }
-        default { $data->{cmd} = uc $one ." :$two" . $data->{cmd} }
+        when('j') { $data->{cmd} = "JOIN $two" }
+        when('me') { $data->{cmd} = "PRIVMSG $data->{cname} :\x{1}ACTION $two$data->{cmd}\x{1}" }
+        when('msg') { $data->{cmd} = "PRIVMSG $two :$data->{cmd}" }
+        default { $data->{cmd} = join ' ', uc($one), $two }
       }
     }
+    elsif($data->{cmd} =~ m!/part\s*!i) {
+      $data->{cmd} = "PART $data->{cname}";
+    }
     else {
-      $data->{cmd} = sprintf 'PRIVMSG %s :%s', $data->{cname}, $data->{cmd};
+      $data->{cmd} = "PRIVMSG $data->{cname} :$data->{cmd}";
     }
 
     $self->logf(debug => '[connection:%s:to_server] < %s', $cid, $data->{cmd});
