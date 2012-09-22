@@ -42,6 +42,7 @@ i[class^="icon-"], i[class*=" icon-"] {
 #messages li i[class^="icon-"],
 #messages li i[class*=" icon-"] { position: relative; top: 2px }
 #messages li .message { display: block }
+#messages li .me { display: block; font-style: italic }
 #messages li .timestamp { position: absolute; top: 0; right: 0; text-align: right; opacity: 0.8 }
 
 #statusbar {

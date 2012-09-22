@@ -64,7 +64,11 @@
         <span class="timestamp"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
           % $last_messenger = $message->{prefix};
         % }
+        % if($message->{special} eq 'me') {
+        <span class="me" title="<%= format_time $message->{timestamp}, '%H:%M:%S %d. %n %y' %>"><%= $nick %> <%= $message->{params}[1] %></span>
+        % } else {
         <span class="message" title="<%= format_time $message->{timestamp}, '%H:%M:%S %d. %n %y' %>"><%= $message->{params}[1] %></span>
+        % }
       </li>
       % }
     </ul>

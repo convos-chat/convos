@@ -51,9 +51,14 @@ sub pack_irc {
 
 sub unpack_irc {
   my($timestamp, $raw_line) = unpack 'Na*', $_[0];
+  my $special = '';
+  my $message;
+
   utf8::decode($raw_line);
-  my $message = Parse::IRC::parse_irc($raw_line);
+  $special = 'me' if $raw_line =~ s/\x{1}ACTION (.*)\x{1}/$1/; # TODO: No idea if this is the right place to put this
+  $message = Parse::IRC::parse_irc($raw_line);
   $message->{timestamp} = $timestamp;
+  $message->{special} = $special;
   $message;
 }
 
