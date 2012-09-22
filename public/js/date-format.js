@@ -15,8 +15,9 @@
 
   // Monkeypatching the Date object. This is evil. Almost like ruby...
   Date.prototype.sprintf = function(format) {
+    var d = this;
     return format.replace(/%(.)/g, function(m, p) {
-      var rv = this.d[ (markers[p])[0] ]()
+      var rv = d[ (markers[p])[0] ]()
       if(markers[p][1] != null ) rv = markers[p][1](rv)
       return rv
     });
