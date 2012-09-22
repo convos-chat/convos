@@ -26,7 +26,7 @@ Structure.registerModule('Wirc.Chat', {
       next = tmpl('tmpl_li_error', data);
     }
     else if($previous.find('.sender a').text() == data.sender) {
-      next = tmpl('tmpl_li_message', { message: data.message, timestamp: data.timestamp });
+      next = tmpl('tmpl_li_message', { sender: false, message: data.message, timestamp: data.timestamp });
     }
     else {
       next = tmpl('tmpl_li_message', data);
@@ -54,13 +54,16 @@ Structure.registerModule('Wirc.Chat', {
       window.console && console.log('[websocket] < ' + JSON.stringify(data));
     } catch(e) {
       window.console && console.log('[websocket] ! ' + e);
-      this.print({ error: e });
+      this.print({ error: '[ws]' + e });
     };
   },
   connectToWebSocket: function() {
     var self = this;
     self.websocket = Wirc.websocket('/socket', {
       onmessage: self.receiveData,
+      onopen: function function_name (argument) {
+        self.sendData({ cid: self.connection_id, cname: self.conversation_name });
+      },
       onerror: function(e) {
         self.print({ error: e.data });
         self.$input.attr('disabled', 'disabled');
@@ -99,7 +102,7 @@ Structure.registerModule('Wirc.Chat', {
 
     window.console && console.log('[Wirc.Chat.setupUI] form.submit');
     self.$input.parents('form').submit(function() {
-      self.sendData({ command: self.$input.val(), target: self.target });
+      self.sendData({ cid: self.connection_id, cname: self.conversation_name, cmd: self.$input.val() });
       self.$input.val('');
       return false;
     });
@@ -107,8 +110,8 @@ Structure.registerModule('Wirc.Chat', {
     self.scrollToBottom();
   },
   start: function($) {
-    this.server = unescape(window.location.href.split('/')[4] || '');
-    this.target = unescape(window.location.href.split('/')[5] || '');
+    this.connection_id = $('#targets').attr('data-cid');
+    this.conversation_name = $('#targets').attr('data-cname');
     this.$messages = $('#messages');
     this.$input = $('#message input[type="text"]');
     this.connectToWebSocket();
@@ -130,14 +133,14 @@ BASEURL = window.location.href;
  * Flash fallback for websocket
  *
 if(!('WebSocket' in window)) {
-    document.write([
-        '<script type="text/javascript" src="' + BASEURL + '/js/swfobject.js"></script>',
-        '<script type="text/javascript" src="' + BASEURL + '/js/FABridge.js"></script>',
-        '<script type="text/javascript" src="' + BASEURL + '/js/web_socket.js"></script>'
-    ].join(''));
+  document.write([
+    '<script type="text/javascript" src="' + BASEURL + '/js/swfobject.js"></script>',
+    '<script type="text/javascript" src="' + BASEURL + '/js/FABridge.js"></script>',
+    '<script type="text/javascript" src="' + BASEURL + '/js/web_socket.js"></script>'
+  ].join(''));
 }
 if(WebSocket.__initialize) {
-    // Set URL of your WebSocketMain.swf here:
-    WebSocket.__swfLocation = BASEURL + '/js/WebSocketMain.swf';
+  // Set URL of your WebSocketMain.swf here:
+  WebSocket.__swfLocation = BASEURL + '/js/WebSocketMain.swf';
 }
 */

@@ -215,7 +215,7 @@ Internal errors in the mojo ioloop
 use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::IOLoop;
 use IRC::Utils;
-use Parse::IRC;
+use Parse::IRC ();
 use Scalar::Util 'weaken';
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
@@ -309,7 +309,7 @@ sub connect {
           $buffer .= $_[1];
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
-            $message = parse_irc($1);
+            $message = Parse::IRC::parse_irc($1);
             $method = $message->{command} || '';
 
             if ($method =~ /^\d+$/) {

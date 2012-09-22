@@ -9,6 +9,7 @@ WebIrc::Client - Mojolicious controller for IRC chat
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
 use List::MoreUtils qw/ zip /;
+use WebIrc::Core::Util qw/ unpack_irc /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $JSON = Mojo::JSON->new;
@@ -58,10 +59,16 @@ sub view {
         }
 
         $active ||= $cname || $cid;
-        $self->redis->lrange("connection:$cid:msg:$cname", -50, -1, $delay->begin);
+        $self->stash(connection_id => $cid);
+        $self->stash(conversation_name => $cname);
+        $self->redis->lrange("connection:$cid:$cname:msg", -50, -1, $delay->begin);
       },
       sub {
-        $self->stash(conversation => $_[1]);
+        my($delay, $conversation) = @_;
+
+        $_ = unpack_irc $_ for @$conversation;
+
+        $self->stash(conversation => $conversation);
         $self->stash(active => $active);
         $self->render;
       }
@@ -76,41 +83,65 @@ TODO
 
 sub socket {
   my $self = shift;
-  my $log = $self->app->log;
-  my $redis = $self->app->redis;
+  my $uid = $self->session('uid');
+  my %allowed;
 
   # try to avoid inactivity timeout
   Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
 
   $self->on(finish => sub {
-    $log->debug("Client finished");
+    $self->logf(debug => "Client finished");
   });
 
   $self->on(message => sub {
-    $log->debug("[ws] < $_[1]");
+    $self->logf(debug => '[ws] < %s', $_[1]);
     my $self = shift;
-    my $data = $JSON->decode(shift) or return;
-    my $irc_message;
+    my $data = $JSON->decode(shift) || {};
+    my $cid = $data->{cid} or return $self->finish; # TODO: report invalid message?
 
-    if($data->{command} =~ m!^/(\w+)\s+(.*)!) {
-      $irc_message = sprintf '%s %s', uc($1), $2;
-    }
-    elsif($data->{target}) {
-      $irc_message = sprintf 'PRIVMSG %s :%s', $data->{target}, $data->{command};
+    if($allowed{$cid}) {
+      $self->_handle_socket_data($cid => $data);
     }
     else {
-      $self->send($JSON->encode({ error => "Cannot send PRIVMSG without target" }));
-      return;
+      $self->redis->sismember("user:$uid:connections", $cid, sub {
+        $self->logf(debug => 'Allowed to listen to %s? %s', $cid, $_[1] ? 'Yes' : 'No');
+        $_[1] or return $self->finish; # TODO: Report 401 to user?
+        $allowed{$cid} = 1;
+        $self->_subscribe_to_server_messages($cid);
+        $self->_handle_socket_data($cid => $data);
+      });
+    }
+  });
+}
+
+sub _handle_socket_data {
+  my($self, $cid, $data) = @_;
+  my $cmd;
+
+  if($data->{cmd}) {
+    if($data->{cmd} =~ s!^/(\w+)\s+(\S*)!!) {
+      my($one, $two) = ($1, $2);
+      given($one) {
+        when('msg') { $data->{cmd} = "PRIVMSG :$two" .$data->{cmd} }
+        default { $data->{cmd} = uc $one ." :$two" . $data->{cmd} }
+      }
+    }
+    else {
+      $data->{cmd} = sprintf 'PRIVMSG %s :%s', $data->{cname}, $data->{cmd};
     }
 
-    $log->debug("[pubsub] < $irc_message");
-    $redis->publish('connection:1:to_server', $irc_message);
-  });
+    $self->logf(debug => '[connection:%s:to_server] < %s', $cid, $data->{cmd});
+    $self->redis->publish("connection:$cid:to_server", $data->{cmd});
+  }
+}
 
-  $redis->subscribe('connection:1:from_server', sub {
+sub _subscribe_to_server_messages {
+  my($self, $cid) = @_;
+
+  $self->redis->subscribe("connection:$cid:from_server", sub {
     my ($redis,$res)=@_;
     for my $message (@$res) {
-      $log->debug("[pubsub] > $message");
+      #$self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
       $self->send($message) if $message =~ /^\{/; # only pass on json - skip internal redis messages
     }
   });

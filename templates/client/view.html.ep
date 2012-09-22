@@ -2,13 +2,16 @@
 
 <script type="text/html" id="tmpl_li_error">
   <li>
-    <i class="icon-exclamation-sign"></i> Error: <%%= error %>
+    <i class="icon-exclamation-sign"></i><%%= error %>
   </li>
 </script>
 <script type="text/html" id="tmpl_li_message">
   <li>
     <%% if(sender) { %>
-    <span class="sender"><i class="icon-comment"></i><a href="<%%= href %>"><%%= sender %></a></span>
+    <span class="sender">
+      <i class="icon-comment"></i>
+      <a href="/privmsg/<%%= sender %>"><%%= sender %></a>
+    </span>
     <span class="timestamp"><%%= timestamp %></span>
     <%% } %>
     <span class="message" title="<%%= timestamp %>"><%%= message %></span>
@@ -17,7 +20,7 @@
 
 <div class="row-fluid">
   <div class="span2">
-    <ul id="targets" class="nav nav-list">
+    <ul id="targets" class="nav nav-list" data-cid="<%= $connection_id %>" data-cname="<%= $conversation_name %>">
       % for my $c (@$connections) {
       <li class="nav-header <%= $c->{id} eq $active ? 'active' : '' %>">
         <div class="btn-group">
@@ -50,18 +53,18 @@
       %= text_field 'title', '', class => 'span12'
     % end
     <ul class="unstyled" id="messages">
-      % my $sender = '';
+      % my $last_messenger = '';
       % for my $message (@$conversation) {
       <li>
-        % if($sender ne $message->{sender}) {
-          % $sender = $message->{sender};
+        % if($last_messenger ne $message->{prefix}) {
         <span class="sender">
           <i class="icon-comment"></i>
-          %= link_to $message->{sender}, 'view', {};
+          %= link_to $message->{prefix}, 'privmsg', { to => $message->{prefix} };
         </span>
         <span class="timestamp"><%= localtime $message->{timestamp} %></span>
+          % $last_messenger = $message->{prefix};
         % }
-        <span class="message" title="<%= localtime $message->{timestamp} %>"><%= $message->{message} %></span>
+        <span class="message" title="<%= localtime $message->{timestamp} %>"><%= $message->{params}[1] %></span>
       </li>
       % }
     </ul>

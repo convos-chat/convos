@@ -49,7 +49,9 @@ l</irc_error>.
 use Mojo::Base -base;
 use Mojo::IRC;
 use Mojo::JSON;
-use Scalar::Util 'weaken';
+use WebIrc::Core::Util qw/ pack_irc /;
+use Parse::IRC ();
+use Scalar::Util qw/ weaken /;
 use Carp qw/ croak /;
 
 # default to true while developing
@@ -148,6 +150,14 @@ sub connect {
       $self->_irc->nick($attrs->{nick});
       $self->_irc->user($attrs->{user});
       $self->_irc->connect($cb);
+      $self->redis->subscribe("connection:$id:to_server", sub {
+        for(@{ $_[1] }) {
+          next unless /^[A-Z]+/; # avoid "0: subscribe", "1: ...", ...
+          $self->_irc->write($_);
+          my $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $_);
+          $self->add_message($msg);
+        }
+      });
     }
   );
 
@@ -168,10 +178,7 @@ sub add_server_message {
   my $time = time;
 
   if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
-    $self->redis->rpush(
-      "connection:@{[$self->id]}:msg",
-      join("\0", $time, $self->_irc->host, $message->{params}[1] || $message->{params}[0]),    # 1 = normal, 0 = error
-    );
+    $self->redis->rpush("connection:@{[$self->id]}:msg", pack_irc $time, $message->{raw_line});
     $self->_publish({
         timestamp => $time,
         sender    => $self->_irc->host,
@@ -197,12 +204,12 @@ sub add_message {
   my $time = time;
 
   $self->redis->rpush(
-    "connection:@{[$self->id]}:msg:$message->{params}[0]",
-    join("\0", $time, $message->{prefix}, $message->{params}[1]),
+    "connection:@{[$self->id]}:$message->{params}[0]:msg",
+    pack_irc $time, $message->{raw_line}
   );
-  $self->redis->_publish({
+  $self->_publish({
     timestamp => $time,
-    server    => $self->host,
+    server    => $self->_irc->host,
     sender    => $message->{prefix},
     target    => $message->{params}[0],
     message   => $message->{params}[1],
@@ -286,7 +293,7 @@ sub irc_rpl_namreply {
   my ($self, $message) = @_;
   my @nicks = split /\s+/, $message->{params}[3];    # 3 = +nick0 @nick1, nick2
 
-  $self->redis->sadd("connection:@{[$self->id]}:$message->{params}[2]", @nicks);
+  $self->redis->sadd("connection:@{[$self->id]}:$message->{params}[2]:nicks", @nicks);
 }
 
 =head2 irc_error
