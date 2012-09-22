@@ -12,6 +12,7 @@
     %= javascript '/bootstrap/js/bootstrap-typeahead.js';
     %= javascript '/js/template.js';
     %= javascript '/js/structure.min.js';
+    %= javascript '/js/date-format.js';
     %= javascript '/js/wirc.js';
   </head>
   <body>

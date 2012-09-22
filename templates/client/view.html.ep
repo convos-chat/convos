@@ -1,5 +1,5 @@
 % title 'Chat';
-
+% use WebIrc::Core::Util qw/ format_time /;
 <script type="text/html" id="tmpl_li_error">
   <li>
     <i class="icon-exclamation-sign"></i><%%= error %>
@@ -12,9 +12,9 @@
       <i class="icon-comment"></i>
       <a href="/privmsg/<%%= sender %>"><%%= sender %></a>
     </span>
-    <span class="timestamp"><%%= timestamp %></span>
+    <span class="timestamp"><%%= d.sprintf('%H:%M:%S') %></span>
     <%% } %>
-    <span class="message" title="<%%= timestamp %>"><%%= message %></span>
+    <span class="message" title="<%%= d.sprintf('%H:%M:%S %d. %n %y') %>"><%%= message %></span>
   </li>
 </script>
 
@@ -61,10 +61,10 @@
           <i class="icon-comment"></i>
           %= link_to $message->{prefix}, 'privmsg', { to => $message->{prefix} };
         </span>
-        <span class="timestamp"><%= localtime $message->{timestamp} %></span>
+        <span class="timestamp"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
           % $last_messenger = $message->{prefix};
         % }
-        <span class="message" title="<%= localtime $message->{timestamp} %>"><%= $message->{params}[1] %></span>
+        <span class="message" title="<%= format_time $message->{timestamp}, '%H:%M:%S %d. %n %y' %>"><%= $message->{params}[1] %></span>
       </li>
       % }
     </ul>

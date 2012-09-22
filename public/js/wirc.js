@@ -22,11 +22,15 @@ Structure.registerModule('Wirc.Chat', {
     var $previous = this.$messages.find('li .sender').eq(-1).parent();
     var next;
 
+    if(data.timestamp) {
+      data.d = new Date(data.timestamp + '0000');
+    }
+
     if(data.error) {
       next = tmpl('tmpl_li_error', data);
     }
     else if($previous.find('.sender a').text() == data.sender) {
-      next = tmpl('tmpl_li_message', { sender: false, message: data.message, timestamp: data.timestamp });
+      next = tmpl('tmpl_li_message', { sender: false, message: data.message, d: data.d });
     }
     else {
       next = tmpl('tmpl_li_message', data);
