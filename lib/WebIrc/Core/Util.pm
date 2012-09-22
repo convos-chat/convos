@@ -50,7 +50,7 @@ sub pack_irc {
 =cut
 
 sub unpack_irc {
-  my($timestamp, $raw_line) = unpack 'Na*', $_[0];
+  my($raw_line,$timestamp) = @_;
   my $special = '';
   my $message;
 

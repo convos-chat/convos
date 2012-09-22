@@ -53,6 +53,7 @@ use WebIrc::Core::Util qw/ pack_irc /;
 use Parse::IRC ();
 use Scalar::Util qw/ weaken /;
 use Carp qw/ croak /;
+use Time::HiRes qw/time/;
 
 # default to true while developing
 use constant DEBUG => $ENV{'WIRC_DEBUG'} // 1;
@@ -179,7 +180,7 @@ sub add_server_message {
   my $time = time;
 
   if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
-    $self->redis->rpush("connection:@{[$self->id]}:msg", pack_irc $time, $message->{raw_line});
+    $self->redis->zadd("connection:@{[$self->id]}:msg", $time, $message->{raw_line});
     $self->_publish({
         timestamp => $time,
         sender    => $self->_irc->host,
@@ -204,9 +205,9 @@ sub add_message {
   my ($self, $message) = @_;
   my $time = time;
 
-  $self->redis->rpush(
+  $self->redis->zadd(
     "connection:@{[$self->id]}:$message->{params}[0]:msg",
-    pack_irc $time, $message->{raw_line}
+    $time, $message->{raw_line}
   );
   $self->_publish({
     timestamp => $time,

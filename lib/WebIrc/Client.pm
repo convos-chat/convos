@@ -59,14 +59,16 @@ sub view {
         $self->stash(active => $cname);
         $self->stash(connection_id => $cid);
         $self->stash(conversation_name => $cname);
-        $self->redis->lrange("connection:$cid:$cname:msg", -50, -1, $delay->begin);
+        # FIXME: Should be using last seen tz instead of -inf
+        $self->redis->zrevrangebyscore("connection:$cid:$cname:msg",,'+inf','-inf','withscores','limit', 0, 50, $delay->begin);
       },
       sub {
         my($delay, $conversation) = @_;
-
-        $_ = unpack_irc $_ for @$conversation;
-
-        $self->stash(conversation => $conversation);
+        my $msgs=[];
+        for(my $i=0; $i < @$conversation; $i=$i+2) {
+          unshift $msgs, unpack_irc($conversation->[$i],$conversation->[$i+1])
+        }
+        $self->stash(conversation => $msgs);
         $self->render;
       }
     );
