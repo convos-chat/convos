@@ -87,7 +87,7 @@ sub socket {
   my %allowed;
 
   # try to avoid inactivity timeout
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
+  Mojo::IOLoop->stream($self->tx->connection)->timeout(0);
 
   $self->on(finish => sub {
     $self->logf(debug => "Client finished");
@@ -95,10 +95,15 @@ sub socket {
 
   $self->on(message => sub {
     $self->logf(debug => '[ws] < %s', $_[1]);
-    my $self = shift;
-    my $data = $JSON->decode(shift) || {};
-    my $cid = $data->{cid} or return $self->finish; # TODO: report invalid message?
-
+    my ($self,$message) = @_;
+    $message;
+    my $data = $JSON->decode($message) || {};
+    my $cid = $data->{cid}; # TODO: report invalid message?
+    if(!$cid) {
+      $self->logf(debug => "Invalid message:\n".$message. "\nerr:".$JSON->error);
+      return;
+    }
+    
     if($allowed{$cid}) {
       $self->_handle_socket_data($cid => $data);
     }
