@@ -59,7 +59,7 @@ sub view {
         $self->stash(active => $cname);
         $self->stash(connection_id => $cid);
         $self->stash(conversation_name => $cname);
-        # FIXME: Should be using last seen tz instead of -inf
+        # FIXME: Should be using last seen tz and default to -inf
         $self->redis->zrevrangebyscore("connection:$cid:$cname:msg",,'+inf','-inf','withscores','limit', 0, 50, $delay->begin);
       },
       sub {

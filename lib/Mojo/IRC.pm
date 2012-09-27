@@ -143,7 +143,7 @@ Internal errors in the mojo ioloop
     prefix => 'Tampa.FL.US.Undernet.org'
   });
 
-=head2 rpl_luserme
+=head2 irc_rpl_luserme
 
   $self->$callback({
     params => ['somenick', 'I have 12000 clients and 1 servers'],

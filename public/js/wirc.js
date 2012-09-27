@@ -23,7 +23,7 @@ Structure.registerModule('Wirc.Chat', {
     var next;
 
     if(data.timestamp) {
-      data.d = new Date(parseInt(data.timestamp + '000'));
+      data.d = new Date(parseInt(data.timestamp));
     }
 
     if(data.error) {

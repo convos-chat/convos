@@ -34,7 +34,6 @@ sub start {
                 return;
               }
               my ($pass,$cid)=split(':',$credentials{PASS});
-              warn "Trying $pass";
               $self->core->login(
                 {
                   login      => $credentials{USER},
@@ -44,13 +43,32 @@ sub start {
                   my($core, $uid, $error) = @_;
                   if($uid) {
                     $stream->write(":wirc.pl NOTICE AUTH :*** AUTHENTICATED\r\n");
-                    # TODO: Should channels be a set or a string?
-                    $core->redis->smembers("connection:$cid:channels", sub {
-                        my ($redis,@channels)=@_;
+                    my @channels;
+                    Mojo::IOLoop->delay(sub { 
+                      my $delay=shift;
+                      $core->redis->smembers("connection:$cid:channels", $delay->begin);
+                      },
+                      sub {
+                        my $delay=shift;
+                        @channels=@_;
                         foreach my $channel (@channels) {
-                          warn "$channel";
+                          $core->redis->get("connection:$cid:channel:$channel:topic",$delay->begin);
                         }
-                      }
+                      },
+                      sub {
+                        my ($delay,@topics)=@_;
+                        for( my $i=0; $i++; $i<(scalar @channels) ) {
+                          $stream->write(':wirc 332 '.$channels[$i].' :'.$topics[$i]);
+                          $core->redis->smembers("connection:$cid:channel:".$channels[$i].":nicks",$delay->begin);                        
+                        }
+                      },
+                      sub {
+                        my ($delay, @members)=@_;
+                        for( my $i=0; $i++; $i< (scalar @channels)) {
+                          my @nicks=@{$members[$i]};
+                          $stream->write(':wirc 353 '.$credentials{NICK}.' = '.$channels[$i].' :'.join(' ',@nicks));
+                        }
+                      }  
                     );
                   }
                   else {
