@@ -5,8 +5,10 @@ use Mojo::Base -base;
 has port => '6667';
 has 'core';
 
+use Data::Dumper;
+
 sub start {
-  my $self = shift;
+  my ($self, $cb) = @_;
   Mojo::IOLoop->server(
     {port => $self->port},
     sub {
@@ -14,80 +16,86 @@ sub start {
       $stream->timeout(15);
       my %credentials;
       my $uid;
+      my $buffer = '';
       $stream->on(
         read => sub {
           my ($stream, $chunk) = @_;
-          my ($command, @args) = split m/\s+/, $chunk;
-          if (!$uid) {
-            if ($command ~~ m/^(?:PASS|USER|NICK)$/) {
-              $credentials{$command} = $args[0];
+          $buffer .= $chunk;
+          while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
+            my ($command, @args) = split m/\s+/, $1;
+            if (!$uid) {
+              if ($command ~~ m/^(?:PASS|USER|NICK)$/) {
+                $credentials{$command} = $args[0];
+              }
+              else {
+                $stream->write(":wirc.pl NOTICE AUTH :*** REJECTED\r\n");
+                return $stream->stop;
+              }
+              if ($credentials{USER} && $credentials{NICK}) {
+                if (!$credentials{PASS}) {
+                  $stream->write(
+                    "wirc.pl AUTH :*** You need to send your password. Try /quote PASS <connection>:<password>\r\n");
+                  next;
+                }
+                my ($pass, $cid) = split(':', $credentials{PASS});
+                $self->core->login(
+                  {login => $credentials{USER}, password => $pass,},
+                  sub {
+                    my ($core,$uid) = @_;
+                    if ($uid) {
+                      $stream->write(":wirc.pl NOTICE AUTH :*** AUTHENTICATED\r\n");
+                      my $channels;
+                      Mojo::IOLoop->delay(
+                        sub {
+                          my $delay = shift;
+                          $self->core->redis->smembers("connection:$uid:channels", $delay->begin);
+                        },
+                        sub {
+                          my $delay = shift;
+                          $channels = shift;
+                          
+                          foreach my $channel (@$channels) {
+                            $self->core->redis->get("connection:$uid:channel:$channel:topic", $delay->begin);
+                          }
+                        },
+                        sub {
+                          my ($delay, @topics) = @_;
+                          for (my $i = 0; $i < scalar @$channels; $i++) {
+                            $stream->write(':wirc 332 ' . $channels->[$i] . ' :' . $topics[$i]);
+                            warn("getting "."connection:$uid:names:" . $channels->[$i]);
+                            $self->core->redis->smembers("connection:$uid:names:" . $channels->[$i],
+                              $delay->begin);
+                          }
+                        },
+                        sub {
+                          my ($delay, @members) = @_;
+                          warn Data::Dumper::Dumper(\@members);
+                          for (my $i = 0; $i < (scalar @$channels); $i++) {
+                            my @nicks = @{$members[$i]};
+                           # warn("Writing nicks:".join(' ',@nicks));
+                            $stream->write(
+                              ':wirc 353 ' . $credentials{NICK} . ' = ' . $channels->[$i] . ' :' . join(' ', @nicks));
+                          }
+                        }
+                      );
+                    }
+                    else {
+                      $stream->write(":wirc.pl NOTICE AUTH :*** REJECTED\r\n");
+                      $stream->stop;
+                    }
+                  },
+                );
+              }
             }
             else {
-              $stream->write(":wirc.pl NOTICE AUTH :*** REJECTED\r\n");
-              return $stream->stop;
             }
-            if ($credentials{USER} && $credentials{NICK}) {
-              if (!$credentials{PASS}) {
-                $stream->write(
-                  "wirc.pl AUTH :*** You need to send your password. Try /quote PASS <connection>:<password>\r\n"
-                );
-                return;
-              }
-              my ($pass,$cid)=split(':',$credentials{PASS});
-              $self->core->login(
-                {
-                  login      => $credentials{USER},
-                  password   => $pass,
-                },
-                sub {
-                  my($core, $uid, $error) = @_;
-                  if($uid) {
-                    $stream->write(":wirc.pl NOTICE AUTH :*** AUTHENTICATED\r\n");
-                    my @channels;
-                    Mojo::IOLoop->delay(sub { 
-                      my $delay=shift;
-                      $core->redis->smembers("connection:$cid:channels", $delay->begin);
-                      },
-                      sub {
-                        my $delay=shift;
-                        @channels=@_;
-                        foreach my $channel (@channels) {
-                          $core->redis->get("connection:$cid:channel:$channel:topic",$delay->begin);
-                        }
-                      },
-                      sub {
-                        my ($delay,@topics)=@_;
-                        for( my $i=0; $i++; $i<(scalar @channels) ) {
-                          $stream->write(':wirc 332 '.$channels[$i].' :'.$topics[$i]);
-                          $core->redis->smembers("connection:$cid:channel:".$channels[$i].":nicks",$delay->begin);                        
-                        }
-                      },
-                      sub {
-                        my ($delay, @members)=@_;
-                        for( my $i=0; $i++; $i< (scalar @channels)) {
-                          my @nicks=@{$members[$i]};
-                          $stream->write(':wirc 353 '.$credentials{NICK}.' = '.$channels[$i].' :'.join(' ',@nicks));
-                        }
-                      }  
-                    );
-                  }
-                  else {
-                    $stream->write(":wirc.pl NOTICE AUTH :*** REJECTED\r\n");
-                    $stream->stop;
-                  }
-                },
-              );
-            }
-          }
-          else {
-
           }
         }
       );
-      $stream->write(
-        ":wirc.pl NOTICE AUTH :*** Welcome. Please enter credentials.\r\n");
+      $stream->write(":wirc.pl NOTICE AUTH :*** Welcome. Please enter credentials.\r\n");
     }
   );
+  $cb->($self) if $cb;
 }
 
 1;

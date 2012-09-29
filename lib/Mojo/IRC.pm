@@ -12,12 +12,12 @@ Mojo::IRC - IRC Client for the Mojo IOLoop
               host => 'irc.perl.org',
             );
 
-  $irc->on(join => sub {
+  $irc->on(irc_join => sub {
       my($self, $message) = @_;
     warn "yay! i joined $message->{params}[0]";
   });
 
-  $irc->on(privmsg => sub {
+  $irc->on(irc_privmsg => sub {
     my($self, $message) = @_;
     say $message->{prefix}, " said: ", $message->{params}[1];
   });
@@ -29,7 +29,7 @@ Mojo::IRC - IRC Client for the Mojo IOLoop
   });
 
   Mojo::IOLoop->start;
-
+  
 =head1 DESCRIPTION
 
 This class inherit from L<Mojo::EventEmitter>.
@@ -255,6 +255,16 @@ The name of this IRC client. Defaults to "Mojo IRC".
 
 has name => 'Mojo IRC';
 
+
+
+=head2 pass
+
+Password for authentication
+
+=cut
+
+has 'pass';
+
 =head1 METHODS
 
 =head2 connect
@@ -277,7 +287,7 @@ sub connect {
 
   $self->register_default_event_handlers;
 
-  weaken $self;
+ # weaken $self;
   Mojo::IOLoop->client(
     address => $host,
     port    => $port || 6667,
@@ -324,6 +334,8 @@ sub connect {
       $self->{_stream} = $stream;
       $self->write(NICK => $self->nick);
       $self->write(USER => $self->user, 8, '*', ':'.$self->name);
+      $self->write(PASS=> $self->pass) if $self->pass;
+      
       $self->$callback(undef);
     }
   );
