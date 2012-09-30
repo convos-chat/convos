@@ -315,7 +315,7 @@ sub connect {
       );
       $stream->on(
         read => sub {
-          #warn "Mojo::IRC::read($_[1])\n" if DEBUG;
+          warn "Mojo::IRC::read($_[1])\n" if DEBUG;
           $buffer .= $_[1];
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {

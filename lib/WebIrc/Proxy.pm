@@ -61,20 +61,17 @@ sub start {
                         sub {
                           my ($delay, @topics) = @_;
                           for (my $i = 0; $i < scalar @$channels; $i++) {
-                            $stream->write(':wirc 332 ' . $channels->[$i] . ' :' . $topics[$i]);
-                            warn("getting "."connection:$uid:names:" . $channels->[$i]);
+                            $stream->write(':wirc 332 ' . $channels->[$i] . ' :' . $topics[$i]."\r\n");
                             $self->core->redis->smembers("connection:$uid:names:" . $channels->[$i],
                               $delay->begin);
                           }
                         },
                         sub {
                           my ($delay, @members) = @_;
-                          warn Data::Dumper::Dumper(\@members);
                           for (my $i = 0; $i < (scalar @$channels); $i++) {
                             my @nicks = @{$members[$i]};
-                           # warn("Writing nicks:".join(' ',@nicks));
                             $stream->write(
-                              ':wirc 353 ' . $credentials{NICK} . ' = ' . $channels->[$i] . ' :' . join(' ', @nicks));
+                              ':wirc 353 ' . $credentials{NICK} . ' = ' . $channels->[$i] . ' :' . join(' ', @nicks)."\r\n");
                           }
                         }
                       );
