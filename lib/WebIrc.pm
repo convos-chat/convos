@@ -115,10 +115,10 @@ sub startup {
   my $self = shift;
   my $config = $self->plugin('Config');
 
-  $self->plugin('UrlWith');
+  $self->plugin('Mojolicious::Plugin::UrlWith');
+  $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
-  $self->add_helpers($config);
   $self->defaults(
     layout => 'default',
     logged_in => 0,
@@ -156,74 +156,6 @@ sub startup {
 
   $self->core->start unless $ENV{SKIP_CONNECT};
   $self->proxy->start unless $ENV{DISABLE_PROXY};
-}
-
-=head2 add_helpers
-
-Will add thease helpers:
-
-=head3 form_block
-
-  %= form_block $name, class => [$str, ...] begin
-  ...
-  % end
-
-The code above will create this markup:
-
-  <div class="@$class" title="$error">
-    ...
-  </div>
-
-In addition, <@$class> will contain "error" if C<$error> can be fetched from the
-stash hash C<errors>, using C<$name> as key.
-
-=head3 logf
-
-  $c->logf($level => $format, @args);
-  $c->logf(debug => 'yay %s', \%data);
-
-Used to log more complex datastructures and to prevent logging C<undef>.
-
-=head3 redis
-
-Returns a L<Mojo::Redis> object.
-
-=cut
-
-sub add_helpers {
-  my($self, $config) = @_;
-
-  $self->helper(logf => sub {
-    use Data::Dumper;
-    my($c, $level, $format, @args) = @_;
-    local $Data::Dumper::Maxdepth = 2;
-    local $Data::Dumper::Indent = 0;
-    local $Data::Dumper::Terse = 1;
-
-    for my $arg (@args) {
-      if(ref($arg) =~ /^\w+$/) {
-        $arg = Dumper($arg);
-      }
-      elsif(!defined $arg) {
-        $arg = '__UNDEF__';
-      }
-    }
-
-    $self->log->$level(sprintf $format, @args);
-  });
-  $self->helper(form_block => sub {
-    my $content = pop;
-    my($c, $field, %args) = @_;
-    my $error = $c->stash('errors')->{$field} // '';
-    my $classes = $args{class} ||= [];
-    push @$classes, 'error' if $error;
-    $c->tag(div =>
-      class => join(' ', @$classes),
-      title => $error,
-      $content
-    );
-  });
-  $self->helper(redis => sub { $self->redis });
 }
 
 =head1 COPYRIGHT
