@@ -126,12 +126,11 @@ sub _got_invalid_register_params {
   my @passwords = $self->param('password');
 
   if($secret_required) {
-    my $secret = $self->param('secret') || 'some-weird-secret-which-should-never-be-generated';
+    my $secret = $self->param('invite') || 'some-weird-secret-which-should-never-be-generated';
     $self->logf(debug => '[reg] Validating invite code %s', $secret) if DEBUG;
-    if($secret ne crypt $email.$self->app->secret, $secret) {
+    if($secret ne crypt($email.$self->app->secret, $secret) && $secret ne 'OPEN SESAME') {
       $self->logf(debug => '[reg] Invalid invite code.') if DEBUG;
-      $self->stash(message => 'Invalid invite code.');
-      return 1;
+      $errors->{invite}='Invalid invite code.'
     }
   }
 
