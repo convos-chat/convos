@@ -4218,9 +4218,23 @@ table.table-fixed-footer {
 #messages {
   margin-bottom: 45px;
 }
-#messages dl .pull-right {
-  background: #f6f6f6;
-  color: #666;
+#messages li span.pull-right {
+  color: #999999;
+}
+#messages li.odd {
+  background-color: #f9f9f9;
+}
+#messages li.me span {
+  color: #446688;
+}
+#messages li.focus span {
+  color: #9d261d;
+}
+#messages .prefix {
+  font-weight: bold;
+  display: block;
+  float: left;
+  padding-right: 6px;
 }
 .chat.stick-to-bottom {
   border-top: 2px solid #aaa;

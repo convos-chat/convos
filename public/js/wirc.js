@@ -21,34 +21,43 @@ Structure.registerModule('Wirc.Chat', {
     '/part': {}
   },
   print: function(data) {
-    var $previous = this.$messages.find('td.nick').eq(-1).parent();
-    var next;
+    // need to calculate at_bottom before appending a new element
+    var at_bottom = $(window).scrollTop() + $(window).height() >= $('body').height() - 30;
+    var $messages = this.$messages;
 
     if(data.timestamp) {
       data.timestamp = new Date(parseInt(data.timestamp, 10));
     }
 
-    if(data.error) {
-      next = tmpl('error_message_template', data);
+    data.class_name = $messages.find('li:last').hasClass('even') ? 'odd' : 'even';
+
+    if(data.status) {
+      $messages.append(tmpl('server_status_template', data));
     }
-    else {
-      next = tmpl('message_template', data);
+    else if(data.nick) {
+      this.nick = data.nick;
+      $messages.append(tmpl('nick_change_template', data));
+    }
+    else if(data.message && data.target == this.target) {
+      var me_re = new RegExp("\\b" + this.nick + "\\b");
+      data.message = data.message.replace(/</i, '&lt;');
+      data.prefix = data.sender.replace(/!.*/, '');
+      if(data.prefix === this.nick) data.class_name = 'me';
+      else if(data.message.match(me_re)) data.class_name = 'focus';
+      data.message = data.message.replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
+      $messages.append(tmpl('message_template', data));
     }
 
-    this.$messages.append(next);
-    this.scrollToBottom();
+    if(at_bottom) {
+      this.scrollToBottom();
+    }
   },
   scrollToBottom: function() {
-    $('html, body').scrollTop($('body').get(0).scrollHeight);
+    $('html, body').scrollTop($('body').height());
   },
   receiveData: function(e) {
-    var data = $.parseJSON(e.data);
-
     if(window.console) console.log('[websocket] > ' + e.data);
-
-    if(data.error || data.message) {
-      this.print(data);
-    }
+    this.print($.parseJSON(e.data));
   },
   sendData: function(data) {
     // TODO: Figure out if JSON.stringify() works in other browsers than chrome
@@ -65,7 +74,7 @@ Structure.registerModule('Wirc.Chat', {
     self.websocket = Wirc.websocket('/socket', {
       onmessage: self.receiveData,
       onopen: function function_name (argument) {
-        self.sendData({ cid: self.connection_id, cname: self.conversation_name });
+        self.sendData({ cid: self.connection_id, target: self.target });
       },
       onerror: function(e) {
         self.print({ error: e.data });
@@ -80,32 +89,30 @@ Structure.registerModule('Wirc.Chat', {
   setupUI: function() {
     var self = this;
 
-    if(window.console) console.log('[Wirc.Chat.setupUI] input.autocomplete');
     self
-    .$input
-    .attr('autocomplete', 'off')
-    .focus()
-    .typeahead({
-      source: Object.keys(self.autocomplete_commands),
-      items: 5,
-      matcher: function(item) {
-        return item.toLowerCase().indexOf(this.query.toLowerCase()) === 0;
-      },
-      updater: function(item) {
-        if(self.autocomplete_commands[item].append) {
-          return item + self.autocomplete_commands[item].append;
+      .$input
+      .attr('autocomplete', 'off')
+      .focus()
+      .typeahead({
+        source: Object.keys(self.autocomplete_commands),
+        items: 5,
+        matcher: function(item) {
+          return item.toLowerCase().indexOf(this.query.toLowerCase()) === 0;
+        },
+        updater: function(item) {
+          if(self.autocomplete_commands[item].append) {
+            return item + self.autocomplete_commands[item].append;
+          }
+          else {
+            self.$input.val(item);
+            self.$input.parents('form').submit();
+            return '';
+          }
         }
-        else {
-          self.$input.val(item);
-          self.$input.parents('form').submit();
-          return '';
-        }
-      }
-    });
+      });
 
-    if(window.console) console.log('[Wirc.Chat.setupUI] form.submit');
     self.$input.parents('form').submit(function() {
-      self.sendData({ cid: self.connection_id, cname: self.conversation_name, cmd: self.$input.val() });
+      self.sendData({ cid: self.connection_id, target: self.target, cmd: self.$input.val() });
       self.$input.val('');
       return false;
     });
@@ -143,7 +150,8 @@ Structure.registerModule('Wirc.Chat', {
   },
   start: function($) {
     this.connection_id = $('#messages').attr('data-cid');
-    this.conversation_name = $('#messages').attr('data-cname');
+    this.nick = $('#messages').attr('data-nick');
+    this.target = $('#messages').attr('data-target');
     this.$messages = $('#messages');
     this.$input = $('.chat.stick-to-bottom input[type="text"]');
     this.connectToWebSocket();

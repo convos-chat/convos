@@ -1,45 +1,55 @@
 % title 'Chat';
 % use WebIrc::Core::Util 'format_time';
 <script type="text/html" id="message_template">
-  <dt>
-    <a href="/privmsg/<%%= sender %>"><%%= sender.replace(/!.*/, '') %></a>
-  </dt>
-  <dd>
-    <div class="pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></div>
-    <div><%%= message %></div>
-  </dt>
+  <li class="<%%= class_name %>">
+    <span class="prefix"><%%= prefix %>:</span>
+    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
+    <span class="message"><%%= message %></span>
+  </li>
+</script>
+<script type="text/html" id="nick_change_template">
+  <li class="muted <%%= class_name %>">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span class="message">Nick changed to "<%%= nick %>"</span>
+  </li>
+</script>
+<script type="text/html" id="server_status_template">
+  <li class="muted <%%= class_name %>">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span class="message"><%%= status == 200 ? 'Connected' : 'Error' %></span>
+  </li>
 </script>
 
 <div class="chat row-fluid">
   <div class="span12">
-    <dl class="dl-horizontal" id="messages" data-cid="<%= $connection_id %>" data-cname="<%= $conversation_name %>">
+    <ul class="unstyled" id="messages" data-cid="<%= $connection_id %>" data-target="<%= $target %>" data-nick="<%= $nick %>">
+    % my $n = 0;
     % for my $message (@$conversation) {
-      <dt>
-        %= link_to +($message->{prefix} =~ m/^(.*?)!/)[0], 'privmsg', { to => $message->{prefix} };
-      </dt>
-      <dd>
-        <div class="pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></div>
-        <div><%= $message->{params}[1] %></div>
-      </dd>
+      % my $prefix = $message->{prefix} =~ /^(.*?)!/ ? $1 : $message->{prefix};
+      % my $class = $message->{params}[1] =~ /\b$nick\b/ ? 'focus ' : $prefix eq $nick ? 'me ' : '';
+      <li class="<%= $class %><%= $n++ % 2 ? 'odd' : 'even' %>">
+        <span class="prefix"><%= $prefix %>:</span>
+        <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
+        <span class="message"><%== $message->{text} %></span>
+      </li>
     % }
-      <dt><%= app->config->{name} %></dt>
-      <dd>
-        <div class="pull-right"><%= format_time time, '%H:%M:%S' %></div>
-        <div>Connecting to <%= $conversation_name %>...</div>
-      </dd>
+      <li class="muted <%= $n++ % 2 ? 'odd' : 'even' %>">
+        <span class="prefix"><%= app->config->{name} %>:</span>
+        <span class="timestamp pull-right"><%= format_time time, '%H:%M:%S' %></span>
+        <span class="message">Connecting to <%= $target %>...</span>
+      </li>
     </dl>
   </div>
 </div>
 <div class="chat stick-to-bottom">
-  <dl class="dl-horizontal">
-    <dt>You</dt>
-    <dd>
-      %= form_for '', class => 'form-inline', begin
-        <div>
-          %= text_field 'say'
-          <button class="btn btn-primary">Send</button>
-        </div>
-      % end
-    </dd>
-  </dl>
+  <div class="span12">
+    %= form_for '', class => 'form-inline', begin
+      <div>
+        %= text_field 'say'
+        <button class="btn btn-primary">Send</button>
+      </div>
+    % end
+  </div>
 </div>

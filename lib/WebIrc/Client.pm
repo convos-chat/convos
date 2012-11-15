@@ -8,6 +8,7 @@ WebIrc::Client - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
+use Mojo::Util 'html_escape';
 use List::MoreUtils qw/ zip /;
 use WebIrc::Core::Util qw/ unpack_irc /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
@@ -23,58 +24,66 @@ Used to render the main IRC client view.
 =cut
 
 sub view {
-    my $self = shift;
-    my $uid = $self->session('uid');
-    my @keys = qw/ channels nick host /;
-    my $connections;
+  my $self = shift;
+  my $uid = $self->session('uid');
+  my @keys = qw/ channels nick host /;
+  my $connections;
 
-    $self->render_later;
-    Mojo::IOLoop->delay(
-      sub {
-        $self->redis->smembers("user:$uid:connections", $_[0]->begin);
-      },
-      sub {
-        $connections = $_[1] || [];
-        $self->redis->execute(
-          (map { [ hmget => "connection:$_" => @keys ] } @$connections),
-          $_[0]->begin,
-        );
-      },
-      sub {
-        my($delay, @info) = @_;
-        my($cid, $cname);
+  $self->render_later;
+  Mojo::IOLoop->delay(
+    sub {
+      $self->redis->smembers("user:$uid:connections", $_[0]->begin);
+    },
+    sub {
+      $connections = $_[1] || [];
+      $self->redis->execute(
+        (map { [ hmget => "connection:$_" => @keys ] } @$connections),
+        $_[0]->begin,
+      );
+    },
+    sub {
+      my($delay, @info) = @_;
+      my($cid, $target);
 
-        for my $info (@info) {
-          $info = { zip @keys, @$info };
-          $info->{channels} = [ split /,/, $info->{channels} ];
-          $info->{id} = shift @$connections;
-        }
-
-        @info = sort { $a->{host} cmp $b->{host} } @info;
-        $cid = $info[0]{id};
-        $cname = $info[0]{channels}[0];
-
-        $self->stash(
-          connections => \@info,
-          nick => $info[0]{nick},
-          active => $cname,
-          connection_id => $cid,
-          conversation_name => $cname,
-        );
-
-        # FIXME: Should be using last seen tz and default to -inf
-        $self->redis->zrevrangebyscore("connection:$cid:$cname:msg",,'+inf','-inf','withscores','limit', 0, 50, $delay->begin);
-      },
-      sub {
-        my($delay, $conversation) = @_;
-        my $msgs=[];
-        for(my $i=0; $i < @$conversation; $i=$i+2) {
-          unshift $msgs, unpack_irc($conversation->[$i],$conversation->[$i+1])
-        }
-        $self->stash(conversation => $msgs);
-        $self->render;
+      for my $info (@info) {
+        $info = { zip @keys, @$info };
+        $info->{channels} = [ split /,/, $info->{channels} ];
+        $info->{id} = shift @$connections;
       }
-    );
+
+      @info = sort { $a->{host} cmp $b->{host} } @info;
+      $cid = $info[0]{id};
+      $target = $info[0]{channels}[0];
+
+      $self->stash(
+        connections => \@info,
+        nick => $info[0]{nick},
+        connection_id => $cid,
+        target => $target,
+      );
+
+      # FIXME: Should be using last seen tz and default to -inf
+      $self->redis->zrevrangebyscore(
+        "connection:$cid:$target:msg",
+        "+inf" => "-inf",
+        "withscores",
+        "limit" => 0, 50,
+        $delay->begin,
+      );
+    },
+    sub {
+      my($delay, $conversation) = @_;
+      my $messages = [];
+      for(my $i = 0; $i < @$conversation; $i = $i + 2) {
+        my $message = unpack_irc($conversation->[$i], $conversation->[$i + 1]);
+        $message->{text} = html_escape $message->{params}[1];
+        $message->{text} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
+        unshift @$messages, $message;
+      }
+      $self->stash(conversation => $messages);
+      $self->render;
+    }
+  );
 }
 
 =head2 socket
@@ -112,6 +121,7 @@ sub socket {
     else {
       $self->redis->sismember("user:$uid:connections", $cid, sub {
         $self->logf(debug => 'Allowed to listen to %s? %s', $cid, $_[1] ? 'Yes' : 'No');
+        $self->send({ text => $JSON->encode({ cid => $cid, status => $_[1] ? 200 : 403 }) });
         $_[1] or return $self->finish; # TODO: Report 401 to user?
         $allowed{$cid} = 1;
         $self->_subscribe_to_server_messages($cid);
@@ -130,16 +140,16 @@ sub _handle_socket_data {
       my($one, $two) = ($1, $2);
       given($one) {
         when('j') { $data->{cmd} = "JOIN $two" }
-        when('me') { $data->{cmd} = "PRIVMSG $data->{cname} :\x{1}ACTION $two$data->{cmd}\x{1}" }
+        when('me') { $data->{cmd} = "PRIVMSG $data->{target} :\x{1}ACTION $two$data->{cmd}\x{1}" }
         when('msg') { $data->{cmd} = "PRIVMSG $two :$data->{cmd}" }
         default { $data->{cmd} = join ' ', uc($one), $two }
       }
     }
     elsif($data->{cmd} =~ m!/part\s*!i) {
-      $data->{cmd} = "PART $data->{cname}";
+      $data->{cmd} = "PART $data->{target}";
     }
     else {
-      $data->{cmd} = "PRIVMSG $data->{cname} :$data->{cmd}";
+      $data->{cmd} = "PRIVMSG $data->{target} :$data->{cmd}";
     }
 
     $self->logf(debug => '[connection:%s:to_server] < %s', $cid, $data->{cmd});
@@ -155,7 +165,8 @@ sub _subscribe_to_server_messages {
     my ($redis, $message)=@_;
     $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
     utf8::decode($message);
-    $self->send({text=>$message}) if $message =~ /^\{/; # only pass on json - skip internal redis messages
+
+    $self->send({ text => $message });
   });
 
   $self->stash->{sub} = $sub;
