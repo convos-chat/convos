@@ -4,8 +4,7 @@
     %= stylesheet '/css/wirc.css';
     %= stylesheet '/show-hide.css';
     %= javascript '/js/jquery.js';
-    %= javascript '/bootstrap/js/bootstrap-dropdown.js';
-    %= javascript '/bootstrap/js/bootstrap-typeahead.js';
+    %= javascript '/js/bootstrap-typeahead.js';
     %= javascript '/js/template.js';
     %= javascript '/js/structure.min.js';
     %= javascript '/js/date-format.js';
