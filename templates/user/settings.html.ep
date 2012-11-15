@@ -1,5 +1,5 @@
 % title 'Settings';
-<div class="row">
+<div class="row-fluid">
   <div class="offset1 span10">
     <h1 class="page-header">Settings</h1>
     <div class="tabbable tabs-left connection-tab-container">

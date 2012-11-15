@@ -1,38 +1,38 @@
 % title 'Register';
-<div class="row">
-    <div class="offset3 span6">
-        <h1 class="page-header">Register a new acccount</h1>
-        %= include('inc/alert');
-        %= form_for 'register', method => 'post', class => 'form-orizontal', begin
-            %= form_block login => class => ['control-group'], begin
-                <label class="control-label" for="login">Username</label>
-                <div class="controls">
-                    %= text_field 'login', id => 'login', class => 'span3';
-                    <p class="help-block">Choose something that's simple to remember. Your IRC handle for instance.</p>
-                </div>
-            % end
-            %= form_block email => class => ['control-group'], begin
-                <label class="control-label" for="login">Email</label>
-                <div class="controls">
-                    %= text_field 'email', id => 'email', class => 'span3';
-                </div>
-            % end
-            %= form_block password => class => ['control-group'], begin
-                <label class="control-label" for="password">Password</label>
-                <div class="controls">
-                    %= password_field 'password', id => 'password', class => 'span3';
-                    <p class="help-block">Your password need to be at least six characters long.</p>
-                </div>
-            % end
-            %= form_block password => class => ['control-group'], begin
-                <label class="control-label" for="password">Repeat password</label>
-                <div class="controls">
-                    %= password_field 'password', id => 'password', class => 'span3';
-                </div>
-            % end
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Register</button>
-            </div>
-        % end
-    </div>
+<div class="row-fluid">
+  <div class="offset3 span6">
+    <h1 class="page-header">Register a new acccount</h1>
+    %= include('inc/alert');
+    %= form_for 'register', method => 'post', class => 'form-orizontal', begin
+      %= form_block login => class => ['control-group'], begin
+        <label class="control-label" for="login">Username</label>
+        <div class="controls">
+          %= text_field 'login', id => 'login', class => 'span3';
+          <p class="help-block">Choose something that's simple to remember. Your IRC handle for instance.</p>
+        </div>
+      % end
+      %= form_block email => class => ['control-group'], begin
+        <label class="control-label" for="login">Email</label>
+        <div class="controls">
+          %= text_field 'email', id => 'email', class => 'span3';
+        </div>
+      % end
+      %= form_block password => class => ['control-group'], begin
+        <label class="control-label" for="password">Password</label>
+        <div class="controls">
+          %= password_field 'password', id => 'password', class => 'span3';
+          <p class="help-block">Your password need to be at least six characters long.</p>
+        </div>
+      % end
+      %= form_block password => class => ['control-group'], begin
+        <label class="control-label" for="password">Repeat password</label>
+        <div class="controls">
+          %= password_field 'password', id => 'password', class => 'span3';
+        </div>
+      % end
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Register</button>
+      </div>
+    % end
+  </div>
 </div>

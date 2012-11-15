@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head><title><%= join ' - ', app->config->{name}, title %></title>
-    %= stylesheet '/css/bootstrap.css';
-    %= stylesheet '/css/font-awesome.css';
-    %= stylesheet '/css/font-awesome-ie7.css';
     %= stylesheet '/css/wirc.css';
     %= stylesheet '/show-hide.css';
     %= javascript '/js/jquery.js';
-    %= javascript '/bootstrap/js/less-1.3.0.min.js';
     %= javascript '/bootstrap/js/bootstrap-dropdown.js';
     %= javascript '/bootstrap/js/bootstrap-typeahead.js';
     %= javascript '/js/template.js';
@@ -17,7 +13,7 @@
   </head>
   <body>
   <div id="container">
-    <div id="navbar" class="navbar navbar-fixed-top">
+    <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">

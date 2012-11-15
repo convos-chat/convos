@@ -1,22 +1,25 @@
 % title 'Home';
-<header class="jumbotron">
-  <div class="inner">
-    <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
-    <p>
-      Interact with friends and/or colleges.
-    </p>
-    <p class="download-info">
-      %= link_to 'login', class => 'btn btn-primary btn-large', begin
-        Login
-      % end
-      or
-      %= link_to 'register', class => 'btn btn-success btn-large', begin
-        Register
-      % end
-    </p>
+<div class="row-fluid">
+  <div class="span12">
+    <header class="jumbotron">
+      <div class="inner">
+        <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
+        <p>
+          Interact with friends and/or colleges.
+        </p>
+        <p class="download-info">
+          %= link_to 'login', class => 'btn btn-primary btn-large', begin
+            Login
+          % end
+          or
+          %= link_to 'register', class => 'btn btn-success btn-large', begin
+            Register
+          % end
+        </p>
+      </div>
+    </header>
   </div>
-</header>
-
+</div>
 <div class="row">
   <div class="span6">
     <h2>What is so cool about Wirc?</h2>
