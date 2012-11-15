@@ -1,10 +1,10 @@
+% title 'Login';
 <div class="row">
     <div class="offset3 span6">
         <h1 class="page-header">Login to wirc</h1>
         <p>It feels like I've seen you before.</p>
         %= include('inc/alert');
         %= form_for 'login', method => 'post', class => 'form-horizontal', begin
-            <div class="control-group">
             %= form_block login => class => ['control-group'], begin
                 <label class="control-label" for="login">Username</label>
                 <div class="controls">

@@ -1,3 +1,4 @@
+% title 'Home';
 <header class="jumbotron">
   <div class="inner">
     <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>

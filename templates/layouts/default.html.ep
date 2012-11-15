@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head><title><%= title %></title>
+  <head><title><%= join ' - ', app->config->{name}, title %></title>
     %= stylesheet '/css/bootstrap.css';
     %= stylesheet '/css/font-awesome.css';
     %= stylesheet '/css/font-awesome-ie7.css';
@@ -25,7 +25,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <span class="brand"><%== page_header %></span>
+          <span class="brand"><%= app->config->{name} %></span>
           <div class="nav-collapse collapse">
             <ul class="nav main-menu pull-right">
               <li class="visible-if-user"><%= link_to 'Chat', 'chat' %></li>

@@ -184,10 +184,6 @@ stash hash C<errors>, using C<$name> as key.
 
 Used to log more complex datastructures and to prevent logging C<undef>.
 
-=head3 page_header
-
-Used to set/retrieve the page header used by C<layout/default.html.ep>
-
 =head3 redis
 
 Returns a L<Mojo::Redis> object.
@@ -214,11 +210,6 @@ sub add_helpers {
     }
 
     $self->log->$level(sprintf $format, @args);
-  });
-  $self->helper(page_header => sub {
-    $_[0]->stash('page_header', $_[1]) if @_ == 2;
-    $_[0]->stash('title', Mojo::DOM->new($_[1])->all_text) if @_ == 2 and not $self->stash('title');
-    $_[0]->stash('page_header') // $self->config->{name};
   });
   $self->helper(form_block => sub {
     my $content = pop;
