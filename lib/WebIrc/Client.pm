@@ -54,11 +54,14 @@ sub view {
         $cid = $info[0]{id};
         $cname = $info[0]{channels}[0];
 
-        $self->stash(connections => \@info);
-        $self->stash(nick => $info[0]{nick});
-        $self->stash(active => $cname);
-        $self->stash(connection_id => $cid);
-        $self->stash(conversation_name => $cname);
+        $self->stash(
+          connections => \@info,
+          nick => $info[0]{nick},
+          active => $cname,
+          connection_id => $cid,
+          conversation_name => $cname,
+        );
+
         # FIXME: Should be using last seen tz and default to -inf
         $self->redis->zrevrangebyscore("connection:$cid:$cname:msg",,'+inf','-inf','withscores','limit', 0, 50, $delay->begin);
       },
@@ -146,15 +149,16 @@ sub _handle_socket_data {
 
 sub _subscribe_to_server_messages {
   my($self, $cid) = @_;
+  my $sub = $self->redis->subscribe("connection:$cid:from_server");
 
-  $self->redis->subscribe("connection:$cid:from_server", sub {
-    my ($redis,$res)=@_;
-    for my $message (@$res) {
-      #$self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-      utf8::decode($message);
-      $self->send({text=>$message}) if $message =~ /^\{/; # only pass on json - skip internal redis messages
-    }
+  $sub->on(message => sub {
+    my ($redis, $message)=@_;
+    $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
+    utf8::decode($message);
+    $self->send({text=>$message}) if $message =~ /^\{/; # only pass on json - skip internal redis messages
   });
+
+  $self->stash->{sub} = $sub;
 }
 
 =head1 COPYRIGHT

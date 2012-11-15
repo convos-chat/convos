@@ -56,7 +56,7 @@ use Carp qw/ croak /;
 use Time::HiRes qw/time/;
 
 # default to true while developing
-use constant DEBUG => $ENV{'WIRC_DEBUG'} // 1;
+use constant DEBUG => $ENV{WIRC_DEBUG} // 1;
 
 my $JSON = Mojo::JSON->new;
 my @keys = qw/ nick user host /;
@@ -151,14 +151,13 @@ sub connect {
       $self->_irc->nick($attrs->{nick});
       $self->_irc->user($attrs->{user});
       $self->_irc->connect($cb);
-      $self->redis->subscribe("connection:$id:to_server", sub {
-        for(@{ $_[1] }) {
-          next unless /^[A-Z]+/; # avoid "0: subscribe", "1: ...", ...
-          $self->_irc->write($_);
-          utf8::encode($_);
-          my $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $_);
-          $self->add_message($msg);
-        }
+      $self->{sub} = $redis->subscribe("connection:$id:to_server");
+      $self->{sub}->on(message => sub {
+        my($sub, $msg) = @_;
+        $self->_irc->write($msg);
+        utf8::encode($msg);
+        $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $msg);
+        $self->add_message($msg);
       });
     }
   );

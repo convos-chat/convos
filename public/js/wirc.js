@@ -1,3 +1,5 @@
+var BASEURL = window.location.href;
+
 (function($) {
 
 Structure.registerModule('Wirc', {
@@ -10,10 +12,6 @@ Structure.registerModule('Wirc', {
   }
 }); // End Wirc
 
-setTimeout(function() {
-  document.title = "flash";
-}, 2000);
-
 Structure.registerModule('Wirc.Chat', {
   autocomplete_commands: {
     '/join': { append: ' #' },
@@ -23,28 +21,25 @@ Structure.registerModule('Wirc.Chat', {
     '/part': {}
   },
   print: function(data) {
-    var $previous = this.$messages.find('li .sender').eq(-1).parent();
+    var $previous = this.$messages.find('td.nick').eq(-1).parent();
     var next;
 
     if(data.timestamp) {
-      data.d = new Date(parseInt(data.timestamp, 10));
+      data.timestamp = new Date(parseInt(data.timestamp, 10));
     }
 
     if(data.error) {
-      next = tmpl('tmpl_li_error', data);
-    }
-    else if($previous.find('.sender a').text() == data.sender) {
-      next = tmpl('tmpl_li_message', { sender: false, message: data.message, d: data.d });
+      next = tmpl('error_message_template', data);
     }
     else {
-      next = tmpl('tmpl_li_message', data);
+      next = tmpl('message_template', data);
     }
 
     this.$messages.append(next);
     this.scrollToBottom();
   },
   scrollToBottom: function() {
-    this.$messages.scrollTop(this.$messages.get(0).scrollHeight - this.$messages.height());
+    $('html, body').scrollTop($('body').get(0).scrollHeight);
   },
   receiveData: function(e) {
     var data = $.parseJSON(e.data);
@@ -117,25 +112,53 @@ Structure.registerModule('Wirc.Chat', {
 
     self.scrollToBottom();
   },
+  listenToScroll: function() {
+    var $win = $(window);
+    var $table = $('table.table-with-fixed-footer');
+    var url = '/?does_not_exist'; //window.location.href;
+    var loading = false;
+    var page = 1;
+
+    $win.on('scroll', function() {
+      if(loading || $win.scrollTop() !== 0) return;
+      loading = $('<div class="alert alert-info">Loading previous conversations...</div>');
+      page++;
+      $table.before(loading);
+      $.ajax({
+        url: url + (url.indexOf('?') > 0 ? '&page=' : '?page=') + page,
+        success: function(data) {
+          var $tr = $(data).find('table.table-with-fixed-footer tbody tr');
+          if($tr.length) {
+            $table.find('tbody').prepend($tr);
+            loading.remove();
+            loading = false;
+            $(window).resize(); // fix fixed table header
+          }
+          else {
+            loading.removeClass('alert-info').text('End of conversation log.');
+          }
+        }
+      });
+    });
+  },
   start: function($) {
-    this.connection_id = $('#targets').attr('data-cid');
-    this.conversation_name = $('#targets').attr('data-cname');
+    this.connection_id = $('#messages').attr('data-cid');
+    this.conversation_name = $('#messages').attr('data-cname');
     this.$messages = $('#messages');
-    this.$input = $('#message input[type="text"]');
+    this.$input = $('.chat.stick-to-bottom input[type="text"]');
     this.connectToWebSocket();
     this.setupUI();
+    this.listenToScroll();
     if(window.console) console.log('[Wirc.Chat.start] ', this);
   }
-}); // End Wirc.Chat
+}); /* End Structure.registerModule('Wirc.Chat') */
 
-jQuery(document).ready(function() {
+$(document).ready(function() {
   BASEURL = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
-  if($('#messages').length) Wirc.Chat.start($);
+  $('#messages').each(function() { setTimeout(function() { Wirc.Chat.start($); }, 100); });
 });
 
 })(jQuery);
-
-BASEURL = window.location.href;
 
 /*
  * Flash fallback for websocket

@@ -56,16 +56,22 @@
     }
 
   , show: function () {
+      var $menu = this.$menu;
       var pos = $.extend({}, this.$element.offset(), {
         height: this.$element[0].offsetHeight
       })
 
-      this.$menu.css({
-        top: pos.top + pos.height
-      , left: pos.left
-      })
+      $menu.css({ top: '-1000px', left: pos.left });
 
-      this.$menu.show()
+      if(pos.top + pos.height + $menu.height() > $(window).height()) {
+        // +12 is one ugly hack
+        $menu.css('top', pos.top + 14 - pos.height - $menu.height());
+      }
+      else {
+        $menu.css('top', pos.top + pos.height);
+      }
+
+      $menu.show()
       this.shown = true
       return this
     }

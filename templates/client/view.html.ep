@@ -1,85 +1,45 @@
 % title 'Chat';
-% use WebIrc::Core::Util qw/ format_time /;
-<script type="text/html" id="tmpl_li_error">
-  <li>
-    <i class="icon-exclamation-sign"></i><%%= error %>
-  </li>
-</script>
-<script type="text/html" id="tmpl_li_message">
-  <li>
-    <%% if(sender) { %>
-    <span class="sender">
-      <i class="icon-comment"></i>
-      <a href="/privmsg/<%%= sender %>"><%%= sender %></a>
-    </span>
-    <span class="timestamp"><%%= d.sprintf('%H:%M:%S') %></span>
-    <%% } %>
-    <span class="message" title="<%%= d.sprintf('%H:%M:%S %d. %n %y') %>"><%%= message %></span>
-  </li>
+% use WebIrc::Core::Util 'format_time';
+<script type="text/html" id="message_template">
+  <dt>
+    <a href="/privmsg/<%%= sender %>"><%%= sender.replace(/!.*/, '') %></a>
+  </dt>
+  <dd>
+    <div class="pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></div>
+    <div><%%= message %></div>
+  </dt>
 </script>
 
-<div class="row-fluid">
-  <div class="span2">
-    <ul id="targets" class="nav nav-list" data-cid="<%= $connection_id %>" data-cname="<%= $conversation_name %>">
-      % for my $c (@$connections) {
-      <li class="nav-header <%= $c->{id} eq $active ? 'active' : '' %>">
-        <div class="btn-group">
-          %= link_to $c->{host}, 'view', { server => $c->{host}, target => '' }
-          <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
-          <ul class="dropdown-menu">
-            <li><%= link_to 'join', { server => $c->{host} }, begin %><i class="icon-plus"></i> Join channel</a><% end %></li>
-            <li><%= link_to 'disconnect', { server => $c->{host} }, begin %><i class="icon-signout"></i> Disconnect</a><% end %></li>
-          </ul>
-        </div>
-      </li>
-        % for my $channel (@{ $c->{channels} }) {
-      <li class="<%= $channel eq $active ? 'active' : '' %>">
-        <div class="btn-group">
-          %= link_to $channel, 'view', { target => $channel, server => $c->{host} }
-          <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
-          <ul class="dropdown-menu">
-            <li><%= link_to 'information', { target => $channel, server => $c->{host} }, begin %><i class="icon-info-sign"></i> Information<% end %></li>
-            <li><%= link_to 'search', { target => $channel, server => $c->{host} }, begin %><i class="icon-comments"></i> Search<% end %></li>
-            <li><%= link_to 'close', { target => $channel, server => $c->{host} }, begin %><i class="icon-signout"></i> Close<% end %></li>
-          </ul>
-        </div>
-      </li>
-        % }
-      % }
-    </ul>
-  </div>
-  <div class="span10">
-    %= form_for 'change_title', id => 'change_title', class => 'no-margins', begin
-      %= text_field 'title', '', class => 'span12'
-    % end
-    <ul class="unstyled" id="messages">
-      % my $last_messenger = '';
-      % for my $message (@$conversation) {
-      <li>
-        % if($last_messenger ne $message->{prefix}) {
-        <span class="sender">
-          <i class="icon-comment"></i>
-          %= link_to $message->{prefix}, 'privmsg', { to => $message->{prefix} };
-        </span>
-        <span class="timestamp"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
-          % $last_messenger = $message->{prefix};
-        % }
-        % if($message->{special} eq 'me') {
-        <span class="me" title="<%= format_time $message->{timestamp}, '%H:%M:%S %d. %n %y' %>"><%= $nick %> <%= $message->{params}[1] %></span>
-        % } else {
-        <span class="message" title="<%= format_time $message->{timestamp}, '%H:%M:%S %d. %n %y' %>"><%= $message->{params}[1] %></span>
-        % }
-      </li>
-      % }
-    </ul>
-    %= form_for 'send', method => 'post', id => 'message', class => 'no-margins', begin
-      %= text_field 'message', class => 'span12'
-    % end
+<div class="chat row-fluid">
+  <div class="span12">
+    <dl class="dl-horizontal" id="messages" data-cid="<%= $connection_id %>" data-cname="<%= $conversation_name %>">
+    % for my $message (@$conversation) {
+      <dt>
+        %= link_to +($message->{prefix} =~ m/^(.*?)!/)[0], 'privmsg', { to => $message->{prefix} };
+      </dt>
+      <dd>
+        <div class="pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></div>
+        <div><%= $message->{params}[1] %></div>
+      </dd>
+    % }
+      <dt><%= app->config->{name} %></dt>
+      <dd>
+        <div class="pull-right"><%= format_time time, '%H:%M:%S' %></div>
+        <div>Connecting to <%= $conversation_name %>...</div>
+      </dd>
+    </dl>
   </div>
 </div>
-<div class="row-fluid">
-  <div class="span2">&nbsp;<!-- offset2 --></div>
-  <div id="statusbar" class="span10">
-    1 person(s) in chat room.
-  </div>
+<div class="chat stick-to-bottom">
+  <dl class="dl-horizontal">
+    <dt>You</dt>
+    <dd>
+      %= form_for '', class => 'form-inline', begin
+        <div>
+          %= text_field 'say'
+          <button class="btn btn-primary">Send</button>
+        </div>
+      % end
+    </dd>
+  </dl>
 </div>
