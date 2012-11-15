@@ -96,9 +96,17 @@ The actual IRC server connected to. Will be set by L</irc_rpl_welcome>.
 
 has real_host => '';
 
+=head2 log
+
+Holds a L<Mojo::Log> object.
+
+=cut
+
+has log => sub { Mojo::Log->new };
+
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome /;
-my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_rpl_namreply irc_error /;
+my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_rpl_namreply irc_error /;
 
 has _irc => sub {
   my $self = shift;
@@ -115,8 +123,7 @@ has _irc => sub {
     $irc->on($event => sub { $self->add_server_message($_[1]) });
   }
   for my $event (@OTHER_EVENTS) {
-    my $method = "$event";
-    $irc->on($event => sub { $self->$method($_[1]) });
+    $irc->on($event => sub { $self->$event($_[1]) });
   }
 
   $irc;
@@ -142,7 +149,7 @@ sub connect {
   my $id = $self->id or croak "Cannot load connection without id";
 
   $self->redis->execute(
-    [hgetall  => "connection:$id"],
+    [hgetall => "connection:$id"],
     sub {
       my ($redis, $attrs) = @_;
 
@@ -167,7 +174,7 @@ sub connect {
 
 =head2 add_server_message
 
-  $bool = $self->add_server_message(\%message);
+  $self->add_server_message(\%message);
 
 Will look at L<%message> and add it to the database as a server message
 if it looks like one. Returns true if the message was added to redis.
@@ -186,10 +193,7 @@ sub add_server_message {
         message   => $message->{params}[1] || $message->{params}[0],                   # 1 = normal, 0 = error
         server    => $self->_irc->host,
     });
-    return 1;
   }
-
-  return;
 }
 
 =head2 add_message
@@ -279,7 +283,19 @@ Example message:
 sub irc_join {
   my ($self, $message) = @_;
 
-  $self->_publish({joined => $message->{params}[0], timestamp => time});
+  $self->_publish({ joined => $message->{params}[0], timestamp => time });
+}
+
+=head2 irc_nick
+
+=cut
+
+sub irc_nick {
+  my ($self, $message) = @_;
+  my $nick = $message->{params}[0];
+
+  $self->_publish({ nick => $nick, timestamp => time });
+  $self->redis->hset("connection:@{[$self->id]}", nick => $nick);
 }
 
 =head2 irc_rpl_namreply
@@ -307,29 +323,14 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
-  #warn Data::Dumper::Dumper($message);
   if ($message->{raw_line} =~ /Closing Link/i) {
-    warn sprintf "[connection:%s] ! Closing link (reconnect)\n", $self->_irc->disconnect(
-      sub {
-        $self->connect(sub { });
-      }
-    );
+    $self->log(warn => "[connection:@{[$self->id]}] ! Closing link (reconnect)");
+    $self->_irc->disconnect(sub { $self->connect(sub {}); });
   }
-}
-
-=head2 error
-
-TODO
-
-=cut
-
-sub error {
-  warn "Handle ".@_;
 }
 
 sub _publish {
   my($self, $data) = @_;
-
   $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
 }
 
