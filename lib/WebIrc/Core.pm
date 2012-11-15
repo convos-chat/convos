@@ -38,6 +38,9 @@ sub start {
 
   $self->redis->smembers('connections', sub {
     my ($redis, $cids) = @_;
+    if(!$cids) {
+      return warn "[core] No connections to start\n" if DEBUG;      
+    };
     warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
     for my $cid (@$cids) {
       my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);

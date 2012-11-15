@@ -7,9 +7,8 @@ use strict;
 use warnings;
 
 
-my $redis = Mojo::Redis->new(server => '127.0.0.1:6379');
 
-# populate_redis($redis);
+ populate_redis($redis);
 my $core = WebIrc::Core->new(redis => $redis);
 $core->start;
 use_ok('WebIrc::Proxy');
@@ -26,11 +25,6 @@ $proxy->start(
       sub {
         my ($loop, $err, $stream) = @_;
         warn("Connected");
-        $stream->on(
-          read => sub {
-            my ($stream, $chunk) = @_;
-          }
-        );
         ok(1, 'connected');
         $stream->close;
       }
@@ -62,3 +56,10 @@ $proxy->start(
 );
 Mojo::IOLoop->start;
 done_testing;
+
+
+sub setup_test {
+  my $t=shift;
+  my $redis = Mojo::Redis->new(server => '127.0.0.1:6379');
+  $redis->select(11,$delay->begin);
+}

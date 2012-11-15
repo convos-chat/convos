@@ -39,7 +39,7 @@ sub start {
                 }
                 my ($pass, $cid) = split(':', $credentials{PASS});
                 $self->core->login(
-                  {login => $credentials{USER}, password => $pass,},
+                  {login => $credentials{USER}, password => $pass },
                   sub {
                     my ($core,$uid) = @_;
                     if ($uid) {
