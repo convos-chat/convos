@@ -1,6 +1,7 @@
 #!/bin/sh
-cd public/bootstrap/less
+cd ../bootstrap/less;
 (
   lessc bootstrap.less;
   lessc responsive.less
-) > ../../css/bootstrap.css
+) > ../../wirc/public/css/wirc.css
+cp -r ../font ../../wirc/public/
