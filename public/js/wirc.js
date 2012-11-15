@@ -4,11 +4,15 @@ Structure.registerModule('Wirc', {
   websocket: function(path, callbacks) {
     var url = BASEURL.replace(/^http/, 'ws') + path;
     var websocket = new WebSocket(BASEURL.replace(/^http/, 'ws') + '/socket');
-    window.console && console.log('[websocket] ' + url);
-    $.each(callbacks, function(name, callback) { websocket[name] = callback });
+    if(window.console) console.log('[websocket] ' + url);
+    $.each(callbacks, function(name, callback) { websocket[name] = callback; });
     return websocket;
   }
 }); // End Wirc
+
+setTimeout(function() {
+  document.title = "flash";
+}, 2000);
 
 Structure.registerModule('Wirc.Chat', {
   autocomplete_commands: {
@@ -23,7 +27,7 @@ Structure.registerModule('Wirc.Chat', {
     var next;
 
     if(data.timestamp) {
-      data.d = new Date(parseInt(data.timestamp));
+      data.d = new Date(parseInt(data.timestamp, 10));
     }
 
     if(data.error) {
@@ -45,7 +49,7 @@ Structure.registerModule('Wirc.Chat', {
   receiveData: function(e) {
     var data = $.parseJSON(e.data);
 
-    window.console && console.log('[websocket] > ' + e.data);
+    if(window.console) console.log('[websocket] > ' + e.data);
 
     if(data.error || data.message) {
       this.print(data);
@@ -55,11 +59,11 @@ Structure.registerModule('Wirc.Chat', {
     // TODO: Figure out if JSON.stringify() works in other browsers than chrome
     try {
       this.websocket.send(JSON.stringify(data));
-      window.console && console.log('[websocket] < ' + JSON.stringify(data));
+      if(window.console) console.log('[websocket] < ' + JSON.stringify(data));
     } catch(e) {
-      window.console && console.log('[websocket] ! ' + e);
+      if(window.console) console.log('[websocket] ! ' + e);
       this.print({ error: '[ws]' + e });
-    };
+    }
   },
   connectToWebSocket: function() {
     var self = this;
@@ -81,7 +85,7 @@ Structure.registerModule('Wirc.Chat', {
   setupUI: function() {
     var self = this;
 
-    window.console && console.log('[Wirc.Chat.setupUI] input.autocomplete');
+    if(window.console) console.log('[Wirc.Chat.setupUI] input.autocomplete');
     self
     .$input
     .attr('autocomplete', 'off')
@@ -90,7 +94,7 @@ Structure.registerModule('Wirc.Chat', {
       source: Object.keys(self.autocomplete_commands),
       items: 5,
       matcher: function(item) {
-        return item.toLowerCase().indexOf(this.query.toLowerCase()) == 0;
+        return item.toLowerCase().indexOf(this.query.toLowerCase()) === 0;
       },
       updater: function(item) {
         if(self.autocomplete_commands[item].append) {
@@ -104,7 +108,7 @@ Structure.registerModule('Wirc.Chat', {
       }
     });
 
-    window.console && console.log('[Wirc.Chat.setupUI] form.submit');
+    if(window.console) console.log('[Wirc.Chat.setupUI] form.submit');
     self.$input.parents('form').submit(function() {
       self.sendData({ cid: self.connection_id, cname: self.conversation_name, cmd: self.$input.val() });
       self.$input.val('');
@@ -120,7 +124,7 @@ Structure.registerModule('Wirc.Chat', {
     this.$input = $('#message input[type="text"]');
     this.connectToWebSocket();
     this.setupUI();
-    window.console && console.log('[Wirc.Chat.start] ', this);
+    if(window.console) console.log('[Wirc.Chat.start] ', this);
   }
 }); // End Wirc.Chat
 
