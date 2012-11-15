@@ -29,7 +29,7 @@ Mojo::IRC - IRC Client for the Mojo IOLoop
   });
 
   Mojo::IOLoop->start;
-  
+
 =head1 DESCRIPTION
 
 This class inherit from L<Mojo::EventEmitter>.
@@ -65,6 +65,15 @@ Internal errors in the mojo ioloop
     raw_line => ':somenick!~someuser@1.2.3.4 JOIN #html',
     command => 'JOIN',
     prefix => 'somenick!~someuser@1.2.3.4'
+  });
+
+=head2 irc_nick
+
+  $self->$callback({
+    params => ['newnick'],
+    raw_line => ':oldnick!~someuser@hostname.com MODE somenick :+i',
+    command => 'NICK',
+    prefix => 'somenick!~someuser@hostname.com'
   });
 
 =head2 irc_mode
@@ -219,7 +228,7 @@ use Parse::IRC ();
 use Scalar::Util 'weaken';
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
-my @DEFAULT_EVENTS = qw/ irc_ping irc_notice /;
+my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice /;
 
 =head1 ATTRIBUTES
 
@@ -335,7 +344,7 @@ sub connect {
       $self->write(NICK => $self->nick);
       $self->write(USER => $self->user, 8, '*', ':'.$self->name);
       $self->write(PASS=> $self->pass) if $self->pass;
-      
+
       $self->$callback(undef);
     }
   );
@@ -401,6 +410,18 @@ sub write {
 }
 
 =head1 DEFAULT EVENT HANDLERS
+
+=head2 irc_nick
+
+Used to update the L</nick> attribute when the nick has changed.
+
+=cut
+
+sub irc_nick {
+  my ($self, $message) = @_;
+
+  $self->nick($message->{'params'}[0]);
+}
 
 =head2 irc_notice
 
