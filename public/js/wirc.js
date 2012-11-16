@@ -144,9 +144,9 @@ Structure.registerModule('Wirc.Chat', {
       height = $('body').height();
       page++;
       $messages.before($loading);
-      if(window.console) console.log(BASEURL + '/chat/history/' + page);
+      if(window.console) console.log(BASEURL + '/history/' + page);
       $.ajax({
-        url: BASEURL + '/chat/history/' + page,
+        url: BASEURL + '/history/' + page,
         success: function(data) {
           var $li = $(data).find('#chat_messages li');
           if($li.length) {
