@@ -40,12 +40,20 @@ Structure.registerModule('Wirc.Chat', {
     }
     else if(data.message && data.target == this.target) {
       var me_re = new RegExp("\\b" + this.nick + "\\b");
+      var tmp;
       data.message = data.message.replace(/</i, '&lt;');
       data.prefix = data.sender.replace(/!.*/, '');
       if(data.prefix === this.nick) data.class_name = 'me';
       else if(data.message.match(me_re)) data.class_name = 'focus';
       data.message = data.message.replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
-      $messages.append(tmpl('message_template', data));
+      tmp = data.message.match(/^\u0001 ACTION (.*)/);
+      if(tmp) {
+        data.message = tmp[1];
+        $messages.append(tmpl('action_message_template', data));
+      }
+      else {
+        $messages.append(tmpl('message_template', data));
+      }
     }
 
     if(at_bottom) {
