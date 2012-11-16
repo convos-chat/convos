@@ -9,11 +9,11 @@ Mojo::IRC - IRC Client for the Mojo IOLoop
   my $irc = Mojo::IRC->new(
               nick => 'test123',
               user => 'my name',
-              host => 'irc.perl.org',
+              server => 'irc.perl.org:6667',
             );
 
   $irc->on(irc_join => sub {
-      my($self, $message) = @_;
+    my($self, $message) = @_;
     warn "yay! i joined $message->{params}[0]";
   });
 
@@ -54,7 +54,7 @@ This event is used by IRC errors
 
 =head2 error
 
-Internal errors in the mojo ioloop
+Internal errors with the mojo ioloop
 
 =head2 irc_err_nicknameinuse
 
@@ -232,6 +232,14 @@ my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice /;
 
 =head1 ATTRIBUTES
 
+=head2 ioloop
+
+Holds an instance of L<Mojo::IOLoop>.
+
+=cut
+
+has ioloop => sub { Mojo::IOLoop->singleton };
+
 =head2 nick
 
 IRC server nickname.
@@ -248,13 +256,13 @@ IRC username.
 
 has user => '';
 
-=head2 host
+=head2 server
 
-IRC server hostname.
+Server name and optionally a port to connect to.
 
 =cut
 
-has host => '';
+has server => '';
 
 =head2 name
 
@@ -263,8 +271,6 @@ The name of this IRC client. Defaults to "Mojo IRC".
 =cut
 
 has name => 'Mojo IRC';
-
-
 
 =head2 pass
 
@@ -280,24 +286,23 @@ has 'pass';
 
   $self->connect(\&callback);
 
-Will login to the IRC L</host> and call C<&callback> once connected or on error.
-The callback receives a string describing the error if it fail and undef on
-success.
+Will login to the IRC L</server> and call C<&callback> once connected. The
+L</error> event will be called if connect fail in any way.
 
 =cut
 
 sub connect {
   my ($self, $callback) = @_;
-  my ($host, $port) = split /:/, $self->host;
+  my ($host, $port) = split /:/, $self->server;
 
-  if ($self->{_stream}) {
-    return $self->$callback(ref $self->{_stream} ? undef : $self->{_stream});
+  if (ref $self->{stream}) {
+    return $self->$callback;
   }
 
   $self->register_default_event_handlers;
 
- # weaken $self;
-  Mojo::IOLoop->client(
+  weaken $self;
+  $self->{stream_id} = $self->ioloop->client(
     address => $host,
     port    => $port || 6667,
     sub {
@@ -305,29 +310,32 @@ sub connect {
       my ($method, $message);
       my $buffer = '';
 
-      $err and return $self->$callback($err);
+      $err and return $self->emit(error => $err);
 
-      $stream->timeout(0);    # never time out
+      $stream->timeout(600); # TODO: I think we should get a PING during 600 seconds..?
       $stream->on(
         close => sub {
+          warn "[@{[$self->server]}] : close\n" if DEBUG;
+          $self or return;
           $self->emit('close');
-          warn "Mojo::IRC::close\n" if DEBUG;
-          delete $self->{_stream};
+          delete $self->{stream};
         }
       );
       $stream->on(
         error => sub {
-          return if !$self;
+          $self or return;
+          $self->ioloop->remove(delete $self->{stream_id});
           $self->emit(error => $_[1]);
-          delete $self->{_stream};
+          delete $self->{stream};
+          $self->ioloop
         }
       );
       $stream->on(
         read => sub {
-          warn "Mojo::IRC::read($_[1])\n" if DEBUG;
           $buffer .= $_[1];
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
+            warn "[@{[$self->server]}] >>> $1\n" if DEBUG;
             $message = Parse::IRC::parse_irc($1);
             $method = $message->{command} || '';
 
@@ -340,12 +348,11 @@ sub connect {
         }
       );
 
-      $self->{_stream} = $stream;
+      $self->{stream} = $stream;
       $self->write(NICK => $self->nick);
       $self->write(USER => $self->user, 8, '*', ':'.$self->name);
       $self->write(PASS=> $self->pass) if $self->pass;
-
-      $self->$callback(undef);
+      $self->$callback;
     }
   );
 }
@@ -362,7 +369,7 @@ sub disconnect {
   my ($self, $cb) = @_;
 
   # already disconnected
-  return $self->$cb unless $self->{_stream};
+  return $self->$cb unless $self->{stream};
 
   # TODO: Figure out how this really works:
   # I think ->close will kill the connection at once and never fire the close
@@ -370,8 +377,8 @@ sub disconnect {
   # I think you are right:
   # Event "irc_error" failed: Can't call method "once" on an undefined value at script/../lib/Mojo/IRC.pm line 345.
   $self->write('QUIT');
-  $self->{_stream}->close;
-  $self->{_stream}->once(close => $cb);
+  $self->{stream}->close;
+  $self->{stream}->once(close => $cb);
 }
 
 =head2 register_default_event_handlers
@@ -405,8 +412,8 @@ with " " and "\r\n" will be appended.
 sub write {
   my $self = shift;
   my $buf = join ' ', @_;
-  warn "Mojo::IRC::write($buf)\n" if DEBUG;
-  $self->{_stream}->write("$buf\r\n");
+  warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
+  $self->{stream}->write("$buf\r\n");
 }
 
 =head1 DEFAULT EVENT HANDLERS
@@ -465,6 +472,14 @@ sub irc_err_nicknameinuse {
 
   $self->nick($self->nick . '_');
   $self->write(NICK => $self->nick);
+}
+
+sub DESTROY {
+  my $self = shift;
+  my $id = $self->{stream_id} or return;
+  my $ioloop = $self->ioloop or return;
+
+  $ioloop->remove($id);
 }
 
 =head1 COPYRIGHT
