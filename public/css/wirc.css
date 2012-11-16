@@ -2603,7 +2603,7 @@ ul.icons li .icon-large:before {
 }
 .dropdown-menu .active > a,
 .dropdown-menu .active > a:hover {
-  color: #333333;
+  color: #eee;
   text-decoration: none;
   outline: 0;
   background-color: #0081c2;
@@ -4215,63 +4215,51 @@ table.table-fixed-footer {
   margin-top: 40px;
 }
 /* chat */
-#messages {
+#chat_messages {
   margin-bottom: 45px;
 }
-#messages li span.pull-right {
+#chat_messages li span.pull-right {
   color: #999999;
 }
-#messages li.odd {
+#chat_messages li.odd {
   background-color: #f9f9f9;
 }
-#messages li.me span {
+#chat_messages li.me span {
   color: #446688;
 }
-#messages li.focus span {
+#chat_messages li.action span {
+  font-style: italic;
+}
+#chat_messages li.focus span {
   color: #9d261d;
 }
-#messages .prefix {
+#chat_messages .prefix {
   font-weight: bold;
   display: block;
   float: left;
   padding-right: 6px;
 }
-.chat.stick-to-bottom {
+#chat_input_field {
   border-top: 2px solid #aaa;
   background: #f8f8f8;
+  width: 100%;
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
 }
-.chat.stick-to-bottom form {
+#chat_input_field form {
   margin: 0;
-  width: 100%;
+  padding: 4px 90px 4px 20px;
   overflow: hidden;
   position: relative;
 }
-.chat.stick-to-bottom form div {
-  padding-right: 70px;
-}
-.chat.stick-to-bottom .dl-horizontal {
-  padding: 4px 20px;
-  margin: 0;
-}
-.chat.stick-to-bottom .dl-horizontal dt {
-  padding-top: 4px;
-}
-.chat.stick-to-bottom input {
+#chat_input_field input {
   width: 100%;
 }
-.chat.stick-to-bottom button {
+#chat_input_field button {
   position: absolute;
-  right: 0;
-  top: 0;
-}
-@media (max-width: 767px) {
-  .chat.stick-to-bottom .dl-horizontal dt {
-    display: none;
-  }
+  right: 20px;
+  top: 4px;
 }
 /* settings */
 .connection-tab-container .nav {

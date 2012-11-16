@@ -28,7 +28,7 @@ sub view {
   my $self = shift->render_later;
   my $uid = $self->session('uid');
   my @keys = qw/ channels nick host /;
-  my $connections;
+  my($connections, $cid, $target);
 
   Mojo::IOLoop->delay(
     sub {
@@ -43,7 +43,6 @@ sub view {
     },
     sub {
       my($delay, @info) = @_;
-      my($cid, $target);
 
       for my $info (@info) {
         $info = { zip @keys, @$info };
@@ -77,16 +76,11 @@ sub view {
       );
     },
     sub {
-      my($delay, $conversation) = @_;
-      my $messages = [];
-      for(my $i = 0; $i < @$conversation; $i = $i + 2) {
-        my $message = unpack_irc($conversation->[$i], $conversation->[$i + 1]);
-        $message->{text} = html_escape $message->{params}[1];
-        $message->{text} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
-        unshift @$messages, $message;
-      }
-      $self->stash(conversation => $messages);
-      $self->render;
+      $self->stash(conversation => $self->_format_conversation($_[1]));
+      $self->redis->smembers("connection:$cid:$target:nicks", $_[0]->begin);
+    },
+    sub {
+      $self->render(nicks => join ',', @{ $_[1] });
     }
   );
 }
@@ -119,24 +113,37 @@ sub history {
       );
     },
     sub {
-      my($delay, $conversation) = @_;
-      my $messages = [];
-      for(my $i = 0; $i < @$conversation; $i = $i + 2) {
-        my $message = unpack_irc($conversation->[$i], $conversation->[$i + 1]);
-        $message->{text} = html_escape $message->{params}[1];
-        $message->{text} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
-        unshift @$messages, $message;
-      }
       $self->render(
         connection_id => $cid,
         connections => [],
-        conversation => $messages,
+        conversation => $self->_format_conversation($_[1]),
         nick => $self->session('nick'),
         target => $target,
         template => 'client/view',
       );
     }
   );
+}
+
+sub _format_conversation {
+  my($self, $conversation) = @_;
+  my $nick = $self->session('nick');
+  my $messages = [];
+
+  for(my $i = 0; $i < @$conversation; $i = $i + 2) {
+    my $message = unpack_irc $conversation->[$i], $conversation->[$i + 1];
+    $message->{message} = html_escape $message->{params}[1];
+    $message->{message} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
+    $message->{nick} = $message->{prefix} =~ /^(.*?)!/ ? $1 : '';
+    $message->{class_name} = $message->{message} =~ /\b$nick\b/ ? 'focus'
+                           : $message->{special} eq 'me'     ? 'action'
+                           : $message->{nick} eq $nick       ? 'me'
+                           :                                   '';
+
+    unshift @$messages, $message;
+  }
+
+  return $messages;
 }
 
 =head2 socket

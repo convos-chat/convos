@@ -20,6 +20,22 @@ Structure.registerModule('Wirc.Chat', {
     '/nick': { append: ' ' },
     '/part': {}
   },
+  formatIrcData: function(data) {
+    var me_re = new RegExp("\\b" + this.nick + "\\b");
+    var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
+
+    if(action) data.message = action[1];
+
+    data.nick = data.sender.replace(/!.*/, '');
+    data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
+    data.template = action ? 'action_message_template' : 'message_template';
+    data.class_name = data.prefix === this.nick                           ? 'me'
+                    : data.message.match(me_re)                           ? 'focus'
+                    : $('#chat_messages').find('li:last').hasClass('odd') ? 'even'
+                    :                                                       'odd';
+
+    return data;
+  },
   print: function(data) {
     // need to calculate at_bottom before appending a new element
     var at_bottom = $(window).scrollTop() + $(window).height() >= $('body').height() - 30;
@@ -29,8 +45,6 @@ Structure.registerModule('Wirc.Chat', {
       data.timestamp = new Date(parseInt(data.timestamp, 10));
     }
 
-    data.class_name = $messages.find('li:last').hasClass('even') ? 'odd' : 'even';
-
     if(data.status) {
       $messages.append(tmpl('server_status_template', data));
     }
@@ -39,21 +53,8 @@ Structure.registerModule('Wirc.Chat', {
       $messages.append(tmpl('nick_change_template', data));
     }
     else if(data.message && data.target == this.target) {
-      var me_re = new RegExp("\\b" + this.nick + "\\b");
-      var tmp;
-      data.message = data.message.replace(/</i, '&lt;');
-      data.prefix = data.sender.replace(/!.*/, '');
-      if(data.prefix === this.nick) data.class_name = 'me';
-      else if(data.message.match(me_re)) data.class_name = 'focus';
-      data.message = data.message.replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
-      tmp = data.message.match(/^\u0001 ACTION (.*)/);
-      if(tmp) {
-        data.message = tmp[1];
-        $messages.append(tmpl('action_message_template', data));
-      }
-      else {
-        $messages.append(tmpl('message_template', data));
-      }
+      data = this.formatIrcData(data);
+      $messages.append(tmpl(data.template, data));
     }
 
     if(at_bottom) {
@@ -102,7 +103,7 @@ Structure.registerModule('Wirc.Chat', {
       .attr('autocomplete', 'off')
       .focus()
       .typeahead({
-        source: Object.keys(self.autocomplete_commands),
+        source: function() { return Object.keys(self.autocomplete_commands); },
         items: 5,
         matcher: function(item) {
           return item.toLowerCase().indexOf(this.query.toLowerCase()) === 0;
@@ -125,11 +126,12 @@ Structure.registerModule('Wirc.Chat', {
       return false;
     });
 
+    $('body').click(function() { self.$input.focus(); });
     self.scrollToBottom();
   },
   listenToScroll: function() {
     var $win = $(window);
-    var $messages = $('#messages');
+    var $messages = $('#chat_messages');
     var $loading;
     var page = 1;
     var height;
@@ -144,7 +146,7 @@ Structure.registerModule('Wirc.Chat', {
       $.ajax({
         url: BASEURL + '/chat/history/' + page,
         success: function(data) {
-          var $li = $(data).find('#messages li');
+          var $li = $(data).find('#chat_messages li');
           if($li.length) {
             $messages.prepend($li);
             $loading.remove();
@@ -159,21 +161,28 @@ Structure.registerModule('Wirc.Chat', {
     });
   },
   start: function($) {
-    this.connection_id = $('#messages').attr('data-cid');
-    this.nick = $('#messages').attr('data-nick');
-    this.target = $('#messages').attr('data-target');
-    this.$messages = $('#messages');
-    this.$input = $('.chat.stick-to-bottom input[type="text"]');
-    this.connectToWebSocket();
-    this.setupUI();
-    this.listenToScroll();
+    var self = this;
+    self.connection_id = $('#chat_messages').attr('data-cid');
+    self.nick = $('#chat_messages').attr('data-nick');
+    self.target = $('#chat_messages').attr('data-target');
+    self.$messages = $('#chat_messages');
+    self.$input = $('#chat_input_field input[type="text"]');
+    self.connectToWebSocket();
+    self.setupUI();
+    self.listenToScroll();
+
+    $.each($('#chat_messages').attr('data-nicks').split(','), function(i, v) {
+      v = v.replace(/^\@/, '');
+      self.autocomplete_commands[v] = { append: ': ' };
+    });
+
     if(window.console) console.log('[Wirc.Chat.start] ', this);
   }
 }); /* End Structure.registerModule('Wirc.Chat') */
 
 $(document).ready(function() {
   BASEURL = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
-  $('#messages').each(function() { setTimeout(function() { Wirc.Chat.start($); }, 100); });
+  $('#chat_messages').each(function() { setTimeout(function() { Wirc.Chat.start($); }, 100); });
 });
 
 })(jQuery);
