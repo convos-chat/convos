@@ -36,7 +36,7 @@
     <ul class="unstyled" id="chat_messages"
       data-cid="<%= $connection_id %>"
       data-nick="<%= $nick %>"
-      data-nicks="<%= $nicks %>"
+      data-nicks="<%= join ',', @$nicks %>"
       data-target="<%= $target %>">
     % my $n = 0;
     % for my $message (@$conversation) {

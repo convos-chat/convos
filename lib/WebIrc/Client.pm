@@ -80,7 +80,7 @@ sub view {
       $self->redis->smembers("connection:$cid:$target:nicks", $_[0]->begin);
     },
     sub {
-      $self->render(nicks => join ',', @{ $_[1] });
+      $self->render(nicks => $_[1]);
     }
   );
 }
@@ -116,6 +116,7 @@ sub history {
       $self->render(
         connection_id => $cid,
         connections => [],
+        nicks => [],
         conversation => $self->_format_conversation($_[1]),
         nick => $self->session('nick'),
         target => $target,
