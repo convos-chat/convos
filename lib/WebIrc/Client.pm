@@ -13,6 +13,7 @@ use List::MoreUtils qw/ zip /;
 use WebIrc::Core::Util qw/ unpack_irc /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
+my $N_MESSAGES = 50;
 my $JSON = Mojo::JSON->new;
 
 =head1 METHODS
@@ -24,12 +25,11 @@ Used to render the main IRC client view.
 =cut
 
 sub view {
-  my $self = shift;
+  my $self = shift->render_later;
   my $uid = $self->session('uid');
   my @keys = qw/ channels nick host /;
   my $connections;
 
-  $self->render_later;
   Mojo::IOLoop->delay(
     sub {
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
@@ -61,13 +61,18 @@ sub view {
         connection_id => $cid,
         target => $target,
       );
+      $self->session(
+        nick => $info[0]{nick},
+        target => $target,
+        connection_id => $cid,
+      );
 
       # FIXME: Should be using last seen tz and default to -inf
       $self->redis->zrevrangebyscore(
         "connection:$cid:$target:msg",
         "+inf" => "-inf",
         "withscores",
-        "limit" => 0, 50,
+        "limit" => 0, $N_MESSAGES,
         $delay->begin,
       );
     },
@@ -82,6 +87,54 @@ sub view {
       }
       $self->stash(conversation => $messages);
       $self->render;
+    }
+  );
+}
+
+=head2 history
+
+=cut
+
+sub history {
+  my $self = shift->render_later;
+  my $page = $self->param('page');
+  my $cid = $self->session('connection_id');
+  my $target = $self->session('target');
+
+  unless($page and $cid and $target) {
+    return $self->render_excetion; # TODO: Need to have a better error message?
+  }
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      my $offset = ($page - 1) * $N_MESSAGES;
+
+      $self->redis->zrevrangebyscore(
+        "connection:$cid:$target:msg",
+        "+inf" => "-inf",
+        "withscores",
+        "limit" => $offset, $offset + $N_MESSAGES,
+        $delay->begin,
+      );
+    },
+    sub {
+      my($delay, $conversation) = @_;
+      my $messages = [];
+      for(my $i = 0; $i < @$conversation; $i = $i + 2) {
+        my $message = unpack_irc($conversation->[$i], $conversation->[$i + 1]);
+        $message->{text} = html_escape $message->{params}[1];
+        $message->{text} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
+        unshift @$messages, $message;
+      }
+      $self->render(
+        connection_id => $cid,
+        connections => [],
+        conversation => $messages,
+        nick => $self->session('nick'),
+        target => $target,
+        template => 'client/view',
+      );
     }
   );
 }

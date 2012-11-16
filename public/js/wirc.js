@@ -129,28 +129,30 @@ Structure.registerModule('Wirc.Chat', {
   },
   listenToScroll: function() {
     var $win = $(window);
-    var $table = $('table.table-with-fixed-footer');
-    var url = '/?does_not_exist'; //window.location.href;
-    var loading = false;
+    var $messages = $('#messages');
+    var $loading;
     var page = 1;
+    var height;
 
     $win.on('scroll', function() {
-      if(loading || $win.scrollTop() !== 0) return;
-      loading = $('<div class="alert alert-info">Loading previous conversations...</div>');
+      if($loading || $win.scrollTop() !== 0) return;
+      $loading = $('<div class="alert alert-info">Loading previous conversations...</div>');
+      height = $('body').height();
       page++;
-      $table.before(loading);
+      $messages.before($loading);
+      if(window.console) console.log(BASEURL + '/chat/history/' + page);
       $.ajax({
-        url: url + (url.indexOf('?') > 0 ? '&page=' : '?page=') + page,
+        url: BASEURL + '/chat/history/' + page,
         success: function(data) {
-          var $tr = $(data).find('table.table-with-fixed-footer tbody tr');
-          if($tr.length) {
-            $table.find('tbody').prepend($tr);
-            loading.remove();
-            loading = false;
-            $(window).resize(); // fix fixed table header
+          var $li = $(data).find('#messages li');
+          if($li.length) {
+            $messages.prepend($li);
+            $loading.remove();
+            $loading = false;
+            $win.scrollTop($('body').height() - height);
           }
           else {
-            loading.removeClass('alert-info').text('End of conversation log.');
+            $loading.removeClass('alert-info').text('End of conversation log.');
           }
         }
       });

@@ -1,10 +1,18 @@
 % title 'Chat';
+% my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
+% unless($as_history) {
 <script type="text/html" id="message_template">
   <li class="<%%= class_name %>">
     <span class="prefix"><%%= prefix %>:</span>
     <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= message %></span>
+  </li>
+</script>
+<script type="text/html" id="action_message_template">
+  <li class="<%%= class_name %>">
+    <span class="action"><%%= prefix %> <%%= message %></span>
+    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="nick_change_template">
@@ -21,6 +29,7 @@
     <span class="message"><%%= status == 200 ? 'Connected' : 'Error' %></span>
   </li>
 </script>
+% }
 
 <div class="chat row-fluid">
   <div class="span12">
@@ -35,11 +44,13 @@
         <span class="message"><%== $message->{text} %></span>
       </li>
     % }
+    % unless($as_history) {
       <li class="muted <%= $n++ % 2 ? 'odd' : 'even' %>">
         <span class="prefix"><%= app->config->{name} %>:</span>
         <span class="timestamp pull-right"><%= format_time time, '%H:%M:%S' %></span>
         <span class="message">Connecting to <%= $target %>...</span>
       </li>
+    % }
     </dl>
   </div>
 </div>

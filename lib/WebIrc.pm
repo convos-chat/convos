@@ -138,6 +138,7 @@ sub startup {
   $private_r->route('/settings')->to('user#settings')->name('settings');
 
   $private_r->route('/chat')->to('client#view');
+  $private_r->route('/chat/history/:page')->to('client#history');
   $private_r->route('/close/#host/:target')->to('client#close')->name('irc_close');
   $private_r->route('/disconnect/*host')->to('client#disconnect')->name('irc_disconnect');
   $private_r->route('/join/*host')->to('client#join')->name('irc_join');
