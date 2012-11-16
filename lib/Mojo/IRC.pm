@@ -419,8 +419,11 @@ Used to update the L</nick> attribute when the nick has changed.
 
 sub irc_nick {
   my ($self, $message) = @_;
+  my $old_nick = ($message->{prefix} =~ /^(.*?)!/)[0] || '';
 
-  $self->nick($message->{'params'}[0]);
+  if($old_nick eq $self->nick) {
+    $self->nick($message->{params}[0]);
+  }
 }
 
 =head2 irc_notice
@@ -434,7 +437,7 @@ sub irc_notice {
   my ($self, $message) = @_;
 
   # NOTICE AUTH :*** Ident broken or disabled, to continue to connect you must type /QUOTE PASS 21105
-  if ($message->{'params'}[0] =~ m!/Ident broken.*QUOTE PASS (\S+)!) {
+  if ($message->{params}[0] =~ m!/Ident broken.*QUOTE PASS (\S+)!) {
     $self->write(QUOTE => PASS => $1);
   }
 }
