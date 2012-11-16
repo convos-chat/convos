@@ -114,7 +114,14 @@ has _irc => sub {
 
   weaken $self;
   $irc->register_default_event_handlers;
-  $irc->on(close => sub { delete $self->{_irc} });
+  $irc->on(close => sub {
+    $self->log->debug('Reconnecting on close...');
+    $self->_irc->ioloop->timer(1, sub { $self->connect(sub {}); });
+  });
+  $irc->on(error => sub {
+    $self->log->error("Reconnecting on error: $_[1]");
+    $self->_irc->ioloop->timer(2, sub { $self->connect(sub {}); });
+  });
 
   for my $event (@ADD_MESSAGE_EVENTS) {
     $irc->on($event => sub { $self->add_message($_[1]) });
@@ -133,7 +140,7 @@ has _irc => sub {
 
 =head2 connect
 
-  $self = $self->connect(\&callback);
+  $self = $self->connect($callback);
 
 This method will create a new L<Mojo::IRC> object with attribute data from
 L</redis>. The values fetched from the backend is identified by L</id>. This
@@ -154,10 +161,10 @@ sub connect {
       my ($redis, $attrs) = @_;
 
       $self->channels($attrs->{channels});
-      $self->_irc->host($attrs->{host});
+      $self->_irc->server($attrs->{host});
       $self->_irc->nick($attrs->{nick});
       $self->_irc->user($attrs->{user});
-      $self->_irc->connect($cb);
+      $self->_irc->connect(sub { $self->$cb; });
       $self->{sub} = $redis->subscribe("connection:$id:to_server");
       $self->{sub}->on(message => sub {
         my($sub, $msg) = @_;
@@ -189,9 +196,9 @@ sub add_server_message {
     $self->redis->zadd("connection:@{[$self->id]}:msg", $time, $message->{raw_line});
     $self->_publish({
         timestamp => $time,
-        sender    => $self->_irc->host,
+        sender    => $self->_irc->server,
         message   => $message->{params}[1] || $message->{params}[0],                   # 1 = normal, 0 = error
-        server    => $self->_irc->host,
+        server    => $self->_irc->server,
     });
   }
 }
@@ -214,7 +221,7 @@ sub add_message {
   );
   $self->_publish({
     timestamp => $time,
-    server    => $self->_irc->host,
+    server    => $self->_irc->server,
     sender    => $message->{prefix},
     target    => $message->{params}[0],
     message   => $message->{params}[1],
@@ -232,7 +239,7 @@ Will disconnect from the L</irc> server.
 =cut
 
 sub disconnect {
-  $_[0]->_irc->disconnect($_[1] || sub { });
+  $_[0]->_irc->disconnect($_[1] || sub {});
 }
 
 =head1 EVENT HANDLERS
@@ -268,7 +275,6 @@ sub irc_rpl_myinfo {
   my @keys = qw/ nick real_host version available_user_modes available_channel_modes /;
   my $i = 0;
 
-  $self->_irc->nick($message->{params}[0]);
   $self->redis->hmset("connection:@{[$self->id]}", map { $_, $message->{params}[$i++] // '' } @keys);
 }
 
@@ -329,7 +335,7 @@ sub irc_error {
   my ($self, $message) = @_;
   if ($message->{raw_line} =~ /Closing Link/i) {
     $self->log(warn => "[connection:@{[$self->id]}] ! Closing link (reconnect)");
-    $self->_irc->disconnect(sub { $self->connect(sub {}); });
+    delete $self->{_irc};
   }
 }
 
