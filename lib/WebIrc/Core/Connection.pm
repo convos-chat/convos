@@ -292,10 +292,14 @@ sub irc_join {
 
 sub irc_nick {
   my ($self, $message) = @_;
-  my $nick = $message->{params}[0];
+  my $old_nick = ($message->{prefix} =~ /^(.*?)!/)[0] || '';
+  my $new_nick = $message->{params}[0];
 
-  $self->_publish({ nick => $nick, timestamp => time });
-  $self->redis->hset("connection:@{[$self->id]}", nick => $nick);
+  if($old_nick eq $self->_irc->nick) {
+    $self->redis->hset("connection:@{[$self->id]}", nick => $new_nick);
+  }
+
+  $self->_publish({ old_nick => $old_nick, new_nick => $new_nick, timestamp => time });
 }
 
 =head2 irc_rpl_namreply

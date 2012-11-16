@@ -48,8 +48,10 @@ Structure.registerModule('Wirc.Chat', {
     if(data.status) {
       $messages.append(tmpl('server_status_template', data));
     }
-    else if(data.nick) {
-      this.nick = data.nick;
+    else if(data.new_nick) {
+      if(data.old_nick == this.nick) {
+        this.nick = data.new_nick;
+      }
       $messages.append(tmpl('nick_change_template', data));
     }
     else if(data.message && data.target == this.target) {

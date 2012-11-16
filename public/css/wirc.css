@@ -137,7 +137,7 @@ textarea {
 .input-block-level {
   display: block;
   width: 100%;
-  min-height: 30px;
+  min-height: 40px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -146,7 +146,7 @@ body {
   margin: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 14px;
-  line-height: 20px;
+  line-height: 30px;
   color: #333333;
   background-color: #ffffff;
 }
@@ -289,7 +289,7 @@ a:hover {
 .row-fluid [class*="span"] {
   display: block;
   width: 100%;
-  min-height: 30px;
+  min-height: 40px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -484,13 +484,13 @@ a:hover {
   clear: both;
 }
 p {
-  margin: 0 0 10px;
+  margin: 0 0 15px;
 }
 .lead {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   font-size: 21px;
   font-weight: 200;
-  line-height: 30px;
+  line-height: 45px;
 }
 small {
   font-size: 85%;
@@ -537,10 +537,10 @@ h3,
 h4,
 h5,
 h6 {
-  margin: 10px 0;
+  margin: 15px 0;
   font-family: inherit;
   font-weight: bold;
-  line-height: 20px;
+  line-height: 30px;
   color: inherit;
   text-rendering: optimizelegibility;
 }
@@ -557,7 +557,7 @@ h6 small {
 h1,
 h2,
 h3 {
-  line-height: 40px;
+  line-height: 60px;
 }
 h1 {
   font-size: 38.5px;
@@ -590,14 +590,14 @@ h4 small {
   font-size: 14px;
 }
 .page-header {
-  padding-bottom: 9px;
-  margin: 20px 0 30px;
+  padding-bottom: 14px;
+  margin: 30px 0 45px;
   border-bottom: 1px solid #eeeeee;
 }
 ul,
 ol {
   padding: 0;
-  margin: 0 0 10px 25px;
+  margin: 0 0 15px 25px;
 }
 ul ul,
 ul ol,
@@ -606,7 +606,7 @@ ol ul {
   margin-bottom: 0;
 }
 li {
-  line-height: 20px;
+  line-height: 30px;
 }
 ul.unstyled,
 ol.unstyled {
@@ -614,17 +614,17 @@ ol.unstyled {
   list-style: none;
 }
 dl {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 dt,
 dd {
-  line-height: 20px;
+  line-height: 30px;
 }
 dt {
   font-weight: bold;
 }
 dd {
-  margin-left: 10px;
+  margin-left: 15px;
 }
 .dl-horizontal {
   *zoom: 1;
@@ -651,7 +651,7 @@ dd {
   margin-left: 180px;
 }
 hr {
-  margin: 20px 0;
+  margin: 30px 0;
   border: 0;
   border-top: 1px solid #eeeeee;
   border-bottom: 1px solid #ffffff;
@@ -667,18 +667,18 @@ abbr.initialism {
 }
 blockquote {
   padding: 0 0 0 15px;
-  margin: 0 0 20px;
+  margin: 0 0 30px;
   border-left: 5px solid #eeeeee;
 }
 blockquote p {
   margin-bottom: 0;
   font-size: 16px;
   font-weight: 300;
-  line-height: 25px;
+  line-height: 37.5px;
 }
 blockquote small {
   display: block;
-  line-height: 20px;
+  line-height: 30px;
   color: #999999;
 }
 blockquote small:before {
@@ -709,9 +709,9 @@ blockquote:after {
 }
 address {
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   font-style: normal;
-  line-height: 20px;
+  line-height: 30px;
 }
 code,
 pre {
@@ -731,10 +731,10 @@ code {
 }
 pre {
   display: block;
-  padding: 9.5px;
-  margin: 0 0 10px;
+  padding: 14.5px;
+  margin: 0 0 15px;
   font-size: 13px;
-  line-height: 20px;
+  line-height: 30px;
   word-break: break-all;
   word-wrap: break-word;
   white-space: pre;
@@ -747,7 +747,7 @@ pre {
   border-radius: 4px;
 }
 pre.prettyprint {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 pre code {
   padding: 0;
@@ -760,7 +760,7 @@ pre code {
   overflow-y: scroll;
 }
 form {
-  margin: 0 0 20px;
+  margin: 0 0 30px;
 }
 fieldset {
   padding: 0;
@@ -771,15 +771,15 @@ legend {
   display: block;
   width: 100%;
   padding: 0;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   font-size: 21px;
-  line-height: 40px;
+  line-height: 60px;
   color: #333333;
   border: 0;
   border-bottom: 1px solid #e5e5e5;
 }
 legend small {
-  font-size: 15px;
+  font-size: 22.5px;
   color: #999999;
 }
 label,
@@ -789,7 +789,7 @@ select,
 textarea {
   font-size: 14px;
   font-weight: normal;
-  line-height: 20px;
+  line-height: 30px;
 }
 input,
 button,
@@ -819,11 +819,11 @@ input[type="tel"],
 input[type="color"],
 .uneditable-input {
   display: inline-block;
-  height: 20px;
+  height: 30px;
   padding: 4px 6px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   font-size: 14px;
-  line-height: 20px;
+  line-height: 30px;
   color: #555555;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -912,13 +912,13 @@ input[type="checkbox"] {
 }
 select,
 input[type="file"] {
-  height: 30px;
+  height: 40px;
   /* In IE7, the height of the select element cannot be changed by height, only font-size */
 
   *margin-top: 4px;
   /* For IE7, add top margin to align select with labels */
 
-  line-height: 30px;
+  line-height: 40px;
 }
 select {
   width: 220px;
@@ -969,7 +969,7 @@ textarea::-webkit-input-placeholder {
 }
 .radio,
 .checkbox {
-  min-height: 20px;
+  min-height: 30px;
   padding-left: 20px;
 }
 .radio input[type="radio"],
@@ -1263,9 +1263,9 @@ select:focus:required:invalid:focus {
   box-shadow: 0 0 6px #f8b9b7;
 }
 .form-actions {
-  padding: 19px 20px 20px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  padding: 29px 20px 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
   background-color: #f5f5f5;
   border-top: 1px solid #e5e5e5;
   *zoom: 1;
@@ -1285,7 +1285,7 @@ select:focus:required:invalid:focus {
 }
 .help-block {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 .help-inline {
   display: inline-block;
@@ -1338,12 +1338,12 @@ select:focus:required:invalid:focus {
 .input-prepend .add-on {
   display: inline-block;
   width: auto;
-  height: 20px;
+  height: 30px;
   min-width: 16px;
   padding: 4px 5px;
   font-size: 14px;
   font-weight: normal;
-  line-height: 20px;
+  line-height: 30px;
   text-align: center;
   text-shadow: 0 1px 0 #ffffff;
   background-color: #eeeeee;
@@ -1531,14 +1531,14 @@ input.search-query {
   margin-left: 0;
 }
 .control-group {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 legend + .control-group {
-  margin-top: 20px;
+  margin-top: 30px;
   -webkit-margin-top-collapse: separate;
 }
 .form-horizontal .control-group {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   *zoom: 1;
 }
 .form-horizontal .control-group:before,
@@ -1571,7 +1571,7 @@ legend + .control-group {
 .form-horizontal input + .help-block,
 .form-horizontal select + .help-block,
 .form-horizontal textarea + .help-block {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 .form-horizontal .form-actions {
   padding-left: 180px;
@@ -1584,12 +1584,12 @@ table {
 }
 .table {
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 .table th,
 .table td {
   padding: 8px;
-  line-height: 20px;
+  line-height: 30px;
   text-align: left;
   vertical-align: top;
   border-top: 1px solid #dddddd;
@@ -2572,7 +2572,7 @@ ul.icons li .icon-large:before {
 .dropdown-menu .divider {
   *width: 100%;
   height: 1px;
-  margin: 9px 1px;
+  margin: 14px 1px;
   *margin: -5px 0 5px;
   overflow: hidden;
   background-color: #e5e5e5;
@@ -2583,7 +2583,7 @@ ul.icons li .icon-large:before {
   padding: 3px 20px;
   clear: both;
   font-weight: normal;
-  line-height: 20px;
+  line-height: 30px;
   color: #333333;
   white-space: nowrap;
 }
@@ -2738,8 +2738,8 @@ ul.icons li .icon-large:before {
   padding: 4px 12px;
   margin-bottom: 0;
   font-size: 14px;
-  line-height: 20px;
-  *line-height: 20px;
+  line-height: 30px;
+  *line-height: 30px;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -3122,7 +3122,7 @@ input[type="submit"].btn.btn-mini {
 }
 .alert {
   padding: 8px 35px 8px 14px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   background-color: #fcf8e3;
   border: 1px solid #fbeed5;
@@ -3138,7 +3138,7 @@ input[type="submit"].btn.btn-mini {
   position: relative;
   top: -2px;
   right: -21px;
-  line-height: 20px;
+  line-height: 30px;
 }
 .alert-success {
   background-color: #dff0d8;
@@ -3169,7 +3169,7 @@ input[type="submit"].btn.btn-mini {
 }
 .nav {
   margin-left: 0;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   list-style: none;
 }
 .nav > li > a {
@@ -3187,7 +3187,7 @@ input[type="submit"].btn.btn-mini {
   padding: 3px 15px;
   font-size: 11px;
   font-weight: bold;
-  line-height: 20px;
+  line-height: 30px;
   color: #999999;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
@@ -3222,7 +3222,7 @@ input[type="submit"].btn.btn-mini {
 .nav-list .divider {
   *width: 100%;
   height: 1px;
-  margin: 9px 1px;
+  margin: 14px 1px;
   *margin: -5px 0 5px;
   overflow: hidden;
   background-color: #e5e5e5;
@@ -3264,7 +3264,7 @@ input[type="submit"].btn.btn-mini {
 .nav-tabs > li > a {
   padding-top: 8px;
   padding-bottom: 8px;
-  line-height: 20px;
+  line-height: 30px;
   border: 1px solid transparent;
   -webkit-border-radius: 4px 4px 0 0;
   -moz-border-radius: 4px 4px 0 0;
@@ -3494,7 +3494,7 @@ input[type="submit"].btn.btn-mini {
 }
 .navbar {
   overflow: visible;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   color: #777777;
   *position: relative;
   *z-index: 2;
@@ -3539,7 +3539,7 @@ input[type="submit"].btn.btn-mini {
 .navbar .brand {
   float: left;
   display: block;
-  padding: 10px 20px 10px;
+  padding: 5px 20px 5px;
   margin-left: -20px;
   font-size: 20px;
   font-weight: 200;
@@ -3700,7 +3700,7 @@ input[type="submit"].btn.btn-mini {
 }
 .navbar .nav > li > a {
   float: none;
-  padding: 10px 15px 10px;
+  padding: 5px 15px 5px;
   color: #777777;
   text-decoration: none;
   text-shadow: 0 1px 0 #ffffff;
@@ -4019,8 +4019,8 @@ input[type="submit"].btn.btn-mini {
 }
 .progress {
   overflow: hidden;
-  height: 20px;
-  margin-bottom: 20px;
+  height: 30px;
+  margin-bottom: 30px;
   background-color: #f7f7f7;
   background-image: -moz-linear-gradient(top, #f5f5f5, #f9f9f9);
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f5f5f5), to(#f9f9f9));
@@ -4240,7 +4240,7 @@ table.table-fixed-footer {
   padding-right: 6px;
 }
 #chat_input_field {
-  border-top: 2px solid #aaa;
+  border-top: 1px solid #d5d5d5;
   background: #f8f8f8;
   width: 100%;
   position: fixed;
@@ -4249,17 +4249,12 @@ table.table-fixed-footer {
 }
 #chat_input_field form {
   margin: 0;
-  padding: 4px 90px 4px 20px;
+  padding: 4px 20px;
   overflow: hidden;
   position: relative;
 }
 #chat_input_field input {
   width: 100%;
-}
-#chat_input_field button {
-  position: absolute;
-  right: 20px;
-  top: 4px;
 }
 /* settings */
 .connection-tab-container .nav {
@@ -4327,7 +4322,7 @@ table.table-fixed-footer {
 .input-block-level {
   display: block;
   width: 100%;
-  min-height: 30px;
+  min-height: 40px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -4489,7 +4484,7 @@ table.table-fixed-footer {
   .row-fluid [class*="span"] {
     display: block;
     width: 100%;
-    min-height: 30px;
+    min-height: 40px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -4814,7 +4809,7 @@ table.table-fixed-footer {
   .row-fluid [class*="span"] {
     display: block;
     width: 100%;
-    min-height: 30px;
+    min-height: 40px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -5084,7 +5079,7 @@ table.table-fixed-footer {
   .uneditable-input {
     display: block;
     width: 100%;
-    min-height: 30px;
+    min-height: 40px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -5120,7 +5115,7 @@ table.table-fixed-footer {
   }
   .page-header h1 small {
     display: block;
-    line-height: 20px;
+    line-height: 30px;
   }
   input[type="checkbox"],
   input[type="radio"] {
@@ -5177,7 +5172,7 @@ table.table-fixed-footer {
     position: static;
   }
   .navbar-fixed-bottom {
-    margin-top: 20px;
+    margin-top: 30px;
   }
   .navbar-fixed-top .navbar-inner,
   .navbar-fixed-bottom .navbar-inner {
@@ -5197,7 +5192,7 @@ table.table-fixed-footer {
   }
   .nav-collapse .nav {
     float: none;
-    margin: 0 0 10px;
+    margin: 0 0 15px;
   }
   .nav-collapse .nav > li {
     float: none;
@@ -5282,8 +5277,8 @@ table.table-fixed-footer {
   .nav-collapse .navbar-form,
   .nav-collapse .navbar-search {
     float: none;
-    padding: 10px 15px;
-    margin: 10px 0;
+    padding: 15px 15px;
+    margin: 15px 0;
     border-top: 1px solid #f2f2f2;
     border-bottom: 1px solid #f2f2f2;
     -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 1px 0 rgba(255,255,255,.1);

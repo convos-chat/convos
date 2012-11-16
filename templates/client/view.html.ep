@@ -19,7 +19,7 @@
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
     <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
-    <span class="message">Nick changed to "<%%= nick %>"</span>
+    <span class="message"><%%= old_nick %> changed nick to "<%%= new_nick %>"</span>
   </li>
 </script>
 <script type="text/html" id="server_status_template">
@@ -66,6 +66,5 @@
 <div id="chat_input_field">
   %= form_for '', class => 'form-inline', begin
     %= text_field 'say'
-    <button class="btn btn-primary">Send</button>
   % end
 </div>
