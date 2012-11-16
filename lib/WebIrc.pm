@@ -126,7 +126,7 @@ sub startup {
 
   # Normal route to controller
   my $r = $self->routes;
-  $r->get('/')->to(template => 'index');
+  $r->get('/')->to('client#view')->name('index');
   $r->get('/show-hide', [format => 'css'])->to(template => 'show-hide');
   $r->get('/login')->to(template => 'user/login');
   $r->get('/logout')->to('user#logout');
@@ -137,17 +137,7 @@ sub startup {
   my $private_r=$r->bridge('/')->to('user#auth');
   $private_r->route('/settings')->to('user#settings')->name('settings');
 
-  $private_r->route('/chat')->to('client#view');
-  $private_r->route('/chat/history/:page')->to('client#history');
-  $private_r->route('/close/#host/:target')->to('client#close')->name('irc_close');
-  $private_r->route('/disconnect/*host')->to('client#disconnect')->name('irc_disconnect');
-  $private_r->route('/join/*host')->to('client#join')->name('irc_join');
-
-  $private_r->route('/archive')->to('archive#list');
-  $private_r->route('/archive/search')->to('archive#search');
-  $private_r->route('/archive/:host/:target')->to('archive#view');
-  $private_r->route('/archive/:host/:target')->to('archive#view');
-
+  $private_r->get('/history/:page')->to('client#history');
   $private_r->websocket('/socket')->to('client#socket');
 
   $self->hook(before_dispatch => sub {

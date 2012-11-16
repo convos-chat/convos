@@ -30,6 +30,10 @@ sub view {
   my @keys = qw/ channels nick host /;
   my($connections, $cid, $target);
 
+  unless($uid) {
+    return $self->render(template => 'index');
+  }
+
   Mojo::IOLoop->delay(
     sub {
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);

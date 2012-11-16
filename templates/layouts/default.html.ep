@@ -20,10 +20,10 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <span class="brand"><%= app->config->{name} %></span>
+          <span class="brand"><%= link_to app->config->{name}, 'index' %></span>
           <div class="nav-collapse collapse">
             <ul class="nav main-menu pull-right">
-              <li class="visible-if-user"><%= link_to 'Chat', 'chat' %></li>
+              <li class="visible-if-user"><%= link_to 'Chat', 'index' %></li>
               <!-- li class="visible-if-user"><%= link_to 'Archive', 'archive' %></li -->
               <li class="visible-if-user"><%= link_to 'Settings', 'settings' %></li>
               <li class="visible-if-user"><%= link_to 'Logout', 'logout' %></li>
