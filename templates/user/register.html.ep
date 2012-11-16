@@ -8,20 +8,28 @@
         <label class="control-label" for="login">Username</label>
         <div class="controls">
           %= text_field 'login', id => 'login', class => 'span8';
-          <p class="help-block">Choose something that's simple to remember. Your IRC handle for instance.</p>
+          <p class="help-block"><%= stash('errors')->{login} || 'Choose something that\'s simple to remember. Your IRC handle for instance.'%></p>
         </div>
       % end
       %= form_block email => class => ['control-group'], begin
         <label class="control-label" for="login">Email</label>
         <div class="controls">
           %= text_field 'email', id => 'email', class => 'span8';
+          <p class="help-block"><%= stash('errors')->{email}%></p>
+        </div>
+      % end
+      %= form_block invite => class => ['control-group'], begin
+        <label class="control-label" for="invite">Invite Code</label>
+        <div class="controls">
+          %= text_field 'invite', id => 'invite', class => 'span8';
+          <p class="help-block"><%= stash('errors')->{invite} || 'Required unless this is your installation and you are the first user. Get invited by the site owner.'%></p>
         </div>
       % end
       %= form_block password => class => ['control-group'], begin
         <label class="control-label" for="password">Password</label>
         <div class="controls">
           %= password_field 'password', id => 'password', class => 'span8';
-          <p class="help-block">Your password need to be at least six characters long.</p>
+          <p class="help-block"><%= stash('errors')->{password} || 'Your password need to be at least six characters long.'%></p>
         </div>
       % end
       %= form_block password => class => ['control-group'], begin
