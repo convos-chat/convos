@@ -3698,6 +3698,9 @@ input[type="submit"].btn.btn-mini {
 .navbar .nav > li {
   float: left;
 }
+.navbar .nav.pull-right:last-child a {
+  padding-right: 5px;
+}
 .navbar .nav > li > a {
   float: none;
   padding: 9px 15px 9px;
@@ -4215,6 +4218,26 @@ table.table-fixed-footer {
   margin-top: 40px;
 }
 /* chat */
+#channel_list {
+  position: fixed;
+  top: 40px;
+  bottom: 40px;
+  left: 12px;
+  overflow-y: hidden;
+}
+#channel_list .nav {
+  height: 100%;
+}
+#channel_list .nav-tabs > li > a {
+  padding: 4px;
+  padding-left: 8px;
+}
+#channel_list .nav-tabs > li.server {
+  margin-top: 8px;
+}
+#channel_list .nav-tabs > li.server > a {
+  color: #000;
+}
 #chat_messages {
   margin-bottom: 45px;
   padding: 0 4px;
@@ -4250,7 +4273,7 @@ table.table-fixed-footer {
 }
 #chat_input_field form {
   margin: 0;
-  padding: 4px 34px 4px 20px;
+  padding: 4px 34px 4px 24px;
   overflow: hidden;
   position: relative;
 }
@@ -5018,14 +5041,18 @@ table.table-fixed-footer {
     padding-left: 20px;
     padding-right: 20px;
   }
-  .navbar-fixed-top,
-  .navbar-fixed-bottom,
-  .navbar-static-top {
-    margin-left: -20px;
-    margin-right: -20px;
-  }
   .container-fluid {
     padding: 0;
+  }
+  #channel_list {
+    height: auto;
+    background: #fff;
+    display: none;
+    /* need to be able to toggle this from a button... */
+  
+  }
+  #chat_input_field .span2 {
+    display: none;
   }
   .dl-horizontal dt {
     float: none;
@@ -5161,17 +5188,7 @@ table.table-fixed-footer {
     position: static;
   }
 }
-@media (max-width: 979px) {
-  body {
-    padding-top: 0;
-  }
-  #container {
-    margin-top: 0;
-  }
-  .navbar-fixed-top,
-  .navbar-fixed-bottom {
-    position: static;
-  }
+@media (max-width: 767px) {
   .navbar-fixed-bottom {
     margin-top: 22px;
   }
@@ -5308,7 +5325,7 @@ table.table-fixed-footer {
     padding-right: 10px;
   }
 }
-@media (min-width: 980px) {
+@media (min-width: 768px) {
   .nav-collapse.collapse {
     height: auto !important;
     overflow: visible !important;

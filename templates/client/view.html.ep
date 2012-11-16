@@ -1,38 +1,21 @@
 % title 'Chat';
 % my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
-% unless($as_history) {
-<script type="text/html" id="message_template">
-  <li class="<%%= class_name %>">
-    <span class="prefix"><%%= nick %>:</span>
-    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
-    <span class="message"><%%= message %></span>
-  </li>
-</script>
-<script type="text/html" id="action_message_template">
-  <li class="action">
-    <span class="action">* <%%= nick %> <%%= message %></span>
-    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
-  </li>
-</script>
-<script type="text/html" id="nick_change_template">
-  <li class="muted">
-    <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
-    <span class="message"><%%= old_nick %> changed nick to "<%%= new_nick %>"</span>
-  </li>
-</script>
-<script type="text/html" id="server_status_template">
-  <li class="muted">
-    <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
-    <span class="message"><%%= status == 200 ? 'Connected' : 'Error' %></span>
-  </li>
-</script>
+<div id="channel_list" class="tabbable tabs-left">
+  <ul class="nav nav-tabs span2">
+% for my $c (@$connections) {
+    <li class="server"><a href="#channel_list"><%= $c->{host} %></a></li>
+  % for my $channel (@{ $c->{channels} }) {
+    <li class="<%= $channel eq $target ? 'active' : '' %>"><%= link_with $channel, '', { target => $channel, cid => $c->{id} } %></li>
+  % }
 % }
-
+  </ul>
+</div>
 <div class="chat row-fluid">
-  <div class="span12">
+  <div class="span2">
+    <!-- hack to make the fixed channel_list above get space -->
+  </div>
+  <div class="span10">
     <ul class="unstyled" id="chat_messages"
       data-cid="<%= $connection_id %>"
       data-nick="<%= $nick %>"
@@ -64,7 +47,39 @@
   </div>
 </div>
 <div id="chat_input_field">
+  <div class="span2">&nbsp;</div>
   %= form_for '', class => 'form-inline', begin
     %= text_field 'say'
   % end
 </div>
+
+% unless($as_history) {
+<script type="text/html" id="message_template">
+  <li class="<%%= class_name %>">
+    <span class="prefix"><%%= nick %>:</span>
+    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
+    <span class="message"><%%= message %></span>
+  </li>
+</script>
+<script type="text/html" id="action_message_template">
+  <li class="action">
+    <span class="action">* <%%= nick %> <%%= message %></span>
+    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
+  </li>
+</script>
+<script type="text/html" id="nick_change_template">
+  <li class="muted">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span class="message"><%%= old_nick %> changed nick to "<%%= new_nick %>"</span>
+  </li>
+</script>
+<script type="text/html" id="server_status_template">
+  <li class="muted">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span class="message"><%%= status == 200 ? 'Connected' : 'Error' %></span>
+  </li>
+</script>
+% }
+

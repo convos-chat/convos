@@ -67,8 +67,17 @@ Structure.registerModule('Wirc.Chat', {
     $('html, body').scrollTop($('body').height());
   },
   receiveData: function(e) {
+    var data = $.parseJSON(e.data);
     if(window.console) console.log('[websocket] > ' + e.data);
-    this.print($.parseJSON(e.data));
+    if(data.joined) {
+      var $li = $('#channel_list li:last').clone();
+      // TODO: Fix a better link
+      $li.find('a').text(data.joined);
+      $('#channel_list > ul').append($li);
+    }
+    else {
+      this.print(data);
+    }
   },
   sendData: function(data) {
     // TODO: Figure out if JSON.stringify() works in other browsers than chrome

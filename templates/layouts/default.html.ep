@@ -2,7 +2,6 @@
 <html>
   <head><title><%= join ' - ', app->config->{name}, title %></title>
     %= stylesheet '/css/wirc.css';
-    %= stylesheet '/show-hide.css';
     %= javascript '/js/jquery.js';
     %= javascript '/js/bootstrap-typeahead.js';
     %= javascript '/js/template.js';
@@ -23,12 +22,14 @@
           <span class="brand"><%= link_to app->config->{name}, 'index' %></span>
           <div class="nav-collapse collapse">
             <ul class="nav main-menu pull-right">
-              <li class="visible-if-user"><%= link_to 'Chat', 'index' %></li>
-              <!-- li class="visible-if-user"><%= link_to 'Archive', 'archive' %></li -->
-              <li class="visible-if-user"><%= link_to 'Settings', 'settings' %></li>
-              <li class="visible-if-user"><%= link_to 'Logout', 'logout' %></li>
-              <li class="visible-no-user"><%= link_to 'Login', 'login' %></li>
-              <li class="visible-no-user"><%= link_to 'Register', 'register' %></li>
+            % if(session 'uid') {
+              <li><%= link_to 'Chat', 'index' %></li>
+              <li><%= link_to 'Settings', 'settings' %></li>
+              <li><%= link_to 'Logout', 'logout' %></li>
+            % } else {
+              <li><%= link_to 'Login', 'login' %></li>
+              <li><%= link_to 'Register', 'register' %></li>
+            % }
             </ul>
           </div>
         </div>
