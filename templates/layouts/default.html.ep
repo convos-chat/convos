@@ -24,7 +24,7 @@
           <div class="nav-collapse collapse">
             <ul class="nav main-menu pull-right">
               <li class="visible-if-user"><%= link_to 'Chat', 'chat' %></li>
-              <li class="visible-if-user"><%= link_to 'Archive', 'archive' %></li>
+              <!-- li class="visible-if-user"><%= link_to 'Archive', 'archive' %></li -->
               <li class="visible-if-user"><%= link_to 'Settings', 'settings' %></li>
               <li class="visible-if-user"><%= link_to 'Logout', 'logout' %></li>
               <li class="visible-no-user"><%= link_to 'Login', 'login' %></li>
