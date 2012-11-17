@@ -10,3 +10,5 @@ MANIFEST*
 !MANIFEST.SKIP
 *META.*
 /local
+
+public/bootstrap/
