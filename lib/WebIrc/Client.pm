@@ -27,7 +27,7 @@ Used to render the main IRC client view.
 sub view {
   my $self = shift->render_later;
   my $uid = $self->session('uid');
-  my @keys = qw/ channels nick host /;
+  my @keys = qw/ nick host /;
   my($connections);
   my $target=$self->param('target');
   my $cid=$self->param('cid');
@@ -50,10 +50,14 @@ sub view {
     sub {
       my($delay, @info) = @_;
 
+      my $cb=$delay->begin;
       for my $info (@info) {
         $info = { zip @keys, @$info };
-        $info->{channels} = [ split /,/, $info->{channels} ];
         $info->{id} = shift @$connections;
+        $self->redis->smembers("connection:".$info->{id}.':channels', sub {
+          my ($redis,$channels) = @_;
+          $info->{channels}=$channels;
+        });
       }
 
       @info = sort { $a->{host} cmp $b->{host} } @info;
@@ -78,7 +82,7 @@ sub view {
         "+inf" => "-inf",
         "withscores",
         "limit" => 0, $N_MESSAGES,
-        $delay->begin,
+        $cb,
       );
     },
     sub {
@@ -206,7 +210,10 @@ sub _handle_socket_data {
     if($data->{cmd} =~ s!^/(\w+)\s+(\S*)!!) {
       my($one, $two) = ($1, $2);
       given($one) {
-        when('j') { $data->{cmd} = "JOIN $two" }
+        when('j') { 
+          $data->{cmd} = "JOIN $two";
+          $self->redis->sadd("connection:$cid:channels",$two);
+        }
         when('me') { $data->{cmd} = "PRIVMSG $data->{target} :\x{1}ACTION $two$data->{cmd}\x{1}" }
         when('msg') { $data->{cmd} = "PRIVMSG $two :$data->{cmd}" }
         default { $data->{cmd} = join ' ', uc($one), $two }
@@ -214,6 +221,7 @@ sub _handle_socket_data {
     }
     elsif($data->{cmd} =~ m!/part\s*!i) {
       $data->{cmd} = "PART $data->{target}";
+      $self->redis->srem("connection:$cid:channels",$two);
     }
     else {
       $data->{cmd} = "PRIVMSG $data->{target} :$data->{cmd}";

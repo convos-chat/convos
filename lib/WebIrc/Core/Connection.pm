@@ -156,11 +156,12 @@ sub connect {
   my $id = $self->id or croak "Cannot load connection without id";
 
   $self->redis->execute(
-    [hgetall => "connection:$id"],
+    [hgetall  => "connection:$id"],
+    [smembers => "connection:$id:channels"],
     sub {
-      my ($redis, $attrs) = @_;
+      my ($redis, $attrs, $channels) = @_;
 
-      $self->channels($attrs->{channels});
+      $self->channels($channels);
       $self->_irc->server($attrs->{host});
       $self->_irc->nick($attrs->{nick});
       $self->_irc->user($attrs->{user});
@@ -175,9 +176,8 @@ sub connect {
       });
     }
   );
-
   $self;
-}
+};
 
 =head2 add_server_message
 
@@ -257,7 +257,7 @@ sub irc_rpl_welcome {
 
   $self->real_host($message->{prefix});
 
-  for my $channel (split /,/, $self->channels) {
+  for my $channel (@{ $self->channels }) {
     $self->_irc->write(JOIN => $channel);
   }
 }
