@@ -252,17 +252,17 @@ sub _add_connection {
 sub _update_connection {
   my $self = shift;
   my $cid = $self->param('connection');
-  # TODO: Should probably use some kind of $core->update_connection() to
-  # actually update nick, user ++ as well
 
   $self->param(user => $self->session('login')) unless $self->param('user');
 
   sub {
     $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
-    $self->redis->execute(
-      [ hmset => "connection:$cid", map { $_, scalar $self->param($_) } qw/ host user nick channels / ],
-      $_[0]->begin,
-    );
+    $self->app->core->update_connection($cid, {
+      host => $self->param('host') || '',
+      nick => $self->param('nick') || '',
+      user => $self->param('user') || $self->session('login'),
+      channels => $self->param('channels') || '',
+    }, $_[0]->begin);
   },
 }
 

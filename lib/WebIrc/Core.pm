@@ -101,6 +101,41 @@ sub add_connection {
   });
 }
 
+=head2 update_connection
+
+    $self->update_connection($cid, {
+      host => $str, # irc_server[:port]
+      nick => $str,
+      user => $str,
+      channels => $str, # '#foo #bar, ...'
+    }, $callback);
+
+Update a connection's settings and reconnect.
+
+=cut
+sub update_connection {
+  my ($self,$cid,$conn,$cb)=@_;
+  my %errors;
+
+  for my $name (qw/ host nick user /) {
+    next if $conn->{$name};
+    $errors{$name} = "$name is required.";
+  }
+
+  $conn->{channels} =~ s/[\s,]+/,/g;
+
+  return $self->$cb(undef, \%errors) if keys %errors;
+
+    $self->redis->execute(
+      [ hmset => "connection:$cid", %$conn ],
+      sub {
+	# flush
+	 $self->_connections->{$cid}->disconnect;
+         $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+	 $self->$cb($cid) },
+    );
+}
+
 =head2 login
 
   $self->login({ login => $str, password => $str }, $callback);

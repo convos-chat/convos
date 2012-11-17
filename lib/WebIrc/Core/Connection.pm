@@ -116,7 +116,7 @@ has _irc => sub {
   $irc->register_default_event_handlers;
   $irc->on(close => sub {
     $self->log->debug('Reconnecting on close...');
-    $self->_irc->ioloop->timer(1, sub { $self->connect(sub {}); });
+    $self->_irc->ioloop->timer(30, sub { $self->connect(sub {}); });
   });
   $irc->on(error => sub {
     $self->log->error("Reconnecting on error: $_[1]");
