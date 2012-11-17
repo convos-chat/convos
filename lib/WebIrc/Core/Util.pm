@@ -14,8 +14,10 @@ L</import> can export any of the L</FUNCTIONS>.
 
 use strict;
 use warnings;
+use Mojo::Log;
 use Parse::IRC ();
 
+my $LOGGER = Mojo::Log->new;
 my @days = qw/ Sun Mon Tue Wed Thu Fri Sat /;
 my @months = qw/ Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec /;
 my %date_markers = (
@@ -30,6 +32,36 @@ my %date_markers = (
 );
 
 =head1 FUNCTIONS
+
+=head2 logf
+
+  $c->logf($level => $format, @args);
+  $c->logf(debug => 'yay %s', \%data);
+
+Used to log more complex datastructures and to prevent logging C<undef>.
+
+=cut
+
+sub logf {
+  use Data::Dumper;
+  my($self, $level, $format, @args) = @_;
+  my $log = $self->{app}{log} || $self->{log} || $LOGGER;
+
+  local $Data::Dumper::Maxdepth = 2;
+  local $Data::Dumper::Indent = 0;
+  local $Data::Dumper::Terse = 1;
+
+  for my $arg (@args) {
+    if(ref($arg) =~ /^\w+$/) {
+      $arg = Dumper($arg);
+    }
+    elsif(!defined $arg) {
+      $arg = '__UNDEF__';
+    }
+  }
+
+  $log->$level(sprintf $format, @args);
+}
 
 =head2 pack_irc
 
