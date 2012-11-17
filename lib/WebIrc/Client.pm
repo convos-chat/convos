@@ -28,8 +28,9 @@ sub view {
   my $self = shift->render_later;
   my $uid = $self->session('uid');
   my @keys = qw/ channels nick host /;
-  my($connections, $cid);
+  my($connections);
   my $target=$self->param('target');
+  my $cid=$self->param('cid');
 
   unless($uid) {
     return $self->render(template => 'index');
@@ -56,7 +57,7 @@ sub view {
       }
 
       @info = sort { $a->{host} cmp $b->{host} } @info;
-      $cid = $info[0]{id};
+      $cid //= $info[0]{id};
       $target //= $info[0]{channels}[0];
 
       $self->stash(
