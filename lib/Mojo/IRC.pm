@@ -359,26 +359,20 @@ sub connect {
 
 =head2 disconnect
 
-  $self->disconnect(\&callback);
+  $self->disconnect($callback);
 
-Will disconnect form the server.
+Will disconnect form the server and run the callback once it is done.
 
 =cut
 
 sub disconnect {
-  my ($self, $cb) = @_;
+  my($self, $cb) = @_;
 
-  # already disconnected
   return $self->$cb unless $self->{stream};
-
-  # TODO: Figure out how this really works:
-  # I think ->close will kill the connection at once and never fire the close
-  # event...
-  # I think you are right:
-  # Event "irc_error" failed: Can't call method "once" on an undefined value at script/../lib/Mojo/IRC.pm line 345.
-  $self->write('QUIT');
-  $self->{stream}->close;
-  $self->{stream}->once(close => $cb);
+  return $self->{stream}->write("QUIT\r\n", sub {
+    $self->{stream}->close;
+    $self->$cb;
+  });
 }
 
 =head2 register_default_event_handlers
