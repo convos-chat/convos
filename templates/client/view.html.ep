@@ -36,13 +36,6 @@
       </li>
       % }
     % }
-    % unless($as_history) {
-      <li class="muted <%= $n++ % 2 ? 'odd' : 'even' %>">
-        <span class="prefix"><%= app->config->{name} %>:</span>
-        <span class="timestamp pull-right"><%= format_time time, '%H:%M:%S' %></span>
-        <span class="message">Connecting to <%= $target %>...</span>
-      </li>
-    % }
     </dl>
   </div>
 </div>
