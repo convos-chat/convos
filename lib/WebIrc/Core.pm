@@ -85,8 +85,7 @@ sub add_connection {
     $errors{$name} = "$name is required.";
   }
 
-  $conn->{channels} =~ s/[\s,]+/,/g;
-
+  my @channels= split  =~ m/[\s,]+/, delete $conn->{channels};
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->incr('connections:id',sub {
     my ($redis,$cid) = @_;
@@ -96,6 +95,7 @@ sub add_connection {
       [ sadd => "connections", $cid ],
       [ sadd => "user:$uid:connections", $cid ],
       [ hmset => "connection:$cid", %$conn ],
+      [ sadd=> "connection:$cid:channels", @channels ],
       sub { $self->$cb($cid) },
     );
   });
@@ -122,17 +122,19 @@ sub update_connection {
     $errors{$name} = "$name is required.";
   }
 
-  $conn->{channels} =~ s/[\s,]+/,/g;
+  my @channels= split  =~ m/[\s,]+/, delete $conn->{channels};
 
   return $self->$cb(undef, \%errors) if keys %errors;
 
     $self->redis->execute(
       [ hmset => "connection:$cid", %$conn ],
+      [ sadd  => "connection:$cid:channels", @channels],
       sub {
-	# flush
-	 $self->_connections->{$cid}->disconnect;
-         $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-	 $self->$cb($cid) },
+	      # flush
+	      $self->_connections->{$cid}->disconnect;
+        $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+	      $self->$cb($cid) ;
+      },
     );
 }
 
