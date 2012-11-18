@@ -221,7 +221,7 @@ sub _handle_socket_data {
     }
     elsif($data->{cmd} =~ m!/part\s*!i) {
       $data->{cmd} = "PART $data->{target}";
-      $self->redis->srem("connection:$cid:channels",$two);
+      $self->redis->srem("connection:$cid:channels",$data->{target});
     }
     else {
       $data->{cmd} = "PRIVMSG $data->{target} :$data->{cmd}";

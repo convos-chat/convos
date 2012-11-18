@@ -85,7 +85,9 @@ sub add_connection {
     $errors{$name} = "$name is required.";
   }
 
-  my @channels= split  =~ m/[\s,]+/, delete $conn->{channels};
+  my $channels= delete $conn->{channels};
+  my @channels= split m/[\s,]+/, $channels;
+
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->incr('connections:id',sub {
     my ($redis,$cid) = @_;
@@ -121,13 +123,14 @@ sub update_connection {
     next if $conn->{$name};
     $errors{$name} = "$name is required.";
   }
-
-  my @channels= split  =~ m/[\s,]+/, delete $conn->{channels};
+  my $channels= delete $conn->{channels};
+  my @channels= split m/[\s,]+/, $channels;
 
   return $self->$cb(undef, \%errors) if keys %errors;
 
     $self->redis->execute(
       [ hmset => "connection:$cid", %$conn ],
+      [ del   => "connection:$cid:channels"],
       [ sadd  => "connection:$cid:channels", @channels],
       sub {
 	      # flush
