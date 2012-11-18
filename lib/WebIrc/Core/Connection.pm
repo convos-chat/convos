@@ -173,7 +173,7 @@ sub connect {
         utf8::encode($msg);
         $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $msg);
         $self->add_message($msg);
-      });
+      }) if $self->{sub};
     }
   );
   $self;

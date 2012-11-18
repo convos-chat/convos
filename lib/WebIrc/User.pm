@@ -209,14 +209,18 @@ sub settings {
       return $last->() unless $cids and @$cids;
       $self->redis->execute(
         (map { [ hgetall => "connection:$_" ] } @$cids),
+        (map { [ smembers => "connection:$_:channels" ] } @$cids),
+
         $_[0]->begin
       );
     },
     sub { # convert connections to data structures
       my $delay = shift;
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
-      for my $info (@_) {
-        $info->{id} = shift @$cids;
+      for(my $i=0; $i<@$cids; $i++) {
+        my $info=$_[$i];
+        $info->{id} = $cids->[$i];
+        $info->{channels}=join(' ',@{ $_[@$cids+$i] });
         push @connections, $info;
       }
       $last->();
