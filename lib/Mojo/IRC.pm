@@ -243,11 +243,21 @@ has ioloop => sub { Mojo::IOLoop->singleton };
 
 =head2 nick
 
-IRC server nickname.
+IRC server nickname. Will also change the nick in the server if this attribute
+is changed and we are connected to the IRC server.
 
 =cut
 
-has nick => '';
+sub nick {
+  my $self = shift;
+  my $old = $self->{nick} // '';
+
+  return $old if !@_;
+  return $self if $old eq $_[1];
+  $self->{nick} = $_[1];
+  $self->write("NICK $_[1]") if $self->{stream};
+  $self;
+}
 
 =head2 real_host
 
@@ -268,11 +278,21 @@ has user => '';
 
 =head2 server
 
-Server name and optionally a port to connect to.
+Server name and optionally a port to connect to. Changing this while connected
+to the IRC server will issue a reconnect.
 
 =cut
 
-has server => '';
+sub server {
+  my $self = shift;
+  my $old = $self->{server} || '';
+
+  return $old if !@_;
+  return $self if $old eq $_[1];
+  $self->{server} = $_[1];
+  $self->disconnect(sub { $self->connect(sub {}) });
+  $self;
+}
 
 =head2 name
 
@@ -305,7 +325,7 @@ sub connect {
   my ($self, $callback) = @_;
   my ($host, $port) = split /:/, $self->server;
 
-  if (ref $self->{stream}) {
+  if ($self->{stream_id}) {
     return $self->$callback;
   }
 
@@ -329,6 +349,7 @@ sub connect {
           $self or return;
           $self->emit('close');
           delete $self->{stream};
+          delete $self->{stream_id};
         }
       );
       $stream->on(
