@@ -51,6 +51,7 @@ use Mojo::IRC;
 use Mojo::JSON;
 use WebIrc::Core::Util qw/ pack_irc /;
 use Parse::IRC ();
+use IRC::Utils qw/parse_user/;
 use Scalar::Util qw/ weaken /;
 use Carp qw/ croak /;
 use Time::HiRes qw/time/;
@@ -222,9 +223,10 @@ Will add a private message to the database.
 sub add_message {
   my ($self, $message) = @_;
   my $time = time;
+  my $target= $message->{params}->[0] =~ /^\#/x ?$message->{params}->[0]:  parse_user($message->{prefix});
 
   $self->redis->zadd(
-    "connection:@{[$self->id]}:$message->{params}[0]:msg",
+    "connection:@{[$self->id]}:$target:msg",
     $time, $message->{raw_line}
   );
   $self->_publish({
@@ -236,7 +238,7 @@ sub add_message {
   });
 
   unless ($message->{params}->[0] =~ /^\#/x) {    # not a channel
-    $self->redis->sadd("connection:@{[$self->id]}:conversations", $message->{params}[0]);
+    $self->redis->sadd("connection:@{[$self->id]}:conversations", $target);
   }
 }
 

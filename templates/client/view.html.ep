@@ -4,10 +4,14 @@
 <div id="channel_list" class="tabbable tabs-left">
   <ul class="nav nav-tabs span2">
 % for my $c (@$connections) {
-    <li class="server"><a href="#channel_list"><%= $c->{host} %></a></li>
+    <li class="server"><a href="[%link%]"><%= $c->{host} %></a></li>
   % for my $channel (@{ $c->{channels} }) {
     <li class="<%= $channel eq $target ? 'active' : '' %>"><%= link_with $channel, '', { target => $channel, cid => $c->{id} } %></li>
   % }
+  % for my $conversation (@{ $c->{conversations} }) {
+    <li class="<%= $conversation eq $target ? 'active' : '' %>"><%= link_with $conversation, '', { target => $conversation, cid => $c->{id} } %></li>
+  % }
+  
 % }
   </ul>
 </div>

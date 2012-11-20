@@ -54,10 +54,14 @@ sub view {
       for my $info (@info) {
         $info = { zip @keys, @$info };
         $info->{id} = shift @$connections;
-        $self->redis->smembers("connection:".$info->{id}.':channels', sub {
-          my ($redis,$channels) = @_;
+        $self->redis->execute(
+          ['smembers', "connection:".$info->{id}.':channels'],
+          ['smembers', "connection:".$info->{id}.':conversations'], sub {
+          my ($redis,$channels,$conversations) = @_;
           $info->{channels}=$channels;
+          $info->{conversations}=$conversations;
         });
+        
       }
 
       @info = sort { $a->{host} cmp $b->{host} } @info;
