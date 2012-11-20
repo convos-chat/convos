@@ -275,7 +275,7 @@ sub irc_err_nicknameinuse {
   my ($self,$message) =@_;
   $self->_irc->nick($self->_irc->nick.'_');
   $self->redis->hset("connection:@{[$self->id]}", nick => $self->_irc->nick);
-  $self->_irc->write(NICK =>$self->_irc->nick );  
+  $self->_irc->write(NICK =>$self->_irc->nick );
 }
 
 =head2 irc_rpl_myinfo
