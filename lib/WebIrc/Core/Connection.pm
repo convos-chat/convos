@@ -172,7 +172,15 @@ sub connect {
         $self->_irc->write($msg);
         utf8::encode($msg);
         $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $msg);
-        $self->add_message($msg);
+        if($msg->{command} eq 'PRIVMSG') {
+          $self->add_message($msg);
+        }
+        else {
+          my $action='cmd_'.lc($msg->{command});
+          warn "BOO:".$action;  
+          $self->$action($msg) if $self->can($action);
+        }
+        
       }) if $self->{sub};
     }
   );
@@ -342,6 +350,18 @@ sub irc_error {
 sub _publish {
   my($self, $data) = @_;
   $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
+}
+
+
+sub cmd_join {
+  my($self,$msg)=@_;
+  $self->redis->sadd("connection:@{[$self->id]}:channels",@{$msg->{params}});
+
+}
+
+sub cmd_part {
+  my($self,$msg)=@_;
+  $self->redis->srem("connection:@{[$self->id]}:channels",@{$msg->{params}});
 }
 
 =head1 COPYRIGHT
