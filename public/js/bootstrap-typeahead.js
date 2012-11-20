@@ -202,7 +202,6 @@
       if (!this.shown) return
 
       switch(e.keyCode) {
-        case 9: // tab
         case 13: // enter
         case 27: // escape
           e.preventDefault()
@@ -213,6 +212,7 @@
           this.prev()
           break
 
+        case 9:  // tab
         case 40: // down arrow
           e.preventDefault()
           this.next()
@@ -239,9 +239,9 @@
         case 16: // shift
         case 17: // ctrl
         case 18: // alt
+        case 9: // tab
           break
 
-        case 9: // tab
         case 13: // enter
           if (!this.shown) return
           this.select()
