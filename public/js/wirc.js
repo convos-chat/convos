@@ -48,7 +48,7 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     if(data.status) {
-      $messages.append(tmpl('server_status_template', data));
+      $('#ws-status').css('color','#33CC33');
     }
     else if(data.new_nick) {
       if(data.old_nick == this.nick) {
