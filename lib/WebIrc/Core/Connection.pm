@@ -106,7 +106,7 @@ has log => sub { Mojo::Log->new };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome /;
-my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_rpl_namreply irc_error /;
+my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_rpl_namreply irc_error irc_err_nicknameinuse /;
 
 has _irc => sub {
   my $self = shift;
@@ -268,6 +268,14 @@ sub irc_rpl_welcome {
   for my $channel (@{ $self->channels }) {
     $self->_irc->write(JOIN => $channel);
   }
+}
+
+use Data::Dumper;
+sub irc_err_nicknameinuse {
+  my ($self,$message) =@_;
+  $self->_irc->nick($self->_irc->nick.'_');
+  $self->redis->hset("connection:@{[$self->id]}", nick => $self->_irc->nick);
+  $self->_irc->write(NICK =>$self->_irc->nick );  
 }
 
 =head2 irc_rpl_myinfo
