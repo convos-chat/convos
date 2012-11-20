@@ -212,7 +212,6 @@ sub _handle_socket_data {
       given($one) {
         when('j') { 
           $data->{cmd} = "JOIN $two";
-          $self->redis->sadd("connection:$cid:channels",$two);
         }
         when('me') { $data->{cmd} = "PRIVMSG $data->{target} :\x{1}ACTION $two$data->{cmd}\x{1}" }
         when('msg') { $data->{cmd} = "PRIVMSG $two :$data->{cmd}" }
@@ -221,7 +220,6 @@ sub _handle_socket_data {
     }
     elsif($data->{cmd} =~ m!/part\s*!i) {
       $data->{cmd} = "PART $data->{target}";
-      $self->redis->srem("connection:$cid:channels",$data->{target});
     }
     else {
       $data->{cmd} = "PRIVMSG $data->{target} :$data->{cmd}";
