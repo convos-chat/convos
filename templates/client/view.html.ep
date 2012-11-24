@@ -11,7 +11,7 @@
   % for my $conversation (@{ $c->{conversations} }) {
     <li class="<%= $conversation eq $target ? 'active' : '' %>"><%= link_with $conversation, '', { target => $conversation, cid => $c->{id} } %></li>
   % }
-  
+
 % }
   </ul>
 </div>
@@ -44,7 +44,7 @@
   </div>
 </div>
 <div id="chat_input_field">
-  <div class="span2">&nbsp;<span id="ws-status">☁</span>&nbsp;</div>
+  <div class="span2">&nbsp;</div>
   %= form_for '', class => 'form-inline', begin
     %= text_field 'say'
   % end

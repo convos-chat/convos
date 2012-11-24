@@ -46,7 +46,9 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     if(data.status) {
-      $('#ws-status').css('color','#33CC33');
+      if(data.status == this.status) return; // do not want duplicate status messages
+      if(data.message) $messages.append(tmpl('server_status_template', data));
+      this.status = data.status;
     }
     else if(data.new_nick) {
       if(data.old_nick == this.nick) {
@@ -94,19 +96,15 @@ Structure.registerModule('Wirc.Chat', {
     self.websocket = Wirc.websocket('/socket', {
       onmessage: self.receiveData,
       onopen: function function_name (argument) {
-        self.$input.attr('disabled',undefined);
-        $('#ws-status').css('color','green');
+        self.$input.removeAttr('disabled').css({ background: '#fff' }).val('');
         self.sendData({ cid: self.connection_id, target: self.target });
       },
       onerror: function(e) {
-        self.print({ error: e.data });
-        self.$input.attr('disabled', 'disabled');
-        $('#ws-status').css('color','red');
+        self.$input.attr('disabled', 'disabled').css({ background: '#fdd' }).val(e);
+        // TODO: Should we reconnect here?
       },
       onclose: function() {
-        self.print({ error: 'Disconnected.' });
-        $('#ws-status').css('color','orange');
-        self.$input.attr('disabled', 'disabled');
+        self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Reconnecting...');
       }
     });
   },
@@ -135,6 +133,7 @@ Structure.registerModule('Wirc.Chat', {
         }
       });
 
+    self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Connecting...');
     self.$input.parents('form').submit(function() {
       self.sendData({ cid: self.connection_id, target: self.target, cmd: self.$input.val() });
       self.$input.val('');
