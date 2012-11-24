@@ -228,7 +228,8 @@ use Parse::IRC ();
 use Scalar::Util 'weaken';
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
-my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice /;
+my $TIMEOUT = 60;
+my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice irc_rpl_welcome /;
 
 =head1 ATTRIBUTES
 
@@ -247,6 +248,15 @@ IRC server nickname.
 =cut
 
 has nick => '';
+
+=head2 real_host
+
+Will be set by L</irc_rpl_welcome>. Holds the actual hostname of the IRC
+server that we are connected to.
+
+=cut
+
+has real_host => '';
 
 =head2 user
 
@@ -312,7 +322,7 @@ sub connect {
 
       $err and return $self->emit(error => $err);
 
-      $stream->timeout(600); # TODO: I think we should get a PING during 600 seconds..?
+      $stream->timeout($TIMEOUT);
       $stream->on(
         close => sub {
           warn "[@{[$self->server]}] : close\n" if DEBUG;
@@ -368,8 +378,14 @@ Will disconnect form the server and run the callback once it is done.
 sub disconnect {
   my($self, $cb) = @_;
 
-  return $self->$cb unless $self->{stream};
-  return $self->{stream}->write("QUIT\r\n", sub {
+  if(my $tid = delete $self->{ping_tid}) {
+    $self->ioloop->remove($tid);
+  }
+  if(!$self->{stream}) {
+    return $self->$cb;
+  }
+
+  $self->{stream}->write("QUIT\r\n", sub {
     $self->{stream}->close;
     $self->$cb;
   });
@@ -451,7 +467,24 @@ Responds to the server with "PONG ...".
 
 sub irc_ping {
   my ($self, $message) = @_;
-  $self->write(PONG => $message->{params}->[0]);
+  $self->write(PONG => $message->{params}[0]);
+}
+
+=head2 irc_rpl_welcome
+
+Used to get the hostname of the server. Will also set up automatic PING
+requests to prevent timeout.
+
+=cut
+
+sub irc_rpl_welcome {
+  my ($self, $message) = @_;
+
+  Scalar::Util::weaken($self);
+  $self->real_host($message->{prefix});
+  $self->{ping_tid} = $self->ioloop->timer($TIMEOUT - 10, sub {
+    $self->write(PING => $self->real_host);
+  });
 }
 
 =head2 irc_err_nicknameinuse
@@ -470,10 +503,12 @@ sub irc_err_nicknameinuse {
 
 sub DESTROY {
   my $self = shift;
-  my $id = $self->{stream_id} or return;
   my $ioloop = $self->ioloop or return;
+  my $tid = $self->{ping_tid};
+  my $sid = $self->{stream_id};
 
-  $ioloop->remove($id);
+  $ioloop->remove($sid) if $sid;
+  $ioloop->remove($tid) if $tid;
 }
 
 =head1 COPYRIGHT
