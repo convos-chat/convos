@@ -224,6 +224,7 @@ Internal errors with the mojo ioloop
 use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::IOLoop;
 use IRC::Utils;
+use Carp qw/croak/;
 use Parse::IRC ();
 use Scalar::Util 'weaken';
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
@@ -443,6 +444,7 @@ with " " and "\r\n" will be appended.
 sub write {
   my $self = shift;
   my $buf = join ' ', @_;
+  croak('Tried to write without a stream') unless ref $self->{stream};
   warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
   $self->{stream}->write("$buf\r\n");
 }

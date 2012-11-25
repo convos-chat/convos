@@ -23,11 +23,10 @@ Mojo::IOLoop->server(
 
 {
   my %got;
-  my $irc = Mojo::IRC->new(
-              nick => 'test123',
-              user => 'my name',
-              host => $ENV{IRC_HOST} || "localhost:$port",
-            );
+  my $irc = Mojo::IRC->new();
+  $irc->nick('test123');
+  $irc->user('my name');
+  $irc->server($ENV{IRC_HOST} || "localhost:$port");
 
   $irc->on(irc_join => sub {
     my($self, $message) = @_;
