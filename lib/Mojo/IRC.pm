@@ -284,12 +284,12 @@ to the IRC server will issue a reconnect.
 =cut
 
 sub server {
-  my $self = shift;
+  my ($self,$server) = @_;
   my $old = $self->{server} || '';
 
-  return $old if !@_;
-  return $self if $old && $old eq $_[1];
-  $self->{server} = $_[1];
+  return $old unless defined $server;
+  return $self if $old && $old eq $server;
+  $self->{server} = $server;
   $self->disconnect(sub { $self->connect(sub {}) });
   $self;
 }
