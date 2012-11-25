@@ -229,7 +229,7 @@ use Scalar::Util 'weaken';
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
 my $TIMEOUT = 60;
-my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice irc_rpl_welcome /;
+my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice irc_rpl_welcome irc_err_nicknameinuse/;
 
 =head1 ATTRIBUTES
 
@@ -249,13 +249,13 @@ is changed and we are connected to the IRC server.
 =cut
 
 sub nick {
-  my $self = shift;
+  my ($self,$nick) = @_;
   my $old = $self->{nick} // '';
 
-  return $old if !@_;
-  return $self if $old eq $_[1];
-  $self->{nick} = $_[1];
-  $self->write("NICK $_[1]") if $self->{stream};
+  return $old unless defined $nick;
+  return $self if $old && $old eq $nick;
+  $self->{nick} = $nick;
+  $self->write(NICK => $nick) if $self->{stream};
   $self;
 }
 
@@ -288,7 +288,7 @@ sub server {
   my $old = $self->{server} || '';
 
   return $old if !@_;
-  return $self if $old eq $_[1];
+  return $self if $old && $old eq $_[1];
   $self->{server} = $_[1];
   $self->disconnect(sub { $self->connect(sub {}) });
   $self;
