@@ -51,6 +51,11 @@ See L<WebIrc::Core::Util/logf>.
 
 Returns a L<Mojo::Redis> object.
 
+=head3 as_id
+
+strip non-word characters from input.
+
+
 =head1 METHODS
 
 =head2 register
@@ -65,6 +70,7 @@ sub register {
     $app->helper(form_block => \&form_block);
     $app->helper(logf => \&WebIrc::Core::Util::logf);
     $app->helper(redis => sub { shift->app->redis(@_) });
+    $app->helper( as_id => sub { my ($self,$val)=@_; $val =~ s/\W+//g; $val } );
 }
 
 =head1 AUTHOR
