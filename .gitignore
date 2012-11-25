@@ -1,4 +1,4 @@
-.*
+
 *~
 !.gitignore
 !.perltidyrc
@@ -11,4 +11,4 @@ MANIFEST*
 *META.*
 /local
 
-public/bootstrap/
+
