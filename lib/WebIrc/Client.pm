@@ -179,7 +179,7 @@ sub socket {
   });
   $self->redis->smembers("user:$uid:connections", sub {
     my ($reds,$cids)=@_;
-    $self->_subscribe_to_server_messages($_) for $cids;
+    $self->_subscribe_to_server_messages($_) for @$cids;
     my %allowed=map { $_ => 1 } @$cids;
 
     $self->on(message => sub {
