@@ -363,11 +363,23 @@ sub _publish {
 }
 
 
+=head1 cmd_join
+
+Handle join commands from user. Add to channel set.
+
+=cut
+
 sub cmd_join {
   my($self,$msg)=@_;
   $self->redis->sadd("connection:@{[$self->id]}:channels",@{$msg->{params}});
 
 }
+
+=head1 cmd_part
+
+Handle part commands from user. Remove from channel set.
+
+=cut
 
 sub cmd_part {
   my($self,$msg)=@_;
