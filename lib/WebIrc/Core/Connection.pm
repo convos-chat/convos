@@ -272,7 +272,6 @@ sub irc_rpl_welcome {
   }
 }
 
-use Data::Dumper;
 sub irc_err_nicknameinuse {
   my ($self,$message) =@_;
   $self->_irc->nick($self->_irc->nick.'_');
