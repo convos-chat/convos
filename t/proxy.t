@@ -8,7 +8,7 @@ use warnings;
 
 
 
- populate_redis($redis);
+my $redis= setup_test();
 my $core = WebIrc::Core->new(redis => $redis);
 $core->start;
 use_ok('WebIrc::Proxy');
@@ -30,7 +30,7 @@ $proxy->start(
       }
     );
     my $irc = Mojo::IRC->new(nick => 'test', user => 'test', pass => 'testing', host => "localhost:$port");
-    warn('Connecting to ' . $irc->host);
+    warn('Connecting to ' . $irc->server);
     $irc->on(
       irc_rpl_namreply=> sub {
         my ($self, $message) = @_;
@@ -60,6 +60,7 @@ done_testing;
 
 sub setup_test {
   my $t=shift;
-  my $redis = Mojo::Redis->new(server => '127.0.0.1:6379');
-  $redis->select(11,$delay->begin);
+  my $redis = Mojo::Redis->new(server => 'redis://127.0.0.1:6379/1');
+  $redis->flushall;
+  return $redis;
 }
