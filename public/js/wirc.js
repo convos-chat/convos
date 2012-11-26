@@ -72,11 +72,11 @@ Structure.registerModule('Wirc.Chat', {
     var data = $.parseJSON(e.data);
     if(window.console) console.log('[websocket] > ' + e.data);
     if(data.joined) {
-      data.channel_id=data.joined;
-      data.channel_id.replace(new RegExp("\\W+"),"");
-      var $channel=$('#connection_'+data.cid+' #channel'+data.channel_id);
+      data.channel_id=data.joined.replace(/\W/g,'');
+      var $channel=$('#connection_'+data.cid+' #channel_'+data.channel_id);
       if(!$channel.length) {
-        $('#connection_'+data.cid+' ul').append(tmpl('new_channel_template'),data);
+        console.log(data.cid);
+        $('#connection_'+data.cid+' ul').append(tmpl('new_channel_template',data));
       }
     }
     else {

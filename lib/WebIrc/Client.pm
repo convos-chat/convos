@@ -236,7 +236,6 @@ sub _subscribe_to_server_messages {
     my ($redis, $message)=@_;
     $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
     utf8::decode($message);
-
     $self->send({ text => $message });
   });
 

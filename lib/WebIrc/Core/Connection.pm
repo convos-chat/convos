@@ -352,6 +352,7 @@ sub irc_error {
 
 sub _publish {
   my($self, $data) = @_;
+  $data->{cid}=$self->id;
   $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
 }
 
