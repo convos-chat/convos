@@ -4,7 +4,7 @@
 <div id="channel_list" class="tabbable tabs-left">
   <ul class="nav nav-tabs span2">
 % for my $c (@$connections) {
-    <li class="server" id="connection_<%= as_id($c->{id})%>">"<%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a></li><ul>
+    <li class="server" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a></li><ul>
   % for my $channel (@{ $c->{channels} }) {
     <li id="channel_<%= as_id($channel) %>" class="<%= $channel eq $target ? 'active' : '' %>"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
   % }
