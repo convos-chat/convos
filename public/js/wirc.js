@@ -73,10 +73,10 @@ Structure.registerModule('Wirc.Chat', {
     if(window.console) console.log('[websocket] > ' + e.data);
     if(data.joined) {
       data.channel_id=data.joined.replace(/\W/g,'');
-      var $channel=$('#connection_'+data.cid+' #channel_'+data.channel_id);
+      var $channel=$('#target_'+data.cid+'_'+data.channel_id);
       if(!$channel.length) {
         console.log(data.cid);
-        $('#connection_'+data.cid+' ul').append(tmpl('new_channel_template',data));
+        $('#connection_'+data.cid+' .channels').append(tmpl('new_channel_template',data));
       }
     }
     else {
