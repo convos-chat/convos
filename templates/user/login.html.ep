@@ -19,7 +19,7 @@
       % end
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Login</button>
-        <button type="submit" name="register" value="1" class="btn">Register</button>
+        %= link_to('or click here to make a new account.','register');
       </div>
     % end
   </div>
