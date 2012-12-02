@@ -378,6 +378,7 @@ Handle part commands from user. Remove from channel set.
 sub cmd_part {
   my($self,$msg)=@_;
   $self->redis->srem("connection:@{[$self->id]}:channels",@{$msg->{params}});
+  $self->_publish({ parted => $msg->{params}[0], timestamp => time });
 }
 
 =head1 COPYRIGHT

@@ -79,6 +79,10 @@ Structure.registerModule('Wirc.Chat', {
         $('#connection_'+data.cid+' .channels').append(tmpl('new_channel_template',data));
       }
     }
+    else if(data.parted) {
+      data.channel_id=data.parted.replace(/\W/g,'');
+      $('#target_'+data.cid+'_'+data.channel_id).remove();
+    }
     else {
       this.print(data);
     }
