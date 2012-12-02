@@ -1,7 +1,4 @@
 #!/bin/sh
-cd ../bootstrap/less;
-(
-  lessc bootstrap.less;
-  lessc responsive.less
-) > ../../wirc/public/css/wirc.css
-cp -r ../font ../../wirc/public/
+
+  lessc --compress templates/less/wirc.less > public/css/wirc.css
+cp -r vendor/font-awesome/font public/
