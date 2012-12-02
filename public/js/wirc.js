@@ -107,7 +107,6 @@ Structure.registerModule('Wirc.Chat', {
       },
       onerror: function(e) {
         self.$input.attr('disabled', 'disabled').css({ background: '#fdd' }).val(e);
-        // TODO: Should we reconnect here?
       },
       onclose: function() {
         self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Reconnecting...');
