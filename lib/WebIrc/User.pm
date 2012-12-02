@@ -49,7 +49,14 @@ sub login {
       my($core, $uid, $error) = @_;
       return $self->render(message => 'Invalid username/password.') unless $uid;
       $self->session(uid => $uid, login => $self->param('login'));
-      $self->redirect_to('/settings');
+      
+      $self->redis->smembers("user:$uid:connections", sub {
+        my ($redis,$conn)=@_;
+        if(@$conn) {
+          return $self->redirect_to('index');
+        }
+        $self->redirect_to('/settings');
+      });
     },
   );
 }
