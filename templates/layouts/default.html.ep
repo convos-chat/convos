@@ -2,12 +2,14 @@
 <html>
   <head><title><%= join ' - ', app->config->{name}, title %></title>
     %= stylesheet '/css/wirc.css';
+    %= stylesheet '/css/jquery.terminal.css';
     %= javascript '/js/jquery.js';
     %= javascript '/js/ws-reconnecting.js';
     %= javascript '/js/bootstrap-typeahead.js';
     %= javascript '/js/template.js';
     %= javascript '/js/structure.min.js';
     %= javascript '/js/date-format.js';
+    %= javascript '/js/jquery.terminal-min.js';
     %= javascript '/js/wirc.js';
   </head>
   <body>

@@ -47,11 +47,8 @@
     </dl>
   </div>
 </div>
-<div id="chat_input_field">
-  <div class="span2">&nbsp;</div>
-  %= form_for '', class => 'form-inline', begin
-    %= text_field 'say'
-  % end
+<div class="terminal" style="height:20px">
+<div id="chat_input_field"></div>
 </div>
 
 % unless($as_history) {

@@ -116,26 +116,40 @@ Structure.registerModule('Wirc.Chat', {
   },
   setupUI: function() {
     var self = this;
-
-    self
-      .$input
-      .attr('autocomplete', 'off')
-      .focus()
-      .typeahead({
-        source: function() { return Object.keys(self.autocomplete_commands); },
-        items: 5,
-        matcher: function(item) {
-          return item.toLowerCase().indexOf(this.query.toLowerCase()) === 0;
-        },
-        updater: function(item) {
-          if(self.autocomplete_commands[item].append) {
-            return item + self.autocomplete_commands[item].append;
+    var tab_count = 0;
+    var partial = null;  
+    self.$input.cmd({
+        prompt: '['+self.target+'] ',
+        keydown: function(e,cmd) {
+          if (e.which !== 9) { // not a TAB
+              partial = null;
+              tab_count = 0;
           }
           else {
-            self.$input.val(item);
-            self.$input.parents('form').submit();
-            return '';
+            ++tab_count;
+            var command = partial || self.$input.get();
+            if (!command.match(' ')) { // complete only first word
+                var reg = new RegExp('^' + command);
+                var matched = [];
+                for (cmd in self.autocomplete_commands) {
+                    if (reg.test(cmd)) {
+                        matched.push(cmd);
+                    }
+                }
+                if(!matched.length) { return false; }
+                if (matched.length <= tab_count) {
+                  tab_count=0;
+                } 
+                partial= matched.length ? command : null;
+                self.$input.set(matched[tab_count]);
+              }
+            return false;
           }
+          return true;
+          
+        },
+        commands: function(command) {
+          console.log('dealing with '+command);
         }
       });
 
@@ -186,7 +200,7 @@ Structure.registerModule('Wirc.Chat', {
     self.nick = $('#chat_messages').attr('data-nick');
     self.target = $('#chat_messages').attr('data-target');
     self.$messages = $('#chat_messages');
-    self.$input = $('#chat_input_field input[type="text"]');
+    self.$input = $('#chat_input_field');
     self.connectToWebSocket();
     self.setupUI();
     self.listenToScroll();
