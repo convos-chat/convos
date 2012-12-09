@@ -13,13 +13,13 @@ Structure.registerModule('Wirc', {
 }); // End Wirc
 
 Structure.registerModule('Wirc.Chat', {
-  autocomplete_commands: {
-    '/join': { append: ' #' },
-    '/msg': { append: ' ' },
-    '/me': { append: ' ' },
-    '/nick': { append: ' ' },
-    '/part': {}
-  },
+  autocomplete_commands: [
+    '/join #',
+    '/msg ',
+    '/me ',
+    '/nick ',
+    '/part ',
+    ],
   formatIrcData: function(data) {
     var me_re = new RegExp("\\b" + this.nick + "\\b");
     var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
@@ -131,9 +131,9 @@ Structure.registerModule('Wirc.Chat', {
             if (!command.match(' ')) { // complete only first word
                 var reg = new RegExp('^' + command);
                 var matched = [];
-                for (cmd in self.autocomplete_commands) {
-                    if (reg.test(cmd)) {
-                        matched.push(cmd);
+                for (i in self.autocomplete_commands) {
+                    if (reg.test(self.autocomplete_commands[i])) {
+                        matched.push(self.autocomplete_commands[i]);
                     }
                 }
                 if(!matched.length) { return false; }
@@ -142,8 +142,9 @@ Structure.registerModule('Wirc.Chat', {
                 } 
                 partial= matched.length ? command : null;
                 self.$input.set(matched[tab_count]);
+                return false;
               }
-            return false;
+            return true;
           }
           return true;
           
@@ -207,7 +208,7 @@ Structure.registerModule('Wirc.Chat', {
 
     $.each($('#chat_messages').attr('data-nicks').split(','), function(i, v) {
       v = v.replace(/^\@/, '');
-      self.autocomplete_commands[v] = { append: ': ' };
+      self.autocomplete_commands.unshift(v+': ');
     });
 
     if(window.console) console.log('[Wirc.Chat.start] ', this);
