@@ -150,7 +150,7 @@ Structure.registerModule('Wirc.Chat', {
           
         },
         commands: function(command) {
-          console.log('dealing with '+command);
+          self.sendData({ cid: self.connection_id, target: self.target, cmd: command });
         }
       });
 
