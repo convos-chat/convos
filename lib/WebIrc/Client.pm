@@ -81,8 +81,9 @@ sub view {
       );
 
       # FIXME: Should be using last seen tz and default to -inf
+      my $redis_key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
       $self->redis->zrevrangebyscore(
-        "connection:$cid:$target:msg",
+        $redis_key,
         "+inf" => "-inf",
         "withscores",
         "limit" => 0, $N_MESSAGES,
