@@ -201,7 +201,7 @@ Structure.registerModule('Wirc.Chat', {
     self.nick = $('#chat_messages').attr('data-nick');
     self.target = $('#chat_messages').attr('data-target');
     self.$messages = $('#chat_messages');
-    self.$input = $('#chat_input_field');
+    self.$input = $('#command_line');
     self.connectToWebSocket();
     self.setupUI();
     self.listenToScroll();
