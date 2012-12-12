@@ -1,4 +1,4 @@
-% title 'Chat';
+% title 'Chat'; $target ||= 'server';
 % my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
 <div id="channel_list" class="tabbable tabs-left">
