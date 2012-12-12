@@ -92,7 +92,7 @@ sub view {
     },
     sub {
       $self->stash(conversation => $self->_format_conversation($_[1]));
-      return $self->render(nickes => []) if(!$target);
+      return $self->render(nicks => []) if(!$target);
       $self->redis->smembers("connection:$cid:$target:nicks", $_[0]->begin);
     },
     sub {
