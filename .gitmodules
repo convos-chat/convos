@@ -1,0 +1,9 @@
+[submodule "vendor/bootstrap"]
+	path = vendor/bootstrap
+	url = https://github.com/twitter/bootstrap.git
+[submodule "vendor/font-awesome"]
+	path = vendor/font-awesome
+	url = https://github.com/FortAwesome/Font-Awesome.git
+[submodule "vendor/less.js"]
+	path = vendor/less.js
+	url = git@github.com:marcusramberg/less.js.git
