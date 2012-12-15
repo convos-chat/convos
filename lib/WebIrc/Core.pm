@@ -39,7 +39,7 @@ sub start {
   $self->redis->smembers('connections', sub {
     my ($redis, $cids) = @_;
     if(!$cids) {
-      return warn "[core] No connections to start\n" if DEBUG;      
+      return warn "[core] No connections to start\n" if DEBUG;
     };
     warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
     for my $cid (@$cids) {

@@ -56,7 +56,7 @@ Structure.registerModule('Wirc.Chat', {
       }
       $messages.append(tmpl('nick_change_template', data));
     }
-    else if(data.message && data.target == this.target) {
+    else if(data.message && data.target == this.target || data.sender_nick == this.target) {
       data = this.formatIrcData(data);
       $messages.append(tmpl(data.template, data));
     }
@@ -71,17 +71,24 @@ Structure.registerModule('Wirc.Chat', {
   receiveData: function(e) {
     var data = $.parseJSON(e.data);
     if(window.console) console.log('[websocket] > ' + e.data);
+    data.sender_nick = data.sender.replace(/!.*/, '');
     if(data.joined) {
       data.channel_id=data.joined.replace(/\W/g,'');
       var $channel=$('#target_'+data.cid+'_'+data.channel_id);
       if(!$channel.length) {
         console.log(data.cid);
-        $('#connection_'+data.cid+' .channels').append(tmpl('new_channel_template',data));
+        $(tmpl('new_channel_template',data)).insertAfter('#connection_list_'+data.cid+' .channel:last');
       }
     }
     else if(data.parted) {
       data.channel_id=data.parted.replace(/\W/g,'');
       $('#target_'+data.cid+'_'+data.channel_id).remove();
+    }
+    else if(data.target && self.target != self.sender_nick && self.target != data.target && data.target===this.nick) {
+      var $conversation=$('#target_'+data.cid+'_'+data.sender_nick);
+      if(!$conversation.length) {
+        $(tmpl('new_conversation_template',data)).appendTo('#connection_list_'+data.cid);        
+      }
     }
     else {
       this.print(data);

@@ -237,7 +237,7 @@ sub add_message {
     message   => $message->{params}[1],
   });
 
-  unless ($message->{params}->[0] =~ /^\#/x) {    # not a channel
+  unless ($message->{params}->[0] =~ /^\#/x || $target eq $self->_irc->nick) {    # not a channel
     $self->redis->sadd("connection:@{[$self->id]}:conversations", $target);
   }
 }

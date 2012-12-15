@@ -2,22 +2,19 @@
 % my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
 <div id="channel_list" class="tabbable tabs-left">
-  <ul class="nav nav-tabs span2">
 % for my $c (@$connections) {
+  <ul class="nav nav-tabs span2" id="connection_list_<%= as_id($c->{id})%>">
     <li class="server" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a> 
-      <ul class="channels">
   % for my $channel (@{ $c->{channels} }) {
-    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= $channel eq $target ? 'active' : '' %>"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
+    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= $channel eq $target ? 'active' : '' %> channel"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
   % }
-  </ul><ul class="conversations">
   % for my $conversation (@{ $c->{conversations} }) {
-    <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>)" 
-        class="<%= $conversation eq $target ? 'active' : '' %>">
-        <%= link_with $conversation, '', { target => $conversation, cid => $c->{id} } %></li>
+    <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>" 
+        class="<%= $conversation eq $target ? 'active' : '' %> conversation">
+        <%= link_to $conversation, url_for('channel.view',  target => $conversation, cid => $c->{id} ) %></li>
   % }
-  </ul></li>
-% }
   </ul>
+% }
 </div>
 <div class="chat row-fluid">
   <div class="span2">
@@ -80,7 +77,10 @@
   </li>
 </script>
 <script type="text/html" id="new_channel_template">
-<li id="target<%%= cid %>_<%%= channel_id %>" class=""><a href="/<%%=cid%><%%=channel_id%>/<%%=encodeURIComponent(joined)%>"><%%=joined%></a></li>
+<li id="target<%%= cid %>_<%%= channel_id %>" class="channel"><a href="/<%%=cid%>/<%%=encodeURIComponent(joined)%>"><%%=joined%></a></li>
 </script>
-% }
+<script type="text/html" id="new_conversation_template">
+<li id="target<%%= cid %>_<%%= sender_nick %>" class="conversation"><a href="/<%%=cid%>/<%%=encodeURIComponent(sender_nick)%>"><%%=sender%></a></li>
+</script>
 
+% }

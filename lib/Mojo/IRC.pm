@@ -230,7 +230,7 @@ use Scalar::Util 'weaken';
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
 my $TIMEOUT = 60;
-my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice irc_rpl_welcome irc_err_nicknameinuse/;
+my @DEFAULT_EVENTS = qw/irc_ping irc_nick irc_notice irc_rpl_welcome irc_err_nicknameinuse/;
 
 =head1 ATTRIBUTES
 
