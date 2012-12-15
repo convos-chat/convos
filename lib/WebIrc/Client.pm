@@ -109,19 +109,21 @@ sub history {
   my $self = shift->render_later;
   my $page = $self->param('page');
   my $cid = $self->session('connection_id');
-  my $target = $self->session('target');
+  my $target = $self->session('target') // '';
 
-  unless($page and $cid and $target) {
-    return $self->render_exception; # TODO: Need to have a better error message?
+  unless($page and $cid) {
+    return $self->render_exception('Missing parameters'); # TODO: Need to have a better error message?
   }
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
       my $offset = ($page - 1) * $N_MESSAGES;
+      
+      my $redis_key= $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
 
       $self->redis->zrevrangebyscore(
-        "connection:$cid:$target:msg",
+        $redis_key,
         "+inf" => "-inf",
         "withscores",
         "limit" => $offset, $offset + $N_MESSAGES,
