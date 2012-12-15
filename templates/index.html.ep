@@ -32,19 +32,20 @@
   <div class="span6">
     <h2>How does Wirc work anywhere?</h2>
     <p>
-      Wirc is a web application, built on top of Twitter's
-      <%= link_to 'bootstrap', 'http://twitter.github.com/bootstrap/' %>,
-      so on top of its responsive design concepts we build application
-      that work anywhere.
-    </p>
+      Wirc is a web application with a responsive design that
+      works great on small and big screens. Wirc also acts as a
+      Proxy for your native clients, while seamlessly keeping
+      track of the messages you've seen on each client. </p>
   </div>
 </div>
 <div class="row">
   <div class="span6">
-    <h2>Always online?</h2>
+    <h2>Host it anywhere</h2>
     <p>
-      An IRC proxy will keep you online and record everything that is going
-      on, so the next time you log on you can browse through the history.
+      Rather than selling you a monthly service with a tiered
+      model based on how much you use, we just sell you the
+      software. it's trivial to set up on your cloud / server
+      of choice.
     </p>
   </div>
 </div>
