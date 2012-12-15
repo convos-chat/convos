@@ -71,6 +71,14 @@ sub register {
     $app->helper(logf => \&WebIrc::Core::Util::logf);
     $app->helper(redis => sub { shift->app->redis(@_) });
     $app->helper( as_id => sub { my ($self,$val)=@_; $val =~ s/\W+//g; $val } );
+    $app->helper( is_active => sub {
+      my ($self,$c,$target)=@_;
+      if($c->{id}==$self->param('cid')) {
+        return 1 if !defined $target && !defined $self->param('target');
+        return 1 if defined $target && defined $self->param('target') &&  $target eq $self->param('target');
+      }
+      return 0;
+      });
 }
 
 =head1 AUTHOR

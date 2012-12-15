@@ -1,20 +1,22 @@
 % title 'Chat'; $target ||= 'server';
 % my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
-<div id="channel_list" class="tabbable tabs-left">
+<div id="channel_list" class="tabbable">
+  <ul class="nav nav-list">
 % for my $c (@$connections) {
-  <ul class="nav nav-tabs span2" id="connection_list_<%= as_id($c->{id})%>">
-    <li class="server" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a> 
+  <li><ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
+    <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a> 
   % for my $channel (@{ $c->{channels} }) {
-    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= $channel eq $target ? 'active' : '' %> channel"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
+    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c,$channel) ? 'active' : '' %> channel"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
   % }
   % for my $conversation (@{ $c->{conversations} }) {
     <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>" 
         class="<%= $conversation eq $target ? 'active' : '' %> conversation">
         <%= link_to $conversation, url_for('channel.view',  target => $conversation, cid => $c->{id} ) %></li>
   % }
-  </ul>
+  </ul></li>
 % }
+</ul>
 </div>
 <div class="chat row-fluid">
   <div class="span2">
