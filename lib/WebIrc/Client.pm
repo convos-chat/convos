@@ -35,10 +35,12 @@ sub route {
     $self->redis->smembers("user:$uid:connections",shift->begin);
   }, sub {
     $connections=pop;
+    $self->redirect_to($self->url_for('settings')) unless @$connections;
     $self->redis->smembers('connection:'.$connections->[0].':channels',shift->begin);
   }, sub {
     $channels=pop;
-    $self->redirect_to($self->url_for('channel.view',cid => $connections->[0],target=>$channels->[0]));
+    return $self->redirect_to($self->url_for('channel.view',cid => $connections->[0],target=>$channels->[0])) if @$channels;
+    $self->redirect_to($self->url_for('settings'));
   });
 }
 
