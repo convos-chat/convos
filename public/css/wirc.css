@@ -4957,23 +4957,32 @@ table.table-fixed-footer {
   bottom: 40px;
   left: 12px;
   overflow-y: hidden;
+  border-right: 1px dotted #ccc;
 }
 #channel_list .nav {
   height: 100%;
 }
-#channel_list .nav-tabs > li > a {
+#channel_list .nav-list > li > a {
   padding: 4px;
   padding-left: 8px;
 }
-#channel_list .nav-tabs > li.server {
+#channel_list .nav-list > li.server {
   margin-top: 8px;
 }
-#channel_list .nav-tabs > li.server > a {
-  color: #000;
+@font-face {
+  font-family: 'Hume Mono';
+  src: url('/font/Hume%202%20Mono.eot');
+  src: url('/font/Hume%202%20Mono.eot?#iefix') format('embedded-opentype'), url('/font/Hume%202%20Mono.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
 #chat_messages {
   margin-bottom: 45px;
   padding: 0 4px;
+  font-family: Hume Mono,monospace;
+}
+#chat_messages .message {
+  white-space: pre;
 }
 #chat_messages li span.pull-right {
   color: #999999;
@@ -5002,16 +5011,7 @@ table.table-fixed-footer {
   width: 100%;
   position: fixed;
   bottom: 0;
-  left: 0;
-}
-#chat_input_field form {
-  margin: 0;
-  padding: 4px 34px 4px 24px;
-  overflow: hidden;
-  position: relative;
-}
-#chat_input_field input {
-  width: 100%;
+  left: 150px;
 }
 /* settings */
 .connection-tab-container .nav {
@@ -5064,27 +5064,6 @@ table.table-fixed-footer {
 .navbar {
   position: fixed;
 }
-textarea:focus,
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="datetime"]:focus,
-input[type="datetime-local"]:focus,
-input[type="date"]:focus,
-input[type="month"]:focus,
-input[type="time"]:focus,
-input[type="week"]:focus,
-input[type="number"]:focus,
-input[type="email"]:focus,
-input[type="url"]:focus,
-input[type="search"]:focus,
-input[type="tel"]:focus,
-input[type="color"]:focus,
-.uneditable-input:focus {
-  border-color: rgba(82, 82, 82, 0.3);
-  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 4px rgba(82,82,82,.3);
-  -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 4px rgba(82,82,82,.3);
-  box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 4px rgba(82,82,82,.3);
-}
 .terminal .clipboard {
   position: absolute;
   bottom: 0;
@@ -5114,14 +5093,8 @@ input[type="color"]:focus,
   height: 14px;
 }
 .terminal {
-  font-family: FreeMono, monospace;
-  color: #333;
-  background-color: #000;
-  font-size: 12px;
+  font-family: Hume, monospace;
   line-height: 14px;
-}
-.terminal .terminal-output div span {
-  display: inline-block;
 }
 .terminal .cmd span {
   display: inline-block;

@@ -1,8 +1,8 @@
 % title 'Chat'; $target ||= 'server';
 % my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
-<div id="channel_list" class="tabbable">
-  <ul class="nav nav-list">
+<div id="channel_list">
+  <ul class="nav nav-list well">
 % for my $c (@$connections) {
   <li><ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
     <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a> 
