@@ -71,7 +71,7 @@ Structure.registerModule('Wirc.Chat', {
   receiveData: function(e) {
     var data = $.parseJSON(e.data);
     if(window.console) console.log('[websocket] > ' + e.data);
-    data.sender_nick = data.sender.replace(/!.*/, '');
+    if (data.sender) { data.sender_nick = data.sender.replace(/!.*/, ''); }
     if(data.joined) {
       data.channel_id=data.joined.replace(/\W/g,'');
       var $channel=$('#target_'+data.cid+'_'+data.channel_id);
