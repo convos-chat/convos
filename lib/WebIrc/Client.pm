@@ -24,17 +24,33 @@ Used to render the main IRC client view.
 
 =cut
 
+sub route {
+  my $self=shift;
+  my $uid = $self->session('uid');
+  return $self->render(template => 'index') unless $uid;
+  return $self->redirect_to( $self->session('current_active')) if $self->session('current_active');
+  $self->render_later;
+  my ($connections,$channels);
+  Mojo::IOLoop->delay( sub {
+    $self->redis->smembers("user:$uid:connections",shift->begin);
+  }, sub {
+    $connections=pop;
+    $self->redis->smembers('connection:'.$connections->[0].':channels',shift->begin);
+  }, sub {
+    $channels=pop;
+    $self->redirect_to($self->url_for('channel.view',cid => $connections->[0],target=>$channels->[0]));
+  });
+}
+
 sub view {
   my $self = shift->render_later;
+  $self->session('current_active' => $self->url_for);
   my $uid = $self->session('uid');
   my @keys = qw/ nick host /;
   my($connections);
   my $target=$self->param('target');
   my $cid=$self->param('cid');
 
-  unless($uid) {
-    return $self->render(template => 'index');
-  }
 
   Mojo::IOLoop->delay(
     sub {
