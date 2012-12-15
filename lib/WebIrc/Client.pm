@@ -110,7 +110,7 @@ sub history {
   my $target = $self->session('target');
 
   unless($page and $cid and $target) {
-    return $self->render_excetion; # TODO: Need to have a better error message?
+    return $self->render_exception; # TODO: Need to have a better error message?
   }
 
   Mojo::IOLoop->delay(

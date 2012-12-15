@@ -4,10 +4,10 @@
     %= stylesheet '/css/wirc.css';
     %= javascript '/js/jquery.js';
     %= javascript '/js/ws-reconnecting.js';
-    %= javascript '/js/bootstrap-typeahead.js';
     %= javascript '/js/template.js';
     %= javascript '/js/structure.min.js';
     %= javascript '/js/date-format.js';
+    %= javascript '/js/jquery.terminal-min.js';
     %= javascript '/js/wirc.js';
   </head>
   <body>
