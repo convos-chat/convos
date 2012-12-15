@@ -90,10 +90,14 @@ Proxy manager
 =cut
 
 has redis => sub {
-  my $log = $_[0]->app->log;
-  my $redis = Mojo::Redis->new(server=>'127.0.0.1:6379',timeout=>600);
-  $redis->on(error => sub { $log->error('[REDIS ERROR] ' .$_[1]) });
-  $redis;
+  my $self=shift;
+  my $log = $self->app->log;
+  my $redis = Mojo::Redis->new(server=>($self->config->{redis}||'127.0.0.1:6379'), timeout=>600);
+  $redis->on(error => sub { 
+    my($redis,$err)=@_;
+    $log->error('[REDIS ERROR] ' .$err);
+  });
+  return $redis;
 };
 has core => sub { WebIrc::Core->new(redis=>shift->redis)};
 has archive => sub {
