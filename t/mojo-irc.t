@@ -23,11 +23,14 @@ Mojo::IOLoop->server(
 
 {
   my %got;
-  my $irc = Mojo::IRC->new(
-              nick => 'test123',
-              user => 'my name',
-              host => $ENV{IRC_HOST} || "localhost:$port",
-            );
+  my $irc = Mojo::IRC->new();
+  isa_ok($irc,'Mojo::IRC','Constructor returns right object');
+  $irc->nick('test123');
+  is($irc->nick(),'test123','nick setter works');
+  $irc->user('my name');
+  my $server=$ENV{IRC_HOST} || "localhost:$port";
+  $irc->server($server);
+  is($irc->server(),$server,'server setter works');
 
   $irc->on(irc_join => sub {
     my($self, $message) = @_;
@@ -53,3 +56,4 @@ Mojo::IOLoop->server(
 
   Mojo::IOLoop->start;
 }
+  

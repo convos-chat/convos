@@ -1,5 +1,3 @@
-function ReconnectingWebSocket(a){function f(g){c=new WebSocket(a);if(b.debug||ReconnectingWebSocket.debugAll){console.debug("ReconnectingWebSocket","attempt-connect",a)}var h=c;var i=setTimeout(function(){if(b.debug||ReconnectingWebSocket.debugAll){console.debug("ReconnectingWebSocket","connection-timeout",a)}e=true;h.close();e=false},b.timeoutInterval);c.onopen=function(c){clearTimeout(i);if(b.debug||ReconnectingWebSocket.debugAll){console.debug("ReconnectingWebSocket","onopen",a)}b.readyState=WebSocket.OPEN;g=false;b.onopen(c)};c.onclose=function(h){clearTimeout(i);c=null;if(d){b.readyState=WebSocket.CLOSED;b.onclose(h)}else{b.readyState=WebSocket.CONNECTING;if(!g&&!e){if(b.debug||ReconnectingWebSocket.debugAll){console.debug("ReconnectingWebSocket","onclose",a)}b.onclose(h)}setTimeout(function(){f(true)},b.reconnectInterval)}};c.onmessage=function(c){if(b.debug||ReconnectingWebSocket.debugAll){console.debug("ReconnectingWebSocket","onmessage",a,c.data)}b.onmessage(c)};c.onerror=function(c){if(b.debug||ReconnectingWebSocket.debugAll){console.debug("ReconnectingWebSocket","onerror",a,c)}b.onerror(c)}}this.debug=false;this.reconnectInterval=1e3;this.timeoutInterval=2e3;var b=this;var c;var d=false;var e=false;this.url=a;this.readyState=WebSocket.CONNECTING;this.URL=a;this.onopen=function(a){};this.onclose=function(a){};this.onmessage=function(a){};this.onerror=function(a){};f(a);this.send=function(d){if(c){if(b.debug||ReconnectingWebSocket.debugAll){console.debug("ReconnectingWebSocket","send",a,d)}return c.send(d)}else{throw"INVALID_STATE_ERR : Pausing to reconnect websocket"}};this.close=function(){if(c){d=true;c.close()}};this.refresh=function(){if(c){c.close()}}}ReconnectingWebSocket.debugAll=false
-
 var BASEURL = window.location.href;
 
 (function($) {
@@ -48,7 +46,9 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     if(data.status) {
-      $('#ws-status').css('color','#33CC33');
+      if(data.status == this.status) return; // do not want duplicate status messages
+      if(data.message) $messages.append(tmpl('server_status_template', data));
+      this.status = data.status;
     }
     else if(data.new_nick) {
       if(data.old_nick == this.nick) {
@@ -72,10 +72,16 @@ Structure.registerModule('Wirc.Chat', {
     var data = $.parseJSON(e.data);
     if(window.console) console.log('[websocket] > ' + e.data);
     if(data.joined) {
-      var $li = $('#channel_list li:last').clone();
-      // TODO: Fix a better link
-      $li.find('a').text(data.joined);
-      $('#channel_list > ul').append($li);
+      data.channel_id=data.joined.replace(/\W/g,'');
+      var $channel=$('#target_'+data.cid+'_'+data.channel_id);
+      if(!$channel.length) {
+        console.log(data.cid);
+        $('#connection_'+data.cid+' .channels').append(tmpl('new_channel_template',data));
+      }
+    }
+    else if(data.parted) {
+      data.channel_id=data.parted.replace(/\W/g,'');
+      $('#target_'+data.cid+'_'+data.channel_id).remove();
     }
     else {
       this.print(data);
@@ -96,19 +102,14 @@ Structure.registerModule('Wirc.Chat', {
     self.websocket = Wirc.websocket('/socket', {
       onmessage: self.receiveData,
       onopen: function function_name (argument) {
-        self.$input.attr('disabled',undefined);
-        $('#ws-status').css('color','green');
+        self.$input.removeAttr('disabled').css({ background: '#fff' }).val('');
         self.sendData({ cid: self.connection_id, target: self.target });
       },
       onerror: function(e) {
-        self.print({ error: e.data });
-        self.$input.attr('disabled', 'disabled');
-        $('#ws-status').css('color','red');
+        self.$input.attr('disabled', 'disabled').css({ background: '#fdd' }).val(e);
       },
       onclose: function() {
-        self.print({ error: 'Disconnected.' });
-        $('#ws-status').css('color','orange');
-        self.$input.attr('disabled', 'disabled');
+        self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Reconnecting...');
       }
     });
   },
@@ -137,6 +138,7 @@ Structure.registerModule('Wirc.Chat', {
         }
       });
 
+    self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Connecting...');
     self.$input.parents('form').submit(function() {
       self.sendData({ cid: self.connection_id, target: self.target, cmd: self.$input.val() });
       self.$input.val('');

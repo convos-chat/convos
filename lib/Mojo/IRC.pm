@@ -224,11 +224,13 @@ Internal errors with the mojo ioloop
 use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::IOLoop;
 use IRC::Utils;
+use Carp qw/croak/;
 use Parse::IRC ();
 use Scalar::Util 'weaken';
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
-my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice /;
+my $TIMEOUT = 60;
+my @DEFAULT_EVENTS = qw/ irc_ping irc_nick irc_notice irc_rpl_welcome irc_err_nicknameinuse/;
 
 =head1 ATTRIBUTES
 
@@ -242,11 +244,30 @@ has ioloop => sub { Mojo::IOLoop->singleton };
 
 =head2 nick
 
-IRC server nickname.
+IRC server nickname. Will also change the nick in the server if this attribute
+is changed and we are connected to the IRC server.
 
 =cut
 
-has nick => '';
+sub nick {
+  my ($self,$nick) = @_;
+  my $old = $self->{nick} // '';
+
+  return $old unless defined $nick;
+  return $self if $old && $old eq $nick;
+  $self->{nick} = $nick;
+  $self->write(NICK => $nick) if $self->{stream};
+  $self;
+}
+
+=head2 real_host
+
+Will be set by L</irc_rpl_welcome>. Holds the actual hostname of the IRC
+server that we are connected to.
+
+=cut
+
+has real_host => '';
 
 =head2 user
 
@@ -258,11 +279,21 @@ has user => '';
 
 =head2 server
 
-Server name and optionally a port to connect to.
+Server name and optionally a port to connect to. Changing this while connected
+to the IRC server will issue a reconnect.
 
 =cut
 
-has server => '';
+sub server {
+  my ($self,$server) = @_;
+  my $old = $self->{server} || '';
+
+  return $old unless defined $server;
+  return $self if $old && $old eq $server;
+  $self->{server} = $server;
+  $self->disconnect(sub { $self->connect(sub {}) });
+  $self;
+}
 
 =head2 name
 
@@ -295,7 +326,7 @@ sub connect {
   my ($self, $callback) = @_;
   my ($host, $port) = split /:/, $self->server;
 
-  if (ref $self->{stream}) {
+  if ($self->{stream_id}) {
     return $self->$callback;
   }
 
@@ -312,13 +343,14 @@ sub connect {
 
       $err and return $self->emit(error => $err);
 
-      $stream->timeout(600); # TODO: I think we should get a PING during 600 seconds..?
+      $stream->timeout($TIMEOUT);
       $stream->on(
         close => sub {
           warn "[@{[$self->server]}] : close\n" if DEBUG;
           $self or return;
           $self->emit('close');
           delete $self->{stream};
+          delete $self->{stream_id};
         }
       );
       $stream->on(
@@ -359,26 +391,26 @@ sub connect {
 
 =head2 disconnect
 
-  $self->disconnect(\&callback);
+  $self->disconnect($callback);
 
-Will disconnect form the server.
+Will disconnect form the server and run the callback once it is done.
 
 =cut
 
 sub disconnect {
-  my ($self, $cb) = @_;
+  my($self, $cb) = @_;
 
-  # already disconnected
-  return $self->$cb unless $self->{stream};
+  if(my $tid = delete $self->{ping_tid}) {
+    $self->ioloop->remove($tid);
+  }
+  if(!$self->{stream}) {
+    return $self->$cb;
+  }
 
-  # TODO: Figure out how this really works:
-  # I think ->close will kill the connection at once and never fire the close
-  # event...
-  # I think you are right:
-  # Event "irc_error" failed: Can't call method "once" on an undefined value at script/../lib/Mojo/IRC.pm line 345.
-  $self->write('QUIT');
-  $self->{stream}->close;
-  $self->{stream}->once(close => $cb);
+  $self->{stream}->write("QUIT\r\n", sub {
+    $self->{stream}->close;
+    $self->$cb;
+  });
 }
 
 =head2 register_default_event_handlers
@@ -412,6 +444,7 @@ with " " and "\r\n" will be appended.
 sub write {
   my $self = shift;
   my $buf = join ' ', @_;
+  croak('Tried to write without a stream') unless ref $self->{stream};
   warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
   $self->{stream}->write("$buf\r\n");
 }
@@ -457,7 +490,24 @@ Responds to the server with "PONG ...".
 
 sub irc_ping {
   my ($self, $message) = @_;
-  $self->write(PONG => $message->{params}->[0]);
+  $self->write(PONG => $message->{params}[0]);
+}
+
+=head2 irc_rpl_welcome
+
+Used to get the hostname of the server. Will also set up automatic PING
+requests to prevent timeout.
+
+=cut
+
+sub irc_rpl_welcome {
+  my ($self, $message) = @_;
+
+  Scalar::Util::weaken($self);
+  $self->real_host($message->{prefix});
+  $self->{ping_tid} = $self->ioloop->timer($TIMEOUT - 10, sub {
+    $self->write(PING => $self->real_host);
+  });
 }
 
 =head2 irc_err_nicknameinuse
@@ -476,10 +526,12 @@ sub irc_err_nicknameinuse {
 
 sub DESTROY {
   my $self = shift;
-  my $id = $self->{stream_id} or return;
   my $ioloop = $self->ioloop or return;
+  my $tid = $self->{ping_tid};
+  my $sid = $self->{stream_id};
 
-  $ioloop->remove($id);
+  $ioloop->remove($sid) if $sid;
+  $ioloop->remove($tid) if $tid;
 }
 
 =head1 COPYRIGHT

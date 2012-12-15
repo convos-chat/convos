@@ -4,14 +4,18 @@
 <div id="channel_list" class="tabbable tabs-left">
   <ul class="nav nav-tabs span2">
 % for my $c (@$connections) {
-    <li class="server"><a href="[%link%]"><%= $c->{host} %></a></li>
+    <li class="server" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a> 
+      <ul class="channels">
   % for my $channel (@{ $c->{channels} }) {
-    <li class="<%= $channel eq $target ? 'active' : '' %>"><%= link_with $channel, '', { target => $channel, cid => $c->{id} } %></li>
+    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= $channel eq $target ? 'active' : '' %>"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
   % }
+  </ul><ul class="conversations">
   % for my $conversation (@{ $c->{conversations} }) {
-    <li class="<%= $conversation eq $target ? 'active' : '' %>"><%= link_with $conversation, '', { target => $conversation, cid => $c->{id} } %></li>
+    <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>)" 
+        class="<%= $conversation eq $target ? 'active' : '' %>">
+        <%= link_with $conversation, '', { target => $conversation, cid => $c->{id} } %></li>
   % }
-  
+  </ul></li>
 % }
   </ul>
 </div>
@@ -44,7 +48,7 @@
   </div>
 </div>
 <div id="chat_input_field">
-  <div class="span2">&nbsp;<span id="ws-status">☁</span>&nbsp;</div>
+  <div class="span2">&nbsp;</div>
   %= form_for '', class => 'form-inline', begin
     %= text_field 'say'
   % end
@@ -77,6 +81,9 @@
     <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= status == 200 ? 'Connected' : 'Error' %></span>
   </li>
+</script>
+<script type="text/html" id="new_channel_template">
+<li id="target<%%= cid %>_<%%= channel_id %>" class=""><a href="/<%%=cid%><%%=channel_id%>/<%%=encodeURIComponent(joined)%>"><%%=joined%></a></li>
 </script>
 % }
 

@@ -107,7 +107,7 @@ has log => sub { Mojo::Log->new };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome /;
-my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_rpl_namreply irc_error irc_err_nicknameinuse /;
+my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_rpl_namreply irc_error /;
 
 has _irc => sub {
   my $self = shift;
@@ -272,13 +272,6 @@ sub irc_rpl_welcome {
   }
 }
 
-use Data::Dumper;
-sub irc_err_nicknameinuse {
-  my ($self,$message) =@_;
-  $self->_irc->nick($self->_irc->nick.'_');
-  $self->redis->hset("connection:@{[$self->id]}", nick => $self->_irc->nick);
-  $self->_irc->write(NICK =>$self->_irc->nick );
-}
 
 =head2 irc_rpl_myinfo
 
@@ -359,9 +352,16 @@ sub irc_error {
 
 sub _publish {
   my($self, $data) = @_;
+  $data->{cid}=$self->id;
   $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
 }
 
+
+=head1 cmd_join
+
+Handle join commands from user. Add to channel set.
+
+=cut
 
 sub cmd_join {
   my($self,$msg)=@_;
@@ -369,9 +369,16 @@ sub cmd_join {
 
 }
 
+=head1 cmd_part
+
+Handle part commands from user. Remove from channel set.
+
+=cut
+
 sub cmd_part {
   my($self,$msg)=@_;
   $self->redis->srem("connection:@{[$self->id]}:channels",@{$msg->{params}});
+  $self->_publish({ parted => $msg->{params}[0], timestamp => time });
 }
 
 =head1 COPYRIGHT

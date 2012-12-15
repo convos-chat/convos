@@ -7,13 +7,11 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use Mojo::Log;
-
-my $LOGGER = Mojo::Log->new;
+use WebIrc::Core::Util ();
 
 =head1 HELPERS
 
-=head3 form_block
+=head2 form_block
 
   %= form_block $name, class => [$str, ...] begin
   ...
@@ -45,39 +43,18 @@ sub form_block {
   );
 }
 
-=head3 logf
+=head2 logf
 
-  $c->logf($level => $format, @args);
-  $c->logf(debug => 'yay %s', \%data);
+See L<WebIrc::Core::Util/logf>.
 
-Used to log more complex datastructures and to prevent logging C<undef>.
-
-=cut
-
-sub logf {
-  use Data::Dumper;
-  my($c, $level, $format, @args) = @_;
-  local $Data::Dumper::Maxdepth = 2;
-  local $Data::Dumper::Indent = 0;
-  local $Data::Dumper::Terse = 1;
-
-  $LOGGER ||= $c->app->log;
-
-  for my $arg (@args) {
-    if(ref($arg) =~ /^\w+$/) {
-      $arg = Dumper($arg);
-    }
-    elsif(!defined $arg) {
-      $arg = '__UNDEF__';
-    }
-  }
-
-  $LOGGER->$level(sprintf $format, @args);
-}
-
-=head3 redis
+=head2 redis
 
 Returns a L<Mojo::Redis> object.
+
+=head3 as_id
+
+strip non-word characters from input.
+
 
 =head1 METHODS
 
@@ -91,8 +68,9 @@ sub register {
     my($self, $app) = @_;
 
     $app->helper(form_block => \&form_block);
-    $app->helper(logf => \&logf);
+    $app->helper(logf => \&WebIrc::Core::Util::logf);
     $app->helper(redis => sub { shift->app->redis(@_) });
+    $app->helper( as_id => sub { my ($self,$val)=@_; $val =~ s/\W+//g; $val } );
 }
 
 =head1 AUTHOR

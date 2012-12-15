@@ -40,6 +40,7 @@
       % end
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Register</button>
+        %= link_to('Already have an account?','login');
       </div>
     % end
   </div>

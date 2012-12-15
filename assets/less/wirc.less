@@ -1,0 +1,153 @@
+/*!
+ * Bootstrap v2.2.1
+ *
+ * Copyright 2012 Twitter, Inc
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ */
+
+/* Copy variables you want to override in here rather than changing variables.less */
+
+@dropdownLinkColorActive:       #eee;
+@blue:                          #468;
+@baseLineHeight:                22px;
+@navbarCollapseWidth:           767px;
+@navbarInverseLinkColorHover:    @navbarInverseLinkColor;
+
+
+ul.inline-list { overflow: hidden; height: auto }
+ul.inline-list li { float: left; margin-right: 20px }
+form.no-margins { margin: 0 }
+.footer .inline-list { margin-top: 40px; padding-top: 20px; border-top: 1px solid #aaa }
+.footer .powered-by,
+.footer .powered-by a { font-size: 11px; color: #888 }
+
+table.table-fixed-footer {
+  margin: 0;
+  background: #fff;
+  border-top: 2px solid #888;
+}
+
+#container { margin-top: 40px }
+
+/* chat */
+#channel_list {
+  position: fixed;
+  top: 40px;
+  bottom: 40px;
+  left: 12px;
+  overflow-y: hidden;
+}
+#channel_list .nav {
+  height: 100%;
+}
+#channel_list .nav-tabs > li > a {
+  padding: 4px;
+  padding-left: 8px;
+}
+#channel_list .nav-tabs > li.server {
+  margin-top: 8px;
+}
+#channel_list .nav-tabs > li.server > a {
+  color: #000;
+}
+#chat_messages {
+  margin-bottom: 45px;
+  padding: 0 4px;
+}
+#chat_messages li span.pull-right { color: @grayLight; }
+#chat_messages li.odd { background-color: @tableBackgroundAccent; }
+#chat_messages li.me span { color: @blue; }
+#chat_messages li.action span { font-style: italic; }
+#chat_messages li.focus span { color: @red; }
+#chat_messages .prefix {
+  font-weight: bold;
+  display: block;
+  float: left;
+  padding-right: 6px;
+}
+#chat_input_field {
+  border-top: 1px solid #d5d5d5;
+  background: #f8f8f8;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+#chat_input_field form {
+  margin: 0;
+  padding: 4px 34px 4px 24px;
+  overflow: hidden;
+  position: relative;
+}
+#chat_input_field input {
+  width: 100%;
+}
+
+/* settings */
+.connection-tab-container .nav {
+  margin-right: -1px;
+  position: relative;
+  z-index: 2;
+}
+
+.connection-tab-container .tab-content {
+  border-left: 1px solid #ccc;
+  padding-right: 19px;
+  position: relative;
+  z-index: 1;
+}
+
+.connection-tab-container .nav a {
+  cursor: pointer; /* not sure why this does not work */
+}
+
+/* home */
+.jumbotron { text-align: center }
+.jumbotron { padding: 36px 0 }
+.jumbotron h1 { font-size: 50px; line-height: 90px }
+.jumbotron p { font-size: 30px; margin: 40px }
+.jumbotron .btn { font-size: 20px }
+
+/* responsive */
+@media (max-width: 767px) {
+  #channel_list {
+    height: auto;
+    background: #fff;
+    display: none; /* need to be able to toggle this from a button... */
+  }
+  #chat_input_field .span2 {
+    display: none;
+  }
+
+}
+
+.navbar {
+  position: fixed;
+}
+
+// FIXME: What are we trying to accomplish here? Should probably be an easier / less universal rule.
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"],
+.uneditable-input {
+  &:focus {
+    border-color: rgba(82,82,82,.3);
+    .box-shadow(~"inset 0 1px 1px rgba(0,0,0,.3), 0 0 4px rgba(82,82,82,.3)");
+  }
+}
+

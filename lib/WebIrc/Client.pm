@@ -170,7 +170,6 @@ TODO
 sub socket {
   my $self = shift;
   my $uid = $self->session('uid');
-  my %allowed;
 
   # try to avoid inactivity timeout
   Mojo::IOLoop->stream($self->tx->connection)->timeout(0);
@@ -178,31 +177,26 @@ sub socket {
   $self->on(finish => sub {
     $self->logf(debug => "Client finished");
   });
+  $self->redis->smembers("user:$uid:connections", sub {
+    my ($reds,$cids)=@_;
+    $self->_subscribe_to_server_messages($_) for @$cids;
+    my %allowed=map { $_ => 1 } @$cids;
 
-  $self->on(message => sub {
-    $self->logf(debug => '[ws] < %s', $_[1]);
-    my ($self,$message) = @_;
-    utf8::encode($message);
-    my $data = $JSON->decode($message) || {};
-    my $cid = $data->{cid}; # TODO: report invalid message?
-    if(!$cid) {
-      $self->logf(debug => "Invalid message:\n".$message. "\nerr:".$JSON->error);
-      return;
-    }
+    $self->on(message => sub {
+      $self->logf(debug => '[ws] < %s', $_[1]);
+      my ($self,$message) = @_;
+      utf8::encode($message);
+      my $data = $JSON->decode($message) || {};
+      my $cid = $data->{cid}; # TODO: report invalid message?
+      if(!$cid) {
+        $self->logf(debug => "Invalid message:\n".$message. "\nerr:".$JSON->error);
+        return;
+      }
+      return $self->_handle_socket_data($cid => $data) if($allowed{$cid});
 
-    if($allowed{$cid}) {
-      $self->_handle_socket_data($cid => $data);
-    }
-    else {
-      $self->redis->sismember("user:$uid:connections", $cid, sub {
-        $self->logf(debug => 'Allowed to listen to %s? %s', $cid, $_[1] ? 'Yes' : 'No');
-        $self->send({ text => $JSON->encode({ cid => $cid, status => $_[1] ? 200 : 403 }) });
-        $_[1] or return $self->finish; # TODO: Report 401 to user?
-        $allowed{$cid} = 1;
-        $self->_subscribe_to_server_messages($cid);
-        $self->_handle_socket_data($cid => $data);
-      });
-    }
+      $self->send({ text => $JSON->encode({ cid => $cid, status => 403 }) });
+      return $self->finish;
+    });
   });
 }
 
@@ -242,11 +236,10 @@ sub _subscribe_to_server_messages {
     my ($redis, $message)=@_;
     $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
     utf8::decode($message);
-
     $self->send({ text => $message });
   });
 
-  $self->stash->{sub} = $sub;
+  $self->stash("sub_$cid" => $sub);
 }
 
 =head1 COPYRIGHT
