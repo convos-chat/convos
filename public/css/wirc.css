@@ -4950,9 +4950,6 @@ table.table-fixed-footer {
   background: #fff;
   border-top: 2px solid #888;
 }
-#container {
-  margin-top: 40px;
-}
 /* chat */
 #channel_list {
   position: fixed;
@@ -5087,6 +5084,51 @@ input[type="color"]:focus,
   -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 4px rgba(82,82,82,.3);
   -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 4px rgba(82,82,82,.3);
   box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 4px rgba(82,82,82,.3);
+}
+.terminal .clipboard {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  opacity: 0.0001;
+  filter: alpha(opacity=0.01);
+  filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
+  width: 2px;
+}
+.cmd > .clipboard {
+  position: fixed;
+}
+.terminal {
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.cmd {
+  padding: 0;
+  margin: 0;
+  height: 1.3em;
+}
+.terminal .terminal-output div div,
+.terminal .prompt {
+  display: block;
+  line-height: 9px;
+  height: 14px;
+}
+.terminal {
+  font-family: FreeMono, monospace;
+  color: #333;
+  background-color: #000;
+  font-size: 12px;
+  line-height: 14px;
+}
+.terminal .terminal-output div span {
+  display: inline-block;
+}
+.terminal .cmd span {
+  display: inline-block;
+}
+.terminal .cmd span.inverted {
+  background-color: #aaa;
+  color: #000;
 }
 body {
   padding-top: 60px;
