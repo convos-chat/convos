@@ -53,14 +53,14 @@
 % unless($as_history) {
 <script type="text/html" id="message_template">
   <li class="<%%= class_name %>">
-    <span class="prefix"><%%= nick %>:</span>
+    <span class="prefix"><%%= sender_nick %>:</span>
     <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= message %></span>
   </li>
 </script>
 <script type="text/html" id="action_message_template">
   <li class="action">
-    <span class="action">* <%%= nick %> <%%= message %></span>
+    <span class="action">* <%%= sender_nick %> <%%= message %></span>
     <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
   </li>
 </script>
@@ -82,7 +82,7 @@
 <li id="target<%%= cid %>_<%%= channel_id %>" class="channel"><a href="/<%%=cid%>/<%%=encodeURIComponent(joined)%>"><%%=joined%></a></li>
 </script>
 <script type="text/html" id="new_conversation_template">
-<li id="target<%%= cid %>_<%%= sender_nick %>" class="conversation"><a href="/<%%=cid%>/<%%=encodeURIComponent(sender_nick)%>"><%%=sender%></a></li>
+<li id="target<%%= cid %>_<%%= sender_nick %>" class="conversation"><a href="/<%%=cid%>/<%%=encodeURIComponent(sender_nick)%>"><%%=sender%><button class="close">&times;</button></a></li>
 </script>
 
 % }

@@ -26,7 +26,6 @@ Structure.registerModule('Wirc.Chat', {
 
     if(action) data.message = action[1];
 
-    data.nick = data.sender.replace(/!.*/, '');
     data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
     data.template = action ? 'action_message_template' : 'message_template';
     data.class_name = data.prefix === this.nick                           ? 'me'
