@@ -4982,7 +4982,7 @@ table.table-fixed-footer {
   font-family: Hume Mono,monospace;
 }
 #chat_messages .message {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 #chat_messages li span.pull-right {
   color: #999999;
@@ -5008,7 +5008,7 @@ table.table-fixed-footer {
 #chat_input_field {
   border-top: 1px solid #d5d5d5;
   background: #f8f8f8;
-  width: 100%;
+  width: 80%;
   position: fixed;
   bottom: 0;
   left: 150px;
@@ -5094,7 +5094,7 @@ table.table-fixed-footer {
 }
 .terminal {
   font-family: Hume, monospace;
-  line-height: 14px;
+  line-height: 25px;
 }
 .terminal .cmd span {
   display: inline-block;
