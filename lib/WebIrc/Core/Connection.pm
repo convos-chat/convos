@@ -170,8 +170,8 @@ sub connect {
       $self->{sub} = $redis->subscribe("connection:$id:to_server");
       $self->{sub}->on(message => sub {
         my($sub, $msg) = @_;
+        $msg=Unicode::UTF8::encode_utf8($msg, sub { $_[0] });
         $self->_irc->write($msg);
-        utf8::encode($msg);
         $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $msg);
         if($msg->{command} eq 'PRIVMSG') {
           $self->add_message($msg);

@@ -8,6 +8,7 @@ WebIrc::Client - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
+use Unicode::UTF8;
 use Mojo::Util 'html_escape';
 use List::MoreUtils qw/ zip /;
 use WebIrc::Core::Util qw/ unpack_irc /;
@@ -206,10 +207,10 @@ sub socket {
 
     $self->on(message => sub {
       $self->logf(debug => '[ws] < %s', $_[1]);
-      my ($self,$message) = @_;
-      utf8::encode($message);
+      my ($self,$octets) = @_;
+      my $message= Unicode::UTF8::encode_utf8($octets, sub { $_[0] });;
       my $data = $JSON->decode($message) || {};
-      my $cid = $data->{cid}; # TODO: report invalid message?
+      my $cid = $data->{cid};
       if(!$cid) {
         $self->logf(debug => "Invalid message:\n".$message. "\nerr:".$JSON->error);
         return;
@@ -255,9 +256,9 @@ sub _subscribe_to_server_messages {
   my $sub = $self->redis->subscribe("connection:$cid:from_server");
 
   $sub->on(message => sub {
-    my ($redis, $message)=@_;
+    my ($redis, $octets)=@_;
+    my $message=Unicode::UTF8::decode_utf8($octets, sub { $_[0] });
     $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-    utf8::decode($message);
     $self->send({ text => $message });
   });
 
