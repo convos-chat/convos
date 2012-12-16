@@ -58,6 +58,9 @@ Structure.registerModule('Wirc.Chat', {
     }
     else if(data.message && data.target == this.target || data.sender_nick == this.target) {
       data = this.formatIrcData(data);
+      var index=$.inArray(data.sender_nick+': ',this.autocomplete_commands);
+        if(index!=-1) { this.autocomplete_commands.splice(index,1)  }
+      this.autocomplete_commands.unshift(data.sender_nick+': ');
       $messages.append(tmpl(data.template, data));
     }
 
