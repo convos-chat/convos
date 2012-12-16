@@ -9,6 +9,7 @@ WebIrc::Client - Mojolicious controller for IRC chat
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
 use Unicode::UTF8;
+no warnings "utf8";
 use Mojo::Util 'html_escape';
 use List::MoreUtils qw/ zip /;
 use WebIrc::Core::Util qw/ unpack_irc /;
