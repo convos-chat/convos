@@ -10,7 +10,7 @@
     <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
       %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
         %= $channel
-        <span class="badge badge-important hide">0</span>
+        <span class="badge hide">0</span>
       % end
     </li>
   % }

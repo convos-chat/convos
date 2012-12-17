@@ -2,6 +2,8 @@ var BASEURL = window.location.href;
 
 (function($) {
 
+
+
 Structure.registerModule('Wirc', {
   websocket: function(path, callbacks) {
     var url = BASEURL.replace(/^http/, 'ws') + path;
@@ -21,15 +23,13 @@ Structure.registerModule('Wirc.Chat', {
     '/part '
   ],
   formatIrcData: function(data) {
-    var me_re = new RegExp("\\b" + this.nick + "\\b");
     var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
 
     if(action) data.message = action[1];
-
     data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
     data.template = action ? 'action_message_template' : 'message_template';
     data.class_name = data.prefix === this.nick                           ? 'me'
-                    : data.message.match(me_re)                           ? 'focus'
+                    : data.highlight                           ? 'focus'
                     : $('#chat_messages').find('li:last').hasClass('odd') ? 'even'
                     :                                                       'odd';
 
@@ -82,6 +82,8 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.sender) {
       data.nick = data.sender.replace(/!.*/, '');
     }
+    data.highlight=data.message.match("\\b" + this.nick + "\\b") ? 1 :0;
+    
 
     if(data.joined) {
       channel_id = data.joined.replace(/\W/g, '');
@@ -112,12 +114,10 @@ Structure.registerModule('Wirc.Chat', {
     }
     else if(data.target) {
       channel_id = data.target.replace(/\W/g, '');
-      if(!this.unread[data.cid + '_' + channel_id]) this.unread[data.cid + '_' + channel_id] = 0;
-      this.unread[data.cid + '_' + channel_id]++;
-      $(['#target', data.cid, channel_id].join('_'))
-        .find('.badge')
-        .text(this.unread[data.cid + '_' + channel_id])
-        .show();
+      
+      var $badge=$(['#target', data.cid, channel_id].join('_')+' .badge')
+      if(data.highlight) { $badge.addClass('badge-important') }
+      $badge.text(parseInt($badge.text())+1).show();
     }
   },
   sendData: function(data) {
