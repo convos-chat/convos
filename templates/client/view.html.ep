@@ -48,7 +48,7 @@
 </div>
 <div id="chat_input_field">
   <form>
-    <input type="text" name="say">
+    <input type="text" name="say" placeholder="Write a message to reply...">
   </form>
 </div>
 
