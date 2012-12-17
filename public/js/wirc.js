@@ -83,7 +83,10 @@ Structure.registerModule('Wirc.Chat', {
       data.nick = data.sender.replace(/!.*/, '');
     }
     data.highlight=data.message.match("\\b" + this.nick + "\\b") ? 1 :0;
-    
+    if (window.webkitNotifications.checkPermission() == 0 && data.highlight) { 
+      notification = window.webkitNotifications.createNotification('', 'Message from '+data.sender, data.message);
+      notification.show()
+    }
 
     if(data.joined) {
       channel_id = data.joined.replace(/\W/g, '');
@@ -201,6 +204,7 @@ Structure.registerModule('Wirc.Chat', {
 
         case 13: // return
           if(this.value.length === 0) return e.preventDefault();
+          if(window.webkitNotifications && window.webkitNotifications.checkPermission()) { window.webkitNotifications.requestPermission() }
           self.history.push(this.value);
           self.history_index = self.history.length;
           break;
