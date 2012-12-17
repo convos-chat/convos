@@ -5,12 +5,12 @@
   <ul class="nav nav-list well">
 % for my $c (@$connections) {
   <li><ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
-    <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a> 
+    <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a>
   % for my $channel (@{ $c->{channels} }) {
     <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c,$channel) ? 'active' : '' %> channel"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
   % }
   % for my $conversation (@{ $c->{conversations} }) {
-    <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>" 
+    <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>"
         class="<%= $conversation eq $target ? 'active' : '' %> conversation">
          <a class="close pull-right" href="#">&times;</button></a><a href="<%=url_for('channel.view',  target => $conversation, cid => $c->{id} ) %>"><%=$conversation%></a></li>
   % }
@@ -46,8 +46,10 @@
     </dl>
   </div>
 </div>
-<div id="chat_input_field" class="terminal" style="height:20px">
-<div id="command_line"></div>
+<div id="chat_input_field">
+  <form>
+    <input type="text" name="say">
+  </form>
 </div>
 
 % unless($as_history) {

@@ -37,7 +37,6 @@ table.table-fixed-footer {
   bottom: 40px;
   left: 12px;
   overflow-y: hidden;
-  border-right: 1px dotted #ccc;
 }
 #channel_list .nav {
   height: 100%;
@@ -59,13 +58,7 @@ table.table-fixed-footer {
   font-style: normal;
 }
 
-#chat_messages {
-  margin-bottom: 45px;
-  padding: 0 4px;
-  font-family: Hume Mono,monospace;
-}
-
-
+#chat_messages { margin-bottom: 45px; padding: 0 4px; font-family: Hume Mono, monospace; }
 #chat_messages .message {   white-space:pre-wrap;}
 #chat_messages li span.pull-right { color: @grayLight; }
 #chat_messages li.odd { background-color: @tableBackgroundAccent; }
@@ -77,14 +70,6 @@ table.table-fixed-footer {
   display: block;
   float: left;
   padding-right: 6px;
-}
-#chat_input_field {
-  border-top: 1px solid #d5d5d5;
-  background: #f8f8f8;
-  width: 80%;
-  position: fixed;
-  bottom: 0;
-  left: 150px;
 }
 
 /* settings */
@@ -119,59 +104,33 @@ table.table-fixed-footer {
     background: #fff;
     display: none; /* need to be able to toggle this from a button... */
   }
-  #chat_input_field .span2 {
-    display: none;
-  }
-
 }
 
 .navbar {
   position: fixed;
 }
 
-#channel_list .close {
-    display: none;
-}
-#channel_list li:hover .close {
-    display: inline;
+#channel_list .close { display: none; }
+#channel_list li:hover .close { display: inline; }
+
+#chat_input_field {
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  border-top: 1px solid #999;
 }
 
-// Command line
+#chat_input_field form {
+  margin: 0;
+  padding: 0;
+  padding-right: 10px;
+  border: 4px solid #eee;
+  border-left-width: 190px;
+  border-right-width: 20px;
+}
 
-.terminal .clipboard {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    .opacity(0.01);
-    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
-    width: 2px;
-}
-.cmd > .clipboard {
-    position: fixed;
-}
-.terminal {
-    padding: 10px;
-    position: relative;
-    overflow: hidden;
-}
-.cmd {
-    padding: 0;
-    margin: 0;
-    height: 1.3em;
-}
-.terminal .terminal-output div div, .terminal .prompt {
-    display: block;
-    line-height: 9px;
-    height: 14px;
-}
-.terminal {
-    font-family: Hume, monospace;
-    line-height: 25px;
-}
-.terminal .cmd span {
-    display: inline-block;
-}
-.terminal .cmd span.inverted {
-    background-color: #aaa;
-    color: #000;
+#chat_input_field form input {
+  width: 100%;
+  margin: 0;
 }

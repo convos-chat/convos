@@ -18,8 +18,8 @@ Structure.registerModule('Wirc.Chat', {
     '/msg ',
     '/me ',
     '/nick ',
-    '/part ',
-    ],
+    '/part '
+  ],
   formatIrcData: function(data) {
     var me_re = new RegExp("\\b" + this.nick + "\\b");
     var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
@@ -55,11 +55,11 @@ Structure.registerModule('Wirc.Chat', {
       }
       $messages.append(tmpl('nick_change_template', data));
     }
-    else if(data.message && data.target == this.target || data.sender_nick == this.target) {
+    else if(data.message && data.target == this.target || data.nick == this.target) {
       data = this.formatIrcData(data);
-      var index=$.inArray(data.sender_nick+': ',this.autocomplete_commands);
-        if(index!=-1) { this.autocomplete_commands.splice(index,1)  }
-      this.autocomplete_commands.unshift(data.sender_nick+': ');
+      var index = $.inArray(data.nick + ': ', this.autocomplete_commands);
+      if(index != -1) { this.autocomplete_commands.splice(index,1); }
+      this.autocomplete_commands.unshift(data.nick+': ');
       $messages.append(tmpl(data.template, data));
     }
 
@@ -73,7 +73,7 @@ Structure.registerModule('Wirc.Chat', {
   receiveData: function(e) {
     var data = $.parseJSON(e.data);
     if(window.console) console.log('[websocket] > ' + e.data);
-    if (data.sender) { data.sender_nick = data.sender.replace(/!.*/, ''); }
+    if (data.sender) { data.nick = data.sender.replace(/!.*/, ''); }
     if(data.joined) {
       data.channel_id=data.joined.replace(/\W/g,'');
       var $channel=$('#target_'+data.cid+'_'+data.channel_id);
@@ -86,10 +86,10 @@ Structure.registerModule('Wirc.Chat', {
       data.channel_id=data.parted.replace(/\W/g,'');
       $('#target_'+data.cid+'_'+data.channel_id).remove();
     }
-    else if(data.target && self.target != self.sender_nick && self.target != data.target && data.target===this.nick) {
-      var $conversation=$('#target_'+data.cid+'_'+data.sender_nick);
+    else if(data.target && self.target != self.nick && self.target != data.target && data.target===this.nick) {
+      var $conversation=$('#target_'+data.cid+'_'+data.nick);
       if(!$conversation.length) {
-        $(tmpl('new_conversation_template',data)).appendTo('#connection_list_'+data.cid);        
+        $(tmpl('new_conversation_template',data)).appendTo('#connection_list_'+data.cid);
       }
     }
     else {
@@ -124,52 +124,79 @@ Structure.registerModule('Wirc.Chat', {
   },
   setupUI: function() {
     var self = this;
-    var tab_count = 0;
-    var partial = null;  
-    self.$input.cmd({
-        prompt: '['+self.target+'] ',
-        keydown: function(e,cmd) {
-          if (e.which !== 9) { // not a TAB
-              partial = null;
-              tab_count = 0;
-          }
-          else {
-            ++tab_count;
-            var command = partial || self.$input.get();
-            if (!command.match(' ')) { // complete only first word
-                var reg = new RegExp('^' + command);
-                var matched = [];
-                for (i in self.autocomplete_commands) {
-                    if (reg.test(self.autocomplete_commands[i])) {
-                        matched.push(self.autocomplete_commands[i]);
-                    }
-                }
-                if(!matched.length) { return false; }
-                if (matched.length <= tab_count) {
-                  tab_count=0;
-                } 
-                partial= matched.length ? command : null;
-                self.$input.set(matched[tab_count]);
-                return false;
-              }
-            return true;
-          }
-          return true;
-          
-        },
-        commands: function(command) {
-          self.sendData({ cid: self.connection_id, target: self.target, cmd: command });
-        }
-      });
+    var $input = self.$input;
 
-    self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Connecting...');
-    self.$input.parents('form').submit(function() {
-      self.sendData({ cid: self.connection_id, target: self.target, cmd: self.$input.val() });
-      self.$input.val('');
+    $input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Connecting...');
+    $input.parents('form').submit(function() {
+      self.sendData({ cid: self.connection_id, target: self.target, cmd: $input.val() });
+      $input.val('');
       return false;
     });
 
-    $('body').click(function() { self.$input.focus(); });
+    $input.keydown(function(e) {
+      switch(e.keyCode) {
+        case 35: // end
+        case 36: // home
+        case 16: // shift
+        case 17: // ctrl
+        case 18: // alt
+        case 37: // left
+        case 39: // right
+        case 27: // escape
+          e.preventDefault();
+          break;
+
+        case 38: // up
+          e.preventDefault();
+          if(--self.history_index < 0) self.history_index = 0;
+          $input.val(self.history[self.history_index]);
+          break;
+
+        case 40: // down
+          e.preventDefault();
+          if(++self.history_index > self.history.length) self.history_index = self.history.length;
+          $input.val(self.history[self.history_index]);
+          break;
+
+        case 8: // backspace
+          if(!this.initial_value) break;
+          e.preventDefault();
+          this.value = this.initial_value;
+          delete this.initial_value;
+          break;
+
+        case 9: // tab
+          e.preventDefault();
+
+          if(typeof this.initial_value === "undefined") {
+            var v = this.value;
+            this.tabbed = 0;
+            this.offset = v.lastIndexOf(' ') + 1;
+            this.partial_re = new RegExp('^' + v.substr(this.offset));
+            if(this.offset > 0 && v.substr(this.offset).search(/^[a-z_]/i) !== 0) return;
+            this.initial_value = v;
+          }
+
+          var re = this.partial_re;
+          var matched = $.grep(self.autocomplete_commands, function(v) { return re.test(v); });
+          if(matched.length === 0) return;
+          if(++this.tabbed >= matched.length) this.tabbed = 0;
+          this.value = this.value.substr(0, this.offset) + matched[this.tabbed];
+          break;
+
+        case 13: // return
+          if(this.value.length === 0) return e.preventDefault();
+          self.history.push(this.value);
+          self.history_index = self.history.length;
+          break;
+
+        default:
+          delete this.initial_value;
+      }
+    });
+
+    $('body').click(function() { $input.focus(); });
+    $input.focus();
     self.scrollToBottom();
   },
   listenToScroll: function() {
@@ -208,8 +235,10 @@ Structure.registerModule('Wirc.Chat', {
     self.connection_id = $('#chat_messages').attr('data-cid');
     self.nick = $('#chat_messages').attr('data-nick');
     self.target = $('#chat_messages').attr('data-target');
+    self.history = [''];
+    self.history_index = 0;
     self.$messages = $('#chat_messages');
-    self.$input = $('#command_line');
+    self.$input = $('#chat_input_field input[type="text"]');
     self.connectToWebSocket();
     self.setupUI();
     self.listenToScroll();
