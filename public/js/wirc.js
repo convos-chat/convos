@@ -112,6 +112,7 @@ Structure.registerModule('Wirc.Chat', {
       onmessage: self.receiveData,
       onopen: function function_name (argument) {
         self.$input.removeAttr('disabled').css({ background: '#fff' }).val('');
+        self.$input.focus();
         self.sendData({ cid: self.connection_id, target: self.target });
       },
       onerror: function(e) {
@@ -196,7 +197,6 @@ Structure.registerModule('Wirc.Chat', {
     });
 
     $('body').click(function() { $input.focus(); });
-    $input.focus();
     self.scrollToBottom();
   },
   listenToScroll: function() {
