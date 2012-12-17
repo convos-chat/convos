@@ -107,7 +107,7 @@ Structure.registerModule('Wirc.Chat', {
       this.print(data);
     }
 
-    if(data.cid == this.cid && data.target == this.target) {
+    if(data.cid == this.connection_id && data.target == this.target) {
       document.title = 'New message in ' + this.target;
     }
     else if(data.target) {
