@@ -136,27 +136,17 @@ Structure.registerModule('Wirc.Chat', {
 
     $input.keydown(function(e) {
       switch(e.keyCode) {
-        case 35: // end
-        case 36: // home
-        case 16: // shift
-        case 17: // ctrl
-        case 18: // alt
-        case 37: // left
-        case 39: // right
-        case 27: // escape
-          e.preventDefault();
-          break;
-
         case 38: // up
           e.preventDefault();
+          if(self.history_index == self.history.length) this.initial_value = this.value;
           if(--self.history_index < 0) self.history_index = 0;
           $input.val(self.history[self.history_index]);
           break;
 
         case 40: // down
           e.preventDefault();
-          if(++self.history_index > self.history.length) self.history_index = self.history.length;
-          $input.val(self.history[self.history_index]);
+          if(++self.history_index >= self.history.length) self.history_index = self.history.length;
+          $input.val(self.history[self.history_index] || this.initial_value || '');
           break;
 
         case 8: // backspace
@@ -169,13 +159,13 @@ Structure.registerModule('Wirc.Chat', {
         case 9: // tab
           e.preventDefault();
 
-          if(typeof this.initial_value === "undefined") {
+          if(typeof this.tabbed === "undefined") {
             var v = this.value;
-            this.tabbed = 0;
             this.offset = v.lastIndexOf(' ') + 1;
-            this.partial_re = new RegExp('^' + v.substr(this.offset));
             if(this.offset > 0 && v.substr(this.offset).search(/^[a-z_]/i) !== 0) return;
             this.initial_value = v;
+            this.partial_re = new RegExp('^' + v.substr(this.offset));
+            this.tabbed = 0;
           }
 
           var re = this.partial_re;
@@ -192,6 +182,7 @@ Structure.registerModule('Wirc.Chat', {
           break;
 
         default:
+          delete this.tabbed;
           delete this.initial_value;
       }
     });
@@ -235,7 +226,7 @@ Structure.registerModule('Wirc.Chat', {
     self.connection_id = $('#chat_messages').attr('data-cid');
     self.nick = $('#chat_messages').attr('data-nick');
     self.target = $('#chat_messages').attr('data-target');
-    self.history = [''];
+    self.history = [];
     self.history_index = 0;
     self.$messages = $('#chat_messages');
     self.$input = $('#chat_input_field input[type="text"]');
