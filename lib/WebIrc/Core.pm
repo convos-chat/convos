@@ -153,7 +153,7 @@ Disconnect a connection by connection id.
 sub disconnect_connection {
   my ($self,$cid)=@_;
   $self->_connections->{$cid}->disconnect;
-  delete $self->connections->{$cid};
+  delete $self->_connections->{$cid};
 }
 
 =head2 login
