@@ -97,23 +97,14 @@ table.table-fixed-footer {
 .jumbotron p { font-size: 30px; margin: 40px }
 .jumbotron .btn { font-size: 20px }
 
-/* responsive */
-@media (max-width: 767px) {
-  #channel_list {
-    height: auto;
-    background: #fff;
-    display: none; /* need to be able to toggle this from a button... */
-  }
-}
-
-.navbar {
-  position: fixed;
-}
+.navbar { position: fixed; }
 
 #channel_list .close { display: none; }
 #channel_list li:hover .close { display: inline; }
 
 #chat_input_field {
+  background: #eee;
+  padding: 4px 0;
   position: fixed;
   bottom: 0px;
   left: 0;
@@ -121,16 +112,16 @@ table.table-fixed-footer {
   border-top: 1px solid #999;
 }
 
-#chat_input_field form {
-  margin: 0;
-  padding: 0;
-  padding-right: 10px;
-  border: 4px solid #eee;
-  border-left-width: 190px;
-  border-right-width: 20px;
+#chat_input_field form,
+#chat_input_field form input {
+  margin-bottom: 0;
+  margin-top: 0;
 }
 
-#chat_input_field form input {
-  width: 100%;
-  margin: 0;
+@media (max-width: 767px) {
+  #channel_list {
+    height: auto;
+    background: #fff;
+    display: none; /* need to be able to toggle this from a button... */
+  }
 }

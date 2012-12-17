@@ -19,10 +19,7 @@
 </ul>
 </div>
 <div class="chat row-fluid">
-  <div class="span2">
-    <!-- hack to make the fixed channel_list above get space -->
-  </div>
-  <div class="span10">
+  <div class="span10 offset2">
     <ul class="unstyled" id="chat_messages"
       data-cid="<%= $connection_id %>"
       data-nick="<%= $nick %>"
@@ -47,9 +44,13 @@
   </div>
 </div>
 <div id="chat_input_field">
-  <form>
-    <input type="text" name="say" placeholder="Write a message to reply...">
-  </form>
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <form class="span10 offset2">
+        <input type="text" name="say" class="span12" placeholder="Write a message to reply...">
+      </form>
+    </div>
+  </div>
 </div>
 
 % unless($as_history) {
