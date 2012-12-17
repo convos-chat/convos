@@ -141,6 +141,21 @@ sub update_connection {
     );
 }
 
+
+=head2 disconnect_connection
+
+    $self->disconnect_connection($cid);
+
+Disconnect a connection by connection id.
+
+=cut
+
+sub disconnect_connection {
+  my ($self,$cid)=@_;
+  $self->_connections->{$cid}->disconnect;
+  delete $self->connections->{$cid};
+}
+
 =head2 login
 
   $self->login({ login => $str, password => $str }, $callback);
