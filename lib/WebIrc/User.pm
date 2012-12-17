@@ -287,14 +287,14 @@ sub _delete_connection {
     $self->redis->execute([ keys => "connection:$cid:*" ], $_[0]->begin);
   },
   sub {
-    # TODO: Also disconnect from irc server in core
     my($delay, $keys) = @_;
+    $self->app->core->disconnect_connection($cid);
     $self->redis->execute(
       [ del => @$keys ],
       [ srem => "connections", $cid ],
       $delay->begin,
     );
-  }
+  },
 }
 
 =head1 COPYRIGHT
