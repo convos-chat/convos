@@ -6,4 +6,4 @@
 	url = https://github.com/FortAwesome/Font-Awesome.git
 [submodule "vendor/less.js"]
 	path = vendor/less.js
-	url = git@github.com:marcusramberg/less.js.git
+	url = https://github.com/marcusramberg/less.js.git
