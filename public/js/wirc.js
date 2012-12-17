@@ -41,7 +41,7 @@ Structure.registerModule('Wirc.Chat', {
     var $messages = this.$messages;
 
     if(data.timestamp) {
-      data.timestamp = new Date(parseInt(data.timestamp, 10));
+      data.timestamp = new Date(parseInt(data.timestamp*1000, 10));
     }
 
     if(data.status) {
