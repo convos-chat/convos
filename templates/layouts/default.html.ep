@@ -8,6 +8,7 @@
     %= javascript '/js/structure.min.js';
     %= javascript '/js/date-format.js';
     %= javascript '/js/wirc.js';
+    <meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no;user-scalable=0;"/>
   </head>
   <body>
   <div id="container">
