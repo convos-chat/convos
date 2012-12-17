@@ -7,7 +7,12 @@
   <li><ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
     <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a>
   % for my $channel (@{ $c->{channels} }) {
-    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c,$channel) ? 'active' : '' %> channel"><%= link_to $channel  => url_for('channel.view', target => $channel, cid => $c->{id}) %></li>
+    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
+      %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
+        %= $channel
+        <span class="badge badge-important hide">0</span>
+      % end
+    </li>
   % }
   % for my $conversation (@{ $c->{conversations} }) {
     <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>"
@@ -74,6 +79,13 @@
     <span class="message"><%%= old_nick %> changed nick to "<%%= new_nick %>"</span>
   </li>
 </script>
+<script type="text/html" id="nick_joined_template">
+  <li class="muted">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span class="message"><%%= nick %> joined <%%= joined %></span>
+  </li>
+</script>
 <script type="text/html" id="server_status_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
@@ -82,10 +94,9 @@
   </li>
 </script>
 <script type="text/html" id="new_channel_template">
-<li id="target<%%= cid %>_<%%= channel_id %>" class="channel"><a href="/<%%=cid%>/<%%=encodeURIComponent(joined)%>"><%%=joined%></a></li>
+  <li id="target<%%= cid %>_<%%= channel_id %>" class="channel"><a href="/<%%= cid %>/<%%= encodeURIComponent(joined) %>"><%%= joined %></a></li>
 </script>
 <script type="text/html" id="new_conversation_template">
-<li id="target<%%= cid %>_<%%= nick %>" class="conversation"><a href="/<%%=cid%>/<%%=encodeURIComponent(nick)%>"><%%=sender%><button class="close">&times;</button></a></li>
+  <li id="target<%%= cid %>_<%%= nick %>" class="conversation"><a href="/<%%= cid %>/<%%= encodeURIComponent(nick) %>"><%%= sender %><button class="close">&times;</button></a></li>
 </script>
-
 % }

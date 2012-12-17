@@ -302,7 +302,7 @@ Example message:
 sub irc_join {
   my ($self, $message) = @_;
 
-  $self->_publish({ joined => $message->{params}[0], timestamp => time });
+  $self->_publish({ prefix => $message->{prefix}, joined => $message->{params}[0], timestamp => time });
 }
 
 =head2 irc_nick

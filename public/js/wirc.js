@@ -59,7 +59,7 @@ Structure.registerModule('Wirc.Chat', {
       data = this.formatIrcData(data);
       var index = $.inArray(data.nick + ': ', this.autocomplete_commands);
       if(index != -1) { this.autocomplete_commands.splice(index,1); }
-      this.autocomplete_commands.unshift(data.nick+': ');
+      this.autocomplete_commands.unshift(data.nick + ': ');
       $messages.append(tmpl(data.template, data));
     }
 
@@ -72,28 +72,52 @@ Structure.registerModule('Wirc.Chat', {
   },
   receiveData: function(e) {
     var data = $.parseJSON(e.data);
+    var channel_id;
+
     if(window.console) console.log('[websocket] > ' + e.data);
-    if (data.sender) { data.nick = data.sender.replace(/!.*/, ''); }
+
+    if(data.prefix) {
+      data.nick = data.prefix.replace(/!.*/, '');
+    }
+    else if(data.sender) {
+      data.nick = data.sender.replace(/!.*/, '');
+    }
+
     if(data.joined) {
-      data.channel_id=data.joined.replace(/\W/g,'');
-      var $channel=$('#target_'+data.cid+'_'+data.channel_id);
+      channel_id = data.joined.replace(/\W/g, '');
+      var $channel = $('#target_' + data.cid + '_' + channel_id);
       if(!$channel.length) {
-        console.log(data.cid);
-        $(tmpl('new_channel_template',data)).insertAfter('#connection_list_'+data.cid+' .channel:last');
+        $(tmpl('new_channel_template', data)).insertAfter('#connection_list_' + data.cid + ' .channel:last');
+      }
+      if(data.nick !== this.nick && data.joined === this.target) {
+        this.$messages.append( $(tmpl('nick_joined_template', data)) );
       }
     }
     else if(data.parted) {
-      data.channel_id=data.parted.replace(/\W/g,'');
-      $('#target_'+data.cid+'_'+data.channel_id).remove();
+      channel_id = data.parted.replace(/\W/g, '');
+      $('#target_' + data.cid + '_' + channel_id).remove();
     }
-    else if(data.target && self.target != self.nick && self.target != data.target && data.target===this.nick) {
-      var $conversation=$('#target_'+data.cid+'_'+data.nick);
+    else if(data.target && this.target != this.nick && this.target != data.target && data.target === this.nick) {
+      var $conversation=$('#target_' + data.cid + '_' + data.nick);
       if(!$conversation.length) {
-        $(tmpl('new_conversation_template',data)).appendTo('#connection_list_'+data.cid);
+        $(tmpl('new_conversation_template',data)).appendTo('#connection_list_' + data.cid);
       }
     }
     else {
       this.print(data);
+    }
+
+    if(data.cid == this.cid && data.target == this.target) {
+      document.title = 'New message in ' + this.target;
+    }
+    else if(data.target) {
+      channel_id = data.target.replace(/\W/g, '');
+      if(!this.unread[data.cid + '_' + channel_id]) this.unread[data.cid + '_' + channel_id] = 0;
+      this.unread[data.cid + '_' + channel_id]++;
+      $(['#target', data.cid, channel_id].join('_'))
+        .find('.badge')
+        .text(this.unread[data.cid + '_' + channel_id])
+        .show();
     }
   },
   sendData: function(data) {
@@ -228,6 +252,7 @@ Structure.registerModule('Wirc.Chat', {
     self.target = $('#chat_messages').attr('data-target');
     self.history = [];
     self.history_index = 0;
+    self.unread = {};
     self.$messages = $('#chat_messages');
     self.$input = $('#chat_input_field input[type="text"]');
     self.connectToWebSocket();
