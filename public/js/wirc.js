@@ -113,6 +113,7 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     if(data.cid == this.connection_id && data.target == this.target) {
+
       document.title = 'New message in ' + this.target;
     }
     else if(data.target) {
@@ -138,15 +139,15 @@ Structure.registerModule('Wirc.Chat', {
     self.websocket = Wirc.websocket('/socket', {
       onmessage: self.receiveData,
       onopen: function function_name (argument) {
-        self.$input.removeAttr('disabled').css({ background: '#fff' }).val('');
+        self.$input.removeAttr('disabled').css({ background: '#fff' }).attr('placeholder','Write a message to reply');
         self.$input.focus();
         self.sendData({ cid: self.connection_id, target: self.target });
       },
       onerror: function(e) {
-        self.$input.attr('disabled', 'disabled').css({ background: '#fdd' }).val(e);
+        self.$input.attr('disabled', 'disabled').css({ background: '#fdd' }).attr('placeholder',e)
       },
       onclose: function() {
-        self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Reconnecting...');
+        self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).attr('placeholder','Reconnecting...');
       }
     });
   },
@@ -154,7 +155,7 @@ Structure.registerModule('Wirc.Chat', {
     var self = this;
     var $input = self.$input;
 
-    $input.attr('disabled', 'disabled').css({ background: '#eee' }).val('Connecting...');
+    $input.attr('disabled', 'disabled').css({ background: '#eee' }).attr('placeholder','Connecting...');
     $input.parents('form').submit(function() {
       self.sendData({ cid: self.connection_id, target: self.target, cmd: $input.val() });
       $input.val('');
