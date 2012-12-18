@@ -39,7 +39,7 @@
       </li>
       % } else {
       <li class="<%= $message->{class_name} %> <%= $n++ % 2 ? 'odd' : 'even' %>">
-        <span class="prefix"><%= $message->{nick} || $message->{prefix} %>:</span>
+        <span class="prefix"><%= $message->{nick} %>:</span>
         <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
         <span class="message"><%== $message->{message} %></span>
       </li>

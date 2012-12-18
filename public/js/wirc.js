@@ -28,7 +28,7 @@ Structure.registerModule('Wirc.Chat', {
     if(action) data.message = action[1];
     data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
     data.template = action ? 'action_message_template' : 'message_template';
-    data.class_name = data.prefix === this.nick                           ? 'me'
+    data.class_name = data.nick === this.nick                           ? 'me'
                     : data.highlight                           ? 'focus'
                     : $('#chat_messages').find('li:last').hasClass('odd') ? 'even'
                     :                                                       'odd';
@@ -76,12 +76,6 @@ Structure.registerModule('Wirc.Chat', {
 
     if(window.console) console.log('[websocket] > ' + e.data);
 
-    if(data.prefix) {
-      data.nick = data.prefix.replace(/!.*/, '');
-    }
-    else if(data.sender) {
-      data.nick = data.sender.replace(/!.*/, '');
-    }
     data.highlight=data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 :0;
     if (window.webkitNotifications && window.webkitNotifications.checkPermission() == 0 && (data.highlight || data.target === this.nick)) { 
       notification = window.webkitNotifications.createNotification('', 'Message from '+data.sender, data.message);
@@ -89,8 +83,8 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     if(data.joined) {
-      channel_id = data.joined.replace(/\W/g, '');
-      var $channel = $('#target_' + data.cid + '_' + channel_id);
+      data.channel_id = data.joined.replace(/\W/g, '');
+      var $channel = $('#target_' + data.cid + '_' + data.channel_id);
       if(!$channel.length) {
         $(tmpl('new_channel_template', data)).insertAfter('#connection_list_' + data.cid + ' .channel:last');
       }

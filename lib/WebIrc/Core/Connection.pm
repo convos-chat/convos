@@ -180,7 +180,6 @@ sub connect {
         }
         else {
           my $action='cmd_'.lc($msg->{command});
-          warn "BOO:".$action;  
           $self->$action($msg) if $self->can($action);
         }
         
@@ -231,10 +230,13 @@ sub add_message {
     "connection:@{[$self->id]}:$target:msg",
     $time, $message->{raw_line}
   );
+  my ($nick, $user, $host) = parse_user($message->{prefix});
   $self->_publish({
     timestamp => $time,
     server    => $self->_irc->server,
-    sender    => $message->{prefix},
+    nick      => $nick,
+    user      => $user,
+    host      => $host,
     target    => $message->{params}[0],
     message   => $message->{params}[1],
   });
@@ -301,8 +303,10 @@ Example message:
 
 sub irc_join {
   my ($self, $message) = @_;
-
-  $self->_publish({ prefix => $message->{prefix}, joined => $message->{params}[0], timestamp => time });
+  my ($nick, $user, $host) = parse_user($message->{prefix});
+  $self->_publish({ nick=>$nick, user => $user,host=>$host, joined => $message->{params}[0], timestamp => time });
+  return if $nick eq $self->_irc->nick;
+  $self->redis->sadd("connection:@{[$self->id]}:$message->{params}[0]:nicks", $nick);
 }
 
 =head2 irc_nick
@@ -346,6 +350,7 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
+  $self->add_server_message($message);
   if ($message->{raw_line} =~ /Closing Link/i) {
     $self->log(warn => "[connection:@{[$self->id]}] ! Closing link (reconnect)");
     delete $self->{_irc};
@@ -380,6 +385,7 @@ Handle part commands from user. Remove from channel set.
 sub cmd_part {
   my($self,$msg)=@_;
   $self->redis->srem("connection:@{[$self->id]}:channels",@{$msg->{params}});
+  $self->redis->del("connection:@{[$self->id]}:channel:$msg->{params}[0]:nicks");
   $self->_publish({ parted => $msg->{params}[0], timestamp => time });
 }
 

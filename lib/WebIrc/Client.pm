@@ -11,6 +11,7 @@ use Mojo::JSON;
 use Unicode::UTF8;
 no warnings "utf8";
 use Mojo::Util 'html_escape';
+use IRC::Utils qw/parse_user/;
 use List::MoreUtils qw/ zip /;
 use WebIrc::Core::Util qw/ unpack_irc /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
@@ -171,9 +172,10 @@ sub _format_conversation {
 
   for(my $i = 0; $i < @$conversation; $i = $i + 2) {
     my $message = unpack_irc $conversation->[$i], $conversation->[$i + 1];
+    @{$message}{qw/nick user host/} = parse_user($message->{prefix});
+    
     $message->{message} = html_escape $message->{params}[1];
     $message->{message} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
-    $message->{nick} = $message->{prefix} =~ /^(.*?)!/ ? $1 : '';
     $message->{class_name} = $message->{message} =~ /\b$nick\b/ ? 'focus'
                            : $message->{special} eq 'me'     ? 'action'
                            : $message->{nick} eq $nick       ? 'me'
