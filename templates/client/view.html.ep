@@ -52,7 +52,7 @@
   <div class="container-fluid">
     <div class="row-fluid">
       <form class="span10 offset2">
-        <input type="text" name="say" class="span12" placeholder="Write a message to reply...">
+        <input autocomplete="off" type="text" name="say" class="span12" placeholder="Write a message to reply...">
       </form>
     </div>
   </div>
