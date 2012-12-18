@@ -97,6 +97,6 @@
   <li id="target<%%= cid %>_<%%= channel_id %>" class="channel"><a href="/<%%= cid %>/<%%= encodeURIComponent(joined) %>"><%%= joined %></a></li>
 </script>
 <script type="text/html" id="new_conversation_template">
-  <li id="target<%%= cid %>_<%%= nick %>" class="conversation"><a href="/<%%= cid %>/<%%= encodeURIComponent(nick) %>"><%%= sender %><button class="close">&times;</button></a></li>
+  <li id="target<%%= cid %>_<%%= nick %>" class="conversation"><a href="/<%%= cid %>/<%%= encodeURIComponent(nick) %>"><%%= nick %><button class="close">&times;</button></a></li>
 </script>
 % }

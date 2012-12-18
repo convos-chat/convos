@@ -77,8 +77,11 @@ Structure.registerModule('Wirc.Chat', {
     if(window.console) console.log('[websocket] > ' + e.data);
 
     data.highlight=data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 :0;
-    if (window.webkitNotifications && window.webkitNotifications.checkPermission() == 0 && (data.highlight || data.target === this.nick)) { 
-      notification = window.webkitNotifications.createNotification('', 'Message from '+data.sender, data.message);
+    if (window.webkitNotifications && window.webkitNotifications.checkPermission() == 0 && data.highlight) {
+      notification = window.webkitNotifications.createNotification('', 'New mention by '+data.nick +' in '+data.target, data.message);
+      notification.show()
+    } else if (window.webkitNotifications && window.webkitNotifications.checkPermission() == 0 && data.target === this.nick) { 
+      notification = window.webkitNotifications.createNotification('', 'New message from '+data.nick, data.message);
       notification.show()
     }
 
@@ -174,13 +177,6 @@ Structure.registerModule('Wirc.Chat', {
           $input.val(self.history[self.history_index] || this.initial_value || '');
           break;
 
-        case 8: // backspace
-          if(!this.initial_value) break;
-          e.preventDefault();
-          this.value = this.initial_value;
-          delete this.initial_value;
-          break;
-
         case 9: // tab
           e.preventDefault();
 
@@ -197,7 +193,9 @@ Structure.registerModule('Wirc.Chat', {
           var matched = $.grep(self.autocomplete_commands, function(v) { return re.test(v); });
           if(matched.length === 0) return;
           if(++this.tabbed >= matched.length) this.tabbed = 0;
-          this.value = this.value.substr(0, this.offset) + matched[this.tabbed];
+          if(this.offset) {
+            this.value = this.value.substr(0, this.offset) + matched[this.tabbed].replace(/:\s*$/,' ');
+          } else {  this.value = matched[this.tabbed];}
           break;
 
         case 13: // return
