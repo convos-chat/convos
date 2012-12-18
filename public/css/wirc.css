@@ -5125,7 +5125,7 @@ table.table-fixed-footer {
 #channel_list .close {
   display: none;
 }
-#channel_list li:hover .close {
+#channel_list li:hover > .close {
   display: inline;
 }
 #chat_input_field {
