@@ -82,7 +82,7 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.sender) {
       data.nick = data.sender.replace(/!.*/, '');
     }
-    data.highlight=data.message.match("\\b" + this.nick + "\\b") ? 1 :0;
+    data.highlight=data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 :0;
     if (window.webkitNotifications.checkPermission() == 0 && (data.highlight || data.target === this.nick)) { 
       notification = window.webkitNotifications.createNotification('', 'Message from '+data.sender, data.message);
       notification.show()
