@@ -16,7 +16,7 @@
   % }
   % for my $conversation (@{ $c->{conversations} }) {
     <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>"
-        class="<%= $conversation eq $target ? 'active' : '' %> conversation">
+        class="<%= is_active($c,$conversation)? 'active' : '' %> conversation">
          <a class="close pull-right" href="#">&times;</button></a><a href="<%=url_for('channel.view',  target => $conversation, cid => $c->{id} ) %>"><%=$conversation%></a></li>
   % }
   </ul></li>
