@@ -224,24 +224,23 @@ Will add a private message to the database.
 sub add_message {
   my ($self, $message) = @_;
   my $time = time;
-  my $target= $message->{params}->[0] =~ /^\#/x ?$message->{params}->[0]:  parse_user($message->{prefix});
-
+  my ($nick, $user, $host) = parse_user($message->{prefix});
+  my $target=  $message->{params}->[0] eq $self->_irc->nick ? $nick : $message->{params}->[0];
   $self->redis->zadd(
     "connection:@{[$self->id]}:$target:msg",
     $time, $message->{raw_line}
   );
-  my ($nick, $user, $host) = parse_user($message->{prefix});
   $self->_publish({
     timestamp => $time,
     server    => $self->_irc->server,
     nick      => $nick,
     user      => $user,
     host      => $host,
-    target    => $message->{params}[0],
+    target    => $target,
     message   => $message->{params}[1],
   });
 
-  unless ($message->{params}->[0] =~ /^\#/x || $target eq $self->_irc->nick) {    # not a channel
+  unless ($message->{params}->[0] =~ /^\#/x) {    # not a channel or me.
     $self->redis->sadd("connection:@{[$self->id]}:conversations", $target);
   }
 }
