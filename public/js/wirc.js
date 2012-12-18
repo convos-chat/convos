@@ -114,7 +114,10 @@ Structure.registerModule('Wirc.Chat', {
 
     if(data.cid == this.connection_id && data.target == this.target) {
 
-      document.title = 'New message in ' + this.target;
+      if(!self.hasfocus && !this.oldTitle) {
+        this.oldTitle=document.title;
+        document.title = 'New message in ' + this.target;
+      }
     }
     else if(data.target) {
       channel_id = data.target.replace(/\W/g, '');
@@ -218,6 +221,15 @@ Structure.registerModule('Wirc.Chat', {
 
     $('body').click(function() { $input.focus(); });
     self.scrollToBottom();
+    $(window).blur( function() { self.hasfocus = false; });
+
+     $(window).focus( function() {
+       self.hasfocus = true;
+       if(self.oldTitle) {
+         document.title=self.oldTitle;
+         self.oldTitle=null;
+       }
+     });
   },
   listenToScroll: function() {
     var $win = $(window);
