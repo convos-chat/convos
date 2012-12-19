@@ -225,7 +225,7 @@ sub add_message {
   my ($self, $message) = @_;
   my $time = time;
   my ($nick, $user, $host) = parse_user($message->{prefix});
-  my $target=  $message->{params}->[0] eq $self->_irc->nick ? $nick : $message->{params}->[0];
+  my $target=  lc($message->{params}->[0] eq $self->_irc->nick ? $nick : $message->{params}->[0]);
   $self->redis->zadd(
     "connection:@{[$self->id]}:$target:msg",
     $time, $message->{raw_line}
