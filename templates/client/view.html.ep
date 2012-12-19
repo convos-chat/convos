@@ -3,25 +3,30 @@
 % use WebIrc::Core::Util 'format_time';
 <div id="channel_list">
   <ul class="nav nav-list well">
-% for my $c (@$connections) {
-  <li><ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
-    <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a>
-  % for my $channel (@{ $c->{channels} }) {
-    <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
-      %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
-        %= $channel
-        <span class="badge hide">0</span>
-      % end
+  % for my $c (@$connections) {
+    <li>
+      <ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
+        <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a>
+      % for my $channel (@{ $c->{channels} }) {
+        <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
+          %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
+            %= $channel
+            <span class="badge hide">0</span>
+          % end
+        </li>
+      % }
+      % for my $conversation (@{ $c->{conversations} }) {
+        <li id="target_<%= $c->{id} %>_<%= as_id($conversation) %>" class="<%= is_active($c, $conversation)? 'active' : '' %> conversation">
+          %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
+            %= $conversation
+            <span class="badge hide">0</span>
+          % end
+        </li>
+      % }
+      </ul>
     </li>
   % }
-  % for my $conversation (@{ $c->{conversations} }) {
-    <li id="target_<%= $c->{id} %>_<%=as_id($conversation)%>"
-        class="<%= is_active($c,$conversation)? 'active' : '' %> conversation">
-         <a class="close pull-right" href="#">&times;</button></a><a href="<%=url_for('channel.view',  target => $conversation, cid => $c->{id} ) %>"><%=$conversation%></a></li>
-  % }
-  </ul></li>
-% }
-</ul>
+  </ul>
 </div>
 <div class="chat row-fluid">
   <div class="span10 offset2">
@@ -94,9 +99,19 @@
   </li>
 </script>
 <script type="text/html" id="new_channel_template">
-  <li id="target<%%= cid %>_<%%= channel_id %>" class="channel"><a href="/<%%= cid %>/<%%= encodeURIComponent(joined) %>"><%%= joined %></a></li>
+  <li id="<%%= Wirc.Chat.makeTargetId(cid, joined) %>" class="channel">
+    <a href="/<%%= cid %>/<%%= encodeURIComponent(joined) %>">
+      <%%= joined %>
+      <span class="badge hide">0</span>
+    </a>
+  </li>
 </script>
 <script type="text/html" id="new_conversation_template">
-  <li id="target<%%= cid %>_<%%= nick %>" class="conversation"><a href="/<%%= cid %>/<%%= encodeURIComponent(nick) %>"><%%= nick %><button class="close">&times;</button></a></li>
+  <li id="<%%= Wirc.Chat.makeTargetId(cid, nick) %>" class="conversation">
+    <a href="/<%%= cid %>/<%%= encodeURIComponent(nick) %>">
+      <%%= nick %>
+      <span class="badge hide">0</span>
+    </a>
+  </li>
 </script>
 % }
