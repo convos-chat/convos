@@ -2,8 +2,6 @@ var BASEURL = window.location.href;
 
 (function($) {
 
-
-
 Structure.registerModule('Wirc', {
   websocket: function(path, callbacks) {
     var url = BASEURL.replace(/^http/, 'ws') + path;
@@ -13,6 +11,19 @@ Structure.registerModule('Wirc', {
     return websocket;
   }
 }); // End Wirc
+
+Structure.registerModule('Wirc.Notifier', {
+  init: function() {
+    if(!window.webkitNotifications) return;
+    if(window.webkitNotifications.checkPermission() != 0) return;
+    return window.webkitNotifications;
+  },
+  show: function(icon, title, msg) {
+    if(!this.notifier = this.init()) return;
+    var notification = this.notifier.createNotification(icon || '', title, msg || '');
+    notification.show();
+  }
+}); // End Wirc.Notify
 
 Structure.registerModule('Wirc.Chat', {
   autocomplete_commands: [
@@ -78,13 +89,13 @@ Structure.registerModule('Wirc.Chat', {
 
     if(window.console) console.log('[websocket] > ' + e.data);
 
-    data.highlight=data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 :0;
-    if (window.webkitNotifications && window.webkitNotifications.checkPermission() == 0 && data.highlight) {
-      notification = window.webkitNotifications.createNotification('', 'New mention by '+data.nick +' in '+data.target, data.message);
-      notification.show()
-    } else if (window.webkitNotifications && window.webkitNotifications.checkPermission() == 0 && data.target === this.nick) { 
-      notification = window.webkitNotifications.createNotification('', 'New message from '+data.nick, data.message);
-      notification.show()
+    data.highlight = data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 : 0;
+    
+    if (data.highlight) {
+      Wirc.Notifier.show('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
+    }
+    else if (data.target === this.nick) {
+      Wirc.Notifier.show('', 'New message from ' + data.nick, data.message);
     }
 
     if(data.joined) {
