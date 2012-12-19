@@ -42,17 +42,26 @@ Structure.registerModule('Wirc.Notifier', {
 }); // End Wirc.Notify
 
 Structure.registerModule('Wirc.Chat', {
-  formatIrcData: function(data) {
-    var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
+  parseIrcMessage: function(d) {
+    var data = $.parseJSON(d);
+    var action = data.message ? data.message.match(/^\u0001ACTION (.*)\u0001$/) : [];
 
-    if(data.timestamp) data.timestamp = new Date(parseInt(data.timestamp*1000, 10));
-    if(action) data.message = action[1];
+    data.template = 'message_template';
 
-    data.highlight = data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 : 0;
-    data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
-    data.template = action ? 'action_message_template' : 'message_template';
-    data.class_name = data.nick === this.nick                           ? 'me'
-                    : data.highlight                           ? 'focus'
+    if(action.length) {
+      data.message = action[1];
+      data.template = 'action_message_template';
+    }
+    if(data.message) {
+      data.highlight = data.message.match("\\b" + this.nick + "\\b") ? 1 : 0;
+      data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
+    }
+    if(data.timestamp) {
+      data.timestamp = new Date(parseInt(data.timestamp*1000, 10));
+    }
+
+    data.class_name = data.nick === this.nick                             ? 'me'
+                    : data.highlight                                      ? 'focus'
                     : $('#chat_messages').find('li:last').hasClass('odd') ? 'even'
                     :                                                       'odd';
 
@@ -117,7 +126,7 @@ Structure.registerModule('Wirc.Chat', {
     }
   },
   receiveData: function(e) {
-    var data = this.formatIrcData($.parseJSON(e.data));
+    var data = this.parseIrcMessage(e.data);
     var channel_id;
 
     if(window.console) console.log('[websocket] > ' + e.data);
