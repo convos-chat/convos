@@ -44,18 +44,14 @@ Structure.registerModule('Wirc.Notifier', {
 Structure.registerModule('Wirc.Chat', {
   parseIrcMessage: function(d) {
     var data = $.parseJSON(d);
-    var action = data.message ? data.message.match(/^\u0001ACTION (.*)\u0001$/) : [];
 
-    data.template = 'message_template';
-
-    if(action.length) {
-      data.message = action[1];
-      data.template = 'action_message_template';
-    }
     if(data.message) {
+      var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
+      if(action) data.message = action[1];
       data.highlight = data.message.match("\\b" + this.nick + "\\b") ? 1 : 0;
       data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
-    }
+      data.template = action ? 'action_message_template' : 'message_template';      
+    }    
     if(data.timestamp) {
       data.timestamp = new Date(parseInt(data.timestamp*1000, 10));
     }
@@ -117,7 +113,7 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.nick !== this.nick && data.joined === this.target) {
       $messages.append( $(tmpl('nick_joined_template', data)) );
     }
-    else if(data.message && data.target == this.target || data.nick == this.target) {
+    else if(data.template && data.target == this.target || data.nick == this.target) {
       $messages.append(tmpl(data.template, data));
     }
 
