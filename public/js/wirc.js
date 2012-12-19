@@ -14,29 +14,41 @@ Structure.registerModule('Wirc', {
 
 Structure.registerModule('Wirc.Notifier', {
   init: function() {
-    if(!window.webkitNotifications) return;
-    if(window.webkitNotifications.checkPermission() != 0) return;
-    return window.webkitNotifications;
+    var self = this;
+
+    if(!window.webkitNotifications) {
+      return self;
+    }
+    if(!webkitNotifications.checkPermission()) { // already granted
+      self.notifier = webkitNotifications;
+      return self;
+    }
+
+    // cannot run requestPermission() without a user action, such as mouse click or key down
+    $(document).one('keydown', function() {
+      webkitNotifications.requestPermission(function(e) {
+        if(window.console) console.log(e);
+        if(!webkitNotifications.checkPermission()) self.notifier = notifier;
+      });
+    });
+
+    return self;
   },
-  show: function(icon, title, msg) {
-    if(!this.notifier = this.init()) return;
+  notify: function(icon, title, msg) {
+    if(!this.notifier) return;
     var notification = this.notifier.createNotification(icon || '', title, msg || '');
     notification.show();
   }
 }); // End Wirc.Notify
 
 Structure.registerModule('Wirc.Chat', {
-  autocomplete_commands: [
-    '/join #',
-    '/msg ',
-    '/me ',
-    '/nick ',
-    '/part '
-  ],
   formatIrcData: function(data) {
     var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
 
+    if(data.timestamp) data.timestamp = new Date(parseInt(data.timestamp*1000, 10));
     if(action) data.message = action[1];
+
+    data.highlight = data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 : 0;
     data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
     data.template = action ? 'action_message_template' : 'message_template';
     data.class_name = data.nick === this.nick                           ? 'me'
@@ -46,33 +58,57 @@ Structure.registerModule('Wirc.Chat', {
 
     return data;
   },
-  print: function(data) {
-    // need to calculate at_bottom before appending a new element
-    var at_bottom = $(window).scrollTop() + $(window).height() >= $('body').height() - 30;
-    var $messages = this.$messages;
+  channels: function(data) {
+    if(!data) return []; // TODO: return channel names
 
-    if(data.timestamp) {
-      data.timestamp = new Date(parseInt(data.timestamp*1000, 10));
+    var id = (data.joined || data.parted).replace(/\W/, '');
+    var $channel = $('#target_' + data.cid + '_' + id);
+
+    if(data.parted) {
+      $channel.remove();
     }
+    else if(data.joined && !$channel.length) {
+      $(tmpl('new_channel_template', data)).insertAfter('#connection_list_' + data.cid + ' .channel:last');
+    }
+
+    return this; // allow chaining
+  },
+  conversations: function(data) {
+    if(!data) return []; // TODO: return conversation list
+
+    var id = data.nick.replace(/\W/, '');
+    var $conversation = $('#target_' + data.cid + '_' + id);
+
+    if(!$conversation.length) {
+      $(tmpl('new_conversation_template', data)).appendTo('#connection_list_' + data.cid);
+    }
+
+    return this; // allow chaining
+  },
+  displayUnread: function(data) {
+    var $badge = $('#target' + '_' + data.cid + '_' + channel_id + ' .badge');
+    $badge.text(parseInt($badge.text(), 10) + 1 ).show();
+    if(data.highlight) $badge.addClass('badge-important');
+  },
+  scrollToBottom: function() {
+    $('html, body').scrollTop($('body').height());
+  },
+  print: function(data) {
+    var at_bottom = $(window).scrollTop() + $(window).height() >= $('body').height() - 30; // need to calculate at_bottom before appending a new element
+    var $messages = this.$messages;
 
     if(data.status) {
       if(data.status == this.status) return; // do not want duplicate status messages
       if(data.message) $messages.append(tmpl('server_status_template', data));
       this.status = data.status;
     }
-    else if(data.new_nick) {
-      if(data.cid === this.connection_id) {
-        if(data.old_nick == this.nick) {
-          this.nick = data.new_nick;
-        }
-        $messages.append(tmpl('nick_change_template', data));
-      }
+    else if(data.new_nick && data.cid === this.connection_id) {
+      $messages.append(tmpl('nick_change_template', data));
+    }
+    else if(data.nick !== this.nick && data.joined === this.target) {
+      $messages.append( $(tmpl('nick_joined_template', data)) );
     }
     else if(data.message && data.target == this.target || data.nick == this.target) {
-      data = this.formatIrcData(data);
-      var index = $.inArray(data.nick + ': ', this.autocomplete_commands);
-      if(index != -1) { this.autocomplete_commands.splice(index,1); }
-      this.autocomplete_commands.unshift(data.nick + ': ');
       $messages.append(tmpl(data.template, data));
     }
 
@@ -80,62 +116,43 @@ Structure.registerModule('Wirc.Chat', {
       this.scrollToBottom();
     }
   },
-  scrollToBottom: function() {
-    $('html, body').scrollTop($('body').height());
-  },
   receiveData: function(e) {
-    var data = $.parseJSON(e.data);
+    var data = this.formatIrcData($.parseJSON(e.data));
     var channel_id;
 
     if(window.console) console.log('[websocket] > ' + e.data);
 
-    data.highlight = data.message && data.message.match("\\b" + this.nick + "\\b") ? 1 : 0;
-    
-    if (data.highlight) {
-      Wirc.Notifier.show('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
-    }
-    else if (data.target === this.nick) {
-      Wirc.Notifier.show('', 'New message from ' + data.nick, data.message);
-    }
-
-    if(data.joined) {
-      data.channel_id = data.joined.replace(/\W/g, '');
-      var $channel = $('#target_' + data.cid + '_' + data.channel_id);
-      if(!$channel.length) {
-        $(tmpl('new_channel_template', data)).insertAfter('#connection_list_' + data.cid + ' .channel:last');
+    // notification handling
+    if(!self.window_has_focus) {
+      if(data.highlight) {
+        this.notifier.notify('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
       }
-      if(data.nick !== this.nick && data.joined === this.target) {
-        this.$messages.append( $(tmpl('nick_joined_template', data)) );
+      else if(data.target === this.nick) {
+        this.notifier.notify('', 'New message from ' + data.nick, data.message);
       }
-    }
-    else if(data.parted) {
-      channel_id = data.parted.replace(/\W/g, '');
-      $('#target_' + data.cid + '_' + channel_id).remove();
-    }
-    else if(data.target && this.target != this.nick && this.target != data.target && data.target === this.nick) {
-      var $conversation=$('#target_' + data.cid + '_' + data.nick);
-      if(!$conversation.length) {
-        $(tmpl('new_conversation_template',data)).appendTo('#connection_list_' + data.cid);
-      }
-    }
-    else {
-      this.print(data);
-    }
-
-    if(data.cid == this.connection_id && data.target == this.target) {
-
-      if(!self.hasfocus && !this.oldTitle) {
-        this.oldTitle=document.title;
+      if(data.cid == this.connection_id && data.target == this.target) {
         document.title = 'New message in ' + this.target;
       }
     }
-    else if(data.target) {
-      channel_id = data.target.replace(/\W/g, '');
-      
-      var $badge=$(['#target', data.cid, channel_id].join('_')+' .badge')
-      if(data.highlight) { $badge.addClass('badge-important') }
-      $badge.text(parseInt($badge.text())+1).show();
+
+    // action handling
+    if(data.joined || data.parted) {
+      this.channels(data);
     }
+    else if(data.target) {
+      if(data.target === this.nick && data.target !== this.target && this.target != this.nick) {
+        this.conversations(data);
+      }
+      if(data.target !== this.target) {
+        this.displayUnread(data);
+      }
+    }
+    else if(data.new_nick) {
+      this.input.autoCompleteNicks(data);
+      if(this.nick === data.old_nick) this.nick = this.new_nick;
+    }
+
+    this.print(data);
   },
   sendData: function(data) {
     // TODO: Figure out if JSON.stringify() works in other browsers than chrome
@@ -146,95 +163,6 @@ Structure.registerModule('Wirc.Chat', {
       if(window.console) console.log('[websocket] ! ' + e);
       this.print({ error: '[ws]' + e });
     }
-  },
-  connectToWebSocket: function() {
-    var self = this;
-    self.websocket = Wirc.websocket('/socket', {
-      onmessage: self.receiveData,
-      onopen: function function_name (argument) {
-        self.$input.removeAttr('disabled').css({ background: '#fff' }).attr('placeholder','Write a message to reply');
-        self.$input.focus();
-        self.sendData({ cid: self.connection_id, target: self.target });
-      },
-      onerror: function(e) {
-        self.$input.attr('disabled', 'disabled').css({ background: '#fdd' }).attr('placeholder',e)
-      },
-      onclose: function() {
-        self.$input.attr('disabled', 'disabled').css({ background: '#eee' }).attr('placeholder','Reconnecting...');
-      }
-    });
-  },
-  setupUI: function() {
-    var self = this;
-    var $input = self.$input;
-
-    $input.attr('disabled', 'disabled').css({ background: '#eee' }).attr('placeholder','Connecting...');
-    $input.parents('form').submit(function() {
-      self.sendData({ cid: self.connection_id, target: self.target, cmd: $input.val() });
-      $input.val('');
-      return false;
-    });
-
-    $input.keydown(function(e) {
-      switch(e.keyCode) {
-        case 38: // up
-          e.preventDefault();
-          if(self.history_index == self.history.length) this.initial_value = this.value;
-          if(--self.history_index < 0) self.history_index = 0;
-          $input.val(self.history[self.history_index]);
-          break;
-
-        case 40: // down
-          e.preventDefault();
-          if(++self.history_index >= self.history.length) self.history_index = self.history.length;
-          $input.val(self.history[self.history_index] || this.initial_value || '');
-          break;
-
-        case 9: // tab
-          e.preventDefault();
-
-          if(typeof this.tabbed === "undefined") {
-            var v = this.value;
-            this.offset = v.lastIndexOf(' ') + 1;
-            if(this.offset > 0 && v.substr(this.offset).search(/^[a-z_]/i) !== 0) return;
-            this.initial_value = v;
-            this.partial_re = new RegExp('^' + v.substr(this.offset));
-            this.tabbed = 0;
-          }
-
-          var re = this.partial_re;
-          var matched = $.grep(self.autocomplete_commands, function(v) { return re.test(v); });
-          if(matched.length === 0) return;
-          if(++this.tabbed >= matched.length) this.tabbed = 0;
-          if(this.offset) {
-            this.value = this.value.substr(0, this.offset) + matched[this.tabbed].replace(/:\s*$/,' ');
-          } else {  this.value = matched[this.tabbed];}
-          break;
-
-        case 13: // return
-          if(this.value.length === 0) return e.preventDefault();
-          if(window.webkitNotifications && window.webkitNotifications.checkPermission()) { window.webkitNotifications.requestPermission() }
-          self.history.push(this.value);
-          self.history_index = self.history.length;
-          break;
-
-        default:
-          delete this.tabbed;
-          delete this.initial_value;
-      }
-    });
-
-    $('body').click(function() { $input.focus(); });
-    self.scrollToBottom();
-    $(window).blur( function() { self.hasfocus = false; });
-
-     $(window).focus( function() {
-       self.hasfocus = true;
-       if(self.oldTitle) {
-         document.title=self.oldTitle;
-         self.oldTitle=null;
-       }
-     });
   },
   listenToScroll: function() {
     var $win = $(window);
@@ -267,32 +195,146 @@ Structure.registerModule('Wirc.Chat', {
       });
     });
   },
-  start: function($) {
+  init: function($) {
     var self = this;
+    var original_title = document.title;
+
+    self.$messages = $('#chat_messages');
     self.connection_id = $('#chat_messages').attr('data-cid');
     self.nick = $('#chat_messages').attr('data-nick');
     self.target = $('#chat_messages').attr('data-target');
-    self.history = [];
-    self.history_index = 0;
-    self.unread = {};
-    self.$messages = $('#chat_messages');
-    self.$input = $('#chat_input_field input[type="text"]');
-    self.connectToWebSocket();
-    self.setupUI();
+    self.input = Wirc.Chat.Input.init($('#chat_input_field input[type="text"]'));
+    self.notifier = Wirc.Notifier.init();
+    self.scrollToBottom();
     self.listenToScroll();
 
-    $.each($('#chat_messages').attr('data-nicks').split(','), function(i, v) {
-      v = v.replace(/^\@/, '');
-      self.autocomplete_commands.unshift(v+': ');
+    self.websocket = Wirc.websocket('/socket', {
+      onmessage: self.receiveData,
+      onopen: function function_name (argument) {
+        self.sendData({ cid: self.connection_id, target: self.target });
+      }
     });
 
-    if(window.console) console.log('[Wirc.Chat.start] ', this);
+    self.input.submit = function(e) {
+      self.sendData({ cid: self.connection_id, target: self.target, cmd: this.$input.val() });
+      this.$input.val(''); // TODO: Do not clear the input field until echo is returned?
+      return false;
+    };
+
+    $.each($('#chat_messages').attr('data-nicks').split(','), function(i, v) {
+      if(v == this.nick) return;
+      self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
+    });
+
+    $(window).blur(function() { self.window_has_focus = false; });
+    $(window).focus(function() { self.window_has_focus = true; document.title = original_title; });
+    if(window.console) console.log('[Wirc.Chat.init] ', self);
+
+    return self;
   }
 }); /* End Structure.registerModule('Wirc.Chat') */
 
+Structure.registerModule('Wirc.Chat.Input', {
+  autocomplete: [
+    '/join #',
+    '/msg ',
+    '/me ',
+    '/nick ',
+    '/part '
+  ],
+  autoCompleteNicks: function(data) {
+    if(data.old_nick) {
+      var needle = data.old_nick;
+      this.autocomplete = $.grep(this.autocomplete, function(v, i) {
+        return v != needle;
+      });
+    }
+    if(data.new_nick) {
+      this.autoCompleteNicks({ old_nick: data.new_nick });
+      this.autocomplete.unshift(data.new_nick);
+    }
+  },
+  tabbing: function(val) {
+    var complete;
+
+    if(val === false) {
+      delete this.tabbed;
+      return this;
+    }
+    if(typeof this.tabbed === 'undefined') {
+      var offset = val.lastIndexOf(' ') + 1;
+      var re = new RegExp('^' + val.substr(offset));
+
+      this.autocomplete_offset = offset;
+      this.matched = $.grep(this.autocomplete, function(v, i) {
+                      return offset ? v.indexOf('/') === -1 && re.test(v) : re.test(v);
+                     });
+      this.tabbed = -1; // ++ below will make this 0 the first time
+    }
+
+    if(this.matched.length === 0) return val;
+    if(++this.tabbed >= this.matched.length) this.tabbed = 0;
+    complete = val.substr(0, this.autocomplete_offset) + this.matched[this.tabbed];
+    if(complete.indexOf('/') !== 0 && val.indexOf(' ') === -1) complete +=  ': ';
+    if(this.matched.length === 1) this.matched = []; // do not allow more tabbing on one hit
+
+    return complete;
+  },
+  keydownCallback: function(e) {
+    var self = this;
+    return function(e) {
+      switch(e.keyCode) {
+        case 38: // up
+          e.preventDefault();
+          if(self.history_index == self.history.length) self.initial_value = this.value;
+          if(--self.history_index < 0) self.history_index = 0;
+          this.value = self.history[self.history_index];
+          break;
+
+        case 40: // down
+          e.preventDefault();
+          if(++self.history_index >= self.history.length) self.history_index = self.history.length;
+          this.value = self.history[self.history_index] || self.initial_value || '';
+          break;
+
+        case 9: // tab
+          e.preventDefault();
+          this.value = self.tabbing(this.value);
+          break;
+
+        case 13: // return
+          if(this.value.length === 0) return e.preventDefault(); // do not send empty commands
+          self.history.push(this.value);
+          self.history_index = self.history.length;
+          break;
+
+        default:
+          self.tabbing(false);
+          delete self.initial_value;
+      }
+    };
+  },
+  init: function(input_selector) {
+    var self = this;
+    var $input = $(input_selector);
+
+    self.history = [];
+    self.history_index = 0;
+    self.$input = $input;
+
+    $input.keydown(self.keydownCallback());
+    $input.parents('form').submit(function(e) { return self.submit(e); });
+    $input.focus();
+
+    $('body').click(function() { $input.focus(); });
+
+    return self;
+  }
+}); // End Wirc.Chat.Input
+
 $(document).ready(function() {
   BASEURL = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
-  $('#chat_messages').each(function() { setTimeout(function() { Wirc.Chat.start($); }, 100); });
+  $('#chat_messages').each(function() { setTimeout(function() { Wirc.Chat.init($); }, 100); });
 });
 
 })(jQuery);
