@@ -163,19 +163,20 @@ Structure.registerModule('Wirc.Chat', {
   },
   onScroll: function() {
     if(this.$history_indicator || $(window).scrollTop() !== 0) return;
+    var self = this;
     var height_before_load = $('body').height();
-    this.$history_indicator = $('<div class="alert alert-info">Loading previous conversations...</div>');
-    this.$messages.before($history_indicator);
-    $.get(Wirc.base_url + '/history/' + (++this.history_index), function(data) {
+    self.$history_indicator = $('<div class="alert alert-info">Loading previous conversations...</div>');
+    self.$messages.before($history_indicator);
+    $.get(Wirc.base_url + '/history/' + (++self.history_index), function(data) {
       var $li = $(data).find('#chat_messages li');
       if($li.length) {
-        this$messages.prepend($li);
-        this.$history_indicator.remove();
-        this.$history_indicator = false;
+        self.$messages.prepend($li);
+        self.$history_indicator.remove();
+        self.$history_indicator = false;
         $(window).scrollTop($('body').height() - height_before_load);
       }
       else {
-        $history_indicator.removeClass('alert-info').text('End of conversation log.');
+        self.$history_indicator.removeClass('alert-info').text('End of conversation log.');
       }
     });
   },
@@ -208,7 +209,7 @@ Structure.registerModule('Wirc.Chat', {
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
     $(window).blur(function() { self.window_has_focus = false; });
-    $(window).focus(function() { self.window_has_focus = true; document.title = original_title; });
+    $(window).focus(function() { self.window_has_focus = true; self.input.focus(); document.title = original_title; });
     if(window.console) console.log('[Wirc.Chat.init] ', self);
 
     return self;
@@ -296,6 +297,9 @@ Structure.registerModule('Wirc.Chat.Input', {
           delete self.initial_value;
       }
     };
+  },
+  focus: function() {
+    this.$input.focus();
   },
   init: function(input_selector) {
     var self = this;

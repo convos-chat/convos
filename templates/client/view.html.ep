@@ -39,7 +39,7 @@
     % for my $message (@$conversation) {
       % if($message->{special} eq 'me') {
       <li class="action">
-        <span class="message">* <%= $message->{nick} || $nick %> <%= $message->{message} %></span>
+        <span class="message">* <%= $message->{nick} || $nick %> <%== $message->{message} %></span>
         <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
       </li>
       % } else {
