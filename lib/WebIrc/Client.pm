@@ -28,12 +28,15 @@ Used to render the main IRC client view.
 =cut
 
 sub route {
-  my $self=shift;
+  my $self = shift->render_later;
   my $uid = $self->session('uid');
+  my ($connections,$channels);
+
   return $self->render(template => 'index') unless $uid;
   return $self->redirect_to( $self->session('current_active')) if $self->session('current_active');
-  $self->render_later;
-  my ($connections,$channels);
+
+  # do we need weaken here? I don't think so, since the CODE refs are going
+  # out of scope once it has completed...
   Mojo::IOLoop->delay( sub {
     $self->redis->smembers("user:$uid:connections",shift->begin);
   }, sub {
@@ -49,13 +52,13 @@ sub route {
 
 sub view {
   my $self = shift->render_later;
-  $self->session('current_active' => $self->url_for);
   my $uid = $self->session('uid');
   my @keys = qw/ nick host /;
-  my($connections);
   my $target=$self->param('target');
   my $cid=$self->param('cid');
+  my $connections;
 
+  $self->session('current_active' => $self->url_for);
 
   Mojo::IOLoop->delay(
     sub {
@@ -70,8 +73,8 @@ sub view {
     },
     sub {
       my($delay, @info) = @_;
+      my $cb = $delay->begin;
 
-      my $cb=$delay->begin;
       for my $info (@info) {
         $info = { zip @keys, @$info };
         $info->{id} = shift @$connections;
@@ -82,7 +85,7 @@ sub view {
           $info->{channels}=$channels;
           $info->{conversations}=$conversations;
         });
-        
+
       }
 
       @info = sort { $a->{host} cmp $b->{host} } @info;
@@ -140,7 +143,7 @@ sub history {
     sub {
       my($delay) = @_;
       my $offset = ($page - 1) * $N_MESSAGES;
-      
+
       my $redis_key= $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
 
       $self->redis->zrevrangebyscore(
@@ -173,7 +176,7 @@ sub _format_conversation {
   for(my $i = 0; $i < @$conversation; $i = $i + 2) {
     my $message = unpack_irc $conversation->[$i], $conversation->[$i + 1];
     @{$message}{qw/nick user host/} = parse_user($message->{prefix});
-    
+
     $message->{message} = html_escape $message->{params}[1];
     $message->{message} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
     $message->{class_name} = $message->{message} =~ /\b$nick\b/ ? 'focus'
@@ -197,31 +200,33 @@ sub socket {
   my $self = shift;
   my $uid = $self->session('uid');
 
-  # try to avoid inactivity timeout
+  # try to avoid inactivity timeout. TODO: Should we rather set this to 600?
+  # After all, we have reconnect feature in wirc.js
   Mojo::IOLoop->stream($self->tx->connection)->timeout(0);
+  Scalar::Util::weaken($self);
 
   $self->on(finish => sub {
     $self->logf(debug => "Client finished");
   });
   $self->redis->smembers("user:$uid:connections", sub {
-    my ($reds,$cids)=@_;
-    $self->_subscribe_to_server_messages($_) for @$cids;
+    my ($redis, $cids)=@_;
     my %allowed=map { $_ => 1 } @$cids;
 
+    $self->_subscribe_to_server_messages($_) for @$cids;
     $self->on(message => sub {
       $self->logf(debug => '[ws] < %s', $_[1]);
       my ($self,$octets) = @_;
-      my $message= Unicode::UTF8::encode_utf8($octets, sub { $_[0] });;
+      my $message = Unicode::UTF8::encode_utf8($octets, sub { $_[0] });;
       my $data = $JSON->decode($message) || {};
       my $cid = $data->{cid};
       if(!$cid) {
         $self->logf(debug => "Invalid message:\n".$message. "\nerr:".$JSON->error);
         return;
       }
-      return $self->_handle_socket_data($cid => $data) if($allowed{$cid});
 
+      return $self->_handle_socket_data($cid => $data) if $allowed{$cid};
       $self->send({ text => $JSON->encode({ cid => $cid, status => 403 }) });
-      return $self->finish;
+      $self->finish;
     });
   });
 }
@@ -234,7 +239,7 @@ sub _handle_socket_data {
     if($data->{cmd} =~ s!^/(\w+)\s+(\S*)!!) {
       my($one, $two) = ($1, $2);
       given($one) {
-        when('j') { 
+        when('j') {
           $data->{cmd} = "JOIN $two";
         }
         when('me') { $data->{cmd} = "PRIVMSG $data->{target} :\x{1}ACTION $two$data->{cmd}\x{1}" }
@@ -258,6 +263,7 @@ sub _subscribe_to_server_messages {
   my($self, $cid) = @_;
   my $sub = $self->redis->subscribe("connection:$cid:from_server");
 
+  Scalar::Util::weaken($self);
   $sub->on(message => sub {
     my ($redis, $octets)=@_;
     my $message=Unicode::UTF8::decode_utf8($octets, sub { $_[0] });

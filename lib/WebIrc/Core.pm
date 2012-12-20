@@ -36,11 +36,10 @@ Will fetch connection information from the database and try to connect to them.
 sub start {
   my $self = shift;
 
+  Scalar::Util::weaken($self);
   $self->redis->smembers('connections', sub {
     my ($redis, $cids) = @_;
-    if(!$cids) {
-      return warn "[core] No connections to start\n" if DEBUG;
-    };
+    return unless $cids and @$cids;
     warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
     for my $cid (@$cids) {
       my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
@@ -57,9 +56,9 @@ Start a single connection by connection id.
 =cut
 
 sub start_connection {
-  my ($self,$cid)=@_;
-  return unless my $conn = $self->_connections->{$cid};
-  return $conn->connect(sub {});
+  my ($self,$cid) = @_;
+  my $conn = $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+  $conn->connect(sub {});
 }
 
 =head2 add_connection
@@ -77,7 +76,7 @@ set all the keys in the %connection hash
 =cut
 
 sub add_connection {
-  my ($self,$uid,$conn,$cb)=@_;
+  my ($self,$uid,$conn,$cb) = @_;
   my %errors;
 
   for my $name (qw/ host nick user /) {
@@ -85,9 +84,10 @@ sub add_connection {
     $errors{$name} = "$name is required.";
   }
 
-  my $channels= delete $conn->{channels};
-  my @channels= split m/[\s,]+/, $channels;
+  my $channels = delete $conn->{channels};
+  my @channels = split m/[\s,]+/, $channels;
 
+  Scalar::Util::weaken($self);
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->incr('connections:id',sub {
     my ($redis,$cid) = @_;
@@ -115,32 +115,38 @@ sub add_connection {
 Update a connection's settings and reconnect.
 
 =cut
+
 sub update_connection {
   my ($self,$cid,$conn,$cb)=@_;
-  my %errors;
+  my (%errors, @channels, $channels, $connections);
 
   for my $name (qw/ host nick user /) {
     next if $conn->{$name};
     $errors{$name} = "$name is required.";
   }
-  my $channels= delete $conn->{channels};
-  my @channels= split m/[\s,]+/, $channels;
+
+  Scalar::Util::weaken($self);
+  $channels = delete $conn->{channels};
+  @channels = split m/[\s,]+/, $channels;
+  $connections = $self->_connections;
 
   return $self->$cb(undef, \%errors) if keys %errors;
-
-    $self->redis->execute(
-      [ hmset => "connection:$cid", %$conn ],
-      [ del   => "connection:$cid:channels"],
-      [ sadd  => "connection:$cid:channels", @channels],
-      sub {
-	      # flush
-	      $self->_connections->{$cid}->disconnect;
-        $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-	      $self->$cb($cid) ;
-      },
-    );
+  return $self->redis->execute(
+    [ hmset => "connection:$cid", %$conn ],
+    [ del   => "connection:$cid:channels"],
+    [ sadd  => "connection:$cid:channels", @channels],
+    sub {
+      # flush
+      if($connections->{$cid}) {
+        $connections->{$cid}->disconnect(sub { $self->start_connection($cid) });
+      }
+      else {
+        $self->start_connection($cid);
+      }
+      $self->$cb($cid) ;
+    },
+  );
 }
-
 
 =head2 disconnect_connection
 
@@ -152,8 +158,11 @@ Disconnect a connection by connection id.
 
 sub disconnect_connection {
   my ($self,$cid)=@_;
-  $self->_connections->{$cid}->disconnect;
-  delete $self->_connections->{$cid};
+
+  Scalar::Util::weaken($self);
+  $self->_connections->{$cid}->disconnect(sub {
+    delete $self->_connections->{$cid};
+  });
 }
 
 =head2 login

@@ -118,12 +118,14 @@ has _irc => sub {
   weaken $self;
   $irc->register_default_event_handlers;
   $irc->on(close => sub {
+    my $irc = shift;
     $self->log->debug('Reconnecting on close...');
-    $self->_irc->ioloop->timer(30, sub { $self->connect(sub {}); });
+    $irc->ioloop->timer(30, sub { $self->connect(sub {}); });
   });
   $irc->on(error => sub {
+    my $irc = shift;
     $self->log->error("Reconnecting on error: $_[1]");
-    $self->_irc->ioloop->timer(2, sub { $self->connect(sub {}); });
+    $irc->_irc->ioloop->timer(2, sub { $self->connect(sub {}); });
   });
 
   for my $event (@ADD_MESSAGE_EVENTS) {
@@ -158,6 +160,7 @@ sub connect {
   my ($self, $cb) = @_;
   my $id = $self->id or croak "Cannot load connection without id";
 
+  weaken $self;
   $self->redis->execute(
     [hgetall  => "connection:$id"],
     [smembers => "connection:$id:channels"],
@@ -172,18 +175,18 @@ sub connect {
       $self->{sub} = $redis->subscribe("connection:$id:to_server");
       $self->{sub}->on(message => sub {
         my($sub, $msg) = @_;
-        $msg=Unicode::UTF8::encode_utf8($msg, sub { $_[0] });
+        $msg = Unicode::UTF8::encode_utf8($msg, sub { $_[0] });
         $self->_irc->write($msg);
         $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $msg);
         if($msg->{command} eq 'PRIVMSG') {
           $self->add_message($msg);
         }
         else {
-          my $action='cmd_'.lc($msg->{command});
+          my $action = 'cmd_'. lc $msg->{command};
           $self->$action($msg) if $self->can($action);
         }
-        
-      }) if $self->{sub};
+
+      }) if $self->{sub}; # this should -never- be false
     }
   );
   $self;
@@ -226,6 +229,7 @@ sub add_message {
   my $time = time;
   my ($nick, $user, $host) = parse_user($message->{prefix});
   my $target=  $message->{params}->[0] eq $self->_irc->nick ? $nick : $message->{params}->[0];
+
   $self->redis->zadd(
     "connection:@{[$self->id]}:$target:msg",
     $time, $message->{raw_line}
