@@ -208,7 +208,7 @@ Structure.registerModule('Wirc.Chat', {
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
     $(window).blur(function() { self.window_has_focus = false; });
-    $(window).focus(function() { self.window_has_focus = true; document.title = original_title; });
+    $(window).focus(function() { self.window_has_focus = true; self.input.focus(); document.title = original_title; });
     if(window.console) console.log('[Wirc.Chat.init] ', self);
 
     return self;
@@ -296,6 +296,9 @@ Structure.registerModule('Wirc.Chat.Input', {
           delete self.initial_value;
       }
     };
+  },
+  focus: function() {
+    this.$input.focus();
   },
   init: function(input_selector) {
     var self = this;
