@@ -149,12 +149,11 @@ Structure.registerModule('Wirc.Chat', {
     // notification handling
     if(data.highlight) {
       this.notifier.popup('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
+      this.notifier.title('New mention by ' + data.nick + ' in ' + data.target);
     }
     else if(data.target === this.nick) {
       this.notifier.popup('', 'New message from ' + data.nick, data.message);
-    }
-    if(data.message) {
-      this.notifier.title('New message in ' + data.target);
+      this.notifier.title('New message from ' + data.nick);
     }
 
     // action handling
