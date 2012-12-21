@@ -226,7 +226,7 @@ use Mojo::IOLoop;
 use IRC::Utils;
 use Carp qw/croak/;
 use Parse::IRC ();
-use Scalar::Util 'weaken';
+use Scalar::Util ();
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
 my $TIMEOUT = 900;
@@ -288,6 +288,7 @@ sub server {
   my ($self,$server) = @_;
   my $old = $self->{server} || '';
 
+  Scalar::Util::weaken($self);
   return $old unless defined $server;
   return $self if $old && $old eq $server;
   $self->{server} = $server;
@@ -330,9 +331,8 @@ sub connect {
     return $self->$callback;
   }
 
+  Scalar::Util::weaken($self);
   $self->register_default_event_handlers;
-
-  weaken $self;
   $self->{stream_id} = $self->ioloop->client(
     address => $host,
     port    => $port || 6667,
@@ -359,7 +359,6 @@ sub connect {
           $self->ioloop->remove(delete $self->{stream_id});
           $self->emit(error => $_[1]);
           delete $self->{stream};
-          $self->ioloop
         }
       );
       $stream->on(
@@ -375,7 +374,7 @@ sub connect {
               $method = IRC::Utils::numeric_to_name($method);
             }
 
-            $self->emit_safe(lc 'irc_'.$method => $message);
+            $self->emit_safe(lc('irc_'.$method) => $message);
           }
         }
       );
@@ -383,7 +382,7 @@ sub connect {
       $self->{stream} = $stream;
       $self->write(NICK => $self->nick);
       $self->write(USER => $self->user, 8, '*', ':'.$self->name);
-      $self->write(PASS=> $self->pass) if $self->pass;
+      $self->write(PASS => $self->pass) if $self->pass;
       $self->$callback;
     }
   );
@@ -407,6 +406,7 @@ sub disconnect {
     return $self->$cb;
   }
 
+  Scalar::Util::weaken($self);
   $self->{stream}->write("QUIT\r\n", sub {
     $self->{stream}->close;
     $self->$cb;
@@ -425,7 +425,7 @@ already subscribed to the event.
 sub register_default_event_handlers {
   my $self = shift;
 
-  weaken $self;
+  Scalar::Util::weaken($self);
   for my $event (@DEFAULT_EVENTS) {
     next if $self->has_subscribers($event);
     $self->on($event => $self->can($event));

@@ -54,7 +54,7 @@ use Mojo::JSON;
 use WebIrc::Core::Util qw/ pack_irc /;
 use Parse::IRC ();
 use IRC::Utils qw/parse_user/;
-use Scalar::Util qw/ weaken /;
+use Scalar::Util ();
 use Carp qw/ croak /;
 use Time::HiRes qw/time/;
 
@@ -115,7 +115,7 @@ has _irc => sub {
   my $self = shift;
   my $irc  = Mojo::IRC->new;
 
-  weaken $self;
+  Scalar::Util::weaken($self);
   $irc->register_default_event_handlers;
   $irc->on(close => sub {
     my $irc = shift;
@@ -160,7 +160,7 @@ sub connect {
   my ($self, $cb) = @_;
   my $id = $self->id or croak "Cannot load connection without id";
 
-  weaken $self;
+  Scalar::Util::weaken($self);
   $self->redis->execute(
     [hgetall  => "connection:$id"],
     [smembers => "connection:$id:channels"],
