@@ -1,35 +1,37 @@
 % title 'Chat'; $target ||= 'server';
 % my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
-<div id="channel_list">
-  <ul class="nav nav-list well">
-  % for my $c (@$connections) {
-    <li>
-      <ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
-        <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a>
-      % for my $channel (@{ $c->{channels} }) {
-        <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
-          %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
-            %= $channel
-            <span class="badge hide">0</span>
-          % end
-        </li>
-      % }
-      % for my $conversation (@{ $c->{conversations} }) {
-        <li id="target_<%= $c->{id} %>_<%= as_id($conversation) %>" class="<%= is_active($c, $conversation)? 'active' : '' %> conversation">
-          %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
-            %= $conversation
-            <span class="badge hide">0</span>
-          % end
-        </li>
-      % }
-      </ul>
-    </li>
-  % }
-  </ul>
-</div>
 <div class="chat row-fluid">
-  <div class="span10 offset2">
+  <div class="conversation-list">
+    <ul class="nav nav-list well">
+    % for my $c (@$connections) {
+      <li>
+        <ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
+          <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a>
+        % for my $channel (@{ $c->{channels} }) {
+          <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
+            %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
+              %= $channel
+              <span class="badge hide">0</span>
+            % end
+          </li>
+        % }
+        % for my $conversation (@{ $c->{conversations} }) {
+          <li id="target_<%= $c->{id} %>_<%= as_id($conversation) %>" class="<%= is_active($c, $conversation)? 'active' : '' %> conversation">
+            %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
+              %= $conversation
+              <span class="badge hide">0</span>
+            % end
+          </li>
+        % }
+          <li class="divider"></li>
+          <li><%= link_to 'Settings', 'settings' %></li>
+        </ul>
+      </li>
+    % }
+    </ul>
+  </div>
+  <div class="span10 chat-messages">
     <ul class="unstyled" id="chat_messages"
       data-cid="<%= $connection_id %>"
       data-nick="<%= $nick %>"
@@ -53,14 +55,10 @@
     </dl>
   </div>
 </div>
-<div id="chat_input_field">
-  <div class="container-fluid">
-    <div class="row-fluid">
-      <form class="span10 offset2">
-        <input autocomplete="off" type="text" name="say" class="span12" placeholder="Write a message to reply...">
-      </form>
-    </div>
-  </div>
+<div id="chat_input">
+  <form>
+    <input autocomplete="off" type="text" name="say" class="span12" placeholder="Write a message to reply...">
+  </form>
 </div>
 
 % unless($as_history) {

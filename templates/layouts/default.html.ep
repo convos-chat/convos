@@ -12,6 +12,7 @@
   </head>
   <body>
   <div id="container">
+    % unless(stash 'cid') {
     <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
@@ -36,6 +37,7 @@
         </div>
       </div>
     </div>
+    % }
     <div class="container-fluid">
       %= content
     </div>

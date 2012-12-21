@@ -14,13 +14,17 @@
 @blue:                          #468;
 @baseLineHeight:                22px;
 @navbarCollapseWidth:           767px;
-@navbarInverseLinkColorHover:    @navbarInverseLinkColor;
+@navbarInverseLinkColorHover:   @navbarInverseLinkColor;
+@conversationListWidth:         150px;
 
+body {
+  padding-top: 10px;
+}
 
 ul.inline-list { overflow: hidden; height: auto }
-ul.inline-list li { float: left; margin-right: 20px }
+ul.inline-list li { float: left; margin-right: @gridGutterWidth }
 form.no-margins { margin: 0 }
-.footer .inline-list { margin-top: 40px; padding-top: 20px; border-top: 1px solid #aaa }
+.footer .inline-list { margin-top: 40px; padding-top: @gridGutterWidth; border-top: 1px solid #aaa }
 .footer .powered-by,
 .footer .powered-by a { font-size: 11px; color: #888 }
 
@@ -31,22 +35,69 @@ table.table-fixed-footer {
 }
 
 /* chat */
-#channel_list {
-  position: fixed;
-  top: 40px;
-  bottom: 40px;
-  left: 12px;
+.chat .conversation-list {
+  background: #eee url(../image/show-hide-conversation-list.gif) 0px 50% no-repeat;
+  border-right: 1px solid #999;
+  width: @conversationListWidth;
   overflow-y: hidden;
+  position: fixed;
+  top: 0;
+  bottom: 38px;
+  left: 0;
+  z-index: 10;
+  cursor: w-resize;
 }
-#channel_list .nav {
+.chat .conversation-list .nav-list {
   height: 100%;
+  padding: 0;
+  margin: 0 10px;
+  cursor: auto;
 }
-#channel_list .nav-list > li > a {
+.chat .conversation-list .nav-list > li > a {
   padding: 4px;
   padding-left: 8px;
 }
-#channel_list .nav-list > li.server {
+.chat .conversation-list .nav-list > li.server {
   margin-top: 8px;
+}
+
+.row-fluid.chat .chat-messages {
+  margin-left: @conversationListWidth;
+}
+
+#chat_input {
+  background: #eee;
+  padding: 4px 0;
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  border-top: 1px solid #999;
+}
+
+#chat_input form {
+  margin: 0 35px 0 @conversationListWidth + 15;
+}
+
+#chat_input form input {
+  font-family: Hume Mono, monospace;
+  margin-bottom: 0;
+  margin-top: 0;
+  width: 100%;
+}
+
+.chat .conversation-list.conversation-list-hidden {
+  left: -@conversationListWidth + 10;
+  background-position: -9px 50%;
+  cursor: e-resize;
+}
+.chat .conversation-list.conversation-list-hidden .nav-list { display: none; }
+.row-fluid.chat .chat-messages.conversation-list-hidden { margin-left: 0; }
+#chat_input.conversation-list-hidden form { margin: 0 20px 0 10px; }
+
+@media (max-width: 767px) {
+  .row-fluid.chat .chat-messages { margin-left: 0; }
+  #chat_input form { margin: 0 20px 0 10px; }
 }
 
 @font-face {
@@ -99,30 +150,3 @@ table.table-fixed-footer {
 
 .navbar { position: fixed; }
 
-#channel_list .close { display: none; }
-#channel_list li:hover > .close { display: inline; }
-
-#chat_input_field {
-  background: #eee;
-  padding: 4px 0;
-  position: fixed;
-  bottom: 0px;
-  left: 0;
-  width: 100%;
-  border-top: 1px solid #999;
-}
-
-#chat_input_field form,
-#chat_input_field form input {
-  margin-bottom: 0;
-  margin-top: 0;
-  font-family: Hume Mono, monospace;
-}
-
-@media (max-width: 767px) {
-  #channel_list {
-    height: auto;
-    background: #fff;
-    display: none; /* need to be able to toggle this from a button... */
-  }
-}
