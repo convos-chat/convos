@@ -4,7 +4,7 @@ Structure.registerModule('Wirc', {
     console.log(Wirc.base_url);
     console.log(Wirc.Chat.makeTargetId('target', 1, '#bar'));
 
-    Wirc.Notifier.show('', 'Running tests...', 'Yay!');
+    Wirc.Notifier.popup('', 'Running tests...', 'Yay!');
     Wirc.Chat.modifyChannelList({ joined: '#too_cool', cid: 1 });
     setTimeout(function() { Wirc.Chat.modifyChannelList({ parted: '#too_cool', cid: 1 }); }, 500);
     Wirc.Chat.modifyConversationlist({ nick: 'caveman', cid: 1 });
@@ -14,18 +14,31 @@ Structure.registerModule('Wirc', {
     console.log(JSON.stringify(Wirc.Chat.parseIrcInput({ timestamp: 1355957508, message: "\u0001ACTION what ever\u0001" })));
     console.log(JSON.stringify(Wirc.Chat.parseIrcInput({ timestamp: 1355957508, message: 'hello ' + Wirc.Chat.nick })));
 
-    Wirc.Chat.window_has_focus = false;
+    Wirc.Notifier.window_has_focus = false;
     Wirc.Chat.receiveData({ data: { cid: 1, timestamp: 1355957508, nick: 'caveman', target: Wirc.Chat.target, message: "\u0001ACTION what ever\u0001" } });
     Wirc.Chat.receiveData({ data: { cid: 1, timestamp: 1355957508, nick: 'caveman', target: Wirc.Chat.target, message: 'hi!' } });
     Wirc.Chat.receiveData({ data: { cid: 1, timestamp: 1355957508, nick: 'caveman', target: Wirc.Chat.target, message: 'what up ' + Wirc.Chat.nick } });
     Wirc.Chat.receiveData({ data: { cid: 1, timestamp: 1355957508, old_nick: 'caveman', new_nick: 'cavewoman' } });
-    Wirc.Chat.window_has_focus = true;
+    Wirc.Notifier.window_has_focus = true;
+
+    // Need to unfocus the window to make this run. Should blink the tab
+    // setTimeout(function() { Wirc.Notifier.title('yikes!'); }, 3000);
   }
 });
 
 Structure.registerModule('Wirc.Notifier', {
-  show: function(icon, title, msg) {
+  window_has_focus: true,
+  original_title: document.title,
+  popup: function(icon, title, msg) {
+    if(this.window_has_focus) return;
     if(this.notifier) this.notifier.createNotification(icon || '', title, msg || '').show();
+  },
+  title: function(t) { // change title and make the tab flash (at least in chrome)
+    if(this._t) clearTimeout(this._t);
+    if(this.window_has_focus) return;
+    if(t) this._title = t;
+    document.title = document.title == this._title || document.title == this.original_title ? this._title + ' - ' + this.original_title : this._title;
+    this._t = setTimeout(this.title, 2000);
   },
   requestPermission: function() {
     webkitNotifications.requestPermission(function() {
@@ -33,6 +46,8 @@ Structure.registerModule('Wirc.Notifier', {
     });
   },
   init: function() {
+    var self = this;
+
     if(!window.webkitNotifications) {
       // cannot show notifications
     }
@@ -43,6 +58,15 @@ Structure.registerModule('Wirc.Notifier', {
     else {
       this.notifier = webkitNotifications;
     }
+
+    $(window).blur(function() {
+      self.window_has_focus = false;
+    });
+    $(window).focus(function() {
+      self.window_has_focus = true;
+      this._t = setTimeout(function() { document.title = self.original_title; }, 4000);
+    });
+
     return this;
   }
 }); // End Wirc.Notify
@@ -121,17 +145,14 @@ Structure.registerModule('Wirc.Chat', {
     var data = Wirc.Chat.parseIrcInput(e.data);
 
     // notification handling
-    if(!self.window_has_focus) {
-      if(data.highlight) {
-        this.notifier.show('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
-      }
-      else if(data.target === this.nick) {
-        this.notifier.show('', 'New message from ' + data.nick, data.message);
-      }
-      if(data.cid == this.connection_id && data.target == this.target) {
-        document.title = 'New message in ' + this.target;
-      }
+    if(data.highlight) {
+      this.notifier.popup('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
     }
+    else if(data.target === this.nick) {
+      this.notifier.popup('', 'New message from ' + data.nick, data.message);
+    }
+
+    this.notifier.title('New message in ' + this.target);
 
     // action handling
     if(data.joined || data.parted) {
@@ -182,7 +203,6 @@ Structure.registerModule('Wirc.Chat', {
   },
   init: function($) {
     var self = this;
-    var original_title = document.title;
 
     self.$messages = $('#chat_messages');
     self.connection_id = self.$messages.attr('data-cid');
@@ -208,8 +228,6 @@ Structure.registerModule('Wirc.Chat', {
 
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
-    $(window).blur(function() { self.window_has_focus = false; });
-    $(window).focus(function() { self.window_has_focus = true; self.input.focus(); document.title = original_title; });
     if(window.console) console.log('[Wirc.Chat.init] ', self);
 
     return self;
