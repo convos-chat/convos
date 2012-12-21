@@ -143,7 +143,7 @@ Structure.registerModule('Wirc.Chat', {
     return data;
   },
   receiveData: function(e) {
-    if(window.console) console.log('[websocket] > ', e.data);
+    if(window.console) console.log('[websocket] > ' + e.data);
     var data = Wirc.Chat.parseIrcInput(e.data);
 
     // notification handling
@@ -153,8 +153,9 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.target === this.nick) {
       this.notifier.popup('', 'New message from ' + data.nick, data.message);
     }
-
-    this.notifier.title('New message in ' + this.target);
+    if(data.message) {
+      this.notifier.title('New message in ' + data.target);
+    }
 
     // action handling
     if(data.joined || data.parted) {
