@@ -168,10 +168,9 @@ Structure.registerModule('Wirc.Chat', {
         this.displayUnread(data);
       }
     }
-    else if(data.new_nick) {
-      this.input.autoCompleteNicks(data);
-      if(this.nick === data.old_nick) this.nick = this.new_nick;
-    }
+    else if(data.new_nick && this.nick === data.old_nick) this.nick = this.new_nick;
+    
+    this.input.autoCompleteNicks(data);
 
     this.print(data);
   },
@@ -256,6 +255,9 @@ Structure.registerModule('Wirc.Chat.Input', {
     if(data.new_nick) {
       this.autoCompleteNicks({ old_nick: data.new_nick });
       this.autocomplete.unshift(data.new_nick);
+    } else if(data.nick) {
+      this.autoCompleteNicks({ old_nick: data.nick });
+      this.autocomplete.unshift(data.nick);      
     }
   },
   tabbing: function(val) {

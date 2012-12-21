@@ -5059,6 +5059,7 @@ table.table-fixed-footer {
   margin-bottom: 45px;
   padding: 0 4px;
   font-family: Hume Mono, monospace;
+  -webkit-font-smoothing: antialiased;
 }
 #chat_messages .message {
   white-space: pre-wrap;
