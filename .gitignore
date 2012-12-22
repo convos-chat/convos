@@ -10,5 +10,4 @@ MANIFEST*
 !MANIFEST.SKIP
 *META.*
 /local
-
-
+.DS_Store
