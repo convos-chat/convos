@@ -95,6 +95,12 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.parted === this.target && data.nick !== this.nick) {
       $messages.append( $(tmpl('nick_parted_template', data)) );
     }
+    else if(data.whois) {
+      $messages.append( $(tmpl('whois_template', data)) );
+    }
+    else if(data.whois_channels) {
+      $messages.append( $(tmpl('whois_channels_template', data)) );
+    }
     else if(data.template && data.target == this.target || data.nick == this.target) {
       $messages.append(tmpl(data.template, data));
     }
@@ -224,7 +230,8 @@ Structure.registerModule('Wirc.Chat.Input', {
     '/msg ',
     '/me ',
     '/nick ',
-    '/part '
+    '/part ',
+    '/whois '
   ],
   autoCompleteNicks: function(data) {
     if(data.old_nick) {

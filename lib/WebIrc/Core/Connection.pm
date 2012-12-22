@@ -108,7 +108,9 @@ has log => sub { Mojo::Log->new };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome /;
-my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply irc_error /;
+my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply irc_error
+                                    irc_rpl_whoisuser irc_rpl_whoischannels
+                                /;
 
 has _irc => sub {
   my $self = shift;
@@ -266,6 +268,35 @@ sub irc_rpl_welcome {
   }
 }
 
+=head2 irc_rpl_whoisuser
+
+=cut
+
+sub irc_rpl_whoisuser {
+  my($self, $message) = @_;
+
+  $self->_publish({
+    whois => $message->{params}[0], # may change, but will be true
+    nick => $message->{params}[1],
+    user => $message->{params}[2],
+    host => $message->{params}[3],
+    realname => $message->{params}[5],
+  });
+}
+
+=head2 irc_rpl_whoischannels
+
+=cut
+
+sub irc_rpl_whoischannels {
+  my($self, $message) = @_;
+
+  $self->_publish({
+    whois_channels => $message->{params}[0], # may change, but will be true
+    nick => $message->{params}[1],
+    channels => [ sort split ' ', $message->{params}[2] || '' ],
+  });
+}
 
 =head2 irc_rpl_myinfo
 

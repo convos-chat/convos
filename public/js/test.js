@@ -24,6 +24,9 @@ Structure.registerModule('Wirc.Test', {
     Wirc.Chat.receiveData({ data: '{"cid":1,"timestamp":1355957508,"old_nick":"caveman","new_nick":"cavewoman"}' });
     Wirc.Notifier.window_has_focus = true;
 
+    Wirc.Chat.print({ whois: 1, nick: 'yay', user: 'anything', host: 'localhost', realname: 'Mr. Man' });
+    Wirc.Chat.print({ whois_channels: 1, nick: 'yay', channels: ['#mojo'] });
+
     // Need to unfocus the window to make this run. Should blink the tab
     // setTimeout(function() { Wirc.Notifier.title('yikes!'); }, 3000);
   }

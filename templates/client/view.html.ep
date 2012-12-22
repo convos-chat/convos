@@ -72,8 +72,8 @@
 <script type="text/html" id="message_template">
   <li class="<%%= class_name %>">
     <span class="prefix"><%%= nick %>:</span>
-    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= message %></span>
+    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="action_message_template">
@@ -85,29 +85,43 @@
 <script type="text/html" id="nick_change_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= old_nick %> changed nick to "<%%= new_nick %>"</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="nick_joined_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= nick %> joined <%%= joined %></span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="nick_parted_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= nick %> parted <%%= parted %></span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+  </li>
+</script>
+<script type="text/html" id="whois_template">
+  <li class="muted">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="message"><%%= nick %> is <%%= realname %> and connected from <%%= host %>.</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+  </li>
+</script>
+<script type="text/html" id="whois_channels_template">
+  <li class="muted">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="message"><%%= nick %> has joined <%%= channels.join(', ') %>.</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="server_status_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= status == 200 ? 'Connected' : 'Error' %></span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="new_channel_template">
