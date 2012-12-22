@@ -5,10 +5,15 @@
   <ul class="nav nav-list well">
   % for my $c (@$connections) {
     <li>
-      <ul class="nav nav-list" id="connection_list_<%= as_id($c->{id})%>">
-        <li class="nav-header server<%= is_active($c) ? ' active' : '' %>" id="connection_<%= as_id($c->{id})%>"><%=link_to($c->{host} => url_for('server.view',cid => $c->{id})) %></a>
+      <ul class="nav nav-list" id="connection_list_<%= $c->{id} %>">
+        <li id="target_<%= $c->{id} %>" class="nav-header server<%= is_active($c) ? ' active' : '' %>">
+          %= link_to url_for('server.view',cid => $c->{id}), begin
+            %= $c->{host}
+            <span class="badge hide">0</span>
+          % end
+        </li>
       % for my $channel (@{ $c->{channels} }) {
-        <li id="target_<%=$c->{id}%>_<%= as_id($channel) %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
+        <li id="target_<%= $c->{id} %>_<%= as_id $channel %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
           %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
             %= $channel
             <span class="badge hide">0</span>
@@ -16,7 +21,7 @@
         </li>
       % }
       % for my $conversation (@{ $c->{conversations} }) {
-        <li id="target_<%= $c->{id} %>_<%= as_id($conversation) %>" class="<%= is_active($c, $conversation)? 'active' : '' %> conversation">
+        <li id="target_<%= $c->{id} %>_<%= as_id $conversation %>" class="<%= is_active($c, $conversation)? 'active' : '' %> conversation">
           %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
             %= $conversation
             <span class="badge hide">0</span>
@@ -89,6 +94,13 @@
     <span class="prefix"><%= app->config->{name} %>:</span>
     <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
     <span class="message"><%%= nick %> joined <%%= joined %></span>
+  </li>
+</script>
+<script type="text/html" id="nick_parted_template">
+  <li class="muted">
+    <span class="prefix"><%= app->config->{name} %>:</span>
+    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span class="message"><%%= nick %> parted <%%= parted %></span>
   </li>
 </script>
 <script type="text/html" id="server_status_template">

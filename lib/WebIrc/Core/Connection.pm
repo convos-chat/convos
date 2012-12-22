@@ -39,8 +39,8 @@ L<Mojo::IRC/rpl_endofmotd>, L<Mojo::IRC/rpl_welcome> and L<Mojo::IRC/error>.
 
 =item * Other events
 
-L</irc_rpl_welcome>, L</irc_rpl_myinfo>, L</irc_join>, L<irc_rpl_namreply> and
-l</irc_error>.
+L</irc_rpl_welcome>, L</irc_rpl_myinfo>, L</irc_join>, L</irc_part>,
+L<irc_rpl_namreply> and l</irc_error>.
 
 =back
 
@@ -51,12 +51,11 @@ use Mojo::IRC;
 use Unicode::UTF8;
 no warnings "utf8";
 use Mojo::JSON;
-use WebIrc::Core::Util qw/ pack_irc /;
 use Parse::IRC ();
-use IRC::Utils qw/parse_user/;
+use IRC::Utils ();
 use Scalar::Util ();
 use Carp qw/ croak /;
-use Time::HiRes qw/time/;
+use Time::HiRes qw/ time /;
 
 # default to true while developing
 use constant DEBUG => $ENV{WIRC_DEBUG} // 1;
@@ -109,7 +108,7 @@ has log => sub { Mojo::Log->new };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome /;
-my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_rpl_namreply irc_error /;
+my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply irc_error /;
 
 has _irc => sub {
   my $self = shift;
@@ -174,16 +173,16 @@ sub connect {
       $self->_irc->connect(sub { $self->$cb; });
       $self->{sub} = $redis->subscribe("connection:$id:to_server");
       $self->{sub}->on(message => sub {
-        my($sub, $msg) = @_;
-        $msg = Unicode::UTF8::encode_utf8($msg, sub { $_[0] });
-        $self->_irc->write($msg);
-        $msg = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $msg);
-        if($msg->{command} eq 'PRIVMSG') {
-          $self->add_message($msg);
+        my($sub, $message) = @_;
+        $message = Unicode::UTF8::encode_utf8($message, sub { $_[0] });
+        $self->_irc->write($message);
+        $message = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $message);
+        if($message->{command} eq 'PRIVMSG') {
+          $self->add_message($message);
         }
         else {
-          my $action = 'cmd_'. lc $msg->{command};
-          $self->$action($msg) if $self->can($action);
+          my $action = 'cmd_'. lc $message->{command};
+          $self->$action($message) if $self->can($action);
         }
 
       }) if $self->{sub}; # this should -never- be false
@@ -203,16 +202,12 @@ if it looks like one. Returns true if the message was added to redis.
 
 sub add_server_message {
   my ($self, $message) = @_;
-  my $time = time;
 
   if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
-    $self->redis->zadd("connection:@{[$self->id]}:msg", $time, $message->{raw_line});
-    $self->_publish({
-        timestamp => $time,
-        sender    => $self->_irc->server,
-        message   => $message->{params}[1] || $message->{params}[0],                   # 1 = normal, 0 = error
-        server    => $self->_irc->server,
-    });
+    $self->redis->zadd("connection:@{[$self->id]}:msg", time, $message->{raw_line});
+
+    # 1 = normal, 0 = error
+    $self->_publish({ message => $message->{params}[1] || $message->{params}[0] });
   }
 }
 
@@ -226,24 +221,17 @@ Will add a private message to the database.
 
 sub add_message {
   my ($self, $message) = @_;
-  my $time = time;
-  my ($nick, $user, $host) = parse_user($message->{prefix});
-  my $target=  lc($message->{params}->[0] eq $self->_irc->nick ? $nick : $message->{params}->[0]);
-  $self->redis->zadd(
-    "connection:@{[$self->id]}:$target:msg",
-    $time, $message->{raw_line}
-  );
+  my ($nick) = IRC::Utils::parse_user($message->{prefix});
+  my $target = lc($message->{params}[0] eq $self->_irc->nick ? $nick : $message->{params}[0]);
+
+  $self->redis->zadd("connection:@{[$self->id]}:$target:msg", time, $message->{raw_line});
   $self->_publish({
-    timestamp => $time,
-    server    => $self->_irc->server,
     nick      => $nick,
-    user      => $user,
-    host      => $host,
     target    => $target,
     message   => $message->{params}[1],
   });
 
-  unless ($message->{params}->[0] =~ /^\#/x) {    # not a channel or me.
+  unless ($message->{params}[0] =~ /^\#/x) {    # not a channel or me.
     $self->redis->sadd("connection:@{[$self->id]}:conversations", $target);
   }
 }
@@ -297,18 +285,18 @@ sub irc_rpl_myinfo {
 
 =head2 irc_join
 
-Example message:
-
-:somenick!~someuser@148.122.202.168 JOIN #html
+See L<Mojo::IRC/irc_join>.
 
 =cut
 
 sub irc_join {
-  my ($self, $message) = @_;
-  my ($nick, $user, $host) = parse_user($message->{prefix});
-  $self->_publish({ nick=>$nick, user => $user,host=>$host, joined => $message->{params}[0], timestamp => time });
+  my($self, $message) = @_;
+  my($nick) = IRC::Utils::parse_user($message->{prefix});
+  my $channel = $message->{params}[0];
+
   return if $nick eq $self->_irc->nick;
-  $self->redis->sadd("connection:@{[$self->id]}:$message->{params}[0]:nicks", $nick);
+  $self->_publish({ nick => $nick, joined => $channel });
+  $self->redis->sadd("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
 
 =head2 irc_nick
@@ -316,15 +304,28 @@ sub irc_join {
 =cut
 
 sub irc_nick {
-  my ($self, $message) = @_;
-  my $old_nick = ($message->{prefix} =~ /^(.*?)!/)[0] || '';
+  my($self, $message) = @_;
+  my($old_nick) = IRC::Utils::parse_user($message->{prefix});
   my $new_nick = $message->{params}[0];
 
   if($old_nick eq $self->_irc->nick) {
     $self->redis->hset("connection:@{[$self->id]}", nick => $new_nick);
   }
 
-  $self->_publish({ old_nick => $old_nick, new_nick => $new_nick, timestamp => time });
+  $self->_publish({ old_nick => $old_nick, new_nick => $new_nick });
+}
+
+=head2 irc_part
+
+=cut
+
+sub irc_part {
+  my($self, $message) = @_;
+  my($nick) = IRC::Utils::parse_user($message->{prefix});
+  my $channel = $message->{params}[0];
+
+  $self->_publish({ nick => $nick, parted => $channel });
+  $self->redis->srem("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
 
 =head2 irc_rpl_namreply
@@ -359,13 +360,6 @@ sub irc_error {
   }
 }
 
-sub _publish {
-  my($self, $data) = @_;
-  $data->{cid}=$self->id;
-  $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
-}
-
-
 =head1 cmd_join
 
 Handle join commands from user. Add to channel set.
@@ -373,9 +367,12 @@ Handle join commands from user. Add to channel set.
 =cut
 
 sub cmd_join {
-  my($self,$msg)=@_;
-  $self->redis->sadd("connection:@{[$self->id]}:channels",@{$msg->{params}});
+  my($self, $message) = @_;
+  my $channel = $message->{params}[0];
 
+  $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
+  $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks"); # clean up old nick list
+  $self->_publish({ nick => $self->_irc->nick, joined => $channel });
 }
 
 =head1 cmd_part
@@ -385,10 +382,21 @@ Handle part commands from user. Remove from channel set.
 =cut
 
 sub cmd_part {
-  my($self,$msg)=@_;
-  $self->redis->srem("connection:@{[$self->id]}:channels",@{$msg->{params}});
-  $self->redis->del("connection:@{[$self->id]}:channel:$msg->{params}[0]:nicks");
-  $self->_publish({ parted => $msg->{params}[0], timestamp => time });
+  my($self, $message) = @_;
+  my $channel = $message->{params}[0];
+
+  $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
+  $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
+  $self->_publish({ nick => $self->_irc->nick, parted => $channel });
+}
+
+sub _publish {
+  my($self, $data) = @_;
+
+  local $data->{cid} = $self->id;
+  local $data->{timestamp} = time;
+
+  $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
 }
 
 =head1 COPYRIGHT

@@ -83,11 +83,11 @@ sub pack_irc {
 =cut
 
 sub unpack_irc {
-  my($raw_line,$timestamp) = @_;
+  my($raw_line, $timestamp) = @_;
   my $special = '';
   my $message;
 
-  $raw_line= Unicode::UTF8::decode_utf8($raw_line, sub { $_[0] });
+  $raw_line = Unicode::UTF8::decode_utf8($raw_line, sub { $_[0] });
   $special = 'me' if $raw_line =~ s/\x{1}ACTION (.*)\x{1}/$1/; # TODO: No idea if this is the right place to put this
   $message = Parse::IRC::parse_irc($raw_line);
   $message->{timestamp} = $timestamp;

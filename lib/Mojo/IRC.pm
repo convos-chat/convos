@@ -94,6 +94,15 @@ Internal errors with the mojo ioloop
     prefix => 'Zurich.CH.EU.Undernet.Org',
   });
 
+=head2 irc_part
+
+  $self->$callback({
+    command => 'PART',
+    params => ['#channel'],
+    raw_line => ':somenick!~someuser@host PART #channel',
+    prefix => 'somenick!~someuser@host',
+  })
+
 =head2 irc_ping
 
   $self->$callback({

@@ -3,10 +3,9 @@
   <head><title><%= join ' - ', app->config->{name}, title %></title>
     %= stylesheet '/css/wirc.css';
     %= javascript '/js/jquery.js';
-    %= javascript '/js/ws-reconnecting.js';
-    %= javascript '/js/template.js';
     %= javascript '/js/structure.min.js';
-    %= javascript '/js/date-format.js';
+    %= javascript '/js/ws-reconnecting.js';
+    %= javascript '/js/misc.js';
     %= javascript '/js/wirc.js';
     <meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no,user-scalable=0"/>
   </head>

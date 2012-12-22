@@ -1,30 +1,9 @@
 Structure.registerModule('Wirc', {
   base_url: window.location.href,
-  test: function() { // poor mans test suite...
-    console.log(Wirc.base_url);
-    console.log(Wirc.Chat.makeTargetId('target', 1, '#bar'));
-
-    Wirc.Notifier.popup('', 'Running tests...', 'Yay!');
-    Wirc.Chat.modifyChannelList({ joined: '#too_cool', cid: 1 });
-    setTimeout(function() { Wirc.Chat.modifyChannelList({ parted: '#too_cool', cid: 1 }); }, 500);
-    Wirc.Chat.modifyConversationlist({ nick: 'caveman', cid: 1 });
-    setTimeout(function() { Wirc.Chat.displayUnread({ target: 'caveman', cid: 1 }); }, 300);
-
-    console.log(JSON.stringify(Wirc.Chat.parseIrcInput('{"timestamp":1355957508,"nick":"caveman"}')));
-    console.log(JSON.stringify(Wirc.Chat.parseIrcInput('{"timestamp":1355957508,"message":"\\u0001ACTION what ever\\u0001"}')));
-    console.log(JSON.stringify(Wirc.Chat.parseIrcInput('{"timestamp":1355957508,"message":"hello ' + Wirc.Chat.nick + '"}')));
-
-    Wirc.Chat.onScroll();
-
-    Wirc.Notifier.window_has_focus = false;
-    Wirc.Chat.receiveData({ data: '{"cid":1,"timestamp":1355957508,"nick":"caveman","target":"' + Wirc.Chat.target + '","message":"\\u0001ACTION what ever\\u0001"}' });
-    Wirc.Chat.receiveData({ data: '{"cid":1,"timestamp":1355957508,"nick":"caveman","target":"' + Wirc.Chat.target + '","message":"hi!"}' });
-    Wirc.Chat.receiveData({ data: '{"cid":1,"timestamp":1355957508,"nick":"caveman","target":"' + Wirc.Chat.target + '","message":"what up ' + Wirc.Chat.nick + '"}' });
-    Wirc.Chat.receiveData({ data: '{"cid":1,"timestamp":1355957508,"old_nick":"caveman","new_nick":"cavewoman"}' });
-    Wirc.Notifier.window_has_focus = true;
-
-    // Need to unfocus the window to make this run. Should blink the tab
-    // setTimeout(function() { Wirc.Notifier.title('yikes!'); }, 3000);
+  test: function() {
+    loadScript(Wirc.base_url + '/js/test.js', function() {
+      Wirc.Test.run();
+    });
   }
 });
 
@@ -93,7 +72,8 @@ Structure.registerModule('Wirc.Chat', {
       $(tmpl('new_conversation_template', data)).appendTo('#connection_list_' + data.cid);
   },
   displayUnread: function(data) {
-    var $badge = $('#' + this.makeTargetId(data.cid, data.target) + ' .badge');
+    var id = data.target ? this.makeTargetId(data.cid, data.target) : this.makeTargetId(data.cid);
+    var $badge = $('#' + id + ' .badge');
     $badge.text(parseInt($badge.text(), 10) + 1 ).show();
     if(data.highlight) $badge.addClass('badge-important');
   },
@@ -109,11 +89,17 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.new_nick && data.cid === this.connection_id) {
       $messages.append(tmpl('nick_change_template', data));
     }
-    else if(data.nick !== this.nick && data.joined === this.target) {
+    else if(data.joined === this.target) {
       $messages.append( $(tmpl('nick_joined_template', data)) );
+    }
+    else if(data.parted === this.target && data.nick !== this.nick) {
+      $messages.append( $(tmpl('nick_parted_template', data)) );
     }
     else if(data.template && data.target == this.target || data.nick == this.target) {
       $messages.append(tmpl(data.template, data));
+    }
+    else if(data.message) {
+      this.displayUnread(data);
     }
 
     if(at_bottom) {
@@ -157,16 +143,11 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     // action handling
-    if(data.joined || data.parted) {
+    if(data.nick === this.nick && (data.joined || data.parted)) {
       this.modifyChannelList(data);
     }
-    else if(data.target) {
-      if(data.target === this.nick && data.target !== this.target && this.target != this.nick) {
-        this.modifyConversationlist(data);
-      }
-      if(data.target !== this.target) {
-        this.displayUnread(data);
-      }
+    else if(data.target === this.nick && data.target !== this.target && this.target !== this.nick) {
+      this.modifyConversationlist(data);
     }
     else if(data.new_nick && this.nick === data.old_nick) this.nick = this.new_nick;
     
