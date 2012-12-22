@@ -200,23 +200,17 @@ sub socket {
   my $self = shift;
   my $uid = $self->session('uid');
 
-  # try to avoid inactivity timeout. TODO: Should we rather set this to 600?
-  # After all, we have reconnect feature in wirc.js
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(0);
-  Scalar::Util::weaken($self);
+  Mojo::IOLoop->stream($self->tx->connection)->timeout(90);
 
-  $self->on(finish => sub {
-    $self->logf(debug => "Client finished");
-  });
   $self->redis->smembers("user:$uid:connections", sub {
-    my ($redis, $cids)=@_;
+    my ($redis, $cids) = @_;
     my %allowed=map { $_ => 1 } @$cids;
 
     $self->_subscribe_to_server_messages($_) for @$cids;
     $self->on(message => sub {
       $self->logf(debug => '[ws] < %s', $_[1]);
       my ($self,$octets) = @_;
-      my $message = Unicode::UTF8::encode_utf8($octets, sub { $_[0] });;
+      my $message = Unicode::UTF8::encode_utf8($octets, sub { $_[0] });
       my $data = $JSON->decode($message) || {};
       my $cid = $data->{cid};
       if(!$cid) {
@@ -265,8 +259,8 @@ sub _subscribe_to_server_messages {
 
   Scalar::Util::weaken($self);
   $sub->on(message => sub {
-    my ($redis, $octets)=@_;
-    my $message=Unicode::UTF8::decode_utf8($octets, sub { $_[0] });
+    my ($redis, $octets) = @_;
+    my $message = Unicode::UTF8::decode_utf8($octets, sub { $_[0] });
     $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
     $self->send({ text => $message });
   });
