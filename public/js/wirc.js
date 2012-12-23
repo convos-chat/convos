@@ -179,9 +179,8 @@ Structure.registerModule('Wirc.Chat', {
     self.$messages.before(self.$history_indicator);
     if(window.console) console.log('[Wirc.Chat.onScroll] ' + url);
     $.get(url, function(data) {
-      var $li = $(data).find('#chat_messages li');
-      if($li.length) {
-        self.$messages.prepend($li);
+      if(data) {
+        self.$messages.prepend(data);
         self.$history_indicator.remove();
         self.$history_indicator = false;
         $(window).scrollTop($('body').height() - height_before_load);
@@ -215,6 +214,7 @@ Structure.registerModule('Wirc.Chat', {
       if(v == this.nick) return;
       self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
     });
+		
 
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);

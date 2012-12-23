@@ -156,13 +156,14 @@ sub history {
     },
     sub {
       $self->render(
+        layout => undef,
         connection_id => $cid,
         connections => [],
         nicks => [],
         conversation => $self->_format_conversation($_[1]),
         nick => $self->session('nick'),
         target => $target,
-        template => 'client/view',
+        template => 'client/conversation',
       );
     }
   );

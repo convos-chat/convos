@@ -1,5 +1,4 @@
 % title 'Chat'; $target ||= 'server';
-% my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
 % use WebIrc::Core::Util 'format_time';
 <div id="channel_list">
   <ul class="nav nav-list well">
@@ -35,27 +34,7 @@
 </div>
 <div class="chat row-fluid">
   <div class="span10 offset2">
-    <ul class="unstyled" id="chat_messages"
-      data-cid="<%= $connection_id %>"
-      data-nick="<%= $nick %>"
-      data-nicks="<%= join ',', @$nicks %>"
-      data-target="<%= $target %>">
-    % my $n = 0;
-    % for my $message (@$conversation) {
-      % if($message->{special} eq 'me') {
-      <li class="action">
-        <span class="message">* <%= $message->{nick} || $nick %> <%== $message->{message} %></span>
-        <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
-      </li>
-      % } else {
-      <li class="<%= $message->{class_name} %> <%= $n++ % 2 ? 'odd' : 'even' %>">
-        <span class="prefix"><%= $message->{nick} %>:</span>
-        <span class="message"><%== $message->{message} %></span>
-        <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
-      </li>
-      % }
-    % }
-    </dl>
+		%= include 'client/conversation'
   </div>
 </div>
 <div id="chat_input_field">
@@ -68,7 +47,6 @@
   </div>
 </div>
 
-% unless($as_history) {
 <script type="text/html" id="message_template">
   <li class="<%%= class_name %>">
     <span class="prefix"><%%= nick %>:</span>
@@ -140,4 +118,3 @@
     </a>
   </li>
 </script>
-% }

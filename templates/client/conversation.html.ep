@@ -1,0 +1,23 @@
+% if(layout) {
+    <ul class="unstyled" id="chat_messages"
+      data-cid="<%= $connection_id %>"
+      data-nick="<%= $nick %>"
+      data-nicks="<%= join ',', @$nicks %>"
+      data-target="<%= $target %>">
+% }
+    % my $n = 0;
+    % for my $message (@$conversation) {
+      % if($message->{special} eq 'me') {
+      <li class="action">
+        <span class="message">* <%= $message->{nick} || $nick %> <%== $message->{message} %></span>
+        <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
+      </li>
+      % } else {
+      <li class="<%= $message->{class_name} %> <%= $n++ % 2 ? 'odd' : 'even' %>">
+        <span class="prefix"><%= $message->{nick} %>:</span>
+        <span class="message"><%== $message->{message} %></span>
+        <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
+      </li>
+      % }
+    % }
+<%if (layout) { %></ul><% } %>
