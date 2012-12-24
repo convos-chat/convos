@@ -5131,7 +5131,7 @@ body {
 }
 body.chat {
   padding-top: 3px;
-  padding-bottom: 20px;
+  padding-bottom: 32px;
 }
 @media (max-width: 767px) {
   body .navbar-fixed-top,
@@ -5200,10 +5200,14 @@ body.chat {
     display: none;
   }
 }
-.chat .messages td {
+.chat .messages li {
   font-family: Hume Mono, monospace;
   -webkit-font-smoothing: antialiased;
   padding: 0 4px;
+  clear: right;
+}
+.chat .messages li.odd {
+  background: #f5f5f5;
 }
 .chat .messages .me * {
   color: #049cdb;
@@ -5219,7 +5223,7 @@ body.chat {
 }
 .chat .messages .timestamp {
   color: #777;
-  text-align: right;
+  float: right;
 }
 /* settings */
 .connection-tab-container .nav {

@@ -181,9 +181,9 @@ Structure.registerModule('Wirc.Chat', {
     self.$messages.parents('table:first').before(self.$history_indicator);
     if(window.console) console.log('[Wirc.Chat.onScroll] ' + url);
     $.get(url, function(data) {
-      var $tr = $(data).find('.chat .chat-messages tr');
-      if($tr.length) {
-        self.$messages.prepend($tr);
+      var $li = $(data).find('.messages li');
+      if($li.length) {
+        self.$messages.prepend($li);
         self.$history_indicator.remove();
         self.$history_indicator = false;
         $(window).scrollTop($('body').height() - height_before_load);
@@ -202,7 +202,7 @@ Structure.registerModule('Wirc.Chat', {
 
     self.history_index = 1;
     self.notifier = Wirc.Notifier.init();
-    self.$messages = $('.messages table tbody');
+    self.$messages = $('.messages ul');
 
     self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
     self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
@@ -233,8 +233,8 @@ Structure.registerModule('Wirc.Chat', {
       $window.on('scroll', self.onScroll);
     }, 400);
 
-    this.$conversation_list.click(this.showHideConversationList);
-    if($(window).width() < 767) this.$conversation_list.click();
+    $conversation_list.click(this.showHideConversationList);
+    if($(window).width() < 767) $conversation_list.click();
 
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
