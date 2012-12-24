@@ -178,7 +178,7 @@ Structure.registerModule('Wirc.Chat', {
     var height_before_load = $('body').height();
     var url = Wirc.base_url + '/history/' + (++self.history_index);
     self.$history_indicator = $('<div class="alert alert-info">Loading previous conversations...</div>');
-    self.$messages.parents('table:first').before(self.$history_indicator);
+    self.$messages.before(self.$history_indicator);
     if(window.console) console.log('[Wirc.Chat.onScroll] ' + url);
     $.get(url, function(data) {
       var $li = $(data).find('.messages li');
