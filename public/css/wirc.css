@@ -5139,6 +5139,11 @@ body.chat {
     margin: 0;
   }
 }
+@media (max-width: 480px) {
+  body {
+    font-size: 12px;
+  }
+}
 /* chat */
 .chat .conversation-list {
   background: #fff;
