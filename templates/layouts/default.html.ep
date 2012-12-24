@@ -9,7 +9,7 @@
     %= javascript '/js/wirc.js';
     <meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no,user-scalable=0"/>
   </head>
-  <body>
+  <body class="<%= stash('cid') ? 'chat' : '' %>">
   <div id="container">
     % unless(stash 'cid') {
     <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">

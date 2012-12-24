@@ -15,8 +15,6 @@ Structure.registerModule('Wirc.Test', {
     console.log(JSON.stringify(Wirc.Chat.parseIrcInput('{"timestamp":1355957508,"message":"\\u0001ACTION what ever\\u0001"}')));
     console.log(JSON.stringify(Wirc.Chat.parseIrcInput('{"timestamp":1355957508,"message":"hello ' + Wirc.Chat.nick + '"}')));
 
-    Wirc.Chat.onScroll();
-
     Wirc.Notifier.window_has_focus = false;
     Wirc.Chat.receiveData({ data: '{"cid":1,"timestamp":1355957508,"nick":"caveman","target":"' + Wirc.Chat.target + '","message":"\\u0001ACTION what ever\\u0001"}' });
     Wirc.Chat.receiveData({ data: '{"cid":1,"timestamp":1355957508,"nick":"caveman","target":"' + Wirc.Chat.target + '","message":"hi!"}' });
@@ -26,6 +24,8 @@ Structure.registerModule('Wirc.Test', {
 
     Wirc.Chat.print({ whois: 1, nick: 'yay', user: 'anything', host: 'localhost', realname: 'Mr. Man' });
     Wirc.Chat.print({ whois_channels: 1, nick: 'yay', channels: ['#mojo'] });
+
+    // Wirc.Chat.onScroll();
 
     // Need to unfocus the window to make this run. Should blink the tab
     // setTimeout(function() { Wirc.Notifier.title('yikes!'); }, 3000);
