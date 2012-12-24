@@ -233,6 +233,11 @@ Structure.registerModule('Wirc.Chat', {
       $window.on('scroll', self.onScroll);
     }, 400);
 
+    this.$conversation_list.click(this.showHideConversationList);
+    if($(window).width() < 767) this.$conversation_list.click();
+
+    $('html, body').scrollTop($('body').height());
+    $(window).on('scroll', Wirc.Chat.onScroll);
     if(window.console) console.log('[Wirc.Chat.init] ', self);
 
     return self;
