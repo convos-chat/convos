@@ -5146,7 +5146,8 @@ body.chat {
 }
 /* chat */
 .chat .conversation-list {
-  background: #fff;
+  background: #f7f7f7;
+  border-right: 1px solid #aaa;
   height: 100%;
   position: fixed;
   left: 0;
@@ -5181,8 +5182,6 @@ body.chat {
 }
 @media (max-width: 767px) {
   .chat .conversation-list {
-    background: #f7f7f7;
-    border-right: 1px solid #aaa;
     display: block;
     visibility: visible;
     padding-left: 15px;
