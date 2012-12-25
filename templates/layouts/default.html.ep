@@ -8,7 +8,9 @@
     %= javascript '/js/ws-reconnecting.js';
     %= javascript '/js/misc.js';
     %= javascript '/js/wirc.js';
-    <meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no,user-scalable=0"/>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   </head>
   <body class="<%= session('uid') ? 'chat' : '' %>">
   <div id="container">

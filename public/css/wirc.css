@@ -5138,10 +5138,14 @@ body.chat {
   body .navbar-fixed-bottom {
     margin: 0;
   }
+  body.chat {
+    padding-right: 3px;
+  }
 }
 @media (max-width: 480px) {
   body {
     font-size: 12px;
+    margin-right: 3px;
   }
 }
 /* chat */
