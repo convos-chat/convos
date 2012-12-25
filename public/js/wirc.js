@@ -216,12 +216,12 @@ Structure.registerModule('Wirc.Chat', {
     };
 
     $('a.show-hide').click(function() {
-      $conversation_list.toggleClass('hidden');
+      $conversation_list.toggleClass('hidden open');
       return false;
     });
     $window.resize(function() {
       if($window.width() < 767) {
-        $conversation_list.addClass('hidden');
+        if(!$conversation_list.hasClass('open')) $conversation_list.addClass('hidden');
       }
       else {
         $conversation_list.removeClass('hidden');
