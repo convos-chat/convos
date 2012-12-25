@@ -9,9 +9,9 @@
     %= javascript '/js/wirc.js';
     <meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no,user-scalable=0"/>
   </head>
-  <body class="<%= stash('cid') ? 'chat' : '' %>">
+  <body class="<%= session('uid') ? 'chat' : '' %>">
   <div id="container">
-    % unless(stash 'cid') {
+    % unless(session 'uid') {
     <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">

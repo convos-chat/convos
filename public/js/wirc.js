@@ -195,25 +195,12 @@ Structure.registerModule('Wirc.Chat', {
       }
     });
   },
-  init: function() {
+  generic: function() {
     var self = this;
     var $conversation_list = $('.conversation-list');
     var $window = $(window);
 
-    self.history_index = 1;
     self.notifier = Wirc.Notifier.init();
-    self.$messages = $('.messages ul');
-
-    self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
-    self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
-    self.websocket.onmessage = self.receiveData;
-
-    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
-    self.input.submit = function(e) {
-      self.sendData({ cid: self.connection_id, target: self.target, cmd: this.$input.val() });
-      this.$input.val(''); // TODO: Do not clear the input field until echo is returned?
-      return false;
-    };
 
     $('a.show-hide').click(function() {
       $conversation_list.toggleClass('hidden open');
@@ -227,14 +214,29 @@ Structure.registerModule('Wirc.Chat', {
         $conversation_list.removeClass('hidden');
       }
     }).resize();
+  },
+  init: function() {
+    var self = this;
+
+    self.generic();
+    self.history_index = 1;
+    self.$messages = $('.messages ul');
+
+    self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
+    self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
+    self.websocket.onmessage = self.receiveData;
+
+    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
+    self.input.submit = function(e) {
+      self.sendData({ cid: self.connection_id, target: self.target, cmd: this.$input.val() });
+      this.$input.val(''); // TODO: Do not clear the input field until echo is returned?
+      return false;
+    };
 
     setTimeout(function() {
       $('html, body').scrollTop($('body').height());
       $window.on('scroll', self.onScroll);
     }, 400);
-
-    $conversation_list.click(this.showHideConversationList);
-    if($(window).width() < 767) $conversation_list.click();
 
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
@@ -369,7 +371,7 @@ Structure.registerModule('Wirc.Chat.Input', {
       return false;
     });
 
-    if($('body.chat').length) Wirc.Chat.init();
+    return $('body.chat .messages').length ? Wirc.Chat.init() : Wirc.Chat.generic();
   });
 })(jQuery);
 
