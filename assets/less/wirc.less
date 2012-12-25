@@ -49,7 +49,7 @@ body.chat { padding-top: 3px; padding-bottom: 32px; }
   font-weight: bold;
 }
 
-.chat .conversation-list .show-hide {
+.chat .conversation-list a.show-hide {
   background: url(../image/show-hide-conversation-list.gif) -20px 50% no-repeat;
   height: 100%;
   width: 15px;
@@ -57,6 +57,9 @@ body.chat { padding-top: 3px; padding-bottom: 32px; }
   top: 0;
   left: 0;
   display: none;
+}
+.chat .conversation-list a.show-hide:hover {
+  text-decoration: none;
 }
 
 .chat .messages .alert {
@@ -74,8 +77,8 @@ body.chat { padding-top: 3px; padding-bottom: 32px; }
     visibility: visible;
     padding-left: 15px;
   }
-  .chat .conversation-list .show-hide { display: block; }
-  .chat .conversation-list.hidden .show-hide { background-position: 5px 50%; }
+  .chat .conversation-list a.show-hide { display: block; }
+  .chat .conversation-list.hidden a.show-hide { background-position: 5px 50%; }
   .chat .conversation-list.hidden { width: 0px; }
   .chat .conversation-list.hidden ul { display: none; }
 }
