@@ -202,7 +202,7 @@ Structure.registerModule('Wirc.Chat', {
 
     self.notifier = Wirc.Notifier.init();
 
-    $('a.show-hide').click(function() {
+    $('a.show-hide').fastclick(function() {
       $conversation_list.toggleClass('hidden open');
       return false;
     });
