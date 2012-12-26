@@ -71,6 +71,7 @@ sub register {
     $app->helper(logf => \&WebIrc::Core::Util::logf);
     $app->helper(redis => sub { shift->app->redis(@_) });
     $app->helper( as_id => sub { my ($self,$val)=@_; $val =~ s/\W+//g; $val } );
+		$app->helper( pjax => sub {  });
     $app->helper( is_active => sub {
       my ($self,$c,$target)=@_;
       if($c->{id}==$self->param('cid')) {

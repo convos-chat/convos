@@ -1,10 +1,10 @@
-% if(layout) {
-    <ul class="unstyled" id="chat_messages"
-      data-cid="<%= $connection_id %>"
-      data-nick="<%= $nick %>"
-      data-nicks="<%= join ',', @$nicks %>"
-      data-target="<%= $target %>">
-% }
+    % if(@$nicks) {
+      <ul class="unstyled" id="chat_messages"
+        data-cid="<%= $connection_id %>"
+        data-nick="<%= $nick %>"
+        data-nicks="<%= join ',', @$nicks %>"
+        data-target="<%= $target %>">
+    % }
     % my $n = 0;
     % for my $message (@$conversation) {
       % if($message->{special} eq 'me') {
@@ -20,4 +20,4 @@
       </li>
       % }
     % }
-<%if (layout) { %></ul><% } %>
+%== qq{</ul>} if $@nicks

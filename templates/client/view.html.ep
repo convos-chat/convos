@@ -33,7 +33,7 @@
   </ul>
 </div>
 <div class="chat row-fluid">
-  <div class="span10 offset2">
+  <div id="conversation" class="span10 offset2">
 		%= include 'client/conversation'
   </div>
 </div>

@@ -179,7 +179,7 @@ Structure.registerModule('Wirc.Chat', {
     self.$messages.before(self.$history_indicator);
     if(window.console) console.log('[Wirc.Chat.onScroll] ' + url);
     $.get(url, function(data) {
-      if(data) {
+      if($(data).find('li').length) {
         self.$messages.prepend(data);
         self.$history_indicator.remove();
         self.$history_indicator = false;
@@ -214,8 +214,8 @@ Structure.registerModule('Wirc.Chat', {
       if(v == this.nick) return;
       self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
     });
-		
-
+    self.pjax = Wirc.Chat.Pjax.init('#channel_list a'),'#conversation');
+    
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
     if(window.console) console.log('[Wirc.Chat.init] ', self);
@@ -223,6 +223,32 @@ Structure.registerModule('Wirc.Chat', {
     return self;
   }
 }); /* End Structure.registerModule('Wirc.Chat') */
+
+Structure.registerModule('Wirc.Chat.Pjax', {
+  setup_activity: function() {
+    $(document).on('pjax:send', function() {
+      $('#loading').show()
+    })
+    $(document).on('pjax:complete', function() {
+      $('#loading').hide()
+    });
+    $(document).on('pjax:timeout', function(event) {
+      // Prevent default timeout redirection behavior
+      event.preventDefault()
+    });
+    
+  },
+  init: function(link_selector,target) {
+    var self = this;
+    $(document).pjax(link_selector,target);
+    $(target).on('pjax:success',function(e){
+      Wirc.Chat.init($);
+    });
+    self.setup_activity()
+  }
+  
+}); /* End Structure.registerModule('Wirc.Pjax') */
+
 
 Structure.registerModule('Wirc.Chat.Input', {
   autocomplete: [
