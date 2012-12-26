@@ -126,7 +126,7 @@ has _irc => sub {
   $irc->on(error => sub {
     my $irc = shift;
     $self->log->error("Reconnecting on error: $_[1]");
-    $irc->_irc->ioloop->timer(2, sub { $self->connect(sub {}); });
+    $irc->ioloop->timer(2, sub { $self->connect(sub {}); });
   });
 
   for my $event (@ADD_MESSAGE_EVENTS) {
