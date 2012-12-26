@@ -109,7 +109,9 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     if(at_bottom) {
+      this.do_not_load_history = true;
       $('html, body').scrollTop($('body').height());
+      this.do_not_load_history = false;
     }
   },
   parseIrcInput: function(d) {
@@ -127,10 +129,9 @@ Structure.registerModule('Wirc.Chat', {
       data.timestamp = new Date(parseInt(data.timestamp * 1000, 10));
     }
 
-    data.class_name = data.nick === this.nick                             ? 'me'
-                    : data.highlight                                      ? 'focus'
-                    : $('#chat_messages').find('li:last').hasClass('odd') ? 'even'
-                    :                                                       'odd';
+    data.class_name = data.nick === this.nick ? 'me'
+                    : data.highlight          ? 'focus'
+                    :                           '';
 
     return data;
   },
@@ -171,6 +172,7 @@ Structure.registerModule('Wirc.Chat', {
     }
   },
   onScroll: function() {
+    if(this.do_not_load_history) return;
     if(this.$history_indicator || $(window).scrollTop() !== 0) return;
     var self = this;
     var height_before_load = $('body').height();
@@ -186,25 +188,44 @@ Structure.registerModule('Wirc.Chat', {
         $(window).scrollTop($('body').height() - height_before_load);
       }
       else {
+        self.do_not_load_history = true;
         self.$history_indicator.removeClass('alert-info').text('End of conversation log.');
+        setTimeout(function() { self.$history_indicator.fadeOut('slow'); }, 2000);
       }
     });
   },
-  init: function($) {
+  generic: function() {
+    var self = this;
+    var $conversation_list = $('.conversation-list');
+    var $window = $(window);
+
+    self.notifier = Wirc.Notifier.init();
+
+    $('a.show-hide').fastclick(function() {
+      $conversation_list.toggleClass('hidden open');
+      return false;
+    });
+    $window.resize(function() {
+      if($window.width() < 767) {
+        if(!$conversation_list.hasClass('open')) $conversation_list.addClass('hidden');
+      }
+      else {
+        $conversation_list.removeClass('hidden');
+      }
+    }).resize();
+  },
+  init: function() {
     var self = this;
 
-    self.$messages = $('#chat_messages');
-    self.connection_id = self.$messages.attr('data-cid');
-    self.nick = self.$messages.attr('data-nick');
-    self.target = self.$messages.attr('data-target');
+    self.generic();
     self.history_index = 1;
-    self.notifier = Wirc.Notifier.init();
+    self.$messages = $('.messages ul');
 
     self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
     self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
     self.websocket.onmessage = self.receiveData;
 
-    self.input = Wirc.Chat.Input.init($('#chat_input_field input[type="text"]'));
+    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
     self.input.submit = function(e) {
       self.sendData({ cid: self.connection_id, target: self.target, cmd: this.$input.val() });
       this.$input.val(''); // TODO: Do not clear the input field until echo is returned?
@@ -216,6 +237,12 @@ Structure.registerModule('Wirc.Chat', {
     });
     self.pjax = Wirc.Chat.Pjax.init('#channel_list a'),'#conversation');
     
+
+    setTimeout(function() {
+      $('html, body').scrollTop($('body').height());
+      $window.on('scroll', self.onScroll);
+    }, 400);
+
     $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
     if(window.console) console.log('[Wirc.Chat.init] ', self);
@@ -362,7 +389,20 @@ Structure.registerModule('Wirc.Chat.Input', {
 (function($) {
   $(document).ready(function() {
     Wirc.base_url = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
-    $('#chat_messages').each(function() { setTimeout(function() { Wirc.Chat.init($); }, 100); });
+
+    /* toggle dropdown */
+    $('a.dropdown-toggle').click(function() {
+      var $e = $(this);
+      $e.parents('.dropdown:first').toggleClass('open');
+      $(window).one('click', function(e) {
+        if($(e.target).parents('.dropdown:first').length) return true;
+        $e.parents('.dropdown:first').removeClass('open');
+        return false;
+      });
+      return false;
+    });
+
+    return $('body.chat .messages').length ? Wirc.Chat.init() : Wirc.Chat.generic();
   });
 })(jQuery);
 

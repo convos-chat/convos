@@ -1,48 +1,69 @@
 % title 'Chat'; $target ||= 'server';
 % use WebIrc::Core::Util 'format_time';
-<div id="channel_list">
-  <ul class="nav nav-list well">
+<script type="text/javascript">
+Wirc.Chat.connection_id = '<%= $connection_id %>';
+Wirc.Chat.nick = '<%= $nick %>';
+Wirc.Chat.target = '<%= $target %>';
+% for my $nick (@$nicks) {
+Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') });
+% }
+</script>
+<div class="conversation-list">
+  <div class="span2">
+    <a href="#" class="show-hide">&nbsp;</a>
+    <ul class="nav nav-list main-menu">
+      <li class="dropdown">
+        %= link_to 'index', class => 'dropdown-toggle', begin
+          %= app->config->{name}
+        % end
+        <ul class="dropdown-menu">
+          <li><%= link_to 'Settings', 'settings' %></li>
+          <li><%= link_to 'Logout', 'logout' %></li>
+        </ul>
+      </li>
+    </ul>
   % for my $c (@$connections) {
-    <li>
-      <ul class="nav nav-list" id="connection_list_<%= $c->{id} %>">
-        <li id="target_<%= $c->{id} %>" class="nav-header server<%= is_active($c) ? ' active' : '' %>">
-          %= link_to url_for('server.view',cid => $c->{id}), begin
-            %= $c->{host}
-            <span class="badge hide">0</span>
-          % end
-        </li>
-      % for my $channel (@{ $c->{channels} }) {
-        <li id="target_<%= $c->{id} %>_<%= as_id $channel %>" class="<%= is_active($c, $channel) ? 'active' : '' %> channel">
-          %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
-            %= $channel
-            <span class="badge hide">0</span>
-          % end
-        </li>
-      % }
-      % for my $conversation (@{ $c->{conversations} }) {
-        <li id="target_<%= $c->{id} %>_<%= as_id $conversation %>" class="<%= is_active($c, $conversation)? 'active' : '' %> conversation">
-          %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
-            %= $conversation
-            <span class="badge hide">0</span>
-          % end
-        </li>
-      % }
-      </ul>
-    </li>
+    <ul class="nav nav-list" id="connection_list_<%= $c->{id} %>">
+      <li id="target_<%= $c->{id} %>" class="<%= is_active($c) ? ' active' : '' %> nav-header">
+        %= link_to url_for('server.view',cid => $c->{id}), begin
+          %= $c->{host}
+          <span class="badge hide">0</span>
+        % end
+      </li>
+    % for my $channel (@{ $c->{channels} }) {
+      <li id="target_<%= $c->{id} %>_<%= as_id $channel %>" class="<%= is_active($c, $channel) ? 'active' : '' %>">
+        %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
+          %= $channel
+          <span class="badge hide">0</span>
+        % end
+      </li>
+    % }
+    % for my $conversation (@{ $c->{conversations} }) {
+      <li id="target_<%= $c->{id} %>_<%= as_id $conversation %>" class="<%= is_active($c, $conversation)? 'active' : '' %>">
+        %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
+          %= $conversation
+          <span class="badge hide">0</span>
+        % end
+      </li>
+    % }
+    </ul>
   % }
-  </ul>
+  </div>
 </div>
 <div class="chat row-fluid">
   <div id="conversation" class="span10 offset2">
 		%= include 'client/conversation'
   </div>
 </div>
-<div id="chat_input_field">
-  <div class="container-fluid">
+
+<div class="chat-input navbar navbar-fixed-bottom">
+  <div class="navbar-inner">
     <div class="row-fluid">
-      <form class="span10 offset2">
-        <input autocomplete="off" type="text" name="say" class="span12" placeholder="Write a message to reply...">
-      </form>
+      <div class="offset2 span10">
+        <form class="navbar-form" method="post">
+          <input type="text" class="span12" placeholder="Enter message to reply">
+        </form>
+      </div>
     </div>
   </div>
 </div>
@@ -50,56 +71,56 @@
 <script type="text/html" id="message_template">
   <li class="<%%= class_name %>">
     <span class="prefix"><%%= nick %>:</span>
-    <span class="message"><%%= message %></span>
-    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
+    <span><%%= message %></span>
+    <span class="timestamp"><%%= timestamp.sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="action_message_template">
   <li class="action">
-    <span class="action">* <%%= nick %> <%%= message %></span>
-    <span class="timestamp pull-right"><%%= timestamp.sprintf('%H:%M:%S') %></span>
+    <span colspan="2">* <%%= nick %> <%%= message %></span>
+    <span class="timestamp"><%%= timestamp.sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="nick_change_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="message"><%%= old_nick %> changed nick to "<%%= new_nick %>"</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span><%%= old_nick %> changed nick to "<%%= new_nick %>"</span>
+    <span class="timestamp"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="nick_joined_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="message"><%%= nick %> joined <%%= joined %></span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span><%%= nick %> joined <%%= joined %></span>
+    <span class="timestamp"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="nick_parted_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="message"><%%= nick %> parted <%%= parted %></span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span><%%= nick %> parted <%%= parted %></span>
+    <span class="timestamp"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="whois_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="message"><%%= nick %> is <%%= realname %> and connected from <%%= host %>.</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span><%%= nick %> is <%%= realname %> and connected from <%%= host %>.</span>
+    <span class="timestamp"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="whois_channels_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="message"><%%= nick %> has joined <%%= channels.join(', ') %>.</span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span><%%= nick %> is in <%%= channels.join(', ') %>.</span>
+    <span class="timestamp"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="server_status_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span class="message"><%%= status == 200 ? 'Connected' : 'Error' %></span>
-    <span class="timestamp pull-right"><%%= new Date().sprintf('%H:%M:%S') %></span>
+    <span><%%= status == 200 ? 'Connected' : 'Error' %></span>
+    <span class="timestamp"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="new_channel_template">

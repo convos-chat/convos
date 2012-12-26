@@ -14,63 +14,86 @@
 @blue:                          #468;
 @baseLineHeight:                22px;
 @navbarCollapseWidth:           767px;
-@navbarInverseLinkColorHover:    @navbarInverseLinkColor;
+@navbarInverseLinkColorHover:   @navbarInverseLinkColor;
 
+body { padding-top: 40px; }
+body.chat { padding-top: 3px; padding-bottom: 32px; }
 
-ul.inline-list { overflow: hidden; height: auto }
-ul.inline-list li { float: left; margin-right: 20px }
-form.no-margins { margin: 0 }
-.footer .inline-list { margin-top: 40px; padding-top: 20px; border-top: 1px solid #aaa }
-.footer .powered-by,
-.footer .powered-by a { font-size: 11px; color: #888 }
+@media (max-width: 767px) {
+  body .navbar-fixed-top,
+  body .navbar-fixed-bottom { margin: 0; }
+  body.chat { padding-right: 3px; }
+}
 
-table.table-fixed-footer {
-  margin: 0;
-  background: #fff;
-  border-top: 2px solid #888;
+@media (max-width: 480px) {
+  body { font-size: 12px; }
 }
 
 /* chat */
-#channel_list {
-  position: fixed;
-  top: 40px;
-  bottom: 40px;
-  left: 12px;
-  overflow-y: hidden;
-}
-#channel_list .nav {
+.chat .conversation-list {
+  background: #f7f7f7;
+  border-right: 1px solid #aaa;
   height: 100%;
-}
-#channel_list .nav-list > li > a {
-  padding: 4px;
-  padding-left: 8px;
-}
-#channel_list .nav-list > li.server {
-  margin-top: 8px;
+  position: fixed;
+  left: 0;
+  top: 0;
 }
 
-@font-face {
-  font-family: 'Hume Mono';
-  src: url('/font/Hume%202%20Mono.eot');
-  src: url('/font/Hume%202%20Mono.eot?#iefix') format('embedded-opentype'),
-       url('/font/Hume%202%20Mono.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
+.chat .conversation-list li.nav-header {
+  border-top: 1px solid #ddd;
 }
 
-#chat_messages { margin-bottom: 45px; padding: 0 4px; font-family: Hume Mono, monospace;-webkit-font-smoothing:antialiased; }
-#chat_messages .message {   white-space:pre-wrap;}
-#chat_messages li span.pull-right { color: @grayLight; }
-#chat_messages li.odd { background-color: @tableBackgroundAccent; }
-#chat_messages li.me span { color: @blue; }
-#chat_messages li.action span { font-style: italic; }
-#chat_messages li.focus span { color: @red; }
-#chat_messages .prefix {
+.chat .conversation-list .main-menu > li > a {
+  font-size: 16px;
   font-weight: bold;
-  display: block;
-  float: left;
-  padding-right: 6px;
 }
+
+.chat .conversation-list a.show-hide {
+  background: url(../image/show-hide-conversation-list.gif) -20px 50% no-repeat;
+  height: 100%;
+  width: 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+}
+.chat .conversation-list a.show-hide:hover {
+  text-decoration: none;
+}
+
+.chat .messages .alert {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+}
+
+.chat-input form { padding: 0 20px; }
+.chat-input input { font-family: Hume Mono, monospace; }
+
+@media (max-width: 767px) {
+  .chat .conversation-list {
+    display: block;
+    visibility: visible;
+    padding-left: 15px;
+  }
+  .chat .conversation-list a.show-hide { display: block; }
+  .chat .conversation-list.hidden a.show-hide { background-position: 5px 50%; }
+  .chat .conversation-list.hidden { width: 0px; }
+  .chat .conversation-list.hidden ul { display: none; }
+}
+
+.chat .messages li {
+  font-family: Hume Mono, monospace;
+  -webkit-font-smoothing: antialiased;
+  padding: 0 4px;
+  clear: right;
+}
+.chat .messages li.odd { background: #f5f5f5; }
+.chat .messages .me * { color: @blue; }
+.chat .messages .action * { font-style: italic; }
+.chat .messages .focus * { color: @red; }
+.chat .messages .prefix { font-weight: bold }
+.chat .messages .timestamp { color: #777; float: right; }
 
 /* settings */
 .connection-tab-container .nav {
@@ -99,30 +122,11 @@ table.table-fixed-footer {
 
 .navbar { position: fixed; }
 
-#channel_list .close { display: none; }
-#channel_list li:hover > .close { display: inline; }
-
-#chat_input_field {
-  background: #eee;
-  padding: 4px 0;
-  position: fixed;
-  bottom: 0px;
-  left: 0;
-  width: 100%;
-  border-top: 1px solid #999;
-}
-
-#chat_input_field form,
-#chat_input_field form input {
-  margin-bottom: 0;
-  margin-top: 0;
-  font-family: Hume Mono, monospace;
-}
-
-@media (max-width: 767px) {
-  #channel_list {
-    height: auto;
-    background: #fff;
-    display: none; /* need to be able to toggle this from a button... */
-  }
+@font-face {
+  font-family: 'Hume Mono';
+  src: url('/font/Hume%202%20Mono.eot');
+  src: url('/font/Hume%202%20Mono.eot?#iefix') format('embedded-opentype'),
+       url('/font/Hume%202%20Mono.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
