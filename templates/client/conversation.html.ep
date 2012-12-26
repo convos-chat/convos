@@ -7,17 +7,14 @@
     % }
     % my $n = 0;
     % for my $message (@$conversation) {
+      <li class="<%= $n++ % 2 ? 'odd' : 'even' %>">
+        <span class="timestamp" title="<%= format_time $message->{timestamp}, '%d %n %H:%M:%S' %>"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
       % if($message->{special} eq 'me') {
-      <li class="action">
-        <span class="message">* <%= $message->{nick} || $nick %> <%== $message->{message} %></span>
-        <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
-      </li>
+        <span class="action">* <%= $message->{nick} %> <%== $message->{message} %></span>
       % } else {
-      <li class="<%= $message->{class_name} %> <%= $n++ % 2 ? 'odd' : 'even' %>">
         <span class="prefix"><%= $message->{nick} %>:</span>
-        <span class="message"><%== $message->{message} %></span>
-        <span class="timestamp pull-right"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
-      </li>
+        <span><%== $message->{message} %></span>
       % }
     % }
+      </li>
 %== qq{</ul>} if $@nicks
