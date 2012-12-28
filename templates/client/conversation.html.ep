@@ -17,4 +17,4 @@
       % }
     % }
       </li>
-%== qq{</ul>} if $@nicks
+%== qq{</ul>} if @$nicks

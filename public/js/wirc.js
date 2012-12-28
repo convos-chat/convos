@@ -235,7 +235,7 @@ Structure.registerModule('Wirc.Chat', {
       if(v == this.nick) return;
       self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
     });
-    self.pjax = Wirc.Chat.Pjax.init('#channel_list a'),'#conversation');
+    self.pjax = Wirc.Chat.Pjax.init('#channel_list a', '#conversation');
     
 
     setTimeout(function() {
