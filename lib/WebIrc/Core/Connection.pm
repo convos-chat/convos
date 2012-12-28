@@ -121,11 +121,17 @@ has _irc => sub {
   $irc->on(close => sub {
     my $irc = shift;
     $self->log->debug('Reconnecting on close...');
+    $self->add_server_message({ params => [ 'Disconnected. Attempting reconnect in 30 seconds.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Disconnected. Attempting reconnect in 30 seconds.' });
     $irc->ioloop->timer(30, sub { $self->connect(sub {}); });
   });
-  $irc->on(error => sub {
+  $irc->on(connect => sub {
     my $irc = shift;
-    $self->log->error("Reconnecting on error: $_[1]");
+    $self->add_server_message({ params => [ 'Connected.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Connected.' });
+  });
+  $irc->on(error => sub {
+    my ($irc,$error) = @_;
+    $self->log->error("Reconnecting on error: $error");
+    $self->add_server_message({ params => [ $error ], raw_line => ':'.$self->_irc->server.' 372 wirc :'.$error });
     $irc->ioloop->timer(2, sub { $self->connect(sub {}); });
   });
 

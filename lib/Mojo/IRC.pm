@@ -351,6 +351,7 @@ sub connect {
       my $buffer = '';
 
       $err and return $self->emit(error => $err);
+      $self->emit('connect');
 
       $stream->timeout($TIMEOUT);
       $stream->on(
