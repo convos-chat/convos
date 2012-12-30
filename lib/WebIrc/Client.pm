@@ -116,11 +116,18 @@ sub view {
     },
     sub {
       $self->stash(conversation => $self->_format_conversation($_[1]));
-      return $self->render(nicks => []) if(!$target);
+      unless($target) {
+        return $self->render( nicks => [], template => 'client/conversation', layout=>undef)
+          if $self->req->is_xhr;
+        return $self->render(nicks => []);
+      }
       $self->redis->smembers("connection:$cid:$target:nicks", $_[0]->begin);
     },
     sub {
-      $self->render(nicks => $_[1]);
+      return $self->render( nicks => $_[1], template => 'client/conversation', layout=>undef)
+        if $self->req->is_xhr;
+      $self->render( nicks => $_[1]);
+
     }
   );
 }

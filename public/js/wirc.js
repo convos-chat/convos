@@ -217,25 +217,31 @@ Structure.registerModule('Wirc.Chat', {
   init: function() {
     var self = this;
 
+    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
+    Wirc.Chat.connection_id = $('#chat-messages').attr('data-cid');
+    Wirc.Chat.nick = $('#chat-messages').attr('data-nick');
+    Wirc.Chat.target = $('#chat-messages').attr('data-target');
+    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));    
+    $.each($('#chat-messages').attr('data-nicks').split(','), function(i, v) {
+      if(v == this.nick) return;
+      self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
+    });
+  
     self.generic();
     self.history_index = 1;
     self.$messages = $('.messages ul');
 
+    if(self.websocket && self.websocket.onopen) self.websocket.onopen = function() {};
     self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
     self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
     self.websocket.onmessage = self.receiveData;
 
-    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
     self.input.submit = function(e) {
       self.sendData({ cid: self.connection_id, target: self.target, cmd: this.$input.val() });
       this.$input.val(''); // TODO: Do not clear the input field until echo is returned?
       return false;
     };
-    $.each($('#chat_messages').attr('data-nicks').split(','), function(i, v) {
-      if(v == this.nick) return;
-      self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
-    });
-    self.pjax = Wirc.Chat.Pjax.init('#channel_list a', '#conversation');
+    self.pjax = Wirc.Chat.Pjax.init('.server a', '#conversation');
     
 
     setTimeout(function() {
@@ -270,6 +276,10 @@ Structure.registerModule('Wirc.Chat.Pjax', {
     $(document).pjax(link_selector,target);
     $(target).on('pjax:success',function(e){
       Wirc.Chat.init($);
+      $('.server li').removeClass('active');
+      var $target=$('#' + Wirc.Chat.makeTargetId(Wirc.Chat.connection_id,Wirc.Chat.target));
+      $target.addClass('active');
+      $target.find('.badget').remove();
     });
     self.setup_activity()
   }
@@ -401,7 +411,6 @@ Structure.registerModule('Wirc.Chat.Input', {
       });
       return false;
     });
-
     return $('body.chat .messages').length ? Wirc.Chat.init() : Wirc.Chat.generic();
   });
 })(jQuery);

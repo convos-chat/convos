@@ -1,13 +1,5 @@
 % title 'Chat'; $target ||= 'server';
 % use WebIrc::Core::Util 'format_time';
-<script type="text/javascript">
-Wirc.Chat.connection_id = '<%= $connection_id %>';
-Wirc.Chat.nick = '<%= $nick %>';
-Wirc.Chat.target = '<%= $target %>';
-% for my $nick (@$nicks) {
-Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') });
-% }
-</script>
 <div class="conversation-list">
   <div class="span2">
     <a href="#" class="show-hide">&nbsp;</a>
@@ -23,7 +15,7 @@ Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') 
       </li>
     </ul>
   % for my $c (@$connections) {
-    <ul class="nav nav-list" id="connection_list_<%= $c->{id} %>">
+    <ul class="server nav nav-list" id="connection_list_<%= $c->{id} %>">
       <li id="target_<%= $c->{id} %>" class="<%= is_active($c) ? ' active' : '' %> nav-header">
         %= link_to url_for('server.view',cid => $c->{id}), begin
           %= $c->{host}
@@ -50,7 +42,7 @@ Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') 
   % }
   </div>
 </div>
-<div class="chat row-fluid">
+<div class="messages row-fluid">
   <div id="conversation" class="span10 offset2">
 		%= include 'client/conversation'
   </div>
