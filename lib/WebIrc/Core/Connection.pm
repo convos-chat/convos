@@ -120,7 +120,7 @@ has _irc => sub {
   $irc->register_default_event_handlers;
   $irc->on(close => sub {
     my $irc = shift;
-    $self->log->debug('Reconnecting on close...');
+    ref $self->log && $self->log->debug('Reconnecting on close...');
     $self->add_server_message({ params => [ 'Disconnected. Attempting reconnect in 30 seconds.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Disconnected. Attempting reconnect in 30 seconds.' });
     $irc->ioloop->timer(30, sub { $self->connect(sub {}); });
   });
@@ -130,7 +130,7 @@ has _irc => sub {
   });
   $irc->on(error => sub {
     my ($irc,$error) = @_;
-    $self->log->error("Reconnecting on error: $error");
+    ref $self->log && $self->log->error("Reconnecting on error: $error");
     $self->add_server_message({ params => [ $error ], raw_line => ':'.$self->_irc->server.' 372 wirc :'.$error });
     $irc->ioloop->timer(2, sub { $self->connect(sub {}); });
   });
@@ -181,10 +181,11 @@ sub connect {
       $self->_irc->connect(sub { $self->$cb; });
       $self->{sub} = $redis->subscribe("connection:$id:to_server");
       $self->{sub}->on(message => sub {
-        my($sub, $message) = @_;
-        $message = Unicode::UTF8::encode_utf8($message, sub { $_[0] });
-        $self->_irc->write($message);
-        $message = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $message);
+        my($sub, $raw_message) = @_;
+        $raw_message = Unicode::UTF8::encode_utf8($raw_message, sub { $_[0] });
+        $self->_irc->write($raw_message);
+        my $message = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $raw_message);
+        return $self->log->debug("Unable to parse $raw_message") unless ref $message;
         if($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
         }

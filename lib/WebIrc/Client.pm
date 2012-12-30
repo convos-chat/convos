@@ -175,6 +175,10 @@ sub _format_conversation {
 
   for(my $i = 0; $i < @$conversation; $i = $i + 2) {
     my $message = unpack_irc $conversation->[$i], $conversation->[$i + 1];
+    unless(ref $message) {
+      $self->log->debug('Unable to parse raw message: '. $conversation->[$i].' - '.$conversation->[$i+1]);
+      next;
+    }
     @{$message}{qw/nick user host/} = parse_user($message->{prefix});
 
     $message->{message} = html_escape($message->{params}[1] || $message->{params}[0]); # 1 = normal, 0 = error
