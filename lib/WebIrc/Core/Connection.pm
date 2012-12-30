@@ -120,7 +120,7 @@ has _irc => sub {
   $irc->register_default_event_handlers;
   $irc->on(close => sub {
     my $irc = shift;
-    ref $self->log && $self->log->debug('Reconnecting on close...');
+    ref $self->log && $self->log->debug('['.$self->id.'] Reconnecting to '.$self->_irc->server.' on close...');
     $self->add_server_message({ params => [ 'Disconnected. Attempting reconnect in 30 seconds.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Disconnected. Attempting reconnect in 30 seconds.' });
     $irc->ioloop->timer(30, sub { $self->connect(sub {}); });
   });
@@ -130,7 +130,7 @@ has _irc => sub {
   });
   $irc->on(error => sub {
     my ($irc,$error) = @_;
-    ref $self->log && $self->log->error("Reconnecting on error: $error");
+    ref $self->log && $self->log->debug('['.$self->id."] Reconnecting on error: $error");
     $self->add_server_message({ params => [ $error ], raw_line => ':'.$self->_irc->server.' 372 wirc :'.$error });
     $irc->ioloop->timer(2, sub { $self->connect(sub {}); });
   });
