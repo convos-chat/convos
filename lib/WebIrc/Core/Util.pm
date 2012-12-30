@@ -14,6 +14,7 @@ L</import> can export any of the L</FUNCTIONS>.
 
 use strict;
 use warnings;
+no warnings "utf8";
 use Mojo::Log;
 use Parse::IRC ();
 use Unicode::UTF8;

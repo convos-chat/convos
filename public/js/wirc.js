@@ -240,7 +240,7 @@ Structure.registerModule('Wirc.Chat', {
 
     setTimeout(function() {
       $('html, body').scrollTop($('body').height());
-      $window.on('scroll', self.onScroll);
+      $(window).on('scroll', self.onScroll);
     }, 400);
 
     $('html, body').scrollTop($('body').height());
