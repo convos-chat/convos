@@ -1,4 +1,4 @@
-    % if(@$nicks) {
+    % if(@$connections) {
       <ul class="unstyled" id="chat-messages"
         data-cid="<%= $connection_id %>"
         data-nick="<%= $nick %>"
@@ -17,4 +17,4 @@
       % }
     % }
       </li>
-%== qq{</ul>} if @$nicks
+%== qq{</ul>} if @$connections

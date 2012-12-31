@@ -86,23 +86,25 @@ Structure.registerModule('Wirc.Chat', {
       if(data.message) $messages.append(tmpl('server_status_template', data));
       this.status = data.status;
     }
-    else if(data.new_nick && data.cid === this.connection_id) {
-      $messages.append(tmpl('nick_change_template', data));
-    }
-    else if(data.joined === this.target) {
-      $messages.append( $(tmpl('nick_joined_template', data)) );
-    }
-    else if(data.parted === this.target && data.nick !== this.nick) {
-      $messages.append( $(tmpl('nick_parted_template', data)) );
+    else if(data.cid === this.connection_id) {
+      if( data.new_nick ) {
+        $messages.append(tmpl('nick_change_template', data));
+      }
+      else if(data.joined === this.target) {
+        $messages.append( $(tmpl('nick_joined_template', data)) );
+      }
+      else if(data.parted === this.target && data.nick !== this.nick) {
+        $messages.append( $(tmpl('nick_parted_template', data)) );
+      }
+      else if(data.template && data.target == this.target || data.nick == this.target) {
+        $messages.append(tmpl(data.template, data));
+      }
     }
     else if(data.whois) {
       $messages.append( $(tmpl('whois_template', data)) );
     }
     else if(data.whois_channels) {
       $messages.append( $(tmpl('whois_channels_template', data)) );
-    }
-    else if(data.template && data.target == this.target || data.nick == this.target) {
-      $messages.append(tmpl(data.template, data));
     }
     else if(data.message) {
       this.displayUnread(data);
@@ -194,6 +196,23 @@ Structure.registerModule('Wirc.Chat', {
       }
     });
   },
+  changeChannel: function() {
+    var self = this;
+    self.$messages = $('.messages ul');
+    Wirc.Chat.connection_id = $('#chat-messages').attr('data-cid');
+    Wirc.Chat.nick = $('#chat-messages').attr('data-nick');
+    Wirc.Chat.target = $('#chat-messages').attr('data-target');
+    $.each($('#chat-messages').attr('data-nicks').split(','), function(i, v) {
+      if(v == this.nick) return;
+      self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
+    });
+    $('.server li').removeClass('active');
+    var $target=$('#' + Wirc.Chat.makeTargetId(Wirc.Chat.connection_id,Wirc.Chat.target));
+    $target.addClass('active');
+    $target.find('.badget').remove();
+    $('html, body').scrollTop($('body').height());
+    self.input.focus();
+  },
   generic: function() {
     var self = this;
     var $conversation_list = $('.conversation-list');
@@ -218,20 +237,10 @@ Structure.registerModule('Wirc.Chat', {
     var self = this;
 
     self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
-    Wirc.Chat.connection_id = $('#chat-messages').attr('data-cid');
-    Wirc.Chat.nick = $('#chat-messages').attr('data-nick');
-    Wirc.Chat.target = $('#chat-messages').attr('data-target');
-    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));    
-    $.each($('#chat-messages').attr('data-nicks').split(','), function(i, v) {
-      if(v == this.nick) return;
-      self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
-    });
-  
     self.generic();
+    self.changeChannel();
     self.history_index = 1;
     self.$messages = $('.messages ul');
-
-    if(self.websocket && self.websocket.onopen) self.websocket.onopen = function() {};
     self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
     self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
     self.websocket.onmessage = self.receiveData;
@@ -249,7 +258,6 @@ Structure.registerModule('Wirc.Chat', {
       $(window).on('scroll', self.onScroll);
     }, 400);
 
-    $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
     if(window.console) console.log('[Wirc.Chat.init] ', self);
 
@@ -275,11 +283,7 @@ Structure.registerModule('Wirc.Chat.Pjax', {
     var self = this;
     $(document).pjax(link_selector,target);
     $(target).on('pjax:success',function(e){
-      Wirc.Chat.init($);
-      $('.server li').removeClass('active');
-      var $target=$('#' + Wirc.Chat.makeTargetId(Wirc.Chat.connection_id,Wirc.Chat.target));
-      $target.addClass('active');
-      $target.find('.badget').remove();
+      Wirc.Chat.changeChannel();
     });
     self.setup_activity()
   }
@@ -387,7 +391,6 @@ Structure.registerModule('Wirc.Chat.Input', {
 
     $input.keydown(self.keydownCallback());
     $input.parents('form').submit(function(e) { return self.submit(e); });
-    $input.focus();
 
     $(window).blur(function() { focus = false; });
     $(window).click(function() { if(!focus) $input.focus(); focus = true; });
