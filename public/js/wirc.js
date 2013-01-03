@@ -82,7 +82,8 @@ Structure.registerModule('Wirc.Chat', {
     var $messages = this.$messages;
 
     if(data.status) {
-      if(data.status == this.status) return; // do not want duplicate status messages
+     // if(data.status == this.status) return; // do not want duplicate status messages
+     console.log(data);
       if(data.message) $messages.append(tmpl('server_status_template', data));
       this.status = data.status;
     }

@@ -7,17 +7,17 @@ WebIrc::Client - Mojolicious controller for IRC chat
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Mojo::JSON;
 use Unicode::UTF8;
 no warnings "utf8";
 use Mojo::Util 'html_escape';
+use Mojo::JSON;
 use IRC::Utils qw/parse_user/;
 use List::MoreUtils qw/ zip /;
 use WebIrc::Core::Util qw/ unpack_irc /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $N_MESSAGES = 50;
-my $JSON = Mojo::JSON->new;
+my $JSON=Mojo::JSON->new;
 
 =head1 METHODS
 
@@ -60,6 +60,7 @@ sub view {
 
   $self->session('current_active' => $self->url_for);
 
+  
   Mojo::IOLoop->delay(
     sub {
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
@@ -223,7 +224,7 @@ sub socket {
       }
 
       return $self->_handle_socket_data($cid => $data) if $allowed{$cid};
-      $self->send({ text => $JSON->encode({ cid => $cid, status => 403 }) });
+      $self->send_json({ cid => $cid, status =>  200 });
       $self->finish;
     });
   });
@@ -231,29 +232,10 @@ sub socket {
 
 sub _handle_socket_data {
   my($self, $cid, $data) = @_;
-  my $cmd;
-
-  if($data->{cmd}) {
-    if($data->{cmd} =~ s!^/(\w+)\s+(\S*)!!) {
-      my($one, $two) = ($1, $2);
-      given($one) {
-        when('j') {
-          $data->{cmd} = "JOIN $two";
-        }
-        when('me') { $data->{cmd} = "PRIVMSG $data->{target} :\x{1}ACTION $two$data->{cmd}\x{1}" }
-        when('msg') { $data->{cmd} = "PRIVMSG $two :$data->{cmd}" }
-        default { $data->{cmd} = join ' ', uc($one), $two }
-      }
-    }
-    elsif($data->{cmd} =~ m!/part\s*!i) {
-      $data->{cmd} = "PART $data->{target}";
-    }
-    else {
-      $data->{cmd} = "PRIVMSG $data->{target} :$data->{cmd}";
-    }
-
+  my $cmd = $self->parse_command($data);
+  if($cmd) {
     $self->logf(debug => '[connection:%s:to_server] < %s', $cid, $data->{cmd});
-    $self->redis->publish("connection:$cid:to_server", $data->{cmd});
+    $self->redis->publish("connection:$cid:to_server", $cmd);
   }
 }
 

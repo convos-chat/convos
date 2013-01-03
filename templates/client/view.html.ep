@@ -135,7 +135,7 @@ Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') 
 <script type="text/html" id="server_status_template">
   <li class="muted">
     <span class="prefix"><%= app->config->{name} %>:</span>
-    <span><%%= status == 200 ? 'Connected' : 'Error' %></span>
+    <span><%%= status == 200 ? 'Notice' : 'Error' %> - <%%=message %></span>
     <span class="timestamp"><%%= new Date().sprintf('%H:%M:%S') %></span>
   </li>
 </script>

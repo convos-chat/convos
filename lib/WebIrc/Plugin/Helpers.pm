@@ -8,6 +8,9 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util ();
+use Mojo::JSON;
+
+my $JSON = Mojo::JSON->new;
 
 =head1 HELPERS
 
@@ -43,6 +46,45 @@ sub form_block {
   );
 }
 
+=head2 parse_command $data
+
+Takes a websocket command, parses it into a IRC resposne
+
+=cut
+
+my %commands = (
+  j    => 'JOIN',
+  w    => 'WHOIS',
+  me   => sub { my $data=pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
+  msg  => sub { my $data=pop; "PRIVMSG $data->{target} :$data->{cmd}" },
+  part => sub { "PART ".pop->{target} },
+  help => sub { my ($self,$data)=@_;
+    $self->send_json({cid=>$data->{cid},status=>200, message=>"Available Commands:\nj\tw\me\tmsg\tpart\tthelp"});
+    return;
+  }
+  );
+
+sub parse_command {
+  my ($self,$data)=@_;
+  if($data->{cmd}) {
+    if($data->{cmd} =~ s!^/(\w+)\b!!) {
+      my($cmd) = $1;
+      if(my $irc_cmd=$commands{$cmd}) {
+        return $irc_cmd->($self, $data) if(ref $irc_cmd);
+        return $irc_cmd .' '.$data->{cmd};
+      }
+      else {
+        warn "Sending json";
+        $self->send_json({ cid=>$data->{cid}, status=> '401', message=>'Unknown command' });
+      }
+    }
+    else {
+      return "PRIVMSG $data->{target} :$data->{cmd}";
+    }
+  }
+  return;
+}
+
 =head2 logf
 
 See L<WebIrc::Core::Util/logf>.
@@ -69,8 +111,10 @@ sub register {
 
     $app->helper(form_block => \&form_block);
     $app->helper(logf => \&WebIrc::Core::Util::logf);
+    $app->helper(parse_command => \&parse_command);
     $app->helper(redis => sub { shift->app->redis(@_) });
     $app->helper( as_id => sub { my ($self,$val)=@_; $val =~ s/\W+//g; $val } );
+    $app->helper( send_json => sub {my $self=shift; $self->send({text=>$JSON->encode(shift)}); $self->log->debug('JSON Error:'.$JSON->error) if $JSON->error; });
     $app->helper( is_active => sub {
       my ($self,$c,$target)=@_;
       if($c->{id}==$self->param('cid')) {
