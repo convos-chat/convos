@@ -268,7 +268,6 @@ sub _handle_socket_data {
 sub _subscribe_to_server_messages {
   my($self, $cid) = @_;
   my $sub = $self->redis->subscribe("connection:$cid:from_server");
-
   Scalar::Util::weaken($self);
   $sub->on(message => sub {
     my ($redis, $octets) = @_;
@@ -278,6 +277,7 @@ sub _subscribe_to_server_messages {
   });
 
   $self->stash("sub_$cid" => $sub);
+  $self->on(finish => sub { $self->stash( "sub_$cid")->disconnect});
 }
 
 =head1 COPYRIGHT
