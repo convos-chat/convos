@@ -211,7 +211,7 @@ Structure.registerModule('Wirc.Chat', {
     $target.addClass('active');
     $target.find('.badget').remove();
     $('html, body').scrollTop($('body').height());
-    self.input.focus();
+//    self.input.focus();
   },
   generic: function() {
     var self = this;
@@ -269,9 +269,16 @@ Structure.registerModule('Wirc.Chat.Pjax', {
   setup_activity: function() {
     $(document).on('pjax:send', function() {
       $('#loading').show()
-    })
+      Wirc.Chat.input.$input.css('background', 'url(/image/loading.gif) no-repeat');
+      self.placeholder=Wirc.Chat.input.$input.attr('placeholder');
+      Wirc.Chat.input.$input.attr('placeholder','');
+      Wirc.Chat.input.$input.prop('disabled',true);
+    });
     $(document).on('pjax:complete', function() {
-      $('#loading').hide()
+      Wirc.Chat.input.$input.css('background', '');
+      Wirc.Chat.input.$input.attr('placeholder',self.placeholder);
+      Wirc.Chat.input.$input.prop('disabled',false);
+      Wirc.Chat.input.$input.focus();
     });
     $(document).on('pjax:timeout', function(event) {
       // Prevent default timeout redirection behavior
