@@ -211,7 +211,6 @@ Structure.registerModule('Wirc.Chat', {
     $target.addClass('active');
     $target.find('.badget').remove();
     $('html, body').scrollTop($('body').height());
-//    self.input.focus();
   },
   generic: function() {
     var self = this;
