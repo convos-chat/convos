@@ -183,7 +183,7 @@ Structure.registerModule('Wirc.Chat', {
     self.$messages.before(self.$history_indicator);
     if(window.console) console.log('[Wirc.Chat.onScroll] ' + url);
     $.get(url, function(data) {
-      if($(data).find('li').length) {
+      if($(data).find('*').length) {
         self.$messages.prepend(data);
         self.$history_indicator.remove();
         self.$history_indicator = false;
