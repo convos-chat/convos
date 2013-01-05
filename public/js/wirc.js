@@ -106,7 +106,8 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.whois_channels) {
       $messages.append( $(tmpl('whois_channels_template', data)) );
     }
-    else if(data.message) {
+    
+    if(data.message) {
       this.displayUnread(data);
     }
 
