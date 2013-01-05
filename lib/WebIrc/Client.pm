@@ -277,7 +277,7 @@ sub _subscribe_to_server_messages {
   });
 
   $self->stash("sub_$cid" => $sub);
-  $self->on(finish => sub { $self->stash( "sub_$cid")->disconnect});
+  $self->on(finish => sub { $self->stash( "sub_$cid" => undef) });
 }
 
 =head1 COPYRIGHT
