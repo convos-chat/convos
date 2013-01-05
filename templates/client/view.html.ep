@@ -1,5 +1,4 @@
 % title 'Chat'; $target ||= 'server';
-% use WebIrc::Core::Util 'format_time';
 <div class="conversation-list">
   <div class="span2">
     <a href="#" class="show-hide">&nbsp;</a>

@@ -69,6 +69,7 @@ sub register {
 
     $app->helper(form_block => \&form_block);
     $app->helper(logf => \&WebIrc::Core::Util::logf);
+    $app->helper(format_time => sub { my $self=shift; WebIrc::Core::Util::format_time(@_); });
     $app->helper(redis => sub { shift->app->redis(@_) });
     $app->helper( as_id => sub { my ($self,$val)=@_; $val =~ s/\W+//g; $val } );
 		$app->helper( pjax => sub {  });
