@@ -5232,6 +5232,9 @@ body.chat {
   color: #777;
   float: right;
 }
+.chat .messages span {
+  white-space: pre-wrap;
+}
 /* settings */
 .connection-tab-container .nav {
   margin-right: -1px;
