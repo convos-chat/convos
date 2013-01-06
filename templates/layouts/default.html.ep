@@ -4,6 +4,7 @@
     %= stylesheet '/css/wirc.css';
     %= javascript '/js/jquery.js';
     %= javascript '/js/jquery.pjax.js';
+    %= javascript '/js/jquery.hotkeys.js';
     %= javascript '/js/jquery.fastclick.js';
     %= javascript '/js/structure.min.js';
     %= javascript '/js/ws-reconnecting.js';
