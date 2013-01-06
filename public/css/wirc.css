@@ -5155,7 +5155,8 @@ body.chat {
   position: fixed;
   left: 0;
   top: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 .chat .conversation-list li.nav-header {
   border-top: 1px solid #ddd;
