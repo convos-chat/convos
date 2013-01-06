@@ -111,7 +111,7 @@ sub register {
 
     $app->helper(form_block => \&form_block);
     $app->helper(logf => \&WebIrc::Core::Util::logf);
-    $app->helper(parse_command => \&parse_command);
+    $app->helper(format_time => sub { my $self=shift; WebIrc::Core::Util::format_time(@_); });
     $app->helper(redis => sub { shift->app->redis(@_) });
     $app->helper( as_id => sub { my ($self,$val)=@_; $val =~ s/\W+//g; $val } );
     $app->helper( send_json => sub {my $self=shift; $self->send({text=>$JSON->encode(shift)}); $self->log->debug('JSON Error:'.$JSON->error) if $JSON->error; });

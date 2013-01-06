@@ -5155,7 +5155,8 @@ body.chat {
   position: fixed;
   left: 0;
   top: 0;
-  text-overflow: elipsis;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 .chat .conversation-list li.nav-header {
   border-top: 1px solid #ddd;
@@ -5210,6 +5211,7 @@ body.chat {
   font-family: Hume Mono, monospace;
   -webkit-font-smoothing: antialiased;
   padding: 0 4px;
+  line-height: 1.6;
   clear: right;
 }
 .chat .messages li.odd {
@@ -5230,6 +5232,9 @@ body.chat {
 .chat .messages .timestamp {
   color: #777;
   float: right;
+}
+.chat .messages span {
+  white-space: pre-wrap;
 }
 /* settings */
 .connection-tab-container .nav {

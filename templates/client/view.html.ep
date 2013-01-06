@@ -1,14 +1,4 @@
 % title 'Chat'; $target ||= 'server';
-% my $as_history = $self->req->url =~ /history/ ? 1 : 0; # TODO: This is an ugly hack
-% use WebIrc::Core::Util 'format_time';
-<script type="text/javascript">
-Wirc.Chat.connection_id = '<%= $connection_id %>';
-Wirc.Chat.nick = '<%= $nick %>';
-Wirc.Chat.target = '<%= $target %>';
-% for my $nick (@$nicks) {
-Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') });
-% }
-</script>
 <div class="conversation-list">
   <div class="span2">
     <a href="#" class="show-hide">&nbsp;</a>
@@ -24,7 +14,7 @@ Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') 
       </li>
     </ul>
   % for my $c (@$connections) {
-    <ul class="nav nav-list" id="connection_list_<%= $c->{id} %>">
+    <ul class="server nav nav-list" id="connection_list_<%= $c->{id} %>">
       <li id="target_<%= $c->{id} %>" class="<%= is_active($c) ? ' active' : '' %> nav-header">
         %= link_to url_for('server.view',cid => $c->{id}), begin
           %= $c->{host}
@@ -51,23 +41,9 @@ Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') 
   % }
   </div>
 </div>
-
 <div class="messages row-fluid">
-  <div class="span10 offset2">
-    <ul class="unstyled">
-    % my $n = 0;
-    % for my $message (@$conversation) {
-      <li class="<%= $n++ % 2 ? 'odd' : 'even' %>">
-        <span class="timestamp" title="<%= format_time $message->{timestamp}, '%d %n %H:%M:%S' %>"><%= format_time $message->{timestamp}, '%H:%M:%S' %></span>
-      % if($message->{special} eq 'me') {
-        <span class="action">* <%= $message->{nick} || $nick %> <%== $message->{message} %></span>
-      % } else {
-        <span class="prefix"><%= $message->{nick} %>:</span>
-        <span><%== $message->{message} %></span>
-      % }
-    % }
-      </li>
-    </table>
+  <div id="conversation" class="span10 offset2">
+		%= include 'client/conversation'
   </div>
 </div>
 
@@ -83,7 +59,6 @@ Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') 
   </div>
 </div>
 
-% unless($as_history) {
 <script type="text/html" id="message_template">
   <li class="<%%= class_name %>">
     <span class="prefix"><%%= nick %>:</span>
@@ -155,4 +130,3 @@ Wirc.Chat.Input.autoCompleteNicks({ new_nick: "<%= $nick %>".replace(/^\@/, '') 
     </a>
   </li>
 </script>
-% }

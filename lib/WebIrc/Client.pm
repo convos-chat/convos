@@ -117,11 +117,18 @@ sub view {
     },
     sub {
       $self->stash(conversation => $self->_format_conversation($_[1]));
-      return $self->render(nicks => []) if(!$target);
+      unless($target) {
+        return $self->render( nicks => [], template => 'client/conversation', layout=>undef)
+          if $self->req->is_xhr;
+        return $self->render(nicks => []);
+      }
       $self->redis->smembers("connection:$cid:$target:nicks", $_[0]->begin);
     },
     sub {
-      $self->render(nicks => $_[1]);
+      return $self->render( nicks => $_[1], template => 'client/conversation', layout=>undef)
+        if $self->req->is_xhr;
+      $self->render( nicks => $_[1]);
+
     }
   );
 }
@@ -157,13 +164,14 @@ sub history {
     },
     sub {
       $self->render(
+        layout => undef,
         connection_id => $cid,
         connections => [],
         nicks => [],
         conversation => $self->_format_conversation($_[1]),
         nick => $self->session('nick'),
         target => $target,
-        template => 'client/view',
+        template => 'client/conversation',
       );
     }
   );
@@ -242,7 +250,6 @@ sub _handle_socket_data {
 sub _subscribe_to_server_messages {
   my($self, $cid) = @_;
   my $sub = $self->redis->subscribe("connection:$cid:from_server");
-
   Scalar::Util::weaken($self);
   $sub->on(message => sub {
     my ($redis, $octets) = @_;
@@ -252,6 +259,7 @@ sub _subscribe_to_server_messages {
   });
 
   $self->stash("sub_$cid" => $sub);
+  $self->on(finish => sub { $self->stash( "sub_$cid" => undef) });
 }
 
 =head1 COPYRIGHT

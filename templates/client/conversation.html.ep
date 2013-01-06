@@ -1,0 +1,20 @@
+    % if(@$connections) {
+      <ul class="unstyled" id="chat-messages"
+        data-cid="<%= $connection_id %>"
+        data-nick="<%= $nick %>"
+        data-nicks="<%= join ',', @$nicks %>"
+        data-target="<%= $target %>">
+    % }
+    % my $n = 0;
+    % for my $message (@$conversation) {
+      <li class="<%= $n++ % 2 ? 'odd' : 'even' %>">
+        <span class="timestamp" title="<%= format_time($message->{timestamp}, '%d %n %H:%M:%S')%>"><%= format_time($message->{timestamp}, '%H:%M:%S') %></span>
+      % if($message->{special} eq 'me') {
+        <span class="action">* <%= $message->{nick} %> <%== $message->{message} %></span>
+      % } else {
+        <span class="prefix"><%= $message->{nick} %>:</span>
+        <span><%== $message->{message} %></span>
+      % }
+    % }
+      </li>
+%== qq{</ul>} if @$connections

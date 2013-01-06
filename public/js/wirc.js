@@ -7,54 +7,9 @@ Structure.registerModule('Wirc', {
   }
 });
 
-Structure.registerModule('Wirc.Notifier', {
-  window_has_focus: true,
-  original_title: document.title,
-  popup: function(icon, title, msg) {
-    if(this.window_has_focus) return;
-    if(this.notifier) this.notifier.createNotification(icon || '', title, msg || '').show();
-  },
-  title: function(t) { // change title and make the tab flash (at least in chrome)
-    if(this._t) clearTimeout(this._t);
-    if(this.window_has_focus) return;
-    if(t) this._title = t;
-    document.title = document.title == this._title || document.title == this.original_title ? this._title + ' - ' + this.original_title : this._title;
-    this._t = setTimeout(this.title, 2000);
-  },
-  requestPermission: function() {
-    webkitNotifications.requestPermission(function() {
-      if(!webkitNotifications.checkPermission()) Wirc.Notifier.notifier = notifier;
-    });
-  },
-  init: function() {
-    var self = this;
-
-    if(!window.webkitNotifications) {
-      // cannot show notifications
-    }
-    else if(webkitNotifications.checkPermission()) {
-      // cannot run requestPermission() without a user action, such as mouse click or key down
-      $(document).one('keydown', function() { Wirc.Notifier.requestPermission(); });
-    }
-    else {
-      this.notifier = webkitNotifications;
-    }
-
-    $(window).blur(function() {
-      self.window_has_focus = false;
-    });
-    $(window).focus(function() {
-      self.window_has_focus = true;
-      this._t = setTimeout(function() { document.title = self.original_title; }, 4000);
-    });
-
-    return this;
-  }
-}); // End Wirc.Notify
-
 Structure.registerModule('Wirc.Chat', {
-  makeTargetId: function() {
-    return 'target_' + $.map(arguments, function(v, i) { return v.toString().replace(/\W/g, ''); }).join('_');
+  makeTargetId: function(cid,target) {
+    return 'target_' + ( target ? cid+"_"+target.replace(/\W/g, '') : cid);
   },
   modifyChannelList: function(data) { // TODO: return channel names
     var $channel = $('#' + this.makeTargetId(data.cid, data.joined || data.parted));
@@ -72,7 +27,7 @@ Structure.registerModule('Wirc.Chat', {
       $(tmpl('new_conversation_template', data)).appendTo('#connection_list_' + data.cid);
   },
   displayUnread: function(data) {
-    var id = data.target ? this.makeTargetId(data.cid, data.target) : this.makeTargetId(data.cid);
+    var id =  this.makeTargetId(data.cid, data.target);
     var $badge = $('#' + id + ' .badge');
     $badge.text(parseInt($badge.text(), 10) + 1 ).show();
     if(data.highlight) $badge.addClass('badge-important');
@@ -87,14 +42,19 @@ Structure.registerModule('Wirc.Chat', {
       if(data.message) $messages.append(tmpl('server_status_template', data));
       this.status = data.status;
     }
-    else if(data.new_nick && data.cid === this.connection_id) {
-      $messages.append(tmpl('nick_change_template', data));
-    }
-    else if(data.joined === this.target) {
-      $messages.append( $(tmpl('nick_joined_template', data)) );
-    }
-    else if(data.parted === this.target && data.nick !== this.nick) {
-      $messages.append( $(tmpl('nick_parted_template', data)) );
+    else if(data.cid === this.connection_id) {
+      if( data.new_nick ) {
+        $messages.append(tmpl('nick_change_template', data));
+      }
+      else if(data.joined === this.target) {
+        $messages.append( $(tmpl('nick_joined_template', data)) );
+      }
+      else if(data.parted === this.target && data.nick !== this.nick) {
+        $messages.append( $(tmpl('nick_parted_template', data)) );
+      }
+      else if(data.template && data.target == this.target || data.nick == this.target) {
+        $messages.append(tmpl(data.template, data));
+      }
     }
     else if(data.whois) {
       $messages.append( $(tmpl('whois_template', data)) );
@@ -102,10 +62,8 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.whois_channels) {
       $messages.append( $(tmpl('whois_channels_template', data)) );
     }
-    else if(data.template && data.target == this.target || data.nick == this.target) {
-      $messages.append(tmpl(data.template, data));
-    }
-    else if(data.message) {
+    
+    if(data.message) {
       this.displayUnread(data);
     }
 
@@ -182,9 +140,8 @@ Structure.registerModule('Wirc.Chat', {
     self.$messages.before(self.$history_indicator);
     if(window.console) console.log('[Wirc.Chat.onScroll] ' + url);
     $.get(url, function(data) {
-      var $li = $(data).find('.messages li');
-      if($li.length) {
-        self.$messages.prepend($li);
+      if($(data).find('*').length) {
+        self.$messages.prepend(data);
         self.$history_indicator.remove();
         self.$history_indicator = false;
         $(window).scrollTop($('body').height() - height_before_load);
@@ -195,6 +152,22 @@ Structure.registerModule('Wirc.Chat', {
         setTimeout(function() { self.$history_indicator.fadeOut('slow'); }, 2000);
       }
     });
+  },
+  changeChannel: function() {
+    var self = this;
+    self.$messages = $('.messages ul');
+    Wirc.Chat.connection_id = $('#chat-messages').attr('data-cid');
+    Wirc.Chat.nick = $('#chat-messages').attr('data-nick');
+    Wirc.Chat.target = $('#chat-messages').attr('data-target');
+    $.each($('#chat-messages').attr('data-nicks').split(','), function(i, v) {
+      if(v == this.nick) return;
+      self.input.autoCompleteNicks({ new_nick: v.replace(/^\@/, '') });
+    });
+    $('.server li').removeClass('active');
+    var $target=$('#' + Wirc.Chat.makeTargetId(Wirc.Chat.connection_id,Wirc.Chat.target));
+    $target.addClass('active');
+    $target.find('.badge').remove();
+    $('html, body').scrollTop($('body').height());
   },
   generic: function() {
     var self = this;
@@ -219,33 +192,37 @@ Structure.registerModule('Wirc.Chat', {
   init: function() {
     var self = this;
 
+    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
     self.generic();
+    self.changeChannel();
     self.history_index = 1;
     self.$messages = $('.messages ul');
-
     self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
     self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
     self.websocket.onmessage = self.receiveData;
 
-    self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
     self.input.submit = function(e) {
       self.sendData({ cid: self.connection_id, target: self.target, cmd: this.$input.val() });
       this.$input.val(''); // TODO: Do not clear the input field until echo is returned?
       return false;
     };
+    self.pjax = Wirc.Chat.Pjax.init('.server a', '#conversation');
+    self.shortcuts = Wirc.Chat.Shortcuts.init();
+    
 
     setTimeout(function() {
       $('html, body').scrollTop($('body').height());
       $(window).on('scroll', self.onScroll);
     }, 400);
 
-    $('html, body').scrollTop($('body').height());
     $(window).on('scroll', Wirc.Chat.onScroll);
     if(window.console) console.log('[Wirc.Chat.init] ', self);
 
     return self;
   }
 }); /* End Structure.registerModule('Wirc.Chat') */
+
+
 
 Structure.registerModule('Wirc.Chat.Input', {
   autocomplete: [
@@ -339,7 +316,6 @@ Structure.registerModule('Wirc.Chat.Input', {
   init: function(input_selector) {
     var self = this;
     var $input = $(input_selector);
-    var focus = true;
 
     self.history = [];
     self.history_index = 0;
@@ -347,14 +323,125 @@ Structure.registerModule('Wirc.Chat.Input', {
 
     $input.keydown(self.keydownCallback());
     $input.parents('form').submit(function(e) { return self.submit(e); });
-    $input.focus();
-
-    $(window).blur(function() { focus = false; });
-    $(window).click(function() { if(!focus) $input.focus(); focus = true; });
+    self.focus();
+    $(window).focus(function() { console.log('OOH'); self.focus(); });
 
     return self;
   }
 }); // End Wirc.Chat.Input
+
+Structure.registerModule('Wirc.Notifier', {
+  window_has_focus: true,
+  original_title: document.title,
+  popup: function(icon, title, msg) {
+    if(this.window_has_focus) return;
+    if(this.notifier) this.notifier.createNotification(icon || '', title, msg || '').show();
+  },
+  title: function(t) { // change title and make the tab flash (at least in chrome)
+    if(this._t) clearTimeout(this._t);
+    if(this.window_has_focus) return;
+    if(t) this._title = t;
+    document.title = document.title == this._title || document.title == this.original_title ? this._title + ' - ' + this.original_title : this._title;
+    this._t = setTimeout(this.title, 2000);
+  },
+  requestPermission: function() {
+    webkitNotifications.requestPermission(function() {
+      if(!webkitNotifications.checkPermission()) Wirc.Notifier.notifier = notifier;
+    });
+  },
+  init: function() {
+    var self = this;
+
+    if(!window.webkitNotifications) {
+      // cannot show notifications
+    }
+    else if(webkitNotifications.checkPermission()) {
+      // cannot run requestPermission() without a user action, such as mouse click or key down
+      $(document).one('keydown', function() { Wirc.Notifier.requestPermission(); });
+    }
+    else {
+      this.notifier = webkitNotifications;
+    }
+
+    $(window).blur(function() {
+      self.window_has_focus = false;
+    });
+    $(window).focus(function() {
+      self.window_has_focus = true;
+      this._t = setTimeout(function() { document.title = self.original_title; }, 4000);
+    });
+
+    return this;
+  }
+}); // End Wirc.Notify
+
+
+Structure.registerModule('Wirc.Chat.Pjax', {
+  setup_activity: function() {
+    $(document).on('pjax:send', function() {
+      $('#loading').show()
+      Wirc.Chat.input.$input.css('background', 'url(/image/loading.gif) no-repeat');
+      self.placeholder=Wirc.Chat.input.$input.attr('placeholder');
+      Wirc.Chat.input.$input.attr('placeholder','');
+      Wirc.Chat.input.$input.prop('disabled',true);
+    });
+    $(document).on('pjax:complete', function() {
+      Wirc.Chat.input.$input.css('background', '');
+      Wirc.Chat.input.$input.attr('placeholder',self.placeholder);
+      Wirc.Chat.input.$input.prop('disabled',false);
+      Wirc.Chat.input.$input.focus();
+    });
+    $(document).on('pjax:timeout', function(event) {
+      // Prevent default timeout redirection behavior
+      event.preventDefault()
+    });
+    
+  },
+  init: function(link_selector,target) {
+    var self = this;
+    $(document).pjax(link_selector,target);
+    $(target).on('pjax:success',function(e){
+      Wirc.Chat.changeChannel();
+    });
+    self.setup_activity()
+  }
+  
+}); /* End Structure.registerModule('Wirc.Pjax') */
+
+Structure.registerModule('Wirc.Chat.Shortcuts', {
+
+  init: function() {
+    var self=this;
+    $(document).bind('keyup','shift+return',function() {
+      Wirc.Chat.input.focus();
+    })
+    $('input').bind('keyup','ctrl+up',function() {
+      $('.conversation-list li.active').prev().find('a').click();
+    });
+    $('input').bind('keyup','ctrl+down',function() {
+      $('.conversation-list li.active').next().find('a').click();
+    });
+    $('input').bind('keyup','ctrl+shift+up',function() {
+      $('.conversation-list li.active').prevAll().each(function(i) {
+        if($(this).find('.badge').length) {
+          $(this).find('a').click();
+          return false;
+        }
+      });
+    });
+    $('input').bind('keyup','ctrl+shift+down',function() {
+      $('.conversation-list li.active').nextAll().each(function(i) {
+        if($(this).find('.badge').length) {
+          $(this).find('a').click();
+          return false;
+        }
+      });
+    });
+
+  }
+});// End Wirc.Chat.Shortcuts
+
+
 
 (function($) {
   $(document).ready(function() {
@@ -371,7 +458,6 @@ Structure.registerModule('Wirc.Chat.Input', {
       });
       return false;
     });
-
     return $('body.chat .messages').length ? Wirc.Chat.init() : Wirc.Chat.generic();
   });
 })(jQuery);
