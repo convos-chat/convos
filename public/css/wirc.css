@@ -5211,6 +5211,7 @@ body.chat {
   font-family: Hume Mono, monospace;
   -webkit-font-smoothing: antialiased;
   padding: 0 4px;
+  line-height: 1.6;
   clear: right;
 }
 .chat .messages li.odd {
