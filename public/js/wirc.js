@@ -53,8 +53,8 @@ Structure.registerModule('Wirc.Notifier', {
 }); // End Wirc.Notify
 
 Structure.registerModule('Wirc.Chat', {
-  makeTargetId: function() {
-    return 'target_' + $.map(arguments, function(v, i) { return v.toString().replace(/\W/g, ''); }).join('_');
+  makeTargetId: function(cid,target) {
+    return 'target_' + ( target ? cid+"_"+target.replace(/\W/g, '') : cid);
   },
   modifyChannelList: function(data) { // TODO: return channel names
     var $channel = $('#' + this.makeTargetId(data.cid, data.joined || data.parted));
@@ -72,7 +72,7 @@ Structure.registerModule('Wirc.Chat', {
       $(tmpl('new_conversation_template', data)).appendTo('#connection_list_' + data.cid);
   },
   displayUnread: function(data) {
-    var id = data.target ? this.makeTargetId(data.cid, data.target) : this.makeTargetId(data.cid);
+    var id =  this.makeTargetId(data.cid, data.target);
     var $badge = $('#' + id + ' .badge');
     $badge.text(parseInt($badge.text(), 10) + 1 ).show();
     if(data.highlight) $badge.addClass('badge-important');
