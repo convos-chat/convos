@@ -7,51 +7,6 @@ Structure.registerModule('Wirc', {
   }
 });
 
-Structure.registerModule('Wirc.Notifier', {
-  window_has_focus: true,
-  original_title: document.title,
-  popup: function(icon, title, msg) {
-    if(this.window_has_focus) return;
-    if(this.notifier) this.notifier.createNotification(icon || '', title, msg || '').show();
-  },
-  title: function(t) { // change title and make the tab flash (at least in chrome)
-    if(this._t) clearTimeout(this._t);
-    if(this.window_has_focus) return;
-    if(t) this._title = t;
-    document.title = document.title == this._title || document.title == this.original_title ? this._title + ' - ' + this.original_title : this._title;
-    this._t = setTimeout(this.title, 2000);
-  },
-  requestPermission: function() {
-    webkitNotifications.requestPermission(function() {
-      if(!webkitNotifications.checkPermission()) Wirc.Notifier.notifier = notifier;
-    });
-  },
-  init: function() {
-    var self = this;
-
-    if(!window.webkitNotifications) {
-      // cannot show notifications
-    }
-    else if(webkitNotifications.checkPermission()) {
-      // cannot run requestPermission() without a user action, such as mouse click or key down
-      $(document).one('keydown', function() { Wirc.Notifier.requestPermission(); });
-    }
-    else {
-      this.notifier = webkitNotifications;
-    }
-
-    $(window).blur(function() {
-      self.window_has_focus = false;
-    });
-    $(window).focus(function() {
-      self.window_has_focus = true;
-      this._t = setTimeout(function() { document.title = self.original_title; }, 4000);
-    });
-
-    return this;
-  }
-}); // End Wirc.Notify
-
 Structure.registerModule('Wirc.Chat', {
   makeTargetId: function() {
     return 'target_' + $.map(arguments, function(v, i) { return v.toString().replace(/\W/g, ''); }).join('_');
@@ -250,6 +205,7 @@ Structure.registerModule('Wirc.Chat', {
       return false;
     };
     self.pjax = Wirc.Chat.Pjax.init('.server a', '#conversation');
+    self.shortcuts = Wirc.Chat.Shortcuts.init();
     
 
     setTimeout(function() {
@@ -264,37 +220,6 @@ Structure.registerModule('Wirc.Chat', {
   }
 }); /* End Structure.registerModule('Wirc.Chat') */
 
-Structure.registerModule('Wirc.Chat.Pjax', {
-  setup_activity: function() {
-    $(document).on('pjax:send', function() {
-      $('#loading').show()
-      Wirc.Chat.input.$input.css('background', 'url(/image/loading.gif) no-repeat');
-      self.placeholder=Wirc.Chat.input.$input.attr('placeholder');
-      Wirc.Chat.input.$input.attr('placeholder','');
-      Wirc.Chat.input.$input.prop('disabled',true);
-    });
-    $(document).on('pjax:complete', function() {
-      Wirc.Chat.input.$input.css('background', '');
-      Wirc.Chat.input.$input.attr('placeholder',self.placeholder);
-      Wirc.Chat.input.$input.prop('disabled',false);
-      Wirc.Chat.input.$input.focus();
-    });
-    $(document).on('pjax:timeout', function(event) {
-      // Prevent default timeout redirection behavior
-      event.preventDefault()
-    });
-    
-  },
-  init: function(link_selector,target) {
-    var self = this;
-    $(document).pjax(link_selector,target);
-    $(target).on('pjax:success',function(e){
-      Wirc.Chat.changeChannel();
-    });
-    self.setup_activity()
-  }
-  
-}); /* End Structure.registerModule('Wirc.Pjax') */
 
 
 Structure.registerModule('Wirc.Chat.Input', {
@@ -404,6 +329,119 @@ Structure.registerModule('Wirc.Chat.Input', {
     return self;
   }
 }); // End Wirc.Chat.Input
+
+Structure.registerModule('Wirc.Notifier', {
+  window_has_focus: true,
+  original_title: document.title,
+  popup: function(icon, title, msg) {
+    if(this.window_has_focus) return;
+    if(this.notifier) this.notifier.createNotification(icon || '', title, msg || '').show();
+  },
+  title: function(t) { // change title and make the tab flash (at least in chrome)
+    if(this._t) clearTimeout(this._t);
+    if(this.window_has_focus) return;
+    if(t) this._title = t;
+    document.title = document.title == this._title || document.title == this.original_title ? this._title + ' - ' + this.original_title : this._title;
+    this._t = setTimeout(this.title, 2000);
+  },
+  requestPermission: function() {
+    webkitNotifications.requestPermission(function() {
+      if(!webkitNotifications.checkPermission()) Wirc.Notifier.notifier = notifier;
+    });
+  },
+  init: function() {
+    var self = this;
+
+    if(!window.webkitNotifications) {
+      // cannot show notifications
+    }
+    else if(webkitNotifications.checkPermission()) {
+      // cannot run requestPermission() without a user action, such as mouse click or key down
+      $(document).one('keydown', function() { Wirc.Notifier.requestPermission(); });
+    }
+    else {
+      this.notifier = webkitNotifications;
+    }
+
+    $(window).blur(function() {
+      self.window_has_focus = false;
+    });
+    $(window).focus(function() {
+      self.window_has_focus = true;
+      this._t = setTimeout(function() { document.title = self.original_title; }, 4000);
+    });
+
+    return this;
+  }
+}); // End Wirc.Notify
+
+
+Structure.registerModule('Wirc.Chat.Pjax', {
+  setup_activity: function() {
+    $(document).on('pjax:send', function() {
+      $('#loading').show()
+      Wirc.Chat.input.$input.css('background', 'url(/image/loading.gif) no-repeat');
+      self.placeholder=Wirc.Chat.input.$input.attr('placeholder');
+      Wirc.Chat.input.$input.attr('placeholder','');
+      Wirc.Chat.input.$input.prop('disabled',true);
+    });
+    $(document).on('pjax:complete', function() {
+      Wirc.Chat.input.$input.css('background', '');
+      Wirc.Chat.input.$input.attr('placeholder',self.placeholder);
+      Wirc.Chat.input.$input.prop('disabled',false);
+      Wirc.Chat.input.$input.focus();
+    });
+    $(document).on('pjax:timeout', function(event) {
+      // Prevent default timeout redirection behavior
+      event.preventDefault()
+    });
+    
+  },
+  init: function(link_selector,target) {
+    var self = this;
+    $(document).pjax(link_selector,target);
+    $(target).on('pjax:success',function(e){
+      Wirc.Chat.changeChannel();
+    });
+    self.setup_activity()
+  }
+  
+}); /* End Structure.registerModule('Wirc.Pjax') */
+
+Structure.registerModule('Wirc.Chat.Shortcuts', {
+
+  init: function() {
+    var self=this;
+    $(document).bind('keyup','shift+return',function() {
+      Wirc.Chat.input.focus();
+    })
+    $('input').bind('keyup','ctrl+up',function() {
+      $('.conversation-list li.active').prev().find('a').click();
+    });
+    $('input').bind('keyup','ctrl+down',function() {
+      $('.conversation-list li.active').next().find('a').click();
+    });
+    $('input').bind('keyup','ctrl+shift+up',function() {
+      $('.conversation-list li.active').prevAll().each(function(i) {
+        if($(this).find('.badge').length) {
+          $(this).find('a').click();
+          return false;
+        }
+      });
+    });
+    $('input').bind('keyup','ctrl+shift+down',function() {
+      $('.conversation-list li.active').nextAll().each(function(i) {
+        if($(this).find('.badge').length) {
+          $(this).find('a').click();
+          return false;
+        }
+      });
+    });
+
+  }
+});// End Wirc.Chat.Shortcuts
+
+
 
 (function($) {
   $(document).ready(function() {
