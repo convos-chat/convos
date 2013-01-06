@@ -61,7 +61,8 @@ Structure.registerModule('Wirc.Chat', {
     else if(data.whois_channels) {
       $messages.append( $(tmpl('whois_channels_template', data)) );
     }
-    else if(data.message) {
+    
+    if(data.message) {
       this.displayUnread(data);
     }
 
@@ -164,7 +165,7 @@ Structure.registerModule('Wirc.Chat', {
     $('.server li').removeClass('active');
     var $target=$('#' + Wirc.Chat.makeTargetId(Wirc.Chat.connection_id,Wirc.Chat.target));
     $target.addClass('active');
-    $target.find('.badget').remove();
+    $target.find('.badge').remove();
     $('html, body').scrollTop($('body').height());
   },
   generic: function() {
@@ -314,7 +315,6 @@ Structure.registerModule('Wirc.Chat.Input', {
   init: function(input_selector) {
     var self = this;
     var $input = $(input_selector);
-    var focus = true;
 
     self.history = [];
     self.history_index = 0;
@@ -322,9 +322,8 @@ Structure.registerModule('Wirc.Chat.Input', {
 
     $input.keydown(self.keydownCallback());
     $input.parents('form').submit(function(e) { return self.submit(e); });
-
-    $(window).blur(function() { focus = false; });
-    $(window).click(function() { if(!focus) $input.focus(); focus = true; });
+    self.focus();
+    $(window).focus(function() { console.log('OOH'); self.focus(); });
 
     return self;
   }
