@@ -323,7 +323,7 @@ Structure.registerModule('Wirc.Chat.Input', {
     $input.keydown(self.keydownCallback());
     $input.parents('form').submit(function(e) { return self.submit(e); });
     self.focus();
-    $(window).focus(function() { console.log('OOH'); self.focus(); });
+    $(window).focus(function() { self.focus(); });
 
     return self;
   }
@@ -411,7 +411,8 @@ Structure.registerModule('Wirc.Chat.Shortcuts', {
 
   init: function() {
     var self=this;
-    $(document).bind('keyup','shift+return',function() {
+    return ; //disable for now because it goes crazy in production.
+    $(document).bind('keyup','return+shift',function() {
       Wirc.Chat.input.focus();
     })
     $('input').bind('keyup','ctrl+up',function() {
