@@ -134,7 +134,7 @@ Structure.registerModule('Wirc.Chat', {
     if(this.$history_indicator || $(window).scrollTop() !== 0) return;
     var self = this;
     var height_before_load = $('body').height();
-    var url = Wirc.base_url + '/history/' + (++self.history_index);
+    var url = Wirc.base_url + '/history/' + (++self.history_index)+"?cid="+Wirc.Chat.connection_id+"&target="+ encodeURIComponent(Wirc.Chat.target);
     self.$history_indicator = $('<div class="alert alert-info">Loading previous conversations...</div>');
     self.$messages.before(self.$history_indicator);
     if(window.console) console.log('[Wirc.Chat.onScroll] ' + url);
@@ -201,6 +201,7 @@ Structure.registerModule('Wirc.Chat', {
     self.websocket.onmessage = self.receiveData;
 
     self.input.submit = function(e) {
+      
       self.sendData({ cid: self.connection_id, target: self.target, cmd: this.$input.val() });
       this.$input.val(''); // TODO: Do not clear the input field until echo is returned?
       return false;
@@ -226,6 +227,7 @@ Structure.registerModule('Wirc.Chat', {
 Structure.registerModule('Wirc.Chat.Input', {
   autocomplete: [
     '/join #',
+    '/query #',
     '/msg ',
     '/me ',
     '/nick ',

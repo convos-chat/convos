@@ -91,17 +91,13 @@ sub view {
       @info = sort { $a->{host} cmp $b->{host} } @info;
       $cid //= $info[0]{id};
       $target //= $info[0]{channels}[0];
-
+      
+      my ($conn)=grep { $cid == $_->{cid} } @info;
       $self->stash(
         connections => \@info,
-        nick => $info[0]{nick},
+        nick=>  ($conn ? $conn->{nick} : $info[0]{nick} ),
         connection_id => $cid,
         target => $target,
-      );
-      $self->session(
-        nick => $info[0]{nick},
-        target => $target,
-        connection_id => $cid,
       );
 
       # FIXME: Should be using last seen tz and default to -inf
@@ -139,8 +135,8 @@ sub view {
 sub history {
   my $self = shift->render_later;
   my $page = $self->param('page');
-  my $cid = $self->session('connection_id');
-  my $target = $self->session('target') // '';
+  my $cid = $self->param('cid');
+  my $target = $self->param('target') // '';
 
   unless($page and $cid) {
     return $self->render_exception('Missing parameters'); # TODO: Need to have a better error message?
@@ -149,6 +145,12 @@ sub history {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
+      $self->redis->hget( "connection:$cid", 'nick', $delay->begin,
+      );
+    },
+    sub {
+      my ($delay,$nick)=@_;
+      $self->stash( nick => $nick);
       my $offset = ($page - 1) * $N_MESSAGES;
 
       my $redis_key= $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
@@ -168,7 +170,7 @@ sub history {
         connections => [],
         nicks => [],
         conversation => $self->_format_conversation($_[1]),
-        nick => $self->session('nick'),
+        nick => $self->stash('nick'),
         target => $target,
         template => 'client/conversation',
       );
@@ -178,7 +180,7 @@ sub history {
 
 sub _format_conversation {
   my($self, $conversation) = @_;
-  my $nick = $self->session('nick');
+  my $nick = $self->stash('nick');
   my $messages = [];
 
   for(my $i = 0; $i < @$conversation; $i = $i + 2) {
