@@ -5191,7 +5191,7 @@ body.chat {
 .chat-input input {
   font-family: Hume Mono, monospace;
 }
-@media (max-width: 767px) {
+@media (max-width: 920px) {
   .chat .conversation-list {
     display: block;
     visibility: visible;
