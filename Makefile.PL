@@ -16,7 +16,7 @@ WriteMakefile(
     'List::MoreUtils'              => 0,
     'File::Slurp'                  => 0,
     'Time::Piece'                  => 1.20,
-    'Unicode::UTF8'		   => 0,
+    'Unicode::UTF8'                => 0,
   },
   test => {TESTS => 't/*.t'}
 );
