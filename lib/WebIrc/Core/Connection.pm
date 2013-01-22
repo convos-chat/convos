@@ -122,7 +122,7 @@ has _irc => sub {
     my $irc = shift;
     ref $self->log && $self->log->debug('['.$self->id.'] Reconnecting to '.$self->_irc->server.' on close...');
     $self->add_server_message({ params => [ 'Disconnected. Attempting reconnect in 30 seconds.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Disconnected. Attempting reconnect in 30 seconds.' });
-    $irc->ioloop->timer(30, sub { $self->connect(sub {}); });
+    $irc->ioloop->timer(10, sub { $self->connect(sub {}); });
   });
   $irc->on(connect => sub {
     my $irc = shift;
@@ -132,7 +132,7 @@ has _irc => sub {
     my ($irc,$error) = @_;
     ref $self->log && $self->log->debug('['.$self->id."] Reconnecting on error: $error");
     $self->add_server_message({ params => [ $error ], raw_line => ':'.$self->_irc->server.' 372 wirc :'.$error });
-    $irc->ioloop->timer(2, sub { $self->connect(sub {}); });
+    $irc->ioloop->timer(10, sub { $self->connect(sub {}); });
   });
 
   for my $event (@ADD_MESSAGE_EVENTS) {
@@ -394,7 +394,7 @@ sub irc_error {
   $self->add_server_message($message);
   if ($message->{raw_line} =~ /Closing Link/i) {
     $self->log(warn => "[connection:@{[$self->id]}] ! Closing link (reconnect)");
-    delete $self->{_irc};
+#    delete $self->{_irc};
   }
 }
 

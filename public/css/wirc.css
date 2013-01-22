@@ -5133,15 +5133,6 @@ body.chat {
   padding-top: 3px;
   padding-bottom: 32px;
 }
-@media (max-width: 767px) {
-  body .navbar-fixed-top,
-  body .navbar-fixed-bottom {
-    margin: 0;
-  }
-  body.chat {
-    padding-right: 3px;
-  }
-}
 @media (max-width: 480px) {
   body {
     font-size: 12px;
@@ -5157,6 +5148,9 @@ body.chat {
   top: 0;
   overflow-x: hidden;
   overflow-y: scroll;
+}
+.chat .conversation-list .span2 {
+  margin-bottom: 3em;
 }
 .chat .conversation-list li.nav-header {
   border-top: 1px solid #ddd;
@@ -5188,7 +5182,7 @@ body.chat {
 .chat-input input {
   font-family: Hume Mono, monospace;
 }
-@media (max-width: 767px) {
+@media (max-width: 1025px) {
   .chat .conversation-list {
     display: block;
     visibility: visible;
