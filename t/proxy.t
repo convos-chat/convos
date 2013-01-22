@@ -60,7 +60,7 @@ done_testing;
 
 sub setup_test {
   my $t=shift;
-  my $redis = Mojo::Redis->new(server => 'redis://127.0.0.1:6379/1');
+  my $redis = Mojo::Redis->new(server => 'redis://127.0.0.1:6379/11');
   $redis->flushall;
   return $redis;
 }
