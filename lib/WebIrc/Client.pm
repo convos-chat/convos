@@ -59,7 +59,6 @@ sub view {
 
   $self->session('current_active' => $self->url_for);
 
-  
   Mojo::IOLoop->delay(
     sub {
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
@@ -233,7 +232,7 @@ sub socket {
       }
 
       return $self->_handle_socket_data($cid => $data) if $allowed{$cid};
-      $self->send_json({ cid => $cid, status =>  200 });
+      $self->send_json({ cid => $cid, status =>  403 });
       $self->finish;
     });
   });
