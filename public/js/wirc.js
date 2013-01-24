@@ -53,12 +53,12 @@ Structure.registerModule('Wirc.Chat', {
       else if(data.template && data.target == this.target || data.nick == this.target) {
         $messages.append(tmpl(data.template, data));
       }
-    }
-    else if(data.whois) {
-      $messages.append( $(tmpl('whois_template', data)) );
-    }
-    else if(data.whois_channels) {
-      $messages.append( $(tmpl('whois_channels_template', data)) );
+      else if(data.whois) {
+        $messages.append( $(tmpl('whois_template', data)) );
+      }
+      else if(data.whois_channels) {
+        $messages.append( $(tmpl('whois_channels_template', data)) );
+      }
     }
     
     if(data.message) {

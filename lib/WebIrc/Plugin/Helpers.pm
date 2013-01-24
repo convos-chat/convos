@@ -59,7 +59,7 @@ my %commands = (
   msg  => sub { my $data=pop; "PRIVMSG $data->{target} :$data->{cmd}" },
   part => sub { "PART ".pop->{target} },
   help => sub { my ($self,$data)=@_;
-    $self->send_json({cid=>$data->{cid},status=>200, message=>"Available Commands:\nj\tw\me\tmsg\tpart\tthelp"});
+    $self->send_json({cid=>$data->{cid},status=>200, message=>"Available Commands:\nj\tw\tme\tmsg\tpart\thelp"});
     return;
   }
   );
@@ -110,6 +110,7 @@ sub register {
     my($self, $app) = @_;
 
     $app->helper(form_block => \&form_block);
+    $app->helper(parse_command => \&parse_command);
     $app->helper(logf => \&WebIrc::Core::Util::logf);
     $app->helper(format_time => sub { my $self=shift; WebIrc::Core::Util::format_time(@_); });
     $app->helper(redis => sub { shift->app->redis(@_) });
