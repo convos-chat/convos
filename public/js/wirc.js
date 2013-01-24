@@ -400,7 +400,7 @@ Structure.registerModule('Wirc.Chat.Pjax', {
   init: function(link_selector,target) {
     var self = this;
     $(document).pjax(link_selector,target);
-    $(target).on('pjax:success',function(e){
+    $(target).on('pjax:end',function(e){
       Wirc.Chat.changeChannel();
     });
     self.setup_activity()
