@@ -56,6 +56,7 @@ use IRC::Utils ();
 use Scalar::Util ();
 use Carp qw/ croak /;
 use Time::HiRes qw/ time /;
+use DateTime;
 
 # default to true while developing
 use constant DEBUG => $ENV{WIRC_DEBUG} // 1;
@@ -107,9 +108,9 @@ Holds a L<Mojo::Log> object.
 has log => sub { Mojo::Log->new };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
-my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome /;
+my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome/;
 my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply irc_error
-                                    irc_rpl_whoisuser irc_rpl_whoischannels
+                                    irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_rpl_topicwhotime
                                 /;
 
 has _irc => sub {
@@ -302,6 +303,35 @@ sub irc_rpl_whoischannels {
     whois_channels => $message->{params}[0], # may change, but will be true
     nick => $message->{params}[1],
     channels => [ sort split ' ', $message->{params}[2] || '' ],
+  });
+}
+
+=head2 irc_rpl_topic
+
+=cut
+
+sub irc_rpl_topic {
+  my($self, $message) = @_;
+
+  $self->_publish({
+    template  => 'channel_topic_template',
+    topic     => $message->{params}[2],
+    target    => $message->{params}[1]
+  });
+}
+
+=head2 irc_rpl_topic_whotime
+
+=cut
+
+sub irc_rpl_topicwhotime {
+  my($self, $message) = @_;
+
+  $self->_publish({
+    template  => 'channel_topic_by_template',
+    ts        => DateTime->from_epoch(epoch=>$message->{params}[3])->datetime,
+    nick      => $message->{params}[2],
+    target    => $message->{params}[1]
   });
 }
 

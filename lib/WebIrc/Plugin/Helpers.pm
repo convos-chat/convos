@@ -53,12 +53,15 @@ Takes a websocket command, parses it into a IRC resposne
 =cut
 
 my %commands = (
-  j    => 'JOIN',
-  w    => 'WHOIS',
-  me   => sub { my $data=pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
-  msg  => sub { my $data=pop; "PRIVMSG $data->{target} :$data->{cmd}" },
-  part => sub { "PART ".pop->{target} },
-  help => sub { my ($self,$data)=@_;
+  j     => 'JOIN',
+  t     => sub { my $data=pop; "TOPIC $data->{target}" . ( $data->{cmd} ? ' :'.$data->{cmd} : '') },
+  topic => sub { my $data=pop; "TOPIC $data->{target}" . ( $data->{cmd} ? ' :'.$data->{cmd} : '') },
+  w     => 'WHOIS',
+  whois => 'WHOIS',
+  me    => sub { my $data=pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
+  msg   => sub { my $data=pop; "PRIVMSG $data->{target} :$data->{cmd}" },
+  part  => sub {  my $data=pop; "PART ".( $data->{cmd} || $data->{target} ) },
+  help  => sub { my ($self,$data)=@_;
     $self->send_json({cid=>$data->{cid},status=>200, message=>"Available Commands:\nj\tw\tme\tmsg\tpart\thelp"});
     return;
   }
@@ -67,7 +70,7 @@ my %commands = (
 sub parse_command {
   my ($self,$data)=@_;
   if($data->{cmd}) {
-    if($data->{cmd} =~ s!^/(\w+)\b!!) {
+    if($data->{cmd} =~ s!^/(\w+)\s*!!) {
       my($cmd) = $1;
       if(my $irc_cmd=$commands{$cmd}) {
         return $irc_cmd->($self, $data) if(ref $irc_cmd);
