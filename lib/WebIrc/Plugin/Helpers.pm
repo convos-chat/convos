@@ -78,7 +78,6 @@ sub parse_command {
         return $irc_cmd .' '.$data->{cmd};
       }
       else {
-        warn "Sending json";
         $self->send_json({ cid=>$data->{cid}, status=> '401', message=>'Unknown command' });
       }
     }

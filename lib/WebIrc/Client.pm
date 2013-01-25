@@ -91,7 +91,7 @@ sub view {
       $cid //= $info[0]{id};
       $target //= $info[0]{channels}[0];
       
-      my ($conn)=grep { $cid == $_->{cid} } @info;
+      my ($conn)=grep { $_->{cid} && $cid == $_->{cid} } @info;
       $self->stash(
         connections => \@info,
         nick=>  ($conn ? $conn->{nick} : $info[0]{nick} ),
