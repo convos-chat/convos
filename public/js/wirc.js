@@ -274,10 +274,19 @@ Structure.registerModule('Wirc.Chat.Input', {
 
     return complete;
   },
+  keyupCallback: function(e) {
+    return function(e) {
+      if (e.keyCode == 17) self.ctrlClicked=false;
+    };
+  },
   keydownCallback: function(e) {
     var self = this;
     return function(e) {
+      if(self.ctrlClicked) return;
       switch(e.keyCode) {
+        case 17: // ctrl
+        self.ctrlClicked=true;
+        break;
         case 38: // up
           e.preventDefault();
           if(self.history.length === 0) return;
@@ -322,6 +331,7 @@ Structure.registerModule('Wirc.Chat.Input', {
     self.$input = $input;
 
     $input.keydown(self.keydownCallback());
+    $input.keyup(self.keyupCallback());
     $input.parents('form').submit(function(e) { return self.submit(e); });
     self.focus();
     $(window).focus(function() { self.focus(); });
@@ -412,17 +422,18 @@ Structure.registerModule('Wirc.Chat.Shortcuts', {
 
   init: function() {
     var self=this;
-    return ; //disable for now because it goes crazy in production.
-    $(document).bind('keyup','return+shift',function() {
+    $(document).bind('keydown','return+shift',function() {
       Wirc.Chat.input.focus();
     })
-    $('input').bind('keyup','ctrl+up',function() {
+    $('input').bind('keydown','ctrl+up',function(e) {
+      e.preventDefault();
       $('.conversation-list li.active').prev().find('a').click();
     });
-    $('input').bind('keyup','ctrl+down',function() {
+    $('input').bind('keydown','ctrl+down',function(e) {
+      e.preventDefault();
       $('.conversation-list li.active').next().find('a').click();
     });
-    $('input').bind('keyup','ctrl+shift+up',function() {
+    $('input').bind('keydown','ctrl+shift+up',function() {
       $('.conversation-list li.active').prevAll().each(function(i) {
         if($(this).find('.badge').length) {
           $(this).find('a').click();
@@ -430,7 +441,7 @@ Structure.registerModule('Wirc.Chat.Shortcuts', {
         }
       });
     });
-    $('input').bind('keyup','ctrl+shift+down',function() {
+    $('input').bind('keydown','ctrl+shift+down',function() {
       $('.conversation-list li.active').nextAll().each(function(i) {
         if($(this).find('.badge').length) {
           $(this).find('a').click();
