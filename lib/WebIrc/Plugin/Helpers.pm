@@ -58,11 +58,12 @@ my %commands = (
   topic => sub { my $data=pop; "TOPIC $data->{target}" . ( $data->{cmd} ? ' :'.$data->{cmd} : '') },
   w     => 'WHOIS',
   whois => 'WHOIS',
+  nick  => 'NICK',
   me    => sub { my $data=pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
   msg   => sub { my $data=pop; "PRIVMSG $data->{target} :$data->{cmd}" },
   part  => sub {  my $data=pop; "PART ".( $data->{cmd} || $data->{target} ) },
   help  => sub { my ($self,$data)=@_;
-    $self->send_json({cid=>$data->{cid},status=>200, message=>"Available Commands:\nj\tw\tme\tmsg\tpart\thelp"});
+    $self->send_json({cid=>$data->{cid},status=>200, message=>"Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"});
     return;
   }
   );
