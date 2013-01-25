@@ -37,9 +37,8 @@ Structure.registerModule('Wirc.Chat', {
     var $messages = this.$messages;
 
     if(data.status) {
-      if(data.status == this.status) return; // do not want duplicate status messages
+     console.log(data);
       if(data.message) $messages.append(tmpl('server_status_template', data));
-      this.status = data.status;
     }
     else if(data.cid === this.connection_id) {
       if( data.new_nick ) {
@@ -54,12 +53,12 @@ Structure.registerModule('Wirc.Chat', {
       else if(data.template && data.target == this.target || data.nick == this.target) {
         $messages.append(tmpl(data.template, data));
       }
-    }
-    else if(data.whois) {
-      $messages.append( $(tmpl('whois_template', data)) );
-    }
-    else if(data.whois_channels) {
-      $messages.append( $(tmpl('whois_channels_template', data)) );
+      else if(data.whois) {
+        $messages.append( $(tmpl('whois_template', data)) );
+      }
+      else if(data.whois_channels) {
+        $messages.append( $(tmpl('whois_channels_template', data)) );
+      }
     }
     
     if(data.message) {
