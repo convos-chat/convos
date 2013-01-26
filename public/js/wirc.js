@@ -110,7 +110,7 @@ Structure.registerModule('Wirc.Chat', {
     if(data.nick === this.nick && (data.joined || data.parted)) {
       this.modifyChannelList(data);
     }
-    else if(data.target === this.nick && data.target !== this.target && this.target !== this.nick) {
+    else if(data.target !== this.target && this.target !== this.nick && data.target && ! data.target.match(/^[#&]/) ) {
       this.modifyConversationlist(data);
     }
     else if(data.new_nick && this.nick === data.old_nick) this.nick = this.new_nick;
