@@ -35,7 +35,7 @@ Structure.registerModule('Wirc.Chat', {
   print: function(data) {
     var at_bottom = $(window).scrollTop() + $(window).height() >= $('body').height() - 30; // need to calculate at_bottom before appending a new element
     var $messages = this.$messages;
-
+    data.toggleClass=$('#chat-messages li:last').hasClass('odd') ? 'even' : 'odd';
     if(data.status) {
      console.log(data);
       if(data.message) $messages.append(tmpl('server_status_template', data));
@@ -110,7 +110,7 @@ Structure.registerModule('Wirc.Chat', {
     if(data.nick === this.nick && (data.joined || data.parted)) {
       this.modifyChannelList(data);
     }
-    else if(data.target !== this.target && this.target !== this.nick && data.target && ! data.target.match(/^[#&]/) ) {
+    else if(data.target !== this.target && this.target !== this.nick && data.target &&  ! data.target.match(/^[#&]/) ) {
       this.modifyConversationlist(data);
     }
     else if(data.new_nick && this.nick === data.old_nick) this.nick = this.new_nick;

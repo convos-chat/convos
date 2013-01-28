@@ -60,14 +60,14 @@
 </div>
 
 <script type="text/html" id="message_template">
-  <li class="<%%= class_name %>">
+  <li class="<%%= class_name %> <%%= toggleClass %>">
     <span class="prefix"><%%= nick %>:</span>
     <span><%%= message %></span>
     <span class="timestamp"><%%= timestamp.sprintf('%H:%M:%S') %></span>
   </li>
 </script>
 <script type="text/html" id="action_message_template">
-  <li class="action">
+  <li class="action <%%= toggleClass%>">
     <span colspan="2">* <%%= nick %> <%%= message %></span>
     <span class="timestamp"><%%= timestamp.sprintf('%H:%M:%S') %></span>
   </li>
