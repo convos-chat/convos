@@ -234,11 +234,11 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::IOLoop;
 use IRC::Utils;
 use Carp qw/croak/;
-use Parse::IRC ();
+use Parse::IRC   ();
 use Scalar::Util ();
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
-my $TIMEOUT = 900;
+my $TIMEOUT        = 900;
 my @DEFAULT_EVENTS = qw/irc_ping irc_nick irc_notice irc_rpl_welcome irc_err_nicknameinuse/;
 
 =head1 ATTRIBUTES
@@ -259,7 +259,7 @@ is changed and we are connected to the IRC server.
 =cut
 
 sub nick {
-  my ($self,$nick) = @_;
+  my ($self, $nick) = @_;
   my $old = $self->{nick} // '';
 
   return $old unless defined $nick;
@@ -294,14 +294,18 @@ to the IRC server will issue a reconnect.
 =cut
 
 sub server {
-  my ($self,$server) = @_;
+  my ($self, $server) = @_;
   my $old = $self->{server} || '';
 
   Scalar::Util::weaken($self);
   return $old unless defined $server;
   return $self if $old && $old eq $server;
   $self->{server} = $server;
-  $self->disconnect(sub { $self->connect(sub {}) });
+  $self->disconnect(
+    sub {
+      $self->connect(sub { });
+    }
+  );
   $self;
 }
 
@@ -384,14 +388,16 @@ sub connect {
               $method = IRC::Utils::numeric_to_name($method);
             }
 
-            $self->emit_safe(lc('irc_'.$method) => $message);
+            $self->emit_safe(lc('irc_' . $method) => $message);
+
+            $self->emit_safe('irc_error' => $message) if $method =~ m/^err_/i;
           }
         }
       );
 
       $self->{stream} = $stream;
       $self->write(NICK => $self->nick);
-      $self->write(USER => $self->user, 8, '*', ':'.$self->name);
+      $self->write(USER => $self->user, 8, '*', ':' . $self->name);
       $self->write(PASS => $self->pass) if $self->pass;
       $self->$callback;
     }
@@ -407,20 +413,23 @@ Will disconnect form the server and run the callback once it is done.
 =cut
 
 sub disconnect {
-  my($self, $cb) = @_;
+  my ($self, $cb) = @_;
 
-  if(my $tid = delete $self->{ping_tid}) {
+  if (my $tid = delete $self->{ping_tid}) {
     $self->ioloop->remove($tid);
   }
-  if(!$self->{stream}) {
+  if (!$self->{stream}) {
     return $self->$cb;
   }
 
   Scalar::Util::weaken($self);
-  $self->{stream}->write("QUIT\r\n", sub {
-    $self->{stream}->close;
-    $self->$cb;
-  });
+  $self->{stream}->write(
+    "QUIT\r\n",
+    sub {
+      $self->{stream}->close;
+      $self->$cb;
+    }
+  );
 }
 
 =head2 register_default_event_handlers
@@ -471,7 +480,7 @@ sub irc_nick {
   my ($self, $message) = @_;
   my $old_nick = ($message->{prefix} =~ /^(.*?)!/)[0] || '';
 
-  if($old_nick eq $self->nick) {
+  if ($old_nick eq $self->nick) {
     $self->nick($message->{params}[0]);
   }
 }
@@ -515,9 +524,12 @@ sub irc_rpl_welcome {
 
   Scalar::Util::weaken($self);
   $self->real_host($message->{prefix});
-  $self->{ping_tid} = $self->ioloop->timer($TIMEOUT - 10, sub {
-    $self->write(PING => $self->real_host);
-  });
+  $self->{ping_tid} = $self->ioloop->timer(
+    $TIMEOUT - 10,
+    sub {
+      $self->write(PING => $self->real_host);
+    }
+  );
 }
 
 =head2 irc_err_nicknameinuse
@@ -535,10 +547,10 @@ sub irc_err_nicknameinuse {
 }
 
 sub DESTROY {
-  my $self = shift;
+  my $self   = shift;
   my $ioloop = $self->ioloop or return;
-  my $tid = $self->{ping_tid};
-  my $sid = $self->{stream_id};
+  my $tid    = $self->{ping_tid};
+  my $sid    = $self->{stream_id};
 
   $ioloop->remove($sid) if $sid;
   $ioloop->remove($tid) if $tid;

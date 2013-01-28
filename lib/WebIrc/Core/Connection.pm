@@ -210,6 +210,7 @@ if it looks like one. Returns true if the message was added to redis.
 
 =cut
 
+use Data::Dumper;
 sub add_server_message {
   my ($self, $message) = @_;
 
@@ -217,7 +218,8 @@ sub add_server_message {
     $self->redis->zadd("connection:@{[$self->id]}:msg", time, $message->{raw_line});
 
     # 1 = normal, 0 = error
-    $self->_publish({ message => $message->{params}[1] || $message->{params}[0] });
+    my $params=$message->{params};shift $params;
+    $self->_publish({ message => join(' ',$message->{params})});
   }
 }
 
