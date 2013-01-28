@@ -47,19 +47,17 @@ sub start {
       $conn->connect(sub {});
     }
   });
+  $self->{control} = $self->redis->subscribe("core:control");
+  $self->{control}->on(message => sub {
+    my ($sub, $raw_msg)=@_;
+    my ($msg,$cid)=split(':',$raw_msg);
+    my $action = 'ctrl_'. $msg;
+    $self->$action($cid) if $self->can($action);
+  });
+  
 }
 
-=head2 start_connection
 
-Start a single connection by connection id.
-
-=cut
-
-sub start_connection {
-  my ($self,$cid) = @_;
-  my $conn = $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-  $conn->connect(sub {});
-}
 
 =head2 add_connection
 
@@ -128,7 +126,6 @@ sub update_connection {
   Scalar::Util::weaken($self);
   $channels = delete $conn->{channels};
   @channels = split m/[\s,]+/, $channels;
-  $connections = $self->_connections;
 
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->execute(
@@ -136,33 +133,60 @@ sub update_connection {
     [ del   => "connection:$cid:channels"],
     [ sadd  => "connection:$cid:channels", @channels],
     sub {
-      # flush
-      if($connections->{$cid}) {
-        $connections->{$cid}->disconnect(sub { $self->start_connection($cid) });
-      }
-      else {
-        $self->start_connection($cid);
-      }
+      $self->redis->publish('core:control',"restart:$cid");
       $self->$cb($cid) ;
     },
   );
 }
 
-=head2 disconnect_connection
+=head2 ctrl_stop
 
-    $self->disconnect_connection($cid);
+    $self->ctrl_stop($cid);
 
-Disconnect a connection by connection id.
+Stop a connection by connection id.
 
 =cut
 
-sub disconnect_connection {
+sub ctrl_stop {
   my ($self,$cid)=@_;
 
   Scalar::Util::weaken($self);
   $self->_connections->{$cid}->disconnect(sub {
     delete $self->_connections->{$cid};
   });
+}
+
+=head2 ctrl_restart
+
+    $self->ctrl_restart($cid);
+
+Restart a connection by connection id.
+
+=cut
+
+
+sub ctrl_restart {
+  my ($self,$cid)=@_;
+  # flush
+  Scalar::Util::weaken($self);
+  if($self->_connections->{$cid}) {
+    $self->_connections->{$cid}->disconnect(sub { $self->ctrl_start($cid) });
+  }
+  else {
+    $self->ctrl_start($cid);
+  }
+}
+
+=head2 ctrl_start
+
+Start a single connection by connection id.
+
+=cut
+
+sub ctrl_start {
+  my ($self,$cid) = @_;
+  my $conn = $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+  $conn->connect(sub {});
 }
 
 =head2 login

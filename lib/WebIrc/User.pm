@@ -249,7 +249,7 @@ sub _add_connection {
     }
     $self->param(connection => $cid);
     $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
-    $self->app->core->start_connection($cid);
+    $self->redis->publish('core:control',"start:$cid");
     $delay->begin->();
   },
 }
@@ -288,7 +288,7 @@ sub _delete_connection {
   },
   sub {
     my($delay, $keys) = @_;
-    $self->app->core->disconnect_connection($cid);
+    $self->redis->publish("core:control", "stop:$cid");
     $self->redis->execute(
       [ del => @$keys ],
       [ srem => "connections", $cid ],

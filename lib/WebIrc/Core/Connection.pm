@@ -122,7 +122,7 @@ has _irc => sub {
   $irc->on(close => sub {
     my $irc = shift;
     ref $self->log && $self->log->debug('['.$self->id.'] Reconnecting to '.$self->_irc->server.' on close...');
-    $self->add_server_message({ params => [ 'Disconnected. Attempting reconnect in 30 seconds.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Disconnected. Attempting reconnect in 30 seconds.' });
+    $self->add_server_message({ params => [ 'Disconnected. Attempting reconnect in 10 seconds.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Disconnected. Attempting reconnect in 30 seconds.' });
     $irc->ioloop->timer(10, sub { $self->connect(sub {}); });
   });
   $irc->on(connect => sub {
