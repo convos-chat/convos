@@ -2,16 +2,10 @@
 <div class="conversation-list">
   <div class="span2">
     <a href="#" class="show-hide">&nbsp;</a>
-    <ul class="nav nav-list main-menu">
-      <li class="dropdown">
-        %= link_to 'index', class => 'dropdown-toggle', begin
-          %= app->config->{name}
-        % end
-        <ul class="dropdown-menu">
-          <li><%= link_to 'Settings', 'settings' %></li>
-          <li><%= link_to 'Logout', 'logout' %></li>
-        </ul>
-      </li>
+    <h4 class="">
+      %= link_to app->config->{name}, 'index'
+      %= link_to '', 'settings', class=>"icon-cog"
+      </h4>
     </ul>
   % for my $c (@$connections) {
     <ul class="server nav nav-list" id="connection_list_<%= $c->{id} %>">

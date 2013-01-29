@@ -458,18 +458,6 @@ Structure.registerModule('Wirc.Chat.Shortcuts', {
 (function($) {
   $(document).ready(function() {
     Wirc.base_url = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
-
-    /* toggle dropdown */
-    $('a.dropdown-toggle').click(function() {
-      var $e = $(this);
-      $e.parents('.dropdown:first').toggleClass('open');
-      $(window).one('click', function(e) {
-        if($(e.target).parents('.dropdown:first').length) return true;
-        $e.parents('.dropdown:first').removeClass('open');
-        return false;
-      });
-      return false;
-    });
     return $('body.chat .messages').length ? Wirc.Chat.init() : Wirc.Chat.generic();
   });
 })(jQuery);

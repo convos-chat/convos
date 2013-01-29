@@ -5168,7 +5168,7 @@ body.chat {
   left: 0;
   display: none;
 }
-.chat .conversation-list a.show-hide:hover {
+.chat .conversation-list a {
   text-decoration: none;
 }
 .chat .messages .alert {
