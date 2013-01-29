@@ -21,7 +21,10 @@ Structure.registerModule('Wirc.Chat', {
       $(tmpl('new_channel_template', data)).insertAfter('#connection_list_' + data.cid + ' .channel:last');
   },
   modifyConversationlist: function(data) {
-    var $conversation = $('#' + this.makeTargetId(data.cid, data.nick));
+    var $conversation = $('#' + this.makeTargetId(data.cid, data.target));
+
+    if(data.closed)
+      $conversation.remove();
 
     if(!$conversation.length)
       $(tmpl('new_conversation_template', data)).appendTo('#connection_list_' + data.cid);
@@ -110,7 +113,7 @@ Structure.registerModule('Wirc.Chat', {
     if(data.nick === this.nick && (data.joined || data.parted)) {
       this.modifyChannelList(data);
     }
-    else if(data.target !== this.target && this.target !== this.nick && data.target &&  ! data.target.match(/^[#&]/) ) {
+    else if(data.closed || data.target !== this.target && this.target !== this.nick && data.target &&  ! data.target.match(/^[#&]/) ) {
       this.modifyConversationlist(data);
     }
     else if(data.new_nick && this.nick === data.old_nick) this.nick = this.new_nick;

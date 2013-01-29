@@ -59,6 +59,16 @@ my %commands = (
   me   => sub { my $data = pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
   msg  => sub { my $data = pop; $data->{cmd} =~ s!^(\w+)\s*!!;  "PRIVMSG $1 :$data->{cmd}" },
   part => sub { my $data = pop; "PART " . ($data->{cmd} || $data->{target}) },
+  close=> sub { my ($self,$data) = @_;
+                my $target=$data->{cmd} || $data->{target};
+                $self->redis->sismember("connection:@{[$data->{cid}]}:conversations",$target, sub {
+                  my ($redis,$member)=@_;
+                  return unless $member;
+                  $self->redis->srem("connection:@{[$data->{cid}]}:conversations",$target);
+                  $self->send_json({cid => $data->{cid},status=>200, closed=>1,target=>$target});
+                });
+                return;
+  },
   help => sub {
     my ($self, $data) = @_;
     $self->send_json(
