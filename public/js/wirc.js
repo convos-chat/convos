@@ -101,7 +101,7 @@ Structure.registerModule('Wirc.Chat', {
       this.notifier.popup('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
       this.notifier.title('New mention by ' + data.nick + ' in ' + data.target);
     }
-    else if(data.target === this.nick) {
+    else if(data.message && ! data.target.match(/^[#&]/)) {
       this.notifier.popup('', 'New message from ' + data.nick, data.message);
       this.notifier.title('New message from ' + data.nick);
     }
