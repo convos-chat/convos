@@ -31,6 +31,7 @@ Structure.registerModule('Wirc.Chat', {
   },
   displayUnread: function(data) {
     var id =  this.makeTargetId(data.cid, data.target);
+    if($('#'+id).hasClass('active')) return;
     var $badge = $('#' + id + ' .badge');
     $badge.text(parseInt($badge.text(), 10) + 1 ).show();
     if(data.highlight) $badge.addClass('badge-important');
@@ -104,7 +105,7 @@ Structure.registerModule('Wirc.Chat', {
       this.notifier.popup('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
       this.notifier.title('New mention by ' + data.nick + ' in ' + data.target);
     }
-    else if(data.message && ! data.target.match(/^[#&]/)) {
+    else if(data.message && data.target && ! data.target.match(/^[#&]/)) {
       this.notifier.popup('', 'New message from ' + data.nick, data.message);
       this.notifier.title('New message from ' + data.nick);
     }
