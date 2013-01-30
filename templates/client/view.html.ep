@@ -4,7 +4,7 @@
     <a href="#" class="show-hide">&nbsp;</a>
     <h4 class="">
       %= link_to app->config->{name}, 'index'
-      %= link_to '', 'settings', class=>"icon-cog"
+      %= link_to '', 'settings', class=>"link-settings icon-cog"
       </h4>
     </ul>
   % for my $c (@$connections) {
