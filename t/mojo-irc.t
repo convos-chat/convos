@@ -4,14 +4,14 @@ use Mojo::IRC;
 use File::Slurp;
 use Test::More;
 
-plan tests => 6;
+plan tests => 9;
 #$SIG{__DIE__} = \&Carp::cluck;
 
 my $port = Mojo::IOLoop->generate_port;
 my $read = '';
 
 Mojo::IOLoop->server(
-  port => $port,
+  {port => $port},
   sub {
     my($self, $stream) = @_;
     my $data = read_file 't/data/irc.perl.org';

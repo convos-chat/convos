@@ -301,6 +301,7 @@ sub server {
   return $old unless defined $server;
   return $self if $old && $old eq $server;
   $self->{server} = $server;
+  return $self if ! $self->{stream_id};
   $self->disconnect(
     sub {
       $self->connect(sub { });
@@ -399,7 +400,10 @@ sub connect {
       $self->write(NICK => $self->nick);
       $self->write(USER => $self->user, 8, '*', ':' . $self->name);
       $self->write(PASS => $self->pass) if $self->pass;
-      $self->$callback;
+      my $drained=0;
+      $stream->on(drain => sub { 
+        unless($drained++) { $self->$callback; }
+      })
     }
   );
 }
