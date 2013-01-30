@@ -167,7 +167,7 @@ Structure.registerModule('Wirc.Chat', {
     $('.server li').removeClass('active');
     var $target=$('#' + Wirc.Chat.makeTargetId(Wirc.Chat.connection_id,Wirc.Chat.target));
     $target.addClass('active');
-    $target.find('.badge').remove();
+    $target.find('.badge').text('0').hide();
     $('html, body').scrollTop($('body').height());
   },
   generic: function() {
@@ -438,7 +438,7 @@ Structure.registerModule('Wirc.Chat.Shortcuts', {
     });
     $('input').bind('keydown','ctrl+shift+up',function() {
       $('.conversation-list li.active').prevAll().each(function(i) {
-        if($(this).find('.badge').length) {
+        if($(this).find('.badge:visible').length) {
           $(this).find('a').click();
           return false;
         }
@@ -446,7 +446,8 @@ Structure.registerModule('Wirc.Chat.Shortcuts', {
     });
     $('input').bind('keydown','ctrl+shift+down',function() {
       $('.conversation-list li.active').nextAll().each(function(i) {
-        if($(this).find('.badge').length) {
+        if($(this).find('.badge:visible').length) {
+          
           $(this).find('a').click();
           return false;
         }

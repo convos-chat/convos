@@ -18,9 +18,8 @@
     % for my $channel (@{ $c->{channels} }) {
       <li id="target_<%= $c->{id} %>_<%= as_id $channel %>" class="channel <%= is_active($c, $channel) ? 'active' : '' %>">
         %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
-          %= $channel
-          
-          %#<span class="badge hide">0</span>
+        %= $channel
+          <span class="badge hide">0</span>
         % end
       </li>
     % }
@@ -28,7 +27,7 @@
       <li id="target_<%= $c->{id} %>_<%= as_id $conversation %>" class="<%= is_active($c, $conversation)? 'active' : '' %>">
         %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
           %= $conversation
-          %# <span class="badge hide">0</span>
+          <span class="badge hide">0</span>
         % end
       </li>
     % }
@@ -135,7 +134,8 @@
 <script type="text/html" id="new_conversation_template">
   <li id="<%%= Wirc.Chat.makeTargetId(cid, target ) %>" class="conversation">
     <a href="/<%%= cid %>/<%%= encodeURIComponent(target) %>">
-      <%%= target %>
+      <%%= target  %>
+      <span class="badge hide">0</span>
     </a>
   </li>
 </script>
