@@ -278,50 +278,38 @@ Structure.registerModule('Wirc.Chat.Input', {
 
     return complete;
   },
-  keyupCallback: function(e) {
-    return function(e) {
-      if (e.keyCode == 17) self.ctrlClicked=false;
-    };
-  },
-  keydownCallback: function(e) {
+  inputKeys: function($input) {
     var self = this;
-    return function(e) {
-      if(self.ctrlClicked) return;
-      switch(e.keyCode) {
-        case 17: // ctrl
-        self.ctrlClicked=true;
-        break;
-        case 38: // up
-          e.preventDefault();
-          if(self.history.length === 0) return;
-          if(self.history_index == self.history.length) self.initial_value = this.value;
-          if(--self.history_index < 0) self.history_index = 0;
-          this.value = self.history[self.history_index];
-          break;
+    $input.bind('keydown','up',function(e) {
+      e.preventDefault();
+      
+      if(self.history.length === 0) return;
+      if(self.history_index == self.history.length) self.initial_value = this.value;
+      if(--self.history_index < 0) self.history_index = 0;
+      this.value = self.history[self.history_index];
+          
+    });
+    $input.bind('keydown','down',function(e) {
+      e.preventDefault();
+      if(self.history.length === 0) return;
+      if(++self.history_index >= self.history.length) self.history_index = self.history.length;
+      this.value = self.history[self.history_index] || self.initial_value || '';
+    });
 
-        case 40: // down
-          e.preventDefault();
-          if(self.history.length === 0) return;
-          if(++self.history_index >= self.history.length) self.history_index = self.history.length;
-          this.value = self.history[self.history_index] || self.initial_value || '';
-          break;
-
-        case 9: // tab
-          e.preventDefault();
-          this.value = self.tabbing(this.value);
-          break;
-
-        case 13: // return
-          if(this.value.length === 0) return e.preventDefault(); // do not send empty commands
-          self.history.push(this.value);
-          self.history_index = self.history.length;
-          break;
-
-        default:
-          self.tabbing(false);
-          delete self.initial_value;
-      }
-    };
+    $input.bind('keydown','tab',function(e) {
+      e.preventDefault();
+      this.value = self.tabbing(this.value);
+      
+    });
+    $input.bind('keydown','return',function(e){
+      if(this.value.length === 0) return e.preventDefault(); // do not send empty commands
+      self.history.push(this.value);
+      self.history_index = self.history.length;      
+    });
+    $input.on('keydown',function(e) {
+      self.tabbing(false);
+      delete self.initial_value;
+    });
   },
   focus: function() {
     this.$input.focus();
@@ -334,8 +322,8 @@ Structure.registerModule('Wirc.Chat.Input', {
     self.history_index = 0;
     self.$input = $input;
 
-    $input.keydown(self.keydownCallback());
-    $input.keyup(self.keyupCallback());
+    self.inputKeys($input);
+    
     $input.parents('form').submit(function(e) { return self.submit(e); });
     self.focus();
     $(window).focus(function() { self.focus(); });
@@ -426,7 +414,7 @@ Structure.registerModule('Wirc.Chat.Shortcuts', {
 
   init: function() {
     var self=this;
-    $(document).bind('keydown','return+shift',function() {
+    $(document).bind('keydown','shift+return',function() {
       Wirc.Chat.input.focus();
     })
     $('input').bind('keydown','ctrl+up',function(e) {
