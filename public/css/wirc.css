@@ -5171,6 +5171,9 @@ body.chat {
 .chat .conversation-list a {
   text-decoration: none;
 }
+.chat .conversation-list .link-settings {
+  display: inline-block;
+}
 .chat .messages .alert {
   position: absolute;
   right: 2px;
@@ -5270,8 +5273,8 @@ body.chat {
 }
 @font-face {
   font-family: 'Hume Mono';
-  src: url('/font/HumeMonoRegular.eot');
-  src: url('/font/HumeMonoRegular.eot?#iefix') format('embedded-opentype'), url('/font/HumeMonoRegular.woff') format('woff');
+  src: url('/font/Hume%202%20Mono.eot');
+  src: url('/font/Hume%202%20Mono.eot?#iefix') format('embedded-opentype'), url('/font/Hume%202%20Mono.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
