@@ -5,13 +5,14 @@ use WebIrc::Core::Util qw/ pack_irc unpack_irc format_time /;
 
 {
     my $time = 1348308427;
-    my $str = pack_irc $time, ':test123!jhthorsen@m33p.com PRIVMSG #wirc :hey!';
+    my $str = ':test123!jhthorsen@m33p.com PRIVMSG #wirc :hey!';
     is_deeply(
-        unpack_irc($str),
+        unpack_irc($str,$time),
         {
             command => 'PRIVMSG',
             prefix => 'test123!jhthorsen@m33p.com',
             params => [ '#wirc', 'hey!' ],
+            special => '',
             raw_line => ':test123!jhthorsen@m33p.com PRIVMSG #wirc :hey!',
             timestamp => 1348308427,
         },
