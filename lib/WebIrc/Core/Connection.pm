@@ -280,6 +280,8 @@ sub irc_rpl_welcome {
 
 =head2 irc_rpl_whoisuser
 
+Reply with user info
+
 =cut
 
 sub irc_rpl_whoisuser {
@@ -296,6 +298,8 @@ sub irc_rpl_whoisuser {
 
 =head2 irc_rpl_whoischannels
 
+Reply with user channels
+
 =cut
 
 sub irc_rpl_whoischannels {
@@ -310,6 +314,8 @@ sub irc_rpl_whoischannels {
 
 =head2 irc_rpl_topic
 
+Reply with topic
+
 =cut
 
 sub irc_rpl_topic {
@@ -322,7 +328,9 @@ sub irc_rpl_topic {
   });
 }
 
-=head2 irc_rpl_topic_whotime
+=head2 irc_rpl_topicwhotime
+
+Reply with who and when for topic change
 
 =cut
 
@@ -430,7 +438,7 @@ sub irc_error {
   }
 }
 
-=head1 cmd_join
+=head2 cmd_join
 
 Handle join commands from user. Add to channel set.
 
@@ -445,7 +453,7 @@ sub cmd_join {
   $self->_publish({ nick => $self->_irc->nick, joined => $channel });
 }
 
-=head1 cmd_part
+=head2 cmd_part
 
 Handle part commands from user. Remove from channel set.
 

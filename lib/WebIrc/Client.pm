@@ -20,9 +20,9 @@ my $JSON=Mojo::JSON->new;
 
 =head1 METHODS
 
-=head2 view
+=head2 route
 
-Used to render the main IRC client view.
+Route to last seen IRC channel.
 
 =cut
 
@@ -48,6 +48,12 @@ sub route {
     $self->redirect_to($self->url_for('settings'));
   });
 }
+
+=head2 view
+
+Used to render the main IRC client view.
+
+=cut
 
 sub view {
   my $self = shift->render_later;
