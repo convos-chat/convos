@@ -387,7 +387,7 @@ sub irc_nick {
   my $new_nick = $message->{params}[0];
 
   if($old_nick eq $self->_irc->nick) {
-    $self->redis->hset("connection:@{[$self->id]}", nick => $new_nick);
+    $self->redis->hset("connection:@{[$self->id]}", current_nick => $new_nick);
   }
 
   $self->_publish({ old_nick => $old_nick, new_nick => $new_nick });
@@ -437,6 +437,13 @@ sub irc_error {
 #    delete $self->{_irc};
   }
 }
+
+
+sub cmd_nick {
+  my($self, $message) = @_;
+  $self->redis->hset("connection:@{[$self->id]}", nick => $new_nick);
+}
+
 
 =head2 cmd_join
 
