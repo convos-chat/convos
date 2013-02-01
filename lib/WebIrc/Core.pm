@@ -52,7 +52,7 @@ sub start {
     my ($sub, $raw_msg)=@_;
     my ($msg,$cid)=split(':',$raw_msg);
     my $action = 'ctrl_'. $msg;
-    $self->$action($cid) if $self->can($action);
+    $self->$action($cid);
   });
   
 }
