@@ -251,20 +251,19 @@ Holds an instance of L<Mojo::IOLoop>.
 
 has ioloop => sub { Mojo::IOLoop->singleton };
 
-=head2 nick
+=head2 change_nick
 
-IRC server nickname. Will also change the nick in the server if this attribute
-is changed and we are connected to the IRC server.
+Change IRC nick name. Will only set nick accessor if not connected to a server.
 
 =cut
 
-sub nick {
+sub change_nick {
   my ($self, $nick) = @_;
-  my $old = $self->{nick} // '';
+  my $old = $self->nick // '';
 
   return $old unless defined $nick;
   return $self if $old && $old eq $nick;
-  $self->{nick} = $nick;
+  $self->nick($nick);
   $self->write(NICK => $nick) if $self->{stream};
   $self;
 }
@@ -286,12 +285,21 @@ IRC username.
 
 has user => '';
 
+=head2 nick
+
+IRC nick name accessor.
+
+=cut
+
+has nick => '';
+
 =head2 server
 
 Server name and optionally a port to connect to. Changing this while connected
 to the IRC server will issue a reconnect.
 
 =cut
+
 
 sub server {
   my ($self, $server) = @_;
@@ -546,6 +554,7 @@ added. The new nick will be stored in L</nick>.
 sub irc_err_nicknameinuse {
   my ($self, $message) = @_;
 
+  warn $self->nick .' in use';
   $self->nick($self->nick . '_');
   $self->write(NICK => $self->nick);
 }

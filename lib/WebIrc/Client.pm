@@ -58,7 +58,7 @@ Used to render the main IRC client view.
 sub view {
   my $self = shift->render_later;
   my $uid = $self->session('uid');
-  my @keys = qw/ nick host /;
+  my @keys = qw/ current_nick host /;
   my $target=$self->param('target');
   my $cid=$self->param('cid');
   my $connections;
@@ -100,7 +100,7 @@ sub view {
       my ($conn)=grep { $_->{cid} && $cid == $_->{cid} } @info;
       $self->stash(
         connections => \@info,
-        nick=>  ($conn ? $conn->{nick} : $info[0]{nick} ),
+        nick=>  ($conn ? $conn->{nick} : $info[0]{current_nick} ),
         connection_id => $cid,
         target => $target,
       );
@@ -150,7 +150,7 @@ sub history {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->hget( "connection:$cid", 'nick', $delay->begin,
+      $self->redis->hget( "connection:$cid", 'current_nick', $delay->begin,
       );
     },
     sub {

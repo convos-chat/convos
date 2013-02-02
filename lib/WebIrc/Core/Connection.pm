@@ -128,6 +128,16 @@ has _irc => sub {
   $irc->on(connect => sub {
     my $irc = shift;
     $self->add_server_message({ params => [ 'Connected.' ], raw_line => ':'.$self->_irc->server.' 372 wirc :Connected.' });
+    $self->redis->hset("connection:@{[$self->id]}", current_nick => $self->_irc->nick);
+    $self->{keepnick}=$irc->ioloop->recurring(60, sub {
+      $self->redis->hget("connection:@{[$self->id]}", "nick",sub {
+        my ($redis,$nick)=@_;
+        if($nick ne $self->_irc->nick) {
+          $self->_irc->change_nick($nick);
+        }
+      })
+    });
+
   });
   $irc->on(error => sub {
     my ($irc,$error) = @_;
@@ -386,6 +396,7 @@ sub irc_nick {
   my($old_nick) = IRC::Utils::parse_user($message->{prefix});
   my $new_nick = $message->{params}[0];
 
+  warn "comparing $old_nick to ".$self->_irc->nick;
   if($old_nick eq $self->_irc->nick) {
     $self->redis->hset("connection:@{[$self->id]}", current_nick => $new_nick);
   }
@@ -441,7 +452,9 @@ sub irc_error {
 
 sub cmd_nick {
   my($self, $message) = @_;
+  my $new_nick = $message->{params}[0];
   $self->redis->hset("connection:@{[$self->id]}", nick => $new_nick);
+  $self->_irc->nick($new_nick);
 }
 
 
