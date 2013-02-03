@@ -51,7 +51,7 @@ Structure.registerModule('Wirc.Chat', {
       else if(data.joined === this.target) {
         $messages.append( $(tmpl('nick_joined_template', data)) );
       }
-      else if(data.parted === this.target && data.nick !== this.nick) {
+      else if(data.parted === this.target && data.nick !== this.nick[data.cid]) {
         $messages.append( $(tmpl('nick_parted_template', data)) );
       }
       else if(data.template && data.target == this.target || data.nick == this.target) {
@@ -76,12 +76,13 @@ Structure.registerModule('Wirc.Chat', {
     }
   },
   parseIrcInput: function(d) {
+    var self=this;
     var data = $.parseJSON(d);
 
     if(data.message) {
       var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
       if(action) data.message = action[1];
-      data.highlight = data.message.match("\\b" + this.nick + "\\b") ? 1 : 0;
+      data.highlight = data.message.match("\\b" + self.nick[data.cid] + "\\b") ? 1 : 0;
       data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
       data.template = action ? 'action_message_template' : 'message_template';
     }
@@ -90,7 +91,8 @@ Structure.registerModule('Wirc.Chat', {
       data.timestamp = new Date(parseInt(data.timestamp * 1000, 10));
     }
 
-    data.class_name = data.nick === this.nick ? 'me'
+    console.log(self.nick);
+    data.class_name = data.nick === self.nick[data.cid] ? 'me'
                     : data.highlight          ? 'focus'
                     :                           '';
 
@@ -111,13 +113,13 @@ Structure.registerModule('Wirc.Chat', {
     }
 
     // action handling
-    if(data.nick === this.nick && (data.joined || data.parted)) {
+    if(data.nick === this.nick[data.cid] && (data.joined || data.parted)) {
       this.modifyChannelList(data);
     }
-    else if(data.closed || data.target !== this.target && this.target !== this.nick && data.target &&  ! data.target.match(/^[#&]/) ) {
+    else if(data.closed || data.target !== this.target && this.target !== this.nick[data.cid] && data.target &&  ! data.target.match(/^[#&]/) ) {
       this.modifyConversationlist(data);
     }
-    else if(data.new_nick && this.nick === data.old_nick) this.nick = this.new_nick;
+    else if(data.new_nick && this.nick[data.cid] === data.old_nick) this.nick[data.cid] = this.new_nick;
 
     this.input.autoCompleteNicks(data);
 
@@ -159,7 +161,6 @@ Structure.registerModule('Wirc.Chat', {
     var self = this;
     self.$messages = $('.messages ul');
     Wirc.Chat.connection_id = $('#chat-messages').attr('data-cid');
-    Wirc.Chat.nick = $('#chat-messages').attr('data-nick');
     Wirc.Chat.target = $('#chat-messages').attr('data-target');
     $.each($('#chat-messages').attr('data-nicks').split(','), function(i, v) {
       if(v == this.nick) return;
@@ -196,6 +197,11 @@ Structure.registerModule('Wirc.Chat', {
 
     self.input = Wirc.Chat.Input.init($('.chat form input[type="text"]'));
     self.generic();
+    self.nick=[];
+    $('.server').each(function(i) {
+      self.nick[$(this).attr('data-cid')]=$(this).attr('data-nick');
+    });
+    
     self.changeChannel();
     self.history_index = 1;
     self.$messages = $('.messages ul');

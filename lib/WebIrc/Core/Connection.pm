@@ -384,11 +384,13 @@ sub irc_join {
 sub irc_nick {
   my($self, $message) = @_;
   my($old_nick) = IRC::Utils::parse_user($message->{prefix});
+  warn "old_nick $old_nick - ".$self->_irc->nick;
   my $new_nick = $message->{params}[0];
 
   if($old_nick eq $self->_irc->nick) {
     $self->redis->hset("connection:@{[$self->id]}", nick => $new_nick);
   }
+  
 
   $self->_publish({ old_nick => $old_nick, new_nick => $new_nick });
 }
