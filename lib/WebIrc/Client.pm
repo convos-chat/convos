@@ -71,7 +71,6 @@ sub view {
       },
     sub {
       my($delay, $conn) = @_;
-      warn('Conn is '.$conn);
       return $self->render_not_found if(!$conn);
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
