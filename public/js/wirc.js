@@ -91,7 +91,6 @@ Structure.registerModule('Wirc.Chat', {
       data.timestamp = new Date(parseInt(data.timestamp * 1000, 10));
     }
 
-    console.log(self.nick);
     data.class_name = data.nick === self.nick[data.cid] ? 'me'
                     : data.highlight          ? 'focus'
                     :                           '';

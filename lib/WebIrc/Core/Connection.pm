@@ -219,7 +219,7 @@ sub add_server_message {
 
     # 1 = normal, 0 = error
     my $params=$message->{params};shift $params;
-    $self->_publish({ message => join(' ',$message->{params})});
+    $self->_publish({ message => join(' ',@{$message->{params}})});
   }
 }
 
@@ -474,6 +474,7 @@ sub _publish {
   my($self, $data) = @_;
 
   local $data->{cid} = $self->id;
+  local $data->{status} = 200;
   local $data->{timestamp} = time;
 
   $self->redis->publish("connection:@{[$self->id]}:from_server", $JSON->encode($data));
