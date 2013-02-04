@@ -75,7 +75,7 @@ sub view {
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
     sub {
-      my($delay, $connections) = @_;
+      $connections = $_[1];
       $self->redis->execute(
         (map { [ hmget => "connection:$_" => @keys ] } @$connections),
         $_[0]->begin,
