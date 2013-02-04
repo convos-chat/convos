@@ -67,10 +67,16 @@ sub view {
 
   Mojo::IOLoop->delay(
     sub {
+      $self->redis->sismember("user:$uid:connections",$cid, $_[0]->begin);
+      },
+    sub {
+      my($delay, $conn) = @_;
+      warn('Conn is '.$conn);
+      return $self->render_not_found if(!$conn);
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
     sub {
-      $connections = $_[1] || [];
+      my($delay, $connections) = @_;
       $self->redis->execute(
         (map { [ hmget => "connection:$_" => @keys ] } @$connections),
         $_[0]->begin,
@@ -94,8 +100,6 @@ sub view {
       }
 
       @info = sort { $a->{host} cmp $b->{host} } @info;
-      $cid //= $info[0]{id};
-      $target //= $info[0]{channels}[0];
       
       my ($conn)=grep { $_->{cid} && $cid == $_->{cid} } @info;
       $self->stash(
