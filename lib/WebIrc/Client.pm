@@ -198,7 +198,7 @@ sub _format_conversation {
     }
     @{$message}{qw/nick user host/} = parse_user($message->{prefix});
     $nick //= '[server]';
-    my @params=@{$message->{params}};shift @params;
+    my @params=@{$message->{params}|| []};shift @params;
     $message->{message} = xml_escape(join(' ',@params)); # 1 = normal, 0 = error
     $message->{message} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
     $message->{class_name} = $message->{message} =~ /\b$nick\b/ ? 'focus'
