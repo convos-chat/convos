@@ -168,7 +168,7 @@ Structure.registerModule('Wirc.Chat', {
     $('.server li').removeClass('active');
     var $target=$('#' + Wirc.Chat.makeTargetId(Wirc.Chat.connection_id,Wirc.Chat.target));
     $target.addClass('active');
-    $target.find('.badge').text('0').hide();
+    $target.find('.badge').text('0').removeClass('badge-important').hide();
     $('html, body').scrollTop($('body').height());
   },
   generic: function() {
