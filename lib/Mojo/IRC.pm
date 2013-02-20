@@ -363,8 +363,7 @@ sub connect {
       my ($method, $message);
       my $buffer = '';
 
-      $err and return $self->emit(error => $err);
-      $self->emit('connect');
+      $err and return $self->$callback($err);
 
       $stream->timeout($TIMEOUT);
       $stream->on(
@@ -405,15 +404,19 @@ sub connect {
       );
 
       $self->{stream} = $stream;
-      $self->write(NICK => $self->nick);
-      $self->write(USER => $self->user, 8, '*', ':' . $self->name);
-      $self->write(PASS => $self->pass) if $self->pass;
-      my $drained = 0;
-      $stream->on(
-        drain => sub {
-          unless ($drained++) { $self->$callback; }
-        }
-      );
+      Mojo::IOLoop::Delay->new->steps(sub {
+        $self->write(NICK => $self->nick,shift->begin);
+      },
+      sub {
+        $self->write(USER => $self->user, 8, '*', ':' . $self->name,shift->begin);
+      },sub {
+        my $delay=shift;
+        return $self->write(PASS => $self->pass,$delay->begin) if $self->pass;
+        $delay->begin->();
+      },
+      sub {
+        $self->$callback;
+      });
     }
   );
 }
@@ -475,11 +478,12 @@ with " " and "\r\n" will be appended.
 =cut
 
 sub write {
+ my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
   my $self = shift;
   my $buf = join ' ', @_;
   croak('Tried to write without a stream') unless ref $self->{stream};
   warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
-  $self->{stream}->write("$buf\r\n");
+  $self->{stream}->write("$buf\r\n",$cb);
 }
 
 =head1 DEFAULT EVENT HANDLERS

@@ -16,7 +16,21 @@ Mojo::IOLoop->server(
     my($self, $stream) = @_;
     my $data = read_file 't/data/irc.perl.org';
     $data =~ s/\n/\r\n/sg;
-    $stream->on(read => sub { $read .= $_[1] });
+    $stream->on(read => sub {
+      my ($stream,$data)=@_;
+      $read .= $data;
+      if ($read =~ /JOIN/ ) 
+      {
+        my $join=read_file 't/data/join.mojo';
+        $join =~ s/\n/\r\n/sg;
+        $stream->write($join);
+      }
+      elsif ($read =~ /NICK/) {
+        my $welcome=read_file 't/data/welcome';
+        $welcome =~ s/\n/\r\n/sg;
+        $stream->write($welcome);
+      }
+    });
     $stream->write($data);
   },
 );
@@ -50,10 +64,11 @@ Mojo::IOLoop->server(
 
   $irc->connect(sub {
     my($irc, $err) = @_;
-    return warn $err if $err;
+    die $err if $err;
     $irc->write(JOIN => '#mojo');
   });
 
   Mojo::IOLoop->start;
 }
+
   
