@@ -404,19 +404,22 @@ sub connect {
       );
 
       $self->{stream} = $stream;
-      Mojo::IOLoop::Delay->new->steps(sub {
-        $self->write(NICK => $self->nick,shift->begin);
-      },
-      sub {
-        $self->write(USER => $self->user, 8, '*', ':' . $self->name,shift->begin);
-      },sub {
-        my $delay=shift;
-        return $self->write(PASS => $self->pass,$delay->begin) if $self->pass;
-        $delay->begin->();
-      },
-      sub {
-        $self->$callback;
-      });
+      Mojo::IOLoop::Delay->new->steps(
+        sub {
+          $self->write(NICK => $self->nick, shift->begin);
+        },
+        sub {
+          $self->write(USER => $self->user, 8, '*', ':' . $self->name, shift->begin);
+        },
+        sub {
+          my $delay = shift;
+          return $self->write(PASS => $self->pass, $delay->begin) if $self->pass;
+          $delay->begin->();
+        },
+        sub {
+          $self->$callback;
+        }
+      );
     }
   );
 }
@@ -478,12 +481,12 @@ with " " and "\r\n" will be appended.
 =cut
 
 sub write {
- my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
+  my $cb   = ref $_[-1] eq 'CODE' ? pop : undef;
   my $self = shift;
-  my $buf = join ' ', @_;
+  my $buf  = join ' ', @_;
   croak('Tried to write without a stream') unless ref $self->{stream};
   warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
-  $self->{stream}->write("$buf\r\n",$cb);
+  $self->{stream}->write("$buf\r\n", $cb);
 }
 
 =head1 DEFAULT EVENT HANDLERS
