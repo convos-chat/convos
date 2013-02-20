@@ -72,7 +72,7 @@ Holds the id of this connection. This attribute is required.
 
 =cut
 
-has id => 0;
+has 'id';
 
 =head2 redis
 
