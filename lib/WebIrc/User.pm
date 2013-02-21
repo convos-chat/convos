@@ -18,7 +18,7 @@ Check authentication and login
 =cut
 
 sub auth {
-  my $self=shift;
+  my $self = shift;
   return 1 if $self->session('uid');
   $self->redirect_to('login');
   return 0;
@@ -31,26 +31,26 @@ Authenticate local user
 =cut
 
 sub login {
-  my $self=shift;
+  my $self = shift;
 
   $self->render_later;
   $self->app->core->login(
-    {
-      login => scalar $self->param('login'),
-      password => scalar $self->param('password'),
-    },
+    {login => scalar $self->param('login'), password => scalar $self->param('password'),},
     sub {
-      my($core, $uid, $error) = @_;
+      my ($core, $uid, $error) = @_;
       return $self->render(message => 'Invalid username/password.') unless $uid;
       $self->session(uid => $uid, login => $self->param('login'));
-      
-      $self->redis->smembers("user:$uid:connections", sub {
-        my ($redis,$conn)=@_;
-        if(@$conn) {
-          return $self->redirect_to('index');
+
+      $self->redis->smembers(
+        "user:$uid:connections",
+        sub {
+          my ($redis, $conn) = @_;
+          if (@$conn) {
+            return $self->redirect_to('index');
+          }
+          $self->redirect_to('/settings');
         }
-        $self->redirect_to('/settings');
-      });
+      );
     },
   );
 }
@@ -62,90 +62,96 @@ See L</login>.
 =cut
 
 sub register {
-  my $self=shift;
-  my $admin=0;
+  my $self  = shift;
+  my $admin = 0;
 
-  if($self->session('uid')) {
+  if ($self->session('uid')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
     $self->redirect_to('/settings');
     return;
   }
 
   $self->render_later;
-  Mojo::IOLoop->delay(sub {
-    my $delay=shift;
-    $self->redis->get('user:uids',$delay->begin);
-  },
-  sub { # Check invitation unless first user, or make admin.
-    my ($delay,$uids)=@_;
-    $self->logf(debug => '[reg] Got uids %s', $uids) if DEBUG;
+  Mojo::IOLoop->delay(
+    sub {
+      my $delay = shift;
+      $self->redis->get('user:uids', $delay->begin);
+    },
+    sub {    # Check invitation unless first user, or make admin.
+      my ($delay, $uids) = @_;
+      $self->logf(debug => '[reg] Got uids %s', $uids) if DEBUG;
 
-    if($self->_got_invalid_register_params($uids)) {
-      $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-      $self->render;
-      return;
-    }
+      if ($self->_got_invalid_register_params($uids)) {
+        $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
+        $self->render;
+        return;
+      }
 
-    if($uids) {
-      $self->redis->get("user:@{[$self->param('login')]}:uid", $delay->begin);
+      if ($uids) {
+        $self->redis->get("user:@{[$self->param('login')]}:uid", $delay->begin);
+      }
+      else {
+        $admin++;
+        $self->logf(debug => '[reg] First login == admin') if DEBUG;
+        $delay->begin->();
+      }
+    },
+    sub {    # Get uid unless user exists
+      my ($delay, $uid) = @_;
+      if ($uid) {
+        $self->stash('errors')->{login} = 'Username is taken.';
+        $self->render;
+      }
+      else {
+        $self->redis->incr('user:uids', $delay->begin);
+      }
+    },
+    sub {    # Create user
+      my ($delay, $uid) = @_;
+      my $login = $self->param('login');
+      my $digest = crypt $self->param('password'), join '',
+        ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
+      $self->logf(debug => '[reg] New user uid=%s, login=%s', $uid, $self->param('login')) if DEBUG;
+      $self->session(uid => $uid, login => $self->param('login'));
+      $self->redis->execute(
+        [set   => "user:$login:uid", $uid],
+        [hmset => "user:$uid",       digest => $digest, email => scalar $self->param('email')],
+        $delay->begin,
+      );
+    },
+    sub {
+      my ($delay) = @_;
+      $self->redirect_to('/settings');
     }
-    else {
-      $admin++;
-      $self->logf(debug => '[reg] First login == admin') if DEBUG;
-      $delay->begin->();
-    }
-  }, sub {  # Get uid unless user exists
-    my ($delay,$uid)=@_;
-    if($uid) {
-      $self->stash('errors')->{login} = 'Username is taken.';
-      $self->render;
-    }
-    else {
-      $self->redis->incr('user:uids',$delay->begin);
-    }
-  }, sub { # Create user
-    my ($delay,$uid)=@_;
-    my $login = $self->param('login');
-    my $digest = crypt $self->param('password'), join '', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
-    $self->logf(debug => '[reg] New user uid=%s, login=%s', $uid, $self->param('login')) if DEBUG;
-    $self->session(uid=>$uid,login => $self->param('login'));
-    $self->redis->execute(
-      [ set => "user:$login:uid", $uid ],
-      [ hmset => "user:$uid", digest => $digest, email => scalar $self->param('email') ],
-      $delay->begin,
-    );
-  }, sub {
-    my ($delay)=@_;
-    $self->redirect_to('/settings');
-  });
+  );
 }
 
 sub _got_invalid_register_params {
-  my($self, $secret_required) = @_;
-  my $errors = $self->stash('errors');
-  my $email = $self->param('email') || '';
+  my ($self, $secret_required) = @_;
+  my $errors    = $self->stash('errors');
+  my $email     = $self->param('email') || '';
   my @passwords = $self->param('password');
 
-  if($secret_required) {
+  if ($secret_required) {
     my $secret = $self->param('invite') || 'some-weird-secret-which-should-never-be-generated';
     $self->logf(debug => '[reg] Validating invite code %s', $secret) if DEBUG;
-    if($secret ne crypt($email.$self->app->secret, $secret) && $secret ne 'OPEN SESAME') {
+    if ($secret ne crypt($email . $self->app->secret, $secret) && $secret ne 'OPEN SESAME') {
       $self->logf(debug => '[reg] Invalid invite code.') if DEBUG;
-      $errors->{invite}='Invalid invite code.'
+      $errors->{invite} = 'Invalid invite code.';
     }
   }
 
-  if(($self->param('login') || '') !~ m/^[\w]{4,15}$/) {
+  if (($self->param('login') || '') !~ m/^[\w]{4,15}$/) {
     $errors->{login} = 'Username must consist of letters and numbers and be 4-15 characters long';
   }
-  if($self->param('email') !~ m/.\@./) {
+  if ($self->param('email') !~ m/.\@./) {
     $errors->{email} = 'Invalid email.';
   }
 
-  if((grep { $_ } @passwords) != 2 or $passwords[0] ne $passwords[1]) {
+  if ((grep {$_} @passwords) != 2 or $passwords[0] ne $passwords[1]) {
     $errors->{password} = 'You need to enter the same password twice.';
   }
-  elsif(length($passwords[0]) < 6) {
+  elsif (length($passwords[0]) < 6) {
     $errors->{password} = 'The password must be at least 6 characters long';
   }
 
@@ -159,8 +165,8 @@ Will delete data from session.
 =cut
 
 sub logout {
-  my $self=shift;
-  $self->session(uid=>undef,login=>undef);
+  my $self = shift;
+  $self->session(uid => undef, login => undef);
   $self->redirect_to('/');
 }
 
@@ -171,40 +177,39 @@ Used to retrieve, save and update connection information.
 =cut
 
 sub settings {
-  my $self = shift;
-  my $uid = $self->session('uid');
+  my $self   = shift;
+  my $uid    = $self->session('uid');
   my $action = $self->param('action') || '';
-  my(@actions, $cids, @connections, @clients);
+  my (@actions, $cids, @connections, @clients);
 
   $self->stash(connections => \@connections);
-  $self->stash(clients => \@clients);
-  
+  $self->stash(clients     => \@clients);
+
   $self->render_later;
   Mojo::IOLoop->delay(
-    sub { # get connections
+    sub {    # get connections
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
-    sub { # get connection data
-      my $delay=shift;
+    sub {    # get connection data
+      my $delay = shift;
       $cids = shift;
       $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
       $self->redis->execute(
-        (map { [ hgetall => "connection:$_" ] } @$cids),
-        (map { [ smembers => "connection:$_:channels" ] } @$cids),
+        (map { [hgetall => "connection:$_"] } @$cids), (map { [smembers => "connection:$_:channels"] } @$cids),
 
         $delay->begin
       );
     },
-    sub { # convert connections to data structures
+    sub {    # convert connections to data structures
       my $delay = shift;
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
-      for(my $i=0; $i<@$cids; $i++) {
-        my $info=$_[$i];
+      for (my $i = 0; $i < @$cids; $i++) {
+        my $info = $_[$i];
         $info->{id} = $cids->[$i];
-        $info->{channels}=join(' ',@{ $_[@$cids+$i] });
+        $info->{channels} = join(' ', @{$_[@$cids + $i]});
         push @connections, $info;
       }
-      push @connections, { id => 0, %{ $self->app->config->{'default_connection'} }, nick => $self->session('login') };
+      push @connections, {id => 0, %{$self->app->config->{'default_connection'}}, nick => $self->session('login')};
       $self->param(connection => $connections[0]{id}) unless defined $self->param('connection');
       $self->render;
     },
@@ -216,47 +221,55 @@ sub add_connection {
 
   Mojo::IOLoop->delay(
     sub {
-   $self->app->core->add_connection($self->session('uid'), {
-      host => $self->param('host') || '',
-      nick => $self->param('nick') || '',
-      user => $self->param('user') || $self->session('login'),
-      channels => $self->param('channels') || '',
-    }, $_[0]->begin);
-  },
-  sub {
-    my ($delay,$cid,$cname)=@_;
-    unless($cid) {
-      $self->stash(errors => $cname); # cname is a hash-ref if $cid is undef
-      $self->render;
-      return;
-    }
-    $self->param(connection => $cid);
-    $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
-    $self->redis->publish('core:control',"start:$cid");
-    $self->redirect_to('settings');
-  },
+      $self->app->core->add_connection(
+        $self->session('uid'),
+        {
+          host     => $self->param('host')     || '',
+          nick     => $self->param('nick')     || '',
+          user     => $self->param('user')     || $self->session('login'),
+          channels => $self->param('channels') || '',
+        },
+        $_[0]->begin
+      );
+    },
+    sub {
+      my ($delay, $cid, $cname) = @_;
+      unless ($cid) {
+        $self->stash(errors => $cname);    # cname is a hash-ref if $cid is undef
+        $self->render;
+        return;
+      }
+      $self->param(connection => $cid);
+      $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
+      $self->redis->publish('core:control', "start:$cid");
+      $self->redirect_to('settings');
+    },
   );
 }
 
 sub edit_connection {
   my $self = shift;
-  my $cid = $self->param('connection');
+  my $cid  = $self->param('connection');
 
   Mojo::IOLoop->delay(
     sub {
-      my $delay=shift;
-      $self->redis->sismember("user:".$self->session('uid').":connections",$cid,$delay->begin);
+      my $delay = shift;
+      $self->redis->sismember("user:" . $self->session('uid') . ":connections", $cid, $delay->begin);
     },
     sub {
-      my ($delay,$member)=@_;
+      my ($delay, $member) = @_;
       return $self->render_not_found unless $member;
       $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
-      $self->app->core->update_connection($cid, {
-        host => $self->param('host') || '',
-        nick => $self->param('nick') || '',
-        user => $self->param('user') || $self->session('login'),
-        channels => $self->param('channels') || '',
-      }, $delay->begin);
+      $self->app->core->update_connection(
+        $cid,
+        {
+          host     => $self->param('host')     || '',
+          nick     => $self->param('nick')     || '',
+          user     => $self->param('user')     || $self->session('login'),
+          channels => $self->param('channels') || '',
+        },
+        $delay->begin
+      );
     },
     sub {
       $self->redirect_to('settings');
@@ -266,38 +279,34 @@ sub edit_connection {
 
 sub delete_connection {
   my $self = shift;
-  my $uid = $self->session('uid');
-  my $cid = $self->param('connection');
+  my $uid  = $self->session('uid');
+  my $cid  = $self->param('connection');
 
   $self->param(connection => 0);
 
   Mojo::IOLoop->delay(
     sub {
-      my $delay=shift;
-      $self->redis->sismember("user:".$self->session('uid').":connections",$cid,$delay->begin);
+      my $delay = shift;
+      $self->redis->sismember("user:" . $self->session('uid') . ":connections", $cid, $delay->begin);
     },
-  sub {
-    my ($delay,$member)=@_;
-    return $self->render_not_found unless $member;
-    $self->redis->publish("core:control", "stop:$cid");
-    $self->redis->srem("user:$uid:connections", $cid, $delay->begin);
-  },
-  sub {
-    my($delay, $removed) = @_;
-    return $self->render_not_found unless $removed;
-    $self->redis->execute([ keys => "connection:$cid:*" ], $_[0]->begin);
-  },
-  sub {
-    my($delay, $keys) = @_;
-    $self->redis->execute(
-      [ del => @$keys ],
-      [ srem => "connections", $cid ],
-      $delay->begin,
-    );
-  },
-  sub {
-    $self->redirect_to('settings');
-  }
+    sub {
+      my ($delay, $member) = @_;
+      return $self->render_not_found unless $member;
+      $self->redis->publish("core:control", "stop:$cid");
+      $self->redis->srem("user:$uid:connections", $cid, $delay->begin);
+    },
+    sub {
+      my ($delay, $removed) = @_;
+      return $self->render_not_found unless $removed;
+      $self->redis->execute([keys => "connection:$cid:*"], $_[0]->begin);
+    },
+    sub {
+      my ($delay, $keys) = @_;
+      $self->redis->execute([del => @$keys], [srem => "connections", $cid], $delay->begin,);
+    },
+    sub {
+      $self->redirect_to('settings');
+    }
   );
 }
 
