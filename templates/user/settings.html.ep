@@ -1,5 +1,5 @@
 % title 'Settings';
-% my $connection;
+% my ($connection,$id);
 <div class="conversation-list">
   <div class="span2">
     <h4 class="nav">
@@ -12,6 +12,7 @@
     % for my $conn (@$connections) {
       % if($conn->{id} eq param('connection')) {
       % $connection = $conn;
+      % $id=$connection->{id};
       <li class="active">
       % } else {
       <li>
@@ -32,14 +33,13 @@
 <div class="row-fluid">
   <div class="span10 offset2">
   <h2 class="page-header">Settings</h2>
-  % if($connection) {
     %= include('inc/alert')
-    %= form_for 'settings', class => 'form-horizontal', method=>'post', begin
+    %= form_for url_for($id ? 'connection.edit' :'connection.add', id=>$id), class => 'form-horizontal', method=>'post', begin
       %= form_block host => class => ['control-group'], begin
         <label class="control-label" for="host">Server</label>
         <div class="controls">
           %= text_field 'host', $connection->{host}, id => 'host'
-          %= hidden_field connection => $connection->{id};
+          %= hidden_field connection => $id;
           <p class="help-block">Add ":port" unless you want to use default port 6667.</p>
         </div>
       % end
@@ -58,14 +58,17 @@
         </div>
       % end
       <div class="form-actions">
-      % if($connection->{id}) {
-        <button type="submit" class="btn btn-info">Save</button>
-        <button type="submit" class="btn" name="action" value="delete">Delete</button>
-      % } else {
-        <button type="submit" class="btn btn-info">Add</button>
-      % }
+        <button type="submit" class="btn btn-info"><%= $id ? 'Save' : 'Add'%></button>
       </div>
+        
     % end
-  % }
+    % if($id) {
+      %= form_for url_for('connection.delete',id=>$id), class => 'form-horizontal', method=>'post', begin
+      <div class="form-actions">
+        <label for="action"> DANGER ZONE: If you delete your connection, ifs permanently gone.</label>
+
+      <button type="submit" class="btn btn-info" name="action" value="delete">Delete</button>
+    </div>
+    % end }
   </div>
 </div>

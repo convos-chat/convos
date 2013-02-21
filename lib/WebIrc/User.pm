@@ -178,41 +178,21 @@ sub settings {
 
   $self->stash(connections => \@connections);
   $self->stash(clients => \@clients);
-
-  if($self->req->method eq 'POST') {
-    push @actions, $action eq 'delete'        ? $self->_delete_connection
-                 : $self->param('connection') ? $self->_update_connection
-                 :                              $self->_add_connection;
-  }
-  if($action eq 'connect') {
-    push @actions, sub {
-      $self->redirect_to(view =>
-        host => $self->param('host'),
-        target => ($self->param('channels') =~ /(\S+)/)[0] || '',
-      );
-    };
-  }
-
-  my $last = sub {
-    push @connections, { id => 0, %{ $self->app->config->{'default_connection'} }, nick => $self->session('login') };
-    $self->param(connection => $connections[0]{id}) unless defined $self->param('connection');
-    $self->render;
-  };
+  
   $self->render_later;
   Mojo::IOLoop->delay(
-    @actions,
     sub { # get connections
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
     sub { # get connection data
-      $cids = $_[1];
+      my $delay=shift;
+      $cids = shift;
       $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
-      return $last->() unless $cids and @$cids;
       $self->redis->execute(
         (map { [ hgetall => "connection:$_" ] } @$cids),
         (map { [ smembers => "connection:$_:channels" ] } @$cids),
 
-        $_[0]->begin
+        $delay->begin
       );
     },
     sub { # convert connections to data structures
@@ -224,15 +204,18 @@ sub settings {
         $info->{channels}=join(' ',@{ $_[@$cids+$i] });
         push @connections, $info;
       }
-      $last->();
+      push @connections, { id => 0, %{ $self->app->config->{'default_connection'} }, nick => $self->session('login') };
+      $self->param(connection => $connections[0]{id}) unless defined $self->param('connection');
+      $self->render;
     },
   );
 }
 
-sub _add_connection {
+sub add_connection {
   my $self = shift;
 
-  sub {
+  Mojo::IOLoop->delay(
+    sub {
    $self->app->core->add_connection($self->session('uid'), {
       host => $self->param('host') || '',
       nick => $self->param('nick') || '',
@@ -250,51 +233,72 @@ sub _add_connection {
     $self->param(connection => $cid);
     $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
     $self->redis->publish('core:control',"start:$cid");
-    $delay->begin->();
+    $self->redirect_to('settings');
   },
+  );
 }
 
-sub _update_connection {
+sub edit_connection {
   my $self = shift;
   my $cid = $self->param('connection');
 
-  $self->param(user => $self->session('login')) unless $self->param('user');
-
-  sub {
-    $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
-    $self->app->core->update_connection($cid, {
-      host => $self->param('host') || '',
-      nick => $self->param('nick') || '',
-      user => $self->param('user') || $self->session('login'),
-      channels => $self->param('channels') || '',
-    }, $_[0]->begin);
-  },
+  Mojo::IOLoop->delay(
+    sub {
+      my $delay=shift;
+      $self->redis->sismember("user:".$self->session('uid').":connections",$cid,$delay->begin);
+    },
+    sub {
+      my ($delay,$member)=@_;
+      return $self->render_not_found unless $member;
+      $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
+      $self->app->core->update_connection($cid, {
+        host => $self->param('host') || '',
+        nick => $self->param('nick') || '',
+        user => $self->param('user') || $self->session('login'),
+        channels => $self->param('channels') || '',
+      }, $delay->begin);
+    },
+    sub {
+      $self->redirect_to('settings');
+    }
+  );
 }
 
-sub _delete_connection {
+sub delete_connection {
   my $self = shift;
   my $uid = $self->session('uid');
   my $cid = $self->param('connection');
 
   $self->param(connection => 0);
 
+  Mojo::IOLoop->delay(
+    sub {
+      my $delay=shift;
+      $self->redis->sismember("user:".$self->session('uid').":connections",$cid,$delay->begin);
+    },
   sub {
-    $self->redis->srem("user:$uid:connections", $cid, $_[0]->begin);
+    my ($delay,$member)=@_;
+    return $self->render_not_found unless $member;
+    $self->redis->publish("core:control", "stop:$cid");
+    $self->redis->srem("user:$uid:connections", $cid, $delay->begin);
   },
   sub {
     my($delay, $removed) = @_;
-    return $_[0]->begin->() unless $removed;
+    return $self->render_not_found unless $removed;
     $self->redis->execute([ keys => "connection:$cid:*" ], $_[0]->begin);
   },
   sub {
     my($delay, $keys) = @_;
-    $self->redis->publish("core:control", "stop:$cid");
     $self->redis->execute(
       [ del => @$keys ],
       [ srem => "connections", $cid ],
       $delay->begin,
     );
   },
+  sub {
+    $self->redirect_to('settings');
+  }
+  );
 }
 
 =head1 COPYRIGHT

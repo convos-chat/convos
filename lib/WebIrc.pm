@@ -141,7 +141,10 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $private_r=$r->bridge('/')->to('user#auth');
-  $private_r->route('/settings')->to('user#settings')->name('settings');
+  $private_r->get('/settings')->to('user#settings')->name('settings');
+  $private_r->post('/add')->to('user#add_connection')->name('connection.add');
+  $private_r->post('/edit/:id')->to('user#edit_connection')->name('connection.edit');
+  $private_r->post('/delete/:id')->to('user#delete_connection')->name('connection.delete');
 
   $private_r->get('/history/:page')->to('client#history');
   $private_r->websocket('/socket')->to('client#socket');
