@@ -300,10 +300,9 @@ Delete a connection.
 sub delete_connection {
   my $self = shift;
   my $uid  = $self->session('uid');
-  my $cid  = $self->param('connection');
+  my $cid  = $self->param('id');
 
-  $self->param(connection => 0);
-
+  $self->render_later;
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
