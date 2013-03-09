@@ -8,7 +8,7 @@
       </h4>
     </ul>
   % for my $c (@$connections) {
-    <ul class="server nav nav-list" id="connection_list_<%= $c->{id} %>"  data-cid="<%=$c->{id}%>" data-nick="<%= $c->{nick} %>">
+    <ul class="server nav nav-list" id="connection_list_<%= $c->{id} %>"  data-cid="<%=$c->{id}%>" data-nick="<%= $c->{current_nick} || $c->{nick} %>">
       <li id="target_<%= $c->{id} %>" class="<%= is_active($c) ? ' active' : '' %> nav-header">
         %= link_to url_for('server.view',cid => $c->{id}), begin
           %= $c->{host}

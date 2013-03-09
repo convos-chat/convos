@@ -63,7 +63,7 @@ Used to render the main IRC client view.
 sub view {
   my $self   = shift->render_later;
   my $uid    = $self->session('uid');
-  my @keys   = qw/ current_nick host /;
+  my @keys   = qw/ nick current_nick host /;
   my $target = $self->param('target');
   my $cid    = $self->param('cid');
   my $connections;
