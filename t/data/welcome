@@ -1,0 +1,38 @@
+:spectral.shadowcat.co.uk 001 test123 :Welcome to the MAGnet Internet Relay Chat Network test123
+:spectral.shadowcat.co.uk 002 test123 :Your host is spectral.shadowcat.co.uk[0.0.0.0/6667], running version hybrid-7.2.3
+:spectral.shadowcat.co.uk 003 test123 :This server was created Feb  8 2010 at 21:26:22
+:spectral.shadowcat.co.uk 004 test123 spectral.shadowcat.co.uk hybrid-7.2.3 CDGabcdfgiklnorsuwxyz biklmnopstveIh bkloveIh
+:spectral.shadowcat.co.uk 005 test123 CALLERID CASEMAPPING=rfc1459 DEAF=D KICKLEN=160 MODES=4 NICKLEN=19 PREFIX=(ohv)@%+ STATUSMSG=@%+ TOPICLEN=390 NETWORK=MAGnet MAXLIST=beI:50 MAXTARGETS=4 CHANTYPES=#& :are supported by this server
+:spectral.shadowcat.co.uk 005 test123 CHANLIMIT=#&:50 CHANNELLEN=50 CHANMODES=eIb,k,l,imnpst ELIST=CMNTU SAFELIST KNOCK AWAYLEN=160 EXCEPTS=e INVEX=I :are supported by this server
+:spectral.shadowcat.co.uk 251 test123 :There are 7 users and 1393 invisible on 1 servers
+:spectral.shadowcat.co.uk
+ 252 test123 16 :IRC Operators online
+:spectral.shadowcat.co.uk 253 test123 3 :unknown connection(s)
+:spectral.shadowcat.co.uk 254 test123 434 :channels formed
+:spectral.shadowcat.co.uk 255 test123 :I have 1400 clients and 0 servers
+:spectral.shadowcat.co.uk 265 test123 :Current local users: 1400  Max: 1564
+:spectral.shadowcat.co.uk 266 test123 :Current global users: 1400  Max: 1564
+:spectral.shadowcat.co.uk 375 test123 :- spectral.shadowcat.co.uk Message of the Day -
+:spectral.shadowcat.co.uk 372 test123 :-                      _             _
+:spectral.shadowcat.co.uk 372 test123 :-  ___ _ __   ___  ___| |_ _ __ __ _| |
+:spectral.shadowcat.co.uk 372 test123 :- / __| '_ \ / _ \/ __| __| '__/ _` | |
+:spectral.shadowcat.co.uk 372 test123 :- \__ \ |_) |  __/ (__| |_| | | (_| | |  _
+:spectral.shadowcat.co.uk 372 test123 :- |___/ .__/ \___|\___|\__|_|  \__,_|_| (_)
+:spectral.shadowcat.co.uk 372 test123 :-     |_|
+:spectral.shadowcat.co.uk 372 test123 :
+-      _               _                        _
+:spectral.shadowcat.co.uk 372 test123 :-  ___| |__   __ _  __| | _____      _____ __ _| |_
+:spectral.shadowcat.co.uk 372 test123 :- / __| '_ \ / _` |/ _` |/ _ \ \ /\ / / __/ _` | __|
+:spectral.shadowcat.co.uk 372 test123 :- \__ \ | | | (_| | (_| | (_) \ V  V / (_| (_| | |_
+:spectral.shadowcat.co.uk 372 test123 :- |___/_| |_|\__,_|\__,_|\___/ \_/\_/ \___\__,_|\__|
+:spectral.shadowcat.co.uk 372 test123 :-
+:spectral.shadowcat.co.uk 372 test123 :- We scan all connecting clients for open proxies and other
+:spectral.shadowcat.co.uk 372 test123 :- exploitable nasties. If you don't wish to be scanned,
+:spectral.shadowcat.co.uk 372 test123 :- don't connect again, and sorry for scanning you this time.
+:spectral.shadowcat.co.uk 372 test123 :-
+:spectral.shadowcat.co.uk 372 test123 :- This server is run by http://www.shadowcat.co.uk/ as part
+:spectral.shadowcat.co.uk 372 test123 :- of the http://www.irc.perl.org/ network. Please configure
+:spectral.shadowcat.
+co.uk 372 test123 :- your client to /connect irc.perl.org, not directly.
+:spectral.shadowcat.co.uk 376 test123 :End of /MOTD command.
+:test123!~my@1.2.3.4.foo.com MODE test123 :+i

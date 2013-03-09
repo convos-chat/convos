@@ -12,7 +12,7 @@ TODO
 
 use Mojo::Base -base;
 use WebIrc::Core::Connection;
-use constant DEBUG => $ENV{WIRC_DEBUG} // 1;
+use constant DEBUG => $ENV{WIRC_DEBUG} // 0;
 
 =head1 ATTRIBUTES
 
@@ -22,7 +22,7 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
-has redis => sub { Mojo::Redis->new };
+has redis        => sub { Mojo::Redis->new };
 has _connections => sub { +{} };
 
 =head1 METHODS
@@ -37,26 +37,30 @@ sub start {
   my $self = shift;
 
   Scalar::Util::weaken($self);
-  $self->redis->smembers('connections', sub {
-    my ($redis, $cids) = @_;
-    return unless $cids and @$cids;
-    warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
-    for my $cid (@$cids) {
-      my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-      $self->_connections->{$cid} = $conn;
-      $conn->connect(sub {});
+  $self->redis->smembers(
+    'connections',
+    sub {
+      my ($redis, $cids) = @_;
+      return unless $cids and @$cids;
+      warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
+      for my $cid (@$cids) {
+        my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+        $self->_connections->{$cid} = $conn;
+        $conn->connect(sub { });
+      }
     }
-  });
+  );
   $self->{control} = $self->redis->subscribe("core:control");
-  $self->{control}->on(message => sub {
-    my ($sub, $raw_msg)=@_;
-    my ($msg,$cid)=split(':',$raw_msg);
-    my $action = 'ctrl_'. $msg;
-    $self->$action($cid) if $self->can($action);
-  });
-  
-}
+  $self->{control}->on(
+    message => sub {
+      my ($sub, $raw_msg) = @_;
+      my ($msg, $cid) = split(':', $raw_msg);
+      my $action = 'ctrl_' . $msg;
+      $self->$action($cid);
+    }
+  );
 
+}
 
 
 =head2 add_connection
@@ -74,7 +78,7 @@ set all the keys in the %connection hash
 =cut
 
 sub add_connection {
-  my ($self,$uid,$conn,$cb) = @_;
+  my ($self, $uid, $conn, $cb) = @_;
   my %errors;
 
   for my $name (qw/ host nick user /) {
@@ -87,18 +91,21 @@ sub add_connection {
 
   Scalar::Util::weaken($self);
   return $self->$cb(undef, \%errors) if keys %errors;
-  return $self->redis->incr('connections:id',sub {
-    my ($redis,$cid) = @_;
+  return $self->redis->incr(
+    'connections:id',
+    sub {
+      my ($redis, $cid) = @_;
 
-    $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-    $self->redis->execute(
-      [ sadd => "connections", $cid ],
-      [ sadd => "user:$uid:connections", $cid ],
-      [ hmset => "connection:$cid", %$conn ],
-      [ sadd=> "connection:$cid:channels", @channels ],
-      sub { $self->$cb($cid) },
-    );
-  });
+      $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+      $self->redis->execute(
+        [sadd  => "connections",              $cid],
+        [sadd  => "user:$uid:connections",    $cid],
+        [hmset => "connection:$cid",          %$conn],
+        [sadd  => "connection:$cid:channels", @channels],
+        sub { $self->$cb($cid) },
+      );
+    }
+  );
 }
 
 =head2 update_connection
@@ -115,7 +122,7 @@ Update a connection's settings and reconnect.
 =cut
 
 sub update_connection {
-  my ($self,$cid,$conn,$cb)=@_;
+  my ($self, $cid, $conn, $cb) = @_;
   my (%errors, @channels, $channels, $connections);
 
   for my $name (qw/ host nick user /) {
@@ -129,12 +136,12 @@ sub update_connection {
 
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->execute(
-    [ hmset => "connection:$cid", %$conn ],
-    [ del   => "connection:$cid:channels"],
-    [ sadd  => "connection:$cid:channels", @channels],
+    [hmset => "connection:$cid",          %$conn],
+    [del   => "connection:$cid:channels"],
+    [sadd  => "connection:$cid:channels", @channels],
     sub {
-      $self->redis->publish('core:control',"restart:$cid");
-      $self->$cb($cid) ;
+      $self->redis->publish('core:control', "restart:$cid");
+      $self->$cb($cid);
     },
   );
 }
@@ -148,12 +155,14 @@ Stop a connection by connection id.
 =cut
 
 sub ctrl_stop {
-  my ($self,$cid)=@_;
+  my ($self, $cid) = @_;
 
   Scalar::Util::weaken($self);
-  $self->_connections->{$cid}->disconnect(sub {
-    delete $self->_connections->{$cid};
-  });
+  $self->_connections->{$cid}->disconnect(
+    sub {
+      delete $self->_connections->{$cid};
+    }
+  );
 }
 
 =head2 ctrl_restart
@@ -166,10 +175,11 @@ Restart a connection by connection id.
 
 
 sub ctrl_restart {
-  my ($self,$cid)=@_;
+  my ($self, $cid) = @_;
+
   # flush
   Scalar::Util::weaken($self);
-  if($self->_connections->{$cid}) {
+  if ($self->_connections->{$cid}) {
     $self->_connections->{$cid}->disconnect(sub { $self->ctrl_start($cid) });
   }
   else {
@@ -184,9 +194,9 @@ Start a single connection by connection id.
 =cut
 
 sub ctrl_start {
-  my ($self,$cid) = @_;
+  my ($self, $cid) = @_;
   my $conn = $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-  $conn->connect(sub {});
+  $conn->connect(sub { });
 }
 
 =head2 login
@@ -202,21 +212,23 @@ either:
 =cut
 
 sub login {
-  my($self, $params, $cb)=@_;
+  my ($self, $params, $cb) = @_;
   my $uid;
 
   Mojo::IOLoop->delay(
     sub {
-      $self->redis->get("user:$params->{login}:uid",$_[0]->begin);
-    }, sub {
+      $self->redis->get("user:$params->{login}:uid", $_[0]->begin);
+    },
+    sub {
       my $delay = shift;
       $uid = shift;
       return $self->$cb($uid, shift) unless $uid && $uid =~ /\d+/;
       warn "[core] Got the uid: $uid" if DEBUG;
       $self->redis->hget("user:$uid", "digest", $delay->begin);
-    }, sub {
-      my($delay,$digest)=@_;
-      if(crypt($params->{password},$digest) eq $digest) {
+    },
+    sub {
+      my ($delay, $digest) = @_;
+      if (crypt($params->{password}, $digest) eq $digest) {
         warn "[core] User $uid has valid password" if DEBUG;
         $self->$cb($uid);
       }
