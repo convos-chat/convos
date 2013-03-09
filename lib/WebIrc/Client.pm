@@ -67,10 +67,15 @@ sub view {
 
   Mojo::IOLoop->delay(
     sub {
+      $self->redis->sismember("user:$uid:connections",$cid, $_[0]->begin);
+      },
+    sub {
+      my($delay, $conn) = @_;
+      return $self->render_not_found if(!$conn);
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
     sub {
-      $connections = $_[1] || [];
+      $connections = $_[1];
       $self->redis->execute(
         (map { [ hmget => "connection:$_" => @keys ] } @$connections),
         $_[0]->begin,
@@ -94,13 +99,14 @@ sub view {
       }
 
       @info = sort { $a->{host} cmp $b->{host} } @info;
-      $cid //= $info[0]{id};
-      $target //= $info[0]{channels}[0];
       
       my ($conn)=grep { $_->{cid} && $cid == $_->{cid} } @info;
       $self->stash(
         connections => \@info,
+<<<<<<< HEAD
         nick=>  ($conn ? $conn->{nick} : $info[0]{current_nick} ),
+=======
+>>>>>>> develop
         connection_id => $cid,
         target => $target,
       );
@@ -195,7 +201,8 @@ sub _format_conversation {
       next;
     }
     @{$message}{qw/nick user host/} = parse_user($message->{prefix});
-    my @params=@{$message->{params}};shift @params;
+    $nick //= '[server]';
+    my @params=@{$message->{params}|| []};shift @params;
     $message->{message} = xml_escape(join(' ',@params)); # 1 = normal, 0 = error
     $message->{message} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
     $message->{class_name} = $message->{message} =~ /\b$nick\b/ ? 'focus'

@@ -72,7 +72,7 @@ Holds the id of this connection. This attribute is required.
 
 =cut
 
-has id => 0;
+has 'id';
 
 =head2 redis
 
@@ -261,9 +261,8 @@ sub add_server_message {
     $self->redis->zadd("connection:@{[$self->id]}:msg", time, $message->{raw_line});
 
     # 1 = normal, 0 = error
-    my $params = $message->{params};
-    shift $params;
-    $self->_publish({message => join(' ', $message->{params})});
+    my $params=$message->{params};shift $params;
+    $self->_publish({ status=>200, message => join(' ',@{$message->{params}})});
   }
 }
 
@@ -425,14 +424,16 @@ sub irc_join {
 =cut
 
 sub irc_nick {
-  my ($self, $message) = @_;
-  my ($old_nick) = IRC::Utils::parse_user($message->{prefix});
+  my($self, $message) = @_;
+  my($old_nick) = IRC::Utils::parse_user($message->{prefix});
+  warn "old_nick $old_nick - ".$self->_irc->nick;
   my $new_nick = $message->{params}[0];
 
   warn "comparing $old_nick to " . $self->_irc->nick;
   if ($old_nick eq $self->_irc->nick) {
     $self->redis->hset("connection:@{[$self->id]}", current_nick => $new_nick);
   }
+  
 
   $self->_publish({old_nick => $old_nick, new_nick => $new_nick});
 }

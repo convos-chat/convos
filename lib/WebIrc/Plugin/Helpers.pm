@@ -69,6 +69,11 @@ my %commands = (
                 });
                 return;
   },
+  reconnect=> sub { my ($self,$data) = @_;
+                $self->redis->publish('core:control',"restart:".$data->{cid});
+                return;
+  },
+  
   help => sub {
     my ($self, $data) = @_;
     $self->send_json(
