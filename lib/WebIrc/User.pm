@@ -216,6 +216,14 @@ sub settings {
   );
 }
 
+
+=head2 add_connection
+
+Add a new connection.
+
+=cut
+
+
 sub add_connection {
   my $self = shift;
 
@@ -247,6 +255,12 @@ sub add_connection {
   );
 }
 
+=head2 edit_connection
+
+Change a connection.
+
+=cut
+
 sub edit_connection {
   my $self = shift;
   my $cid  = $self->param('connection');
@@ -276,6 +290,12 @@ sub edit_connection {
     }
   );
 }
+
+=head2 delete_connection
+
+Delete a connection.
+
+=cut
 
 sub delete_connection {
   my $self = shift;

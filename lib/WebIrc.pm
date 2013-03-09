@@ -92,7 +92,7 @@ Proxy manager
 has redis => sub {
   my $self  = shift;
   my $log   = $self->app->log;
-  my $redis = Mojo::Redis->new(server => ($self->config->{redis} || '127.0.0.1:6379'), timeout => 600);
+  my $redis = Mojo::Redis->new(server => $self->config->{redis}, timeout => 600);
 
   $redis->on(
     error => sub {

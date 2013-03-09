@@ -1,5 +1,5 @@
 use t::Helper;
-BEGIN { $ENV{SKIP_CONNECT} = 1; }
+BEGIN { $ENV{MOJO_MODE} = 'testing' }
 $t->app->redis->on(
   error => sub {
     my ($redis, $error) = @_;
@@ -13,18 +13,12 @@ $t->get_ok('/login')->status_is('200')->element_exists_not('.alert');
 
 # 'Done with login test';
 $t->get_ok('/register')->status_is('200')->element_exists_not('.error');
+
 my $delay = Mojo::IOLoop->delay(
   sub {
     my $delay = shift;
-    $t->app->redis->select(11, $delay->begin);
-  },
-  sub {
-    my $delay = shift;
     $t->app->redis->flushdb($delay->begin);
-  },
-  sub {
-    my $delay = shift;
-  }
+  }, sub { }
 );
 $delay->wait;
 $t->post_ok('/login', form => {login => 'foobar', password => 'barbar'})->status_is('200')->element_exists('.alert');
