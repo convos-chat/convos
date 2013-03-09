@@ -103,10 +103,6 @@ sub view {
       my ($conn)=grep { $_->{cid} && $cid == $_->{cid} } @info;
       $self->stash(
         connections => \@info,
-<<<<<<< HEAD
-        nick=>  ($conn ? $conn->{nick} : $info[0]{current_nick} ),
-=======
->>>>>>> develop
         connection_id => $cid,
         target => $target,
       );

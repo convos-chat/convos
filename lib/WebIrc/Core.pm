@@ -12,7 +12,7 @@ TODO
 
 use Mojo::Base -base;
 use WebIrc::Core::Connection;
-use constant DEBUG => $ENV{WIRC_DEBUG} // 1;
+use constant DEBUG => $ENV{WIRC_DEBUG} // 0;
 
 =head1 ATTRIBUTES
 

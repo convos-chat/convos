@@ -124,7 +124,6 @@ sub startup {
 
   $self->plugin('Mojolicious::Plugin::UrlWith');
   $self->plugin('WebIrc::Plugin::Helpers');
-  $self->plugin('Devlicious');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
   $self->defaults(

@@ -1,5 +1,5 @@
 use t::Helper;
-
+BEGIN { $ENV{SKIP_CONNECT}=1; };
 $t->app->redis->on(error => sub {
   my ($redis,$error)=@_;
   ok(0,"An error occured:".$error);
@@ -8,7 +8,7 @@ $t->app->redis->on(error => sub {
 });
 
 $t->get_ok('/login')->status_is('200')->element_exists_not('.alert');
-diag 'Done with login test';
+# 'Done with login test';
 $t->get_ok('/register')->status_is('200')->element_exists_not('.error');
 my $delay=Mojo::IOLoop->delay(sub {
   my $delay=shift;
@@ -20,18 +20,18 @@ my $delay=Mojo::IOLoop->delay(sub {
   my $delay=shift;
 });
 $delay->wait;
-$t->post_form_ok('/login' => { login => 'foobar', password => 'barbar' })
+$t->post_ok('/login', form => { login => 'foobar', password => 'barbar' })
   ->status_is('200')
   ->element_exists('.alert');
 
-$t->post_form_ok('/register' => { login => '1', password => '1', email => '1' })
+$t->post_ok('/register', form => { login => '1', password => '1', email => '1' })
   ->status_is('200')
   ->element_exists('.error')
   ->element_exists('div[title*="Username must consist"]')
   ->element_exists('div[title*="Invalid email"]')
   ->element_exists('div[title*="same password twice"]');
 
-$t->post_form_ok('/register' => {
+$t->post_ok('/register', form => {
     login => 'foobar',
     email => 'foobar@barbar.com',
     password => ['barbar', 'barbar'],
@@ -39,33 +39,34 @@ $t->post_form_ok('/register' => {
   ->status_is('302');
 
 $t->ua->cookie_jar->empty; # logout
-diag 'same user tries to log in later on...';
-$t->post_form_ok('/login' => { login => 'foobar', password => 'barbar' })
+# 'same user tries to log in later on...';
+$t->post_ok('/login', form => { login => 'foobar', password => 'barbar' })
   ->status_is('302');
 
 $t->ua->cookie_jar->empty; # logout
-diag 'new user tries to log in...';
-$t->post_form_ok('/register' => {})
+# 'new user tries to log in...';
+$t->post_ok('/register', form=> {})
   ->status_is(200, 'Second user needs an invite code')
-  ->element_exists('.alert')
+  ->element_exists('.error')
   ->content_like(qr{Invalid invite code});
 
-$t->post_form_ok('/register' => {
+$t->post_ok('/register', form => {
     login => 'foobar',
     password => ['barbar', 'barbar'],
     email => 'marcus@iusethis.com',
-    secret => crypt('marcus@iusethis.com'.$t->app->secret, rand 1000),
+    invite=> crypt('marcus@iusethis.com'.$t->app->secret,'marcus@iusethis.com'),
   })
   ->status_is('200')
   ->element_exists('.error')
   ->element_exists('div[title*="Username is taken"]')
   ;
+#  diag $t->tx->res->body;
 
-$t->post_form_ok('/register' => {
+$t->post_ok('/register', form => {
     login => 'number2',
     password => ['barbar', 'barbar'],
     email => 'marcus@iusethis.com',
-    secret => crypt('marcus@iusethis.com'.$t->app->secret, rand 1000),
+    invite=> crypt('marcus@iusethis.com'.$t->app->secret, 'marcus@iusethis.com'),
   })
   ->status_is('302');
 

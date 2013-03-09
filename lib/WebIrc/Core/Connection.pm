@@ -484,6 +484,11 @@ sub irc_error {
   }
 }
 
+=head2 cmd_nick
+
+Handle nick commands from user. Change nick and set new nick in redis.
+
+=cut
 
 sub cmd_nick {
   my ($self, $message) = @_;

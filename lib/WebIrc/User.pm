@@ -103,7 +103,7 @@ sub register {
     else {
       $self->redis->incr('user:uids',$delay->begin);
     }
-  }, sub { # Create user
+    }, sub { # Create user
     my ($delay,$uid)=@_;
     my $login = $self->param('login');
     my $digest = crypt $self->param('password'), join '', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
@@ -138,7 +138,7 @@ sub _got_invalid_register_params {
   if(($self->param('login') || '') !~ m/^[\w]{4,15}$/) {
     $errors->{login} = 'Username must consist of letters and numbers and be 4-15 characters long';
   }
-  if($self->param('email') !~ m/.\@./) {
+  if(!$self->param('email') || $self->param('email') !~ m/.\@./) {
     $errors->{email} = 'Invalid email.';
   }
 

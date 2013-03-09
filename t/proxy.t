@@ -1,4 +1,4 @@
-use Test::More;
+use Test::More skip_all =>"Not implemented yet";
 use Mojo::IOLoop;
 use Mojo::IRC;
 use WebIrc::Core;
