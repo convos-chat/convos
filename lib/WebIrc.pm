@@ -90,23 +90,23 @@ Proxy manager
 =cut
 
 has redis => sub {
-  my $self=shift;
-  my $log = $self->app->log;
-  my $redis = Mojo::Redis->new(server=>($self->config->{redis}||'127.0.0.1:6379'), timeout=>600);
+  my $self  = shift;
+  my $log   = $self->app->log;
+  my $redis = Mojo::Redis->new(server => ($self->config->{redis} || '127.0.0.1:6379'), timeout => 600);
 
-  $redis->on(error => sub {
-    my($redis,$err)=@_;
-    $log->error('[REDIS ERROR] ' .$err);
-  });
+  $redis->on(
+    error => sub {
+      my ($redis, $err) = @_;
+      $log->error('[REDIS ERROR] ' . $err);
+    }
+  );
 
   return $redis;
 };
-has core => sub { WebIrc::Core->new(redis=>shift->redis)};
+has core => sub { WebIrc::Core->new(redis => shift->redis) };
 has archive => sub {
   my $self = shift;
-  WebIrc::Core::Archive->new(
-    $self->config->{archive} || $self->path_to('archive')
-  );
+  WebIrc::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
 has proxy => sub { WebIrc::Proxy->new(core => shift->core) };
 
@@ -119,17 +119,14 @@ This method will run once at server start
 =cut
 
 sub startup {
-  my $self = shift;
+  my $self   = shift;
   my $config = $self->plugin('Config');
 
   $self->plugin('Mojolicious::Plugin::UrlWith');
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
-  $self->defaults(
-    layout => 'default',
-    logged_in => 0,
-  );
+  $self->defaults(layout => 'default', logged_in => 0,);
 
   # Normal route to controller
   my $r = $self->routes;
@@ -152,12 +149,14 @@ sub startup {
   $private_r->get('/:cid/*target')->to('client#view')->name('channel.view');
   $private_r->get('/:cid')->to('client#view')->name('server.view');
 
-  $self->hook(before_dispatch => sub {
-    my $c = shift;
-    $c->stash(errors => {}); # this need to be set up each time, since it's a ref
-  });
+  $self->hook(
+    before_dispatch => sub {
+      my $c = shift;
+      $c->stash(errors => {});    # this need to be set up each time, since it's a ref
+    }
+  );
 
-  $self->core->start unless $ENV{SKIP_CONNECT};
+  $self->core->start  unless $ENV{SKIP_CONNECT};
   $self->proxy->start unless $ENV{DISABLE_PROXY};
 }
 

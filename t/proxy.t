@@ -1,4 +1,4 @@
-use Test::More;
+use Test::More skip_all => "Not implemented yet";
 use Mojo::IOLoop;
 use Mojo::IRC;
 use WebIrc::Core;
@@ -6,9 +6,7 @@ use Mojo::Redis;
 use strict;
 use warnings;
 
-
-
-my $redis= setup_test();
+my $redis = setup_test();
 my $core = WebIrc::Core->new(redis => $redis);
 $core->start;
 use_ok('WebIrc::Proxy');
@@ -32,7 +30,7 @@ $proxy->start(
     my $irc = Mojo::IRC->new(nick => 'test', user => 'test', pass => 'testing', host => "localhost:$port");
     warn('Connecting to ' . $irc->server);
     $irc->on(
-      irc_rpl_namreply=> sub {
+      irc_rpl_namreply => sub {
         my ($self, $message) = @_;
         is($message->{params}[2], '#wirc', 'Joined #wirc');
         Mojo::IOLoop->stop;
@@ -59,7 +57,7 @@ done_testing;
 
 
 sub setup_test {
-  my $t=shift;
+  my $t = shift;
   my $redis = Mojo::Redis->new(server => 'redis://127.0.0.1:6379/11');
   $redis->flushall;
   return $redis;

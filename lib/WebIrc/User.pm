@@ -144,7 +144,7 @@ sub _got_invalid_register_params {
   if (($self->param('login') || '') !~ m/^[\w]{4,15}$/) {
     $errors->{login} = 'Username must consist of letters and numbers and be 4-15 characters long';
   }
-  if ($self->param('email') !~ m/.\@./) {
+  if (!$self->param('email') || $self->param('email') !~ m/.\@./) {
     $errors->{email} = 'Invalid email.';
   }
 

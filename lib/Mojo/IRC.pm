@@ -251,20 +251,19 @@ Holds an instance of L<Mojo::IOLoop>.
 
 has ioloop => sub { Mojo::IOLoop->singleton };
 
-=head2 nick
+=head2 change_nick
 
-IRC server nickname. Will also change the nick in the server if this attribute
-is changed and we are connected to the IRC server.
+Change IRC nick name. Will only set nick accessor if not connected to a server.
 
 =cut
 
-sub nick {
+sub change_nick {
   my ($self, $nick) = @_;
-  my $old = $self->{nick} // '';
+  my $old = $self->nick // '';
 
   return $old unless defined $nick;
   return $self if $old && $old eq $nick;
-  $self->{nick} = $nick;
+  $self->nick($nick);
   $self->write(NICK => $nick) if $self->{stream};
   $self;
 }
@@ -286,12 +285,21 @@ IRC username.
 
 has user => '';
 
+=head2 nick
+
+IRC nick name accessor.
+
+=cut
+
+has nick => '';
+
 =head2 server
 
 Server name and optionally a port to connect to. Changing this while connected
 to the IRC server will issue a reconnect.
 
 =cut
+
 
 sub server {
   my ($self, $server) = @_;
@@ -301,7 +309,7 @@ sub server {
   return $old unless defined $server;
   return $self if $old && $old eq $server;
   $self->{server} = $server;
-  return $self if ! $self->{stream_id};
+  return $self if !$self->{stream_id};
   $self->disconnect(
     sub {
       $self->connect(sub { });
@@ -355,8 +363,7 @@ sub connect {
       my ($method, $message);
       my $buffer = '';
 
-      $err and return $self->emit(error => $err);
-      $self->emit('connect');
+      $err and return $self->$callback($err);
 
       $stream->timeout($TIMEOUT);
       $stream->on(
@@ -397,13 +404,22 @@ sub connect {
       );
 
       $self->{stream} = $stream;
-      $self->write(NICK => $self->nick);
-      $self->write(USER => $self->user, 8, '*', ':' . $self->name);
-      $self->write(PASS => $self->pass) if $self->pass;
-      my $drained=0;
-      $stream->on(drain => sub { 
-        unless($drained++) { $self->$callback; }
-      })
+      Mojo::IOLoop::Delay->new->steps(
+        sub {
+          $self->write(NICK => $self->nick, shift->begin);
+        },
+        sub {
+          $self->write(USER => $self->user, 8, '*', ':' . $self->name, shift->begin);
+        },
+        sub {
+          my $delay = shift;
+          return $self->write(PASS => $self->pass, $delay->begin) if $self->pass;
+          $delay->begin->();
+        },
+        sub {
+          $self->$callback;
+        }
+      );
     }
   );
 }
@@ -465,11 +481,12 @@ with " " and "\r\n" will be appended.
 =cut
 
 sub write {
+  my $cb   = ref $_[-1] eq 'CODE' ? pop : undef;
   my $self = shift;
-  my $buf = join ' ', @_;
+  my $buf  = join ' ', @_;
   croak('Tried to write without a stream') unless ref $self->{stream};
   warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
-  $self->{stream}->write("$buf\r\n");
+  $self->{stream}->write("$buf\r\n", $cb);
 }
 
 =head1 DEFAULT EVENT HANDLERS
@@ -546,6 +563,7 @@ added. The new nick will be stored in L</nick>.
 sub irc_err_nicknameinuse {
   my ($self, $message) = @_;
 
+  warn $self->nick . ' in use';
   $self->nick($self->nick . '_');
   $self->write(NICK => $self->nick);
 }
