@@ -287,7 +287,7 @@ sub add_message {
 
   $self->_publish($event => $data);
 
-  unless ($message->{params}[0] =~ /^\[#&]/x) {    # not a channel or me.
+  unless ($message->{params}[0] =~ /^[#&]/x) {    # not a channel or me.
     $self->redis->sadd("connection:@{[$self->id]}:conversations", $data->{target});
   }
 }
