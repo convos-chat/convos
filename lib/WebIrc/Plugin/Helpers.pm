@@ -82,8 +82,10 @@ my %commands = (
 
   help => sub {
     my ($self, $data) = @_;
+    warn "Sending help";
     $self->send_partial(
       'event/server_message',
+      timestamp => time,
       status  => 200,
       message => "Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"
     );

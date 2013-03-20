@@ -79,7 +79,7 @@ Structure.registerModule('Wirc.Chat', {
     
     this.input.autoCompleteNicks({old_nick: $data.data('old_nick'), new_nick: $data.data('new_nick')});
 
-    if($('#'+$data.data('target')).hasClass('active')) {
+    if($('#'+$data.data('target')).hasClass('active')|| ! $data.data('target')) {
       this.print($data);
     } else {
       this.displayUnread($data);

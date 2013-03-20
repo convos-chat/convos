@@ -364,7 +364,7 @@ Reply with topic
 sub irc_rpl_topic {
   my ($self, $message) = @_;
 
-  $self->_publish(channel_topic => {topic => $message->{params}[2], target => $message->{params}[1]});
+  $self->_publish(topic => {topic => $message->{params}[2], target => $message->{params}[1]});
 }
 
 =head2 irc_rpl_topicwhotime
@@ -377,7 +377,7 @@ sub irc_rpl_topicwhotime {
   my ($self, $message) = @_;
 
   $self->_publish(
-    channel_topic_by => {
+    topic_by => {
       ts     => DateTime->from_epoch(epoch => $message->{params}[3])->datetime,
       nick   => $message->{params}[2],
       target => $message->{params}[1]

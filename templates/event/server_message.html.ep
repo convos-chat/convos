@@ -1,4 +1,4 @@
-<li class="muted" data-target="target_<%=$cid%>">
+<li class="muted" <%= $self->stash('cid')  ? "data-target=\"".$self->stash('cid')."\"" : "" %>>
   <span><%= $status < 400 ? 'Notice' : 'Error' %> - <%= $message %></span>
 %if($self->stash('timestamp')) {
   <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S" %></span>
