@@ -1,0 +1,6 @@
+<li id="target_<%= $cid %>_<%= as_id $target %>" class="conversation">
+  <a href="/<%= cid %>/<%= url_escape target %>">
+    <%= $target %>
+    <span class="badge hide">0</span>
+  </a>
+</li>

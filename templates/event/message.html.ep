@@ -1,0 +1,5 @@
+<li class="message">
+  <span class="prefix"><%= $nick %>:</span>
+  <span><%= $message %></span>
+  <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>
+</li>

@@ -1,0 +1,1 @@
+<li id="target_<%= $cid %>_<%= as_id $channel %>" class="channel parted"></li>

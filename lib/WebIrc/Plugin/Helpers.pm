@@ -50,34 +50,43 @@ Takes a websocket command, parses it into a IRC resposne
 
 my %commands = (
   j     => 'JOIN',
-  join   => 'JOIN',
+  join  => 'JOIN',
   t     => sub { my $data = pop; "TOPIC $data->{target}" . ($data->{cmd} ? ' :' . $data->{cmd} : '') },
   topic => sub { my $data = pop; "TOPIC $data->{target}" . ($data->{cmd} ? ' :' . $data->{cmd} : '') },
   w     => 'WHOIS',
   whois => 'WHOIS',
   nick  => 'NICK',
   me   => sub { my $data = pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
-  msg  => sub { my $data = pop; $data->{cmd} =~ s!^(\w+)\s*!!;  "PRIVMSG $1 :$data->{cmd}" },
+  msg  => sub { my $data = pop; $data->{cmd} =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$data->{cmd}" },
   part => sub { my $data = pop; "PART " . ($data->{cmd} || $data->{target}) },
-  close=> sub { my ($self,$data) = @_;
-                my $target=$data->{cmd} || $data->{target};
-                $self->redis->sismember("connection:@{[$data->{cid}]}:conversations",$target, sub {
-                  my ($redis,$member)=@_;
-                  return unless $member;
-                  $self->redis->srem("connection:@{[$data->{cid}]}:conversations",$target);
-                  $self->send_json({cid => $data->{cid},status=>200, closed=>1,target=>$target});
-                });
-                return;
+  close => sub {
+    my ($self, $data) = @_;
+    my $target = $data->{cmd} || $data->{target};
+    $self->redis->sismember(
+      "connection:@{[$data->{cid}]}:conversations",
+      $target,
+      sub {
+        my ($redis, $member) = @_;
+        return unless $member;
+        $self->redis->srem("connection:@{[$data->{cid}]}:conversations", $target);
+        $self->send_partial( 'event/remove_conversation ', cid => $data->{cid}, target => $target);
+      }
+    );
+    return;
   },
-  reconnect=> sub { my ($self,$data) = @_;
-                $self->redis->publish('core:control',"restart:".$data->{cid});
-                return;
+  reconnect => sub {
+    my ($self, $data) = @_;
+    $self->redis->publish('core:control', "restart:" . $data->{cid});
+    return;
   },
-  
+
   help => sub {
     my ($self, $data) = @_;
-    $self->send_json(
-      {cid => $data->{cid}, status => 200, message => "Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"});
+    $self->send_partial(
+      'event/server_message',
+      status  => 200,
+      message => "Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"
+    );
     return;
   }
 );
@@ -92,7 +101,7 @@ sub parse_command {
         return $irc_cmd . ' ' . $data->{cmd};
       }
       else {
-        $self->send_json({cid => $data->{cid}, status => '401', message => 'Unknown command'});
+        $self->send_partial('event/server_message', status => '401', message => 'Unknown command');
       }
     }
     else {
@@ -133,10 +142,9 @@ sub register {
   $app->helper(redis => sub { shift->app->redis(@_) });
   $app->helper(as_id => sub { my ($self, $val) = @_; $val =~ s/\W+//g; $val });
   $app->helper(
-    send_json => sub {
+    send_partial => sub {
       my $self = shift;
-      $self->send({text => $JSON->encode(shift)});
-      $self->log->debug('JSON Error:' . $JSON->error) if $JSON->error;
+      $self->send({text => $self->render_partial(@_)});
     }
   );
   $app->helper(

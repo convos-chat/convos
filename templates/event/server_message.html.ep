@@ -1,0 +1,4 @@
+<li class="muted">
+  <span><%= $status < 400 ? 'Notice' : 'Error' %> - <%= $message %></span>
+  <span class="timestamp"><%= format_time ($self->stash('timestamp')||time), "%H:%M:%S" %></span>
+</li>

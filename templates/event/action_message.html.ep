@@ -1,0 +1,4 @@
+<li class="action <%%= toggleClass%>">
+  <span colspan="2">* <%%= nick %> <%%= message %></span>
+  <span class="timestamp"><%%= timestamp.sprintf('%H:%M:%S') %></span>
+</li>

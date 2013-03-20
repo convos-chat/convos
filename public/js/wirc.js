@@ -11,23 +11,24 @@ Structure.registerModule('Wirc.Chat', {
   makeTargetId: function(cid,target) {
     return 'target_' + ( target ? cid+"_"+target.replace(/\W/g, '') : cid);
   },
-  modifyChannelList: function(data) { // TODO: return channel names
-    var $channel = $('#' + this.makeTargetId(data.cid, data.joined || data.parted));
+  modifyChannelList: function($data) { // TODO: return channel names
+    var $channel = $('#'+$data.attr('id'));
 
-    if(data.parted)
-      $channel.remove();
+    if($data.hasClass('parted')) {
+      return $channel.remove();
+    }
 
-    if(data.joined && !$channel.length)
-      $(tmpl('new_channel_template', data)).insertAfter('#connection_list_' + data.cid + ' .channel:last');
+    $data.insertAfter('#connection_list_' + $data.data('cid') + ' .channel:last');
   },
   modifyConversationlist: function(data) {
     var $conversation = $('#' + this.makeTargetId(data.cid, data.target));
 
-    if(data.closed)
-      $conversation.remove();
+    if($data.hasClass('closed')) {
+      return $conversation.remove();
+    }
 
     if(!$conversation.length)
-      $(tmpl('new_conversation_template', data)).appendTo('#connection_list_' + data.cid);
+      $data.appendTo('#connection_list_' + $data.data('cid'));
   },
   displayUnread: function(data) {
     var id =  this.makeTargetId(data.cid, data.target);
@@ -36,36 +37,12 @@ Structure.registerModule('Wirc.Chat', {
     $badge.text(parseInt($badge.text(), 10) + 1 ).show();
     if(data.highlight) $badge.addClass('badge-important');
   },
-  print: function(data) {
+  print: function($data) {
     var at_bottom = $(window).scrollTop() + $(window).height() >= $('body').height() - 30; // need to calculate at_bottom before appending a new element
     var $messages = this.$messages;
-    data.toggleClass=$('#chat-messages li:last').hasClass('odd') ? 'even' : 'odd';
-    if(data.status) {
-     console.log(data);
-      if(data.message) $messages.append(tmpl('server_status_template', data));
-    }
-    else if(data.cid === this.connection_id) {
-      if( data.new_nick ) {
-        $messages.append(tmpl('nick_change_template', data));
-      }
-      else if(data.joined === this.target) {
-        $messages.append( $(tmpl('nick_joined_template', data)) );
-      }
-      else if(data.parted === this.target && data.nick !== this.nick[data.cid]) {
-        $messages.append( $(tmpl('nick_parted_template', data)) );
-      }
-      else if(data.template && data.target == this.target || data.nick == this.target) {
-        $messages.append(tmpl(data.template, data));
-      }
-      else if(data.whois) {
-        $messages.append( $(tmpl('whois_template', data)) );
-      }
-      else if(data.whois_channels) {
-        $messages.append( $(tmpl('whois_channels_template', data)) );
-      }
-    }
+    $messages.append($data);
     
-    if(data.message) {
+    if($data.hasClass('message')) {
       this.displayUnread(data);
     }
 
@@ -75,54 +52,27 @@ Structure.registerModule('Wirc.Chat', {
       this.do_not_load_history = false;
     }
   },
-  parseIrcInput: function(d) {
-    var self=this;
-    var data = $.parseJSON(d);
-
-    if(data.message) {
-      var action = data.message.match(/^\u0001ACTION (.*)\u0001$/);
-      if(action) data.message = action[1];
-      data.highlight = data.message.match("\\b" + self.nick[data.cid] + "\\b") ? 1 : 0;
-      data.message = data.message.replace(/</i, '&lt;').replace(/\b(\w{2,5}:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
-      data.template = action ? 'action_message_template' : 'message_template';
-    }
-
-    if(data.timestamp) {
-      data.timestamp = new Date(parseInt(data.timestamp * 1000, 10));
-    }
-
-    data.class_name = data.nick === self.nick[data.cid] ? 'me'
-                    : data.highlight          ? 'focus'
-                    :                           '';
-
-    return data;
-  },
   receiveData: function(e) {
     if(window.console) console.log('[websocket] > ' + e.data);
-    var data = Wirc.Chat.parseIrcInput(e.data);
+    var $data = $(e.data);
 
     // notification handling
-    if(data.highlight) {
-      this.notifier.popup('', 'New mention by ' + data.nick + ' in ' + data.target, data.message);
-      this.notifier.title('New mention by ' + data.nick + ' in ' + data.target);
-    }
-    else if(data.message && data.target && ! data.target.match(/^[#&]/)) {
-      this.notifier.popup('', 'New message from ' + data.nick, data.message);
-      this.notifier.title('New message from ' + data.nick);
+    if($data.data('highlight')) {
+      this.notifier.popup('', $data.data('highlight'));
+      this.notifier.title('New mention by ' + $data.nick + ' in ' + data.target);
     }
 
     // action handling
-    if(data.nick === this.nick[data.cid] && (data.joined || data.parted)) {
-      this.modifyChannelList(data);
+    if($data.hasClass('channel')) {
+      return this.modifyChannelList($data);
     }
-    else if(data.closed || data.target !== this.target && this.target !== this.nick[data.cid] && data.target &&  ! data.target.match(/^[#&]/) ) {
-      this.modifyConversationlist(data);
+    if($data.hasClass('conversation')) {
+      return this.modifyConversationList($data);
     }
-    else if(data.new_nick && this.nick[data.cid] === data.old_nick) this.nick[data.cid] = this.new_nick;
+    
+    this.input.autoCompleteNicks({old_nick: $data.data('old_nick'), new_nick: $data.data('new_nick')});
 
-    this.input.autoCompleteNicks(data);
-
-    this.print(data);
+    this.print($data);
   },
   sendData: function(data) {
     try {

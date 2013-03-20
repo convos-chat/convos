@@ -1,0 +1,5 @@
+<li class="muted">
+  <span class="prefix">Topic is</span>
+  <span><%= $topic %></span>
+  <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
+</li>

@@ -1,0 +1,6 @@
+<li id="target_<%= $cid %>_<%= as_id $channel %>" class="channel">
+  <a href="/<%%= cid %>/<%%= encodeURIComponent(joined) %>">
+    <%%= joined %>
+    <span class="badge hide">0</span>
+  </a>
+</li>
