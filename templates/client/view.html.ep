@@ -16,20 +16,10 @@
         % end
       </li>
     % for my $channel (@{ $c->{channels} }) {
-      <li id="target_<%= $c->{id} %>_<%= as_id $channel %>" class="channel <%= is_active($c, $channel) ? 'active' : '' %>">
-        %= link_to url_for('channel.view', target => $channel, cid => $c->{id}), begin
-        %= $channel
-          <span class="badge hide">0</span>
-        % end
-      </li>
+      %= include 'event/new_channel', cid => $c->{id}, channel => $channel
     % }
     % for my $conversation (@{ $c->{conversations} }) {
-      <li id="target_<%= $c->{id} %>_<%= as_id $conversation %>" class="conversation <%= is_active($c, $conversation)? 'active' : '' %>">
-        %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
-          %= $conversation
-          <span class="badge hide">0</span>
-        % end
-      </li>
+      %= include 'event/new_conversation', cid => $c->{id}, target => $conversation
     % }
     </ul>
   % }

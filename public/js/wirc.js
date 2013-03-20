@@ -37,21 +37,15 @@ Structure.registerModule('Wirc.Chat', {
     if(!$conversation.length)
       $data.appendTo('#connection_list_' + $data.data('cid'));
   },
-  displayUnread: function(data) {
-    var id =  this.makeTargetId(data.cid, data.target);
-    if($('#'+id).hasClass('active')) return;
-    var $badge = $('#' + id + ' .badge');
+  displayUnread: function($data) {
+    var $badge = $('#' + $data.data('target') + ' .badge');
     $badge.text(parseInt($badge.text(), 10) + 1 ).show();
-    if(data.highlight) $badge.addClass('badge-important');
+    if($data.hasClass('highlight')) $badge.addClass('badge-important');
   },
   print: function($data) {
     var at_bottom = $(window).scrollTop() + $(window).height() >= $('body').height() - 30; // need to calculate at_bottom before appending a new element
     var $messages = this.$messages;
     $messages.append($data);
-    
-    if($data.hasClass('message')) {
-      this.displayUnread($data);
-    }
 
     if(at_bottom) {
       this.do_not_load_history = true;
@@ -64,9 +58,15 @@ Structure.registerModule('Wirc.Chat', {
     var $data = $(e.data);
 
     // notification handling
-    if($data.data('highlight')) {
-      this.notifier.popup('', $data.data('highlight'));
-      this.notifier.title('New mention by ' + $data.nick + ' in ' + data.target);
+    if($data.hasClass('highlight')) {
+      if($('#'+$data.data('target')).hasClass('conversation')) {
+        this.notifier.popup('', 'New message from ' + $('#'+$data.data('target')).attr('title'), $data.find('.content').text());
+        this.notifier.title('New message from ' + $('#'+$data.data('target')).attr('title'));
+      }
+      else {
+        this.notifier.popup('', 'New mention by ' + $data.find('.prefix').text() + ' in ' + $data.find('.content').text(), $data.find('.content').text());
+        this.notifier.title('New mention by ' + $data.find('.prefix').text() + ' in ' + $data.data('target'));
+      }
     }
 
     // action handling
@@ -79,7 +79,11 @@ Structure.registerModule('Wirc.Chat', {
     
     this.input.autoCompleteNicks({old_nick: $data.data('old_nick'), new_nick: $data.data('new_nick')});
 
-    this.print($data);
+    if($('#'+$data.data('target')).hasClass('active')) {
+      this.print($data);
+    } else {
+      this.displayUnread($data);
+    }
   },
   sendData: function(data) {
     try {

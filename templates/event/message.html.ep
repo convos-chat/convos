@@ -1,5 +1,5 @@
-<li class="message">
-  <span class="prefix"><%= $nick %>:</span>
-  <span><%= $message %></span>
+<li class="message<%= $self->stash('highlight') ? " highlight" : ""%>" data-cid="<%=$cid%>" data-target="target_<%= $cid %>_<%= as_id $target %>">
+  <<span class="prefix"><%= $nick %></span>>
+  <span class="content"><%= $message %></span>
   <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>
 </li>
