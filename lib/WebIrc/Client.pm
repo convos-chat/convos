@@ -207,6 +207,7 @@ sub socket {
 
   Mojo::IOLoop->stream($self->tx->connection)->timeout(90);
 
+  $self->render_later;
   $self->redis->smembers(
     "user:$uid:connections",
     sub {
