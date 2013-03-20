@@ -24,7 +24,7 @@
       </li>
     % }
     % for my $conversation (@{ $c->{conversations} }) {
-      <li id="target_<%= $c->{id} %>_<%= as_id $conversation %>" class="<%= is_active($c, $conversation)? 'active' : '' %>">
+      <li id="target_<%= $c->{id} %>_<%= as_id $conversation %>" class="conversation <%= is_active($c, $conversation)? 'active' : '' %>">
         %= link_to url_for('channel.view', target => $conversation, cid => $c->{id}), begin
           %= $conversation
           <span class="badge hide">0</span>

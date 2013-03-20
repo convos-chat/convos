@@ -1,1 +1,1 @@
-<li id="target_<%= $cid %>_<%= as_id $channel %>" class="channel parted"></li>
+<li id="target_<%= $cid %>_<%= as_id $channel %>" data-cid="<%=$cid%>" class="channel parted"></li>

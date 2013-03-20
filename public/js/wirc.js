@@ -11,14 +11,21 @@ Structure.registerModule('Wirc.Chat', {
   makeTargetId: function(cid,target) {
     return 'target_' + ( target ? cid+"_"+target.replace(/\W/g, '') : cid);
   },
-  modifyChannelList: function($data) { // TODO: return channel names
+  modifyChannelList: function($data) { 
     var $channel = $('#'+$data.attr('id'));
 
     if($data.hasClass('parted')) {
+      if($channel.hasClass('active')) {
+        $('#connection_list_' + $data.data('cid') + ' .channel:first a').click();
+      }
       return $channel.remove();
     }
-
+    if($channel.length) {
+      return $channel.find('a').click();
+    }
+    
     $data.insertAfter('#connection_list_' + $data.data('cid') + ' .channel:last');
+    $data.find('a').click();
   },
   modifyConversationlist: function(data) {
     var $conversation = $('#' + this.makeTargetId(data.cid, data.target));
@@ -43,7 +50,7 @@ Structure.registerModule('Wirc.Chat', {
     $messages.append($data);
     
     if($data.hasClass('message')) {
-      this.displayUnread(data);
+      this.displayUnread($data);
     }
 
     if(at_bottom) {

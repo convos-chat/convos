@@ -1,6 +1,7 @@
-<li id="target_<%= $cid %>_<%= as_id $channel %>" class="channel">
-  <a href="/<%%= cid %>/<%%= encodeURIComponent(joined) %>">
-    <%%= joined %>
+% use ojo 'b';
+<li id="target_<%= $cid %>_<%= as_id $channel %>" data-cid="<%=$cid%>" class="channel">
+  <a href="/<%= $cid %>/<%= b($channel)->url_escape %>">
+    <%= $channel %>
     <span class="badge hide">0</span>
   </a>
 </li>
