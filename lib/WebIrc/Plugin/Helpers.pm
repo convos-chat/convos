@@ -84,6 +84,7 @@ my %commands = (
     my ($self, $data) = @_;
     $self->send_partial(
       'event/server_message',
+      cid     => 0,
       status  => 200,
       message => "Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"
     );
@@ -101,7 +102,7 @@ sub parse_command {
         return $irc_cmd . ' ' . $data->{cmd};
       }
       else {
-        $self->send_partial('event/server_message', status => '401', message => 'Unknown command');
+        $self->send_partial('event/server_message', status => '401', cid=>0, message => 'Unknown command');
       }
     }
     else {

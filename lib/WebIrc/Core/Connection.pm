@@ -504,6 +504,8 @@ sub cmd_join {
   my ($self, $message) = @_;
   my $channel = $message->{params}[0];
 
+  return $self->_publish(server_message => { cid=>0,message =>'Channel to join is required', status=>400 }) unless $channel;
+  return $self->_publish(server_message => { cid=>0,message =>'Channel must start with & or #', status=>400 }) unless $channel =~ /^[#&]/x;
   $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
 
   # clean up old nick list
@@ -529,8 +531,8 @@ sub cmd_part {
 sub _publish {
   my ($self, $event, $data) = @_;
 
-  local $data->{cid}       = $self->id;
-  local $data->{timestamp} = time;
+  $data->{cid}       //= $self->id;
+  $data->{timestamp} = time;
   $data->{event} = $event;
   my $message = $JSON->encode($data);
   $self->redis->publish("connection:@{[$self->id]}:from_server", $message);
