@@ -146,7 +146,8 @@ sub register {
   $app->helper(
     send_partial => sub {
       my $self = shift;
-      $self->send({text => $self->render_partial(@_)});
+      my $message = Unicode::UTF8::encode_utf8($self->render_partial(@_), sub { $_[0] });
+      $self->send({text => $message });
     }
   );
   $app->helper(

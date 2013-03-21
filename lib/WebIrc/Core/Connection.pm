@@ -224,7 +224,6 @@ sub connect {
       $self->{sub}->on(
         message => sub {
           my ($sub, $raw_message) = @_;
-          $raw_message = Unicode::UTF8::encode_utf8($raw_message, sub { $_[0] });
           $self->_irc->write($raw_message);
           my $message = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $raw_message);
           return $self->log->debug("Unable to parse $raw_message") unless ref $message;

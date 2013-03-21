@@ -487,11 +487,11 @@ sub write {
   my $cb   = ref $_[-1] eq 'CODE' ? pop : undef;
   my $self = shift;
   my $buf  = join ' ', @_;
-  my $message = Unicode::UTF8::encode_utf8($buf, sub { $_[0] });
+  $buf = Unicode::UTF8::encode_utf8($buf, sub { $_[0] });
   
   croak('Tried to write without a stream') unless ref $self->{stream};
-  warn "[@{[$self->server]}] <<< $message\n" if DEBUG;
-  $self->{stream}->write("$message\r\n", $cb);
+  warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
+  $self->{stream}->write("$buf\r\n", $cb);
 }
 
 =head1 DEFAULT EVENT HANDLERS

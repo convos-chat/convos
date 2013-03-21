@@ -204,7 +204,7 @@ sub socket {
   my $self = shift;
   my $uid  = $self->session('uid');
 
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(90);
+  Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
 
   $self->render_later;
   $self->redis->smembers(
