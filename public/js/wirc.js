@@ -15,10 +15,11 @@ Structure.registerModule('Wirc.Chat', {
     var $channel = $('#'+$data.attr('id'));
 
     if($data.hasClass('parted')) {
+      $channel.remove();
       if($channel.hasClass('active')) {
         $('#connection_list_' + $data.data('cid') + ' .channel:first a').click();
       }
-      return $channel.remove();
+      return;
     }
     if($channel.length) {
       return $channel.find('a').click();

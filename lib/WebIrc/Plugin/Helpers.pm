@@ -82,10 +82,8 @@ my %commands = (
 
   help => sub {
     my ($self, $data) = @_;
-    warn "Sending help";
     $self->send_partial(
       'event/server_message',
-      timestamp => time,
       status  => 200,
       message => "Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"
     );
@@ -143,13 +141,7 @@ sub register {
   $app->helper(format_time => sub { my $self = shift; WebIrc::Core::Util::format_time(@_); });
   $app->helper(redis => sub { shift->app->redis(@_) });
   $app->helper(as_id => sub { my ($self, $val) = @_; $val =~ s/\W+//g; $val });
-  $app->helper(
-    send_partial => sub {
-      my $self = shift;
-      my $message = Unicode::UTF8::encode_utf8($self->render_partial(@_), sub { $_[0] });
-      $self->send({text => $message });
-    }
-  );
+  $app->helper(send_partial => sub { $self = shift; $self->send( $self->render_partial(@_).'' ); });
   $app->helper(
     is_active => sub {
       my ($self, $c, $target) = @_;

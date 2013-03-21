@@ -215,14 +215,13 @@ sub socket {
 
       $self->_subscribe_to_server_messages($_) for @$cids;
       $self->on(
-        message => sub {
+        text=> sub {
           $self->logf(debug => '[ws] < %s', $_[1]);
           my ($self, $octets) = @_;
-          my $message = Unicode::UTF8::encode_utf8($octets, sub { $_[0] });
-          my $data = $JSON->decode($message) || {};
+          my $data = $JSON->decode($octets) || {};
           my $cid = $data->{cid};
           if (!$cid) {
-            $self->logf(debug => "Invalid message:\n" . $message . "\nerr:" . $JSON->error);
+            $self->logf(debug => "Invalid message:\n" . $octets . "\nerr:" . $JSON->error);
             return;
           }
 
