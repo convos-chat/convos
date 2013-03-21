@@ -11,7 +11,6 @@ use Unicode::UTF8;
 no warnings "utf8";
 use Mojo::Util 'xml_escape';
 use List::MoreUtils qw/ zip /;
-use WebIrc::Core::Util qw/ unpack_irc /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $N_MESSAGES = 50;
@@ -251,9 +250,9 @@ sub _subscribe_to_server_messages {
   Scalar::Util::weaken($self);
   $sub->on(
     message => sub {
-      my ($redis, $octets) = @_;
-      my $data = $JSON->decode($octets) || {};
-      $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $octets);
+      my ($redis, $message) = @_;
+      my $data = $JSON->decode($message) || {};
+      $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
       $self->send_partial('event/'.$data->{event},%$data);
     }
   );

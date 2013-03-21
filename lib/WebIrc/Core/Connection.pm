@@ -48,7 +48,6 @@ L<irc_rpl_namreply> and l</irc_error>.
 
 use Mojo::Base -base;
 use Mojo::IRC;
-use Unicode::UTF8;
 no warnings "utf8";
 use Mojo::JSON;
 use Parse::IRC   ();
