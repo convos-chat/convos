@@ -251,23 +251,6 @@ Holds an instance of L<Mojo::IOLoop>.
 
 has ioloop => sub { Mojo::IOLoop->singleton };
 
-=head2 change_nick
-
-Change IRC nick name. Will only set nick accessor if not connected to a server.
-
-=cut
-
-sub change_nick {
-  my ($self, $nick) = @_;
-  my $old = $self->nick // '';
-
-  return $old unless defined $nick;
-  return $self if $old && $old eq $nick;
-  $self->nick($nick);
-  $self->write(NICK => $nick) if $self->{stream};
-  $self;
-}
-
 =head2 real_host
 
 Will be set by L</irc_rpl_welcome>. Holds the actual hostname of the IRC
@@ -335,6 +318,23 @@ Password for authentication
 has 'pass';
 
 =head1 METHODS
+
+=head2 change_nick
+
+Change IRC nick name. Will only set nick accessor if not connected to a server.
+
+=cut
+
+sub change_nick {
+  my ($self, $nick) = @_;
+  my $old = $self->nick // '';
+
+  return $old unless defined $nick;
+  return $self if $old && $old eq $nick;
+  $self->nick($nick);
+  $self->write(NICK => $nick) if $self->{stream};
+  $self;
+}
 
 =head2 connect
 
