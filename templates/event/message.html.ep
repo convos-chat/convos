@@ -1,5 +1,8 @@
-<li class="message<%= $self->stash('highlight') ? " highlight" : ""%>" data-cid="<%=$cid%>" data-target="target_<%= $cid %>_<%= as_id $target %>">
+<li class="message<%= stash('highlight') ? " highlight" : ""%>" data-cid="<%=$cid%>" data-target="target_<%= $cid %>_<%= as_id $target %>">
   <<span class="prefix"><%= $nick %></span>>
   <span class="content"><%= $message %></span>
   <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>
+  % if(stash('embed')) {
+    <div class="embed"><%=stash('embed')%></div>
+  % }
 </li>

@@ -16,6 +16,8 @@ use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 my $N_MESSAGES = 50;
 my $JSON       = Mojo::JSON->new;
 
+has ua => sub { Mojo::UserAgent->new; };
+
 =head1 METHODS
 
 =head2 route
@@ -61,7 +63,7 @@ Used to render the main IRC client view.
 sub view {
   my $self   = shift->render_later;
   my $uid    = $self->session('uid');
-  my @keys   = qw/ nick current_nick host /;
+  my @keys   = qw/nick current_nick host/;
   my $target = $self->param('target');
   my $cid    = $self->param('cid');
   my $connections;
@@ -174,6 +176,16 @@ sub history {
   );
 }
 
+sub _handle_link {
+  my ($self,$message,$link)=@_;
+  my $tx=$self->ua->head($link);
+  if($tx->res->headers->content_type =~ m{^image/}) {
+    $message->{embed} .= $self->image($link);
+  }
+  
+  return $self->link_to($link);
+}
+
 sub _format_conversation {
   my ($self, $conversation) = @_;
   my $nick     = $self->stash('nick');
@@ -186,7 +198,7 @@ sub _format_conversation {
       next;
     }
     $nick //= '[server]';
-    $message->{message} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
+    $message->{message} =~ s!\b(\w{2,5}://\S+)!$self->_handle_link($message,$1)!e;
 
     unshift @$messages, $message;
   }
@@ -250,7 +262,7 @@ sub _subscribe_to_server_messages {
   $sub->on(
     message => sub {
       my ($redis, $message) = @_;
-      my $data = $JSON->decode($message) || {};
+      my $data=$self->_format_conversation([$message])->[0];
       $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
       $self->send_partial('event/'.$data->{event},%$data);
     }
