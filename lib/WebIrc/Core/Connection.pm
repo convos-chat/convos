@@ -224,7 +224,9 @@ sub connect {
       $self->{sub}->on(
         message => sub {
           my ($sub, $raw_message) = @_;
-          $self->_irc->write($raw_message);
+          eval { $self->_irc->write($raw_message); };
+          $self->_publish(wirc_notice => {message => "Could not send message, not connected to server"})
+            if ($@ && $@ =~ m/without\s+a\+sstream/);
           my $message = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $raw_message);
           return $self->log->debug("Unable to parse $raw_message") unless ref $message;
           if ($message->{command} eq 'PRIVMSG') {
@@ -502,8 +504,8 @@ sub cmd_join {
   my ($self, $message) = @_;
   my $channel = $message->{params}[0];
 
-  return $self->_publish(server_message => { cid=>0,message =>'Channel to join is required', status=>400 }) unless $channel;
-  return $self->_publish(server_message => { cid=>0,message =>'Channel must start with & or #', status=>400 }) unless $channel =~ /^[#&]/x;
+  return $self->_publish(wirc_notice => {message => 'Channel to join is required'})    unless $channel;
+  return $self->_publish(wirc_notice => {message => 'Channel must start with & or #'}) unless $channel =~ /^[#&]/x;
   $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
 
   # clean up old nick list
@@ -529,9 +531,9 @@ sub cmd_part {
 sub _publish {
   my ($self, $event, $data) = @_;
 
-  $data->{cid}       //= $self->id;
+  $data->{cid} //= $self->id;
   $data->{timestamp} = time;
-  $data->{event} = $event;
+  $data->{event}     = $event;
   my $message = $JSON->encode($data);
   $self->redis->publish("connection:@{[$self->id]}:from_server", $message);
   return unless $data->{save};
