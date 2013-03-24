@@ -1,0 +1,5 @@
+<li class="muted">
+  <span class="prefix"><%= app->config->{name} %>:</span>
+  <span><%= $nick %> is <%=$user%>@<%= $host %> (<%= $realname %>).</span>
+  <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
+</li>

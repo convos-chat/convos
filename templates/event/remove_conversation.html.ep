@@ -1,0 +1,1 @@
+<li id="target_<%= $cid %>_<%= as_id $arget %>" class="conversation parted"></li>

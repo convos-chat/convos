@@ -1,0 +1,5 @@
+<li class="muted">
+  <span class="prefix">Set by</span>
+  <span> <%= $nick %> at <%= format_time $ts,'%H:%M:%S' %></span>
+  <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>
+</li>

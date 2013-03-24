@@ -10,9 +10,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Unicode::UTF8;
 no warnings "utf8";
 use Mojo::Util 'xml_escape';
-use IRC::Utils qw/parse_user/;
 use List::MoreUtils qw/ zip /;
-use WebIrc::Core::Util qw/ unpack_irc /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $N_MESSAGES = 50;
@@ -144,7 +142,7 @@ sub history {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->redis->hget("connection:$cid", 'current_nick', $delay->begin,);
+      $self->redis->hget("connection:$cid", 'current_nick', $delay->begin);
     },
     sub {
       my ($delay, $nick) = @_;
@@ -182,22 +180,13 @@ sub _format_conversation {
   my $messages = [];
 
   for (my $i = 0; $i < @$conversation; $i = $i + 2) {
-    my $message = unpack_irc $conversation->[$i], $conversation->[$i + 1];
+    my $message = $JSON->decode($conversation->[$i]);
     unless (ref $message) {
-      $self->log->debug('Unable to parse raw message: ' . $conversation->[$i] . ' - ' . $conversation->[$i + 1]);
+      $self->logf(debug =>'Unable to parse raw message: ' . $conversation->[$i]);
       next;
     }
-    @{$message}{qw/nick user host/} = parse_user($message->{prefix});
     $nick //= '[server]';
-    my @params = @{$message->{params} || []};
-    shift @params;
-    $message->{message} = xml_escape(join(' ', @params));    # 1 = normal, 0 = error
     $message->{message} =~ s!\b(\w{2,5}://\S+)!<a href="$1" target="_blank">$1</a>!gi;
-    $message->{class_name}
-      = $message->{message} =~ /\b$nick\b/ ? 'focus'
-      : $message->{special} eq 'me'        ? 'action'
-      : $message->{nick} eq $nick          ? 'me'
-      :                                      '';
 
     unshift @$messages, $message;
   }
@@ -215,8 +204,9 @@ sub socket {
   my $self = shift;
   my $uid  = $self->session('uid');
 
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(90);
+  Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
 
+  $self->render_later;
   $self->redis->smembers(
     "user:$uid:connections",
     sub {
@@ -225,19 +215,18 @@ sub socket {
 
       $self->_subscribe_to_server_messages($_) for @$cids;
       $self->on(
-        message => sub {
+        text=> sub {
           $self->logf(debug => '[ws] < %s', $_[1]);
           my ($self, $octets) = @_;
-          my $message = Unicode::UTF8::encode_utf8($octets, sub { $_[0] });
-          my $data = $JSON->decode($message) || {};
+          my $data = $JSON->decode($octets) || {};
           my $cid = $data->{cid};
           if (!$cid) {
-            $self->logf(debug => "Invalid message:\n" . $message . "\nerr:" . $JSON->error);
+            $self->logf(debug => "Invalid message:\n" . $octets . "\nerr:" . $JSON->error);
             return;
           }
 
           return $self->_handle_socket_data($cid => $data) if $allowed{$cid};
-          $self->send_json({cid => $cid, status => 403});
+          $self->send_partial('event/server_message', message => "Not allowed to subscribe to $cid", status => 403);
           $self->finish;
         }
       );
@@ -260,10 +249,10 @@ sub _subscribe_to_server_messages {
   Scalar::Util::weaken($self);
   $sub->on(
     message => sub {
-      my ($redis, $octets) = @_;
-      my $message = Unicode::UTF8::decode_utf8($octets, sub { $_[0] });
+      my ($redis, $message) = @_;
+      my $data = $JSON->decode($message) || {};
       $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-      $self->send({text => $message});
+      $self->send_partial('event/'.$data->{event},%$data);
     }
   );
 

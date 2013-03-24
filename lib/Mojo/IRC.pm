@@ -234,6 +234,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::IOLoop;
 use IRC::Utils;
 use Carp qw/croak/;
+use Unicode::UTF8;
 use Parse::IRC   ();
 use Scalar::Util ();
 use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
@@ -385,7 +386,9 @@ sub connect {
       );
       $stream->on(
         read => sub {
-          $buffer .= $_[1];
+          my $message = Unicode::UTF8::decode_utf8($_[1], sub { $_[0] });
+          
+          $buffer .= $message;
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
             warn "[@{[$self->server]}] >>> $1\n" if DEBUG;
@@ -484,6 +487,8 @@ sub write {
   my $cb   = ref $_[-1] eq 'CODE' ? pop : undef;
   my $self = shift;
   my $buf  = join ' ', @_;
+  $buf = Unicode::UTF8::encode_utf8($buf, sub { $_[0] });
+  
   croak('Tried to write without a stream') unless ref $self->{stream};
   warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
   $self->{stream}->write("$buf\r\n", $cb);
