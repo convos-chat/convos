@@ -169,6 +169,7 @@ Structure.registerModule('Wirc.Chat', {
     self.websocket = new ReconnectingWebSocket(Wirc.base_url.replace(/^http/, 'ws') + '/socket');
     self.websocket.onopen = function() { self.sendData({ cid: self.connection_id, target: self.target }); };
     self.websocket.onmessage = self.receiveData;
+    $('.embed img').live('click',function() { $(this).remove()});
 
     self.input.submit = function(e) {
       

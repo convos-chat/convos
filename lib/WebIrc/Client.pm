@@ -16,7 +16,7 @@ use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 my $N_MESSAGES = 50;
 my $JSON       = Mojo::JSON->new;
 
-has ua => sub { Mojo::UserAgent->new; };
+has ua => sub {  Mojo::UserAgent->new(connect_timeout=>1,request_timeout=>2); };
 
 =head1 METHODS
 
@@ -179,7 +179,7 @@ sub history {
 sub _handle_link {
   my ($self,$message,$link)=@_;
   my $tx=$self->ua->head($link);
-  if($tx->res->headers->content_type =~ m{^image/}) {
+  if($tx->res && $tx->res->headers->content_type =~ m{^image/}) {
     $message->{embed} .= $self->image($link);
   }
   
@@ -198,6 +198,7 @@ sub _format_conversation {
       next;
     }
     $nick //= '[server]';
+    $self->stash(embed=>undef);
     $message->{message} =~ s!\b(\w{2,5}://\S+)!$self->_handle_link($message,$1)!e;
 
     unshift @$messages, $message;
