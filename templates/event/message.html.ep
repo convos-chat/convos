@@ -1,5 +1,5 @@
 <li class="message<%= stash('highlight') ? " highlight" : ""%>" data-cid="<%=stash('cid')%>" <%if(stash('cid') && stash('target')) {%>data-target="target_<%= $cid %>_<%= as_id $target %>"<%}%>>
-  <span class="prefix"><%= $nick %></span>>
+  &lt;<span class="prefix"><%= $nick %></span>&gt;
   <span class="content"><%== $message %></span>
   <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>
   % if(stash('embed')) {
