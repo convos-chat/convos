@@ -284,7 +284,7 @@ sub add_message {
   $data->{target} = lc($msg ? $data->{nick} : $message->{params}[0]);
   $data->{highlight}++ if $msg || $data->{message} =~ /\b$current_nick\b/;
   my $event = 'message';
-  $event = 'action_message' if $message->{raw_line} =~ s/\x{1}ACTION (.*)\x{1}/$1/;
+  $event = 'action_message' if $message->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/;
 
   $self->_publish($event => $data);
 
