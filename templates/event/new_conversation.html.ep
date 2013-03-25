@@ -1,5 +1,4 @@
-% use ojo 'b';
-<li id="target_<%= $cid %>_<%= as_id $target %>" title="<%=$target%>" class="conversation">
+<li id="target_<%= $cid %>_<%= as_id $target %>" data-cid="<%=$cid%>" title="<%=$target%>" class="conversation">
   %= link_to url_for('channel.view', target => $target, cid => $cid), begin
     <%= $target %>
     <span class="badge hide">0</span>

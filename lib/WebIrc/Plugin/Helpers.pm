@@ -59,6 +59,20 @@ my %commands = (
   me   => sub { my $data = pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
   msg  => sub { my $data = pop; $data->{cmd} =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$data->{cmd}" },
   part => sub { my $data = pop; "PART " . ($data->{cmd} || $data->{target}) },
+  query=> sub {
+    my ($self, $data) = @_;
+    my $target = $data->{cmd} || $data->{target};
+    $self->redis->sadd(
+      "connection:@{[$data->{cid}]}:conversations",
+      $target,
+      sub {
+        my ($redis, $member) = @_;
+        return unless $member;
+        $self->send_partial( 'event/new_conversation', cid => $data->{cid}, target => $target);
+      }
+    );
+    return;
+  },
   close => sub {
     my ($self, $data) = @_;
     my $target = $data->{cmd} || $data->{target};
@@ -69,7 +83,7 @@ my %commands = (
         my ($redis, $member) = @_;
         return unless $member;
         $self->redis->srem("connection:@{[$data->{cid}]}:conversations", $target);
-        $self->send_partial( 'event/remove_conversation ', cid => $data->{cid}, target => $target);
+        $self->send_partial( 'event/remove_conversation', cid => $data->{cid}, target => $target);
       }
     );
     return;

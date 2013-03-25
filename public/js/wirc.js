@@ -28,15 +28,18 @@ Structure.registerModule('Wirc.Chat', {
     $data.insertAfter('#connection_list_' + $data.data('cid') + ' .channel:last');
     $data.find('a').click();
   },
-  modifyConversationlist: function(data) {
-    var $conversation = $('#' + this.makeTargetId(data.cid, data.target));
+  modifyConversationlist: function($data) {
+    var $conversation = $('#'+$data.attr('id'));
 
     if($data.hasClass('closed')) {
       return $conversation.remove();
     }
 
-    if(!$conversation.length)
+    console.log("Appending?");
+    if(!$conversation.length) {
+      console.log("Appending! "+$data.data('cid'));
       $data.appendTo('#connection_list_' + $data.data('cid'));
+    }
   },
   displayUnread: function($data) {
     var $badge = $('#' + $data.data('target') + ' .badge');
@@ -74,8 +77,8 @@ Structure.registerModule('Wirc.Chat', {
     if($data.hasClass('channel')) {
       return this.modifyChannelList($data);
     }
-    if($data.hasClass('conversation')) {
-      return this.modifyConversationList($data);
+    else if($data.hasClass('conversation')) {
+      return this.modifyConversationlist($data);
     }
     
     this.input.autoCompleteNicks({old_nick: $data.data('old_nick'), new_nick: $data.data('new_nick')});
