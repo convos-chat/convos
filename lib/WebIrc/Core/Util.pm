@@ -6,8 +6,6 @@ WebIrc::Core::Util - Utility functions for WebIrc
 
 =head1 SYNOPSIS
 
-  use WebIrc::Core::Util qw/ pack_msg ... /;
-
 L</import> can export any of the L</FUNCTIONS>.
 
 =cut
@@ -65,36 +63,6 @@ sub logf {
   $log->$level(sprintf $format, @args);
 }
 
-=head2 pack_irc
-
-  $str = pack_irc $timestamp, $raw_line;
-
-Takes a timestamp and a raw IRC message and packs them together into a string.
-
-=cut
-
-sub pack_irc {
-  pack 'Na*', @_;
-}
-
-=head2 unpack_irc
-
-    $hash_ref = unpack_irc $str;
-
-=cut
-
-sub unpack_irc {
-  my($raw_line, $timestamp) = @_;
-  my $special = '';
-  my $message;
-
-  $raw_line = Unicode::UTF8::decode_utf8($raw_line, sub { $_[0] });
-  $message = Parse::IRC::parse_irc($raw_line);
-  $message->{timestamp} = $timestamp;
-  $message->{special} = $special;
-  $message;
-}
-
 =head2 format_time
 
   $str = format_time $timestamp, $format;
@@ -127,7 +95,7 @@ sub import {
 
   no strict 'refs';
   for my $name (@export) {
-      *{ "$caller\::$name" } = \&{ "$class\::$name" };
+    *{ "$caller\::$name" } = \&{ "$class\::$name" };
   }
 }
 
