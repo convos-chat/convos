@@ -27,7 +27,7 @@
 </div>
 <div class="messages row-fluid">
   <div id="conversation" class="span10 offset2">
-		%= include 'client/conversation'
+    %= include 'client/conversation'
   </div>
 </div>
 

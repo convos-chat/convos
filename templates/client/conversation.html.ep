@@ -1,6 +1,6 @@
     % if(@$connections) {
       <ul class="unstyled" id="chat-messages"
-        data-cid="<%= $connection_id %>"
+        data-cid="<%= $cid %>"
         data-nicks="<%= join ',', @$nicks %>"
         data-target="<%= $target %>">
     % }
