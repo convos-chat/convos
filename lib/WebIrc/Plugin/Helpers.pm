@@ -80,7 +80,7 @@ sub __handle_link {
     $message->{embed} .= $c->image($link);
   }
 
-  return $c->link_to($link);
+  return $c->link_to($link,$link,(target=>"_blank"));
 }
 
 =head2 logf
