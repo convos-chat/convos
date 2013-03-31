@@ -1,4 +1,4 @@
-<li class="muted" <%if(stash('cid') && stash('target')) {%>data-target="target_<%= $cid %>_<%= as_id $channel %>"<%}%>>
+<li class="muted" <%if(stash('cid') && stash('channel')) {%>data-target="target_<%= $cid %>_<%= as_id $channel %>"<%}%>>
   <span class="prefix"><%= app->config->{name} %>:</span>
   <span><%= $nick %> joined <%= $channel %></span>
   <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
