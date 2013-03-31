@@ -1,0 +1,18 @@
+CACHE MANIFEST
+CACHE:
+/css/wirc.css';
+/js/jquery.js';
+/js/jquery.pjax.js';
+/js/jquery.hotkeys.js';
+/js/jquery.fastclick.js';
+/js/structure.min.js';
+/js/ws-reconnecting.js';
+/js/misc.js';
+/js/wirc.js';
+
+NETWORK:
+/socket
+/login
+
+FALLBACK:
+/*/*
