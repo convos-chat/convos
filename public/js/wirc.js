@@ -35,11 +35,11 @@ Structure.registerModule('Wirc.Chat', {
       return $conversation.remove();
     }
 
-    console.log("Appending?");
     if(!$conversation.length) {
-      console.log("Appending! "+$data.data('cid'));
       $data.appendTo('#connection_list_' + $data.data('cid'));
+      return $data.find('a').click();
     }
+    return $conversation.find('a').click();
   },
   displayUnread: function($data) {
     var $badge = $('#' + $data.data('target') + ' .badge');
