@@ -283,7 +283,7 @@ Will add a private message to the database.
 sub add_message {
   my ($self, $message) = @_;
   my $current_nick = $self->_irc->nick;
-  my $msg          = $message->{params}[0] eq $current_nick;
+      my $msg          = $message->{params}[0] eq $current_nick;
   my $data         = {message => $message->{params}[1], save => 1};
   @{$data}{qw/nick user host/} = parse_user($message->{prefix});
   $data->{target} = lc($msg ? $data->{nick} : $message->{params}[0]);
@@ -467,7 +467,7 @@ sub irc_part {
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
-  $self->_publish(remove_channel => {nick => $nick, channel => $channel, save => 1});
+  $self->_publish(nick_parted => {nick => $nick, channel => $channel, save => 1});
   $self->redis->srem("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
 
