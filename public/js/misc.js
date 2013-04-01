@@ -1,3 +1,22 @@
+(function($) {
+  var base_url;
+
+  $.fn.atBottom = function() {
+    return this.scrollTop() + this.height() >= $('body').height() - 30;
+  };
+  $.fn.scrollToBottom = function() {
+    $('html, body').scrollTop($('body').height());
+    return this;
+  };
+  $.url_for = function() {
+    var args = $.makeArray(arguments);
+    if(!base_url) base_url = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
+    args.unshift(base_url);
+    return args.join('/');
+  };
+
+})(jQuery);
+
 (function() {
   var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -26,7 +45,7 @@
 
 // https://gist.github.com/3633336
 // + caching added by Jan Henning Thorsen
-function loadScript(path, fn) {
+loadScript = function(path, fn) {
   var el = document.createElement('script');
   var loaded = 0;
   var onreadystatechange = 'onreadystatechange';
@@ -48,5 +67,17 @@ function loadScript(path, fn) {
   el.async = 1;
   el.src = path;
   document.getElementsByTagName('head')[0].appendChild(el);
-}
+};
 
+// usage: log('inside coolFunc',this,arguments);
+// http://paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
+window.log = function() {
+  log.history = log.history || [];   // store logs to an array for reference
+  log.history.push(arguments);
+  if(this.console) console.log.apply(
+    window.console,
+    $.map(arguments, function(e, i) {
+      return typeof e === 'string' ? e : JSON.stringify(e);
+    })
+  );
+};

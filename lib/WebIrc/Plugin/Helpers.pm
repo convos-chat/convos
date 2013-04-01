@@ -42,86 +42,45 @@ sub form_block {
   $c->tag(div => class => join(' ', @$classes), title => $error, $content);
 }
 
-=head2 parse_command $data
+=head2 format_conversation
 
-Takes a websocket command, parses it into a IRC resposne
+  $messages = $c->format_conversation(\@conversation);
+
+Takes a list of JSON strings and turns them into a list of hash-refs where the
+"message" key contains a formatted version with HTML and such.
 
 =cut
 
-my %commands = (
-  j     => 'JOIN',
-  join  => 'JOIN',
-  t     => sub { my $data = pop; "TOPIC $data->{target}" . ($data->{cmd} ? ' :' . $data->{cmd} : '') },
-  topic => sub { my $data = pop; "TOPIC $data->{target}" . ($data->{cmd} ? ' :' . $data->{cmd} : '') },
-  w     => 'WHOIS',
-  whois => 'WHOIS',
-  nick  => 'NICK',
-  me   => sub { my $data = pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
-  msg  => sub { my $data = pop; $data->{cmd} =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$data->{cmd}" },
-  part => sub { my $data = pop; "PART " . ($data->{cmd} || $data->{target}) },
-  query=> sub {
-    my ($self, $data) = @_;
-    my $target = $data->{cmd} || $data->{target};
-    $self->redis->sadd(
-      "connection:@{[$data->{cid}]}:conversations",
-      $target,
-      sub {
-        my ($redis, $member) = @_;
-        return unless $member;
-        $self->send_partial( 'event/new_conversation', cid => $data->{cid}, target => $target);
-      }
-    );
-    return;
-  },
-  close => sub {
-    my ($self, $data) = @_;
-    my $target = $data->{cmd} || $data->{target};
-    $self->redis->sismember(
-      "connection:@{[$data->{cid}]}:conversations",
-      $target,
-      sub {
-        my ($redis, $member) = @_;
-        return unless $member;
-        $self->redis->srem("connection:@{[$data->{cid}]}:conversations", $target);
-        $self->send_partial( 'event/remove_conversation', cid => $data->{cid}, target => $target);
-      }
-    );
-    return;
-  },
-  reconnect => sub {
-    my ($self, $data) = @_;
-    $self->redis->publish('core:control', "restart:" . $data->{cid});
-    return;
-  },
+sub format_conversation {
+  my ($c, $conversation) = @_;
+  my $nick     = $c->stash('nick');
+  my $messages = [];
 
-  help => sub {
-    my ($self, $data) = @_;
-    $self->send_partial(
-      'event/wirc_notice',
-      message => "Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"
-    );
-    return;
-  }
-);
+  for (my $i = 0; $i < @$conversation; $i = $i + 2) {
+    my $message = $JSON->decode($conversation->[$i]);
+    unless (ref $message) {
+      $c->logf(debug =>'Unable to parse raw message: ' . $conversation->[$i]);
+      next;
+    }
+    $nick //= '[server]';
+    $c->stash(embed=>undef);
+    $message->{message} =~ s!\b(\w{2,5}://\S+)!__handle_link($c, $message,$1)!e;
 
-sub parse_command {
-  my ($self, $data) = @_;
-  if ($data->{cmd}) {
-    if ($data->{cmd} =~ s!^/(\w+)\s*!!) {
-      my ($cmd) = $1;
-      if (my $irc_cmd = $commands{$cmd}) {
-        return $irc_cmd->($self, $data) if (ref $irc_cmd);
-        return $irc_cmd . ' ' . $data->{cmd};
-      }
-      else {
-        $self->send_partial('event/wirc_notice', message => 'Unknown command');
-      }
-    }
-    else {
-      return "PRIVMSG $data->{target} :$data->{cmd}";
-    }
+    unshift @$messages, $message;
   }
-  return;
+
+  return $messages;
+}
+
+sub __handle_link {
+  my($c, $message, $link)=@_;
+  my $tx = $c->app->ua->head($link);
+
+  if(!$tx->error and $tx->res->headers->content_type =~ m{^image/}) {
+    $message->{embed} .= $c->image($link);
+  }
+
+  return $c->link_to($link,$link,(target=>"_blank"));
 }
 
 =head2 logf
@@ -136,7 +95,6 @@ Returns a L<Mojo::Redis> object.
 
 strip non-word characters from input.
 
-
 =head1 METHODS
 
 =head2 register
@@ -149,7 +107,7 @@ sub register {
   my ($self, $app) = @_;
 
   $app->helper(form_block    => \&form_block);
-  $app->helper(parse_command => \&parse_command);
+  $app->helper(format_conversation => \&format_conversation);
   $app->helper(logf          => \&WebIrc::Core::Util::logf);
   $app->helper(format_time => sub { my $self = shift; WebIrc::Core::Util::format_time(@_); });
   $app->helper(redis => sub { shift->app->redis(@_) });

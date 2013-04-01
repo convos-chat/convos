@@ -144,7 +144,7 @@ sub startup {
   $private_r->post('/delete/:id')->to('user#delete_connection')->name('connection.delete');
 
   $private_r->get('/history/:page')->to('client#history');
-  $private_r->websocket('/socket')->to('client#socket');
+  $private_r->websocket('/socket')->to('chat#socket');
 
   $private_r->get('/:cid/*target')->to('client#view')->name('channel.view');
   $private_r->get('/:cid')->to('client#view')->name('server.view');
