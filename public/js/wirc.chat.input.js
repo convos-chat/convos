@@ -29,65 +29,62 @@
     },
     inputKeys: function() {
       var self = this;
-      this.bind('keydown','up',function(e) {
-        e.preventDefault();
 
+      self.bind('keydown', 'up', function(e) {
+        e.preventDefault();
         if(history.length === 0) return;
-        if(history_index == history.length) self.data('initial_value', this.value);
+        if(history_index == history.length) self.data('initial_value', self.value);
         if(--history_index < 0) history_index = 0;
         this.value = history[history_index];
-
       });
-      this.bind('keydown','down',function(e) {
+      self.bind('keydown', 'down', function(e) {
         e.preventDefault();
         if(history.length === 0) return;
         if(++history_index >= history.length) history_index = history.length;
         this.value = history[history_index] || self.data('initial_value') || '';
       });
-
-      this.bind('keydown','tab',function(e) {
-        e.preventDefault();
-        this.value = methods.tabbing.call($(this), this.value);
-
-      });
-      this.bind('keydown','return',function(e){
+      self.bind('keydown', 'return', function(e) {
         if(this.value.length === 0) return e.preventDefault(); // do not send empty commands
         history.push(this.value);
         history_index = history.length;
       });
-      this.on('keydown',function(e) {
-        methods.tabbing.call($(this), false);
-      });
 
-      return this;
+      self.data('tabbing', { tabbed: -1, autocomplete: autocomplete });
+      self.on('keydown', function(e) { return methods.tabbing.call(self, e); });
+
+      return self;
     },
-    tabbing: function(val) {
-      var complete, tabbed;
+    tabbing: function(e) {
+      var data = this.data('tabbing');
+      var val = this.val();
 
-      if(val === false) {
-        this.removeData('tabbed̈́');
-        return this;
+      if(e.keyCode === 9) {
+        if(data.tabbed === -1) data.offset = val.length;
       }
-      if(this.hasData('tabbed̈́')) {
+      else {
+        if(data.tabbed >= 0) data.tabbed = -1;
+        return true;
+      }
+
+      log('tabbing <', e.keyCode, this.data('tabbing'));
+      if(data.tabbed === -1) {
         var offset = val.lastIndexOf(' ') + 1;
         var re = new RegExp('^' + val.substr(offset));
 
-        autocomplete_offset = offset;
-        this.matched = $.grep(autocomplete, function(v, i) {
-                        return offset ? v.indexOf('/') === -1 && re.test(v) : re.test(v);
-                       });
-        tabbed = -1; // ++ below will make this 0 the first time
+        data.offset = offset;
+        data.matched = $.grep(data.autocomplete, function(v, i) {
+          return offset ? v.indexOf('/') === -1 && re.test(v) : re.test(v);
+        });
       }
 
-      tabbed = this.data('tabbed');
-      if(this.matched.length === 0) return val;
-      if(++tabbed >= this.matched.length) tabbed = 0;
-      this.dat('tabbed', tabbed);
-      complete = val.substr(0, autocomplete_offset) + this.matched[tabbed];
-      if(complete.indexOf('/') !== 0 && val.indexOf(' ') === -1) complete +=  ': ';
-      if(this.matched.length === 1) this.matched = []; // do not allow more tabbing on one hit
+      if(data.matched.length === 0) return false;
+      if(++data.tabbed >= data.matched.length) data.tabbed = 0;
+      data.complete = val.substr(0, data.offset) + data.matched[data.tabbed];
+      if(data.complete.indexOf('/') !== 0 || val.indexOf(' ') == val.length) data.complete += ': ';
 
-      return complete;
+      log('tabbing >', this.data('tabbing'));
+      this.val(data.complete);
+      return false;
     }
   };
 
