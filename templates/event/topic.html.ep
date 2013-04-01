@@ -1,5 +1,9 @@
 <li class="muted" <%if(stash('cid') && stash('target')) {%>data-target="target_<%= $cid %>_<%= as_id $target %>"<%}%>>
-  <span class="prefix">Topic is</span>
-  <span><%= $topic %></span>
-  <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
+  % if(length $topic) {
+    <span class="prefix">Topic is</span>
+    <span><%= $topic %></span>
+  % } else {
+    <span>No topic is set.</span>
+  % }
+    <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
 </li>

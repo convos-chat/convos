@@ -108,10 +108,15 @@ Holds a L<Mojo::Log> object.
 has log => sub { Mojo::Log->new };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
-my @ADD_SERVER_MESSAGE_EVENTS = qw/ irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd irc_rpl_welcome/;
-my @OTHER_EVENTS              = qw/ irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply irc_error
-  irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_rpl_topicwhotime
-  /;
+my @ADD_SERVER_MESSAGE_EVENTS = qw/
+  irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd
+  irc_rpl_welcome
+/;
+my @OTHER_EVENTS              = qw/
+  irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
+  irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic
+  irc_rpl_topicwhotime irc_rpl_notopic
+/;
 
 has _irc => sub {
   my $self = shift;
@@ -352,7 +357,26 @@ sub irc_rpl_whoischannels {
   my ($self, $message) = @_;
 
   $self->_publish(
-    whois_channels => {nick => $message->{params}[1], channels => [sort split ' ', $message->{params}[2] || ''],});
+    whois_channels => {
+      nick => $message->{params}[1],
+      channels => [sort split ' ', $message->{params}[2] || ''],
+    },
+  );
+}
+
+=head2 irc_rpl_notopic
+
+  :server 331 nick #channel :No topic is set.
+
+=cut
+
+sub irc_rpl_notopic {
+  my ($self, $message) = @_;
+
+  $self->_publish(topic => {
+    topic => '',
+    target => $message->{params}[1],
+  });
 }
 
 =head2 irc_rpl_topic
