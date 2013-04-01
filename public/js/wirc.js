@@ -87,9 +87,9 @@
     },
     changeChannel: function() {
       var $chat_messages = $('#chat-messages');
-      cid = $chat_messages.attr('data-cid');
-      target = $chat_messages.attr('data-target');
-      $.each($chat_messages.attr('data-nicks').split(','), function(i, v) {
+      cid = $chat_messages.data('cid');
+      target = $chat_messages.data('target');
+      $.each($chat_messages.data('nicks').split(','), function(i, v) {
         if(v == nick) return; // TODO: This does not work since nick is an object
         $(input_selector).chatInput('autoCompleteNicks', { new_nick: v.replace(/^\@/, '') });
       });
