@@ -141,14 +141,14 @@
           $(window).scrollToBottom();
           do_not_load_history = false;
         }
-      } else {
+      } else if(this.hasClass('message')) {
         var $badge = $('#' + this.data('target') + ' .badge');
         $badge.text(parseInt($badge.text(), 10) + 1).show();
         if(this.hasClass('highlight')) $badge.addClass('badge-important');
       }
     },
     receiveData: function(e) {
-      log('[websocket] >', e.data.length);
+      log('[websocket] >', e.data);
       var $data = $(e.data);
 
       // notification handling
