@@ -36,6 +36,7 @@
     },
     initPjax: function() {
       $(document).on('pjax:send', function() {
+        do_not_load_history = true;
         $(input_selector).addClass('loading').prop('disabled', true);
       });
       $(document).on('pjax:complete', function() {
@@ -46,6 +47,7 @@
       });
       $('#conversation').on('pjax:end', function(e) {
         methods.changeChannel();
+        setTimeout(function() { do_not_load_history = false; }, 100);
       });
       $(document).pjax('.server a', '#conversation');
     },
@@ -82,7 +84,6 @@
     },
     initWebSocket: function() {
       websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
-      websocket.onopen = function() { methods.sendData({ cid: cid, target: target }); };
       websocket.onmessage = methods.receiveData;
     },
     changeChannel: function() {
@@ -180,8 +181,9 @@
     },
     sendData: function(data) {
       try {
-        websocket.send(JSON.stringify(data));
-        log('[websocket] <', data);
+        var $data = $(data).attr({ 'data-cid': cid, 'data-target': target }).wrap('<div>').parent();
+        websocket.send($data.html());
+        console.log('[websocket] <', $data.html());
       } catch(e) {
         log('[websocket] !', e);
       }
@@ -201,7 +203,7 @@
       $history_indicator = $('<div class="alert alert-info">Loading previous conversations...</div>');
       $(messages_selector).before($history_indicator);
       log('Load previous conversatins', history_index + 1);
-      $.get($.url_for('history', (++history_index)), function(data) {
+      $.get($.url_for(cid, target, (++history_index)), function(data) {
         if($(data).find('*').length) {
           $(messages_selector).prepend(data);
           $history_indicator.remove();
@@ -216,7 +218,7 @@
       });
     },
     onSubmit: function() {
-      methods.sendData({ cid: cid, target: target, cmd: $(input_selector).val() });
+      methods.sendData('<div>' + $(input_selector).val() + '</div>');
       $(input_selector).val(''); // TODO: Do not clear the input field until echo is returned?
       return false;
     }

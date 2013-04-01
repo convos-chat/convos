@@ -143,9 +143,10 @@ sub startup {
   $private_r->post('/edit/:id')->to('user#edit_connection')->name('connection.edit');
   $private_r->post('/delete/:id')->to('user#delete_connection')->name('connection.delete');
 
-  $private_r->get('/history/:page')->to('client#history');
   $private_r->websocket('/socket')->to('chat#socket');
 
+  $private_r->get('/:cid/*target/:page', [page => qr{\d+}])->to('client#history');
+  $private_r->get('/:cid/:page', [page => qr{\d+}])->to('client#history');
   $private_r->get('/:cid/*target')->to('client#view')->name('channel.view');
   $private_r->get('/:cid')->to('client#view')->name('server.view');
 

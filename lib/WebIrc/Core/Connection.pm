@@ -253,8 +253,6 @@ if it looks like one. Returns true if the message was added to redis.
 
 =cut
 
-use Data::Dumper;
-
 sub add_server_message {
   my ($self, $message) = @_;
 
@@ -263,7 +261,14 @@ sub add_server_message {
     # 1 = normal, 0 = error
     my $params = $message->{params};
     shift $params;
-    $self->_publish(server_message => {save => 1, status => 200, message => join(' ', @{$message->{params}})});
+    $self->_publish(
+      server_message => {
+        message => join(' ', @{$message->{params}}),
+        save => 1,
+        status => 200,
+        timestamp => time,
+      },
+    );
   }
 }
 

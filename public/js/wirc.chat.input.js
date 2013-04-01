@@ -3,12 +3,16 @@
   var history_index = 0;
   var autocomplete = [
     '/join #',
-    '/query #',
+    '/query ',
     '/msg ',
     '/me ',
     '/nick ',
     '/part ',
-    '/whois '
+    '/topic ',
+    '/close',
+    '/reconnect',
+    '/whois ',
+    '/help'
   ];
 
   var methods = {

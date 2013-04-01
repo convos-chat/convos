@@ -124,9 +124,9 @@ client view.
 
 sub history {
   my $self = shift->render_later;
-  my $page = $self->param('page');
-  my $cid = $self->param('cid');
-  my $target = $self->param('target') // '';
+  my $page = $self->stash('page');
+  my $cid = $self->stash('cid');
+  my $target = $self->stash('target') // '';
 
   unless($page and $cid) {
     return $self->render_exception('Missing parameters'); # TODO: Need to have a better error message?

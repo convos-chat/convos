@@ -63,8 +63,8 @@ sub format_conversation {
       next;
     }
     $nick //= '[server]';
-    $c->stash(embed=>undef);
-    $message->{message} =~ s!\b(\w{2,5}://\S+)!__handle_link($c, $message,$1)!e;
+    $c->stash(embed => undef);
+    $message->{message} =~ s!\b(\w{2,5}://\S+)!__handle_link($c, $message,$1)!e if $message->{message};
 
     unshift @$messages, $message;
   }
