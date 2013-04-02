@@ -11,10 +11,12 @@
     init: function() {
       $conversation_list = $('.conversation-list');
 
+      websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
+      websocket.onmessage = methods.receiveData;
+
       methods.changeChannel();
       methods.initPjax();
       methods.initShortcuts();
-      methods.initWebSocket();
       methods.onResize();
       notifier.init();
 
@@ -82,10 +84,6 @@
         });
       });
     },
-    initWebSocket: function() {
-      websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
-      websocket.onmessage = methods.receiveData;
-    },
     changeChannel: function() {
       var $chat_messages = $('#chat-messages');
       cid = $chat_messages.attr('data-cid');
@@ -95,13 +93,10 @@
         $(input_selector).chatInput('autoCompleteNicks', { new_nick: v.replace(/^\@/, '') });
       });
       $('.server li').removeClass('active');
-      var $target = $('#' + methods.makeTargetId(cid, target));
+      var $target = $('#' + 'target_' + (target ? cid + '_' + target.replace(/\W/g, '') : cid));
       $target.addClass('active');
       $target.find('.badge').text('0').removeClass('badge-important').hide();
       $(window).scrollToBottom();
-    },
-    makeTargetId: function(cid, target) {
-      return 'target_' + (target ? cid + '_' + target.replace(/\W/g, '') : cid);
     },
     modifyChannelList: function() {
       var $channel = $('#' + this.attr('id'));
@@ -142,7 +137,8 @@
           $(window).scrollToBottom();
           do_not_load_history = false;
         }
-      } else {
+      }
+      else {
         var $badge = $('#' + this.data('target') + ' .badge');
         $badge.text(parseInt($badge.text(), 10) + 1).show();
         if(this.hasClass('highlight')) $badge.addClass('badge-important');
@@ -179,15 +175,6 @@
 
       methods.printMessage.call($data);
     },
-    sendData: function(data) {
-      try {
-        var $data = $(data).attr({ 'data-cid': cid, 'data-target': target }).wrap('<div>').parent();
-        websocket.send($data.html());
-        console.log('[websocket] <', $data.html());
-      } catch(e) {
-        log('[websocket] !', e);
-      }
-    },
     onResize: function() {
       if($(window).width() < 767) {
         if(!$conversation_list.hasClass('open')) $conversation_list.addClass('hidden');
@@ -218,7 +205,15 @@
       });
     },
     onSubmit: function() {
-      methods.sendData('<div>' + $(input_selector).val() + '</div>');
+      try {
+        var $data = $('<div>' + $(input_selector).val() + '</div>').attr({ 'data-cid': cid, 'data-target': target }).wrap('<div>').parent();
+        websocket.send($data.html());
+        console.log('[websocket] <', $data.html());
+      }
+      catch(e) {
+        log('[websocket] !', e);
+      }
+
       $(input_selector).val(''); // TODO: Do not clear the input field until echo is returned?
       return false;
     }
