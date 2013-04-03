@@ -34,7 +34,6 @@
       var autocomplete = this.data('autocomplete');
       $.each(list, function(i, needle) {
         $.each(autocomplete, function(i, command) {
-          console.log(needle, command);
           if(command === needle) {
             autocomplete.splice(i, i + 1);
             if(cb) cb.call(this.get(0), needle);
