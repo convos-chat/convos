@@ -486,8 +486,12 @@ Example message:
 sub irc_rpl_namreply {
   my ($self, $message) = @_;
   my @nicks = split /\s+/, $message->{params}[3];    # 3 = +nick0 @nick1, nick2
+  my $nick = $self->_irc->nick || '';
 
-  $self->redis->sadd("connection:@{[$self->id]}:$message->{params}[2]:nicks", @nicks);
+  $self->redis->sadd(
+    "connection:@{[$self->id]}:$message->{params}[2]:nicks",
+    grep { $_ ne $nick } @nicks
+  );
 }
 
 =head2 irc_error
