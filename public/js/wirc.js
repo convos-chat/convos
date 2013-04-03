@@ -1,7 +1,6 @@
 (function($) {
   var input_selector = '.chat form input[type="text"]';
   var messages_selector = '.messages ul';
-
   var websocket, history_index, $conversation, $conversation_list, $history_indicator;
 
   var methods = {
@@ -96,6 +95,14 @@
       if($('#conversation_' + target).length) {
         var at_bottom = $(window).atBottom(); // need to calculate at_bottom before appending a new element
         $(messages_selector).append(this);
+        if($data.hasClass('nick-joined')) {
+          txt = $data.children('span').eq(1).text();
+          $(input_selector).chatInput('addAutocomplete', [txt.replace(/.*(\S+)$/, '$1')]);
+        }
+        else if($data.hasClass('nick-parted')) {
+          txt = $data.children('span').eq(1).text();
+          $(input_selector).chatInput('removeAutocomplete', [txt.replace(/.*(\S+)$/, '')]);
+        }
         if(at_bottom) $(window).scrollToBottom();
       }
       else {
@@ -109,15 +116,16 @@
       var $data = $(e.data);
       var target = $data.attr('data-target').replace(/:/g, '\\:');
       var $target = $('#target_' + target);
+      var txt;
 
       // notification handling
       if($data.hasClass('highlight')) {
         if($target.hasClass('conversation')) {
-          notifier.popup('New message from ' + $target.attr('title'), $data.find('.content').text());
+          notifier.popup('New message from ' + $target.attr('title'), $data.find('.content').text(), '');
           notifier.title('New message from ' + $target.attr('title'));
         }
         else {
-          notifier.popup('', 'New mention by ' + $data.find('.prefix').text() + ' in ' + $data.find('.content').text(), $data.find('.content').text());
+          notifier.popup('New mention by ' + $data.find('.prefix').text() + ' in ' + $data.find('.content').text(), $data.find('.content').text(), '');
           notifier.title('New mention by ' + $data.find('.prefix').text() + ' in ' + $target.attr('title'));
         }
       }
@@ -134,7 +142,7 @@
         });
       }
       else if($data.hasClass('nick-change')) {
-        var txt = $data.children('span').eq(1).text();
+        txt = $data.children('span').eq(1).text();
         $(input_selector)
           .chatInput('removeAutocomplete', [txt.replace(/\s.*/, '')], function() { $data.attr('data-target', 'any'); })
           .chatInput('addAutocomplete', [txt.replace(/.*"(.*)"/, '$1')]);
