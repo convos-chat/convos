@@ -180,15 +180,9 @@
       });
     },
     onSubmit: function() {
-      try {
-        var $data = $('<div data-target="' + methods.activeTarget() + '">' + $(input_selector).val() + '</div>').wrap('<div>').parent();
-        websocket.send($data.html());
-        log('[websocket] <', $data.html());
-      }
-      catch(e) {
-        log('[websocket] !', e);
-      }
-
+      var $data = $('<div data-target="' + methods.activeTarget() + '">' + $(input_selector).val() + '</div>').wrap('<div>').parent();
+      log('[websocket] <', $data.html());
+      websocket.send($data.html());
       $(input_selector).val(''); // TODO: Do not clear the input field until echo is returned?
       return false;
     }
