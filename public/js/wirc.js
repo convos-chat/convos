@@ -95,12 +95,12 @@
       if($('#conversation_' + target).length) {
         var at_bottom = $(window).atBottom(); // need to calculate at_bottom before appending a new element
         $(messages_selector).append(this);
-        if($data.hasClass('nick-joined')) {
-          txt = $data.children('span').eq(1).text();
+        if(this.hasClass('nick-joined')) {
+          txt = this.children('span').eq(1).text();
           $(input_selector).chatInput('addAutocomplete', [txt.replace(/.*(\S+)$/, '$1')]);
         }
-        else if($data.hasClass('nick-parted')) {
-          txt = $data.children('span').eq(1).text();
+        else if(this.hasClass('nick-parted')) {
+          txt = this.children('span').eq(1).text();
           $(input_selector).chatInput('removeAutocomplete', [txt.replace(/.*(\S+)$/, '')]);
         }
         if(at_bottom) $(window).scrollToBottom();
