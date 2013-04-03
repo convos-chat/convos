@@ -1,4 +1,4 @@
-<li class="muted" <%if(stash('cid') && stash('target')) {%>data-target="target_<%= $cid %>_<%= as_id $target %>"<%}%>>
+<li class="muted" data-target="<%= as_id $cid, $target %>">
   <span class="prefix">Set by</span>
   <span> <%= $nick %> at <%= format_time $ts,'%H:%M:%S' %></span>
   <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>

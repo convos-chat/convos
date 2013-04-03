@@ -1,12 +1,5 @@
-    % if(@$connections) {
-      <ul class="unstyled" id="chat-messages"
-        data-cid="<%= $cid %>"
-        data-nicks="<%= join ',', @$nicks %>"
-        data-target="<%= $target %>">
-    % }
-    % my $n = 0;
-    % for my $message (@$conversation) {
-      %= include 'event/'.$message->{event}, %$message
-    % }
-      </li>
-%== qq{</ul>} if @$connections
+<ul class="unstyled chat-messages" id="conversation_<%= as_id $cid, $target %>" data-nick="<%= $nick %>" data-nicks="<%= join ',', @$nicks %>">
+% for my $message (@$conversation) {
+    %= include 'event/'.$message->{event}, %$message
+% }
+</ul>

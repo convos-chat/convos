@@ -1,6 +1,6 @@
-<li class="muted">
+<li class="muted" data-target="any">
   <span>wirc - <%= $message %></span>
 %if(stash('timestamp')) {
-  <span class="timestamp"><%= format_time stash('timestamp'), "%H:%M:%S" %></span>
+  <span class="timestamp"><%= format_time time, "%H:%M:%S" %></span>
 %}
 </li>

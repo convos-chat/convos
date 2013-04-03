@@ -442,7 +442,7 @@ sub irc_join {
   my $channel = $message->{params}[0];
 
   return if $nick eq $self->_irc->nick;
-  $self->_publish(nick_joined => {save => 1, nick => $nick, channel => $channel, save => 1});
+  $self->_publish(nick_joined => { save => 1, nick => $nick, channel => $channel });
   $self->redis->sadd("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
 
@@ -459,8 +459,7 @@ sub irc_nick {
     $self->redis->hset("connection:@{[$self->id]}", current_nick => $new_nick);
   }
 
-
-  $self->_publish(nick_change => {save => 1, old_nick => $old_nick, new_nick => $new_nick});
+  $self->_publish(nick_change => { save => 1, old_nick => $old_nick, new_nick => $new_nick });
 }
 
 =head2 irc_part
@@ -472,7 +471,7 @@ sub irc_part {
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
-  $self->_publish(remove_channel => {nick => $nick, channel => $channel, save => 1});
+  $self->_publish(nick_parted => { nick => $nick, target => $channel, save => 1 });
   $self->redis->srem("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
 
@@ -539,7 +538,7 @@ sub cmd_join {
 
   # clean up old nick list
   $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
-  $self->_publish(new_channel => {nick => $self->_irc->nick, channel => $channel});
+  $self->_publish(new_conversation => { target => $channel, save => 1 });
 }
 
 =head2 cmd_part
@@ -554,7 +553,7 @@ sub cmd_part {
 
   $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
   $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
-  $self->_publish(remove_channel => {nick => $self->_irc->nick, channel => $channel});
+  $self->_publish(remove_conversation => { target => $channel, save => 1 });
 }
 
 sub _publish {

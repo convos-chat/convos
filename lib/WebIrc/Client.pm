@@ -25,7 +25,7 @@ sub route {
   my $settings = sub { $self->redirect_to($self->url_for('settings')) };
 
   if(!$uid) {
-    $self->render(template => 'index');
+    $self->render('index');
   }
   elsif($self->session('cid_target')) {
     my($cid, $target) = split /:/, $self->session('cid_target');
@@ -63,13 +63,19 @@ Used to render the main IRC client view.
 
 sub view {
   my $self   = shift->render_later;
-  my $cid    = $self->param('cid');
-  my $target = $self->param('target') || '';
+  my $uid    = $self->session('uid');
+  my $cid    = $self->stash('cid');
+  my $target = $self->stash('target') || '';
+  my $current_nick;
 
   $self->session(cid_target => join ':', $cid, $target);
 
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
+    sub {
+      my($delay) = @_;
+      $self->redis->smembers("user:$uid:connections", $delay->begin);
+    },
     sub {
       my($delay, $cids) = @_;
       my $cb = $delay->begin;
@@ -83,35 +89,73 @@ sub view {
       my($delay, $connections, $cids) = @_;
       $self->_fetch_conversation_lists(
         $delay,
-        map { +{ id => shift @$cids, host => $_->[1], nick => $_->[0] } } @$connections
+        map { +{ cid => shift @$cids, host => $_->[1], nick => $_->[0] } } @$connections
       );
     },
     sub {
       my($delay, @connections) = @_;
-      my($current) = grep { $_->{id} == $cid } @connections;
+      my($current) = grep { $_->{cid} == $cid } @connections;
+      $current_nick = $current->{nick} || '';
 
       $self->stash(
         connections => [ sort { $a->{host} cmp $b->{host} } @connections ],
         cid => $cid,
         target => $target,
-        nick => $current->{nick} || '',
+        nick => $current_nick,
       );
 
       if($target) {
         $self->redis->smembers("connection:$cid:$target:nicks", $delay->begin);
       }
       else {
-        $delay->begin->([]);
+        $delay->begin->(undef, []);
       }
 
       $self->_fetch_conversation($_[0], $cid, $target, 0);
     },
     sub {
-      $self->stash(nicks => $_[1] || [], conversation => $_[2]);
-      return $self->render(template => 'client/conversation', layout => undef) if $self->req->is_xhr;
+      my($delay, $nicks, $conversation) = @_;
+      my @nicks = ($current_nick, grep { $_ ne $current_nick } @{ $nicks || [] }); # make sure "my nick" is part of the nicks list
+      $self->stash(nicks => \@nicks, conversation => $conversation);
+      return $self->render('client/conversation', layout => undef) if $self->req->is_xhr;
       return $self->render;
     },
+  );
+}
 
+=head2 connection_list
+
+Will render the connection list for a given connection id.
+
+=cut
+
+sub connection_list {
+  my $self = shift->render_later;
+  my($cid, $target) = $self->id_as($self->stash('target'));
+
+  $target ||= '';
+  $self->stash(target => $target, cid => $cid);
+  Mojo::IOLoop->delay(
+    $self->_check_if_uid_own_cid($cid),
+    sub {
+      my($delay) = @_;
+      $self->redis->hmget("connection:$cid" => qw/ nick host /, $delay->begin);
+    },
+    sub {
+      my($delay, $connection) = @_;
+      $self->_fetch_conversation_lists(
+        $delay,
+        {
+          cid => $cid,
+          host => $connection->[1],
+          nick => $connection->[0],
+        },
+      );
+    },
+    sub {
+      my($delay, $connection) = @_;
+      $self->render('client/connection_list', %$connection);
+    },
   );
 }
 
@@ -125,13 +169,14 @@ client view.
 sub history {
   my $self = shift->render_later;
   my $page = $self->stash('page');
-  my $cid = $self->stash('cid');
-  my $target = $self->stash('target') // '';
+  my($cid, $target) = $self->id_as($self->stash('target'));
 
   unless($page and $cid) {
     return $self->render_exception('Missing parameters'); # TODO: Need to have a better error message?
   }
 
+  $target ||= '';
+  $self->stash(target => $target, cid => $cid);
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
     sub {
@@ -139,18 +184,16 @@ sub history {
     },
     sub {
       $self->render(
+        'client/conversation',
         cid => $cid,
         conversation => $_[1],
-        layout => undef,
         nick => '',
         nicks => [],
         target => $target,
-        template => 'client/conversation',
       );
     },
   );
 }
-
 
 sub _check_if_uid_own_cid {
   my($self, $cid) = @_;
@@ -162,7 +205,7 @@ sub _check_if_uid_own_cid {
   },
   sub {
     my($delay, $is_owner) = @_;
-    return $self->redis->smembers("user:$uid:connections", $delay->begin) if $is_owner;
+    return $delay->begin->();
     delete $self->session->{cid_target};
     return $self->route;
   },
@@ -189,8 +232,8 @@ sub _fetch_conversation_lists {
   for my $info (@connections) {
     my $cb = $delay->begin;
     $self->redis->execute(
-      [ smembers => "connection:$info->{id}:channels" ],
-      [ smembers => "connection:$info->{id}:conversations" ],
+      [ smembers => "connection:$info->{cid}:channels" ],
+      [ smembers => "connection:$info->{cid}:conversations" ],
       sub {
         my ($redis, $channels, $conversations) = @_;
         $info->{channels} = $channels;

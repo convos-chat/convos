@@ -7,21 +7,8 @@
       %= link_to '', 'settings', class=>"link-settings icon-cog"
       </h4>
     </ul>
-  % for my $c (@$connections) {
-    <ul class="server nav nav-list" id="connection_list_<%= $c->{id} %>"  data-cid="<%=$c->{id}%>" data-nick="<%= $c->{current_nick} || $c->{nick} %>">
-      <li id="target_<%= $c->{id} %>" class="<%= is_active($c) ? ' active' : '' %> nav-header">
-        %= link_to url_for('server.view',cid => $c->{id}), begin
-          %= $c->{host}
-          <span class="badge hide">0</span>
-        % end
-      </li>
-    % for my $channel (@{ $c->{channels} }) {
-      %= include 'event/new_channel', cid => $c->{id}, channel => $channel
-    % }
-    % for my $conversation (@{ $c->{conversations} }) {
-      %= include 'event/new_conversation', cid => $c->{id}, target => $conversation
-    % }
-    </ul>
+  % for my $connection (@$connections) {
+    %= include 'client/connection_list', %$connection;
   % }
   </div>
 </div>

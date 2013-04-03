@@ -14,6 +14,45 @@ my $JSON = Mojo::JSON->new;
 
 =head1 HELPERS
 
+=head2 as_id
+
+    $id = as_id @str;
+
+This method will convert the input to a string which can be used as id
+attribute in your HTML doc.
+
+It will convert non-word characters to ":hex" and join C<@str> with ":00".
+
+=cut
+
+sub as_id {
+  my $c = shift;
+
+  join ':00', map {
+    local $_ = $_; # local $_ is for changing constants and not changing input
+    s/:/:3a/g;
+    s/([^\w:])/{ sprintf ':%02x', ord $1 }/ge;
+    $_;
+  } grep {
+    length $_;
+  } @_;
+}
+
+=head2 id_as
+
+    @str = id_as $id;
+
+Reverse of L</as_id>.
+
+=cut
+
+sub id_as {
+  map {
+    s/:(\w\w)/{ chr hex $1 }/ge;
+    $_;
+  } split /:00/, $_[1];
+}
+
 =head2 form_block
 
   %= form_block $name, class => [$str, ...] begin
@@ -91,10 +130,6 @@ See L<WebIrc::Core::Util/logf>.
 
 Returns a L<Mojo::Redis> object.
 
-=head3 as_id
-
-strip non-word characters from input.
-
 =head1 METHODS
 
 =head2 register
@@ -111,16 +146,17 @@ sub register {
   $app->helper(logf          => \&WebIrc::Core::Util::logf);
   $app->helper(format_time => sub { my $self = shift; WebIrc::Core::Util::format_time(@_); });
   $app->helper(redis => sub { shift->app->redis(@_) });
-  $app->helper(as_id => sub { my ($self, $val) = @_; $val =~ s/\W+//g; $val });
+  $app->helper(as_id => \&as_id);
+  $app->helper(id_as => \&id_as);
   $app->helper(send_partial => sub { $self = shift; $self->send( $self->render_partial(@_).'' ); });
   $app->helper(
     is_active => sub {
-      my ($self, $c, $target) = @_;
-      if ($c->{id} == $self->param('cid')) {
-        return 1 if !defined $target && !defined $self->param('target');
-        return 1 if defined $target && defined $self->param('target') && $target eq $self->param('target');
+      my ($c, $id, $target) = @_;
+      if ($id eq $c->stash('cid')) {
+        return 'active' if !length $target and !length $c->stash('target');
+        return 'active' if length $target and length $c->stash('target') and $target eq $c->stash('target');
       }
-      return 0;
+      return '';
     }
   );
 }

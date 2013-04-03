@@ -5,7 +5,9 @@
     return this.scrollTop() + this.height() >= $('body').height() - 30;
   };
   $.fn.scrollToBottom = function() {
+    window.the_machine_is_scrolling = true;
     $('html, body').scrollTop($('body').height());
+    window.the_machine_is_scrolling = false;
     return this;
   };
   $.url_for = function() {

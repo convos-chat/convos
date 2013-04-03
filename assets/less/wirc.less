@@ -39,7 +39,6 @@ body.chat { padding-top: 3px; padding-bottom: 32px; }
   margin-bottom: 3em;
 }
 
-
 .chat .conversation-list li.nav-header {
   border-top: 1px solid #ddd;
 }
@@ -66,7 +65,20 @@ body.chat { padding-top: 3px; padding-bottom: 32px; }
 	display: inline-block;
 }
 
-.chat .messages .alert {
+.chat .conversation-list li.loading > a,
+.chat .conversation-list li.active.loading > a {
+  background-color: #aaa;
+  -webkit-animation: pulsate 1s ease-out;
+  -webkit-animation-iteration-count: infinite;
+}
+
+@-webkit-keyframes pulsate {
+  0% { opacity: 1.0; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1.0; }
+}
+
+#conversation .alert {
   position: absolute;
   right: 2px;
   top: 2px;
@@ -74,9 +86,6 @@ body.chat { padding-top: 3px; padding-bottom: 32px; }
 
 .chat-input form { padding: 0 20px; }
 .chat-input input { font-family: "Hume Mono", monospace; }
-.chat-input input.loading {
-  background: url(../image/loading.gif) no-repeat;
-}
 
 @media (max-width: 1025px) {
   .chat .conversation-list {
@@ -104,6 +113,7 @@ body.chat { padding-top: 3px; padding-bottom: 32px; }
 .chat .messages .prefix { font-weight: bold }
 .chat .messages .timestamp { color: #777; float: right; }
 .chat .messages span {   white-space:pre-wrap; }
+
 /* settings */
 .connection-tab-container .nav {
   margin-right: -1px;

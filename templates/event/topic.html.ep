@@ -1,4 +1,4 @@
-<li class="muted" <%if(stash('cid') && stash('target')) {%>data-target="target_<%= $cid %>_<%= as_id $target %>"<%}%>>
+<li class="muted" id="topic_<%= as_id $cid, $target %>">
   % if(length $topic) {
     <span class="prefix">Topic is</span>
     <span><%= $topic %></span>

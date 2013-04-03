@@ -1,4 +1,4 @@
-<li class="muted">
+<li class="muted" data-target="<%= as_id $cid, $target %>">
   <span class="prefix"><%= app->config->{name} %>:</span>
   <span><%= $nick %> is in <%= join(', ', @$channels) %>.</span>
   <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
