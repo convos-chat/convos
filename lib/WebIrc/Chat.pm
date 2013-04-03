@@ -28,7 +28,7 @@ my %COMMANDS; %COMMANDS = (
       $target,
       sub {
         my ($redis, $member) = @_;
-        $self->send_partial('event/new_conversation', cid => $dom->{cid}, target => $target) if $member;
+        $self->send_partial('event/add_conversation', cid => $dom->{cid}, target => $target) if $member;
       }
     );
     return;

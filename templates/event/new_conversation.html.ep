@@ -1,1 +1,0 @@
-<div class="new-conversation" data-target="<%= as_id $cid, $target %>"></div>

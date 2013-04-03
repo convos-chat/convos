@@ -131,8 +131,8 @@
       }
 
       // action handling
-      if($data.hasClass('new-conversation') || $data.hasClass('remove-conversation')) {
-        var p = $data.hasClass('new-conversation') ? $data.attr('data-target') : $data.attr('data-target').replace(/:.*/, '');
+      if($data.hasClass('add-conversation') || $data.hasClass('remove-conversation')) {
+        var p = $data.hasClass('add-conversation') ? $data.attr('data-target') : $data.attr('data-target').replace(/:.*/, '');
         $conversation_list.fadeTo('fast', 0.5);
         return $.get($.url_for('v1', p, 'connection-list'), function(data) {
           var $data = $(data);

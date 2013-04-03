@@ -542,7 +542,7 @@ sub cmd_join {
 
   # clean up old nick list
   $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
-  $self->_publish(new_conversation => { target => $channel, save => 1 });
+  $self->_publish(add_conversation => { target => $channel, save => 1 });
 }
 
 =head2 cmd_part
