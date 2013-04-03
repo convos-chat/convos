@@ -104,17 +104,17 @@ sub view {
         nick => $current_nick,
       );
 
+      $self->_fetch_conversation($cid, $target, 0, $delay->begin);
+
       if($target) {
         $self->redis->smembers("connection:$cid:$target:nicks", $delay->begin);
       }
       else {
         $delay->begin->(undef, []);
       }
-
-      $self->_fetch_conversation($_[0], $cid, $target, 0);
     },
     sub {
-      my($delay, $nicks, $conversation) = @_;
+      my($delay, $conversation, $nicks) = @_;
       my @nicks = ($current_nick, grep { $_ ne $current_nick } @{ $nicks || [] }); # make sure "my nick" is part of the nicks list
       $self->stash(nicks => \@nicks, conversation => $conversation);
       return $self->render('client/conversation', layout => undef) if $self->req->is_xhr;
@@ -180,13 +180,15 @@ sub history {
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
     sub {
-      $self->_fetch_conversation($_[0], $cid, $target, $page - 1);
+      my($delay) = @_;
+      $self->_fetch_conversation($cid, $target, $page - 1, $delay->begin);
     },
     sub {
+      my($delay, $conversation) = @_;
       $self->render(
         'client/conversation',
         cid => $cid,
-        conversation => $_[1],
+        conversation => $conversation,
         nick => '',
         nicks => [],
         target => $target,
@@ -212,9 +214,8 @@ sub _check_if_uid_own_cid {
 }
 
 sub _fetch_conversation {
-  my($self, $delay, $cid, $target, $page) = @_;
+  my($self, $cid, $target, $page, $cb) = @_;
   my $n_messages = 50;
-  my $cb = $delay->begin;
 
   # FIXME: Should be using last seen tz and default to -inf
   $self->redis->zrevrangebyscore(
