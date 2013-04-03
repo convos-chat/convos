@@ -288,7 +288,7 @@ Will add a private message to the database.
 sub add_message {
   my ($self, $message) = @_;
   my $current_nick = $self->_irc->nick;
-  my $msg          = $message->{params}[0] eq $current_nick;
+      my $msg          = $message->{params}[0] eq $current_nick;
   my $data         = {message => $message->{params}[1], save => 1};
   @{$data}{qw/nick user host/} = parse_user($message->{prefix});
   $data->{target} = lc($msg ? $data->{nick} : $message->{params}[0]);

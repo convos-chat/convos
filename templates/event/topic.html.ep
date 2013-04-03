@@ -1,9 +1,9 @@
 <li class="muted" id="topic_<%= as_id $cid, $target %>">
-  % if(length $topic) {
-    <span class="prefix">Topic is</span>
-    <span><%= $topic %></span>
-  % } else {
-    <span>No topic is set.</span>
-  % }
-    <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
+% if(length $topic) {
+  <span class="prefix">Topic is</span>
+  <span><%= $topic %></span>
+% } else {
+  <span>No topic is set.</span>
+% }
+  <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
 </li>

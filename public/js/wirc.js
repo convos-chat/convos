@@ -105,7 +105,7 @@
       }
     },
     receiveData: function(e) {
-      log('[websocket] >', e.data.length);
+      log('[websocket] >', e.data);
       var $data = $(e.data);
       var target = $data.attr('data-target').replace(/:/g, '\\:');
       var $target = $('#target_' + target);
