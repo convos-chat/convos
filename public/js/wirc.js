@@ -1,14 +1,14 @@
 (function($) {
   var input_selector = '.chat form input[type="text"]';
   var messages_selector = '.messages ul';
-  var websocket, history_index, $conversation, $conversation_list, $history_indicator;
+  var websocket, history_index, $conversation, $conversation_list;
 
   var methods = {
     init: function() {
-      $conversation_list = $('.conversation-list');
-
       websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
       websocket.onmessage = methods.receiveData;
+
+      $conversation_list = $('.conversation-list');
 
       methods.changeChannel();
       methods.initPjax();
@@ -30,9 +30,8 @@
     },
     initPjax: function() {
       $(document).on('pjax:send', function(event) {
-        window.the_machine_is_scrolling = true;
         $(event.relatedTarget).parent('li:first').addClass('loading');
-        $conversation_list.fadeTo('fast', 0.5);
+        statusIndicator('show', 'Loading...');
       });
       $(document).on('pjax:complete', function(event) {
         $(event.relatedTarget).parent('li:first').removeClass('loading');
@@ -41,8 +40,8 @@
         event.preventDefault(); // Prevent default timeout redirection behavior
       });
       $('#conversation').on('pjax:end', function(e) {
+        statusIndicator('fadeOut');
         methods.changeChannel();
-        setTimeout(function() { window.the_machine_is_scrolling = false; }, 100);
       });
       $(document).pjax('.server a', '#conversation');
     },
@@ -78,17 +77,17 @@
       });
     },
     activeTarget: function(escaped) {
-      var target = $conversation_list.attr('id').replace(/^conversation_/, '');
+      var target = $conversation.attr('id').replace(/^conversation_/, '');
       return escaped ? target.replace(/:/g, '\\:') : target;
     },
     changeChannel: function() {
       history_index = 1;
-      $conversation_list = $('#conversation > ul');
+      $conversation = $('#conversation > ul');
       $(window).scrollToBottom();
-      $(input_selector).chatInput('initAutocomplete', $conversation_list.attr('data-nicks').replace(/\@/g, '').split(','));
+      $(input_selector).chatInput('initAutocomplete', $conversation.attr('data-nicks').replace(/\@/g, '').split(','));
       $('.server li').removeClass('active').find('.badge').text('0').removeClass('badge-important').hide();
       $('#target_' + methods.activeTarget(1)).addClass('active');
-      log('changeChannel', $conversation_list.attr('id'));
+      log('changeChannel', $conversation.attr('id'));
     },
     printMessage: function(target) {
       if(target == 'any') target = methods.activeTarget(1); // special server messages
@@ -99,7 +98,8 @@
           $(input_selector).chatInput('addAutocomplete', this.attr('data-nick'));
         else if(this.hasClass('nick-parted'))
           $(input_selector).chatInput('removeAutocomplete', this.attr('data-nick'));
-        if(at_bottom) $(window).scrollToBottom();
+        if(at_bottom)
+          $(window).scrollToBottom();
       }
       else {
         var $badge = $('#target_' + target + ' .badge');
@@ -128,7 +128,7 @@
       // action handling
       if($data.hasClass('add-conversation') || $data.hasClass('remove-conversation')) {
         var p = $data.hasClass('add-conversation') ? $data.attr('data-target') : $data.attr('data-target').replace(/:.*/, '');
-        $conversation_list.fadeTo('fast', 0.5);
+        statusIndicator('show', 'Loading...');
         return $.get($.url_for('v1', p, 'connection-list'), function(data) {
           var $data = $(data);
           var target = $data.attr('id').replace(/:/g, '\\:');
@@ -155,22 +155,20 @@
       }
     },
     onScroll: function() {
-      if(window.the_machine_is_scrolling) return;
-      if($history_indicator || $(window).scrollTop() !== 0) return;
-      var height_before_load = $('body').height();
-      $history_indicator = $('<div class="alert alert-info">Loading previous conversations...</div>');
-      $(messages_selector).before($history_indicator);
-      $.get($.url_for('v1', methods.activeTarget(1), 'history', (++history_index)), function(data) {
+      if(!history_index || statusIndicator()) return;
+      if($(window).scrollTop() !== 0) return;
+      statusIndicator('show', 'Loading previous conversations...');
+      $.get($.url_for('v1', methods.activeTarget(0), 'history', (++history_index)), function(data) {
         if($(data).find('*').length) {
+          var height_before_prepend = $('body').height();
+          statusIndicator('fadeOut');
           $(messages_selector).prepend(data);
-          $history_indicator.remove();
-          $history_indicator = false;
-          $(window).scrollTop($('body').height() - height_before_load);
+          $(window).scrollTop($('body').height() - height_before_prepend);
         }
         else {
-          window.the_machine_is_scrolling = true;
-          $history_indicator.removeClass('alert-info').text('End of conversation log.');
-          setTimeout(function() { $history_indicator.fadeOut('slow'); }, 2000);
+          history_index = 0;
+          statusIndicator('show', 'End of conversation log.');
+          setTimeout(function() { statusIndicator('fadeOut'); }, 5000);
         }
       });
     },

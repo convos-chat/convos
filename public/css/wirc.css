@@ -5191,8 +5191,8 @@ body.chat {
     opacity: 1.0;
   }
 }
-#conversation .alert {
-  position: absolute;
+#status_indicator {
+  position: fixed;
   right: 2px;
   top: 2px;
 }

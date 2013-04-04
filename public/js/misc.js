@@ -1,13 +1,12 @@
 (function($) {
-  var base_url;
+  var status_indicator_is_active = false;
+  var base_url, $status_indicator;
 
   $.fn.atBottom = function() {
     return this.scrollTop() + this.height() >= $('body').height() - 30;
   };
   $.fn.scrollToBottom = function() {
-    window.the_machine_is_scrolling = true;
     $('html, body').scrollTop($('body').height());
-    window.the_machine_is_scrolling = false;
     return this;
   };
   $.url_for = function() {
@@ -16,7 +15,31 @@
     args.unshift(base_url);
     return args.join('/');
   };
-
+  window.statusIndicator = function(action, text) {
+    if(!$status_indicator) {
+      $status_indicator = $('<div class="alert alert-info" id="status_indicator"></div>');
+      $('#container').append($status_indicator.hide());
+    }
+    if(!action) {
+      return status_indicator_is_active;
+    }
+    else if(text) {
+      status_indicator_is_active = true;
+      if(action == 'show') {
+        $status_indicator.text(text).show();
+      }
+      else {
+        $status_indicator.text(text)[action](function() {
+          status_indicator_is_active = false;
+          $status_indicator.text('');
+        });
+      }
+    }
+    else {
+      status_indicator_is_active = false;
+      $status_indicator[action](function() { $status_indicator.text(''); });
+    }
+  };
 })(jQuery);
 
 (function() {
