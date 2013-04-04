@@ -85,8 +85,8 @@
       $conversation = $('#conversation > ul');
       $(window).scrollToBottom();
       $(input_selector).chatInput('initAutocomplete', $conversation.attr('data-nicks').replace(/\@/g, '').split(','));
-      $('.server li').removeClass('active').find('.badge').text('0').removeClass('badge-important').hide();
-      $('#target_' + methods.activeTarget(1)).addClass('active');
+      $('.server li').removeClass('active');
+      $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
       log('changeChannel', $conversation.attr('id'));
     },
     printMessage: function(target) {

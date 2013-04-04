@@ -90,6 +90,7 @@ sub view {
     },
     sub {
       my($delay, $connections, $cids) = @_;
+      $self->redis->del($target ? "connection:$cid:$target:unread" : "connection:$cid:unread");
       $self->_fetch_conversation_lists(
         $delay,
         map { +{ cid => shift @$cids, host => $_->[1], nick => $_->[0] } } @$connections
@@ -234,15 +235,26 @@ sub _fetch_conversation_lists {
   my($self, $delay, @connections) = @_;
 
   for my $info (@connections) {
+    my $cid = $info->{cid};
     my $cb = $delay->begin;
     $self->redis->execute(
-      [ smembers => "connection:$info->{cid}:channels" ],
-      [ smembers => "connection:$info->{cid}:conversations" ],
+      [ smembers => "connection:$cid:channels" ],
+      [ smembers => "connection:$cid:conversations" ],
+      [ get => "connection:$cid:unread" ],
       sub {
-        my ($redis, $channels, $conversations) = @_;
+        my ($redis, $channels, $conversations, $unread) = @_;
+        my @unread = map { [get => "connection:$cid:$_:unread"] } @$channels, @$conversations;
+
         $info->{channels} = $channels;
         $info->{conversations} = $conversations;
-        $cb->(undef, $info);
+        $info->{unread} = [$unread];
+
+        return $cb->(undef, $info) unless @unread;
+        return $redis->execute(@unread, sub {
+          my $redis = shift;
+          push @{ $info->{unread} }, @_;
+          $cb->(undef, $info);
+        });
       },
     );
   }
