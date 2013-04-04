@@ -1,1 +1,1 @@
-<li id="target_<%= $cid %>_<%= as_id $target %>" class="conversation closed"></li>
+<div class="remove-conversation" data-target="<%= as_id $cid, $target %>"></div>

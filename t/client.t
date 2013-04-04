@@ -31,21 +31,27 @@ $t->post_ok('/register' => form => {
 $t->get_ok('/')
   ->status_is('302')
   ->header_like('Location', qr{/1/%23yikes}, 'Redirect to index page')
+  ->content_is('')
   ;
 
 $t->get_ok('/2/foo')
   ->status_is('302')
   ->header_like('Location', qr{/1/%23yikes}, 'Redirect on invalid conversation')
+  ->content_is('')
   ;
 
 $t->get_ok('/1/%23yikes')
   ->status_is(200, 'Render yikes conversation')
   ->element_exists('.conversation-list')
   ->element_exists('#target_1')
-  ->element_exists('#target_1_yikes')
-  ->element_exists('#conversation')
-  ->element_exists('#chat-messages[data-cid="1"][data-target="#yikes"]')
+  ->element_exists('#target_1\:00\:23yikes')
+  ->element_exists('#conversation_1\:00\:23yikes')
   ->element_exists('.chat-input')
+  ;
+
+$t->get_ok('/')
+  ->header_like('Location', qr{/1/%23yikes}, 'Redirect on invalid conversation')
+  ->content_is('')
   ;
 
 done_testing;

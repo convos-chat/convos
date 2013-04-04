@@ -1,4 +1,4 @@
-<li class="action message"  data-cid="<%=stash('cid')%>" <%if(stash('cid') && stash('target')) {%>data-target="target_<%= $cid %>_<%= as_id $target %>"<%}%>>
+<li class="action" data-target="<%= as_id $cid, $target %>">
   <span colspan="2">* <%= $nick %> <%= $message %></span>
   <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>
 </li>

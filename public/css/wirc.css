@@ -5174,7 +5174,24 @@ body.chat {
 .chat .conversation-list .link-settings {
   display: inline-block;
 }
-.chat .messages .alert {
+.chat .conversation-list li.loading > a,
+.chat .conversation-list li.active.loading > a {
+  background-color: #aaa;
+  -webkit-animation: pulsate 1s ease-out;
+  -webkit-animation-iteration-count: infinite;
+}
+@-webkit-keyframes pulsate {
+  0% {
+    opacity: 1.0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1.0;
+  }
+}
+#conversation .alert {
   position: absolute;
   right: 2px;
   top: 2px;

@@ -1,31 +1,55 @@
 (function($) {
   var history = [];
   var history_index = 0;
-  var autocomplete = [
+  var commands = [
     '/join #',
-    '/query #',
+    '/query ',
     '/msg ',
     '/me ',
     '/nick ',
     '/part ',
-    '/whois '
+    '/topic ',
+    '/close',
+    '/reconnect',
+    '/whois ',
+    '/help'
   ];
 
   var methods = {
-    autoCompleteNicks: function(data) {
-      if(data.old_nick) {
-        var needle = data.old_nick;
-        autocomplete = $.grep(autocomplete, function(v, i) {
-          return v != needle;
-        });
-      }
-      if(data.new_nick) {
-        methods.autoCompleteNicks.call(this, { old_nick: data.new_nick });
-        autocomplete.unshift(data.new_nick);
-      } else if(data.nick) {
-        methods.autoCompleteNicks.call(this, { old_nick: data.nick });
-        autocomplete.unshift(data.nick);
-      }
+    initAutocomplete: function(list) {
+      var autocomplete = commands.slice(0);
+      $.each(list, function(i) { autocomplete.unshift(this); });
+      this.data('autocomplete', autocomplete);
+      log('initAutocomplete', list, autocomplete);
+      return this;
+    },
+    addAutocomplete: function(command) {
+      var autocomplete = this.data('autocomplete');
+      methods.removeAutocomplete.call(this, command); // prevent duplicates
+      autocomplete.unshift(command);
+      log('addAutocomplete', command, autocomplete);
+      return this;
+    },
+    removeAutocomplete: function(command) {
+      var autocomplete = this.data('autocomplete');
+      $.each(autocomplete, function(i) {
+        if(this != command) return;
+        autocomplete.splice(i, i + 1);
+        return false; // stop each()
+      });
+      log('removeAutocomplete', command, autocomplete);
+      return this;
+    },
+    replaceAutocomplete: function(from, to, cb) {
+      var autocomplete = this.data('autocomplete');
+      $.each(autocomplete, function(i) {
+        if(this != from) return;
+        autocomplete.splice(i, i + 1, to);
+        if(cb) cb.call(this);
+        return false; // stop each()
+      });
+      log('replaceAutocomplete', from, to, autocomplete);
+      return this;
     },
     inputKeys: function() {
       var self = this;
@@ -49,7 +73,7 @@
         history_index = history.length;
       });
 
-      self.data('tabbing', { tabbed: -1, autocomplete: autocomplete });
+      self.data('tabbing', { tabbed: -1 });
       self.on('keydown', function(e) { return methods.tabbing.call(self, e); });
 
       return self;
@@ -68,11 +92,12 @@
 
       log('tabbing <', e.keyCode, this.data('tabbing'));
       if(data.tabbed === -1) {
+        var autocomplete = this.data('autocomplete');
         var offset = val.lastIndexOf(' ') + 1;
         var re = new RegExp('^' + val.substr(offset));
 
         data.offset = offset;
-        data.matched = $.grep(data.autocomplete, function(v, i) {
+        data.matched = $.grep(autocomplete, function(v, i) {
           return offset ? v.indexOf('/') === -1 && re.test(v) : re.test(v);
         });
       }

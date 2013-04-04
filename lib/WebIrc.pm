@@ -137,15 +137,16 @@ sub startup {
   $r->get('/register')->to(template => 'user/register');
   $r->post('/register')->to('user#register');
 
-  my $private_r=$r->bridge('/')->to('user#auth');
+  my $private_r = $r->bridge('/')->to('user#auth');
   $private_r->get('/settings')->to('user#settings')->name('settings');
   $private_r->post('/add')->to('user#add_connection')->name('connection.add');
   $private_r->post('/edit/:id')->to('user#edit_connection')->name('connection.edit');
   $private_r->post('/delete/:id')->to('user#delete_connection')->name('connection.delete');
 
-  $private_r->get('/history/:page')->to('client#history');
   $private_r->websocket('/socket')->to('chat#socket');
 
+  $private_r->get('/v1/:target/connection-list')->to('client#connection_list', layout => undef);
+  $private_r->get('/v1/:target/history/:page', [page => qr{\d+}])->to('client#history', layout => undef);
   $private_r->get('/:cid/*target')->to('client#view')->name('channel.view');
   $private_r->get('/:cid')->to('client#view')->name('server.view');
 
