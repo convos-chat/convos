@@ -1,5 +1,7 @@
 package Mojo::IRC;
 
+no warnings "utf8";
+
 =head1 NAME
 
 Mojo::IRC - IRC Client for the Mojo IOLoop
