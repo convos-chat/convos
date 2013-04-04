@@ -1,14 +1,14 @@
 (function($) {
   var input_selector = '.chat form input[type="text"]';
   var messages_selector = '.messages ul';
-  var websocket, history_index, $conversation, $conversation_list;
+  var websocket, history_index, $conversation, $connection_list;
 
   var methods = {
     init: function() {
       websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
       websocket.onmessage = methods.receiveData;
 
-      $conversation_list = $('.conversation-list');
+      $connection_list = $('.conversation-list');
 
       methods.changeChannel();
       methods.initPjax();
@@ -17,7 +17,7 @@
       notifier.init();
 
       $('.embed img').live('click', function() { $(this).remove(); });
-      $('a.show-hide').fastclick(function() { $conversation_list.toggleClass('hidden open'); return false; });
+      $('a.show-hide').fastclick(function() { $connection_list.toggleClass('hidden open'); return false; });
       $(input_selector).chatInput().parents('form').submit(methods.onSubmit);
       $(window).resize(methods.onResize);
 
@@ -148,10 +148,10 @@
     },
     onResize: function() {
       if($(window).width() < 767) {
-        if(!$conversation_list.hasClass('open')) $conversation_list.addClass('hidden');
+        if(!$connection_list.hasClass('open')) $connection_list.addClass('hidden');
       }
       else {
-        $conversation_list.removeClass('hidden');
+        $connection_list.removeClass('hidden');
       }
     },
     onScroll: function() {
