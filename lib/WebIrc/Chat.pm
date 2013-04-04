@@ -85,7 +85,7 @@ sub socket {
 
       $self->_subscribe_to_server_messages($_) for @$cids;
       $self->on(
-        text => sub {
+        message => sub {
           $self->logf(debug => '[ws] < %s', $_[1]);
           my ($self, $octets) = @_;
           my $dom = Mojo::DOM->new($octets)->at('div');
