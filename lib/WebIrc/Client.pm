@@ -28,7 +28,7 @@ sub route {
     $self->render('index');
   }
   elsif($self->session('cid_target')) {
-    my($cid, $target) = split /:/, $self->session('cid_target');
+    my($cid, $target) = $self->id_as($self->session('cid_target'));
     $self->redirect_to(
       $self->url_for('channel.view', cid => $cid, target => $target)
     );
@@ -68,7 +68,7 @@ sub view {
   my $target = $self->stash('target') || '';
   my $current_nick;
 
-  $self->session(cid_target => join ':', $cid, $target);
+  $self->session(cid_target => $self->as_id($cid, $target));
 
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
@@ -207,7 +207,7 @@ sub _check_if_uid_own_cid {
   },
   sub {
     my($delay, $is_owner) = @_;
-    return $delay->begin->();
+    return $delay->begin->() if $is_owner;
     delete $self->session->{cid_target};
     return $self->route;
   },
