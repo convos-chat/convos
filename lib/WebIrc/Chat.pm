@@ -93,7 +93,7 @@ sub socket {
 
           @$dom{qw/ cid target /} = ($cid, $target);
 
-          if($allowed{$cid}) {
+          if($cid and $allowed{$cid}) {
             $self->_handle_socket_data($dom);
           }
           else {
