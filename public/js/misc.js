@@ -79,7 +79,8 @@ window.log = function() {
   if(this.console) console.log.apply(
     window.console,
     $.map(arguments, function(e, i) {
-      return typeof e === 'string' ? e : JSON.stringify(e);
+      var t = typeof e;
+      return t == 'string' ? e : t == 'object' && e['charAt'] ? e + '' : JSON.stringify(e);
     })
   );
 };

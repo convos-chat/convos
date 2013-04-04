@@ -1,4 +1,4 @@
-<li class="muted nick-change" data-target="<%= $cid %>">
+<li class="muted nick-change" data-target="<%= $target ? $target : $cid %>" data-nick="<%= $new_nick %>" data-old-nick="<%= $old_nick %>">
   <span class="prefix"><%= app->config->{name} %>:</span>
   <span><%= $old_nick %> changed nick to "<%= $new_nick %>"</span>
   <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>

@@ -84,25 +84,21 @@
     changeChannel: function() {
       history_index = 1;
       $conversation_list = $('#conversation > ul');
-      log('changeChannel', methods.activeTarget());
       $(window).scrollToBottom();
       $(input_selector).chatInput('initAutocomplete', $conversation_list.attr('data-nicks').replace(/\@/g, '').split(','));
       $('.server li').removeClass('active').find('.badge').text('0').removeClass('badge-important').hide();
       $('#target_' + methods.activeTarget(1)).addClass('active');
+      log('changeChannel', $conversation_list.attr('id'));
     },
     printMessage: function(target) {
-      if(target === 'any') target = methods.activeTarget(1); // special server messages
+      if(target == 'any') target = methods.activeTarget(1); // special server messages
       if($('#conversation_' + target).length) {
         var at_bottom = $(window).atBottom(); // need to calculate at_bottom before appending a new element
         $(messages_selector).append(this);
-        if(this.hasClass('nick-joined')) {
-          txt = this.children('span').eq(1).text();
-          $(input_selector).chatInput('addAutocomplete', [txt.replace(/.*(\S+)$/, '$1')]);
-        }
-        else if(this.hasClass('nick-parted')) {
-          txt = this.children('span').eq(1).text();
-          $(input_selector).chatInput('removeAutocomplete', [txt.replace(/.*(\S+)$/, '')]);
-        }
+        if(this.hasClass('nick-joined'))
+          $(input_selector).chatInput('addAutocomplete', this.attr('data-nick'));
+        else if(this.hasClass('nick-parted'))
+          $(input_selector).chatInput('removeAutocomplete', this.attr('data-nick'));
         if(at_bottom) $(window).scrollToBottom();
       }
       else {
@@ -112,7 +108,6 @@
       }
     },
     receiveData: function(e) {
-      log('[websocket] >', e.data);
       var $data = $(e.data);
       var target = $data.attr('data-target').replace(/:/g, '\\:');
       var $target = $('#target_' + target);
@@ -142,10 +137,11 @@
         });
       }
       else if($data.hasClass('nick-change')) {
-        txt = $data.children('span').eq(1).text();
-        $(input_selector)
-          .chatInput('removeAutocomplete', [txt.replace(/\s.*/, '')], function() { $data.attr('data-target', 'any'); })
-          .chatInput('addAutocomplete', [txt.replace(/.*"(.*)"/, '$1')]);
+        $(input_selector).chatInput(
+          'replaceAutocomplete',
+          $data.attr('data-old-nick'), $data.attr('data-nick'),
+          function() { target = 'any'; }
+        );
       }
 
       methods.printMessage.call($data, target);
@@ -164,7 +160,6 @@
       var height_before_load = $('body').height();
       $history_indicator = $('<div class="alert alert-info">Loading previous conversations...</div>');
       $(messages_selector).before($history_indicator);
-      log('Load previous conversatins', history_index + 1);
       $.get($.url_for('v1', methods.activeTarget(1), 'history', (++history_index)), function(data) {
         if($(data).find('*').length) {
           $(messages_selector).prepend(data);
@@ -181,7 +176,6 @@
     },
     onSubmit: function() {
       var $data = $('<div data-target="' + methods.activeTarget() + '">' + $(input_selector).val() + '</div>').wrap('<div>').parent();
-      log('[websocket] <', $data.html());
       websocket.send($data.html());
       $(input_selector).val(''); // TODO: Do not clear the input field until echo is returned?
       return false;

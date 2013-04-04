@@ -448,6 +448,8 @@ sub irc_join {
 
 =head2 irc_nick
 
+  :old_nick!~username@1.2.3.4 NICK :new_nick
+
 =cut
 
 sub irc_nick {
@@ -455,7 +457,7 @@ sub irc_nick {
   my ($old_nick) = IRC::Utils::parse_user($message->{prefix});
   my $new_nick = $message->{params}[0];
 
-  if ($old_nick eq $self->_irc->nick) {
+  if ($new_nick eq $self->_irc->nick) {
     $self->redis->hset("connection:@{[$self->id]}", current_nick => $new_nick);
   }
 

@@ -18,29 +18,37 @@
   var methods = {
     initAutocomplete: function(list) {
       var autocomplete = commands.slice(0);
-      $.each(list, function() { autocomplete.unshift(this); });
+      $.each(list, function(i) { autocomplete.unshift(this); });
       this.data('autocomplete', autocomplete);
       log('initAutocomplete', list, autocomplete);
       return this;
     },
-    addAutocomplete: function(list) {
+    addAutocomplete: function(command) {
       var autocomplete = this.data('autocomplete');
-      methods.removeAutocomplete.call(this, list); // prevent duplicates
-      $.each(list, function() { autocomplete.unshift(this); });
-      log('addAutocomplete', list, autocomplete);
+      methods.removeAutocomplete.call(this, command); // prevent duplicates
+      autocomplete.unshift(command);
+      log('addAutocomplete', command, autocomplete);
       return this;
     },
-    removeAutocomplete: function(list, cb) {
+    removeAutocomplete: function(command) {
       var autocomplete = this.data('autocomplete');
-      $.each(list, function(i, needle) {
-        $.each(autocomplete, function(i, command) {
-          if(command === needle) {
-            autocomplete.splice(i, i + 1);
-            if(cb) cb.call(this.get(0), needle);
-          }
-        });
+      $.each(autocomplete, function(i) {
+        if(this != command) return;
+        autocomplete.splice(i, i + 1);
+        return false; // stop each()
       });
-      log('removeAutocomplete', list, autocomplete);
+      log('removeAutocomplete', command, autocomplete);
+      return this;
+    },
+    replaceAutocomplete: function(from, to, cb) {
+      var autocomplete = this.data('autocomplete');
+      $.each(autocomplete, function(i) {
+        if(this != from) return;
+        autocomplete.splice(i, i + 1, to);
+        if(cb) cb.call(this);
+        return false; // stop each()
+      });
+      log('replaceAutocomplete', from, to, autocomplete);
       return this;
     },
     inputKeys: function() {
