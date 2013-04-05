@@ -5193,7 +5193,10 @@ body.chat {
   padding: 0 20px;
 }
 #chat_input input {
+  background: #444;
+  color: #fff;
   font-family: "Hume Mono", monospace;
+  border: 0;
 }
 #messages li {
   font-family: Hume Mono, monospace;

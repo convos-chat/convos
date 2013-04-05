@@ -13,7 +13,7 @@
   </div>
 </div>
 
-<div id="chat_input" class="navbar navbar-fixed-bottom">
+<div id="chat_input" class="navbar navbar-inverse navbar-fixed-bottom">
   <div class="navbar-inner">
     <div class="row-fluid">
       <div class="span12">
