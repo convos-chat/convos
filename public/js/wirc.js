@@ -100,6 +100,9 @@
           $(input_selector).chatInput('removeAutocomplete', this.attr('data-nick'));
         if(at_bottom)
           $(window).scrollToBottom();
+        this.find('img').once('load', function() {
+          if(at_bottom) $(window).scrollToBottom();
+        });
       }
       else {
         var $badge = $('#target_' + target + ' .badge');
