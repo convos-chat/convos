@@ -1,7 +1,7 @@
 <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
-      <%= link_to $target, 'index', class => 'brand' %>
+      <%= link_to $target, 'index', class => 'brand title', title => $target %>
       <ul class="nav pull-right">
         <li class="dropdown">
           %= link_to 'index', class => 'unread-menu dropdown-toggle', title => 'Show unread conversations', begin

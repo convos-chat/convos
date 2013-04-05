@@ -1,9 +1,9 @@
-<li class="muted" data-target="<%= as_id $cid, $target %>">
-% if(length $topic) {
+<li class="muted topic" data-target="<%= as_id $cid, $target %>">
   <span class="prefix">Topic is</span>
+% if(length $topic) {
   <span><%= $topic %></span>
 % } else {
-  <span>No topic is set.</span>
+  <span>No topic.</span>
 % }
   <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
 </li>

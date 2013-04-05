@@ -2,14 +2,17 @@
   var input_selector = '.chat form input[type="text"]';
   var messages_selector = '#messages ul';
   var at_bottom = true;
-  var websocket, history_offset, $conversation, $connection_list;
+  var websocket = {};
+  var history_offset, $conversation, $connection_list;
 
   var methods = {
     init: function() {
       websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
       websocket.onmessage = methods.receiveData;
+      websocket.onclose = function() { websocket.is_open = false; };
+      websocket.onopen = function() { websocket.is_open = true; };
 
-      methods.changeChannel();
+      methods.changeConversation();
       methods.initNavbar();
       methods.initPjax();
       methods.initShortcuts();
@@ -67,7 +70,7 @@
       });
       $('#messages > div').on('pjax:end', function(e) {
         statusIndicator('fadeOut');
-        methods.changeChannel(e);
+        methods.changeConversation(e);
       });
       $(document).pjax('#connection_list a', '#messages > div');
     },
@@ -106,22 +109,30 @@
       var target = $conversation.attr('id').replace(/^conversation_/, '');
       return escaped ? target.replace(/:/g, '\\:') : target;
     },
-    changeChannel: function(e) {
+    changeConversation: function(e) {
       var $target = e ? $(e.relatedTarget) : false;
+
       $conversation = $('#messages ul:first');
-      history_offset = $conversation.attr('data-offset');
       $(window).scrollToBottom();
       $(input_selector).chatInput('initAutocomplete', $conversation.attr('data-nicks').replace(/\@/g, '').split(','));
       $('#connection_list li').removeClass('active');
       $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
+
+      history_offset = $conversation.attr('data-offset');
       methods.unread('init');
+
+      var tid = setInterval(function() {
+        if(!websocket.is_open) return;
+        methods.sendData('/topic');
+        clearInterval(tid);
+      }, 200);
 
       if($target) {
         var name = $target.children('span:first').text();
         $('#navbar .brand').text(name);
       }
 
-      log('changeChannel', $conversation.attr('id'));
+      log('changeConversation', $conversation.attr('id'));
     },
     printMessage: function(target) {
       if(target == 'any') target = methods.activeTarget(1); // special server messages
@@ -173,8 +184,20 @@
           function() { target = 'any'; }
         );
       }
+      else if($data.hasClass('topic')) {
+        var text = [ $('#navbar .brand').text(), $data.find('span:eq(1)').text() ].join(': ');
+        $('#navbar .brand').text(text).attr('title', text);
+      }
 
       methods.printMessage.call($data, target);
+    },
+    sendData: function(msg) {
+      try {
+        var $data = $('<div data-target="' + methods.activeTarget() + '">' + msg + '</div>').wrap('<div>').parent();
+        websocket.send($data.html());
+      } catch(e) {
+        statusIndicator('show', e);
+      }
     },
     unread: function(action, target) {
       if(action == 'init') {
@@ -224,8 +247,7 @@
       });
     },
     onSubmit: function() {
-      var $data = $('<div data-target="' + methods.activeTarget() + '">' + $(input_selector).val() + '</div>').wrap('<div>').parent();
-      websocket.send($data.html());
+      methods.sendData($(input_selector).val());
       $(input_selector).val(''); // TODO: Do not clear the input field until echo is returned?
       return false;
     }

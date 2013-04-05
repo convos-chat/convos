@@ -5160,6 +5160,17 @@ body.chat {
 #navbar a.unread-menu span.badge-important {
   top: 19px;
 }
+#navbar a.brand.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: absolute;
+  right: 170px;
+  left: 20px;
+}
+#navbar a.brand.title:hover {
+  color: #999999;
+}
 @media (max-width: 767px) {
   #navbar .container-fluid {
     padding: 0 20px;
