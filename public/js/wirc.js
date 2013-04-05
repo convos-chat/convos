@@ -100,7 +100,7 @@
           $(input_selector).chatInput('removeAutocomplete', this.attr('data-nick'));
         if(at_bottom)
           $(window).scrollToBottom();
-        this.find('img').once('load', function() {
+        this.find('img').one('load', function() {
           if(at_bottom) $(window).scrollToBottom();
         });
       }
