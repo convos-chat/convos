@@ -1,4 +1,4 @@
-<li class="message<%= stash('highlight') ? ' highlight' : '' %>" data-target="<%= as_id $cid, $target %>">
+<li class="message<%= $highlight ? ' highlight' : '' %>" data-target="<%= as_id $cid, $target %>" data-sender="<%= $nick %>">
   &lt;<span class="prefix"><%= $nick %></span>&gt;
   <span class="content"><%== $message %></span>
   <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>

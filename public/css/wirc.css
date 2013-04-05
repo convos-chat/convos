@@ -5170,6 +5170,13 @@ body.chat {
 }
 .chat .conversation-list a {
   text-decoration: none;
+  position: relative;
+}
+.chat .conversation-list a .badge {
+  position: absolute;
+  right: -6px;
+  top: 4px;
+  opacity: 0.8;
 }
 .chat .conversation-list .link-settings {
   display: inline-block;

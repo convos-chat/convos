@@ -1,14 +1,14 @@
 (function($) {
   var input_selector = '.chat form input[type="text"]';
   var messages_selector = '.messages ul';
-  var websocket, history_index, $conversation, $conversation_list;
+  var websocket, history_index, $conversation, $connection_list;
 
   var methods = {
     init: function() {
       websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
       websocket.onmessage = methods.receiveData;
 
-      $conversation_list = $('.conversation-list');
+      $connection_list = $('.conversation-list');
 
       methods.changeChannel();
       methods.initPjax();
@@ -17,7 +17,7 @@
       notifier.init();
 
       $('.embed img').live('click', function() { $(this).remove(); });
-      $('a.show-hide').fastclick(function() { $conversation_list.toggleClass('hidden open'); return false; });
+      $('a.show-hide').fastclick(function() { $connection_list.toggleClass('hidden open'); return false; });
       $(input_selector).chatInput().parents('form').submit(methods.onSubmit);
       $(window).resize(methods.onResize);
 
@@ -85,8 +85,8 @@
       $conversation = $('#conversation > ul');
       $(window).scrollToBottom();
       $(input_selector).chatInput('initAutocomplete', $conversation.attr('data-nicks').replace(/\@/g, '').split(','));
-      $('.server li').removeClass('active').find('.badge').text('0').removeClass('badge-important').hide();
-      $('#target_' + methods.activeTarget(1)).addClass('active');
+      $('.server li').removeClass('active');
+      $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
       log('changeChannel', $conversation.attr('id'));
     },
     printMessage: function(target) {
@@ -111,18 +111,14 @@
       var $data = $(e.data);
       var target = $data.attr('data-target').replace(/:/g, '\\:');
       var $target = $('#target_' + target);
+      var channel = /:23(.+)/.exec(target); // ":23" = "#"
       var txt;
 
       // notification handling
       if($data.hasClass('highlight')) {
-        if($target.hasClass('conversation')) {
-          notifier.popup('New message from ' + $target.attr('title'), $data.find('.content').text(), '');
-          notifier.title('New message from ' + $target.attr('title'));
-        }
-        else {
-          notifier.popup('New mention by ' + $data.find('.prefix').text() + ' in ' + $data.find('.content').text(), $data.find('.content').text(), '');
-          notifier.title('New mention by ' + $data.find('.prefix').text() + ' in ' + $target.attr('title'));
-        }
+        var sender = $data.attr('data-sender');
+        var what = channel ? 'mentioned you in #' + channel[1] : 'sent you a message';
+        notifier.popup([sender, what].join(' '), $data.find('.content').text(), '');
       }
 
       // action handling
@@ -148,10 +144,10 @@
     },
     onResize: function() {
       if($(window).width() < 767) {
-        if(!$conversation_list.hasClass('open')) $conversation_list.addClass('hidden');
+        if(!$connection_list.hasClass('open')) $connection_list.addClass('hidden');
       }
       else {
-        $conversation_list.removeClass('hidden');
+        $connection_list.removeClass('hidden');
       }
     },
     onScroll: function() {

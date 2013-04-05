@@ -50,7 +50,7 @@ my %COMMANDS; %COMMANDS = (
   },
   reconnect => sub {
     my ($self, $dom) = @_;
-    $self->redis->publish('core:control', "restart:" . $dom->{cid});
+    $self->redis->publish('core:control', "restart:$dom->{cid}");
     return;
   },
   help => sub {

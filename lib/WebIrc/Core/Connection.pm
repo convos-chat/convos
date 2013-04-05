@@ -266,6 +266,7 @@ sub add_server_message {
     # 1 = normal, 0 = error
     my $params = $message->{params};
     shift $params;
+    $self->redis->incr("connection:@{[$self->id]}:unread");
     $self->_publish(
       server_message => {
         message => join(' ', @{$message->{params}}),
@@ -288,15 +289,18 @@ Will add a private message to the database.
 sub add_message {
   my ($self, $message) = @_;
   my $current_nick = $self->_irc->nick;
-      my $msg          = $message->{params}[0] eq $current_nick;
+  my $msg          = $message->{params}[0] eq $current_nick;
   my $data         = {message => $message->{params}[1], save => 1};
+
   @{$data}{qw/nick user host/} = parse_user($message->{prefix});
   $data->{target} = lc($msg ? $data->{nick} : $message->{params}[0]);
-  $data->{highlight}++ if $msg || $data->{message} =~ /\b$current_nick\b/;
-  my $event = 'message';
-  $event = 'action_message' if $data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/;
+  $data->{highlight} = ($msg or $data->{message} =~ /\b$current_nick\b/) ? 1 : 0;
 
-  $self->_publish($event => $data);
+  $self->redis->incr("connection:@{[$self->id]}:$data->{target}:unread");
+  $self->_publish(
+    $data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/ ? 'action_message' : 'message',
+    $data,
+  );
 
   unless ($message->{params}[0] =~ /^[#&]/x) {    # not a channel or me.
     $self->redis->sadd("connection:@{[$self->id]}:conversations", $data->{target});

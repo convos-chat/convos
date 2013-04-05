@@ -27,17 +27,21 @@ sub route {
   if(!$uid) {
     $self->render('index');
   }
-  elsif($self->session('cid_target')) {
-    my($cid, $target) = $self->id_as($self->session('cid_target'));
-    $self->redirect_to(
-      $self->url_for('channel.view', cid => $cid, target => $target)
-    );
-  }
   else {
     Mojo::IOLoop->delay(
       sub {
         my($delay) = @_;
-        $self->redis->smembers("user:$uid:connections", $delay->begin);
+        $self->redis->get("user:$uid:cid_target", $delay->begin);
+      },
+      sub {
+        my($delay, $cid_target) = @_;
+        if(my($cid, $target) = $self->id_as($cid_target || '')) {
+          $self->redis->del("user:$uid:cid_target"); # prevent loop on invalid cid_target
+          $self->redirect_to($self->url_for('channel.view', cid => $cid, target => $target));
+        }
+        else {
+          $self->redis->smembers("user:$uid:connections", $delay->begin);
+        }
       },
       sub {
         my($delay, $connections) = @_;
@@ -68,13 +72,12 @@ sub view {
   my $target = $self->stash('target') || '';
   my $current_nick;
 
-  $self->session(cid_target => $self->as_id($cid, $target));
-
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
       $self->redis->smembers("user:$uid:connections", $delay->begin);
+      $self->redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
     },
     sub {
       my($delay, $cids) = @_;
@@ -87,6 +90,7 @@ sub view {
     },
     sub {
       my($delay, $connections, $cids) = @_;
+      $self->redis->del($target ? "connection:$cid:$target:unread" : "connection:$cid:unread");
       $self->_fetch_conversation_lists(
         $delay,
         map { +{ cid => shift @$cids, host => $_->[1], nick => $_->[0] } } @$connections
@@ -208,8 +212,8 @@ sub _check_if_uid_own_cid {
   sub {
     my($delay, $is_owner) = @_;
     return $delay->begin->() if $is_owner;
-    delete $self->session->{cid_target};
-    return $self->route;
+    $self->redis->del("user:$uid:cid_target");
+    $self->route;
   },
 }
 
@@ -231,15 +235,26 @@ sub _fetch_conversation_lists {
   my($self, $delay, @connections) = @_;
 
   for my $info (@connections) {
+    my $cid = $info->{cid};
     my $cb = $delay->begin;
     $self->redis->execute(
-      [ smembers => "connection:$info->{cid}:channels" ],
-      [ smembers => "connection:$info->{cid}:conversations" ],
+      [ smembers => "connection:$cid:channels" ],
+      [ smembers => "connection:$cid:conversations" ],
+      [ get => "connection:$cid:unread" ],
       sub {
-        my ($redis, $channels, $conversations) = @_;
+        my ($redis, $channels, $conversations, $unread) = @_;
+        my @unread = map { [get => "connection:$cid:$_:unread"] } @$channels, @$conversations;
+
         $info->{channels} = $channels;
         $info->{conversations} = $conversations;
-        $cb->(undef, $info);
+        $info->{unread} = [$unread];
+
+        return $cb->(undef, $info) unless @unread;
+        return $redis->execute(@unread, sub {
+          my $redis = shift;
+          push @{ $info->{unread} }, @_;
+          $cb->(undef, $info);
+        });
       },
     );
   }
