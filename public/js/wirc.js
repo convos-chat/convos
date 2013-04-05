@@ -118,8 +118,6 @@
 
       if($target) {
         var name = $target.children('span:first').text();
-        log(document.title.replace(/ -.*/, ' - ' + name));
-        notifier.title(document.title.replace(/ -.*/, ' - ' + name), {});
         $('#navbar .brand').text(name);
       }
 

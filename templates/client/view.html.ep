@@ -1,6 +1,4 @@
-% $target ||= 'Chat';
-% title $target;
-
+% title 'Chat';
 <div id="connection_list">
   <div class="dropdown-menu pull-right">
   % for my $connection (@$connections) {
