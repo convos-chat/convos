@@ -296,12 +296,14 @@ sub add_message {
   $data->{target} = lc($msg ? $data->{nick} : $message->{params}[0]);
   $data->{highlight} = ($msg or $data->{message} =~ /\b$current_nick\b/) ? 1 : 0;
 
-  $self->redis->incr("connection:@{[$self->id]}:$data->{target}:unread");
   $self->_publish(
     $data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/ ? 'action_message' : 'message',
     $data,
   );
 
+  unless ($data->{nick} eq $current_nick) {
+    $self->redis->incr("connection:@{[$self->id]}:$data->{target}:unread");
+  }
   unless ($message->{params}[0] =~ /^[#&]/x) {    # not a channel or me.
     $self->redis->sadd("connection:@{[$self->id]}:conversations", $data->{target});
   }
