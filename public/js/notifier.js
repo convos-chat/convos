@@ -8,20 +8,24 @@
     popup: function(title, msg, icon) {
       if(window_has_focus) return;
       if(notifier) notifier.createNotification(icon || '', title, msg || '').show();
+      this.title(title);
+      console.log([icon, title, msg]);
+      tid = setInterval(this.title, 2000);
     },
     title: function(text) { // change title and make the tab flash (at least in chrome)
-      if(tid) clearTimeout(tid);
       if(window_has_focus) return;
-      if(text) current_title = text;
+
+      if(text) {
+        current_title = text;
+        clearInterval(tid);
+      }
 
       if(document.title == current_title || document.title == original_title) {
-        document.title = current_title + ' - ' + original_title;
+        document.title = [original_title, current_title].join(' - ');
       }
       else {
         document.title = current_title;
       }
-
-      tid = setTimeout(this.title, 2000);
     },
     requestPermission: function() {
       webkitNotifications.requestPermission(function() {
@@ -44,8 +48,9 @@
         window_has_focus = false;
       });
       $(window).focus(function() {
+        clearInterval(tid);
+        tid = setInterval(function() { document.title = original_title; clearInterval(tid); }, 4000);
         window_has_focus = true;
-        tid = setTimeout(function() { document.title = original_title; }, 4000);
       });
 
       return this;

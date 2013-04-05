@@ -111,18 +111,14 @@
       var $data = $(e.data);
       var target = $data.attr('data-target').replace(/:/g, '\\:');
       var $target = $('#target_' + target);
+      var channel = /:23(.+)/.exec(target); // ":23" = "#"
       var txt;
 
       // notification handling
       if($data.hasClass('highlight')) {
-        if($target.hasClass('conversation')) {
-          notifier.popup('New message from ' + $target.attr('title'), $data.find('.content').text(), '');
-          notifier.title('New message from ' + $target.attr('title'));
-        }
-        else {
-          notifier.popup('New mention by ' + $data.find('.prefix').text() + ' in ' + $data.find('.content').text(), $data.find('.content').text(), '');
-          notifier.title('New mention by ' + $data.find('.prefix').text() + ' in ' + $target.attr('title'));
-        }
+        var sender = $data.attr('data-sender');
+        var what = channel ? 'mentioned you in #' + channel[1] : 'sent you a message';
+        notifier.popup([sender, what].join(' '), $data.find('.content').text(), '');
       }
 
       // action handling
