@@ -1,5 +1,5 @@
 % my $n = shift @$unread || 0;
-<ul class="server nav nav-list" id="connection_list_<%= $cid %>" data-nick="<%= stash('current_nick') || $nick %>" title="<%= $host %>">
+<ul class="nav nav-list" id="connection_list_<%= $cid %>" data-nick="<%= stash('current_nick') || $nick %>" title="<%= $host %>">
   <li class="nav-header <%= is_active($cid) %>" id="target_<%= $cid %>">
     %= link_to 'server.view', { cid => $cid }, begin
       %= $host
@@ -25,4 +25,3 @@
   </li>
 % }
 </ul>
-

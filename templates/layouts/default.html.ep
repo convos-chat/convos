@@ -17,6 +17,9 @@
   </head>
   <body class="<%= session('uid') ? 'chat' : '' %>">
   <div id="container">
+  % if(stash 'cid') {
+    %= include 'client/navbar';
+  % } else {
     % unless(session 'uid') {
     <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
@@ -43,6 +46,7 @@
       </div>
     </div>
     % }
+  % }
     <div class="container-fluid">
       %= content
     </div>
