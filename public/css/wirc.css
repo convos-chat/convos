@@ -5160,6 +5160,11 @@ body.chat {
 #navbar a.unread-menu span.badge-important {
   top: 19px;
 }
+@media (max-width: 767px) {
+  #navbar .container-fluid {
+    padding: 0 20px;
+  }
+}
 /* chat */
 #connection_list {
   position: fixed;
