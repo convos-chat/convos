@@ -294,7 +294,7 @@ sub add_message {
 
   @{$data}{qw/nick user host/} = parse_user($message->{prefix});
   $data->{target} = lc($msg ? $data->{nick} : $message->{params}[0]);
-  $data->{highlight}++ if $msg or $data->{message} =~ /\b$current_nick\b/;
+  $data->{highlight} = ($msg or $data->{message} =~ /\b$current_nick\b/) ? 1 : 0;
 
   $self->redis->incr("connection:@{[$self->id]}:$data->{target}:unread");
   $self->_publish(
