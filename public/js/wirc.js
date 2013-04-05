@@ -82,8 +82,8 @@
       return escaped ? target.replace(/:/g, '\\:') : target;
     },
     changeChannel: function() {
-      history_index = 1;
       $conversation = $('#conversation > ul');
+      history_offset = $conversation.attr('data-offset');
       $(window).scrollToBottom();
       $(input_selector).chatInput('initAutocomplete', $conversation.attr('data-nicks').replace(/\@/g, '').split(','));
       $('.server li').removeClass('active');
@@ -159,15 +159,17 @@
       if(!history_index || statusIndicator()) return;
       if($(window).scrollTop() !== 0) return;
       statusIndicator('show', 'Loading previous conversations...');
-      $.get($.url_for('v1', methods.activeTarget(0), 'history', (++history_index)), function(data) {
-        if($(data).find('*').length) {
+      $.get($.url_for('v1', methods.activeTarget(0), 'history', history_offset), function(data) {
+        var $data = $(data);
+        if($data.find('*').length) {
           var height_before_prepend = $('body').height();
-          statusIndicator('fadeOut');
+          history_offset = $data.attr('data-offset');
           $(messages_selector).prepend(data);
           $(window).scrollTop($('body').height() - height_before_prepend);
+          statusIndicator('fadeOut');
         }
         else {
-          history_index = 0;
+          history_offset = 0;
           statusIndicator('show', 'End of conversation log.');
           setTimeout(function() { statusIndicator('fadeOut'); }, 5000);
         }
