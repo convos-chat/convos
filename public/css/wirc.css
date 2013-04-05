@@ -199,7 +199,7 @@ body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 20px;
-  color: #333333;
+  color: #222222;
   background-color: #ffffff;
 }
 a {
@@ -1910,7 +1910,7 @@ select:focus:invalid:focus {
 }
 .help-block,
 .help-inline {
-  color: #595959;
+  color: #484848;
 }
 .help-block {
   display: block;
@@ -5144,6 +5144,12 @@ body.chat {
     font-size: 12px;
   }
 }
+#status_indicator {
+  position: fixed;
+  z-index: 4999;
+  right: 2px;
+  top: 34px;
+}
 #navbar a > i {
   font-size: 18px;
 }
@@ -5199,12 +5205,6 @@ body.chat {
   top: 4px;
   opacity: 0.9;
 }
-#status_indicator {
-  position: fixed;
-  z-index: 4999;
-  right: 2px;
-  top: 34px;
-}
 #chat_input form {
   padding: 0 20px;
 }
@@ -5219,10 +5219,11 @@ body.chat {
   -webkit-font-smoothing: antialiased;
   padding: 0 4px;
   line-height: 1.6;
-  clear: right;
+  position: relative;
+  border-right: 80px solid transparent;
 }
-#messages li.odd {
-  background: #f5f5f5;
+#messages li:nth-child(even) {
+  background: #eee;
 }
 #messages .me * {
   color: #049cdb;
@@ -5236,12 +5237,15 @@ body.chat {
 #messages .prefix {
   font-weight: bold;
 }
+#messages .muted {
+  color: #666;
+}
 #messages .timestamp {
   color: #777;
-  float: right;
-}
-#messages span {
-  white-space: pre-wrap;
+  margin-right: -80px;
+  position: absolute;
+  top: 2px;
+  right: 5px;
 }
 /* settings */
 .connection-tab-container .nav {

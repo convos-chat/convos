@@ -5,5 +5,5 @@
 % } else {
   <span>No topic.</span>
 % }
-  <span class="timestamp"><%= format_time $timestamp, "%H:%M:%S"  %></span>
+  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
 </li>

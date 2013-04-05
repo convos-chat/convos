@@ -23,6 +23,13 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
   body { font-size: 12px; }
 }
 
+#status_indicator {
+  position: fixed;
+  z-index: 4999;
+  right: 2px;
+  top: 34px;
+}
+
 #navbar a > i { font-size: 18px }
 
 /* chat navbar */
@@ -75,13 +82,6 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
   a .badge { position: absolute; right: -6px; top: 4px; opacity: 0.9; }
 }
 
-#status_indicator {
-  position: fixed;
-  z-index: 4999;
-  right: 2px;
-  top: 34px;
-}
-
 #chat_input form { padding: 0 20px; }
 #chat_input input {
   background: #444;
@@ -90,20 +90,31 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
   border: 0;
 }
 
-#messages li {
-  font-family: Hume Mono, monospace;
-  -webkit-font-smoothing: antialiased;
-  padding: 0 4px;
-  line-height: 1.6;
-  clear: right;
+#messages {
+  li {
+    font-family: Hume Mono, monospace;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 4px;
+    line-height: 1.6;
+    position: relative;
+    border-right: 80px solid transparent;
+  }
+
+  li:nth-child(even) { background: #eee; }
+  .me * { color: @blue; }
+  .action * { font-style: italic; }
+  .focus * { color: @red; }
+  .prefix { font-weight: bold }
+  .muted { color: #666; }
+
+  .timestamp {
+    color: #777;
+    margin-right: -80px;
+    position: absolute;
+    top: 2px;
+    right: 5px;
+  }
 }
-#messages li.odd { background: #f5f5f5; }
-#messages .me * { color: @blue; }
-#messages .action * { font-style: italic; }
-#messages .focus * { color: @red; }
-#messages .prefix { font-weight: bold }
-#messages .timestamp { color: #777; float: right; }
-#messages span {   white-space:pre-wrap; }
 
 /* settings */
 .connection-tab-container .nav {
