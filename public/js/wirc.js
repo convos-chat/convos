@@ -63,12 +63,11 @@
         statusIndicator('show', 'Loading...');
       });
       $(document).on('pjax:timeout', function(event) {
-        statusIndicator('show', 'Timeout');
         event.preventDefault(); // Prevent default timeout redirection behavior
       });
       $('#messages > div').on('pjax:end', function(e) {
         statusIndicator('fadeOut');
-        methods.changeChannel();
+        methods.changeChannel(e);
       });
       $(document).pjax('#connection_list a', '#messages > div');
     },
@@ -107,7 +106,8 @@
       var target = $conversation.attr('id').replace(/^conversation_/, '');
       return escaped ? target.replace(/:/g, '\\:') : target;
     },
-    changeChannel: function() {
+    changeChannel: function(e) {
+      var $target = e ? $(e.relatedTarget) : false;
       $conversation = $('#messages ul:first');
       history_offset = $conversation.attr('data-offset');
       $(window).scrollToBottom();
@@ -115,6 +115,14 @@
       $('#connection_list li').removeClass('active');
       $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
       methods.unread('init');
+
+      if($target) {
+        var name = $target.children('span:first').text();
+        log(document.title.replace(/ -.*/, ' - ' + name));
+        notifier.title(document.title.replace(/ -.*/, ' - ' + name), {});
+        $('#navbar .brand').text(name);
+      }
+
       log('changeChannel', $conversation.attr('id'));
     },
     printMessage: function(target) {

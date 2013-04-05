@@ -12,9 +12,15 @@
       console.log([icon, title, msg]);
       tid = setInterval(this.title, 2000);
     },
-    title: function(text) { // change title and make the tab flash (at least in chrome)
-      if(window_has_focus) return;
-
+    title: function(text, permanent) { // change title and make the tab flash (at least in chrome)
+      if(permanent) {
+        original_title = text;
+        document.title = text;
+        return;
+      }
+      if(window_has_focus) {
+        return;
+      }
       if(text) {
         current_title = text;
         clearInterval(tid);

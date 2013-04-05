@@ -1,8 +1,7 @@
-% my $brand = $target =~ /#/ ? "$target: Loading topic..." : "$target: Private conversation";
 <div id="navbar" class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
-      <%= link_to $brand, 'index', class => 'brand' %>
+      <%= link_to $target, 'index', class => 'brand' %>
       <ul class="nav pull-right">
         <li class="dropdown">
           %= link_to 'index', class => 'unread-menu dropdown-toggle', begin
