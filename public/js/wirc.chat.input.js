@@ -20,14 +20,12 @@
       var autocomplete = commands.slice(0);
       $.each(list, function(i) { autocomplete.unshift(this); });
       this.data('autocomplete', autocomplete);
-      log('initAutocomplete', list, autocomplete);
       return this;
     },
     addAutocomplete: function(command) {
       var autocomplete = this.data('autocomplete');
       methods.removeAutocomplete.call(this, command); // prevent duplicates
       autocomplete.unshift(command);
-      log('addAutocomplete', command, autocomplete);
       return this;
     },
     removeAutocomplete: function(command) {
@@ -37,7 +35,6 @@
         autocomplete.splice(i, i + 1);
         return false; // stop each()
       });
-      log('removeAutocomplete', command, autocomplete);
       return this;
     },
     replaceAutocomplete: function(from, to, cb) {
@@ -48,7 +45,6 @@
         if(cb) cb.call(this);
         return false; // stop each()
       });
-      log('replaceAutocomplete', from, to, autocomplete);
       return this;
     },
     inputKeys: function() {
