@@ -1,6 +1,7 @@
 (function($) {
   var input_selector = '.chat form input[type="text"]';
   var messages_selector = '.messages ul';
+  var at_bottom = true;
   var websocket, history_index, $conversation, $connection_list;
 
   var methods = {
@@ -92,7 +93,6 @@
     printMessage: function(target) {
       if(target == 'any') target = methods.activeTarget(1); // special server messages
       if($('#conversation_' + target).length) {
-        var at_bottom = $(window).atBottom(); // need to calculate at_bottom before appending a new element
         $(messages_selector).append(this);
         if(this.hasClass('nick-joined'))
           $(input_selector).chatInput('addAutocomplete', this.attr('data-nick'));
@@ -100,6 +100,9 @@
           $(input_selector).chatInput('removeAutocomplete', this.attr('data-nick'));
         if(at_bottom)
           $(window).scrollToBottom();
+        this.find('img').once('load', function() {
+          if(at_bottom) $(window).scrollToBottom();
+        });
       }
       else if(this.hasClass('message')) {
         var $badge = $('#target_' + target + ' .badge');
@@ -143,6 +146,7 @@
       methods.printMessage.call($data, target);
     },
     onResize: function() {
+      if(at_bottom) $(window).scrollToBottom();
       if($(window).width() < 767) {
         if(!$connection_list.hasClass('open')) $connection_list.addClass('hidden');
       }
@@ -151,6 +155,7 @@
       }
     },
     onScroll: function() {
+      at_bottom = $(window).atBottom(); // need to calculate at_bottom before appending a new element
       if(!history_index || statusIndicator()) return;
       if($(window).scrollTop() !== 0) return;
       statusIndicator('show', 'Loading previous conversations...');
