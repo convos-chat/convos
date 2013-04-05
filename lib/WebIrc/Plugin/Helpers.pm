@@ -92,23 +92,20 @@ Takes a list of JSON strings and turns them into a list of hash-refs where the
 
 sub format_conversation {
   my ($c, $conversation) = @_;
-  my $nick     = $c->stash('nick');
-  my $messages = [];
+  my @messages;
 
-  for (my $i = 0; $i < @$conversation; $i = $i + 2) {
-    my $message = $JSON->decode($conversation->[$i]);
+  for(@$conversation) {
+    my $message = $JSON->decode($_);
     unless (ref $message) {
-      $c->logf(debug =>'Unable to parse raw message: ' . $conversation->[$i]);
+      $c->logf(debug => "Unable to parse raw message: $_");
       next;
     }
-    $nick //= '[server]';
     $c->stash(embed => undef);
     $message->{message} =~ s!\b(\w{2,5}://\S+)!__handle_link($c, $message,$1)!e if $message->{message};
-
-    unshift @$messages, $message;
+    unshift @messages, $message;
   }
 
-  return $messages;
+  return \@messages;
 }
 
 sub __handle_link {

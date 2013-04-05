@@ -99,6 +99,8 @@ sub view {
     sub {
       my($delay, @connections) = @_;
       my($current) = grep { $_->{cid} == $cid } @connections;
+      my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
+
       $current_nick = $current->{nick} || '';
 
       $self->stash(
@@ -108,7 +110,12 @@ sub view {
         nick => $current_nick,
       );
 
-      $self->_fetch_conversation($cid, $target, 0, $delay->begin);
+      $self->redis->zrevrangebyscore($key => '+inf', '-inf', limit => 0 => $N_MESSAGES, $delay->begin);
+    },
+    sub {
+      my($delay, $conversation) = @_;
+
+      $self->stash(conversation => $self->format_conversation($conversation));
 
       if($target) {
         $self->redis->smembers("connection:$cid:$target:nicks", $delay->begin);
@@ -118,9 +125,8 @@ sub view {
       }
     },
     sub {
-      my($delay, $conversation, $nicks) = @_;
-      my @nicks = ($current_nick, grep { $_ ne $current_nick } @{ $nicks || [] }); # make sure "my nick" is part of the nicks list
-      $self->stash(nicks => \@nicks, conversation => $conversation);
+      my($delay, $nicks) = @_;
+      $self->stash(nicks => [$current_nick, grep { $_ ne $current_nick } @{ $nicks || [] } ]); # make sure "my nick" is part of the nicks list
       return $self->render('client/conversation', layout => undef) if $self->req->is_xhr;
       return $self->render;
     },
@@ -172,31 +178,25 @@ client view.
 
 sub history {
   my $self = shift->render_later;
-  my $page = $self->stash('page');
+  my $offset = $self->stash('offset');
   my($cid, $target) = $self->id_as($self->stash('target'));
+  my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
 
-  unless($page and $cid) {
+  unless($offset and $cid) {
     return $self->render_exception('Missing parameters'); # TODO: Need to have a better error message?
   }
 
   $target ||= '';
-  $self->stash(target => $target, cid => $cid);
+  $self->stash(target => $target, cid => $cid, nick => '', nicks => []);
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-      $self->_fetch_conversation($cid, $target, $page - 1, $delay->begin);
+      $self->redis->zrevrangebyscore($key => $offset, '-inf', limit => 0 => $N_MESSAGES, $delay->begin);
     },
     sub {
       my($delay, $conversation) = @_;
-      $self->render(
-        'client/conversation',
-        cid => $cid,
-        conversation => $conversation,
-        nick => '',
-        nicks => [],
-        target => $target,
-      );
+      $self->render('client/conversation', conversation => $self->format_conversation($conversation));
     },
   );
 }
@@ -215,20 +215,6 @@ sub _check_if_uid_own_cid {
     $self->redis->del("user:$uid:cid_target");
     $self->route;
   },
-}
-
-sub _fetch_conversation {
-  my($self, $cid, $target, $page, $cb) = @_;
-  my $n_messages = 50;
-
-  # FIXME: Should be using last seen tz and default to -inf
-  $self->redis->zrevrangebyscore(
-    $target ? "connection:$cid:$target:msg" : "connection:$cid:msg",
-    "+inf" => "-inf",
-    "withscores",
-    "limit" => $page * $n_messages, $n_messages,
-    sub { $cb->(undef, $self->format_conversation($_[1])) },
-  );
 }
 
 sub _fetch_conversation_lists {
