@@ -3,7 +3,7 @@
   var messages_selector = '#messages ul';
   var at_bottom = true;
   var websocket = {};
-  var history_offset, $conversation, $connection_list;
+  var history_offset, conversation_name, $conversation, $connection_list;
 
   var methods = {
     init: function() {
@@ -11,6 +11,7 @@
       websocket.onmessage = methods.receiveData;
       websocket.onclose = function() { websocket.is_open = false; };
       websocket.onopen = function() { websocket.is_open = true; };
+      conversation_name = $('#navbar .brand').text();
 
       methods.changeConversation();
       methods.initNavbar();
@@ -45,6 +46,11 @@
         $li.addClass('open');
         $('body').one('click', hide);
       };
+
+      $('#navbar .brand').click(function(e) {
+        methods.sendData('/topic');
+        return false;
+      });
 
       $('#navbar .unread-menu').click(function(e) {
         if($(this).parent('li:first').hasClass('open')) return hide.call(this, e);
@@ -128,8 +134,8 @@
       }, 200);
 
       if($target) {
-        var name = $target.children('span:first').text();
-        $('#navbar .brand').text(name);
+        conversation_name = $target.children('span:first').text();
+        $('#navbar .brand').text(conversation_name);
       }
 
       log('changeConversation', $conversation.attr('id'));
@@ -185,7 +191,7 @@
         );
       }
       else if($data.hasClass('topic')) {
-        var text = [ $('#navbar .brand').text(), $data.find('span:eq(1)').text() ].join(': ');
+        var text = [ conversation_name, $data.find('span:eq(1)').text() ].join(': ');
         $('#navbar .brand').text(text).attr('title', text);
       }
 
