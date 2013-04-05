@@ -101,7 +101,7 @@
         if(at_bottom)
           $(window).scrollToBottom();
       }
-      else {
+      else if(this.hasClass('message')) {
         var $badge = $('#target_' + target + ' .badge');
         $badge.text(parseInt($badge.text(), 10) + 1).show();
         if(this.hasClass('highlight')) $badge.addClass('badge-important');
