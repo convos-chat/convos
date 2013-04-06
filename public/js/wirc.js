@@ -3,7 +3,7 @@
   var messages_selector = '#messages ul';
   var at_bottom = true;
   var websocket = {};
-  var history_offset, conversation_name, $conversation, $connection_list;
+  var history_offset, conversation_name, $conversation;
 
   var methods = {
     init: function() {
@@ -18,6 +18,8 @@
       methods.initPjax();
       methods.initShortcuts();
       notifier.init();
+
+      $('#connection_list > div, #nick_list .nav').disableOuterScroll();
 
       $('.embed img').live('click', function() { $(this).remove(); });
       $(input_selector).chatInput().parents('form').submit(methods.onSubmit);
