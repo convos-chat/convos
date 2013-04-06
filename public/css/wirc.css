@@ -5185,13 +5185,17 @@ body.chat {
 /* chat */
 #connection_list {
   position: fixed;
-  top: 32px;
-  right: 40px;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 17.3%;
   display: block;
-  z-index: 5000;
+  z-index: 1000;
 }
 #connection_list .dropdown-menu {
-  max-height: 200px;
+  width: 100%;
+  top: 38px;
+  bottom: 38px;
   overflow-y: auto;
   overflow-x: hidden;
 }

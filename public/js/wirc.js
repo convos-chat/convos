@@ -17,12 +17,10 @@
       methods.initNavbar();
       methods.initPjax();
       methods.initShortcuts();
-      methods.onResize();
       notifier.init();
 
       $('.embed img').live('click', function() { $(this).remove(); });
       $(input_selector).chatInput().parents('form').submit(methods.onSubmit);
-      $(window).resize(methods.onResize);
 
       setTimeout(function() {
         $(window).scrollToBottom().on('scroll', methods.onScroll);
@@ -34,17 +32,17 @@
     initNavbar: function() {
       var $connection_list = $('#connection_list > .dropdown-menu');
       var hide = function(e) {
-          e.preventDefault();
-          $connection_list.hide();
-          $('#navbar').find('a').parent('li').removeClass('open');
-          $('body').unbind('click', hide);
+        e.preventDefault();
+        $connection_list.hide();
+        $('#messages > div').removeClass('span10').addClass('span12');
+        $('#navbar').find('a').parent('li').removeClass('open');
       };
       var show = function(e) {
         var $li = $(this).parent('li:first');
         hide.call(this, e);
-        $connection_list.css('right', $(window).width() - $li.offset().left - $li.width() - 43).show();
+        $connection_list.show();
         $li.addClass('open');
-        $('body').one('click', hide);
+        $('#messages > div').addClass('span10').removeClass('span12');
       };
 
       $('#navbar .brand').click(function(e) {
@@ -81,35 +79,46 @@
       $(document).pjax('#connection_list a', '#messages > div');
     },
     initShortcuts: function() {
-      var $input = $('input');
+      var guard, $active, $e;
+      var moveToConversation = function(e, selector) {
+        if(selector) {
+          $e = $('#navbar ' + selector);
+          if($active || !$e.parent().hasClass('open')) $e.click();
+          $active = $('#connection_list li.active').focus();
+        }
+        else if(!$active) {
+          return;
+        }
 
-      $(document).bind('keydown', 'shift+return', function() {
+        e.preventDefault();
+        $e = $active;
+        guard = 200;
+
+        if($e.filter(':visible').length === 0) {
+          $e = $('#connection_list li:first');
+          e.keyCode = 40;
+        }
+
+        do {
+          $e = e.keyCode === 40 ? $e.next() : e.keyCode === 38 ? $e.prev() : $e;
+          if(!--guard) break;
+        } while($e.length && !$e.filter(':visible').length);
+        if($e.length) $active = $e;
+        $active.find('a').focus();
+      };
+
+      $(input_selector).focus(function() { $active = false; });
+
+      $('input, body')
+      .bind('keydown', 'shift+return', function(e) {
+        e.preventDefault();
         $(input_selector).focus();
-      });
-      $input.bind('keydown', 'ctrl+up', function(e) {
-        e.preventDefault();
-        $('#connection_list li.active').prev().find('a').click();
-      });
-      $input.bind('keydown', 'ctrl+down', function(e) {
-        e.preventDefault();
-        $('#connection_list li.active').next().find('a').click();
-      });
-      $input.bind('keydown', 'ctrl+shift+up', function() {
-        $('#connection_list li.active').prevAll().each(function(i) {
-          if($(this).find('.badge:visible').length) {
-            $(this).find('a').click();
-            return false;
-          }
-        });
-      });
-      $input.bind('keydown', 'ctrl+shift+down', function() {
-        $('#connection_list li.active').nextAll().each(function(i) {
-          if($(this).find('.badge:visible').length) {
-            $(this).find('a').click();
-            return false;
-          }
-        });
-      });
+      })
+      .bind('keydown', 'ctrl+m', function(e) { moveToConversation.call(this, e, '.unread-menu'); })
+      .bind('keydown', 'ctrl+shift+m', function(e) { moveToConversation.call(this, e, '.chat-menu'); })
+      .bind('keydown', 'up', moveToConversation)
+      .bind('keydown', 'down', moveToConversation)
+      ;
     },
     activeTarget: function(escaped) {
       var target = $conversation.attr('id').replace(/^conversation_/, '');
@@ -227,10 +236,6 @@
           $badge.text(parseInt($badge.text(), 10) + 1);
         }
       }
-    },
-    onResize: function() {
-      var h = $(window).height() - 60;
-      $('#connection_list .dropdown-menu').css({ 'max-height': h });
     },
     onScroll: function() {
       if(!history_offset || statusIndicator()) return;

@@ -3,11 +3,9 @@
     <div class="container-fluid">
       <%= link_to $target, 'index', class => 'brand title', title => $target %>
       <ul class="nav pull-right">
-        <li class="dropdown">
-          %= link_to 'index', class => 'unread-menu dropdown-toggle', title => 'Show unread conversations', begin
-            <span class="badge badge-unimportant">0</span>
-            <span class="badge badge-important">0</span>
-            <i class="icon-comments-alt"></i>
+        <li>
+          %= link_to 'settings', class => 'settings', title => 'Go to main settings', begin
+            <i class="icon-cog"></i>
           % end
         </li>
         <li class="dropdown">
@@ -15,9 +13,11 @@
             <i class="icon-comment"></i>
           % end
         </li>
-        <li>
-          %= link_to 'settings', class => 'settings', title => 'Go to main settings', begin
-            <i class="icon-cog"></i>
+        <li class="dropdown">
+          %= link_to 'index', class => 'unread-menu dropdown-toggle', title => 'Show unread conversations', begin
+            <span class="badge badge-unimportant">0</span>
+            <span class="badge badge-important">0</span>
+            <i class="icon-comments-alt"></i>
           % end
         </li>
       </ul>
