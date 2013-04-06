@@ -37,6 +37,7 @@
         e.preventDefault();
         $connection_list.hide().parent().hide();
         $('#navbar').find('a').parent('li').removeClass('open');
+        $(input_selector).focus();
       };
       var show = function(e) {
         var $li = $(this).parent('li:first');
