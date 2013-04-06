@@ -217,7 +217,7 @@
     unread: function(action, target) {
       if(action == 'init') {
         var method, n = 0;
-        $('#connection_list span.badge').each(function() {
+        $('#connection_list .badge').each(function() {
           n += parseInt($(this).text(), 10);
         });
         $('#navbar .unread-menu .badge-unimportant').text(n);
