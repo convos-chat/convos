@@ -16,10 +16,8 @@
   ];
 
   var methods = {
-    initAutocomplete: function(list) {
-      var autocomplete = commands.slice(0);
-      $.each(list, function(i) { autocomplete.unshift(this); });
-      this.data('autocomplete', autocomplete);
+    initAutocomplete: function() {
+      this.data('autocomplete', commands.slice(0));
       return this;
     },
     addAutocomplete: function(command) {

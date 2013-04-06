@@ -33,17 +33,15 @@
       var $connection_list = $('#connection_list > .dropdown-menu');
       var hide = function(e) {
         e.preventDefault();
-        $connection_list.hide();
-        $('#messages > div').removeClass('span10').addClass('span12');
+        $connection_list.hide().parent().hide();
         $('#navbar').find('a').parent('li').removeClass('open');
         if(at_bottom) $(window).scrollToBottom();
       };
       var show = function(e) {
         var $li = $(this).parent('li:first');
         hide.call(this, e);
-        $connection_list.show();
+        $connection_list.show().parent().show();
         $li.addClass('open');
-        $('#messages > div').addClass('span10').removeClass('span12');
         if(at_bottom) $(window).scrollToBottom();
       };
 
@@ -130,13 +128,22 @@
     },
     changeConversation: function(e) {
       var $target = e ? $(e.relatedTarget) : false;
+      var $input = $(input_selector);
+      var $nick_list = $('#nick_list ul:first');
+      var li = [];
 
       $conversation = $('#messages ul:first');
+      $input.chatInput('initAutocomplete');
       $(window).scrollToBottom();
-      $(input_selector).chatInput('initAutocomplete', $conversation.attr('data-nicks').replace(/\@/g, '').split(','));
       $('#connection_list li').removeClass('active');
       $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
 
+      $.each($conversation.attr('data-nicks').split(','), function(i, nick) {
+        $input.chatInput('addAutocomplete', nick.replace(/\@/g, ''));
+        li.push('<li><a href="#">' + nick + '</a></li>');
+      });
+
+      $nick_list.html(li.join('')).find('a').click(function() { console.log(this); return false; });
       history_offset = $conversation.attr('data-offset');
       methods.unread('init');
 

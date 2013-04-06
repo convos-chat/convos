@@ -8,9 +8,17 @@
 </div>
 
 <div id="messages" class="row-fluid">
-  <div class="span12">
+  <div class="span10">
     %= include 'client/conversation'
   </div>
+</div>
+
+<div id="nick_list" class="row-fluid">
+  <ul class="nav nav-list">
+  % for my $nick (sort @$nicks) {
+    <li><%= link_to $nick, 'index' %></li>
+  % }
+  </ul>
 </div>
 
 <div id="chat_input" class="navbar navbar-inverse navbar-fixed-bottom">

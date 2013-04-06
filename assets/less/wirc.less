@@ -74,7 +74,7 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
   right: 0;
   height: 100%;
   width: 17.3%;
-  display: block;
+  display: none;
   z-index: 1000;
 
   .dropdown-menu {
@@ -86,6 +86,28 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
   }
   a { text-decoration: none; position: relative; }
   a .badge { position: absolute; right: -6px; top: 4px; opacity: 0.9; }
+}
+
+#nick_list {
+  background: #fcfcfc;
+  border-left: 1px solid #999;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 17.3%;
+  display: block;
+  z-index: 999;
+
+  .nav {
+    display: block;
+    width: 100%;
+    position: absolute;
+    top: 43px;
+    bottom: 43px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }
 
 #chat_input form { padding: 0 20px; }
