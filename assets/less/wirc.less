@@ -25,38 +25,40 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
 
 #status_indicator {
   position: fixed;
+  right: 10px;
+  top: 10px;
   z-index: 4999;
-  right: 2px;
-  top: 34px;
+  min-width: 20%;
+  opacity: 0.97;
 }
 
 #navbar a > i { font-size: 18px }
 
 /* chat navbar */
-#navbar a.unread-menu {
-  position: relative;
-  padding-right: 30px;
-  span {
+#navbar {
+  a.chat-menu,
+  a.unread-menu {
+    position: relative;
+    padding-right: 30px;
+    span {
+      position: absolute;
+      left: 34px;
+      bottom: 4px;
+    }
+  }
+
+  a.brand.title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     position: absolute;
-    right: 8px;
-    top: 4px;
+    right: 170px;
+    left: 20px
   }
-  span.badge-important {
-    top: 19px;
+
+  a.brand.title:hover {
+    color: #999999;
   }
-}
-
-#navbar a.brand.title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  position: absolute;
-  right: 170px;
-  left: 20px
-}
-
-#navbar a.brand.title:hover {
-  color: #999999;
 }
 
 @media (max-width: 767px) {

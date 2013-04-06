@@ -55,7 +55,9 @@
       $('#navbar .unread-menu').click(function(e) {
         if($(this).parent('li:first').hasClass('open')) return hide.call(this, e);
         $connection_list.find('.channel, .conversation').each(function() {
-          if($(this).find('.badge').text() == '0') $(this).hide();
+          var $b = $(this).find('.badge');
+          if(!$b.hasClass('badge-important')) $(this).hide();
+          else if($b.text() == '0') $(this).hide();
         });
         show.call(this, e);
         return false;
@@ -222,19 +224,19 @@
         $('#connection_list .badge').each(function() {
           n += parseInt($(this).text(), 10);
         });
-        $('#navbar .unread-menu .badge-unimportant').text(n);
-        $('#navbar .unread-menu .badge-important').text(0); // TODO: This should be calculated like unimportant
+        $('#navbar .badge-unimportant').text(n);
+        $('#navbar .badge-important').text(0); // TODO: This should be calculated like unimportant
       }
       else {
         var $badge = $('#target_' + target + ' .badge');
         $badge.text(parseInt($badge.text(), 10) + 1).show();
         if(action == 'important') {
           $badge.addClass('badge-important');
-          $badge = $('#navbar .unread-menu .badge-important');
+          $badge = $('#navbar .badge-important');
           $badge.text(parseInt($badge.text(), 10) + 1);
         }
         else {
-          $badge = $('#navbar .unread-menu .badge-unimportant');
+          $badge = $('#navbar .badge-unimportant');
           $badge.text(parseInt($badge.text(), 10) + 1);
         }
       }

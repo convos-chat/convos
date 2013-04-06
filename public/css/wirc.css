@@ -5146,25 +5146,26 @@ body.chat {
 }
 #status_indicator {
   position: fixed;
+  right: 10px;
+  top: 10px;
   z-index: 4999;
-  right: 2px;
-  top: 34px;
+  min-width: 20%;
+  opacity: 0.97;
 }
 #navbar a > i {
   font-size: 18px;
 }
 /* chat navbar */
+#navbar a.chat-menu,
 #navbar a.unread-menu {
   position: relative;
   padding-right: 30px;
 }
+#navbar a.chat-menu span,
 #navbar a.unread-menu span {
   position: absolute;
-  right: 8px;
-  top: 4px;
-}
-#navbar a.unread-menu span.badge-important {
-  top: 19px;
+  left: 34px;
+  bottom: 4px;
 }
 #navbar a.brand.title {
   overflow: hidden;

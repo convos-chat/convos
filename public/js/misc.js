@@ -17,7 +17,7 @@
   };
   window.statusIndicator = function(action, text) {
     if(!$status_indicator) {
-      $status_indicator = $('<div class="alert alert-info" id="status_indicator"></div>');
+      $status_indicator = $('<div class="alert alert-info dropdown-menu pull-right" id="status_indicator"></div>');
       $('#container').append($status_indicator.hide());
     }
     if(!action) {
