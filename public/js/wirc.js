@@ -37,14 +37,12 @@
         e.preventDefault();
         $connection_list.hide().parent().hide();
         $('#navbar').find('a').parent('li').removeClass('open');
-        if(at_bottom) $(window).scrollToBottom();
       };
       var show = function(e) {
         var $li = $(this).parent('li:first');
         hide.call(this, e);
         $connection_list.show().parent().show();
         $li.addClass('open');
-        if(at_bottom) $(window).scrollToBottom();
       };
 
       $('#navbar .brand').click(function(e) {
