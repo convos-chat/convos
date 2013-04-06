@@ -36,6 +36,7 @@
         $connection_list.hide();
         $('#messages > div').removeClass('span10').addClass('span12');
         $('#navbar').find('a').parent('li').removeClass('open');
+        if(at_bottom) $(window).scrollToBottom();
       };
       var show = function(e) {
         var $li = $(this).parent('li:first');
@@ -43,6 +44,7 @@
         $connection_list.show();
         $li.addClass('open');
         $('#messages > div').addClass('span10').removeClass('span12');
+        if(at_bottom) $(window).scrollToBottom();
       };
 
       $('#navbar .brand').click(function(e) {
