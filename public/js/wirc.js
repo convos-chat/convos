@@ -106,7 +106,14 @@
           $e = e.keyCode === 40 ? $e.next() : e.keyCode === 38 ? $e.prev() : $e;
           if(!--guard) break;
         } while($e.length && !$e.filter(':visible').length);
-        if($e.length) $active = $e;
+
+        if(selector && selector == '.unread-menu' && $e.length === 0) {
+          return moveToConversation.call(this, e, '.chat-menu');
+        }
+        if($e.length) {
+          $active = $e;
+        }
+
         $active.find('a').focus();
       };
 
