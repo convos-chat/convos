@@ -103,8 +103,8 @@ sub format_conversation {
     $c->stash(embed => undef);
 
     if($message->{message}) {
-      $message->{message} =~ s!<!&gt;!g;
-      $message->{message} =~ s!\b(\w{2,5}://\S+)!__handle_link($c, $message,$1)!ge if $message->{message};
+      $message->{message} = Mojo::Util::xml_escape($message->{message});
+      $message->{message} =~ s!\b(\w{2,5}://\S+)!__handle_link($c, $message,$1)!ge;
     }
 
     unshift @messages, $message;
