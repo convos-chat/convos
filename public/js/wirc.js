@@ -139,6 +139,7 @@
       var $input = $(input_selector);
       var $nick_list = $('#nick_list ul:first');
       var li = [];
+      var my_nick;
 
       $conversation = $('#messages ul:first');
       $input.chatInput('initAutocomplete');
@@ -146,12 +147,23 @@
       $('#connection_list li').removeClass('active');
       $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
 
+      my_nick = $conversation.attr('data-nick') || '';
       $.each($conversation.attr('data-nicks').split(','), function(i, nick) {
         $input.chatInput('addAutocomplete', nick.replace(/\@/g, ''));
+        if(nick.indexOf(my_nick) >= 0) return;
         li.push('<li><a href="#">' + nick + '</a></li>');
       });
 
-      $nick_list.html(li.join('')).find('a').click(function() { console.log(this); return false; });
+      if(li.length) {
+        $nick_list.html(li.join('')).find('a').click(function() {
+          methods.sendData('/query ' + $(this).text());
+          return false;
+        }).parent().show();
+      }
+      else {
+        $('#nick_list').hide();
+      }
+
       history_offset = $conversation.attr('data-offset');
       methods.unread('init');
 
