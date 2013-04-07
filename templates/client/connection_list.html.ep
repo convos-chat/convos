@@ -18,7 +18,7 @@
   <li class="conversation <%= is_active($cid, $conversation) %>" id="target_<%= as_id $cid, $conversation %>" title="<%= $conversation %>">
     %= link_to 'channel.view', { target => $conversation, cid => $cid }, begin
       <span><%= $conversation %></span>
-      <span class="badge<%= $n ? '' : ' hide' %>"><%= $n %></span>
+      <span class="badge badge-important<%= $n ? '' : ' hide' %>"><%= $n %></span>
     %= end
   </li>
 % }

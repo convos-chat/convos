@@ -202,22 +202,19 @@
     receiveData: function(e) {
       var $data = $(e.data);
       var target = $data.attr('data-target').replace(/:/g, '\\:');
-      var $target = $('#target_' + target);
       var channel = /:23(.+)/.exec(target); // ":23" = "#"
       var txt;
 
-      // notification handling
       if($data.hasClass('highlight')) {
         var sender = $data.attr('data-sender');
         var what = channel ? 'mentioned you in #' + channel[1] : 'sent you a message';
         notifier.popup([sender, what].join(' '), $data.find('.content').text(), '');
       }
 
-      // action handling
       if($data.hasClass('add-conversation') || $data.hasClass('remove-conversation')) {
         var p = $data.hasClass('add-conversation') ? $data.attr('data-target') : $data.attr('data-target').replace(/:.*/, '');
         statusIndicator('show', 'Loading...');
-        return $.get($.url_for('v1', p, 'connection-list'), function(data) {
+        $.get($.url_for('v1', p, 'connection-list'), function(data) {
           var $data = $(data);
           var target = $data.attr('id').replace(/:/g, '\\:');
           $('#' + target).replaceWith($data);
@@ -235,6 +232,13 @@
         var text = [ conversation_name, $data.find('span:eq(1)').text() ].join(': ');
         $('#navbar .brand').text(text).attr('title', text);
       }
+      else if($('#target_' + target).length === 0) {
+        $.get($.url_for('v1', methods.activeTarget(), 'connection-list'), function(data) {
+          var $data = $(data);
+          var target = $data.attr('id').replace(/:/g, '\\:');
+          $('#' + target).replaceWith($data);
+        });
+      }
 
       methods.printMessage.call($data, target);
     },
@@ -248,12 +252,15 @@
     },
     unread: function(action, target) {
       if(action == 'init') {
-        var method, n = 0;
+        var method, n = 0, i = 0;
         $('#connection_list .badge').each(function() {
-          n += parseInt($(this).text(), 10);
+          if($(this).hasClass('badge-important'))
+            i += parseInt($(this).text(), 10);
+          else
+            n += parseInt($(this).text(), 10);
         });
         $('#navbar .badge-unimportant').text(n);
-        $('#navbar .badge-important').text(0); // TODO: This should be calculated like unimportant
+        $('#navbar .badge-important').text(i);
       }
       else {
         var $badge = $('#target_' + target + ' .badge');
