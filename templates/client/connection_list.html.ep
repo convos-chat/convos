@@ -4,7 +4,7 @@
       <span><%= $host %></span>
     % end
   </li>
-% for my $channel (@{ $channels }) {
+% for my $channel (sort @{ $channels }) {
   % my $n = shift @$unread || 0;
   <li class="channel <%= is_active($cid, $channel) %>" id="target_<%= as_id $cid, $channel %>" title="<%= $channel %>">
     %= link_to 'channel.view', { target => $channel, cid => $cid }, begin
@@ -13,7 +13,7 @@
     %=end
   </li>
 % }
-% for my $conversation (@{ $conversations }) {
+% for my $conversation (sort @{ $conversations }) {
   % my $n = shift @$unread || 0;
   <li class="conversation <%= is_active($cid, $conversation) %>" id="target_<%= as_id $cid, $conversation %>" title="<%= $conversation %>">
     %= link_to 'channel.view', { target => $conversation, cid => $cid }, begin

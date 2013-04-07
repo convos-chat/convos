@@ -108,6 +108,7 @@
         } while($e.length && !$e.filter(':visible').length);
 
         if(selector && selector == '.unread-menu' && $e.length === 0) {
+          e.keyCode = 0;
           return moveToConversation.call(this, e, '.chat-menu');
         }
         if($e.length) {
@@ -138,14 +139,13 @@
       var $target = e ? $(e.relatedTarget) : false;
       var $input = $(input_selector);
       var $nick_list = $('#nick_list ul:first');
-      var li = [];
-      var my_nick;
+      var li = [], my_nick;
 
       $conversation = $('#messages ul:first');
-      $input.chatInput('initAutocomplete');
-      $(window).scrollToBottom();
       $('#connection_list li').removeClass('active');
       $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
+      $(window).scrollToBottom();
+      $input.chatInput('initAutocomplete').focus();
 
       my_nick = $conversation.attr('data-nick') || '';
       $.each($conversation.attr('data-nicks').split(','), function(i, nick) {
@@ -158,7 +158,8 @@
         $nick_list.html(li.join('')).find('a').click(function() {
           methods.sendData('/query ' + $(this).text());
           return false;
-        }).parent().show();
+        });
+        $('#nick_list').show();
       }
       else {
         $('#nick_list').hide();
