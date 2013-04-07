@@ -5145,12 +5145,12 @@ body.chat {
   }
 }
 #status_indicator {
+  margin: 0 10px;
+  min-width: 20%;
+  opacity: 0.93;
   position: fixed;
-  right: 10px;
   top: 10px;
   z-index: 4999;
-  min-width: 20%;
-  opacity: 0.97;
 }
 #navbar a > i {
   font-size: 18px;
@@ -5172,7 +5172,7 @@ body.chat {
   text-overflow: ellipsis;
   white-space: nowrap;
   position: absolute;
-  right: 170px;
+  right: 200px;
   left: 20px;
 }
 #navbar a.brand.title:hover {
