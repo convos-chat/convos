@@ -68,7 +68,7 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
 
   .dropdown-menu {
     width: 100%;
-    top: 38px;
+    top: 35px;
     bottom: 38px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -76,6 +76,11 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
     li > a:hover,
     li > a:focus {
       #gradient > .vertical(lighten(@dropdownLinkBackgroundHover, 10%), lighten(@dropdownLinkBackgroundHover, 30%));
+    }
+    li.nav-header {
+      background: #eee;
+      border-top: 2px solid #fff;
+      padding: 0 10px;
     }
   }
   a { text-decoration: none; position: relative; }
