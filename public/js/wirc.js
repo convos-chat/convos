@@ -146,7 +146,8 @@
       $('#connection_list li').removeClass('active');
       $('#target_' + methods.activeTarget(1)).addClass('active').find('.badge').text('0').removeClass('badge-important').hide();
       $(window).scrollToBottom();
-      $input.chatInput('initAutocomplete').focus();
+      $input.chatInput('initAutocomplete');
+      if(!isTouchDevice) $input.focus();
 
       $.each($conversation.attr('data-nicks').split(','), function(i, nick) {
         $input.chatInput('addAutocomplete', nick.replace(/\@/g, ''));
