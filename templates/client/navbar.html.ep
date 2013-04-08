@@ -9,16 +9,28 @@
           % end
         </li>
         <li>
+        % if(stash 'settings') {
+          %= link_to 'index', class => 'dropdown-toggle', title => 'Chat', begin
+            <i class="icon-comment"></i>
+          % end
+        % } else {
           %= link_to 'index', class => 'chat-menu dropdown-toggle', title => 'Show conversations', begin
             <span class="badge badge-unimportant">0</span>
             <i class="icon-comment"></i>
           % end
+        % }
         </li>
         <li>
+        % if(stash 'settings') {
+          %= link_to 'logout', title => 'Logout', begin
+            <i class="icon-signout"></i>
+          % end
+        % } else {
           %= link_to 'index', class => 'unread-menu dropdown-toggle', title => 'Show unread conversations', begin
             <span class="badge badge-important">0</span>
             <i class="icon-comments-alt"></i>
           % end
+        % }
         </li>
       </ul>
     </div>
