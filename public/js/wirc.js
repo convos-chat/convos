@@ -47,6 +47,7 @@
         $li.addClass('open');
       };
 
+      $('#navbar a').fastclick();
       $('#navbar .brand').click(function(e) {
         methods.sendData('/topic');
         return false;
