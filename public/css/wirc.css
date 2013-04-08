@@ -1883,11 +1883,8 @@ select:focus:invalid:focus {
   box-shadow: 0 0 6px #f8b9b7;
 }
 .form-actions {
-  padding: 19px 20px 20px;
-  margin-top: 20px;
+  padding: 0 20px 20px;
   margin-bottom: 20px;
-  background-color: #f5f5f5;
-  border-top: 1px solid #e5e5e5;
   *zoom: 1;
 }
 .form-actions:before,
@@ -5184,15 +5181,15 @@ body.chat {
   }
 }
 /* chat */
+#settings_connection_list,
 #connection_list {
   position: fixed;
   top: 0;
   right: 0;
   height: 100%;
   width: 17.3%;
-  display: none;
-  z-index: 1000;
 }
+#settings_connection_list .dropdown-menu,
 #connection_list .dropdown-menu {
   width: 100%;
   top: 38px;
@@ -5200,15 +5197,25 @@ body.chat {
   overflow-y: auto;
   overflow-x: hidden;
 }
+#settings_connection_list a,
 #connection_list a {
   text-decoration: none;
   position: relative;
 }
+#settings_connection_list a .badge,
 #connection_list a .badge {
   position: absolute;
   right: -6px;
   top: 4px;
   opacity: 0.9;
+}
+#connection_list {
+  display: none;
+  z-index: 1000;
+}
+#settings_connection_list .dropdown-menu {
+  display: block;
+  bottom: -2px;
 }
 #nick_list {
   background: #fcfcfc;

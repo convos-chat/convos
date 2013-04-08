@@ -1,0 +1,19 @@
+% title 'Delete connection';
+
+<div class="row-fluid">
+  <div class="span10">
+    <h2 class="page-header">Confirm deletion</h2>
+    %= form_for 'connection.delete', method => 'post', begin
+      <div class="alert alert-error">
+        DANGER ZONE!
+        Are you sure you want to delete the connection? If you delete the
+        connection all conversation logs and other assosiated data will be
+        permanently gone.
+      </div>
+      <div>
+        %= link_to 'No! Take me back', 'connection.edit', class => 'btn btn-primary'
+        <button type="submit" class="btn btn-danger">Yes, I want to delete the connection</button>
+      </div>
+    % end
+  </div>
+</div>

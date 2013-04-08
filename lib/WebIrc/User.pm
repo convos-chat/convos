@@ -177,15 +177,13 @@ Used to retrieve, save and update connection information.
 =cut
 
 sub settings {
-  my $self   = shift;
+  my $self   = shift->render_later;
   my $uid    = $self->session('uid');
-  my $action = $self->param('action') || '';
   my (@actions, $cids, @connections, @clients);
 
-  $self->stash(connections => \@connections);
-  $self->stash(clients     => \@clients);
+  # cid is just to trick layouts/default.html.ep
+  $self->stash(clients => \@clients, connections => \@connections);
 
-  $self->render_later;
   Mojo::IOLoop->delay(
     sub {    # get connections
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
@@ -195,8 +193,8 @@ sub settings {
       $cids = shift;
       $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
       $self->redis->execute(
-        (map { [hgetall => "connection:$_"] } @$cids), (map { [smembers => "connection:$_:channels"] } @$cids),
-
+        (map { [hgetall => "connection:$_"] } @$cids),
+        (map { [smembers => "connection:$_:channels"] } @$cids),
         $delay->begin
       );
     },
@@ -205,12 +203,12 @@ sub settings {
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
       for (my $i = 0; $i < @$cids; $i++) {
         my $info = $_[$i];
-        $info->{id} = $cids->[$i];
-        $info->{channels} = join(' ', @{$_[@$cids + $i]});
+        $info->{cid} = $cids->[$i];
+        $info->{channels} = join(' ', sort @{$_[@$cids + $i]});
         push @connections, $info;
       }
-      push @connections, {id => 0, %{$self->app->config->{'default_connection'}}, nick => $self->session('login')};
-      $self->param(connection => $connections[0]{id}) unless defined $self->param('connection');
+      push @connections, {cid => 0, %{$self->app->config->{'default_connection'}}, nick => $self->session('login')};
+      $self->stash->{cid} //= $connections[0]{cid};
       $self->render;
     },
   );
@@ -247,10 +245,9 @@ sub add_connection {
         $self->render;
         return;
       }
-      $self->param(connection => $cid);
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
       $self->redis->publish('core:control', "start:$cid");
-      $self->redirect_to('settings');
+      $self->redirect_to('settings.show', cid => $cid);
     },
   );
 }
@@ -263,7 +260,7 @@ Change a connection.
 
 sub edit_connection {
   my $self = shift;
-  my $cid  = $self->param('connection');
+  my $cid  = $self->param('cid');
 
   Mojo::IOLoop->delay(
     sub {
@@ -300,7 +297,7 @@ Delete a connection.
 sub delete_connection {
   my $self = shift;
   my $uid  = $self->session('uid');
-  my $cid  = $self->param('id');
+  my $cid  = $self->param('cid');
 
   $self->render_later;
   Mojo::IOLoop->delay(

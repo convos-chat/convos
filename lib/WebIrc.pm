@@ -122,6 +122,8 @@ sub startup {
   my $self   = shift;
   my $config = $self->plugin('Config');
 
+  $config->{name} ||= 'Wirc';
+
   $self->plugin('Mojolicious::Plugin::UrlWith');
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
@@ -138,17 +140,20 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  $private_r->get('/settings')->to('user#settings')->name('settings');
-  $private_r->post('/add')->to('user#add_connection')->name('connection.add');
-  $private_r->post('/edit/:id')->to('user#edit_connection')->name('connection.edit');
-  $private_r->post('/delete/:id')->to('user#delete_connection')->name('connection.delete');
+  my $settings_r = $private_r->route('/settings')->to(target => $config->{name});
+  $settings_r->get('/')->to('user#settings')->name('settings');
+  $settings_r->get('/:cid', [cid => qr{\d+}])->to('user#settings')->name('connection.edit');
+  $settings_r->post('/:cid', [cid => qr{\d+}])->to('user#edit_connection');
+  $settings_r->post('/add')->to('user#add_connection')->name('connection.add');
+  $settings_r->get('/:cid/delete')->to(template => 'user/delete_connection')->name('connection.delete');
+  $settings_r->post('/:cid/delete')->to('user#delete_connection');
 
   $private_r->websocket('/socket')->to('chat#socket');
 
   $private_r->get('/v1/:target/connection-list')->to('client#connection_list', layout => undef);
   $private_r->get('/v1/:target/history/:offset', [page => qr{\d+}])->to('client#history', layout => undef);
-  $private_r->get('/:cid/*target')->to('client#view')->name('channel.view');
-  $private_r->get('/:cid')->to('client#view')->name('server.view');
+  $private_r->get('/:cid/*target', [cid => qr{\d+}])->to('client#view')->name('channel.view');
+  $private_r->get('/:cid', [cid => qr{\d+}])->to('client#view')->name('server.view');
 
   $self->hook(
     before_dispatch => sub {

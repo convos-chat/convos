@@ -68,14 +68,13 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
 }
 
 /* chat */
+#settings_connection_list,
 #connection_list {
   position: fixed;
   top: 0;
   right: 0;
   height: 100%;
   width: 17.3%;
-  display: none;
-  z-index: 1000;
 
   .dropdown-menu {
     width: 100%;
@@ -86,6 +85,18 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
   }
   a { text-decoration: none; position: relative; }
   a .badge { position: absolute; right: -6px; top: 4px; opacity: 0.9; }
+}
+
+#connection_list {
+  display: none;
+  z-index: 1000;
+}
+
+#settings_connection_list {
+  .dropdown-menu {
+    display: block;
+    bottom: -2px;
+  }
 }
 
 #nick_list {
