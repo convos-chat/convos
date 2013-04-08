@@ -244,8 +244,8 @@
     },
     sendData: function(msg) {
       try {
-        var $data = $('<div data-target="' + methods.activeTarget() + '">' + msg + '</div>').wrap('<div>').parent();
-        websocket.send($data.html());
+        var $data = $('<div data-target="' + methods.activeTarget() + '"></div>').text(msg);
+        websocket.send($data.prop('outerHTML'));
       } catch(e) {
         statusIndicator('show', e);
       }
