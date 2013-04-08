@@ -6766,6 +6766,8 @@ body.chat {
   overflow-y: auto;
   overflow-x: hidden;
 }
+#settings_connection_list .dropdown-menu li > a:hover,
+#connection_list .dropdown-menu li > a:hover,
 #settings_connection_list .dropdown-menu li > a:focus,
 #connection_list .dropdown-menu li > a:focus {
   background-color: #727272;
@@ -6776,7 +6778,6 @@ body.chat {
   background-image: linear-gradient(to bottom, #5e5e5e, #919191);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff5e5e5e', endColorstr='#ff919191', GradientType=0);
-  border: 2px solid #5e5e5e;
 }
 #settings_connection_list a,
 #connection_list a {
