@@ -139,7 +139,7 @@
       var $target = e ? $(e.relatedTarget) : false;
       var $input = $(input_selector);
       var $nick_list = $('#nick_list ul:first');
-      var li = [], my_nick;
+      var li = [];
 
       $conversation = $('#messages ul:first');
       $('#connection_list li').removeClass('active');
@@ -147,10 +147,8 @@
       $(window).scrollToBottom();
       $input.chatInput('initAutocomplete').focus();
 
-      my_nick = $conversation.attr('data-nick') || '';
       $.each($conversation.attr('data-nicks').split(','), function(i, nick) {
         $input.chatInput('addAutocomplete', nick.replace(/\@/g, ''));
-        if(nick.indexOf(my_nick) >= 0) return;
         li.push('<li><a href="#">' + nick + '</a></li>');
       });
 
