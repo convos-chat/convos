@@ -179,10 +179,10 @@ Used to retrieve, save and update connection information.
 sub settings {
   my $self   = shift->render_later;
   my $uid    = $self->session('uid');
-  my (@actions, $cids, @connections, @clients);
+  my (@actions, $cids, @connections);
 
   # cid is just to trick layouts/default.html.ep
-  $self->stash(clients => \@clients, connections => \@connections);
+  $self->stash(connections => \@connections, settings => 1);
 
   Mojo::IOLoop->delay(
     sub {    # get connections
