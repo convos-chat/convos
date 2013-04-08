@@ -226,14 +226,13 @@ sub _fetch_conversation_lists {
     $self->redis->execute(
       [ smembers => "connection:$cid:channels" ],
       [ smembers => "connection:$cid:conversations" ],
-      [ get => "connection:$cid:unread" ],
       sub {
-        my ($redis, $channels, $conversations, $unread) = @_;
-        my @unread = map { [get => "connection:$cid:$_:unread"] } @$channels, @$conversations;
+        my ($redis, $channels, $conversations) = @_;
+        my @unread = map { [get => "connection:$cid:$_:unread"] } sort(@$channels), sort(@$conversations);
 
         $info->{channels} = $channels;
         $info->{conversations} = $conversations;
-        $info->{unread} = [$unread];
+        $info->{unread} = [];
 
         return $cb->(undef, $info) unless @unread;
         return $redis->execute(@unread, sub {

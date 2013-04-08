@@ -1,27 +1,30 @@
-% title 'Chat'; $target ||= 'server';
-<div class="conversation-list">
-  <div class="span2">
-    <a href="#" class="show-hide">&nbsp;</a>
-    <h4 class="">
-      %= link_to app->config->{name}, 'index'
-      %= link_to '', 'settings', class=>"link-settings icon-cog"
-      </h4>
-    </ul>
+% title 'Chat';
+<div id="connection_list">
+  <div class="dropdown-menu pull-right">
   % for my $connection (@$connections) {
     %= include 'client/connection_list', %$connection;
   % }
   </div>
 </div>
-<div class="messages row-fluid">
-  <div id="conversation" class="span10 offset2">
+
+<div id="messages" class="row-fluid">
+  <div class="span10">
     %= include 'client/conversation'
   </div>
 </div>
 
-<div class="chat-input navbar navbar-fixed-bottom">
+<div id="nick_list" class="row-fluid">
+  <ul class="nav nav-list">
+  % for my $nick (sort @$nicks) {
+    <li><%= link_to $nick, 'index' %></li>
+  % }
+  </ul>
+</div>
+
+<div id="chat_input" class="navbar navbar-inverse navbar-fixed-bottom">
   <div class="navbar-inner">
     <div class="row-fluid">
-      <div class="offset2 span10">
+      <div class="span12">
         <form class="navbar-form" method="post">
           <input type="text" class="span12" placeholder="Enter message to reply">
         </form>

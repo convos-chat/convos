@@ -114,7 +114,7 @@ my @ADD_SERVER_MESSAGE_EVENTS = qw/
 /;
 my @OTHER_EVENTS              = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
-  irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic
+  irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic
 /;
 
@@ -399,7 +399,25 @@ Reply with topic
 sub irc_rpl_topic {
   my ($self, $message) = @_;
 
-  $self->_publish(topic => {topic => $message->{params}[2], target => $message->{params}[1]});
+  $self->_publish(topic => {
+    topic => $message->{params}[2],
+    target => $message->{params}[1],
+  });
+}
+
+=head2 irc_topic
+
+    :nick!~user@hostname TOPIC #channel :some topic
+
+=cut
+
+sub irc_topic {
+  my ($self, $message) = @_;
+
+  $self->_publish(topic => {
+    topic => $message->{params}[1],
+    target => $message->{params}[0],
+  });
 }
 
 =head2 irc_rpl_topicwhotime

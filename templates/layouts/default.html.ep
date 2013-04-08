@@ -7,6 +7,7 @@
     %= javascript '/js/jquery.hotkeys.js';
     %= javascript '/js/jquery.fastclick.js';
     %= javascript '/js/ws-reconnecting.js';
+    %= javascript '/js/jquery.cj-swipe.js';
     %= javascript '/js/misc.js';
     %= javascript '/js/notifier.js';
     %= javascript '/js/wirc.chat.input.js';
@@ -17,6 +18,9 @@
   </head>
   <body class="<%= session('uid') ? 'chat' : '' %>">
   <div id="container">
+  % if(defined stash 'cid') {
+    %= include 'client/navbar';
+  % } else {
     % unless(session 'uid') {
     <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
@@ -43,6 +47,7 @@
       </div>
     </div>
     % }
+  % }
     <div class="container-fluid">
       %= content
     </div>
