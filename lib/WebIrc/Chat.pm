@@ -113,7 +113,7 @@ sub socket {
 
 sub _handle_socket_data {
   my ($self, $dom) = @_;
-  my $cmd = $dom->text(0);
+  my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $key = "connection:@{[$dom->{cid}]}:to_server";
 
   $self->logf(debug => '[%s] < %s', $key, $cmd);
