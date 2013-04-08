@@ -37,10 +37,11 @@
         e.preventDefault();
         $connection_list.hide().parent().hide();
         $('#navbar').find('a').parent('li').removeClass('open');
-        $(input_selector).focus();
+        if(!e.show && !isTouchDevice()) $(input_selector).focus();
       };
       var show = function(e) {
         var $li = $(this).parent('li:first');
+        e.show = true;
         hide.call(this, e);
         $connection_list.show().parent().show();
         $li.addClass('open');

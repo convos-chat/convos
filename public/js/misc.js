@@ -79,6 +79,8 @@
       $status_indicator[action](function() { $status_indicator.text(''); });
     }
   };
+
+  window.isTouchDevice = function() { return !!('ontouchstart'in window); };
 })(jQuery);
 
 (function() {
