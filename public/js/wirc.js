@@ -20,7 +20,7 @@
       notifier.init();
 
       $('#connection_list > div, #nick_list .nav').disableOuterScroll();
-
+      $('#container').touchSwipe(methods.toggleNickList);
       $('.embed img').live('click', function() { $(this).remove(); });
       $(input_selector).chatInput().parents('form').submit(methods.onSubmit);
 
@@ -159,7 +159,7 @@
           methods.sendData('/query ' + $(this).text());
           return false;
         });
-        $('#nick_list').show();
+        if($(window).width() > 768) $('#nick_list').show();
       }
       else {
         $('#nick_list').hide();
@@ -274,6 +274,17 @@
           $badge = $('#navbar .badge-unimportant');
           $badge.text(parseInt($badge.text(), 10) + 1);
         }
+      }
+    },
+    toggleNickList: function(direction) {
+      if($(window).width() > 768) {
+        return;
+      }
+      else if(direction == 'left') {
+        $('#nick_list').show();
+      }
+      else {
+        $('#nick_list').hide();
       }
     },
     onScroll: function() {

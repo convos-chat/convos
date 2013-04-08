@@ -19,10 +19,6 @@
 body { padding-top: 40px; }
 body.chat { padding-top: 52px; padding-bottom: 32px; }
 
-@media (max-width: 480px) {
-  body { font-size: 12px; }
-}
-
 #status_indicator {
   margin: 0 10px;
   min-width: 20%;
@@ -58,12 +54,6 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
 
   a.brand.title:hover {
     color: #999999;
-  }
-}
-
-@media (max-width: 767px) {
-  #navbar .container-fluid {
-    padding: 0 20px;
   }
 }
 
@@ -184,6 +174,16 @@ body.chat { padding-top: 52px; padding-bottom: 32px; }
 .jumbotron h1 { font-size: 50px; line-height: 90px }
 .jumbotron p { font-size: 30px; margin: 40px }
 .jumbotron .btn { font-size: 20px }
+
+@media (max-width: 480px) {
+  body { font-size: 12px; }
+}
+
+@media (max-width: 767px) {
+  body { padding-left: 0; padding-right: 0; }
+  #navbar .container-fluid { padding: 0 20px; }
+  #nick_list { display: none; }
+}
 
 @font-face {
   font-family: 'Hume Mono';
