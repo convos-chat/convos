@@ -570,7 +570,6 @@ added. The new nick will be stored in L</nick>.
 sub irc_err_nicknameinuse {
   my ($self, $message) = @_;
 
-  warn $self->nick . ' in use';
   $self->nick($self->nick . '_');
   $self->write(NICK => $self->nick);
 }
