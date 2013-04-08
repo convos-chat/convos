@@ -108,8 +108,7 @@
         } while($e.length && !$e.filter(':visible').length);
 
         if(selector && selector == '.unread-menu' && $e.length === 0) {
-          e.keyCode = 0;
-          return moveToConversation.call(this, e, '.chat-menu');
+          return;
         }
         if($e.length) {
           $active = $e;
