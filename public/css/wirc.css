@@ -6921,6 +6921,7 @@ body.chat {
   }
   #nick_list {
     display: none;
+    width: 150px;
   }
 }
 @font-face {
