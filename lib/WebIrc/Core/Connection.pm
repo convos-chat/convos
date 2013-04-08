@@ -465,7 +465,9 @@ sub irc_join {
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
-  return if $nick eq $self->_irc->nick;
+  if($nick eq $self->_irc->nick) {
+    return $self->redis->del("connection:@{[$self->id]}:$channel:nicks");
+  }
   $self->_publish(nick_joined => { save => 1, nick => $nick, target => $channel });
   $self->redis->sadd("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
