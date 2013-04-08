@@ -227,7 +227,7 @@ sub _fetch_conversation_lists {
       [ smembers => "connection:$cid:channels" ],
       [ smembers => "connection:$cid:conversations" ],
       sub {
-        my ($redis, $channels, $conversations, $unread) = @_;
+        my ($redis, $channels, $conversations) = @_;
         my @unread = map { [get => "connection:$cid:$_:unread"] } @$channels, @$conversations;
 
         $info->{channels} = $channels;
