@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <%= link_to $target, 'index', class => 'brand title', title => $target %>
       <ul class="nav pull-right">
-        <li >
+        <li>
           %= link_to 'help', class => 'help', title => 'Help', begin
             <i class="icon-question-sign"></i>
           % end
