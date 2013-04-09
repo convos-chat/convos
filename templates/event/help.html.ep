@@ -13,7 +13,7 @@
     <dd>Show current topic, or set a new one</dd>
     <dt>q/query &lt;nick&gt;</dt>
     <dd>Open up a new chat window with nick</dd>
-    <dt>close &lt;nick&gt;</dt>
+    <dt>close [&lt;nick&gt;]</dt>
     <dd>Close conversation with nick, defaults to current active.</dd>
     <dt>m/msg &lt;nick&gt;</dt>
     <dd>Send a direct message to nick</dd>

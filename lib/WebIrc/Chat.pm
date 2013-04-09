@@ -124,7 +124,7 @@ sub _handle_socket_data {
       $cmd = ref $irc_cmd eq 'CODE' ? $self->$irc_cmd($dom) : "$irc_cmd $cmd";
     }
     else {
-      $cmd = $self->send_partial('event/wirc_notice', message => 'Unknown command');
+      $cmd = $self->send_partial('event/wirc_notice', message => 'Unknown command. Type /help to see available commands.');
     }
   }
   elsif($dom->{target}) {
