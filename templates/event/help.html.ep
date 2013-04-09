@@ -1,0 +1,36 @@
+<div class="help" data-target="any">
+  <h4>Available commands (All commands start with /)</h4>
+  <dl>
+    <dt>me &lt;message&gt;</dt>
+    <dd>Send message as an action.</dd>
+    <dt>w/whois &lt;nick&gt;</dt>
+    <dd>Show information about a user</dd>
+    <dt>j/join &lt;#channel&gt;</dt>
+    <dd>Join channel and open up a chat window</dd>
+    <dt>part &lt;#channel&gt;</dt>
+    <dd>Leave channel, and close window</dd>
+    <dt>t/topic &lt;#channel&gt; [&lt;new topic&gt;]</dt>
+    <dd>Show current topic, or set a new one</dd>
+    <dt>q/query &lt;nick&gt;</dt>
+    <dd>Open up a new chat window with nick</dd>
+    <dt>close &lt;nick&gt;</dt>
+    <dd>Close conversation with nick, defaults to current active.</dd>
+    <dt>m/msg &lt;nick&gt;</dt>
+    <dd>Send a direct message to nick</dd>
+    <dt>m/nick &lt;nick&gt;</dt>
+    <dd>Change your wanted nick.</dd>
+    <dt>reconnect</dt>
+    <dd>Restart the current connection.</dd>
+  </dl>
+  <h4>Keyboard Shortcuts</h4>
+  <dl>
+    <dt>ctrl+m</dt>
+    <dd>Show/hide unread messages</dd>
+    <dt>ctrl+shift+m</dt>
+    <dd>Show/hide conversation list</dd>
+    <dt>Up/down</dt>
+    <dd>Navigate in recent history, or in conversation list when active.</dd>
+    <dt>Tab</dt>
+    <dd>Autocomplete nick.</dd>
+  </dl>
+</div>

@@ -56,8 +56,7 @@ my %COMMANDS; %COMMANDS = (
   help => sub {
     my ($self, $dom) = @_;
     $self->send_partial(
-      'event/wirc_notice',
-      message => "Available Commands:\n" .join(", ", sort keys %COMMANDS),
+      'event/help',
     );
     return;
   }
