@@ -35,7 +35,6 @@
             <ul class="nav main-menu pull-right">
             % if(session 'uid') {
               <li><%= link_to 'Chat', 'index' %></li>
-              <li><%= link_to 'Chat', 'index' %></li>
               <li><%= link_to 'Settings', 'settings' %></li>
               <li><%= link_to 'Logout', 'logout' %></li>
             % } else {
