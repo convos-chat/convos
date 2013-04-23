@@ -56,8 +56,7 @@ my %COMMANDS; %COMMANDS = (
   help => sub {
     my ($self, $dom) = @_;
     $self->send_partial(
-      'event/wirc_notice',
-      message => "Available Commands:\n" .join(", ", sort keys %COMMANDS),
+      'event/help',
     );
     return;
   }
@@ -125,7 +124,7 @@ sub _handle_socket_data {
       $cmd = ref $irc_cmd eq 'CODE' ? $self->$irc_cmd($dom) : "$irc_cmd $cmd";
     }
     else {
-      $cmd = $self->send_partial('event/wirc_notice', message => 'Unknown command');
+      $cmd = $self->send_partial('event/wirc_notice', message => 'Unknown command. Type /help to see available commands.');
     }
   }
   elsif($dom->{target}) {

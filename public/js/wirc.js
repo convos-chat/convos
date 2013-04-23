@@ -22,6 +22,10 @@
       $('#connection_list > div, #nick_list .nav').disableOuterScroll();
       $('#container').touchSwipe(methods.toggleNickList);
       $('.embed img').live('click', function() { $(this).remove(); });
+      $('#navbar a.help').click(function(e) {
+        e.preventDefault();
+        $(input_selector).attr('value','/help').focus();
+      })
       $(input_selector).chatInput().parents('form').submit(methods.onSubmit);
 
       setTimeout(function() {

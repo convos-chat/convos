@@ -6931,3 +6931,12 @@ body.chat {
   font-weight: normal;
   font-style: normal;
 }
+.help dt,
+.help dd {
+  display: inline;
+  margin: 0;
+}
+.help dd:after {
+  content: '\A';
+  white-space: pre;
+}

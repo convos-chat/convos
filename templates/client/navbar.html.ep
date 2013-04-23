@@ -3,6 +3,11 @@
     <div class="container-fluid">
       <%= link_to $target, 'index', class => 'brand title', title => $target %>
       <ul class="nav pull-right">
+        <li>
+          %= link_to 'help', class => 'help', title => 'Help', begin
+            <i class="icon-question-sign"></i>
+          % end
+        </li>
         <li class="<%= stash('settings') ? 'active' : '' %>">
           %= link_to 'settings', class => 'settings', title => 'Settings', begin
             <i class="icon-wrench"></i>
