@@ -247,7 +247,7 @@ sub add_connection {
       }
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
       $self->redis->publish('core:control', "start:$cid");
-      $self->redirect_to('settings.show', cid => $cid);
+      $self->redirect_to('settings', cid => $cid);
     },
   );
 }

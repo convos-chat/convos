@@ -141,7 +141,7 @@ sub update_connection {
     [sadd  => "connection:$cid:channels", @channels],
     sub {
       $self->redis->publish('core:control', "restart:$cid");
-      $self->$cb($cid);
+      $self->$cb($cid, {});
     },
   );
 }
