@@ -171,6 +171,7 @@ has _irc => sub {
     error => sub {
       my ($irc, $error) = @_;
       ref $self->log && $self->log->debug('[' . $self->id . "] Reconnecting on error: $error");
+      $self->_irc or return;
       $self->add_server_message({params => [$error], raw_line => ':' . $self->_irc->server . ' 372 wirc :' . $error});
       $irc->ioloop->timer(
         10,
