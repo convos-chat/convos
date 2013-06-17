@@ -132,6 +132,26 @@ See L<WebIrc::Core::Util/logf>.
 
 Returns a L<Mojo::Redis> object.
 
+=cut
+
+sub redis {
+  my $self  = shift;
+
+  $self->stash->{redis} ||= do {
+    my $log = $self->app->log;
+    my $redis = Mojo::Redis->new(server => $self->config->{redis}, timeout => 600);
+
+    $redis->on(
+      error => sub {
+        my ($redis, $err) = @_;
+        $log->error('[REDIS ERROR] ' . $err);
+      }
+    );
+
+    $redis;
+  };
+}
+
 =head1 METHODS
 
 =head2 register
@@ -147,7 +167,7 @@ sub register {
   $app->helper(format_conversation => \&format_conversation);
   $app->helper(logf          => \&WebIrc::Core::Util::logf);
   $app->helper(format_time => sub { my $self = shift; WebIrc::Core::Util::format_time(@_); });
-  $app->helper(redis => sub { shift->app->redis(@_) });
+  $app->helper(redis => \&redis);
   $app->helper(as_id => \&as_id);
   $app->helper(id_as => \&id_as);
   $app->helper(send_partial => sub { $self = shift; $self->send( $self->render_partial(@_).'' ); });

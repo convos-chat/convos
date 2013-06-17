@@ -226,6 +226,7 @@ sub connect {
       $self->_irc->user($attrs->{user});
       $self->_irc->connect(sub { $self->$cb; });
       $self->{sub} = $redis->subscribe("connection:$id:to_server");
+      $self->{sub}->timeout(3600);
       $self->{sub}->on(
         message => sub {
           my ($sub, $raw_message) = @_;
@@ -243,7 +244,14 @@ sub connect {
           }
 
         }
-      ) if $self->{sub};    # this should -never- be false
+      );
+      $self->{sub}->on(
+        error => sub {
+          my ($sub, $error) = @_;
+          $self->log->warn("[connection:$id:to_server] $error (reconnecting)");
+          $self->{sub}->connect;
+        },
+      );
     }
   );
   $self;
@@ -534,9 +542,7 @@ sub irc_error {
   my ($self, $message) = @_;
   $self->add_server_message($message);
   if ($message->{raw_line} =~ /Closing Link/i) {
-    $self->log(warn => "[connection:@{[$self->id]}] ! Closing link (reconnect)");
-
-#    delete $self->{_irc};
+    $self->log->warn("[connection:@{[$self->id]}] ! Closing link (reconnect)");
   }
 }
 

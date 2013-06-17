@@ -142,6 +142,10 @@ sub _subscribe_to_server_messages {
   my $sub = $self->redis->subscribe("connection:$cid:from_server");
 
   Scalar::Util::weaken($self);
+  $sub->timeout(300);
+  $sub->on(
+    error => sub { $self->finish; }
+  );
   $sub->on(
     message => sub {
       my ($redis, $message) = @_;
