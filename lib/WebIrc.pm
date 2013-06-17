@@ -67,6 +67,7 @@ Backend functionality.
 =cut
 
 use Mojo::Base 'Mojolicious';
+use File::Spec::Functions qw(catfile tmpdir);
 use WebIrc::Core;
 use WebIrc::Proxy;
 use Mojo::Redis;
@@ -162,8 +163,20 @@ sub startup {
     }
   );
 
-  $self->core->start  unless $ENV{SKIP_CONNECT};
-  $self->proxy->start unless $ENV{DISABLE_PROXY};
+  Mojo::IOLoop->timer(0, sub {
+    $self->_start_backend or return;
+    $self->core->start;
+    $self->proxy->start if $config->{backend}{proxy};
+  });
+}
+
+sub _start_backend {
+  my $self = shift;
+  my $file = $self->config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
+
+  return 0 if $ENV{HYPNOTOAD_APP}; # TODO: Evil to use internal environment variables
+  return 0 if -e $file;
+  return 1;
 }
 
 =head1 COPYRIGHT
