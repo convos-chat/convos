@@ -55,7 +55,6 @@ use IRC::Utils   ();
 use Scalar::Util ();
 use Carp qw/ croak /;
 use Time::HiRes qw/ time /;
-use DateTime;
 use IRC::Utils qw/parse_user/;
 
 # default to true while developing
@@ -432,9 +431,9 @@ sub irc_rpl_topicwhotime {
 
   $self->_publish(
     topic_by => {
-      ts     => DateTime->from_epoch(epoch => $message->{params}[3])->datetime,
+      ts     => $message->{params}[3],
       nick   => $message->{params}[2],
-      target => $message->{params}[1]
+      target => $message->{params}[1],
     }
   );
 }
