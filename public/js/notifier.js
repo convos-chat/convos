@@ -13,7 +13,7 @@
         n.show();
         return n;
       };
-      window.Notification.permission = 'default';
+      window.Notification.permission = webkitNotifications.checkPermission() ? 'default' : 'granted';
       window.Notification.requestPermission = function(cb) {
         webkitNotifications.requestPermission(function() {
           window.Notification.permission = webkitNotifications.checkPermission() ? 'denied' : 'granted';

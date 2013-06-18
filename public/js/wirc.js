@@ -332,5 +332,20 @@
 
   $(document).ready(function() {
     if($('#messages').length) $(document).wircChat();
+
+    if(Notification.permission === 'granted') {
+      $('#request_notification').hide();
+    }
+    else {
+      $('#request_notification').show().find('a').click(function() {
+        Notification.requestPermission(function(permission) {
+          if(permission === 'granted') {
+            $('#request_notification').hide();
+            new Notification('Notifications enabled!');
+          }
+        });
+        return false;
+      });
+    }
   });
 })(jQuery);

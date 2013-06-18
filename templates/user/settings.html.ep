@@ -23,6 +23,9 @@
 </div>
 
 <div class="row-fluid">
+  <div id="request_notification" class="alert alert-info">
+    Do you want desktop notifications from wirc? <a href="#yes" class="btn btn-primary">Yes!</a>
+  </div>
   <div class="span10">
     <h2 class="page-header"><%= $current->{cid} ? "Edit $current->{host}" : 'New connection' %></h2>
     %= include 'inc/alert'
