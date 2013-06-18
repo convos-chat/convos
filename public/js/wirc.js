@@ -17,7 +17,6 @@
       methods.initNavbar();
       methods.initPjax();
       methods.initShortcuts();
-      notifier.init();
 
       $('#connection_list > div, #nick_list .nav').disableOuterScroll();
       $('#container').touchSwipe(methods.toggleNickList);
