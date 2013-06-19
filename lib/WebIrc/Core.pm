@@ -16,13 +16,31 @@ use constant DEBUG => $ENV{WIRC_DEBUG} // 0;
 
 =head1 ATTRIBUTES
 
+=head2 log
+
+Holds a L<Mojo::Log> object.
+
 =head2 redis
 
 Holds a L<Mojo::Redis> object.
 
 =cut
 
-has redis        => sub { Mojo::Redis->new };
+has log => sub { Mojo::Log->new };
+
+has redis => sub {
+  my $self = shift;
+  my $redis = Mojo::Redis->new;
+  my $log = $self->log;
+
+  $redis->on(error => sub {
+    my($redis, $error) = @_;
+    $log->error("[CORE:REDIS] $error");
+  });
+
+  $redis;
+};
+
 has _connections => sub { +{} };
 
 =head1 METHODS
@@ -41,16 +59,16 @@ sub start {
     'connections',
     sub {
       my ($redis, $cids) = @_;
-      return unless $cids and @$cids;
+      ref $cids or return $self->log->error("[core] Invalid connections (@_)\n");
       warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
       for my $cid (@$cids) {
-        my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-        $self->_connections->{$cid} = $conn;
-        $conn->connect(sub { });
+        $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+        $self->_connections->{$cid}->connect(sub { });
       }
     }
   );
   $self->{control} = $self->redis->subscribe("core:control");
+  $self->{control}->timeout(3600);
   $self->{control}->on(
     message => sub {
       my ($sub, $raw_msg) = @_;
@@ -59,7 +77,13 @@ sub start {
       $self->$action($cid);
     }
   );
-
+  $self->{control}->on(
+    error => sub {
+      my ($sub, $error) = @_;
+      $self->log->warn("[core:control] $error (reconnecting)");
+      $self->start;
+    },
+  );
 }
 
 

@@ -74,42 +74,37 @@ use Mojo::Redis;
 
 =head1 ATTRIBUTES
 
-=head2 redis
+=head2 archive
 
-Holds a L<Mojo::Redis> object.
+Holds a L<WebIrc::Core::Archive> object.
 
 =head2 core
 
 Holds a L<WebIrc::Core> object.
 
-=head2 archive
-
 =head2 proxy
 
-Proxy manager
+Holds a L<WebIrc::Proxy> object.
 
 =cut
 
-has redis => sub {
-  my $self  = shift;
-  my $log   = $self->app->log;
-  my $redis = Mojo::Redis->new(server => $self->config->{redis}, timeout => 600);
-
-  $redis->on(
-    error => sub {
-      my ($redis, $err) = @_;
-      $log->error('[REDIS ERROR] ' . $err);
-    }
-  );
-
-  return $redis;
-};
-has core => sub { WebIrc::Core->new(redis => shift->redis) };
 has archive => sub {
   my $self = shift;
   WebIrc::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
-has proxy => sub { WebIrc::Proxy->new(core => shift->core) };
+
+has core => sub {
+  my $self = shift;
+  my $core = WebIrc::Core->new;
+
+  $core->redis->server($self->redis->server);
+  $core;
+};
+
+has proxy => sub {
+  my $self = shift;
+  WebIrc::Proxy->new(core => $self->core);
+};
 
 =head1 METHODS
 
