@@ -121,8 +121,12 @@ sub view {
     },
     sub {
       my($delay, $conversation) = @_;
+      $self->format_conversation($conversation, $delay->begin);
+    },
+    sub {
+      my($delay, $conversation) = @_;
 
-      $self->stash(conversation => $self->format_conversation($conversation));
+      $self->stash(conversation => $conversation);
 
       if($target) {
         $self->redis->smembers("connection:$cid:$target:nicks", $delay->begin);
@@ -203,7 +207,11 @@ sub history {
     },
     sub {
       my($delay, $conversation) = @_;
-      $self->render('client/conversation', conversation => $self->format_conversation($conversation));
+      $self->format_conversation($conversation, $delay->begin);
+    },
+    sub {
+      my($delay, $conversation) = @_;
+      $self->render('client/conversation', conversation => $conversation);
     },
   );
 }

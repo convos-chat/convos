@@ -149,9 +149,12 @@ sub _subscribe_to_server_messages {
   $sub->on(
     message => sub {
       my ($redis, $message) = @_;
-      my $data = $self->format_conversation([$message])->[0];
+
       $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-      $self->send_partial('event/'.$data->{event}, target => '', %$data);
+      $self->format_conversation([$message], sub {
+        my($self, $messages) = @_;
+        $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
+      });
     }
   );
 
