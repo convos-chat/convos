@@ -48,12 +48,12 @@ sub run {
   my($self, @args) = @_;
   my $app = $self->app;
 
-  if(++$ENV{WIRC_BACKEND_REV} == 1 and !$app->_start_backend) {
-    die "Backend is already started\n";
-  }
+  $ENV{WIRC_BACKEND_REV}++; # used to allow fork+exec when running in background
+
   if($ENV{WIRC_BACKEND_REV} == 1) {
     my $lock_file = $self->app->config->{backend}{lock_file};
     $app->log->debug("Backend lock_file: $lock_file");
+    die "Backend is already started\n" unless $app->_start_backend;
   }
 
   $self->{foreground} = int grep { $_ eq '-f' } @args;

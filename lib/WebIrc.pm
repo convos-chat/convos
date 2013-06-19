@@ -119,6 +119,7 @@ sub startup {
   my $config = $self->plugin('Config');
 
   $config->{name} ||= 'Wirc';
+  $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
 
   $self->plugin('Mojolicious::Plugin::UrlWith');
   $self->plugin('WebIrc::Plugin::Helpers');
@@ -167,10 +168,9 @@ sub startup {
 
 sub _start_backend {
   my $self = shift;
-  my $file = $self->config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
 
   return 0 if $ENV{HYPNOTOAD_APP}; # TODO: Evil to use internal environment variables
-  return 0 if -e $file;
+  return 0 if -e $self->config->{backend}{lock_file};
   return 1;
 }
 
