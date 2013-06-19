@@ -14,7 +14,7 @@ warn ref $app->redis;
 $app->redis->execute('keys','connection:*:msg',sub {
   my($redis,$keys)=@_;
   for my $key (@$keys) {
-    $redis->zremrangebyscore($key => '-inf',$yesterday);
+    $redis->zremrangebyscore($key => '-inf','('.$yesterday);
   };
   $redis->keys('*:msg',sub {
     $redis->ioloop->stop;
