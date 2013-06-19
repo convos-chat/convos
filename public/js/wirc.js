@@ -8,9 +8,7 @@
   var methods = {
     init: function() {
       websocket = new ReconnectingWebSocket($.url_for('socket').replace(/^http/, 'ws'));
-      websocket.onmessage = methods.receiveData;
-      websocket.onclose = function() { websocket.is_open = false; };
-      websocket.onopen = function() { websocket.is_open = true; };
+      websocket.on('message', methods.receiveData);
       conversation_name = $('#navbar .brand').text();
 
       methods.changeConversation();
@@ -170,12 +168,7 @@
 
       history_offset = $conversation.attr('data-offset');
       methods.unread('init');
-
-      var tid = setInterval(function() {
-        if(!websocket.is_open) return;
-        methods.sendData('/topic');
-        clearInterval(tid);
-      }, 200);
+      methods.sendData('/topic');
 
       if($target) {
         conversation_name = $target.children('span:first').text();
@@ -246,12 +239,8 @@
       methods.printMessage.call($data, target);
     },
     sendData: function(msg) {
-      try {
-        var $data = $('<div data-target="' + methods.activeTarget() + '"></div>').text(msg);
-        websocket.send($data.prop('outerHTML'));
-      } catch(e) {
-        statusIndicator('show', e);
-      }
+      var $data = $('<div data-target="' + methods.activeTarget() + '"></div>').text(msg);
+      websocket.send($data.prop('outerHTML'));
     },
     unread: function(action, target) {
       if(action == 'init') {
