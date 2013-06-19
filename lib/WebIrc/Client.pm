@@ -70,6 +70,7 @@ sub view {
   my $uid    = $self->session('uid');
   my $cid    = $self->stash('cid');
   my $target = $self->stash('target') || '';
+  my $key    = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
   my $current_nick;
 
   Mojo::IOLoop->delay(
@@ -81,19 +82,19 @@ sub view {
     },
     sub {
       my($delay, $cids) = @_;
-      my $cb = $delay->begin;
+
+      $self->stash(cids => $cids);
       $self->redis->execute(
         (map { [ hmget => "connection:$_" => qw/ nick host / ] } @$cids),
-        sub { $cb->(shift, [@_]) },
+        $delay->begin,
       );
-      $delay->begin->(undef, $cids);
     },
     sub {
-      my($delay, $connections, $cids) = @_;
+      my($delay, @connections) = @_;
       $self->redis->del($target ? "connection:$cid:$target:unread" : "connection:$cid:unread");
       $self->_fetch_conversation_lists(
         $delay,
-        map { +{ cid => shift @$cids, host => $_->[1], nick => $_->[0] } } @$connections
+        map { +{ cid => shift @{ $self->stash('cids') }, host => $_->[1], nick => $_->[0] } } @connections
       );
     },
     sub {
@@ -110,7 +111,13 @@ sub view {
         nick => $current_nick,
       );
 
-      $self->redis->zrevrangebyscore($key => '+inf', '-inf', limit => 0 => $N_MESSAGES, $delay->begin);
+      $self->redis->zcard($key, $delay->begin);
+    },
+    sub {
+      my($delay, $length) = @_;
+      my $end = $length > $N_MESSAGES ? $N_MESSAGES : $length;
+
+      $self->redis->zrevrange($key => 0, -$end, $delay->begin);
     },
     sub {
       my($delay, $conversation) = @_;
