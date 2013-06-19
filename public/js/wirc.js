@@ -20,8 +20,8 @@
       $('#container').touchSwipe(methods.toggleNickList);
       $('.embed img').live('click', function() { $(this).remove(); });
       $('#navbar a.help').click(function(e) {
-        e.preventDefault();
-        $(input_selector).attr('value','/help').focus();
+        methods.sendData('/help');
+        return false;
       })
       $(input_selector).chatInput().parents('form').submit(methods.onSubmit);
 
