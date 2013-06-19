@@ -11,6 +11,7 @@ use WebIrc::Core::Util ();
 use Mojo::JSON;
 
 my $JSON = Mojo::JSON->new;
+my $YOUTUBE_INCLUDE = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
 
 =head1 HELPERS
 
@@ -83,45 +84,56 @@ sub form_block {
 
 =head2 format_conversation
 
-  $messages = $c->format_conversation(\@conversation);
+  $c->format_conversation(\@conversation, $callback);
 
 Takes a list of JSON strings and turns them into a list of hash-refs where the
-"message" key contains a formatted version with HTML and such.
+"message" key contains a formatted version with HTML and such. The result will
+be passed on to the C<$callback>.
 
 =cut
 
 sub format_conversation {
-  my ($c, $conversation) = @_;
+  my ($c, $conversation, $cb) = @_;
+  my $ua = Mojo::UserAgent->new(request_timeout => 2, connect_timeout => 2);
+  my $delay = Mojo::IOLoop->delay;
   my @messages;
+
+  my $url_formatter = sub {
+    my($message, $url) = @_;
+    my $cb = $delay->begin;
+
+    if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
+      $message->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
+      $cb->();
+    }
+    else {
+      $ua->head($url => sub {
+        my $ct = $_[1]->res->headers->content_type || '';
+        $message->{embed} = $c->image($url, alt => 'Embedded media') if $ct =~ /^image/;
+        $cb->();
+      });
+    }
+
+    $c->link_to($url, $url, target => '_blank');
+  };
 
   for(@$conversation) {
     my $message = $JSON->decode($_);
-    unless (ref $message) {
+
+    if(not ref $message) {
       $c->logf(debug => "Unable to parse raw message: $_");
       next;
     }
-    $c->stash(embed => undef);
-
     if($message->{message}) {
       $message->{message} = Mojo::Util::xml_escape($message->{message});
-      $message->{message} =~ s!\b(\w{2,5}://\S+)!__handle_link($c, $message,$1)!ge;
+      $message->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($message, $1)}!ge;
     }
 
     unshift @messages, $message;
   }
 
-  return \@messages;
-}
-
-sub __handle_link {
-  my($c, $message, $link)=@_;
-  my $tx = $c->app->ua->head($link);
-
-  if(!$tx->error and $tx->res->headers->content_type =~ m{^image/}) {
-    $message->{embed} .= $c->image($link);
-  }
-
-  return $c->link_to($link,$link,(target=>"_blank"));
+  $delay->once(finish => sub { $c->$cb(\@messages) });
+  $delay->begin->(); # need to do at least one step
 }
 
 =head2 logf
