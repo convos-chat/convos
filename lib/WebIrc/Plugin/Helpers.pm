@@ -102,6 +102,8 @@ sub format_conversation {
     my($message, $url) = @_;
     my $cb = $delay->begin;
 
+    $message->{embed} = '';
+
     if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
       $message->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
       $cb->();
