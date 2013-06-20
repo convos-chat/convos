@@ -67,13 +67,22 @@ sub start {
       }
     }
   );
-  $self->{control} = $self->redis->subscribe("core:control");
+
+  $self->_start_control_channel;
+  $self;
+}
+
+sub _start_control_channel {
+  my $self = shift;
+
+  Scalar::Util::weaken($self);
+  $self->{control} = $self->redis->subscribe('core:control');
   $self->{control}->timeout(0);
   $self->{control}->on(
     message => sub {
       my ($sub, $raw_msg) = @_;
-      my ($msg, $cid) = split(':', $raw_msg);
-      my $action = 'ctrl_' . $msg;
+      my ($command, $cid) = split /:/, $raw_msg;
+      my $action = "ctrl_$command";
       $self->$action($cid);
     }
   );
@@ -81,11 +90,10 @@ sub start {
     error => sub {
       my ($sub, $error) = @_;
       $self->log->warn("[core:control] $error (reconnecting)");
-      $self->start;
+      $self->_start_control_channel;
     },
   );
 }
-
 
 =head2 add_connection
 

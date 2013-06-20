@@ -123,7 +123,7 @@ has _irc => sub {
     close => sub {
       my $irc = shift;
       $self->_publish(wirc_notice => { message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
-      $irc->ioloop->timer($self->_reconnect_in, sub { $self->connect });
+      $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
     }
   );
 
