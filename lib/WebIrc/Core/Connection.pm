@@ -13,9 +13,7 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
           redis => Mojo::Redis->new,
         );
 
-  $c->connect(sub {
-    warn "I am connected to the irc server!";
-  });
+  $c->connect;
 
   Mojo::IOLoop->start;
 
@@ -56,9 +54,7 @@ use Scalar::Util ();
 use Carp qw/ croak /;
 use Time::HiRes qw/ time /;
 use IRC::Utils qw/parse_user/;
-
-# default to true while developing
-use constant DEBUG => $ENV{WIRC_DEBUG} // 1;
+use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $JSON = Mojo::JSON->new;
 my @keys = qw/ nick user host /;
@@ -71,7 +67,7 @@ Holds the id of this connection. This attribute is required.
 
 =cut
 
-has 'id';
+has id => 0;
 
 =head2 redis
 
@@ -88,7 +84,7 @@ server by L</connect>.
 
 =cut
 
-has channels => '';
+has channels => sub { [] };
 
 =head2 real_host
 
@@ -126,58 +122,8 @@ has _irc => sub {
   $irc->on(
     close => sub {
       my $irc = shift;
-      ref $self->log
-        && $self->log->debug('[' . $self->id . '] Reconnecting to ' . $self->_irc->server . ' on close...');
-      $self->add_server_message(
-        {
-          params   => ['Disconnected. Attempting reconnect in 10 seconds.'],
-          raw_line => ':' . $self->_irc->server . ' 372 wirc :Disconnected. Attempting reconnect in 30 seconds.'
-        }
-      );
-      $irc->ioloop->timer(
-        10,
-        sub {
-          $self->connect(sub { });
-        }
-      );
-    }
-  );
-  $irc->on(
-    connect => sub {
-      my $irc = shift;
-      $self->add_server_message(
-        {params => ['Connected.'], raw_line => ':' . $self->_irc->server . ' 372 wirc :Connected.'});
-      $self->redis->hset("connection:@{[$self->id]}", current_nick => $self->_irc->nick);
-      $self->{keepnick} = $irc->ioloop->recurring(
-        60,
-        sub {
-          $self->redis->hget(
-            "connection:@{[$self->id]}",
-            "nick",
-            sub {
-              my ($redis, $nick) = @_;
-              if ($nick ne $self->_irc->nick) {
-                $self->_irc->change_nick($nick);
-              }
-            }
-          );
-        }
-      );
-
-    }
-  );
-  $irc->on(
-    error => sub {
-      my ($irc, $error) = @_;
-      ref $self->log && $self->log->debug('[' . $self->id . "] Reconnecting on error: $error");
-      $self->_irc or return;
-      $self->add_server_message({params => [$error], raw_line => ':' . $self->_irc->server . ' 372 wirc :' . $error});
-      $irc->ioloop->timer(
-        10,
-        sub {
-          $self->connect(sub { });
-        }
-      );
+      $self->_publish(wirc_notice => { message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
+      $irc->ioloop->timer($self->_reconnect_in, sub { $self->connect });
     }
   );
 
@@ -194,11 +140,13 @@ has _irc => sub {
   $irc;
 };
 
+has _reconnect_in => 10;
+
 =head1 METHODS
 
 =head2 connect
 
-  $self = $self->connect($callback);
+  $self = $self->connect;
 
 This method will create a new L<Mojo::IRC> object with attribute data from
 L</redis>. The values fetched from the backend is identified by L</id>. This
@@ -210,10 +158,72 @@ is set in L</channels> and used by L</irc_rpl_welcome>.
 =cut
 
 sub connect {
-  my ($self, $cb) = @_;
+  my ($self) = @_;
+  my $irc = $self->_irc;
   my $id = $self->id or croak "Cannot load connection without id";
 
+  # we will try to "steal" the nich we want every 60 second
+  $self->{keepnick_tid} ||= $irc->ioloop->recurring(60, sub {
+    $self->redis->hget("connection:$id", "nick", sub { $irc->change_nick($_[1]) });
+  });
+
+  $self->_connect;
+  $self->_subscribe;
+  $self;
+}
+
+sub _subscribe {
+  my $self = shift;
+  my $id = $self->id;
+  my $irc = $self->_irc;
+
   Scalar::Util::weaken($self);
+  $self->{messages} = $self->redis->subscribe("connection:$id:to_server");
+  $self->{messages}->timeout(0);
+  $self->{messages}->on(
+    error => sub {
+      my ($sub, $error) = @_;
+      $self->log->warn("[$id] Re-subcribing to messages to @{[$irc->server]}. ($error)");
+      $self->_subscribe;
+    },
+  );
+  $self->{messages}->on(
+    message => sub {
+      my ($sub, $raw_message) = @_;
+      my $message = Parse::IRC::parse_irc(sprintf ':%s %s', $irc->nick, $raw_message);
+
+      unless(ref $message) {
+        $self->_publish(wirc_notice => { message => "Unable to parse: $raw_message" });
+        return;
+      }
+
+      $irc->write($raw_message, sub {
+        my($irc, $error) = @_;
+
+        if($error) {
+          $self->_publish(wirc_notice => { message => "Could not send message to @{[$irc->server]}: $error" });
+        }
+        elsif($message->{command} eq 'PRIVMSG') {
+          $self->add_message($message);
+        }
+        else {
+          my $action = 'cmd_' . lc $message->{command};
+          $self->$action($message) if $self->can($action);
+        }
+      });
+    }
+  );
+
+  $self;
+}
+
+sub _connect {
+  my $self = shift;
+  my $id = $self->id;
+  my $irc = $self->_irc;
+
+  Scalar::Util::weaken($self);
+
   $self->redis->execute(
     [hgetall  => "connection:$id"],
     [smembers => "connection:$id:channels"],
@@ -221,40 +231,23 @@ sub connect {
       my ($redis, $attrs, $channels) = @_;
 
       $self->channels($channels);
-      $self->_irc->server($attrs->{host});
-      $self->_irc->nick($attrs->{nick});
-      $self->_irc->user($attrs->{user});
-      $self->_irc->connect(sub { $self->$cb; });
-      $self->{sub} = $redis->subscribe("connection:$id:to_server");
-      $self->{sub}->timeout(0);
-      $self->{sub}->on(
-        message => sub {
-          my ($sub, $raw_message) = @_;
-          eval { $self->_irc->write($raw_message); };
-          $self->_publish(wirc_notice => {message => "Could not send message, not connected to server"})
-            if ($@ && $@ =~ m/without\s+a\+sstream/);
-          my $message = Parse::IRC::parse_irc(sprintf ':%s %s', $self->_irc->nick, $raw_message);
-          return $self->log->debug("Unable to parse $raw_message") unless ref $message;
-          if ($message->{command} eq 'PRIVMSG') {
-            $self->add_message($message);
-          }
-          else {
-            my $action = 'cmd_' . lc $message->{command};
-            $self->$action($message) if $self->can($action);
-          }
+      $irc->server($attrs->{host});
+      $irc->nick($attrs->{nick});
+      $irc->user($attrs->{user});
+      $irc->connect(sub {
+        my($irc, $error) = @_;
 
+        if($error) {
+          $self->_publish(wirc_notice => { message => "Could not connect to @{[$irc->server]}: $error" });
+          $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
         }
-      );
-      $self->{sub}->on(
-        error => sub {
-          my ($sub, $error) = @_;
-          $self->log->warn("[connection:$id:to_server] $error (reconnecting)");
-          $self->{sub}->connect;
-        },
-      );
-    }
+        else {
+          $self->redis->hset("connection:@{[$self->id]}", current_nick => $irc->nick);
+          $self->_publish(wirc_notice => { message => "Connected to @{[$irc->server]}." });
+        }
+      });
+    },
   );
-  $self;
 }
 
 =head2 add_server_message
@@ -392,10 +385,7 @@ sub irc_rpl_whoischannels {
 sub irc_rpl_notopic {
   my ($self, $message) = @_;
 
-  $self->_publish(topic => {
-    topic => '',
-    target => $message->{params}[1],
-  });
+  $self->_publish(topic => { topic => '', target => $message->{params}[1] });
 }
 
 =head2 irc_rpl_topic
@@ -407,10 +397,7 @@ Reply with topic
 sub irc_rpl_topic {
   my ($self, $message) = @_;
 
-  $self->_publish(topic => {
-    topic => $message->{params}[2],
-    target => $message->{params}[1],
-  });
+  $self->_publish(topic => { topic => $message->{params}[2], target => $message->{params}[1] });
 }
 
 =head2 irc_topic
@@ -422,10 +409,7 @@ sub irc_rpl_topic {
 sub irc_topic {
   my ($self, $message) = @_;
 
-  $self->_publish(topic => {
-    topic => $message->{params}[1],
-    target => $message->{params}[0],
-  });
+  $self->_publish(topic => { topic => $message->{params}[1], target => $message->{params}[0] });
 }
 
 =head2 irc_rpl_topicwhotime
@@ -570,8 +554,8 @@ sub cmd_join {
   my ($self, $message) = @_;
   my $channel = $message->{params}[0];
 
-  return $self->_publish(wirc_notice => {message => 'Channel to join is required'})    unless $channel;
-  return $self->_publish(wirc_notice => {message => 'Channel must start with & or #'}) unless $channel =~ /^[#&]/x;
+  return $self->_publish(wirc_notice => { message => 'Channel to join is required' }) unless $channel;
+  return $self->_publish(wirc_notice => { message => 'Channel must start with & or #' }) unless $channel =~ /^[#&]/x;
   $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
 
   # clean up old nick list
@@ -596,20 +580,26 @@ sub cmd_part {
 
 sub _publish {
   my ($self, $event, $data) = @_;
+  my $message;
 
   $data->{cid} //= $self->id;
-  $data->{timestamp} = time;
-  $data->{event}     = $event;
-  my $message = $JSON->encode($data);
-  $self->redis->publish("connection:@{[$self->id]}:from_server", $message);
-  return unless $data->{save};
-  if ($data->{target}) {
-    $self->redis->zadd("connection:@{[$self->id]}:$data->{target}:msg", time, $message);
-  }
-  else {
-    $self->redis->zadd("connection:@{[$self->id]}:msg", time, $message);
-  }
+  $data->{timestamp} ||= time;
+  $data->{event} = $event;
+  $message = $JSON->encode($data);
 
+  $self->redis->publish("connection:$data->{cid}:from_server", $message);
+
+  if($event eq 'wirc_notice') {
+    $self->log->warn("[$data->{cid}] $data->{message}");
+  }
+  if($data->{save}) {
+    if ($data->{target}) {
+      $self->redis->zadd("connection:$data->{cid}:$data->{target}:msg", time, $message);
+    }
+    else {
+      $self->redis->zadd("connection:$data->{cid}:msg", time, $message);
+    }
+  }
 }
 
 =head1 COPYRIGHT

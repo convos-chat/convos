@@ -63,12 +63,12 @@ sub start {
       warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
       for my $cid (@$cids) {
         $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-        $self->_connections->{$cid}->connect(sub { });
+        $self->_connections->{$cid}->connect;
       }
     }
   );
   $self->{control} = $self->redis->subscribe("core:control");
-  $self->{control}->timeout(3600);
+  $self->{control}->timeout(0);
   $self->{control}->on(
     message => sub {
       my ($sub, $raw_msg) = @_;
@@ -220,7 +220,7 @@ Start a single connection by connection id.
 sub ctrl_start {
   my ($self, $cid) = @_;
   my $conn = $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-  $conn->connect(sub { });
+  $conn->connect;
 }
 
 =head2 login
