@@ -44,19 +44,21 @@ TODO:
 
 =head1 EVENTS
 
-=head2 irc_close
+=head2 close
 
-  $self->$callback;
+Emitted once the connection to the server close.
+
+=head2 error
+
+Emitted once the stream emits an error.
+
+=head2 irc_close
 
 Called when the client has closed the connection.
 
 =head2 irc_error
 
 This event is used by IRC errors
-
-=head2 error
-
-Internal errors with the mojo ioloop
 
 =head2 irc_err_nicknameinuse
 
@@ -293,14 +295,10 @@ sub server {
 
   Scalar::Util::weaken($self);
   return $old unless defined $server;
-  return $self if $old && $old eq $server;
+  return $self if $old and $old eq $server;
   $self->{server} = $server;
-  return $self if !$self->{stream_id};
-  $self->disconnect(
-    sub {
-      $self->connect(sub { });
-    }
-  );
+  return $self unless $self->{stream_id};
+  $self->disconnect(sub { $self->connect(sub {}) });
   $self;
 }
 
@@ -333,9 +331,8 @@ sub change_nick {
   my $old = $self->nick // '';
 
   return $old unless defined $nick;
-  return $self if $old && $old eq $nick;
-  $self->nick($nick);
-  $self->write(NICK => $nick) if $self->{stream};
+  return $self if $old and $old eq $nick;
+  $self->write(NICK => $nick, sub { $_[1] or $self->nick($nick) });
   $self;
 }
 
@@ -344,16 +341,17 @@ sub change_nick {
   $self->connect(\&callback);
 
 Will login to the IRC L</server> and call C<&callback> once connected. The
-L</error> event will be called if connect fail in any way.
+C<&callback> will be called once connected or if it fail to connect. The
+second argument will be an error message or empty string on success.
 
 =cut
 
 sub connect {
-  my ($self, $callback) = @_;
+  my ($self, $cb) = @_;
   my ($host, $port) = split /:/, $self->server;
 
   if ($self->{stream_id}) {
-    return $self->$callback;
+    return $self->$cb('');
   }
 
   Scalar::Util::weaken($self);
@@ -366,7 +364,7 @@ sub connect {
       my ($method, $message);
       my $buffer = '';
 
-      $err and return $self->$callback($err);
+      $err and return $self->$cb($err);
 
       $stream->timeout($TIMEOUT);
       $stream->on(
@@ -381,9 +379,8 @@ sub connect {
       $stream->on(
         error => sub {
           $self or return;
-          $self->ioloop->remove(delete $self->{stream_id});
+          $self->ioloop->remove($self->{stream_id});
           $self->emit(error => $_[1]);
-          delete $self->{stream};
         }
       );
       $stream->on(
@@ -402,14 +399,13 @@ sub connect {
             }
 
             $self->emit_safe(lc('irc_' . $method) => $message);
-
             $self->emit_safe('irc_error' => $message) if $method =~ m/^err_/i;
           }
         }
       );
 
       $self->{stream} = $stream;
-      Mojo::IOLoop::Delay->new->steps(
+      $self->ioloop->delay(
         sub {
           $self->write(NICK => $self->nick, shift->begin);
         },
@@ -422,7 +418,7 @@ sub connect {
           $delay->begin->();
         },
         sub {
-          $self->$callback;
+          $self->$cb('');
         }
       );
     }
@@ -431,7 +427,7 @@ sub connect {
 
 =head2 disconnect
 
-  $self->disconnect($callback);
+  $self->disconnect(\&callback);
 
 Will disconnect form the server and run the callback once it is done.
 
@@ -478,22 +474,23 @@ sub register_default_event_handlers {
 
 =head2 write
 
-  $self->write(@str);
+  $self->write(@str, \&callback);
 
 This method writes a message to the IRC server. C<@str> will be concatenated
-with " " and "\r\n" will be appended.
+with " " and "\r\n" will be appended. C<&callback> is called once the message is
+delivered over the stream. The second argument to the callback will be
+an error message: Empty string on success and a description on error.
 
 =cut
 
 sub write {
-  my $cb   = ref $_[-1] eq 'CODE' ? pop : undef;
+  my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
   my $self = shift;
-  my $buf  = join ' ', @_;
-  $buf = Unicode::UTF8::encode_utf8($buf, sub { $_[0] });
-  
-  croak('Tried to write without a stream') unless ref $self->{stream};
+  my $buf = Unicode::UTF8::encode_utf8(join(' ', @_), sub { $_[0] });
+
+  return $self->$cb('Not connected') unless ref $self->{stream};
   warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
-  $self->{stream}->write("$buf\r\n", $cb);
+  return $self->{stream}->write("$buf\r\n", $cb);
 }
 
 =head1 DEFAULT EVENT HANDLERS
