@@ -1,28 +1,25 @@
-% my $n = shift @$unread || 0;
-<ul class="server nav nav-list" id="connection_list_<%= $cid %>" data-nick="<%= stash('current_nick') || $nick %>" title="<%= $host %>">
+<ul class="nav nav-list" id="connection_list_<%= $cid %>" data-nick="<%= stash('current_nick') || $nick %>" title="<%= $host %>">
   <li class="nav-header <%= is_active($cid) %>" id="target_<%= $cid %>">
     %= link_to 'server.view', { cid => $cid }, begin
-      %= $host
-      <span class="badge<%= $n ? '' : ' hide' %>"><%= $n %></span>
+      <span><%= $host %></span>
     % end
   </li>
-% for my $channel (@{ $channels }) {
-  % $n = shift @$unread || 0;
+% for my $channel (sort @{ $channels }) {
+  % my $n = shift @$unread || 0;
   <li class="channel <%= is_active($cid, $channel) %>" id="target_<%= as_id $cid, $channel %>" title="<%= $channel %>">
     %= link_to 'channel.view', { target => $channel, cid => $cid }, begin
-      %= $channel
+      <span><%= $channel %></span>
       <span class="badge<%= $n ? '' : ' hide' %>"><%= $n %></span>
     %=end
   </li>
 % }
-% for my $conversation (@{ $conversations }) {
-  % $n = shift @$unread || 0;
+% for my $conversation (sort @{ $conversations }) {
+  % my $n = shift @$unread || 0;
   <li class="conversation <%= is_active($cid, $conversation) %>" id="target_<%= as_id $cid, $conversation %>" title="<%= $conversation %>">
     %= link_to 'channel.view', { target => $conversation, cid => $cid }, begin
-      <%= $conversation %>
-      <span class="badge<%= $n ? '' : ' hide' %>"><%= $n %></span>
+      <span><%= $conversation %></span>
+      <span class="badge badge-important<%= $n ? '' : ' hide' %>"><%= $n %></span>
     %= end
   </li>
 % }
 </ul>
-

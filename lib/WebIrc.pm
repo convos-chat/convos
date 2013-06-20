@@ -67,48 +67,44 @@ Backend functionality.
 =cut
 
 use Mojo::Base 'Mojolicious';
+use File::Spec::Functions qw(catfile tmpdir);
 use WebIrc::Core;
 use WebIrc::Proxy;
 use Mojo::Redis;
 
 =head1 ATTRIBUTES
 
-=head2 redis
+=head2 archive
 
-Holds a L<Mojo::Redis> object.
+Holds a L<WebIrc::Core::Archive> object.
 
 =head2 core
 
 Holds a L<WebIrc::Core> object.
 
-=head2 archive
-
 =head2 proxy
 
-Proxy manager
+Holds a L<WebIrc::Proxy> object.
 
 =cut
 
-has redis => sub {
-  my $self  = shift;
-  my $log   = $self->app->log;
-  my $redis = Mojo::Redis->new(server => $self->config->{redis}, timeout => 600);
-
-  $redis->on(
-    error => sub {
-      my ($redis, $err) = @_;
-      $log->error('[REDIS ERROR] ' . $err);
-    }
-  );
-
-  return $redis;
-};
-has core => sub { WebIrc::Core->new(redis => shift->redis) };
 has archive => sub {
   my $self = shift;
   WebIrc::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
-has proxy => sub { WebIrc::Proxy->new(core => shift->core) };
+
+has core => sub {
+  my $self = shift;
+  my $core = WebIrc::Core->new;
+
+  $core->redis->server($self->redis->server);
+  $core;
+};
+
+has proxy => sub {
+  my $self = shift;
+  WebIrc::Proxy->new(core => $self->core);
+};
 
 =head1 METHODS
 
@@ -121,6 +117,9 @@ This method will run once at server start
 sub startup {
   my $self   = shift;
   my $config = $self->plugin('Config');
+
+  $config->{name} ||= 'Wirc';
+  $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
 
   $self->plugin('Mojolicious::Plugin::UrlWith');
   $self->plugin('WebIrc::Plugin::Helpers');
@@ -138,17 +137,20 @@ sub startup {
   $r->post('/register')->to('user#register');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  $private_r->get('/settings')->to('user#settings')->name('settings');
-  $private_r->post('/add')->to('user#add_connection')->name('connection.add');
-  $private_r->post('/edit/:id')->to('user#edit_connection')->name('connection.edit');
-  $private_r->post('/delete/:id')->to('user#delete_connection')->name('connection.delete');
+  my $settings_r = $private_r->route('/settings')->to(target => $config->{name});
+  $settings_r->get('/')->to('user#settings')->name('settings');
+  $settings_r->get('/:cid', [cid => qr{\d+}])->to('user#settings')->name('connection.edit');
+  $settings_r->post('/:cid', [cid => qr{\d+}])->to('user#edit_connection');
+  $settings_r->post('/add')->to('user#add_connection')->name('connection.add');
+  $settings_r->get('/:cid/delete')->to(template => 'user/delete_connection')->name('connection.delete');
+  $settings_r->post('/:cid/delete')->to('user#delete_connection');
 
   $private_r->websocket('/socket')->to('chat#socket');
 
   $private_r->get('/v1/:target/connection-list')->to('client#connection_list', layout => undef);
   $private_r->get('/v1/:target/history/:offset', [page => qr{\d+}])->to('client#history', layout => undef);
-  $private_r->get('/:cid/*target')->to('client#view')->name('channel.view');
-  $private_r->get('/:cid')->to('client#view')->name('server.view');
+  $private_r->get('/:cid/*target', [cid => qr{\d+}])->to('client#view')->name('channel.view');
+  $private_r->get('/:cid', [cid => qr{\d+}])->to('client#view')->name('server.view');
 
   $self->hook(
     before_dispatch => sub {
@@ -157,8 +159,19 @@ sub startup {
     }
   );
 
-  $self->core->start  unless $ENV{SKIP_CONNECT};
-  $self->proxy->start unless $ENV{DISABLE_PROXY};
+  Mojo::IOLoop->timer(0, sub {
+    $self->_start_backend or return;
+    $self->core->start;
+    $self->proxy->start if $config->{backend}{proxy};
+  });
+}
+
+sub _start_backend {
+  my $self = shift;
+
+  return 0 if $ENV{HYPNOTOAD_APP}; # TODO: Evil to use internal environment variables
+  return 0 if -e $self->config->{backend}{lock_file};
+  return 1;
 }
 
 =head1 COPYRIGHT

@@ -56,8 +56,7 @@ my %COMMANDS; %COMMANDS = (
   help => sub {
     my ($self, $dom) = @_;
     $self->send_partial(
-      'event/wirc_notice',
-      message => "Available Commands:\n" .join(", ", sort keys %COMMANDS),
+      'event/help',
     );
     return;
   }
@@ -113,7 +112,7 @@ sub socket {
 
 sub _handle_socket_data {
   my ($self, $dom) = @_;
-  my $cmd = $dom->text(0);
+  my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $key = "connection:@{[$dom->{cid}]}:to_server";
 
   $self->logf(debug => '[%s] < %s', $key, $cmd);
@@ -125,7 +124,7 @@ sub _handle_socket_data {
       $cmd = ref $irc_cmd eq 'CODE' ? $self->$irc_cmd($dom) : "$irc_cmd $cmd";
     }
     else {
-      $cmd = $self->send_partial('event/wirc_notice', message => 'Unknown command');
+      $cmd = $self->send_partial('event/wirc_notice', message => 'Unknown command. Type /help to see available commands.');
     }
   }
   elsif($dom->{target}) {
@@ -143,12 +142,19 @@ sub _subscribe_to_server_messages {
   my $sub = $self->redis->subscribe("connection:$cid:from_server");
 
   Scalar::Util::weaken($self);
+  $sub->timeout(0);
+  $sub->on(
+    error => sub { $self->finish; }
+  );
   $sub->on(
     message => sub {
       my ($redis, $message) = @_;
-      my $data = $self->format_conversation([$message])->[0];
+
       $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-      $self->send_partial('event/'.$data->{event}, target => '', %$data);
+      $self->format_conversation([$message], sub {
+        my($self, $messages) = @_;
+        $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
+      });
     }
   );
 

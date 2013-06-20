@@ -1,8 +1,8 @@
 <li class="message<%= $highlight ? ' highlight' : '' %>" data-target="<%= as_id $cid, $target %>" data-sender="<%= $nick %>">
-  &lt;<span class="prefix"><%= $nick %></span>&gt;
+  <span class="prefix"><%= $nick %>:</span>
   <span class="content"><%== $message %></span>
-  <span class="timestamp"><%= format_time $timestamp, '%H:%M:%S' %></span>
-  % if(stash('embed')) {
-    <div class="embed"><%==stash('embed')%></div>
-  % }
+  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
+% if(my $embed = stash 'embed') {
+  <div class="embed"><%== $embed %></div>
+% }
 </li>

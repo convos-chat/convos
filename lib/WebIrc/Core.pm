@@ -16,13 +16,31 @@ use constant DEBUG => $ENV{WIRC_DEBUG} // 0;
 
 =head1 ATTRIBUTES
 
+=head2 log
+
+Holds a L<Mojo::Log> object.
+
 =head2 redis
 
 Holds a L<Mojo::Redis> object.
 
 =cut
 
-has redis        => sub { Mojo::Redis->new };
+has log => sub { Mojo::Log->new };
+
+has redis => sub {
+  my $self = shift;
+  my $redis = Mojo::Redis->new(timeout => 0);
+  my $log = $self->log;
+
+  $redis->on(error => sub {
+    my($redis, $error) = @_;
+    $log->error("[CORE:REDIS] $error");
+  });
+
+  $redis;
+};
+
 has _connections => sub { +{} };
 
 =head1 METHODS
@@ -41,27 +59,41 @@ sub start {
     'connections',
     sub {
       my ($redis, $cids) = @_;
-      return unless $cids and @$cids;
+      ref $cids or return $self->log->error("[core] Invalid connections (@_)\n");
       warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
       for my $cid (@$cids) {
-        my $conn = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-        $self->_connections->{$cid} = $conn;
-        $conn->connect(sub { });
+        $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+        $self->_connections->{$cid}->connect;
       }
     }
   );
-  $self->{control} = $self->redis->subscribe("core:control");
+
+  $self->_start_control_channel;
+  $self;
+}
+
+sub _start_control_channel {
+  my $self = shift;
+
+  Scalar::Util::weaken($self);
+  $self->{control} = $self->redis->subscribe('core:control');
+  $self->{control}->timeout(0);
   $self->{control}->on(
     message => sub {
       my ($sub, $raw_msg) = @_;
-      my ($msg, $cid) = split(':', $raw_msg);
-      my $action = 'ctrl_' . $msg;
+      my ($command, $cid) = split /:/, $raw_msg;
+      my $action = "ctrl_$command";
       $self->$action($cid);
     }
   );
-
+  $self->{control}->on(
+    error => sub {
+      my ($sub, $error) = @_;
+      $self->log->warn("[core:control] $error (reconnecting)");
+      $self->_start_control_channel;
+    },
+  );
 }
-
 
 =head2 add_connection
 
@@ -141,7 +173,7 @@ sub update_connection {
     [sadd  => "connection:$cid:channels", @channels],
     sub {
       $self->redis->publish('core:control', "restart:$cid");
-      $self->$cb($cid);
+      $self->$cb($cid, {});
     },
   );
 }
@@ -196,7 +228,7 @@ Start a single connection by connection id.
 sub ctrl_start {
   my ($self, $cid) = @_;
   my $conn = $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-  $conn->connect(sub { });
+  $conn->connect;
 }
 
 =head2 login

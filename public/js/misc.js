@@ -5,6 +5,23 @@
   $.fn.atBottom = function() {
     return this.scrollTop() + this.height() >= $('body').height() - 30;
   };
+  $.fn.disableOuterScroll = function() {
+    return this.bind('mousewheel DOMMouseScroll', function(e) {
+      var scrollTo = null;
+
+      if(e.type == 'mousewheel') {
+        scrollTo = (e.originalEvent.wheelDelta * -1);
+      }
+      else if(e.type == 'DOMMouseScroll') {
+        scrollTo = 40 * e.originalEvent.detail;
+      }
+
+      if(scrollTo) {
+        e.preventDefault();
+        $(this).scrollTop(scrollTo + $(this).scrollTop());
+      }
+    });
+  };
   $.fn.scrollToBottom = function() {
     $('html, body').scrollTop($('body').height());
     return this;
@@ -15,9 +32,31 @@
     args.unshift(base_url);
     return args.join('/');
   };
+  $.fn.passThrough = function() {
+    this.hover(
+        function() { $(this).fadeTo('fast', 0.2); },
+        function() { $(this).fadeTo('fast', 0.93); }
+    );
+    this.each(function() {
+      var self = this;
+
+      $(self).bind('click', function (e) {
+        var tmp = self.style.display || 'block';
+        var under;
+
+        e.preventDefault();
+        self.style.display = 'none';
+        under = document.elementFromPoint(e.clientX, e.clientY); // could also be pageX, pageY..?
+        self.style.display = tmp;
+        if(under) $(under).trigger(e.type);
+      });
+    });
+  };
+
   window.statusIndicator = function(action, text) {
     if(!$status_indicator) {
-      $status_indicator = $('<div class="alert alert-info" id="status_indicator"></div>');
+      $status_indicator = $('<div class="alert alert-info dropdown-menu pull-right" id="status_indicator"></div>');
+      $status_indicator.passThrough();
       $('#container').append($status_indicator.hide());
     }
     if(!action) {
@@ -26,7 +65,7 @@
     else if(text) {
       status_indicator_is_active = true;
       if(action == 'show') {
-        $status_indicator.text(text).show();
+        $status_indicator.text(text).show().addClass('pull-right');
       }
       else {
         $status_indicator.text(text)[action](function() {
@@ -40,6 +79,8 @@
       $status_indicator[action](function() { $status_indicator.text(''); });
     }
   };
+
+  window.isTouchDevice = function() { return !!('ontouchstart'in window); };
 })(jQuery);
 
 (function() {

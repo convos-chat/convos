@@ -11,3 +11,7 @@ MANIFEST*
 *META.*
 /local
 .DS_Store
+/web_irc.production.conf
+/script/hypnotoad.pid
+/log
+*.sublime-*
