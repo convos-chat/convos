@@ -1,14 +1,20 @@
-@import url(http://fonts.googleapis.com/css?family=PT+Sans);
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans);
+@font-face {
+  font-family: 'Hume Mono';
+  src: url('/font/HumeMonoRegular.eot');
+  src: url('/font/HumeMonoRegular.eot?#iefix') format('embedded-opentype'),
+       url('/font/HumeMonoRegular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
 
 @backgroundColor: #fff;
-@fontFamily: 'Droid Sans', Arial, sans-serif;
+@fontFamily: Arial, sans-serif;
 @fontColor: #333;
-@linkColor: #46a;
+@linkColor: #469;
 @fontSize: 14px;
 @bodyGutter: 20px;
 @navHeight: 44px;
-@footerHeight: 100px;
+@footerHeight: 50px;
 @maxWidth: 980px;
 @responsiveWidth: 700px;
 @columnWidth: 8.333333%;
@@ -71,209 +77,103 @@ div.wrapper {
   min-height: 100%;
   height: auto !important;
   height: 100%;
-  margin-footer: -@footerHeight;
+  margin-bottom: -@footerHeight;
 
   div.clear {
-    height: @footerHeight + 40;
+    height: @footerHeight + 20;
     clear: both;
   }
 }
 footer {
   height: @footerHeight;
-  background: #333;
+  background: #fff;
   color: #999;
   clear: both;
-  padding: @bodyGutter;
+  padding: 2px;
+  max-width: @maxWidth;
+  margin: 0 auto;
+
+  form { margin: 0; }
+  input { width: 100%; }
 }
 
 /*
  * Typographi and base CSS
  */
-h1, h2, h3 { font-family: PT Sans; color: #46738d; font-weight: normal; }
-h1 { .font-size-margin(2.4em); }
-h2 { .font-size-margin(1.8em); }
-h3 { .font-size-margin(1.2em); }
-form, p { margin: 1em 0; }
-section { padding-top: 30px; }
-a.facebook, a.appstore, a.twitter {
-  background: url(../image/sprite.png) no-repeat 0 0;
-  text-decoration: none;
-  text-indent: -10000px;
-  height: 34px;
-  width: 34px;
-  display: block;
-  opacity: 0.7;
-  padding-top: 7px;
-  white-space: nowrap;
-}
-a.twitter { background-position: -37px 0; }
-a.appstore { background-position: -72px 0; }
-a.facebook:hover, a.appstore:hover, a.twitter:hover { opacity: 1; text-indent: 37px; }
-.row { max-width: @maxWidth; margin: 50px auto; clear: both; }
-.text-center { text-align: center; }
+h1 a, h3 a { text-decoration: none; }
+h1 { .font-size-margin(2em); }
+img { max-width: 100%; }
+form { margin: 0; }
+.row { max-width: @maxWidth; margin: 0 auto; clear: both; }
 
 /*
  * Form elements
  * TODO: Make it generic
  */
-button, input {
-  padding: 10px;
+input {
+  padding: 6px;
   font-size: 1.3em;
   outline: none;
   .border-radius(3px);
 }
-button {
-  color: #fff;
-  background: #4d90fe;
-  border: 2px solid darken(#4d90fe, 10%);
-}
-button:hover, button:active { background: darken(#4d90fe, 10%); }
 input { border: 2px solid #aaa; width: 290px; }
 input:focus { border: 2px solid darken(#aaa, 15%); }
 
-img { max-width: 100%; }
-
 /*
- * Landing page sections
+ * Chat
  */
-header {
-  background: #f7f7f7 url(../image/mobile-banner.jpg) no-repeat 50% 50%; // TODO: default need to be smaller
-  background-size: cover;
-  height: 500px;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
 
-  .video { height: 500px; }
-  .row { height: 0; padding: 0; }
-  iframe {
-    height: 100%;
-    width: 100%;
-    display: block;
-    text-indent: -10000px;
-  }
-  .logo {
-    background: url('../image/sprite.png') no-repeat 0 -80px;
-    width: 190px;
-    height: 45px;
-    margin-bottom: 5px;
-    text-indent: -10000px;
-    display: block;
-  }
-  .hook {
-    color: #fff;
-    font-size: 18px;
-    position: absolute;
-    top: 40px;
-    padding-left: @bodyGutter;
-    a, span { display: block; }
-  }
-}
 nav {
-  background: #fcfcfc;
-  position: static;
+  background: #fdfdfd;
+  padding: 5px;
+  position: fixed;
   top: 0;
-  overflow: hidden;
+  left: 0;
   width: 100%;
-  .box-shadow(0 4px 4px -2px rgba(150, 150, 150, 0.5));
-  .opacity(0.9);
+  z-index: 1000;
+  .box-shadow(0 4px 4px -2px rgba(180, 180, 180, 0.5));
 
-  ul { max-width: @maxWidth; margin: 0 auto; }
-  a {
+  h1 {
+    max-width: @maxWidth;
+    margin: 0 auto;
+  }
+}
+
+section.messages {
+  li {
     display: block;
-    float: left;
-    padding: 7px;
-    text-decoration: none;
-    color: #777;
-  }
-  a.pull-right { float: right; }
-  a.appstore { display: none; } // TODO: Enable once in appstore
-}
-section.line {
-  h2 { color: #888; }
-  img { .box-shadow(0 1px 1px -2px #ddd); }
-}
-section.sinker {
-  padding: 100px 0;
-  button { padding: 15px; }
-  input {
-    background-color: #f8f8f8;
-    padding: 15px;
-    width: 280px;
-  }
-}
-section.examples {
-  img { margin: 0; padding: 0; border: 1px solid #888; }
-  .big img { margin-left: 2%; width: 96%; }
-  .small img { margin: 0 2% 4% 2%; width: 46%; float: left; }
-}
-section.services {
-  .left, .image, .right { .grid(4); }
-  .image {
-    background: url(../image/iphone-slider.jpg) 20px 0px repeat-x;
-    background-size: cover;
-    line-height: 0px;
-  }
-}
-section.testimonials {
-  padding: 100px 0;
-  .testimonial {
-    padding: @bodyGutter;
-    background: #fdfdfd;
-    .grid(6);
-    .box-shadow(0px 0px 2px rgba(100, 100, 100, 0.5));
-    .border-radius(6px);
+    position: relative;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0ff;
+    overflow: hidden;
 
-    img { float: left; }
-    h2 { margin: 0 0 0 120px; font-size: 1.4em; }
-    p { margin: 5px 0 0 120px; }
-    .stars {
-      background: url(../image/sprite.png) no-repeat 0 -34px;
-      clear: left;
-      text-align: right;
-      padding-top: 5px;
+    img {
+      float: left;
+    }
+    h3 {
+      font-size: 1.2em;
+      color: #467;
+      line-height: 1.2em;
+      margin: 0;
+    }
+    h3, div {
+      margin-left: 50px;
+    }
+    div {
+      font-family: "HumeMonoRegular", monospace;
+    }
+    span.timestamp {
+      position: absolute;
+      top: 2px;
+      right: 0;
+      color: #999;
     }
   }
 }
 
 @media (max-width: (@maxWidth + @bodyGutter)) {
-  .row {
+  footer, nav, .row {
     padding-left: @bodyGutter;
     padding-right: @bodyGutter;
-  }
-}
-
-@media (max-width: @responsiveWidth) {
-  section.services {
-    .image {
-      float: right;
-      width: 257px;
-      overflow: hidden;
-    }
-  }
-}
-
-@media (min-width: @responsiveWidth) {
-  section.sinker input { width: 400px; }
-  section.examples {
-    .big, .small { width: 50%; float: left; }
-  }
-  p.heart {
-    background: url(../image/arrow-left-down.png) 100% 100% no-repeat;
-    padding-bottom: 80px;
-  }
-  p.manual {
-    background: url(../image/arrow-right-up.png) 0 100% no-repeat;
-    padding-bottom: 60px;
-  }
-  h2.phone {
-    margin-top: 40px;
-  }
-}
-
-@media (min-width: (@maxWidth)) {
-  header {
-    background-image: url(../image/top-banner.jpg);
-    .video { width: 100%; height: auto; }
   }
 }

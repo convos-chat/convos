@@ -1,11 +1,19 @@
 % title 'Chat';
-<section class="messages">
-  %= include 'client/conversation'
-</section>
-
+<nav>
+  <h1><%= $target %></h1>
+</nav>
+<div class="wrapper">
+  <section class="messages row">
+    <div>&nbsp;</div><!-- margin-top hack -->
+    %= include 'client/conversation'
+  </section>
+  <div class="clear"></div>
+</div>
+<footer>
 %= form_for 'chat', method => 'post', begin
   %= text_field 'message', placeholder => 'Enter message to reply'
 % end
+</footer>
 
 <!-- div id="connection_list">
   <div class="dropdown-menu pull-right">

@@ -117,7 +117,7 @@ sub view {
       my($delay, $length) = @_;
       my $end = $length > $N_MESSAGES ? $N_MESSAGES : $length;
 
-      $self->redis->zrevrange($key => 0, -$end, $delay->begin);
+      $self->redis->zrevrange($key => -$end, -1, $delay->begin);
     },
     sub {
       my($delay, $conversation) = @_;

@@ -22,9 +22,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   </head>
-  <body class="<%= session('uid') ? 'chat' : '' %>">
-  <div id="wrapper">
+  <body>
     %= content
-  </div>
   </body>
 </html>

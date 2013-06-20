@@ -1,6 +1,11 @@
 <li class="message<%= $highlight ? ' highlight' : '' %>" data-target="<%= as_id $cid, $target %>" data-sender="<%= $nick %>">
-  <span class="prefix"><%= $nick %>:</span>
-  <span class="content"><%== $message %></span>
+% if($nick =~ /marcus/) {
+  %= image 'https://secure.gravatar.com/avatar/35b5b4f201a73b67ecde67db82b55579?s=40', alt => $nick
+% } else {
+  %= image 'https://en.gravatar.com/avatar/806800a3aeddbad6af673dade958933b?s=40', alt => $nick
+% }
+  <h3><%= link_to $nick, $nick %></h3>
+  <div class="content"><%== $message %></div>
   <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>
