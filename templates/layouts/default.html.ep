@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head><title><%= join ' - ', app->config->{name}, title %></title>
+% if($self->app->mode eq 'production') {
+  %= stylesheet '/css/basic.css'
+% } else {
+  <link rel="stylesheet/less" href="<%= url_for('/less/basic.less') %>" type="text/css">
+  %= javascript '/js/less.min.js'
+% }
     %= stylesheet '/css/wirc.css';
     %= javascript '/js/jquery.js';
     %= javascript '/js/jquery.pjax.js';
@@ -17,40 +23,8 @@
     <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   </head>
   <body class="<%= session('uid') ? 'chat' : '' %>">
-  <div id="container">
-  % if(defined stash 'cid') {
-    %= include 'client/navbar';
-  % } else {
-    % unless(session 'uid') {
-    <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <%= link_to app->config->{name}, 'index', class=>'brand'%>
-          <div class="nav-collapse collapse">
-            <ul class="nav main-menu pull-right">
-            % if(session 'uid') {
-              <li><%= link_to 'Chat', 'index' %></li>
-              <li><%= link_to 'Settings', 'settings' %></li>
-              <li><%= link_to 'Logout', 'logout' %></li>
-            % } else {
-              <li><%= link_to 'Login', 'login' %></li>
-              <li><%= link_to 'Register', 'register' %></li>
-            % }
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-    % }
-  % }
-    <div class="container-fluid">
-      %= content
-    </div>
+  <div id="wrapper">
+    %= content
   </div>
   </body>
 </html>

@@ -1,0 +1,279 @@
+@import url(http://fonts.googleapis.com/css?family=PT+Sans);
+@import url(http://fonts.googleapis.com/css?family=Droid+Sans);
+
+@backgroundColor: #fff;
+@fontFamily: 'Droid Sans', Arial, sans-serif;
+@fontColor: #333;
+@linkColor: #46a;
+@fontSize: 14px;
+@bodyGutter: 20px;
+@navHeight: 44px;
+@footerHeight: 100px;
+@maxWidth: 980px;
+@responsiveWidth: 700px;
+@columnWidth: 8.333333%;
+
+/*
+ * Less helpers
+ */
+.box-shadow(@string) { -webkit-box-shadow: @string; -moz-box-shadow: @string; box-shadow: @string; }
+.border-radius(@radius) { -webkit-border-radius: @radius; -moz-border-radius: @radius; border-radius: @radius; }
+.opacity(@opacity) { -moz-opacity: @opacity; -khtml-opacity: @opacity; -webkit-opacity: @opacity; opacity: @opacity; -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opacity*100})"; filter: ~"alpha(opacity=@{opacity*100})"; }
+.font-size-margin(@size) { font-size: @size; margin-top: 1 / @size; margin-bottom: 1 / @size; }
+.grid(@cols:1, @last:0) {
+  @gutter: abs(2% * (@last - 1));
+  @column: @columnWidth - @gutter;
+  width: (@cols * (@column + @gutter) - @gutter);
+  margin-right: @gutter;
+  float: left;
+
+  @media (max-width: @responsiveWidth) {
+    float: none;
+    width: 100%;
+  }
+}
+
+/*
+ * http://html5reset.org + minor modifications
+ */
+html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video, details, summary { margin: 0; padding: 0; border: 0; font-size: 100%; line-height: 1.6em; vertical-align: baseline; background: transparent; }
+article, aside, figure, footer, header, hgroup, nav, section, details, summary { display: block; }
+ul { list-style: none; }
+a { margin: 0; padding: 0; vertical-align: baseline; background: transparent; }
+abbr[title], dfn[title] { border-bottom: 1px dotted #000; cursor: help; }
+table { border-collapse: collapse; border-spacing: 0; }
+th { font-weight: bold; vertical-align: bottom; }
+td { font-weight: normal; vertical-align: top; }
+input, select, button { vertical-align: middle; }
+select, input, textarea { font-size: @fontSize - 1; }
+table { font-size: inherit; font: 100%; }
+.clickable, label, input[type=file], button { cursor: pointer; }
+button, input, select, textarea { margin: 0; }
+button { width: auto; overflow: visible; }
+.ie7 img { -ms-interpolation-mode: bicubic; }
+.clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
+.clearfix:after { clear: both; }
+.clearfix { zoom: 1; }
+* { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+body { background-color: @backgroundColor; font-size: @fontSize; font-family: @fontFamily; }
+body, select, input, textarea { color: @fontColor; }
+a { color: @linkColor; }
+a:hover { color: darken(@linkColor, 20%); }
+a:link { -webkit-tap-highlight-color: darken(@linkColor, 20%); }
+input:-moz-placeholder { color: lighten(@fontColor, 30%); }
+textarea:-moz-placeholder { color: lighten(@fontColor, 30%); }
+
+/*
+ * Footer
+ */
+html, body { height: 100%; }
+div.wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin-footer: -@footerHeight;
+
+  div.clear {
+    height: @footerHeight + 40;
+    clear: both;
+  }
+}
+footer {
+  height: @footerHeight;
+  background: #333;
+  color: #999;
+  clear: both;
+  padding: @bodyGutter;
+}
+
+/*
+ * Typographi and base CSS
+ */
+h1, h2, h3 { font-family: PT Sans; color: #46738d; font-weight: normal; }
+h1 { .font-size-margin(2.4em); }
+h2 { .font-size-margin(1.8em); }
+h3 { .font-size-margin(1.2em); }
+form, p { margin: 1em 0; }
+section { padding-top: 30px; }
+a.facebook, a.appstore, a.twitter {
+  background: url(../image/sprite.png) no-repeat 0 0;
+  text-decoration: none;
+  text-indent: -10000px;
+  height: 34px;
+  width: 34px;
+  display: block;
+  opacity: 0.7;
+  padding-top: 7px;
+  white-space: nowrap;
+}
+a.twitter { background-position: -37px 0; }
+a.appstore { background-position: -72px 0; }
+a.facebook:hover, a.appstore:hover, a.twitter:hover { opacity: 1; text-indent: 37px; }
+.row { max-width: @maxWidth; margin: 50px auto; clear: both; }
+.text-center { text-align: center; }
+
+/*
+ * Form elements
+ * TODO: Make it generic
+ */
+button, input {
+  padding: 10px;
+  font-size: 1.3em;
+  outline: none;
+  .border-radius(3px);
+}
+button {
+  color: #fff;
+  background: #4d90fe;
+  border: 2px solid darken(#4d90fe, 10%);
+}
+button:hover, button:active { background: darken(#4d90fe, 10%); }
+input { border: 2px solid #aaa; width: 290px; }
+input:focus { border: 2px solid darken(#aaa, 15%); }
+
+img { max-width: 100%; }
+
+/*
+ * Landing page sections
+ */
+header {
+  background: #f7f7f7 url(../image/mobile-banner.jpg) no-repeat 50% 50%; // TODO: default need to be smaller
+  background-size: cover;
+  height: 500px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+
+  .video { height: 500px; }
+  .row { height: 0; padding: 0; }
+  iframe {
+    height: 100%;
+    width: 100%;
+    display: block;
+    text-indent: -10000px;
+  }
+  .logo {
+    background: url('../image/sprite.png') no-repeat 0 -80px;
+    width: 190px;
+    height: 45px;
+    margin-bottom: 5px;
+    text-indent: -10000px;
+    display: block;
+  }
+  .hook {
+    color: #fff;
+    font-size: 18px;
+    position: absolute;
+    top: 40px;
+    padding-left: @bodyGutter;
+    a, span { display: block; }
+  }
+}
+nav {
+  background: #fcfcfc;
+  position: static;
+  top: 0;
+  overflow: hidden;
+  width: 100%;
+  .box-shadow(0 4px 4px -2px rgba(150, 150, 150, 0.5));
+  .opacity(0.9);
+
+  ul { max-width: @maxWidth; margin: 0 auto; }
+  a {
+    display: block;
+    float: left;
+    padding: 7px;
+    text-decoration: none;
+    color: #777;
+  }
+  a.pull-right { float: right; }
+  a.appstore { display: none; } // TODO: Enable once in appstore
+}
+section.line {
+  h2 { color: #888; }
+  img { .box-shadow(0 1px 1px -2px #ddd); }
+}
+section.sinker {
+  padding: 100px 0;
+  button { padding: 15px; }
+  input {
+    background-color: #f8f8f8;
+    padding: 15px;
+    width: 280px;
+  }
+}
+section.examples {
+  img { margin: 0; padding: 0; border: 1px solid #888; }
+  .big img { margin-left: 2%; width: 96%; }
+  .small img { margin: 0 2% 4% 2%; width: 46%; float: left; }
+}
+section.services {
+  .left, .image, .right { .grid(4); }
+  .image {
+    background: url(../image/iphone-slider.jpg) 20px 0px repeat-x;
+    background-size: cover;
+    line-height: 0px;
+  }
+}
+section.testimonials {
+  padding: 100px 0;
+  .testimonial {
+    padding: @bodyGutter;
+    background: #fdfdfd;
+    .grid(6);
+    .box-shadow(0px 0px 2px rgba(100, 100, 100, 0.5));
+    .border-radius(6px);
+
+    img { float: left; }
+    h2 { margin: 0 0 0 120px; font-size: 1.4em; }
+    p { margin: 5px 0 0 120px; }
+    .stars {
+      background: url(../image/sprite.png) no-repeat 0 -34px;
+      clear: left;
+      text-align: right;
+      padding-top: 5px;
+    }
+  }
+}
+
+@media (max-width: (@maxWidth + @bodyGutter)) {
+  .row {
+    padding-left: @bodyGutter;
+    padding-right: @bodyGutter;
+  }
+}
+
+@media (max-width: @responsiveWidth) {
+  section.services {
+    .image {
+      float: right;
+      width: 257px;
+      overflow: hidden;
+    }
+  }
+}
+
+@media (min-width: @responsiveWidth) {
+  section.sinker input { width: 400px; }
+  section.examples {
+    .big, .small { width: 50%; float: left; }
+  }
+  p.heart {
+    background: url(../image/arrow-left-down.png) 100% 100% no-repeat;
+    padding-bottom: 80px;
+  }
+  p.manual {
+    background: url(../image/arrow-right-up.png) 0 100% no-repeat;
+    padding-bottom: 60px;
+  }
+  h2.phone {
+    margin-top: 40px;
+  }
+}
+
+@media (min-width: (@maxWidth)) {
+  header {
+    background-image: url(../image/top-banner.jpg);
+    .video { width: 100%; height: auto; }
+  }
+}

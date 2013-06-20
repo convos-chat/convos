@@ -1,5 +1,13 @@
 % title 'Chat';
-<div id="connection_list">
+<section class="messages">
+  %= include 'client/conversation'
+</section>
+
+%= form_for 'chat', method => 'post', begin
+  %= text_field 'message', placeholder => 'Enter message to reply'
+% end
+
+<!-- div id="connection_list">
   <div class="dropdown-menu pull-right">
   % for my $connection (@$connections) {
     %= include 'client/connection_list', %$connection;
@@ -31,5 +39,5 @@
       </div>
     </div>
   </div>
-</div>
+</div -->
 
