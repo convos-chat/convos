@@ -79,7 +79,7 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
-has redis => sub { Mojo::Redis->new };
+has redis => sub { Mojo::Redis->new(timeout => 0); };
 
 =head2 channels
 
@@ -226,7 +226,7 @@ sub connect {
       $self->_irc->user($attrs->{user});
       $self->_irc->connect(sub { $self->$cb; });
       $self->{sub} = $redis->subscribe("connection:$id:to_server");
-      $self->{sub}->timeout(3600);
+      $self->{sub}->timeout(0);
       $self->{sub}->on(
         message => sub {
           my ($sub, $raw_message) = @_;

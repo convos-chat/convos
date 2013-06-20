@@ -30,7 +30,7 @@ has log => sub { Mojo::Log->new };
 
 has redis => sub {
   my $self = shift;
-  my $redis = Mojo::Redis->new;
+  my $redis = Mojo::Redis->new(timeout => 0);
   my $log = $self->log;
 
   $redis->on(error => sub {
