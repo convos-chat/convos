@@ -182,7 +182,7 @@ sub register {
   $app->helper(redis => \&redis);
   $app->helper(as_id => \&as_id);
   $app->helper(id_as => \&id_as);
-  $app->helper(send_partial => sub { $self = shift; $self->send( $self->render(partial => 1, @_).'' ); });
+  $app->helper(send_partial => sub { my $c = shift; $c->send($c->render(@_, partial => 1)->to_string); });
   $app->helper(
     is_active => sub {
       my ($c, $id, $target) = @_;
