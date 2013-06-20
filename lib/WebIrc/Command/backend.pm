@@ -17,6 +17,8 @@ creating the lock file.
 
 use Mojo::Base 'Mojolicious::Command';
 
+our @SIGNALS = qw/ HUP INT TERM /;
+
 =head1 ATTRIBUTES
 
 =head2 description
@@ -87,7 +89,7 @@ sub _lock {
   my $self = shift;
   my $lock_file = $self->app->config->{backend}{lock_file};
 
-  $SIG{INT} = $SIG{TERM} = sub { $self->_term; exit 0 };
+  $SIG{$_} = sub { $self->_term; exit 0 } for @SIGNALS;
 
   open my $LOCK, '>', $lock_file or die "Create $lock_file: $!";
   print $LOCK $$;
