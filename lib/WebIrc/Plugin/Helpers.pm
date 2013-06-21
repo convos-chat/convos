@@ -102,8 +102,6 @@ sub format_conversation {
     my($message, $url) = @_;
     my $cb = $delay->begin;
 
-    $message->{embed} = '';
-
     if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
       $message->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
       $cb->();
@@ -121,6 +119,8 @@ sub format_conversation {
 
   for(@$conversation) {
     my $message = $JSON->decode($_);
+
+    $message->{embed} ||= '';
 
     if(not ref $message) {
       $c->logf(debug => "Unable to parse raw message: $_");
