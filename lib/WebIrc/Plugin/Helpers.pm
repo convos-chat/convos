@@ -120,7 +120,7 @@ sub format_conversation {
   for(@$conversation) {
     my $message = $JSON->decode($_);
 
-    $message->{embed} ||= '';
+    $message->{embed} = '';
 
     if(not ref $message) {
       $c->logf(debug => "Unable to parse raw message: $_");
