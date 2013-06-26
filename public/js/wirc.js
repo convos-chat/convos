@@ -161,6 +161,7 @@
           return false;
         });
         if($(window).width() > 768) $('#nick_list').show();
+        methods.sendData('/topic');
       }
       else {
         $('#nick_list').hide();
@@ -168,7 +169,6 @@
 
       history_offset = $conversation.attr('data-offset');
       methods.unread('init');
-      methods.sendData('/topic');
 
       if($target) {
         conversation_name = $target.children('span:first').text();
