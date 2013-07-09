@@ -1,51 +1,22 @@
 % title 'Chat';
 <nav>
-  <h1><%= $target %></h1>
+  % for my $conversation (@$conversations) {
+    %= link_to 'channel.view' => $conversation, class => $conversation->{current} ? 'current' : 'conversation', begin
+      %= $conversation->{target}
+    % end
+  % }
+  %= link_to 'Conversations', 'conversation_list', class => 'conversation-list'
+  %= link_to 'Settings', 'settings', class => 'settings'
 </nav>
 <div class="wrapper">
   <section class="messages row">
     <div>&nbsp;</div><!-- margin-top hack -->
-    %= include 'client/conversation'
+    %= include 'client/conversation', class => 'more'
   </section>
   <div class="clear"></div>
 </div>
 <footer>
 %= form_for 'chat', method => 'post', begin
-  %= text_field 'message', placeholder => 'Enter message to reply'
+  %= text_field 'message', placeholder => "What's on your mind $nick?"
 % end
 </footer>
-
-<!-- div id="connection_list">
-  <div class="dropdown-menu pull-right">
-  % for my $connection (@$connections) {
-    %= include 'client/connection_list', %$connection;
-  % }
-  </div>
-</div>
-
-<div id="messages" class="row-fluid">
-  <div class="span10">
-    %= include 'client/conversation'
-  </div>
-</div>
-
-<div id="nick_list" class="row-fluid">
-  <ul class="nav nav-list">
-  % for my $nick (sort @$nicks) {
-    <li><%= link_to $nick, 'index' %></li>
-  % }
-  </ul>
-</div>
-
-<div id="chat_input" class="navbar navbar-inverse navbar-fixed-bottom">
-  <div class="navbar-inner">
-    <div class="row-fluid">
-      <div class="span12">
-        <form class="navbar-form" method="post">
-          <input type="text" class="span12" placeholder="Enter message to reply">
-        </form>
-      </div>
-    </div>
-  </div>
-</div -->
-

@@ -1,5 +1,5 @@
 <li class="message<%= $highlight ? ' highlight' : '' %>" data-target="<%= as_id $cid, $target %>" data-sender="<%= $nick %>">
-% if($nick =~ /marcus/) {
+% if($nick =~ /jhthorsen/) {
   %= image 'https://secure.gravatar.com/avatar/35b5b4f201a73b67ecde67db82b55579?s=40', alt => $nick
 % } else {
   %= image 'https://en.gravatar.com/avatar/806800a3aeddbad6af673dade958933b?s=40', alt => $nick

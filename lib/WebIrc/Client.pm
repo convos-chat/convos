@@ -77,41 +77,22 @@ sub view {
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-      $self->redis->smembers("user:$uid:connections", $delay->begin);
+      $self->redis->hgetall("connection:$cid", $delay->begin);
+      $self->redis->lrange("user:$uid:conversations", 0, -1, $delay->begin);
       $self->redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
-    },
-    sub {
-      my($delay, $cids) = @_;
-
-      $self->stash(cids => $cids);
-      $self->redis->execute(
-        (map { [ hmget => "connection:$_" => qw/ nick host / ] } @$cids),
-        $delay->begin,
-      );
-    },
-    sub {
-      my($delay, @connections) = @_;
       $self->redis->del($target ? "connection:$cid:$target:unread" : "connection:$cid:unread");
-      $self->_fetch_conversation_lists(
-        $delay,
-        map { +{ cid => shift @{ $self->stash('cids') }, host => $_->[1], nick => $_->[0] } } @connections
-      );
     },
     sub {
-      my($delay, @connections) = @_;
-      my($current) = grep { $_->{cid} == $cid } @connections;
-      my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
+      my($delay, $connection, $conversations) = @_;
 
-      $current_nick = $current->{nick} || '';
-
-      $self->stash(
-        connections => [ sort { $a->{host} cmp $b->{host} } @connections ],
-        cid => $cid,
-        target => $target,
-        nick => $current_nick,
-      );
-
+      $self->stash(%$connection, conversations => $conversations);
       $self->redis->zcard($key, $delay->begin);
+
+      for my $conversation (@$conversations) {
+        $conversation =~ /^(\d+):(.*)/;
+        my $current = ($1 eq $cid and $target eq $2) ? 1 : 0;
+        $conversation = { cid => $1, target => $2, current => $current };
+      }
     },
     sub {
       my($delay, $length) = @_;
@@ -121,6 +102,7 @@ sub view {
     },
     sub {
       my($delay, $conversation) = @_;
+
       $self->format_conversation($conversation, $delay->begin);
     },
     sub {
@@ -128,16 +110,6 @@ sub view {
 
       $self->stash(conversation => $conversation);
 
-      if($target) {
-        $self->redis->smembers("connection:$cid:$target:nicks", $delay->begin);
-      }
-      else {
-        $delay->begin->(undef, []);
-      }
-    },
-    sub {
-      my($delay, $nicks) = @_;
-      $self->stash(nicks => [$current_nick, grep { $_ ne $current_nick } @{ $nicks || [] } ]); # make sure "my nick" is part of the nicks list
       return $self->render('client/conversation', layout => undef) if $self->req->is_xhr;
       return $self->render;
     },

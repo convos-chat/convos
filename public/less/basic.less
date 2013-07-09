@@ -15,7 +15,6 @@
 @bodyGutter: 20px;
 @navHeight: 44px;
 @footerHeight: 50px;
-@maxWidth: 980px;
 @responsiveWidth: 700px;
 @columnWidth: 8.333333%;
 
@@ -89,9 +88,7 @@ footer {
   background: #fff;
   color: #999;
   clear: both;
-  padding: 2px;
-  max-width: @maxWidth;
-  margin: 0 auto;
+  padding: 2px @bodyGutter;
 
   form { margin: 0; }
   input { width: 100%; }
@@ -104,7 +101,7 @@ h1 a, h3 a { text-decoration: none; }
 h1 { .font-size-margin(2em); }
 img { max-width: 100%; }
 form { margin: 0; }
-.row { max-width: @maxWidth; margin: 0 auto; clear: both; }
+.row { padding: 0 @bodyGutter; clear: both; }
 
 /*
  * Form elements
@@ -125,21 +122,46 @@ input:focus { border: 2px solid darken(#aaa, 15%); }
 
 nav {
   background: #fdfdfd;
-  padding: 5px;
   position: fixed;
+  padding: 0 @bodyGutter;
   top: 0;
   left: 0;
   width: 100%;
+  height: 48px;
   z-index: 1000;
+  overflow: hidden;
   .box-shadow(0 4px 4px -2px rgba(180, 180, 180, 0.5));
 
-  h1 {
-    max-width: @maxWidth;
-    margin: 0 auto;
+  a {
+    color: #000;
+    text-decoration: none;
+    padding: 13px 3px;
+    margin-left: -1px;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    display: block;
+    float: left;
   }
+  a.conversation { color: #666; }
+  a.current { font-size: 28px; border: 0; padding-right: 10px; }
+  a.conversation-list, a.settings {
+    background: #fff url(../image/sprite.png) no-repeat 0 0;
+    width: 36px;
+    text-indent: -10000px;
+    position: absolute;
+    float: none;
+    right: 20px;
+  }
+  a.conversation-list {
+    background-position: -36px 0;
+    margin-right: 35px;
+    .box-shadow(-14px 0px 10px rgba(253, 253, 253, 0.9));
+  }
+  a:hover { color: #000; background-color: darken(#fff, 5%); }
 }
 
 section.messages {
+  margin-top: 40px;
   li {
     display: block;
     position: relative;
@@ -151,7 +173,7 @@ section.messages {
       float: left;
     }
     h3 {
-      font-size: 1.2em;
+      font-size: 1em;
       color: #467;
       line-height: 1.2em;
       margin: 0;
@@ -171,9 +193,13 @@ section.messages {
   }
 }
 
-@media (max-width: (@maxWidth + @bodyGutter)) {
-  footer, nav, .row {
-    padding-left: @bodyGutter;
-    padding-right: @bodyGutter;
+@media (max-width: @responsiveWidth) {
+  footer, nav, .row { padding: 0; }
+  nav {
+    height: 40px;
+    a { padding: 9px 3px; }
+    a.conversation-list, a.settings { right: 0; }
+    a.conversation-list { background-position: -36px -4px; }
+    a.settings { background-position: 0 -4px; }
   }
 }
