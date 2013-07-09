@@ -48,7 +48,7 @@ sub login {
           if (@$conn) {
             return $self->redirect_to('index');
           }
-          $self->redirect_to('/settings');
+          $self->redirect_to('settings');
         }
       );
     },
@@ -67,7 +67,7 @@ sub register {
 
   if ($self->session('uid')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
-    $self->redirect_to('/settings');
+    $self->redirect_to('settings');
     return;
   }
 
@@ -121,7 +121,7 @@ sub register {
     },
     sub {
       my ($delay) = @_;
-      $self->redirect_to('/settings');
+      $self->redirect_to('settings');
     }
   );
 }
@@ -179,6 +179,7 @@ Used to retrieve, save and update connection information.
 sub settings {
   my $self   = shift->render_later;
   my $uid    = $self->session('uid');
+  my $cid    = $self->stash('cid');
   my (@actions, $cids, @connections);
 
   # cid is just to trick layouts/default.html.ep
@@ -200,20 +201,25 @@ sub settings {
     },
     sub {    # convert connections to data structures
       my $delay = shift;
+      my $current;
+
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
+
       for (my $i = 0; $i < @$cids; $i++) {
         my $info = $_[$i];
+        $cid //= $cids->[$i];
         $info->{cid} = $cids->[$i];
-        $info->{channels} = join(' ', sort @{$_[@$cids + $i]});
+        $info->{channels} = join ' ', sort @{ $_[@$cids + $i] };
+        $current = $info if $info->{cid} eq $cid;
         push @connections, $info;
       }
-      push @connections, {cid => 0, %{$self->app->config->{'default_connection'}}, nick => $self->session('login')};
-      $self->stash->{cid} //= $connections[0]{cid};
+
+      $current ||= $self->app->config->{default_connection};
+      $self->stash(cid => $cid, current => $current);
       $self->render;
     },
   );
 }
-
 
 =head2 add_connection
 

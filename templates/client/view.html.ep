@@ -14,7 +14,7 @@
 
 %= include 'client/conversation_list'
 
-<div class="wrapper">
+<div class="wrapper with-fixed-navbar">
   <section class="messages row">
     <div>&nbsp;</div><!-- margin-top hack -->
     %= include 'client/conversation', class => 'more'

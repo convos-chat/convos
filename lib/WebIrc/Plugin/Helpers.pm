@@ -74,7 +74,7 @@ stash hash C<errors>, using C<$name> as key.
 sub form_block {
   my $content = pop;
   my ($c, $field, %args) = @_;
-  my $error = $c->stash('errors')->{$field} // '';
+  my $error = $c->stash->{errors}{$field} // '';
   my $classes = $args{class} ||= [];
 
   push @$classes, 'error' if $error;

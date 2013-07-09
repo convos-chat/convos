@@ -92,8 +92,9 @@ footer {
   clear: both;
   padding: 2px @bodyGutter;
 
-  form { margin: 0; }
-  input { width: 100%; }
+  form {
+    input { width: 100%; padding: 6px; font-size: 1.3em; }
+  }
 }
 
 /*
@@ -101,27 +102,52 @@ footer {
  */
 h1 a, h3 a { text-decoration: none; }
 h1 { .font-size-margin(2em); }
+h2 { .font-size-margin(1.6em); }
+h3 { .font-size-margin(1.2em); }
 img { max-width: 100%; }
-form { margin: 0; }
+p { margin: 1em 0; }
 .row { padding: 0 @bodyGutter; clear: both; }
+.question {
+  background: #def;
+  color: #158;
+  padding: 1em;
+  border: 1px solid #bde;
+  .border-radius(3px);
+}
 
 /*
  * Form elements
  * TODO: Make it generic
  */
-input {
-  padding: 6px;
-  font-size: 1.3em;
-  outline: none;
-  .border-radius(3px);
+form {
+  margin: 0;
+  label { display: block; margin-top: 4px; }
+  input {
+    padding: 4px;
+    font-size: 1.2em;
+    outline: none;
+    border: 2px solid #aaa;
+    width: 290px;
+    .border-radius(3px);
+  }
+  input:focus { border: 2px solid darken(#aaa, 15%); }
+  div.actions {
+    margin-top: 2em;
+    clear: left;
+    border-top: 1px solid #ddd;
+    padding: 0.5em 0;
+  }
+  p.help {
+    font-size: 0.9em;
+    color: #555;
+    display: inline;
+    margin: 0.3em;
+  }
 }
-input { border: 2px solid #aaa; width: 290px; }
-input:focus { border: 2px solid darken(#aaa, 15%); }
 
 /*
  * Chat
  */
-
 nav {
   background: #fdfdfd;
   position: fixed;
@@ -161,7 +187,7 @@ nav {
     b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
   }
   a.conversation-list-button.alert {
-    background-position: -72px 0;
+    background-position: -(@navBarIconWidth * 2) 0;
     b { color: #b22; }
   }
   a.active, a:hover { color: #000; background-color: darken(#fff, 5%); }
@@ -185,7 +211,7 @@ div.conversation-list {
 }
 
 section.messages {
-  margin-top: 40px;
+  padding-top: 45px;
   li {
     display: block;
     position: relative;
@@ -217,13 +243,25 @@ section.messages {
   }
 }
 
+/*
+ * Settings
+ */
+ .settings {
+  padding-top: 50px;
+  h2 select { font-size: 18px; font-weight: bold; }
+ }
+
 @media (max-width: @responsiveWidth) {
   footer, nav, .row { padding: 0; }
   nav {
     height: 40px;
     a { padding: 9px 3px; }
     a.conversation-list-button, a.settings-button { right: 0; }
-    a.conversation-list-button { background-position: @navBarIconWidth -4px; }
+    a.conversation-list-button { background-position: -@navBarIconWidth -4px; }
+    a.conversation-list-button.alert { background-position: -(@navBarIconWidth * 2) -4px; }
     a.settings-button { background-position: 0 -4px; }
+  }
+  form {
+    p.help { display: block; }
   }
 }
