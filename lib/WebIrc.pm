@@ -147,7 +147,7 @@ sub startup {
 
   $private_r->websocket('/socket')->to('chat#socket');
 
-  $private_r->get('/v1/:target/connection-list')->to('client#connection_list', layout => undef);
+  $private_r->get('/v1/conversation-list')->to('client#conversation_list', layout => undef)->name('conversation_list');
   $private_r->get('/v1/:target/history/:offset', [page => qr{\d+}])->to('client#history', layout => undef);
   $private_r->get('/:cid/*target', [cid => qr{\d+}])->to('client#view')->name('channel.view');
   $private_r->get('/:cid', [cid => qr{\d+}])->to('client#view')->name('server.view');

@@ -78,51 +78,20 @@ sub view {
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-      $redis->zrevrangebyscore("user:$uid:important_conversations", '+inf', '-inf', 'WITHSCORES', $delay->begin);
-    },
-    sub {
-      my($delay, $important_conversations) = @_;
-      my $n_notifications = 0;
-      my $i = 0;
-
-      while($i < @$important_conversations) {
-        my($score) = splice @$important_conversations, ($i + 1), 1;
-        $n_notifications += $score;
-        $important_conversations->[$i] =~ /^(\d+):(.*)/;
-        $important_conversations->[$i] = {
-          cid => $1,
-          id => $important_conversations->[$i],
-          target => $2,
-          score => $score,
-        };
-        $i++;
-      }
-
-      $self->stash(
-        important_conversations => $important_conversations,
-        n_notifications => $n_notifications,
-      );
 
       $redis->hgetall("connection:$cid", $delay->begin);
-      $redis->lrange("user:$uid:conversations", 0, -1, $delay->begin);
-      $redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
-      $redis->del($target ? "connection:$cid:$target:unread" : "connection:$cid:unread");
-    },
-    sub {
-      my($delay, $connection, $conversations) = @_;
-
-      $self->stash(%$connection, conversations => $conversations);
       $redis->zcard($key, $delay->begin);
-
-      for my $cid_target (@$conversations) {
-        $cid_target =~ /^(\d+):(.*)/;
-        $cid_target = { cid => $1, id => $cid_target, target => $2 };
-      }
+      $redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
+      $redis->zrem("user:$uid:important_conversations", "$cid:$target");
+      $redis->lrem("user:$uid:conversations", 0, "$cid:$target");
+      $redis->lpush("user:$uid:conversations", "$cid:$target");
+      $self->_conversation_list($delay->begin);
     },
     sub {
-      my($delay, $length) = @_;
+      my($delay, $connection, $length) = @_;
       my $end = $length > $N_MESSAGES ? $N_MESSAGES : $length;
 
+      $self->stash(%$connection);
       $redis->zrevrange($key => -$end, -1, $delay->begin);
     },
     sub {
@@ -143,38 +112,23 @@ sub view {
   );
 }
 
-=head2 connection_list
+=head2 conversation_list
 
 Will render the connection list for a given connection id.
 
 =cut
 
-sub connection_list {
+sub conversation_list {
   my $self = shift->render_later;
-  my($cid, $target) = $self->id_as($self->stash('target'));
 
-  $target ||= '';
-  $self->stash(target => $target, cid => $cid);
   Mojo::IOLoop->delay(
-    $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-      $self->redis->hmget("connection:$cid" => qw/ nick host /, $delay->begin);
+      $self->_conversation_list($delay->begin);
     },
     sub {
-      my($delay, $connection) = @_;
-      $self->_fetch_conversation_lists(
-        $delay,
-        {
-          cid => $cid,
-          host => $connection->[1],
-          nick => $connection->[0],
-        },
-      );
-    },
-    sub {
-      my($delay, $connection) = @_;
-      $self->render('client/connection_list', %$connection);
+      my($delay) = @_;
+      $self->render('client/conversation_list');
     },
   );
 }
@@ -231,32 +185,70 @@ sub _check_if_uid_own_cid {
   },
 }
 
-sub _fetch_conversation_lists {
-  my($self, $delay, @connections) = @_;
+sub _conversation_list {
+  my($self, $cb) = @_;
+  my $redis = $self->redis;
+  my $uid = $self->session('uid');
 
-  for my $info (@connections) {
-    my $cid = $info->{cid};
-    my $cb = $delay->begin;
-    $self->redis->execute(
-      [ smembers => "connection:$cid:channels" ],
-      [ smembers => "connection:$cid:conversations" ],
-      sub {
-        my ($redis, $channels, $conversations) = @_;
-        my @unread = map { [get => "connection:$cid:$_:unread"] } sort(@$channels), sort(@$conversations);
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $redis->smembers("user:$uid:connections", $delay->begin);
+    },
+    sub {
+      my($delay, $cids) = @_;
+      $self->stash(cids => $cids);
+      $redis->execute((map { [ hget => "connection:$_", "host" ] } @$cids), $delay->begin);
+    },
+    sub {
+      my($delay, @hosts) = @_;
+      my $cids = $self->stash('cids');
+      $self->stash(servers => { map { $_ => shift @hosts || '' } @$cids });
+      $redis->zrevrangebyscore("user:$uid:important_conversations", '+inf', '-inf', 'WITHSCORES', $delay->begin);
+    },
+    sub {
+      my($delay, $important_conversations) = @_;
+      my $n_notifications = 0;
+      my $i = 0;
 
-        $info->{channels} = $channels;
-        $info->{conversations} = $conversations;
-        $info->{unread} = [];
+      while($i < @$important_conversations) {
+        my($score) = splice @$important_conversations, ($i + 1), 1;
+        $n_notifications += $score;
+        $important_conversations->[$i] =~ /^(\d+):(.*)/;
+        $important_conversations->[$i] = {
+          cid => $1,
+          id => $important_conversations->[$i],
+          target => $2,
+          score => $score,
+        };
+        $i++;
+      }
 
-        return $cb->(undef, $info) unless @unread;
-        return $redis->execute(@unread, sub {
-          my $redis = shift;
-          push @{ $info->{unread} }, @_;
-          $cb->(undef, $info);
-        });
-      },
-    );
-  }
+      $self->stash(
+        important_conversations => $important_conversations,
+        n_notifications => $n_notifications,
+      );
+
+      $redis->lrange("user:$uid:conversations", 0, -1, $delay->begin);
+    },
+    sub {
+      my($delay, $conversations) = @_;
+      my $i = 0;
+
+      for my $item (@$conversations) {
+        $item =~ /^(\d+):(.*)/;
+        $item = { cid => $1, id => $item, target => $2 };
+        $item->{title}
+          = $i++                    ? "View conversation with $item->{target}"
+          : $item->{target} =~ /^#/ ? "(Topic is not loaded)"
+          :                           "Private conversation"
+          ;
+      }
+
+      $self->stash(conversations => $conversations);
+      $cb->();
+    },
+  );
 }
 
 =head1 COPYRIGHT

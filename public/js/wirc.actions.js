@@ -1,14 +1,14 @@
 ;(function($) {
 
-  var toggleConversationList = function() {
-    $('div.conversation-list').toggle();
-    $('a.conversation-list-button').toggleClass('active');
+  var toggleConversationList = function(e) {
+    $('.conversation-list').toggle();
+    $('.conversation-list-button').toggleClass('active');
     $(document).unbind('click', toggleConversationList);
 
-    if($('div.conversation-list').is(':visible'))
+    if($('.conversation-list').is(':visible'))
       $(document).one('click', toggleConversationList);
 
-    return false;
+    return $(e.target).closest('.conversation-list, .settings-button').length ? true : false;
   };
 
   $(document).ready(function() {
