@@ -1,13 +1,44 @@
 % title 'Chat';
+% my $i = 0;
+% my %displayed = ($conversations->[0]{id} => 1);
 <nav>
   % for my $conversation (@$conversations) {
-    %= link_to 'channel.view' => $conversation, class => $conversation->{current} ? 'current' : 'conversation', begin
+    % my $title = $i ? "View conversation with $conversation->{target}" : "(Topic is not loaded)";
+    %= link_to 'channel.view' => $conversation, title => $title, class => $i++ ? 'conversation' : 'current', begin
       %= $conversation->{target}
     % end
   % }
-  %= link_to 'Conversations', 'conversation_list', class => 'conversation-list'
-  %= link_to 'Settings', 'settings', class => 'settings'
+  %= link_to 'conversation_list', title => 'List conversations', class => $n_notifications ? 'alert conversation-list-button' : 'conversation-list-button', begin
+    <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
+  % end
+  %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings-button'
 </nav>
+
+<div class="conversation-list">
+  <ul>
+    % for my $conversation (@$important_conversations) {
+      % $displayed{$conversation->{id}} = 1;
+    <li class="important">
+      %= link_to 'channel.view' => $conversation, begin
+        %= $conversation->{target}
+        <small>(<%= $conversation->{score} %>)</small>
+      % end
+    </li>
+    % }
+    % if(@$important_conversations) {
+    <li class="separator">&nbsp;</li>
+    % }
+    % for my $conversation (@$conversations) {
+      % next if $displayed{$conversation->{id}};
+    <li>
+      %= link_to 'channel.view' => $conversation, title => "View conversation with $conversation->{target}", class => $i++ ? 'conversation' : 'current', begin
+        %= $conversation->{target}
+      % end
+    </li>
+    % }
+  </ul>
+</div>
+
 <div class="wrapper">
   <section class="messages row">
     <div>&nbsp;</div><!-- margin-top hack -->

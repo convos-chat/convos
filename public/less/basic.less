@@ -17,6 +17,7 @@
 @footerHeight: 50px;
 @responsiveWidth: 700px;
 @columnWidth: 8.333333%;
+@navBarIconWidth: 36px;
 
 /*
  * Less helpers
@@ -41,7 +42,7 @@
 /*
  * http://html5reset.org + minor modifications
  */
-html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video, details, summary { margin: 0; padding: 0; border: 0; font-size: 100%; line-height: 1.6em; vertical-align: baseline; background: transparent; }
+html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video, details, summary { margin: 0; padding: 0; border: 0; font-size: 100%; line-height: 1.6em; vertical-align: baseline; background: transparent; }
 article, aside, figure, footer, header, hgroup, nav, section, details, summary { display: block; }
 ul { list-style: none; }
 a { margin: 0; padding: 0; vertical-align: baseline; background: transparent; }
@@ -67,6 +68,7 @@ a:hover { color: darken(@linkColor, 20%); }
 a:link { -webkit-tap-highlight-color: darken(@linkColor, 20%); }
 input:-moz-placeholder { color: lighten(@fontColor, 30%); }
 textarea:-moz-placeholder { color: lighten(@fontColor, 30%); }
+li.separator { background: #eee; height: 1px; overflow: hidden; }
 
 /*
  * Footer
@@ -144,19 +146,41 @@ nav {
   }
   a.conversation { color: #666; }
   a.current { font-size: 28px; border: 0; padding-right: 10px; }
-  a.conversation-list, a.settings {
+  a.conversation-list-button, a.settings-button {
     background: #fff url(../image/sprite.png) no-repeat 0 0;
-    width: 36px;
-    text-indent: -10000px;
+    width: @navBarIconWidth;
     position: absolute;
     float: none;
     right: 20px;
   }
-  a.conversation-list {
-    background-position: -36px 0;
+  a.settings-button { text-indent: -10000px; }
+  a.conversation-list-button {
+    background-position: -@navBarIconWidth 0;
     margin-right: 35px;
     .box-shadow(-14px 0px 10px rgba(253, 253, 253, 0.9));
+    b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
   }
+  a.conversation-list-button.alert {
+    background-position: -72px 0;
+    b { color: #b22; }
+  }
+  a.active, a:hover { color: #000; background-color: darken(#fff, 5%); }
+}
+
+div.conversation-list {
+  background: darken(#fdfdfd, 1%);
+  position: fixed;
+  top: 44px;
+  right: 6px;
+  width: 200px;
+  z-index: 1001;
+  display: none;
+  overflow: hidden;
+  .box-shadow(0 0 1px 1px rgba(180, 180, 180, 0.5));
+
+  a { color: #000; text-decoration: none; padding: 4px; display: block; }
+  li.important a { color: #900; }
+  li.important small { float: right; }
   a:hover { color: #000; background-color: darken(#fff, 5%); }
 }
 
@@ -198,8 +222,8 @@ section.messages {
   nav {
     height: 40px;
     a { padding: 9px 3px; }
-    a.conversation-list, a.settings { right: 0; }
-    a.conversation-list { background-position: -36px -4px; }
-    a.settings { background-position: 0 -4px; }
+    a.conversation-list-button, a.settings-button { right: 0; }
+    a.conversation-list-button { background-position: @navBarIconWidth -4px; }
+    a.settings-button { background-position: 0 -4px; }
   }
 }

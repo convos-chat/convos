@@ -67,6 +67,7 @@ Used to render the main IRC client view.
 
 sub view {
   my $self   = shift->render_later;
+  my $redis  = $self->redis;
   my $uid    = $self->session('uid');
   my $cid    = $self->stash('cid');
   my $target = $self->stash('target') || '';
@@ -77,28 +78,52 @@ sub view {
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-      $self->redis->hgetall("connection:$cid", $delay->begin);
-      $self->redis->lrange("user:$uid:conversations", 0, -1, $delay->begin);
-      $self->redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
-      $self->redis->del($target ? "connection:$cid:$target:unread" : "connection:$cid:unread");
+      $redis->zrevrangebyscore("user:$uid:important_conversations", '+inf', '-inf', 'WITHSCORES', $delay->begin);
+    },
+    sub {
+      my($delay, $important_conversations) = @_;
+      my $n_notifications = 0;
+      my $i = 0;
+
+      while($i < @$important_conversations) {
+        my($score) = splice @$important_conversations, ($i + 1), 1;
+        $n_notifications += $score;
+        $important_conversations->[$i] =~ /^(\d+):(.*)/;
+        $important_conversations->[$i] = {
+          cid => $1,
+          id => $important_conversations->[$i],
+          target => $2,
+          score => $score,
+        };
+        $i++;
+      }
+
+      $self->stash(
+        important_conversations => $important_conversations,
+        n_notifications => $n_notifications,
+      );
+
+      $redis->hgetall("connection:$cid", $delay->begin);
+      $redis->lrange("user:$uid:conversations", 0, -1, $delay->begin);
+      $redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
+      $redis->del($target ? "connection:$cid:$target:unread" : "connection:$cid:unread");
     },
     sub {
       my($delay, $connection, $conversations) = @_;
 
       $self->stash(%$connection, conversations => $conversations);
-      $self->redis->zcard($key, $delay->begin);
+      $redis->zcard($key, $delay->begin);
 
-      for my $conversation (@$conversations) {
-        $conversation =~ /^(\d+):(.*)/;
-        my $current = ($1 eq $cid and $target eq $2) ? 1 : 0;
-        $conversation = { cid => $1, target => $2, current => $current };
+      for my $cid_target (@$conversations) {
+        $cid_target =~ /^(\d+):(.*)/;
+        $cid_target = { cid => $1, id => $cid_target, target => $2 };
       }
     },
     sub {
       my($delay, $length) = @_;
       my $end = $length > $N_MESSAGES ? $N_MESSAGES : $length;
 
-      $self->redis->zrevrange($key => -$end, -1, $delay->begin);
+      $redis->zrevrange($key => -$end, -1, $delay->begin);
     },
     sub {
       my($delay, $conversation) = @_;
@@ -108,7 +133,9 @@ sub view {
     sub {
       my($delay, $conversation) = @_;
 
-      $self->stash(conversation => $conversation);
+      $self->stash(
+        conversation => $conversation,
+      );
 
       return $self->render('client/conversation', layout => undef) if $self->req->is_xhr;
       return $self->render;

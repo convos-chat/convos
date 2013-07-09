@@ -1,23 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head><title><%= join ' - ', app->config->{name}, title %></title>
-% if($self->app->mode eq 'production') {
-  %= stylesheet '/css/basic.css'
-% } else {
-  <link rel="stylesheet/less" href="<%= url_for('/less/basic.less') %>" type="text/css">
-  %= javascript '/js/less.min.js'
-% }
-    %= stylesheet '/css/wirc.css';
+  % if($self->app->mode eq 'production') {
+    %= stylesheet '/css/basic.css'
+  % } else {
+    <link rel="stylesheet/less" href="<%= url_for('/less/basic.less') %>" type="text/css">
+    %= javascript '/js/less.min.js'
+  % }
     %= javascript '/js/jquery.js';
     %= javascript '/js/jquery.pjax.js';
     %= javascript '/js/jquery.hotkeys.js';
-    %= javascript '/js/jquery.fastclick.js';
     %= javascript '/js/ws-reconnecting.js';
-    %= javascript '/js/jquery.cj-swipe.js';
-    %= javascript '/js/misc.js';
-    %= javascript '/js/notifier.js';
-    %= javascript '/js/wirc.chat.input.js';
-    %= javascript '/js/wirc.js';
+    %= javascript '/js/wirc.actions.js';
     <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent"/>
