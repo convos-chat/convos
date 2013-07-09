@@ -115,7 +115,7 @@ my @OTHER_EVENTS              = qw/
 
 has _irc => sub {
   my $self = shift;
-  my $irc  = Mojo::IRC->new;
+  my $irc  = Mojo::IRC->new(debug_key => $self->id);
 
   Scalar::Util::weaken($self);
   $irc->register_default_event_handlers;

@@ -1,7 +1,5 @@
 package Mojo::IRC;
 
-no warnings "utf8";
-
 =head1 NAME
 
 Mojo::IRC - IRC Client for the Mojo IOLoop
@@ -354,11 +352,14 @@ sub connect {
     return $self->$cb('');
   }
 
+  $port ||= 6667;
+  $self->{debug_key} ||= "$host:$port";
+
   Scalar::Util::weaken($self);
   $self->register_default_event_handlers;
   $self->{stream_id} = $self->ioloop->client(
     address => $host,
-    port    => $port || 6667,
+    port    => $port,
     sub {
       my ($loop, $err, $stream) = @_;
       my ($method, $message);
@@ -369,8 +370,8 @@ sub connect {
       $stream->timeout($TIMEOUT);
       $stream->on(
         close => sub {
-          warn "[@{[$self->server]}] : close\n" if DEBUG;
           $self or return;
+          warn "[$self->{debug_key}] : close\n" if DEBUG;
           $self->emit('close');
           delete $self->{stream};
           delete $self->{stream_id};
@@ -385,12 +386,13 @@ sub connect {
       );
       $stream->on(
         read => sub {
+          no warnings 'utf8';
           my $message = Unicode::UTF8::decode_utf8($_[1], sub { $_[0] });
           
           $buffer .= $message;
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
-            warn "[@{[$self->server]}] >>> $1\n" if DEBUG;
+            warn "[$self->{debug_key}] >>> $1\n" if DEBUG;
             $message = Parse::IRC::parse_irc($1);
             $method = $message->{command} || '';
 
@@ -484,12 +486,13 @@ an error message: Empty string on success and a description on error.
 =cut
 
 sub write {
+  no warnings 'utf8';
   my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
   my $self = shift;
   my $buf = Unicode::UTF8::encode_utf8(join(' ', @_), sub { $_[0] });
 
   return $self->$cb('Not connected') unless ref $self->{stream};
-  warn "[@{[$self->server]}] <<< $buf\n" if DEBUG;
+  warn "[$self->{debug_key}] <<< $buf\n" if DEBUG;
   return $self->{stream}->write("$buf\r\n", $cb);
 }
 
