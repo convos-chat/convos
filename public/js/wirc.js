@@ -1,7 +1,6 @@
 (function($) {
   var input_selector = '.chat form input[type="text"]';
   var messages_selector = '#messages ul';
-  var at_bottom = true;
   var websocket = {};
   var history_offset, conversation_name, $conversation;
 
@@ -178,6 +177,7 @@
       log('changeConversation', $conversation.attr('id'));
     },
     printMessage: function(target) {
+      var at_bottom = $(window).atBottom();
       if(target == 'any') target = methods.activeTarget(1); // special server messages
       if($('#conversation_' + target).length) {
         $(messages_selector).append(this);
