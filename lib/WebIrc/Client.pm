@@ -115,9 +115,10 @@ sub view {
     },
     sub {
       my($delay, $length) = @_;
-      my $end = $length > $N_MESSAGES ? $N_MESSAGES : $length;
+      my $end = $length >= $N_MESSAGES ? $N_MESSAGES - 1 : $length;
 
-      $self->redis->zrevrange($key => 0, -$end, $delay->begin);
+      $self->stash(offset => $end + 1);
+      $self->redis->zrevrange($key => 0, $end, $delay->begin);
     },
     sub {
       my($delay, $conversation) = @_;
@@ -203,10 +204,11 @@ sub history {
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-      $self->redis->zrevrangebyscore($key => $offset, '-inf', limit => 0 => $N_MESSAGES, $delay->begin);
+      $self->redis->zrevrange($key => $offset, $offset + $N_MESSAGES, $delay->begin);
     },
     sub {
       my($delay, $conversation) = @_;
+      $self->stash(offset => $offset + @$conversation - 1);
       $self->format_conversation($conversation, $delay->begin);
     },
     sub {
