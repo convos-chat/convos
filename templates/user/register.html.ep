@@ -1,47 +1,31 @@
 % title 'Register';
-<div class="row-fluid">
-  <div class="offset3 span6">
-    <h1 class="page-header">Register a new acccount</h1>
-    %= include('inc/alert');
-    %= form_for 'register', method => 'post', class => 'form-orizontal', begin
-      %= form_block login => class => ['control-group'], begin
-        <label class="control-label" for="login">Username</label>
-        <div class="controls">
-          %= text_field 'login', id => 'login', class => 'span8';
-          <p class="help-block"><%= stash('errors')->{login} || 'Choose something that\'s simple to remember. Your IRC handle for instance.'%></p>
-        </div>
-      % end
-      %= form_block email => class => ['control-group'], begin
-        <label class="control-label" for="login">Email</label>
-        <div class="controls">
-          %= text_field 'email', id => 'email', class => 'span8';
-          <p class="help-block"><%= stash('errors')->{email}%></p>
-        </div>
-      % end
-      %= form_block invite => class => ['control-group'], begin
-        <label class="control-label" for="invite">Invite Code</label>
-        <div class="controls">
-          %= text_field 'invite', id => 'invite', class => 'span8';
-          <p class="help-block"><%= stash('errors')->{invite} || 'Required unless this is your installation and you are the first user. Get invited by the site owner.'%></p>
-        </div>
-      % end
-      %= form_block password => class => ['control-group'], begin
-        <label class="control-label" for="password">Password</label>
-        <div class="controls">
-          %= password_field 'password', id => 'password', class => 'span8';
-          <p class="help-block"><%= stash('errors')->{password} || 'Your password need to be at least six characters long.'%></p>
-        </div>
-      % end
-      %= form_block password => class => ['control-group'], begin
-        <label class="control-label" for="password">Repeat password</label>
-        <div class="controls">
-          %= password_field 'password', id => 'password', class => 'span8';
-        </div>
-      % end
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Register</button>
-        %= link_to('Already have an account?','login');
-      </div>
+<div class="register row">
+  <h1 class="page-header">Register a new acccount</h1>
+  %= form_for '', method => 'post', class => $form eq 'register' ? 'focus' : '', begin
+    %= include 'inc/alert' if $form eq 'register'
+    %= form_block login => class => [], begin
+      <label for="register_login">Username</label>
+      %= text_field 'login', id => 'register_login', placeholder => 'john_doe'
+      <p class="help"><%= $errors->{login} || 'Choose something that\'s simple to remember. Your IRC handle for instance.'%></p>
     % end
-  </div>
+    %= form_block email => class => [], begin
+      <label for="email">Email</label>
+      %= text_field 'email', id => 'email', placeholder => 'your@email.com'
+      <p class="help"><%= $errors->{email} || 'Your email address.' %></p>
+    % end
+    %= form_block invite => class => [], begin
+      <label for="invite">Invite Code</label>
+      %= text_field 'invite', id => 'invite', placeholder => '******'
+      <p class="help"><%= $errors->{invite} || 'Required unless this is your installation and you are the first user. Get invited by the site owner.'%></p>
+    % end
+    %= form_block password => class => [], begin
+      <label for="register_password">Password</label>
+      %= password_field 'password', id => 'register_password', placeholder => 'Something secret'
+      %= password_field 'password', placeholder => 'Repeat secret'
+      <p class="help"><%= $errors->{password} || 'Your password need to be at least six characters long.'%></p>
+    % end
+    <div class="actions">
+      <button type="submit" class="btn btn-primary">Register</button>
+    </div>
+  % end
 </div>

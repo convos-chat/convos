@@ -1,26 +1,18 @@
 % title 'Login';
-<div class="row-fluid">
-  <div class="offset3 span6">
-    <h1 class="page-header">Login to wirc</h1>
-    <p>It feels like I've seen you before.</p>
-    %= include('inc/alert');
-    %= form_for 'login', method => 'post', class => 'form-horizontal', begin
-      %= form_block login => class => ['control-group'], begin
-        <label class="control-label" for="login">Username</label>
-        <div class="controls">
-          %= text_field 'login', id => 'login', class => 'span8'
-        </div>
-      % end
-      %= form_block password => class => ['control-group'], begin
-        <label class="control-label" for="password">Password</label>
-        <div class="controls">
-          %= password_field 'password', id => 'password', class => 'span8'
-        </div>
-      % end
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Login</button>
-        %= link_to('or click here to make a new account.','register');
-      </div>
+<div class="login row">
+  <h1>Login to wirc</h1>
+  %= form_for '', method => 'post', class => $form eq 'login' ? 'focus' : '', begin
+    %= include 'inc/alert' if $form eq 'login'
+    %= form_block login => class => [], begin
+      <label for="login">Username</label>
+      %= text_field 'login', id => 'login', class => 'span8'
     % end
-  </div>
+    %= form_block password => class => [], begin
+      <label for="password">Password</label>
+      %= password_field 'password', id => 'password', class => 'span8'
+    % end
+    <div class="actions">
+      <button type="submit">Login</button>
+    </div>
+  % end
 </div>

@@ -106,14 +106,12 @@ h2 { .font-size-margin(1.6em); }
 h3 { .font-size-margin(1.2em); }
 img { max-width: 100%; }
 p { margin: 1em 0; }
+.center { text-align: center; }
 .row { padding: 0 @bodyGutter; clear: both; }
-.question {
-  background: #def;
-  color: #158;
-  padding: 1em;
-  border: 1px solid #bde;
-  .border-radius(3px);
-}
+
+div.alert, div.question { padding: 1em; margin: 1em 0; .border-radius(3px); }
+div.alert { background: #fed; color: #851; border: 1px solid #edb; }
+div.question { background: #def; color: #158; border: 1px solid #bde; }
 
 /*
  * Form elements
@@ -121,7 +119,7 @@ p { margin: 1em 0; }
  */
 form {
   margin: 0;
-  label { display: block; margin-top: 4px; }
+  label { display: block; margin-top: @bodyGutter; }
   input {
     padding: 4px;
     font-size: 1.2em;
@@ -131,6 +129,10 @@ form {
     .border-radius(3px);
   }
   input:focus { border: 2px solid darken(#aaa, 15%); }
+  div.error {
+    input { border-color: #e66; }
+    p.help { color: #f44; }
+  }
   div.actions {
     margin-top: 2em;
     clear: left;
@@ -138,11 +140,28 @@ form {
     padding: 0.5em 0;
   }
   p.help {
-    font-size: 0.9em;
     color: #555;
-    display: inline;
-    margin: 0.3em;
+    font-size: 0.9em;
+    margin-top: 0.1em;
   }
+}
+
+button, .button {
+  color: #222;
+  background: darken(#fff, 10%);
+  font-size: 1.3em;
+  text-decoration: none;
+  padding: 6px 8px;
+  border: 2px solid darken(#fff, 40%);
+  .border-radius(3px);
+}
+
+button:hover, .button:hover {
+  border: 2px solid darken(#fff, 70%);
+}
+
+button:active, button.active, .button:active, .button.active {
+  background: darken(#fff, 20%);
 }
 
 /*
@@ -172,21 +191,21 @@ nav {
   }
   a.conversation { color: #666; }
   a.current { font-size: 28px; border: 0; padding-right: 10px; }
-  a.conversation-list-button, a.settings-button {
+  a.conversation-list, a.settings {
     background: #fff url(../image/sprite.png) no-repeat 0 0;
     width: @navBarIconWidth;
     position: absolute;
     float: none;
-    right: 20px;
+    right: @bodyGutter;
   }
-  a.settings-button { text-indent: -10000px; }
-  a.conversation-list-button {
+  a.settings { text-indent: -10000px; }
+  a.conversation-list {
     background-position: -@navBarIconWidth 0;
     margin-right: 35px;
     .box-shadow(-14px 0px 10px rgba(253, 253, 253, 0.9));
     b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
   }
-  a.conversation-list-button.alert {
+  a.conversation-list.alert {
     background-position: -(@navBarIconWidth * 2) 0;
     b { color: #b22; }
   }
@@ -246,22 +265,66 @@ section.messages {
 /*
  * Settings
  */
- .settings {
+.settings {
   padding-top: 50px;
   h2 select { font-size: 18px; font-weight: bold; }
- }
+}
+
+/*
+ * Landing page
+ */
+.landing-page {
+  margin: auto;
+  width: 800px;
+  img {
+    margin: 2em 41px;
+    border: 1px solid #ccc;
+    .box-shadow(0 0px 4px 2px rgba(180, 180, 180, 0.5));
+  }
+  .login, .register, .about {
+    width: 700px;
+    margin: 2em auto;
+    overflow: hidden;
+  }
+  .nav {
+    width: 700px;
+    margin: 0 auto;
+    overflow: hidden;
+    a {
+      background: darken(#fff, 2%);
+      margin-right: 10px;
+      border: 2px solid darken(#fff, 20%);
+      display: block;
+      float: left;
+    }
+    a.active { border-bottom: 0; position: relative; z-index: 5; }
+  }
+  .login, .register {
+    background: darken(#fff, 2%);
+    border: 2px solid darken(#fff, 20%);
+    display: none;
+    margin-top: -4px;
+    padding-bottom: @bodyGutter;
+    position: relative;
+    h1 { display: none; }
+  }
+  .about { padding-bottom: 100px; }
+}
 
 @media (max-width: @responsiveWidth) {
   footer, nav, .row { padding: 0; }
   nav {
     height: 40px;
     a { padding: 9px 3px; }
-    a.conversation-list-button, a.settings-button { right: 0; }
-    a.conversation-list-button { background-position: -@navBarIconWidth -4px; }
-    a.conversation-list-button.alert { background-position: -(@navBarIconWidth * 2) -4px; }
-    a.settings-button { background-position: 0 -4px; }
+    a.conversation-list, a.settings { right: 0; }
+    a.conversation-list { background-position: -@navBarIconWidth -4px; }
+    a.conversation-list.alert { background-position: -(@navBarIconWidth * 2) -4px; }
+    a.settings { background-position: 0 -4px; }
   }
-  form {
-    p.help { display: block; }
+  .landing-page {
+    width: 100%;
+    img { margin: 2em 0; }
+    .row { padding-left: 10px; padding-right: 10px; }
+    .nav, .login, .register, .about { width: 100% };
   }
 }

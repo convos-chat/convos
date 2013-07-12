@@ -6,10 +6,10 @@
       %= $conversation->{target}
     % end
   % }
-  %= link_to 'conversation_list', title => 'List conversations', class => $n_notifications ? 'alert conversation-list-button' : 'conversation-list-button', begin
+  %= link_to 'conversation_list', title => 'List conversations', class => $n_notifications ? 'alert conversation-list' : 'conversation-list', 'data-toggle-element' => 'div.conversation-list', begin
     <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
   % end
-  %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings-button'
+  %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings'
 </nav>
 
 %= include 'client/conversation_list'

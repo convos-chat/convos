@@ -130,6 +130,7 @@ sub startup {
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
+  $r->post('/')->to('user#login_or_register');
   $r->get('/login')->to(template => 'user/login');
   $r->get('/logout')->to('user#logout');
   $r->post('/login')->to('user#login');

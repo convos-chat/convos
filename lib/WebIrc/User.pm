@@ -24,6 +24,25 @@ sub auth {
   return 0;
 }
 
+=head2 login_or_register
+
+Will either call L</login> or L</register> based on form input.
+
+=cut
+
+sub login_or_register {
+  my $self = shift;
+
+  if(defined $self->param('email')) {
+    $self->stash(template => 'index');
+    $self->register;
+  }
+  else {
+    $self->stash(template => 'index');
+    $self->login;
+  }
+}
+
 =head2 login
 
 Authenticate local user
@@ -34,6 +53,7 @@ sub login {
   my $self = shift;
 
   $self->render_later;
+  $self->stash(form => 'login');
   $self->app->core->login(
     {login => scalar $self->param('login'), password => scalar $self->param('password'),},
     sub {
@@ -64,6 +84,8 @@ See L</login>.
 sub register {
   my $self  = shift;
   my $admin = 0;
+
+  $self->stash(form => 'register');
 
   if ($self->session('uid')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
@@ -99,7 +121,7 @@ sub register {
     sub {    # Get uid unless user exists
       my ($delay, $uid) = @_;
       if ($uid) {
-        $self->stash('errors')->{login} = 'Username is taken.';
+        $self->stash->{errors}{login} = 'Username is taken.';
         $self->render;
       }
       else {
@@ -137,7 +159,7 @@ sub _got_invalid_register_params {
     $self->logf(debug => '[reg] Validating invite code %s', $secret) if DEBUG;
     if ($secret ne crypt($email . $self->app->secret, $secret) && $secret ne 'OPEN SESAME') {
       $self->logf(debug => '[reg] Invalid invite code.') if DEBUG;
-      $errors->{invite} = 'Invalid invite code.';
+      $errors->{invite} = 'You need a valid invite code to register.';
     }
   }
 
@@ -226,7 +248,6 @@ sub settings {
 Add a new connection.
 
 =cut
-
 
 sub add_connection {
   my $self = shift;
