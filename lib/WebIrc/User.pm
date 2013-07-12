@@ -269,8 +269,8 @@ sub add_connection {
     sub {
       my ($delay, $cid, $cname) = @_;
       unless ($cid) {
-        $self->stash(errors => $cname);    # cname is a hash-ref if $cid is undef
-        $self->render;
+        $self->stash(errors => $cname, template => 'user/settings'); # cname is a hash-ref if $cid is undef
+        $self->settings;
         return;
       }
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
