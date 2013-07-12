@@ -1,4 +1,12 @@
 ;(function($) {
+  var confirmFirst = function() {
+    var $a = $(this);
+    var confirm_text = 'Click again to confirm';
+    var original_text = $a.text();
+    if(original_text == confirm_text) return true;
+    $a.text(confirm_text).one('mouseleave', function() { $a.text(original_text); });
+    return false;
+  };
 
   var gotoConnection = function() {
     var $select = $(this);
@@ -43,6 +51,7 @@
   $(document).ready(function() {
     $('.settings select[name="cid"]').change(gotoConnection);
     $('a[data-toggle-element]').each(toggleElementWithClick).filter('.active').trigger('toggler_show');
+    $('a.confirm').click(confirmFirst);
 
     setTimeout(whenDocumentHasBeenDrawed, 100);
   });

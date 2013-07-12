@@ -3,14 +3,15 @@
 
 <nav>
   %= link_to config->{name} .' settings', 'settings', class => 'current'
-  %= link_to 'channel.view', { cid => 0 }, title => 'Go to chat', class => $n_notifications ? 'alert conversation-list-button' : 'conversation-list-button', begin
+  %= link_to 'channel.view', { cid => 0 }, title => 'Go to chat', class => $n_notifications ? 'alert conversation-list' : 'conversation-list', begin
     <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
   % end
-  %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings-button active'
+  %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings active'
 </nav>
 
 <div class="settings">
   <div class="row">
+    <h1>Connections</h1>
     %= form_for url_for($cid ? 'connection.edit' : 'connection.add', { cid => $cid }), class => 'connections', method => 'post', begin
     <h2>
       Edit
@@ -34,20 +35,11 @@
       % end
       <div class="actions">
         <button type="submit"><%= $cid ? 'Save' : 'Add' %></button>
+        <button type="submit" name="action" value="connect"><%= $cid ? 'Save' : 'Add' %> & Chat</button>
       % if($cid) {
-        %= link_to 'Delete', 'connection.delete', { cid => $cid }
+        %= link_to 'Delete', 'connection.delete', { cid => $cid }, class => 'button confirm'
       % }
       </div>
     % end
-  </div>
-  <div class="row desktop-notifications">
-    <h2>Notifications</h2>
-    <p class="question">
-      Do you want desktop notifications from wirc? <a href="#yes">Yes!</a>
-    </p>
-    <p>
-      Firefox users might need an
-      <a href="https://addons.mozilla.org/en-us/firefox/addon/html-notifications" target="_blank">addon</a>.
-    </p>
   </div>
 </div>

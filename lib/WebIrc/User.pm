@@ -194,7 +194,7 @@ sub logout {
 
 =head2 settings
 
-Used to retrieve, save and update connection information.
+Used to retrieve connection information.
 
 =cut
 
@@ -251,6 +251,7 @@ Add a new connection.
 
 sub add_connection {
   my $self = shift;
+  my $action = $self->param('action') || '';
 
   Mojo::IOLoop->delay(
     sub {
@@ -274,7 +275,8 @@ sub add_connection {
       }
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
       $self->redis->publish('core:control', "start:$cid");
-      $self->redirect_to('settings', cid => $cid);
+      return $self->redirect_to('index') if $action eq 'connect';
+      return $self->redirect_to('settings', cid => $cid);
     },
   );
 }
@@ -287,6 +289,7 @@ Change a connection.
 
 sub edit_connection {
   my $self = shift;
+  my $action = $self->param('action') || '';
   my $cid  = $self->param('cid');
 
   Mojo::IOLoop->delay(
@@ -310,7 +313,8 @@ sub edit_connection {
       );
     },
     sub {
-      $self->redirect_to('settings');
+      return $self->redirect_to('index') if $action eq 'connect';
+      return $self->redirect_to('settings');
     }
   );
 }
