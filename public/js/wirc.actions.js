@@ -16,15 +16,13 @@
 
   var toggleElementWithClick = function() {
     var $a = $(this);
-    var $target = $( $a.attr('data-toggle-element') );
+    var selector = $a.attr('data-toggle-element');
     var toggler;
 
     toggler = function(e) {
-      console.log($a);
-      if($(e.target).closest($target).length) {
-        return true; // prevent hiding when clicking inside forms
-      }
+      var $target = $(selector);
 
+      if($(e.target).closest($target).length) return true; // prevent hiding when clicking inside forms
       $target.toggle();
       $('a[data-toggle-element]').filter('.active').trigger('toggler_hide');
       $(document).unbind('click', toggler);
@@ -38,14 +36,8 @@
     };
 
     $a.click(toggler);
-    $a.on('toggler_hide', function() { $a.removeClass('active'); $target.hide(); });
-    $a.on('toggler_show', function() { $a.addClass('active'); $target.show(); });
-  };
-
-  var whenDocumentHasBeenDrawed = function() {
-    $('form.focus:first').each(function() {
-      $('html, body').scrollTop($(this).offset().top - 50);
-    });
+    $a.on('toggler_hide', function() { $a.removeClass('active'); $(selector).hide(); });
+    $a.on('toggler_show', function() { $a.addClass('active'); $(selector).show(); });
   };
 
   $(document).ready(function() {
@@ -53,6 +45,10 @@
     $('a[data-toggle-element]').each(toggleElementWithClick).filter('.active').trigger('toggler_show');
     $('a.confirm').click(confirmFirst);
 
-    setTimeout(whenDocumentHasBeenDrawed, 100);
+    $(document).on('completely_ready', function() {
+      $('form.focus:first').each(function() {
+        $('html, body').scrollTop($(this).offset().top - 50);
+      });
+    });
   });
 })(jQuery);

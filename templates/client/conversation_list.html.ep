@@ -1,31 +1,27 @@
 % my %displayed = ($conversations->[0]{id} => 1);
 <div class="conversation-list">
   <ul>
-
     % for my $c (@$important_conversations) {
       % $displayed{$c->{id}} = 1;
       % my $server = $servers->{$c->{cid}} || 'Unknown';
-    <li class="important">
+    <li class="important" id="target_<%= as_id(@$c{qw/ cid target/}) %>">
       %= link_to 'channel.view' => $c, title => "View conversation with $c->{target} on $server", begin
         %= $c->{target}
         <small>(<%= $c->{score} %>)</small>
       % end
     </li>
     % }
-
     % if(@$important_conversations) {
     <li class="separator">&nbsp;</li>
     % }
-
     % for my $c (@$conversations) {
       % next if $displayed{$c->{id}};
       % my $server = $servers->{$c->{cid}} || 'Unknown';
-    <li>
+    <li id="target_<%= as_id(@$c{qw/ cid target/}) %>">
       %= link_to 'channel.view' => $c, title => "View conversation with $c->{target} on $server", begin
         %= $c->{target}
       % end
     </li>
     % }
-
   </ul>
 </div>

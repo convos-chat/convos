@@ -10,6 +10,7 @@
     <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
   % end
   %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings'
+  %= link_to 'Help', 'help', title => 'Display help', class => 'help'
 </nav>
 
 %= include 'client/conversation_list'
@@ -24,6 +25,6 @@
 
 <footer>
 %= form_for 'chat', method => 'post', begin
-  %= text_field 'message', placeholder => "What's on your mind $nick?"
+  %= text_field 'message', placeholder => "What's on your mind $nick?", autocomplete => 'off'
 % end
 </footer>

@@ -8,10 +8,11 @@
     %= javascript '/js/less.min.js'
   % }
     %= javascript '/js/jquery.js';
-    %= javascript '/js/jquery.pjax.js';
     %= javascript '/js/jquery.hotkeys.js';
-    %= javascript '/js/ws-reconnecting.js';
+    %= javascript '/js/jquery.notifier.js';
+    %= javascript '/js/jquery.wirc.js';
     %= javascript '/js/wirc.actions.js';
+    %= javascript '/js/wirc.chat.js';
     <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent"/>

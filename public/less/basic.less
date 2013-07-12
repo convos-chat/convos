@@ -94,6 +94,9 @@ footer {
 
   form {
     input { width: 100%; padding: 6px; font-size: 1.3em; }
+    input.sending {
+      background: url(../image/loading.gif) no-repeat 99% 50%;
+    }
   }
 }
 
@@ -106,6 +109,18 @@ h2 { .font-size-margin(1.6em); }
 h3 { .font-size-margin(1.2em); }
 img { max-width: 100%; }
 p { margin: 1em 0; }
+dl {
+  @dtWidth: 220px;
+  dt {
+    width: @dtWidth;
+    float: left;
+    clear: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  dd { margin-left: @dtWidth + @bodyGutter; }
+}
 .center { text-align: center; }
 .row { padding: 0 @bodyGutter; clear: both; }
 
@@ -187,19 +202,22 @@ nav {
   }
   a.conversation { color: #666; }
   a.current { font-size: 28px; border: 0; padding-right: 10px; }
-  a.conversation-list, a.settings {
+  a.conversation-list, a.settings, a.help {
     background: #fff url(../image/sprite.png) no-repeat 0 0;
     width: @navBarIconWidth;
     position: absolute;
     float: none;
     right: @bodyGutter;
   }
-  a.settings { text-indent: -10000px; }
+  a.settings { text-indent: -10000px; margin-right: 35px; }
   a.conversation-list {
     background-position: -@navBarIconWidth 0;
-    margin-right: 35px;
-    .box-shadow(-14px 0px 10px rgba(253, 253, 253, 0.9));
+    margin-right: 70px;
     b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
+  }
+  a.help {
+    background-position: -(@navBarIconWidth * 3) 0;
+    text-indent: -10000px;
   }
   a.conversation-list.alert {
     background-position: -(@navBarIconWidth * 2) 0;
@@ -221,7 +239,7 @@ div.conversation-list {
 
   a { color: #000; text-decoration: none; padding: 4px; display: block; }
   li.important a { color: #900; }
-  li.important small { float: right; }
+  li small { float: right; }
   a:hover { color: #000; background-color: darken(#fff, 5%); }
 }
 
