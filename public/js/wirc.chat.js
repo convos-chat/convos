@@ -21,10 +21,8 @@
     var at_bottom = $win.data('at_bottom');
     var txt;
 
-    if(reloadConversationList($data, target)) {
-      $.get($.url_for('v1/conversation-list'), function(data) {
-        $('div.conversation-list').replaceWith(data);
-      });
+    if(reloadConversationListWhen($data, target)) {
+      $('div.conversation-list').trigger('reload');
     }
     if($data.hasClass('highlight')) {
       var sender = $data.attr('data-sender');
@@ -49,7 +47,7 @@
     if($win.data('at_bottom')) $win.scrollToBottom();
   };
 
-  var reloadConversationList = function($data, target) {
+  var reloadConversationListWhen = function($data, target) {
     if($('#conversation_' + target).length) return false;
     if($('#target_' + target).length === 0) return true;
     if($data.hasClass('add-conversation')) return true;
@@ -92,6 +90,20 @@
       e.preventDefault();
       $win.scrollToBottom();
       $input.focus();
+    });
+
+    $('div.conversation-list').on('reload', function(e) {
+      var $e = $(this);
+      var $container = $('nav .conversations');
+
+      $.get($.url_for('v1/conversation-list'), function(data) {
+        $container.find('a').remove();
+        $e.replaceWith(data).find('li').not('.important').find('a').each(function(i) {
+          var $a = $(this);
+          $a.attr('class', '').addClass(i ? 'conversation' : 'current');
+          $container.append($a);
+        });
+      });
     });
   });
 

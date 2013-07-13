@@ -1,11 +1,13 @@
 % title 'Chat';
 % my $i = 0;
 <nav class="bar">
-  % for my $conversation (@$conversations) {
-    %= link_to 'channel.view' => $conversation, title => $conversation->{title}, class => $i++ ? 'conversation' : 'current', begin
-      %= $conversation->{target}
-    % end
-  % }
+  <div class="conversations">
+    % for my $conversation (@$conversations) {
+      %= link_to 'channel.view' => $conversation, title => $conversation->{title}, class => $i++ ? 'conversation' : 'current', begin
+        %= $conversation->{target}
+      % end
+    % }
+  </div>
   <div class="right">
     %= link_to 'conversation_list', title => 'List conversations', class => $n_notifications ? 'alert conversation-list' : 'conversation-list', 'data-toggle' => 'div.conversation-list', begin
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
