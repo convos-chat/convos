@@ -3,10 +3,13 @@
 
 <nav>
   %= link_to config->{name} .' settings', 'settings', class => 'current'
-  %= link_to 'channel.view', { cid => 0 }, title => 'Go to chat', class => $n_notifications ? 'alert conversation-list' : 'conversation-list', begin
-    <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
-  % end
-  %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings active'
+  <div class="right">
+    %= link_to 'channel.view', { cid => 0 }, title => 'Go to chat', class => $n_notifications ? 'alert conversation-list' : 'conversation-list', begin
+      <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
+    % end
+    %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings active'
+    %= link_to 'Log out', 'logout', title => 'Log out', class => 'logout'
+  </div>
 </nav>
 
 <div class="settings">

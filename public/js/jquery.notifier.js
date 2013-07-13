@@ -31,7 +31,6 @@
   }
 
   window.notify = function(title, body, icon) {
-    console.log(window_has_focus);
     if(window_has_focus) return;
 
     new Notification(title, { iconUrl: icon, body: body });
@@ -53,7 +52,7 @@
     });
     $(window).focus(function() {
       clearInterval(tid);
-      tid = setInterval(function() { document.title = original_title; clearInterval(tid); }, 4000);
+      tid = setInterval(function() { document.title = original_title; clearInterval(tid); }, 3000);
       window_has_focus = true;
     });
   });
