@@ -8,7 +8,7 @@
     return false;
   };
 
-  var gotoConnection = function() {
+  var gotoConnectionSettings = function() {
     var $select = $(this);
     var cid = $select.find(":selected").attr('value');
     location.href = location.href.replace(/\/settings.*/, '/settings/' + cid);
@@ -16,39 +16,57 @@
 
   var toggleElementWithClick = function() {
     var $a = $(this);
-    var selector = $a.attr('data-toggle-element');
-    var toggler;
+    var focus = $a.attr('data-focus');
+    var target = $a.attr('data-toggle');
 
-    toggler = function(e) {
-      var $target = $(selector);
+    $a.click(function(e) {
+      var $target = $(target);
+      var is_active = $a.hasClass('active');
 
-      if($(e.target).closest($target).length) return true; // prevent hiding when clicking inside forms
-      $target.toggle();
-      $('a[data-toggle-element]').filter('.active').trigger('toggler_hide');
-      $(document).unbind('click', toggler);
+      $('a[data-toggle]').filter('.active').trigger('toggle_hide');
+      if(is_active) return false;
 
-      if($target.is(':visible')) {
+      if(!$a.hasClass('active')) {
         $a.addClass('active');
-        $(document).one('click', toggler);
+        $target.show();
+        toggleElementWithClick.visible = $target;
+        if(focus) $(focus).focus();
       }
 
       return false;
-    };
+    });
 
-    $a.click(toggler);
-    $a.on('toggler_hide', function() { $a.removeClass('active'); $(selector).hide(); });
-    $a.on('toggler_show', function() { $a.addClass('active'); $(selector).show(); });
+    $a.on('toggle_hide', function() { $a.removeClass('active'); $(target).hide(); toggleElementWithClick.visible = false; });
+    $a.on('toggle_show', function() { $a.removeClass('active'); $a.click(); });
   };
 
   $(document).ready(function() {
-    $('.settings select[name="cid"]').change(gotoConnection);
-    $('a[data-toggle-element]').each(toggleElementWithClick).filter('.active').trigger('toggler_show');
+    var $togglers = $('a[data-toggle]').each(toggleElementWithClick);
+    var $focus = $togglers.filter('.active').trigger('toggle_show').filter('.focus');
+    var $login_button = $('a[data-toggle="div.login"]');
+
+    $(document).click(function(e) {
+      var $target = toggleElementWithClick.visible;
+      if(!$target) return true;
+      if($target.hasClass('ignore-document-close')) return true;
+      if($(e.target).closest($target).length) return true; // prevent hiding when clicking inside forms
+      $('a[data-toggle]').filter('.active').trigger('toggle_hide');
+      return false;
+    });
+
+    $('.settings select[name="cid"]').change(gotoConnectionSettings);
     $('a.confirm').click(confirmFirst);
 
-    $(document).on('completely_ready', function() {
-      $('form.focus:first').each(function() {
-        $('html, body').scrollTop($(this).offset().top - 50);
+    if($login_button.length) {
+      $('body').bind('keydown', 'shift+return', function(e) {
+        e.preventDefault();
+        $login_button.click();
       });
+    }
+
+    $(document).on('completely_ready', function() {
+      if(!$focus.offset()) return;
+      $('html, body').scrollTop($focus.offset().top - 20);
     });
   });
 })(jQuery);

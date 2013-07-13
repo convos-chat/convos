@@ -18,6 +18,7 @@
 @responsiveWidth: 700px;
 @columnWidth: 8.333333%;
 @navBarIconWidth: 36px;
+@buttonBorderHover: 2px solid darken(#fff, 70%);
 
 /*
  * Less helpers
@@ -130,7 +131,6 @@ div.question { background: #def; color: #158; border: 1px solid #bde; }
 
 /*
  * Form elements
- * TODO: Make it generic
  */
 form {
   margin: 0;
@@ -173,12 +173,9 @@ button, .button {
 button { height: 34px; vertical-align: baseline; } // make <a> and <button> align. at least in chrome
 button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
 button.confirm, a.confirm { color: #900; border: 2px solid #900; }
-button:hover, .button:hover { border: 2px solid darken(#fff, 70%); }
+button:hover, .button:hover { border: @buttonBorderHover; }
 
-/*
- * Chat
- */
-nav {
+nav.bar {
   background: #fdfdfd;
   position: fixed;
   padding: 0 @bodyGutter;
@@ -223,6 +220,9 @@ nav {
   a.active, a:hover { color: #000; background-color: darken(#fff, 5%); }
 }
 
+/*
+ * Chat
+ */
 div.conversation-list {
   background: darken(#fdfdfd, 1%);
   position: fixed;
@@ -285,37 +285,41 @@ section.messages {
  * Landing page
  */
 .landing-page {
+  @loginBackground: darken(#fff, 2%);
   margin: auto;
   width: 800px;
   img {
-    margin: 2em 41px;
+    margin: 2em 40px;
     border: 1px solid #ccc;
     .box-shadow(0 0px 4px 2px rgba(180, 180, 180, 0.5));
   }
-  .login, .register, .about {
+  nav, .login, .register, .about {
     width: 700px;
     margin: 2em auto;
     overflow: hidden;
   }
-  .nav {
-    width: 700px;
-    margin: 0 auto;
-    overflow: hidden;
-    a {
-      background: darken(#fff, 2%);
+  nav {
+    margin-bottom: 0;
+    a.button, a.button.active {
+      background: @loginBackground;
       margin-right: 10px;
-      border: 2px solid darken(#fff, 20%);
       display: block;
       float: left;
     }
-    a.active { border-bottom: 0; position: relative; z-index: 5; }
+    a.active {
+      border: @buttonBorderHover;
+      border-bottom: 0;
+      position: relative;
+      z-index: 5;
+    }
   }
+  .row { padding: 0; }
   .login, .register {
-    background: darken(#fff, 2%);
-    border: 2px solid darken(#fff, 20%);
-    display: none;
+    background: @loginBackground;
+    border: @buttonBorderHover;
     margin-top: -4px;
-    padding-bottom: @bodyGutter;
+    display: none;
+    padding: @bodyGutter;
     position: relative;
     h1 { display: none; }
   }
@@ -324,7 +328,7 @@ section.messages {
 
 @media (max-width: @responsiveWidth) {
   footer, nav, .row { padding: 0; }
-  nav {
+  nav.bar {
     height: 40px;
     a { padding: 9px 3px; }
     .right { top: -4px; right: 0; }
@@ -333,6 +337,6 @@ section.messages {
     width: 100%;
     img { margin: 2em 0; }
     .row { padding-left: 10px; padding-right: 10px; }
-    .nav, .login, .register, .about { width: 100% };
+    nav, .login, .register, .about { width: 100% };
   }
 }

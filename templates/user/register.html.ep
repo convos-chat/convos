@@ -1,7 +1,7 @@
 % title 'Register';
-<div class="register row">
+<div class="register row ignore-document-close">
   <h1 class="page-header">Register a new acccount</h1>
-  %= form_for '', method => 'post', class => $form eq 'register' ? 'focus' : '', begin
+  %= form_for '', method => 'post', begin
     %= include 'inc/alert' if $form eq 'register'
     %= form_block login => class => [], begin
       <label for="register_login">Username</label>

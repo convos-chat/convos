@@ -131,11 +131,9 @@ sub startup {
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
   $r->post('/')->to('user#login_or_register');
-  $r->get('/login')->to(template => 'user/login');
+  $r->any('/login')->to('user#login_or_register');
+  $r->any('/register')->to('user#login_or_register', register_page => 1);
   $r->get('/logout')->to('user#logout');
-  $r->post('/login')->to('user#login');
-  $r->get('/register')->to(template => 'user/register');
-  $r->post('/register')->to('user#register');
 
   my $private_r = $r->bridge('/')->to('user#auth');
   my $settings_r = $private_r->route('/settings')->to(target => $config->{name});

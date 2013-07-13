@@ -1,7 +1,7 @@
 % title 'Login';
-<div class="login row">
+<div class="login row ignore-document-close">
   <h1>Login to wirc</h1>
-  %= form_for '', method => 'post', class => $form eq 'login' ? 'focus' : '', begin
+  %= form_for '', method => 'post', begin
     %= include 'inc/alert' if $form eq 'login'
     %= form_block login => class => [], begin
       <label for="login">Username</label>

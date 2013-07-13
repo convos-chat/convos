@@ -75,6 +75,8 @@
     $messages = $('.messages ul:first');
     $win = $(window);
 
+    if($messages.length === 0) return; // not on chat page
+
     chat_ws = $.ws($.url_for('socket').replace(/^http/, 'ws'));
     current_target = $messages.attr('id').replace(/^conversation_/, '');
     history_offset = $messages.attr('data-offset') || 0;
@@ -86,11 +88,11 @@
     chat_ws.on('message', receiveMessage);
 
     // TODO: Add shortcut for changing recent conversations
-    $('input, body').bind('keydown', 'shift+return', function(e) {
+    $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
       $win.scrollToBottom();
       $input.focus();
-    })
+    });
   });
 
   $(document).on('completely_ready', function() {
