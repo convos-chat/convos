@@ -15,9 +15,8 @@
     <li class="separator">&nbsp;</li>
     % }
     % for my $c (@$conversations) {
-      % next if $displayed{$c->{id}};
       % my $server = $servers->{$c->{cid}} || 'Unknown';
-    <li id="target_<%= as_id(@$c{qw/ cid target/}) %>">
+    <li id="target_<%= as_id(@$c{qw/ cid target/}) %>" class="<%= $displayed{$c->{id}} ? 'hidden' : '' %>">
       %= link_to 'channel.view' => $c, title => "View conversation with $c->{target} on $server", begin
         %= $c->{target}
       % end

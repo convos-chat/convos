@@ -79,13 +79,18 @@ sub view {
     sub {
       my($delay) = @_;
 
+      $redis->lrem("user:$uid:conversations", 0, "$cid:$target", $delay->begin);
+      $redis->zrem("user:$uid:important_conversations", "$cid:$target");
+    },
+    sub {
+      my($delay, $part_of_conversation) = @_;
+      $part_of_conversation or return $self->redirect_to('index');
+
       $redis->hgetall("connection:$cid", $delay->begin);
       $redis->zcard($key, $delay->begin);
-      $redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
-      $redis->zrem("user:$uid:important_conversations", "$cid:$target");
-      $redis->lrem("user:$uid:conversations", 0, "$cid:$target");
-      $redis->lpush("user:$uid:conversations", "$cid:$target");
       $self->_conversation_list($delay->begin);
+      $redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
+      $redis->lpush("user:$uid:conversations", "$cid:$target");
     },
     sub {
       my($delay, $connection, $length) = @_;
