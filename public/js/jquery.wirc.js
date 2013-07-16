@@ -1,9 +1,9 @@
 ;(function($) {
   var at_bottom_threshold = 40;
-  var base_url;
+  var $heigth_from, $win, base_url;
 
   $.fn.scrollToBottom = function() {
-    $(this).scrollTop($('div.wrapper').height());
+    $(this).scrollTop($heigth_from.height());
     return this;
   };
 
@@ -11,7 +11,7 @@
     var args = $.makeArray(arguments);
     if(!base_url) base_url = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
     args.unshift(base_url);
-    return args.join('/');
+    return args.join('/').replace(/#/g, '%23')
   };
 
   // this code is originally from https://github.com/joewalnes/reconnecting-websocket
@@ -85,13 +85,13 @@
   };
 
   $(document).ready(function() {
-    var $body = $('body');
-    var $win = $(window);
+    $heigth_from = $('div.wrapper').length ? $('div.wrapper') : $('body');
+    $win = $(window).data('at_bottom', false);
 
     setTimeout(function() { $(document).trigger('completely_ready'); }, 200);
 
     $win.on('scroll', function() {
-      var at_bottom = $win.scrollTop() + $win.height() > $body.height() - at_bottom_threshold;
+      var at_bottom = $win.scrollTop() + $win.height() > $heigth_from.height() - at_bottom_threshold;
       $win.data('at_bottom', at_bottom);
     });
   });

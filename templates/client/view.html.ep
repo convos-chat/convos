@@ -1,15 +1,11 @@
 % title 'Chat';
 % my $i = 0;
 <nav class="bar">
-  <div class="conversations">
-    % for my $conversation (@$conversations) {
-      %= link_to 'channel.view' => $conversation, title => $conversation->{title}, class => $i++ ? 'conversation' : 'current', begin
-        %= $conversation->{target}
-      % end
-    % }
-  </div>
+  %= include 'client/conversation_list'
+  <a href="#" title="List conversations" class="conversation-list" data-toggle="div.conversation-list">Conversation list</a>
   <div class="right">
-    %= link_to 'conversation_list', title => 'List conversations', class => $n_notifications ? 'alert conversation-list' : 'conversation-list', 'data-toggle' => 'div.conversation-list', begin
+    % my $class = @$notification_list == 0 ? 'hidden notification-list' : $n_notifications ? 'alert notification-list' : 'notification-list';
+    %= link_to 'conversation_list', title => 'List notifications', class => $class, 'data-toggle' => 'div.notification-list', begin
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
     % end
     %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings'
@@ -17,7 +13,13 @@
   </div>
 </nav>
 
-%= include 'client/conversation_list'
+<div class="conversation-list">
+  %= include 'client/conversation_list'
+</div>
+
+<div class="notification-list">
+  %= include 'client/notification_list'
+</div>
 
 <div class="wrapper">
   <section class="messages row">

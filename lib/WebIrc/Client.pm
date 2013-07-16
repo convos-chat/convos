@@ -7,56 +7,47 @@ WebIrc::Client - Mojolicious controller for IRC chat
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
+use Mojo::JSON;
+use WebIrc::Core::Util qw/ as_id id_as /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $N_MESSAGES = 50;
+my $JSON = Mojo::JSON->new;
 
 =head1 METHODS
 
 =head2 route
 
-Route to last seen IRC channel.
+Route to last seen IRC conversation.
 
 =cut
 
 sub route {
   my $self = shift->render_later;
-  my $uid  = $self->session('uid');
-  my $settings = sub { $self->redirect_to($self->url_for('settings')) };
+  my $uid  = $self->session('uid') or return $self->render('index');
+  my $goto_view;
 
-  if(!$uid) {
-    $self->render('index');
-  }
-  else {
-    Mojo::IOLoop->delay(
-      sub {
-        my($delay) = @_;
-        $self->redis->get("user:$uid:cid_target", $delay->begin);
-      },
-      sub {
-        my($delay, $cid_target) = @_;
-        if(my($cid, $target) = $self->id_as($cid_target || '')) {
-          $self->redis->del("user:$uid:cid_target"); # prevent loop on invalid cid_target
-          $self->redirect_to($self->url_for('channel.view', cid => $cid, target => $target));
-        }
-        else {
-          $self->redis->smembers("user:$uid:connections", $delay->begin);
-        }
-      },
-      sub {
-        my($delay, $connections) = @_;
-        return $settings->() unless $connections->[0];
-        $self->redis->smembers("connection:$connections->[0]:channels", $delay->begin);
-        $delay->begin->(undef, $connections->[0]);
-      },
-      sub {
-        my($delay, $channels, $cid) = @_;
-        $self->redirect_to(
-          $self->url_for('channel.view', cid => $cid, target => $channels->[0])
-        );
-      }
-    );
-  }
+  $goto_view = sub {
+    my($delay, $cid_target) = @_;
+
+    $cid_target = $cid_target->[0] if ref $cid_target;
+
+    if(my($cid, $target) = id_as $cid_target || '') {
+      $self->redis->del("user:$uid:cid_target"); # prevent loop on invalid cid_target
+      $self->redirect_to($self->url_for('channel.view', cid => $cid, target => $target));
+    }
+    else {
+      $delay->begin->();
+    }
+  };
+
+  Mojo::IOLoop->delay(
+    sub { $self->redis->get("user:$uid:cid_target", shift->begin) },
+    $goto_view,
+    sub { $self->redis->zrevrange("user:$uid:conversations", 0, 1, shift->begin) },
+    $goto_view,
+    sub { $self->redirect_to($self->url_for('settings')) }
+  );
 }
 
 =head2 view
@@ -66,112 +57,133 @@ Used to render the main IRC client view.
 =cut
 
 sub view {
-  my $self   = shift->render_later;
-  my $redis  = $self->redis;
-  my $uid    = $self->session('uid');
-  my $cid    = $self->stash('cid');
-  my $target = $self->stash('target') || '';
-  my $key    = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
-  my $current_nick;
+  my $self = shift->render_later;
+  my $uid = $self->session('uid');
+  my $cid = $self->stash('cid');
+  my $id = as_id $cid, $self->stash('target');
+  my $with_layout = $self->req->is_xhr ? 0 : 1;
+
+  $self->redis->zadd("user:$uid:conversations", time, $id);
 
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-
-      $redis->lrem("user:$uid:conversations", 0, "$cid:$target", $delay->begin);
-      $redis->zrem("user:$uid:important_conversations", "$cid:$target");
+      $self->redis->hgetall("connection:$cid", $delay->begin);
+      $self->_modify_notification($self->param('notification'), read => 1) if defined $self->param('notification');
+      $self->_conversation($delay->begin);
     },
     sub {
-      my($delay, $part_of_conversation) = @_;
-      $part_of_conversation or return $self->redirect_to('index');
-
-      $redis->hgetall("connection:$cid", $delay->begin);
-      $redis->zcard($key, $delay->begin);
-      $self->_conversation_list($delay->begin);
-      $redis->set("user:$uid:cid_target", $self->as_id($cid, $target));
-      $redis->lpush("user:$uid:conversations", "$cid:$target");
+      my($delay, $connection, $conversation) = @_;
+      $self->stash(%$connection, conversation => $conversation);
+      $self->conversation_list($delay->begin) if $with_layout;
+      $self->notification_list($delay->begin) if $with_layout;
+      $self->redis->set("user:$uid:cid_target", $id, $delay->begin);
     },
     sub {
-      my($delay, $connection, $length) = @_;
-      my $end = $length > $N_MESSAGES ? $N_MESSAGES : $length;
-
-      $self->stash(%$connection);
-      $redis->zrevrange($key => -$end, -1, $delay->begin);
-    },
-    sub {
-      my($delay, $conversation) = @_;
-
-      $self->format_conversation($conversation, $delay->begin);
-    },
-    sub {
-      my($delay, $conversation) = @_;
-
-      $self->stash(
-        conversation => $conversation,
-      );
-
-      return $self->render('client/conversation', layout => undef) if $self->req->is_xhr;
-      return $self->render;
+      return $self->render if $with_layout;
+      return $self->render('client/conversation', layout => undef)
     },
   );
 }
 
 =head2 conversation_list
 
-Will render the connection list for a given connection id.
+Will render the conversation list for all conversations.
 
 =cut
 
 sub conversation_list {
-  my $self = shift->render_later;
+  my($self, $cb) = @_;
+  my $uid = $self->session('uid');
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->_conversation_list($delay->begin);
+      $self->redis->zrevrange("user:$uid:conversations", 0, -1, 'WITHSCORES', $delay->begin);
     },
     sub {
-      my($delay) = @_;
-      $self->render('client/conversation_list');
+      my($delay, $conversation_list) = @_;
+      my $i = 0;
+
+      $delay->begin(0)->($conversation_list);
+
+      while($i < @$conversation_list) {
+        my $id = $conversation_list->[$i];
+        my $timestamp = splice @$conversation_list, ($i + 1), 1;
+        my($cid, $target) = id_as $id;
+
+        $target ||= '';
+        $conversation_list->[$i] = {
+          cid => $cid,
+          id => $id,
+          is_channel => $target =~ /^#/ ? 1 : 0,
+          target => $target,
+          timestamp => $timestamp,
+        };
+
+        $self->redis->zcount("connection:$cid:$target:msg", $timestamp, '+inf', $delay->begin);
+        $i++;
+      }
+
+      $self->stash(conversation_list => $conversation_list);
+    },
+    sub {
+      my($delay, $conversation_list, @unread_count) = @_;
+
+      for my $c (@$conversation_list) {
+        $c->{unread} = shift @unread_count || 0;
+      }
+
+      return $self->$cb($conversation_list) if $cb;
+      return $self->render;
     },
   );
+
+  $self->render_later;
 }
 
-=head2 history
+=head2 notification_list
 
-Used to render the previous messages in a conversation, suitable for the IRC
-client view.
+Will render notifications.
 
 =cut
 
-sub history {
-  my $self = shift->render_later;
-  my $offset = $self->stash('offset');
-  my($cid, $target) = $self->id_as($self->stash('target'));
-  my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
+sub notification_list {
+  my($self, $cb) = @_;
+  my $uid = $self->session('uid');
 
-  unless($offset and $cid) {
-    return $self->render_exception('Missing parameters'); # TODO: Need to have a better error message?
-  }
-
-  $target ||= '';
-  $self->stash(target => $target, cid => $cid, nick => '', nicks => []);
   Mojo::IOLoop->delay(
-    $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
-      $self->redis->zrevrangebyscore($key => $offset, '-inf', limit => 0 => $N_MESSAGES, $delay->begin);
+      $self->redis->lrange("user:$uid:notifications", 0, -1, $delay->begin);
     },
     sub {
-      my($delay, $conversation) = @_;
-      $self->format_conversation($conversation, $delay->begin);
-    },
-    sub {
-      my($delay, $conversation) = @_;
-      $self->render('client/conversation', conversation => $conversation);
+      my($delay, $notification_list) = @_;
+      my $n_notifications = 0;
+      my $i = 0;
+
+      while($i < @$notification_list) {
+        my $notification = $JSON->decode($notification_list->[$i]);
+        $notification->{id} = as_id @$notification{qw/ cid target /};
+        $notification->{index} = $i;
+        $notification->{is_channel} = $notification->{target} =~ /^#/ ? 1 : 0;
+        $notification_list->[$i] = $notification;
+        $n_notifications++ unless $notification->{read};
+        $i++;
+      }
+
+      $self->stash(
+        notification_list => $notification_list,
+        n_notifications => $n_notifications,
+      );
+
+      return $self->$cb($notification_list) if $cb;
+      return $self->render;
     },
   );
+
+  $self->render_later;
 }
 
 sub _check_if_uid_own_cid {
@@ -190,70 +202,54 @@ sub _check_if_uid_own_cid {
   },
 }
 
-sub _conversation_list {
+sub _conversation {
   my($self, $cb) = @_;
-  my $redis = $self->redis;
   my $uid = $self->session('uid');
+  my $cid = $self->stash('cid');
+  my $target = $self->stash('target');
+  my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
 
-  Mojo::IOLoop->delay(
-    sub {
-      my($delay) = @_;
-      $redis->smembers("user:$uid:connections", $delay->begin);
-    },
-    sub {
-      my($delay, $cids) = @_;
-      $self->stash(cids => $cids);
-      $redis->execute((map { [ hget => "connection:$_", "host" ] } @$cids), $delay->begin);
-    },
-    sub {
-      my($delay, @hosts) = @_;
-      my $cids = $self->stash('cids');
-      $self->stash(servers => { map { $_ => shift @hosts || '' } @$cids });
-      $redis->zrevrangebyscore("user:$uid:important_conversations", '+inf', '-inf', 'WITHSCORES', $delay->begin);
-    },
-    sub {
-      my($delay, $important_conversations) = @_;
-      my $n_notifications = 0;
-      my $i = 0;
+  if(my $before = $self->param('before')) { # before a timestamp
+    $self->redis->zrank($key => $before, sub {
+      my $redis = shift;
+      my $stop = shift || 0;
+      my $start = $stop > $N_MESSAGES ? $stop - $N_MESSAGES : 0;
+      $redis->zrange($key => $start, $stop, sub {
+        my $list = pop || [];
+        pop @$list; # ignore the last element
+        $self->format_conversation($list, $cb);
+      });
+    });
+  }
+  elsif(my $after = $self->param('after')) { # after at timestamp
+    $self->redis->zrangebyscore($key => $after, '+inf', LIMIT => 0, $N_MESSAGES, sub {
+      my $list = pop || [];
+      $self->format_conversation($list, $cb);
+    });
+  }
+  else { # default
+    $self->redis->zcard($key, sub {
+      my($redis, $end) = @_;
+      my $start = $end > $N_MESSAGES ? $end - $N_MESSAGES : 0;
+      $redis->zrange($key => $start, $end, sub {
+        $self->format_conversation($_[1] || [], $cb);
+      });
+    });
+  }
+}
 
-      while($i < @$important_conversations) {
-        my($score) = splice @$important_conversations, ($i + 1), 1;
-        $n_notifications += $score;
-        $important_conversations->[$i] =~ /^(\d+):(.*)/;
-        $important_conversations->[$i] = {
-          cid => $1,
-          id => $important_conversations->[$i],
-          target => $2,
-          score => $score,
-        };
-        $i++;
-      }
+sub _modify_notification {
+  my($self, $id, $key, $value) = @_;
+  my $uid = $self->session('uid');
+  my $redis_key = "user:$uid:notifications";
 
-      $self->stash(
-        important_conversations => $important_conversations,
-        n_notifications => $n_notifications,
-      );
-
-      $redis->lrange("user:$uid:conversations", 0, -1, $delay->begin);
-    },
-    sub {
-      my($delay, $conversations) = @_;
-      my $i = 0;
-
-      for my $item (@$conversations) {
-        $item =~ /^(\d+):(.*)/;
-        $item = { cid => $1, id => $item, target => $2 };
-        $item->{title}
-          = $i++                    ? "View conversation with $item->{target}"
-          : $item->{target} =~ /^#/ ? "(Topic is not loaded)"
-          :                           "Private conversation"
-          ;
-      }
-
-      $self->stash(conversations => $conversations);
-      $cb->();
-    },
-  );
+  $self->redis->lindex($redis_key, $id, sub {
+    my $redis = shift;
+    my $notification = shift or return;
+    $notification = $JSON->decode($notification);
+    $notification->{$key} = $value;
+    $redis->lset($redis_key, $id, $JSON->encode($notification));
+  });
 }
 
 =head1 COPYRIGHT

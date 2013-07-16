@@ -15,44 +15,13 @@ my $YOUTUBE_INCLUDE = '<iframe width="390" height="220" src="//www.youtube-nocoo
 
 =head1 HELPERS
 
-=head2 as_id
-
-    $id = as_id @str;
-
-This method will convert the input to a string which can be used as id
-attribute in your HTML doc.
-
-It will convert non-word characters to ":hex" and join C<@str> with ":00".
-
-=cut
-
-sub as_id {
-  my $c = shift;
-
-  join ':00', map {
-    local $_ = $_; # local $_ is for changing constants and not changing input
-    s/:/:3a/g;
-    s/([^\w:])/{ sprintf ':%02x', ord $1 }/ge;
-    $_;
-  } grep {
-    length $_;
-  } @_;
-}
-
 =head2 id_as
 
-    @str = id_as $id;
+See L<WebIrc::Core::Util/id_as>.
 
-Reverse of L</as_id>.
+=head2 as_id
 
-=cut
-
-sub id_as {
-  map {
-    s/:(\w\w)/{ chr hex $1 }/ge;
-    $_;
-  } split /:00/, $_[1];
-}
+See L<WebIrc::Core::Util/as_id>.
 
 =head2 form_block
 
@@ -96,22 +65,23 @@ sub format_conversation {
   my ($c, $conversation, $cb) = @_;
   my $ua = Mojo::UserAgent->new(request_timeout => 2, connect_timeout => 2);
   my $delay = Mojo::IOLoop->delay;
+  my $current_nick = $c->stash('nick') || '';
   my @messages;
 
   my $url_formatter = sub {
-    my($message, $url) = @_;
+    my($data, $url) = @_;
     my $cb = $delay->begin;
 
-    $message->{embed} = '';
+    $data->{embed} = '';
 
     if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
-      $message->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
+      $data->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
       $cb->();
     }
     else {
       $ua->head($url => sub {
         my $ct = $_[1]->res->headers->content_type || '';
-        $message->{embed} = $c->image($url, alt => 'Embedded media') if $ct =~ /^image/;
+        $data->{embed} = $c->image($url, alt => 'Embedded media') if $ct =~ /^image/;
         $cb->();
       });
     }
@@ -120,18 +90,19 @@ sub format_conversation {
   };
 
   for(@$conversation) {
-    my $message = $JSON->decode($_);
+    my $data = $JSON->decode($_);
 
-    if(not ref $message) {
+    if(not ref $data) {
       $c->logf(debug => "Unable to parse raw message: $_");
       next;
     }
-    if($message->{message}) {
-      $message->{message} = Mojo::Util::xml_escape($message->{message});
-      $message->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($message, $1)}!ge;
+    if($data->{message}) {
+      $data->{message} = Mojo::Util::xml_escape($data->{message});
+      $data->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($data, $1)}!ge;
+      $data->{highlight} ||= 0;
     }
 
-    unshift @messages, $message;
+    push @messages, $data;
   }
 
   $delay->once(finish => sub { $c->$cb(\@messages) });
@@ -177,13 +148,13 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
-  $app->helper(form_block    => \&form_block);
+  $app->helper(form_block => \&form_block);
   $app->helper(format_conversation => \&format_conversation);
-  $app->helper(logf          => \&WebIrc::Core::Util::logf);
+  $app->helper(logf => \&WebIrc::Core::Util::logf);
   $app->helper(format_time => sub { my $self = shift; WebIrc::Core::Util::format_time(@_); });
   $app->helper(redis => \&redis);
-  $app->helper(as_id => \&as_id);
-  $app->helper(id_as => \&id_as);
+  $app->helper(as_id => sub { shift; WebIrc::Core::Util::as_id(@_) });
+  $app->helper(id_as => sub { shift; WebIrc::Core::Util::id_as(@_) });
   $app->helper(send_partial => sub { my $c = shift; $c->send($c->render(@_, partial => 1)->to_string); });
   $app->helper(
     is_active => sub {

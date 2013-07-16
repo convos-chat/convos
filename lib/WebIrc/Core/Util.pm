@@ -33,6 +33,43 @@ my %date_markers = (
 
 =head1 FUNCTIONS
 
+=head2 as_id
+
+    $id = as_id @str;
+
+This method will convert the input to a string which can be used as id
+attribute in your HTML doc.
+
+It will convert non-word characters to ":hex" and join C<@str> with ":00".
+
+=cut
+
+sub as_id {
+  join ':00', map {
+    local $_ = $_; # local $_ is for changing constants and not changing input
+    s/:/:3a/g;
+    s/([^\w:])/{ sprintf ':%02x', ord $1 }/ge;
+    $_;
+  } grep {
+    length $_;
+  } @_;
+}
+
+=head2 id_as
+
+    @str = id_as $id;
+
+Reverse of L</as_id>.
+
+=cut
+
+sub id_as {
+  map {
+    s/:(\w\w)/{ chr hex $1 }/ge;
+    $_;
+  } split /:00/, $_[0];
+}
+
 =head2 logf
 
   $c->logf($level => $format, @args);

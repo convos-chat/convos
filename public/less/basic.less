@@ -17,7 +17,7 @@
 @footerHeight: 50px;
 @responsiveWidth: 700px;
 @columnWidth: 8.333333%;
-@navBarIconWidth: 36px;
+@navBarIconWidth: 32px;
 @buttonBorderHover: 2px solid darken(#fff, 70%);
 
 /*
@@ -25,6 +25,7 @@
  */
 .box-shadow(@string) { -webkit-box-shadow: @string; -moz-box-shadow: @string; box-shadow: @string; }
 .border-radius(@radius) { -webkit-border-radius: @radius; -moz-border-radius: @radius; border-radius: @radius; }
+.ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
 .opacity(@opacity) { filter: ~"alpha(opacity=@{opacity*100})"; -moz-opacity: @opacity; -khtml-opacity: @opacity; -webkit-opacity: @opacity; opacity: @opacity; }
 .font-size-margin(@size) { font-size: @size; margin-top: 1 / @size; margin-bottom: 1 / @size; }
 .grid(@cols:1, @last:0) {
@@ -183,7 +184,7 @@ nav.bar {
   top: 0;
   left: 0;
   width: 100%;
-  height: 48px;
+  height: 42px;
   z-index: 1000;
   overflow: hidden;
   .box-shadow(0 4px 4px -2px rgba(180, 180, 180, 0.5));
@@ -191,7 +192,7 @@ nav.bar {
   a {
     color: #000;
     text-decoration: none;
-    padding: 13px 3px;
+    padding: 10px 4px;
     margin-left: -1px;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
@@ -199,46 +200,56 @@ nav.bar {
     float: left;
   }
 
-  .right {
-    .box-shadow(-14px 0px 10px rgba(253, 253, 253, 0.9));
-    position: absolute;
-    right: @bodyGutter;
-    a {
-      background: #fff url(../image/sprite.png) no-repeat 0 0;
-      width: @navBarIconWidth;
-    }
-    a.settings, a.help, a.logout { text-indent: -10000px; }
-    a.conversation-list { background-position: -@navBarIconWidth 0; }
-    a.conversation-list.alert { background-position: -(@navBarIconWidth * 2) 0; }
-    a.help { background-position: -(@navBarIconWidth * 3) 0; }
-    a.logout { background-position: -(@navBarIconWidth * 4) 0; }
-    a.conversation-list b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
-    a.conversation-list.alert b { color: #b22; }
+  a.current { font-size: 22px; border: 0; padding-right: 10px; }
+  a.conversation { color: #666; }
+  a.settings, a.help, a.logout, a.conversation-list { text-indent: -10000px; }
+  a.conversation-list {
+    background: #fff url(../image/sprite.png) no-repeat 0 0;
+    width: 20px;
+    background-position: -(@navBarIconWidth * 5 + 7) 0;
+    display: none;
   }
 
-  a.current { font-size: 28px; border: 0; padding-right: 10px; }
-  a.conversation { color: #666; }
+  .right {
+    position: absolute;
+    right: @bodyGutter;
+    a { background: #fff url(../image/sprite.png) no-repeat 0 0; width: @navBarIconWidth; }
+    a.notification-list { background-position: -@navBarIconWidth 0; }
+    a.notification-list.alert { background-position: -(@navBarIconWidth * 2) 0; }
+    a.help { background-position: -(@navBarIconWidth * 3) 0; }
+    a.logout { background-position: -(@navBarIconWidth * 4) 0; }
+    a.notification-list b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
+    a.notification-list.alert b { color: #b22; }
+    a.hidden { display: none; }
+  }
+
   a.active, a:hover { color: #000; background-color: darken(#fff, 5%); }
 }
 
 /*
  * Chat
  */
-div.conversation-list {
+div.conversation-list,
+div.notification-list {
   background: darken(#fdfdfd, 1%);
   position: fixed;
-  top: 44px;
-  right: 6px;
-  width: 200px;
+  top: 42px;
+  width: 320px;
+  max-height: 70%;
+  overflow: auto;
   z-index: 1001;
   display: none;
-  overflow: hidden;
   .box-shadow(0 0 1px 1px rgba(180, 180, 180, 0.5));
 
+  li { border-bottom: 1px solid #eee; }
   a { color: #000; text-decoration: none; padding: 4px; display: block; }
-  li.important a { color: #900; }
-  li small { float: right; }
   a:hover { color: #000; background-color: darken(#fff, 5%); }
+}
+
+div.notification-list {
+  right: 6px;
+  li.unread { border-right: 2px solid #f66; }
+  span.message { color: #666; font-size: 0.9em; line-height: 1em; .ellipsis(); }
 }
 
 section.messages {
@@ -272,6 +283,10 @@ section.messages {
       color: #999;
     }
   }
+
+  li.highlight { background: #fee; }
+  li.action-message .content { font-style: italic; }
+  li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
 }
 
 /*
@@ -328,12 +343,8 @@ section.messages {
 }
 
 @media (max-width: @responsiveWidth) {
-  footer, nav, .row { padding: 0; }
-  nav.bar {
-    height: 40px;
-    a { padding: 9px 3px; }
-    .right { top: -4px; right: 0; }
-  }
+  footer, nav.bar, .row { padding: 0; }
+  nav.bar .right { right: 0; }
   .landing-page {
     width: 100%;
     img { margin: 2em 0; }

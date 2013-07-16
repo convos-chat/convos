@@ -1,4 +1,4 @@
-<ul id="conversation_<%= as_id $cid, $target %>" data-nick="<%= $nick %>" data-offset="<%= @$conversation ? int $conversation->[0]{timestamp} : time %>">
+<ul id="conversation_<%= as_id $cid, $target %>" data-nick="<%= $nick %>" data-offset="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>">
 % for my $message (@$conversation) {
     %= include "event/$message->{event}", highlight => 0, %$message
 % }

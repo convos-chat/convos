@@ -1,4 +1,4 @@
-<li class="muted topic" data-target="<%= as_id $cid, $target %>">
+<li class="topic" data-target="<%= as_id $cid, $target %>">
   <span class="prefix">Topic is</span>
 % if(length $topic) {
   <span><%= $topic %></span>

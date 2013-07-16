@@ -21,31 +21,22 @@ my %COMMANDS; %COMMANDS = (
   part => sub { my $dom = pop; "PART " . ($dom->{cmd} || $dom->{target}) },
   query=> sub {
     my ($self, $dom) = @_;
-    my $target = $dom->{cmd} || $dom->{target};
-    $target =~ /^#/ and return;
-    $self->redis->sadd(
-      "connection:@{[$dom->{cid}]}:conversations",
-      $target,
-      sub {
-        my ($redis, $member) = @_;
-        $self->send_partial('event/add_conversation', cid => $dom->{cid}, target => $target) if $member;
-      }
-    );
+    my $uid = $self->session('uid');
+    my $id = $self->as_id($dom->{cid}, $dom->{cmd} || $dom->{target});
+
+    $self->redis->zrem("user:$uid:conversations", $id, sub {
+      $self->send_partial('event/add_conversation', target => $dom->{cmd}, %$dom);
+    });
     return;
   },
   close => sub {
     my ($self, $dom) = @_;
-    my $target = $dom->{cmd} || $dom->{target};
-    $self->redis->sismember(
-      "connection:@{[$dom->{cid}]}:conversations",
-      $target,
-      sub {
-        my ($redis, $member) = @_;
-        return unless $member;
-        $self->redis->srem("connection:@{[$dom->{cid}]}:conversations", $target);
-        $self->send_partial('event/remove_conversation', cid => $dom->{cid}, target => $target) if $member;
-      }
-    );
+    my $uid = $self->session('uid');
+    my $id = $self->as_id($dom->{cid}, $dom->{cmd} || $dom->{target});
+
+    $self->redis->zrem("user:$uid:conversations", $id, sub {
+      $self->send_partial('event/remove_conversation', target => $dom->{cmd}, %$dom);
+    });
     return;
   },
   reconnect => sub {
@@ -55,9 +46,7 @@ my %COMMANDS; %COMMANDS = (
   },
   help => sub {
     my ($self, $dom) = @_;
-    $self->send_partial(
-      'event/help',
-    );
+    $self->send_partial('event/help');
     return;
   }
 );

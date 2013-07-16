@@ -46,14 +46,13 @@ L<irc_rpl_namreply> and l</irc_error>.
 
 use Mojo::Base -base;
 use Mojo::IRC;
-no warnings "utf8";
 use Mojo::JSON;
-use Parse::IRC   ();
-use IRC::Utils   ();
-use Scalar::Util ();
+no warnings 'utf8';
 use Carp qw/ croak /;
-use Time::HiRes qw/ time /;
 use IRC::Utils qw/parse_user/;
+use Parse::IRC   ();
+use Scalar::Util ();
+use Time::HiRes qw/ time /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $JSON = Mojo::JSON->new;
@@ -68,6 +67,14 @@ Holds the id of this connection. This attribute is required.
 =cut
 
 has id => 0;
+
+=head2 uid
+
+The user ID.
+
+=cut
+
+has uid => 0;
 
 =head2 redis
 
@@ -261,19 +268,19 @@ if it looks like one. Returns true if the message was added to redis.
 
 sub add_server_message {
   my ($self, $message) = @_;
+  my $timestamp = time;
 
   if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
 
     # 1 = normal, 0 = error
     my $params = $message->{params};
     shift $params;
-    $self->redis->incr("connection:@{[$self->id]}:unread");
     $self->_publish(
       server_message => {
         message => join(' ', @{$message->{params}}),
         save => 1,
         status => 200,
-        timestamp => time,
+        timestamp => $timestamp,
       },
     );
   }
@@ -290,24 +297,29 @@ Will add a private message to the database.
 sub add_message {
   my ($self, $message) = @_;
   my $current_nick = $self->_irc->nick;
-  my $msg          = $message->{params}[0] eq $current_nick;
-  my $data         = {message => $message->{params}[1], save => 1};
+  my $is_private_message = $message->{params}[0] eq $current_nick;
+  my $data = {
+    cid => $self->id,
+    highlight => 0,
+    message => $message->{params}[1],
+    save => 1,
+    timestamp => time,
+  };
 
-  @{$data}{qw/nick user host/} = parse_user($message->{prefix});
-  $data->{target} = lc($msg ? $data->{nick} : $message->{params}[0]);
-  $data->{highlight} = ($msg or $data->{message} =~ /\b$current_nick\b/) ? 1 : 0;
+  @{$data}{qw/nick user host/} = parse_user $message->{prefix};
+  $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
+
+  if($data->{nick} ne $current_nick) {
+    if($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
+      $data->{highlight} = 1;
+      $self->redis->lpush("user:@{[$self->uid]}:notifications", $JSON->encode($data));
+    }
+  }
 
   $self->_publish(
     $data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/ ? 'action_message' : 'message',
     $data,
   );
-
-  unless ($data->{nick} eq $current_nick) {
-    $self->redis->incr("connection:@{[$self->id]}:$data->{target}:unread");
-  }
-  unless ($message->{params}[0] =~ /^[#&]/x) {    # not a channel or me.
-    $self->redis->sadd("connection:@{[$self->id]}:conversations", $data->{target});
-  }
 }
 
 =head2 disconnect
@@ -460,6 +472,7 @@ sub irc_join {
   if($nick eq $self->_irc->nick) {
     return $self->redis->del("connection:@{[$self->id]}:$channel:nicks");
   }
+
   $self->_publish(nick_joined => { save => 0, nick => $nick, target => $channel });
   $self->redis->sadd("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
@@ -543,7 +556,6 @@ sub cmd_nick {
   $self->_irc->nick($new_nick);
 }
 
-
 =head2 cmd_join
 
 Handle join commands from user. Add to channel set.
@@ -556,9 +568,7 @@ sub cmd_join {
 
   return $self->_publish(wirc_notice => { message => 'Channel to join is required' }) unless $channel;
   return $self->_publish(wirc_notice => { message => 'Channel must start with & or #' }) unless $channel =~ /^[#&]/x;
-  $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
 
-  # clean up old nick list
   $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
   $self->_publish(add_conversation => { target => $channel, save => 1 });
 }
@@ -573,7 +583,6 @@ sub cmd_part {
   my ($self, $message) = @_;
   my $channel = $message->{params}[0];
 
-  $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
   $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
   $self->_publish(remove_conversation => { target => $channel, save => 1 });
 }
