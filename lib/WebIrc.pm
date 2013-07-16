@@ -158,19 +158,12 @@ sub startup {
     }
   );
 
-  Mojo::IOLoop->timer(0, sub {
-    $self->_start_backend or return;
-    $self->core->start;
-    $self->proxy->start if $config->{backend}{proxy};
-  });
-}
-
-sub _start_backend {
-  my $self = shift;
-
-  return 0 if $ENV{HYPNOTOAD_APP}; # TODO: Evil to use internal environment variables
-  return 0 if -e $self->config->{backend}{lock_file};
-  return 1;
+  if($config->{backend}{embedded}) {
+    Mojo::IOLoop->timer(0, sub {
+      $self->core->start;
+      $self->proxy->start if $config->{backend}{proxy};
+    });
+  }
 }
 
 =head1 COPYRIGHT
