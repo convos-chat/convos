@@ -379,6 +379,7 @@ sub connect {
       $stream->on(
         error => sub {
           $self or return;
+          $self->ioloop or return;
           $self->ioloop->remove($self->{stream_id});
           $self->emit(error => $_[1]);
         }
