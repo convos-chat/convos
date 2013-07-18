@@ -47,6 +47,9 @@
       $('navbar a.current').attr('title', $data.find('span:eq(1)').text());
     }
     if($('#conversation_' + cid_target_selector).length) {
+      if($data.hasClass('remove-conversation')) {
+        return location.href = $.url_for(cid_target.join('/'));
+      }
       $messages.append($data.fadeIn('fast'));
     }
     if(at_bottom) {

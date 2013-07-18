@@ -31,12 +31,17 @@ my %COMMANDS; %COMMANDS = (
   },
   close => sub {
     my ($self, $dom) = @_;
+    my $target = $dom->{cmd} || $dom->{target};
+
+    $target =~ /^#/ and return "PART $target";
+
+    my $id = $self->as_id($dom->{cid}, $target);
     my $uid = $self->session('uid');
-    my $id = $self->as_id($dom->{cid}, $dom->{cmd} || $dom->{target});
 
     $self->redis->zrem("user:$uid:conversations", $id, sub {
       $self->send_partial('event/remove_conversation', target => $dom->{cmd}, %$dom);
     });
+
     return;
   },
   reconnect => sub {

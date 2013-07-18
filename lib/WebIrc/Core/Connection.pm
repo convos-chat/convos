@@ -53,6 +53,7 @@ use IRC::Utils qw/parse_user/;
 use Parse::IRC   ();
 use Scalar::Util ();
 use Time::HiRes qw/ time /;
+use WebIrc::Core::Util qw/ as_id /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $JSON = Mojo::JSON->new;
@@ -213,9 +214,8 @@ sub _subscribe {
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
         }
-        else {
-          my $action = 'cmd_' . lc $message->{command};
-          $self->$action($message) if $self->can($action);
+        elsif(my $method = $self->can('cmd_' . lc $message->{command})) {
+          $self->$method($message);
         }
       });
     }
@@ -504,8 +504,16 @@ sub irc_part {
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
-  $self->_publish(nick_parted => { nick => $nick, target => $channel, save => 0 });
-  $self->redis->srem("connection:@{[$self->id]}:$channel:nicks", $nick);
+  if($nick eq $self->_irc->nick) {
+    my $id = as_id $self->id, $channel;
+    $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
+      $self->_publish(remove_conversation => { cid => $self->id, target => $channel, save => 0 });
+    });
+  }
+  else {
+    $self->redis->srem("connection:@{[$self->id]}:$channel:nicks", $nick);
+    $self->_publish(nick_parted => { nick => $nick, target => $channel, save => 0 });
+  }
 }
 
 =head2 irc_rpl_namreply
@@ -571,20 +579,6 @@ sub cmd_join {
 
   $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
   $self->_publish(add_conversation => { target => $channel, save => 1 });
-}
-
-=head2 cmd_part
-
-Handle part commands from user. Remove from channel set.
-
-=cut
-
-sub cmd_part {
-  my ($self, $message) = @_;
-  my $channel = $message->{params}[0];
-
-  $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
-  $self->_publish(remove_conversation => { target => $channel, save => 1 });
 }
 
 sub _publish {
