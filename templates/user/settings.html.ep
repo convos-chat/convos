@@ -4,7 +4,7 @@
 <nav class="bar">
   %= link_to config->{name} .' settings', 'settings', class => 'current'
   <div class="right">
-    %= link_to 'channel.view', { cid => 0 }, title => 'Go to chat', class => 'notifications', begin
+    %= link_to 'index', title => 'Go to chat', class => 'notification-list', begin
       <b>&nbsp;</b>
     % end
     %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings active'

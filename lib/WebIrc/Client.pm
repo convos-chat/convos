@@ -33,7 +33,6 @@ sub route {
     $cid_target = $cid_target->[0] if ref $cid_target;
 
     if(my($cid, $target) = id_as $cid_target || '') {
-      $self->redis->del("user:$uid:cid_target"); # prevent loop on invalid cid_target
       $self->redirect_to($self->url_for('channel.view', cid => $cid, target => $target));
     }
     else {
@@ -63,12 +62,11 @@ sub view {
   my $id = as_id $cid, $self->stash('target');
   my $with_layout = $self->req->is_xhr ? 0 : 1;
 
-  $self->redis->zadd("user:$uid:conversations", time, $id);
-
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),
     sub {
       my($delay) = @_;
+      $self->redis->zadd("user:$uid:conversations", time, $id);
       $self->redis->hgetall("connection:$cid", $delay->begin);
       $self->_modify_notification($self->param('notification'), read => 1) if defined $self->param('notification');
       $self->_conversation($delay->begin);
@@ -197,7 +195,7 @@ sub _check_if_uid_own_cid {
   sub {
     my($delay, $is_owner) = @_;
     return $delay->begin->() if $is_owner;
-    $self->redis->del("user:$uid:cid_target");
+    $self->redis->del("user:$uid:cid_target"); # prevent loop on invalid cid_target
     $self->route;
   },
 }
