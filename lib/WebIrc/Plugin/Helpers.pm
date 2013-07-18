@@ -100,6 +100,7 @@ sub format_conversation {
       $data->{message} = Mojo::Util::xml_escape($data->{message});
       $data->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($data, $1)}!ge;
       $data->{highlight} ||= 0;
+      $data->{avatar} = "https://secure.gravatar.com/avatar/TODO?s=40";
     }
 
     push @messages, $data;
