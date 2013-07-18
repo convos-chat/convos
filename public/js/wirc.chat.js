@@ -1,5 +1,19 @@
 ;(function($) {
-  var $input, $messages, $win, chat_ws, current_target, history_offset;
+  var $input, $messages, $win, chat_ws, current_target, history_offset, nick, nicks;
+  var commands = [
+    '/help',
+    '/join #',
+    '/query ',
+    '/msg ',
+    '/me ',
+    '/nick ',
+    '/close',
+    '/part ',
+    '/names ',
+    '/topic ',
+    '/reconnect',
+    '/whois '
+  ];
 
   // same as id_as() helper in mojo
   var id_as = function(str) {
@@ -23,6 +37,51 @@
     history_offset = 0;
   };
 
+  var initInputField = function() {
+    var complete, val, offset, re;
+    $input = $('footer form input');
+
+    $win.focus(function() {
+      if($win.data('at_bottom')) $input.focus();
+    });
+    $('body, input').bind('keydown', 'shift+return', function(e) {
+      e.preventDefault();
+      $win.scrollToBottom();
+      $input.focus();
+    });
+    $input.bind('keydown', function(e) {
+      if(e.keyCode !== 9) complete = false; // not tab
+    });
+    $input.bind('keydown', 'tab', function(e) {
+      val = $input.val();
+      offset = val.lastIndexOf(' ') + 1;
+      re = new RegExp('^' + val.substr(offset));
+      complete = complete || {
+        i: 0,
+        prefix: val.substr(0, offset),
+        list: $.map(
+          $.grep(
+            nicks.slice(0).concat(commands),
+            function(v, i) {
+              return offset && v.indexOf('/') === 0 ? false : re.test(v) ? true : false;
+            }
+          ),
+          function(v, i) {
+            return offset || v.indexOf('/') === 0 ? v : v + ': ';
+          }
+        ).concat(val.substr(offset))
+      };
+
+      $input.val(complete.prefix + complete.list[complete.i++]);
+      if(complete.i == complete.list.length) complete.i = 0;
+      return false;
+    });
+    $input.closest('form').submit(function() {
+      sendMessage($input.val()); $input.val('');
+      return false;
+    });
+  };
+
   var receiveMessage = function(e) {
     var $data = $(e.data);
     var cid_target = id_as($data.attr('data-target'));
@@ -36,6 +95,9 @@
     }
     if($data.hasClass('remove-conversation')) {
       $('div.conversation-list').trigger('reload');
+    }
+    if($data.hasClass('nicks')) {
+      nicks = $data.find('[data-nick]').map(function() { return $(this).attr('data-nick'); }).get();
     }
     if($data.hasClass('highlight')) {
       var sender = $data.attr('data-sender');
@@ -101,24 +163,16 @@
   }
 
   $(document).ready(function() {
-    $input = $('footer form input');
     $messages = $('.messages ul:first');
     $win = $(window);
 
     if($messages.length === 0) return; // not on chat page
 
     $('nav a.help').click(function(e) { sendMessage('/help'); $(document).click(); return false; })
-    $input.closest('form').submit(function() { sendMessage($input.val()); $input.val(''); return false; });
     $win.on('scroll', getHistory).on('resize', drawUI);
     chat_ws = $.ws($.url_for('socket').replace(/^http/, 'ws'));
     chat_ws.on('message', receiveMessage);
-
-    // TODO: Add shortcut for changing recent conversation-list
-    $('body, input').bind('keydown', 'shift+return', function(e) {
-      e.preventDefault();
-      $win.scrollToBottom();
-      $input.focus();
-    });
+    initInputField();
 
     $('div.conversation-list').on('reload', function(e) {
       $.get($.url_for('conversations'), function(data) {
@@ -147,14 +201,13 @@
   $(document).on('conversation_loaded', function() {
     current_target = $messages.attr('id').replace(/^conversation_/, '');
     history_offset = parseFloat($messages.attr('data-offset') || 0);
+    nick = $('.messages ul').attr('data-nick') || '';
+    nicks = [];
     sendMessage('/topic');
+    sendMessage('/names');
   });
 
   $(document).on('completely_ready', function() {
-    $win.focus(function() {
-      if($win.data('at_bottom')) $input.focus();
-    });
-
     if(location.href.indexOf('after=') === -1) {
       $input.focus();
       $win.data('at_bottom', true); // required before drawUI()

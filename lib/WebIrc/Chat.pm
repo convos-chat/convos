@@ -16,6 +16,7 @@ my %COMMANDS; %COMMANDS = (
   w     => \'whois',
   whois => 'WHOIS',
   nick  => 'NICK',
+  names => sub { my $dom = pop; "NAMES " . ($dom->{cmd} || $dom->{target}) },
   me   => sub { my $dom = pop; "PRIVMSG $dom->{target} :\x{1}ACTION $dom->{cmd}\x{1}" },
   msg  => sub { my $dom = pop; $dom->{cmd} =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$dom->{cmd}" },
   part => sub { my $dom = pop; "PART " . ($dom->{cmd} || $dom->{target}) },

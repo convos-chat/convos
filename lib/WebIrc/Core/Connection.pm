@@ -469,12 +469,7 @@ sub irc_join {
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
-  if($nick eq $self->_irc->nick) {
-    return $self->redis->del("connection:@{[$self->id]}:$channel:nicks");
-  }
-
   $self->_publish(nick_joined => { save => 0, nick => $nick, target => $channel });
-  $self->redis->sadd("connection:@{[$self->id]}:$channel:nicks", $nick);
 }
 
 =head2 irc_nick
@@ -506,12 +501,12 @@ sub irc_part {
 
   if($nick eq $self->_irc->nick) {
     my $id = as_id $self->id, $channel;
+    $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
     $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
       $self->_publish(remove_conversation => { cid => $self->id, target => $channel, save => 0 });
     });
   }
   else {
-    $self->redis->srem("connection:@{[$self->id]}:$channel:nicks", $nick);
     $self->_publish(nick_parted => { nick => $nick, target => $channel, save => 0 });
   }
 }
@@ -526,13 +521,17 @@ Example message:
 
 sub irc_rpl_namreply {
   my ($self, $message) = @_;
-  my @nicks = split /\s+/, $message->{params}[3];    # 3 = +nick0 @nick1, nick2
-  my $nick = $self->_irc->nick || '';
+  my @nicks;
 
-  $self->redis->sadd(
-    "connection:@{[$self->id]}:$message->{params}[2]:nicks",
-    grep { $_ ne $nick } @nicks
-  );
+  for(sort split /\s+/, $message->{params}[3]) { # 3 = "+nick0 @nick1 nick2"
+    my $mode = s/^(\W)// ? $1 : '';
+    push @nicks, { nick => $_, mode => $mode };
+  }
+
+  $self->_publish(rpl_namreply => {
+    nicks => \@nicks,
+    target => $message->{params}[2],
+  });
 }
 
 =head2 irc_error
@@ -577,7 +576,7 @@ sub cmd_join {
   return $self->_publish(wirc_notice => { message => 'Channel to join is required' }) unless $channel;
   return $self->_publish(wirc_notice => { message => 'Channel must start with & or #' }) unless $channel =~ /^[#&]/x;
 
-  $self->redis->del("connection:@{[$self->id]}:channel:$channel:nicks");
+  $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
   $self->_publish(add_conversation => { target => $channel, save => 1 });
 }
 
