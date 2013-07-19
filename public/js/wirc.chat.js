@@ -86,10 +86,11 @@
     var $data = $(e.data);
     var cid_target = id_as($data.attr('data-target'));
     var cid_target_selector = targetToSelector($data.attr('data-target'));
-    var channel = /^\#/.exec(cid_target[1]);
     var at_bottom = $win.data('at_bottom');
     var current = $('#conversation_' + cid_target_selector).length ? true : false;
     var txt;
+
+    if(typeof cid_target[1] === 'undefined') cid_target[1] = ''; // server messages
 
     if($data.hasClass('add-conversation')) {
       return location.href = $.url_for(cid_target.join('/'));
@@ -103,7 +104,7 @@
     }
     if($data.hasClass('highlight')) {
       var sender = $data.attr('data-sender');
-      var what = channel ? 'mentioned you in #' + channel[1] : 'sent you a message';
+      var what = cid_target[1].indexOf('#') === 0 ? 'mentioned you in #' + cid_target[1] : 'sent you a message';
       window.notify([sender, what].join(' '), $data.find('.content').text(), '');
       $('div.notification-list').trigger('reload');
     }
