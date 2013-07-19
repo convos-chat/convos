@@ -1,5 +1,6 @@
 ;(function($) {
-  var $input, $messages, $win, chat_ws, current_target, history_offset, nick, nicks;
+  var $input, $messages, $win, chat_ws, current_target, history_offset, nick;
+  var nicks = new sortedSet();
   var commands = [
     '/help',
     '/join #',
@@ -56,13 +57,13 @@
     $input.bind('keydown', 'tab', function(e) {
       val = $input.val();
       offset = val.lastIndexOf(' ') + 1;
-      re = new RegExp('^' + RegExp.escape(val.substr(offset)));
+      re = new RegExp('^' + RegExp.escape(val.substr(offset)), 'i');
       complete = complete || {
         i: 0,
         prefix: val.substr(0, offset),
         list: $.map(
           $.grep(
-            nicks.slice(0).concat(commands),
+            nicks.revrange(0, -1).concat(commands),
             function(v, i) {
               return offset && v.indexOf('/') === 0 ? false : re.test(v) ? true : false;
             }
@@ -100,44 +101,50 @@
     });
   };
 
+  var initNickList = function($data) {
+    var senders = {};
+
+    $('.messages li[data-sender]').each(function(i) {
+      senders[$(this).attr('data-sender')] = i;
+    });
+
+    nicks.clear();
+    $data.find('[data-nick]').each(function() {
+      var n = $(this).attr('data-nick');
+      if(n === nick) return;
+      nicks.add(senders[n] || 1, n);
+    });
+  }
+
   var receiveMessage = function(e) {
     var $data = $(e.data);
     var cid_target = id_as($data.attr('data-target'));
     var cid_target_selector = targetToSelector($data.attr('data-target'));
     var at_bottom = $win.data('at_bottom');
     var current = $('#conversation_' + cid_target_selector).length ? true : false;
-    var txt;
+
+    $input.removeClass('sending');
 
     if(typeof cid_target[1] === 'undefined') cid_target[1] = ''; // server messages
+    if($data.hasClass('add-conversation')) return location.href = $.url_for(cid_target.join('/'));
+    if($data.hasClass('remove-conversation') && current) return location.href = $.url_for('/');
+    if($data.hasClass('remove-conversation')) $('div.conversation-list').trigger('reload');
+    if($data.hasClass('nicks')) initNickList($data);
+    if($data.hasClass('nick-joined')) nicks.add(0, $data.attr('data-nick'));
+    if($data.hasClass('nick-parted')) nicks.rem($data.attr('data.nick'));
+    if($data.attr('data-sender')) nicks.add(new Date().getTime(), $data.attr('data-sender'))
+    if(current) $messages.append($data.fadeIn('fast'));
 
-    if($data.hasClass('add-conversation')) {
-      return location.href = $.url_for(cid_target.join('/'));
-    }
-    if($data.hasClass('remove-conversation')) {
-      if(current) return location.href = $.url_for('/');
-      $('div.conversation-list').trigger('reload');
-    }
-    if($data.hasClass('nicks')) {
-      nicks = $data.find('[data-nick]').map(function() { return $(this).attr('data-nick'); }).get();
-    }
     if($data.hasClass('highlight')) {
       var sender = $data.attr('data-sender');
       var what = cid_target[1].indexOf('#') === 0 ? 'mentioned you in ' + cid_target[1] : 'sent you a message';
       window.notify([sender, what].join(' '), $data.find('.content').text(), '');
       $('div.notification-list').trigger('reload');
     }
-    if($data.hasClass('topic')) {
-      $('navbar a.current').attr('title', $data.find('span:eq(1)').text());
-    }
-    if(current) {
-      $messages.append($data.fadeIn('fast'));
-    }
     if(at_bottom) {
       $win.scrollToBottom();
       $data.find('img').one('load', function() { $win.scrollToBottom() });
     }
-
-    $input.removeClass('sending');
   };
 
   var drawUI = function() {
@@ -220,7 +227,7 @@
     current_target = $messages.attr('id').replace(/^conversation_/, '');
     history_offset = parseFloat($messages.attr('data-offset') || 0);
     nick = $('.messages ul').attr('data-nick') || '';
-    nicks = [];
+    nicks = new sortedSet();
 
     if(/:23/.exec(current_target)) { // is channel
       sendMessage('/names');

@@ -95,4 +95,19 @@
       $win.data('at_bottom', at_bottom);
     });
   });
+
 })(jQuery);
+
+// super cheap sorted set implementation
+window.sortedSet = function() { this.set = {}; return this; };
+window.sortedSet.prototype.add = function(score, member) { this.set[member] = score; return this; };
+window.sortedSet.prototype.clear = function() { this.set = {}; return this; };
+window.sortedSet.prototype.rem = function(member) { delete this.set[member]; return this; };
+window.sortedSet.prototype.revrange = function(start, stop) {
+  var k, res = [], self = this;
+  for(k in self.set) res.push(k);
+  if(start < 0) start = res.length + start;
+  if(stop < 0) stop = res.length + stop + 1;
+  return res.sort(function(a, b) { return self.set[b] - self.set[a]; }).splice(start, stop);
+};
+
