@@ -469,6 +469,11 @@ sub irc_join {
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
+  if($nick eq $self->_irc->nick) {
+    my $id = as_id $self->id, $channel;
+    $self->redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
+  }
+
   $self->_publish(nick_joined => { save => 0, nick => $nick, target => $channel });
 }
 
