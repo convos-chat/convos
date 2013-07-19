@@ -72,8 +72,6 @@ sub format_conversation {
     my($data, $url) = @_;
     my $cb = $delay->begin;
 
-    $data->{embed} = '';
-
     if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
       $data->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
       $cb->();
@@ -96,6 +94,9 @@ sub format_conversation {
       $c->logf(debug => "Unable to parse raw message: $_");
       next;
     }
+
+    $data->{embed} = '';
+
     if($data->{message}) {
       $data->{message} = Mojo::Util::xml_escape($data->{message});
       $data->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($data, $1)}!ge;
