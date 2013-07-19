@@ -55,7 +55,7 @@
     $input.bind('keydown', 'tab', function(e) {
       val = $input.val();
       offset = val.lastIndexOf(' ') + 1;
-      re = new RegExp('^' + val.substr(offset));
+      re = new RegExp('^' + RegExp.escape(val.substr(offset)));
       complete = complete || {
         i: 0,
         prefix: val.substr(0, offset),

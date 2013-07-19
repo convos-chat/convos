@@ -1,4 +1,9 @@
 ;(function($) {
+
+  RegExp.escape = RegExp.escape || function( value ) {
+    return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
+  }
+
   var confirmFirst = function() {
     var $a = $(this);
     var confirm_text = 'Click again to confirm';
