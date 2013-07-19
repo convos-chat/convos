@@ -39,6 +39,7 @@
 
   var initInputField = function() {
     var complete, val, offset, re;
+    var history = { index: 0, list: [], current: '' };
     $input = $('footer form input');
 
     $win.focus(function() {
@@ -76,9 +77,26 @@
       if(complete.i == complete.list.length) complete.i = 0;
       return false;
     });
-    $input.closest('form').submit(function() {
-      sendMessage($input.val()); $input.val('');
-      return false;
+    $input.bind('keydown', 'up', function(e) {
+      e.preventDefault();
+      if(history.index == 0) return;
+      if(history.index == history.list.length) history.current = $input.val();
+      $input.val(history.list[--history.index]);
+    });
+    $input.bind('keydown', 'down', function(e) {
+      e.preventDefault();
+      if(++history.index == history.list.length) return $input.val(history.current);
+      if(history.index > history.list.length) return history.index = history.list.length;
+      $input.val(history.list[history.index]);
+    });
+    $input.closest('form').submit(function(e) {
+      e.preventDefault();
+      var val = $input.val();
+      if(val.length === 0) return false;
+      sendMessage(val);
+      history.list.push(val);
+      history.index = history.list.length;
+      $input.val('');
     });
   };
 
