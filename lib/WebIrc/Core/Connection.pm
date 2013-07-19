@@ -452,7 +452,7 @@ Example message:
 
 sub irc_rpl_myinfo {
   my ($self, $message) = @_;
-  my @keys = qw/ nick real_host version available_user_modes available_channel_modes /;
+  my @keys = qw/ current_nick real_host version available_user_modes available_channel_modes /;
   my $i    = 0;
 
   $self->redis->hmset("connection:@{[$self->id]}", map { $_, $message->{params}[$i++] // '' } @keys);
