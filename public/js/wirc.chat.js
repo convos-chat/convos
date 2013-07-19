@@ -88,12 +88,14 @@
     var cid_target_selector = targetToSelector($data.attr('data-target'));
     var channel = /^\#/.exec(cid_target[1]);
     var at_bottom = $win.data('at_bottom');
+    var current = $('#conversation_' + cid_target_selector).length ? true : false;
     var txt;
 
     if($data.hasClass('add-conversation')) {
       return location.href = $.url_for(cid_target.join('/'));
     }
     if($data.hasClass('remove-conversation')) {
+      if(current) return location.href = $.url_for('/');
       $('div.conversation-list').trigger('reload');
     }
     if($data.hasClass('nicks')) {
@@ -108,10 +110,7 @@
     if($data.hasClass('topic')) {
       $('navbar a.current').attr('title', $data.find('span:eq(1)').text());
     }
-    if($('#conversation_' + cid_target_selector).length) {
-      if($data.hasClass('remove-conversation')) {
-        return location.href = $.url_for(cid_target.join('/'));
-      }
+    if(current) {
       $messages.append($data.fadeIn('fast'));
     }
     if(at_bottom) {
@@ -203,8 +202,11 @@
     history_offset = parseFloat($messages.attr('data-offset') || 0);
     nick = $('.messages ul').attr('data-nick') || '';
     nicks = [];
-    sendMessage('/topic');
-    sendMessage('/names');
+
+    if(/:23/.exec(current_target)) { // is channel
+      sendMessage('/names');
+      sendMessage('/topic');
+    }
   });
 
   $(document).on('completely_ready', function() {

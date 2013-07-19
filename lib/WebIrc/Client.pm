@@ -25,27 +25,25 @@ Route to last seen IRC conversation.
 sub route {
   my $self = shift->render_later;
   my $uid  = $self->session('uid') or return $self->render('index');
-  my $goto_view;
-
-  $goto_view = sub {
-    my($delay, $cid_target) = @_;
-
-    $cid_target = $cid_target->[0] if ref $cid_target;
-
-    if(my($cid, $target) = id_as $cid_target || '') {
-      $self->redirect_to($self->url_for('channel.view', cid => $cid, target => $target));
-    }
-    else {
-      $delay->begin->();
-    }
-  };
 
   Mojo::IOLoop->delay(
-    sub { $self->redis->get("user:$uid:cid_target", shift->begin) },
-    $goto_view,
-    sub { $self->redis->zrevrange("user:$uid:conversations", 0, 1, shift->begin) },
-    $goto_view,
-    sub { $self->redirect_to($self->url_for('settings')) }
+    sub {
+      my($delay) = @_;
+      $self->redis->zrevrange("user:$uid:conversations", 0, 1, $delay->begin);
+    },
+    sub {
+      my($delay, $id) = @_;
+
+      if($id and $id->[0]) {
+        if(my($cid, $target) = id_as $id->[0]) {
+          return $self->redirect_to(
+            $self->url_for('channel.view', cid => $cid, target => $target)
+          );
+        }
+      }
+
+      $self->redirect_to($self->url_for('settings')); # fallback
+    }
   );
 }
 
@@ -76,7 +74,6 @@ sub view {
       $self->stash(%$connection, conversation => $conversation);
       $self->conversation_list($delay->begin) if $with_layout;
       $self->notification_list($delay->begin) if $with_layout;
-      $self->redis->set("user:$uid:cid_target", $id, $delay->begin);
     },
     sub {
       return $self->render if $with_layout;
@@ -195,7 +192,6 @@ sub _check_if_uid_own_cid {
   sub {
     my($delay, $is_owner) = @_;
     return $delay->begin->() if $is_owner;
-    $self->redis->del("user:$uid:cid_target"); # prevent loop on invalid cid_target
     $self->route;
   },
 }

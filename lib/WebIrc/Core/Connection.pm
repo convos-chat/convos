@@ -38,7 +38,7 @@ L<Mojo::IRC/rpl_endofmotd>, L<Mojo::IRC/rpl_welcome> and L<Mojo::IRC/error>.
 =item * Other events
 
 L</irc_rpl_welcome>, L</irc_rpl_myinfo>, L</irc_join>, L</irc_part>,
-L<irc_rpl_namreply> and l</irc_error>.
+L</irc_rpl_namreply>, L</irc_err_nosuchchannel> and l</irc_error>.
 
 =back
 
@@ -118,7 +118,7 @@ my @ADD_SERVER_MESSAGE_EVENTS = qw/
 my @OTHER_EVENTS              = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
   irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_topic
-  irc_rpl_topicwhotime irc_rpl_notopic
+  irc_rpl_topicwhotime irc_rpl_notopic irc_err_nosuchchannel
 /;
 
 has _irc => sub {
@@ -509,6 +509,22 @@ sub irc_part {
   else {
     $self->_publish(nick_parted => { nick => $nick, target => $channel, save => 0 });
   }
+}
+
+=head2 irc_err_nosuchchannel
+
+:astral.shadowcat.co.uk 403 nick #channel :No such channel
+
+=cut
+
+sub irc_err_nosuchchannel {
+  my ($self, $message) = @_;
+  my $channel = $message->{params}[1];
+  my $id = as_id $self->id, $channel;
+
+  $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
+    $self->_publish(remove_conversation => { cid => $self->id, target => $channel, save => 0 });
+  });
 }
 
 =head2 irc_rpl_namreply
