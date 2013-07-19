@@ -87,6 +87,10 @@ sub format_conversation {
     $c->link_to($url, $url, target => '_blank');
   };
 
+  my $gravatar_lookup = sub {
+    return Mojo::Util::md5_sum($_[0]->{nick} || $_[0]->{target});
+  };
+
   for(@$conversation) {
     my $data = $JSON->decode($_);
 
@@ -98,10 +102,11 @@ sub format_conversation {
     $data->{embed} = '';
 
     if($data->{message}) {
+      my $gravatar = $gravatar_lookup->($data);
       $data->{message} = Mojo::Util::xml_escape($data->{message});
       $data->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($data, $1)}!ge;
       $data->{highlight} ||= 0;
-      $data->{avatar} = "https://secure.gravatar.com/avatar/TODO?s=40";
+      $data->{avatar} = "https://secure.gravatar.com/avatar/$gravatar?s=40&d=retro";
     }
 
     push @messages, $data;
