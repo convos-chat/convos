@@ -104,7 +104,7 @@
     }
     if($data.hasClass('highlight')) {
       var sender = $data.attr('data-sender');
-      var what = cid_target[1].indexOf('#') === 0 ? 'mentioned you in #' + cid_target[1] : 'sent you a message';
+      var what = cid_target[1].indexOf('#') === 0 ? 'mentioned you in ' + cid_target[1] : 'sent you a message';
       window.notify([sender, what].join(' '), $data.find('.content').text(), '');
       $('div.notification-list').trigger('reload');
     }
