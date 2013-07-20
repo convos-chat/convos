@@ -10,6 +10,7 @@
     %= javascript '/js/jquery.js';
     %= javascript '/js/jquery.hotkeys.js';
     %= javascript '/js/jquery.notifier.js';
+    %= javascript '/js/jquery.pjax.js';
     %= javascript '/js/jquery.wirc.js';
     %= javascript '/js/wirc.actions.js';
     %= javascript '/js/wirc.chat.js';

@@ -25,6 +25,53 @@
     });
   };
 
+  var conversationLoaded = function(e) {
+    current_target = $messages.attr('id').replace(/^conversation_/, '');
+    history_offset = parseFloat($messages.attr('data-offset') || 0);
+    nick = $('.messages ul').attr('data-nick') || '';
+    nicks = new sortedSet();
+
+    if(/:23/.exec(current_target)) { // is channel
+      sendMessage('/names');
+      sendMessage('/topic');
+    }
+    if(e) {
+      reloadConversationList();
+      reloadNotificationList();
+    }
+
+    drawUI();
+  };
+
+  var drawUI = function() {
+    var $conversation_list = $('div.conversation-list li').hide();
+    var $conversation_list_button = $('nav a.conversation-list').hide();
+    var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
+    var used_width = 0;
+    var left;
+
+    $('nav .conversation-list a').each(function(i) {
+      used_width += $(this).show().outerWidth();
+      if(used_width < available_width) return;
+      $conversation_list.eq(i).show();
+      $(this).hide();
+    });
+
+    if(used_width >= available_width) {
+      $conversation_list_button.show();
+      left = $conversation_list_button.offset().left - 320 + 22;
+      left = left < 6 ? 6 : left;
+      $conversation_list.closest('div').css('left', left + 'px');
+    }
+    else {
+      $conversation_list_button.trigger('toggle_hide');
+    }
+
+    if($win.data('at_bottom')) {
+      $win.scrollToBottom();
+    }
+  };
+
   var getHistory = function() {
     if(!history_offset || $win.scrollTop() !== 0) return;
     $.get(location.href, { before: history_offset }, function(data) {
@@ -130,7 +177,7 @@
     if(typeof cid_target[1] === 'undefined') cid_target[1] = ''; // server messages
     if($data.hasClass('add-conversation')) return location.href = $.url_for(cid_target.join('/'));
     if($data.hasClass('remove-conversation') && current) return location.href = $.url_for('/');
-    if($data.hasClass('remove-conversation')) $('div.conversation-list').trigger('reload');
+    if($data.hasClass('remove-conversation')) reloadConversationList();
     if($data.hasClass('nicks')) initNickList($data);
     if($data.hasClass('nick-joined')) nicks.add(0, $data.attr('data-nick'));
     if($data.hasClass('nick-parted')) nicks.rem($data.attr('data.nick'));
@@ -141,7 +188,7 @@
       var sender = $data.attr('data-sender');
       var what = cid_target[1].indexOf('#') === 0 ? 'mentioned you in ' + cid_target[1] : 'sent you a message';
       window.notify([sender, what].join(' '), $data.find('.content').text(), '');
-      $('div.notification-list').trigger('reload');
+      reloadNotificationList();
     }
     if(at_bottom) {
       $win.scrollToBottom();
@@ -149,33 +196,25 @@
     }
   };
 
-  var drawUI = function() {
-    var $conversation_list = $('div.conversation-list li').hide();
-    var $conversation_list_button = $('nav a.conversation-list').hide();
-    var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
-    var used_width = 0;
-    var left;
-
-    $('nav .conversation-list a').each(function(i) {
-      used_width += $(this).show().outerWidth();
-      if(used_width < available_width) return;
-      $conversation_list.eq(i).show();
-      $(this).hide();
+  var reloadConversationList = function(e) {
+    $.get($.url_for('conversations'), function(data) {
+      $('ul.conversation-list').replaceWith(data);
+      drawUI();
     });
+  };
 
-    if(used_width >= available_width) {
-      $conversation_list_button.show();
-      left = $conversation_list_button.offset().left - 320 + 22;
-      left = left < 6 ? 6 : left;
-      $conversation_list.closest('div').css('left', left + 'px');
-    }
-    else {
-      $conversation_list_button.trigger('toggle_hide');
-    }
+  var reloadNotificationList = function(e) {
+    var $notification_list = $('div.notification-list');
+    var $n_notifications = $('a.notification-list');
+    var n;
 
-    if($win.data('at_bottom')) {
-      $win.scrollToBottom();
-    }
+    $.get($.url_for('notifications'), function(data) {
+      $notification_list.html(data);
+      n = parseInt($notification_list.children('ul').attr('data-notifications'), 10);
+      $n_notifications.children('b').text(n);
+      if($notification_list.find('li').length) $n_notifications.removeClass('hidden');
+      $n_notifications[n ? 'addClass' : 'removeClass']('alert');
+    });
   };
 
   var sendMessage = function(message) {
@@ -201,40 +240,10 @@
     chat_ws.on('message', receiveMessage);
     initInputField();
 
-    $('div.conversation-list').on('reload', function(e) {
-      $.get($.url_for('conversations'), function(data) {
-        $('ul.conversation-list').replaceWith(data);
-        drawUI();
-      });
-    });
-
-    $('div.notification-list').on('reload', function(e) {
-      var $e = $(this);
-      var $n_notifications = $('a.notification-list');
-      var n;
-
-      $.get($.url_for('notifications'), function(data) {
-        $e.html(data);
-        n = parseInt($e.children('ul').attr('data-notifications'), 10);
-        $n_notifications.children('b').text(n);
-        if($e.find('li').length) $n_notifications.removeClass('hidden');
-        $n_notifications[n ? 'addClass' : 'removeClass']('alert');
-      });
-    });
-
-    $(document).trigger('conversation_loaded');
-  });
-
-  $(document).on('conversation_loaded', function() {
-    current_target = $messages.attr('id').replace(/^conversation_/, '');
-    history_offset = parseFloat($messages.attr('data-offset') || 0);
-    nick = $('.messages ul').attr('data-nick') || '';
-    nicks = new sortedSet();
-
-    if(/:23/.exec(current_target)) { // is channel
-      sendMessage('/names');
-      sendMessage('/topic');
-    }
+    $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
+    $(document).pjax('ul.conversation-list a', $messages);
+    $(document).pjax('ul.notification-list a', $messages);
+    $messages.on('pjax:end', conversationLoaded);
   });
 
   $(document).on('completely_ready', function() {
@@ -242,8 +251,7 @@
       $input.focus();
       $win.data('at_bottom', true); // required before drawUI()
     }
-
-    drawUI();
+    conversationLoaded();
   });
 
 })(jQuery);
