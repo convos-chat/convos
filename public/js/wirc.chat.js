@@ -29,10 +29,12 @@
     if(!history_offset || $win.scrollTop() !== 0) return;
     $.get(location.href, { before: history_offset }, function(data) {
       var $data = $(data);
+      var $heigth_from = $(document).data('heigth_from');
       if($data.children('li').length === 0) return;
-      var height_before_prepend = $('body').height();
+      var height_before_prepend = $heigth_from.height();
       $messages.prepend($data.children('li'));
-      $win.scrollTop($('body').height() - height_before_prepend);
+      $win.scrollTop($heigth_from.height() - height_before_prepend);
+      console.log(height_before_prepend);
       history_offset = $data.attr('data-offset');
     });
     history_offset = 0;

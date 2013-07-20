@@ -474,7 +474,7 @@ sub irc_join {
     $self->redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
   }
 
-  $self->_publish(nick_joined => { save => 0, nick => $nick, target => $channel });
+  $self->_publish(nick_joined => { nick => $nick, target => $channel });
 }
 
 =head2 irc_nick
@@ -492,7 +492,7 @@ sub irc_nick {
     $self->redis->hset("connection:@{[$self->id]}", current_nick => $new_nick);
   }
 
-  $self->_publish(nick_change => { save => 1, old_nick => $old_nick, new_nick => $new_nick });
+  $self->_publish(nick_change => { old_nick => $old_nick, new_nick => $new_nick });
 }
 
 =head2 irc_part
@@ -508,11 +508,11 @@ sub irc_part {
     my $id = as_id $self->id, $channel;
     $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
     $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
-      $self->_publish(remove_conversation => { cid => $self->id, target => $channel, save => 0 });
+      $self->_publish(remove_conversation => { cid => $self->id, target => $channel, });
     });
   }
   else {
-    $self->_publish(nick_parted => { nick => $nick, target => $channel, save => 0 });
+    $self->_publish(nick_parted => { nick => $nick, target => $channel });
   }
 }
 
@@ -528,7 +528,7 @@ sub irc_err_nosuchchannel {
   my $id = as_id $self->id, $channel;
 
   $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
-    $self->_publish(remove_conversation => { cid => $self->id, target => $channel, save => 0 });
+    $self->_publish(remove_conversation => { cid => $self->id, target => $channel });
   });
 }
 
@@ -598,7 +598,7 @@ sub cmd_join {
   return $self->_publish(wirc_notice => { message => 'Channel must start with & or #' }) unless $channel =~ /^[#&]/x;
 
   $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
-  $self->_publish(add_conversation => { target => $channel, save => 1 });
+  $self->_publish(add_conversation => { target => $channel });
 }
 
 sub _publish {
@@ -617,10 +617,10 @@ sub _publish {
   }
   if($data->{save}) {
     if ($data->{target}) {
-      $self->redis->zadd("connection:$data->{cid}:$data->{target}:msg", time, $message);
+      $self->redis->zadd("connection:$data->{cid}:$data->{target}:msg", $data->{timestamp}, $message);
     }
     else {
-      $self->redis->zadd("connection:$data->{cid}:msg", time, $message);
+      $self->redis->zadd("connection:$data->{cid}:msg", $data->{timestamp}, $message);
     }
   }
 }

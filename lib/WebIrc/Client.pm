@@ -74,6 +74,7 @@ sub view {
       $self->stash(%$connection, conversation => $conversation);
       $self->conversation_list($delay->begin) if $with_layout;
       $self->notification_list($delay->begin) if $with_layout;
+      $delay->begin->(0);
     },
     sub {
       return $self->render if $with_layout;
@@ -204,15 +205,10 @@ sub _conversation {
   my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
 
   if(my $before = $self->param('before')) { # before a timestamp
-    $self->redis->zrank($key => $before, sub {
-      my $redis = shift;
-      my $stop = shift || 0;
-      my $start = $stop > $N_MESSAGES ? $stop - $N_MESSAGES : 0;
-      $redis->zrange($key => $start, $stop, sub {
-        my $list = pop || [];
-        pop @$list; # ignore the last element
-        $self->format_conversation($list, $cb);
-      });
+    $self->redis->zrevrangebyscore($key => $before, '-inf', LIMIT => 0, $N_MESSAGES, sub {
+      my $list = pop || [];
+      shift @$list; # remove the *last* element
+      $self->format_conversation([reverse @$list], $cb);
     });
   }
   elsif(my $after = $self->param('after')) { # after at timestamp
