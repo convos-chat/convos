@@ -89,6 +89,7 @@
     $win = $(window).data('at_bottom', false);
 
     setTimeout(function() { $(document).trigger('completely_ready'); }, 200);
+    $(document).data('heigth_from', $heigth_from);
 
     $win.on('scroll', function() {
       var at_bottom = $win.scrollTop() + $win.height() > $heigth_from.height() - at_bottom_threshold;
