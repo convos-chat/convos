@@ -2,8 +2,27 @@
   var at_bottom_threshold = 40;
   var $heigth_from, $win, base_url;
 
-  $.fn.scrollToBottom = function() {
-    $(this).scrollTop($heigth_from.height());
+  $.fn.loadingIndicator = function(action) {
+    if(action == 'hide') {
+      this.find('.loading-indicator-overlay, .loading-indicator').remove();
+    }
+    else {
+      var position = this.css('position') || 'static';
+      if(position == 'static') this.css('position', 'relative');
+      this.append('<div class="loading-indicator-overlay"></div><div class="loading-indicator"></div>');
+    }
+    return this;
+  };
+
+  $.fn.scrollTo = function(pos) {
+    if(pos === 'bottom') {
+      $(this).scrollTop($heigth_from.height());
+      $win.data('at_bottom', true);
+    }
+    else {
+      $(this).scrollTop(pos);
+      $win.data('at_bottom', false);
+    }
     return this;
   };
 
@@ -112,6 +131,13 @@ window.sortedSet.prototype.revrange = function(start, stop) {
   return res.sort(function(a, b) { return self.set[b] - self.set[a]; }).splice(start, stop);
 };
 
+// console.log()
+window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
+
+// add escape() with the *same* functionality as per's quotemeta()
+RegExp.escape = RegExp.escape || function(str) {
+  return str.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
+};
 
 // jquery.pjax.js
 // copyright chris wanstrath

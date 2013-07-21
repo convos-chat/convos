@@ -97,7 +97,7 @@ footer {
   form {
     input { width: 100%; padding: 6px; font-size: 1.3em; }
     input.sending {
-      background: url(../image/loading.gif) no-repeat 99% 50%;
+      background: url(../image/loader-facebook.gif) no-repeat 99% 50%;
     }
   }
 }
@@ -176,6 +176,25 @@ button { height: 34px; vertical-align: baseline; } // make <a> and <button> alig
 button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
 button.confirm, a.confirm { color: #900; border: 2px solid #900; }
 button:hover, .button:hover { border: @buttonBorderHover; }
+
+/*
+ * Loading indicator
+ */
+div.loading-indicator-overlay,
+div.loading-indicator {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+div.loading-indicator-overlay {
+  background: #fff;
+  .opacity(0.7);
+}
+div.loading-indicator {
+  background: url(../image/loader-squares-circle.gif) 50% 50% fixed no-repeat;
+}
 
 nav.bar {
   background: #fdfdfd;
@@ -257,7 +276,7 @@ section.messages {
   li {
     display: block;
     position: relative;
-    padding: 6px 0;
+    padding: 3px 0;
     border-bottom: 1px solid #f0f0ff;
     overflow: hidden;
 

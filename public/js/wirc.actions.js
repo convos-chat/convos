@@ -1,9 +1,5 @@
 ;(function($) {
 
-  RegExp.escape = RegExp.escape || function( value ) {
-    return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
-  }
-
   var confirmFirst = function() {
     var $a = $(this);
     var confirm_text = 'Click again to confirm';
@@ -28,7 +24,7 @@
       var $target = $(target);
       var is_active = $a.hasClass('active');
 
-      $('a[data-toggle]').filter('.active').trigger('toggle_hide');
+      $('a[data-toggle]').filter('.active').trigger('deactivate');
       if(is_active) return false;
 
       if(!$a.hasClass('active')) {
@@ -41,13 +37,13 @@
       return false;
     });
 
-    $a.on('toggle_hide', function() { $a.removeClass('active'); $(target).hide(); toggleElementWithClick.visible = false; });
-    $a.on('toggle_show', function() { $a.removeClass('active'); $a.click(); });
+    $a.on('deactivate', function() { $a.removeClass('active'); $(target).hide(); toggleElementWithClick.visible = false; });
+    $a.on('activate', function() { $a.removeClass('active'); $a.click(); });
   };
 
   $(document).ready(function() {
     var $togglers = $('a[data-toggle]').each(toggleElementWithClick);
-    var $focus = $togglers.filter('.active').trigger('toggle_show').filter('.focus');
+    var $focus = $togglers.filter('.active').trigger('activate').filter('.focus');
     var $login_button = $('a[data-toggle="div.login"]');
 
     $(document).click(function(e) {
@@ -55,7 +51,7 @@
       if(!$target) return true;
       if($target.hasClass('ignore-document-close')) return true;
       if($(e.target).closest($target).length) return true; // prevent hiding when clicking inside forms
-      $('a[data-toggle]').filter('.active').trigger('toggle_hide');
+      $('a[data-toggle]').filter('.active').trigger('deactivate');
       return false;
     });
 

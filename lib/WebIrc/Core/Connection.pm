@@ -474,6 +474,7 @@ sub irc_join {
   if($nick eq $self->_irc->nick) {
     my $id = as_id $self->id, $channel;
     $self->redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
+    $self->_publish(add_conversation => { target => $channel });
   }
 
   $self->_publish(nick_joined => { nick => $nick, target => $channel });
@@ -609,8 +610,12 @@ sub cmd_join {
   return $self->_publish(wirc_notice => { message => 'Channel to join is required' }) unless $channel;
   return $self->_publish(wirc_notice => { message => 'Channel must start with & or #' }) unless $channel =~ /^[#&]/x;
 
-  $self->redis->sadd("connection:@{[$self->id]}:channels", $channel);
-  $self->_publish(add_conversation => { target => $channel });
+  $self->redis->sadd("connection:@{[$self->id]}:channels", $channel, sub {
+    my($redis, $added) = @_;
+    my $id = as_id $self->id, $channel;
+    $redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
+    $self->_publish(add_conversation => { target => $channel }) unless $added;
+  });
 }
 
 sub _publish {

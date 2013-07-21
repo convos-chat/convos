@@ -23,7 +23,6 @@
 
 <div class="wrapper">
   <section class="messages row">
-    <div>&nbsp;</div><!-- margin-top hack -->
     %= include 'client/conversation', class => 'more'
   </section>
   <div class="clear"></div>
