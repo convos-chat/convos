@@ -38,8 +38,8 @@ L<Mojo::IRC/rpl_endofmotd>, L<Mojo::IRC/rpl_welcome> and L<Mojo::IRC/error>.
 =item * Other events
 
 L</irc_rpl_welcome>, L</irc_rpl_myinfo>, L</irc_join>, L</irc_part>,
-L</irc_rpl_namreply>, L</irc_err_nosuchchannel> L</irc_err_notonchannel> and
-l</irc_error>.
+L</irc_rpl_namreply>, L</irc_err_nosuchchannel> L</irc_err_notonchannel>
+L</irc_err_bannedfromchan> and l</irc_error>.
 
 =back
 
@@ -120,7 +120,7 @@ my @OTHER_EVENTS              = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
   irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic irc_err_nosuchchannel
-  irc_err_notonchannel
+  irc_err_notonchannel irc_err_bannedfromchan
 /;
 
 has _irc => sub {
@@ -517,6 +517,23 @@ sub irc_part {
   else {
     $self->_publish(nick_parted => { nick => $nick, target => $channel });
   }
+}
+
+=head2 irc_err_bannedfromchan
+
+:electret.shadowcat.co.uk 474 nick #channel :Cannot join channel (+b)
+
+=cut
+
+sub irc_err_bannedfromchan {
+  my($self, $message) = @_;
+  my $channel = $message->{params}[1];
+  my $id = as_id $self->id, $channel;
+
+  $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
+    $self->_publish(remove_conversation => { cid => $self->id, target => $channel });
+    $self->_publish(wirc_notice => { message => $message->{params}[2] });
+  });
 }
 
 =head2 irc_err_nosuchchannel
