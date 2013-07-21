@@ -204,25 +204,47 @@ sub _conversation {
   my $target = $self->stash('target');
   my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
 
-  if(my $before = $self->param('before')) { # before a timestamp
-    $self->redis->zrevrangebyscore($key => $before, '-inf', LIMIT => 0, $N_MESSAGES, sub {
+  if(my $to = $self->param('to')) { # to a timestamp
+    $self->redis->zrevrangebyscore($key => $to, '-inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES, sub {
       my $list = pop || [];
-      shift @$list; # remove the *last* element
-      $self->format_conversation([reverse @$list], $cb);
+      $self->format_conversation(
+        sub {
+          my $timestamp = pop @$list;
+          my $message = $JSON->decode(pop @$list) or return;
+          $message->{timestamp} = $timestamp;
+          $message;
+        },
+        $cb
+      );
     });
   }
-  elsif(my $after = $self->param('after')) { # after at timestamp
-    $self->redis->zrangebyscore($key => $after, '+inf', LIMIT => 0, $N_MESSAGES, sub {
+  elsif(my $from = $self->param('from')) { # from at timestamp
+    $self->redis->zrangebyscore($key => $from, '+inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES, sub {
       my $list = pop || [];
-      $self->format_conversation($list, $cb);
+      $self->format_conversation(
+        sub {
+          my $message = $JSON->decode(shift @$list) or return;
+          $message->{timestamp} = shift @$list;
+          $message;
+        },
+        $cb,
+      );
     });
   }
   else { # default
     $self->redis->zcard($key, sub {
       my($redis, $end) = @_;
       my $start = $end > $N_MESSAGES ? $end - $N_MESSAGES : 0;
-      $redis->zrange($key => $start, $end, sub {
-        $self->format_conversation($_[1] || [], $cb);
+      $redis->zrange($key => $start, $end, 'WITHSCORES', sub {
+        my $list = pop || [];
+        $self->format_conversation(
+          sub {
+            my $message = $JSON->decode(shift @$list) or return;
+            $message->{timestamp} = shift @$list;
+            $message;
+          },
+          $cb,
+        );
       });
     });
   }

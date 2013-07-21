@@ -8,9 +8,7 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util ();
-use Mojo::JSON;
 
-my $JSON = Mojo::JSON->new;
 my $YOUTUBE_INCLUDE = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
 
 =head1 HELPERS
@@ -53,7 +51,7 @@ sub form_block {
 
 =head2 format_conversation
 
-  $c->format_conversation(\@conversation, $callback);
+  $c->format_conversation(\&iterator, \&callback);
 
 Takes a list of JSON strings and turns them into a list of hash-refs where the
 "message" key contains a formatted version with HTML and such. The result will
@@ -91,14 +89,7 @@ sub format_conversation {
     return Mojo::Util::md5_sum($_[0]->{nick} || $_[0]->{target});
   };
 
-  for(@$conversation) {
-    my $data = $JSON->decode($_);
-
-    if(not ref $data) {
-      $c->logf(debug => "Unable to parse raw message: $_");
-      next;
-    }
-
+  while(my $data = $conversation->()) {
     $data->{embed} = '';
 
     if($data->{message}) {

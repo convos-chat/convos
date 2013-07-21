@@ -7,7 +7,9 @@ WebIrc::Chat - Mojolicious controller for IRC chat
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
+use Mojo::JSON;
 
+my $JSON = Mojo::JSON->new;
 my %COMMANDS; %COMMANDS = (
   j     => \'join',
   join  => 'JOIN',
@@ -143,13 +145,17 @@ sub _subscribe_to_server_messages {
   );
   $sub->on(
     message => sub {
-      my ($redis, $message) = @_;
+      my $redis = shift;
+      my @messages = (shift);
 
-      $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-      $self->format_conversation([$message], sub {
-        my($self, $messages) = @_;
-        $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
-      });
+      $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $messages[0]);
+      $self->format_conversation(
+        sub { $JSON->decode(shift @messages) },
+        sub {
+          my($self, $messages) = @_;
+          $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
+        },
+      );
     }
   );
 
