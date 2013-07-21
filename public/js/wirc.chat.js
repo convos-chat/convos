@@ -17,6 +17,12 @@
     '/whois '
   ];
 
+  // override original method with a filter
+  nicks.add = function(score, member) {
+    if(member !== nick) this.set[member] = score;
+    return this;
+  };
+
   // same as id_as() helper in mojo
   var id_as = function(str) {
     return $.map(str.split(':00'), function(s, i) {
@@ -31,7 +37,7 @@
     $messages = $('section.messages ul');
     current_target = $messages.attr('id').replace(/^conversation_/, '');
     nick = $messages.attr('data-nick') || '';
-    nicks = new sortedSet();
+    nicks.clear();
 
     $messages.start_time = parseFloat($messages.attr('data-start-time') || 0);
 
@@ -191,7 +197,6 @@
     nicks.clear();
     $data.find('[data-nick]').each(function() {
       var n = $(this).attr('data-nick');
-      if(n === nick) return;
       nicks.add(senders[n] || 1, n);
     });
   }
