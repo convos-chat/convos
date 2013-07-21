@@ -30,28 +30,20 @@
     }
   }
 
-  window.notifier = {
-    popup: function(title, msg, icon) {
-      if(window_has_focus) return;
-      new Notification(title, { iconUrl: icon, body: msg });
-      this.title(title);
-      console.log([icon, title, msg]);
-      tid = setInterval(this.title, 2000);
-    },
-    title: function(text) { // change title and make the tab flash (at least in chrome)
-      if(window_has_focus) return;
-      if(text) {
-        current_title = text;
-        clearInterval(tid);
-      }
+  window.notify = function(title, body, icon) {
+    if(window_has_focus) return;
 
-      if(document.title == current_title || document.title == original_title) {
-        document.title = [original_title, current_title].join(' - ');
-      }
-      else {
-        document.title = current_title;
-      }
-    },
+    new Notification(title, { iconUrl: icon, body: body });
+    tid = setInterval(this.title, 2000);
+    current_title = title;
+    clearInterval(tid);
+
+    if(document.title == current_title || document.title == original_title) {
+      document.title = [original_title, current_title].join(' - ');
+    }
+    else {
+      document.title = current_title;
+    }
   };
 
   $(document).ready(function() {
@@ -60,7 +52,7 @@
     });
     $(window).focus(function() {
       clearInterval(tid);
-      tid = setInterval(function() { document.title = original_title; clearInterval(tid); }, 4000);
+      tid = setInterval(function() { document.title = original_title; clearInterval(tid); }, 3000);
       window_has_focus = true;
     });
   });

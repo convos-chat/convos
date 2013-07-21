@@ -1,4 +1,4 @@
-<li class="muted" data-target="<%= $cid ? as_id $cid : 'any' %>">
+<li class="server-message" data-target="<%= $cid ? as_id $cid : 'any' %>">
   <span><%= $status < 400 ? 'Notice' : 'Error' %> - <%= $message %></span>
 % if(my $timestamp = stash 'timestamp') {
   <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>

@@ -36,6 +36,17 @@ has usage => <<"EOF";
 usage: $0 backend
 EOF
 
+has _pid_file => sub {
+  shift->app->config->{backend}{pid_file} ||= '/tmp/web_irc.pid';
+};
+
+has _pid => sub {
+  open my $FH, '<', shift->_pid_file or return 0;
+  my $pid = readline $FH;
+  chomp $pid;
+  $pid || 0;
+};
+
 =head1 METHODS
 
 =head2 run
@@ -50,16 +61,13 @@ sub run {
   my($self, @args) = @_;
   my $app = $self->app;
 
-  $ENV{WIRC_BACKEND_REV}++; # used to allow fork+exec when running in background
-
-  if($ENV{WIRC_BACKEND_REV} == 1) {
-    my $lock_file = $self->app->config->{backend}{lock_file};
-    $app->log->debug("Backend lock_file: $lock_file");
-    die "Backend is already started\n" unless $app->_start_backend;
+  # used to allow fork+exec when running in background
+  if(++$ENV{WIRC_BACKEND_REV} == 1) {
+    $self->_create_pid_file;
+    $self->_exec unless grep { $_ eq '-f' } @args;
   }
 
-  $self->{foreground} = int grep { $_ eq '-f' } @args;
-  $self->_lock->_exec;
+  $SIG{$_} = sub { $self->_term; exit 0 } for @SIGNALS;
   $app->core->start;
   $app->proxy->start if $app->config->{backend}{proxy};
   Mojo::IOLoop->start;
@@ -68,42 +76,43 @@ sub run {
   return 0;
 }
 
+sub _create_pid_file {
+  my $self = shift;
+
+  $self->app->log->debug('PID file: ' .$self->_pid_file);
+
+  if(my $pid = $self->_pid) {
+    if(kill 0, $pid) {
+      die "Backend is running with PID $pid\n";
+      return 0;
+    }
+  }
+
+  open my $FH, '>', $self->_pid_file or die "Cannot write to PID file: $!";
+  print $FH $$;
+  return 1;
+}
+
 sub _exec {
   my $self = shift;
 
-  unless($self->{foreground}) {
-    die "Can't fork: $!" unless defined(my $pid = fork);
-    $pid and _exit('Backend running in background');
-    open STDIN, '</dev/null';
-    open STDOUT, '>/dev/null';
-    open STDERR, '>&STDOUT';
-  }
-
-  $ENV{MOJO_MODE} and return $self;
-  $ENV{MOJO_MODE} = 'production';
+  die "Can't fork: $!" unless defined(my $pid = fork);
+  $pid and _exit('Backend running in background');
+  open STDIN, '</dev/null';
+  open STDOUT, '>/dev/null';
+  open STDERR, '>&STDOUT';
+  $ENV{MOJO_MODE} ||= 'production';
   warn "exec($0 @ARGV)\n" if $ENV{WIRC_DEBUG};
   exec $0 => @ARGV;
 }
 
-sub _lock {
-  my $self = shift;
-  my $lock_file = $self->app->config->{backend}{lock_file};
-
-  $SIG{$_} = sub { $self->_term; exit 0 } for @SIGNALS;
-
-  open my $LOCK, '>', $lock_file or die "Create $lock_file: $!";
-  print $LOCK $$;
-  close $LOCK;
-  $self;
-}
-
 sub _term {
   my $self = shift;
-  my $lock_file = $self->app->config->{backend}{lock_file};
+  my $pid_file = $self->app->config->{backend}{pid_file};
 
-  if(-e $lock_file) {
+  if(-e $pid_file) {
     $self->app->log->debug('Cleaning up on signal.');
-    unlink $lock_file;
+    unlink $pid_file;
   }
 }
 

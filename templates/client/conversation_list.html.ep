@@ -1,0 +1,8 @@
+<ul class="conversation-list">
+  % my $i = 0;
+  % for my $c (@$conversation_list) {
+  <li id="target_<%= $c->{id} %>">
+    %= link_to $c->{target}, 'channel.view' => $c, class => $i++ ? 'conversation' : 'current', title => "View conversation with $c->{target}"
+  </li>
+  % }
+</ul>

@@ -130,11 +130,10 @@ sub startup {
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
-  $r->get('/login')->to(template => 'user/login');
+  $r->post('/')->to('user#login_or_register');
+  $r->any('/login')->to('user#login_or_register');
+  $r->any('/register')->to('user#login_or_register', register_page => 1);
   $r->get('/logout')->to('user#logout');
-  $r->post('/login')->to('user#login');
-  $r->get('/register')->to(template => 'user/register');
-  $r->post('/register')->to('user#register');
 
   my $private_r = $r->bridge('/')->to('user#auth');
   my $settings_r = $private_r->route('/settings')->to(target => $config->{name});
@@ -147,8 +146,8 @@ sub startup {
 
   $private_r->websocket('/socket')->to('chat#socket');
 
-  $private_r->get('/v1/:target/connection-list')->to('client#connection_list', layout => undef);
-  $private_r->get('/v1/:target/history/:offset', [page => qr{\d+}])->to('client#history', layout => undef);
+  $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
+  $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
   $private_r->get('/:cid/*target', [cid => qr{\d+}])->to('client#view')->name('channel.view');
   $private_r->get('/:cid', [cid => qr{\d+}])->to('client#view')->name('server.view');
 
@@ -159,19 +158,12 @@ sub startup {
     }
   );
 
-  Mojo::IOLoop->timer(0, sub {
-    $self->_start_backend or return;
-    $self->core->start;
-    $self->proxy->start if $config->{backend}{proxy};
-  });
-}
-
-sub _start_backend {
-  my $self = shift;
-
-  return 0 if $ENV{HYPNOTOAD_APP}; # TODO: Evil to use internal environment variables
-  return 0 if -e $self->config->{backend}{lock_file};
-  return 1;
+  if($config->{backend}{embedded}) {
+    Mojo::IOLoop->timer(0, sub {
+      $self->core->start;
+      $self->proxy->start if $config->{backend}{proxy};
+    });
+  }
 }
 
 =head1 COPYRIGHT

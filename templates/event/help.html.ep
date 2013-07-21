@@ -1,36 +1,32 @@
-<div class="help" data-target="any">
+<li class="help" data-target="any">
   <h4>Available commands. (Shortcuts in parenthesis)</h4>
   <dl>
-    <dt><code>/me &lt;message&gt;</code></dt>
+    <dt>/me &lt;message&gt;</dt>
     <dd>Send message as an action.</dd>
-    <dt><code>/whois(w) &lt;nick&gt;</code></dt>
+    <dt>/whois(w) &lt;nick&gt;</dt>
     <dd>Show information about a user</dd>
-    <dt><code>/join(j) &lt;#channel&gt;</code></dt>
+    <dt>/join(j) &lt;#channel&gt;</dt>
     <dd>Join channel and open up a chat window</dd>
-    <dt><code>/part &lt;#channel&gt;</code></dt>
+    <dt>/part &lt;#channel&gt;</dt>
     <dd>Leave channel, and close window</dd>
-    <dt><code>/topic(t) &lt;#channel&gt; [&lt;new topic&gt;]</code></dt>
+    <dt>/topic(t) &lt;#channel&gt; [&lt;new topic&gt;]</dt>
     <dd>Show current topic, or set a new one</dd>
-    <dt><code>/query(q) &lt;nick&gt;</code></dt>
+    <dt>/query(q) &lt;nick&gt;</dt>
     <dd>Open up a new chat window with nick</dd>
-    <dt><code>/close [&lt;nick&gt;]</code></dt>
+    <dt>/close [&lt;nick&gt;]</dt>
     <dd>Close conversation with nick, defaults to current active.</dd>
-    <dt><code>/msg(m) &lt;nick&gt;</code></dt>
+    <dt>/msg(m) &lt;nick&gt;</dt>
     <dd>Send a direct message to nick</dd>
-    <dt><code>/nick &lt;nick&gt;</code></dt>
+    <dt>/nick &lt;nick&gt;</dt>
     <dd>Change your wanted nick.</dd>
-    <dt><code>/reconnect</code></dt>
+    <dt>/reconnect</dt>
     <dd>Restart the current connection.</dd>
+    <dt>/names</dt>
+    <dd>Retrieve nick list.</dd>
   </dl>
   <h4>Keyboard Shortcuts</h4>
   <dl>
-    <dt>ctrl+m</dt>
-    <dd>Show/hide unread messages</dd>
-    <dt>ctrl+shift+m</dt>
-    <dd>Show/hide conversation list</dd>
-    <dt>Up/down</dt>
-    <dd>Navigate in recent history, or in conversation list when active.</dd>
-    <dt>Tab</dt>
-    <dd>Autocomplete nick.</dd>
+    <dt>shift+enter</dt>
+    <dd>Focus chat input field</dd>
   </dl>
-</div>
+</li>

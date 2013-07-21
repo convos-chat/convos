@@ -1,6 +1,7 @@
 <li class="message<%= $highlight ? ' highlight' : '' %>" data-target="<%= as_id $cid, $target %>" data-sender="<%= $nick %>">
-  <span class="prefix"><%= $nick %>:</span>
-  <span class="content"><%== $message %></span>
+  %= image $avatar, alt => $nick
+  <h3><%= link_to $nick, $nick %></h3>
+  <div class="content"><%== $message %></div>
   <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>

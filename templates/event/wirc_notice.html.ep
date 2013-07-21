@@ -1,5 +1,5 @@
 % my $timestamp = stash('timestamp') || time;
-<li class="muted" data-target="any">
+<li class="notice" data-target="any">
   <span>wirc - <%= $message %></span>
   <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
 </li>

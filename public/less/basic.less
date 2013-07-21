@@ -1,0 +1,374 @@
+@font-face {
+  font-family: 'Hume Mono';
+  src: url('/font/HumeMonoRegular.eot');
+  src: url('/font/HumeMonoRegular.eot?#iefix') format('embedded-opentype'),
+       url('/font/HumeMonoRegular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@backgroundColor: #fff;
+@fontFamily: Arial, sans-serif;
+@fontColor: #333;
+@linkColor: #469;
+@fontSize: 14px;
+@bodyGutter: 20px;
+@navHeight: 44px;
+@footerHeight: 50px;
+@responsiveWidth: 700px;
+@columnWidth: 8.333333%;
+@navBarIconWidth: 32px;
+@buttonBorderHover: 2px solid darken(#fff, 70%);
+
+/*
+ * Less helpers
+ */
+.box-shadow(@string) { -webkit-box-shadow: @string; -moz-box-shadow: @string; box-shadow: @string; }
+.border-radius(@radius) { -webkit-border-radius: @radius; -moz-border-radius: @radius; border-radius: @radius; }
+.ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
+.opacity(@opacity) { filter: ~"alpha(opacity=@{opacity*100})"; -moz-opacity: @opacity; -khtml-opacity: @opacity; -webkit-opacity: @opacity; opacity: @opacity; }
+.font-size-margin(@size) { font-size: @size; margin-top: 1 / @size; margin-bottom: 1 / @size; }
+.grid(@cols:1, @last:0) {
+  @gutter: abs(2% * (@last - 1));
+  @column: @columnWidth - @gutter;
+  width: (@cols * (@column + @gutter) - @gutter);
+  margin-right: @gutter;
+  float: left;
+
+  @media (max-width: @responsiveWidth) {
+    float: none;
+    width: 100%;
+  }
+}
+
+/*
+ * http://html5reset.org + minor modifications
+ */
+html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video, details, summary { margin: 0; padding: 0; border: 0; font-size: 100%; line-height: 1.6em; vertical-align: baseline; background: transparent; }
+article, aside, figure, footer, header, hgroup, nav, section, details, summary { display: block; }
+ul { list-style: none; }
+a { margin: 0; padding: 0; vertical-align: baseline; background: transparent; }
+abbr[title], dfn[title] { border-bottom: 1px dotted #000; cursor: help; }
+table { border-collapse: collapse; border-spacing: 0; }
+th { font-weight: bold; vertical-align: bottom; }
+td { font-weight: normal; vertical-align: top; }
+input, select, button { vertical-align: middle; }
+select, input, textarea { font-size: @fontSize - 1; }
+table { font-size: inherit; font: 100%; }
+.clickable, label, input[type=file], button { cursor: pointer; }
+button, input, select, textarea { margin: 0; }
+button { width: auto; overflow: visible; }
+.ie7 img { -ms-interpolation-mode: bicubic; }
+.clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
+.clearfix:after { clear: both; }
+.clearfix { zoom: 1; }
+* { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+body { background-color: @backgroundColor; font-size: @fontSize; font-family: @fontFamily; }
+body, select, input, textarea { color: @fontColor; }
+a { color: @linkColor; }
+a:hover { color: darken(@linkColor, 20%); }
+a:link { -webkit-tap-highlight-color: darken(@linkColor, 20%); }
+input:-moz-placeholder { color: lighten(@fontColor, 30%); }
+textarea:-moz-placeholder { color: lighten(@fontColor, 30%); }
+li.separator { background: #eee; height: 1px; overflow: hidden; }
+
+/*
+ * Footer
+ */
+html, body { height: 100%; }
+div.wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin-bottom: -@footerHeight;
+
+  div.clear {
+    height: @footerHeight + 20;
+    clear: both;
+  }
+}
+footer {
+  height: @footerHeight;
+  background: #fff;
+  color: #999;
+  clear: both;
+  padding: 2px @bodyGutter;
+
+  form {
+    input { width: 100%; padding: 6px; font-size: 1.3em; }
+    input.sending {
+      background: url(../image/loader-facebook.gif) no-repeat 99% 50%;
+    }
+  }
+}
+
+/*
+ * Typographi and base CSS
+ */
+h1 a, h3 a { text-decoration: none; }
+h1 { .font-size-margin(2em); }
+h2 { .font-size-margin(1.6em); }
+h3 { .font-size-margin(1.2em); }
+img { max-width: 100%; }
+p { margin: 1em 0; }
+dl {
+  @dtWidth: 220px;
+  dt {
+    width: @dtWidth;
+    float: left;
+    clear: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  dd { margin-left: @dtWidth + @bodyGutter; }
+}
+.center { text-align: center; }
+.hidden { display: none; }
+.row { padding: 0 @bodyGutter; clear: both; }
+
+div.alert, div.question { padding: 1em; margin: 1em 0; .border-radius(3px); }
+div.alert { background: #fed; color: #851; border: 1px solid #edb; }
+div.question { background: #def; color: #158; border: 1px solid #bde; }
+
+/*
+ * Form elements
+ */
+form {
+  margin: 0;
+  label { display: block; margin-top: @bodyGutter; }
+  input {
+    padding: 4px;
+    font-size: 1.2em;
+    outline: none;
+    border: 2px solid #aaa;
+    width: 290px;
+    .border-radius(3px);
+  }
+  input:focus { border: 2px solid darken(#aaa, 15%); }
+  div.error {
+    input { border-color: #e66; }
+    p.help { color: #f44; }
+  }
+  div.actions {
+    margin-top: 2em;
+    clear: left;
+    border-top: 1px solid #ddd;
+    padding: 0.5em 0;
+  }
+  p.help {
+    color: #555;
+    font-size: 0.9em;
+    margin-top: 0.1em;
+  }
+}
+
+button, .button {
+  color: #222;
+  background: darken(#fff, 10%);
+  font-size: 16px;
+  text-decoration: none;
+  padding: 6px 8px;
+  border: 2px solid darken(#fff, 40%);
+  .border-radius(3px);
+}
+button { height: 34px; vertical-align: baseline; } // make <a> and <button> align. at least in chrome
+button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
+button.confirm, a.confirm { color: #900; border: 2px solid #900; }
+button:hover, .button:hover { border: @buttonBorderHover; }
+
+/*
+ * Loading indicator
+ */
+div.loading-indicator-overlay,
+div.loading-indicator {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+div.loading-indicator-overlay {
+  background: #fff;
+  .opacity(0.7);
+}
+div.loading-indicator {
+  background: url(../image/loader-squares-circle.gif) 50% 50% fixed no-repeat;
+}
+
+nav.bar {
+  background: #fdfdfd;
+  position: fixed;
+  padding: 0 @bodyGutter;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 42px;
+  z-index: 1000;
+  overflow: hidden;
+  .box-shadow(0 4px 4px -2px rgba(180, 180, 180, 0.5));
+
+  a {
+    color: #000;
+    text-decoration: none;
+    padding: 10px 4px;
+    margin-left: -1px;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    display: block;
+    float: left;
+  }
+
+  a.current { font-size: 22px; border: 0; padding-right: 10px; }
+  a.conversation { color: #666; }
+  a.settings, a.help, a.logout, a.conversation-list { text-indent: -10000px; }
+  a.conversation-list {
+    background: #fff url(../image/sprite.png) no-repeat 0 0;
+    width: 20px;
+    background-position: -(@navBarIconWidth * 5 + 7) 0;
+    display: none;
+  }
+
+  .right {
+    position: absolute;
+    right: @bodyGutter;
+    a { background: #fff url(../image/sprite.png) no-repeat 0 0; width: @navBarIconWidth; }
+    a.notification-list { background-position: -@navBarIconWidth 0; }
+    a.notification-list.alert { background-position: -(@navBarIconWidth * 2) 0; }
+    a.help { background-position: -(@navBarIconWidth * 3) 0; }
+    a.logout { background-position: -(@navBarIconWidth * 4) 0; }
+    a.notification-list b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
+    a.notification-list.alert b { color: #b22; }
+    a.hidden { display: none; }
+  }
+
+  a.active, a:hover { color: #000; background-color: darken(#fff, 5%); }
+}
+
+/*
+ * Chat
+ */
+div.conversation-list,
+div.notification-list {
+  background: darken(#fdfdfd, 1%);
+  position: fixed;
+  top: 42px;
+  width: 320px;
+  max-height: 70%;
+  overflow: auto;
+  z-index: 1001;
+  display: none;
+  .box-shadow(0 0 1px 1px rgba(180, 180, 180, 0.5));
+
+  li { border-bottom: 1px solid #eee; }
+  a { color: #000; text-decoration: none; padding: 4px; display: block; }
+  a:hover { color: #000; background-color: darken(#fff, 5%); }
+}
+
+div.notification-list {
+  right: 6px;
+  li.unread { border-right: 2px solid #f66; }
+  span.message { color: #666; font-size: 0.9em; line-height: 1em; .ellipsis(); }
+}
+
+section.messages {
+  padding-top: 45px;
+  li {
+    display: block;
+    position: relative;
+    padding: 3px 0;
+    border-bottom: 1px solid #f0f0ff;
+    overflow: hidden;
+
+    img {
+      float: left;
+    }
+    h3 {
+      font-size: 1em;
+      color: #467;
+      line-height: 1.2em;
+      margin: 0;
+    }
+    h3, div {
+      margin-left: 50px;
+    }
+    div {
+      font-family: "HumeMonoRegular", monospace;
+    }
+    span.timestamp {
+      position: absolute;
+      top: 2px;
+      right: 0;
+      color: #999;
+    }
+  }
+
+  li.highlight { background: #fee; }
+  li.action-message .content { font-style: italic; }
+  li.message .embed, li.message .embed img { max-height: 220px; }
+  li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
+}
+
+/*
+ * Settings
+ */
+.settings {
+  padding-top: 50px;
+  h2 select { font-size: 18px; font-weight: bold; }
+}
+
+/*
+ * Landing page
+ */
+.landing-page {
+  @loginBackground: darken(#fff, 2%);
+  margin: auto;
+  width: 800px;
+  img {
+    margin: 2em 40px;
+    border: 1px solid #ccc;
+    .box-shadow(0 0px 4px 2px rgba(180, 180, 180, 0.5));
+  }
+  nav, .login, .register, .about {
+    width: 700px;
+    margin: 2em auto;
+    overflow: hidden;
+  }
+  nav {
+    margin-bottom: 0;
+    a.button, a.button.active {
+      background: @loginBackground;
+      margin-right: 10px;
+      display: block;
+      float: left;
+    }
+    a.active {
+      border: @buttonBorderHover;
+      border-bottom: 0;
+      position: relative;
+      z-index: 5;
+    }
+  }
+  .row { padding: 0; }
+  .login, .register {
+    background: @loginBackground;
+    border: @buttonBorderHover;
+    margin-top: -4px;
+    display: none;
+    padding: @bodyGutter;
+    position: relative;
+    h1 { display: none; }
+  }
+  .about { padding-bottom: 100px; }
+}
+
+@media (max-width: @responsiveWidth) {
+  footer, nav.bar, .row { padding: 0; }
+  nav.bar .right { right: 0; }
+  .landing-page {
+    width: 100%;
+    img { margin: 2em 0; }
+    .row { padding-left: 10px; padding-right: 10px; }
+    nav, .login, .register, .about { width: 100% };
+  }
+}

@@ -1,45 +1,32 @@
 % title 'Home';
-<div class="row-fluid">
-  <div class="span12">
-    <header class="jumbotron">
-      <div class="inner">
-        <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
-        <p>
-          Interact with friends and/or colleges.
-        </p>
-        <p class="download-info">
-          %= link_to 'login', class => 'btn btn-primary btn-large', begin
-            Login
-          % end
-          or
-          %= link_to 'register', class => 'btn btn-success btn-large', begin
-            Register
-          % end
-        </p>
-      </div>
-    </header>
-  </div>
-</div>
-<div class="row">
-  <div class="span6">
+% my $form = stash->{form} ||= '';
+
+<div class="landing-page">
+  <header class="row center">
+    <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
+    <h2>Interact with friends and colleges.</h2>
+  </header>
+  %= image '/image/landing-page-example-chat.jpeg', alt => 'Example chat'
+  <nav>
+    %= link_to 'Login', 'login', class => $form eq 'login' ? 'button focus active' : 'button', 'data-focus' => 'div.login input:first', 'data-toggle' => 'div.login',
+    %= link_to 'Register', 'register', class => $form eq 'register' ? 'button focus active' : 'button', 'data-focus' => 'div.register input:first', 'data-toggle' => 'div.register',
+  </nav>
+  %= include 'user/login'
+  %= include 'user/register'
+  <div class="row about">
     <h2>What is so cool about Wirc?</h2>
     <p>
       Ever wanted to log into an IRC channel from your phone, tablet or computer
       and never log out? Keep track of what is going on and search through your
       history from the beginning of time on any device?
     </p>
-  </div>
-  <div class="span6">
     <h2>How does Wirc work anywhere?</h2>
     <p>
       Wirc is a web application with a responsive design that
       works great on small and big screens. Wirc also acts as a
       Proxy for your native clients, while seamlessly keeping
       track of the messages you've seen on each client. </p>
-  </div>
-</div>
-<div class="row">
-  <div class="span6">
+    </p>
     <h2>Host it anywhere</h2>
     <p>
       Rather than selling you a monthly service with a tiered

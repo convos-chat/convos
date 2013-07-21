@@ -24,6 +24,25 @@ sub auth {
   return 0;
 }
 
+=head2 login_or_register
+
+Will either call L</login> or L</register> based on form input.
+
+=cut
+
+sub login_or_register {
+  my $self = shift;
+
+  if(defined $self->param('email') or $self->stash('register_page')) {
+    $self->stash(template => 'index', form => 'register');
+    $self->register if $self->req->method eq 'POST';
+  }
+  else {
+    $self->stash(template => 'index', form => 'login');
+    $self->login if $self->req->method eq 'POST';
+  }
+}
+
 =head2 login
 
 Authenticate local user
@@ -48,7 +67,7 @@ sub login {
           if (@$conn) {
             return $self->redirect_to('index');
           }
-          $self->redirect_to('/settings');
+          $self->redirect_to('settings');
         }
       );
     },
@@ -67,7 +86,7 @@ sub register {
 
   if ($self->session('uid')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
-    $self->redirect_to('/settings');
+    $self->redirect_to('settings');
     return;
   }
 
@@ -99,7 +118,7 @@ sub register {
     sub {    # Get uid unless user exists
       my ($delay, $uid) = @_;
       if ($uid) {
-        $self->stash('errors')->{login} = 'Username is taken.';
+        $self->stash->{errors}{login} = 'Username is taken.';
         $self->render;
       }
       else {
@@ -121,7 +140,7 @@ sub register {
     },
     sub {
       my ($delay) = @_;
-      $self->redirect_to('/settings');
+      $self->redirect_to('settings');
     }
   );
 }
@@ -137,7 +156,7 @@ sub _got_invalid_register_params {
     $self->logf(debug => '[reg] Validating invite code %s', $secret) if DEBUG;
     if ($secret ne crypt($email . $self->app->secret, $secret) && $secret ne 'OPEN SESAME') {
       $self->logf(debug => '[reg] Invalid invite code.') if DEBUG;
-      $errors->{invite} = 'Invalid invite code.';
+      $errors->{invite} = 'You need a valid invite code to register.';
     }
   }
 
@@ -172,13 +191,14 @@ sub logout {
 
 =head2 settings
 
-Used to retrieve, save and update connection information.
+Used to retrieve connection information.
 
 =cut
 
 sub settings {
   my $self   = shift->render_later;
   my $uid    = $self->session('uid');
+  my $cid    = $self->stash('cid');
   my (@actions, $cids, @connections);
 
   # cid is just to trick layouts/default.html.ep
@@ -200,20 +220,25 @@ sub settings {
     },
     sub {    # convert connections to data structures
       my $delay = shift;
+      my $current;
+
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
+
       for (my $i = 0; $i < @$cids; $i++) {
         my $info = $_[$i];
+        $cid //= $cids->[$i];
         $info->{cid} = $cids->[$i];
-        $info->{channels} = join(' ', sort @{$_[@$cids + $i]});
+        $info->{channels} = join ' ', sort @{ $_[@$cids + $i] };
+        $current = $info if $info->{cid} eq $cid;
         push @connections, $info;
       }
-      push @connections, {cid => 0, %{$self->app->config->{'default_connection'}}, nick => $self->session('login')};
-      $self->stash->{cid} //= $connections[0]{cid};
+
+      $current ||= $self->app->config->{default_connection};
+      $self->stash(cid => $cid, current => $current);
       $self->render;
     },
   );
 }
-
 
 =head2 add_connection
 
@@ -221,9 +246,9 @@ Add a new connection.
 
 =cut
 
-
 sub add_connection {
   my $self = shift;
+  my $action = $self->param('action') || '';
 
   Mojo::IOLoop->delay(
     sub {
@@ -241,13 +266,14 @@ sub add_connection {
     sub {
       my ($delay, $cid, $cname) = @_;
       unless ($cid) {
-        $self->stash(errors => $cname);    # cname is a hash-ref if $cid is undef
-        $self->render;
+        $self->stash(errors => $cname, template => 'user/settings'); # cname is a hash-ref if $cid is undef
+        $self->settings;
         return;
       }
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
       $self->redis->publish('core:control', "start:$cid");
-      $self->redirect_to('settings', cid => $cid);
+      return $self->redirect_to('index') if $action eq 'connect';
+      return $self->redirect_to('settings', cid => $cid);
     },
   );
 }
@@ -260,6 +286,7 @@ Change a connection.
 
 sub edit_connection {
   my $self = shift;
+  my $action = $self->param('action') || '';
   my $cid  = $self->param('cid');
 
   Mojo::IOLoop->delay(
@@ -283,7 +310,8 @@ sub edit_connection {
       );
     },
     sub {
-      $self->redirect_to('settings');
+      return $self->redirect_to('index') if $action eq 'connect';
+      return $self->redirect_to('settings');
     }
   );
 }

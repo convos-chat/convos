@@ -41,8 +41,6 @@ has redis => sub {
   $redis;
 };
 
-has _connections => sub { +{} };
-
 =head1 METHODS
 
 =head2 start
@@ -55,21 +53,45 @@ sub start {
   my $self = shift;
 
   Scalar::Util::weaken($self);
-  $self->redis->smembers(
-    'connections',
+  Mojo::IOLoop->delay(
     sub {
-      my ($redis, $cids) = @_;
-      ref $cids or return $self->log->error("[core] Invalid connections (@_)\n");
+      my($delay) = @_;
+      $self->redis->smembers('connections', $delay->begin);
+    },
+    sub {
+      my($delay, $cids) = @_;
       warn sprintf "[core] Starting %s connection(s)\n", int @$cids if DEBUG;
-      for my $cid (@$cids) {
-        $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-        $self->_connections->{$cid}->connect;
-      }
+      $self->_connection(id => $_, $delay->begin) for @$cids;
+    },
+    sub {
+      my($delay, @conn) = @_;
+      $_->connect for @conn;
     }
   );
 
   $self->_start_control_channel;
   $self;
+}
+
+sub _connection {
+  my $cb = pop;
+  my($self, %args) = @_;
+  my $conn = $self->{connections}{$args{id}};
+
+  if($conn) {
+    $self->$cb($conn);
+  }
+  elsif(!$args{uid}) {
+    $self->redis->hget("connection:$args{id}", "uid", sub {
+      my $uid = pop or die "Did you forget to run script/populate-connections-with-data.pl ?";
+      $self->_connection(%args, uid => $uid, $cb);
+    });
+  }
+  else {
+    $conn = WebIrc::Core::Connection->new(redis => $self->redis, %args);
+    $self->{connections}{$args{id}} = $conn;
+    $self->$cb($conn);
+  }
 }
 
 sub _start_control_channel {
@@ -121,6 +143,7 @@ sub add_connection {
   my $channels = delete $conn->{channels};
   my @channels = split m/[\s,]+/, $channels;
 
+  $conn->{uid} = $uid;
   Scalar::Util::weaken($self);
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->incr(
@@ -128,7 +151,7 @@ sub add_connection {
     sub {
       my ($redis, $cid) = @_;
 
-      $self->_connections->{$cid} = WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
+      $self->_connection(id => $cid, uid => $uid, sub {});
       $self->redis->execute(
         [sadd  => "connections",              $cid],
         [sadd  => "user:$uid:connections",    $cid],
@@ -168,7 +191,7 @@ sub update_connection {
 
   return $self->$cb(undef, \%errors) if keys %errors;
   return $self->redis->execute(
-    [hmset => "connection:$cid",          %$conn],
+    [hmset => "connection:$cid", %$conn],
     [del   => "connection:$cid:channels"],
     [sadd  => "connection:$cid:channels", @channels],
     sub {
@@ -190,11 +213,10 @@ sub ctrl_stop {
   my ($self, $cid) = @_;
 
   Scalar::Util::weaken($self);
-  $self->_connections->{$cid}->disconnect(
-    sub {
-      delete $self->_connections->{$cid};
-    }
-  );
+
+  if(my $conn = $self->{connections}{$cid}) {
+    $conn->disconnect(sub { delete $self->{connections}{$cid} });
+  }
 }
 
 =head2 ctrl_restart
@@ -209,10 +231,13 @@ Restart a connection by connection id.
 sub ctrl_restart {
   my ($self, $cid) = @_;
 
-  # flush
   Scalar::Util::weaken($self);
-  if ($self->_connections->{$cid}) {
-    $self->_connections->{$cid}->disconnect(sub { $self->ctrl_start($cid) });
+
+  if(my $conn = $self->{connections}{$cid}) {
+    $conn->disconnect(sub {
+      delete $self->{connections}{$cid};
+      $self->ctrl_start($cid);
+    });
   }
   else {
     $self->ctrl_start($cid);
@@ -227,8 +252,8 @@ Start a single connection by connection id.
 
 sub ctrl_start {
   my ($self, $cid) = @_;
-  my $conn = $self->_connections->{$cid} ||= WebIrc::Core::Connection->new(redis => $self->redis, id => $cid);
-  $conn->connect;
+
+  $self->_connection(id => $cid, sub { pop->connect });
 }
 
 =head2 login

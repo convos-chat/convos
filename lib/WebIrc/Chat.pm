@@ -7,7 +7,9 @@ WebIrc::Chat - Mojolicious controller for IRC chat
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
+use Mojo::JSON;
 
+my $JSON = Mojo::JSON->new;
 my %COMMANDS; %COMMANDS = (
   j     => \'join',
   join  => 'JOIN',
@@ -16,36 +18,33 @@ my %COMMANDS; %COMMANDS = (
   w     => \'whois',
   whois => 'WHOIS',
   nick  => 'NICK',
+  names => sub { my $dom = pop; "NAMES " . ($dom->{cmd} || $dom->{target}) },
   me   => sub { my $dom = pop; "PRIVMSG $dom->{target} :\x{1}ACTION $dom->{cmd}\x{1}" },
   msg  => sub { my $dom = pop; $dom->{cmd} =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$dom->{cmd}" },
   part => sub { my $dom = pop; "PART " . ($dom->{cmd} || $dom->{target}) },
   query=> sub {
     my ($self, $dom) = @_;
-    my $target = $dom->{cmd} || $dom->{target};
-    $target =~ /^#/ and return;
-    $self->redis->sadd(
-      "connection:@{[$dom->{cid}]}:conversations",
-      $target,
-      sub {
-        my ($redis, $member) = @_;
-        $self->send_partial('event/add_conversation', cid => $dom->{cid}, target => $target) if $member;
-      }
-    );
+    my $uid = $self->session('uid');
+    my $id = $self->as_id($dom->{cid}, $dom->{cmd} || $dom->{target});
+
+    $self->redis->zrem("user:$uid:conversations", $id, sub {
+      $self->send_partial('event/add_conversation', target => $dom->{cmd}, %$dom);
+    });
     return;
   },
   close => sub {
     my ($self, $dom) = @_;
     my $target = $dom->{cmd} || $dom->{target};
-    $self->redis->sismember(
-      "connection:@{[$dom->{cid}]}:conversations",
-      $target,
-      sub {
-        my ($redis, $member) = @_;
-        return unless $member;
-        $self->redis->srem("connection:@{[$dom->{cid}]}:conversations", $target);
-        $self->send_partial('event/remove_conversation', cid => $dom->{cid}, target => $target) if $member;
-      }
-    );
+
+    $target =~ /^#/ and return "PART $target";
+
+    my $id = $self->as_id($dom->{cid}, $target);
+    my $uid = $self->session('uid');
+
+    $self->redis->zrem("user:$uid:conversations", $id, sub {
+      $self->send_partial('event/remove_conversation', target => $dom->{cmd}, %$dom);
+    });
+
     return;
   },
   reconnect => sub {
@@ -55,9 +54,7 @@ my %COMMANDS; %COMMANDS = (
   },
   help => sub {
     my ($self, $dom) = @_;
-    $self->send_partial(
-      'event/help',
-    );
+    $self->send_partial('event/help');
     return;
   }
 );
@@ -148,13 +145,17 @@ sub _subscribe_to_server_messages {
   );
   $sub->on(
     message => sub {
-      my ($redis, $message) = @_;
+      my $redis = shift;
+      my @messages = (shift);
 
-      $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $message);
-      $self->format_conversation([$message], sub {
-        my($self, $messages) = @_;
-        $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
-      });
+      $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $messages[0]);
+      $self->format_conversation(
+        sub { $JSON->decode(shift @messages) },
+        sub {
+          my($self, $messages) = @_;
+          $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
+        },
+      );
     }
   );
 

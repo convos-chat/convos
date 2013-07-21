@@ -1,0 +1,300 @@
+;(function($) {
+  var $input, $win, chat_ws, current_target, nick;
+  var $messages = $('does-not-exist-yet');
+  var nicks = new sortedSet();
+  var conversation_list = [];
+  var commands = [
+    '/help',
+    '/join #',
+    '/query ',
+    '/msg ',
+    '/me ',
+    '/nick ',
+    '/close',
+    '/part ',
+    '/names ',
+    '/topic ',
+    '/reconnect',
+    '/whois '
+  ];
+
+  // override original method with a filter
+  nicks.add = function(score, member) {
+    if(member !== nick) this.set[member] = score;
+    return this;
+  };
+
+  // same as id_as() helper in mojo
+  var id_as = function(str) {
+    return $.map(str.split(':00'), function(s, i) {
+      return s.replace(/:(\w\w)/g, function(match, p1) {
+        return String.fromCharCode(parseInt('0x' + p1, 16));
+      });
+    });
+  };
+
+  var conversationLoaded = function() {
+    var old_target = current_target;
+    $messages = $('section.messages ul');
+    conversation_list = $('ul.conversation-list a').map(function() { return $(this).text(); }).get();
+    current_target = $messages.attr('id').replace(/^conversation_/, '');
+    nick = $messages.attr('data-nick') || '';
+    nicks.clear();
+
+    $messages.start_time = parseFloat($messages.attr('data-start-time') || 0);
+
+    if(/:23/.exec(current_target)) { // :23 = # = is a channel
+      sendMessage('/names');
+      sendMessage('/topic');
+    }
+    if(old_target && old_target != current_target) {
+      reloadConversationList({});
+    }
+
+    if(location.href.indexOf('from=') > 0) { // link from notification list
+      $messages.end_time = parseFloat($messages.attr('data-end-time') || 0);
+      $win.scrollTo(0);
+      $('a.notification-list').trigger('deactivate'); // hide ul.notification-list
+      reloadNotificationList();
+    }
+    else {
+      $input.focus();
+      $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
+    }
+
+    console.log({ at_bottom: $win.data('at_bottom'), current_target: current_target, nick: nick });
+    $('body').loadingIndicator('hide');
+    getMessages();
+    drawUI();
+  };
+
+  var drawUI = function() {
+    var $conversation_list = $('div.conversation-list li').hide();
+    var $conversation_list_button = $('nav a.conversation-list').hide();
+    var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
+    var used_width = 0;
+    var left;
+
+    $('nav .conversation-list a').each(function(i) {
+      used_width += $(this).show().outerWidth();
+      if(used_width < available_width) return;
+      $conversation_list.eq(i).show();
+      $(this).hide();
+    });
+
+    if(used_width >= available_width) {
+      $conversation_list_button.show();
+      left = $conversation_list_button.offset().left - 320 + 22;
+      left = left < 6 ? 6 : left;
+      $conversation_list.closest('div').css('left', left + 'px');
+    }
+    else {
+      $conversation_list_button.trigger('deactivate');
+    }
+
+    if($win.data('at_bottom')) {
+      $win.scrollTo('bottom');
+    }
+  };
+
+  var getMessages = function() {
+    if($messages.start_time && $win.scrollTop() == 0) {
+      var end_time = $messages.end_time;
+      $.get(location.href.replace(/\?.*/, ''), { to: $messages.start_time }, function(data) {
+        var $data = $(data);
+        var $li = $data.children('li:lt(-1)');
+        var height_before_prepend = $(document).data('heigth_from').height();
+        $messages.end_time = end_time;
+        if(!$li.length) return;
+        $messages.start_time = parseFloat($data.attr('data-start-time'));
+        $messages.prepend($li);
+        $win.scrollTop($(document).data('heigth_from').height() - height_before_prepend);
+      });
+      $messages.start_time = $messages.end_time = 0;
+    }
+    else if($messages.end_time && $win.data('at_bottom')) {
+      var start_time = $messages.start_time;
+      $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
+        var $data = $(data);
+        var $li = $data.children('li:gt(0)');
+        $messages.start_time = start_time;
+        if(!$li.length) return;
+        $messages.end_time = parseFloat($data.attr('data-end-time'));
+        $messages.append($li);
+      });
+      $messages.start_time = $messages.end_time = 0;
+    }
+  };
+
+  var initInputField = function() {
+    var complete, val, offset, re;
+    var history = { index: 0, list: [], current: '' };
+    $input = $('footer form input');
+
+    $win.focus(function() {
+      if($win.data('at_bottom')) $input.focus();
+    });
+    $('body, input').bind('keydown', 'shift+return', function(e) {
+      e.preventDefault();
+      $win.scrollTo('bottom');
+      $input.focus();
+    });
+    $input.bind('keydown', function(e) {
+      if(e.keyCode !== 9) complete = false; // not tab
+    });
+    $input.bind('keydown', 'tab', function(e) {
+      val = $input.val();
+      offset = val.lastIndexOf(' ') + 1;
+      re = new RegExp('^' + RegExp.escape(val.substr(offset)), 'i');
+      complete = complete || {
+        i: 0,
+        prefix: val.substr(0, offset),
+        list: $.map(
+          $.grep(
+            nicks.revrange(0, -1).concat(conversation_list).concat(commands).unique(),
+            function(v, i) {
+              return offset && v.indexOf('/') === 0 ? false : re.test(v) ? true : false;
+            }
+          ),
+          function(v, i) {
+            return offset || v.indexOf('/') === 0 ? v : v + ': ';
+          }
+        ).concat(val.substr(offset))
+      };
+
+      $input.val(complete.prefix + complete.list[complete.i++]);
+      if(complete.i == complete.list.length) complete.i = 0;
+      return false;
+    });
+    $input.bind('keydown', 'up', function(e) {
+      e.preventDefault();
+      if(history.index == 0) return;
+      if(history.index == history.list.length) history.current = $input.val();
+      $input.val(history.list[--history.index]);
+    });
+    $input.bind('keydown', 'down', function(e) {
+      e.preventDefault();
+      if(++history.index == history.list.length) return $input.val(history.current);
+      if(history.index > history.list.length) return history.index = history.list.length;
+      $input.val(history.list[history.index]);
+    });
+    $input.closest('form').submit(function(e) {
+      e.preventDefault();
+      var val = $input.val();
+      if(val.length === 0) return false;
+      sendMessage(val);
+      history.list.push(val);
+      history.index = history.list.length;
+      $input.val('');
+    });
+  };
+
+  var initNickList = function($data) {
+    var senders = {};
+
+    $messages.find('li[data-sender]').each(function(i) {
+      senders[$(this).attr('data-sender')] = i;
+    });
+
+    nicks.clear();
+    $data.find('[data-nick]').each(function() {
+      var n = $(this).attr('data-nick');
+      nicks.add(senders[n] || 1, n);
+    });
+  }
+
+  var receiveMessage = function(e) {
+    var $data = $(e.data);
+    var cid_target = id_as($data.attr('data-target'));
+    var cid_target_selector = targetToSelector($data.attr('data-target'));
+    var at_bottom = $win.data('at_bottom');
+    var is_current = $('#conversation_' + cid_target_selector).length ? true : false;
+
+    $input.removeClass('sending');
+
+    if(typeof cid_target[1] === 'undefined') cid_target[1] = ''; // server messages
+    if($data.hasClass('nicks')) initNickList($data);
+    if($data.hasClass('nick-joined')) nicks.add(0, $data.attr('data-nick'));
+    if($data.hasClass('nick-parted')) nicks.rem($data.attr('data.nick'));
+    if($data.attr('data-sender')) nicks.add(new Date().getTime(), $data.attr('data-sender'))
+
+    if($data.hasClass('remove-conversation')) {
+      reloadConversationList({ goto_current: is_current });
+    }
+    else if($data.hasClass('add-conversation')) {
+      reloadConversationList({ goto_current: true });
+    }
+    else if(is_current) {
+      $messages.append($data.fadeIn('fast'));
+    }
+
+    if($data.hasClass('highlight')) {
+      var sender = $data.attr('data-sender');
+      var what = cid_target[1].indexOf('#') === 0 ? 'mentioned you in ' + cid_target[1] : 'sent you a message';
+      window.notify([sender, what].join(' '), $data.find('.content').text(), '');
+      reloadNotificationList();
+    }
+    if(at_bottom) {
+      $win.scrollTo('bottom');
+      $data.find('img').one('load', function() { $win.scrollTo('bottom') });
+    }
+  };
+
+  var reloadConversationList = function(e) {
+    var goto_current = e.goto_current;
+    $.get($.url_for('conversations'), function(data) {
+      $('ul.conversation-list').replaceWith(data);
+      if(goto_current) $('ul.conversation-list').find('.current').click();
+      conversation_list = $('ul.conversation-list a').map(function() { return $(this).text() }).get();
+      drawUI();
+    });
+  };
+
+  var reloadNotificationList = function(e) {
+    var $notification_list = $('div.notification-list');
+    var $n_notifications = $('a.notification-list');
+    var n;
+
+    $.get($.url_for('notifications'), function(data) {
+      $notification_list.html(data);
+      n = parseInt($notification_list.children('ul').attr('data-notifications'), 10);
+      $n_notifications.children('b').text(n);
+      if($notification_list.find('li').length) $n_notifications.removeClass('hidden');
+      $n_notifications[n ? 'addClass' : 'removeClass']('alert');
+    });
+  };
+
+  var sendMessage = function(message) {
+    var $message = $('<div data-target="' + current_target + '"></div>').text(message);
+    chat_ws.send($message.prop('outerHTML'));
+    $input.addClass('sending');
+  };
+
+  var targetToSelector = function(target) {
+    if(target === 'any') target = current_target;
+    return target.replace(/:/g, '\\:');
+  }
+
+  $(document).ready(function() {
+    $win = $(window);
+    if($('section.messages').length === 0) return; // not on chat page
+    $('nav a.help').click(function(e) { sendMessage('/help'); $(document).click(); return false; })
+    $win.on('scroll', getMessages).on('resize', drawUI);
+    chat_ws = $.ws($.url_for('socket').replace(/^http/, 'ws'));
+    chat_ws.on('message', receiveMessage);
+    initInputField();
+
+    $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
+    $(document).pjax('ul.conversation-list a', 'section.messages');
+    $(document).pjax('ul.notification-list a', 'section.messages');
+    $('section.messages').on('pjax:end', conversationLoaded);
+    $('section.messages').on('pjax:start', function(xhr, options) {
+      $('body').loadingIndicator('show');
+    });
+  });
+
+  $(document).on('completely_ready', function() {
+    conversationLoaded();
+  });
+
+})(jQuery);
