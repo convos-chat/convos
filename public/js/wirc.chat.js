@@ -2,6 +2,7 @@
   var $input, $win, chat_ws, current_target, nick;
   var $messages = $('does-not-exist-yet');
   var nicks = new sortedSet();
+  var conversation_list = [];
   var commands = [
     '/help',
     '/join #',
@@ -35,6 +36,7 @@
   var conversationLoaded = function() {
     var old_target = current_target;
     $messages = $('section.messages ul');
+    conversation_list = $('ul.conversation-list a').map(function() { return $(this).text(); }).get();
     current_target = $messages.attr('id').replace(/^conversation_/, '');
     nick = $messages.attr('data-nick') || '';
     nicks.clear();
@@ -149,7 +151,7 @@
         prefix: val.substr(0, offset),
         list: $.map(
           $.grep(
-            nicks.revrange(0, -1).concat(commands),
+            nicks.revrange(0, -1).concat(conversation_list).concat(commands).unique(),
             function(v, i) {
               return offset && v.indexOf('/') === 0 ? false : re.test(v) ? true : false;
             }
@@ -243,6 +245,7 @@
     $.get($.url_for('conversations'), function(data) {
       $('ul.conversation-list').replaceWith(data);
       if(goto_current) $('ul.conversation-list').find('.current').click();
+      conversation_list = $('ul.conversation-list a').map(function() { return $(this).text() }).get();
       drawUI();
     });
   };

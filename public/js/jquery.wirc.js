@@ -139,6 +139,14 @@ RegExp.escape = RegExp.escape || function(str) {
   return str.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
 };
 
+Array.prototype.unique = function() {
+    var r = [];
+    for(i = 0; i < this.length; i++) {
+      if(r.indexOf(this[i]) === -1) r.push(this[i]);
+    }
+    return r;
+};
+
 // jquery.pjax.js
 // copyright chris wanstrath
 // https://github.com/defunkt/jquery-pjax
