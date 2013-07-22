@@ -216,6 +216,7 @@
     $('body').swipe({
       cancelThreshold: 0,
       threshold: 10,
+      allowPageScroll: 'vertical',
       triggerOnTouchEnd : true,
       swipeStatus: function(e, phase, direction, distance, duration, n_fingers) {
         if(disable_swipe) {
