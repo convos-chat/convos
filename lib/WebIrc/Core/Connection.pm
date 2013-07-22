@@ -132,6 +132,7 @@ has _irc => sub {
   $irc->on(
     close => sub {
       my $irc = shift;
+      $self->{stop} and return;
       $self->_publish(wirc_notice => { message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
       $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
     }
@@ -173,6 +174,7 @@ sub connect {
   my $id = $self->id or croak "Cannot load connection without id";
 
   # we will try to "steal" the nich we want every 60 second
+  Scalar::Util::weaken($self);
   $self->{keepnick_tid} ||= $irc->ioloop->recurring(60, sub {
     $self->redis->hget("connection:$id", "nick", sub { $irc->change_nick($_[1]) });
   });
@@ -232,7 +234,6 @@ sub _connect {
   my $irc = $self->_irc;
 
   Scalar::Util::weaken($self);
-
   $self->redis->execute(
     [hgetall  => "connection:$id"],
     [smembers => "connection:$id:channels"],
@@ -333,7 +334,9 @@ Will disconnect from the L</irc> server.
 =cut
 
 sub disconnect {
-  $_[0]->_irc->disconnect($_[1] || sub { });
+  my($self, $cb) = @_;
+  $self->{stop} = 1;
+  $self->_irc->disconnect($cb || sub {});
 }
 
 =head1 EVENT HANDLERS
@@ -509,6 +512,7 @@ sub irc_part {
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
+  Scalar::Util::weaken($self);
   if($nick eq $self->_irc->nick) {
     my $id = as_id $self->id, $channel;
     $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
@@ -532,6 +536,7 @@ sub irc_err_bannedfromchan {
   my $channel = $message->{params}[1];
   my $id = as_id $self->id, $channel;
 
+  Scalar::Util::weaken($self);
   $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
     $self->_publish(remove_conversation => { cid => $self->id, target => $channel });
     $self->_publish(wirc_notice => { message => $message->{params}[2] });
@@ -549,6 +554,7 @@ sub irc_err_nosuchchannel {
   my $channel = $message->{params}[1];
   my $id = as_id $self->id, $channel;
 
+  Scalar::Util::weaken($self);
   $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
     $self->_publish(remove_conversation => { cid => $self->id, target => $channel });
   });
@@ -629,6 +635,7 @@ sub cmd_join {
   return $self->_publish(wirc_notice => { message => 'Channel to join is required' }) unless $channel;
   return $self->_publish(wirc_notice => { message => 'Channel must start with & or #' }) unless $channel =~ /^[#&]/x;
 
+  Scalar::Util::weaken($self);
   $self->redis->sadd("connection:@{[$self->id]}:channels", $channel, sub {
     my($redis, $added) = @_;
     my $id = as_id $self->id, $channel;
@@ -659,6 +666,14 @@ sub _publish {
       $self->redis->zadd("connection:$data->{cid}:msg", $data->{timestamp}, $message);
     }
   }
+}
+
+sub DESTROY {
+  warn "DESTROY $_[0]->{id}\n" if DEBUG;
+  my $self = shift;
+  my $ioloop = $self->{_irc}{ioloop} or return;
+  my $keepnick_tid = $self->{keepnick_tid} or return;
+  $ioloop->remove($keepnick_tid);
 }
 
 =head1 COPYRIGHT

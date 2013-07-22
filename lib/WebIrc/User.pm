@@ -323,6 +323,7 @@ sub edit_connection {
         },
         $delay->begin
       );
+      $self->redis->publish('core:control', "restart:$cid");
     },
     sub {
       return $self->redirect_to('index') if $action eq 'connect';
