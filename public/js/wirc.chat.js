@@ -207,31 +207,8 @@
   };
 
   var initNickList = function() {
-    var start_pos = -180;
-
     $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({
       preventPageScrolling: true
-    });
-
-    $('body').swipe({
-      cancelThreshold: 0,
-      threshold: 10,
-      allowPageScroll: 'vertical',
-      triggerOnTouchEnd : true,
-      swipeStatus: function(e, phase, direction, distance, duration, n_fingers) {
-        if(disable_swipe) {
-          return;
-        }
-        else if(phase == 'move' && (direction == 'left' || direction == 'right')) {
-          var right = direction == 'right' ? start_pos - distance : start_pos + distance;
-          if(right > 0) right = 0;
-          $nick_list.css({ right: right + 'px' });
-        }
-        else if(phase == 'end' || phase == 'cancel') {
-          start_pos = (direction == 'left' && distance > 80) ? 0 : -180;
-          $nick_list.animate({ right: start_pos + 'px' });
-        }
-      }
     });
   };
 

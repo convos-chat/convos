@@ -10,7 +10,6 @@
     %= javascript '/js/jquery.js'
     %= javascript '/js/jquery.hotkeys.js'
     %= javascript '/js/jquery.nanoscroller.min.js'
-    %= javascript '/js/jquery.touchSwipe.min.js'
     %= javascript '/js/jquery.wirc.js'
     %= javascript '/js/wirc.actions.js'
     %= javascript '/js/wirc.chat.js'
