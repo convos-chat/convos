@@ -27,7 +27,7 @@ textarea:-moz-placeholder{color:#808080}
 li.separator{background:#eee;height:1px;overflow:hidden}
 html,body{height:100%}
 div.wrapper{min-height:100%;height:auto !important;height:100%;margin-bottom:-50px}div.wrapper div.clear{height:70px;clear:both}
-footer{height:50px;background:#fff;color:#999;clear:both;padding:2px 20px}footer form input{font-size:1.1em;font-family:'Hume Mono',monospace;width:100%;padding:8px}
+footer{height:50px;background:#fff;color:#999;clear:both;padding:2px 20px}footer form{margin-right:180px}footer form input{font-size:1.1em;font-family:'Hume Mono',monospace;width:100%;padding:8px}
 footer form input.sending{background:url(../image/loader-facebook.gif) no-repeat 99% 50%}
 h1 a,h3 a{text-decoration:none}
 h1{font-size:2em;margin-top:.5em;margin-bottom:.5em}
@@ -79,7 +79,8 @@ div.conversation-list a,div.notification-list a{color:#000;text-decoration:none;
 div.conversation-list a:hover,div.notification-list a:hover{color:#000;background-color:#f2f2f2}
 div.notification-list{right:6px}div.notification-list li.unread{border-right:2px solid #f66}
 div.notification-list span.message{color:#666;font-size:.9em;line-height:1em;text-overflow:ellipsis;white-space:nowrap;display:block;overflow:hidden}
-section.messages{padding-top:45px}section.messages li{font-family:"Hume Mono",monospace;display:block;position:relative;padding:3px 0;border-top:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
+div.nick-list{background:#fff;border:1px solid #eee;width:180px;position:fixed;top:42px;bottom:-1px;right:0;overflow:auto;z-index:2}div.nick-list a{text-decoration:none;border-bottom:1px solid #eee;display:block;padding:2px}
+section.messages{margin-right:180px;padding-top:45px}section.messages li{font-family:"Hume Mono",monospace;display:block;position:relative;padding:3px 0;border-top:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
 section.messages li h3{font-size:1em;color:#467;line-height:1.2em;margin:0}
 section.messages li h3,section.messages li div{margin-left:50px}
 section.messages li div.question{margin-left:0}
@@ -97,4 +98,4 @@ section.messages li.nick-change,section.messages li.nick-joined,section.messages
 .landing-page .row{padding:0}
 .landing-page .login,.landing-page .register{background:#fafafa;border:2px solid #4d4d4d;margin-top:-4px;display:none;padding:20px;position:relative}.landing-page .login h1,.landing-page .register h1{display:none}
 .landing-page .about{padding-bottom:100px}
-@media (max-width:700px){footer,nav.bar,.row{padding:0} nav.bar .right{right:0} .landing-page{width:100%}.landing-page img{margin:2em 0} .landing-page .row{padding-left:10px;padding-right:10px} .landing-page nav,.landing-page .login,.landing-page .register,.landing-page .about{width:100%}}
+@media (max-width:700px){footer,nav.bar,.row{padding:0} nav.bar .right{right:0} section.messages{margin-right:0} footer form{margin-right:0} div.nick-list{right:-180px} .landing-page{width:100%}.landing-page img{margin:2em 0} .landing-page .row{padding-left:10px;padding-right:10px} .landing-page nav,.landing-page .login,.landing-page .register,.landing-page .about{width:100%}}

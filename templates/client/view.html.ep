@@ -21,6 +21,10 @@
   %= include 'client/notification_list'
 </div>
 
+<div class="nick-list">
+  <ul></ul>
+</div>
+
 <div class="wrapper">
   <section class="messages row">
     %= include 'client/conversation', class => 'more'

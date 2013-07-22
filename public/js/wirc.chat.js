@@ -1,5 +1,5 @@
 ;(function($) {
-  var $input, $win, chat_ws, current_target, nick;
+  var $input, $nick_list, $win, chat_ws, current_target, disable_swipe, nick;
   var $messages = $('does-not-exist-yet');
   var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="//yes" class="button yes">Yes</a> <a href="//no" class="button confirm">No</a></div></li>');
   var nicks = new sortedSet();
@@ -58,6 +58,7 @@
     $messages.start_time = parseFloat($messages.attr('data-start-time') || 0);
     $('a.conversation-list').trigger('deactivate');
     $('a.notification-list').trigger('deactivate');
+    if($win.smallScreen()) $('div.nick-list').animate({ right: '-180px' });
 
     if(/:23/.exec(current_target)) { // :23 = # = is a channel
       sendMessage('/names');
@@ -81,6 +82,7 @@
     $('body').loadingIndicator('hide');
     getMessages();
     drawUI();
+    nickList($('<div/>'));
   };
 
   var drawUI = function() {
@@ -89,6 +91,9 @@
     var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
     var used_width = 0;
     var left;
+
+    disable_swipe = $win.smallScreen() ? false : true;
+    $nick_list.css({ right: disable_swipe ? 0 : '-180px' });
 
     $('nav .conversation-list a').each(function(i) {
       used_width += $(this).show().outerWidth();
@@ -201,19 +206,29 @@
     });
   };
 
-  var initNickList = function($data) {
-    var senders = {};
+  var initNickList = function() {
+    var start_pos = -180;
 
-    $messages.find('li[data-sender]').each(function(i) {
-      senders[$(this).attr('data-sender')] = i;
+    $('body').swipe({
+      cancelThreshold: 0,
+      threshold: 10,
+      triggerOnTouchEnd : true,
+      swipeStatus: function(e, phase, direction, distance, duration, n_fingers) {
+        if(disable_swipe) {
+          return;
+        }
+        else if(phase == 'move' && (direction == 'left' || direction == 'right')) {
+          var right = direction == 'right' ? start_pos - distance : start_pos + distance;
+          if(right > 0) right = 0;
+          $nick_list.css({ right: right + 'px' });
+        }
+        else if(phase == 'end' || phase == 'cancel') {
+          start_pos = (direction == 'left' && distance > 80) ? 0 : -180;
+          $nick_list.animate({ right: start_pos + 'px' });
+        }
+      }
     });
-
-    nicks.clear();
-    $data.find('[data-nick]').each(function() {
-      var n = $(this).attr('data-nick');
-      nicks.add(senders[n] || 1, n);
-    });
-  }
+  };
 
   var initNotifications = function() {
     var m = document.cookie.match(/notification_permission=(\w+)/) || [];
@@ -240,12 +255,38 @@
     appendToMessages($ask_for_notifications);
   };
 
+  var nickList = function($data) {
+    var $nicks = $('.nick-list ul');
+    var cid = id_as(current_target)[0];
+    var extra = [nick];
+    var senders = {};
+
+    $messages.find('li[data-sender]').each(function(i) {
+      senders[$(this).attr('data-sender')] = i;
+    });
+
+    $data.find('[data-nick]').each(function() {
+      var $a = $(this);
+      var n = $a.attr('data-nick');
+      nicks.add(senders[n] || 1, n);
+    });
+
+    if(current_target.indexOf(':23') == -1) {
+      extra.unshift(id_as(current_target)[1]);
+    }
+
+    $nicks.html('');
+    $.each(nicks.revrange(0, -1).concat(extra).sort(), function(i, n) {
+      $nicks.append($('<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>'));
+    });
+  }
+
   var receiveMessage = function(e) {
     var $data = $(e.data);
     var cid_target = id_as($data.attr('data-target'));
     var cid_target_selector = targetToSelector($data.attr('data-target'));
     var at_bottom = $win.data('at_bottom');
-    var is_current = $('#conversation_' + cid_target_selector).length ? true : false;
+    var to_current = $('#conversation_' + cid_target_selector).length ? true : false;
     var re;
 
     $input.removeClass('sending');
@@ -254,34 +295,35 @@
       cid_target[1] = ''; // server messages
     }
 
-    if($data.hasClass('nicks')) {
-      initNickList($data);
-    }
-    else if($data.hasClass('nick-change')) {
-      nicks.rem($data.attr('data-old-nick')).add($data.attr('data-nick'));
-      if($data.attr('data-old-nick') == nick) {
-        re = new RegExp('\\b' + nick + '\\b', 'i');
-        nick = $data.attr('data-nick');
-        $input.attr('placeholder', $input.attr('placeholder').replace(re, nick)).attr('title', $input.attr('placeholder'));
-      }
-    }
-    else if($data.hasClass('nick-joined')) {
-      nicks.add(0, $data.attr('data-nick'));
-    }
-    else if($data.hasClass('nick-parted')) {
-      nicks.rem($data.attr('data-nick'));
-    }
-    else if($data.attr('data-sender')) {
-      nicks.add(new Date().getTime(), $data.attr('data-sender'));
-    }
-
     if($data.hasClass('remove-conversation')) {
-      reloadConversationList({ goto_current: is_current });
+      reloadConversationList({ goto_current: to_current });
     }
     else if($data.hasClass('add-conversation')) {
       reloadConversationList({ goto_current: true });
     }
-    else if(is_current) {
+    else if(to_current) {
+      if($data.hasClass('nicks')) {
+        nickList($data);
+        return;
+      }
+      else if($data.hasClass('nick-change')) {
+        nicks.rem($data.attr('data-old-nick')).add($data.attr('data-nick'));
+        if($data.attr('data-old-nick') == nick) {
+          re = new RegExp('\\b' + nick + '\\b', 'i');
+          nick = $data.attr('data-nick');
+          $input.attr('placeholder', $input.attr('placeholder').replace(re, nick)).attr('title', $input.attr('placeholder'));
+        }
+      }
+      else if($data.hasClass('nick-joined')) {
+        nicks.add(0, $data.attr('data-nick'));
+      }
+      else if($data.hasClass('nick-parted')) {
+        nicks.rem($data.attr('data-nick'));
+      }
+      else if($data.attr('data-sender')) {
+        nicks.add(new Date().getTime(), $data.attr('data-sender'));
+      }
+
       appendToMessages($data);
     }
 
@@ -337,13 +379,16 @@
     if($('section.messages').length === 0) return; // not on chat page
     $('nav a.help').click(function(e) { sendMessage('/help'); $(document).click(); return false; })
     $win.on('scroll', getMessages).on('resize', drawUI);
+    $nick_list = $('div.nick-list');
     chat_ws = $.ws($.url_for('socket').replace(/^http/, 'ws'));
     chat_ws.on('message', receiveMessage);
     initInputField();
+    initNickList();
 
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
     $(document).pjax('ul.conversation-list a', 'section.messages');
     $(document).pjax('ul.notification-list a', 'section.messages');
+    $(document).pjax('div.nick-list a', 'section.messages');
     $('section.messages').on('pjax:end', conversationLoaded);
     $('section.messages').on('pjax:start', function(xhr, options) {
       $('body').loadingIndicator('show');

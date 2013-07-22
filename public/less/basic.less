@@ -19,6 +19,7 @@
 @columnWidth: 8.333333%;
 @navBarIconWidth: 32px;
 @buttonBorderHover: 2px solid darken(#fff, 70%);
+@nickListWidth: 180px;
 
 /*
  * Less helpers
@@ -87,6 +88,7 @@ div.wrapper {
     clear: both;
   }
 }
+
 footer {
   height: @footerHeight;
   background: #fff;
@@ -95,6 +97,7 @@ footer {
   padding: 2px @bodyGutter;
 
   form {
+    margin-right: @nickListWidth;
     input { font-size: 1.1em; font-family: 'Hume Mono', monospace; width: 100%; padding: 8px; }
     input.sending {
       background: url(../image/loader-facebook.gif) no-repeat 99% 50%;
@@ -198,6 +201,9 @@ div.loading-indicator {
   background: url(../image/loader-squares-circle.gif) 50% 50% fixed no-repeat;
 }
 
+/*
+ * Chat
+ */
 nav.bar {
   background: #fdfdfd;
   position: fixed;
@@ -247,9 +253,6 @@ nav.bar {
   a.active, a:hover { color: #000; background-color: darken(#fff, 5%); }
 }
 
-/*
- * Chat
- */
 div.conversation-list,
 div.notification-list {
   background: darken(#fdfdfd, 1%);
@@ -273,7 +276,27 @@ div.notification-list {
   span.message { color: #666; font-size: 0.9em; line-height: 1em; .ellipsis(); }
 }
 
+div.nick-list {
+  background: #fff;
+  border: 1px solid #eee;
+  width: @nickListWidth;
+  position: fixed;
+  top: 42px;
+  bottom: -1px;
+  right: 0;
+  overflow: auto;
+  z-index: 2;
+
+  a {
+    text-decoration: none;
+    border-bottom: 1px solid #eee;
+    display: block;
+    padding: 2px;
+  }
+}
+
 section.messages {
+  margin-right: @nickListWidth;
   padding-top: 45px;
   li {
     font-family: "Hume Mono", monospace;
@@ -359,6 +382,9 @@ section.messages {
 @media (max-width: @responsiveWidth) {
   footer, nav.bar, .row { padding: 0; }
   nav.bar .right { right: 0; }
+  section.messages { margin-right: 0; }
+  footer form { margin-right: 0; }
+  div.nick-list { right: -(@nickListWidth); }
   .landing-page {
     width: 100%;
     img { margin: 2em 0; }

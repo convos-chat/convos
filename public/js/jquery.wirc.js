@@ -34,6 +34,10 @@
     return this;
   };
 
+  $.fn.smallScreen = function() {
+    return $win.width() < 700 ? true : false;
+  };
+
   $.fn.scrollTo = function(pos) {
     if(pos === 'bottom') {
       $(this).scrollTop($heigth_from.height());
