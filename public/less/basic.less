@@ -1,14 +1,5 @@
-@font-face {
-  font-family: 'Hume Mono';
-  src: url('/font/humemono-regular.eot');
-  src: url('/font/humemono-regular.eot?#iefix') format('embedded-opentype'),
-       url('/font/humemono-regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
-
 @backgroundColor: #fff;
-@fontFamily: Arial, sans-serif;
+@fontFamily: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 @fontColor: #333;
 @linkColor: #469;
 @fontSize: 14px;
@@ -98,7 +89,7 @@ footer {
 
   form {
     margin-right: @nickListWidth;
-    input { font-size: 1.1em; font-family: 'Hume Mono', monospace; width: 100%; padding: 8px; }
+    input { font-size: 1.1em; width: 100%; padding: 8px; }
     input.sending {
       background: url(../image/loader-facebook.gif) no-repeat 99% 50%;
     }
@@ -334,7 +325,6 @@ section.messages {
   margin-right: @nickListWidth;
   padding-top: 45px;
   li {
-    font-family: "Hume Mono", monospace;
     display: block;
     position: relative;
     padding: 3px 0;
