@@ -57,6 +57,11 @@
 
     $('.settings select[name="cid"]').change(gotoConnectionSettings);
     $('a.confirm').click(confirmFirst);
+    
+     $('a.notification-list').click(function() {
+       $.post($.url_for('clear_notifications'));
+       $('a.notification-list').children('b').text(0);
+     });
 
     if($login_button.length) {
       $('body').bind('keydown', 'shift+return', function(e) {

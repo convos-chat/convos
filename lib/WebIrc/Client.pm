@@ -139,6 +139,38 @@ sub conversation_list {
   $self->render_later;
 }
 
+=head2 clear_notifications
+
+Will mark all notifications as read.
+
+=cut
+
+sub clear_notifications {
+  my($self, $cb) = @_;
+  my $uid = $self->session('uid');
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->lrange("user:$uid:notifications", 0, -1, $delay->begin);
+    },
+    sub {
+      my($delay, $notification_list) = @_;
+      my $n_notifications = 0;
+      my $i = 0;
+
+      while($i < @$notification_list) {
+        my $notification = $JSON->decode($notification_list->[$i]);
+        $notification->{read}++;
+        $self->redis->lset("user:$uid:notifications", $i, $JSON->encode($notification));
+        $i++;
+      }
+      $self->render(text=>'OK');
+  });
+  $self->render_later();
+}
+
+
 =head2 notification_list
 
 Will render notifications.
