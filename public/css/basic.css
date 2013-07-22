@@ -64,12 +64,12 @@ div.loading-indicator{background:url(../image/loader-squares-circle.gif) 50% 50%
 .nanoscroller>.pane{position:absolute;width:10px;right:0;top:0;bottom:0;visibility:hidden\9;opacity:.01;-webkit-transition:.2s;-moz-transition:.2s;-o-transition:.2s;transition:.2s;-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px}
 .nanoscroller>.pane>.slider{background:#444;background:rgba(0,0,0,0.5);position:relative;margin:0 1px;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}
 .nanoscroller:hover>.pane,.pane.active,.pane.flashed{visibility:visible\9;opacity:.99}
-nav.bar{background:#fdfdfd;position:fixed;padding:0 20px;top:0;left:0;width:100%;height:42px;z-index:1000;overflow:hidden;-webkit-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);-moz-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);box-shadow:0 4px 4px -2px rgba(180,180,180,0.5)}nav.bar a{color:#000;text-decoration:none;padding:10px 4px;margin-left:-1px;border-left:1px solid #eee;border-right:1px solid #eee;display:block;float:left}
+nav.bar{background:#fafafa;position:fixed;padding:0 20px;top:0;left:0;width:100%;height:42px;z-index:1000;overflow:hidden;-webkit-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);-moz-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);filter:alpha(opacity=@{opacity*100});-moz-opacity:.95;-khtml-opacity:.95;-webkit-opacity:.95;opacity:.95}nav.bar a{color:#000;text-decoration:none;padding:10px 4px;display:block;float:left}
 nav.bar a.current{font-size:22px;border:0;padding-right:10px}
 nav.bar a.conversation{color:#666}
 nav.bar a.settings,nav.bar a.help,nav.bar a.logout,nav.bar a.conversation-list{text-indent:-10000px}
-nav.bar a.conversation-list{background:#fff url(../image/sprite.png) no-repeat 0 0;width:20px;background-position:-167px 0;display:none}
-nav.bar .right{position:absolute;right:20px}nav.bar .right a{background:#fff url(../image/sprite.png) no-repeat 0 0;width:32px}
+nav.bar a.conversation-list{background:url(../image/sprite.png) no-repeat 0 0;width:20px;background-position:-167px 0;display:none}
+nav.bar .right{position:absolute;right:20px}nav.bar .right a{background:url(../image/sprite.png) no-repeat 0 0;width:32px}
 nav.bar .right a.notification-list{background-position:-32px 0}
 nav.bar .right a.notification-list.alert{background-position:-64px 0}
 nav.bar .right a.help{background-position:-96px 0}
@@ -77,20 +77,21 @@ nav.bar .right a.logout{background-position:-128px 0}
 nav.bar .right a.notification-list b{position:relative;top:14px;color:#bbb;font-size:.9em}
 nav.bar .right a.notification-list.alert b{color:#b22}
 nav.bar .right a.hidden{display:none}
-nav.bar a.active,nav.bar a:hover{color:#000;background-color:#f2f2f2}
+nav.bar a.active,nav.bar a:hover{color:#000;background-color:#ebebeb}
 div.conversation-list,div.notification-list{background:#fafafa;position:fixed;top:42px;width:320px;max-height:70%;overflow:auto;z-index:1001;display:none;-webkit-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);-moz-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);box-shadow:0 0 1px 1px rgba(180,180,180,0.5)}div.conversation-list li,div.notification-list li{border-bottom:1px solid #eee}
 div.conversation-list a,div.notification-list a{color:#000;text-decoration:none;padding:4px;display:block}
 div.conversation-list a:hover,div.notification-list a:hover{color:#000;background-color:#f2f2f2}
 div.notification-list{right:6px}div.notification-list li.unread{border-right:2px solid #f66}
 div.notification-list span.message{color:#666;font-size:.9em;line-height:1em;text-overflow:ellipsis;white-space:nowrap;display:block;overflow:hidden}
-div.nick-list{background:#fff;border:1px solid #eee;width:180px;position:fixed;top:42px;bottom:-1px;right:0;z-index:2}div.nick-list a{text-decoration:none;border-bottom:1px solid #eee;display:block;padding:2px}
-section.messages{margin-right:180px;padding-top:45px}section.messages li{font-family:"Hume Mono",monospace;display:block;position:relative;padding:3px 0;border-top:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
+div.nick-list{background:#eee;border-left:2px solid #ccc;width:180px;position:fixed;top:42px;bottom:-1px;right:0;z-index:2}div.nick-list a{text-decoration:none;display:block;padding:4px 8px}
+div.nick-list a:hover{background:#e1e1e1}
+section.messages{margin-right:180px;padding-top:45px}section.messages li{font-family:"Hume Mono",monospace;display:block;position:relative;padding:3px 0;overflow:hidden}section.messages li img{float:left}
 section.messages li h3{font-size:1em;color:#467;line-height:1.2em;margin:0}
 section.messages li h3,section.messages li div{margin-left:50px}
 section.messages li div.question{margin-left:0}
 section.messages li span.timestamp{letter-spacing:-1px;position:absolute;top:2px;right:2px;color:#999}
 section.messages li.highlight{background:#fee}
-section.messages li.same-nick{border-top:0;padding-top:0}
+section.messages li.same-nick{padding-top:0}
 section.messages li.action-message .content{font-style:italic}
 section.messages li.message .embed,section.messages li.message .embed img{max-height:220px}
 section.messages li.nick-change,section.messages li.nick-joined,section.messages li.nick-parted,section.messages li.topic,section.messages li.whois,section.messages li.notice{color:#555}

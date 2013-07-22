@@ -247,7 +247,7 @@ div.loading-indicator {
  * Chat
  */
 nav.bar {
-  background: #fdfdfd;
+  background: #fafafa;
   position: fixed;
   padding: 0 @bodyGutter;
   top: 0;
@@ -257,14 +257,12 @@ nav.bar {
   z-index: 1000;
   overflow: hidden;
   .box-shadow(0 4px 4px -2px rgba(180, 180, 180, 0.5));
+  .opacity(0.95);
 
   a {
     color: #000;
     text-decoration: none;
     padding: 10px 4px;
-    margin-left: -1px;
-    border-left: 1px solid #eee;
-    border-right: 1px solid #eee;
     display: block;
     float: left;
   }
@@ -273,7 +271,7 @@ nav.bar {
   a.conversation { color: #666; }
   a.settings, a.help, a.logout, a.conversation-list { text-indent: -10000px; }
   a.conversation-list {
-    background: #fff url(../image/sprite.png) no-repeat 0 0;
+    background: url(../image/sprite.png) no-repeat 0 0;
     width: 20px;
     background-position: -(@navBarIconWidth * 5 + 7) 0;
     display: none;
@@ -282,7 +280,7 @@ nav.bar {
   .right {
     position: absolute;
     right: @bodyGutter;
-    a { background: #fff url(../image/sprite.png) no-repeat 0 0; width: @navBarIconWidth; }
+    a { background: url(../image/sprite.png) no-repeat 0 0; width: @navBarIconWidth; }
     a.notification-list { background-position: -@navBarIconWidth 0; }
     a.notification-list.alert { background-position: -(@navBarIconWidth * 2) 0; }
     a.help { background-position: -(@navBarIconWidth * 3) 0; }
@@ -292,7 +290,7 @@ nav.bar {
     a.hidden { display: none; }
   }
 
-  a.active, a:hover { color: #000; background-color: darken(#fff, 5%); }
+  a.active, a:hover { color: #000; background-color: darken(#fff, 8%); }
 }
 
 div.conversation-list,
@@ -319,8 +317,8 @@ div.notification-list {
 }
 
 div.nick-list {
-  background: #fff;
-  border: 1px solid #eee;
+  background: #eee;
+  border-left: 2px solid #ccc;
   width: @nickListWidth;
   position: fixed;
   top: 42px;
@@ -328,12 +326,8 @@ div.nick-list {
   right: 0;
   z-index: 2;
 
-  a {
-    text-decoration: none;
-    border-bottom: 1px solid #eee;
-    display: block;
-    padding: 2px;
-  }
+  a { text-decoration: none; display: block; padding: 4px 8px; }
+  a:hover { background: darken(#eee, 5%); };
 }
 
 section.messages {
@@ -344,7 +338,6 @@ section.messages {
     display: block;
     position: relative;
     padding: 3px 0;
-    border-top: 1px solid #f0f0ff;
     overflow: hidden;
 
     img { float: left; }
@@ -361,7 +354,7 @@ section.messages {
   }
 
   li.highlight { background: #fee; }
-  li.same-nick { border-top: 0; padding-top: 0; }
+  li.same-nick { padding-top: 0; }
   li.action-message .content { font-style: italic; }
   li.message .embed, li.message .embed img { max-height: 220px; }
   li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
