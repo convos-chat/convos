@@ -281,7 +281,7 @@
     }
 
     $nicks.html('');
-    $.each(nicks.revrange(0, -1).concat(extra).sort(), function(i, n) {
+    $.each(nicks.revrange(0, -1).concat(extra).sortCaseInsensitive(), function(i, n) {
       $nicks.append($('<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>'));
     });
     $nick_list.nanoScroller(); // reset

@@ -172,11 +172,19 @@ RegExp.escape = RegExp.escape || function(str) {
 };
 
 Array.prototype.unique = function() {
-    var r = [];
-    for(i = 0; i < this.length; i++) {
-      if(r.indexOf(this[i]) === -1) r.push(this[i]);
-    }
-    return r;
+  var r = [];
+  for(i = 0; i < this.length; i++) {
+    if(r.indexOf(this[i]) === -1) r.push(this[i]);
+  }
+  return r;
+};
+
+Array.prototype.sortCaseInsensitive = function() {
+  return this.sort(function(a, b) {
+    a = a.toLowerCase();
+    b = b.toLowerCase();
+    return a == b ? 0 : a > b ? 1 : -1;
+  });
 };
 
 if(!window.Notification) {
