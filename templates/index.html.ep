@@ -4,7 +4,7 @@
 <div class="landing-page">
   <header class="row center">
     <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
-    <h2>Interact with friends and colleges.</h2>
+    <h2>Interact with friends and colleagues.</h2>
   </header>
   %= image '/image/landing-page-example-chat.jpeg', alt => 'Example chat'
   <nav>
@@ -33,6 +33,11 @@
       model based on how much you use, we just sell you the
       software. it's trivial to set up on your cloud / server
       of choice.
+    </p>
+    <h2>Contact us</h2>
+    <p>
+      Interested in Wirc? Send an email to
+      <a href="mailto:marcus@nordaaker.no">marcus@nordaaker.no</a>.
     </p>
   </div>
 </div>
