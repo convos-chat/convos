@@ -1,4 +1,4 @@
-@font-face{font-family:'Hume Mono';src:url('/font/HumeMonoRegular.eot');src:url('/font/HumeMonoRegular.eot?#iefix') format('embedded-opentype'),url('/font/HumeMonoRegular.woff') format('woff');font-weight:normal;font-style:normal}html,body,body div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,figure,footer,header,hgroup,menu,nav,section,time,mark,audio,video,details,summary{margin:0;padding:0;border:0;font-size:100%;line-height:1.6em;vertical-align:baseline;background:transparent}
+@font-face{font-family:'Hume Mono';src:url('/font/humemono-regular.eot');src:url('/font/humemono-regular.eot?#iefix') format('embedded-opentype'),url('/font/humemono-regular.woff') format('woff');font-weight:normal;font-style:normal}html,body,body div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,figure,footer,header,hgroup,menu,nav,section,time,mark,audio,video,details,summary{margin:0;padding:0;border:0;font-size:100%;line-height:1.6em;vertical-align:baseline;background:transparent}
 article,aside,figure,footer,header,hgroup,nav,section,details,summary{display:block}
 ul{list-style:none}
 a{margin:0;padding:0;vertical-align:baseline;background:transparent}
@@ -27,7 +27,7 @@ textarea:-moz-placeholder{color:#808080}
 li.separator{background:#eee;height:1px;overflow:hidden}
 html,body{height:100%}
 div.wrapper{min-height:100%;height:auto !important;height:100%;margin-bottom:-50px}div.wrapper div.clear{height:70px;clear:both}
-footer{height:50px;background:#fff;color:#999;clear:both;padding:2px 20px}footer form input{width:100%;padding:6px;font-size:1.3em}
+footer{height:50px;background:#fff;color:#999;clear:both;padding:2px 20px}footer form input{font-size:1.1em;font-family:'Hume Mono',monospace;width:100%;padding:8px}
 footer form input.sending{background:url(../image/loader-facebook.gif) no-repeat 99% 50%}
 h1 a,h3 a{text-decoration:none}
 h1{font-size:2em;margin-top:.5em;margin-bottom:.5em}
@@ -79,12 +79,11 @@ div.conversation-list a,div.notification-list a{color:#000;text-decoration:none;
 div.conversation-list a:hover,div.notification-list a:hover{color:#000;background-color:#f2f2f2}
 div.notification-list{right:6px}div.notification-list li.unread{border-right:2px solid #f66}
 div.notification-list span.message{color:#666;font-size:.9em;line-height:1em;text-overflow:ellipsis;white-space:nowrap;display:block;overflow:hidden}
-section.messages{padding-top:45px}section.messages li{display:block;position:relative;padding:3px 0;border-top:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
+section.messages{padding-top:45px}section.messages li{font-family:"Hume Mono",monospace;display:block;position:relative;padding:3px 0;border-top:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
 section.messages li h3{font-size:1em;color:#467;line-height:1.2em;margin:0}
 section.messages li h3,section.messages li div{margin-left:50px}
-section.messages li div{font-family:"HumeMonoRegular",monospace}
 section.messages li div.question{margin-left:0}
-section.messages li span.timestamp{position:absolute;top:2px;right:0;color:#999}
+section.messages li span.timestamp{letter-spacing:-1px;position:absolute;top:2px;right:2px;color:#999}
 section.messages li.highlight{background:#fee}
 section.messages li.same-nick{border-top:0;padding-top:0}
 section.messages li.action-message .content{font-style:italic}

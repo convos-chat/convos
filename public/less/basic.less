@@ -1,8 +1,8 @@
 @font-face {
   font-family: 'Hume Mono';
-  src: url('/font/HumeMonoRegular.eot');
-  src: url('/font/HumeMonoRegular.eot?#iefix') format('embedded-opentype'),
-       url('/font/HumeMonoRegular.woff') format('woff');
+  src: url('/font/humemono-regular.eot');
+  src: url('/font/humemono-regular.eot?#iefix') format('embedded-opentype'),
+       url('/font/humemono-regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
@@ -95,7 +95,7 @@ footer {
   padding: 2px @bodyGutter;
 
   form {
-    input { width: 100%; padding: 6px; font-size: 1.3em; }
+    input { font-size: 1.1em; font-family: 'Hume Mono', monospace; width: 100%; padding: 8px; }
     input.sending {
       background: url(../image/loader-facebook.gif) no-repeat 99% 50%;
     }
@@ -276,6 +276,7 @@ div.notification-list {
 section.messages {
   padding-top: 45px;
   li {
+    font-family: "Hume Mono", monospace;
     display: block;
     position: relative;
     padding: 3px 0;
@@ -285,12 +286,12 @@ section.messages {
     img { float: left; }
     h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
     h3, div { margin-left: 50px; }
-    div { font-family: "HumeMonoRegular", monospace; }
     div.question { margin-left: 0; }
     span.timestamp {
+      letter-spacing: -1px;
       position: absolute;
       top: 2px;
-      right: 0;
+      right: 2px;
       color: #999;
     }
   }
