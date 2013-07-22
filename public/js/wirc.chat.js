@@ -209,8 +209,8 @@
   var initNickList = function() {
     var start_pos = -180;
 
-    $nick_list.wrapInner('<div/>').children('div').slimScroll({
-      height: '100%'
+    $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({
+      preventPageScrolling: true
     });
 
     $('body').swipe({
@@ -284,6 +284,7 @@
     $.each(nicks.revrange(0, -1).concat(extra).sort(), function(i, n) {
       $nicks.append($('<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>'));
     });
+    $nick_list.nanoScroller(); // reset
   }
 
   var receiveMessage = function(e) {

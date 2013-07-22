@@ -60,6 +60,10 @@ button:hover,.button:hover{border:2px solid #4d4d4d}
 div.loading-indicator-overlay,div.loading-indicator{height:100%;width:100%;position:absolute;top:0;left:0}
 div.loading-indicator-overlay{background:#fff;filter:alpha(opacity=@{opacity*100});-moz-opacity:.7;-khtml-opacity:.7;-webkit-opacity:.7;opacity:.7}
 div.loading-indicator{background:url(../image/loader-squares-circle.gif) 50% 50% fixed no-repeat}
+.nanoscroller>.content{position:absolute;overflow:scroll;overflow-x:hidden;top:0;right:0;bottom:0;left:0}
+.nanoscroller>.pane{position:absolute;width:10px;right:0;top:0;bottom:0;visibility:hidden\9;opacity:.01;-webkit-transition:.2s;-moz-transition:.2s;-o-transition:.2s;transition:.2s;-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px}
+.nanoscroller>.pane>.slider{background:#444;background:rgba(0,0,0,0.5);position:relative;margin:0 1px;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}
+.nanoscroller:hover>.pane,.pane.active,.pane.flashed{visibility:visible\9;opacity:.99}
 nav.bar{background:#fdfdfd;position:fixed;padding:0 20px;top:0;left:0;width:100%;height:42px;z-index:1000;overflow:hidden;-webkit-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);-moz-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);box-shadow:0 4px 4px -2px rgba(180,180,180,0.5)}nav.bar a{color:#000;text-decoration:none;padding:10px 4px;margin-left:-1px;border-left:1px solid #eee;border-right:1px solid #eee;display:block;float:left}
 nav.bar a.current{font-size:22px;border:0;padding-right:10px}
 nav.bar a.conversation{color:#666}
@@ -79,7 +83,7 @@ div.conversation-list a,div.notification-list a{color:#000;text-decoration:none;
 div.conversation-list a:hover,div.notification-list a:hover{color:#000;background-color:#f2f2f2}
 div.notification-list{right:6px}div.notification-list li.unread{border-right:2px solid #f66}
 div.notification-list span.message{color:#666;font-size:.9em;line-height:1em;text-overflow:ellipsis;white-space:nowrap;display:block;overflow:hidden}
-div.nick-list{background:#fff;border:1px solid #eee;width:180px;position:fixed;top:42px;bottom:-1px;right:0;overflow:auto;z-index:2}div.nick-list a{text-decoration:none;border-bottom:1px solid #eee;display:block;padding:2px}
+div.nick-list{background:#fff;border:1px solid #eee;width:180px;position:fixed;top:42px;bottom:-1px;right:0;z-index:2}div.nick-list a{text-decoration:none;border-bottom:1px solid #eee;display:block;padding:2px}
 section.messages{margin-right:180px;padding-top:45px}section.messages li{font-family:"Hume Mono",monospace;display:block;position:relative;padding:3px 0;border-top:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
 section.messages li h3{font-size:1em;color:#467;line-height:1.2em;margin:0}
 section.messages li h3,section.messages li div{margin-left:50px}
