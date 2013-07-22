@@ -207,10 +207,6 @@ sub _subscribe {
         return;
       }
 
-      $message->{host} ||= $irc->server;
-      $message->{nick} ||= $irc->nick;
-      $message->{user} ||= $irc->user;
-
       $irc->write($raw_message, sub {
         my($irc, $error) = @_;
 
@@ -312,8 +308,10 @@ sub add_message {
     timestamp => time,
   };
 
-  @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix});
+  @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
+  $data->{host} ||= WebIrc::Core::Util::hostname;
+  $data->{user} ||= $self->_irc->user;
 
   if($data->{nick} ne $current_nick) {
     if($is_private_message or $data->{message} =~ /\b$current_nick\b/) {

@@ -18,6 +18,7 @@ use Parse::IRC ();
 use Unicode::UTF8;
 
 my $LOGGER = Mojo::Log->new;
+my $hostname;
 my @days = qw/ Sun Mon Tue Wed Thu Fri Sat /;
 my @months = qw/ Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec /;
 my %date_markers = (
@@ -30,6 +31,7 @@ my %date_markers = (
     M => [ 1, sub { $_[0] < 10 ? "0$_[0]" : $_[0] } ],
     S => [ 0, sub { $_[0] < 10 ? "0$_[0]" : $_[0] } ],
 );
+
 
 =head1 FUNCTIONS
 
@@ -68,6 +70,24 @@ sub id_as {
     s/:(\w\w)/{ chr hex $1 }/ge;
     $_;
   } split /:00/, $_[0];
+}
+
+=head2 hostname
+
+  $hostname = hostname();
+
+Returns the public domain name for the current host or fall back on "localhost".
+
+=cut
+
+sub hostname {
+  $hostname ||= do {
+    use IO::Socket::INET;
+    use Socket;
+    $ENV{PUBLIC_IP} ||= Mojo::UserAgent->new->get('http://icanhazip.com')->res->body;
+    $ENV{PUBLIC_IP} =~ s/\s//g;
+    +(gethostbyaddr inet_aton($ENV{PUBLIC_IP}), AF_INET)[0] || 'localhost';
+  };
 }
 
 =head2 logf

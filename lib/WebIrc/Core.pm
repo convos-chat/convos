@@ -195,7 +195,7 @@ sub update_connection {
     [del   => "connection:$cid:channels"],
     [sadd  => "connection:$cid:channels", @channels],
     sub {
-      $self->redis->publish('core:control', "restart:$cid");
+      # $self->redis->publish('core:control', "restart:$cid"); # <--- seems to cause duplicate connections
       $self->$cb($cid, {});
     },
   );

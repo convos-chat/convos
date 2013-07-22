@@ -8,6 +8,7 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util ();
+use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $YOUTUBE_INCLUDE = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
 
@@ -89,12 +90,13 @@ sub format_conversation {
     $message->{embed} = '';
 
     if($message->{message}) {
-      my $avatar = $message->{host} ? join '@', @$message{qw/ user host /} : $message->{nick}; # need to check for "host" to be backward compat
+      my $lookup = $message->{host} ? join '@', @$message{qw/ user host /} : $message->{nick}; # need to check for "host" to be backward compat
       my $cb = $delay->begin;
 
-      $avatar =~ s!^~!!;
-      $c->redis->get("avatar:$avatar", sub {
-        $avatar = Mojo::Util::md5_sum(pop || $avatar);
+      $lookup =~ s!^~!!;
+      $c->redis->get("avatar:$lookup", sub {
+        my $lookup = $_[1] || $lookup;
+        my $avatar = Mojo::Util::md5_sum($lookup);
         $message->{avatar} = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
         $cb->();
       });

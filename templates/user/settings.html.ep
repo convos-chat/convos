@@ -1,6 +1,8 @@
 % title 'Settings';
 % my $n_notifications = 0; # TODO: Get this from backend
 
+<!-- <%= $fqn %> -->
+
 <nav class="bar">
   %= link_to config->{name} .' settings', 'settings', class => 'current'
   <div class="right">
@@ -35,6 +37,11 @@
         <label for="channels">Channel</label>
         %= text_field 'channels', $current->{channels}, id => 'channels'
         <p class="help">You can specify more channels by separating them with space.</p>
+      % end
+      %= form_block avatar => class => [], begin
+        <label for="avatar">Gravatar email</label>
+        %= text_field 'avatar', $current->{avatar}, id => 'avatar'
+        <p class="help">Don't have a gravatar? <a href="http://gravatar.com">Register now!</a></p>
       % end
       <div class="actions">
         <button type="submit"><%= $cid ? 'Save' : 'Add' %></button>
