@@ -209,14 +209,34 @@
     var cid_target_selector = targetToSelector($data.attr('data-target'));
     var at_bottom = $win.data('at_bottom');
     var is_current = $('#conversation_' + cid_target_selector).length ? true : false;
+    var re;
 
     $input.removeClass('sending');
 
-    if(typeof cid_target[1] === 'undefined') cid_target[1] = ''; // server messages
-    if($data.hasClass('nicks')) initNickList($data);
-    if($data.hasClass('nick-joined')) nicks.add(0, $data.attr('data-nick'));
-    if($data.hasClass('nick-parted')) nicks.rem($data.attr('data.nick'));
-    if($data.attr('data-sender')) nicks.add(new Date().getTime(), $data.attr('data-sender'))
+    if(typeof cid_target[1] === 'undefined') {
+      cid_target[1] = ''; // server messages
+    }
+
+    if($data.hasClass('nicks')) {
+      initNickList($data);
+    }
+    else if($data.hasClass('nick-change')) {
+      nicks.rem($data.attr('data-old-nick')).add($data.attr('data-nick'));
+      if($data.attr('data-old-nick') == nick) {
+        re = new RegExp('\\b' + nick + '\\b', 'i');
+        nick = $data.attr('data-nick');
+        $input.attr('placeholder', $input.attr('placeholder').replace(re, nick));
+      }
+    }
+    else if($data.hasClass('nick-joined')) {
+      nicks.add(0, $data.attr('data-nick'));
+    }
+    else if($data.hasClass('nick-parted')) {
+      nicks.rem($data.attr('data-nick'));
+    }
+    else if($data.attr('data-sender')) {
+      nicks.add(new Date().getTime(), $data.attr('data-sender'));
+    }
 
     if($data.hasClass('remove-conversation')) {
       reloadConversationList({ goto_current: is_current });
