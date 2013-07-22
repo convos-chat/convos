@@ -209,6 +209,10 @@
   var initNickList = function() {
     var start_pos = -180;
 
+    $nick_list.wrapInner('<div/>').children('div').slimScroll({
+      height: '100%'
+    });
+
     $('body').swipe({
       cancelThreshold: 0,
       threshold: 10,
