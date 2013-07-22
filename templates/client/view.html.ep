@@ -30,6 +30,6 @@
 
 <footer>
 %= form_for 'chat', method => 'post', begin
-  %= text_field 'message', placeholder => "What's on your mind $nick?", autocomplete => 'off'
+  %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off'
 % end
 </footer>

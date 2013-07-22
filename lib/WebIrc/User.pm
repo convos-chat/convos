@@ -33,13 +33,17 @@ Will either call L</login> or L</register> based on form input.
 sub login_or_register {
   my $self = shift;
 
-  if(defined $self->param('email') or $self->stash('register_page')) {
-    $self->stash(template => 'index', form => 'register');
-    $self->register if $self->req->method eq 'POST';
-  }
-  else {
-    $self->stash(template => 'index', form => 'login');
-    $self->login if $self->req->method eq 'POST';
+  $self->stash(template => 'index', form => '');
+
+  if($self->req->method eq 'POST') {
+    if(defined $self->param('email') or $self->stash('register_page')) {
+      $self->stash(form => 'register');
+      $self->register;
+    }
+    else {
+      $self->stash(form => 'login');
+      $self->login;
+    }
   }
 }
 

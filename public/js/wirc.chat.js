@@ -146,9 +146,6 @@
     var history = { index: 0, list: [], current: '' };
     $input = $('footer form input');
 
-    $win.focus(function() {
-      if($win.data('at_bottom')) $input.focus();
-    });
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
       $win.scrollTo('bottom');
@@ -265,7 +262,7 @@
       if($data.attr('data-old-nick') == nick) {
         re = new RegExp('\\b' + nick + '\\b', 'i');
         nick = $data.attr('data-nick');
-        $input.attr('placeholder', $input.attr('placeholder').replace(re, nick));
+        $input.attr('placeholder', $input.attr('placeholder').replace(re, nick)).attr('title', $input.attr('placeholder'));
       }
     }
     else if($data.hasClass('nick-joined')) {

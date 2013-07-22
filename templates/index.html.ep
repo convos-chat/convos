@@ -1,6 +1,4 @@
 % title 'Home';
-% my $form = stash->{form} ||= '';
-
 <div class="landing-page">
   <header class="row center">
     <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
