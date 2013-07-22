@@ -56,6 +56,8 @@
     nicks.clear();
 
     $messages.start_time = parseFloat($messages.attr('data-start-time') || 0);
+    $('a.conversation-list').trigger('deactivate');
+    $('a.notification-list').trigger('deactivate');
 
     if(/:23/.exec(current_target)) { // :23 = # = is a channel
       sendMessage('/names');
@@ -68,7 +70,6 @@
     if(location.href.indexOf('from=') > 0) { // link from notification list
       $messages.end_time = parseFloat($messages.attr('data-end-time') || 0);
       $win.scrollTo(0);
-      $('a.notification-list').trigger('deactivate'); // hide ul.notification-list
       reloadNotificationList();
     }
     else {
@@ -84,7 +85,7 @@
 
   var drawUI = function() {
     var $conversation_list = $('div.conversation-list li').hide();
-    var $conversation_list_button = $('nav a.conversation-list').hide();
+    var $conversation_list_button = $('a.conversation-list').hide();
     var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
     var used_width = 0;
     var left;
