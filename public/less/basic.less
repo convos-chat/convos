@@ -130,6 +130,8 @@ dl {
 div.alert, div.question { padding: 1em; margin: 1em 0; .border-radius(3px); }
 div.alert { background: #fed; color: #851; border: 1px solid #edb; }
 div.question { background: #def; color: #158; border: 1px solid #bde; }
+div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
+div.question .button.confirm { background: darken(#def, 10%); border: 2px solid #900; }
 
 /*
  * Form elements
@@ -280,21 +282,11 @@ section.messages {
     border-bottom: 1px solid #f0f0ff;
     overflow: hidden;
 
-    img {
-      float: left;
-    }
-    h3 {
-      font-size: 1em;
-      color: #467;
-      line-height: 1.2em;
-      margin: 0;
-    }
-    h3, div {
-      margin-left: 50px;
-    }
-    div {
-      font-family: "HumeMonoRegular", monospace;
-    }
+    img { float: left; }
+    h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
+    h3, div { margin-left: 50px; }
+    div { font-family: "HumeMonoRegular", monospace; }
+    div.question { margin-left: 0; }
     span.timestamp {
       position: absolute;
       top: 2px;

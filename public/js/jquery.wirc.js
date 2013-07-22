@@ -1,6 +1,26 @@
 ;(function($) {
   var at_bottom_threshold = 40;
-  var $heigth_from, $win, base_url;
+  var original_title = document.title;
+  var current_title = original_title;
+  var tid, $heigth_from, $win, base_url;
+
+  $.notify = function(title, body, icon) {
+    if($win.data('has_focus')) return this;
+    if(Notification.permission == 'granted') new Notification(title, { iconUrl: icon, body: body });
+
+    tid = setInterval(this.title, 2000);
+    current_title = title;
+    clearInterval(tid);
+
+    if(document.title == current_title || document.title == original_title) {
+      document.title = [original_title, current_title].join(' - ');
+    }
+    else {
+      document.title = current_title;
+    }
+
+    return this;
+  };
 
   $.fn.loadingIndicator = function(action) {
     if(action == 'hide') {
@@ -105,7 +125,7 @@
 
   $(document).ready(function() {
     $heigth_from = $('div.wrapper').length ? $('div.wrapper') : $('body');
-    $win = $(window).data('at_bottom', false);
+    $win = $(window).data('at_bottom', false).data('has_focus', true);
 
     setTimeout(function() { $(document).trigger('completely_ready'); }, 200);
     $(document).data('heigth_from', $heigth_from);
@@ -113,6 +133,14 @@
     $win.on('scroll', function() {
       var at_bottom = $win.scrollTop() + $win.height() > $heigth_from.height() - at_bottom_threshold;
       $win.data('at_bottom', at_bottom);
+    });
+    $win.blur(function() {
+      $win.data('has_focus', false);
+    });
+    $win.focus(function() {
+      clearInterval(tid);
+      tid = setInterval(function() { document.title = original_title; clearInterval(tid); }, 3000);
+      $win.data('has_focus', true);
     });
   });
 
@@ -146,6 +174,32 @@ Array.prototype.unique = function() {
     }
     return r;
 };
+
+if(!window.Notification) {
+  if(window.webkitNotifications) {
+    window.Notification = function(title, args) {
+      var n = window.webkitNotifications.createNotification(args.iconUrl || '', title, args.body || '');
+      $.each(['onshow', 'onclose'], function(k, i) { if(args[k]) this[k] = args[k]; });
+      n.ondisplay = function() { if(this.onshow) this.onshow() };
+      n.show();
+      return n;
+    };
+    window.Notification.permission = webkitNotifications.checkPermission() ? 'default' : 'granted';
+    window.Notification.requestPermission = function(cb) {
+      webkitNotifications.requestPermission(function() {
+        window.Notification.permission = webkitNotifications.checkPermission() ? 'denied' : 'granted';
+        cb(window.Notification.permission);
+      });
+    };
+    window.Notification.prototype.close = function() { if(this.onclose) this.onclose(); };
+  }
+  else {
+    window.Notification = function(title, args) { return this; };
+    window.Notification.permission = 'unsupported'; // TODO: "denied" instead?
+    window.Notification.requestPermission = function(cb) { cb('unsupported'); };
+    window.Notification.prototype.close = function() { if(this.onclose) this.onclose(); };
+  }
+}
 
 // jquery.pjax.js
 // copyright chris wanstrath

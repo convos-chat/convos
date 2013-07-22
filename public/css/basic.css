@@ -43,6 +43,8 @@ dl dd{margin-left:240px}
 div.alert,div.question{padding:1em;margin:1em 0;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px}
 div.alert{background:#fed;color:#851;border:1px solid #edb}
 div.question{background:#def;color:#158;border:1px solid #bde}
+div.question .button{background:#aad4ff;border:2px solid #18f}
+div.question .button.confirm{background:#aad4ff;border:2px solid #900}
 form{margin:0}form label{display:block;margin-top:20px}
 form input{padding:4px;font-size:1.2em;outline:none;border:2px solid #aaa;width:290px;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px}
 form input:focus{border:2px solid #848484}
@@ -81,6 +83,7 @@ section.messages{padding-top:45px}section.messages li{display:block;position:rel
 section.messages li h3{font-size:1em;color:#467;line-height:1.2em;margin:0}
 section.messages li h3,section.messages li div{margin-left:50px}
 section.messages li div{font-family:"HumeMonoRegular",monospace}
+section.messages li div.question{margin-left:0}
 section.messages li span.timestamp{position:absolute;top:2px;right:0;color:#999}
 section.messages li.highlight{background:#fee}
 section.messages li.action-message .content{font-style:italic}
