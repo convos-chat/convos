@@ -34,6 +34,19 @@
     });
   };
 
+  var appendToMessages = function($data) {
+    var $previous = $messages.children('li:last');
+    var last_nick = $previous.attr('data-sender') || '';
+
+    if($data.hasClass('message') && $previous.hasClass('message')) {
+      if(last_nick == $data.attr('data-sender')) {
+        $data.addClass('same-nick').children('h3, .avatar, .timestamp').remove();
+      }
+    }
+
+    $messages.append($data.fadeIn('fast'));
+  };
+
   var conversationLoaded = function() {
     var old_target = current_target;
     $messages = $('section.messages ul');
@@ -121,7 +134,7 @@
         $messages.start_time = start_time;
         if(!$li.length) return;
         $messages.end_time = parseFloat($data.attr('data-end-time'));
-        $messages.append($li);
+        $li.each(function() { appendToMessages($(this)); });
       });
       $messages.start_time = $messages.end_time = 0;
     }
@@ -226,7 +239,7 @@
       return false;
     });
 
-    $messages.append($ask_for_notifications);
+    appendToMessages($ask_for_notifications);
   };
 
   var receiveMessage = function(e) {
@@ -271,7 +284,7 @@
       reloadConversationList({ goto_current: true });
     }
     else if(is_current) {
-      $messages.append($data.fadeIn('fast'));
+      appendToMessages($data);
     }
 
     if($data.hasClass('highlight')) {

@@ -1,5 +1,7 @@
+% my $prev_nick = '';
 <ul id="conversation_<%= as_id $cid, $target %>" data-nick="<%= $nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
 % for my $message (@$conversation) {
-  %= include "event/$message->{event}", highlight => 0, %$message
+  %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
+  % $prev_nick = $message->{event} eq 'message' ? $message->{nick} : '';
 % }
 </ul>

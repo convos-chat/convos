@@ -6,5 +6,5 @@
       <%= link_to join('', @$n{qw/mode nick/}), 'channel.view', { cid => $cid, target => $n->{nick} }, 'data-nick' => $n->{nick} %><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
   </span>
-  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
+  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%d. %n %H:%M:%S' %></span>
 </li>

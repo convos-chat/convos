@@ -1,4 +1,4 @@
 <li class="action-message<%= $highlight ? ' highlight' : '' %>" data-target="<%= as_id $cid, $target %>" data-sender="<%= $nick %>">
   <span class="content" colspan="2">* <%= $nick %> <%== $message %></span>
-  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
+  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%d. %n %H:%M:%S' %></span>
 </li>

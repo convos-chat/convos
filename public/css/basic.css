@@ -79,13 +79,14 @@ div.conversation-list a,div.notification-list a{color:#000;text-decoration:none;
 div.conversation-list a:hover,div.notification-list a:hover{color:#000;background-color:#f2f2f2}
 div.notification-list{right:6px}div.notification-list li.unread{border-right:2px solid #f66}
 div.notification-list span.message{color:#666;font-size:.9em;line-height:1em;text-overflow:ellipsis;white-space:nowrap;display:block;overflow:hidden}
-section.messages{padding-top:45px}section.messages li{display:block;position:relative;padding:3px 0;border-bottom:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
+section.messages{padding-top:45px}section.messages li{display:block;position:relative;padding:3px 0;border-top:1px solid #f0f0ff;overflow:hidden}section.messages li img{float:left}
 section.messages li h3{font-size:1em;color:#467;line-height:1.2em;margin:0}
 section.messages li h3,section.messages li div{margin-left:50px}
 section.messages li div{font-family:"HumeMonoRegular",monospace}
 section.messages li div.question{margin-left:0}
 section.messages li span.timestamp{position:absolute;top:2px;right:0;color:#999}
 section.messages li.highlight{background:#fee}
+section.messages li.same-nick{border-top:0;padding-top:0}
 section.messages li.action-message .content{font-style:italic}
 section.messages li.message .embed,section.messages li.message .embed img{max-height:220px}
 section.messages li.nick-change,section.messages li.nick-joined,section.messages li.nick-parted,section.messages li.topic,section.messages li.whois,section.messages li.notice{color:#555}

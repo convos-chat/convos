@@ -1,5 +1,5 @@
 <li class="whois" data-target="any">
   <span class="prefix"><%= app->config->{name} %>:</span>
   <span><%= $nick %> is <%=$user%>@<%= $host %> (<%= $realname %>).</span>
-  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%H:%M:%S' %></span>
+  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%d. %n %H:%M:%S' %></span>
 </li>
