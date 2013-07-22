@@ -50,8 +50,8 @@ use Mojo::IRC;
 use Mojo::JSON;
 no warnings 'utf8';
 use Carp qw/ croak /;
-use IRC::Utils qw/parse_user/;
-use Parse::IRC   ();
+use IRC::Utils;
+use Parse::IRC ();
 use Scalar::Util ();
 use Time::HiRes qw/ time /;
 use WebIrc::Core::Util qw/ as_id /;
@@ -207,6 +207,10 @@ sub _subscribe {
         return;
       }
 
+      $message->{host} ||= $irc->server;
+      $message->{nick} ||= $irc->nick;
+      $message->{user} ||= $irc->user;
+
       $irc->write($raw_message, sub {
         my($irc, $error) = @_;
 
@@ -308,7 +312,7 @@ sub add_message {
     timestamp => time,
   };
 
-  @{$data}{qw/nick user host/} = parse_user $message->{prefix};
+  @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix});
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
 
   if($data->{nick} ne $current_nick) {

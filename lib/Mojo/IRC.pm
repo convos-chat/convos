@@ -494,13 +494,20 @@ an error message: Empty string on success and a description on error.
 
 sub write {
   no warnings 'utf8';
-  my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
+  my $cb = ref $_[-1] eq 'CODE' ? pop : sub {};
   my $self = shift;
   my $buf = Unicode::UTF8::encode_utf8(join(' ', @_), sub { $_[0] });
 
-  return $self->$cb('Not connected') unless ref $self->{stream};
-  warn "[$self->{debug_key}] <<< $buf\n" if DEBUG;
-  return $self->{stream}->write("$buf\r\n", $cb);
+  Scalar::Util::weaken($self);
+  if(ref $self->{stream}) {
+    warn "[$self->{debug_key}] <<< $buf\n" if DEBUG;
+    $self->{stream}->write("$buf\r\n", sub { $self->$cb(''); });
+  }
+  else {
+    $self->$cb('Not connected');
+  }
+
+  $self;
 }
 
 =head1 DEFAULT EVENT HANDLERS
