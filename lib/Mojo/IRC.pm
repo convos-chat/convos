@@ -115,6 +115,13 @@ This event is used by IRC errors
 
 =head2 irc_privmsg
 
+  $self->$callback({
+    params => [ '#channel', 'some message' ],
+    raw_line => ':nick!user@host PRIVMSG #nms :some message',
+    command => 'PRIVMSG',
+    prefix => 'nick!user@host',
+  });
+
 =head2 irc_rpl_created
 
   $self->$callback({
@@ -122,7 +129,6 @@ This event is used by IRC errors
     raw_line => ':Tampa.FL.US.Undernet.org 003 somenick :This server was created Thu Jun 21 2012 at 01:26:15 UTC',
     command => '003',
     prefix => 'Tampa.FL.US.Undernet.org'
-
   });
 
 =head2 irc_rpl_endofmotd
@@ -389,7 +395,7 @@ sub connect {
         read => sub {
           no warnings 'utf8';
           my $message = Unicode::UTF8::decode_utf8($_[1], sub { $_[0] });
-          
+
           $buffer .= $message;
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
