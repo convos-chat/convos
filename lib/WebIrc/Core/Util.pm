@@ -14,6 +14,7 @@ use strict;
 use warnings;
 no warnings "utf8";
 use Mojo::Log;
+use Mojo::UserAgent;
 use Parse::IRC ();
 use Unicode::UTF8;
 

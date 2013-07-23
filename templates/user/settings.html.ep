@@ -41,7 +41,7 @@
       %= form_block avatar => class => [], begin
         <label for="avatar">Gravatar email</label>
         %= text_field 'avatar', $current->{avatar}, id => 'avatar'
-        <p class="help">Don't have a gravatar? <a href="http://gravatar.com">Register now!</a></p>
+        <p class="help">Don't have a gravatar? <%= link_to 'Register now!', 'http://gravatar.com', target => '_blank' %></p>
       % end
       <div class="actions">
         <button type="submit"><%= $cid ? 'Save' : 'Add' %></button>
