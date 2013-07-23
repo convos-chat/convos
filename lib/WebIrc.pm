@@ -148,7 +148,7 @@ sub startup {
 
   $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
   $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
-  $private_r->post('/clear_notifications')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
+  $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
   $private_r->get('/:cid/*target', [cid => qr{\d+}])->to('client#view')->name('channel.view');
   $private_r->get('/:cid', [cid => qr{\d+}])->to('client#view')->name('server.view');
 

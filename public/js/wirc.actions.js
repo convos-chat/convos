@@ -19,13 +19,17 @@
     var $a = $(this);
     var focus = $a.attr('data-focus');
     var target = $a.attr('data-toggle');
+    var inside = false;
 
     $a.click(function(e) {
+      if(inside) return false;
       var $target = $(target);
       var is_active = $a.hasClass('active');
 
       $('a[data-toggle]').filter('.active').trigger('deactivate');
       if(is_active) return false;
+      inside = true;
+      $a.trigger('activate');
 
       if(!$a.hasClass('active')) {
         $a.addClass('active');
@@ -34,6 +38,7 @@
         if(focus) $(focus).focus();
       }
 
+      inside = false;
       return false;
     });
 
@@ -57,11 +62,6 @@
 
     $('.settings select[name="cid"]').change(gotoConnectionSettings);
     $('a.confirm').click(confirmFirst);
-    
-     $('a.notification-list').click(function() {
-       $.post($.url_for('clear_notifications'));
-       $('a.notification-list').children('b').text(0);
-     });
 
     if($login_button.length) {
       $('body').bind('keydown', 'shift+return', function(e) {

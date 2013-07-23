@@ -27,6 +27,6 @@
   <h4>Keyboard Shortcuts</h4>
   <dl>
     <dt>shift+enter</dt>
-    <dd>Focus chat input field</dd>
+    <dd>Shift focus between chat input field and main menu</dd>
   </dl>
 </li>

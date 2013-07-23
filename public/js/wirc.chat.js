@@ -153,8 +153,12 @@
 
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
-      $win.scrollTo('bottom');
-      $input.focus();
+      if(document.activeElement == $input.get(0)) {
+        $('nav .conversation-list a:eq(1)').focus();
+      }
+      else {
+        $input.focus();
+      }
     });
     $input.bind('keydown', function(e) {
       if(e.keyCode !== 9) complete = false; // not tab
@@ -375,6 +379,29 @@
     $('section.messages').on('pjax:end', conversationLoaded);
     $('section.messages').on('pjax:start', function(xhr, options) {
       $('body').loadingIndicator('show');
+    });
+
+    $('body').bind('keydown', 'esc', function(e) {
+      var $active = $('a[data-toggle]').filter('.active');
+      if(!$active.length) return true;
+      $active.trigger('deactivate').focus();
+      return false;
+    });
+    $('div.conversation-list, div.notification-list').bind('keydown', 'up', function(e) {
+      $(document.activeElement).closest('li').prev().find('a').focus();
+      return false;
+    });
+    $('div.conversation-list, div.notification-list').bind('keydown', 'down', function(e) {
+      $(document.activeElement).closest('li').next().find('a').focus();
+      return false;
+    });
+
+    $('a.notification-list').on('activate', function() {
+      var $a = $(this);
+      $.post($.url_for('notifications/clear'), function(res) {
+        $a.removeClass('alert').children('b').text(0);
+      });
+      setTimeout(function() { $('div.notification-list a:first').focus(); }, 100);
     });
   });
 
