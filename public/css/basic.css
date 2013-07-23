@@ -57,7 +57,7 @@ button{height:34px;vertical-align:baseline}
 button:active,button.active,.button:active,.button.active{background:#ccc}
 button.confirm,a.confirm{color:#900;border:2px solid #900}
 button:hover,.button:hover{border:2px solid #4d4d4d}
-div.loading-indicator-overlay,div.loading-indicator{height:100%;width:100%;position:absolute;top:0;left:0}
+div.loading-indicator-overlay,div.loading-indicator{height:100%;width:100%;position:fixed;top:0;left:0}
 div.loading-indicator-overlay{background:#fff;filter:alpha(opacity=@{opacity*100});-moz-opacity:.7;-khtml-opacity:.7;-webkit-opacity:.7;opacity:.7}
 div.loading-indicator{background:url(../image/loader-squares-circle.gif) 50% 50% fixed no-repeat}
 .nanoscroller>.content{position:absolute;overflow:scroll;overflow-x:hidden;top:0;right:0;bottom:0;left:0}
