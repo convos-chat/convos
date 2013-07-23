@@ -94,6 +94,7 @@ section.messages li.highlight{background:#fee}
 section.messages li.same-nick{padding-top:0}
 section.messages li.action-message .content{font-style:italic}
 section.messages li.message .embed,section.messages li.message .embed img{max-height:220px}
+section.messages li.message .embed img{border:2px solid #bbb;-webkit-border-radius:20px;-moz-border-radius:20px;border-radius:20px;margin:8px 0}
 section.messages li.nick-change,section.messages li.nick-joined,section.messages li.nick-parted,section.messages li.topic,section.messages li.whois,section.messages li.notice{color:#555}
 .settings{padding-top:50px}.settings h2 select{font-size:18px;font-weight:bold}
 .landing-page{margin:auto;width:800px}.landing-page img{margin:2em 40px;border:1px solid #ccc;-webkit-box-shadow:0 0 4px 2px rgba(180,180,180,0.5);-moz-box-shadow:0 0 4px 2px rgba(180,180,180,0.5);box-shadow:0 0 4px 2px rgba(180,180,180,0.5)}
