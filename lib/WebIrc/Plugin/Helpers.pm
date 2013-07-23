@@ -8,6 +8,7 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util ();
+use Regexp::Common qw/ URI /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $YOUTUBE_INCLUDE = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
@@ -102,7 +103,7 @@ sub format_conversation {
       });
 
       $message->{message} = Mojo::Util::xml_escape($message->{message});
-      $message->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($message, $1)}!ge;
+      $message->{message} =~ s!($RE{URI}{HTTP})!{$url_formatter->($message, $1)}!ge;
       $message->{highlight} ||= 0;
     }
 
