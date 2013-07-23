@@ -24,7 +24,7 @@ Route to last seen IRC conversation.
 
 sub route {
   my $self = shift->render_later;
-  my $uid  = $self->session('uid') or return $self->render('index');
+  my $uid  = $self->session('uid') or return $self->render('index', form=>'');
 
   Mojo::IOLoop->delay(
     sub {
