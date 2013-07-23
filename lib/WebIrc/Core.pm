@@ -83,7 +83,7 @@ sub _connection {
   }
   elsif(!$args{uid}) {
     $self->redis->hget("connection:$args{id}", "uid", sub {
-      my $uid = pop or die "Did you forget to run script/populate-connections-with-data.pl ?";
+      my $uid = pop or die "Did you forget to run script/populate-connections-with-data.pl (".$args{id}.")?";
       $self->_connection(%args, uid => $uid, $cb);
     });
   }
