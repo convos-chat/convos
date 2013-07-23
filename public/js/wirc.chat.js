@@ -180,7 +180,7 @@
             }
           ),
           function(v, i) {
-            return offset || v.indexOf('/') === 0 ? v : v + ': ';
+            return offset ? v + ' ' : v.indexOf('/') === 0 ? v : v + ': ';
           }
         ).concat(val.substr(offset))
       };
