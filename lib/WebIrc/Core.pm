@@ -194,10 +194,7 @@ sub update_connection {
     [hmset => "connection:$cid", %$conn],
     [del   => "connection:$cid:channels"],
     [sadd  => "connection:$cid:channels", @channels],
-    sub {
-      $self->redis->publish('core:control', "restart:$cid");
-      $self->$cb($cid, {});
-    },
+    sub { $self->$cb($cid, {}); },
   );
 }
 

@@ -8,6 +8,7 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util ();
+use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $YOUTUBE_INCLUDE = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
 
@@ -85,19 +86,24 @@ sub format_conversation {
     $c->link_to($url, $url, target => '_blank');
   };
 
-  my $gravatar_lookup = sub {
-    return Mojo::Util::md5_sum($_[0]->{nick} || $_[0]->{target});
-  };
-
   while(my $message = $conversation->()) {
     $message->{embed} = '';
 
     if($message->{message}) {
-      my $gravatar = $gravatar_lookup->($message);
+      my $lookup = $message->{host} ? join '@', @$message{qw/ user host /} : $message->{nick}; # need to check for "host" to be backward compat
+      my $cb = $delay->begin;
+
+      $lookup =~ s!^~!!;
+      $c->redis->get("avatar:$lookup", sub {
+        my $lookup = $_[1] || $lookup;
+        my $avatar = Mojo::Util::md5_sum($lookup);
+        $message->{avatar} = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
+        $cb->();
+      });
+
       $message->{message} = Mojo::Util::xml_escape($message->{message});
       $message->{message} =~ s!\b(\w{2,5}://\S+)!{$url_formatter->($message, $1)}!ge;
       $message->{highlight} ||= 0;
-      $message->{avatar} = "https://secure.gravatar.com/avatar/$gravatar?s=40&d=retro";
     }
 
     push @messages, $message;

@@ -115,6 +115,13 @@ This event is used by IRC errors
 
 =head2 irc_privmsg
 
+  $self->$callback({
+    params => [ '#channel', 'some message' ],
+    raw_line => ':nick!user@host PRIVMSG #nms :some message',
+    command => 'PRIVMSG',
+    prefix => 'nick!user@host',
+  });
+
 =head2 irc_rpl_created
 
   $self->$callback({
@@ -122,7 +129,6 @@ This event is used by IRC errors
     raw_line => ':Tampa.FL.US.Undernet.org 003 somenick :This server was created Thu Jun 21 2012 at 01:26:15 UTC',
     command => '003',
     prefix => 'Tampa.FL.US.Undernet.org'
-
   });
 
 =head2 irc_rpl_endofmotd
@@ -389,7 +395,7 @@ sub connect {
         read => sub {
           no warnings 'utf8';
           my $message = Unicode::UTF8::decode_utf8($_[1], sub { $_[0] });
-          
+
           $buffer .= $message;
 
           while ($buffer =~ s/^([^\r\n]+)\r\n//m) {
@@ -488,13 +494,20 @@ an error message: Empty string on success and a description on error.
 
 sub write {
   no warnings 'utf8';
-  my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
+  my $cb = ref $_[-1] eq 'CODE' ? pop : sub {};
   my $self = shift;
   my $buf = Unicode::UTF8::encode_utf8(join(' ', @_), sub { $_[0] });
 
-  return $self->$cb('Not connected') unless ref $self->{stream};
-  warn "[$self->{debug_key}] <<< $buf\n" if DEBUG;
-  return $self->{stream}->write("$buf\r\n", $cb);
+  Scalar::Util::weaken($self);
+  if(ref $self->{stream}) {
+    warn "[$self->{debug_key}] <<< $buf\n" if DEBUG;
+    $self->{stream}->write("$buf\r\n", sub { $self->$cb(''); });
+  }
+  else {
+    $self->$cb('Not connected');
+  }
+
+  $self;
 }
 
 =head1 DEFAULT EVENT HANDLERS
