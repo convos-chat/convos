@@ -155,7 +155,8 @@
       e.preventDefault();
       $('a[data-toggle]').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
-        $('nav .conversation-list a:eq(1)').focus();
+        var $a = $('nav .conversation-list a');
+        $a.eq($a.length > 1 ? 1 : 0).focus();
       }
       else {
         $input.focus();
