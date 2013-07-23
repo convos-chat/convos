@@ -3,6 +3,6 @@
   <span class="prefix">Topic is</span>
   <span><%= $topic %></span>
 % } else {
-  <span class="prefix">No topic.</span>
+  <span class="prefix">No topic is set for <%= $target %>.</span>
 % }
 </li>
