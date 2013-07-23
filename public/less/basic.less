@@ -20,6 +20,7 @@
 .ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
 .opacity(@opacity) { filter: ~"alpha(opacity=@{opacity*100})"; -moz-opacity: @opacity; -khtml-opacity: @opacity; -webkit-opacity: @opacity; opacity: @opacity; }
 .font-size-margin(@size) { font-size: @size; margin-top: 1 / @size; margin-bottom: 1 / @size; }
+.transition(@transition) { -webkit-transition: @transition; -moz-transition: @transition; -o-transition: @transition; transition: @transition; }
 .grid(@cols:1, @last:0) {
   @gutter: abs(2% * (@last - 1));
   @column: @columnWidth - @gutter;
@@ -196,42 +197,35 @@ div.loading-indicator {
  * nanoScrollerJs
  */
 .nanoscroller > .content {
-  position      : absolute;
-  overflow      : scroll;
-  overflow-x    : hidden;
-  top           : 0;
-  right         : 0;
-  bottom        : 0;
-  left          : 0;
+  position: absolute;
+  overflow: scroll;
+  overflow-x: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 .nanoscroller > .pane {
-  position   : absolute;
-  width      : 10px;
-  right      : 0;
-  top        : 0;
-  bottom     : 0;
-  visibility : hidden\9; /* Target only IE7 and IE8 with this hack */
-  opacity    : .01;
-  -webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;
-  -moz-border-radius    : 5px;
-  -webkit-border-radius : 5px;
-  border-radius         : 5px;
+  position: absolute;
+  width: 10px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  .opacity(0.01);
+  .transition(0.2s);
+  .border-radius(5px);
 }
 .nanoscroller > .pane > .slider {
   background: #444;
-  background: rgba(0,0,0,.5);
-  position              : relative;
-  margin                : 0 1px;
-  -moz-border-radius    : 3px;
-  -webkit-border-radius : 3px;
-  border-radius         : 3px;
+  background: rgba(0, 0, 0, 0.5);
+  position: relative;
+  margin: 0 1px;
+  .border-radius(3px);
 }
 .nanoscroller:hover > .pane, .pane.active, .pane.flashed {
-  visibility : visible\9; /* Target only IE7 and IE8 with this hack */
-  opacity    : 0.99;
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  .opacity(0.99);
 }
 
 /*
