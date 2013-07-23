@@ -153,6 +153,7 @@
 
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
+      $('a[data-toggle]').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
         $('nav .conversation-list a:eq(1)').focus();
       }
