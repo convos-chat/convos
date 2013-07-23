@@ -103,7 +103,7 @@ sub format_conversation {
       });
 
       $message->{message} = Mojo::Util::xml_escape($message->{message});
-      $message->{message} =~ s!($RE{URI}{HTTP})!{$url_formatter->($message, $1)}!ge;
+      $message->{message} =~ s!($RE{URI})!{$url_formatter->($message, $1)}!ge;
       $message->{highlight} ||= 0;
     }
 
