@@ -219,9 +219,6 @@
   };
 
   var initNotifications = function() {
-    var m = document.cookie.match(/notification_permission=(\w+)/) || [];
-
-    if(!Notification.permission) Notification.permission = m[1] || 'unknown';
     if(Notification.permission === 'granted') return;
     if(Notification.permission === 'unsupported') return;
     if(Notification.permission === 'denied') return;
@@ -229,14 +226,12 @@
     $ask_for_notifications.find('a.button.yes').click(function() {
       Notification.requestPermission(function(p) {
         if(p == 'granted') Notification.permission = p;
-        if(Notification.permission === 'granted') document.cookie = 'notification_permission=granted'; // hacking bug in chromium 28.0.1500.52
       });
       $(this).closest('li').fadeOut();
       return false;
     });
     $ask_for_notifications.find('a.confirm').click(function() {
       $(this).closest('li').fadeOut();
-      document.cookie = 'notification_permission=denied';
       return false;
     });
 

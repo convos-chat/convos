@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
-  <head><title><%= join ' - ', app->config->{name}, title %></title>
+  <head>
+    <title><%= join ' - ', app->config->{name}, title %></title>
   % if($self->app->mode eq 'production') {
     %= stylesheet '/css/basic.css'
   % } else {
