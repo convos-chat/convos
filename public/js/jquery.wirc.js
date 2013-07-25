@@ -6,7 +6,18 @@
 
   $.notify = function(title, body, icon) {
     if($win.data('has_focus')) return this;
-    if(Notification.permission == 'granted') new Notification(title, { iconUrl: icon, body: body });
+
+    if(Notification.permission == 'granted') {
+      var n = new Notification(
+                title,
+                {
+                  iconUrl: icon,
+                  body: body,
+                  onclose: function() { clearTimeout(tid); }
+                }
+              );
+      var tid = setTimeout(function() { n.close(); }, 5000);
+    }
 
     tid = setInterval(this.title, 2000);
     current_title = title;
