@@ -25,26 +25,24 @@ my %COMMANDS; %COMMANDS = (
   query=> sub {
     my ($self, $dom) = @_;
     my $uid = $self->session('uid');
-    my $id = $self->as_id($dom->{cid}, $dom->{cmd} || $dom->{target});
+    my $target = $dom->{cmd} || $dom->{target};
+    my $id = $self->as_id($dom->{cid}, $target);
 
     $self->redis->zrem("user:$uid:conversations", $id, sub {
-      $self->send_partial('event/add_conversation', target => $dom->{cmd}, %$dom);
+      $self->send_partial('event/add_conversation', %$dom, target => $target);
     });
     return;
   },
   close => sub {
     my ($self, $dom) = @_;
-    my $target = $dom->{cmd} || $dom->{target};
-
-    $target =~ /^#/ and return "PART $target";
-
-    my $id = $self->as_id($dom->{cid}, $target);
     my $uid = $self->session('uid');
+    my $target = $dom->{cmd} || $dom->{target};
+    my $id = $self->as_id($dom->{cid}, $target);
 
+    return "PART $target" if $target =~ /^#/;
     $self->redis->zrem("user:$uid:conversations", $id, sub {
-      $self->send_partial('event/remove_conversation', target => $dom->{cmd}, %$dom);
+      $self->send_partial('event/remove_conversation', %$dom, target => $target);
     });
-
     return;
   },
   reconnect => sub {
@@ -116,7 +114,7 @@ sub _handle_socket_data {
 
   if ($cmd =~ s!^/(\w+)\s*!!) {
     if (my $irc_cmd = $COMMANDS{$1}) {
-      $dom->{cmd} = $cmd;
+      $dom->{cmd} = $cmd =~ s/\s+//r; # / st2 format hack
       $irc_cmd = $COMMANDS{$$irc_cmd} if ref $irc_cmd eq 'SCALAR';
       $cmd = ref $irc_cmd eq 'CODE' ? $self->$irc_cmd($dom) : "$irc_cmd $cmd";
     }
