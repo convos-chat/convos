@@ -7,11 +7,12 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use WebIrc::Core::Util ();
+use WebIrc::Core::Util qw(format_time);
 use Regexp::Common qw/ URI /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
-my $YOUTUBE_INCLUDE = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
+my $YOUTUBE_INCLUDE
+  = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
 
 =head1 HELPERS
 
@@ -69,38 +70,47 @@ sub format_conversation {
   my @messages;
 
   my $url_formatter = sub {
-    my($data, $url) = @_;
+    my ($data, $url) = @_;
     my $cb = $delay->begin;
 
-    if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
+    if ($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
       $data->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
       $cb->();
     }
     else {
-      $ua->head($url => sub {
-        my $ct = $_[1]->res->headers->content_type || '';
-        $data->{embed} = $c->image($url, alt => 'Embedded media') if $ct =~ /^image/;
-        $cb->();
-      });
+      $ua->head(
+        $url => sub {
+          my $ct = $_[1]->res->headers->content_type || '';
+          $data->{embed} = $c->image($url, alt => 'Embedded media')
+            if $ct =~ /^image/;
+          $cb->();
+        }
+      );
     }
 
     $c->link_to($url, $url, target => '_blank');
   };
 
-  while(my $message = $conversation->()) {
+  while (my $message = $conversation->()) {
     $message->{embed} = '';
 
-    if($message->{message}) {
-      my $lookup = $message->{host} ? join '@', @$message{qw/ user host /} : $message->{nick}; # need to check for "host" to be backward compat
+    if ($message->{message}) {
+      my $lookup = $message->{host}
+        ? join '@', @$message{qw/ user host /}
+        : $message->{nick};    # need to check for "host" to be backward compat
       my $cb = $delay->begin;
 
       $lookup =~ s!^~!!;
-      $c->redis->get("avatar:$lookup", sub {
-        my $lookup = $_[1] || $lookup;
-        my $avatar = Mojo::Util::md5_sum($lookup);
-        $message->{avatar} = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
-        $cb->();
-      });
+      $c->redis->get(
+        "avatar:$lookup",
+        sub {
+          my $lookup = $_[1] || $lookup;
+          my $avatar = Mojo::Util::md5_sum($lookup);
+          $message->{avatar}
+            = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
+          $cb->();
+        }
+      );
 
       $message->{message} = Mojo::Util::xml_escape($message->{message});
       $message->{message} =~ s!($RE{URI})!{$url_formatter->($message, $1)}!ge;
@@ -111,7 +121,7 @@ sub format_conversation {
   }
 
   $delay->once(finish => sub { $c->$cb(\@messages) });
-  $delay->begin->(); # need to do at least one step
+  $delay->begin->();    # need to do at least one step
 }
 
 =head2 logf
@@ -125,11 +135,12 @@ Returns a L<Mojo::Redis> object.
 =cut
 
 sub redis {
-  my $self  = shift;
+  my $self = shift;
 
   $self->stash->{redis} ||= do {
     my $log = $self->app->log;
-    my $redis = Mojo::Redis->new(server => $self->config->{redis}, timeout => 600);
+    my $redis
+      = Mojo::Redis->new(server => $self->config->{redis}, timeout => 600);
 
     $redis->on(
       error => sub {
@@ -153,22 +164,40 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
-  $app->helper(form_block => \&form_block);
+  $app->helper(form_block          => \&form_block);
   $app->helper(format_conversation => \&format_conversation);
-  $app->helper(logf => \&WebIrc::Core::Util::logf);
-  $app->helper(format_time => sub { my $self = shift; WebIrc::Core::Util::format_time(@_); });
+  $app->helper(logf                => \&WebIrc::Core::Util::logf);
+  $app->helper(format_time => sub { my $self = shift; format_time(@_); });
   $app->helper(redis => \&redis);
   $app->helper(as_id => sub { shift; WebIrc::Core::Util::as_id(@_) });
   $app->helper(id_as => sub { shift; WebIrc::Core::Util::id_as(@_) });
-  $app->helper(send_partial => sub { my $c = shift; $c->send($c->render(@_, partial => 1)->to_string); });
+  $app->helper(
+    send_partial =>
+      sub { my $c = shift; $c->send($c->render(@_, partial => 1)->to_string); }
+  );
   $app->helper(
     is_active => sub {
       my ($c, $id, $target) = @_;
       if ($id eq $c->stash('cid')) {
         return 'active' if !length $target and !length $c->stash('target');
-        return 'active' if length $target and length $c->stash('target') and $target eq $c->stash('target');
+        return 'active'
+          if length $target
+          and length $c->stash('target')
+          and $target eq $c->stash('target');
       }
       return '';
+    }
+  );
+  $app->helper(
+    timestamp_span => sub {
+      my ($self, $timestamp) = @_;
+
+      return $self->tag(
+        'span',
+        class => 'timestamp',
+        title => format_time($timestamp, '%e. %B'),
+        format_time($timestamp, '%e. %b %H:%M:%S')
+      );
     }
   );
 }

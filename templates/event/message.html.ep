@@ -6,7 +6,7 @@
 % }
   <div class="content"><%== $message %></div>
 % if($nick ne $prev_nick) {
-  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%d. %n %H:%M:%S' %></span>
+  %= timestamp_span($timestamp)
 % }
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>

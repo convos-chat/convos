@@ -1,5 +1,5 @@
 <li class="nick-parted" data-target="<%= as_id $cid, $target %>" data-nick="<%= $nick %>">
   <span class="prefix"><%= app->config->{name} %>:</span>
   <span><%= $nick %> parted <%= $target %></span>
-  <span class="timestamp" title="<%= format_time $timestamp, '%d. %n' %>"><%= format_time $timestamp, '%d. %n %H:%M:%S' %></span>
+  %= timestamp_span($timestamp)
 </li>

@@ -19,22 +19,10 @@ use Mojo::Log;
 use Mojo::UserAgent;
 use Parse::IRC ();
 use Unicode::UTF8;
+use Time::Piece;
 
 my $LOGGER = Mojo::Log->new;
 my $hostname;
-my @days = qw/ Sun Mon Tue Wed Thu Fri Sat /;
-my @months = qw/ Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec /;
-my %date_markers = (
-    d => [ 3, sub { $_[0] } ],
-    m => [ 4, sub { $_[0] < 10 ? "0" .($_[0] + 1) : $_[0] + 1 } ],
-    n => [ 4, sub { @months[$_[0]] } ],
-    w => [ 6, sub { @days[$_[0]] } ],
-    y => [ 5, sub { $_[0] + 1900 } ],
-    H => [ 2, sub { $_[0] < 10 ? "0$_[0]" : $_[0] } ],
-    M => [ 1, sub { $_[0] < 10 ? "0$_[0]" : $_[0] } ],
-    S => [ 0, sub { $_[0] < 10 ? "0$_[0]" : $_[0] } ],
-);
-
 
 =head1 FUNCTIONS
 
@@ -130,15 +118,10 @@ sub logf {
 =cut
 
 sub format_time {
-  my @date = localtime shift;
+  my $date = localtime shift;
   my $format = shift;
 
-  $format =~ s/%(\w)/
-    my $f = $date_markers{$1};
-    $f ? $f->[1]->( $date[$f->[0]] ) : $1;
-  /ge;
-
-  $format;
+  return $date->strftime($format);
 }
 
 =head1 AUTHOR
