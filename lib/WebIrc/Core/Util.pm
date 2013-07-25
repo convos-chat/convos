@@ -10,8 +10,10 @@ L</import> can export any of the L</FUNCTIONS>.
 
 =cut
 
-use strict;
-use warnings;
+use Mojo::Base 'Exporter';
+
+our @EXPORT_OK = ( qw(as_id id_as hostname logf format_time) );
+
 no warnings "utf8";
 use Mojo::Log;
 use Mojo::UserAgent;
@@ -137,24 +139,6 @@ sub format_time {
   /ge;
 
   $format;
-}
-
-=head1 METHODS
-
-=head2 import
-
-See L</SYNOPSIS>.
-
-=cut
-
-sub import {
-  my($class, @export) = @_;
-  my $caller = caller;
-
-  no strict 'refs';
-  for my $name (@export) {
-    *{ "$caller\::$name" } = \&{ "$class\::$name" };
-  }
 }
 
 =head1 AUTHOR
