@@ -320,7 +320,7 @@
     if($data.hasClass('highlight')) {
       var sender = $data.attr('data-sender');
       var what = cid_target[1].indexOf('#') === 0 ? 'mentioned you in ' + cid_target[1] : 'sent you a message';
-      $.notify([sender, what].join(' '), $data.find('.content').text(), '');
+      $.notify([sender, what].join(' '), $data.find('.content').text(), $data.find('img').attr('src'));
       reloadNotificationList();
     }
     if(at_bottom) {
