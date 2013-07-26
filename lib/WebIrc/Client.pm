@@ -180,24 +180,33 @@ Will render notifications.
 sub notification_list {
   my($self, $cb) = @_;
   my $uid = $self->session('uid');
+  my $key = "user:$uid:notifications";
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->lrange("user:$uid:notifications", 0, -1, $delay->begin);
+      $self->redis->lrange($key, 0, -1, $delay->begin);
     },
     sub {
       my($delay, $notification_list) = @_;
       my $n_notifications = 0;
+      my %nick_seen = ();
       my $i = 0;
 
       while($i < @$notification_list) {
-        my $notification = $JSON->decode($notification_list->[$i]);
-        $notification->{id} = as_id @$notification{qw/ cid target /};
-        $notification->{index} = $i;
-        $notification->{is_channel} = $notification->{target} =~ /^#/ ? 1 : 0;
-        $notification_list->[$i] = $notification;
-        $n_notifications++ unless $notification->{read};
+        my $n = $JSON->decode($notification_list->[$i]);
+        $n->{id} = as_id @$n{qw/ cid target /};
+        $n->{index} = $i;
+        $n->{is_channel} = $n->{target} =~ /^#/ ? 1 : 0;
+
+        if(!$n->{is_channel} and $nick_seen{$n->{target}}++) {
+          $self->redis->lrem($key, 1, $notification_list->[$i]);
+          splice @$notification_list, $i, 1, ();
+          next;
+        }
+
+        $notification_list->[$i] = $n;
+        $n_notifications++ unless $n->{read};
         $i++;
       }
 
