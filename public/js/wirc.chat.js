@@ -53,7 +53,6 @@
     conversation_list = $('ul.conversation-list a').map(function() { return $(this).text(); }).get();
     current_target = $messages.attr('id').replace(/^conversation_/, '');
     nick = $messages.attr('data-nick') || '';
-    nicks.clear();
 
     $messages.start_time = parseFloat($messages.attr('data-start-time') || 0);
     $('a.conversation-list').trigger('deactivate');
@@ -82,6 +81,7 @@
     $('body').loadingIndicator('hide');
     getMessages();
     drawUI();
+    nicks.clear();
     nickList($('<div/>'));
   };
 
@@ -239,30 +239,34 @@
   };
 
   var nickList = function($data) {
-    var $nicks = $('.nick-list ul');
+    var $nicks = $data.find('[data-nick]');
     var cid = id_as(current_target)[0];
     var extra = [nick];
     var senders = {};
 
-    $messages.find('li[data-sender]').each(function(i) {
-      senders[$(this).attr('data-sender')] = i;
-    });
+    if($nicks.length) {
+      $messages.find('li[data-sender]').each(function(i) {
+        senders[$(this).attr('data-sender')] = i;
+      });
 
-    $data.find('[data-nick]').each(function() {
-      var $a = $(this);
-      var n = $a.attr('data-nick');
-      nicks.add(senders[n] || 1, n);
-    });
+      $nicks.each(function() {
+        var $a = $(this);
+        var n = $a.attr('data-nick');
+        nicks.add(senders[n] || 1, n);
+      });
+    }
 
     if(current_target.indexOf(':23') == -1) {
       extra.unshift(id_as(current_target)[1]);
     }
 
-    $nicks.html('');
-    $.each(nicks.revrange(0, -1).concat(extra).sortCaseInsensitive(), function(i, n) {
-      $nicks.append($('<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>'));
-    });
-    $nick_list.nanoScroller(); // reset
+    $nick_list.html([
+      '<ul>',
+      $.map(nicks.revrange(0, -1).concat(extra).sortCaseInsensitive(), function(n, i) {
+        return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
+      }).join(''),
+      '</ul>'
+    ].join('')).nanoScroller(); // reset scrollbar;
   }
 
   var receiveMessage = function(e) {
@@ -300,9 +304,11 @@
       }
       else if($data.hasClass('nick-joined')) {
         nicks.add(0, $data.attr('data-nick'));
+        nickList($('<div/>'));
       }
       else if($data.hasClass('nick-parted')) {
         nicks.rem($data.attr('data-nick'));
+        nickList($('<div/>'));
       }
       else if($data.attr('data-sender')) {
         nicks.add(new Date().getTime(), $data.attr('data-sender'));
