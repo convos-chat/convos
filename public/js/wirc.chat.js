@@ -260,13 +260,13 @@
       extra.unshift(id_as(current_target)[1]);
     }
 
-    $nick_list.html([
-      '<ul>',
+    $nick_list.find('ul').html(
       $.map(nicks.revrange(0, -1).concat(extra).sortCaseInsensitive(), function(n, i) {
         return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
-      }).join(''),
-      '</ul>'
-    ].join('')).nanoScroller(); // reset scrollbar;
+      }).join('')
+    );
+
+    $nick_list.nanoScroller(); // reset scrollbar;
   }
 
   var receiveMessage = function(e) {
