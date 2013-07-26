@@ -114,12 +114,13 @@ sub _handle_socket_data {
 
   if ($cmd =~ s!^/(\w+)\s*!!) {
     if (my $irc_cmd = $COMMANDS{$1}) {
-      $dom->{cmd} = $cmd =~ s/\s+//r; # / st2 format hack
+      $dom->{cmd} = $cmd =~ s/\s+$//r; # / st2 format hack
       $irc_cmd = $COMMANDS{$$irc_cmd} if ref $irc_cmd eq 'SCALAR';
       $cmd = ref $irc_cmd eq 'CODE' ? $self->$irc_cmd($dom) : "$irc_cmd $cmd";
     }
     else {
-      $cmd = $self->send_partial('event/wirc_notice', message => 'Unknown command. Type /help to see available commands.');
+      $self->send_partial('event/wirc_notice', message => 'Unknown command. Type /help to see available commands.');
+      $cmd = undef;
     }
   }
   elsif($dom->{target}) {
