@@ -1,5 +1,4 @@
-% my $timestamp = stash('timestamp') || time;
-<li class="notice" data-target="any">
+<li class="notice" data-cid="0" data-target="any">
   <span>wirc - <%= $message %></span>
-  %= timestamp_span($timestamp)
+  %= timestamp_span(stash('timestamp') || time)
 </li>

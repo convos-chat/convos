@@ -69,10 +69,5 @@
         $login_button.click();
       });
     }
-
-    $(document).on('completely_ready', function() {
-      if(!$focus.offset()) return;
-      $('html, body').scrollTop($focus.offset().top - 20);
-    });
   });
 })(jQuery);

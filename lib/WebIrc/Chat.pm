@@ -83,7 +83,7 @@ sub socket {
           $self->logf(debug => '[ws] < %s', $_[1]);
           my ($self, $octets) = @_;
           my $dom = Mojo::DOM->new($octets)->at('div');
-          my($cid, $target) = $self->id_as($dom->{'data-target'});
+          my($cid, $target) = map { delete $dom->{$_} || '' } qw/ data-cid data-target /;
 
           @$dom{qw/ cid target /} = ($cid, $target);
 

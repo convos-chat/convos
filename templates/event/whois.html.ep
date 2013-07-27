@@ -1,4 +1,4 @@
-<li class="whois" data-target="any">
+<li class="whois" data-cid="<%= $cid %>" data-target="any">
   <span class="prefix"><%= app->config->{name} %>:</span>
   <span>
     %= link_to $nick, 'channel.view', { cid => $cid, target => $nick }

@@ -1,4 +1,4 @@
-<li class="topic" data-target="<%= as_id $cid, $target %>">
+<li class="topic" data-cid="<%= $cid %>" data-target="<%= $target %>">
   <span class="prefix">Set by</span>
   <span> <%= $nick %> at <%= format_time $ts,'%H:%M:%S' %></span>
 </li>

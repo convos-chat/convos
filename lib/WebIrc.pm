@@ -144,7 +144,7 @@ sub startup {
   $settings_r->get('/:cid/delete')->to(template => 'user/delete_connection')->name('connection.delete');
   $settings_r->post('/:cid/delete')->to('user#delete_connection');
 
-  $private_r->websocket('/socket')->to('chat#socket');
+  $private_r->websocket('/socket')->to('chat#socket')->name('socket');
 
   $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
   $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');

@@ -1,4 +1,4 @@
-<li class="help" data-target="any">
+<li class="help" data-cid="0" data-target="any">
   <h4>Available commands. (Shortcuts in parenthesis)</h4>
   <dl>
     <dt>/me &lt;message&gt;</dt>

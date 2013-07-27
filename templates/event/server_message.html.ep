@@ -1,6 +1,4 @@
-<li class="server-message" data-target="<%= $cid ? as_id $cid : 'any' %>">
+<li class="server-message <%= $status < 400 ? 'notice' : 'error' %>" data-cid="<%= $cid || 0 %>" data-target="<%= 'any' %>">
   <span><%= $status < 400 ? 'Notice' : 'Error' %> - <%= $message %></span>
-% if(my $timestamp = stash 'timestamp') {
-  %= timestamp_span($timestamp)
-% }
+  %= timestamp_span($timestamp || time)
 </li>

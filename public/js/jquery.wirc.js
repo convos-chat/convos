@@ -2,7 +2,7 @@
   var at_bottom_threshold = 40;
   var original_title = document.title;
   var current_title = original_title;
-  var tid, $heigth_from, $win, base_url;
+  var $heigth_from, $win, base_url;
 
   $.notify = function(title, body, icon) {
     if($win.data('has_focus')) return this;
@@ -19,9 +19,8 @@
       var tid = setTimeout(function() { n.close(); }, 5000);
     }
 
-    tid = setInterval(this.title, 2000);
     current_title = title;
-    clearInterval(tid);
+    if($.notify.focus_tid) clearInterval($.notify.focus_tid);
 
     if(document.title == current_title || document.title == original_title) {
       document.title = [original_title, current_title].join(' - ');
@@ -30,6 +29,12 @@
       document.title = current_title;
     }
 
+    return this;
+  };
+
+  $.fn.focusSoon = function() {
+    var $e = this.eq(0);
+    setTimeout(function() { $e.focus(); }, 100);
     return this;
   };
 
@@ -63,9 +68,9 @@
 
   $.url_for = function() {
     var args = $.makeArray(arguments);
-    if(!base_url) base_url = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '');
+    if(!base_url) base_url = $('script[src$="jquery.js"]').get(0).src.replace(/\/js\/[^\/]+$/, '').replace(/^\w+:\/\/[^\/]+/, '');
     args.unshift(base_url);
-    return args.join('/').replace(/#/g, '%23')
+    return args.join('/').replace(/#/g, '%23');
   };
 
   // this code is originally from https://github.com/joewalnes/reconnecting-websocket
@@ -140,8 +145,6 @@
   $(document).ready(function() {
     $heigth_from = $('div.wrapper').length ? $('div.wrapper') : $('body');
     $win = $(window).data('at_bottom', false).data('has_focus', true);
-
-    setTimeout(function() { $(document).trigger('completely_ready'); }, 200);
     $(document).data('heigth_from', $heigth_from);
 
     $win.on('scroll', function() {
@@ -152,8 +155,8 @@
       $win.data('has_focus', false);
     });
     $win.focus(function() {
-      clearInterval(tid);
-      tid = setInterval(function() { document.title = original_title; clearInterval(tid); }, 3000);
+      if($.notify.focus_tid) clearInterval($.notify.focus_tid);
+      $.notify.focus_tid = setInterval(function() { document.title = original_title; }, 3000);
       $win.data('has_focus', true);
     });
   });
@@ -240,6 +243,27 @@ else if(!window.Notification) {
   window.Notification.requestPermission = function(cb) { cb('unsupported'); };
   window.Notification.prototype.close = function() { if(this.onclose) this.onclose(); };
 }
+
+Object.equals = function(a, b) {
+  for(p in a) {
+    switch(typeof(a[p])) {
+      case 'object':
+        if(!a[p].equals(b[p])) return false;
+        break;
+      case 'function':
+        if(typeof(b[p])=='undefined' || (p != 'equals' && a[p].toString() != b[p].toString())) return false;
+        break;
+      default:
+        if(a[p] != b[p]) return false;
+    }
+  }
+
+  for(p in b) {
+    if(typeof(a[p])=='undefined') return false;
+  }
+
+  return true;
+};
 
 // jquery.pjax.js
 // copyright chris wanstrath
