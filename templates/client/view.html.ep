@@ -14,9 +14,7 @@
     %= link_to 'settings', title => 'Go to settings', class => 'settings', begin
       <i class="icon-cog"></i>
     % end
-    %= link_to 'help', title => 'Display help', class => 'help', begin
-      <i class="icon-info-sign"></i>
-    % end
+    <a href="#!help" title="Display help" class="help"><i class="icon-info-sign"></i></a>
   </div>
 </nav>
 

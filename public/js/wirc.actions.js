@@ -21,6 +21,10 @@
     var target = $a.attr('data-toggle');
     var inside = false;
 
+    $(target).on('click', 'a', function() {
+      $a.trigger('deactivate');
+    });
+
     $a.click(function(e) {
       if(inside) return false;
       var $target = $(target);

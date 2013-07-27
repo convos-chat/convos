@@ -1,6 +1,6 @@
 ;(function($) {
   var $input, $messages, $nick_list, $win;
-  var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="//yes" class="button yes">Yes</a> <a href="//no" class="button confirm no">No</a></div></li>');
+  var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
   var nicks = new sortedSet();
   var conversation_list = [];
   var commands = [
@@ -77,8 +77,6 @@
   var conversationLoaded = function() {
     $messages = $('div.messages ul');
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
-    $('a.conversations-toggler').trigger('deactivate');
-    $('a.notifications-toggler').trigger('deactivate');
 
     if($messages.data('target').indexOf('#') === 0) {
       $input.send('/names', 0).send('/topic', 0);
@@ -127,13 +125,12 @@
       $a.attr('data-unread', unread).addClass('unread').attr('title', unread + " unread messages in " + $message.data('target'));
     }
 
-    $dropdown.find('li').remove();
     $conversations.each(function() {
       var $li = $(this);
       if(!$li.parent('ul').is('.conversations')) $menu.append($li);
       used_width += $li.find('a').outerWidth();
       if(used_width < available_width) return;
-      $dropdown.append($li);
+      $dropdown.prepend($li);
     });
 
     if(used_width >= available_width) {
@@ -187,16 +184,6 @@
       $input.history_i = $input.history.length;
     });
 
-    $('body, input').bind('keydown', 'shift+return', function(e) {
-      e.preventDefault();
-      $('a[data-toggle]').trigger('deactivate');
-      if(document.activeElement == $input.get(0)) {
-        $('nav ul.conversations a').slice(0, 2).eq(-1).focus();
-      }
-      else {
-        $input.focus();
-      }
-    });
     $input.bind('keydown', function(e) {
       if(e.keyCode !== 9) complete = false; // not tab
     });
@@ -251,18 +238,17 @@
     $ask_for_notifications.find('a.yes').click(function() {
       Notification.requestPermission();
       $(this).closest('li').fadeOut();
-      return false;
     });
     $ask_for_notifications.find('a.no').click(function() {
       $(this).closest('li').fadeOut();
-      return false;
     });
   };
 
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
-    $(document).pjax('ul.conversations a', 'div.messages');
-    $(document).pjax('ul.notifications a', 'div.messages');
+    $(document).pjax('nav a.conversation', 'div.messages');
+    $(document).pjax('div.conversations-container a', 'div.messages');
+    $(document).pjax('div.notifications-container a', 'div.messages');
     $(document).pjax('div.nicks-container a', 'div.messages');
     $('div.messages').on('pjax:end', conversationLoaded);
     $('div.messages').on('pjax:start', function(xhr, options) {
@@ -284,6 +270,36 @@
       return $input;
     };
   }
+
+  var initShortcuts = function() {
+    $('body').bind('keydown', 'esc', function(e) {
+      e.preventDefault();
+      var $active = $('a[data-toggle]').filter('.active');
+      if(!$active.length) return true;
+      $active.trigger('deactivate').focus();
+    });
+
+    $('body, input').bind('keydown', 'shift+return', function(e) {
+      e.preventDefault();
+      $('a[data-toggle]').trigger('deactivate');
+      if(document.activeElement == $input.get(0)) {
+        $('nav ul.conversations a').slice(0, 2).eq(-1).focus();
+      }
+      else {
+        $input.focus();
+      }
+    });
+
+    $('div.conversations-container, div.notifications-container')
+      .bind('keydown', 'up', function(e) {
+        $(document.activeElement).closest('li').prev().find('a').focus();
+        return false;
+      })
+      .bind('keydown', 'down', function(e) {
+        $(document.activeElement).closest('li').next().find('a').focus();
+        return false;
+      });
+  };
 
   var nickList = function($data) {
     var $nicks = $data.find('[data-nick]');
@@ -354,9 +370,9 @@
     var goto_current = e.goto_current;
     $.get($.url_for('conversations'), function(data) {
       $('ul.conversations').replaceWith(data);
+      $('div.conversations-container ul').html('');
       if(goto_current) $('ul.conversations li:first a').click();
       conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
-      $('div.conversations-container ul').html('');
       drawConversationMenu();
     });
   };
@@ -382,33 +398,10 @@
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
+    initShortcuts();
     initSocket();
-    initInputField();
     initPjax();
-
-    $win.on('scroll', getMessages).on('resize', drawUI);
-
-    $('nav a.help').click(function(e) {
-      e.preventDefault();
-      $input.send('/help', 0);
-    })
-
-    $('body').bind('keydown', 'esc', function(e) {
-      e.preventDefault();
-      var $active = $('a[data-toggle]').filter('.active');
-      if(!$active.length) return true;
-      $active.trigger('deactivate').focus();
-    });
-
-    $('div.conversations-container, div.notifications-container')
-      .bind('keydown', 'up', function(e) {
-        $(document.activeElement).closest('li').prev().find('a').focus();
-        return false;
-      })
-      .bind('keydown', 'down', function(e) {
-        $(document.activeElement).closest('li').next().find('a').focus();
-        return false;
-      });
+    initInputField();
 
     $('a.notifications-toggler').on('activate', function() {
       var $a = $(this);
@@ -417,32 +410,39 @@
       });
       $('div.notifications-container a:first').focusSoon();
     });
-
     $('nav a.conversations-toggler').on('activate', function() {
       var left = $('nav a.conversations-toggler').offset().left - 300;
       if(left < 4) left = 4;
       $('div.conversations-container').css('left', left);
     });
-
-    $('div.messages').on('click', '.message h3 a', function(e) {
-      e.preventDefault();
+    $('div.messages').on('mousedown touchstart', '.message h3 a', function(e) {
+      this.href = '#!' + this.href;
       $input.val($(this).text() + ': ').focusSoon();
     });
-
-    $nick_list.click(function() {
-      $(this).toggleClass('visible');
-    })
-
-    $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({
-      preventPageScrolling: true
+    $('div.messages').on('mousedown touchstart', '.close', function(e) {
+      $(this).closest('li').remove();
     });
 
+    $('nav, div.conversations-container, div.notifications-container').fastButton();
+    $('nav a.help').click(function(e) { $input.send('/help', 0); })
+    $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
+    $nick_list.click(function() { $(this).toggleClass('visible'); })
+    $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({ preventPageScrolling: true });
+    $win.on('scroll', getMessages).on('resize', drawUI);
     conversationLoaded();
+    initNotifications();
   });
 
-  $(document).on('load', function() {
-    initNotifications();
-    drawUI();
+  /* hack to hide location bar in ios */
+  $(window).load(function() {
+    if(!!('ontouchstart' in window)) {
+      $('div.wrapper').css('min-height', $('div.wrapper').height() + 60);
+    }
+    setTimeout(function() {
+      window.scrollTo(0, 1);
+      $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
+      drawUI();
+    }, 10);
   });
 
 })(jQuery);

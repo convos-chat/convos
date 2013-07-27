@@ -1,4 +1,5 @@
 <li class="help" data-cid="0" data-target="any">
+  <b class="close">&times;</b>
   <h4>Available commands. (Shortcuts in parenthesis)</h4>
   <dl>
     <dt>/me &lt;message&gt;</dt>
