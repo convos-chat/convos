@@ -21,6 +21,7 @@
   // override original method with a filter
   nicks.add = function(score, member) {
     if(member !== $messages.data('nick')) this.set[member] = score;
+    this.length++;
     return this;
   };
 

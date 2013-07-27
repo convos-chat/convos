@@ -160,10 +160,10 @@
 })(jQuery);
 
 // super cheap sorted set implementation
-window.sortedSet = function() { this.set = {}; return this; };
-window.sortedSet.prototype.add = function(score, member) { this.set[member] = score; return this; };
-window.sortedSet.prototype.clear = function() { this.set = {}; return this; };
-window.sortedSet.prototype.rem = function(member) { delete this.set[member]; return this; };
+window.sortedSet = function() { this.set = { length: 0 }; return this; };
+window.sortedSet.prototype.add = function(score, member) { this.set[member] = score; this.length++; return this; };
+window.sortedSet.prototype.clear = function() { this.set = {}; this.length = 0; return this; };
+window.sortedSet.prototype.rem = function(member) { delete this.set[member]; this.length--; return this; };
 window.sortedSet.prototype.revrange = function(start, stop) {
   var k, res = [], self = this;
   for(k in self.set) res.push(k);
