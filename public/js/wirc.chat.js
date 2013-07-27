@@ -149,7 +149,11 @@
   var initInputField = function() {
     var complete, val, offset, re;
     var history = { index: 0, list: [], current: '' };
-    $input = $('footer form input');
+
+    $.get($.url_for(['command-history']), function(data) {
+      history.list = data;
+      history.index = history.list.length;
+    });
 
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
@@ -370,6 +374,7 @@
     $('nav a.help').click(function(e) { sendMessage('/help'); $(document).click(); return false; })
     $win.on('scroll', getMessages).on('resize', drawUI);
     $nick_list = $('div.nick-list');
+    $input = $('footer form input[name="message"]');
     chat_ws = $.ws($.url_for('socket').replace(/^http/, 'ws'));
     chat_ws.on('message', receiveMessage);
     initInputField();

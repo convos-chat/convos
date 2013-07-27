@@ -71,9 +71,13 @@ sub view {
     },
     sub {
       my($delay, $connection, $conversation) = @_;
+
+      if($with_layout) {
+        $self->conversation_list($delay->begin);
+        $self->notification_list($delay->begin);
+      }
+
       $self->stash(%$connection, conversation => $conversation);
-      $self->conversation_list($delay->begin) if $with_layout;
-      $self->notification_list($delay->begin) if $with_layout;
       $delay->begin->(0);
     },
     sub {
@@ -81,6 +85,21 @@ sub view {
       return $self->render('client/conversation', layout => undef)
     },
   );
+}
+
+=head2 command_history
+
+Render the command history.
+
+=cut
+
+sub command_history {
+  my $self = shift->render_later;
+  my $uid = $self->session('uid') || 0;
+
+  $self->redis->lrange("user:$uid:cmd_history", 0, -1, sub {
+    $self->render(json => $_[1] || []);
+  });
 }
 
 =head2 conversation_list

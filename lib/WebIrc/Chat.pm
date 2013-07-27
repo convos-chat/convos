@@ -109,6 +109,7 @@ sub _handle_socket_data {
   my ($self, $dom) = @_;
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $key = "connection:@{[$dom->{cid}]}:to_server";
+  my $uid = $self->session('uid');
 
   $self->logf(debug => '[%s] < %s', $key, $cmd);
 
@@ -130,7 +131,11 @@ sub _handle_socket_data {
     $cmd = undef;
   }
 
-  $self->redis->publish($key => $cmd) if defined $cmd;
+  if(defined $cmd) {
+    $self->redis->publish($key => $cmd);
+    $self->redis->rpush("user:$uid:cmd_history", $dom->text(0));
+    $self->redis->ltrim("user:$uid:cmd_history", -30, -1);
+  }
 }
 
 sub _subscribe_to_server_messages {
