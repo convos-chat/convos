@@ -62,7 +62,11 @@ sub view {
   my $with_layout = $self->req->is_xhr ? 0 : 1;
 
   if($id ne $previous_id) {
-    $self->redis->zadd("user:$uid:conversations", time - 0.001, $previous_id);
+    # make sure it's not a removed conversation before doing zadd
+    $self->redis->zscore("user:$uid:conversations", $previous_id, sub {
+      my($redis, $score) = @_;
+      $redis->zadd("user:$uid:conversations", time - 0.001, $previous_id) if $score;
+    });
   }
 
   $self->session(view_id => $id);
