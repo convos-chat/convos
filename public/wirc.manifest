@@ -16,3 +16,24 @@ NETWORK:
 
 FALLBACK:
 /*/*
+
+
+fontawesome.less  wirc.manifest
+
+css:
+basic.css
+
+font:
+fontawesome-webfont.afm  fontawesome-webfont.ttf   icon-reference.html
+fontawesome-webfont.eot  fontawesome-webfont.woff
+
+image:
+landing-page-example-chat.jpeg  loader-facebook.gif  loader-squares-circle.gif  sprite.png
+
+js:
+jquery.fastclick.js  jquery.js                   jquery.wirc.js  wirc.actions.js
+jquery.hotkeys.js    jquery.nanoscroller.min.js  less.min.js     wirc.chat.js
+
+less:
+basic.less
+

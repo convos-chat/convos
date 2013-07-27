@@ -6,11 +6,15 @@
 <nav class="bar">
   %= link_to config->{name} .' settings', 'settings', class => 'current'
   <div class="right">
-    %= link_to 'index', title => 'Go to chat', class => 'notification-list', begin
-      <b>&nbsp;</b>
+    %= link_to 'index', title => 'Go to chat', class => 'chat', begin
+      <i class="icon-comments"></i>
     % end
-    %= link_to 'Settings', 'settings', title => 'Go to settings', class => 'settings active'
-    %= link_to 'Log out', 'logout', title => 'Log out', class => 'logout'
+    %= link_to 'settings', title => 'Go to settings', class => 'settings active', begin
+      <i class="icon-cog"></i>
+    % end
+    %= link_to 'logout', title => 'Log out', class => 'logout', begin
+      <i class="icon-signout"></i>
+    % end
   </div>
 </nav>
 

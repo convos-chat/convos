@@ -133,7 +133,7 @@ sub startup {
   $r->post('/')->to('user#login_or_register');
   $r->any('/login')->to('user#login_or_register');
   $r->any('/register')->to('user#login_or_register', register_page => 1);
-  $r->get('/logout')->to('user#logout');
+  $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
   my $settings_r = $private_r->route('/settings')->to(target => $config->{name});

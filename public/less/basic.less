@@ -250,23 +250,14 @@ nav.bar {
   }
 
   a.conversation { color: #666; }
-  a.settings, a.help, a.logout, a.conversations-toggler { text-indent: -10000px; }
-  a.conversations-toggler {
-    background: url(../image/sprite.png) no-repeat 0 0;
-    width: 20px;
-    background-position: -(@navBarIconWidth * 5 + 7) 0;
-    display: none;
-  }
+  a.conversations-toggler { display: none; }
 
   .right {
     position: absolute;
     right: @bodyGutter;
-    a { background: url(../image/sprite.png) no-repeat 0 0; width: @navBarIconWidth; }
-    a.notifications-toggler { background-position: -@navBarIconWidth 0; }
-    a.notifications-toggler.alert { background-position: -(@navBarIconWidth * 2) 0; }
-    a.help { background-position: -(@navBarIconWidth * 3) 0; }
-    a.logout { background-position: -(@navBarIconWidth * 4) 0; }
-    a.notifications-toggler b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
+    a { font-size: 1.2em; width: 2em; text-align: center; }
+    a.notifications-toggler { position: relative; }
+    a.notifications-toggler b { position: absolute; bottom: -3px; left: 2px; color: #bbb; font-size: 0.9em; }
     a.notifications-toggler.alert b { color: #b22; }
     a.hidden { display: none; }
   }
@@ -412,3 +403,102 @@ div.messages.with-nick-list {
     nav, .login, .register, .about { width: 100% };
   }
 }
+
+/*!
+ *  Font Awesome 3.0.2
+ *  -------------------------------------------------------
+ *  - The Font Awesome font is licensed under the SIL Open Font License - http://scripts.sil.org/OFL
+ *  - Font Awesome CSS, LESS, and SASS files are licensed under the MIT License -
+ *    http://opensource.org/licenses/mit-license.html
+ *  - The Font Awesome pictograms are licensed under the CC BY 3.0 License - http://creativecommons.org/licenses/by/3.0/
+ *  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
+ *    "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome"
+ */
+
+@FontAwesomePath:   "../font";
+@borderColor:       #eee;
+@iconMuted:         #eee;
+.border-radius(@radius) { -webkit-border-radius: @radius; -moz-border-radius: @radius; border-radius: @radius; }
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('@{FontAwesomePath}/fontawesome-webfont.eot?v=3.0.1');
+  src: url('@{FontAwesomePath}/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),
+    url('@{FontAwesomePath}/fontawesome-webfont.woff?v=3.0.1') format('woff'),
+    url('@{FontAwesomePath}/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
+//  url('@{FontAwesomePath}/fontawesome-webfont.svg#fontawesomeregular?v=3.0.1') format('svg');
+//  src: url('@{FontAwesomePath}/FontAwesome.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/*  Font Awesome styles
+    ------------------------------------------------------- */
+[class^="icon-"],
+[class*=" icon-"] {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  text-decoration: inherit;
+  -webkit-font-smoothing: antialiased;
+
+/* sprites.less reset */
+  display: inline;
+  width: auto;
+  height: auto;
+  line-height: normal;
+  vertical-align: baseline;
+  background-image: none;
+  background-position: 0% 0%;
+  background-repeat: repeat;
+  margin-top: 0;
+}
+
+[class^="icon-"]:before,
+[class*=" icon-"]:before {
+  text-decoration: inherit;
+  display: inline-block;
+  speak: none;
+}
+
+/* makes sure icons active on rollover in links */
+a {
+  [class^="icon-"],
+  [class*=" icon-"] {
+    display: inline-block;
+  }
+}
+
+/* makes the font 33% larger relative to the icon container */
+.icon-large:before {
+  vertical-align: -10%;
+  font-size: 4/3em;
+}
+
+// Icon Borders
+// -------------------------
+
+.icon-border {
+  border: solid 1px @borderColor;
+  padding: .2em .25em .15em;
+  .border-radius(3px);
+}
+
+[class^="icon-"],
+[class*=" icon-"] {
+  &.pull-left {
+    margin-right: .3em;
+  }
+  &.pull-right {
+    margin-left: .3em;
+  }
+}
+
+/*  Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
+    readers do not read off random characters that represent icons */.icon-user:before    { content: "\f021"; }
+.icon-cog:before    { content: "\f022"; }
+.icon-info-sign:before    { content: "\f023"; }
+.icon-chevron-down:before   { content: "\f024"; }
+.icon-comments:before   { content: "\f025"; }
+.icon-signout:before    { content: "\f026"; }
+.icon-bullhorn:before   { content: "\f027"; }
