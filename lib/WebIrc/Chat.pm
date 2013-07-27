@@ -133,8 +133,10 @@ sub _handle_socket_data {
 
   if(defined $cmd) {
     $self->redis->publish($key => $cmd);
-    $self->redis->rpush("user:$uid:cmd_history", $dom->text(0));
-    $self->redis->ltrim("user:$uid:cmd_history", -30, -1);
+    if($dom->{'data-history'}) {
+      $self->redis->rpush("user:$uid:cmd_history", $dom->text(0));
+      $self->redis->ltrim("user:$uid:cmd_history", -30, -1);
+    }
   }
 }
 

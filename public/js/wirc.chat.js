@@ -81,7 +81,7 @@
     if($win.smallScreen()) $('div.nick-list').animate({ right: '-180px' });
 
     if($messages.data('target').indexOf('#') === 0) {
-      $input.send('/names', false).send('/topic', false);
+      $input.send('/names', 0).send('/topic', 0);
     }
     if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
       reloadConversationList({});
@@ -225,7 +225,7 @@
     });
     $input.closest('form').submit(function(e) {
       e.preventDefault();
-      $input.send($input.val()).val('');
+      $input.send($input.val(), 1).val('');
     });
   };
 
@@ -264,7 +264,7 @@
     $input.socket.on('message', receiveMessage);
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
-      $input.socket.send($('<div/>').cidAndTarget($messages).text(message).prop('outerHTML'));
+      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-history', history).text(message).prop('outerHTML'));
       $input.addClass('sending');
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
@@ -364,7 +364,7 @@
 
     $win.on('scroll', getMessages).on('resize', drawUI);
     $('nav a.help').click(function(e) {
-      $input.send('/help', false);
+      $input.send('/help', 0);
       return false;
     })
     $('body').bind('keydown', 'esc', function(e) {
