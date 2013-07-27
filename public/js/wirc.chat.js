@@ -309,9 +309,15 @@
   var receiveMessage = function(e) {
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
-    var to_current = Object.equals($message.cidAndTarget(), $messages.cidAndTarget());
+    var to_current;
 
     $input.removeClass('sending');
+
+    if($message.data('target') === 'any') {
+      $message.data('target', $messages.data('target')).data('cid', $messages.data('cid'));
+    }
+
+    to_current = Object.equals($message.cidAndTarget(), $messages.cidAndTarget());
 
     if($message.hasClass('remove-conversation')) {
       reloadConversationList({ goto_current: to_current });
