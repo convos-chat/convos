@@ -429,6 +429,10 @@
       return false;
     });
 
+    $nick_list.click(function() {
+      $(this).toggleClass('visible');
+    })
+
     $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({
       preventPageScrolling: true
     });
