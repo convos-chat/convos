@@ -342,7 +342,7 @@
       var sender = $message.data('sender');
       var what = $message.data('target').indexOf('#') === 0 ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
       $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
-      reloadNotificationList();
+      if(!to_current) reloadNotificationList();
     }
     if(at_bottom) {
       $win.scrollTo('bottom');
@@ -389,15 +389,15 @@
     $win.on('scroll', getMessages).on('resize', drawUI);
 
     $('nav a.help').click(function(e) {
+      e.preventDefault();
       $input.send('/help', 0);
-      return false;
     })
 
     $('body').bind('keydown', 'esc', function(e) {
+      e.preventDefault();
       var $active = $('a[data-toggle]').filter('.active');
       if(!$active.length) return true;
       $active.trigger('deactivate').focus();
-      return false;
     });
 
     $('div.conversations-container, div.notifications-container')
@@ -424,9 +424,9 @@
       $('div.conversations-container').css('left', left);
     });
 
-    $('div.messages').on('click', '.message h3 a', function() {
+    $('div.messages').on('click', '.message h3 a', function(e) {
+      e.preventDefault();
       $input.val($(this).text() + ': ').focusSoon();
-      return false;
     });
 
     $nick_list.click(function() {
