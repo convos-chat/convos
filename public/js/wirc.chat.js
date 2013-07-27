@@ -341,6 +341,13 @@
 
     to_current = Object.equals($message.cidAndTarget(), $messages.cidAndTarget());
 
+    if($message.hasClass('highlight')) {
+      var sender = $message.data('sender');
+      var what = $message.data('target').indexOf('#') === 0 ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
+      $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
+      if(!to_current) reloadNotificationList();
+    }
+
     if($message.hasClass('remove-conversation')) {
       reloadConversationList({ goto_current: to_current });
     }
@@ -354,12 +361,6 @@
       drawConversationMenu($message);
     }
 
-    if($message.hasClass('highlight')) {
-      var sender = $message.data('sender');
-      var what = $message.data('target').indexOf('#') === 0 ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
-      $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
-      if(!to_current) reloadNotificationList();
-    }
     if(at_bottom) {
       $win.scrollTo('bottom');
       $message.find('img').one('load', function() { $win.scrollTo('bottom') });
