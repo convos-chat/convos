@@ -407,6 +407,11 @@
       $('div.conversations-container').css('left', left);
     });
 
+    $('div.messages').on('click', '.message h3 a', function() {
+      $input.val($(this).text() + ': ').focusSoon();
+      return false;
+    });
+
     $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({
       preventPageScrolling: true
     });
