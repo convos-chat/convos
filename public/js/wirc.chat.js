@@ -76,8 +76,8 @@
   var conversationLoaded = function() {
     $messages = $('div.messages ul');
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
-    $('a.conversation-list').trigger('deactivate');
-    $('a.notification-list').trigger('deactivate');
+    $('a.conversations-toggler').trigger('deactivate');
+    $('a.notifications-toggler').trigger('deactivate');
 
     if($messages.data('target').indexOf('#') === 0) {
       $input.send('/names', 0).send('/topic', 0);
@@ -113,33 +113,33 @@
     drawUI();
   };
 
-  var drawUI = function() {
-    var $conversation_list = $('div.conversation-list li').hide();
-    var $conversation_list_button = $('a.conversation-list').hide();
+  var drawConversationMenu = function() {
+    var $conversations = $('ul.conversations li, div.conversations-container li');
+    var $dropdown = $('div.conversations-container ul');
+    var $menu = $('nav ul.conversations');
     var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
     var used_width = 0;
-    var left;
 
-    $('nav .conversation-list a').each(function(i) {
-      used_width += $(this).show().outerWidth();
+    $dropdown.find('li').remove();
+    $conversations.each(function() {
+      var $li = $(this);
+      if(!$li.parent('ul').is('.conversations')) $menu.append($li);
+      used_width += $li.find('a').outerWidth();
       if(used_width < available_width) return;
-      $conversation_list.eq(i).show();
-      $(this).hide();
+      $dropdown.append($li);
     });
 
     if(used_width >= available_width) {
-      $conversation_list_button.show();
-      left = $conversation_list_button.offset().left - 320 + 22;
-      left = left < 6 ? 6 : left;
-      $conversation_list.closest('div').css('left', left + 'px');
+      $('nav a.conversations-toggler').show();
     }
     else {
-      $conversation_list_button.trigger('deactivate');
+      $('nav a.conversations-toggler').trigger('deactivate').hide();
     }
+  };
 
-    if($win.data('at_bottom')) {
-      $win.scrollTo('bottom');
-    }
+  var drawUI = function() {
+    drawConversationMenu();
+    if($win.data('at_bottom')) $win.scrollTo('bottom');
   };
 
   var getMessages = function() {
@@ -184,7 +184,7 @@
       e.preventDefault();
       $('a[data-toggle]').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
-        $('nav .conversation-list a').slice(0, 2).eq(-1).focus();
+        $('nav ul.conversations a').slice(0, 2).eq(-1).focus();
       }
       else {
         $input.focus();
@@ -254,9 +254,9 @@
 
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
-    $(document).pjax('ul.conversation-list a', 'div.messages');
-    $(document).pjax('ul.notification-list a', 'div.messages');
-    $(document).pjax('div.nick-list a', 'div.messages');
+    $(document).pjax('ul.conversations a', 'div.messages');
+    $(document).pjax('ul.notifications a', 'div.messages');
+    $(document).pjax('div.nicks-container a', 'div.messages');
     $('div.messages').on('pjax:end', conversationLoaded);
     $('div.messages').on('pjax:start', function(xhr, options) {
       $('body').loadingIndicator('show');
@@ -337,16 +337,16 @@
   var reloadConversationList = function(e) {
     var goto_current = e.goto_current;
     $.get($.url_for('conversations'), function(data) {
-      $('ul.conversation-list').replaceWith(data);
-      if(goto_current) $('ul.conversation-list').find('.current').click();
-      conversation_list = $('ul.conversation-list a').map(function() { return $(this).text(); }).get();
-      drawUI();
+      $('ul.conversations').replaceWith(data);
+      if(goto_current) $('ul.conversations li:first a').click();
+      conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
+      drawConversationMenu();
     });
   };
 
   var reloadNotificationList = function(e) {
-    var $notification_list = $('div.notification-list');
-    var $n_notifications = $('a.notification-list');
+    var $notification_list = $('div.notifications-container');
+    var $n_notifications = $('a.notifications-toggler');
     var n;
 
     $.get($.url_for('notifications'), function(data) {
@@ -361,40 +361,52 @@
   $(document).ready(function() {
     if($('div.messages').length === 0) return; // not on chat page
     $input = $('footer form input[name="message"]');
-    $nick_list = $('div.nick-list');
+    $nick_list = $('div.nicks-container');
     $win = $(window);
-    conversation_list = $('ul.conversation-list a').map(function() { return $(this).text(); }).get();
+    conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
     initSocket();
     initInputField();
     initPjax();
 
     $win.on('scroll', getMessages).on('resize', drawUI);
+
     $('nav a.help').click(function(e) {
       $input.send('/help', 0);
       return false;
     })
+
     $('body').bind('keydown', 'esc', function(e) {
       var $active = $('a[data-toggle]').filter('.active');
       if(!$active.length) return true;
       $active.trigger('deactivate').focus();
       return false;
     });
-    $('div.conversation-list, div.notification-list').bind('keydown', 'up', function(e) {
-      $(document.activeElement).closest('li').prev().find('a').focus();
-      return false;
-    });
-    $('div.conversation-list, div.notification-list').bind('keydown', 'down', function(e) {
-      $(document.activeElement).closest('li').next().find('a').focus();
-      return false;
-    });
-    $('a.notification-list').on('activate', function() {
+
+    $('div.conversations-container, div.notifications-container')
+      .bind('keydown', 'up', function(e) {
+        $(document.activeElement).closest('li').prev().find('a').focus();
+        return false;
+      })
+      .bind('keydown', 'down', function(e) {
+        $(document.activeElement).closest('li').next().find('a').focus();
+        return false;
+      });
+
+    $('a.notifications-toggler').on('activate', function() {
       var $a = $(this);
       $.post($.url_for('notifications/clear'), function(res) {
         $a.removeClass('alert').children('b').text(0);
       });
-      $('div.notification-list a:first').focusSoon();
+      $('div.notifications-container a:first').focusSoon();
     });
+
+    $('nav a.conversations-toggler').on('activate', function() {
+      var left = $('nav a.conversations-toggler').offset().left - 300;
+      if(left < 4) left = 4;
+      $('div.conversations-container').css('left', left);
+    });
+
     $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({
       preventPageScrolling: true
     });

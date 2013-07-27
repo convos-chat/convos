@@ -1,8 +1,9 @@
-<ul class="conversation-list">
+<ul class="conversations">
   % my $i = 0;
   % for my $c (@$conversation_list) {
-  <li>
-    %= link_to $c->{target}, 'channel.view' => $c, class => $i++ ? 'conversation' : 'current', title => "View conversation with $c->{target}"
+  % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target}" : "View conversation with $c->{target}";
+  <li class="<%= $c->{unread} ? 'unread' : '' %>">
+    %= link_to $c->{target}, 'channel.view' => $c, class => 'conversation', title => $title
   </li>
   % }
 </ul>

@@ -249,10 +249,9 @@ nav.bar {
     float: left;
   }
 
-  a.current { font-size: 22px; border: 0; padding-right: 10px; }
   a.conversation { color: #666; }
-  a.settings, a.help, a.logout, a.conversation-list { text-indent: -10000px; }
-  a.conversation-list {
+  a.settings, a.help, a.logout, a.conversations-toggler { text-indent: -10000px; }
+  a.conversations-toggler {
     background: url(../image/sprite.png) no-repeat 0 0;
     width: 20px;
     background-position: -(@navBarIconWidth * 5 + 7) 0;
@@ -263,24 +262,26 @@ nav.bar {
     position: absolute;
     right: @bodyGutter;
     a { background: url(../image/sprite.png) no-repeat 0 0; width: @navBarIconWidth; }
-    a.notification-list { background-position: -@navBarIconWidth 0; }
-    a.notification-list.alert { background-position: -(@navBarIconWidth * 2) 0; }
+    a.notifications-toggler { background-position: -@navBarIconWidth 0; }
+    a.notifications-toggler.alert { background-position: -(@navBarIconWidth * 2) 0; }
     a.help { background-position: -(@navBarIconWidth * 3) 0; }
     a.logout { background-position: -(@navBarIconWidth * 4) 0; }
-    a.notification-list b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
-    a.notification-list.alert b { color: #b22; }
+    a.notifications-toggler b { position: relative; top: 14px; color: #bbb; font-size: 0.9em; }
+    a.notifications-toggler.alert b { color: #b22; }
     a.hidden { display: none; }
   }
 
-  a.active, a:hover { color: #000; background-color: darken(#fff, 8%); }
+  a.active, a:hover { background-color: darken(#fff, 9%); color: #000; }
+  ul.conversations li:first-of-type a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
+  ul.conversations li.unread a { color: #a00 };
 }
 
-div.conversation-list,
-div.notification-list {
+div.conversations-container,
+div.notifications-container {
   background: darken(#fdfdfd, 1%);
   position: fixed;
   top: 42px;
-  width: 320px;
+  width: 300px;
   max-height: 70%;
   overflow: auto;
   z-index: 1001;
@@ -292,13 +293,13 @@ div.notification-list {
   a:hover { color: #000; background-color: darken(#fff, 5%); }
 }
 
-div.notification-list {
+div.notifications-container {
   right: 6px;
   li.unread { border-right: 2px solid #f66; }
   span.message { color: #666; font-size: 0.9em; line-height: 1em; .ellipsis(); }
 }
 
-div.nick-list {
+div.nicks-container {
   background: #eee;
   border-left: 2px solid #ccc;
   width: @nickListWidth;
