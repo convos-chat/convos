@@ -423,10 +423,21 @@
       $(this).closest('li').remove();
     });
 
+    if(!!('ontouchstart' in window)) {
+      $('nav a.help').html('<i class="icon-user"></i>').click(function(e) {
+        e.preventDefault();
+        $nick_list.toggleClass('visible');
+      });
+    }
+    else {
+      $('nav a.help').click(function(e) {
+        e.preventDefault();
+        $input.send('/help', 0);
+      })
+    }
+
     $('nav, div.conversations-container, div.notifications-container').fastButton();
-    $('nav a.help').click(function(e) { $input.send('/help', 0); })
     $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
-    $nick_list.click(function() { $(this).toggleClass('visible'); })
     $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({ preventPageScrolling: true });
     $win.on('scroll', getMessages).on('resize', drawUI);
     conversationLoaded();

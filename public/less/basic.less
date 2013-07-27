@@ -400,15 +400,12 @@ div.messages.with-nick-list {
   footer, nav.bar, .row { padding: 0; }
   nav.bar .right { right: 0; }
   div.messages { margin-right: 0; }
-  div.nicks-container {
-    right: -(@nickListWidth - 10);
-    .content { left: 10px; }
-  }
+  div.nicks-container { right: -@nickListWidth; }
   div.nicks-container.visible {
     right: 0;
     .content { left: 0; }
   }
-  div.messages.with-nick-list, footer form.with-nick-list { margin-right: 10px; }
+  div.messages.with-nick-list, footer form.with-nick-list { margin-right: 0; }
   .landing-page {
     width: 100%;
     img { margin: 2em 0; }
