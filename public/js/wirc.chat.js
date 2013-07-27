@@ -74,17 +74,21 @@
   };
 
   var conversationLoaded = function() {
-    $messages = $('section.messages ul');
+    $messages = $('div.messages ul');
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
     $('a.conversation-list').trigger('deactivate');
     $('a.notification-list').trigger('deactivate');
-    if($win.smallScreen()) $('div.nick-list').animate({ right: '-180px' });
 
     if($messages.data('target').indexOf('#') === 0) {
       $input.send('/names', 0).send('/topic', 0);
+      $input.parent('form').addClass('with-nick-list');
+      $messages.parent('div').addClass('with-nick-list');
+      $nick_list.removeClass('hidden');
     }
-    if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
-      reloadConversationList({});
+    else {
+      $nick_list.addClass('hidden');
+      $input.parent('form').removeClass('with-nick-list');
+      $messages.parent('div').removeClass('with-nick-list');
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
@@ -94,15 +98,19 @@
       reloadNotificationList();
     }
     else {
-      $input.focus();
+      $input.focusSoon();
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
+    }
+
+    if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
+      reloadConversationList({});
     }
 
     $('body').loadingIndicator('hide');
     $input.cidAndTarget($messages);
-    drawUI();
+    $nick_list.find('ul').html('');
     nicks.clear();
-    nickList($('<div/>'));
+    drawUI();
   };
 
   var drawUI = function() {
@@ -111,8 +119,6 @@
     var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
     var used_width = 0;
     var left;
-
-    $nick_list.css({ right: $win.smallScreen() ? '-180px' : '0' });
 
     $('nav .conversation-list a').each(function(i) {
       used_width += $(this).show().outerWidth();
@@ -248,11 +254,11 @@
 
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
-    $(document).pjax('ul.conversation-list a', 'section.messages');
-    $(document).pjax('ul.notification-list a', 'section.messages');
-    $(document).pjax('div.nick-list a', 'section.messages');
-    $('section.messages').on('pjax:end', conversationLoaded);
-    $('section.messages').on('pjax:start', function(xhr, options) {
+    $(document).pjax('ul.conversation-list a', 'div.messages');
+    $(document).pjax('ul.notification-list a', 'div.messages');
+    $(document).pjax('div.nick-list a', 'div.messages');
+    $('div.messages').on('pjax:end', conversationLoaded);
+    $('div.messages').on('pjax:start', function(xhr, options) {
       $('body').loadingIndicator('show');
     });
   }
@@ -289,13 +295,14 @@
       });
     }
 
-    $nick_list.find('ul').html(
-      $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-        return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
-      }).join('')
-    );
-
-    $nick_list.nanoScroller(); // reset scrollbar;
+    if(nicks.length) {
+      $nick_list.find('ul').html(
+        $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
+          return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
+        }).join('')
+      );
+      $nick_list.show().nanoScroller(); // reset scrollbar;
+    }
   }
 
   var receiveMessage = function(e) {
@@ -352,7 +359,7 @@
   };
 
   $(document).ready(function() {
-    if($('section.messages').length === 0) return; // not on chat page
+    if($('div.messages').length === 0) return; // not on chat page
     $input = $('footer form input[name="message"]');
     $nick_list = $('div.nick-list');
     $win = $(window);

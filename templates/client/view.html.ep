@@ -21,19 +21,19 @@
   %= include 'client/notification_list'
 </div>
 
-<div class="nick-list">
+<div class="nick-list<%= $target =~ /^#/ ? '' : ' hidden' %>">
   <ul></ul>
 </div>
 
 <div class="wrapper">
-  <section class="messages row">
+  <div class="messages row<%= $target =~ /^#/ ? ' with-nick-list' : '' %>">
     %= include 'client/conversation', class => 'more'
-  </section>
+  </div>
   <div class="clear"></div>
 </div>
 
 <footer>
-%= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, begin
+%= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, class => $target =~ /^#/ ? 'with-nick-list' : '', begin
   %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off', 'data-cid' => $cid, 'data-target' => $target
 % end
 </footer>

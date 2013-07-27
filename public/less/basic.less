@@ -88,13 +88,9 @@ footer {
   clear: both;
   padding: 2px @bodyGutter;
 
-  form {
-    margin-right: @nickListWidth;
-    input { font-size: 1.1em; width: 100%; padding: 8px; }
-    input.sending {
-      background: url(../image/loader-facebook.gif) no-repeat 99% 50%;
-    }
-  }
+  form input { font-size: 1.1em; width: 100%; padding: 8px; }
+  input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
+  form.with-nick-list { margin-right: @nickListWidth; }
 }
 
 /*
@@ -316,8 +312,7 @@ div.nick-list {
   a:hover { background: darken(#eee, 5%); };
 }
 
-section.messages {
-  margin-right: @nickListWidth;
+div.messages {
   padding-top: 45px;
   li {
     display: block;
@@ -344,6 +339,10 @@ section.messages {
   li.message .embed, li.message .embed img { max-height: 220px; }
   li.message .embed img { border: 2px solid #bbb; .border-radius(20px); margin: 8px 0; }
   li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
+}
+
+div.messages.with-nick-list {
+  margin-right: @nickListWidth;
 }
 
 /*
@@ -402,9 +401,9 @@ section.messages {
 @media (max-width: @responsiveWidth) {
   footer, nav.bar, .row { padding: 0; }
   nav.bar .right { right: 0; }
-  section.messages { margin-right: 0; }
-  footer form { margin-right: 0; }
-  div.nick-list { right: -(@nickListWidth); }
+  div.messages { margin-right: 0; }
+  div.nick-list { display: none; }
+  div.messages.with-nick-list, footer form.with-nick-list { margin-right: 0; }
   .landing-page {
     width: 100%;
     img { margin: 2em 0; }
