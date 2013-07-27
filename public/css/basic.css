@@ -78,8 +78,9 @@ nav.bar .right a.notifications-toggler b{position:relative;top:14px;color:#bbb;f
 nav.bar .right a.notifications-toggler.alert b{color:#b22}
 nav.bar .right a.hidden{display:none}
 nav.bar a.active,nav.bar a:hover{background-color:#e8e8e8;color:#000}
-nav.bar ul li:first-of-type a{background-color:#f2f2f2;color:#000;font-weight:bold}
-div.conversations-container,div.notifications-container{background:#fafafa;position:fixed;top:42px;width:320px;max-height:70%;overflow:auto;z-index:1001;display:none;-webkit-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);-moz-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);box-shadow:0 0 1px 1px rgba(180,180,180,0.5)}div.conversations-container li,div.notifications-container li{border-bottom:1px solid #eee}
+nav.bar ul.conversations li:first-of-type a{background-color:#f2f2f2;color:#000;font-weight:bold}
+nav.bar ul.conversations li.unread a{color:#a00}
+div.conversations-container,div.notifications-container{background:#fafafa;position:fixed;top:42px;width:300px;max-height:70%;overflow:auto;z-index:1001;display:none;-webkit-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);-moz-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);box-shadow:0 0 1px 1px rgba(180,180,180,0.5)}div.conversations-container li,div.notifications-container li{border-bottom:1px solid #eee}
 div.conversations-container a,div.notifications-container a{color:#000;text-decoration:none;padding:4px;display:block}
 div.conversations-container a:hover,div.notifications-container a:hover{color:#000;background-color:#f2f2f2}
 div.notifications-container{right:6px}div.notifications-container li.unread{border-right:2px solid #f66}
