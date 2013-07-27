@@ -67,14 +67,10 @@ div.loading-indicator{background:url(../image/loader-squares-circle.gif) 50% 50%
 .nanoscroller:hover>.pane,.pane.active,.pane.flashed{visibility:visible\9;filter:alpha(opacity=@{opacity*100});-moz-opacity:.99;-khtml-opacity:.99;-webkit-opacity:.99;opacity:.99}
 nav.bar{background:#fafafa;position:fixed;padding:0 20px;top:0;left:0;width:100%;height:42px;z-index:1000;overflow:hidden;-webkit-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);-moz-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);filter:alpha(opacity=@{opacity*100});-moz-opacity:.95;-khtml-opacity:.95;-webkit-opacity:.95;opacity:.95}nav.bar a{color:#000;text-decoration:none;padding:10px 4px;display:block;float:left}
 nav.bar a.conversation{color:#666}
-nav.bar a.settings,nav.bar a.help,nav.bar a.logout,nav.bar a.conversations-toggler{text-indent:-10000px}
-nav.bar a.conversations-toggler{background:url(../image/sprite.png) no-repeat 0 0;width:20px;background-position:-167px 0;display:none}
-nav.bar .right{position:absolute;right:20px}nav.bar .right a{background:url(../image/sprite.png) no-repeat 0 0;width:32px}
-nav.bar .right a.notifications-toggler{background-position:-32px 0}
-nav.bar .right a.notifications-toggler.alert{background-position:-64px 0}
-nav.bar .right a.help{background-position:-96px 0}
-nav.bar .right a.logout{background-position:-128px 0}
-nav.bar .right a.notifications-toggler b{position:relative;top:14px;color:#bbb;font-size:.9em}
+nav.bar a.conversations-toggler{display:none}
+nav.bar .right{position:absolute;right:20px}nav.bar .right a{font-size:1.2em;width:2em;text-align:center}
+nav.bar .right a.notifications-toggler{position:relative}
+nav.bar .right a.notifications-toggler b{position:absolute;bottom:-3px;left:2px;color:#bbb;font-size:.9em}
 nav.bar .right a.notifications-toggler.alert b{color:#b22}
 nav.bar .right a.hidden{display:none}
 nav.bar a.active,nav.bar a:hover{background-color:#e8e8e8;color:#000}
@@ -83,6 +79,7 @@ nav.bar ul.conversations li.unread a{color:#a00}
 div.conversations-container,div.notifications-container{background:#fafafa;position:fixed;top:42px;width:300px;max-height:70%;overflow:auto;z-index:1001;display:none;-webkit-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);-moz-box-shadow:0 0 1px 1px rgba(180,180,180,0.5);box-shadow:0 0 1px 1px rgba(180,180,180,0.5)}div.conversations-container li,div.notifications-container li{border-bottom:1px solid #eee}
 div.conversations-container a,div.notifications-container a{color:#000;text-decoration:none;padding:4px;display:block}
 div.conversations-container a:hover,div.notifications-container a:hover{color:#000;background-color:#f2f2f2}
+div.conversations-container li.unread a{color:#a00}
 div.notifications-container{right:6px}div.notifications-container li.unread{border-right:2px solid #f66}
 div.notifications-container span.message{color:#666;font-size:.9em;line-height:1em;text-overflow:ellipsis;white-space:nowrap;display:block;overflow:hidden}
 div.nicks-container{background:#eee;border-left:2px solid #ccc;width:180px;position:fixed;top:42px;bottom:-1px;right:0;z-index:2}div.nicks-container a{text-decoration:none;display:block;padding:4px 8px}

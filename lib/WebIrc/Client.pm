@@ -58,7 +58,14 @@ sub view {
   my $uid = $self->session('uid');
   my $cid = $self->stash('cid');
   my $id = as_id $cid, $self->stash('target');
+  my $previous_id = $self->session('view_id') || '';
   my $with_layout = $self->req->is_xhr ? 0 : 1;
+
+  if($id ne $previous_id) {
+    $self->redis->zadd("user:$uid:conversations", time - 0.001, $previous_id);
+  }
+
+  $self->session(view_id => $id);
 
   Mojo::IOLoop->delay(
     $self->_check_if_uid_own_cid($cid),

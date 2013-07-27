@@ -11,6 +11,7 @@
 @navBarIconWidth: 32px;
 @buttonBorderHover: 2px solid darken(#fff, 70%);
 @nickListWidth: 180px;
+@unreadColor: #a00;
 
 /*
  * Less helpers
@@ -264,7 +265,7 @@ nav.bar {
 
   a.active, a:hover { background-color: darken(#fff, 9%); color: #000; }
   ul.conversations li:first-of-type a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
-  ul.conversations li.unread a { color: #a00 };
+  ul.conversations li.unread a { color: @unreadColor };
 }
 
 div.conversations-container,
@@ -282,6 +283,10 @@ div.notifications-container {
   li { border-bottom: 1px solid #eee; }
   a { color: #000; text-decoration: none; padding: 4px; display: block; }
   a:hover { color: #000; background-color: darken(#fff, 5%); }
+}
+
+div.conversations-container {
+  li.unread a { color: @unreadColor };
 }
 
 div.notifications-container {

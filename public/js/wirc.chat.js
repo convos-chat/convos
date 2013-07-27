@@ -114,12 +114,18 @@
     drawUI();
   };
 
-  var drawConversationMenu = function() {
+  var drawConversationMenu = function($message) {
     var $conversations = $('ul.conversations li, div.conversations-container li');
     var $dropdown = $('div.conversations-container ul');
     var $menu = $('nav ul.conversations');
     var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
-    var used_width = 0;
+    var used_width = 0, unread, $a;
+
+    if($message) {
+      $a = $conversations.find('a[href="' + $.url_for($message.data('cid'), $message.data('target')) + '"]');
+      unread = parseInt($a.attr('data-unread')) + 1;
+      $a.attr('data-unread', unread).addClass('unread').attr('title', unread + " unread messages in " + $message.data('target'));
+    }
 
     $dropdown.find('li').remove();
     $conversations.each(function() {
@@ -328,6 +334,9 @@
     else if(to_current) {
       $message.appendToMessages();
     }
+    else {
+      drawConversationMenu($message);
+    }
 
     if($message.hasClass('highlight')) {
       var sender = $message.data('sender');
@@ -347,6 +356,7 @@
       $('ul.conversations').replaceWith(data);
       if(goto_current) $('ul.conversations li:first a').click();
       conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
+      $('div.conversations-container ul').html('');
       drawConversationMenu();
     });
   };

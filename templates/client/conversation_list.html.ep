@@ -3,7 +3,7 @@
   % for my $c (@$conversation_list) {
   % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target}" : "View conversation with $c->{target}";
   <li class="<%= $c->{unread} ? 'unread' : '' %>">
-    %= link_to $c->{target}, 'channel.view' => $c, class => 'conversation', title => $title
+    %= link_to $c->{target}, 'channel.view' => $c, class => 'conversation', title => $title, 'data-unread' => $c->{unread}
   </li>
   % }
 </ul>
