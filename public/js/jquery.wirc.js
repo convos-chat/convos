@@ -69,75 +69,6 @@
     return args.join('/').replace(/#/g, '%23');
   };
 
-  // this code is originally from https://github.com/joewalnes/reconnecting-websocket
-  $.ws = function(a) {
-    function f(g) {
-      c = new WebSocket(a);
-      if (b.debug) console.debug("ReconnectingWebSocket", "attempt-connect", a);
-      var h = c;
-      var i = setTimeout(function() {
-        if (b.debug) console.debug("ReconnectingWebSocket", "connection-timeout", a);
-        e = true;
-        h.close();
-        e = false;
-      }, b.timeoutInterval);
-      c.onopen = function(c) {
-        clearTimeout(i);
-        if (b.debug) console.debug("ReconnectingWebSocket", "onopen", a);
-        b.readyState = WebSocket.OPEN;
-        g = false;
-        on.open.fire(c);
-        dfd_c.resolve(c);
-      };
-      c.onclose = function(h) {
-        clearTimeout(i);
-        c = null;
-        dfd_c = $.Deferred();
-        if (d) {
-          b.readyState = WebSocket.CLOSED;
-          on.close.fire(h, false);
-        } else {
-          b.readyState = WebSocket.CONNECTING;
-          if (!g && !e) {
-            if (b.debug) console.debug("ReconnectingWebSocket", "onclose", a);
-            on.close.fire(h, true);
-          }
-          setTimeout(function() { f(true); }, b.reconnectInterval);
-        }
-      };
-      c.onmessage = function(c) {
-        if (b.debug) console.debug("ReconnectingWebSocket", "onmessage", a, c.data);
-        on.message.fire(c);
-      };
-      c.onerror = function(c) {
-        if (b.debug) console.debug("ReconnectingWebSocket", "onerror", a, c);
-        on.error.fire(c);
-      };
-    }
-    var d = false;
-    var e = false;
-    var c;
-    var dfd_c = $.Deferred();
-    var on = {
-      close: $.Callbacks(),
-      error: $.Callbacks(),
-      message: $.Callbacks(),
-      open: $.Callbacks()
-    };
-    var b = {
-      debug: false,
-      reconnectInterval: 1e3,
-      timeoutInterval: 2e3,
-      readyState: WebSocket.CONNECTING,
-      url: a,
-      close: function() { if(!c) return false; c.close(); return(d = true); },
-      on: function(event, fn) { on[event].add(fn); },
-      send: function(m) { var msg = m; return dfd_c.done(function() { return c.send(m); }); }
-    };
-    f(a);
-    return b;
-  };
-
   $(document).ready(function() {
     $height_from = $('div.wrapper').length ? $('div.wrapper') : $('body');
     $win = $(window).data('at_bottom', false).data('has_focus', true);
@@ -174,6 +105,79 @@ window.sortedSet.prototype.revrange = function(start, stop) {
 
 // console.log()
 window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
+
+// this code is originally from https://github.com/joewalnes/reconnecting-websocket
+window.ws = function(a) {
+  function f(g) {
+    c = new WebSocket(a);
+    if (b.debug) console.debug("ReconnectingWebSocket", "attempt-connect", a);
+    var h = c;
+    var i = setTimeout(function() {
+      if (b.debug) console.debug("ReconnectingWebSocket", "connection-timeout", a);
+      e = true;
+      h.close();
+      e = false;
+    }, b.timeoutInterval);
+    c.onopen = function(c) {
+      clearTimeout(i);
+      if (b.debug) console.debug("ReconnectingWebSocket", "onopen", a);
+      b.readyState = WebSocket.OPEN;
+      g = false;
+      b.onopen(c);
+      while(b.buffer.length) h.send(b.buffer.shift());
+    };
+    c.onclose = function(h) {
+      clearTimeout(i);
+      c = null;
+      if (d) {
+        b.readyState = WebSocket.CLOSED;
+        b.onclose(h, false);
+      } else {
+        b.readyState = WebSocket.CONNECTING;
+        if (!g && !e) {
+          if (b.debug) console.debug("ReconnectingWebSocket", "onclose", a);
+          b.onclose(h, true);
+        }
+        setTimeout(function() { f(true); }, b.reconnectInterval);
+      }
+    };
+    c.onmessage = function(m) {
+      if (b.debug) console.debug("ReconnectingWebSocket", "onmessage", a, m.data);
+      b.onmessage(m);
+    };
+    c.onerror = function(e) {
+      if (b.debug) console.debug("ReconnectingWebSocket", "onerror", a, e);
+      on.onerror(e);
+    };
+  }
+  var d = false;
+  var e = false;
+  var c;
+  var b = {
+    buffer: [],
+    debug: false,
+    onerror: function(e) { console.log(b.url + ' ! ' + e); },
+    onopen: function(c) { console.log(b.url + ' : open'); },
+    onmessage: function(m) { console.log(b.url + ' < ' + m); },
+    onclose: function(e) { console.log(b.url + ' : close'); },
+    reconnectInterval: 1e3,
+    timeoutInterval: 2e3,
+    readyState: WebSocket.CONNECTING,
+    url: a,
+    close: function() { if(!c) return false; c.close(); return(d = true); },
+    send: function(m) {
+      if(b.readyState == WebSocket.OPEN) {
+        c.send(m);
+      }
+      else {
+        b.buffer.push(m);
+      }
+      return b
+    }
+  };
+  f(a);
+  return b;
+};
 
 // add escape() with the *same* functionality as per's quotemeta()
 RegExp.escape = RegExp.escape || function(str) {

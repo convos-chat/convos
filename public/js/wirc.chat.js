@@ -1,6 +1,7 @@
 ;(function($) {
-  var $goto_bottom, $input, $messages, $nick_list, $win;
+  var $goto_bottom, $input, $nick_list, $win;
   var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
+  var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
   var conversation_list = [];
   var commands = [
@@ -264,8 +265,8 @@
   var initSocket = function() {
     $input.history = [];
     $input.history_i = 0;
-    $input.socket = $.ws($input.closest('form').data('socket-url'));
-    $input.socket.on('message', receiveMessage);
+    $input.socket = window.ws($input.closest('form').data('socket-url'));
+    $input.socket.onmessage = receiveMessage;
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-history', history).text(message).prop('outerHTML'));
@@ -450,13 +451,9 @@
     $win.on('scroll', getMessages).on('resize', drawUI);
   });
 
-  /* hack to hide location bar in ios */
   $(window).load(function() {
-    setTimeout(function() {
-      window.scrollTo(0, 1);
-      initNotifications();
-      conversationLoaded();
-    }, 10);
+    initNotifications();
+    conversationLoaded();
   });
 
 })(jQuery);
