@@ -446,9 +446,6 @@
 
   /* hack to hide location bar in ios */
   $(window).load(function() {
-    if(!!('ontouchstart' in window)) {
-      $('div.wrapper').css('min-height', $('div.wrapper').height() + 60);
-    }
     setTimeout(function() {
       window.scrollTo(0, 1);
       initNotifications();
