@@ -82,7 +82,7 @@ unless($ENV{LESSC_BIN} //= '') {
 
 unless($ENV{YUI_COMPRESSOR_BIN} //= '') {
   for(split /:/, $ENV{PATH} || '') {
-    next unless -e "$_/lessc"; # -e because it might be a symlink
+    next unless -e "$_/yui-compressor"; # -e because it might be a symlink
     $ENV{YUI_COMPRESSOR_BIN} = "$_/yui-compressor";
     last;
   }
