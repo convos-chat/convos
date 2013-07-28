@@ -13,6 +13,5 @@ MANIFEST*
 *META.*
 /local
 /log
-/public/compiled.js
 /script/hypnotoad.pid
 /web_irc.production.conf

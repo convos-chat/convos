@@ -72,10 +72,18 @@ use WebIrc::Core;
 use WebIrc::Proxy;
 use Mojo::Redis;
 
-unless($ENV{LESSC_BIN} ||= '') {
+unless($ENV{LESSC_BIN} //= '') {
   for(split /:/, $ENV{PATH} || '') {
     next unless -e "$_/lessc"; # -e because it might be a symlink
     $ENV{LESSC_BIN} = "$_/lessc";
+    last;
+  }
+}
+
+unless($ENV{YUI_COMPRESSOR_BIN} //= '') {
+  for(split /:/, $ENV{PATH} || '') {
+    next unless -e "$_/lessc"; # -e because it might be a symlink
+    $ENV{YUI_COMPRESSOR_BIN} = "$_/yui-compressor";
     last;
   }
 }
@@ -175,21 +183,8 @@ sub startup {
     });
   }
 
-  $self->_compile_stylesheet; # try to remind me to commit changes in compiled.css as well
-}
-
-=head2 production_mode
-
-Will compile javascripts into one file for production.
-
-Would be nice if it also created on css file, but that require
-L<lessc|http://lesscss.org> 1.4.x which is probably not available
-on the "alien" system.
-
-=cut
-
-sub production_mode {
-  my $self = shift;
+  # try to remind me to commit changes in compiled.css and .js as well
+  $self->_compile_stylesheet;
   $self->_compile_javascript;
 }
 
@@ -198,6 +193,7 @@ sub _compile_javascript { require Mojo::DOM;
   my $config = $self->plugin('Config'); # make sure config file is loaded
   my $args = { template => 'empty', layout => 'default', title => '', VERSION => 0 };
   my $compiled = $self->home->rel_file('public/compiled.js');
+  my $modified = +(stat $compiled)[9] || 0;
   my $js = '';
   my($output, $format);
 
@@ -208,6 +204,7 @@ sub _compile_javascript { require Mojo::DOM;
 
   $output->find('script')->each(sub {
     my $file = $self->home->rel_file("public" . $_[0]->{src});
+    $file = $self->_minify_javascript($file, $modified);
     $self->log->debug("Compiling $file");
     open my $JS, '<', $file or die "Read $file: $!";
     while(<$JS>) {
@@ -226,8 +223,18 @@ sub _compile_stylesheet {
   my $less_file = $self->home->rel_file('public/less/main.less');
   my $css_file = $self->home->rel_file('public/compiled.css');
 
-  -x $ENV{LESSC_BIN} or return;
-  system $ENV{LESSC_BIN} => -x => $less_file => $css_file;
+  system $ENV{LESSC_BIN} => -x => $less_file => $css_file if $ENV{LESSC_BIN};
+}
+
+sub _minify_javascript {
+  my($self, $file, $compiled_modified) = @_;
+  my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
+  my $modified = +(stat $mini)[9] || -1;
+
+  return $file if $mini eq $file;
+  return $mini if $modified < $compiled_modified;
+  system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini if $ENV{YUI_COMPRESSOR_BIN};
+  return -e $mini ? $mini : $file;
 }
 
 =head1 COPYRIGHT
