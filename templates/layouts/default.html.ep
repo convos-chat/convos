@@ -3,17 +3,24 @@
   <head>
     <title><%= join ' - ', app->config->{name}, title %></title>
   % if($self->app->mode eq 'production') {
-    %= stylesheet '/css/basic.css'
+    %= stylesheet "/compiled.css?_=$VERSION"
   % } else {
-    <link rel="stylesheet/less" href="<%= url_for('/less/basic.less') %>" type="text/css">
+    <link rel="stylesheet/less" href="<%= url_for('/less/main.less') %>" type="text/css">
     %= javascript '/js/less.min.js'
   % }
+  % if($self->app->mode eq 'production') {
+    %= javascript "/compiled.js?_=$VERSION"
+  % } else {
+    %= javascript '/js/globals.js'
+    %= javascript '/js/ws-reconnecting.js'
     %= javascript '/js/jquery.js'
     %= javascript '/js/jquery.hotkeys.js'
+    %= javascript '/js/jquery.fastbutton.js'
     %= javascript '/js/jquery.nanoscroller.min.js'
+    %= javascript '/js/jquery.pjax.js'
     %= javascript '/js/jquery.wirc.js'
-    %= javascript '/js/wirc.actions.js'
     %= javascript '/js/wirc.chat.js'
+  % }
     <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent"/>

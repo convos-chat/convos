@@ -72,6 +72,14 @@ use WebIrc::Core;
 use WebIrc::Proxy;
 use Mojo::Redis;
 
+unless($ENV{LESSC_BIN} ||= '') {
+  for(split /:/, $ENV{PATH} || '') {
+    next unless -e "$_/lessc"; # -e because it might be a symlink
+    $ENV{LESSC_BIN} = "$_/lessc";
+    last;
+  }
+}
+
 =head1 ATTRIBUTES
 
 =head2 archive
@@ -125,7 +133,7 @@ sub startup {
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
-  $self->defaults(layout => 'default', logged_in => 0,);
+  $self->defaults(layout => 'default', logged_in => 0, VERSION => time);
 
   # Normal route to controller
   my $r = $self->routes;
@@ -166,6 +174,56 @@ sub startup {
       $self->proxy->start if $config->{backend}{proxy};
     });
   }
+
+  $self->_compile_stylesheet; # try to remind me to commit changes in compiled.css as well
+}
+
+=head2 production_mode
+
+Will compile javascripts into one file for production.
+
+Would be nice if it also created on css file, but that require
+L<lessc|http://lesscss.org> 1.4.x which is probably not available
+on the "alien" system.
+
+=cut
+
+sub production_mode {
+  my $self = shift;
+  $self->_compile_javascript;
+}
+
+sub _compile_javascript { require Mojo::DOM;
+  my $self = shift;
+  my $config = $self->plugin('Config'); # make sure config file is loaded
+  my $args = { template => 'empty', layout => 'default', title => '', VERSION => 0 };
+  my $compiled = $self->home->rel_file('public/compiled.js');
+  my $js = '';
+  my($output, $format);
+
+  $self->app->mode('develop');
+  ($output, $format) = $self->renderer->render(Mojolicious::Controller->new(app => $self), $args);
+  $self->app->mode('production');
+  $output = Mojo::DOM->new($output);
+
+  $output->find('script')->each(sub {
+    my $file = $self->home->rel_file("public" . $_[0]->{src});
+    open my $JS, '<', $file or die "Read $file: $!";
+    $js .= $_ while <$JS>;
+    $js .= "\n";
+  });
+
+  open my $COMPILED, '>', $compiled or die "Write $compiled: $!";
+  print $COMPILED $js;
+}
+
+sub _compile_stylesheet {
+  my $self = shift;
+  my $less_file = $self->home->rel_file('public/less/main.less');
+  my $css_file = $self->home->rel_file('public/compiled.css');
+
+  -x $ENV{LESSC_BIN} or return;
+  system $ENV{LESSC_BIN} => -x => $less_file => $css_file;
 }
 
 =head1 COPYRIGHT
