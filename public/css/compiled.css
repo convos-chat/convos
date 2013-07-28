@@ -25,7 +25,7 @@ a:link{-webkit-tap-highlight-color:#253752}
 input:-moz-placeholder{color:#808080}
 textarea:-moz-placeholder{color:#808080}
 li.separator{background:#eee;height:1px;overflow:hidden}
-html,body{height:100%}
+html,body{height:100%;-webkit-tap-highlight-color:rgba(0,0,0,0)}
 div.wrapper{min-height:100%;height:auto !important;height:100%;margin-bottom:-50px}div.wrapper div.clear{height:70px;clear:both}
 footer{height:50px;background:#fff;color:#999;clear:both;padding:2px 20px}footer form input{font-size:1.1em;width:100%;padding:8px}
 footer input.sending{background:url(../image/loader-facebook.gif) no-repeat 99% 50%}
