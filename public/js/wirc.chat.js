@@ -78,6 +78,11 @@
     $messages = $('div.messages ul');
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
+    $('body').loadingIndicator('hide');
+    $input.cidAndTarget($messages);
+    $nick_list.find('ul').html('');
+    nicks.clear();
+
     if($messages.data('target').indexOf('#') === 0) {
       $input.send('/names', 0).send('/topic', 0);
       $input.parent('form').addClass('with-nick-list');
@@ -105,10 +110,6 @@
       reloadConversationList({});
     }
 
-    $('body').loadingIndicator('hide');
-    $input.cidAndTarget($messages);
-    $nick_list.find('ul').html('');
-    nicks.clear();
     drawUI();
   };
 
@@ -441,8 +442,6 @@
     $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
     $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({ preventPageScrolling: true });
     $win.on('scroll', getMessages).on('resize', drawUI);
-    conversationLoaded();
-    initNotifications();
   });
 
   /* hack to hide location bar in ios */
@@ -452,8 +451,8 @@
     }
     setTimeout(function() {
       window.scrollTo(0, 1);
-      $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
-      drawUI();
+      initNotifications();
+      conversationLoaded();
     }, 10);
   });
 
