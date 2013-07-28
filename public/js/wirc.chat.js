@@ -207,6 +207,7 @@
     $input.bind('keydown', 'tab', function(e) {
       val = $input.val();
       offset = val.lastIndexOf(' ') + 1;
+      re = new RegExp('^' + RegExp.escape(val.substr(offset)), 'i');
       complete = complete || {
         i: 0,
         prefix: val.substr(0, offset),
@@ -214,7 +215,6 @@
           $.grep(
             nicks.revrange(0, -1).concat(conversation_list).concat(commands).unique(),
             function(v, i) {
-              re = re || new RegExp('^' + RegExp.escape(val.substr(offset)), 'i');
               return offset && v.indexOf('/') === 0 ? false : re.test(v) ? true : false;
             }
           ),
