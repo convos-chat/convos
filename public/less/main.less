@@ -61,7 +61,6 @@ body { background-color: @backgroundColor; font-size: @fontSize; font-family: @f
 body, select, input, textarea { color: @fontColor; }
 a, a:active { color: @linkColor; }
 a:hover { color: darken(@linkColor, 20%); }
-a:link { -webkit-tap-highlight-color: darken(@linkColor, 20%); }
 input:-moz-placeholder { color: lighten(@fontColor, 30%); }
 textarea:-moz-placeholder { color: lighten(@fontColor, 30%); }
 li.separator { background: #eee; height: 1px; overflow: hidden; }
@@ -69,7 +68,7 @@ li.separator { background: #eee; height: 1px; overflow: hidden; }
 /*
  * Footer
  */
-html, body { height: 100%; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
+html, body { height: 100%; }
 div.wrapper {
   min-height: 100%;
   height: auto !important;
