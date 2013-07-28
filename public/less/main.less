@@ -367,7 +367,7 @@ div.goto-bottom a {
   color: #333;
   position: fixed;
   right: 6px;
-  bottom: 40px;
+  bottom: 42px;
   padding: 5px;
   z-index: 100;
   border: 1px solid #ccc;
@@ -439,12 +439,27 @@ div.goto-bottom a {
     div.nicks.container { display: none; }
   }
 
+  div.wrapper {
+    margin-bottom: -42px;
+    div.clear { height: 42px; }
+  }
+
+  footer {
+    height: 42px;
+    input, input:focus {
+      border-bottom: 0;
+      border-right: 0;
+      border-left: 0;
+    }
+  }
+
   .landing-page {
     width: 100%;
     img { margin: 2em 0; }
-    .row { padding-left: 10px; padding-right: 10px; }
     nav, .login, .register, .about { width: 100% };
+    .row { padding-left: 10px; padding-right: 10px; }
   }
+
   dl {
     dt {
       float: none;
