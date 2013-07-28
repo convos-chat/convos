@@ -224,6 +224,7 @@ sub _compile_stylesheet {
   my $css_file = $self->home->rel_file('public/compiled.css');
 
   system $ENV{LESSC_BIN} => -x => $less_file => $css_file if $ENV{LESSC_BIN};
+  system $ENV{YUI_COMPRESSOR_BIN} => $css_file => -o => $css_file if $ENV{YUI_COMPRESSOR_BIN};
 }
 
 sub _minify_javascript {
