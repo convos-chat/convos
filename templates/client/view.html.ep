@@ -1,6 +1,5 @@
 % title 'Chat';
 % my $i = 0;
-<div class="<%= $target =~ /^#/ ? 'with-nick-list' : 'without-nick-list' %>">
 <nav class="bar">
   %= include 'client/conversation_list'
   %= link_to 'conversation_list', class => 'conversations toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations.container', begin
@@ -39,4 +38,3 @@
 <div class="nicks container<%= $target =~ /^#/ ? '' : ' hidden' %>"><ul></ul></div>
 <div class="notifications container"><%= include 'client/notification_list' %></div>
 <div class="goto-bottom"><a href="#bottom"><i class="icon-chevron-down"></i></a></div>
-</div>

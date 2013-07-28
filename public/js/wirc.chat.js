@@ -145,7 +145,10 @@
 
     $('a[data-toggle]').filter('.active').trigger('activate');
 
-    if($win.width() > min_width) {
+    if($('.without-nick-list').length) {
+      $('div.nicks.container').css({ left: '', height: '', display: 'none' });
+    }
+    else if($win.width() > min_width) {
       $('a.nicks.toggler').trigger('deactivate');
       $('div.nicks.container').css({ left: '', height: '', display: 'block' });
     }
@@ -157,6 +160,7 @@
     }
 
     if($win.data('at_bottom')) $win.scrollTo('bottom');
+    $('nav').width($(window).width());
   };
 
   var getMessages = function() {

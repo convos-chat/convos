@@ -55,10 +55,11 @@ Used to render the main IRC client view.
 
 sub view {
   my $self = shift->render_later;
+  my $previous_id = $self->session('view_id') || '';
   my $uid = $self->session('uid');
   my $cid = $self->stash('cid');
-  my $id = as_id $cid, $self->stash('target');
-  my $previous_id = $self->session('view_id') || '';
+  my $target = $self->stash('target');
+  my $id = as_id $cid, $target;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
 
   if($previous_id and $id ne $previous_id) {
@@ -69,6 +70,7 @@ sub view {
     });
   }
 
+  $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : 'without-nick-list');
   $self->session(view_id => $id);
 
   Mojo::IOLoop->delay(

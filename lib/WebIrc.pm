@@ -141,7 +141,7 @@ sub startup {
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
-  $self->defaults(layout => 'default', logged_in => 0, VERSION => time);
+  $self->defaults(layout => 'default', logged_in => 0, VERSION => time, body_class => 'default');
 
   # Normal route to controller
   my $r = $self->routes;

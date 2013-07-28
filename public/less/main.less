@@ -57,7 +57,7 @@ button { width: auto; overflow: visible; }
 .clearfix:after { clear: both; }
 .clearfix { zoom: 1; }
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
-body { background-color: @backgroundColor; font-size: @fontSize; font-family: @fontFamily; }
+body { background-color: @backgroundColor; font-size: @fontSize; font-family: @fontFamily; -webkit-text-size-adjust: none; }
 body, select, input, textarea { color: @fontColor; }
 a, a:active { color: @linkColor; }
 a:hover { color: darken(@linkColor, 20%); }
@@ -263,6 +263,7 @@ nav.bar {
   a.nicks.toggler { display: none; }
 
   .right {
+    background: #fafafa;
     position: absolute;
     right: @bodyGutter;
     a, a:active { font-size: 1.2em; width: 2em; text-align: center; }
@@ -354,7 +355,7 @@ div.messages {
   li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
 }
 
-div.with-nick-list {
+.with-nick-list {
   div.messages { margin-right: @nickListWidth; }
   footer form { margin-right: @nickListWidth; }
 }
@@ -364,8 +365,8 @@ div.goto-bottom a {
   background: #fafafa;
   color: #333;
   position: fixed;
-  right: 3px;
-  bottom: 3px;
+  right: 6px;
+  bottom: 40px;
   padding: 5px;
   z-index: 100;
   border: 1px solid #ccc;
@@ -431,7 +432,7 @@ div.goto-bottom a {
   nav.bar .right { right: 0; }
   div.messages { margin-right: 0; }
 
-  div.with-nick-list {
+  .with-nick-list {
     a.nicks.toggler { display: block; }
     div.messages, footer form { margin-right: 0; }
     div.nicks.container { display: none; }
