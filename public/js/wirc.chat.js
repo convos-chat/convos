@@ -4,6 +4,7 @@
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
   var conversation_list = [];
+  var min_width = 700;
   var commands = [
     '/help',
     '/join #',
@@ -80,7 +81,7 @@
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
     $('body').loadingIndicator('hide');
-    $('div.nicks-container ul').html('');
+    $('div.nicks.container ul').html('');
     nicks.clear();
 
     if($messages.data('target').indexOf('#') === 0) {
@@ -111,8 +112,8 @@
   };
 
   var drawConversationMenu = function($message) {
-    var $conversations = $('ul.conversations li, div.conversations-container li');
-    var $dropdown = $('div.conversations-container ul');
+    var $conversations = $('ul.conversations li, div.conversations.container li');
+    var $dropdown = $('div.conversations.container ul');
     var $menu = $('nav ul.conversations');
     var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
     var used_width = 0, unread, $a;
@@ -132,10 +133,10 @@
     });
 
     if(used_width >= available_width) {
-      $('nav a.conversations-toggler').show();
+      $('nav a.conversations.toggler').show();
     }
     else {
-      $('nav a.conversations-toggler').trigger('deactivate').hide();
+      $('nav a.conversations.toggler').trigger('deactivate').hide();
     }
   };
 
@@ -144,15 +145,15 @@
 
     $('a[data-toggle]').filter('.active').trigger('activate');
 
-    if($win.width() > 700) {
-      $('a.nicks-toggler').trigger('deactivate');
-      $('div.nicks-container').css({ left: '', height: '', display: 'block' });
+    if($win.width() > min_width) {
+      $('a.nicks.toggler').trigger('deactivate');
+      $('div.nicks.container').css({ left: '', height: '', display: 'block' });
     }
-    else if($('a.nicks-toggler').is('.active')) {
-      $('div.nicks-container').css({ display: 'block' });
+    else if($('a.nicks.toggler').is('.active')) {
+      $('div.nicks.container').css({ display: 'block' });
     }
     else {
-      $('div.nicks-container').css({ display: 'none' });
+      $('div.nicks.container').css({ display: 'none' });
     }
 
     if($win.data('at_bottom')) $win.scrollTo('bottom');
@@ -263,13 +264,9 @@
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
     $(document).pjax('nav a.conversation', 'div.messages');
-    $(document).pjax('div.conversations-container a', 'div.messages');
-    $(document).pjax('div.notifications-container a', 'div.messages');
-    $(document).pjax('div.nicks-container a', 'div.messages');
+    $(document).pjax('div.container a', 'div.messages');
     $('div.messages').on('pjax:end', conversationLoaded);
-    $('div.messages').on('pjax:start', function(xhr, options) {
-      $('body').loadingIndicator('show');
-    });
+    $('div.messages').on('pjax:start', function(xhr, options) { $('body').loadingIndicator('show'); });
   }
 
   var initSocket = function() {
@@ -298,7 +295,7 @@
 
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
-      $('a[data-toggle]').trigger('deactivate');
+      $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.nicks.toggler').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
         $('nav ul.conversations a').slice(0, 2).eq(-1).focus();
       }
@@ -307,15 +304,23 @@
       }
     });
 
-    $('div.conversations-container, div.notifications-container')
-      .bind('keydown', 'up', function(e) {
-        $(document.activeElement).closest('li').prev().find('a').focus();
+    var upDown = function(method, page) {
+      var $e, i;
+      return function(e) {
+        $e = $(document.activeElement).closest('li');
+        if($e.length === 0) return true;
+        i = page ? parseInt($e.closest('div.container').height() / $e.height()) + 1 : 0;
+        $e = $e[method]();
+        if($e.length <= i) i = $e.length - 1;
+        $e.eq(i).find('a').focus();
         return false;
-      })
-      .bind('keydown', 'down', function(e) {
-        $(document.activeElement).closest('li').next().find('a').focus();
-        return false;
-      });
+      };
+    };
+
+    $('body').bind('keydown', 'up', upDown('prevAll', 0));
+    $('body').bind('keydown', 'pageup', upDown('prevAll', 1));
+    $('body').bind('keydown', 'down', upDown('nextAll', 0));
+    $('body').bind('keydown', 'pagedown', upDown('nextAll', 1));
   };
 
   var nickList = function($data) {
@@ -336,12 +341,12 @@
     }
 
     if(nicks.length) {
-      $('div.nicks-container ul').html(
+      $('div.nicks.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
           return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
         }).join('')
       );
-      $('div.nicks-container').nanoScroller(); // reset scrollbar;
+      $('div.nicks.container').nanoScroller(); // reset scrollbar;
     }
   }
 
@@ -388,7 +393,7 @@
     var goto_current = e.goto_current;
     $.get($.url_for('conversations'), function(data) {
       $('ul.conversations').replaceWith(data);
-      $('div.conversations-container ul').html('');
+      $('div.conversations.container ul').html('');
       if(goto_current) $('ul.conversations li:first a').click();
       conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
       drawConversationMenu();
@@ -396,8 +401,8 @@
   };
 
   var reloadNotificationList = function(e) {
-    var $notification_list = $('div.notifications-container');
-    var $n_notifications = $('a.notifications-toggler');
+    var $notification_list = $('div.notifications.container');
+    var $n_notifications = $('a.notifications.toggler');
     var n;
 
     $.get($.url_for('notifications'), function(data) {
@@ -421,7 +426,7 @@
     initPjax();
     initInputField();
 
-    $('nav a.notifications-toggler').on('activate', function() {
+    $('nav a.notifications.toggler').on('activate', function() {
       $.post($.url_for('notifications/clear'));
       $(this).removeClass('alert').children('b').text(0);
     });
@@ -433,8 +438,8 @@
       $(this).closest('li').remove();
     });
 
-    $('nav a').filter('.conversations-toggler, .notifications-toggler, .nicks-toggler').initDropDown();
-    $('nav, div.conversations-container, div.notifications-container, div.goto-bottom').fastButton();
+    $('nav a.toggler').initDropDown();
+    $('nav, div.container, div.goto-bottom').fastButton();
     $('nav a.help').click(function(e) { $input.send('/help', 0); return false; })
     $('nav a.settings').click(function(e) { location.href = this.href; });
     $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });

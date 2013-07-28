@@ -250,16 +250,16 @@ nav.bar {
   }
 
   a.conversation { color: #666; }
-  a.conversations-toggler { display: none; }
-  a.nicks-toggler { display: none; }
+  a.conversations.toggler { display: none; }
+  a.nicks.toggler { display: none; }
 
   .right {
     position: absolute;
     right: @bodyGutter;
     a, a:active { font-size: 1.2em; width: 2em; text-align: center; }
-    a.notifications-toggler { position: relative; }
-    a.notifications-toggler b { position: absolute; bottom: -3px; left: 2px; color: #bbb; font-size: 0.9em; }
-    a.notifications-toggler.alert b { color: #b22; }
+    a.notifications.toggler { position: relative; }
+    a.notifications.toggler b { position: absolute; bottom: -3px; left: 2px; color: #bbb; font-size: 0.9em; }
+    a.notifications.toggler.alert b { color: #b22; }
     a.hidden { display: none; }
   }
 
@@ -268,9 +268,9 @@ nav.bar {
   ul.conversations li.unread a { color: @unreadColor };
 }
 
-div.conversations-container,
-div.notifications-container,
-div.nicks-container {
+div.conversations.container,
+div.notifications.container,
+div.nicks.container {
   background: darken(#fdfdfd, 2%);
   position: fixed;
   top: 39px;
@@ -284,24 +284,23 @@ div.nicks-container {
   border-top-width: 6px;
   .box-shadow(0 3px 2px rgba(100, 100, 100, 0.5));
 
-  li { border-bottom: 1px solid #eee; }
   a { color: #000; text-decoration: none; padding: 4px; display: block; }
   a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
   a:focus { background-color: darken(#fff, 8%); }
 }
 
-div.conversations-container {
+div.conversations.container {
   li.unread a { color: @unreadColor };
 }
 
-div.notifications-container {
+div.notifications.container {
   li.unread { border-right: 2px solid #f66; }
   span.message { color: #666; font-size: 0.9em; line-height: 1em; .ellipsis(); }
 }
 
 @media (min-width: @responsiveWidth) {
-  div.nicks-container {
-    background: #eee;
+  div.nicks.container {
+    background: #f3f3f3;
     border: 0;
     border-left: 2px solid #ccc;
     width: @nickListWidth;
@@ -424,9 +423,9 @@ div.goto-bottom a {
   div.messages { margin-right: 0; }
 
   div.with-nick-list {
-    a.nicks-toggler { display: block; }
+    a.nicks.toggler { display: block; }
     div.messages, footer form { margin-right: 0; }
-    div.nicks-container { display: none; }
+    div.nicks.container { display: none; }
   }
 
   .landing-page {
