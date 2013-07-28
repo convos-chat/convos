@@ -41,7 +41,7 @@
 html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video, details, summary { margin: 0; padding: 0; border: 0; font-size: 100%; line-height: 1.6em; vertical-align: baseline; background: transparent; }
 article, aside, figure, footer, header, hgroup, nav, section, details, summary { display: block; }
 ul { list-style: none; }
-a { margin: 0; padding: 0; vertical-align: baseline; background: transparent; }
+a, a:active { margin: 0; padding: 0; vertical-align: baseline; background: transparent; }
 abbr[title], dfn[title] { border-bottom: 1px dotted #000; cursor: help; }
 table { border-collapse: collapse; border-spacing: 0; }
 th { font-weight: bold; vertical-align: bottom; }
@@ -59,7 +59,7 @@ button { width: auto; overflow: visible; }
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 body { background-color: @backgroundColor; font-size: @fontSize; font-family: @fontFamily; }
 body, select, input, textarea { color: @fontColor; }
-a { color: @linkColor; }
+a, a:active { color: @linkColor; }
 a:hover { color: darken(@linkColor, 20%); }
 a:link { -webkit-tap-highlight-color: darken(@linkColor, 20%); }
 input:-moz-placeholder { color: lighten(@fontColor, 30%); }
@@ -243,7 +243,7 @@ nav.bar {
   .box-shadow(0 4px 4px -2px rgba(180, 180, 180, 0.5));
   .opacity(0.95);
 
-  a {
+  a, a:active {
     color: #000;
     text-decoration: none;
     padding: 10px 4px;
@@ -257,14 +257,14 @@ nav.bar {
   .right {
     position: absolute;
     right: @bodyGutter;
-    a { font-size: 1.2em; width: 2em; text-align: center; }
+    a, a:active { font-size: 1.2em; width: 2em; text-align: center; }
     a.notifications-toggler { position: relative; }
     a.notifications-toggler b { position: absolute; bottom: -3px; left: 2px; color: #bbb; font-size: 0.9em; }
     a.notifications-toggler.alert b { color: #b22; }
     a.hidden { display: none; }
   }
 
-  a.active, a:hover { background-color: darken(#fff, 9%); color: #000; }
+  a.active, a:hover, a:active { background-color: darken(#fff, 9%); color: #000; }
   ul.conversations li:first-of-type a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
   ul.conversations li.unread a { color: @unreadColor };
 }
@@ -283,7 +283,7 @@ div.notifications-container {
 
   li { border-bottom: 1px solid #eee; }
   a { color: #000; text-decoration: none; padding: 4px; display: block; }
-  a:hover { color: #000; background-color: darken(#fff, 5%); }
+  a:hover, a:active { color: #000; background-color: darken(#fff, 5%); }
 }
 
 div.conversations-container {
