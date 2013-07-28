@@ -275,6 +275,7 @@
       $input.history_i = $input.history.length;
       return $input;
     };
+    setInterval(function() { $input.socket.send('K'); }, 30 * 1000);
   }
 
   var initShortcuts = function() {
