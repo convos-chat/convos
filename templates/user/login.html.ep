@@ -5,11 +5,11 @@
     %= include 'inc/alert' if $form eq 'login'
     %= form_block login => class => [], begin
       <label for="login">Username</label>
-      %= text_field 'login', id => 'login', class => 'span8'
+      %= text_field 'login', id => 'login', autocapitalize => 'off', autocorrect => 'off'
     % end
     %= form_block password => class => [], begin
       <label for="password">Password</label>
-      %= password_field 'password', id => 'password', class => 'span8'
+      %= password_field 'password', id => 'password'
     % end
     <div class="actions">
       <button type="submit">Login</button>

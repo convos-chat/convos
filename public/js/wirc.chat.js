@@ -443,6 +443,7 @@
   });
 
   $(window).load(function() {
+    if($('div.messages').length === 0) return; // not on chat page
     initNotifications();
     conversationLoaded();
   });

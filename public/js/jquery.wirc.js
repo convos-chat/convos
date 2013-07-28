@@ -117,7 +117,7 @@
         if(is_active) return false;
 
         if(!$a.hasClass('active')) {
-          $toggled_element_with_click = $a;
+          $toggled_element_with_click = $target;
           inside = true;
           $target.show();
           $a.data('target', $target).trigger('activate').addClass('active');
@@ -142,7 +142,7 @@
     var $focus = $togglers.filter('.active').trigger('activate').filter('.focus');
     var $login_button = $('a[data-toggle="div.login"]');
 
-    $(document).click(function(e) {
+    $(window).click(function(e) {
       if(!$toggled_element_with_click) return true;
       if($toggled_element_with_click.hasClass('ignore-document-close')) return true;
       if($(e.target).closest($toggled_element_with_click).length) return true; // prevent hiding when clicking inside forms

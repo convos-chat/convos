@@ -5,17 +5,17 @@
     %= include 'inc/alert' if $form eq 'register'
     %= form_block login => class => [], begin
       <label for="register_login">Username</label>
-      %= text_field 'login', id => 'register_login', placeholder => 'john_doe'
+      %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
       <p class="help"><%= $errors->{login} || 'Choose something that\'s simple to remember. Your IRC handle for instance.'%></p>
     % end
     %= form_block email => class => [], begin
       <label for="email">Email</label>
-      %= text_field 'email', id => 'email', placeholder => 'your@email.com'
+      %= email_field 'email', id => 'email', placeholder => 'your@email.com'
       <p class="help"><%= $errors->{email} || 'Your email address.' %></p>
     % end
     %= form_block invite => class => [], begin
       <label for="invite">Invite Code</label>
-      %= text_field 'invite', id => 'invite', placeholder => '******'
+      %= text_field 'invite', id => 'invite', placeholder => '******', autocapitalize => 'off', autocorrect => 'off'
       <p class="help"><%= $errors->{invite} || 'Required unless this is your installation and you are the first user. Get invited by the site owner.'%></p>
     % end
     %= form_block password => class => [], begin
