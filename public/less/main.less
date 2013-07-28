@@ -87,17 +87,18 @@ footer {
   color: #999;
   clear: both;
   padding: 2px @bodyGutter;
+  overflow: hidden;
 
   form {
     position: relative;
     input { font-size: 1.1em; width: 100%; padding: 8px; padding-right: 30px; }
     input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
-  }
-  .menu {
-    position: absolute;
-    top: 5px;
-    right: 4px;
-    a { color: #555; font-size: 22px; text-decoration: none; display: block; padding: 4px; }
+    .menu {
+      position: absolute;
+      top: 5px;
+      right: 4px;
+      a { color: #555; font-size: 22px; text-decoration: none; display: block; padding: 4px; }
+    }
   }
 }
 
@@ -243,7 +244,7 @@ nav.bar {
   padding: 0 @bodyGutter;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
   height: 42px;
   z-index: 1000;
   overflow: hidden;

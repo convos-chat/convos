@@ -160,7 +160,6 @@
     }
 
     if($win.data('at_bottom')) $win.scrollTo('bottom');
-    $('nav').width($(window).width());
   };
 
   var getMessages = function() {
