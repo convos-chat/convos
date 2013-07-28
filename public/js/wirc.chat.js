@@ -79,7 +79,6 @@
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
     $('body').loadingIndicator('hide');
-    $input.cidAndTarget($messages);
     $nick_list.find('ul').html('');
     nicks.clear();
 
@@ -110,6 +109,7 @@
       reloadConversationList({});
     }
 
+    $input.cidAndTarget($messages); // must be done after Object.equals(...) above
     drawUI();
   };
 
