@@ -1,5 +1,5 @@
 ;(function($) {
-  var $goto_bottom, $input, $nick_list, $win;
+  var $goto_bottom, $input, $win;
   var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
@@ -80,19 +80,15 @@
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
     $('body').loadingIndicator('hide');
-    $nick_list.find('ul').html('');
+    $('div.nicks-container ul').html('');
     nicks.clear();
 
     if($messages.data('target').indexOf('#') === 0) {
       $input.send('/names', 0).send('/topic', 0);
-      $input.parent('form').addClass('with-nick-list');
-      $messages.parent('div').addClass('with-nick-list');
-      $nick_list.removeClass('hidden');
+      $('.without-nick-list').addClass('with-nick-list').removeClass('without-nick-list');
     }
     else {
-      $nick_list.addClass('hidden');
-      $input.parent('form').removeClass('with-nick-list');
-      $messages.parent('div').removeClass('with-nick-list');
+      $('.with-nick-list').addClass('without-nick-list').removeClass('with-nick-list');
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
@@ -145,6 +141,20 @@
 
   var drawUI = function() {
     drawConversationMenu();
+
+    $('a[data-toggle]').filter('.active').trigger('activate');
+
+    if($win.width() > 700) {
+      $('a.nicks-toggler').trigger('deactivate');
+      $('div.nicks-container').css({ left: '', height: '', display: 'block' });
+    }
+    else if($('a.nicks-toggler').is('.active')) {
+      $('div.nicks-container').css({ display: 'block' });
+    }
+    else {
+      $('div.nicks-container').css({ display: 'none' });
+    }
+
     if($win.data('at_bottom')) $win.scrollTo('bottom');
   };
 
@@ -326,12 +336,12 @@
     }
 
     if(nicks.length) {
-      $nick_list.find('ul').html(
+      $('div.nicks-container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
           return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
         }).join('')
       );
-      $nick_list.show().nanoScroller(); // reset scrollbar;
+      $('div.nicks-container').nanoScroller(); // reset scrollbar;
     }
   }
 
@@ -403,7 +413,6 @@
     if($('div.messages').length === 0) return; // not on chat page
     $goto_bottom = $('div.goto-bottom a');
     $input = $('footer form input[name="message"]');
-    $nick_list = $('div.nicks-container');
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
@@ -412,17 +421,9 @@
     initPjax();
     initInputField();
 
-    $('a.notifications-toggler').on('activate', function() {
-      var $a = $(this);
-      $.post($.url_for('notifications/clear'), function(res) {
-        $a.removeClass('alert').children('b').text(0);
-      });
-      $('div.notifications-container a:first').focusSoon();
-    });
-    $('nav a.conversations-toggler').on('activate', function() {
-      var left = $('nav a.conversations-toggler').offset().left - 300;
-      if(left < 4) left = 4;
-      $('div.conversations-container').css('left', left);
+    $('nav a.notifications-toggler').on('activate', function() {
+      $.post($.url_for('notifications/clear'));
+      $(this).removeClass('alert').children('b').text(0);
     });
     $('div.messages').on('mousedown touchstart', '.message h3 a', function(e) {
       this.href = '#!' + this.href;
@@ -432,23 +433,11 @@
       $(this).closest('li').remove();
     });
 
-    if(!!('ontouchstart' in window)) {
-      $('nav a.help').html('<i class="icon-user"></i>').click(function(e) {
-        e.preventDefault();
-        $nick_list.toggleClass('visible');
-      });
-    }
-    else {
-      $('nav a.help').click(function(e) {
-        e.preventDefault();
-        $input.send('/help', 0);
-      })
-    }
-
+    $('nav a').filter('.conversations-toggler, .notifications-toggler, .nicks-toggler').initDropDown();
     $('nav, div.conversations-container, div.notifications-container, div.goto-bottom').fastButton();
+    $('nav a.help').click(function(e) { $input.send('/help', 0); return false; })
     $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
-    $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({ preventPageScrolling: true });
     $win.on('scroll', getMessages).on('resize', drawUI);
   });
 

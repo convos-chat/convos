@@ -90,7 +90,6 @@ footer {
 
   form input { font-size: 1.1em; width: 100%; padding: 8px; }
   input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
-  form.with-nick-list { margin-right: @nickListWidth; }
 }
 
 /*
@@ -252,6 +251,7 @@ nav.bar {
 
   a.conversation { color: #666; }
   a.conversations-toggler { display: none; }
+  a.nicks-toggler { display: none; }
 
   .right {
     position: absolute;
@@ -263,26 +263,31 @@ nav.bar {
     a.hidden { display: none; }
   }
 
-  a.active, a:hover, a:active { background-color: darken(#fff, 9%); color: #000; }
+  a.active, a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
   ul.conversations li:first-of-type a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
   ul.conversations li.unread a { color: @unreadColor };
 }
 
 div.conversations-container,
-div.notifications-container {
-  background: darken(#fdfdfd, 1%);
+div.notifications-container,
+div.nicks-container {
+  background: darken(#fdfdfd, 2%);
   position: fixed;
-  top: 42px;
+  top: 39px;
   width: 300px;
-  max-height: 70%;
-  overflow: auto;
+  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   z-index: 1001;
   display: none;
-  .box-shadow(0 0 1px 1px rgba(180, 180, 180, 0.5));
+  border: 1px solid darken(#fff, 15%);
+  border-top-width: 6px;
+  .box-shadow(0 3px 2px rgba(100, 100, 100, 0.5));
 
   li { border-bottom: 1px solid #eee; }
   a { color: #000; text-decoration: none; padding: 4px; display: block; }
-  a:hover, a:active { color: #000; background-color: darken(#fff, 5%); }
+  a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
+  a:focus { background-color: darken(#fff, 8%); }
 }
 
 div.conversations-container {
@@ -290,23 +295,26 @@ div.conversations-container {
 }
 
 div.notifications-container {
-  right: 6px;
   li.unread { border-right: 2px solid #f66; }
   span.message { color: #666; font-size: 0.9em; line-height: 1em; .ellipsis(); }
 }
 
-div.nicks-container {
-  background: #eee;
-  border-left: 2px solid #ccc;
-  width: @nickListWidth;
-  position: fixed;
-  top: 42px;
-  bottom: -1px;
-  right: 0;
-  z-index: 2;
+@media (min-width: @responsiveWidth) {
+  div.nicks-container {
+    background: #eee;
+    border: 0;
+    border-left: 2px solid #ccc;
+    width: @nickListWidth;
+    position: fixed;
+    display: block;
+    top: 42px;
+    bottom: -1px;
+    right: 0;
+    z-index: 2;
 
-  a { text-decoration: none; display: block; padding: 4px 8px; }
-  a:hover { background: darken(#eee, 5%); };
+    a { text-decoration: none; display: block; padding: 4px 8px; }
+    a:hover { background: darken(#eee, 5%); };
+  }
 }
 
 div.messages {
@@ -338,8 +346,9 @@ div.messages {
   li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
 }
 
-div.messages.with-nick-list {
-  margin-right: @nickListWidth;
+div.with-nick-list {
+  div.messages { margin-right: @nickListWidth; }
+  footer form { margin-right: @nickListWidth; }
 }
 
 div.goto-bottom a {
@@ -413,12 +422,13 @@ div.goto-bottom a {
   footer, nav.bar, .row { padding: 0; }
   nav.bar .right { right: 0; }
   div.messages { margin-right: 0; }
-  div.nicks-container { right: -@nickListWidth; }
-  div.nicks-container.visible {
-    right: 0;
-    .content { left: 0; }
+
+  div.with-nick-list {
+    a.nicks-toggler { display: block; }
+    div.messages, footer form { margin-right: 0; }
+    div.nicks-container { display: none; }
   }
-  div.messages.with-nick-list, footer form.with-nick-list { margin-right: 0; }
+
   .landing-page {
     width: 100%;
     img { margin: 2em 0; }

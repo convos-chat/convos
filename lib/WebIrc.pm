@@ -231,7 +231,7 @@ sub _compile_stylesheet {
 sub _minify_javascript {
   my($self, $file, $compiled_modified) = @_;
   my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
-  my $modified = +(stat $mini)[9] || -1;
+  my $modified = +(stat $file)[9] || -1;
 
   return $file if $mini eq $file;
   return $mini if $modified < $compiled_modified;

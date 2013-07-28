@@ -6,8 +6,8 @@
   </header>
   %= image '/image/landing-page-example-chat.jpeg', alt => 'Example chat'
   <nav>
-    %= link_to 'Login', 'login', class => $form eq 'login' ? 'button focus active' : 'button', 'data-focus' => 'div.login input:first', 'data-toggle' => 'div.login',
-    %= link_to 'Register', 'register', class => $form eq 'register' ? 'button focus active' : 'button', 'data-focus' => 'div.register input:first', 'data-toggle' => 'div.register',
+    %= link_to 'Login', 'login', class => $form eq 'login' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.login',
+    %= link_to 'Register', 'register', class => $form eq 'register' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.register',
   </nav>
   %= include 'user/login'
   %= include 'user/register'

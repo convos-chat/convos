@@ -1,13 +1,15 @@
 % title 'Chat';
 % my $i = 0;
+<div class="<%= $target =~ /^#/ ? 'with-nick-list' : 'without-nick-list' %>">
 <nav class="bar">
   %= include 'client/conversation_list'
-  %= link_to 'conversation_list', class => 'conversations-toggler', 'data-toggle' => 'div.conversations-container', begin
+  %= link_to 'conversation_list', class => 'conversations-toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations-container', begin
     <i class="icon-chevron-down"></i>
   % end
   <div class="right">
     % my $class = @$notification_list == 0 ? 'hidden notifications-toggler' : $n_notifications ? 'alert notifications-toggler' : 'notifications-toggler';
-    %= link_to 'conversation_list', title => 'List notifications', class => $class, 'data-toggle' => 'div.notifications-container', begin
+    <a href="#!nicks" title="Display nick list" class="nicks-toggler" data-focus="a" data-toggle="div.nicks-container"><i class="icon-user"></i></a>
+    %= link_to 'conversation_list', title => 'List notifications', class => $class, 'data-focus' => 'a', 'data-toggle' => 'div.notifications-container', begin
       <i class="icon-bullhorn"></i>
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
     % end
@@ -19,14 +21,14 @@
 </nav>
 
 <div class="wrapper">
-  <div class="messages row<%= $target =~ /^#/ ? ' with-nick-list' : '' %>">
+  <div class="messages row">
     %= include 'client/conversation', class => 'more'
   </div>
   <div class="clear"></div>
 </div>
 
 <footer id="bottom">
-%= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, class => $target =~ /^#/ ? 'with-nick-list' : '', begin
+%= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, begin
   %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off', 'data-cid' => $cid, 'data-target' => $target
 % end
 </footer>
@@ -35,3 +37,4 @@
 <div class="nicks-container<%= $target =~ /^#/ ? '' : ' hidden' %>"><ul></ul></div>
 <div class="notifications-container"><%= include 'client/notification_list' %></div>
 <div class="goto-bottom"><a href="#bottom"><i class="icon-chevron-down"></i></a></div>
+</div>

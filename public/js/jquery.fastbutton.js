@@ -64,7 +64,6 @@
           self.active = true;
           self.startX = touch.clientX;
           self.startY = touch.clientY;
-          return e.stopPropagation();
         },
         touchend: function(e) {
           if (!self.active) return;
@@ -80,7 +79,7 @@
         touch = e.originalEvent.touches[0];
         dx = Math.abs(touch.clientX - self.startX);
         dy = Math.abs(touch.clientY - self.startY);
-        if (dx > clickDistance || dy > clickDistance) return self.active = false;
+        if (dx > clickDistance || dy > clickDistance) self.active = false;
       });
     });
   }; // end fastButton()
