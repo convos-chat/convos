@@ -105,11 +105,6 @@ window.sortedSet.prototype.revrange = function(start, stop) {
 
 // console.log()
 window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
-window.console = {
-  log: function() {
-    $('body').append('<br> DEBUG: ' + jQuery.makeArray(arguments).join(' '));
-  }
-};
 
 // this code is originally from https://github.com/joewalnes/reconnecting-websocket
 window.ws = function(a) {
@@ -128,8 +123,8 @@ window.ws = function(a) {
       if (b.debug) console.debug("ReconnectingWebSocket", "onopen", a);
       b.readyState = WebSocket.OPEN;
       g = false;
-      while(b.buffer.length) b.send(b.buffer.shift());
       b.onopen(c);
+      while(b.buffer.length) b.send(b.buffer.shift());
     };
     c.onclose = function(h) {
       clearTimeout(i);
@@ -165,18 +160,16 @@ window.ws = function(a) {
     onopen: function(c) { console.log(b.url + ' : open'); },
     onmessage: function(m) { console.log(b.url + ' < ' + m); },
     onclose: function(e) { console.log(b.url + ' : close'); },
-    reconnectInterval: 1e3,
+    reconnectInterval: 2e3,
     timeoutInterval: 5e3,
     readyState: WebSocket.CONNECTING,
     url: a,
     close: function() { if(!c) return false; c.close(); return(d = true); },
     send: function(m) {
       if(b.readyState == WebSocket.OPEN) {
-        $('body').append('OK: ' + $(m).text());
         c.send(m);
       }
       else {
-        $('body').append('QUE: ' + $(m).text());
         b.buffer.push(m);
       }
       return b
