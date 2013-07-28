@@ -4,7 +4,7 @@
     <title><%= join ' - ', app->config->{name}, title %></title>
   % if($self->app->mode eq 'production') {
     %= stylesheet "/compiled.css?_=$VERSION"
-  % } else {
+  % } elsif($self->app->mode ne 'compiling') {
     <link rel="stylesheet/less" href="<%= url_for('/less/main.less') %>" type="text/css">
     %= javascript '/js/less.min.js'
   % }

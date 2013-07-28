@@ -70,3 +70,4 @@ window.ws = function(a) {
   f(a);
   return b;
 };
+

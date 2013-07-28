@@ -201,16 +201,20 @@ sub _compile_javascript { require Mojo::DOM;
   my $js = '';
   my($output, $format);
 
-  $self->app->mode('develop');
+  $self->mode('compiling');
   ($output, $format) = $self->renderer->render(Mojolicious::Controller->new(app => $self), $args);
-  $self->app->mode('production');
+  $self->mode('production');
   $output = Mojo::DOM->new($output);
 
   $output->find('script')->each(sub {
     my $file = $self->home->rel_file("public" . $_[0]->{src});
+    $self->log->debug("Compiling $file");
     open my $JS, '<', $file or die "Read $file: $!";
-    $js .= $_ while <$JS>;
-    $js .= "\n";
+    while(<$JS>) {
+      m!^\s*//! and next;
+      m!^\s*(.+)! or next;
+      $js .= "$1\n";
+    }
   });
 
   open my $COMPILED, '>', $compiled or die "Write $compiled: $!";

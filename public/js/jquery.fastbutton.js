@@ -1,5 +1,4 @@
-
-// modified version of - By jhthorsen@cpan.org
+// modified version by jhthorsen@cpan.org
 // http://x1024.github.io/jquery-fastbutton/
 // https://raw.github.com/x1024/jquery-fastbutton/master/bin/fastbutton.js
 (function() {
