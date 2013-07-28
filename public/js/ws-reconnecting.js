@@ -39,7 +39,7 @@ window.ws = function(a) {
     };
     c.onerror = function(e) {
       if (b.debug) console.debug("ReconnectingWebSocket", "onerror", a, e);
-      on.onerror(e);
+      b.onerror(e);
     };
   }
   var d = false;
@@ -48,9 +48,9 @@ window.ws = function(a) {
   var b = {
     buffer: [],
     debug: false,
-    onerror: function(e) { console.log(b.url + ' ! ' + e); },
-    onopen: function(c) { console.log(b.url + ' : open'); },
-    onmessage: function(m) { console.log(b.url + ' < ' + m); },
+    onerror: function(e) { console.log(b.url + ' !', e.type, c.readyState); },
+    onopen: function(e) { console.log(b.url + ' : open'); },
+    onmessage: function(e) { console.log(b.url + ' <', e.data); },
     onclose: function(e) { console.log(b.url + ' : close'); },
     reconnectInterval: 2e3,
     timeoutInterval: 5e3,
