@@ -436,6 +436,7 @@
     $('nav a').filter('.conversations-toggler, .notifications-toggler, .nicks-toggler').initDropDown();
     $('nav, div.conversations-container, div.notifications-container, div.goto-bottom').fastButton();
     $('nav a.help').click(function(e) { $input.send('/help', 0); return false; })
+    $('nav a.settings').click(function(e) { location.href = this.href; });
     $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getMessages).on('resize', drawUI);
