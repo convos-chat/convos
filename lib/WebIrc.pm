@@ -194,12 +194,13 @@ sub _compile_javascript { require Mojo::DOM;
   my $args = { template => 'empty', layout => 'default', title => '', VERSION => 0 };
   my $compiled = $self->home->rel_file('public/compiled.js');
   my $modified = +(stat $compiled)[9] || 0;
+  my $mode = $self->mode;
   my $js = '';
   my($output, $format);
 
   $self->mode('compiling');
   ($output, $format) = $self->renderer->render(Mojolicious::Controller->new(app => $self), $args);
-  $self->mode('production');
+  $self->mode($mode);
   $output = Mojo::DOM->new($output);
 
   $output->find('script')->each(sub {
