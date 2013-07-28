@@ -274,10 +274,12 @@
     $input.history_i = 0;
     $input.socket = window.ws($input.closest('form').data('socket-url'));
     $input.socket.onmessage = receiveMessage;
+    $input.socket.onopen = function() { $input.removeAttr('disabled'); };
+    $input.socket.onclose = function() { $input.attr('disabled', 'disabled'); };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-history', history).text(message).prop('outerHTML'));
-      $input.addClass('sending').sibling('.menu').hide();
+      $input.addClass('sending').siblings('.menu').hide();
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
       return $input;
@@ -355,7 +357,7 @@
     var at_bottom = $win.data('at_bottom');
     var to_current;
 
-    $input.removeClass('sending').sibling('.menu').show();
+    $input.removeClass('sending').siblings('.menu').show();
 
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target')).data('cid', $messages.data('cid'));
