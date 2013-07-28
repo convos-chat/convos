@@ -88,8 +88,17 @@ footer {
   clear: both;
   padding: 2px @bodyGutter;
 
-  form input { font-size: 1.1em; width: 100%; padding: 8px; }
-  input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
+  form {
+    position: relative;
+    input { font-size: 1.1em; width: 100%; padding: 8px; padding-right: 30px; }
+    input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
+  }
+  .menu {
+    position: absolute;
+    top: 5px;
+    right: 4px;
+    a { color: #555; font-size: 22px; text-decoration: none; display: block; padding: 4px; }
+  }
 }
 
 /*

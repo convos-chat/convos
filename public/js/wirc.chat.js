@@ -277,7 +277,7 @@
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-history', history).text(message).prop('outerHTML'));
-      $input.addClass('sending');
+      $input.addClass('sending').sibling('.menu').hide();
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
       return $input;
@@ -355,7 +355,7 @@
     var at_bottom = $win.data('at_bottom');
     var to_current;
 
-    $input.removeClass('sending');
+    $input.removeClass('sending').sibling('.menu').show();
 
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target')).data('cid', $messages.data('cid'));
@@ -440,8 +440,8 @@
 
     $('nav a.toggler').initDropDown();
     $('nav, div.container, div.goto-bottom').fastButton();
-    $('nav a.help').click(function(e) { $input.send('/help', 0); return false; })
     $('nav a.settings').click(function(e) { location.href = this.href; });
+    $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
     $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getMessages).on('resize', drawUI);

@@ -16,7 +16,6 @@
     %= link_to 'settings', title => 'Go to settings', class => 'settings', begin
       <i class="icon-cog"></i>
     % end
-    <a href="#!help" title="Display help" class="help"><i class="icon-info-sign"></i></a>
   </div>
 </nav>
 
@@ -28,9 +27,12 @@
 </div>
 
 <footer id="bottom">
-%= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, begin
-  %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off', 'data-cid' => $cid, 'data-target' => $target
-% end
+  %= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, begin
+    %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off', 'data-cid' => $cid, 'data-target' => $target
+    <div class="menu">
+      <a href="#!help" title="Display help" class="help"><i class="icon-info-sign"></i></a>
+    </div>
+  % end
 </footer>
 
 <div class="conversations container"><ul></ul></div>
