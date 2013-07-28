@@ -1,5 +1,5 @@
 ;(function($) {
-  var $input, $messages, $nick_list, $win;
+  var $goto_bottom, $input, $messages, $nick_list, $win;
   var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
   var nicks = new sortedSet();
   var conversation_list = [];
@@ -148,17 +148,21 @@
   };
 
   var getMessages = function() {
+    var $height_from = $(document).data('height_from')
+
+    $goto_bottom[$win.scrollTop() + $win.height() < $height_from.height() - 200 ? 'show' : 'hide']();
+
     if($messages.start_time && $win.scrollTop() == 0) {
       var end_time = $messages.end_time;
       $.get(location.href.replace(/\?.*/, ''), { to: $messages.start_time }, function(data) {
         var $ul = $(data);
         var $li = $ul.children('li:lt(-1)');
-        var height_before_prepend = $(document).data('heigth_from').height();
+        var height_before_prepend = $height_from.height();
         $messages.end_time = end_time;
         if(!$li.length) return;
         $messages.start_time = parseFloat($ul.data('start-time'));
         $messages.prepend($li);
-        $win.scrollTop($(document).data('heigth_from').height() - height_before_prepend);
+        $win.scrollTop($height_from.height() - height_before_prepend);
       });
       $messages.start_time = $messages.end_time = 0;
     }
@@ -395,6 +399,7 @@
 
   $(document).ready(function() {
     if($('div.messages').length === 0) return; // not on chat page
+    $goto_bottom = $('div.goto-bottom a');
     $input = $('footer form input[name="message"]');
     $nick_list = $('div.nicks-container');
     $win = $(window);
@@ -438,8 +443,9 @@
       })
     }
 
-    $('nav, div.conversations-container, div.notifications-container').fastButton();
+    $('nav, div.conversations-container, div.notifications-container, div.goto-bottom').fastButton();
     $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
+    $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $nick_list.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({ preventPageScrolling: true });
     $win.on('scroll', getMessages).on('resize', drawUI);
   });

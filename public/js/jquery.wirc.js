@@ -2,7 +2,7 @@
   var at_bottom_threshold = !!('ontouchstart' in window) ? 110 : 40;
   var original_title = document.title;
   var current_title = original_title;
-  var $heigth_from, $win, base_url;
+  var $height_from, $win, base_url;
 
   $.notify = function(title, body, icon) {
     if($win.data('has_focus')) return this;
@@ -52,7 +52,7 @@
 
   $.fn.scrollTo = function(pos) {
     if(pos === 'bottom') {
-      $(this).scrollTop($heigth_from.height());
+      $(this).scrollTop($height_from.height());
       $win.data('at_bottom', true);
     }
     else {
@@ -139,12 +139,12 @@
   };
 
   $(document).ready(function() {
-    $heigth_from = $('div.wrapper').length ? $('div.wrapper') : $('body');
+    $height_from = $('div.wrapper').length ? $('div.wrapper') : $('body');
     $win = $(window).data('at_bottom', false).data('has_focus', true);
-    $(document).data('heigth_from', $heigth_from);
+    $(document).data('height_from', $height_from);
 
     $win.on('scroll', function() {
-      var at_bottom = $win.scrollTop() + $win.height() > $heigth_from.height() - at_bottom_threshold;
+      var at_bottom = $win.scrollTop() + $win.height() > $height_from.height() - at_bottom_threshold;
       $win.data('at_bottom', at_bottom);
     });
     $win.blur(function() {

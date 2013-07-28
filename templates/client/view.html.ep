@@ -18,10 +18,6 @@
   </div>
 </nav>
 
-<div class="conversations-container"><ul></ul></div>
-<div class="nicks-container<%= $target =~ /^#/ ? '' : ' hidden' %>"><ul></ul></div>
-<div class="notifications-container"><%= include 'client/notification_list' %></div>
-
 <div class="wrapper">
   <div class="messages row<%= $target =~ /^#/ ? ' with-nick-list' : '' %>">
     %= include 'client/conversation', class => 'more'
@@ -29,8 +25,13 @@
   <div class="clear"></div>
 </div>
 
-<footer>
+<footer id="bottom">
 %= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, class => $target =~ /^#/ ? 'with-nick-list' : '', begin
   %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off', 'data-cid' => $cid, 'data-target' => $target
 % end
 </footer>
+
+<div class="conversations-container"><ul></ul></div>
+<div class="nicks-container<%= $target =~ /^#/ ? '' : ' hidden' %>"><ul></ul></div>
+<div class="notifications-container"><%= include 'client/notification_list' %></div>
+<div class="goto-bottom"><a href="#bottom"><i class="icon-chevron-down"></i></a></div>
