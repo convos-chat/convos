@@ -119,12 +119,12 @@ sub _start_control_channel {
 
 =head2 add_connection
 
-    $self->add_connection($uid, {
-      host => $str, # irc_server[:port]
-      nick => $str,
-      user => $str,
-      channels => $str, # '#foo #bar, ...'
-    }, $callback);
+  $self->add_connection($uid, {
+    host => $str, # irc_server[:port]
+    nick => $str,
+    user => $str,
+    channels => $str, # '#foo #bar, ...'
+  }, $callback);
 
 Add a new connection to redis. Will create a new connection id and
 set all the keys in the %connection hash
@@ -133,44 +133,57 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my ($self, $uid, $conn, $cb) = @_;
-  my %errors;
+  my (@channels, %errors);
 
   for my $name (qw/ host nick user /) {
     next if $conn->{$name};
     $errors{$name} = "$name is required.";
   }
 
-  my $channels = delete $conn->{channels};
-  my @channels = split m/[\s,]+/, $channels;
+  @channels = $self->_parse_channels(delete $conn->{channels});
+  @channels or $errors{channels} = "channels is required.";
 
   $conn->{uid} = $uid;
   Scalar::Util::weaken($self);
-  return $self->$cb(undef, \%errors) if keys %errors;
-  return $self->redis->incr(
-    'connections:id',
-    sub {
-      my ($redis, $cid) = @_;
+  return $self->$cb(\%errors, undef) if keys %errors;
 
-      $self->_connection(id => $cid, uid => $uid, sub {});
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->incr('connections:id', $delay->begin);
+    },
+    sub {
+      my($delay, $cid) = @_;
+
+      $delay->begin(0)->($cid);
       $self->redis->execute(
         [sadd  => "connections",              $cid],
         [sadd  => "user:$uid:connections",    $cid],
         [hmset => "connection:$cid",          %$conn],
         [sadd  => "connection:$cid:channels", @channels],
-        sub { $self->$cb($cid) },
+        $delay->begin,
       );
-    }
+    },
+    sub {
+      my($delay, $cid, @saved) = @_;
+      $self->redis->publish('core:control', "start:$cid", $delay->begin);
+      $delay->begin(0)->($cid);
+    },
+    sub {
+      my($delay, $cid, @saved) = @_;
+      $self->$cb(undef, $cid);
+    },
   );
 }
 
 =head2 update_connection
 
-    $self->update_connection($cid, {
-      host => $str, # irc_server[:port]
-      nick => $str,
-      user => $str,
-      channels => $str, # '#foo #bar, ...'
-    }, $callback);
+  $self->update_connection($cid, {
+    host => $str, # irc_server[:port]
+    nick => $str,
+    user => $str,
+    channels => $str, # '#foo #bar, ...'
+  }, $callback);
 
 Update a connection's settings and reconnect.
 
@@ -178,7 +191,7 @@ Update a connection's settings and reconnect.
 
 sub update_connection {
   my ($self, $cid, $conn, $cb) = @_;
-  my (%errors, @channels, $channels, $connections);
+  my ($restart, %errors, @channels, %channels);
 
   for my $name (qw/ host nick user /) {
     next if $conn->{$name};
@@ -186,15 +199,87 @@ sub update_connection {
   }
 
   Scalar::Util::weaken($self);
-  $channels = delete $conn->{channels};
-  @channels = split m/[\s,]+/, $channels;
+  @channels = $self->_parse_channels(delete $conn->{channels});
 
-  return $self->$cb(undef, \%errors) if keys %errors;
-  return $self->redis->execute(
-    [hmset => "connection:$cid", %$conn],
-    [del   => "connection:$cid:channels"],
-    [sadd  => "connection:$cid:channels", @channels],
-    sub { $self->$cb($cid, {}); },
+  return $self->$cb(\%errors, $conn) if keys %errors;
+
+  $conn = { %$conn }; # need let us not mess up the input
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->hgetall("connection:$cid", $delay->begin);
+      $self->redis->smembers("connection:$cid:channels", $delay->begin);
+    },
+    sub {
+      my($delay, $connection, $channels) = @_;
+
+      %channels = map { $_, 1 } @{ $channels || [] };
+      $conn->{$_} ~~ $connection->{$_} and delete $conn->{$_} for keys %$connection;
+      $self->redis->hmset("connection:$cid", %$conn, $delay->begin) if %$conn;
+      $self->redis->del("connection:$cid:channels", $delay->begin);
+      $self->redis->sadd("connection:$cid:channels", @channels, $delay->begin);
+    },
+    sub {
+      my($delay, @saved) = @_;
+
+      return $self->redis->publish('core:control', "restart:$cid", $delay->begin) if $conn->{host};
+      return $self->_connection(id => $cid, $delay->begin);
+    },
+    sub {
+      my($delay, $connection) = @_;
+
+      if(!UNIVERSAL::isa($connection, 'WebIrc::Core::Connection')) {
+        return $self->$cb(undef, $conn);
+      }
+      if($conn->{nick}) {
+        $self->redis->publish("connection:$cid:to_server", "NICK $conn->{nick}", $delay->begin);
+      }
+      for(@channels) {
+        next if delete $channels{$_};
+        $self->redis->publish("connection:$cid:to_server", "JOIN $_", $delay->begin);
+      }
+      for(keys %channels) {
+        $self->redis->publish("connection:$cid:to_server", "PART $_", $delay->begin);
+      }
+
+      $delay->begin->();
+    },
+    sub {
+      my($delay, @saved) = @_;
+      $self->$cb(undef, $conn);
+    },
+  );
+}
+
+=head2 delete_connection
+
+  $self->delete_connection($uid, $cid, $cb);
+
+=cut
+
+sub delete_connection {
+  my($self, $uid, $cid, $cb) = @_;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->srem("user:$uid:connections", $cid, $delay->begin);
+    },
+    sub {
+      my ($delay, $removed) = @_;
+      return $self->$cb($cid) unless $removed;
+      $self->redis->srem("connections", $cid, $delay->begin);
+      $self->redis->keys("connection:$cid:*", $delay->begin); # jht: not sure if i like this...
+    },
+    sub {
+      my ($delay, $deleted, $keys) = @_;
+      $self->redis->del(@$keys, $delay->begin);
+      $self->redis->publish("core:control", "stop:$cid", $delay->begin);
+    },
+    sub {
+      my($delay, @deleted) = @_;
+      $self->$cb($cid);
+    },
   );
 }
 
@@ -291,6 +376,12 @@ sub login {
       }
     }
   );
+}
+
+sub _parse_channels {
+  my $self = shift;
+  my $channels = shift or return;
+  sort grep { $_ ne '#' } map { /^#/ ? $_ : "#$_" } split m/[\s,]+/, $channels;
 }
 
 =head1 COPYRIGHT

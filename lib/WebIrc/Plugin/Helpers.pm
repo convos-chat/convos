@@ -153,6 +153,39 @@ sub redis {
   };
 }
 
+=head2 send_partial
+
+Will render "partial" and L<send|Mojolicious::Controller/send> the result.
+
+=cut
+
+sub send_partial {
+  my $c = shift;
+
+  eval {
+    $c->send($c->render(@_, partial => 1)->to_string)
+  } or do {
+    $c->app->log->error($@);
+  };
+}
+
+=head2 timestamp_span
+
+Returns a "E<lt>span>" tag with a timestamp.
+
+=cut
+
+sub timestamp_span {
+  my ($c, $timestamp) = @_;
+
+  return $c->tag(
+    'span',
+    class => 'timestamp',
+    title => format_time($timestamp, '%e. %B'),
+    format_time($timestamp, '%e. %b %H:%M:%S')
+  );
+}
+
 =head1 METHODS
 
 =head2 register
@@ -171,35 +204,8 @@ sub register {
   $app->helper(redis => \&redis);
   $app->helper(as_id => sub { shift; WebIrc::Core::Util::as_id(@_) });
   $app->helper(id_as => sub { shift; WebIrc::Core::Util::id_as(@_) });
-  $app->helper(
-    send_partial =>
-      sub { my $c = shift; $c->send($c->render(@_, partial => 1)->to_string); }
-  );
-  $app->helper(
-    is_active => sub {
-      my ($c, $id, $target) = @_;
-      if ($id eq $c->stash('cid')) {
-        return 'active' if !length $target and !length $c->stash('target');
-        return 'active'
-          if length $target
-          and length $c->stash('target')
-          and $target eq $c->stash('target');
-      }
-      return '';
-    }
-  );
-  $app->helper(
-    timestamp_span => sub {
-      my ($self, $timestamp) = @_;
-
-      return $self->tag(
-        'span',
-        class => 'timestamp',
-        title => format_time($timestamp, '%e. %B'),
-        format_time($timestamp, '%e. %b %H:%M:%S')
-      );
-    }
-  );
+  $app->helper(send_partial => \&send_partial);
+  $app->helper(timestamp_span => \&timestamp_span);
 }
 
 =head1 AUTHOR

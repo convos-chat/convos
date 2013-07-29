@@ -1,4 +1,4 @@
-% title 'Home';
+% title 'Chat with your friends and colleagues';
 <div class="landing-page">
   <header class="row">
     <h1 class="center">IRC hotel - <%= config('name') || '[YourName]' %></h1>

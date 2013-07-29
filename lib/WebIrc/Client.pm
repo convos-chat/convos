@@ -24,7 +24,7 @@ Route to last seen IRC conversation.
 
 sub route {
   my $self = shift->render_later;
-  my $uid  = $self->session('uid') or return $self->render('index', form=>'');
+  my $uid  = $self->session('uid') or return $self->render('index', form => '');
 
   Mojo::IOLoop->delay(
     sub {
@@ -178,7 +178,7 @@ Will mark all notifications as read.
 =cut
 
 sub clear_notifications {
-  my($self, $cb) = @_;
+  my $self = shift->render_later;
   my $uid = $self->session('uid');
 
   Mojo::IOLoop->delay(
@@ -197,9 +197,9 @@ sub clear_notifications {
         $self->redis->lset("user:$uid:notifications", $i, $JSON->encode($notification));
         $i++;
       }
-      $self->render(text=>'OK');
+
+      $self->render(json => { cleared => $i });
   });
-  $self->render_later();
 }
 
 
@@ -266,7 +266,7 @@ sub _check_if_uid_own_cid {
   sub {
     my($delay, $is_owner) = @_;
     return $delay->begin->() if $is_owner;
-    $self->route;
+    return $self->route;
   },
 }
 

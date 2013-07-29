@@ -14,7 +14,7 @@ my $t = Test::Mojo->new('WebIrc');
     nick_change => { old_nick => 'old', new_nick => 'doe' },
     rpl_namreply => { nicks => [ { mode => '@', nick => 'random' } ] },
     topic => { topic => 'Cool topic' },
-    whois_channels => { channels => [qw/ #wirc #mojo /] },
+    whois_channels => { channels => ['#wirc', '#mojo'] },
     whois => { realname => 'John doe', host => 'wirc.pl', user => 'user@wir.pl' },
   );
 
@@ -28,6 +28,7 @@ my $t = Test::Mojo->new('WebIrc');
       target => '#yikes',
       template => "event/$e",
       timestamp => 1375085961,
+      title => 'WHO CARES',
       %{ $stash{$e} || {} },
     );
 

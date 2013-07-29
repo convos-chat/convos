@@ -4,10 +4,12 @@ use warnings;
 use Test::More;
 use Test::Mojo;
 
-BEGIN { $ENV{WIRC_DEBUG} = 1 }
+BEGIN { $ENV{WIRC_DEBUG} //= $ENV{TEST_VERBOSE} }
+
+my $t;
 
 sub capture_redis_errors {
-  my($class, $t) = @_;
+  my $class = shift;
   $t->app->redis->on(error => sub {
     my ($redis,$error) = @_;
     ok(0, "An error occured: $error");
@@ -16,7 +18,7 @@ sub capture_redis_errors {
 }
 
 sub init_database {
-  my($class, $t) = @_;
+  my $class = shift;
   my $delay
     = Mojo::IOLoop->delay(
       sub {
@@ -33,43 +35,46 @@ sub init_database {
   $delay->wait;
 }
 
-sub async_do {
+sub redis_do {
   my $delay = Mojo::IOLoop->delay;
-  $_->($delay) for @_;
+  $t->app->redis->execute(@_, $delay->begin);
   $delay->wait;
 }
 
-sub redis_do {
-  my $t = shift;
-  my $delay = Mojo::IOLoop->delay;
-
-  while(@_) {
-    my $method = shift;
-    my $args = shift;
-    $t->app->redis->$method(@$args, $delay->begin);
-  }
-
-  $delay->wait;
+sub wait_a_bit {
+  my($cb, $text) = @_;
+  my $tid = Mojo::IOLoop->timer(2, sub {
+    Test::More::ok(0, $text || 'TIMED OUT!');
+    Mojo::IOLoop->stop;
+  });
+  return sub {
+    Mojo::IOLoop->remove($tid);
+    $cb->();
+    Mojo::IOLoop->stop;
+  };
 }
 
 sub import {
   my $class = shift;
   my $caller = caller;
-  my $t = Test::Mojo->new('WebIrc');
+  my $keys;
 
   strict->import;
   warnings->import;
+  $ENV{REDIS_TEST_DATABASE} ||= 'redis://127.0.0.1:6379/14';
 
   # make sure we use our own test database
-  $t->app->redis->select($ENV{REDIS_TEST_DB} || 11);
-  $t->app->redis->flushdb if $ENV{REDIS_TEST_DB};
+  $t = Test::Mojo->new('WebIrc');
+  $t->app->config(redis => $ENV{REDIS_TEST_DATABASE});
+  $t->app->core->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
+  $t->app->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
+  $t->app->redis->flushdb unless $ENV{KEEP_REDIS};
 
   eval "package $caller; use Test::More; 1" or die $@;
   no strict 'refs';
   *{ "$caller\::t" } = \$t;
-  *{ "$caller\::async_do" } = \&async_do;
   *{ "$caller\::redis_do" } = \&redis_do;
-
+  *{ "$caller\::wait_a_bit" } = \&wait_a_bit;
 }
 
 1;

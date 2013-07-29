@@ -3,10 +3,9 @@ use warnings;
 use Mojo::IRC;
 use File::Slurp;
 use Test::More;
+use Data::Dumper;
 
 plan tests => 9;
-
-#$SIG{__DIE__} = \&Carp::cluck;
 
 my $port = Mojo::IOLoop->generate_port;
 my $read = '';
@@ -26,7 +25,7 @@ Mojo::IOLoop->server(
           $join =~ s/\n/\r\n/sg;
           $stream->write($join);
         }
-        elsif ($read =~ /NICK/) {
+        elsif ($read =~ /NICK/ and $read !~ /USER/) {
           my $welcome = read_file 't/data/welcome';
           $welcome =~ s/\n/\r\n/sg;
           $stream->write($welcome);
@@ -39,7 +38,7 @@ Mojo::IOLoop->server(
 
 {
   my %got;
-  my $irc = Mojo::IRC->new();
+  my $irc = Mojo::IRC->new;
   isa_ok($irc, 'Mojo::IRC', 'Constructor returns right object');
   $irc->nick('test123');
   is($irc->nick(), 'test123', 'nick setter works');
@@ -76,5 +75,3 @@ Mojo::IOLoop->server(
 
   Mojo::IOLoop->start;
 }
-
-

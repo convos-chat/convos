@@ -1,4 +1,3 @@
-% title 'Login';
 <div class="login row ignore-document-close">
   <h1>Login to wirc</h1>
   %= form_for '', method => 'post', begin

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= join ' - ', app->config->{name}, title %></title>
+    <title><%= join ' - ', app->config('name'), title %></title>
   % if($self->app->mode eq 'production') {
     %= stylesheet "/compiled.css?_=$VERSION"
   % } elsif($self->app->mode ne 'compiling') {

@@ -167,7 +167,10 @@ sub _subscribe_to_server_messages {
   );
 
   $self->stash("sub_$cid" => $sub);
-  $self->on(finish => sub { $self->stash("sub_$cid" => undef) });
+  $self->on(finish => sub {
+    $self or return; # global destruction
+    $self->stash("sub_$cid" => undef);
+  });
 }
 
 =head1 COPYRIGHT

@@ -69,7 +69,6 @@ Backend functionality.
 use Mojo::Base 'Mojolicious';
 use File::Spec::Functions qw(catfile tmpdir);
 use WebIrc::Core;
-use WebIrc::Proxy;
 use Mojo::Redis;
 
 unless($ENV{LESSC_BIN} //= '') {
@@ -98,10 +97,6 @@ Holds a L<WebIrc::Core::Archive> object.
 
 Holds a L<WebIrc::Core> object.
 
-=head2 proxy
-
-Holds a L<WebIrc::Proxy> object.
-
 =cut
 
 has archive => sub {
@@ -115,11 +110,6 @@ has core => sub {
 
   $core->redis->server($self->redis->server);
   $core;
-};
-
-has proxy => sub {
-  my $self = shift;
-  WebIrc::Proxy->new(core => $self->core);
 };
 
 =head1 METHODS
@@ -154,11 +144,9 @@ sub startup {
   my $private_r = $r->bridge('/')->to('user#auth');
   my $settings_r = $private_r->route('/settings')->to(target => $config->{name});
   $settings_r->get('/')->to('user#settings')->name('settings');
+  $settings_r->post('/add')->to('user#add_connection')->name('connection.add');
   $settings_r->get('/:cid', [cid => qr{\d+}])->to('user#settings')->name('connection.edit');
   $settings_r->post('/:cid', [cid => qr{\d+}])->to('user#edit_connection');
-  $settings_r->post('/add')->to('user#add_connection')->name('connection.add');
-  $settings_r->get('/:cid/delete')->to(template => 'user/delete_connection')->name('connection.delete');
-  $settings_r->post('/:cid/delete')->to('user#delete_connection');
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
 
@@ -179,7 +167,6 @@ sub startup {
   if($config->{backend}{embedded}) {
     Mojo::IOLoop->timer(0, sub {
       $self->core->start;
-      $self->proxy->start if $config->{backend}{proxy};
     });
   }
 

@@ -20,7 +20,7 @@ Check authentication and login
 sub auth {
   my $self = shift;
   return 1 if $self->session('uid');
-  $self->redirect_to('login');
+  $self->redirect_to('/');
   return 0;
 }
 
@@ -54,26 +54,22 @@ Authenticate local user
 =cut
 
 sub login {
-  my $self = shift;
+  my $self = shift->render_later;
 
-  $self->render_later;
   $self->app->core->login(
-    {login => scalar $self->param('login'), password => scalar $self->param('password'),},
+    {
+      login => scalar $self->param('login'),
+      password => scalar $self->param('password'),
+    },
     sub {
       my ($core, $uid, $error) = @_;
-      return $self->render(message => 'Invalid username/password.') unless $uid;
+      return $self->render(message => 'Invalid username/password.', status => 401) unless $uid;
       $self->session(uid => $uid, login => $self->param('login'));
 
-      $self->redis->smembers(
-        "user:$uid:connections",
-        sub {
-          my ($redis, $conn) = @_;
-          if (@$conn) {
-            return $self->redirect_to('index');
-          }
-          $self->redirect_to('settings');
-        }
-      );
+      # this is super ugly
+      require WebIrc::Client;
+      bless $self, 'WebIrc::Client';
+      $self->route;
     },
   );
 }
@@ -106,7 +102,7 @@ sub register {
 
       if ($self->_got_invalid_register_params($uids)) {
         $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        $self->render;
+        $self->render(status => 400);
         return;
       }
 
@@ -123,7 +119,7 @@ sub register {
       my ($delay, $uid) = @_;
       if ($uid) {
         $self->stash->{errors}{login} = 'Username is taken.';
-        $self->render;
+        $self->render(status => 400);
       }
       else {
         $self->redis->incr('user:uids', $delay->begin);
@@ -241,7 +237,7 @@ sub settings {
         push @connections, $info;
       }
 
-      $current ||= $self->app->config->{default_connection};
+      $current ||= $self->app->config('default_connection');
       $current->{avatar} = $avatar;
       $self->stash(cid => $cid, current => $current);
       $self->render;
@@ -263,6 +259,7 @@ sub add_connection {
 
   Mojo::IOLoop->delay(
     sub {
+      my($delay) = @_;
       $self->app->core->add_connection(
         $self->session('uid'),
         {
@@ -271,21 +268,20 @@ sub add_connection {
           channels => $self->param('channels') || '',
           user     => $login,
         },
-        $_[0]->begin
+        $delay->begin
       );
     },
     sub {
-      my ($delay, $cid, $cname) = @_;
-      unless ($cid) {
-        $self->stash(errors => $cname, template => 'user/settings'); # cname is a hash-ref if $cid is undef
+      my ($delay, $errors, $cid) = @_;
+      if($errors) {
+        $self->stash(errors => $errors, template => 'user/settings');
         $self->settings;
         return;
       }
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
-      $self->redis->publish('core:control', "start:$cid");
       $self->redis->set("avatar:$login\@$hostname", $self->param('avatar') || '');
       return $self->redirect_to('index') if $action eq 'connect';
-      return $self->redirect_to('settings', cid => $cid);
+      return $self->redirect_to('connection.edit', cid => $cid);
     },
   );
 }
@@ -299,14 +295,19 @@ Change a connection.
 sub edit_connection {
   my $self = shift;
   my $action = $self->param('action') || '';
-  my $cid = $self->param('cid');
+  my $cid = $self->param('cid') || '';
+  my $uid = $self->session('uid');
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
+
+  if($action eq 'delete') {
+    return $self->delete_connection;
+  }
 
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->sismember("user:" . $self->session('uid') . ":connections", $cid, $delay->begin);
+      $self->redis->sismember("user:$uid:connections", $cid, $delay->begin);
     },
     sub {
       my ($delay, $member) = @_;
@@ -323,9 +324,10 @@ sub edit_connection {
         },
         $delay->begin
       );
-      $self->redis->publish('core:control', "restart:$cid");
     },
     sub {
+      my($delay, $errors, $changed) = @_;
+      $self->stash(errors => $errors || {});
       return $self->redirect_to('index') if $action eq 'connect';
       return $self->redirect_to('settings');
     }
@@ -341,30 +343,21 @@ Delete a connection.
 sub delete_connection {
   my $self = shift;
   my $uid  = $self->session('uid');
-  my $cid  = $self->param('cid');
+  my $cid  = $self->param('cid') || '';
 
   $self->render_later;
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->sismember("user:" . $self->session('uid') . ":connections", $cid, $delay->begin);
+      $self->redis->sismember("user:$uid:connections", $cid, $delay->begin);
     },
     sub {
       my ($delay, $member) = @_;
       return $self->render_not_found unless $member;
-      $self->redis->publish("core:control", "stop:$cid");
-      $self->redis->srem("user:$uid:connections", $cid, $delay->begin);
+      return $self->app->core->delete_connection($uid, $cid, $delay->begin);
     },
     sub {
-      my ($delay, $removed) = @_;
-      return $self->render_not_found unless $removed;
-      $self->redis->execute([keys => "connection:$cid:*"], $_[0]->begin);
-    },
-    sub {
-      my ($delay, $keys) = @_;
-      $self->redis->execute([del => @$keys], [srem => "connections", $cid], $delay->begin,);
-    },
-    sub {
+      my ($delay, $deleted) = @_;
       $self->redirect_to('settings');
     }
   );

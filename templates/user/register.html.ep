@@ -1,31 +1,30 @@
-% title 'Register';
 <div class="register row ignore-document-close">
-  <h1 class="page-header">Register a new acccount</h1>
+  <h1>Register a new acccount</h1>
   %= form_for '', method => 'post', begin
     %= include 'inc/alert' if $form eq 'register'
-    %= form_block login => class => [], begin
+    %= form_block login => class => ['username'], begin
       <label for="register_login">Username</label>
       %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
       <p class="help"><%= $errors->{login} || 'Choose something that\'s simple to remember. Your IRC handle for instance.'%></p>
     % end
-    %= form_block email => class => [], begin
+    %= form_block email => class => ['email'], begin
       <label for="email">Email</label>
       %= email_field 'email', id => 'email', placeholder => 'your@email.com'
       <p class="help"><%= $errors->{email} || 'Your email address.' %></p>
     % end
-    %= form_block invite => class => [], begin
+    %= form_block invite => class => ['invite'], begin
       <label for="invite">Invite Code</label>
       %= text_field 'invite', id => 'invite', placeholder => '******', autocapitalize => 'off', autocorrect => 'off'
       <p class="help"><%= $errors->{invite} || 'Required unless this is your installation and you are the first user. Get invited by the site owner.'%></p>
     % end
-    %= form_block password => class => [], begin
+    %= form_block password => class => ['password'], begin
       <label for="register_password">Password</label>
       %= password_field 'password', id => 'register_password', placeholder => 'Something secret'
       %= password_field 'password', placeholder => 'Repeat secret'
       <p class="help"><%= $errors->{password} || 'Your password need to be at least six characters long.'%></p>
     % end
     <div class="actions">
-      <button type="submit" class="btn btn-primary">Register</button>
+      <button type="submit">Register</button>
     </div>
   % end
 </div>
