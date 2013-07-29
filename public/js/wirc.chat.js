@@ -278,8 +278,8 @@
     $input.history_i = 0;
     $input.socket = window.ws($input.closest('form').data('socket-url'));
     $input.socket.onmessage = receiveMessage;
-    $input.socket.onopen = function() { $input.removeAttr('disabled'); };
-    $input.socket.onclose = function() { $input.attr('disabled', 'disabled'); };
+    $input.socket.onopen = function() { $input.removeClass('disabled'); };
+    $input.socket.onclose = function() { $input.addClass('disabled'); };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-history', history).text(message).prop('outerHTML'));
