@@ -1,8 +1,8 @@
 % title 'Home';
 <div class="landing-page">
-  <header class="row center">
-    <h1>IRC hotel - <%= config('name') || '[YourName]' %></h1>
-    <h2>Interact with friends and colleagues.</h2>
+  <header class="row">
+    <h1 class="center">IRC hotel - <%= config('name') || '[YourName]' %></h1>
+    <h2 class="center">Interact with friends and colleagues.</h2>
   </header>
   %= image '/image/landing-page-example-chat.jpeg', alt => 'Example chat'
   <nav>
@@ -12,6 +12,18 @@
   %= include 'user/login'
   %= include 'user/register'
   <div class="row about">
+    <!--[if IE]>
+    <div class="alert">
+      Wirc does not work in Internet Explorer. It works best in the following browsers:
+      (in order)
+      <ol>
+        <li><%= link_to 'Google Chrome', 'http://www.google.com/chrome' %></li>
+        <li><%= link_to 'Mozilla Firefox', 'http://getfirefox.com' %></li>
+        <li><%= link_to 'Opera', 'http://opera.com' %></li>
+        <li>Or any webkit based browser, such as Safari.</li>
+      </ol>
+    </div>
+    <![endif]-->
     <h2>What is so cool about Wirc?</h2>
     <p>
       Ever wanted to log into an IRC channel from your phone, tablet or computer
