@@ -1,5 +1,5 @@
 <li class="nick-change" data-cid="<%= $cid %>" data-target="<%= $target %>">
   <span class="prefix"><%= app->config->{name} %>:</span>
-  <span><b class="old"><%= $old_nick %></b> changed nick to <b class="nick"><%= $new_nick %>"</b></span>
+  <span><b class="old"><%= $old_nick %></b> changed nick to "<%= link_to $new_nick, { cid => $cid, target => $new_nick }, class => 'nick' %>"</b></span>
   %= timestamp_span($timestamp)
 </li>

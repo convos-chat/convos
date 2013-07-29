@@ -442,9 +442,9 @@ sub irc_rpl_topicwhotime {
 
   $self->_publish(
     topic_by => {
-      ts     => $message->{params}[3],
-      nick   => $message->{params}[2],
-      target => $message->{params}[1],
+      timestamp => $message->{params}[3],
+      nick      => $message->{params}[2],
+      target    => $message->{params}[1],
     }
   );
 }

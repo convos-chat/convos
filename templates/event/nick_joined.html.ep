@@ -1,5 +1,5 @@
 <li class="nick-joined" data-cid="<%= $cid %>" data-target="<%= $target %>">
   <span class="prefix"><%= app->config->{name} %>:</span>
-  <span><b class="nick"><%= $nick %></b> joined <%= $target %></span>
+  <span><%= link_to $nick, { cid => $cid, target => $nick }, class => 'nick' %></b> joined <%= $target %></span>
   %= timestamp_span($timestamp)
 </li>
