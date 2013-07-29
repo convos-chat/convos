@@ -199,18 +199,10 @@
     var current = '';
     var complete, val, offset, re;
 
-    $.get($.url_for(['command-history']), function(data) {
-      $input.history = data;
-      $input.history_i = $input.history.length;
-    });
-
-    $input.bind('keydown', function(e) {
-      if(e.keyCode !== 9) complete = false; // not tab
-    });
-    $input.bind('keydown', 'tab', function(e) {
-      val = $input.val();
-      offset = val.lastIndexOf(' ') + 1;
-      re = new RegExp('^' + RegExp.escape(val.substr(offset)), 'i');
+    var autocomplete = function(e) {
+      var val = $input.val();
+      var offset = val.lastIndexOf(' ') + 1;
+      var re = new RegExp('^' + RegExp.escape(val.substr(offset)), 'i');
       complete = complete || {
         i: 0,
         prefix: val.substr(0, offset),
@@ -230,7 +222,16 @@
       $input.val(complete.prefix + complete.list[complete.i++]);
       if(complete.i == complete.list.length) complete.i = 0;
       return false;
+    };
+
+    $.get($.url_for(['command-history']), function(data) {
+      $input.history = data;
+      $input.history_i = $input.history.length;
     });
+
+    $input.doubletap(autocomplete);
+    $input.bind('keydown', function(e) { if(e.keyCode !== 9) complete = false; }); // not tab
+    $input.bind('keydown', 'tab', autocomplete);
     $input.bind('keydown', 'up', function(e) {
       e.preventDefault();
       if($input.history_i == 0) return;

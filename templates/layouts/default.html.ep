@@ -16,6 +16,7 @@
     %= javascript '/minified/jquery.js'
     %= javascript '/js/jquery.hotkeys.js'
     %= javascript '/js/jquery.fastbutton.js'
+    %= javascript '/js/jquery.doubletap.js'
     %= javascript '/minified/jquery.nanoscroller.js'
     %= javascript '/js/jquery.pjax.js'
     %= javascript '/js/jquery.wirc.js'
