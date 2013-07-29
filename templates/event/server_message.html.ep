@@ -1,4 +1,4 @@
-<li class="server-message <%= $status < 400 ? 'notice' : 'error' %>" data-cid="<%= $cid || 0 %>" data-target="<%= 'any' %>">
+<li class="server-message <%= $status < 400 ? 'notice' : 'error' %>" data-cid="<%= $cid || 0 %>" data-target="any">
   <span><%= $status < 400 ? 'Notice' : 'Error' %> - <%= $message %></span>
   %= timestamp_span($timestamp || time)
 </li>

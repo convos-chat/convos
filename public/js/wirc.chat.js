@@ -121,7 +121,8 @@
     if($message) {
       $a = $conversations.find('a[href="' + $.url_for($message.data('cid'), $message.data('target')) + '"]');
       unread = parseInt($a.attr('data-unread')) + 1;
-      $a.attr('data-unread', unread).addClass('unread').attr('title', unread + " unread messages in " + $message.data('target'));
+      $a.attr('data-unread', unread).attr('title', unread + " unread messages in " + $message.data('target'));
+      $a.closest('li').addClass('unread');
     }
 
     $conversations.each(function() {
