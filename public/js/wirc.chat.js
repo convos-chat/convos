@@ -21,6 +21,7 @@
   ];
 
   // override original method with a filter
+  nicks.with_mode = {};
   nicks.add = function(score, member) {
     if(member !== $messages.data('nick')) this.set[member] = score;
     this.length++;
@@ -343,6 +344,7 @@
       $nicks.each(function() {
         var $a = $(this);
         var n = $a.data('nick');
+        nicks.with_mode[n] = $a.text();
         nicks.add(senders[n] || 1, n);
       });
     }
@@ -350,7 +352,7 @@
     if(nicks.length) {
       $('div.nicks.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
+          return '<li><a href="' + $.url_for(cid, n) + '">' + nicks.with_mode[n] + '</a></li>';
         }).join('')
       );
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
