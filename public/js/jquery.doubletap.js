@@ -1,12 +1,11 @@
 (function($){
   var ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
-  var event_name = ios == true ? 'touchend' : 'click';
 
   $.fn.doubletap = function(cb) {
     return this.each(function() {
       var last = new Date().getTime();
 
-      $(this).bind(event_name, function(e) {
+      $(this).bind('touchend', function(e) {
         var now = new Date().getTime();
         var delta = now - last;
 
