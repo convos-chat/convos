@@ -66,7 +66,7 @@ sub start {
     sub {
       my($delay, @conn) = @_;
       $_->connect for @conn;
-    }
+    },
   );
 
   $self->_start_control_channel;

@@ -248,8 +248,8 @@ sub _connect {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish(wirc_notice => { message => "Could not connect to @{[$irc->server]}: $error" });
           $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
+          $self->_publish(wirc_notice => { message => "Could not connect to @{[$irc->server]}: $error" });
         }
         else {
           $self->redis->hset("connection:@{[$self->id]}", current_nick => $irc->nick);
@@ -271,22 +271,16 @@ if it looks like one. Returns true if the message was added to redis.
 
 sub add_server_message {
   my ($self, $message) = @_;
-  my $timestamp = time;
+  my $params = $message->{params};
 
-  if (!$message->{prefix} or $message->{prefix} eq $self->real_host) {
-
-    # 1 = normal, 0 = error
-    my $params = $message->{params};
-    shift $params;
-    $self->_publish(
-      server_message => {
-        message => join(' ', @{$message->{params}}),
-        save => 1,
-        status => 200,
-        timestamp => $timestamp,
-      },
-    );
-  }
+  shift @$params; # I think this removes our own nick... Not quite sure though
+  $self->_publish(
+    server_message => {
+      message => join(' ', @$params),
+      save => 1,
+      status => 200,
+    },
+  );
 }
 
 =head2 add_message
@@ -302,7 +296,6 @@ sub add_message {
   my $current_nick = $self->_irc->nick;
   my $is_private_message = $message->{params}[0] eq $current_nick;
   my $data = {
-    cid => $self->id,
     highlight => 0,
     message => $message->{params}[1],
     save => 1,
@@ -421,7 +414,7 @@ sub irc_rpl_topic {
 
 =head2 irc_topic
 
-    :nick!~user@hostname TOPIC #channel :some topic
+  :nick!~user@hostname TOPIC #channel :some topic
 
 =cut
 
@@ -481,8 +474,9 @@ sub irc_join {
     $self->redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
     $self->_publish(add_conversation => { target => $channel });
   }
-
-  $self->_publish(nick_joined => { nick => $nick, target => $channel });
+  else {
+    $self->_publish(nick_joined => { nick => $nick, target => $channel });
+  }
 }
 
 =head2 irc_nick
@@ -517,7 +511,7 @@ sub irc_part {
     my $id = as_id $self->id, $channel;
     $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
     $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
-      $self->_publish(remove_conversation => { cid => $self->id, target => $channel, });
+      $self->_publish(remove_conversation => { target => $channel });
     });
   }
   else {
@@ -538,8 +532,8 @@ sub irc_err_bannedfromchan {
 
   Scalar::Util::weaken($self);
   $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
-    $self->_publish(remove_conversation => { cid => $self->id, target => $channel });
-    $self->_publish(wirc_notice => { message => $message->{params}[2] });
+    $self->_publish(remove_conversation => { target => $channel });
+    $self->_publish(wirc_notice => { save => 1, message => $message->{params}[2] });
   });
 }
 
@@ -556,7 +550,7 @@ sub irc_err_nosuchchannel {
 
   Scalar::Util::weaken($self);
   $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
-    $self->_publish(remove_conversation => { cid => $self->id, target => $channel });
+    $self->_publish(remove_conversation => { target => $channel });
   });
 }
 
@@ -603,10 +597,14 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
-  $self->add_server_message($message);
-  if ($message->{raw_line} =~ /Closing Link/i) {
-    $self->log->warn("[connection:@{[$self->id]}] ! Closing link (reconnect)");
-  }
+
+  $self->_publish(
+    server_message => {
+      message => join(' ', @{$message->{params}}),
+      save => 1,
+      status => 500,
+    },
+  );
 }
 
 =head2 cmd_nick
@@ -630,25 +628,28 @@ Handle join commands from user. Add to channel set.
 
 sub cmd_join {
   my ($self, $message) = @_;
-  my $channel = $message->{params}[0];
+  my $channel = $message->{params}[0] || '';
 
-  return $self->_publish(wirc_notice => { message => 'Channel to join is required' }) unless $channel;
-  return $self->_publish(wirc_notice => { message => 'Channel must start with & or #' }) unless $channel =~ /^[#&]/x;
+  if($channel =~ /^#\w/) {
+    Scalar::Util::weaken($self);
+    $self->redis->sadd("connection:@{[$self->id]}:channels", $channel, sub {
+      my($redis, $added) = @_;
+      my $id = as_id $self->id, $channel;
+      $redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
+      $self->_publish(add_conversation => { target => $channel }) if $added;
+    });
+  }
+  else {
+    $self->_publish(wirc_notice => { message => 'Do not understand which channel to join' });
 
-  Scalar::Util::weaken($self);
-  $self->redis->sadd("connection:@{[$self->id]}:channels", $channel, sub {
-    my($redis, $added) = @_;
-    my $id = as_id $self->id, $channel;
-    $redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
-    $self->_publish(add_conversation => { target => $channel }) unless $added;
-  });
+  }
 }
 
 sub _publish {
   my ($self, $event, $data) = @_;
   my $message;
 
-  $data->{cid} //= $self->id;
+  $data->{cid} = $self->id;
   $data->{timestamp} ||= time;
   $data->{event} = $event;
   $message = $JSON->encode($data);

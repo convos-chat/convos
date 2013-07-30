@@ -9,9 +9,11 @@ my $dom = Mojo::DOM->new;
 my $json = Mojo::JSON->new;
 my $server = $t->app->redis->subscribe('connection:6:to_server');
 my @data = data();
+my $connection = WebIrc::Core::Connection->new;
 
 $server->on(message => sub {
-  $t->app->redis->publish('connection:6:from_server' => $json->encode(shift @data));
+  my($method, $message) = (shift @data, shift @data);
+  $connection->$method($message);
 });
 
 redis_do(
@@ -22,56 +24,180 @@ redis_do(
   [ hmset => 'connection:6', nick => 'doe' ],
 );
 
+$connection->id(6)->uid(42)->redis($t->app->redis)->_irc(dummy_irc());
 $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/6/%23wirc$}, 'Redirect to conversation');
 
-$t->websocket_ok('/socket')->send_ok('yikes')->message_ok;
-$dom->parse($t->message->[1]);
-ok $dom->at('li[data-cid="0"][data-target="any"]'), 'Got correct 6+any';
-is $dom->at('li.server-message.error span')->text, 'Error - Not allowed to subscribe to', 'Error - Not allowed to subscribe to';
+{
+  $t->websocket_ok('/socket')->send_ok('yikes');
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li[data-cid="0"][data-target="any"]'), 'Got correct 6+any';
+  is $dom->at('li.server-message.error span')->text, 'Error - Not allowed to subscribe to', 'Error - Not allowed to subscribe to';
+}
 
-$t->websocket_ok('/socket')->send_ok(msg('/names'))->message_ok;
-$dom->parse($t->message->[1]);
-ok $dom->at('li.nicks[data-cid="6"][data-target="#wirc"]'), 'Got correct 6+#wirc';
-is $dom->at('a[href="/6/fooman"][data-nick="fooman"]')->text, 'fooman', 'got fooman';
-is $dom->at('a[href="/6/woman"][data-nick="woman"]')->text, '@woman', 'got woman';
+{
+  $t->websocket_ok('/socket')->send_ok(msg('/names'));
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.nicks[data-cid="6"][data-target="#wirc"]'), 'Got correct 6+#wirc';
+  is $dom->at('a[href="/6/fooman"][data-nick="fooman"]')->text, 'fooman', 'got fooman';
+  is $dom->at('a[href="/6/woman"][data-nick="woman"]')->text, '@woman', 'got woman';
+}
 
-$t->app->redis->publish('connection:6:from_server' => $json->encode(shift @data));
-$t->websocket_ok('/socket')->message_ok;
-$dom->parse($t->message->[1]);
-ok $dom->at('li.message[data-cid="6"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
-ok $dom->at('img[alt="fooman"][src="https://secure.gravatar.com/avatar/23799a05dda548f5a6cf77e23d28418e?s=40&d=retro"]'), 'default gravatar image';
-is $dom->at('h3 a[href="/6/fooman"]')->text, 'fooman', 'got message from fooman';
-is $dom->at('a[href="http://google.com"]')->text, 'http://google.com', 'got google link';
-is $dom->at('.timestamp')->text, '29. juli 23:30:12', 'got timestamp';
+{
+  $connection->add_message({
+    params => [ '#mojo', 'doe: see this link: http://wirc.pl#yikes' ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.message[data-cid="6"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
+  ok $dom->at('img[alt="fooman"][src="https://secure.gravatar.com/avatar/4cac29f5fcfe500bc7e9b88e503045b1?s=40&d=retro"]'), 'default gravatar image';
+  is $dom->at('h3 a[href="/6/fooman"]')->text, 'fooman', 'got message from fooman';
+  is $dom->at('a[href="http://wirc.pl#yikes"]')->text, 'http://wirc.pl#yikes', 'http://wirc.pl#yikes';
+  like $dom->at('.timestamp')->text, qr{^\d+\. \w+ [\d\:]+$}, 'got timestamp';
 
-$t->finish_ok;
+  $connection->add_message({
+    params => [ '#mojo', "\x{1}ACTION is too cool\x{1}" ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.action.message[data-cid="6"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
+  ok $dom->at('img[alt="fooman"][src="https://secure.gravatar.com/avatar/4cac29f5fcfe500bc7e9b88e503045b1?s=40&d=retro"]'), 'default gravatar image';
+  ok $dom->at('a[href="/6/fooman"]'), 'got action message from fooman';
+  is $dom->at('.content')->all_text, 'fooman is too cool', 'without special characters';
+}
+
+{
+  $connection->irc_error({
+    params => [ 'some error', 'message' ],
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.server-message.error[data-cid="6"][data-target="any"]'), 'Got IRC error';
+  is $dom->at('span')->text, 'Error - some error message', 'Error - some error message';
+}
+
+{
+  $connection->add_server_message({
+    params => ['somenick', 'Your host is Tampa.FL.US.Undernet.org'],
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  ok !$dom->at('li.server-message.error'), 'No server error';
+  ok $dom->at('li.server-message[data-cid="6"][data-target="any"]'), 'Got server message';
+  is $dom->at('span')->text, 'Notice - Your host is Tampa.FL.US.Undernet.org', 'Your host is Tampa.FL.US.Undernet.org';
+}
+
+{
+  $connection->irc_rpl_whoisuser({
+    params => ['', 'doe', 'john', 'wirc.pl', '', 'Real name'],
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois';
+  is $dom->at('span:nth-of-type(2)')->all_text, 'doe is john@wirc.pl (Real name).', 'doe is john@wirc.pl (Real name)';
+}
+
+{
+  $connection->irc_rpl_whoischannels({
+    params => ['', 'doe', '#wirc #mojo #other'],
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois channels';
+  is $dom->at('span:nth-of-type(2)')->all_text, 'doe is in #mojo, #other, #wirc.', 'doe is in sorted channels';
+}
+
+{
+  $connection->irc_rpl_notopic({ params => ['', '#wirc'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got no topic';
+  is $dom->at('span')->all_text, 'No topic is set.', 'No topic is set';
+
+  $connection->irc_topic({ params => ['#wirc', 'Awesome'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got topic';
+  is $dom->at('span')->all_text, 'Topic is Awesome', 'Awesome topic';
+}
+
+{
+  $connection->irc_rpl_topic({ params => ['', '#wirc', 'Speling'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got topic';
+  is $dom->at('span')->all_text, 'Topic is Speling', 'Speling topic';
+
+  $connection->irc_rpl_topicwhotime({ params => ['', '#wirc', 'doe', '1375212722'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got topic';
+  is $dom->at('span')->all_text, 'Set by doe at 30. juli 21:32:02', 'Set by doe at 30. juli 21:32:02';
+}
+
+{
+  $connection->irc_join({ params => [ '#mojo' ], prefix => 'fooman!user@host' });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.nick-joined[data-cid="6"][data-target="#mojo"]'), 'user joined';
+  is $dom->at('span:nth-of-type(2)')->all_text, 'fooman joined #mojo', 'fooman joined #mojo';
+
+  $connection->irc_join({ params => [ '#mojo' ], prefix => 'doe!user@host' });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.add-conversation[data-cid="6"][data-target="#mojo"]'), 'self joined';
+}
+
+{
+  $connection->irc_nick({ params => [ 'new_nick' ], prefix => 'fooman!user@host' });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.nick-change[data-cid="6"][data-target="any"]'), 'nick change';
+  is $dom->at('b.old')->text, 'fooman', 'got old nick';
+  is $dom->at('a.nick[href="/6/new_nick"]')->text, 'new_nick', 'got new nick';
+}
+
+{
+  $connection->irc_part({ params => [ '#mojo' ], prefix => 'fooman!user@host' });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.nick-parted[data-cid="6"][data-target="#mojo"]'), 'user parted';
+  is $dom->at('span:nth-of-type(2)')->all_text, 'fooman parted #mojo', 'fooman parted #mojo';
+
+  $connection->irc_part({ params => [ '#mojo' ], prefix => 'doe!user@host' });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.remove-conversation[data-cid="6"][data-target="#mojo"]'), 'self parted';
+}
+
+{
+  $connection->irc_err_bannedfromchan({ params => [ 'doe', '#mojo', 'Cannot join channel (+b)' ] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.remove-conversation[data-cid="6"][data-target="#mojo"]'), 'remove conversation when banned';
+
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.notice[data-cid="0"][data-target="any"]'), 'banned notice';
+  is $dom->at('span')->all_text, 'wirc - Cannot join channel (+b)', 'wirc - Cannot join channel (+b)';
+}
+
+for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
+  $connection->$m({ params => [ '', '#mojo' ] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.remove-conversation[data-cid="6"][data-target="#mojo"]'), 'remove conversation when banned';
+}
+
+{
+  $connection->cmd_join({ params => ['jalla'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.notice[data-cid="0"][data-target="any"]'), 'invalid join';
+  is $dom->at('span')->all_text, 'wirc - Do not understand which channel to join', 'wirc - Do not understand which channel to join';
+
+  $connection->cmd_join({ params => ['#perl'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.add-conversation[data-cid="6"][data-target="#perl"]'), 'joined';
+}
 
 done_testing;
 
 sub data {
-  {
-    cid => 6,
-    target => '#wirc',
-    event => 'rpl_namreply',
-    timestamp => 1375133412,
-    nicks => [
-      { nick => 'fooman', mode => '' },
-      { nick => 'woman', mode => '@' },
-    ],
+  irc_rpl_namreply => {
+    params => [ 'WHATEVER', 'WHATEVER', '#wirc', 'fooman @woman' ],
   },
-  {
-    cid => 6,
-    target => '#mojo',
-    event => 'message',
-    nick => 'fooman',
-    timestamp => 1375133412,
-    message => 'doe: see this link: http://google.com',
-  },
-  {
-    the_end => 1,
-  },
+  the_end => {}, # should never come to this
 }
 
 sub msg {
   qq(<div data-history="1" data-cid="6" data-target="#wirc">$_[0]</div>);
+}
+
+sub dummy_irc {
+  *test::dummy_irc::nick = sub { 'doe' };
+  *test::dummy_irc::user = sub { '' };
+  bless {}, 'test::dummy_irc';
 }

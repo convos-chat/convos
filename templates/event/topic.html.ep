@@ -1,8 +1,7 @@
 <li class="topic" data-cid="<%= $cid %>" data-target="<%= $target %>">
 % if(length $topic) {
-  <span class="prefix">Topic is</span>
-  <span><%= $topic %></span>
+  <span>Topic is <%= $topic %></span>
 % } else {
-  <span class="prefix">No topic is set for <%= $target %>.</span>
+  <span>No topic is set.</span>
 % }
 </li>

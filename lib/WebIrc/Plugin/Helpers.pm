@@ -63,57 +63,17 @@ be passed on to the C<$callback>.
 =cut
 
 sub format_conversation {
-  my ($c, $conversation, $cb) = @_;
-  my $ua = Mojo::UserAgent->new(request_timeout => 2, connect_timeout => 2);
+  my($self, $c, $conversation, $cb) = @_;
   my $delay = Mojo::IOLoop->delay;
-  my $current_nick = $c->stash('nick') || '';
   my @messages;
-
-  my $url_formatter = sub {
-    my ($data, $url) = @_;
-    my $cb = $delay->begin;
-
-    if ($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
-      $data->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
-      $cb->();
-    }
-    else {
-      $ua->head(
-        $url => sub {
-          my $ct = $_[1]->res->headers->content_type || '';
-          $data->{embed} = $c->image($url, alt => 'Embedded media')
-            if $ct =~ /^image/;
-          $cb->();
-        }
-      );
-    }
-
-    $c->link_to($url, $url, target => '_blank');
-  };
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
 
     if ($message->{message}) {
-      my $lookup = $message->{host}
-        ? join '@', @$message{qw/ user host /}
-        : $message->{nick};    # need to check for "host" to be backward compat
-      my $cb = $delay->begin;
-
-      $lookup =~ s!^~!!;
-      $c->redis->get(
-        "avatar:$lookup",
-        sub {
-          my $lookup = $_[1] || $lookup;
-          my $avatar = Mojo::Util::md5_sum($lookup);
-          $message->{avatar}
-            = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
-          $cb->();
-        }
-      );
-
+      $self->_message_avatar($c, $message, $delay);
       $message->{message} = Mojo::Util::xml_escape($message->{message});
-      $message->{message} =~ s!($RE{URI})!{$url_formatter->($message, $1)}!ge;
+      $message->{message} =~ s!($RE{URI}(?:#[\w\.-]+)?)!{$self->_message_url($c, $1, $message, $delay)}!ge;
       $message->{highlight} ||= 0;
     }
 
@@ -122,6 +82,48 @@ sub format_conversation {
 
   $delay->once(finish => sub { $c->$cb(\@messages) });
   $delay->begin->();    # need to do at least one step
+}
+
+sub _message_avatar {
+  my($self, $c, $message, $delay) = @_;
+  my($lookup, $cb);
+
+  $message->{nick} or return; # do not want to insert avatar unless a user sent the message
+  $message->{host} or return; # old data does not have "host" stored because of a bug
+  $cb = $delay->begin;
+  $lookup = join '@', @$message{qw/ user host /};
+  $lookup =~ s!^~!!;
+  $c->redis->get(
+    "avatar:$lookup",
+    sub {
+      my($redis, $email) = @_;
+      warn $email || $lookup;
+      my $avatar = Mojo::Util::md5_sum($email || $lookup);
+      $message->{avatar} = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
+      $cb->();
+    }
+  );
+}
+
+sub _message_url {
+  my($self, $c, $url, $message, $delay) = @_;
+  my $cb;
+
+  if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
+    $message->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
+  }
+  else {
+    $cb = $delay->begin;
+    $self->{embed_ua}->head(
+      $url => sub {
+        my $ct = $_[1]->res->headers->content_type || '';
+        $message->{embed} = $c->image($url, alt => 'Embedded media') if $ct =~ /^image/;
+        $cb->();
+      }
+    );
+  }
+
+  return $c->link_to($url, $url, target => '_blank');
 }
 
 =head2 logf
@@ -197,8 +199,10 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
+  $self->{embed_ua} = Mojo::UserAgent->new(request_timeout => 2, connect_timeout => 2);
+
   $app->helper(form_block          => \&form_block);
-  $app->helper(format_conversation => \&format_conversation);
+  $app->helper(format_conversation => sub { $self->format_conversation(@_) });
   $app->helper(logf                => \&WebIrc::Core::Util::logf);
   $app->helper(format_time => sub { my $self = shift; format_time(@_); });
   $app->helper(redis => \&redis);

@@ -1,4 +1,3 @@
 <li class="topic" data-cid="<%= $cid %>" data-target="<%= $target %>">
-  <span class="prefix">Set by</span>
-  <span> <%= $nick %> at <%= format_time $timestamp, '%e. %b %H:%M:%S' %></span>
+  <span>Set by <%= $nick %> at <%= format_time $timestamp, '%e. %b %H:%M:%S' %></span>
 </li>
