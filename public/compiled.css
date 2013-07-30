@@ -17,7 +17,7 @@ button{width:auto;overflow:visible}
 .clearfix:after{clear:both}
 .clearfix{zoom:1}
 *{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
-body{background-color:#fff;font-size:14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+body{background-color:#fff;font-size:14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:none}
 body,select,input,textarea{color:#333}
 a,a:active{color:#469}
 a:hover{color:#253752}
@@ -26,8 +26,10 @@ textarea:-moz-placeholder{color:#808080}
 li.separator{background:#eee;height:1px;overflow:hidden}
 html,body{height:100%}
 div.wrapper{min-height:100%;height:auto !important;height:100%;margin-bottom:-50px}div.wrapper div.clear{height:70px;clear:both}
-footer{height:50px;background:#fff;color:#999;clear:both;padding:2px 20px}footer form input{font-size:1.1em;width:100%;padding:8px}
-footer input.sending{background:url(../image/loader-facebook.gif) no-repeat 99% 50%}
+footer{height:50px;background:#fff;color:#999;clear:both;padding:2px 20px;overflow:hidden}footer form{position:relative}footer form input{font-size:1.1em;width:100%;padding:8px;padding-right:30px}
+footer form input.sending{background:url(../image/loader-facebook.gif) no-repeat 99% 50%}
+footer form input.disabled,footer form input.sending.disabled{background-color:#eee}
+footer form .menu{position:absolute;top:5px;right:4px}footer form .menu a{color:#555;font-size:22px;text-decoration:none;display:block;padding:4px}
 h1 a,h3 a,.nick-link{text-decoration:none}
 .nick-link{font-weight:bold}
 h1{font-size:2em;margin-top:.5em;margin-bottom:.5em}
@@ -35,6 +37,7 @@ h2{font-size:1.6em;margin-top:.625em;margin-bottom:.625em}
 h3{font-size:1.2em;margin-top:.8333333333333334em;margin-bottom:.8333333333333334em}
 img{max-width:100%}
 p{margin:1em 0}
+ol{margin-left:2em}
 dl dt{width:220px;float:left;clear:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 dl dd{margin-left:240px}
 .center{text-align:center}
@@ -65,11 +68,11 @@ div.loading-indicator{background:url(../image/loader-squares-circle.gif) 50% 50%
 .nanoscroller>.pane{position:absolute;width:10px;right:0;top:0;bottom:0;visibility:hidden\9;filter:alpha(opacity=@{opacity*100});-moz-opacity:.01;-khtml-opacity:.01;-webkit-opacity:.01;opacity:.01;-webkit-transition:.2s;-moz-transition:.2s;-o-transition:.2s;transition:.2s;border-radius:5px;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px}
 .nanoscroller>.pane>.slider{background:#444;background:rgba(0,0,0,0.5);position:relative;margin:0 1px;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px}
 .nanoscroller:hover>.pane,.pane.active,.pane.flashed{visibility:visible\9;filter:alpha(opacity=@{opacity*100});-moz-opacity:.99;-khtml-opacity:.99;-webkit-opacity:.99;opacity:.99}
-nav.bar{background:#fafafa;position:fixed;padding:0 20px;top:0;left:0;width:100%;height:42px;z-index:1000;overflow:hidden;-webkit-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);-moz-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);filter:alpha(opacity=@{opacity*100});-moz-opacity:.95;-khtml-opacity:.95;-webkit-opacity:.95;opacity:.95}nav.bar a,nav.bar a:active{color:#000;text-decoration:none;padding:10px 4px;display:block;float:left}
+nav.bar{background:#fafafa;position:fixed;padding:0 20px;top:0;left:0;right:0;height:42px;z-index:1000;overflow:hidden;-webkit-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);-moz-box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);box-shadow:0 4px 4px -2px rgba(180,180,180,0.5);filter:alpha(opacity=@{opacity*100});-moz-opacity:.95;-khtml-opacity:.95;-webkit-opacity:.95;opacity:.95}nav.bar a,nav.bar a:active{color:#000;text-decoration:none;padding:10px 4px;display:block;float:left}
 nav.bar a.conversation{color:#666}
 nav.bar a.conversations.toggler{display:none}
 nav.bar a.nicks.toggler{display:none}
-nav.bar .right{position:absolute;right:20px}nav.bar .right a,nav.bar .right a:active{font-size:1.2em;width:2em;text-align:center}
+nav.bar .right{background:#fafafa;position:absolute;right:20px}nav.bar .right a,nav.bar .right a:active{font-size:1.2em;width:2em;text-align:center}
 nav.bar .right a.notifications.toggler{position:relative}
 nav.bar .right a.notifications.toggler b{position:absolute;bottom:-3px;left:2px;color:#bbb;font-size:.9em}
 nav.bar .right a.notifications.toggler.alert b{color:#b22}
@@ -94,9 +97,9 @@ div.messages li.message .action{font-style:italic}
 div.messages li.message .embed,div.messages li.message .embed img{max-height:220px}
 div.messages li.message .embed img{border:2px solid #bbb;-webkit-border-radius:20px;-moz-border-radius:20px;border-radius:20px;margin:8px 0}
 div.messages li.nick-change,div.messages li.nick-joined,div.messages li.nick-parted,div.messages li.topic,div.messages li.whois,div.messages li.notice{color:#555}
-div.with-nick-list div.messages{margin-right:180px}
-div.with-nick-list footer form{margin-right:180px}
-div.goto-bottom a{display:none;background:#fafafa;color:#333;position:fixed;right:3px;bottom:3px;padding:5px;z-index:100;border:1px solid #ccc;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;filter:alpha(opacity=@{opacity*100});-moz-opacity:.8;-khtml-opacity:.8;-webkit-opacity:.8;opacity:.8}
+.with-nick-list div.messages{margin-right:180px}
+.with-nick-list footer form{margin-right:180px}
+div.goto-bottom a{display:none;background:#fafafa;color:#333;position:fixed;right:6px;bottom:42px;padding:5px;z-index:100;border:1px solid #ccc;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;filter:alpha(opacity=@{opacity*100});-moz-opacity:.8;-khtml-opacity:.8;-webkit-opacity:.8;opacity:.8}
 .settings{padding-top:50px}.settings h2 select{font-size:18px;font-weight:bold}
 .landing-page{margin:auto;width:800px}.landing-page img{margin:2em 40px;border:1px solid #ccc;-webkit-box-shadow:0 0 4px 2px rgba(180,180,180,0.5);-moz-box-shadow:0 0 4px 2px rgba(180,180,180,0.5);box-shadow:0 0 4px 2px rgba(180,180,180,0.5)}
 .landing-page nav,.landing-page .login,.landing-page .register,.landing-page .about{width:700px;margin:2em auto;overflow:hidden}
@@ -105,7 +108,7 @@ div.goto-bottom a{display:none;background:#fafafa;color:#333;position:fixed;righ
 .landing-page .row{padding:0}
 .landing-page .login,.landing-page .register{background:#fafafa;border:2px solid #4d4d4d;margin-top:-4px;display:none;padding:20px;position:relative}.landing-page .login h1,.landing-page .register h1{display:none}
 .landing-page .about{padding-bottom:100px}
-@media (max-width:700px){footer,nav.bar,.row{padding:0} nav.bar .right{right:0} div.messages{margin-right:0} div.with-nick-list a.nicks.toggler{display:block} div.with-nick-list div.messages,div.with-nick-list footer form{margin-right:0} div.with-nick-list div.nicks.container{display:none} .landing-page{width:100%}.landing-page img{margin:2em 0} .landing-page .row{padding-left:10px;padding-right:10px} .landing-page nav,.landing-page .login,.landing-page .register,.landing-page .about{width:100%} dl dt{float:none;clear:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} dl dd{margin-left:20px}}@font-face{font-family:'FontAwesome';src:url('../font/fontawesome-webfont.eot?v=3.0.1');src:url('../font/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),url('../font/fontawesome-webfont.woff?v=3.0.1') format('woff'),url('../font/fontawesome-webfont.ttf?v=3.0.1') format('truetype');font-weight:normal;font-style:normal}[class^="icon-"],[class*=" icon-"]{font-family:FontAwesome;font-weight:normal;font-style:normal;text-decoration:inherit;-webkit-font-smoothing:antialiased;display:inline;width:auto;height:auto;line-height:normal;vertical-align:baseline;background-image:none;background-position:0 0;background-repeat:repeat;margin-top:0}
+@media (max-width:700px){footer,nav.bar,.row{padding:0} nav.bar .right{right:0} div.messages{margin-right:0} .with-nick-list nav.bar a.nicks.toggler{display:block} .with-nick-list div.messages,.with-nick-list footer form{margin-right:0} .with-nick-list div.nicks.container{display:none} div.wrapper{margin-bottom:-42px}div.wrapper div.clear{height:42px} footer{height:42px}footer input,footer input:focus{border-bottom:0;border-right:0;border-left:0} .landing-page{width:100%}.landing-page img{margin:2em 0} .landing-page nav,.landing-page .login,.landing-page .register,.landing-page .about{width:100%} .landing-page .row{padding-left:10px;padding-right:10px} dl dt{float:none;clear:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} dl dd{margin-left:20px}}@font-face{font-family:'FontAwesome';src:url('../font/fontawesome-webfont.eot?v=3.0.1');src:url('../font/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),url('../font/fontawesome-webfont.woff?v=3.0.1') format('woff'),url('../font/fontawesome-webfont.ttf?v=3.0.1') format('truetype');font-weight:normal;font-style:normal}[class^="icon-"],[class*=" icon-"]{font-family:FontAwesome;font-weight:normal;font-style:normal;text-decoration:inherit;-webkit-font-smoothing:antialiased;display:inline;width:auto;height:auto;line-height:normal;vertical-align:baseline;background-image:none;background-position:0 0;background-repeat:repeat;margin-top:0}
 [class^="icon-"]:before,[class*=" icon-"]:before{text-decoration:inherit;display:inline-block;speak:none}
 a [class^="icon-"],a [class*=" icon-"]{display:inline-block}
 .icon-large:before{vertical-align:-10%;font-size:1.3333333333333333em}

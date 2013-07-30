@@ -1,9 +1,5 @@
 <li class="nick-change" data-cid="<%= $cid %>" data-target="any">
   <span class="prefix"><%= app->config->{name} %>:</span>
-<<<<<<< HEAD
-  <span><b class="old"><%= $old_nick %></b> changed nick to "<%= link_to $new_nick, 'channel.view', { cid => $cid, target => $new_nick }, class => 'nick' %>"</span>
-=======
-  <span><b class="old"><%= $old_nick %></b> changed nick to <%= link_to $new_nick, $new_nick, class=>'nick-link' %>"</span>
->>>>>>> Reformat nick links, make more links links
+  <span><b class="old"><%= $old_nick %></b> changed nick to "<%= link_to $new_nick, 'channel.view', { cid => $cid, target => $new_nick }, class => 'nick-link' %>"</span>
   %= timestamp_span($timestamp)
 </li>
