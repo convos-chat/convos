@@ -132,7 +132,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   $connection->irc_rpl_topicwhotime({ params => ['', '#wirc', 'doe', '1375212722'] });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got topic';
-  is $dom->at('span')->all_text, 'Set by doe at 30. juli 21:32:02', 'Set by doe at 30. juli 21:32:02';
+  like $dom->at('span')->all_text, qr/Set by doe at 30\. jul\S* 21:32:02/i, 'Set by doe at 30. jul 21:32:02';
 }
 
 {
