@@ -388,7 +388,7 @@
     else if(to_current) {
       $message.appendToMessages();
     }
-    else {
+    else if($message.hasClass('message')) {
       drawConversationMenu($message);
     }
 
