@@ -8,9 +8,10 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util qw(format_time);
-use Regexp::Common qw/ URI /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
+# Modified regex from RFC 3986
+my $URL_RE = qw!https?:(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(\S+))?!;
 my $YOUTUBE_INCLUDE
   = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
 
@@ -72,8 +73,8 @@ sub format_conversation {
 
     if ($message->{message}) {
       $self->_message_avatar($c, $message, $delay);
-      $message->{message} = Mojo::Util::xml_escape($message->{message});
-      $message->{message} =~ s!($RE{URI}(?:#[\w\.-]+)?)!{$self->_message_url($c, $1, $message, $delay)}!ge;
+      $message->{message} =~ s!<!&lt;!g; # let us not allow evil tags
+      $message->{message} =~ s!($URL_RE)!{$self->_message_url($c, $1, $message, $delay)}!ge;
       $message->{highlight} ||= 0;
     }
 

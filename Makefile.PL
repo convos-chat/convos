@@ -15,7 +15,6 @@ WriteMakefile(
     'Parse::IRC'                   => '1.18',
     'List::MoreUtils'              => 0,
     'File::Slurp'                  => 0,
-    'Regexp-Common'                => 2013031301,
     'Time::Piece'                  => 1.20,
     'Unicode::UTF8'                => 0.58,
   },

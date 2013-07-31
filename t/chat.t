@@ -44,15 +44,24 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
 
 {
   $connection->add_message({
-    params => [ '#mojo', 'doe: see this link: http://wirc.pl#yikes' ],
+    params => [ '#mojo', 'doe: see this link: http://wirc.pl?a=1&b=2#yikes # really cool' ],
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.message[data-cid="6"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   ok $dom->at('img[alt="fooman"][src="https://secure.gravatar.com/avatar/4cac29f5fcfe500bc7e9b88e503045b1?s=40&d=retro"]'), 'default gravatar image';
   is $dom->at('h3 a[href="/6/fooman"]')->text, 'fooman', 'got message from fooman';
-  is $dom->at('a[href="http://wirc.pl#yikes"]')->text, 'http://wirc.pl#yikes', 'http://wirc.pl#yikes';
+  is $dom->at('a[href="http://wirc.pl?a=1&b=2#yikes"]')->text, 'http://wirc.pl?a=1&b=2#yikes', 'http://wirc.pl#yikes';
   like $dom->at('.timestamp')->text, qr{^\d+\. \w+ [\d\:]+$}, 'got timestamp';
+
+  $connection->add_message({
+    params => [ '#mojo', '<script src="i/will/take/over.js"></script>' ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.message[data-cid="6"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
+  ok !$dom->at('script'), 'no script tag';
+  is $dom->at('div.content'), '<div class="content">&lt;script src=&quot;i/will/take/over.js&quot;&gt;&lt;/script&gt;</div>', 'no tags';
 
   $connection->add_message({
     params => [ '#mojo', "\x{1}ACTION is too cool\x{1}" ],
