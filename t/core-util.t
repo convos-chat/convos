@@ -5,9 +5,9 @@ use WebIrc::Core::Util qw/ format_time as_id id_as /;
 
 {
     my $time = 1348308427;
-    is(
+    like(
         format_time($time, '%d-%m-%Y %b %H:%M:%S'),
-        '22-09-2012 sep. 12:07:07',
+        qr/22-09-2012 sep\W* 12:07:07/i,
         'format_time(1348308427)'
     );
 }
