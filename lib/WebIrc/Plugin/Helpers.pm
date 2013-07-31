@@ -97,7 +97,6 @@ sub _message_avatar {
     "avatar:$lookup",
     sub {
       my($redis, $email) = @_;
-      warn $email || $lookup;
       my $avatar = Mojo::Util::md5_sum($email || $lookup);
       $message->{avatar} = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
       $cb->();

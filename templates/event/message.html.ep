@@ -2,7 +2,7 @@
 <li class="message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-cid="<%= $cid %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
 % if($nick ne $prev_nick) {
   %= image $avatar, alt => $nick, class => 'avatar'
-  <h3><%= link_to $nick, 'channel.view', { cid => $cid, target => $nick }, class=>'nick-link' %></h3>
+  <h3><%= link_to $nick, 'channel.view', { cid => $cid, target => $nick } %></h3>
 % }
   <div class="content"><%== $message %></div>
 % if($nick ne $prev_nick) {
