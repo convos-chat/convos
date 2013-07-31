@@ -70,19 +70,34 @@ sub format_conversation {
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
-
-    if ($message->{message}) {
-      $self->_message_avatar($c, $message, $delay);
-      $message->{message} =~ s!<!&lt;!g; # let us not allow evil tags
-      $message->{message} =~ s!($URL_RE)!{$self->_message_url($c, $1, $message, $delay)}!ge;
-      $message->{highlight} ||= 0;
-    }
+    $message->{message} = $self->_parse_message($c, $message, $delay) if $message->{message};
 
     push @messages, $message;
   }
 
   $delay->once(finish => sub { $c->$cb(\@messages) });
   $delay->begin->();    # need to do at least one step
+}
+
+sub _parse_message {
+  my($self, $c, $message, $delay) = @_;
+  my $last = 0;
+  my @chunks;
+
+  $self->_message_avatar($c, $message, $delay);
+  $message->{highlight} ||= 0;
+
+  while($message->{message} =~ m!($URL_RE)!g) {
+    my $url = $1;
+    my $now = pos $message->{message};
+
+    push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last, $now - length $url);
+    push @chunks, $self->_message_url($c, $url, $message, $delay);
+    $last = $now;
+  }
+
+  push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last);
+  return join '', @chunks;
 }
 
 sub _message_avatar {

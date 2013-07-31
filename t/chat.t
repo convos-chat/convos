@@ -44,7 +44,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
 
 {
   $connection->add_message({
-    params => [ '#mojo', 'doe: see this link: http://wirc.pl?a=1&b=2#yikes # really cool' ],
+    params => [ '#mojo', 'doe: see this &amp; link: http://wirc.pl?a=1&b=2#yikes # really cool' ],
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
@@ -52,6 +52,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   ok $dom->at('img[alt="fooman"][src="https://secure.gravatar.com/avatar/4cac29f5fcfe500bc7e9b88e503045b1?s=40&d=retro"]'), 'default gravatar image';
   is $dom->at('h3 a[href="/6/fooman"]')->text, 'fooman', 'got message from fooman';
   is $dom->at('a[href="http://wirc.pl?a=1&b=2#yikes"]')->text, 'http://wirc.pl?a=1&b=2#yikes', 'http://wirc.pl#yikes';
+  is $dom->at('div.content'), '<div class="content">doe: see this &amp;amp; link: <a href="http://wirc.pl?a=1&amp;b=2#yikes" target="_blank">http://wirc.pl?a=1&amp;b=2#yikes</a> # really cool</div>', 'got link and amp';
   like $dom->at('.timestamp')->text, qr{^\d+\. \w+ [\d\:]+$}, 'got timestamp';
 
   $connection->add_message({
