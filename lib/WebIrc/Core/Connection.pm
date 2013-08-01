@@ -312,11 +312,40 @@ sub add_message {
       $data->{highlight} = 1;
       $self->redis->lpush("user:@{[$self->uid]}:notifications", $JSON->encode($data));
     }
+    if($is_private_message) {
+      $self->_add_conversation($data);
+    }
   }
 
   $self->_publish(
     $data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/ ? 'action_message' : 'message',
     $data,
+  );
+}
+
+sub _add_conversation {
+  my($self, $data) = @_;
+  my $uid = $self->uid;
+  my $id = as_id $self->id, $data->{target};
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->zincrby("user:$uid:conversations", 0, $id, $delay->begin);
+    },
+    sub {
+      my($delay, $new) = @_;
+      $new and return; # has a score
+      $self->redis->zrevrange("user:$uid:conversations", 0, 0, 'WITHSCORES', $delay->begin);
+    },
+    sub {
+      my($delay, $score) = @_;
+      $self->redis->zadd("user:$uid:conversations", $score->[1] - 0.0001, $id, $delay->begin);
+    },
+    sub {
+      my($delay) = @_;
+      $self->_publish(add_conversation => { target => $data->{target} });
+    },
   );
 }
 

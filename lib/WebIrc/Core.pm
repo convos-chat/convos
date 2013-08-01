@@ -362,13 +362,13 @@ sub login {
       my $delay = shift;
       $uid = shift;
       return $self->$cb($uid, shift) unless $uid && $uid =~ /\d+/;
-      warn "[core] Got the uid: $uid" if DEBUG;
+      warn "[core] Got the uid: $uid\n" if DEBUG;
       $self->redis->hget("user:$uid", "digest", $delay->begin);
     },
     sub {
       my ($delay, $digest) = @_;
       if (crypt($params->{password}, $digest) eq $digest) {
-        warn "[core] User $uid has valid password" if DEBUG;
+        warn "[core] User $uid has valid password\n" if DEBUG;
         $self->$cb($uid);
       }
       else {

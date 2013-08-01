@@ -6,7 +6,6 @@ t::Helper->capture_redis_errors;
 t::Helper->init_database;
 
 my $dom = Mojo::DOM->new;
-my $json = Mojo::JSON->new;
 my $server = $t->app->redis->subscribe('connection:6:to_server');
 my @data = data();
 my $connection = WebIrc::Core::Connection->new;
