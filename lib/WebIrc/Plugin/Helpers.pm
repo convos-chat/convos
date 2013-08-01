@@ -10,8 +10,12 @@ use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util qw(format_time);
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
-# Modified regex from RFC 3986
-my $URL_RE = qw!https?:(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(\S+))?!;
+my $URL_RE = do {
+  # Modified regex from RFC 3986
+  no warnings; # Possible attempt to put comments
+  qw!https?:(//([^/?\#]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
+};
+
 my $YOUTUBE_INCLUDE
   = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
 
