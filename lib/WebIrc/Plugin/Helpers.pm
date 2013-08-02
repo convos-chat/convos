@@ -108,6 +108,7 @@ sub _message_avatar {
   my($self, $c, $message, $delay) = @_;
   my($lookup, $cb);
 
+  $message->{avatar} = '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro';
   $message->{nick} or return; # do not want to insert avatar unless a user sent the message
   $message->{host} or return; # old data does not have "host" stored because of a bug
   $cb = $delay->begin;
@@ -118,7 +119,7 @@ sub _message_avatar {
     sub {
       my($redis, $email) = @_;
       my $avatar = Mojo::Util::md5_sum($email || $lookup);
-      $message->{avatar} = "https://secure.gravatar.com/avatar/$avatar?s=40&d=retro";
+      $message->{avatar} =~ s/0000000000000000000000000000/$avatar/;
       $cb->();
     }
   );
