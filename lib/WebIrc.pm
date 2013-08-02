@@ -71,22 +71,6 @@ use File::Spec::Functions qw(catfile tmpdir);
 use WebIrc::Core;
 use Mojo::Redis;
 
-unless($ENV{LESSC_BIN} //= '') {
-  for(split /:/, $ENV{PATH} || '') {
-    next unless -e "$_/lessc"; # -e because it might be a symlink
-    $ENV{LESSC_BIN} = "$_/lessc";
-    last;
-  }
-}
-
-unless($ENV{YUI_COMPRESSOR_BIN} //= '') {
-  for(split /:/, $ENV{PATH} || '') {
-    next unless -e "$_/yui-compressor"; # -e because it might be a symlink
-    $ENV{YUI_COMPRESSOR_BIN} = "$_/yui-compressor";
-    last;
-  }
-}
-
 =head1 ATTRIBUTES
 
 =head2 archive
@@ -169,61 +153,6 @@ sub startup {
       $self->core->start;
     });
   }
-
-  # try to remind me to commit changes in compiled.css and .js as well
-  $self->_compile_stylesheet;
-  $self->_compile_javascript;
-}
-
-sub _compile_javascript { require Mojo::DOM;
-  my $self = shift;
-  my $config = $self->plugin('Config'); # make sure config file is loaded
-  my $args = { template => 'empty', layout => 'default', title => '', VERSION => 0 };
-  my $compiled = $self->home->rel_file('public/compiled.js');
-  my $modified = +(stat $compiled)[9] || 0;
-  my $mode = $self->mode;
-  my $js = '';
-  my($output, $format);
-
-  $self->mode('compiling');
-  ($output, $format) = $self->renderer->render(Mojolicious::Controller->new(app => $self), $args);
-  $self->mode($mode);
-  $output = Mojo::DOM->new($output);
-
-  $output->find('script')->each(sub {
-    my $file = $self->home->rel_file("public" . $_[0]->{src});
-    $file = $self->_minify_javascript($file, $modified);
-    $self->log->debug("Compiling $file");
-    open my $JS, '<', $file or die "Read $file: $!";
-    while(<$JS>) {
-      m!^\s*//! and next;
-      m!^\s*(.+)! or next;
-      $js .= "$1\n";
-    }
-  });
-
-  open my $COMPILED, '>', $compiled or die "Write $compiled: $!";
-  print $COMPILED $js;
-}
-
-sub _compile_stylesheet {
-  my $self = shift;
-  my $less_file = $self->home->rel_file('public/less/main.less');
-  my $css_file = $self->home->rel_file('public/compiled.css');
-
-  system $ENV{LESSC_BIN} => -x => $less_file => $css_file if $ENV{LESSC_BIN};
-  system $ENV{YUI_COMPRESSOR_BIN} => $css_file => -o => $css_file if $ENV{YUI_COMPRESSOR_BIN};
-}
-
-sub _minify_javascript {
-  my($self, $file, $compiled_modified) = @_;
-  my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
-  my $modified = +(stat $file)[9] || -1;
-
-  return $file if $mini eq $file;
-  return $mini if $modified < $compiled_modified;
-  system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini if $ENV{YUI_COMPRESSOR_BIN};
-  return -e $mini ? $mini : $file;
 }
 
 =head1 COPYRIGHT
