@@ -137,7 +137,6 @@ sub _minify_javascript {
   return -e $mini ? $mini : $file;
 }
 
-
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
