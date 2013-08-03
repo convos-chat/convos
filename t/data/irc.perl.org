@@ -1,6 +1,0 @@
-:spectral.shadowcat.co.uk NOTICE AUTH :*** Looking up your hostname...
-:spectral.shadowcat.co.uk NOTICE AUTH :*** Checking Ident
-
-:spectral.shadowcat.co.uk NOTICE AUTH :*** Found your hostname
-
-:spectral.shadowcat.co.uk NOTICE AUTH :*** No Ident response
