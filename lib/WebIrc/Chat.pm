@@ -82,7 +82,6 @@ sub socket {
         message => sub {
           $self->logf(debug => '[ws] < %s', $_[1]);
           my ($self, $octets) = @_;
-          return if $octets eq 'K'; # try to keep the socket alive
           my $dom = Mojo::DOM->new($octets)->at('div');
           my($cid, $target) = map { delete $dom->{$_} || '' } qw/ data-cid data-target /;
 
