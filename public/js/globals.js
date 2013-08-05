@@ -3,6 +3,7 @@ window.sortedSet = function() { this.set = { length: 0 }; return this; };
 window.sortedSet.prototype.add = function(score, member) { this.set[member] = score; this.length++; return this; };
 window.sortedSet.prototype.clear = function() { this.set = {}; this.length = 0; return this; };
 window.sortedSet.prototype.rem = function(member) { delete this.set[member]; this.length--; return this; };
+window.sortedSet.prototype.score = function(member) { return this.set[member] || 0 };
 window.sortedSet.prototype.revrange = function(start, stop) {
   var k, res = [], self = this;
   for(k in self.set) res.push(k);

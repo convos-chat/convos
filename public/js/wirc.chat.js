@@ -21,7 +21,6 @@
   ];
 
   // override original method with a filter
-  nicks.with_mode = {};
   nicks.add = function(score, member) {
     if(member !== $messages.data('nick')) this.set[member] = score;
     this.length++;
@@ -55,7 +54,7 @@
     }
     else if(this.hasClass('nick-change')) {
       var re, txt, old = this.find('.old').text(), nick = this.find('.nick').text();
-      nicks.rem(old).add(nick);
+      nicks.add(nicks.score(old), nick).rem(old);
       if(old == $messages.data('nick')) {
         re = new RegExp('\\b' + old + '\\b', 'i');
         txt = $input.attr('placeholder').replace(re, nick);
@@ -68,7 +67,7 @@
       nickList($('<div/>'));
     }
     else if(this.hasClass('nick-parted')) {
-      nicks.rem(0, this.find('.nick').text());
+      nicks.rem(this.find('.nick').text());
       nickList($('<div/>'));
     }
     else if(this.hasClass('nicks')) {
@@ -360,7 +359,6 @@
       $nicks.each(function() {
         var $a = $(this);
         var n = $a.data('nick');
-        nicks.with_mode[n] = $a.text();
         nicks.add(senders[n] || 1, n);
       });
     }
@@ -368,7 +366,7 @@
     if(nicks.length) {
       $('div.nicks.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(cid, n) + '">' + nicks.with_mode[n] + '</a></li>';
+          return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
         }).join('')
       );
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
