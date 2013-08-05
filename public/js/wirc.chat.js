@@ -28,9 +28,25 @@
     return this;
   };
 
+  $.fn.attachEventsToMessage = function() {
+    this.find('h3 a').each(function() {
+      this.href = '#' + this.href;
+    }).click(function() {
+      var n = $(this).text();
+      $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
+    });
+
+    this.find('.close').click(function() {
+      $(this).closest('li').remove();
+    });
+  };
+
+
   $.fn.appendToMessages = function() {
     var $previous = $messages.children('li:last');
     var last_nick = $previous.data('sender') || '';
+
+    this.attachEventsToMessage();
 
     if(this.hasClass('message') && $previous.hasClass('message')) {
       if(last_nick == this.data('sender')) {
@@ -83,6 +99,7 @@
 
     $('body').loadingIndicator('hide');
     $('div.nicks.container ul').html('');
+    $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
     if($messages.data('target').indexOf('#') === 0) {
@@ -438,19 +455,11 @@
       $.post($.url_for('notifications/clear'));
       $(this).removeClass('alert').children('b').text(0);
     });
-    $('div.messages').on('mousedown touchstart', '.message h3 a', function(e) {
-      this.href = '#!' + this.href;
-      $input.val($(this).text() + ': ').focusSoon();
-    });
-    $('div.messages').on('mousedown touchstart', '.close', function(e) {
-      $(this).closest('li').remove();
-    });
 
     $('nav a.toggler').initDropDown();
     $('nav, div.container, div.goto-bottom').fastButton();
     $('nav a.settings').click(function(e) { location.href = this.href; });
     $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
-    $('div.messages').on('click', '.message h3 a', function(e) { $input.val($(this).text() + ': ').focusSoon(); $win.scrollTo('bottom') });
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getMessages).on('resize', drawUI);
   });
