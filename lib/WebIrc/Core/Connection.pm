@@ -310,7 +310,7 @@ sub add_message {
   if($data->{nick} ne $current_nick) {
     if($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
       $data->{highlight} = 1;
-      $self->redis->lpush("user:@{[$self->uid]}:notifications", $JSON->encode($data));
+      $self->redis->lpush("user:@{[$self->uid]}:notifications", $JSON->encode({ cid => $self->id ,%$data}));
     }
     if($is_private_message) {
       $self->_add_conversation($data);
