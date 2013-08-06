@@ -1,35 +1,50 @@
-@backgroundColor: #fff;
-@fontFamily: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-@fontColor: #333;
-@linkColor: #469;
-@fontSize: 14px;
-@bodyGutter: 20px;
-@navHeight: 44px;
-@footerHeight: 50px;
-@responsiveWidth: 700px;
-@columnWidth: 8.333333%;
-@navBarIconWidth: 32px;
-@buttonBorderHover: 2px solid darken(#fff, 70%);
-@nickListWidth: 180px;
-@unreadColor: #a00;
+$backgroundColor: #fff;
+$fontFamily: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$fontColor: #333;
+$linkColor: #469;
+$fontSize: 14px;
+$bodyGutter: 20px;
+$navHeight: 44px;
+$footerHeight: 50px;
+$responsiveWidth: 700px;
+$columnWidth: 8.333333%;
+$navBarIconWidth: 32px;
+$buttonBorderHover: 2px solid darken(#fff, 70%);
+$nickListWidth: 180px;
+$unreadColor: #a00;
 
 /*
- * Less helpers
+ * Sass mixins
  */
-.box-shadow(@string) { -webkit-box-shadow: @string; -moz-box-shadow: @string; box-shadow: @string; }
-.border-radius(@radius) { -webkit-border-radius: @radius; -moz-border-radius: @radius; border-radius: @radius; }
-.ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
+@mixin prefix($property, $value...){      // Chews experimental css properties,
+    -webkit-#{$property}:   $value;       // spits out browser prefixes.
+    -moz-#{$property}:      $value;       // Does not include -o- and -ms- because,
+    #{$property}:           $value;       // you know ... They're useless.
+}
+
+@mixin box-shadow($shadow...) {
+  -webkit-box-shadow: $shadow;
+  -moz-box-shadow: $shadow;
+  box-shadow: $shadow;
+}
+
+@mixin ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
 .opacity(@opacity) { filter: ~"alpha(opacity=@{opacity*100})"; -moz-opacity: @opacity; -khtml-opacity: @opacity; -webkit-opacity: @opacity; opacity: @opacity; }
-.font-size-margin(@size) { font-size: @size; margin-top: 1 / @size; margin-bottom: 1 / @size; }
-.transition(@transition) { -webkit-transition: @transition; -moz-transition: @transition; -o-transition: @transition; transition: @transition; }
-.grid(@cols:1, @last:0) {
-  @gutter: abs(2% * (@last - 1));
-  @column: @columnWidth - @gutter;
-  width: (@cols * (@column + @gutter) - @gutter);
-  margin-right: @gutter;
+
+@mixin font-size-margin($size) {
+  font-size: $size;
+  margin-top: 1 / $size;
+  margin-bottom: 1 / $size;
+}
+
+@mixin grid($cols, $last: 0) {
+  $gutter: 2% * ($last - 1);
+  $column: $columnWidth - $gutter;
+  width: ($cols * ($column + $gutter) - $gutter);
+  margin-right: $gutter;
   float: left;
 
-  @media (max-width: @responsiveWidth) {
+  @media (max-width: $responsiveWidth) {
     float: none;
     width: 100%;
   }
@@ -47,7 +62,7 @@ table { border-collapse: collapse; border-spacing: 0; }
 th { font-weight: bold; vertical-align: bottom; }
 td { font-weight: normal; vertical-align: top; }
 input, select, button { vertical-align: middle; }
-select, input, textarea { font-size: @fontSize - 1; }
+select, input, textarea { font-size: $fontSize - 1; }
 table { font-size: inherit; font: 100%; }
 .clickable, label, input[type=file], button { cursor: pointer; }
 button, input, select, textarea { margin: 0; }
@@ -57,12 +72,12 @@ button { width: auto; overflow: visible; }
 .clearfix:after { clear: both; }
 .clearfix { zoom: 1; }
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
-body { background-color: @backgroundColor; font-size: @fontSize; font-family: @fontFamily; -webkit-text-size-adjust: none; }
-body, select, input, textarea { color: @fontColor; }
-a, a:active { color: @linkColor; }
-a:hover { color: darken(@linkColor, 20%); }
-input:-moz-placeholder { color: lighten(@fontColor, 30%); }
-textarea:-moz-placeholder { color: lighten(@fontColor, 30%); }
+body { background-color: $backgroundColor; font-size: $fontSize; font-family: $fontFamily; -webkit-text-size-adjust: none; }
+body, select, input, textarea { color: $fontColor; }
+a, a:active { color: $linkColor; }
+a:hover { color: darken($linkColor, 20%); }
+input:-moz-placeholder { color: lighten($fontColor, 30%); }
+textarea:-moz-placeholder { color: lighten($fontColor, 30%); }
 li.separator { background: #eee; height: 1px; overflow: hidden; }
 
 /*
@@ -73,21 +88,21 @@ div.wrapper {
   min-height: 100%;
   height: auto !important;
   height: 100%;
-  margin-bottom: -@footerHeight;
+  margin-bottom: -$footerHeight;
 
   div.clear {
-    height: @footerHeight + 20;
+    height: $footerHeight + 20;
     clear: both;
   }
 }
 
 footer {
-  height: @footerHeight;
+  height: $footerHeight;
   width: 100%;
   background: #fff;
   color: #999;
   clear: both;
-  padding: 5px @bodyGutter;
+  padding: 5px $bodyGutter;
   overflow: hidden;
   position: fixed;
   bottom: 0;
@@ -105,7 +120,7 @@ footer {
     }
   }
 
-  @media (max-width: @responsiveWidth) {
+  @media (max-width: $responsiveWidth) {
     position: static;
   }
 }
@@ -121,23 +136,23 @@ img { max-width: 100%; }
 p { margin: 1em 0; }
 ol { margin-left: 2em; }
 dl {
-  @dtWidth: 220px;
+  $dtWidth: 220px;
   dt {
-    width: @dtWidth;
+    width: $dtWidth;
     float: left;
     clear: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  dd { margin-left: @dtWidth + @bodyGutter; }
+  dd { margin-left: $dtWidth + $bodyGutter; }
 }
 .center { text-align: center; }
 .hidden { display: none; }
-.row { padding: 0 @bodyGutter; clear: both; }
+.row { padding: 0 $bodyGutter; clear: both; }
 .close { display: block; float: right; cursor: pointer; font-size: 1.3em; padding: 3px; }
 
-div.alert, div.question { padding: 1em; margin: 1em 0; .border-radius(3px); }
+div.alert, div.question { padding: 1em; margin: 1em 0; border-radius: 3px; }
 div.alert { background: #fed; color: #851; border: 1px solid #edb; }
 div.question { background: #def; color: #158; border: 1px solid #bde; }
 div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
@@ -148,14 +163,14 @@ div.question .button.confirm { background: darken(#def, 10%); border: 2px solid 
  */
 form {
   margin: 0;
-  label { display: block; margin-top: @bodyGutter; }
+  label { display: block; margin-top: $bodyGutter; }
   input {
     padding: 4px;
     font-size: 1.2em;
     outline: none;
     border: 2px solid #ccc;
     width: 290px;
-    .border-radius(3px);
+    border-radius: 3px;
   }
   input:focus { border: 2px solid darken(#ccc, 15%); }
   div.error {
@@ -182,12 +197,12 @@ button, .button {
   text-decoration: none;
   padding: 6px 8px;
   border: 2px solid darken(#fff, 40%);
-  .border-radius(3px);
+  border-radius: 3px;
 }
 button { height: 34px; vertical-align: baseline; } // make <a> and <button> align. at least in chrome
 button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
 button.confirm, a.confirm { color: #900; border: 2px solid #900; }
-button:hover, .button:hover { border: @buttonBorderHover; }
+button:hover, .button:hover { border: $buttonBorderHover; }
 
 /*
  * Loading indicator
@@ -203,7 +218,7 @@ div.loading-indicator {
 }
 div.loading-indicator-overlay {
   background: #fff;
-  .opacity(0.7);
+  @include opacity(0.7);
 }
 div.loading-indicator {
   background: url(../image/loader-squares-circle.gif) 50% 50% no-repeat;
@@ -228,20 +243,20 @@ div.loading-indicator {
   top: 0;
   bottom: 0;
   visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
-  .opacity(0.01);
-  .transition(0.2s);
-  .border-radius(5px);
+  @include opacity(.01);
+  @include prefix(transition, all ease .2s)
+  border-radius: 5px;
 }
 .nanoscroller > .pane > .slider {
   background: #444;
   background: rgba(0, 0, 0, 0.5);
   position: relative;
   margin: 0 1px;
-  .border-radius(3px);
+  border-radius: 3px;
 }
 .nanoscroller:hover > .pane, .pane.active, .pane.flashed {
   visibility: visible\9; /* Target only IE7 and IE8 with this hack */
-  .opacity(0.99);
+  @include opacity(.99);
 }
 
 /*
@@ -250,15 +265,15 @@ div.loading-indicator {
 nav.bar {
   background: #fafafa;
   position: fixed;
-  padding: 0 @bodyGutter;
+  padding: 0 $bodyGutter;
   top: 0;
   left: 0;
   right: 0;
   height: 42px;
   z-index: 1000;
   overflow: hidden;
-  .box-shadow(0 4px 4px -2px rgba(180, 180, 180, 0.5));
-  .opacity(0.95);
+  @include prefix(box-shadow, 0 4px 4px -2px rgba(180,180,180,.5));
+  @include opacity(.95);
 
   a, a:active {
     color: #000;
@@ -275,7 +290,7 @@ nav.bar {
   .right {
     background: #fafafa;
     position: absolute;
-    right: @bodyGutter;
+    right: $bodyGutter;
     a, a:active { font-size: 1.2em; width: 2em; text-align: center; }
     a.notifications.toggler { position: relative; }
     a.notifications.toggler b { position: absolute; bottom: -3px; right: 2px; color: #bbb; font-size: 0.9em; font-weight: normal; }
@@ -285,7 +300,7 @@ nav.bar {
 
   a.active, a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
   ul.conversations li:first-of-type a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
-  ul.conversations li.unread a { color: @unreadColor };
+  ul.conversations li.unread a { color: $unreadColor };
 }
 
 div.conversations.container,
@@ -310,20 +325,20 @@ div.nicks.container {
 }
 
 div.conversations.container {
-  li.unread a { color: @unreadColor };
+  li.unread a { color: $unreadColor };
 }
 
 div.notifications.container {
   li.unread { border-right: 2px solid #f66; }
-  span.message { color: #666; font-size: 0.9em; line-height: 1em; .ellipsis(); }
+  span.message { color: #666; font-size: 0.9em; line-height: 1em; @include ellipsis(); }
 }
 
-@media (min-width: @responsiveWidth) {
+@media (min-width: $responsiveWidth) {
   div.nicks.container {
     background: #f3f3f3;
     border: 0;
     border-left: 1px solid #ddd;
-    width: @nickListWidth;
+    width: $nickListWidth;
     position: fixed;
     display: block;
     top: 42px;
@@ -361,13 +376,13 @@ div.messages {
   li.same-nick { padding-top: 0; }
   li.message .action { font-style: italic; }
   li.message .embed, li.message .embed img { max-height: 220px; }
-  li.message .embed img { border: 2px solid #bbb; .border-radius(20px); margin: 8px 0; }
+  li.message .embed img { border: 2px solid #bbb; border-radius: 20px; margin: 8px 0; }
   li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
 }
 
 .with-nick-list {
-  div.messages { margin-right: @nickListWidth; }
-  footer form { margin-right: @nickListWidth; }
+  div.messages { margin-right: $nickListWidth; }
+  footer form { margin-right: $nickListWidth; }
 }
 
 div.goto-bottom a {
@@ -380,8 +395,8 @@ div.goto-bottom a {
   padding: 5px;
   z-index: 100;
   border: 1px solid #ccc;
-  .border-radius(4px);
-  .opacity(0.8);
+  border-radius: 4px;
+  @include opacity(.8);
 }
 
 /*
@@ -396,13 +411,13 @@ div.goto-bottom a {
  * Landing page
  */
 .landing-page {
-  @loginBackground: darken(#fff, 2%);
+  $loginBackground: darken(#fff, 2%);
   margin: auto;
   width: 800px;
   img {
     margin: 2em 40px;
     border: 1px solid #ccc;
-    .box-shadow(0 0px 4px 2px rgba(180, 180, 180, 0.5));
+    @include prefix(box-shadow, 0 0 4px 2px rgba(180,180,180,.5));
   }
   nav, .login, .register, .about {
     width: 700px;
@@ -412,13 +427,13 @@ div.goto-bottom a {
   nav {
     margin-bottom: 0;
     a.button, a.button.active {
-      background: @loginBackground;
+      background: $loginBackground;
       margin-right: 10px;
       display: block;
       float: left;
     }
     a.active {
-      border: @buttonBorderHover;
+      border: $buttonBorderHover;
       border-bottom: 0;
       position: relative;
       z-index: 5;
@@ -426,18 +441,18 @@ div.goto-bottom a {
   }
   .row { padding: 0; }
   .login, .register {
-    background: @loginBackground;
-    border: @buttonBorderHover;
+    background: $loginBackground;
+    border: $buttonBorderHover;
     margin-top: -4px;
     display: none;
-    padding: @bodyGutter;
+    padding: $bodyGutter;
     position: relative;
     h1 { display: none; }
   }
   .about { padding-bottom: 100px; }
 }
 
-@media (max-width: @responsiveWidth) {
+@media (max-width: $responsiveWidth) {
   footer, nav.bar, .row { padding: 0; }
   nav.bar .right { right: 0; }
   div.messages { margin-right: 0; }
@@ -477,7 +492,7 @@ div.goto-bottom a {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    dd { margin-left: @bodyGutter; }
+    dd { margin-left: $bodyGutter; }
   }
 }
 
@@ -492,10 +507,9 @@ div.goto-bottom a {
  *    "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome"
  */
 
-@FontAwesomePath:   "../font";
-@borderColor:       #eee;
-@iconMuted:         #eee;
-.border-radius(@radius) { -webkit-border-radius: @radius; -moz-border-radius: @radius; border-radius: @radius; }
+$FontAwesomePath:   "../font";
+$borderColor:       #eee;
+$iconMuted:         #eee;
 
 @font-face {
   font-family: 'FontAwesome';
@@ -556,9 +570,9 @@ a {
 // -------------------------
 
 .icon-border {
-  border: solid 1px @borderColor;
+  border: solid 1px $borderColor;
   padding: .2em .25em .15em;
-  .border-radius(3px);
+  border-radius: 3px;
 }
 
 [class^="icon-"],
