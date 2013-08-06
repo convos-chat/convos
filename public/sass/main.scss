@@ -367,6 +367,9 @@ div.messages {
     img { float: left; }
     h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
     h3, div { margin-left: 50px; }
+    .content {
+      max-width: 40em;
+    }
     div.question { margin-left: 0; }
     span.timestamp {
       letter-spacing: -1px;
