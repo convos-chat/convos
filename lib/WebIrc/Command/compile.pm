@@ -11,9 +11,9 @@ directory.
 
 =head1 ENVIRONMENT VARIABLES
 
-=head2 LESSC_BIN
+=head2 SASS_BIN
 
-Defaults to the first "lessc" file found in PATH.
+Defaults to the first "sass" file found in PATH.
 
 =head2 YUI_COMPRESSOR_BIN
 
@@ -24,10 +24,10 @@ Defaults to the first "yui-compressor" file found in PATH.
 use Mojo::Base 'Mojolicious::Command';
 use Mojo::DOM;
 
-unless($ENV{LESSC_BIN} //= '') {
+unless($ENV{SASS_BIN} //= '') {
   for(split /:/, $ENV{PATH} || '') {
-    next unless -e "$_/lessc"; # -e because it might be a symlink
-    $ENV{LESSC_BIN} = "$_/lessc";
+    next unless -e "$_/sass"; # -e because it might be a symlink
+    $ENV{SASS_BIN} = "$_/sass";
     last;
   }
 }
@@ -112,17 +112,17 @@ sub compile_javascript {
 
 =head2 compile_stylesheet
 
-Creates "public/compiled.css" from "public/less/main.less", using
-L</LESSC_BIN> and L</YUI_COMPRESSOR_BIN> if they exists
+Creates "public/compiled.css" from "public/sass/main.scss", using
+L</SASS_BIN> and L</YUI_COMPRESSOR_BIN> if they exists
 
 =cut
 
 sub compile_stylesheet {
   my $self = shift;
-  my $less_file = $self->app->home->rel_file('public/less/main.less');
+  my $sass_file = $self->app->home->rel_file('public/sass/main.scss');
   my $css_file = $self->app->home->rel_file('public/compiled.css');
 
-  system $ENV{LESSC_BIN} => -x => $less_file => $css_file if $ENV{LESSC_BIN};
+  system $ENV{SASS_BIN} => $sass_file => $css_file => '--style', 'compressed' if $ENV{SASS_BIN};
   system $ENV{YUI_COMPRESSOR_BIN} => $css_file => -o => $css_file if $ENV{YUI_COMPRESSOR_BIN};
 }
 
