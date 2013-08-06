@@ -155,6 +155,39 @@ sub startup {
   }
 }
 
+=head2 production_mode
+
+This method will run L<WebIrc::Command::compile/compile_javascript> and
+L<WebIrc::Command::compile/compile_stylesheet>.
+
+=cut
+
+sub production_mode {
+  my $self = shift;
+
+  require WebIrc::Command::compile;
+  WebIrc::Command::compile->new(app => $self)->compile_javascript->compile_stylesheet;
+}
+
+=head2 development_mode
+
+This will run L<WebIrc::Command::compile/compile_stylesheet> unless
+L<Test::Mojo> is loaded. This allow you to start morbo like this:
+
+  $ morbo script/web_irc -w public/sass -w lib
+
+=cut
+
+sub development_mode {
+  my $self = shift;
+
+  # ugly hack to prevent this from running when running unit tests
+  unless($INC{'Test/Mojo.pm'}) {
+    require WebIrc::Command::compile;
+    WebIrc::Command::compile->new(app => $self)->compile_stylesheet;
+  }
+}
+
 =head1 COPYRIGHT
 
 Nordaaker

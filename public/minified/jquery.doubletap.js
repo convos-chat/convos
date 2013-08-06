@@ -1,1 +1,0 @@
-(function(b){var a=/(iPad|iPhone|iPod)/g.test(navigator.userAgent);b.fn.doubletap=function(c){return this.each(function(){var d=new Date().getTime();b(this).bind("touchend",function(g){var f=new Date().getTime();var h=f-d;if(h<500&&h>0){g.preventDefault();g.stopPropagation();d=0;c(g)}else{d=f}})})}})(jQuery);

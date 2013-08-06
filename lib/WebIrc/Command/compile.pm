@@ -108,6 +108,7 @@ sub compile_javascript {
 
   open my $COMPILED, '>', $compiled or die "Write $compiled: $!";
   print $COMPILED $js;
+  return $self;
 }
 
 =head2 compile_stylesheet
@@ -124,6 +125,7 @@ sub compile_stylesheet {
 
   system $ENV{SASS_BIN} => $sass_file => $css_file => '--style', 'compressed' if $ENV{SASS_BIN};
   system $ENV{YUI_COMPRESSOR_BIN} => $css_file => -o => $css_file if $ENV{YUI_COMPRESSOR_BIN};
+  return $self;
 }
 
 sub _minify_javascript {
