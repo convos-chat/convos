@@ -16,7 +16,7 @@ $unreadColor: #a00;
 /*
  * Sass mixins
  */
-@mixin prefix($property, $value...){      // Chews experimental css properties,
+@mixin prefix($property, $value...) {      // Chews experimental css properties,
     -webkit-#{$property}:   $value;       // spits out browser prefixes.
     -moz-#{$property}:      $value;       // Does not include -o- and -ms- because,
     #{$property}:           $value;       // you know ... They're useless.
@@ -29,12 +29,17 @@ $unreadColor: #a00;
 }
 
 @mixin ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
-.opacity(@opacity) { filter: ~"alpha(opacity=@{opacity*100})"; -moz-opacity: @opacity; -khtml-opacity: @opacity; -webkit-opacity: @opacity; opacity: @opacity; }
+@mixin opacity($value) {
+  opacity: $value;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=" $value * 100 ")";
+  filter: alpha(opacity= $value * 100 );
+  zoom: 1;
+}
 
 @mixin font-size-margin($size) {
   font-size: $size;
-  margin-top: 1 / $size;
-  margin-bottom: 1 / $size;
+  margin-top: $size;
+  margin-bottom: $size;
 }
 
 @mixin grid($cols, $last: 0) {
@@ -129,9 +134,9 @@ footer {
  * Typographi and base CSS
  */
 h1 a, h3 a { text-decoration: none; }
-h1 { .font-size-margin(2em); }
-h2 { .font-size-margin(1.6em); }
-h3 { .font-size-margin(1.2em); }
+h1 { @include font-size-margin(2em); }
+h2 { @include font-size-margin(1.6em); }
+h3 { @include font-size-margin(1.2em); }
 img { max-width: 100%; }
 p { margin: 1em 0; }
 ol { margin-left: 2em; }
@@ -244,7 +249,7 @@ div.loading-indicator {
   bottom: 0;
   visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
   @include opacity(.01);
-  @include prefix(transition, all ease .2s)
+  @include prefix(transition, all ease-in-out .2s);
   border-radius: 5px;
 }
 .nanoscroller > .pane > .slider {
@@ -513,10 +518,10 @@ $iconMuted:         #eee;
 
 @font-face {
   font-family: 'FontAwesome';
-  src: url('@{FontAwesomePath}/fontawesome-webfont.eot?v=3.0.1');
-  src: url('@{FontAwesomePath}/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),
-    url('@{FontAwesomePath}/fontawesome-webfont.woff?v=3.0.1') format('woff'),
-    url('@{FontAwesomePath}/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
+  src: url('#{$FontAwesomePath}/fontawesome-webfont.eot?v=3.0.1');
+  src: url('#{$FontAwesomePath}/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),
+    url('#{$FontAwesomePath}/fontawesome-webfont.woff?v=3.0.1') format('woff'),
+    url('#{$FontAwesomePath}/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
 //  url('@{FontAwesomePath}/fontawesome-webfont.svg#fontawesomeregular?v=3.0.1') format('svg');
 //  src: url('@{FontAwesomePath}/FontAwesome.otf') format('opentype');
   font-weight: normal;
