@@ -673,7 +673,6 @@ div.goto-bottom a {
   font-style: normal;
   text-decoration: inherit;
   -webkit-font-smoothing: antialiased;
-  /* sprites.less reset */
   display: inline;
   width: auto;
   height: auto;

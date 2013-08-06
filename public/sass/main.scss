@@ -501,16 +501,16 @@ div.goto-bottom a {
   }
 }
 
-/*!
- *  Font Awesome 3.0.2
- *  -------------------------------------------------------
- *  - The Font Awesome font is licensed under the SIL Open Font License - http://scripts.sil.org/OFL
- *  - Font Awesome CSS, LESS, and SASS files are licensed under the MIT License -
- *    http://opensource.org/licenses/mit-license.html
- *  - The Font Awesome pictograms are licensed under the CC BY 3.0 License - http://creativecommons.org/licenses/by/3.0/
- *  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
- *    "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome"
- */
+//
+//  Font Awesome 3.0.2
+//  -------------------------------------------------------
+//  - The Font Awesome font is licensed under the SIL Open Font License - http://scripts.sil.org/OFL
+//  - Font Awesome CSS, LESS, and SASS files are licensed under the MIT License -
+//    http://opensource.org/licenses/mit-license.html
+//  - The Font Awesome pictograms are licensed under the CC BY 3.0 License - http://creativecommons.org/licenses/by/3.0/
+//  - Attribution is no longer required in Font Awesome 3.0, but much appreciated:
+//    "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome"
+//
 
 $FontAwesomePath:   "../font";
 $borderColor:       #eee;
@@ -522,14 +522,14 @@ $iconMuted:         #eee;
   src: url('#{$FontAwesomePath}/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),
     url('#{$FontAwesomePath}/fontawesome-webfont.woff?v=3.0.1') format('woff'),
     url('#{$FontAwesomePath}/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
-//  url('@{FontAwesomePath}/fontawesome-webfont.svg#fontawesomeregular?v=3.0.1') format('svg');
-//  src: url('@{FontAwesomePath}/FontAwesome.otf') format('opentype');
+//  url('#{$FontAwesomePath}/fontawesome-webfont.svg#fontawesomeregular?v=3.0.1') format('svg');
+//  src: url('#{$FontAwesomePath}/FontAwesome.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
 
-/*  Font Awesome styles
-    ------------------------------------------------------- */
+//  Font Awesome styles
+//    -------------------------------------------------------
 [class^="icon-"],
 [class*=" icon-"] {
   font-family: FontAwesome;
@@ -538,7 +538,6 @@ $iconMuted:         #eee;
   text-decoration: inherit;
   -webkit-font-smoothing: antialiased;
 
-/* sprites.less reset */
   display: inline;
   width: auto;
   height: auto;
