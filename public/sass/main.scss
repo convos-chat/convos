@@ -107,7 +107,7 @@ footer {
   background: #fff;
   color: #999;
   clear: both;
-  padding: 5px $bodyGutter;
+  padding: 0 ($bodyGutter - 5) 5px;
   overflow: hidden;
   position: fixed;
   bottom: 0;
