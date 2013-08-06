@@ -16,3 +16,4 @@ MANIFEST*
 /script/hypnotoad.pid
 /web_irc.production.conf
 /cover_db
+/.sass-cache/
