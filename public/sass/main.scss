@@ -372,11 +372,11 @@ div.messages {
     }
     div.question { margin-left: 0; }
     span.timestamp {
-      letter-spacing: -1px;
       position: absolute;
       top: 2px;
       right: 2px;
       color: #999;
+      font-size: .85em;
     }
   }
 
@@ -539,6 +539,7 @@ $iconMuted:         #eee;
   font-family: FontAwesome;
   font-weight: normal;
   font-style: normal;
+  font-size: 21px;
   text-decoration: inherit;
   -webkit-font-smoothing: antialiased;
 
