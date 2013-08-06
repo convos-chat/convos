@@ -2,9 +2,6 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
-t::Helper->capture_redis_errors;
-t::Helper->init_database;
-
 my $dom = Mojo::DOM->new;
 my $server = $t->app->redis->subscribe('connection:6:to_server');
 my @data = data();

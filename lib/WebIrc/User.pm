@@ -81,7 +81,7 @@ See L</login>.
 =cut
 
 sub register {
-  my $self  = shift;
+  my $self = shift->render_later;
   my $admin = 0;
 
   if ($self->session('uid')) {
@@ -90,7 +90,6 @@ sub register {
     return;
   }
 
-  $self->render_later;
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
@@ -252,7 +251,7 @@ Add a new connection.
 =cut
 
 sub add_connection {
-  my $self = shift;
+  my $self = shift->render_later;
   my $action = $self->param('action') || '';
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
@@ -293,7 +292,7 @@ Change a connection.
 =cut
 
 sub edit_connection {
-  my $self = shift;
+  my $self = shift->render_later;
   my $action = $self->param('action') || '';
   my $cid = $self->param('cid') || '';
   my $uid = $self->session('uid');
@@ -341,11 +340,10 @@ Delete a connection.
 =cut
 
 sub delete_connection {
-  my $self = shift;
+  my $self = shift->render_later;
   my $uid  = $self->session('uid');
   my $cid  = $self->param('cid') || '';
 
-  $self->render_later;
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;

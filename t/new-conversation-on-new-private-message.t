@@ -2,9 +2,6 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
-t::Helper->capture_redis_errors;
-t::Helper->init_database;
-
 my $dom = Mojo::DOM->new;
 my $connection = WebIrc::Core::Connection->new;
 my $messages = $t->app->redis->subscribe('connection:6:from_server');

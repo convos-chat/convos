@@ -1,8 +1,5 @@
 use t::Helper;
 
-t::Helper->capture_redis_errors;
-t::Helper->init_database;
-
 my $control = $t->app->redis->subscribe('core:control');
 my $server = $t->app->redis->subscribe('connection:1:to_server');
 my($form, $tmp);

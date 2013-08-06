@@ -126,7 +126,7 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $settings_r = $private_r->route('/settings')->to(target => $config->{name});
+  my $settings_r = $private_r->route('/settings');
   $settings_r->get('/')->to('user#settings')->name('settings');
   $settings_r->post('/add')->to('user#add_connection')->name('connection.add');
   $settings_r->get('/:cid', [cid => qr{\d+}])->to('user#settings')->name('connection.edit');

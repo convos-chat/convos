@@ -1,8 +1,5 @@
 use t::Helper;
 
-t::Helper->capture_redis_errors;
-t::Helper->init_database;
-
 redis_do(
   [ set => 'user:doe:uid', 42 ],
   [ hmset => 'user:42', digest => 'E2G3goEIb8gpw', email => '' ],
