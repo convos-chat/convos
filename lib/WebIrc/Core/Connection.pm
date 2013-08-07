@@ -95,14 +95,6 @@ server by L</connect>.
 
 has channels => sub { [] };
 
-=head2 real_host
-
-The actual IRC server connected to. Will be set by L</irc_rpl_welcome>.
-
-=cut
-
-has real_host => '';
-
 =head2 log
 
 Holds a L<Mojo::Log> object.
@@ -373,8 +365,6 @@ Example message:
 sub irc_rpl_welcome {
   my ($self, $message) = @_;
 
-  $self->real_host($message->{prefix});
-
   for my $channel (@{$self->channels}) {
     $self->_irc->write(JOIN => $channel);
   }
@@ -483,7 +473,10 @@ sub irc_rpl_myinfo {
   my @keys = qw/ current_nick real_host version available_user_modes available_channel_modes /;
   my $i    = 0;
 
-  $self->redis->hmset("connection:@{[$self->id]}", map { $_, $message->{params}[$i++] // '' } @keys);
+  $self->redis->hmset(
+    "connection:@{[$self->id]}",
+    map { $_, $message->{params}[$i++] // '' } @keys,
+  );
 }
 
 =head2 irc_join
