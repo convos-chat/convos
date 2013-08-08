@@ -386,11 +386,11 @@ div.messages {
 
   li.highlight { background: #fee; }
   li.same-nick { padding-top: 0; }
-  li.action.message { overflow: visible; }
-  li.action.message div.content { font-style: italic; }
+  li.action.message div.content { padding-top: 20px; font-style: italic; }
+  li.action.message.same-nick div.content { padding-top: 0; }
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
   li.server-message.error { background: #fed; }
-  li.nick-change, li.nick-joined, li.nick-parted, li.notice {
+  li.nick-change, li.nick-joined, li.nick-parted, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
     color: #888;
   }
