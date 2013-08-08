@@ -366,7 +366,7 @@ div.messages {
 
     img { float: left; }
     h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
-    h3, div { margin-left: 50px; }
+    h3, div.content { margin-left: 50px; }
     .content {
       max-width: 40em;
     }
@@ -378,15 +378,25 @@ div.messages {
       right: 2px;
       color: #999;
     }
+    .embed {
+        max-height: 220px;
+        img { max-height: 220px; border: 2px solid #bbb; border-radius: 20px; margin: 8px 0; }
+    }
   }
 
   li.highlight { background: #fee; }
   li.same-nick { padding-top: 0; }
-  li.message .action { font-style: italic; }
-  li.message .action a { font-style: normal; font-weight: bold; text-decoration: none; }
-  li.message .embed, li.message .embed img { max-height: 220px; }
-  li.message .embed img { border: 2px solid #bbb; border-radius: 20px; margin: 8px 0; }
-  li.nick-change, li.nick-joined, li.nick-parted, li.topic, li.whois, li.notice { color: #555; }
+  li.action.message { overflow: visible; }
+  li.action.message div.content { font-style: italic; }
+  li.action.message div.content a { font-weight: normal; text-decoration: none; }
+  li.server-message.error { background: #fed; }
+  li.nick-change, li.nick-joined, li.nick-parted, li.notice {
+    background-color: #f9f7fa;
+    color: #888;
+  }
+  li.nick-change, li.nick-parted {
+    .content b { font-weight: normal; }
+  }
 }
 
 .with-nick-list {

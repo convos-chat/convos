@@ -1,5 +1,4 @@
 <li class="nick-parted" data-cid="<%= $cid %>" data-target="<%= $target %>">
-  <span class="prefix"><%= app->config->{name} %>:</span>
-  <span><b class="nick"><%= $nick %></b> parted <%= $target %></span>
+  <div class="content"><b class="nick"><%= $nick %></b> parted <%= $target %></div>
   %= timestamp_span($timestamp)
 </li>

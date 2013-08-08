@@ -1,6 +1,5 @@
 <li class="whois" data-cid="<%= $cid %>" data-target="any">
-  <span class="prefix"><%= app->config->{name} %>:</span>
-  <span>
+  <div class="content">
     %= link_to $nick, 'channel.view', { cid => $cid, target => $nick }
     is in
     % my $i = 0;
@@ -8,5 +7,5 @@
       % my $target = $channel; $target =~ s/^.\#/#/;
       <%= link_to $channel, 'channel.view', { cid => $cid, target => $target } %><%= ++$i == @$channels ? '.' : ', ' %>
     % }
-  </span>
+  </div>
 </li>
