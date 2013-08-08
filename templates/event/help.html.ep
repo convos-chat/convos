@@ -29,5 +29,7 @@
   <dl>
     <dt>shift+enter</dt>
     <dd>Shift focus between chat input field and main menu</dd>
+    <dt>tab/shift+tab</dt>
+    <dd>Navigate main menu when focused. Enter to choose.</dd>
   </dl>
 </li>
