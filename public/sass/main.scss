@@ -369,6 +369,7 @@ div.messages {
     h3, div.content { margin-left: 50px; }
     .content {
       max-width: 40em;
+      white-space: pre-wrap;
     }
     div.question { margin-left: 0; }
     span.timestamp {
