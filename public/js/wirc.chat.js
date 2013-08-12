@@ -235,7 +235,7 @@
       return false;
     };
 
-    $.get($.url_for(['command-history']), function(data) {
+    $.get($.url_for('command-history'), function(data) {
       $input.history = data;
       $input.history_i = $input.history.length;
     });

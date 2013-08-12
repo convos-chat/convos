@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-basepath="<%= $self->url_for('/') %>">
   <head>
     <title><%= join ' - ', app->config('name'), title %></title>
     %= stylesheet "/compiled.css?_=$VERSION"

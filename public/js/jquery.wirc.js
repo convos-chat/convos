@@ -3,7 +3,7 @@
   var original_title = document.title;
   var current_title = original_title;
   var has_fancy_scrollbars = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
-  var $height_from, $win, base_url;
+  var $height_from, $win;
 
   var confirmFirst = function() {
     var $a = $(this);
@@ -140,8 +140,7 @@
 
   $.url_for = function() {
     var args = $.makeArray(arguments);
-    if(!base_url) base_url = $('script[src$="jquery.js"], script[src*="_="]').get(0).src.replace(/\/(minified\/)?\w+\.js.*/, '').replace(/^\w+:\/\/[^\/]+/, '');
-    args.unshift(base_url);
+    args.unshift($('html').data('basepath').replace(/\/$/, ''));
     return args.join('/').replace(/#/g, '%23');
   };
 
