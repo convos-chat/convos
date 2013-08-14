@@ -1,23 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html data-basepath="<%= $self->url_for('/') %>">
   <head>
     <title><%= join ' - ', app->config('name'), title %></title>
-  % if($self->app->mode eq 'production') {
     %= stylesheet "/compiled.css?_=$VERSION"
-  % } elsif($self->app->mode ne 'compiling') {
-    <link rel="stylesheet/less" href="<%= url_for('/less/main.less') %>" type="text/css">
-    %= javascript '/minified/less.js'
-  % }
   % if($self->app->mode eq 'production') {
     %= javascript "/compiled.js?_=$VERSION"
   % } else {
     %= javascript '/js/globals.js'
     %= javascript '/js/ws-reconnecting.js'
-    %= javascript '/minified/jquery.js'
+    %= javascript '/js/jquery.js'
     %= javascript '/js/jquery.hotkeys.js'
     %= javascript '/js/jquery.fastbutton.js'
     %= javascript '/js/jquery.doubletap.js'
-    %= javascript '/minified/jquery.nanoscroller.js'
+    %= javascript '/js/jquery.nanoscroller.js'
     %= javascript '/js/jquery.pjax.js'
     %= javascript '/js/jquery.wirc.js'
     %= javascript '/js/wirc.chat.js'

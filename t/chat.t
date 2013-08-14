@@ -2,9 +2,6 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
-t::Helper->capture_redis_errors;
-t::Helper->init_database;
-
 my $dom = Mojo::DOM->new;
 my $server = $t->app->redis->subscribe('connection:6:to_server');
 my @data = data();
@@ -30,7 +27,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   $t->websocket_ok('/socket')->send_ok('yikes');
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li[data-cid="0"][data-target="any"]'), 'Got correct 6+any';
-  is $dom->at('li.server-message.error span')->text, 'Error - Not allowed to subscribe to', 'Error - Not allowed to subscribe to';
+  is $dom->at('li.server-message.error div.content')->text, 'Not allowed to subscribe to', 'Not allowed to subscribe to';
 }
 
 {
@@ -87,7 +84,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.server-message.error[data-cid="6"][data-target="any"]'), 'Got IRC error';
-  is $dom->at('span')->text, 'Error - some error message', 'Error - some error message';
+  is $dom->at('div.content')->text, 'some error message', 'some error message';
 }
 
 {
@@ -96,8 +93,8 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok !$dom->at('li.server-message.error'), 'No server error';
-  ok $dom->at('li.server-message[data-cid="6"][data-target="any"]'), 'Got server message';
-  is $dom->at('span')->text, 'Notice - Your host is Tampa.FL.US.Undernet.org', 'Your host is Tampa.FL.US.Undernet.org';
+  ok $dom->at('li.server-message.notice[data-cid="6"][data-target="any"]'), 'Got server message';
+  is $dom->at('div.content')->text, 'Your host is Tampa.FL.US.Undernet.org', 'Your host is Tampa.FL.US.Undernet.org';
 }
 
 {
@@ -106,7 +103,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois';
-  is $dom->at('span:nth-of-type(2)')->all_text, 'doe is john@wirc.pl (Real name).', 'doe is john@wirc.pl (Real name)';
+  is $dom->at('div.content')->all_text, 'doe is john@wirc.pl (Real name).', 'doe is john@wirc.pl (Real name)';
 }
 
 {
@@ -115,38 +112,38 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois channels';
-  is $dom->at('span:nth-of-type(2)')->all_text, 'doe is in #mojo, #other, #wirc.', 'doe is in sorted channels';
+  is $dom->at('div.content')->all_text, 'doe is in #mojo, #other, #wirc.', 'doe is in sorted channels';
 }
 
 {
   $connection->irc_rpl_notopic({ params => ['', '#wirc'] });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got no topic';
-  is $dom->at('span')->all_text, 'No topic is set.', 'No topic is set';
+  is $dom->at('div.content')->all_text, 'No topic is set.', 'No topic is set';
 
   $connection->irc_topic({ params => ['#wirc', 'Awesome'] });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got topic';
-  is $dom->at('span')->all_text, 'Topic is Awesome', 'Awesome topic';
+  is $dom->at('div.content')->all_text, 'Topic is Awesome', 'Awesome topic';
 }
 
 {
   $connection->irc_rpl_topic({ params => ['', '#wirc', 'Speling'] });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got topic';
-  is $dom->at('span')->all_text, 'Topic is Speling', 'Speling topic';
+  is $dom->at('div.content')->all_text, 'Topic is Speling', 'Speling topic';
 
   $connection->irc_rpl_topicwhotime({ params => ['', '#wirc', 'doe', '1375212722'] });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.topic[data-cid="6"][data-target="#wirc"]'), 'Got topic';
-  like $dom->at('span')->all_text, qr/Set by doe at 30\. jul\S* 21:32:02/i, 'Set by doe at 30. jul 21:32:02';
+  like $dom->at('div.content')->all_text, qr/Set by doe at 30\. jul\S* 21:32:02/i, 'Set by doe at 30. jul 21:32:02';
 }
 
 {
   $connection->irc_join({ params => [ '#mojo' ], prefix => 'fooman!user@host' });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nick-joined[data-cid="6"][data-target="#mojo"]'), 'user joined';
-  is $dom->at('span:nth-of-type(2)')->all_text, 'fooman joined #mojo', 'fooman joined #mojo';
+  is $dom->at('div.content')->all_text, 'fooman joined #mojo', 'fooman joined #mojo';
 
   $connection->irc_join({ params => [ '#mojo' ], prefix => 'doe!user@host' });
   $dom->parse($t->message_ok->message->[1]);
@@ -165,7 +162,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   $connection->irc_part({ params => [ '#mojo' ], prefix => 'fooman!user@host' });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nick-parted[data-cid="6"][data-target="#mojo"]'), 'user parted';
-  is $dom->at('span:nth-of-type(2)')->all_text, 'fooman parted #mojo', 'fooman parted #mojo';
+  is $dom->at('div.content')->all_text, 'fooman parted #mojo', 'fooman parted #mojo';
 
   $connection->irc_part({ params => [ '#mojo' ], prefix => 'doe!user@host' });
   $dom->parse($t->message_ok->message->[1]);
@@ -179,7 +176,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
 
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.notice[data-cid="0"][data-target="any"]'), 'banned notice';
-  is $dom->at('span')->all_text, 'wirc - Cannot join channel (+b)', 'wirc - Cannot join channel (+b)';
+  is $dom->at('div.content')->all_text, 'Cannot join channel (+b)', 'wirc - Cannot join channel (+b)';
 }
 
 for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
@@ -192,7 +189,7 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
   $connection->cmd_join({ params => ['jalla'] });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.notice[data-cid="0"][data-target="any"]'), 'invalid join';
-  is $dom->at('span')->all_text, 'wirc - Do not understand which channel to join', 'wirc - Do not understand which channel to join';
+  is $dom->at('div.content')->all_text, 'Do not understand which channel to join', 'wirc - Do not understand which channel to join';
 
   $connection->cmd_join({ params => ['#perl'] });
   $dom->parse($t->message_ok->message->[1]);

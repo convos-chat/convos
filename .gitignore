@@ -17,3 +17,5 @@ MANIFEST*
 /web_irc.production.conf
 /cover_db
 /.sass-cache/
+/public/compiled.css
+/public/compiled.js

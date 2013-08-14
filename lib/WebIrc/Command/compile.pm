@@ -108,6 +108,7 @@ sub compile_javascript {
 
   open my $COMPILED, '>', $compiled or die "Write $compiled: $!";
   print $COMPILED $js;
+  return $self;
 }
 
 =head2 compile_stylesheet
@@ -124,15 +125,16 @@ sub compile_stylesheet {
 
   system $ENV{SASS_BIN} => $sass_file => $css_file => '--style', 'compressed' if $ENV{SASS_BIN};
   system $ENV{YUI_COMPRESSOR_BIN} => $css_file => -o => $css_file if $ENV{YUI_COMPRESSOR_BIN};
+  return $self;
 }
 
 sub _minify_javascript {
   my($self, $file, $compiled_modified) = @_;
   my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
-  my $modified = +(stat $file)[9] || -1;
+  my $modified = +(stat $file)[9];
 
   return $file if $mini eq $file;
-  return $mini if $modified < $compiled_modified;
+  return $mini if -r $mini and $modified < $compiled_modified;
   system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini if $ENV{YUI_COMPRESSOR_BIN};
   return -e $mini ? $mini : $file;
 }

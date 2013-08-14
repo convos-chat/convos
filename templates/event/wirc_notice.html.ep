@@ -1,4 +1,4 @@
 <li class="notice" data-cid="0" data-target="any">
-  <span>wirc - <%= $message %></span>
+  <div class="alert content"><%== $message %></div>
   %= timestamp_span(stash('timestamp') || time)
 </li>

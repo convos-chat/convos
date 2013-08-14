@@ -3,7 +3,7 @@
   var original_title = document.title;
   var current_title = original_title;
   var has_fancy_scrollbars = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
-  var $toggled_element_with_click, $height_from, $win, base_url;
+  var $height_from, $win;
 
   var confirmFirst = function() {
     var $a = $(this);
@@ -97,6 +97,14 @@
     return this;
   };
 
+  var hideToggledElement = function(e) {
+    var $active = $('a[data-toggle]').filter('.active');
+    if(!$active.length) return true;
+    if($(e.target).closest($active).length) return true; // prevent hiding when clicking inside forms
+    $active.trigger('deactivate');
+    return false;
+  };
+
   $.fn.toggleElementWithClick = function() {
     return this.each(function() {
       var $a = $(this);
@@ -112,17 +120,17 @@
         var $target = $(target);
         var is_active = $a.hasClass('active');
 
+        $(document).off('click', hideToggledElement);
         $('a[data-toggle]').filter('.active').trigger('deactivate');
-        $toggled_element_with_click = false;
         if(is_active) return false;
 
         if(!$a.hasClass('active')) {
-          $toggled_element_with_click = $target;
           inside = true;
           $target.show();
           $a.data('target', $target).trigger('activate').addClass('active');
           inside = false;
           if(focus) $(focus, target).eq(0).focusSoon();
+          if(!$target.hasClass('ignore-document-close')) $(document).one('click', hideToggledElement);
         }
 
         return false;
@@ -132,8 +140,7 @@
 
   $.url_for = function() {
     var args = $.makeArray(arguments);
-    if(!base_url) base_url = $('script[src$="jquery.js"], script[src*="_="]').get(0).src.replace(/\/(minified\/)?\w+\.js.*/, '').replace(/^\w+:\/\/[^\/]+/, '');
-    args.unshift(base_url);
+    args.unshift($('html').data('basepath').replace(/\/$/, ''));
     return args.join('/').replace(/#/g, '%23');
   };
 
@@ -141,14 +148,6 @@
     var $togglers = $('a[data-toggle]').toggleElementWithClick();
     var $focus = $togglers.filter('.active').trigger('activate').filter('.focus');
     var $login_button = $('a[data-toggle="div.login"]');
-
-    $(window).click(function(e) {
-      if(!$toggled_element_with_click) return true;
-      if($toggled_element_with_click.hasClass('ignore-document-close')) return true;
-      if($(e.target).closest($toggled_element_with_click).length) return true; // prevent hiding when clicking inside forms
-      $('a[data-toggle]').filter('.active').trigger('deactivate');
-      return false;
-    });
 
     $('.settings select[name="cid"]').change(gotoConnectionSettings);
     $('a.confirm').click(confirmFirst);

@@ -1,10 +1,9 @@
 % my $prev_nick = stash('prev_nick') || '';
-<li class="message action<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-cid="<%= $cid %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
+<li class="action message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-cid="<%= $cid %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
 % if($nick ne $prev_nick) {
   %= image $avatar, alt => $nick, class => 'avatar'
-  <h3>&nbsp;</h3>
 % }
-  <div class="action content" ><%= link_to $nick, 'channel.view', { cid => $cid, target => $nick } %> <%== $message %></div>
+  <div class="content"><%= link_to $nick, 'channel.view', { cid => $cid, target => $nick } %> <%== $message %></div>
 % if($nick ne $prev_nick) {
   %= timestamp_span($timestamp)
 % }

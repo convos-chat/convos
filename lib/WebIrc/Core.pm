@@ -166,8 +166,8 @@ sub add_connection {
     },
     sub {
       my($delay, $cid, @saved) = @_;
-      $self->redis->publish('core:control', "start:$cid", $delay->begin);
       $delay->begin(0)->($cid);
+      $self->redis->publish('core:control', "start:$cid", $delay->begin);
     },
     sub {
       my($delay, $cid, @saved) = @_;

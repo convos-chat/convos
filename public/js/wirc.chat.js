@@ -20,13 +20,6 @@
     '/whois '
   ];
 
-  // override original method with a filter
-  nicks.add = function(score, member) {
-    if(member !== $messages.data('nick')) this.set[member] = score;
-    this.length++;
-    return this;
-  };
-
   $.fn.attachEventsToMessage = function() {
     this.find('h3 a').each(function() {
       this.href = '#' + this.href;
@@ -242,7 +235,7 @@
       return false;
     };
 
-    $.get($.url_for(['command-history']), function(data) {
+    $.get($.url_for('command-history'), function(data) {
       $input.history = data;
       $input.history_i = $input.history.length;
     });

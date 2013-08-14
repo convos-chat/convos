@@ -184,7 +184,7 @@ sub clear_notifications {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->lrange("user:$uid:notifications", 0, -1, $delay->begin);
+      $self->redis->lrange("user:$uid:notifications", 0, 100, $delay->begin);
     },
     sub {
       my($delay, $notification_list) = @_;
@@ -202,7 +202,6 @@ sub clear_notifications {
   });
 }
 
-
 =head2 notification_list
 
 Will render notifications.
@@ -217,7 +216,7 @@ sub notification_list {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->lrange($key, 0, -1, $delay->begin);
+      $self->redis->lrange($key, 0, 100, $delay->begin);
     },
     sub {
       my($delay, $notification_list) = @_;

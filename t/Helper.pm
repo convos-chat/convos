@@ -8,33 +8,6 @@ BEGIN { $ENV{WIRC_DEBUG} //= $ENV{TEST_VERBOSE} }
 
 my $t;
 
-sub capture_redis_errors {
-  my $class = shift;
-  $t->app->redis->on(error => sub {
-    my ($redis,$error) = @_;
-    ok(0, "An error occured: $error");
-    exit;
-  });
-}
-
-sub init_database {
-  my $class = shift;
-  my $delay
-    = Mojo::IOLoop->delay(
-      sub {
-        $t->app->redis->select(11, $_[0]->begin);
-      },
-      sub {
-        $t->app->redis->flushdb($_[0]->begin);
-      },
-      sub {
-        Test::More::diag('Database initialized');
-      }
-    );
-
-  $delay->wait;
-}
-
 sub redis_do {
   my $delay = Mojo::IOLoop->delay;
   $t->app->redis->execute(@_, $delay->begin);
@@ -68,7 +41,8 @@ sub import {
   $t->app->config(redis => $ENV{REDIS_TEST_DATABASE});
   $t->app->core->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
   $t->app->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
-  $t->app->redis->flushdb unless $ENV{KEEP_REDIS};
+
+  redis_do('flushdb') unless $ENV{KEEP_REDIS};
 
   eval "package $caller; use Test::More; 1" or die $@;
   no strict 'refs';
