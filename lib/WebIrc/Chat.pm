@@ -83,9 +83,9 @@ sub socket {
           $self->logf(debug => '[ws] < %s', $_[1]);
           my ($self, $octets) = @_;
           my $dom = Mojo::DOM->new($octets)->at('div');
-          my($cid, $target) = map { delete $dom->{$_} || '' } qw/ data-cid data-target /;
+          my($cid, $target,$uuid) = map { delete $dom->{$_} || '' } qw/ data-cid data-target data-uuid/;
 
-          @$dom{qw/ cid target /} = ($cid, $target);
+          @$dom{qw/ cid target uuid/} = ($cid, $target, $uuid);
 
           if($cid and $allowed{$cid}) {
             $self->_handle_socket_data($dom);
@@ -132,7 +132,7 @@ sub _handle_socket_data {
   }
 
   if(defined $cmd) {
-    $self->redis->publish($key => $cmd);
+    $self->redis->publish($key => $dom->{uuid}.' '.$cmd);
     if($dom->{'data-history'}) {
       $self->redis->rpush("user:$uid:cmd_history", $dom->text(0));
       $self->redis->ltrim("user:$uid:cmd_history", -30, -1);

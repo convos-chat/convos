@@ -1,3 +1,5 @@
+
+
 ;(function($) {
   var $goto_bottom, $input, $win;
   var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
@@ -120,6 +122,17 @@
     $input.cidAndTarget($messages); // must be done after Object.equals(...) above
     drawUI();
   };
+
+  var s4 = function() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+               .toString(16)
+               .substring(1);
+  };
+
+  var guid = function() {
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+           s4() + '-' + s4() + s4() + s4();
+  }
 
   var drawConversationMenu = function($message) {
     var $conversations = $('ul.conversations li, div.conversations.container li');
@@ -293,7 +306,11 @@
     $input.socket.onclose = function() { $input.addClass('disabled'); };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
-      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-history', history).text(message).prop('outerHTML'));
+      var uuid=guid();
+      if(!message.match('^\/')) {
+        receiveMessage({data: $('<li class="pending_message"/>').attr('data-uuid',uuid).cidAndTarget($messages).text('Sending: '+message).prop('outerHTML')});
+      }
+      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-uuid',uuid).attr('data-history', history).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
@@ -370,6 +387,14 @@
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
     var to_current;
+
+    if($message.hasClass('message_ok')) {
+      return $('.pending_message').each(function() {
+        if($(this).data('uuid') === $message.data('uuid')) {
+          $(this).remove();
+        }
+      })
+    }
 
     $input.removeClass('sending').siblings('.menu').show();
 
