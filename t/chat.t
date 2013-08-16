@@ -48,7 +48,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   ok $dom->at('img[alt="fooman"][src="//gravatar.com/avatar/4cac29f5fcfe500bc7e9b88e503045b1?s=40&d=retro"]'), 'gravatar image based on user+host';
   is $dom->at('h3 a[href="/6/fooman"]')->text, 'fooman', 'got message from fooman';
   is $dom->at('a[href="http://wirc.pl?a=1&b=2#yikes"]')->text, 'http://wirc.pl?a=1&b=2#yikes', 'http://wirc.pl#yikes';
-  is $dom->at('div.content'), '<div class="content">doe: see this &amp;amp; link: <a href="http://wirc.pl?a=1&amp;b=2#yikes" target="_blank">http://wirc.pl?a=1&amp;b=2#yikes</a> # really cool</div>', 'got link and amp';
+  is $dom->at('div.content'), '<div class="content whitespace">doe: see this &amp;amp; link: <a href="http://wirc.pl?a=1&amp;b=2#yikes" target="_blank">http://wirc.pl?a=1&amp;b=2#yikes</a> # really cool</div>', 'got link and amp';
   like $dom->at('.timestamp')->text, qr{^\d+\. \S+ [\d\:]+$}, 'got timestamp';
 
   $connection->add_message({
@@ -56,6 +56,15 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
+
+  ok $dom->at('a[href="http://wirc.pl/foo"]'), 'link is without really cool' or diag $dom;
+
+  $connection->add_message({
+    params => [ '#mojo', 'doe: see this &amp; link: http://wirc.pl/foo' ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+
   ok $dom->at('a[href="http://wirc.pl/foo"]'), 'link is without really cool' or diag $dom;
 
   $connection->add_message({
@@ -65,7 +74,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.message[data-cid="6"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   ok !$dom->at('script'), 'no script tag';
-  is $dom->at('div.content'), '<div class="content">&lt;script src=&quot;i/will/take/over.js&quot;&gt;&lt;/script&gt;</div>', 'no tags';
+  is $dom->at('div.content'), '<div class="content whitespace">&lt;script src=&quot;i/will/take/over.js&quot;&gt;&lt;/script&gt;</div>', 'no tags';
 
 
 
@@ -105,7 +114,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois';
-  is $dom->at('div.response')->all_text, 'doe is john@wirc.pl (Real name).', 'doe is john@wirc.pl (Real name)';
+  is $dom->at('div.content')->all_text, 'doe is john@wirc.pl (Real name).', 'doe is john@wirc.pl (Real name)';
 }
 
 {
@@ -114,7 +123,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois channels';
-  is $dom->at('div.response')->all_text, 'doe is in #mojo, #other, #wirc.', 'doe is in sorted channels';
+  is $dom->at('div.content')->all_text, 'doe is in #mojo, #other, #wirc.', 'doe is in sorted channels';
 }
 
 {

@@ -367,7 +367,8 @@ div.messages {
     img { float: left; }
     h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
     h3, div.content, div.embed { margin-left: 50px; }
-    div.content { max-width: 40em; white-space: pre-wrap; }
+    div.content { max-width: 40em; }
+    div.whitespace {  white-space: pre-wrap; }
     div.question { margin-left: 0; }
     div.embed {
       max-height: 220px;
