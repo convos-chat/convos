@@ -67,6 +67,8 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   ok !$dom->at('script'), 'no script tag';
   is $dom->at('div.content'), '<div class="content">&lt;script src=&quot;i/will/take/over.js&quot;&gt;&lt;/script&gt;</div>', 'no tags';
 
+
+
   $connection->add_message({
     params => [ '#mojo', "\x{1}ACTION is too cool\x{1}" ],
     prefix => '',
@@ -103,7 +105,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois';
-  is $dom->at('div.content')->all_text, 'doe is john@wirc.pl (Real name).', 'doe is john@wirc.pl (Real name)';
+  is $dom->at('div.response')->all_text, 'doe is john@wirc.pl (Real name).', 'doe is john@wirc.pl (Real name)';
 }
 
 {
@@ -112,7 +114,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.whois[data-cid="6"][data-target="any"]'), 'Got whois channels';
-  is $dom->at('div.content')->all_text, 'doe is in #mojo, #other, #wirc.', 'doe is in sorted channels';
+  is $dom->at('div.response')->all_text, 'doe is in #mojo, #other, #wirc.', 'doe is in sorted channels';
 }
 
 {
