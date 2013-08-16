@@ -1,5 +1,5 @@
 <li class="whois" data-cid="<%= $cid %>" data-target="any">
-  <div class="content">
+  <div class="response">
     %= link_to $nick, 'channel.view', { cid => $cid, target => $nick }
     is in
     % my $i = 0;
