@@ -207,6 +207,7 @@ sub _subscribe {
         my($irc, $error) = @_;
 
         if($error) {
+          $self->_publish(message_status => {status=>'failed', uuid=>$uuid});
           return $self->_publish(wirc_notice => { message => "Could not send message to @{[$irc->server]}: $error", uuid=>$uuid, error=>1});
         }
         elsif($message->{command} eq 'PRIVMSG') {
@@ -215,7 +216,7 @@ sub _subscribe {
         elsif(my $method = $self->can('cmd_' . lc $message->{command})) {
           $self->$method($message);
         }
-        $self->_publish(message_ok=> { uuid=>$uuid});
+        $self->_publish(message_status => { status=>'ok', uuid=>$uuid});
       });
       
     }

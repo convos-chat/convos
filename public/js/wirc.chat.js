@@ -308,7 +308,9 @@
       if(message.length == 0) return $input;
       var uuid=guid();
       if(!message.match('^\/')) {
-        receiveMessage({data: $('<li class="pending_message"/>').attr('data-uuid',uuid).cidAndTarget($messages).text('Sending: '+message).prop('outerHTML')});
+        var $pendingMessage=$('<li class="message-pending"/>').attr('data-uuid',uuid).cidAndTarget($messages).text('Sending: '+message);
+        setTimeout(function() { messageFailed($pendingMessage)},10000);
+        receiveMessage({data: $pendingMessage.prop('outerHTML')});
       }
       $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-uuid',uuid).attr('data-history', history).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
@@ -382,18 +384,38 @@
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
     }
   }
+  
+  var messageFailed = function($message) {
+    $('.message-pending').each(function() {
+       if($(this).data('uuid') === $message.data('uuid')) {
+         $(this).addClass('message-error');
+         $(this).append('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">X</button></span>');
+       }
+     });
+  }
+  $('.resend-message').on('click', function() {
+    $input.send($(this).parents('li').text());
+    $(this).parents('li').remove();
+  });
+  $('.remove-message').on('click', function() {
+    $(this).parents('li').remove();
+  });
+  
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
     var to_current;
 
-    if($message.hasClass('message_ok')) {
-      return $('.pending_message').each(function() {
+    if($message.hasClass('message-ok')) {
+      return $('.message-pending').each(function() {
         if($(this).data('uuid') === $message.data('uuid')) {
           $(this).remove();
         }
       })
+    }
+    else if($message.hasClass('message-failed')) {
+      return messageFailed($message);
     }
 
     $input.removeClass('sending').siblings('.menu').show();
