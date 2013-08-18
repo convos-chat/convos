@@ -52,11 +52,17 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
   like $dom->at('.timestamp')->text, qr{^\d+\. \S+ [\d\:]+$}, 'got timestamp';
 
   $connection->add_message({
+    params => [ '#mojo', "mIRC \x{3}4colors \x{3}4,14http://www.mirc.com/colors.html\x{3} suck imho" ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  is $dom->at('div.content')->all_text, 'mIRC colors http://www.mirc.com/colors.html suck imho', 'some error message';
+
+  $connection->add_message({
     params => [ '#mojo', 'doe: see this &amp; link: http://wirc.pl/foo really cool' ],
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-
   ok $dom->at('a[href="http://wirc.pl/foo"]'), 'link is without really cool' or diag $dom;
 
   $connection->add_message({
