@@ -91,6 +91,10 @@ sub _parse_message {
   $self->_message_avatar($c, $message, $delay);
   $message->{highlight} ||= 0;
 
+  # http://www.mirc.com/colors.html
+  $message->{message} =~ s/\x03\d{0,15}(,\d{0,15})?//g;
+  $message->{message} =~ s/\x03//g;
+
   while($message->{message} =~ m!($URL_RE)!g) {
     my $url = $1;
     my $now = pos $message->{message};
