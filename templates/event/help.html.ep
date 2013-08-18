@@ -24,6 +24,8 @@
     <dd>Restart the current connection.</dd>
     <dt>/names</dt>
     <dd>Retrieve nick list.</dd>
+    <dt>/list</dt>
+    <dd>Retrieve channel list.</dd>
   </dl>
   <h4>Keyboard Shortcuts</h4>
   <dl>

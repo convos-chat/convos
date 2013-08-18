@@ -17,6 +17,7 @@ my %COMMANDS; %COMMANDS = (
   topic => sub { my $dom = pop; "TOPIC $dom->{target}" . ($dom->{cmd} ? ' :' . $dom->{cmd} : '') },
   w     => \'whois',
   whois => 'WHOIS',
+  list  => 'LIST',
   nick  => 'NICK',
   names => sub { my $dom = pop; "NAMES " . ($dom->{cmd} || $dom->{target}) },
   me   => sub { my $dom = pop; "PRIVMSG $dom->{target} :\x{1}ACTION $dom->{cmd}\x{1}" },

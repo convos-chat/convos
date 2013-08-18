@@ -112,7 +112,8 @@ my @OTHER_EVENTS              = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
   irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic irc_err_nosuchchannel
-  irc_err_notonchannel irc_err_bannedfromchan
+  irc_err_notonchannel irc_err_bannedfromchan irc_rpl_liststart irc_rpl_list
+  irc_rpl_listend
 /;
 
 has _irc => sub {
@@ -611,6 +612,50 @@ sub irc_rpl_namreply {
     nicks => \@nicks,
     target => $message->{params}[2],
   });
+}
+
+=head2 irc_rpl_liststart
+
+:servername 321 fooman Channel :Users  Name
+
+=cut
+
+sub irc_rpl_liststart {
+  my($self, $message) = @_;
+
+  $self->{channel_list} = [];
+}
+
+=head2 irc_rpl_list
+
+:servername 322 somenick #channel 10 :[+n] some topic
+
+=cut
+
+sub irc_rpl_list {
+  my($self, $message) = @_;
+
+  push @{ $self->{channel_list} }, {
+    name => $message->{params}[1],
+    visible => $message->{params}[2],
+    title => $message->{params}[3] || 'No title',
+  };
+}
+
+=head2 irc_rpl_listend
+
+:servername 323 somenick :End of /LIST
+
+=cut
+
+sub irc_rpl_listend {
+  my($self, $message) = @_;
+
+  $self->_publish(
+    channel_list => {
+      channel_list => $self->{channel_list},
+    },
+  );
 }
 
 =head2 irc_error

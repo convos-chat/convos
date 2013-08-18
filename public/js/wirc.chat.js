@@ -20,6 +20,7 @@
     '/topic ',
     '/reconnect',
     '/whois '
+    '/list'
   ];
 
   $.fn.attachEventsToMessage = function() {
