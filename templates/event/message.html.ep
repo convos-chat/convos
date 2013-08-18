@@ -4,7 +4,7 @@
   %= image $avatar, alt => $nick, class => 'avatar'
   <h3><%= link_to $nick, 'channel.view', { cid => $cid, target => $nick } %></h3>
 % }
-  <div class="content"><%== $message %></div>
+  <div class="content whitespace"><%== $message %></div>
 % if($nick ne $prev_nick) {
   %= timestamp_span($timestamp)
 % }
