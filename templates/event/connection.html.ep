@@ -1,0 +1,41 @@
+<li class="connection" data-cid="<%= $cid %>" data-target="any">
+  %= form_for url_for($cid ? 'connection.edit' : 'connection.add', { cid => $cid }), method => 'post', begin
+    % if($cid) {
+    <h3>Edit <%= $host %></h3>
+    % } else {
+    <h3>Add connection</h3>
+    % }
+    %= form_block host => class => ['host'], begin
+      <label for="host">Server</label>
+      %= text_field 'host', $host, id => 'host'
+      % unless($cid) {
+      <p class="help">Add ":port" unless you want to use default port 6667.</p>
+      % }
+    % end
+    %= form_block nick => class => ['nick'], begin
+      <label for="nick">Nick</label>
+      %= text_field 'nick', $nick, id => 'nick'
+      % unless($cid) {
+      <p class="help">Handle to operate under.</p>
+      % }
+    % end
+    %= form_block channels => class => ['channels'], begin
+      <label for="channels">Channels</label>
+      <select name="channels" id="channels" multiple="multiple">
+      % for my $channel (@$channels) {
+        % my @selected = (selected => 'selected') if $cid;
+        %= tag 'option', @selected, value => $channel, sub { $channel }
+      % }
+      </select>
+      % unless($cid) {
+      <p class="help">Which chat rooms you want to be part of.</p>
+      % }
+    % end
+    <div>
+      <button type="submit" name="action" value="save"><%= $cid ? 'Update' : 'Add' %> connection</button>
+    % if($cid) {
+      %= link_to 'Delete', 'connection.delete', { cid => $cid }, class => 'confirm button'
+    % }
+    </div>
+  % end
+</li>

@@ -36,13 +36,11 @@ sub route {
 
       if($id and $id->[0]) {
         if(my($cid, $target) = id_as $id->[0]) {
-          return $self->redirect_to(
-            $self->url_for('channel.view', cid => $cid, target => $target)
-          );
+          return $self->redirect_to('view', cid => $cid, target => $target);
         }
       }
 
-      $self->redirect_to($self->url_for('settings')); # fallback
+      $self->redirect_to('settings');
     }
   );
 }
@@ -58,7 +56,7 @@ sub view {
   my $previous_id = $self->session('view_id') || '';
   my $uid = $self->session('uid');
   my $cid = $self->stash('cid');
-  my $target = $self->stash('target');
+  my $target = $self->stash('target') || '';
   my $id = as_id $cid, $target;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
 
@@ -74,13 +72,13 @@ sub view {
   $self->session(view_id => $id);
 
   Mojo::IOLoop->delay(
-    $self->_check_if_uid_own_cid($cid),
+    $cid ? $self->_check_if_uid_own_cid($cid) : (),
     sub {
       my($delay) = @_;
       $self->redis->zadd("user:$uid:conversations", time, $id);
       $self->redis->hgetall("connection:$cid", $delay->begin);
       $self->_modify_notification($self->param('notification'), read => 1) if defined $self->param('notification');
-      $self->_conversation($delay->begin);
+      $self->_conversation($delay->begin) unless $self->stash('settings');
     },
     sub {
       my($delay, $connection, $conversation) = @_;
@@ -90,12 +88,13 @@ sub view {
         $self->notification_list($delay->begin);
       }
 
-      $self->stash(%$connection, conversation => $conversation);
+      $self->stash(%$connection);
+      $self->stash(conversation => $conversation) if $conversation;
       $delay->begin->(0);
     },
     sub {
       return $self->render if $with_layout;
-      return $self->render('client/conversation', layout => undef)
+      return $self->render('client/conversation', layout => undef);
     },
   );
 }

@@ -270,10 +270,12 @@ sub delete_connection {
       return $self->$cb($cid) unless $removed;
       $self->redis->srem("connections", $cid, $delay->begin);
       $self->redis->keys("connection:$cid:*", $delay->begin); # jht: not sure if i like this...
+      $self->redis->zrange("user:$uid:conversations", 0, -1, $delay->begin);
     },
     sub {
-      my ($delay, $deleted, $keys) = @_;
+      my ($delay, $deleted, $keys, $conversations) = @_;
       $self->redis->del(@$keys, $delay->begin);
+      $self->redis->zrem("user:$uid:conversations", $_) for grep { /^$cid:/ } @$conversations;
       $self->redis->publish("core:control", "stop:$cid", $delay->begin);
     },
     sub {

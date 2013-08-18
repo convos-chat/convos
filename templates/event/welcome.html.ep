@@ -1,0 +1,12 @@
+<li class="welcome" data-cid="0" data-target="any">
+  <h3>Welcome to <%= config 'name' %> chat!</h3>
+  <div class="content">
+    <p>
+      Below you can add your first connection. Almost all fields are
+      predefined, so just select a channel and click "Add" to start chatting.
+      After a <abbr title="Should be less than a minute...">couple of seconds</abbr>,
+      the menu above should contain one or more of the channels that you
+      have chosen to be part of.
+    </p>
+  </div>
+</li>

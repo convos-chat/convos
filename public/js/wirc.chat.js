@@ -91,17 +91,13 @@
     $messages = $('div.messages ul');
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
-    $('body').loadingIndicator('hide');
+    $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
     $('div.nicks.container ul').html('');
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
-    if($messages.data('target').indexOf('#') === 0) {
+    if($messages.hasClass('with-nick-list')) {
       $input.send('/names', 0).send('/topic', 0);
-      $('.without-nick-list').addClass('with-nick-list').removeClass('without-nick-list');
-    }
-    else {
-      $('.with-nick-list').addClass('without-nick-list').removeClass('with-nick-list');
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
@@ -115,7 +111,11 @@
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
-    if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
+    if($messages.hasClass('settings')) {
+      drawSettings();
+      setTimeout(function() { reloadConversationList({}); }, 1000);
+    }
+    else if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
       reloadConversationList({});
     }
 
@@ -164,12 +164,25 @@
     }
   };
 
+  var drawSettings = function() {
+    $('form select#channels').selectize({
+      delimiter: ' ',
+      persist: false,
+      hideSelected: true,
+      openOnFocus: true,
+      create: function(value) {
+        if(value.indexOf('#') === -1) value = '#' + value;
+        return { value: value, text: value };
+      }
+    });
+  };
+
   var drawUI = function() {
     drawConversationMenu();
 
     $('a[data-toggle]').filter('.active').trigger('activate');
 
-    if($('.without-nick-list').length) {
+    if($('body').is('.without-nick-list, .settings')) {
       $('div.nicks.container').css({ left: '', height: '', display: 'none' });
     }
     else if($win.width() > min_width) {
@@ -292,6 +305,7 @@
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
     $(document).pjax('nav a.conversation', 'div.messages');
+    $(document).pjax('nav a.settings', 'div.messages');
     $(document).pjax('div.container a', 'div.messages');
     $('div.messages').on('pjax:end', conversationLoaded);
     $('div.messages').on('pjax:start', function(xhr, options) { $('body').loadingIndicator('show'); });
@@ -451,7 +465,7 @@
     $.get($.url_for('conversations'), function(data) {
       $('ul.conversations').replaceWith(data);
       $('div.conversations.container ul').html('');
-      if(goto_current) $('ul.conversations li:first a').click();
+      if(goto_current) $('ul.conversations li.first a').click();
       conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
       drawConversationMenu();
     });
@@ -466,13 +480,11 @@
       $notification_list.html(data);
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
       $n_notifications.children('b').text(n);
-      if($notification_list.find('li').length) $n_notifications.removeClass('hidden');
       $n_notifications[n ? 'addClass' : 'removeClass']('alert');
     });
   };
 
   $(document).ready(function() {
-    if($('div.messages').length === 0) return; // not on chat page
     $goto_bottom = $('div.goto-bottom a');
     $input = $('footer form input[name="message"]');
     $win = $(window);
@@ -490,7 +502,6 @@
 
     $('nav a.toggler').initDropDown();
     $('nav, div.container, div.goto-bottom').fastButton();
-    $('nav a.settings').click(function(e) { location.href = this.href; });
     $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getMessages).on('resize', drawUI);
@@ -504,7 +515,6 @@
   });
 
   $(window).load(function() {
-    if($('div.messages').length === 0) return; // not on chat page
     initNotifications();
     conversationLoaded();
   });

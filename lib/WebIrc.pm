@@ -110,6 +110,7 @@ sub startup {
 
   $config->{name} ||= 'Wirc';
   $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
+  $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
 
   $self->plugin('Mojolicious::Plugin::UrlWith');
   $self->plugin('WebIrc::Plugin::Helpers');
@@ -126,20 +127,19 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $settings_r = $private_r->route('/settings');
-  $settings_r->get('/')->to('user#settings')->name('settings');
-  $settings_r->post('/add')->to('user#add_connection')->name('connection.add');
-  $settings_r->get('/:cid', [cid => qr{\d+}])->to('user#settings')->name('connection.edit');
-  $settings_r->post('/:cid', [cid => qr{\d+}])->to('user#edit_connection');
+  my $cid_r = $private_r->any('/:cid', [cid => qr{\d+}]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
-
   $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
   $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
   $private_r->get('/command-history')->to('client#command_history');
   $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
-  $private_r->get('/:cid/*target', [cid => qr{\d+}])->to('client#view')->name('channel.view');
-  $private_r->get('/:cid', [cid => qr{\d+}])->to('client#view')->name('server.view');
+  $private_r->get('/settings', [cid => 0])->to('user#settings')->name('settings');
+  $private_r->post('/settings/connection', [cid => 0])->to('user#add_connection')->name('connection.add');
+
+  $cid_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
+  $cid_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
+  $cid_r->get('/*target')->to('client#view')->name('view');
 
   $self->hook(
     before_dispatch => sub {
@@ -165,8 +165,10 @@ L<WebIrc::Command::compile/compile_stylesheet>.
 sub production_mode {
   my $self = shift;
 
-  require WebIrc::Command::compile;
-  WebIrc::Command::compile->new(app => $self)->compile_javascript->compile_stylesheet;
+  unless($ENV{WIRC_BACKEND_REV}) {
+    require WebIrc::Command::compile;
+    WebIrc::Command::compile->new(app => $self)->compile_javascript->compile_stylesheet;
+  }
 }
 
 =head2 development_mode

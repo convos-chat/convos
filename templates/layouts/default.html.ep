@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html data-basepath="<%= $self->url_for('/') %>">
   <head>
-    <title><%= join ' - ', app->config('name'), title %></title>
+    <title><%= config 'name' %> - <%= title %></title>
     %= stylesheet "/compiled.css?_=$VERSION"
   % if($self->app->mode eq 'production') {
     %= javascript "/compiled.js?_=$VERSION"
@@ -14,6 +14,7 @@
     %= javascript '/js/jquery.doubletap.js'
     %= javascript '/js/jquery.nanoscroller.js'
     %= javascript '/js/jquery.pjax.js'
+    %= javascript '/js/selectize.min.js'
     %= javascript '/js/jquery.wirc.js'
     %= javascript '/js/wirc.chat.js'
   % }

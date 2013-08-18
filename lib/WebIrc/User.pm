@@ -6,7 +6,8 @@ WebIrc::User - Mojolicious controller for user data
 
 =cut
 
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'WebIrc::Client';
+use WebIrc::Core::Util qw/ as_id /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 =head1 METHODS
@@ -86,7 +87,7 @@ sub register {
 
   if ($self->session('uid')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
-    $self->redirect_to('settings');
+    $self->redirect_to('view');
     return;
   }
 
@@ -195,23 +196,29 @@ Used to retrieve connection information.
 =cut
 
 sub settings {
-  my $self   = shift->render_later;
-  my $uid    = $self->session('uid');
-  my $cid    = $self->stash('cid');
+  my $self = shift->render_later;
+  my $uid = $self->session('uid');
+  my $cid = $self->stash('cid') || 0;
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
-  my (@actions, $cids, @connections);
+  my $with_layout = $self->req->is_xhr ? 0 : 1;
+  my @conversation;
 
   # cid is just to trick layouts/default.html.ep
-  $self->stash(connections => \@connections, settings => 1, fqn => "$login\@$hostname");
+  $self->stash(
+    cid => $cid,
+    body_class => 'settings',
+    conversation => \@conversation,
+    nick => $login,
+    target => 'settings',
+  );
 
   Mojo::IOLoop->delay(
     sub {    # get connections
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
     sub {    # get connection data
-      my $delay = shift;
-      $cids = shift;
+      my($delay, $cids) = @_;
       $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
       $self->redis->execute(
         [get => "avatar:$login\@$hostname"],
@@ -219,11 +226,12 @@ sub settings {
         (map { [smembers => "connection:$_:channels"] } @$cids),
         $delay->begin
       );
+      $delay->begin(0)->($cids);
     },
     sub {    # convert connections to data structures
       my $delay = shift;
       my $avatar = shift || '';
-      my $current;
+      my $cids = pop;
 
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
 
@@ -231,15 +239,27 @@ sub settings {
         my $info = $_[$i];
         $cid //= $cids->[$i];
         $info->{cid} = $cids->[$i];
-        $info->{channels} = join ' ', sort @{ $_[@$cids + $i] };
-        $current = $info if $info->{cid} eq $cid;
-        push @connections, $info;
+        $info->{channels} = $_[@$cids + $i];
+        $info->{event} = 'connection';
+        push @conversation, $info;
       }
 
-      $current ||= $self->app->config('default_connection');
-      $current->{avatar} = $avatar;
-      $self->stash(cid => $cid, current => $current);
-      $self->render;
+      push @conversation, { event => 'welcome' } unless @conversation;
+      push @conversation, $self->app->config('default_connection');
+      $conversation[-1]{event} = 'connection';
+
+      if($with_layout) {
+        $self->conversation_list($delay->begin);
+        $self->notification_list($delay->begin);
+      }
+
+      $delay->begin->();
+    },
+    sub {
+      my($delay) = @_;
+
+      return $self->render('client/view') if $with_layout;
+      return $self->render('client/conversation', layout => undef);
     },
   );
 }
@@ -252,7 +272,6 @@ Add a new connection.
 
 sub add_connection {
   my $self = shift->render_later;
-  my $action = $self->param('action') || '';
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
 
@@ -264,23 +283,19 @@ sub add_connection {
         {
           host     => $self->param('host')     || '',
           nick     => $self->param('nick')     || '',
-          channels => $self->param('channels') || '',
+          channels => join(' ', $self->param('channels')),
           user     => $login,
         },
-        $delay->begin
+        $delay->begin,
       );
     },
     sub {
       my ($delay, $errors, $cid) = @_;
-      if($errors) {
-        $self->stash(errors => $errors, template => 'user/settings');
-        $self->settings;
-        return;
-      }
+      $self->stash(errors => $errors) if $errors;
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
-      $self->redis->set("avatar:$login\@$hostname", $self->param('avatar') || '');
-      return $self->redirect_to('index') if $action eq 'connect';
-      return $self->redirect_to('connection.edit', cid => $cid);
+      $self->redis->set("avatar:$login\@$hostname", $self->param('avatar')) if $self->param('avatar');
+      return $self->settings if $errors;
+      return $self->redirect_to('settings');
     },
   );
 }
@@ -293,14 +308,13 @@ Change a connection.
 
 sub edit_connection {
   my $self = shift->render_later;
-  my $action = $self->param('action') || '';
   my $cid = $self->param('cid') || '';
   my $uid = $self->session('uid');
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
 
-  if($action eq 'delete') {
-    return $self->delete_connection;
+  if($self->req->method ne 'POST') {
+    return $self->settings;
   }
 
   Mojo::IOLoop->delay(
@@ -318,7 +332,7 @@ sub edit_connection {
         {
           host     => $self->param('host')     || '',
           nick     => $self->param('nick')     || '',
-          channels => $self->param('channels') || '',
+          channels => join(' ', $self->param('channels')),
           user     => $login,
         },
         $delay->begin
@@ -326,8 +340,8 @@ sub edit_connection {
     },
     sub {
       my($delay, $errors, $changed) = @_;
-      $self->stash(errors => $errors || {});
-      return $self->redirect_to('index') if $action eq 'connect';
+      $self->stash(errors => $errors) if $errors;
+      return $self->settings if $errors;
       return $self->redirect_to('settings');
     }
   );

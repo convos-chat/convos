@@ -1,6 +1,6 @@
 <li class="whois" data-cid="<%= $cid %>" data-target="any">
   <div class="content">
-    %= link_to $nick, 'channel.view', { cid => $cid, target => $nick }
+    %= link_to $nick, view => { cid => $cid, target => $nick }
     is <%= $user %>@<%= $host %> (<%= $realname %>).
   </div>
   %= timestamp_span($timestamp)

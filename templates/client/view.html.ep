@@ -1,19 +1,24 @@
 % title 'Chat';
 % my $i = 0;
+% my @class;
 <nav class="bar">
   %= include 'client/conversation_list'
   %= link_to 'conversation_list', class => 'conversations toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations.container', begin
     <i class="icon-chevron-down"></i>
   % end
   <div class="right">
-    % my $class = @$notification_list == 0 ? ' hidden' : $n_notifications ? ' alert' : '';
     <a href="#!nicks" title="Display nick list" class="nicks toggler" data-focus="a" data-toggle="div.nicks.container"><i class="icon-user"></i></a>
-    %= link_to 'conversation_list', title => 'List notifications', class => "notifications toggler$class", 'data-focus' => 'a', 'data-toggle' => 'div.notifications.container', begin
+    % @class = qw/ notifications toggler /;
+    % push @class, 'alert' if $n_notifications;
+    %= link_to 'conversation_list', title => 'List notifications', class => "@class", 'data-focus' => 'a', 'data-toggle' => 'div.notifications.container', begin
       <i class="icon-bullhorn"></i>
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
     % end
-    %= link_to 'settings', title => 'Go to settings', class => 'settings', begin
+    %= link_to 'settings', title => 'Edit setttings', class => 'settings', begin
       <i class="icon-cog"></i>
+    % end
+    %= link_to 'logout', title => 'Log out', class => 'logout', begin
+      <i class="icon-signout"></i>
     % end
   </div>
 </nav>

@@ -28,6 +28,12 @@ $unreadColor: #a00;
   box-shadow: $shadow;
 }
 
+@mixin border-radius($border_radius) {
+  -moz-border-radius: $border_radius;
+  -webkit-border-radius: $border_radius;
+  border-radius: $border_radius;
+}
+
 @mixin ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
 @mixin opacity($value) {
   opacity: $value;
@@ -157,7 +163,7 @@ dl {
 .row { padding: 0 $bodyGutter; clear: both; }
 .close { display: block; float: right; cursor: pointer; font-size: 1.3em; padding: 3px; }
 
-div.alert, div.question { padding: 1em; margin: 1em 0; border-radius: 3px; }
+div.alert, div.question { padding: 1em; margin: 1em 0; @include border-radius(3px); }
 div.alert { background: #fed; color: #851; border: 1px solid #edb; }
 div.question { background: #def; color: #158; border: 1px solid #bde; }
 div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
@@ -169,17 +175,24 @@ div.question .button.confirm { background: darken(#def, 10%); border: 2px solid 
 form {
   margin: 0;
   label { display: block; margin-top: $bodyGutter; }
-  input {
+
+  select[multi] { height: 30px; }
+  .selectize-input, .selectize-control.single .selectize-input.focus, input {
     padding: 4px;
     font-size: 1.2em;
     outline: none;
     border: 2px solid #ccc;
     width: 290px;
-    border-radius: 3px;
+    @include border-radius(3px);
   }
-  input:focus { border: 2px solid darken(#ccc, 15%); }
+  .selectize-input {
+    padding: 2px; // no idea why 2px is right instead of 4px
+  }
+  .selectize-input.focus, input:focus { border: 2px solid darken(#ccc, 15%); }
   div.error {
-    input { border-color: #e66; }
+    .selectize-input, .selectize-control.single .selectize-input.focus, input {
+      border-color: #e66;
+    }
     p.help { color: #f44; }
   }
   div.actions {
@@ -200,14 +213,16 @@ button, .button {
   background: darken(#fff, 10%);
   font-size: 16px;
   text-decoration: none;
-  padding: 6px 8px;
+  padding: 4px 8px;
   border: 2px solid darken(#fff, 40%);
-  border-radius: 3px;
+  @include border-radius(3px);
 }
 button { height: 34px; vertical-align: baseline; } // make <a> and <button> align. at least in chrome
 button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
 button.confirm, a.confirm { color: #900; border: 2px solid #900; }
 button:hover, .button:hover { border: $buttonBorderHover; }
+
+@import "selectize.scss";
 
 /*
  * Loading indicator
@@ -250,14 +265,14 @@ div.loading-indicator {
   visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
   @include opacity(.01);
   @include prefix(transition, all ease-in-out .2s);
-  border-radius: 5px;
+  @include border-radius(5px);
 }
 .nanoscroller > .pane > .slider {
   background: #444;
   background: rgba(0, 0, 0, 0.5);
   position: relative;
   margin: 0 1px;
-  border-radius: 3px;
+  @include border-radius(3px);
 }
 .nanoscroller:hover > .pane, .pane.active, .pane.flashed {
   visibility: visible\9; /* Target only IE7 and IE8 with this hack */
@@ -300,11 +315,10 @@ nav.bar {
     a.notifications.toggler { position: relative; }
     a.notifications.toggler b { position: absolute; bottom: -3px; right: 2px; color: #bbb; font-size: 0.9em; font-weight: normal; }
     a.notifications.toggler.alert b { color: #b22; }
-    a.hidden { display: none; }
+    a.hidden, a.logout { display: none; }
   }
 
   a.active, a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
-  ul.conversations li:first-of-type a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
   ul.conversations li.unread a { color: $unreadColor };
 }
 
@@ -322,7 +336,6 @@ div.nicks.container {
   display: none;
   border: 1px solid darken(#fff, 15%);
   border-top-width: 6px;
-//  .box-shadow(0 3px 2px rgba(100, 100, 100, 0.5));
 
   a { color: #000; text-decoration: none; padding: 4px; display: block; }
   a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
@@ -358,6 +371,7 @@ div.notifications.container {
 
 div.messages {
   padding-top: 45px;
+
   li {
     display: block;
     position: relative;
@@ -372,7 +386,7 @@ div.messages {
     div.question { margin-left: 0; }
     div.embed {
       max-height: 220px;
-      img { max-height: 220px; border: 2px solid #bbb; border-radius: 20px; margin: 8px 0; }
+      img { max-height: 220px; border: 2px solid #bbb; @include border-radius(20px); margin: 8px 0; }
     }
     span.timestamp {
       position: absolute;
@@ -402,12 +416,35 @@ div.messages {
   li.nick-change, li.nick-parted {
     .content b { font-weight: normal; }
   }
+
+  li.welcome,
+  li.connection {
+    $marginLeft: 65px;
+    overflow: visible;
+    form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }
+    label { float: left; margin-left: -$marginLeft; margin-top: 4px; }
+    input, button, .selectize-input, .selectize-control.single .selectize-input.focus {
+      font-size: 14px;
+    }
+    button { height: 30px; padding: 2px 5px; }
+    p.help { display: inline; }
+  }
 }
 
-.with-nick-list {
+body.with-nick-list, body.without-nick-list {
+  ul.conversations li.first a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
+}
+
+body.with-nick-list {
   div.messages { margin-right: $nickListWidth; }
   footer form { margin-right: $nickListWidth; }
   div.messages li.highlight { background: #fee; }
+}
+
+body.settings {
+  div.nicks.container { display: none; }
+  footer { display: none; }
+  nav.bar .right a.logout { display: block; }
 }
 
 div.goto-bottom a {
@@ -420,16 +457,8 @@ div.goto-bottom a {
   padding: 5px;
   z-index: 100;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  @include border-radius(4px);
   @include opacity(.8);
-}
-
-/*
- * Settings
- */
-.settings {
-  padding-top: 50px;
-  h2 select { font-size: 18px; font-weight: bold; }
 }
 
 /*
@@ -482,7 +511,7 @@ div.goto-bottom a {
   nav.bar .right { right: 0; }
   div.messages { margin-right: 0; }
 
-  .with-nick-list {
+  body.with-nick-list {
     nav.bar a.nicks.toggler { display: block; }
     div.messages, footer form { margin-right: 0; }
     div.nicks.container { display: none; }
@@ -597,7 +626,7 @@ a {
 .icon-border {
   border: solid 1px $borderColor;
   padding: .2em .25em .15em;
-  border-radius: 3px;
+  @include border-radius(3px);
 }
 
 [class^="icon-"],

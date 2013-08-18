@@ -3,7 +3,7 @@
   <span>
     % my $i = 0;
     % for my $n (@$nicks) {
-      <%= link_to join('', @$n{qw/mode nick/}), 'channel.view', { cid => $cid, target => $n->{nick} }, 'data-nick' => $n->{nick} %><%= ++$i == @$nicks ? '.' : ', ' %>
+      <%= link_to join('', @$n{qw/mode nick/}), view => { cid => $cid, target => $n->{nick} }, 'data-nick' => $n->{nick} %><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
   </span>
   %= timestamp_span($timestamp)
