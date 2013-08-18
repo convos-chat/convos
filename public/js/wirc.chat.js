@@ -393,11 +393,11 @@
        }
      });
   }
-  $('.resend-message').on('click', function() {
+  $('.messages').on('click','.resend-message', function() {
     $input.send($(this).parents('li').text());
     $(this).parents('li').remove();
   });
-  $('.remove-message').on('click', function() {
+  $('.messages').on('click','.remove-message', function() {
     $(this).parents('li').remove();
   });
   
