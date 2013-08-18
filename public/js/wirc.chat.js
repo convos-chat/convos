@@ -308,7 +308,7 @@
       if(message.length == 0) return $input;
       var uuid=guid();
       if(!message.match('^\/')) {
-        var $pendingMessage=$('<li class="message-pending"/>').attr('data-uuid',uuid).cidAndTarget($messages).text('Sending: '+message);
+        var $pendingMessage=$('<li class="message-pending"><span class="what">Sending:</span> <span class="body">'+message+'</span></li>').attr('data-uuid',uuid).cidAndTarget($messages);
         setTimeout(function() { messageFailed($pendingMessage)},10000);
         receiveMessage({data: $pendingMessage.prop('outerHTML')});
       }
@@ -388,18 +388,12 @@
   var messageFailed = function($message) {
     $('.message-pending').each(function() {
        if($(this).data('uuid') === $message.data('uuid')) {
+         $(this).find('.what').text('Failed:');
          $(this).addClass('message-error');
          $(this).append('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">X</button></span>');
        }
      });
   }
-  $('.messages').on('click','.resend-message', function() {
-    $input.send($(this).parents('li').text());
-    $(this).parents('li').remove();
-  });
-  $('.messages').on('click','.remove-message', function() {
-    $(this).parents('li').remove();
-  });
   
 
   var receiveMessage = function(e) {
@@ -500,6 +494,13 @@
     $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getMessages).on('resize', drawUI);
+    $('.messages').on('click','.resend-message', function() {
+      $input.send($(this).parents('li').find('.body').text());
+      $(this).parents('li').remove();
+    });
+    $('.messages').on('click','.remove-message', function() {
+      $(this).parents('li').remove();
+    });
   });
 
   $(window).load(function() {
