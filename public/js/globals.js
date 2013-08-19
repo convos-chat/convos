@@ -1,3 +1,13 @@
+(function(window) {
+  var s4 = function() {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  };
+
+  window.guid = function() {
+    return [ s4() + s4(), s4(), s4(), s4(), s4() + s4() + s4() ].join('-');
+  };
+})(window);
+
 // super cheap sorted set implementation
 window.sortedSet = function() { this.set = { length: 0 }; return this; };
 window.sortedSet.prototype.add = function(score, member) { this.set[member] = score; this.length++; return this; };

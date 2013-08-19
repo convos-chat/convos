@@ -123,17 +123,6 @@
     drawUI();
   };
 
-  var s4 = function() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-               .toString(16)
-               .substring(1);
-  };
-
-  var guid = function() {
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-           s4() + '-' + s4() + s4() + s4();
-  }
-
   var drawConversationMenu = function($message) {
     var $conversations = $('ul.conversations li, div.conversations.container li');
     var $dropdown = $('div.conversations.container ul');
@@ -338,13 +327,14 @@
     $input.socket.onclose = function() { $input.addClass('disabled'); };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
-      var uuid=guid();
+      var uuid = window.guid();
       if(!message.match('^\/')) {
         var $pendingMessage = $('<li class="message-pending"><h3>Sending message...</h3><div class="content">' + message + '</div></li>').attr('data-uuid', uuid).cidAndTarget($messages);
         setTimeout(function() { messageFailed($pendingMessage); }, 10000);
-        receiveMessage({data: $pendingMessage.prop('outerHTML')});
+        $pendingMessage.appendToMessages();
+        $win.scrollTo('bottom');
       }
-      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-uuid',uuid).attr('data-history', history).text(message).prop('outerHTML'));
+      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-uuid', uuid).attr('data-history', history).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
