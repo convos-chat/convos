@@ -308,7 +308,7 @@
       if(message.length == 0) return $input;
       var uuid=guid();
       if(!message.match('^\/')) {
-        var $pendingMessage=$('<li class="message-pending"><span class="what">Sending:</span> <span class="body">'+message+'</span></li>').attr('data-uuid',uuid).cidAndTarget($messages);
+        var $pendingMessage=$('<li class="message-pending"><span class="what">Sending:</span> <span class="content">'+message+'</span></li>').attr('data-uuid',uuid).cidAndTarget($messages);
         setTimeout(function() { messageFailed($pendingMessage)},10000);
         receiveMessage({data: $pendingMessage.prop('outerHTML')});
       }
