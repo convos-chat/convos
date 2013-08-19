@@ -4,4 +4,7 @@
   %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
   % $prev_nick = $message->{nick};
 % }
+% if(stash 'got_more') {
+  %= include 'event/historic_messages'
+% }
 </ul>

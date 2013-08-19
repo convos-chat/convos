@@ -11,7 +11,7 @@ use Mojo::JSON;
 use WebIrc::Core::Util qw/ as_id id_as /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
-my $N_MESSAGES = 50;
+my $N_MESSAGES = $ENV{N_MESSAGES} || 50;
 my $JSON = Mojo::JSON->new;
 
 =head1 METHODS
@@ -68,8 +68,8 @@ sub view {
     });
   }
 
-  $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : 'without-nick-list');
   $self->session(view_id => $id);
+  $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : 'without-nick-list');
 
   Mojo::IOLoop->delay(
     $cid ? $self->_check_if_uid_own_cid($cid) : (),
@@ -290,11 +290,15 @@ sub _conversation {
     });
   }
   elsif(my $from = $self->param('from')) { # from at timestamp
-    $self->redis->zrangebyscore($key => $from, '+inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES, sub {
+    $self->redis->zrangebyscore($key => $from, '+inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES + 1, sub {
       my $list = pop || [];
+      $self->stash(got_more => @$list / 2 > $N_MESSAGES);
+      $self->stash(body_class => 'historic') if $self->stash('got_more');
       $self->format_conversation(
         sub {
-          my $message = $JSON->decode(shift @$list) or return;
+          my $current = shift @$list or return;
+          my $message = $JSON->decode($current);
+          @$list or return; # skip the last
           $message->{timestamp} = shift @$list;
           $message;
         },

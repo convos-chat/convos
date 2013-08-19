@@ -211,13 +211,13 @@ form {
 button, .button {
   color: #222;
   background: darken(#fff, 10%);
-  font-size: 16px;
+  font-size: 1.2em;
   text-decoration: none;
-  padding: 4px 8px;
+  padding: 0.3em 0.6em;
   border: 2px solid darken(#fff, 40%);
   @include border-radius(3px);
 }
-button { height: 34px; vertical-align: baseline; } // make <a> and <button> align. at least in chrome
+button { height: 2em; vertical-align: baseline; } // make <a> and <button> align. at least in chrome
 button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
 button.confirm, a.confirm { color: #900; border: 2px solid #900; }
 button:hover, .button:hover { border: $buttonBorderHover; }
@@ -397,9 +397,8 @@ div.messages {
     }
     span.actions {
       float:right;
-      button { font-size: .85em; }
+      button, .button { font-size: 0.9em; }
     }
-
   }
 
   li.same-nick { padding-top: 0; }
@@ -423,27 +422,27 @@ div.messages {
     overflow: visible;
     form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }
     label { float: left; margin-left: -$marginLeft; margin-top: 4px; }
-    input, button, .selectize-input, .selectize-control.single .selectize-input.focus {
-      font-size: 14px;
+    input, button, .button, .selectize-input, .selectize-control.single .selectize-input.focus {
+      font-size: 1em;
     }
-    button { height: 30px; padding: 2px 5px; }
     p.help { display: inline; }
   }
 }
 
-body.with-nick-list, body.without-nick-list {
+body.with-nick-list, body.without-nick-list, body.historic {
   ul.conversations li.first a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
 }
-
 body.with-nick-list {
   div.messages { margin-right: $nickListWidth; }
   footer form { margin-right: $nickListWidth; }
   div.messages li.highlight { background: #fee; }
 }
-
-body.settings {
+body.settings, body.historic {
   div.nicks.container { display: none; }
   footer { display: none; }
+  div.clear { height: 20px; }
+}
+body.settings {
   nav.bar .right a.logout { display: block; }
 }
 
@@ -517,9 +516,12 @@ div.goto-bottom a {
     div.nicks.container { display: none; }
   }
 
-  div.wrapper {
-    margin-bottom: -42px;
-    div.clear { height: 42px; }
+  body.with-nick-list,
+  body.without-nick-list {
+    div.wrapper {
+      margin-bottom: -42px;
+      div.clear { height: 42px; }
+    }
   }
 
   footer {
@@ -584,7 +586,6 @@ $iconMuted:         #eee;
   font-family: FontAwesome;
   font-weight: normal;
   font-style: normal;
-  font-size: 21px;
   text-decoration: inherit;
   -webkit-font-smoothing: antialiased;
 

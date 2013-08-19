@@ -23,17 +23,18 @@
 
   $.fn.attachEventsToMessage = function() {
     this.find('h3 a').each(function() {
-      this.href = '#' + this.href;
+      this.href = '#';
     }).click(function() {
       var n = $(this).text();
       $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
     });
 
-    this.find('.close').click(function() {
-      $(this).closest('li').remove();
+    this.find('.close').click(function() { $(this).closest('li').remove(); });
+    this.filter('.historic-message').find('a.button.newer').click(getNewMessages);
+    this.filter('.historic-message').find('a.button.current').click(function(e) {
+      return $.pjax.click(e, { container: 'div.messages' });
     });
   };
-
 
   $.fn.appendToMessages = function() {
     var $previous = $messages.children('li:last');
@@ -82,7 +83,7 @@
         .data('cid', $from.data('cid')).data('target', $from.data('target'))
     }
     else {
-      return { cid: this.data('cid'), cid: this.data('target') };
+      return { cid: this.data('cid'), target: this.data('target') };
     }
   };
 
@@ -102,7 +103,7 @@
     if(location.href.indexOf('from=') > 0) { // link from notification list
       $messages.end_time = parseFloat($messages.data('end-time') || 0);
       $win.scrollTo(0);
-      getMessages();
+      getHistoricMessages();
       reloadNotificationList();
     }
     else {
@@ -181,7 +182,7 @@
 
     $('a[data-toggle]').filter('.active').trigger('activate');
 
-    if($('body').is('.without-nick-list, .settings')) {
+    if($('body').is('.without-nick-list, .settings, .historic')) {
       $('div.nicks.container').css({ left: '', height: '', display: 'none' });
     }
     else if($win.width() > min_width) {
@@ -198,7 +199,7 @@
     if($win.data('at_bottom')) $win.scrollTo('bottom');
   };
 
-  var getMessages = function() {
+  var getHistoricMessages = function() {
     var $height_from = $(document).data('height_from')
 
     $goto_bottom[$win.scrollTop() + $win.height() < $height_from.height() - 200 ? 'show' : 'hide']();
@@ -217,18 +218,31 @@
       });
       $messages.start_time = $messages.end_time = 0;
     }
-    else if($messages.end_time && $win.data('at_bottom')) {
-      var start_time = $messages.start_time;
-      $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
-        var $ul = $(data);
-        var $li = $ul.children('li:gt(0)');
-        $messages.start_time = start_time;
-        if(!$li.length) return;
-        $messages.end_time = parseFloat($ul.data('end-time'));
-        $li.each(function() { $(this).appendToMessages(); });
-      });
-      $messages.start_time = $messages.end_time = 0;
-    }
+
+    return false;
+  };
+
+  var getNewMessages = function(e) {
+    var $btn = $(this);
+    var start_time = $messages.start_time;
+    $('body').loadingIndicator('show');
+    $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
+      var $ul = $(data);
+      var $li = $ul.children('li:gt(0)');
+      $('body').loadingIndicator('hide');
+      $messages.start_time = start_time;
+      $btn.closest('li').remove();
+      if(!$li.length) return;
+      $messages.end_time = parseFloat($ul.data('end-time'));
+      $li.each(function() { $(this).appendToMessages(); });
+      if(!$li.filter('.historic-message').length) {
+        $('body').attr('class', $messages.cidAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
+        $win.data('at_bottom', false); // prevent scroll to bottom
+        drawUI();
+      }
+    });
+    $messages.start_time = $messages.end_time = 0;
+    return false;
   };
 
   var initInputField = function() {
@@ -321,7 +335,7 @@
       if(message.length == 0) return $input;
       var uuid=guid();
       if(!message.match('^\/')) {
-        var $pendingMessage=$('<li class="message-pending"><span class="what">Sending:</span> <span class="content">'+message+'</span></li>').attr('data-uuid',uuid).cidAndTarget($messages);
+        var $pendingMessage=$('<li class="message-pending"><span class="what">Sending:</span> <span class="content">'+message+'</span></li>').attr('data-uuid', uuid).cidAndTarget($messages);
         setTimeout(function() { messageFailed($pendingMessage)},10000);
         receiveMessage({data: $pendingMessage.prop('outerHTML')});
       }
@@ -397,7 +411,7 @@
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
     }
   }
-  
+
   var messageFailed = function($message) {
     $('.message-pending').each(function() {
        if($(this).data('uuid') === $message.data('uuid')) {
@@ -407,12 +421,11 @@
        }
      });
   }
-  
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
-    var to_current;
+    var to_current = false;
 
     if($message.hasClass('message-ok')) {
       return $('.message-pending').each(function() {
@@ -430,9 +443,9 @@
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target')).data('cid', $messages.data('cid'));
     }
-
-    to_current = Object.equals($message.cidAndTarget(), $messages.cidAndTarget());
-
+    if($('body').attr('class').indexOf('-nick-list') > 0) {
+      to_current = Object.equals($message.cidAndTarget(), $messages.cidAndTarget());
+    }
     if($message.hasClass('highlight')) {
       var sender = $message.data('sender');
       var what = $message.data('target').indexOf('#') === 0 ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
@@ -503,7 +516,7 @@
     $('nav, div.container, div.goto-bottom').fastButton();
     $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
-    $win.on('scroll', getMessages).on('resize', drawUI);
+    $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click','.resend-message', function() {
       $input.send($(this).parents('li').find('.content').text());
       $(this).parents('li').remove();
