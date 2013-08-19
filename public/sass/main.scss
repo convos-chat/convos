@@ -382,9 +382,7 @@ div.messages {
       font-size: .85em;
     }
     span.actions {
-      position: absolute;
-      right: 2px;
-      top: 0px;
+      float:right;
       button { font-size: .85em; }
     }
 
