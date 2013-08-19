@@ -329,14 +329,19 @@
     $input.history_i = 0;
     $input.socket = window.ws($input.closest('form').data('socket-url'));
     $input.socket.onmessage = receiveMessage;
-    $input.socket.onopen = function() { $input.removeClass('disabled'); };
+    $input.socket.debug = location.href.indexOf('#debug') > 0 ? true : false;
+    $input.socket.reconnectInterval = 1;
+    $input.socket.onopen = function() {
+      $input.removeClass('disabled');
+      if($input.socket.opened++) getNewMessages();
+    };
     $input.socket.onclose = function() { $input.addClass('disabled'); };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       var uuid=guid();
       if(!message.match('^\/')) {
-        var $pendingMessage=$('<li class="message-pending"><span class="what">Sending:</span> <span class="content">'+message+'</span></li>').attr('data-uuid', uuid).cidAndTarget($messages);
-        setTimeout(function() { messageFailed($pendingMessage)},10000);
+        var $pendingMessage = $('<li class="message-pending"><h3>Sending message...</h3><div class="content">' + message + '</div></li>').attr('data-uuid', uuid).cidAndTarget($messages);
+        setTimeout(function() { messageFailed($pendingMessage); }, 10000);
         receiveMessage({data: $pendingMessage.prop('outerHTML')});
       }
       $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-uuid',uuid).attr('data-history', history).text(message).prop('outerHTML'));
@@ -414,10 +419,11 @@
 
   var messageFailed = function($message) {
     $('.message-pending').each(function() {
-       if($(this).data('uuid') === $message.data('uuid')) {
-         $(this).find('.what').text('Failed:');
-         $(this).addClass('message-error');
-         $(this).append('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">X</button></span>');
+      var $pending = $(this);
+       if($pending.data('uuid') === $message.data('uuid')) {
+         $pending.addClass('message-error').removeClass('message-pending');
+         $pending.find('h3').text('Could not send message');
+         $pending.prepend('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">&times;</button></span>');
        }
      });
   }
@@ -428,7 +434,7 @@
     var to_current = false;
 
     if($message.hasClass('message-ok')) {
-      return $('.message-pending').each(function() {
+      return $('.message-pending, .message-error').each(function() {
         if($(this).data('uuid') === $message.data('uuid')) {
           $(this).remove();
         }
@@ -517,7 +523,8 @@
     $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
-    $('.messages').on('click','.resend-message', function() {
+    $('.messages').on('click', '.resend-message', function() {
+      $input.socket.buffer = []; // need to clear buffer when resending messages
       $input.send($(this).parents('li').find('.content').text());
       $(this).parents('li').remove();
     });

@@ -396,7 +396,8 @@ div.messages {
       font-size: .85em;
     }
     span.actions {
-      float:right;
+      float: right;
+      padding-right: 2px;
       button, .button { font-size: 0.9em; }
     }
   }
@@ -406,9 +407,11 @@ div.messages {
   li.action.message div.content { padding-top: 20px; font-style: italic; }
   li.action.message.same-nick div.content { padding-top: 0; }
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
-  li.message-pending { color: #ccc; font-style: italic; }
-  li.message-error { color: #e44; font-style: bold; }
-  li.server-message.error { background: #fed; }
+  li.message-pending div.content { color: #ccc; font-style: italic; }
+  li.message-pending h3 { color: #ccc; }
+  li.message-error { font-style: italic; }
+  li.message-error h3 { color: #333; font-style: italic; }
+  li.message-error, li.server-message.error { background: #fbb; }
   li.nick-change, li.nick-joined, li.nick-parted, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
     color: #888;
