@@ -1,3 +1,5 @@
+
+
 ;(function($) {
   var $goto_bottom, $input, $win;
   var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
@@ -120,6 +122,17 @@
     $input.cidAndTarget($messages); // must be done after Object.equals(...) above
     drawUI();
   };
+
+  var s4 = function() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+               .toString(16)
+               .substring(1);
+  };
+
+  var guid = function() {
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+           s4() + '-' + s4() + s4() + s4();
+  }
 
   var drawConversationMenu = function($message) {
     var $conversations = $('ul.conversations li, div.conversations.container li');
@@ -293,7 +306,13 @@
     $input.socket.onclose = function() { $input.addClass('disabled'); };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
-      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-history', history).text(message).prop('outerHTML'));
+      var uuid=guid();
+      if(!message.match('^\/')) {
+        var $pendingMessage=$('<li class="message-pending"><span class="what">Sending:</span> <span class="content">'+message+'</span></li>').attr('data-uuid',uuid).cidAndTarget($messages);
+        setTimeout(function() { messageFailed($pendingMessage)},10000);
+        receiveMessage({data: $pendingMessage.prop('outerHTML')});
+      }
+      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-uuid',uuid).attr('data-history', history).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
@@ -365,11 +384,33 @@
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
     }
   }
+  
+  var messageFailed = function($message) {
+    $('.message-pending').each(function() {
+       if($(this).data('uuid') === $message.data('uuid')) {
+         $(this).find('.what').text('Failed:');
+         $(this).addClass('message-error');
+         $(this).append('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">X</button></span>');
+       }
+     });
+  }
+  
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
     var to_current;
+
+    if($message.hasClass('message-ok')) {
+      return $('.message-pending').each(function() {
+        if($(this).data('uuid') === $message.data('uuid')) {
+          $(this).remove();
+        }
+      })
+    }
+    else if($message.hasClass('message-failed')) {
+      return messageFailed($message);
+    }
 
     $input.removeClass('sending').siblings('.menu').show();
 
@@ -453,6 +494,13 @@
     $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getMessages).on('resize', drawUI);
+    $('.messages').on('click','.resend-message', function() {
+      $input.send($(this).parents('li').find('.content').text());
+      $(this).parents('li').remove();
+    });
+    $('.messages').on('click','.remove-message', function() {
+      $(this).parents('li').remove();
+    });
   });
 
   $(window).load(function() {

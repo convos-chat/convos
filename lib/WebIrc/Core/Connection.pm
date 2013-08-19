@@ -194,6 +194,8 @@ sub _subscribe {
   $self->{messages}->on(
     message => sub {
       my ($sub, $raw_message) = @_;
+      $raw_message =~ s/(\S+)\s//;
+      my $uuid=$1;
       my $message = Parse::IRC::parse_irc(sprintf ':%s %s', $irc->nick, $raw_message);
 
       unless(ref $message) {
@@ -205,7 +207,8 @@ sub _subscribe {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish(wirc_notice => { message => "Could not send message to @{[$irc->server]}: $error" });
+          $self->_publish(message_status => {status=>'failed', uuid=>$uuid});
+          return $self->_publish(wirc_notice => { message => "Could not send message to @{[$irc->server]}: $error", uuid=>$uuid, error=>1});
         }
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
@@ -213,7 +216,9 @@ sub _subscribe {
         elsif(my $method = $self->can('cmd_' . lc $message->{command})) {
           $self->$method($message);
         }
+        $self->_publish(message_status => { status=>'ok', uuid=>$uuid});
       });
+      
     }
   );
 

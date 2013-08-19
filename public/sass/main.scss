@@ -381,12 +381,19 @@ div.messages {
       color: #999;
       font-size: .85em;
     }
+    span.actions {
+      float:right;
+      button { font-size: .85em; }
+    }
+
   }
 
   li.same-nick { padding-top: 0; }
   li.action.message div.content { padding-top: 20px; font-style: italic; }
   li.action.message.same-nick div.content { padding-top: 0; }
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
+  li.message-pending { color: #ccc; font-style: italic; }
+  li.message-error { color: #e44; font-style: bold; }
   li.server-message.error { background: #fed; }
   li.nick-change, li.nick-joined, li.nick-parted, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
