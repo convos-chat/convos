@@ -495,7 +495,7 @@
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getMessages).on('resize', drawUI);
     $('.messages').on('click','.resend-message', function() {
-      $input.send($(this).parents('li').find('.body').text());
+      $input.send($(this).parents('li').find('.content').text());
       $(this).parents('li').remove();
     });
     $('.messages').on('click','.remove-message', function() {
