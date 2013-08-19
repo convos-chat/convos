@@ -1,5 +1,3 @@
-
-
 ;(function($) {
   var $goto_bottom, $input, $win;
   var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
@@ -19,7 +17,7 @@
     '/names ',
     '/topic ',
     '/reconnect',
-    '/whois '
+    '/whois ',
     '/list'
   ];
 
