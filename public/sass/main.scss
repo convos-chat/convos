@@ -401,6 +401,7 @@ div.messages {
     }
   }
 
+  li.highlight { background: #fee; }
   li.same-nick { padding-top: 0; }
   li.action.message div.content { padding-top: 20px; font-style: italic; }
   li.action.message.same-nick div.content { padding-top: 0; }
@@ -435,7 +436,6 @@ body.with-nick-list, body.without-nick-list, body.historic {
 body.with-nick-list {
   div.messages { margin-right: $nickListWidth; }
   footer form { margin-right: $nickListWidth; }
-  div.messages li.highlight { background: #fee; }
 }
 body.settings, body.historic {
   div.nicks.container { display: none; }
