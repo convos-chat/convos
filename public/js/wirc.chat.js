@@ -226,7 +226,7 @@
       $li.each(function() { $(this).appendToMessages(); });
       if(!$li.filter('.historic-message').length) {
         $('body').attr('class', $messages.cidAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
-        $win.data('at_bottom', false); // prevent scroll to bottom
+        if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
         drawUI();
       }
     });
@@ -317,14 +317,20 @@
     $input.history = [];
     $input.history_i = 0;
     $input.socket = window.ws($input.closest('form').data('socket-url'));
+    $input.socket.opened = 0;
     $input.socket.onmessage = receiveMessage;
     $input.socket.debug = location.href.indexOf('#debug') > 0 ? true : false;
-    $input.socket.reconnectInterval = 1;
     $input.socket.onopen = function() {
       $input.removeClass('disabled');
-      if($input.socket.opened++) getNewMessages();
+      $input.socket.reconnectInterval = 500;
+      if($input.socket.opened++) getNewMessages({ goto_bottom: true });
     };
-    $input.socket.onclose = function() { $input.addClass('disabled'); };
+    $input.socket.onerror = function(e) {
+      if($input.socket.reconnectInterval < 5e3) $input.socket.reconnectInterval += 500;
+    };
+    $input.socket.onclose = function() {
+      $input.addClass('disabled');
+    };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
