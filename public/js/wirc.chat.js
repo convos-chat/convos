@@ -115,6 +115,7 @@
     if($messages.hasClass('settings')) {
       drawSettings();
       setTimeout(function() { reloadConversationList({}); }, 1000);
+      $win.data('at_bottom', false);
     }
     else if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
       reloadConversationList({});
