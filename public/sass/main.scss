@@ -176,6 +176,7 @@ form {
   label { display: block; margin-top: $bodyGutter; }
 
   select[multi] { height: 30px; }
+  input[readonly] { background: #f6f6f6; color: #666; }
   .selectize-input, .selectize-control.single .selectize-input.focus, input {
     padding: 4px;
     font-size: 1.2em;
@@ -420,7 +421,7 @@ div.messages {
   }
 
   li.welcome,
-  li.connection {
+  li.setting {
     $marginLeft: 65px;
     overflow: visible;
     form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }

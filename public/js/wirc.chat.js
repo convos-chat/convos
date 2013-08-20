@@ -119,6 +119,9 @@
     else if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
       reloadConversationList({});
     }
+    else {
+      initNotifications();
+    }
 
     $input.cidAndTarget($messages); // must be done after Object.equals(...) above
     drawUI();
@@ -545,7 +548,6 @@
 
   $(window).load(function() {
     conversationLoaded();
-    initNotifications(); // need to be done after conversationLoaded()
   });
 
 })(jQuery);
