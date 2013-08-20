@@ -3,6 +3,7 @@
   var $ask_for_notifications = $('<li><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
+  var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var conversation_list = [];
   var min_width = 700;
   var commands = [
@@ -504,6 +505,14 @@
     $input = $('footer form input[name="message"]');
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
+
+    if(running_on_ios) {
+      $('input, textarea').on('click', function() {
+        $('nav.bar').hide();
+      }).on('focusout', function() {
+        $('nav.bar').show();
+      });
+    }
 
     initShortcuts();
     initSocket();
