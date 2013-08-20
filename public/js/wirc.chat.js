@@ -215,14 +215,14 @@
   var getNewMessages = function(e) {
     var $btn = $(this);
     var start_time = $messages.start_time;
-    if(!args.silent) {
+    if(!e.silent) {
       $('body').loadingIndicator('show');
     }
     if($messages.end_time) {
       $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
         var $ul = $(data);
         var $li = $ul.children('li:gt(0)');
-        if(!args.silent) $('body').loadingIndicator('hide');
+        if(!e.silent) $('body').loadingIndicator('hide');
         $btn.closest('li').remove();
         $messages.start_time = start_time;
         if(!$li.length) return;
