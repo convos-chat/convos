@@ -16,6 +16,7 @@
     '/close',
     '/part ',
     '/names ',
+    '/mode ',
     '/topic ',
     '/reconnect',
     '/whois ',

@@ -213,6 +213,14 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
   ok $dom->at('li.add-conversation[data-cid="6"][data-target="#perl"]'), 'joined';
 }
 
+{
+  $connection->irc_mode({ params => ['#wirc', '+o', 'batman'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.notice[data-cid="6"][data-target="#wirc"]'), 'mode to #wirc';
+  is $dom->at('div.content b')->text, '+o', 'op for...';
+  is $dom->at('div.content span')->text, 'batman', 'op for batman';
+}
+
 done_testing;
 
 sub data {

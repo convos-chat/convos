@@ -20,6 +20,7 @@ my %COMMANDS; %COMMANDS = (
   list  => 'LIST',
   nick  => 'NICK',
   oper => sub { my $dom = pop; "OPER $dom->{cmd}" },
+  mode => sub { my $dom = pop; "MODE $dom->{cmd}" },
   names => sub { my $dom = pop; "NAMES " . ($dom->{cmd} || $dom->{target}) },
   me   => sub { my $dom = pop; "PRIVMSG $dom->{target} :\x{1}ACTION $dom->{cmd}\x{1}" },
   msg  => sub { my $dom = pop; $dom->{cmd} =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$dom->{cmd}" },
