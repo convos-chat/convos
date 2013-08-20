@@ -110,23 +110,34 @@ sub _parse_message {
 
 sub _message_avatar {
   my($self, $c, $message, $delay) = @_;
-  my($lookup, $cb);
+  my($lookup, $cache, $cb);
 
   $message->{avatar} = '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro';
   $message->{nick} or return; # do not want to insert avatar unless a user sent the message
   $message->{host} or return; # old data does not have "host" stored because of a bug
-  $cb = $delay->begin;
   $lookup = join '@', @$message{qw/ user host /};
   $lookup =~ s!^~!!;
-  $c->redis->get(
-    "avatar:$lookup",
-    sub {
-      my($redis, $email) = @_;
-      my $avatar = Mojo::Util::md5_sum($email || $lookup);
-      $message->{avatar} =~ s/0000000000000000000000000000/$avatar/;
-      $cb->();
-    }
-  );
+  $cache = $self->{avatar_cache}{$lookup} ||= {};
+
+  if(defined $cache->{avatar}) {
+    $message->{avatar} = $cache->{avatar};
+    return;
+  }
+  if(!$cache->{messages}) {
+    $cb = $delay->begin;
+    $c->redis->get(
+      "avatar:$lookup",
+      sub {
+        my($redis, $email) = @_;
+        my $avatar = Mojo::Util::md5_sum($email || $lookup);
+        $cache->{avatar} = "//gravatar.com/avatar/$avatar?s=40&d=retro";
+        $_->{avatar} = $cache->{avatar} for @{ $cache->{messages} };
+        $cb->();
+      }
+    );
+  }
+
+  push @{ $cache->{messages} }, $message;
 }
 
 sub _message_url {
