@@ -329,7 +329,7 @@
       if(message.length == 0) return $input;
       var uuid = window.guid();
       if(!message.match('^\/')) {
-        var $pendingMessage = $('<li class="message-pending"><h3>Sending message...</h3><div class="content">' + message + '</div></li>').attr('data-uuid', uuid).cidAndTarget($messages);
+        var $pendingMessage = $('<li class="message-pending"><div class="content">' + message + '</div></li>').attr('data-uuid', uuid).cidAndTarget($messages);
         setTimeout(function() { messageFailed($pendingMessage); }, 10000);
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
@@ -412,7 +412,7 @@
       var $pending = $(this);
        if($pending.data('uuid') === $message.data('uuid')) {
          $pending.addClass('message-error').removeClass('message-pending');
-         $pending.find('h3').text('Could not send message');
+         $pending.prepend('<h3>Could not send message</h3>');
          $pending.prepend('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">&times;</button></span>');
        }
      });
