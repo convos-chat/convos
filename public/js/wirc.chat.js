@@ -215,22 +215,26 @@
   var getNewMessages = function(e) {
     var $btn = $(this);
     var start_time = $messages.start_time;
-    $('body').loadingIndicator('show');
-    $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
-      var $ul = $(data);
-      var $li = $ul.children('li:gt(0)');
-      $('body').loadingIndicator('hide');
-      $messages.start_time = start_time;
-      $btn.closest('li').remove();
-      if(!$li.length) return;
-      $messages.end_time = parseFloat($ul.data('end-time'));
-      $li.each(function() { $(this).appendToMessages(); });
-      if(!$li.filter('.historic-message').length) {
-        $('body').attr('class', $messages.cidAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
-        if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
-        drawUI();
-      }
-    });
+    if(!args.silent) {
+      $('body').loadingIndicator('show');
+    }
+    if($messages.end_time) {
+      $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
+        var $ul = $(data);
+        var $li = $ul.children('li:gt(0)');
+        if(!args.silent) $('body').loadingIndicator('hide');
+        $btn.closest('li').remove();
+        $messages.start_time = start_time;
+        if(!$li.length) return;
+        $messages.end_time = parseFloat($ul.data('end-time'));
+        $li.each(function() { $(this).appendToMessages(); });
+        if(!$li.filter('.historic-message').length) {
+          $('body').attr('class', $messages.cidAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
+          if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
+          drawUI();
+        }
+      });
+    }
     $messages.start_time = $messages.end_time = 0;
     return false;
   };
@@ -325,7 +329,7 @@
     $input.socket.onopen = function() {
       $input.removeClass('disabled');
       $input.socket.reconnectInterval = 500;
-      if($input.socket.opened++) getNewMessages({ goto_bottom: true });
+      if($input.socket.opened++) getNewMessages({ goto_bottom: true, silent: true });
     };
     $input.socket.onerror = function(e) {
       if($input.socket.reconnectInterval < 5e3) $input.socket.reconnectInterval += 500;
