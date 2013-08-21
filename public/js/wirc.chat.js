@@ -39,7 +39,7 @@
   };
 
   $.fn.appendToMessages = function() {
-    var $previous = $messages.children('li:last');
+    var $previous = $messages.children('li').not('.message-pending').eq(-1);
     var last_nick = $previous.data('sender') || '';
 
     this.attachEventsToMessage();
