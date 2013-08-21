@@ -163,8 +163,7 @@ dl {
 .row { padding: 0 $bodyGutter; clear: both; }
 .close { display: block; float: right; cursor: pointer; font-size: 1.3em; padding: 3px; }
 
-div.alert, div.question { padding: 1em; margin: 1em 0; @include border-radius(3px); }
-div.alert { background: #fed; color: #851; border: 1px solid #edb; }
+div.question { padding: 0.5em; @include border-radius(3px); }
 div.question { background: #def; color: #158; border: 1px solid #bde; }
 div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
 div.question .button.confirm { background: darken(#def, 10%); border: 2px solid #900; }
@@ -177,6 +176,7 @@ form {
   label { display: block; margin-top: $bodyGutter; }
 
   select[multi] { height: 30px; }
+  input[readonly] { background: #f6f6f6; color: #666; }
   .selectize-input, .selectize-control.single .selectize-input.focus, input {
     padding: 4px;
     font-size: 1.2em;
@@ -378,12 +378,13 @@ div.messages {
     padding: 3px 0;
     overflow: hidden;
 
+    div.question { padding-left: 50px; }
+    button, .button { font-size: 0.9em; }
     img { float: left; }
     h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
     h3, div.content, div.embed { margin-left: 50px; }
     div.content { max-width: 40em; line-height:1.4em; }
     div.whitespace {  white-space: pre-wrap; }
-    div.question { margin-left: 0; }
     div.embed {
       max-height: 220px;
       img { max-height: 220px; border: 2px solid #bbb; @include border-radius(20px); margin: 8px 0; }
@@ -398,7 +399,6 @@ div.messages {
     span.actions {
       float: right;
       padding-right: 2px;
-      button, .button { font-size: 0.9em; }
     }
   }
 
@@ -421,7 +421,7 @@ div.messages {
   }
 
   li.welcome,
-  li.connection {
+  li.setting {
     $marginLeft: 65px;
     overflow: visible;
     form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }

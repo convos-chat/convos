@@ -53,7 +53,7 @@ window.ws = function(a) {
     onmessage: function(e) { console.log(b.url + ' <', e.data); },
     onclose: function(e) { console.log(b.url + ' : close'); },
     reconnectInterval: 2e3,
-    timeoutInterval: 5e3,
+    timeoutInterval: 10e3,
     readyState: WebSocket.CONNECTING,
     url: a,
     close: function() { if(!c) return false; c.close(); return(d = true); },

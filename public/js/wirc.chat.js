@@ -1,8 +1,9 @@
 ;(function($) {
   var $goto_bottom, $input, $win;
-  var $ask_for_notifications = $('<li class="notice"><div class="question">Do you want notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
+  var $ask_for_notifications = $('<li><div class="question">Do you want desktop notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
+  var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var conversation_list = [];
   var min_width = 700;
   var commands = [
@@ -15,6 +16,7 @@
     '/close',
     '/part ',
     '/names ',
+    '/mode ',
     '/topic ',
     '/reconnect',
     '/whois ',
@@ -114,9 +116,13 @@
     if($messages.hasClass('settings')) {
       drawSettings();
       setTimeout(function() { reloadConversationList({}); }, 1000);
+      $win.data('at_bottom', false);
     }
     else if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
       reloadConversationList({});
+    }
+    else {
+      initNotifications();
     }
 
     $input.cidAndTarget($messages); // must be done after Object.equals(...) above
@@ -214,22 +220,26 @@
   var getNewMessages = function(e) {
     var $btn = $(this);
     var start_time = $messages.start_time;
-    $('body').loadingIndicator('show');
-    $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
-      var $ul = $(data);
-      var $li = $ul.children('li:gt(0)');
-      $('body').loadingIndicator('hide');
-      $messages.start_time = start_time;
-      $btn.closest('li').remove();
-      if(!$li.length) return;
-      $messages.end_time = parseFloat($ul.data('end-time'));
-      $li.each(function() { $(this).appendToMessages(); });
-      if(!$li.filter('.historic-message').length) {
-        $('body').attr('class', $messages.cidAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
-        $win.data('at_bottom', false); // prevent scroll to bottom
-        drawUI();
-      }
-    });
+    if(!e.silent) {
+      $('body').loadingIndicator('show');
+    }
+    if($messages.end_time) {
+      $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
+        var $ul = $(data);
+        var $li = $ul.children('li:gt(0)');
+        if(!e.silent) $('body').loadingIndicator('hide');
+        $btn.closest('li').remove();
+        $messages.start_time = start_time;
+        if(!$li.length) return;
+        $messages.end_time = parseFloat($ul.data('end-time'));
+        $li.each(function() { $(this).appendToMessages(); });
+        if(!$li.filter('.historic-message').length) {
+          $('body').attr('class', $messages.cidAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
+          if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
+          drawUI();
+        }
+      });
+    }
     $messages.start_time = $messages.end_time = 0;
     return false;
   };
@@ -290,6 +300,7 @@
   };
 
   var initNotifications = function() {
+    console.log('initNotifications: ' + Notification.permission);
     if(Notification.permission === 'granted') return;
     if(Notification.permission === 'unsupported') return;
     if(Notification.permission === 'denied') return;
@@ -317,14 +328,20 @@
     $input.history = [];
     $input.history_i = 0;
     $input.socket = window.ws($input.closest('form').data('socket-url'));
+    $input.socket.opened = 0;
     $input.socket.onmessage = receiveMessage;
     $input.socket.debug = location.href.indexOf('#debug') > 0 ? true : false;
-    $input.socket.reconnectInterval = 1;
     $input.socket.onopen = function() {
       $input.removeClass('disabled');
-      if($input.socket.opened++) getNewMessages();
+      $input.socket.reconnectInterval = 500;
+      if($input.socket.opened++) getNewMessages({ goto_bottom: true, silent: true });
     };
-    $input.socket.onclose = function() { $input.addClass('disabled'); };
+    $input.socket.onerror = function(e) {
+      if($input.socket.reconnectInterval < 5e3) $input.socket.reconnectInterval += 500;
+    };
+    $input.socket.onclose = function() {
+      $input.addClass('disabled');
+    };
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
@@ -498,6 +515,14 @@
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
+    if(running_on_ios) {
+      $('input, textarea').on('click', function() {
+        $('nav.bar').hide();
+      }).on('focusout', function() {
+        $('nav.bar').show();
+      });
+    }
+
     initShortcuts();
     initSocket();
     initPjax();
@@ -524,7 +549,6 @@
   });
 
   $(window).load(function() {
-    initNotifications();
     conversationLoaded();
   });
 

@@ -113,7 +113,7 @@ my @OTHER_EVENTS              = qw/
   irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic irc_err_nosuchchannel
   irc_err_notonchannel irc_err_bannedfromchan irc_rpl_liststart irc_rpl_list
-  irc_rpl_listend
+  irc_rpl_listend irc_mode
 /;
 
 has _irc => sub {
@@ -219,7 +219,7 @@ sub _subscribe {
         }
         $self->_publish(message_status => { status=>'ok', uuid=>$uuid});
       });
-      
+
     }
   );
 
@@ -654,6 +654,24 @@ sub irc_rpl_listend {
   $self->_publish(
     channel_list => {
       channel_list => $self->{channel_list},
+    },
+  );
+}
+
+=head2 irc_mode
+
+:nick!user@host MODE #channel +o othernick
+
+=cut
+
+sub irc_mode {
+  my($self, $message) = @_;
+
+  $self->_publish(
+    mode => {
+      target => shift @{ $message->{params} },
+      mode => shift @{ $message->{params} },
+      args => join(' ', @{ $message->{params} }),
     },
   );
 }

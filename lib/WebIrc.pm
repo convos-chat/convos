@@ -135,7 +135,8 @@ sub startup {
   $private_r->get('/command-history')->to('client#command_history');
   $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
   $private_r->get('/settings', [cid => 0])->to('user#settings')->name('settings');
-  $private_r->post('/settings/connection', [cid => 0])->to('user#add_connection')->name('connection.add');
+  $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
+  $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
   $cid_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
   $cid_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');

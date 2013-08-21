@@ -222,6 +222,7 @@ sub settings {
       $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
       $self->redis->execute(
         [get => "avatar:$login\@$hostname"],
+        [hgetall => "user:$uid"],
         (map { [hgetall => "connection:$_"] } @$cids),
         (map { [smembers => "connection:$_:channels"] } @$cids),
         $delay->begin
@@ -231,6 +232,7 @@ sub settings {
     sub {    # convert connections to data structures
       my $delay = shift;
       my $avatar = shift || '';
+      my $user = shift;
       my $cids = pop;
 
       $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
@@ -244,7 +246,19 @@ sub settings {
         push @conversation, $info;
       }
 
-      push @conversation, { event => 'welcome' } unless @conversation;
+      if(@conversation) {
+        unshift @conversation, {
+          event => 'user',
+          avatar => $avatar,
+          email => $user->{email},
+          login => $login,
+          hostname => $hostname,
+        };
+      }
+      else {
+        unshift @conversation, { event => 'welcome' }
+      }
+
       push @conversation, $self->app->config('default_connection');
       $conversation[-1]{event} = 'connection';
 
@@ -272,7 +286,6 @@ Add a new connection.
 
 sub add_connection {
   my $self = shift->render_later;
-  my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
@@ -293,7 +306,6 @@ sub add_connection {
       my ($delay, $errors, $cid) = @_;
       $self->stash(errors => $errors) if $errors;
       $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
-      $self->redis->set("avatar:$login\@$hostname", $self->param('avatar')) if $self->param('avatar');
       return $self->settings if $errors;
       return $self->redirect_to('settings');
     },
@@ -310,12 +322,7 @@ sub edit_connection {
   my $self = shift->render_later;
   my $cid = $self->param('cid') || '';
   my $uid = $self->session('uid');
-  my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
-
-  if($self->req->method ne 'POST') {
-    return $self->settings;
-  }
 
   Mojo::IOLoop->delay(
     sub {
@@ -326,7 +333,6 @@ sub edit_connection {
       my ($delay, $member) = @_;
       return $self->render_not_found unless $member;
       $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
-      $self->redis->set("avatar:$login\@$hostname", $self->param('avatar') || '');
       $self->app->core->update_connection(
         $cid,
         {
@@ -370,6 +376,34 @@ sub delete_connection {
     },
     sub {
       my ($delay, $deleted) = @_;
+      $self->redirect_to('settings');
+    }
+  );
+}
+
+=head2 edit_user
+
+Change user profile.
+
+=cut
+
+sub edit_user {
+  my $self = shift->render_later;
+  my $uid = $self->session('uid');
+  my $login = $self->session('login');
+  my $hostname = WebIrc::Core::Util::hostname();
+
+  Mojo::IOLoop->delay(
+    sub {
+      my $delay = shift;
+      $self->redis->execute(
+        [hmset => "user:$uid", email => scalar $self->param('email')],
+        [set => "avatar:$login\@$hostname", scalar $self->param('avatar')],
+        $delay->begin,
+      );
+    },
+    sub {
+      my($delay, @saved) = @_;
       $self->redirect_to('settings');
     }
   );

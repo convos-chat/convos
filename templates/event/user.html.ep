@@ -1,0 +1,24 @@
+<li class="setting" data-cid="<%= $cid %>" data-target="any">
+  %= form_for 'user.edit', method => 'post', begin
+    <h3>Edit account</h3>
+    %= form_block login => class => ['login'], begin
+      <label for="login">Login</label>
+      %= text_field 'login', $login, id => 'login', readonly => 'readonly'
+    % end
+    %= form_block email => class => ['email'], begin
+      <label for="email">Email</label>
+      %= text_field 'email', $email, id => 'email', placeholder => 'your-personal@email.com'
+    % end
+    %= form_block avatar => class => ['avatar'], begin
+      <label for="avatar">Gravatar</label>
+      %= text_field 'avatar', $avatar, id => 'avatar', placeholder => 'your-gravatar@email.com'
+      <p class="help">Don't have a gravatar? <%= link_to 'Register now!', 'http://gravatar.com', target => '_blank' %></p>
+    % end
+    <div>
+      <button type="submit">Update profile</button>
+    % if(0) {
+      %= link_to 'Delete account', 'user.delete', class => 'confirm button'
+    % }
+    </div>
+  % end
+</li>

@@ -1,4 +1,4 @@
-<li class="connection" data-cid="<%= $cid %>" data-target="any">
+<li class="setting" data-cid="<%= $cid %>" data-target="any">
   %= form_for url_for($cid ? 'connection.edit' : 'connection.add', { cid => $cid }), method => 'post', begin
     % if($cid) {
     <h3>Edit <%= $host %></h3>
