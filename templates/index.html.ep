@@ -1,7 +1,7 @@
 % title 'Chat with your friends and colleagues';
 <div class="landing-page">
   <header class="row">
-    <h1 class="center">IRC hotel - <%= config('name') || '[YourName]' %></h1>
+    <h1 class="center"> Group chat in style - <%= config('name') || '[YourName]' %></h1>
     <h2 class="center">Interact with friends and colleagues.</h2>
   </header>
   %= image '/image/landing-page-example-chat.jpeg', alt => 'Example chat'
