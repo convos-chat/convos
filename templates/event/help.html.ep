@@ -22,8 +22,6 @@
     <dd>Change your wanted nick.</dd>
     <dt>/reconnect</dt>
     <dd>Restart the current connection.</dd>
-    <dt>/names</dt>
-    <dd>Retrieve nick list.</dd>
     <dt>/list</dt>
     <dd>Retrieve channel list.</dd>
   </dl>
