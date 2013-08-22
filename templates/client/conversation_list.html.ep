@@ -1,4 +1,7 @@
 <ul class="conversations">
+% unless(@$conversation_list) {
+  <li><%= link_to 'Setttings', 'settings' %></li>
+% }
 % my $i = 0;
 % for my $c (@$conversation_list) {
   % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target}" : "View conversation with $c->{target}";

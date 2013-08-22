@@ -14,12 +14,6 @@
     return false;
   };
 
-  var gotoConnectionSettings = function() {
-    var $select = $(this);
-    var cid = $select.find(":selected").attr('value');
-    location.href = location.href.replace(/\/settings.*/, '/settings/' + cid);
-  };
-
   $.notify = function(title, body, icon) {
     if($win.data('has_focus')) return this;
 
@@ -149,7 +143,6 @@
     var $focus = $togglers.filter('.active').trigger('activate').filter('.focus');
     var $login_button = $('a[data-toggle="div.login"]');
 
-    $('.settings select[name="cid"]').change(gotoConnectionSettings);
     $('a.confirm').click(confirmFirst);
 
     if($login_button.length) {
