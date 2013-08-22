@@ -86,15 +86,19 @@ sub socket {
           $self->logf(debug => '[ws] < %s', $_[1]);
           my ($self, $octets) = @_;
           my $dom = Mojo::DOM->new($octets)->at('div');
-          my($cid, $target,$uuid) = map { delete $dom->{$_} || '' } qw/ data-cid data-target data-uuid/;
+          my($cid, $target, $uuid) = map { delete $dom->{$_} || '' } qw/ data-cid data-target id /;
 
-          @$dom{qw/ cid target uuid/} = ($cid, $target, $uuid);
-
-          if($cid and $allowed{$cid}) {
-            $self->_handle_socket_data($dom);
+          unless($cid and $uuid) {
+            return $self->send_partial(
+              'event/server_message',
+              cid => '',
+              message => "Invalid message: ($octets)",
+              status => 403,
+              timestamp => time,
+            )->finish;
           }
-          else {
-            $self->send_partial(
+          unless($allowed{$cid}) {
+            return $self->send_partial(
               'event/server_message',
               cid => '',
               message => "Not allowed to subscribe to $cid",
@@ -102,6 +106,9 @@ sub socket {
               timestamp => time,
             )->finish;
           }
+
+          @$dom{qw/ cid target uuid /} = ($cid, $target, $uuid);
+          $self->_handle_socket_data($dom);
         }
       );
     }
@@ -113,8 +120,6 @@ sub _handle_socket_data {
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $key = "connection:@{[$dom->{cid}]}:to_server";
   my $uid = $self->session('uid');
-
-  $self->logf(debug => '[%s] < %s', $key, $cmd);
 
   if ($cmd =~ s!^/(\w+)\s*!!) {
     if (my $irc_cmd = $COMMANDS{$1}) {
@@ -135,7 +140,9 @@ sub _handle_socket_data {
   }
 
   if(defined $cmd) {
-    $self->redis->publish($key => $dom->{uuid}.' '.$cmd);
+    $cmd = "$dom->{uuid} $cmd";
+    $self->logf(debug => '[%s] < %s', $key, $cmd);
+    $self->redis->publish($key => $cmd);
     if($dom->{'data-history'}) {
       $self->redis->rpush("user:$uid:cmd_history", $dom->text(0));
       $self->redis->ltrim("user:$uid:cmd_history", -30, -1);

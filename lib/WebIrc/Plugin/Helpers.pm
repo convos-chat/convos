@@ -74,6 +74,7 @@ sub format_conversation {
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
+    $message->{uuid} ||= '';
     $message->{message} = $self->_parse_message($c, $message, $delay) if $message->{message};
 
     push @messages, $message;

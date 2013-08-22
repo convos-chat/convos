@@ -195,21 +195,25 @@ sub _subscribe {
   $self->{messages}->on(
     message => sub {
       my ($sub, $raw_message) = @_;
+      my($uuid, $message);
+
       $raw_message =~ s/(\S+)\s//;
-      my $uuid=$1;
-      my $message = Parse::IRC::parse_irc(sprintf ':%s %s', $irc->nick, $raw_message);
+      $uuid = $1;
+      $raw_message = sprintf ':%s %s', $irc->nick, $raw_message;
+      $message = Parse::IRC::parse_irc($raw_message);
 
       unless(ref $message) {
-        $self->_publish(wirc_notice => { message => "Unable to parse: $raw_message" });
+        $self->_publish(wirc_notice => { message => "Unable to parse: $raw_message", uuid => $uuid });
         return;
       }
+
+      $message->{uuid} = $uuid;
 
       $irc->write($raw_message, sub {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish(message_status => {status=>'failed', uuid=>$uuid});
-          return $self->_publish(wirc_notice => { message => "Could not send message to @{[$irc->server]}: $error", uuid=>$uuid, error=>1});
+          $self->_publish(wirc_notice => { message => "Could not send message to @{[$irc->server]}: $error", uuid => $uuid, error => 1 });
         }
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
@@ -217,9 +221,7 @@ sub _subscribe {
         elsif(my $method = $self->can('cmd_' . lc $message->{command})) {
           $self->$method($message);
         }
-        $self->_publish(message_status => { status=>'ok', uuid=>$uuid});
       });
-
     }
   );
 
@@ -298,6 +300,7 @@ sub add_message {
     message => $message->{params}[1],
     save => 1,
     timestamp => time,
+    uuid => $message->{uuid},
   };
 
   @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
@@ -741,6 +744,7 @@ sub _publish {
   $data->{cid} = $self->id;
   $data->{timestamp} ||= time;
   $data->{event} = $event;
+  $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
   $message = $JSON->encode($data);
 
   $self->redis->publish("connection:$data->{cid}:from_server", $message);
