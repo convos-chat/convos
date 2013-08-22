@@ -133,8 +133,6 @@ sub conversation_list {
       my($delay, $conversation_list) = @_;
       my $i = 0;
 
-      $delay->begin(0)->($conversation_list);
-
       while($i < @$conversation_list) {
         my $id = $conversation_list->[$i];
         my $timestamp = splice @$conversation_list, ($i + 1), 1;
@@ -153,10 +151,12 @@ sub conversation_list {
         $i++;
       }
 
+      $delay->begin->(undef, $conversation_list);
       $self->stash(conversation_list => $conversation_list);
     },
     sub {
-      my($delay, $conversation_list, @unread_count) = @_;
+      my($delay, @unread_count) = @_;
+      my $conversation_list = pop @unread_count;
 
       for my $c (@$conversation_list) {
         $c->{unread} = shift @unread_count || 0;

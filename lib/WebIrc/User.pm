@@ -227,7 +227,7 @@ sub settings {
         (map { [smembers => "connection:$_:channels"] } @$cids),
         $delay->begin
       );
-      $delay->begin(0)->($cids);
+      $delay->begin->(undef, $cids);
     },
     sub {    # convert connections to data structures
       my $delay = shift;
