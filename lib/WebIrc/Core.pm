@@ -114,16 +114,16 @@ sub _start_control_channel {
   Scalar::Util::weaken($self);
 
   $cb = sub {
-    my($redis, $name, $li) = @_;
-    $redis->brpop($name => 0, $cb);
-    $li or return;
+    my($redis, $li) = @_;
+    $redis->brpop($li->[0], 0, $cb);
+    $li->[1] or return;
     my($command, $uid, $host) = split /:/, $li->[1];
     my $action = "ctrl_$command";
     $self->$action($uid, $host);
   };
 
   $self->{control} = Mojo::Redis->new(timeout => 0, server => $self->redis->server);
-  $self->{control}->$cb('core:control');
+  $self->{control}->$cb(['core:control']);
   $self->{control}->on(
     error => sub {
       my($redis, $error) = @_;
