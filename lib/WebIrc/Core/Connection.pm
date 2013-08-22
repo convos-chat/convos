@@ -98,7 +98,7 @@ server by L</connect>.
 sub channels {
   my $self = shift;
   return sort keys %{ $self->{channels} || {} } unless @_;
-  $_[1] eq 'add' ? $self->{channels}{$_[0]} = 1 : delete $self->{channels}{$_[0]};
+  $_[0] eq 'add' ? $self->{channels}{$_[1]} = 1 : delete $self->{channels}{$_[1]};
   $self;
 }
 
@@ -256,7 +256,7 @@ sub _connect {
 
   Scalar::Util::weaken($self);
   $self->redis->execute(
-    [hgetall  => $self->{path}],
+    [hgetall => $self->{path}],
     sub {
       my ($redis, $args) = @_;
 

@@ -299,6 +299,7 @@ sub delete_connection {
       my($delay) = @_;
       $self->redis->srem("connections", "$uid:$host", $delay->begin);
       $self->redis->srem("user:$uid:connections", $host, $delay->begin);
+      $self->redis->del("user:$uid:connection:$host", $delay->begin);
     },
     sub {
       my ($delay, @removed) = @_;
@@ -371,7 +372,7 @@ Start a single connection by connection id.
 sub ctrl_start {
   my ($self, $uid, $host) = @_;
 
-  $self->_connection(name => $uid => $host, sub { pop->connect });
+  $self->_connection(name => $uid, host => $host, sub { pop->connect });
 }
 
 =head2 login
