@@ -15,13 +15,16 @@ $server->on(message => sub {
 redis_do(
   [ set => 'user:doe:uid', 42 ],
   [ hmset => 'user:42', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:42:conversations', time, 'wirc.pl:00:23wirc', time - 1, 'wirc.pl:00batman' ],
+  [ zadd => 'user:42:conversations', time, 'wirc:2epl:00:23wirc', time - 1, 'wirc:2epl:00batman' ],
   [ sadd => 'user:42:connections', 'wirc.pl' ],
   [ hmset => 'user:42:connection:wirc.pl', nick => 'doe' ],
 );
 
 $connection->redis($t->app->redis)->_irc(dummy_irc());
-$t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/wirc\.pl/%23wirc$}, 'Redirect to conversation');
+$t->post_ok('/', form => { login => 'doe', password => 'barbar' })
+  ->status_is(302)
+  ->header_like('Location', qr{/wirc\.pl/%23wirc$}, 'Redirect to conversation')
+  ;
 
 {
   $t->websocket_ok('/socket')->send_ok('yikes');
@@ -31,7 +34,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
 }
 
 {
-  $t->websocket_ok('/socket')->send_ok(msg('/names'));
+  $t->websocket_ok('/socket')->send_ok('<div data-host="irc.perl.org" data-target="#test123" id="003cb6af-e826-e17d-6691-3cae034fac1a">/names</div>');
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nicks[data-host="wirc.pl"][data-target="#wirc"]'), 'Got correct 6+#wirc';
   is $dom->at('a[href="/wirc.pl/fooman"][data-nick="fooman"]')->text, 'fooman', 'got fooman';

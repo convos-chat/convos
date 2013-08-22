@@ -346,12 +346,12 @@
       if(message.length == 0) return $input;
       var uuid = window.guid();
       if(!message.match('^\/')) {
-        var $pendingMessage = $('<li class="message-pending"><div class="content">' + message + '</div></li>').attr('data-uuid', uuid).hostAndTarget($messages);
+        var $pendingMessage = $('<li class="message-pending"><div class="content">' + message + '</div></li>').attr('id', uuid).hostAndTarget($messages);
         setTimeout(function() { messageFailed($pendingMessage); }, 10000);
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
       }
-      $input.socket.send($('<div/>').hostAndTarget($messages).attr('data-uuid', uuid).attr('data-history', history).text(message).prop('outerHTML'));
+      $input.socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr('data-history', history).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
@@ -425,30 +425,30 @@
   }
 
   var messageFailed = function($message) {
-    $('.message-pending').each(function() {
-      var $pending = $(this);
-       if($pending.data('uuid') === $message.data('uuid')) {
-         $pending.addClass('message-error').removeClass('message-pending');
-         $pending.prepend('<h3>Could not send message</h3>');
-         $pending.prepend('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">&times;</button></span>');
-       }
-     });
+    var uuid = $message.attr('id');
+    $message.removeAttr('id');
+    $messages.find('#' + uuid)
+      .filter('.message-pending')
+      .addClass('message-error')
+      .removeClass('message-pending')
+      .prepend('<h3>Could not send message</h3>')
+      .prepend('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">&times;</button></span>')
+      ;
   }
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
     var to_current = false;
+    var uuid = $message.attr('id');
 
-    if($message.hasClass('message-ok')) {
-      return $('.message-pending, .message-error').each(function() {
-        if($(this).data('uuid') === $message.data('uuid')) {
-          $(this).remove();
-        }
-      })
-    }
-    else if($message.hasClass('message-failed')) {
-      return messageFailed($message);
+    if($messages.find('#' + uuid).length) {
+      if($message.hasClass('error')) {
+        messageFailed($message);
+      }
+      else {
+        $messages.find('#' + uuid).remove();
+      }
     }
 
     $input.removeClass('sending').siblings('.menu').show();

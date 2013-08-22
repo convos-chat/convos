@@ -1,5 +1,5 @@
 % my $prev_nick = stash('prev_nick') || '';
-<li class="action message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-host="<%= $host %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
+<li id="<%= $uuid %>" class="action message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-host="<%= $host %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
 % if($nick ne $prev_nick) {
   %= image $avatar, alt => $nick, class => 'avatar'
 % }

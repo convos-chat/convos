@@ -85,7 +85,7 @@ sub socket {
 
       $self->logf(debug => '[ws] < %s', $octets);
 
-      if($dom) {
+      if($dom and $dom->attr('id')) {
         $self->_handle_socket_data($dom);
       }
       else {
@@ -93,6 +93,7 @@ sub socket {
           'event/wirc_notice',
           message => "Invalid message ($octets)",
           timestamp => time,
+          uuid => '',
         )->finish;
       }
     }
@@ -126,11 +127,9 @@ sub _handle_socket_data {
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $uid = $self->session('uid');
   my $key = "wirc:user:$uid:in";
-  my($host, $target, $uuid) = map { delete $dom->{$_} || '' } qw/ data-host data-target data-uuid/;
+  my($host, $target, $uuid) = map { delete $dom->{$_} || '' } qw/ data-host data-target id /;
 
   @$dom{qw/ host target uuid/} = ($host, $target, $uuid);
-
-  $self->logf(debug => '[%s] < %s', $key, $cmd);
 
   if ($cmd =~ s!^/(\w+)\s*!!) {
     if (my $irc_cmd = $COMMANDS{$1}) {
@@ -151,7 +150,9 @@ sub _handle_socket_data {
   }
 
   if(defined $cmd) {
-    $self->redis->publish($key => $dom->{uuid}.' '.$cmd);
+    $cmd = "$dom->{uuid} $cmd";
+    $self->logf(debug => '[%s] < %s', $key, $cmd);
+    $self->redis->publish($key => $cmd);
     if($dom->{'data-history'}) {
       $self->redis->rpush("user:$uid:cmd_history", $dom->text(0));
       $self->redis->ltrim("user:$uid:cmd_history", -30, -1);
