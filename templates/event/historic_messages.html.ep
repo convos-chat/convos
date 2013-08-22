@@ -1,8 +1,8 @@
-<li class="notice historic-message" data-cid="<%= $cid %>" data-target="<%= $target %>">
+<li class="notice historic-message" data-host="<%= $host %>" data-target="<%= $target %>">
   <span class="actions">
-    % my $more = url_for('view' => { cid => $cid, target => $target })->query(from => $conversation->[-1]{timestamp});
+    % my $more = url_for('view' => { host => $host, target => $target })->query(from => $conversation->[-1]{timestamp});
     %= link_to 'More...', $more, class => 'button newer'
-    %= link_to 'Chat', 'view' => { cid => $cid, target => $target }, class => 'button current'
+    %= link_to 'Chat', 'view' => { host => $host, target => $target }, class => 'button current'
   </span>
   <div class="content">
     The above messages are from archive.

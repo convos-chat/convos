@@ -1,7 +1,6 @@
 use t::Helper;
 
-my $control = Mojo::Redis->new(server => $t->app->redis->server);
-my $server = $t->app->redis->subscribe('connection:1:to_server');
+my $server = $t->app->redis->subscribe('wirc:user:1:in');
 my($form, $tmp);
 
 $form = {
@@ -27,6 +26,7 @@ $t->post_ok('/register' => form => $form)
 
 $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Nordaaker - Chat')
+  ->element_exists('li.welcome')
   ->element_exists('form[action="/settings/connection"][method="post"]')
   ->element_exists('input[name="host"][id="host"]')
   ->element_exists('input[name="nick"][id="nick"]')
@@ -53,66 +53,66 @@ $form = {
   nick => 'ice_cool',
   channels => ', #way #cool ,,,',
 };
-$control->brpop('core:control' => 0, sub { $tmp = pop->[1] });
 $t->post_ok('/settings/connection', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page')
   ;
-
-is $tmp, 'start:1', 'start connection';
+is redis_do([rpop => 'core:control']), 'start:1:freenode', 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Nordaaker - Chat')
-  ->element_exists('form[action="/1/settings/edit"][method="post"]')
+  ->element_exists('form[action="/freenode/settings/edit"][method="post"]')
   ->element_exists('input[name="host"][value="freenode"]')
   ->element_exists('input[name="nick"][value="ice_cool"]')
   ->element_exists('select[name="channels"]')
   ->element_exists('option[value="#cool"][selected="selected"]')
   ->element_exists('option[value="#way"][selected="selected"]')
-  ->element_exists('a.confirm.button[href="/1/settings/delete"]')
+  ->element_exists('a.confirm.button[href="/freenode/settings/delete"]')
   ->text_is('button[type="submit"][name="action"][value="save"]', 'Update connection')
   ;
 
-$control->brpop('core:control' => 0, sub { $tmp = pop->[1] });
 $form->{host} = 'irc.perl.org';
-$t->post_ok('/1/settings/edit', form => $form)
+$t->post_ok('/freenode/settings/edit', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page')
   ;
 
-is $tmp, 'restart:1', 'restart connection on host change';
+is_deeply(
+  [ redis_do([rpop => 'core:control'], [rpop => 'core:control']) ],
+  [ 'start:1:irc.perl.org', 'stop:1:freenode' ],
+  'start/stop connection on update',
+);
 
 $server->once(message => sub { $tmp = $_[1] });
 $form->{nick} = 'marcus';
-$t->post_ok('/1/settings/edit', form => $form)->status_is('302');
+$t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'NICK marcus', 'NICK marcus';
 
 $server->once(message => sub { $tmp = $_[1] });
 $form->{channels} = '#way';
-$t->post_ok('/1/settings/edit', form => $form)->status_is('302');
+$t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'PART #cool', 'PART #cool';
 
 $server->once(message => sub { $tmp = $_[1] });
 $form->{channels} = '#wirc';
-$t->post_ok('/1/settings/edit', form => $form)->status_is('302');
+$t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'JOIN #wirc', 'JOIN #wirc';
 
 $t->post_ok('/settings/2', form => $form)->status_is('404');
-$t->get_ok('/2/settings/delete')->status_is('404');
+$t->get_ok('/yay/settings/delete')->status_is('404');
 
-$control->brpop('core:control' => 0, sub { $tmp = pop->[1] });
-$t->get_ok('/1/settings/delete')
+$t->get_ok('/irc.perl.org/settings/delete')
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page after delete')
   ;
-is $tmp, 'stop:1', 'stop connection';
+is redis_do([rpop => 'core:control']), 'stop:1:irc.perl.org', 'stop connection';
 
 $t->get_ok('/logout')
   ->status_is(302)
   ->header_like('Location', qr{/$}, 'Logout')
   ;
 
-$t->post_ok('/1/settings/edit', form => $form)
+$t->post_ok('/irc.perl.org/settings/edit', form => $form)
   ->status_is(302)
   ->header_like('Location', qr{/$}, 'Need to login')
   ;

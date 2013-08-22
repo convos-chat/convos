@@ -32,11 +32,11 @@ sub route {
       $self->redis->zrevrange("user:$uid:conversations", 0, 1, $delay->begin);
     },
     sub {
-      my($delay, $id) = @_;
+      my($delay, $names) = @_;
 
-      if($id and $id->[0]) {
-        if(my($cid, $target) = id_as $id->[0]) {
-          return $self->redirect_to('view', cid => $cid, target => $target);
+      if($names and $names->[0]) {
+        if(my($host, $target) = id_as $names->[0]) {
+          return $self->redirect_to('view', host => $host, target => $target);
         }
       }
 
@@ -53,42 +53,46 @@ Used to render the main IRC client view.
 
 sub view {
   my $self = shift->render_later;
-  my $previous_id = $self->session('view_id') || '';
+  my $prev_name = $self->session('name') || '';
   my $uid = $self->session('uid');
-  my $cid = $self->stash('cid');
+  my $host = $self->stash('host');
   my $target = $self->stash('target') || '';
-  my $id = as_id $cid, $target;
+  my $name = as_id $host, $target;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
 
-  if($previous_id and $id ne $previous_id) {
+  if($prev_name and $name ne $prev_name) {
     # make sure it's not a removed conversation before doing zadd
-    $self->redis->zscore("user:$uid:conversations", $previous_id, sub {
+    $self->redis->zscore("user:$uid:conversations", $prev_name, sub {
       my($redis, $score) = @_;
-      $redis->zadd("user:$uid:conversations", time - 0.001, $previous_id) if $score;
+      $redis->zadd("user:$uid:conversations", time - 0.001, $prev_name) if $score;
     });
   }
 
-  $self->session(view_id => $id);
+  $self->session(name => $name);
   $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : 'without-nick-list');
 
   Mojo::IOLoop->delay(
-    $cid ? $self->_check_if_uid_own_cid($cid) : (),
     sub {
       my($delay) = @_;
-      $self->redis->zadd("user:$uid:conversations", time, $id);
-      $self->redis->hgetall("connection:$cid", $delay->begin);
-      $self->_modify_notification($self->param('notification'), read => 1) if defined $self->param('notification');
-      $self->_conversation($delay->begin) unless $self->stash('settings');
+      $self->redis->hgetall("user:$uid:connection:$host", $delay->begin);
     },
     sub {
-      my($delay, $connection, $conversation) = @_;
+      my($delay, $connection) = @_;
+      return $self->route unless %$connection;
+      $self->stash(%$connection);
+      $self->redis->zadd("user:$uid:conversations", time, $name);
+      $self->_modify_notification($self->param('notification'), read => 1) if defined $self->param('notification');
+      $self->_conversation($delay->begin);
+      $delay->begin->();
+    },
+    sub {
+      my($delay, $conversation) = @_;
 
       if($with_layout) {
         $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
 
-      $self->stash(%$connection);
       $self->stash(conversation => $conversation) if $conversation;
       $delay->begin->(0);
     },
@@ -134,20 +138,19 @@ sub conversation_list {
       my $i = 0;
 
       while($i < @$conversation_list) {
-        my $id = $conversation_list->[$i];
+        my $name = $conversation_list->[$i];
         my $timestamp = splice @$conversation_list, ($i + 1), 1;
-        my($cid, $target) = id_as $id;
+        my($host, $target) = id_as $name;
 
         $target ||= '';
         $conversation_list->[$i] = {
-          cid => $cid,
-          id => $id,
+          host => $host,
           is_channel => $target =~ /^#/ ? 1 : 0,
           target => $target,
           timestamp => $timestamp,
         };
 
-        $self->redis->zcount("connection:$cid:$target:msg", $timestamp, '+inf', $delay->begin);
+        $self->redis->zcount("user:$uid:connection:$host:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;
       }
 
@@ -225,7 +228,6 @@ sub notification_list {
 
       while($i < @$notification_list) {
         my $n = $JSON->decode($notification_list->[$i]);
-        $n->{id} = as_id @$n{qw/ cid target /};
         $n->{index} = $i;
         $n->{is_channel} = $n->{target} =~ /^#/ ? 1 : 0;
 
@@ -253,27 +255,12 @@ sub notification_list {
   $self->render_later;
 }
 
-sub _check_if_uid_own_cid {
-  my($self, $cid) = @_;
-  my $uid = $self->session('uid') // -1;
-
-  sub {
-    my($delay) = @_;
-    $self->redis->sismember("user:$uid:connections", $cid, $delay->begin);
-  },
-  sub {
-    my($delay, $is_owner) = @_;
-    return $delay->begin->() if $is_owner;
-    return $self->route;
-  },
-}
-
 sub _conversation {
   my($self, $cb) = @_;
   my $uid = $self->session('uid');
-  my $cid = $self->stash('cid');
+  my $host = $self->stash('host');
   my $target = $self->stash('target');
-  my $key = $target ? "connection:$cid:$target:msg" : "connection:$cid:msg";
+  my $key = $target ? "user:$uid:connection:$host:$target:msg" : "user:$uid:connection:$host:msg";
 
   if(my $to = $self->param('to')) { # to a timestamp
     $self->redis->zrevrangebyscore($key => $to, '-inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES, sub {

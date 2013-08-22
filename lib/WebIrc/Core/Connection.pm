@@ -9,7 +9,8 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
   use WebIrc::Core::Connection;
 
   $c = WebIrc::Core::Connection->new(
-          id => 'foobar',
+          host => 'irc.localhost',
+          uid => 123,
           redis => Mojo::Redis->new,
         );
 
@@ -19,7 +20,7 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
 
 =head1 DESCRIPTION
 
-This module use L<Mojo::IRC> to set up a connection to an IRC server. The
+This module use L<Mojo::IRC> to  up a connection to an IRC server. The
 attributes used to do so is figured out from a redis server.
 
 There are quite a few L<EVENTS|Mojo::IRC/EVENTS> that this module use:
@@ -49,7 +50,6 @@ use Mojo::Base -base;
 use Mojo::IRC;
 use Mojo::JSON;
 no warnings 'utf8';
-use Carp qw/ croak /;
 use IRC::Utils;
 use Parse::IRC ();
 use Scalar::Util ();
@@ -62,13 +62,11 @@ my @keys = qw/ nick user host /;
 
 =head1 ATTRIBUTES
 
-=head2 id
-
-Holds the id of this connection. This attribute is required.
+=head2 host
 
 =cut
 
-has id => 0;
+has host => '';
 
 =head2 uid
 
@@ -88,12 +86,21 @@ has redis => sub { Mojo::Redis->new(timeout => 0); };
 
 =head2 channels
 
+  @channels = $self->channels;
+  $self = $self->channels(add => $add_channel_name);
+  $self = $self->channels(del => $del_channel_name);
+
 IRC channels to join. The channel list will be fetched from the L</redis>
 server by L</connect>.
 
 =cut
 
-has channels => sub { [] };
+sub channels {
+  my $self = shift;
+  return sort keys %{ $self->{channels} || {} } unless @_;
+  $_[1] eq 'add' ? $self->{channels}{$_[0]} = 1 : delete $self->{channels}{$_[0]};
+  $self;
+}
 
 =head2 log
 
@@ -118,7 +125,7 @@ my @OTHER_EVENTS              = qw/
 
 has _irc => sub {
   my $self = shift;
-  my $irc  = Mojo::IRC->new(debug_key => $self->id);
+  my $irc  = Mojo::IRC->new(debug_key => join ':', $self->uid, $self->host);
 
   Scalar::Util::weaken($self);
   $irc->register_default_event_handlers;
@@ -148,13 +155,29 @@ has _reconnect_in => 10;
 
 =head1 METHODS
 
+=head2 new
+
+Checks for mandatory attributes: L</uid> and L</host>.
+
+=cut
+
+sub new {
+  my $self = shift->SUPER::new(@_);
+
+  $self->uid or die "uid is required";
+  $self->host or die "host is required";
+  $self->{path} = "user:$self->{uid}:connection:$self->{host}";
+  $self;
+}
+
 =head2 connect
 
   $self = $self->connect;
 
 This method will create a new L<Mojo::IRC> object with attribute data from
-L</redis>. The values fetched from the backend is identified by L</id>. This
-method then call L<Mojo::IRC/connect> after the object is set up.
+L</redis>. The values fetched from the backend is identified by L</host> and
+L</uid>. This method then call L<Mojo::IRC/connect> after the object is set
+up.
 
 Attributes fetched from backend: nick, user, host and channels. The latter
 is set in L</channels> and used by L</irc_rpl_welcome>.
@@ -164,12 +187,11 @@ is set in L</channels> and used by L</irc_rpl_welcome>.
 sub connect {
   my ($self) = @_;
   my $irc = $self->_irc;
-  my $id = $self->id or croak "Cannot load connection without id";
 
   # we will try to "steal" the nich we want every 60 second
   Scalar::Util::weaken($self);
   $self->{keepnick_tid} ||= $irc->ioloop->recurring(60, sub {
-    $self->redis->hget("connection:$id", "nick", sub { $irc->change_nick($_[1]) });
+    $self->redis->hget($self->{path}, 'nick', sub { $irc->change_nick($_[1]) });
   });
 
   $self->_connect;
@@ -179,16 +201,16 @@ sub connect {
 
 sub _subscribe {
   my $self = shift;
-  my $id = $self->id;
   my $irc = $self->_irc;
+  my $uid = $self->uid;
 
   Scalar::Util::weaken($self);
-  $self->{messages} = $self->redis->subscribe("connection:$id:to_server");
+  $self->{messages} = $self->redis->subscribe("wirc:user:$uid:in");
   $self->{messages}->timeout(0);
   $self->{messages}->on(
     error => sub {
       my ($sub, $error) = @_;
-      $self->log->warn("[$id] Re-subcribing to messages to @{[$irc->server]}. ($error)");
+      $self->log->warn("[$self->{path}] Re-subcribing to messages to @{[$irc->server]}. ($error)");
       $self->_subscribe;
     },
   );
@@ -228,20 +250,18 @@ sub _subscribe {
 
 sub _connect {
   my $self = shift;
-  my $id = $self->id;
   my $irc = $self->_irc;
 
   Scalar::Util::weaken($self);
   $self->redis->execute(
-    [hgetall  => "connection:$id"],
-    [smembers => "connection:$id:channels"],
+    [hgetall  => $self->{path}],
     sub {
-      my ($redis, $attrs, $channels) = @_;
+      my ($redis, $args) = @_;
 
-      $self->channels($channels);
-      $irc->server($attrs->{host});
-      $irc->nick($attrs->{nick});
-      $irc->user($attrs->{user});
+      $self->channels(add => $_) for split ' ', $args->{channels};
+      $irc->server($args->{host});
+      $irc->nick($args->{nick});
+      $irc->user($args->{user});
       $irc->connect(sub {
         my($irc, $error) = @_;
 
@@ -250,7 +270,7 @@ sub _connect {
           $self->_publish(wirc_notice => { message => "Could not connect to @{[$irc->server]}: $error" });
         }
         else {
-          $self->redis->hset("connection:@{[$self->id]}", current_nick => $irc->nick);
+          $self->redis->hset($self->{path}, current_nick => $irc->nick);
           $self->_publish(wirc_notice => { message => "Connected to @{[$irc->server]}." });
         }
       });
@@ -323,12 +343,12 @@ sub add_message {
 sub _add_conversation {
   my($self, $data) = @_;
   my $uid = $self->uid;
-  my $id = as_id $self->id, $data->{target};
+  my $name = as_id $self->host, $data->{target};
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->zincrby("user:$uid:conversations", 0, $id, $delay->begin);
+      $self->redis->zincrby("user:$uid:conversations", 0, $name, $delay->begin);
     },
     sub {
       my($delay, $new) = @_;
@@ -337,7 +357,7 @@ sub _add_conversation {
     },
     sub {
       my($delay, $score) = @_;
-      $self->redis->zadd("user:$uid:conversations", $score->[1] - 0.0001, $id, $delay->begin);
+      $self->redis->zadd("user:$uid:conversations", $score->[1] - 0.0001, $name, $delay->begin);
     },
     sub {
       my($delay) = @_;
@@ -371,7 +391,7 @@ Example message:
 sub irc_rpl_welcome {
   my ($self, $message) = @_;
 
-  for my $channel (@{$self->channels}) {
+  for my $channel ($self->channels) {
     $self->_irc->write(JOIN => $channel);
   }
 }
@@ -479,10 +499,7 @@ sub irc_rpl_myinfo {
   my @keys = qw/ current_nick real_host version available_user_modes available_channel_modes /;
   my $i    = 0;
 
-  $self->redis->hmset(
-    "connection:@{[$self->id]}",
-    map { $_, $message->{params}[$i++] // '' } @keys,
-  );
+  $self->redis->hmset($self->{path}, map { $_, $message->{params}[$i++] // '' } @keys);
 }
 
 =head2 irc_join
@@ -497,8 +514,8 @@ sub irc_join {
   my $channel = $message->{params}[0];
 
   if($nick eq $self->_irc->nick) {
-    my $id = as_id $self->id, $channel;
-    $self->redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
+    my $name = as_id $self->host, $channel;
+    $self->redis->zadd("user:@{[$self->uid]}:conversations", time, $name);
     $self->_publish(add_conversation => { target => $channel });
   }
   else {
@@ -518,7 +535,7 @@ sub irc_nick {
   my $new_nick = $message->{params}[0];
 
   if ($new_nick eq $self->_irc->nick) {
-    $self->redis->hset("connection:@{[$self->id]}", current_nick => $new_nick);
+    $self->redis->hset($self->{path}, current_nick => $new_nick);
   }
 
   $self->_publish(nick_change => { old_nick => $old_nick, new_nick => $new_nick });
@@ -535,9 +552,11 @@ sub irc_part {
 
   Scalar::Util::weaken($self);
   if($nick eq $self->_irc->nick) {
-    my $id = as_id $self->id, $channel;
-    $self->redis->srem("connection:@{[$self->id]}:channels", $channel);
-    $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
+    my $name = as_id $self->host, $channel;
+
+    $self->channels(del => $channel);
+    $self->redis->hset($self->{path}, 'channels', join ',', $self->channels);
+    $self->redis->zrem("user:@{[$self->uid]}:conversations", $name, sub {
       $self->_publish(remove_conversation => { target => $channel });
     });
   }
@@ -555,10 +574,10 @@ sub irc_part {
 sub irc_err_bannedfromchan {
   my($self, $message) = @_;
   my $channel = $message->{params}[1];
-  my $id = as_id $self->id, $channel;
+  my $name = as_id $self->host, $channel;
 
   Scalar::Util::weaken($self);
-  $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
+  $self->redis->zrem("user:@{[$self->uid]}:conversations", $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
     $self->_publish(wirc_notice => { save => 1, message => $message->{params}[2] });
   });
@@ -573,10 +592,10 @@ sub irc_err_bannedfromchan {
 sub irc_err_nosuchchannel {
   my ($self, $message) = @_;
   my $channel = $message->{params}[1];
-  my $id = as_id $self->id, $channel;
+  my $name = as_id $self->host, $channel;
 
   Scalar::Util::weaken($self);
-  $self->redis->zrem("user:@{[$self->uid]}:conversations", $id, sub {
+  $self->redis->zrem("user:@{[$self->uid]}:conversations", $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
   });
 }
@@ -705,7 +724,7 @@ Handle nick commands from user. Change nick and set new nick in redis.
 sub cmd_nick {
   my ($self, $message) = @_;
   my $new_nick = $message->{params}[0];
-  $self->redis->hset("connection:@{[$self->id]}", nick => $new_nick);
+  $self->redis->hset($self->{path}, nick => $new_nick);
   $self->_irc->nick($new_nick);
 }
 
@@ -719,51 +738,52 @@ sub cmd_join {
   my ($self, $message) = @_;
   my $channel = $message->{params}[0] || '';
 
-  if($channel =~ /^#\w/) {
-    Scalar::Util::weaken($self);
-    $self->redis->sadd("connection:@{[$self->id]}:channels", $channel, sub {
-      my($redis, $added) = @_;
-      my $id = as_id $self->id, $channel;
-      $redis->zadd("user:@{[$self->uid]}:conversations", time, $id);
-      $self->_publish(add_conversation => { target => $channel }) if $added;
-    });
+  unless($channel =~ /^#\w/) {
+    return $self->_publish(wirc_notice => { message => 'Do not understand which channel to join' });
   }
-  else {
-    $self->_publish(wirc_notice => { message => 'Do not understand which channel to join' });
 
-  }
+  Scalar::Util::weaken($self);
+  $self->channels(add => $channel);
+  $self->redis->hset($self->{path}, 'channels', join(',', $self->channels), sub {
+    my($redis, $new) = @_;
+    my $name = as_id $self->host, $channel;
+    $redis->zadd("user:@{[$self->uid]}:conversations", time, $name);
+    $self->_publish(add_conversation => { target => $channel });
+  });
 }
 
 sub _publish {
   my ($self, $event, $data) = @_;
+  my $uid = $self->uid;
+  my $host = $self->host;
   my $message;
 
-  $data->{cid} = $self->id;
+  $data->{host} = $host;
   $data->{timestamp} ||= time;
   $data->{event} = $event;
   $message = $JSON->encode($data);
 
-  $self->redis->publish("connection:$data->{cid}:from_server", $message);
+  $self->redis->publish("wirc:user:$uid:out", $message);
 
   if($data->{highlight}) {
-    $self->redis->lpush("user:@{[$self->uid]}:notifications", $message);
+    $self->redis->lpush("user:$uid:notifications", $message);
   }
 
   if($event eq 'wirc_notice') {
-    $self->log->warn("[$data->{cid}] $data->{message}");
+    $self->log->warn("[$uid:$host] $data->{message}");
   }
   if($data->{save}) {
     if ($data->{target}) {
-      $self->redis->zadd("connection:$data->{cid}:$data->{target}:msg", $data->{timestamp}, $message);
+      $self->redis->zadd("user:$uid:connection:$host:$data->{target}:msg", $data->{timestamp}, $message);
     }
     else {
-      $self->redis->zadd("connection:$data->{cid}:msg", $data->{timestamp}, $message);
+      $self->redis->zadd("user:$uid:connection:$host:msg", $data->{timestamp}, $message);
     }
   }
 }
 
 sub DESTROY {
-  warn "DESTROY $_[0]->{id}\n" if DEBUG;
+  warn "DESTROY $_[0]->{path}\n" if DEBUG;
   my $self = shift;
   my $ioloop = $self->{_irc}{ioloop} or return;
   my $keepnick_tid = $self->{keepnick_tid} or return;

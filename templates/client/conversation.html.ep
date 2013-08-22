@@ -1,5 +1,5 @@
 % my $prev_nick = '';
-<ul class="<%= $body_class %>" data-cid="<%= $cid %>" data-target="<%= $target %>" data-nick="<%= $nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
+<ul class="<%= $body_class %>" data-host="<%= $host %>" data-target="<%= $target %>" data-nick="<%= $nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
 % for my $message (@$conversation) {
   %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
   % $prev_nick = $message->{nick};

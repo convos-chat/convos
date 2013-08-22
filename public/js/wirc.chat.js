@@ -78,14 +78,14 @@
     $messages.append(this.fadeIn('fast'));
   };
 
-  $.fn.cidAndTarget = function($from) {
+  $.fn.hostAndTarget = function($from) {
     if($from) {
       return this
-        .attr('data-cid', $from.data('cid')).attr('data-target', $from.data('target'))
-        .data('cid', $from.data('cid')).data('target', $from.data('target'))
+        .attr('data-host', $from.data('host')).attr('data-target', $from.data('target'))
+        .data('host', $from.data('host')).data('target', $from.data('target'))
     }
     else {
-      return { cid: this.data('cid'), target: this.data('target') };
+      return { host: this.data('host'), target: this.data('target') };
     }
   };
 
@@ -118,14 +118,14 @@
       setTimeout(function() { reloadConversationList({}); }, 1000);
       $win.data('at_bottom', false);
     }
-    else if(!Object.equals($input.cidAndTarget(), $messages.cidAndTarget())) {
+    else if(!Object.equals($input.hostAndTarget(), $messages.hostAndTarget())) {
       reloadConversationList({});
     }
     else {
       initNotifications();
     }
 
-    $input.cidAndTarget($messages); // must be done after Object.equals(...) above
+    $input.hostAndTarget($messages); // must be done after Object.equals(...) above
     drawUI();
   };
 
@@ -137,7 +137,7 @@
     var used_width = 0, unread, $a;
 
     if($message) {
-      $a = $conversations.find('a[href="' + $.url_for($message.data('cid'), $message.data('target')) + '"]');
+      $a = $conversations.find('a[href="' + $.url_for($message.data('host'), $message.data('target')) + '"]');
       unread = parseInt($a.attr('data-unread')) + 1;
       $a.attr('data-unread', unread).attr('title', unread + " unread messages in " + $message.data('target'));
       $a.closest('li').addClass('unread');
@@ -234,7 +234,7 @@
         $messages.end_time = parseFloat($ul.data('end-time'));
         $li.each(function() { $(this).appendToMessages(); });
         if(!$li.filter('.historic-message').length) {
-          $('body').attr('class', $messages.cidAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
+          $('body').attr('class', $messages.hostAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
           if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
           drawUI();
         }
@@ -346,12 +346,12 @@
       if(message.length == 0) return $input;
       var uuid = window.guid();
       if(!message.match('^\/')) {
-        var $pendingMessage = $('<li class="message-pending"><div class="content">' + message + '</div></li>').attr('data-uuid', uuid).cidAndTarget($messages);
+        var $pendingMessage = $('<li class="message-pending"><div class="content">' + message + '</div></li>').attr('data-uuid', uuid).hostAndTarget($messages);
         setTimeout(function() { messageFailed($pendingMessage); }, 10000);
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
       }
-      $input.socket.send($('<div/>').cidAndTarget($messages).attr('data-uuid', uuid).attr('data-history', history).text(message).prop('outerHTML'));
+      $input.socket.send($('<div/>').hostAndTarget($messages).attr('data-uuid', uuid).attr('data-history', history).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
       if(history) $input.history.push(message);
       $input.history_i = $input.history.length;
@@ -399,7 +399,7 @@
 
   var nickList = function($data) {
     var $nicks = $data.find('[data-nick]');
-    var cid = $messages.data('cid');
+    var host = $messages.data('host');
     var senders = {};
 
     if($nicks.length) {
@@ -417,7 +417,7 @@
     if(nicks.length) {
       $('div.nicks.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(cid, n) + '">' + n + '</a></li>';
+          return '<li><a href="' + $.url_for(host, n) + '">' + n + '</a></li>';
         }).join('')
       );
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
@@ -454,10 +454,10 @@
     $input.removeClass('sending').siblings('.menu').show();
 
     if($message.data('target') === 'any') {
-      $message.data('target', $messages.data('target')).data('cid', $messages.data('cid'));
+      $message.data('target', $messages.data('target')).data('host', $messages.data('host'));
     }
     if($('body').attr('class').indexOf('-nick-list') > 0) {
-      to_current = Object.equals($message.cidAndTarget(), $messages.cidAndTarget());
+      to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
     }
     if($message.hasClass('highlight')) {
       var sender = $message.data('sender');

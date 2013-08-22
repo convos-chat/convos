@@ -1,4 +1,4 @@
-<li class="notice" data-cid="0" data-target="any">
+<li class="notice" data-target="any">
   <div class="content"><%== $message %></div>
   %= timestamp_span(stash('timestamp') || time)
 </li>

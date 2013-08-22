@@ -198,15 +198,14 @@ Used to retrieve connection information.
 sub settings {
   my $self = shift->render_later;
   my $uid = $self->session('uid');
-  my $cid = $self->stash('cid') || 0;
+  my $host = $self->stash('host') || 0;
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
   my $with_layout = $self->req->is_xhr ? 0 : 1;
   my @conversation;
 
-  # cid is just to trick layouts/default.html.ep
   $self->stash(
-    cid => $cid,
+    host => $host,
     body_class => 'settings',
     conversation => \@conversation,
     nick => $login,
@@ -214,39 +213,54 @@ sub settings {
   );
 
   Mojo::IOLoop->delay(
-    sub {    # get connections
+    sub {
+      my($delay) = @_;
       $self->redis->smembers("user:$uid:connections", $_[0]->begin);
     },
-    sub {    # get connection data
-      my($delay, $cids) = @_;
-      $self->logf(debug => '[settings] connections %s', $cids) if DEBUG;
-      $self->redis->execute(
-        [get => "avatar:$login\@$hostname"],
-        [hgetall => "user:$uid"],
-        (map { [hgetall => "connection:$_"] } @$cids),
-        (map { [smembers => "connection:$_:channels"] } @$cids),
-        $delay->begin
+    sub {
+      my($delay, $hosts) = @_;
+      my $cb = $delay->begin;
+
+      return $self->$cb() unless @$hosts;
+      return $self->redis->execute(
+        (map { [hgetall => "user:$uid:connection:$_"] } @$hosts),
+        $cb,
       );
-      $delay->begin->(undef, $cids);
     },
-    sub {    # convert connections to data structures
-      my $delay = shift;
-      my $avatar = shift || '';
-      my $user = shift;
-      my $cids = pop;
+    sub {
+      my($delay, @connections) = @_;
 
-      $self->logf(debug => '[settings] connection data %s', \@_) if DEBUG;
+      $self->logf(debug => '[settings] connection data %s', \@connections) if DEBUG;
 
-      for (my $i = 0; $i < @$cids; $i++) {
-        my $info = $_[$i];
-        $cid //= $cids->[$i];
-        $info->{cid} = $cids->[$i];
-        $info->{channels} = $_[@$cids + $i];
-        $info->{event} = 'connection';
-        push @conversation, $info;
+      for my $conn (@connections) {
+        $conn->{event} = 'connection';
+        $conn->{lookup} = $conn->{host};
+        $conn->{channels} = [ split ' ', $conn->{channels} ];
+        push @conversation, $conn;
       }
 
       if(@conversation) {
+        $self->redis->get("avatar:$login\@$hostname", $delay->begin);
+        $self->redis->hgetall("user:$uid", $delay->begin);
+      }
+      else {
+        push @conversation, { event => 'welcome' };
+      }
+
+      push @conversation, $self->app->config('default_connection');
+      $conversation[-1]{event} = 'connection';
+      $conversation[-1]{lookup} = '';
+      $delay->begin->();
+    },
+    sub {
+      my($delay, $user, $avatar) = @_;
+
+      if($with_layout) {
+        $self->conversation_list($delay->begin);
+        $self->notification_list($delay->begin);
+      }
+
+      if($user) {
         unshift @conversation, {
           event => 'user',
           avatar => $avatar,
@@ -255,22 +269,11 @@ sub settings {
           hostname => $hostname,
         };
       }
-      else {
-        unshift @conversation, { event => 'welcome' }
-      }
-
-      push @conversation, $self->app->config('default_connection');
-      $conversation[-1]{event} = 'connection';
-
-      if($with_layout) {
-        $self->conversation_list($delay->begin);
-        $self->notification_list($delay->begin);
-      }
 
       $delay->begin->();
     },
     sub {
-      my($delay) = @_;
+      my($delay, @res) = @_;
 
       return $self->render('client/view') if $with_layout;
       return $self->render('client/conversation', layout => undef);
@@ -294,8 +297,8 @@ sub add_connection {
       $self->app->core->add_connection(
         $self->session('uid'),
         {
-          host     => $self->param('host')     || '',
-          nick     => $self->param('nick')     || '',
+          host     => $self->param('host') || '',
+          nick     => $self->param('nick') || '',
           channels => join(' ', $self->param('channels')),
           user     => $login,
         },
@@ -303,9 +306,8 @@ sub add_connection {
       );
     },
     sub {
-      my ($delay, $errors, $cid) = @_;
+      my ($delay, $errors, $conn) = @_;
       $self->stash(errors => $errors) if $errors;
-      $self->logf(debug => '[settings] cid=%s', $cid) if DEBUG;
       return $self->settings if $errors;
       return $self->redirect_to('settings');
     },
@@ -320,28 +322,20 @@ Change a connection.
 
 sub edit_connection {
   my $self = shift->render_later;
-  my $cid = $self->param('cid') || '';
-  my $uid = $self->session('uid');
-  my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
     sub {
-      my $delay = shift;
-      $self->redis->sismember("user:$uid:connections", $cid, $delay->begin);
-    },
-    sub {
-      my ($delay, $member) = @_;
-      return $self->render_not_found unless $member;
-      $self->logf(debug => '[settings] update %s', $cid) if DEBUG;
+      my ($delay) = @_;
       $self->app->core->update_connection(
-        $cid,
+        $self->session('uid'),
         {
-          host     => $self->param('host')     || '',
-          nick     => $self->param('nick')     || '',
+          host     => $self->req->body_params->param('host') || '',
+          lookup   => $self->stash('host') || '',
+          nick     => $self->param('nick') || '',
           channels => join(' ', $self->param('channels')),
-          user     => $login,
+          user     => $self->session('login'),
         },
-        $delay->begin
+        $delay->begin,
       );
     },
     sub {
@@ -362,21 +356,16 @@ Delete a connection.
 sub delete_connection {
   my $self = shift->render_later;
   my $uid  = $self->session('uid');
-  my $cid  = $self->param('cid') || '';
 
   Mojo::IOLoop->delay(
     sub {
-      my $delay = shift;
-      $self->redis->sismember("user:$uid:connections", $cid, $delay->begin);
+      my ($delay) = @_;
+      return $self->app->core->delete_connection($uid, $self->stash('host'), $delay->begin);
     },
     sub {
-      my ($delay, $member) = @_;
-      return $self->render_not_found unless $member;
-      return $self->app->core->delete_connection($uid, $cid, $delay->begin);
-    },
-    sub {
-      my ($delay, $deleted) = @_;
-      $self->redirect_to('settings');
+      my ($delay, $error) = @_;
+      return $self->render_not_found if $error;
+      return $self->redirect_to('settings');
     }
   );
 }

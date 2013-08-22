@@ -127,20 +127,20 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $cid_r = $private_r->any('/:cid', [cid => qr{\d+}]);
+  my $host_r = $private_r->any('/#host');
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
   $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
   $private_r->get('/command-history')->to('client#command_history');
   $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
-  $private_r->get('/settings', [cid => 0])->to('user#settings')->name('settings');
+  $private_r->get('/settings')->to('user#settings')->name('settings');
   $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
-  $cid_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
-  $cid_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
-  $cid_r->get('/*target')->to('client#view')->name('view');
+  $host_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
+  $host_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
+  $host_r->get('/*target')->to('client#view')->name('view');
 
   $self->hook(
     before_dispatch => sub {

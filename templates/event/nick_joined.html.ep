@@ -1,4 +1,4 @@
-<li class="nick-joined" data-cid="<%= $cid %>" data-target="<%= $target %>">
-  <div class="content"><%= link_to $nick, 'channel.view', { cid => $cid, target => $nick }, class => 'nick' %></b> joined <%= $target %></div>
+<li class="nick-joined" data-host="<%= $host %>" data-target="<%= $target %>">
+  <div class="content"><%= link_to $nick, 'channel.view', { host => $host, target => $nick }, class => 'nick' %></b> joined <%= $target %></div>
   %= timestamp_span($timestamp)
 </li>

@@ -1,4 +1,4 @@
-<li class="welcome" data-cid="0" data-target="any">
+<li class="welcome" data-target="any">
   <h3>Welcome to <%= config 'name' %> chat!</h3>
   <div class="content">
     <p>

@@ -29,7 +29,7 @@ my %COMMANDS; %COMMANDS = (
     my ($self, $dom) = @_;
     my $uid = $self->session('uid');
     my $target = $dom->{cmd} || $dom->{target};
-    my $id = $self->as_id($dom->{cid}, $target);
+    my $id = $self->as_id($dom->{host}, $target);
 
     $self->redis->zrem("user:$uid:conversations", $id, sub {
       $self->send_partial('event/add_conversation', %$dom, target => $target);
@@ -40,7 +40,7 @@ my %COMMANDS; %COMMANDS = (
     my ($self, $dom) = @_;
     my $uid = $self->session('uid');
     my $target = $dom->{cmd} || $dom->{target};
-    my $id = $self->as_id($dom->{cid}, $target);
+    my $id = $self->as_id($dom->{host}, $target);
 
     return "PART $target" if $target =~ /^#/;
     $self->redis->zrem("user:$uid:conversations", $id, sub {
@@ -50,7 +50,7 @@ my %COMMANDS; %COMMANDS = (
   },
   reconnect => sub {
     my ($self, $dom) = @_;
-    $self->app->core->control(restart => $dom->{cid}, sub {});
+    $self->app->core->control(restart => $dom->{host}, sub {});
     return;
   },
   help => sub {
@@ -70,49 +70,65 @@ Handle conversation exchange over websocket.
 
 sub socket {
   my $self = shift->render_later;
-  my $uid  = $self->session('uid');
+  my $uid = $self->session('uid');
+  my $key = "wirc:user:$uid:out";
+  my $sub = $self->redis->subscribe($key);
 
+  Scalar::Util::weaken($self);
   Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
 
-  $self->redis->smembers(
-    "user:$uid:connections",
-    sub {
-      my ($redis, $cids) = @_;
-      my %allowed = map { $_ => 1 } @$cids;
+  # from browser to backend
+  $self->on(
+    message => sub {
+      my ($self, $octets) = @_;
+      my $dom = Mojo::DOM->new($octets)->at('div');
 
-      $self->_subscribe_to_server_messages($_) for @$cids;
-      $self->on(
-        message => sub {
-          $self->logf(debug => '[ws] < %s', $_[1]);
-          my ($self, $octets) = @_;
-          my $dom = Mojo::DOM->new($octets)->at('div');
-          my($cid, $target,$uuid) = map { delete $dom->{$_} || '' } qw/ data-cid data-target data-uuid/;
+      $self->logf(debug => '[ws] < %s', $octets);
 
-          @$dom{qw/ cid target uuid/} = ($cid, $target, $uuid);
+      if($dom) {
+        $self->_handle_socket_data($dom);
+      }
+      else {
+        $self->send_partial(
+          'event/wirc_notice',
+          message => "Invalid message ($octets)",
+          timestamp => time,
+        )->finish;
+      }
+    }
+  );
 
-          if($cid and $allowed{$cid}) {
-            $self->_handle_socket_data($dom);
-          }
-          else {
-            $self->send_partial(
-              'event/server_message',
-              cid => '',
-              message => "Not allowed to subscribe to $cid",
-              status => 403,
-              timestamp => time,
-            )->finish;
-          }
-        }
+  # from backend to browser
+  $sub->timeout(0);
+  $sub->on(error => sub { $self->logf(warn => 'sub: %s', pop); $self->finish; });
+  $sub->on(
+    message => sub {
+      my $sub = shift;
+      my @messages = (shift);
+
+      $self->logf(debug => '[%s] > %s', $key, $messages[0]);
+      $self->format_conversation(
+        sub { $JSON->decode(shift @messages) },
+        sub {
+          my($self, $messages) = @_;
+          $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
+        },
       );
     }
   );
+
+  $self->stash(sub => $sub);
+  $self->on(finish => sub { $self and delete $self->stash->{sub} });
 }
 
 sub _handle_socket_data {
   my ($self, $dom) = @_;
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
-  my $key = "connection:@{[$dom->{cid}]}:to_server";
   my $uid = $self->session('uid');
+  my $key = "wirc:user:$uid:in";
+  my($host, $target, $uuid) = map { delete $dom->{$_} || '' } qw/ data-host data-target data-uuid/;
+
+  @$dom{qw/ host target uuid/} = ($host, $target, $uuid);
 
   $self->logf(debug => '[%s] < %s', $key, $cmd);
 
@@ -141,38 +157,6 @@ sub _handle_socket_data {
       $self->redis->ltrim("user:$uid:cmd_history", -30, -1);
     }
   }
-}
-
-sub _subscribe_to_server_messages {
-  my ($self, $cid) = @_;
-  my $sub = $self->redis->subscribe("connection:$cid:from_server");
-
-  Scalar::Util::weaken($self);
-  $sub->timeout(0);
-  $sub->on(
-    error => sub { $self->finish; }
-  );
-  $sub->on(
-    message => sub {
-      my $redis = shift;
-      my @messages = (shift);
-
-      $self->logf(debug => '[connection:%s:from_server] > %s', $cid, $messages[0]);
-      $self->format_conversation(
-        sub { $JSON->decode(shift @messages) },
-        sub {
-          my($self, $messages) = @_;
-          $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
-        },
-      );
-    }
-  );
-
-  $self->stash("sub_$cid" => $sub);
-  $self->on(finish => sub {
-    $self or return; # global destruction
-    $self->stash("sub_$cid" => undef);
-  });
 }
 
 =head1 COPYRIGHT

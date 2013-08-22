@@ -1,4 +1,4 @@
-<li class="topic" data-cid="<%= $cid %>" data-target="<%= $target %>">
+<li class="topic" data-host="<%= $host %>" data-target="<%= $target %>">
 % if(length $topic) {
   <div class="content">Topic is <%= $topic %></div>
 % } else {
