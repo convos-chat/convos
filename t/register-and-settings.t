@@ -1,6 +1,6 @@
 use t::Helper;
 
-my $control = $t->app->redis->subscribe('core:control');
+my $control = Mojo::Redis->new(server => $t->app->redis->server);
 my $server = $t->app->redis->subscribe('connection:1:to_server');
 my($form, $tmp);
 
@@ -8,6 +8,7 @@ $form = {
   login => 'foobar',
   password => 'barbar'
 };
+
 $t->post_ok('/login' => form => $form)
   ->status_is('401', 'failed to log in')
   ;
@@ -52,7 +53,7 @@ $form = {
   nick => 'ice_cool',
   channels => ', #way #cool ,,,',
 };
-$control->once(message => sub { $tmp = $_[1] });
+$control->brpop('core:control' => 0, sub { $tmp = pop->[1] });
 $t->post_ok('/settings/connection', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page')
@@ -72,7 +73,7 @@ $t->get_ok($t->tx->res->headers->location)
   ->text_is('button[type="submit"][name="action"][value="save"]', 'Update connection')
   ;
 
-$control->once(message => sub { $tmp = $_[1] });
+$control->brpop('core:control' => 0, sub { $tmp = pop->[1] });
 $form->{host} = 'irc.perl.org';
 $t->post_ok('/1/settings/edit', form => $form)
   ->status_is('302')
@@ -99,7 +100,7 @@ is $tmp, 'JOIN #wirc', 'JOIN #wirc';
 $t->post_ok('/settings/2', form => $form)->status_is('404');
 $t->get_ok('/2/settings/delete')->status_is('404');
 
-$control->once(message => sub { $tmp = $_[1] });
+$control->brpop('core:control' => 0, sub { $tmp = pop->[1] });
 $t->get_ok('/1/settings/delete')
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page after delete')

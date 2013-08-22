@@ -43,6 +43,22 @@ has redis => sub {
 
 =head1 METHODS
 
+=head2 control
+
+  $self->control($command, $cb);
+
+Used to issue a control command.
+
+=cut
+
+sub control {
+  my($self, @args) = @_;
+  my $cb = pop @args;
+
+  $self->redis->lpush('core:control', join(':', @args), $cb);
+  $self;
+}
+
 =head2 start
 
 Will fetch connection information from the database and try to connect to them.
@@ -96,21 +112,24 @@ sub _connection {
 
 sub _start_control_channel {
   my $self = shift;
+  my $cb;
 
   Scalar::Util::weaken($self);
-  $self->{control} = $self->redis->subscribe('core:control');
-  $self->{control}->timeout(0);
-  $self->{control}->on(
-    message => sub {
-      my ($sub, $raw_msg) = @_;
-      my ($command, $cid) = split /:/, $raw_msg;
-      my $action = "ctrl_$command";
-      $self->$action($cid);
-    }
-  );
+
+  $cb = sub {
+    my($redis, $name, $li) = @_;
+    $redis->brpop($name => 0, $cb);
+    $li or return;
+    my ($command, $cid) = split /:/, $li->[1];
+    my $action = "ctrl_$command";
+    $self->$action($cid);
+  };
+
+  $self->{control} = Mojo::Redis->new(timeout => 0, server => $self->redis->server);
+  $self->{control}->$cb('core:control');
   $self->{control}->on(
     error => sub {
-      my ($sub, $error) = @_;
+      my($redis, $error) = @_;
       $self->log->warn("[core:control] $error (reconnecting)");
       $self->_start_control_channel;
     },
@@ -167,7 +186,7 @@ sub add_connection {
     sub {
       my($delay, $cid, @saved) = @_;
       $delay->begin(0)->($cid);
-      $self->redis->publish('core:control', "start:$cid", $delay->begin);
+      $self->control(start => $cid, $delay->begin);
     },
     sub {
       my($delay, $cid, @saved) = @_;
@@ -222,7 +241,7 @@ sub update_connection {
     sub {
       my($delay, @saved) = @_;
 
-      return $self->redis->publish('core:control', "restart:$cid", $delay->begin) if $conn->{host};
+      return $self->control(restart => $cid, $delay->begin) if $conn->{host};
       return $self->_connection(id => $cid, $delay->begin);
     },
     sub {
@@ -276,7 +295,7 @@ sub delete_connection {
       my ($delay, $deleted, $keys, $conversations) = @_;
       $self->redis->del(@$keys, $delay->begin);
       $self->redis->zrem("user:$uid:conversations", $_) for grep { /^$cid:/ } @$conversations;
-      $self->redis->publish("core:control", "stop:$cid", $delay->begin);
+      $self->control(stop => $cid, $delay->begin);
     },
     sub {
       my($delay, @deleted) = @_;
