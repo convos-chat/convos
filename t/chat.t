@@ -6,9 +6,12 @@ my $dom = Mojo::DOM->new;
 my $server = $t->app->redis->subscribe('connection:6:to_server');
 my @data = data();
 my $connection = WebIrc::Core::Connection->new;
+my $i = 0;
 
 $server->on(message => sub {
   my($method, $message) = (shift @data, shift @data);
+  diag "$i --- $method";
+  $i++;
   $connection->$method($message);
 });
 
@@ -26,12 +29,19 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like(
 {
   $t->websocket_ok('/socket')->send_ok('yikes');
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li[data-cid="0"][data-target="any"]'), 'Got correct 6+any';
-  is $dom->at('li.server-message.error div.content')->text, 'Not allowed to subscribe to', 'Not allowed to subscribe to';
+  ok $dom->at('li[data-cid="0"][data-target="any"]'), 'Got correct cid+any';
+  is $dom->at('li.server-message.error div.content')->text, 'Invalid message: (yikes)', 'Invalid message: (yikes)';
 }
 
 {
-  $t->websocket_ok('/socket')->send_ok(msg('/names'));
+  $t->websocket_ok('/socket')->send_ok('<div data-cid="123" data-target="#test123" id="003cb6af-e826-e17d-6691-3cae034fac1a">/names</div>');
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li[data-cid="0"][data-target="any"]'), 'Got correct cid+any';
+  is $dom->at('li.server-message.error div.content')->text, 'Not allowed to subscribe to 123', 'Not allowed to subscribe to 123';
+}
+
+{
+  $t->websocket_ok('/socket')->send_ok('<div data-cid="6" data-target="#test123" id="003cb6af-e826-e17d-6691-3cae034fac1a">/names</div>');
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nicks[data-cid="6"][data-target="#wirc"]'), 'Got correct 6+#wirc';
   is $dom->at('a[href="/6/fooman"][data-nick="fooman"]')->text, 'fooman', 'got fooman';
