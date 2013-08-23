@@ -240,8 +240,8 @@ sub settings {
       }
 
       if(@conversation) {
-        $self->redis->get("avatar:$login\@$hostname", $delay->begin);
         $self->redis->hgetall("user:$uid", $delay->begin);
+        $self->redis->get("avatar:$login\@$hostname", $delay->begin);
       }
       else {
         push @conversation, { event => 'welcome' };
@@ -381,19 +381,22 @@ sub edit_user {
   my $uid = $self->session('uid');
   my $login = $self->session('login');
   my $hostname = WebIrc::Core::Util::hostname();
+  my $avatar = $self->param('avatar');
+  my %settings;
+
+  $settings{email} = $self->param('email') if defined $self->param('email');
 
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->execute(
-        [hmset => "user:$uid", email => scalar $self->param('email')],
-        [set => "avatar:$login\@$hostname", scalar $self->param('avatar')],
-        $delay->begin,
-      );
+      $self->redis->hmset("user:$uid", %settings, $delay->begin);
+      $self->redis->set("avatar:$login\@$hostname", $avatar, $delay->begin) if defined $avatar;
+      $delay->begin->();
     },
     sub {
       my($delay, @saved) = @_;
-      $self->redirect_to('settings');
+      return $self->render(json => {}) if $self->req->is_xhr;
+      return $self->redirect_to('settings');
     }
   );
 }
