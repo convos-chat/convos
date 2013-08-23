@@ -231,6 +231,16 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
   is $dom->at('div.content span')->text, 'batman', 'op for batman';
 }
 
+{
+  # Fix parsing links without a path part
+  $connection->add_message({
+    params => [ '#mojo', 'http://wirc.pl is really cool' ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  is eval { $dom->at('a[href="http://wirc.pl"]')->text }, 'http://wirc.pl', 'not with "is really cool"' or diag $dom;
+}
+
 done_testing;
 
 sub data {

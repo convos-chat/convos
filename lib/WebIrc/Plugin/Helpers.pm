@@ -13,7 +13,7 @@ use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 my $URL_RE = do {
   # Modified regex from RFC 3986
   no warnings; # Possible attempt to put comments
-  qw!https?:(//([^/?\#]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
+  qw!https?:(//([^/?\#\s]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
 };
 
 my $YOUTUBE_INCLUDE
