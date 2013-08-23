@@ -12,6 +12,7 @@ $navBarIconWidth: 32px;
 $buttonBorderHover: 2px solid darken(#fff, 70%);
 $nickListWidth: 180px;
 $unreadColor: #a00;
+$navBarZindex: 1000;
 
 /*
  * Sass mixins
@@ -185,6 +186,7 @@ form {
     width: 290px;
     @include border-radius(3px);
   }
+  input[type="checkbox"] { width: auto; }
   .selectize-input {
     padding: 2px; // no idea why 2px is right instead of 4px
   }
@@ -234,7 +236,7 @@ div.loading-indicator {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 10;
+  z-index: $navBarZindex - 100;
 }
 div.loading-indicator-overlay {
   background: #fff;
@@ -290,7 +292,7 @@ nav.bar {
   left: 0;
   right: 0;
   height: 42px;
-  z-index: 1000;
+  z-index: $navBarZindex;
   overflow: hidden;
   @include prefix(box-shadow, 0 4px 4px -2px rgba(180,180,180,.5));
   @include opacity(.95);
@@ -322,6 +324,16 @@ nav.bar {
   ul.conversations li.unread a { color: $unreadColor };
 }
 
+div.notification.question {
+  padding-left: $bodyGutter;
+  width: 100%;
+  z-index: $navBarZindex - 1;
+  position: fixed;
+  top: 40px;
+  display: none;
+  button, .button { font-size: 0.9em; }
+}
+
 div.conversations.container,
 div.notifications.container,
 div.nicks.container {
@@ -332,7 +344,7 @@ div.nicks.container {
   overflow: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  z-index: 1001;
+  z-index: $navBarZindex + 1;
   display: none;
   border: 1px solid darken(#fff, 15%);
   border-top-width: 6px;
@@ -421,7 +433,7 @@ div.messages {
 
   li.welcome,
   li.setting {
-    $marginLeft: 65px;
+    $marginLeft: 90px;
     overflow: visible;
     form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }
     label { float: left; margin-left: -$marginLeft; margin-top: 4px; }
@@ -459,7 +471,7 @@ div.goto-bottom a {
   right: 6px;
   bottom: 42px;
   padding: 5px;
-  z-index: 100;
+  z-index: $navBarZindex;
   border: 1px solid #ccc;
   @include border-radius(4px);
   @include opacity(.8);
