@@ -1,7 +1,7 @@
 <li class="setting" data-host="<%= $host %>" data-target="any">
   %= form_for url_for($lookup ? 'connection.edit' : 'connection.add', { host => $lookup }), method => 'post', begin
     % if($lookup) {
-    <h3>Edit <%= $lookup %></h3>
+    <h3>Edit <%= $lookup %></b></h3>
     % } else {
     <h3>Add connection</h3>
     % }
@@ -32,8 +32,9 @@
       % }
     % end
     <div>
-      <button type="submit" name="action" value="save"><%= $lookup ? 'Update' : 'Add' %> connection</button>
+      <button type="submit" name="action" value="save"><%= $lookup ? 'Update' : 'Add' %></button>
     % if($lookup) {
+      %= link_to 'Log', 'view.server', { host => $lookup }, class => 'button'
       %= link_to 'Delete', 'connection.delete', { host => $lookup }, class => 'confirm button'
     % }
     </div>

@@ -10,7 +10,8 @@ my $t;
 
 sub redis_do {
   my $delay = Mojo::IOLoop->delay;
-  $t->app->redis->execute(@_, $delay->begin);
+  my $redis = $t->app->redis;
+  $redis->execute(@_, $delay->begin);
   $delay->wait;
 }
 

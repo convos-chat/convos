@@ -90,7 +90,9 @@ sub socket {
       }
       else {
         $self->send_partial(
-          'event/wirc_notice',
+          'event/server_message',
+          status => 400,
+          host => $dom->{'data-host'} || 'any',
           message => "Invalid message ($octets)",
           timestamp => time,
           uuid => '',
@@ -138,7 +140,7 @@ sub _handle_socket_data {
       $cmd = ref $irc_cmd eq 'CODE' ? $self->$irc_cmd($dom) : "$irc_cmd $cmd";
     }
     else {
-      $self->send_partial('event/wirc_notice', message => 'Unknown command. Type /help to see available commands.');
+      $self->send_partial('event/server_message', status => 400, message => 'Unknown command. Type /help to see available commands.');
       $cmd = undef;
     }
   }

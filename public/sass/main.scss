@@ -435,6 +435,7 @@ div.messages {
 body.with-nick-list, body.without-nick-list, body.historic {
   ul.conversations li.first a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
 }
+
 body.with-nick-list {
   div.messages {
     margin-right: $nickListWidth;
@@ -442,13 +443,27 @@ body.with-nick-list {
   }
   footer form { margin-right: $nickListWidth; }
 }
+
 body.settings, body.historic {
   div.nicks.container { display: none; }
   footer { display: none; }
   div.clear { height: 20px; }
 }
+
 body.settings {
   nav.bar .right a.logout { display: block; }
+  li.notice {
+    background-color: transparent;
+    color: inherit;
+
+    div.content {
+      font-family: monospace;
+      font-size: 0.8em;
+      line-height: 1.1em;
+      max-width: 100%;
+      margin-left: 0;
+    }
+  }
 }
 
 div.goto-bottom a {

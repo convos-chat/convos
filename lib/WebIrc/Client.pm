@@ -68,8 +68,9 @@ sub view {
     });
   }
 
-  $self->session(name => $name);
-  $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : 'without-nick-list');
+  $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : $target ? 'without-nick-list' : 'settings');
+  $self->stash(target => $target);
+  $self->session(name => $target ? $name : '');
 
   Mojo::IOLoop->delay(
     sub {
@@ -80,7 +81,7 @@ sub view {
       my($delay, $connection) = @_;
       return $self->route unless %$connection;
       $self->stash(%$connection);
-      $self->redis->zadd("user:$uid:conversations", time, $name);
+      $self->redis->zadd("user:$uid:conversations", time, $name) if $target;
       $self->_modify_notification($self->param('notification'), read => 1) if defined $self->param('notification');
       $self->_conversation($delay->begin);
       $delay->begin->();

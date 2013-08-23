@@ -34,7 +34,7 @@ $t->get_ok($t->tx->res->headers->location)
   ->element_exists('option[value="#wirc"]')
   # ->element_exists('input[name="avatar"][id="avatar"]')
   ->element_exists('a.logout[href="/logout"]')
-  ->text_is('button[type="submit"][name="action"][value="save"]', 'Add connection')
+  ->text_is('button[type="submit"][name="action"][value="save"]', 'Add')
   ;
 
 $form = {};
@@ -49,7 +49,7 @@ $t->post_ok('/settings/connection', form => $form)
   ;
 
 $form = {
-  host => 'freenode',
+  host => 'freenode.org',
   nick => 'ice_cool',
   channels => ', #way #cool ,,,',
 };
@@ -57,29 +57,29 @@ $t->post_ok('/settings/connection', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page')
   ;
-is redis_do([rpop => 'core:control']), 'start:1:freenode', 'start connection';
+is redis_do([rpop => 'core:control']), 'start:1:freenode.org', 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Nordaaker - Chat')
-  ->element_exists('form[action="/freenode/settings/edit"][method="post"]')
-  ->element_exists('input[name="host"][value="freenode"]')
+  ->element_exists('form[action="/freenode.org/settings/edit"][method="post"]')
+  ->element_exists('input[name="host"][value="freenode.org"]')
   ->element_exists('input[name="nick"][value="ice_cool"]')
   ->element_exists('select[name="channels"]')
   ->element_exists('option[value="#cool"][selected="selected"]')
   ->element_exists('option[value="#way"][selected="selected"]')
-  ->element_exists('a.confirm.button[href="/freenode/settings/delete"]')
-  ->text_is('button[type="submit"][name="action"][value="save"]', 'Update connection')
+  ->element_exists('a.confirm.button[href="/freenode.org/settings/delete"]')
+  ->text_is('button[type="submit"][name="action"][value="save"]', 'Update')
   ;
 
 $form->{host} = 'irc.perl.org';
-$t->post_ok('/freenode/settings/edit', form => $form)
+$t->post_ok('/freenode.org/settings/edit', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page')
   ;
 
 is_deeply(
   [ redis_do([rpop => 'core:control'], [rpop => 'core:control']) ],
-  [ 'start:1:irc.perl.org', 'stop:1:freenode' ],
+  [ 'start:1:irc.perl.org', 'stop:1:freenode.org' ],
   'start/stop connection on update',
 );
 

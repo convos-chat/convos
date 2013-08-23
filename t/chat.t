@@ -30,7 +30,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
   $t->websocket_ok('/socket')->send_ok('yikes');
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li[data-target="any"]'), 'Got correct 6+any';
-  is $dom->at('li.notice div.content')->text, 'Invalid message (yikes)', 'Invalid message';
+  is $dom->at('li.server-message.error div.content')->text, 'Invalid message (yikes)', 'Invalid message';
 }
 
 {
@@ -195,7 +195,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
   ok $dom->at('li.remove-conversation[data-host="wirc.pl"][data-target="#mojo"]'), 'remove conversation when banned';
 
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.notice[data-target="any"]'), 'banned notice';
+  ok $dom->at('li.error[data-target="any"]'), 'banned error';
   is $dom->at('div.content')->all_text, 'Cannot join channel (+b)', 'wirc - Cannot join channel (+b)';
 }
 
@@ -208,7 +208,7 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
 {
   $connection->cmd_join({ params => ['jalla'] });
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.notice[data-target="any"]'), 'invalid join';
+  ok $dom->at('li.error[data-target="any"]'), 'invalid join';
   is $dom->at('div.content')->all_text, 'Do not understand which channel to join', 'do not understand which channel to join';
 
   $connection->cmd_join({ params => ['#perl'] });
@@ -238,6 +238,7 @@ sub msg {
 }
 
 sub dummy_irc {
+  no warnings;
   *test::dummy_irc::nick = sub { 'doe' };
   *test::dummy_irc::user = sub { '' };
   bless {}, 'test::dummy_irc';

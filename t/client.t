@@ -10,7 +10,7 @@ redis_do(
 
 $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect to conversation');
 $t->get_ok($t->tx->res->headers->location)->status_is(200);
-$t->get_ok('/invalid/foo')->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect on invalid conversation');
+$t->get_ok('/inv.alid/foo')->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect on invalid conversation');
 
 $t->get_ok($t->tx->res->headers->location)
   ->status_is(200)

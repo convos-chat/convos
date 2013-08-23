@@ -133,7 +133,7 @@ has _irc => sub {
     close => sub {
       my $irc = shift;
       $self->{stop} and return;
-      $self->_publish(wirc_notice => { message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
+      $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
       $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
     }
   );
@@ -225,7 +225,7 @@ sub _subscribe {
       $message = Parse::IRC::parse_irc($raw_message);
 
       unless(ref $message) {
-        $self->_publish(wirc_notice => { message => "Unable to parse: $raw_message", uuid => $uuid });
+        $self->_publish(server_message => { save => 1, status => 400, message => "[wirc] Unable to parse: $raw_message", uuid => $uuid });
         return;
       }
 
@@ -235,7 +235,7 @@ sub _subscribe {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish(wirc_notice => { message => "Could not send message to @{[$irc->server]}: $error", uuid => $uuid, error => 1 });
+          $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
         }
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
@@ -269,11 +269,11 @@ sub _connect {
 
         if($error) {
           $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
-          $self->_publish(wirc_notice => { message => "Could not connect to @{[$irc->server]}: $error" });
+          $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Could not connect to @{[$irc->server]}: $error" });
         }
         else {
           $self->redis->hset($self->{path}, current_nick => $irc->nick);
-          $self->_publish(wirc_notice => { message => "Connected to @{[$irc->server]}." });
+          $self->_publish(server_message => { save => 1, status => 200, message => "[wirc] Connected to @{[$irc->server]}." });
         }
       });
     },
@@ -296,9 +296,9 @@ sub add_server_message {
   shift @$params; # I think this removes our own nick... Not quite sure though
   $self->_publish(
     server_message => {
-      message => join(' ', @$params),
       save => 1,
       status => 200,
+      message => join(' ', @$params),
     },
   );
 }
@@ -582,7 +582,7 @@ sub irc_err_bannedfromchan {
   Scalar::Util::weaken($self);
   $self->redis->zrem("user:@{[$self->uid]}:conversations", $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
-    $self->_publish(wirc_notice => { save => 1, message => $message->{params}[2] });
+    $self->_publish(server_message => { save => 1, status => 401, message => $message->{params}[2] });
   });
 }
 
@@ -711,9 +711,9 @@ sub irc_error {
 
   $self->_publish(
     server_message => {
-      message => join(' ', @{$message->{params}}),
       save => 1,
       status => 500,
+      message => join(' ', @{$message->{params}}),
     },
   );
 }
@@ -742,7 +742,7 @@ sub cmd_join {
   my $channel = $message->{params}[0] || '';
 
   unless($channel =~ /^#\w/) {
-    return $self->_publish(wirc_notice => { message => 'Do not understand which channel to join' });
+    return $self->_publish(server_message => { status => 400, message => 'Do not understand which channel to join' });
   }
 
   Scalar::Util::weaken($self);
@@ -773,7 +773,7 @@ sub _publish {
     $self->redis->lpush("user:$uid:notifications", $message);
   }
 
-  if($event eq 'wirc_notice') {
+  if($event eq 'server_message' and $data->{status} != 200) {
     $self->log->warn("[$uid:$host] $data->{message}");
   }
   if($data->{save}) {

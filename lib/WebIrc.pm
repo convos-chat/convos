@@ -127,7 +127,7 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#host');
+  my $host_r = $private_r->any('/#host', [ host => qr{\w+\.[^/]+} ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
@@ -141,6 +141,7 @@ sub startup {
   $host_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
   $host_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
   $host_r->get('/*target')->to('client#view')->name('view');
+  $host_r->get('/')->to('client#view')->name('view.server');
 
   $self->hook(
     before_dispatch => sub {

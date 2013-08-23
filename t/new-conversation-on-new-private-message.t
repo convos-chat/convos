@@ -6,7 +6,7 @@ my $dom = Mojo::DOM->new;
 my $connection = WebIrc::Core::Connection->new(uid => 42, host => 'irc.perl.org');
 my $messages = $t->app->redis->subscribe('wirc:user:42:out');
 
-$messages->on(message => sub { Mojo::IOLoop->stop; });
+$messages->on(message => sub { Mojo::IOLoop->stop });
 
 redis_do(
   [ set => 'user:doe:uid', 42 ],
@@ -27,11 +27,13 @@ $t->websocket_ok('/socket');
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.message[data-host="irc.perl.org"][data-target="fooman"][data-sender="fooman"]'), 'private message';
 
+  Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.add-conversation[data-host="irc.perl.org"][data-target="fooman"]'), 'new private message';
 
   $connection->add_message({ params => [ 'doe', 'really cool' ], prefix => 'fooman!user@host' });
+  Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.message[data-host="irc.perl.org"][data-target="fooman"][data-sender="fooman"]'), 'just the message the second time';
