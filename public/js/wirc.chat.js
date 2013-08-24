@@ -426,7 +426,6 @@
 
   var messageFailed = function($message) {
     var uuid = $message.attr('id');
-    $message.removeAttr('id');
     $messages.find('#' + uuid)
       .filter('.message-pending')
       .addClass('message-error')
