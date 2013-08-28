@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use feature 'say';
 use strict;
 use warnings;
 use FindBin;
@@ -26,17 +27,54 @@ $delay->steps(
   sub {
     my($delay, $max_uid, @res) = @_;
 
+    say "del connections";
+
     for my $uid (1..$max_uid) {
-      my $cids = shift @res or next; # maybe a user is deleted?
-      $app->log->info("Adding uid=$uid to cid=@$cids");
-      for my $cid (@$cids) {
-        $redis->hset("connection:$cid", uid => $uid, $delay->begin);
+      say "del user:$uid:connections";
+      if(my $cids = shift @res) { # maybe a user is deleted?
+        for my $cid (@$cids) {
+          $delay->begin(0)->($uid, $cid);
+          $redis->hget("connection:$cid", 'host', $delay->begin);
+        }
       }
     }
   },
   sub {
-    my($delay, @res) = @_;
-    $app->log->info("Done!");
+    my $delay = shift;
+    my %hosts;
+
+    while(@_) {
+      my($uid, $cid, $host) = (shift, shift, shift);
+      push @{ $hosts{$uid} }, $host;
+      say "rename connection:$cid uid:$uid:connection:$host";
+      say "sadd connections $uid:$host";
+      $delay->begin(0)->($uid, $host);
+      $redis->smembers("connection:$cid:channels", $delay->begin);
+      $redis->keys("connection:$cid:*", $delay->begin);
+    }
+
+    while(my($uid, $hosts) = each %hosts) {
+      say "sadd user:$uid:connections @$hosts";
+    }
+  },
+  sub {
+    my $delay = shift;
+
+    while(@_) {
+      my($uid, $host, $channels, $keys) = (shift, shift, shift, shift);
+      for my $key (@$keys) {
+        my($rest) = $key =~ /connection:\d+:(.+)/ ? $1 : 'WHAT';
+        say "hset uid:$uid:connection:$host channels @$channels" if ref $channels;
+        if($key =~ /:(?:nicks|unread|channels)$/) {
+          say "delete $key";
+        }
+        else {
+          say "rename $key uid:$uid:connection:$host:$rest";
+        }
+      }
+    }
+
+    $app->log->debug("Done!");
   }
 );
 
