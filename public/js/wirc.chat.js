@@ -108,7 +108,7 @@
       getHistoricMessages();
       reloadNotificationList();
     }
-    else {
+    else if($messages.length) {
       $input.focusSoon();
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
@@ -325,9 +325,11 @@
   }
 
   var initSocket = function() {
+    var url = $input.closest('form').data('socket-url');
+    if(!url) return;
     $input.history = [];
     $input.history_i = 0;
-    $input.socket = window.ws($input.closest('form').data('socket-url'));
+    $input.socket = window.ws(url);
     $input.socket.opened = 0;
     $input.socket.onmessage = receiveMessage;
     $input.socket.debug = location.href.indexOf('#debug') > 0 ? true : false;
