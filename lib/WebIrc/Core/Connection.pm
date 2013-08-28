@@ -205,7 +205,7 @@ sub _subscribe {
   my $uid = $self->uid;
 
   Scalar::Util::weaken($self);
-  $self->{messages} = $self->redis->subscribe("wirc:user:$uid:in");
+  $self->{messages} = $self->redis->subscribe("wirc:user:$uid:@{$self->host}");
   $self->{messages}->timeout(0);
   $self->{messages}->on(
     error => sub {

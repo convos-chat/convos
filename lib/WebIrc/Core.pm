@@ -261,16 +261,16 @@ sub update_connection {
         $self->redis->hmset("user:$uid:connection:$conn->{host}", %$conn, $delay->begin)
       }
       if($conn->{nick}) {
-        $self->redis->publish("wirc:user:$uid:in", "dummy-uuid NICK $conn->{nick}", $delay->begin);
+        $self->redis->publish("wirc:user:$uid:$conn->{host}", "dummy-uuid NICK $conn->{nick}", $delay->begin);
         warn "[core:uid:$uid] NICK $conn->{nick}\n" if DEBUG;
       }
       for my $channel (@channels) {
         next if delete $channels{$channel};
-        $self->redis->publish("wirc:user:$uid:in", "dummy-uuid JOIN $channel", $delay->begin);
+        $self->redis->publish("wirc:user:$uid:$conn->{host}", "dummy-uuid JOIN $channel", $delay->begin);
         warn "[core:uid:$uid] JOIN $_\n" if DEBUG;
       }
       for my $channel (keys %channels) {
-        $self->redis->publish("wirc:user:$uid:in", "dummy-uuid PART $channel", $delay->begin);
+        $self->redis->publish("wirc:user:$uid:$conn->{host}", "dummy-uuid PART $channel", $delay->begin);
         warn "[core:uid:$uid] PART $channel\n" if DEBUG;
       }
 

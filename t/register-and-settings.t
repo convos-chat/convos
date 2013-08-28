@@ -1,6 +1,6 @@
 use t::Helper;
 
-my $server = $t->app->redis->subscribe('wirc:user:1:in');
+my $server = $t->app->redis->subscribe('wirc:user:1:irc.perl.org');
 my($form, $tmp);
 
 $form = {

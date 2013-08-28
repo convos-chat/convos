@@ -85,7 +85,7 @@ sub socket {
 
       $self->logf(debug => '[ws] < %s', $octets);
 
-      if($dom and $dom->attr('id')) {
+      if($dom and $dom->attr('id') and $dom->attr('data-host')) {
         $self->_handle_socket_data($dom);
       }
       else {
@@ -128,7 +128,6 @@ sub _handle_socket_data {
   my ($self, $dom) = @_;
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $uid = $self->session('uid');
-  my $key = "wirc:user:$uid:in";
   my($host, $target, $uuid) = map { delete $dom->{$_} || '' } qw/ data-host data-target id /;
 
   @$dom{qw/ host target uuid/} = ($host, $target, $uuid);
@@ -152,6 +151,7 @@ sub _handle_socket_data {
   }
 
   if(defined $cmd) {
+    my $key = "wirc:user:$uid:$dom->{host}";
     $cmd = "$dom->{uuid} $cmd";
     $self->logf(debug => '[%s] < %s', $key, $cmd);
     $self->redis->publish($key => $cmd);

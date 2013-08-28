@@ -3,7 +3,7 @@ use Mojo::JSON;
 use Mojo::DOM;
 
 my $dom = Mojo::DOM->new;
-my $server = $t->app->redis->subscribe('wirc:user:42:in');
+my $server = $t->app->redis->subscribe('wirc:user:42:irc.perl.org');
 my @data = data();
 my $connection = WebIrc::Core::Connection->new(host => 'wirc.pl', uid => 42);
 
