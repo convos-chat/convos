@@ -558,7 +558,7 @@ sub irc_part {
     my $name = as_id $self->host, $channel;
 
     $self->channels(del => $channel);
-    $self->redis->hset($self->{path}, 'channels', join ',', $self->channels);
+    $self->redis->hset($self->{path}, 'channels', join ' ', $self->channels);
     $self->redis->zrem("user:@{[$self->uid]}:conversations", $name, sub {
       $self->_publish(remove_conversation => { target => $channel });
     });
@@ -747,7 +747,7 @@ sub cmd_join {
 
   Scalar::Util::weaken($self);
   $self->channels(add => $channel);
-  $self->redis->hset($self->{path}, 'channels', join(',', $self->channels), sub {
+  $self->redis->hset($self->{path}, 'channels', join(' ', $self->channels), sub {
     my($redis, $new) = @_;
     my $name = as_id $self->host, $channel;
     $redis->zadd("user:@{[$self->uid]}:conversations", time, $name);
