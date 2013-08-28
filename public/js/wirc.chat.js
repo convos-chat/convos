@@ -1,6 +1,5 @@
 ;(function($) {
   var $goto_bottom, $input, $win;
-  var $ask_for_notifications = $('<li><div class="question">Do you want desktop notifications? <a href="#!yes" class="button yes">Yes</a> <a href="#!no" class="button confirm no">No</a></div></li>');
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
   var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
@@ -121,7 +120,8 @@
     else if(!Object.equals($input.hostAndTarget(), $messages.hostAndTarget())) {
       reloadConversationList({});
     }
-    else {
+
+    if(!$messages.hasClass('settings') && typeof initNotifications.asked == 'undefined') {
       initNotifications();
     }
 
@@ -305,14 +305,20 @@
     if(Notification.permission === 'unsupported') return;
     if(Notification.permission === 'denied') return;
 
-    $ask_for_notifications.appendToMessages();
-    $ask_for_notifications.find('a.yes').click(function() {
-      Notification.requestPermission();
-      $(this).closest('li').fadeOut();
+    var $ask_for_notifications = $('div.notification.question');
+    initNotifications.asked = true;
+    $ask_for_notifications.find('a.yes').off('click').click(function() {
+      Notification.requestPermission(function() {});
+      $.post($.url_for('settings/profile'), { notifications: 1 });
+      $ask_for_notifications.hide();
+      return false;
     });
-    $ask_for_notifications.find('a.no').click(function() {
-      $(this).closest('li').fadeOut();
+    $ask_for_notifications.find('a.no').off('click').click(function() {
+      $ask_for_notifications.fadeOut('fast');
+      $.post($.url_for('settings/profile'), { notifications: 0 });
+      return false;
     });
+    $ask_for_notifications.show();
   };
 
   var initPjax = function() {
