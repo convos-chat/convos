@@ -46,7 +46,7 @@ $delay->steps(
     while(@_) {
       my($uid, $cid, $host) = (shift, shift, shift);
       push @{ $hosts{$uid} }, $host;
-      say "rename connection:$cid uid:$uid:connection:$host";
+      say "rename connection:$cid user:$uid:connection:$host";
       say "sadd connections $uid:$host";
       $delay->begin(0)->($uid, $host);
       $redis->smembers("connection:$cid:channels", $delay->begin);
@@ -64,13 +64,15 @@ $delay->steps(
       my($uid, $host, $channels, $keys) = (shift, shift, shift, shift);
       for my $key (@$keys) {
         my($rest) = $key =~ /connection:\d+:(.+)/ ? $1 : 'WHAT';
-        say "hset uid:$uid:connection:$host channels @$channels" if ref $channels;
         if($key =~ /:(?:nicks|unread|channels)$/) {
-          say "delete $key";
+          say "del $key";
         }
         else {
-          say "rename $key uid:$uid:connection:$host:$rest";
+          say "rename $key user:$uid:connection:$host:$rest";
         }
+      }
+      if(ref $channels) {
+        say qq(hset user:$uid:connection:$host channels "@$channels")
       }
     }
 
