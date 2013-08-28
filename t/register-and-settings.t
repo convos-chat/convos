@@ -86,17 +86,17 @@ is_deeply(
 $server->once(message => sub { $tmp = $_[1] });
 $form->{nick} = 'marcus';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
-is $tmp, 'NICK marcus', 'NICK marcus';
+is $tmp, 'dummy-uuid NICK marcus', 'NICK marcus';
 
 $server->once(message => sub { $tmp = $_[1] });
 $form->{channels} = '#way';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
-is $tmp, 'PART #cool', 'PART #cool';
+is $tmp, 'dummy-uuid PART #cool', 'PART #cool';
 
 $server->once(message => sub { $tmp = $_[1] });
 $form->{channels} = '#wirc';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
-is $tmp, 'JOIN #wirc', 'JOIN #wirc';
+is $tmp, 'dummy-uuid JOIN #wirc', 'JOIN #wirc';
 
 $t->post_ok('/settings/2', form => $form)->status_is('404');
 $t->get_ok('/yay/settings/delete')->status_is('404');
