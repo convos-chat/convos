@@ -372,7 +372,7 @@ Start a single connection by connection id.
 sub ctrl_start {
   my ($self, $login, $host) = @_;
 
-  $self->_connection(name => $login, host => $host, sub { pop->connect });
+  $self->_connection(login => $login, host => $host, sub { pop->connect });
 }
 
 =head2 login
