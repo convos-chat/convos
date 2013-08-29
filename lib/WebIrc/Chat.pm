@@ -8,6 +8,7 @@ WebIrc::Chat - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
+use constant PING_INTERVAL => $ENV{WIRC_PING_INTERVAL} || 30;
 
 my $JSON = Mojo::JSON->new;
 my %COMMANDS; %COMMANDS = (
@@ -73,9 +74,15 @@ sub socket {
   my $uid = $self->session('uid');
   my $key = "wirc:user:$uid:out";
   my $sub = $self->redis->subscribe($key);
+  my $tid;
 
   Scalar::Util::weaken($self);
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
+  Mojo::IOLoop->stream($self->tx->connection)->timeout(PING_INTERVAL * 2);
+
+  # send ping frames
+  $tid = Mojo::IOLoop->recurring(PING_INTERVAL, sub {
+           $self->send([1, 0, 0, 0, 9, 'pin']);
+         });
 
   # from browser to backend
   $self->on(
@@ -120,7 +127,11 @@ sub socket {
   );
 
   $self->stash(sub => $sub);
-  $self->on(finish => sub { $self and delete $self->stash->{sub} });
+  $self->on(finish => sub {
+    Mojo::IOLoop->remove($tid);
+    $self or return;
+    delete $self->stash->{sub};
+  });
 }
 
 sub _handle_socket_data {
