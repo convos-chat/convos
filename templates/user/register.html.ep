@@ -2,7 +2,7 @@
   <h1>Register a new acccount</h1>
   %= form_for '', method => 'post', begin
     %= include 'inc/alert' if $form eq 'register'
-    %= form_block login => class => ['username'], begin
+    %= form_block login => class => ['login'], begin
       <label for="register_login">Username</label>
       %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
       <p class="help"><%= $errors->{login} || 'Choose something that\'s simple to remember. Your IRC handle for instance.'%></p>

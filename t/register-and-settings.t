@@ -1,6 +1,6 @@
 use t::Helper;
 
-my $server = $t->app->redis->subscribe('wirc:user:1:irc.perl.org');
+my $server = $t->app->redis->subscribe('wirc:user:fooman:irc.perl.org');
 my($form, $tmp);
 
 $form = {
@@ -57,7 +57,7 @@ $t->post_ok('/settings/connection', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page')
   ;
-is redis_do([rpop => 'core:control']), 'start:1:freenode.org', 'start connection';
+is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Nordaaker - Chat')
@@ -79,7 +79,7 @@ $t->post_ok('/freenode.org/settings/edit', form => $form)
 
 is_deeply(
   [ redis_do([rpop => 'core:control'], [rpop => 'core:control']) ],
-  [ 'start:1:irc.perl.org', 'stop:1:freenode.org' ],
+  [ 'start:fooman:irc.perl.org', 'stop:fooman:freenode.org' ],
   'start/stop connection on update',
 );
 
@@ -105,7 +105,7 @@ $t->get_ok('/irc.perl.org/settings/delete')
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page after delete')
   ;
-is redis_do([rpop => 'core:control']), 'stop:1:irc.perl.org', 'stop connection';
+is redis_do([rpop => 'core:control']), 'stop:fooman:irc.perl.org', 'stop connection';
 
 $t->get_ok('/logout')
   ->status_is(302)
@@ -114,18 +114,25 @@ $t->get_ok('/logout')
 
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)
   ->status_is(302)
-  ->header_like('Location', qr{/$}, 'Need to login')
+  ->header_like('Location', qr{localhost:\d+/$}, 'Need to login')
   ;
 
 $form = {
-    login => 'fooman',
+    login => 'user2',
     email => 'foobar@barbar.com',
-    password => ['barbar', 'barbar'],
+    password => ['yikes', 'yikes'],
 };
 $t->post_ok('/' => form => $form)
   ->status_is(400)
-  ->element_exists('div.invite.error .help')
+  ->element_exists('div.password.error')
+  ->element_exists('div.invite.error')
   ->text_is('div.invite.error p.help', 'You need a valid invite code to register.')
+  ;
+
+$form->{login} = 'fooman';
+$t->post_ok('/' => form => $form)
+  ->status_is(400)
+  ->element_exists('div.login.error')
   ;
 
 done_testing;

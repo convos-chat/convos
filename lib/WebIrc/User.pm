@@ -20,7 +20,7 @@ Check authentication and login
 
 sub auth {
   my $self = shift;
-  return 1 if $self->session('uid');
+  return 1 if $self->session('login');
   $self->redirect_to('/');
   return 0;
 }
@@ -56,16 +56,22 @@ Authenticate local user
 
 sub login {
   my $self = shift->render_later;
+  my $login = $self->param('login');
 
   $self->app->core->login(
     {
-      login => scalar $self->param('login'),
+      login => $login,
       password => scalar $self->param('password'),
     },
     sub {
-      my ($core, $uid, $error) = @_;
-      return $self->render(message => 'Invalid username/password.', status => 401) unless $uid;
-      $self->session(uid => $uid, login => $self->param('login'));
+      my ($core, $error) = @_;
+
+      if($error) {
+        $self->render(message => 'Invalid username/password.', status => 401);
+        return;
+      }
+
+      $self->session(login => $login);
 
       # this is super ugly
       require WebIrc::Client;
@@ -83,9 +89,10 @@ See L</login>.
 
 sub register {
   my $self = shift->render_later;
+  my $wanted_login = $self->param('login');
   my $admin = 0;
 
-  if ($self->session('uid')) {
+  if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
     $self->redirect_to('view');
     return;
@@ -94,55 +101,43 @@ sub register {
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->get('user:uids', $delay->begin);
+      $self->redis->sismember('users', $wanted_login, $delay->begin);
+      $self->redis->scard('users', $delay->begin);
     },
     sub {    # Check invitation unless first user, or make admin.
-      my ($delay, $uids) = @_;
-      $self->logf(debug => '[reg] Got uids %s', $uids) if DEBUG;
+      my ($delay, $exists, $secret_required) = @_;
+      my $digest;
 
-      if ($self->_got_invalid_register_params($uids)) {
+      $admin = $secret_required ? 0 : 1;
+
+      if($exists) {
+        $self->stash->{errors}{login} = "Username ($wanted_login) is taken.";
+        $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
+        $self->render(status => 400);
+        return;
+      }
+      if($self->_got_invalid_register_params($secret_required)) {
         $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
         $self->render(status => 400);
         return;
       }
 
-      if ($uids) {
-        $self->redis->get("user:@{[$self->param('login')]}:uid", $delay->begin);
-      }
-      else {
-        $admin++;
-        $self->logf(debug => '[reg] First login == admin') if DEBUG;
-        $delay->begin->();
-      }
-    },
-    sub {    # Get uid unless user exists
-      my ($delay, $uid) = @_;
-      if ($uid) {
-        $self->stash->{errors}{login} = 'Username is taken.';
-        $self->render(status => 400);
-      }
-      else {
-        $self->redis->incr('user:uids', $delay->begin);
-      }
-    },
-    sub {    # Create user
-      my ($delay, $uid) = @_;
-      my $login = $self->param('login');
-      my $digest = crypt $self->param('password'), join '',
-        ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
-      $self->logf(debug => '[reg] New user uid=%s, login=%s', $uid, $self->param('login')) if DEBUG;
-      $self->session(uid => $uid, login => $self->param('login'));
-      $self->redis->execute(
-        [set   => "user:$login:uid", $uid],
-        [hmset => "user:$uid", digest => $digest, email => scalar $self->param('email')],
-        $delay->begin,
-      );
+      $digest = $self->_digest($self->param('password'));
+
+      $self->logf(debug => '[reg] New user login=%s', $wanted_login) if DEBUG;
+      $self->session(login => $wanted_login);
+      $self->redis->hmset("user:$wanted_login", digest => $digest, email => scalar $self->param('email'), $delay->begin);
+      $self->redis->sadd('users', $wanted_login, $delay->begin);
     },
     sub {
-      my ($delay) = @_;
+      my ($delay, @saved) = @_;
       $self->redirect_to('settings');
     }
   );
+}
+
+sub _digest {
+    crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
 sub _got_invalid_register_params {
@@ -185,7 +180,7 @@ Will delete data from session.
 
 sub logout {
   my $self = shift;
-  $self->session(uid => undef, login => undef);
+  $self->session(login => undef);
   $self->redirect_to('/');
 }
 
@@ -197,10 +192,9 @@ Used to retrieve connection information.
 
 sub settings {
   my $self = shift->render_later;
-  my $uid = $self->session('uid');
-  my $host = $self->stash('host') || 0;
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
+  my $host = $self->stash('host') || 0;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
   my @conversation;
 
@@ -215,7 +209,7 @@ sub settings {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->smembers("user:$uid:connections", $_[0]->begin);
+      $self->redis->smembers("user:$login:connections", $_[0]->begin);
     },
     sub {
       my($delay, $hosts) = @_;
@@ -223,7 +217,7 @@ sub settings {
 
       return $self->$cb() unless @$hosts;
       return $self->redis->execute(
-        (map { [hgetall => "user:$uid:connection:$_"] } @$hosts),
+        (map { [hgetall => "user:$login:connection:$_"] } @$hosts),
         $cb,
       );
     },
@@ -240,7 +234,7 @@ sub settings {
       }
 
       if(@conversation) {
-        $self->redis->hgetall("user:$uid", $delay->begin);
+        $self->redis->hgetall("user:$login", $delay->begin);
         $self->redis->get("avatar:$login\@$hostname", $delay->begin);
       }
       else {
@@ -295,7 +289,7 @@ sub add_connection {
     sub {
       my($delay) = @_;
       $self->app->core->add_connection(
-        $self->session('uid'),
+        $self->session('login'),
         {
           host     => $self->param('host') || '',
           nick     => $self->param('nick') || '',
@@ -327,7 +321,7 @@ sub edit_connection {
     sub {
       my ($delay) = @_;
       $self->app->core->update_connection(
-        $self->session('uid'),
+        $self->session('login'),
         {
           host     => $self->req->body_params->param('host') || '',
           lookup   => $self->stash('host') || '',
@@ -355,12 +349,12 @@ Delete a connection.
 
 sub delete_connection {
   my $self = shift->render_later;
-  my $uid  = $self->session('uid');
+  my $login  = $self->session('login');
 
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      return $self->app->core->delete_connection($uid, $self->stash('host'), $delay->begin);
+      $self->app->core->delete_connection($login, $self->stash('host'), $delay->begin);
     },
     sub {
       my ($delay, $error) = @_;
@@ -378,7 +372,6 @@ Change user profile.
 
 sub edit_user {
   my $self = shift->render_later;
-  my $uid = $self->session('uid');
   my $login = $self->session('login');
   my $hostname = WebIrc::Core::Util::hostname();
   my $avatar = $self->param('avatar');
@@ -389,7 +382,7 @@ sub edit_user {
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->hmset("user:$uid", %settings, $delay->begin);
+      $self->redis->hmset("user:$login", %settings, $delay->begin);
       $self->redis->set("avatar:$login\@$hostname", $avatar, $delay->begin) if defined $avatar;
       $delay->begin->();
     },

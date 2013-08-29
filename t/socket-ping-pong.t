@@ -4,11 +4,10 @@ use t::Helper;
 {
   diag 'login first';
   redis_do(
-    [ set => 'user:doe:uid', 42 ],
-    [ hmset => 'user:42', digest => 'E2G3goEIb8gpw', email => '' ],
+    [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
   );
 
-  $t->post_ok('/', form => { login => 'doe', password => 'barbar' });
+  $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->status_is(302);
 }
 
 {

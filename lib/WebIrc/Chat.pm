@@ -28,23 +28,23 @@ my %COMMANDS; %COMMANDS = (
   part => sub { my $dom = pop; "PART " . ($dom->{cmd} || $dom->{target}) },
   query=> sub {
     my ($self, $dom) = @_;
-    my $uid = $self->session('uid');
+    my $login = $self->session('login');
     my $target = $dom->{cmd} || $dom->{target};
     my $id = $self->as_id($dom->{host}, $target);
 
-    $self->redis->zrem("user:$uid:conversations", $id, sub {
+    $self->redis->zrem("user:$login:conversations", $id, sub {
       $self->send_partial('event/add_conversation', %$dom, target => $target);
     });
     return;
   },
   close => sub {
     my ($self, $dom) = @_;
-    my $uid = $self->session('uid');
+    my $login = $self->session('login');
     my $target = $dom->{cmd} || $dom->{target};
     my $id = $self->as_id($dom->{host}, $target);
 
     return "PART $target" if $target =~ /^#/;
-    $self->redis->zrem("user:$uid:conversations", $id, sub {
+    $self->redis->zrem("user:$login:conversations", $id, sub {
       $self->send_partial('event/remove_conversation', %$dom, target => $target);
     });
     return;
@@ -71,8 +71,8 @@ Handle conversation exchange over websocket.
 
 sub socket {
   my $self = shift->render_later;
-  my $uid = $self->session('uid');
-  my $key = "wirc:user:$uid:out";
+  my $login = $self->session('login');
+  my $key = "wirc:user:$login:out";
   my $sub = $self->redis->subscribe($key);
   my $tid;
 
@@ -137,7 +137,7 @@ sub socket {
 sub _handle_socket_data {
   my ($self, $dom) = @_;
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
-  my $uid = $self->session('uid');
+  my $login = $self->session('login');
   my($host, $target, $uuid) = map { delete $dom->{$_} || '' } qw/ data-host data-target id /;
 
   @$dom{qw/ host target uuid/} = ($host, $target, $uuid);
@@ -161,13 +161,13 @@ sub _handle_socket_data {
   }
 
   if(defined $cmd) {
-    my $key = "wirc:user:$uid:$dom->{host}";
+    my $key = "wirc:user:$login:$dom->{host}";
     $cmd = "$dom->{uuid} $cmd";
     $self->logf(debug => '[%s] < %s', $key, $cmd);
     $self->redis->publish($key => $cmd);
     if($dom->{'data-history'}) {
-      $self->redis->rpush("user:$uid:cmd_history", $dom->text(0));
-      $self->redis->ltrim("user:$uid:cmd_history", -30, -1);
+      $self->redis->rpush("user:$login:cmd_history", $dom->text(0));
+      $self->redis->ltrim("user:$login:cmd_history", -30, -1);
     }
   }
 }
