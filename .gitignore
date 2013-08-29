@@ -18,3 +18,4 @@ MANIFEST*
 /cover_db
 /.sass-cache/
 /public/compiled.*
+/script/toadfarm.pid
