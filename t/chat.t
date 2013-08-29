@@ -3,9 +3,9 @@ use Mojo::JSON;
 use Mojo::DOM;
 
 my $dom = Mojo::DOM->new;
-my $server = $t->app->redis->subscribe('wirc:user:42:irc.perl.org');
+my $server = $t->app->redis->subscribe('wirc:user:doe:irc.perl.org');
 my @data = data();
-my $connection = WebIrc::Core::Connection->new(host => 'wirc.pl', uid => 42);
+my $connection = WebIrc::Core::Connection->new(host => 'wirc.pl', login => 'doe');
 
 $server->on(message => sub {
   my($method, $message) = (shift @data, shift @data);
@@ -13,11 +13,10 @@ $server->on(message => sub {
 });
 
 redis_do(
-  [ set => 'user:doe:uid', 42 ],
-  [ hmset => 'user:42', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:42:conversations', time, 'wirc:2epl:00:23wirc', time - 1, 'wirc:2epl:00batman' ],
-  [ sadd => 'user:42:connections', 'wirc.pl' ],
-  [ hmset => 'user:42:connection:wirc.pl', nick => 'doe' ],
+  [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
+  [ zadd => 'user:doe:conversations', time, 'wirc:2epl:00:23wirc', time - 1, 'wirc:2epl:00batman' ],
+  [ sadd => 'user:doe:connections', 'wirc.pl' ],
+  [ hmset => 'user:doe:connection:wirc.pl', nick => 'doe' ],
 );
 
 $connection->redis($t->app->redis)->_irc(dummy_irc());

@@ -1,11 +1,10 @@
 use t::Helper;
 
 redis_do(
-  [ set => 'user:doe:uid', 42 ],
-  [ hmset => 'user:42', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:42:conversations', time, 'irc:2eperl:2eorg:00:23wirc', time - 1, 'irc:2eperl:2eorg:00batman' ],
-  [ sadd => 'user:42:connections', 'irc.perl.org' ],
-  [ hmset => 'user:42:connection:irc.perl.org', nick => 'doe' ],
+  [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
+  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23wirc', time - 1, 'irc:2eperl:2eorg:00batman' ],
+  [ sadd => 'user:doe:connections', 'irc.perl.org' ],
+  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
 );
 
 $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect to conversation');

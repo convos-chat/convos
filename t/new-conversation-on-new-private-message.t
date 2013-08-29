@@ -3,17 +3,16 @@ use Mojo::JSON;
 use Mojo::DOM;
 
 my $dom = Mojo::DOM->new;
-my $connection = WebIrc::Core::Connection->new(uid => 42, host => 'irc.perl.org');
-my $messages = $t->app->redis->subscribe('wirc:user:42:out');
+my $connection = WebIrc::Core::Connection->new(login => 'doe', host => 'irc.perl.org');
+my $messages = $t->app->redis->subscribe('wirc:user:doe:out');
 
 $messages->on(message => sub { Mojo::IOLoop->stop });
 
 redis_do(
-  [ set => 'user:doe:uid', 42 ],
-  [ hmset => 'user:42', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:42:conversations', time, 'irc:2eperl:2eorg:00:23wirc', time - 1, 'irc:2eperl:2eorg:00batman' ],
-  [ sadd => 'user:42:connections', 'irc.perl.org' ],
-  [ hmset => 'user:42:connection:irc.perl.org', nick => 'doe' ],
+  [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
+  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23wirc', time - 1, 'irc:2eperl:2eorg:00batman' ],
+  [ sadd => 'user:doe:connections', 'irc.perl.org' ],
+  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
 );
 
 $connection->redis($t->app->redis);
