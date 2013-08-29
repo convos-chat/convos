@@ -177,8 +177,7 @@ sub redis {
 
   $self->stash->{redis} ||= do {
     my $log = $self->app->log;
-    my $redis
-      = Mojo::Redis->new(server => $self->config->{redis}, timeout => 600);
+    my $redis = Mojo::Redis->new(server => $self->config->{redis});
 
     $redis->on(
       error => sub {

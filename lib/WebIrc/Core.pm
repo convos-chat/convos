@@ -30,7 +30,7 @@ has log => sub { Mojo::Log->new };
 
 has redis => sub {
   my $self = shift;
-  my $redis = Mojo::Redis->new(timeout => 0);
+  my $redis = Mojo::Redis->new;
   my $log = $self->log;
 
   $redis->on(error => sub {
@@ -122,7 +122,7 @@ sub _start_control_channel {
     $self->$action($uid, $host);
   };
 
-  $self->{control} = Mojo::Redis->new(timeout => 0, server => $self->redis->server);
+  $self->{control} = Mojo::Redis->new(server => $self->redis->server);
   $self->{control}->$cb(['core:control']);
   $self->{control}->on(
     error => sub {

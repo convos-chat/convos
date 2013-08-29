@@ -14,7 +14,7 @@ WriteMakefile(
     'List::MoreUtils'              => 0,
     'Mojo::IRC'                    => 0.01,
     'Mojolicious::Plugin::UrlWith' => 0.0501,
-    'Mojo::Redis'                  => '0.9912',
+    'Mojo::Redis'                  => '0.9913',
     'Parse::IRC'                   => '1.18',
     'Time::Piece'                  => 1.20,
     'Unicode::UTF8'                => 0.58,

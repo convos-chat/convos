@@ -102,7 +102,6 @@ sub socket {
   );
 
   # from backend to browser
-  $sub->timeout(0);
   $sub->on(error => sub { $self->logf(warn => 'sub: %s', pop); $self->finish; });
   $sub->on(
     message => sub {

@@ -82,7 +82,7 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
-has redis => sub { Mojo::Redis->new(timeout => 0); };
+has redis => sub { Mojo::Redis->new };
 
 =head2 channels
 
@@ -215,7 +215,6 @@ sub _subscribe {
 
   Scalar::Util::weaken($self);
   $self->{messages} = $self->redis->subscribe("wirc:user:$uid:@{[$self->host]}");
-  $self->{messages}->timeout(0);
   $self->{messages}->on(
     error => sub {
       my ($sub, $error) = @_;
