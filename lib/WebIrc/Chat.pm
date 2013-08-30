@@ -29,12 +29,19 @@ my %COMMANDS; %COMMANDS = (
   query=> sub {
     my ($self, $dom) = @_;
     my $login = $self->session('login');
-    my $target = $dom->{cmd} || $dom->{target};
+    my $target = $dom->{cmd} || '';
     my $id = $self->as_id($dom->{host}, $target);
 
-    $self->redis->zrem("user:$login:conversations", $id, sub {
-      $self->send_partial('event/add_conversation', %$dom, target => $target);
-    });
+    if($target =~ /^#?[\w_-]+$/) {
+      $self->redis->zadd("user:$login:conversations", time, $id, sub {
+        $self->send_partial('event/add_conversation', %$dom, target => $target);
+      });
+    }
+    else {
+      $target ||= 'Missing';
+      $self->send_partial('event/server_message', status => 400, message => "Invalid target: $target");
+    }
+
     return;
   },
   close => sub {
