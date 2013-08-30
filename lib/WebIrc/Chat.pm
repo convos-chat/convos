@@ -58,7 +58,7 @@ my %COMMANDS; %COMMANDS = (
   },
   reconnect => sub {
     my ($self, $dom) = @_;
-    $self->app->core->control(restart => $dom->{host}, sub {});
+    $self->app->core->control(restart => $self->session('login'), $dom->{host}, sub {});
     return;
   },
   help => sub {
