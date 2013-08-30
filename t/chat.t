@@ -250,10 +250,6 @@ sub data {
   the_end => {}, # should never come to this
 }
 
-sub msg {
-  qq(<div data-history="1" data-host="wirc.pl" data-target="#wirc">$_[0]</div>);
-}
-
 sub dummy_irc {
   no warnings;
   *test::dummy_irc::nick = sub { 'doe' };
