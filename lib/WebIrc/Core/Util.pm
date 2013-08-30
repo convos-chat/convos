@@ -23,7 +23,7 @@ use Time::Piece;
 
 my $hostname;
 
-our $host_re = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
+our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
 
 =head1 FUNCTIONS
 
@@ -68,7 +68,7 @@ sub id_as {
 
   $hostname = hostname();
 
-Returns the public domain name for the current host or fall back on "localhost".
+Returns the public domain name for the current hostname or fall back on "localhost".
 
 =cut
 

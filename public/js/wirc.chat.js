@@ -112,11 +112,11 @@
   $.fn.hostAndTarget = function($from) {
     if($from) {
       return this
-        .attr('data-host', $from.data('host')).attr('data-target', $from.data('target'))
-        .data('host', $from.data('host')).data('target', $from.data('target'))
+        .attr('data-server', $from.data('server')).attr('data-target', $from.data('target'))
+        .data('server', $from.data('server')).data('target', $from.data('target'))
     }
     else {
-      return { host: this.data('host'), target: this.data('target') };
+      return { server: this.data('server'), target: this.data('target') };
     }
   };
 
@@ -168,7 +168,7 @@
     var used_width = 0, unread, $a;
 
     if($message) {
-      $a = $conversations.find('a[href="' + $.url_for($message.data('host'), $message.data('target')) + '"]');
+      $a = $conversations.find('a[href="' + $.url_for($message.data('server'), $message.data('target')) + '"]');
       unread = parseInt($a.attr('data-unread')) + 1;
       $a.attr('data-unread', unread).attr('title', unread + " unread messages in " + $message.data('target'));
       $a.closest('li').addClass('unread');
@@ -435,7 +435,7 @@
 
   var nickList = function($data) {
     var $nicks = $data.find('[data-nick]');
-    var host = $messages.data('host');
+    var server = $messages.data('server');
     var senders = {};
 
     if($nicks.length) {
@@ -453,7 +453,7 @@
     if(nicks.length) {
       $('div.nicks.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(host, n) + '">' + n + '</a></li>';
+          return '<li><a href="' + $.url_for(server, n) + '">' + n + '</a></li>';
         }).join('')
       );
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
@@ -490,7 +490,7 @@
 
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target'));
-      if(!$message.data('host')) $message.data('host', $messages.data('host'));
+      if(!$message.data('server')) $message.data('server', $messages.data('server'));
     }
     if($('body').attr('class').indexOf('-nick-list') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());

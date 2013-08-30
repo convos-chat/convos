@@ -27,7 +27,7 @@ redis_do(
 {
   is_deeply(
     [$core->_parse_channels('#foo, #bar #baz ,,, stuff  #foo')],
-    [qw/ #bar #baz #foo #stuff /],
+    ['#bar', '#baz', '#foo', '#stuff'],
     '_parse_channels()',
   );
 }

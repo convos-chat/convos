@@ -9,7 +9,7 @@ WebIrc::Core::Connection - Represents a connection to an IRC server
   use WebIrc::Core::Connection;
 
   $c = WebIrc::Core::Connection->new(
-          host => 'irc.localhost',
+          server => 'irc.localhost',
           login => 'username',
           redis => Mojo::Redis->new,
         );
@@ -56,16 +56,15 @@ use Scalar::Util ();
 use Time::HiRes qw/ time /;
 use WebIrc::Core::Util qw/ as_id /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
-
-my @keys = qw/ nick user host /;
+use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
 =head1 ATTRIBUTES
 
-=head2 host
+=head2 server
 
 =cut
 
-has host => '';
+has server => '';
 
 =head2 login
 
@@ -126,12 +125,12 @@ has _irc => sub {
   my $self = shift;
   my $irc;
 
-  if($self->host eq 'loopback') {
+  if($self->server eq 'loopback') {
     require WebIrc::Loopback;
     return WebIrc::Loopback->new(connection => $self, redis => $self->redis);
   }
   else {
-    $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->host);
+    $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->server);
   }
 
   Scalar::Util::weaken($self);
@@ -174,7 +173,7 @@ sub _reconnect_in {
 
 =head2 new
 
-Checks for mandatory attributes: L</login> and L</host>.
+Checks for mandatory attributes: L</login> and L</server>.
 
 =cut
 
@@ -182,8 +181,9 @@ sub new {
   my $self = shift->SUPER::new(@_);
 
   $self->login or die "login is required";
-  $self->host or die "host is required";
-  $self->{path} = "user:$self->{login}:connection:$self->{host}";
+  $self->server or die "server is required";
+  $self->{path} = "user:$self->{login}:connection:$self->{server}";
+  $self->{conversation_path} = "user:$self->{login}:conversations";
   $self;
 }
 
@@ -192,7 +192,7 @@ sub new {
   $self = $self->connect;
 
 This method will create a new L<Mojo::IRC> object with attribute data from
-L</redis>. The values fetched from the backend is identified by L</host> and
+L</redis>. The values fetched from the backend is identified by L</server> and
 L</login>. This method then call L<Mojo::IRC/connect> after the object is set
 up.
 
@@ -221,7 +221,7 @@ sub _subscribe {
   my $irc = $self->_irc;
 
   Scalar::Util::weaken($self);
-  $self->{messages} = $self->redis->subscribe("wirc:user:@{[$self->login]}:@{[$self->host]}");
+  $self->{messages} = $self->redis->subscribe("wirc:user:@{[$self->login]}:@{[$self->server]}");
   $self->{messages}->on(
     error => sub {
       my ($sub, $error) = @_;
@@ -270,14 +270,12 @@ sub _connect {
   my $irc = $self->_irc;
 
   Scalar::Util::weaken($self);
-  $self->redis->execute(
-    [hgetall => $self->{path}],
-    sub {
+  $self->redis->hgetall($self->{path} => sub {
       my ($redis, $args) = @_;
 
       $self->channels(add => $_) for split ' ', $args->{channels};
       $irc->nick($args->{nick} || $self->login);
-      $irc->server($args->{host});
+      $irc->server($args->{server} || $args->{host});
       $irc->tls({}) if $args->{tls};
       $irc->user($args->{user} || $self->login);
       $irc->connect(sub {
@@ -361,22 +359,21 @@ sub add_message {
 
 sub _add_conversation {
   my($self, $data) = @_;
-  my $login = $self->login;
-  my $name = as_id $self->host, $data->{target};
+  my $name = as_id $self->server, $data->{target};
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->zincrby("user:$login:conversations", 0, $name, $delay->begin);
+      $self->redis->zincrby($self->{conversation_path}, 0, $name, $delay->begin);
     },
     sub {
       my($delay, $new) = @_;
       $new and return; # has a score
-      $self->redis->zrevrange("user:$login:conversations", 0, 0, 'WITHSCORES', $delay->begin);
+      $self->redis->zrevrange($self->{conversation_path}, 0, 0, 'WITHSCORES', $delay->begin);
     },
     sub {
       my($delay, $score) = @_;
-      $self->redis->zadd("user:$login:conversations", $score->[1] - 0.0001, $name, $delay->begin);
+      $self->redis->zadd($self->{conversation_path}, $score->[1] - 0.0001, $name, $delay->begin);
     },
     sub {
       my($delay) = @_;
@@ -570,11 +567,11 @@ sub irc_part {
 
   Scalar::Util::weaken($self);
   if($nick eq $self->_irc->nick) {
-    my $name = as_id $self->host, $channel;
+    my $name = as_id $self->server, $channel;
 
     $self->channels(del => $channel);
     $self->redis->hset($self->{path}, 'channels', join ' ', $self->channels);
-    $self->redis->zrem("user:@{[$self->login]}:conversations", $name, sub {
+    $self->redis->zrem($self->{conversation_path}, $name, sub {
       $self->_publish(remove_conversation => { target => $channel });
     });
   }
@@ -592,10 +589,10 @@ sub irc_part {
 sub irc_err_bannedfromchan {
   my($self, $message) = @_;
   my $channel = $message->{params}[1];
-  my $name = as_id $self->host, $channel;
+  my $name = as_id $self->server, $channel;
 
   Scalar::Util::weaken($self);
-  $self->redis->zrem("user:@{[$self->login]}:conversations", $name, sub {
+  $self->redis->zrem($self->{conversation_path}, $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
     $self->_publish(server_message => { save => 1, status => 401, message => $message->{params}[2] });
   });
@@ -610,10 +607,10 @@ sub irc_err_bannedfromchan {
 sub irc_err_nosuchchannel {
   my ($self, $message) = @_;
   my $channel = $message->{params}[1];
-  my $name = as_id $self->host, $channel;
+  my $name = as_id $self->server, $channel;
 
   Scalar::Util::weaken($self);
-  $self->redis->zrem("user:@{[$self->login]}:conversations", $name, sub {
+  $self->redis->zrem($self->{conversation_path}, $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
   });
 }
@@ -697,7 +694,7 @@ sub irc_rpl_listend {
 
 =head2 irc_mode
 
-:nick!user@host MODE #channel +o othernick
+  :nick!user@host MODE #channel +o othernick
 
 =cut
 
@@ -763,8 +760,8 @@ sub cmd_join {
   $self->channels(add => $channel);
   $self->redis->hset($self->{path}, 'channels', join(' ', $self->channels), sub {
     my($redis, $new) = @_;
-    my $name = as_id $self->host, $channel;
-    $redis->zadd("user:@{[$self->login]}:conversations", time, $name);
+    my $name = as_id $self->server, $channel;
+    $redis->zadd($self->{conversation_path}, time, $name);
     $self->_publish(add_conversation => { target => $channel });
   });
 }
@@ -772,12 +769,16 @@ sub cmd_join {
 sub _publish {
   my ($self, $event, $data) = @_;
   my $login = $self->login;
-  my $host = $self->host;
+  my $server = $self->server;
   my $message;
 
-  $data->{host} = $host;
-  $data->{timestamp} ||= time;
+  if(UNITTEST) {
+    exists $data->{$_} and die $_ for qw/ server event /;
+  }
+
   $data->{event} = $event;
+  $data->{server} = $server;
+  $data->{timestamp} ||= time;
   $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
   $message = j $data;
 
@@ -792,14 +793,14 @@ sub _publish {
   }
 
   if($event eq 'server_message' and $data->{status} != 200) {
-    $self->log->warn("[$login:$host] $data->{message}");
+    $self->log->warn("[$login:$server] $data->{message}");
   }
   if($data->{save}) {
     if ($data->{target}) {
-      $self->redis->zadd("user:$login:connection:$host:$data->{target}:msg", $data->{timestamp}, $message);
+      $self->redis->zadd("$self->{path}:$data->{target}:msg", $data->{timestamp}, $message);
     }
     else {
-      $self->redis->zadd("user:$login:connection:$host:msg", $data->{timestamp}, $message);
+      $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
     }
   }
 }

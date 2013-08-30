@@ -1,4 +1,4 @@
-<li class="notice" data-host="<%= $host %>" data-target="<%= $target %>">
+<li class="notice" data-server="<%= $server %>" data-target="<%= $target %>">
   <div class="content">
     <b><%= $mode %></b>
     <span><%= $args %></span>

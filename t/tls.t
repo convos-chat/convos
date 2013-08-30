@@ -15,14 +15,14 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->status_is(30
 {
   $t->get_ok('/settings')
     ->element_exists('form[action="/settings/connection"][method="post"]')
-    ->element_exists('input[name="host"][id="host"]')
+    ->element_exists('input[name="server"][id="server"]')
     ->element_exists('select[name="tls"]')
     ->text_is('select[name="tls"] option[value="0"]', 'No')
     ->text_is('select[name="tls"] option[value="1"]', 'TLS')
     ;
 
   $form = {
-    host => 'localhost:6667',
+    server => 'localhost:6667',
     nick => 'ice_cool',
     channels => '#foo',
     tls => 1,

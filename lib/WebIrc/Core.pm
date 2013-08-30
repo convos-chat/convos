@@ -79,9 +79,9 @@ sub start {
     sub {
       my($delay, $connections) = @_;
       warn sprintf "[core] Starting %s connection(s)\n", int @$connections if DEBUG;
-      for(@$connections) {
-        my($login, $host) = split /:/;
-        $self->_connection(login => $login, host => $host)->connect;
+      for my $conn (@$connections) {
+        my($login, $server) = split /:/, $conn;
+        $self->_connection(login => $login, server => $server)->connect;
       }
     },
   );
@@ -92,11 +92,11 @@ sub start {
 
 sub _connection {
   my($self, %args) = @_;
-  my $conn = $self->{connections}{$args{login}}{$args{host}};
+  my $conn = $self->{connections}{$args{login}}{$args{server}};
 
   unless($conn) {
     $conn = WebIrc::Core::Connection->new(redis => $self->redis, %args);
-    $self->{connections}{$args{login}}{$args{host}} = $conn;
+    $self->{connections}{$args{login}}{$args{server}} = $conn;
   }
 
   $conn;
@@ -112,9 +112,9 @@ sub _start_control_channel {
     my($redis, $li) = @_;
     $redis->brpop($li->[0], 0, $cb);
     $li->[1] or return;
-    my($command, $login, $host) = split /:/, $li->[1];
+    my($command, $login, $server) = split /:/, $li->[1];
     my $action = "ctrl_$command";
-    $self->$action($login, $host);
+    $self->$action($login, $server);
   };
 
   $self->{control} = Mojo::Redis->new(server => $self->redis->server);
@@ -131,7 +131,7 @@ sub _start_control_channel {
 =head2 add_connection
 
   $self->add_connection($login, {
-    host => $str, # irc_server[:port]
+    server => $str, # irc_server[:port]
     nick => $str,
     user => $str,
     channels => $str, # '#foo #bar, ...'
@@ -151,7 +151,7 @@ sub add_connection {
   return $self unless $self->_valid_connection_args($conn, $cb);
 
   @channels = $self->_parse_channels($conn->{channels});
-  $key = join ':', "user:$login:connection:$conn->{host}";
+  $key = join ':', "user:$login:connection:$conn->{server}";
   $conn->{channels} = join ' ', @channels;
   warn "[core:$login] add (", join(', ', %$conn), ")\n" if DEBUG;
 
@@ -166,17 +166,17 @@ sub add_connection {
     sub {
       my($delay, $exists) = @_;
 
-      return $self->$cb({ host => 'Connection exists' }, undef) if $exists;
+      return $self->$cb({ server => 'Connection exists' }, undef) if $exists;
       return $self->redis->execute(
-        [sadd => "connections", "$login:$conn->{host}"],
-        [sadd => "user:$login:connections", $conn->{host}],
-        [hmset => "user:$login:connection:$conn->{host}", %$conn],
+        [sadd => "connections", "$login:$conn->{server}"],
+        [sadd => "user:$login:connections", $conn->{server}],
+        [hmset => "user:$login:connection:$conn->{server}", %$conn],
         $delay->begin,
       );
     },
     sub {
       my($delay, @saved) = @_;
-      $self->control(start => $login => $conn->{host}, $delay->begin);
+      $self->control(start => $login => $conn->{server}, $delay->begin);
     },
     sub {
       my($delay, $started) = @_;
@@ -188,7 +188,7 @@ sub add_connection {
 =head2 update_connection
 
   $self->update_connection($login => {
-    host => $str, # irc_server[:port]
+    server => $str, # irc_server[:port]
     lookup => $str, # irc_server[:port]
     nick => $str,
     user => $str,
@@ -209,7 +209,7 @@ sub update_connection {
 
   Scalar::Util::weaken($self);
 
-  if($conn->{host} ne $lookup) {
+  if($conn->{server} ne $lookup) {
     warn "[core:$login] update $lookup -> add/delete\n";
     Mojo::IOLoop->delay(
       sub {
@@ -230,7 +230,7 @@ sub update_connection {
     return $self;
   }
 
-  for my $name (qw/ host nick user /) {
+  for my $name (qw/ server nick user /) {
     next if $conn->{$name};
     $errors{$name} = "$name is required.";
   }
@@ -243,30 +243,30 @@ sub update_connection {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->hgetall("user:$login:connection:$conn->{host}", $delay->begin);
+      $self->redis->hgetall("user:$login:connection:$conn->{server}", $delay->begin);
     },
     sub {
       my($delay, $found) = @_;
 
       return $self->$cb('Connection does not exist', undef) unless $found;
       %channels = map { $_, 1 } split ' ', $found->{channels} || '';
-      delete $found->{host}; # want this value
+      delete $found->{$_} for qw/ server host /; # want this value
       $conn->{$_} ~~ $found->{$_} and delete $conn->{$_} for keys %$found;
 
       if(%$conn) {
-        $self->redis->hmset("user:$login:connection:$conn->{host}", %$conn, $delay->begin)
+        $self->redis->hmset("user:$login:connection:$conn->{server}", %$conn, $delay->begin)
       }
       if($conn->{nick}) {
-        $self->redis->publish("wirc:user:$login:$conn->{host}", "dummy-uuid NICK $conn->{nick}", $delay->begin);
+        $self->redis->publish("wirc:user:$login:$conn->{server}", "dummy-uuid NICK $conn->{nick}", $delay->begin);
         warn "[core:$login] NICK $conn->{nick}\n" if DEBUG;
       }
       for my $channel (@channels) {
         next if delete $channels{$channel};
-        $self->redis->publish("wirc:user:$login:$conn->{host}", "dummy-uuid JOIN $channel", $delay->begin);
-        warn "[core:$login] JOIN $_\n" if DEBUG;
+        $self->redis->publish("wirc:user:$login:$conn->{server}", "dummy-uuid JOIN $channel", $delay->begin);
+        warn "[core:$login] JOIN $channel\n" if DEBUG;
       }
       for my $channel (keys %channels) {
-        $self->redis->publish("wirc:user:$login:$conn->{host}", "dummy-uuid PART $channel", $delay->begin);
+        $self->redis->publish("wirc:user:$login:$conn->{server}", "dummy-uuid PART $channel", $delay->begin);
         warn "[core:$login] PART $channel\n" if DEBUG;
       }
 
@@ -281,33 +281,33 @@ sub update_connection {
 
 =head2 delete_connection
 
-  $self->delete_connection($login, $host, $cb);
+  $self->delete_connection($login, $server, $cb);
 
 =cut
 
 sub delete_connection {
-  my($self, $login, $host, $cb) = @_;
+  my($self, $login, $server, $cb) = @_;
 
-  warn "[core:$login] delete $host\n" if DEBUG;
+  warn "[core:$login] delete $server\n" if DEBUG;
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->srem("connections", "$login:$host", $delay->begin);
-      $self->redis->srem("user:$login:connections", $host, $delay->begin);
-      $self->redis->del("user:$login:connection:$host", $delay->begin);
+      $self->redis->srem("connections", "$login:$server", $delay->begin);
+      $self->redis->srem("user:$login:connections", $server, $delay->begin);
+      $self->redis->del("user:$login:connection:$server", $delay->begin);
     },
     sub {
       my ($delay, @removed) = @_;
       return $self->$cb('Unknown connection') unless grep $_, @removed;
-      $self->redis->keys("user:$login:connection:$host:*", $delay->begin); # jht: not sure if i like this...
+      $self->redis->keys("user:$login:connection:$server:*", $delay->begin); # jht: not sure if i like this...
       $self->redis->zrange("user:$login:conversations", 0, -1, $delay->begin);
     },
     sub {
       my ($delay, $keys, $conversations) = @_;
       $self->redis->del(@$keys, $delay->begin);
-      $self->redis->zrem("user:$login:conversations", $_) for grep { /^$host:/ } @$conversations;
-      $self->control(stop => $login => $host, $delay->begin);
+      $self->redis->zrem("user:$login:conversations", $_) for grep { /^$server:/ } @$conversations;
+      $self->control(stop => $login => $server, $delay->begin);
     },
     sub {
       my($delay, @deleted) = @_;
@@ -318,25 +318,25 @@ sub delete_connection {
 
 =head2 ctrl_stop
 
-    $self->ctrl_stop($login, $host);
+    $self->ctrl_stop($login, $server);
 
 Stop a connection by connection id.
 
 =cut
 
 sub ctrl_stop {
-  my ($self, $login, $host) = @_;
+  my ($self, $login, $server) = @_;
 
   Scalar::Util::weaken($self);
 
-  if(my $conn = $self->{connections}{$login}{$host}) {
-    $conn->disconnect(sub { delete $self->{connections}{$login}{$host} });
+  if(my $conn = $self->{connections}{$login}{$server}) {
+    $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
   }
 }
 
 =head2 ctrl_restart
 
-    $self->ctrl_restart($login, $host);
+    $self->ctrl_restart($login, $server);
 
 Restart a connection by connection id.
 
@@ -344,18 +344,18 @@ Restart a connection by connection id.
 
 
 sub ctrl_restart {
-  my ($self, $login, $host) = @_;
+  my ($self, $login, $server) = @_;
 
   Scalar::Util::weaken($self);
 
-  if(my $conn = $self->{connections}{$login}{$host}) {
+  if(my $conn = $self->{connections}{$login}{$server}) {
     $conn->disconnect(sub {
-      delete $self->{connections}{$login}{$host};
-      $self->ctrl_start($login => $host);
+      delete $self->{connections}{$login}{$server};
+      $self->ctrl_start($login => $server);
     });
   }
   else {
-    $self->ctrl_start($login => $host);
+    $self->ctrl_start($login => $server);
   }
 }
 
@@ -366,8 +366,8 @@ Start a single connection by connection id.
 =cut
 
 sub ctrl_start {
-  my ($self, $login, $host) = @_;
-  $self->_connection(login => $login, host => $host)->connect;
+  my ($self, $login, $server) = @_;
+  $self->_connection(login => $login, server => $server)->connect;
 }
 
 =head2 login
@@ -422,13 +422,17 @@ sub _valid_connection_args {
   my($self, $conn, $cb) = @_;
   my %errors;
 
-  for my $name (qw/ host nick user /) {
+  if(!$conn->{server}) { # back compat
+    $conn->{server} = delete $conn->{host};
+  }
+
+  for my $name (qw/ server nick user /) {
     next if $conn->{$name};
     $errors{$name} = "$name is required.";
   }
 
-  if($conn->{host} and $conn->{host} !~ $WebIrc::Core::Util::host_re) {
-    $errors{host} = "Invalid host";
+  if($conn->{server} and $conn->{server} !~ $WebIrc::Core::Util::SERVER_NAME_RE) {
+    $errors{server} = "Invalid server";
   }
 
   return 1 unless %errors;

@@ -14,12 +14,12 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->status_is(30
 
 $t->get_ok('/settings')
   ->element_exists('form[action="/settings/connection"][method="post"]')
-  ->element_exists('input[name="host"][id="host"][value="localhost:6667"]')
+  ->element_exists('input[name="server"][id="server"][value="localhost:6667"]')
   ->element_exists('input[name="nick"][id="nick"][value="doe"]')
   ;
 
 $form = {
-  host => 'localhost:6667',
+  server => 'localhost:6667',
   nick => 'ice_cool',
   channels => '#foo',
 };

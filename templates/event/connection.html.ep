@@ -1,13 +1,13 @@
-<li class="setting" data-host="<%= $host %>" data-target="any">
-  %= form_for url_for($lookup ? 'connection.edit' : 'connection.add', { host => $lookup }), method => 'post', begin
+<li class="setting" data-server="<%= $server %>" data-target="any">
+  %= form_for url_for($lookup ? 'connection.edit' : 'connection.add', { server => $lookup }), method => 'post', begin
     % if($lookup) {
     <h3>Edit <%= $lookup %></b></h3>
     % } else {
     <h3>Add connection</h3>
     % }
-    %= form_block host => class => ['host'], begin
-      <label for="host">Server</label>
-      %= text_field 'host', $host, id => 'host'
+    %= form_block server => class => ['server'], begin
+      <label for="server">Server</label>
+      %= text_field 'server', $server, id => 'server'
       % unless($lookup) {
       <p class="help">Add ":port" unless you want to use default port 6667.</p>
       % }
@@ -38,8 +38,8 @@
     <div>
       <button type="submit" name="action" value="save"><%= $lookup ? 'Update' : 'Add' %></button>
     % if($lookup) {
-      %= link_to 'Log', 'view.server', { host => $lookup }, class => 'button'
-      %= link_to 'Delete', 'connection.delete', { host => $lookup }, class => 'confirm button'
+      %= link_to 'Log', 'view.server', { server => $lookup }, class => 'button'
+      %= link_to 'Delete', 'connection.delete', { server => $lookup }, class => 'confirm button'
     % }
     </div>
   % end

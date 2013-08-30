@@ -5,7 +5,7 @@ use Mojo::DOM;
 my $dom = Mojo::DOM->new;
 my $sub = $t->app->redis->subscribe('wirc:user:doe:irc.perl.org');
 my $pub = $t->app->redis;
-my $connection = WebIrc::Core::Connection->new(host => 'wirc.pl', login => 'doe');
+my $connection = WebIrc::Core::Connection->new(server => 'wirc.pl', login => 'doe');
 my $ws;
 
 redis_do(
@@ -24,11 +24,11 @@ $t->websocket_ok('/socket');
 
   $t->send_ok(msg('/query marcus'));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-host="irc.perl.org"][data-target="marcus"]'), 'QUERY marcus';
+  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="marcus"]'), 'QUERY marcus';
 
   $t->send_ok(msg('/query #wirc  '));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-host="irc.perl.org"][data-target="#wirc"]'), 'QUERY #wirc';
+  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="#wirc"]'), 'QUERY #wirc';
 }
 
 {
@@ -44,17 +44,17 @@ $t->websocket_ok('/socket');
 }
 
 {
-  publish(event => 'remove_conversation', host => 'irc.perl.org', target => '#wirc');
+  publish(event => 'remove_conversation', server => 'irc.perl.org', target => '#wirc');
   $t->send_ok(msg('/close'));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 PART #wirc', 'abc-123 PART #wirc';
-  ok $dom->at('li.remove-conversation[data-host="irc.perl.org"][data-target="#wirc"]'), 'CLOSE';
+  ok $dom->at('li.remove-conversation[data-server="irc.perl.org"][data-target="#wirc"]'), 'CLOSE';
 
   $ws = '';
   $t->send_ok(msg('/close   marcus    '));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, '', 'closing a pm will not send a message to backend';
-  ok $dom->at('li.remove-conversation[data-host="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
+  ok $dom->at('li.remove-conversation[data-server="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
 }
 
 {
@@ -63,11 +63,11 @@ $t->websocket_ok('/socket');
 }
 
 for my $cmd (qw/ j join /) {
-  publish(event => 'add_conversation', host => 'irc.perl.org', target => '#toocool');
+  publish(event => 'add_conversation', server => 'irc.perl.org', target => '#toocool');
   $t->send_ok(msg("/$cmd #toocool  "));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 JOIN #toocool', 'abc-123 JOIN #toocool';
-  ok $dom->at('li.add-conversation[data-host="irc.perl.org"][data-target="#toocool"]'), 'JOIN #toocool';
+  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="#toocool"]'), 'JOIN #toocool';
 }
 
 for my $cmd (qw/ t topic /) {
@@ -114,7 +114,7 @@ for my $cmd (qw/ t topic /) {
 done_testing;
 
 sub msg {
-  qq(<div data-history="1" data-host="irc.perl.org" data-target="#wirc" id="abc-123">$_[0]</div>);
+  qq(<div data-history="1" data-server="irc.perl.org" data-target="#wirc" id="abc-123">$_[0]</div>);
 }
 
 sub ws {

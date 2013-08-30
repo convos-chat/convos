@@ -28,7 +28,7 @@ $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Nordaaker - Chat')
   ->element_exists('li.welcome')
   ->element_exists('form[action="/settings/connection"][method="post"]')
-  ->element_exists('input[name="host"][id="host"]')
+  ->element_exists('input[name="server"][id="server"]')
   ->element_exists('input[name="nick"][id="nick"]')
   ->element_exists('select[name="channels"][id="channels"]')
   ->element_exists('option[value="#wirc"]')
@@ -39,16 +39,16 @@ $t->get_ok($t->tx->res->headers->location)
 
 $form = {};
 $t->post_ok('/settings/connection', form => $form)
-  ->element_exists('div.host.error')
+  ->element_exists('div.server.error')
   ->element_exists('div.nick.error')
   ->element_exists_not('div.avatar.error')
-  ->element_exists('input[name="host"][value="irc.perl.org"]')
+  ->element_exists('input[name="server"][value="irc.perl.org"]')
   ->element_exists('input[name="nick"][value]')
   ->element_exists('select[name="channels"]')
   ;
 
 $form = {
-  host => 'freenode.org',
+  server => 'freenode.org',
   nick => 'ice_cool',
   channels => ', #way #cool ,,,',
 };
@@ -61,7 +61,7 @@ is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start conne
 $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Nordaaker - Chat')
   ->element_exists('form[action="/freenode.org/settings/edit"][method="post"]')
-  ->element_exists('input[name="host"][value="freenode.org"]')
+  ->element_exists('input[name="server"][value="freenode.org"]')
   ->element_exists('input[name="nick"][value="ice_cool"]')
   ->element_exists('select[name="channels"]')
   ->element_exists('option[value="#cool"][selected="selected"]')
@@ -70,7 +70,7 @@ $t->get_ok($t->tx->res->headers->location)
   ->text_is('button[type="submit"][name="action"][value="save"]', 'Update')
   ;
 
-$form->{host} = 'irc.perl.org';
+$form->{server} = 'irc.perl.org';
 $t->post_ok('/freenode.org/settings/edit', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page')

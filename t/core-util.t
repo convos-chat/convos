@@ -24,13 +24,13 @@ use WebIrc::Core::Util qw/ format_time as_id id_as /;
 }
 
 {
-  like 'localhost', $WebIrc::Core::Util::host_re, 'localhost is valid';
-  like 'localhost:123', $WebIrc::Core::Util::host_re, 'localhost:123 is valid';
-  like 'irc.perl.org', $WebIrc::Core::Util::host_re, 'irc.perl.org is valid';
-  like 'irc.perl.org:6667', $WebIrc::Core::Util::host_re, 'irc.perl.org:6667 is valid';
-  like 'loopback', $WebIrc::Core::Util::host_re, 'loopback is valid';
-  ok 'loop' !~ $WebIrc::Core::Util::host_re, 'loop is invalid';
-  ok 'foo:6667' !~ $WebIrc::Core::Util::host_re, 'foo:6667 is invalid';
+  like 'localhost', $WebIrc::Core::Util::SERVER_NAME_RE, 'localhost is valid';
+  like 'localhost:123', $WebIrc::Core::Util::SERVER_NAME_RE, 'localhost:123 is valid';
+  like 'irc.perl.org', $WebIrc::Core::Util::SERVER_NAME_RE, 'irc.perl.org is valid';
+  like 'irc.perl.org:6667', $WebIrc::Core::Util::SERVER_NAME_RE, 'irc.perl.org:6667 is valid';
+  like 'loopback', $WebIrc::Core::Util::SERVER_NAME_RE, 'loopback is valid';
+  ok 'loop' !~ $WebIrc::Core::Util::SERVER_NAME_RE, 'loop is invalid';
+  ok 'foo:6667' !~ $WebIrc::Core::Util::SERVER_NAME_RE, 'foo:6667 is invalid';
 }
 
 done_testing;

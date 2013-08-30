@@ -119,6 +119,7 @@ sub startup {
   $config->{name} ||= 'Wirc';
   $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
   $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
+  $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
 
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
@@ -134,7 +135,7 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#host', [ host => $WebIrc::Core::Util::host_re ]);
+  my $host_r = $private_r->any('/#server', [ server => $WebIrc::Core::Util::SERVER_NAME_RE ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');

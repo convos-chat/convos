@@ -194,12 +194,12 @@ sub settings {
   my $self = shift->render_later;
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
-  my $host = $self->stash('host') || 0;
+  my $server = $self->stash('server') || 0;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
   my @conversation;
 
   $self->stash(
-    host => $host,
+    server => $server,
     body_class => 'settings',
     conversation => \@conversation,
     nick => $login,
@@ -228,8 +228,9 @@ sub settings {
 
       for my $conn (@connections) {
         $conn->{event} = 'connection';
-        $conn->{lookup} = $conn->{host};
+        $conn->{lookup} = $conn->{server} || $conn->{host};
         $conn->{channels} = [ split ' ', $conn->{channels} ];
+        $conn->{server} ||= $conn->{host}; # back compat
         push @conversation, $conn;
       }
 
@@ -291,7 +292,7 @@ sub add_connection {
       $self->app->core->add_connection(
         $self->session('login'),
         {
-          host     => $self->param('host') || '',
+          server     => $self->param('server') || '',
           nick     => $self->param('nick') || '',
           channels => join(' ', $self->param('channels')),
           tls      => $self->param('tls') || 0,
@@ -324,8 +325,8 @@ sub edit_connection {
       $self->app->core->update_connection(
         $self->session('login'),
         {
-          host     => $self->req->body_params->param('host') || '',
-          lookup   => $self->stash('host') || '',
+          server     => $self->req->body_params->param('server') || '',
+          lookup   => $self->stash('server') || '',
           nick     => $self->param('nick') || '',
           channels => join(' ', $self->param('channels')),
           tls      => $self->param('tls') || 0,
@@ -356,7 +357,7 @@ sub delete_connection {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->delete_connection($login, $self->stash('host'), $delay->begin);
+      $self->app->core->delete_connection($login, $self->stash('server'), $delay->begin);
     },
     sub {
       my ($delay, $error) = @_;
