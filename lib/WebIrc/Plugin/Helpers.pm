@@ -94,7 +94,7 @@ sub _parse_message {
 
   # http://www.mirc.com/colors.html
   $message->{message} =~ s/\x03\d{0,15}(,\d{0,15})?//g;
-  $message->{message} =~ s/\x03//g;
+  $message->{message} =~ s/[\x00-\x1f]//g;
 
   while($message->{message} =~ m!($URL_RE)!g) {
     my $url = $1;
