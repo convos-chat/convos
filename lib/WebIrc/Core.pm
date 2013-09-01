@@ -79,12 +79,8 @@ sub start {
       warn sprintf "[core] Starting %s connection(s)\n", int @$connections if DEBUG;
       for(@$connections) {
         my($login, $host) = split /:/;
-        $self->_connection(login => $login, host => $host, $delay->begin)
+        $self->_connection(login => $login, host => $host)->connect;
       }
-    },
-    sub {
-      my($delay, @conn) = @_;
-      $_->connect for @conn;
     },
   );
 
@@ -93,18 +89,15 @@ sub start {
 }
 
 sub _connection {
-  my $cb = pop;
   my($self, %args) = @_;
   my $conn = $self->{connections}{$args{login}}{$args{host}};
 
-  if($conn) {
-    $self->$cb($conn);
-  }
-  else {
+  unless($conn) {
     $conn = WebIrc::Core::Connection->new(redis => $self->redis, %args);
     $self->{connections}{$args{login}}{$args{host}} = $conn;
-    $self->$cb($conn);
   }
+
+  $conn;
 }
 
 sub _start_control_channel {
@@ -128,7 +121,7 @@ sub _start_control_channel {
     error => sub {
       my($redis, $error) = @_;
       $self->log->warn("[core:control] $error (reconnecting)");
-      $self->_start_control_channel;
+      Mojo::IOLoop->timer(0.5, sub { $self->_start_control_channel })
     },
   );
 }
@@ -371,8 +364,7 @@ Start a single connection by connection id.
 
 sub ctrl_start {
   my ($self, $login, $host) = @_;
-
-  $self->_connection(login => $login, host => $host, sub { pop->connect });
+  $self->_connection(login => $login, host => $host)->connect;
 }
 
 =head2 login
@@ -419,7 +411,13 @@ sub login {
 sub _parse_channels {
   my $self = shift;
   my $channels = shift or return;
-  sort grep { $_ ne '#' } map { /^#/ ? $_ : "#$_" } split m/[\s,]+/, $channels;
+  my %dup;
+  sort grep { $_ ne '#' and !$dup{$_}++ } map { /^#/ ? $_ : "#$_" } split m/[\s,]+/, $channels;
+}
+
+sub DESTROY {
+  my $self = shift;
+  delete $self->{$_} for qw/ control redis /;
 }
 
 =head1 COPYRIGHT
