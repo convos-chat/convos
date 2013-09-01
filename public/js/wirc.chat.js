@@ -107,8 +107,10 @@
       getHistoricMessages();
       reloadNotificationList();
     }
-    else if($messages.length) {
-      $input.focusSoon();
+    else if($messages.length ) {
+      if(!$.supportsTouch) {
+        $input.focusSoon();
+      }
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
@@ -300,7 +302,6 @@
   };
 
   var initNotifications = function() {
-    console.log('initNotifications: ' + Notification.permission);
     if(Notification.permission === 'granted') return;
     if(Notification.permission === 'unsupported') return;
     if(Notification.permission === 'denied') return;
