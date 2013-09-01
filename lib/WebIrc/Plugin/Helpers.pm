@@ -10,6 +10,8 @@ use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util qw(format_time);
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
+my %AVATAR_CACHE;
+
 my $URL_RE = do {
   # Modified regex from RFC 3986
   no warnings; # Possible attempt to put comments
@@ -68,14 +70,14 @@ be passed on to the C<$callback>.
 =cut
 
 sub format_conversation {
-  my($self, $c, $conversation, $cb) = @_;
+  my($c, $conversation, $cb) = @_;
   my $delay = Mojo::IOLoop->delay;
   my @messages;
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
     $message->{uuid} ||= '';
-    $message->{message} = $self->_parse_message($c, $message, $delay) if $message->{message};
+    $message->{message} = _parse_message($c, $message, $delay) if $message->{message};
 
     push @messages, $message;
   }
@@ -85,11 +87,11 @@ sub format_conversation {
 }
 
 sub _parse_message {
-  my($self, $c, $message, $delay) = @_;
+  my($c, $message, $delay) = @_;
   my $last = 0;
   my @chunks;
 
-  $self->_message_avatar($c, $message, $delay);
+  _message_avatar($c, $message, $delay);
   $message->{highlight} ||= 0;
 
   # http://www.mirc.com/colors.html
@@ -101,7 +103,7 @@ sub _parse_message {
     my $now = pos $message->{message};
 
     push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last, $now - length $url);
-    push @chunks, $self->_message_url($c, $url, $message, $delay);
+    push @chunks, _message_url($c, $url, $message, $delay);
     $last = $now;
   }
 
@@ -110,7 +112,7 @@ sub _parse_message {
 }
 
 sub _message_avatar {
-  my($self, $c, $message, $delay) = @_;
+  my($c, $message, $delay) = @_;
   my($lookup, $cache, $cb);
 
   $message->{avatar} = '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro';
@@ -118,7 +120,7 @@ sub _message_avatar {
   $message->{host} or return; # old data does not have "host" stored because of a bug
   $lookup = join '@', @$message{qw/ user host /};
   $lookup =~ s!^~!!;
-  $cache = $self->{avatar_cache}{$lookup} ||= {};
+  $cache = $AVATAR_CACHE{$lookup} ||= {};
 
   if(defined $cache->{avatar}) {
     $message->{avatar} = $cache->{avatar};
@@ -142,7 +144,8 @@ sub _message_avatar {
 }
 
 sub _message_url {
-  my($self, $c, $url, $message, $delay) = @_;
+  my($c, $url, $message, $delay) = @_;
+  my $embed_ua = $c->stash->{embed_ua} ||= Mojo::UserAgent->new(request_timeout => 2, connect_timeout => 2);
   my $cb;
 
   if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
@@ -150,7 +153,7 @@ sub _message_url {
   }
   else {
     $cb = $delay->begin;
-    $self->{embed_ua}->head(
+    $embed_ua->head(
       $url => sub {
         my $ct = $_[1]->res->headers->content_type || '';
         $message->{embed} = $c->image($url, alt => 'Embedded media') if $ct =~ /^image/;
@@ -173,11 +176,11 @@ Returns a L<Mojo::Redis> object.
 =cut
 
 sub redis {
-  my $self = shift;
+  my $c = shift;
 
-  $self->stash->{redis} ||= do {
-    my $log = $self->app->log;
-    my $redis = Mojo::Redis->new(server => $self->config->{redis});
+  $c->stash->{redis} ||= do {
+    my $log = $c->app->log;
+    my $redis = Mojo::Redis->new(server => $c->config->{redis});
 
     $redis->on(
       error => sub {
@@ -234,12 +237,10 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
-  $self->{embed_ua} = Mojo::UserAgent->new(request_timeout => 2, connect_timeout => 2);
-
   $app->helper(form_block          => \&form_block);
-  $app->helper(format_conversation => sub { $self->format_conversation(@_) });
+  $app->helper(format_conversation => \&format_conversation);
   $app->helper(logf                => \&WebIrc::Core::Util::logf);
-  $app->helper(format_time => sub { my $self = shift; format_time(@_); });
+  $app->helper(format_time => sub { shift; format_time(@_); });
   $app->helper(redis => \&redis);
   $app->helper(as_id => sub { shift; WebIrc::Core::Util::as_id(@_) });
   $app->helper(id_as => sub { shift; WebIrc::Core::Util::id_as(@_) });

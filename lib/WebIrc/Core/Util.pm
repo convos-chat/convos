@@ -21,7 +21,6 @@ use Parse::IRC ();
 use Unicode::UTF8;
 use Time::Piece;
 
-my $LOGGER = Mojo::Log->new;
 my $hostname;
 
 =head1 FUNCTIONS
@@ -93,7 +92,7 @@ Used to log more complex datastructures and to prevent logging C<undef>.
 sub logf {
   use Data::Dumper;
   my($self, $level, $format, @args) = @_;
-  my $log = $self->{app}{log} || $self->{log} || $LOGGER;
+  my $log = $self->{app}{log} || $self->{log} || Mojo::Log->new;
 
   local $Data::Dumper::Maxdepth = 2;
   local $Data::Dumper::Indent = 0;

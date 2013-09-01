@@ -7,12 +7,11 @@ WebIrc::Client - Mojolicious controller for IRC chat
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Mojo::JSON;
+use Mojo::JSON 'j';
 use WebIrc::Core::Util qw/ as_id id_as /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 my $N_MESSAGES = $ENV{N_MESSAGES} || 50;
-my $JSON = Mojo::JSON->new;
 
 =head1 METHODS
 
@@ -195,9 +194,9 @@ sub clear_notifications {
       my $i = 0;
 
       while($i < @$notification_list) {
-        my $notification = $JSON->decode($notification_list->[$i]);
+        my $notification = j $notification_list->[$i];
         $notification->{read}++;
-        $self->redis->lset("user:$login:notifications", $i, $JSON->encode($notification));
+        $self->redis->lset("user:$login:notifications", $i, j $notification);
         $i++;
       }
 
@@ -228,7 +227,7 @@ sub notification_list {
       my $i = 0;
 
       while($i < @$notification_list) {
-        my $n = $JSON->decode($notification_list->[$i]);
+        my $n = j $notification_list->[$i];
         $n->{index} = $i;
         $n->{is_channel} = $n->{target} =~ /^#/ ? 1 : 0;
 
@@ -269,7 +268,7 @@ sub _conversation {
       $self->format_conversation(
         sub {
           my $timestamp = pop @$list;
-          my $message = $JSON->decode(pop @$list) or return;
+          my $message = j(pop @$list) or return;
           $message->{timestamp} = $timestamp;
           $message;
         },
@@ -285,7 +284,7 @@ sub _conversation {
       $self->format_conversation(
         sub {
           my $current = shift @$list or return;
-          my $message = $JSON->decode($current);
+          my $message = j $current;
           @$list or return; # skip the last
           $message->{timestamp} = shift @$list;
           $message;
@@ -302,7 +301,7 @@ sub _conversation {
         my $list = pop || [];
         $self->format_conversation(
           sub {
-            my $message = $JSON->decode(shift @$list) or return;
+            my $message = j(shift @$list) or return;
             $message->{timestamp} = shift @$list;
             $message;
           },
@@ -321,9 +320,9 @@ sub _modify_notification {
   $self->redis->lindex($redis_key, $id, sub {
     my $redis = shift;
     my $notification = shift or return;
-    $notification = $JSON->decode($notification);
+    $notification = j $notification;
     $notification->{$key} = $value;
-    $redis->lset($redis_key, $id, $JSON->encode($notification));
+    $redis->lset($redis_key, $id, j $notification);
   });
 }
 

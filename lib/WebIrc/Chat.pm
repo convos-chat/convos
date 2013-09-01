@@ -20,16 +20,15 @@ Handle conversation exchange over websocket.
 =cut
 
 sub socket {
-  my $self = shift->render_later;
+  my $self = shift;
   my $login = $self->session('login');
   my $key = "wirc:user:$login:out";
-  my $sub = $self->redis->subscribe($key);
-  my $tid;
+  my($sub, $tid);
 
-  Scalar::Util::weaken($self);
   Mojo::IOLoop->stream($self->tx->connection)->timeout(PING_INTERVAL * 2);
 
   # send ping frames
+  Scalar::Util::weaken($self);
   $tid = Mojo::IOLoop->recurring(PING_INTERVAL, sub {
            $self->send([1, 0, 0, 0, 9, 'pin']);
          });
@@ -57,9 +56,22 @@ sub socket {
       }
     }
   );
+  $self->on(
+    finish => sub {
+      my $self = shift;
+      Mojo::IOLoop->remove($tid);
+      delete $self->stash->{$_} for qw/ sub redis /;
+    }
+  );
 
   # from backend to browser
-  $sub->on(error => sub { $self->logf(warn => 'sub: %s', pop); $self->finish; });
+  $sub = $self->stash->{sub} = $self->redis->subscribe($key);
+  $sub->on(
+    error => sub {
+      $self->logf(warn => 'sub: %s', pop);
+      $self->finish;
+    }
+  );
   $sub->on(
     message => sub {
       my $sub = shift;
@@ -75,13 +87,6 @@ sub socket {
       );
     }
   );
-
-  $self->stash(sub => $sub);
-  $self->on(finish => sub {
-    Mojo::IOLoop->remove($tid);
-    $self or return;
-    delete $self->stash->{sub};
-  });
 }
 
 sub _handle_socket_data {

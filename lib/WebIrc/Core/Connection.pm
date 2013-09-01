@@ -48,7 +48,7 @@ L</irc_err_bannedfromchan> and l</irc_error>.
 
 use Mojo::Base -base;
 use Mojo::IRC;
-use Mojo::JSON;
+use Mojo::JSON 'j';
 no warnings 'utf8';
 use IRC::Utils;
 use Parse::IRC ();
@@ -57,7 +57,6 @@ use Time::HiRes qw/ time /;
 use WebIrc::Core::Util qw/ as_id /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
-my $JSON = Mojo::JSON->new;
 my @keys = qw/ nick user host /;
 
 =head1 ATTRIBUTES
@@ -772,7 +771,7 @@ sub _publish {
   $data->{timestamp} ||= time;
   $data->{event} = $event;
   $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
-  $message = $JSON->encode($data);
+  $message = j $data;
 
   $self->redis->publish("wirc:user:$login:out", $message);
 
