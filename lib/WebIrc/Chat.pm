@@ -7,59 +7,9 @@ WebIrc::Chat - Mojolicious controller for IRC chat
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Mojo::JSON;
+use Mojo::JSON 'j';
 use constant PING_INTERVAL => $ENV{WIRC_PING_INTERVAL} || 30;
-
-my $JSON = Mojo::JSON->new;
-my %COMMANDS; %COMMANDS = (
-  j     => \'join',
-  join  => 'JOIN',
-  t     => \'topic',
-  topic => sub { my $dom = pop; "TOPIC $dom->{target}" . ($dom->{cmd} ? ' :' . $dom->{cmd} : '') },
-  w     => \'whois',
-  whois => 'WHOIS',
-  list  => 'LIST',
-  nick  => 'NICK',
-  oper => sub { my $dom = pop; "OPER $dom->{cmd}" },
-  mode => sub { my $dom = pop; "MODE $dom->{cmd}" },
-  names => sub { my $dom = pop; "NAMES " . ($dom->{cmd} || $dom->{target}) },
-  me   => sub { my $dom = pop; "PRIVMSG $dom->{target} :\x{1}ACTION $dom->{cmd}\x{1}" },
-  msg  => sub { my $dom = pop; $dom->{cmd} =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$dom->{cmd}" },
-  part => sub { my $dom = pop; "PART " . ($dom->{cmd} || $dom->{target}) },
-  query=> sub {
-    my ($self, $dom) = @_;
-    my $login = $self->session('login');
-    my $target = $dom->{cmd} || $dom->{target};
-    my $id = $self->as_id($dom->{host}, $target);
-
-    $self->redis->zrem("user:$login:conversations", $id, sub {
-      $self->send_partial('event/add_conversation', %$dom, target => $target);
-    });
-    return;
-  },
-  close => sub {
-    my ($self, $dom) = @_;
-    my $login = $self->session('login');
-    my $target = $dom->{cmd} || $dom->{target};
-    my $id = $self->as_id($dom->{host}, $target);
-
-    return "PART $target" if $target =~ /^#/;
-    $self->redis->zrem("user:$login:conversations", $id, sub {
-      $self->send_partial('event/remove_conversation', %$dom, target => $target);
-    });
-    return;
-  },
-  reconnect => sub {
-    my ($self, $dom) = @_;
-    $self->app->core->control(restart => $dom->{host}, sub {});
-    return;
-  },
-  help => sub {
-    my ($self, $dom) = @_;
-    $self->send_partial('event/help');
-    return;
-  }
-);
+use WebIrc::Core::Commands;
 
 =head1 METHODS
 
@@ -117,7 +67,7 @@ sub socket {
 
       $self->logf(debug => '[%s] > %s', $key, $messages[0]);
       $self->format_conversation(
-        sub { $JSON->decode(shift @messages) },
+        sub { j(shift @messages) },
         sub {
           my($self, $messages) = @_;
           $self->send_partial("event/$messages->[0]{event}", target => '', %{ $messages->[0] });
@@ -138,15 +88,15 @@ sub _handle_socket_data {
   my ($self, $dom) = @_;
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $login = $self->session('login');
-  my($host, $target, $uuid) = map { delete $dom->{$_} || '' } qw/ data-host data-target id /;
 
-  @$dom{qw/ host target uuid/} = ($host, $target, $uuid);
+  @$dom{qw/ host target /} = map { delete $dom->{$_} || '' } qw/ data-host data-target /;
+  $dom->{timestamp} ||= time;
 
-  if ($cmd =~ s!^/(\w+)\s*!!) {
-    if (my $irc_cmd = $COMMANDS{$1}) {
-      $dom->{cmd} = $cmd =~ s/\s+$//r; # / st2 format hack
-      $irc_cmd = $COMMANDS{$$irc_cmd} if ref $irc_cmd eq 'SCALAR';
-      $cmd = ref $irc_cmd eq 'CODE' ? $self->$irc_cmd($dom) : "$irc_cmd $cmd";
+  if ($cmd =~ s!^/(\w+)\s*(.*)!!) {
+    my($action, $arg) = ($1, $2);
+    $arg =~ s/\s+$//;
+    if (my $code = WebIrc::Core::Commands->can($action)) {
+      $cmd = $self->$code($arg, $dom);
     }
     else {
       $self->send_partial('event/server_message', status => 400, message => 'Unknown command. Type /help to see available commands.');
@@ -162,7 +112,7 @@ sub _handle_socket_data {
 
   if(defined $cmd) {
     my $key = "wirc:user:$login:$dom->{host}";
-    $cmd = "$dom->{uuid} $cmd";
+    $cmd = "$dom->{id} $cmd";
     $self->logf(debug => '[%s] < %s', $key, $cmd);
     $self->redis->publish($key => $cmd);
     if($dom->{'data-history'}) {

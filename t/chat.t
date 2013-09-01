@@ -54,7 +54,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
   like $dom->at('.timestamp')->text, qr{^\d+\. \S+ [\d\:]+$}, 'got timestamp';
 
   $connection->add_message({
-    params => [ '#mojo', "mIRC \x{3}4colors \x{3}4,14http://www.mirc.com/colors.html\x{3} suck imho" ],
+    params => [ '#mojo', "mIRC \x{03}4colors \x{03}4,14http://www.mirc.com/colors.html\x{03} suck imho" ],
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
@@ -231,6 +231,14 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
   });
   $dom->parse($t->message_ok->message->[1]);
   is eval { $dom->at('a[href="http://wirc.pl"]')->text }, 'http://wirc.pl', 'not with "is really cool"' or diag $dom;
+
+  # Fix parsing github links
+  $connection->add_message({
+    params => [ '#mojo', ":gh!~gh@192.30.252.50 PRIVMSG #wirc :[\x{03}13wirc\x{0f}] \x{03}15jhthorsen\x{0f} closed issue #132: /query is broken  \x{03}02\x{1f}http://git.io/saYuUg\x{0f}" ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  is eval { $dom->at('a[href="http://git.io/saYuUg"]')->text }, 'http://git.io/saYuUg', 'without %OF' or diag $dom;
 }
 
 done_testing;
@@ -240,10 +248,6 @@ sub data {
     params => [ 'WHATEVER', 'WHATEVER', '#wirc', 'fooman @woman' ],
   },
   the_end => {}, # should never come to this
-}
-
-sub msg {
-  qq(<div data-history="1" data-host="wirc.pl" data-target="#wirc">$_[0]</div>);
 }
 
 sub dummy_irc {
