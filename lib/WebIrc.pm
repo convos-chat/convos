@@ -112,7 +112,6 @@ sub startup {
   $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
   $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
 
-  $self->plugin('Mojolicious::Plugin::UrlWith');
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
