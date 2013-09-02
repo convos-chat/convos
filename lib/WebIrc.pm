@@ -126,7 +126,7 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#host', [ host => qr{\w+\.[^/]+} ]);
+  my $host_r = $private_r->any('/#host', [ host => qr{(?:\w+\.|localhost)[^/]+} ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
