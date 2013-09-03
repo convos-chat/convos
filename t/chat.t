@@ -41,6 +41,33 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
 }
 
 {
+  # Fix parsing links without a path part
+  $connection->add_message({
+    params => [ '#mojo', 'http://wirc.pl is really cool' ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  is eval { $dom->at('a[href="http://wirc.pl"]')->text }, 'http://wirc.pl', 'not with "is really cool"' or diag $dom;
+
+  # Fix parsing github links
+  $connection->add_message({
+    params => [ '#mojo', "[\x{03}13wirc\x{0f}] \x{03}15jhthorsen\x{0f} closed issue #132: /query is broken  \x{03}02\x{1f}http://git.io/saYuUg\x{0f}" ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  is eval { $dom->at('a[href="http://git.io/saYuUg"]')->text }, 'http://git.io/saYuUg', 'without %OF' or diag $dom;
+
+  # Fix parsing multiple links in one message
+  $connection->add_message({
+    params => [ '#mojo', "this http://perl.org and https://github.com/jhthorsen is cool!" ],
+    prefix => 'fooman!user@host',
+  });
+  $dom->parse($t->message_ok->message->[1]);
+  diag $dom;
+  is $dom->at('div.content')->text, 'this and is cool!', '<a href="http://perl.org" target="_blank">http://perl.org</a> https://github.<a href="https://github.com/jhthorsen" target="_blank">https://github.com/jhthorsen</a> yay!';
+}
+
+{
   $connection->add_message({
     params => [ '#mojo', 'doe: see this &amp; link: http://wirc.pl?a=1&b=2#yikes # really cool' ],
     prefix => 'fooman!user@host',
@@ -221,24 +248,6 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
   ok $dom->at('li.notice[data-host="wirc.pl"][data-target="#wirc"]'), 'mode to #wirc';
   is $dom->at('div.content b')->text, '+o', 'op for...';
   is $dom->at('div.content span')->text, 'batman', 'op for batman';
-}
-
-{
-  # Fix parsing links without a path part
-  $connection->add_message({
-    params => [ '#mojo', 'http://wirc.pl is really cool' ],
-    prefix => 'fooman!user@host',
-  });
-  $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://wirc.pl"]')->text }, 'http://wirc.pl', 'not with "is really cool"' or diag $dom;
-
-  # Fix parsing github links
-  $connection->add_message({
-    params => [ '#mojo', ":gh!~gh@192.30.252.50 PRIVMSG #wirc :[\x{03}13wirc\x{0f}] \x{03}15jhthorsen\x{0f} closed issue #132: /query is broken  \x{03}02\x{1f}http://git.io/saYuUg\x{0f}" ],
-    prefix => 'fooman!user@host',
-  });
-  $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://git.io/saYuUg"]')->text }, 'http://git.io/saYuUg', 'without %OF' or diag $dom;
 }
 
 done_testing;

@@ -18,9 +18,6 @@ my $URL_RE = do {
   qw!https?:(//([^/?\#\s]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
 };
 
-my $YOUTUBE_INCLUDE
-  = '<iframe width="390" height="220" src="//www.youtube-nocookie.com/embed/%s?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen></iframe>';
-
 =head1 HELPERS
 
 =head2 id_as
@@ -102,8 +99,8 @@ sub _parse_message {
     my $url = $1;
     my $now = pos $message->{message};
 
-    push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last, $now - length $url);
-    push @chunks, _message_url($c, $url, $message, $delay);
+    push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last, $now - length($url) - $last);
+    push @chunks, $c->link_to($url, $url, target => '_blank');
     $last = $now;
   }
 
@@ -141,28 +138,6 @@ sub _message_avatar {
   }
 
   push @{ $cache->{messages} }, $message;
-}
-
-sub _message_url {
-  my($c, $url, $message, $delay) = @_;
-  my $embed_ua = $c->stash->{embed_ua} ||= Mojo::UserAgent->new(request_timeout => 2, connect_timeout => 2);
-  my $cb;
-
-  if($url =~ m!youtube.com\/watch?.*?\bv=([^&]+)!) {
-    $message->{embed} = sprintf $YOUTUBE_INCLUDE, $1;
-  }
-  else {
-    $cb = $delay->begin;
-    $embed_ua->head(
-      $url => sub {
-        my $ct = $_[1]->res->headers->content_type || '';
-        $message->{embed} = $c->image($url, alt => 'Embedded media') if $ct =~ /^image/;
-        $cb->();
-      }
-    );
-  }
-
-  return $c->link_to($url, $url, target => '_blank');
 }
 
 =head2 logf
