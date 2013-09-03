@@ -29,6 +29,7 @@
                   onclose: function() { clearTimeout(tid); }
                 }
               );
+      n.onclick = function(x) { window.focus(); this.cancel(); };
       var tid = setTimeout(function() { n.close(); }, 5000);
     }
 
