@@ -129,6 +129,7 @@ sub startup {
   my $host_r = $private_r->any('/#host', [ host => qr{(?:\w+\.|localhost)[^/]+} ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
+  $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
   $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
   $private_r->get('/command-history')->to('client#command_history');

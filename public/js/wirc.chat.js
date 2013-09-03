@@ -30,6 +30,19 @@
       $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
     });
 
+    // embed media
+    this.find('a[target="_blank"]').each(function() {
+      var $a = $(this);
+      $.get($.url_for('oembed?url=' + this.href), function(embed_code) {
+        var at_bottom = $win.data('at_bottom');
+        $a.closest('div').after(embed_code);
+        if(at_bottom) {
+          $win.scrollTo('bottom');
+          $a.closest('div').find('img').one('load', function() { $win.scrollTo('bottom') });
+        }
+      });
+    });
+
     this.find('.close').click(function() { $(this).closest('li').remove(); });
     this.filter('.historic-message').find('a.button.newer').click(getNewMessages);
     this.filter('.historic-message').find('a.button.current').click(function(e) {
@@ -446,9 +459,9 @@
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
-    var at_bottom = $win.data('at_bottom');
     var to_current = false;
     var uuid = $message.attr('id');
+
 
     if($messages.find('#' + uuid).length) {
       if($message.hasClass('error')) {
@@ -485,11 +498,6 @@
     }
     else if($message.hasClass('message')) {
       drawConversationMenu($message);
-    }
-
-    if(at_bottom) {
-      $win.scrollTo('bottom');
-      $message.find('img').one('load', function() { $win.scrollTo('bottom') });
     }
   };
 
