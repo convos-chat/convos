@@ -418,7 +418,7 @@ div.messages {
   li.action.message div.content { padding-top: 20px; font-style: italic; }
   li.action.message.same-nick div.content { padding-top: 0; }
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
-  li.message-pending div.content { color: #ccc; font-style: italic; }
+  li.message-pending div.content { color: #999; }
   li.message-pending h3 { color: #ccc; }
   li.message-error { font-style: italic; }
   li.message-error h3 { color: #333; font-style: italic; }
