@@ -459,9 +459,9 @@
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
+    var at_bottom = $win.data('at_bottom');
     var to_current = false;
     var uuid = $message.attr('id');
-
 
     if($messages.find('#' + uuid).length) {
       if($message.hasClass('error')) {
@@ -499,6 +499,8 @@
     else if($message.hasClass('message')) {
       drawConversationMenu($message);
     }
+
+    if($win.data('at_bottom')) $win.scrollTo('bottom');
   };
 
   var reloadConversationList = function(e) {
