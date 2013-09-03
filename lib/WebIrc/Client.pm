@@ -11,7 +11,7 @@ use Mojo::JSON 'j';
 use WebIrc::Core::Util qw/ as_id id_as /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
-my $N_MESSAGES = $ENV{N_MESSAGES} || 50;
+my $N_MESSAGES = $ENV{N_MESSAGES} || 30;
 
 =head1 METHODS
 
@@ -218,7 +218,7 @@ sub notification_list {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->lrange($key, 0, 100, $delay->begin);
+      $self->redis->lrange($key, 0, 20, $delay->begin);
     },
     sub {
       my($delay, $notification_list) = @_;
