@@ -4,6 +4,10 @@ package WebIrc;
 
 WebIrc - IRC client on web
 
+=head1 VERSION
+
+0.01
+
 =head1 SYNOPSIS
 
 =head2 Production
@@ -67,9 +71,11 @@ Backend functionality.
 =cut
 
 use Mojo::Base 'Mojolicious';
+use Mojo::Redis;
 use File::Spec::Functions qw(catfile tmpdir);
 use WebIrc::Core;
-use Mojo::Redis;
+
+our $VERSION = '0.01';
 
 =head1 ATTRIBUTES
 

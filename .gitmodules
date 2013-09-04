@@ -1,3 +1,0 @@
-[submodule "vendor/less.js"]
-	path = vendor/less.js
-	url = https://github.com/marcusramberg/less.js.git

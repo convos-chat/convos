@@ -63,7 +63,6 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-  diag $dom;
   is $dom->at('div.content')->text, 'this and is cool!', '<a href="http://perl.org" target="_blank">http://perl.org</a> https://github.<a href="https://github.com/jhthorsen" target="_blank">https://github.com/jhthorsen</a> yay!';
 }
 
