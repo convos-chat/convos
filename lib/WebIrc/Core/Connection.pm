@@ -270,8 +270,8 @@ sub _connect {
 
       $self->channels(add => $_) for split ' ', $args->{channels};
       $irc->server($args->{host});
-      $irc->nick($args->{nick});
-      $irc->user($args->{user});
+      $irc->nick($args->{nick} || $self->login);
+      $irc->user($args->{user} || $self->login);
       $irc->tls({}) if $args->{tls};
       $irc->connect(sub {
         my($irc, $error) = @_;
