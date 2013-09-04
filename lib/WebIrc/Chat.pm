@@ -45,11 +45,10 @@ sub socket {
         $self->_handle_socket_data($dom);
       }
       else {
-        $self->send_partial(
-          'event/server_message',
-          status => 400,
+        $self->send_partial('event/server_message',
           host => $dom->{'data-host'} || 'any',
           message => "Invalid message ($octets)",
+          status => 400,
           timestamp => time,
           uuid => '',
         )->finish;
@@ -104,15 +103,20 @@ sub _handle_socket_data {
       $cmd = $self->$code($arg, $dom);
     }
     else {
-      $self->send_partial('event/server_message', status => 400, message => 'Unknown command. Type /help to see available commands.');
-      $cmd = undef;
+      return $self->send_partial('event/server_message',
+        host => $dom->{host},
+        message => 'Unknown command. Type /help to see available commands.',
+        status => 400,
+        timestamp => time,
+        uuid => '',
+      );
     }
   }
   elsif($dom->{target}) {
     $cmd = "PRIVMSG $dom->{target} :$cmd";
   }
   else {
-    $cmd = undef;
+    return;
   }
 
   if(defined $cmd) {
