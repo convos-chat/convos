@@ -218,11 +218,21 @@ sub notification_list {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->lrange($key, 0, 20, $delay->begin);
-      $self->_modify_notification($self->param('notification'), read => 1, $delay->begin) if defined $self->param('notification');
+      my $n = $self->param('notification');
+
+      if(defined $n) {
+        $self->_modify_notification($n, read => 1, $delay->begin)
+      }
+      else {
+        $delay->begin->();
+      }
     },
     sub {
-      my($delay, $notification_list, $modified) = @_;
+      my($delay, $modified) = @_;
+      $self->redis->lrange($key, 0, 20, $delay->begin);
+     },
+     sub {
+      my($delay, $notification_list) = @_;
       my $n_notifications = 0;
       my %nick_seen = ();
       my $i = 0;
