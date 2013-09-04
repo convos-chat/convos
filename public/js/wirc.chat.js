@@ -474,6 +474,7 @@
 
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target'));
+      if(!$message.data('host')) $message.data('host', $messages.data('host'));
     }
     if($('body').attr('class').indexOf('-nick-list') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
