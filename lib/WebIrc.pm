@@ -150,6 +150,14 @@ sub startup {
     }
   );
 
+  # since the xxx_mode() methods will be deprecated
+  if($self->mode =~ /^prod/) {
+    $self->_production_mode;
+  }
+  elsif($self->mode =~ /^dev/) {
+    $self->_development_mode;
+  }
+
   if($config->{backend}{embedded}) {
     Mojo::IOLoop->timer(0, sub {
       $self->core->start;
@@ -157,14 +165,7 @@ sub startup {
   }
 }
 
-=head2 production_mode
-
-This method will run L<WebIrc::Command::compile/compile_javascript> and
-L<WebIrc::Command::compile/compile_stylesheet>.
-
-=cut
-
-sub production_mode {
+sub _production_mode {
   my $self = shift;
 
   unless($ENV{WIRC_BACKEND_REV}) {
@@ -173,16 +174,7 @@ sub production_mode {
   }
 }
 
-=head2 development_mode
-
-This will run L<WebIrc::Command::compile/compile_stylesheet> unless
-L<Test::Mojo> is loaded. This allow you to start morbo like this:
-
-  $ morbo script/web_irc -w public/sass -w lib
-
-=cut
-
-sub development_mode {
+sub _development_mode {
   my $self = shift;
 
   # ugly hack to prevent this from running when running unit tests
