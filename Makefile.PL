@@ -5,7 +5,7 @@ WriteMakefile(
     'File::Slurp'     => 0,
     'IRC::Utils'      => 0.12,
     'List::MoreUtils' => 0,
-    'Mojo::IRC'       => 0.01,
+    'Mojo::IRC'       => 0.03,
     'Mojolicious'     => 4.30,
     'Mojo::Redis'     => 0.9914,
     'Parse::IRC'      => 1.18,

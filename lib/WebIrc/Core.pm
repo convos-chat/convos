@@ -133,6 +133,7 @@ sub _start_control_channel {
     nick => $str,
     user => $str,
     channels => $str, # '#foo #bar, ...'
+    tls => $bool,
   }, $callback);
 
 Add a new connection to redis. Will create a new connection id and
@@ -143,6 +144,7 @@ set all the keys in the %connection hash
 sub add_connection {
   my ($self, $login, $conn, $cb) = @_;
   my ($key, @channels, %errors);
+  my $tls;
 
   for my $name (qw/ host nick user /) {
     next if $conn->{$name};
@@ -193,6 +195,7 @@ sub add_connection {
     nick => $str,
     user => $str,
     channels => $str, # '#foo #bar, ...'
+    tls => $bool,
   }, $callback);
 
 Update a connection's settings and reconnect.
@@ -246,7 +249,7 @@ sub update_connection {
       my($delay, $found) = @_;
 
       return $self->$cb('Connection does not exist', undef) unless $found;
-      %channels = map { $_, 1 } split ' ', $found->{channels};
+      %channels = map { $_, 1 } split ' ', $found->{channels} || '';
       delete $found->{host}; # want this value
       $conn->{$_} ~~ $found->{$_} and delete $conn->{$_} for keys %$found;
 

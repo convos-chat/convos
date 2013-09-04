@@ -270,6 +270,7 @@ sub _connect {
       $irc->server($args->{host});
       $irc->nick($args->{nick});
       $irc->user($args->{user});
+      $irc->tls({}) if $args->{tls};
       $irc->connect(sub {
         my($irc, $error) = @_;
 
