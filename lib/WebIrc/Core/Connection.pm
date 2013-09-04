@@ -133,7 +133,7 @@ has _irc => sub {
       my $irc = shift;
       $self->{stop} and return;
       $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
-      $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
+      $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
   $irc->on(
@@ -141,7 +141,7 @@ has _irc => sub {
       my $irc = shift;
       $self->{stop} and return;
       $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Connection to  @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
-      $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
+      $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
 
@@ -276,7 +276,7 @@ sub _connect {
         my($irc, $error) = @_;
 
         if($error) {
-          $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
+          $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
           $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Could not connect to @{[$irc->server]}: $error" });
         }
         else {
