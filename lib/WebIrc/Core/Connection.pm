@@ -524,9 +524,7 @@ sub irc_join {
   my $channel = $message->{params}[0];
 
   if($nick eq $self->_irc->nick) {
-    my $name = as_id $self->host, $channel;
-    $self->redis->zadd("user:@{[$self->login]}:conversations", time, $name);
-    $self->_publish(add_conversation => { target => $channel });
+    $self->_publish(server_message => { status => 200, message => "You joined $channel" });
   }
   else {
     $self->_publish(nick_joined => { nick => $nick, target => $channel });

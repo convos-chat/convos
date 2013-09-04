@@ -192,7 +192,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
 
   $connection->irc_join({ params => [ '#mojo' ], prefix => 'doe!user@host' });
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-host="wirc.pl"][data-target="#mojo"]'), 'self joined';
+  is $dom->at('li.server-message.notice[data-host="wirc.pl"][data-target="any"] .content')->text, 'You joined #mojo', 'self joined';
 }
 
 {
