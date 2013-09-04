@@ -17,7 +17,7 @@ Defaults to the first "sass" file found in PATH.
 
 =head2 YUI_COMPRESSOR_BIN
 
-Defaults to the first "yui-compressor" file found in PATH.
+Defaults to the first "yuicompressor" or "yui-compressor" file found in PATH.
 
 =cut
 
@@ -34,9 +34,9 @@ unless($ENV{SASS_BIN} //= '') {
 
 unless($ENV{YUI_COMPRESSOR_BIN} //= '') {
   for(split /:/, $ENV{PATH} || '') {
-    next unless -e "$_/yui-compressor"; # -e because it might be a symlink
-    $ENV{YUI_COMPRESSOR_BIN} = "$_/yui-compressor";
-    last;
+    # -e because it might be a symlink
+    $ENV{YUI_COMPRESSOR_BIN} = "$_/yuicompressor", last if -e "$_/yuicompressor"; # installed from npm
+    $ENV{YUI_COMPRESSOR_BIN} = "$_/yui-compressor", last if -e "$_/yui-compressor";
   }
 }
 
