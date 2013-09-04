@@ -159,7 +159,9 @@ has _irc => sub {
   $irc;
 };
 
-has _reconnect_in => 10;
+sub _reconnect_in {
+  10 + int rand 30;
+}
 
 =head1 METHODS
 
