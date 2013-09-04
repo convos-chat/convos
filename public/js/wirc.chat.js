@@ -11,6 +11,7 @@
     '/query ',
     '/msg ',
     '/me ',
+    '/say ',
     '/nick ',
     '/close',
     '/part ',

@@ -85,6 +85,9 @@ for my $cmd (qw/ t topic /) {
   $t->send_ok(msg('/me is too cool :) '));
   is ws(), "abc-123 PRIVMSG #wirc :\x{1}ACTION is too cool :)\x{1}", '/me is too cool :)';
 
+  $t->send_ok(msg('/say /me is cool! '));
+  is ws(), "abc-123 PRIVMSG #wirc :/me is cool!", 'PRIVMSG /me is cool!';
+
   $t->send_ok(msg('/mode +o batman '));
   is ws(), 'abc-123 MODE +o batman', 'abc-123 MODE +o batman';
 

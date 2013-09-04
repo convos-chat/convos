@@ -97,6 +97,8 @@ sub reconnect {
   return;
 }
 
+=head2 say
+
 =head2 t
 
 =head2 topic
@@ -116,6 +118,7 @@ sub names { "NAMES " . ($_[1] || $_[2]->{target}) }
 sub nick { "NICK $_[1]" }
 sub oper { "OPER $_[1]" }
 sub part { "PART " . ($_[1] || $_[2]->{target}) }
+sub say { "PRIVMSG $_[2]->{target} :$_[1]" }
 sub topic { "TOPIC $_[2]->{target}" . ($_[1] ? " :$_[1]" : "") }
 sub whois { "WHOIS $_[1]" }
 
