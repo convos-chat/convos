@@ -94,7 +94,7 @@ if(window.webkitNotifications) {
     n.show();
     return n;
   };
-  window.Notification.permission = window.webkitNotifications.checkPermission() ? 'default' : 'granted';
+  window.Notification.permission = window.webkitNotifications.checkPermission() ? 'denied' : 'granted';
   window.Notification.requestPermission = function(cb) {
     cb = cb || function() {};
     window.webkitNotifications.requestPermission(function() {
