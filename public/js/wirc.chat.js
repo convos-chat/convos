@@ -62,13 +62,22 @@
       }
     }
     else if(this.hasClass('nick-change')) {
-      var re, txt, old = this.find('.old').text(), nick = this.find('.nick').text();
-      nicks.add(nicks.score(old), nick).rem(old);
-      if(old == $messages.data('nick')) {
-        re = new RegExp('\\b' + old + '\\b', 'i');
-        txt = $input.attr('placeholder').replace(re, nick);
+      var new_nick = this.find('.nick').text();
+      var old_nick = this.find('.old').text();
+      var old_score = nicks.score(old_nick);
+      var re, txt;
+
+      if(old_nick == $messages.data('nick')) {
+        re = new RegExp('\\b' + old_nick + '\\b', 'i');
+        txt = $input.attr('placeholder').replace(re, new_nick);
         $input.attr('placeholder', txt).attr('title', txt);
-        $messages.data('nick', nick);
+        $messages.data('nick', new_nick);
+      }
+      if(typeof old_score == 'undefined') {
+        nicks.add(old_score, new_nick).rem(old_nick);
+      }
+      else {
+        return; // do not want to show joined when in other channel
       }
     }
     else if(this.hasClass('nick-joined')) {
