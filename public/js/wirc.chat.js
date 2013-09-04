@@ -475,7 +475,7 @@
     $input.removeClass('sending').siblings('.menu').show();
 
     if($message.data('target') === 'any') {
-      $message.data('target', $messages.data('target')).data('host', $messages.data('host'));
+      $message.data('target', $messages.data('target'));
     }
     if($('body').attr('class').indexOf('-nick-list') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
@@ -483,8 +483,10 @@
     if($message.hasClass('highlight')) {
       var sender = $message.data('sender');
       var what = $message.data('target').indexOf('#') === 0 ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
+      var reload_notification_list_args = {};
       $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
-      if(!to_current) reloadNotificationList();
+      if($win.data('has_focus') && to_current) reload_notification_list_args.clear_notification = 0;
+      reloadNotificationList(reload_notification_list_args);
     }
 
     if($message.hasClass('remove-conversation')) {
@@ -517,9 +519,14 @@
   var reloadNotificationList = function(e) {
     var $notification_list = $('div.notifications.container');
     var $n_notifications = $('a.notifications.toggler');
+    var reload_notification_list_args = {};
     var n;
 
-    $.get($.url_for('notifications'), function(data) {
+    if(typeof e.clear_notification != 'undefined') {
+      reload_notification_list_args.notification = e.clear_notification;
+    }
+
+    $.get($.url_for('notifications'), reload_notification_list_args, function(data) {
       $notification_list.html(data);
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
       $n_notifications.children('b').text(n);
