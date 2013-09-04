@@ -475,7 +475,7 @@
     $input.removeClass('sending').siblings('.menu').show();
 
     if($message.data('target') === 'any') {
-      $message.data('target', $messages.data('target')).data('host', $messages.data('host'));
+      $message.data('target', $messages.data('target'));
     }
     if($('body').attr('class').indexOf('-nick-list') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
