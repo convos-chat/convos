@@ -41,7 +41,6 @@ $form = {};
 $t->post_ok('/settings/connection', form => $form)
   ->element_exists('div.host.error')
   ->element_exists('div.nick.error')
-  ->element_exists('div.channels.error', 'channels are required unless the redirect will fail later on')
   ->element_exists_not('div.avatar.error')
   ->element_exists('input[name="host"][value="irc.perl.org"]')
   ->element_exists('input[name="nick"][value]')

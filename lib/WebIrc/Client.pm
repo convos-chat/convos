@@ -67,7 +67,7 @@ sub view {
     });
   }
 
-  $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : $target ? 'without-nick-list' : 'settings');
+  $self->stash(body_class => ($target and $target =~ /^#/) ? 'with-nick-list' : 'without-nick-list');
   $self->stash(target => $target);
   $self->session(name => $target ? $name : '');
 

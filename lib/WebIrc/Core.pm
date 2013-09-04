@@ -152,7 +152,6 @@ sub add_connection {
   }
 
   @channels = $self->_parse_channels($conn->{channels});
-  @channels or $errors{channels} = "channels is required.";
   $key = join ':', "user:$login:connection:$conn->{host}";
   $conn->{channels} = join ' ', @channels;
   warn "[core:$login] add (", join(', ', %$conn), ")\n" if DEBUG;
