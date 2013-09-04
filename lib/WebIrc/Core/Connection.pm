@@ -137,14 +137,13 @@ has _irc => sub {
     }
   );
   $irc->on(
-    error=> sub {
+    error => sub {
       my $irc = shift;
       $self->{stop} and return;
       $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Connection to  @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
       $irc->ioloop->timer($self->_reconnect_in, sub { $self->_connect });
     }
   );
-
 
   for my $event (@ADD_MESSAGE_EVENTS) {
     $irc->on($event => sub { $self->add_message($_[1]) });
