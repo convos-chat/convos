@@ -81,7 +81,7 @@ sub view {
       return $self->route unless %$connection;
       $self->stash(%$connection);
       $self->redis->zadd("user:$login:conversations", time, $name) if $target;
-      $self->_modify_notification($self->param('notification'), read => 1) if defined $self->param('notification');
+      $self->_modify_notification($self->param('notification'), read => 1, sub {}) if defined $self->param('notification');
       $self->_conversation($delay->begin);
       $delay->begin->();
     },
@@ -219,9 +219,10 @@ sub notification_list {
     sub {
       my($delay) = @_;
       $self->redis->lrange($key, 0, 20, $delay->begin);
+      $self->_modify_notification($self->param('notification'), read => 1, $delay->begin) if defined $self->param('notification');
     },
     sub {
-      my($delay, $notification_list) = @_;
+      my($delay, $notification_list, $modified) = @_;
       my $n_notifications = 0;
       my %nick_seen = ();
       my $i = 0;
@@ -313,17 +314,21 @@ sub _conversation {
 }
 
 sub _modify_notification {
-  my($self, $id, $key, $value) = @_;
+  my($self, $id, $key, $value, $cb) = @_;
   my $login = $self->session('login');
   my $redis_key = "user:$login:notifications";
 
-  $self->redis->lindex($redis_key, $id, sub {
-    my $redis = shift;
-    my $notification = shift or return;
-    $notification = j $notification;
-    $notification->{$key} = $value;
-    $redis->lset($redis_key, $id, j $notification);
-  });
+  $self->redis->lindex(
+    $redis_key,
+    $id,
+    sub {
+      my $redis = shift;
+      my $notification = shift or return $redis->$cb(0);
+      $notification = j $notification;
+      $notification->{$key} = $value;
+      $redis->lset($redis_key, $id, j($notification), $cb);
+    }
+  );
 }
 
 =head1 COPYRIGHT

@@ -776,6 +776,10 @@ sub _publish {
   $self->redis->publish("wirc:user:$login:out", $message);
 
   if($data->{highlight}) {
+    # Ooops! This must be broken: We're clearing the notification by index in
+    # Client.pm, but the index we're clearing does not have to be the index in
+    # the list. The bug should appear if we use an old ?notification=42 link
+    # and in the meanwhile we have added more notifications..?
     $self->redis->lpush("user:$login:notifications", $message);
   }
 
