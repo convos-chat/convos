@@ -323,13 +323,11 @@
     initNotifications.asked = true;
     $ask_for_notifications.find('a.yes').off('click').click(function() {
       Notification.requestPermission(function() {});
-      $.post($.url_for('settings/profile'), { notifications: 1 });
       $ask_for_notifications.hide();
       return false;
     });
     $ask_for_notifications.find('a.no').off('click').click(function() {
       $ask_for_notifications.fadeOut('fast');
-      $.post($.url_for('settings/profile'), { notifications: 0 });
       return false;
     });
     $ask_for_notifications.show();
