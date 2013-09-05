@@ -22,7 +22,7 @@ Defaults to the first "yuicompressor" or "yui-compressor" file found in PATH.
 =cut
 
 use Mojo::Base 'Mojolicious::Command';
-use Mojo::Util qw/ slurp spurt /;
+use Mojo::Util 'slurp';
 use Mojo::DOM;
 
 unless($ENV{SASS_BIN} //= '') {
@@ -95,14 +95,21 @@ sub compile_javascript {
   $app->mode($mode);
   $output = Mojo::DOM->new($output);
 
+  open my $COMPILED, '>', "$compiled.new";
+
   $output->find('script')->each(sub {
     my $file = $app->home->rel_file("public" . $_[0]->{src});
-    $file = $self->_minify_javascript($file, $modified);
-    $app->log->debug("Compiling $file");
-    $js .= slurp $file;
+    my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
+
+    if($file ne $mini and $ENV{YUI_COMPRESSOR_BIN}) {
+      $app->log->info("Compiled $file to $mini");
+      system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini
+    }
+
+    print $COMPILED slurp $mini;
   });
 
-  spurt $js, $compiled;
+  rename "$compiled.new", $compiled or die "rename $compiled.new => $compiled $!";
   return $self;
 }
 
@@ -115,22 +122,12 @@ if it possible.
 
 sub compile_stylesheet {
   my $self = shift;
-  my $sass_file = $self->app->home->rel_file('public/sass/main.scss');
-  my $css_file = $self->app->home->rel_file('public/compiled.css');
+  my $file = $self->app->home->rel_file('public/sass/main.scss');
+  my $mini = $self->app->home->rel_file('public/compiled.css');
 
-  system $ENV{SASS_BIN} => $sass_file => $css_file => '--style', 'compressed' if $ENV{SASS_BIN};
+  $self->app->log->info("Compiled $file to $mini");
+  system $ENV{SASS_BIN} => $file => $mini => '--style', 'compressed' if $ENV{SASS_BIN};
   return $self;
-}
-
-sub _minify_javascript {
-  my($self, $file, $compiled_modified) = @_;
-  my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
-  my $modified = -e $mini ? (stat $mini)[9] : $compiled_modified;
-
-  return $file if $mini eq $file;
-  return $mini if -r $mini and $modified < $compiled_modified;
-  system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini if $ENV{YUI_COMPRESSOR_BIN};
-  return -e $mini ? $mini : $file;
 }
 
 =head1 AUTHOR
