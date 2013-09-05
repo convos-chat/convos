@@ -128,12 +128,9 @@
       $messages.end_time = parseFloat($messages.data('end-time') || 0);
       $win.scrollTo(0);
       getHistoricMessages();
-      reloadNotificationList();
     }
     else if($messages.length ) {
-      if(!$.supportsTouch) {
-        $input.focusSoon();
-      }
+      if(!$.supportsTouch) $input.focusSoon();
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
