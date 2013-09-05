@@ -24,6 +24,7 @@ window.sortedSet.prototype.revrange = function(start, stop) {
 
 // console.log()
 window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
+window.console._debug = function() { if(window.DEBUG) window.console.log.apply(window.console, arguments) };
 
 // add escape() with the *same* functionality as per's quotemeta()
 RegExp.escape = RegExp.escape || function(str) {

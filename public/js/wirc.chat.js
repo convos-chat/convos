@@ -23,6 +23,12 @@
     '/list'
   ];
 
+  window.wirc = {
+    conversation_list: conversation_list,
+    messages: $messages,
+    nicks: nicks
+  };
+
   $.fn.attachEventsToMessage = function() {
     this.find('h3 a').each(function() {
       this.href = '#';
@@ -68,6 +74,8 @@
       var old_score = nicks.score(old_nick);
       var re, txt;
 
+      console._debug('new_nick=' + new_nick + ', old_nick=' + old_nick + ', old_score=' + old_score);
+
       if(old_nick == $messages.data('nick')) {
         re = new RegExp('\\b' + old_nick + '\\b', 'i');
         txt = $input.attr('placeholder').replace(re, new_nick);
@@ -75,10 +83,10 @@
         $messages.data('nick', new_nick);
       }
       if(typeof old_score == 'undefined') {
-        nicks.add(old_score, new_nick).rem(old_nick);
+        return; // do not want to show joined when in other channel
       }
       else {
-        return; // do not want to show joined when in other channel
+        nicks.add(old_score, new_nick).rem(old_nick);
       }
     }
     else if(this.hasClass('nick-joined')) {
