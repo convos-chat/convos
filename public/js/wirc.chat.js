@@ -526,7 +526,7 @@
   };
 
   var reloadNotificationList = function(e) {
-    var $notification_list = $('div.notifications.container');
+    var $notification_list = $('div.notifications.container ul').parent();
     var $n_notifications = $('a.notifications.toggler');
     var reload_notification_list_args = {};
     var n;
