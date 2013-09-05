@@ -124,7 +124,6 @@ sub compile_stylesheet {
   my $css_file = $self->app->home->rel_file('public/compiled.css');
 
   system $ENV{SASS_BIN} => $sass_file => $css_file => '--style', 'compressed' if $ENV{SASS_BIN};
-  system $ENV{YUI_COMPRESSOR_BIN} => $css_file => -o => $css_file if $ENV{YUI_COMPRESSOR_BIN};
   return $self;
 }
 
