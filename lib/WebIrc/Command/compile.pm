@@ -22,6 +22,7 @@ Defaults to the first "yuicompressor" or "yui-compressor" file found in PATH.
 =cut
 
 use Mojo::Base 'Mojolicious::Command';
+use Mojo::Util qw/ slurp spurt /;
 use Mojo::DOM;
 
 unless($ENV{SASS_BIN} //= '') {
@@ -98,23 +99,17 @@ sub compile_javascript {
     my $file = $app->home->rel_file("public" . $_[0]->{src});
     $file = $self->_minify_javascript($file, $modified);
     $app->log->debug("Compiling $file");
-    open my $JS, '<', $file or die "Read $file: $!";
-    while(<$JS>) {
-      m!^\s*//! and next;
-      m!^\s*(.+)! or next;
-      $js .= "$1\n";
-    }
+    $js .= slurp $file;
   });
 
-  open my $COMPILED, '>', $compiled or die "Write $compiled: $!";
-  print $COMPILED $js;
+  spurt $js, $compiled;
   return $self;
 }
 
 =head2 compile_stylesheet
 
-Creates "public/compiled.css" from "public/sass/main.scss", using
-L</SASS_BIN> and L</YUI_COMPRESSOR_BIN> if they exists
+Creates "public/compiled.css" from "public/sass/main.scss", using L</SASS_BIN>
+if it possible.
 
 =cut
 
@@ -130,7 +125,7 @@ sub compile_stylesheet {
 sub _minify_javascript {
   my($self, $file, $compiled_modified) = @_;
   my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
-  my $modified = +(stat $file)[9];
+  my $modified = -e $mini ? (stat $mini)[9] : $compiled_modified;
 
   return $file if $mini eq $file;
   return $mini if -r $mini and $modified < $compiled_modified;
