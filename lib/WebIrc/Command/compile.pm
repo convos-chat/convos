@@ -102,7 +102,7 @@ sub compile_javascript {
     my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
 
     if($file ne $mini and $ENV{YUI_COMPRESSOR_BIN}) {
-      $app->log->info("Compiled $file to $mini");
+      $app->log->info("$ENV{YUI_COMPRESSOR_BIN} $file -o $mini");
       system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini
     }
 
@@ -125,7 +125,8 @@ sub compile_stylesheet {
   my $file = $self->app->home->rel_file('public/sass/main.scss');
   my $mini = $self->app->home->rel_file('public/compiled.css');
 
-  $self->app->log->info("Compiled $file to $mini");
+  return $self if $ENV{SASS_BIN};
+  $self->app->log->info("$ENV{SASS_BIN} $file $mini --style compressed");
   system $ENV{SASS_BIN} => $file => $mini => '--style', 'compressed' if $ENV{SASS_BIN};
   return $self;
 }
