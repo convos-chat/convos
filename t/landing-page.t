@@ -42,9 +42,7 @@ for my $p ('/', '/register') {
     ->element_exists('a.button.focus.active[data-toggle="div.register"]', 'with register form in focus')
     ->element_exists('a.button[data-toggle="div.login"]')
     ->text_is('.register button[type="submit"]', 'Register')
-    ->element_exists('div.error.login')
-    ->element_exists('div.error.email')
-    ->element_exists('div.error.password')
+    ->element_exists('div.error:nth-of-type(2)')
     ;
 }
 

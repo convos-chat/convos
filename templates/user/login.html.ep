@@ -5,6 +5,9 @@
     %= form_block login => class => [], begin
       <label for="login">Username</label>
       %= text_field 'login', id => 'login', autocapitalize => 'off', autocorrect => 'off'
+      % if($errors->{login}) {
+      <p class="help"><%= $errors->{login} %></p>
+      % }
     % end
     %= form_block password => class => [], begin
       <label for="password">Password</label>
