@@ -57,7 +57,7 @@ sub socket {
   );
   $self->on(
     finish => sub {
-      my $self = shift;
+      my $self = shift or return;
       Mojo::IOLoop->remove($tid);
       delete $self->stash->{$_} for qw/ sub redis /;
     }
