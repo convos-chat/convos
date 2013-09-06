@@ -95,6 +95,11 @@ sub compile_javascript {
   $app->mode($mode);
   $output = Mojo::DOM->new($output);
 
+  unless($ENV{YUI_COMPRESSOR_BIN}) {
+    $app->log->warn('YUI_COMPRESSOR_BIN is missing');
+    return $self;
+  }
+
   open my $COMPILED, '>', "$compiled.new";
 
   $output->find('script')->each(sub {
@@ -125,7 +130,11 @@ sub compile_stylesheet {
   my $file = $self->app->home->rel_file('public/sass/main.scss');
   my $mini = $self->app->home->rel_file('public/compiled.css');
 
-  return $self unless $ENV{SASS_BIN};
+  unless($ENV{SASS_BIN}) {
+    $self->app->log->warn('SASS_BIN is missing');
+    return $self;
+  }
+
   $self->app->log->info("$ENV{SASS_BIN} $file $mini --style compressed");
   system $ENV{SASS_BIN} => $file => $mini => '--style', 'compressed' if $ENV{SASS_BIN};
   return $self;
