@@ -528,7 +528,7 @@
       if(goto_current) $('ul.conversations li.first a').click();
       conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
       drawConversationMenu();
-    }).fail(function() { console.log('Failed to get conversations') });
+    });
   };
 
   var reloadNotificationList = function(e) {
@@ -546,7 +546,7 @@
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
       $n_notifications.children('b').text(n);
       $n_notifications[n ? 'addClass' : 'removeClass']('alert');
-    }).fail(function() { console.log("Failed to get notifications"); });
+    });
   };
 
   $(document).ready(function() {
@@ -554,6 +554,13 @@
     $input = $('footer form input[name="message"]');
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
+
+    $.ajaxSetup({
+      cache: false,
+      error: function(jqXHR, exception) {
+        console.log('ajax: ' + this.url + ' failed: ' + exception);
+      }
+    });
 
     if(running_on_ios) {
       $('input, textarea').on('click', function() {
