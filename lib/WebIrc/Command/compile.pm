@@ -125,7 +125,7 @@ sub compile_stylesheet {
   my $file = $self->app->home->rel_file('public/sass/main.scss');
   my $mini = $self->app->home->rel_file('public/compiled.css');
 
-  return $self if $ENV{SASS_BIN};
+  return $self unless $ENV{SASS_BIN};
   $self->app->log->info("$ENV{SASS_BIN} $file $mini --style compressed");
   system $ENV{SASS_BIN} => $file => $mini => '--style', 'compressed' if $ENV{SASS_BIN};
   return $self;
