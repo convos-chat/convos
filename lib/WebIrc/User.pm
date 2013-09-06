@@ -7,7 +7,7 @@ WebIrc::User - Mojolicious controller for user data
 =cut
 
 use Mojo::Base 'WebIrc::Client';
-use WebIrc::Core::Util qw/ as_id /;
+use WebIrc::Core::Util qw/ as_id id_as /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 =head1 METHODS
@@ -217,19 +217,21 @@ sub settings {
 
       return $self->$cb() unless @$hosts;
       return $self->redis->execute(
+        [zrange => "user:$login:conversations", 0, -1],
         (map { [hgetall => "user:$login:connection:$_"] } @$hosts),
         $cb,
       );
     },
     sub {
-      my($delay, @connections) = @_;
+      my($delay, $channels, @connections) = @_;
 
+      @$channels = grep { /^#/ } map { (id_as $_)[1] } @$channels;
       $self->logf(debug => '[settings] connection data %s', \@connections) if DEBUG;
 
       for my $conn (@connections) {
         $conn->{event} = 'connection';
         $conn->{lookup} = $conn->{server} || $conn->{host};
-        $conn->{channels} = [ split ' ', $conn->{channels} ];
+        $conn->{channels} = $channels;
         $conn->{server} ||= $conn->{host}; # back compat
         push @conversation, $conn;
       }
@@ -294,7 +296,7 @@ sub add_connection {
         {
           server     => $self->param('server') || '',
           nick     => $self->param('nick') || '',
-          channels => join(' ', $self->param('channels')),
+          channels => [$self->param('channels')],
           tls      => $self->param('tls') || 0,
           user     => $login,
         },
@@ -328,7 +330,7 @@ sub edit_connection {
           server     => $self->req->body_params->param('server') || '',
           lookup   => $self->stash('server') || '',
           nick     => $self->param('nick') || '',
-          channels => join(' ', $self->param('channels')),
+          channels => [$self->param('channels')],
           tls      => $self->param('tls') || 0,
           user     => $self->session('login'),
         },

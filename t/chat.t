@@ -189,10 +189,6 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nick-joined[data-server="wirc.pl"][data-target="#mojo"]'), 'user joined';
   is $dom->at('div.content')->all_text, 'fooman joined #mojo', 'fooman joined #mojo';
-
-  $connection->irc_join({ params => [ '#mojo' ], prefix => 'doe!user@host' });
-  $dom->parse($t->message_ok->message->[1]);
-  is $dom->at('li.server-message.notice[data-server="wirc.pl"][data-target="any"] .content')->text, 'You joined #mojo', 'self joined';
 }
 
 {
@@ -235,10 +231,6 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.error[data-target="any"]'), 'invalid join';
   is $dom->at('div.content')->all_text, 'Do not understand which channel to join', 'do not understand which channel to join';
-
-  $connection->cmd_join({ params => ['#perl'] });
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-server="wirc.pl"][data-target="#perl"]'), 'joined';
 }
 
 {
