@@ -6,15 +6,15 @@
   % if($self->app->mode eq 'production') {
     %= javascript "/compiled.js?_=$VERSION"
   % } else {
-    %= javascript '/js/globals.js'
-    %= javascript '/js/ws-reconnecting.js'
     %= javascript '/minified/jquery.js'
     %= javascript '/minified/jquery.hotkeys.js'
     %= javascript '/minified/jquery.fastbutton.js'
-    %= javascript '/js/jquery.doubletap.js'
     %= javascript '/minified/jquery.nanoscroller.js'
     %= javascript '/minified/jquery.pjax.js'
     %= javascript '/minified/selectize.min.js'
+    %= javascript '/js/globals.js'
+    %= javascript '/js/jquery.doubletap.js'
+    %= javascript '/js/ws-reconnecting.js'
     %= javascript '/js/jquery.wirc.js'
     %= javascript '/js/wirc.chat.js'
   % }

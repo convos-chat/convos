@@ -82,40 +82,34 @@ Will also minify that file using L</YUI_COMPRESSOR_BIN> if it exists.
 
 sub compile_javascript {
   my $self = shift;
-  my $app = $self->app;
   my $args = { template => 'empty', layout => 'default', title => '', VERSION => 0 };
-  my $compiled = $app->home->rel_file('public/compiled.js');
-  my $modified = +(stat $compiled)[9] || 0;
+  my $app = $self->app;
+  my $mini = $app->home->rel_file('public/compiled.js');
   my $mode = $app->mode;
-  my $js = '';
-  my($output, $format);
+  my $output;
 
   $app->mode('compiling');
-  ($output, $format) = $app->renderer->render(Mojolicious::Controller->new(app => $app), $args);
+  ($output) = $app->renderer->render(Mojolicious::Controller->new(app => $app), $args);
   $app->mode($mode);
   $output = Mojo::DOM->new($output);
 
   unless($ENV{YUI_COMPRESSOR_BIN}) {
-    $app->log->warn('YUI_COMPRESSOR_BIN is missing');
+    $app->log->warn("YUI_COMPRESSOR_BIN is missing, cannot create $mini");
     return $self;
   }
 
-  open my $COMPILED, '>', "$compiled.new";
-
+  open my $COMPILED, '>', $mini;
   $output->find('script')->each(sub {
-    my $file = $app->home->rel_file("public" . $_[0]->{src});
-    my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
-
-    if($file ne $mini and $ENV{YUI_COMPRESSOR_BIN}) {
-      $app->log->info("$ENV{YUI_COMPRESSOR_BIN} $file -o $mini");
-      system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini
-    }
-
-    print $COMPILED slurp $mini;
+    my $file = $app->home->rel_file("public$_[0]->{src}");
+    return print $COMPILED slurp $file if $file =~ m!/minified/!;
+    $app->log->info("$ENV{YUI_COMPRESSOR_BIN} $file -o tmp.js");
+    system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => "tmp.js";
+    print $COMPILED slurp "tmp.js";
   });
+  unlink 'tmp.js';
+  close $COMPILED;
 
-  rename "$compiled.new", $compiled or die "rename $compiled.new => $compiled $!";
-  return $self;
+  $self;
 }
 
 =head2 compile_stylesheet
@@ -131,7 +125,7 @@ sub compile_stylesheet {
   my $mini = $self->app->home->rel_file('public/compiled.css');
 
   unless($ENV{SASS_BIN}) {
-    $self->app->log->warn('SASS_BIN is missing');
+    $self->app->log->warn("SASS_BIN is missing, cannot create $mini");
     return $self;
   }
 
