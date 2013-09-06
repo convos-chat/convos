@@ -253,7 +253,12 @@ sub _update_connection {
 
       delete $found->{$_} for qw/ server host /; # want these values
       $conn->{$_} ~~ $found->{$_} and delete $conn->{$_} for keys %$found;
-      $existing_channels = { map { $_, 1 } grep { /^#/ } map { (id_as $_)[1] } @$existing_channels };
+      $existing_channels = {
+        map { $_, 1 }
+        grep { $_->[0] eq $conn->{server} and $_->[1] =~ /^#/ }
+        map { [id_as $_] }
+        @$existing_channels
+      };
 
       if(%$conn) {
         $self->redis->hmset("user:$login:connection:$conn->{server}", %$conn, $delay->begin)

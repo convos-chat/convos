@@ -394,7 +394,7 @@ sub irc_rpl_welcome {
 
     for(@$conversations) {
       my($server, $channel) = id_as $_;
-      $self->_irc->write(JOIN => $channel) if $channel =~ /^#/;
+      $self->_irc->write(JOIN => $channel) if $channel =~ /^#/ and $server eq $self->server;
     }
   });
 }
