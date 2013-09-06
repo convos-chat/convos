@@ -77,6 +77,7 @@ use WebIrc::Core;
 use WebIrc::Core::Util ();
 
 our $VERSION = '0.01';
+$ENV{WIRC_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
 
@@ -156,6 +157,8 @@ sub startup {
       $c->stash(errors => {});    # this need to be set up each time, since it's a ref
     }
   );
+
+  $self->log->info("mode=@{[$self->mode]}, WIRC_BACKEND_REV=$ENV{WIRC_BACKEND_REV}");
 
   # since the xxx_mode() methods will be deprecated
   if($self->mode =~ /^prod/) {
