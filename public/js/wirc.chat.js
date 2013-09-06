@@ -304,7 +304,7 @@
       return false;
     };
 
-    $.get($.url_for('command-history'), function(data) {
+    $.get($.url_for('command-history'), noCache({}), function(data) {
       $input.history = data;
       $input.history_i = $input.history.length;
     });
@@ -471,6 +471,11 @@
       ;
   }
 
+  var noCache = function(args) {
+    args._ts = new Date().getTime();
+    return args;
+  };
+
   var receiveMessage = function(e) {
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
@@ -522,7 +527,7 @@
 
   var reloadConversationList = function(e) {
     var goto_current = e.goto_current;
-    $.get($.url_for('conversations'), function(data) {
+    $.get($.url_for('conversations'), noCache({}), function(data) {
       $('ul.conversations').replaceWith(data);
       $('div.conversations.container ul').html('');
       if(goto_current) $('ul.conversations li.first a').click();
@@ -541,7 +546,7 @@
       reload_notification_list_args.notification = e.clear_notification;
     }
 
-    $.get($.url_for('notifications'), reload_notification_list_args, function(data) {
+    $.get($.url_for('notifications'), noCache(reload_notification_list_args), function(data) {
       $notification_list.html(data);
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
       $n_notifications.children('b').text(n);
@@ -556,7 +561,6 @@
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
     $.ajaxSetup({
-      cache: false,
       error: function(jqXHR, exception) {
         console.log('ajax: ' + this.url + ' failed: ' + exception);
       }
