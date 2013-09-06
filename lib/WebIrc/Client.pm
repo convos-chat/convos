@@ -34,8 +34,8 @@ sub route {
       my($delay, $names) = @_;
 
       if($names and $names->[0]) {
-        if(my($host, $target) = id_as $names->[0]) {
-          return $self->redirect_to('view', host => $host, target => $target);
+        if(my($server, $target) = id_as $names->[0]) {
+          return $self->redirect_to('view', server => $server, target => $target);
         }
       }
 
@@ -54,9 +54,9 @@ sub view {
   my $self = shift->render_later;
   my $prev_name = $self->session('name') || '';
   my $login = $self->session('login');
-  my $host = $self->stash('host');
+  my $server = $self->stash('server');
   my $target = $self->stash('target') || '';
-  my $name = as_id $host, $target;
+  my $name = as_id $server, $target;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
 
   if($prev_name and $name ne $prev_name) {
@@ -67,18 +67,19 @@ sub view {
     });
   }
 
-  $self->stash(body_class => $target =~ /^#/ ? 'with-nick-list' : $target ? 'without-nick-list' : 'settings');
+  $self->stash(body_class => ($target and $target =~ /^#/) ? 'with-nick-list' : 'without-nick-list');
   $self->stash(target => $target);
   $self->session(name => $target ? $name : '');
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->hgetall("user:$login:connection:$host", $delay->begin);
+      $self->redis->hgetall("user:$login:connection:$server", $delay->begin);
     },
     sub {
       my($delay, $connection) = @_;
       return $self->route unless %$connection;
+      delete $connection->{server};
       $self->stash(%$connection);
       $self->redis->zadd("user:$login:conversations", time, $name) if $target;
       $self->_modify_notification($self->param('notification'), read => 1, sub {}) if defined $self->param('notification');
@@ -140,17 +141,17 @@ sub conversation_list {
       while($i < @$conversation_list) {
         my $name = $conversation_list->[$i];
         my $timestamp = splice @$conversation_list, ($i + 1), 1;
-        my($host, $target) = id_as $name;
+        my($server, $target) = id_as $name;
 
         $target ||= '';
         $conversation_list->[$i] = {
-          host => $host,
+          server => $server,
           is_channel => $target =~ /^#/ ? 1 : 0,
           target => $target,
           timestamp => $timestamp,
         };
 
-        $self->redis->zcount("user:$login:connection:$host:$target:msg", $timestamp, '+inf', $delay->begin);
+        $self->redis->zcount("user:$login:connection:$server:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;
       }
 
@@ -269,9 +270,9 @@ sub notification_list {
 sub _conversation {
   my($self, $cb) = @_;
   my $login = $self->session('login');
-  my $host = $self->stash('host');
+  my $server = $self->stash('server');
   my $target = $self->stash('target');
-  my $key = $target ? "user:$login:connection:$host:$target:msg" : "user:$login:connection:$host:msg";
+  my $key = $target ? "user:$login:connection:$server:$target:msg" : "user:$login:connection:$server:msg";
 
   if(my $to = $self->param('to')) { # to a timestamp
     $self->redis->zrevrangebyscore($key => $to, '-inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES, sub {

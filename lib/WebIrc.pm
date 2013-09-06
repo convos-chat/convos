@@ -4,6 +4,10 @@ package WebIrc;
 
 WebIrc - IRC client on web
 
+=head1 VERSION
+
+0.01
+
 =head1 SYNOPSIS
 
 =head2 Production
@@ -67,9 +71,13 @@ Backend functionality.
 =cut
 
 use Mojo::Base 'Mojolicious';
+use Mojo::Redis;
 use File::Spec::Functions qw(catfile tmpdir);
 use WebIrc::Core;
-use Mojo::Redis;
+use WebIrc::Core::Util ();
+
+our $VERSION = '0.01';
+$ENV{WIRC_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
 
@@ -111,6 +119,7 @@ sub startup {
   $config->{name} ||= 'Wirc';
   $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
   $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
+  $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
 
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
@@ -126,7 +135,7 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#host', [ host => qr{(?:\w+\.|localhost)[^/]+} ]);
+  my $host_r = $private_r->any('/#server', [ server => $WebIrc::Core::Util::SERVER_NAME_RE ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
@@ -150,6 +159,16 @@ sub startup {
     }
   );
 
+  $self->log->info("mode=@{[$self->mode]}, WIRC_BACKEND_REV=$ENV{WIRC_BACKEND_REV}");
+
+  # since the xxx_mode() methods will be deprecated
+  if($self->mode =~ /^prod/) {
+    $self->_production_mode;
+  }
+  elsif($self->mode =~ /^dev/) {
+    $self->_development_mode;
+  }
+
   if($config->{backend}{embedded}) {
     Mojo::IOLoop->timer(0, sub {
       $self->core->start;
@@ -157,14 +176,7 @@ sub startup {
   }
 }
 
-=head2 production_mode
-
-This method will run L<WebIrc::Command::compile/compile_javascript> and
-L<WebIrc::Command::compile/compile_stylesheet>.
-
-=cut
-
-sub production_mode {
+sub _production_mode {
   my $self = shift;
 
   unless($ENV{WIRC_BACKEND_REV}) {
@@ -173,16 +185,7 @@ sub production_mode {
   }
 }
 
-=head2 development_mode
-
-This will run L<WebIrc::Command::compile/compile_stylesheet> unless
-L<Test::Mojo> is loaded. This allow you to start morbo like this:
-
-  $ morbo script/web_irc -w public/sass -w lib
-
-=cut
-
-sub development_mode {
+sub _development_mode {
   my $self = shift;
 
   # ugly hack to prevent this from running when running unit tests

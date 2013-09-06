@@ -11,6 +11,7 @@
     '/query ',
     '/msg ',
     '/me ',
+    '/say ',
     '/nick ',
     '/close',
     '/part ',
@@ -21,6 +22,12 @@
     '/whois ',
     '/list'
   ];
+
+  window.wirc = {
+    conversation_list: conversation_list,
+    messages: $messages,
+    nicks: nicks
+  };
 
   $.fn.attachEventsToMessage = function() {
     this.find('h3 a').each(function() {
@@ -62,13 +69,25 @@
       }
     }
     else if(this.hasClass('nick-change')) {
-      var re, txt, old = this.find('.old').text(), nick = this.find('.nick').text();
-      nicks.add(nicks.score(old), nick).rem(old);
-      if(old == $messages.data('nick')) {
-        re = new RegExp('\\b' + old + '\\b', 'i');
-        txt = $input.attr('placeholder').replace(re, nick);
+      var new_nick = this.find('.nick').text();
+      var old_nick = this.find('.old').text();
+      var old_score = nicks.score(old_nick);
+      var re, txt;
+
+      console.log('new_nick=' + new_nick + ', old_nick=' + old_nick + ', old_score=' + old_score);
+
+      if(old_nick == $messages.data('nick')) {
+        re = new RegExp('\\b' + old_nick + '\\b', 'i');
+        txt = $input.attr('placeholder').replace(re, new_nick);
         $input.attr('placeholder', txt).attr('title', txt);
-        $messages.data('nick', nick);
+        $messages.data('nick', new_nick);
+      }
+      if(typeof old_score == 'undefined') {
+        return; // do not want to show joined when in other channel
+      }
+      else {
+        nicks.add(old_score, new_nick).rem(old_nick);
+        nickList($('<div/>'));
       }
     }
     else if(this.hasClass('nick-joined')) {
@@ -93,11 +112,11 @@
   $.fn.hostAndTarget = function($from) {
     if($from) {
       return this
-        .attr('data-host', $from.data('host')).attr('data-target', $from.data('target'))
-        .data('host', $from.data('host')).data('target', $from.data('target'))
+        .attr('data-server', $from.data('server')).attr('data-target', $from.data('target'))
+        .data('server', $from.data('server')).data('target', $from.data('target'))
     }
     else {
-      return { host: this.data('host'), target: this.data('target') };
+      return { server: this.data('server'), target: this.data('target') };
     }
   };
 
@@ -118,12 +137,9 @@
       $messages.end_time = parseFloat($messages.data('end-time') || 0);
       $win.scrollTo(0);
       getHistoricMessages();
-      reloadNotificationList();
     }
     else if($messages.length ) {
-      if(!$.supportsTouch) {
-        $input.focusSoon();
-      }
+      if(!$.supportsTouch) $input.focusSoon();
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
@@ -152,7 +168,7 @@
     var used_width = 0, unread, $a;
 
     if($message) {
-      $a = $conversations.find('a[href="' + $.url_for($message.data('host'), $message.data('target')) + '"]');
+      $a = $conversations.find('a[href="' + $.url_for($message.data('server'), $message.data('target')) + '"]');
       unread = parseInt($a.attr('data-unread')) + 1;
       $a.attr('data-unread', unread).attr('title', unread + " unread messages in " + $message.data('target'));
       $a.closest('li').addClass('unread');
@@ -288,7 +304,7 @@
       return false;
     };
 
-    $.get($.url_for('command-history'), function(data) {
+    $.get($.url_for('command-history'), noCache({}), function(data) {
       $input.history = data;
       $input.history_i = $input.history.length;
     });
@@ -323,13 +339,11 @@
     initNotifications.asked = true;
     $ask_for_notifications.find('a.yes').off('click').click(function() {
       Notification.requestPermission(function() {});
-      $.post($.url_for('settings/profile'), { notifications: 1 });
       $ask_for_notifications.hide();
       return false;
     });
     $ask_for_notifications.find('a.no').off('click').click(function() {
       $ask_for_notifications.fadeOut('fast');
-      $.post($.url_for('settings/profile'), { notifications: 0 });
       return false;
     });
     $ask_for_notifications.show();
@@ -421,7 +435,7 @@
 
   var nickList = function($data) {
     var $nicks = $data.find('[data-nick]');
-    var host = $messages.data('host');
+    var server = $messages.data('server');
     var senders = {};
 
     if($nicks.length) {
@@ -439,7 +453,7 @@
     if(nicks.length) {
       $('div.nicks.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(host, n) + '">' + n + '</a></li>';
+          return '<li><a href="' + $.url_for(server, n) + '">' + n + '</a></li>';
         }).join('')
       );
       $('div.nicks.container').nanoScroller(); // reset scrollbar;
@@ -456,6 +470,11 @@
       .prepend('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">&times;</button></span>')
       ;
   }
+
+  var noCache = function(args) {
+    args._ts = new Date().getTime();
+    return args;
+  };
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
@@ -476,6 +495,7 @@
 
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target'));
+      if(!$message.data('server')) $message.data('server', $messages.data('server'));
     }
     if($('body').attr('class').indexOf('-nick-list') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
@@ -507,17 +527,17 @@
 
   var reloadConversationList = function(e) {
     var goto_current = e.goto_current;
-    $.get($.url_for('conversations'), function(data) {
+    $.get($.url_for('conversations'), noCache({}), function(data) {
       $('ul.conversations').replaceWith(data);
       $('div.conversations.container ul').html('');
       if(goto_current) $('ul.conversations li.first a').click();
       conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
       drawConversationMenu();
-    }).fail(function() { console.log('Failed to get conversations') });
+    });
   };
 
   var reloadNotificationList = function(e) {
-    var $notification_list = $('div.notifications.container');
+    var $notification_list = $('div.notifications.container ul').parent();
     var $n_notifications = $('a.notifications.toggler');
     var reload_notification_list_args = {};
     var n;
@@ -526,12 +546,12 @@
       reload_notification_list_args.notification = e.clear_notification;
     }
 
-    $.get($.url_for('notifications'), reload_notification_list_args, function(data) {
+    $.get($.url_for('notifications'), noCache(reload_notification_list_args), function(data) {
       $notification_list.html(data);
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
       $n_notifications.children('b').text(n);
       $n_notifications[n ? 'addClass' : 'removeClass']('alert');
-    }).fail(function() { console.log("Failed to get notifications"); });
+    });
   };
 
   $(document).ready(function() {
@@ -539,6 +559,12 @@
     $input = $('footer form input[name="message"]');
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
+
+    $.ajaxSetup({
+      error: function(jqXHR, exception) {
+        console.log('ajax: ' + this.url + ' failed: ' + exception);
+      }
+    });
 
     if(running_on_ios) {
       $('input, textarea').on('click', function() {

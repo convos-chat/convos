@@ -17,11 +17,12 @@ Defaults to the first "sass" file found in PATH.
 
 =head2 YUI_COMPRESSOR_BIN
 
-Defaults to the first "yui-compressor" file found in PATH.
+Defaults to the first "yuicompressor" or "yui-compressor" file found in PATH.
 
 =cut
 
 use Mojo::Base 'Mojolicious::Command';
+use Mojo::Util 'slurp';
 use Mojo::DOM;
 
 unless($ENV{SASS_BIN} //= '') {
@@ -34,9 +35,9 @@ unless($ENV{SASS_BIN} //= '') {
 
 unless($ENV{YUI_COMPRESSOR_BIN} //= '') {
   for(split /:/, $ENV{PATH} || '') {
-    next unless -e "$_/yui-compressor"; # -e because it might be a symlink
-    $ENV{YUI_COMPRESSOR_BIN} = "$_/yui-compressor";
-    last;
+    # -e because it might be a symlink
+    $ENV{YUI_COMPRESSOR_BIN} = "$_/yuicompressor", last if -e "$_/yuicompressor"; # installed from npm
+    $ENV{YUI_COMPRESSOR_BIN} = "$_/yui-compressor", last if -e "$_/yui-compressor";
   }
 }
 
@@ -81,62 +82,56 @@ Will also minify that file using L</YUI_COMPRESSOR_BIN> if it exists.
 
 sub compile_javascript {
   my $self = shift;
-  my $app = $self->app;
   my $args = { template => 'empty', layout => 'default', title => '', VERSION => 0 };
-  my $compiled = $app->home->rel_file('public/compiled.js');
-  my $modified = +(stat $compiled)[9] || 0;
+  my $app = $self->app;
+  my $mini = $app->home->rel_file('public/compiled.js');
   my $mode = $app->mode;
-  my $js = '';
-  my($output, $format);
+  my $output;
 
   $app->mode('compiling');
-  ($output, $format) = $app->renderer->render(Mojolicious::Controller->new(app => $app), $args);
+  ($output) = $app->renderer->render(Mojolicious::Controller->new(app => $app), $args);
   $app->mode($mode);
   $output = Mojo::DOM->new($output);
 
-  $output->find('script')->each(sub {
-    my $file = $app->home->rel_file("public" . $_[0]->{src});
-    $file = $self->_minify_javascript($file, $modified);
-    $app->log->debug("Compiling $file");
-    open my $JS, '<', $file or die "Read $file: $!";
-    while(<$JS>) {
-      m!^\s*//! and next;
-      m!^\s*(.+)! or next;
-      $js .= "$1\n";
-    }
-  });
+  unless($ENV{YUI_COMPRESSOR_BIN}) {
+    $app->log->warn("YUI_COMPRESSOR_BIN is missing, cannot create $mini");
+    return $self;
+  }
 
-  open my $COMPILED, '>', $compiled or die "Write $compiled: $!";
-  print $COMPILED $js;
-  return $self;
+  open my $COMPILED, '>', $mini;
+  $output->find('script')->each(sub {
+    my $file = $app->home->rel_file("public$_[0]->{src}");
+    return print $COMPILED slurp $file if $file =~ m!/minified/!;
+    $app->log->info("$ENV{YUI_COMPRESSOR_BIN} $file -o tmp.js");
+    system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => "tmp.js";
+    print $COMPILED slurp "tmp.js";
+  });
+  unlink 'tmp.js';
+  close $COMPILED;
+
+  $self;
 }
 
 =head2 compile_stylesheet
 
-Creates "public/compiled.css" from "public/sass/main.scss", using
-L</SASS_BIN> and L</YUI_COMPRESSOR_BIN> if they exists
+Creates "public/compiled.css" from "public/sass/main.scss", using L</SASS_BIN>
+if it possible.
 
 =cut
 
 sub compile_stylesheet {
   my $self = shift;
-  my $sass_file = $self->app->home->rel_file('public/sass/main.scss');
-  my $css_file = $self->app->home->rel_file('public/compiled.css');
+  my $file = $self->app->home->rel_file('public/sass/main.scss');
+  my $mini = $self->app->home->rel_file('public/compiled.css');
 
-  system $ENV{SASS_BIN} => $sass_file => $css_file => '--style', 'compressed' if $ENV{SASS_BIN};
-  system $ENV{YUI_COMPRESSOR_BIN} => $css_file => -o => $css_file if $ENV{YUI_COMPRESSOR_BIN};
+  unless($ENV{SASS_BIN}) {
+    $self->app->log->warn("SASS_BIN is missing, cannot create $mini");
+    return $self;
+  }
+
+  $self->app->log->info("$ENV{SASS_BIN} $file $mini --style compressed");
+  system $ENV{SASS_BIN} => $file => $mini => '--style', 'compressed' if $ENV{SASS_BIN};
   return $self;
-}
-
-sub _minify_javascript {
-  my($self, $file, $compiled_modified) = @_;
-  my $mini = $file =~ s!/js/!/minified/!r; # ! st2 hack
-  my $modified = +(stat $file)[9];
-
-  return $file if $mini eq $file;
-  return $mini if -r $mini and $modified < $compiled_modified;
-  system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => $mini if $ENV{YUI_COMPRESSOR_BIN};
-  return -e $mini ? $mini : $file;
 }
 
 =head1 AUTHOR

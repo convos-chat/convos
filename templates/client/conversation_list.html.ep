@@ -5,7 +5,7 @@
 % my $i = 0;
 % for my $c (@$conversation_list) {
   % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target}" : "View conversation with $c->{target}";
-  % my $text = $c->{host} ? $c->{target} : ucfirst $c->{target};
+  % my $text = $c->{server} ? $c->{target} : ucfirst $c->{target};
   % my @class;
   % push @class, 'unread' if $c->{unread};
   % push @class, 'first' if $i == 0;

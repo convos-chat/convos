@@ -27,7 +27,7 @@ sub close {
     return "PART $target"
   }
   else {
-    $id = as_id $dom->{host}, $target;
+    $id = as_id $dom->{server}, $target;
     $self->redis->zrem("user:$login:conversations", $id, sub {
       $self->send_partial('event/remove_conversation', %$dom, target => $target);
     });
@@ -72,7 +72,7 @@ sub help {
 sub query {
   my($self, $target, $dom) = @_;
   my $login = $self->session('login');
-  my $id = as_id $dom->{host}, $target;
+  my $id = as_id $dom->{server}, $target;
 
   if($target =~ /^#?[\w_-]+$/) {
     $self->redis->zadd("user:$login:conversations", time, $id, sub {
@@ -81,7 +81,7 @@ sub query {
   }
   else {
     $target ||= 'Missing';
-    $self->send_partial('event/server_message', %$dom, status => 400, message => "Invalid target: $target");
+    $self->send_partial('event/server_message', %$dom, status => 400, message => "Invalid target: $target", timestamp => time);
   }
 
   return;
@@ -93,9 +93,11 @@ sub query {
 
 sub reconnect {
   my ($self, $arg, $dom) = @_;
-  $self->app->core->control(restart => $self->session('login'), $dom->{host}, sub {});
+  $self->app->core->control(restart => $self->session('login'), $dom->{server}, sub {});
   return;
 }
+
+=head2 say
 
 =head2 t
 
@@ -116,6 +118,7 @@ sub names { "NAMES " . ($_[1] || $_[2]->{target}) }
 sub nick { "NICK $_[1]" }
 sub oper { "OPER $_[1]" }
 sub part { "PART " . ($_[1] || $_[2]->{target}) }
+sub say { "PRIVMSG $_[2]->{target} :$_[1]" }
 sub topic { "TOPIC $_[2]->{target}" . ($_[1] ? " :$_[1]" : "") }
 sub whois { "WHOIS $_[1]" }
 

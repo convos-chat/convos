@@ -7,7 +7,7 @@ WebIrc::User - Mojolicious controller for user data
 =cut
 
 use Mojo::Base 'WebIrc::Client';
-use WebIrc::Core::Util qw/ as_id /;
+use WebIrc::Core::Util qw/ as_id id_as /;
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
 =head1 METHODS
@@ -194,12 +194,12 @@ sub settings {
   my $self = shift->render_later;
   my $hostname = WebIrc::Core::Util::hostname();
   my $login = $self->session('login');
-  my $host = $self->stash('host') || 0;
+  my $server = $self->stash('server') || 0;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
   my @conversation;
 
   $self->stash(
-    host => $host,
+    server => $server,
     body_class => 'settings',
     conversation => \@conversation,
     nick => $login,
@@ -217,19 +217,22 @@ sub settings {
 
       return $self->$cb() unless @$hosts;
       return $self->redis->execute(
+        [zrange => "user:$login:conversations", 0, -1],
         (map { [hgetall => "user:$login:connection:$_"] } @$hosts),
         $cb,
       );
     },
     sub {
-      my($delay, @connections) = @_;
+      my($delay, $channels, @connections) = @_;
 
+      @$channels = grep { /^#/ } map { (id_as $_)[1] } @$channels;
       $self->logf(debug => '[settings] connection data %s', \@connections) if DEBUG;
 
       for my $conn (@connections) {
         $conn->{event} = 'connection';
-        $conn->{lookup} = $conn->{host};
-        $conn->{channels} = [ split ' ', $conn->{channels} ];
+        $conn->{lookup} = $conn->{server} || $conn->{host};
+        $conn->{channels} = $channels;
+        $conn->{server} ||= $conn->{host}; # back compat
         push @conversation, $conn;
       }
 
@@ -291,9 +294,10 @@ sub add_connection {
       $self->app->core->add_connection(
         $self->session('login'),
         {
-          host     => $self->param('host') || '',
+          server     => $self->param('server') || '',
           nick     => $self->param('nick') || '',
-          channels => join(' ', $self->param('channels')),
+          channels => [$self->param('channels')],
+          tls      => $self->param('tls') || 0,
           user     => $login,
         },
         $delay->begin,
@@ -323,10 +327,11 @@ sub edit_connection {
       $self->app->core->update_connection(
         $self->session('login'),
         {
-          host     => $self->req->body_params->param('host') || '',
-          lookup   => $self->stash('host') || '',
+          server     => $self->req->body_params->param('server') || '',
+          lookup   => $self->stash('server') || '',
           nick     => $self->param('nick') || '',
-          channels => join(' ', $self->param('channels')),
+          channels => [$self->param('channels')],
+          tls      => $self->param('tls') || 0,
           user     => $self->session('login'),
         },
         $delay->begin,
@@ -354,7 +359,7 @@ sub delete_connection {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->delete_connection($login, $self->stash('host'), $delay->begin);
+      $self->app->core->delete_connection($login, $self->stash('server'), $delay->begin);
     },
     sub {
       my ($delay, $error) = @_;

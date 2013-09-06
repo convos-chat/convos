@@ -1,4 +1,4 @@
-<li class="setting" data-host="<%= $host %>" data-target="any">
+<li class="setting" data-server="<%= $server %>" data-target="any">
   %= form_for 'user.edit', method => 'post', begin
     <h3>Edit profile</h3>
     %= form_block login => class => ['login'], begin

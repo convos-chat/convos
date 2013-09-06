@@ -1,0 +1,9 @@
+^mypp.yml
+.git
+\.old
+\.swp
+~$
+^blib/
+^Makefile$
+^MANIFEST.*
+^

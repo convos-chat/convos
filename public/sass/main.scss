@@ -213,9 +213,9 @@ form {
 button, .button {
   color: #222;
   background: darken(#fff, 10%);
-  font-size: 1.2em;
+  font-size: $fontSize;
   text-decoration: none;
-  padding: 0.3em 0.6em;
+  padding: 3px 6px;
   border: 2px solid darken(#fff, 40%);
   @include border-radius(3px);
 }
@@ -498,24 +498,28 @@ div.goto-bottom a {
 .landing-page {
   $loginBackground: darken(#fff, 2%);
   margin: auto;
-  width: 800px;
+  width: 720px;
+  position: relative;
+
   img {
-    margin: 2em 40px;
+    margin: 2em 0;
     border: 1px solid #ccc;
     @include prefix(box-shadow, 0 0 4px 2px rgba(180,180,180,.5));
   }
   nav, .login, .register, .about {
-    width: 700px;
+    width: 100%;
     margin: 2em auto;
     overflow: hidden;
   }
   nav {
     margin-bottom: 0;
+    margin-top: 2px;
     a.button, a.button.active {
       background: $loginBackground;
-      margin-right: 10px;
+      font-size: 14px;
+      margin-left: 10px;
       display: block;
-      float: left;
+      float: right;
     }
     a.active {
       border: $buttonBorderHover;
@@ -531,7 +535,8 @@ div.goto-bottom a {
     margin-top: -4px;
     display: none;
     padding: $bodyGutter;
-    position: relative;
+    position: absolute;
+    right: 0;
     h1 { display: none; }
   }
   .about { padding-bottom: 100px; }

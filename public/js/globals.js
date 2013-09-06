@@ -13,7 +13,7 @@ window.sortedSet = function() { this.set = { length: 0 }; return this; };
 window.sortedSet.prototype.add = function(score, member) { this.set[member] = score; this.length++; return this; };
 window.sortedSet.prototype.clear = function() { this.set = {}; this.length = 0; return this; };
 window.sortedSet.prototype.rem = function(member) { delete this.set[member]; this.length--; return this; };
-window.sortedSet.prototype.score = function(member) { return this.set[member] || 0 };
+window.sortedSet.prototype.score = function(member) { return this.set[member] };
 window.sortedSet.prototype.revrange = function(start, stop) {
   var k, res = [], self = this;
   for(k in self.set) res.push(k);
@@ -24,6 +24,7 @@ window.sortedSet.prototype.revrange = function(start, stop) {
 
 // console.log()
 window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
+window.console._debug = function() { if(window.DEBUG) window.console.log.apply(window.console, arguments) };
 
 // add escape() with the *same* functionality as per's quotemeta()
 RegExp.escape = RegExp.escape || function(str) {
@@ -94,7 +95,7 @@ if(window.webkitNotifications) {
     n.show();
     return n;
   };
-  window.Notification.permission = window.webkitNotifications.checkPermission() ? 'default' : 'granted';
+  window.Notification.permission = window.webkitNotifications.checkPermission() ? 'denied' : 'granted';
   window.Notification.requestPermission = function(cb) {
     cb = cb || function() {};
     window.webkitNotifications.requestPermission(function() {

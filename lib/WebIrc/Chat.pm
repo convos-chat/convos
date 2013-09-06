@@ -8,8 +8,8 @@ WebIrc::Chat - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
-use constant PING_INTERVAL => $ENV{WIRC_PING_INTERVAL} || 30;
 use WebIrc::Core::Commands;
+use constant PING_INTERVAL => $ENV{WIRC_PING_INTERVAL} || 30;
 
 =head1 METHODS
 
@@ -41,15 +41,16 @@ sub socket {
 
       $self->logf(debug => '[ws] < %s', $octets);
 
-      if($dom and $dom->attr('id') and $dom->attr('data-host')) {
+      if($dom and $dom->{'id'} and $dom->{'data-server'}) {
+        @$dom{qw/ server target uuid /} = map { delete $dom->{$_} || '' } qw/ data-server data-target id /;
         $self->_handle_socket_data($dom);
       }
       else {
-        $self->send_partial(
-          'event/server_message',
+        $self->send_partial('event/server_message',
           status => 400,
-          host => $dom->{'data-host'} || 'any',
+          server => $dom->{'data-server'} || 'any',
           message => "Invalid message ($octets)",
+          status => 400,
           timestamp => time,
           uuid => '',
         )->finish;
@@ -58,7 +59,7 @@ sub socket {
   );
   $self->on(
     finish => sub {
-      my $self = shift;
+      my $self = shift or return;
       Mojo::IOLoop->remove($tid);
       delete $self->stash->{$_} for qw/ sub redis /;
     }
@@ -94,9 +95,6 @@ sub _handle_socket_data {
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $login = $self->session('login');
 
-  @$dom{qw/ host target /} = map { delete $dom->{$_} || '' } qw/ data-host data-target /;
-  $dom->{timestamp} ||= time;
-
   if ($cmd =~ s!^/(\w+)\s*(.*)!!) {
     my($action, $arg) = ($1, $2);
     $arg =~ s/\s+$//;
@@ -104,20 +102,25 @@ sub _handle_socket_data {
       $cmd = $self->$code($arg, $dom);
     }
     else {
-      $self->send_partial('event/server_message', status => 400, message => 'Unknown command. Type /help to see available commands.');
-      $cmd = undef;
+      return $self->send_partial('event/server_message',
+        server => $dom->{server},
+        message => 'Unknown command. Type /help to see available commands.',
+        status => 400,
+        timestamp => time,
+        uuid => '',
+      );
     }
   }
   elsif($dom->{target}) {
     $cmd = "PRIVMSG $dom->{target} :$cmd";
   }
   else {
-    $cmd = undef;
+    return;
   }
 
   if(defined $cmd) {
-    my $key = "wirc:user:$login:$dom->{host}";
-    $cmd = "$dom->{id} $cmd";
+    my $key = "wirc:user:$login:$dom->{server}";
+    $cmd = "$dom->{uuid} $cmd";
     $self->logf(debug => '[%s] < %s', $key, $cmd);
     $self->redis->publish($key => $cmd);
     if($dom->{'data-history'}) {

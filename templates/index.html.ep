@@ -1,16 +1,16 @@
 % title 'Chat with your friends and colleagues';
 <div class="landing-page">
+  <nav>
+    %= link_to 'Register', 'register', class => $form eq 'register' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.register',
+    %= link_to 'Login', 'login', class => $form eq 'login' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.login',
+  </nav>
+  %= include 'user/login'
+  %= include 'user/register'
   <header class="row">
     <h1 class="center"> Group chat in style - <%= config('name') || '[YourName]' %></h1>
     <h2 class="center">Interact with friends and colleagues.</h2>
   </header>
   %= image '/image/landing-page-example-chat.jpeg', alt => 'Example chat'
-  <nav>
-    %= link_to 'Login', 'login', class => $form eq 'login' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.login',
-    %= link_to 'Register', 'register', class => $form eq 'register' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.register',
-  </nav>
-  %= include 'user/login'
-  %= include 'user/register'
   <div class="row about">
     <!--[if IE]>
     <div class="alert">
