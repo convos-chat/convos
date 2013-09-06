@@ -74,6 +74,7 @@ use Mojo::Base 'Mojolicious';
 use Mojo::Redis;
 use File::Spec::Functions qw(catfile tmpdir);
 use WebIrc::Core;
+use WebIrc::Core::Util ();
 
 our $VERSION = '0.01';
 
@@ -132,7 +133,7 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#host', [ host => qr{(?:\w+\.|localhost)[^/]+} ]);
+  my $host_r = $private_r->any('/#host', [ host => $WebIrc::Core::Util::host_re ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');

@@ -23,6 +23,8 @@ use Time::Piece;
 
 my $hostname;
 
+our $host_re = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
+
 =head1 FUNCTIONS
 
 =head2 as_id

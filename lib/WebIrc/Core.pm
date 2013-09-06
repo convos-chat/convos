@@ -12,6 +12,7 @@ TODO
 
 use Mojo::Base -base;
 use WebIrc::Core::Connection;
+use WebIrc::Core::Util ();
 use constant DEBUG => $ENV{WIRC_DEBUG} // 0;
 
 =head1 ATTRIBUTES
@@ -72,6 +73,7 @@ sub start {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
+      $self->redis->del('wirc:loopback:names'); # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
     },
     sub {
@@ -146,10 +148,7 @@ sub add_connection {
   my ($key, @channels, %errors);
   my $tls;
 
-  for my $name (qw/ host nick user /) {
-    next if $conn->{$name};
-    $errors{$name} = "$name is required.";
-  }
+  return $self unless $self->_valid_connection_args($conn, $cb);
 
   @channels = $self->_parse_channels($conn->{channels});
   $key = join ':', "user:$login:connection:$conn->{host}";
@@ -205,6 +204,8 @@ sub update_connection {
   my ($self, $login, $conn, $cb) = @_;
   my $lookup = delete $conn->{lookup};
   my (%errors, @channels, %channels);
+
+  return $self unless $self->_valid_connection_args($conn, $cb);
 
   Scalar::Util::weaken($self);
 
@@ -415,6 +416,24 @@ sub _parse_channels {
   my $channels = shift or return;
   my %dup;
   sort grep { $_ ne '#' and !$dup{$_}++ } map { /^#/ ? $_ : "#$_" } split m/[\s,]+/, $channels;
+}
+
+sub _valid_connection_args {
+  my($self, $conn, $cb) = @_;
+  my %errors;
+
+  for my $name (qw/ host nick user /) {
+    next if $conn->{$name};
+    $errors{$name} = "$name is required.";
+  }
+
+  if($conn->{host} and $conn->{host} !~ $WebIrc::Core::Util::host_re) {
+    $errors{host} = "Invalid host";
+  }
+
+  return 1 unless %errors;
+  $self->$cb(\%errors);
+  return 0;
 }
 
 sub DESTROY {

@@ -23,4 +23,14 @@ use WebIrc::Core::Util qw/ format_time as_id id_as /;
   is_deeply [id_as('conver:3asation:004:00:23foo')], ['conver:sation', '4', '#foo'], 'id_as s_conversation_4_foo';
 }
 
+{
+  like 'localhost', $WebIrc::Core::Util::host_re, 'localhost is valid';
+  like 'localhost:123', $WebIrc::Core::Util::host_re, 'localhost:123 is valid';
+  like 'irc.perl.org', $WebIrc::Core::Util::host_re, 'irc.perl.org is valid';
+  like 'irc.perl.org:6667', $WebIrc::Core::Util::host_re, 'irc.perl.org:6667 is valid';
+  like 'loopback', $WebIrc::Core::Util::host_re, 'loopback is valid';
+  ok 'loop' !~ $WebIrc::Core::Util::host_re, 'loop is invalid';
+  ok 'foo:6667' !~ $WebIrc::Core::Util::host_re, 'foo:6667 is invalid';
+}
+
 done_testing;

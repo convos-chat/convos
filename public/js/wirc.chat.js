@@ -74,7 +74,7 @@
       var old_score = nicks.score(old_nick);
       var re, txt;
 
-      console._debug('new_nick=' + new_nick + ', old_nick=' + old_nick + ', old_score=' + old_score);
+      console.log('new_nick=' + new_nick + ', old_nick=' + old_nick + ', old_score=' + old_score);
 
       if(old_nick == $messages.data('nick')) {
         re = new RegExp('\\b' + old_nick + '\\b', 'i');
@@ -87,6 +87,7 @@
       }
       else {
         nicks.add(old_score, new_nick).rem(old_nick);
+        nickList($('<div/>'));
       }
     }
     else if(this.hasClass('nick-joined')) {

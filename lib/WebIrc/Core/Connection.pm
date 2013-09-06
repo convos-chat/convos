@@ -124,7 +124,15 @@ my @OTHER_EVENTS              = qw/
 
 has _irc => sub {
   my $self = shift;
-  my $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->host);
+  my $irc;
+
+  if($self->host eq 'loopback') {
+    require WebIrc::Loopback;
+    return WebIrc::Loopback->new(connection => $self, redis => $self->redis);
+  }
+  else {
+    $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->host);
+  }
 
   Scalar::Util::weaken($self);
   $irc->register_default_event_handlers;
@@ -268,10 +276,10 @@ sub _connect {
       my ($redis, $args) = @_;
 
       $self->channels(add => $_) for split ' ', $args->{channels};
-      $irc->server($args->{host});
       $irc->nick($args->{nick} || $self->login);
-      $irc->user($args->{user} || $self->login);
+      $irc->server($args->{host});
       $irc->tls({}) if $args->{tls};
+      $irc->user($args->{user} || $self->login);
       $irc->connect(sub {
         my($irc, $error) = @_;
 
@@ -404,6 +412,7 @@ sub irc_rpl_welcome {
 
   for my $channel ($self->channels) {
     $self->_irc->write(JOIN => $channel);
+    $self->cmd_join({ params => [$channel] });
   }
 }
 
@@ -734,7 +743,6 @@ sub cmd_nick {
   my ($self, $message) = @_;
   my $new_nick = $message->{params}[0];
   $self->redis->hset($self->{path}, nick => $new_nick);
-  $self->_irc->nick($new_nick);
 }
 
 =head2 cmd_join
