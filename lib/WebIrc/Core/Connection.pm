@@ -109,7 +109,7 @@ has _irc => sub {
 
   if($self->server eq 'loopback') {
     require WebIrc::Loopback;
-    return WebIrc::Loopback->new(connection => $self, redis => $self->redis);
+    return WebIrc::Loopback->new(connection => $self);
   }
   else {
     $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->server);
@@ -162,8 +162,8 @@ Checks for mandatory attributes: L</login> and L</server>.
 sub new {
   my $self = shift->SUPER::new(@_);
 
-  $self->login or die "login is required";
-  $self->server or die "server is required";
+  $self->{login} or die "login is required";
+  $self->{server} or die "server is required";
   $self->{path} = "user:$self->{login}:connection:$self->{server}";
   $self->{conversation_path} = "user:$self->{login}:conversations";
   $self;
@@ -273,6 +273,24 @@ sub _connect {
       });
     },
   );
+}
+
+=head2 channels_from_conversations
+
+  @channels = $self->channels_from_conversations(\@conversations);
+
+This method returns an array ref of channels based on the conversations
+input. It will use L</server> to filter out the right list.
+
+=cut
+
+sub channels_from_conversations {
+  my($self, $conversations) = @_;
+
+  map { $_->[1] }
+  grep { $_->[0] eq $self->server and $_->[1] =~ /^#/ }
+  map { [ id_as $_ ] }
+  @{ $conversations || [] };
 }
 
 =head2 add_server_message
@@ -390,12 +408,7 @@ sub irc_rpl_welcome {
 
   Scalar::Util::weaken($self);
   $self->redis->zrange($self->{conversation_path}, 0, -1, sub {
-    my($redis, $conversations) = @_;
-
-    for(@$conversations) {
-      my($server, $channel) = id_as $_;
-      $self->_irc->write(JOIN => $channel) if $channel =~ /^#/ and $server eq $self->server;
-    }
+    $self->_irc->write(JOIN => $_) for $self->channels_from_conversations($_[1]);
   });
 }
 

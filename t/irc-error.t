@@ -7,7 +7,7 @@ my $conn;
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
   [ srem => 'user:doe:connections', "localhost:$port" ],
-  [ hmset => "user:doe:connection:localhost:$port", nick => 'doe', host => "localhost:$port", channels => '#foo' ],
+  [ hmset => "user:doe:connection:localhost:$port", nick => 'doe', host => "localhost:$port" ],
 );
 
 {

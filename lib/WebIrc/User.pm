@@ -223,15 +223,16 @@ sub settings {
       );
     },
     sub {
-      my($delay, $channels, @connections) = @_;
+      my($delay, $conversations, @connections) = @_;
+      my $cobj = WebIrc::Core::Connection->new(login => $login, server => 'anything');
 
-      @$channels = grep { /^#/ } map { (id_as $_)[1] } @$channels;
       $self->logf(debug => '[settings] connection data %s', \@connections) if DEBUG;
 
       for my $conn (@connections) {
+        $cobj->server($conn->{server} || $conn->{host}); # back compat
         $conn->{event} = 'connection';
         $conn->{lookup} = $conn->{server} || $conn->{host};
-        $conn->{channels} = $channels;
+        $conn->{channels} = [ $cobj->channels_from_conversations($conversations) ];
         $conn->{server} ||= $conn->{host}; # back compat
         push @conversation, $conn;
       }
@@ -292,11 +293,11 @@ sub add_connection {
     sub {
       my($delay) = @_;
       $self->app->core->add_connection(
-        $self->session('login'),
         {
-          server     => $self->param('server') || '',
-          nick     => $self->param('nick') || '',
           channels => [$self->param('channels')],
+          login    => $self->session('login'),
+          nick     => $self->param('nick') || '',
+          server   => $self->param('server') || '',
           tls      => $self->param('tls') || 0,
           user     => $login,
         },
@@ -325,12 +326,12 @@ sub edit_connection {
     sub {
       my ($delay) = @_;
       $self->app->core->update_connection(
-        $self->session('login'),
         {
-          server     => $self->req->body_params->param('server') || '',
+          channels => [$self->param('channels')],
+          login    => $self->session('login'),
           lookup   => $self->stash('server') || '',
           nick     => $self->param('nick') || '',
-          channels => [$self->param('channels')],
+          server   => $self->req->body_params->param('server') || '',
           tls      => $self->param('tls') || 0,
           user     => $self->session('login'),
         },
@@ -354,12 +355,17 @@ Delete a connection.
 
 sub delete_connection {
   my $self = shift->render_later;
-  my $login  = $self->session('login');
 
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->delete_connection($login, $self->stash('server'), $delay->begin);
+      $self->app->core->delete_connection(
+        {
+          login  => $self->session('login'),
+          server => $self->stash('server'),
+        },
+        $delay->begin,
+      );
     },
     sub {
       my ($delay, $error) = @_;

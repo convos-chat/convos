@@ -40,7 +40,6 @@ $t->get_ok($t->tx->res->headers->location)
 $form = {};
 $t->post_ok('/settings/connection', form => $form)
   ->element_exists('div.server.error')
-  ->element_exists('div.nick.error')
   ->element_exists_not('div.avatar.error')
   ->element_exists('input[name="server"][value="irc.perl.org"]')
   ->element_exists('input[name="nick"][value]')

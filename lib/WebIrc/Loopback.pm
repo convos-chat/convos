@@ -57,7 +57,7 @@ Holds an instance of L<Mojo::Redis>.
 =cut
 
 has ioloop => sub { shift->redis->ioloop };
-has redis => sub { Mojo::Redis->new };
+has redis => sub { shift->connection->redis };
 
 =head2 connection
 
@@ -157,20 +157,20 @@ sub _nick_changed {
 
   if($old ne $new) {
     delete $self->{conversation}{$old};
-    $self->redis->srem("wirc:loopback:names", $old);
     $self->_publish("NICK :$new");
+    $self->redis->srem("wirc:loopback:names", $old);
+    $self->redis->zrange($self->connection->{conversation_path}, 0, -1, sub {
+      my($redis, $conversations) = @_;
+      for($self->connection->channels_from_conversations($conversations)) {
+        $redis->srem("wirc:loopback:$_:names", $old);
+        $redis->sadd("wirc:loopback:$_:names", $new);
+      }
+    });
   }
 
   $self->nick($new);
   $self->{conversation}{$new} = $self->redis->subscribe("wirc:loopback:$new");
   $self->{conversation}{$new}->on(message => sub { $self and $self->_message_from($new, $_[1]) });
-
-  $self->redis->execute(
-    map {
-      [srem => "wirc:loopback:$_:names", $old ],
-      [sadd => "wirc:loopback:$_:names", $new ],
-    } $self->connection->channels
-  );
 }
 
 sub _publish {
