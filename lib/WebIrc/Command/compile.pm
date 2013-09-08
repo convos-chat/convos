@@ -102,11 +102,11 @@ sub compile_javascript {
   $output->find('script')->each(sub {
     my $file = $app->home->rel_file("public$_[0]->{src}");
     return print $COMPILED slurp $file if $file =~ m!/minified/!;
-    $app->log->info("$ENV{YUI_COMPRESSOR_BIN} $file -o tmp.js");
-    system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => "tmp.js";
-    print $COMPILED slurp "tmp.js";
+    $app->log->info("$ENV{YUI_COMPRESSOR_BIN} $file -o /tmp/min.js");
+    system $ENV{YUI_COMPRESSOR_BIN} => $file => -o => "/tmp/min.js";
+    print $COMPILED slurp "/tmp/min.js";
   });
-  unlink 'tmp.js';
+  unlink '/tmp/min.js';
   close $COMPILED;
 
   $self;
