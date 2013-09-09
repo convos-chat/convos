@@ -34,7 +34,7 @@ $t->websocket_ok('/socket');
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.action.message[data-server="wirc.pl"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
-  ok $dom->at('img[alt="fooman"][src="//graph.facebook.com/jhthorsen/picture?height=40"]'), 'facebook avatar' or diag $dom;
+  ok $dom->at('img[alt="fooman"][src="//graph.facebook.com/jhthorsen/picture?height=40&width=40"]'), 'facebook avatar' or diag $dom;
 }
 
 {

@@ -130,7 +130,7 @@ sub _message_avatar {
           $avatar = sprintf '//gravatar.com/avatar/%s?s=40&d=retro', Mojo::Util::md5_sum($avatar);
         }
         else {
-          $avatar = sprintf '//graph.facebook.com/%s/picture?height=40', $avatar;
+          $avatar = sprintf '//graph.facebook.com/%s/picture?height=40&width=40', $avatar;
         }
 
         $_->{avatar} = $avatar for @{ $cache->{messages} };
