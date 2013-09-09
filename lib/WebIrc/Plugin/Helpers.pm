@@ -119,19 +119,22 @@ sub _message_avatar {
   $lookup =~ s!^~!!;
   $cache = $AVATAR_CACHE{$lookup} ||= {};
 
-  if(defined $cache->{avatar}) {
-    $message->{avatar} = $cache->{avatar};
-    return;
-  }
   if(!$cache->{messages}) {
     $cb = $delay->begin;
     $c->redis->get(
       "avatar:$lookup",
       sub {
-        my($redis, $email) = @_;
-        my $avatar = Mojo::Util::md5_sum($email || $lookup);
-        $cache->{avatar} = "//gravatar.com/avatar/$avatar?s=40&d=retro";
-        $_->{avatar} = $cache->{avatar} for @{ $cache->{messages} };
+        my $avatar = $_[1] || $lookup;
+
+        if($avatar =~ /\@/) {
+          $avatar = sprintf '//gravatar.com/avatar/%s?s=40&d=retro', Mojo::Util::md5_sum($avatar);
+        }
+        else {
+          $avatar = sprintf '//graph.facebook.com/%s/picture?height=40', $avatar;
+        }
+
+        $_->{avatar} = $avatar for @{ $cache->{messages} };
+        delete $AVATAR_CACHE{$lookup};
         $cb->();
       }
     );

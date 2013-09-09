@@ -73,7 +73,6 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.message[data-server="wirc.pl"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
-  ok $dom->at('img[alt="fooman"][src="//gravatar.com/avatar/4cac29f5fcfe500bc7e9b88e503045b1?s=40&d=retro"]'), 'gravatar image based on user+server';
   is $dom->at('h3 a[href="/wirc.pl/fooman"]')->text, 'fooman', 'got message from fooman';
   is $dom->at('a[href="http://wirc.pl?a=1&b=2#yikes"]')->text, 'http://wirc.pl?a=1&b=2#yikes', 'http://wirc.pl#yikes';
   is $dom->at('div.content'), '<div class="content whitespace">doe: see this &amp;amp; link: <a href="http://wirc.pl?a=1&amp;b=2#yikes" target="_blank">http://wirc.pl?a=1&amp;b=2#yikes</a> # really cool</div>', 'got link and amp';
@@ -118,7 +117,6 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
   });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.action.message[data-server="wirc.pl"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
-  ok $dom->at('img[alt="fooman"][src="//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro"]'), 'default gravatar image';
   ok $dom->at('a[href="/wirc.pl/fooman"]'), 'got action message from fooman';
   is $dom->at('.content')->all_text, 'fooman is too cool', 'without special characters';
 }
