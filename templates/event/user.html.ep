@@ -10,9 +10,9 @@
       %= text_field 'email', $email, id => 'email', placeholder => 'your-personal@email.com'
     % end
     %= form_block avatar => class => ['avatar'], begin
-      <label for="avatar">Gravatar</label>
+      <label for="avatar">Avatar</label>
       %= text_field 'avatar', $avatar, id => 'avatar', placeholder => 'your-gravatar@email.com'
-      <p class="help">Don't have a gravatar? <%= link_to 'Register now!', 'http://gravatar.com', target => '_blank' %></p>
+      <p class="help">Enter your Facebook username or <%= link_to 'Gravatar', 'http://gravatar.com', target => '_blank' %> email.</p>
     % end
     <div>
       <button type="submit">Update</button>
