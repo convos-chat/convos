@@ -10,8 +10,6 @@ use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util qw(format_time);
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
-my %AVATAR_CACHE;
-
 my $URL_RE = do {
   # Modified regex from RFC 3986
   no warnings; # Possible attempt to put comments
@@ -117,7 +115,7 @@ sub _message_avatar {
   $message->{host} or return; # old data does not have "host" stored because of a bug
   $lookup = join '@', @$message{qw/ user host /};
   $lookup =~ s!^~!!;
-  $cache = $AVATAR_CACHE{$lookup} ||= {};
+  $cache = $c->stash->{"avatar.$lookup"} ||= {};
 
   if(!$cache->{messages}) {
     $cb = $delay->begin;
@@ -125,6 +123,8 @@ sub _message_avatar {
       "avatar:$lookup",
       sub {
         my $avatar = $_[1] || $lookup;
+
+        delete $c->stash->{"avatar.$lookup"};
 
         if($avatar =~ /\@/) {
           $avatar = sprintf '//gravatar.com/avatar/%s?s=40&d=retro', Mojo::Util::md5_sum($avatar);
@@ -134,7 +134,6 @@ sub _message_avatar {
         }
 
         $_->{avatar} = $avatar for @{ $cache->{messages} };
-        delete $AVATAR_CACHE{$lookup};
         $cb->();
       }
     );
