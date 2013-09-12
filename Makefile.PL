@@ -11,6 +11,7 @@ WriteMakefile(
     'Parse::IRC'      => 1.18,
     'Time::Piece'     => 1.20,
     'Unicode::UTF8'   => 0.58,
+    'DateTime'        => 0,
   },
   test => {
     TESTS => 't/*.t',
