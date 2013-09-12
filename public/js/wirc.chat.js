@@ -382,7 +382,8 @@
       if(message.length == 0) return $input;
       var uuid = window.guid();
       if(!message.match('^\/')) {
-        var $pendingMessage = $('<li class="message-pending"><div class="content">' + message + '</div></li>').attr('id', uuid).hostAndTarget($messages);
+        var $pendingMessage = $('<li class="message-pending"><div class="content"></div></li>').attr('id', uuid).hostAndTarget($messages);
+        $pendingMessage.find('.content').text(message);
         setTimeout(function() { messageFailed($pendingMessage); }, 10000);
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
