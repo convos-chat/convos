@@ -1,0 +1,3 @@
+<li class="topic" data-server="<%= $server %>" data-target="<%= $target %>">
+  <div class="content">Set by <%= $nick %> at <%= format_time $timestamp, '%e. %b %H:%M:%S' %></div>
+</li>

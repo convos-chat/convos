@@ -1,0 +1,7 @@
+<li class="whois" data-server="<%= $server %>" data-target="any">
+  <div class="content">
+    %= link_to $nick, view => { server => $server, target => $nick }
+    is <%= $user %>@<%= $host %> (<%= $realname %>).
+  </div>
+  %= timestamp_span($timestamp)
+</li>

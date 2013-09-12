@@ -1,19 +1,10 @@
-    % if(@$connections) {
-      <ul class="unstyled" id="chat-messages"
-        data-cid="<%= $connection_id %>"
-        data-nicks="<%= join ',', @$nicks %>"
-        data-target="<%= $target %>">
-    % }
-    % my $n = 0;
-    % for my $message (@$conversation) {
-      <li class="<%= $n++ % 2 ? 'odd' : 'even' %>">
-        <span class="timestamp" title="<%= format_time($message->{timestamp}, '%d %n %H:%M:%S')%>"><%= format_time($message->{timestamp}, '%H:%M:%S') %></span>
-      % if($message->{special} eq 'me') {
-        <span class="action">* <%= $message->{nick} %> <%== $message->{message} %></span>
-      % } else {
-        <span class="prefix"><%= $message->{nick} %>:</span>
-        <span><%== $message->{message} %></span>
-      % }
-    % }
-      </li>
-%== qq{</ul>} if @$connections
+% my $prev_nick = '';
+<ul class="<%= $body_class %>" data-server="<%= $server %>" data-target="<%= $target %>" data-nick="<%= $nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
+% for my $message (@$conversation) {
+  %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
+  % $prev_nick = $message->{nick};
+% }
+% if(stash 'got_more') {
+  %= include 'event/historic_messages'
+% }
+</ul>

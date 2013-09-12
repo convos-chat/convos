@@ -1,0 +1,7 @@
+#!/bin/sh
+
+[ -z $WIRC_DEBUG ]       && export WIRC_DEBUG=1
+[ -z $MOJO_REDIS_DEBUG ] && export MOJO_REDIS_DEBUG=1
+[ -z $MOJO_IRC_DEBUG ]   && export MOJO_IRC_DEBUG=1
+
+exec morbo script/web_irc -w public/sass -w lib -w templates $@

@@ -1,0 +1,4 @@
+<li class="server-message <%= $status < 400 ? 'notice' : 'error' %>" data-server="<%= $server %>" data-target="any">
+  <div class="content"><%== $message %></div>
+  %= timestamp_span($timestamp || time)
+</li>

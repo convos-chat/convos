@@ -1,0 +1,7 @@
+<li class="notice" data-server="<%= $server %>" data-target="<%= $target %>">
+  <div class="content">
+    <b><%= $mode %></b>
+    <span><%= $args %></span>
+  </div>
+  %= timestamp_span($timestamp)
+</li>

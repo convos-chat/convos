@@ -1,0 +1,24 @@
+<li class="setting" data-server="<%= $server %>" data-target="any">
+  %= form_for 'user.edit', method => 'post', begin
+    <h3>Edit profile</h3>
+    %= form_block login => class => ['login'], begin
+      <label for="login">Login</label>
+      %= text_field 'login', $login, id => 'login', readonly => 'readonly'
+    % end
+    %= form_block email => class => ['email'], begin
+      <label for="email">Email</label>
+      %= text_field 'email', $email, id => 'email', placeholder => 'your-personal@email.com'
+    % end
+    %= form_block avatar => class => ['avatar'], begin
+      <label for="avatar">Avatar</label>
+      %= text_field 'avatar', $avatar, id => 'avatar', placeholder => 'your-gravatar@email.com'
+      <p class="help">Enter your Facebook username or <%= link_to 'Gravatar', 'http://gravatar.com', target => '_blank' %> email.</p>
+    % end
+    <div>
+      <button type="submit">Update</button>
+    % if(0) {
+      %= link_to 'Delete account', 'user.delete', class => 'confirm button'
+    % }
+    </div>
+  % end
+</li>

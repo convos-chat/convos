@@ -4,6 +4,10 @@ package WebIrc;
 
 WebIrc - IRC client on web
 
+=head1 VERSION
+
+0.01
+
 =head1 SYNOPSIS
 
 =head2 Production
@@ -67,48 +71,38 @@ Backend functionality.
 =cut
 
 use Mojo::Base 'Mojolicious';
-use WebIrc::Core;
-use WebIrc::Proxy;
 use Mojo::Redis;
+use File::Spec::Functions qw(catfile tmpdir);
+use WebIrc::Core;
+use WebIrc::Core::Util ();
+
+our $VERSION = '0.01';
+$ENV{WIRC_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
 
-=head2 redis
+=head2 archive
 
-Holds a L<Mojo::Redis> object.
+Holds a L<WebIrc::Core::Archive> object.
 
 =head2 core
 
 Holds a L<WebIrc::Core> object.
 
-=head2 archive
-
-=head2 proxy
-
-Proxy manager
-
 =cut
 
-has redis => sub {
-  my $self  = shift;
-  my $log   = $self->app->log;
-  my $redis = Mojo::Redis->new(server => ($self->config->{redis} || '127.0.0.1:6379'), timeout => 600);
-
-  $redis->on(
-    error => sub {
-      my ($redis, $err) = @_;
-      $log->error('[REDIS ERROR] ' . $err);
-    }
-  );
-
-  return $redis;
-};
-has core => sub { WebIrc::Core->new(redis => shift->redis) };
 has archive => sub {
   my $self = shift;
   WebIrc::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
-has proxy => sub { WebIrc::Proxy->new(core => shift->core) };
+
+has core => sub {
+  my $self = shift;
+  my $core = WebIrc::Core->new;
+
+  $core->redis->server($self->redis->server);
+  $core;
+};
 
 =head1 METHODS
 
@@ -122,29 +116,41 @@ sub startup {
   my $self   = shift;
   my $config = $self->plugin('Config');
 
-  $self->plugin('Mojolicious::Plugin::UrlWith');
+  $config->{name} ||= 'Wirc';
+  $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
+  $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
+  $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
+
   $self->plugin('WebIrc::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
-  $self->defaults(layout => 'default', logged_in => 0,);
+  $self->defaults(layout => 'default', logged_in => 0, VERSION => time, body_class => 'default');
 
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
-  $r->get('/login')->to(template => 'user/login');
-  $r->get('/logout')->to('user#logout');
-  $r->post('/login')->to('user#login');
-  $r->get('/register')->to(template => 'user/register');
-  $r->post('/register')->to('user#register');
+  $r->post('/')->to('user#login_or_register');
+  $r->any('/login')->to('user#login_or_register');
+  $r->any('/register')->to('user#login_or_register', register_page => 1);
+  $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  $private_r->route('/settings')->to('user#settings')->name('settings');
+  my $host_r = $private_r->any('/#server', [ server => $WebIrc::Core::Util::SERVER_NAME_RE ]);
 
-  $private_r->get('/history/:page')->to('client#history');
-  $private_r->websocket('/socket')->to('client#socket');
+  $private_r->websocket('/socket')->to('chat#socket')->name('socket');
+  $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
+  $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
+  $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
+  $private_r->get('/command-history')->to('client#command_history');
+  $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
+  $private_r->get('/settings')->to('user#settings')->name('settings');
+  $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
+  $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
-  $private_r->get('/:cid/*target')->to('client#view')->name('channel.view');
-  $private_r->get('/:cid')->to('client#view')->name('server.view');
+  $host_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
+  $host_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
+  $host_r->get('/*target')->to('client#view')->name('view');
+  $host_r->get('/')->to('client#view')->name('view.server');
 
   $self->hook(
     before_dispatch => sub {
@@ -153,8 +159,40 @@ sub startup {
     }
   );
 
-  $self->core->start  unless $ENV{SKIP_CONNECT};
-  $self->proxy->start unless $ENV{DISABLE_PROXY};
+  $self->log->info("mode=@{[$self->mode]}, WIRC_BACKEND_REV=$ENV{WIRC_BACKEND_REV}");
+
+  # since the xxx_mode() methods will be deprecated
+  if($self->mode =~ /^prod/) {
+    $self->_production_mode;
+  }
+  elsif($self->mode =~ /^dev/) {
+    $self->_development_mode;
+  }
+
+  if($config->{backend}{embedded}) {
+    Mojo::IOLoop->timer(0, sub {
+      $self->core->start;
+    });
+  }
+}
+
+sub _production_mode {
+  my $self = shift;
+
+  unless($ENV{WIRC_BACKEND_REV}) {
+    require WebIrc::Command::compile;
+    WebIrc::Command::compile->new(app => $self)->compile_javascript->compile_stylesheet;
+  }
+}
+
+sub _development_mode {
+  my $self = shift;
+
+  # ugly hack to prevent this from running when running unit tests
+  unless($INC{'Test/Mojo.pm'}) {
+    require WebIrc::Command::compile;
+    WebIrc::Command::compile->new(app => $self)->compile_stylesheet;
+  }
 }
 
 =head1 COPYRIGHT

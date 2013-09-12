@@ -1,0 +1,1 @@
+<li class="add-conversation" data-server="<%= $server %>" data-target="<%= $target %>"></li>

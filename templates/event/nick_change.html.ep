@@ -1,0 +1,4 @@
+<li class="nick-change" data-server="<%= $server %>" data-target="any">
+  <div class="content"><b class="old"><%= $old_nick %></b> changed nick to "<%= link_to $new_nick, view => { server => $server, target => $new_nick }, class => 'nick' %>"</div>
+  %= timestamp_span($timestamp)
+</li>

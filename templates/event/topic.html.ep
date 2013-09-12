@@ -1,0 +1,7 @@
+<li class="topic" data-server="<%= $server %>" data-target="<%= $target %>">
+% if(length $topic) {
+  <div class="content">Topic is <%= $topic %></div>
+% } else {
+  <div class="content">No topic is set.</div>
+% }
+</li>

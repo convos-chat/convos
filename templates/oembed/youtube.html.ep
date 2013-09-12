@@ -1,0 +1,3 @@
+<div class="embed">
+  <iframe width="<%= $width %>" height="<%= $height %>" src="//www.youtube-nocookie.com/embed/<%= $id %>?rel=0&amp;wmode=opaque" allowfullscreen></iframe>
+</div>

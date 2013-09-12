@@ -1,0 +1,52 @@
+use t::Helper;
+use Mojo::JSON;
+use Mojo::DOM;
+
+my $dom = Mojo::DOM->new;
+my $connection = WebIrc::Core::Connection->new(login => 'doe', server => 'irc.perl.org');
+my $messages = $t->app->redis->subscribe('wirc:user:doe:out');
+
+$messages->on(message => sub { Mojo::IOLoop->stop });
+
+redis_do(
+  [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
+  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23wirc', time - 1, 'irc:2eperl:2eorg:00batman' ],
+  [ sadd => 'user:doe:connections', 'irc.perl.org' ],
+  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
+);
+
+$connection->redis($t->app->redis);
+$connection->_irc->nick('doe')->user('');
+$t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect to conversation');
+$t->websocket_ok('/socket');
+
+{
+  $connection->add_message({ params => [ 'doe', 'really cool' ], prefix => 'fooman!user@host' });
+  Mojo::IOLoop->start;
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.message[data-server="irc.perl.org"][data-target="fooman"][data-sender="fooman"]'), 'private message';
+
+  Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
+  Mojo::IOLoop->start;
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="fooman"]'), 'new private message';
+
+  $connection->add_message({ params => [ 'doe', 'really cool' ], prefix => 'fooman!user@host' });
+  Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
+  Mojo::IOLoop->start;
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.message[data-server="irc.perl.org"][data-target="fooman"][data-sender="fooman"]'), 'just the message the second time';
+
+  $t->finish_ok;
+}
+
+{
+  $t->get_ok('/conversations')
+    ->element_exists('li:nth-of-child(1) a[data-unread="0"][href="/irc.perl.org/%23wirc"]')
+    ->element_exists('li:nth-of-child(2) a[data-unread="2"][href="/irc.perl.org/fooman"]')
+    ->element_exists('li.unread a[data-unread="2"][href="/irc.perl.org/fooman"]')
+    ->element_exists('li:nth-of-child(3) a[data-unread="0"][href="/irc.perl.org/batman"]')
+    ;
+}
+
+done_testing;

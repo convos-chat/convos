@@ -1,0 +1,46 @@
+<li class="setting" data-server="<%= $server %>" data-target="any">
+  %= form_for url_for($lookup ? 'connection.edit' : 'connection.add', { server => $lookup }), method => 'post', begin
+    % if($lookup) {
+    <h3>Edit <%= $lookup %></b></h3>
+    % } else {
+    <h3>Add connection</h3>
+    % }
+    %= form_block server => class => ['server'], begin
+      <label for="server">Server</label>
+      %= text_field 'server', $server, id => 'server'
+      % unless($lookup) {
+      <p class="help">Add ":port" unless you want to use default port 6667.</p>
+      % }
+    % end
+    %= form_block nick => class => ['nick'], begin
+      <label for="nick">Nick</label>
+      %= text_field 'nick', $nick, id => 'nick'
+      % unless($lookup) {
+      <p class="help">Handle to operate under.</p>
+      % }
+    % end
+    %= form_block channels => class => ['channels'], begin
+      <label for="channels">Channels</label>
+      <select name="channels" id="channels" multiple="multiple">
+      % for my $channel (@$channels) {
+        % my @selected = (selected => 'selected') if $lookup;
+        %= tag 'option', @selected, value => $channel, sub { $channel }
+      % }
+      </select>
+      % unless($lookup) {
+      <p class="help">Which chat rooms you want to be part of.</p>
+      % }
+    % end
+    %= form_block host => class => ['host'], begin
+      <label for="host">Secure</label>
+      %= select_field 'tls', [ ['No' => 0], [TLS => 1] ]
+    % end
+    <div>
+      <button type="submit" name="action" value="save"><%= $lookup ? 'Update' : 'Add' %></button>
+    % if($lookup) {
+      %= link_to 'Log', 'view.server', { server => $lookup }, class => 'button'
+      %= link_to 'Delete', 'connection.delete', { server => $lookup }, class => 'confirm button'
+    % }
+    </div>
+  % end
+</li>

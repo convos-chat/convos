@@ -7,12 +7,24 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use WebIrc::Core::Util ();
-use Mojo::JSON;
+use WebIrc::Core::Util qw(format_time);
+use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
 
-my $JSON = Mojo::JSON->new;
+my $URL_RE = do {
+  # Modified regex from RFC 3986
+  no warnings; # Possible attempt to put comments
+  qw!https?:(//([^/?\#\s]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
+};
 
 =head1 HELPERS
+
+=head2 id_as
+
+See L<WebIrc::Core::Util/id_as>.
+
+=head2 as_id
+
+See L<WebIrc::Core::Util/as_id>.
 
 =head2 form_block
 
@@ -34,7 +46,7 @@ stash hash C<errors>, using C<$name> as key.
 sub form_block {
   my $content = pop;
   my ($c, $field, %args) = @_;
-  my $error = $c->stash('errors')->{$field} // '';
+  my $error = $c->stash->{errors}{$field} // '';
   my $classes = $args{class} ||= [];
 
   push @$classes, 'error' if $error;
@@ -42,64 +54,92 @@ sub form_block {
   $c->tag(div => class => join(' ', @$classes), title => $error, $content);
 }
 
-=head2 parse_command $data
+=head2 format_conversation
 
-Takes a websocket command, parses it into a IRC resposne
+  $c->format_conversation(\&iterator, \&callback);
+
+Takes a list of JSON strings and turns them into a list of hash-refs where the
+"message" key contains a formatted version with HTML and such. The result will
+be passed on to the C<$callback>.
 
 =cut
 
-my %commands = (
-  j     => 'JOIN',
-  join   => 'JOIN',
-  t     => sub { my $data = pop; "TOPIC $data->{target}" . ($data->{cmd} ? ' :' . $data->{cmd} : '') },
-  topic => sub { my $data = pop; "TOPIC $data->{target}" . ($data->{cmd} ? ' :' . $data->{cmd} : '') },
-  w     => 'WHOIS',
-  whois => 'WHOIS',
-  nick  => 'NICK',
-  me   => sub { my $data = pop; "PRIVMSG $data->{target} :\x{1}ACTION $data->{cmd}\x{1}" },
-  msg  => sub { my $data = pop; $data->{cmd} =~ s!^(\w+)\s*!!;  "PRIVMSG $1 :$data->{cmd}" },
-  part => sub { my $data = pop; "PART " . ($data->{cmd} || $data->{target}) },
-  close=> sub { my ($self,$data) = @_;
-                my $target=$data->{cmd} || $data->{target};
-                $self->redis->sismember("connection:@{[$data->{cid}]}:conversations",$target, sub {
-                  my ($redis,$member)=@_;
-                  return unless $member;
-                  $self->redis->srem("connection:@{[$data->{cid}]}:conversations",$target);
-                  $self->send_json({cid => $data->{cid},status=>200, closed=>1,target=>$target});
-                });
-                return;
-  },
-  reconnect=> sub { my ($self,$data) = @_;
-                $self->redis->publish('core:control',"restart:".$data->{cid});
-                return;
-  },
-  
-  help => sub {
-    my ($self, $data) = @_;
-    $self->send_json(
-      {cid => $data->{cid}, status => 200, message => "Available Commands:\nj\tw\tme\tmsg\tpart\tnick\thelp"});
-    return;
-  }
-);
+sub format_conversation {
+  my($c, $conversation, $cb) = @_;
+  my $delay = Mojo::IOLoop->delay;
+  my @messages;
 
-sub parse_command {
-  my ($self, $data) = @_;
-  if ($data->{cmd}) {
-    if ($data->{cmd} =~ s!^/(\w+)\s*!!) {
-      my ($cmd) = $1;
-      if (my $irc_cmd = $commands{$cmd}) {
-        return $irc_cmd->($self, $data) if (ref $irc_cmd);
-        return $irc_cmd . ' ' . $data->{cmd};
-      }
-      else {
-        $self->send_json({cid => $data->{cid}, status => '401', message => 'Unknown command'});
-      }
-    }
-    else {
-      return "PRIVMSG $data->{target} :$data->{cmd}";
-    }
+  while (my $message = $conversation->()) {
+    $message->{embed} = '';
+    $message->{uuid} ||= '';
+    $message->{message} = _parse_message($c, $message, $delay) if $message->{message};
+
+    push @messages, $message;
   }
-  return;
+
+  $delay->once(finish => sub { $c->$cb(\@messages) });
+  $delay->begin->();    # need to do at least one step
+}
+
+sub _parse_message {
+  my($c, $message, $delay) = @_;
+  my $last = 0;
+  my @chunks;
+
+  _message_avatar($c, $message, $delay);
+  $message->{highlight} ||= 0;
+
+  # http://www.mirc.com/colors.html
+  $message->{message} =~ s/\x03\d{0,15}(,\d{0,15})?//g;
+  $message->{message} =~ s/[\x00-\x1f]//g;
+
+  while($message->{message} =~ m!($URL_RE)!g) {
+    my $url = $1;
+    my $now = pos $message->{message};
+
+    push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last, $now - length($url) - $last);
+    push @chunks, $c->link_to($url, $url, target => '_blank');
+    $last = $now;
+  }
+
+  push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last);
+  return join '', @chunks;
+}
+
+sub _message_avatar {
+  my($c, $message, $delay) = @_;
+  my($lookup, $cache, $cb);
+
+  $message->{avatar} = '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro';
+  $message->{nick} or return; # do not want to insert avatar unless a user sent the message
+  $message->{host} or return; # old data does not have "host" stored because of a bug
+  $lookup = join '@', @$message{qw/ user host /};
+  $lookup =~ s!^~!!;
+  $cache = $c->stash->{"avatar.$lookup"} ||= {};
+
+  if(!$cache->{messages}) {
+    $cb = $delay->begin;
+    $c->redis->get(
+      "avatar:$lookup",
+      sub {
+        my $avatar = $_[1] || $lookup;
+
+        delete $c->stash->{"avatar.$lookup"};
+
+        if($avatar =~ /\@/) {
+          $avatar = sprintf '//gravatar.com/avatar/%s?s=40&d=retro', Mojo::Util::md5_sum($avatar);
+        }
+        else {
+          $avatar = sprintf '//graph.facebook.com/%s/picture?height=40&width=40', $avatar;
+        }
+
+        $_->{avatar} = $avatar for @{ $cache->{messages} };
+        $cb->();
+      }
+    );
+  }
+
+  push @{ $cache->{messages} }, $message;
 }
 
 =head2 logf
@@ -110,10 +150,58 @@ See L<WebIrc::Core::Util/logf>.
 
 Returns a L<Mojo::Redis> object.
 
-=head3 as_id
+=cut
 
-strip non-word characters from input.
+sub redis {
+  my $c = shift;
 
+  $c->stash->{redis} ||= do {
+    my $log = $c->app->log;
+    my $redis = Mojo::Redis->new(server => $c->config->{redis});
+
+    $redis->on(
+      error => sub {
+        my ($redis, $err) = @_;
+        $log->error('[REDIS ERROR] ' . $err);
+      }
+    );
+
+    $redis;
+  };
+}
+
+=head2 send_partial
+
+Will render "partial" and L<send|Mojolicious::Controller/send> the result.
+
+=cut
+
+sub send_partial {
+  my $c = shift;
+
+  eval {
+    $c->send($c->render(@_, partial => 1)->to_string)
+  } or do {
+    $c->app->log->error($@);
+  };
+}
+
+=head2 timestamp_span
+
+Returns a "E<lt>span>" tag with a timestamp.
+
+=cut
+
+sub timestamp_span {
+  my ($c, $timestamp) = @_;
+
+  return $c->tag(
+    'span',
+    class => 'timestamp',
+    title => format_time($timestamp, '%e. %B'),
+    format_time($timestamp, '%e. %b %H:%M:%S')
+  );
+}
 
 =head1 METHODS
 
@@ -126,29 +214,15 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
-  $app->helper(form_block    => \&form_block);
-  $app->helper(parse_command => \&parse_command);
-  $app->helper(logf          => \&WebIrc::Core::Util::logf);
-  $app->helper(format_time => sub { my $self = shift; WebIrc::Core::Util::format_time(@_); });
-  $app->helper(redis => sub { shift->app->redis(@_) });
-  $app->helper(as_id => sub { my ($self, $val) = @_; $val =~ s/\W+//g; $val });
-  $app->helper(
-    send_json => sub {
-      my $self = shift;
-      $self->send({text => $JSON->encode(shift)});
-      $self->log->debug('JSON Error:' . $JSON->error) if $JSON->error;
-    }
-  );
-  $app->helper(
-    is_active => sub {
-      my ($self, $c, $target) = @_;
-      if ($c->{id} == $self->param('cid')) {
-        return 1 if !defined $target && !defined $self->param('target');
-        return 1 if defined $target && defined $self->param('target') && $target eq $self->param('target');
-      }
-      return 0;
-    }
-  );
+  $app->helper(form_block          => \&form_block);
+  $app->helper(format_conversation => \&format_conversation);
+  $app->helper(logf                => \&WebIrc::Core::Util::logf);
+  $app->helper(format_time => sub { shift; format_time(@_); });
+  $app->helper(redis => \&redis);
+  $app->helper(as_id => sub { shift; WebIrc::Core::Util::as_id(@_) });
+  $app->helper(id_as => sub { shift; WebIrc::Core::Util::id_as(@_) });
+  $app->helper(send_partial => \&send_partial);
+  $app->helper(timestamp_span => \&timestamp_span);
 }
 
 =head1 AUTHOR

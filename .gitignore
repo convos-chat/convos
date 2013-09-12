@@ -1,7 +1,9 @@
-
+*.swp
 *~
+*.sublime-*
 !.gitignore
 !.perltidyrc
+.DS_Store
 blib
 pm_to_blib
 Makefile*
@@ -10,4 +12,10 @@ MANIFEST*
 !MANIFEST.SKIP
 *META.*
 /local
-.DS_Store
+/log
+/script/hypnotoad.pid
+/web_irc.production.conf
+/cover_db
+/.sass-cache/
+/public/compiled.*
+/script/toadfarm.pid

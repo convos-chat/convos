@@ -1,0 +1,9 @@
+<li class="channel-list" data-server="<%= $server %>" data-target="any">
+  <div class="content">
+    % my $i = 0;
+    % for my $c (sort { $a->{name} cmp $b->{name} } @$channel_list) {
+      <%= link_to $c->{name}, view => { server => $server, target => $c->{name} }, title => $c->{title} %><%= ++$i == @$nicks ? '.' : ', ' %>
+    % }
+  </div>
+  %= timestamp_span($timestamp)
+</li>
