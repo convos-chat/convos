@@ -15,9 +15,19 @@ directory.
 
 Defaults to the first "sass" file found in PATH.
 
+"sass" can be installed with the following command:
+
+  $ sudo apt-get install rubygems
+  $ sudo gem install sass
+
 =head2 YUI_COMPRESSOR_BIN
 
 Defaults to the first "yuicompressor" or "yui-compressor" file found in PATH.
+
+"yuicompressor" can be installed with the following command:
+
+  $ sudo apt-get install npm
+  $ sudo npm -g i yuicompressor
 
 =cut
 
