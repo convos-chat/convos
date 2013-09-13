@@ -96,6 +96,18 @@ $form->{channels} = '#wirc';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'dummy-uuid JOIN #wirc', 'JOIN #wirc';
 
+is_deeply(
+  redis_do([hgetall => 'user:fooman:connection:irc.perl.org']),
+  {
+    user => 'fooman',
+    server => 'irc.perl.org',
+    nick => 'marcus',
+    tls => 0,
+    login => 'fooman',
+  },
+  'not too much data stored in backend',
+);
+
 $t->post_ok('/settings/2', form => $form)->status_is('404');
 $t->get_ok('/yay/settings/delete')->status_is('404');
 

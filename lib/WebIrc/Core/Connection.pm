@@ -258,7 +258,7 @@ sub _connect {
       $irc->nick($args->{nick} || $self->login);
       $irc->server($args->{server} || $args->{host});
       $irc->tls({}) if $args->{tls};
-      $irc->user($args->{user} || $self->login);
+      $irc->user($self->login);
       $irc->connect(sub {
         my($irc, $error) = @_;
 
