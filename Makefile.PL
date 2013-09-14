@@ -11,6 +11,11 @@ WriteMakefile(
     'Parse::IRC'      => 1.18,
     'Time::Piece'     => 1.20,
     'Unicode::UTF8'   => 0.58,
+    
+    # AssetPack and optional deps
+    'Mojolicious::Plugin::AssetPack' => '0.01',
+    'JavaScript::Minifier::XS' => 0.09,
+    'CSS::Minifier::XS' => 0.08,
   },
   test => {
     TESTS => 't/*.t',

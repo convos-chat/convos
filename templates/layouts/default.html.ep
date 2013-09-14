@@ -2,22 +2,8 @@
 <html data-basepath="<%= $self->url_for('/') %>">
   <head>
     <title><%= config 'name' %> - <%= title %></title>
-    %= stylesheet "/compiled.css?_=$VERSION"
-  % if($self->app->mode eq 'production') {
-    %= javascript "/compiled.js?_=$VERSION"
-  % } else {
-    %= javascript '/minified/jquery.js'
-    %= javascript '/minified/jquery.hotkeys.js'
-    %= javascript '/minified/jquery.fastbutton.js'
-    %= javascript '/minified/jquery.nanoscroller.js'
-    %= javascript '/minified/jquery.pjax.js'
-    %= javascript '/minified/selectize.min.js'
-    %= javascript '/js/globals.js'
-    %= javascript '/js/jquery.doubletap.js'
-    %= javascript '/js/ws-reconnecting.js'
-    %= javascript '/js/jquery.wirc.js'
-    %= javascript '/js/wirc.chat.js'
-  % }
+    %= asset 'webirc.css'
+    %= asset 'webirc.js'
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent">
