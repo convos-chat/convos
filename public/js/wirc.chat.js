@@ -126,7 +126,7 @@
 
     $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
     $('div.nicks.container ul').html('');
-    $messages.find('li').attachEventsToMessage();
+    $messages.find('li').each(function() { $(this).attachEventsToMessage(); });
     nicks.clear();
 
     if($messages.hasClass('with-nick-list')) {
