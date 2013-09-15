@@ -30,30 +30,33 @@
   };
 
   $.fn.attachEventsToMessage = function() {
-    this.find('h3 a').each(function() {
-      this.href = '#';
-    }).click(function() {
-      var n = $(this).text();
-      $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
-    });
-
-    // embed media
-    this.find('a[target="_blank"]').each(function() {
-      var $a = $(this);
-      $.get($.url_for('oembed?url=' + this.href), function(embed_code) {
-        var at_bottom = $win.data('at_bottom');
-        $a.closest('div').after(embed_code);
-        if(at_bottom) {
-          $win.scrollTo('bottom');
-          $a.closest('div').find('img').one('load', function() { $win.scrollTo('bottom') });
-        }
+    return this.each(function() {
+      var $message = $(this);
+      $message.find('h3 a').each(function() {
+        this.href = '#';
+      }).click(function() {
+        var n = $(this).text();
+        $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
       });
-    });
 
-    this.find('.close').click(function() { $(this).closest('li').remove(); });
-    this.filter('.historic-message').find('a.button.newer').click(getNewMessages);
-    this.filter('.historic-message').find('a.button.current').click(function(e) {
-      return $.pjax.click(e, { container: 'div.messages' });
+      // embed media
+      $message.find('a[target="_blank"]').each(function() {
+        var $a = $(this);
+        $.get($.url_for('oembed?url=' + this.href), function(embed_code) {
+          var at_bottom = $win.data('at_bottom');
+          $a.closest('div').after(embed_code);
+          if(at_bottom) {
+            $win.scrollTo('bottom');
+            $a.closest('div').find('img').one('load', function() { $win.scrollTo('bottom') });
+          }
+        });
+      });
+
+      $message.find('.close').click(function() { $(this).closest('li').remove(); });
+      $message.filter('.historic-message').find('a.button.newer').click(getNewMessages);
+      $message.filter('.historic-message').find('a.button.current').click(function(e) {
+        return $.pjax.click(e, { container: 'div.messages' });
+      });
     });
   };
 
@@ -126,7 +129,7 @@
 
     $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
     $('div.nicks.container ul').html('');
-    $messages.find('li').each(function() { $(this).attachEventsToMessage(); });
+    $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
     if($messages.hasClass('with-nick-list')) {
@@ -239,7 +242,7 @@
         $messages.end_time = end_time;
         if(!$li.length) return;
         $messages.start_time = parseFloat($ul.data('start-time'));
-        $messages.prepend($li);
+        $messages.prepend($li.attachEventsToMessage());
         $win.scrollTop($height_from.height() - height_before_prepend);
       });
       $messages.start_time = $messages.end_time = 0;
