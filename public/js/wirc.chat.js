@@ -42,7 +42,7 @@
       // embed media
       $message.find('a[target="_blank"]').each(function() {
         var $a = $(this);
-        $.get($.url_for('oembed?url=' + this.href), function(embed_code) {
+        $.get($.url_for('oembed'), { url: this.href }, function(embed_code) {
           var at_bottom = $win.data('at_bottom');
           $a.closest('div').after(embed_code);
           if(at_bottom) {
