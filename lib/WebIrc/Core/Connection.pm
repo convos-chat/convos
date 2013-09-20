@@ -736,7 +736,13 @@ Handle nick commands from user. Change nick and set new nick in redis.
 sub cmd_nick {
   my ($self, $message) = @_;
   my $new_nick = $message->{params}[0];
-  $self->redis->hset($self->{path}, nick => $new_nick);
+
+  if($new_nick =~ /^[\w-]$/) {
+    $self->redis->hset($self->{path}, nick => $new_nick);
+  }
+  else {
+    $self->_publish(server_message => { status => 400, message => 'Invalid nick' });
+  }
 }
 
 =head2 cmd_join
