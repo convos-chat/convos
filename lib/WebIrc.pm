@@ -126,7 +126,7 @@ sub startup {
   $self->sessions->default_expiration(86400 * 30);
   $self->defaults(layout => 'default', logged_in => 0, VERSION => time, body_class => 'default');
 
-  $self->plugin('AssetPack' => { rebuild => 1 });
+  $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
   $self->asset('webirc.css', '/sass/main.scss');
   $self->asset('webirc.js',
     '/js/jquery.min.js',
