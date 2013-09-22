@@ -1,3 +1,5 @@
+[![Build Status](http://strider.vm.nordaaker.com/523f43dc5893510900000008/marcusramberg/wirc/badge)](http://strider.vm.nordaaker.com/marcusramberg/wirc)
+
 # WIRC
 
 ## About
