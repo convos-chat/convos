@@ -51,5 +51,7 @@ redis_do(
   $core->control(foo => 'doe', 'irc.perl.org', sub {});
   is_deeply [$delay->wait], [$core, 'doe', 'irc.perl.org'], 'ctrl_foo()';
 }
-
 done_testing;
+
+diag "FIXME: We should not have to undef core->{control} to make core quit. Probably hiding a loop here";
+$core->{control}=undef;
