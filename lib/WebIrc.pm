@@ -126,6 +126,22 @@ sub startup {
   $self->sessions->default_expiration(86400 * 30);
   $self->defaults(layout => 'default', logged_in => 0, VERSION => time, body_class => 'default');
 
+  $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
+  $self->asset('webirc.css', '/sass/main.scss');
+  $self->asset('webirc.js',
+    '/js/jquery.min.js',
+    '/js/jquery.hotkeys.min.js',
+    '/js/jquery.fastbutton.min.js',
+    '/js/jquery.nanoscroller.min.js',
+    '/js/jquery.pjax.min.js',
+    '/js/selectize.min.js',
+    '/js/globals.js',
+    '/js/jquery.doubletap.js',
+    '/js/ws-reconnecting.js',
+    '/js/jquery.wirc.js',
+    '/js/wirc.chat.js',
+  );
+
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
@@ -159,39 +175,10 @@ sub startup {
     }
   );
 
-  $self->log->info("mode=@{[$self->mode]}, WIRC_BACKEND_REV=$ENV{WIRC_BACKEND_REV}");
-
-  # since the xxx_mode() methods will be deprecated
-  if($self->mode =~ /^prod/) {
-    $self->_production_mode;
-  }
-  elsif($self->mode =~ /^dev/) {
-    $self->_development_mode;
-  }
-
   if($config->{backend}{embedded}) {
     Mojo::IOLoop->timer(0, sub {
       $self->core->start;
     });
-  }
-}
-
-sub _production_mode {
-  my $self = shift;
-
-  unless($ENV{WIRC_BACKEND_REV}) {
-    require WebIrc::Command::compile;
-    WebIrc::Command::compile->new(app => $self)->compile_javascript->compile_stylesheet;
-  }
-}
-
-sub _development_mode {
-  my $self = shift;
-
-  # ugly hack to prevent this from running when running unit tests
-  unless($INC{'Test/Mojo.pm'}) {
-    require WebIrc::Command::compile;
-    WebIrc::Command::compile->new(app => $self)->compile_stylesheet;
   }
 }
 

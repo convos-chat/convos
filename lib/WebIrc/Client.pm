@@ -74,13 +74,12 @@ sub view {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->hgetall("user:$login:connection:$server", $delay->begin);
+      $self->redis->hget("user:$login:connection:$server", "nick", $delay->begin);
     },
     sub {
-      my($delay, $connection) = @_;
-      return $self->route unless %$connection;
-      delete $connection->{server};
-      $self->stash(%$connection);
+      my($delay, $nick) = @_;
+      return $self->route unless $nick;
+      $self->stash(nick => $nick);
       $self->redis->zadd("user:$login:conversations", time, $name) if $target;
       $self->_modify_notification($self->param('notification'), read => 1, sub {}) if defined $self->param('notification');
       $self->_conversation($delay->begin);
