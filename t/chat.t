@@ -179,7 +179,7 @@ $t->post_ok('/', form => { login => 'doe', password => 'barbar' })
   $connection->irc_rpl_topicwhotime({ params => ['', '#wirc', 'doe', '1375212722'] });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.topic[data-server="wirc.pl"][data-target="#wirc"]'), 'Got topic';
-  like $dom->at('div.content')->all_text, qr/Set by doe at 30\. jul\S* 21:32:02/i, 'Set by doe at 30. jul 21:32:02';
+  like $dom->at('div.content')->all_text, qr/Set by doe at 30\. jul\S* \d{2}:32:02/i, 'Set by doe at 30. jul 21:32:02';
 }
 
 {

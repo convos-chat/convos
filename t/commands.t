@@ -57,10 +57,7 @@ $t->websocket_ok('/socket');
   ok $dom->at('li.remove-conversation[data-server="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
 }
 
-{
-  local $TODO = 'Need to convert backend to a list';
   $t->send_ok(msg('/reconnect    '));
-}
 
 for my $cmd (qw/ j join /) {
   publish(event => 'add_conversation', server => 'irc.perl.org', target => '#toocool');
