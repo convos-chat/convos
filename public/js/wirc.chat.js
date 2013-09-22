@@ -182,7 +182,7 @@
       if(!$li.parent('ul').is('.conversations')) $menu.append($li);
       used_width += $li.find('a').outerWidth();
       if(used_width < available_width) return;
-      $dropdown.prepend($li);
+      $dropdown.append($li);
     });
 
     if(used_width >= available_width) {
