@@ -8,10 +8,8 @@ requires 'Parse::IRC'      => 1.18;
 requires 'Time::Piece'     => 1.20;
 requires 'Unicode::UTF8'   => 0.58;
     
-on 'develop' => sub {
-  # AssetPack and optional deps
-  recommends 'Mojolicious::Plugin::AssetPack' => '0.01';
-  recommends 'JavaScript::Minifier::XS' => 0.09;
-  recommends 'CSS::Minifier::XS' => 0.08;
-};
+# AssetPack and optional deps
+requires 'Mojolicious::Plugin::AssetPack' => '0.01';
+requires 'JavaScript::Minifier::XS' => 0.09;
+requires 'CSS::Minifier::XS' => 0.08;
 
