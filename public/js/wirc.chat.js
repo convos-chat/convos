@@ -44,10 +44,11 @@
         var $a = $(this);
         $.get($.url_for('oembed'), { url: this.href }, function(embed_code) {
           var at_bottom = $win.data('at_bottom');
-          $a.closest('div').after(embed_code);
+          var $embed_code = $(embed_code);
+          $a.closest('div').after($embed_code);
           if(at_bottom) {
             $win.scrollTo('bottom');
-            $a.closest('div').find('img').one('load', function() { $win.scrollTo('bottom') });
+            $embed_code.find('img').one('load', function() { $win.scrollTo('bottom') });
           }
         });
       });
