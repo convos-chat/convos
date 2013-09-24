@@ -259,7 +259,10 @@ sub notification_list {
       );
 
       return $self->$cb($notification_list) if $cb;
-      return $self->render;
+      return $self->respond_to(
+        json => { json => $self->stash('notification_list') },
+        html => sub { shift->render },
+      );
     },
   );
 

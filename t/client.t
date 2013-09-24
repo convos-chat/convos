@@ -46,6 +46,12 @@ $t->get_ok('/notifications')
   ->element_exists_not('li:nth-of-type(1)')
   ;
 
+$t->get_ok('/notifications',{Accept => 'application/json'})
+  ->status_is(200)
+  ->content_type_is('application/json')
+  ;
+
+
 $t->post_ok('/notifications/clear')
   ->status_is(200)
   ->json_is('/cleared', 0)
