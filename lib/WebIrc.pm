@@ -180,6 +180,19 @@ sub startup {
       $self->core->start;
     });
   }
+  if ($self->mode eq 'production') {
+    unless($ENV{WIRC_BACKEND_REV}) {
+      require WebIrc::Command::compile;
+      WebIrc::Command::compile->new(app => $self)->compile_javascript->compile_stylesheet;
+    }
+  }
+  elsif ($self->mode eq 'development') {
+    # ugly hack to prevent this from running when running unit tests
+    unless($INC{'Test/Mojo.pm'}) {
+      require WebIrc::Command::compile;
+      WebIrc::Command::compile->new(app => $self)->compile_stylesheet;
+    }
+  }
 }
 
 =head1 COPYRIGHT
