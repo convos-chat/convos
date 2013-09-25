@@ -38,11 +38,9 @@ sub login_or_register {
 
   if($self->req->method eq 'POST') {
     if(defined $self->param('email') or $self->stash('register_page')) {
-      $self->stash(form => 'register');
       $self->register;
     }
     else {
-      $self->stash(form => 'login');
       $self->login;
     }
   }
@@ -57,13 +55,14 @@ Authenticate local user
 sub login {
   my $self=shift;
   $self->respond_to(
-    html => sub { redirect_to => $self->url_for('/') },
-    json => { json => { login => $self->session('login') } }
+    html => sub { $self->redirect_to( $self->url_for('/') ) },
+    json => { json => { login => $self->session('login') || 0 } }
   );
 }
 
 sub do_login {
   my $self = shift->render_later;
+  $self->stash(form => 'login');
   my $login = $self->param('login');
 
   $self->app->core->login(
@@ -75,13 +74,17 @@ sub do_login {
       my ($core, $error) = @_;
 
       if($error) {
-        $self->render(message => 'Invalid username/password.', status => 401);
+        $self->render('index',message => 'Invalid username/password.', status => 401);
         return;
       }
 
       $self->session(login => $login);
 
-      $self->redirect_last($login);
+      $self->respond_to(
+        html => sub { $self->redirect_last($login); },
+        json => { json => { login => $self->session('login') || 0 } }
+      );
+
     },
   );
 }
@@ -94,6 +97,7 @@ See L</login>.
 
 sub register {
   my $self = shift->render_later;
+  $self->stash(form => 'register');
   my $wanted_login = $self->param('login');
   my $admin = 0;
 
@@ -118,12 +122,12 @@ sub register {
       if($exists) {
         $self->stash->{errors}{login} = "Username ($wanted_login) is taken.";
         $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        $self->render(status => 400);
+        $self->render('index', status => 400);
         return;
       }
       if($self->_got_invalid_register_params($secret_required)) {
         $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        $self->render(status => 400);
+        $self->render('index', status => 400);
         return;
       }
 

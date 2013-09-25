@@ -1,6 +1,6 @@
 <div class="register row ignore-document-close">
   <h1>Register a new acccount</h1>
-  %= form_for '', method => 'post', begin
+  %= form_for '/register', method => 'post', begin
     %= include 'inc/alert' if $form eq 'register'
     %= form_block login => class => [], begin
       <label for="register_login">Username</label>

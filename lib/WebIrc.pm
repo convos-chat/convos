@@ -146,8 +146,9 @@ sub startup {
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
   $r->post('/')->to('user#login_or_register');
-  $r->any('/login')->to('user#login_or_register');
-  $r->any('/register')->to('user#login_or_register', register_page => 1);
+  $r->get('/login')->to('user#login');
+  $r->post('/login')->to('user#do_login');
+  $r->post('/register')->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
@@ -179,19 +180,6 @@ sub startup {
     Mojo::IOLoop->timer(0, sub {
       $self->core->start;
     });
-  }
-  if ($self->mode eq 'production') {
-    unless($ENV{WIRC_BACKEND_REV}) {
-      require WebIrc::Command::compile;
-      WebIrc::Command::compile->new(app => $self)->compile_javascript->compile_stylesheet;
-    }
-  }
-  elsif ($self->mode eq 'development') {
-    # ugly hack to prevent this from running when running unit tests
-    unless($INC{'Test/Mojo.pm'}) {
-      require WebIrc::Command::compile;
-      WebIrc::Command::compile->new(app => $self)->compile_stylesheet;
-    }
   }
 }
 

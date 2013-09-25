@@ -1,6 +1,6 @@
 <div class="login row ignore-document-close">
   <h1>Login to wirc</h1>
-  %= form_for '', method => 'post', begin
+  %= form_for '/login', method => 'post', begin
     %= include 'inc/alert' if $form eq 'login'
     %= form_block login => class => [], begin
       <label for="login">Username</label>
