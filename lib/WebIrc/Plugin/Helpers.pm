@@ -203,6 +203,27 @@ sub timestamp_span {
   );
 }
 
+sub redirect_last {
+  my ($self,$login)=@_;
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
+    },
+    sub {
+      my($delay, $names) = @_;
+
+      if($names and $names->[0]) {
+        if(my($server, $target) = id_as $names->[0]) {
+          return $self->redirect_to('view', server => $server, target => $target);
+        }
+      }
+
+      $self->redirect_to('settings');
+    }
+  );
+}
+
 =head1 METHODS
 
 =head2 register
@@ -223,6 +244,7 @@ sub register {
   $app->helper(id_as => sub { shift; WebIrc::Core::Util::id_as(@_) });
   $app->helper(send_partial => \&send_partial);
   $app->helper(timestamp_span => \&timestamp_span);
+  $app->helper(redirect_last => \&redirect_last);
 }
 
 =head1 AUTHOR

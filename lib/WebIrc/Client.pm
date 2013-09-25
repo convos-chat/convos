@@ -24,24 +24,7 @@ Route to last seen IRC conversation.
 sub route {
   my $self = shift->render_later;
   my $login  = $self->session('login') or return $self->render('index', form => '');
-
-  Mojo::IOLoop->delay(
-    sub {
-      my($delay) = @_;
-      $self->redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
-    },
-    sub {
-      my($delay, $names) = @_;
-
-      if($names and $names->[0]) {
-        if(my($server, $target) = id_as $names->[0]) {
-          return $self->redirect_to('view', server => $server, target => $target);
-        }
-      }
-
-      $self->redirect_to('settings');
-    }
-  );
+  $self->redirect_last($login);
 }
 
 =head2 view

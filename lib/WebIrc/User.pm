@@ -55,6 +55,14 @@ Authenticate local user
 =cut
 
 sub login {
+  my $self=shift;
+  $self->respond_to(
+    html => sub { redirect_to => $self->url_for('/') },
+    json => { json => { login => $self->session('login') } }
+  );
+}
+
+sub do_login {
   my $self = shift->render_later;
   my $login = $self->param('login');
 
@@ -73,10 +81,7 @@ sub login {
 
       $self->session(login => $login);
 
-      # this is super ugly
-      require WebIrc::Client;
-      bless $self, 'WebIrc::Client';
-      $self->route;
+      $self->redirect_last($login);
     },
   );
 }
