@@ -9,6 +9,7 @@ WebIrc::Plugin::Helpers - Mojo's little helpers
 use Mojo::Base 'Mojolicious::Plugin';
 use WebIrc::Core::Util qw(format_time);
 use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
+use WebIrc::Core::Util qw/id_as/;
 
 my $URL_RE = do {
   # Modified regex from RFC 3986
