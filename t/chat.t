@@ -20,7 +20,7 @@ redis_do(
 );
 
 $connection->redis($t->app->redis)->_irc(dummy_irc());
-$t->post_ok('/', form => { login => 'doe', password => 'barbar' })
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
   ->status_is(302)
   ->header_like('Location', qr{/wirc\.pl/%23wirc$}, 'Redirect to conversation')
   ;

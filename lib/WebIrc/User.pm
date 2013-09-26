@@ -25,27 +25,6 @@ sub auth {
   return 0;
 }
 
-=head2 login_or_register
-
-Will either call L</login> or L</register> based on form input.
-
-=cut
-
-sub login_or_register {
-  my $self = shift;
-
-  $self->stash(template => 'index', form => '');
-
-  if($self->req->method eq 'POST') {
-    if(defined $self->param('email') or $self->stash('register_page')) {
-      $self->register;
-    }
-    else {
-      $self->login;
-    }
-  }
-}
-
 =head2 login
 
 Authenticate local user
@@ -55,14 +34,13 @@ Authenticate local user
 sub login {
   my $self=shift;
   $self->respond_to(
-    html => sub { $self->redirect_to( $self->url_for('/') ) },
+    html => sub { $self->render('index', form => 'login' ) },
     json => { json => { login => $self->session('login') || 0 } }
   );
 }
 
 sub do_login {
   my $self = shift->render_later;
-  $self->stash(form => 'login');
   my $login = $self->param('login');
 
   $self->app->core->login(
@@ -74,7 +52,7 @@ sub do_login {
       my ($core, $error) = @_;
 
       if($error) {
-        $self->render('index',message => 'Invalid username/password.', status => 401);
+        $self->render('index', form=>'login', message => 'Invalid username/password.', status => 401);
         return;
       }
 

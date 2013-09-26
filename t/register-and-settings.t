@@ -132,13 +132,13 @@ $form = {
     email => 'foobar@barbar.com',
     password => ['yikes', 'yikes'],
 };
-$t->post_ok('/' => form => $form)
+$t->post_ok('/register' => form => $form)
   ->status_is(400)
   ->text_is('div.register .error p.help', 'You need a valid invite code to register.')
   ;
 
 $form->{login} = 'fooman';
-$t->post_ok('/' => form => $form)
+$t->post_ok('/register' => form => $form)
   ->status_is(400)
   ->text_is('div.login .error:nth-of-child(1) p.help', 'Username (fooman) is taken.')
   ;

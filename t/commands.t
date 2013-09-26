@@ -14,7 +14,7 @@ redis_do(
   [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
 );
 
-$t->post_ok('/', form => { login => 'doe', password => 'barbar' }) ->status_is(302); # login
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' }) ->status_is(302); # login
 $t->websocket_ok('/socket');
 
 {

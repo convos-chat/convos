@@ -7,7 +7,7 @@ use t::Helper;
     [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
   );
 
-  $t->post_ok('/', form => { login => 'doe', password => 'barbar' })->status_is(302);
+  $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 }
 
 {

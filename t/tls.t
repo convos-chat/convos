@@ -10,7 +10,7 @@ my $core = $t->app->core;
 my($form, $tmp);
 
 # login
-$t->post_ok('/', form => { login => 'doe', password => 'barbar' })->status_is(302);
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
 {
   $t->get_ok('/settings')

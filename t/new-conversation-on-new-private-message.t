@@ -17,7 +17,7 @@ redis_do(
 
 $connection->redis($t->app->redis);
 $connection->_irc->nick('doe')->user('');
-$t->post_ok('/', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect to conversation');
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect to conversation');
 $t->websocket_ok('/socket');
 
 {

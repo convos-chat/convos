@@ -13,7 +13,7 @@ $t->get_ok('/oembed?url=http://google.com')
   ;
 
 # login
-$t->post_ok('/', form => { login => 'doe', password => 'barbar' })->status_is(302);
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
 $t->get_ok('/oembed?url=http://google.com')->status_is(404);
 

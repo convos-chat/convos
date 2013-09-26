@@ -10,7 +10,7 @@ my $server = $t->app->redis->subscribe('wirc:user:fooman:localhost:6667');
 my($form, $tmp);
 
 # login
-$t->post_ok('/', form => { login => 'doe', password => 'barbar' })->status_is(302);
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
 $t->get_ok('/settings')
   ->element_exists('form[action="/settings/connection"][method="post"]')
