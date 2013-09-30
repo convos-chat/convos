@@ -1,6 +1,7 @@
 ;(function($) {
   var $goto_bottom, $input, $win;
   var $messages = $('<div/>'); // need to be defined
+  var reconnectHandler;
   var nicks = new sortedSet();
   var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var conversation_list = [];
@@ -367,7 +368,7 @@
     if(!url) return;
     $input.history = [];
     $input.history_i = 0;
-    $input.socket = window.ws(url);
+    $input.socket = new ReconnectingWebSocket(url);
     $input.socket.opened = 0;
     $input.socket.onmessage = receiveMessage;
     $input.socket.debug = location.href.indexOf('#debug') > 0 ? true : false;
@@ -382,6 +383,7 @@
     $input.socket.onclose = function() {
       $input.addClass('disabled');
     };
+    reconnectHandler= window.setTimeout(function() { $input.socket.refresh()},60000);
     $input.send = function(message, history) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
@@ -482,6 +484,8 @@
   };
 
   var receiveMessage = function(e) {
+    window.clearTimeout(reconnectHandler);
+    reconnectHandler= window.setTimeout(function() { console.log('WAT'); $input.socket.refresh() },60000);
     var $message = $(e.data);
     var at_bottom = $win.data('at_bottom');
     var to_current = false;
