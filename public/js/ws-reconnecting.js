@@ -52,6 +52,7 @@ function ReconnectingWebSocket(url, protocols) {
 
     // These can be altered by calling code.
     this.debug = false;
+    this.buffer = []
     this.reconnectInterval = 1000;
     this.timeoutInterval = 2000;
 
@@ -106,6 +107,7 @@ function ReconnectingWebSocket(url, protocols) {
             self.readyState = WebSocket.OPEN;
             reconnectAttempt = false;
             self.onopen(event);
+            while(self.buffer.length) self.send(self.buffer.shift());
         };
         
         ws.onclose = function(event) {
@@ -132,7 +134,7 @@ function ReconnectingWebSocket(url, protocols) {
             if (self.debug || ReconnectingWebSocket.debugAll) {
                 console.debug('ReconnectingWebSocket', 'onmessage', url, event.data);
             }
-        	self.onmessage(event);
+            self.onmessage(event);
         };
         ws.onerror = function(event) {
             if (self.debug || ReconnectingWebSocket.debugAll) {
@@ -148,7 +150,12 @@ function ReconnectingWebSocket(url, protocols) {
             if (self.debug || ReconnectingWebSocket.debugAll) {
                 console.debug('ReconnectingWebSocket', 'send', url, data);
             }
-            return ws.send(data);
+            if(self.readyState == WebSocket.OPEN) {
+              return ws.send(data);
+            }
+            else {
+              buffer.push(data);
+            }
         } else {
             throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
         }
