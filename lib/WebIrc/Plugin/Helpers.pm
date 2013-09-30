@@ -204,6 +204,12 @@ sub timestamp_span {
   );
 }
 
+=head2 redirect_last $login
+
+Redirect to the last visited channel for $login. Falls back to settings.
+
+=cut
+
 sub redirect_last {
   my ($self,$login)=@_;
   Mojo::IOLoop->delay(

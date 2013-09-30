@@ -27,7 +27,7 @@ sub auth {
 
 =head2 login
 
-Authenticate local user
+Show the login form. Also responds to JSON requests with login status.
 
 =cut
 
@@ -38,6 +38,12 @@ sub login {
     json => { json => { login => $self->session('login') || 0 } }
   );
 }
+
+=head2 do_login
+
+Authenticate local user
+
+=cut
 
 sub do_login {
   my $self = shift->render_later;
