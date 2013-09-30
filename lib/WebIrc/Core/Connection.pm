@@ -190,7 +190,9 @@ sub connect {
   # we will try to "steal" the nich we want every 60 second
   Scalar::Util::weaken($self);
   $self->{keepnick_tid} ||= $irc->ioloop->recurring(60, sub {
-    $self->redis->hget($self->{path}, 'nick', sub { $irc->change_nick($_[1]) });
+    $self->redis->hget($self->{path}, 'nick', sub {
+      $irc->write(NICK => $_[1]) if $irc->nick ne $_[1];
+    });
   });
 
   $self->_connect;
