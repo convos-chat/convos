@@ -21,7 +21,7 @@ use t::Helper;
   });
 
   Mojo::IOLoop->start;
-  is $frame->[4], 9, 'got ping from server';
+  is $frame->[4], 1, 'sent as message';
   is $frame->[5], '<div class="ping"/>', 'Avoid browser ping/pong to prevent browser errors (Chrome!#$%!)';
 }
 
