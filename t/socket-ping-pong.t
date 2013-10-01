@@ -22,7 +22,7 @@ use t::Helper;
 
   Mojo::IOLoop->start;
   is $frame->[4], 9, 'got ping from server';
-  is $frame->[5], 'pin', 'why just "pin" ? because i am crazy! mohahaha!';
+  is $frame->[5], '<div class="ping"/>', 'Avoid browser ping/pong to prevent browser errors (Chrome!#$%!)';
 }
 
 #warn $t->message->[1];

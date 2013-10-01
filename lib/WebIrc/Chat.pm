@@ -30,7 +30,7 @@ sub socket {
   # send ping frames
   Scalar::Util::weaken($self);
   $tid = Mojo::IOLoop->recurring(PING_INTERVAL, sub {
-           $self->send([1, 0, 0, 0, 9, 'pin']);
+           $self->send('<div class="ping"/>');
          });
 
   # from browser to backend
@@ -38,14 +38,14 @@ sub socket {
     message => sub {
       my ($self, $octets) = @_;
       my $dom = Mojo::DOM->new($octets)->at('div');
-
+      return if $dom->attr('class') eq 'pong';
       $self->logf(debug => '[ws] < %s', $octets);
 
       if($dom and $dom->{'id'} and $dom->{'data-server'}) {
         @$dom{qw/ server target uuid /} = map { delete $dom->{$_} || '' } qw/ data-server data-target id /;
         $self->_handle_socket_data($dom);
       }
-      else {
+      else{
         $self->send_partial('event/server_message',
           status => 400,
           server => $dom->{'data-server'} || 'any',

@@ -484,9 +484,12 @@
   };
 
   var receiveMessage = function(e) {
-    window.clearTimeout(reconnectHandler);
-    reconnectHandler= window.setTimeout(function() { console.log('WAT'); $input.socket.refresh() },60000);
+      window.clearTimeout(reconnectHandler);
+      reconnectHandler= window.setTimeout(function() { $input.socket.refresh() },60000);
     var $message = $(e.data);
+    if($message.hasClass('ping')) {
+      return $input.ws.send('<div class="pong"/>')
+    }
     var at_bottom = $win.data('at_bottom');
     var to_current = false;
     var uuid = $message.attr('id');

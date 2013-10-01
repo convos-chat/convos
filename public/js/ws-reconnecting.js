@@ -154,7 +154,7 @@ function ReconnectingWebSocket(url, protocols) {
               return ws.send(data);
             }
             else {
-              buffer.push(data);
+              self.buffer.push(data);
             }
         } else {
             throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
