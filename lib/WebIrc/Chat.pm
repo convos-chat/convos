@@ -38,7 +38,7 @@ sub socket {
     message => sub {
       my ($self, $octets) = @_;
       my $dom = Mojo::DOM->new($octets)->at('div');
-      return if $dom->attr('class') eq 'pong';
+      return if $dom && $dom->attr('class') eq 'pong';
       $self->logf(debug => '[ws] < %s', $octets);
 
       if($dom and $dom->{'id'} and $dom->{'data-server'}) {
