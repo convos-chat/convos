@@ -104,10 +104,10 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 6.52
       Test::More 0.82
       perl 5.00503
-  Mojo-IRC-0.0302
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.0302.tar.gz
+  Mojo-IRC-0.0303
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.0303.tar.gz
     provides:
-      Mojo::IRC 0.0302
+      Mojo::IRC 0.0303
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
