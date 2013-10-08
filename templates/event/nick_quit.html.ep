@@ -1,0 +1,9 @@
+<li class="nick-quit" data-server="<%= $server %>" data-target="any">
+  <div class="content">
+    <b class="nick"><%= $nick %></b> quit.
+  % $message =~ s/^quit\W+//i; # Quit: Leaving
+  % if($message) {
+    <span><%= ucfirst $message %></span>
+  % }
+  %= timestamp_span($timestamp)
+</li>

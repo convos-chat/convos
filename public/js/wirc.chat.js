@@ -103,6 +103,14 @@
       nicks.rem(this.find('.nick').text());
       nickList($('<div/>'));
     }
+    else if(this.hasClass('nick-quit')) {
+      var nick = this.find('.nick').text();
+      if(nicks.score(nick)) {
+        nicks.rem(nick);
+        nickList($('<div/>'));
+      }
+      // want else { return; }, but let's keep all nick-quit messages for now
+    }
     else if(this.hasClass('nicks')) {
       nickList(this);
       return;

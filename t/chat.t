@@ -240,6 +240,14 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
 }
 
 {
+  $connection->irc_quit({ params => ['Quit: leaving'], prefix => 'fooman!user@host' });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.nick-quit[data-server="wirc.pl"][data-target="any"]'), 'nick quit';
+  is $dom->at('div.content b.nick')->text, 'fooman', 'fooman quit';
+  is $dom->at('div.content span')->text, 'Leaving', 'fooman leaving';
+}
+
+{
   # Fix parsing links without a path part
   $connection->add_message({
     params => [ '#mojo', 'http://wirc.pl is really cool' ],

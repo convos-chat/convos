@@ -557,6 +557,25 @@ sub irc_nick {
   $self->_publish(nick_change => { old_nick => $old_nick, new_nick => $new_nick });
 }
 
+=head2 irc_quit
+
+  {
+    params => [ 'Quit: leaving' ],
+    raw_line => ':nick!~user@localhost QUIT :Quit: leaving',
+    command => 'QUIT',
+    prefix => 'nick!~user@localhost'
+  };
+
+=cut
+
+sub irc_quit {
+  my ($self, $message) = @_;
+  my ($nick) = IRC::Utils::parse_user($message->{prefix});
+
+  Scalar::Util::weaken($self);
+  $self->_publish(nick_quit => { nick => $nick, message => $message->{params}[0] });
+}
+
 =head2 irc_part
 
 =cut
