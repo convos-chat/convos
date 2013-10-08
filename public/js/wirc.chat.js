@@ -115,7 +115,7 @@
       nickList(this);
       return;
     }
-    else if(this.data('sender')) {
+    else if(this.data('sender') && this.data('sender') != $messages.data('nick')) {
       nicks.add(new Date().getTime(), this.data('sender'));
     }
 
