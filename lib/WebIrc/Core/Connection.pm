@@ -40,7 +40,7 @@ L<Mojo::IRC/rpl_endofmotd>, L<Mojo::IRC/rpl_welcome> and L<Mojo::IRC/error>.
 
 L</irc_rpl_welcome>, L</irc_rpl_myinfo>, L</irc_join>, L</irc_part>,
 L</irc_rpl_namreply>, L</irc_err_nosuchchannel> L</irc_err_notonchannel>
-L</irc_err_bannedfromchan> and l</irc_error>.
+L</irc_err_bannedfromchan>, l</irc_error> and L</irc_quit>.
 
 =back
 
@@ -100,7 +100,7 @@ my @OTHER_EVENTS              = qw/
   irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic irc_err_nosuchchannel
   irc_err_notonchannel irc_err_bannedfromchan irc_rpl_liststart irc_rpl_list
-  irc_rpl_listend irc_mode
+  irc_rpl_listend irc_mode irc_quit
 /;
 
 has _irc => sub {
