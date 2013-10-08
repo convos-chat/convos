@@ -109,7 +109,9 @@
         nicks.rem(nick);
         nickList($('<div/>'));
       }
-      // want else { return; }, but let's keep all nick-quit messages for now
+      else {
+        return;
+      }
     }
     else if(this.hasClass('nicks')) {
       nickList(this);

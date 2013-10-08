@@ -423,11 +423,11 @@ div.messages {
   li.message-error { font-style: italic; }
   li.message-error h3 { color: #333; font-style: italic; }
   li.message-error, li.server-message.error { background: #fbb; }
-  li.nick-change, li.nick-joined, li.nick-parted, li.notice, li.topic, li.whois {
+  li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
     color: #888;
   }
-  li.nick-change, li.nick-parted {
+  li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
   }
 
