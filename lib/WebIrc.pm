@@ -116,6 +116,12 @@ sub startup {
   my $self   = shift;
   my $config = $self->plugin('Config');
 
+  if(my $log = $config->{log}) {
+    $log->level($log->{level}) if $log->{level};
+    $log->path($log->{file}) if $log->{file} ||= $log->{path};
+    delete $log->{handle}; # make sure it's fresh to file
+  }
+
   $config->{name} ||= 'Wirc';
   $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
   $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
