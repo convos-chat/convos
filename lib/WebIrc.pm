@@ -117,8 +117,8 @@ sub startup {
   my $config = $self->plugin('Config');
 
   if(my $log = $config->{log}) {
-    $log->level($log->{level}) if $log->{level};
-    $log->path($log->{file}) if $log->{file} ||= $log->{path};
+    $self->log->level($log->{level}) if $log->{level};
+    $self->log->path($log->{file}) if $log->{file} ||= $log->{path};
     delete $log->{handle}; # make sure it's fresh to file
   }
 
