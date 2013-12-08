@@ -141,7 +141,8 @@ Backend functionality.
 
 use Mojo::Base 'Mojolicious';
 use Mojo::Redis;
-use File::Spec::Functions qw(catfile tmpdir);
+use File::Spec::Functions qw( catdir catfile tmpdir );
+use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
 
@@ -182,8 +183,11 @@ This method will run once at server start
 =cut
 
 sub startup {
-  my $self   = shift;
-  my $config = $self->plugin('Config');
+  my $self = shift;
+  my $config;
+
+  $self->_from_cpan;
+  $config = $self->plugin('Config');
 
   if(my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
@@ -258,6 +262,17 @@ sub startup {
       $self->core->start;
     });
   }
+}
+
+sub _from_cpan {
+  my $self = shift;
+  my $home = catdir dirname(__FILE__), 'Convos';
+  my $config = catfile $home, 'convos.conf';
+
+  -r $config or return;
+  $self->home->parse($home);
+  $self->static->paths->[0] = $self->home->rel_dir('public');
+  $self->renderer->paths->[0] = $self->home->rel_dir('templates');
 }
 
 =head1 COPYRIGHT AND LICENSE
