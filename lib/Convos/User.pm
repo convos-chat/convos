@@ -58,8 +58,7 @@ sub do_login {
       my ($core, $error) = @_;
 
       if($error) {
-        $self->render('index', form=>'login', message => 'Invalid username/password.', status => 401);
-        return;
+        return $self->render('index', form=>'login', message => 'Invalid username/password.', status => 401);
       }
 
       $self->session(login => $login);
@@ -87,8 +86,7 @@ sub register {
 
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
-    $self->redirect_to('view');
-    return;
+    return $self->redirect_to('view');
   }
 
   Mojo::IOLoop->delay(
@@ -106,13 +104,11 @@ sub register {
       if($exists) {
         $self->stash->{errors}{login} = "Username ($wanted_login) is taken.";
         $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        $self->render('index', status => 400);
-        return;
+        return $self->render('index', status => 400);
       }
       if($self->_got_invalid_register_params($secret_required)) {
         $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        $self->render('index', status => 400);
-        return;
+        return $self->render('index', status => 400);
       }
 
       $digest = $self->_digest($self->param('password'));
