@@ -2,54 +2,116 @@ package Convos;
 
 =head1 NAME
 
-Convos - IRC client on web
+Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
 0.01
 
-=head1 SYNOPSIS
+=begin html
 
-=head1 Dependencies
+<img src="http://strider.vm.nordaaker.com/523f43dc5893510900000008/marcusramberg/wirc/badge">
 
-Dependencies can be installed with C<cpanm|App::cpanminus> using the
-C<cpanfile> found in the root of the project:
-
-  $ cpanm --installdeps .
-
-=head2 Production
-
-  $ hypnotoad script/convos
-
-=head2 Development
-
-  $ morbo script/convos
+=end html
 
 =head1 DESCRIPTION
 
-L<Convos> is a web frontend for IRC with additional features such as:
+WiRC is to a multi-user IRC Proxy, that also provides a easy to use Web
+interface. Feature list:
 
 =over 4
 
-=item Avatars
-
-The chat contains profile pictures which can be retrieved from Facebook
-or from gravatar.com.
-
-=item Include external resources
-
-Links to images and video will be displayed inline. No need to click on
-the link to view the data.
-
-=item Always online
+=item * Always online
 
 The backend server will keep you logged in and logs all the activity
 in your archive.
 
-=item Archive
+=item * Archive
 
 All chats will be logged and indexed, which allow you to search in
 earlier conversations.
+
+=item * Avatars
+
+The chat contains profile pictures which can be retrieved from Facebook
+or from gravatar.com.
+
+=item * Include external resources
+
+Links to images and video will be displayed inline. No need to click on
+the link to view the data.
+
+=back
+
+=head2 Dependencies
+
+To install, you need L<perl>, L<cpanm|App::cpanminus> and
+L<git|http://git-scm.com/book/en/Getting-Started-Installing-Git>.
+
+L<Perl module|http://metacpan.org> dependencies can be installed with
+L<cpanm|App::cpanminus> or L<carton> using the C<cpanfile> found
+in the root of the project:
+
+  $ cpanm --installdeps .
+
+=head2 Installation
+
+To install wirc, you can run the following commands:
+
+  $ git clone https://github.com/Nordaaker/convos.git
+  $ cd convos
+  $ git submodule update -i
+  $ cpanm --installdeps .
+  # edit convos.conf, point to a working redis server
+  $ morbo script/convos
+  # open http://yourdomain:3000 in your favorite browser
+
+=head2 Running convos in production
+
+L<morbo|Mojo::Server::Morbo> is an excellent tool for testing, but
+L<hypnotoad|Mojo::Server::Hypnotoad> should be used to run Convos in
+production:
+
+  $ hypnotoad script/convos
+
+The command above will start a full featured, UNIX optimized, preforking
+non-blocking webserver. Run the same command again, and the webserver
+will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
+loosing any connections.
+
+=head2 Wanted features
+
+=over 4
+
+=item * Per client state (track seen messages).
+
+=item * Web Notifications that integrate with notification center.
+
+=item * Fast JS Web Interface with async communication (Web Sockets)
+
+=item * Use HTML5 pushstate to be restful and fall back to page reloads for fully functioning non-async lite version.
+
+=item * Monospaced to be compatible with old school IRC clients/ascii
+
+=item * Rich media preview for links.
+
+=item * Facebook Connect for registration/Avatars.
+
+=item * Useful Archive search/viewer
+
+=back
+
+=head2 Architecture principles
+
+=over 4
+
+=item * Keep the JS simple and manageable
+
+=item * Use Redis to manage state / publish subscribe
+
+=item * Archive logs in plain text format, use ack to search them.
+
+=item * Bootstrap-based user interface
 
 =back
 
@@ -57,19 +119,19 @@ earlier conversations.
 
 =over 4
 
-=item L<Convos::Archive>
+=item * L<Convos::Archive>
 
 Mojolicious controller for IRC logs.
 
-=item L<Convos::Client>
+=item * L<Convos::Client>
 
 Mojolicious controller for IRC chat.
 
-=item L<Convos::User>
+=item * L<Convos::User>
 
 Mojolicious controller for user data.
 
-=item L<Convos::Core>
+=item * L<Convos::Core>
 
 Backend functionality.
 
@@ -196,15 +258,18 @@ sub startup {
   }
 }
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Nordaaker
+Copyright (C) 2012-2013, Nordaaker.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Artistic License version 2.0.
 
 =head1 AUTHOR
 
-Jan Henning Thorsen - jhthorsen@cpan.org
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
-Marcus Ramberg
+Marcus Ramberg - C<marcus@nordaaker.com>
 
 =cut
 
