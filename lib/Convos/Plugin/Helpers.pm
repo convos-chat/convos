@@ -1,15 +1,15 @@
-package WebIrc::Plugin::Helpers;
+package Convos::Plugin::Helpers;
 
 =head1 NAME
 
-WebIrc::Plugin::Helpers - Mojo's little helpers
+Convos::Plugin::Helpers - Mojo's little helpers
 
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use WebIrc::Core::Util qw(format_time);
-use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
-use WebIrc::Core::Util qw/id_as/;
+use Convos::Core::Util qw(format_time);
+use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
+use Convos::Core::Util qw/id_as/;
 
 my $URL_RE = do {
   # Modified regex from RFC 3986
@@ -21,11 +21,11 @@ my $URL_RE = do {
 
 =head2 id_as
 
-See L<WebIrc::Core::Util/id_as>.
+See L<Convos::Core::Util/id_as>.
 
 =head2 as_id
 
-See L<WebIrc::Core::Util/as_id>.
+See L<Convos::Core::Util/as_id>.
 
 =head2 form_block
 
@@ -145,7 +145,7 @@ sub _message_avatar {
 
 =head2 logf
 
-See L<WebIrc::Core::Util/logf>.
+See L<Convos::Core::Util/logf>.
 
 =head2 redis
 
@@ -244,11 +244,11 @@ sub register {
 
   $app->helper(form_block          => \&form_block);
   $app->helper(format_conversation => \&format_conversation);
-  $app->helper(logf                => \&WebIrc::Core::Util::logf);
+  $app->helper(logf                => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });
   $app->helper(redis => \&redis);
-  $app->helper(as_id => sub { shift; WebIrc::Core::Util::as_id(@_) });
-  $app->helper(id_as => sub { shift; WebIrc::Core::Util::id_as(@_) });
+  $app->helper(as_id => sub { shift; Convos::Core::Util::as_id(@_) });
+  $app->helper(id_as => sub { shift; Convos::Core::Util::id_as(@_) });
   $app->helper(send_partial => \&send_partial);
   $app->helper(timestamp_span => \&timestamp_span);
   $app->helper(redirect_last => \&redirect_last);

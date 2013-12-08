@@ -24,7 +24,7 @@
     '/list'
   ];
 
-  window.wirc = {
+  window.convos = {
     conversation_list: conversation_list,
     messages: $messages,
     nicks: nicks

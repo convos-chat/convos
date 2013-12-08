@@ -1,8 +1,8 @@
-package WebIrc;
+package Convos;
 
 =head1 NAME
 
-WebIrc - IRC client on web
+Convos - IRC client on web
 
 =head1 VERSION
 
@@ -12,15 +12,15 @@ WebIrc - IRC client on web
 
 =head2 Production
 
-  hypnotoad script/web_irc
+  $ hypnotoad script/convos
 
 =head2 Development
 
-  morbo script/web_irc
+  $ morbo script/convos
 
 =head1 DESCRIPTION
 
-L<WebIrc> is a web frontend for IRC with additional features such as:
+L<Convos> is a web frontend for IRC with additional features such as:
 
 =over 4
 
@@ -50,19 +50,19 @@ earlier conversations.
 
 =over 4
 
-=item L<WebIrc::Archive>
+=item L<Convos::Archive>
 
 Mojolicious controller for IRC logs.
 
-=item L<WebIrc::Client>
+=item L<Convos::Client>
 
 Mojolicious controller for IRC chat.
 
-=item L<WebIrc::User>
+=item L<Convos::User>
 
 Mojolicious controller for user data.
 
-=item L<WebIrc::Core>
+=item L<Convos::Core>
 
 Backend functionality.
 
@@ -73,32 +73,32 @@ Backend functionality.
 use Mojo::Base 'Mojolicious';
 use Mojo::Redis;
 use File::Spec::Functions qw(catfile tmpdir);
-use WebIrc::Core;
-use WebIrc::Core::Util ();
+use Convos::Core;
+use Convos::Core::Util ();
 
 our $VERSION = '0.01';
-$ENV{WIRC_BACKEND_REV} ||= 0;
+$ENV{CONVOS_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
 
 =head2 archive
 
-Holds a L<WebIrc::Core::Archive> object.
+Holds a L<Convos::Core::Archive> object.
 
 =head2 core
 
-Holds a L<WebIrc::Core> object.
+Holds a L<Convos::Core> object.
 
 =cut
 
 has archive => sub {
   my $self = shift;
-  WebIrc::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
+  Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
 
 has core => sub {
   my $self = shift;
-  my $core = WebIrc::Core->new;
+  my $core = Convos::Core->new;
 
   $core->redis->server($self->redis->server);
   $core;
@@ -122,19 +122,19 @@ sub startup {
     delete $log->{handle}; # make sure it's fresh to file
   }
 
-  $config->{name} ||= 'Wirc';
-  $config->{backend}{lock_file} ||= catfile(tmpdir, 'wirc-backend.lock');
+  $config->{name} ||= 'Convos';
+  $config->{backend}{lock_file} ||= catfile(tmpdir, 'convos-backend.lock');
   $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
   $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
 
-  $self->plugin('WebIrc::Plugin::Helpers');
+  $self->plugin('Convos::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
   $self->defaults(layout => 'default', logged_in => 0, VERSION => time, body_class => 'default');
 
   $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
-  $self->asset('webirc.css', '/sass/main.scss');
-  $self->asset('webirc.js',
+  $self->asset('convos.css', '/sass/main.scss');
+  $self->asset('convos.js',
     '/js/jquery.min.js',
     '/js/jquery.hotkeys.min.js',
     '/js/jquery.fastbutton.min.js',
@@ -144,8 +144,8 @@ sub startup {
     '/js/globals.js',
     '/js/jquery.doubletap.js',
     '/js/ws-reconnecting.js',
-    '/js/jquery.wirc.js',
-    '/js/wirc.chat.js',
+    '/js/jquery.helpers.js',
+    '/js/convos.chat.js',
   );
 
   # Normal route to controller
@@ -158,7 +158,7 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#server', [ server => $WebIrc::Core::Util::SERVER_NAME_RE ]);
+  my $host_r = $private_r->any('/#server', [ server => $Convos::Core::Util::SERVER_NAME_RE ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');

@@ -1,8 +1,8 @@
-package WebIrc::Core::Archive;
+package Convos::Core::Archive;
 
 =head1 NAME
 
-WebIrc::Core::Archive - Backend archive
+Convos::Core::Archive - Backend archive
 
 =head1 SYNOPSIS
 
@@ -44,7 +44,7 @@ sub search {
 
 =head1 COPYRIGHT
 
-See L<WebIrc>.
+See L<Convos>.
 
 =head1 AUTHOR
 

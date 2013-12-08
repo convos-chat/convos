@@ -1,4 +1,4 @@
-BEGIN { $ENV{WIRC_PING_INTERVAL} = 0.1 }
+BEGIN { $ENV{CONVOS_PING_INTERVAL} = 0.1 }
 use t::Helper;
 
 {

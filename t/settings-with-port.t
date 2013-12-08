@@ -6,7 +6,7 @@ redis_do(
   [ hmset => 'user:doe:connection:localhost:6667', nick => 'doe', host => 'localhost:6667', channels => '#foo' ],
 );
 
-my $server = $t->app->redis->subscribe('wirc:user:fooman:localhost:6667');
+my $server = $t->app->redis->subscribe('convos:user:fooman:localhost:6667');
 my($form, $tmp);
 
 # login

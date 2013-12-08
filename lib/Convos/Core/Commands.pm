@@ -1,14 +1,14 @@
-package WebIrc::Core::Commands;
+package Convos::Core::Commands;
 
 =head1 NAME
 
-WebIrc::Core::Commands - Translate to IRC commands
+Convos::Core::Commands - Translate to IRC commands
 
 =cut
 
 use strict;
 use warnings;
-use WebIrc::Core::Util 'as_id';
+use Convos::Core::Util 'as_id';
 
 =head1 METHODS
 

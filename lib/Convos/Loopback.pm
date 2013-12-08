@@ -1,20 +1,20 @@
-package WebIrc::Loopback;
+package Convos::Loopback;
 
 =head1 NAME
 
-WebIrc::Loopback - Loopback connection
+Convos::Loopback - Loopback connection
 
 =head1 DESCRIPTION
 
 This class represents a loopback connection. That is a connection which is
-only visible internally to wirc, and thus does not require a IRC server.
+only visible internally to convos, and thus does not require a IRC server.
 
 This module must be compatible with L<Mojo::IRC>.
 
 =head1 SYNOPSIS
 
-  my $connection = WebIrc::Core::Connection->new(....);
-  my $loopback = WebIrc::Loopback->new(connection => $connection);
+  my $connection = Convos::Core::Connection->new(....);
+  my $loopback = Convos::Loopback->new(connection => $connection);
 
   $loopback->connect(sub {
     my($loopback, $error) = @_;
@@ -61,7 +61,7 @@ has redis => sub { shift->connection->redis };
 
 =head2 connection
 
-Holds and instance of L<WebIrc::Core::Connection>. Must be provided in
+Holds and instance of L<Convos::Core::Connection>. Must be provided in
 constructor.
 
 =cut
@@ -123,7 +123,7 @@ sub connect {
   });
 
   Scalar::Util::weaken($self);
-  $self->{messages} = $self->redis->subscribe("wirc:loopback");
+  $self->{messages} = $self->redis->subscribe("convos:loopback");
   $self->{messages}->on(message => sub {
     my $message = Parse::IRC::parse_irc($_[1]);
     my $method = lc('irc_' .($message->{command} || 'error'));
@@ -142,11 +142,11 @@ sub _register_nick {
   my($self, $new, $cb) = @_;
   my $old = $self->nick;
 
-  $self->_redis_execute([ sismember => "wirc:loopback:names", $new ], sub {
+  $self->_redis_execute([ sismember => "convos:loopback:names", $new ], sub {
     my($self, $taken) = @_;
 
     return $self->_register_nick($new .'_', $cb) if $taken;
-    $self->redis->sadd("wirc:loopback:names", $new);
+    $self->redis->sadd("convos:loopback:names", $new);
     $self->_nick_changed($old, $new);
     $self->$cb($new, $old);
   });
@@ -158,25 +158,25 @@ sub _nick_changed {
   if($old ne $new) {
     delete $self->{conversation}{$old};
     $self->_publish("NICK :$new");
-    $self->redis->srem("wirc:loopback:names", $old);
+    $self->redis->srem("convos:loopback:names", $old);
     $self->redis->zrange($self->connection->{conversation_path}, 0, -1, sub {
       my($redis, $conversations) = @_;
       for($self->connection->channels_from_conversations($conversations)) {
-        $redis->srem("wirc:loopback:$_:names", $old);
-        $redis->sadd("wirc:loopback:$_:names", $new);
+        $redis->srem("convos:loopback:$_:names", $old);
+        $redis->sadd("convos:loopback:$_:names", $new);
       }
     });
   }
 
   $self->nick($new);
-  $self->{conversation}{$new} = $self->redis->subscribe("wirc:loopback:$new");
+  $self->{conversation}{$new} = $self->redis->subscribe("convos:loopback:$new");
   $self->{conversation}{$new}->on(message => sub { $self and $self->_message_from($new, $_[1]) });
 }
 
 sub _publish {
   my($self, $message) = @_;
   $self->redis->publish(
-    "wirc:loopback",
+    "convos:loopback",
     sprintf(':%s!~%s\@loopback %s', $self->nick, $self->nick, $message),
   );
 }
@@ -232,9 +232,9 @@ sub _write_join {
   my($self, $channel) = @_;
 
   Scalar::Util::weaken($self);
-  $self->{conversation}{$channel} = $self->redis->subscribe("wirc:loopback:$channel");
+  $self->{conversation}{$channel} = $self->redis->subscribe("convos:loopback:$channel");
   $self->{conversation}{$channel}->once(data => sub {
-    $self->redis->sadd("wirc:loopback:$channel:names", $self->nick);
+    $self->redis->sadd("convos:loopback:$channel:names", $self->nick);
     $self->_publish("JOIN $channel");
   });
   $self->{conversation}{$channel}->on(message => sub {
@@ -247,7 +247,7 @@ sub _write_join {
 sub _write_names {
   my($self, $channel) = @_;
 
-  $self->_redis_execute([ smembers => "wirc:loopback:$channel:names" ], sub {
+  $self->_redis_execute([ smembers => "convos:loopback:$channel:names" ], sub {
     my($self, $names) = @_;
     $self->connection->irc_rpl_namreply({ params => ['', '', $channel, join ' ', @$names] });
   });
@@ -258,7 +258,7 @@ sub _write_nick {
   my $old = $self->nick;
 
   $new or return;
-  $self->_redis_execute([ sadd => "wirc:loopback:names", $new ], sub {
+  $self->_redis_execute([ sadd => "convos:loopback:names", $new ], sub {
     my($self, $added) = @_;
 
     if($added) {
@@ -275,7 +275,7 @@ sub _write_part {
   my($self, $channel) = @_;
   my $nick = $self->nick;
 
-  $self->_redis_execute([ srem => "wirc:loopback:$channel:names", $self->nick ], sub {
+  $self->_redis_execute([ srem => "convos:loopback:$channel:names", $self->nick ], sub {
     my($self, $parted) = @_;
     $self->_publish("PART $channel");
   })
@@ -286,7 +286,7 @@ sub _write_privmsg {
 
   local $" = ' ';
   $msg[0] =~ s/^://;
-  $self->redis->publish("wirc:loopback:$target", sprintf ':%s %s', $self->nick, "@msg");
+  $self->redis->publish("convos:loopback:$target", sprintf ':%s %s', $self->nick, "@msg");
 }
 
 sub _write_topic {
@@ -295,13 +295,13 @@ sub _write_topic {
 
   if($topic) {
     $topic =~ s/^://;
-    $self->_redis_execute([ hset => "wirc:loopback:$channel", "topic", $topic ], sub {
+    $self->_redis_execute([ hset => "convos:loopback:$channel", "topic", $topic ], sub {
       my($self) = @_;
       $self->_publish("TOPIC $channel :$topic");
     });
   }
   else {
-    $self->_redis_execute([ hget => "wirc:loopback:$channel", "topic" ], sub {
+    $self->_redis_execute([ hget => "convos:loopback:$channel", "topic" ], sub {
       my($self, $topic) = @_;
       $self->connection->irc_rpl_topic({ params => ['', $channel, $topic // ''] });
     });

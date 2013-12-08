@@ -6,7 +6,7 @@ use lib "$FindBin::Bin/../lib";
 
 # Start commands for application
 require Mojolicious::Commands;
-require WebIrc;
-my $commands = Mojolicious::Commands->new(app => WebIrc->new);
-push @{$commands->namespaces}, 'WebIrc::Command';
+require Convos;
+my $commands = Mojolicious::Commands->new(app => Convos->new);
+push @{$commands->namespaces}, 'Convos::Command';
 $commands->run(@ARGV);

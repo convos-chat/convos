@@ -12,7 +12,7 @@ redis_do(
 
 {
   no warnings 'redefine';
-  *WebIrc::Core::Connection::_reconnect_in = sub { Mojo::IOLoop->stop; 0.01 };
+  *Convos::Core::Connection::_reconnect_in = sub { Mojo::IOLoop->stop; 0.01 };
 }
 
 {

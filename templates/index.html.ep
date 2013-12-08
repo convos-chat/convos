@@ -14,7 +14,7 @@
   <div class="row about">
     <!--[if IE]>
     <div class="alert">
-      Wirc does not work in Internet Explorer. It works best in the following browsers:
+      Convos does not work in Internet Explorer. It works best in the following browsers:
       (in order)
       <ol>
         <li><%= link_to 'Google Chrome', 'http://www.google.com/chrome' %></li>
@@ -24,16 +24,16 @@
       </ol>
     </div>
     <![endif]-->
-    <h2>What is so cool about Wirc?</h2>
+    <h2>What is so cool about Convos?</h2>
     <p>
       Ever wanted to log into an IRC channel from your phone, tablet or computer
       and never log out? Keep track of what is going on and search through your
       history from the beginning of time on any device?
     </p>
-    <h2>How does Wirc work anywhere?</h2>
+    <h2>How does Convos work anywhere?</h2>
     <p>
-      Wirc is a web application with a responsive design that
-      works great on small and big screens. Wirc also acts as a
+      Convos is a web application with a responsive design that
+      works great on small and big screens. Convos also acts as a
       Proxy for your native clients, while seamlessly keeping
       track of the messages you've seen on each client. </p>
     </p>
@@ -46,7 +46,7 @@
     </p>
     <h2>Contact us</h2>
     <p>
-      Interested in Wirc? Send an email to
+      Interested in Convos? Send an email to
       <a href="mailto:marcus@nordaaker.no">marcus@nordaaker.no</a>.
     </p>
   </div>

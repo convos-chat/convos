@@ -1,5 +1,5 @@
 use t::Helper;
-use WebIrc::Core;
+use Convos::Core;
 
 my $core = $t->app->core;
 my $redis = $t->app->redis;
@@ -47,7 +47,7 @@ redis_do(
 
   $delay = Mojo::IOLoop->delay;
   @cb = ($delay->begin(0));
-  local *WebIrc::Core::ctrl_foo = sub { pop(@cb)->(@_) };
+  local *Convos::Core::ctrl_foo = sub { pop(@cb)->(@_) };
   $core->control(foo => 'doe', 'irc.perl.org', sub {});
   is_deeply [$delay->wait], [$core, 'doe', 'irc.perl.org'], 'ctrl_foo()';
 }

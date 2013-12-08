@@ -1,12 +1,12 @@
-package WebIrc::Command::backend;
+package Convos::Command::backend;
 
 =head1 NAME
 
-WebIrc::Command::backend - Start wirc backend
+Convos::Command::backend - Start convos backend
 
 =head1 DESCRIPTION
 
-This web_irc command will start the wirc backend in a standalone process.
+This convos command will start the convos backend in a standalone process.
 At the same time a lock file is created preventing a frontend from starting
 the backend.
 
@@ -39,7 +39,7 @@ EOF
 =head2 run
 
 This method creates a lock file which prevent a frontend from also starting
-the backend. Will then call L<WebIrc::Core/start> and L<WebIrc::Proxy/start>.
+the backend. Will then call L<Convos::Core/start> and L<Convos::Proxy/start>.
 The proxy will only be started if enabled in the config file.
 
 =cut

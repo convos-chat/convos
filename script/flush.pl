@@ -4,12 +4,12 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use WebIrc;
+use Convos;
 my $now=time;
 my $yesterday = $now -86400;
 
 # Start commands for application
-my $app=WebIrc->new();
+my $app=Convos->new();
 warn ref $app->redis;
 $app->redis->execute('keys','connection:*:msg',sub {
   my($redis,$keys)=@_;

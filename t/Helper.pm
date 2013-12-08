@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use Test::Mojo;
 
-BEGIN { $ENV{WIRC_DEBUG} //= $ENV{TEST_VERBOSE} }
+BEGIN { $ENV{CONVOS_DEBUG} //= $ENV{TEST_VERBOSE} }
 
 my $t;
 
@@ -38,7 +38,7 @@ sub import {
   $ENV{REDIS_TEST_DATABASE} ||= 'redis://127.0.0.1:6379/14';
 
   # make sure we use our own test database
-  $t = Test::Mojo->new('WebIrc');
+  $t = Test::Mojo->new('Convos');
   $t->app->config(redis => $ENV{REDIS_TEST_DATABASE});
   $t->app->core->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
   $t->app->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;

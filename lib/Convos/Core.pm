@@ -1,8 +1,8 @@
-package WebIrc::Core;
+package Convos::Core;
 
 =head1 NAME
 
-WebIrc::Core - TODO
+Convos::Core - TODO
 
 =head1 SYNOPSIS
 
@@ -11,9 +11,9 @@ TODO
 =cut
 
 use Mojo::Base -base;
-use WebIrc::Core::Connection;
-use WebIrc::Core::Util qw/ as_id id_as /;
-use constant DEBUG => $ENV{WIRC_DEBUG} // 0;
+use Convos::Core::Connection;
+use Convos::Core::Util qw/ as_id id_as /;
+use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
 =head1 ATTRIBUTES
 
@@ -61,7 +61,7 @@ sub start {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->del('wirc:loopback:names'); # clear loopback nick list
+      $self->redis->del('convos:loopback:names'); # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
     },
     sub {
@@ -83,7 +83,7 @@ sub _connection {
   my $conn = $self->{connections}{$args{login}}{$args{server}};
 
   unless($conn) {
-    $conn = WebIrc::Core::Connection->new(redis => $self->redis, %args);
+    $conn = Convos::Core::Connection->new(redis => $self->redis, %args);
     $self->{connections}{$args{login}}{$args{server}} = $conn;
   }
 
@@ -242,18 +242,18 @@ sub _update_connection {
         $self->redis->hmset("user:$login:connection:$server", %$conn, $delay->begin)
       }
       if($conn->{nick}) {
-        $self->redis->publish("wirc:user:$login:$server", "dummy-uuid NICK $conn->{nick}", $delay->begin);
+        $self->redis->publish("convos:user:$login:$server", "dummy-uuid NICK $conn->{nick}", $delay->begin);
         warn "[core:$login] NICK $conn->{nick}\n" if DEBUG;
       }
       for my $channel (@wanted_channels) {
         next if delete $existing_channels{$channel};
         $self->redis->zadd("user:$login:conversations", time, as_id $server, $channel);
-        $self->redis->publish("wirc:user:$login:$server", "dummy-uuid JOIN $channel", $delay->begin);
+        $self->redis->publish("convos:user:$login:$server", "dummy-uuid JOIN $channel", $delay->begin);
         warn "[core:$login] JOIN $channel\n" if DEBUG;
       }
       for my $channel (keys %existing_channels) {
         $self->redis->zrem("user:$login:conversations", time, as_id $server, $channel);
-        $self->redis->publish("wirc:user:$login:$server", "dummy-uuid PART $channel", $delay->begin);
+        $self->redis->publish("convos:user:$login:$server", "dummy-uuid PART $channel", $delay->begin);
         warn "[core:$login] PART $channel\n" if DEBUG;
       }
 
@@ -431,7 +431,7 @@ sub _validate_connection_args {
     $errors{$name} = "$name is required.";
   }
 
-  if($conn->{server} and $conn->{server} !~ $WebIrc::Core::Util::SERVER_NAME_RE) {
+  if($conn->{server} and $conn->{server} !~ $Convos::Core::Util::SERVER_NAME_RE) {
     $errors{server} = "Invalid server";
   }
 
@@ -447,7 +447,7 @@ sub DESTROY {
 
 =head1 COPYRIGHT
 
-See L<WebIrc>.
+See L<Convos>.
 
 =head1 AUTHOR
 

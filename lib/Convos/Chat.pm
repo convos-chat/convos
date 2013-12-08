@@ -1,15 +1,15 @@
-package WebIrc::Chat;
+package Convos::Chat;
 
 =head1 NAME
 
-WebIrc::Chat - Mojolicious controller for IRC chat
+Convos::Chat - Mojolicious controller for IRC chat
 
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
-use WebIrc::Core::Commands;
-use constant PING_INTERVAL => $ENV{WIRC_PING_INTERVAL} || 30;
+use Convos::Core::Commands;
+use constant PING_INTERVAL => $ENV{CONVOS_PING_INTERVAL} || 30;
 
 =head1 METHODS
 
@@ -22,7 +22,7 @@ Handle conversation exchange over websocket.
 sub socket {
   my $self = shift;
   my $login = $self->session('login');
-  my $key = "wirc:user:$login:out";
+  my $key = "convos:user:$login:out";
   my($sub, $tid);
 
   Mojo::IOLoop->stream($self->tx->connection)->timeout(PING_INTERVAL * 2);
@@ -98,7 +98,7 @@ sub _handle_socket_data {
   if ($cmd =~ s!^/(\w+)\s*(.*)!!) {
     my($action, $arg) = ($1, $2);
     $arg =~ s/\s+$//;
-    if (my $code = WebIrc::Core::Commands->can($action)) {
+    if (my $code = Convos::Core::Commands->can($action)) {
       $cmd = $self->$code($arg, $dom);
     }
     else {
@@ -119,7 +119,7 @@ sub _handle_socket_data {
   }
 
   if(defined $cmd) {
-    my $key = "wirc:user:$login:$dom->{server}";
+    my $key = "convos:user:$login:$dom->{server}";
     $cmd = "$dom->{uuid} $cmd";
     $self->logf(debug => '[%s] < %s', $key, $cmd);
     $self->redis->publish($key => $cmd);
@@ -132,7 +132,7 @@ sub _handle_socket_data {
 
 =head1 COPYRIGHT
 
-See L<WebIrc>.
+See L<Convos>.
 
 =head1 AUTHOR
 

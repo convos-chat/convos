@@ -1,15 +1,15 @@
-package WebIrc::Client;
+package Convos::Client;
 
 =head1 NAME
 
-WebIrc::Client - Mojolicious controller for IRC chat
+Convos::Client - Mojolicious controller for IRC chat
 
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
-use WebIrc::Core::Util qw/ as_id id_as /;
-use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
+use Convos::Core::Util qw/ as_id id_as /;
+use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 
 my $N_MESSAGES = $ENV{N_MESSAGES} || 30;
 
@@ -329,7 +329,7 @@ sub _modify_notification {
 
 =head1 COPYRIGHT
 
-See L<WebIrc>.
+See L<Convos>.
 
 =head1 AUTHOR
 

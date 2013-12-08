@@ -1,6 +1,6 @@
 use t::Helper;
 
-my $server = $t->app->redis->subscribe('wirc:user:fooman:irc.perl.org');
+my $server = $t->app->redis->subscribe('convos:user:fooman:irc.perl.org');
 my($form, $tmp);
 
 $form = {
@@ -31,7 +31,7 @@ $t->get_ok($t->tx->res->headers->location)
   ->element_exists('input[name="server"][id="server"]')
   ->element_exists('input[name="nick"][id="nick"]')
   ->element_exists('select[name="channels"][id="channels"]')
-  ->element_exists('option[value="#wirc"]')
+  ->element_exists('option[value="#convos"]')
   # ->element_exists('input[name="avatar"][id="avatar"]')
   ->element_exists('a.logout[href="/logout"]')
   ->text_is('button[type="submit"][name="action"][value="save"]', 'Add')
@@ -92,9 +92,9 @@ $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'dummy-uuid PART #cool', 'PART #cool';
 
 $server->once(message => sub { $tmp = $_[1] });
-$form->{channels} = '#wirc';
+$form->{channels} = '#convos';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
-is $tmp, 'dummy-uuid JOIN #wirc', 'JOIN #wirc';
+is $tmp, 'dummy-uuid JOIN #convos', 'JOIN #convos';
 
 is_deeply(
   redis_do([hgetall => 'user:fooman:connection:irc.perl.org']),

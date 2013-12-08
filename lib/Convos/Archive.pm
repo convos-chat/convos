@@ -1,8 +1,8 @@
-package WebIrc::Archive;
+package Convos::Archive;
 
 =head1 NAME
 
-WebIrc::Archive - Mojolicious Controller for IRC logs
+Convos::Archive - Mojolicious Controller for IRC logs
 
 =cut
 
@@ -32,7 +32,7 @@ sub view {
 
 =head2 search
 
-Search in previous conversations. See also L<WebIrc::Core::Archive/search>.
+Search in previous conversations. See also L<Convos::Core::Archive/search>.
 
 =cut
 
@@ -42,7 +42,7 @@ sub search {
 
 =head1 COPYRIGHT
 
-See L<WebIrc>.
+See L<Convos>.
 
 =head1 AUTHOR
 

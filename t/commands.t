@@ -3,9 +3,9 @@ use Mojo::JSON;
 use Mojo::DOM;
 
 my $dom = Mojo::DOM->new;
-my $sub = $t->app->redis->subscribe('wirc:user:doe:irc.perl.org');
+my $sub = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
 my $pub = $t->app->redis;
-my $connection = WebIrc::Core::Connection->new(server => 'wirc.pl', login => 'doe');
+my $connection = Convos::Core::Connection->new(server => 'convos.pl', login => 'doe');
 my $ws;
 
 redis_do(
@@ -26,9 +26,9 @@ $t->websocket_ok('/socket');
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="marcus"]'), 'QUERY marcus';
 
-  $t->send_ok(msg('/query #wirc  '));
+  $t->send_ok(msg('/query #convos  '));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="#wirc"]'), 'QUERY #wirc';
+  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="#convos"]'), 'QUERY #convos';
 }
 
 {
@@ -44,11 +44,11 @@ $t->websocket_ok('/socket');
 }
 
 {
-  publish(event => 'remove_conversation', server => 'irc.perl.org', target => '#wirc');
+  publish(event => 'remove_conversation', server => 'irc.perl.org', target => '#convos');
   $t->send_ok(msg('/close'));
   $dom->parse($t->message_ok->message->[1]);
-  is $ws, 'abc-123 PART #wirc', 'abc-123 PART #wirc';
-  ok $dom->at('li.remove-conversation[data-server="irc.perl.org"][data-target="#wirc"]'), 'CLOSE';
+  is $ws, 'abc-123 PART #convos', 'abc-123 PART #convos';
+  ok $dom->at('li.remove-conversation[data-server="irc.perl.org"][data-target="#convos"]'), 'CLOSE';
 
   $ws = '';
   $t->send_ok(msg('/close   marcus    '));
@@ -69,10 +69,10 @@ for my $cmd (qw/ j join /) {
 
 for my $cmd (qw/ t topic /) {
   $t->send_ok(msg("/$cmd"));
-  is ws(), 'abc-123 TOPIC #wirc', 'abc-123 TOPIP #wirc';
+  is ws(), 'abc-123 TOPIC #convos', 'abc-123 TOPIP #convos';
 
   $t->send_ok(msg("/$cmd yikes!  "));
-  is ws(), 'abc-123 TOPIC #wirc :yikes!', 'abc-123 TOPIC #wirc :yikes!';
+  is ws(), 'abc-123 TOPIC #convos :yikes!', 'abc-123 TOPIC #convos :yikes!';
 }
 
 {
@@ -80,10 +80,10 @@ for my $cmd (qw/ t topic /) {
   is ws(), 'abc-123 LIST', 'abc-123 LIST';
 
   $t->send_ok(msg('/me is too cool :) '));
-  is ws(), "abc-123 PRIVMSG #wirc :\x{1}ACTION is too cool :)\x{1}", '/me is too cool :)';
+  is ws(), "abc-123 PRIVMSG #convos :\x{1}ACTION is too cool :)\x{1}", '/me is too cool :)';
 
   $t->send_ok(msg('/say /me is cool! '));
-  is ws(), "abc-123 PRIVMSG #wirc :/me is cool!", 'PRIVMSG /me is cool!';
+  is ws(), "abc-123 PRIVMSG #convos :/me is cool!", 'PRIVMSG /me is cool!';
 
   $t->send_ok(msg('/mode +o batman '));
   is ws(), 'abc-123 MODE +o batman', 'abc-123 MODE +o batman';
@@ -91,7 +91,7 @@ for my $cmd (qw/ t topic /) {
   $t->send_ok(msg('/names #foo '));
   is ws(), 'abc-123 NAMES #foo', 'abc-123 NAMES #foo';
   $t->send_ok(msg('/names '));
-  is ws(), 'abc-123 NAMES #wirc', 'abc-123 NAMES #wirc';
+  is ws(), 'abc-123 NAMES #convos', 'abc-123 NAMES #convos';
 
   $t->send_ok(msg('/nick bat '));
   is ws(), 'abc-123 NICK bat', 'abc-123 NICK bat';
@@ -102,7 +102,7 @@ for my $cmd (qw/ t topic /) {
   $t->send_ok(msg('/part #yikes '));
   is ws(), 'abc-123 PART #yikes', 'abc-123 PART #yikes';
   $t->send_ok(msg('/part      '));
-  is ws(), 'abc-123 PART #wirc', 'abc-123 PART #wirc';
+  is ws(), 'abc-123 PART #convos', 'abc-123 PART #convos';
 
   $t->send_ok(msg('/whois batman '));
   is ws(), 'abc-123 WHOIS batman', 'abc-123 WHOIS batman';
@@ -111,7 +111,7 @@ for my $cmd (qw/ t topic /) {
 done_testing;
 
 sub msg {
-  qq(<div data-history="1" data-server="irc.perl.org" data-target="#wirc" id="abc-123">$_[0]</div>);
+  qq(<div data-history="1" data-server="irc.perl.org" data-target="#convos" id="abc-123">$_[0]</div>);
 }
 
 sub ws {
@@ -129,6 +129,6 @@ sub publish {
 
   $sub->once(message => sub {
     $ws = $_[1];
-    $pub->publish('wirc:user:doe:out', $data);
+    $pub->publish('convos:user:doe:out', $data);
   });
 }

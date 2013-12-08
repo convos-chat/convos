@@ -1,8 +1,8 @@
-package WebIrc::Oembed;
+package Convos::Oembed;
 
 =head1 NAME
 
-WebIrc::Oembed - Generate oembed chunks.
+Convos::Oembed - Generate oembed chunks.
 
 =cut
 

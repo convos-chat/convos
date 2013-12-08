@@ -1,14 +1,14 @@
-package WebIrc::User;
+package Convos::User;
 
 =head1 NAME
 
-WebIrc::User - Mojolicious controller for user data
+Convos::User - Mojolicious controller for user data
 
 =cut
 
-use Mojo::Base 'WebIrc::Client';
-use WebIrc::Core::Util qw/ as_id id_as /;
-use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
+use Mojo::Base 'Convos::Client';
+use Convos::Core::Util qw/ as_id id_as /;
+use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 
 =head1 METHODS
 
@@ -185,7 +185,7 @@ Used to retrieve connection information.
 
 sub settings {
   my $self = shift->render_later;
-  my $hostname = WebIrc::Core::Util::hostname();
+  my $hostname = Convos::Core::Util::hostname();
   my $login = $self->session('login');
   my $server = $self->stash('server') || 0;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
@@ -217,7 +217,7 @@ sub settings {
     },
     sub {
       my($delay, $conversations, @connections) = @_;
-      my $cobj = WebIrc::Core::Connection->new(login => $login, server => 'anything');
+      my $cobj = Convos::Core::Connection->new(login => $login, server => 'anything');
 
       $self->logf(debug => '[settings] connection data %s', \@connections) if DEBUG;
 
@@ -377,7 +377,7 @@ Change user profile.
 sub edit_user {
   my $self = shift->render_later;
   my $login = $self->session('login');
-  my $hostname = WebIrc::Core::Util::hostname();
+  my $hostname = Convos::Core::Util::hostname();
   my $avatar = $self->param('avatar');
   my %settings;
 
@@ -400,7 +400,7 @@ sub edit_user {
 
 =head1 COPYRIGHT
 
-See L<WebIrc>.
+See L<Convos>.
 
 =head1 AUTHOR
 

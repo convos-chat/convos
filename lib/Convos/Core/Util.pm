@@ -1,8 +1,8 @@
-package WebIrc::Core::Util;
+package Convos::Core::Util;
 
 =head1 NAME
 
-WebIrc::Core::Util - Utility functions for WebIrc
+Convos::Core::Util - Utility functions for Convos
 
 =head1 SYNOPSIS
 

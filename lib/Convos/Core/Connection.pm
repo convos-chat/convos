@@ -1,14 +1,14 @@
-package WebIrc::Core::Connection;
+package Convos::Core::Connection;
 
 =head1 NAME
 
-WebIrc::Core::Connection - Represents a connection to an IRC server
+Convos::Core::Connection - Represents a connection to an IRC server
 
 =head1 SYNOPSIS
 
-  use WebIrc::Core::Connection;
+  use Convos::Core::Connection;
 
-  $c = WebIrc::Core::Connection->new(
+  $c = Convos::Core::Connection->new(
           server => 'irc.localhost',
           login => 'username',
           redis => Mojo::Redis->new,
@@ -54,8 +54,8 @@ use IRC::Utils;
 use Parse::IRC ();
 use Scalar::Util ();
 use Time::HiRes qw/ time /;
-use WebIrc::Core::Util qw/ as_id id_as /;
-use constant DEBUG => $ENV{WIRC_DEBUG} ? 1 : 0;
+use Convos::Core::Util qw/ as_id id_as /;
+use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
 =head1 ATTRIBUTES
@@ -108,8 +108,8 @@ has _irc => sub {
   my $irc;
 
   if($self->server eq 'loopback') {
-    require WebIrc::Loopback;
-    return WebIrc::Loopback->new(connection => $self);
+    require Convos::Loopback;
+    return Convos::Loopback->new(connection => $self);
   }
   else {
     $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->server);
@@ -121,7 +121,7 @@ has _irc => sub {
     close => sub {
       my $irc = shift;
       $self->{stop} and return;
-      $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
+      $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -129,7 +129,7 @@ has _irc => sub {
     error => sub {
       my $irc = shift;
       $self->{stop} and return;
-      $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Connection to  @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
+      $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Connection to  @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -205,7 +205,7 @@ sub _subscribe {
   my $irc = $self->_irc;
 
   Scalar::Util::weaken($self);
-  $self->{messages} = $self->redis->subscribe("wirc:user:@{[$self->login]}:@{[$self->server]}");
+  $self->{messages} = $self->redis->subscribe("convos:user:@{[$self->login]}:@{[$self->server]}");
   $self->{messages}->on(
     error => sub {
       my ($sub, $error) = @_;
@@ -224,7 +224,7 @@ sub _subscribe {
       $message = Parse::IRC::parse_irc($raw_message);
 
       unless(ref $message) {
-        $self->_publish(server_message => { save => 1, status => 400, message => "[wirc] Unable to parse: $raw_message", uuid => $uuid });
+        $self->_publish(server_message => { save => 1, status => 400, message => "[convos] Unable to parse: $raw_message", uuid => $uuid });
         return;
       }
 
@@ -234,7 +234,7 @@ sub _subscribe {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
+          $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
         }
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
@@ -266,11 +266,11 @@ sub _connect {
 
         if($error) {
           $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
-          $self->_publish(server_message => { save => 1, status => 500, message => "[wirc] Could not connect to @{[$irc->server]}: $error" });
+          $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Could not connect to @{[$irc->server]}: $error" });
         }
         else {
           $self->redis->hset($self->{path}, current_nick => $irc->nick);
-          $self->_publish(server_message => { save => 1, status => 200, message => "[wirc] Connected to @{[$irc->server]}." });
+          $self->_publish(server_message => { save => 1, status => 200, message => "[convos] Connected to @{[$irc->server]}." });
         }
       });
     },
@@ -340,7 +340,7 @@ sub add_message {
 
   @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
-  $data->{host} ||= WebIrc::Core::Util::hostname;
+  $data->{host} ||= Convos::Core::Util::hostname;
   $data->{user} ||= $self->_irc->user;
 
   if($data->{nick} ne $current_nick) {
@@ -802,7 +802,7 @@ sub _publish {
   $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
   $message = j $data;
 
-  $self->redis->publish("wirc:user:$login:out", $message);
+  $self->redis->publish("convos:user:$login:out", $message);
 
   if($data->{highlight}) {
     # Ooops! This must be broken: We're clearing the notification by index in
@@ -835,7 +835,7 @@ sub DESTROY {
 
 =head1 COPYRIGHT
 
-See L<WebIrc>.
+See L<Convos>.
 
 =head1 AUTHOR
 

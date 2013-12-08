@@ -3,21 +3,21 @@ use Mojo::JSON;
 use Mojo::DOM;
 
 my $dom = Mojo::DOM->new;
-my $connection = WebIrc::Core::Connection->new(login => 'doe', server => 'irc.perl.org');
-my $messages = $t->app->redis->subscribe('wirc:user:doe:out');
+my $connection = Convos::Core::Connection->new(login => 'doe', server => 'irc.perl.org');
+my $messages = $t->app->redis->subscribe('convos:user:doe:out');
 
 $messages->on(message => sub { Mojo::IOLoop->stop });
 
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23wirc', time - 1, 'irc:2eperl:2eorg:00batman' ],
+  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23convos', time - 1, 'irc:2eperl:2eorg:00batman' ],
   [ sadd => 'user:doe:connections', 'irc.perl.org' ],
   [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
 );
 
 $connection->redis($t->app->redis);
 $connection->_irc->nick('doe')->user('');
-$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23wirc$}, 'Redirect to conversation');
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23convos$}, 'Redirect to conversation');
 $t->websocket_ok('/socket');
 
 {
@@ -42,7 +42,7 @@ $t->websocket_ok('/socket');
 
 {
   $t->get_ok('/conversations')
-    ->element_exists('li:nth-of-child(1) a[data-unread="0"][href="/irc.perl.org/%23wirc"]')
+    ->element_exists('li:nth-of-child(1) a[data-unread="0"][href="/irc.perl.org/%23convos"]')
     ->element_exists('li:nth-of-child(2) a[data-unread="2"][href="/irc.perl.org/fooman"]')
     ->element_exists('li.unread a[data-unread="2"][href="/irc.perl.org/fooman"]')
     ->element_exists('li:nth-of-child(3) a[data-unread="0"][href="/irc.perl.org/batman"]')
