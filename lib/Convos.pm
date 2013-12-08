@@ -10,6 +10,13 @@ Convos - IRC client on web
 
 =head1 SYNOPSIS
 
+=head1 Dependencies
+
+Dependencies can be installed with C<cpanm|App::cpanminus> using the
+C<cpanfile> found in the root of the project:
+
+  $ cpanm --installdeps .
+
 =head2 Production
 
   $ hypnotoad script/convos
