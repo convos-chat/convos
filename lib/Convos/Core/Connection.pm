@@ -343,7 +343,7 @@ sub add_message {
   $data->{host} ||= Convos::Core::Util::hostname;
   $data->{user} ||= $self->_irc->user;
 
-  if($data->{nick} ne $current_nick) {
+  if($data->{nick} && $data->{nick} ne $current_nick) {
     if($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
       $data->{highlight} = 1;
     }
