@@ -258,15 +258,18 @@ sub startup {
   }
 }
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Nordaaker
+Copyright (C) 2012-2013, Nordaaker.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Artistic License version 2.0.
 
 =head1 AUTHOR
 
-Jan Henning Thorsen - jhthorsen@cpan.org
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
-Marcus Ramberg
+Marcus Ramberg - C<marcus@nordaaker.com>
 
 =cut
 
