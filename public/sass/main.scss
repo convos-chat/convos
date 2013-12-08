@@ -45,8 +45,8 @@ $navBarZindex: 1000;
 
 @mixin font-size-margin($size) {
   font-size: $size;
-  margin-top: $size;
-  margin-bottom: $size;
+  margin-top: $size/2;
+  margin-bottom: $size/2;
 }
 
 @mixin grid($cols, $last: 0) {
@@ -200,7 +200,6 @@ form {
   div.actions {
     margin-top: 2em;
     clear: left;
-    border-top: 1px solid #ddd;
     padding: 0.5em 0;
   }
   p.help {
@@ -531,13 +530,7 @@ div.goto-bottom a {
   .row { padding: 0; }
   .login, .register {
     background: $loginBackground;
-    border: $buttonBorderHover;
     margin-top: -4px;
-    display: none;
-    padding: $bodyGutter;
-    position: absolute;
-    right: 0;
-    h1 { display: none; }
   }
   .about { padding-bottom: 100px; }
 }
