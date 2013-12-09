@@ -13,7 +13,6 @@ for my $p ('/login') {
   $t->post_ok($p, form => { login => 'whatever' })
     ->status_is(401)
     ->element_exists('div.landing-page', 'still on landing page')
-    ->element_exists('a.button[data-toggle="div.register"]')
     ->text_is('.login button[type="submit"]', 'Login')
     ->text_is('div.alert', 'Invalid username/password.')
     ;
@@ -29,7 +28,6 @@ for my $p ('/register') {
   $t->post_ok($p, form => { email => 'whatever' })
     ->status_is(400)
     ->element_exists('div.landing-page', 'still on landing page')
-    ->element_exists('a.button.focus.active[data-toggle="div.register"]', 'with register form in focus')
     ->text_is('.register button[type="submit"]', 'Register')
     ->element_exists('div.error:nth-of-type(2)')
     ;

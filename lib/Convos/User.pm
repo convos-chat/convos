@@ -80,14 +80,20 @@ See L</login>.
 
 sub register {
   my $self = shift->render_later;
-  $self->stash(form => 'register');
-  my $wanted_login = $self->param('login');
-  my $admin = 0;
-
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
+  $self->stash(form => 'register');
+
+  my $validation=$self->validation;
+  $self->render('index') unless $validation->has_data;
+
+  $validation->required('login')->like(qr/^\w+$/)->size(3,15);
+  $validation->required('email')->like(qr/.\@./);
+  $validation->required('password_again')->equal_to('password');
+  $validation->required('password')->size(5,255);
+  my $wanted_login=$validation->param('login');
 
   Mojo::IOLoop->delay(
     sub {
@@ -95,27 +101,16 @@ sub register {
       $self->redis->sismember('users', $wanted_login, $delay->begin);
       $self->redis->scard('users', $delay->begin);
     },
-    sub {    # Check invitation unless first user, or make admin.
-      my ($delay, $exists, $secret_required) = @_;
-      my $digest;
-
-      $admin = $secret_required ? 0 : 1;
-
-      if($exists) {
-        $self->stash->{errors}{login} = "Username ($wanted_login) is taken.";
-        $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        return $self->render('index', status => 400);
-      }
-      if($self->_got_invalid_register_params($secret_required)) {
-        $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        return $self->render('index', status => 400);
-      }
-
-      $digest = $self->_digest($self->param('password'));
+    sub {    # Check invitation unless first user
+      my ($delay, $exists) = @_;
+      $self->validation->{error}{login}= "taken" if $exists;
+      return $self->render('index', status => 400) if $validation->has_error;
 
       $self->logf(debug => '[reg] New user login=%s', $wanted_login) if DEBUG;
       $self->session(login => $wanted_login);
-      $self->redis->hmset("user:$wanted_login", digest => $digest, email => scalar $self->param('email'), $delay->begin);
+      $self->redis->hmset("user:$wanted_login", 
+        digest => $self->_digest($self->param('password')),
+        email  => scalar $self->param('email'), $delay->begin);
       $self->redis->sadd('users', $wanted_login, $delay->begin);
     },
     sub {
@@ -129,36 +124,9 @@ sub _digest {
     crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
-sub _got_invalid_register_params {
-  my ($self, $secret_required) = @_;
-  my $errors    = $self->stash('errors');
-  my $email     = $self->param('email') || '';
-  my @passwords = $self->param('password');
+sub _setup_validation {
+  my ($self) = @_;
 
-  if ($secret_required) {
-    my $secret = $self->param('invite') || 'some-weird-secret-which-should-never-be-generated';
-    $self->logf(debug => '[reg] Validating invite code %s', $secret) if DEBUG;
-    if ($secret ne crypt($email . $self->app->secret, $secret) && $secret ne 'OPEN SESAME') {
-      $self->logf(debug => '[reg] Invalid invite code.') if DEBUG;
-      $errors->{invite} = 'You need a valid invite code to register.';
-    }
-  }
-
-  if (($self->param('login') || '') !~ m/^[\w]{3,15}$/) {
-    $errors->{login} = 'Username must consist of letters and numbers and be 3-15 characters long';
-  }
-  if (!$self->param('email') || $self->param('email') !~ m/.\@./) {
-    $errors->{email} = 'Invalid email.';
-  }
-
-  if ((grep {$_} @passwords) != 2 or $passwords[0] ne $passwords[1]) {
-    $errors->{password} = 'You need to enter the same password twice.';
-  }
-  elsif (length($passwords[0]) < 6) {
-    $errors->{password} = 'The password must be at least 6 characters long';
-  }
-
-  return keys %$errors;
 }
 
 =head2 logout
