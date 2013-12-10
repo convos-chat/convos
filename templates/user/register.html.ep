@@ -5,35 +5,35 @@
       %= label_for login => 'Login (Choose something that\'s simple to remember. Your IRC handle for instance).'
       %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
       % if (my $err = validation->error('login')) {
-      <p class="help">
+      <div class="error">
         %= 'Login is required.' if $err->[0] eq 'required'
         %= 'Login needs to be 3-15 characters long.' if $err->[0] eq 'size'
         %= 'Login must consist of letters and/or numbers.' if $err->[0] eq 'like'
         %= 'That username is taken.' if $err->[0] eq 'taken';
-      </p>
+      </div>
       % }
       %= label_for email => 'Email address'
       %= email_field 'email', id => 'email', placeholder => 'your@email.com'
       % if (my $err = validation->error('email')) {
-      <p class="help">
+      <div class="error">
         %= 'Email is required.' if $err->[0] eq 'required'
         %= 'Invalid email.' if $err->[0] eq 'like'
-      </p>
+      </div>
       % }
       %= label_for password => 'Password (needs to be at least six characters long)'
       %= password_field 'password', id => 'register_password', placeholder => 'Something secret'
       % if (my $err = validation->error('password')) {
-      <p class="help">
+      <div class="error">
         %= 'Password required' if $err->[0] eq 'required'
         %= 'Password must be 7-255 characters long' if $err->[0] eq 'size'
-      </p>
+      </div>
       % }
       %= label_for password_again => ''
       %= password_field 'password_again', placeholder => 'Repeat secret'
       % if (my $err = validation->error('password_again')) {
-      <p class="help">
+      <div class="error">
         %= 'Password must match' if $err->[0] eq 'equal_to'
-      </p>
+      </div>
       % }
 
       <div class="actions">

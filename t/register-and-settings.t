@@ -17,7 +17,8 @@ $t->post_ok('/login' => form => $form)
 $form = {
   login => 'fooman',
   email => 'foobar@barbar.com',
-  password => ['barbar', 'barbar'],
+  password => 'barbar',
+  password_again => 'barbar',
 };
 $t->post_ok('/register' => form => $form)
   ->status_is('302', 'first user gets to be admin')
@@ -127,20 +128,10 @@ $t->post_ok('/irc.perl.org/settings/edit', form => $form)
   ->header_like('Location', qr{localhost:\d+/$}, 'Need to login')
   ;
 
-$form = {
-    login => 'user2',
-    email => 'foobar@barbar.com',
-    password => ['yikes', 'yikes'],
-};
-$t->post_ok('/register' => form => $form)
-  ->status_is(400)
-  ->text_is('div.register .error p.help', 'You need a valid invite code to register.')
-  ;
-
 $form->{login} = 'fooman';
 $t->post_ok('/register' => form => $form)
   ->status_is(400)
-  ->text_is('div.login .error:nth-of-child(1) p.help', 'Username (fooman) is taken.')
+  ->text_is('.error', 'That username is taken.')
   ;
 
 done_testing;

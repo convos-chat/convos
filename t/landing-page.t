@@ -20,7 +20,6 @@ for my $p ('/login') {
 
 $t->get_ok('/register')
   ->element_exists('.register input[name="email"][id="email"]')
-  ->element_exists('.register input[name="invite"][id="invite"]')
   ->element_exists('.register input[type="password"][name="password"][id="register_password"]', 'need custom id to make label target correct element')
   ;
 
@@ -28,7 +27,7 @@ for my $p ('/register') {
   $t->post_ok($p, form => { email => 'whatever' })
     ->status_is(400)
     ->element_exists('div.landing-page', 'still on landing page')
-    ->text_is('.register button[type="submit"]', 'Register')
+    ->element_exists('.register input[type="submit"][value="Register"]', 'Register button')
     ->element_exists('div.error:nth-of-type(2)')
     ;
 }
