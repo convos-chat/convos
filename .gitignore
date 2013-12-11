@@ -18,5 +18,4 @@ MANIFEST*
 /convos.production.conf
 /cover_db
 /script/toadfarm.pid
-/public/packed/
-/public/sass/main.css
+/public/packed

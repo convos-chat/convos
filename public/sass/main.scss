@@ -1,7 +1,7 @@
 $backgroundColor: #fff;
 $fontFamily: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $fontColor: #333;
-$linkColor: #469;
+$linkColor: #00451f;
 $fontSize: 15px;
 $bodyGutter: 20px;
 $navHeight: 44px;
@@ -497,48 +497,28 @@ div.goto-bottom a {
 .landing-page {
   $loginBackground: darken(#fff, 2%);
   margin: auto;
+  padding-top: 1em;
   width: 720px;
-  position: relative;
 
   h1 {
-    text-indent: -1000px;
-    height: 55px;
-    background: url('/image/logo.png') no-repeat top left;
-    background: none,url('/image/logo.svg') no-repeat top left;
-  }
-  img {
-    margin: 2em 0;
-    border: 1px solid #ccc;
-    @include prefix(box-shadow, 0 0 4px 2px rgba(180,180,180,.5));
-  }
-  nav, .login, .register, .about {
-    width: 100%;
-    margin: 2em auto;
-    overflow: hidden;
-  }
-  nav {
-    margin-bottom: 0;
-    margin-top: 2px;
-    a.button, a.button.active {
-      background: $loginBackground;
-      font-size: 14px;
-      margin-left: 10px;
+    .logo {
+      text-indent: -1000px;
       display: block;
-      float: right;
+      height: 55px;
+      width: 300px;
+      background: url('/image/logo.png') no-repeat top left;
+      background: none,url('/image/logo.svg') no-repeat top left;
     }
-    a.active {
-      border: $buttonBorderHover;
-      border-bottom: 0;
-      position: relative;
-      z-index: 5;
+    small {
+      display: block;
     }
   }
-  .row { padding: 0; }
-  .login, .register {
-    background: $loginBackground;
-    margin-top: -4px;
+  h2.login-register {
+    font-size: 1em;
   }
-  .about { padding-bottom: 100px; }
+  div.footer {
+    margin-top: 2em;
+  }
 }
 
 @media (max-width: $responsiveWidth) {
