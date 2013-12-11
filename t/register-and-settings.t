@@ -86,4 +86,11 @@ $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is(302)
 $form->{login} = 'fooman';
 $t->post_ok('/register' => form => $form)->status_is(400)->text_is('.error', 'That username is taken.');
 
+# invite code
+#
+$t->app->config->{invite_code}='test';
+$t->post_ok('/register' => form => $form)->status_is(400)->text_is('.alert h2', 'Invite only installation.');
+
+
+
 done_testing;

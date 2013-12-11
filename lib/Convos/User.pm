@@ -82,7 +82,10 @@ sub register {
     return $self->redirect_to('view');
   }
   $self->stash(form => 'register');
-
+  my $code=$self->param('invite') || '';
+  if ($self->app->config->{invite_code} && $code ne $self->app->config->{invite_code}) {
+    return $self->render('index', form=> 'invite_only', status => 400);
+  }
   my $validation = $self->validation;
   $self->render('index') unless $validation->has_data;
 
@@ -122,11 +125,6 @@ sub register {
 
 sub _digest {
   crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
-}
-
-sub _setup_validation {
-  my ($self) = @_;
-
 }
 
 =head2 logout

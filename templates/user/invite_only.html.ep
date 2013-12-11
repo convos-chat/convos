@@ -1,0 +1,5 @@
+<h2>Register or <%=link_to 'Login', 'login' %></h2>
+<div class="alert">
+  <h2>Invite only installation.</h2>
+  Please ask your administrator for the invite URL
+</div>
