@@ -37,6 +37,8 @@ The command above will start a full featured, UNIX optimized, preforking non-blo
 
 See also the [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT) for production deployment.
 
+For convenience, we also include a Dockerfile, and you can pull our image directly from the docker index.
+
 ## Architecture principles
 * Keep it easy to install
 * Keep the JS simple and manageable
