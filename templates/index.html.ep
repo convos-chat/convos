@@ -2,7 +2,8 @@
 % title "Convos";
 <div class="landing-page">
   <header class="row">
-  <h1> <%= $name %> Convos</h1>
+  <h1>Convos</h1>
+  <h2><%=$name%></h2>
   </header>
   %= include "user/$form"
     <p> <small>

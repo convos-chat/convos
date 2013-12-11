@@ -500,6 +500,12 @@ div.goto-bottom a {
   width: 720px;
   position: relative;
 
+  h1 {
+    text-indent: -1000px;
+    height: 55px;
+    background: url('/image/logo.png') no-repeat top left;
+    background: none,url('/image/logo.svg') no-repeat top left;
+  }
   img {
     margin: 2em 0;
     border: 1px solid #ccc;
