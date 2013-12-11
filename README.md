@@ -22,12 +22,16 @@ Links to images and video will be displayed inline. No need to click on the link
 Wirc requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get.
 To install wirc, you can run the following commands:
 
-  $ git clone https://github.com/Nordaaker/convos.git
-  $ cd convos
-  $ ./vendor/bin/carton
-  # edit convos.conf, point to your redis server
-  $ ./vendor/bin/carton exec morbo script/convos
-  # open http://localhost:3000 in your favorite browser
+    $ git clone https://github.com/Nordaaker/convos.git
+    $ cd convos
+    # Either install using carton bundled with the repo
+    $ ./vendor/bin/carton
+    # edit convos.conf, point to your redis server
+    # Start up the backend
+    $ ./vendor/bin/carton exec script/convos backend &
+    # And start the web server
+    $ ./vendor/bin/carton exec morbo script/convos
+    # open http://localhost:3000 in your favorite browser
 
 Running convos in production
 morbo is an excellent tool for testing, but hypnotoad should be used to run Convos in production:
