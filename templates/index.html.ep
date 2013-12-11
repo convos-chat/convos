@@ -1,18 +1,11 @@
-% title 'Chat with your friends and colleagues';
+% my $name=config('name') || '[YourName]';
+% title "Convos";
 <div class="landing-page">
-  <nav>
-    %= link_to 'Register', 'register', class => $form eq 'register' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.register',
-    %= link_to 'Login', 'login', class => $form eq 'login' ? 'button focus active' : 'button', 'data-focus' => 'input', 'data-toggle' => 'div.login',
-  </nav>
-  %= include 'user/login'
-  %= include 'user/register'
   <header class="row">
-    <h1 class="center"> Group chat in style - <%= config('name') || '[YourName]' %></h1>
-    <h2 class="center">Interact with friends and colleagues.</h2>
+  <h1>Convos</h1>
+  <h2><%=$name%></h2>
   </header>
-  %= image '/image/landing-page-example-chat.jpeg', alt => 'Example chat'
-  <div class="row about">
-    <!--[if IE]>
+  <!--[if IE]>
     <div class="alert">
       Convos does not work in Internet Explorer. It works best in the following browsers:
       (in order)
@@ -23,31 +16,12 @@
         <li>Or any webkit based browser, such as Safari.</li>
       </ol>
     </div>
-    <![endif]-->
-    <h2>What is so cool about Convos?</h2>
-    <p>
-      Ever wanted to log into an IRC channel from your phone, tablet or computer
-      and never log out? Keep track of what is going on and search through your
-      history from the beginning of time on any device?
-    </p>
-    <h2>How does Convos work anywhere?</h2>
-    <p>
-      Convos is a web application with a responsive design that
-      works great on small and big screens. Convos also acts as a
-      Proxy for your native clients, while seamlessly keeping
-      track of the messages you've seen on each client. </p>
-    </p>
-    <h2>Host it anywhere</h2>
-    <p>
-      Rather than selling you a monthly service with a tiered
-      model based on how much you use, we just sell you the
-      software. it's trivial to set up on your cloud / server
-      of choice.
-    </p>
-    <h2>Contact us</h2>
-    <p>
-      Interested in Convos? Send an email to
-      <a href="mailto:marcus@nordaaker.no">marcus@nordaaker.no</a>.
+    <![endif]--> 
+  %= include "user/$form"
+    <p> <small>
+    A <%= link_to "Marcus", "http://twitter.com/marcusramberg"%> &amp; <%= link_to "Jan Henning", "http://twitter.com/jhthorsen"%> creation. Produced by <%=link_to "Nordaaker", "http://nordaaker.com"%>.
+    <%= link_to "convos.by", "http://convos.by" %>
+  </small>
     </p>
   </div>
 </div>

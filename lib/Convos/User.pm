@@ -32,10 +32,10 @@ Show the login form. Also responds to JSON requests with login status.
 =cut
 
 sub login {
-  my $self=shift;
+  my $self = shift;
   $self->respond_to(
-    html => sub { $self->render('index', form => 'login' ) },
-    json => { json => { login => $self->session('login') || 0 } }
+    html => sub { $self->render('index', form => 'login') },
+    json => {json => {login => $self->session('login') || 0}}
   );
 }
 
@@ -46,27 +46,23 @@ Authenticate local user
 =cut
 
 sub do_login {
-  my $self = shift->render_later;
+  my $self  = shift->render_later;
   my $login = $self->param('login');
 
   $self->app->core->login(
-    {
-      login => $login,
-      password => scalar $self->param('password'),
-    },
+    {login => $login, password => scalar $self->param('password'),},
     sub {
       my ($core, $error) = @_;
 
-      if($error) {
-        $self->render('index', form=>'login', message => 'Invalid username/password.', status => 401);
-        return;
+      if ($error) {
+        return $self->render('index', form => 'login', message => 'Invalid username/password.', status => 401);
       }
 
       $self->session(login => $login);
 
       $self->respond_to(
         html => sub { $self->redirect_last($login); },
-        json => { json => { login => $self->session('login') || 0 } }
+        json => {json => {login => $self->session('login') || 0}}
       );
 
     },
@@ -81,15 +77,20 @@ See L</login>.
 
 sub register {
   my $self = shift->render_later;
-  $self->stash(form => 'register');
-  my $wanted_login = $self->param('login');
-  my $admin = 0;
-
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
-    $self->redirect_to('view');
-    return;
+    return $self->redirect_to('view');
   }
+  $self->stash(form => 'register');
+
+  my $validation = $self->validation;
+  $self->render('index') unless $validation->has_data;
+
+  $validation->required('login')->like(qr/^\w+$/)->size(3, 15);
+  $validation->required('email')->like(qr/.\@./);
+  $validation->required('password_again')->equal_to('password');
+  $validation->required('password')->size(5, 255);
+  my $wanted_login = $validation->param('login');
 
   Mojo::IOLoop->delay(
     sub {
@@ -97,29 +98,19 @@ sub register {
       $self->redis->sismember('users', $wanted_login, $delay->begin);
       $self->redis->scard('users', $delay->begin);
     },
-    sub {    # Check invitation unless first user, or make admin.
-      my ($delay, $exists, $secret_required) = @_;
-      my $digest;
-
-      $admin = $secret_required ? 0 : 1;
-
-      if($exists) {
-        $self->stash->{errors}{login} = "Username ($wanted_login) is taken.";
-        $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        $self->render('index', status => 400);
-        return;
-      }
-      if($self->_got_invalid_register_params($secret_required)) {
-        $self->logf(debug => '[reg] Failed %s', $self->stash('errors')) if DEBUG;
-        $self->render('index', status => 400);
-        return;
-      }
-
-      $digest = $self->_digest($self->param('password'));
+    sub {    # Check invitation unless first user
+      my ($delay, $exists) = @_;
+      $validation->error(login => ["taken"]) if $exists;
+      return $self->render('index', status => 400) if $validation->has_error;
 
       $self->logf(debug => '[reg] New user login=%s', $wanted_login) if DEBUG;
       $self->session(login => $wanted_login);
-      $self->redis->hmset("user:$wanted_login", digest => $digest, email => scalar $self->param('email'), $delay->begin);
+      $self->redis->hmset(
+        "user:$wanted_login",
+        digest => $self->_digest($self->param('password')),
+        email  => scalar $self->param('email'),
+        $delay->begin
+      );
       $self->redis->sadd('users', $wanted_login, $delay->begin);
     },
     sub {
@@ -130,39 +121,12 @@ sub register {
 }
 
 sub _digest {
-    crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
+  crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
-sub _got_invalid_register_params {
-  my ($self, $secret_required) = @_;
-  my $errors    = $self->stash('errors');
-  my $email     = $self->param('email') || '';
-  my @passwords = $self->param('password');
+sub _setup_validation {
+  my ($self) = @_;
 
-  if ($secret_required) {
-    my $secret = $self->param('invite') || 'some-weird-secret-which-should-never-be-generated';
-    $self->logf(debug => '[reg] Validating invite code %s', $secret) if DEBUG;
-    if ($secret ne crypt($email . $self->app->secret, $secret) && $secret ne 'OPEN SESAME') {
-      $self->logf(debug => '[reg] Invalid invite code.') if DEBUG;
-      $errors->{invite} = 'You need a valid invite code to register.';
-    }
-  }
-
-  if (($self->param('login') || '') !~ m/^[\w]{3,15}$/) {
-    $errors->{login} = 'Username must consist of letters and numbers and be 3-15 characters long';
-  }
-  if (!$self->param('email') || $self->param('email') !~ m/.\@./) {
-    $errors->{email} = 'Invalid email.';
-  }
-
-  if ((grep {$_} @passwords) != 2 or $passwords[0] ne $passwords[1]) {
-    $errors->{password} = 'You need to enter the same password twice.';
-  }
-  elsif (length($passwords[0]) < 6) {
-    $errors->{password} = 'The password must be at least 6 characters long';
-  }
-
-  return keys %$errors;
 }
 
 =head2 logout
@@ -184,87 +148,79 @@ Used to retrieve connection information.
 =cut
 
 sub settings {
-  my $self = shift->render_later;
-  my $hostname = Convos::Core::Util::hostname();
-  my $login = $self->session('login');
-  my $server = $self->stash('server') || 0;
+  my $self        = shift->render_later;
+  my $hostname    = Convos::Core::Util::hostname();
+  my $login       = $self->session('login');
+  my $server      = $self->stash('server') || 0;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
   my @conversation;
 
   $self->stash(
-    server => $server,
-    body_class => 'settings',
+    server       => $server,
+    body_class   => 'settings',
     conversation => \@conversation,
-    nick => $login,
-    target => 'settings',
+    nick         => $login,
+    target       => 'settings',
   );
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->redis->smembers("user:$login:connections", $_[0]->begin);
     },
     sub {
-      my($delay, $hosts) = @_;
+      my ($delay, $hosts) = @_;
       my $cb = $delay->begin;
 
       return $self->$cb() unless @$hosts;
-      return $self->redis->execute(
-        [zrange => "user:$login:conversations", 0, -1],
-        (map { [hgetall => "user:$login:connection:$_"] } @$hosts),
-        $cb,
-      );
+      return $self->redis->execute([zrange => "user:$login:conversations", 0, -1],
+        (map { [hgetall => "user:$login:connection:$_"] } @$hosts), $cb,);
     },
     sub {
-      my($delay, $conversations, @connections) = @_;
+      my ($delay, $conversations, @connections) = @_;
       my $cobj = Convos::Core::Connection->new(login => $login, server => 'anything');
 
       $self->logf(debug => '[settings] connection data %s', \@connections) if DEBUG;
 
       for my $conn (@connections) {
-        $cobj->server($conn->{server} || $conn->{host}); # back compat
-        $conn->{event} = 'connection';
-        $conn->{lookup} = $conn->{server} || $conn->{host};
-        $conn->{channels} = [ $cobj->channels_from_conversations($conversations) ];
-        $conn->{server} ||= $conn->{host}; # back compat
+        $cobj->server($conn->{server} || $conn->{host});    # back compat
+        $conn->{event}    = 'connection';
+        $conn->{lookup}   = $conn->{server} || $conn->{host};
+        $conn->{channels} = [$cobj->channels_from_conversations($conversations)];
+        $conn->{server} ||= $conn->{host};                  # back compat
         push @conversation, $conn;
       }
 
-      if(@conversation) {
+      if (@conversation) {
         $self->redis->hgetall("user:$login", $delay->begin);
         $self->redis->get("avatar:$login\@$hostname", $delay->begin);
       }
       else {
-        push @conversation, { event => 'welcome' };
+        push @conversation, {event => 'welcome'};
       }
 
       push @conversation, $self->app->config('default_connection');
-      $conversation[-1]{event} = 'connection';
+      $conversation[-1]{event}  = 'connection';
       $conversation[-1]{lookup} = '';
       $delay->begin->();
     },
     sub {
-      my($delay, $user, $avatar) = @_;
+      my ($delay, $user, $avatar) = @_;
 
-      if($with_layout) {
+      if ($with_layout) {
         $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
 
-      if($user) {
-        unshift @conversation, {
-          event => 'user',
-          avatar => $avatar,
-          email => $user->{email},
-          login => $login,
-          hostname => $hostname,
-        };
+      if ($user) {
+        unshift @conversation,
+          {event => 'user', avatar => $avatar, email => $user->{email}, login => $login, hostname => $hostname,};
       }
 
       $delay->begin->();
     },
     sub {
-      my($delay, @res) = @_;
+      my ($delay, @res) = @_;
 
       return $self->render('client/view') if $with_layout;
       return $self->render('client/conversation', layout => undef);
@@ -279,12 +235,12 @@ Add a new connection.
 =cut
 
 sub add_connection {
-  my $self = shift->render_later;
+  my $self  = shift->render_later;
   my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->app->core->add_connection(
         {
           channels => [$self->param('channels')],
@@ -332,7 +288,7 @@ sub edit_connection {
       );
     },
     sub {
-      my($delay, $errors, $changed) = @_;
+      my ($delay, $errors, $changed) = @_;
       $self->stash(errors => $errors) if $errors;
       return $self->settings if $errors;
       return $self->redirect_to('settings');
@@ -352,13 +308,8 @@ sub delete_connection {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->delete_connection(
-        {
-          login  => $self->session('login'),
-          server => $self->stash('server'),
-        },
-        $delay->begin,
-      );
+      $self->app->core->delete_connection({login => $self->session('login'), server => $self->stash('server'),},
+        $delay->begin,);
     },
     sub {
       my ($delay, $error) = @_;
@@ -375,10 +326,10 @@ Change user profile.
 =cut
 
 sub edit_user {
-  my $self = shift->render_later;
-  my $login = $self->session('login');
+  my $self     = shift->render_later;
+  my $login    = $self->session('login');
   my $hostname = Convos::Core::Util::hostname();
-  my $avatar = $self->param('avatar');
+  my $avatar   = $self->param('avatar');
   my %settings;
 
   $settings{email} = $self->param('email') if defined $self->param('email');
@@ -391,7 +342,7 @@ sub edit_user {
       $delay->begin->();
     },
     sub {
-      my($delay, @saved) = @_;
+      my ($delay, @saved) = @_;
       return $self->render(json => {}) if $self->req->is_xhr;
       return $self->redirect_to('settings');
     }
