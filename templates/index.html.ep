@@ -5,6 +5,18 @@
   <h1>Convos</h1>
   <h2><%=$name%></h2>
   </header>
+  <!--[if IE]>
+    <div class="alert">
+      Convos does not work in Internet Explorer. It works best in the following browsers:
+      (in order)
+      <ol>
+        <li><%= link_to 'Google Chrome', 'http://www.google.com/chrome' %></li>
+        <li><%= link_to 'Mozilla Firefox', 'http://getfirefox.com' %></li>
+        <li><%= link_to 'Opera', 'http://opera.com' %></li>
+        <li>Or any webkit based browser, such as Safari.</li>
+      </ol>
+    </div>
+    <![endif]--> 
   %= include "user/$form"
     <p> <small>
     A <%= link_to "Marcus", "http://twitter.com/marcusramberg"%> &amp; <%= link_to "Jan Henning", "http://twitter.com/jhthorsen"%> creation. Produced by <%=link_to "Nordaaker", "http://nordaaker.com"%>.

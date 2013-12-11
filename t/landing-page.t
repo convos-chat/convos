@@ -7,6 +7,8 @@ $t->get_ok('/')
 $t->get_ok('/login')
   ->element_exists('input[name="login"][id="login"]')
   ->element_exists('input[type="password"][name="password"][id="password"]')
+  ->content_like(qr{<!--\[if IE\]>}, 'with ie warning');
+
   ;
 
 for my $p ('/login') {

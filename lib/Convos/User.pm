@@ -103,7 +103,7 @@ sub register {
     },
     sub {    # Check invitation unless first user
       my ($delay, $exists) = @_;
-      $self->validation->{error}{login}= ["taken"] if $exists;
+      $validation->error(login=> ["taken"]) if $exists;
       return $self->render('index', status => 400) if $validation->has_error;
 
       $self->logf(debug => '[reg] New user login=%s', $wanted_login) if DEBUG;
