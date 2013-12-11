@@ -23,8 +23,7 @@ Route to last seen IRC conversation.
 
 sub route {
   my $self = shift->render_later;
-  my $login  = $self->session('login')
-    or return $self->redirect_to('login');
+  my $login = $self->session('login') or return $self->redirect_to('login');
   $self->redirect_last($login);
 }
 
@@ -35,20 +34,25 @@ Used to render the main IRC client view.
 =cut
 
 sub view {
-  my $self = shift->render_later;
-  my $prev_name = $self->session('name') || '';
-  my $login = $self->session('login');
-  my $server = $self->stash('server');
-  my $target = $self->stash('target') || '';
-  my $name = as_id $server, $target;
+  my $self        = shift->render_later;
+  my $prev_name   = $self->session('name') || '';
+  my $login       = $self->session('login');
+  my $server      = $self->stash('server');
+  my $target      = $self->stash('target') || '';
+  my $name        = as_id $server, $target;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
 
-  if($prev_name and $name ne $prev_name) {
+  if ($prev_name and $name ne $prev_name) {
+
     # make sure it's not a removed conversation before doing zadd
-    $self->redis->zscore("user:$login:conversations", $prev_name, sub {
-      my($redis, $score) = @_;
-      $redis->zadd("user:$login:conversations", time - 0.001, $prev_name) if $score;
-    });
+    $self->redis->zscore(
+      "user:$login:conversations",
+      $prev_name,
+      sub {
+        my ($redis, $score) = @_;
+        $redis->zadd("user:$login:conversations", time - 0.001, $prev_name) if $score;
+      }
+    );
   }
 
   $self->stash(body_class => ($target and $target =~ /^#/) ? 'with-nick-list' : 'without-nick-list');
@@ -57,22 +61,23 @@ sub view {
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->redis->hget("user:$login:connection:$server", "nick", $delay->begin);
     },
     sub {
-      my($delay, $nick) = @_;
+      my ($delay, $nick) = @_;
       return $self->route unless $nick;
       $self->stash(nick => $nick);
       $self->redis->zadd("user:$login:conversations", time, $name) if $target;
-      $self->_modify_notification($self->param('notification'), read => 1, sub {}) if defined $self->param('notification');
+      $self->_modify_notification($self->param('notification'), read => 1, sub { })
+        if defined $self->param('notification');
       $self->_conversation($delay->begin);
       $delay->begin->();
     },
     sub {
-      my($delay, $conversation) = @_;
+      my ($delay, $conversation) = @_;
 
-      if($with_layout) {
+      if ($with_layout) {
         $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
@@ -97,9 +102,13 @@ sub command_history {
   my $self = shift->render_later;
   my $login = $self->session('login') || '';
 
-  $self->redis->lrange("user:$login:cmd_history", 0, -1, sub {
-    $self->render(json => $_[1] || []);
-  });
+  $self->redis->lrange(
+    "user:$login:cmd_history",
+    0, -1,
+    sub {
+      $self->render(json => $_[1] || []);
+    }
+  );
 }
 
 =head2 conversation_list
@@ -109,30 +118,26 @@ Will render the conversation list for all conversations.
 =cut
 
 sub conversation_list {
-  my($self, $cb) = @_;
+  my ($self, $cb) = @_;
   my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->redis->zrevrange("user:$login:conversations", 0, -1, 'WITHSCORES', $delay->begin);
     },
     sub {
-      my($delay, $conversation_list) = @_;
+      my ($delay, $conversation_list) = @_;
       my $i = 0;
 
-      while($i < @$conversation_list) {
+      while ($i < @$conversation_list) {
         my $name = $conversation_list->[$i];
         my $timestamp = splice @$conversation_list, ($i + 1), 1;
-        my($server, $target) = id_as $name;
+        my ($server, $target) = id_as $name;
 
         $target ||= '';
-        $conversation_list->[$i] = {
-          server => $server,
-          is_channel => $target =~ /^#/ ? 1 : 0,
-          target => $target,
-          timestamp => $timestamp,
-        };
+        $conversation_list->[$i]
+          = {server => $server, is_channel => $target =~ /^#/ ? 1 : 0, target => $target, timestamp => $timestamp,};
 
         $self->redis->zcount("user:$login:connection:$server:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;
@@ -142,7 +147,7 @@ sub conversation_list {
       $self->stash(conversation_list => $conversation_list);
     },
     sub {
-      my($delay, @unread_count) = @_;
+      my ($delay, @unread_count) = @_;
       my $conversation_list = pop @unread_count;
 
       for my $c (@$conversation_list) {
@@ -164,28 +169,29 @@ Will mark all notifications as read.
 =cut
 
 sub clear_notifications {
-  my $self = shift->render_later;
+  my $self  = shift->render_later;
   my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->redis->lrange("user:$login:notifications", 0, 100, $delay->begin);
     },
     sub {
-      my($delay, $notification_list) = @_;
+      my ($delay, $notification_list) = @_;
       my $n_notifications = 0;
-      my $i = 0;
+      my $i               = 0;
 
-      while($i < @$notification_list) {
+      while ($i < @$notification_list) {
         my $notification = j $notification_list->[$i];
         $notification->{read}++;
         $self->redis->lset("user:$login:notifications", $i, j $notification);
         $i++;
       }
 
-      $self->render(json => { cleared => $i });
-  });
+      $self->render(json => {cleared => $i});
+    }
+  );
 }
 
 =head2 notification_list
@@ -195,38 +201,38 @@ Will render notifications.
 =cut
 
 sub notification_list {
-  my($self, $cb) = @_;
+  my ($self, $cb) = @_;
   my $login = $self->session('login');
-  my $key = "user:$login:notifications";
+  my $key   = "user:$login:notifications";
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       my $n = $self->param('notification');
 
-      if(defined $n) {
-        $self->_modify_notification($n, read => 1, $delay->begin)
+      if (defined $n) {
+        $self->_modify_notification($n, read => 1, $delay->begin);
       }
       else {
         $delay->begin->();
       }
     },
     sub {
-      my($delay, $modified) = @_;
+      my ($delay, $modified) = @_;
       $self->redis->lrange($key, 0, 20, $delay->begin);
-     },
-     sub {
-      my($delay, $notification_list) = @_;
+    },
+    sub {
+      my ($delay, $notification_list) = @_;
       my $n_notifications = 0;
-      my %nick_seen = ();
-      my $i = 0;
+      my %nick_seen       = ();
+      my $i               = 0;
 
-      while($i < @$notification_list) {
+      while ($i < @$notification_list) {
         my $n = j $notification_list->[$i];
         $n->{index} = $i;
         $n->{is_channel} = $n->{target} =~ /^#/ ? 1 : 0;
 
-        if(!$n->{is_channel} and $nick_seen{$n->{target}}++) {
+        if (!$n->{is_channel} and $nick_seen{$n->{target}}++) {
           $self->redis->lrem($key, 1, $notification_list->[$i]);
           splice @$notification_list, $i, 1, ();
           next;
@@ -237,16 +243,10 @@ sub notification_list {
         $i++;
       }
 
-      $self->stash(
-        notification_list => $notification_list,
-        n_notifications => $n_notifications,
-      );
+      $self->stash(notification_list => $notification_list, n_notifications => $n_notifications,);
 
       return $self->$cb($notification_list) if $cb;
-      return $self->respond_to(
-        json => { json => $self->stash('notification_list') },
-        html => sub { shift->render },
-      );
+      return $self->respond_to(json => {json => $self->stash('notification_list')}, html => sub { shift->render },);
     },
   );
 
@@ -254,65 +254,87 @@ sub notification_list {
 }
 
 sub _conversation {
-  my($self, $cb) = @_;
-  my $login = $self->session('login');
+  my ($self, $cb) = @_;
+  my $login  = $self->session('login');
   my $server = $self->stash('server');
   my $target = $self->stash('target');
-  my $key = $target ? "user:$login:connection:$server:$target:msg" : "user:$login:connection:$server:msg";
+  my $key    = $target ? "user:$login:connection:$server:$target:msg" : "user:$login:connection:$server:msg";
 
-  if(my $to = $self->param('to')) { # to a timestamp
-    $self->redis->zrevrangebyscore($key => $to, '-inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES, sub {
-      my $list = pop || [];
-      $self->format_conversation(
-        sub {
-          my $timestamp = pop @$list;
-          my $message = j(pop @$list) or return;
-          $message->{timestamp} = $timestamp;
-          $message;
-        },
-        $cb
-      );
-    });
-  }
-  elsif(my $from = $self->param('from')) { # from at timestamp
-    $self->redis->zrangebyscore($key => $from, '+inf', 'WITHSCORES', LIMIT => 0, $N_MESSAGES + 1, sub {
-      my $list = pop || [];
-      $self->stash(got_more => @$list / 2 > $N_MESSAGES);
-      $self->stash(body_class => 'historic') if $self->stash('got_more');
-      $self->format_conversation(
-        sub {
-          my $current = shift @$list or return;
-          my $message = j $current;
-          @$list or return; # skip the last
-          $message->{timestamp} = shift @$list;
-          $message;
-        },
-        $cb,
-      );
-    });
-  }
-  else { # default
-    $self->redis->zcard($key, sub {
-      my($redis, $end) = @_;
-      my $start = $end > $N_MESSAGES ? $end - $N_MESSAGES : 0;
-      $redis->zrange($key => $start, $end, 'WITHSCORES', sub {
+  if (my $to = $self->param('to')) {    # to a timestamp
+    $self->redis->zrevrangebyscore(
+      $key => $to,
+      '-inf',
+      'WITHSCORES',
+      LIMIT => 0,
+      $N_MESSAGES,
+      sub {
         my $list = pop || [];
         $self->format_conversation(
           sub {
-            my $message = j(shift @$list) or return;
+            my $timestamp = pop @$list;
+            my $message = j(pop @$list) or return;
+            $message->{timestamp} = $timestamp;
+            $message;
+          },
+          $cb
+        );
+      }
+    );
+  }
+  elsif (my $from = $self->param('from')) {    # from at timestamp
+    $self->redis->zrangebyscore(
+      $key => $from,
+      '+inf',
+      'WITHSCORES',
+      LIMIT => 0,
+      $N_MESSAGES + 1,
+      sub {
+        my $list = pop || [];
+        $self->stash(got_more => @$list / 2 > $N_MESSAGES);
+        $self->stash(body_class => 'historic') if $self->stash('got_more');
+        $self->format_conversation(
+          sub {
+            my $current = shift @$list or return;
+            my $message = j $current;
+            @$list or return;    # skip the last
             $message->{timestamp} = shift @$list;
             $message;
           },
           $cb,
         );
-      });
-    });
+      }
+    );
+  }
+  else {                         # default
+    $self->redis->zcard(
+      $key,
+      sub {
+        my ($redis, $end) = @_;
+        my $start = $end > $N_MESSAGES ? $end - $N_MESSAGES : 0;
+        $redis->zrange(
+          $key => $start,
+          $end,
+          'WITHSCORES',
+          sub {
+            my $list = pop || [];
+            $self->format_conversation(
+              sub {
+                my $message = j(shift @$list) or return;
+                $message->{timestamp} = shift @$list;
+                $message;
+              },
+              $cb,
+            );
+          }
+        );
+      }
+    );
   }
 }
 
 sub _modify_notification {
-  my($self, $id, $key, $value, $cb) = @_;
-  my $login = $self->session('login');
+  my ($self, $id, $key, $value, $cb) = @_;
+  my $login     = $self->session('login');
   my $redis_key = "user:$login:notifications";
 
   $self->redis->lindex(
