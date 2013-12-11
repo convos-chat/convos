@@ -224,6 +224,8 @@ sub startup {
   $r->post('/login')->to('user#do_login');
   $r->get('/register')->to('user#register');
   $r->post('/register')->to('user#register');
+  $r->get('/register/:invite')->to('user#register');
+  $r->post('/register/:invite')->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
