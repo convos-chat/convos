@@ -3,6 +3,8 @@ use Test::More;
 use Convos::Loopback;
 use Convos::Core::Connection;
 
+plan skip_all => 'Do not want to mess up your database by accident' unless $ENV{REDIS_TEST_DATABASE};
+
 my $conn = Convos::Core::Connection->new(server => 'loopback', login => 'doe');
 my $loopback = $conn->_irc;
 

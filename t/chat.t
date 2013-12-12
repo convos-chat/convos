@@ -2,6 +2,8 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
+plan skip_all => 'Do not want to mess up your database by accident' unless $ENV{REDIS_TEST_DATABASE};
+
 my $dom = Mojo::DOM->new;
 my $server = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
 my @data = data();

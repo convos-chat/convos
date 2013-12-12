@@ -1,5 +1,7 @@
 use t::Helper;
 
+plan skip_all => 'Do not want to mess up your database by accident' unless $ENV{REDIS_TEST_DATABASE};
+
 $t->get_ok('/')->status_is(302)->header_like('location', qr|/login$|);
 
 $t->get_ok('/login')->element_exists('input[name="login"][id="login"]')

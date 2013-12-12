@@ -18,7 +18,7 @@ The chat contains profile pictures which can be retrieved from Facebook or from 
 Links to images and video will be displayed inline. No need to click on the link to view the data.
 
 ## Installation
-Convos requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get. Note that we require Redis 2.6+. If your distro version is too old, you can easily build redis from source.
+Convos requires a Redis server to function. If you are deploying on osx you can use homebrew, or if you are on ubuntu or similar install redis-server using apt-get. Note that we require Redis 2.6+. If your distro version is too old, you can easily build redis from source.
 To install convos, you can run the following commands:
 
     $ curl https://codeload.github.com/Nordaaker/convos/tar.gz/release | tar zxvf -
@@ -26,7 +26,7 @@ To install convos, you can run the following commands:
     # Install deps using carton bundled with the repo 
     $ ./vendor/bin/carton
     # OR use cpanm to install deps to your perl, if you have it set up
-    # Then you don't need cartion exec in front of the next commands:
+    # Then you don't need carton exec in front of the next commands:
     $ cpanm --installdeps .
     # edit convos.conf, point to your redis server
     # Start up the backend
@@ -39,7 +39,9 @@ To install convos, you can run the following commands:
 
 morbo is an excellent tool for testing, but hypnotoad should be used to run Convos in production:
 
+    $ ./vendor/bin/carton exec script/convos backend &
     $ ./vendor/bin/carton exec hypnotoad script/convos
+
 The command above will start a full featured, UNIX optimized, preforking non-blocking webserver. Run the same command again, and the webserver will hot reload the source code without loosing any connections. By default it will listen to http://*:5000/ but you can easily configure this in convos.conf - It can even serve HTTPS directly if you install IO::Socket::SSL from CPAN.
 
 See also the [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT) for production deployment.
