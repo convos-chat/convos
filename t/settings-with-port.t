@@ -1,6 +1,6 @@
 use t::Helper;
 
-plan skip_all => 'Do not want to mess up your database by accident' unless $ENV{REDIS_TEST_DATABASE};
+plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
 
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],

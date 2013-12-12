@@ -2,7 +2,7 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
-plan skip_all => 'Do not want to mess up your database by accident' unless $ENV{REDIS_TEST_DATABASE};
+plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
 
 my $dom = Mojo::DOM->new;
 my $sub = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
