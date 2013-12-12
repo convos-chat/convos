@@ -78,7 +78,7 @@ See L</login>.
 sub register {
   my $self = shift->render_later;
   my $validation = $self->validation;
-  my $wanted_login;
+  my($code, $wanted_login);
 
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
@@ -91,6 +91,11 @@ sub register {
   # fail without a login
   if($self->req->method ne 'POST' or !$self->param('login')) {
     return $self->render('index');
+  }
+
+  $code = $self->param('invite') || '';
+  if ($self->app->config->{invite_code} && $code ne $self->app->config->{invite_code}) {
+    return $self->render('index', form => 'invite_only', status => 400);
   }
 
   $validation->required('login')->like(qr/^\w+$/)->size(3, 15);
@@ -131,11 +136,6 @@ sub register {
 
 sub _digest {
   crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
-}
-
-sub _setup_validation {
-  my ($self) = @_;
-
 }
 
 =head2 logout

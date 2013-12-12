@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.01
+0.1
 
 =begin html
 
@@ -145,7 +145,7 @@ use File::Spec::Functions qw(catfile tmpdir);
 use Convos::Core;
 use Convos::Core::Util ();
 
-our $VERSION = '0.01';
+our $VERSION = '0.1';
 $ENV{CONVOS_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
@@ -224,6 +224,8 @@ sub startup {
   $r->post('/login')->to('user#login');
   $r->get('/register')->to('user#register')->name('register');
   $r->post('/register')->to('user#register');
+  $r->get('/register/:invite')->to('user#register');
+  $r->post('/register/:invite')->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');

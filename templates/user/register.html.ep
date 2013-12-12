@@ -1,6 +1,6 @@
 <div class="row register">
   <h2 class="login-register">Register or <%=link_to 'Login', 'login' %></h2>
-  %= form_for '/register', method => 'post', begin
+  %= form_for +(param('invite') ? "/register/".param('invite') : '/register'), method => 'post', begin
     %= include 'inc/alert' if $form eq 'register'
     %= label_for login => 'Login (Choose something that\'s simple to remember. Your IRC handle for instance).'
     %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
