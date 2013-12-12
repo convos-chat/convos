@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.01
+0.1
 
 =begin html
 
@@ -145,7 +145,7 @@ use File::Spec::Functions qw(catfile tmpdir);
 use Convos::Core;
 use Convos::Core::Util ();
 
-our $VERSION = '0.01';
+our $VERSION = '0.1';
 $ENV{CONVOS_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
