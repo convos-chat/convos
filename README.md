@@ -21,8 +21,8 @@ Links to images and video will be displayed inline. No need to click on the link
 Convos requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get.
 To install convos, you can run the following commands:
 
-    $ curl https://github.com/Nordaaker/convos/archive/release.tar.gz | tar zxvf -
-    $ cd Nordaaker-convos-*
+    $ curl https://codeload.github.com/Nordaaker/convos/tar.gz/release | tar zxvf -
+    $ cd convos-release
     # Install deps using carton bundled with the repo 
     $ ./vendor/bin/carton
     # OR use cpanm to install deps to your perl, if you have it set up
