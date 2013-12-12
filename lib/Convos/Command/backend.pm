@@ -29,7 +29,7 @@ Returns a string describing how to use this command.
 
 =cut
 
-has description => "Start application with HTTP and WebSocket server.\n";
+has description => "Start the Convos IRC proxy.\n";
 has usage => <<"EOF";
 usage: $0 backend
 EOF

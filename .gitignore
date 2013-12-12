@@ -18,3 +18,4 @@ MANIFEST*
 /convos.production.conf
 /cover_db
 /script/toadfarm.pid
+Convos-*.gz
