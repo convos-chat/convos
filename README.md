@@ -26,7 +26,7 @@ To install convos, you can run the following commands:
     # Install deps using carton bundled with the repo 
     $ ./vendor/bin/carton
     # OR use cpanm to install deps to your perl, if you have it set up
-    # Then you don't need cartion exec in front of the next commands:
+    # Then you don't need carton exec in front of the next commands:
     $ cpanm --installdeps .
     # edit convos.conf, point to your redis server
     # Start up the backend
