@@ -24,15 +24,15 @@
     %= password_field 'password', id => 'register_password', placeholder => 'Something secret'
     % if (my $err = validation->error('password')) {
     <div class="error">
-      %= 'Password required' if $err->[0] eq 'required'
-      %= 'Password must be 7-255 characters long' if $err->[0] eq 'size'
+      %= 'Password required.' if $err->[0] eq 'required'
+      %= 'Password must be 7-255 characters long.' if $err->[0] eq 'size'
     </div>
     % }
     %= label_for password_again => ''
     %= password_field 'password_again', placeholder => 'Repeat secret'
     % if (my $err = validation->error('password_again')) {
     <div class="error">
-      %= 'Password must match' if $err->[0] eq 'equal_to'
+      %= 'Password must match.' if $err->[0] eq 'equal_to'
     </div>
     % }
 

@@ -32,39 +32,39 @@ Show the login form. Also responds to JSON requests with login status.
 =cut
 
 sub login {
-  my $self = shift;
-  $self->respond_to(
-    html => sub { $self->render('index', form => 'login') },
-    json => {json => {login => $self->session('login') || 0}}
-  );
-}
+  my $self = shift->render_later;
+  my %credentials;
 
-=head2 do_login
+  $self->stash(form => 'login');
 
-Authenticate local user
-
-=cut
-
-sub do_login {
-  my $self  = shift->render_later;
-  my $login = $self->param('login');
+  if ($self->session('login')) {
+    $self->logf(debug => '[reg] Already logged in') if DEBUG;
+    return $self->redirect_to('view');
+  }
+  if ($self->req->method eq 'POST') {
+    $credentials{$_} = $self->param($_) for qw( login password );
+  }
+  if (2 != grep { $_ } values %credentials) {
+    return $self->respond_to(
+      html => { template => 'index' },
+      json => { json => { login => $self->session('login') || '' } },
+    );
+  }
 
   $self->app->core->login(
-    {login => $login, password => scalar $self->param('password'),},
+    \%credentials,
     sub {
       my ($core, $error) = @_;
 
       if ($error) {
-        return $self->render('index', form => 'login', message => 'Invalid username/password.', status => 401);
+        return $self->render('index', message => 'Invalid username/password.', status => 401);
       }
 
-      $self->session(login => $login);
-
+      $self->session(login => $credentials{login});
       $self->respond_to(
-        html => sub { $self->redirect_last($login); },
-        json => {json => {login => $self->session('login') || 0}}
+        html => sub { $self->redirect_last($credentials{login}); },
+        json => { json => { login => $self->session('login') || '' } },
       );
-
     },
   );
 }
@@ -77,20 +77,28 @@ See L</login>.
 
 sub register {
   my $self = shift->render_later;
+  my $validation = $self->validation;
+  my $wanted_login;
+
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
+
   $self->stash(form => 'register');
 
-  my $validation = $self->validation;
-  $self->render('index') unless $validation->has_data;
+  # cannt continue on error since the sismember(...$wanted_login...) will
+  # fail without a login
+  if($self->req->method ne 'POST' or !$self->param('login')) {
+    return $self->render('index');
+  }
 
   $validation->required('login')->like(qr/^\w+$/)->size(3, 15);
   $validation->required('email')->like(qr/.\@./);
   $validation->required('password_again')->equal_to('password');
   $validation->required('password')->size(5, 255);
-  my $wanted_login = $validation->param('login');
+
+  $wanted_login = $validation->param('login');
 
   Mojo::IOLoop->delay(
     sub {
@@ -100,6 +108,7 @@ sub register {
     },
     sub {    # Check invitation unless first user
       my ($delay, $exists) = @_;
+
       $validation->error(login => ["taken"]) if $exists;
       return $self->render('index', status => 400) if $validation->has_error;
 
