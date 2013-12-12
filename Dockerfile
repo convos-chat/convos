@@ -14,6 +14,5 @@ add ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 add . /convos
 run gem install sass
 run cd /convos; ./vendor/bin/carton
-expose 5000 
-expose 6379
+expose 8080 
 entrypoint ["/usr/bin/supervisord"]
