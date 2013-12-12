@@ -18,7 +18,7 @@ The chat contains profile pictures which can be retrieved from Facebook or from 
 Links to images and video will be displayed inline. No need to click on the link to view the data.
 
 ## Installation
-Convos requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get.
+Convos requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get. Note that we require Redis 2.6+. If your distro version is too old, you can easily build redis from source.
 To install convos, you can run the following commands:
 
     $ curl https://codeload.github.com/Nordaaker/convos/tar.gz/release | tar zxvf -
