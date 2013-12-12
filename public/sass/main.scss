@@ -223,6 +223,15 @@ button:active, button.active, .button:active, .button.active { background: darke
 button.confirm, a.confirm { color: #900; border: 2px solid #900; }
 button:hover, .button:hover { border: $buttonBorderHover; }
 
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  line-height: 1px;
+  height: 1px;
+  margin-top: 1em;
+  padding-bottom: 1em;
+}
+
 @import "selectize.scss";
 
 /*
@@ -516,8 +525,15 @@ div.goto-bottom a {
   h2.login-register {
     font-size: 1em;
   }
-  div.footer {
-    margin-top: 2em;
+}
+
+div.footer {
+  font-size: 0.8em;
+  margin-top: 2em;
+  padding-top: 1em;
+  a {
+    color: #777;
+    text-decoration: none;
   }
 }
 

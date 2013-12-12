@@ -4,7 +4,7 @@
   <header class="row">
     <h1>
       <span class="logo">Convos</span>
-      <small>by <%= $name %></small>
+      <small>for <%= $name %></small>
     </h1>
   </header>
 <!--[if IE]>
@@ -21,10 +21,8 @@
 <![endif]-->
   %= include "user/$form"
   <div class="row footer">
-    A
-    <%= link_to "Marcus", "http://twitter.com/marcusramberg" %> &amp;
-    <%= link_to "Jan Henning", "http://twitter.com/jhthorsen "%> creation.
-    Produced by <%= link_to "Nordaaker", "http://nordaaker.com"%>.
-    <%= link_to "convos.by", "http://convos.by" %>
+    <hr>
+    &copy; <%= link_to "Nordaaker", "http://nordaaker.com"%>
+    - <%= link_to "About", "http://convos.by" %>
   </div>
 </div>
