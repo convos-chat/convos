@@ -8,15 +8,9 @@ Convos - Multiuser IRC proxy with web interface
 
 0.1
 
-=begin html
-
-<img src="http://strider.vm.nordaaker.com/523f43dc5893510900000008/marcusramberg/wirc/badge">
-
-=end html
-
 =head1 DESCRIPTION
 
-WiRC is to a multi-user IRC Proxy, that also provides a easy to use Web
+Convos is to a multi-user IRC Proxy, that also provides a easy to use Web
 interface. Feature list:
 
 =over 4
@@ -43,41 +37,36 @@ the link to view the data.
 
 =back
 
-=head2 Dependencies
+=head2 Running convos
 
-To install, you need L<perl>, L<cpanm|App::cpanminus> and
-L<git|http://git-scm.com/book/en/Getting-Started-Installing-Git>.
+Convos has sane defaults so after installing L<Convos> you should be
+able to just run it:
 
-L<Perl module|http://metacpan.org> dependencies can be installed with
-L<cpanm|App::cpanminus> or L<carton> using the C<cpanfile> found
-in the root of the project:
+  # Install
+  $ cpanm Convos
+  # Run it
+  $ convos backend &
+  $ convos daemon
 
-  $ cpanm --installdeps .
+The above works, but if you have a lot of users you probably want to use
+L<hypnotoad|Mojo::Server::Hypnotoad> instead of C<daemon>:
 
-=head2 Installation
-
-To install wirc, you can run the following commands:
-
-  $ git clone https://github.com/Nordaaker/convos.git
-  $ cd convos
-  $ git submodule update -i
-  $ cpanm --installdeps .
-  # edit convos.conf, point to a working redis server
-  $ morbo script/convos
-  # open http://yourdomain:3000 in your favorite browser
-
-=head2 Running convos in production
-
-L<morbo|Mojo::Server::Morbo> is an excellent tool for testing, but
-L<hypnotoad|Mojo::Server::Hypnotoad> should be used to run Convos in
-production:
-
-  $ hypnotoad script/convos
+  $ hypnotoad $(which convos)
 
 The command above will start a full featured, UNIX optimized, preforking
 non-blocking webserver. Run the same command again, and the webserver
 will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
 loosing any connections.
+
+=head2 Configuration
+
+You can also customize the config by setting C<MOJO_CONFIG> before
+running any of the commands above. Example:
+
+  $ MOJO_CONFIG=$HOME/.convos.conf convos daemon
+
+You can use L<https://github.com/Nordaaker/convos/blob/release/convos.conf>
+as config file template.
 
 =head2 Wanted features
 
