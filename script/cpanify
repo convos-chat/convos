@@ -71,6 +71,7 @@ WriteMakefile(
 ^public
 ^templates
 ^vendor
+^Convos-
   MANIFEST_SKIP
 }
 
