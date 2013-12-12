@@ -423,7 +423,7 @@ div.messages {
   }
 
   li.same-nick { padding-top: 0; }
-  li.action.message div.content { padding-top: 20px; font-style: italic; }
+  li.action.message div.content { padding-top: 20px; }
   li.action.message.same-nick div.content { padding-top: 0; }
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
   li.message-pending div.content { color: #999; }
