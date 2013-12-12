@@ -18,7 +18,7 @@ The chat contains profile pictures which can be retrieved from Facebook or from 
 Links to images and video will be displayed inline. No need to click on the link to view the data.
 
 ## Installation
-Wirc requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get.
+Convos requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get.
 To install wirc, you can run the following commands:
 
     $ curl https://github.com/Nordaaker/convos/tarball/release | tar zxvf -
