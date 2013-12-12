@@ -1,0 +1,84 @@
+#!/usr/bin/env perl
+use Mojo::Base -strict;
+use Module::CPANfile;
+use Data::Dumper;
+
+$Data::Dumper::Indent = 1;
+$Data::Dumper::Sortkeys = 1;
+$Data::Dumper::Terse = 1;
+
+my $prereqs = Module::CPANfile->load->prereqs;
+my $BUILD_REQUIRES = Dumper($prereqs->as_string_hash->{runtime}{requires});
+my $PREREQ_PM = Dumper({});
+
+for($BUILD_REQUIRES, $PREREQ_PM) {
+  chomp;
+  s/\n/\n  /g;
+}
+
+{
+  open my $MAKEFILE, '>', 'Makefile.PL' or die $!;
+
+  print $MAKEFILE <<"  MAKEFILE";
+use ExtUtils::MakeMaker;
+WriteMakefile(
+  NAME => 'Convos',
+  ABSTRACT_FROM => 'lib/Convos.pm',
+  VERSION_FROM => 'lib/Convos.pm',
+  AUTHOR => 'Jan Henning Thorsen <jhthorsen\@cpan.org>',
+  LICENSE => 'artistic_2',
+  PREREQ_PM => $PREREQ_PM,
+  BUILD_REQUIRES => $BUILD_REQUIRES,
+  META_MERGE => {
+    resources => {
+      license => 'http://www.opensource.org/licenses/artistic-license-2.0',
+      homepage => 'https://github.com/Nordaaker/convos',
+      bugtracker => 'https://github.com/Nordaaker/convos/issues',
+      repository => 'https://github.com/Nordaaker/convos',
+    },
+  },
+  test => { TESTS => 't/*.t' },
+  EXE_FILES => ['script/convos'],
+);
+  MAKEFILE
+}
+
+{
+  open my $MANIFEST_SKIP, '>', 'MANIFEST.SKIP' or die $!;
+  print $MANIFEST_SKIP <<"  MANIFEST_SKIP";
+.swp
+~$
+.DS_Store
+.gitignore
+.perltidyrc
+.sass-cache
+.pid
+^.git
+.vimrc
+^convos.production.conf
+^cover_db
+^cpanfile
+^docs
+^log
+^local
+^MANIFEST
+^MYMETA.*
+^README.pod
+^script/cpanify
+^script/dev-mode
+^script/flush.pl
+^script/parse-irc-line.pl
+^public
+^templates
+^vendor
+  MANIFEST_SKIP
+}
+
+system 'rsync -va convos.conf templates public lib/Convos/';
+system 'cp convos.conf lib/Convos/';
+system 'perl Makefile.PL';
+system 'perldoc -tT lib/Convos.pm > README';
+system 'make manifest';
+system 'make dist';
+system "rm -r lib/Convos/$_" for qw( convos.conf templates public );
+system "rm $_" for qw( README Makefile* MANIFEST* );
