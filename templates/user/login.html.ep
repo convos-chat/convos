@@ -1,5 +1,5 @@
-<div class="login row ignore-document-close">
-<h2>Login or <%=link_to 'Register', 'register' %></h2>
+<div class="row login">
+  <h2 class="login-register">Login or <%= link_to 'Register', 'register' %></h2>
   %= form_for '/login', method => 'post', begin
     %= include 'inc/alert' if $form eq 'login'
     %= form_block login => class => [], begin

@@ -582,6 +582,10 @@
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
+    if($input.length == 0) {
+      return;
+    }
+
     $.ajaxSetup({
       error: function(jqXHR, exception) {
         console.log('ajax: ' + this.url + ' failed: ' + exception);
@@ -621,8 +625,12 @@
     });
   });
 
+  $(document).ready(function() {
+    $('.login, .register').find('form input[type="text"]:first').focus();
+  });
+
   $(window).load(function() {
-    conversationLoaded();
+    if($input.length) conversationLoaded();
   });
 
 })(jQuery);

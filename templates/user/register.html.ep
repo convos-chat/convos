@@ -1,43 +1,43 @@
-<div class="register row ignore-document-close">
-<h2>Register or <%=link_to 'Login', 'login' %></h2>
+<div class="row register">
+  <h2 class="login-register">Register or <%=link_to 'Login', 'login' %></h2>
   %= form_for +(param('invite') ? "/register/".param('invite') : '/register'), method => 'post', begin
     %= include 'inc/alert' if $form eq 'register'
-      %= label_for login => 'Login (Choose something that\'s simple to remember. Your IRC handle for instance).'
-      %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
-      % if (my $err = validation->error('login')) {
-      <div class="error">
-        %= 'Login is required.' if $err->[0] eq 'required'
-        %= 'Login needs to be 3-15 characters long.' if $err->[0] eq 'size'
-        %= 'Login must consist of letters and/or numbers.' if $err->[0] eq 'like'
-        %= 'That username is taken.' if $err->[0] eq 'taken';
-      </div>
-      % }
-      %= label_for email => 'Email address'
-      %= email_field 'email', id => 'email', placeholder => 'your@email.com'
-      % if (my $err = validation->error('email')) {
-      <div class="error">
-        %= 'Email is required.' if $err->[0] eq 'required'
-        %= 'Invalid email.' if $err->[0] eq 'like'
-      </div>
-      % }
-      %= label_for password => 'Password (needs to be at least six characters long)'
-      %= password_field 'password', id => 'register_password', placeholder => 'Something secret'
-      % if (my $err = validation->error('password')) {
-      <div class="error">
-        %= 'Password required' if $err->[0] eq 'required'
-        %= 'Password must be 7-255 characters long' if $err->[0] eq 'size'
-      </div>
-      % }
-      %= label_for password_again => ''
-      %= password_field 'password_again', placeholder => 'Repeat secret'
-      % if (my $err = validation->error('password_again')) {
-      <div class="error">
-        %= 'Password must match' if $err->[0] eq 'equal_to'
-      </div>
-      % }
+    %= label_for login => 'Login (Choose something that\'s simple to remember. Your IRC handle for instance).'
+    %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
+    % if (my $err = validation->error('login')) {
+    <div class="error">
+      %= 'Login is required.' if $err->[0] eq 'required'
+      %= 'Login needs to be 3-15 characters long.' if $err->[0] eq 'size'
+      %= 'Login must consist of letters and/or numbers.' if $err->[0] eq 'like'
+      %= 'That username is taken.' if $err->[0] eq 'taken';
+    </div>
+    % }
+    %= label_for email => 'Email address'
+    %= email_field 'email', id => 'email', placeholder => 'your@email.com'
+    % if (my $err = validation->error('email')) {
+    <div class="error">
+      %= 'Email is required.' if $err->[0] eq 'required'
+      %= 'Invalid email.' if $err->[0] eq 'like'
+    </div>
+    % }
+    %= label_for password => 'Password (needs to be at least six characters long)'
+    %= password_field 'password', id => 'register_password', placeholder => 'Something secret'
+    % if (my $err = validation->error('password')) {
+    <div class="error">
+      %= 'Password required.' if $err->[0] eq 'required'
+      %= 'Password must be 7-255 characters long.' if $err->[0] eq 'size'
+    </div>
+    % }
+    %= label_for password_again => ''
+    %= password_field 'password_again', placeholder => 'Repeat secret'
+    % if (my $err = validation->error('password_again')) {
+    <div class="error">
+      %= 'Password must match.' if $err->[0] eq 'equal_to'
+    </div>
+    % }
 
-      <div class="actions">
-        %= submit_button 'Register'
-      </div>
+    <div class="actions">
+      %= submit_button 'Register'
+    </div>
   % end
 </div>
