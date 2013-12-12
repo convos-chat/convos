@@ -18,11 +18,11 @@ The chat contains profile pictures which can be retrieved from Facebook or from 
 Links to images and video will be displayed inline. No need to click on the link to view the data.
 
 ## Installation
-Convos requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get.
+Convos requires a Redis server to function. If you are deploying on osx you can use perlbrew, or if you are on ubuntu or similar install redis-server using apt-get. Note that we require Redis 2.6+. If your distro version is too old, you can easily build redis from source.
 To install convos, you can run the following commands:
 
-    $ curl https://github.com/Nordaaker/convos/tarball/release | tar zxvf -
-    $ cd Nordaaker-convos-*
+    $ curl https://codeload.github.com/Nordaaker/convos/tar.gz/release | tar zxvf -
+    $ cd convos-release
     # Install deps using carton bundled with the repo 
     $ ./vendor/bin/carton
     # OR use cpanm to install deps to your perl, if you have it set up
@@ -44,7 +44,7 @@ The command above will start a full featured, UNIX optimized, preforking non-blo
 
 See also the [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT) for production deployment.
 
-For convenience, we also include a Dockerfile so you can build a Docker image easily if you want a custom config or  pull our image directly from the [docker index](http://index.docker.com/nordaaker/convos).
+For convenience, we also include a Dockerfile so you can build a Docker image easily if you want a custom config or  pull our image directly from the [docker index](https://index.docker.io/u/nordaaker/convos/).
 
 Note: By default Convos will use the Mojo IOLoop, which is pure perl. In production you might want to install [EV](https://metacpan.org/release/EV) - we automatically use it if it is installed, and it performs much better.
 

@@ -1,12 +1,19 @@
-FROM ubuntu
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" >> /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get upgrade
-RUN apt-get -y install curl perl supervisor redis-server make rubygems
-ADD ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-ADD . /convos
-RUN gem install sass
-RUN cd /convos; ./vendor/bin/carton
-EXPOSE 5000 
-EXPOSE 6379
-CMD ["supervisord", "-n"]
+from   base
+env    DEBIAN_FRONTEND noninteractive
+
+run    dpkg-divert --local --rename --add /sbin/initctl
+run    ln -s /bin/true /sbin/initctl
+
+run    apt-get install -y -q software-properties-common
+run    add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
+run    apt-get --yes update
+run    apt-get --yes upgrade --force-yes
+
+run apt-get -y install curl perl supervisor redis-server make rubygems
+add ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+add . /convos
+run gem install sass
+run cd /convos; ./vendor/bin/carton
+expose 5000 
+expose 6379
+entrypoint ["/usr/bin/supervisord"]
