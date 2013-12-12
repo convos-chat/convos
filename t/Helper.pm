@@ -4,7 +4,10 @@ use warnings;
 use Test::More;
 use Test::Mojo;
 
-BEGIN { $ENV{CONVOS_DEBUG} //= $ENV{TEST_VERBOSE} }
+BEGIN {
+  $ENV{CONVOS_DEBUG} //= $ENV{TEST_VERBOSE};
+  $ENV{REDIS_TEST_DATABASE} ||= '';
+}
 
 my $t;
 
@@ -35,7 +38,7 @@ sub import {
 
   strict->import;
   warnings->import;
-  $ENV{REDIS_TEST_DATABASE} ||= 'redis://127.0.0.1:6379/14';
+  $ENV{REDIS_TEST_DATABASE} = 'redis://127.0.0.1:6379/14' if $ENV{REDIS_TEST_DATABASE} eq 'default';
 
   # make sure we use our own test database
   $t = Test::Mojo->new('Convos');

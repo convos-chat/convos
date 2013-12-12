@@ -1,6 +1,8 @@
 BEGIN { $ENV{CONVOS_PING_INTERVAL} = 0.1 }
 use t::Helper;
 
+plan skip_all => 'Do not want to mess up your database by accident' unless $ENV{REDIS_TEST_DATABASE};
+
 {
   diag 'login first';
   redis_do(

@@ -2,6 +2,8 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
+plan skip_all => 'Do not want to mess up your database by accident' unless $ENV{REDIS_TEST_DATABASE};
+
 my $dom = Mojo::DOM->new;
 my $connection = Convos::Core::Connection->new(login => 'doe', server => 'irc.perl.org');
 my $messages = $t->app->redis->subscribe('convos:user:doe:out');
