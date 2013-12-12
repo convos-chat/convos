@@ -571,6 +571,7 @@
     $.get($.url_for('notifications'), noCache(reload_notification_list_args), function(data) {
       $notification_list.html(data);
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
+      if(n==0) { n='' }
       $n_notifications.children('b').text(n);
       $n_notifications[n ? 'addClass' : 'removeClass']('alert');
     });
@@ -607,7 +608,7 @@
 
     $('nav a.notifications.toggler').on('activate', function() {
       $.post($.url_for('notifications/clear'));
-      $(this).removeClass('alert').children('b').text(0);
+      $(this).removeClass('alert').children('b').text('');
     });
 
     $('nav a.toggler').initDropDown();

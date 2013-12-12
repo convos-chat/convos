@@ -12,7 +12,7 @@
     % push @class, 'alert' if $n_notifications;
     %= link_to 'conversation_list', title => 'List notifications', class => "@class", 'data-focus' => 'a', 'data-toggle' => 'div.notifications.container', begin
       <i class="icon-bullhorn"></i>
-      <b><%= $n_notifications > 999 ? '999+' : $n_notifications %></b>
+      <b><%= ( $n_notifications > 999 ? '999+' : $n_notifications ) if $n_notifications %></b>
     % end
     %= link_to 'settings', title => 'Edit setttings', class => 'settings', begin
       <i class="icon-cog"></i>
