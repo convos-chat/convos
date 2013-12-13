@@ -508,9 +508,14 @@ body.tactile {
  * Landing page
  */
 .landing-page {
-  margin: auto;
-  padding-top: 1em;
-  width: 680px;
+  background: transparent url(../image/tactile-highlight-bg.jpg) 50% 0 no-repeat;
+  min-height: 595px;
+
+  .row {
+    margin: auto;
+    padding-top: 1em;
+    width: 680px;
+  }
 
   h1 {
     .logo {
