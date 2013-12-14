@@ -197,6 +197,7 @@ sub settings {
         $conn->{lookup}   = $conn->{server} || $conn->{host};
         $conn->{channels} = [$cobj->channels_from_conversations($conversations)];
         $conn->{server} ||= $conn->{host};                  # back compat
+        $conn->{password} ||= '';
         push @conversation, $conn;
       }
 
@@ -211,6 +212,7 @@ sub settings {
       push @conversation, $self->app->config('default_connection');
       $conversation[-1]{event}  = 'connection';
       $conversation[-1]{lookup} = '';
+      $conversation[-1]{password} = '';
       $delay->begin->();
     },
     sub {
@@ -258,6 +260,7 @@ sub add_connection {
           server   => $self->param('server') || '',
           tls      => $self->param('tls') || 0,
           user     => $login,
+          password => $self->param('password') || '',
         },
         $delay->begin,
       );
@@ -292,6 +295,7 @@ sub edit_connection {
           server   => $self->req->body_params->param('server') || '',
           tls      => $self->param('tls') || 0,
           user     => $self->session('login'),
+          password => $self->param('password') || '',
         },
         $delay->begin,
       );
