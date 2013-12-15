@@ -237,13 +237,6 @@ sub startup {
   $host_r->get('/*target')->to('client#view')->name('view');
   $host_r->get('/')->to('client#view')->name('view.server');
 
-  $self->hook(
-    before_dispatch => sub {
-      my $c = shift;
-      $c->stash(errors => {});    # this need to be set up each time, since it's a ref
-    }
-  );
-
   if($config->{backend}{embedded}) {
     Mojo::IOLoop->timer(0, sub {
       $self->core->start;
