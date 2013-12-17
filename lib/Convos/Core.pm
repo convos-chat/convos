@@ -136,6 +136,7 @@ sub add_connection {
   my($self, $input, $cb) = @_;
   my $validation = $self->_validation($input);
 
+  $validation->optional('password');
   $validation->required('login')->size(3, 30);
   $validation->required('nick')->size(1, 30);
   $validation->required('server')->size(1, 64);
@@ -201,6 +202,7 @@ sub update_connection {
   my $validation = $self->_validation($input);
   my $lookup;
 
+  $validation->optional('password');
   $validation->required('login')->size(3, 30);
   $validation->required('lookup');
   $validation->required('nick')->size(1, 30);
@@ -266,8 +268,12 @@ sub _update_connection {
       }
 
       %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
+      $conn = {};
       delete $found->{$_} for qw( server host ); # want these values
-      $conn = { map { ($_ => scalar $validation->param($_)) } qw( login nick server tls ) };
+      for my $k (qw( login nick server tls password )) {
+        my $value = $validation->param($k) or next;
+        $conn->{$k} = $value;
+      }
 
       for my $k (keys %$found) {
         next unless defined $conn->{$k} and defined $found->{$k};

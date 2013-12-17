@@ -203,6 +203,7 @@ sub settings {
         $conn->{lookup}   = $conn->{server} || $conn->{host};
         $conn->{channels} = [$cobj->channels_from_conversations($conversations)];
         $conn->{server} ||= $conn->{host};                  # back compat
+        $conn->{password} ||= '';
         push @conversation, $conn;
       }
 
