@@ -70,7 +70,7 @@ is $tmp, 'dummy-uuid JOIN #convos', 'JOIN #convos';
 
 is_deeply(
   redis_do([hgetall => 'user:fooman:connection:irc.perl.org']),
-  {user => 'fooman', server => 'irc.perl.org', nick => 'marcus', tls => 0, login => 'fooman',},
+  {user => 'fooman', server => 'irc.perl.org', nick => 'marcus', tls => 0, login => 'fooman',password=>'noway'},
   'not too much data stored in backend',
 );
 

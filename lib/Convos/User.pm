@@ -221,7 +221,6 @@ sub settings {
       push @conversation, $self->app->config('default_connection');
       $conversation[-1]{event}  = 'connection';
       $conversation[-1]{lookup} = '';
-      $conversation[-1]{password} = '';
       $delay->begin->();
     },
     sub {

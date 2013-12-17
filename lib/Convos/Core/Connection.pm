@@ -258,6 +258,7 @@ sub _connect {
       my ($redis, $args) = @_;
 
       $irc->nick($args->{nick} || $self->login);
+      $irc->pass($args->{password}) if $args->{password};
       $irc->server($args->{server} || $args->{host});
       $irc->tls({}) if $args->{tls};
       $irc->user($self->login);

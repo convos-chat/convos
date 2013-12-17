@@ -235,7 +235,7 @@ sub _update_connection {
       $found or return $self->$cb('Connection does not exist', undef);
       %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
       delete $found->{$_} for qw/ server host /; # want these values
-      $conn = { map { $_ => $conn->{$_} } qw/ login nick server tls / };
+      $conn = { map { $_ => $conn->{$_} } qw/ login nick server tls password/ };
 
       for my $k (keys %$found) {
         next unless defined $conn->{$k} and defined $found->{$k};

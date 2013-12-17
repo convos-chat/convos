@@ -33,7 +33,7 @@
     % end
     %= form_block password => class => ['password'], begin
       <label for="password">Password</label>
-      %= input_tag 'password', type=>'password',id => 'password'
+      %= input_tag 'password', type=>'password',id => 'password',value=>stash('password')
       % unless($lookup) {
       <p class="help">Server connection password.</p>
       % }
