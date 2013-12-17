@@ -28,7 +28,7 @@ $t->post_ok('/settings/connection', form => $form)->element_exists('div.server.e
   ->element_exists_not('div.avatar.error')->element_exists('input[name="server"][value="irc.perl.org"]')
   ->element_exists('input[name="nick"][value]')->element_exists('select[name="channels"]');
 
-$form = {server => 'freenode.org', nick => 'ice_cool', channels => ', #way #cool ,,,',};
+$form = {server => 'freenode.org', password => 'noway', nick => 'ice_cool', channels => ', #way #cool ,,,',};
 $t->post_ok('/settings/connection', form => $form)->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page');
 is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start connection';
@@ -36,6 +36,8 @@ is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start conne
 $t->get_ok($t->tx->res->headers->location)->text_is('title', 'Nordaaker - Chat')
   ->element_exists('form[action="/freenode.org/settings/edit"][method="post"]')
   ->element_exists('input[name="server"][value="freenode.org"]')
+  ->element_exists('input[name="password"][value="noway"]')
+  ->element_exists('input[name="password"][type="password"]')
   ->element_exists('input[name="nick"][value="ice_cool"]')->element_exists('select[name="channels"]')
   ->element_exists('option[value="#cool"][selected="selected"]')
   ->element_exists('option[value="#way"][selected="selected"]')
@@ -69,7 +71,7 @@ is $tmp, 'dummy-uuid JOIN #convos', 'JOIN #convos';
 
 is_deeply(
   redis_do([hgetall => 'user:fooman:connection:irc.perl.org']),
-  {user => 'fooman', server => 'irc.perl.org', nick => 'marcus', tls => 0, login => 'fooman',},
+  {user => 'fooman', server => 'irc.perl.org', nick => 'marcus', tls => 0, login => 'fooman',password=>'noway'},
   'not too much data stored in backend',
 );
 
