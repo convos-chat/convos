@@ -35,6 +35,15 @@ sub login {
   my $self = shift->render_later;
   my %credentials;
 
+  unless($self->app->config->{redis_version}) {
+    return $self->redis->info(server => sub {
+      my $app = $self->app;
+      $app->config->{redis_version} = $_[1] =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
+      $app->log->info("Redis server version: @{[$app->config->{redis_version}]}");
+      $self->login;
+    });
+  }
+
   $self->stash(form => 'login');
 
   if ($self->session('login')) {

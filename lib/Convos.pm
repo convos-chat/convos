@@ -213,12 +213,10 @@ sub startup {
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
-  $r->get('/login')->to('user#login')->name('login');
-  $r->post('/login')->to('user#login');
-  $r->get('/register')->to('user#register')->name('register');
-  $r->post('/register')->to('user#register');
-  $r->get('/register/:invite')->to('user#register');
-  $r->post('/register/:invite')->to('user#register');
+  $r->get('/login')->to('user#login', body_class => 'tactile')->name('login');
+  $r->post('/login')->to('user#login', body_class => 'tactile');
+  $r->get('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile')->name('register');;
+  $r->post('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile');
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');

@@ -17,33 +17,6 @@ for($BUILD_REQUIRES, $PREREQ_PM) {
 }
 
 {
-  open my $MAKEFILE, '>', 'Makefile.PL' or die $!;
-
-  print $MAKEFILE <<"  MAKEFILE";
-use ExtUtils::MakeMaker;
-WriteMakefile(
-  NAME => 'Convos',
-  ABSTRACT_FROM => 'lib/Convos.pm',
-  VERSION_FROM => 'lib/Convos.pm',
-  AUTHOR => 'Jan Henning Thorsen <jhthorsen\@cpan.org>',
-  LICENSE => 'artistic_2',
-  PREREQ_PM => $PREREQ_PM,
-  BUILD_REQUIRES => $BUILD_REQUIRES,
-  META_MERGE => {
-    resources => {
-      license => 'http://www.opensource.org/licenses/artistic-license-2.0',
-      homepage => 'https://github.com/Nordaaker/convos',
-      bugtracker => 'https://github.com/Nordaaker/convos/issues',
-      repository => 'https://github.com/Nordaaker/convos',
-    },
-  },
-  test => { TESTS => 't/*.t' },
-  EXE_FILES => ['script/convos'],
-);
-  MAKEFILE
-}
-
-{
   open my $MANIFEST_SKIP, '>', 'MANIFEST.SKIP' or die $!;
   print $MANIFEST_SKIP <<"  MANIFEST_SKIP";
 .swp
