@@ -262,7 +262,6 @@ sub _connect {
       $irc->server($args->{server} || $args->{host});
       $irc->tls({}) if $args->{tls};
       $irc->user($self->login);
-      $irc->pass($args->{pass}) if $args->{pass};
       $irc->connect(sub {
         my($irc, $error) = @_;
 
