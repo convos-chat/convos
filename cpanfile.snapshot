@@ -219,10 +219,10 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.010001
-  Mojolicious-Plugin-AssetPack-0.0502
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.0502.tar.gz
+  Mojolicious-Plugin-AssetPack-0.06
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.06.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.0502
+      Mojolicious::Plugin::AssetPack 0.06
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
