@@ -262,7 +262,7 @@ sub _update_connection {
       my %existing_channels;
 
       unless($found and %$found) {
-        $validation->error(server => 'Connection does not exist');
+        $validation->error(server => ['no_such_connection']);
         $self->$cb($validation, undef);
         return $self;
       }
@@ -350,7 +350,7 @@ sub delete_connection {
       my ($delay, @removed) = @_;
 
       unless(grep $_, @removed) {
-        $validation->error(server => 'Connection does not exist');
+        $validation->error(server => ['no_such_connection']);
         $self->$cb($validation);
         return $self;
       }
@@ -458,7 +458,7 @@ sub login {
     sub {
       my ($delay, $digest) = @_;
       if(!$digest) {
-        $validation->error(login => 'No such user.');
+        $validation->error(login => ['no_such_user']);
         $self->$cb($validation);
       }
       elsif ($digest eq crypt scalar $validation->param('password'), $digest) {
@@ -466,7 +466,7 @@ sub login {
         $self->$cb(undef);
       }
       else {
-        $validation->error(login => 'Could not verify digest.');
+        $validation->error(login => ['invalid_password']);
         $self->$cb($validation);
       }
     }
