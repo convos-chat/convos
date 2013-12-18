@@ -60,12 +60,10 @@ sub login {
     $self->validation,
     sub {
       my ($core, $error) = @_;
-      my $login = $self->validation->param('login');
+      my $login;
 
-      if ($error) {
-        return $self->render('index', message => 'Invalid username/password.', status => 401);
-      }
-
+      $error and return $self->render('index', status => 401);
+      $login = $self->validation->param('login');
       $self->session(login => $login);
       $self->respond_to(
         html => sub { $self->redirect_last($login) },

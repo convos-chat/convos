@@ -1,5 +1,0 @@
-%if(my $message = stash 'message') {
-<div class="alert">
-  <strong>Oops!</strong> <%= $message %>
-</div>
-%}

@@ -23,8 +23,10 @@ Route to last seen IRC conversation.
 
 sub route {
   my $self = shift->render_later;
-  my $login = $self->session('login') or return $self->redirect_to('login');
-  $self->redirect_last($login);
+  my $login = $self->session('login');
+
+  return $self->render('index', body_class => 'tactile', form => 'login') if !$login;
+  return $self->redirect_last($login);
 }
 
 =head2 view

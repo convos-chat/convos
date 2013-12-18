@@ -1,43 +1,70 @@
+% my $err;
 <div class="row register">
   <h2 class="login-register">Register or <%=link_to 'Login', 'login' %></h2>
-  %= form_for +(param('invite') ? "/register/".param('invite') : '/register'), method => 'post', begin
-    %= include 'inc/alert' if $form eq 'register'
-    %= label_for login => 'Login (Choose something that\'s simple to remember. Your IRC handle for instance).'
-    %= text_field 'login', id => 'register_login', placeholder => 'john_doe', autocapitalize => 'off', autocorrect => 'off'
-    % if (my $err = validation->error('login')) {
-    <div class="error">
-      %= 'Login is required.' if $err->[0] eq 'required'
-      %= 'Login needs to be 3-15 characters long.' if $err->[0] eq 'size'
-      %= 'Login must consist of letters and/or numbers.' if $err->[0] eq 'like'
-      %= 'That username is taken.' if $err->[0] eq 'taken';
+  %= form_for 'register' => { invite => param 'invite' }, class => 'horizontal', method => 'post', begin
+    <div class="form-group login">
+      %= label_for login => 'Username'
+      %= text_field 'login', id => 'login', placeholder => 'superwoman', autocapitalize => 'off', autocorrect => 'off'
+      % if ($err = validation->error('login')) {
+      <p class="error">
+        % if($err->[0] eq 'size') {
+          Login needs to be 3-15 characters long.
+        % } elsif($err->[0] eq 'like') {
+          Login must consist of letters and/or numbers.
+        % } elsif($err->[0] eq 'taken') {
+          That username is taken.
+        % } else {
+          Login is required.
+        % }
+      </p>
+      % }
+      <p class="help">
+        Choose something that\'s simple to remember. Your IRC handle for instance.
+      </p>
     </div>
-    % }
-    %= label_for email => 'Email address'
-    %= email_field 'email', id => 'email', placeholder => 'your@email.com'
-    % if (my $err = validation->error('email')) {
-    <div class="error">
-      %= 'Email is required.' if $err->[0] eq 'required'
-      %= 'Invalid email.' if $err->[0] eq 'like'
+    <div class="form-group email">
+      %= label_for email => 'Email address'
+      %= email_field 'email', id => 'email', placeholder => 'your@email.com'
+      % if ($err = validation->error('email')) {
+      <p class="error">
+        % if($err->[0] eq 'like') {
+          Invalid email.
+        % } else {
+          Email is required.
+        % }
+      </p>
+      % }
+      <p class="help">
+        Used for password recovery.
+      </p>
     </div>
-    % }
-    %= label_for password => 'Password (needs to be at least six characters long)'
-    %= password_field 'password', id => 'register_password', placeholder => 'Something secret'
-    % if (my $err = validation->error('password')) {
-    <div class="error">
-      %= 'Password required.' if $err->[0] eq 'required'
-      %= 'Password must be 7-255 characters long.' if $err->[0] eq 'size'
+    <div class="form-group password">
+      %= label_for password => 'Password'
+      %= password_field 'password', id => 'password', placeholder => 'Something secret'
+      % if ($err = validation->error('password')) {
+      <p class="error">
+        % if($err->[0] eq 'size') {
+          Password must be 7-255 characters long.
+        % } else {
+          Password required.
+        % }
+      </p>
+      % }
     </div>
-    % }
-    %= label_for password_again => ''
-    %= password_field 'password_again', placeholder => 'Repeat secret'
-    % if (my $err = validation->error('password_again')) {
-    <div class="error">
-      %= 'Password must match.' if $err->[0] eq 'equal_to'
+    <div class="form-group password_again">
+      %= label_for password_again => ''
+      %= password_field 'password_again', placeholder => 'Repeat secret'
+      % if ($err = validation->error('password_again')) {
+      <p class="error">
+        Password must match.
+      </p>
+      % }
+      <p class="help">
+        Needs to be at least six characters long.
+      </p>
     </div>
-    % }
-
     <div class="actions">
-      %= submit_button 'Register'
+      <button>Register</button>
     </div>
   % end
 </div>
