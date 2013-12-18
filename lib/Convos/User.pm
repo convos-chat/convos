@@ -49,7 +49,7 @@ sub login {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
-  if (!$self->validation->has_data) {
+  if ($self->req->method ne 'POST') {
     return $self->respond_to(
       html => { template => 'index' },
       json => { json => { login => $self->session('login') || '' } },

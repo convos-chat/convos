@@ -269,12 +269,14 @@ sub _update_connection {
 
       %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
       $conn = {};
-      delete $found->{$_} for qw( server host ); # want these values
+
       for my $k (qw( login nick server tls password )) {
         my $value = $validation->param($k) or next;
         $conn->{$k} = $value;
       }
-
+      for my $k (qw( server host )) { # want these values
+        delete $found->{$_};
+      }
       for my $k (keys %$found) {
         next unless defined $conn->{$k} and defined $found->{$k};
         next unless $found->{$k} eq $conn->{$k};
@@ -288,6 +290,7 @@ sub _update_connection {
         $self->redis->publish("convos:user:$login:$server", "dummy-uuid NICK $conn->{nick}", $delay->begin);
         warn "[core:$login] NICK $conn->{nick}\n" if DEBUG;
       }
+
       for my $channel (@wanted_channels) {
         next if delete $existing_channels{$channel};
         $self->redis->zadd("user:$login:conversations", time, as_id $server, $channel);
@@ -329,7 +332,7 @@ sub delete_connection {
   $validation->required('server');
 
   if($validation->has_error) {
-    $self->$cb($validation, undef);
+    $self->$cb($validation);
     return $self;
   }
 
