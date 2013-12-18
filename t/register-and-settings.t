@@ -24,9 +24,13 @@ $t->get_ok($t->tx->res->headers->location)->text_is('title', 'Nordaaker - Chat')
   ->element_exists('a.logout[href="/logout"]')->text_is('button[type="submit"][name="action"][value="save"]', 'Add');
 
 $form = {};
-$t->post_ok('/settings/connection', form => $form)->element_exists('div.server.error')
-  ->element_exists_not('div.avatar.error')->element_exists('input[name="server"][value="irc.perl.org"]')
-  ->element_exists('input[name="nick"][value]')->element_exists('select[name="channels"]');
+$t->post_ok('/settings/connection', form => $form)
+  ->element_exists('div.server > .field-with-error')
+  ->element_exists_not('div.avatar > .field-with-error')
+  ->element_exists('input[name="server"][value="irc.perl.org"]')
+  ->element_exists('input[name="nick"][value]')
+  ->element_exists('select[name="channels"]')
+  ;
 
 $form = {server => 'freenode.org', password => 'noway', nick => 'ice_cool', channels => ', #way #cool ,,,',};
 $t->post_ok('/settings/connection', form => $form)->status_is('302')
@@ -88,13 +92,15 @@ $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is(302)
   ->header_like('Location', qr{localhost:\d+/$}, 'Need to login');
 
 $form->{login} = 'fooman';
-$t->post_ok('/register' => form => $form)->status_is(400)->text_is('.error', 'That username is taken.');
+$t->post_ok('/register' => form => $form)
+  ->status_is(400)
+  ->text_is('div.error', 'That username is taken.')
+  ;
 
 # invite code
-#
 $t->app->config->{invite_code}='test';
-$t->post_ok('/register' => form => $form)->status_is(400)->text_is('.alert h2', 'Invite only installation.');
-
-
+$t->post_ok('/register' => form => $form)
+  ->status_is(400)
+  ->text_is('.alert h2', 'Invite only installation.');
 
 done_testing;
