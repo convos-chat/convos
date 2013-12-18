@@ -6,7 +6,7 @@ perl:
   - "5.12"
   - "5.10"
 env:
-  - "HARNESS_OPTIONS=j1 TEST_POD=1 TEST_EV=1"
+  - "HARNESS_OPTIONS=j1 TEST_POD=1 REDIS_TEST_DATABASE=redis://convos:7cf5ce9c987f333e52948dca16023e06@50.30.35.9:2311/"
 install:
   - "cpanm -n Test::Pod Test::Pod::Coverage EV"
   - "cpanm -n --installdeps ."
