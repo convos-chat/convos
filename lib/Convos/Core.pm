@@ -134,13 +134,8 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input);
+  my $validation = $self->_validation($input, qw( password login nick server tls ));
 
-  $validation->optional('password');
-  $validation->required('login')->size(3, 30);
-  $validation->required('nick')->size(1, 30);
-  $validation->required('server')->size(1, 64);
-  $validation->required('tls')->in(0, 1);
   $validation->input->{user} ||= $validation->input->{login};
 
   if($validation->has_error) {
@@ -199,15 +194,9 @@ Update a connection's settings and reconnect.
 
 sub update_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input);
+  my $validation = $self->_validation($input, qw( password login lookup nick server tls ));
   my $lookup;
 
-  $validation->optional('password');
-  $validation->required('login')->size(3, 30);
-  $validation->required('lookup');
-  $validation->required('nick')->size(1, 30);
-  $validation->required('server')->like($Convos::Core::Util::SERVER_NAME_RE);
-  $validation->required('tls')->in(0, 1);
   $validation->input->{user} ||= $validation->input->{login};
   $lookup = delete $validation->input->{lookup} || '';
 
@@ -490,12 +479,26 @@ sub _dumper { # function
 }
 
 sub _validation {
-  if(UNIVERSAL::isa($_[1], 'Mojolicious::Validator::Validation')) {
-    return $_[1];
+  my($self, $input, @names) = @_;
+  my $validation;
+
+  if(UNIVERSAL::isa($input, 'Mojolicious::Validator::Validation')) {
+    $validation = $input;
   }
   else {
-    return Mojolicious::Validator->new->validation(input => $_[1]);
+    $validation = Mojolicious::Validator->new->validation(input => $input);
   }
+
+  for my $k (@names) {
+    if($k eq 'password') { $validation->optional('password') }
+    elsif($k eq 'login') { $validation->required('login')->size(3, 30) }
+    elsif($k eq 'nick') { $validation->required('nick')->size(1, 30) }
+    elsif($k eq 'server') { $validation->required('server')->like($Convos::Core::Util::SERVER_NAME_RE) }
+    elsif($k eq 'tls') { $validation->required('tls')->in(0, 1) }
+    else { $validation->required($k) }
+  }
+
+  $validation;
 }
 
 sub DESTROY {
