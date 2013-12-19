@@ -29,6 +29,19 @@ sub route {
   return $self->redirect_last($login);
 }
 
+=head2 convos
+
+Will render all server logs.
+
+=cut
+
+sub convos {
+  my $self = shift->render_later;
+
+  $self->stash(server => 'convos', template => 'client/view');
+  $self->view;
+}
+
 =head2 view
 
 Used to render the main IRC client view.
@@ -64,6 +77,7 @@ sub view {
       my $time = time;
 
       return $self->route if $target and not grep { $_ } @score; # no such conversation
+      return $delay->begin(0)->($login) if $server eq 'convos';
 
       $redis->hget("user:$login:connection:$server", "nick", $delay->begin);
       $redis->zadd("user:$login:conversations", $time, $name) if $score[0];
@@ -123,6 +137,7 @@ Will render the conversation list for all conversations.
 
 sub conversation_list {
   my ($self, $cb) = @_;
+  my $prev_name = $self->session('name') || '';
   my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
@@ -140,8 +155,13 @@ sub conversation_list {
         my ($server, $target) = id_as $name;
 
         $target ||= '';
-        $conversation_list->[$i]
-          = {server => $server, is_channel => $target =~ /^#/ ? 1 : 0, target => $target, timestamp => $timestamp,};
+        $conversation_list->[$i] = {
+          server => $server,
+          is_channel => $target =~ /^#/ ? 1 : 0,
+          target => $target,
+          timestamp => $timestamp,
+          active => $name eq $prev_name ? 1 : 0,
+        };
 
         $self->redis->zcount("user:$login:connection:$server:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;

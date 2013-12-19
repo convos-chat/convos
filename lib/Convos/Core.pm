@@ -11,6 +11,7 @@ TODO
 =cut
 
 use Mojo::Base -base;
+use Mojo::JSON 'j';
 use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
@@ -47,6 +48,42 @@ sub control {
 
   $self->redis->lpush('core:control', join(':', @args), $cb);
   $self;
+}
+
+=head2 start_convos_conversation
+
+  $self = $self->start_convos_conversation($login);
+
+Will add default messages to the convos conversation.
+
+=cut
+
+sub start_convos_conversation {
+  my($self, $login) = @_;
+  my $data = {
+    event => 'message',
+    host => 'loopback',
+    nick => 'convos',
+    server => 'loopback',
+    status => 200,
+    target => 'convos',
+    avatar => '/image/avatar-convos.png',
+    timestamp => time - 1,
+    user => $login,
+  };
+
+  for(
+    "Hi $login!",
+    "While convos is establishing a connection, you can try out the help command: Type '/help' in the input field in the bottom on the page and hit enter.",
+    "You can also use the <tab> key to autocomplete commands and nicks.",
+  ) {
+    $data->{message} = $_;
+    $data->{timestamp} += 0.01;
+    $data->{uuid} = Mojo::Util::md5_sum($data->{timestamp} .$data->{message}); # not really an uuid
+    $self->redis->zadd("user:$login:connection:convos:msg", $data->{timestamp}, j $data);
+  }
+
+  return $self;
 }
 
 =head2 start

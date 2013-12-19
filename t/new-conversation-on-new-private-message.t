@@ -44,10 +44,10 @@ $t->websocket_ok('/socket');
 
 {
   $t->get_ok('/conversations')
-    ->element_exists('li:nth-of-child(1) a[data-unread="0"][href="/irc.perl.org/%23convos"]')
-    ->element_exists('li:nth-of-child(2) a[data-unread="2"][href="/irc.perl.org/fooman"]')
+    ->element_exists('li:nth-of-child(2) a[data-unread="0"][href="/irc.perl.org/%23convos"]')
+    ->element_exists('li:nth-of-child(3) a[data-unread="2"][href="/irc.perl.org/fooman"]')
     ->element_exists('li.unread a[data-unread="2"][href="/irc.perl.org/fooman"]')
-    ->element_exists('li:nth-of-child(3) a[data-unread="0"][href="/irc.perl.org/batman"]')
+    ->element_exists('li:nth-of-child(4) a[data-unread="0"][href="/irc.perl.org/batman"]')
     ;
 }
 

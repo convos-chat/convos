@@ -111,8 +111,6 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
   ok !$dom->at('script'), 'no script tag';
   is $dom->at('div.content'), '<div class="content whitespace">&lt;script src=&quot;i/will/take/over.js&quot;&gt;&lt;/script&gt;</div>', 'no tags';
 
-
-
   $connection->add_message({
     params => [ '#mojo', "\x{1}ACTION is too cool\x{1}" ],
     prefix => '',
@@ -130,11 +128,16 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.server-message.error[data-server="convos.pl"][data-target="any"]'), 'Got IRC error';
   is $dom->at('div.content')->text, 'some error message', 'some error message';
+
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.message[data-server="convos"][data-target="any"]'), 'Got IRC error in convos conversation';
+  is $dom->at('div.content')->text, 'some error message', 'some error message in convos conversation';
 }
 
 {
   $connection->add_server_message({
     params => ['somenick', 'Your host is Tampa.FL.US.Undernet.org'],
+    command => '123',
   });
   $dom->parse($t->message_ok->message->[1]);
   ok !$dom->at('li.server-message.error'), 'No server error';
@@ -218,6 +221,10 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.error[data-target="any"]'), 'banned error';
   is $dom->at('div.content')->all_text, 'Cannot join channel (+b)', 'convos - Cannot join channel (+b)';
+
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.message[data-server="convos"][data-target="any"]'), 'banned error in convos conversation';
+  is $dom->at('div.content')->text, 'Cannot join channel (+b)', 'Cannot join channel (+b)';
 }
 
 for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {

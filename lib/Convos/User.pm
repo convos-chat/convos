@@ -123,6 +123,7 @@ sub register {
 
       $self->logf(debug => '[reg] New user login=%s', $wanted_login) if DEBUG;
       $self->session(login => $wanted_login);
+      $self->app->core->start_convos_conversation($wanted_login);
       $self->redis->hmset(
         "user:$wanted_login",
         digest => $self->_digest($self->param('password')),
@@ -267,16 +268,14 @@ sub add_connection {
     sub {
       my ($delay, $errors, $conn) = @_;
 
-      if($errors) {
-        if($self->param('wizard')) {
-          $self->render('user/wizard', body_class => 'tactile');
-        }
-        else {
-          $self->settings;
-        }
+      if($errors and $self->param('wizard')) {
+        $self->render('user/wizard', body_class => 'tactile');
+      }
+      elsif($errors) {
+        $self->settings;
       }
       else {
-        $self->redirect_to('settings');
+        $self->redirect_to($self->param('wizard') ? 'convos' : 'settings');
       }
     },
   );

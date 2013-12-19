@@ -83,6 +83,7 @@ sub _message_avatar {
   my($c, $message, $delay) = @_;
   my($lookup, $cache, $cb);
 
+  $message->{avatar} and return;
   $message->{avatar} = '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro';
   $message->{nick} or return; # do not want to insert avatar unless a user sent the message
   $message->{host} or return; # old data does not have "host" stored because of a bug
@@ -176,7 +177,7 @@ sub timestamp_span {
   );
 }
 
-=head2 redirect_last $login
+=head2 redirect_last
 
 Redirect to the last visited channel for $login. Falls back to settings.
 
@@ -190,18 +191,14 @@ sub redirect_last {
     sub {
       my($delay) = @_;
       $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
-      $redis->srandmember("user:$login:connections", $delay->begin);
     },
     sub {
-      my($delay, $names, $server) = @_;
+      my($delay, $names) = @_;
 
       if($names and $names->[0]) {
         if(my($server, $target) = id_as $names->[0]) {
           return $self->redirect_to('view', server => $server, target => $target);
         }
-      }
-      if($server) {
-        return $self->redirect_to('settings');
       }
 
       $self->redirect_to('wizard');
