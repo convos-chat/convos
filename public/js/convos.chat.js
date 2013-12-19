@@ -216,6 +216,15 @@
         return { value: value, text: value };
       }
     });
+    $('form.predefined').find('a[href$="#edit"], .selectize-control, :input').click(function(e) {
+      var $target = $(e.target);
+      if(!$target.is('button[type="submit"]')) {
+        $target.closest('form').removeClass('predefined').addClass('edit-mode');
+      }
+      if($target.is('a[href$="#edit"]')) {
+        return false;
+      }
+    });
   };
 
   var drawUI = function() {
@@ -628,6 +637,7 @@
 
   $(document).ready(function() {
     $('.login, .register').find('form input[type="text"]:first').focus();
+    drawSettings();
   });
 
   $(window).load(function() {

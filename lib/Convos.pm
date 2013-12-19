@@ -228,6 +228,7 @@ sub startup {
   $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
   $private_r->get('/command-history')->to('client#command_history');
   $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
+  $private_r->get('/wizard')->to('user#wizard', body_class => 'tactile')->name('wizard');
   $private_r->get('/settings')->to('user#settings')->name('settings');
   $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');

@@ -133,7 +133,7 @@ sub register {
     },
     sub {
       my ($delay, @saved) = @_;
-      $self->redirect_to('settings');
+      $self->redirect_to('wizard');
     }
   );
 }
@@ -185,9 +185,16 @@ sub settings {
       my ($delay, $hosts) = @_;
       my $cb = $delay->begin;
 
-      return $self->$cb() unless @$hosts;
-      return $self->redis->execute([zrange => "user:$login:conversations", 0, -1],
-        (map { [hgetall => "user:$login:connection:$_"] } @$hosts), $cb,);
+      unless(@$hosts) {
+        $self->redirect_to('wizard');
+        return;
+      }
+
+      $self->redis->execute(
+        [zrange => "user:$login:conversations", 0, -1],
+        (map { [hgetall => "user:$login:connection:$_"] } @$hosts),
+        $cb
+      );
     },
     sub {
       my ($delay, $conversations, @connections) = @_;
@@ -205,13 +212,8 @@ sub settings {
         push @conversation, $conn;
       }
 
-      if (@conversation) {
-        $self->redis->hgetall("user:$login", $delay->begin);
-        $self->redis->get("avatar:$login\@$hostname", $delay->begin);
-      }
-      else {
-        push @conversation, {event => 'welcome'};
-      }
+      $self->redis->hgetall("user:$login", $delay->begin);
+      $self->redis->get("avatar:$login\@$hostname", $delay->begin);
 
       push @conversation, $self->app->config('default_connection');
       $conversation[-1]{event}  = 'connection';
@@ -264,8 +266,21 @@ sub add_connection {
     },
     sub {
       my ($delay, $errors, $conn) = @_;
-      return $self->settings if $errors;
-      return $self->redirect_to('settings');
+
+      if($errors) {
+        if($self->param('wizard')) {
+          $self->render('user/wizard', body_class => 'tactile');
+        }
+        else {
+          $self->redirect_last($self->session('login'));
+        }
+      }
+      elsif($errors) {
+        $self->settings;
+      }
+      else {
+        $self->redirect_to('settings');
+      }
     },
   );
 }

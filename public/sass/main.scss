@@ -250,8 +250,29 @@ form.horizontal {
   }
 }
 
+form.predefined {
+  .help, div.password, div.tls {
+    display: none;
+  }
+  .selectize-control .selectize-input > div, .selectize-input, input, select {
+    background: transparent;
+    border: 0;
+  }
+  a.edit-mode {
+    padding-left: 4px;
+    color: lighten($fontColor, 15%);
+    text-decoration: none;
+  }
+}
+
+form.edit-mode {
+  a.edit-mode {
+    display: none;
+  }
+}
+
 button, .button {
-  background: darken(#fff, 5%);
+  background: darken(#fff, 2%);
   color: #222;
   font-size: $fontSize;
   text-decoration: none;
