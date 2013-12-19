@@ -46,7 +46,7 @@
       </div>
       <div class="actions">
         <button type="submit" name="action" value="save">Start chatting</button>
-        <a href="#edit" class="edit-mode">Edit connection</a>
+        <button type="button">Edit connection</button>
       </div>
     % end
   </div>
