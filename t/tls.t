@@ -5,7 +5,7 @@ plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for d
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
   [ srem => 'user:doe:connections', 'localhost:6667' ],
-  [ sadd => 'user:doe:connections', $0 ],
+  [ sadd => 'user:doe:connections', 'anything' ],
   [ del => 'user:doe:connection:localhost:6667' ],
 );
 
@@ -32,7 +32,7 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_
   };
   $t->post_ok('/settings/connection', form => $form)
     ->status_is('302')
-    ->header_like('Location', qr{/localhost:6667$}, 'Redirect to server log page')
+    ->header_like('Location', qr{/settings$}, 'Redirect to settings page')
     ;
 }
 

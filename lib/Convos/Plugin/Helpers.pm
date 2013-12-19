@@ -201,7 +201,7 @@ sub redirect_last {
         }
       }
       if($server) {
-        return $self->redirect_to('view.server', server => $server);
+        return $self->redirect_to('settings');
       }
 
       $self->redirect_to('wizard');

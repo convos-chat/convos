@@ -34,7 +34,7 @@ $t->post_ok('/settings/connection', form => $form)
   ->element_exists('select[name="channels"]')
   ;
 
-$form = { wizard => 1, server => 'freenode.org', password => 'noway', nick => 'ice_cool', channels => ', #way #cool ,,,',};
+$form = { server => 'freenode.org', password => 'noway', nick => 'ice_cool', channels => ', #way #cool ,,,',};
 $t->post_ok('/settings/connection', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/settings$}, 'Redirect back to settings page');
@@ -98,7 +98,7 @@ $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is(302)
 $form->{login} = 'fooman';
 $t->post_ok('/register' => form => $form)
   ->status_is(400)
-  ->text_is('div.error', 'That username is taken.')
+  ->text_is('p.error', 'That username is taken.')
   ;
 
 # invite code

@@ -276,7 +276,7 @@ sub add_connection {
         }
       }
       else {
-        $self->redirect_to('view.server', server => $conn->{server});
+        $self->redirect_to('settings');
       }
     },
   );
