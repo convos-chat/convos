@@ -25,7 +25,7 @@ sub route {
   my $self = shift->render_later;
   my $login = $self->session('login');
 
-  return $self->render('index', body_class => 'tactile', form => 'login') if !$login;
+  return $self->redirect_to('login') if !$login;
   return $self->redirect_last($login);
 }
 

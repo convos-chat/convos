@@ -2,15 +2,17 @@ use t::Helper;
 
 plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
 
+$t->get_ok('/')
+  ->status_is(302)
+  ->header_like('Location' => qr{:\d+/login$})
+  ;
 
-for my $p (qw( / /login )) {
-  $t->get_ok($p)
-    ->status_is(200)
-    ->element_exists('input[name="login"][id="login"]')
-    ->element_exists('input[type="password"][name="password"][id="password"]')
-    ->content_like(qr{<!--\[if IE\]>}, 'with ie warning')
-    ;
-}
+$t->get_ok('/login')
+  ->status_is(200)
+  ->element_exists('input[name="login"][id="login"]')
+  ->element_exists('input[type="password"][name="password"][id="password"]')
+  ->content_like(qr{<!--\[if IE\]>}, 'with ie warning')
+  ;
 
 $t->post_ok('/login', form => { login => 'whatever', password => 'yikes' })
   ->status_is(401)
