@@ -2,17 +2,17 @@
   <h2 class="login-register">Login or <%= link_to 'Register', 'register' %></h2>
   %= form_for '/login', method => 'post', begin
     %= include 'inc/alert' if $form eq 'login'
-    %= form_block login => class => [], begin
+    <div class="form-group login">
       <label for="login">Username</label>
       %= text_field 'login', id => 'login', autocapitalize => 'off', autocorrect => 'off'
-      % if($errors->{login}) {
-      <p class="help"><%= $errors->{login} %></p>
+      % if (validation->error('login')) {
+      <p class="help">Invalid username or password.</p>
       % }
-    % end
-    %= form_block password => class => [], begin
+    </div>
+    <div class="form-group password">
       <label for="password">Password</label>
       %= password_field 'password', id => 'password'
-    % end
+    </div>
     <div class="actions">
       <button type="submit">Login</button>
     </div>
