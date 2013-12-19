@@ -184,21 +184,27 @@ Redirect to the last visited channel for $login. Falls back to settings.
 
 sub redirect_last {
   my ($self,$login)=@_;
+  my $redis = $self->redis;
+
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
+      $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
+      $redis->srandmember("user:$login:connections", $delay->begin);
     },
     sub {
-      my($delay, $names) = @_;
+      my($delay, $names, $server) = @_;
 
       if($names and $names->[0]) {
         if(my($server, $target) = id_as $names->[0]) {
           return $self->redirect_to('view', server => $server, target => $target);
         }
       }
+      if($server) {
+        return $self->redirect_to('view.server', server => $server);
+      }
 
-      $self->redirect_to('settings');
+      $self->redirect_to('wizard');
     }
   );
 }

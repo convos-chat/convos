@@ -272,14 +272,11 @@ sub add_connection {
           $self->render('user/wizard', body_class => 'tactile');
         }
         else {
-          $self->redirect_last($self->session('login'));
+          $self->settings;
         }
       }
-      elsif($errors) {
-        $self->settings;
-      }
       else {
-        $self->redirect_to('settings');
+        $self->redirect_to('view.server', server => $conn->{server});
       }
     },
   );

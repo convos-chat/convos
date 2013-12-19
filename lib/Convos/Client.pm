@@ -43,18 +43,11 @@ sub view {
   my $target      = $self->stash('target') || '';
   my $name        = as_id $server, $target;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
+  my $redis       = $self->redis;
+  my @rearrange   = ([ zscore => "user:$login:conversations", $name ]);
 
-  if ($prev_name and $name ne $prev_name) {
-
-    # make sure it's not a removed conversation before doing zadd
-    $self->redis->zscore(
-      "user:$login:conversations",
-      $prev_name,
-      sub {
-        my ($redis, $score) = @_;
-        $redis->zadd("user:$login:conversations", time - 0.001, $prev_name) if $score;
-      }
-    );
+  if($prev_name and $prev_name ne $name) {
+    push @rearrange, [ zscore => "user:$login:conversations", $prev_name ];
   }
 
   $self->stash(body_class => ($target and $target =~ /^#/) ? 'with-nick-list' : 'without-nick-list');
@@ -64,13 +57,22 @@ sub view {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->redis->hget("user:$login:connection:$server", "nick", $delay->begin);
+      $redis->execute(@rearrange, $delay->begin); # make sure conversations exists before doing zadd
+    },
+    sub {
+      my ($delay, @score) = @_;
+      my $time = time;
+
+      return $self->route if $target and not grep { $_ } @score; # no such conversation
+
+      $redis->hget("user:$login:connection:$server", "nick", $delay->begin);
+      $redis->zadd("user:$login:conversations", $time, $name) if $score[0];
+      $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
     },
     sub {
       my ($delay, $nick) = @_;
       return $self->route unless $nick;
       $self->stash(nick => $nick);
-      $self->redis->zadd("user:$login:conversations", time, $name) if $target;
       $self->_modify_notification($self->param('notification'), read => 1, sub { })
         if defined $self->param('notification');
       $self->_conversation($delay->begin);

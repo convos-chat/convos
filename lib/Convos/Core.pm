@@ -162,7 +162,6 @@ sub add_connection {
         [sadd => "connections", "$login:$server"],
         [sadd => "user:$login:connections", $server],
         [hmset => "user:$login:connection:$server", %{ $validation->input }],
-        (map { [ zadd => "user:$login:conversations", time, as_id $server, $_ ] } @channels),
         $delay->begin,
       );
     },
@@ -282,12 +281,10 @@ sub _update_connection {
 
       for my $channel (@wanted_channels) {
         next if delete $existing_channels{$channel};
-        $self->redis->zadd("user:$login:conversations", time, as_id $server, $channel);
         $self->redis->publish("convos:user:$login:$server", "dummy-uuid JOIN $channel", $delay->begin);
         warn "[core:$login] JOIN $channel\n" if DEBUG;
       }
       for my $channel (keys %existing_channels) {
-        $self->redis->zrem("user:$login:conversations", time, as_id $server, $channel);
         $self->redis->publish("convos:user:$login:$server", "dummy-uuid PART $channel", $delay->begin);
         warn "[core:$login] PART $channel\n" if DEBUG;
       }
