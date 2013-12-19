@@ -40,9 +40,15 @@ Holds the nick.
 
 Alias for L</nick>.
 
+=head2  pass
+
+for compat reasons
+
 =cut
 
+
 has nick => '';
+has 'pass';
 sub server { 'loopback' }
 sub user { shift->nick }
 
