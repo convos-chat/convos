@@ -135,7 +135,7 @@ use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
 
-our $VERSION = '0.1002';
+our $VERSION = '0.2';
 $ENV{CONVOS_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
@@ -192,7 +192,7 @@ sub startup {
   $self->plugin('Convos::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
-  $self->defaults(layout => 'default', logged_in => 0, VERSION => time, body_class => 'default');
+  $self->defaults(layout => 'default', logged_in => 0, body_class => 'default');
 
   $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
   $self->asset('convos.css', '/sass/main.scss');
