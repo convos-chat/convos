@@ -264,7 +264,7 @@ sub _update_connection {
         $conn->{$k} = $value;
       }
       for my $k (qw( server host )) { # want these values
-        delete $found->{$_};
+        delete $found->{$k};
       }
       for my $k (keys %$found) {
         next unless defined $conn->{$k} and defined $found->{$k};
