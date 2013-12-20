@@ -423,7 +423,7 @@ div.messages {
   }
 
   li.same-nick { padding-top: 0; }
-  li.action.message div.content { padding-top: 20px; font-style: italic; }
+  li.action.message div.content { padding-top: 20px; }
   li.action.message.same-nick div.content { padding-top: 0; }
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
   li.message-pending div.content { color: #999; }
@@ -500,14 +500,17 @@ div.goto-bottom a {
   @include opacity(.8);
 }
 
+body.tactile {
+  background: #e7e7e7 url(../image/tactile-body-bg.png) 0 0 repeat;
+}
+
 /*
  * Landing page
  */
 .landing-page {
-  $loginBackground: darken(#fff, 2%);
   margin: auto;
   padding-top: 1em;
-  width: 720px;
+  width: 680px;
 
   h1 {
     .logo {
@@ -520,10 +523,12 @@ div.goto-bottom a {
     }
     small {
       display: block;
+      font-weight: normal;
+      color: #999;
     }
   }
   h2.login-register {
-    font-size: 1em;
+    font-size: 1.1em;
   }
 }
 

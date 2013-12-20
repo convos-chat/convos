@@ -1,14 +1,20 @@
-% my $name=config('name') || '[YourName]';
 % title "Convos";
+% my $redis_version = $self->app->config->{redis_version} || 0;
 <div class="landing-page">
   <header class="row">
     <h1>
       <span class="logo">Convos</span>
-      <small>for <%= $name %></small>
+      <small>for <%= config('name') || 'You' %></small>
     </h1>
   </header>
+% if($redis_version and $redis_version < 2.6) {
+  <div class="row question">
+    The Redis server is too old. Version <b>2.6.x</b> or newer is required,
+    but we detected version <b><%= $redis_version %></b>.
+  </div>
+% }
 <!--[if IE]>
-  <div class="alert">
+  <div class="row question">
     Convos does not work in Internet Explorer. It works best in the following browsers:
     (in order)
     <ol>

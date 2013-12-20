@@ -33,7 +33,15 @@ Show the login form. Also responds to JSON requests with login status.
 
 sub login {
   my $self = shift->render_later;
-  my %credentials;
+
+  unless($self->app->config->{redis_version}) {
+    return $self->redis->info(server => sub {
+      my $app = $self->app;
+      $app->config->{redis_version} = $_[1] =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
+      $app->log->info("Redis server version: @{[$app->config->{redis_version}]}");
+      $self->login;
+    });
+  }
 
   $self->stash(form => 'login');
 
@@ -41,10 +49,7 @@ sub login {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
-  if ($self->req->method eq 'POST') {
-    $credentials{$_} = $self->param($_) for qw( login password );
-  }
-  if (2 != grep { $_ } values %credentials) {
+  if ($self->req->method ne 'POST') {
     return $self->respond_to(
       html => { template => 'index' },
       json => { json => { login => $self->session('login') || '' } },
@@ -52,18 +57,19 @@ sub login {
   }
 
   $self->app->core->login(
-    \%credentials,
+    $self->validation,
     sub {
       my ($core, $error) = @_;
+      my $login = $self->validation->param('login');
 
       if ($error) {
         return $self->render('index', message => 'Invalid username/password.', status => 401);
       }
 
-      $self->session(login => $credentials{login});
+      $self->session(login => $login);
       $self->respond_to(
-        html => sub { $self->redirect_last($credentials{login}); },
-        json => { json => { login => $self->session('login') || '' } },
+        html => sub { $self->redirect_last($login) },
+        json => { json => { login => $login } },
       );
     },
   );
@@ -197,6 +203,7 @@ sub settings {
         $conn->{lookup}   = $conn->{server} || $conn->{host};
         $conn->{channels} = [$cobj->channels_from_conversations($conversations)];
         $conn->{server} ||= $conn->{host};                  # back compat
+        $conn->{password} ||= '';
         push @conversation, $conn;
       }
 
@@ -245,26 +252,20 @@ Add a new connection.
 
 sub add_connection {
   my $self  = shift->render_later;
-  my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->add_connection(
-        {
-          channels => [$self->param('channels')],
-          login    => $self->session('login'),
-          nick     => $self->param('nick') || '',
-          server   => $self->param('server') || '',
-          tls      => $self->param('tls') || 0,
-          user     => $login,
-        },
-        $delay->begin,
-      );
+      my $validation = $self->validation;
+
+      $validation->input->{channels} = [$self->param('channels')];
+      $validation->input->{login} = $self->session('login');
+      $validation->input->{tls} ||= 0;
+
+      $self->app->core->add_connection($validation, $delay->begin);
     },
     sub {
       my ($delay, $errors, $conn) = @_;
-      $self->stash(errors => $errors) if $errors;
       return $self->settings if $errors;
       return $self->redirect_to('settings');
     },
@@ -283,22 +284,18 @@ sub edit_connection {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->update_connection(
-        {
-          channels => [$self->param('channels')],
-          login    => $self->session('login'),
-          lookup   => $self->stash('server') || '',
-          nick     => $self->param('nick') || '',
-          server   => $self->req->body_params->param('server') || '',
-          tls      => $self->param('tls') || 0,
-          user     => $self->session('login'),
-        },
-        $delay->begin,
-      );
+      my $validation = $self->validation;
+
+      $validation->input->{channels} = [$self->param('channels')];
+      $validation->input->{login} = $self->session('login');
+      $validation->input->{lookup} = $self->stash('server');
+      $validation->input->{server} = $self->req->body_params->param('server');
+      $validation->input->{tls} ||= 0;
+
+      $self->app->core->update_connection($validation, $delay->begin);
     },
     sub {
       my ($delay, $errors, $changed) = @_;
-      $self->stash(errors => $errors) if $errors;
       return $self->settings if $errors;
       return $self->redirect_to('settings');
     }
@@ -317,8 +314,12 @@ sub delete_connection {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->delete_connection({login => $self->session('login'), server => $self->stash('server'),},
-        $delay->begin,);
+      my $validation = $self->validation;
+
+      $validation->input->{login} = $self->session('login');
+      $validation->input->{server} = $self->stash('server');
+
+      $self->app->core->delete_connection($validation, $delay->begin);
     },
     sub {
       my ($delay, $error) = @_;

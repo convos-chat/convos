@@ -27,34 +27,6 @@ See L<Convos::Core::Util/id_as>.
 
 See L<Convos::Core::Util/as_id>.
 
-=head2 form_block
-
-  %= form_block $name, class => [$str, ...] begin
-  ...
-  % end
-
-The code above will create this markup:
-
-  <div class="@$class" title="$error">
-    ...
-  </div>
-
-In addition, <@$class> will contain "error" if C<$error> can be fetched from the
-stash hash C<errors>, using C<$name> as key.
-
-=cut
-
-sub form_block {
-  my $content = pop;
-  my ($c, $field, %args) = @_;
-  my $error = $c->stash->{errors}{$field} // '';
-  my $classes = $args{class} ||= [];
-
-  push @$classes, 'error' if $error;
-
-  $c->tag(div => class => join(' ', @$classes), title => $error, $content);
-}
-
 =head2 format_conversation
 
   $c->format_conversation(\&iterator, \&callback);
@@ -242,7 +214,6 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
-  $app->helper(form_block          => \&form_block);
   $app->helper(format_conversation => \&format_conversation);
   $app->helper(logf                => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });
