@@ -879,13 +879,16 @@ div.goto-bottom a {
   filter: alpha(opacity=80);
   zoom: 1; }
 
+body.tactile {
+  background: #e7e7e7 url(../image/tactile-body-bg.png) 0 0 repeat; }
+
 /*
  * Landing page
  */
 .landing-page {
   margin: auto;
   padding-top: 1em;
-  width: 720px; }
+  width: 680px; }
   .landing-page h1 .logo {
     text-indent: -1000px;
     display: block;
@@ -894,9 +897,11 @@ div.goto-bottom a {
     background: url("/image/logo.png") no-repeat top left;
     background: none, url("/image/logo.svg") no-repeat top left; }
   .landing-page h1 small {
-    display: block; }
+    display: block;
+    font-weight: normal;
+    color: #999; }
   .landing-page h2.login-register {
-    font-size: 1em; }
+    font-size: 1.1em; }
 
 div.footer {
   font-size: 0.8em;
