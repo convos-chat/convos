@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.1002
+0.2
 
 =head1 DESCRIPTION
 
