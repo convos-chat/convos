@@ -33,11 +33,15 @@
   $.fn.attachEventsToMessage = function() {
     return this.each(function() {
       var $message = $(this);
-      $message.find('h3 a').each(function() {
-        this.href = '#';
-      }).click(function() {
-        var n = $(this).text();
-        $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
+      $message.find('h3 a').click(function(e) {
+        e.preventDefault();
+        if($(this).hasClass('goto-server')) {
+          $.pjax.click(e, { container: $('div.messages') });
+        }
+        else {
+          var n = $(this).text();
+          $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
+        }
       });
 
       // embed media
