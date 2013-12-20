@@ -125,9 +125,10 @@ sub register {
       $self->session(login => $wanted_login);
       $self->app->core->start_convos_conversation($wanted_login);
       $self->redis->hmset(
-        "user:$wanted_login",
-        digest => $self->_digest($self->param('password')),
-        email  => scalar $self->param('email'),
+        "user:$wanted_login" => {
+          digest => $self->_digest($validation->output->{password}),
+          email  => $validation->output->{email},
+        },
         $delay->begin
       );
       $self->redis->sadd('users', $wanted_login, $delay->begin);
