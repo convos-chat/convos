@@ -45,6 +45,7 @@ for($BUILD_REQUIRES, $PREREQ_PM) {
 ^templates
 ^vendor
 ^Convos-
+^.travis
   MANIFEST_SKIP
 }
 
@@ -55,4 +56,4 @@ system 'perldoc -tT lib/Convos.pm > README';
 system 'make manifest';
 system 'make dist';
 system "rm -r lib/Convos/$_" for qw( convos.conf templates public );
-system "rm $_" for qw( README Makefile* MANIFEST* );
+system "rm $_" for qw( README Makefile MANIFEST* );
