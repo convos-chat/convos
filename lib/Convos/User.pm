@@ -60,12 +60,10 @@ sub login {
     $self->validation,
     sub {
       my ($core, $error) = @_;
-      my $login = $self->validation->param('login');
+      my $login;
 
-      if ($error) {
-        return $self->render('index', message => 'Invalid username/password.', status => 401);
-      }
-
+      $error and return $self->render('index', status => 401);
+      $login = $self->validation->param('login');
       $self->session(login => $login);
       $self->respond_to(
         html => sub { $self->redirect_last($login) },
@@ -125,17 +123,19 @@ sub register {
 
       $self->logf(debug => '[reg] New user login=%s', $wanted_login) if DEBUG;
       $self->session(login => $wanted_login);
+      $self->app->core->start_convos_conversation($wanted_login);
       $self->redis->hmset(
-        "user:$wanted_login",
-        digest => $self->_digest($self->param('password')),
-        email  => scalar $self->param('email'),
+        "user:$wanted_login" => {
+          digest => $self->_digest($validation->output->{password}),
+          email  => $validation->output->{email},
+        },
         $delay->begin
       );
       $self->redis->sadd('users', $wanted_login, $delay->begin);
     },
     sub {
       my ($delay, @saved) = @_;
-      $self->redirect_to('settings');
+      $self->redirect_to('wizard');
     }
   );
 }
@@ -187,9 +187,16 @@ sub settings {
       my ($delay, $hosts) = @_;
       my $cb = $delay->begin;
 
-      return $self->$cb() unless @$hosts;
-      return $self->redis->execute([zrange => "user:$login:conversations", 0, -1],
-        (map { [hgetall => "user:$login:connection:$_"] } @$hosts), $cb,);
+      unless(@$hosts) {
+        $self->redirect_to('wizard');
+        return;
+      }
+
+      $self->redis->execute(
+        [zrange => "user:$login:conversations", 0, -1],
+        (map { [hgetall => "user:$login:connection:$_"] } @$hosts),
+        $cb
+      );
     },
     sub {
       my ($delay, $conversations, @connections) = @_;
@@ -207,13 +214,8 @@ sub settings {
         push @conversation, $conn;
       }
 
-      if (@conversation) {
-        $self->redis->hgetall("user:$login", $delay->begin);
-        $self->redis->get("avatar:$login\@$hostname", $delay->begin);
-      }
-      else {
-        push @conversation, {event => 'welcome'};
-      }
+      $self->redis->hgetall("user:$login", $delay->begin);
+      $self->redis->get("avatar:$login\@$hostname", $delay->begin);
 
       push @conversation, $self->app->config('default_connection');
       $conversation[-1]{event}  = 'connection';
@@ -266,8 +268,16 @@ sub add_connection {
     },
     sub {
       my ($delay, $errors, $conn) = @_;
-      return $self->settings if $errors;
-      return $self->redirect_to('settings');
+
+      if($errors and $self->param('wizard')) {
+        $self->render('user/wizard', body_class => 'tactile');
+      }
+      elsif($errors) {
+        $self->settings;
+      }
+      else {
+        $self->redirect_to($self->param('wizard') ? 'convos' : 'settings');
+      }
     },
   );
 }

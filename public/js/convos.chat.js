@@ -33,11 +33,15 @@
   $.fn.attachEventsToMessage = function() {
     return this.each(function() {
       var $message = $(this);
-      $message.find('h3 a').each(function() {
-        this.href = '#';
-      }).click(function() {
-        var n = $(this).text();
-        $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
+      $message.find('h3 a').click(function(e) {
+        e.preventDefault();
+        if($(this).hasClass('goto-server')) {
+          $.pjax.click(e, { container: $('div.messages') });
+        }
+        else {
+          var n = $(this).text();
+          $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
+        }
       });
 
       // embed media
@@ -214,6 +218,15 @@
       create: function(value) {
         if(value.indexOf('#') === -1) value = '#' + value;
         return { value: value, text: value };
+      }
+    });
+    $('form.predefined').find('a[href$="#edit"], .selectize-control, :input').click(function(e) {
+      var $target = $(e.target);
+      if(!$target.is('button[type="submit"]')) {
+        $target.closest('form').removeClass('predefined').addClass('edit-mode');
+      }
+      if($target.is('a[href$="#edit"]')) {
+        return false;
       }
     });
   };
@@ -631,6 +644,7 @@
 
   $(document).ready(function() {
     $('.login, .register').find('form input[type="text"]:first').focus();
+    drawSettings();
   });
 
   $(window).load(function() {
