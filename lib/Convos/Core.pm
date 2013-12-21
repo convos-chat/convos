@@ -246,7 +246,7 @@ sub update_connection {
     return $self;
   }
 
-  warn "[core:@{[$validation->param('login')]}] delete+add $lookup\n";
+  warn "[core:@{[$validation->param('login')]}] delete+add $lookup\n" if DEBUG;
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
     sub {

@@ -113,7 +113,6 @@ sub _handle_socket_data {
     }
   }
   elsif($dom->{server} eq 'convos') {
-    warn Data::Dumper::Dumper($dom);
     $self->send_partial('event/message',
       server => $dom->{server},
       target => '',
