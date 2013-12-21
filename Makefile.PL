@@ -22,7 +22,7 @@ WriteMakefile(
   META_MERGE => {
     resources => {
       license => 'http://www.opensource.org/licenses/artistic-license-2.0',
-      homepage => 'https://github.com/Nordaaker/convos',
+      homepage => 'http://convos.by',
       bugtracker => 'https://github.com/Nordaaker/convos/issues',
       repository => 'https://github.com/Nordaaker/convos',
     },
