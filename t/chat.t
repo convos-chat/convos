@@ -249,6 +249,18 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
 }
 
 {
+  $connection->cmd_nick({ params => ['TheMack'] });
+  $dom->parse($t->message_ok->message->[1]);
+  is $dom->at('div.content')->text, 'Set nick to TheMack', 'Nick set correctly';
+}
+{
+  $connection->cmd_nick({ params => ['TheM@ck'] });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.error[data-target="any"]'), 'Is error';
+  is $dom->at('div.content')->all_text, 'Invalid nick', 'Correct error';
+}
+
+{
   $connection->irc_quit({ params => ['Quit: leaving'], prefix => 'fooman!user@host' });
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nick-quit[data-server="convos.pl"][data-target="any"]'), 'nick quit';

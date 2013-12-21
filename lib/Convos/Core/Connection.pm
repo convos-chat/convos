@@ -789,6 +789,7 @@ sub cmd_nick {
 
   if($new_nick =~ /^[\w-]+$/) {
     $self->redis->hset($self->{path}, nick => $new_nick);
+    $self->_publish(server_message => { status => 200, message => 'Set nick to '.$new_nick });
   }
   else {
     $self->_publish(server_message => { status => 400, message => 'Invalid nick' });
