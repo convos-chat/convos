@@ -68,28 +68,6 @@ running any of the commands above. Example:
 You can use L<https://github.com/Nordaaker/convos/blob/release/convos.conf>
 as config file template.
 
-=head2 Wanted features
-
-=over 4
-
-=item * Per client state (track seen messages).
-
-=item * Web Notifications that integrate with notification center.
-
-=item * Fast JS Web Interface with async communication (Web Sockets)
-
-=item * Use HTML5 pushstate to be restful and fall back to page reloads for fully functioning non-async lite version.
-
-=item * Monospaced to be compatible with old school IRC clients/ascii
-
-=item * Rich media preview for links.
-
-=item * Facebook Connect for registration/Avatars.
-
-=item * Useful Archive search/viewer
-
-=back
-
 =head2 Architecture principles
 
 =over 4
@@ -101,6 +79,18 @@ as config file template.
 =item * Archive logs in plain text format, use ack to search them.
 
 =item * Bootstrap-based user interface
+
+=back
+
+=head1 RESOURCES
+
+=over 4
+
+=item * Homepage: L<http://convos.by>
+
+=item * Project page: L<https://github.com/Nordaaker/convos>
+
+=item * Icon: L<https://raw.github.com/Nordaaker/convos/master/public/image/icon-196.png>
 
 =back
 
