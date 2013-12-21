@@ -10,6 +10,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
 use Convos::Core::Commands;
 use constant PING_INTERVAL => $ENV{CONVOS_PING_INTERVAL} || 30;
+use constant DEFAULT_RESPONSE => "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
 
 =head1 METHODS
 
@@ -95,7 +96,20 @@ sub _handle_socket_data {
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $login = $self->session('login');
 
-  if ($cmd =~ s!^/(\w+)\s*(.*)!!) {
+  if($dom->{server} eq 'convos') {
+    return $self->send_partial('event/message',
+      server => $dom->{server},
+      target => '',
+      avatar => '/image/avatar-convos.png',
+      nick => $dom->{server},
+      highlight => 0,
+      message => DEFAULT_RESPONSE,
+      status => 200,
+      timestamp => time,
+      uuid => $dom->{uuid},
+    );
+  }
+  elsif($cmd =~ s!^/(\w+)\s*(.*)!!) {
     my($action, $arg) = ($1, $2);
     $arg =~ s/\s+$//;
     if (my $code = Convos::Core::Commands->can($action)) {
