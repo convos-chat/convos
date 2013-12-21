@@ -29,13 +29,18 @@ my($css, $js);
 
 SKIP: {
   my $packed = './public/packed';
+
   $t->get_ok($css)->status_is(200);
   -d $packed or skip "Cannot look into $packed", 3;
   opendir(my $PACKED, $packed);
-  my @packed = sort grep { /convos-\w+\.(css|js)$/ } readdir $PACKED;
+
+  my @packed = map { $_->[0] }
+               sort { $_->[1] cmp $_->[1] }
+               map { /convos-\w+\.(css|js)$/; [ $_, $1 || 'x' ] }
+               readdir $PACKED;
+
   is $packed[0], basename($css), 'found convos.css file';
   is $packed[1], basename($js), 'found convos.js file';
-  is @packed, 2, 'found two packed convos files';
 }
 
 {
