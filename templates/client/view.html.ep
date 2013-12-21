@@ -2,6 +2,9 @@
 % my $i = 0;
 % my @class;
 <nav class="bar">
+  %= link_to 'convos', title => 'Status messages', 'data-unread' => 0, begin
+    %= image '/image/icon-navbar.png', alt => 'Convos'
+  % end
   %= include 'client/conversation_list'
   %= link_to 'conversation_list', class => 'conversations toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations.container', begin
     <i class="icon-chevron-down"></i>

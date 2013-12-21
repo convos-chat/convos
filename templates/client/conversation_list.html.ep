@@ -1,9 +1,4 @@
 <ul class="conversations">
-  <li>
-    %= link_to 'convos', title => 'Status messages', 'data-unread' => 0, begin
-      %= image '/image/icon-navbar.png', alt => 'Convos'
-    % end
-  </li>
 % my $i = 0;
 % for my $c (@$conversation_list) {
   % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target}" : "View conversation with $c->{target}";
