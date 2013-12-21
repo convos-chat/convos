@@ -35,8 +35,9 @@ SKIP: {
   opendir(my $PACKED, $packed);
 
   my @packed = map { $_->[0] }
-               sort { $_->[1] cmp $_->[1] }
-               map { /convos-\w+\.(css|js)$/; [ $_, $1 || 'x' ] }
+               sort { $a->[1] cmp $b->[1] }
+               grep { $_->[1] }
+               map { /convos-\w+\.(css|js)$/; [ $_, $1 ] }
                readdir $PACKED;
 
   is $packed[0], basename($css), 'found convos.css file';
