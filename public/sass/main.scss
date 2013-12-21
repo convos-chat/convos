@@ -492,7 +492,7 @@ div.messages {
   li.message-pending h3 { color: #ccc; }
   li.message-error { font-style: italic; }
   li.message-error h3 { color: #333; font-style: italic; }
-  li.message-error, li.server-message.error { background: $errorColor; }
+  li.message-error, li.server-message.error { background: lighten($errorColor, 40%); }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
     color: #888;
