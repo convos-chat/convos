@@ -787,7 +787,7 @@ sub cmd_nick {
   my ($self, $message) = @_;
   my $new_nick = $message->{params}[0];
 
-  if($new_nick =~ /^[\w-]$/) {
+  if($new_nick =~ /^[\w-]+$/) {
     $self->redis->hset($self->{path}, nick => $new_nick);
   }
   else {
