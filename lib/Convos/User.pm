@@ -231,8 +231,13 @@ sub settings {
       }
 
       if ($user) {
-        unshift @conversation,
-          {event => 'user', avatar => $avatar, email => $user->{email}, login => $login, hostname => $hostname,};
+        unshift @conversation, {
+          event => 'user',
+          avatar => $avatar,
+          email => $user->{email},
+          hostname => $hostname,
+          login => $login,
+        };
       }
 
       $delay->begin->();
@@ -254,16 +259,15 @@ Add a new connection.
 
 sub add_connection {
   my $self  = shift->render_later;
+  my $validation = $self->validation;
+
+  $validation->input->{channels} = [$self->param('channels')];
+  $validation->input->{login} = $self->session('login');
+  $validation->input->{tls} ||= 0;
 
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      my $validation = $self->validation;
-
-      $validation->input->{channels} = [$self->param('channels')];
-      $validation->input->{login} = $self->session('login');
-      $validation->input->{tls} ||= 0;
-
       $self->app->core->add_connection($validation, $delay->begin);
     },
     sub {
@@ -290,18 +294,17 @@ Change a connection.
 
 sub edit_connection {
   my $self = shift->render_later;
+  my $validation = $self->validation;
+
+  $validation->input->{channels} = [$self->param('channels')];
+  $validation->input->{login} = $self->session('login');
+  $validation->input->{lookup} = $self->stash('server');
+  $validation->input->{server} = $self->req->body_params->param('server');
+  $validation->input->{tls} ||= 0;
 
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      my $validation = $self->validation;
-
-      $validation->input->{channels} = [$self->param('channels')];
-      $validation->input->{login} = $self->session('login');
-      $validation->input->{lookup} = $self->stash('server');
-      $validation->input->{server} = $self->req->body_params->param('server');
-      $validation->input->{tls} ||= 0;
-
       $self->app->core->update_connection($validation, $delay->begin);
     },
     sub {
@@ -320,15 +323,14 @@ Delete a connection.
 
 sub delete_connection {
   my $self = shift->render_later;
+  my $validation = $self->validation;
+
+  $validation->input->{login} = $self->session('login');
+  $validation->input->{server} = $self->stash('server');
 
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      my $validation = $self->validation;
-
-      $validation->input->{login} = $self->session('login');
-      $validation->input->{server} = $self->stash('server');
-
       $self->app->core->delete_connection($validation, $delay->begin);
     },
     sub {
@@ -346,19 +348,25 @@ Change user profile.
 =cut
 
 sub edit_user {
-  my $self     = shift->render_later;
-  my $login    = $self->session('login');
-  my $hostname = Convos::Core::Util::hostname();
-  my $avatar   = $self->param('avatar');
-  my %settings;
+  my $self       = shift->render_later;
+  my $login      = $self->session('login');
+  my $hostname   = Convos::Core::Util::hostname();
+  my $validation = $self->validation;
+  my $avatar;
 
-  $settings{email} = $self->param('email') if defined $self->param('email');
+  $validation->required('email')->like(qr{.\@.});
+  $validation->optional('avatar')->size(1, 64);
+  $avatar = $validation->output->{avatar};
+
+  if($validation->has_error) {
+    return $self->render;
+  }
 
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->hmset("user:$login", %settings, $delay->begin);
-      $self->redis->set("avatar:$login\@$hostname", $avatar, $delay->begin) if defined $avatar;
+      $self->redis->hmset("user:$login", $validation->output, $delay->begin);
+      $self->redis->set("avatar:$login\@$hostname", $avatar, $delay->begin) if $avatar;
       $delay->begin->();
     },
     sub {
