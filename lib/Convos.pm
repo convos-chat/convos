@@ -90,7 +90,10 @@ as config file template.
 
 =item * Project page: L<https://github.com/Nordaaker/convos>
 
-=item * Icon: L<https://raw.github.com/Nordaaker/convos/master/public/image/icon-196.png>
+=item * Icon: L<https://raw.github.com/Nordaaker/convos/master/public/image/icon.svg>
+
+=item * Logo: L<https://raw.github.com/Nordaaker/convos/master/public/image/logo.svg>
+
 
 =back
 
