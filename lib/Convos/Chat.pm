@@ -96,20 +96,7 @@ sub _handle_socket_data {
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
   my $login = $self->session('login');
 
-  if($dom->{server} eq 'convos') {
-    return $self->send_partial('event/message',
-      server => $dom->{server},
-      target => '',
-      avatar => '/image/avatar-convos.png',
-      nick => $dom->{server},
-      highlight => 0,
-      message => DEFAULT_RESPONSE,
-      status => 200,
-      timestamp => time,
-      uuid => $dom->{uuid},
-    );
-  }
-  elsif($cmd =~ s!^/(\w+)\s*(.*)!!) {
+  if($cmd =~ s!^/(\w+)\s*(.*)!!) {
     my($action, $arg) = ($1, $2);
     $arg =~ s/\s+$//;
     if (my $code = Convos::Core::Commands->can($action)) {
@@ -124,6 +111,31 @@ sub _handle_socket_data {
         uuid => '',
       );
     }
+  }
+  elsif($dom->{server} eq 'convos') {
+    warn Data::Dumper::Dumper($dom);
+    $self->send_partial('event/message',
+      server => $dom->{server},
+      target => '',
+      avatar => '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro',
+      nick =>  $login,
+      highlight => 0,
+      message => $cmd,
+      status => 200,
+      timestamp => time,
+      uuid => $dom->{uuid}.'_',
+    );
+    return $self->send_partial('event/message',
+      server => $dom->{server},
+      target => '',
+      avatar => '/image/avatar-convos.png',
+      nick => $dom->{server},
+      highlight => 0,
+      message => DEFAULT_RESPONSE,
+      status => 200,
+      timestamp => time,
+      uuid => $dom->{uuid},
+    );
   }
   elsif($dom->{target}) {
     $cmd = "PRIVMSG $dom->{target} :$cmd";
