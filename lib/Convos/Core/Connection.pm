@@ -618,12 +618,12 @@ sub irc_err_bannedfromchan {
   my $name = as_id $self->server, $channel;
   my $data = { status => 401, message => $message->{params}[2] };
 
+  $self->_publish_and_save(server_message => $data);
   $self->_add_convos_message($data);
 
   Scalar::Util::weaken($self);
   $self->redis->zrem($self->{conversation_path}, $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
-    $self->_publish_and_save(server_message => $data);
   });
 }
 

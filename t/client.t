@@ -9,9 +9,14 @@ redis_do(
   [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
 );
 
-$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->header_like('Location', qr{/irc.perl.org/%23convos$}, 'Redirect to conversation');
-$t->get_ok($t->tx->res->headers->location)->status_is(200);
-$t->get_ok('/inv.alid/foo')->header_like('Location', qr{/irc.perl.org/%23convos$}, 'Redirect on invalid conversation');
+$t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
+  ->header_like('Location', qr{/irc.perl.org/%23convos$}, 'Redirect to conversation');
+
+$t->get_ok($t->tx->res->headers->location)
+  ->status_is(200);
+
+$t->get_ok('/inv.alid/foo')
+  ->header_like('Location', qr{/irc.perl.org/%23convos$}, 'Redirect on invalid conversation');
 
 $t->get_ok($t->tx->res->headers->location)
   ->status_is(200)

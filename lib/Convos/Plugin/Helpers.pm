@@ -53,17 +53,21 @@ be passed on to the C<$callback>.
 sub format_conversation {
   my($c, $conversation, $cb) = @_;
   my $delay = Mojo::IOLoop->delay;
-  my @messages;
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
     $message->{uuid} ||= '';
     $message->{message} = _parse_message($c, $message, $delay) if defined $message->{message};
 
-    push @messages, $message;
+    push @{ $c->{conversation} }, $message;
   }
 
-  $delay->once(finish => sub { $c->$cb(\@messages) });
+  $c->{format_conversation}++;
+
+  $delay->once(finish => sub {
+    $c->$cb(delete $c->{conversation} || []) unless --$c->{format_conversation};
+  });
+
   $delay->begin->();    # need to do at least one step
 }
 

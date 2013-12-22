@@ -215,16 +215,17 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
 
 {
   $connection->irc_err_bannedfromchan({ params => [ 'doe', '#mojo', 'Cannot join channel (+b)' ] });
+
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.error[data-server="convos.pl"][data-target="any"]'), 'convos.pl got banned error';
+  is $dom->at('div.content')->all_text, 'Cannot join channel (+b)', 'convos.pl - Cannot join channel (+b)';
+
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.message[data-server="convos"][data-target="any"]'), 'convos got banned error';
+  is $dom->at('div.content')->text, 'Cannot join channel (+b)', 'convos: Cannot join channel (+b)';
+
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.remove-conversation[data-server="convos.pl"][data-target="#mojo"]'), 'remove conversation when banned';
-
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.error[data-target="any"]'), 'banned error';
-  is $dom->at('div.content')->all_text, 'Cannot join channel (+b)', 'convos - Cannot join channel (+b)';
-
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-server="convos"][data-target="any"]'), 'banned error in convos conversation';
-  is $dom->at('div.content')->text, 'Cannot join channel (+b)', 'Cannot join channel (+b)';
 }
 
 for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
