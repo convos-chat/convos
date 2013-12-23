@@ -530,8 +530,8 @@ sub _parse_channels {
   my %dup;
 
   sort
-  grep { $_ ne '#' and !$dup{$_}++ }
-  map { /^#/ ? $_ : "#$_" }
+  grep { $_ !~ /^[#&]$/ and !$dup{$_}++ }
+  map { /^[#&]/ ? $_ : "#$_" }
   map { split m/[\s,]+/ }
   @$channels;
 }

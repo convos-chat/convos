@@ -63,7 +63,7 @@ sub view {
     push @rearrange, [ zscore => "user:$login:conversations", $prev_name ];
   }
 
-  $self->stash(body_class => ($target and $target =~ /^#/) ? 'with-nick-list' : 'without-nick-list');
+  $self->stash(body_class => ($target and $target =~ /^[#&]/) ? 'with-nick-list' : 'without-nick-list');
   $self->stash(target => $target);
   $self->session(name => $target ? $name : '');
 
@@ -157,7 +157,7 @@ sub conversation_list {
         $target ||= '';
         $conversation_list->[$i] = {
           server => $server,
-          is_channel => $target =~ /^#/ ? 1 : 0,
+          is_channel => $target =~ /^[#&]/ ? 1 : 0,
           target => $target,
           timestamp => $timestamp,
           active => $name eq $prev_name ? 1 : 0,
@@ -254,7 +254,7 @@ sub notification_list {
       while ($i < @$notification_list) {
         my $n = j $notification_list->[$i];
         $n->{index} = $i;
-        $n->{is_channel} = $n->{target} =~ /^#/ ? 1 : 0;
+        $n->{is_channel} = $n->{target} =~ /^[#&]/ ? 1 : 0;
 
         if (!$n->{is_channel} and $nick_seen{$n->{target}}++) {
           $self->redis->lrem($key, 1, $notification_list->[$i]);
