@@ -137,6 +137,11 @@ $ENV{CONVOS_BACKEND_REV} ||= 0;
 
 Holds a L<Convos::Core::Archive> object.
 
+=head2 cache
+
+Holds a L<Mojolicious::Static> object pointing to a cache dir.
+The directory is "/tmp/convos" by default.
+
 =head2 core
 
 Holds a L<Convos::Core> object.
@@ -146,6 +151,16 @@ Holds a L<Convos::Core> object.
 has archive => sub {
   my $self = shift;
   Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
+};
+
+has cache => sub {
+  my $self = shift;
+  my $dir = $self->config->{cache_dir} ||= catfile(tmpdir, 'convos');
+
+  $self->log->info("Cache dir: $dir");
+  mkdir $dir or die "mkdir $dir: $!" unless -d $dir;
+
+  Mojolicious::Static->new(paths => [$dir]);
 };
 
 has core => sub {
@@ -182,6 +197,7 @@ sub startup {
   $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
   $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
 
+  $self->cache; # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
   $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
@@ -206,6 +222,7 @@ sub startup {
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
+  $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
   $r->get('/login')->to('user#login', body_class => 'tactile')->name('login');
   $r->post('/login')->to('user#login', body_class => 'tactile');
   $r->get('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile')->name('register');;

@@ -1,7 +1,7 @@
 % my $prev_nick = stash('prev_nick') || '';
 <li id="<%= $uuid %>" class="action message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-server="<%= $server %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
 % if($nick ne $prev_nick) {
-  %= image $avatar, alt => $nick, class => 'avatar'
+  %= avatar { host => $host, user => $user }, alt => $nick, class => 'avatar'
 % }
   <div class="content whitespace"><%= link_to $nick, view => { server => $server, target => $nick } %> <%== $message %></div>
 % if($nick ne $prev_nick) {

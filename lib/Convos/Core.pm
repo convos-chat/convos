@@ -19,7 +19,6 @@ use Time::HiRes qw( time );
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
 my %CONVOS_MESSAGE = (
-  avatar => '/image/avatar-convos.png',
   event => 'message',
   host => 'loopback',
   nick => 'convos',
