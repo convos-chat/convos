@@ -19,6 +19,19 @@ my $URL_RE = do {
 
 =head1 HELPERS
 
+=head2 avatar
+
+Used to insert an image tag.
+
+=cut
+
+sub avatar {
+  my($self, $avatar, @args) = @_;
+  my $id = join '@', @$avatar{qw( user host )};
+
+  $self->image($self->url_for(avatar => { id => $id }), @args);
+}
+
 =head2 id_as
 
 See L<Convos::Core::Util/id_as>.
@@ -40,17 +53,21 @@ be passed on to the C<$callback>.
 sub format_conversation {
   my($c, $conversation, $cb) = @_;
   my $delay = Mojo::IOLoop->delay;
-  my @messages;
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
     $message->{uuid} ||= '';
     $message->{message} = _parse_message($c, $message, $delay) if defined $message->{message};
 
-    push @messages, $message;
+    push @{ $c->{conversation} }, $message;
   }
 
-  $delay->once(finish => sub { $c->$cb(\@messages) });
+  $c->{format_conversation}++;
+
+  $delay->once(finish => sub {
+    $c->$cb(delete $c->{conversation} || []) unless --$c->{format_conversation};
+  });
+
   $delay->begin->();    # need to do at least one step
 }
 
@@ -59,7 +76,6 @@ sub _parse_message {
   my $last = 0;
   my @chunks;
 
-  _message_avatar($c, $message, $delay);
   $message->{highlight} ||= 0;
 
   # http://www.mirc.com/colors.html
@@ -77,43 +93,6 @@ sub _parse_message {
 
   push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last);
   return join '', @chunks;
-}
-
-sub _message_avatar {
-  my($c, $message, $delay) = @_;
-  my($lookup, $cache, $cb);
-
-  $message->{avatar} and return;
-  $message->{avatar} = '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro';
-  $message->{nick} or return; # do not want to insert avatar unless a user sent the message
-  $message->{host} or return; # old data does not have "host" stored because of a bug
-  $lookup = join '@', @$message{qw/ user host /};
-  $lookup =~ s!^~!!;
-  $cache = $c->stash->{"avatar.$lookup"} ||= {};
-
-  if(!$cache->{messages}) {
-    $cb = $delay->begin;
-    $c->redis->get(
-      "avatar:$lookup",
-      sub {
-        my $avatar = $_[1] || $lookup;
-
-        delete $c->stash->{"avatar.$lookup"};
-
-        if($avatar =~ /\@/) {
-          $avatar = sprintf '//gravatar.com/avatar/%s?s=40&d=retro', Mojo::Util::md5_sum($avatar);
-        }
-        else {
-          $avatar = sprintf '//graph.facebook.com/%s/picture?height=40&width=40', $avatar;
-        }
-
-        $_->{avatar} = $avatar for @{ $cache->{messages} };
-        $cb->();
-      }
-    );
-  }
-
-  push @{ $cache->{messages} }, $message;
 }
 
 =head2 logf
@@ -217,6 +196,7 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
+  $app->helper(avatar => \&avatar);
   $app->helper(format_conversation => \&format_conversation);
   $app->helper(logf                => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });

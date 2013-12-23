@@ -41,7 +41,7 @@ Mojo::IOLoop->start;
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 $t->get_ok('/convos')
   ->status_is(200)
-  ->element_exists('div.messages ul li:first-child img[src="//gravatar.com/avatar/68ea9c8363aecbfbd4ecb98289273d0e?s=40&d=retro"]')
+  ->element_exists('div.messages ul li:first-child img[src="/avatar/convos@irc.perl.org"]')
   ->text_is('div.messages ul li:nth-of-child(1) h3 a', 'irc.perl.org')
   ->text_is('div.messages ul li:nth-of-child(1) div', 'Welcome to the MAGnet Internet Relay Chat Network jhthorsen')
   ->text_is('div.messages ul li:nth-of-child(2) div', 'You are connected to irc.perl.org with mode +i')

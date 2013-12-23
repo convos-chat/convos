@@ -8,7 +8,22 @@ Convos::User - Mojolicious controller for user data
 
 use Mojo::Base 'Convos::Client';
 use Convos::Core::Util qw/ as_id id_as /;
+use Mojo::Asset::File;
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
+use constant DEFAULT_URL => $ENV{DEFAULT_AVATAR_URL} || 'https://graph.facebook.com/%s/picture?height=40&width=40';
+use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
+
+has _avatar_ua => sub {
+  my $self = shift;
+
+  Mojo::UserAgent->new(
+    connect_timeout => 1,
+    inactivity_timeout => 5,
+    max_redirects => 3,
+    request_timeout => 5,
+    server => $self->app->ua->server, # jhthorsen: not sure if this is just a bad hack, but it makes t/avatar.t happy
+  );
+};
 
 =head1 METHODS
 
@@ -23,6 +38,67 @@ sub auth {
   return 1 if $self->session('login');
   $self->redirect_to('/');
   return 0;
+}
+
+=head2 avatar
+
+Used to render an avatar for a user.
+
+=cut
+
+sub avatar {
+  my $self = shift->render_later;
+  my $id = $self->stash('id');
+  my $user = $id =~ /^(\w+)/ ? $1 : 'd'; # d = not a real user, but a default user
+  my $cache = $self->app->cache;
+  my $cache_name;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->hmget("user:$user", qw( avatar email ), $delay->begin);
+    },
+    sub {
+      my($delay, $data) = @_;
+      my $from_database = defined $data->[1] ? 1 : 0;
+      my $url;
+
+      $id = shift @$data || shift @$data || $id;
+
+      if($id =~ /\@/) {
+        $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum($id));
+      }
+      elsif($from_database) {
+        $url = sprintf(DEFAULT_URL, $id);
+      }
+      else {
+        return $self->render(text => "Cannot find avatar.\n", status => 404);
+      }
+
+      $cache_name = $url;
+      $cache_name =~ s![^\w]!_!g;
+      $cache_name = "$cache_name.jpg";
+
+      $cache->serve($self, $cache_name) and return $self->rendered;
+      $self->app->log->debug("Getting avatar for $id: $url");
+      $self->_avatar_ua->get($url, $delay->begin);
+    },
+    sub {
+      my($delay, $tx) = @_;
+      my $headers = $self->res->headers;
+
+      if($tx->success) {
+        open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name) or die "Write avatar $cache_name: $!";
+        syswrite $CACHE, $tx->res->body;
+        close $CACHE or die "Close avatar $cache_name: $!";
+        $cache->serve($self, $cache_name);
+        $self->rendered;
+      }
+      else {
+        $self->render(text => "Could not fetch avatar from third party.\n", status => 404);
+      }
+    },
+  );
 }
 
 =head2 login
@@ -352,11 +428,9 @@ sub edit_user {
   my $login      = $self->session('login');
   my $hostname   = Convos::Core::Util::hostname();
   my $validation = $self->validation;
-  my $avatar;
 
   $validation->required('email')->like(qr{.\@.});
   $validation->optional('avatar')->size(1, 64);
-  $avatar = $validation->output->{avatar};
 
   if($validation->has_error) {
     return $self->render;
@@ -366,7 +440,6 @@ sub edit_user {
     sub {
       my $delay = shift;
       $self->redis->hmset("user:$login", $validation->output, $delay->begin);
-      $self->redis->set("avatar:$login\@$hostname", $avatar, $delay->begin) if $avatar;
       $delay->begin->();
     },
     sub {
