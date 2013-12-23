@@ -141,6 +141,10 @@ Holds a L<Convos::Core::Archive> object.
 
 Holds a L<Convos::Core> object.
 
+=head2 backend_pid
+
+The pid for the backend process, if running embedded.
+
 =cut
 
 has archive => sub {
@@ -155,6 +159,8 @@ has core => sub {
   $core->redis->server($self->redis->server);
   $core;
 };
+
+has 'backend_pid';
 
 =head1 METHODS
 
@@ -233,9 +239,11 @@ sub startup {
   $host_r->get('/')->to('client#view')->name('view.server');
 
   if($config->{backend}{embedded}) {
-    Mojo::IOLoop->timer(0, sub {
-      $self->core->start;
-    });
+    die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);
+    return $self->backend_pid($pid) if $pid;
+    $self->core->start;
+    Mojo::IOLoop->start;
+    exit 0;
   }
 }
 
