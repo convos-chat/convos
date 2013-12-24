@@ -241,8 +241,12 @@ sub startup {
   if($config->{backend}{embedded}) {
     die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);
     return $self->backend_pid($pid) if $pid;
+    my $loop=Mojo::IOLoop->singleton;
     $self->core->start;
-    Mojo::IOLoop->start;
+
+    $SIG{$_}= 'DEFAULT' for  qw(INT TERM CHLD TTIN TTOU);
+    $SIG{QUIT} = sub{ $loop->max_connnections(0)};
+    $loop->start;
     exit 0;
   }
 }
