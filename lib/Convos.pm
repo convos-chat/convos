@@ -243,6 +243,7 @@ sub startup {
     return $self->backend_pid($pid) if $pid;
     my $loop=Mojo::IOLoop->singleton;
     $self->core->start;
+    $0='convos backend';
 
     $SIG{$_}= 'DEFAULT' for  qw(INT TERM CHLD TTIN TTOU);
     $SIG{QUIT} = sub{ $loop->max_connnections(0)};
