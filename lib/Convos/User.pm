@@ -7,23 +7,11 @@ Convos::User - Mojolicious controller for user data
 =cut
 
 use Mojo::Base 'Convos::Client';
-use Convos::Core::Util qw/ as_id id_as /;
+use Convos::Core::Util qw( as_id id_as $URL_RE );
 use Mojo::Asset::File;
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use constant DEFAULT_URL => $ENV{DEFAULT_AVATAR_URL} || 'https://graph.facebook.com/%s/picture?height=40&width=40';
 use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
-
-has _avatar_ua => sub {
-  my $self = shift;
-
-  Mojo::UserAgent->new(
-    connect_timeout => 1,
-    inactivity_timeout => 5,
-    max_redirects => 3,
-    request_timeout => 5,
-    server => $self->app->ua->server, # jhthorsen: not sure if this is just a bad hack, but it makes t/avatar.t happy
-  );
-};
 
 =head1 METHODS
 
@@ -40,63 +28,105 @@ sub auth {
   return 0;
 }
 
-=head2 avatar
+=head2 avatar_from_database
 
-Used to render an avatar for a user.
+This is a public resource which will respond with avatar for a user from the
+local database. Will respond with 404 if the user could not be found.
 
 =cut
 
-sub avatar {
+sub avatar_from_database {
   my $self = shift->render_later;
-  my $id = $self->stash('id');
-  my $user = $id =~ /^(\w+)/ ? $1 : 'd'; # d = not a real user, but a default user
-  my $cache = $self->app->cache;
-  my $cache_name;
+  my $login = shift || $self->stash('login');
+  my $cb = shift || '_avatar_failed';
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->hmget("user:$user", qw( avatar email ), $delay->begin);
+      $self->_avatar_from_cache("loopback-$login.jpg", $delay->begin);
+    },
+    sub { # avatar is not cached
+      my($delay) = @_;
+      $self->redis->hmget("user:$login", qw( avatar email ), $delay->begin);
     },
     sub {
       my($delay, $data) = @_;
-      my $from_database = defined $data->[1] ? 1 : 0;
-      my $url;
+      my $lookup = $data->[0] || $data->[1];
 
-      $id = shift @$data || shift @$data || $id;
-
-      if($id =~ /\@/) {
-        $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum($id));
-      }
-      elsif($from_database) {
-        $url = sprintf(DEFAULT_URL, $id);
-      }
-      else {
-        return $self->render(text => "Cannot find avatar.\n", status => 404);
-      }
-
-      $cache_name = $url;
-      $cache_name =~ s![^\w]!_!g;
-      $cache_name = "$cache_name.jpg";
-
-      $cache->serve($self, $cache_name) and return $self->rendered;
-      $self->app->log->debug("Getting avatar for $id: $url");
-      $self->_avatar_ua->get($url, $delay->begin);
+      return $delay->begin(0)->(0) unless $lookup;
+      return $self->_avatar_from_3rd_party($lookup, "loopback-$login.jpg", $delay->begin);
     },
     sub {
-      my($delay, $tx) = @_;
-      my $headers = $self->res->headers;
+      my($delay, $avatar_from_3rd_party) = @_;
+      $self->$cb("Could not find avatar.\n") unless $avatar_from_3rd_party;
+    }
+  );
+}
 
-      if($tx->success) {
-        open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name) or die "Write avatar $cache_name: $!";
-        syswrite $CACHE, $tx->res->body;
-        close $CACHE or die "Close avatar $cache_name: $!";
-        $cache->serve($self, $cache_name);
-        $self->rendered;
+=head2 avatar_from_irc
+
+This resource require you to be logged in. It will run "/whois" on the
+requested nick and use the response to lookup avatar:
+
+=over 4
+
+=item 1. L</avatar_from_database>
+
+First step is to look up the "user" response from the "/whois" in the
+local database.
+
+=item 2. Third party lookup
+
+=item 3. Fallback
+
+The fallback is to serve a generated avatar from L<http://gravatar.com>.
+
+=back
+
+=cut
+
+sub avatar_from_irc {
+  my $self = shift->render_later;
+  my $login = $self->session('login');
+  my $nick = $self->stash('nick');
+  my $server = $self->stash('server');
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->_avatar_from_cache("$server-$nick.jpg", $delay->begin);
+    },
+    sub { # avatar is not cached
+      my($delay) = @_;
+      $self->app->core->control(write => $login, $server => "WHOIS $nick", $delay->begin);
+    },
+    sub {
+      my($delay, $whois) = @_;
+
+      $whois or return $self->_avatar_failed("No such nick.\n");
+      $delay->begin(0)->($whois);
+      $self->avatar_from_database($whois->{user}, $delay->begin);
+    },
+    sub {
+      my($delay, $whois, $not_found_in_database) = @_; # not local user
+
+      $delay->begin(0)->($whois);
+
+      if($whois->{realname} =~ /($URL_RE)/) {
+        my $url = $1;
+        $url =~ s!/profile$!/avatar.jpg!;
+        $self->_avatar_from_3rd_party($url, "$server-$nick.jpg", $delay->begin);
       }
-      else {
-        $self->render(text => "Could not fetch avatar from third party.\n", status => 404);
-      }
+    },
+    sub {
+      my($delay, $whois, $avatar_from_alien_convos) = @_;
+
+      return if $avatar_from_alien_convos;
+      return $self->_avatar_from_3rd_party("$whois->{user}\@$server", "$server-$nick.jpg", $delay->begin);
+    },
+    sub {
+      my($delay, $avatar_from_3rd_party) = @_;
+      $self->_avatar_failed("3rd party failed.\n") unless $avatar_from_3rd_party;
     },
   );
 }
@@ -447,6 +477,63 @@ sub edit_user {
       return $self->render(json => {}) if $self->req->is_xhr;
       return $self->redirect_to('settings');
     }
+  );
+}
+
+sub _avatar_failed {
+  my($self, $message) = @_;
+
+  $self->render(text => $message, layout => undef, status => 404);
+}
+
+sub _avatar_from_cache {
+  my($self, $filename, $cb) = @_;
+  my $app = $self->app;
+  my $nick = $filename =~ /-(.*\.jpg)/ ? $1 : '';
+
+  # TODO: Add timeout for cached avatars?
+  return $self->rendered if $nick and $app->static->serve($self, "/image/avatar/$nick");
+  return $self->rendered if $app->cache->serve($self, $filename);
+  return $self->$cb;
+}
+
+sub _avatar_from_3rd_party {
+  my($self, $lookup, $filename, $cb) = @_;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      my $url;
+
+      if($lookup =~ /^http/) {
+        $url = $lookup;
+      }
+      elsif($lookup =~ /\@/) {
+        $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum($lookup));
+      }
+      else {
+        $url = sprintf(DEFAULT_URL, $lookup);
+      }
+
+      $self->app->log->debug("Getting avatar for $lookup: $url");
+      $self->app->ua->get($url, $delay->begin);
+    },
+    sub {
+      my($delay, $tx) = @_;
+      my $headers = $self->res->headers;
+      my $cache = $self->app->cache;
+
+      unless($tx->success) {
+        return $self->$cb(0);
+      }
+
+      open my $CACHE, '>', join('/', $cache->paths->[0], $filename) or die "Write avatar $filename $!";
+      syswrite $CACHE, $tx->res->body;
+      close $CACHE or die "Close avatar $filename $!";
+      $cache->serve($self, $filename);
+      $self->rendered;
+      $self->$cb(1);
+    },
   );
 }
 
