@@ -223,6 +223,7 @@ sub startup {
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
   $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
+  $r->get('/:login/profile')->to('user#profile', body_class => 'tactile')->name('profile');
   $r->get('/login')->to('user#login', body_class => 'tactile')->name('login');
   $r->post('/login')->to('user#login', body_class => 'tactile');
   $r->get('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile')->name('register');;
