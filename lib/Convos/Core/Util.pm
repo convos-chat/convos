@@ -21,7 +21,7 @@ use Time::Piece;
 
 my $hostname;
 
-our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
+our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|convos|localhost|loopback):?\d*};
 our $URL_RE = do {
   # Modified regex from RFC 3986
   no warnings; # Possible attempt to put comments

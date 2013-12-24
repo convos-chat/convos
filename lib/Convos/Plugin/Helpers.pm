@@ -19,10 +19,13 @@ Used to insert an image tag.
 =cut
 
 sub avatar {
-  my($self, $avatar, @args) = @_;
-  my $id = join '@', @$avatar{qw( user host )};
+  my($self, %args) = @_;
 
-  $self->image($self->url_for(avatar => { id => $id }), @args);
+  $self->image(
+    $self->url_for(avatar => \%args) .'.jpg',
+    alt => $args{nick},
+    class => 'avatar',
+  );
 }
 
 =head2 id_as

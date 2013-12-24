@@ -44,7 +44,7 @@ is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start conne
 $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Nordaaker - Chat')
   ->element_exists('div.messages ul li')
-  ->element_exists('div.messages ul li:first-child img[src="/avatar/convos@loopback"]')
+  ->element_exists('div.messages ul li:first-child img[src="/loopback/convos/avatar.jpg"]')
   ->text_is('div.messages ul li:first-child h3 a', 'convos')
   ->text_is('div.messages ul li:first-child div', 'Hi fooman!')
   ;
