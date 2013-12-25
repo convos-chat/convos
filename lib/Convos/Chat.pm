@@ -27,9 +27,9 @@ sub socket {
   my($sub, $tid);
 
   Mojo::IOLoop->stream($self->tx->connection)->timeout(PING_INTERVAL * 2);
+  Scalar::Util::weaken($self);
 
   # send ping frames
-  Scalar::Util::weaken($self);
   $tid = Mojo::IOLoop->recurring(PING_INTERVAL, sub {
            $self->send('<div class="ping"/>');
          });
@@ -39,22 +39,17 @@ sub socket {
     message => sub {
       my ($self, $octets) = @_;
       my $dom = Mojo::DOM->new($octets)->at('div');
-      return if $dom && $dom->attr('class') eq 'pong';
       $self->logf(debug => '[ws] < %s', $octets);
 
-      if($dom and $dom->{'id'} and $dom->{'data-server'}) {
-        @$dom{qw/ server target uuid /} = map { delete $dom->{$_} || '' } qw/ data-server data-target id /;
+      if($dom and $dom->attr('class') eq 'pong') {
+        return;
+      }
+      elsif($dom and $dom->{'id'} and $dom->{'data-server'}) {
+        @$dom{qw( server target uuid )} = map { delete $dom->{$_} || '' } qw( data-server data-target id );
         $self->_handle_socket_data($dom);
       }
       else{
-        $self->send_partial('event/server_message',
-          status => 400,
-          server => $dom->{'data-server'} || 'any',
-          message => "Invalid message ($octets)",
-          status => 400,
-          timestamp => time,
-          uuid => '',
-        )->finish;
+        $self->_send_400($dom, "Invalid message ($octets)")->finish;
       }
     }
   );
@@ -62,7 +57,7 @@ sub socket {
     finish => sub {
       my $self = shift or return;
       Mojo::IOLoop->remove($tid);
-      delete $self->stash->{$_} for qw/ sub redis /;
+      delete $self->stash->{$_} for qw( sub redis );
     }
   );
 
@@ -91,6 +86,34 @@ sub socket {
   );
 }
 
+sub _convos_message {
+  my($self, $args, $input, $response) = @_;
+  my $login = $self->session('login');
+
+  $self->send_partial(
+    'event/message',
+    highlight => 0,
+    message => $input,
+    nick =>  $login,
+    server => $args->{server},
+    status => 200,
+    target => '',
+    timestamp => time,
+    uuid => $args->{uuid}.'_',
+  );
+  $self->send_partial(
+    'event/message',
+    highlight => 0,
+    message => $response,
+    nick => $args->{server},
+    server => $args->{server},
+    status => 200,
+    target => '',
+    timestamp => time,
+    uuid => $args->{uuid},
+  );
+}
+
 sub _handle_socket_data {
   my ($self, $dom) = @_;
   my $cmd = Mojo::Util::html_unescape($dom->text(0));
@@ -103,39 +126,11 @@ sub _handle_socket_data {
       $cmd = $self->$code($arg, $dom);
     }
     else {
-      return $self->send_partial('event/server_message',
-        server => $dom->{server},
-        message => 'Unknown command. Type /help to see available commands.',
-        status => 400,
-        timestamp => time,
-        uuid => '',
-      );
+      return $self->_send_400($dom, 'Unknown command. Type /help to see available commands.');
     }
   }
   elsif($dom->{server} eq 'convos') {
-    warn Data::Dumper::Dumper($dom);
-    $self->send_partial('event/message',
-      server => $dom->{server},
-      target => '',
-      avatar => '//gravatar.com/avatar/0000000000000000000000000000?s=40&d=retro',
-      nick =>  $login,
-      highlight => 0,
-      message => $cmd,
-      status => 200,
-      timestamp => time,
-      uuid => $dom->{uuid}.'_',
-    );
-    return $self->send_partial('event/message',
-      server => $dom->{server},
-      target => '',
-      avatar => '/image/avatar-convos.png',
-      nick => $dom->{server},
-      highlight => 0,
-      message => DEFAULT_RESPONSE,
-      status => 200,
-      timestamp => time,
-      uuid => $dom->{uuid},
-    );
+    return $self->_convos_message($dom, $cmd, DEFAULT_RESPONSE);
   }
   elsif($dom->{target}) {
     $cmd = "PRIVMSG $dom->{target} :$cmd";
@@ -154,6 +149,19 @@ sub _handle_socket_data {
       $self->redis->ltrim("user:$login:cmd_history", -30, -1);
     }
   }
+}
+
+sub _send_400 {
+  my($self, $args, $message) = @_;
+
+  $self->send_partial(
+    'event/server_message',
+    status => 400,
+    timestamp => time,
+    uuid => '',
+    server => $args->{'data-server'} || 'any',
+    message => $message,
+  );
 }
 
 =head1 COPYRIGHT

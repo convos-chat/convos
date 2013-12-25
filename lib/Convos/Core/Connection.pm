@@ -120,9 +120,9 @@ has _irc => sub {
   $irc->on(
     close => sub {
       my $irc = shift;
-      my $data = { save => 1, status => 500, message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
+      my $data = { status => 500, message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
       $self->{stop} and return;
-      $self->_publish(server_message => $data);
+      $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
@@ -130,9 +130,9 @@ has _irc => sub {
   $irc->on(
     error => sub {
       my $irc = shift;
-      my $data = { save => 1, status => 500, message => "Connection to @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
+      my $data = { status => 500, message => "Connection to @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
       $self->{stop} and return;
-      $self->_publish(server_message => $data);
+      $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
@@ -229,7 +229,7 @@ sub _subscribe {
       $message = Parse::IRC::parse_irc($raw_message);
 
       unless(ref $message) {
-        $self->_publish(server_message => { save => 1, status => 400, message => "Unable to parse: $raw_message", uuid => $uuid });
+        $self->_publish_and_save(server_message => { status => 400, message => "Unable to parse: $raw_message", uuid => $uuid });
         return;
       }
 
@@ -239,7 +239,7 @@ sub _subscribe {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish(server_message => { save => 1, status => 500, message => "Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
+          $self->_publish_and_save(server_message => { status => 500, message => "Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
         }
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
@@ -272,15 +272,15 @@ sub _connect {
         my $data;
 
         if($error) {
-          $data = { save => 1, status => 500, message => "Could not connect to @{[$irc->server]}: $error" };
+          $data = { status => 500, message => "Could not connect to @{[$irc->server]}: $error" };
           $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
         }
         else {
           $self->redis->hset($self->{path}, current_nick => $irc->nick);
-          $data = { save => 1, status => 200, message => "Connecting..." };
+          $data = { status => 200, message => "Connecting..." };
         }
 
-        $self->_publish(server_message => $data);
+        $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
       });
     },
@@ -317,16 +317,13 @@ if it looks like one. Returns true if the message was added to redis.
 sub add_server_message {
   my ($self, $message) = @_;
   my $params = $message->{params};
-  my $data = {
-    save => 1,
-    status => 200,
-  };
+  my $data = { status => 200 };
 
   shift @$params; # I think this removes our own nick... Not quite sure though
   $data->{message} = join ' ', @$params;
   $message->{command} ||= '';
 
-  $self->_publish(server_message => $data);
+  $self->_publish_and_save(server_message => $data);
   $self->_add_convos_message($data) if $message->{command} eq '001';
 }
 
@@ -345,7 +342,6 @@ sub add_message {
   my $data = {
     highlight => 0,
     message => $message->{params}[1],
-    save => 1,
     timestamp => time,
     uuid => $message->{uuid},
   };
@@ -364,7 +360,7 @@ sub add_message {
     }
   }
 
-  $self->_publish(
+  $self->_publish_and_save(
     $data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/ ? 'action_message' : 'message',
     $data,
   );
@@ -620,14 +616,14 @@ sub irc_err_bannedfromchan {
   my($self, $message) = @_;
   my $channel = $message->{params}[1];
   my $name = as_id $self->server, $channel;
-  my $data = { save => 1, status => 401, message => $message->{params}[2] };
+  my $data = { status => 401, message => $message->{params}[2] };
 
+  $self->_publish_and_save(server_message => $data);
   $self->_add_convos_message($data);
 
   Scalar::Util::weaken($self);
   $self->redis->zrem($self->{conversation_path}, $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
-    $self->_publish(server_message => $data);
   });
 }
 
@@ -768,12 +764,11 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 sub irc_error {
   my ($self, $message) = @_;
   my $data = {
-    save => 1,
     status => 500,
     message => join(' ', @{ $message->{params} }),
   };
 
-  $self->_publish(server_message => $data);
+  $self->_publish_and_save(server_message => $data);
   $self->_add_convos_message($data);
 }
 
@@ -852,7 +847,18 @@ sub _publish {
   $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
   $message = j $data;
 
+  if($event eq 'server_message' and $data->{status} != 200) {
+    $self->log->warn("[$login:$server] $data->{message}");
+  }
+
   $self->redis->publish("convos:user:$login:out", $message);
+  $message;
+}
+
+sub _publish_and_save {
+  my ($self, $event, $data) = @_;
+  my $login = $self->login;
+  my $message = $self->_publish($event, $data);
 
   if($data->{highlight}) {
     # Ooops! This must be broken: We're clearing the notification by index in
@@ -862,16 +868,11 @@ sub _publish {
     $self->redis->lpush("user:$login:notifications", $message);
   }
 
-  if($event eq 'server_message' and $data->{status} != 200) {
-    $self->log->warn("[$login:$server] $data->{message}");
+  if ($data->{target}) {
+    $self->redis->zadd("$self->{path}:$data->{target}:msg", $data->{timestamp}, $message);
   }
-  if($data->{save}) {
-    if ($data->{target}) {
-      $self->redis->zadd("$self->{path}:$data->{target}:msg", $data->{timestamp}, $message);
-    }
-    else {
-      $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
-    }
+  else {
+    $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
   }
 }
 
