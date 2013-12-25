@@ -102,8 +102,7 @@ sub avatar_from_irc {
     },
     sub {
       my($delay, $whois) = @_;
-
-      $whois or return $self->_avatar_failed("No such nick.\n");
+      return $self->_avatar_failed("No such nick.\n") unless $whois and $whois->{user};
       $delay->begin(0)->($whois);
       $self->avatar_from_database($whois->{user}, $delay->begin);
     },
@@ -486,8 +485,14 @@ sub edit_user {
 
 sub _avatar_failed {
   my($self, $message) = @_;
+  my $format = $self->stash('format') || 'html';
+  my $res = $self->res;
 
-  $self->render(text => $message, layout => undef, status => 404);
+  $self->app->log->warn($message);
+  $res->code(404);
+  $res->headers->content_type('image/jpeg');
+  $res->content->asset($self->app->static->file('/image/avatar/404.jpg'));
+  $self->rendered;
 }
 
 sub _avatar_from_cache {

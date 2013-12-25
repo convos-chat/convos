@@ -34,7 +34,7 @@ redis_do(
 {
   unlink '/tmp/convos/loopback-doe.jpg';
   $t->get_ok('/doe/avatar.jpg')->status_is(200)->header_is('Content-Type', 'image/jpeg');
-  $t->get_ok('/invalid/avatar.jpg')->content_is("Could not find avatar.\n")->status_is(404);
+  $t->get_ok('/invalid/avatar.jpg')->status_is(404);
 }
 
 {
@@ -43,12 +43,30 @@ redis_do(
 }
 
 {
+  $core->start;
+
+  $cb = sub {
+    $connection = $core->_connection(login => 'doe', server => 'irc.perl.org');
+    $connection->irc_error({
+      command => '401',
+      params => [
+        "whatever",
+        "nick42",
+        "No such nick/channel",
+      ],
+    });
+  };
+
+  unlink '/tmp/convos/irc.perl.org-nick42.jpg';
+  $t->get_ok('/irc.perl.org/nick42/avatar.jpg')->status_is(404)->header_is('Content-Type', 'image/jpeg');
+
   $cb = sub {
     $connection = $core->_connection(login => 'doe', server => 'irc.perl.org');
     $connection->irc_rpl_whoisuser({
+      command => '311',
       params => [
         "whatever",
-        "batman",
+        "nick42",
         "jhthorsen",
         "some.domain.com",
         "whatever",
@@ -57,10 +75,9 @@ redis_do(
     });
   };
 
-  $core->start;
-  unlink '/tmp/convos/irc.perl.org-batman.jpg';
-  $t->get_ok('/irc.perl.org/batman/avatar.jpg')->status_is(200)->header_is('Content-Type', 'image/jpeg');
-  is $bytes, 'WHOIS batman', "write($bytes)";
+  unlink '/tmp/convos/irc.perl.org-nick42.jpg';
+  $t->get_ok('/irc.perl.org/nick42/avatar.jpg')->status_is(200)->header_is('Content-Type', 'image/jpeg');
+  is $bytes, 'WHOIS nick42', "write($bytes)";
 }
 
 {
