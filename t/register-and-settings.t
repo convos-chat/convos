@@ -17,7 +17,7 @@ $t->post_ok('/register' => form => $form)
   ->header_like('Location', qr{/wizard$}, 'Redirect to settings page');
 
 $t->get_ok($t->tx->res->headers->location)
-  ->text_is('title', 'Nordaaker - Add connection')
+  ->text_is('title', 'Testing - Add connection')
   ->element_exists('form[action="/settings/connection"][method="post"]')
   ->element_exists('input[name="server"][id="server"]')
   ->element_exists('input[name="nick"][id="nick"]')
@@ -42,14 +42,14 @@ $t->post_ok('/settings/connection', form => $form)
 is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)
-  ->text_is('title', 'Nordaaker - Chat')
+  ->text_is('title', 'Testing - Chat')
   ->element_exists('div.messages ul li')
   ->element_exists('div.messages ul li:first-child img[src="/avatar/convos@loopback"]')
   ->text_is('div.messages ul li:first-child h3 a', 'convos')
   ->text_is('div.messages ul li:first-child div', 'Hi fooman!')
   ;
 
-$t->get_ok('/settings')->text_is('title', 'Nordaaker - Chat')
+$t->get_ok('/settings')->text_is('title', 'Testing - Chat')
   ->element_exists('form[action="/freenode.org/settings/edit"][method="post"]')
   ->element_exists('input[name="server"][value="freenode.org"]')
   ->element_exists('input[name="password"][value="noway"]')
