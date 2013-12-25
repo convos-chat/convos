@@ -5,6 +5,7 @@ use Test::More;
 use Test::Mojo;
 
 BEGIN {
+  $ENV{MOJO_MODE} = 'testing';
   $ENV{CONVOS_DEBUG} //= $ENV{TEST_VERBOSE};
   $ENV{REDIS_TEST_DATABASE} ||= '';
 }
