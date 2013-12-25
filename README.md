@@ -33,7 +33,7 @@ To install convos, you can run the following commands:
     $ ./vendor/bin/carton exec morbo script/convos
     # open http://localhost:3000 in your favorite browser
 
-### Running convos in production
+## Running convos in production
 
 morbo is an excellent tool for testing, but hypnotoad should be used to run Convos in production:
 
@@ -48,7 +48,7 @@ For convenience, we also include a Dockerfile so you can build a Docker image ea
 
 Note: By default Convos will use the Mojo IOLoop, which is pure perl. In production you might want to install [EV](https://metacpan.org/release/EV) - we automatically use it if it is installed, and it performs much better.
 
-#### Running the backend separately.
+### Running the backend separately.
 
 In production setups, you might want to start the backend separately from the web application, for various reasons. To do so, just turn off the 'embedded' flag in the backend section of the convos.conf file. The just start it up separately:
 
