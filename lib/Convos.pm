@@ -256,7 +256,6 @@ sub startup {
   $host_r->get('/')->to('client#view')->name('view.server');
 
   if($config->{backend}{embedded}) {
-    warn "Starting embedded";
     die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);
     return $self->backend_pid($pid) if $pid;
     my $loop=Mojo::IOLoop->singleton;
