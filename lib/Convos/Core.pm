@@ -449,7 +449,6 @@ sub ctrl_write {
   my $conn = $self->{connections}{$login}{$server} or return;
   my $channel = $command =~ s/^(\S+)\s// ? $1 : '';
 
-  # TODO: Should $conn have a write() method?
   $conn->write($command, $channel);
 }
 
