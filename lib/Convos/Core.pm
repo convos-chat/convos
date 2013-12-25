@@ -211,7 +211,7 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login nick server tls ));
+  my $validation = $self->_validation($input, qw( password login name nick server tls ));
 
   $validation->output->{user} ||= $validation->output->{login};
 
@@ -271,7 +271,7 @@ Update a connection's settings and reconnect.
 
 sub update_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login lookup nick server tls ));
+  my $validation = $self->_validation($input, qw( password login lookup name nick server tls ));
   my $lookup;
 
   $validation->output->{user} ||= $validation->output->{login};

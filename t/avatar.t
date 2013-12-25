@@ -14,7 +14,10 @@ my $dom = Mojo::DOM->new;
 my $core = $t->app->core;
 my($connection, $bytes, $cb);
 
-*Convos::Core::Connection::connect = sub { diag join '|', @_ };
+*Convos::Core::Connection::connect = sub {
+  diag 'Skip connecting to irc server';
+};
+
 *Mojo::IRC::write = sub {
   $bytes = $_[1];
   Mojo::IOLoop->timer(0.01, $cb);

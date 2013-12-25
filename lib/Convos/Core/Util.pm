@@ -19,8 +19,6 @@ use Parse::IRC ();
 use Unicode::UTF8;
 use Time::Piece;
 
-my $hostname;
-
 our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|convos|localhost|loopback):?\d*};
 our $URL_RE = do {
   # Modified regex from RFC 3986
@@ -28,7 +26,7 @@ our $URL_RE = do {
   qw!https?:(//([^/?\#\s]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
 };
 
-our @EXPORT_OK = qw( as_id id_as hostname logf format_time $URL_RE $SERVER_NAME_RE );
+our @EXPORT_OK = qw( as_id id_as logf format_time $URL_RE $SERVER_NAME_RE );
 
 =head1 FUNCTIONS
 
@@ -67,24 +65,6 @@ sub id_as {
     s/:(\w\w)/{ chr hex $1 }/ge;
     $_;
   } split /:00/, $_[0];
-}
-
-=head2 hostname
-
-  $hostname = hostname();
-
-Returns the public domain name for the current hostname or fall back on "localhost".
-
-=cut
-
-sub hostname {
-  $hostname ||= do {
-    use IO::Socket::INET;
-    use Socket;
-    $ENV{PUBLIC_IP} ||= Mojo::UserAgent->new->get('http://icanhazip.com')->res->body;
-    $ENV{PUBLIC_IP} =~ s/\s//g;
-    +(gethostbyaddr inet_aton($ENV{PUBLIC_IP}), AF_INET)[0] || 'localhost';
-  };
 }
 
 =head2 logf

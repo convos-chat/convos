@@ -32,6 +32,10 @@ use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
 Cannot be set. Will always return "loopback".
 
+=head2 name
+
+The name of the user.
+
 =head2 nick
 
 Holds the nick.
@@ -47,8 +51,9 @@ for compat reasons
 =cut
 
 
+has name => '';
 has nick => '';
-has 'pass';
+has pass => undef;
 sub server { 'loopback' }
 sub user { shift->nick }
 

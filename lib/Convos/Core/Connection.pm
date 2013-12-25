@@ -262,6 +262,7 @@ sub _connect {
   $self->redis->hgetall($self->{path} => sub {
       my ($redis, $args) = @_;
 
+      $irc->name($args->{name} || 'Convos');
       $irc->nick($args->{nick} || $self->login);
       $irc->pass($args->{password}) if $args->{password};
       $irc->server($args->{server} || $args->{host});
@@ -348,7 +349,7 @@ sub add_message {
 
   @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
-  $data->{host} ||= Convos::Core::Util::hostname;
+  $data->{host} ||= 'convos'; # jhthorsen: Try to figure out why I set the default in the first place
   $data->{user} ||= $self->_irc->user;
 
   if($data->{nick} && $data->{nick} ne $current_nick) {

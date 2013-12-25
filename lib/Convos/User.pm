@@ -250,6 +250,12 @@ sub _digest {
   crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
+sub _connection_name {
+  my $self = shift;
+
+  $self->url_for('profile', login => $self->session('login'))->to_abs->to_string;
+}
+
 =head2 logout
 
 Will delete data from session.
@@ -270,7 +276,6 @@ Used to retrieve connection information.
 
 sub settings {
   my $self        = shift->render_later;
-  my $hostname    = Convos::Core::Util::hostname();
   my $login       = $self->session('login');
   my $server      = $self->stash('server') || 0;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
@@ -321,7 +326,6 @@ sub settings {
       }
 
       $self->redis->hgetall("user:$login", $delay->begin);
-      $self->redis->get("avatar:$login\@$hostname", $delay->begin);
 
       push @conversation, $self->app->config('default_connection');
       $conversation[-1]{event}  = 'connection';
@@ -329,7 +333,7 @@ sub settings {
       $delay->begin->();
     },
     sub {
-      my ($delay, $user, $avatar) = @_;
+      my ($delay, $user) = @_;
 
       if ($with_layout) {
         $self->conversation_list($delay->begin);
@@ -339,9 +343,8 @@ sub settings {
       if ($user) {
         unshift @conversation, {
           event => 'user',
-          avatar => $avatar,
+          avatar => $user->{avatar} || '',
           email => $user->{email},
-          hostname => $hostname,
           login => $login,
         };
       }
@@ -369,6 +372,7 @@ sub add_connection {
 
   $validation->input->{channels} = [$self->param('channels')];
   $validation->input->{login} = $self->session('login');
+  $validation->input->{name} = $self->_connection_name;
   $validation->input->{tls} ||= 0;
 
   Mojo::IOLoop->delay(
@@ -405,6 +409,7 @@ sub edit_connection {
   $validation->input->{channels} = [$self->param('channels')];
   $validation->input->{login} = $self->session('login');
   $validation->input->{lookup} = $self->stash('server');
+  $validation->input->{name} = $self->_connection_name;
   $validation->input->{server} = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
 
@@ -456,7 +461,6 @@ Change user profile.
 sub edit_user {
   my $self       = shift->render_later;
   my $login      = $self->session('login');
-  my $hostname   = Convos::Core::Util::hostname();
   my $validation = $self->validation;
 
   $validation->required('email')->like(qr{.\@.});
