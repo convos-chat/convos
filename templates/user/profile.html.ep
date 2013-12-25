@@ -1,0 +1,19 @@
+% title "$login's profile";
+<div class="landing-page">
+  <header class="row">
+    <h1>
+      <span class="logo">Convos</span>
+      <small><%= $login %></small>
+    </h1>
+  </header>
+  <div class="row">
+    <p>
+      <%= $login %> has a private profile.
+    </p>
+  </div>
+  <div class="row footer">
+    <hr>
+    &copy; <%= link_to "Nordaaker", "http://nordaaker.com"%>
+    - <%= link_to "About", "http://convos.by" %>
+  </div>
+</div>

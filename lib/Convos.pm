@@ -222,7 +222,8 @@ sub startup {
   # Normal route to controller
   my $r = $self->routes;
   $r->get('/')->to('client#route')->name('index');
-  $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
+  $r->get('/:login/avatar')->to('user#avatar_from_database');
+  $r->get('/:login/profile')->to('user#profile', body_class => 'tactile')->name('profile');
   $r->get('/login')->to('user#login', body_class => 'tactile')->name('login');
   $r->post('/login')->to('user#login', body_class => 'tactile');
   $r->get('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile')->name('register');;
@@ -244,6 +245,7 @@ sub startup {
   $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
+  $host_r->get('/#nick/avatar')->to('user#avatar_from_irc')->name('avatar');
   $host_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
   $host_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
   $host_r->get('/*target')->to('client#view')->name('view');

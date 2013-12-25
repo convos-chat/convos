@@ -220,7 +220,7 @@ sub _subscribe {
   );
   $self->{messages}->on(
     message => sub {
-      my ($sub, $raw_message) = @_;
+      my($sub, $raw_message) = @_;
       my($uuid, $message);
 
       $raw_message =~ s/(\S+)\s//;
@@ -401,6 +401,38 @@ sub disconnect {
   my($self, $cb) = @_;
   $self->{stop} = 1;
   $self->_irc->disconnect($cb || sub {});
+}
+
+=head2 write
+
+  $self = $self->write($raw_message, $channel);
+
+This method is used to write a C<$raw_message> to the IRC server and get feedback
+sent to a given C<$channel> instead of publishing the message to the standard
+redis pubsub channel.
+
+=cut
+
+sub write {
+  my($self, $raw_message, $channel) = @_;
+  my $message = Parse::IRC::parse_irc($raw_message);
+  my $cb = sub {};
+  my $event;
+
+  if($message->{command} eq 'WHOIS') {
+    $event = 'whois';
+    push @{ $self->{filter}{$event} }, [
+      { nick => $message->{params}[0] },
+      $channel,
+    ];
+  }
+
+  $self->_irc->write($raw_message, sub {
+    my($irc, $error) = @_;
+    delete $self->{filter}{$event} if $error and $event; # $_[1] = error;
+  });
+
+  $self;
 }
 
 =head1 EVENT HANDLERS
@@ -831,9 +863,27 @@ sub _add_convos_message {
   $self->redis->publish("convos:user:$login:out", $message);
 }
 
+sub _channel_name {
+  my($self, $event, $data) = @_;
+  my $login = $self->login;
+  my $list = $self->{filter}{$event} || [];
+
+  CHANNEL:
+  for my $i (0..@$list-1) {
+    my($filter, $channel) = @{ $list->[$i] };
+    for my $k (keys $filter) {
+      next CHANNEL unless $data->{$k};
+      next CHANNEL unless $data->{$k} eq $filter->{$k};
+    }
+    splice @$list, $i, 1, ();
+    return $channel;
+  }
+
+  return "convos:user:$login:out";
+}
+
 sub _publish {
   my ($self, $event, $data) = @_;
-  my $login = $self->login;
   my $server = $self->server;
   my $message;
 
@@ -848,10 +898,10 @@ sub _publish {
   $message = j $data;
 
   if($event eq 'server_message' and $data->{status} != 200) {
-    $self->log->warn("[$login:$server] $data->{message}");
+    $self->log->warn("[@{[$self->login]}:$server] $data->{message}");
   }
 
-  $self->redis->publish("convos:user:$login:out", $message);
+  $self->redis->publish($self->_channel_name($event, $data), $message);
   $message;
 }
 
