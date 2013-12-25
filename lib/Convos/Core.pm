@@ -336,7 +336,7 @@ sub _update_connection {
       %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
       $conn = {};
 
-      for my $k (qw( login nick server tls password )) {
+      for my $k (qw( login name nick server tls password )) {
         my $value = $validation->param($k) or next;
         $conn->{$k} = $value;
       }

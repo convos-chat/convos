@@ -80,11 +80,12 @@ $form->{channels} = '#way';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'dummy-uuid PART #cool', 'PART #cool';
 
+
+redis_do([hset => 'user:fooman:connection:irc.perl.org', 'name' => 'whatever']);
 $server->once(message => sub { $tmp = $_[1] });
 $form->{channels} = '#convos';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'dummy-uuid JOIN #convos', 'JOIN #convos';
-
 
 is_deeply(
   redis_do([hgetall => 'user:fooman:connection:irc.perl.org']),
