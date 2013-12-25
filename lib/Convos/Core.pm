@@ -11,10 +11,22 @@ TODO
 =cut
 
 use Mojo::Base -base;
+use Mojo::JSON 'j';
 use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
+use Time::HiRes qw( time );
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
+
+my %CONVOS_MESSAGE = (
+  event => 'message',
+  host => 'loopback',
+  nick => 'convos',
+  server => 'loopback',
+  status => 200,
+  target => 'convos',
+  user => 'convos',
+);
 
 =head1 ATTRIBUTES
 
@@ -47,6 +59,55 @@ sub control {
 
   $self->redis->lpush('core:control', join(':', @args), $cb);
   $self;
+}
+
+=head2 send_convos_message
+
+  $self = $self->send_convos_message($login, $message);
+  $self = $self->send_convos_message($login, $message, $cb);
+
+Used to add a C<$message> to the user C<$login>.
+
+=cut
+
+sub send_convos_message {
+  my($self, $login, $message, @cb) = @_;
+  my $time = time;
+
+  local $CONVOS_MESSAGE{message} = $message;
+  local $CONVOS_MESSAGE{timestamp} = $time;
+  local $CONVOS_MESSAGE{uuid} = Mojo::Util::md5_sum($time .$message); # not really an uuid
+
+  $self->redis->zadd(
+    "user:$login:connection:convos:msg",
+    $CONVOS_MESSAGE{timestamp},
+    j(\%CONVOS_MESSAGE),
+    @cb
+  );
+
+  $self;
+}
+
+=head2 start_convos_conversation
+
+  $self = $self->start_convos_conversation($login);
+
+Will add default messages to the convos conversation.
+
+=cut
+
+sub start_convos_conversation {
+  my($self, $login) = @_;
+
+  for(
+    "Hi $login!",
+    "While convos is establishing a connection, you can try out the help command: Type '/help' in the input field in the bottom on the page and hit enter.",
+    "You can also use the <tab> key to autocomplete commands and nicks.",
+  ) {
+    $self->send_convos_message($login, $_);
+  }
+
+  return $self;
 }
 
 =head2 start
@@ -136,7 +197,7 @@ sub add_connection {
   my($self, $input, $cb) = @_;
   my $validation = $self->_validation($input, qw( password login nick server tls ));
 
-  $validation->input->{user} ||= $validation->input->{login};
+  $validation->output->{user} ||= $validation->output->{login};
 
   if($validation->has_error) {
     $self->$cb($validation, undef);
@@ -147,7 +208,7 @@ sub add_connection {
   my @channels = $self->_parse_channels(delete $validation->input->{channels});
   my $key = join ':', "user:$login:connection:$server";
 
-  warn "[core:$login] add ", _dumper($validation->input), "\n" if DEBUG;
+  warn "[core:$login] add ", _dumper($validation->output), "\n" if DEBUG;
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
     sub {
@@ -161,7 +222,7 @@ sub add_connection {
       return $self->redis->execute(
         [sadd => "connections", "$login:$server"],
         [sadd => "user:$login:connections", $server],
-        [hmset => "user:$login:connection:$server", %{ $validation->input }],
+        [hmset => "user:$login:connection:$server", %{ $validation->output }],
         (map { [ zadd => "user:$login:conversations", time, as_id $server, $_ ] } @channels),
         $delay->begin,
       );
@@ -172,7 +233,7 @@ sub add_connection {
     },
     sub {
       my($delay, $started) = @_;
-      $self->$cb(undef, $validation->input);
+      $self->$cb(undef, $validation->output);
     },
   );
 }
@@ -197,8 +258,8 @@ sub update_connection {
   my $validation = $self->_validation($input, qw( password login lookup nick server tls ));
   my $lookup;
 
-  $validation->input->{user} ||= $validation->input->{login};
-  $lookup = delete $validation->input->{lookup} || '';
+  $validation->output->{user} ||= $validation->output->{login};
+  $lookup = delete $validation->output->{lookup} || '';
 
   if($validation->has_error) {
     $self->$cb($validation, undef);
@@ -209,7 +270,7 @@ sub update_connection {
     return $self;
   }
 
-  warn "[core:@{[$validation->param('login')]}] delete+add $lookup\n";
+  warn "[core:@{[$validation->param('login')]}] delete+add $lookup\n" if DEBUG;
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
     sub {
@@ -224,7 +285,7 @@ sub update_connection {
     },
     sub {
       my($delay, $error) = @_; # TODO: How to handle error?
-      $self->$cb(undef, $validation->input);
+      $self->$cb(undef, $validation->output);
     },
   );
 
@@ -237,8 +298,8 @@ sub _update_connection {
   my($conn, $login, $server);
 
   ($login, $server) = $validation->param([qw( login server )]);
-  warn "[core:$login] update ", _dumper($validation->input), "\n" if DEBUG;
-  $conn = $self->_connection(%{ $validation->input });
+  warn "[core:$login] update ", _dumper($validation->output), "\n" if DEBUG;
+  $conn = $self->_connection(%{ $validation->output });
 
   Mojo::IOLoop->delay(
     sub {
@@ -287,7 +348,7 @@ sub _update_connection {
         warn "[core:$login] JOIN $channel\n" if DEBUG;
       }
       for my $channel (keys %existing_channels) {
-        $self->redis->zrem("user:$login:conversations", time, as_id $server, $channel);
+        $self->redis->zrem("user:$login:conversations", as_id $server, $channel);
         $self->redis->publish("convos:user:$login:$server", "dummy-uuid PART $channel", $delay->begin);
         warn "[core:$login] PART $channel\n" if DEBUG;
       }

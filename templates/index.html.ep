@@ -1,4 +1,4 @@
-% title "Convos";
+% title ucfirst($form) || "Convos";
 % my $redis_version = $self->app->config->{redis_version} || 0;
 <div class="landing-page">
   <header class="row">

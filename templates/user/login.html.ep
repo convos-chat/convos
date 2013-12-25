@@ -1,20 +1,23 @@
 <div class="row login">
   <h2 class="login-register">Login or <%= link_to 'Register', 'register' %></h2>
-  %= form_for '/login', method => 'post', begin
-    %= include 'inc/alert' if $form eq 'login'
+  %= form_for 'login', class => 'horizontal', method => 'post', begin
     <div class="form-group login">
-      <label for="login">Username</label>
-      %= text_field 'login', id => 'login', autocapitalize => 'off', autocorrect => 'off'
-      % if (validation->error('login')) {
-      <p class="help">Invalid username or password.</p>
-      % }
+      %= label_for login => 'Username'
+    % my @login = qw( login id login autocapitalize off autocorrect off );
+    % if (validation->has_error) {
+      %= text_field @login, class => 'field-with-error'
+      <p class="error">Invalid username or password.</p>
+    % } else {
+      %= text_field @login
+    % }
     </div>
     <div class="form-group password">
+      %# Use plain input to avoid class="field-with-error" from mojo
       <label for="password">Password</label>
-      %= password_field 'password', id => 'password'
+      <input type="password" name="password" id="password">
     </div>
     <div class="actions">
-      <button type="submit">Login</button>
+      <button>Login</button>
     </div>
   % end
 </div>

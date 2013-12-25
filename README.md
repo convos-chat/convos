@@ -29,13 +29,11 @@ To install convos, you can run the following commands:
     # Then you don't need carton exec in front of the next commands:
     $ cpanm --installdeps .
     # edit convos.conf, point to your redis server
-    # Start up the backend
-    $ ./vendor/bin/carton exec script/convos backend &
     # And start the web server
     $ ./vendor/bin/carton exec morbo script/convos
     # open http://localhost:3000 in your favorite browser
 
-### Running convos in production
+## Running convos in production
 
 morbo is an excellent tool for testing, but hypnotoad should be used to run Convos in production:
 
@@ -49,6 +47,13 @@ See also the [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides
 For convenience, we also include a Dockerfile so you can build a Docker image easily if you want a custom config or  pull our image directly from the [docker index](https://index.docker.io/u/nordaaker/convos/).
 
 Note: By default Convos will use the Mojo IOLoop, which is pure perl. In production you might want to install [EV](https://metacpan.org/release/EV) - we automatically use it if it is installed, and it performs much better.
+
+### Running the backend separately.
+
+In production setups, you might want to start the backend separately from the web application, for various reasons. To do so, just turn off the 'embedded' flag in the backend section of the convos.conf file. The just start it up separately:
+
+    # Start up the backend
+    $ ./vendor/bin/carton exec script/convos backend &
 
 ## Architecture principles
 * Keep it easy to install

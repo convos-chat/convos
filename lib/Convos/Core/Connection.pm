@@ -93,7 +93,7 @@ has log => sub { Mojo::Log->new };
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/
   irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd
-  irc_rpl_welcome
+  irc_rpl_welcome rpl_luserclient
 /;
 my @OTHER_EVENTS              = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
@@ -120,16 +120,20 @@ has _irc => sub {
   $irc->on(
     close => sub {
       my $irc = shift;
+      my $data = { status => 500, message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
       $self->{stop} and return;
-      $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
+      $self->_publish_and_save(server_message => $data);
+      $self->_add_convos_message($data);
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
   $irc->on(
     error => sub {
       my $irc = shift;
+      my $data = { status => 500, message => "Connection to @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
       $self->{stop} and return;
-      $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Connection to  @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." });
+      $self->_publish_and_save(server_message => $data);
+      $self->_add_convos_message($data);
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -164,8 +168,9 @@ sub new {
 
   $self->{login} or die "login is required";
   $self->{server} or die "server is required";
-  $self->{path} = "user:$self->{login}:connection:$self->{server}";
+  $self->{convos_path} = "user:$self->{login}:connection:convos:msg";
   $self->{conversation_path} = "user:$self->{login}:conversations";
+  $self->{path} = "user:$self->{login}:connection:$self->{server}";
   $self;
 }
 
@@ -224,7 +229,7 @@ sub _subscribe {
       $message = Parse::IRC::parse_irc($raw_message);
 
       unless(ref $message) {
-        $self->_publish(server_message => { save => 1, status => 400, message => "[convos] Unable to parse: $raw_message", uuid => $uuid });
+        $self->_publish_and_save(server_message => { status => 400, message => "Unable to parse: $raw_message", uuid => $uuid });
         return;
       }
 
@@ -234,7 +239,7 @@ sub _subscribe {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
+          $self->_publish_and_save(server_message => { status => 500, message => "Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
         }
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
@@ -264,15 +269,19 @@ sub _connect {
       $irc->user($self->login);
       $irc->connect(sub {
         my($irc, $error) = @_;
+        my $data;
 
         if($error) {
+          $data = { status => 500, message => "Could not connect to @{[$irc->server]}: $error" };
           $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
-          $self->_publish(server_message => { save => 1, status => 500, message => "[convos] Could not connect to @{[$irc->server]}: $error" });
         }
         else {
           $self->redis->hset($self->{path}, current_nick => $irc->nick);
-          $self->_publish(server_message => { save => 1, status => 200, message => "[convos] Connected to @{[$irc->server]}." });
+          $data = { status => 200, message => "Connecting..." };
         }
+
+        $self->_publish_and_save(server_message => $data);
+        $self->_add_convos_message($data);
       });
     },
   );
@@ -308,15 +317,14 @@ if it looks like one. Returns true if the message was added to redis.
 sub add_server_message {
   my ($self, $message) = @_;
   my $params = $message->{params};
+  my $data = { status => 200 };
 
   shift @$params; # I think this removes our own nick... Not quite sure though
-  $self->_publish(
-    server_message => {
-      save => 1,
-      status => 200,
-      message => join(' ', @$params),
-    },
-  );
+  $data->{message} = join ' ', @$params;
+  $message->{command} ||= '';
+
+  $self->_publish_and_save(server_message => $data);
+  $self->_add_convos_message($data) if $message->{command} eq '001';
 }
 
 =head2 add_message
@@ -334,7 +342,6 @@ sub add_message {
   my $data = {
     highlight => 0,
     message => $message->{params}[1],
-    save => 1,
     timestamp => time,
     uuid => $message->{uuid},
   };
@@ -353,7 +360,7 @@ sub add_message {
     }
   }
 
-  $self->_publish(
+  $self->_publish_and_save(
     $data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/ ? 'action_message' : 'message',
     $data,
   );
@@ -609,11 +616,14 @@ sub irc_err_bannedfromchan {
   my($self, $message) = @_;
   my $channel = $message->{params}[1];
   my $name = as_id $self->server, $channel;
+  my $data = { status => 401, message => $message->{params}[2] };
+
+  $self->_publish_and_save(server_message => $data);
+  $self->_add_convos_message($data);
 
   Scalar::Util::weaken($self);
   $self->redis->zrem($self->{conversation_path}, $name, sub {
     $self->_publish(remove_conversation => { target => $channel });
-    $self->_publish(server_message => { save => 1, status => 401, message => $message->{params}[2] });
   });
 }
 
@@ -714,19 +724,33 @@ sub irc_rpl_listend {
 =head2 irc_mode
 
   :nick!user@host MODE #channel +o othernick
+  :nick!user@host MODE yournick +i
 
 =cut
 
 sub irc_mode {
   my($self, $message) = @_;
+  my $target = shift @{ $message->{params} };
+  my $mode = shift @{ $message->{params} };
 
-  $self->_publish(
-    mode => {
-      target => shift @{ $message->{params} },
-      mode => shift @{ $message->{params} },
-      args => join(' ', @{ $message->{params} }),
-    },
-  );
+  if($target eq $self->_irc->nick) {
+    my $data = {
+      target => $self->server,
+      message => "You are connected to @{[$self->server]} with mode $mode",
+    };
+
+    $self->_add_convos_message($data);
+    $self->_publish(server_message => $data);
+  }
+  else {
+    $self->_publish(
+      mode => {
+        target => $target,
+        mode => $mode,
+        args => join(' ', @{ $message->{params} }),
+      },
+    );
+  }
 }
 
 =head2 irc_error
@@ -739,14 +763,13 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
+  my $data = {
+    status => 500,
+    message => join(' ', @{ $message->{params} }),
+  };
 
-  $self->_publish(
-    server_message => {
-      save => 1,
-      status => 500,
-      message => join(' ', @{$message->{params}}),
-    },
-  );
+  $self->_publish_and_save(server_message => $data);
+  $self->_add_convos_message($data);
 }
 
 =head2 cmd_nick
@@ -759,8 +782,9 @@ sub cmd_nick {
   my ($self, $message) = @_;
   my $new_nick = $message->{params}[0];
 
-  if($new_nick =~ /^[\w-]$/) {
+  if($new_nick =~ /^[\w-]+$/) {
     $self->redis->hset($self->{path}, nick => $new_nick);
+    $self->_publish(server_message => { status => 200, message => 'Set nick to '.$new_nick });
   }
   else {
     $self->_publish(server_message => { status => 400, message => 'Invalid nick' });
@@ -787,6 +811,26 @@ sub cmd_join {
   }
 }
 
+sub _add_convos_message {
+  my ($self, $data) = @_;
+  my $login = $self->login;
+  my $message;
+
+  $data->{status} ||= 200;
+  $data->{timestamp} ||= time;
+  local $data->{event} = 'message';
+  local $data->{host} = $self->server;
+  local $data->{nick} = $self->server;
+  local $data->{server} = 'convos'; # make sure target in js works
+  local $data->{target} = 'any';
+  local $data->{user} = 'convos';
+  local $data->{uuid} = Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
+  $message = j $data;
+
+  $self->redis->zadd($self->{convos_path}, $data->{timestamp}, $message);
+  $self->redis->publish("convos:user:$login:out", $message);
+}
+
 sub _publish {
   my ($self, $event, $data) = @_;
   my $login = $self->login;
@@ -803,7 +847,18 @@ sub _publish {
   $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
   $message = j $data;
 
+  if($event eq 'server_message' and $data->{status} != 200) {
+    $self->log->warn("[$login:$server] $data->{message}");
+  }
+
   $self->redis->publish("convos:user:$login:out", $message);
+  $message;
+}
+
+sub _publish_and_save {
+  my ($self, $event, $data) = @_;
+  my $login = $self->login;
+  my $message = $self->_publish($event, $data);
 
   if($data->{highlight}) {
     # Ooops! This must be broken: We're clearing the notification by index in
@@ -813,16 +868,11 @@ sub _publish {
     $self->redis->lpush("user:$login:notifications", $message);
   }
 
-  if($event eq 'server_message' and $data->{status} != 200) {
-    $self->log->warn("[$login:$server] $data->{message}");
+  if ($data->{target}) {
+    $self->redis->zadd("$self->{path}:$data->{target}:msg", $data->{timestamp}, $message);
   }
-  if($data->{save}) {
-    if ($data->{target}) {
-      $self->redis->zadd("$self->{path}:$data->{target}:msg", $data->{timestamp}, $message);
-    }
-    else {
-      $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
-    }
+  else {
+    $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
   }
 }
 

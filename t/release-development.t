@@ -10,7 +10,7 @@ use Mojolicious::Plugin::AssetPack;
 }
 
 unlink glob 'public/packed/main-*';
-$ENV{MOJO_MODE} = 'development';
+$ENV{MOJO_MODE} = 'testing';
 my $t = Test::Mojo->new('Convos');
 my $css;
 

@@ -23,8 +23,23 @@ Route to last seen IRC conversation.
 
 sub route {
   my $self = shift->render_later;
-  my $login = $self->session('login') or return $self->redirect_to('login');
-  $self->redirect_last($login);
+  my $login = $self->session('login');
+
+  return $self->redirect_to('login') if !$login;
+  return $self->redirect_last($login);
+}
+
+=head2 convos
+
+Will render all server logs.
+
+=cut
+
+sub convos {
+  my $self = shift->render_later;
+
+  $self->stash(server => 'convos', template => 'client/view');
+  $self->view;
 }
 
 =head2 view
@@ -41,18 +56,11 @@ sub view {
   my $target      = $self->stash('target') || '';
   my $name        = as_id $server, $target;
   my $with_layout = $self->req->is_xhr ? 0 : 1;
+  my $redis       = $self->redis;
+  my @rearrange   = ([ zscore => "user:$login:conversations", $name ]);
 
-  if ($prev_name and $name ne $prev_name) {
-
-    # make sure it's not a removed conversation before doing zadd
-    $self->redis->zscore(
-      "user:$login:conversations",
-      $prev_name,
-      sub {
-        my ($redis, $score) = @_;
-        $redis->zadd("user:$login:conversations", time - 0.001, $prev_name) if $score;
-      }
-    );
+  if($prev_name and $prev_name ne $name) {
+    push @rearrange, [ zscore => "user:$login:conversations", $prev_name ];
   }
 
   $self->stash(body_class => ($target and $target =~ /^#/) ? 'with-nick-list' : 'without-nick-list');
@@ -62,13 +70,23 @@ sub view {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->redis->hget("user:$login:connection:$server", "nick", $delay->begin);
+      $redis->execute(@rearrange, $delay->begin); # make sure conversations exists before doing zadd
+    },
+    sub {
+      my ($delay, @score) = @_;
+      my $time = time;
+
+      return $self->route if $target and not grep { $_ } @score; # no such conversation
+      return $delay->begin(0)->($login) if $server eq 'convos';
+
+      $redis->hget("user:$login:connection:$server", "nick", $delay->begin);
+      $redis->zadd("user:$login:conversations", $time, $name) if $score[0];
+      $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
     },
     sub {
       my ($delay, $nick) = @_;
       return $self->route unless $nick;
       $self->stash(nick => $nick);
-      $self->redis->zadd("user:$login:conversations", time, $name) if $target;
       $self->_modify_notification($self->param('notification'), read => 1, sub { })
         if defined $self->param('notification');
       $self->_conversation($delay->begin);
@@ -119,6 +137,7 @@ Will render the conversation list for all conversations.
 
 sub conversation_list {
   my ($self, $cb) = @_;
+  my $prev_name = $self->session('name') || '';
   my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
@@ -136,8 +155,13 @@ sub conversation_list {
         my ($server, $target) = id_as $name;
 
         $target ||= '';
-        $conversation_list->[$i]
-          = {server => $server, is_channel => $target =~ /^#/ ? 1 : 0, target => $target, timestamp => $timestamp,};
+        $conversation_list->[$i] = {
+          server => $server,
+          is_channel => $target =~ /^#/ ? 1 : 0,
+          target => $target,
+          timestamp => $timestamp,
+          active => $name eq $prev_name ? 1 : 0,
+        };
 
         $self->redis->zcount("user:$login:connection:$server:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;

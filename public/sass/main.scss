@@ -13,6 +13,7 @@ $buttonBorderHover: 2px solid darken(#fff, 70%);
 $nickListWidth: 180px;
 $unreadColor: #a00;
 $navBarZindex: 1000;
+$errorColor: #d5000d;
 
 /*
  * Sass mixins
@@ -178,9 +179,10 @@ form {
 
   select[multi] { height: 30px; }
   input[readonly] { background: #f6f6f6; color: #666; }
-  .selectize-input, .selectize-control.single .selectize-input.focus, input {
+  .selectize-input, .selectize-control.single .selectize-input.focus, input, select {
+    background: #fff;
     padding: 4px;
-    font-size: 1.2em;
+    font-size: 1.1em;
     outline: none;
     border: 2px solid #ccc;
     width: 290px;
@@ -191,11 +193,8 @@ form {
     padding: 2px; // no idea why 2px is right instead of 4px
   }
   .selectize-input.focus, input:focus { border: 2px solid darken(#ccc, 15%); }
-  div.error {
-    .selectize-input, .selectize-control.single .selectize-input.focus, input {
-      border-color: #e66;
-    }
-    p.help { color: #f44; }
+  input.field-with-error, select.field-with-error {
+    border-color: $errorColor;
   }
   div.actions {
     margin-top: 2em;
@@ -209,9 +208,72 @@ form {
   }
 }
 
+form.horizontal {
+  label {
+    margin-top: 4px;
+    float: left;
+    width: 8em;
+  }
+  div.form-group {
+    padding: 4px 0;
+    clear: left;
+  }
+  div.actions {
+    margin-top: 1em;
+    margin-left: 8em;
+  }
+  p.help, p.error {
+    font-size: 0.9em;
+    margin: 2px 0 0 (8em / 0.9);
+  }
+  p.error {
+    background: lighten($errorColor, 40%);
+    width: 290px;
+    margin-top: -3px;
+    padding: 4px;
+    border: 2px solid $errorColor;
+    border-top: 0;
+    @include border-radius(3px);
+  }
+  input.field-with-error, select.field-with-error {
+    border-bottom: 0;
+  }
+
+  @media (max-width: 400px) {
+    label {
+      float: none;
+      width: 100%;
+    }
+    div.actions, p.help, p.error {
+      margin-left: 0;
+    }
+  }
+}
+
+form.predefined {
+  .help, div.password, div.tls {
+    display: none;
+  }
+  .selectize-control .selectize-input > div, .selectize-input, input, select {
+    background: transparent;
+    border: 0;
+  }
+  a.edit-mode {
+    padding-left: 4px;
+    color: lighten($fontColor, 15%);
+    text-decoration: none;
+  }
+}
+
+form.edit-mode {
+  a.edit-mode {
+    display: none;
+  }
+}
+
 button, .button {
+  background: darken(#fff, 2%);
   color: #222;
-  background: darken(#fff, 10%);
   font-size: $fontSize;
   text-decoration: none;
   padding: 3px 6px;
@@ -430,7 +492,7 @@ div.messages {
   li.message-pending h3 { color: #ccc; }
   li.message-error { font-style: italic; }
   li.message-error h3 { color: #333; font-style: italic; }
-  li.message-error, li.server-message.error { background: #fbb; }
+  li.message-error, li.server-message.error { background: lighten($errorColor, 40%); }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
     color: #888;
@@ -508,11 +570,17 @@ body.tactile {
  * Landing page
  */
 .landing-page {
-  margin: auto;
-  padding-top: 1em;
-  width: 680px;
+  background: transparent url(../image/tactile-highlight-bg.jpg) 50% 0 no-repeat;
+  min-height: 595px;
+
+  .row {
+    margin: auto;
+    padding-top: 1em;
+    width: 680px;
+  }
 
   h1 {
+    margin-bottom: 0;
     .logo {
       text-indent: -1000px;
       display: block;
@@ -571,10 +639,9 @@ div.footer {
   }
 
   .landing-page {
-    width: 100%;
     img { margin: 2em 0; }
     nav, .login, .register, .about { width: 100% };
-    .row { padding-left: 10px; padding-right: 10px; }
+    .row { width: 100%; padding-left: 10px; padding-right: 10px; }
   }
 
   dl {

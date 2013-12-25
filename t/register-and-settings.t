@@ -12,18 +12,20 @@ $t->post_ok('/login' => form => $form)->status_is('401', 'failed to log in');
 # invalid register is tested in landing-page.t
 
 $form = {login => 'fooman', email => 'foobar@barbar.com', password => 'barbar', password_again => 'barbar',};
-$t->post_ok('/register' => form => $form)->status_is('302', 'first user gets to be admin')
-  ->header_like('Location', qr{/settings$}, 'Redirect to settings page');
+$t->post_ok('/register' => form => $form)
+  ->status_is('302', 'first user gets to be admin')
+  ->header_like('Location', qr{/wizard$}, 'Redirect to settings page');
 
-$t->get_ok($t->tx->res->headers->location)->text_is('title', 'Nordaaker - Chat')->element_exists('li.welcome')
+$t->get_ok($t->tx->res->headers->location)
+  ->text_is('title', 'Testing - Add connection')
   ->element_exists('form[action="/settings/connection"][method="post"]')
-  ->element_exists('input[name="server"][id="server"]')->element_exists('input[name="nick"][id="nick"]')
-  ->element_exists('select[name="channels"][id="channels"]')->element_exists('option[value="#convos"]')
+  ->element_exists('input[name="server"][id="server"]')
+  ->element_exists('input[name="nick"][id="nick"]')
+  ->element_exists('select[name="channels"][id="channels"]')
+  ->element_exists('option[value="#convos"]')
+  ->text_is('button[name="action"][value="save"]', 'Start chatting');
 
-  # ->element_exists('input[name="avatar"][id="avatar"]')
-  ->element_exists('a.logout[href="/logout"]')->text_is('button[type="submit"][name="action"][value="save"]', 'Add');
-
-$form = {};
+$form = { wizard => 1 };
 $t->post_ok('/settings/connection', form => $form)
   ->element_exists('div.server > .field-with-error')
   ->element_exists_not('div.avatar > .field-with-error')
@@ -32,12 +34,22 @@ $t->post_ok('/settings/connection', form => $form)
   ->element_exists('select[name="channels"]')
   ;
 
-$form = {server => 'freenode.org', password => 'noway', nick => 'ice_cool', channels => ', #way #cool ,,,',};
-$t->post_ok('/settings/connection', form => $form)->status_is('302')
-  ->header_like('Location', qr{/settings$}, 'Redirect back to settings page');
+$form = { wizard => 1, server => 'freenode.org', password => 'noway', nick => 'ice_cool', channels => ', #way #cool ,,,',};
+$t->post_ok('/settings/connection', form => $form)
+  ->status_is('302')
+  ->header_like('Location', qr{/convos$}, 'Redirect back to settings page');
+
 is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start connection';
 
-$t->get_ok($t->tx->res->headers->location)->text_is('title', 'Nordaaker - Chat')
+$t->get_ok($t->tx->res->headers->location)
+  ->text_is('title', 'Testing - Chat')
+  ->element_exists('div.messages ul li')
+  ->element_exists('div.messages ul li:first-child img[src="/avatar/convos@loopback"]')
+  ->text_is('div.messages ul li:first-child h3 a', 'convos')
+  ->text_is('div.messages ul li:first-child div', 'Hi fooman!')
+  ;
+
+$t->get_ok('/settings')->text_is('title', 'Testing - Chat')
   ->element_exists('form[action="/freenode.org/settings/edit"][method="post"]')
   ->element_exists('input[name="server"][value="freenode.org"]')
   ->element_exists('input[name="password"][value="noway"]')
@@ -94,7 +106,7 @@ $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is(302)
 $form->{login} = 'fooman';
 $t->post_ok('/register' => form => $form)
   ->status_is(400)
-  ->text_is('div.error', 'That username is taken.')
+  ->text_is('p.error', 'That username is taken.')
   ;
 
 # invite code
