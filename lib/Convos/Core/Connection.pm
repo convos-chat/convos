@@ -300,7 +300,7 @@ sub channels_from_conversations {
   my($self, $conversations) = @_;
 
   map { $_->[1] }
-  grep { $_->[0] eq $self->server and $_->[1] =~ /^#/ }
+  grep { $_->[0] eq $self->server and $_->[1] =~ /^[#&]/ }
   map { [ id_as $_ ] }
   @{ $conversations || [] };
 }
@@ -802,7 +802,7 @@ sub cmd_join {
   my $channel = $message->{params}[0] || '';
   my $name;
 
-  if($channel =~ /^#\w/) {
+  if($channel =~ /^[#&]\w/) {
     $name = as_id $self->server, $channel;
     $self->redis->zadd($self->{conversation_path}, time, $name);
   }

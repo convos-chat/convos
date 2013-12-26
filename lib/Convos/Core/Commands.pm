@@ -23,7 +23,7 @@ sub close {
 
   $target ||= $dom->{target};
 
-  if($target =~ /^#/) {
+  if($target =~ /^[#&]/) {
     return "PART $target"
   }
   else {
@@ -74,7 +74,7 @@ sub query {
   my $login = $self->session('login');
   my $id = as_id $dom->{server}, $target;
 
-  if($target =~ /^#?[\w_-]+$/) {
+  if($target =~ /^[#&]?[\w_-]+$/) {
     $self->redis->zadd("user:$login:conversations", time, $id, sub {
       $self->send_partial('event/add_conversation', %$dom, target => $target);
     });

@@ -4,9 +4,10 @@ plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for d
 
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23convos', time - 1, 'irc:2eperl:2eorg:00batman' ],
-  [ sadd => 'user:doe:connections', 'irc.perl.org' ],
+  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23convos', time - 1, 'irc:2eperl:2eorg:00batman', time - 2, 'im:2ebitlbee:2eorg:00:26bitlbee' ],
+  [ sadd => 'user:doe:connections', 'irc.perl.org', 'im.bitlbee.org' ],
   [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
+  [ hmset => 'user:doe:connection:im.bitlbee.org', nick => 'doe' ],
 );
 
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
@@ -24,10 +25,16 @@ $t->get_ok($t->tx->res->headers->location)
   ->element_exists('body.with-nick-list')
   ;
 
+$t->get_ok('/im.bitlbee.org/&bitlbee')
+  ->status_is(200)
+  ->element_exists_not('body.without-nick-list')
+  ->element_exists('body.with-nick-list')
+  ;
+
 $t->get_ok('/irc.perl.org/batman')
   ->status_is(200)
   ->element_exists('body.without-nick-list')
-  ->element_exists_not('body.wit-nick-list')
+  ->element_exists_not('body.with-nick-list')
   ;
 
 $t->get_ok('/')->header_like('Location', qr{/irc.perl.org/batman$}, 'Redirect on last conversation');
@@ -43,8 +50,10 @@ $t->get_ok('/conversations')
   ->element_exists('li:nth-of-type(1)')
   ->element_exists('a[href="/irc.perl.org/batman"][data-unread="0"]')
   ->element_exists('li:nth-of-type(2)')
+  ->element_exists('a[href="/im.bitlbee.org/&bitlbee"][data-unread="0"]')
+  ->element_exists('li:nth-of-type(3)')
   ->element_exists('a[href="/irc.perl.org/%23convos"][data-unread="0"]')
-  ->element_exists_not('li:nth-of-type(3)')
+  ->element_exists_not('li:nth-of-type(4)')
   ;
 
 $t->get_ok('/notifications')

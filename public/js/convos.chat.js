@@ -216,7 +216,7 @@
       hideSelected: true,
       openOnFocus: true,
       create: function(value) {
-        if(value.indexOf('#') === -1) value = '#' + value;
+        if(!/^[#&]/.test(value)) value = '#' + value;
         return { value: value, text: value };
       }
     });
@@ -293,7 +293,7 @@
         $messages.end_time = parseFloat($ul.data('end-time'));
         $li.each(function() { $(this).appendToMessages(); });
         if(!$li.filter('.historic-message').length) {
-          $('body').attr('class', $messages.hostAndTarget().target.indexOf('#') === 0 ? 'with-nick-list' : 'without-nick-list');
+          $('body').attr('class', /^[#&]/.test($messages.hostAndTarget().target) ? 'with-nick-list' : 'without-nick-list');
           if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
           drawUI();
         }
@@ -540,7 +540,7 @@
     }
     if($message.hasClass('highlight')) {
       var sender = $message.data('sender');
-      var what = $message.data('target').indexOf('#') === 0 ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
+      var what = /^[#&]/.test($message.data('target')) ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
       var reload_notification_list_args = {};
       $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
       if($win.data('has_focus') && to_current) reload_notification_list_args.clear_notification = 0;
