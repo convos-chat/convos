@@ -1,4 +1,4 @@
-- Support channels with & prefix
+- Support channels with & prefix (Andreas Vögele)	
 
 ## 0.3 (2013-12-26)
 
