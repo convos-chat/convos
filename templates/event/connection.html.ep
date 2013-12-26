@@ -40,6 +40,7 @@
     </div>
     <div class="form-group secure">
       <label for="host">Secure</label>
+      % param tls => $tls || 0;
       %= select_field 'tls', [ ['No' => 0], [TLS => 1] ]
     </div>
     <div class="submit">

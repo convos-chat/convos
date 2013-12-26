@@ -287,6 +287,7 @@ sub settings {
         $conn->{channels} = [$cobj->channels_from_conversations($conversations)];
         $conn->{server} ||= $conn->{host};                  # back compat
         $conn->{password} ||= '';
+        $conn->{tls} ||= 0;
         push @conversation, $conn;
       }
 
@@ -296,6 +297,7 @@ sub settings {
       push @conversation, $self->app->config('default_connection');
       $conversation[-1]{event}  = 'connection';
       $conversation[-1]{lookup} = '';
+      $conversation[-1]{tls} ||= 0;
       $delay->begin->();
     },
     sub {

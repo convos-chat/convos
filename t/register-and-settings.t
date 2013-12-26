@@ -91,6 +91,13 @@ is_deeply(
   'not too much data stored in backend',
 );
 
+$form->{tls} = 1;
+$t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
+$t->get_ok('/settings')
+  ->status_is('200')
+  ->text_is('select > option[selected="selected"][value=1]', 'TLS')
+  ;
+
 $t->post_ok('/settings/2', form => $form)->status_is('404');
 $t->get_ok('/yay/settings/delete')->status_is('404');
 
