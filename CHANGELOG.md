@@ -1,3 +1,5 @@
+- Support channels with & prefix
+
 ## 0.3 (2013-12-26)
 
 - New setup wizard for installation and better form validation
