@@ -15,6 +15,7 @@ MANIFEST*
 /local
 /log
 /script/hypnotoad.pid
+/convos.development.conf
 /convos.production.conf
 /cover_db
 /script/toadfarm.pid
