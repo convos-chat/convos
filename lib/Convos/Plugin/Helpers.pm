@@ -7,15 +7,8 @@ Convos::Plugin::Helpers - Mojo's little helpers
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use Convos::Core::Util qw(format_time);
+use Convos::Core::Util qw( format_time id_as $URL_RE );
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
-use Convos::Core::Util qw/id_as/;
-
-my $URL_RE = do {
-  # Modified regex from RFC 3986
-  no warnings; # Possible attempt to put comments
-  qw!https?:(//([^/?\#\s]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
-};
 
 =head1 HELPERS
 

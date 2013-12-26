@@ -12,8 +12,6 @@ L</import> can export any of the L</FUNCTIONS>.
 
 use Mojo::Base 'Exporter';
 
-our @EXPORT_OK = ( qw(as_id id_as hostname logf format_time) );
-
 no warnings "utf8";
 use Mojo::Log;
 use Mojo::UserAgent;
@@ -24,6 +22,13 @@ use Time::Piece;
 my $hostname;
 
 our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
+our $URL_RE = do {
+  # Modified regex from RFC 3986
+  no warnings; # Possible attempt to put comments
+  qw!https?:(//([^/?\#\s]*))?([^?\#\s]*)(\?([^\#\s]*))?(\#(\S+))?!;
+};
+
+our @EXPORT_OK = qw( as_id id_as hostname logf format_time $URL_RE $SERVER_NAME_RE );
 
 =head1 FUNCTIONS
 

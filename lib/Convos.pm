@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.2001
+0.3
 
 =head1 DESCRIPTION
 
@@ -128,7 +128,7 @@ use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
 
-our $VERSION = '0.2001';
+our $VERSION = '0.3';
 $ENV{CONVOS_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
@@ -145,6 +145,10 @@ The directory is "/tmp/convos" by default.
 =head2 core
 
 Holds a L<Convos::Core> object.
+
+=head2 backend_pid
+
+The pid for the backend process, if running embedded.
 
 =cut
 
@@ -170,6 +174,8 @@ has core => sub {
   $core->redis->server($self->redis->server);
   $core;
 };
+
+has 'backend_pid';
 
 =head1 METHODS
 
@@ -250,9 +256,16 @@ sub startup {
   $host_r->get('/')->to('client#view')->name('view.server');
 
   if($config->{backend}{embedded}) {
-    Mojo::IOLoop->timer(0, sub {
-      $self->core->start;
-    });
+    die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);
+    return $self->backend_pid($pid) if $pid;
+    my $loop=Mojo::IOLoop->singleton;
+    $self->core->start;
+    $0='convos backend';
+
+    $SIG{$_}= 'DEFAULT' for  qw(INT TERM CHLD TTIN TTOU);
+    $SIG{QUIT} = sub{ $loop->max_connnections(0)};
+    $loop->start;
+    exit 0;
   }
 }
 

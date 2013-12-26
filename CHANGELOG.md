@@ -1,3 +1,10 @@
+## 0.3 (2013-12-26)
+
+- New setup wizard for installation and better form validation
+- Run server embedded by default
+- Caching support for Avatars.
+- Ensure test suite runs with it's own config.
+
 ## 0.2 (2013-12-20)
 
 - Added support for server password
