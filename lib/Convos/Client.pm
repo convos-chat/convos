@@ -137,7 +137,6 @@ Will render the conversation list for all conversations.
 
 sub conversation_list {
   my ($self, $cb) = @_;
-  my $prev_name = $self->session('name') || '';
   my $login = $self->session('login');
 
   Mojo::IOLoop->delay(
@@ -160,7 +159,6 @@ sub conversation_list {
           is_channel => $target =~ /^#/ ? 1 : 0,
           target => $target,
           timestamp => $timestamp,
-          active => $name eq $prev_name ? 1 : 0,
         };
 
         $self->redis->zcount("user:$login:connection:$server:$target:msg", $timestamp, '+inf', $delay->begin);
