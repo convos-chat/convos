@@ -5,7 +5,7 @@
   % my $text = $c->{server} ? $c->{target} : ucfirst $c->{target};
   % my @class;
   % push @class, 'unread' if $c->{unread};
-  % push @class, 'first' if $c->{active};
+  % push @class, 'first' if $i == 0;
   <li class="<%= join ' ', @class %>">
     %= link_to $text, view => $c, class => 'conversation', title => $title, 'data-unread' => $c->{unread}
   </li>
