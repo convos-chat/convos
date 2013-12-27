@@ -6,7 +6,7 @@ redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
   [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23convos' ],
   [ sadd => 'user:doe:connections', 'irc.perl.org' ],
-  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
+  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe', state => '' ],
   [ del => 'core:control' ],
 );
 
@@ -14,9 +14,28 @@ $t->get_ok('/irc.perl.org/control/start.json')->status_is(403);
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
 $t->get_ok('/irc.perl.org/control/invalid.json')->status_is(302); # TODO: This status does not make much sense
-$t->get_ok('/irc.perl.org/control/start.json')->status_is(200);
-$t->get_ok('/irc.perl.org/control/stop.json')->status_is(200);
-$t->get_ok('/irc.perl.org/control/restart.json')->status_is(200);
+
+$t->get_ok('/irc.perl.org/control/start.json')
+  ->status_is(200)
+  ->json_is('/state', 'starting');
+
+$t->get_ok('/irc.perl.org/control/stop.json')
+  ->status_is(200)
+  ->json_is('/state', 'stopping');
+
+$t->get_ok('/irc.perl.org/control/restart.json')
+  ->status_is(200)
+  ->json_is('/state', 'restarting');
+
+$t->get_ok('/irc.perl.org/control/state.json')
+  ->status_is(200)
+  ->json_is('/state', 'disconnected', 'default value for state');
+
+redis_do(hset => 'user:doe:connection:irc.perl.org', state => 'connected');
+$t->get_ok('/irc.perl.org/control/state.json')
+  ->status_is(200)
+  ->json_is('/state', 'connected');
+
 
 is_deeply(
   redis_do(lrange => 'core:control', 0, -1),

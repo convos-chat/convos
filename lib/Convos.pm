@@ -250,7 +250,7 @@ sub startup {
   $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
-  $host_r->get('/control/:command', [ command => [qw( restart stop start )] ])->to('user#control')->name('connection.control');
+  $host_r->get('/control/:command', [ command => [qw( restart stop start state )] ])->to('user#control')->name('connection.control');
   $host_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
   $host_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
   $host_r->get('/*target')->to('client#view')->name('view');

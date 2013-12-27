@@ -121,9 +121,10 @@ has _irc => sub {
     close => sub {
       my $irc = shift;
       my $data = { status => 500, message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
-      $self->{stop} and return;
+      $self->{stop} and return $self->redis->hset($self->{path}, state => 'disconnected');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
+      $self->redis->hset($self->{path}, state => 'reconneting');
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -131,9 +132,10 @@ has _irc => sub {
     error => sub {
       my $irc = shift;
       my $data = { status => 500, message => "Connection to @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
-      $self->{stop} and return;
+      $self->{stop} and return $self->redis->hset($self->{path}, state => 'error');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
+      $self->redis->hset($self->{path}, state => 'reconneting');
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -200,6 +202,7 @@ sub connect {
     });
   });
 
+  $self->redis->hset($self->{path}, state => 'disconnected');
   $self->_connect;
   $self->_subscribe;
   $self;
@@ -259,7 +262,8 @@ sub _connect {
   my $irc = $self->_irc;
 
   Scalar::Util::weaken($self);
-  $self->redis->hgetall($self->{path} => sub {
+  $self->redis->hgetall(
+    $self->{path} => sub {
       my ($redis, $args) = @_;
 
       $irc->nick($args->{nick} || $self->login);
@@ -274,10 +278,11 @@ sub _connect {
         if($error) {
           $data = { status => 500, message => "Could not connect to @{[$irc->server]}: $error" };
           $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
+          $self->redis->hset($self->{path}, state => 'reconneting');
         }
         else {
-          $self->redis->hset($self->{path}, current_nick => $irc->nick);
-          $data = { status => 200, message => "Connecting..." };
+          $self->redis->hmset($self->{path}, current_nick => $irc->nick, state => 'connected');
+          $data = { status => 200, message => "Connected to IRC server" };
         }
 
         $self->_publish_and_save(server_message => $data);
@@ -325,6 +330,7 @@ sub add_server_message {
 
   $self->_publish_and_save(server_message => $data);
   $self->_add_convos_message($data) if $message->{command} eq '001';
+  $self->redis->hset($self->{path}, state => 'connected');
 }
 
 =head2 add_message

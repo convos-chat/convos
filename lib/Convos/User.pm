@@ -111,29 +111,56 @@ sub avatar {
   );
 }
 
-=headc control
+=head2 control
+
+  /#host/control/start
+  /#host/control/stop
+  /#host/control/restart
+  /#host/control/state
 
 Used to control a connection. See L<Convos::Core/control>.
+
+Special case is "state": It will return the state of the connection:
+"disconnected", "error", "reconnecting" or "connected".
 
 =cut
 
 sub control {
   my $self = shift->render_later;
+  my $command = $self->stash('command');
 
-  $self->app->core->control(
-    $self->stash('command'),
-    $self->session('login'),
-    $self->stash('server'),
-    sub {
-      my($core, $sent) = @_;
-      my $status = $sent ? 200 : 500;
+  if($command eq 'state') {
+    $self->redis->hget(
+      sprintf('user:%s:connection:%s', $self->session('login'), $self->stash('server')),
+      'state',
+      sub {
+        my $redis = shift;
+        my $state = shift || 'disconnected';
 
-      $self->respond_to(
-        json => { json => {}, status => $status },
-        any => { text => "$status\n", status => $status },
-      );
-    },
-  );
+        $self->respond_to(
+          json => { json => { state => $state } },
+          any => { text => "$state\n" },
+        );
+      },
+    );
+  }
+  else {
+    $self->app->core->control(
+      $command,
+      $self->session('login'),
+      $self->stash('server'),
+      sub {
+        my($core, $sent) = @_;
+        my $status = $sent ? 200 : 500;
+        my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
+
+        $self->respond_to(
+          json => { json => { state => $state }, status => $status },
+          any => { text => "$state\n", status => $status },
+        );
+      },
+    );
+  }
 }
 
 =head2 login
