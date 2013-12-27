@@ -47,18 +47,33 @@ has redis => sub { Mojo::Redis->new };
 
 =head2 control
 
-  $self->control($command, $cb);
+  $self = $self->control(restart => $login, $server, $cb);
+  $self = $self->control(start => $login, $server, $cb);
+  $self = $self->control(stop => $login, $server, $cb);
+  $self = $self->control(write => $login, $server, $irc_command, $cb);
 
-Used to issue a control command.
+Used to issue a control C<$command>: L<restart|/ctrl_restart>,
+L<write|/ctrl_write>, L<stop|/ctrl_stop> or L<start|/ctrl_start>.
 
 =cut
 
 sub control {
   my($self, @args) = @_;
   my $cb = pop @args;
+  my $message = join ':', @args;
 
-  $self->redis->lpush('core:control', join(':', @args), $cb);
-  $self;
+  Scalar::Util::weaken($self);
+  if($args[0] eq 'write') {
+    my $channel = Mojo::Util::md5_sum($message);
+    $self->{$channel} = $self->redis->subscribe($channel);
+    $self->{$channel}->on(message => sub { $self->$cb(j $_[1]); delete $self->{$channel}; });
+    $self->redis->lpush('core:control', join ':', write => @args[1, 2], $channel .' ' .$args[3]);
+  }
+  else {
+    $self->redis->lpush('core:control', $message, $cb);
+  }
+
+  return $self;
 }
 
 =head2 send_convos_message
@@ -162,9 +177,10 @@ sub _start_control_channel {
     my($redis, $li) = @_;
     $redis->brpop($li->[0], 0, $cb);
     $li->[1] or return;
-    my($command, $login, $server) = split /:/, $li->[1];
+    my($command, $login, $server, $rest) = split /:/, $li->[1];
     my $action = "ctrl_$command";
-    $self->$action($login, $server);
+    warn "[core] $action('$login', '$server', '$rest')\n" if DEBUG;
+    $self->$action($login, $server, $rest);
   };
 
   $self->{control} = Mojo::Redis->new(server => $self->redis->server);
@@ -195,7 +211,7 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login nick server tls ));
+  my $validation = $self->_validation($input, qw( password login name nick server tls ));
 
   $validation->output->{user} ||= $validation->output->{login};
 
@@ -255,7 +271,7 @@ Update a connection's settings and reconnect.
 
 sub update_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login lookup nick server tls ));
+  my $validation = $self->_validation($input, qw( password login lookup name nick server tls ));
   my $lookup;
 
   $validation->output->{user} ||= $validation->output->{login};
@@ -320,7 +336,7 @@ sub _update_connection {
       %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
       $conn = {};
 
-      for my $k (qw( login nick server tls password )) {
+      for my $k (qw( login name nick server tls password )) {
         my $value = $validation->param($k) or next;
         $conn->{$k} = $value;
       }
@@ -422,9 +438,23 @@ sub delete_connection {
   );
 }
 
+=head2 ctrl_write
+
+Used to write raw commands to the IRC server.
+
+=cut
+
+sub ctrl_write {
+  my ($self, $login, $server, $command) = @_;
+  my $conn = $self->{connections}{$login}{$server} or return;
+  my $channel = $command =~ s/^(\S+)\s// ? $1 : '';
+
+  $conn->write($command, $channel);
+}
+
 =head2 ctrl_stop
 
-    $self->ctrl_stop($login, $server);
+  $self->ctrl_stop($login, $server);
 
 Stop a connection by connection id.
 
@@ -432,17 +462,17 @@ Stop a connection by connection id.
 
 sub ctrl_stop {
   my ($self, $login, $server) = @_;
+  my $conn = $self->{connections}{$login}{$server} or return;
 
   Scalar::Util::weaken($self);
-
-  if(my $conn = $self->{connections}{$login}{$server}) {
-    $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
-  }
+  $conn->disconnect(sub {
+    delete $self->{connections}{$login}{$server};
+  });
 }
 
 =head2 ctrl_restart
 
-    $self->ctrl_restart($login, $server);
+  $self->ctrl_restart($login, $server);
 
 Restart a connection by connection id.
 
@@ -473,6 +503,7 @@ Start a single connection by connection id.
 
 sub ctrl_start {
   my ($self, $login, $server) = @_;
+
   $self->_connection(login => $login, server => $server)->connect;
 }
 

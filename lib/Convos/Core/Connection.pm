@@ -170,6 +170,7 @@ sub new {
   $self->{server} or die "server is required";
   $self->{convos_path} = "user:$self->{login}:connection:convos:msg";
   $self->{conversation_path} = "user:$self->{login}:conversations";
+  $self->{feedback} = [];
   $self->{path} = "user:$self->{login}:connection:$self->{server}";
   $self;
 }
@@ -220,7 +221,7 @@ sub _subscribe {
   );
   $self->{messages}->on(
     message => sub {
-      my ($sub, $raw_message) = @_;
+      my($sub, $raw_message) = @_;
       my($uuid, $message);
 
       $raw_message =~ s/(\S+)\s//;
@@ -262,6 +263,7 @@ sub _connect {
   $self->redis->hgetall($self->{path} => sub {
       my ($redis, $args) = @_;
 
+      $irc->name($args->{name} || 'Convos');
       $irc->nick($args->{nick} || $self->login);
       $irc->pass($args->{password}) if $args->{password};
       $irc->server($args->{server} || $args->{host});
@@ -348,7 +350,7 @@ sub add_message {
 
   @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
-  $data->{host} ||= Convos::Core::Util::hostname;
+  $data->{host} ||= 'convos'; # jhthorsen: Try to figure out why I set the default in the first place
   $data->{user} ||= $self->_irc->user;
 
   if($data->{nick} && $data->{nick} ne $current_nick) {
@@ -403,6 +405,40 @@ sub disconnect {
   $self->_irc->disconnect($cb || sub {});
 }
 
+=head2 write
+
+  $self = $self->write($raw_message, $channel);
+
+This method is used to write a C<$raw_message> to the IRC server and get feedback
+sent to a given C<$channel> instead of publishing the message to the standard
+redis pubsub channel.
+
+=cut
+
+sub write {
+  my($self, $raw_message, $channel) = @_;
+  my $message = Parse::IRC::parse_irc($raw_message);
+  my $i;
+
+  if($message->{command} eq 'WHOIS') {
+    $i = @{ $self->{feedback} };
+    $self->{feedback}[$i] = [
+      $channel,
+      { # $command => { $params_index => $value }
+        311 => { 1 => $message->{params}[0] }, # irc_rpl_whoisuser
+        401 => { 1 => $message->{params}[0] }, # err_nosuchnick
+      },
+    ];
+  }
+
+  $self->_irc->write($raw_message, sub {
+    my($irc, $error) = @_;
+    splice @{ $self->{feedback} }, $i, 1, () if $error and defined $i; # $_[1] = error;
+  });
+
+  $self;
+}
+
 =head1 EVENT HANDLERS
 
 =head2 irc_rpl_welcome
@@ -437,7 +473,8 @@ sub irc_rpl_whoisuser {
       user     => $message->{params}[2],
       host     => $message->{params}[3],
       realname => $message->{params}[5],
-    }
+    },
+    $message,
   );
 }
 
@@ -768,7 +805,7 @@ sub irc_error {
     message => join(' ', @{ $message->{params} }),
   };
 
-  $self->_publish_and_save(server_message => $data);
+  $self->_publish_and_save(server_message => $data, $message);
   $self->_add_convos_message($data);
 }
 
@@ -831,34 +868,54 @@ sub _add_convos_message {
   $self->redis->publish("convos:user:$login:out", $message);
 }
 
+sub _channel_name {
+  my($self, $raw) = @_;
+  my $command = $raw->{command} or return;
+  my($channel, $rules) = @{ $self->{feedback}[0] || [] };
+
+  COMMAND:
+  for my $c (keys %$rules) {
+    next COMMAND unless $command eq $c;
+    my $f = $rules->{$c};
+
+    for my $i (keys %$f) {
+      next CHANNEL unless $raw->{params}[$i];
+      next CHANNEL unless $raw->{params}[$i] eq $f->{$i};
+    }
+
+    shift @{ $self->{feedback} };
+    return $channel;
+  }
+
+  return;
+}
+
 sub _publish {
-  my ($self, $event, $data) = @_;
+  my ($self, $event, $data, $raw) = @_;
   my $login = $self->login;
   my $server = $self->server;
-  my $message;
-
-  if(UNITTEST) {
-    exists $data->{$_} and die $_ for qw/ server event /;
-  }
+  my($channel, $message);
 
   $data->{event} = $event;
   $data->{server} = $server;
   $data->{timestamp} ||= time;
   $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
+  $channel = $self->_channel_name($raw);
   $message = j $data;
 
   if($event eq 'server_message' and $data->{status} != 200) {
-    $self->log->warn("[$login:$server] $data->{message}");
+    $self->log->warn("[@{[$self->login]}:$server] $data->{message}");
   }
 
-  $self->redis->publish("convos:user:$login:out", $message);
-  $message;
+  $self->redis->publish($channel || "convos:user:$login:out", $message);
+
+  return $channel ? undef : $message;
 }
 
 sub _publish_and_save {
-  my ($self, $event, $data) = @_;
+  my ($self, $event, $data, $raw) = @_;
   my $login = $self->login;
-  my $message = $self->_publish($event, $data);
+  my $message = $self->_publish($event, $data, $raw) or return;
 
   if($data->{highlight}) {
     # Ooops! This must be broken: We're clearing the notification by index in

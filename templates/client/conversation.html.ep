@@ -3,7 +3,7 @@
   %= include 'event/connecting' unless @$conversation
 % unless(@$conversation) {
 <li id="3bf6cda3326848d426b18a65dcef1ee8" class="message" data-server="loopback" data-target="convos" data-sender="convos">
-  %= image '/image/avatar-convos.jpg', alt => 'convos', class => 'avatar'
+  %= image '/loopback/avatar/convos.jpg', alt => 'convos', class => 'avatar'
   <h3><%= link_to 'convos', 'convos' %></h3>
   <div class="content whitespace">Welcome to <%= $target || $server %>. Start by typing "hi!" in the input field at the bottom of the page.</div>
   %= timestamp_span(time)

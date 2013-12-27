@@ -44,7 +44,7 @@ is redis_do([rpop => 'core:control']), 'start:fooman:freenode.org', 'start conne
 $t->get_ok($t->tx->res->headers->location)
   ->text_is('title', 'Testing - Chat')
   ->element_exists('div.messages ul li')
-  ->element_exists('div.messages ul li:first-child img[src="/avatar/convos@loopback"]')
+  ->element_exists('div.messages ul li:first-child img[src="/loopback/convos/avatar.jpg"]')
   ->text_is('div.messages ul li:first-child h3 a', 'convos')
   ->text_is('div.messages ul li:first-child div', 'Hi fooman!')
   ;
@@ -80,6 +80,8 @@ $form->{channels} = '#way';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
 is $tmp, 'dummy-uuid PART #cool', 'PART #cool';
 
+
+redis_do([hset => 'user:fooman:connection:irc.perl.org', 'name' => 'whatever']);
 $server->once(message => sub { $tmp = $_[1] });
 $form->{channels} = '#convos';
 $t->post_ok('/irc.perl.org/settings/edit', form => $form)->status_is('302');
@@ -87,7 +89,15 @@ is $tmp, 'dummy-uuid JOIN #convos', 'JOIN #convos';
 
 is_deeply(
   redis_do([hgetall => 'user:fooman:connection:irc.perl.org']),
-  {user => 'fooman', server => 'irc.perl.org', nick => 'marcus', tls => 0, login => 'fooman',password=>'noway'},
+  {
+    login => 'fooman',
+    name => $t->ua->server->url->clone->path('/fooman/profile')->to_string,
+    nick => 'marcus',
+    password => 'noway',
+    server => 'irc.perl.org',
+    tls => 0,
+    user => 'fooman',
+  },
   'not too much data stored in backend',
 );
 
