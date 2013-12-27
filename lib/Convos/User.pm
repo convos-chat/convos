@@ -111,6 +111,31 @@ sub avatar {
   );
 }
 
+=headc control
+
+Used to control a connection. See L<Convos::Core/control>.
+
+=cut
+
+sub control {
+  my $self = shift->render_later;
+
+  $self->app->core->control(
+    $self->stash('command'),
+    $self->session('login'),
+    $self->stash('server'),
+    sub {
+      my($core, $sent) = @_;
+      my $status = $sent ? 200 : 500;
+
+      $self->respond_to(
+        json => { json => {}, status => $status },
+        any => { text => "$status\n", status => $status },
+      );
+    },
+  );
+}
+
 =head2 login
 
 Show the login form. Also responds to JSON requests with login status.
