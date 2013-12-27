@@ -35,8 +35,18 @@ Check authentication and login
 
 sub auth {
   my $self = shift;
-  return 1 if $self->session('login');
-  $self->redirect_to('/');
+
+  if($self->session('login')) {
+    return 1;
+  }
+
+  if($self->req->url->path =~ /\.json$/) {
+    $self->render(json => {}, status => 403);
+  }
+  else {
+    $self->redirect_to('/');
+  }
+
   return 0;
 }
 
