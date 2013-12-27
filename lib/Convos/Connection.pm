@@ -7,6 +7,7 @@ Convos::Connection - Mojolicious controller for IRC connections
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
+use Convos::Core::Util qw( as_id id_as );
 
 =head1 METHODS
 
@@ -193,6 +194,61 @@ sub wizard {
         networks => \@networks,
       );
     },
+  );
+}
+
+=head2 edit_connection
+
+Used to edit a connection.
+
+=cut
+
+sub edit_connection {
+  my $self = shift->render_later;
+  my $validation = $self->validation;
+
+  $validation->input->{channels} = [$self->param('channels')];
+  $validation->input->{login} = $self->session('login');
+  $validation->input->{lookup} = $self->stash('server');
+  $validation->input->{server} = $self->req->body_params->param('server');
+  $validation->input->{tls} ||= 0;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->app->core->update_connection($validation, $delay->begin);
+    },
+    sub {
+      my ($delay, $errors, $changed) = @_;
+      return $self->settings if $errors;
+      return $self->redirect_to('settings');
+    }
+  );
+}
+
+=head2 delete_connection
+
+Delete a connection.
+
+=cut
+
+sub delete_connection {
+  my $self = shift->render_later;
+  my $validation = $self->validation;
+
+  $validation->input->{login} = $self->session('login');
+  $validation->input->{server} = $self->stash('server');
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->app->core->delete_connection($validation, $delay->begin);
+    },
+    sub {
+      my ($delay, $error) = @_;
+      return $self->render_not_found if $error;
+      return $self->redirect_to('settings');
+    }
   );
 }
 

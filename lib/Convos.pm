@@ -264,12 +264,12 @@ sub startup {
   $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
   $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
   $private_r->get('/settings')->to('user#settings')->name('settings');
-  $private_r->post('/settings/connection')->to('connection#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
   my $network_r = $private_r->route('/:server');
   $network_r->any('/control')->to('user#control')->name('connection.control')->name('connection.control');
-  $network_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
+  $network_r->get('/settings/delete')->to(template => 'connection/delete', body_class => 'tactile');
+  $network_r->post('/settings/delete')->to('connection#delete_connection')->name('connection.delete');
   $network_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
   $network_r->get('/*target')->to('client#view')->name('view');
   $network_r->get('/')->to('client#view')->name('view.server');
