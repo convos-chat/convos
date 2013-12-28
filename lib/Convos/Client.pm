@@ -97,6 +97,8 @@ sub view {
     $self->stash->{body_class} = 'with-sidebar';
   }
 
+  $self->stash->{body_class} .= ' '. ($server eq 'convos' ? 'convos' : 'chat');
+
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;

@@ -496,8 +496,14 @@ div.messages {
   }
 }
 
-body.with-sidebar, body.without-sidebar, body.historic {
-  ul.conversations li.first a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
+body.chat ul.conversations li.first a {
+  background-color: darken(#fff, 5%);
+  font-weight: bold;
+  color: #000;
+}
+
+body.convos a.convos {
+  background-color: darken(#fff, 5%);
 }
 
 body.without-sidebar {
