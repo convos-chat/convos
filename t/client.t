@@ -22,20 +22,20 @@ $t->get_ok('/invalid/foo')
 
 $t->get_ok($t->tx->res->headers->location)
   ->status_is(200)
-  ->element_exists_not('body.without-nick-list')
-  ->element_exists('body.with-nick-list')
+  ->element_exists_not('body.without-sidebar')
+  ->element_exists('body.with-sidebar')
   ;
 
 $t->get_ok('/bitlbee/&bitlbee')
   ->status_is(200)
-  ->element_exists_not('body.without-nick-list')
-  ->element_exists('body.with-nick-list')
+  ->element_exists_not('body.without-sidebar')
+  ->element_exists('body.with-sidebar')
   ;
 
 $t->get_ok('/magnet/batman')
   ->status_is(200)
-  ->element_exists('body.without-nick-list')
-  ->element_exists_not('body.with-nick-list')
+  ->element_exists('body.without-sidebar')
+  ->element_exists_not('body.with-sidebar')
   ;
 
 $t->get_ok('/')->header_like('Location', qr{/magnet/batman$}, 'Redirect on last conversation');

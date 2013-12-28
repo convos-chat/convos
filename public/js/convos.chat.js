@@ -117,7 +117,7 @@
         return;
       }
     }
-    else if(this.hasClass('nicks')) {
+    else if(this.hasClass('sidebar')) {
       nickList(this);
       return;
     }
@@ -144,11 +144,11 @@
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
     $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
-    $('div.nicks.container ul').html('');
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
-    if($messages.hasClass('with-nick-list')) {
+    if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
+      $('div.sidebar.container ul').html('');
       $input.send('/names', 0).send('/topic', 0);
     }
 
@@ -244,18 +244,18 @@
 
     $('a[data-toggle]').filter('.active').trigger('activate');
 
-    if($('body').is('.without-nick-list, .settings, .historic')) {
-      $('div.nicks.container').css({ left: '', height: '', display: 'none' });
+    if($('body').is('.without-sidebar, .settings, .historic')) {
+      $('div.sidebar.container').css({ left: '', height: '', display: 'none' });
     }
     else if($win.width() > min_width) {
-      $('a.nicks.toggler').trigger('deactivate');
-      $('div.nicks.container').css({ left: '', height: '', display: 'block' });
+      $('a.sidebar.toggler').trigger('deactivate');
+      $('div.sidebar.container').css({ left: '', height: '', display: 'block' });
     }
-    else if($('a.nicks.toggler').is('.active')) {
-      $('div.nicks.container').css({ display: 'block' });
+    else if($('a.sidebar.toggler').is('.active')) {
+      $('div.sidebar.container').css({ display: 'block' });
     }
     else {
-      $('div.nicks.container').css({ display: 'none' });
+      $('div.sidebar.container').css({ display: 'none' });
     }
 
     if($win.data('at_bottom')) $win.scrollTo('bottom');
@@ -301,7 +301,7 @@
         $messages.end_time = parseFloat($ul.data('end-time'));
         $li.each(function() { $(this).appendToMessages(); });
         if(!$li.filter('.historic-message').length) {
-          $('body').attr('class', /^[#&]/.test($messages.hostAndTarget().target) ? 'with-nick-list' : 'without-nick-list');
+          $('body').attr('class', /^[#&]/.test($messages.hostAndTarget().target) ? 'with-sidebar' : 'without-sidebar');
           if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
           drawUI();
         }
@@ -443,7 +443,7 @@
 
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
-      $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.nicks.toggler').trigger('deactivate');
+      $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.sidebar.toggler').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
         $('nav ul.conversations a').slice(0, 2).eq(-1).focus();
       }
@@ -489,12 +489,12 @@
     }
 
     if(nicks.length) {
-      $('div.nicks.container ul').html(
+      $('div.sidebar.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
           return '<li><a href="' + $.url_for(server, n) + '">' + n + '</a></li>';
         }).join('')
       );
-      $('div.nicks.container').nanoScroller(); // reset scrollbar;
+      $('div.sidebar.container').nanoScroller(); // reset scrollbar;
     }
   }
 
@@ -543,7 +543,7 @@
       $message.data('target', $messages.data('target'));
       if(!$message.data('server')) $message.data('server', $messages.data('server'));
     }
-    if($('body').attr('class').indexOf('-nick-list') > 0) {
+    if($('body').attr('class').indexOf('-sidebar') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
     }
     if($message.hasClass('highlight')) {

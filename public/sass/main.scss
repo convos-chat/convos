@@ -360,7 +360,7 @@ nav.bar {
 
   a.conversation { color: #666; }
   a.conversations.toggler { display: none; }
-  a.nicks.toggler { display: none; }
+  a.sidebar.toggler { display: none; }
 
   .right {
     background: #fafafa;
@@ -389,7 +389,7 @@ div.notification.question {
 
 div.conversations.container,
 div.notifications.container,
-div.nicks.container {
+div.sidebar.container {
   background: darken(#fdfdfd, 2%);
   position: fixed;
   top: 39px;
@@ -402,7 +402,8 @@ div.nicks.container {
   border: 1px solid darken(#fff, 15%);
   border-top-width: 6px;
 
-  a { color: #000; text-decoration: none; padding: 4px; display: block; }
+  h3, a { color: #000; text-decoration: none; padding: 4px; display: block; }
+  h3 { font-size: 1em; margin: 0; };
   a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
   a:focus { background-color: darken(#fff, 8%); }
 }
@@ -417,7 +418,7 @@ div.notifications.container {
 }
 
 @media (min-width: $responsiveWidth) {
-  div.nicks.container {
+  div.sidebar.container {
     background: #f3f3f3;
     border: 0;
     border-left: 1px solid #ddd;
@@ -429,7 +430,7 @@ div.notifications.container {
     right: 0;
     z-index: 2;
 
-    a { text-decoration: none; display: block; padding: 4px 8px; }
+    h3, a { text-decoration: none; display: block; padding: 4px 8px; }
     a:hover { background: darken(#eee, 5%); };
   }
 }
@@ -494,11 +495,17 @@ div.messages {
   }
 }
 
-body.with-nick-list, body.without-nick-list, body.historic {
+body.with-sidebar, body.without-sidebar, body.historic {
   ul.conversations li.first a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
 }
 
-body.with-nick-list {
+body.without-sidebar {
+  div.sidebar.container {
+    display: none;
+  }
+}
+
+body.with-sidebar {
   div.messages {
     margin-right: $nickListWidth;
     li.highlight { background: #fee; }
@@ -507,7 +514,7 @@ body.with-nick-list {
 }
 
 body.settings, body.historic {
-  div.nicks.container { display: none; }
+  div.sidebar.container { display: none; }
   footer { display: none; }
   div.clear { height: 20px; }
 }
@@ -595,14 +602,14 @@ div.footer {
   nav.bar .right { right: 0; }
   div.messages { margin-right: 0; }
 
-  body.with-nick-list {
-    nav.bar a.nicks.toggler { display: block; }
+  body.with-sidebar {
+    nav.bar a.sidebar.toggler { display: block; }
     div.messages, footer form { margin-right: 0; }
-    div.nicks.container { display: none; }
+    div.sidebar.container { display: none; }
   }
 
-  body.with-nick-list,
-  body.without-nick-list {
+  body.with-sidebar,
+  body.without-sidebar {
     div.wrapper {
       margin-bottom: -42px;
       div.clear { height: 42px; }
