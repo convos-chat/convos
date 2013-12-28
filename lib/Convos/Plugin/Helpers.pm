@@ -34,6 +34,59 @@ See L<Convos::Core::Util/id_as>.
 
 See L<Convos::Core::Util/as_id>.
 
+=head2 conversation_list
+
+Will render the conversation list for all conversations.
+
+=cut
+
+sub conversation_list {
+  my ($self, $cb) = @_;
+  my $login = $self->session('login');
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->zrevrange("user:$login:conversations", 0, -1, 'WITHSCORES', $delay->begin);
+    },
+    sub {
+      my ($delay, $conversation_list) = @_;
+      my $i = 0;
+
+      while ($i < @$conversation_list) {
+        my $name = $conversation_list->[$i];
+        my $timestamp = splice @$conversation_list, ($i + 1), 1;
+        my ($server, $target) = id_as $name;
+
+        $target ||= '';
+        $conversation_list->[$i] = {
+          server => $server,
+          is_channel => $target =~ /^[#&]/ ? 1 : 0,
+          target => $target,
+          timestamp => $timestamp,
+        };
+
+        $self->redis->zcount("user:$login:connection:$server:$target:msg", $timestamp, '+inf', $delay->begin);
+        $i++;
+      }
+
+      $delay->begin->(undef, $conversation_list);
+      $self->stash(conversation_list => $conversation_list);
+    },
+    sub {
+      my ($delay, @unread_count) = @_;
+      my $conversation_list = pop @unread_count;
+
+      for my $c (@$conversation_list) {
+        $c->{unread} = shift @unread_count || 0;
+      }
+
+      return $self->$cb($conversation_list) if $cb;
+      return $self->render;
+    },
+  );
+}
+
 =head2 format_conversation
 
   $c->format_conversation(\&iterator, \&callback);
@@ -112,6 +165,63 @@ sub redis {
   };
 }
 
+=head2 notification_list
+
+Will render notifications.
+
+=cut
+
+sub notification_list {
+  my ($self, $cb) = @_;
+  my $login = $self->session('login');
+  my $key   = "user:$login:notifications";
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      my $n = $self->param('notification');
+
+      if (defined $n) {
+        $self->_modify_notification($n, read => 1, $delay->begin);
+      }
+      else {
+        $delay->begin->();
+      }
+    },
+    sub {
+      my ($delay, $modified) = @_;
+      $self->redis->lrange($key, 0, 20, $delay->begin);
+    },
+    sub {
+      my ($delay, $notification_list) = @_;
+      my $n_notifications = 0;
+      my %nick_seen       = ();
+      my $i               = 0;
+
+      while ($i < @$notification_list) {
+        my $n = j $notification_list->[$i];
+        $n->{index} = $i;
+        $n->{is_channel} = $n->{target} =~ /^[#&]/ ? 1 : 0;
+
+        if (!$n->{is_channel} and $nick_seen{$n->{target}}++) {
+          $self->redis->lrem($key, 1, $notification_list->[$i]);
+          splice @$notification_list, $i, 1, ();
+          next;
+        }
+
+        $notification_list->[$i] = $n;
+        $n_notifications++ unless $n->{read};
+        $i++;
+      }
+
+      $self->stash(notification_list => $notification_list, n_notifications => $n_notifications,);
+
+      return $self->$cb($notification_list) if $cb;
+      return $self->respond_to(json => {json => $self->stash('notification_list')}, html => sub { shift->render },);
+    },
+  );
+}
+
 =head2 send_partial
 
 Will render "partial" and L<send|Mojolicious::Controller/send> the result.
@@ -187,8 +297,10 @@ sub register {
 
   $app->helper(avatar => \&avatar);
   $app->helper(format_conversation => \&format_conversation);
+  $app->helper(conversation_list => \&conversation_list);
   $app->helper(logf                => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });
+  $app->helper(notification_list => \&notification_list);
   $app->helper(redis => \&redis);
   $app->helper(as_id => sub { shift; Convos::Core::Util::as_id(@_) });
   $app->helper(id_as => sub { shift; Convos::Core::Util::id_as(@_) });
