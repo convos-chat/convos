@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Mojo;
+use Mojo::Redis;
 
 BEGIN {
   $ENV{MOJO_MODE} = 'testing';
@@ -10,11 +11,11 @@ BEGIN {
   $ENV{REDIS_TEST_DATABASE} ||= '';
 }
 
-my $t;
+my($redis, $t);
 
 sub redis_do {
   my $delay = Mojo::IOLoop->delay;
-  my $redis = $t->app->redis;
+  my $redis = $redis || $t->app->redis;
   $redis->execute(@_, $delay->begin);
   $delay->wait;
 }
@@ -34,6 +35,7 @@ sub wait_a_bit {
 
 sub import {
   my $class = shift;
+  my $no_web = grep { /no_web/ } @_;
   my $caller = caller;
   my $keys;
 
@@ -42,10 +44,15 @@ sub import {
   $ENV{REDIS_TEST_DATABASE} = 'redis://127.0.0.1:6379/14' if $ENV{REDIS_TEST_DATABASE} eq 'default';
 
   # make sure we use our own test database
-  $t = Test::Mojo->new('Convos');
-  $t->app->config(redis => $ENV{REDIS_TEST_DATABASE});
-  $t->app->core->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
-  $t->app->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
+  if($no_web) {
+    $redis = Mojo::Redis->new(server => $ENV{REDIS_TEST_DATABASE});
+  }
+  else {
+    $t = Test::Mojo->new('Convos');
+    $t->app->config(redis => $ENV{REDIS_TEST_DATABASE});
+    $t->app->core->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
+    $t->app->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
+  }
 
   redis_do('flushdb') unless $ENV{KEEP_REDIS};
 

@@ -127,6 +127,7 @@ use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
+use Convos::Upgrader;
 
 our $VERSION = '0.3';
 $ENV{CONVOS_BACKEND_REV} ||= 0;
@@ -137,6 +138,10 @@ $ENV{CONVOS_BACKEND_REV} ||= 0;
 
 Holds a L<Convos::Core::Archive> object.
 
+=head2 backend_pid
+
+The pid for the backend process, if running embedded.
+
 =head2 cache
 
 Holds a L<Mojolicious::Static> object pointing to a cache dir.
@@ -146,9 +151,9 @@ The directory is "/tmp/convos" by default.
 
 Holds a L<Convos::Core> object.
 
-=head2 backend_pid
+=head2 upgrader
 
-The pid for the backend process, if running embedded.
+Holds a L<Convos::Upgrader> object.
 
 =cut
 
@@ -156,6 +161,8 @@ has archive => sub {
   my $self = shift;
   Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
+
+has backend_pid => 0;
 
 has cache => sub {
   my $self = shift;
@@ -175,7 +182,12 @@ has core => sub {
   $core;
 };
 
-has 'backend_pid';
+has upgrader => sub {
+  my $self = shift;
+  my $upgrader = Convos::Upgrader->new(redis => $self->redis);
+  $upgrader->on(finish => sub { $self->log->info($_[1]) });
+  $upgrader;
+};
 
 =head1 METHODS
 
@@ -267,6 +279,8 @@ sub startup {
     $loop->start;
     exit 0;
   }
+
+  Mojo::IOLoop->timer(0, sub { $self->upgrader->run });
 }
 
 sub _from_cpan {
