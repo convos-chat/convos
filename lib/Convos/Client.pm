@@ -44,26 +44,9 @@ Will render all server logs.
 
 sub convos {
   my $self = shift->render_later;
-  my $login = $self->session('login');
 
-  $self->stash(
-    server => 'convos',
-    sidebar => 'convos',
-    template => 'client/view',
-  );
-
-  Mojo::IOLoop->delay(
-    sub {
-      my($delay) = @_;
-      $self->redis->smembers("user:$login:connections", $_[0]->begin);
-    },
-    sub {
-      my($delay, $connections) = @_;
-
-      $self->stash(connections => $connections || []);
-      $self->view;
-    },
-  );
+  $self->stash(server => 'convos', sidebar => 'convos', template => 'client/view');
+  $self->connection_list(\&view);
 }
 
 =head2 view

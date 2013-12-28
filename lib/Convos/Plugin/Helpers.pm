@@ -34,6 +34,29 @@ See L<Convos::Core::Util/id_as>.
 
 See L<Convos::Core::Util/as_id>.
 
+=head2 connection_list
+
+=cut
+
+sub connection_list {
+  my ($self, $cb) = @_;
+  my $login = $self->session('login');
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->smembers("user:$login:connections", $_[0]->begin);
+    },
+    sub {
+      my($delay, $connections) = @_;
+
+      $self->redirect_to('wizard') unless $connections and @$connections;
+      $self->stash(connections => $connections || []);
+      $self->$cb;
+    },
+  );
+}
+
 =head2 conversation_list
 
 Will render the conversation list for all conversations.
@@ -297,6 +320,7 @@ sub register {
 
   $app->helper(avatar => \&avatar);
   $app->helper(format_conversation => \&format_conversation);
+  $app->helper(connection_list => \&connection_list);
   $app->helper(conversation_list => \&conversation_list);
   $app->helper(logf                => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });
