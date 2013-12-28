@@ -234,7 +234,7 @@ sub startup {
     '/js/jquery.hotkeys.min.js',
     '/js/jquery.fastbutton.min.js',
     '/js/jquery.nanoscroller.min.js',
-    '/js/jquery.pjax.min.js',
+    '/js/jquery.pjax.js',
     '/js/selectize.js',
     '/js/globals.js',
     '/js/jquery.doubletap.js',
