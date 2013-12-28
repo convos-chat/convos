@@ -404,6 +404,7 @@ div.sidebar.container {
 
   h3, a { color: #000; text-decoration: none; padding: 4px; display: block; }
   h3 { font-size: 1em; margin: 0; };
+  a.inactive { color: lighten(#000, 60%); }
   a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
   a:focus { background-color: darken(#fff, 8%); }
 }

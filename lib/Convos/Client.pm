@@ -44,9 +44,26 @@ Will render all server logs.
 
 sub convos {
   my $self = shift->render_later;
+  my $login = $self->session('login');
 
-  $self->stash(server => 'convos', template => 'client/view');
-  $self->view;
+  $self->stash(
+    server => 'convos',
+    sidebar => 'convos',
+    template => 'client/view',
+  );
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->smembers("user:$login:connections", $_[0]->begin);
+    },
+    sub {
+      my($delay, $connections) = @_;
+
+      $self->stash(connections => $connections || []);
+      $self->view;
+    },
+  );
 }
 
 =head2 view
@@ -62,17 +79,23 @@ sub view {
   my $server      = $self->stash('server');
   my $target      = $self->stash('target') || '';
   my $name        = as_id $server, $target;
-  my $with_layout = $self->req->is_xhr ? 0 : 1;
+  my $xhr         = $self->req->is_xhr ? 1 : 0;
   my $redis       = $self->redis;
   my @rearrange   = ([ zscore => "user:$login:conversations", $name ]);
 
   if($prev_name and $prev_name ne $name) {
     push @rearrange, [ zscore => "user:$login:conversations", $prev_name ];
   }
+  if($xhr) {
+    $self->stash(layout => undef);
+  }
 
-  $self->stash(body_class => ($target and $target =~ /^[#&]/) ? 'with-nick-list' : 'without-nick-list');
-  $self->stash(target => $target);
+  $self->stash(target => $target, body_class => 'without-sidebar', xhr => $xhr);
   $self->session(name => $target ? $name : '');
+
+  if(!$target or $target =~ /^[#&]/) {
+    $self->stash->{body_class} = 'with-sidebar';
+  }
 
   Mojo::IOLoop->delay(
     sub {
@@ -84,25 +107,32 @@ sub view {
       my $time = time;
 
       return $self->route if $target and not grep { $_ } @score; # no such conversation
-      return $delay->begin(0)->($login) if $server eq 'convos';
+      return $delay->begin(0)->([ $login, 'connected' ]) if $server eq 'convos';
 
-      $redis->hget("user:$login:connection:$server", "nick", $delay->begin);
+      $redis->hmget("user:$login:connection:$server", qw( nick state ), $delay->begin);
       $redis->zadd("user:$login:conversations", $time, $name) if $score[0];
       $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
     },
     sub {
-      my ($delay, $nick) = @_;
-      return $self->route unless $nick;
-      $self->stash(nick => $nick);
-      $self->_modify_notification($self->param('notification'), read => 1, sub { })
-        if defined $self->param('notification');
+      my ($delay, $nick_state) = @_;
+
+      if(!$nick_state or !$nick_state->[0]) {
+        return $self->route;
+      }
+      if(defined $self->param('notification')) {
+        $self->_modify_notification($self->param('notification'), read => 1, sub {});
+      }
+
+      $nick_state->[1] ||= 'disconnected';
+      $self->stash(nick => $nick_state->[0], state => $nick_state->[1]);
+      $self->stash->{sidebar} ||= 'server' unless $target;
       $self->_conversation($delay->begin);
       $delay->begin->();
     },
     sub {
       my ($delay, $conversation) = @_;
 
-      if ($with_layout) {
+      unless($xhr) {
         $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
@@ -111,8 +141,7 @@ sub view {
       $delay->begin->(0);
     },
     sub {
-      return $self->render if $with_layout;
-      return $self->render('client/conversation', layout => undef);
+      $self->render;
     },
   );
 }

@@ -139,7 +139,9 @@
     }
   };
 
-  var conversationLoaded = function() {
+  var conversationLoaded = function(e, data, status_text, xhr, options) {
+    var $doc = $(data || '<div></div>');
+
     $messages = $('div.messages ul');
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
@@ -147,8 +149,10 @@
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
+    if($doc.filter('div.sidebar.container').length) {
+      $('div.sidebar.container ul').html($doc.filter('div.sidebar.container').find('ul').children());
+    }
     if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
-      $('div.sidebar.container ul').html('');
       $input.send('/names', 0).send('/topic', 0);
     }
 
@@ -387,11 +391,14 @@
 
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
-    $(document).pjax('nav a.conversation', 'div.messages');
-    $(document).pjax('nav a.settings', 'div.messages');
-    $(document).pjax('div.container a', 'div.messages');
-    $('div.messages').on('pjax:end', conversationLoaded);
+    $(document).pjax('nav a.conversation', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('nav a.convos', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('nav a.settings', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('div.container a', 'div.messages', { fragment: 'div.messages' });
+
+    $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
     $('div.messages').on('pjax:start', function(xhr, options) { $('body').loadingIndicator('show'); });
+    $('div.messages').on('pjax:success', conversationLoaded);
   }
 
   var initSocket = function() {

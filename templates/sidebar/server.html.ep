@@ -1,0 +1,15 @@
+<li>
+  <h3><%= $server %></h3>
+</li>
+<li>
+  %= link_to 'Connect', 'connection.remote', { command => 'start' }, ($state eq 'connected' ? (class => 'inactive') : ())
+</li>
+<li>
+  %= link_to 'Disconnect', 'connection.remote', { command => 'stop' }, ($state eq 'disconnected' ? (class => 'inactive') : ())
+</li>
+<li>
+  %= link_to 'Restart', 'connection.remote', { command => 'restart' }
+</li>
+<li>
+  %= link_to 'Delete', 'connection.delete'
+</li>
