@@ -1,4 +1,4 @@
-% title 'Chat';
+% title $target || $server;
 % my $partial = $self->req->is_xhr;
 
 % unless($partial) {

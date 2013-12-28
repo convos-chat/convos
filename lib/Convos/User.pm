@@ -6,7 +6,7 @@ Convos::User - Mojolicious controller for user data
 
 =cut
 
-use Mojo::Base 'Convos::Client';
+use Mojo::Base 'Mojolicious::Controller';
 use Convos::Core::Util qw/ as_id id_as /;
 use Mojo::Asset::File;
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
@@ -300,95 +300,57 @@ sub logout {
   $self->redirect_to('/');
 }
 
-=head2 settings
+=head2 edit
 
-Used to retrieve connection information.
+Change user profile.
 
 =cut
 
-sub settings {
-  my $self        = shift->render_later;
-  my $hostname    = Convos::Core::Util::hostname();
-  my $login       = $self->session('login');
-  my $server      = $self->stash('server') || 0;
-  my $with_layout = $self->req->is_xhr ? 0 : 1;
-  my @conversation;
+sub edit {
+  my $self = shift->render_later;
+  my $login = $self->session('login');
+  my $method = $self->req->method eq 'POST' ? '_edit' : 'render';
+  my $partial = $self->req->is_xhr;
 
-  $self->stash(
-    server       => $server,
-    body_class   => 'settings',
-    conversation => \@conversation,
-    nick         => $login,
-    target       => 'settings',
-  );
+  $self->stash(body_class => 'convos with-sidebar');
 
   Mojo::IOLoop->delay(
     sub {
-      my ($delay) = @_;
-      $self->redis->smembers("user:$login:connections", $_[0]->begin);
-    },
-    sub {
-      my ($delay, $hosts) = @_;
-      my $cb = $delay->begin;
-
-      unless(@$hosts) {
-        $self->redirect_to('wizard');
-        return;
-      }
-
-      $self->redis->execute(
-        [zrange => "user:$login:conversations", 0, -1],
-        (map { [hgetall => "user:$login:connection:$_"] } @$hosts),
-        $cb
-      );
-    },
-    sub {
-      my ($delay, $conversations, @connections) = @_;
-      my $cobj = Convos::Core::Connection->new(login => $login, server => 'anything');
-
-      $self->logf(debug => '[settings] connection data %s', \@connections) if DEBUG;
-
-      for my $conn (@connections) {
-        $cobj->server($conn->{server} || $conn->{host});    # back compat
-        $conn->{event}    = 'connection';
-        $conn->{lookup}   = $conn->{server} || $conn->{host};
-        $conn->{channels} = [$cobj->channels_from_conversations($conversations)];
-        $conn->{server} ||= $conn->{host};                  # back compat
-        $conn->{password} ||= '';
-        $conn->{tls} ||= 0;
-        push @conversation, $conn;
-      }
-
-      $self->redis->hgetall("user:$login", $delay->begin);
-      $self->redis->get("avatar:$login\@$hostname", $delay->begin);
+      my($delay) = @_;
+      $self->redis->hgetall("user:$login", $delay->begin) if $method eq 'render';
+      $self->connection_list($delay->begin);
+      $self->conversation_list($delay->begin) unless $partial;
+      $self->notification_list($delay->begin) unless $partial;
       $delay->begin->();
     },
     sub {
-      my ($delay, $user, $avatar) = @_;
+      my($delay, $user) = @_;
+      $user = {} if ref $user ne 'HASH';
+      $self->param($_ => $user->{$_}) for keys %$user;
+      $self->$method;
+    },
+  );
+}
 
-      if ($with_layout) {
-        $self->conversation_list($delay->begin);
-        $self->notification_list($delay->begin);
-      }
+sub _edit {
+  my $self = shift;
+  my $login = $self->session('login');
+  my $validation = $self->validation;
 
-      if ($user) {
-        unshift @conversation, {
-          event => 'user',
-          avatar => $avatar,
-          email => $user->{email},
-          hostname => $hostname,
-          login => $login,
-        };
-      }
+  $validation->required('email')->like(qr{.\@.});
+  $validation->optional('avatar')->size(3, 64);
+  $validation->has_error and return $self->render;
+  $validation->output->{avatar} ||= '';
 
-      $delay->begin->();
+  Mojo::IOLoop->delay(
+    sub {
+      my $delay = shift;
+      $self->redis->hmset("user:$login", $validation->output, $delay->begin);
     },
     sub {
-      my ($delay, @res) = @_;
-
-      return $self->render('client/view') if $with_layout;
-      return $self->render('client/conversation', layout => undef);
-    },
+      my ($delay, $saved) = @_;
+      $self->render;
+    }
   );
 }
 
@@ -442,39 +404,6 @@ sub delete_connection {
     sub {
       my ($delay, $error) = @_;
       return $self->render_not_found if $error;
-      return $self->redirect_to('settings');
-    }
-  );
-}
-
-=head2 edit_user
-
-Change user profile.
-
-=cut
-
-sub edit_user {
-  my $self       = shift->render_later;
-  my $login      = $self->session('login');
-  my $hostname   = Convos::Core::Util::hostname();
-  my $validation = $self->validation;
-
-  $validation->required('email')->like(qr{.\@.});
-  $validation->optional('avatar')->size(1, 64);
-
-  if($validation->has_error) {
-    return $self->render;
-  }
-
-  Mojo::IOLoop->delay(
-    sub {
-      my $delay = shift;
-      $self->redis->hmset("user:$login", $validation->output, $delay->begin);
-      $delay->begin->();
-    },
-    sub {
-      my ($delay, @saved) = @_;
-      return $self->render(json => {}) if $self->req->is_xhr;
       return $self->redirect_to('settings');
     }
   );

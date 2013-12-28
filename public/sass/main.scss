@@ -376,7 +376,7 @@ nav.bar {
     a.notifications.toggler { position: relative; }
     a.notifications.toggler b { position: absolute; bottom: -3px; right: 2px; color: #bbb; font-size: 0.9em; font-weight: normal; }
     a.notifications.toggler.alert b { color: #b22; }
-    a.hidden, a.logout { display: none; }
+    a.hidden { display: none; }
   }
 
   a.active, a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
@@ -508,8 +508,8 @@ body.chat ul.conversations li.first a {
   color: #000;
 }
 
-body.convos a.convos {
-  background-color: darken(#fff, 5%);
+body.convos {
+  a.convos { background-color: darken(#fff, 5%); }
 }
 
 body.without-sidebar {
@@ -526,26 +526,10 @@ body.with-sidebar {
   footer form { margin-right: $nickListWidth; }
 }
 
-body.settings, body.historic {
+body.historic {
   div.sidebar.container { display: none; }
   footer { display: none; }
   div.clear { height: 20px; }
-}
-
-body.settings {
-  nav.bar .right a.logout { display: block; }
-  li.notice {
-    background-color: transparent;
-    color: inherit;
-
-    div.content {
-      font-family: monospace;
-      font-size: 0.8em;
-      line-height: 1.1em;
-      max-width: 100%;
-      margin-left: 0;
-    }
-  }
 }
 
 div.goto-bottom a {
@@ -744,10 +728,8 @@ a {
 }
 
 /*  Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
-    readers do not read off random characters that represent icons */.icon-user:before    { content: "\f021"; }
-.icon-cog:before    { content: "\f022"; }
+    readers do not read off random characters that represent icons */
 .icon-info-sign:before    { content: "\f023"; }
 .icon-chevron-down:before   { content: "\f024"; }
 .icon-comments:before   { content: "\f025"; }
-.icon-signout:before    { content: "\f026"; }
 .icon-bullhorn:before   { content: "\f027"; }

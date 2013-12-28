@@ -1,4 +1,13 @@
 <li>
+  <h3>User</h3>
+</li>
+<li>
+  %= link_to 'Edit profile', 'user.edit'
+</li>
+<li>
+  %= link_to 'Logout', 'logout'
+</li>
+<li>
   <h3>Connections</h3>
 </li>
 % for my $name (@$connections) {

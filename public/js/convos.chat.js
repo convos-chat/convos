@@ -166,16 +166,11 @@
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
-    if($messages.hasClass('settings')) {
-      drawSettings();
-      setTimeout(function() { reloadConversationList({}); }, 1000);
-      $win.data('at_bottom', false);
-    }
-    else if(!Object.equals($input.hostAndTarget(), $messages.hostAndTarget())) {
+    if(!Object.equals($input.hostAndTarget(), $messages.hostAndTarget())) {
       reloadConversationList({});
     }
 
-    if(!$messages.hasClass('settings') && typeof initNotifications.asked == 'undefined') {
+    if(initNotifications.asked == 'undefined') {
       initNotifications();
     }
 
@@ -187,7 +182,7 @@
     var $conversations = $('ul.conversations li, div.conversations.container li');
     var $dropdown = $('div.conversations.container ul');
     var $menu = $('nav ul.conversations');
-    var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
+    var available_width = $('nav').width() - $('nav .right').outerWidth();
     var used_width = 0, unread, $a;
 
     if($message) {
@@ -248,7 +243,7 @@
 
     $('a[data-toggle]').filter('.active').trigger('activate');
 
-    if($('body').is('.without-sidebar, .settings, .historic')) {
+    if($('body').is('.without-sidebar, .historic')) {
       $('div.sidebar.container').css({ left: '', height: '', display: 'none' });
     }
     else if($win.width() > min_width) {
@@ -393,7 +388,6 @@
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
     $(document).pjax('nav a.conversation', 'div.messages', { fragment: 'div.messages' });
     $(document).pjax('nav a.convos', 'div.messages', { fragment: 'div.messages' });
-    $(document).pjax('nav a.settings', 'div.messages', { fragment: 'div.messages' });
     $(document).pjax('div.container a', 'div.messages', { fragment: 'div.messages' });
 
     $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
