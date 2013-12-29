@@ -35,8 +35,18 @@ Check authentication and login
 
 sub auth {
   my $self = shift;
-  return 1 if $self->session('login');
-  $self->redirect_to('/');
+
+  if($self->session('login')) {
+    return 1;
+  }
+
+  if($self->req->url->path =~ /\.json$/) {
+    $self->render(json => {}, status => 403);
+  }
+  else {
+    $self->redirect_to('/');
+  }
+
   return 0;
 }
 
@@ -99,6 +109,64 @@ sub avatar {
       }
     },
   );
+}
+
+=head2 control
+
+  /#host/control/start
+  /#host/control/stop
+  /#host/control/restart
+  /#host/control/state
+
+Used to control a connection. See L<Convos::Core/control>.
+
+Special case is "state": It will return the state of the connection:
+"disconnected", "error", "reconnecting" or "connected".
+
+=cut
+
+sub control {
+  my $self = shift->render_later;
+  my $command = $self->param('cmd') || 'state';
+
+  if($command eq 'state') {
+    $self->redis->hget(
+      sprintf('user:%s:connection:%s', $self->session('login'), $self->stash('server')),
+      'state',
+      sub {
+        my $redis = shift;
+        my $state = shift || 'disconnected';
+
+        $self->respond_to(
+          json => { json => { state => $state } },
+          any => { text => "$state\n" },
+        );
+      },
+    );
+  }
+  elsif($self->req->method eq 'POST' and grep { $command eq $_ } qw( start stop restart )) {
+    $self->app->core->control(
+      $command,
+      $self->session('login'),
+      $self->stash('server'),
+      sub {
+        my($core, $sent) = @_;
+        my $status = $sent ? 200 : 500;
+        my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
+
+        $self->respond_to(
+          json => { json => { state => $state }, status => $status },
+          any => { text => "$state\n", status => $status },
+        );
+      },
+    );
+  }
+  else {
+    $self->respond_to(
+      json => { json => {}, status => 400 },
+      any => { text => "Invalid request\n", status => 400 },
+    );
+  }
 }
 
 =head2 login
