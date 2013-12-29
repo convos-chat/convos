@@ -13,26 +13,27 @@ redis_do(
 $t->get_ok('/irc.perl.org/control/start.json')->status_is(403);
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
-$t->get_ok('/irc.perl.org/control/invalid.json')->status_is(302); # TODO: This status does not make much sense
+$t->get_ok('/irc.perl.org/control.json?cmd=invalid')->status_is(400);
+$t->get_ok('/irc.perl.org/control.json?cmd=start')->status_is(400);
 
-$t->get_ok('/irc.perl.org/control/start.json')
+$t->post_ok('/irc.perl.org/control.json?cmd=start')
   ->status_is(200)
   ->json_is('/state', 'starting');
 
-$t->get_ok('/irc.perl.org/control/stop.json')
+$t->post_ok('/irc.perl.org/control.json?cmd=stop')
   ->status_is(200)
   ->json_is('/state', 'stopping');
 
-$t->get_ok('/irc.perl.org/control/restart.json')
+$t->post_ok('/irc.perl.org/control.json?cmd=restart')
   ->status_is(200)
   ->json_is('/state', 'restarting');
 
-$t->get_ok('/irc.perl.org/control/state.json')
+$t->get_ok('/irc.perl.org/control.json?cmd=state')
   ->status_is(200)
   ->json_is('/state', 'disconnected', 'default value for state');
 
 redis_do(hset => 'user:doe:connection:irc.perl.org', state => 'connected');
-$t->get_ok('/irc.perl.org/control/state.json')
+$t->get_ok('/irc.perl.org/control.json?cmd=state')
   ->status_is(200)
   ->json_is('/state', 'connected');
 

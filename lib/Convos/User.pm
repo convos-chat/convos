@@ -127,7 +127,7 @@ Special case is "state": It will return the state of the connection:
 
 sub control {
   my $self = shift->render_later;
-  my $command = $self->stash('command');
+  my $command = $self->param('cmd') || 'state';
 
   if($command eq 'state') {
     $self->redis->hget(
@@ -144,7 +144,7 @@ sub control {
       },
     );
   }
-  else {
+  elsif($self->req->method eq 'POST' and grep { $command eq $_ } qw( start stop restart )) {
     $self->app->core->control(
       $command,
       $self->session('login'),
@@ -159,6 +159,12 @@ sub control {
           any => { text => "$state\n", status => $status },
         );
       },
+    );
+  }
+  else {
+    $self->respond_to(
+      json => { json => {}, status => 400 },
+      any => { text => "Invalid request\n", status => 400 },
     );
   }
 }
