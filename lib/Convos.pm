@@ -229,7 +229,7 @@ sub startup {
     '/js/jquery.fastbutton.min.js',
     '/js/jquery.nanoscroller.min.js',
     '/js/jquery.pjax.min.js',
-    '/js/selectize.min.js',
+    '/js/selectize.js',
     '/js/globals.js',
     '/js/jquery.doubletap.js',
     '/js/ws-reconnecting.js',

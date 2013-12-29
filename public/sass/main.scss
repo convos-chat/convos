@@ -179,20 +179,18 @@ form {
 
   select[multi] { height: 30px; }
   input[readonly] { background: #f6f6f6; color: #666; }
-  .selectize-input, .selectize-control.single .selectize-input.focus, input, select {
+  .selectize-input, input, select {
     background: #fff;
-    padding: 4px;
-    font-size: 1.1em;
+    font-size: $fontSize - 1;
     outline: none;
     border: 2px solid #ccc;
+    padding: 4px;
     width: 290px;
     @include border-radius(3px);
   }
-  input[type="checkbox"] { width: auto; }
-  .selectize-input {
-    padding: 2px; // no idea why 2px is right instead of 4px
-  }
+  .selectize-input { padding: 2px; }
   .selectize-input.focus, input:focus { border: 2px solid darken(#ccc, 15%); }
+  input[type="checkbox"] { width: auto; }
   input.field-with-error, select.field-with-error {
     border-color: $errorColor;
   }
@@ -507,9 +505,6 @@ div.messages {
     overflow: visible;
     form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }
     label { float: left; margin-left: -$marginLeft; margin-top: 4px; }
-    input, button, .button, .selectize-input, .selectize-control.single .selectize-input.focus {
-      font-size: 1em;
-    }
     p.help { display: inline; }
   }
 }
