@@ -1,3 +1,5 @@
+- Added system for upgrding Redis schema
+- Added API for controlling connections
 - Support channels with & prefix (Andreas Vögele)	
 
 ## 0.3 (2013-12-26)
