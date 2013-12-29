@@ -17,7 +17,7 @@ namespace.
 
 =over 4
 
-=item * L<Convos::Upgrader::s0_3002>
+=item * L<Convos::Upgrader::v0_3002>
 
 =back
 
@@ -111,7 +111,7 @@ sub _steps {
 }
 
 sub _version_from_class {
-  my $v = $_[1] =~ /::s(\d.*)/ ? $1 : 0;
+  my $v = $_[1] =~ /::v(\d.*)/ ? $1 : 0;
   $v =~ s/_/\./;
   $v;
 }
