@@ -264,6 +264,7 @@ sub startup {
   $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
   $private_r->get('/convos')->to('client#convos')->name('convos');
   $private_r->get('/wizard')->to('user#wizard', body_class => 'tactile')->name('wizard');
+  $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
   $private_r->get('/settings')->to('user#settings')->name('settings');
   $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
