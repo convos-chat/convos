@@ -361,11 +361,6 @@ sub settings {
 
       $self->redis->hgetall("user:$login", $delay->begin);
       $self->redis->get("avatar:$login\@$hostname", $delay->begin);
-
-      push @conversation, $self->app->config('default_connection');
-      $conversation[-1]{event}  = 'connection';
-      $conversation[-1]{lookup} = '';
-      $conversation[-1]{tls} ||= 0;
       $delay->begin->();
     },
     sub {
@@ -393,41 +388,6 @@ sub settings {
 
       return $self->render('client/view') if $with_layout;
       return $self->render('client/conversation', layout => undef);
-    },
-  );
-}
-
-=head2 add_connection
-
-Add a new connection.
-
-=cut
-
-sub add_connection {
-  my $self  = shift->render_later;
-  my $validation = $self->validation;
-
-  $validation->input->{channels} = [$self->param('channels')];
-  $validation->input->{login} = $self->session('login');
-  $validation->input->{tls} ||= 0;
-
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      $self->app->core->add_connection($validation, $delay->begin);
-    },
-    sub {
-      my ($delay, $errors, $conn) = @_;
-
-      if($errors and $self->param('wizard')) {
-        $self->render('user/wizard', body_class => 'tactile');
-      }
-      elsif($errors) {
-        $self->settings;
-      }
-      else {
-        $self->redirect_to($self->param('wizard') ? 'convos' : 'settings');
-      }
     },
   );
 }

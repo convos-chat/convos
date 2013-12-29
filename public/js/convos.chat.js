@@ -210,7 +210,24 @@
   };
 
   var drawSettings = function() {
-    $('form select#channels').selectize({
+    var channels = {};
+
+    $('select#name option').each(function() {
+      channels[this.value] = $(this).attr('data-channels').split(' ');
+    });
+
+    $('select#name').selectize({
+      create: false,
+      openOnFocus: true,
+      onChange: function(val) {
+        var s = $('select#channels')[0].selectize
+        s.clearOptions();
+        s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
+        s.refreshOptions(false);
+        s.setValue(channels[val].join(' '));
+      }
+    });
+    $('select#channels').selectize({
       delimiter: ' ',
       persist: false,
       hideSelected: true,
@@ -218,15 +235,6 @@
       create: function(value) {
         if(!/^[#&]/.test(value)) value = '#' + value;
         return { value: value, text: value };
-      }
-    });
-    $('form.predefined').find('a[href$="#edit"], .selectize-control, :input').click(function(e) {
-      var $target = $(e.target);
-      if(!$target.is('button[type="submit"]')) {
-        $target.closest('form').removeClass('predefined').addClass('edit-mode');
-      }
-      if($target.is('a[href$="#edit"]')) {
-        return false;
       }
     });
   };

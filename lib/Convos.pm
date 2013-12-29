@@ -212,8 +212,6 @@ sub startup {
 
   $config->{name} ||= 'Convos';
   $config->{backend}{lock_file} ||= catfile(tmpdir, 'convos-backend.lock');
-  $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
-  $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
 
   $self->cache; # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
@@ -263,10 +261,10 @@ sub startup {
   $private_r->get('/command-history')->to('client#command_history');
   $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
   $private_r->get('/convos')->to('client#convos')->name('convos');
-  $private_r->get('/wizard')->to('user#wizard', body_class => 'tactile')->name('wizard');
+  $private_r->get('/wizard')->to('connection#wizard')->name('wizard');
   $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
   $private_r->get('/settings')->to('user#settings')->name('settings');
-  $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
+  $private_r->post('/settings/connection')->to('connection#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
   $host_r->any('/control')->to('user#control')->name('connection.control')->name('connection.control');

@@ -195,7 +195,7 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login nick server tls ));
+  my $validation = $self->_validation($input, qw( password login name nick server tls ));
 
   $validation->output->{user} ||= $validation->output->{login};
 
@@ -218,8 +218,13 @@ sub add_connection {
     sub {
       my($delay, $exists) = @_;
 
-      return $self->$cb({ server => 'Connection exists' }, undef) if $exists;
-      return $self->redis->execute(
+      if($exists) {
+        $validation->error(name => ['exists']);
+        $self->$cb($validation);
+        return;
+      }
+
+      $self->redis->execute(
         [sadd => "connections", "$login:$server"],
         [sadd => "user:$login:connections", $server],
         [hmset => "user:$login:connection:$server", %{ $validation->output }],
@@ -553,6 +558,7 @@ sub _validation {
   for my $k (@names) {
     if($k eq 'password') { $validation->optional('password') }
     elsif($k eq 'login') { $validation->required('login')->size(3, 30) }
+    elsif($k eq 'name') { $validation->required('name')->like(qr{^[-a-z0-9]+$}) } # network name
     elsif($k eq 'nick') { $validation->required('nick')->size(1, 30) }
     elsif($k eq 'server') { $validation->required('server')->like($Convos::Core::Util::SERVER_NAME_RE) }
     elsif($k eq 'tls') { $validation->required('tls')->in(0, 1) }
