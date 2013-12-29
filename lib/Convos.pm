@@ -263,6 +263,7 @@ sub startup {
   $private_r->get('/convos')->to('client#convos')->name('convos');
   $private_r->get('/wizard')->to('connection#wizard')->name('wizard');
   $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
+  $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
   $private_r->get('/settings')->to('user#settings')->name('settings');
   $private_r->post('/settings/connection')->to('connection#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');

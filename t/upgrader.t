@@ -34,6 +34,7 @@ my($finish, $err);
     redis_do([hgetall => 'irc:network:magnet']),
     {
       home_page => "http://www.irc.perl.org",
+      channels => '#convos',
       server => "irc.perl.org",
       port => 7062,
       tls => 1,

@@ -21,9 +21,10 @@ redis_do(
     ->element_exists('input[type="hidden"][name="referrer"]')
     ->element_exists('input[type="text"][name="name"]')
     ->element_exists('input[type="text"][name="server"]')
-    ->element_exists('input[type="text"][name="port"]')
     ->element_exists('input[type="text"][name="home_page"]')
-    ->element_exists('select[name="tls"]')
+    ->element_exists('input[type="checkbox"][name="tls"]')
+    ->element_exists('input[type="checkbox"][name="password"]')
+    ->element_exists('input[type="checkbox"][name="default"]')
     ->text_is('div.actions button[type="submit"]', 'Add network')
     ->text_is('div.actions a', 'Cancel')
     ;
@@ -33,8 +34,7 @@ redis_do(
   $form = {
     name => 'cool_network',
     referrer => '/wizard',
-    server => 'irc.perl.org:1234',
-    tls => 0,
+    server => 'irc.perl.org:foo',
   };
   $t->post_ok('/network/add', form => $form)
     ->status_is(400)
@@ -49,13 +49,39 @@ redis_do(
     ->status_is(302)
     ->header_like('Location', qr{/wizard$});
     ;
+
+  $t->get_ok('/wizard')
+    ->status_is(200)
+    ->element_exists('select[name="name"] option[value="cool-network-123"]')
+    ->element_exists('select[name="name"] option[value="magnet"][data-channels="#convos"][selected="selected"]')
+    ;
 }
 
 {
-  $t->get_ok('/wizard')
-    ->status_is(200)
-    ->element_exists('select[name="network"] option[value="cool-network-123"]')
+  delete $form->{name};
+  $form->{default} = 1;
+  $form->{password} = 1;
+  $t->post_ok('/network/cool-network-123/edit', form => $form)
+    ->status_is(302)
     ;
+
+  $t->get_ok($t->tx->res->headers->location)
+    ->status_is(200)
+    ->element_exists_not('input[name="name"]')
+    ->element_exists('input[type="text"][name="server"][value="irc.perl.org:6667"]')
+    ->element_exists('input[type="text"][name="home_page"]')
+    ->element_exists('input[type="checkbox"][name="tls"]')
+    ->element_exists('input[type="checkbox"][name="password"][checked]')
+    ->element_exists('input[type="checkbox"][name="default"][checked]')
+    ->text_is('div.actions button[type="submit"]', 'Update network')
+    ;
+
+  $t->get_ok('/wizard')
+    ->element_exists('select[name="name"] option[value="cool-network-123"][selected="selected"]')
+    ->element_exists('select[name="name"] option[value="magnet"][data-channels="#convos"]')
+    ;
+
+  $t->get_ok('/network/not-here/edit')->status_is(404);
 }
 
 done_testing;
