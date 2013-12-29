@@ -252,7 +252,6 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#server', [ server => $Convos::Core::Util::SERVER_NAME_RE ]);
 
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
@@ -268,11 +267,12 @@ sub startup {
   $private_r->post('/settings/connection')->to('connection#add_connection')->name('connection.add');
   $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
 
-  $host_r->any('/control')->to('user#control')->name('connection.control')->name('connection.control');
-  $host_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
-  $host_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
-  $host_r->get('/*target')->to('client#view')->name('view');
-  $host_r->get('/')->to('client#view')->name('view.server');
+  my $network_r = $private_r->route('/:server');
+  $network_r->any('/control')->to('user#control')->name('connection.control')->name('connection.control');
+  $network_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
+  $network_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
+  $network_r->get('/*target')->to('client#view')->name('view');
+  $network_r->get('/')->to('client#view')->name('view.server');
 
   if($config->{backend}{embedded}) {
     die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);
