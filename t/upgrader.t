@@ -7,7 +7,8 @@ my $upgrader = Convos::Upgrader->new;
 my($finish, $err);
 
 {
-  redis_do(del => 'convos:version');
+  redis_do(del => 'convos:version', 'irc:networks');
+  redis_do(del => map { "irc:network:$_" } qw( efnet freenode magnet ));
   redis_do(set => 'convos:version', $ENV{CONVOS_VERSION}) if $ENV{CONVOS_VERSION};
 }
 
@@ -21,6 +22,24 @@ my($finish, $err);
   is $finish, 1, 'finishd';
   is $err, undef, 'no error';
   is redis_do(get => 'convos:version'), '0.3002', 'convos:version is set';
+}
+
+{
+  is_deeply(
+    [ sort @{ redis_do([smembers => 'irc:networks']) || [] } ],
+    [ qw( efnet freenode magnet ) ],
+    'irc:networks added',
+  );
+  is_deeply(
+    redis_do([hgetall => 'irc:network:magnet']),
+    {
+      home_page => "http://www.irc.perl.org",
+      server => "irc.perl.org",
+      port => 7062,
+      tls => 1,
+    },
+    'got network config for magnet',
+  );
 }
 
 done_testing;
