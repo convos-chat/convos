@@ -217,9 +217,15 @@ sub startup {
 
   $self->cache; # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
-  $self->secret($config->{secret} || die '"secret" is required in config file');
   $self->sessions->default_expiration(86400 * 30);
   $self->defaults(layout => 'default', logged_in => 0, body_class => 'default');
+
+  if($self->can('secrets')) {
+    $self->secrets($config->{secrets} || [$config->{secret} || die '"secret" is required in config file']);
+  }
+  else {
+    $self->secret($config->{secret} || die '"secret" is required in config file');
+  }
 
   $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
   $self->asset('convos.css', '/sass/main.scss');
