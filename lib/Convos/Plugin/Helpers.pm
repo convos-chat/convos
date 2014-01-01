@@ -7,8 +7,9 @@ Convos::Plugin::Helpers - Mojo's little helpers
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use Convos::Core::Util qw( format_time id_as $URL_RE );
+use Convos::Core::Util qw( format_time id_as);
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
+use URI::Find;
 
 =head1 HELPERS
 
@@ -75,17 +76,12 @@ sub _parse_message {
   $message->{message} =~ s/\x03\d{0,15}(,\d{0,15})?//g;
   $message->{message} =~ s/[\x00-\x1f]//g;
 
-  while($message->{message} =~ m!($URL_RE)!g) {
-    my $url = $1;
-    my $now = pos $message->{message};
-
-    push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last, $now - length($url) - $last);
-    push @chunks, $c->link_to($url, $url, target => '_blank');
-    $last = $now;
-  }
-
-  push @chunks, Mojo::Util::xml_escape(substr $message->{message}, $last);
-  return join '', @chunks;
+  my $finder=URI::Find->new(sub { 
+      my $url=Mojo::Util::html_unescape(shift.''); 
+      $c->link_to($url, $url, target => '_blank'); });
+  my $msg=Mojo::Util::xml_escape($message->{message});
+  $finder->find(\$msg);
+  return $msg;
 }
 
 =head2 logf
