@@ -25,8 +25,15 @@ sub route {
   my $self = shift->render_later;
   my $login = $self->session('login');
 
-  return $self->redirect_to('login') if !$login;
-  return $self->redirect_last($login);
+  if($login) {
+    $self->redirect_last($login);
+  }
+  else {
+    $self->redis->scard('users', sub {
+      my($redis, $n) = @_;
+      $self->redirect_to($n ? 'login' : 'register');
+    });
+  }
 }
 
 =head2 convos

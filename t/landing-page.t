@@ -4,6 +4,13 @@ plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for d
 
 $t->get_ok('/')
   ->status_is(302)
+  ->header_like('Location' => qr{:\d+/register$})
+  ;
+
+redis_do([ sadd => 'users', 'some_username' ]);
+
+$t->get_ok('/')
+  ->status_is(302)
   ->header_like('Location' => qr{:\d+/login$})
   ;
 
