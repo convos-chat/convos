@@ -1,5 +1,5 @@
 requires 'IRC::Utils'                     => 0.12;
-requires 'URI::Find';
+requires 'URI::Find'                      => 20111103;
 requires 'Mojo::IRC'                      => 0.0303;
 requires 'Mojolicious'                    => 4.60;
 requires 'Mojolicious::Plugin::AssetPack' => 0.06;
