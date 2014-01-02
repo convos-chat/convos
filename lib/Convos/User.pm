@@ -237,7 +237,7 @@ sub register {
 
   # cannt continue on error since the sismember(...$wanted_login...) will
   # fail without a login
-  if($self->req->method ne 'POST' or !$self->param('login')) {
+  if($self->req->method ne 'POST') {
     return $self->render('index');
   }
 
