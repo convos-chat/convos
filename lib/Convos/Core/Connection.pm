@@ -9,10 +9,10 @@ Convos::Core::Connection - Represents a connection to an IRC server
   use Convos::Core::Connection;
 
   $c = Convos::Core::Connection->new(
-          server => 'irc.localhost',
-          login => 'username',
-          redis => Mojo::Redis->new,
-        );
+         name => 'magnet',
+         login => 'username',
+         redis => Mojo::Redis->new,
+       );
 
   $c->connect;
 
@@ -60,11 +60,11 @@ use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
 =head1 ATTRIBUTES
 
-=head2 server
+=head2 name
 
 =cut
 
-has server => '';
+has name => '';
 
 =head2 login
 
@@ -107,12 +107,12 @@ has _irc => sub {
   my $self = shift;
   my $irc;
 
-  if($self->server eq 'loopback') {
+  if($self->name eq 'loopback') {
     require Convos::Loopback;
     return Convos::Loopback->new(connection => $self);
   }
   else {
-    $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->server);
+    $irc  = Mojo::IRC->new(debug_key => join ':', $self->login, $self->name);
   }
 
   Scalar::Util::weaken($self);
@@ -120,7 +120,7 @@ has _irc => sub {
   $irc->on(
     close => sub {
       my $irc = shift;
-      my $data = { status => 500, message => "Disconnected from @{[$irc->server]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
+      my $data = { status => 500, message => "Disconnected from @{[$irc->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
       $self->{stop} and return $self->redis->hset($self->{path}, state => 'disconnected');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
@@ -131,7 +131,7 @@ has _irc => sub {
   $irc->on(
     error => sub {
       my $irc = shift;
-      my $data = { status => 500, message => "Connection to @{[$irc->server]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
+      my $data = { status => 500, message => "Connection to @{[$irc->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
       $self->{stop} and return $self->redis->hset($self->{path}, state => 'error');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
@@ -161,7 +161,7 @@ sub _reconnect_in {
 
 =head2 new
 
-Checks for mandatory attributes: L</login> and L</server>.
+Checks for mandatory attributes: L</login> and L</name>.
 
 =cut
 
@@ -169,10 +169,10 @@ sub new {
   my $self = shift->SUPER::new(@_);
 
   $self->{login} or die "login is required";
-  $self->{server} or die "server is required";
+  $self->{name} or die "name is required";
   $self->{convos_path} = "user:$self->{login}:connection:convos:msg";
   $self->{conversation_path} = "user:$self->{login}:conversations";
-  $self->{path} = "user:$self->{login}:connection:$self->{server}";
+  $self->{path} = "user:$self->{login}:connection:$self->{name}";
   $self;
 }
 
@@ -181,7 +181,7 @@ sub new {
   $self = $self->connect;
 
 This method will create a new L<Mojo::IRC> object with attribute data from
-L</redis>. The values fetched from the backend is identified by L</server> and
+L</redis>. The values fetched from the backend is identified by L</name> and
 L</login>. This method then call L<Mojo::IRC/connect> after the object is set
 up.
 
@@ -213,11 +213,11 @@ sub _subscribe {
   my $irc = $self->_irc;
 
   Scalar::Util::weaken($self);
-  $self->{messages} = $self->redis->subscribe("convos:user:@{[$self->login]}:@{[$self->server]}");
+  $self->{messages} = $self->redis->subscribe("convos:user:@{[$self->login]}:@{[$self->name]}");
   $self->{messages}->on(
     error => sub {
       my ($sub, $error) = @_;
-      $self->log->warn("[$self->{path}] Re-subcribing to messages to @{[$irc->server]}. ($error)");
+      $self->log->warn("[$self->{path}] Re-subcribing to messages to @{[$irc->name]}. ($error)");
       $self->_subscribe;
     },
   );
@@ -242,7 +242,7 @@ sub _subscribe {
         my($irc, $error) = @_;
 
         if($error) {
-          $self->_publish_and_save(server_message => { status => 500, message => "Could not send message to @{[$irc->server]}: $error", uuid => $uuid });
+          $self->_publish_and_save(server_message => { status => 500, message => "Could not send message to @{[$irc->name]}: $error", uuid => $uuid });
         }
         elsif($message->{command} eq 'PRIVMSG') {
           $self->add_message($message);
@@ -297,7 +297,7 @@ sub _connect {
   @channels = $self->channels_from_conversations(\@conversations);
 
 This method returns an array ref of channels based on the conversations
-input. It will use L</server> to filter out the right list.
+input. It will use L</name> to filter out the right list.
 
 =cut
 
@@ -305,7 +305,7 @@ sub channels_from_conversations {
   my($self, $conversations) = @_;
 
   map { $_->[1] }
-  grep { $_->[0] eq $self->server and $_->[1] =~ /^[#&]/ }
+  grep { $_->[0] eq $self->name and $_->[1] =~ /^[#&]/ }
   map { [ id_as $_ ] }
   @{ $conversations || [] };
 }
@@ -374,7 +374,7 @@ sub add_message {
 
 sub _add_conversation {
   my($self, $data) = @_;
-  my $name = as_id $self->server, $data->{target};
+  my $name = as_id $self->name, $data->{target};
 
   Mojo::IOLoop->delay(
     sub {
@@ -601,7 +601,7 @@ sub irc_part {
 
   Scalar::Util::weaken($self);
   if($nick eq $self->_irc->nick) {
-    my $name = as_id $self->server, $channel;
+    my $name = as_id $self->name, $channel;
 
     $self->redis->zrem($self->{conversation_path}, $name, sub {
       $self->_publish(remove_conversation => { target => $channel });
@@ -621,7 +621,7 @@ sub irc_part {
 sub irc_err_bannedfromchan {
   my($self, $message) = @_;
   my $channel = $message->{params}[1];
-  my $name = as_id $self->server, $channel;
+  my $name = as_id $self->name, $channel;
   my $data = { status => 401, message => $message->{params}[2] };
 
   $self->_publish_and_save(server_message => $data);
@@ -642,7 +642,7 @@ sub irc_err_bannedfromchan {
 sub irc_err_nosuchchannel {
   my ($self, $message) = @_;
   my $channel = $message->{params}[1];
-  my $name = as_id $self->server, $channel;
+  my $name = as_id $self->name, $channel;
 
   Scalar::Util::weaken($self);
   $self->redis->zrem($self->{conversation_path}, $name, sub {
@@ -741,8 +741,8 @@ sub irc_mode {
 
   if($target eq $self->_irc->nick) {
     my $data = {
-      target => $self->server,
-      message => "You are connected to @{[$self->server]} with mode $mode",
+      target => $self->name,
+      message => "You are connected to @{[$self->name]} with mode $mode",
     };
 
     $self->_add_convos_message($data);
@@ -809,7 +809,7 @@ sub cmd_join {
   my $name;
 
   if($channel =~ /^[#&]\w/) {
-    $name = as_id $self->server, $channel;
+    $name = as_id $self->name, $channel;
     $self->redis->zadd($self->{conversation_path}, time, $name);
   }
   else {
@@ -825,8 +825,8 @@ sub _add_convos_message {
   $data->{status} ||= 200;
   $data->{timestamp} ||= time;
   local $data->{event} = 'message';
-  local $data->{host} = $self->server;
-  local $data->{nick} = $self->server;
+  local $data->{host} = $self->name;
+  local $data->{nick} = $self->name;
   local $data->{server} = 'convos'; # make sure target in js works
   local $data->{target} = 'any';
   local $data->{user} = 'convos';
@@ -840,21 +840,17 @@ sub _add_convos_message {
 sub _publish {
   my ($self, $event, $data) = @_;
   my $login = $self->login;
-  my $server = $self->server;
+  my $name = $self->name;
   my $message;
 
-  if(UNITTEST) {
-    exists $data->{$_} and die $_ for qw/ server event /;
-  }
-
   $data->{event} = $event;
-  $data->{server} = $server;
+  $data->{server} = $name;
   $data->{timestamp} ||= time;
   $data->{uuid} ||= Mojo::Util::md5_sum($data->{timestamp} .$$); # not really an uuid
   $message = j $data;
 
   if($event eq 'server_message' and $data->{status} != 200) {
-    $self->log->warn("[$login:$server] $data->{message}");
+    $self->log->warn("[$login:$name] $data->{message}");
   }
 
   $self->redis->publish("convos:user:$login:out", $message);

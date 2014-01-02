@@ -4,36 +4,36 @@ plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for d
 
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:doe:conversations', time, 'irc:2eperl:2eorg:00:23convos' ],
-  [ sadd => 'user:doe:connections', 'irc.perl.org' ],
-  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe', state => '' ],
+  [ zadd => 'user:doe:conversations', time, 'magnet:00:23convos' ],
+  [ sadd => 'user:doe:connections', 'magnet' ],
+  [ hmset => 'user:doe:connection:magnet', nick => 'doe', state => '' ],
   [ del => 'core:control' ],
 );
 
-$t->get_ok('/irc.perl.org/control/start.json')->status_is(403);
+$t->get_ok('/magnet/control/start.json')->status_is(403);
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
-$t->get_ok('/irc.perl.org/control.json?cmd=invalid')->status_is(400);
-$t->get_ok('/irc.perl.org/control.json?cmd=start')->status_is(400);
+$t->get_ok('/magnet/control.json?cmd=invalid')->status_is(400);
+$t->get_ok('/magnet/control.json?cmd=start')->status_is(400);
 
-$t->post_ok('/irc.perl.org/control.json?cmd=start')
+$t->post_ok('/magnet/control.json?cmd=start')
   ->status_is(200)
   ->json_is('/state', 'starting');
 
-$t->post_ok('/irc.perl.org/control.json?cmd=stop')
+$t->post_ok('/magnet/control.json?cmd=stop')
   ->status_is(200)
   ->json_is('/state', 'stopping');
 
-$t->post_ok('/irc.perl.org/control.json?cmd=restart')
+$t->post_ok('/magnet/control.json?cmd=restart')
   ->status_is(200)
   ->json_is('/state', 'restarting');
 
-$t->get_ok('/irc.perl.org/control.json?cmd=state')
+$t->get_ok('/magnet/control.json?cmd=state')
   ->status_is(200)
   ->json_is('/state', 'disconnected', 'default value for state');
 
-redis_do(hset => 'user:doe:connection:irc.perl.org', state => 'connected');
-$t->get_ok('/irc.perl.org/control.json?cmd=state')
+redis_do(hset => 'user:doe:connection:magnet', state => 'connected');
+$t->get_ok('/magnet/control.json?cmd=state')
   ->status_is(200)
   ->json_is('/state', 'connected');
 
@@ -41,9 +41,9 @@ $t->get_ok('/irc.perl.org/control.json?cmd=state')
 is_deeply(
   redis_do(lrange => 'core:control', 0, -1),
   [qw(
-    restart:doe:irc.perl.org
-    stop:doe:irc.perl.org
-    start:doe:irc.perl.org
+    restart:doe:magnet
+    stop:doe:magnet
+    start:doe:magnet
   )],
   'commands pushed to queue',
 );

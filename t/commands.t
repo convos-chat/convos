@@ -7,7 +7,7 @@ plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for d
 my $dom = Mojo::DOM->new;
 my $sub = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
 my $pub = $t->app->redis;
-my $connection = Convos::Core::Connection->new(server => 'convos.pl', login => 'doe');
+my $connection = Convos::Core::Connection->new(name => 'magnet', login => 'doe');
 my $ws;
 
 redis_do(

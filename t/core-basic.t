@@ -42,7 +42,7 @@ redis_do(
   is $core->{control}->server, $redis->server, 'core control use the right redis server';
   $core->control(foo => 'bar', sub {});
   $core->{control}->once(error => sub {
-      pop(@cb)->($_[1]);
+    pop(@cb)->($_[1]);
   });
 
   like $delay->wait, qr{locate object method "ctrl_foo"}, 'invalid control method';
@@ -51,10 +51,8 @@ redis_do(
   @cb = ($delay->begin(0));
   local *Convos::Core::ctrl_foo = sub { pop(@cb)->(@_) };
   isa_ok(\&Convos::Core::ctrl_foo,'CODE');
-  $core->control(foo => 'doe', 'irc.perl.org', sub {});
-  is_deeply [$delay->wait], [$core, 'doe', 'irc.perl.org'], 'ctrl_foo()';
+  $core->control(foo => 'doe', 'magnet', sub {});
+  is_deeply [$delay->wait], [$core, 'doe', 'magnet'], 'ctrl_foo()';
 }
-done_testing;
 
-diag "FIXME: We should not have to undef core->{control} to make core quit. Probably hiding a loop here";
-$core->{control}=undef;
+done_testing;

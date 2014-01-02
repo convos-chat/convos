@@ -11,13 +11,13 @@ use Mojo::DOM;
 plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
 
 my $dom = Mojo::DOM->new;
-my $connection = Convos::Core::Connection->new(server => 'convos.pl', login => 'doe');
+my $connection = Convos::Core::Connection->new(name => 'magnet', login => 'doe');
 
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
   [ zadd => 'user:doe:conversations', time, 'convos:2epl:00:23convos', time - 1, 'convos:2epl:00batman' ],
-  [ sadd => 'user:doe:connections', 'convos.pl' ],
-  [ hmset => 'user:doe:connection:convos.pl', nick => 'doe' ],
+  [ sadd => 'user:doe:connections', 'magnet' ],
+  [ hmset => 'user:doe:connection:magnet', nick => 'doe' ],
 );
 
 {
@@ -35,11 +35,11 @@ $t->websocket_ok('/socket');
 
 {
   $connection->add_message({
-    params => [ '#mojo', 'doe: see this &amp; link: http://convos.pl?a=1&b=2#yikes # really cool' ],
+    params => [ '#mojo', 'doe: see this &amp; link: http://magnet?a=1&b=2#yikes # really cool' ],
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-server="convos.pl"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
+  ok $dom->at('li.message[data-server="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   ok $dom->at('img[alt="fooman"][src="/avatar/user@host"]'), 'gravatar image based on user+host';
 }
 
@@ -49,7 +49,7 @@ $t->websocket_ok('/socket');
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.action.message[data-server="convos.pl"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
+  ok $dom->at('li.action.message[data-server="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   ok $dom->at('img[alt="fooman"][src="/avatar/user@host"]'), 'default gravatar image';
 }
 
