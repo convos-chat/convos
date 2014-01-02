@@ -11,5 +11,8 @@
   %= link_to 'Restart', 'connection.remote', { command => 'restart' }
 </li>
 <li>
+  %= link_to 'Edit', 'connection.edit'
+</li>
+<li>
   %= link_to 'Delete', 'connection.delete'
 </li>

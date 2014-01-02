@@ -15,3 +15,6 @@
   %= link_to $name, 'view.server', { server => $name }
 </li>
 % }
+<li>
+  %= link_to 'Add connection...', 'connection.add'
+</li>
