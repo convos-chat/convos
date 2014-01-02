@@ -49,7 +49,7 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://convos.pl"]')->text }, 'http://convos.pl', 'not with "is really cool"' or diag $dom;
+  is eval { $dom->at('a[href="http://convos.pl/"]')->text }, 'http://convos.pl/', 'not with "is really cool"' or diag $dom;
 
   # Fix parsing github links
   $connection->add_message({
@@ -76,7 +76,7 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.message[data-server="convos.pl"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   is $dom->at('h3 a[href="/convos.pl/fooman"]')->text, 'fooman', 'got message from fooman';
-  is $dom->at('a[href="http://convos.pl?a=1&b=2#yikes"]')->text, 'http://convos.pl?a=1&b=2#yikes', 'http://convos.pl#yikes';
+  is $dom->at('.content a')->text, 'http://convos.pl?a=1&b=2#yikes', 'http://convos.pl#yikes';
   is $dom->at('div.content'), '<div class="content whitespace">doe: see this &amp;amp; link: <a href="http://convos.pl?a=1&amp;b=2#yikes" target="_blank">http://convos.pl?a=1&amp;b=2#yikes</a> # really cool</div>', 'got link and amp';
   like $dom->at('.timestamp')->text, qr{^\d+\. \S+ [\d\:]+$}, 'got timestamp';
 
@@ -276,7 +276,7 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://convos.pl"]')->text }, 'http://convos.pl', 'not with "is really cool"' or diag $dom;
+  is eval { $dom->at('a[href="http://convos.pl/"]')->text }, 'http://convos.pl/', 'not with "is really cool"' or diag $dom;
 
   # Fix parsing github links
   $connection->add_message({
@@ -285,6 +285,16 @@ for my $m (qw/ irc_err_nosuchchannel irc_err_notonchannel /) {
   });
   $dom->parse($t->message_ok->message->[1]);
   is eval { $dom->at('a[href="http://git.io/saYuUg"]')->text }, 'http://git.io/saYuUg', 'without %OF' or diag $dom;
+  
+  # Fix parsing links in parens
+  $connection->add_message({
+    params => [ '#mojo', 'This is cool (http://convos.pl)' ],
+    prefix => 'fooman!user@host',
+  });
+
+  $dom->parse($t->message_ok->message->[1]);
+  is eval { $dom->at('a[href="http://convos.pl/"]')->text }, 'http://convos.pl/', 'not with ")"' or diag $dom;
+
 }
 
 done_testing;
