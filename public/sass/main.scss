@@ -153,7 +153,6 @@ dl {
   dt {
     width: $dtWidth;
     float: left;
-    clear: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -163,10 +162,17 @@ dl {
 .center { text-align: center; }
 .hidden { display: none; }
 .row { padding: 0 $bodyGutter; clear: both; }
-.close { display: block; float: right; cursor: pointer; font-size: 1.3em; padding: 3px; }
+.close {
+  display: block;
+  float: right;
+  cursor: pointer;
+  font-size: 1.3em;
+  padding: 5px;
+  line-height: 0.4em;
+}
 
 div.question { padding: 0.5em; @include border-radius(3px); }
-div.question { background: #def; color: #158; border: 1px solid #bde; }
+div.question, li.info { background: #def; color: #158; border: 1px solid #bde; }
 div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
 div.question .button.confirm { background: darken(#def, 10%); border: 2px solid #900; }
 
@@ -641,7 +647,6 @@ div.footer {
   dl {
     dt {
       float: none;
-      clear: left;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
