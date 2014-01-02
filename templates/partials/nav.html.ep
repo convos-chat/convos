@@ -8,15 +8,15 @@
     <i class="icon-chevron-down"></i>
   % end
   <div class="right">
-    %= link_to 'add_conversation', title => 'Add conversation', 'data-focus' => '+', begin
+    %= link_to 'add_conversation', title => 'Add conversation',  class => 'add-conversation toggler', 'data-focus' => 'input', 'data-toggle' => 'div.add-conversation', begin
       <i class="icon-plus">+</i>
     % end
-    <a href="#sidebar" title="Display nick list" class="sidebar toggler" data-focus="a" data-toggle="div.sidebar.container"><i class="icon-user"></i></a>
-    % @class = qw/ notifications toggler /;
+    % @class = qw( notifications toggler );
     % push @class, 'alert' if $n_notifications;
     %= link_to 'conversation_list', title => 'List notifications', class => "@class", 'data-focus' => 'a', 'data-toggle' => 'div.notifications.container', begin
       <i class="icon-bullhorn"></i>
       <b><%= ( $n_notifications > 999 ? '999+' : $n_notifications ) if $n_notifications %></b>
     % end
+    <a href="#sidebar" title="Display nick list" class="sidebar toggler" data-focus="a" data-toggle="div.sidebar.container"><i class="icon-user"></i></a>
   </div>
 </nav>

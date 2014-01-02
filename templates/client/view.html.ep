@@ -22,9 +22,9 @@
   % end
 </footer>
 
-<div class="conversations container"><ul></ul></div>
+<div class="conversations container scrolled"><ul></ul></div>
 
-<div class="sidebar container">
+<div class="sidebar container scrolled">
   <ul>
   % if(my $sidebar = stash 'sidebar') {
     %= include "sidebar/$sidebar"
@@ -33,6 +33,7 @@
 </div>
 
 % unless($partial) {
-<div class="notifications container"><%= include 'client/notification_list' %></div>
+<div class="notifications container scrolled"><%= include 'client/notification_list' %></div>
+<div class="add-conversation container"><%= include 'client/add_conversation' %></div>
 <div class="goto-bottom"><a href="#bottom"><i class="icon-chevron-down"></i></a></div>
 % }

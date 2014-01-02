@@ -16,5 +16,5 @@
 </li>
 % }
 <li>
-  %= link_to 'Add connection...', 'connection.add'
+  %= link_to 'Add connection', 'connection.add'
 </li>

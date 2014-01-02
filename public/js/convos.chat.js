@@ -153,7 +153,7 @@
       $('div.sidebar.container ul').html($doc.filter('div.sidebar.container').find('ul').children());
     }
     if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
-      $input.send('/names', 0).send('/topic', 0);
+      $input.send('/names', 0).send('/topic', { 'data-history': 0 });
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
@@ -310,6 +310,19 @@
     return false;
   };
 
+  var initAddConversation = function() {
+    $('.add-conversation form').submit(function(e) {
+      var $form = $(this);
+      var server = $form.find('select[name="name"]').val();
+      var channel = $form.find('input[name="channel"]').val().replace(/^\s*#/, '');
+
+      e.preventDefault();
+      $input.send('/join #' + channel, { 'data-server': server });
+      $input.focus();
+      $('a[data-toggle]').filter('.active').trigger('deactivate');
+    });
+  };
+
   var initInputField = function() {
     var current = '';
     var complete, val, offset, re;
@@ -361,7 +374,7 @@
     });
     $input.closest('form').submit(function(e) {
       e.preventDefault();
-      $input.send($input.val(), 1).val('');
+      $input.send($input.val(), { 'data-history': 1 }).val('');
     });
   };
 
@@ -416,9 +429,10 @@
       $input.addClass('disabled');
     };
     reconnectHandler= window.setTimeout(function() { $input.socket.refresh()},60000);
-    $input.send = function(message, history) {
+    $input.send = function(message, attr) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
+      attr = attr || {};
       if(!message.match('^\/')) {
         var $pendingMessage = $('<li class="message-pending"><div class="content"></div></li>').attr('id', uuid).hostAndTarget($messages);
         $pendingMessage.find('.content').text(message);
@@ -426,9 +440,9 @@
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
       }
-      $input.socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr('data-history', history).text(message).prop('outerHTML'));
+      $input.socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr(attr).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
-      if(history) $input.history.push(message);
+      if(attr['data-history']) $input.history.push(message);
       $input.history_i = $input.history.length;
       return $input;
     };
@@ -612,6 +626,8 @@
       return;
     }
 
+    $input.focus();
+
     $.ajaxSetup({
       error: function(jqXHR, exception) {
         console.log('ajax: ' + this.url + ' failed: ' + exception);
@@ -630,6 +646,7 @@
     initSocket();
     initPjax();
     initInputField();
+    initAddConversation();
 
     $('nav a.notifications.toggler').on('activate', function() {
       $.post($.url_for('notifications/clear'));
@@ -638,7 +655,7 @@
 
     $('nav a.toggler').initDropDown();
     $('nav, div.container, div.goto-bottom').fastButton();
-    $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
+    $('footer a.help').click(function(e) { $input.send('/help', { 'data-history': 0 }); return false; })
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {

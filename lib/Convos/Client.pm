@@ -99,30 +99,32 @@ sub view {
       $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
     },
     sub {
-      my ($delay, $nick_state) = @_;
+      my $delay = shift;
+      my $nick = shift @{ $_[0] };
+      my $state = shift @{ $_[0] };
 
-      if(!$nick_state or !$nick_state->[0]) {
+      if(!$nick) {
         return $self->route;
       }
       if(defined $self->param('notification')) {
         $self->_modify_notification($self->param('notification'), read => 1, sub {});
       }
 
-      $nick_state->[1] ||= 'disconnected';
-      $self->stash(nick => $nick_state->[0], state => $nick_state->[1]);
+      $state ||= 'disconnected';
+      $self->stash(nick => $nick, state => $state);
       $self->stash->{sidebar} ||= 'server' unless $target;
+      $redis->smembers("user:$login:connections", $delay->begin);
       $self->_conversation($delay->begin);
-      $delay->begin->();
     },
     sub {
-      my ($delay, $conversation) = @_;
+      my ($delay, $networks, $conversation) = @_;
 
       unless($xhr) {
         $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
 
-      $self->stash(conversation => $conversation) if $conversation;
+      $self->stash(conversation => $conversation || [], networks => $networks || []);
       $delay->begin->(0);
     },
     sub {

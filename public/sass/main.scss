@@ -393,6 +393,7 @@ div.notification.question {
   button, .button { font-size: 0.9em; }
 }
 
+div.add-conversation.container,
 div.conversations.container,
 div.notifications.container,
 div.sidebar.container {
@@ -413,6 +414,12 @@ div.sidebar.container {
   a.inactive { color: lighten(#000, 60%); }
   a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
   a:focus { background-color: darken(#fff, 8%); }
+}
+
+div.add-conversation.container {
+  padding-left: 3px;
+  padding-bottom: 6px;
+  height: auto;
 }
 
 div.conversations.container {
