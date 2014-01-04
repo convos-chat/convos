@@ -275,14 +275,17 @@ sub startup {
   $host_r->get('/')->to('client#view')->name('view.server');
 
   if($config->{backend}{embedded}) {
-    die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);
+    die "Can't run embedded backend, fork failed: $!" unless defined(my $pid = fork);
     return $self->backend_pid($pid) if $pid;
-    my $loop=Mojo::IOLoop->singleton;
-    $self->core->start;
-    $0='convos backend';
 
-    $SIG{$_}= 'DEFAULT' for  qw(INT TERM CHLD TTIN TTOU);
-    $SIG{QUIT} = sub{ $loop->max_connnections(0)};
+    # child
+    my $parent_pid = getppid;
+    my $loop = Mojo::IOLoop->singleton;
+    $0 = 'convos backend';
+    $SIG{$_} = 'DEFAULT' for qw( INT TERM CHLD TTIN TTOU );
+    $SIG{QUIT} = sub { $loop->max_connnections(0) };
+    $self->core->start;
+    $loop->recurring(1 => sub { getppid == $parent_pid or exit 3 }); # Can't continue embedded backend when parent pid change
     $loop->start;
     exit 0;
   }
