@@ -27,8 +27,7 @@ sub auth {
   if($self->session('login')) {
     return 1;
   }
-
-  if($self->req->url->path =~ /\.json$/) {
+  elsif($self->req->url->path =~ /\.json$/) {
     $self->render(json => {}, status => 403);
   }
   else {
@@ -214,10 +213,6 @@ sub register {
   );
 }
 
-sub _digest {
-  crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
-}
-
 =head2 logout
 
 Will delete data from session.
@@ -284,58 +279,8 @@ sub _edit {
   );
 }
 
-=head2 edit_connection
-
-Change a connection.
-
-=cut
-
-sub edit_connection {
-  my $self = shift->render_later;
-  my $validation = $self->validation;
-
-  $validation->input->{channels} = [$self->param('channels')];
-  $validation->input->{login} = $self->session('login');
-  $validation->input->{server} = $self->req->body_params->param('server');
-  $validation->input->{tls} ||= 0;
-
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      $self->app->core->update_connection($validation, $delay->begin);
-    },
-    sub {
-      my ($delay, $errors, $changed) = @_;
-      return $self->settings if $errors;
-      return $self->redirect_to('settings');
-    }
-  );
-}
-
-=head2 delete_connection
-
-Delete a connection.
-
-=cut
-
-sub delete_connection {
-  my $self = shift->render_later;
-  my $validation = $self->validation;
-
-  $validation->input->{login} = $self->session('login');
-  $validation->input->{name} = $self->stash('network');
-
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      $self->app->core->delete_connection($validation, $delay->begin);
-    },
-    sub {
-      my ($delay, $error) = @_;
-      return $self->render_not_found if $error;
-      return $self->redirect_to('settings');
-    }
-  );
+sub _digest {
+  crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
 =head1 COPYRIGHT

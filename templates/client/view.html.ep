@@ -14,7 +14,7 @@
 </div>
 
 <footer id="bottom">
-  %= form_for 'chat', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, begin
+  %= form_for 'view.network', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, begin
     %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off', 'data-network' => $network, 'data-target' => $target, class => 'disabled'
     <div class="menu">
       <a href="#!help" title="Display help" class="help"><i class="icon-info-sign"></i></a>

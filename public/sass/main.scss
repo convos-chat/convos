@@ -122,6 +122,7 @@ footer {
 
   form {
     position: relative;
+    display: none;
     input { font-family: inherit; font-size: 1.1em; width: 100%; padding: 8px; padding-right: 30px; }
     input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
     input.disabled, input.sending.disabled { background-color: #eee; }
@@ -509,14 +510,22 @@ div.messages {
   }
 }
 
-body.chat ul.conversations li.first a {
-  background-color: darken(#fff, 5%);
-  font-weight: bold;
-  color: #000;
+body.chat {
+  footer form {
+    display: block;
+  }
+  ul.conversations li.first a {
+    background-color: darken(#fff, 5%);
+    font-weight: bold;
+    color: #000;
+  }
 }
 
 body.convos {
   a.convos { background-color: darken(#fff, 5%); }
+  footer form {
+    display: block;
+  }
 }
 
 body.without-sidebar {

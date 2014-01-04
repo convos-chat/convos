@@ -60,19 +60,26 @@ sub view {
     $self->stash(layout => undef);
   }
 
-  $self->stash(target => $target, body_class => 'without-sidebar', xhr => $xhr);
   $self->session(name => $target ? $name : '');
+  $self->stash(target => $target, xhr => $xhr);
 
-  if(!$target or $target =~ /^[#&]/) {
-    $self->stash->{body_class} = 'with-sidebar';
+  if($target =~ /^[#&]/) {
+    $self->stash->{body_class} = 'with-sidebar chat';
+  }
+  elsif($network eq 'convos') {
+    $self->stash->{body_class} = 'with-sidebar convos';
+  }
+  elsif(!$target) {
+    $self->stash->{body_class} = 'with-sidebar convos';
+  }
+  else {
+    $self->stash->{body_class} = 'without-sidebar chat';
   }
 
   if($network eq 'convos') {
-    $self->stash->{body_class} .= ' convos';
     $self->stash->{sidebar} = 'convos';
   }
   elsif(!$target) {
-    $self->stash->{body_class} .= ' chat';
     $self->stash->{sidebar} = 'server';
   }
 
