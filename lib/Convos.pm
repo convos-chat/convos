@@ -284,7 +284,7 @@ sub startup {
     $0 = 'convos backend';
     $SIG{$_} = 'DEFAULT' for qw( INT TERM CHLD TTIN TTOU );
     $SIG{QUIT} = sub { $loop->max_connnections(0) };
-    $self->core->start;
+    $loop->timer( 10 => sub {$self->core->start });
     $loop->recurring(1 => sub { getppid == $parent_pid or exit 3 }); # Can't continue embedded backend when parent pid change
     $loop->start;
     exit 0;
