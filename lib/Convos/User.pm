@@ -13,18 +13,6 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use constant DEFAULT_URL => $ENV{DEFAULT_AVATAR_URL} || 'https://graph.facebook.com/%s/picture?height=40&width=40';
 use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
 
-has _avatar_ua => sub {
-  my $self = shift;
-
-  Mojo::UserAgent->new(
-    connect_timeout => 1,
-    inactivity_timeout => 5,
-    max_redirects => 3,
-    request_timeout => 5,
-    server => $self->app->ua->server, # jhthorsen: not sure if this is just a bad hack, but it makes t/avatar.t happy
-  );
-};
-
 =head1 METHODS
 
 =head2 auth
@@ -91,7 +79,7 @@ sub avatar {
 
       $cache->serve($self, $cache_name) and return $self->rendered;
       $self->app->log->debug("Getting avatar for $id: $url");
-      $self->_avatar_ua->get($url, $delay->begin);
+      $self->app->ua->get($url, $delay->begin);
     },
     sub {
       my($delay, $tx) = @_;
