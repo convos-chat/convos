@@ -45,7 +45,7 @@ Will render all server logs.
 sub convos {
   my $self = shift->render_later;
 
-  $self->stash(server => 'convos', sidebar => 'convos', template => 'client/view');
+  $self->stash(network => 'convos', sidebar => 'convos', template => 'client/view');
   $self->connection_list(\&view);
 }
 
@@ -59,9 +59,9 @@ sub view {
   my $self        = shift->render_later;
   my $prev_name   = $self->session('name') || '';
   my $login       = $self->session('login');
-  my $server      = $self->stash('server');
+  my $network     = $self->stash('network');
   my $target      = $self->stash('target') || '';
-  my $name        = as_id $server, $target;
+  my $name        = as_id $network, $target;
   my $xhr         = $self->req->is_xhr ? 1 : 0;
   my $redis       = $self->redis;
   my @rearrange   = ([ zscore => "user:$login:conversations", $name ]);
@@ -80,7 +80,7 @@ sub view {
     $self->stash->{body_class} = 'with-sidebar';
   }
 
-  $self->stash->{body_class} .= ' '. ($server eq 'convos' ? 'convos' : 'chat');
+  $self->stash->{body_class} .= ' '. ($network eq 'convos' ? 'convos' : 'chat');
 
   Mojo::IOLoop->delay(
     sub {
@@ -92,9 +92,9 @@ sub view {
       my $time = time;
 
       return $self->route if $target and not grep { $_ } @score; # no such conversation
-      return $delay->begin(0)->([ $login, 'connected' ]) if $server eq 'convos';
+      return $delay->begin(0)->([ $login, 'connected' ]) if $network eq 'convos';
 
-      $redis->hmget("user:$login:connection:$server", qw( nick state ), $delay->begin);
+      $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
       $redis->zadd("user:$login:conversations", $time, $name) if $score[0];
       $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
     },
@@ -186,10 +186,10 @@ sub clear_notifications {
 
 sub _conversation {
   my ($self, $cb) = @_;
-  my $login  = $self->session('login');
-  my $server = $self->stash('server');
-  my $target = $self->stash('target');
-  my $key    = $target ? "user:$login:connection:$server:$target:msg" : "user:$login:connection:$server:msg";
+  my $login   = $self->session('login');
+  my $network = $self->stash('network');
+  my $target  = $self->stash('target');
+  my $key     = $target ? "user:$login:connection:$network:$target:msg" : "user:$login:connection:$network:msg";
 
   if (my $to = $self->param('to')) {    # to a timestamp
     $self->redis->zrevrangebyscore(

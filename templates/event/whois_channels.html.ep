@@ -1,11 +1,11 @@
-<li class="whois" data-server="<%= $server %>" data-target="any">
+<li class="whois" data-network="<%= $network %>" data-target="any">
   <div class="content">
-    %= link_to $nick, view => { server => $server, target => $nick }
+    %= link_to $nick, view => { network => $network, target => $nick }
     is in
     % my $i = 0;
     % for my $channel (@$channels) {
       % my $target = $channel; $target =~ s/^.\#/#/;
-      <%= link_to $channel, view => { server => $server, target => $target } %><%= ++$i == @$channels ? '.' : ', ' %>
+      <%= link_to $channel, view => { network => $network, target => $target } %><%= ++$i == @$channels ? '.' : ', ' %>
     % }
   </div>
 </li>

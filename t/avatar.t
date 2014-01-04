@@ -39,7 +39,7 @@ $t->websocket_ok('/socket');
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-server="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
+  ok $dom->at('li.message[data-network="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   ok $dom->at('img[alt="fooman"][src="/avatar/user@host"]'), 'gravatar image based on user+host';
 }
 
@@ -49,7 +49,7 @@ $t->websocket_ok('/socket');
     prefix => 'fooman!user@host',
   });
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.action.message[data-server="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
+  ok $dom->at('li.action.message[data-network="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   ok $dom->at('img[alt="fooman"][src="/avatar/user@host"]'), 'default gravatar image';
 }
 

@@ -35,7 +35,7 @@
       var $message = $(this);
       $message.find('h3 a').click(function(e) {
         e.preventDefault();
-        if($(this).hasClass('goto-server')) {
+        if($(this).hasClass('goto-network')) {
           $.pjax.click(e, { container: $('div.messages') });
         }
         else {
@@ -47,7 +47,7 @@
       // embed media
       $message.find('a[target="_blank"]').each(function() {
         var $a = $(this);
-        $.get($.url_for('oembed'), { url: this.href }, function(embed_code) {
+        $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
           var at_bottom = $win.data('at_bottom');
           var $embed_code = $(embed_code);
           $a.closest('div').after($embed_code);
@@ -131,11 +131,11 @@
   $.fn.hostAndTarget = function($from) {
     if($from) {
       return this
-        .attr('data-server', $from.data('server')).attr('data-target', $from.data('target'))
-        .data('server', $from.data('server')).data('target', $from.data('target'))
+        .attr('data-network', $from.data('network')).attr('data-target', $from.data('target'))
+        .data('network', $from.data('network')).data('target', $from.data('target'))
     }
     else {
-      return { server: this.data('server'), target: this.data('target') };
+      return { network: this.data('network'), target: this.data('target') };
     }
   };
 
@@ -186,7 +186,7 @@
     var used_width = 0, unread, $a;
 
     if($message) {
-      $a = $conversations.find('a[href="' + $.url_for($message.data('server'), $message.data('target')) + '"]');
+      $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
       unread = parseInt($a.attr('data-unread')) + 1;
       $a.attr('data-unread', unread).attr('title', unread + " unread messages in " + $message.data('target'));
       $a.closest('li').addClass('unread');
@@ -313,11 +313,11 @@
   var initAddConversation = function() {
     $('.add-conversation form').submit(function(e) {
       var $form = $(this);
-      var server = $form.find('select[name="name"]').val();
+      var network = $form.find('select[name="name"]').val();
       var channel = $form.find('input[name="channel"]').val().replace(/^\s*#/, '');
 
       e.preventDefault();
-      $input.send('/join #' + channel, { 'data-server': server });
+      $input.send('/join #' + channel, { 'data-network': network });
       $input.focus();
       $('a[data-toggle]').filter('.active').trigger('deactivate');
     });
@@ -352,7 +352,7 @@
       return false;
     };
 
-    $.get($.url_for('command-history'), noCache({}), function(data) {
+    $.get($.url_for('/chat/command-history'), noCache({}), function(data) {
       $input.history = data;
       $input.history_i = $input.history.length;
     });
@@ -488,7 +488,7 @@
 
   var nickList = function($data) {
     var $nicks = $data.find('[data-nick]');
-    var server = $messages.data('server');
+    var network = $messages.data('network');
     var senders = {};
 
     if($nicks.length) {
@@ -506,7 +506,7 @@
     if(nicks.length) {
       $('div.sidebar.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(server, n) + '">' + n + '</a></li>';
+          return '<li><a href="' + $.url_for(network, n) + '">' + n + '</a></li>';
         }).join('')
       );
       $('div.sidebar.container').nanoScroller(); // reset scrollbar;
@@ -556,7 +556,7 @@
 
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target'));
-      if(!$message.data('server')) $message.data('server', $messages.data('server'));
+      if(!$message.data('network')) $message.data('network', $messages.data('network'));
     }
     if($('body').attr('class').indexOf('-sidebar') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
@@ -588,7 +588,7 @@
 
   var reloadConversationList = function(e) {
     var goto_current = e.goto_current;
-    $.get($.url_for('conversations'), noCache({}), function(data) {
+    $.get($.url_for('/chat/conversations'), noCache({}), function(data) {
       $('ul.conversations').replaceWith(data);
       $('div.conversations.container ul').html('');
       if(goto_current) $('ul.conversations li.first a').click();
@@ -607,7 +607,7 @@
       reload_notification_list_args.notification = e.clear_notification;
     }
 
-    $.get($.url_for('notifications'), noCache(reload_notification_list_args), function(data) {
+    $.get($.url_for('/chat/notifications'), noCache(reload_notification_list_args), function(data) {
       $notification_list.html(data);
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
       if(n==0) { n='' }
@@ -649,7 +649,7 @@
     initAddConversation();
 
     $('nav a.notifications.toggler').on('activate', function() {
-      $.post($.url_for('notifications/clear'));
+      $.post($.url_for('/chat/notifications/clear'));
       $(this).removeClass('alert').children('b').text('');
     });
 

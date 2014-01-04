@@ -27,7 +27,7 @@ sub close {
     return "PART $target"
   }
   else {
-    $id = as_id $dom->{server}, $target;
+    $id = as_id $dom->{network}, $target;
     $self->redis->zrem("user:$login:conversations", $id, sub {
       $self->send_partial('event/remove_conversation', %$dom, target => $target);
     });
@@ -72,7 +72,7 @@ sub help {
 sub query {
   my($self, $target, $dom) = @_;
   my $login = $self->session('login');
-  my $id = as_id $dom->{server}, $target;
+  my $id = as_id $dom->{network}, $target;
 
   if($target =~ /^[#&]?[\w_-]+$/) {
     $self->redis->zadd("user:$login:conversations", time, $id, sub {
@@ -93,7 +93,7 @@ sub query {
 
 sub reconnect {
   my ($self, $arg, $dom) = @_;
-  $self->app->core->control(restart => $self->session('login'), $dom->{server}, sub {});
+  $self->app->core->control(restart => $self->session('login'), $dom->{network}, sub {});
   return;
 }
 

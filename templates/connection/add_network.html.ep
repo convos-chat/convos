@@ -43,7 +43,7 @@
           <abbr title="Default secure port">6697</abbr>.
         </p>
       </div>
-      <div class="form-group server">
+      <div class="form-group channels">
         <label for="channels">Channels</label>
         <select name="channels" id="channels" multiple="multiple">
         % for my $channel (@$channels) {

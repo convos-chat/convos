@@ -252,27 +252,26 @@ sub startup {
   $r->get('/logout')->to('user#logout')->name('logout');
 
   my $private_r = $r->bridge('/')->to('user#auth');
-
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
-  $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
-  $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
-  $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
-  $private_r->get('/command-history')->to('client#command_history');
-  $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
-  $private_r->get('/convos')->to('client#convos')->name('convos');
-  $private_r->get('/wizard')->to('connection#wizard')->name('wizard');
+  $private_r->get('/chat/command-history')->to('client#command_history');
+  $private_r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)->name('conversation.list');
+  $private_r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)->name('notification.list');
+  $private_r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
+  $private_r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
+  $private_r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
+  $private_r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
+  $private_r->get('/connection/:name/delete')->to(template => 'connection/delete', body_class => 'tactile');
+  $private_r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
   $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
   $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
-  $private_r->get('/settings')->to('user#settings')->name('settings');
-  $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
+  $private_r->get('/convos')->to('client#convos')->name('convos.chat');
+  $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
+  $private_r->any('/profile')->to('user#edit')->name('user.edit');
+  $private_r->get('/wizard')->to('connection#wizard')->name('wizard');
 
-  my $network_r = $private_r->route('/:server');
-  $network_r->any('/control')->to('user#control')->name('connection.control')->name('connection.control');
-  $network_r->get('/settings/delete')->to(template => 'connection/delete', body_class => 'tactile');
-  $network_r->post('/settings/delete')->to('connection#delete_connection')->name('connection.delete');
-  $network_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
+  my $network_r = $private_r->route('/:network');
   $network_r->get('/*target')->to('client#view')->name('view');
-  $network_r->get('/')->to('client#view')->name('view.server');
+  $network_r->get('/')->to('client#view')->name('view.network');
 
   if($config->{backend}{embedded}) {
     die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);

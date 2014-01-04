@@ -10,30 +10,30 @@ redis_do(
   [ del => 'core:control' ],
 );
 
-$t->get_ok('/magnet/control/start.json')->status_is(403);
+$t->get_ok('/connection/magnet/control/start.json')->status_is(403);
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
-$t->get_ok('/magnet/control.json?cmd=invalid')->status_is(400);
-$t->get_ok('/magnet/control.json?cmd=start')->status_is(400);
+$t->get_ok('/connection/magnet/control.json?cmd=invalid')->status_is(400);
+$t->get_ok('/connection/magnet/control.json?cmd=start')->status_is(400);
 
-$t->post_ok('/magnet/control.json?cmd=start')
+$t->post_ok('/connection/magnet/control.json?cmd=start')
   ->status_is(200)
   ->json_is('/state', 'starting');
 
-$t->post_ok('/magnet/control.json?cmd=stop')
+$t->post_ok('/connection/magnet/control.json?cmd=stop')
   ->status_is(200)
   ->json_is('/state', 'stopping');
 
-$t->post_ok('/magnet/control.json?cmd=restart')
+$t->post_ok('/connection/magnet/control.json?cmd=restart')
   ->status_is(200)
   ->json_is('/state', 'restarting');
 
-$t->get_ok('/magnet/control.json?cmd=state')
+$t->get_ok('/connection/magnet/control.json?cmd=state')
   ->status_is(200)
   ->json_is('/state', 'disconnected', 'default value for state');
 
 redis_do(hset => 'user:doe:connection:magnet', state => 'connected');
-$t->get_ok('/magnet/control.json?cmd=state')
+$t->get_ok('/connection/magnet/control.json?cmd=state')
   ->status_is(200)
   ->json_is('/state', 'connected');
 

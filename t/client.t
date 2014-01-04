@@ -11,14 +11,17 @@ redis_do(
 );
 
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
-  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect to conversation');
+  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect to conversation')
+  ;
 
 $t->get_ok($t->tx->res->headers->location)
-  ->status_is(200);
+  ->status_is(200)
+  ;
 
 $t->get_ok('/invalid/foo')
   ->status_is(302)
-  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect on invalid conversation');
+  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect on invalid conversation')
+  ;
 
 $t->get_ok($t->tx->res->headers->location)
   ->status_is(200)
@@ -38,14 +41,16 @@ $t->get_ok('/magnet/batman')
   ->element_exists_not('body.with-sidebar')
   ;
 
-$t->get_ok('/')->header_like('Location', qr{/magnet/batman$}, 'Redirect on last conversation');
+$t->get_ok('/')
+  ->header_like('Location', qr{/magnet/batman$}, 'Redirect on last conversation')
+  ;
 
-$t->get_ok('/command-history')
+$t->get_ok('/chat/command-history')
   ->status_is(200)
   ->content_is('[]')
   ;
 
-$t->get_ok('/conversations')
+$t->get_ok('/chat/conversations')
   ->status_is(200)
   ->element_exists('ul.conversations')
   ->element_exists('li:nth-of-type(1)')
@@ -57,19 +62,18 @@ $t->get_ok('/conversations')
   ->element_exists_not('li:nth-of-type(4)')
   ;
 
-$t->get_ok('/notifications')
+$t->get_ok('/chat/notifications')
   ->status_is(200)
   ->element_exists('ul.notifications')
   ->element_exists_not('li:nth-of-type(1)')
   ;
 
-$t->get_ok('/notifications',{Accept => 'application/json'})
+$t->get_ok('/chat/notifications', { Accept => 'application/json' })
   ->status_is(200)
   ->content_type_is('application/json')
   ;
 
-
-$t->post_ok('/notifications/clear')
+$t->post_ok('/chat/notifications/clear')
   ->status_is(200)
   ->json_is('/cleared', 0)
   ;

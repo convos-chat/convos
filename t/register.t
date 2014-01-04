@@ -17,8 +17,9 @@ $t->post_ok('/register' => form => $form)
   ->header_like('Location', qr{/wizard$}, 'Redirect to settings page');
 
 $t->get_ok($t->tx->res->headers->location)
+  ->status_is(200)
   ->text_is('title', 'Testing - Add connection')
-  ->element_exists('form[action="/settings/connection"][method="post"]')
+  ->element_exists('form[action="/connection/add"][method="post"]')
   ->element_exists('select[name="name"]')
   ->element_exists('select[name="name"] option[value="efnet"]')
   ->element_exists('input[name="nick"][id="nick"]')
@@ -28,7 +29,8 @@ $t->get_ok($t->tx->res->headers->location)
   ;
 
 $form = { wizard => 1 };
-$t->post_ok('/settings/connection', form => $form)
+$t->post_ok('/connection/add', form => $form)
+  ->status_is(200)
   ->element_exists('div.name > .error')
   ->element_exists_not('div.avatar > .error')
   ->element_exists('select[name="name"] option[value="magnet"]')
@@ -37,7 +39,7 @@ $t->post_ok('/settings/connection', form => $form)
   ;
 
 $form = { wizard => 1, name => 'freenode', nick => 'ice_cool', channels => ', #way #cool ,,,',};
-$t->post_ok('/settings/connection', form => $form)
+$t->post_ok('/connection/add', form => $form)
   ->status_is('302')
   ->header_like('Location', qr{/convos$}, 'Redirect back to settings page')
   ;
@@ -45,7 +47,8 @@ $t->post_ok('/settings/connection', form => $form)
 is redis_do([rpop => 'core:control']), 'start:fooman:freenode', 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)
-  ->text_is('title', 'Testing - Chat')
+  ->status_is(200)
+  ->text_is('title', 'Testing - convos')
   ->element_exists('div.messages ul li')
   ->element_exists('div.messages ul li:first-child img[src="/avatar/convos@loopback"]')
   ->text_is('div.messages ul li:first-child h3 a', 'convos')

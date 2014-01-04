@@ -1,4 +1,4 @@
-% my $default_network = stash('server') || '';
+% my $default_network = stash('network') || '';
 %= form_for 'conversation.add', class => 'horizontal', method => 'post', begin
   <div class="form-group name">
     <select name="name" id="name">

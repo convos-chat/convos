@@ -1,5 +1,5 @@
 <li>
-  <h3><%= $server %></h3>
+  <h3><%= $network %></h3>
 </li>
 <li>
   %= link_to 'Connect', 'connection.remote', { command => 'start' }, ($state eq 'connected' ? (class => 'inactive') : ())

@@ -128,6 +128,7 @@
 
   $.url_for = function() {
     var args = $.makeArray(arguments);
+    args[0] = args[0].replace(/^\//, '');
     args.unshift($('html').data('basepath').replace(/\/$/, ''));
     return args.join('/').replace(/#/g, '%23');
   };

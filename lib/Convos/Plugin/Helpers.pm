@@ -36,6 +36,8 @@ See L<Convos::Core::Util/as_id>.
 
 =head2 connection_list
 
+Render the connections for a given user.
+
 =cut
 
 sub connection_list {
@@ -79,17 +81,17 @@ sub conversation_list {
       while ($i < @$conversation_list) {
         my $name = $conversation_list->[$i];
         my $timestamp = splice @$conversation_list, ($i + 1), 1;
-        my ($server, $target) = id_as $name;
+        my ($network, $target) = id_as $name;
 
         $target ||= '';
         $conversation_list->[$i] = {
-          server => $server,
+          network => $network,
           is_channel => $target =~ /^[#&]/ ? 1 : 0,
           target => $target,
           timestamp => $timestamp,
         };
 
-        $self->redis->zcount("user:$login:connection:$server:$target:msg", $timestamp, '+inf', $delay->begin);
+        $self->redis->zcount("user:$login:connection:$network:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;
       }
 
@@ -105,7 +107,7 @@ sub conversation_list {
       }
 
       return $self->$cb($conversation_list) if $cb;
-      return $self->render;
+      return $self->render('client/conversation_list');
     },
   );
 }
@@ -127,8 +129,8 @@ sub format_conversation {
   while (my $message = $conversation->()) {
     $message->{embed} = '';
     $message->{uuid} ||= '';
-    $message->{message} = _parse_message($c, $message, $delay) if defined $message->{message};
-
+    
+    defined $message->{message} and _parse_message($c, $message, $delay);
     push @{ $c->{conversation} }, $message;
   }
 
@@ -143,21 +145,18 @@ sub format_conversation {
 
 sub _parse_message {
   my($c, $message, $delay) = @_;
-  my $last = 0;
-  my @chunks;
-
-  $message->{highlight} ||= 0;
 
   # http://www.mirc.com/colors.html
   $message->{message} =~ s/\x03\d{0,15}(,\d{0,15})?//g;
   $message->{message} =~ s/[\x00-\x1f]//g;
 
-  my $finder=URI::Find->new(sub { 
-      my $url=Mojo::Util::html_unescape(shift.''); 
-      $c->link_to($url, $url, target => '_blank'); });
-  my $msg=Mojo::Util::xml_escape($message->{message});
-  $finder->find(\$msg);
-  return $msg;
+  $message->{highlight} ||= 0;
+  $message->{message} = Mojo::Util::xml_escape($message->{message});
+
+  URI::Find->new(sub { 
+    my $url = Mojo::Util::html_unescape(shift .''); 
+    $c->link_to($url, $url, target => '_blank');
+  })->find(\$message->{message});
 }
 
 =head2 logf
@@ -240,7 +239,10 @@ sub notification_list {
       $self->stash(notification_list => $notification_list, n_notifications => $n_notifications,);
 
       return $self->$cb($notification_list) if $cb;
-      return $self->respond_to(json => {json => $self->stash('notification_list')}, html => sub { shift->render },);
+      return $self->respond_to(
+        json => { json => $self->stash('notification_list') },
+        html => { template => 'client/notification_list' },
+      );
     },
   );
 }
@@ -297,8 +299,8 @@ sub redirect_last {
       my($delay, $names) = @_;
 
       if($names and $names->[0]) {
-        if(my($server, $target) = id_as $names->[0]) {
-          return $self->redirect_to('view', server => $server, target => $target);
+        if(my($network, $target) = id_as $names->[0]) {
+          return $self->redirect_to('view', network => $network, target => $target);
         }
       }
 

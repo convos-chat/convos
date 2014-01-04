@@ -44,8 +44,8 @@ sub socket {
       if($dom and $dom->attr('class') eq 'pong') {
         return;
       }
-      elsif($dom and $dom->{'id'} and $dom->{'data-server'}) {
-        @$dom{qw( server target uuid )} = map { delete $dom->{$_} || '' } qw( data-server data-target id );
+      elsif($dom and $dom->{'id'} and $dom->{'data-network'}) {
+        @$dom{qw( network target uuid )} = map { delete $dom->{$_} || '' } qw( data-network data-target id );
         $self->_handle_socket_data($dom);
       }
       else{
@@ -95,7 +95,7 @@ sub _convos_message {
     highlight => 0,
     message => $input,
     nick =>  $login,
-    server => $args->{server},
+    network => $args->{network},
     status => 200,
     target => '',
     timestamp => time,
@@ -105,8 +105,8 @@ sub _convos_message {
     'event/message',
     highlight => 0,
     message => $response,
-    nick => $args->{server},
-    server => $args->{server},
+    nick => $args->{network},
+    network => $args->{network},
     status => 200,
     target => '',
     timestamp => time,
@@ -129,7 +129,7 @@ sub _handle_socket_data {
       return $self->_send_400($dom, 'Unknown command. Type /help to see available commands.');
     }
   }
-  elsif($dom->{server} eq 'convos') {
+  elsif($dom->{network} eq 'convos') {
     return $self->_convos_message($dom, $cmd, DEFAULT_RESPONSE);
   }
   elsif($dom->{target}) {
@@ -140,7 +140,7 @@ sub _handle_socket_data {
   }
 
   if(defined $cmd) {
-    my $key = "convos:user:$login:$dom->{server}";
+    my $key = "convos:user:$login:$dom->{network}";
     $cmd = "$dom->{uuid} $cmd";
     $self->logf(debug => '[%s] < %s', $key, $cmd);
     $self->redis->publish($key => $cmd);
@@ -159,7 +159,7 @@ sub _send_400 {
     status => 400,
     timestamp => time,
     uuid => '',
-    server => $args->{'data-server'} || 'any',
+    network => $args->{'data-network'} || 'any',
     message => $message,
   );
 }

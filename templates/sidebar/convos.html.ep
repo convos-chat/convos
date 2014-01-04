@@ -12,7 +12,7 @@
 </li>
 % for my $name (@$connections) {
 <li>
-  %= link_to $name, 'view.server', { server => $name }
+  %= link_to $name, 'view.network', { network => $name }
 </li>
 % }
 <li>

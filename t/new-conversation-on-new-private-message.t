@@ -26,24 +26,24 @@ $t->websocket_ok('/socket');
   $connection->add_message({ params => [ 'doe', 'really cool' ], prefix => 'fooman!user@host' });
   Mojo::IOLoop->start;
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-server="magnet"][data-target="fooman"][data-sender="fooman"]'), 'private message';
+  ok $dom->at('li.message[data-network="magnet"][data-target="fooman"][data-sender="fooman"]'), 'private message';
 
   Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-server="magnet"][data-target="fooman"]'), 'new private message';
+  ok $dom->at('li.add-conversation[data-network="magnet"][data-target="fooman"]'), 'new private message';
 
   $connection->add_message({ params => [ 'doe', 'really cool' ], prefix => 'fooman!user@host' });
   Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-server="magnet"][data-target="fooman"][data-sender="fooman"]'), 'just the message the second time';
+  ok $dom->at('li.message[data-network="magnet"][data-target="fooman"][data-sender="fooman"]'), 'just the message the second time';
 
   $t->finish_ok;
 }
 
 {
-  $t->get_ok('/conversations')
+  $t->get_ok('/chat/conversations')
     ->element_exists('li:nth-of-child(1) a[data-unread="0"][href="/magnet/%23convos"]')
     ->element_exists('li:nth-of-child(2) a[data-unread="2"][href="/magnet/fooman"]')
     ->element_exists('li.unread a[data-unread="2"][href="/magnet/fooman"]')
