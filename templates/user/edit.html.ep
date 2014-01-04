@@ -29,7 +29,7 @@
           </div>
           <div class="actions">
             <button type="submit">Update</button>
-            %= link_to 'Cancel', 'convos', class => 'button'
+            %= link_to 'Cancel', 'view.network', { network => 'convos' }, class => 'button'
           </div>
           % if (validation->is_valid and validation->has_data) {
           <p class="help">Profile saved.</p>

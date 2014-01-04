@@ -269,7 +269,7 @@ sub _edit {
 
   $validation->required('email')->like(qr{.\@.});
   $validation->optional('avatar')->size(3, 64);
-  $validation->has_error and return $self->render;
+  $validation->has_error and return $self->render(status => 400);
   $validation->output->{avatar} ||= '';
 
   Mojo::IOLoop->delay(
@@ -280,7 +280,7 @@ sub _edit {
     sub {
       my ($delay, $saved) = @_;
       $self->render;
-    }
+    },
   );
 }
 
