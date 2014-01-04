@@ -238,6 +238,7 @@ sub edit {
   my $partial = $self->req->is_xhr;
 
   $self->stash(body_class => 'convos with-sidebar');
+  $self->stash(layout => undef) if $partial;
 
   Mojo::IOLoop->delay(
     sub {
