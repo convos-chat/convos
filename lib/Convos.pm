@@ -264,7 +264,6 @@ sub startup {
   $private_r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
   $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
   $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
-  $private_r->get('/convos')->to('client#convos')->name('convos.chat');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $private_r->any('/profile')->to('user#edit')->name('user.edit');
   $private_r->get('/wizard')->to('connection#wizard')->name('wizard');

@@ -1,6 +1,6 @@
 <nav class="bar">
   % my @class;
-  %= link_to 'convos', class => 'convos', title => 'Status messages and settings', 'data-unread' => 0, begin
+  %= link_to 'view.network', { network => 'convos' }, class => 'convos', title => 'Status messages and settings', 'data-unread' => 0, begin
     %= image '/image/icon-navbar.png', alt => 'Convos'
   % end
   %= include 'client/conversation_list'

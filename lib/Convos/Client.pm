@@ -36,19 +36,6 @@ sub route {
   }
 }
 
-=head2 convos
-
-Will render all server logs.
-
-=cut
-
-sub convos {
-  my $self = shift->render_later;
-
-  $self->stash(network => 'convos', sidebar => 'convos', template => 'client/view');
-  $self->connection_list(\&view);
-}
-
 =head2 view
 
 Used to render the main IRC client view.
@@ -80,7 +67,14 @@ sub view {
     $self->stash->{body_class} = 'with-sidebar';
   }
 
-  $self->stash->{body_class} .= ' '. ($network eq 'convos' ? 'convos' : 'chat');
+  if($network eq 'convos') {
+    $self->stash->{body_class} .= ' convos';
+    $self->stash->{sidebar} = 'convos';
+  }
+  elsif(!$target) {
+    $self->stash->{body_class} .= ' chat';
+    $self->stash->{sidebar} = 'server';
+  }
 
   Mojo::IOLoop->delay(
     sub {
@@ -91,8 +85,14 @@ sub view {
       my ($delay, @score) = @_;
       my $time = time;
 
-      return $self->route if $target and not grep { $_ } @score; # no such conversation
-      return $delay->begin(0)->([ $login, 'connected' ]) if $network eq 'convos';
+      if($target and not grep { $_ } @score) { # no such conversation
+        return $self->route;
+      }
+      if($network eq 'convos') {
+        $self->connection_list($delay->begin);
+        $delay->begin(0)->([ $login, 'connected' ]);
+        return;
+      }
 
       $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
       $redis->zadd("user:$login:conversations", $time, $name) if $score[0];
@@ -112,7 +112,6 @@ sub view {
 
       $state ||= 'disconnected';
       $self->stash(nick => $nick, state => $state);
-      $self->stash->{sidebar} ||= 'server' unless $target;
       $redis->smembers("user:$login:connections", $delay->begin);
       $self->_conversation($delay->begin);
     },

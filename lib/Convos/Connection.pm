@@ -46,7 +46,7 @@ sub add_connection {
         $self->settings;
       }
       else {
-        $self->redirect_to($self->param('wizard') ? 'convos.chat' : 'settings');
+        $self->redirect_to('view.network', network => 'convos');
       }
     },
   );
@@ -278,7 +278,7 @@ sub edit_connection {
     sub {
       my ($delay, $errors, $changed) = @_;
       return $self->settings if $errors;
-      return $self->redirect_to('settings');
+      return $self->redirect_to('view.network', network => 'convos');
     }
   );
 }
@@ -304,7 +304,7 @@ sub delete_connection {
     sub {
       my ($delay, $error) = @_;
       return $self->render_not_found if $error;
-      return $self->redirect_to('settings');
+      return $self->redirect_to('view.network', network => 'convos');
     }
   );
 }

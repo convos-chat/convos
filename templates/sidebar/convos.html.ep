@@ -5,6 +5,9 @@
   %= link_to 'Edit profile', 'user.edit'
 </li>
 <li>
+  %= link_to 'Add connection', 'connection.add'
+</li>
+<li>
   %= link_to 'Logout', 'logout'
 </li>
 <li>
@@ -15,6 +18,3 @@
   %= link_to $name, 'view.network', { network => $name }
 </li>
 % }
-<li>
-  %= link_to 'Add connection', 'connection.add'
-</li>
