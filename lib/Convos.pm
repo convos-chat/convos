@@ -266,7 +266,7 @@ sub startup {
   $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $private_r->any('/profile')->to('user#edit')->name('user.edit');
-  $private_r->get('/wizard')->to('connection#wizard')->name('wizard');
+  $private_r->get('/wizard')->to('connection#add_connection', wizard => 1)->name('wizard');
 
   my $network_r = $private_r->route('/:network');
   $network_r->get('/*target')->to('client#view')->name('view');

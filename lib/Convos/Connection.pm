@@ -19,6 +19,20 @@ Add a new connection based on network name.
 
 sub add_connection {
   my $self = shift->render_later;
+
+  $self->stash->{body_class} = 'tactile';
+  $self->stash->{wizard} ||= 0;
+
+  if($self->req->method eq 'POST') {
+    $self->_add_connection;
+  }
+  else {
+    $self->_add_connection_form;
+  }
+}
+
+sub _add_connection {
+  my $self = shift;
   my $validation = $self->validation;
   my $name = $self->param('name') || '';
 
@@ -39,15 +53,47 @@ sub add_connection {
     sub {
       my($delay, $errors, $conn) = @_;
 
-      if($errors and $self->param('wizard')) {
-        $self->stash(template => 'connection/wizard')->wizard;
+      return $self->render if $errors;
+      return $self->redirect_to('view.network', network => 'convos');
+    },
+  );
+}
+
+sub _add_connection_form {
+  my $self = shift;
+  my $login = $self->session('login');
+  my $redis = $self->redis;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $redis->smembers("irc:networks", $delay->begin);
+      $redis->smembers("user:$login:connections", $delay->begin);
+    },
+    sub {
+      my $delay = shift;
+      my @names = sort @{ shift || [] };
+      my %existing = map { $_, 1 } sort @{ shift || [] };
+
+      @names = ('loopback') unless @names;
+      $delay->begin(0)->(\@names);
+      $redis->get('irc:default:network', $delay->begin);
+      $redis->hgetall("irc:network:$_", $delay->begin) for grep { !$existing{$_} } @names;
+    },
+    sub {
+      my($delay, $names, $default_network, @networks) = @_;
+      my @channels;
+
+      for my $network (@networks) {
+        $network->{name} = shift @$names;
+        @channels = split /\s+/, $network->{channels} || '' if $network->{name} eq $default_network;
       }
-      elsif($errors) {
-        $self->settings;
-      }
-      else {
-        $self->redirect_to('view.network', network => 'convos');
-      }
+
+      $self->render(
+        channels => \@channels,
+        default_network => $default_network,
+        networks => \@networks,
+      );
     },
   );
 }
@@ -206,50 +252,6 @@ sub edit_network {
         default_network => $default_network,
         name => $name,
         network => $network,
-      );
-    },
-  );
-}
-
-=head2 wizard
-
-Used to add the first connection.
-
-=cut
-
-sub wizard {
-  my $self = shift->render_later;
-  my $redis = $self->redis;
-
-  Mojo::IOLoop->delay(
-    sub {
-      my($delay) = @_;
-
-      $self->stash(body_class => 'tactile');
-      $redis->smembers('irc:networks', $delay->begin);
-    },
-    sub {
-      my $delay = shift;
-      my @names = sort @{ shift || [] };
-
-      @names = ('loopback') unless @names;
-      $delay->begin(0)->(\@names);
-      $redis->get('irc:default:network', $delay->begin);
-      $redis->hgetall("irc:network:$_", $delay->begin) for @names;
-    },
-    sub {
-      my($delay, $names, $default_network, @networks) = @_;
-      my @channels;
-
-      for my $network (@networks) {
-        $network->{name} = shift @$names;
-        @channels = split /\s+/, $network->{channels} || '' if $network->{name} eq $default_network;
-      }
-
-      $self->render(
-        channels => \@channels,
-        default_network => $default_network,
-        networks => \@networks,
       );
     },
   );
