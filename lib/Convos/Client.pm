@@ -36,13 +36,13 @@ sub route {
   }
 }
 
-=head2 view
+=head2 conversation
 
-Used to render the main IRC client view.
+Used to render the main IRC client conversation.
 
 =cut
 
-sub view {
+sub conversation {
   my $self        = shift->render_later;
   my $prev_name   = $self->session('name') || '';
   my $login       = $self->session('login');
@@ -116,15 +116,14 @@ sub view {
 
       $state ||= 'disconnected';
       $self->stash(nick => $nick, state => $state);
-      $redis->smembers("user:$login:connections", $delay->begin);
       $self->_conversation($delay->begin);
     },
     sub {
-      my ($delay, $networks, $conversation) = @_;
+      my ($delay, $conversation) = @_;
 
       $self->conversation_list($delay->begin) if $full_page;
       $self->notification_list($delay->begin) if $full_page;
-      $self->stash(conversation => $conversation || [], networks => $networks || []);
+      $self->stash(conversation => $conversation || []);
       $delay->begin->(0);
     },
     sub {

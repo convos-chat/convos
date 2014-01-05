@@ -241,16 +241,16 @@ sub startup {
   );
 
   # Normal route to controller
-  my $r = $self->routes;
+  my $r = $self->routes->route->to(layout => 'tactile');
   $r->get('/')->to('client#route')->name('index');
   $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
-  $r->get('/login')->to('user#login', body_class => 'tactile')->name('login');
-  $r->post('/login')->to('user#login', body_class => 'tactile');
-  $r->get('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile')->name('register');;
-  $r->post('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile');
+  $r->get('/login')->to('user#login')->name('login');
+  $r->post('/login')->to('user#login');
+  $r->get('/register/:invite', { invite => '' })->to('user#register')->name('register');;
+  $r->post('/register/:invite', { invite => '' })->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
 
-  my $private_r = $r->bridge('/')->to('user#auth');
+  my $private_r = $r->bridge('/')->to('user#auth', layout => 'view');
   $private_r->websocket('/socket')->to('chat#socket')->name('socket');
   $private_r->get('/chat/command-history')->to('client#command_history');
   $private_r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)->name('conversation.list');
@@ -259,19 +259,19 @@ sub startup {
   $private_r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
   $private_r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
   $private_r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
-  $private_r->get('/connection/:name/delete')->to(template => 'connection/delete', body_class => 'tactile');
+  $private_r->get('/connection/:name/delete')->to(template => 'connection/delete', layout => 'tactile');
   $private_r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
   $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
   $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
   $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $private_r->any('/profile')->to('user#edit')->name('user.edit');
-  $private_r->get('/wizard')->to('connection#wizard')->name('wizard');
+  $private_r->get('/wizard')->to('connection#wizard', layout => 'tactile')->name('wizard');
 
   my $network_r = $private_r->route('/:network');
-  $network_r->get('/*target')->to('client#view')->name('view');
-  $network_r->get('/')->to('client#view')->name('view.network');
+  $network_r->get('/*target')->to('client#conversation')->name('view');
+  $network_r->get('/')->to('client#conversation')->name('view.network');
 
-  $self->defaults(layout => 'default', full_page => 1, body_class => 'default');
+  $self->defaults(full_page => 1);
   $self->hook(before_dispatch => sub {
     my $c = shift;
     $c->stash(layout => undef, full_page => 0) if $c->req->is_xhr or $c->param('_pjax');

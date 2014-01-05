@@ -1,21 +1,8 @@
 % title 'Add connection';
-% my $err;
-%= include 'partials/nav' if $full_page;
-
-<div class="wrapper">
-  <div class="messages row">
-    <ul class="with-sidebar">
-      <li>
-        <h2>Add connection</h2>
-        %= include 'connection/add_connection_form', wizard => 0
-      </li>
-    </ul>
-  </div>
-  <div class="clear"></div>
-</div>
-
-<div class="sidebar container">
-  <ul>
-    %= include 'sidebar/convos'
-  </ul>
-</div>
+% stash sidebar => 'convos';
+<ul class="with-sidebar">
+  <li>
+    <h2>Add connection</h2>
+    %= include 'connection/add_connection_form', wizard => 0
+  </li>
+</ul>

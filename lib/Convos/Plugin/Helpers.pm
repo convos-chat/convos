@@ -89,9 +89,10 @@ sub conversation_list {
     sub {
       my ($delay) = @_;
       $self->redis->zrevrange("user:$login:conversations", 0, -1, 'WITHSCORES', $delay->begin);
+      $self->redis->smembers("user:$login:connections", $delay->begin);
     },
     sub {
-      my ($delay, $conversation_list) = @_;
+      my ($delay, $conversation_list, $networks) = @_;
       my $i = 0;
 
       while ($i < @$conversation_list) {
@@ -112,7 +113,7 @@ sub conversation_list {
       }
 
       $delay->begin->(undef, $conversation_list);
-      $self->stash(conversation_list => $conversation_list);
+      $self->stash(conversation_list => $conversation_list, networks => $networks || []);
     },
     sub {
       my ($delay, @unread_count) = @_;

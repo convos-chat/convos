@@ -52,7 +52,7 @@ sub add_network {
   my @channels = $self->param('channels');
   my($is_default, $name, $redis, $referrer);
 
-  $self->stash(body_class => 'tactile', channels => \@channels);
+  $self->stash(layout => 'tactile', channels => \@channels);
   $self->req->method eq 'POST' or return $self->render;
 
   $validation->input->{tls} ||= 0;
@@ -160,7 +160,7 @@ sub edit_network {
   my $self = shift->render_later;
   my $name = $self->stash('name');
 
-  $self->stash(body_class => 'tactile');
+  $self->stash(layout => 'tactile');
 
   if($self->req->method eq 'POST') {
     $self->param(referrer => $self->req->url->to_abs);
@@ -258,14 +258,11 @@ Render wizard page for first connection.
 =cut
 
 sub wizard {
-  my $self = shift->render_later;
-
-  $self->stash(body_class => 'tactile');
-  $self->_add_connection_form;
+  shift->_add_connection_form;
 }
 
 sub _add_connection {
-  my $self = shift;
+  my $self = shift->render_later;
   my $validation = $self->validation;
   my $name = $self->param('name') || '';
 
@@ -293,7 +290,7 @@ sub _add_connection {
 }
 
 sub _add_connection_form {
-  my $self = shift;
+  my $self = shift->render_later;
   my $login = $self->session('login');
   my $redis = $self->redis;
 
