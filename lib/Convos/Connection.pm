@@ -204,23 +204,21 @@ Used to edit a connection.
 
 sub edit_connection {
   my $self = shift->render_later;
-  my $validation = $self->validation;
-
-  $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
-  $validation->input->{login} = $self->session('login');
-  $validation->input->{server} = $self->req->body_params->param('server');
-  $validation->input->{tls} ||= 0;
+  my $full_page = $self->stash('full_page');
+  my $method = $self->req->method eq 'POST' ? '_edit_connection' : '_edit_connection_form';
 
   Mojo::IOLoop->delay(
     sub {
-      my ($delay) = @_;
-      $self->app->core->update_connection($validation, $delay->begin);
+      my($delay) = @_;
+
+      $self->conversation_list($delay->begin) if $full_page;
+      $self->notification_list($delay->begin) if $full_page;
+      $delay->begin->();
     },
     sub {
-      my ($delay, $errors, $changed) = @_;
-      return $self->settings if $errors;
-      return $self->redirect_to('view.network', network => 'convos');
-    }
+      my($delay) = @_;
+      $self->$method;
+    },
   );
 }
 
@@ -326,6 +324,46 @@ sub _add_connection_form {
         default_network => $default_network,
         networks => \@networks,
       );
+    },
+  );
+}
+
+sub _edit_connection {
+  my $self = shift;
+  my $validation = $self->validation;
+
+  $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
+  $validation->input->{login} = $self->session('login');
+  $validation->input->{server} = $self->req->body_params->param('server');
+  $validation->input->{tls} ||= 0;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->app->core->update_connection($validation, $delay->begin);
+    },
+    sub {
+      my($delay, $errors, $changed) = @_;
+      return $self->settings if $errors;
+      return $self->redirect_to('view.network', network => 'convos');
+    }
+  );
+}
+
+sub _edit_connection_form {
+  my $self = shift;
+  my $login = $self->session('login');
+  my $name = $self->stash('name');
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->hgetall("user:$login:connection:$name", $delay->begin);
+    },
+    sub {
+      my($delay, $connection) = @_;
+      $self->param($_ => $connection->{$_}) for keys %$connection;
+      $self->render;
     },
   );
 }

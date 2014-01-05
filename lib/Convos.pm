@@ -259,7 +259,7 @@ sub startup {
   $private_r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
   $private_r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
   $private_r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
-  $private_r->get('/connection/:name/delete')->to(template => 'connection/delete', layout => 'tactile');
+  $private_r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
   $private_r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
   $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
   $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');

@@ -1,0 +1,39 @@
+% title "Edit $name";
+%# stash sidebar => 'server';
+<ul class="with-sidebar">
+  <li>
+    <h2>Edit <%= $name %></h2>
+    %= form_for 'connection.add', class => 'horizontal', method => 'post', begin
+      % my $err;
+      <div class="form-group server">
+        <label for="server">Server</label>
+        %= text_field 'server', id => 'server'
+        % if ($err = validation->error('server')) {
+        <p class="error">Invalid server name.</p>
+        % }
+        <p class="help">
+          Add ":port" if you do not want the default port
+          <abbr title="Default non-secure port">6667</abbr> or
+          <abbr title="Default secure port">6697</abbr>.
+        </p>
+      </div>
+      <div class="form-group nick">
+        <label for="nick">Nick</label>
+        %= text_field 'nick', id => 'nick'
+        % if ($err = validation->error('nick')) {
+        <p class="error">Need to be a-z, 0-9, - and _.</p>
+        % }
+        <p class="help">Handle to operate under.</p>
+      </div>
+      <div class="form-group tls">
+        <label for="tls">Secure</label>
+        %= check_box tls => 1
+        <p class="help">Chat over TLS for increased privacy. Require server support.</p>
+      </div>
+      <div class="actions">
+        <button type="submit">Update</button>
+        %= link_to 'Delete', 'connection.delete', class => 'button confirm'
+      </div>
+    % end
+  </li>
+</ul>

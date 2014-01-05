@@ -11,8 +11,8 @@
   %= link_to 'Restart', 'connection.remote', { command => 'restart' }
 </li>
 <li>
-  %= link_to 'Edit', 'connection.edit'
+  %= link_to 'Edit', 'connection.edit', { name => $network }
 </li>
 <li>
-  %= link_to 'Delete', 'connection.delete'
+  %= link_to 'Delete', 'connection.delete', { name => $network }
 </li>

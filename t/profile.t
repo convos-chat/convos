@@ -6,7 +6,6 @@ plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for d
 
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => 'e1@convos.by', avatar => 'a1@convos.by' ],
-  [ zadd => 'user:doe:conversations', time, 'convos:2epl:00:23convos' ],
   [ sadd => 'user:doe:connections', 'magnet' ],
   [ hmset => 'user:doe:connection:magnet', nick => 'doe' ],
 );
