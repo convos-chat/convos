@@ -216,7 +216,6 @@ sub startup {
   $self->cache; # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
   $self->sessions->default_expiration(86400 * 30);
-  $self->defaults(layout => 'default', logged_in => 0, body_class => 'default');
 
   if($self->can('secrets')) {
     $self->secrets($config->{secrets} || [$config->{secret} || die '"secret" is required in config file']);
@@ -271,6 +270,12 @@ sub startup {
   my $network_r = $private_r->route('/:network');
   $network_r->get('/*target')->to('client#view')->name('view');
   $network_r->get('/')->to('client#view')->name('view.network');
+
+  $self->defaults(layout => 'default', full_page => 1, body_class => 'default');
+  $self->hook(before_dispatch => sub {
+    my $c = shift;
+    $c->stash(layout => undef, full_page => 0) if $c->req->is_xhr or $c->param('_pjax');
+  });
 
   if($config->{backend}{embedded}) {
     die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);

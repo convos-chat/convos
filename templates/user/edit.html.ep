@@ -1,8 +1,7 @@
 % title 'Edit user';
-% my $partial = $self->req->is_xhr;
 % my $err;
 
-% unless($partial) {
+% if($full_page) {
 %= include 'partials/nav'
 % }
 

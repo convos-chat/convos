@@ -1,7 +1,6 @@
 % title $target || $network;
-% my $partial = $self->req->is_xhr;
 
-% unless($partial) {
+% if($full_page) {
 %= include 'partials/nav'
 %= include 'partials/desktop-notifications-question'
 % }
@@ -32,7 +31,7 @@
   </ul>
 </div>
 
-% unless($partial) {
+% if($full_page) {
 <div class="notifications container scrolled"><%= include 'client/notification_list' %></div>
 <div class="add-conversation container"><%= include 'client/add_conversation' %></div>
 <div class="goto-bottom"><a href="#bottom"><i class="icon-chevron-down"></i></a></div>

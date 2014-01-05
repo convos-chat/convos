@@ -235,18 +235,17 @@ sub edit {
   my $self = shift->render_later;
   my $login = $self->session('login');
   my $method = $self->req->method eq 'POST' ? '_edit' : 'render';
-  my $partial = $self->req->is_xhr;
+  my $full_page = $self->stash('full_page');
 
   $self->stash(body_class => 'convos with-sidebar');
-  $self->stash(layout => undef) if $partial;
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
       $self->redis->hgetall("user:$login", $delay->begin) if $method eq 'render';
       $self->connection_list($delay->begin);
-      $self->conversation_list($delay->begin) unless $partial;
-      $self->notification_list($delay->begin) unless $partial;
+      $self->conversation_list($delay->begin) if $full_page;
+      $self->notification_list($delay->begin) if $full_page;
       $delay->begin->();
     },
     sub {

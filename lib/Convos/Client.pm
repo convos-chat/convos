@@ -49,19 +49,16 @@ sub view {
   my $network     = $self->stash('network');
   my $target      = $self->stash('target') || '';
   my $name        = as_id $network, $target;
-  my $xhr         = $self->req->is_xhr ? 1 : 0;
   my $redis       = $self->redis;
+  my $full_page   = $self->stash('full_page');
   my @rearrange   = ([ zscore => "user:$login:conversations", $name ]);
 
   if($prev_name and $prev_name ne $name) {
     push @rearrange, [ zscore => "user:$login:conversations", $prev_name ];
   }
-  if($xhr) {
-    $self->stash(layout => undef);
-  }
 
   $self->session(name => $target ? $name : '');
-  $self->stash(target => $target, xhr => $xhr);
+  $self->stash(target => $target);
 
   if($target =~ /^[#&]/) {
     $self->stash->{body_class} = 'with-sidebar chat';
@@ -125,11 +122,8 @@ sub view {
     sub {
       my ($delay, $networks, $conversation) = @_;
 
-      unless($xhr) {
-        $self->conversation_list($delay->begin);
-        $self->notification_list($delay->begin);
-      }
-
+      $self->conversation_list($delay->begin) if $full_page;
+      $self->notification_list($delay->begin) if $full_page;
       $self->stash(conversation => $conversation || [], networks => $networks || []);
       $delay->begin->(0);
     },
