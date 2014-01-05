@@ -1,16 +1,13 @@
 % title 'Edit user';
 % my $err;
-
-% if($full_page) {
-%= include 'partials/nav'
-% }
+%= include 'partials/nav' if $full_page;
 
 <div class="wrapper">
   <div class="messages row">
     <ul class="with-sidebar">
       <li>
+        <h2>Edit profile</h2>
         %= form_for 'user.edit', method => 'post', class => 'horizontal', begin
-          <h2>Edit profile</h2>
           <div class="form-group email">
             <label for="email">Email</label>
             %= text_field 'email', id => 'email', placeholder => 'your-personal@email.com'
@@ -30,7 +27,7 @@
             <button type="submit">Update</button>
             %= link_to 'Cancel', 'view.network', { network => 'convos' }, class => 'button'
           </div>
-          % if (validation->is_valid and validation->has_data) {
+          % if ($self->req->method eq 'POST' and validation->is_valid) {
           <p class="help">Profile saved.</p>
           % }
         % end
@@ -42,6 +39,6 @@
 
 <div class="sidebar container">
   <ul>
-    %= include "sidebar/convos"
+    %= include 'sidebar/convos'
   </ul>
 </div>

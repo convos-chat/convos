@@ -19,81 +19,21 @@ Add a new connection based on network name.
 
 sub add_connection {
   my $self = shift->render_later;
-
-  $self->stash->{body_class} = 'tactile';
-  $self->stash->{wizard} ||= 0;
-
-  if($self->req->method eq 'POST') {
-    $self->_add_connection;
-  }
-  else {
-    $self->_add_connection_form;
-  }
-}
-
-sub _add_connection {
-  my $self = shift;
-  my $validation = $self->validation;
-  my $name = $self->param('name') || '';
-
-  $validation->input->{channels} = [$self->param('channels')];
-  $validation->input->{login} = $self->session('login');
+  my $full_page = $self->stash('full_page');
+  my $method = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
 
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $self->redis->hgetall("irc:network:$name", $delay->begin);
+
+      $self->connection_list($delay->begin);
+      $self->conversation_list($delay->begin) if $full_page;
+      $self->notification_list($delay->begin) if $full_page;
+      $delay->begin->();
     },
-    sub {
-      my($delay, $params) = @_;
-
-      $validation->input->{$_} ||= $params->{$_} for keys %$params;
-      $self->app->core->add_connection($validation, $delay->begin);
-    },
-    sub {
-      my($delay, $errors, $conn) = @_;
-
-      return $self->render if $errors;
-      return $self->redirect_to('view.network', network => 'convos');
-    },
-  );
-}
-
-sub _add_connection_form {
-  my $self = shift;
-  my $login = $self->session('login');
-  my $redis = $self->redis;
-
-  Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $redis->smembers("irc:networks", $delay->begin);
-      $redis->smembers("user:$login:connections", $delay->begin);
-    },
-    sub {
-      my $delay = shift;
-      my @names = sort @{ shift || [] };
-      my %existing = map { $_, 1 } sort @{ shift || [] };
-
-      @names = ('loopback') unless @names;
-      $delay->begin(0)->(\@names);
-      $redis->get('irc:default:network', $delay->begin);
-      $redis->hgetall("irc:network:$_", $delay->begin) for grep { !$existing{$_} } @names;
-    },
-    sub {
-      my($delay, $names, $default_network, @networks) = @_;
-      my @channels;
-
-      for my $network (@networks) {
-        $network->{name} = shift @$names;
-        @channels = split /\s+/, $network->{channels} || '' if $network->{name} eq $default_network;
-      }
-
-      $self->render(
-        channels => \@channels,
-        default_network => $default_network,
-        networks => \@networks,
-      );
+      $self->$method;
     },
   );
 }
@@ -310,6 +250,87 @@ sub delete_connection {
     }
   );
 }
+
+=head2 wizard
+
+Render wizard page for first connection.
+
+=cut
+
+sub wizard {
+  my $self = shift->render_later;
+
+  $self->stash(body_class => 'tactile');
+  $self->_add_connection_form;
+}
+
+sub _add_connection {
+  my $self = shift;
+  my $validation = $self->validation;
+  my $name = $self->param('name') || '';
+
+  $validation->input->{channels} = [$self->param('channels')];
+  $validation->input->{login} = $self->session('login');
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->redis->hgetall("irc:network:$name", $delay->begin);
+    },
+    sub {
+      my($delay, $params) = @_;
+
+      $validation->input->{$_} ||= $params->{$_} for keys %$params;
+      $self->app->core->add_connection($validation, $delay->begin);
+    },
+    sub {
+      my($delay, $errors, $conn) = @_;
+
+      return $self->render if $errors;
+      return $self->redirect_to('view.network', network => 'convos');
+    },
+  );
+}
+
+sub _add_connection_form {
+  my $self = shift;
+  my $login = $self->session('login');
+  my $redis = $self->redis;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $redis->smembers("irc:networks", $delay->begin);
+      $redis->smembers("user:$login:connections", $delay->begin);
+    },
+    sub {
+      my $delay = shift;
+      my @names = sort @{ shift || [] };
+      my %existing = map { $_, 1 } sort @{ shift || [] };
+
+      @names = ('loopback') unless @names;
+      $delay->begin(0)->(\@names);
+      $redis->get('irc:default:network', $delay->begin);
+      $redis->hgetall("irc:network:$_", $delay->begin) for grep { !$existing{$_} } @names;
+    },
+    sub {
+      my($delay, $names, $default_network, @networks) = @_;
+      my @channels;
+
+      for my $network (@networks) {
+        $network->{name} = shift @$names;
+        @channels = split /\s+/, $network->{channels} || '' if $network->{name} eq $default_network;
+      }
+
+      $self->render(
+        channels => \@channels,
+        default_network => $default_network,
+        networks => \@networks,
+      );
+    },
+  );
+}
+
 
 =head1 COPYRIGHT
 

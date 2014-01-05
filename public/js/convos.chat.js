@@ -212,7 +212,7 @@
     var channels = {};
 
     $('select#name option').each(function() {
-      channels[this.value] = $(this).attr('data-channels').split(' ');
+      channels[this.value] = ($(this).attr('data-channels') || '').split(' ');
     });
 
     $('select#name').selectize({
