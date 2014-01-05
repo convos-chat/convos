@@ -77,7 +77,7 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
   ok $dom->at('li.message[data-network="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct li.message from fooman';
   is $dom->at('h3 a[href="/magnet/fooman"]')->text, 'fooman', 'got message from fooman';
   is $dom->at('.content a')->text, 'http://convos.by?a=1&b=2#yikes', 'http://convos.by#yikes';
-  is $dom->at('div.content'), '<div class="content whitespace">doe: see this &amp;amp; link: <a href="http://convos.by?a=1&amp;b=2#yikes" target="_blank">http://convos.by?a=1&amp;b=2#yikes</a> # really cool</div>', 'got link and amp';
+  is $dom->at('div.content'), '<div class="content whitespace">doe: see this &amp;amp; link: <a class="embed" href="http://convos.by?a=1&amp;b=2#yikes" target="_blank">http://convos.by?a=1&amp;b=2#yikes</a> # really cool</div>', 'got link and amp';
   like $dom->at('.timestamp')->text, qr{^\d+\. \S+ [\d\:]+$}, 'got timestamp';
 
   $connection->add_message({

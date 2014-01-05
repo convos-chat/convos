@@ -171,7 +171,7 @@ sub _parse_message {
 
   URI::Find->new(sub { 
     my $url = Mojo::Util::html_unescape(shift .''); 
-    $c->link_to($url, $url, target => '_blank');
+    $c->link_to($url, $url, target => '_blank', class => 'embed');
   })->find(\$message->{message});
 }
 
