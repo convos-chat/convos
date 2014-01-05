@@ -23,9 +23,8 @@ $t->get_ok($t->tx->res->headers->location)
   ->element_exists('select[name="name"]')
   ->element_exists('select[name="name"] option[value="efnet"]')
   ->element_exists('input[name="nick"][id="nick"]')
-  ->element_exists('select[name="channels"][id="channels"]')
-  ->element_exists('option[value="#convos"]')
-  ->text_is('button[name="action"][value="save"]', 'Start chatting')
+  ->element_exists('input[name="channels"][id="channels"][value="#convos"]')
+  ->text_is('form button', 'Start chatting')
   ;
 
 $form = { wizard => 1 };
@@ -35,7 +34,7 @@ $t->post_ok('/connection/add', form => $form)
   ->element_exists_not('div.avatar > .error')
   ->element_exists('select[name="name"] option[value="magnet"]')
   ->element_exists('input[name="nick"][value]')
-  ->element_exists('select[name="channels"]')
+  ->element_exists('input[name="channels"]')
   ;
 
 $form = { wizard => 1, name => 'freenode', nick => 'ice_cool', channels => ', #way #cool ,,,',};

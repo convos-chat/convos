@@ -175,6 +175,7 @@
     }
 
     $input.hostAndTarget($messages); // must be done after Object.equals(...) above
+    drawSettings();
     drawUI();
   };
 
@@ -210,26 +211,29 @@
 
   var drawSettings = function() {
     var channels = {};
+    var networkChange;
 
     $('select#name option').each(function() {
       channels[this.value] = ($(this).attr('data-channels') || '').split(' ');
     });
 
+    networkChange = function(val) {
+      var s = $('select#channels')[0].selectize
+      s.clearOptions();
+      s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
+      s.refreshOptions(false);
+      s.setValue(channels[val].join(' '));
+    };
+
     $('select#name').selectize({
       create: false,
       openOnFocus: true,
-      onChange: function(val) {
-        var s = $('select#channels')[0].selectize
-        s.clearOptions();
-        s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
-        s.refreshOptions(false);
-        s.setValue(channels[val].join(' '));
-      }
-    });
-    $('select#channels').selectize({
+      onChange: networkChange
+    }).trigger('change');
+
+    $('input#channels').selectize({
       delimiter: ' ',
       persist: false,
-      hideSelected: true,
       openOnFocus: true,
       create: function(value) {
         if(!/^[#&]/.test(value)) value = '#' + value;
@@ -670,7 +674,7 @@
 
   $(document).ready(function() {
     $('.login, .register').find('form input[type="text"]:first').focus();
-    drawSettings();
+    if(!$input.length) drawSettings();
   });
 
   $(window).load(function() {

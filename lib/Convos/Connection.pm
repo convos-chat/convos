@@ -49,7 +49,7 @@ NOTE: This method currently also does update.
 sub add_network {
   my $self = shift->render_later;
   my $validation = $self->validation;
-  my @channels = $self->param('channels');
+  my @channels = map { split /\s+/ } $self->param('channels');
   my($is_default, $name, $redis, $referrer);
 
   $self->stash(layout => 'tactile', channels => \@channels);
@@ -63,7 +63,7 @@ sub add_network {
   $validation->required('tls')->in(0, 1);
   $validation->optional('home_page')->like(qr{^https?://.});
   $validation->has_error and return $self->render(status => 400);
-  $validation->output->{channels} = join ' ', $self->param('channels');
+  $validation->output->{channels} = join ' ', @channels;
 
   if($validation->output->{server} =~ s!:(\d+)!!) {
     $validation->output->{port} = $1;
@@ -183,12 +183,11 @@ sub edit_network {
       my($delay, $default_network, $network) = @_;
 
       $network->{server} or return $self->render_not_found;
-      $self->param($_ => $network->{$_} || '') for qw( password tls home_page );
+      $self->param($_ => $network->{$_} || '') for qw( channels password tls home_page );
       $self->param(name => $name);
       $self->param(default => 1) if $default_network eq $name;
       $self->param(server => join ':', @$network{qw( server port )});
       $self->render(
-        channels => [ split /\s+/, $network->{channels} || '' ],
         default_network => $default_network,
         name => $name,
         network => $network,
@@ -207,7 +206,7 @@ sub edit_connection {
   my $self = shift->render_later;
   my $validation = $self->validation;
 
-  $validation->input->{channels} = [$self->param('channels')];
+  $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
   $validation->input->{server} = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
@@ -266,7 +265,7 @@ sub _add_connection {
   my $validation = $self->validation;
   my $name = $self->param('name') || '';
 
-  $validation->input->{channels} = [$self->param('channels')];
+  $validation->input->{channels} = [map { split /\s/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
 
   Mojo::IOLoop->delay(
@@ -297,37 +296,39 @@ sub _add_connection_form {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
-      $redis->smembers("irc:networks", $delay->begin);
       $redis->smembers("user:$login:connections", $delay->begin);
+      $redis->smembers("irc:networks", $delay->begin);
     },
     sub {
       my $delay = shift;
-      my @names = sort @{ shift || [] };
       my %existing = map { $_, 1 } sort @{ shift || [] };
+      my @names = sort grep { !$existing{$_} } @{ shift || [] };
 
-      @names = ('loopback') unless @names;
+      unless(@names) {
+        $self->render(default_network => '', networks => []);
+      }
+
       $delay->begin(0)->(\@names);
       $redis->get('irc:default:network', $delay->begin);
-      $redis->hgetall("irc:network:$_", $delay->begin) for grep { !$existing{$_} } @names;
+      $redis->hgetall("irc:network:$_", $delay->begin) for @names;
     },
     sub {
       my($delay, $names, $default_network, @networks) = @_;
-      my @channels;
+      my $channels = $self->param('channels');
 
       for my $network (@networks) {
         $network->{name} = shift @$names;
-        @channels = split /\s+/, $network->{channels} || '' if $network->{name} eq $default_network;
+        $channels = $network->{channels} || '' if !$channels and $network->{name} eq $default_network;
       }
 
+      $self->param(channels => $channels || $networks[0]{channels} || '');
       $self->render(
-        channels => \@channels,
         default_network => $default_network,
         networks => \@networks,
       );
     },
   );
 }
-
 
 =head1 COPYRIGHT
 
