@@ -48,7 +48,6 @@
     <button type="submit">Start chatting</button>
   % } else {
     <button type="submit">Add connection</button>
-    %= link_to 'Cancel', 'view.network', { network => 'convos' }, class => 'button'
   % }
   </div>
 % end

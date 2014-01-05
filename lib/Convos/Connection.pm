@@ -111,19 +111,12 @@ sub control {
   my $command = $self->param('cmd') || 'state';
 
   if($command eq 'state') {
-    $self->redis->hget(
-      sprintf('user:%s:connection:%s', $self->session('login'), $self->stash('name')),
-      'state',
-      sub {
-        my $redis = shift;
-        my $state = shift || 'disconnected';
-
-        $self->respond_to(
-          json => { json => { state => $state } },
-          any => { text => "$state\n" },
-        );
-      },
-    );
+    $self->_connection_state(sub {
+      $self->respond_to(
+        json => { json => { state => $_[1] } },
+        any => { text => "$_[1]\n" },
+      );
+    });
   }
   elsif($self->req->method eq 'POST' and grep { $command eq $_ } qw( start stop restart )) {
     $self->app->core->control(
@@ -148,6 +141,43 @@ sub control {
       any => { text => "Invalid request\n", status => 400 },
     );
   }
+}
+
+=head2 edit_connection
+
+Used to edit a connection.
+
+=cut
+
+sub edit_connection {
+  my $self = shift->render_later;
+  my $full_page = $self->stash('full_page');
+  my $method = $self->req->method eq 'POST' ? '_edit_connection' : '_edit_connection_form';
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+
+      if($full_page) {
+        $self->_connection_state($delay->begin);
+        $self->conversation_list($delay->begin);
+        $self->notification_list($delay->begin);
+      }
+      else {
+        $delay->begin->();
+      }
+    },
+    sub {
+      my($delay, $state) = @_;
+
+      $self->stash(
+        network => $self->stash('name'),
+        state => $state,
+      );
+
+      $self->$method;
+    },
+  );
 }
 
 =head2 edit_network
@@ -192,32 +222,6 @@ sub edit_network {
         name => $name,
         network => $network,
       );
-    },
-  );
-}
-
-=head2 edit_connection
-
-Used to edit a connection.
-
-=cut
-
-sub edit_connection {
-  my $self = shift->render_later;
-  my $full_page = $self->stash('full_page');
-  my $method = $self->req->method eq 'POST' ? '_edit_connection' : '_edit_connection_form';
-
-  Mojo::IOLoop->delay(
-    sub {
-      my($delay) = @_;
-
-      $self->conversation_list($delay->begin) if $full_page;
-      $self->notification_list($delay->begin) if $full_page;
-      $delay->begin->();
-    },
-    sub {
-      my($delay) = @_;
-      $self->$method;
     },
   );
 }
@@ -328,9 +332,21 @@ sub _add_connection_form {
   );
 }
 
+sub _connection_state {
+  my($self, $cb) = @_;
+  my $login = $self->session('login');
+  my $name = $self->stash('name');
+
+  $self->redis->hget(
+    "user:$login:connection:$name" => "state",
+    sub { $cb->($_[0], $_[1] || 'disconnected') },
+  );
+}
+
 sub _edit_connection {
   my $self = shift;
   my $validation = $self->validation;
+  my $full_page = $self->stash('full_page');
 
   $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
@@ -344,7 +360,7 @@ sub _edit_connection {
     },
     sub {
       my($delay, $errors, $changed) = @_;
-      return $self->settings if $errors;
+      return $self->render if $errors or !$full_page;
       return $self->redirect_to('view.network', network => 'convos');
     }
   );
@@ -358,12 +374,15 @@ sub _edit_connection_form {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
+      $self->_connection_state($delay->begin);
       $self->redis->hgetall("user:$login:connection:$name", $delay->begin);
     },
     sub {
-      my($delay, $connection) = @_;
+      my($delay, $state, $connection) = @_;
       $self->param($_ => $connection->{$_}) for keys %$connection;
-      $self->render;
+      $self->render(
+        state => $state,
+      );
     },
   );
 }

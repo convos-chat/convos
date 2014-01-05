@@ -501,21 +501,10 @@ div.messages {
   li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
   }
-
-  li.welcome,
-  li.setting {
-    $marginLeft: 90px;
-    overflow: visible;
-    form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }
-    label { float: left; margin-left: -$marginLeft; margin-top: 4px; }
-    p.help { display: inline; }
-  }
 }
 
 body.chat {
-  footer form {
-    display: block;
-  }
+  footer form { display: block; }
   ul.conversations li.first a {
     background-color: darken(#fff, 5%);
     font-weight: bold;
@@ -525,9 +514,7 @@ body.chat {
 
 body.convos {
   a.convos { background-color: darken(#fff, 5%); }
-  footer form {
-    display: block;
-  }
+  footer form { display: block; }
 }
 
 body.without-sidebar {
@@ -537,11 +524,11 @@ body.without-sidebar {
 }
 
 body.with-sidebar {
+  footer form { margin-right: $nickListWidth; }
   div.messages {
     margin-right: $nickListWidth;
     li.highlight { background: #fee; }
   }
-  footer form { margin-right: $nickListWidth; }
 }
 
 body.historic {

@@ -3,7 +3,7 @@
 <ul class="with-sidebar">
   <li>
     <h2>Edit <%= $name %></h2>
-    %= form_for 'connection.add', class => 'horizontal', method => 'post', begin
+    %= form_for 'connection.edit', class => 'horizontal', method => 'post', begin
       % my $err;
       <div class="form-group server">
         <label for="server">Server</label>
@@ -32,7 +32,6 @@
       </div>
       <div class="actions">
         <button type="submit">Update</button>
-        %= link_to 'Delete', 'connection.delete', class => 'button confirm'
       </div>
     % end
   </li>

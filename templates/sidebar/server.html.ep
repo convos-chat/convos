@@ -11,8 +11,8 @@
   %= link_to 'Restart', 'connection.remote', { command => 'restart' }
 </li>
 <li>
-  %= link_to 'Edit', 'connection.edit', { name => $network }
+  %= link_to 'Edit', active_class('connection.edit', { name => $network })
 </li>
 <li>
-  %= link_to 'Delete', 'connection.delete', { name => $network }
+  %= link_to 'Delete', active_class('connection.delete', { name => $network })
 </li>
