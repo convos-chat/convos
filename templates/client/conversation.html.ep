@@ -6,7 +6,13 @@
 <li id="3bf6cda3326848d426b18a65dcef1ee8" class="message" data-network="loopback" data-target="convos" data-sender="convos">
   %= image '/image/avatar-convos.jpg', alt => 'convos', class => 'avatar'
   <h3><%= link_to 'convos', 'convos' %></h3>
-  <div class="content whitespace">Welcome to <%= $target || $network %>. Start by typing "hi!" in the input field at the bottom of the page.</div>
+  <div class="content">
+  % if($target) {
+    Welcome to <%= $target || $network %>. Start by typing "hi!" in the input field at the bottom of the page.
+  % } else {
+    You are not connected to <%= $network %>. Please wait or check your connection details.
+  % }
+  </div>
   %= timestamp_span(time)
 </li>
 % }
