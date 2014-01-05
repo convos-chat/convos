@@ -177,6 +177,8 @@ div.question, li.info { background: #def; color: #158; border: 1px solid #bde; }
 div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
 div.question .button.confirm { background: darken(#def, 10%); border: 2px solid #900; }
 
+a.active { background-color: darken(#fff, 10%); }
+
 /*
  * Form elements
  */

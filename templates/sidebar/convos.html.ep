@@ -2,7 +2,7 @@
   <h3>User</h3>
 </li>
 <li>
-  %= link_to 'Edit profile', 'user.edit'
+  %= link_to 'Edit profile', active_class('user.edit')
 </li>
 <li>
   %= link_to 'Add connection', 'connection.add'
@@ -15,6 +15,6 @@
 </li>
 % for my $name (@$connections) {
 <li>
-  %= link_to $name, 'view.network', { network => $name }
+  %= link_to $name, active_class('view.network', { network => $name })
 </li>
 % }

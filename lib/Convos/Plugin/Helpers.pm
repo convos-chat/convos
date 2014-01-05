@@ -13,6 +13,22 @@ use URI::Find;
 
 =head1 HELPERS
 
+=head2 active_class
+
+Will add "active" class to a link based on url
+
+=cut
+
+sub active_class {
+  my $c = shift;
+  my $url = $c->url_for(@_);
+
+  return(
+    $url,
+    $url eq $c->req->url->path ? (class => 'active') : (),
+  );
+}
+
 =head2 avatar
 
 Used to insert an image tag.
@@ -320,6 +336,7 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
+  $app->helper(active_class => \&active_class);
   $app->helper(avatar => \&avatar);
   $app->helper(format_conversation => \&format_conversation);
   $app->helper(connection_list => \&connection_list);
