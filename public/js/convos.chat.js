@@ -272,7 +272,7 @@
     if($messages.start_time && $win.scrollTop() == 0) {
       var end_time = $messages.end_time;
       $.get(location.href.replace(/\?.*/, ''), { to: $messages.start_time }, function(data) {
-        var $ul = $(data);
+        var $ul = $(data).find('ul[data-network]');
         var $li = $ul.children('li:lt(-1)');
         var height_before_prepend = $height_from.height();
         $messages.end_time = end_time;
