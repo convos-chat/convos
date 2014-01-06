@@ -210,7 +210,6 @@ sub startup {
     delete $log->{handle}; # make sure it's fresh to file
   }
 
-  $config->{name} ||= 'Convos';
   $config->{backend}{lock_file} ||= catfile(tmpdir, 'convos-backend.lock');
 
   $self->cache; # make sure cache is ok
@@ -277,20 +276,8 @@ sub startup {
     $c->stash(layout => undef, full_page => 0) if $c->req->is_xhr or $c->param('_pjax');
   });
 
-  if($config->{backend}{embedded}) {
-    die "Can't run embedded, fork failed: $!" unless defined(my $pid = fork);
-    return $self->backend_pid($pid) if $pid;
-    my $loop=Mojo::IOLoop->singleton;
-    $self->core->start;
-    $0='convos backend';
-
-    $SIG{$_}= 'DEFAULT' for  qw(INT TERM CHLD TTIN TTOU);
-    $SIG{QUIT} = sub{ $loop->max_connnections(0)};
-    $loop->start;
-    exit 0;
-  }
-
-  Mojo::IOLoop->timer(0, sub { $self->upgrader->run });
+  $self->_start_embedded_server if $config->{backend}{embedded};
+  $self->_setup_events; # need to be called after _start_embedded_server()
 }
 
 sub _from_cpan {
@@ -302,6 +289,36 @@ sub _from_cpan {
   $self->home->parse($home);
   $self->static->paths->[0] = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
+}
+
+sub _setup_events {
+  my $self = shift;
+
+  Mojo::IOLoop->timer(0, sub { $self->upgrader->run });
+}
+
+sub _start_embedded_server {
+  my $self = shift;
+  my $parent_pid = $$;
+  my($loop, $pid);
+
+  if($pid = fork) {
+    return $self->backend_pid($pid);
+  }
+  elsif(!defined $pid) {
+    die "Can't run embedded backend, fork failed: $!";
+  }
+
+  # child
+  $loop = Mojo::IOLoop->singleton;
+  $0 = 'convos backend';
+  $SIG{$_} = 'DEFAULT' for qw( INT TERM CHLD TTIN TTOU );
+  $SIG{QUIT} = sub { $loop->max_connnections(0) };
+
+  $loop->timer(10 => sub { $self->core->start }); # Delay startup of core to avoid starting when not persistent
+  $loop->recurring(2 => sub { getppid == $parent_pid or exit 3 }); # Can't continue embedded backend when parent pid change
+  $loop->start;
+  exit 0;
 }
 
 =head1 COPYRIGHT AND LICENSE
