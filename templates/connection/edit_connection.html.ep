@@ -1,5 +1,5 @@
 % title "Edit $name";
-%# stash sidebar => 'server';
+% stash sidebar => 'convos';
 <ul class="with-sidebar">
   <li>
     <h2>Edit <%= $name %></h2>

@@ -58,26 +58,19 @@ sub conversation {
   }
 
   $self->session(name => $target ? $name : '');
-  $self->stash(target => $target);
+  $self->stash(target => $target, sidebar => 'convos');
 
   if($target =~ /^[#&]/) {
-    $self->stash->{body_class} = 'with-sidebar chat';
+    $self->stash(body_class => 'with-sidebar chat');
   }
   elsif($network eq 'convos') {
-    $self->stash->{body_class} = 'with-sidebar convos';
+    $self->stash(body_class => 'with-sidebar convos');
   }
   elsif(!$target) {
-    $self->stash->{body_class} = 'with-sidebar convos';
+    $self->stash(body_class => 'with-sidebar convos');
   }
   else {
-    $self->stash->{body_class} = 'without-sidebar chat';
-  }
-
-  if($network eq 'convos') {
-    $self->stash->{sidebar} = 'convos';
-  }
-  elsif(!$target) {
-    $self->stash->{sidebar} = 'server';
+    $self->stash(body_class => 'without-sidebar chat');
   }
 
   Mojo::IOLoop->delay(
@@ -89,11 +82,12 @@ sub conversation {
       my ($delay, @score) = @_;
       my $time = time;
 
+      $self->connection_list(sub {});
+
       if($target and not grep { $_ } @score) { # no such conversation
         return $self->route;
       }
       if($network eq 'convos') {
-        $self->connection_list($delay->begin);
         $delay->begin(0)->([ $login, 'connected' ]);
         return;
       }

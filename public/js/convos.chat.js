@@ -150,7 +150,7 @@
     nicks.clear();
 
     if($doc.filter('div.sidebar.container').length) {
-      $('div.sidebar.container ul').html($doc.filter('div.sidebar.container').find('ul').children());
+      $('div.sidebar.container ul').html($doc.filter('div.sidebar.container').find('ul:first').children());
     }
     if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
       $input.send('/names', 0).send('/topic', { 'data-history': 0 });

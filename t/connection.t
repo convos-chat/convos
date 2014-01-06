@@ -25,6 +25,8 @@ redis_do(
 {
   $t->get_ok('/connection/magnet/edit')
     ->status_is(200)
+    ->element_exists('.sidebar.container a[href="/connection/magnet/edit"]')
+    ->element_exists('.sidebar.container a[href="/connection/magnet/delete"]')
     ->element_exists('form[action="/connection/magnet/edit"][method="post"]')
     ->element_exists('form input[name="server"][value="irc.perl.org"]')
     ->element_exists('form input[name="nick"][value="doe"]')
@@ -32,12 +34,19 @@ redis_do(
     ->text_is('form .actions button', 'Update')
     ;
 
-  $form = {
-    server => 'irc.perl.org',
-    nick => 'yay',
-    tls => 1,
-  };
+  $form = { nick => '123456789012345678901234567890abcdef' };
   $t->post_ok('/connection/magnet/edit', form => $form)
+    ->element_exists('.sidebar.container a[href="/connection/magnet/edit"]')
+    ->element_exists('.sidebar.container a[href="/connection/magnet/delete"]')
+    ->element_exists('.server .error')
+    ->element_exists('.nick .error')
+    ->text_is('form .actions button', 'Update')
+    ;
+
+  $form = { server => 'irc.perl.org', nick => 'yay', tls => 1 };
+  $t->post_ok('/connection/magnet/edit', form => $form)
+    ->element_exists('.sidebar.container a[href="/connection/magnet/edit"]')
+    ->element_exists('.sidebar.container a[href="/connection/magnet/delete"]')
     ->element_exists('form[action="/connection/magnet/edit"][method="post"]')
     ->element_exists('form input[name="server"][value="irc.perl.org"]')
     ->element_exists('form input[name="nick"][value="yay"]')

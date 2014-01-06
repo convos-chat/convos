@@ -276,7 +276,7 @@ IRC commands to reflect the changes.
 
 sub update_connection {
   my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( login name password server tls ));
+  my $validation = $self->_validation($input, qw( login name nick password server tls ));
 
   if($validation->has_error) {
     $self->$cb($validation, undef);

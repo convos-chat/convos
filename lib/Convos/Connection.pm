@@ -163,9 +163,8 @@ sub edit_connection {
         $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
-      else {
-        $delay->begin->();
-      }
+
+      $self->connection_list($delay->begin);
     },
     sub {
       my($delay, $state) = @_;
@@ -367,7 +366,7 @@ sub _edit_connection {
     },
     sub {
       my($delay, $errors, $changed) = @_;
-      return $self->render if $errors or !$full_page;
+      return $self->_edit_connection_form if $errors or !$full_page;
       return $self->redirect_to('view.network', network => 'convos');
     }
   );
@@ -382,14 +381,12 @@ sub _edit_connection_form {
     sub {
       my($delay) = @_;
       $self->_connection_state($delay->begin);
-      $self->redis->hgetall("user:$login:connection:$name", $delay->begin);
+      $self->redis->hgetall("user:$login:connection:$name", $delay->begin) unless $self->req->method eq 'POST';
     },
     sub {
       my($delay, $state, $connection) = @_;
       $self->param($_ => $connection->{$_}) for keys %$connection;
-      $self->render(
-        state => $state,
-      );
+      $self->render(state => $state);
     },
   );
 }

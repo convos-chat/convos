@@ -1,3 +1,4 @@
+% my $network = stash('network') || '';
 <li>
   <h3>User</h3>
 </li>
@@ -16,5 +17,10 @@
 % for my $name (@$connections) {
 <li>
   %= link_to $name, active_class('view.network', { network => $name })
+  % if($name eq $network) {
+  <ul>
+    %= include 'sidebar/server'
+  </ul>
+  % }
 </li>
 % }

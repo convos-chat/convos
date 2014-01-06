@@ -417,6 +417,14 @@ div.sidebar.container {
   a.inactive { color: lighten(#000, 60%); }
   a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
   a:focus { background-color: darken(#fff, 8%); }
+
+  ul ul li a {
+    background-image: url(../image/fa-caret-right.png);
+    background-position: 9px 50%;
+    background-repeat: no-repeat;
+    font-size: 0.9em;
+    padding: 2px 2px 2px 20px;
+  }
 }
 
 div.add-conversation.container {
@@ -448,7 +456,7 @@ div.notifications.container {
     z-index: 2;
 
     h3, a { text-decoration: none; display: block; padding: 4px 8px; }
-    a:hover { background: darken(#eee, 5%); };
+    a:hover { background-color: darken(#eee, 5%); };
   }
 }
 
