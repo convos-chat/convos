@@ -32,11 +32,11 @@ $t->get_ok('/connection/magnet/control.json?cmd=state')
   ->status_is(200)
   ->json_is('/state', 'disconnected', 'default value for state');
 
-redis_do(hset => 'user:doe:connection:magnet', state => 'connected');
-$t->get_ok('/connection/magnet/control.json?cmd=state')
-  ->status_is(200)
-  ->json_is('/state', 'connected');
-
+{
+  redis_do(hset => 'user:doe:connection:magnet', state => 'connected');
+  $t->get_ok('/connection/magnet/control.json?cmd=state')->status_is(200)->json_is('/state', 'connected');
+  $t->get_ok('/connection/magnet/control?cmd=state')->status_is(200)->content_is("connected\n");
+}
 
 is_deeply(
   redis_do(lrange => 'core:control', 0, -1),
@@ -47,5 +47,18 @@ is_deeply(
   )],
   'commands pushed to queue',
 );
+
+{
+  $t->post_ok('/connection/magnet/control?cmd=start')
+    ->status_is(302)
+    ->header_like(Location => qr{:\d+/magnet$});
+}
+
+{
+  local *Mojolicious::Controller::csrf_token = sub { 'abc' };
+  $t->get_ok('/connection/magnet/control?cmd=start&csrf=abc')
+    ->status_is(302)
+    ->header_like(Location => qr{:\d+/magnet$});
+}
 
 done_testing;

@@ -94,10 +94,10 @@ sub add_network {
 
 =head2 control
 
-  /#host/control/start
-  /#host/control/stop
-  /#host/control/restart
-  /#host/control/state
+  POST /:name/control/start
+  POST /:name/control/stop
+  POST /:name/control/restart
+  GET /:name/control/state
 
 Used to control a connection. See L<Convos::Core/control>.
 
@@ -109,38 +109,41 @@ Special case is "state": It will return the state of the connection:
 sub control {
   my $self = shift->render_later;
   my $command = $self->param('cmd') || 'state';
+  my $name = $self->stash('name');
+  my $redirect_to = $self->url_for('view.network', { network => $name });
+
+  $self->stash(layout => undef);
 
   if($command eq 'state') {
-    $self->_connection_state(sub {
+    return $self->_connection_state(sub {
       $self->respond_to(
         json => { json => { state => $_[1] } },
         any => { text => "$_[1]\n" },
       );
     });
   }
-  elsif($self->req->method eq 'POST' and grep { $command eq $_ } qw( start stop restart )) {
-    $self->app->core->control(
-      $command,
-      $self->session('login'),
-      $self->stash('name'),
-      sub {
-        my($core, $sent) = @_;
-        my $status = $sent ? 200 : 500;
-        my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
 
-        $self->respond_to(
-          json => { json => { state => $state }, status => $status },
-          any => { text => "$state\n", status => $status },
-        );
-      },
-    );
+  # the csrf part is a hack to allow non-post request, such as the links in the server sidebar
+  if($self->req->method ne 'POST' and $self->csrf_token ne ($self->param('csrf') || '')) {
+    return $self->_invalid_control_request;
   }
-  else {
-    $self->respond_to(
-      json => { json => {}, status => 400 },
-      any => { text => "Invalid request\n", status => 400 },
-    );
-  }
+
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $self->app->core->control($command, $self->session('login'), $name, $delay->begin);
+    },
+    sub {
+      my($delay, $sent) = @_;
+      my $status = $sent ? 200 : 500;
+      my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
+
+      $self->respond_to(
+        json => { json => { state => $state }, status => $status },
+        any => sub { shift->redirect_to($redirect_to) },
+      );
+    },
+  );
 }
 
 =head2 edit_connection
@@ -388,6 +391,13 @@ sub _edit_connection_form {
       $self->param($_ => $connection->{$_}) for keys %$connection;
       $self->render(state => $state);
     },
+  );
+}
+
+sub _invalid_control_request {
+  shift->respond_to(
+    json => { json => {}, status => 400 },
+    any => { text => "Invalid request\n", status => 400 },
   );
 }
 

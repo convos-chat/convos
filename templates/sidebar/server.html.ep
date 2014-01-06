@@ -1,11 +1,12 @@
+% my $control_url = url_for('connection.control', { name => $network })->query(csrf => $self->csrf_token);
 <li>
-  %= link_to 'Connect', 'connection.remote', { command => 'start' }, ($state eq 'connected' ? (class => 'inactive') : ())
+  %= link_to 'Connect', $control_url->query([ cmd => 'start' ]), ($state eq 'connected' ? (class => 'inactive') : ())
 </li>
 <li>
-  %= link_to 'Disconnect', 'connection.remote', { command => 'stop' }, ($state eq 'disconnected' ? (class => 'inactive') : ())
+  %= link_to 'Disconnect', $control_url->query([ cmd => 'stop' ]), ($state eq 'disconnected' ? (class => 'inactive') : ())
 </li>
 <li>
-  %= link_to 'Restart', 'connection.remote', { command => 'restart' }
+  %= link_to 'Restart', $control_url->query([ cmd => 'restart' ])
 </li>
 <li>
   %= link_to 'Edit', active_class('connection.edit', { name => $network })
