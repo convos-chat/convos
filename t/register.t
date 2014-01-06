@@ -3,7 +3,17 @@ use t::Helper;
 plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
 
 my $server = $t->app->redis->subscribe('convos:user:fooman:magnet');
-my ($form, $tmp);
+my ($form, $tmp, @ctrl);
+
+# make sure we have networks in database
+$t->app->core->upgrader->once(finish => sub { Mojo::IOLoop->stop });
+$t->app->core->start;
+Mojo::IOLoop->start;
+
+{
+  no warnings 'redefine';
+  *Convos::Core::ctrl_start = sub { shift; push @ctrl, @_ };
+}
 
 $form = {login => 'foobar', password => 'barbar'};
 
@@ -45,7 +55,7 @@ $t->post_ok('/connection/add', form => $form)
   ->header_like('Location', qr{/convos$}, 'Redirect back to settings page')
   ;
 
-is redis_do([rpop => 'core:control']), 'start:fooman:freenode', 'start connection';
+is_deeply \@ctrl, [qw( fooman freenode )], 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)
   ->status_is(200)

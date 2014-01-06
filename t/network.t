@@ -3,6 +3,11 @@ my $form;
 
 plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
 
+# make sure we have networks in database
+$t->app->core->upgrader->once(finish => sub { Mojo::IOLoop->stop });
+$t->app->core->start;
+Mojo::IOLoop->start;
+
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
   [ del => 'user:doe:connections' ],

@@ -127,7 +127,6 @@ use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
-use Convos::Upgrader;
 
 our $VERSION = '0.3';
 $ENV{CONVOS_BACKEND_REV} ||= 0;
@@ -150,10 +149,6 @@ The directory is "/tmp/convos" by default.
 =head2 core
 
 Holds a L<Convos::Core> object.
-
-=head2 upgrader
-
-Holds a L<Convos::Upgrader> object.
 
 =cut
 
@@ -180,13 +175,6 @@ has core => sub {
 
   $core->redis->server($self->redis->server);
   $core;
-};
-
-has upgrader => sub {
-  my $self = shift;
-  my $upgrader = Convos::Upgrader->new(redis => $self->redis);
-  $upgrader->on(finish => sub { $self->log->info($_[1]) });
-  $upgrader;
 };
 
 =head1 METHODS
@@ -226,7 +214,7 @@ sub startup {
   });
 
   $self->_start_embedded_server if $config->{backend}{embedded};
-  $self->_setup_events; # need to be called after _start_embedded_server()
+  # any IOLoop events need to be added after _start_embedded_server()
 }
 
 sub _assets {
@@ -298,12 +286,6 @@ sub _public_routes {
   $r->post('/register/:invite', { invite => '' })->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
   $r;
-}
-
-sub _setup_events {
-  my $self = shift;
-
-  Mojo::IOLoop->timer(0, sub { $self->upgrader->run });
 }
 
 sub _start_embedded_server {

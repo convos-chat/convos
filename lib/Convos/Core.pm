@@ -15,6 +15,7 @@ use Mojo::JSON 'j';
 use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
+use Convos::Upgrader;
 use Time::HiRes qw( time );
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
@@ -38,10 +39,15 @@ Holds a L<Mojo::Log> object.
 
 Holds a L<Mojo::Redis> object.
 
+=head2 upgrader
+
+Holds a L<Convos::Upgrader> object.
+
 =cut
 
 has log => sub { Mojo::Log->new };
 has redis => sub { Mojo::Redis->new };
+has upgrader => sub { Convos::Upgrader->new(redis => $_[0]->redis) };
 
 =head1 METHODS
 
@@ -123,6 +129,13 @@ sub start {
   Mojo::IOLoop->delay(
     sub {
       my($delay) = @_;
+      $self->upgrader->once(finish => $delay->begin);
+      $self->upgrader->run;
+    },
+    sub {
+      my($delay, $message) = @_;
+
+      $self->log->info($message);
       $self->redis->del('convos:loopback:names'); # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
     },
