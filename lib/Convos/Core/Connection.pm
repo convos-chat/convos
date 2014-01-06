@@ -120,12 +120,22 @@ has _irc => sub {
   $irc->on(
     close => sub {
       my $irc = shift;
-      my $data = { status => 500, message => "Disconnected from @{[$irc->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
-      $self->{stop} and return $self->redis->hset($self->{path}, state => 'disconnected');
-      $self->_publish_and_save(server_message => $data);
-      $self->_add_convos_message($data);
-      $self->redis->hset($self->{path}, state => 'reconneting');
-      $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
+      my $data;
+
+      if($self->{stop}) {
+        $data = { status => 200, message => 'Disconnected.' };
+        $self->redis->hset($self->{path}, state => 'disconnected');
+        $self->_publish_and_save(server_message => $data);
+        $self->_add_convos_message($data);
+        return;
+      }
+      else {
+        $data = { status => 500, message => "Disconnected from @{[$irc->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds." };
+        $self->_publish_and_save(server_message => $data);
+        $self->_add_convos_message($data);
+        $self->redis->hset($self->{path}, state => 'reconneting');
+        $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
+      }
     }
   );
   $irc->on(
