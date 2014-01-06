@@ -117,7 +117,7 @@
         return;
       }
     }
-    else if(this.hasClass('sidebar')) {
+    else if(this.hasClass('nicks')) {
       nickList(this);
       return;
     }
