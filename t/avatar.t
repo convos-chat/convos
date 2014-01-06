@@ -15,7 +15,7 @@ my $connection = Convos::Core::Connection->new(name => 'magnet', login => 'doe')
 
 redis_do(
   [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ zadd => 'user:doe:conversations', time, 'convos:2epl:00:23convos', time - 1, 'convos:2epl:00batman' ],
+  [ zadd => 'user:doe:conversations', time, 'magnet:00:23convos', time - 1, 'magnet:00batman' ],
   [ sadd => 'user:doe:connections', 'magnet' ],
   [ hmset => 'user:doe:connection:magnet', nick => 'doe' ],
 );
@@ -31,7 +31,8 @@ redis_do(
 
 $connection->redis($t->app->redis)->_irc(dummy_irc());
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
-$t->websocket_ok('/socket');
+$t->get_ok('/')->status_is(302)->header_like(Location => qr{:\d+/magnet/%23convos});
+$t->websocket_ok('/socket')->status_is(101);
 
 {
   $connection->add_message({

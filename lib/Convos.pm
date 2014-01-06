@@ -203,6 +203,7 @@ sub startup {
 
   $self->_from_cpan;
   $config = $self->plugin('Config');
+  $config->{backend}{lock_file} ||= catfile(tmpdir, 'convos-backend.lock');
 
   if(my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
@@ -210,18 +211,26 @@ sub startup {
     delete $log->{handle}; # make sure it's fresh to file
   }
 
-  $config->{backend}{lock_file} ||= catfile(tmpdir, 'convos-backend.lock');
-
   $self->cache; # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
+  $self->secrets($config->{secrets} || [$config->{secret} || die '"secrets" is required in config file']);
   $self->sessions->default_expiration(86400 * 30);
+  $self->_assets($config);
+  $self->_public_routes;
+  $self->_private_routes;
 
-  if($self->can('secrets')) {
-    $self->secrets($config->{secrets} || [$config->{secret} || die '"secret" is required in config file']);
-  }
-  else {
-    $self->secret($config->{secret} || die '"secret" is required in config file');
-  }
+  $self->defaults(full_page => 1);
+  $self->hook(before_dispatch => sub {
+    my $c = shift;
+    $c->stash(layout => undef, full_page => 0) if $c->req->is_xhr or $c->param('_pjax');
+  });
+
+  $self->_start_embedded_server if $config->{backend}{embedded};
+  $self->_setup_events; # need to be called after _start_embedded_server()
+}
+
+sub _assets {
+  my($self, $config) = @_;
 
   $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
   $self->asset('convos.css', '/sass/main.scss');
@@ -238,46 +247,6 @@ sub startup {
     '/js/jquery.helpers.js',
     '/js/convos.chat.js',
   );
-
-  # Normal route to controller
-  my $r = $self->routes->route->to(layout => 'tactile');
-  $r->get('/')->to('client#route')->name('index');
-  $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
-  $r->get('/login')->to('user#login')->name('login');
-  $r->post('/login')->to('user#login');
-  $r->get('/register/:invite', { invite => '' })->to('user#register')->name('register');;
-  $r->post('/register/:invite', { invite => '' })->to('user#register');
-  $r->get('/logout')->to('user#logout')->name('logout');
-
-  my $private_r = $r->bridge('/')->to('user#auth', layout => 'view');
-  $private_r->websocket('/socket')->to('chat#socket')->name('socket');
-  $private_r->get('/chat/command-history')->to('client#command_history');
-  $private_r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)->name('conversation.list');
-  $private_r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)->name('notification.list');
-  $private_r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
-  $private_r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
-  $private_r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
-  $private_r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
-  $private_r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
-  $private_r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
-  $private_r->any('/network/add')->to('connection#add_network')->name('network.add');
-  $private_r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
-  $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
-  $private_r->any('/profile')->to('user#edit')->name('user.edit');
-  $private_r->get('/wizard')->to('connection#wizard')->name('wizard');
-
-  my $network_r = $private_r->route('/:network');
-  $network_r->get('/*target')->to('client#conversation')->name('view');
-  $network_r->get('/')->to('client#conversation')->name('view.network');
-
-  $self->defaults(full_page => 1);
-  $self->hook(before_dispatch => sub {
-    my $c = shift;
-    $c->stash(layout => undef, full_page => 0) if $c->req->is_xhr or $c->param('_pjax');
-  });
-
-  $self->_start_embedded_server if $config->{backend}{embedded};
-  $self->_setup_events; # need to be called after _start_embedded_server()
 }
 
 sub _from_cpan {
@@ -289,6 +258,46 @@ sub _from_cpan {
   $self->home->parse($home);
   $self->static->paths->[0] = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
+}
+
+sub _private_routes {
+  my $self = shift;
+  my $r = $self->routes->route->bridge('/')->to('user#auth', layout => 'view');
+  my $network_r;
+
+  $r->websocket('/socket')->to('chat#socket')->name('socket');
+  $r->get('/chat/command-history')->to('client#command_history');
+  $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)->name('conversation.list');
+  $r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)->name('notification.list');
+  $r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
+  $r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
+  $r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
+  $r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
+  $r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
+  $r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
+  $r->any('/network/add')->to('connection#add_network')->name('network.add');
+  $r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
+  $r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
+  $r->any('/profile')->to('user#edit')->name('user.edit');
+  $r->get('/wizard')->to('connection#wizard')->name('wizard');
+
+  $network_r = $r->route('/:network');
+  $network_r->get('/*target')->to('client#conversation')->name('view');
+  $network_r->get('/')->to('client#conversation')->name('view.network');
+}
+
+sub _public_routes {
+  my $self = shift;
+  my $r = $self->routes->route->to(layout => 'tactile');
+
+  $r->get('/')->to('client#route')->name('index');
+  $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
+  $r->get('/login')->to('user#login')->name('login');
+  $r->post('/login')->to('user#login');
+  $r->get('/register/:invite', { invite => '' })->to('user#register')->name('register');;
+  $r->post('/register/:invite', { invite => '' })->to('user#register');
+  $r->get('/logout')->to('user#logout')->name('logout');
+  $r;
 }
 
 sub _setup_events {
