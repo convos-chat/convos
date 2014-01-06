@@ -259,11 +259,18 @@ Render wizard page for first connection.
 =cut
 
 sub wizard {
-  shift->_add_connection_form;
+  my $self = shift->render_later;
+
+  $self->stash(
+    layout => 'tactile',
+    template => 'connection/wizard',
+  );
+
+  $self->_add_connection_form;
 }
 
 sub _add_connection {
-  my $self = shift->render_later;
+  my $self = shift;
   my $validation = $self->validation;
   my $name = $self->param('name') || '';
 
@@ -284,14 +291,14 @@ sub _add_connection {
     sub {
       my($delay, $errors, $conn) = @_;
 
-      return $self->render if $errors;
-      return $self->redirect_to('view.network', network => 'convos');
+      return $self->redirect_to('view.network', network => 'convos') unless $errors;
+      return $self->param('wizard') ? $self->wizard : $self->_add_connection_form;
     },
   );
 }
 
 sub _add_connection_form {
-  my $self = shift->render_later;
+  my $self = shift;
   my $login = $self->session('login');
   my $redis = $self->redis;
 

@@ -68,7 +68,6 @@ sub connection_list {
     sub {
       my($delay, $connections) = @_;
 
-      $self->redirect_to('wizard') unless $connections and @$connections;
       $self->stash(connections => $connections || []);
       $self->$cb;
     },
