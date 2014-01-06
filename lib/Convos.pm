@@ -208,7 +208,7 @@ sub startup {
   if(my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
     $self->log->path($log->{file}) if $log->{file} ||= $log->{path};
-    delete $log->{handle}; # make sure it's fresh to file
+    delete $self->log->{handle}; # make sure it's fresh to file
   }
 
   $self->cache; # make sure cache is ok
