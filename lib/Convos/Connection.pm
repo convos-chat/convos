@@ -359,6 +359,7 @@ sub _edit_connection {
 
   $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
+  $validation->input->{name} = $self->stash('name');
   $validation->input->{server} = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
 
@@ -369,8 +370,8 @@ sub _edit_connection {
     },
     sub {
       my($delay, $errors, $changed) = @_;
-      return $self->_edit_connection_form if $errors or !$full_page;
-      return $self->redirect_to('view.network', network => 'convos');
+      return $self->_edit_connection_form if $errors;
+      return $self->redirect_to('view.network', network => $self->stash('name'));
     }
   );
 }

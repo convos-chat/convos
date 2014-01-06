@@ -71,7 +71,6 @@ $core->start;
 
 {
   my $conn = {
-    channels => ['#foo'],
     login => 'batman',
     name => 'magnet',
     nick => 'bruce',
@@ -80,7 +79,7 @@ $core->start;
   };
 
   @messages = ();
-  $stop = sub { /dummy-uuid PART/ };
+  $stop = sub { /NICK bruce/ };
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
   is $res[1], undef, 'update_connection() magnet' or diag Data::Dumper::Dumper($res[1]->{error});
@@ -88,20 +87,11 @@ $core->start;
   is_deeply $res[2], $conn, 'update_connection() returned connection details';
 
   Mojo::IOLoop->start unless @messages == 3;
-  is_deeply(
-    \@messages,
-    [
-      'dummy-uuid NICK bruce',
-      'dummy-uuid JOIN #foo',
-      'dummy-uuid PART #mojo',
-    ],
-    'sent NICK + JOIN + PART'
-  );
+  is_deeply \@messages, ['dummy-uuid NICK bruce'], 'sent NICK + JOIN + PART';
 }
 
 {
   my $conn = {
-    channels => ['#foo'],
     login => 'batman',
     name => 'magnet',
     nick => 'bruce',

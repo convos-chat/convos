@@ -261,7 +261,6 @@ sub add_connection {
 =head2 update_connection
 
   $self->update_connection({
-    channels => [ '#foo', '#bar', '...' ],
     login => $str,
     name => $str,
     nick => $str,
@@ -283,12 +282,10 @@ sub update_connection {
     return $self;
   }
 
-  $validation->optional($_) for qw( nick user );
-  $validation->output->{nick} ||= $validation->output->{login};
+  $validation->optional('user');
   $validation->output->{user} ||= $validation->output->{login};
 
   my($login, $name) = $validation->param([qw( login name )]);
-  my @channels = $self->_parse_channels(delete $validation->input->{channels});
   my $conn = Convos::Core::Connection->new(%{ $validation->output });
   my $redis = $self->redis;
 
@@ -326,18 +323,6 @@ sub update_connection {
       if($current->{nick} ne $conn->{nick}) {
         warn "[core:$login] NICK $conn->{nick}\n" if DEBUG;
         $redis->publish("convos:user:$login:$name", "dummy-uuid NICK $conn->{nick}");
-      }
-
-      for my $channel (@channels) {
-        next if delete $existing_channels{$channel};
-        $redis->publish("convos:user:$login:$name", "dummy-uuid JOIN $channel");
-        $redis->zadd("user:$login:conversations", time, as_id $name, $channel);
-        warn "[core:$login] JOIN $channel\n" if DEBUG;
-      }
-      for my $channel (keys %existing_channels) {
-        $redis->publish("convos:user:$login:$name", "dummy-uuid PART $channel");
-        $redis->zrem("user:$login:conversations", as_id $name, $channel);
-        warn "[core:$login] PART $channel\n" if DEBUG;
       }
 
       $self->$cb(undef, $conn);

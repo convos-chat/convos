@@ -45,13 +45,8 @@ redis_do(
 
   $form = { server => 'irc.perl.org', nick => 'yay', tls => 1 };
   $t->post_ok('/connection/magnet/edit', form => $form)
-    ->element_exists('.sidebar.container a[href="/connection/magnet/edit"]')
-    ->element_exists('.sidebar.container a[href="/connection/magnet/delete"]')
-    ->element_exists('form[action="/connection/magnet/edit"][method="post"]')
-    ->element_exists('form input[name="server"][value="irc.perl.org"]')
-    ->element_exists('form input[name="nick"][value="yay"]')
-    ->element_exists('form input[name="tls"][value="1"][checked="checked"]')
-    ->text_is('form .actions button', 'Update')
+    ->status_is(302)
+    ->header_like(Location => qr{:\d+/magnet$})
     ;
 }
 
