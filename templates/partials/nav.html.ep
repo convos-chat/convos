@@ -8,7 +8,7 @@
     <i class="icon-chevron-down"></i>
   % end
   <div class="right">
-    %= link_to 'add_conversation', title => 'Add conversation',  class => 'add-conversation toggler', 'data-focus' => 'input', 'data-toggle' => 'div.add-conversation', begin
+    %= link_to 'add_conversation', title => 'Add conversation',  class => 'add-conversation toggler', 'data-focus' => 'input[name="channel"]', 'data-toggle' => 'div.add-conversation', begin
       <i class="icon-plus">+</i>
     % end
     % @class = qw( notifications toggler );
