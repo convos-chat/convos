@@ -7,6 +7,7 @@ Convos::Plugin::Helpers - Mojo's little helpers
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
+use Mojo::JSON 'j';
 use Convos::Core::Util qw( format_time id_as);
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use URI::Find;
