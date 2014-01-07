@@ -17,7 +17,7 @@ $t->get_ok('/oembed?url=http://google.com')
 # login
 $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })->status_is(302);
 
-$t->get_ok('/oembed?url=http://google.com')->status_is(404);
+$t->get_ok('/oembed?url=http://google.com')->status_is(204);
 
 $t->get_ok('/oembed?url=http://catoverflow.com/cats/MG5CCEJ.gif')
   ->status_is(200)
