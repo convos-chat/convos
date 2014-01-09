@@ -130,17 +130,12 @@ use Convos::Core::Util ();
 use Convos::Upgrader;
 
 our $VERSION = '0.3005';
-$ENV{CONVOS_BACKEND_REV} ||= 0;
 
 =head1 ATTRIBUTES
 
 =head2 archive
 
 Holds a L<Convos::Core::Archive> object.
-
-=head2 backend_pid
-
-The pid for the backend process, if running embedded.
 
 =head2 cache
 
@@ -161,8 +156,6 @@ has archive => sub {
   my $self = shift;
   Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
-
-has backend_pid => 0;
 
 has cache => sub {
   my $self = shift;
@@ -211,7 +204,6 @@ sub startup {
   }
 
   $config->{name} ||= 'Convos';
-  $config->{backend}{lock_file} ||= catfile(tmpdir, 'convos-backend.lock');
   $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
   $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
 
@@ -274,8 +266,8 @@ sub startup {
   $host_r->get('/*target')->to('client#view')->name('view');
   $host_r->get('/')->to('client#view')->name('view.server');
 
-  $self->_start_embedded_server if $config->{backend}{embedded};
-  Mojo::IOLoop->timer(0, sub { $self->upgrader->run });
+  Mojo::IOLoop->timer(5 => sub { $self->_start_backend }); # Delay startup of core to avoid starting when not persistent
+  Mojo::IOLoop->timer(0 => sub { $self->upgrader->run });
 }
 
 sub _from_cpan {
@@ -289,37 +281,61 @@ sub _from_cpan {
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
 }
 
-sub _start_embedded_server {
+sub _start_backend {
   my $self = shift;
-  my $parent_pid = $$;
-  my($loop, $pid);
+  my $redis = $self->redis;
 
-  if($pid = fork) {
-    $self->log->info("Started embedded convos backend. ($pid)");
-    return $self->backend_pid($pid);
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $redis->getset('convos:backend:lock' => 1, $delay->begin);
+      $redis->get('convos:backend:pid', $delay->begin);
+      $redis->expire('convos:backend:lock' => 5);
+    },
+    sub {
+      my($delay, $lock, $pid) = @_;
+
+      if($pid and kill 0, $pid) {
+        $self->log->debug('Backend is running.');
+      }
+      elsif($lock) {
+        $self->log->debug('Another process is starting the backend.');
+      }
+      elsif($SIG{USR2}) { # hypnotoad
+        $self->log->debug('Starting backend as external process.');
+        $pid = $self->_start_backend_as_external_app;
+      }
+      elsif($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) { # forced or ./script/convos daemon
+        $pid = $$;
+        $self->log->debug('Starting embedded backend.');
+        $self->core->start;
+      }
+      else { # morbo
+        $self->log->warn('Backend is not running and it will not be automatically started.');
+      }
+
+      $redis->del('convos:backend:lock') unless $lock;
+      $redis->set('convos:backend:pid' => $pid);
+    },
+  );
+}
+
+sub _start_backend_as_external_app {
+  my $self = shift;
+  my $loop;
+
+  if(my $pid = fork) {
+    $self->log->info("Started external backend. ($pid)");
+    return $pid;
   }
   elsif(!defined $pid) {
-    die "Can't run embedded backend, fork failed: $!";
+    $self->log->error("Can't start external backend, fork failed: $!");
+    return;
   }
 
-  # child
-  $loop = Mojo::IOLoop->singleton;
-  $0 = 'convos backend';
-  $SIG{$_} = 'DEFAULT' for qw( INT TERM CHLD TTIN TTOU );
-  $SIG{QUIT} = sub { $loop->max_connnections(0) };
-
-  # Delay startup of core to avoid starting when not persistent
-  $loop->timer(10 => sub { $self->core->start });
-
-  # Can't continue embedded backend when parent pid change
-  $loop->recurring($ENV{POLL_FOR_INVALID_PARENT} || 2, sub {
-    return if getppid == $parent_pid;
-    $self->log->warn("Parent pid (@{[getppid]} != $parent_pid) changed! Force exit embedded convos backend");
-    exit 3;
-  });
-
-  $loop->start;
-  exit 0;
+  { exec $0 => 'backend' }
+  $self->log->error("Failed to exec backend: $!");
+  exit;
 }
 
 =head1 COPYRIGHT AND LICENSE
