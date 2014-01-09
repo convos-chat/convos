@@ -274,23 +274,7 @@ sub startup {
   $host_r->get('/*target')->to('client#view')->name('view');
   $host_r->get('/')->to('client#view')->name('view.server');
 
-  if($config->{backend}{embedded}) {
-    die "Can't run embedded backend, fork failed: $!" unless defined(my $pid = fork);
-    return $self->backend_pid($pid) if $pid;
-
-    # child
-    my $parent_pid = getppid;
-    my $loop = Mojo::IOLoop->singleton;
-    $0 = 'convos backend';
-    $SIG{$_} = 'DEFAULT' for qw( INT TERM CHLD TTIN TTOU );
-    $SIG{QUIT} = sub { $loop->max_connnections(0) };
-    # Delay startup of core to avoid starting when not persistent
-    $loop->timer( 10 => sub {$self->core->start });
-    $loop->recurring(1 => sub { getppid == $parent_pid or exit 3 }); # Can't continue embedded backend when parent pid change
-    $loop->start;
-    exit 0;
-  }
-
+  $self->_start_embedded_server if $config->{backend}{embedded};
   Mojo::IOLoop->timer(0, sub { $self->upgrader->run });
 }
 
@@ -303,6 +287,39 @@ sub _from_cpan {
   $self->home->parse($home);
   $self->static->paths->[0] = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
+}
+
+sub _start_embedded_server {
+  my $self = shift;
+  my $parent_pid = $$;
+  my($loop, $pid);
+
+  if($pid = fork) {
+    $self->log->info("Started embedded convos backend. ($pid)");
+    return $self->backend_pid($pid);
+  }
+  elsif(!defined $pid) {
+    die "Can't run embedded backend, fork failed: $!";
+  }
+
+  # child
+  $loop = Mojo::IOLoop->singleton;
+  $0 = 'convos backend';
+  $SIG{$_} = 'DEFAULT' for qw( INT TERM CHLD TTIN TTOU );
+  $SIG{QUIT} = sub { $loop->max_connnections(0) };
+
+  # Delay startup of core to avoid starting when not persistent
+  $loop->timer(10 => sub { $self->core->start });
+
+  # Can't continue embedded backend when parent pid change
+  $loop->recurring($ENV{POLL_FOR_INVALID_PARENT} || 2, sub {
+    return if getppid == $parent_pid;
+    $self->log->warn("Parent pid (@{[getppid]} != $parent_pid) changed! Force exit embedded convos backend");
+    exit 3;
+  });
+
+  $loop->start;
+  exit 0;
 }
 
 =head1 COPYRIGHT AND LICENSE
