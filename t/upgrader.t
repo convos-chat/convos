@@ -66,10 +66,7 @@ my($finish, $err);
 { # v0_3004
   is_deeply(
     [ sort @{ redis_do(zrange => 'user:jhthorsen:conversations', 0, -1) || [] } ],
-    [ qw(
-      convos-by:00marcus
-      magnet:00:23convos
-    ) ],
+    [ 'convos-by:00marcus', 'magnet:00:23convos' ],
     'converted conversation names',
   );
   is_deeply(
@@ -80,19 +77,14 @@ my($finish, $err);
   is_deeply(
     [ sort @{ redis_do(keys => 'user:jhthorsen:connection*') || [] } ],
     [
-      qw(
-        user:jhthorsen:connection:convos-by
-        user:jhthorsen:connection:convos-by:marcus:msg
-        user:jhthorsen:connection:magnet
-        user:jhthorsen:connection:magnet:#convos:msg
-        user:jhthorsen:connections
-      )
+      'user:jhthorsen:connection:convos-by',
+      'user:jhthorsen:connection:convos-by:marcus:msg',
+      'user:jhthorsen:connection:magnet',
+      'user:jhthorsen:connection:magnet:#convos:msg',
+      'user:jhthorsen:connections',
     ],
     'converted connection keys',
   );
-
-  diag join "\n", sort @{ redis_do(smembers => 'user:jhthorsen:connections') };
-  diag join "\n", sort @{ redis_do( keys => 'user:jhthorsen:connection*') };
 }
 
 done_testing;

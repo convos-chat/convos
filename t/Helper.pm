@@ -9,6 +9,11 @@ BEGIN {
   $ENV{MOJO_MODE} = 'testing';
   $ENV{CONVOS_DEBUG} //= $ENV{TEST_VERBOSE};
   $ENV{REDIS_TEST_DATABASE} ||= '';
+  $ENV{CONVOS_BACKUP_FILE} = 'backup.redis';
+}
+
+END {
+  unlink $ENV{CONVOS_BACKUP_FILE};
 }
 
 my($redis, $t);
