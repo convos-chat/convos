@@ -89,7 +89,7 @@ sub _next {
 
   $step->on(finish => sub { $self->{stepped}++; $self->_next; });
   $step->on(error => sub { $self->error(pop); });
-  $step->_run;
+  $step->run;
 }
 
 sub _steps {

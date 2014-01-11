@@ -6,7 +6,8 @@ Convos::Upgrader::v0_3002 - Upgrade instructions to version 0.3002
 
 =head1 DESCRIPTION
 
-This is currently a dummy module to make the unittest do anything.
+This upgrade step will add predefined networks to the database. These
+networks are used to simplify the connection process.
 
 =cut
 
@@ -37,7 +38,15 @@ my %NETWORKS = (
   },
 );
 
-sub _run {
+=head1 METHODS
+
+=head2 run
+
+Called by L<Convos::Upgrader>.
+
+=cut
+
+sub run {
   my $self = shift;
   my $delay = $self->redis->ioloop->delay;
   my $guard = $delay->begin;

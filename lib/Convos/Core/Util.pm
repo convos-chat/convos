@@ -42,7 +42,7 @@ sub as_id {
   join ':00', map {
     local $_ = $_; # local $_ is for changing constants and not changing input
     s/:/:3a/g;
-    s/([^\w:])/{ sprintf ':%02x', ord $1 }/ge;
+    s/([^\w:-])/{ sprintf ':%02x', ord $1 }/ge;
     $_;
   } grep {
     length $_;
