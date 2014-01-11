@@ -16,7 +16,6 @@ no warnings "utf8";
 use Mojo::Log;
 use Mojo::UserAgent;
 use Parse::IRC ();
-use Unicode::UTF8;
 use Time::Piece;
 
 my $hostname;
