@@ -128,6 +128,7 @@ use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
 use Convos::Upgrader;
+use POSIX ();
 
 our $VERSION = '0.3005';
 
@@ -194,6 +195,7 @@ sub startup {
   my $self = shift;
   my $config;
 
+  $self->{convos_executable_path} = $0; # required to work from within toadfarm
   $self->_from_cpan;
   $config = $self->plugin('Config');
 
@@ -293,7 +295,7 @@ sub _start_backend {
       $redis->expire('convos:backend:lock' => 5);
     },
     sub {
-      my($delay, $lock, $pid) = @_;
+      my($delay, $locked, $pid) = @_;
 
       # This "hack" will restart the external backend each time we
       # restart hypnotoad. I want to replace this later on with
@@ -306,45 +308,64 @@ sub _start_backend {
       }
 
       if($pid and kill 0, $pid) {
-        $self->log->debug('Backend is running.');
+        $self->log->debug("Backend $pid is running.");
       }
-      elsif($lock) {
+      elsif($locked) {
         $self->log->debug('Another process is starting the backend.');
       }
       elsif($SIG{USR2}) { # hypnotoad
-        $self->log->debug('Starting backend as external process.');
-        $pid = $self->_start_backend_as_external_app;
+        $self->_start_backend_as_external_app;
       }
       elsif($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) { # forced or ./script/convos daemon
-        $pid = $$;
         $self->log->debug('Starting embedded backend.');
+        $redis->set('convos:backend:pid' => $$);
         $self->core->start;
       }
       else { # morbo
         $self->log->warn('Backend is not running and it will not be automatically started.');
       }
 
-      $redis->del('convos:backend:lock') unless $lock;
-      $redis->set('convos:backend:pid' => $pid);
+      $redis->del('convos:backend:lock') unless $locked;
     },
   );
 }
 
 sub _start_backend_as_external_app {
   my $self = shift;
-  my $loop;
+
+  local $0 = $self->{convos_executable_path};
+
+  if(!-x $0) {
+    $self->log->error("Cannot execute $0: Not executable");
+    return;
+  }
 
   if(my $pid = fork) {
-    $self->log->info("Started external backend. ($pid)");
-    return $pid;
+    $self->log->debug("Starting $0 backend with double fork");
+    wait; # wait for "fork and exit" below
+    $self->log->info("Detached $0 backend ($pid=$?)");
+    return $pid; # parent process returns
   }
   elsif(!defined $pid) {
     $self->log->error("Can't start external backend, fork failed: $!");
     return;
   }
 
+  # start detaching new process from hypnotoad
+  if(!POSIX::setsid) {
+    $self->log->error("Can't start a new session for backend: $!");
+    exit $!;
+  }
+
+  # detach child from hypnotoad or die trying
+  defined(fork and exit) or die;
+
+  # replace fork with "convos backend" process
+  delete $ENV{MOJO_CONFIG} if $ENV{TOADFARM_APPLICATION_CLASS};
+  $ENV{CONVOS_BACKEND_EMBEDDED} = 1;
+  $self->log->debug("Replacing current process with $0 backend");
   { exec $0 => 'backend' }
-  $self->log->error("Failed to exec backend: $!");
+  $self->log->error("Failed to replace current process: $!");
   exit;
 }
 

@@ -12,7 +12,6 @@ use Mojolicious::Plugin::AssetPack;
 unlink glob 'public/packed/convos-*';
 $ENV{MOJO_MODE} = 'production';
 my $t = Test::Mojo->new('Convos');
-kill 9,$t->app->backend_pid;
 my($css, $js);
 
 {

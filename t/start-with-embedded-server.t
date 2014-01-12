@@ -1,8 +1,5 @@
-BEGIN {
-  *CORE::GLOBAL::exec = sub { sleep 100 };
-}
-
 use t::Helper;
+use Mojo::Util qw( spurt );
 
 plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
 
@@ -18,6 +15,21 @@ $t->app->log->on(message => sub { shift; shift; push @log, @_; });
     $core->redis->incr('convos:backend:started');
     Mojo::IOLoop->stop unless $$ == $t_pid;
   };
+}
+
+{
+  my $backend = $t->app->home->rel_file('backend.tmp');
+  like $t->app->{convos_executable_path}, qr{/start-with-embedded-server\.t$}, 'convos_executable_path';
+  $t->app->{convos_executable_path} = $backend;
+  spurt <<"  APP", $backend;
+#!$^X
+BEGIN { \$ENV{REDIS_TEST_DATABASE} = "$ENV{REDIS_TEST_DATABASE}" }
+use lib 'lib';
+use t::Helper;
+redis_do set => 'convos:backend:pid' => \$\$;
+sleep 4;
+  APP
+  chmod 0770, $backend;
 }
 
 {
@@ -39,7 +51,7 @@ $t->app->log->on(message => sub { shift; shift; push @log, @_; });
 
 {
   start_backend(0.1);
-  like $log[-1], qr{Backend is running}, 'Backend is running';
+  like $log[-1], qr{Backend \d+ is running}, 'Backend is running';
 }
 
 {
@@ -50,28 +62,21 @@ $t->app->log->on(message => sub { shift; shift; push @log, @_; });
 }
 
 {
+  my $pid;
   local $SIG{USR2} = 'DEFAULT';
+
   redis_do(del => 'convos:backend:lock');
-  start_backend(0.1);
-  my $pid = redis_do(get => 'convos:backend:pid');
+  Mojo::IOLoop->recurring(0.05 => sub {
+    $pid and Mojo::IOLoop->stop;
+    redis_do->get('convos:backend:pid' => sub { $pid = pop });
+  });
+  start_backend(1);
+
   is redis_do(get => 'convos:backend:lock'), undef, 'external: lock is not set';
   like $pid, qr{^\d+$}, 'external: pid is set';
-  ok kill(QUIT => $pid), 'external: sent QUIT';
+  ok kill(9, $pid), 'external: killed';
 
-  Mojo::IOLoop->timer(1 => sub {
-    diag "Timeout!";
-    kill 9, $pid;
-    Mojo::IOLoop->stop;
-  });
-
-  Mojo::IOLoop->recurring(0.01 => sub {
-    kill 0, $pid and return;
-    Mojo::IOLoop->stop;
-  });
-
-  Mojo::IOLoop->start;
-
-  ok !kill(0 => $pid), 'external: backend completed';
+  unlink 'backend.tmp';
 }
 
 done_testing;
