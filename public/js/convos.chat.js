@@ -149,9 +149,13 @@
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
-    if($doc.filter('div.sidebar.container').length) {
-      $('div.sidebar.container ul').html($doc.filter('div.sidebar.container').find('ul:first').children());
-    }
+    $doc.filter('form.connection-control').each(function() {
+      $('form.connection-control').attr('action', this.action);
+    });
+    $doc.find('div.sidebar.container').each(function() {
+      $('div.sidebar.container ul').html($(this).find('ul:first').children());
+    });
+
     if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
       $input.send('/names', 0).send('/topic', { 'data-history': 0 });
     }

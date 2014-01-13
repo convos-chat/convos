@@ -39,6 +39,22 @@ $t->get_ok('/magnet/batman')
   ->status_is(200)
   ->element_exists('body.without-sidebar')
   ->element_exists_not('body.with-sidebar')
+  ->element_exists('head script')
+  ->element_exists('nav')
+  ->element_exists('.notifications.container')
+  ->element_exists('.add-conversation.container')
+  ->element_exists('.goto-bottom')
+  ;
+
+$t->get_ok('/magnet/batman?_pjax=some.element')
+  ->status_is(200)
+  ->element_exists('body.without-sidebar')
+  ->element_exists_not('body.with-sidebar')
+  ->element_exists_not('head script')
+  ->element_exists_not('nav')
+  ->element_exists_not('.notifications.container')
+  ->element_exists_not('.add-conversation.container')
+  ->element_exists_not('.goto-bottom')
   ;
 
 $t->get_ok('/')

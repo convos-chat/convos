@@ -54,11 +54,4 @@ is_deeply(
     ->header_like(Location => qr{:\d+/magnet$});
 }
 
-{
-  local *Mojolicious::Controller::csrf_token = sub { 'abc' };
-  $t->get_ok('/connection/magnet/control?cmd=start&csrf=abc')
-    ->status_is(302)
-    ->header_like(Location => qr{:\d+/magnet$});
-}
-
 done_testing;

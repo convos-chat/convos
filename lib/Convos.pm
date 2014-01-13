@@ -203,7 +203,7 @@ sub startup {
   $self->defaults(full_page => 1);
   $self->hook(before_dispatch => sub {
     my $c = shift;
-    $c->stash(layout => undef, full_page => 0) if $c->req->is_xhr or $c->param('_pjax');
+    $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
   });
 
   Mojo::IOLoop->timer(5 => sub { $self->_start_backend; });

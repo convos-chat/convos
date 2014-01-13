@@ -123,8 +123,7 @@ sub control {
     });
   }
 
-  # the csrf part is a hack to allow non-post request, such as the links in the server sidebar
-  if($self->req->method ne 'POST' and $self->csrf_token ne ($self->param('csrf') || '')) {
+  if($self->req->method ne 'POST') {
     return $self->_invalid_control_request;
   }
 

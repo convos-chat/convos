@@ -414,16 +414,42 @@ div.sidebar.container {
 
   h3, a { color: #000; text-decoration: none; padding: 4px; display: block; }
   h3 { font-size: 1em; margin: 0; };
-  a.inactive { color: lighten(#000, 60%); }
-  a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
-  a:focus { background-color: darken(#fff, 8%); }
+  button.inactive, a.inactive { color: lighten(#000, 60%); }
 
-  ul ul li a {
-    background-image: url(../image/fa-caret-right.png);
-    background-position: 9px 50%;
-    background-repeat: no-repeat;
-    font-size: 0.9em;
-    padding: 2px 2px 2px 20px;
+  ul ul li {
+    a, button {
+      background-image: url(../image/fa-caret-right.png);
+      background-position: 9px 50%;
+      background-repeat: no-repeat;
+      font-size: 0.9em;
+      height: 2em;
+      padding: 2px 2px 2px 20px;
+      border: 0;
+    }
+  }
+
+  a:hover, a:active, a:focus {
+    background-color: darken(#eee, 5%);
+    color: #000;
+    outline: 0;
+  }
+  a:focus, button:focus { background-color: darken(#fff, 8%); }
+}
+
+div.sidebar.container {
+  button {
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    display: block;
+    overflow: visible; /* shrinkwrap the text in <IE7 */
+    cursor: pointer;
+    -moz-user-select: text;
+  }
+
+  button:hover, button:focus {
+    background-color: darken(#eee, 5%);
+    color: #000;
   }
 }
 
@@ -456,7 +482,6 @@ div.notifications.container {
     z-index: 2;
 
     h3, a { text-decoration: none; display: block; padding: 4px 8px; }
-    a:hover { background-color: darken(#eee, 5%); };
   }
 }
 

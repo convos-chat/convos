@@ -58,16 +58,16 @@ sub conversation {
   }
 
   $self->session(name => $target ? $name : '');
-  $self->stash(target => $target, sidebar => 'convos');
+  $self->stash(target => $target);
 
   if($target =~ /^[#&]/) {
     $self->stash(body_class => 'with-sidebar chat');
   }
   elsif($network eq 'convos') {
-    $self->stash(body_class => 'with-sidebar convos');
+    $self->stash(body_class => 'with-sidebar convos', sidebar => 'convos');
   }
   elsif(!$target) {
-    $self->stash(body_class => 'with-sidebar convos');
+    $self->stash(body_class => 'with-sidebar convos', sidebar => 'convos');
   }
   else {
     $self->stash(body_class => 'without-sidebar chat');

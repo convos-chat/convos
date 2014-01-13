@@ -4,7 +4,11 @@
 <!DOCTYPE html>
 <html data-basepath="<%= $self->url_for('/') %>">
   <head>
+  % if($full_page) {
     %= include 'partials/head'
+  % } else {
+    <title><%= config 'name' %> - <%= title %></title>
+  % }
   </head>
   <body class="<%= stash('body_class') %>">
   % if($full_page) {
@@ -30,13 +34,15 @@
 
     <div class="conversations container scrolled"><ul></ul></div>
 
-    <div class="sidebar container scrolled">
-      <ul>
-      % if(my $sidebar = stash 'sidebar') {
-        %= include "sidebar/$sidebar"
-      % }
-      </ul>
-    </div>
+    %= form_for 'connection.control', { name => $network }, method => 'post', class => 'connection-control', begin
+      <div class="sidebar container scrolled">
+        <ul>
+        % if(my $sidebar = stash 'sidebar') {
+          %= include "sidebar/$sidebar"
+        % }
+        </ul>
+      </div>
+    % end
 
     % if($full_page) {
     <div class="notifications container scrolled"><%= include 'client/notification_list' %></div>
