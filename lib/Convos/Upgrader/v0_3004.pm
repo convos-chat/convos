@@ -23,33 +23,35 @@ Called by L<Convos::Upgrader>.
 =cut
 
 sub run {
-  my $self = shift;
+  my $self  = shift;
   my $delay = $self->redis->ioloop->delay;
   my $guard = $delay->begin;
 
   $self->_convert_connections($delay);
   $delay->on(finish => sub { $self->emit('finish'); });
-  $guard->(); # make sure finish is triggered
+  $guard->();    # make sure finish is triggered
 }
 
 sub _convert_connections {
-  my($self, $delay) = @_;
+  my ($self, $delay) = @_;
   my $redis = $self->redis;
   my $guard = $delay->begin;
 
-  $redis->smembers(users => sub {
-    my($redis, $users) = @_;
+  $redis->smembers(
+    users => sub {
+      my ($redis, $users) = @_;
 
-    $self->_convert_connections_for_user($_, $delay) for @$users;
-    $guard->();
-  });
+      $self->_convert_connections_for_user($_, $delay) for @$users;
+      $guard->();
+    }
+  );
 }
 
 sub _convert_connection_name {
-  my($self, $name) = @_;
+  my ($self, $name) = @_;
 
-  return 'linpro' if $name eq 'irc.linpro.no';
-  return 'magnet' if $name eq 'irc.perl.org';
+  return 'linpro'   if $name eq 'irc.linpro.no';
+  return 'magnet'   if $name eq 'irc.perl.org';
   return 'freenode' if $name eq 'irc.freenode.org';
 
   $name =~ s!\W!-!g;
@@ -57,60 +59,69 @@ sub _convert_connection_name {
 }
 
 sub _convert_connections_for_user {
-  my($self, $user, $delay) = @_;
+  my ($self, $user, $delay) = @_;
   my $redis = $self->redis;
   my $guard = $delay->begin;
 
-  $redis->smembers("user:$user:connections" => sub {
-    my($redis, $connections) = @_;
-    my %map;
+  $redis->smembers(
+    "user:$user:connections" => sub {
+      my ($redis, $connections) = @_;
+      my %map;
 
-    for my $name (@$connections) {
-      my $old = $name;
-      my $cb = $delay->begin;
+      for my $name (@$connections) {
+        my $old = $name;
+        my $cb  = $delay->begin;
 
-      $name = $self->_convert_connection_name($old);
-      $map{$old} = $name;
+        $name = $self->_convert_connection_name($old);
+        $map{$old} = $name;
 
-      $redis->keys("user:$user:connection:$old*", sub {
-        my($redis, $keys) = @_;
+        $redis->keys(
+          "user:$user:connection:$old*",
+          sub {
+            my ($redis, $keys) = @_;
 
-        for my $key_old (@$keys) {
-          my $key_new = $key_old;
-          $key_new =~ s/:$old\b/:$name/;
-          $redis->rename($key_old, $key_new, $delay->begin);
-        }
+            for my $key_old (@$keys) {
+              my $key_new = $key_old;
+              $key_new =~ s/:$old\b/:$name/;
+              $redis->rename($key_old, $key_new, $delay->begin);
+            }
 
-        $cb->();
-      });
+            $cb->();
+          }
+        );
+      }
+
+      $self->_convert_conversations_for_user($user, \%map, $delay);
+      @$connections or return $guard->();
+      $redis->del("user:$user:connections");
+      $redis->sadd("user:$user:connections" => @$connections, $guard);
     }
-
-    $self->_convert_conversations_for_user($user, \%map, $delay);
-    @$connections or return $guard->();
-    $redis->del("user:$user:connections");
-    $redis->sadd("user:$user:connections" => @$connections, $guard);
-  });
+  );
 }
 
 sub _convert_conversations_for_user {
-  my($self, $user, $map, $delay) = @_;
+  my ($self, $user, $map, $delay) = @_;
   my $redis = $self->redis;
   my $guard = $delay->begin;
 
-  $redis->zrange("user:$user:conversations", 0, -1, 'WITHSCORES' => sub {
-    my($redis, $conversations) = @_;
+  $redis->zrange(
+    "user:$user:conversations",
+    0, -1,
+    'WITHSCORES' => sub {
+      my ($redis, $conversations) = @_;
 
-    $redis->del("user:$user:conversations", $guard);
+      $redis->del("user:$user:conversations", $guard);
 
-    while(@$conversations) {
-      my(@name) = id_as shift @$conversations;
-      my $score = shift @$conversations or last;
-      $name[0] = $map->{$name[0]} or next;
-      $redis->zadd("user:$user:conversations", $score, as_id @name);
+      while (@$conversations) {
+        my (@name) = id_as shift @$conversations;
+        my $score = shift @$conversations or last;
+        $name[0] = $map->{$name[0]} or next;
+        $redis->zadd("user:$user:conversations", $score, as_id @name);
+      }
+
+      $guard->();
     }
-
-    $guard->();
-  });
+  );
 }
 
 =head1 AUTHOR

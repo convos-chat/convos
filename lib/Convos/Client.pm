@@ -22,17 +22,20 @@ Route to last seen IRC conversation.
 =cut
 
 sub route {
-  my $self = shift->render_later;
+  my $self  = shift->render_later;
   my $login = $self->session('login');
 
-  if($login) {
+  if ($login) {
     $self->redirect_last($login);
   }
   else {
-    $self->redis->scard('users', sub {
-      my($redis, $n) = @_;
-      $self->redirect_to($n ? 'login' : 'register');
-    });
+    $self->redis->scard(
+      'users',
+      sub {
+        my ($redis, $n) = @_;
+        $self->redirect_to($n ? 'login' : 'register');
+      }
+    );
   }
 }
 
@@ -43,30 +46,30 @@ Used to render the main IRC client conversation.
 =cut
 
 sub conversation {
-  my $self        = shift->render_later;
-  my $prev_name   = $self->session('name') || '';
-  my $login       = $self->session('login');
-  my $network     = $self->stash('network');
-  my $target      = $self->stash('target') || '';
-  my $name        = as_id $network, $target;
-  my $redis       = $self->redis;
-  my $full_page   = $self->stash('full_page');
-  my @rearrange   = ([ zscore => "user:$login:conversations", $name ]);
+  my $self      = shift->render_later;
+  my $prev_name = $self->session('name') || '';
+  my $login     = $self->session('login');
+  my $network   = $self->stash('network');
+  my $target    = $self->stash('target') || '';
+  my $name      = as_id $network, $target;
+  my $redis     = $self->redis;
+  my $full_page = $self->stash('full_page');
+  my @rearrange = ([zscore => "user:$login:conversations", $name]);
 
-  if($prev_name and $prev_name ne $name) {
-    push @rearrange, [ zscore => "user:$login:conversations", $prev_name ];
+  if ($prev_name and $prev_name ne $name) {
+    push @rearrange, [zscore => "user:$login:conversations", $prev_name];
   }
 
   $self->session(name => $target ? $name : '');
   $self->stash(target => $target);
 
-  if($target =~ /^[#&]/) {
+  if ($target =~ /^[#&]/) {
     $self->stash(body_class => 'with-sidebar chat');
   }
-  elsif($network eq 'convos') {
+  elsif ($network eq 'convos') {
     $self->stash(body_class => 'with-sidebar convos', sidebar => 'convos');
   }
-  elsif(!$target) {
+  elsif (!$target) {
     $self->stash(body_class => 'with-sidebar convos', sidebar => 'convos');
   }
   else {
@@ -76,36 +79,36 @@ sub conversation {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $redis->execute(@rearrange, $delay->begin); # make sure conversations exists before doing zadd
+      $redis->execute(@rearrange, $delay->begin);    # make sure conversations exists before doing zadd
     },
     sub {
       my ($delay, @score) = @_;
       my $time = time;
 
-      $self->connection_list(sub {});
+      $self->connection_list(sub { });
 
-      if($target and not grep { $_ } @score) { # no such conversation
+      if ($target and not grep {$_} @score) {        # no such conversation
         return $self->route;
       }
-      if($network eq 'convos') {
-        $delay->begin(0)->([ $login, 'connected' ]);
+      if ($network eq 'convos') {
+        $delay->begin(0)->([$login, 'connected']);
         return;
       }
 
       $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
-      $redis->zadd("user:$login:conversations", $time, $name) if $score[0];
+      $redis->zadd("user:$login:conversations", $time,         $name)      if $score[0];
       $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
     },
     sub {
       my $delay = shift;
-      my $nick = shift @{ $_[0] };
-      my $state = shift @{ $_[0] };
+      my $nick  = shift @{$_[0]};
+      my $state = shift @{$_[0]};
 
-      if(!$nick) {
+      if (!$nick) {
         return $self->route;
       }
-      if(defined $self->param('notification')) {
-        $self->_modify_notification($self->param('notification'), read => 1, sub {});
+      if (defined $self->param('notification')) {
+        $self->_modify_notification($self->param('notification'), read => 1, sub { });
       }
 
       $state ||= 'disconnected';

@@ -80,58 +80,69 @@ to the wanted version.
 sub run {
   my $self = shift;
 
-  $self->redis->get('convos:version', sub {
-    my($redis, $current) = @_;
-    $self->{steps} = $self->_steps($current);
-    return $self->_finish unless @{ $self->{steps} };
-    return $self->_backup;
-  });
+  $self->redis->get(
+    'convos:version',
+    sub {
+      my ($redis, $current) = @_;
+      $self->{steps} = $self->_steps($current);
+      return $self->_finish unless @{$self->{steps}};
+      return $self->_backup;
+    }
+  );
 
   $self;
 }
 
 sub _backup {
-  my $self = shift;
-  my $max_keys = $ENV{CONVOS_MAX_DUMP_KEYS} ||= 10_000;
+  my $self        = shift;
+  my $max_keys    = $ENV{CONVOS_MAX_DUMP_KEYS} ||= 10_000;
   my $backup_file = $self->backup_file;
-  my($dumper, $keys);
+  my ($dumper, $keys);
 
   open my $BACKUP, '>', $backup_file or return $self->emit(error => "Could not create $backup_file: $!");
 
   $dumper = sub {
     my $redis = shift;
-    my $key = shift @$keys;
+    my $key   = shift @$keys;
 
-    unless($key) {
+    unless ($key) {
       return $self->emit(error => "Could not close $backup_file: $!") unless close $BACKUP;
       return $self->_next;
     }
 
-    $redis->execute(dump => $key => sub {
-      $_[1] =~ s!([^A-Za-z0-9._~,-])!{ sprintf '\x%02x', ord $1 }!ge;
-      printf $BACKUP qq(RESTORE %s 0 "%s"\n), $key, $_[1];
-      $dumper->($_[0]);
-    });
+    $redis->execute(
+      dump => $key => sub {
+        $_[1] =~ s!([^A-Za-z0-9._~,-])!{ sprintf '\x%02x', ord $1 }!ge;
+        printf $BACKUP qq(RESTORE %s 0 "%s"\n), $key, $_[1];
+        $dumper->($_[0]);
+      }
+    );
   };
 
-  $self->redis->dbsize(sub {
-    return $self->emit(error => "Too many keys in database to do a dump. (>$max_keys)") if $_[1] > $max_keys;
-    return $self->_raw_redis->keys('*' => sub { $keys = pop; $dumper->(shift); });
-  });
+  $self->redis->dbsize(
+    sub {
+      return $self->emit(error => "Too many keys in database to do a dump. (>$max_keys)") if $_[1] > $max_keys;
+      return $self->_raw_redis->keys('*' => sub { $keys = pop; $dumper->(shift); });
+    }
+  );
 }
 
 sub _finish {
   my $self = shift;
 
   return $self->emit(finish => "Database schema has latest version.") unless $self->{version};
-  return $self->redis->set('convos:version', $self->{version}, sub {
-    $self->emit(finish => "Upgraded database to $self->{version} through $self->{stepped} steps.");
-  });
+  return $self->redis->set(
+    'convos:version',
+    $self->{version},
+    sub {
+      $self->emit(finish => "Upgraded database to $self->{version} through $self->{stepped} steps.");
+    }
+  );
 }
 
 sub _next {
   my $self = shift;
-  my $step = shift @{ $self->{steps} } or return $self->_finish;
+  my $step = shift @{$self->{steps}} or return $self->_finish;
 
   $step->on(finish => sub { $self->{stepped}++; $self->_next; });
   $step->on(error => sub { $self->error(pop); });
@@ -139,12 +150,12 @@ sub _next {
 }
 
 sub _steps {
-  my $self = shift;
+  my $self    = shift;
   my $current = shift || 0;
-  my $loader = $self->_loader;
+  my $loader  = $self->_loader;
   my @steps;
 
-  for my $class (sort @{ $loader->search('Convos::Upgrader') }) {
+  for my $class (sort @{$loader->search('Convos::Upgrader')}) {
     my $v = $self->_version_from_class($class) or next;
     my $e;
     $v <= $current and next;

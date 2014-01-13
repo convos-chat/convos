@@ -10,7 +10,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Convos::Core::Util qw/ as_id id_as /;
 use Mojo::Asset::File;
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
-use constant DEFAULT_URL => $ENV{DEFAULT_AVATAR_URL} || 'https://graph.facebook.com/%s/picture?height=40&width=40';
+use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
 use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
 
 =head1 METHODS
@@ -24,10 +24,10 @@ Check authentication and login
 sub auth {
   my $self = shift;
 
-  if($self->session('login')) {
+  if ($self->session('login')) {
     return 1;
   }
-  elsif($self->req->url->path =~ /\.json$/) {
+  elsif ($self->req->url->path =~ /\.json$/) {
     $self->render(json => {}, status => 403);
   }
   else {
@@ -44,28 +44,28 @@ Used to render an avatar for a user.
 =cut
 
 sub avatar {
-  my $self = shift->render_later;
-  my $id = $self->stash('id');
-  my $user = $id =~ /^(\w+)/ ? $1 : 'd'; # d = not a real user, but a default user
+  my $self  = shift->render_later;
+  my $id    = $self->stash('id');
+  my $user  = $id =~ /^(\w+)/ ? $1 : 'd';    # d = not a real user, but a default user
   my $cache = $self->app->cache;
   my $cache_name;
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->redis->hmget("user:$user", qw( avatar email ), $delay->begin);
     },
     sub {
-      my($delay, $data) = @_;
+      my ($delay, $data) = @_;
       my $from_database = defined $data->[1] ? 1 : 0;
       my $url;
 
       $id = shift @$data || shift @$data || $id;
 
-      if($id =~ /\@/) {
+      if ($id =~ /\@/) {
         $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum($id));
       }
-      elsif($from_database) {
+      elsif ($from_database) {
         $url = sprintf(DEFAULT_URL, $id);
       }
       else {
@@ -81,10 +81,10 @@ sub avatar {
       $self->app->ua->get($url, $delay->begin);
     },
     sub {
-      my($delay, $tx) = @_;
+      my ($delay, $tx) = @_;
       my $headers = $self->res->headers;
 
-      if($tx->success) {
+      if ($tx->success) {
         open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name) or die "Write avatar $cache_name: $!";
         syswrite $CACHE, $tx->res->body;
         close $CACHE or die "Close avatar $cache_name: $!";
@@ -107,13 +107,15 @@ Show the login form. Also responds to JSON requests with login status.
 sub login {
   my $self = shift->render_later;
 
-  unless($self->app->config->{redis_version}) {
-    return $self->redis->info(server => sub {
-      my $app = $self->app;
-      $app->config->{redis_version} = $_[1] =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
-      $app->log->info("Redis server version: @{[$app->config->{redis_version}]}");
-      $self->login;
-    });
+  unless ($self->app->config->{redis_version}) {
+    return $self->redis->info(
+      server => sub {
+        my $app = $self->app;
+        $app->config->{redis_version} = $_[1] =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
+        $app->log->info("Redis server version: @{[$app->config->{redis_version}]}");
+        $self->login;
+      }
+    );
   }
 
   $self->stash(form => 'login');
@@ -123,9 +125,7 @@ sub login {
     return $self->redirect_to('view');
   }
   if ($self->req->method ne 'POST') {
-    return $self->respond_to(
-      html => { template => 'index' },
-      json => { json => { login => $self->session('login') || '' } },
+    return $self->respond_to(html => {template => 'index'}, json => {json => {login => $self->session('login') || ''}},
     );
   }
 
@@ -138,10 +138,7 @@ sub login {
       $error and return $self->render('index', status => 401);
       $login = $self->validation->param('login');
       $self->session(login => $login);
-      $self->respond_to(
-        html => sub { $self->redirect_last($login) },
-        json => { json => { login => $login } },
-      );
+      $self->respond_to(html => sub { $self->redirect_last($login) }, json => {json => {login => $login}},);
     },
   );
 }
@@ -153,9 +150,9 @@ See L</login>.
 =cut
 
 sub register {
-  my $self = shift->render_later;
+  my $self       = shift->render_later;
   my $validation = $self->validation;
-  my($code, $wanted_login);
+  my ($code, $wanted_login);
 
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
@@ -166,7 +163,7 @@ sub register {
 
   # cannt continue on error since the sismember(...$wanted_login...) will
   # fail without a login
-  if($self->req->method ne 'POST') {
+  if ($self->req->method ne 'POST') {
     return $self->render('index');
   }
 
@@ -198,10 +195,8 @@ sub register {
       $self->session(login => $wanted_login);
       $self->app->core->start_convos_conversation($wanted_login);
       $self->redis->hmset(
-        "user:$wanted_login" => {
-          digest => $self->_digest($validation->output->{password}),
-          email  => $validation->output->{email},
-        },
+        "user:$wanted_login" =>
+          {digest => $self->_digest($validation->output->{password}), email => $validation->output->{email},},
         $delay->begin
       );
       $self->redis->sadd('users', $wanted_login, $delay->begin);
@@ -232,16 +227,16 @@ Change user profile.
 =cut
 
 sub edit {
-  my $self = shift->render_later;
-  my $login = $self->session('login');
-  my $method = $self->req->method eq 'POST' ? '_edit' : 'render';
+  my $self      = shift->render_later;
+  my $login     = $self->session('login');
+  my $method    = $self->req->method eq 'POST' ? '_edit' : 'render';
   my $full_page = $self->stash('full_page');
 
   $self->stash(body_class => 'convos with-sidebar');
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->redis->hgetall("user:$login", $delay->begin) if $method eq 'render';
       $self->connection_list($delay->begin);
       $self->conversation_list($delay->begin) if $full_page;
@@ -249,7 +244,7 @@ sub edit {
       $delay->begin->();
     },
     sub {
-      my($delay, $user) = @_;
+      my ($delay, $user) = @_;
       $user = {} if ref $user ne 'HASH';
       $self->param($_ => $user->{$_}) for keys %$user;
       $self->$method;
@@ -258,8 +253,8 @@ sub edit {
 }
 
 sub _edit {
-  my $self = shift;
-  my $login = $self->session('login');
+  my $self       = shift;
+  my $login      = $self->session('login');
   my $validation = $self->validation;
 
   $validation->required('email')->like(qr{.\@.});

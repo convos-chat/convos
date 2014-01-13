@@ -2,21 +2,23 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
-plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
+plan skip_all =>
+  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
+  unless $ENV{REDIS_TEST_DATABASE};
 
-my $dom = Mojo::DOM->new;
-my $sub = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
-my $pub = $t->app->redis;
+my $dom        = Mojo::DOM->new;
+my $sub        = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
+my $pub        = $t->app->redis;
 my $connection = Convos::Core::Connection->new(name => 'magnet', login => 'doe');
 my $ws;
 
 redis_do(
-  [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ sadd => 'user:doe:connections', 'irc.perl.org' ],
-  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
+  [hmset => 'user:doe',             digest => 'E2G3goEIb8gpw', email => ''],
+  [sadd  => 'user:doe:connections', 'irc.perl.org'],
+  [hmset => 'user:doe:connection:irc.perl.org', nick => 'doe'],
 );
 
-$t->post_ok('/login', form => { login => 'doe', password => 'barbar' }) ->status_is(302); # login
+$t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);    # login
 $t->websocket_ok('/socket');
 
 {
@@ -59,7 +61,7 @@ $t->websocket_ok('/socket');
   ok $dom->at('li.remove-conversation[data-network="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
 }
 
-  $t->send_ok(msg('/reconnect    '));
+$t->send_ok(msg('/reconnect    '));
 
 for my $cmd (qw/ j join /) {
   publish(event => 'add_conversation', server => 'irc.perl.org', target => '#toocool');
@@ -117,20 +119,24 @@ sub msg {
 }
 
 sub ws {
-  $sub->once(message => sub {
-    $ws = $_[1];
-    Mojo::IOLoop->stop;
-  });
+  $sub->once(
+    message => sub {
+      $ws = $_[1];
+      Mojo::IOLoop->stop;
+    }
+  );
   Mojo::IOLoop->start;
   $ws;
 }
 
 sub publish {
   use Mojo::JSON 'j';
-  my $data = j { @_ };
+  my $data = j {@_};
 
-  $sub->once(message => sub {
-    $ws = $_[1];
-    $pub->publish('convos:user:doe:out', $data);
-  });
+  $sub->once(
+    message => sub {
+      $ws = $_[1];
+      $pub->publish('convos:user:doe:out', $data);
+    }
+  );
 }

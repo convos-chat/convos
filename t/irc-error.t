@@ -1,15 +1,17 @@
 use t::Helper;
 
-plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
+plan skip_all =>
+  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
+  unless $ENV{REDIS_TEST_DATABASE};
 
 my $port = Mojo::IOLoop->generate_port;
 my $core = $t->app->core;
 my $conn;
 
 redis_do(
-  [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ srem => 'user:doe:connections', "localhost:$port" ],
-  [ hmset => "user:doe:connection:localhost:$port", nick => 'doe', host => "localhost:$port" ],
+  [hmset => 'user:doe',                            digest => 'E2G3goEIb8gpw', email => ''],
+  [srem  => 'user:doe:connections',                "localhost:$port"],
+  [hmset => "user:doe:connection:localhost:$port", nick   => 'doe',           host  => "localhost:$port"],
 );
 
 {
@@ -25,9 +27,9 @@ redis_do(
 }
 
 Mojo::IOLoop->server(
-  { port => $port },
+  {port => $port},
   sub {
-    my($ioloop, $stream) = @_;
+    my ($ioloop, $stream) = @_;
     Mojo::IOLoop->timer(0.01 => sub { $stream->close });
   },
 );

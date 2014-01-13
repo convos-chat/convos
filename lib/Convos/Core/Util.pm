@@ -40,13 +40,11 @@ It will convert non-word characters to ":hex" and join C<@str> with ":00".
 
 sub as_id {
   join ':00', map {
-    local $_ = $_; # local $_ is for changing constants and not changing input
+    local $_ = $_;    # local $_ is for changing constants and not changing input
     s/:/:3a/g;
     s/([^\w:-])/{ sprintf ':%02x', ord $1 }/ge;
     $_;
-  } grep {
-    length $_;
-  } @_;
+  } grep { length $_; } @_;
 }
 
 =head2 id_as
@@ -93,18 +91,18 @@ Used to log more complex datastructures and to prevent logging C<undef>.
 
 sub logf {
   use Data::Dumper;
-  my($self, $level, $format, @args) = @_;
+  my ($self, $level, $format, @args) = @_;
   my $log = $self->{app}{log} || $self->{log} || Mojo::Log->new;
 
   local $Data::Dumper::Maxdepth = 2;
-  local $Data::Dumper::Indent = 0;
-  local $Data::Dumper::Terse = 1;
+  local $Data::Dumper::Indent   = 0;
+  local $Data::Dumper::Terse    = 1;
 
   for my $arg (@args) {
-    if(ref($arg) =~ /^\w+$/) {
+    if (ref($arg) =~ /^\w+$/) {
       $arg = Dumper($arg);
     }
-    elsif(!defined $arg) {
+    elsif (!defined $arg) {
       $arg = '__UNDEF__';
     }
   }
@@ -119,7 +117,7 @@ sub logf {
 =cut
 
 sub format_time {
-  my $date = localtime shift;
+  my $date   = localtime shift;
   my $format = shift;
 
   return decode_utf8($date->strftime($format));

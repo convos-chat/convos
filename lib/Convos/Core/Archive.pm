@@ -28,7 +28,7 @@ What is this?
 
 =cut
 
-has 'ack' => sub {};
+has 'ack' => sub { };
 
 =head1 METHODS
 
@@ -39,7 +39,7 @@ has 'ack' => sub {};
 =cut
 
 sub search {
-  my $self=shift;
+  my $self = shift;
 }
 
 =head1 COPYRIGHT

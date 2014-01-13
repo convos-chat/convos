@@ -17,20 +17,24 @@ use Convos::Core::Util 'as_id';
 =cut
 
 sub close {
-  my($self, $target, $dom) = @_;
+  my ($self, $target, $dom) = @_;
   my $login = $self->session('login');
   my $id;
 
   $target ||= $dom->{target};
 
-  if($target =~ /^[#&]/) {
-    return "PART $target"
+  if ($target =~ /^[#&]/) {
+    return "PART $target";
   }
   else {
     $id = as_id $dom->{network}, $target;
-    $self->redis->zrem("user:$login:conversations", $id, sub {
-      $self->send_partial('event/remove_conversation', %$dom, target => $target);
-    });
+    $self->redis->zrem(
+      "user:$login:conversations",
+      $id,
+      sub {
+        $self->send_partial('event/remove_conversation', %$dom, target => $target);
+      }
+    );
     return;
   }
 }
@@ -40,7 +44,7 @@ sub close {
 =cut
 
 sub help {
-  my($self) = @_;
+  my ($self) = @_;
   $self->send_partial('event/help');
   return;
 }
@@ -70,18 +74,27 @@ sub help {
 =cut
 
 sub query {
-  my($self, $target, $dom) = @_;
+  my ($self, $target, $dom) = @_;
   my $login = $self->session('login');
   my $id = as_id $dom->{network}, $target;
 
-  if($target =~ /^[#&]?[\w_-]+$/) {
-    $self->redis->zadd("user:$login:conversations", time, $id, sub {
-      $self->send_partial('event/add_conversation', %$dom, target => $target);
-    });
+  if ($target =~ /^[#&]?[\w_-]+$/) {
+    $self->redis->zadd(
+      "user:$login:conversations",
+      time, $id,
+      sub {
+        $self->send_partial('event/add_conversation', %$dom, target => $target);
+      }
+    );
   }
   else {
     $target ||= 'Missing';
-    $self->send_partial('event/server_message', %$dom, status => 400, message => "Invalid target: $target", timestamp => time);
+    $self->send_partial(
+      'event/server_message', %$dom,
+      status    => 400,
+      message   => "Invalid target: $target",
+      timestamp => time
+    );
   }
 
   return;
@@ -93,7 +106,7 @@ sub query {
 
 sub reconnect {
   my ($self, $arg, $dom) = @_;
-  $self->app->core->control(restart => $self->session('login'), $dom->{network}, sub {});
+  $self->app->core->control(restart => $self->session('login'), $dom->{network}, sub { });
   return;
 }
 
@@ -109,18 +122,18 @@ sub reconnect {
 
 =cut
 
-sub join { "JOIN $_[1]" }
-sub list { "LIST" }
-sub me { "PRIVMSG $_[2]->{target} :\x{1}ACTION $_[1]\x{1}" }
-sub mode { "MODE $_[1]" }
-sub msg { $_[1] =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$_[1]" }
+sub join  {"JOIN $_[1]"}
+sub list  {"LIST"}
+sub me    {"PRIVMSG $_[2]->{target} :\x{1}ACTION $_[1]\x{1}"}
+sub mode  {"MODE $_[1]"}
+sub msg   { $_[1] =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$_[1]" }
 sub names { "NAMES " . ($_[1] || $_[2]->{target}) }
-sub nick { "NICK $_[1]" }
-sub oper { "OPER $_[1]" }
-sub part { "PART " . ($_[1] || $_[2]->{target}) }
-sub say { "PRIVMSG $_[2]->{target} :$_[1]" }
+sub nick  {"NICK $_[1]"}
+sub oper  {"OPER $_[1]"}
+sub part  { "PART " . ($_[1] || $_[2]->{target}) }
+sub say   {"PRIVMSG $_[2]->{target} :$_[1]"}
 sub topic { "TOPIC $_[2]->{target}" . ($_[1] ? " :$_[1]" : "") }
-sub whois { "WHOIS $_[1]" }
+sub whois {"WHOIS $_[1]"}
 
 {
   no warnings 'once';

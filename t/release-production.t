@@ -12,19 +12,16 @@ use Mojolicious::Plugin::AssetPack;
 unlink glob 'public/packed/convos-*';
 $ENV{MOJO_MODE} = 'production';
 my $t = Test::Mojo->new('Convos');
-my($css, $js);
+my ($css, $js);
 
 {
-  $t->get_ok('/login')
-    ->status_is(200)
-    ->element_exists(q(link[rel="stylesheet"][href^="/packed/convos-"]))
-    ->element_exists(q(script[src^="/packed/convos-"]))
-    ;
+  $t->get_ok('/login')->status_is(200)->element_exists(q(link[rel="stylesheet"][href^="/packed/convos-"]))
+    ->element_exists(q(script[src^="/packed/convos-"]));
 
   $css = $t->tx->res->dom->at(q(link[rel="stylesheet"]))->{href};
-  $js = $t->tx->res->dom->at(q(script[src^="/packed/convos-"]))->{src};
+  $js  = $t->tx->res->dom->at(q(script[src^="/packed/convos-"]))->{src};
   like $css, qr{^/packed/convos-\w+\.css$}, 'got production convos.css';
-  like $js, qr{^/packed/convos-\w+\.js$}, 'got production convos.js';
+  like $js,  qr{^/packed/convos-\w+\.js$},  'got production convos.js';
 }
 
 SKIP: {
@@ -35,21 +32,18 @@ SKIP: {
   opendir(my $PACKED, $packed);
 
   my @packed = map { $_->[0] }
-               sort { $a->[1] cmp $b->[1] }
-               grep { $_->[1] }
-               map { /convos-\w+\.(css|js)$/; [ $_, $1 ] }
-               readdir $PACKED;
+    sort { $a->[1] cmp $b->[1] } grep { $_->[1] } map { /convos-\w+\.(css|js)$/; [$_, $1] } readdir $PACKED;
 
   is $packed[0], basename($css), 'found convos.css file';
-  is $packed[1], basename($js), 'found convos.js file';
+  is $packed[1], basename($js),  'found convos.js file';
 }
 
 {
   open my $FH, 'lib/Convos.pm' or skip 'Cannot read lib/Convos.pm', 1;
-  my($version_scalar, $version_pod, $head) = ('s', 'p');
+  my ($version_scalar, $version_pod, $head) = ('s', 'p');
 
-  while(<$FH>) {
-    $head = $1 if /^=head1 (\w+)/;
+  while (<$FH>) {
+    $head           = $1     if /^=head1 (\w+)/;
     $version_scalar = $1 + 0 if /VERSION\s*=\s*'(\S+)';/;
     $version_pod = $1 + 0 if $head eq 'VERSION' and /^([\d\.]+)/;
   }

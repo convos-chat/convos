@@ -21,13 +21,10 @@ Will add "active" class to a link based on url
 =cut
 
 sub active_class {
-  my $c = shift;
+  my $c   = shift;
   my $url = $c->url_for(@_);
 
-  return(
-    $url,
-    $url eq $c->req->url->path ? (class => 'active') : (),
-  );
+  return ($url, $url eq $c->req->url->path ? (class => 'active') : (),);
 }
 
 =head2 avatar
@@ -37,10 +34,10 @@ Used to insert an image tag.
 =cut
 
 sub avatar {
-  my($self, $avatar, @args) = @_;
+  my ($self, $avatar, @args) = @_;
   my $id = join '@', @$avatar{qw( user host )};
 
-  $self->image($self->url_for(avatar => { id => $id }), @args);
+  $self->image($self->url_for(avatar => {id => $id}), @args);
 }
 
 =head2 id_as
@@ -63,11 +60,11 @@ sub connection_list {
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $self->redis->smembers("user:$login:connections", $_[0]->begin);
     },
     sub {
-      my($delay, $connections) = @_;
+      my ($delay, $connections) = @_;
 
       $self->stash(connections => $connections || []);
       $self->$cb;
@@ -101,12 +98,9 @@ sub conversation_list {
         my ($network, $target) = id_as $name;
 
         $target ||= '';
-        $conversation_list->[$i] = {
-          network => $network,
-          is_channel => $target =~ /^[#&]/ ? 1 : 0,
-          target => $target,
-          timestamp => $timestamp,
-        };
+        $conversation_list->[$i]
+          = {network => $network, is_channel => $target =~ /^[#&]/ ? 1 : 0, target => $target, timestamp => $timestamp,
+          };
 
         $self->redis->zcount("user:$login:connection:$network:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;
@@ -140,28 +134,30 @@ be passed on to the C<$callback>.
 =cut
 
 sub format_conversation {
-  my($c, $conversation, $cb) = @_;
+  my ($c, $conversation, $cb) = @_;
   my $delay = Mojo::IOLoop->delay;
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
     $message->{uuid} ||= '';
-    
+
     defined $message->{message} and _parse_message($c, $message, $delay);
-    push @{ $c->{conversation} }, $message;
+    push @{$c->{conversation}}, $message;
   }
 
   $c->{format_conversation}++;
 
-  $delay->once(finish => sub {
-    $c->$cb(delete $c->{conversation} || []) unless --$c->{format_conversation};
-  });
+  $delay->once(
+    finish => sub {
+      $c->$cb(delete $c->{conversation} || []) unless --$c->{format_conversation};
+    }
+  );
 
   $delay->begin->();    # need to do at least one step
 }
 
 sub _parse_message {
-  my($c, $message, $delay) = @_;
+  my ($c, $message, $delay) = @_;
 
   # http://www.mirc.com/colors.html
   $message->{message} =~ s/\x03\d{0,15}(,\d{0,15})?//g;
@@ -170,10 +166,12 @@ sub _parse_message {
   $message->{highlight} ||= 0;
   $message->{message} = Mojo::Util::xml_escape($message->{message});
 
-  URI::Find->new(sub { 
-    my $url = Mojo::Util::html_unescape(shift .''); 
-    $c->link_to($url, $url, target => '_blank', class => 'embed');
-  })->find(\$message->{message});
+  URI::Find->new(
+    sub {
+      my $url = Mojo::Util::html_unescape(shift . '');
+      $c->link_to($url, $url, target => '_blank', class => 'embed');
+    }
+  )->find(\$message->{message});
 }
 
 =head2 logf
@@ -257,8 +255,8 @@ sub notification_list {
 
       return $self->$cb($notification_list) if $cb;
       return $self->respond_to(
-        json => { json => $self->stash('notification_list') },
-        html => { template => 'client/notification_list' },
+        json => {json     => $self->stash('notification_list')},
+        html => {template => 'client/notification_list'},
       );
     },
   );
@@ -273,9 +271,7 @@ Will render "partial" and L<send|Mojolicious::Controller/send> the result.
 sub send_partial {
   my $c = shift;
 
-  eval {
-    $c->send($c->render(@_, partial => 1)->to_string)
-  } or do {
+  eval { $c->send($c->render(@_, partial => 1)->to_string) } or do {
     $c->app->log->error($@);
   };
 }
@@ -304,19 +300,19 @@ Redirect to the last visited channel for $login. Falls back to settings.
 =cut
 
 sub redirect_last {
-  my ($self,$login)=@_;
+  my ($self, $login) = @_;
   my $redis = $self->redis;
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
     },
     sub {
-      my($delay, $names) = @_;
+      my ($delay, $names) = @_;
 
-      if($names and $names->[0]) {
-        if(my($network, $target) = id_as $names->[0]) {
+      if ($names and $names->[0]) {
+        if (my ($network, $target) = id_as $names->[0]) {
           return $self->redirect_to('view', network => $network, target => $target);
         }
       }
@@ -337,20 +333,20 @@ Will register the L</HELPERS> above.
 sub register {
   my ($self, $app) = @_;
 
-  $app->helper(active_class => \&active_class);
-  $app->helper(avatar => \&avatar);
+  $app->helper(active_class        => \&active_class);
+  $app->helper(avatar              => \&avatar);
   $app->helper(format_conversation => \&format_conversation);
-  $app->helper(connection_list => \&connection_list);
-  $app->helper(conversation_list => \&conversation_list);
+  $app->helper(connection_list     => \&connection_list);
+  $app->helper(conversation_list   => \&conversation_list);
   $app->helper(logf                => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });
   $app->helper(notification_list => \&notification_list);
-  $app->helper(redis => \&redis);
+  $app->helper(redis             => \&redis);
   $app->helper(as_id => sub { shift; Convos::Core::Util::as_id(@_) });
   $app->helper(id_as => sub { shift; Convos::Core::Util::id_as(@_) });
-  $app->helper(send_partial => \&send_partial);
+  $app->helper(send_partial   => \&send_partial);
   $app->helper(timestamp_span => \&timestamp_span);
-  $app->helper(redirect_last => \&redirect_last);
+  $app->helper(redirect_last  => \&redirect_last);
 }
 
 =head1 AUTHOR

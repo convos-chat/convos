@@ -182,17 +182,17 @@ sub startup {
   my $self = shift;
   my $config;
 
-  $self->{convos_executable_path} = $0; # required to work from within toadfarm
+  $self->{convos_executable_path} = $0;    # required to work from within toadfarm
   $self->_from_cpan;
   $config = $self->plugin('Config');
 
-  if(my $log = $config->{log}) {
+  if (my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
     $self->log->path($log->{file}) if $log->{file} ||= $log->{path};
-    delete $self->log->{handle}; # make sure it's fresh to file
+    delete $self->log->{handle};           # make sure it's fresh to file
   }
 
-  $self->cache; # make sure cache is ok
+  $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
   $self->secrets($config->{secrets} || [$config->{secret} || die '"secrets" is required in config file']);
   $self->sessions->default_expiration(86400 * 30);
@@ -201,42 +201,39 @@ sub startup {
   $self->_private_routes;
 
   $self->defaults(full_page => 1);
-  $self->hook(before_dispatch => sub {
-    my $c = shift;
-    $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
-  });
+  $self->hook(
+    before_dispatch => sub {
+      my $c = shift;
+      $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
+    }
+  );
 
   Mojo::IOLoop->timer(5 => sub { $self->_start_backend; });
 }
 
 sub _assets {
-  my($self, $config) = @_;
+  my ($self, $config) = @_;
 
-  $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
+  $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
   $self->asset('convos.css', '/sass/main.scss');
-  $self->asset('convos.js',
-    '/js/jquery.min.js',
-    '/js/jquery.hotkeys.min.js',
-    '/js/jquery.fastbutton.min.js',
-    '/js/jquery.nanoscroller.min.js',
-    '/js/jquery.pjax.js',
-    '/js/selectize.js',
-    '/js/globals.js',
-    '/js/jquery.doubletap.js',
-    '/js/ws-reconnecting.js',
-    '/js/jquery.helpers.js',
-    '/js/convos.chat.js',
+  $self->asset(
+    'convos.js',                      '/js/jquery.min.js',
+    '/js/jquery.hotkeys.min.js',      '/js/jquery.fastbutton.min.js',
+    '/js/jquery.nanoscroller.min.js', '/js/jquery.pjax.js',
+    '/js/selectize.js',               '/js/globals.js',
+    '/js/jquery.doubletap.js',        '/js/ws-reconnecting.js',
+    '/js/jquery.helpers.js',          '/js/convos.chat.js',
   );
 }
 
 sub _from_cpan {
-  my $self = shift;
-  my $home = catdir dirname(__FILE__), 'Convos';
+  my $self   = shift;
+  my $home   = catdir dirname(__FILE__), 'Convos';
   my $config = catfile $home, 'convos.conf';
 
   -r $config or return;
   $self->home->parse($home);
-  $self->static->paths->[0] = $self->home->rel_dir('public');
+  $self->static->paths->[0]   = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
 }
 
@@ -247,8 +244,10 @@ sub _private_routes {
 
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
-  $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)->name('conversation.list');
-  $r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)->name('notification.list');
+  $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)
+    ->name('conversation.list');
+  $r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)
+    ->name('notification.list');
   $r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
   $r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
   $r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
@@ -274,25 +273,25 @@ sub _public_routes {
   $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
   $r->get('/login')->to('user#login')->name('login');
   $r->post('/login')->to('user#login');
-  $r->get('/register/:invite', { invite => '' })->to('user#register')->name('register');;
-  $r->post('/register/:invite', { invite => '' })->to('user#register');
+  $r->get('/register/:invite', {invite => ''})->to('user#register')->name('register');
+  $r->post('/register/:invite', {invite => ''})->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
   $r;
 }
 
 sub _start_backend {
-  my $self = shift;
+  my $self  = shift;
   my $redis = $self->redis;
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $redis->getset('convos:backend:lock' => 1, $delay->begin);
       $redis->get('convos:backend:pid', $delay->begin);
       $redis->expire('convos:backend:lock' => 5);
     },
     sub {
-      my($delay, $locked, $pid) = @_;
+      my ($delay, $locked, $pid) = @_;
 
       # This "hack" will restart the external backend each time we
       # restart hypnotoad. I want to replace this later on with
@@ -300,25 +299,25 @@ sub _start_backend {
       # on itself. We can then push a "restart_backend" element
       # from either the frontend or Convos::Upgrader::vx_xx when
       # a restart is required.
-      if($SIG{USR2} and $pid) {
+      if ($SIG{USR2} and $pid) {
         kill 9, $pid;
       }
 
-      if($pid and kill 0, $pid) {
+      if ($pid and kill 0, $pid) {
         $self->log->debug("Backend $pid is running.");
       }
-      elsif($locked) {
+      elsif ($locked) {
         $self->log->debug('Another process is starting the backend.');
       }
-      elsif($SIG{USR2}) { # hypnotoad
+      elsif ($SIG{USR2}) {    # hypnotoad
         $self->_start_backend_as_external_app;
       }
-      elsif($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) { # forced or ./script/convos daemon
+      elsif ($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) {    # forced or ./script/convos daemon
         $self->log->debug('Starting embedded backend.');
         $redis->set('convos:backend:pid' => $$);
         $self->core->start;
       }
-      else { # morbo
+      else {                                                    # morbo
         $self->log->warn('Backend is not running and it will not be automatically started.');
         $self->core->upgrader->run;
       }
@@ -333,24 +332,24 @@ sub _start_backend_as_external_app {
 
   local $0 = $self->{convos_executable_path};
 
-  if(!-x $0) {
+  if (!-x $0) {
     $self->log->error("Cannot execute $0: Not executable");
     return;
   }
 
-  if(my $pid = fork) {
+  if (my $pid = fork) {
     $self->log->debug("Starting $0 backend with double fork");
-    wait; # wait for "fork and exit" below
+    wait;    # wait for "fork and exit" below
     $self->log->info("Detached $0 backend ($pid=$?)");
-    return $pid; # parent process returns
+    return $pid;    # parent process returns
   }
-  elsif(!defined $pid) {
+  elsif (!defined $pid) {
     $self->log->error("Can't start external backend, fork failed: $!");
     return;
   }
 
   # start detaching new process from hypnotoad
-  if(!POSIX::setsid) {
+  if (!POSIX::setsid) {
     $self->log->error("Can't start a new session for backend: $!");
     exit $!;
   }

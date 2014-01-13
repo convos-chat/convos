@@ -30,7 +30,7 @@ Returns a string describing how to use this command.
 =cut
 
 has description => "Start the Convos IRC proxy.\n";
-has usage => <<"EOF";
+has usage       => <<"EOF";
 usage: $0 backend
 EOF
 
@@ -45,8 +45,8 @@ The proxy will only be started if enabled in the config file.
 =cut
 
 sub run {
-  my($self, @args) = @_;
-  my $app = $self->app;
+  my ($self, @args) = @_;
+  my $app  = $self->app;
   my $loop = Mojo::IOLoop->singleton;
 
   $SIG{QUIT} = sub {
