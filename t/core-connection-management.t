@@ -8,7 +8,8 @@ my $sub = $core->redis->subscribe(qw( convos:user:batman:magnet ));
 my $stop = sub { 1 };
 my(@messages, @res);
 
-$core->start;
+$core->start(sub { Mojo::IOLoop->stop; });
+Mojo::IOLoop->start;
 
 {
   no warnings 'redefine';
@@ -82,9 +83,9 @@ $core->start;
   $stop = sub { /NICK bruce/ };
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'update_connection() magnet' or diag Data::Dumper::Dumper($res[1]->{error});
+  is $res[1], undef, 'update_connection(normal) magnet' or diag Data::Dumper::Dumper($res[1]->{error});
   $conn->{user} = 'batman';
-  is_deeply $res[2], $conn, 'update_connection() returned connection details';
+  is_deeply $res[2], $conn, 'update_connection(normal) returned connection details';
 
   Mojo::IOLoop->start unless @messages == 3;
   is_deeply \@messages, ['dummy-uuid NICK bruce'], 'sent NICK + JOIN + PART';
@@ -101,9 +102,9 @@ $core->start;
 
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'update_connection() change server' or diag Data::Dumper::Dumper($res[1]->{error});
+  is $res[1], undef, 'update_connection(change) change server' or diag Data::Dumper::Dumper($res[1]->{error});
   $conn->{user} = 'batman';
-  is_deeply $res[2], $conn, 'update_connection() returned connection details';
+  is_deeply $res[2], $conn, 'update_connection(change) returned connection details';
 
   Mojo::IOLoop->start;
   is $core->{connections}{batman}{magnet}->_irc->nick, 'bruce', 'irc nick bruce';

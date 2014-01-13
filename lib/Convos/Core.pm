@@ -123,7 +123,7 @@ Will fetch connection information from the database and try to connect to them.
 =cut
 
 sub start {
-  my $self = shift;
+  my($self, $cb) = @_;
 
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
@@ -146,6 +146,7 @@ sub start {
         my($login, $name) = split /:/, $conn;
         $self->_connection(login => $login, name => $name)->connect;
       }
+      $self->$cb if $cb;
     },
   );
 
