@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.3
+0.3005
 
 =head1 DESCRIPTION
 
@@ -128,18 +128,13 @@ use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
 
-our $VERSION = '0.3';
-$ENV{CONVOS_BACKEND_REV} ||= 0;
+our $VERSION = '0.3005';
 
 =head1 ATTRIBUTES
 
 =head2 archive
 
 Holds a L<Convos::Core::Archive> object.
-
-=head2 backend_pid
-
-The pid for the backend process, if running embedded.
 
 =head2 cache
 
@@ -156,8 +151,6 @@ has archive => sub {
   my $self = shift;
   Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
 };
-
-has backend_pid => 0;
 
 has cache => sub {
   my $self = shift;
@@ -189,9 +182,9 @@ sub startup {
   my $self = shift;
   my $config;
 
+  $self->{convos_executable_path} = $0; # required to work from within toadfarm
   $self->_from_cpan;
   $config = $self->plugin('Config');
-  $config->{backend}{lock_file} ||= catfile(tmpdir, 'convos-backend.lock');
 
   if(my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
@@ -213,8 +206,7 @@ sub startup {
     $c->stash(layout => undef, full_page => 0) if $c->req->is_xhr or $c->param('_pjax');
   });
 
-  $self->_start_embedded_server if $config->{backend}{embedded};
-  # any IOLoop events need to be added after _start_embedded_server()
+  Mojo::IOLoop->timer(5 => sub { $self->_start_backend; });
 }
 
 sub _assets {
@@ -227,7 +219,7 @@ sub _assets {
     '/js/jquery.hotkeys.min.js',
     '/js/jquery.fastbutton.min.js',
     '/js/jquery.nanoscroller.min.js',
-    '/js/jquery.pjax.min.js',
+    '/js/jquery.pjax.js',
     '/js/selectize.js',
     '/js/globals.js',
     '/js/jquery.doubletap.js',
@@ -288,28 +280,90 @@ sub _public_routes {
   $r;
 }
 
-sub _start_embedded_server {
+sub _start_backend {
   my $self = shift;
-  my $parent_pid = $$;
-  my($loop, $pid);
+  my $redis = $self->redis;
 
-  if($pid = fork) {
-    return $self->backend_pid($pid);
+  Mojo::IOLoop->delay(
+    sub {
+      my($delay) = @_;
+      $redis->getset('convos:backend:lock' => 1, $delay->begin);
+      $redis->get('convos:backend:pid', $delay->begin);
+      $redis->expire('convos:backend:lock' => 5);
+    },
+    sub {
+      my($delay, $locked, $pid) = @_;
+
+      # This "hack" will restart the external backend each time we
+      # restart hypnotoad. I want to replace this later on with
+      # Convos::Core::ctrl_restart_backend(), which will do exec()
+      # on itself. We can then push a "restart_backend" element
+      # from either the frontend or Convos::Upgrader::vx_xx when
+      # a restart is required.
+      if($SIG{USR2} and $pid) {
+        kill 9, $pid;
+      }
+
+      if($pid and kill 0, $pid) {
+        $self->log->debug("Backend $pid is running.");
+      }
+      elsif($locked) {
+        $self->log->debug('Another process is starting the backend.');
+      }
+      elsif($SIG{USR2}) { # hypnotoad
+        $self->_start_backend_as_external_app;
+      }
+      elsif($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) { # forced or ./script/convos daemon
+        $self->log->debug('Starting embedded backend.');
+        $redis->set('convos:backend:pid' => $$);
+        $self->core->start;
+      }
+      else { # morbo
+        $self->log->warn('Backend is not running and it will not be automatically started.');
+      }
+
+      $redis->del('convos:backend:lock') unless $locked;
+    },
+  );
+}
+
+sub _start_backend_as_external_app {
+  my $self = shift;
+
+  local $0 = $self->{convos_executable_path};
+
+  if(!-x $0) {
+    $self->log->error("Cannot execute $0: Not executable");
+    return;
+  }
+
+  if(my $pid = fork) {
+    $self->log->debug("Starting $0 backend with double fork");
+    wait; # wait for "fork and exit" below
+    $self->log->info("Detached $0 backend ($pid=$?)");
+    return $pid; # parent process returns
   }
   elsif(!defined $pid) {
-    die "Can't run embedded backend, fork failed: $!";
+    $self->log->error("Can't start external backend, fork failed: $!");
+    return;
   }
 
-  # child
-  $loop = Mojo::IOLoop->singleton;
-  $0 = 'convos backend';
-  $SIG{$_} = 'DEFAULT' for qw( INT TERM CHLD TTIN TTOU );
-  $SIG{QUIT} = sub { $loop->max_connnections(0) };
+  # start detaching new process from hypnotoad
+  if(!POSIX::setsid) {
+    $self->log->error("Can't start a new session for backend: $!");
+    exit $!;
+  }
 
-  $loop->timer(10 => sub { $self->core->start }); # Delay startup of core to avoid starting when not persistent
-  $loop->recurring(2 => sub { getppid == $parent_pid or exit 3 }); # Can't continue embedded backend when parent pid change
-  $loop->start;
-  exit 0;
+  # detach child from hypnotoad or die trying
+  defined(fork and exit) or die;
+
+  # replace fork with "convos backend" process
+  delete $ENV{MOJO_CONFIG} if $ENV{TOADFARM_APPLICATION_CLASS};
+  $ENV{CONVOS_BACKEND_EMBEDDED} = 1;
+  $self->log->debug("Replacing current process with $0 backend");
+  { exec $0 => 'backend' }
+  $self->log->error("Failed to replace current process: $!");
+  exit;
 }
 
 =head1 COPYRIGHT AND LICENSE

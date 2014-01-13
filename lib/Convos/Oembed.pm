@@ -44,7 +44,7 @@ sub generate {
           $self->render('oembed/image', src => $url);
         }
         else {
-          $self->render(text => $url, status => 404);
+          $self->render(text=>"",status => 204);
         }
       }
     );

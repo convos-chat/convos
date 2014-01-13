@@ -16,6 +16,7 @@ no warnings "utf8";
 use Mojo::Log;
 use Mojo::UserAgent;
 use Parse::IRC ();
+use Unicode::UTF8 'decode_utf8';
 use Time::Piece;
 
 my $hostname;
@@ -121,7 +122,7 @@ sub format_time {
   my $date = localtime shift;
   my $format = shift;
 
-  return $date->strftime($format);
+  return decode_utf8($date->strftime($format));
 }
 
 =head1 AUTHOR

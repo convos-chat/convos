@@ -19,32 +19,24 @@ Links to images and video will be displayed inline. No need to click on the link
 
 ## Installation
 Convos requires a Redis server to function. If you are deploying on osx you can use homebrew, or if you are on ubuntu or similar install redis-server using apt-get. Note that we require Redis 2.6+. If your distro version is too old, you can easily build redis from source.
-To install convos, you can run the following commands:
 
-    $ curl https://codeload.github.com/Nordaaker/convos/tar.gz/release | tar zxvf -
-    $ cd convos-release
-    # Install deps using carton bundled with the repo 
-    $ ./vendor/bin/carton
-    # OR use cpanm to install deps to your perl, if you have it set up
-    # Then you don't need carton exec in front of the next commands:
-    $ cpanm --installdeps .
-    # edit convos.conf, point to your redis server
-    # And start the web server
-    $ ./vendor/bin/carton exec morbo script/convos
-    # open http://localhost:3000 in your favorite browser
+To install convos we provide a simple script. All it requires in addition to redis is a working build environment with make, Perl and a C compiler. Copy/paste this to the command line:
+
+    $ curl http://convos.by/install.sh | bash - 
+
+Then just follow the simple instructions. If you're worried about running a script directly from a web server, just download it and inspect it before you run it.
 
 ## Running convos in production
 
 morbo is an excellent tool for testing, but hypnotoad should be used to run Convos in production:
 
-    $ ./vendor/bin/carton exec script/convos backend &
     $ ./vendor/bin/carton exec hypnotoad script/convos
 
 The command above will start a full featured, UNIX optimized, preforking non-blocking webserver. Run the same command again, and the webserver will hot reload the source code without losing any connections. By default it will listen to http://*:8080/ but you can easily configure this in convos.conf - It can even serve HTTPS directly if you install IO::Socket::SSL from CPAN.
 
 See also the [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT) for production deployment.
 
-For convenience, we also include a Dockerfile so you can build a Docker image easily if you want a custom config or  pull our image directly from the [docker index](https://index.docker.io/u/nordaaker/convos/).
+For convenience, we also include a Dockerfile so you can build a Docker image easily if you want a custom config, or  pull our image directly from the [docker index](https://index.docker.io/u/nordaaker/convos/).
 
 Note: By default Convos will use the Mojo IOLoop, which is pure perl. In production you might want to install [EV](https://metacpan.org/release/EV) - we automatically use it if it is installed, and it performs much better.
 

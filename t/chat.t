@@ -1,3 +1,4 @@
+use utf8;
 use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
@@ -118,7 +119,7 @@ $t->post_ok('/login', form => { login => 'doe', password => 'barbar' })
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.action.message[data-network="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
   ok $dom->at('a[href="/magnet/fooman"]'), 'got action message from fooman';
-  is $dom->at('.content')->all_text, 'fooman is too cool', 'without special characters';
+  is $dom->at('.content')->all_text, '✧ fooman is too cool', 'without special characters';
 }
 
 {

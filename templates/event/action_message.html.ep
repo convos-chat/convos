@@ -3,7 +3,7 @@
 % if($nick ne $prev_nick) {
   %= avatar { host => $host, user => $user }, alt => $nick, class => 'avatar'
 % }
-  <div class="content whitespace"><%= link_to $nick, view => { network => $network, target => $nick } %> <%== $message %></div>
+  <div class="content whitespace">&#10023; <%= link_to $nick, view => { network => $network, target => $nick } %> <%== $message %></div>
 % if($nick ne $prev_nick) {
   %= timestamp_span($timestamp)
 % }
