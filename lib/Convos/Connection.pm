@@ -316,7 +316,7 @@ sub _add_connection_form {
       my @names = sort grep { !$existing{$_} } @{ shift || [] };
 
       unless(@names) {
-        $self->render(default_network => '', networks => []);
+        return $self->render(default_network => '', networks => []);
       }
 
       $delay->begin(0)->(\@names);
