@@ -320,6 +320,7 @@ sub _start_backend {
       }
       else { # morbo
         $self->log->warn('Backend is not running and it will not be automatically started.');
+        $self->core->upgrader->run;
       }
 
       $redis->del('convos:backend:lock') unless $locked;

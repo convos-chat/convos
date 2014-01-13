@@ -78,25 +78,20 @@ to the wanted version.
 =cut
 
 sub run {
-  my($self, $cb) = @_;
+  my $self = shift;
 
   $self->redis->get('convos:version', sub {
     my($redis, $current) = @_;
     $self->{steps} = $self->_steps($current);
-
-    if($ENV{CONVOS_FORCE_UPGRADE}) {
-      $self->_next;
-    }
-    else {
-      $self->_backup(sub { $self->_next });
-    }
+    return $self->_finish unless @{ $self->{steps} };
+    return $self->_backup;
   });
 
   $self;
 }
 
 sub _backup {
-  my($self, $cb) = @_;
+  my $self = shift;
   my $max_keys = $ENV{CONVOS_MAX_DUMP_KEYS} ||= 10_000;
   my $backup_file = $self->backup_file;
   my($dumper, $keys);
@@ -109,7 +104,7 @@ sub _backup {
 
     unless($key) {
       return $self->emit(error => "Could not close $backup_file: $!") unless close $BACKUP;
-      return $self->$cb;
+      return $self->_next;
     }
 
     $redis->execute(dump => $key => sub {
