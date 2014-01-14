@@ -771,3 +771,8 @@ a {
 .icon-chevron-down:before   { content: "\f024"; }
 .icon-comments:before   { content: "\f025"; }
 .icon-bullhorn:before   { content: "\f027"; }
+.icon-signout:before    { content: "\f026"; }
+.icon-user:before    { content: "\f021"; }
+.icon-cog:before    { content: "\f022"; }
+
+body.chat nav .icon-cog:before { content: "\f021"; }
