@@ -41,7 +41,11 @@ sub _convert_connections {
     users => sub {
       my ($redis, $users) = @_;
 
-      $self->_convert_connections_for_user($_, $delay) for @$users;
+      for my $user (@$users) {
+        $self->_convert_connections_for_user($user, $delay);
+        $self->_set_avatar_for_user($user, $delay);
+      }
+
       $guard->();
     }
   );
@@ -120,6 +124,22 @@ sub _convert_conversations_for_user {
       }
 
       $guard->();
+    }
+  );
+}
+
+sub _set_avatar_for_user {
+  my ($self, $user, $delay) = @_;
+  my $cb = $delay->begin;
+
+  $self->redis->hmget(
+    "user:$user",
+    "avatar", "email",
+    sub {
+      my ($redis, $data) = @_;
+      return $cb->() if $data->[0];
+      return $cb->() if !$data->[1];
+      $redis->hset("user:$user", "avatar", $data->[1], $cb);
     }
   );
 }
