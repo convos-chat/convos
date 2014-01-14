@@ -315,14 +315,13 @@ sub _start_backend {
       elsif ($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) {    # forced or ./script/convos daemon
         $self->log->debug('Starting embedded backend.');
         $redis->set('convos:backend:pid' => $$);
+        $redis->del('convos:backend:lock');
         $self->core->start;
       }
       else {                                                    # morbo
         $self->log->warn('Backend is not running and it will not be automatically started.');
         $self->core->upgrader->run;
       }
-
-      $redis->del('convos:backend:lock') unless $locked;
     },
   );
 }
