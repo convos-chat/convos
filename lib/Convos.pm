@@ -299,8 +299,9 @@ sub _start_backend {
       # on itself. We can then push a "restart_backend" element
       # from either the frontend or Convos::Upgrader::vx_xx when
       # a restart is required.
-      if ($SIG{USR2} and $pid) {
+      if ($SIG{USR2} and !$locked and $pid) {
         kill 9, $pid;
+        sleep 1;
       }
 
       if ($pid and kill 0, $pid) {
