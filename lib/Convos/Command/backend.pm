@@ -50,6 +50,10 @@ sub run {
   my $loop  = Mojo::IOLoop->singleton;
   my $redis = $app->redis;
 
+  unless($ENV{MOJO_MODE}) {
+    die qq(MOJO_MODE need to be set to either "production" or "development".\n);
+  }
+
   $SIG{QUIT} = sub {
     $app->log->info('Gracefully stopping backend...');
     $loop->max_connnections(0);
