@@ -37,6 +37,7 @@ sub _convert_connections {
   my $redis = $self->redis;
   my $guard = $delay->begin;
 
+  $redis->del('connections');
   $redis->smembers(
     users => sub {
       my ($redis, $users) = @_;
@@ -98,6 +99,7 @@ sub _convert_connections_for_user {
       $self->_convert_conversations_for_user($user, \%map, $delay);
       @$connections or return $guard->();
       $redis->del("user:$user:connections");
+      $redis->sadd(connections => map {"$user:$_"} @$connections);
       $redis->sadd("user:$user:connections" => @$connections, $guard);
     }
   );
