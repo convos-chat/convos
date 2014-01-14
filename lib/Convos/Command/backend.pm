@@ -47,11 +47,19 @@ The proxy will only be started if enabled in the config file.
 sub run {
   my($self, @args) = @_;
   my $app = $self->app;
+  my $loop = Mojo::IOLoop->singleton;
 
+  $SIG{QUIT} = sub {
+    $app->log->info('Gracefully stopping backend...');
+    $loop->max_connnections(0);
+    $app->redis->del('convos:backend:pid') if $app and $app->redis;
+  };
+
+  $ENV{CONVOS_BACKEND_EMBEDDED} = 1;
+  $app->redis->set('convos:backend:pid', $$);
   $app->core->start;
-  $app->proxy->start if $app->config->{backend}{proxy};
-  Mojo::IOLoop->start;
-  $app->log->warn('Mojo::IOLoop completed');
+  $app->log->info('Starting convos backend');
+  $loop->start;
   return 0;
 }
 

@@ -15,7 +15,8 @@ my($redis, $t);
 
 sub redis_do {
   my $delay = Mojo::IOLoop->delay;
-  my $redis = $redis || $t->app->redis;
+  $redis ||= $t->app->redis;
+  return $redis unless @_;
   $redis->execute(@_, $delay->begin);
   $delay->wait;
 }
