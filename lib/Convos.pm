@@ -153,6 +153,7 @@ Backend functionality.
 
 use Mojo::Base 'Mojolicious';
 use Mojo::Redis;
+use Mojo::Util qw( md5_sum steady_time );
 use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
@@ -233,7 +234,7 @@ sub startup {
 
   $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
-  $self->secrets($config->{secrets} || [$config->{secret} || die '"secrets" is required in config file']);
+  $self->secrets([steady_time]);           # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
   $self->_assets($config);
   $self->_public_routes;
@@ -249,6 +250,7 @@ sub startup {
 
   Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
   Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
+  Mojo::IOLoop->timer(0 => sub { $self->_set_secrets });
 }
 
 sub _assets {
@@ -333,6 +335,32 @@ sub _public_routes {
   $r->post('/register/:invite', {invite => ''})->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
   $r;
+}
+
+sub _set_secrets {
+  my $self  = shift;
+  my $redis = $self->redis;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $redis->lrange('convos:secrets', 0, -1, $delay->begin);
+      $redis->getset('convos:secrets:lock' => 1, $delay->begin);
+      $redis->expire('convos:secrets:lock' => 5);
+    },
+    sub {
+      my ($delay, $secrets, $locked) = @_;
+
+      $secrets ||= $self->config->{secrets};
+
+      return $self->app->secrets($secrets) if @$secrets;
+      return $self->_set_secrets if $locked;
+      $secrets = [md5_sum rand . $$ . steady_time];
+      $self->app->secrets($secrets);
+      $redis->lpush('convos:secrets', $secrets->[0]);
+      $redis->del('convos:secrets:lock');
+    },
+  );
 }
 
 sub _start_backend {
