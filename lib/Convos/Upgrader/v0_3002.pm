@@ -26,9 +26,9 @@ my %NETWORKS = (
   "magnet" => {
     channels  => '#convos',
     home_page => "http://www.irc.perl.org",
-    port      => 7062,
+    port      => 6667,
     server    => "irc.perl.org",
-    tls       => 1,
+    tls       => 0,
     default   => 1,
   },
 );
