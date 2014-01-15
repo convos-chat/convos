@@ -17,6 +17,6 @@
       <i class="icon-bullhorn"></i>
       <b><%= ( $n_notifications > 999 ? '999+' : $n_notifications ) if $n_notifications %></b>
     % end
-    <a href="#sidebar" title="Display nick list" class="sidebar toggler" data-focus="a" data-toggle="div.sidebar.container"><i class="icon-user"></i></a>
+    <a href="#sidebar" title="Display nick list" class="sidebar toggler" data-focus="a" data-toggle="div.sidebar.container"><i class="icon-cog"></i></a>
   </div>
 </nav>

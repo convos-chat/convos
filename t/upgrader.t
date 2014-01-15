@@ -15,11 +15,12 @@ my ($finish, $err);
 }
 
 {    # v0_3004
-  redis_do(sadd => 'users', 'jhthorsen');
+  redis_do(hset => 'user:jhthorsen', 'email', 'jhthorsen@cpan.org');
   redis_do(
     zadd => 'user:jhthorsen:conversations',
     1389446375.9990001, 'irc:2eperl:2eorg:00:23convos', 1389446374.9990001, 'convos:2eby:00marcus'
   );
+  redis_do(sadd => 'connections', 'jhthorsen:irc.perl.org', 'jhthorsen:convos.by');
   redis_do(sadd => 'user:jhthorsen:connections', 'irc.perl.org', 'convos.by');
   redis_do(hset => 'user:jhthorsen:connection:irc.perl.org', server => 'irc.perl.org');
   redis_do(hset => 'user:jhthorsen:connection:convos.by',    server => 'convos.by');
@@ -76,6 +77,17 @@ my ($finish, $err);
       'user:jhthorsen:connections',
     ],
     'converted connection keys',
+  );
+  is_deeply(
+    [sort @{redis_do(smembers => 'connections') || []}],
+    ['jhthorsen:convos-by', 'jhthorsen:magnet',],
+    'converted connection keys',
+  );
+
+  is_deeply(
+    redis_do(hgetall => 'user:jhthorsen'),
+    {email => 'jhthorsen@cpan.org', avatar => 'jhthorsen@cpan.org',},
+    'set avatar email to user email',
   );
 }
 

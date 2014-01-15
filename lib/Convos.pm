@@ -299,8 +299,9 @@ sub _start_backend {
       # on itself. We can then push a "restart_backend" element
       # from either the frontend or Convos::Upgrader::vx_xx when
       # a restart is required.
-      if ($SIG{USR2} and $pid) {
+      if ($SIG{USR2} and !$locked and $pid) {
         kill 9, $pid;
+        sleep 1;
       }
 
       if ($pid and kill 0, $pid) {
@@ -315,14 +316,14 @@ sub _start_backend {
       elsif ($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) {    # forced or ./script/convos daemon
         $self->log->debug('Starting embedded backend.');
         $redis->set('convos:backend:pid' => $$);
+        $redis->del('convos:backend:lock');
         $self->core->start;
       }
       else {                                                    # morbo
         $self->log->warn('Backend is not running and it will not be automatically started.');
+        $redis->del('convos:backend:lock');
         $self->core->upgrader->run;
       }
-
-      $redis->del('convos:backend:lock') unless $locked;
     },
   );
 }

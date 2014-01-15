@@ -99,6 +99,10 @@ sub _backup {
   my $backup_file = $self->backup_file;
   my ($dumper, $keys);
 
+  if ($ENV{CONVOS_FORCE_UPGRADE}) {
+    return $self->_next;
+  }
+
   open my $BACKUP, '>', $backup_file or return $self->emit(error => "Could not create $backup_file: $!");
 
   $dumper = sub {

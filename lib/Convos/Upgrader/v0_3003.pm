@@ -1,8 +1,8 @@
-package Convos::Upgrader::v0_3002;
+package Convos::Upgrader::v0_3003;
 
 =head1 NAME
 
-Convos::Upgrader::v0_3002 - Upgrade instructions to version 0.3002
+Convos::Upgrader::v0_3003 - Upgrade instructions to version 0.3003
 
 =head1 DESCRIPTION
 

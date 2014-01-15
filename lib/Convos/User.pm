@@ -152,7 +152,7 @@ See L</login>.
 sub register {
   my $self       = shift->render_later;
   my $validation = $self->validation;
-  my ($code, $wanted_login);
+  my ($code, $output);
 
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
@@ -161,8 +161,6 @@ sub register {
 
   $self->stash(form => 'register');
 
-  # cannt continue on error since the sismember(...$wanted_login...) will
-  # fail without a login
   if ($self->req->method ne 'POST') {
     return $self->render('index');
   }
@@ -176,30 +174,29 @@ sub register {
   $validation->required('email')->like(qr/.\@./);
   $validation->required('password_again')->equal_to('password');
   $validation->required('password')->size(5, 255);
-
-  $wanted_login = $validation->param('login');
+  $output = $validation->output;
 
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->sismember('users', $wanted_login, $delay->begin);
+      $self->redis->sismember('users', $output->{login}, $delay->begin);
       $self->redis->scard('users', $delay->begin);
     },
     sub {    # Check invitation unless first user
       my ($delay, $exists) = @_;
 
-      $validation->error(login => ["taken"]) if $exists;
+      $validation->error(login => ['taken']) if $exists;
       return $self->render('index', status => 400) if $validation->has_error;
 
-      $self->logf(debug => '[reg] New user login=%s', $wanted_login) if DEBUG;
-      $self->session(login => $wanted_login);
-      $self->app->core->start_convos_conversation($wanted_login);
+      $self->logf(debug => '[reg] New user login=%s', $output->{login}) if DEBUG;
+      $self->session(login => $output->{login});
+      $self->app->core->start_convos_conversation($output->{login});
       $self->redis->hmset(
-        "user:$wanted_login" =>
-          {digest => $self->_digest($validation->output->{password}), email => $validation->output->{email},},
+        "user:$output->{login}" =>
+          {digest => $self->_digest($output->{password}), email => $output->{email}, avatar => $output->{email},},
         $delay->begin
       );
-      $self->redis->sadd('users', $wanted_login, $delay->begin);
+      $self->redis->sadd(users => $output->{login}, $delay->begin);
     },
     sub {
       my ($delay, @saved) = @_;
