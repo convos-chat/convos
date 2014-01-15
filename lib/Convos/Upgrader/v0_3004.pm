@@ -36,18 +36,33 @@ sub _convert_connections {
   my ($self, $delay) = @_;
   my $redis = $self->redis;
   my $guard = $delay->begin;
+  my (%users, %connections);
 
-  $redis->del('connections');
   $redis->smembers(
-    users => sub {
-      my ($redis, $users) = @_;
+    connections => sub {
+      my ($redis, $connections) = @_;
 
-      for my $user (@$users) {
-        $self->_convert_connections_for_user($user, $delay);
-        $self->_set_avatar_for_user($user, $delay);
+      $redis->del('connections', $guard);
+
+      for (@$connections) {
+        my ($user, $name) = split /:/;
+        my $new;
+
+        unless ($users{$user}++) {
+          $redis->del("user:$user:connections", $delay->begin);
+          $redis->zrange("user:$user:conversations", $delay->begin);
+          $redis->sadd("users", $user, $delay->begin);
+          $self->_set_avatar_for_user($user, $delay);
+        }
+
+        $new = $self->_convert_connection_name($old);
+        $connections{$old} = $new;
+        $self->_convert_connection_for_user($user, $name, $new, $delay);
       }
 
-      $guard->();
+      for my $user (keys %users) {
+        $self->_convert_conversations_for_user($user, \%connections, $delay);
+      }
     }
   );
 }
@@ -57,52 +72,35 @@ sub _convert_connection_name {
 
   return 'linpro'   if $name eq 'irc.linpro.no';
   return 'magnet'   if $name eq 'irc.perl.org';
-  return 'freenode' if $name eq 'irc.freenode.org';
+  return 'freenode' if $name eq 'irc.freenode.net';
 
   $name =~ s!\W!-!g;
   $name;
 }
 
-sub _convert_connections_for_user {
-  my ($self, $user, $delay) = @_;
+sub _convert_connection_for_user {
+  my ($self, $user, $old, $new, $delay) = @_;
+  my $old   = $name;
   my $redis = $self->redis;
   my $guard = $delay->begin;
 
-  $redis->smembers(
-    "user:$user:connections" => sub {
-      my ($redis, $connections) = @_;
-      my %map;
+  $redis->keys(
+    "user:$user:connection:$old*",
+    sub {
+      my ($redis, $keys) = @_;
 
-      for my $name (@$connections) {
-        my $old = $name;
-        my $cb  = $delay->begin;
-
-        $name = $self->_convert_connection_name($old);
-        $map{$old} = $name;
-
-        $redis->keys(
-          "user:$user:connection:$old*",
-          sub {
-            my ($redis, $keys) = @_;
-
-            for my $key_old (@$keys) {
-              my $key_new = $key_old;
-              $key_new =~ s/:$old\b/:$name/;
-              $redis->rename($key_old, $key_new, $delay->begin);
-            }
-
-            $cb->();
-          }
-        );
+      for my $key_old (@$keys) {
+        my $key_new = $key_old;
+        $key_new =~ s/:$old\b/:$new/;
+        $redis->rename($key_old, $key_new, $delay->begin) if $key_old ne $key_new;
       }
 
-      $self->_convert_conversations_for_user($user, \%map, $delay);
-      @$connections or return $guard->();
-      $redis->del("user:$user:connections");
-      $redis->sadd(connections => map {"$user:$_"} @$connections);
-      $redis->sadd("user:$user:connections" => @$connections, $guard);
+      $guard->();
     }
   );
+
+  $redis->sadd(connections              => "$user:$new", $delay->begin);
+  $redis->sadd("user:$user:connections" => $new,         $delay->begin);
 }
 
 sub _convert_conversations_for_user {
