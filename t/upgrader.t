@@ -15,7 +15,6 @@ my ($finish, $err);
 }
 
 {    # v0_3004
-  redis_do(sadd => 'users', 'jhthorsen');
   redis_do(hset => 'user:jhthorsen', 'email', 'jhthorsen@cpan.org');
   redis_do(
     zadd => 'user:jhthorsen:conversations',

@@ -50,13 +50,13 @@ sub _convert_connections {
 
         unless ($users{$user}++) {
           $redis->del("user:$user:connections", $delay->begin);
-          $redis->zrange("user:$user:conversations", $delay->begin);
+          $redis->zrange("user:$user:conversations", 0, -1, $delay->begin);
           $redis->sadd("users", $user, $delay->begin);
           $self->_set_avatar_for_user($user, $delay);
         }
 
-        $new = $self->_convert_connection_name($old);
-        $connections{$old} = $new;
+        $new = $self->_convert_connection_name($name);
+        $connections{$name} = $new;
         $self->_convert_connection_for_user($user, $name, $new, $delay);
       }
 
@@ -80,7 +80,6 @@ sub _convert_connection_name {
 
 sub _convert_connection_for_user {
   my ($self, $user, $old, $new, $delay) = @_;
-  my $old   = $name;
   my $redis = $self->redis;
   my $guard = $delay->begin;
 
