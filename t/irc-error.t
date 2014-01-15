@@ -1,9 +1,5 @@
 use t::Helper;
 
-plan skip_all =>
-  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
-  unless $ENV{REDIS_TEST_DATABASE};
-
 my $port = Mojo::IOLoop->generate_port;
 my $core = $t->app->core;
 my $conn;

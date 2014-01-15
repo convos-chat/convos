@@ -106,6 +106,16 @@ Disable the frontend from starting the backend.
 Set how often to send "keep-alive" through the web socket. Default is
 every 30 second.
 
+=item * CONVOS_REDIS_URL
+
+This is the URL to the Redis backend, and should follow this format:
+
+  redis://x:password@server:port/database_index
+  redis://127.0.0.1:6379/1 # suggested value
+
+Convos will use C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> if
+C<CONVOS_REDIS_URL> is not set.
+
 =item * MOJO_IRC_DEBUG=1
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
@@ -123,7 +133,6 @@ Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
 =item * Icon: L<https://raw.github.com/Nordaaker/convos/master/public/image/icon.svg>
 
 =item * Logo: L<https://raw.github.com/Nordaaker/convos/master/public/image/logo.svg>
-
 
 =back
 
@@ -240,6 +249,11 @@ sub startup {
   $self->_public_routes;
   $self->_private_routes;
 
+  if (!eval { Convos::Plugin::Helpers::REDIS_URL() } and $config->{redis}) {
+    $self->log->warn("redis url from config file will be deprecated. Run 'perldoc Convos' for alternative setup.");
+    $ENV{CONVOS_REDIS_URL} = $config->{redis};
+  }
+
   $self->defaults(full_page => 1);
   $self->hook(
     before_dispatch => sub {
@@ -277,7 +291,7 @@ sub _check_version {
       my ($upgrader, $latest) = @_;
       $latest and return;
       $log->error(
-        "The database schema has changed.\nIt must be updated before we can start!\n\nRun '$self->{convos_executable_path} upgrade, then try again.'\n\n"
+        "The database schema has changed.\nIt must be updated before we can start!\n\nRun '$self->{convos_executable_path} upgrade', then try again.\n\n"
       );
       exit;
     },

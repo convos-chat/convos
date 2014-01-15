@@ -4,10 +4,6 @@ use Mojo::DOM;
 
 my $form;
 
-plan skip_all =>
-  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
-  unless $ENV{REDIS_TEST_DATABASE};
-
 redis_do(
   [hmset => 'user:doe',             digest => 'E2G3goEIb8gpw', email => 'e1@convos.by', avatar => 'a1@convos.by'],
   [sadd  => 'user:doe:connections', 'magnet'],

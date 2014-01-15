@@ -5,19 +5,15 @@ use t::Helper;
 use Convos::Upgrader;
 
 # Example usage for running on live database:
-# SAVE_NEW_STATE=1 BOOT_DATABASE= prove -vl t/upgrader.t
+# SAVE_NEW_STATE=1 LIVE_DATABASE= prove -vl t/upgrader.t
 # Requirements:
 # * Input database: local/dump.rdb
 # * Redis server port: 30000
 
-plan skip_all =>
-  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
-  unless $ENV{REDIS_TEST_DATABASE};
-
 my $upgrader = $t->app->upgrader;
 my ($finish, $err, @data);
 
-unless ($ENV{BOOT_DATABASE}) {
+unless ($ENV{LIVE_DATABASE}) {
 
   # v0_3002
   redis_do(set => 'convos:version', $ENV{CONVOS_VERSION}) if $ENV{CONVOS_VERSION};
@@ -47,7 +43,7 @@ unless ($ENV{BOOT_DATABASE}) {
 }
 
 {
-  $upgrader->redis(Mojo::Redis->new(server => $ENV{REDIS_TEST_DATABASE}));
+  $upgrader->redis(Mojo::Redis->new(server => $ENV{CONVOS_REDIS_URL}));
   $upgrader->run(sub { $err = pop; $finish = 1; Mojo::IOLoop->stop; });
   Mojo::IOLoop->start;
 

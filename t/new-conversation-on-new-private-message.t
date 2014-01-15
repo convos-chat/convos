@@ -2,10 +2,6 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
-plan skip_all =>
-  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
-  unless $ENV{REDIS_TEST_DATABASE};
-
 my $dom        = Mojo::DOM->new;
 my $connection = Convos::Core::Connection->new(login => 'doe', name => 'magnet');
 my $messages   = $t->app->redis->subscribe('convos:user:doe:out');
