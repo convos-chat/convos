@@ -46,10 +46,6 @@ my $redis = $t->app->redis;
 
   is $core->start, $core, 'start()';
 
-  $core->upgrader->once(finish => sub { $upgraded++; Mojo::IOLoop->stop });
-  Mojo::IOLoop->start;
-  is $upgraded, 1, 'database got upgraded';
-
   is $core->{control}->server, $redis->server, 'core control use the right redis server';
   $core->control(foo => 'bar', sub { });
   $core->{control}->once(

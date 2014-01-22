@@ -7,10 +7,14 @@ plan skip_all =>
 my $server = $t->app->redis->subscribe('convos:user:fooman:magnet');
 my ($form, $tmp, @ctrl);
 
-# make sure we have networks in database
-$t->app->core->upgrader->once(finish => sub { Mojo::IOLoop->stop });
-$t->app->core->start;
-Mojo::IOLoop->start;
+{
+  # make sure we have networks in database
+  my $upgrader = Convos::Upgrader->new(redis => $t->app->redis);
+  $upgrader->once(finish => sub { Mojo::IOLoop->stop });
+  $upgrader->run;
+  Mojo::IOLoop->start;
+}
+
 
 {
   no warnings 'redefine';

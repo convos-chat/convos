@@ -39,15 +39,10 @@ Holds a L<Mojo::Log> object.
 
 Holds a L<Mojo::Redis> object.
 
-=head2 upgrader
-
-Holds a L<Convos::Upgrader> object.
-
 =cut
 
-has log      => sub { Mojo::Log->new };
-has redis    => sub { Mojo::Redis->new };
-has upgrader => sub { Convos::Upgrader->new(redis => $_[0]->redis) };
+has log   => sub { Mojo::Log->new };
+has redis => sub { Mojo::Redis->new };
 
 =head1 METHODS
 
@@ -125,13 +120,7 @@ sub start {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->upgrader->once(finish => $delay->begin);
-      $self->upgrader->run;
-    },
-    sub {
-      my ($delay, $message) = @_;
 
-      $self->log->info($message);
       $self->redis->del('convos:loopback:names');    # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
     },

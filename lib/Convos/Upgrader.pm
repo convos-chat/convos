@@ -51,11 +51,6 @@ Emitted when the upgrade was completed.
 
 =head1 ATTRIBUTES
 
-=head2 backup_file
-
-Path to backup file. Default is "convos-redis-$timestamp.dump" in temp
-directory or the C<CONVOS_BACKUP_FILE> environement variable.
-
 =head2 redis
 
 Holds a L<Mojo::Redis> object. Required in constructor to avoid migrating the
@@ -63,7 +58,6 @@ wrong database.
 
 =cut
 
-has backup_file => sub { $ENV{CONVOS_BACKUP_FILE} || catfile(tmpdir, "convos-redis-@{[time]}.dump") };
 has redis => undef;
 has _raw_redis => sub { Mojo::Redis->new(server => shift->redis->server, encoding => ''); };
 has _loader => sub { Mojo::Loader->new };
@@ -86,49 +80,11 @@ sub run {
       my ($redis, $current) = @_;
       $self->{steps} = $self->_steps($current);
       return $self->_finish unless @{$self->{steps}};
-      return $self->_backup;
+      return $self->_next;
     }
   );
 
   $self;
-}
-
-sub _backup {
-  my $self        = shift;
-  my $max_keys    = $ENV{CONVOS_MAX_DUMP_KEYS} ||= 10_000;
-  my $backup_file = $self->backup_file;
-  my ($dumper, $keys);
-
-  if ($ENV{CONVOS_FORCE_UPGRADE}) {
-    return $self->_next;
-  }
-
-  open my $BACKUP, '>', $backup_file or return $self->emit(error => "Could not create $backup_file: $!");
-
-  $dumper = sub {
-    my $redis = shift;
-    my $key   = shift @$keys;
-
-    unless ($key) {
-      return $self->emit(error => "Could not close $backup_file: $!") unless close $BACKUP;
-      return $self->_next;
-    }
-
-    $redis->execute(
-      dump => $key => sub {
-        $_[1] =~ s!([^A-Za-z0-9._~,-])!{ sprintf '\x%02x', ord $1 }!ge;
-        printf $BACKUP qq(RESTORE %s 0 "%s"\n), $key, $_[1];
-        $dumper->($_[0]);
-      }
-    );
-  };
-
-  $self->redis->dbsize(
-    sub {
-      return $self->emit(error => "Too many keys in database to do a dump. (>$max_keys)") if $_[1] > $max_keys;
-      return $self->_raw_redis->keys('*' => sub { $keys = pop; $dumper->(shift); });
-    }
-  );
 }
 
 sub _finish {
