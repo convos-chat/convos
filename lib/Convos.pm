@@ -132,6 +132,10 @@ our $VERSION = '0.3005';
 
 =head1 ATTRIBUTES
 
+=head2 auto_start_backend
+
+Set this to false to disable auto starting the backend.
+
 =head2 archive
 
 Holds a L<Convos::Core::Archive> object.
@@ -146,6 +150,8 @@ The directory is "/tmp/convos" by default.
 Holds a L<Convos::Core> object.
 
 =cut
+
+has auto_start_backend => 1;
 
 has archive => sub {
   my $self = shift;
@@ -208,7 +214,7 @@ sub startup {
     }
   );
 
-  Mojo::IOLoop->timer(5 => sub { $self->_start_backend; });
+  Mojo::IOLoop->timer(5 => sub { $self->auto_start_backend and $self->_start_backend; });
 }
 
 sub _assets {
