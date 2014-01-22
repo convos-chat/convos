@@ -54,7 +54,7 @@ my ($finish, $err);
   is_deeply([sort @{redis_do(smembers => 'irc:networks') || []}], [qw( efnet freenode magnet )], 'irc:networks added',);
   is_deeply(
     redis_do(hgetall => 'irc:network:magnet'),
-    {home_page => "http://www.irc.perl.org", channels => '#convos', server => "irc.perl.org", port => 7062, tls => 1,},
+    {home_page => "http://www.irc.perl.org", channels => '#convos', server => "irc.perl.org", port => 6667, tls => 0,},
     'got network config for magnet',
   );
 }
