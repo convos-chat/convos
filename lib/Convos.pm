@@ -293,17 +293,6 @@ sub _start_backend {
     sub {
       my ($delay, $locked, $pid) = @_;
 
-      # This "hack" will restart the external backend each time we
-      # restart hypnotoad. I want to replace this later on with
-      # Convos::Core::ctrl_restart_backend(), which will do exec()
-      # on itself. We can then push a "restart_backend" element
-      # from either the frontend or Convos::Upgrader::vx_xx when
-      # a restart is required.
-      if ($SIG{USR2} and !$locked and $pid) {
-        kill 9, $pid;
-        sleep 1;
-      }
-
       if ($pid and kill 0, $pid) {
         $self->log->debug("Backend $pid is running.");
       }
