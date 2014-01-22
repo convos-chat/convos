@@ -10,9 +10,6 @@ This convos command will start the convos backend in a standalone process.
 At the same time a lock file is created preventing a frontend from starting
 the backend.
 
-This process will detach to background unless C<-f> is sepecified after
-creating the lock file.
-
 =cut
 
 use Mojo::Base 'Mojolicious::Command';
@@ -31,16 +28,14 @@ Returns a string describing how to use this command.
 
 has description => "Start the Convos IRC proxy.\n";
 has usage       => <<"EOF";
-usage: $0 backend
+Usage: $0 backend
 EOF
 
 =head1 METHODS
 
 =head2 run
 
-This method creates a lock file which prevent a frontend from also starting
-the backend. Will then call L<Convos::Core/start> and L<Convos::Proxy/start>.
-The proxy will only be started if enabled in the config file.
+Will start the backend.
 
 =cut
 
@@ -50,7 +45,7 @@ sub run {
   my $loop  = Mojo::IOLoop->singleton;
   my $redis = $app->redis;
 
-  unless($ENV{MOJO_MODE}) {
+  unless ($ENV{MOJO_MODE}) {
     die qq(MOJO_MODE need to be set to either "production" or "development".\n);
   }
 
