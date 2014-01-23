@@ -15,7 +15,6 @@ use Mojo::JSON 'j';
 use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
-use Convos::Upgrader;
 use Time::HiRes qw( time );
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
