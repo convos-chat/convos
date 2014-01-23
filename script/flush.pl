@@ -1,24 +1,42 @@
 #!/usr/bin/perl
-use strict;
-use warnings;
-
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+use Mojo::Base -strict;
+use Mojo::Log;
 use Convos;
-my $now=time;
-my $yesterday = $now -86400;
 
-# Start commands for application
-my $app=Convos->new();
-warn ref $app->redis;
-$app->redis->execute('keys','connection:*:msg',sub {
-  my($redis,$keys)=@_;
-  for my $key (@$keys) {
-    $redis->zremrangebyscore($key => '-inf','('.$yesterday);
-  };
-  $redis->keys('*:msg',sub {
-    $redis->ioloop->stop;
-    });
-  });
+chdir "$FindBin::Bin/..";
+$ENV{MOJO_MODE}      ||= 'production';
+$ENV{MOJO_LOG_LEVEL} ||= 'info';
 
-  $app->redis->ioloop->start;
+Mojo::Log->new->info("Running with MOJO_MODE=$ENV{MOJO_MODE}");
+
+my $days_to_keep  = shift or die "\nUsage: $0 <days-to-keep>\n";
+my $remove_before = time - 86400 * $days_to_keep;
+my $app           = Convos->new;
+my ($flush, @keys);
+
+$app->auto_start_backend(0);
+
+$flush = sub {
+  my $redis = shift;
+  my $key = shift @keys or return $redis->ioloop->stop;
+
+  $redis->zremrangebyscore($key => "-inf", "($remove_before", $flush);
+};
+
+$app->redis->execute(
+  'keys',
+  'connection:*:msg',
+  sub {
+    my ($redis, $keys) = @_;
+    @keys = @$keys;
+    $app->log->info("Will flush @{[int @keys]} conversations...\n");
+    $redis->$flush;
+  },
+);
+
+$app->log->info("Will flush conversation log before @{[localtime $remove_before]}");
+$app->log->info("Getting list of conversations...");
+$app->redis->ioloop->start;
+$app->log->info("Conversation log before @{[localtime $remove_before]} was flushed");

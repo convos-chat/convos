@@ -11,7 +11,7 @@ BEGIN {
   $ENV{REDIS_TEST_DATABASE} ||= '';
 }
 
-my($redis, $t);
+my ($redis, $t);
 
 sub redis_do {
   my $delay = Mojo::IOLoop->delay;
@@ -22,11 +22,14 @@ sub redis_do {
 }
 
 sub wait_a_bit {
-  my($cb, $text) = @_;
-  my $tid = Mojo::IOLoop->timer(2, sub {
-    Test::More::ok(0, $text || 'TIMED OUT!');
-    Mojo::IOLoop->stop;
-  });
+  my ($cb, $text) = @_;
+  my $tid = Mojo::IOLoop->timer(
+    2,
+    sub {
+      Test::More::ok(0, $text || 'TIMED OUT!');
+      Mojo::IOLoop->stop;
+    }
+  );
   return sub {
     Mojo::IOLoop->remove($tid);
     $cb->();
@@ -35,8 +38,8 @@ sub wait_a_bit {
 }
 
 sub import {
-  my $class = shift;
-  my $no_web = grep { /no_web/ } @_;
+  my $class  = shift;
+  my $no_web = grep {/no_web/} @_;
   my $caller = caller;
   my $keys;
 
@@ -45,7 +48,7 @@ sub import {
   $ENV{REDIS_TEST_DATABASE} = 'redis://127.0.0.1:6379/14' if $ENV{REDIS_TEST_DATABASE} eq 'default';
 
   # make sure we use our own test database
-  if($no_web) {
+  if ($no_web) {
     $redis = Mojo::Redis->new(server => $ENV{REDIS_TEST_DATABASE});
   }
   else {
@@ -59,9 +62,9 @@ sub import {
 
   eval "package $caller; use Test::More; 1" or die $@;
   no strict 'refs';
-  *{ "$caller\::t" } = \$t;
-  *{ "$caller\::redis_do" } = \&redis_do;
-  *{ "$caller\::wait_a_bit" } = \&wait_a_bit;
+  *{"$caller\::t"}          = \$t;
+  *{"$caller\::redis_do"}   = \&redis_do;
+  *{"$caller\::wait_a_bit"} = \&wait_a_bit;
 }
 
 1;

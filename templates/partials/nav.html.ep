@@ -1,0 +1,22 @@
+<nav class="bar">
+  % my @class;
+  %= link_to 'view.network', { network => 'convos' }, class => 'convos', title => 'Status messages and settings', 'data-unread' => 0, begin
+    %= image '/image/icon-navbar.png', alt => 'Convos'
+  % end
+  %= include 'client/conversation_list'
+  %= link_to 'conversation_list', class => 'conversations toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations.container', begin
+    <i class="icon-chevron-down"></i>
+  % end
+  <div class="right">
+    %= link_to 'add_conversation', title => 'Add conversation',  class => 'add-conversation toggler', 'data-focus' => 'input[name="channel"]', 'data-toggle' => 'div.add-conversation', begin
+      <i class="icon-plus">+</i>
+    % end
+    % @class = qw( notifications toggler );
+    % push @class, 'alert' if $n_notifications;
+    %= link_to 'conversation_list', title => 'List notifications', class => "@class", 'data-focus' => 'a', 'data-toggle' => 'div.notifications.container', begin
+      <i class="icon-bullhorn"></i>
+      <b><%= ( $n_notifications > 999 ? '999+' : $n_notifications ) if $n_notifications %></b>
+    % end
+    <a href="#sidebar" title="Display nick list" class="sidebar toggler" data-focus="a" data-toggle="div.sidebar.container"><i class="icon-cog"></i></a>
+  </div>
+</nav>

@@ -1,0 +1,90 @@
+% my $err;
+% my $network = stash 'network';
+% my $action = $network ? 'network.edit' : 'network.add';
+% title $network ? 'Edit network' : 'Add network';
+<div class="landing-page">
+  <header class="row">
+    <h1>
+      <span class="logo">Convos</span>
+      <small><%= $network ? qq(Edit network "@{[param 'name']}") : qq(Add a network) %></small>
+    </h1>
+  </header>
+
+  <div class="row">
+    %= form_for $action, class => 'horizontal', method => 'post', begin
+      % my $referrer = param('referrer') || $self->req->headers->referrer;
+      %= hidden_field referrer => $referrer
+      <p>
+        A network is a collection of IRC servers that talk to each other.
+        This form allow you to add a custom network.
+      </p>
+      % unless($network) {
+      <div class="form-group name">
+        <label for="name">Name</label>
+        %= text_field 'name', id => 'name'
+        % if ($err = validation->error('name')) {
+        <p class="error">Invalid network name.</p>
+        % }
+        <p class="help">
+          Choose a friendly name for this network.
+          Valid characters: a-z, 0-9 and "-".
+        </p>
+      </div>
+      % }
+      <div class="form-group server">
+        <label for="server">Server</label>
+        %= text_field 'server', id => 'server'
+        % if ($err = validation->error('server')) {
+        <p class="error">Invalid server name.</p>
+        % }
+        <p class="help">
+          Add ":port" if you do not want the default port
+          <abbr title="Default non-secure port">6667</abbr> or
+          <abbr title="Default secure port">6697</abbr>.
+        </p>
+      </div>
+      <div class="form-group channels">
+        <label for="channels">Channels</label>
+        %= text_field 'channels', id => 'channels'
+        % if ($err = validation->error('channels')) {
+        <p class="error">Invalid channel names.</p>
+        % }
+        <p class="help">The suggested channels for this network.</p>
+      </div>
+      <div class="form-group home_page">
+        <label for="home_page">Home page</label>
+        %= text_field 'home_page', 'http://', id => 'home_page'
+        % if ($err = validation->error('home_page')) {
+        <p class="error">Invalid URL.</p>
+        % }
+        <p class="help">URL to the network's homepage</p>
+      </div>
+      <div class="form-group tls">
+        <label for="tls">Secure</label>
+        %= check_box tls => 1
+        <p class="help">Chat over TLS for increased privacy. Require server support.</p>
+      </div>
+      <div class="form-group password">
+        <label for="default">Password</label>
+        %= check_box password => 1
+        <p class="help">Set this if the network supports a password.</p>
+      </div>
+      <div class="form-group default">
+        <label for="default">Default</label>
+        %= check_box default => 1
+        <p class="help">Set this network as default for new users.</p>
+      </div>
+      <div class="actions">
+        <button type="submit"><%= $network ? 'Update' : 'Add' %> network</button>
+      % unless($network) {
+        %= link_to 'Cancel', $referrer, class => 'button'
+      % }
+      </div>
+    % end
+  </div>
+  <div class="row footer">
+    <hr>
+    &copy; <%= link_to "Nordaaker", "http://nordaaker.com"%>
+    - <%= link_to "About", "http://convos.by" %>
+  </div>
+</div>

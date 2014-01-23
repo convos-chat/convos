@@ -17,7 +17,7 @@ Retrieves previous conversations.
 =cut
 
 sub list {
-  my $self=shift;
+  my $self = shift;
 }
 
 =head2 view
@@ -27,7 +27,7 @@ View a previous conversation.
 =cut
 
 sub view {
-  my $self=shift;
+  my $self = shift;
 }
 
 =head2 search
@@ -37,7 +37,7 @@ Search in previous conversations. See also L<Convos::Core::Archive/search>.
 =cut
 
 sub search {
-  my $self=shift;
+  my $self = shift;
 }
 
 =head1 COPYRIGHT

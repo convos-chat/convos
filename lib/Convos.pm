@@ -82,6 +82,36 @@ as config file template.
 
 =back
 
+=head2 Environment
+
+Convos can be configured with the following environment variables:
+
+=over 4
+
+=item * CONVOS_BACKEND_EMBEDDED=1
+
+Set CONVOS_MANUAL_BACKEND to a true value if you're starting L<Convos>
+with C<morbo> and want to run the backend embedded.
+
+=item * CONVOS_DEBUG=1
+
+Set CONVOS_DEBUG for extra debug output to STDERR.
+
+=item * CONVOS_MANUAL_BACKEND=1
+
+Disable the frontend from starting the backend.
+
+=item * CONVOS_PING_INTERVAL=30
+
+Set how often to send "keep-alive" through the web socket. Default is
+every 30 second.
+
+=item * MOJO_IRC_DEBUG=1
+
+Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
+
+=back
+
 =head1 RESOURCES
 
 =over 4
@@ -127,12 +157,14 @@ use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
-use Convos::Upgrader;
-use POSIX ();
 
 our $VERSION = '0.3005';
 
 =head1 ATTRIBUTES
+
+=head2 auto_start_backend
+
+Set this to false to disable auto starting the backend.
 
 =head2 archive
 
@@ -147,11 +179,9 @@ The directory is "/tmp/convos" by default.
 
 Holds a L<Convos::Core> object.
 
-=head2 upgrader
-
-Holds a L<Convos::Upgrader> object.
-
 =cut
+
+has auto_start_backend => $ENV{CONVOS_MANUAL_BACKEND} ? 0 : 1;
 
 has archive => sub {
   my $self = shift;
@@ -176,13 +206,6 @@ has core => sub {
   $core;
 };
 
-has upgrader => sub {
-  my $self = shift;
-  my $upgrader = Convos::Upgrader->new(redis => $self->redis);
-  $upgrader->on(finish => sub { $self->log->info($_[1]) });
-  $upgrader;
-};
-
 =head1 METHODS
 
 =head2 startup
@@ -195,137 +218,136 @@ sub startup {
   my $self = shift;
   my $config;
 
-  $self->{convos_executable_path} = $0; # required to work from within toadfarm
+  $self->{convos_executable_path} = $0;    # required to work from within toadfarm
   $self->_from_cpan;
   $config = $self->plugin('Config');
 
-  if(my $log = $config->{log}) {
+  if (my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
     $self->log->path($log->{file}) if $log->{file} ||= $log->{path};
-    delete $log->{handle}; # make sure it's fresh to file
+    delete $self->log->{handle};           # make sure it's fresh to file
   }
 
-  $config->{name} ||= 'Convos';
-  $config->{default_connection}{channels} = [ split /[\s,]/, $config->{default_connection}{channels} ] unless ref $config->{default_connection}{channels};
-  $config->{default_connection}{server} = $config->{default_connection}{host} unless $config->{default_connection}{server}; # back compat
-
-  $self->cache; # make sure cache is ok
+  $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
+  $self->secrets($config->{secrets} || [$config->{secret} || die '"secrets" is required in config file']);
   $self->sessions->default_expiration(86400 * 30);
-  $self->defaults(layout => 'default', logged_in => 0, body_class => 'default');
+  $self->_assets($config);
+  $self->_public_routes;
+  $self->_private_routes;
 
-  if($self->can('secrets')) {
-    $self->secrets($config->{secrets} || [$config->{secret} || die '"secret" is required in config file']);
-  }
-  else {
-    $self->secret($config->{secret} || die '"secret" is required in config file');
-  }
-
-  $self->plugin('AssetPack' => { rebuild => $config->{AssetPack}{rebuild} // 1 });
-  $self->asset('convos.css', '/sass/main.scss');
-  $self->asset('convos.js',
-    '/js/jquery.min.js',
-    '/js/jquery.hotkeys.min.js',
-    '/js/jquery.fastbutton.min.js',
-    '/js/jquery.nanoscroller.min.js',
-    '/js/jquery.pjax.js',
-    '/js/selectize.js',
-    '/js/globals.js',
-    '/js/jquery.doubletap.js',
-    '/js/ws-reconnecting.js',
-    '/js/jquery.helpers.js',
-    '/js/convos.chat.js',
+  $self->defaults(full_page => 1);
+  $self->hook(
+    before_dispatch => sub {
+      my $c = shift;
+      $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
+    }
   );
 
-  # Normal route to controller
-  my $r = $self->routes;
-  $r->get('/')->to('client#route')->name('index');
-  $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
-  $r->get('/login')->to('user#login', body_class => 'tactile')->name('login');
-  $r->post('/login')->to('user#login', body_class => 'tactile');
-  $r->get('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile')->name('register');;
-  $r->post('/register/:invite', { invite => '' })->to('user#register', body_class => 'tactile');
-  $r->get('/logout')->to('user#logout')->name('logout');
+  Mojo::IOLoop->timer(5 => sub { $self->auto_start_backend and $self->_start_backend; });
+}
 
-  my $private_r = $r->bridge('/')->to('user#auth');
-  my $host_r = $private_r->any('/#server', [ server => $Convos::Core::Util::SERVER_NAME_RE ]);
+sub _assets {
+  my ($self, $config) = @_;
 
-  $private_r->websocket('/socket')->to('chat#socket')->name('socket');
-  $private_r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
-  $private_r->get('/conversations')->to('client#conversation_list', layout => undef)->name('conversation_list');
-  $private_r->get('/notifications')->to('client#notification_list', layout => undef)->name('notification_list');
-  $private_r->get('/command-history')->to('client#command_history');
-  $private_r->post('/notifications/clear')->to('client#clear_notifications', layout => undef)->name('clear_notifications');
-  $private_r->get('/convos')->to('client#convos')->name('convos');
-  $private_r->get('/wizard')->to('user#wizard', body_class => 'tactile')->name('wizard');
-  $private_r->get('/settings')->to('user#settings')->name('settings');
-  $private_r->post('/settings/connection')->to('user#add_connection')->name('connection.add');
-  $private_r->post('/settings/profile')->to('user#edit_user')->name('user.edit');
-
-  $host_r->any('/control')->to('user#control')->name('connection.control')->name('connection.control');
-  $host_r->get('/settings/delete')->to('user#delete_connection')->name('connection.delete');
-  $host_r->post('/settings/edit')->to('user#edit_connection')->name('connection.edit');
-  $host_r->get('/*target')->to('client#view')->name('view');
-  $host_r->get('/')->to('client#view')->name('view.server');
-
-  Mojo::IOLoop->timer(5 => sub { $self->_start_backend }); # Delay startup of core to avoid starting when not persistent
-  Mojo::IOLoop->timer(0 => sub { $self->upgrader->run });
+  $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
+  $self->asset('convos.css', '/sass/main.scss');
+  $self->asset(
+    'convos.js',                      '/js/jquery.min.js',
+    '/js/jquery.hotkeys.min.js',      '/js/jquery.fastbutton.min.js',
+    '/js/jquery.nanoscroller.min.js', '/js/jquery.pjax.js',
+    '/js/selectize.js',               '/js/globals.js',
+    '/js/jquery.doubletap.js',        '/js/ws-reconnecting.js',
+    '/js/jquery.helpers.js',          '/js/convos.chat.js',
+  );
 }
 
 sub _from_cpan {
-  my $self = shift;
-  my $home = catdir dirname(__FILE__), 'Convos';
+  my $self   = shift;
+  my $home   = catdir dirname(__FILE__), 'Convos';
   my $config = catfile $home, 'convos.conf';
 
   -r $config or return;
   $self->home->parse($home);
-  $self->static->paths->[0] = $self->home->rel_dir('public');
+  $self->static->paths->[0]   = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
 }
 
-sub _start_backend {
+sub _private_routes {
   my $self = shift;
+  my $r = $self->routes->route->bridge('/')->to('user#auth', layout => 'view');
+  my $network_r;
+
+  $r->websocket('/socket')->to('chat#socket')->name('socket');
+  $r->get('/chat/command-history')->to('client#command_history');
+  $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)
+    ->name('conversation.list');
+  $r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)
+    ->name('notification.list');
+  $r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
+  $r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
+  $r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
+  $r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
+  $r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
+  $r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
+  $r->any('/network/add')->to('connection#add_network')->name('network.add');
+  $r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
+  $r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
+  $r->any('/profile')->to('user#edit')->name('user.edit');
+  $r->get('/wizard')->to('connection#wizard')->name('wizard');
+
+  $network_r = $r->route('/:network');
+  $network_r->get('/*target')->to('client#conversation')->name('view');
+  $network_r->get('/')->to('client#conversation')->name('view.network');
+}
+
+sub _public_routes {
+  my $self = shift;
+  my $r = $self->routes->route->to(layout => 'tactile');
+
+  $r->get('/')->to('client#route')->name('index');
+  $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
+  $r->get('/login')->to('user#login')->name('login');
+  $r->post('/login')->to('user#login');
+  $r->get('/register/:invite', {invite => ''})->to('user#register')->name('register');
+  $r->post('/register/:invite', {invite => ''})->to('user#register');
+  $r->get('/logout')->to('user#logout')->name('logout');
+  $r;
+}
+
+sub _start_backend {
+  my $self  = shift;
   my $redis = $self->redis;
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
+      my ($delay) = @_;
       $redis->getset('convos:backend:lock' => 1, $delay->begin);
       $redis->get('convos:backend:pid', $delay->begin);
       $redis->expire('convos:backend:lock' => 5);
     },
     sub {
-      my($delay, $locked, $pid) = @_;
+      my ($delay, $locked, $pid) = @_;
 
-      # This "hack" will restart the external backend each time we
-      # restart hypnotoad. I want to replace this later on with
-      # Convos::Core::ctrl_restart_backend(), which will do exec()
-      # on itself. We can then push a "restart_backend" element
-      # from either the frontend or Convos::Upgrader::vx_xx when
-      # a restart is required.
-      if($SIG{USR2} and $pid) {
-        kill 9, $pid;
-      }
-
-      if($pid and kill 0, $pid) {
+      if ($pid and kill 0, $pid) {
         $self->log->debug("Backend $pid is running.");
       }
-      elsif($locked) {
+      elsif ($locked) {
         $self->log->debug('Another process is starting the backend.');
       }
-      elsif($SIG{USR2}) { # hypnotoad
+      elsif ($SIG{USR2}) {    # hypnotoad
         $self->_start_backend_as_external_app;
       }
-      elsif($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) { # forced or ./script/convos daemon
+      elsif ($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) {    # forced or ./script/convos daemon
         $self->log->debug('Starting embedded backend.');
         $redis->set('convos:backend:pid' => $$);
+        $redis->del('convos:backend:lock');
         $self->core->start;
       }
-      else { # morbo
+      else {                                                    # morbo
         $self->log->warn('Backend is not running and it will not be automatically started.');
+        $redis->del('convos:backend:lock');
       }
-
-      $redis->del('convos:backend:lock') unless $locked;
     },
   );
 }
@@ -335,24 +357,24 @@ sub _start_backend_as_external_app {
 
   local $0 = $self->{convos_executable_path};
 
-  if(!-x $0) {
+  if (!-x $0) {
     $self->log->error("Cannot execute $0: Not executable");
     return;
   }
 
-  if(my $pid = fork) {
+  if (my $pid = fork) {
     $self->log->debug("Starting $0 backend with double fork");
-    wait; # wait for "fork and exit" below
+    wait;    # wait for "fork and exit" below
     $self->log->info("Detached $0 backend ($pid=$?)");
-    return $pid; # parent process returns
+    return $pid;    # parent process returns
   }
-  elsif(!defined $pid) {
+  elsif (!defined $pid) {
     $self->log->error("Can't start external backend, fork failed: $!");
     return;
   }
 
   # start detaching new process from hypnotoad
-  if(!POSIX::setsid) {
+  if (!POSIX::setsid) {
     $self->log->error("Can't start a new session for backend: $!");
     exit $!;
   }

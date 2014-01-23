@@ -19,13 +19,13 @@ use Time::HiRes qw( time );
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
 my %CONVOS_MESSAGE = (
-  event => 'message',
-  host => 'loopback',
-  nick => 'convos',
+  event  => 'message',
+  host   => 'loopback',
+  nick   => 'convos',
   server => 'loopback',
   status => 200,
   target => 'convos',
-  user => 'convos',
+  user   => 'convos',
 );
 
 =head1 ATTRIBUTES
@@ -40,7 +40,7 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
-has log => sub { Mojo::Log->new };
+has log   => sub { Mojo::Log->new };
 has redis => sub { Mojo::Redis->new };
 
 =head1 METHODS
@@ -54,7 +54,7 @@ Used to issue a control command.
 =cut
 
 sub control {
-  my($self, @args) = @_;
+  my ($self, @args) = @_;
   my $cb = pop @args;
 
   $self->redis->lpush('core:control', join(':', @args), $cb);
@@ -71,19 +71,14 @@ Used to add a C<$message> to the user C<$login>.
 =cut
 
 sub send_convos_message {
-  my($self, $login, $message, @cb) = @_;
+  my ($self, $login, $message, @cb) = @_;
   my $time = time;
 
-  local $CONVOS_MESSAGE{message} = $message;
+  local $CONVOS_MESSAGE{message}   = $message;
   local $CONVOS_MESSAGE{timestamp} = $time;
-  local $CONVOS_MESSAGE{uuid} = Mojo::Util::md5_sum($time .$message); # not really an uuid
+  local $CONVOS_MESSAGE{uuid}      = Mojo::Util::md5_sum($time . $message);    # not really an uuid
 
-  $self->redis->zadd(
-    "user:$login:connection:convos:msg",
-    $CONVOS_MESSAGE{timestamp},
-    j(\%CONVOS_MESSAGE),
-    @cb
-  );
+  $self->redis->zadd("user:$login:connection:convos:msg", $CONVOS_MESSAGE{timestamp}, j(\%CONVOS_MESSAGE), @cb);
 
   $self;
 }
@@ -97,13 +92,14 @@ Will add default messages to the convos conversation.
 =cut
 
 sub start_convos_conversation {
-  my($self, $login) = @_;
+  my ($self, $login) = @_;
 
-  for(
+  for (
     "Hi $login!",
     "While convos is establishing a connection, you can try out the help command: Type '/help' in the input field in the bottom on the page and hit enter.",
     "You can also use the <tab> key to autocomplete commands and nicks.",
-  ) {
+    )
+  {
     $self->send_convos_message($login, $_);
   }
 
@@ -117,22 +113,24 @@ Will fetch connection information from the database and try to connect to them.
 =cut
 
 sub start {
-  my $self = shift;
+  my ($self, $cb) = @_;
 
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
-      $self->redis->del('convos:loopback:names'); # clear loopback nick list
+      my ($delay) = @_;
+
+      $self->redis->del('convos:loopback:names');    # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
     },
     sub {
-      my($delay, $connections) = @_;
+      my ($delay, $connections) = @_;
       warn sprintf "[core] Starting %s connection(s)\n", int @$connections if DEBUG;
       for my $conn (@$connections) {
-        my($login, $server) = split /:/, $conn;
-        $self->_connection(login => $login, server => $server)->connect;
+        my ($login, $name) = split /:/, $conn;
+        $self->_connection(login => $login, name => $name)->connect;
       }
+      $self->$cb if $cb;
     },
   );
 
@@ -141,12 +139,12 @@ sub start {
 }
 
 sub _connection {
-  my($self, %args) = @_;
-  my $conn = $self->{connections}{$args{login}}{$args{server}};
+  my ($self, %args) = @_;
+  my $conn = $self->{connections}{$args{login}}{$args{name}};
 
-  unless($conn) {
+  unless ($conn) {
     $conn = Convos::Core::Connection->new(redis => $self->redis, %args);
-    $self->{connections}{$args{login}}{$args{server}} = $conn;
+    $self->{connections}{$args{login}}{$args{name}} = $conn;
   }
 
   $conn;
@@ -159,21 +157,21 @@ sub _start_control_channel {
   Scalar::Util::weaken($self);
 
   $cb = sub {
-    my($redis, $li) = @_;
-    $redis->brpop($li->[0], 0, $cb);
-    $li->[1] or return;
-    my($command, $login, $server) = split /:/, $li->[1];
+    my ($redis, $instruction) = @_;
+    $redis->brpop($instruction->[0], 0, $cb);
+    $instruction->[1] or return;
+    my ($command, $login, $name) = split /:/, $instruction->[1];
     my $action = "ctrl_$command";
-    $self->$action($login, $server);
+    $self->$action($login, $name);
   };
 
   $self->{control} = Mojo::Redis->new(server => $self->redis->server);
   $self->{control}->$cb(['core:control']);
   $self->{control}->on(
     error => sub {
-      my($redis, $error) = @_;
+      my ($redis, $error) = @_;
       $self->log->warn("[core:control] $error (reconnecting)");
-      Mojo::IOLoop->timer(0.5, sub { $self and $self->_start_control_channel })
+      Mojo::IOLoop->timer(0.5, sub { $self and $self->_start_control_channel });
     },
   );
 }
@@ -183,6 +181,7 @@ sub _start_control_channel {
   $self->add_connection({
     channels => [ '#foo', '#bar', '...' ],
     login => $str,
+    name => $str,
     nick => $str,
     server => $str, # irc_server[:port]
     tls => $bool,
@@ -194,45 +193,51 @@ set all the keys in the %connection hash
 =cut
 
 sub add_connection {
-  my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login nick server tls ));
+  my ($self, $input, $cb) = @_;
+  my $validation = $self->_validation($input, qw( password login name server tls ));
 
-  $validation->output->{user} ||= $validation->output->{login};
-
-  if($validation->has_error) {
+  if ($validation->has_error) {
     $self->$cb($validation, undef);
     return $self;
   }
 
-  my($login, $server) = $validation->param([qw( login server )]);
+  $validation->optional($_) for qw( nick user );
+  $validation->output->{nick} ||= $validation->output->{login};
+  $validation->output->{user} ||= $validation->output->{login};
+
+  my ($login, $name) = $validation->param([qw( login name )]);
   my @channels = $self->_parse_channels(delete $validation->input->{channels});
-  my $key = join ':', "user:$login:connection:$server";
 
   warn "[core:$login] add ", _dumper($validation->output), "\n" if DEBUG;
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
-      $self->redis->exists($key, $delay->begin);
+      my ($delay) = @_;
+      $self->redis->exists("user:$login:connection:$name", $delay->begin);
     },
     sub {
-      my($delay, $exists) = @_;
+      my ($delay, $exists) = @_;
 
-      return $self->$cb({ server => 'Connection exists' }, undef) if $exists;
-      return $self->redis->execute(
-        [sadd => "connections", "$login:$server"],
-        [sadd => "user:$login:connections", $server],
-        [hmset => "user:$login:connection:$server", %{ $validation->output }],
-        (map { [ zadd => "user:$login:conversations", time, as_id $server, $_ ] } @channels),
+      if ($exists) {
+        $validation->error(name => ['exists']);
+        $self->$cb($validation, undef);
+        return;
+      }
+
+      $self->redis->execute(
+        [sadd  => "connections",                  "$login:$name"],
+        [sadd  => "user:$login:connections",      $name],
+        [hmset => "user:$login:connection:$name", %{$validation->output}],
+        (map { [zadd => "user:$login:conversations", time, as_id $name, $_] } @channels),
         $delay->begin,
       );
     },
     sub {
-      my($delay, @saved) = @_;
-      $self->control(start => $validation->param([qw( login server )]), $delay->begin);
+      my ($delay, @saved) = @_;
+      $self->control(start => $login, $name, $delay->begin);
     },
     sub {
-      my($delay, $started) = @_;
+      my ($delay, $started) = @_;
       $self->$cb(undef, $validation->output);
     },
   );
@@ -241,122 +246,70 @@ sub add_connection {
 =head2 update_connection
 
   $self->update_connection({
-    channels => [ '#foo', '#bar', '...' ],
     login => $str,
-    lookup => $str, # irc_server[:port]
+    name => $str,
     nick => $str,
     server => $str, # irc_server[:port]
     tls => $bool,
   }, $callback);
 
-Update a connection's settings and reconnect.
+Update a connection's settings. This might issue a reconnect or issue
+IRC commands to reflect the changes.
 
 =cut
 
 sub update_connection {
-  my($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login lookup nick server tls ));
-  my $lookup;
+  my ($self, $input, $cb) = @_;
+  my $validation = $self->_validation($input, qw( login name nick password server tls ));
 
-  $validation->output->{user} ||= $validation->output->{login};
-  $lookup = delete $validation->output->{lookup} || '';
-
-  if($validation->has_error) {
+  if ($validation->has_error) {
     $self->$cb($validation, undef);
     return $self;
   }
-  if($validation->param('server') eq $lookup) {
-    $self->_update_connection($validation, $cb);
-    return $self;
-  }
 
-  warn "[core:@{[$validation->param('login')]}] delete+add $lookup\n" if DEBUG;
-  Scalar::Util::weaken($self);
-  Mojo::IOLoop->delay(
-    sub {
-      my($delay) = @_;
-      $self->add_connection($validation, $delay->begin);
-    },
-    sub {
-      my($delay, $error, $res) = @_;
-      return $self->$cb($error, undef) if $error;
-      local $validation->input->{server} = $lookup;
-      return $self->delete_connection($validation, $delay->begin);
-    },
-    sub {
-      my($delay, $error) = @_; # TODO: How to handle error?
-      $self->$cb(undef, $validation->output);
-    },
-  );
+  $validation->optional('user');
+  $validation->output->{user} ||= $validation->output->{login};
 
-  return $self;
-}
+  my ($login, $name) = $validation->param([qw( login name )]);
+  my $conn  = Convos::Core::Connection->new(%{$validation->output});
+  my $redis = $self->redis;
 
-sub _update_connection {
-  my($self, $validation, $cb) = @_;
-  my @wanted_channels = $self->_parse_channels(delete $validation->input->{channels});
-  my($conn, $login, $server);
-
-  ($login, $server) = $validation->param([qw( login server )]);
   warn "[core:$login] update ", _dumper($validation->output), "\n" if DEBUG;
-  $conn = $self->_connection(%{ $validation->output });
 
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
-      $self->redis->hgetall("user:$login:connection:$server", $delay->begin);
-      $self->redis->zrange("user:$login:conversations", 0, 1, $delay->begin);
+      my ($delay) = @_;
+      $redis->hgetall("user:$login:connection:$name", $delay->begin);
     },
     sub {
-      my($delay, $found, $conversations) = @_;
-      my %existing_channels;
+      my ($delay, $current) = @_;
 
-      unless($found and %$found) {
-        $validation->error(server => ['no_such_connection']);
+      unless ($current and %$current) {
+        $validation->error(name => ['no_such_connection']);
         $self->$cb($validation, undef);
-        return $self;
+        return;
       }
 
-      %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
-      $conn = {};
-
-      for my $k (qw( login nick server tls password )) {
-        my $value = $validation->param($k) or next;
-        $conn->{$k} = $value;
-      }
-      for my $k (qw( server host )) { # want these values
-        delete $found->{$k};
-      }
-      for my $k (keys %$found) {
-        next unless defined $conn->{$k} and defined $found->{$k};
-        next unless $found->{$k} eq $conn->{$k};
-        delete $conn->{$k}; # only keep changed keys
-      }
-
-      if(%$conn) {
-        $self->redis->hmset("user:$login:connection:$server", %$conn, $delay->begin)
-      }
-      if($conn->{nick}) {
-        $self->redis->publish("convos:user:$login:$server", "dummy-uuid NICK $conn->{nick}", $delay->begin);
-        warn "[core:$login] NICK $conn->{nick}\n" if DEBUG;
-      }
-
-      for my $channel (@wanted_channels) {
-        next if delete $existing_channels{$channel};
-        $self->redis->zadd("user:$login:conversations", time, as_id $server, $channel);
-        $self->redis->publish("convos:user:$login:$server", "dummy-uuid JOIN $channel", $delay->begin);
-        warn "[core:$login] JOIN $channel\n" if DEBUG;
-      }
-      for my $channel (keys %existing_channels) {
-        $self->redis->zrem("user:$login:conversations", as_id $server, $channel);
-        $self->redis->publish("convos:user:$login:$server", "dummy-uuid PART $channel", $delay->begin);
-        warn "[core:$login] PART $channel\n" if DEBUG;
-      }
-
-      $delay->begin->();
+      $delay->begin->(@_);    # pass on $current and $conversations
+      $redis->zrange("user:$login:conversations", 0, 1, $delay->begin);
+      $redis->hmset("user:$login:connection:$name", $validation->output, $delay->begin);
     },
     sub {
-      my($delay, @saved) = @_;
+      my ($delay, $current, $conversations) = @_;
+      my %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
+
+      $conn = $validation->output;    # get rid of the extra junk from Connection->new()
+
+      if ($current->{server} ne $conn->{server}) {
+        $self->control(restart => $login, $name, sub { });
+        $self->$cb(undef, $conn);
+        return;
+      }
+      if ($current->{nick} ne $conn->{nick}) {
+        warn "[core:$login] NICK $conn->{nick}\n" if DEBUG;
+        $redis->publish("convos:user:$login:$name", "dummy-uuid NICK $conn->{nick}");
+      }
+
       $self->$cb(undef, $conn);
     },
   );
@@ -368,55 +321,50 @@ sub _update_connection {
 
   $self->delete_connection({
     login => $str,
-    server => $str,
+    name => $str,
   }, $cb);
 
 =cut
 
 sub delete_connection {
-  my($self, $input, $cb) = @_;
+  my ($self, $input, $cb) = @_;
   my $validation = $self->_validation($input);
-  my($login, $server);
 
   $validation->required('login');
-  $validation->required('server');
+  $validation->required('name');
 
-  if($validation->has_error) {
+  if ($validation->has_error) {
     $self->$cb($validation);
     return $self;
   }
 
-  ($login, $server) = $validation->param([qw( login server )]);
+  my ($login, $name) = $validation->param([qw( login name )]);
 
-  warn "[core:$login] delete $server\n" if DEBUG;
+  warn "[core:$login] delete $name\n" if DEBUG;
   Mojo::IOLoop->delay(
     sub {
-      my($delay) = @_;
-      $self->redis->srem("connections", "$login:$server", $delay->begin);
-      $self->redis->srem("user:$login:connections", $server, $delay->begin);
-      $self->redis->del("user:$login:connection:$server", $delay->begin);
+      my ($delay) = @_;
+      $self->redis->del("user:$login:connection:$name", $delay->begin);
+      $self->redis->srem("connections",             "$login:$name", $delay->begin);
+      $self->redis->srem("user:$login:connections", $name,          $delay->begin);
     },
     sub {
       my ($delay, @removed) = @_;
 
-      unless(grep $_, @removed) {
-        $validation->error(server => ['no_such_connection']);
+      unless ($removed[0]) {
+        $validation->error(name => ['no_such_connection']);
         $self->$cb($validation);
         return $self;
       }
 
-      $self->redis->keys("user:$login:connection:$server:*", $delay->begin); # jht: not sure if i like this...
+      $self->redis->keys("user:$login:connection:$name*", $delay->begin);    # jht: not sure if i like this...
       $self->redis->zrange("user:$login:conversations", 0, -1, $delay->begin);
+      $self->control(stop => $login, $name, $delay->begin);
     },
     sub {
-      my($delay, $keys, $conversations) = @_;
-      my $prefix = as_id $server;
+      my ($delay, $keys, $conversations) = @_;
       $self->redis->del(@$keys, $delay->begin) if @$keys;
-      $self->redis->zrem("user:$login:conversations", $_) for grep { /^$prefix:00/ } @$conversations;
-      $self->control(stop => $login, $server, $delay->begin);
-    },
-    sub {
-      my($delay, @deleted) = @_;
+      $self->redis->zrem("user:$login:conversations", $_) for grep {/^$name\b/} @$conversations;
       $self->$cb(undef);
     },
   );
@@ -424,7 +372,7 @@ sub delete_connection {
 
 =head2 ctrl_stop
 
-    $self->ctrl_stop($login, $server);
+  $self->ctrl_stop($login, $server);
 
 Stop a connection by connection id.
 
@@ -435,14 +383,14 @@ sub ctrl_stop {
 
   Scalar::Util::weaken($self);
 
-  if(my $conn = $self->{connections}{$login}{$server}) {
+  if (my $conn = $self->{connections}{$login}{$server}) {
     $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
   }
 }
 
 =head2 ctrl_restart
 
-    $self->ctrl_restart($login, $server);
+  $self->ctrl_restart($login, $server);
 
 Restart a connection by connection id.
 
@@ -454,11 +402,13 @@ sub ctrl_restart {
 
   Scalar::Util::weaken($self);
 
-  if(my $conn = $self->{connections}{$login}{$server}) {
-    $conn->disconnect(sub {
-      delete $self->{connections}{$login}{$server};
-      $self->ctrl_start($login => $server);
-    });
+  if (my $conn = $self->{connections}{$login}{$server}) {
+    $conn->disconnect(
+      sub {
+        delete $self->{connections}{$login}{$server};
+        $self->ctrl_start($login => $server);
+      }
+    );
   }
   else {
     $self->ctrl_start($login => $server);
@@ -472,8 +422,8 @@ Start a single connection by connection id.
 =cut
 
 sub ctrl_start {
-  my ($self, $login, $server) = @_;
-  $self->_connection(login => $login, server => $server)->connect;
+  my ($self, $login, $name) = @_;
+  $self->_connection(login => $login, name => $name)->connect;
 }
 
 =head2 login
@@ -495,7 +445,7 @@ sub login {
   $validation->required('login');
   $validation->required('password');
 
-  if($validation->has_error) {
+  if ($validation->has_error) {
     $self->$cb($validation);
     return $self;
   }
@@ -503,11 +453,11 @@ sub login {
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->hget("user:" .$validation->param('login'), "digest", $delay->begin);
+      $self->redis->hget("user:" . $validation->param('login'), "digest", $delay->begin);
     },
     sub {
       my ($delay, $digest) = @_;
-      if(!$digest) {
+      if (!$digest) {
         $validation->error(login => ['no_such_user']);
         $self->$cb($validation);
       }
@@ -528,35 +478,33 @@ sub _parse_channels {
   my $channels = shift || [];
   my %dup;
 
-  sort
-  grep { $_ !~ /^[#&]$/ and !$dup{$_}++ }
-  map { /^[#&]/ ? $_ : "#$_" }
-  map { split m/[\s,]+/ }
-  @$channels;
+  sort grep { $_ !~ /^[#&]$/ and !$dup{$_}++ } map { /^[#&]/ ? $_ : "#$_" } map { split m/[\s,]+/ } @$channels;
 }
 
-sub _dumper { # function
-  Data::Dumper->new([@_])->Indent(0)->Sortkeys(1)->Terse(1)->Dump
+sub _dumper {    # function
+  Data::Dumper->new([@_])->Indent(0)->Sortkeys(1)->Terse(1)->Dump;
 }
 
 sub _validation {
-  my($self, $input, @names) = @_;
+  my ($self, $input, @names) = @_;
   my $validation;
 
-  if(UNIVERSAL::isa($input, 'Mojolicious::Validator::Validation')) {
+  if (UNIVERSAL::isa($input, 'Mojolicious::Validator::Validation')) {
     $validation = $input;
   }
   else {
-    $validation = Mojolicious::Validator->new->validation(input => $input);
+    $validation = Mojolicious::Validator->new->validation;
+    $validation->input($input);
   }
 
   for my $k (@names) {
-    if($k eq 'password') { $validation->optional('password') }
-    elsif($k eq 'login') { $validation->required('login')->size(3, 30) }
-    elsif($k eq 'nick') { $validation->required('nick')->size(1, 30) }
-    elsif($k eq 'server') { $validation->required('server')->like($Convos::Core::Util::SERVER_NAME_RE) }
-    elsif($k eq 'tls') { $validation->required('tls')->in(0, 1) }
-    else { $validation->required($k) }
+    if    ($k eq 'password') { $validation->optional('password') }
+    elsif ($k eq 'login')    { $validation->required('login')->size(3, 30) }
+    elsif ($k eq 'name')     { $validation->required('name')->like(qr{^[-a-z0-9]+$}) }    # network name
+    elsif ($k eq 'nick')     { $validation->required('nick')->size(1, 30) }
+    elsif ($k eq 'server') { $validation->required('server')->like($Convos::Core::Util::SERVER_NAME_RE) }
+    elsif ($k eq 'tls')    { $validation->required('tls')->in(0, 1) }
+    else                   { $validation->required($k) }
   }
 
   $validation;

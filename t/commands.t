@@ -2,35 +2,37 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
-plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
+plan skip_all =>
+  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
+  unless $ENV{REDIS_TEST_DATABASE};
 
-my $dom = Mojo::DOM->new;
-my $sub = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
-my $pub = $t->app->redis;
-my $connection = Convos::Core::Connection->new(server => 'convos.pl', login => 'doe');
+my $dom        = Mojo::DOM->new;
+my $sub        = $t->app->redis->subscribe('convos:user:doe:irc.perl.org');
+my $pub        = $t->app->redis;
+my $connection = Convos::Core::Connection->new(name => 'magnet', login => 'doe');
 my $ws;
 
 redis_do(
-  [ hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '' ],
-  [ sadd => 'user:doe:connections', 'irc.perl.org' ],
-  [ hmset => 'user:doe:connection:irc.perl.org', nick => 'doe' ],
+  [hmset => 'user:doe',             digest => 'E2G3goEIb8gpw', email => ''],
+  [sadd  => 'user:doe:connections', 'irc.perl.org'],
+  [hmset => 'user:doe:connection:irc.perl.org', nick => 'doe'],
 );
 
-$t->post_ok('/login', form => { login => 'doe', password => 'barbar' }) ->status_is(302); # login
+$t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);    # login
 $t->websocket_ok('/socket');
 
 {
   $t->send_ok(msg('/query ...'));
   $dom->parse($t->message_ok->message->[1]);
-  is $dom->at('li.server-message.error div.content')->text, 'Invalid target: ...', 'Invalid target';
+  is $dom->at('li.network-message.error div.content')->text, 'Invalid target: ...', 'Invalid target';
 
   $t->send_ok(msg('/query marcus'));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="marcus"]'), 'QUERY marcus';
+  ok $dom->at('li.add-conversation[data-network="irc.perl.org"][data-target="marcus"]'), 'QUERY marcus';
 
   $t->send_ok(msg('/query #convos  '));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="#convos"]'), 'QUERY #convos';
+  ok $dom->at('li.add-conversation[data-network="irc.perl.org"][data-target="#convos"]'), 'QUERY #convos';
 }
 
 {
@@ -50,23 +52,23 @@ $t->websocket_ok('/socket');
   $t->send_ok(msg('/close'));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 PART #convos', 'abc-123 PART #convos';
-  ok $dom->at('li.remove-conversation[data-server="irc.perl.org"][data-target="#convos"]'), 'CLOSE';
+  ok $dom->at('li.remove-conversation[data-network="irc.perl.org"][data-target="#convos"]'), 'CLOSE';
 
   $ws = '';
   $t->send_ok(msg('/close   marcus    '));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, '', 'closing a pm will not send a message to backend';
-  ok $dom->at('li.remove-conversation[data-server="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
+  ok $dom->at('li.remove-conversation[data-network="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
 }
 
-  $t->send_ok(msg('/reconnect    '));
+$t->send_ok(msg('/reconnect    '));
 
 for my $cmd (qw/ j join /) {
   publish(event => 'add_conversation', server => 'irc.perl.org', target => '#toocool');
   $t->send_ok(msg("/$cmd #toocool  "));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 JOIN #toocool', 'abc-123 JOIN #toocool';
-  ok $dom->at('li.add-conversation[data-server="irc.perl.org"][data-target="#toocool"]'), 'JOIN #toocool';
+  ok $dom->at('li.add-conversation[data-network="irc.perl.org"][data-target="#toocool"]'), 'JOIN #toocool';
 }
 
 for my $cmd (qw/ t topic /) {
@@ -113,24 +115,28 @@ for my $cmd (qw/ t topic /) {
 done_testing;
 
 sub msg {
-  qq(<div data-history="1" data-server="irc.perl.org" data-target="#convos" id="abc-123">$_[0]</div>);
+  qq(<div data-history="1" data-network="irc.perl.org" data-target="#convos" id="abc-123">$_[0]</div>);
 }
 
 sub ws {
-  $sub->once(message => sub {
-    $ws = $_[1];
-    Mojo::IOLoop->stop;
-  });
+  $sub->once(
+    message => sub {
+      $ws = $_[1];
+      Mojo::IOLoop->stop;
+    }
+  );
   Mojo::IOLoop->start;
   $ws;
 }
 
 sub publish {
   use Mojo::JSON 'j';
-  my $data = j { @_ };
+  my $data = j {@_};
 
-  $sub->once(message => sub {
-    $ws = $_[1];
-    $pub->publish('convos:user:doe:out', $data);
-  });
+  $sub->once(
+    message => sub {
+      $ws = $_[1];
+      $pub->publish('convos:user:doe:out', $data);
+    }
+  );
 }

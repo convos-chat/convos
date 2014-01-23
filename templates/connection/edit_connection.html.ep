@@ -1,0 +1,34 @@
+% title "Edit $name";
+% stash sidebar => 'convos';
+<ul class="with-sidebar">
+  <li>
+    <h2>Edit <%= $name %></h2>
+    %= form_for 'connection.edit', class => 'horizontal', method => 'post', begin
+      % my $err;
+      <div class="form-group server">
+        <label for="server">Server</label>
+        %= text_field 'server', id => 'server'
+        % if ($err = validation->error('server')) {
+        <p class="error">Invalid server name.</p>
+        % }
+        <p class="help">Add ":port" to specify a different port than 6667.</p>
+      </div>
+      <div class="form-group nick">
+        <label for="nick">Nick</label>
+        %= text_field 'nick', id => 'nick'
+        % if ($err = validation->error('nick')) {
+        <p class="error">Need to be a-z, 0-9, - and _.</p>
+        % }
+        <p class="help">Handle to operate under.</p>
+      </div>
+      <div class="form-group tls">
+        <label for="tls">Secure</label>
+        %= check_box tls => 1
+        <p class="help">Chat over TLS for increased privacy. Require server support.</p>
+      </div>
+      <div class="actions">
+        <button type="submit">Update</button>
+      </div>
+    % end
+  </li>
+</ul>

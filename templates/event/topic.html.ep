@@ -1,4 +1,4 @@
-<li class="topic" data-server="<%= $server %>" data-target="<%= $target %>">
+<li class="topic" data-network="<%= $network %>" data-target="<%= $target %>">
 % if(length $topic) {
   <div class="content">Topic is <%= $topic %></div>
 % } else {

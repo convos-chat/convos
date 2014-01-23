@@ -1,0 +1,53 @@
+% my $nick = stash('nick') || '';
+% my $network = stash('network') || 'convos';
+% my $target = stash('target') || 'any';
+<!DOCTYPE html>
+<html data-basepath="<%= $self->url_for('/') %>">
+  <head>
+  % if($full_page) {
+    %= include 'partials/head'
+  % } else {
+    <title><%= config 'name' %> - <%= title %></title>
+  % }
+  </head>
+  <body class="<%= stash('body_class') %>">
+  % if($full_page) {
+    %= include 'partials/nav'
+    %= include 'partials/desktop-notifications-question'
+  % }
+
+    <div class="wrapper">
+      <div class="messages row">
+        %= content
+      </div>
+      <div class="clear"></div>
+    </div>
+
+    <footer id="bottom">
+      %= form_for 'view.network', method => 'post', 'data-socket-url' => url_for('socket')->to_abs, begin
+        %= text_field 'message', placeholder => "What's on your mind $nick?", title => "What's on your mind $nick?", autocomplete => 'off', 'data-network' => $network, 'data-target' => $target, class => 'disabled'
+        <div class="menu">
+          <a href="#!help" title="Display help" class="help"><i class="icon-info-sign"></i></a>
+        </div>
+      % end
+    </footer>
+
+    <div class="conversations container scrolled"><ul></ul></div>
+
+    %= form_for 'connection.control', { name => $network }, method => 'post', class => 'connection-control', begin
+      <div class="sidebar container scrolled">
+        <ul>
+        % if(my $sidebar = stash 'sidebar') {
+          %= include "sidebar/$sidebar"
+        % }
+        </ul>
+      </div>
+    % end
+
+    % if($full_page) {
+    <div class="notifications container scrolled"><%= include 'client/notification_list' %></div>
+    <div class="add-conversation container"><%= include 'client/add_conversation' %></div>
+    <div class="goto-bottom"><a href="#bottom"><i class="icon-chevron-down"></i></a></div>
+    % }
+  </body>
+</html>

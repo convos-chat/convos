@@ -1,0 +1,26 @@
+% my $network = stash('network') || '';
+<li>
+  <h3>User</h3>
+</li>
+<li>
+  %= link_to 'Edit profile', active_class('user.edit')
+</li>
+<li>
+  %= link_to 'Add connection', active_class('connection.add')
+</li>
+<li>
+  %= link_to 'Logout', 'logout', class => 'no-pjax'
+</li>
+<li>
+  <h3>Connections</h3>
+</li>
+% for my $name (@$connections) {
+<li>
+  %= link_to $name, active_class('view.network', { network => $name })
+  % if($name eq $network) {
+  <ul>
+    %= include 'sidebar/server'
+  </ul>
+  % }
+</li>
+% }

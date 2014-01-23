@@ -8,8 +8,8 @@ find(
     my $file = $_;
     return unless -f $file;
     open my $FH, '<', $file or die "open $file: $!";
-    while(<$FH>) {
-      if(/ \bwarn\b/ and !/DEBUG;/) {
+    while (<$FH>) {
+      if (/ \bwarn\b/ and !/DEBUG;/) {
         chomp;
         BAIL_OUT "$File::Find::name\:$.\: Cannot contain ($_)";
       }

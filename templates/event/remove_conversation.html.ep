@@ -1,1 +1,1 @@
-<li class="remove-conversation" data-server="<%= $server %>" data-target="<%= $target %>"></li>
+<li class="remove-conversation" data-network="<%= $network %>" data-target="<%= $target %>"></li>

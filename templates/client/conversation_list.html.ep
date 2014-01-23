@@ -1,8 +1,8 @@
 <ul class="conversations">
 % my $i = 0;
 % for my $c (@$conversation_list) {
-  % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target}" : "View conversation with $c->{target}";
-  % my $text = $c->{server} ? $c->{target} : ucfirst $c->{target};
+  % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target} on $c->{network}" : "View conversation with $c->{target} on $c->{network}";
+  % my $text = $c->{network} ? $c->{target} : ucfirst $c->{target};
   % my @class;
   % push @class, 'unread' if $c->{unread};
   % push @class, 'first' if $i == 0;

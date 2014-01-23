@@ -1,0 +1,24 @@
+% title 'Delete connection';
+<div class="landing-page">
+  <header class="row">
+    <h1>
+      <span class="logo">Convos</span>
+      <small>Delete "<%= $name %>"</small>
+    </h1>
+  </header>
+
+  <div class="row">
+    %= form_for 'connection.delete', method => 'post', begin
+      <p>
+        Are you sure you want to delete the connection "<%= $name %>"?
+      </p>
+      <p>
+        This will delete connection details and conversations!
+      </p>
+      <div class="actions">
+        <button type="submit" class="confirm">Yes</button>
+        %= link_to 'No', 'view.network', { network => $name }, class => 'button'
+      </div>
+    % end
+  </div>
+</div>

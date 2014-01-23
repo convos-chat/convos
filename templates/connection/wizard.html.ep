@@ -1,0 +1,19 @@
+% title 'Add connection';
+<div class="landing-page">
+  <header class="row">
+    <h1>
+      <span class="logo">Convos</span>
+      <small>Welcome to <%= config('name') || 'your' %> chat.</small>
+    </h1>
+  </header>
+  <div class="row">
+    To get started you need to add a connection. Below you see a predefined
+    connection, which you can change to your preferences.
+    %= include 'connection/add_connection_form', wizard => 1
+  </div>
+  <div class="row footer">
+    <hr>
+    &copy; <%= link_to "Nordaaker", "http://nordaaker.com"%>
+    - <%= link_to "About", "http://convos.by" %>
+  </div>
+</div>

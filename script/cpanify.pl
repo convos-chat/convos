@@ -3,15 +3,15 @@ use Mojo::Base -strict;
 use Module::CPANfile;
 use Data::Dumper;
 
-$Data::Dumper::Indent = 1;
+$Data::Dumper::Indent   = 1;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Terse = 1;
+$Data::Dumper::Terse    = 1;
 
-my $prereqs = Module::CPANfile->load->prereqs;
+my $prereqs        = Module::CPANfile->load->prereqs;
 my $BUILD_REQUIRES = Dumper($prereqs->as_string_hash->{runtime}{requires});
-my $PREREQ_PM = Dumper({});
+my $PREREQ_PM      = Dumper({});
 
-for($BUILD_REQUIRES, $PREREQ_PM) {
+for ($BUILD_REQUIRES, $PREREQ_PM) {
   chomp;
   s/\n/\n  /g;
 }
@@ -56,5 +56,5 @@ system 'perl Makefile.PL';
 system 'perldoc -tT lib/Convos.pm > README';
 system 'make manifest';
 system 'make dist';
-system "rm $_" for qw( README Makefile MANIFEST* );
+system "rm $_"               for qw( README Makefile MANIFEST* );
 system "rm -r lib/Convos/$_" for qw( convos.conf convos.testing.conf templates public );
