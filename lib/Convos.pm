@@ -82,6 +82,36 @@ as config file template.
 
 =back
 
+=head2 Environment
+
+Convos can be configured with the following environment variables:
+
+=over 4
+
+=item * CONVOS_BACKEND_EMBEDDED=1
+
+Set CONVOS_MANUAL_BACKEND to a true value if you're starting L<Convos>
+with C<morbo> and want to run the backend embedded.
+
+=item * CONVOS_DEBUG=1
+
+Set CONVOS_DEBUG for extra debug output to STDERR.
+
+=item * CONVOS_MANUAL_BACKEND=1
+
+Disable the frontend from starting the backend.
+
+=item * CONVOS_PING_INTERVAL=30
+
+Set how often to send "keep-alive" through the web socket. Default is
+every 30 second.
+
+=item * MOJO_IRC_DEBUG=1
+
+Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
+
+=back
+
 =head1 RESOURCES
 
 =over 4
@@ -151,7 +181,7 @@ Holds a L<Convos::Core> object.
 
 =cut
 
-has auto_start_backend => 1;
+has auto_start_backend => $ENV{CONVOS_MANUAL_BACKEND} ? 0 : 1;
 
 has archive => sub {
   my $self = shift;
