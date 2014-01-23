@@ -53,8 +53,9 @@ no warnings 'utf8';
 use IRC::Utils;
 use Parse::IRC   ();
 use Scalar::Util ();
-use Time::HiRes qw/ time /;
-use Convos::Core::Util qw/ as_id id_as /;
+use Time::HiRes 'time';
+use Convos::Core::Util qw( as_id id_as );
+use Sys::Hostname ();
 use constant DEBUG    => $ENV{CONVOS_DEBUG}   ? 1 : 0;
 use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
@@ -376,7 +377,7 @@ sub add_message {
 
   @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
-  $data->{host} ||= Convos::Core::Util::hostname;
+  $data->{host} ||= Sys::Hostname::hostname;    # should never happen
   $data->{user} ||= $self->_irc->user;
 
   if ($data->{nick} && $data->{nick} ne $current_nick) {
