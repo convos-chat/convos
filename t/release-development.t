@@ -2,6 +2,7 @@ use Test::More;
 use Test::Mojo;
 use File::Basename qw( basename );
 use Mojolicious::Plugin::AssetPack;
+use t::Helper ();
 
 {
   my $ap = Mojolicious::Plugin::AssetPack->new;
@@ -13,6 +14,8 @@ unlink glob 'public/packed/main-*';
 $ENV{MOJO_MODE} = 'testing';
 my $t = Test::Mojo->new('Convos');
 my $css;
+
+t::Helper->disable_auto_upgrader;
 
 {
   $t->get_ok('/login')->status_is(200)->element_exists(q(link[rel="stylesheet"][href^="/packed/main-"]));

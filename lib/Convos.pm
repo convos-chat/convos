@@ -179,6 +179,10 @@ The directory is "/tmp/convos" by default.
 
 Holds a L<Convos::Core> object.
 
+=head2 upgrader
+
+Holds a L<Convos::Upgrader> object.
+
 =cut
 
 has auto_start_backend => $ENV{CONVOS_MANUAL_BACKEND} ? 0 : 1;
@@ -204,6 +208,11 @@ has core => sub {
 
   $core->redis->server($self->redis->server);
   $core;
+};
+
+has upgrader => sub {
+  require Convos::Upgrader;
+  Convos::Upgrader->new(redis => shift->redis);
 };
 
 =head1 METHODS
@@ -245,6 +254,7 @@ sub startup {
   );
 
   Mojo::IOLoop->timer(5 => sub { $self->auto_start_backend and $self->_start_backend; });
+  Mojo::IOLoop->timer(0 => sub { $self->_check_version; });
 }
 
 sub _assets {
@@ -259,6 +269,20 @@ sub _assets {
     '/js/selectize.js',               '/js/globals.js',
     '/js/jquery.doubletap.js',        '/js/ws-reconnecting.js',
     '/js/jquery.helpers.js',          '/js/convos.chat.js',
+  );
+}
+
+sub _check_version {
+  my $self = shift;
+  my $log  = $self->log;
+
+  $self->upgrader->running_latest(
+    sub {
+      my ($upgrader, $latest) = @_;
+      $latest and return;
+      $log->error("Convos need to be upgraded!\n\nRun '$self->{convos_executable_path} upgrade'\n\n");
+      exit;
+    },
   );
 }
 

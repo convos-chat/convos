@@ -13,6 +13,17 @@ BEGIN {
 
 my ($redis, $t);
 
+sub disable_auto_upgrader {
+  require Convos::Upgrader;
+  Mojo::Util::monkey_patch(
+    'Convos::Upgrader',
+    running_latest => sub {
+      my ($upgrader, $cb) = @_;
+      $upgrader->$cb(1000);
+    },
+  );
+}
+
 sub redis_do {
   my $delay = Mojo::IOLoop->delay;
   $redis ||= $t->app->redis;
@@ -46,6 +57,8 @@ sub import {
   strict->import;
   warnings->import;
   $ENV{REDIS_TEST_DATABASE} = 'redis://127.0.0.1:6379/14' if $ENV{REDIS_TEST_DATABASE} eq 'default';
+
+  $class->disable_auto_upgrader;
 
   # make sure we use our own test database
   if ($no_web) {

@@ -44,11 +44,6 @@ downgrade script.
 Usage: $0 upgrade --yes
 EOF
 
-has _upgrader => sub {
-  my $self = shift;
-  Convos::Upgrader->new(redis => $self->app->redis);
-};
-
 =head1 METHODS
 
 =head2 run
@@ -87,8 +82,8 @@ sub run {
         sleep 1;
       }
 
-      $self->_upgrader->once(finish => $delay->begin);
-      $self->_upgrader->run;
+      $app->upgrader->once(finish => $delay->begin);
+      $app->upgrader->run;
     },
     sub {
       my ($delay, $message) = @_;
