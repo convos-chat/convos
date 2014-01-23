@@ -7,6 +7,8 @@ plan skip_all =>
 my $server = $t->app->redis->subscribe('convos:user:fooman:magnet');
 my ($form, $tmp, @ctrl);
 
+$t->app->core->start;
+
 {
   # make sure we have networks in database
   my $upgrader = Convos::Upgrader->new(redis => $t->app->redis);
