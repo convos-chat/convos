@@ -162,10 +162,6 @@ our $VERSION = '0.3005';
 
 =head1 ATTRIBUTES
 
-=head2 auto_start_backend
-
-Set this to false to disable auto starting the backend.
-
 =head2 archive
 
 Holds a L<Convos::Core::Archive> object.
@@ -184,8 +180,6 @@ Holds a L<Convos::Core> object.
 Holds a L<Convos::Upgrader> object.
 
 =cut
-
-has auto_start_backend => $ENV{CONVOS_MANUAL_BACKEND} ? 0 : 1;
 
 has archive => sub {
   my $self = shift;
@@ -253,8 +247,8 @@ sub startup {
     }
   );
 
-  Mojo::IOLoop->timer(5 => sub { $self->auto_start_backend and $self->_start_backend; });
-  Mojo::IOLoop->timer(0 => sub { $self->_check_version; });
+  Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
+  Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
 }
 
 sub _assets {

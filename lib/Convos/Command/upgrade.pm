@@ -65,7 +65,7 @@ sub run {
     die qq(MOJO_MODE need to be set to either "production" or "development".\n);
   }
 
-  $app->auto_start_backend(0);
+  $ENV{CONVOS_MANUAL_BACKEND} = $ENV{CONVOS_SKIP_VERSION_CHECK} = 1;
 
   Mojo::IOLoop->delay(
     sub {
