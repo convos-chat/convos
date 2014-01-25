@@ -47,11 +47,22 @@ In production setups, you might want to start the backend separately from the we
     # Start up the backend
     $ ./vendor/bin/carton exec script/convos backend &
 
+## Upgrading Convos
+
+To get the latest version of covos, you can run the install script above again from the parent directory of your convos-release directory, and it will download a newer version and overwrite your installation. Before you do this, make sure to stop the running application, then start it again once you've updated. Note that if we've changed the schema, Convos will ask you to upgrade it before you can start the app. to do this, run 
+
+    $ ./script/convos upgrade
+
+From the convos-release folder. This should automatically update your schema to the latest version. 
+
+Note that if you downloaded convos using git, you should do `git pull` instead of using the install script.
+
 ## Architecture principles
 * Keep it easy to install
 * Keep the JS simple and manageable
 * Use Redis to manage state / publish subscribe
 * Archive logs in plain text format, use ack to search them.
+
 
 
 ## Authors 

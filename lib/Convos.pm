@@ -274,7 +274,9 @@ sub _check_version {
     sub {
       my ($upgrader, $latest) = @_;
       $latest and return;
-      $log->error("Convos need to be upgraded!\n\nRun '$self->{convos_executable_path} upgrade'\n\n");
+      $log->error(
+        "The database schema has changed.\nIt must be updated before we can start!\n\nRun '$self->{convos_executable_path} upgrade, then try again.'\n\n"
+      );
       exit;
     },
   );
