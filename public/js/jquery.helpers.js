@@ -5,15 +5,6 @@
   var has_fancy_scrollbars = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var $height_from, $win;
 
-  var confirmFirst = function() {
-    var $a = $(this);
-    var confirm_text = 'Click again to confirm';
-    var original_text = $a.text();
-    if(original_text == confirm_text) return true;
-    $a.text(confirm_text).one('mouseleave', function() { $a.text(original_text); });
-    return false;
-  };
-
   $.supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints;
 
   $.notify = function(title, body, icon) {
@@ -55,8 +46,9 @@
     return this.each(function() {
       var $a = $(this);
       var $container = $( $a.data('toggle') );
+      var scroller = $container.hasClass('scrolled');
 
-      if(!has_fancy_scrollbars) {
+      if(scroller && !has_fancy_scrollbars) {
         $container.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({ preventPageScrolling: true });
       }
 
@@ -64,8 +56,8 @@
         var $a = $(this);
         var height = $win.height() - 70;
         var left = $a.offset().left + $a.outerWidth() - $container.width();
-        if(left < 10) left = 10;
-        $container.css({ left: left, height: height }).nanoScroller();
+        $container.css('left', left < 10 ? 10 : left);
+        if(scroller) $container.height(height).nanoScroller();;
       });
     });
   };
@@ -98,6 +90,7 @@
     var $active = $('a[data-toggle]').filter('.active');
     if(!$active.length) return true;
     if($(e.target).closest($active).length) return true; // prevent hiding when clicking inside forms
+    if($(e.target).closest('form').length) return true; // prevent hiding when clicking inside forms
     $active.trigger('deactivate');
     return false;
   };
@@ -117,7 +110,6 @@
         var $target = $(target);
         var is_active = $a.hasClass('active');
 
-        $(document).off('click', hideToggledElement);
         $('a[data-toggle]').filter('.active').trigger('deactivate');
         if(is_active) return false;
 
@@ -127,7 +119,6 @@
           $a.data('target', $target).trigger('activate').addClass('active');
           inside = false;
           if(focus) $(focus, target).eq(0).focusSoon();
-          if(!$target.hasClass('ignore-document-close')) $(document).one('click', hideToggledElement);
         }
 
         return false;
@@ -137,6 +128,7 @@
 
   $.url_for = function() {
     var args = $.makeArray(arguments);
+    args[0] = args[0].replace(/^\//, '');
     args.unshift($('html').data('basepath').replace(/\/$/, ''));
     return args.join('/').replace(/#/g, '%23');
   };
@@ -146,7 +138,7 @@
     var $focus = $togglers.filter('.active').trigger('activate').filter('.focus');
     var $login_button = $('a[data-toggle="div.login"]');
 
-    $('a.confirm').click(confirmFirst);
+    $(document).on('click', hideToggledElement);
 
     if($login_button.length) {
       $('body').bind('keydown', 'shift+return', function(e) {

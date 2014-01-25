@@ -1,11 +1,11 @@
 % my $prev_nick = stash('prev_nick') || '';
-<li id="<%= $uuid %>" class="message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-server="<%= $server %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
+<li id="<%= $uuid %>" class="message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
 % if($nick ne $prev_nick) {
   %= avatar { host => $host, user => $user }, alt => $nick, class => 'avatar'
-  % if($server eq 'convos') {
-  <h3><%= link_to $nick, 'view.server' => { server => $nick }, class => 'goto-server' %></h3>
+  % if($network eq 'convos') {
+  <h3><%= link_to $nick, 'view.network' => { network => $nick }, class => 'goto-network' %></h3>
   % } else {
-  <h3><%= link_to $nick, view => { server => $server, target => $nick } %></h3>
+  <h3><%= link_to $nick, view => { network => $network, target => $nick } %></h3>
   % }
 % }
   <div class="content whitespace"><%== $message %></div>

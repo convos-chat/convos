@@ -19,7 +19,7 @@
       </p>
       % }
       <p class="help">
-        Choose something that\'s simple to remember. Your IRC handle for instance.
+        Choose something that's simple to remember. Your IRC handle for instance.
       </p>
     </div>
     <div class="form-group email">

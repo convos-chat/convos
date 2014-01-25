@@ -122,6 +122,7 @@ footer {
 
   form {
     position: relative;
+    display: none;
     input { font-family: inherit; font-size: 1.1em; width: 100%; padding: 8px; padding-right: 30px; }
     input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
     input.disabled, input.sending.disabled { background-color: #eee; }
@@ -153,7 +154,6 @@ dl {
   dt {
     width: $dtWidth;
     float: left;
-    clear: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -163,12 +163,21 @@ dl {
 .center { text-align: center; }
 .hidden { display: none; }
 .row { padding: 0 $bodyGutter; clear: both; }
-.close { display: block; float: right; cursor: pointer; font-size: 1.3em; padding: 3px; }
+.close {
+  display: block;
+  float: right;
+  cursor: pointer;
+  font-size: 1.3em;
+  padding: 5px;
+  line-height: 0.4em;
+}
 
 div.question { padding: 0.5em; @include border-radius(3px); }
-div.question { background: #def; color: #158; border: 1px solid #bde; }
+div.question, li.info { background: #def; color: #158; border: 1px solid #bde; }
 div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
 div.question .button.confirm { background: darken(#def, 10%); border: 2px solid #900; }
+
+a.active { background-color: darken(#fff, 10%); }
 
 /*
  * Form elements
@@ -245,21 +254,6 @@ form.horizontal {
     div.actions, p.help, p.error {
       margin-left: 0;
     }
-  }
-}
-
-form.predefined {
-  .help, div.password, div.tls {
-    display: none;
-  }
-  .selectize-control .selectize-input > div, .selectize-input, input, select {
-    background: transparent;
-    border: 0;
-  }
-  a.edit-mode {
-    padding-left: 4px;
-    color: lighten($fontColor, 15%);
-    text-decoration: none;
   }
 }
 
@@ -375,7 +369,7 @@ nav.bar {
 
   a.conversation { color: #666; }
   a.conversations.toggler { display: none; }
-  a.nicks.toggler { display: none; }
+  a.sidebar.toggler { display: none; }
 
   .right {
     background: #fafafa;
@@ -385,7 +379,7 @@ nav.bar {
     a.notifications.toggler { position: relative; }
     a.notifications.toggler b { position: absolute; bottom: -3px; right: 2px; color: #bbb; font-size: 0.9em; font-weight: normal; }
     a.notifications.toggler.alert b { color: #b22; }
-    a.hidden, a.logout { display: none; }
+    a.hidden { display: none; }
   }
 
   a.active, a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
@@ -402,9 +396,10 @@ div.notification.question {
   button, .button { font-size: 0.9em; }
 }
 
+div.add-conversation.container,
 div.conversations.container,
 div.notifications.container,
-div.nicks.container {
+div.sidebar.container {
   background: darken(#fdfdfd, 2%);
   position: fixed;
   top: 39px;
@@ -417,9 +412,51 @@ div.nicks.container {
   border: 1px solid darken(#fff, 15%);
   border-top-width: 6px;
 
-  a { color: #000; text-decoration: none; padding: 4px; display: block; }
-  a:hover, a:active, a:focus { color: #000; background-color: darken(#fff, 5%); outline: 0; }
-  a:focus { background-color: darken(#fff, 8%); }
+  h3, a { color: #000; text-decoration: none; padding: 4px; display: block; }
+  h3 { font-size: 1em; margin: 0; };
+  button.inactive, a.inactive { color: lighten(#000, 60%); }
+
+  ul ul li {
+    a, button {
+      background-image: url(../image/fa-caret-right.png);
+      background-position: 9px 50%;
+      background-repeat: no-repeat;
+      font-size: 0.9em;
+      height: 2em;
+      padding: 2px 2px 2px 20px;
+      border: 0;
+    }
+  }
+
+  a:hover, a:active, a:focus {
+    background-color: darken(#eee, 5%);
+    color: #000;
+    outline: 0;
+  }
+  a:focus, button:focus { background-color: darken(#fff, 8%); }
+}
+
+div.sidebar.container {
+  button {
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    display: block;
+    overflow: visible; /* shrinkwrap the text in <IE7 */
+    cursor: pointer;
+    -moz-user-select: text;
+  }
+
+  button:hover, button:focus {
+    background-color: darken(#eee, 5%);
+    color: #000;
+  }
+}
+
+div.add-conversation.container {
+  padding-left: 3px;
+  padding-bottom: 6px;
+  height: auto;
 }
 
 div.conversations.container {
@@ -432,7 +469,7 @@ div.notifications.container {
 }
 
 @media (min-width: $responsiveWidth) {
-  div.nicks.container {
+  div.sidebar.container {
     background: #f3f3f3;
     border: 0;
     border-left: 1px solid #ddd;
@@ -444,8 +481,7 @@ div.notifications.container {
     right: 0;
     z-index: 2;
 
-    a { text-decoration: none; display: block; padding: 4px 8px; }
-    a:hover { background: darken(#eee, 5%); };
+    h3, a { text-decoration: none; display: block; padding: 4px 8px; }
   }
 }
 
@@ -490,7 +526,7 @@ div.messages {
   li.message-pending h3 { color: #ccc; }
   li.message-error { font-style: italic; }
   li.message-error h3 { color: #333; font-style: italic; }
-  li.message-error, li.server-message.error { background: lighten($errorColor, 40%); }
+  li.message-error, li.network-message.error { background: lighten($errorColor, 40%); }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
     color: #888;
@@ -498,49 +534,40 @@ div.messages {
   li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
   }
+}
 
-  li.welcome,
-  li.setting {
-    $marginLeft: 90px;
-    overflow: visible;
-    form > div, div.content, h3 { clear: left; margin: 2px 0 2px $marginLeft; }
-    label { float: left; margin-left: -$marginLeft; margin-top: 4px; }
-    p.help { display: inline; }
+body.chat {
+  footer form { display: block; }
+  ul.conversations li.first a {
+    background-color: darken(#fff, 5%);
+    font-weight: bold;
+    color: #000;
   }
 }
 
-body.with-nick-list, body.without-nick-list, body.historic {
-  ul.conversations li.first a { background-color: darken(#fff, 5%); color: #000; font-weight: bold; }
+body.convos {
+  a.convos { background-color: darken(#fff, 5%); }
+  footer form { display: block; }
 }
 
-body.with-nick-list {
+body.without-sidebar {
+  div.sidebar.container {
+    display: none;
+  }
+}
+
+body.with-sidebar {
+  footer form { margin-right: $nickListWidth; }
   div.messages {
     margin-right: $nickListWidth;
     li.highlight { background: #fee; }
   }
-  footer form { margin-right: $nickListWidth; }
 }
 
-body.settings, body.historic {
-  div.nicks.container { display: none; }
+body.historic {
+  div.sidebar.container { display: none; }
   footer { display: none; }
   div.clear { height: 20px; }
-}
-
-body.settings {
-  nav.bar .right a.logout { display: block; }
-  li.notice {
-    background-color: transparent;
-    color: inherit;
-
-    div.content {
-      font-family: monospace;
-      font-size: 0.8em;
-      line-height: 1.1em;
-      max-width: 100%;
-      margin-left: 0;
-    }
-  }
 }
 
 div.goto-bottom a {
@@ -610,14 +637,14 @@ div.footer {
   nav.bar .right { right: 0; }
   div.messages { margin-right: 0; }
 
-  body.with-nick-list {
-    nav.bar a.nicks.toggler { display: block; }
+  body.with-sidebar {
+    nav.bar a.sidebar.toggler { display: block; }
     div.messages, footer form { margin-right: 0; }
-    div.nicks.container { display: none; }
+    div.sidebar.container { display: none; }
   }
 
-  body.with-nick-list,
-  body.without-nick-list {
+  body.with-sidebar,
+  body.without-sidebar {
     div.wrapper {
       margin-bottom: -42px;
       div.clear { height: 42px; }
@@ -642,7 +669,6 @@ div.footer {
   dl {
     dt {
       float: none;
-      clear: left;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -740,10 +766,13 @@ a {
 }
 
 /*  Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
-    readers do not read off random characters that represent icons */.icon-user:before    { content: "\f021"; }
-.icon-cog:before    { content: "\f022"; }
+    readers do not read off random characters that represent icons */
 .icon-info-sign:before    { content: "\f023"; }
 .icon-chevron-down:before   { content: "\f024"; }
 .icon-comments:before   { content: "\f025"; }
-.icon-signout:before    { content: "\f026"; }
 .icon-bullhorn:before   { content: "\f027"; }
+.icon-signout:before    { content: "\f026"; }
+.icon-user:before    { content: "\f021"; }
+.icon-cog:before    { content: "\f022"; }
+
+body.chat nav .icon-cog:before { content: "\f021"; }

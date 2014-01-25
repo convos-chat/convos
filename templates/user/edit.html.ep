@@ -1,0 +1,32 @@
+% title 'Edit user';
+% stash sidebar => 'convos';
+<ul class="with-sidebar">
+  <li>
+    <h2>Edit profile</h2>
+    % my $err;
+    %= form_for 'user.edit', method => 'post', class => 'horizontal', begin
+      <div class="form-group email">
+        <label for="email">Email</label>
+        %= text_field 'email', id => 'email', placeholder => 'your-personal@email.com'
+      % if ($err = validation->error('email')) {
+        <p class="error">Invalid email.</p>
+      % }
+      </div>
+      <div class="form-group avatar">
+        <label for="avatar">Avatar</label>
+        %= text_field 'avatar', id => 'avatar', placeholder => 'your-gravatar@email.com'
+      % if ($err = validation->error('avatar')) {
+        <p class="error">Invalid avatar.</p>
+      % }
+        <p class="help">Enter your Facebook username or <%= link_to 'Gravatar', 'http://gravatar.com', target => '_blank' %> email.</p>
+      </div>
+      <div class="actions">
+        <button type="submit">Update</button>
+        %= link_to 'Cancel', 'view.network', { network => 'convos' }, class => 'button'
+      </div>
+      % if ($self->req->method eq 'POST' and validation->is_valid) {
+      <p class="help">Profile saved.</p>
+      % }
+    % end
+  </li>
+</ul>

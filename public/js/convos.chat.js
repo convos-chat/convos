@@ -35,7 +35,7 @@
       var $message = $(this);
       $message.find('h3 a').click(function(e) {
         e.preventDefault();
-        if($(this).hasClass('goto-server')) {
+        if($(this).hasClass('goto-network')) {
           $.pjax.click(e, { container: $('div.messages') });
         }
         else {
@@ -45,9 +45,9 @@
       });
 
       // embed media
-      $message.find('a[target="_blank"]').each(function() {
+      $message.find('a.embed').each(function() {
         var $a = $(this);
-        $.get($.url_for('oembed'), { url: this.href }, function(embed_code) {
+        $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
           var at_bottom = $win.data('at_bottom');
           var $embed_code = $(embed_code);
           $a.closest('div').after($embed_code);
@@ -131,25 +131,33 @@
   $.fn.hostAndTarget = function($from) {
     if($from) {
       return this
-        .attr('data-server', $from.data('server')).attr('data-target', $from.data('target'))
-        .data('server', $from.data('server')).data('target', $from.data('target'))
+        .attr('data-network', $from.data('network')).attr('data-target', $from.data('target'))
+        .data('network', $from.data('network')).data('target', $from.data('target'))
     }
     else {
-      return { server: this.data('server'), target: this.data('target') };
+      return { network: this.data('network'), target: this.data('target') };
     }
   };
 
-  var conversationLoaded = function() {
+  var conversationLoaded = function(e, data, status_text, xhr, options) {
+    var $doc = $(data || '<div></div>');
+
     $messages = $('div.messages ul');
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
     $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
-    $('div.nicks.container ul').html('');
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
-    if($messages.hasClass('with-nick-list')) {
-      $input.send('/names', 0).send('/topic', 0);
+    $doc.filter('form.connection-control').each(function() {
+      $('form.connection-control').attr('action', this.action);
+    });
+    $doc.find('div.sidebar.container').each(function() {
+      $('div.sidebar.container ul').html($(this).find('ul:first').children());
+    });
+
+    if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
+      $input.send('/names', 0).send('/topic', { 'data-history': 0 });
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
@@ -162,20 +170,16 @@
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
-    if($messages.hasClass('settings')) {
-      drawSettings();
-      setTimeout(function() { reloadConversationList({}); }, 1000);
-      $win.data('at_bottom', false);
-    }
-    else if(!Object.equals($input.hostAndTarget(), $messages.hostAndTarget())) {
+    if(!Object.equals($input.hostAndTarget(), $messages.hostAndTarget())) {
       reloadConversationList({});
     }
 
-    if(!$messages.hasClass('settings') && typeof initNotifications.asked == 'undefined') {
+    if(initNotifications.asked == 'undefined') {
       initNotifications();
     }
 
     $input.hostAndTarget($messages); // must be done after Object.equals(...) above
+    drawSettings();
     drawUI();
   };
 
@@ -183,11 +187,11 @@
     var $conversations = $('ul.conversations li, div.conversations.container li');
     var $dropdown = $('div.conversations.container ul');
     var $menu = $('nav ul.conversations');
-    var available_width = $('nav').width() - $('nav .right').outerWidth() - $('nav a.settings').outerWidth();
+    var available_width = $('nav').width() - $('nav .right').outerWidth();
     var used_width = 0, unread, $a;
 
     if($message) {
-      $a = $conversations.find('a[href="' + $.url_for($message.data('server'), $message.data('target')) + '"]');
+      $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
       unread = parseInt($a.attr('data-unread')) + 1;
       $a.attr('data-unread', unread).attr('title', unread + " unread messages in " + $message.data('target'));
       $a.closest('li').addClass('unread');
@@ -210,23 +214,34 @@
   };
 
   var drawSettings = function() {
-    $('form select#channels').selectize({
+    var channels = {};
+    var networkChange;
+
+    $('select#name option').each(function() {
+      channels[this.value] = ($(this).attr('data-channels') || '').split(' ');
+    });
+
+    networkChange = function(val) {
+      var s = $('select#channels')[0].selectize
+      s.clearOptions();
+      s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
+      s.refreshOptions(false);
+      s.setValue(channels[val].join(' '));
+    };
+
+    $('select#name').selectize({
+      create: false,
+      openOnFocus: true,
+      onChange: networkChange
+    }).trigger('change');
+
+    $('input#channels').selectize({
       delimiter: ' ',
       persist: false,
-      hideSelected: true,
       openOnFocus: true,
       create: function(value) {
         if(!/^[#&]/.test(value)) value = '#' + value;
         return { value: value, text: value };
-      }
-    });
-    $('form.predefined').find('a[href$="#edit"], .selectize-control, :input').click(function(e) {
-      var $target = $(e.target);
-      if(!$target.is('button[type="submit"]')) {
-        $target.closest('form').removeClass('predefined').addClass('edit-mode');
-      }
-      if($target.is('a[href$="#edit"]')) {
-        return false;
       }
     });
   };
@@ -236,18 +251,18 @@
 
     $('a[data-toggle]').filter('.active').trigger('activate');
 
-    if($('body').is('.without-nick-list, .settings, .historic')) {
-      $('div.nicks.container').css({ left: '', height: '', display: 'none' });
+    if($('body').is('.without-sidebar, .historic')) {
+      $('div.sidebar.container').css({ left: '', height: '', display: 'none' });
     }
     else if($win.width() > min_width) {
-      $('a.nicks.toggler').trigger('deactivate');
-      $('div.nicks.container').css({ left: '', height: '', display: 'block' });
+      $('a.sidebar.toggler').trigger('deactivate');
+      $('div.sidebar.container').css({ left: '', height: '', display: 'block' });
     }
-    else if($('a.nicks.toggler').is('.active')) {
-      $('div.nicks.container').css({ display: 'block' });
+    else if($('a.sidebar.toggler').is('.active')) {
+      $('div.sidebar.container').css({ display: 'block' });
     }
     else {
-      $('div.nicks.container').css({ display: 'none' });
+      $('div.sidebar.container').css({ display: 'none' });
     }
 
     if($win.data('at_bottom')) $win.scrollTo('bottom');
@@ -261,7 +276,7 @@
     if($messages.start_time && $win.scrollTop() == 0) {
       var end_time = $messages.end_time;
       $.get(location.href.replace(/\?.*/, ''), { to: $messages.start_time }, function(data) {
-        var $ul = $(data);
+        var $ul = $(data).find('ul[data-network]');
         var $li = $ul.children('li:lt(-1)');
         var height_before_prepend = $height_from.height();
         $messages.end_time = end_time;
@@ -293,7 +308,7 @@
         $messages.end_time = parseFloat($ul.data('end-time'));
         $li.each(function() { $(this).appendToMessages(); });
         if(!$li.filter('.historic-message').length) {
-          $('body').attr('class', /^[#&]/.test($messages.hostAndTarget().target) ? 'with-nick-list' : 'without-nick-list');
+          $('body').attr('class', /^[#&]/.test($messages.hostAndTarget().target) ? 'with-sidebar' : 'without-sidebar');
           if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
           drawUI();
         }
@@ -301,6 +316,19 @@
     }
     $messages.start_time = $messages.end_time = 0;
     return false;
+  };
+
+  var initAddConversation = function() {
+    $('.add-conversation form').submit(function(e) {
+      var $form = $(this);
+      var network = $form.find('select[name="name"]').val();
+      var channel = $form.find('input[name="channel"]').val().replace(/^\s*#/, '');
+
+      e.preventDefault();
+      $input.send('/join #' + channel, { 'data-network': network });
+      $input.focus();
+      $('a[data-toggle]').filter('.active').trigger('deactivate');
+    });
   };
 
   var initInputField = function() {
@@ -332,7 +360,7 @@
       return false;
     };
 
-    $.get($.url_for('command-history'), noCache({}), function(data) {
+    $.get($.url_for('/chat/command-history'), noCache({}), function(data) {
       $input.history = data;
       $input.history_i = $input.history.length;
     });
@@ -354,7 +382,7 @@
     });
     $input.closest('form').submit(function(e) {
       e.preventDefault();
-      $input.send($input.val(), 1).val('');
+      $input.send($input.val(), { 'data-history': 1 }).val('');
     });
   };
 
@@ -379,11 +407,13 @@
 
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
-    $(document).pjax('nav a.conversation', 'div.messages');
-    $(document).pjax('nav a.settings', 'div.messages');
-    $(document).pjax('div.container a', 'div.messages');
-    $('div.messages').on('pjax:end', conversationLoaded);
+    $(document).pjax('nav a.conversation', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('nav a.convos', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('div.container a', 'div.messages', { fragment: 'div.messages' });
+
+    $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
     $('div.messages').on('pjax:start', function(xhr, options) { $('body').loadingIndicator('show'); });
+    $('div.messages').on('pjax:success', conversationLoaded);
   }
 
   var initSocket = function() {
@@ -407,9 +437,10 @@
       $input.addClass('disabled');
     };
     reconnectHandler= window.setTimeout(function() { $input.socket.refresh()},60000);
-    $input.send = function(message, history) {
+    $input.send = function(message, attr) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
+      attr = attr || {};
       if(!message.match('^\/')) {
         var $pendingMessage = $('<li class="message-pending"><div class="content"></div></li>').attr('id', uuid).hostAndTarget($messages);
         $pendingMessage.find('.content').text(message);
@@ -417,9 +448,9 @@
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
       }
-      $input.socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr('data-history', history).text(message).prop('outerHTML'));
+      $input.socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr(attr).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
-      if(history) $input.history.push(message);
+      if(attr['data-history']) $input.history.push(message);
       $input.history_i = $input.history.length;
       return $input;
     };
@@ -435,7 +466,7 @@
 
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
-      $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.nicks.toggler').trigger('deactivate');
+      $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.sidebar.toggler').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
         $('nav ul.conversations a').slice(0, 2).eq(-1).focus();
       }
@@ -465,7 +496,7 @@
 
   var nickList = function($data) {
     var $nicks = $data.find('[data-nick]');
-    var server = $messages.data('server');
+    var network = $messages.data('network');
     var senders = {};
 
     if($nicks.length) {
@@ -481,12 +512,12 @@
     }
 
     if(nicks.length) {
-      $('div.nicks.container ul').html(
+      $('div.sidebar.container ul').html(
         $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(server, n) + '">' + n + '</a></li>';
+          return '<li><a href="' + $.url_for(network, n) + '">' + n + '</a></li>';
         }).join('')
       );
-      $('div.nicks.container').nanoScroller(); // reset scrollbar;
+      $('div.sidebar.container').nanoScroller(); // reset scrollbar;
     }
   }
 
@@ -533,9 +564,9 @@
 
     if($message.data('target') === 'any') {
       $message.data('target', $messages.data('target'));
-      if(!$message.data('server')) $message.data('server', $messages.data('server'));
+      if(!$message.data('network')) $message.data('network', $messages.data('network'));
     }
-    if($('body').attr('class').indexOf('-nick-list') > 0) {
+    if($('body').attr('class').indexOf('-sidebar') > 0) {
       to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
     }
     if($message.hasClass('highlight')) {
@@ -565,7 +596,7 @@
 
   var reloadConversationList = function(e) {
     var goto_current = e.goto_current;
-    $.get($.url_for('conversations'), noCache({}), function(data) {
+    $.get($.url_for('/chat/conversations'), noCache({}), function(data) {
       $('ul.conversations').replaceWith(data);
       $('div.conversations.container ul').html('');
       if(goto_current) $('ul.conversations li.first a').click();
@@ -584,7 +615,7 @@
       reload_notification_list_args.notification = e.clear_notification;
     }
 
-    $.get($.url_for('notifications'), noCache(reload_notification_list_args), function(data) {
+    $.get($.url_for('/chat/notifications'), noCache(reload_notification_list_args), function(data) {
       $notification_list.html(data);
       n = parseInt($notification_list.children('ul').data('notifications'), 10);
       if(n==0) { n='' }
@@ -602,6 +633,8 @@
     if($input.length == 0) {
       return;
     }
+
+    $input.focus();
 
     $.ajaxSetup({
       error: function(jqXHR, exception) {
@@ -621,15 +654,16 @@
     initSocket();
     initPjax();
     initInputField();
+    initAddConversation();
 
     $('nav a.notifications.toggler').on('activate', function() {
-      $.post($.url_for('notifications/clear'));
+      $.post($.url_for('/chat/notifications/clear'));
       $(this).removeClass('alert').children('b').text('');
     });
 
     $('nav a.toggler').initDropDown();
     $('nav, div.container, div.goto-bottom').fastButton();
-    $('footer a.help').click(function(e) { $input.send('/help', 0); return false; })
+    $('footer a.help').click(function(e) { $input.send('/help', { 'data-history': 0 }); return false; })
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {
@@ -644,7 +678,7 @@
 
   $(document).ready(function() {
     $('.login, .register').find('form input[type="text"]:first').focus();
-    drawSettings();
+    if(!$input.length) drawSettings();
   });
 
   $(window).load(function() {

@@ -1,0 +1,5 @@
+<div class="notification question" data-disabled="<%= session('notifications') ? 1 : 0 %>">
+  Do you want desktop notifications when someone sends you a message?
+  <a href="#!yes" class="button yes">Yes</a>
+  <a href="#!no" class="button confirm no">No</a>
+</div>

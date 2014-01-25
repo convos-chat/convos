@@ -1,9 +1,9 @@
-<li class="nicks" data-server="<%= $server %>" data-target="<%= $target %>">
+<li class="nicks" data-network="<%= $network %>" data-target="<%= $target %>">
   <span class="prefix">Participants are</span>
   <span>
     % my $i = 0;
     % for my $n (@$nicks) {
-      <%= link_to join('', @$n{qw/mode nick/}), view => { server => $server, target => $n->{nick} }, 'data-nick' => $n->{nick} %><%= ++$i == @$nicks ? '.' : ', ' %>
+      <%= link_to join('', @$n{qw/mode nick/}), view => { network => $network, target => $n->{nick} }, 'data-nick' => $n->{nick} %><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
   </span>
   %= timestamp_span($timestamp)

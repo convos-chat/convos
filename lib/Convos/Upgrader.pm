@@ -8,10 +8,16 @@ Convos::Upgrader - Apply changes from one convos version to another
 
 This class can to upgrade the convos database from one version to another.
 
+Before running the upgrade, we try to do a backup of the current redis
+data related to convos. If that fail, we do not continue.
+
 The upgrade is done by fetching the current version that is stored in the
 database and run the steps from the version after and up to the lastest
 version available. Each step is described in the L<Convos::Upgrader|/STEPS>
 namespace.
+
+It is possible to set the environment variable "CONVOS_FORCE_UPGRADE"
+if you want to skip the backup step.
 
 =head1 STEPS
 
@@ -23,7 +29,9 @@ namespace.
 
 =cut
 
+use utf8 ();
 use Mojo::Base 'Mojo::EventEmitter';
+use File::Spec::Functions qw( catfile tmpdir );
 use Mojo::Loader;
 use Mojo::Redis;
 
@@ -43,15 +51,26 @@ Emitted when the upgrade was completed.
 
 =head1 ATTRIBUTES
 
+=head2 steps
+
+Holds a list of C<Convos::Upgrader::v_xxx> objects that will be used to
+upgrade L<Convos>.
+
 =head2 redis
 
 Holds a L<Mojo::Redis> object. Required in constructor to avoid migrating the
 wrong database.
 
+=head2 version
+
+Holds the target version, once L</run> has figured it out.
+
 =cut
 
+has steps => sub { shift->_build_steps; };
 has redis => undef;
-has _loader => sub { Mojo::Loader->new };
+has version => 0;
+has _raw_redis => sub { Mojo::Redis->new(server => shift->redis->server, encoding => ''); };
 
 =head1 METHODS
 
@@ -63,51 +82,82 @@ to the wanted version.
 =cut
 
 sub run {
-  my($self, $cb) = @_;
+  my $self = shift;
 
-  $self->redis->get('convos:version', sub {
-    my($redis, $current) = @_;
-    $self->{steps} = $self->_steps($current);
-    $self->_next;
-  });
+  $self->redis->get(
+    'convos:version',
+    sub {
+      my ($redis, $current) = @_;
+      $self->version($current || 0);
+      @{$self->steps} ? $self->_next : $self->_finish;
+    }
+  );
 
   $self;
 }
 
-sub _finish {
-  my $self = shift;
+=head2 running_latest
 
-  return $self->emit(finish => "Database schema has latest version.") unless $self->{version};
-  return $self->redis->set('convos:version', $self->{version}, sub {
-    $self->emit(finish => "Upgraded database to $self->{version} through $self->{stepped} steps.");
+  $self = $self->running_latest(sub {
+    my($self, $bool) = @_;
   });
+
+Check if the latest version of the Convos database is in effect.
+
+=cut
+
+sub running_latest {
+  my ($self, $cb) = @_;
+
+  Scalar::Util::weaken($self);
+  $self->redis->get(
+    'convos:version' => sub {
+      my ($redis, $version) = @_;
+      my $steps = $self->_build_steps($version || 0);
+      $self->$cb(@$steps ? 0 : 1);
+    }
+  );
+
+  $self;
 }
 
-sub _next {
-  my $self = shift;
-  my $step = shift @{ $self->{steps} } or return $self->_finish;
+sub _build_steps {
+  my $self    = shift;
+  my $version = shift || $self->version;
+  my $loader  = Mojo::Loader->new;
+  my ($e, @steps);
 
-  $step->on(finish => sub { $self->{stepped}++; $self->_next; });
-  $step->on(error => sub { $self->error(pop); });
-  $step->_run;
-}
-
-sub _steps {
-  my $self = shift;
-  my $current = shift || 0;
-  my $loader = $self->_loader;
-  my @steps;
-
-  for my $class (sort @{ $loader->search('Convos::Upgrader') }) {
+  for my $class (sort @{$loader->search('Convos::Upgrader')}) {
     my $v = $self->_version_from_class($class) or next;
-    my $e;
-    $v <= $current and next;
+    $v <= $version and next;
     $e = $loader->load($class) and $self->emit(error => $e) and next;
     push @steps, $class->new(redis => $self->redis, version => $v);
     $self->{version} = $v;
   }
 
   return \@steps;
+}
+
+sub _finish {
+  my $self = shift;
+
+  return $self->emit(finish => "Database schema has latest version.") unless $self->version;
+  return $self->redis->set(
+    'convos:version',
+    $self->version,
+    sub {
+      $self->emit(finish => "Upgraded database to $self->{version} through $self->{stepped} steps.");
+    }
+  );
+}
+
+sub _next {
+  my $self = shift;
+  my $step = shift @{$self->{steps}} or return $self->_finish;
+
+  $step->on(finish => sub { $self->{stepped}++; $self->_next; });
+  $step->on(error => sub { $self->error(pop); });
+  $step->run;
 }
 
 sub _version_from_class {

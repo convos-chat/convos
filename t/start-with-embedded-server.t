@@ -1,7 +1,9 @@
 use t::Helper;
 use Mojo::Util qw( spurt );
 
-plan skip_all => 'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.' unless $ENV{REDIS_TEST_DATABASE};
+plan skip_all =>
+  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
+  unless $ENV{REDIS_TEST_DATABASE};
 
 my $t_pid = $$;
 my @log;
@@ -36,8 +38,8 @@ sleep 4;
   local $SIG{QUIT} = 'DEFAULT';
   local $SIG{USR2};
   start_backend(0.1);
-  is redis_do(get => 'convos:backend:lock'), undef, 'not started: lock is not set';
-  is redis_do(get => 'convos:backend:pid'), undef, 'not started: pid is not set';
+  is redis_do(get => 'convos:backend:lock'),    undef, 'not started: lock is not set';
+  is redis_do(get => 'convos:backend:pid'),     undef, 'not started: pid is not set';
   is redis_do(get => 'convos:backend:started'), undef, 'not started: backend was not started';
   like $log[-1], qr{Backend is not running .* not be automatically}, 'Backend is not running';
 }
@@ -66,10 +68,12 @@ sleep 4;
   local $SIG{USR2} = 'DEFAULT';
 
   redis_do(del => 'convos:backend:lock');
-  Mojo::IOLoop->recurring(0.05 => sub {
-    $pid and Mojo::IOLoop->stop;
-    redis_do->get('convos:backend:pid' => sub { $pid = pop });
-  });
+  Mojo::IOLoop->recurring(
+    0.05 => sub {
+      $pid and Mojo::IOLoop->stop;
+      redis_do->get('convos:backend:pid' => sub { $pid = pop });
+    }
+  );
   start_backend(1);
 
   is redis_do(get => 'convos:backend:lock'), undef, 'external: lock is not set';
