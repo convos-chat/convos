@@ -4,9 +4,11 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
+$ENV{MOJO_MODE} ||= 'production' if @ARGV and $ARGV[0] eq 'version';
+
 # Start commands for application
 require Mojolicious::Commands;
 require Convos;
 my $commands = Mojolicious::Commands->new(app => Convos->new);
-push @{$commands->namespaces}, 'Convos::Command';
+unshift @{$commands->namespaces}, 'Convos::Command';
 $commands->run(@ARGV);
