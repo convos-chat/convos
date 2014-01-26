@@ -91,6 +91,11 @@ sub run {
 
   $ENV{CONVOS_MANUAL_BACKEND} = $ENV{CONVOS_SKIP_VERSION_CHECK} = 1;
 
+  # force log to STDERR if attached to terminal
+  if (-t STDERR) {
+    $self->app->log->handle(\*STDERR);
+  }
+
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
