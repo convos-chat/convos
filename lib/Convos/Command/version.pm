@@ -39,7 +39,7 @@ sub run {
 
   $ENV{MOJO_MODE} ||= '';
 
-  $redis->get('convos::version', $delay->begin);
+  $redis->get('convos:version', $delay->begin);
   $database_version = $delay->wait;
   $code_version     = Convos->VERSION;
 
