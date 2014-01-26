@@ -186,8 +186,9 @@ Returns a L<Mojo::Redis> object.
 
 sub redis {
   my $c = shift;
+  my $cache_to = $c->{tx} ? 'stash' : sub { $c->app->defaults };
 
-  $c->stash->{redis} ||= do {
+  $c->$cache_to->{redis} ||= do {
     my $log = $c->app->log;
     my $redis = Mojo::Redis->new(server => $c->config->{redis});
 
