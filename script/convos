@@ -5,6 +5,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 $ENV{MOJO_MODE} ||= 'production' if @ARGV and $ARGV[0] eq 'version';
+$ENV{MOJO_MODE} ||= 'production' if @ARGV and $ARGV[0] eq 'upgrade';
 
 # Start commands for application
 require Mojolicious::Commands;

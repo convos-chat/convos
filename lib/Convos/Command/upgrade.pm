@@ -49,6 +49,7 @@ has usage => <<"EOF";
 This command will stop any running backend and then upgrade the database.
 
 IMPORTANT! BACKUP REDIS BEFORE RUNNING THE UPGRADE!
+IMPORTANT! MOJO_MODE is set to '$ENV{MOJO_MODE}'
 
 The upgrade process is tested, but you never know - and there is no
 downgrade script.
@@ -84,9 +85,6 @@ sub run {
 
   unless ($backup or $upgrade) {
     die $self->usage;
-  }
-  unless ($ENV{MOJO_MODE}) {
-    die qq(MOJO_MODE need to be set. Example: MOJO_MODE="production" $0 upgrade\n);
   }
 
   $ENV{CONVOS_MANUAL_BACKEND} = $ENV{CONVOS_SKIP_VERSION_CHECK} = 1;
