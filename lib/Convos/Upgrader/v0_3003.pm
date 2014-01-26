@@ -42,13 +42,20 @@ Called by L<Convos::Upgrader>.
 =cut
 
 sub run {
-  my $self  = shift;
+  my ($self, $cb) = @_;
   my $delay = $self->redis->ioloop->delay;
   my $guard = $delay->begin;
 
-  $self->_add_predefined_networks($delay);
-  $delay->on(finish => sub { $self->emit('finish'); });
-  $guard->();    # make sure finish is triggered
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->_add_predefined_networks($delay);
+    },
+    sub {
+      my ($delay) = @_;
+      $self->$cb('');
+    },
+  );
 }
 
 sub _add_predefined_networks {

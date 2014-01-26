@@ -1,3 +1,6 @@
+BEGIN {
+  $ENV{CONVOS_SKIP_VERSION_CHECK} = 1;    # skip automatic upgrade on clean database
+}
 use t::Helper;
 use Convos::Upgrader;
 
@@ -17,20 +20,18 @@ my ($finish, $err, @data);
 unless ($ENV{BOOT_DATABASE}) {
 
   # v0_3002
-  redis_do(del => 'convos:version', 'irc:networks');
-  redis_do(del => map {"irc:network:$_"} qw( efnet freenode magnet ));
   redis_do(set => 'convos:version', $ENV{CONVOS_VERSION}) if $ENV{CONVOS_VERSION};
 
   # v0_3004
   redis_do(hset => 'user:jhthorsen', 'email', 'jhthorsen@cpan.org');
   redis_do(
     zadd => 'user:jhthorsen:conversations',
-    1389446375.9990001, 'irc:2eperl:2eorg:00:23convos', 1389446374.9990001, 'convos:2eby:00marcus'
+    1389446375.9990001, 'irc:2eperl:2eorg:00:23convos', 1389446374.9990001, 'irc:2econvos:2eby:00marcus'
   );
-  redis_do(sadd => 'connections', 'jhthorsen:irc.perl.org', 'jhthorsen:convos.by');
-  redis_do(sadd => 'user:jhthorsen:connections', 'irc.perl.org', 'convos.by');
-  redis_do(hset => 'user:jhthorsen:connection:irc.perl.org', server => 'irc.perl.org');
-  redis_do(hset => 'user:jhthorsen:connection:convos.by',    server => 'convos.by');
+  redis_do(sadd => 'connections', 'jhthorsen:irc.perl.org', 'jhthorsen:irc.convos.by');
+  redis_do(sadd => 'user:jhthorsen:connections', 'irc.perl.org', 'irc.convos.by');
+  redis_do(hset => 'user:jhthorsen:connection:irc.perl.org',  server => 'irc.perl.org');
+  redis_do(hset => 'user:jhthorsen:connection:irc.convos.by', server => 'irc.convos.by');
   redis_do(
     'zadd',
     'user:jhthorsen:connection:irc.perl.org:#convos:msg',
@@ -39,7 +40,7 @@ unless ($ENV{BOOT_DATABASE}) {
   );
   redis_do(
     'zadd',
-    'user:jhthorsen:connection:convos.by:marcus:msg',
+    'user:jhthorsen:connection:irc.convos.by:marcus:msg',
     1389446123.2134020,
     "{\"nick\":\"batman\",\"event\":\"message\",\"uuid\":\"b3faa8a4-61e0-dd87-c29e-b469c5fddde2\",\"host\":\"ti0034a400-4176.bb.online.no\",\"message\":\"yay\",\"target\":\"#convos\",\"timestamp\":1389446385.81372,\"user\":\"jhthorsen\",\"server\":\"irc.perl.org\",\"highlight\":0}",
   );
@@ -47,13 +48,11 @@ unless ($ENV{BOOT_DATABASE}) {
 
 {
   $upgrader->redis(Mojo::Redis->new(server => $ENV{REDIS_TEST_DATABASE}));
-  $upgrader->on(error  => sub { $err    = pop; Mojo::IOLoop->stop; });
-  $upgrader->on(finish => sub { $finish = 1;   Mojo::IOLoop->stop; });
-  $upgrader->run;
+  $upgrader->run(sub { $err = pop; $finish = 1; Mojo::IOLoop->stop; });
   Mojo::IOLoop->start;
 
-  is $finish, 1,     'finishd';
-  is $err,    undef, 'no error';
+  is $finish, 1,  'finished';
+  is $err,    '', 'no error';
   is redis_do(get => 'convos:version'), '0.3005', 'convos:version is set';
 }
 

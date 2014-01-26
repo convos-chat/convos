@@ -6,12 +6,32 @@ my ($exit, $version);
 no warnings 'redefine';
 require Convos;
 
-*Mojo::Redis::get = sub {
-  my ($redis, $key, $cb) = @_;
-  diag "get $key => $version";
-  $redis->$cb($version);
-  Mojo::IOLoop->stop;
-};
+Mojo::Util::monkey_patch(
+  'Convos::Upgrader',
+  steps => sub {
+    return $_[0]->{steps} unless @_ == 2;
+    $_[0]->{steps} = $_[1];
+    Mojo::IOLoop->stop;
+  }
+);
+
+Mojo::Util::monkey_patch(
+  'Mojo::Redis',
+  get => sub {
+    my ($redis, $key, $cb) = @_;
+    diag "get $key => $version";
+    $redis->$cb($version);
+  }
+);
+
+Mojo::Util::monkey_patch(
+  'Mojo::Redis',
+  scard => sub {
+    my ($redis, $key, $cb) = @_;
+    diag "scard $key => 1";
+    $redis->$cb(1);
+  }
+);
 
 {
   my $c = Convos->new;

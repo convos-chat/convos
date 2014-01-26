@@ -23,47 +23,42 @@ Called by L<Convos::Upgrader>.
 =cut
 
 sub run {
-  my $self  = shift;
-  my $delay = $self->redis->ioloop->delay;
-  my $guard = $delay->begin;
-
-  $self->_convert_connections($delay);
-  $delay->on(finish => sub { $self->emit('finish'); });
-  $guard->();    # make sure finish is triggered
-}
-
-sub _convert_connections {
-  my ($self, $delay) = @_;
+  my ($self, $cb) = @_;
   my $redis = $self->redis;
-  my $guard = $delay->begin;
-  my (%users, %connections);
 
-  $redis->smembers(
-    connections => sub {
-      my ($redis, $connections) = @_;
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->smembers(connections => $delay->begin);
+    },
+    sub {
+      my ($delay, $connections) = @_;
+      my (%connections, %users);
 
-      $redis->del('connections', $guard);
+      $redis->del('connections', $delay->begin);
 
-      for (@$connections) {
-        my ($user, $name) = split /:/;
-        my $new;
+      for my $name (@$connections) {
+        my ($user, $old) = split /:/, $name;
+        my $new = $self->_convert_connection_name($old);
 
         unless ($users{$user}++) {
           $redis->del("user:$user:connections", $delay->begin);
-          $redis->zrange("user:$user:conversations", 0, -1, $delay->begin);
           $redis->sadd("users", $user, $delay->begin);
           $self->_set_avatar_for_user($user, $delay);
         }
 
-        $new = $self->_convert_connection_name($name);
-        $connections{$name} = $new;
-        $self->_convert_connection_for_user($user, $name, $new, $delay);
+        $connections{$old} = $new;
+        $self->_convert_connection_for_user($user, $old, $new, $delay);
       }
 
       for my $user (keys %users) {
         $self->_convert_conversations_for_user($user, \%connections, $delay);
       }
-    }
+    },
+    sub {
+      my ($delay) = @_;
+      $self->$cb('');
+    },
   );
 }
 
@@ -82,7 +77,6 @@ sub _convert_connection_name {
 sub _convert_connection_for_user {
   my ($self, $user, $old, $new, $delay) = @_;
   my $redis = $self->redis;
-  my $guard = $delay->begin;
 
   $redis->keys(
     "user:$user:connection:$old*",
@@ -94,8 +88,6 @@ sub _convert_connection_for_user {
         $key_new =~ s/:$old\b/:$new/;
         $redis->rename($key_old, $key_new, $delay->begin) if $key_old ne $key_new;
       }
-
-      $guard->();
     }
   );
 
@@ -106,7 +98,6 @@ sub _convert_connection_for_user {
 sub _convert_conversations_for_user {
   my ($self, $user, $map, $delay) = @_;
   my $redis = $self->redis;
-  my $guard = $delay->begin;
 
   $redis->zrange(
     "user:$user:conversations",
@@ -114,16 +105,14 @@ sub _convert_conversations_for_user {
     'WITHSCORES' => sub {
       my ($redis, $conversations) = @_;
 
-      $redis->del("user:$user:conversations", $guard);
+      $redis->del("user:$user:conversations", $delay->begin);
 
       while (@$conversations) {
         my (@name) = id_as shift @$conversations;
         my $score = shift @$conversations or last;
         $name[0] = $map->{$name[0]} or next;
-        $redis->zadd("user:$user:conversations", $score, as_id @name);
+        $redis->zadd("user:$user:conversations", $score, as_id(@name), $delay->begin);
       }
-
-      $guard->();
     }
   );
 }

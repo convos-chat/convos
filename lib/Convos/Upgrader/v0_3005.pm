@@ -21,9 +21,8 @@ Called by L<Convos::Upgrader>.
 =cut
 
 sub run {
-  my $self  = shift;
+  my ($self, $cb) = @_;
   my $redis = $self->redis;
-  my $delay = $redis->ioloop->delay;
 
   Mojo::IOLoop->delay(
     sub {
@@ -35,11 +34,11 @@ sub run {
       my ($delay, $c_keys, $a_keys) = @_;
       $redis->del(@$c_keys, $delay->begin) if @$c_keys;
       $redis->del(@$a_keys, $delay->begin) if @$a_keys;
-      $delay->begin->();
+      $delay->begin->();    # guard
     },
     sub {
       my ($delay, @deleted) = @_;
-      $self->emit('finish');
+      $self->$cb('');
     },
   );
 }

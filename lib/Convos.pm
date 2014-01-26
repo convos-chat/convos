@@ -157,6 +157,7 @@ use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
+use Convos::Upgrader;
 
 our $VERSION = '0.3005';
 
@@ -205,7 +206,6 @@ has core => sub {
 };
 
 has upgrader => sub {
-  require Convos::Upgrader;
   Convos::Upgrader->new(redis => shift->redis);
 };
 

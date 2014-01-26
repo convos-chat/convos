@@ -25,7 +25,7 @@ Mojo::Util::monkey_patch(
   'Mojo::Redis',
   'execute' => sub {
     my ($redis, @args) = @_;
-    my $cb = ref $args[-1] eq 'CODE' ? pop @args : undef;
+    my $cb = ref $args[-1] eq 'CODE' ? pop @args : return;
     my $res = shift @redis_res || '';
     push @redis_cmd, @args;
     diag "@args => $res";
@@ -35,11 +35,11 @@ Mojo::Util::monkey_patch(
 
 {
   local $ENV{MOJO_MODE};
-  is $cmd->description, "Upgrade the Convos database.\n", 'description()';
-  like $cmd->usage, qr{DO TAKE BACKUP BEFORE RUNNING THE UPGRADE}, 'usage()';
+  is $cmd->description, "Upgrade the Convos database.\n",            'description()';
+  like $cmd->usage,     qr{BACKUP REDIS BEFORE RUNNING THE UPGRADE}, 'usage()';
 
   eval { $cmd->run };
-  like $@, qr{DO TAKE BACKUP BEFORE RUNNING THE UPGRADE}, 'run()';
+  like $@, qr{BACKUP REDIS BEFORE RUNNING THE UPGRADE}, 'run()';
 
   eval { $cmd->run('--backup') };
   like $@, qr{MOJO_MODE need to be set}, 'run(--backup)';

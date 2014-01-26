@@ -8,7 +8,7 @@ Convos::Command::upgrade - Upgrade Convos
 
 This command will stop any running backend and then upgrade the database.
 
-IMPORTANT! DO TAKE BACKUP BEFORE RUNNING THE UPGRADE!
+IMPORTANT! BACKUP REDIS BEFORE RUNNING THE UPGRADE!
 
 The upgrade process is tested, but you never know - and there is no
 downgrade script.
@@ -18,8 +18,8 @@ Usage:
   $ script/convos upgrade --yes    # upgrade
 
 The "--backup" will run the Redis commands below, which will block the
-database while doing the backup. In addition it will use up the double
-of disk space and it will overwriting any existing "convos-backup.rdb"
+database while doing the backup. In addition it will use twice as much
+disk space and it overwrite any existing "convos-backup.rdb"
 database that exists.
 
   CONFIG SET dbfilename convos-backup.rdb
@@ -29,7 +29,6 @@ database that exists.
 =cut
 
 use Mojo::Base 'Mojolicious::Command';
-use Convos::Upgrader;
 
 =head1 ATTRIBUTES
 
@@ -49,7 +48,7 @@ has usage => <<"EOF";
 
 This command will stop any running backend and then upgrade the database.
 
-IMPORTANT! DO TAKE BACKUP BEFORE RUNNING THE UPGRADE!
+IMPORTANT! BACKUP REDIS BEFORE RUNNING THE UPGRADE!
 
 The upgrade process is tested, but you never know - and there is no
 downgrade script.
@@ -59,8 +58,8 @@ Usage:
   \$ $0 upgrade --yes    # upgrade
 
 The "--backup" will run the Redis commands below, which will block the
-database while doing the backup. In addition it will use up the double
-of disk space and it will overwriting any existing "convos-backup.rdb"
+database while doing the backup. In addition it will use twice as much
+disk space and it overwrite any existing "convos-backup.rdb"
 database that exists.
 
   CONFIG SET dbfilename convos-backup.rdb
@@ -115,8 +114,7 @@ sub run {
       }
 
       if ($upgrade) {
-        $self->app->upgrader->once(finish => $delay->begin);
-        $self->app->upgrader->run;
+        $self->app->upgrader->run($delay->begin);
       }
       else {
         $exit_value = $err ? 1 : 0;
