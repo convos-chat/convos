@@ -122,11 +122,15 @@ sub run {
       }
     },
     sub {
-      my ($delay, $message) = @_;
+      my ($delay, $err) = @_;
 
-      $self->app->log->info($message);
-      $self->app->log->info("You can now start Convos.");
-      $exit_value = 0;
+      if ($err) {
+        $self->app->log->error($err);
+      }
+      else {
+        $self->app->log->info("Upgraded successfully. You can now start Convos.");
+        $exit_value = 0;
+      }
     },
   )->wait;
 
