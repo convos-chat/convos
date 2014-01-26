@@ -106,8 +106,8 @@ DISTRIBUTIONS
       Mojolicious 3.0
       Protocol::Redis 1.0
       Test::More 0.88
-  Mojolicious-4.60
-    pathname: M/MR/MRAMBERG/Mojolicious-4.60.tar.gz
+  Mojolicious-4.69
+    pathname: S/SR/SRI/Mojolicious-4.69.tar.gz
     provides:
       Mojo undef
       Mojo::Asset undef
@@ -126,6 +126,7 @@ DISTRIBUTIONS
       Mojo::DOM undef
       Mojo::DOM::CSS undef
       Mojo::DOM::HTML undef
+      Mojo::DOM::Node undef
       Mojo::Date undef
       Mojo::EventEmitter undef
       Mojo::Exception undef
@@ -170,7 +171,7 @@ DISTRIBUTIONS
       Mojo::UserAgent::Server undef
       Mojo::UserAgent::Transactor undef
       Mojo::Util undef
-      Mojolicious 4.60
+      Mojolicious 4.69
       Mojolicious::Command undef
       Mojolicious::Command::cgi undef
       Mojolicious::Command::cpanify undef
