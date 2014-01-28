@@ -10,15 +10,6 @@ my ($form, $tmp, @ctrl);
 $t->app->core->start;
 
 {
-  # make sure we have networks in database
-  my $upgrader = Convos::Upgrader->new(redis => $t->app->redis);
-  $upgrader->once(finish => sub { Mojo::IOLoop->stop });
-  $upgrader->run;
-  Mojo::IOLoop->start;
-}
-
-
-{
   no warnings 'redefine';
   *Convos::Core::ctrl_start = sub { shift; push @ctrl, @_ };
 }

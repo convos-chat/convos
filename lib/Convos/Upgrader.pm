@@ -23,38 +23,28 @@ if you want to skip the backup step.
 
 =over 4
 
-=item * L<Convos::Upgrader::v0_3002>
+=item * L<Convos::Upgrader::v0_3003>
+
+=item * L<Convos::Upgrader::v0_3004>
+
+=item * L<Convos::Upgrader::v0_3005>
 
 =back
 
 =cut
 
 use utf8 ();
-use Mojo::Base 'Mojo::EventEmitter';
+use Mojo::Base -base;
 use File::Spec::Functions qw( catfile tmpdir );
 use Mojo::Loader;
 use Mojo::Redis;
-
-=head1 EVENTS
-
-=head2 error
-
-  $self->on(error => sub { my($self, $msg) = @_; });
-
-Emitted if the upgrade fail.
-
-=head2 finish
-
-  $self->on(finish => sub { my($self, $msg) = @_; });
-
-Emitted when the upgrade was completed.
 
 =head1 ATTRIBUTES
 
 =head2 steps
 
 Holds a list of C<Convos::Upgrader::v_xxx> objects that will be used to
-upgrade L<Convos>.
+upgrade L<Convos>. This attribute is initialized by L</running_latest>.
 
 =head2 redis
 
@@ -63,11 +53,11 @@ wrong database.
 
 =head2 version
 
-Holds the target version, once L</run> has figured it out.
+Holds the current version. This attribute is initialized by L</running_latest>.
 
 =cut
 
-has steps => sub { shift->_build_steps; };
+has steps => sub { [] };
 has redis => undef;
 has version => 0;
 has _raw_redis => sub { Mojo::Redis->new(server => shift->redis->server, encoding => ''); };
@@ -76,24 +66,33 @@ has _raw_redis => sub { Mojo::Redis->new(server => shift->redis->server, encodin
 
 =head2 run
 
+  $self->run(sub {
+    my($self, $err) = @_;
+  });
+
 This method will check the current database version and run upgrade steps
-to the wanted version.
+to the wanted version. C<$err> will be false if everything went well.
 
 =cut
 
 sub run {
-  my $self = shift;
+  my ($self, $cb) = @_;
+  my ($guard, $error);
 
-  $self->redis->get(
-    'convos:version',
+  Scalar::Util::weaken($self);
+  $guard = $self->redis->once(error => sub { $error++; $self->$cb($_[1]); });
+  $self->{stepped} = 0;
+  $self->running_latest(
     sub {
-      my ($redis, $current) = @_;
-      $self->version($current || 0);
-      @{$self->steps} ? $self->_next : $self->_finish;
+      $self->_next(
+        sub {
+          my ($self, $err) = @_;
+          $self->redis->unsubscribe($guard);
+          $self->$cb($err) unless $error;
+        }
+      );
     }
   );
-
-  $self;
 }
 
 =head2 running_latest
@@ -110,54 +109,62 @@ sub running_latest {
   my ($self, $cb) = @_;
 
   Scalar::Util::weaken($self);
-  $self->redis->get(
-    'convos:version' => sub {
-      my ($redis, $version) = @_;
-      my $steps = $self->_build_steps($version || 0);
-      $self->$cb(@$steps ? 0 : 1);
-    }
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->scard('connections', $delay->begin);
+    },
+    sub {
+      my ($delay, $existing) = @_;
+      $existing and return $self->redis->get('convos:version', $delay->begin);
+
+      # nothing to upgrade, but let us insert defaults
+      $self->steps($self->_build_steps(0));
+      $self->_next(sub { $self->steps([]); $self->$cb(1); });
+    },
+    sub {
+      my ($delay, $version) = @_;
+      $self->steps($self->_build_steps($version || 0));
+      $self->$cb(@{$self->steps} ? 0 : 1);
+    },
   );
 
   $self;
 }
 
 sub _build_steps {
-  my $self    = shift;
-  my $version = shift || $self->version;
-  my $loader  = Mojo::Loader->new;
+  my ($self, $version) = @_;
+  my $loader = Mojo::Loader->new;
   my ($e, @steps);
 
   for my $class (sort @{$loader->search('Convos::Upgrader')}) {
     my $v = $self->_version_from_class($class) or next;
+    $self->version($v);
     $v <= $version and next;
-    $e = $loader->load($class) and $self->emit(error => $e) and next;
+    $e = $loader->load($class) and die "[error] Could not load $class: $@";
     push @steps, $class->new(redis => $self->redis, version => $v);
-    $self->{version} = $v;
   }
 
   return \@steps;
 }
 
-sub _finish {
-  my $self = shift;
+sub _next {
+  my ($self, $cb) = @_;
+  my $step = shift @{$self->steps};
 
-  return $self->emit(finish => "Database schema has latest version.") unless $self->version;
-  return $self->redis->set(
-    'convos:version',
-    $self->version,
+  unless ($step) {
+    $self->redis->set('convos:version', $self->version, sub { $self->$cb('') });
+    return;
+  }
+
+  $self->{stepped}++;
+  $step->run(
     sub {
-      $self->emit(finish => "Upgraded database to $self->{version} through $self->{stepped} steps.");
+      my ($step, $err) = @_;
+      return $self->$cb("Step @{$step->version} failed: $err") if $err;
+      return $self->_next($cb);
     }
   );
-}
-
-sub _next {
-  my $self = shift;
-  my $step = shift @{$self->{steps}} or return $self->_finish;
-
-  $step->on(finish => sub { $self->{stepped}++; $self->_next; });
-  $step->on(error => sub { $self->error(pop); });
-  $step->run;
 }
 
 sub _version_from_class {
