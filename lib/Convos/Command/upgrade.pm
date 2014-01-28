@@ -30,6 +30,8 @@ database that exists.
 
 use Mojo::Base 'Mojolicious::Command';
 
+$ENV{MOJO_MODE} ||= 'production';
+
 =head1 ATTRIBUTES
 
 =head2 description

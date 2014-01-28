@@ -7,7 +7,6 @@ BEGIN {
   require Convos::Command::upgrade;
 }
 
-$ENV{MOJO_MODE} = 'testing';
 my $cmd = Convos::Command::upgrade->new;
 my (@redis_cmd, @redis_res);
 
@@ -34,17 +33,12 @@ Mojo::Util::monkey_patch(
 );
 
 {
-  local $ENV{MOJO_MODE};
   is $cmd->description, "Upgrade the Convos database.\n",            'description()';
   like $cmd->usage,     qr{BACKUP REDIS BEFORE RUNNING THE UPGRADE}, 'usage()';
 
   eval { $cmd->run };
   like $@, qr{BACKUP REDIS BEFORE RUNNING THE UPGRADE}, 'run()';
 
-  eval { $cmd->run('--backup') };
-  like $@, qr{MOJO_MODE need to be set}, 'run(--backup)';
-
-  $ENV{MOJO_MODE} = 'whatever';
   is $cmd->run('--backup'), 1, 'failed --backup';
 }
 
