@@ -1,4 +1,4 @@
-## 0.4
+## 0.4 (2014-01-28)
 
 - Added system for upgrding Redis schema
 - Added API for controlling connections
