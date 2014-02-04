@@ -10,7 +10,7 @@ if [ -z $PERL ]; then
   exit 2;
 fi
 
-function download () {
+download () {
   if [ -n $CURL ]; then
     curl $TAR_GZ | tar zxvf -
   elif [ -n $WGET ]; then
@@ -21,7 +21,7 @@ function download () {
   fi
 }
 
-function deps () {
+deps () {
   cd convos-release;
 
   if ./vendor/bin/carton; then
@@ -34,7 +34,7 @@ function deps () {
   fi
 }
 
-function post_message () {
+post_message () {
   echo "";
   echo "# You can test convos by running the command below,";
   echo "# and then open http://localhost:3000 in your favorite browser.";
