@@ -39,7 +39,7 @@ post_message () {
   echo "# You can test convos by running the command below,";
   echo "# and then open http://localhost:3000 in your favorite browser.";
   echo "";
-  echo "  cd $PWD && ./vendor/bin/carton exec morbo script/convos";
+  echo "  cd $PWD && ./vendor/bin/carton exec script/convos daemon --listen http://*:3000";
   echo "";
   echo "# Visit http://convos.by for more information.";
   echo "";
