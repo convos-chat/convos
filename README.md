@@ -67,7 +67,7 @@ Note that if you downloaded convos using git, you should do `git pull` instead o
 
 ## Authors 
 Jan Henning Thorsen - jhthorsen@cpan.org
-Marcus Ramberg - marcus@nordaaker.org
+Marcus Ramberg - marcus@nordaaker.com
 
 ## Copyright & License
 Copyright (C) 2012-2013, Nordaaker.
