@@ -106,6 +106,21 @@ Disable the frontend from starting the backend.
 Set how often to send "keep-alive" through the web socket. Default is
 every 30 second.
 
+=item * CONVOS_REDIS_URL
+
+This is the URL to the Redis backend, and should follow this format:
+
+  redis://x:password@server:port/database_index
+  redis://127.0.0.1:6379/1 # suggested value
+
+Convos will use C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> if
+C<CONVOS_REDIS_URL> is not set.
+
+It is also possible to set C<CONVOS_REDIS_INDEX=2> to use the
+database index 2, instead of the default. This is useful when
+C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> does not contain
+the datbase index.
+
 =item * MOJO_IRC_DEBUG=1
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
@@ -123,7 +138,6 @@ Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
 =item * Icon: L<https://raw.github.com/Nordaaker/convos/master/public/image/icon.svg>
 
 =item * Logo: L<https://raw.github.com/Nordaaker/convos/master/public/image/logo.svg>
-
 
 =back
 
@@ -153,6 +167,7 @@ Backend functionality.
 
 use Mojo::Base 'Mojolicious';
 use Mojo::Redis;
+use Mojo::Util qw( md5_sum );
 use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
@@ -233,11 +248,16 @@ sub startup {
 
   $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
-  $self->secrets($config->{secrets} || [$config->{secret} || die '"secrets" is required in config file']);
+  $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
   $self->_assets($config);
   $self->_public_routes;
   $self->_private_routes;
+
+  if (!eval { Convos::Plugin::Helpers::REDIS_URL() } and $config->{redis}) {
+    $self->log->warn("redis url from config file will be deprecated. Run 'perldoc Convos' for alternative setup.");
+    $ENV{CONVOS_REDIS_URL} = $config->{redis};
+  }
 
   $self->defaults(full_page => 1);
   $self->hook(
@@ -249,6 +269,7 @@ sub startup {
 
   Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
   Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
+  Mojo::IOLoop->timer(0 => sub { $self->_set_secrets });
 }
 
 sub _assets {
@@ -275,7 +296,7 @@ sub _check_version {
       my ($upgrader, $latest) = @_;
       $latest and return;
       $log->error(
-        "The database schema has changed.\nIt must be updated before we can start!\n\nRun '$self->{convos_executable_path} upgrade, then try again.'\n\n"
+        "The database schema has changed.\nIt must be updated before we can start!\n\nRun '$self->{convos_executable_path} upgrade', then try again.\n\n"
       );
       exit;
     },
@@ -335,6 +356,32 @@ sub _public_routes {
   $r->post('/register/:invite', {invite => ''})->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
   $r;
+}
+
+sub _set_secrets {
+  my $self  = shift;
+  my $redis = $self->redis;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $redis->lrange('convos:secrets', 0, -1, $delay->begin);
+      $redis->getset('convos:secrets:lock' => 1, $delay->begin);
+      $redis->expire('convos:secrets:lock' => 5);
+    },
+    sub {
+      my ($delay, $secrets, $locked) = @_;
+
+      $secrets ||= $self->config->{secrets};
+
+      return $self->app->secrets($secrets) if @$secrets;
+      return $self->_set_secrets if $locked;
+      $secrets = [md5_sum rand . $$ . time];
+      $self->app->secrets($secrets);
+      $redis->lpush('convos:secrets', $secrets->[0]);
+      $redis->del('convos:secrets:lock');
+    },
+  );
 }
 
 sub _start_backend {

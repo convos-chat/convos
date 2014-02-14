@@ -12,6 +12,16 @@ use Convos::Core::Util qw( format_time id_as);
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use URI::Find;
 
+sub REDIS_URL {
+  $ENV{CONVOS_REDIS_URL} ||= do {
+    my $url = $ENV{REDISTOGO_URL} || $ENV{DOTCLOUD_DATA_REDIS_URL}
+      or die "CONVOS_REDIS_URL is not set. Run 'perldoc Convos' for details.\n";
+    $url = Mojo::URL->new($url);
+    $url->path($ENV{CONVOS_REDIS_INDEX}) if $ENV{CONVOS_REDIS_INDEX};
+    $url->to_string;
+  };
+}
+
 =head1 HELPERS
 
 =head2 active_class
@@ -190,7 +200,7 @@ sub redis {
 
   $c->$cache_to->{redis} ||= do {
     my $log = $c->app->log;
-    my $redis = Mojo::Redis->new(server => $c->config->{redis});
+    my $redis = Mojo::Redis->new(server => REDIS_URL);
 
     $redis->on(
       error => sub {

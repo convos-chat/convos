@@ -9,7 +9,7 @@ BEGIN {
   $ENV{MOJO_MODE} = 'testing';
   $ENV{CONVOS_DEBUG} //= $ENV{TEST_VERBOSE};
   $ENV{CONVOS_MANUAL_BACKEND} = 1;
-  $ENV{REDIS_TEST_DATABASE} ||= '';
+  $ENV{CONVOS_REDIS_URL} //= '';
 }
 
 my ($redis, $t);
@@ -46,20 +46,24 @@ sub import {
   strict->import;
   warnings->import;
 
-  if (defined $ENV{BOOT_DATABASE}) {
+  if (defined $ENV{LIVE_DATABASE}) {
     $ENV{REDIS_BACKEND_PID} = fork or exec 'redis-server t/etc/redis.conf';
-    $ENV{REDIS_TEST_DATABASE} = "redis://127.0.0.1:30000/$ENV{BOOT_DATABASE}";
+    $ENV{CONVOS_REDIS_URL} = "redis://127.0.0.1:30000/$ENV{LIVE_DATABASE}";
     $ENV{KEEP_REDIS} //= 1;
     sleep 2;    # TODO: Make this more intelligent
   }
-  else {
-    $ENV{REDIS_TEST_DATABASE} = 'redis://127.0.0.1:6379/14' if $ENV{REDIS_TEST_DATABASE} eq 'default';
+  elsif ($ENV{CONVOS_REDIS_URL} eq 'test') {
+    $ENV{CONVOS_REDIS_URL} = 'redis://127.0.0.1:6379/14';
   }
 
   $t = Test::Mojo->new('Convos');
-  $t->app->config(redis => $ENV{REDIS_TEST_DATABASE});
-  $t->app->core->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
-  $t->app->redis->server eq $ENV{REDIS_TEST_DATABASE} or die;
+
+  eval {
+    $t->app->core->redis->server eq $ENV{CONVOS_REDIS_URL} or die "invalid core redis server";
+    $t->app->redis->server eq $ENV{CONVOS_REDIS_URL} or die "invalid app redis server";
+  } or do {
+    plan skip_all => $@;
+  };
 
   redis_do('flushdb') unless $ENV{KEEP_REDIS};
 

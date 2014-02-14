@@ -3,10 +3,6 @@ use Test::More;
 use Convos::Loopback;
 use Convos::Core::Connection;
 
-plan skip_all =>
-  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
-  unless $ENV{REDIS_TEST_DATABASE};
-
 my $conn = Convos::Core::Connection->new(name => 'loopback', login => 'doe');
 my $loopback = $conn->_irc;
 
