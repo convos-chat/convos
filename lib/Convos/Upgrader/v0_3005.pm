@@ -32,8 +32,8 @@ sub run {
     },
     sub {
       my ($delay, $c_keys, $a_keys) = @_;
-      $redis->del(@$c_keys, $delay->begin) if @$c_keys;
-      $redis->del(@$a_keys, $delay->begin) if @$a_keys;
+      $redis->del(@$c_keys, $delay->begin) if $c_keys and @$c_keys;
+      $redis->del(@$a_keys, $delay->begin) if $a_keys and @$a_keys;
       $delay->begin->();    # guard
     },
     sub {
