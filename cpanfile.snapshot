@@ -84,6 +84,19 @@ DISTRIBUTIONS
       Module::Build 0.35
       Test::More 0
       perl v5.8.8
+  Module-Find-0.12
+    pathname: C/CR/CRENZ/Module-Find-0.12.tar.gz
+    provides:
+      Module::Find 0.12
+      ModuleFindTest undef
+      ModuleFindTest::SubMod undef
+      ModuleFindTest::SubMod::SubSubMod undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      File::Find 0
+      File::Spec 0
+      Test::More 0
+      perl 5.006001
   Mojo-IRC-0.0303
     pathname: J/JH/JHTHORSEN/Mojo-IRC-0.0303.tar.gz
     provides:
@@ -95,10 +108,10 @@ DISTRIBUTIONS
       Parse::IRC 1.20
       Test::More 0.98
       Unicode::UTF8 0.59
-  Mojo-Redis-0.9920
-    pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9920.tar.gz
+  Mojo-Redis-0.9921
+    pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9921.tar.gz
     provides:
-      Mojo::Redis 0.9920
+      Mojo::Redis 0.9921
       Mojo::Redis::Subscription undef
     requirements:
       Encode 0
@@ -106,8 +119,8 @@ DISTRIBUTIONS
       Mojolicious 3.0
       Protocol::Redis 1.0
       Test::More 0.88
-  Mojolicious-4.69
-    pathname: S/SR/SRI/Mojolicious-4.69.tar.gz
+  Mojolicious-4.78
+    pathname: S/SR/SRI/Mojolicious-4.78.tar.gz
     provides:
       Mojo undef
       Mojo::Asset undef
@@ -171,7 +184,7 @@ DISTRIBUTIONS
       Mojo::UserAgent::Server undef
       Mojo::UserAgent::Transactor undef
       Mojo::Util undef
-      Mojolicious 4.69
+      Mojolicious 4.78
       Mojolicious::Command undef
       Mojolicious::Command::cgi undef
       Mojolicious::Command::cpanify undef
@@ -220,10 +233,10 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.010001
-  Mojolicious-Plugin-AssetPack-0.06
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.06.tar.gz
+  Mojolicious-Plugin-AssetPack-0.0601
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.0601.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.06
+      Mojolicious::Plugin::AssetPack 0.0601
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
@@ -231,6 +244,30 @@ DISTRIBUTIONS
       File::Which 1.00
       IPC::Run3 0.04
       JavaScript::Minifier::XS 0.01
+      Mojolicious 4.30
+      Test::More 0.90
+  Mojolicious-Plugin-LinkEmbedder-0.02
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.02.tar.gz
+    provides:
+      Mojolicious::Plugin::LinkEmbedder 0.02
+      Mojolicious::Plugin::LinkEmbedder::Link undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Game undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Image undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text::GistGithub undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text::Twitter undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Blip undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Collegehumor undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Dbtv undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Ted undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Vimeo undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Youtube undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      File::Find 1.00
+      Module::Find 0.10
       Mojolicious 4.30
       Test::More 0.90
   Parse-IRC-1.20
