@@ -157,7 +157,7 @@
     });
 
     if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
-      $input.send('/names', 0).send('/topic', { 'data-history': 0 });
+      $input.send('/names', 0);
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list

@@ -492,8 +492,10 @@ sub irc_rpl_whoischannels {
 
 sub irc_rpl_notopic {
   my ($self, $message) = @_;
+  my $target = $message->{params}[1];
 
-  $self->_publish(topic => {topic => '', target => $message->{params}[1]});
+  $self->redis->hset("$self->{path}:$target", topic => '');
+  $self->_publish(topic => {topic => '', target => $target});
 }
 
 =head2 irc_rpl_topic
@@ -504,8 +506,11 @@ Reply with topic
 
 sub irc_rpl_topic {
   my ($self, $message) = @_;
+  my $target = $message->{params}[1];
+  my $topic  = $message->{params}[2];
 
-  $self->_publish(topic => {topic => $message->{params}[2], target => $message->{params}[1]});
+  $self->redis->hset("$self->{path}:$target", topic => $topic);
+  $self->_publish(topic => {topic => $topic, target => $target});
 }
 
 =head2 irc_topic
@@ -516,8 +521,11 @@ sub irc_rpl_topic {
 
 sub irc_topic {
   my ($self, $message) = @_;
+  my $target = $message->{params}[0];
+  my $topic  = $message->{params}[1];
 
-  $self->_publish(topic => {topic => $message->{params}[1], target => $message->{params}[0]});
+  $self->redis->hset("$self->{path}:$target", topic => $topic);
+  $self->_publish(topic => {topic => $topic, target => $target});
 }
 
 =head2 irc_rpl_topicwhotime
@@ -561,7 +569,9 @@ sub irc_join {
   my $channel = $message->{params}[0];
 
   if ($nick eq $self->_irc->nick) {
+    $self->redis->hset("$self->{path}:$channel", topic => '');
     $self->_publish(add_conversation => {target => $channel});
+    $self->_irc->write(TOPIC => $channel);    # fetch topic for channel
   }
   else {
     $self->_publish(nick_joined => {nick => $nick, target => $channel});
