@@ -113,6 +113,7 @@ sub conversation_list {
           };
 
         $self->redis->zcount("user:$login:connection:$network:$target:msg", $timestamp, '+inf', $delay->begin);
+        $self->redis->hget("user:$login:connection:$network:$target", "topic", $delay->begin);
         $i++;
       }
 
@@ -120,11 +121,12 @@ sub conversation_list {
       $self->stash(conversation_list => $conversation_list, networks => $networks || []);
     },
     sub {
-      my ($delay, @unread_count) = @_;
-      my $conversation_list = pop @unread_count;
+      my ($delay, @args) = @_;
+      my $conversation_list = pop @args;
 
       for my $c (@$conversation_list) {
-        $c->{unread} = shift @unread_count || 0;
+        $c->{unread} = shift @args || 0;
+        $c->{topic}  = shift @args || '';
       }
 
       return $self->$cb($conversation_list) if $cb;
