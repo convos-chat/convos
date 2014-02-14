@@ -37,7 +37,8 @@ sleep 4;
   is redis_do(get => 'convos:backend:lock'),    undef, 'not started: lock is not set';
   is redis_do(get => 'convos:backend:pid'),     undef, 'not started: pid is not set';
   is redis_do(get => 'convos:backend:started'), undef, 'not started: backend was not started';
-  like $log[-1], qr{Backend is not running .* not be automatically}, 'Backend is not running';
+  like $log[-1], qr{Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend},
+    'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend';
 }
 
 {
