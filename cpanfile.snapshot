@@ -84,6 +84,19 @@ DISTRIBUTIONS
       Module::Build 0.35
       Test::More 0
       perl v5.8.8
+  Module-Find-0.12
+    pathname: C/CR/CRENZ/Module-Find-0.12.tar.gz
+    provides:
+      Module::Find 0.12
+      ModuleFindTest undef
+      ModuleFindTest::SubMod undef
+      ModuleFindTest::SubMod::SubSubMod undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      File::Find 0
+      File::Spec 0
+      Test::More 0
+      perl 5.006001
   Mojo-IRC-0.0303
     pathname: J/JH/JHTHORSEN/Mojo-IRC-0.0303.tar.gz
     provides:
@@ -231,6 +244,30 @@ DISTRIBUTIONS
       File::Which 1.00
       IPC::Run3 0.04
       JavaScript::Minifier::XS 0.01
+      Mojolicious 4.30
+      Test::More 0.90
+  Mojolicious-Plugin-LinkEmbedder-0.02
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.02.tar.gz
+    provides:
+      Mojolicious::Plugin::LinkEmbedder 0.02
+      Mojolicious::Plugin::LinkEmbedder::Link undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Game undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Image undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text::GistGithub undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text::Twitter undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Blip undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Collegehumor undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Dbtv undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Ted undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Vimeo undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Video::Youtube undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      File::Find 1.00
+      Module::Find 0.10
       Mojolicious 4.30
       Test::More 0.90
   Parse-IRC-1.20

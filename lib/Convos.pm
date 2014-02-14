@@ -298,6 +298,8 @@ sub _private_routes {
   my $r = $self->routes->route->bridge('/')->to('user#auth', layout => 'view');
   my $network_r;
 
+  $self->plugin('LinkEmbedder');
+
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
   $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)
