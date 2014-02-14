@@ -1,11 +1,12 @@
 <ul class="conversations">
 % my $i = 0;
 % for my $c (@$conversation_list) {
-  % my $title = $c->{unread} ? "$c->{unread} unread messages in $c->{target} on $c->{network}" : "View conversation with $c->{target} on $c->{network}";
   % my $text = $c->{network} ? $c->{target} : ucfirst $c->{target};
+  % my $title = $c->{topic} || "View conversation with $c->{target} on $c->{network}";
   % my @class;
   % push @class, 'unread' if $c->{unread};
   % push @class, 'first' if $i == 0;
+  % $title = "($c->{unread}) $title" if $c->{unread};
   <li class="<%= join ' ', @class %>">
     %= link_to $text, view => $c, class => 'conversation', title => $title, 'data-unread' => $c->{unread}
   </li>
