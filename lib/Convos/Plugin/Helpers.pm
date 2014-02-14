@@ -17,7 +17,7 @@ sub REDIS_URL {
     my $url = $ENV{REDISTOGO_URL} || $ENV{DOTCLOUD_DATA_REDIS_URL}
       or die "CONVOS_REDIS_URL is not set. Run 'perldoc Convos' for details.\n";
     $url = Mojo::URL->new($url);
-    $url->path($ENV{CONVOS_REDIS_INDEX}) unless $url->path;
+    $url->path($ENV{CONVOS_REDIS_INDEX}) if $ENV{CONVOS_REDIS_INDEX};
     $url->to_string;
   };
 }

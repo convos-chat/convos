@@ -116,6 +116,11 @@ This is the URL to the Redis backend, and should follow this format:
 Convos will use C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> if
 C<CONVOS_REDIS_URL> is not set.
 
+It is also possible to set C<CONVOS_REDIS_INDEX=2> to use the
+database index 2, instead of the default. This is useful when
+C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> does not contain
+the datbase index.
+
 =item * MOJO_IRC_DEBUG=1
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
