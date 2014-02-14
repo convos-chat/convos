@@ -90,7 +90,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   is $dom->at('div.content'),
     '<div class="content whitespace">doe: see this &amp;amp; link: <a class="embed" href="http://convos.by?a=1&amp;b=2#yikes" target="_blank">http://convos.by?a=1&amp;b=2#yikes</a> # really cool</div>',
     'got link and amp';
-  like $dom->at('.timestamp')->text, qr{^\d+\. \S+ [\d\:]+$}, 'got timestamp';
+  like $dom->at('.timestamp')->text, qr/^\d{1,2}:\d{1,2}$/, 'got timestamp';
 
   $connection->add_message(
     {

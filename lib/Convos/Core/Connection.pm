@@ -813,7 +813,7 @@ sub cmd_join {
   my $channel = $message->{params}[0] || '';
   my $name;
 
-  if ($channel =~ /^[#&]\w/) {
+  if ($channel =~ /^[#&]+\w/) {
     $name = as_id $self->name, $channel;
     $self->redis->zadd($self->{conversation_path}, time, $name);
   }

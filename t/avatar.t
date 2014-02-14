@@ -30,29 +30,6 @@ redis_do(
 $connection->redis($t->app->redis)->_irc(dummy_irc());
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
 $t->get_ok('/')->status_is(302)->header_like(Location => qr{:\d+/magnet/%23convos});
-$t->websocket_ok('/socket')->status_is(101);
-
-{
-  $connection->add_message(
-    {
-      params => ['#mojo', 'doe: see this &amp; link: http://magnet?a=1&b=2#yikes # really cool'],
-      prefix => 'fooman!user@host',
-    }
-  );
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-network="magnet"][data-target="#mojo"][data-sender="fooman"]'), 'Got correct 6+#mojo';
-  ok $dom->at('img[alt="fooman"][src="/avatar/user@host"]'), 'gravatar image based on user+host';
-}
-
-{
-  $connection->add_message({params => ['#mojo', "\x{1}ACTION is too cool\x{1}"], prefix => 'fooman!user@host',});
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.action.message[data-network="magnet"][data-target="#mojo"][data-sender="fooman"]'),
-    'Got correct 6+#mojo';
-  ok $dom->at('img[alt="fooman"][src="/avatar/user@host"]'), 'default gravatar image';
-}
-
-$t->finish_ok;
 
 done_testing;
 

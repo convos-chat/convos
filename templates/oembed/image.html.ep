@@ -1,3 +1,0 @@
-<div class="embed">
-  %= image $src, alt => $src
-</div>

@@ -30,6 +30,8 @@ database that exists.
 
 use Mojo::Base 'Mojolicious::Command';
 
+$ENV{MOJO_MODE} ||= 'production';
+
 =head1 ATTRIBUTES
 
 =head2 description
@@ -49,6 +51,7 @@ has usage => <<"EOF";
 This command will stop any running backend and then upgrade the database.
 
 IMPORTANT! BACKUP REDIS BEFORE RUNNING THE UPGRADE!
+IMPORTANT! MOJO_MODE is set to '$ENV{MOJO_MODE}'
 
 The upgrade process is tested, but you never know - and there is no
 downgrade script.
@@ -85,11 +88,13 @@ sub run {
   unless ($backup or $upgrade) {
     die $self->usage;
   }
-  unless ($ENV{MOJO_MODE}) {
-    die qq(MOJO_MODE need to be set. Example: MOJO_MODE="production" $0 upgrade\n);
-  }
 
   $ENV{CONVOS_MANUAL_BACKEND} = $ENV{CONVOS_SKIP_VERSION_CHECK} = 1;
+
+  # force log to STDERR if attached to terminal
+  if (-t STDERR) {
+    $self->app->log->handle(\*STDERR);
+  }
 
   Mojo::IOLoop->delay(
     sub {
@@ -122,11 +127,15 @@ sub run {
       }
     },
     sub {
-      my ($delay, $message) = @_;
+      my ($delay, $err) = @_;
 
-      $self->app->log->info($message);
-      $self->app->log->info("You can now start Convos.");
-      $exit_value = 0;
+      if ($err) {
+        $self->app->log->error($err);
+      }
+      else {
+        $self->app->log->info("Upgraded successfully. You can now start Convos.");
+        $exit_value = 0;
+      }
     },
   )->wait;
 

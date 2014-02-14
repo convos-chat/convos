@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.3005
+0.4
 
 =head1 DESCRIPTION
 
@@ -174,7 +174,7 @@ use Convos::Core;
 use Convos::Core::Util ();
 use Convos::Upgrader;
 
-our $VERSION = '0.3005';
+our $VERSION = '0.4';
 
 =head1 ATTRIBUTES
 
@@ -319,6 +319,8 @@ sub _private_routes {
   my $r = $self->routes->route->bridge('/')->to('user#auth', layout => 'view');
   my $network_r;
 
+  $self->plugin('LinkEmbedder');
+
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
   $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)
@@ -412,7 +414,8 @@ sub _start_backend {
         $self->core->start;
       }
       else {                                                    # morbo
-        $self->log->warn('Backend is not running and it will not be automatically started.');
+        $self->log->warn(
+          'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend from morbo. (The backend is not running)');
         $redis->del('convos:backend:lock');
       }
     },
