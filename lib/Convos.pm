@@ -167,7 +167,7 @@ Backend functionality.
 
 use Mojo::Base 'Mojolicious';
 use Mojo::Redis;
-use Mojo::Util qw( md5_sum steady_time );
+use Mojo::Util qw( md5_sum );
 use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
@@ -248,7 +248,7 @@ sub startup {
 
   $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
-  $self->secrets([steady_time]);           # will be replaced by _set_secrets()
+  $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
   $self->_assets($config);
   $self->_public_routes;
@@ -374,7 +374,7 @@ sub _set_secrets {
 
       return $self->app->secrets($secrets) if @$secrets;
       return $self->_set_secrets if $locked;
-      $secrets = [md5_sum rand . $$ . steady_time];
+      $secrets = [md5_sum rand . $$ . time];
       $self->app->secrets($secrets);
       $redis->lpush('convos:secrets', $secrets->[0]);
       $redis->del('convos:secrets:lock');
