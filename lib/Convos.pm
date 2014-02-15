@@ -353,7 +353,7 @@ sub _public_routes {
   my $r = $self->routes->route->to(layout => 'tactile');
 
   $r->get('/')->to('client#route')->name('index');
-  $r->get('/avatar/*id')->to('user#avatar')->name('avatar');
+  $r->get('/avatar')->to('user#avatar')->name('avatar');
   $r->get('/login')->to('user#login')->name('login');
   $r->post('/login')->to('user#login');
   $r->get('/register/:invite', {invite => ''})->to('user#register')->name('register');
