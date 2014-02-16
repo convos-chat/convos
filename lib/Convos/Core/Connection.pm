@@ -255,10 +255,13 @@ sub _subscribe {
       $raw_message = sprintf ':%s %s', $irc->nick, $raw_message;
       $message     = Parse::IRC::parse_irc($raw_message);
 
-      unless (ref $message) {
+      if (!ref $message) {
         $self->_publish_and_save(
           server_message => {status => 400, message => "Unable to parse: $raw_message", uuid => $uuid});
         return;
+      }
+      if ($uuid eq 'internal') {
+        $self->_internal_message($raw_message);
       }
 
       $message->{uuid} = $uuid;
@@ -853,11 +856,25 @@ sub _add_convos_message {
   $self->redis->publish("convos:user:$login:out", $message);
 }
 
+sub _internal_message {
+  my ($self, $raw_message) = @_;
+
+  if ($raw_message =~ /WHOIS (\S+)/) {
+    push @{$self->{internal}{whois}}, {nick => $1};
+  }
+}
+
 sub _publish {
   my ($self, $event, $data) = @_;
   my $login = $self->login;
   my $name  = $self->name;
+  my $rules = $self->{internal}{$event};
   my $message;
+
+  if ($rules and !grep { $data->{$_} ne $rules->[0]{$_} } keys %{$rules->[0]}) {
+    $data->{internal} = 1;
+    shift @$rules;
+  }
 
   $data->{event}   = $event;
   $data->{network} = $name;
