@@ -54,7 +54,8 @@ sub avatar {
       my ($redis, $convos_url) = @_;
 
       return $self->_avatar_discover if !$convos_url;
-      return $self->_avatar_local if $convos_url eq 'loopback';
+      return $self->_avatar_local    if $convos_url eq 'loopback';
+      return $self->_avatar_fallback if $convos_url eq 'fallback';
       return $self->_avatar_remote($convos_url);
     }
   );
@@ -64,7 +65,7 @@ sub _avatar_cache_and_serve {
   my ($self, $cache_name, $tx) = @_;
   my $cache = $self->app->cache;
 
-  if (!$tx->res->code or $tx->res->code ne 200) {
+  if (!$tx->res->code or $tx->res->code ne '200') {
     return $self->_avatar_error(404);
   }
 
@@ -77,17 +78,35 @@ sub _avatar_cache_and_serve {
 }
 
 sub _avatar_discover {
-  my ($self, $cb) = @_;
-  my $host = $self->param('host');
-  my $user = $self->param('user');
+  my $self    = shift;
+  my $network = $self->param('network');
+  my $nick    = $self->param('nick');
+  my $user    = $self->param('user');
 
-  unless ($self->session('login')) {
-    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
+  unless ($network and $network and $user) {
+    return $self->_avatar_error(500, 'Missing query params');
   }
 
-  # TODO: Need to do a WHOIS to see if the user has convos_url set
-  my $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host"));
-  $self->redirect_to($url);
+  Scalar::Util::weaken($self);
+  $self->write_to_irc(
+    $network => "WHOIS $nick",
+    {event => 'whois', nick => $nick},
+    sub {
+      my ($core, $err, $data) = @_;
+
+      if ($err) {
+        $self->_avatar_fallback;
+      }
+      elsif ($data->{realname} =~ /(https?:\S+)/) {
+        $self->redis->hset($data->{host} => $1);
+        $self->_avatar_remote($1);
+      }
+      else {
+        $self->redis->hset($data->{host} => 'fallback');
+        $self->_avatar_fallback;
+      }
+    },
+  );
 }
 
 sub _avatar_error {
@@ -95,6 +114,15 @@ sub _avatar_error {
 
   $self->render_static("/image/avatar-$code.gif");
   $self->app->log->error($message) if $message;
+}
+
+sub _avatar_fallback {
+  my $self = shift;
+  my $host = $self->param('host');
+  my $user = $self->param('user');
+  my $url  = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host"));
+
+  $self->redirect_to($url);
 }
 
 sub _avatar_local {
@@ -135,7 +163,6 @@ sub _avatar_local {
     },
   );
 }
-
 
 sub _avatar_remote {
   my $self = shift;
