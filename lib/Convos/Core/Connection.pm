@@ -158,7 +158,7 @@ has _irc => sub {
     $irc->on($event => sub { $self->add_server_message($_[1]) });
   }
   for my $event (@OTHER_EVENTS) {
-    $irc->on($event => sub { $self->$event($_[1]) });
+    $irc->on($event => sub { $self->_internal_event($_[1]); $self->$event($_[1]) });
   }
 
   $irc;
@@ -249,10 +249,13 @@ sub _subscribe {
       $raw_message = sprintf ':%s %s', $irc->nick, $raw_message;
       $message     = Parse::IRC::parse_irc($raw_message);
 
-      unless (ref $message) {
+      if (!ref $message) {
         $self->_publish_and_save(
           server_message => {status => 400, message => "Unable to parse: $raw_message", uuid => $uuid});
         return;
+      }
+      if ($uuid eq 'internal') {
+        $self->_internal_message($raw_message);
       }
 
       $message->{uuid} = $uuid;
@@ -457,6 +460,7 @@ sub irc_rpl_whoisuser {
 
   $self->_publish(
     whois => {
+      internal => $message->{internal} ? 1 : 0,
       nick     => $message->{params}[1],
       user     => $message->{params}[2],
       host     => $message->{params}[3],
@@ -782,10 +786,16 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
-  my $data = {status => 500, message => join(' ', @{$message->{params}}),};
+  my $data;
 
-  $self->_publish_and_save(server_message => $data);
-  $self->_add_convos_message($data);
+  if ($message->{internal}) {
+    $self->_publish(@{$message->{internal}});
+  }
+  else {
+    $data = {status => 500, message => join(' ', @{$message->{params}}),};
+    $self->_publish_and_save(server_message => $data);
+    $self->_add_convos_message($data);
+  }
 }
 
 =head2 cmd_nick
@@ -845,6 +855,42 @@ sub _add_convos_message {
 
   $self->redis->zadd($self->{convos_path}, $data->{timestamp}, $message);
   $self->redis->publish("convos:user:$login:out", $message);
+}
+
+sub _internal_event {
+  my ($self, $message) = @_;
+  my $events = $self->{internal} ||= [];
+
+  for my $i (0 .. @$events - 1) {
+
+  COMMAND:
+    for my $command (keys %{$events->[$i]}) {
+      next if $command eq 'default';
+      next unless $message->{command} eq $command;
+
+      my $rules = $events->[$i]{$command};
+      for my $n (keys %$rules) {
+        next COMMAND unless $message->{params}[$n] eq $rules->{$n};
+      }
+
+      $message->{internal} = $events->[$i]{default};
+      $message->{internal}[1]{internal} = 1;
+      splice @$events, $i, 1, ();
+      last;
+    }
+  }
+}
+
+sub _internal_message {
+  my ($self, $raw_message) = @_;
+
+  if ($raw_message =~ /\bWHOIS (\S+)/) {
+    push @{$self->{internal}}, {
+      311     => {1     => $1},                                                     # rpl_whoisuser
+      401     => {1     => $1},                                                     # err_nosuchnick
+      default => [whois => {host => '', nick => $1, realname => '', user => ''}],
+    };
+  }
 }
 
 sub _publish {

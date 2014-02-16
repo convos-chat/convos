@@ -82,7 +82,8 @@ sub socket {
         sub { j(shift @messages) },
         sub {
           my ($self, $messages) = @_;
-          $self->send_partial("event/$messages->[0]{event}", target => '', %{$messages->[0]});
+          $self->send_partial("event/$messages->[0]{event}", target => '', %{$messages->[0]})
+            unless $messages->[0]{internal};
         },
       );
     }
