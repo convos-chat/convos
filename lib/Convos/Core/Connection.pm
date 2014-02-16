@@ -565,11 +565,12 @@ See L<Mojo::IRC/irc_join>.
 
 sub irc_join {
   my ($self, $message) = @_;
-  my ($nick) = IRC::Utils::parse_user($message->{prefix});
+  my ($nick, $user, $host) = IRC::Utils::parse_user($message->{prefix});
   my $channel = $message->{params}[0];
 
   if ($nick eq $self->_irc->nick) {
     $self->redis->hset("$self->{path}:$channel", topic => '');
+    $self->redis->hset("convos:host2convos" => $host => 'loopback');
     $self->_publish(add_conversation => {target => $channel});
     $self->_irc->write(TOPIC => $channel);    # fetch topic for channel
   }
