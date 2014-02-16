@@ -2,10 +2,6 @@ BEGIN { $ENV{CONVOS_SKIP_VERSION_CHECK} = 1 }
 use t::Helper;
 use Convos::Core;
 
-plan skip_all =>
-  'Live tests skipped. Set REDIS_TEST_DATABASE to "default" for db #14 on localhost or a redis:// url for custom.'
-  unless $ENV{REDIS_TEST_DATABASE};
-
 my $core = $t->app->core;
 my $sub  = $core->redis->subscribe('convos:user:doe:out');
 my $stop = sub {1};
