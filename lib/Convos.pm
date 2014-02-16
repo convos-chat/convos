@@ -378,7 +378,7 @@ sub _set_secrets {
 
       $secrets ||= $self->config->{secrets};
 
-      return $self->app->secrets($secrets) if @$secrets;
+      return $self->app->secrets($secrets) if $secrets and @$secrets;
       return $self->_set_secrets if $locked;
       $secrets = [md5_sum rand . $$ . time];
       $self->app->secrets($secrets);
