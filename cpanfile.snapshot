@@ -246,10 +246,10 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.01
       Mojolicious 4.30
       Test::More 0.90
-  Mojolicious-Plugin-LinkEmbedder-0.02
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.02.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.03
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.03.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.02
+      Mojolicious::Plugin::LinkEmbedder 0.03
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
