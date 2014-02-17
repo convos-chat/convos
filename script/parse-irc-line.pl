@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/env perl -n
 use Data::Dumper;
 use Parse::IRC;
 use IRC::Utils;
