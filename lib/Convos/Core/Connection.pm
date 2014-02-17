@@ -55,7 +55,6 @@ use Parse::IRC   ();
 use Scalar::Util ();
 use Time::HiRes 'time';
 use Convos::Core::Util qw( as_id id_as );
-use Sys::Hostname ();
 use constant DEBUG    => $ENV{CONVOS_DEBUG}   ? 1 : 0;
 use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
@@ -297,6 +296,7 @@ sub _connect {
       $irc->server($args->{server} || $args->{host});
       $irc->tls({}) if $args->{tls};
       $irc->user($self->login);
+      $irc->name($args->{realname} || 'Convos');
       $irc->connect(
         sub {
           my ($irc, $error) = @_;
@@ -372,12 +372,12 @@ sub add_message {
   my $is_private_message = $message->{params}[0] eq $current_nick;
   my $data = {highlight => 0, message => $message->{params}[1], timestamp => time, uuid => $message->{uuid},};
 
-  @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
+  @$data{qw( nick user host )} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
-  $data->{host} ||= Sys::Hostname::hostname;    # should never happen
+  $data->{host} ||= 'localhost';         # host is set when receiving a message and "localhost" when you send a message
   $data->{user} ||= $self->_irc->user;
 
-  if ($data->{nick} && $data->{nick} ne $current_nick) {
+  if ($data->{nick} and $data->{nick} ne $current_nick) {
     if ($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
       $data->{highlight} = 1;
     }
@@ -568,7 +568,7 @@ sub irc_join {
 
   if ($nick eq $self->_irc->nick) {
     $self->redis->hset("$self->{path}:$channel", topic => '');
-    $self->redis->hset("convos:host2convos" => $host => 'loopback');
+    $self->redis->hset("convos:host2convos" => $host => 'localhost');
     $self->_publish(add_conversation => {target => $channel});
     $self->_irc->write(TOPIC => $channel);    # fetch topic for channel
   }

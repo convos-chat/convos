@@ -45,16 +45,18 @@ Used to render an avatar for a user.
 
 sub avatar {
   my $self = shift->render_later;
-  my $host = $self->param('host');
+  my $host = $self->param('host') || 'localhost';
 
-  $self->redis->hget(
+  return $self->_avatar_local if $host eq 'localhost';
+  return $self->redis->hget(
     'convos:host2convos',
     $host,
     sub {
       my ($redis, $convos_url) = @_;
 
       return $self->_avatar_discover if !$convos_url;
-      return $self->_avatar_local if $convos_url eq 'loopback';
+      return $self->_avatar_local    if $convos_url eq 'localhost';
+      return $self->_avatar_fallback if $convos_url eq 'fallback';
       return $self->_avatar_remote($convos_url);
     }
   );
@@ -64,8 +66,9 @@ sub _avatar_cache_and_serve {
   my ($self, $cache_name, $tx) = @_;
   my $cache = $self->app->cache;
 
-  if (!$tx->res->code or $tx->res->code ne 200) {
-    return $self->_avatar_error(404);
+  if (!$tx->res->code or $tx->res->code ne '200') {
+    $self->app->log->warn(sprintf 'Avatar GET %s: %s', $tx->req->url, $tx->res->code);
+    return $self->_avatar_fallback;
   }
 
   open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name)
@@ -77,24 +80,59 @@ sub _avatar_cache_and_serve {
 }
 
 sub _avatar_discover {
-  my ($self, $cb) = @_;
-  my $host = $self->param('host');
-  my $user = $self->param('user');
+  my $self    = shift;
+  my $host    = $self->param('host');
+  my $network = $self->param('network');
+  my $nick    = $self->param('nick');
+  my $login   = $self->session('login');
 
-  unless ($self->session('login')) {
-    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
+  unless ($network and $nick and $login) {
+    return $self->_avatar_error(500, 'Missing query params');
   }
 
-  # TODO: Need to do a WHOIS to see if the user has convos_url set
-  my $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host"));
-  $self->redirect_to($url);
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->hget("user:$login:connection:$network", "state", $delay->begin);
+    },
+    sub {
+      my ($delay, $state) = @_;
+      $self->_avatar_fallback unless $state and $state eq 'connected';
+      $self->write_to_irc($network => "WHOIS $nick" => {event => 'whois', nick => $nick}, $delay->begin);
+    },
+    sub {
+      my ($delay, $err, $data) = @_;
+
+      if ($err) {
+        $self->app->log->debug("write_to_irc(WHOIS $nick): $err");
+        $self->_avatar_fallback;
+      }
+      elsif ($data->{realname} =~ /(https?:\S+)/) {
+        $self->redis->hset('convos:host2convos', $host => $1);
+        $self->_avatar_remote($1);
+      }
+      else {
+        $self->redis->hset('convos:host2convos', $host => 'fallback');
+        $self->_avatar_fallback;
+      }
+    },
+  );
 }
 
 sub _avatar_error {
   my ($self, $code, $message) = @_;
 
   $self->render_static("/image/avatar-$code.gif");
-  $self->app->log->error($message) if $message;
+  $self->app->log->error($message);
+}
+
+sub _avatar_fallback {
+  my $self = shift;
+  my $host = $self->param('host');
+  my $user = $self->param('user');
+  my $url  = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host"));
+
+  $self->redirect_to($url);
 }
 
 sub _avatar_local {
@@ -135,7 +173,6 @@ sub _avatar_local {
     },
   );
 }
-
 
 sub _avatar_remote {
   my $self = shift;
