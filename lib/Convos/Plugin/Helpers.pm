@@ -45,9 +45,8 @@ Used to insert an image tag.
 
 sub avatar {
   my ($self, $avatar, @args) = @_;
-  my $id = join '@', @$avatar{qw( user host )};
 
-  $self->image($self->url_for(avatar => {id => $id}), @args);
+  $self->image($self->url_for('avatar')->query(%$avatar), alt => $avatar->{user}, @args);
 }
 
 =head2 id_as

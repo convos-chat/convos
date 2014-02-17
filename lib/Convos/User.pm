@@ -44,11 +44,66 @@ Used to render an avatar for a user.
 =cut
 
 sub avatar {
-  my $self  = shift->render_later;
-  my $id    = $self->stash('id');
-  my $user  = $id =~ /^(\w+)/ ? $1 : 'd';    # d = not a real user, but a default user
+  my $self = shift->render_later;
+  my $host = $self->param('host');
+
+  $self->redis->hget(
+    'convos:host2convos',
+    $host,
+    sub {
+      my ($redis, $convos_url) = @_;
+
+      return $self->_avatar_discover if !$convos_url;
+      return $self->_avatar_local if $convos_url eq 'loopback';
+      return $self->_avatar_remote($convos_url);
+    }
+  );
+}
+
+sub _avatar_cache_and_serve {
+  my ($self, $cache_name, $tx) = @_;
   my $cache = $self->app->cache;
+
+  if (!$tx->res->code or $tx->res->code ne 200) {
+    return $self->_avatar_error(404);
+  }
+
+  open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name)
+    or return $self->_avatar_error(500, "Write avatar $cache_name: $!");
+  syswrite $CACHE, $tx->res->body;
+  close $CACHE or return $self->_avatar_error(500, "Close avatar $cache_name: $!");
+  $cache->serve($self, $cache_name);
+  $self->rendered;
+}
+
+sub _avatar_discover {
+  my ($self, $cb) = @_;
+  my $host = $self->param('host');
+  my $user = $self->param('user');
+
+  unless ($self->session('login')) {
+    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
+  }
+
+  # TODO: Need to do a WHOIS to see if the user has convos_url set
+  my $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host"));
+  $self->redirect_to($url);
+}
+
+sub _avatar_error {
+  my ($self, $code, $message) = @_;
+
+  $self->render_static("/image/avatar-$code.gif");
+  $self->app->log->error($message) if $message;
+}
+
+sub _avatar_local {
+  my $self = shift;
+  my $host = $self->param('host');
+  my $user = $self->param('user');
   my $cache_name;
+
+  $user =~ s!^~!!;    # somenick!~someuser@1.2.3.4
 
   Mojo::IOLoop->delay(
     sub {
@@ -57,43 +112,57 @@ sub avatar {
     },
     sub {
       my ($delay, $data) = @_;
-      my $from_database = defined $data->[1] ? 1 : 0;
+      my $id = shift @$data || shift @$data || "$user\@$host";
       my $url;
-
-      $id = shift @$data || shift @$data || $id;
 
       if ($id =~ /\@/) {
         $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum($id));
       }
-      elsif ($from_database) {
-        $url = sprintf(DEFAULT_URL, $id);
-      }
       else {
-        return $self->render(text => "Cannot find avatar.\n", status => 404);
+        $url = sprintf(DEFAULT_URL, $id);
       }
 
       $cache_name = $url;
       $cache_name =~ s![^\w]!_!g;
       $cache_name = "$cache_name.jpg";
 
-      $cache->serve($self, $cache_name) and return $self->rendered;
+      return $self->rendered if $self->app->cache->serve($self, $cache_name);
       $self->app->log->debug("Getting avatar for $id: $url");
-      $self->app->ua->get($url, $delay->begin);
+      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
     },
     sub {
-      my ($delay, $tx) = @_;
-      my $headers = $self->res->headers;
+      $self->_avatar_cache_and_serve($cache_name, $_[1]);
+    },
+  );
+}
 
-      if ($tx->success) {
-        open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name) or die "Write avatar $cache_name: $!";
-        syswrite $CACHE, $tx->res->body;
-        close $CACHE or die "Close avatar $cache_name: $!";
-        $cache->serve($self, $cache_name);
-        $self->rendered;
-      }
-      else {
-        $self->render(text => "Could not fetch avatar from third party.\n", status => 404);
-      }
+
+sub _avatar_remote {
+  my $self = shift;
+  my $url  = Mojo::URL->new(shift);                  # Example $url = http://wirc.pl/
+  my $cache_name;
+
+  unless ($self->session('login')) {
+    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
+  }
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+
+      $url->path('/avatar');
+      $url->query(map { $_ => scalar $self->param($_) } qw( host user ));
+
+      $cache_name = $url;
+      $cache_name =~ s![^\w]!_!g;
+      $cache_name = "$cache_name.jpg";
+
+      return $self->rendered if $self->app->cache->serve($self, $cache_name);
+      $self->app->log->debug("Getting remote avatar from $url");
+      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
+    },
+    sub {
+      $self->_avatar_cache_and_serve($cache_name, $_[1]);
     },
   );
 }
