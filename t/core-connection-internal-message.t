@@ -29,13 +29,11 @@ $out->on(
   Mojo::IOLoop->start;
   is $connection->_irc->nick, 'n1',  'irc nick n1';
   is $connection->_irc->user, 'doe', 'irc user doe';
-
-  local $TODO = 'Add support for remote avatars using WHOIS #24';
-  like $connection->_irc->name, qr{http://localhost}, 'irc user doe';
 }
 
 {
   @irc_buf = ();
+  @out_buf = ();
   $core->redis->publish('convos:user:doe:magnet' => 'internal WHOIS batman');
   $connection->{messages}->once(message => sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
@@ -60,6 +58,26 @@ $out->on(
       },
     ],
     'publish internal message back',
+  );
+}
+
+{
+  @irc_buf = ();
+  @out_buf = ();
+  $core->redis->publish('convos:user:doe:magnet' => 'internal WHOIS batman');
+  $connection->{messages}->once(message => sub { Mojo::IOLoop->stop });
+  Mojo::IOLoop->start;
+
+  $connection->irc_error({command => 401, params => ['doe', 'batman', 'No such nick/channel']});
+  Mojo::IOLoop->start;
+  $out_buf[0] = j $out_buf[0];
+  delete $out_buf[0]{$_} for qw( uuid timestamp );
+  is_deeply(
+    \@out_buf,
+    [
+      {event => 'whois', host => '', internal => 1, network => 'magnet', nick => 'batman', realname => '', user => '',},
+    ],
+    'publish internal message back on error',
   );
 }
 

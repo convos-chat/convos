@@ -59,6 +59,8 @@ use Sys::Hostname ();
 use constant DEBUG    => $ENV{CONVOS_DEBUG}   ? 1 : 0;
 use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
+my %ERR2EVENT = (401 => 'whois');
+
 =head1 ATTRIBUTES
 
 =head2 name
@@ -792,10 +794,23 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
+  my $event = $ERR2EVENT{$message->{command}};
   my $data = {status => 500, message => join(' ', @{$message->{params}}),};
+  my $rules;
 
-  $self->_publish_and_save(server_message => $data);
-  $self->_add_convos_message($data);
+  if ($event and $rules = $self->{internal}{$event}) {
+    my $data = {nick => $message->{params}[1]};
+    if ($rules and !grep { $data->{$_} ne $rules->[0]{$_} } keys %{$rules->[0]}) {
+      shift @$rules;
+      $data->{internal} = 1;
+      @$data{qw( user host realname )} = ('') x 3;
+      $self->_publish(whois => $data);
+    }
+  }
+  else {
+    $self->_publish_and_save(server_message => $data);
+    $self->_add_convos_message($data);
+  }
 }
 
 =head2 cmd_nick
@@ -872,7 +887,7 @@ sub _publish {
   my $rules = $self->{internal}{$event};
   my $message;
 
-  if ($rules and !grep { $data->{$_} ne $rules->[0]{$_} } keys %{$rules->[0]}) {
+  if ($rules and @$rules and !grep { $data->{$_} ne $rules->[0]{$_} } keys %{$rules->[0]}) {
     $data->{internal} = 1;
     shift @$rules;
   }
