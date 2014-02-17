@@ -45,7 +45,11 @@ Used to render an avatar for a user.
 
 sub avatar {
   my $self = shift->render_later;
-  my $host = $self->param('host') or return $self->_avatar_error(404);
+  my $host = $self->param('host') || 'localhost';
+
+  if ($host eq 'localhost') {
+    return $self->_avatar_local;
+  }
 
   $self->redis->hget(
     'convos:host2convos',
@@ -54,7 +58,7 @@ sub avatar {
       my ($redis, $convos_url) = @_;
 
       return $self->_avatar_discover if !$convos_url;
-      return $self->_avatar_local    if $convos_url eq 'loopback';
+      return $self->_avatar_local    if $convos_url eq 'localhost';
       return $self->_avatar_fallback if $convos_url eq 'fallback';
       return $self->_avatar_remote($convos_url);
     }

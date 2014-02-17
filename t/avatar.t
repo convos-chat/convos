@@ -32,8 +32,8 @@ redis_do(
 }
 
 {
-  diag 'loopback avatar';
-  redis_do([hset => 'convos:host2convos', '1.2.3.4' => 'loopback']);
+  diag 'localhost avatar';
+  redis_do([hset => 'convos:host2convos', '1.2.3.4' => 'localhost']);
   Mojo::Util::spurt('fresh', $fresh);
   $t->get_ok('/avatar?user=marcus&host=1.2.3.4')->status_is(200)->content_is('fresh', 'avatar from 3rd party');
 
@@ -70,10 +70,10 @@ redis_do(
 }
 
 {
-  diag 'custom loopback avatar';
+  diag 'custom localhost avatar';
   $fresh = $t->app->home->rel_file('/public/image/6f68bd7cac66e7333e083d94c96428e7');
   Mojo::Util::spurt('custom', $fresh);
-  $t->get_ok('/avatar?user=doe&host=1.2.3.4')->status_is(200)->content_is('custom', 'custom loopback avatar');
+  $t->get_ok('/avatar?user=doe&host=1.2.3.4')->status_is(200)->content_is('custom', 'custom localhost avatar');
   unlink $fresh;
 }
 

@@ -15,6 +15,7 @@ use Mojo::JSON 'j';
 use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
+use Sys::Hostname ();
 use Time::HiRes qw( time );
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
@@ -121,7 +122,8 @@ sub start {
       my ($delay) = @_;
 
       $self->redis->del('convos:host2convos');
-      $self->redis->del('convos:loopback:names');    # clear loopback nick list
+      $self->redis->hset('convos:host2convos', Sys::Hostname::hostname(), 'localhost');    # required to be back compat
+      $self->redis->del('convos:loopback:names');                                          # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
     },
     sub {
