@@ -359,8 +359,7 @@ sub write_to_irc {
     return $self->$cb('Cannot write to IRC unless logged in');
   }
 
-  Scalar::Util::weaken($self);
-  $self->stash->{sub} = $self->redis->scribe("convos:user:$login:out");
+  $self->stash->{sub} = $self->redis->subscribe("convos:user:$login:out");
   $self->stash->{sub}->on(
     message => sub {
       my $data = j $_[1] or return;
@@ -402,6 +401,7 @@ sub register {
   $app->helper(send_partial   => \&send_partial);
   $app->helper(timestamp_span => \&timestamp_span);
   $app->helper(redirect_last  => \&redirect_last);
+  $app->helper(write_to_irc   => \&write_to_irc);
 }
 
 =head1 AUTHOR

@@ -859,7 +859,7 @@ sub _add_convos_message {
 sub _internal_message {
   my ($self, $raw_message) = @_;
 
-  if ($raw_message =~ /WHOIS (\S+)/) {
+  if ($raw_message =~ /\bWHOIS (\S+)/) {
     push @{$self->{internal}{whois}}, {nick => $1};
   }
 }

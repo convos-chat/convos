@@ -5,13 +5,15 @@ BEGIN {
   }
 }
 use t::Helper;
-use Mojo::JSON;
+use Mojo::JSON 'j';
 use Mojo::DOM;
 
 plan skip_all => '/tmp/convos is required' unless -d '/tmp' and -w '/tmp';
 
-my %gif = map { $_ => Mojo::Util::slurp($t->app->home->rel_file("public/image/avatar-$_.gif")) } 404, 500;
+my %gif   = map { $_ => Mojo::Util::slurp($t->app->home->rel_file("public/image/avatar-$_.gif")) } 404, 500;
 my $fresh = $t->app->home->rel_file('/public/image/a0196c429a4c02c1cc96afed12a0ed0c');
+my $redis = $t->app->core->redis;
+my $in    = $redis->subscribe('convos:user:doe:magnet');
 my ($host, $port) = map { $t->ua->server->url->$_ } qw( host port );
 
 unlink glob($fresh);
@@ -48,9 +50,23 @@ redis_do(
 }
 
 {
-  local $TODO = 'Need to run WHOIS and figure out the real identity';
-  $t->get_ok('/avatar?user=jhthorsen&host=convos.by')->status_is(302)
-    ->header_like(Location => qr{/image/deebdae9dacaf91b89f9cb8bed87993e$});
+  diag 'remote';
+  $in->on(
+    message => sub {
+      $redis->publish(
+        'convos:user:doe:out',
+        j {
+          event    => 'whois',
+          nick     => 'fooman',
+          realname => "Jan Henning Thorsen http://$host:$port",
+          user     => 'jhthorsen',
+        }
+      );
+    }
+  );
+
+  local $TODO = 'This test does not work, since it loops';
+  $t->get_ok('/avatar?nick=fooman&user=jhthorsen&host=127.1&network=magnet')->status_is(200);
 }
 
 {

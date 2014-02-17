@@ -45,7 +45,7 @@ Used to render an avatar for a user.
 
 sub avatar {
   my $self = shift->render_later;
-  my $host = $self->param('host');
+  my $host = $self->param('host') or return $self->_avatar_error(404);
 
   $self->redis->hget(
     'convos:host2convos',
@@ -79,11 +79,11 @@ sub _avatar_cache_and_serve {
 
 sub _avatar_discover {
   my $self    = shift;
+  my $host    = $self->param('host');
   my $network = $self->param('network');
   my $nick    = $self->param('nick');
-  my $user    = $self->param('user');
 
-  unless ($network and $network and $user) {
+  unless ($network and $nick) {
     return $self->_avatar_error(500, 'Missing query params');
   }
 
@@ -98,11 +98,11 @@ sub _avatar_discover {
         $self->_avatar_fallback;
       }
       elsif ($data->{realname} =~ /(https?:\S+)/) {
-        $self->redis->hset($data->{host} => $1);
+        $self->redis->hset('convos:host2convos', $host => $1);
         $self->_avatar_remote($1);
       }
       else {
-        $self->redis->hset($data->{host} => 'fallback');
+        $self->redis->hset('convos:host2convos', $host => 'fallback');
         $self->_avatar_fallback;
       }
     },
