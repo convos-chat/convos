@@ -303,6 +303,7 @@ sub _connect {
       $irc->server($args->{server} || $args->{host});
       $irc->tls({}) if $args->{tls};
       $irc->user($self->login);
+      $irc->name($args->{realname} || 'Convos');
       $irc->connect(
         sub {
           my ($irc, $error) = @_;

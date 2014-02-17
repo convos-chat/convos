@@ -185,6 +185,7 @@ sub _start_control_channel {
     login => $str,
     name => $str,
     nick => $str,
+    realname => $str,
     server => $str, # irc_server[:port]
     tls => $bool,
   }, $callback);
@@ -203,7 +204,7 @@ sub add_connection {
     return $self;
   }
 
-  $validation->optional($_) for qw( nick user );
+  $validation->optional($_) for qw( nick realname user );
   $validation->output->{nick} ||= $validation->output->{login};
   $validation->output->{user} ||= $validation->output->{login};
 
@@ -269,7 +270,7 @@ sub update_connection {
     return $self;
   }
 
-  $validation->optional('user');
+  $validation->optional($_) for qw( realname user );
   $validation->output->{user} ||= $validation->output->{login};
 
   my ($login, $name) = $validation->param([qw( login name )]);
