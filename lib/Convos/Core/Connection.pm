@@ -881,7 +881,7 @@ sub _internal_event {
 
       $message->{internal} = $events->[$i]{default};
       $message->{internal}[1]{internal} = 1;
-      splice @$events, 0, $i, ();
+      splice @$events, $i, 1, ();
       last;
     }
   }
