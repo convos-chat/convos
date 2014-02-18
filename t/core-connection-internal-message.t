@@ -38,9 +38,9 @@ $out->on(
   $connection->{messages}->once(message => sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
   is_deeply(\@irc_buf, [':n1 WHOIS batman'], 'WHOIS batman');
-  is_deeply($connection->{internal}{whois}, [{nick => 'batman'}], 'internal whois structure');
 
-  $connection->irc_rpl_whoisuser({params => ['', 'batman', 'jhthorsen', 'magnet', '', 'Jan Henning Thorsen']});
+  $connection->_irc->emit(
+    irc_rpl_whoisuser => {command => 311, params => ['', 'batman', 'jhthorsen', 'magnet', '', 'Jan Henning Thorsen']});
   Mojo::IOLoop->start;
   $out_buf[0] = j $out_buf[0];
   delete $out_buf[0]{$_} for qw( uuid timestamp );
@@ -68,7 +68,7 @@ $out->on(
   $connection->{messages}->once(message => sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
 
-  $connection->irc_error({command => 401, params => ['doe', 'batman', 'No such nick/channel']});
+  $connection->_irc->emit(irc_error => {command => 401, params => ['doe', 'batman', 'No such nick/channel']});
   Mojo::IOLoop->start;
   $out_buf[0] = j $out_buf[0];
   delete $out_buf[0]{$_} for qw( uuid timestamp );
