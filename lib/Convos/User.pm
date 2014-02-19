@@ -13,6 +13,13 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
 use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
 
+has _ua => sub {
+  my $self = shift;
+  my $ua = Mojo::UserAgent->new(max_redirects => 3);    # facebook avatar require redirects
+  $ua->proxy($self->app->ua->proxy);    # piggy back "global" proxy settings
+  $ua;
+};
+
 =head1 METHODS
 
 =head2 auth
@@ -47,11 +54,8 @@ sub avatar {
   my $self = shift->render_later;
   my $host = $self->param('host') || 'localhost';
 
-  if ($host eq 'localhost') {
-    return $self->_avatar_local;
-  }
-
-  $self->redis->hget(
+  return $self->_avatar_local if $host eq 'localhost';
+  return $self->redis->hget(
     'convos:host2convos',
     $host,
     sub {
@@ -86,19 +90,27 @@ sub _avatar_discover {
   my $host    = $self->param('host');
   my $network = $self->param('network');
   my $nick    = $self->param('nick');
+  my $login   = $self->session('login');
 
-  unless ($network and $nick) {
+  unless ($network and $nick and $login) {
     return $self->_avatar_error(500, 'Missing query params');
   }
 
-  Scalar::Util::weaken($self);
-  $self->write_to_irc(
-    $network => "WHOIS $nick",
-    {event => 'whois', nick => $nick},
+  Mojo::IOLoop->delay(
     sub {
-      my ($core, $err, $data) = @_;
+      my ($delay) = @_;
+      $self->redis->hget("user:$login:connection:$network", "state", $delay->begin);
+    },
+    sub {
+      my ($delay, $state) = @_;
+      $self->_avatar_fallback unless $state and $state eq 'connected';
+      $self->write_to_irc($network => "WHOIS $nick" => {event => 'whois', nick => $nick}, $delay->begin);
+    },
+    sub {
+      my ($delay, $err, $data) = @_;
 
       if ($err) {
+        $self->app->log->debug("write_to_irc(WHOIS $nick): $err");
         $self->_avatar_fallback;
       }
       elsif ($data->{realname} =~ /(https?:\S+)/) {
@@ -160,7 +172,7 @@ sub _avatar_local {
 
       return $self->rendered if $self->app->cache->serve($self, $cache_name);
       $self->app->log->debug("Getting avatar for $id: $url");
-      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
+      $self->_ua->get($url => $delay->begin);    # get from either from facebook or gravatar
     },
     sub {
       $self->_avatar_cache_and_serve($cache_name, $_[1]);
@@ -170,7 +182,7 @@ sub _avatar_local {
 
 sub _avatar_remote {
   my $self = shift;
-  my $url  = Mojo::URL->new(shift);                  # Example $url = http://wirc.pl/
+  my $url  = Mojo::URL->new(shift);              # Example $url = http://wirc.pl/
   my $cache_name;
 
   unless ($self->session('login')) {
@@ -190,7 +202,7 @@ sub _avatar_remote {
 
       return $self->rendered if $self->app->cache->serve($self, $cache_name);
       $self->app->log->debug("Getting remote avatar from $url");
-      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
+      $self->_ua->get($url => $delay->begin);    # get from either from facebook or gravatar
     },
     sub {
       $self->_avatar_cache_and_serve($cache_name, $_[1]);

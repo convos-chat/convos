@@ -121,9 +121,13 @@ sub start {
     sub {
       my ($delay) = @_;
 
+      # This is required to be back compat with bad data in the database
+      # Used to default the current users "host" key in Core::Connection to hostname()
+      # This have now changed to "localhost" to make it more obvious
+      $self->redis->hset('convos:host2convos', Sys::Hostname::hostname(), 'localhost');
+
       $self->redis->del('convos:host2convos');
-      $self->redis->hset('convos:host2convos', Sys::Hostname::hostname(), 'localhost');    # required to be back compat
-      $self->redis->del('convos:loopback:names');                                          # clear loopback nick list
+      $self->redis->del('convos:loopback:names');    # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
     },
     sub {
