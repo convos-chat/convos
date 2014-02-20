@@ -74,7 +74,8 @@ sub _avatar_cache_and_serve {
   my $cache = $self->app->cache;
 
   if (!$tx->res->code or $tx->res->code ne '200') {
-    return $self->_avatar_error(404);
+    $self->app->log->warn(sprintf 'Avatar GET %s: %s', $tx->req->url, $tx->res->code);
+    return $self->_avatar_fallback;
   }
 
   open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name)
@@ -129,7 +130,7 @@ sub _avatar_error {
   my ($self, $code, $message) = @_;
 
   $self->render_static("/image/avatar-$code.gif");
-  $self->app->log->error($message) if $message;
+  $self->app->log->error($message);
 }
 
 sub _avatar_fallback {
