@@ -457,15 +457,15 @@ L</irc_rpl_whoischannels>.
 
 sub irc_rpl_endofwhois {
   my ($self, $message) = @_;
-  my $p = $message->{params};
-  my $whois = delete $self->{whois}{$p->[1]} || {};
+  my $nick = $message->{params}[1];
+  my $whois = delete $self->{whois}{$nick} || {};
 
   $whois->{channels} ||= [];
   $whois->{host}     ||= '';
   $whois->{idle}     ||= 0;
-  $whois->{nick} = $p->[1];
   $whois->{realname} ||= '';
   $whois->{user}     ||= '';
+  $whois->{nick} = $nick;
   $self->_publish(whois => $whois);
 }
 
@@ -477,9 +477,9 @@ Store idle info internally. See L</irc_rpl_endofwhois>.
 
 sub irc_rpl_whoisidle {
   my ($self, $message) = @_;
-  my $p = $message->{params};
+  my $nick = $message->{params}[1];
 
-  $self->{whois}{$p->[1]}{idle} = $p->[2] || 0;
+  $self->{whois}{$nick}{idle} = $message->{params}[2] || 0;
 }
 
 =head2 irc_rpl_whoisuser
@@ -490,11 +490,12 @@ Store user info internally. See L</irc_rpl_endofwhois>.
 
 sub irc_rpl_whoisuser {
   my ($self, $message) = @_;
-  my $p = $message->{params};
+  my $params = $message->{params};
+  my $nick   = $params->[1];
 
-  $self->{whois}{$p->[1]}{host}     = $p->[3];
-  $self->{whois}{$p->[1]}{realname} = $p->[5];
-  $self->{whois}{$p->[1]}{user}     = $p->[2];
+  $self->{whois}{$nick}{host}     = $params->[3];
+  $self->{whois}{$nick}{realname} = $params->[5];
+  $self->{whois}{$nick}{user}     = $params->[2];
 }
 
 =head2 irc_rpl_whoischannels
@@ -505,9 +506,9 @@ Reply with user channels
 
 sub irc_rpl_whoischannels {
   my ($self, $message) = @_;
-  my $p = $message->{params};
+  my $nick = $message->{params}[1];
 
-  push @{$self->{whois}{$p->[1]}{channels}}, split ' ', $p->[2] || '';
+  push @{$self->{whois}{$nick}{channels}}, split ' ', $message->{params}[2] || '';
 }
 
 =head2 irc_rpl_notopic
