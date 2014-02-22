@@ -216,6 +216,7 @@ has core => sub {
   my $self = shift;
   my $core = Convos::Core->new;
 
+  $core->log($self->log);
   $core->redis->server($self->redis->server);
   $core;
 };

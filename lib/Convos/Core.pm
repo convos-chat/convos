@@ -145,7 +145,7 @@ sub _connection {
   my $conn = $self->{connections}{$args{login}}{$args{name}};
 
   unless ($conn) {
-    $conn = Convos::Core::Connection->new(redis => $self->redis, %args);
+    $conn = Convos::Core::Connection->new(redis => $self->redis, log => $self->log, %args);
     $self->{connections}{$args{login}}{$args{name}} = $conn;
   }
 
