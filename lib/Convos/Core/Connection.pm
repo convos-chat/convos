@@ -91,10 +91,11 @@ my @ADD_SERVER_MESSAGE_EVENTS = qw/
   /;
 my @OTHER_EVENTS = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
-  irc_error irc_rpl_whoisuser irc_rpl_whoischannels irc_rpl_topic irc_topic
+  irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
+  irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic irc_err_nosuchchannel
   irc_err_notonchannel irc_err_bannedfromchan irc_rpl_liststart irc_rpl_list
-  irc_rpl_listend irc_mode irc_quit
+  irc_rpl_listend irc_mode irc_quit irc_error
   /;
 
 has _irc => sub {
@@ -138,10 +139,11 @@ has _irc => sub {
   );
   $irc->on(
     error => sub {
-      my $irc  = shift;
+      my ($irc, $err) = @_;
       my $data = {
-        status  => 500,
-        message => "Connection to @{[$irc->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds."
+        status => 500,
+        message =>
+          "Connection to @{[$irc->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds. ($err)",
       };
       $self->{stop} and return $self->redis->hset($self->{path}, state => 'error');
       $self->_publish_and_save(server_message => $data);
@@ -446,23 +448,53 @@ sub irc_rpl_welcome {
   );
 }
 
+=head2 irc_rpl_endofwhois
+
+Use data from L</irc_rpl_whoisidle>, L</irc_rpl_whoisuser> and
+L</irc_rpl_whoischannels>.
+
+=cut
+
+sub irc_rpl_endofwhois {
+  my ($self, $message) = @_;
+  my $p = $message->{params};
+  my $whois = delete $self->{whois}{$p->[1]} || {};
+
+  $whois->{channels} ||= [];
+  $whois->{host}     ||= '';
+  $whois->{idle}     ||= 0;
+  $whois->{nick} = $p->[1];
+  $whois->{realname} ||= '';
+  $whois->{user}     ||= '';
+  $self->_publish(whois => $whois);
+}
+
+=head2 irc_rpl_whoisidle
+
+Store idle info internally. See L</irc_rpl_endofwhois>.
+
+=cut
+
+sub irc_rpl_whoisidle {
+  my ($self, $message) = @_;
+  my $p = $message->{params};
+
+  $self->{whois}{$p->[1]}{idle} = $p->[2] || 0;
+}
+
 =head2 irc_rpl_whoisuser
 
-Reply with user info
+Store user info internally. See L</irc_rpl_endofwhois>.
 
 =cut
 
 sub irc_rpl_whoisuser {
   my ($self, $message) = @_;
+  my $p = $message->{params};
 
-  $self->_publish(
-    whois => {
-      nick     => $message->{params}[1],
-      user     => $message->{params}[2],
-      host     => $message->{params}[3],
-      realname => $message->{params}[5],
-    }
-  );
+  $self->{whois}{$p->[1]}{host}     = $p->[3];
+  $self->{whois}{$p->[1]}{realname} = $p->[5];
+  $self->{whois}{$p->[1]}{user}     = $p->[2];
 }
 
 =head2 irc_rpl_whoischannels
@@ -473,9 +505,9 @@ Reply with user channels
 
 sub irc_rpl_whoischannels {
   my ($self, $message) = @_;
+  my $p = $message->{params};
 
-  $self->_publish(
-    whois_channels => {nick => $message->{params}[1], channels => [sort split ' ', $message->{params}[2] || ''],},);
+  push @{$self->{whois}{$p->[1]}{channels}}, split ' ', $p->[2] || '';
 }
 
 =head2 irc_rpl_notopic

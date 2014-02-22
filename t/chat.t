@@ -141,16 +141,29 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 
 {
   $connection->_irc->from_irc_server(":fooman!user\@host 311 doe doe john magnet * :Real name\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 319 doe doe :#other #convos\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 319 doe doe :#mojo\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 318 doe doe :End of WHOIS list\r\n");
   $dom->parse($t->message_ok->message->[1]);
+
   ok $dom->at('li.whois[data-network="magnet"][data-target="any"]'), 'Got whois';
-  is $dom->at('div.content')->all_text, 'doe is john@magnet (Real name).', 'doe is john@magnet (Real name)';
+  is $dom->at('div.content')->all_text, 'doe (john@magnet - Real name) is in #other, #convos, #mojo.', 'got whois text'
+    or diag $dom;
+  ok $dom->at('li.whois[data-network="magnet"][data-target="any"] a[class="nick"][href="/magnet/doe"]'),
+    'got whois /magnet/doe';
+  ok $dom->at('li.whois[data-network="magnet"][data-target="any"] a[class="channel"][href="/magnet/%23convos"]'),
+    'got whois /magnet/%23convos';
+  ok $dom->at('li.whois[data-network="magnet"][data-target="any"] a[class="channel"][href="/magnet/%23mojo"]'),
+    'got whois /magnet/%23mojo';
 }
 
 {
-  $connection->_irc->from_irc_server(":fooman!user\@host 319 doe doe :#other #convos #mojo\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 401 doe doe :No such nick/channel\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 318 doe doe :End of WHOIS list\r\n");
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.whois[data-network="magnet"][data-target="any"]'), 'Got whois channels';
-  is $dom->at('div.content')->all_text, 'doe is in #convos, #mojo, #other.', 'doe is in sorted channels';
+
+  ok $dom->at('li.whois[data-network="magnet"][data-target="any"]'), 'Could not get whois';
+  is $dom->at('div.content')->all_text, 'doe is probably offline.', 'doe is probably offline.' or diag $dom;
 }
 
 {
