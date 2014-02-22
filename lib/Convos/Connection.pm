@@ -261,7 +261,8 @@ sub _add_connection {
   my $name       = $self->param('name') || '';
 
   $validation->input->{channels} = [map { split /\s/ } $self->param('channels')];
-  $validation->input->{login} = $self->session('login');
+  $validation->input->{login}    = $self->session('login');
+  $validation->input->{realname} = $self->req->url->to_abs->clone->path('/');
 
   Mojo::IOLoop->delay(
     sub {
@@ -338,6 +339,7 @@ sub _edit_connection {
   $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
   $validation->input->{login}    = $self->session('login');
   $validation->input->{name}     = $self->stash('name');
+  $validation->input->{realname} = $self->req->url->to_abs->clone->path('/');
   $validation->input->{server}   = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
 

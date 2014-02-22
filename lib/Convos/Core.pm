@@ -15,6 +15,7 @@ use Mojo::JSON 'j';
 use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
+use Sys::Hostname ();
 use Time::HiRes qw( time );
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
@@ -120,6 +121,11 @@ sub start {
     sub {
       my ($delay) = @_;
 
+      # This is required to be back compat with bad data in the database
+      # Used to default the current users "host" key in Core::Connection to hostname()
+      # This have now changed to "localhost" to make it more obvious
+      $self->redis->hset('convos:host2convos', Sys::Hostname::hostname(), 'localhost');
+
       $self->redis->del('convos:host2convos');
       $self->redis->del('convos:loopback:names');    # clear loopback nick list
       $self->redis->smembers('connections', $delay->begin);
@@ -185,6 +191,7 @@ sub _start_control_channel {
     login => $str,
     name => $str,
     nick => $str,
+    realname => $str,
     server => $str, # irc_server[:port]
     tls => $bool,
   }, $callback);
@@ -203,7 +210,7 @@ sub add_connection {
     return $self;
   }
 
-  $validation->optional($_) for qw( nick user );
+  $validation->optional($_) for qw( nick realname user );
   $validation->output->{nick} ||= $validation->output->{login};
   $validation->output->{user} ||= $validation->output->{login};
 
@@ -269,7 +276,7 @@ sub update_connection {
     return $self;
   }
 
-  $validation->optional('user');
+  $validation->optional($_) for qw( realname user );
   $validation->output->{user} ||= $validation->output->{login};
 
   my ($login, $name) = $validation->param([qw( login name )]);

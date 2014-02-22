@@ -340,6 +340,42 @@ sub redirect_last {
   );
 }
 
+=head2 write_to_irc
+
+  $self = $self->write_to_irc($network, $message, \%filter, sub {
+            my($self, $err, $data) = @_;
+          });
+
+This method will write a C<$message> to a given IRC C<$network>, for the
+user logged in. The C<%filter> will decide when C<$cb> is called.
+
+=cut
+
+sub write_to_irc {
+  my ($self, $network, $message, $filter, $cb) = @_;
+  my $login = $self->session('login');
+
+  unless ($login) {
+    return $self->$cb('Cannot write to IRC unless logged in');
+  }
+
+  $self->stash->{sub} = $self->redis->subscribe("convos:user:$login:out");
+  $self->stash->{sub}->on(
+    message => sub {
+      my $data = j $_[1] or return;
+
+      for (keys %$filter) {
+        return if !$data->{$_};
+        return if $data->{$_} ne $filter->{$_};
+      }
+
+      $self->$cb('', $data);
+    }
+  );
+
+  $self->redis->publish("convos:user:$login:$network" => "internal $message");
+}
+
 =head1 METHODS
 
 =head2 register
@@ -365,6 +401,7 @@ sub register {
   $app->helper(send_partial   => \&send_partial);
   $app->helper(timestamp_span => \&timestamp_span);
   $app->helper(redirect_last  => \&redirect_last);
+  $app->helper(write_to_irc   => \&write_to_irc);
 }
 
 =head1 AUTHOR

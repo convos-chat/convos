@@ -5,13 +5,15 @@ BEGIN {
   }
 }
 use t::Helper;
-use Mojo::JSON;
+use Mojo::JSON 'j';
 use Mojo::DOM;
 
 plan skip_all => '/tmp/convos is required' unless -d '/tmp' and -w '/tmp';
 
-my %gif = map { $_ => Mojo::Util::slurp($t->app->home->rel_file("public/image/avatar-$_.gif")) } 404, 500;
+my %gif   = map { $_ => Mojo::Util::slurp($t->app->home->rel_file("public/image/avatar-$_.gif")) } 500;
 my $fresh = $t->app->home->rel_file('/public/image/a0196c429a4c02c1cc96afed12a0ed0c');
+my $redis = $t->app->core->redis;
+my $in    = $redis->subscribe('convos:user:doe:magnet');
 my ($host, $port) = map { $t->ua->server->url->$_ } qw( host port );
 
 unlink glob($fresh);
@@ -30,8 +32,8 @@ redis_do(
 }
 
 {
-  diag 'loopback avatar';
-  redis_do([hset => 'convos:host2convos', '1.2.3.4' => 'loopback']);
+  diag 'localhost avatar';
+  redis_do([hset => 'convos:host2convos', '1.2.3.4' => 'localhost']);
   Mojo::Util::spurt('fresh', $fresh);
   $t->get_ok('/avatar?user=marcus&host=1.2.3.4')->status_is(200)->content_is('fresh', 'avatar from 3rd party');
 
@@ -48,16 +50,30 @@ redis_do(
 }
 
 {
-  local $TODO = 'Need to run WHOIS and figure out the real identity';
-  $t->get_ok('/avatar?user=jhthorsen&host=convos.by')->status_is(302)
-    ->header_like(Location => qr{/image/deebdae9dacaf91b89f9cb8bed87993e$});
+  diag 'remote';
+  $in->on(
+    message => sub {
+      $redis->publish(
+        'convos:user:doe:out',
+        j {
+          event    => 'whois',
+          nick     => 'fooman',
+          realname => "Jan Henning Thorsen http://$host:$port",
+          user     => 'jhthorsen',
+        }
+      );
+    }
+  );
+
+  local $TODO = 'This test does not work, since it loops';
+  $t->get_ok('/avatar?nick=fooman&user=jhthorsen&host=127.1&network=magnet')->status_is(200);
 }
 
 {
-  diag 'custom loopback avatar';
+  diag 'custom localhost avatar';
   $fresh = $t->app->home->rel_file('/public/image/6f68bd7cac66e7333e083d94c96428e7');
   Mojo::Util::spurt('custom', $fresh);
-  $t->get_ok('/avatar?user=doe&host=1.2.3.4')->status_is(200)->content_is('custom', 'custom loopback avatar');
+  $t->get_ok('/avatar?user=doe&host=1.2.3.4')->status_is(200)->content_is('custom', 'custom localhost avatar');
   unlink $fresh;
 }
 

@@ -55,7 +55,6 @@ use Parse::IRC   ();
 use Scalar::Util ();
 use Time::HiRes 'time';
 use Convos::Core::Util qw( as_id id_as );
-use Sys::Hostname ();
 use constant DEBUG    => $ENV{CONVOS_DEBUG}   ? 1 : 0;
 use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
@@ -63,17 +62,15 @@ use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
 =head2 name
 
-=cut
+Name of the connection. Example: "freenode", "magnet" or "efnet".
 
-has name => '';
+=head2 log
+
+Holds a L<Mojo::Log> object.
 
 =head2 login
 
 The username of the owner.
-
-=cut
-
-has login => 0;
 
 =head2 redis
 
@@ -81,17 +78,12 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
+has name  => '';
+has log   => sub { Mojo::Log->new };
+has login => 0;
 has redis => sub { Mojo::Redis->new };
 
-=head2 log
-
-Holds a L<Mojo::Log> object.
-
-=cut
-
-has log => sub { Mojo::Log->new };
-
-my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
+my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg ctcp_action /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/
   irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd
   irc_rpl_welcome rpl_luserclient
@@ -114,6 +106,7 @@ has _irc => sub {
   }
   else {
     $irc = Mojo::IRC->new(debug_key => join ':', $self->login, $self->name);
+    $irc->parser(Parse::IRC->new(ctcp => 1));
   }
 
   Scalar::Util::weaken($self);
@@ -164,7 +157,7 @@ has _irc => sub {
     $irc->on($event => sub { $self->add_server_message($_[1]) });
   }
   for my $event (@OTHER_EVENTS) {
-    $irc->on($event => sub { $self->$event($_[1]) });
+    $irc->on($event => sub { $self->_internal_event($_[1]); $self->$event($_[1]) });
   }
 
   $irc;
@@ -255,10 +248,13 @@ sub _subscribe {
       $raw_message = sprintf ':%s %s', $irc->nick, $raw_message;
       $message     = Parse::IRC::parse_irc($raw_message);
 
-      unless (ref $message) {
+      if (!ref $message) {
         $self->_publish_and_save(
           server_message => {status => 400, message => "Unable to parse: $raw_message", uuid => $uuid});
         return;
+      }
+      if ($uuid eq 'internal') {
+        $self->_internal_message($raw_message);
       }
 
       $message->{uuid} = $uuid;
@@ -300,6 +296,7 @@ sub _connect {
       $irc->server($args->{server} || $args->{host});
       $irc->tls({}) if $args->{tls};
       $irc->user($self->login);
+      $irc->name($args->{realname} || 'Convos');
       $irc->connect(
         sub {
           my ($irc, $error) = @_;
@@ -375,12 +372,12 @@ sub add_message {
   my $is_private_message = $message->{params}[0] eq $current_nick;
   my $data = {highlight => 0, message => $message->{params}[1], timestamp => time, uuid => $message->{uuid},};
 
-  @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
+  @$data{qw( nick user host )} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
-  $data->{host} ||= Sys::Hostname::hostname;    # should never happen
+  $data->{host} ||= 'localhost';         # host is set when receiving a message and "localhost" when you send a message
   $data->{user} ||= $self->_irc->user;
 
-  if ($data->{nick} && $data->{nick} ne $current_nick) {
+  if ($data->{nick} and $data->{nick} ne $current_nick) {
     if ($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
       $data->{highlight} = 1;
     }
@@ -389,7 +386,7 @@ sub add_message {
     }
   }
 
-  $self->_publish_and_save($data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/ ? 'action_message' : 'message', $data,);
+  $self->_publish_and_save($message->{command} eq 'CTCP_ACTION' ? 'action_message' : 'message', $data);
 }
 
 sub _add_conversation {
@@ -463,6 +460,7 @@ sub irc_rpl_whoisuser {
 
   $self->_publish(
     whois => {
+      internal => $message->{internal} ? 1 : 0,
       nick     => $message->{params}[1],
       user     => $message->{params}[2],
       host     => $message->{params}[3],
@@ -570,7 +568,7 @@ sub irc_join {
 
   if ($nick eq $self->_irc->nick) {
     $self->redis->hset("$self->{path}:$channel", topic => '');
-    $self->redis->hset("convos:host2convos" => $host => 'loopback');
+    $self->redis->hset("convos:host2convos" => $host => 'localhost');
     $self->_publish(add_conversation => {target => $channel});
     $self->_irc->write(TOPIC => $channel);    # fetch topic for channel
   }
@@ -788,10 +786,16 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
-  my $data = {status => 500, message => join(' ', @{$message->{params}}),};
+  my $data;
 
-  $self->_publish_and_save(server_message => $data);
-  $self->_add_convos_message($data);
+  if ($message->{internal}) {
+    $self->_publish(@{$message->{internal}});
+  }
+  else {
+    $data = {status => 500, message => join(' ', @{$message->{params}}),};
+    $self->_publish_and_save(server_message => $data);
+    $self->_add_convos_message($data);
+  }
 }
 
 =head2 cmd_nick
@@ -851,6 +855,42 @@ sub _add_convos_message {
 
   $self->redis->zadd($self->{convos_path}, $data->{timestamp}, $message);
   $self->redis->publish("convos:user:$login:out", $message);
+}
+
+sub _internal_event {
+  my ($self, $message) = @_;
+  my $events = $self->{internal} ||= [];
+
+  for my $i (0 .. @$events - 1) {
+
+  COMMAND:
+    for my $command (keys %{$events->[$i]}) {
+      next if $command eq 'default';
+      next unless $message->{command} eq $command;
+
+      my $rules = $events->[$i]{$command};
+      for my $n (keys %$rules) {
+        next COMMAND unless $message->{params}[$n] eq $rules->{$n};
+      }
+
+      $message->{internal} = $events->[$i]{default};
+      $message->{internal}[1]{internal} = 1;
+      splice @$events, $i, 1, ();
+      last;
+    }
+  }
+}
+
+sub _internal_message {
+  my ($self, $raw_message) = @_;
+
+  if ($raw_message =~ /\bWHOIS (\S+)/) {
+    push @{$self->{internal}}, {
+      311     => {1     => $1},                                                     # rpl_whoisuser
+      401     => {1     => $1},                                                     # err_nosuchnick
+      default => [whois => {host => '', nick => $1, realname => '', user => ''}],
+    };
+  }
 }
 
 sub _publish {
