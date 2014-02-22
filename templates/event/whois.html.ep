@@ -2,7 +2,12 @@
   <div class="content">
   % if($host) {
     %= link_to $nick, view => { network => $network, target => $nick }, class => 'nick'
-    (<%= $user %>@<%= $host %> - <%= $realname %>) is in
+    (<%= $user %>@<%= $host %> - <%= $realname %>)
+    % if ($idle) {
+      has been idle for <b><%= $idle %></b> seconds in
+    % } else {
+      is in
+    % }
     % my $i = 0;
     % for my $channel (@$channels) {
       % my $target = $channel; $target =~ s/^.\#/#/;

@@ -141,13 +141,15 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 
 {
   $connection->_irc->from_irc_server(":fooman!user\@host 311 doe doe john magnet * :Real name\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 317 doe doe 7 :seconds idle\r\n");
   $connection->_irc->from_irc_server(":fooman!user\@host 319 doe doe :#other #convos\r\n");
   $connection->_irc->from_irc_server(":fooman!user\@host 319 doe doe :#mojo\r\n");
   $connection->_irc->from_irc_server(":fooman!user\@host 318 doe doe :End of WHOIS list\r\n");
   $dom->parse($t->message_ok->message->[1]);
 
   ok $dom->at('li.whois[data-network="magnet"][data-target="any"]'), 'Got whois';
-  is $dom->at('div.content')->all_text, 'doe (john@magnet - Real name) is in #other, #convos, #mojo.', 'got whois text'
+  is $dom->at('div.content')->all_text,
+    'doe (john@magnet - Real name) has been idle for 7 seconds in #other, #convos, #mojo.', 'got whois text'
     or diag $dom;
   ok $dom->at('li.whois[data-network="magnet"][data-target="any"] a[class="nick"][href="/magnet/doe"]'),
     'got whois /magnet/doe';
