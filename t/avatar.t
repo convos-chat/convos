@@ -10,7 +10,7 @@ use Mojo::DOM;
 
 plan skip_all => '/tmp/convos is required' unless -d '/tmp' and -w '/tmp';
 
-my %gif   = map { $_ => Mojo::Util::slurp($t->app->home->rel_file("public/image/avatar-$_.gif")) } 404, 500;
+my %gif   = map { $_ => Mojo::Util::slurp($t->app->home->rel_file("public/image/avatar-$_.gif")) } 500;
 my $fresh = $t->app->home->rel_file('/public/image/a0196c429a4c02c1cc96afed12a0ed0c');
 my $redis = $t->app->core->redis;
 my $in    = $redis->subscribe('convos:user:doe:magnet');
