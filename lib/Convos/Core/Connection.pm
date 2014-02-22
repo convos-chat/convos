@@ -113,6 +113,7 @@ has _irc => sub {
   }
   else {
     $irc = Mojo::IRC->new(debug_key => join ':', $self->login, $self->name);
+    $irc->parser(Parse::IRC->new(ctcp => 1));
   }
 
   Scalar::Util::weaken($self);
