@@ -54,9 +54,8 @@ use IRC::Utils;
 use Parse::IRC   ();
 use Scalar::Util ();
 use Time::HiRes 'time';
-use Convos::Core::Util qw( as_id id_as );
-use constant DEBUG    => $ENV{CONVOS_DEBUG}   ? 1 : 0;
-use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
+use Convos::Core::Util qw( as_id id_as logf );
+use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 
 =head1 ATTRIBUTES
 
