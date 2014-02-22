@@ -63,17 +63,15 @@ use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
 
 =head2 name
 
-=cut
+Name of the connection. Example: "freenode", "magnet" or "efnet".
 
-has name => '';
+=head2 log
+
+Holds a L<Mojo::Log> object.
 
 =head2 login
 
 The username of the owner.
-
-=cut
-
-has login => 0;
 
 =head2 redis
 
@@ -81,15 +79,10 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
+has name  => '';
+has log   => sub { Mojo::Log->new };
+has login => 0;
 has redis => sub { Mojo::Redis->new };
-
-=head2 log
-
-Holds a L<Mojo::Log> object.
-
-=cut
-
-has log => sub { Mojo::Log->new };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/
