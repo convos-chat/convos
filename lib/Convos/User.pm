@@ -13,13 +13,6 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
 use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
 
-has _ua => sub {
-  my $self = shift;
-  my $ua = Mojo::UserAgent->new(max_redirects => 3);    # facebook avatar require redirects
-  $ua->proxy($self->app->ua->proxy);    # piggy back "global" proxy settings
-  $ua;
-};
-
 =head1 METHODS
 
 =head2 auth
@@ -173,7 +166,7 @@ sub _avatar_local {
 
       return $self->rendered if $self->app->cache->serve($self, $cache_name);
       $self->app->log->debug("Getting avatar for $id: $url");
-      $self->_ua->get($url => $delay->begin);    # get from either from facebook or gravatar
+      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
     },
     sub {
       $self->_avatar_cache_and_serve($cache_name, $_[1]);
@@ -183,7 +176,7 @@ sub _avatar_local {
 
 sub _avatar_remote {
   my $self = shift;
-  my $url  = Mojo::URL->new(shift);              # Example $url = http://wirc.pl/
+  my $url  = Mojo::URL->new(shift);                  # Example $url = http://wirc.pl/
   my $cache_name;
 
   unless ($self->session('login')) {
@@ -203,7 +196,7 @@ sub _avatar_remote {
 
       return $self->rendered if $self->app->cache->serve($self, $cache_name);
       $self->app->log->debug("Getting remote avatar from $url");
-      $self->_ua->get($url => $delay->begin);    # get from either from facebook or gravatar
+      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
     },
     sub {
       $self->_avatar_cache_and_serve($cache_name, $_[1]);

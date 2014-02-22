@@ -254,6 +254,9 @@ sub startup {
   $self->_public_routes;
   $self->_private_routes;
 
+  # need to support redirects to fetch facebook avatars
+  $self->ua->max_redirects(3);
+
   if (!eval { Convos::Plugin::Helpers::REDIS_URL() } and $config->{redis}) {
     $self->log->warn("redis url from config file will be deprecated. Run 'perldoc Convos' for alternative setup.");
     $ENV{CONVOS_REDIS_URL} = $config->{redis};
