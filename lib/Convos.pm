@@ -37,7 +37,21 @@ the link to view the data.
 
 =back
 
-=head2 Running convos
+=head2 Architecture principles
+
+=over 4
+
+=item * Keep the JS simple and manageable
+
+=item * Use Redis to manage state / publish subscribe
+
+=item * Archive logs in plain text format, use ack to search them.
+
+=item * Bootstrap-based user interface
+
+=back
+
+=head1 RUNNING CONVOS
 
 Convos has sane defaults so after installing L<Convos> you should be
 able to just run it:
@@ -68,20 +82,6 @@ running any of the commands above. Example:
 You can use L<https://github.com/Nordaaker/convos/blob/release/convos.conf>
 as config file template.
 
-=head2 Architecture principles
-
-=over 4
-
-=item * Keep the JS simple and manageable
-
-=item * Use Redis to manage state / publish subscribe
-
-=item * Archive logs in plain text format, use ack to search them.
-
-=item * Bootstrap-based user interface
-
-=back
-
 =head2 Environment
 
 Convos can be configured with the following environment variables:
@@ -90,8 +90,9 @@ Convos can be configured with the following environment variables:
 
 =item * CONVOS_BACKEND_EMBEDDED=1
 
-Set CONVOS_MANUAL_BACKEND to a true value if you're starting L<Convos>
-with C<morbo> and want to run the backend embedded.
+Set CONVOS_MANUAL_BACKEND to a true value if you want to force the frontend
+to start the backend embedded. This is useful if you want to test L<Convos>
+with L<morbo|Mojo::Server::Morbo>.
 
 =item * CONVOS_DEBUG=1
 
@@ -99,7 +100,7 @@ Set CONVOS_DEBUG for extra debug output to STDERR.
 
 =item * CONVOS_MANUAL_BACKEND=1
 
-Disable the frontend from starting the backend.
+Disable the frontend from automatically starting the backend.
 
 =item * CONVOS_PING_INTERVAL=30
 
@@ -124,6 +125,40 @@ the datbase index.
 =item * MOJO_IRC_DEBUG=1
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
+
+=back
+
+=head2 HTTP headers
+
+=over 4
+
+=item * X-Request-Base
+
+Set this header if you are mounting Convos under a custom path. Example
+with nginx:
+
+  # mount the application under /convos
+  location /convos { 
+    # remove "/convos" from the forwarded request
+    rewrite ^/convos(.*)$ $1 break;
+
+    # generic headers for correct handling of ws and http
+    proxy_http_version 1.1;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Host $host;
+
+    # set this if you are running SSL
+    proxy_set_header X-Forwarded-HTTPS 1;
+
+    # inform Convos the full location where it is mounted
+    proxy_set_header X-Request-Base "https://some-domain.com/convos";
+
+    # tell nginx where Convos is running
+    proxy_pass http://10.0.0.10:8080;
+  }
 
 =back
 
@@ -268,7 +303,12 @@ sub startup {
   $self->hook(
     before_dispatch => sub {
       my $c = shift;
+
       $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
+
+      if (my $base = $c->req->headers->header('X-Request-Base')) {
+        $c->req->url->base(Mojo::URL->new($base));
+      }
     }
   );
 
