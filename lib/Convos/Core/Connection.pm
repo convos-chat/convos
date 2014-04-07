@@ -39,7 +39,7 @@ L<Mojo::IRC/rpl_endofmotd>, L<Mojo::IRC/rpl_welcome> and L<Mojo::IRC/error>.
 =item * Other events
 
 L</irc_rpl_welcome>, L</irc_rpl_myinfo>, L</irc_join>, L</irc_part>,
-L</irc_rpl_namreply>, L</err_nosuchchannel> L</err_notonchannel>
+L</irc_rpl_namreply>, L</err_nosuchchannel>, L</err_notonchannel>, L</err_nosuchnick>
 L</err_bannedfromchan>, l</irc_error> and L</irc_quit>.
 
 =back
@@ -93,7 +93,7 @@ my @OTHER_EVENTS = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
-  irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel
+  irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
   err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_error
   /;
@@ -461,12 +461,11 @@ sub irc_rpl_endofwhois {
   my $whois = delete $self->{whois}{$nick} || {};
 
   $whois->{channels} ||= [];
-  $whois->{host}     ||= '';
   $whois->{idle}     ||= 0;
   $whois->{realname} ||= '';
   $whois->{user}     ||= '';
   $whois->{nick} = $nick;
-  $self->_publish(whois => $whois);
+  $self->_publish(whois => $whois) if $whois->{host};
 }
 
 =head2 irc_rpl_whoisidle
@@ -713,6 +712,18 @@ sub err_nosuchchannel {
       $self->_publish(remove_conversation => {target => $channel});
     }
   );
+}
+
+=head2 err_nosuchnick
+
+  :electret.shadowcat.co.uk 442 nick nick :No such nick
+
+=cut
+
+sub err_nosuchnick {
+  my ($self, $message) = @_;
+
+  $self->_publish(err_nosuchnick => {nick => $message->{params}[0]});
 }
 
 =head2 err_notonchannel

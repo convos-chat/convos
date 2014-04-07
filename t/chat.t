@@ -160,12 +160,12 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 }
 
 {
-  $connection->_irc->from_irc_server(":fooman!user\@host 401 doe doe :No such nick/channel\r\n");
-  $connection->_irc->from_irc_server(":fooman!user\@host 318 doe doe :End of WHOIS list\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 401 doe :No such nick/channel\r\n");
+  $connection->_irc->from_irc_server(":fooman!user\@host 318 doe :End of WHOIS list\r\n");
   $dom->parse($t->message_ok->message->[1]);
 
-  ok $dom->at('li.whois[data-network="magnet"][data-target="any"]'), 'Could not get whois';
-  is $dom->at('div.content')->all_text, 'doe is probably offline.', 'doe is probably offline.' or diag $dom;
+  ok $dom->at('li.error[data-network="magnet"][data-target="any"]'), 'Could not get whois' or diag $dom;
+  is $dom->at('div.content')->all_text, 'No such nick: doe', 'doe is probably offline.' or diag $dom;
 }
 
 {

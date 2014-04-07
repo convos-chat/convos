@@ -22,7 +22,7 @@ $connection->add_server_message(
 
 $connection->irc_mode({params => ['doe', '+i'], prefix => 'electret.shadowcat.co.uk',});
 
-$connection->irc_err_bannedfromchan(
+$connection->err_bannedfromchan(
   {params => ['doe', '#mojo', 'Cannot join channel (+b)'], prefix => 'electret.shadowcat.co.uk',});
 
 $connection->irc_error({params => ['some error', 'message'], prefix => 'electret.shadowcat.co.uk',});
