@@ -385,6 +385,12 @@ sub add_message {
     }
   }
 
+  # need to take care of when the current user also writes /me...
+  # this is not yet tested, since i have no time right now :(
+  if ($data->{message} =~ s/\x{1}ACTION (.*)\x{1}/$1/) {
+    $message->{command} = "CTCP_ACTION";
+  }
+
   $self->_publish_and_save($message->{command} eq 'CTCP_ACTION' ? 'action_message' : 'message', $data);
 }
 
