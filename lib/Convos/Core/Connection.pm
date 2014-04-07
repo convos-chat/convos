@@ -128,7 +128,7 @@ has _irc => sub {
       else {
         $data = {
           status  => 500,
-          message => "Disconnected from @{[$irc->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds."
+          message => "Disconnected from @{[$self->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds."
         };
         $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
