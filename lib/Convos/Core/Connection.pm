@@ -39,8 +39,8 @@ L<Mojo::IRC/rpl_endofmotd>, L<Mojo::IRC/rpl_welcome> and L<Mojo::IRC/error>.
 =item * Other events
 
 L</irc_rpl_welcome>, L</irc_rpl_myinfo>, L</irc_join>, L</irc_part>,
-L</irc_rpl_namreply>, L</irc_err_nosuchchannel> L</irc_err_notonchannel>
-L</irc_err_bannedfromchan>, l</irc_error> and L</irc_quit>.
+L</irc_rpl_namreply>, L</err_nosuchchannel> L</err_notonchannel>
+L</err_bannedfromchan>, l</irc_error> and L</irc_quit>.
 
 =back
 
@@ -93,8 +93,8 @@ my @OTHER_EVENTS = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
-  irc_rpl_topicwhotime irc_rpl_notopic irc_err_nosuchchannel
-  irc_err_notonchannel irc_err_bannedfromchan irc_rpl_liststart irc_rpl_list
+  irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel
+  err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_error
   /;
 
@@ -160,7 +160,7 @@ has _irc => sub {
     $irc->on($event => sub { $self->add_server_message($_[1]) });
   }
   for my $event (@OTHER_EVENTS) {
-    $irc->on($event => sub { $self->$event($_[1]) });
+    $irc->on($event => sub { $_[1]->{handled}++ or $self->$event($_[1]) });
   }
 
   $irc;
@@ -669,13 +669,13 @@ sub irc_part {
   }
 }
 
-=head2 irc_err_bannedfromchan
+=head2 err_bannedfromchan
 
 :electret.shadowcat.co.uk 474 nick #channel :Cannot join channel (+b)
 
 =cut
 
-sub irc_err_bannedfromchan {
+sub err_bannedfromchan {
   my ($self, $message) = @_;
   my $channel = $message->{params}[1];
   my $name    = as_id $self->name, $channel;
@@ -694,13 +694,13 @@ sub irc_err_bannedfromchan {
   );
 }
 
-=head2 irc_err_nosuchchannel
+=head2 err_nosuchchannel
 
 :astral.shadowcat.co.uk 403 nick #channel :No such channel
 
 =cut
 
-sub irc_err_nosuchchannel {
+sub err_nosuchchannel {
   my ($self, $message) = @_;
   my $channel = $message->{params}[1];
   my $name = as_id $self->name, $channel;
@@ -715,14 +715,14 @@ sub irc_err_nosuchchannel {
   );
 }
 
-=head2 irc_err_notonchannel
+=head2 err_notonchannel
 
 :electret.shadowcat.co.uk 442 nick #channel :You're not on that channel
 
 =cut
 
-sub irc_err_notonchannel {
-  shift->irc_err_nosuchchannel(@_);
+sub err_notonchannel {
+  shift->err_nosuchchannel(@_);
 }
 
 =head2 irc_rpl_namreply
