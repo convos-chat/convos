@@ -1,4 +1,9 @@
 <ul class="conversations">
+  <li>
+    %= link_to 'view.network', { network => 'convos' }, class => 'convos', title => 'Status messages and settings', 'data-unread' => 0, begin
+      %= image '/image/icon-navbar.png', alt => 'Convos'
+    % end
+  </li>
 % my $i = 0;
 % for my $c (@$conversation_list) {
   % my $text = $c->{network} ? $c->{target} : ucfirst $c->{target};

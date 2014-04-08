@@ -43,10 +43,10 @@ $t->websocket_ok('/socket');
 }
 
 {
-  $t->get_ok('/chat/conversations')->element_exists('li:nth-of-child(1) a[data-unread="0"][href="/magnet/%23convos"]')
-    ->element_exists('li:nth-of-child(2) a[data-unread="2"][href="/magnet/fooman"]')
+  $t->get_ok('/chat/conversations')->element_exists('li:nth-of-child(2) a[data-unread="0"][href="/magnet/%23convos"]')
+    ->element_exists('li:nth-of-child(3) a[data-unread="2"][href="/magnet/fooman"]')
     ->element_exists('li.unread a[data-unread="2"][href="/magnet/fooman"]')
-    ->element_exists('li:nth-of-child(3) a[data-unread="0"][href="/magnet/batman"]');
+    ->element_exists('li:nth-of-child(4) a[data-unread="0"][href="/magnet/batman"]');
 }
 
 done_testing;
