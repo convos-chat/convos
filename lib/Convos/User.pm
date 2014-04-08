@@ -318,6 +318,21 @@ sub edit {
   );
 }
 
+=head2 tz_offset
+
+Used to save timezone offset in hours. This value will be saved in session
+under "tz_offset".
+
+=cut
+
+sub tz_offset {
+  my $self = shift;
+  my $offset = ($self->param('hour') || 0) - (localtime)[2];
+
+  $self->session(tz_offset => $offset);
+  $self->render(json => {offset => $offset});
+}
+
 sub _edit {
   my $self       = shift;
   my $login      = $self->session('login');

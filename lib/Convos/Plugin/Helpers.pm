@@ -296,14 +296,14 @@ Returns a "E<lt>span>" tag with a timestamp.
 
 sub timestamp_span {
   my ($c, $timestamp) = @_;
+  my $offset = $c->session('tz_offset') || 0;
   my $now    = time;
   my $format = '%e. %b %H:%M';
 
-  if ($timestamp > $now - 86400) {
-    $format = '%H:%M';
-  }
+  $format = '%H:%M' if $timestamp > $now - 86400;
+  $timestamp += $offset * 3600;    # offset is in hours
 
-  return $c->tag(
+  $c->tag(
     'span',
     class => 'timestamp',
     title => format_time($timestamp, '%e. %B %H:%M:%S'),

@@ -634,6 +634,7 @@
       return;
     }
 
+    $.post($.url_for('/profile/timezone/offset'), { hour: new Date().getHours() });
     $input.focus();
 
     $.ajaxSetup({
