@@ -64,7 +64,7 @@ sub _avatar_cache_and_serve {
   my ($self, $cache_name, $tx) = @_;
   my $cache = $self->app->cache;
 
-  if (!$tx->res->code or $tx->res->code ne 200) {
+  if (!$tx->res->code or $tx->res->code ne '200') {
     return $self->_avatar_error(404);
   }
 
