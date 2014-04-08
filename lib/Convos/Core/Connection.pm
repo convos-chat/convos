@@ -722,14 +722,14 @@ sub err_nosuchchannel {
 
 =head2 err_nosuchnick
 
-  :electret.shadowcat.co.uk 442 nick nick :No such nick
+  :electret.shadowcat.co.uk 442 sender nick :No such nick
 
 =cut
 
 sub err_nosuchnick {
   my ($self, $message) = @_;
 
-  $self->_publish(err_nosuchnick => {nick => $message->{params}[0]});
+  $self->_publish(err_nosuchnick => {nick => $message->{params}[1]});
 }
 
 =head2 err_notonchannel
