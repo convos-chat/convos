@@ -759,7 +759,7 @@ sub irc_rpl_namreply {
     push @nicks, {nick => $_, mode => $mode};
   }
 
-  $self->_publish(rpl_namreply => {nicks => \@nicks, target => $message->{params}[2],});
+  $self->_publish(rpl_namreply => {nicks => \@nicks, target => lc $message->{params}[2],});
 }
 
 =head2 irc_rpl_liststart
