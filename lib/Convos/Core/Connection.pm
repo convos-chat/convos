@@ -524,7 +524,7 @@ sub irc_rpl_whoischannels {
 
 sub irc_rpl_notopic {
   my ($self, $message) = @_;
-  my $target = $message->{params}[1];
+  my $target = lc $message->{params}[1];
 
   $self->redis->hset("$self->{path}:$target", topic => '');
   $self->_publish(topic => {topic => '', target => $target});
@@ -538,7 +538,7 @@ Reply with topic
 
 sub irc_rpl_topic {
   my ($self, $message) = @_;
-  my $target = $message->{params}[1];
+  my $target = lc $message->{params}[1];
   my $topic  = $message->{params}[2];
 
   $self->redis->hset("$self->{path}:$target", topic => $topic);
@@ -553,7 +553,7 @@ sub irc_rpl_topic {
 
 sub irc_topic {
   my ($self, $message) = @_;
-  my $target = $message->{params}[0];
+  my $target = lc $message->{params}[0];
   my $topic  = $message->{params}[1];
 
   $self->redis->hset("$self->{path}:$target", topic => $topic);
@@ -569,8 +569,8 @@ Reply with who and when for topic change
 sub irc_rpl_topicwhotime {
   my ($self, $message) = @_;
 
-  $self->_publish(
-    topic_by => {timestamp => $message->{params}[3], nick => $message->{params}[2], target => $message->{params}[1],});
+  $self->_publish(topic_by =>
+      {timestamp => $message->{params}[3], nick => $message->{params}[2], target => lc $message->{params}[1],});
 }
 
 =head2 irc_rpl_myinfo
