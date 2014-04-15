@@ -188,8 +188,10 @@
     var $conversations = $('ul.conversations li, div.conversations.container li');
     var $dropdown = $('div.conversations.container ul');
     var $menu = $('nav ul.conversations');
-    var available_width = $('nav').width() - $('nav .right').outerWidth();
-    var used_width = 0, unread, $a;
+    var available_width, used_width = 0, unread, $a;
+
+    $('nav a.conversations.toggler').show();
+    available_width = $('nav').width() - $('nav .right').outerWidth();
 
     if($message) {
       $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
@@ -201,17 +203,12 @@
     $conversations.each(function() {
       var $li = $(this);
       if(!$li.parent('ul').is('.conversations')) $menu.append($li);
-      used_width += $li.find('a').outerWidth();
-      if(used_width < available_width) return;
-      $dropdown.append($li);
+      var w = $li.find('a').outerWidth();
+      used_width += w;
+      if(used_width - w / 3 > available_width) $dropdown.append($li);
     });
 
-    if(used_width >= available_width) {
-      $('nav a.conversations.toggler').show();
-    }
-    else {
-      $('nav a.conversations.toggler').trigger('deactivate').hide();
-    }
+    if(used_width < available_width) $('nav a.conversations.toggler').trigger('deactivate').hide();
   };
 
   var drawSettings = function() {

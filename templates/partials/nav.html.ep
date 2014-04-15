@@ -1,10 +1,10 @@
 <nav class="bar">
   % my @class;
   %= include 'client/conversation_list'
-  %= link_to 'conversation_list', class => 'conversations toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations.container', begin
-    <i class="icon-chevron-down"></i>
-  % end
   <div class="right">
+    %= link_to 'conversation_list', class => 'conversations toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations.container', begin
+      <i class="icon-chevron-down"></i>
+    % end
     %= link_to 'add_conversation', title => 'Add conversation',  class => 'add-conversation toggler', 'data-focus' => 'input[name="channel"]', 'data-toggle' => 'div.add-conversation', begin
       <i class="icon-plus">+</i>
     % end
