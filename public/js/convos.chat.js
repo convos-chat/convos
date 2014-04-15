@@ -468,7 +468,7 @@
       e.preventDefault();
       $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.sidebar.toggler').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
-        $('nav ul.conversations a').slice(0, 2).eq(-1).focus();
+        $('nav ul.conversations a').slice(0, 3).eq(-1).focus();
       }
       else {
         $input.focus();
