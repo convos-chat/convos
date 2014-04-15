@@ -33,6 +33,7 @@
   $.fn.attachEventsToMessage = function() {
     return this.each(function() {
       var $message = $(this);
+
       $message.find('h3 a').click(function(e) {
         e.preventDefault();
         if($(this).hasClass('goto-network')) {
@@ -40,7 +41,7 @@
         }
         else {
           var n = $(this).text();
-          $input.val($input.val() ? $input.val() + ' ' + n + ' ' : n + ': ').focusSoon();
+          $input.val($input.val() ? $input.val().replace(/\s+$/, '') + ' ' + n + ' ' : n + ': ').focus();
         }
       });
 
@@ -166,7 +167,7 @@
       getHistoricMessages();
     }
     else if($messages.length ) {
-      if(!$.supportsTouch) $input.focusSoon();
+      if(!$.supportsTouch) $input.focus();
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 

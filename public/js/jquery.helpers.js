@@ -36,12 +36,6 @@
     return this;
   };
 
-  $.fn.focusSoon = function() {
-    var $e = this.eq(0);
-    setTimeout(function() { $e.focus(); }, 100);
-    return this;
-  };
-
   $.fn.initDropDown = function() {
     return this.each(function() {
       var $a = $(this);
@@ -95,7 +89,8 @@
     return false;
   };
 
-  $.fn.toggleElementWithClick = function() {
+  $.fn.toggleElementWithClick = function(e) {
+    if(e) e.preventDefault();
     return this.each(function() {
       var $a = $(this);
       var focus = $a.attr('data-focus');
@@ -118,7 +113,7 @@
           $target.show();
           $a.data('target', $target).trigger('activate').addClass('active');
           inside = false;
-          if(focus) $(focus, target).eq(0).focusSoon();
+          if(focus) $(focus, target).eq(0).focus();
         }
 
         return false;
