@@ -5,7 +5,7 @@
 <html data-basepath="<%= $self->url_for('/') %>">
   <head>
   % if($full_page) {
-    %= include 'partials/head'
+    %= include 'partials/head', minimal_ui => 1
   % } else {
     <title><%= config 'name' %> - <%= title %></title>
   % }
