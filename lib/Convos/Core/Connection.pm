@@ -331,7 +331,7 @@ input. It will use L</name> to filter out the right list.
 sub channels_from_conversations {
   my ($self, $conversations) = @_;
 
-  map { $_->[1] } grep { $_->[0] eq $self->name and $_->[1] =~ /^[#&]/ } map { [id_as $_ ] } @{$conversations || []};
+  map { lc $_->[1] } grep { $_->[0] eq $self->name and $_->[1] =~ /^[#&]/ } map { [id_as $_ ] } @{$conversations || []};
 }
 
 =head2 add_server_message
@@ -524,7 +524,7 @@ sub irc_rpl_whoischannels {
 
 sub irc_rpl_notopic {
   my ($self, $message) = @_;
-  my $target = $message->{params}[1];
+  my $target = lc $message->{params}[1];
 
   $self->redis->hset("$self->{path}:$target", topic => '');
   $self->_publish(topic => {topic => '', target => $target});
@@ -538,7 +538,7 @@ Reply with topic
 
 sub irc_rpl_topic {
   my ($self, $message) = @_;
-  my $target = $message->{params}[1];
+  my $target = lc $message->{params}[1];
   my $topic  = $message->{params}[2];
 
   $self->redis->hset("$self->{path}:$target", topic => $topic);
@@ -553,7 +553,7 @@ sub irc_rpl_topic {
 
 sub irc_topic {
   my ($self, $message) = @_;
-  my $target = $message->{params}[0];
+  my $target = lc $message->{params}[0];
   my $topic  = $message->{params}[1];
 
   $self->redis->hset("$self->{path}:$target", topic => $topic);
@@ -569,8 +569,8 @@ Reply with who and when for topic change
 sub irc_rpl_topicwhotime {
   my ($self, $message) = @_;
 
-  $self->_publish(
-    topic_by => {timestamp => $message->{params}[3], nick => $message->{params}[2], target => $message->{params}[1],});
+  $self->_publish(topic_by =>
+      {timestamp => $message->{params}[3], nick => $message->{params}[2], target => lc $message->{params}[1],});
 }
 
 =head2 irc_rpl_myinfo
@@ -598,7 +598,7 @@ See L<Mojo::IRC/irc_join>.
 sub irc_join {
   my ($self, $message) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($message->{prefix});
-  my $channel = $message->{params}[0];
+  my $channel = lc $message->{params}[0];
 
   if ($nick eq $self->_irc->nick) {
     $self->redis->hset("$self->{path}:$channel", topic => '');
@@ -655,7 +655,7 @@ sub irc_quit {
 sub irc_part {
   my ($self, $message) = @_;
   my ($nick) = IRC::Utils::parse_user($message->{prefix});
-  my $channel = $message->{params}[0];
+  my $channel = lc $message->{params}[0];
 
   Scalar::Util::weaken($self);
   if ($nick eq $self->_irc->nick) {
@@ -682,7 +682,7 @@ sub irc_part {
 
 sub err_bannedfromchan {
   my ($self, $message) = @_;
-  my $channel = $message->{params}[1];
+  my $channel = lc $message->{params}[1];
   my $name    = as_id $self->name, $channel;
   my $data    = {status => 401, message => $message->{params}[2]};
 
@@ -707,7 +707,7 @@ sub err_bannedfromchan {
 
 sub err_nosuchchannel {
   my ($self, $message) = @_;
-  my $channel = $message->{params}[1];
+  my $channel = lc $message->{params}[1];
   my $name = as_id $self->name, $channel;
 
   Scalar::Util::weaken($self);
@@ -759,7 +759,7 @@ sub irc_rpl_namreply {
     push @nicks, {nick => $_, mode => $mode};
   }
 
-  $self->_publish(rpl_namreply => {nicks => \@nicks, target => $message->{params}[2],});
+  $self->_publish(rpl_namreply => {nicks => \@nicks, target => lc $message->{params}[2],});
 }
 
 =head2 irc_rpl_liststart
@@ -782,6 +782,9 @@ sub irc_rpl_liststart {
 
 sub irc_rpl_list {
   my ($self, $message) = @_;
+
+  # Will not force lowercase on channel name [1] here since it is only
+  # used for representation
 
   push @{$self->{channel_list}},
     {name => $message->{params}[1], visible => $message->{params}[2], title => $message->{params}[3] || 'No title',};
@@ -808,10 +811,10 @@ sub irc_rpl_listend {
 
 sub irc_mode {
   my ($self, $message) = @_;
-  my $target = shift @{$message->{params}};
+  my $target = lc shift @{$message->{params}};
   my $mode   = shift @{$message->{params}};
 
-  if ($target eq $self->_irc->nick) {
+  if ($target eq lc $self->_irc->nick) {
     my $data = {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode",};
 
     $self->_add_convos_message($data);
@@ -865,7 +868,7 @@ Handle join commands from user. Add to channel set.
 
 sub cmd_join {
   my ($self, $message) = @_;
-  my $channel = $message->{params}[0] || '';
+  my $channel = lc $message->{params}[0] || '';
   my $name;
 
   if ($channel =~ /^[#&]+\w/) {
