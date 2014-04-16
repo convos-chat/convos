@@ -323,12 +323,9 @@ sub _assets {
   $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
   $self->asset('convos.css', '/sass/main.scss');
   $self->asset(
-    'convos.js',                      '/js/jquery.min.js',
-    '/js/jquery.hotkeys.js',          '/js/jquery.fastbutton.js',
-    '/js/jquery.nanoscroller.min.js', '/js/jquery.pjax.js',
-    '/js/selectize.js',               '/js/globals.js',
-    '/js/jquery.doubletap.js',        '/js/ws-reconnecting.js',
-    '/js/jquery.helpers.js',          '/js/convos.chat.js',
+    'convos.js',              '/js/jquery.min.js',     '/js/jquery.hotkeys.js', '/js/jquery.fastbutton.js',
+    '/js/jquery.pjax.js',     '/js/selectize.js',      '/js/globals.js',        '/js/jquery.doubletap.js',
+    '/js/ws-reconnecting.js', '/js/jquery.helpers.js', '/js/convos.chat.js',
   );
 }
 

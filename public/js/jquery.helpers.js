@@ -42,16 +42,12 @@
       var $container = $( $a.data('toggle') );
       var scroller = $container.hasClass('scrolled');
 
-      if(scroller && !has_fancy_scrollbars) {
-        $container.addClass('nanoscroller').wrapInner('<div class="content"/>').nanoScroller({ preventPageScrolling: true });
-      }
-
       $a.on('activate', function() {
         var $a = $(this);
         var height = $win.height() - 70;
         var left = $a.offset().left + $a.outerWidth() - $container.width();
         $container.css('left', left < 10 ? 10 : left);
-        if(scroller) $container.height(height).nanoScroller();;
+        if(scroller) $container.height(height);
       });
     });
   };
@@ -140,9 +136,6 @@
         e.preventDefault();
         $login_button.click();
       });
-    }
-    if(has_fancy_scrollbars) {
-      $.fn.nanoScroller = function() { return this; };
     }
 
     $height_from = $('div.wrapper').length ? $('div.wrapper') : $('body');

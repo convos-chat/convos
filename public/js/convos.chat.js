@@ -515,7 +515,6 @@
           return '<li><a href="' + $.url_for(network, n) + '">' + n + '</a></li>';
         }).join('')
       );
-      $('div.sidebar.container').nanoScroller(); // reset scrollbar;
     }
   }
 
