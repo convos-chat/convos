@@ -309,41 +309,6 @@ div.loading-indicator {
 }
 
 /*
- * nanoScrollerJs
- */
-.nanoscroller > .content {
-  position: absolute;
-  overflow: scroll;
-  overflow-x: hidden;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-.nanoscroller > .pane {
-  position: absolute;
-  width: 10px;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
-  @include opacity(.01);
-  @include prefix(transition, all ease-in-out .2s);
-  @include border-radius(5px);
-}
-.nanoscroller > .pane > .slider {
-  background: #444;
-  background: rgba(0, 0, 0, 0.5);
-  position: relative;
-  margin: 0 1px;
-  @include border-radius(3px);
-}
-.nanoscroller:hover > .pane, .pane.active, .pane.flashed {
-  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
-  @include opacity(.99);
-}
-
-/*
  * Chat
  */
 nav.bar {
