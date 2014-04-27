@@ -1,11 +1,11 @@
 {
   # Name of your organization
-  name => 'Nordaaker',
+  name => '##CONVOS_ORG_NAME##',
 
   # Invite code
   # If set must be appended to register url.
   # Example http://your.convos.by/register/some-secret-invite-code
-  invite_code => '',
+  invite_code => '##CONVOS_INVITE_CODE##',
 
   # Production config for the hypnotoad web server
   hypnotoad => {

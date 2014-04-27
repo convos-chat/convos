@@ -1,18 +1,24 @@
-from   stackbrew/ubuntu:13.10
-env    DEBIAN_FRONTEND noninteractive
+# nordaaker/convos
+# VERSION 0.0.1
+#
+# BUILD: docker build --no-cache --rm -t nordaaker/convos .
+# RUN:   docker run -p $PORT:8080 nordaaker/convos
 
-#run    dpkg-divert --local --rename --add /sbin/initctl
-#run    ln -s /bin/true /sbin/initctl
+FROM   ubuntu:13.10
+ENV    DEBIAN_FRONTEND noninteractive
 
-run    apt-get --yes update
-run    apt-get --yes upgrade --force-yes
-run    apt-get install -y -q software-properties-common
-run    add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
+#RUN    dpkg-divert --local --rename --add /sbin/initctl
+#RUN    ln -s /bin/true /sbin/initctl
 
-run apt-get -y install curl perl supervisor redis-server make rubygems libio-socket-ssl-perl
-add ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-add . /convos
-run gem install sass
-run cd /convos; ./vendor/bin/carton
-expose 8080
-entrypoint ["/usr/bin/supervisord"]
+RUN    apt-get --yes update
+RUN    apt-get --yes upgrade --force-yes
+RUN    apt-get install -y -q software-properties-common
+
+RUN    apt-get -y install curl perl supervisor redis-server make rubygems libio-socket-ssl-perl
+ADD    ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD    . /convos
+RUN    gem install sass
+RUN    cd /convos; ./vendor/bin/carton
+
+EXPOSE 8080
+CMD    cd /convos && ./setup_config.sh && /usr/bin/supervisord
