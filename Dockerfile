@@ -1,5 +1,4 @@
 from   stackbrew/ubuntu:13.10
-env    DEBIAN_FRONTEND noninteractive
 
 #run    dpkg-divert --local --rename --add /sbin/initctl
 #run    ln -s /bin/true /sbin/initctl
