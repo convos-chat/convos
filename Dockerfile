@@ -10,11 +10,16 @@ ENV    DEBIAN_FRONTEND noninteractive
 #RUN    dpkg-divert --local --rename --add /sbin/initctl
 #RUN    ln -s /bin/true /sbin/initctl
 
-RUN    apt-get --yes update
-RUN    apt-get --yes upgrade --force-yes
-RUN    apt-get install -y -q software-properties-common
+RUN    apt-get update && apt-get install -y \
+       software-properties-common \
+       curl \
+       perl \
+       make \
+       rubygems \
+       libio-socket-ssl-perl \
+       supervisor \
+       redis-server
 
-RUN    apt-get -y install curl perl supervisor redis-server make rubygems libio-socket-ssl-perl
 ADD    ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD    . /convos
 RUN    gem install sass
