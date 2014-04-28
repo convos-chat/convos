@@ -20,5 +20,7 @@ ADD . /convos
 RUN gem install sass
 RUN cd /convos; ./vendor/bin/carton
 
+ENV MOJO_MODE production
+
 EXPOSE 8080
 ENTRYPOINT ["/usr/bin/supervisord"]
