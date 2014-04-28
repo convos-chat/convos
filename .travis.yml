@@ -12,5 +12,7 @@ env:
 install:
   - "cpanm -n Test::Pod Test::Pod::Coverage EV"
   - "cpanm -n --installdeps ."
+before_script:
+  - ./setup_config.sh
 notifications:
   email: false
