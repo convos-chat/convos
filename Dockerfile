@@ -4,7 +4,6 @@ from   stackbrew/ubuntu:13.10
 #run    ln -s /bin/true /sbin/initctl
 
 run    apt-get --yes update
-run    apt-get --yes upgrade --force-yes
 run    apt-get install -y -q software-properties-common
 run    add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
 
