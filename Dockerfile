@@ -1,16 +1,24 @@
-from   stackbrew/ubuntu:13.10
+# nordaaker/convos
+#
+# BUILD: docker build --no-cache --rm -t nordaaker/convos .
+# RUN:   docker run -p $PORT:8080 nordaaker/convos
 
-#run    dpkg-divert --local --rename --add /sbin/initctl
-#run    ln -s /bin/true /sbin/initctl
+FROM stackbrew/ubuntu:13.10
 
-run    apt-get --yes update
-run    apt-get install -y -q software-properties-common
-run    add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    curl \
+    perl \
+    make \
+    rubygems \
+    libio-socket-ssl-perl \
+    supervisor \
+    redis-server
 
-run apt-get -y install curl perl supervisor redis-server make rubygems libio-socket-ssl-perl
-add ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-add . /convos
-run gem install sass
-run cd /convos; ./vendor/bin/carton
-expose 8080
-entrypoint ["/usr/bin/supervisord"]
+ADD ./vendor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD . /convos
+RUN gem install sass
+RUN cd /convos; ./vendor/bin/carton
+
+EXPOSE 8080
+ENTRYPOINT ["/usr/bin/supervisord"]
