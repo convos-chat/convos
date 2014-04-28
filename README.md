@@ -4,7 +4,7 @@ Convos is the simplest way to use IRC. It is always online, and accessible to yo
 
 ![Screenshot](http://convos.by/images/screenshot.jpg)
 
-## Features 
+## Features
 #### Always online
 The backend server will keep you logged in and logs all the activity in your archive.
 
@@ -22,7 +22,7 @@ Convos requires a Redis server to function. If you are deploying on osx you can 
 
 To install convos we provide a simple script. All it requires in addition to redis is a working build environment with make, Perl and a C compiler. Copy/paste this to the command line:
 
-    $ curl -L http://convos.by/install.sh | bash - 
+    $ curl -L http://convos.by/install.sh | bash -
 
 Then just follow the simple instructions. If you're worried about running a script directly from a web server, just download it and inspect it before you run it.
 
@@ -49,11 +49,11 @@ In production setups, you might want to start the backend separately from the we
 
 ## Upgrading Convos
 
-To get the latest version of covos, you can run the install script above again from the parent directory of your convos-release directory, and it will download a newer version and overwrite your installation. Before you do this, make sure to stop the running application, then start it again once you've updated. Note that if we've changed the schema, Convos will ask you to upgrade it before you can start the app. to do this, run 
+To get the latest version of convos, you can run the install script above again from the parent directory of your convos-release directory, and it will download a newer version and overwrite your installation. Before you do this, make sure to stop the running application, then start it again once you've updated. Note that if we've changed the schema, Convos will ask you to upgrade it before you can start the app. to do this, run
 
     $ ./script/convos upgrade
 
-From the convos-release folder. This should automatically update your schema to the latest version. 
+From the convos-release folder. This should automatically update your schema to the latest version.
 
 Note that if you downloaded convos using git, you should do `git pull` instead of using the install script.
 
@@ -65,11 +65,11 @@ Note that if you downloaded convos using git, you should do `git pull` instead o
 
 
 
-## Authors 
+## Authors
 Jan Henning Thorsen - jhthorsen@cpan.org
 Marcus Ramberg - marcus@nordaaker.com
 
 ## Copyright & License
-Copyright (C) 2012-2013, Nordaaker.
+Copyright (C) 2012-2014, Nordaaker.
 
 This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version 2.0.
