@@ -46,16 +46,18 @@ sub socket {
   # from backend to browser
   $self->redis->on(
     message => "convos:user:$login:out" => sub {
-      my ($redis, $err, $message) = @_;
+      my ($redis, $err, $message, $channel) = @_;
 
       if ($err) {
         $self->logf(warn => 'Redis subsciption fail: %s', $err);
         return $self->finish;
       }
 
+      $message = [$message];
+
       $self->logf(debug => '[%s] > %s', "convos:user:$login:out", $message);
       $self->format_conversation(
-        sub { j($message) },
+        sub { j(shift @$message) },
         sub {
           my ($self, $messages) = @_;
           $self->send_partial("event/$messages->[0]{event}", target => '', %{$messages->[0]});
