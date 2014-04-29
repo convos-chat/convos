@@ -373,7 +373,7 @@ sub add_message {
 
   @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
-  $data->{host} ||= Sys::Hostname::hostname;    # should never happen
+  $data->{host} ||= 'localhost';
   $data->{user} ||= $self->_irc->user;
 
   if ($data->{nick} && $data->{nick} ne $current_nick) {
