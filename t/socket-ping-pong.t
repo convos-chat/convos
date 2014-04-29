@@ -1,5 +1,5 @@
-BEGIN { $ENV{CONVOS_PING_INTERVAL} = 0.1 }
 use t::Helper;
+use Mojo::DOM;
 
 {
   diag 'login first';
@@ -9,23 +9,27 @@ use t::Helper;
 }
 
 {
-  my $frame;
+  my $message;
   $t->ua->websocket(
     '/socket' => {'Sec-Websocket-Extensions' => 'none'},
     sub {
       my ($ua, $tx) = @_;
+
       $tx->on(
-        frame => sub {
-          $frame = $_[1];
+        message => sub {
           Mojo::IOLoop->stop;
+          $message = $_[1];
+          $tx->close;
         }
       );
+
+      $tx->send(q(<div id="123" data-target="" data-network="some.host">/ping convos</div>));
     }
   );
 
   Mojo::IOLoop->start;
-  is $frame->[4], 1, 'sent as message';
-  is $frame->[5], '<div class="ping"/>', 'Avoid browser ping/pong to prevent browser errors (Chrome!#$%!)';
+  $message = Mojo::DOM->new($message);
+  is $message->at('li.pong')->at('.content')->text, 'Pong', 'Got pong response' or diag $message;
 }
 
 #warn $t->message->[1];

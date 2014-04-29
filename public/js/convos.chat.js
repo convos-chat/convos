@@ -1,7 +1,7 @@
 ;(function($) {
   var $goto_bottom, $input, $win;
   var $messages = $('<div/>'); // need to be defined
-  var reconnectHandler;
+  var ping_sent = 0;
   var nicks = new sortedSet();
   var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var conversation_list = [];
@@ -419,22 +419,41 @@
     if(!url) return;
     $input.history = [];
     $input.history_i = 0;
+
     $input.socket = new ReconnectingWebSocket(url);
     $input.socket.opened = 0;
     $input.socket.onmessage = receiveMessage;
     $input.socket.debug = location.href.indexOf('#debug') > 0 ? true : false;
+
     $input.socket.onopen = function() {
       $input.removeClass('disabled');
       $input.socket.reconnectInterval = 500;
       if($input.socket.opened++) getNewMessages({ goto_bottom: true, silent: true });
+
+      $input._keepalive = setInterval(
+        function() {
+          if(++ping_sent == 2) {
+            ping_sent = 0;
+            $input.socket.refresh();
+          }
+          else {
+            $input.send('/ping convos', 0);
+          }
+        },
+        10 * 1000, // send ping every ten second
+      );
     };
+
     $input.socket.onerror = function(e) {
       if($input.socket.reconnectInterval < 5e3) $input.socket.reconnectInterval += 500;
+      if($input._keepalive) clearTimeout($input._keepalive);
     };
+
     $input.socket.onclose = function() {
       $input.addClass('disabled');
+      if($input._keepalive) clearTimeout($input._keepalive);
     };
-    reconnectHandler= window.setTimeout(function() { $input.socket.refresh()},60000);
+
     $input.send = function(message, attr) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
@@ -537,11 +556,9 @@
   var receiveMessage = function(e) {
     var $message = $(e.data);
 
-    window.clearTimeout(reconnectHandler);
-    reconnectHandler= window.setTimeout(function() { $input.socket.refresh() },60000);
-
-    if($message.hasClass('ping')) {
-      return $input.socket.send('<div class="pong"/>')
+    if($message.hasClass('pong')) {
+      ping_sent = 0;
+      return;
     }
 
     var at_bottom = $win.data('at_bottom');

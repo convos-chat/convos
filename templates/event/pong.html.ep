@@ -1,0 +1,4 @@
+<li class="notice pong" data-network="<%= $network %>" data-target="any">
+  <div class="content">Pong</div>
+  %= timestamp_span($timestamp)
+</li>

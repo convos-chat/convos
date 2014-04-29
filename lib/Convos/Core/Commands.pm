@@ -69,9 +69,22 @@ sub help {
 
 =head2 part
 
+=head2 ping
+
+This is currently only used to ping the backend for now. Responds with a
+"pong" template.
+
 =head2 query
 
 =cut
+
+sub ping {
+  my ($self, $target, $dom) = @_;
+
+  $self->send_partial('event/pong', %$dom, status => 200, timestamp => time);
+
+  return;
+}
 
 sub query {
   my ($self, $target, $dom) = @_;
