@@ -231,11 +231,11 @@ sub register {
 
   $self->stash(form => 'register');
 
-  if ($self->req->method ne 'POST') {
-    return $self->render('index');
-  }
   if ($invite_code and $invite_code ne ($validation->input->{invite} || '')) {
     return $self->render('index', form => 'invite_only', status => 400);
+  }
+  if ($self->req->method ne 'POST') {
+    return $self->render('index');
   }
 
   $validation->required('login')->like(qr/^\w+$/)->size(3, 15);
