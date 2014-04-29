@@ -52,7 +52,7 @@ function ReconnectingWebSocket(url, protocols) {
 
     // These can be altered by calling code.
     this.debug = false;
-    this.buffer = []
+    this.buffer = [];
     this.reconnectInterval = 1000;
     this.timeoutInterval = 2000;
 
@@ -106,8 +106,8 @@ function ReconnectingWebSocket(url, protocols) {
             }
             self.readyState = WebSocket.OPEN;
             reconnectAttempt = false;
+            while(self.buffer.size && self.send(self.buffer.shift()) {};
             self.onopen(event);
-            while(self.buffer.length) self.send(self.buffer.shift());
         };
         
         ws.onclose = function(event) {
@@ -146,24 +146,29 @@ function ReconnectingWebSocket(url, protocols) {
     connect(url);
 
     this.send = function(data) {
+      var sent = false;
+
+      try {
         if (ws) {
             if (self.debug || ReconnectingWebSocket.debugAll) {
                 console.debug('ReconnectingWebSocket', 'send', url, data);
             }
-            if(self.readyState == WebSocket.OPEN) {
-              return ws.send(data);
-            }
-            else {
-              self.buffer.push(data);
-            }
+            sent = ws.send(data);
+            if(typeof sent == 'undefined') sent = true; // handle gecko void ws.send()
         } else {
             throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
         }
+      } catch(e) {
+        this.buffer.push(data);
+        console.log('Websocket retry on ' + e);
+      };
+
+      return sent;
     };
 
     this.close = function() {
+        forcedClose = true;
         if (ws) {
-            forcedClose = true;
             ws.close();
         }
     };
@@ -183,3 +188,4 @@ function ReconnectingWebSocket(url, protocols) {
  * Setting this to true is the equivalent of setting all instances of ReconnectingWebSocket.debug to true.
  */
 ReconnectingWebSocket.debugAll = false;
+
