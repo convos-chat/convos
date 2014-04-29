@@ -219,9 +219,10 @@ See L</login>.
 =cut
 
 sub register {
-  my $self       = shift->render_later;
-  my $validation = $self->validation;
-  my ($code, $output);
+  my $self        = shift->render_later;
+  my $validation  = $self->validation;
+  my $invite_code = $self->config('invite_code');
+  my ($output);
 
   if ($self->session('login')) {
     $self->logf(debug => '[reg] Already logged in') if DEBUG;
@@ -233,9 +234,7 @@ sub register {
   if ($self->req->method ne 'POST') {
     return $self->render('index');
   }
-
-  $code = $self->param('invite') || '';
-  if ($self->app->config->{invite_code} && $code ne $self->app->config->{invite_code}) {
+  if ($invite_code and $invite_code ne ($validation->input->{invite} || '')) {
     return $self->render('index', form => 'invite_only', status => 400);
   }
 
