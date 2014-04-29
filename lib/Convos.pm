@@ -138,7 +138,7 @@ Set this header if you are mounting Convos under a custom path. Example
 with nginx:
 
   # mount the application under /convos
-  location /convos { 
+  location /convos {
     # remove "/convos" from the forwarded request
     rewrite ^/convos(.*)$ $1 break;
 
@@ -297,6 +297,11 @@ sub startup {
   if (!$ENV{CONVOS_REDIS_URL} and $self->mode eq 'production') {
     $ENV{CONVOS_REDIS_URL} = 'redis://127.0.0.1:6379/1';
     $self->log->info("Using default CONVOS_REDIS_URL=$ENV{CONVOS_REDIS_URL}");
+  }
+
+  if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
+    $self->log->warn("invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
+    $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
   }
 
   $self->defaults(full_page => 1);

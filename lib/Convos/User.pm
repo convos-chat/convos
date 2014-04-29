@@ -221,7 +221,7 @@ See L</login>.
 sub register {
   my $self        = shift->render_later;
   my $validation  = $self->validation;
-  my $invite_code = $self->config('invite_code');
+  my $invite_code = $ENV{CONVOS_INVITE_CODE};
   my ($output);
 
   if ($self->session('login')) {

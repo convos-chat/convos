@@ -22,6 +22,7 @@ RUN cd /convos; ./vendor/bin/carton
 
 ENV MOJO_MODE production
 ENV CONVOS_REDIS_URL redis://127.0.0.1:6379/1
+ENV CONVOS_INVITE_CODE convos
 
 EXPOSE 8080
 ENTRYPOINT ["/usr/bin/supervisord"]
