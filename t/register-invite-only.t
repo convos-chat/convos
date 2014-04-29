@@ -1,8 +1,9 @@
+BEGIN {
+  $ENV{CONVOS_INVITE_CODE} = 'superdupersecret';
+}
 use t::Helper;
 
 my $form;
-
-$t->app->config(invite_code => 'superdupersecret');
 
 {
   local $TODO = 'Will be fixed in #84';
