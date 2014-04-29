@@ -106,7 +106,7 @@ function ReconnectingWebSocket(url, protocols) {
             }
             self.readyState = WebSocket.OPEN;
             reconnectAttempt = false;
-            while(self.buffer.size && self.send(self.buffer.shift()) {};
+            while(self.buffer.size && self.send(self.buffer.shift())) {};
             self.onopen(event);
         };
         

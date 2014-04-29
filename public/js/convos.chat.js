@@ -440,7 +440,7 @@
             $input.send('/ping convos', 0);
           }
         },
-        10 * 1000, // send ping every ten second
+        10 * 1000 // send ping every ten second
       );
     };
 
