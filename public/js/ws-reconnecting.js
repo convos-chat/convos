@@ -106,8 +106,12 @@ function ReconnectingWebSocket(url, protocols) {
             }
             self.readyState = WebSocket.OPEN;
             reconnectAttempt = false;
-            while(self.buffer.size && self.send(self.buffer.shift())) {};
-            self.onopen(event);
+            try {
+              self._emptyBuffer();
+              self.onopen(event);
+            } catch(e) {
+              console.log('ReconnectingWebSocket', 'onopen', url, 'FAIL', e);
+            };
         };
         
         ws.onclose = function(event) {
@@ -149,21 +153,29 @@ function ReconnectingWebSocket(url, protocols) {
       var sent = false;
 
       try {
-        if (ws) {
-            if (self.debug || ReconnectingWebSocket.debugAll) {
-                console.debug('ReconnectingWebSocket', 'send', url, data);
-            }
-            sent = ws.send(data);
-            if(typeof sent == 'undefined') sent = true; // handle gecko void ws.send()
-        } else {
-            throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
-        }
+        this._emptyBuffer();
+        this._send(data);
+        sent = true;
       } catch(e) {
+        console.log('ReconnectingWebSocket', 'send', url, 'FAIL', e);
         this.buffer.push(data);
-        console.log('Websocket retry on ' + e);
       };
 
       return sent;
+    };
+
+    this._send = function(data) {
+        if (ws) {
+            var sent = ws.send(data);
+            if(typeof sent != 'undefined' && !sent) {
+              throw 'INVALID_STATE_ERR : Could not send message';
+            }
+            if (self.debug || ReconnectingWebSocket.debugAll) {
+                console.debug('ReconnectingWebSocket', 'send', url, data);
+            }
+        } else {
+            throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
+        }
     };
 
     this.close = function() {
@@ -182,10 +194,17 @@ function ReconnectingWebSocket(url, protocols) {
             ws.close();
         }
     };
+
+    this._emptyBuffer = function() {
+      while (this.buffer.length) {
+        this._send(this.buffer[0]);
+        this.buffer.shift();
+      }
+    };
 }
 
 /**
  * Setting this to true is the equivalent of setting all instances of ReconnectingWebSocket.debug to true.
  */
-ReconnectingWebSocket.debugAll = false;
+ReconnectingWebSocket.debugAll = location.href.indexOf('ReconnectingWebSocketDebugAll=1') > 0 ? true : false;
 
