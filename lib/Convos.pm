@@ -122,6 +122,12 @@ database index 2, instead of the default. This is useful when
 C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> does not contain
 the datbase index.
 
+=item * CONVOS_INVITE_CODE
+
+If set must be appended to register url. Example:
+
+  http://your.convos.by/register/some-secret-invite-code
+
 =item * MOJO_IRC_DEBUG=1
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
