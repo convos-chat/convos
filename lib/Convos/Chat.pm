@@ -49,7 +49,7 @@ sub socket {
       my ($redis, $err, $message, $channel) = @_;
 
       if ($err) {
-        $self->logf(warn => 'Redis subsciption fail: %s', $err);
+        $self->logf(warn => 'Redis subscription fail: %s', $err);
         return $self->finish;
       }
 
