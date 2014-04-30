@@ -29,7 +29,7 @@ use Mojo::DOM;
 
   Mojo::IOLoop->start;
   $message = Mojo::DOM->new($message);
-  is $message->at('li.pong')->at('.content')->text, 'Pong', 'Got pong response' or diag $message;
+  is $message->find('li.pong')->size, 1, 'Got pong response' or diag $message;
 }
 
 #warn $t->message->[1];
