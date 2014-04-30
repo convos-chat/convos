@@ -432,7 +432,7 @@
 
       $input._keepalive = setInterval(
         function() {
-          if(++ping_sent == 2) {
+          if(++ping_sent == 4) {
             ping_sent = 0;
             $input.socket.refresh();
           }
