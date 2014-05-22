@@ -1,3 +1,17 @@
+
+## 0.5 (2014-05-22)
+
+- Fixed bug with querying people not opening a new tab
+- Improved Dockerfile (Dominik Tobschall)
+- Fix casing bug with channel names.
+- Better scrollbars
+- Fixes for iPhone
+- Serve echoed messages with 'localhost' instead of hostname.
+- Wrap head in &lt;head&gt;
+- Whois improvements
+- CTCP support
+++
+
 ## 0.4 (2014-01-28)
 
 - Added system for upgrading Redis schema

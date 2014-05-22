@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.4
+0.5
 
 =head1 DESCRIPTION
 
@@ -215,7 +215,7 @@ use Convos::Core;
 use Convos::Core::Util ();
 use Convos::Upgrader;
 
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 =head1 ATTRIBUTES
 
@@ -306,7 +306,8 @@ sub startup {
   }
 
   if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
-    $self->log->warn("invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
+    $self->log->warn(
+      "invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
     $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
   }
 
