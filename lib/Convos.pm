@@ -122,6 +122,12 @@ database index 2, instead of the default. This is useful when
 C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> does not contain
 the datbase index.
 
+=item * CONVOS_INVITE_CODE
+
+If set must be appended to register url. Example:
+
+  http://your.convos.by/register/some-secret-invite-code
+
 =item * MOJO_IRC_DEBUG=1
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
@@ -138,7 +144,7 @@ Set this header if you are mounting Convos under a custom path. Example
 with nginx:
 
   # mount the application under /convos
-  location /convos { 
+  location /convos {
     # remove "/convos" from the forwarded request
     rewrite ^/convos(.*)$ $1 break;
 
@@ -297,6 +303,11 @@ sub startup {
   if (!$ENV{CONVOS_REDIS_URL} and $self->mode eq 'production') {
     $ENV{CONVOS_REDIS_URL} = 'redis://127.0.0.1:6379/1';
     $self->log->info("Using default CONVOS_REDIS_URL=$ENV{CONVOS_REDIS_URL}");
+  }
+
+  if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
+    $self->log->warn("invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
+    $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
   }
 
   $self->defaults(full_page => 1);
