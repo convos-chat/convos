@@ -35,7 +35,7 @@ redis_do(
   Mojo::Util::spurt('fresh', $fresh);
   $t->get_ok('/avatar?user=marcus&host=1.2.3.4')->status_is(200)->content_is('fresh', 'avatar from 3rd party');
 
-  Mojo::Util::spurt('cached', '/tmp/convos/_image_a0196c429a4c02c1cc96afed12a0ed0c.jpg');
+  Mojo::Util::spurt('cached', $ENV{TMPDIR} . '/convos/_image_a0196c429a4c02c1cc96afed12a0ed0c.jpg');
   $t->get_ok('/avatar?user=marcus&host=1.2.3.4')->status_is(200)->content_is('cached', 'avatar from cache');
   unlink glob('/tmp/convos/*');
   unlink $fresh;
@@ -64,7 +64,7 @@ redis_do(
 {
   local $TODO = 'This test does not work, since it loops';
   diag 'remote avatar';
-  redis_do([hset => 'convos:host2convos', '1.2.3.4' => "http://$host:$port"]);
+  redis_do([hset => 'convos:host2convos', '1.2.3.4' => " http : //$host : $port "]);
   $t->get_ok('/avatar?user=jhthorsen&host=1.2.3.4');
   unlink glob('/tmp/convos/*');
 }
