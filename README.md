@@ -4,6 +4,8 @@ Convos is the simplest way to use IRC. It is always online, and accessible to yo
 
 ![Screenshot](http://convos.by/images/screenshot.jpg)
 
+You can also check out our [live demo](http://demo.convos.by).
+
 ## Features
 #### Always online
 The backend server will keep you logged in and logs all the activity in your archive.
@@ -37,6 +39,9 @@ The command above will start a full featured, UNIX optimized, preforking non-blo
 See also the [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT) for production deployment.
 
 For convenience, we also include a Dockerfile so you can build a Docker image easily if you want a custom config, or  pull our image directly from the [docker index](https://index.docker.io/u/nordaaker/convos/).
+
+If you are interested in deploying Convos on Digital Ocean, you should follow
+[this guide](http://thorsen.pm/perl/2014/03/02/convos-on-digitalocean.html).
 
 Note: By default Convos will use the Mojo IOLoop, which is pure perl. In production you might want to install [EV](https://metacpan.org/release/EV) - we automatically use it if it is installed, and it performs much better.
 
