@@ -9,6 +9,7 @@ Convos::Chat - Mojolicious controller for IRC chat
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
 use Convos::Core::Commands;
+use constant PING_INTERVAL => $ENV{CONVOS_PING_INTERVAL} || 30;
 use constant DEFAULT_RESPONSE => "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
 
 =head1 METHODS
@@ -22,9 +23,19 @@ Handle conversation exchange over websocket.
 sub socket {
   my $self  = shift;
   my $login = $self->session('login');
+  my $key   = "convos:user:$login:out";
+  my ($sub, $tid);
 
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(30);
+  Mojo::IOLoop->stream($self->tx->connection)->timeout(PING_INTERVAL * 2);
   Scalar::Util::weaken($self);
+
+  # send ping frames
+  $tid = Mojo::IOLoop->recurring(
+    PING_INTERVAL,
+    sub {
+      $self->send('<div class="ping"/>');
+    }
+  );
 
   # from browser to backend
   $self->on(
@@ -33,7 +44,10 @@ sub socket {
       my $dom = Mojo::DOM->new($octets)->at('div');
       $self->logf(debug => '[ws] < %s', $octets);
 
-      if ($dom and $dom->{'id'} and $dom->{'data-network'}) {
+      if ($dom and $dom->attr('class') eq 'pong') {
+        return;
+      }
+      elsif ($dom and $dom->{'id'} and $dom->{'data-network'}) {
         @$dom{qw( network target uuid )} = map { delete $dom->{$_} || '' } qw( data-network data-target id );
         $self->_handle_socket_data($dom);
       }
@@ -42,28 +56,36 @@ sub socket {
       }
     }
   );
+  $self->on(
+    finish => sub {
+      my $self = shift or return;
+      Mojo::IOLoop->remove($tid);
+      delete $self->stash->{$_} for qw( sub redis );
+    }
+  );
 
   # from backend to browser
-  $self->redis->on(
-    message => "convos:user:$login:out" => sub {
-      my ($redis, $err, $message, $channel) = @_;
+  $sub = $self->stash->{sub} = $self->redis->subscribe($key);
+  $sub->on(
+    error => sub {
+      $self->logf(warn => 'sub: %s', pop);
+      $self->finish;
+    }
+  );
+  $sub->on(
+    message => sub {
+      my $sub      = shift;
+      my @messages = (shift);
 
-      if ($err) {
-        $self->logf(warn => 'Redis subscription fail: %s', $err);
-        return $self->finish;
-      }
-
-      $message = [$message];
-
-      $self->logf(debug => '[%s] > %s', "convos:user:$login:out", $message);
+      $self->logf(debug => '[%s] > %s', $key, $messages[0]);
       $self->format_conversation(
-        sub { j(shift @$message) },
+        sub { j(shift @messages) },
         sub {
           my ($self, $messages) = @_;
           $self->send_partial("event/$messages->[0]{event}", target => '', %{$messages->[0]});
         },
       );
-    },
+    }
   );
 }
 

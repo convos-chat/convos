@@ -1,1 +1,0 @@
-<li class="pong" data-network="<%= $network %>"></li>
