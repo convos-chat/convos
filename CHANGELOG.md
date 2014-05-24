@@ -1,5 +1,5 @@
 
-## 0.5 (2014-05-22)
+## 0.5 (2014-05-24)
 
 - Fixed bug with querying people not opening a new tab
 - Improved Dockerfile (Dominik Tobschall)
