@@ -288,6 +288,7 @@ sub startup {
     delete $self->log->{handle};           # make sure it's fresh to file
   }
 
+  $self->ua->max_redirects(2);             # support getting facebook pictures
   $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
   $self->secrets([time]);                  # will be replaced by _set_secrets()
