@@ -102,11 +102,6 @@ Set CONVOS_DEBUG for extra debug output to STDERR.
 
 Disable the frontend from automatically starting the backend.
 
-=item * CONVOS_PING_INTERVAL=30
-
-Set how often to send "keep-alive" through the web socket. Default is
-every 30 second.
-
 =item * CONVOS_REDIS_URL
 
 This is the URL to the Redis backend, and should follow this format:

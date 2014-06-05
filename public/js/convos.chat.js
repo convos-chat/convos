@@ -1,7 +1,6 @@
 ;(function($) {
   var $goto_bottom, $input, $win;
   var $messages = $('<div/>'); // need to be defined
-  var reconnectHandler;
   var nicks = new sortedSet();
   var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var conversation_list = [];
@@ -144,6 +143,7 @@
     var $doc = $(data || '<div></div>');
 
     $messages = $('div.messages ul');
+    $messages.end_time = parseFloat($messages.data('end-time') || 0);
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
     $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
@@ -162,7 +162,6 @@
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
-      $messages.end_time = parseFloat($messages.data('end-time') || 0);
       $win.scrollTo(0);
       getHistoricMessages();
     }
@@ -417,24 +416,15 @@
   var initSocket = function() {
     var url = $input.closest('form').data('socket-url');
     if(!url) return;
+    var socket = $input.data('socket', new ReconnectingWebSocket({ url: url, ping_protocol: [ 'PING', 'PONG' ] })).data('socket');
     $input.history = [];
     $input.history_i = 0;
-    $input.socket = new ReconnectingWebSocket(url);
-    $input.socket.opened = 0;
-    $input.socket.onmessage = receiveMessage;
-    $input.socket.debug = location.href.indexOf('#debug') > 0 ? true : false;
-    $input.socket.onopen = function() {
+    socket.onmessage = receiveMessage;
+    socket.onopen = function(e) {
       $input.removeClass('disabled');
-      $input.socket.reconnectInterval = 500;
-      if($input.socket.opened++) getNewMessages({ goto_bottom: true, silent: true });
+      if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true });
     };
-    $input.socket.onerror = function(e) {
-      if($input.socket.reconnectInterval < 5e3) $input.socket.reconnectInterval += 500;
-    };
-    $input.socket.onclose = function() {
-      $input.addClass('disabled');
-    };
-    reconnectHandler= window.setTimeout(function() { $input.socket.refresh()},60000);
+    socket.onclose = function() { $input.addClass('disabled'); };
     $input.send = function(message, attr) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
@@ -446,7 +436,7 @@
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
       }
-      $input.socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr(attr).text(message).prop('outerHTML'));
+      socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr(attr).text(message).prop('outerHTML'));
       $input.addClass('sending').siblings('.menu').hide();
       if(attr['data-history']) $input.history.push(message);
       $input.history_i = $input.history.length;
@@ -536,14 +526,6 @@
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
-
-    window.clearTimeout(reconnectHandler);
-    reconnectHandler= window.setTimeout(function() { $input.socket.refresh() },60000);
-
-    if($message.hasClass('ping')) {
-      return $input.socket.send('<div class="pong"/>')
-    }
-
     var at_bottom = $win.data('at_bottom');
     var to_current = false;
     var uuid = $message.attr('id');
@@ -665,7 +647,7 @@
     $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {
-      $input.socket.buffer = []; // need to clear buffer when resending messages
+      $input.data('socket').buffer = []; // need to clear buffer when resending messages
       $input.send($(this).parents('li').find('.content').text());
       $(this).parents('li').remove();
     });
