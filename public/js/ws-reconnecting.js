@@ -47,118 +47,87 @@
  * Latest version: https://github.com/joewalnes/reconnecting-websocket/
  * - Joe Walnes
  */
-function ReconnectingWebSocket(url, protocols) {
-    protocols = protocols || [];
-
-    // These can be altered by calling code.
-    this.debug = location.href.indexOf('ReconnectingWebSocketDebugAll=1') > 0;
-    this.buffer = []
-    this.reconnectInterval = 1000;
-    this.timeoutInterval = 2000;
-    this.ping_interval = 20000;
-    this.ping_protocol = [ 'PING', 'PONG' ];
-
+function ReconnectingWebSocket(args) {
     var self = this;
-    var ws;
-    var forcedClose = false;
-    var timedOut = false;
-    var ping_tid;
-    
-    this.url = url;
-    this.protocols = protocols;
+    var ping_interval = args.ping_interval || 20000;
+    var forced_close = false;
+    var reconnecting = false;
+    var ws = { readyState: WebSocket.CLOSED };
+    var connect_tid;
+
+    // attributes
+    this.buffer = []
+    this.connect_timeout = args.timeout || 2000;
+    this.debug = args.debug || location.href.indexOf('ReconnectingWebSocketDebugAll=1') > 0;
+    this.ping_protocol = args.ping_protocol || []; // example: [ 'PING', 'PONG' ];
+    this.protocols = args.protocols || [];
     this.readyState = WebSocket.CLOSED;
-    this.URL = url; // Public API
+    this.reconnect_interval = args.reconnect_interval || 1000;
+    this.url = args.url;
+    this.URL = args.url; // Public API
 
-    this.onopen = function(event) {
-    };
-
-    this.onclose = function(event) {
-    };
-
-    this.onconnecting = function(event) {
-    };
-
-    this.onmessage = function(event) {
-    };
-
-    this.onerror = function(event) {
-    };
-
-    function connect(reconnectAttempt) {
-        ws = new WebSocket(url, protocols);
-        
-        self.readyState = WebSocket.CONNECTING;
-        self.onconnecting();
-        if (self.debug) console.debug('ReconnectingWebSocket', 'attempt-connect', url);
-        
-        var localWs = ws;
-        var timeout = setTimeout(function() {
-            if (self.debug) console.debug('ReconnectingWebSocket', 'connection-timeout', url);
-            timedOut = true;
-            localWs.close();
-            timedOut = false;
-        }, self.timeoutInterval);
+    function connect() {
+        readyState('CONNECTING');
+        emit('onconnecting', reconnecting);
+        forced_close = false;
+        ws = new WebSocket(self.url, self.protocols);
+        connect_tid = setTimeout(function() { ws.close(); }, self.connect_timeout);
         
         ws.onopen = function(event) {
-            clearTimeout(timeout);
-            if (self.debug) console.debug('ReconnectingWebSocket', 'onopen', url);
+            clearTimeout(connect_tid);
             if (self.ping_protocol[0]) self.waiting_for_pong = false;
-            self.readyState = WebSocket.OPEN;
-            reconnectAttempt = false;
-            self.onopen(event);
+            event.reconnected = reconnecting;
+            reconnecting = true;
+            readyState('OPEN');
+            emit('onopen', event);
             while(self.buffer.length) self.send(self.buffer.shift());
         };
-        
         ws.onclose = function(event) {
-            clearTimeout(timeout);
-            ws = null;
-            if (forcedClose) {
-                self.readyState = WebSocket.CLOSED;
-                self.onclose(event);
+            clearTimeout(connect_tid);
+            ws = { readyState: WebSocket.CLOSED };
+            if (forced_close) {
+                readyState('CLOSED');
+                emit('onclose', event);
             } else {
-                self.readyState = WebSocket.CONNECTING;
-                self.onconnecting();
-                if (!reconnectAttempt && !timedOut) {
-                    if (self.debug) console.debug('ReconnectingWebSocket', 'onclose', url);
-                    self.onclose(event);
-                }
-                setTimeout(function() { connect(true); }, self.reconnectInterval);
+                readyState('CONNECTING');
+                setTimeout(function() { connect(); }, self.reconnect_interval);
             }
         };
         ws.onmessage = function(event) {
-            if (self.debug) {
-                console.debug('ReconnectingWebSocket', 'onmessage', url, event.data);
-            }
             if(self.ping_protocol[1] && event.data == self.ping_protocol[1]) {
+              if (self.debug) console.debug('ReconnectingWebSocket', 'pong', event.data);
               self.waiting_for_pong = false;
             }
             else {
-              self.onmessage(event);
+              emit('onmessage', event);
             }
         };
         ws.onerror = function(event) {
-            if (self.debug) console.debug('ReconnectingWebSocket', 'onerror', url, event);
-            self.onerror(event);
+            emit('onerror', event);
         };
     }
 
     this.send = function(data) {
         try {
-          ws.send(data);
-          if(self.debug) console.debug('ReconnectingWebSocket', 'send', url, data);
+          var sent = ws.send(data);
+          if (sent === false) throw 'Could not to send data to websocket.';
+          if (ws.readyState === WebSocket.CLOSED) throw 'WebSocket readyState is CLOSED';
+          if (self.debug) console.debug('ReconnectingWebSocket', 'send', data);
         } catch(e) {
-          connect(url);
           self.buffer.push(data);
-          if(self.debug) console.debug('ReconnectingWebSocket', 'buffer.push', data, e);
-          if(self.readyState != WebSocket.CONNECTING && self.readyState != WebSocket.OPEN) connect(url);
+          console.error('ReconnectingWebSocket', 'send', data, 'fail', e);
+          if (ws.readyState != WebSocket.CONNECTING && ws.readyState != WebSocket.OPEN) connect();
         };
     };
 
     this.close = function() {
-        if (ws) {
-            forcedClose = true;
+        if (self.debug) console.debug('ReconnectingWebSocket', 'close');
+        reconnecting = false;
+        if (ws.readyState != WebSocket.CLOSED) {
+            forced_close = true;
             ws.close();
         }
+        delete self.waiting_for_pong;
     };
 
     /**
@@ -166,16 +135,28 @@ function ReconnectingWebSocket(url, protocols) {
      * For example, if the app suspects bad data / missed heart beats, it can try to refresh.
      */
     this.refresh = function() {
-        if (ws) ws.close();
+        if (self.debug) console.debug('ReconnectingWebSocket', 'refresh');
+        if (ws.readyState != WebSocket.CLOSED) ws.close();
+        delete self.waiting_for_pong;
+    };
+
+    var readyState = function(state) {
+      if (self.debug) console.debug('ReconnectingWebSocket', 'readyState', state);
+      self.readyState = WebSocket[state];
+    }
+
+    var emit = function(name, args) {
+      if (self.debug) console.debug('ReconnectingWebSocket', 'emit', name, args);
+      if (self[name]) self[name](args);
     };
 
     setInterval(
       function() {
-        if(typeof self.waiting_for_pong == 'undefined') return;
-        if(self.waiting_for_pong) return self.refresh();
-        ws.send(self.ping_protocol[0]);
+        if (typeof self.waiting_for_pong == 'undefined') return;
+        if (self.waiting_for_pong) return self.refresh();
+        self.send(self.ping_protocol[0]);
         self.waiting_for_pong = true;
       },
-      self.ping_interval
+      ping_interval
     );
 }
