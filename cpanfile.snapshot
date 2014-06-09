@@ -9,6 +9,26 @@ DISTRIBUTIONS
       Module::Build 0.35
       Test::More 0
       perl v5.8.8
+  Capture-Tiny-0.24
+    pathname: D/DA/DAGOLDEN/Capture-Tiny-0.24.tar.gz
+    provides:
+      Capture::Tiny 0.24
+    requirements:
+      Carp 0
+      Exporter 0
+      ExtUtils::MakeMaker 6.17
+      File::Spec 0
+      File::Spec::Functions 0
+      File::Temp 0
+      IO::File 0
+      IO::Handle 0
+      List::Util 0
+      Scalar::Util 0
+      Test::More 0.62
+      lib 0
+      strict 0
+      version 0
+      warnings 0
   ExtUtils-MakeMaker-6.76
     pathname: B/BI/BINGOS/ExtUtils-MakeMaker-6.76.tar.gz
     provides:
@@ -97,10 +117,10 @@ DISTRIBUTIONS
       File::Spec 0
       Test::More 0
       perl 5.006001
-  Mojo-IRC-0.0303
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.0303.tar.gz
+  Mojo-IRC-0.07
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.07.tar.gz
     provides:
-      Mojo::IRC 0.0303
+      Mojo::IRC 0.07
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
@@ -108,10 +128,10 @@ DISTRIBUTIONS
       Parse::IRC 1.20
       Test::More 0.98
       Unicode::UTF8 0.59
-  Mojo-Redis-0.9921
-    pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9921.tar.gz
+  Mojo-Redis-0.9928
+    pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9928.tar.gz
     provides:
-      Mojo::Redis 0.9921
+      Mojo::Redis 0.9928
       Mojo::Redis::Subscription undef
     requirements:
       Encode 0
@@ -119,8 +139,8 @@ DISTRIBUTIONS
       Mojolicious 3.0
       Protocol::Redis 1.0
       Test::More 0.88
-  Mojolicious-4.78
-    pathname: S/SR/SRI/Mojolicious-4.78.tar.gz
+  Mojolicious-5.05
+    pathname: S/SR/SRI/Mojolicious-5.05.tar.gz
     provides:
       Mojo undef
       Mojo::Asset undef
@@ -139,7 +159,6 @@ DISTRIBUTIONS
       Mojo::DOM undef
       Mojo::DOM::CSS undef
       Mojo::DOM::HTML undef
-      Mojo::DOM::Node undef
       Mojo::Date undef
       Mojo::EventEmitter undef
       Mojo::Exception undef
@@ -184,7 +203,7 @@ DISTRIBUTIONS
       Mojo::UserAgent::Server undef
       Mojo::UserAgent::Transactor undef
       Mojo::Util undef
-      Mojolicious 4.78
+      Mojolicious 5.05
       Mojolicious::Command undef
       Mojolicious::Command::cgi undef
       Mojolicious::Command::cpanify undef
@@ -233,10 +252,10 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.010001
-  Mojolicious-Plugin-AssetPack-0.0601
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.0601.tar.gz
+  Mojolicious-Plugin-AssetPack-0.13
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.13.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.0601
+      Mojolicious::Plugin::AssetPack 0.13
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
@@ -246,10 +265,10 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.01
       Mojolicious 4.30
       Test::More 0.90
-  Mojolicious-Plugin-LinkEmbedder-0.03
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.03.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.04
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.04.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.03
+      Mojolicious::Plugin::LinkEmbedder 0.04
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
@@ -285,6 +304,7 @@ DISTRIBUTIONS
       Config 0
       ExtUtils::MakeMaker 6.30
       File::Spec 0
+      Test 0
       strict 0
   Protocol-Redis-1.0003
     pathname: U/UN/UNDEF/Protocol-Redis-1.0003.tar.gz
@@ -293,7 +313,7 @@ DISTRIBUTIONS
       Protocol::Redis::Test undef
     requirements:
       Carp 0
-      ExtUtils::MakeMaker 6.64
+      ExtUtils::MakeMaker 6.6302
       List::Util 0
       Test::More 0.88
       perl 5.008001
@@ -302,11 +322,16 @@ DISTRIBUTIONS
     provides:
       Test::Fatal 0.012
     requirements:
+      Capture::Tiny 0
       Carp 0
       Exporter 5.57
       ExtUtils::MakeMaker 6.30
       Test::Builder 0
+      Test::Builder::Tester 0
+      Test::More 0.96
       Try::Tiny 0.07
+      blib 0
+      overload 0
       strict 0
       warnings 0
   Test-Script-1.07
@@ -330,8 +355,12 @@ DISTRIBUTIONS
       Carp 0
       Exporter 0
       ExtUtils::MakeMaker 6.30
+      File::Find 0
+      File::Temp 0
+      Test::More 0
       base 0
       constant 0
+      if 0
       strict 0
       warnings 0
   URI-1.60
