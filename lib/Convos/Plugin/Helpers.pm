@@ -272,9 +272,7 @@ Will render "partial" and L<send|Mojolicious::Controller/send> the result.
 sub send_partial {
   my $c = shift;
 
-  eval { $c->send($c->render(@_, partial => 1)->to_string) } or do {
-    $c->app->log->error($@);
-  };
+  eval { $c->send($c->render_to_string(@_)->to_string) } or $c->app->log->error($@);
 }
 
 =head2 timestamp_span

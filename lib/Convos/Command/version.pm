@@ -32,16 +32,16 @@ Run this command.
 =cut
 
 sub run {
-  my $self  = shift;
-  my $redis = $self->app->redis;
-  my $delay = $redis->ioloop->delay;
-  my ($database_version, $code_version);
+  my $self         = shift;
+  my $redis        = $self->app->redis;
+  my $delay        = $redis->ioloop->delay;
+  my $code_version = Convos->VERSION;
+  my $database_version;
 
   $ENV{MOJO_MODE} ||= '';
 
-  $redis->get('convos:version', $delay->begin);
-  $database_version = $delay->wait;
-  $code_version     = Convos->VERSION;
+  $redis->get('convos:version', sub { $database_version = pop; Mojo::IOLoop->stop; });
+  Mojo::IOLoop->start;
 
   print <<EOF;
 Convos

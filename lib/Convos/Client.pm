@@ -87,7 +87,7 @@ sub conversation {
 
       $self->connection_list(sub { });
 
-      if ($target and not grep {$_} @score) {        # no such conversation
+      if ($target and !$score[0]) {                  # no such conversation
         return $self->route;
       }
       if ($network eq 'convos') {

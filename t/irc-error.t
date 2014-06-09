@@ -1,6 +1,6 @@
 use t::Helper;
 
-my $port = Mojo::IOLoop->generate_port;
+my $port = Mojo::IOLoop::Server->generate_port;
 my $core = $t->app->core;
 my $conn;
 

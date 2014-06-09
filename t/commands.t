@@ -44,7 +44,7 @@ $t->websocket_ok('/socket');
 }
 
 {
-  publish(event => 'remove_conversation', server => 'irc.perl.org', target => '#convos');
+  publish(event => 'remove_conversation', network => 'irc.perl.org', target => '#convos');
   $t->send_ok(msg('/close'));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 PART #convos', 'abc-123 PART #convos';
@@ -60,7 +60,7 @@ $t->websocket_ok('/socket');
 $t->send_ok(msg('/reconnect    '));
 
 for my $cmd (qw/ j join /) {
-  publish(event => 'add_conversation', server => 'irc.perl.org', target => '#toocool');
+  publish(event => 'add_conversation', network => 'irc.perl.org', target => '#toocool');
   $t->send_ok(msg("/$cmd #toocool  "));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 JOIN #toocool', 'abc-123 JOIN #toocool';

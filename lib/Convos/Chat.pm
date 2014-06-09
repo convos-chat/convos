@@ -158,12 +158,12 @@ sub _send_400 {
   my ($self, $args, $message) = @_;
 
   $self->send_partial(
-    'event/server_message',
+    message   => $message,
+    network   => $args->{'data-network'} || 'any',
     status    => 400,
+    template  => 'event/server_message',
     timestamp => time,
     uuid      => '',
-    network   => $args->{'data-network'} || 'any',
-    message   => $message,
   );
 }
 
