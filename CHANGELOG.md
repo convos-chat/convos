@@ -1,3 +1,8 @@
+## 0.6 (2014-06-09)
+
+- Compatible with Mojolicious 5.0
+- New WebSocket keep alive code
+- Fix facebook avatars
 
 ## 0.5 (2014-05-24)
 
