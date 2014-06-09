@@ -252,7 +252,7 @@ sub notification_list {
         $i++;
       }
 
-      $self->stash(notification_list => $notification_list, n_notifications => $n_notifications,);
+      $self->stash(notification_list => $notification_list, n_notifications => $n_notifications);
 
       return $self->$cb($notification_list) if $cb;
       return $self->respond_to(

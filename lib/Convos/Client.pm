@@ -165,8 +165,7 @@ sub clear_notifications {
     },
     sub {
       my ($delay, $notification_list) = @_;
-      my $n_notifications = 0;
-      my $i               = 0;
+      my $i = 0;
 
       while ($i < @$notification_list) {
         my $notification = j $notification_list->[$i];
