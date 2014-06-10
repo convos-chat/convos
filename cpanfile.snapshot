@@ -6,70 +6,8 @@ DISTRIBUTIONS
       CSS::Minifier::XS 0.08
     requirements:
       ExtUtils::CBuilder 0
-      Module::Build 0.35
       Test::More 0
       perl v5.8.8
-  Capture-Tiny-0.24
-    pathname: D/DA/DAGOLDEN/Capture-Tiny-0.24.tar.gz
-    provides:
-      Capture::Tiny 0.24
-    requirements:
-      Carp 0
-      Exporter 0
-      ExtUtils::MakeMaker 6.17
-      File::Spec 0
-      File::Spec::Functions 0
-      File::Temp 0
-      IO::File 0
-      IO::Handle 0
-      List::Util 0
-      Scalar::Util 0
-      Test::More 0.62
-      lib 0
-      strict 0
-      version 0
-      warnings 0
-  ExtUtils-MakeMaker-6.76
-    pathname: B/BI/BINGOS/ExtUtils-MakeMaker-6.76.tar.gz
-    provides:
-      DynaLoader 6.76
-      ExtUtils::Command::MM 6.76
-      ExtUtils::Liblist 6.76
-      ExtUtils::Liblist::Kid 6.76
-      ExtUtils::MM 6.76
-      ExtUtils::MM_AIX 6.76
-      ExtUtils::MM_Any 6.76
-      ExtUtils::MM_BeOS 6.76
-      ExtUtils::MM_Cygwin 6.76
-      ExtUtils::MM_DOS 6.76
-      ExtUtils::MM_Darwin 6.76
-      ExtUtils::MM_MacOS 6.76
-      ExtUtils::MM_NW5 6.76
-      ExtUtils::MM_OS2 6.76
-      ExtUtils::MM_QNX 6.76
-      ExtUtils::MM_UWIN 6.76
-      ExtUtils::MM_Unix 6.76
-      ExtUtils::MM_VMS 6.76
-      ExtUtils::MM_VOS 6.76
-      ExtUtils::MM_Win32 6.76
-      ExtUtils::MM_Win95 6.76
-      ExtUtils::MY 6.76
-      ExtUtils::MakeMaker 6.76
-      ExtUtils::MakeMaker::Config 6.76
-      ExtUtils::MakeMaker::_version 6.76
-      ExtUtils::Mkbootstrap 6.76
-      ExtUtils::Mksymlists 6.76
-      ExtUtils::testlib 6.76
-      MM 6.76
-      MY 6.76
-      in 6.76
-    requirements:
-      Data::Dumper 0
-      DirHandle 0
-      File::Basename 0
-      File::Spec 0.8
-      Pod::Man 0
-      perl 5.006
   File-Which-1.09
     pathname: A/AD/ADAMK/File-Which-1.09.tar.gz
     provides:
@@ -101,7 +39,6 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.09
     requirements:
       ExtUtils::CBuilder 0
-      Module::Build 0.35
       Test::More 0
       perl v5.8.8
   Module-Find-0.12
@@ -251,7 +188,6 @@ DISTRIBUTIONS
       ojo undef
     requirements:
       ExtUtils::MakeMaker 0
-      perl 5.010001
   Mojolicious-Plugin-AssetPack-0.13
     pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.13.tar.gz
     provides:
@@ -265,10 +201,10 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.01
       Mojolicious 4.30
       Test::More 0.90
-  Mojolicious-Plugin-LinkEmbedder-0.04
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.04.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.06
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.06.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.04
+      Mojolicious::Plugin::LinkEmbedder 0.06
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
@@ -304,7 +240,6 @@ DISTRIBUTIONS
       Config 0
       ExtUtils::MakeMaker 6.30
       File::Spec 0
-      Test 0
       strict 0
   Protocol-Redis-1.0003
     pathname: U/UN/UNDEF/Protocol-Redis-1.0003.tar.gz
@@ -313,7 +248,7 @@ DISTRIBUTIONS
       Protocol::Redis::Test undef
     requirements:
       Carp 0
-      ExtUtils::MakeMaker 6.6302
+      ExtUtils::MakeMaker 6.66
       List::Util 0
       Test::More 0.88
       perl 5.008001
@@ -322,16 +257,11 @@ DISTRIBUTIONS
     provides:
       Test::Fatal 0.012
     requirements:
-      Capture::Tiny 0
       Carp 0
       Exporter 5.57
       ExtUtils::MakeMaker 6.30
       Test::Builder 0
-      Test::Builder::Tester 0
-      Test::More 0.96
       Try::Tiny 0.07
-      blib 0
-      overload 0
       strict 0
       warnings 0
   Test-Script-1.07
@@ -355,75 +285,10 @@ DISTRIBUTIONS
       Carp 0
       Exporter 0
       ExtUtils::MakeMaker 6.30
-      File::Find 0
-      File::Temp 0
-      Test::More 0
       base 0
       constant 0
-      if 0
       strict 0
       warnings 0
-  URI-1.60
-    pathname: G/GA/GAAS/URI-1.60.tar.gz
-    provides:
-      URI 1.60
-      URI::Escape 3.31
-      URI::Heuristic 4.20
-      URI::IRI undef
-      URI::QueryParam undef
-      URI::Split undef
-      URI::URL 5.04
-      URI::WithBase 2.20
-      URI::_foreign undef
-      URI::_generic undef
-      URI::_idna undef
-      URI::_ldap 1.12
-      URI::_login undef
-      URI::_punycode 0.04
-      URI::_query undef
-      URI::_segment undef
-      URI::_server undef
-      URI::_userpass undef
-      URI::data undef
-      URI::file 4.21
-      URI::file::Base undef
-      URI::file::FAT undef
-      URI::file::Mac undef
-      URI::file::OS2 undef
-      URI::file::QNX undef
-      URI::file::Unix undef
-      URI::file::Win32 undef
-      URI::ftp undef
-      URI::gopher undef
-      URI::http undef
-      URI::https undef
-      URI::ldap 1.12
-      URI::ldapi undef
-      URI::ldaps undef
-      URI::mailto undef
-      URI::mms undef
-      URI::news undef
-      URI::nntp undef
-      URI::pop undef
-      URI::rlogin undef
-      URI::rsync undef
-      URI::rtsp undef
-      URI::rtspu undef
-      URI::sip 0.11
-      URI::sips undef
-      URI::snews undef
-      URI::ssh undef
-      URI::telnet undef
-      URI::tn3270 undef
-      URI::urn undef
-      URI::urn::isbn undef
-      URI::urn::oid undef
-    requirements:
-      ExtUtils::MakeMaker 0
-      MIME::Base64 2
-      Test 0
-      Test::More 0
-      perl 5.008001
   URI-Find-20111103
     pathname: M/MS/MSCHWERN/URI-Find-20111103.tar.gz
     provides:
