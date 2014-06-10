@@ -3,14 +3,15 @@
 # BUILD: docker build --no-cache --rm -t nordaaker/convos .
 # RUN:   docker run -p $PORT:8080 nordaaker/convos
 
-FROM stackbrew/ubuntu:13.10
+FROM stackbrew/ubuntu:14.04
 
 RUN apt-get update && apt-get install -y \
+    build-essential \
     software-properties-common \
     curl \
     perl \
     make \
-    rubygems \
+    ruby \
     libio-socket-ssl-perl \
     supervisor \
     redis-server
