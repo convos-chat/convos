@@ -1,3 +1,7 @@
+## 0.7 (2014-06-10)
+- Add embedding of GitHub gists
+- Fix opening socket in private conversations
+
 ## 0.6 (2014-06-09)
 
 - Compatible with Mojolicious 5.0
