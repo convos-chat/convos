@@ -154,7 +154,6 @@ div.messages {
     div.content { max-width: 40em; line-height:1.4em; }
     div.whitespace {  white-space: pre-wrap; }
     div.embed {
-      max-height: 220px;
       img { max-height: 220px; border: 2px solid #bbb; @include border-radius(20px); margin: 8px 0; }
     }
     span.timestamp {
