@@ -1,0 +1,36 @@
+h1 a, h3 a { text-decoration: none; }
+h1 { @include font-size-margin(2em); }
+h2 { @include font-size-margin(1.6em); }
+h3 { @include font-size-margin(1.2em); }
+img { max-width: 100%; }
+p { margin: 1em 0; }
+ol { margin-left: 2em; }
+dl {
+  $dtWidth: 220px;
+  dt {
+    width: $dtWidth;
+    float: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  dd { margin-left: $dtWidth + $bodyGutter; }
+}
+.center { text-align: center; }
+.hidden { display: none; }
+.row { padding: 0 $bodyGutter; clear: both; }
+.close {
+  display: block;
+  float: right;
+  cursor: pointer;
+  font-size: 1.3em;
+  padding: 5px;
+  line-height: 0.4em;
+}
+
+div.question { padding: 0.5em; @include border-radius(3px); }
+div.question, li.info { background: #def; color: #158; border: 1px solid #bde; }
+div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
+div.question .button.confirm { background: darken(#def, 10%); border: 2px solid #900; }
+
+a.active { background-color: darken(#fff, 10%); }

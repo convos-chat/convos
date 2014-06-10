@@ -1,0 +1,73 @@
+html, body { height: 100%; }
+
+div.wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin-bottom: -$footerHeight;
+
+  div.clear {
+    height: $footerHeight + 20;
+    clear: both;
+  }
+}
+
+footer {
+  height: $footerHeight;
+  width: 100%;
+  background: #fff;
+  color: #999;
+  clear: both;
+  padding: 0 ($bodyGutter - 5) 5px;
+  overflow: hidden;
+  position: fixed;
+  bottom: 0;
+
+  form {
+    position: relative;
+    display: none;
+    input { font-family: inherit; font-size: 1.1em; width: 100%; padding: 8px; padding-right: 30px; }
+    input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
+    input.disabled, input.sending.disabled { background-color: #eee; }
+    .menu {
+      position: absolute;
+      top: 5px;
+      right: 4px;
+      a { color: #555; font-size: 22px; text-decoration: none; display: block; padding: 4px; }
+    }
+  }
+
+  @media (max-width: $responsiveWidth) {
+    position: static;
+  }
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  line-height: 1px;
+  height: 1px;
+  margin-top: 1em;
+  padding-bottom: 1em;
+}
+
+@media (max-width: $responsiveWidth) {
+  footer {
+    height: 42px;
+    input, input:focus {
+      border-bottom: 0;
+      border-right: 0;
+      border-left: 0;
+    }
+  }
+
+  dl {
+    dt {
+      float: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    dd { margin-left: $bodyGutter; }
+  }
+}

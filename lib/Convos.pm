@@ -329,7 +329,7 @@ sub _assets {
   my ($self, $config) = @_;
 
   $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
-  $self->asset('convos.css', '/sass/main.scss');
+  $self->asset('convos.css', '/sass/convos.scss');
   $self->asset(
     'convos.js',              '/js/jquery.min.js',     '/js/jquery.hotkeys.js', '/js/jquery.fastbutton.js',
     '/js/jquery.pjax.js',     '/js/selectize.js',      '/js/globals.js',        '/js/jquery.doubletap.js',
