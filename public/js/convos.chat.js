@@ -427,6 +427,7 @@
       if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true });
     };
     socket.onclose = function() { $input.addClass('disabled'); };
+    socket.send('PING'); // open socket
     $input.send = function(message, attr) {
       if(message.length == 0) return $input;
       var uuid = window.guid();
