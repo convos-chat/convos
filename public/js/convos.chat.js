@@ -1,4 +1,6 @@
 ;(function($) {
+  window.link_embedder_text_gist_github_styled = 1; // custom gist styling
+
   var $goto_bottom, $input, $win;
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
