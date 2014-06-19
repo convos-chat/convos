@@ -87,7 +87,7 @@ sub conversation {
 
       $self->connection_list(sub { });
 
-      if ($target and not grep {$_} @score) {        # no such conversation
+      if ($target and !$score[0]) {                  # no such conversation
         return $self->route;
       }
       if ($network eq 'convos') {
@@ -165,8 +165,7 @@ sub clear_notifications {
     },
     sub {
       my ($delay, $notification_list) = @_;
-      my $n_notifications = 0;
-      my $i               = 0;
+      my $i = 0;
 
       while ($i < @$notification_list) {
         my $notification = j $notification_list->[$i];

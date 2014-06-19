@@ -5,6 +5,7 @@ BEGIN {
   }
 }
 use t::Helper;
+use File::Spec ();
 use Mojo::JSON;
 use Mojo::DOM;
 
@@ -35,7 +36,8 @@ redis_do(
   Mojo::Util::spurt('fresh', $fresh);
   $t->get_ok('/avatar?user=marcus&host=1.2.3.4')->status_is(200)->content_is('fresh', 'avatar from 3rd party');
 
-  Mojo::Util::spurt('cached', $ENV{TMPDIR} . '/convos/_image_a0196c429a4c02c1cc96afed12a0ed0c.jpg');
+  Mojo::Util::spurt('cached',
+    File::Spec->catdir(File::Spec->tmpdir, 'convos/_image_a0196c429a4c02c1cc96afed12a0ed0c.jpg'));
   $t->get_ok('/avatar?user=marcus&host=1.2.3.4')->status_is(200)->content_is('cached', 'avatar from cache');
   unlink glob('/tmp/convos/*');
   unlink $fresh;

@@ -16,10 +16,13 @@ my ($redis, $t);
 
 sub redis_do {
   my $delay = Mojo::IOLoop->delay;
+  my @res;
   $redis ||= $t->app->redis;
   return $redis unless @_;
-  $redis->execute(@_, $delay->begin);
-  $delay->wait;
+  $redis->execute(@_, sub { @res = @_; Mojo::IOLoop->stop; });
+  Mojo::IOLoop->start;
+  shift @res;
+  return wantarray ? @res : $res[0];
 }
 
 sub wait_a_bit {

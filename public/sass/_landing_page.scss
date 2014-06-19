@@ -1,0 +1,48 @@
+.landing-page {
+  background: transparent url(../image/tactile-highlight-bg.jpg) 50% 0 no-repeat;
+  min-height: 595px;
+
+  .row {
+    margin: auto;
+    padding-top: 1em;
+    width: 680px;
+  }
+
+  h1 {
+    margin-bottom: 0;
+    .logo {
+      text-indent: -1000px;
+      display: block;
+      height: 55px;
+      width: 300px;
+      background: url('/image/logo.png') no-repeat top left;
+      background: none,url('/image/logo.svg') no-repeat top left;
+    }
+    small {
+      display: block;
+      font-weight: normal;
+      color: #999;
+    }
+  }
+  h2.login-register {
+    font-size: 1.1em;
+  }
+}
+
+div.footer {
+  font-size: 0.8em;
+  margin-top: 2em;
+  padding-top: 1em;
+  a {
+    color: #777;
+    text-decoration: none;
+  }
+}
+
+@media (max-width: $responsiveWidth) {
+  .landing-page {
+    img { margin: 2em 0; }
+    nav, .login, .register, .about { width: 100% };
+    .row { width: 100%; padding-left: 10px; padding-right: 10px; }
+  }
+}

@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.5
+0.7
 
 =head1 DESCRIPTION
 
@@ -101,11 +101,6 @@ Set CONVOS_DEBUG for extra debug output to STDERR.
 =item * CONVOS_MANUAL_BACKEND=1
 
 Disable the frontend from automatically starting the backend.
-
-=item * CONVOS_PING_INTERVAL=30
-
-Set how often to send "keep-alive" through the web socket. Default is
-every 30 second.
 
 =item * CONVOS_REDIS_URL
 
@@ -220,7 +215,7 @@ use Convos::Core;
 use Convos::Core::Util ();
 use Convos::Upgrader;
 
-our $VERSION = '0.5';
+our $VERSION = '0.7';
 
 =head1 ATTRIBUTES
 
@@ -293,6 +288,7 @@ sub startup {
     delete $self->log->{handle};           # make sure it's fresh to file
   }
 
+  $self->ua->max_redirects(2);             # support getting facebook pictures
   $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
   $self->secrets([time]);                  # will be replaced by _set_secrets()
@@ -339,7 +335,7 @@ sub _assets {
   my ($self, $config) = @_;
 
   $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
-  $self->asset('convos.css', '/sass/main.scss');
+  $self->asset('convos.css', '/sass/convos.scss');
   $self->asset(
     'convos.js',              '/js/jquery.min.js',     '/js/jquery.hotkeys.js', '/js/jquery.fastbutton.js',
     '/js/jquery.pjax.js',     '/js/selectize.js',      '/js/globals.js',        '/js/jquery.doubletap.js',

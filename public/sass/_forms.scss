@@ -1,0 +1,94 @@
+form {
+  margin: 0;
+  label { display: block; margin-top: $bodyGutter; }
+
+  select[multi] { height: 30px; }
+  input[readonly] { background: #f6f6f6; color: #666; }
+  .selectize-input, input, select {
+    background: #fff;
+    font-size: $fontSize - 1;
+    outline: none;
+    border: 2px solid #ccc;
+    padding: 4px;
+    width: 290px;
+    @include border-radius(3px);
+  }
+  .selectize-input { padding: 2px; }
+  .selectize-input.focus, input:focus { border: 2px solid darken(#ccc, 15%); }
+  input[type="checkbox"] { width: auto; }
+  input.field-with-error, select.field-with-error {
+    border-color: $errorColor;
+  }
+  div.actions {
+    margin-top: 2em;
+    clear: left;
+    padding: 0.5em 0;
+  }
+  p.help {
+    color: #555;
+    font-size: 0.9em;
+    margin-top: 0.1em;
+  }
+}
+
+form.horizontal {
+  label {
+    margin-top: 4px;
+    float: left;
+    width: 8em;
+  }
+  div.form-group {
+    padding: 4px 0;
+    clear: left;
+  }
+  div.actions {
+    margin-top: 1em;
+    margin-left: 8em;
+  }
+  p.help, p.error {
+    font-size: 0.9em;
+    margin: 2px 0 0 (8em / 0.9);
+  }
+  p.error {
+    background: lighten($errorColor, 40%);
+    width: 290px;
+    margin-top: -3px;
+    padding: 4px;
+    border: 2px solid $errorColor;
+    border-top: 0;
+    @include border-radius(3px);
+  }
+  input.field-with-error, select.field-with-error {
+    border-bottom: 0;
+  }
+
+  @media (max-width: 400px) {
+    label {
+      float: none;
+      width: 100%;
+    }
+    div.actions, p.help, p.error {
+      margin-left: 0;
+    }
+  }
+}
+
+form.edit-mode {
+  a.edit-mode {
+    display: none;
+  }
+}
+
+button, .button {
+  background: darken(#fff, 2%);
+  color: #222;
+  font-size: $fontSize;
+  text-decoration: none;
+  padding: 3px 6px;
+  border: 2px solid darken(#fff, 40%);
+  @include border-radius(3px);
+}
+button { vertical-align: baseline; } // make <a> and <button> align. at least in chrome
+button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
+button.confirm, a.confirm { color: #900; border: 2px solid #900; }
+button:hover, .button:hover { border: $buttonBorderHover; }

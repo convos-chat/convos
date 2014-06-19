@@ -9,7 +9,6 @@ Convos::Chat - Mojolicious controller for IRC chat
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
 use Convos::Core::Commands;
-use constant PING_INTERVAL => $ENV{CONVOS_PING_INTERVAL} || 30;
 use constant DEFAULT_RESPONSE => "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
 
 =head1 METHODS
@@ -24,30 +23,25 @@ sub socket {
   my $self  = shift;
   my $login = $self->session('login');
   my $key   = "convos:user:$login:out";
-  my ($sub, $tid);
 
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(PING_INTERVAL * 2);
+  Mojo::IOLoop->stream($self->tx->connection)->timeout(60);
   Scalar::Util::weaken($self);
-
-  # send ping frames
-  $tid = Mojo::IOLoop->recurring(
-    PING_INTERVAL,
-    sub {
-      $self->send('<div class="ping"/>');
-    }
-  );
 
   # from browser to backend
   $self->on(
     message => sub {
       my ($self, $octets) = @_;
-      my $dom = Mojo::DOM->new($octets)->at('div');
+      my $dom;
+
       $self->logf(debug => '[ws] < %s', $octets);
 
-      if ($dom and $dom->attr('class') eq 'pong') {
-        return;
+      if ($octets eq 'PING') {
+        return $self->send('PONG');
       }
-      elsif ($dom and $dom->{'id'} and $dom->{'data-network'}) {
+
+      $dom = Mojo::DOM->new($octets)->at('div');
+
+      if ($dom and $dom->{'id'} and $dom->{'data-network'}) {
         @$dom{qw( network target uuid )} = map { delete $dom->{$_} || '' } qw( data-network data-target id );
         $self->_handle_socket_data($dom);
       }
@@ -56,26 +50,21 @@ sub socket {
       }
     }
   );
+
   $self->on(
     finish => sub {
-      my $self = shift or return;
-      Mojo::IOLoop->remove($tid);
-      delete $self->stash->{$_} for qw( sub redis );
+      $self and delete $self->stash->{redis};
     }
   );
 
   # from backend to browser
-  $sub = $self->stash->{sub} = $self->redis->subscribe($key);
-  $sub->on(
-    error => sub {
-      $self->logf(warn => 'sub: %s', pop);
-      $self->finish;
-    }
-  );
-  $sub->on(
-    message => sub {
-      my $sub      = shift;
-      my @messages = (shift);
+  $self->redis->on(
+    message => $key => sub {
+      my ($sub, $err, @messages) = @_;
+
+      return unless $self;
+      return $self->finish->logf(warn => 'sub: %s', $err) if $err;
+      pop @messages;    # remove channel name from messages
 
       $self->logf(debug => '[%s] > %s', $key, $messages[0]);
       $self->format_conversation(
@@ -158,12 +147,12 @@ sub _send_400 {
   my ($self, $args, $message) = @_;
 
   $self->send_partial(
-    'event/server_message',
+    message   => $message,
+    network   => $args->{'data-network'} || 'any',
     status    => 400,
+    template  => 'event/server_message',
     timestamp => time,
     uuid      => '',
-    network   => $args->{'data-network'} || 'any',
-    message   => $message,
   );
 }
 

@@ -1,0 +1,29 @@
+/*
+ * http://html5reset.org + minor modifications
+ */
+html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video, details, summary { margin: 0; padding: 0; border: 0; font-size: 100%; line-height: 1.6em; vertical-align: baseline; background: transparent; }
+article, aside, figure, footer, header, hgroup, nav, section, details, summary { display: block; }
+ul { list-style: none; }
+a { margin: 0; padding: 0; vertical-align: baseline; background: transparent; }
+abbr[title], dfn[title] { border-bottom: 1px dotted #000; cursor: help; }
+table { border-collapse: collapse; border-spacing: 0; }
+th { font-weight: bold; vertical-align: bottom; }
+td { font-weight: normal; vertical-align: top; }
+input, select, button { vertical-align: middle; }
+select, input, textarea { font-size: $fontSize - 1; }
+table { font-size: inherit; font: 100%; }
+.clickable, label, input[type=file], button { cursor: pointer; }
+button, input, select, textarea { margin: 0; }
+button { width: auto; overflow: visible; }
+.ie7 img { -ms-interpolation-mode: bicubic; }
+.clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
+.clearfix:after { clear: both; }
+.clearfix { zoom: 1; }
+* { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+body { background-color: $backgroundColor; font-size: $fontSize; font-family: $fontFamily; -webkit-text-size-adjust: none; }
+body, select, input, textarea { color: $fontColor; }
+a, a:active { color: $linkColor; }
+a:hover { color: darken($linkColor, 20%); }
+input:-moz-placeholder { color: lighten($fontColor, 30%); }
+textarea:-moz-placeholder { color: lighten($fontColor, 30%); }
+li.separator { background: #eee; height: 1px; overflow: hidden; }

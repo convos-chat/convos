@@ -6,50 +6,8 @@ DISTRIBUTIONS
       CSS::Minifier::XS 0.08
     requirements:
       ExtUtils::CBuilder 0
-      Module::Build 0.35
       Test::More 0
       perl v5.8.8
-  ExtUtils-MakeMaker-6.76
-    pathname: B/BI/BINGOS/ExtUtils-MakeMaker-6.76.tar.gz
-    provides:
-      DynaLoader 6.76
-      ExtUtils::Command::MM 6.76
-      ExtUtils::Liblist 6.76
-      ExtUtils::Liblist::Kid 6.76
-      ExtUtils::MM 6.76
-      ExtUtils::MM_AIX 6.76
-      ExtUtils::MM_Any 6.76
-      ExtUtils::MM_BeOS 6.76
-      ExtUtils::MM_Cygwin 6.76
-      ExtUtils::MM_DOS 6.76
-      ExtUtils::MM_Darwin 6.76
-      ExtUtils::MM_MacOS 6.76
-      ExtUtils::MM_NW5 6.76
-      ExtUtils::MM_OS2 6.76
-      ExtUtils::MM_QNX 6.76
-      ExtUtils::MM_UWIN 6.76
-      ExtUtils::MM_Unix 6.76
-      ExtUtils::MM_VMS 6.76
-      ExtUtils::MM_VOS 6.76
-      ExtUtils::MM_Win32 6.76
-      ExtUtils::MM_Win95 6.76
-      ExtUtils::MY 6.76
-      ExtUtils::MakeMaker 6.76
-      ExtUtils::MakeMaker::Config 6.76
-      ExtUtils::MakeMaker::_version 6.76
-      ExtUtils::Mkbootstrap 6.76
-      ExtUtils::Mksymlists 6.76
-      ExtUtils::testlib 6.76
-      MM 6.76
-      MY 6.76
-      in 6.76
-    requirements:
-      Data::Dumper 0
-      DirHandle 0
-      File::Basename 0
-      File::Spec 0.8
-      Pod::Man 0
-      perl 5.006
   File-Which-1.09
     pathname: A/AD/ADAMK/File-Which-1.09.tar.gz
     provides:
@@ -81,7 +39,6 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.09
     requirements:
       ExtUtils::CBuilder 0
-      Module::Build 0.35
       Test::More 0
       perl v5.8.8
   Module-Find-0.12
@@ -97,10 +54,10 @@ DISTRIBUTIONS
       File::Spec 0
       Test::More 0
       perl 5.006001
-  Mojo-IRC-0.0303
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.0303.tar.gz
+  Mojo-IRC-0.07
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.07.tar.gz
     provides:
-      Mojo::IRC 0.0303
+      Mojo::IRC 0.07
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
@@ -108,10 +65,10 @@ DISTRIBUTIONS
       Parse::IRC 1.20
       Test::More 0.98
       Unicode::UTF8 0.59
-  Mojo-Redis-0.9921
-    pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9921.tar.gz
+  Mojo-Redis-0.9928
+    pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9928.tar.gz
     provides:
-      Mojo::Redis 0.9921
+      Mojo::Redis 0.9928
       Mojo::Redis::Subscription undef
     requirements:
       Encode 0
@@ -119,8 +76,8 @@ DISTRIBUTIONS
       Mojolicious 3.0
       Protocol::Redis 1.0
       Test::More 0.88
-  Mojolicious-4.78
-    pathname: S/SR/SRI/Mojolicious-4.78.tar.gz
+  Mojolicious-5.05
+    pathname: S/SR/SRI/Mojolicious-5.05.tar.gz
     provides:
       Mojo undef
       Mojo::Asset undef
@@ -139,7 +96,6 @@ DISTRIBUTIONS
       Mojo::DOM undef
       Mojo::DOM::CSS undef
       Mojo::DOM::HTML undef
-      Mojo::DOM::Node undef
       Mojo::Date undef
       Mojo::EventEmitter undef
       Mojo::Exception undef
@@ -184,7 +140,7 @@ DISTRIBUTIONS
       Mojo::UserAgent::Server undef
       Mojo::UserAgent::Transactor undef
       Mojo::Util undef
-      Mojolicious 4.78
+      Mojolicious 5.05
       Mojolicious::Command undef
       Mojolicious::Command::cgi undef
       Mojolicious::Command::cpanify undef
@@ -232,11 +188,10 @@ DISTRIBUTIONS
       ojo undef
     requirements:
       ExtUtils::MakeMaker 0
-      perl 5.010001
-  Mojolicious-Plugin-AssetPack-0.0601
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.0601.tar.gz
+  Mojolicious-Plugin-AssetPack-0.13
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.13.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.0601
+      Mojolicious::Plugin::AssetPack 0.13
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
@@ -246,10 +201,10 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.01
       Mojolicious 4.30
       Test::More 0.90
-  Mojolicious-Plugin-LinkEmbedder-0.03
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.03.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.06
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.06.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.03
+      Mojolicious::Plugin::LinkEmbedder 0.06
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
@@ -293,7 +248,7 @@ DISTRIBUTIONS
       Protocol::Redis::Test undef
     requirements:
       Carp 0
-      ExtUtils::MakeMaker 6.64
+      ExtUtils::MakeMaker 6.66
       List::Util 0
       Test::More 0.88
       perl 5.008001
@@ -334,67 +289,6 @@ DISTRIBUTIONS
       constant 0
       strict 0
       warnings 0
-  URI-1.60
-    pathname: G/GA/GAAS/URI-1.60.tar.gz
-    provides:
-      URI 1.60
-      URI::Escape 3.31
-      URI::Heuristic 4.20
-      URI::IRI undef
-      URI::QueryParam undef
-      URI::Split undef
-      URI::URL 5.04
-      URI::WithBase 2.20
-      URI::_foreign undef
-      URI::_generic undef
-      URI::_idna undef
-      URI::_ldap 1.12
-      URI::_login undef
-      URI::_punycode 0.04
-      URI::_query undef
-      URI::_segment undef
-      URI::_server undef
-      URI::_userpass undef
-      URI::data undef
-      URI::file 4.21
-      URI::file::Base undef
-      URI::file::FAT undef
-      URI::file::Mac undef
-      URI::file::OS2 undef
-      URI::file::QNX undef
-      URI::file::Unix undef
-      URI::file::Win32 undef
-      URI::ftp undef
-      URI::gopher undef
-      URI::http undef
-      URI::https undef
-      URI::ldap 1.12
-      URI::ldapi undef
-      URI::ldaps undef
-      URI::mailto undef
-      URI::mms undef
-      URI::news undef
-      URI::nntp undef
-      URI::pop undef
-      URI::rlogin undef
-      URI::rsync undef
-      URI::rtsp undef
-      URI::rtspu undef
-      URI::sip 0.11
-      URI::sips undef
-      URI::snews undef
-      URI::ssh undef
-      URI::telnet undef
-      URI::tn3270 undef
-      URI::urn undef
-      URI::urn::isbn undef
-      URI::urn::oid undef
-    requirements:
-      ExtUtils::MakeMaker 0
-      MIME::Base64 2
-      Test 0
-      Test::More 0
-      perl 5.008001
   URI-Find-20111103
     pathname: M/MS/MSCHWERN/URI-Find-20111103.tar.gz
     provides:

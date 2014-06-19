@@ -1,0 +1,44 @@
+@mixin prefix($property, $value...) {      // Chews experimental css properties,
+    -webkit-#{$property}:   $value;       // spits out browser prefixes.
+    -moz-#{$property}:      $value;       // Does not include -o- and -ms- because,
+    #{$property}:           $value;       // you know ... They're useless.
+}
+
+@mixin box-shadow($shadow...) {
+  -webkit-box-shadow: $shadow;
+  -moz-box-shadow: $shadow;
+  box-shadow: $shadow;
+}
+
+@mixin border-radius($border_radius) {
+  -moz-border-radius: $border_radius;
+  -webkit-border-radius: $border_radius;
+  border-radius: $border_radius;
+}
+
+@mixin ellipsis() { text-overflow: ellipsis; white-space: nowrap; display: block; overflow: hidden; }
+@mixin opacity($value) {
+  opacity: $value;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=" $value * 100 ")";
+  filter: alpha(opacity= $value * 100 );
+  zoom: 1;
+}
+
+@mixin font-size-margin($size) {
+  font-size: $size;
+  margin-top: $size/2;
+  margin-bottom: $size/2;
+}
+
+@mixin grid($cols, $last: 0) {
+  $gutter: 2% * ($last - 1);
+  $column: $columnWidth - $gutter;
+  width: ($cols * ($column + $gutter) - $gutter);
+  margin-right: $gutter;
+  float: left;
+
+  @media (max-width: $responsiveWidth) {
+    float: none;
+    width: 100%;
+  }
+}
