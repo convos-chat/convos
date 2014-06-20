@@ -9,9 +9,7 @@
   % }
 % }
   <div class="content whitespace"><%== $message %></div>
-% if($nick ne $prev_nick) {
-  %= timestamp_span($timestamp)
-% }
+  %= timestamp_span $timestamp
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>
 % }
