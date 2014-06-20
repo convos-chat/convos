@@ -88,12 +88,13 @@ sub conversation {
       if ($target and !$score[0]) {                  # no such conversation
         return $self->stash(layout => 'tactile')->render_not_found;
       }
-      if ($network eq 'convos') {
-        $delay->begin(0)->([$login, 'connected']);
-        return;
-      }
 
       $self->connection_list(sub { });
+
+      if ($network eq 'convos') {
+        return $delay->begin(0)->([$login, 'connected']);
+      }
+
       $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
       $redis->zadd("user:$login:conversations", $time,         $name)      if $score[0];
       $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
