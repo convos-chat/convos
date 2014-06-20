@@ -36,7 +36,11 @@ sub socket {
       $self->logf(debug => '[ws] < %s', $octets);
 
       if ($octets eq 'PING') {
-        return $self->send('PONG');
+        return $self->redis->execute(
+          PING => sub {
+            $_[1] ? $self->send('PONG') : $self->finish;
+          }
+        );
       }
 
       $dom = Mojo::DOM->new($octets)->at('div');
@@ -63,7 +67,7 @@ sub socket {
       my ($sub, $err, @messages) = @_;
 
       return unless $self;
-      return $self->finish->logf(warn => 'sub: %s', $err) if $err;
+      return $self->finish->logf(warn => '[REDIS] %s', $err) if $err;
       pop @messages;    # remove channel name from messages
 
       $self->logf(debug => '[%s] > %s', $key, $messages[0]);
