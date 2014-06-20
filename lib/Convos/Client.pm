@@ -96,8 +96,8 @@ sub conversation {
       }
 
       $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
-      $redis->zadd("user:$login:conversations", $time,         $name)      if $score[0];
-      $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
+      $redis->zadd("user:$login:conversations", $time + 0.001, $name)      if $score[0];
+      $redis->zadd("user:$login:conversations", $time,         $prev_name) if $score[1];
     },
     sub {
       my $delay = shift;
