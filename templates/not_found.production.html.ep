@@ -3,10 +3,9 @@
     <h1>Page not found</h1>
     <p>
       You probably want to go chatting, but got lost while trying..?
-      Try this button:
     </p>
     <p>
-      <%= link_to 'Take me to chat!', '/', class => 'button' %>
+      %= link_to 'Yes, take me back to chat', '/', class => 'button'
     </p>
   </section>
 </div>
