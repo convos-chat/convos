@@ -176,10 +176,6 @@
       reloadConversationList({});
     }
 
-    if(initNotifications.asked == 'undefined') {
-      initNotifications();
-    }
-
     $input.hostAndTarget($messages); // must be done after Object.equals(...) above
     drawSettings();
     drawUI();
@@ -391,14 +387,18 @@
     if(Notification.permission === 'denied') return;
 
     var $ask_for_notifications = $('div.notification.question');
-    initNotifications.asked = true;
+
     $ask_for_notifications.find('a.yes').off('click').click(function() {
-      Notification.requestPermission(function() {});
+      Notification.requestPermission(function() {
+        n = new Notification('Notifications enabled.', {});
+        setTimeout(function() { n.close(); }, 2000);
+      });
       $ask_for_notifications.hide();
       return false;
     });
     $ask_for_notifications.find('a.no').off('click').click(function() {
       $ask_for_notifications.fadeOut('fast');
+      Notification.permission = 'denied';
       return false;
     });
     $ask_for_notifications.show();
@@ -639,10 +639,7 @@
     initInputField();
     initAddConversation();
 
-    $('nav a.notifications.toggler').on('activate', function() {
-      $.post($.url_for('/chat/notifications/clear'));
-      $(this).removeClass('alert').children('b').text('');
-    });
+    if($('.notification.question').length) initNotifications();
 
     $('nav a.toggler').initDropDown();
     $('nav, div.container, div.goto-bottom').fastButton();
