@@ -297,8 +297,6 @@ sub edit {
   my $method    = $self->req->method eq 'POST' ? '_edit' : 'render';
   my $full_page = $self->stash('full_page');
 
-  $self->stash(body_class => 'convos with-sidebar');
-
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;

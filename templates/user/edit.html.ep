@@ -1,6 +1,6 @@
 % title 'Edit user';
 % stash sidebar => 'convos';
-<ul class="with-sidebar">
+<ul>
   <li>
     <h2>Edit profile</h2>
     % my $err;

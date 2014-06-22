@@ -36,22 +36,6 @@
     return this;
   };
 
-  $.fn.initDropDown = function() {
-    return this.each(function() {
-      var $a = $(this);
-      var $container = $( $a.data('toggle') );
-      var scroller = $container.hasClass('scrolled');
-
-      $a.on('activate', function() {
-        var $a = $(this);
-        var height = $win.height() - 70;
-        var left = $a.offset().left + $a.outerWidth() - $container.width();
-        $container.css('left', left < 10 ? 10 : left);
-        if(scroller) $container.height(height);
-      });
-    });
-  };
-
   $.fn.loadingIndicator = function(action) {
     if(action == 'hide') {
       this.find('.loading-indicator-overlay, .loading-indicator').remove();
@@ -76,45 +60,28 @@
     return this;
   };
 
-  var hideToggledElement = function(e) {
-    var $active = $('a[data-toggle]').filter('.active');
-    if(!$active.length) return true;
-    if($(e.target).closest($active).length) return true; // prevent hiding when clicking inside forms
-    if($(e.target).closest('form').length) return true; // prevent hiding when clicking inside forms
-    $active.trigger('deactivate');
-    return false;
-  };
-
-  $.fn.toggleElementWithClick = function(e) {
-    if(e) e.preventDefault();
-    return this.each(function() {
+  $.fn.toggler = function() {
+    return this.click(function(e) {
       var $a = $(this);
-      var focus = $a.attr('data-focus');
-      var target = $a.attr('data-toggle');
-      var inside = false;
+      var $target = $(this.href.replace(/^toggle:\/\//, ''));
+      var $hide = $('a.toggler-active').not($a);
 
-      $(target).on('click', 'a', function() { $a.trigger('deactivate'); });
-      $a.on('deactivate', function() { $a.removeClass('active'); $(target).hide(); });
-      $a.on('activate', function() { $a.removeClass('active'); $a.click(); });
-      $a.click(function(e) {
-        if(inside) return false;
-        var $target = $(target);
-        var is_active = $a.hasClass('active');
+      e.preventDefault();
+      $hide.click();
 
-        $('a[data-toggle]').filter('.active').trigger('deactivate');
-        if(is_active) return false;
-
-        if(!$a.hasClass('active')) {
-          inside = true;
-          $target.show();
-          $a.data('target', $target).trigger('activate').addClass('active');
-          inside = false;
-          if(focus) $(focus, target).eq(0).focus();
-        }
-
-        return false;
-      });
-    })
+      if($a.hasClass('toggler-active')) {
+        $a.removeClass('active toggler-active');
+        $target.css({ 'z-index': 900 }).animate({ right: -($target.outerWidth() + 20) }, 200); // +20 to hide shadow
+      }
+      else {
+        $a.addClass('active toggler-active');
+        $target.css({ 'z-index': 901, 'display': 'block', 'right': -$target.outerWidth() }).animate({ right: 0 }, 200);
+      }
+    }).bind('keydown', 'return', function(e) {
+      if(!$(this).hasClass('toggler-active')) return true;
+      $(this.href.replace(/^toggle:\/\//, '')).find('a, input, button').eq(0).focus();
+      return false;
+    });
   };
 
   $.url_for = function() {
@@ -125,22 +92,16 @@
   };
 
   $(document).ready(function() {
-    var $togglers = $('a[data-toggle]').toggleElementWithClick();
-    var $focus = $togglers.filter('.active').trigger('activate').filter('.focus');
-    var $login_button = $('a[data-toggle="div.login"]');
-
-    $(document).on('click', hideToggledElement);
-
-    if($login_button.length) {
-      $('body').bind('keydown', 'shift+return', function(e) {
-        e.preventDefault();
-        $login_button.click();
-      });
-    }
-
     $height_from = $('div.wrapper').length ? $('div.wrapper') : $('body');
     $win = $(window).data('at_bottom', false).data('has_focus', true);
     $(document).data('height_from', $height_from);
+
+    $(document).bind('keydown', 'shift+tab tab', function(e) { // e.target = previous target
+      if(e.target.href && e.target.href.match(/^toggle:/)) $(e.target).addClass('toggler-active').click();
+    });
+    $(document).bind('keyup', 'shift+tab tab', function(e) { // e.target = current target
+      if(e.target.href && e.target.href.match(/^toggle:/)) $(e.target).click();
+    });
 
     $win.on('scroll', function() {
       var at_bottom = $win.scrollTop() + $win.height() > $height_from.height() - at_bottom_threshold;
@@ -154,6 +115,7 @@
       $.notify.focus_tid = setInterval(function() { document.title = original_title; }, 3000);
       $win.data('has_focus', true);
     });
-  });
 
+    $('a[href^="toggle://"]').toggler();
+  });
 })(jQuery);

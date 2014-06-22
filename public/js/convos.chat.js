@@ -1,7 +1,7 @@
 ;(function($) {
   window.link_embedder_text_gist_github_styled = 1; // custom gist styling
 
-  var $goto_bottom, $input, $win;
+  var $input, $win;
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
   var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
@@ -152,14 +152,11 @@
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
-    $doc.filter('form.connection-control').each(function() {
-      $('form.connection-control').attr('action', this.action);
-    });
-    $doc.find('div.sidebar.container').each(function() {
-      $('div.sidebar.container ul').html($(this).find('ul:first').children());
+    $doc.filter('form.sidebar-settings').each(function() {
+      $('form.sidebar-settings ul').html($(this).find('ul:first').children());
     });
 
-    if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
+    if (/^[#&]/.test($messages.hostAndTarget().target)) {
       $input.send('/names', 0);
     }
 
@@ -204,8 +201,6 @@
       used_width += w;
       if(used_width - w / 3 > available_width) $dropdown.append($li);
     });
-
-    if(used_width < available_width) $('nav a.conversations.toggler').trigger('deactivate').hide();
   };
 
   var drawSettings = function() {
@@ -243,30 +238,16 @@
 
   var drawUI = function() {
     drawConversationMenu();
-
-    $('a[data-toggle]').filter('.active').trigger('activate');
-
-    if($('body').is('.without-sidebar, .historic')) {
-      $('div.sidebar.container').css({ left: '', height: '', display: 'none' });
-    }
-    else if($win.width() > min_width) {
-      $('a.sidebar.toggler').trigger('deactivate');
-      $('div.sidebar.container').css({ left: '', height: '', display: 'block' });
-    }
-    else if($('a.sidebar.toggler').is('.active')) {
-      $('div.sidebar.container').css({ display: 'block' });
-    }
-    else {
-      $('div.sidebar.container').css({ display: 'none' });
-    }
-
     if($win.data('at_bottom')) $win.scrollTo('bottom');
+  };
+
+  var focusInput = function() {
+    $('a.toggler-active').click();
+    $input.focus();
   };
 
   var getHistoricMessages = function() {
     var $height_from = $(document).data('height_from')
-
-    $goto_bottom[$win.scrollTop() + $win.height() < $height_from.height() - 200 ? 'show' : 'hide']();
 
     if($messages.start_time && $win.scrollTop() == 0) {
       var end_time = $messages.end_time;
@@ -303,7 +284,6 @@
         $messages.end_time = parseFloat($ul.data('end-time'));
         $li.each(function() { $(this).appendToMessages(); });
         if(!$li.filter('.historic-message').length) {
-          $('body').attr('class', /^[#&]/.test($messages.hostAndTarget().target) ? 'with-sidebar' : 'without-sidebar');
           if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
           drawUI();
         }
@@ -314,15 +294,17 @@
   };
 
   var initAddConversation = function() {
-    $('.add-conversation form').submit(function(e) {
+    $('form.add-conversation').submit(function(e) {
       var $form = $(this);
       var network = $form.find('select[name="name"]').val();
       var channel = $form.find('input[name="channel"]').val().replace(/^\s*#/, '');
 
       e.preventDefault();
-      $input.send('/join #' + channel, { 'data-network': network });
-      $input.focus();
-      $('a[data-toggle]').filter('.active').trigger('deactivate');
+
+      if(channel) {
+        $input.send('/join #' + channel, { 'data-network': network, pending_status: true });
+        focusInput();
+      }
     });
   };
 
@@ -360,7 +342,7 @@
       $input.history_i = $input.history.length;
     });
 
-    $input.doubletap(autocomplete);
+    //TODO: $input.doubletap(autocomplete);
     $input.bind('keydown', function(e) { if(e.keyCode !== 9) complete = false; }); // not tab
     $input.bind('keydown', 'tab', autocomplete);
     $input.bind('keydown', 'up', function(e) {
@@ -432,7 +414,7 @@
       if(message.length == 0) return $input;
       var uuid = window.guid();
       attr = attr || {};
-      if(!message.match('^\/')) {
+      if(!message.match('^\/') || attr.pending_status) {
         var $pendingMessage = $('<li class="message-pending"><div class="content"></div></li>').attr('id', uuid).hostAndTarget($messages);
         $pendingMessage.find('.content').text(message);
         setTimeout(function() { messageFailed($pendingMessage); }, 10000);
@@ -448,37 +430,31 @@
   }
 
   var initShortcuts = function() {
-    $('body').bind('keydown', 'esc', function(e) {
-      e.preventDefault();
-      var $active = $('a[data-toggle]').filter('.active');
-      if(!$active.length) return true;
-      $active.trigger('deactivate').focus();
-    });
-
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
-      $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.sidebar.toggler').trigger('deactivate');
       if(document.activeElement == $input.get(0)) {
         $('nav ul.conversations a').slice(0, 3).eq(-1).focus();
       }
       else {
-        $input.focus();
+        focusInput();
       }
     });
 
     var upDown = function(method, page) {
-      var $e, i;
+      var $items, i;
       return function(e) {
-        $e = $(document.activeElement).closest('li');
-        if($e.length === 0) return true;
-        i = page ? parseInt($e.closest('div.container').height() / $e.height()) + 1 : 0;
-        $e = $e[method]();
-        if($e.length <= i) i = $e.length - 1;
-        $e.eq(i).find('a').focus();
+        $items = $(document.activeElement).closest('li');
+        if(!$items.closest('ul').hasClass('up-down-navigation')) return true;
+        i = page ? parseInt($items.closest('ul').height() / $items.height()) + 1 : 0;
+        $items = $items[method]();
+        $items = $items.find('a, input, button');
+        if($items.length <= i) i = $items.length - 1;
+        $items.eq(i).focus();
         return false;
       };
     };
 
+    $('body, input, button').bind('keydown', 'esc', focusInput);
     $('body').bind('keydown', 'up', upDown('prevAll', 0));
     $('body').bind('keydown', 'pageup', upDown('prevAll', 1));
     $('body').bind('keydown', 'down', upDown('nextAll', 0));
@@ -607,8 +583,7 @@
   };
 
   $(document).ready(function() {
-    $goto_bottom = $('div.goto-bottom a');
-    $input = $('footer form input[name="message"]');
+    $input = $('form.chat input[autocomplete="off"]');
     $win = $(window);
     conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
@@ -633,18 +608,15 @@
       });
     }
 
-    initShortcuts();
     initSocket();
     initPjax();
-    initInputField();
     initAddConversation();
+    initInputField();
+    drawSettings();
+    initShortcuts(); // must be done after drawSettings()
 
     if($('.notification.question').length) initNotifications();
 
-    $('nav a.toggler').initDropDown();
-    $('nav, div.container, div.goto-bottom').fastButton();
-    $('footer a.help').click(function(e) { $input.send('/help', { 'data-history': 0 }); return false; })
-    $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {
       $input.data('socket').buffer = []; // need to clear buffer when resending messages
@@ -658,7 +630,6 @@
 
   $(document).ready(function() {
     $('.login, .register').find('form input[type="text"]:first').focus();
-    if(!$input.length) drawSettings();
   });
 
   $(window).load(function() {

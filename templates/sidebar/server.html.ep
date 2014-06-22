@@ -1,4 +1,3 @@
-% my $control_url = url_for('connection.control', { name => $network })->query(csrf => $self->csrf_token);
 <li>
   <button name="cmd" value="start" class="<%= $state eq 'connected' ? 'inactive' : '' %>">Connect</button>
 </li>

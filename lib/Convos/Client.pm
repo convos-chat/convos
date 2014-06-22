@@ -63,19 +63,6 @@ sub conversation {
   $self->session(name => $target ? $name : '');
   $self->stash(target => $target);
 
-  if ($target =~ /^[#&]/) {
-    $self->stash(body_class => 'with-sidebar chat');
-  }
-  elsif ($network eq 'convos') {
-    $self->stash(body_class => 'with-sidebar convos', sidebar => 'convos');
-  }
-  elsif (!$target) {
-    $self->stash(body_class => 'with-sidebar convos', sidebar => 'convos');
-  }
-  else {
-    $self->stash(body_class => 'without-sidebar chat');
-  }
-
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
@@ -92,6 +79,7 @@ sub conversation {
       $self->connection_list(sub { });
 
       if ($network eq 'convos') {
+        $self->stash(sidebar => 'convos');
         return $delay->begin(0)->([$login, 'connected']);
       }
 
@@ -214,7 +202,6 @@ sub _conversation {
       sub {
         my $list = pop || [];
         $self->stash(got_more => @$list / 2 > $N_MESSAGES);
-        $self->stash(body_class => 'historic') if $self->stash('got_more');
         $self->format_conversation(
           sub {
             my $current = shift @$list or return;

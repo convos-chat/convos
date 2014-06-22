@@ -1,6 +1,6 @@
 % title "Edit $name";
 % stash sidebar => 'convos';
-<ul class="with-sidebar">
+<ul>
   <li>
     <h2>Edit <%= $name %></h2>
     %= form_for 'connection.edit', class => 'horizontal', method => 'post', begin

@@ -1,6 +1,6 @@
 % title 'Add connection';
 % stash sidebar => 'convos';
-<ul class="with-sidebar">
+<ul>
 % if(@$networks) {
   <li>
     <h2>Add connection</h2>
