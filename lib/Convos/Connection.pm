@@ -94,11 +94,6 @@ sub add_network {
 
 =head2 control
 
-  POST /:name/control/start
-  POST /:name/control/stop
-  POST /:name/control/restart
-  GET /:name/control/state
-
 Used to control a connection. See L<Convos::Core/control>.
 
 Special case is "state": It will return the state of the connection:
@@ -123,25 +118,42 @@ sub control {
   }
 
   if ($self->req->method ne 'POST') {
-    return $self->_invalid_control_request;
+    $self->_invalid_control_request;
   }
+  elsif ($command =~ m!^/! or $command eq 'irc') {
+    Mojo::IOLoop->delay(
+      sub {
+        my ($delay) = @_;
+        my $key = sprintf 'convos:user:%s:%s', $self->session('login'), $name;
+        $self->redis->publish($key => $self->param('irc_cmd') // $command, $delay->begin);
+      },
+      sub {
+        my ($delay, $sent) = @_;
+        $self->respond_to(
+          json => {json => {state => $sent ? 'sent' : 'error'}, status => $sent ? 200 : 500},
+          any => sub { shift->redirect_to($redirect_to) },
+        );
+      },
+    );
+  }
+  else {
+    Mojo::IOLoop->delay(
+      sub {
+        my ($delay) = @_;
+        $self->app->core->control($command, $self->session('login'), $name, $delay->begin);
+      },
+      sub {
+        my ($delay, $sent) = @_;
+        my $status = $sent ? 200 : 500;
+        my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
 
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      $self->app->core->control($command, $self->session('login'), $name, $delay->begin);
-    },
-    sub {
-      my ($delay, $sent) = @_;
-      my $status = $sent ? 200 : 500;
-      my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
-
-      $self->respond_to(
-        json => {json => {state => $state}, status => $status},
-        any  => sub   { shift->redirect_to($redirect_to) },
-      );
-    },
-  );
+        $self->respond_to(
+          json => {json => {state => $state}, status => $status},
+          any  => sub   { shift->redirect_to($redirect_to) },
+        );
+      },
+    );
+  }
 }
 
 =head2 edit_connection
