@@ -295,11 +295,11 @@
 
   var initAddConversation = function() {
     $('form.add-conversation').submit(function(e) {
+      e.preventDefault();
+
       var $form = $(this);
       var network = $form.find('select[name="name"]').val();
       var channel = $form.find('input[name="channel"]').val().replace(/^\s*#/, '');
-
-      e.preventDefault();
 
       if(channel) {
         $input.send('/join #' + channel, { 'data-network': network, pending_status: true });
@@ -361,29 +361,6 @@
       e.preventDefault();
       $input.send($input.val(), { 'data-history': 1 }).val('');
     });
-  };
-
-  var initNotifications = function() {
-    if(Notification.permission === 'granted') return;
-    if(Notification.permission === 'unsupported') return;
-    if(Notification.permission === 'denied') return;
-
-    var $ask_for_notifications = $('div.notification.question');
-
-    $ask_for_notifications.find('a.yes').off('click').click(function() {
-      Notification.requestPermission(function() {
-        n = new Notification('Notifications enabled.', {});
-        setTimeout(function() { n.close(); }, 2000);
-      });
-      $ask_for_notifications.hide();
-      return false;
-    });
-    $ask_for_notifications.find('a.no').off('click').click(function() {
-      $ask_for_notifications.fadeOut('fast');
-      Notification.permission = 'denied';
-      return false;
-    });
-    $ask_for_notifications.show();
   };
 
   var initPjax = function() {
@@ -614,8 +591,6 @@
     initInputField();
     drawSettings();
     initShortcuts(); // must be done after drawSettings()
-
-    if($('.notification.question').length) initNotifications();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {

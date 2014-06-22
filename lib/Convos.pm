@@ -343,6 +343,7 @@ sub _assets {
       /js/ws-reconnecting.js
       /js/jquery.hotkeys.js
       /js/jquery.hammer.min.js
+      /js/jquery.notifications.js
       /js/jquery.pjax.js
       /js/jquery.helpers.js
       /js/selectize.js
