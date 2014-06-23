@@ -64,19 +64,21 @@
     return this.click(function(e) {
       var $a = $(this);
       var $target = $(this.href.replace(/^toggle:\/\//, ''));
-      var $hide = $('a.toggler-active').not($a);
+      var $hide;
 
       e.preventDefault();
-      $hide.click();
 
       if($a.hasClass('toggler-active')) {
         $a.removeClass('active toggler-active');
         $target.css({ 'z-index': 900 }).animate({ right: -($target.outerWidth() + 20) }, 200); // +20 to hide shadow
+        return false;
       }
-      else {
-        $a.addClass('active toggler-active');
-        $target.css({ 'z-index': 901, 'display': 'block', 'right': -$target.outerWidth() }).animate({ right: 0 }, 200);
-      }
+
+      $hide = $('a.toggler-active');
+      $hide.click();
+      $a.addClass('active toggler-active');
+      $target.css({ 'z-index': 901, 'right': $hide.length ? 0 : -$target.outerWidth() }).show().animate({ right: 0 }, 200);
+      return false;
     }).bind('keydown', 'return', function(e) {
       if(!$(this).hasClass('toggler-active')) return true;
       $(this.href.replace(/^toggle:\/\//, '')).find('a, input, button').eq(0).focus();
@@ -96,11 +98,11 @@
     $win = $(window).data('at_bottom', false).data('has_focus', true);
     $(document).data('height_from', $height_from);
 
-    $(document).bind('keydown', 'shift+tab tab', function(e) { // e.target = previous target
-      if(e.target.href && e.target.href.match(/^toggle:/)) $(e.target).addClass('toggler-active').click();
-    });
-    $(document).bind('keyup', 'shift+tab tab', function(e) { // e.target = current target
+    var $previous_toggle_element = $();
+    $(document).bind('keydown', 'shift+tab tab', function(e) { $previous_toggle_element = $(e.target); });
+    $(document).bind('keyup', 'shift+tab tab', function(e) {
       if(e.target.href && e.target.href.match(/^toggle:/)) $(e.target).click();
+      if($previous_toggle_element.hasClass('toggler-active')) $previous_toggle_element.click();
     });
 
     $win.on('scroll', function() {
