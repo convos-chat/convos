@@ -7,6 +7,7 @@
     border-bottom: 1px solid #ccc;
     border-radius: 3px;
     margin-bottom: 1em;
+
     .gist-meta {
       overflow: hidden;
       color: #666;
@@ -18,32 +19,15 @@
       background-repeat: repeat-x;
       a { text-decoration: none; }
     }
+
     .gist-data {
       overflow: auto;
       word-wrap: normal;
       background-color: #f8f8ff;
       border-bottom: 1px solid #ddd;
-    }
-    &.scroll {
-      .gist-data {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        bottom: 30px;
-        left: 0px;
-        overflow: scroll;
-      }
-      .gist-meta {
-        position: absolute;
-        bottom: 0px;
-        right: 0px;
-        left: 0px;
-      }
-    }
-    .gist-data {
-      .line-data {
-        padding: .5em !important;
-      }
+      max-height: 400px;
+
+      .line-data { padding: .5em !important; }
       .line-pre {
         background: transparent !important;
         border: none !important;

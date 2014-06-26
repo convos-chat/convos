@@ -16,11 +16,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})
 
 $t->get_ok($t->tx->res->headers->location)->status_is(200);
 
-$t->get_ok('/invalid/foo')->status_is(302)
-  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect on invalid conversation');
-
-$t->get_ok($t->tx->res->headers->location)->status_is(200)->element_exists_not('body.without-sidebar')
-  ->element_exists('body.with-sidebar');
+$t->get_ok('/invalid/foo')->status_is(404);
 
 $t->get_ok('/bitlbee/&bitlbee')->status_is(200)->element_exists_not('body.without-sidebar')
   ->element_exists('body.with-sidebar');

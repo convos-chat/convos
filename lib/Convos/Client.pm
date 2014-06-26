@@ -85,28 +85,25 @@ sub conversation {
       my ($delay, @score) = @_;
       my $time = time;
 
+      if ($target and !$score[0]) {                  # no such conversation
+        return $self->stash(layout => 'tactile')->render_not_found;
+      }
+
       $self->connection_list(sub { });
 
-      if ($target and !$score[0]) {                  # no such conversation
-        return $self->route;
-      }
       if ($network eq 'convos') {
-        $delay->begin(0)->([$login, 'connected']);
-        return;
+        return $delay->begin(0)->([$login, 'connected']);
       }
 
       $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
-      $redis->zadd("user:$login:conversations", $time, $name);
-      $redis->zadd("user:$login:conversations", $time - 0.001, $prev_name) if $score[1];
+      $redis->zadd("user:$login:conversations", $time + 0.001, $name)      if $score[0];
+      $redis->zadd("user:$login:conversations", $time,         $prev_name) if $score[1];
     },
     sub {
       my $delay = shift;
       my $nick  = shift @{$_[0]};
       my $state = shift @{$_[0]};
 
-      if (!$nick) {
-        return $self->route;
-      }
       if (defined $self->param('notification')) {
         $self->_modify_notification($self->param('notification'), read => 1, sub { });
       }

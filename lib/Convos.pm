@@ -123,6 +123,11 @@ If set must be appended to register url. Example:
 
   http://your.convos.by/register/some-secret-invite-code
 
+=item * CONVOS_SECURE_COOKIES=1
+
+Set CONVOS_SECURE_COOKIES to true in order to set the secure flag
+on all session cookies.  Requires HTTPS.
+
 =item * MOJO_IRC_DEBUG=1
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
@@ -288,6 +293,7 @@ sub startup {
   $self->plugin('Convos::Plugin::Helpers');
   $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
+  $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets($config);
   $self->_public_routes;
   $self->_private_routes;
