@@ -231,7 +231,7 @@ sub register {
 
   $self->stash(form => 'register');
 
-  if ($invite_code and $invite_code ne ($validation->input->{invite} || '')) {
+  if ($invite_code and $invite_code ne ($self->param('invite') || '')) {
     return $self->render('index', form => 'invite_only', status => 400);
   }
   if ($self->req->method ne 'POST') {

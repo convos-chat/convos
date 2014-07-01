@@ -17,8 +17,7 @@ my $form;
 }
 
 {
-  $form->{invite} = "superdupersecret";
-  $t->post_ok('/register' => form => $form)->status_is(302);
+  $t->post_ok('/register/superdupersecret' => form => $form)->status_is(302);
 }
 
 done_testing;
