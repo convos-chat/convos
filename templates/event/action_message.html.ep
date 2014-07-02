@@ -4,9 +4,7 @@
   %= avatar { nick => $nick, host => $host, user => $user }, alt => $nick, class => 'avatar'
 % }
   <div class="content whitespace">&#10023; <%= link_to $nick, view => { network => $network, target => $nick } %> <%== $message %></div>
-% if($nick ne $prev_nick) {
-  %= timestamp_span($timestamp)
-% }
+  %= timestamp_span $timestamp
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>
 % }
