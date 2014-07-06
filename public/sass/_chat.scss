@@ -44,14 +44,17 @@ nav.bar {
 }
 
 form.chat {
-  height: 100%;
   overflow: hidden;
 
   .input {
-    position: absolute;
+    position: fixed;
     bottom: 2px;
     left: 0;
     right: 0;
+
+    @media (max-width: $responsiveWidth) {
+      bottom: 0;
+    }
 
     input {
       background: #fafafa;
@@ -69,6 +72,7 @@ form.chat {
 
 div.messages {
   padding-top: 45px;
+  padding-bottom: 45px;
 
   li {
     display: block;
@@ -115,6 +119,10 @@ div.messages {
   }
   li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
+  }
+
+  @media (max-width: $responsiveWidth) {
+    li.with-padding { margin-left: 5px; }
   }
 }
 

@@ -2,20 +2,20 @@
 % my $prev_nick = '';
 <ul data-network="<%= $network %>" data-target="<%= $target %>" data-nick="<%= $nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
   %= include 'event/connecting' unless @$conversation
-% unless(@$conversation) {
-<li id="3bf6cda3326848d426b18a65dcef1ee8" class="message <%= $target ? 'notice' : 'error' %>" data-network="loopback" data-target="convos" data-sender="convos">
-  %= image '/image/avatar-convos.jpg', alt => 'convos', class => 'avatar'
-  <h3><%= link_to 'convos', 'convos' %></h3>
-  <div class="content">
-  % if($target) {
-    Welcome to <%= $target || $network %>. Start by typing "hi!" in the input field at the bottom of the page.
-  % } else {
-    You are not connected to <%= $network %>. Please wait or check your connection details.
+  % unless(@$conversation) {
+  <li id="3bf6cda3326848d426b18a65dcef1ee8" class="message <%= $target ? 'notice' : 'error' %>" data-network="loopback" data-target="convos" data-sender="convos">
+    %= image '/image/avatar-convos.jpg', alt => 'convos', class => 'avatar'
+    <h3><%= link_to 'convos', 'convos' %></h3>
+    <div class="content">
+    % if($target) {
+      Welcome to <%= $target || $network %>. Start by typing "hi!" in the input field at the bottom of the page.
+    % } else {
+      You are not connected to <%= $network %>. Please wait or check your connection details.
+    % }
+    </div>
+    %= timestamp_span(time)
+  </li>
   % }
-  </div>
-  %= timestamp_span(time)
-</li>
-% }
 % for my $message (@$conversation) {
   %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
   % $prev_nick = $message->{nick};

@@ -2,7 +2,7 @@
 % stash sidebar => 'convos';
 <ul>
 % if(@$networks) {
-  <li>
+  <li class="with-padding">
     <h2>Add connection</h2>
     %= include 'connection/add_connection_form', wizard => 0
   </li>
