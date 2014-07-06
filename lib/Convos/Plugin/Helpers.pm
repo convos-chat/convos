@@ -258,7 +258,7 @@ sub notification_list {
       return $self->$cb($notification_list) if $cb;
       return $self->respond_to(
         json => {json     => $self->stash('notification_list')},
-        html => {template => 'client/notification_list'},
+        html => {template => 'sidebar/notification_list'},
       );
     },
   );
