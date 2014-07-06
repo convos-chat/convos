@@ -3,7 +3,7 @@
 <ul data-network="<%= $network %>" data-target="<%= $target %>" data-nick="<%= $nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
   %= include 'event/connecting' unless @$conversation
 % unless(@$conversation) {
-<li id="3bf6cda3326848d426b18a65dcef1ee8" class="message" data-network="loopback" data-target="convos" data-sender="convos">
+<li id="3bf6cda3326848d426b18a65dcef1ee8" class="message <%= $target ? 'notice' : 'error' %>" data-network="loopback" data-target="convos" data-sender="convos">
   %= image '/image/avatar-convos.jpg', alt => 'convos', class => 'avatar'
   <h3><%= link_to 'convos', 'convos' %></h3>
   <div class="content">
