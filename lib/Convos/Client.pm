@@ -82,6 +82,9 @@ sub conversation {
         $self->stash(sidebar => 'convos');
         return $delay->begin(0)->([$login, 'connected']);
       }
+      elsif (!$target) {
+        $self->stash(sidebar => 'convos');
+      }
 
       $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
       $redis->zadd("user:$login:conversations", $time + 0.001, $name)      if $score[0];

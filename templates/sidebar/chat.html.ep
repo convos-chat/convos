@@ -2,10 +2,10 @@
   <h3>Actions</h3>
 </li>
 <li>
-  <button class="link" name="cmd" value="/topic <%= $target%>">Get topic</button>
+  <button class="link ws-cmd" name="cmd" value="/topic <%= $target%>">Get topic</button>
 </li>
 <li>
-  <button class="link" name="cmd" value="/close <%= $target %>">Close chat</button>
+  <button class="link ws-cmd" name="cmd" value="/close <%= $target %>">Close chat</button>
 </li>
 <li>
   <h3>Participants</h3>

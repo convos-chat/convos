@@ -165,6 +165,15 @@ div.sidebar-right {
     display: block;
     padding: 4px 8px;
   }
+
+  ul ul li {
+    a, button.link {
+      background-image: url(../image/fa-caret-right.png);
+      background-position: 9px 50%;
+      background-repeat: no-repeat;
+      padding-left: 20px;
+    }
+  }
 }
 
 form.add-conversation { width: $nickListWidth + 20; }

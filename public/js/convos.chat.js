@@ -152,12 +152,20 @@
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
+    $('form.sidebar-settings button.ws-cmd').each(function() {
+      $(this).removeClass('ws-cmd').click(function(e) {
+        e.preventDefault();
+        $input.send(this.value, 0);
+        $input.send(this.value, { pending_status: true });
+      });
+    });
+
     $doc.filter('form.sidebar-settings').each(function() {
       $('form.sidebar-settings ul').html($(this).find('ul:first').children());
     });
 
     if (/^[#&]/.test($messages.hostAndTarget().target)) {
-      $input.send('/names', 0);
+      $input.send('/names');
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
