@@ -388,8 +388,6 @@ sub _private_routes {
 
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
-  $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)
-    ->name('conversation.list');
   $r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)
     ->name('notification.list');
   $r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');

@@ -106,7 +106,7 @@ sub conversation {
     sub {
       my ($delay, $conversation) = @_;
 
-      $self->conversation_list($delay->begin) if $full_page;
+      $self->conversation_list($delay->begin);
       $self->notification_list($delay->begin) if $full_page;
       $self->stash(conversation => $conversation || []);
       $delay->begin->(0);

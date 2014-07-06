@@ -1,4 +1,5 @@
 % my $prev_nick = stash('prev_nick') || '';
+% $highlight = 0 if $target =~ /^\w/;
 <li id="<%= $uuid %>" class="message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
 % if($nick ne $prev_nick) {
   %= avatar { nick => $nick, host => $host, user => $user }, alt => $nick, class => 'avatar'

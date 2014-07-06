@@ -17,6 +17,22 @@ nav.bar {
     padding: 10px 4px;
     display: block;
     float: left;
+    position: relative;
+  }
+
+  // unread messages count
+  a b {
+    background: #c33;
+    color: #fff;
+    font-size: $fontSize * 0.9;
+    font-weight: normal;
+    line-height: $fontSize + 1;
+    padding: 0 2px;
+    position: absolute;
+    right: 2px;
+    bottom: 1px;
+    @include opacity(.75);
+    @include border-radius(3px);
   }
 
   a.conversation { color: #666; }
@@ -31,11 +47,9 @@ nav.bar {
 
   a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
   a.active {
-    background: #e1e1e1;
+    background: lighten(#e1e1e1, 5%);
     @include box-shadow(inset 0 0px 1px 1px rgba(190, 190, 190, 0.5));
   }
-
-  ul.conversations li.unread a { color: $unreadColor };
 
   @media (max-width: $responsiveWidth) {
     padding: 0;
@@ -135,7 +149,9 @@ div.sidebar-right {
   top: 42px;
   right: 0;
   bottom: -3px;
+  overflow: auto;
   width: $nickListWidth;
+  padding-bottom: 20px;
   z-index: 2;
   @include box-shadow(-2px 0 4px rgba(180,180,180,.5));
 
@@ -177,7 +193,14 @@ div.sidebar-right {
 }
 
 form.add-conversation { width: $nickListWidth + 20; }
-div.notification-list { width: 270px; }
+div.notification-list {
+  width: 270px;
+
+  a { padding: 2px 8px; color: #666; }
+  a span.message { font-size: 0.9em; padding: 0; @include ellipsis(); }
+  li.unread { background: #fee; };
+  li.unread a { color: #000 };
+}
 
 @media (min-width: $responsiveWidth) {
   form.sidebar-settings {

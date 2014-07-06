@@ -1,17 +1,18 @@
 <nav class="bar">
   %= include 'client/conversation_list'
+% if ($full_page) {
+  % my $n_notifications = stash('n_notifications') || 0;
   <div class="right">
     <a href="toggle://form.add-conversation" title="Add conversation">
       <i class="icon-plus">+</i>
     </a>
-    % my @class = qw( notifications toggler );
-    % push @class, 'alert' if $n_notifications;
-    <a href="toggle://div.notification-list" title="List conversations" class="<%= join ' ', @class %>">
+    <a href="toggle://div.notification-list" title="List conversations" class="notifications toggler">
       <i class="icon-bullhorn"></i>
-      <b><%= ( $n_notifications > 999 ? '999+' : $n_notifications ) if $n_notifications %></b>
+      <b><%= $n_notifications > 999 ? '999+' : $n_notifications || '' %></b>
     </a>
     <a href="toggle://form.sidebar-settings" title="Conversation settings" class="hide-on-widescreen">
       <i class="icon-cog"></i>
     </a>
   </div>
+% }
 </nav>

@@ -12,10 +12,8 @@
   % }
   </head>
   <body class="chat" data-want-desktop-notifications="<%= session('desktop_notifications') // 1 %>">
-  % if($full_page) {
     %= include 'partials/nav'
     %= include 'partials/desktop-notifications-question'
-  % }
 
     %= form_for 'connection.control', { name => $network }, method => 'post', class => "sidebar-settings sidebar-right", begin
       <ul class="up-down-navigation">
