@@ -52,7 +52,18 @@ form.chat {
     bottom: 2px;
     left: 0;
     right: 0;
-    input { width: 100%; padding: 8px; }
+
+    input {
+      background: #fafafa;
+      width: 100%;
+      padding: 8px;
+
+      @media (max-width: $responsiveWidth) {
+        border: 0;
+        border-top: 2px solid darken(#fff, 40%);
+        @include border-radius(0);
+      }
+    }
   }
 }
 
