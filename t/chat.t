@@ -37,7 +37,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 {
   $t->websocket_ok('/socket')->send_ok('yikes');
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li[data-target="any"]'), 'Got correct 6+any';
+  ok $dom->at('li[data-target=""]'), 'Got correct item';
   is $dom->at('li.network-message.error div.content')->text, 'Invalid message (yikes)', 'Invalid message';
 }
 
@@ -123,11 +123,11 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 {
   $connection->irc_error({params => ['some error', 'message'],});
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.network-message.error[data-network="magnet"][data-target="any"]'), 'Got IRC error';
+  ok $dom->at('li.network-message.error[data-network="magnet"][data-target=""]'), 'Got IRC error';
   is $dom->at('div.content')->text, 'some error message', 'some error message';
 
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-network="convos"][data-target="any"]'), 'Got IRC error in convos conversation';
+  ok $dom->at('li.message[data-network="convos"][data-target=""]'), 'Got IRC error in convos conversation';
   is $dom->at('div.content')->text, 'some error message', 'some error message in convos conversation';
 }
 
@@ -135,7 +135,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $connection->add_server_message({params => ['somenick', 'Your host is Tampa.FL.US.Undernet.org'], command => '123',});
   $dom->parse($t->message_ok->message->[1]);
   ok !$dom->at('li.network-message.error'), 'No server error';
-  ok $dom->at('li.network-message.notice[data-network="magnet"][data-target="any"]'), 'Got server message';
+  ok $dom->at('li.network-message.notice[data-network="magnet"][data-target=""]'), 'Got server message';
   is $dom->at('div.content')->text, 'Your host is Tampa.FL.US.Undernet.org', 'Your host is Tampa.FL.US.Undernet.org';
 }
 
@@ -147,15 +147,15 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $connection->_irc->from_irc_server(":fooman!user\@host 318 doe doe :End of WHOIS list\r\n");
   $dom->parse($t->message_ok->message->[1]);
 
-  ok $dom->at('li.whois[data-network="magnet"][data-target="any"]'), 'Got whois';
+  ok $dom->at('li.whois[data-network="magnet"][data-target=""]'), 'Got whois';
   is $dom->at('div.content')->all_text,
     'doe (john@magnet - Real name) has been idle for 7 seconds in #other, #convos, #mojo.', 'got whois text'
     or diag $dom;
-  ok $dom->at('li.whois[data-network="magnet"][data-target="any"] a[class="nick"][href="/magnet/doe"]'),
+  ok $dom->at('li.whois[data-network="magnet"][data-target=""] a[class="nick"][href="/magnet/doe"]'),
     'got whois /magnet/doe';
-  ok $dom->at('li.whois[data-network="magnet"][data-target="any"] a[class="channel"][href="/magnet/%23convos"]'),
+  ok $dom->at('li.whois[data-network="magnet"][data-target=""] a[class="channel"][href="/magnet/%23convos"]'),
     'got whois /magnet/%23convos';
-  ok $dom->at('li.whois[data-network="magnet"][data-target="any"] a[class="channel"][href="/magnet/%23mojo"]'),
+  ok $dom->at('li.whois[data-network="magnet"][data-target=""] a[class="channel"][href="/magnet/%23mojo"]'),
     'got whois /magnet/%23mojo';
 }
 
@@ -164,7 +164,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $connection->_irc->from_irc_server(":fooman!user\@host 318 me doe :End of WHOIS list\r\n");
   $dom->parse($t->message_ok->message->[1]);
 
-  ok $dom->at('li.error[data-network="magnet"][data-target="any"]'), 'Could not get whois' or diag $dom;
+  ok $dom->at('li.error[data-network="magnet"][data-target=""]'), 'Could not get whois' or diag $dom;
   is $dom->at('div.content')->all_text, 'No such nick: doe', 'doe is probably offline.' or diag $dom;
 }
 
@@ -195,7 +195,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 {
   $connection->_irc->from_irc_server(":fooman!user\@host NICK new_nick\r\n");
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.nick-change[data-network="magnet"][data-target="any"]'), 'nick change';
+  ok $dom->at('li.nick-change[data-network="magnet"][data-target=""]'), 'nick change';
   is $dom->at('b.old')->text,                           'fooman',   'got old nick';
   is $dom->at('a.nick[href="/magnet/new_nick"]')->text, 'new_nick', 'got new nick';
 }
@@ -214,11 +214,11 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 {
   $connection->_irc->from_irc_server(":doe!user\@host 474 doe #mojo :Cannot join channel (+b)\r\n");
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.error[data-network="magnet"][data-target="any"]'), 'magnet got banned error';
+  ok $dom->at('li.error[data-network="magnet"][data-target=""]'), 'magnet got banned error';
   is $dom->at('div.content')->all_text, 'Cannot join channel (+b)', 'magnet - Cannot join channel (+b)';
 
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-network="convos"][data-target="any"]'), 'convos got banned error';
+  ok $dom->at('li.message[data-network="convos"][data-target=""]'), 'convos got banned error';
   is $dom->at('div.content')->text, 'Cannot join channel (+b)', 'convos: Cannot join channel (+b)';
 
   $dom->parse($t->message_ok->message->[1]);
@@ -236,7 +236,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 {
   $connection->cmd_join({params => ['jalla']});
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.error[data-target="any"]'), 'invalid join';
+  ok $dom->at('li.error[data-target=""]'), 'invalid join';
   is $dom->at('div.content')->all_text, 'Do not understand which channel to join',
     'do not understand which channel to join';
 }
@@ -257,14 +257,14 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 {
   $connection->cmd_nick({params => ['TheM@ck']});
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.error[data-target="any"]'), 'Is error';
+  ok $dom->at('li.error[data-target=""]'), 'Is error';
   is $dom->at('div.content')->all_text, 'Invalid nick', 'Correct error';
 }
 
 {
   $connection->_irc->from_irc_server(":fooman!user\@host QUIT :leaving\r\n");
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.nick-quit[data-network="magnet"][data-target="any"]'), 'nick quit';
+  ok $dom->at('li.nick-quit[data-network="magnet"][data-target=""]'), 'nick quit';
   is $dom->at('div.content b.nick')->text, 'fooman',  'fooman quit';
   is $dom->at('div.content span')->text,   'Leaving', 'fooman leaving';
 }

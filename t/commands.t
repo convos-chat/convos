@@ -34,13 +34,13 @@ $t->websocket_ok('/socket');
 {
   $t->send_ok(msg('/help asdasd'));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.help[data-target="any"] dl'), 'HELP';
+  ok $dom->at('li.help[data-target=""] dl'), 'HELP';
 }
 
 {
   $t->send_ok(msg('/help asdasd'));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.help[data-target="any"] dl'), 'HELP';
+  ok $dom->at('li.help[data-target=""] dl'), 'HELP';
 }
 
 {

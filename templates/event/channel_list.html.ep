@@ -1,4 +1,4 @@
-<li class="channel-list" data-network="<%= $network %>" data-target="any">
+<li class="channel-list" data-network="<%= $network %>" data-target="">
   <div class="content">
     % my $i = 0;
     % for my $c (sort { $a->{name} cmp $b->{name} } @$channel_list) {
