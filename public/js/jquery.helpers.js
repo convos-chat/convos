@@ -105,6 +105,11 @@
       if($previous_toggle_element.hasClass('toggler-active')) $previous_toggle_element.click();
     });
 
+    $('body').on('click', function(e) {
+      if ($(e.target).closest('.sidebar-right').length) return;
+      $('a.toggler-active').click();
+    });
+
     $win.on('scroll', function() {
       var at_bottom = $win.scrollTop() + $win.height() > $height_from.height() - at_bottom_threshold;
       $win.data('at_bottom', at_bottom);
