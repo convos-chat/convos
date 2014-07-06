@@ -8,11 +8,11 @@ no warnings 'redefine';
 };
 
 $version = '2.4.9';
-$t->get_ok('/login')->status_is(200)->element_exists('div.row.question')->content_like(qr{The Redis server is too old});
+$t->get_ok('/login')->status_is(200)->content_like(qr{The Redis server is too old});
 
 delete $t->app->config->{redis_version};
 $version = 'x7';
-$t->get_ok('/login')->status_is(200)->element_exists('div.row.question')->content_like(qr{The Redis server is too old});
+$t->get_ok('/login')->status_is(200)->content_like(qr{The Redis server is too old});
 
 delete $t->app->config->{redis_version};
 $version = '2.6.13';

@@ -22,7 +22,7 @@ Route to last seen IRC conversation.
 =cut
 
 sub route {
-  my $self  = shift->render_later;
+  my $self  = shift;
   my $login = $self->session('login');
 
   if ($login) {
@@ -46,7 +46,7 @@ Used to render the main IRC client conversation.
 =cut
 
 sub conversation {
-  my $self      = shift->render_later;
+  my $self      = shift;
   my $prev_name = $self->session('name') || '';
   my $login     = $self->session('login');
   my $network   = $self->stash('network');
@@ -63,7 +63,7 @@ sub conversation {
   $self->session(name => $target ? $name : '');
   $self->stash(target => $target);
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->execute(@rearrange, $delay->begin);    # make sure conversations exists before doing zadd
@@ -121,7 +121,7 @@ Render the command history.
 =cut
 
 sub command_history {
-  my $self = shift->render_later;
+  my $self = shift;
   my $login = $self->session('login') || '';
 
   $self->redis->lrange(
@@ -140,10 +140,10 @@ Will mark all notifications as read.
 =cut
 
 sub clear_notifications {
-  my $self  = shift->render_later;
+  my $self  = shift;
   my $login = $self->session('login');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->lrange("user:$login:notifications", 0, 100, $delay->begin);

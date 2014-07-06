@@ -428,7 +428,7 @@ sub _set_secrets {
   my $self  = shift;
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->lrange('convos:secrets', 0, -1, $delay->begin);
@@ -454,7 +454,7 @@ sub _start_backend {
   my $self  = shift;
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->getset('convos:backend:lock' => 1, $delay->begin);

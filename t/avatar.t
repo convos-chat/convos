@@ -46,13 +46,13 @@ redis_do(
 {
   diag 'login...';
   $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
-  $t->get_ok('/')->status_is(302)->header_like(Location => qr{:\d+/magnet/%23convos});
+  $t->get_ok('/')->status_is(302)->header_is(Location => '/magnet/%23convos');
 }
 
 {
   local $TODO = 'Need to run WHOIS and figure out the real identity';
   $t->get_ok('/avatar?user=jhthorsen&host=convos.by')->status_is(302)
-    ->header_like(Location => qr{/image/deebdae9dacaf91b89f9cb8bed87993e$});
+    ->header_is(Location => '/image/deebdae9dacaf91b89f9cb8bed87993e');
 }
 
 {

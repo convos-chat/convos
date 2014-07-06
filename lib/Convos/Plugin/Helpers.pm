@@ -67,7 +67,7 @@ sub connection_list {
   my ($self, $cb) = @_;
   my $login = $self->session('login');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->smembers("user:$login:connections", $_[0]->begin);
@@ -91,7 +91,7 @@ sub conversation_list {
   my ($self, $cb) = @_;
   my $login = $self->session('login');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->zrevrange("user:$login:conversations", 0, -1, 'WITHSCORES', $delay->begin);
@@ -156,6 +156,7 @@ sub format_conversation {
     push @{$c->{conversation}}, $message;
   }
 
+  $c->render_later;
   $c->{format_conversation}++;
 
   $delay->once(
@@ -225,7 +226,7 @@ sub notification_list {
   my $login = $self->session('login');
   my $key   = "user:$login:notifications";
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->lrange($key, 0, 20, $delay->begin);
@@ -308,7 +309,7 @@ sub redirect_last {
   my ($self, $login) = @_;
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
@@ -323,7 +324,7 @@ sub redirect_last {
       }
 
       $self->redirect_to('wizard');
-    }
+    },
   );
 }
 

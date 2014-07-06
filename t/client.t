@@ -12,7 +12,7 @@ redis_do(
 );
 
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})
-  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect to conversation');
+  ->header_is('Location', '/magnet/%23convos', 'Redirect to conversation');
 
 $t->get_ok($t->tx->res->headers->location)->status_is(200);
 
@@ -28,7 +28,7 @@ $t->get_ok('/magnet/batman?_pjax=some.element')->status_is(200)->element_exists_
   ->element_exists_not('nav')->element_exists_not('.notifications.container')
   ->element_exists_not('.add-conversation.container')->element_exists_not('.goto-bottom');
 
-$t->get_ok('/')->header_like('Location', qr{/magnet/batman$}, 'Redirect on last conversation');
+$t->get_ok('/')->header_is('Location', '/magnet/batman', 'Redirect on last conversation');
 
 $t->get_ok('/chat/command-history')->status_is(200)->content_is('[]');
 

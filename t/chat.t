@@ -32,7 +32,7 @@ $connection->_irc->nick('doe');
 $connection->redis($t->app->redis);
 
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302)
-  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect to conversation');
+  ->header_is('Location', '/magnet/%23convos', 'Redirect to conversation');
 
 {
   $t->websocket_ok('/socket')->send_ok('yikes');

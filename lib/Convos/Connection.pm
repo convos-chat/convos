@@ -18,11 +18,11 @@ Add a new connection based on network name.
 =cut
 
 sub add_connection {
-  my $self      = shift->render_later;
+  my $self      = shift;
   my $full_page = $self->stash('full_page');
   my $method    = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
@@ -47,7 +47,7 @@ NOTE: This method currently also does update.
 =cut
 
 sub add_network {
-  my $self       = shift->render_later;
+  my $self       = shift;
   my $validation = $self->validation;
   my @channels   = map { split /\s+/ } $self->param('channels');
   my ($is_default, $name, $redis, $referrer);
@@ -77,7 +77,7 @@ sub add_network {
   $is_default = $self->param('default') || 0;
   $referrer   = $self->param('referrer') || '/';
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
@@ -102,7 +102,7 @@ Special case is "state": It will return the state of the connection:
 =cut
 
 sub control {
-  my $self        = shift->render_later;
+  my $self        = shift;
   my $command     = $self->param('cmd') || 'state';
   my $name        = $self->stash('name');
   my $redirect_to = $self->url_for('view.network', {network => $name});
@@ -121,7 +121,7 @@ sub control {
     $self->_invalid_control_request;
   }
   elsif ($command =~ m!^/! or $command eq 'irc') {
-    Mojo::IOLoop->delay(
+    $self->delay(
       sub {
         my ($delay) = @_;
         my $key = sprintf 'convos:user:%s:%s', $self->session('login'), $name;
@@ -137,7 +137,7 @@ sub control {
     );
   }
   else {
-    Mojo::IOLoop->delay(
+    $self->delay(
       sub {
         my ($delay) = @_;
         $self->app->core->control($command, $self->session('login'), $name, $delay->begin);
@@ -163,11 +163,11 @@ Used to edit a connection.
 =cut
 
 sub edit_connection {
-  my $self      = shift->render_later;
+  my $self      = shift;
   my $full_page = $self->stash('full_page');
   my $method    = $self->req->method eq 'POST' ? '_edit_connection' : '_edit_connection_form';
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
@@ -196,7 +196,7 @@ Used to edit settings for a network.
 =cut
 
 sub edit_network {
-  my $self = shift->render_later;
+  my $self = shift;
   my $name = $self->stash('name');
 
   $self->stash(layout => 'tactile');
@@ -208,7 +208,7 @@ sub edit_network {
     return;
   }
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
@@ -234,13 +234,13 @@ Delete a connection.
 =cut
 
 sub delete_connection {
-  my $self       = shift->render_later;
+  my $self       = shift;
   my $validation = $self->validation;
 
   $validation->input->{login} = $self->session('login');
   $validation->input->{name}  = $self->stash('name');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->app->core->delete_connection($validation, $delay->begin);
@@ -260,7 +260,7 @@ Render wizard page for first connection.
 =cut
 
 sub wizard {
-  my $self = shift->render_later;
+  my $self = shift;
 
   $self->stash(layout => 'tactile', template => 'connection/wizard',);
 
@@ -275,7 +275,7 @@ sub _add_connection {
   $validation->input->{channels} = [map { split /\s/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->hgetall("irc:network:$name", $delay->begin);
@@ -300,7 +300,7 @@ sub _add_connection_form {
   my $login = $self->session('login');
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->smembers("user:$login:connections", $delay->begin);
@@ -353,7 +353,7 @@ sub _edit_connection {
   $validation->input->{server}   = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->app->core->update_connection($validation, $delay->begin);
@@ -371,7 +371,7 @@ sub _edit_connection_form {
   my $login = $self->session('login');
   my $name  = $self->stash('name');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->_connection_state($delay->begin);

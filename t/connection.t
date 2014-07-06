@@ -33,7 +33,7 @@ redis_do(
     ->element_exists('.nick .error')->text_is('form .actions button', 'Update');
 
   $form = {server => 'irc.perl.org', nick => 'yay', tls => 1};
-  $t->post_ok('/connection/magnet/edit', form => $form)->status_is(302)->header_like(Location => qr{:\d+/magnet$});
+  $t->post_ok('/connection/magnet/edit', form => $form)->status_is(302)->header_is(Location => '/magnet');
 }
 
 {
@@ -41,7 +41,7 @@ redis_do(
     ->element_exists('form[action="/connection/magnet/delete"][method="post"]')->text_is('form .actions button', 'Yes')
     ->text_is('form .actions a[href="/magnet"]', 'No');
 
-  $t->post_ok('/connection/magnet/delete')->status_is(302)->header_like(Location => qr{:\d+/convos$});
+  $t->post_ok('/connection/magnet/delete')->status_is(302)->header_is(Location => '/convos');
 }
 
 done_testing;

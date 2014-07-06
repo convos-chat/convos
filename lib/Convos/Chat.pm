@@ -24,7 +24,7 @@ sub socket {
   my $login = $self->session('login');
   my $key   = "convos:user:$login:out";
 
-  Mojo::IOLoop->stream($self->tx->connection)->timeout(60);
+  $self->inactivity_timeout(60);
   Scalar::Util::weaken($self);
 
   # from browser to backend
