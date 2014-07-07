@@ -15,7 +15,7 @@
   % push @class, 'active' if $text eq $target;
   <li>
     %= link_to view => $c, class => join(' ', @class), title => "Network: $c->{network}", begin
-      %= $text
+      <span><%= $text %></span>
       <b><%= $c->{unread} > 999 ? '999+' : $c->{unread} || '' %></b>
     % end
   </li>

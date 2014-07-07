@@ -21,6 +21,10 @@
       </ul>
     % end
 
+    %= form_for 'connection.control', { name => $network }, method => 'post', class => 'conversations sidebar-top', begin
+      %= select_field 'goto'
+    % end
+
     <div class="messages row">
       %= content
     </div>

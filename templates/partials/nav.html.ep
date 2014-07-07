@@ -3,6 +3,9 @@
 % if ($full_page) {
   % my $n_notifications = stash('n_notifications') || 0;
   <div class="right">
+    <a href="toggle://form.conversations" title="Show conversations" class="conversations toggler">
+      <i class="icon-drop-down">☰</i>
+    </a>
     <a href="toggle://form.add-conversation" title="Add conversation">
       <i class="icon-plus">+</i>
     </a>

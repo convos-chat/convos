@@ -27,7 +27,7 @@ hr {
   .row { padding: 0; }
 
   footer {
-    height: 42px;
+    height: $navHeight;
     input, input:focus {
       border-bottom: 0;
       border-right: 0;

@@ -5,7 +5,7 @@ nav.bar {
   top: 0;
   left: 0;
   right: 0;
-  height: 42px;
+  height: $navHeight;
   z-index: $navBarZindex;
   overflow: hidden;
   @include box-shadow(0 4px 4px -2px rgba(180,180,180,.5));
@@ -20,27 +20,15 @@ nav.bar {
     position: relative;
   }
 
-  // unread messages count
-  a b {
-    background: #c33;
-    color: #fff;
-    font-size: $fontSize * 0.9;
-    font-weight: normal;
-    line-height: $fontSize + 1;
-    padding: 0 2px;
-    position: absolute;
-    right: 2px;
-    bottom: 1px;
-    @include opacity(.75);
-    @include border-radius(3px);
-  }
+  a b { bottom: 1px; }
 
   a.conversation { color: #666; }
-  a.conversations.toggler { display: none; }
+  ul.conversations { height: $navHeight; }
 
   .right {
     background: #fafafa;
     position: absolute;
+    top: 0;
     right: $bodyGutter;
     a, a:active { font-size: 1.2em; width: 2em; text-align: center; }
   }
@@ -54,6 +42,7 @@ nav.bar {
   @media (max-width: $responsiveWidth) {
     padding: 0;
     .right { right: 0; }
+    a.conversations.toggler { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
   }
 }
 
@@ -82,6 +71,20 @@ form.chat {
       }
     }
   }
+}
+
+// unread messages count
+nav.bar a b, form.conversations b {
+  background: #c33;
+  color: #fff;
+  font-size: $fontSize * 0.9;
+  font-weight: normal;
+  line-height: $fontSize + 1;
+  padding: 0 2px;
+  position: absolute;
+  right: 2px;
+  @include opacity(.75);
+  @include border-radius(3px);
 }
 
 div.messages {
@@ -142,17 +145,17 @@ div.messages {
 
 form.sidebar-right,
 div.sidebar-right {
-  background: #f4f4f4;
+  background: $sidebarBackground;
   color: #333333;
   display: none;
   position: fixed;
-  top: 42px;
+  top: $navHeight;
   right: 0;
   bottom: -3px;
   overflow: auto;
   width: $nickListWidth;
   padding-bottom: 20px;
-  z-index: 2;
+  z-index: $navBarZindex - 1;
   @include box-shadow(-2px 0 4px rgba(180,180,180,.5));
 
   button.link {
@@ -200,6 +203,26 @@ div.notification-list {
   a span.message { font-size: 0.9em; padding: 0; @include ellipsis(); }
   li.unread { background: #fee; };
   li.unread a { color: #000 };
+}
+
+form.conversations {
+  z-index: $navBarZindex - 2;
+  position: fixed;
+  top: $navHeight;
+  width: 100%;
+  display: none;
+
+  select, .selectize-input, .selectize-dropdown {
+    background: $sidebarBackground;
+    border: 0;
+  }
+  select, .selectize-input {
+    width: 100%;
+    @include border-radius(0);
+  }
+  .selectize-dropdown {
+    b { margin-top: 6px; }
+  }
 }
 
 @media (min-width: $responsiveWidth) {

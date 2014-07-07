@@ -165,6 +165,7 @@
     });
     $doc.filter('nav.bar').each(function() {
       $('nav.bar ul.conversations').html($(this).find('ul.conversations').children());
+      drawConversationMenu();
     });
 
     if (/^[#&]/.test($messages.hostAndTarget().target)) {
@@ -189,13 +190,8 @@
   };
 
   var drawConversationMenu = function($message) {
-    var $conversations = $('ul.conversations li, div.conversations.container li');
-    var $dropdown = $('div.conversations.container ul');
-    var $menu = $('nav ul.conversations');
-    var available_width, used_width = 0, unread, $a;
-
-    $('nav a.conversations.toggler').show();
-    available_width = $('nav').width() - $('nav .right').outerWidth();
+    var $conversations = $('nav.bar ul.conversations li');
+    var s = $('form.conversations select')[0].selectize;
 
     if($message) {
       $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
@@ -203,13 +199,18 @@
       $a.children('b').text(unread ? unread : '');
     }
 
-    $conversations.each(function() {
-      var $li = $(this);
-      if(!$li.parent('ul').is('.conversations')) $menu.append($li);
-      var w = $li.find('a').outerWidth();
-      used_width += w;
-      if(used_width - w / 3 > available_width) $dropdown.append($li);
+    s.clearOptions();
+    $conversations.map(function() {
+      var $a = $(this).find('a');
+      var i = { label: $a.find('span').text() };
+      if(!i.label) return;
+      if(i.label == $messages.attr('data-target')) return;
+      i.href = $a.attr('href');
+      i.unread = $(this).find('b').text();
+      i.network = $a.attr('title').replace(/\w+:\s+/, '');
+      s.addOption(i);
     });
+    s.refreshOptions(false);
   };
 
   var drawSettings = function() {
@@ -246,8 +247,8 @@
   };
 
   var drawUI = function() {
-    drawConversationMenu();
     if($win.data('at_bottom')) $win.scrollTo('bottom');
+    drawConversationMenu();
   };
 
   var focusInput = function() {
@@ -376,7 +377,6 @@
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
     $(document).pjax('nav a.conversation', 'div.messages', { fragment: 'div.messages' });
     $(document).pjax('nav a.convos', 'div.messages', { fragment: 'div.messages' });
-    $(document).pjax('div.container a', 'div.messages', { fragment: 'div.messages' });
 
     $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
     $('div.messages').on('pjax:start', function(xhr, options) { $('body').loadingIndicator('show'); });
@@ -419,7 +419,8 @@
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
       if(document.activeElement == $input.get(0)) {
-        $('nav ul.conversations a').slice(0, 3).eq(-1).focus();
+        $('a.conversations.toggler').click();
+        $('form.conversations input').focus();
       }
       else {
         focusInput();
@@ -571,6 +572,24 @@
     $.post($.url_for('/profile/timezone/offset'), { hour: new Date().getHours() });
     $input.focus();
 
+    $('form.conversations select').selectize({
+      create: false,
+      labelField: 'label',
+      maxOptions: 10000,
+      onChange: function(href) { $('a[href="' + href + '"]').click(); },
+      openOnFocus: true,
+      options: [],
+      searchField: [ 'label' ],
+      valueField: 'href',
+      render: {
+        option: function(i, esc) {
+          var n = '<small>on ' + i.network + '</small>';
+          var unread = '<b>' + i.unread + '</b>';
+          return '<div>' + [i.label, n, unread].join(' ') + '</div>';
+        }
+      }
+    });
+
     $.ajaxSetup({
       error: function(jqXHR, exception) {
         console.log('ajax: ' + this.url + ' failed: ' + exception);
@@ -590,7 +609,6 @@
     initAddConversation();
     initInputField();
     drawSettings();
-    initShortcuts(); // must be done after drawSettings()
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {
@@ -609,6 +627,7 @@
 
   $(window).load(function() {
     if($input.length) conversationLoaded();
+    initShortcuts(); // must be done after drawSettings() and drawConversationMenu()
   });
 
 })(jQuery);

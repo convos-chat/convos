@@ -64,20 +64,25 @@
     return this.click(function(e) {
       var $a = $(this);
       var $target = $(this.href.replace(/^toggle:\/\//, ''));
-      var $hide;
+      var $hide, animate, hide;
 
       e.preventDefault();
 
       if($a.hasClass('toggler-active')) {
+        animate = $target.hasClass('sidebar-top') ? { top: -$target.outerHeight() } : { right: -($target.outerWidth() + 20) };
         $a.removeClass('active toggler-active');
-        $target.css({ 'z-index': 900 }).animate({ right: -($target.outerWidth() + 20) }, 200); // +20 to hide shadow
+        $target.css({ 'z-index': 900 }).animate(animate, 200); // +20 to hide shadow
         return false;
       }
 
       $hide = $('a.toggler-active');
+      hide = $target.hasClass('sidebar-top') ? { top: -$target.outerWidth() } : { right: $hide.length ? 0 : -$target.outerWidth() };
+      hide['z-index'] = 901;
+      animate = $target.hasClass('sidebar-top') ? { top: '42px' } : { right: 0 };
       $hide.click();
       $a.addClass('active toggler-active');
-      $target.css({ 'z-index': 901, 'right': $hide.length ? 0 : -$target.outerWidth() }).show().animate({ right: 0 }, 200);
+      $target.css(hide).show().animate(animate, 200);
+      if(e.button == 0) $target.find('input').slice(0, 2).eq(-1).focus();
       return false;
     }).bind('keydown', 'return', function(e) {
       if(!$(this).hasClass('toggler-active')) return true;
@@ -106,7 +111,7 @@
     });
 
     $('body').on('click', function(e) {
-      if ($(e.target).closest('.sidebar-right').length) return;
+      if ($(e.target).closest('.sidebar-right, .sidebar-top').length) return;
       $('a.toggler-active').click();
     });
 

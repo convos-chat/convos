@@ -1449,7 +1449,7 @@
 					e.preventDefault();
 					return;
 				case KEY_RETURN:
-					if (self.isOpen && self.$activeOption) {
+					if (!e.shiftKey && self.$activeOption) {
 						self.onOptionSelect({currentTarget: self.$activeOption});
 					}
 					e.preventDefault();
