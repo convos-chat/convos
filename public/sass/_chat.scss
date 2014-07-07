@@ -23,6 +23,7 @@ nav.bar {
   a b { bottom: 1px; }
 
   a.conversation { color: #666; }
+  a.add-conversation.toggler { display: none; }
   ul.conversations { height: $navHeight; }
 
   .right {
@@ -75,7 +76,7 @@ form.chat {
 
 // unread messages count
 nav.bar a b, form.conversations b {
-  background: #c33;
+  background: rgba(204, 100, 40, 0.98);
   color: #fff;
   font-size: $fontSize * 0.9;
   font-weight: normal;
@@ -201,7 +202,7 @@ div.notification-list {
 
   a { padding: 2px 8px; color: #666; }
   a span.message { font-size: 0.9em; padding: 0; @include ellipsis(); }
-  li.unread { background: #fee; };
+  li.unread { background-color: rgba(204, 100, 40, 0.18); }
   li.unread a { color: #000 };
 }
 
@@ -222,6 +223,10 @@ form.conversations {
   }
   .selectize-dropdown {
     b { margin-top: 6px; }
+  }
+
+  .selectize-control.single .selectize-input::after {
+    border: 0;
   }
 }
 

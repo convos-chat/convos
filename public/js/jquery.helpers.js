@@ -5,8 +5,6 @@
   var has_fancy_scrollbars = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var $height_from, $win;
 
-  $.supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints;
-
   $.notify = function(title, body, icon) {
     if($win.data('has_focus')) return this;
 

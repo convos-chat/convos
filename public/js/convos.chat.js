@@ -179,11 +179,11 @@
       $win.scrollTo(0);
       getHistoricMessages();
     }
-    else if($messages.length ) {
-      if(!$.supportsTouch) $input.focus();
+    else if($messages.length) {
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
+    if(!running_on_ios) $input.focus();
     $input.hostAndTarget($messages);
     drawSettings();
     drawUI();
@@ -303,7 +303,8 @@
     return false;
   };
 
-  var initAddConversation = function() {
+  var initConversations = function() {
+    $('form.add-conversation button[type="reset"]').click(function() { focusInput(); });
     $('form.add-conversation').submit(function(e) {
       e.preventDefault();
 
@@ -314,6 +315,40 @@
       if(channel) {
         $input.send('/join #' + channel, { 'data-network': network, pending_status: true });
         focusInput();
+      }
+    });
+
+    $('form.conversations select').selectize({
+      labelField: 'label',
+      maxOptions: 10000,
+      openOnFocus: true,
+      options: [],
+      placeholder: 'Select or create a new conversation: "#channel" or "some_nick".',
+      searchField: [ 'label' ],
+      valueField: 'href',
+      create: function(value) {
+        if(value.match(/^[#&]/)) {
+          $('a.add-conversation.toggler').click();
+          $('form.add-conversation input[name="channel"]').val(value);
+        }
+        else {
+          $input.send('/query ' + value, { pending_status: true });
+        }
+        return false;
+      },
+      onChange: function(href) {
+        $('a[href="' + href + '"]').click();
+      },
+      render: {
+        option: function(item, esc) {
+          var n = '<small>on ' + esc(item.network) + '</small>';
+          var unread = '<b>' + esc(item.unread) + '</b>';
+          return '<div>' + [esc(item.label), n, unread].join(' ') + '</div>';
+        },
+        option_create: function(data, esc) {
+          var pre = data.input.match(/^[#&]/) ? 'Join channel' : 'Chat with';
+          return '<div class="create">' + pre + ' <strong>' + esc(data.input) + '</strong>.</div>';
+        }
       }
     });
   };
@@ -572,24 +607,6 @@
     $.post($.url_for('/profile/timezone/offset'), { hour: new Date().getHours() });
     $input.focus();
 
-    $('form.conversations select').selectize({
-      create: false,
-      labelField: 'label',
-      maxOptions: 10000,
-      onChange: function(href) { $('a[href="' + href + '"]').click(); },
-      openOnFocus: true,
-      options: [],
-      searchField: [ 'label' ],
-      valueField: 'href',
-      render: {
-        option: function(i, esc) {
-          var n = '<small>on ' + i.network + '</small>';
-          var unread = '<b>' + i.unread + '</b>';
-          return '<div>' + [i.label, n, unread].join(' ') + '</div>';
-        }
-      }
-    });
-
     $.ajaxSetup({
       error: function(jqXHR, exception) {
         console.log('ajax: ' + this.url + ' failed: ' + exception);
@@ -606,7 +623,7 @@
 
     initSocket();
     initPjax();
-    initAddConversation();
+    initConversations();
     initInputField();
     drawSettings();
 

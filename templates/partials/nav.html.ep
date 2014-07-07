@@ -6,7 +6,7 @@
     <a href="toggle://form.conversations" title="Show conversations" class="conversations toggler">
       <i class="icon-drop-down">☰</i>
     </a>
-    <a href="toggle://form.add-conversation" title="Add conversation">
+    <a href="toggle://form.add-conversation" title="Add conversation" class="add-conversation toggler">
       <i class="icon-plus">+</i>
     </a>
     <a href="toggle://div.notification-list" title="List conversations" class="notifications toggler">
