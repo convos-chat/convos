@@ -144,6 +144,7 @@
 
   var conversationLoaded = function(e, data, status_text, xhr, options) {
     var $doc = $(data || '<div></div>');
+    var menu_width = $('nav.bar .right').outerWidth();
 
     $messages = $('div.messages ul');
     $messages.end_time = parseFloat($messages.data('end-time') || 0);
@@ -186,6 +187,10 @@
     if(!running_on_ios) $input.focus();
     $input.hostAndTarget($messages);
     drawSettings();
+
+    $('nav.bar ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
+    $('nav.bar').data('menu_width', menu_width);
+
     drawUI();
   };
 
@@ -248,7 +253,15 @@
 
   var drawUI = function() {
     if($win.data('at_bottom')) $win.scrollTo('bottom');
+
     drawConversationMenu();
+
+    if($('nav.bar').data('menu_width') > $('body').outerWidth()) {
+      $('nav.bar a.conversations.toggler').addClass('overlapping');
+    }
+    else {
+      $('nav.bar a.conversations.toggler').removeClass('overlapping');
+    }
   };
 
   var focusInput = function() {
@@ -323,7 +336,7 @@
       maxOptions: 10000,
       openOnFocus: true,
       options: [],
-      placeholder: 'Select or create a new conversation: "#channel" or "some_nick".',
+      placeholder: 'Select or create a new conversation',
       searchField: [ 'label' ],
       valueField: 'href',
       create: function(value) {

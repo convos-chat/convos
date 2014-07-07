@@ -21,8 +21,12 @@
       </ul>
     % end
 
-    %= form_for 'connection.control', { name => $network }, method => 'post', class => 'conversations sidebar-top', begin
+    %= form_for 'connection.control', { name => $network }, method => 'post', class => 'conversations sidebar-right', begin
       %= select_field 'goto'
+      <p>
+        Start the conversation name with "#" to join a channel,
+        or just write the nick of the person you want to talk with.
+      </p>
     % end
 
     <div class="messages row">

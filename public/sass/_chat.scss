@@ -23,6 +23,7 @@ nav.bar {
   a b { bottom: 1px; }
 
   a.conversation { color: #666; }
+  a.conversations.toggler.overlapping { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
   a.add-conversation.toggler { display: none; }
   ul.conversations { height: $navHeight; }
 
@@ -43,7 +44,6 @@ nav.bar {
   @media (max-width: $responsiveWidth) {
     padding: 0;
     .right { right: 0; }
-    a.conversations.toggler { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
   }
 }
 
@@ -76,7 +76,7 @@ form.chat {
 
 // unread messages count
 nav.bar a b, form.conversations b {
-  background: rgba(204, 100, 40, 0.98);
+  background: rgba(200, 40, 40, 0.98);
   color: #fff;
   font-size: $fontSize * 0.9;
   font-weight: normal;
@@ -156,7 +156,7 @@ div.sidebar-right {
   overflow: auto;
   width: $nickListWidth;
   padding-bottom: 20px;
-  z-index: $navBarZindex - 1;
+  z-index: 2;
   @include box-shadow(-2px 0 4px rgba(180,180,180,.5));
 
   button.link {
@@ -172,7 +172,7 @@ div.sidebar-right {
   }
 
   input, div.selectize-input { width: 100%; }
-  div.form-group { padding: 4px 8px; }
+  div.form-group { padding: $selectizeOptionPadding; }
 
   a:hover, a:focus, button.link:hover, button.link:focus {
     background-color: darken(#eee, 5%);
@@ -180,10 +180,10 @@ div.sidebar-right {
   }
 
   h3 { font-size: 1em; margin: 0; };
-  h3, a, span {
+  h3, a, li > span {
     text-decoration: none;
     display: block;
-    padding: 4px 8px;
+    padding: $selectizeOptionPadding;
   }
 
   ul ul li {
@@ -196,7 +196,7 @@ div.sidebar-right {
   }
 }
 
-form.add-conversation { width: $nickListWidth + 20; }
+form.add-conversation { width: $nickListWidth + 60; }
 div.notification-list {
   width: 270px;
 
@@ -207,26 +207,21 @@ div.notification-list {
 }
 
 form.conversations {
-  z-index: $navBarZindex - 2;
-  position: fixed;
-  top: $navHeight;
-  width: 100%;
-  display: none;
+  width: $nickListWidth + 60;
 
   select, .selectize-input, .selectize-dropdown {
-    background: $sidebarBackground;
-    border: 0;
-  }
-  select, .selectize-input {
-    width: 100%;
-    @include border-radius(0);
-  }
-  .selectize-dropdown {
-    b { margin-top: 6px; }
+    @include box-shadow(0 0 0 0);
   }
 
-  .selectize-control.single .selectize-input::after {
-    border: 0;
+  .selectize-dropdown { background: $sidebarBackground; }
+  .selectize-dropdown b { margin-top: 6px; }
+  .selectize-control.single .selectize-input::after { border: 0; }
+  p {
+    color: #666;
+    font-size: 0.9em;
+    position: absolute;
+    bottom: 0;
+    margin: 0.5em;
   }
 }
 

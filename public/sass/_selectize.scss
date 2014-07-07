@@ -28,7 +28,7 @@
 }
 .selectize-dropdown [data-selectable],
 .selectize-dropdown .optgroup-header {
-  padding: 6px 9px;
+  padding: $selectizeOptionPadding;
 }
 .selectize-dropdown .optgroup:first-child .optgroup-header {
   border-top: 0 none;
