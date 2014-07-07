@@ -1,3 +1,5 @@
+navigator.is_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+
 ;(function($) {
   var at_bottom_threshold = !!('ontouchstart' in window) ? 110 : 40;
   var original_title = document.title;
@@ -59,28 +61,26 @@
   };
 
   $.fn.toggler = function() {
-    return this.click(function(e) {
+    return this.on('click focus', function(e) {
       var $a = $(this);
-      var $target = $(this.href.replace(/^toggle:\/\//, ''));
+      var $t = $(this.href.replace(/^toggle:\/\//, ''));
       var $hide;
 
       e.preventDefault();
 
-      if($a.hasClass('toggler-active')) {
-        $a.removeClass('active toggler-active');
-        $target.css({ 'z-index': 900 }).animate({ right: -($target.outerWidth() + 20) }, 100); // +20 to hide shadow
+      if($a.hasClass('active')) {
+        if(e.originalEvent && e.originalEvent.type == 'focus') return false;
+        $a.removeClass('active');
+        $t.removeClass('active').css({ 'z-index': 900 }).animate({ right: -($t.outerWidth() + 20) }, 100); // +20 to hide shadow
+        if(!$('a.toggler.active').length && !navigator.is_ios) $('.input input').focus();
         return false;
       }
 
-      $hide = $('a.toggler-active');
+      $hide = $('a.toggler.active');
       $hide.click();
-      $a.addClass('active toggler-active');
-      $target.css({ 'z-index': 901, right: $hide.length ? 0 : -$target.outerWidth() }).show().animate({ right: 0 }, 150);
-      if(e.button == 0) $target.find('input').slice(0, 2).eq(-1).focus();
-      return false;
-    }).bind('keydown', 'return', function(e) {
-      if(!$(this).hasClass('toggler-active')) return true;
-      $(this.href.replace(/^toggle:\/\//, '')).find('a, input, button').eq(0).focus();
+      $a.addClass('active');
+      $t.addClass('active').css({ 'z-index': 901, right: $hide.length ? 0 : -$t.outerWidth() }).show().animate({ right: 0 }, 150);
+      $t.find('a, button, input').eq(0).focus();
       return false;
     });
   };
@@ -97,16 +97,9 @@
     $win = $(window).data('at_bottom', false).data('has_focus', true);
     $(document).data('height_from', $height_from);
 
-    var $previous_toggle_element = $();
-    $(document).bind('keydown', 'shift+tab tab', function(e) { $previous_toggle_element = $(e.target); });
-    $(document).bind('keyup', 'shift+tab tab', function(e) {
-      if(e.target.href && e.target.href.match(/^toggle:/)) $(e.target).click();
-      if($previous_toggle_element.hasClass('toggler-active')) $previous_toggle_element.click();
-    });
-
     $('body').on('click', function(e) {
       if ($(e.target).closest('.sidebar-right').length) return;
-      $('a.toggler-active').click();
+      $('a.toggler.active').click();
     });
 
     $win.on('scroll', function() {

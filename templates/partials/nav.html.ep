@@ -13,7 +13,7 @@
       <i class="icon-bullhorn"></i>
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications || '' %></b>
     </a>
-    <a href="toggle://form.sidebar-settings" title="Conversation settings" class="hide-on-widescreen">
+    <a href="toggle://form.sidebar" title="Conversation settings" class="sidebar toggler hide-on-widescreen">
       <i class="icon-cog"></i>
     </a>
   </div>

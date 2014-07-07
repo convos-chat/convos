@@ -15,8 +15,8 @@
     %= include 'partials/nav'
     %= include 'partials/desktop-notifications-question'
 
-    %= form_for 'connection.control', { name => $network }, method => 'post', class => "sidebar-settings sidebar-right", begin
-      <ul class="up-down-navigation">
+    %= form_for 'connection.control', { name => $network }, method => 'post', class => "sidebar sidebar-right", begin
+      <ul>
         %= include "sidebar/$sidebar"
       </ul>
     % end

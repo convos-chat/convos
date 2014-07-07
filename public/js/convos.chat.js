@@ -4,7 +4,6 @@
   var $input, $win;
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
-  var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
   var conversation_list = [];
   var min_width = 700;
   var commands = [
@@ -154,15 +153,15 @@
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
-    $('form.sidebar-settings button.ws-cmd').each(function() {
+    $('form.sidebar button.ws-cmd').each(function() {
       $(this).removeClass('ws-cmd').click(function(e) {
         e.preventDefault();
         $input.send(this.value, { pending_status: true });
       });
     });
 
-    $doc.filter('form.sidebar-settings').each(function() {
-      $('form.sidebar-settings ul').html($(this).find('ul:first').children());
+    $doc.filter('form.sidebar').each(function() {
+      $('form.sidebar ul').html($(this).find('ul:first').children());
     });
     $doc.filter('nav.bar').each(function() {
       $('nav.bar ul.conversations').html($(this).find('ul.conversations').children());
@@ -184,7 +183,7 @@
       $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
-    if(!running_on_ios) $input.focus();
+    if(!navigator.is_ios) $input.focus();
     $input.hostAndTarget($messages);
     drawSettings();
 
@@ -264,11 +263,6 @@
     }
   };
 
-  var focusInput = function() {
-    $('a.toggler-active').click();
-    $input.focus();
-  };
-
   var getHistoricMessages = function() {
     var $height_from = $(document).data('height_from')
 
@@ -317,7 +311,7 @@
   };
 
   var initConversations = function() {
-    $('form.add-conversation button[type="reset"]').click(function() { focusInput(); });
+    $('form.add-conversation button[type="reset"]').click(function() { $('a.toggler.active').click(); });
     $('form.add-conversation').submit(function(e) {
       e.preventDefault();
 
@@ -327,7 +321,7 @@
 
       if(channel) {
         $input.send('/join #' + channel, { 'data-network': network, pending_status: true });
-        focusInput();
+        $('a.toggler.active').click();
       }
     });
 
@@ -352,15 +346,18 @@
       onChange: function(href) {
         $('a[href="' + href + '"]').click();
       },
+      onInitialize: function() {
+        this.$dropdown.hide = function() {};
+      },
       render: {
         option: function(item, esc) {
           var n = '<small>on ' + esc(item.network) + '</small>';
           var unread = '<b>' + esc(item.unread) + '</b>';
-          return '<div>' + [esc(item.label), n, unread].join(' ') + '</div>';
+          return '<a>' + [esc(item.label), n, unread].join(' ') + '</a>';
         },
         option_create: function(data, esc) {
           var pre = data.input.match(/^[#&]/) ? 'Join channel' : 'Chat with';
-          return '<div class="create">' + pre + ' <strong>' + esc(data.input) + '</strong>.</div>';
+          return '<a class="create">' + pre + ' <strong>' + esc(data.input) + '</strong>.</a>';
         }
       }
     });
@@ -464,41 +461,14 @@
   }
 
   var initShortcuts = function() {
-    $('body, input').bind('keydown', 'shift+return', function(e) {
-      e.preventDefault();
-      if(document.activeElement == $input.get(0)) {
-        $('a.conversations.toggler').click();
-        $('form.conversations input').focus();
-      }
-      else {
-        focusInput();
-      }
-    });
-
-    var upDown = function(method, page) {
-      var $items, i;
-      return function(e) {
-        $items = $(document.activeElement).closest('li');
-        if(!$items.closest('ul').hasClass('up-down-navigation')) return true;
-        i = page ? parseInt($items.closest('ul').height() / $items.height()) + 1 : 0;
-        $items = $items[method]();
-        $items = $items.find('a, input, button');
-        if($items.length <= i) i = $items.length - 1;
-        $items.eq(i).focus();
-        return false;
-      };
-    };
-
-    $('body, input, button').bind('keydown', 'esc', focusInput);
-    $('body').bind('keydown', 'up', upDown('prevAll', 0));
-    $('body').bind('keydown', 'pageup', upDown('prevAll', 1));
-    $('body').bind('keydown', 'down', upDown('nextAll', 0));
-    $('body').bind('keydown', 'pagedown', upDown('nextAll', 1));
+    $('body, input, button').bind('keydown', 'alt+shift+a shift+return', function() { $('.toggler.conversations').click(); return false; });
+    $('body, input, button').bind('keydown', 'alt+shift+s', function() { $('.toggler.notifications').click(); return false; });
+    $('body, input, button').bind('keydown', 'alt+shift+d', function() { $('.toggler.sidebar').filter(':visible').click(); return false; });
   };
 
   var nickList = function($data) {
     var $nicks = $data.find('[data-nick]');
-    var $ul = $('form.sidebar-settings ul');
+    var $ul = $('form.sidebar ul');
     var network = $messages.data('network');
     var senders = {};
 
@@ -626,7 +596,7 @@
       }
     });
 
-    if(running_on_ios) {
+    if(navigator.is_ios) {
       $('input, textarea').on('click', function() {
         $('nav.bar').hide();
       }).on('focusout', function() {
@@ -634,11 +604,12 @@
       });
     }
 
+    drawSettings();
     initSocket();
     initPjax();
     initConversations();
     initInputField();
-    drawSettings();
+    initShortcuts();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {
@@ -657,7 +628,6 @@
 
   $(window).load(function() {
     if($input.length) conversationLoaded();
-    initShortcuts(); // must be done after drawSettings() and drawConversationMenu()
   });
 
 })(jQuery);
