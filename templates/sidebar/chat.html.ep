@@ -8,6 +8,9 @@
   <button class="link ws-cmd" name="cmd" value="/close <%= $target %>">Close chat</button>
 </li>
 <li>
+  <button class="link ws-cmd" name="cmd" value="/help">Help</button>
+</li>
+<li>
   <h3>Participants</h3>
 </li>
 <li class="nick">

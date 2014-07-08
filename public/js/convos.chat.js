@@ -156,7 +156,7 @@
     $('form.sidebar button.ws-cmd').each(function() {
       $(this).removeClass('ws-cmd').click(function(e) {
         e.preventDefault();
-        $input.send(this.value, { pending_status: true });
+        $input.send(this.value);
       });
     });
 
