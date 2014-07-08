@@ -58,19 +58,16 @@ form.chat {
 
     @media (max-width: $responsiveWidth) {
       bottom: 0;
-    }
 
-    input {
-      background: #fafafa;
-      width: 100%;
-      padding: 8px;
-
-      @media (max-width: $responsiveWidth) {
+      input {
         border: 0;
         border-top: 2px solid darken(#fff, 40%);
         @include border-radius(0);
       }
     }
+
+    input { background: #fafafa; width: 100%; padding: 8px; }
+    input.disabled, input[disabled] { background-color: #eee; }
   }
 }
 
@@ -203,14 +200,16 @@ div.sidebar-right {
   }
 }
 
-form.add-conversation { width: $nickListWidth + 60; }
+form.add-conversation {
+  width: $nickListWidth + 60;
+}
+
 div.notification-list {
   width: 270px;
 
   a { padding: 2px 8px; color: #666; }
   a span.message { font-size: 0.9em; padding: 0; @include ellipsis(); }
-  li.unread { background-color: rgba(204, 100, 40, 0.18); }
-  li.unread a { color: #000 };
+  li.unread a { background-color: rgba(204, 100, 40, 0.18); color: #000; };
 }
 
 form.conversations {

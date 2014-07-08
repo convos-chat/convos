@@ -119,7 +119,7 @@
       }
     }
     else if(this.hasClass('nicks')) {
-      $input.attr('placeholder', $messages.attr('data-nick'));
+      initInputField()
       nickList(this);
       return;
     }
@@ -172,7 +172,7 @@
       $input.send('/names');
     }
     else {
-      $input.attr('placeholder', $messages.attr('data-nick'));
+      initInputField();
     }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
@@ -397,6 +397,9 @@
       $input.history_i = $input.history.length;
     });
 
+    $input.removeAttr('disabled');
+    $input.attr('placeholder', 'What\'s on your mind ' + $messages.attr('data-nick') + '?');
+
     //TODO: $input.doubletap(autocomplete);
     $input.bind('keydown', function(e) { if(e.keyCode !== 9) complete = false; }); // not tab
     $input.bind('keydown', 'tab', autocomplete);
@@ -435,10 +438,7 @@
     $input.history = [];
     $input.history_i = 0;
     socket.onmessage = receiveMessage;
-    socket.onopen = function(e) {
-      $input.removeClass('disabled');
-      if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true });
-    };
+    socket.onopen = function(e) { $input.removeClass('disabled'); if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true }); };
     socket.onclose = function() { $input.addClass('disabled'); };
     socket.send('PING'); // open socket
     $input.send = function(message, attr) {
@@ -453,7 +453,6 @@
         $win.scrollTo('bottom');
       }
       socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr(attr).text(message).prop('outerHTML'));
-      $input.addClass('sending').siblings('.menu').hide();
       if(attr['data-history']) $input.history.push(message);
       $input.history_i = $input.history.length;
       return $input;
@@ -524,8 +523,6 @@
         $messages.find('#' + uuid).remove();
       }
     }
-
-    $input.removeClass('sending').siblings('.menu').show();
 
     if($message.data('target') === '') {
       $message.data('target', $messages.data('target'));
@@ -608,7 +605,6 @@
     initSocket();
     initPjax();
     initConversations();
-    initInputField();
     initShortcuts();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
