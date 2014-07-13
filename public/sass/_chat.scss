@@ -23,8 +23,8 @@ nav.bar {
   a b { bottom: 1px; }
 
   a.conversation { color: #666; }
-  a.conversations.toggler.overlapping { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
-  a.add-conversation.toggler { display: none; }
+  a.conversations.overlapping { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
+  a.add-conversation { display: none; }
   ul.conversations { height: $navHeight; }
 
   .right {

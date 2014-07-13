@@ -342,11 +342,12 @@ sub _assets {
       /js/jquery.min.js
       /js/ws-reconnecting.js
       /js/jquery.hotkeys.js
-      /js/jquery.hammer.min.js
-      /js/jquery.notifications.js
       /js/jquery.pjax.js
-      /js/jquery.helpers.js
+      /js/jquery.notify.js
+      /js/jquery.at-bottom.js
       /js/selectize.js
+      /js/convos.loading-indicator.js
+      /js/convos.sidebar.js
       /js/convos.chat.js
       )
   );

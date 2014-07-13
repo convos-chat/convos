@@ -3,7 +3,7 @@
 % my $target = stash('target') || 'any';
 % my $sidebar = stash('sidebar') || 'chat';
 <!DOCTYPE html>
-<html data-basepath="<%= $self->url_for('/') %>">
+<html>
   <head>
   % if($full_page) {
     %= include 'partials/head', minimal_ui => 1

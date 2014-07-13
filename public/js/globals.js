@@ -1,4 +1,9 @@
-(function(window) {
+;(function(window) {
+  window.navigator.is_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+
+  window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
+  window.console._debug = function() { if(window.DEBUG) window.console.log.apply(window.console, arguments) };
+
   var s4 = function() {
     return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
   };
@@ -21,10 +26,6 @@ window.sortedSet.prototype.revrange = function(start, stop) {
   if(stop < 0) stop = res.length + stop + 1;
   return res.sort(function(a, b) { return self.set[b] - self.set[a]; }).splice(start, stop);
 };
-
-// console.log()
-window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
-window.console._debug = function() { if(window.DEBUG) window.console.log.apply(window.console, arguments) };
 
 // add escape() with the *same* functionality as per's quotemeta()
 RegExp.escape = RegExp.escape || function(str) {

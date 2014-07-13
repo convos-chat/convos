@@ -3,17 +3,17 @@
 % if ($full_page) {
   % my $n_notifications = stash('n_notifications') || 0;
   <div class="right">
-    <a href="toggle://form.conversations" title="Show conversations" class="conversations toggler">
+    <a href="sidebar://form.conversations" title="Show conversations" class="conversations btn-sidebar">
       <i class="icon-drop-down">☰</i>
     </a>
-    <a href="toggle://form.add-conversation" title="Add conversation" class="add-conversation toggler">
+    <a href="sidebar://form.add-conversation" title="Add conversation" class="add-conversation btn-sidebar">
       <i class="icon-plus">+</i>
     </a>
-    <a href="toggle://div.notification-list" title="List conversations" class="notifications toggler">
+    <a href="sidebar://div.notification-list" title="List conversations" class="notifications btn-sidebar">
       <i class="icon-bullhorn"></i>
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications || '' %></b>
     </a>
-    <a href="toggle://form.sidebar" title="Conversation settings" class="sidebar toggler hide-on-widescreen">
+    <a href="sidebar://form.sidebar" title="Conversation settings" class="sidebar btn-sidebar hide-on-widescreen">
       <i class="icon-cog"></i>
     </a>
   </div>

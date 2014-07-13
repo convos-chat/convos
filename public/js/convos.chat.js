@@ -49,7 +49,7 @@
       $message.find('a.embed').each(function() {
         var $a = $(this);
         $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
-          var at_bottom = $win.data('at_bottom');
+          var at_bottom = $win.atBottom();
           var $embed_code = $(embed_code);
           $a.closest('div').after($embed_code);
           if(at_bottom) {
@@ -119,7 +119,6 @@
       }
     }
     else if(this.hasClass('nicks')) {
-      initInputField()
       nickList(this);
       return;
     }
@@ -143,7 +142,7 @@
 
   var conversationLoaded = function(e, data, status_text, xhr, options) {
     var $doc = $(data || '<div></div>');
-    var menu_width = $('nav.bar .right').outerWidth();
+    var menu_width = $('nav .right').outerWidth();
 
     $messages = $('div.messages ul');
     $messages.end_time = parseFloat($messages.data('end-time') || 0);
@@ -163,38 +162,32 @@
     $doc.filter('form.sidebar').each(function() {
       $('form.sidebar ul').html($(this).find('ul:first').children());
     });
-    $doc.filter('nav.bar').each(function() {
-      $('nav.bar ul.conversations').html($(this).find('ul.conversations').children());
+    $doc.filter('nav').each(function() {
+      $('nav ul.conversations').html($(this).find('ul.conversations').children());
       drawConversationMenu();
     });
 
     if (/^[#&]/.test($messages.hostAndTarget().target)) {
       $input.send('/names');
     }
-    else {
-      initInputField();
-    }
 
     if(location.href.indexOf('from=') > 0) { // link from notification list
       $win.scrollTo(0);
       getHistoricMessages();
-    }
-    else if($messages.length) {
-      $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
     }
 
     if(!navigator.is_ios) $input.focus();
     $input.hostAndTarget($messages);
     drawSettings();
 
-    $('nav.bar ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
-    $('nav.bar').data('menu_width', menu_width);
+    $('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
+    $('nav').data('menu_width', menu_width);
 
     drawUI();
   };
 
   var drawConversationMenu = function($message) {
-    var $conversations = $('nav.bar ul.conversations li');
+    var $conversations = $('nav ul.conversations li');
     var s = $('form.conversations select')[0].selectize;
 
     if($message) {
@@ -251,32 +244,30 @@
   };
 
   var drawUI = function() {
-    if($win.data('at_bottom')) $win.scrollTo('bottom');
+    if($win.atBottom()) $win.scrollTo('bottom');
 
     drawConversationMenu();
 
-    if($('nav.bar').data('menu_width') > $('body').outerWidth()) {
-      $('nav.bar a.conversations.toggler').addClass('overlapping');
+    if($('nav').data('menu_width') > $('body').outerWidth()) {
+      $('nav a.conversations').addClass('overlapping');
     }
     else {
-      $('nav.bar a.conversations.toggler').removeClass('overlapping');
+      $('nav a.conversations').removeClass('overlapping');
     }
   };
 
   var getHistoricMessages = function() {
-    var $height_from = $(document).data('height_from')
-
     if($messages.start_time && $win.scrollTop() == 0) {
       var end_time = $messages.end_time;
       $.get(location.href.replace(/\?.*/, ''), { to: $messages.start_time }, function(data) {
         var $ul = $(data).find('ul[data-network]');
         var $li = $ul.children('li:lt(-1)');
-        var height_before_prepend = $height_from.height();
+        var height_before_prepend = $('body').height();
         $messages.end_time = end_time;
         if(!$li.length) return;
         $messages.start_time = parseFloat($ul.data('start-time'));
         $messages.prepend($li.attachEventsToMessage());
-        $win.scrollTop($height_from.height() - height_before_prepend);
+        $win.scrollTop($('body').height() - height_before_prepend);
       });
       $messages.start_time = $messages.end_time = 0;
     }
@@ -300,10 +291,7 @@
         if(!$li.length) return;
         $messages.end_time = parseFloat($ul.data('end-time'));
         $li.each(function() { $(this).appendToMessages(); });
-        if(!$li.filter('.historic-message').length) {
-          if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
-          drawUI();
-        }
+        if(!$li.filter('.historic-message').length) drawUI();
       });
     }
     $messages.start_time = $messages.end_time = 0;
@@ -311,7 +299,7 @@
   };
 
   var initConversations = function() {
-    $('form.add-conversation button[type="reset"]').click(function() { $('a.toggler.active').click(); });
+    $('form.add-conversation button[type="reset"]').click(function() { $('a.btn-sidebar.active').click(); });
     $('form.add-conversation').submit(function(e) {
       e.preventDefault();
 
@@ -321,7 +309,7 @@
 
       if(channel) {
         $input.send('/join #' + channel, { 'data-network': network, pending_status: true });
-        $('a.toggler.active').click();
+        $('a.btn-sidebar.active').click();
       }
     });
 
@@ -335,7 +323,7 @@
       valueField: 'href',
       create: function(value) {
         if(value.match(/^[#&]/)) {
-          $('a.add-conversation.toggler').click();
+          $('nav a.add-conversation').click();
           $('form.add-conversation input[name="channel"]').val(value);
         }
         else {
@@ -400,7 +388,6 @@
     $input.removeAttr('disabled');
     $input.attr('placeholder', 'What\'s on your mind ' + $messages.attr('data-nick') + '?');
 
-    //TODO: $input.doubletap(autocomplete);
     $input.bind('keydown', function(e) { if(e.keyCode !== 9) complete = false; }); // not tab
     $input.bind('keydown', 'tab', autocomplete);
     $input.bind('keydown', 'up', function(e) {
@@ -460,9 +447,9 @@
   }
 
   var initShortcuts = function() {
-    $('body, input, button').bind('keydown', 'alt+shift+a shift+return', function() { $('.toggler.conversations').click(); return false; });
-    $('body, input, button').bind('keydown', 'alt+shift+s', function() { $('.toggler.notifications').click(); return false; });
-    $('body, input, button').bind('keydown', 'alt+shift+d', function() { $('.toggler.sidebar').filter(':visible').click(); return false; });
+    $('body, input, button').bind('keydown', 'alt+shift+a shift+return', function() { $('nav a.conversations').click(); return false; });
+    $('body, input, button').bind('keydown', 'alt+shift+s', function() { $('nav a.notifications').click(); return false; });
+    $('body, input, button').bind('keydown', 'alt+shift+d', function() { $('nav a.sidebar').filter(':visible').click(); return false; });
   };
 
   var nickList = function($data) {
@@ -510,8 +497,8 @@
   };
 
   var receiveMessage = function(e) {
+    var at_bottom = $win.atBottom();
     var $message = $(e.data);
-    var at_bottom = $win.data('at_bottom');
     var uuid = $message.attr('id');
     var to_current;
 
@@ -536,7 +523,6 @@
       var what = /^[#&]/.test($message.data('target')) ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
       var reload_notification_list_args = {};
       $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
-      if($win.data('has_focus') && to_current) reload_notification_list_args.clear_notification = 0;
       reloadNotificationList(reload_notification_list_args);
     }
 
@@ -555,12 +541,12 @@
       drawConversationMenu($message);
     }
 
-    if($win.data('at_bottom')) $win.scrollTo('bottom');
+    if(at_bottom) $win.scrollTo('bottom');
   };
 
   var reloadNotificationList = function(e) {
     var $notification_list = $('div.notifications.container ul').parent();
-    var $n_notifications = $('a.notifications.toggler');
+    var $n_notifications = $('nav a.notifications');
     var reload_notification_list_args = {};
     var n;
 
@@ -595,9 +581,9 @@
 
     if(navigator.is_ios) {
       $('input, textarea').on('click', function() {
-        $('nav.bar').hide();
+        $('nav').hide();
       }).on('focusout', function() {
-        $('nav.bar').show();
+        $('nav').show();
       });
     }
 
@@ -605,6 +591,7 @@
     initSocket();
     initPjax();
     initConversations();
+    initInputField();
     initShortcuts();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
