@@ -344,7 +344,7 @@
         return false;
       },
       onChange: function(href) {
-        $('a[href="' + href + '"]').click();
+        $('nav a[href="' + href + '"]').click();
       },
       onInitialize: function() {
         this.$dropdown.hide = function() {};
