@@ -73,17 +73,15 @@ sub conversation {
       my $time = time;
 
       if ($target and !$score[0]) {                  # no such conversation
+        return $delay->begin(0)->([$login, 'connected']) if $self->param('from');
         return $self->stash(layout => 'tactile')->render_not_found;
       }
-
-      $self->connection_list(sub { });
-
-      if ($network eq 'convos') {
+      if (!$target) {
+        $self->connection_list(sub { });
         $self->stash(sidebar => 'convos');
-        return $delay->begin(0)->([$login, 'connected']);
       }
-      elsif (!$target) {
-        $self->stash(sidebar => 'convos');
+      if ($network eq 'convos') {
+        return $delay->begin(0)->([$login, 'connected']);
       }
 
       $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
