@@ -220,7 +220,7 @@
     });
 
     networkChange = function(val) {
-      var s = $('select#channels')[0].selectize
+      var s = $('input#channels')[0].selectize
       s.clearOptions();
       s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
       s.refreshOptions(false);
