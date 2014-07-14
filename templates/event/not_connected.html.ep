@@ -1,0 +1,11 @@
+<li class="message error">
+% if(@$conversation) {
+  %= image '/image/avatar-convos.jpg', alt => 'convos', class => 'avatar'
+  <h3><%= link_to 'convos', 'view.network', { network => 'convos' } %></h3>
+% }
+  <div class="content">
+    You are <%= $state eq 'disconnected' ? 'not connected' : ucfirst $state %> to
+    %= link_to $network, 'view.network', { network => $network }
+  </div>
+  %= timestamp_span time if @$conversation;
+</li>

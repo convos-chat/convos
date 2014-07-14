@@ -132,7 +132,7 @@ has _irc => sub {
         };
         $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
-        $self->redis->hset($self->{path}, state => 'reconneting');
+        $self->redis->hset($self->{path}, state => 'reconnecting');
         $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
       }
     }
@@ -148,7 +148,7 @@ has _irc => sub {
       $self->{stop} and return $self->redis->hset($self->{path}, state => 'error');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
-      $self->redis->hset($self->{path}, state => 'reconneting');
+      $self->redis->hset($self->{path}, state => 'reconnecting');
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -304,7 +304,7 @@ sub _connect {
           if ($error) {
             $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
             $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
-            $self->redis->hset($self->{path}, state => 'reconneting');
+            $self->redis->hset($self->{path}, state => 'reconnecting');
           }
           else {
             $self->redis->hmset($self->{path}, current_nick => $irc->nick, state => 'connected');

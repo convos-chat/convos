@@ -46,7 +46,8 @@ sub socket {
       $dom = Mojo::DOM->new($octets)->at('div');
 
       if ($dom and $dom->{'id'} and $dom->{'data-network'}) {
-        @$dom{qw( network target uuid )} = map { delete $dom->{$_} || '' } qw( data-network data-target id );
+        @$dom{qw( network state target uuid )}
+          = map { delete $dom->{$_} // '' } qw( data-network data-state data-target id );
         $self->_handle_socket_data($dom);
       }
       else {

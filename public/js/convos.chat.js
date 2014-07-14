@@ -429,16 +429,17 @@
     socket.onpong = function(e) { $input.attr('placeholder', 'What\'s on your mind ' + $messages.attr('data-nick') + '?'); };
     $input.send = function(message, attr) {
       if(message.length == 0) return $input;
-      var uuid = window.guid();
       attr = attr || {};
+      attr['data-state'] = $messages.attr('data-state');
+      attr['id'] = window.guid();
       if(!message.match('^\/') || attr.pending_status) {
-        var $pendingMessage = $('<li class="message-pending"><div class="content"></div></li>').attr('id', uuid).hostAndTarget($messages);
+        var $pendingMessage = $('<li class="message-pending"><div class="content"></div></li>').attr('id', attr.id).hostAndTarget($messages);
         $pendingMessage.find('.content').text(message);
         setTimeout(function() { messageFailed($pendingMessage); }, 10000);
         $pendingMessage.appendToMessages();
         $win.scrollTo('bottom');
       }
-      socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr(attr).text(message).prop('outerHTML'));
+      socket.send($('<div/>').hostAndTarget($messages).attr(attr).text(message).prop('outerHTML'));
       if(attr['data-history']) $input.history.push(message);
       $input.history_i = $input.history.length;
       return $input;

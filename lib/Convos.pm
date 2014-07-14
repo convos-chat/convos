@@ -479,9 +479,9 @@ sub _start_backend {
         $self->core->start;
       }
       else {                                                    # morbo
+        $self->core->reset;
         $self->log->warn(
           'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend from morbo. (The backend is not running)');
-        $redis->del('convos:backend:lock');
       }
     },
   );

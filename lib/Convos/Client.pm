@@ -61,7 +61,7 @@ sub conversation {
   }
 
   $self->session(name => $target ? $name : '');
-  $self->stash(target => $target);
+  $self->stash(target => $target, state => 'connected');
 
   $self->delay(
     sub {
