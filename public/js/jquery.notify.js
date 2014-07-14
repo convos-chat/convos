@@ -32,10 +32,11 @@
 
     $question.each(function() {
       if(Notification.permission === 'granted') return false;
-      if(Notification.permission === 'unsupported') return false;
       if(Notification.permission === 'denied') return false;
 
       $question.find('a.yes').off('click').click(function() {
+        if(Notification.permission === 'unsupported') return true; // follow link
+
         Notification.requestPermission(function() {
           n = new Notification('Notifications enabled.', {});
           setTimeout(function() { n.close(); }, 2000);
