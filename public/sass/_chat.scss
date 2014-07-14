@@ -9,12 +9,15 @@ nav.bar {
   z-index: $navBarZindex;
   overflow: hidden;
   @include box-shadow(0 4px 4px -2px rgba(180,180,180,.5));
-  @include opacity(.95);
+
+  img { vertical-align: middle; }
 
   a, a:active {
     color: #000;
     text-decoration: none;
-    padding: 10px 4px;
+    padding: 0 4px;
+    height: $navHeight;
+    line-height: $navHeight - 2;
     display: block;
     float: left;
     position: relative;
@@ -36,10 +39,6 @@ nav.bar {
   }
 
   a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
-  a.active {
-    background: lighten(#e1e1e1, 5%);
-    @include box-shadow(inset 0 0px 1px 1px rgba(190, 190, 190, 0.5));
-  }
 
   @media (max-width: $responsiveWidth) {
     padding: 0;
@@ -56,6 +55,9 @@ form.chat {
     left: 0;
     right: 0;
 
+    input { background: #fafafa; width: 100%; padding: 8px; font-size: $fontSize + 1; }
+    input.disabled, input[disabled] { background-color: #eee; }
+
     @media (max-width: $responsiveWidth) {
       bottom: 0;
 
@@ -65,29 +67,26 @@ form.chat {
         @include border-radius(0);
       }
     }
-
-    input { background: #fafafa; width: 100%; padding: 8px; }
-    input.disabled, input[disabled] { background-color: #eee; }
   }
 }
 
 // unread messages count
 nav.bar a b, form.conversations b {
-  background: rgba(200, 40, 40, 0.98);
+  background: #d53;
   color: #fff;
-  font-size: $fontSize * 0.9;
+  font-size: 12px;
+  line-height: 14px;
   font-weight: normal;
-  line-height: $fontSize + 1;
-  padding: 0 2px;
+  padding: 0 3px;
   position: absolute;
   right: 2px;
-  @include opacity(.75);
   @include border-radius(3px);
 }
 
 div.messages {
   padding-top: 45px;
   padding-bottom: 45px;
+  margin-right: 180px;
 
   li {
     display: block;
@@ -146,6 +145,7 @@ div.messages {
   }
 
   @media (max-width: $responsiveWidth) {
+    margin-right: 0;
     li.with-padding { margin-left: 5px; }
   }
 }
@@ -222,7 +222,9 @@ form.conversations {
   }
 
   .selectize-dropdown { background: $sidebarBackground; }
+  .selectize-dropdown a { position: relative; }
   .selectize-dropdown b { margin-top: 6px; }
+  .selectize-dropdown-content { max-height: none; }
   .selectize-control.single .selectize-input::after { border: 0; }
   p {
     color: #666;
@@ -242,4 +244,13 @@ form.conversations {
   }
   form.chat div.input { right: $nickListWidth; }
   form.chat div.messages { margin-right: $nickListWidth; }
+}
+
+@media print {
+  nav, .sidebar-right, div.input {
+    display: none;
+    overflow: hidden;
+    left: -1000px;
+    width: 1px;
+  }
 }
