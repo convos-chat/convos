@@ -4,9 +4,9 @@
 % if($nick ne $prev_nick) {
   %= avatar { nick => $nick, host => $host, user => $user }, alt => $nick, class => 'avatar'
   % if($network eq 'convos') {
-  <h3><%= link_to $nick, 'view.network' => { network => $nick }, class => 'goto-network' %></h3>
+  <h3><%= link_to $nick, 'view.network' => { network => $nick } %></h3>
   % } else {
-  <h3><%= link_to $nick, view => { network => $network, target => $nick } %></h3>
+  <h3><%= link_to $nick, view => { network => $network, target => $nick }, class => 'autocomplete' %></h3>
   % }
 % }
   <div class="content whitespace"><%== $message %></div>

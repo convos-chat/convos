@@ -34,19 +34,19 @@
     return this.each(function() {
       var $message = $(this);
 
-      $message.find('h3 a').click(function(e) {
+      $message.find('a').not('.external').click(function(e) {
         e.preventDefault();
-        if($(this).hasClass('goto-network')) {
-          $.pjax.click(e, { container: $('div.messages') });
+        if($(this).hasClass('autocomplete')) {
+          var str = $(this).text();
+          $input.val($input.val() ? $input.val().replace(/\s+$/, '') + ' ' + str + ' ' : str + ': ').focus();
         }
         else {
-          var n = $(this).text();
-          $input.val($input.val() ? $input.val().replace(/\s+$/, '') + ' ' + n + ' ' : n + ': ').focus();
+          $.pjax.click(e, { container: 'div.messages', fragment: 'div.messages' });
         }
       });
 
       // embed media
-      $message.find('a.embed').each(function() {
+      $message.find('a.external').each(function() {
         var $a = $(this);
         $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
           var at_bottom = $win.atBottom();
@@ -62,7 +62,7 @@
       $message.find('.close').click(function() { $(this).closest('li').remove(); });
       $message.filter('.historic-message').find('a.button.newer').click(getNewMessages);
       $message.filter('.historic-message').find('a.button.current').click(function(e) {
-        return $.pjax.click(e, { container: 'div.messages' });
+        $.pjax.click(e, { container: 'div.messages', fragment: 'div.messages' });
       });
     });
   };
@@ -530,7 +530,7 @@
     }
     else if($message.hasClass('add-conversation')) {
       var path = ['', $message.attr('data-network'), encodeURIComponent($message.attr('data-target'))].join('/');
-      $.pjax({ url: path, container: 'div.messages'})
+      $.pjax({ url: path, fragment: 'div.messages'})
     }
     else if(to_current) {
       $message.appendToMessages();

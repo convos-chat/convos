@@ -109,7 +109,6 @@ sub conversation {
       $self->conversation_list($delay->begin);
       $self->notification_list($delay->begin) if $full_page;
       $self->stash(conversation => $conversation || []);
-      $delay->begin->(0);
     },
     sub {
       $self->render;
