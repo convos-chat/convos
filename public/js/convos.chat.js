@@ -244,10 +244,8 @@
     });
   };
 
-  var drawUI = function() {
-    if($win.atBottom()) $win.scrollTo('bottom');
-
-    drawConversationMenu();
+  var drawUI = function(e) {
+    if(!e) $win.scrollTo('bottom');
 
     if($('nav').data('menu_width') > $('body').outerWidth()) {
       $('nav a.conversations').addClass('overlapping');
@@ -587,12 +585,13 @@
       });
     }
 
-    drawSettings();
     initSocket();
     initPjax();
     initConversations();
     initInputField();
     initShortcuts();
+    drawConversationMenu();
+    drawSettings();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
     $('.messages').on('click', '.resend-message', function() {
