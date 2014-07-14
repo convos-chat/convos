@@ -4,7 +4,6 @@
   var $input, $win;
   var $messages = $('<div/>'); // need to be defined
   var nicks = new sortedSet();
-  var conversation_list = [];
   var min_width = 700;
   var commands = [
     '/help',
@@ -23,12 +22,6 @@
     '/whois ',
     '/list'
   ];
-
-  window.convos = {
-    conversation_list: conversation_list,
-    messages: $messages,
-    nicks: nicks
-  };
 
   $.fn.attachEventsToMessage = function() {
     return this.each(function() {
@@ -198,7 +191,7 @@
     }
 
     s.clearOptions();
-    $conversations.map(function() {
+    $conversations.each(function() {
       var $a = $(this).find('a');
       var i = { label: $a.find('span').text() };
       if(!i.label) return;
@@ -363,7 +356,7 @@
         prefix: val.substr(0, offset),
         list: $.map(
           $.grep(
-            nicks.revrange(0, -1).concat(conversation_list).concat(commands).unique(),
+            nicks.revrange(0, -1).concat(commands).unique(),
             function(v, i) {
               return offset && v.indexOf('/') === 0 ? false : re.test(v) ? true : false;
             }
@@ -562,7 +555,6 @@
   $(document).ready(function() {
     $input = $('form.chat input[autocomplete="off"]');
     $win = $(window);
-    conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
 
     if($input.length == 0) {
       return;
