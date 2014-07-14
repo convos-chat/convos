@@ -24,7 +24,7 @@ $t->get_ok('/magnet/batman')->status_is(200)->element_exists('head script')->ele
   ->element_exists('.notification-list.sidebar-right')->element_exists('.add-conversation.sidebar-right');
 
 $t->get_ok('/magnet/batman?_pjax=some.element')->status_is(200)->element_exists_not('head script')
-  ->element_exists_not('nav')->element_exists_not('.notifications.container')
+  ->element_exists('nav')->element_exists_not('.notifications.container')
   ->element_exists_not('.add-conversation.sidebar-right');
 
 $t->get_ok('/')->header_is('Location', '/magnet/batman', 'Redirect on last conversation');

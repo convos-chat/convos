@@ -33,10 +33,11 @@ Mojo::IOLoop->start;
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
 $t->get_ok('/convos')->status_is(200)->element_exists('div.messages ul li:first-child img[src^="/avatar"]')
   ->text_is('div.messages ul li:nth-of-child(1) h3 a', 'magnet')
-  ->text_is('div.messages ul li:nth-of-child(1) div',  'Welcome to the MAGnet Internet Relay Chat Network jhthorsen')
-  ->text_is('div.messages ul li:nth-of-child(2) div',  'You are connected to magnet with mode +i')
-  ->text_is('div.messages ul li:nth-of-child(3) div',  'Cannot join channel (+b)')
-  ->text_is('div.messages ul li:nth-of-child(4) div',  'some error message');
+  ->text_is('div.messages ul li:nth-of-child(1) div.content',
+  'Welcome to the MAGnet Internet Relay Chat Network jhthorsen')
+  ->text_is('div.messages ul li:nth-of-child(2) div.content', 'You are connected to magnet with mode +i')
+  ->text_is('div.messages ul li:nth-of-child(3) div.content', 'Cannot join channel (+b)')
+  ->text_is('div.messages ul li:nth-of-child(4) div.content', 'some error message');
 
 done_testing;
 

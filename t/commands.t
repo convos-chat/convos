@@ -69,7 +69,7 @@ for my $cmd (qw/ j join /) {
 
 for my $cmd (qw/ t topic /) {
   $t->send_ok(msg("/$cmd"));
-  is ws(), 'abc-123 TOPIC #convos', 'abc-123 TOPIP #convos';
+  is ws(), 'abc-123 TOPIC #convos', 'abc-123 TOPIC #convos';
 
   $t->send_ok(msg("/$cmd yikes!  "));
   is ws(), 'abc-123 TOPIC #convos :yikes!', 'abc-123 TOPIC #convos :yikes!';
@@ -111,7 +111,7 @@ for my $cmd (qw/ t topic /) {
 done_testing;
 
 sub msg {
-  qq(<div data-history="1" data-network="irc.perl.org" data-target="#convos" id="abc-123">$_[0]</div>);
+  qq(<div data-state="connected" data-history="1" data-network="irc.perl.org" data-target="#convos" id="abc-123">$_[0]</div>);
 }
 
 sub ws {

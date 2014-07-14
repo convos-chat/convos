@@ -891,7 +891,7 @@ sub _add_convos_message {
   local $data->{host}    = $self->name;
   local $data->{nick}    = $self->name;
   local $data->{network} = 'convos';                                        # make sure target in js works
-  local $data->{target}  = 'any';
+  local $data->{target}  = '';
   local $data->{user}    = 'convos';
   local $data->{uuid}    = Mojo::Util::md5_sum($data->{timestamp} . $$);    # not really an uuid
   $message = j $data;

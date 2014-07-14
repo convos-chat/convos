@@ -40,8 +40,8 @@ is_deeply \@ctrl, [qw( fooman freenode )], 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Testing - convos')
   ->element_exists('div.messages ul li')->element_exists('div.messages ul li:first-child img[src^="/avatar"]')
-  ->text_is('div.messages ul li:first-child h3 a', 'convos')
-  ->text_is('div.messages ul li:first-child div',  'Hi fooman!');
+  ->text_is('div.messages ul li:first-child h3 a',        'convos')
+  ->text_is('div.messages ul li:first-child div.content', 'Hi fooman!');
 
 $t->get_ok('/profile')->status_is(200)->element_exists('form input[name="email"][value="foobar@barbar.com"]')
   ->element_exists('form input[name="avatar"][value="foobar@barbar.com"]');
