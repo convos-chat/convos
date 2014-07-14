@@ -184,6 +184,7 @@
     $('nav').data('menu_width', menu_width);
 
     drawUI();
+    $input.data('socket').send('PING'); // open socket
   };
 
   var drawConversationMenu = function($message) {
@@ -386,8 +387,6 @@
     });
 
     $input.removeAttr('disabled');
-    $input.attr('placeholder', 'What\'s on your mind ' + $messages.attr('data-nick') + '?');
-
     $input.bind('keydown', function(e) { if(e.keyCode !== 9) complete = false; }); // not tab
     $input.bind('keydown', 'tab', autocomplete);
     $input.bind('keydown', 'up', function(e) {
@@ -425,9 +424,9 @@
     $input.history = [];
     $input.history_i = 0;
     socket.onmessage = receiveMessage;
-    socket.onopen = function(e) { $input.removeClass('disabled'); if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true }); };
     socket.onclose = function() { $input.addClass('disabled'); };
-    socket.send('PING'); // open socket
+    socket.onopen = function(e) { $input.removeClass('disabled'); if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true }); };
+    socket.onpong = function(e) { $input.attr('placeholder', 'What\'s on your mind ' + $messages.attr('data-nick') + '?'); };
     $input.send = function(message, attr) {
       if(message.length == 0) return $input;
       var uuid = window.guid();

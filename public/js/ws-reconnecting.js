@@ -33,6 +33,7 @@
  * The event stream will typically look like:
  *  onconnecting
  *  onopen
+ *  onpong
  *  onmessage
  *  onmessage
  *  onclose // lost connection
@@ -97,6 +98,7 @@ function ReconnectingWebSocket(args) {
             if(self.ping_protocol[1] && event.data == self.ping_protocol[1]) {
               if (self.debug) console.debug('ReconnectingWebSocket', 'pong', event.data);
               self.waiting_for_pong = false;
+              emit('onpong', event);
             }
             else {
               emit('onmessage', event);
