@@ -53,8 +53,7 @@ function ReconnectingWebSocket(args) {
     var ping_interval = args.ping_interval || 20000;
     var forced_close = false;
     var reconnecting = false;
-    var ws = { readyState: WebSocket.CLOSED };
-    var connect_tid;
+    var connect_tid, ws;
 
     // attributes
     this.buffer = []
@@ -67,12 +66,16 @@ function ReconnectingWebSocket(args) {
     this.url = args.url;
     this.URL = args.url; // Public API
 
+    var guard = 1000; // TODO: Remove this
+
     function connect() {
         readyState('CONNECTING');
         emit('onconnecting', reconnecting);
         forced_close = false;
         ws = new WebSocket(self.url, self.protocols);
         connect_tid = setTimeout(function() { ws.close(); }, self.connect_timeout);
+
+        if(!guard--) throw 'GUARD IS DEAD';
         
         ws.onopen = function(event) {
             clearTimeout(connect_tid);
@@ -85,7 +88,7 @@ function ReconnectingWebSocket(args) {
         };
         ws.onclose = function(event) {
             clearTimeout(connect_tid);
-            ws = { readyState: WebSocket.CLOSED };
+            ws = false;
             if (forced_close) {
                 readyState('CLOSED');
                 emit('onclose', event);
@@ -111,6 +114,7 @@ function ReconnectingWebSocket(args) {
 
     this.send = function(data) {
         try {
+          if (!ws) throw 'Need to connect to WebSocket first';
           var sent = ws.send(data);
           if (sent === false) throw 'Could not to send data to websocket.';
           if (ws.readyState === WebSocket.CLOSED) throw 'WebSocket readyState is CLOSED';
@@ -118,7 +122,7 @@ function ReconnectingWebSocket(args) {
         } catch(e) {
           self.buffer.push(data);
           console.error('ReconnectingWebSocket', 'send', data, 'fail', e);
-          if (ws.readyState != WebSocket.CONNECTING && ws.readyState != WebSocket.OPEN) connect();
+          if (self.readyState != WebSocket.CONNECTING && self.readyState != WebSocket.OPEN) connect();
         };
     };
 
