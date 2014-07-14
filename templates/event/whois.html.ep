@@ -1,4 +1,5 @@
 <li class="whois" data-network="<%= $network %>" data-target="">
+  %= timestamp $timestamp
   <div class="content">
   %= link_to $nick, view => { network => $network, target => $nick }, class => 'nick'
   (<%= $user %>@<%= $host %> - <%= $realname %>)
@@ -13,5 +14,4 @@
     <%= link_to $channel, view => { network => $network, target => $target }, class => 'channel' %><%= ++$i == @$channels ? '.' : ', ' %>
   % }
   </div>
-  %= timestamp_span($timestamp)
 </li>

@@ -105,10 +105,10 @@ div.messages {
     div.embed {
       img { max-height: 220px; border: 2px solid #bbb; @include border-radius(20px); margin: 8px 0; }
     }
-    span.timestamp {
-      position: absolute;
-      top: 2px;
-      right: 2px;
+    div.timestamp {
+      float: right;
+      height: 16px;
+      overflow: visible;
       color: #999;
       font-size: .85em;
     }
@@ -132,9 +132,11 @@ div.messages {
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
   li.message-pending div.content { color: #999; }
   li.message-pending h3 { color: #ccc; }
-  li.message-error { font-style: italic; }
-  li.message-error h3 { color: #333; font-style: italic; }
-  li.message-error, li.message.error, li.network-message.error { background: lighten($errorColor, 40%); }
+  li.message-error, li.message.error, li.network-message.error {
+    background: lighten($errorColor, 40%);
+    div.timestamp { color: #fee; }
+    h3 { color: #333; font-style: italic; }
+  }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
     color: #888;

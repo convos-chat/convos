@@ -276,23 +276,24 @@ sub send_partial {
   eval { $c->send($c->render_to_string(@_)->to_string) } or $c->app->log->error($@);
 }
 
-=head2 timestamp_span
+=head2 timestamp
 
-Returns a "E<lt>span>" tag with a timestamp.
+Returns a "E<lt>div>" tag with a timestamp.
 
 =cut
 
-sub timestamp_span {
+sub timestamp {
   my ($c, $timestamp) = @_;
   my $offset = $c->session('tz_offset') || 0;
   my $now    = time;
   my $format = '%e. %b %H:%M';
 
+  $timestamp ||= $now;
   $format = '%H:%M' if $timestamp > $now - 86400;
   $timestamp += $offset * 3600;    # offset is in hours
 
   $c->tag(
-    'span',
+    'div',
     class => 'timestamp',
     title => format_time($timestamp, '%e. %B %H:%M:%S'),
     format_time($timestamp, $format),
@@ -350,9 +351,9 @@ sub register {
   $app->helper(redis             => \&redis);
   $app->helper(as_id => sub { shift; Convos::Core::Util::as_id(@_) });
   $app->helper(id_as => sub { shift; Convos::Core::Util::id_as(@_) });
-  $app->helper(send_partial   => \&send_partial);
-  $app->helper(timestamp_span => \&timestamp_span);
-  $app->helper(redirect_last  => \&redirect_last);
+  $app->helper(send_partial  => \&send_partial);
+  $app->helper(timestamp     => \&timestamp);
+  $app->helper(redirect_last => \&redirect_last);
 }
 
 =head1 AUTHOR

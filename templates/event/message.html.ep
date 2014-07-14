@@ -1,8 +1,9 @@
 % my $prev_nick = stash('prev_nick') || '';
 % $highlight = 0 if $target =~ /^\w/;
 <li id="<%= $uuid %>" class="message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
+  %= timestamp $timestamp
 % if($nick ne $prev_nick) {
-  %= avatar { nick => $nick, host => $host, user => $user }, alt => $nick, class => 'avatar'
+  %= avatar { nick => $nick, host => $host, user => $user }, alt => '', class => 'avatar'
   % if($network eq 'convos') {
   <h3><%= link_to $nick, 'view.network' => { network => $nick } %></h3>
   % } else {
@@ -10,9 +11,6 @@
   % }
 % }
   <div class="content whitespace"><%== $message %></div>
-% if($nick ne $prev_nick) {
-  %= timestamp_span($timestamp)
-% }
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>
 % }
