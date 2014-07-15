@@ -35,7 +35,7 @@
       if(Notification.permission === 'denied') return false;
 
       $question.find('a.yes').off('click').click(function() {
-        if(Notification.permission === 'unsupported') return true; // follow link
+        if(Notification.permission === 'download') return true; // follow link
 
         Notification.requestPermission(function() {
           n = new Notification('Notifications enabled.', {});
@@ -93,7 +93,7 @@ if(window.webkitNotifications) {
 }
 else if(!window.Notification) {
   window.Notification = function(title, args) { return this; };
-  window.Notification.permission = 'unsupported'; // TODO: "denied" instead?
+  window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'denied';
   window.Notification.requestPermission = function(cb) { cb('unsupported'); };
   window.Notification.prototype.close = function() { if(this.onclose) this.onclose(); };
 }
