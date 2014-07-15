@@ -2512,6 +2512,12 @@
 			self.$dropdown.css({visibility: 'visible'});
 			self.trigger('dropdown_open', self.$dropdown);
 		},
+
+                show: function() {
+                        this.$dropdown.css({visibility: 'hidden', display: 'block'});
+                        this.positionDropdown();
+                        this.$dropdown.css({visibility: 'visible'});
+                },
 	
 		/**
 		 * Closes the autocomplete dropdown menu.
