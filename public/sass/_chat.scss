@@ -165,6 +165,8 @@ div.sidebar-right {
   z-index: 2;
   @include box-shadow(-2px 0 4px rgba(180,180,180,.5));
 
+  -webkit-overflow-scrolling: touch;
+
   button.link {
     background: transparent;
     border: 0;
