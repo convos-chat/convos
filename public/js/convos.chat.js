@@ -145,19 +145,19 @@
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
-    $('form.sidebar button.ws-cmd').each(function() {
-      $(this).removeClass('ws-cmd').click(function(e) {
-        e.preventDefault();
-        $input.send(this.value);
-      });
-    });
-
     $doc.filter('form.sidebar').each(function() {
       $('form.sidebar ul').html($(this).find('ul:first').children());
     });
     $doc.filter('nav').each(function() {
       $('nav ul.conversations').html($(this).find('ul.conversations').children());
       drawConversationMenu();
+    });
+
+    $('form.sidebar .ws-cmd').each(function() {
+      $(this).removeClass('ws-cmd').click(function(e) {
+        e.preventDefault();
+        $input.send(this.value);
+      });
     });
 
     if (/^[#&]/.test($messages.hostAndTarget().target)) {
@@ -518,12 +518,17 @@
     }
 
     if($message.hasClass('remove-conversation')) {
-      var path = [$message.attr('data-network'), encodeURIComponent($message.attr('data-target'))].join('/');
-      $('nav ul.conversations a').slice(1).each(function() { if(this.href.indexOf(path) == -1) $(this).click(); });
+      var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
+      $('nav ul.conversations a').slice(1).each(function() {
+        console.log(this.href, url);
+        if(this.href.indexOf(url) >= 0) return;
+        $(this).click();
+        return false;
+      });
     }
     else if($message.hasClass('add-conversation')) {
-      var path = ['', $message.attr('data-network'), encodeURIComponent($message.attr('data-target'))].join('/');
-      $.pjax({ url: path, fragment: 'div.messages'})
+      var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
+      $.pjax({ url: url, container: 'div.messages', fragment: 'div.messages'})
     }
     else if(to_current) {
       $message.appendToMessages();
