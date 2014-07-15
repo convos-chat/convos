@@ -141,7 +141,7 @@
     $messages.end_time = parseFloat($messages.data('end-time') || 0);
     $messages.start_time = parseFloat($messages.data('start-time') || 0);
 
-    $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
+    $('body').attr('class', $messages.attr('class')).loadingIndicator('hide').hideSidebar();
     $messages.find('li').attachEventsToMessage();
     nicks.clear();
 
@@ -182,26 +182,24 @@
 
   var drawConversationMenu = function($message) {
     var $conversations = $('nav ul.conversations li');
-    var s = $('form.conversations select')[0].selectize;
+    var $goto_anything = $('form.conversations ul');
+    var i = 0;
 
     if($message) {
-      $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
+      var $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
       unread = parseInt($a.children('b').html() || 0) + 1;
       $a.children('b').text(unread ? unread : '');
     }
 
-    s.clearOptions();
-    $conversations.each(function() {
-      var $a = $(this).find('a');
-      var i = { label: $a.find('span').text() };
-      if(!i.label) return;
-      if(i.label == $messages.attr('data-target')) return;
-      i.href = $a.attr('href');
-      i.unread = $(this).find('b').text();
-      i.network = $a.attr('title').replace(/\w+:\s+/, '');
-      s.addOption(i);
+    $goto_anything.find('li.dynamic').remove();
+    $conversations.slice(1).map(function() { // skip convos icon
+      var $li = $(this).clone();
+      if(location.href.indexOf($li.find('a').attr('href')) >= 0) return; // skip active conversation
+      if(i++ == 0) $li.find('a').addClass('active');
+      $li.find('a').focus(function() { $goto_anything.find('a.active').removeClass('active'); });
+      $li.addClass('dynamic').get(0).filter_by = $.trim($li.text().toLowerCase());
+      $goto_anything.find('li.last').before($li);
     });
-    s.refreshOptions(false);
   };
 
   var drawSettings = function() {
@@ -291,56 +289,37 @@
   };
 
   var initConversations = function() {
-    $('form.add-conversation button[type="reset"]').click(function() { $('a.btn-sidebar.active').click(); });
-    $('form.add-conversation').submit(function(e) {
+    var $form = $('form.conversations');
+
+    $form.find('li').each(function() {
+      this.filter_by = $.trim($(this).find('a').text().toLowerCase());
+    });
+
+    $form.find('input').focus(function() {
+      $form.find('a.active').removeClass('active');
+      $form.find('a:first').addClass('active');
+    }).bind('keydown', 'return', function(e) { // change or create conversation
       e.preventDefault();
+      var $first = $form.find('a:visible:first').click();
+      if($first.length == 0) $input.send('/query ' + this.value, { 'data-network': $form.find('li.create select').val() });
+      $form.find('input').val('').keyup();
+    }).bind('keyup', function(e) { // filter conversation list
+      var v = this.value;
+      var channel = /^[#&]/.test(v);
+      var exact;
 
-      var $form = $(this);
-      var network = $form.find('select[name="name"]').val();
-      var channel = $form.find('input[name="channel"]').val().replace(/^\s*#/, '');
+      $form.find('ul li').each(function(i) {
+        if(this.filter_by) this.style.display = this.filter_by.indexOf(v) == -1 ? 'none' : 'block';
+        if(!exact) exact = v == this.filter_by;
+      });
 
-      if(channel) {
-        $input.send('/join #' + channel, { 'data-network': network, pending_status: true });
-        $('a.btn-sidebar.active').click();
-      }
+      $form.find('ul li a').removeClass('active').filter(':visible:first').addClass('active');
+      $form.find('li.create')[v.length && !exact ? 'show' : 'hide']();
+      $form.find('li.create').find('.description').text((channel ? 'Join channel "' : 'Chat with "') + v + '" on...');
+      $form.find('li.create').find('button').text(channel ? 'Join' : 'Chat');
     });
 
-    $('form.conversations select').selectize({
-      labelField: 'label',
-      maxOptions: 10000,
-      openOnFocus: true,
-      options: [],
-      placeholder: 'Select or create a new conversation',
-      searchField: [ 'label' ],
-      valueField: 'href',
-      create: function(value) {
-        if(value.match(/^[#&]/)) {
-          $('nav a.add-conversation').click();
-          $('form.add-conversation input[name="channel"]').val(value);
-        }
-        else {
-          $input.send('/query ' + value, { pending_status: true });
-        }
-        return false;
-      },
-      onChange: function(href) {
-        $('nav a[href="' + href + '"]').click();
-      },
-      onInitialize: function() {
-        this.$dropdown.hide = function() {};
-      },
-      render: {
-        option: function(item, esc) {
-          var n = '<small>on ' + esc(item.network) + '</small>';
-          var unread = '<b>' + esc(item.unread) + '</b>';
-          return '<a>' + [esc(item.label), n, unread].join(' ') + '</a>';
-        },
-        option_create: function(data, esc) {
-          var pre = data.input.match(/^[#&]/) ? 'Join channel' : 'Chat with';
-          return '<a class="create">' + pre + ' <strong>' + esc(data.input) + '</strong>.</a>';
-        }
-      }
-    });
+    $form.find('li.create select').selectize({ create: false, openOnFocus: false });
   };
 
   var initInputField = function() {
@@ -400,8 +379,8 @@
 
   var initPjax = function() {
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
-    $(document).pjax('nav a.conversation', 'div.messages', { fragment: 'div.messages' });
-    $(document).pjax('nav a.convos', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('nav ul a', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('.sidebar-right a', 'div.messages', { fragment: 'div.messages' });
 
     $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
     $('div.messages').on('pjax:start', function(xhr, options) { $('body').loadingIndicator('show'); });
@@ -438,9 +417,9 @@
   }
 
   var initShortcuts = function() {
-    $('body, input, button').bind('keydown', 'alt+shift+a shift+return', function() { $('nav a.conversations').click(); return false; });
-    $('body, input, button').bind('keydown', 'alt+shift+s', function() { $('nav a.notifications').click(); return false; });
-    $('body, input, button').bind('keydown', 'alt+shift+d', function() { $('nav a.sidebar').filter(':visible').click(); return false; });
+    $('body, input').bind('keydown', 'alt+shift+a shift+return', function() { $('nav a.conversations').click(); return false; });
+    $('body, input').bind('keydown', 'alt+shift+s', function() { $('nav a.notifications').click(); return false; });
+    $('body, input').bind('keydown', 'alt+shift+d', function() { $('nav a.sidebar').filter(':visible').click(); return false; });
   };
 
   var nickList = function($data) {
@@ -520,7 +499,6 @@
     if($message.hasClass('remove-conversation')) {
       var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
       $('nav ul.conversations a').slice(1).each(function() {
-        console.log(this.href, url);
         if(this.href.indexOf(url) >= 0) return;
         $(this).click();
         return false;
@@ -591,6 +569,7 @@
     drawSettings();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
+
     $('.messages').on('click', '.resend-message', function() {
       $input.data('socket').buffer = []; // need to clear buffer when resending messages
       $input.send($(this).parents('li').find('.content').text());

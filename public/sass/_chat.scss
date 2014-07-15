@@ -27,7 +27,6 @@ nav.bar {
 
   a.conversation { color: #666; }
   a.conversations.overlapping { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
-  a.add-conversation { display: none; }
   ul.conversations { height: $navHeight; }
 
   .right {
@@ -179,8 +178,8 @@ div.sidebar-right {
     -moz-user-select: text;
   }
 
-  input, div.selectize-input { width: 100%; }
-  div.form-group { padding: $selectizeOptionPadding; }
+  select, input, .selectize-input { width: 100%; }
+  hr { margin: $selectizeOptionPadding; padding: 0; }
 
   a:hover, a:focus, button.link:hover, button.link:focus {
     background-color: darken(#eee, 5%);
@@ -188,7 +187,7 @@ div.sidebar-right {
   }
 
   h3 { font-size: 1em; margin: 0; };
-  h3, a, li > span {
+  h3, a, div.form-group {
     text-decoration: none;
     display: block;
     padding: $selectizeOptionPadding;
@@ -204,10 +203,6 @@ div.sidebar-right {
   }
 }
 
-form.add-conversation {
-  width: $nickListWidth + 60;
-}
-
 div.notification-list {
   width: 270px;
 
@@ -218,23 +213,8 @@ div.notification-list {
 
 form.conversations {
   width: $nickListWidth + 60;
-
-  select, .selectize-input, .selectize-dropdown {
-    @include box-shadow(0 0 0 0);
-  }
-
-  .selectize-dropdown { background: $sidebarBackground; }
-  .selectize-dropdown a { position: relative; }
-  .selectize-dropdown b { margin-top: 6px; }
-  .selectize-dropdown-content { max-height: none; }
-  .selectize-control.single .selectize-input::after { border: 0; }
-  p {
-    color: #666;
-    font-size: 0.9em;
-    position: absolute;
-    bottom: 0;
-    margin: 0.5em;
-  }
+  .create { display: none; }
+  .howto { padding: 1em 0; color: #666; font-size: 0.9em; }
 }
 
 @media (min-width: $responsiveWidth) {

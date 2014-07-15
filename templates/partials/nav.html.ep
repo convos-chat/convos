@@ -6,9 +6,6 @@
     <a href="sidebar://form.conversations" title="Show conversations" class="conversations btn-sidebar">
       <i class="icon-drop-down">☰</i>
     </a>
-    <a href="sidebar://form.add-conversation" title="Add conversation" class="add-conversation btn-sidebar">
-      <i class="icon-plus">+</i>
-    </a>
     <a href="sidebar://div.notification-list" title="List conversations" class="notifications btn-sidebar">
       <i class="icon-bullhorn"></i>
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications || '' %></b>

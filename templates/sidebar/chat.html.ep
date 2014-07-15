@@ -15,8 +15,8 @@
 </li>
 <li class="nick">
 % if ($target =~ /^[#&]/) {
-  <span>Loading...</span>
+  <div class="form-group">Loading...</div>
 % } else {
-  <span><%= $target %></span>
+  <div class="form-group"><%= $target %></div>
 % }
 </li>
