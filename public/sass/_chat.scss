@@ -84,8 +84,8 @@ nav.bar a b, form.conversations b {
 }
 
 div.messages {
-  padding-top: 45px;
-  padding-bottom: 45px;
+  padding-top: $navHeight + 4;
+  padding-bottom: $navHeight + 8;
   margin-right: 180px;
 
   li {
