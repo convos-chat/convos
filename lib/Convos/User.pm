@@ -299,19 +299,16 @@ Change user profile.
 =cut
 
 sub edit {
-  my $self      = shift;
-  my $login     = $self->session('login');
-  my $method    = $self->req->method eq 'POST' ? '_edit' : 'render';
-  my $full_page = $self->stash('full_page');
+  my $self   = shift;
+  my $login  = $self->session('login');
+  my $method = $self->req->method eq 'POST' ? '_edit' : 'render';
 
   $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->hgetall("user:$login", $delay->begin) if $method eq 'render';
-      $self->connection_list($delay->begin);
-      $self->conversation_list($delay->begin) if $full_page;
-      $self->notification_list($delay->begin) if $full_page;
-      $delay->begin->();
+      $self->conversation_list($delay->begin);
+      $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
       my ($delay, $user) = @_;

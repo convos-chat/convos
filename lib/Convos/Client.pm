@@ -77,7 +77,6 @@ sub conversation {
         return $self->stash(layout => 'tactile')->render_not_found;
       }
       if (!$target) {
-        $self->connection_list(sub { });
         $self->stash(sidebar => 'convos');
       }
       if ($network eq 'convos') {

@@ -14,7 +14,7 @@
 <li>
   <h3>Connections</h3>
 </li>
-% for my $name (@$connections) {
+% for my $name (@$networks) {
 <li>
   %= link_to $name, active_class('view.network', { network => $name })
   % if ($name eq $network) {

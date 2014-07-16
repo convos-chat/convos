@@ -5,9 +5,9 @@
         %= text_field 'goto', autocomplete => 'off', placeholder => 'Select or create conversation'
       </div>
     </li>
-    <li class="last">
-      %= link_to 'Convos', 'view.network', { network => 'convos' }
-    </li>
+    <li class="add-dynamic-before-this"><%= link_to 'Convos', 'view.network', { network => 'convos' } %></li>
+    <li><%= link_to 'Edit profile', active_class('user.edit') %></li>
+    <li><%= link_to 'Add connection', active_class('connection.add') %></li>
     <li class="create">
       <hr>
       <div class="form-group description"></div>

@@ -32,6 +32,7 @@
       if ($t.is(':animated')) return; // supposed to just hide, not show
       $a.addClass('active sidebar-trigger-active');
       $t.addClass('active').css({ 'z-index': 901, right: $hide.length ? 0 : -$t.outerWidth() }).show().animate({ right: 0 }, 150);
+      $t.trigger('show');
 
       if(disable_focus) {
         $t.find('select').each(function() { var s = this.selectize; if(s) setTimeout(function() { s.show(); }, 50); });

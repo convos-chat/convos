@@ -150,7 +150,6 @@
     });
     $doc.filter('nav').each(function() {
       $('nav ul.conversations').html($(this).find('ul.conversations').children());
-      drawConversationMenu();
     });
 
     $('form.sidebar .ws-cmd').each(function() {
@@ -178,28 +177,6 @@
 
     drawUI();
     $input.data('socket').send('PING'); // open socket
-  };
-
-  var drawConversationMenu = function($message) {
-    var $conversations = $('nav ul.conversations li');
-    var $goto_anything = $('form.conversations ul');
-    var i = 0;
-
-    if($message) {
-      var $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
-      unread = parseInt($a.children('b').html() || 0) + 1;
-      $a.children('b').text(unread ? unread : '');
-    }
-
-    $goto_anything.find('li.dynamic').remove();
-    $conversations.slice(1).map(function() { // skip convos icon
-      var $li = $(this).clone();
-      if(location.href.indexOf($li.find('a').attr('href')) >= 0) return; // skip active conversation
-      if(i++ == 0) $li.find('a').addClass('active');
-      $li.find('a').focus(function() { $goto_anything.find('a.active').removeClass('active'); });
-      $li.addClass('dynamic').get(0).filter_by = $.trim($li.text().toLowerCase());
-      $goto_anything.find('li.last').before($li);
-    });
   };
 
   var drawSettings = function() {
@@ -291,6 +268,15 @@
   var initConversations = function() {
     var $form = $('form.conversations');
 
+    var addGoto = function($li) {
+      var href = $li.find('a').attr('href');
+      if(!href || location.href.indexOf(href) >= 0) return false;
+      $li.find('a').focus(function() { $form.find('a.active').removeClass('active'); });
+      $li.addClass('dynamic').get(0).filter_by = $.trim($li.text().toLowerCase());
+      $form.find('li.add-dynamic-before-this').before($li);
+      return true;
+    };
+
     $form.find('li').each(function() {
       this.filter_by = $.trim($(this).find('a').text().toLowerCase());
     });
@@ -317,6 +303,19 @@
       $form.find('li.create')[v.length && !exact ? 'show' : 'hide']();
       $form.find('li.create').find('.description').text((channel ? 'Join channel "' : 'Chat with "') + v + '" on...');
       $form.find('li.create').find('button').text(channel ? 'Join' : 'Chat');
+    });
+
+    $form.on('show', function(e) {
+      var i = 0;
+      var networks = [];
+      $form.find('li.dynamic').remove();
+      $('nav ul.conversations li').slice(1).map(function() { // slice(1) == skip convos icon
+        var $li = $(this).clone();
+        networks.push($li.find('a').attr('data-network'));
+        addGoto($li);
+      });
+      $('form.sidebar li.nick').map(function() { addGoto($(this).clone()); });
+      $.each(networks.unique(), function() { addGoto($('<li><a href="' + $.url_for(this) + '">' + this + ' server</a></li>')); });
     });
 
     $form.find('li.create select').selectize({ create: false, openOnFocus: false });
@@ -470,6 +469,7 @@
     var at_bottom = $win.atBottom();
     var $message = $(e.data);
     var uuid = $message.attr('id');
+    var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
     var to_current;
 
     if($messages.find('#' + uuid).length) {
@@ -497,7 +497,6 @@
     }
 
     if($message.hasClass('remove-conversation')) {
-      var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
       $('nav ul.conversations a').slice(1).each(function() {
         if(this.href.indexOf(url) >= 0) return;
         $(this).click();
@@ -505,14 +504,14 @@
       });
     }
     else if($message.hasClass('add-conversation')) {
-      var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
       $.pjax({ url: url, container: 'div.messages', fragment: 'div.messages'})
     }
     else if(to_current) {
       $message.appendToMessages();
     }
     else if($message.hasClass('message')) {
-      drawConversationMenu($message);
+      var $unread = $('nav ul.conversations').find('a[href="' + url + '"]').children('b');
+      $unread.text(parseInt($unread.html() || 0) + 1);
     }
 
     if(at_bottom) $win.scrollTo('bottom');
@@ -565,7 +564,6 @@
     initConversations();
     initInputField();
     initShortcuts();
-    drawConversationMenu();
     drawSettings();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);

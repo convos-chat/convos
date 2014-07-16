@@ -18,18 +18,15 @@ Add a new connection based on network name.
 =cut
 
 sub add_connection {
-  my $self      = shift;
-  my $full_page = $self->stash('full_page');
-  my $method    = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
+  my $self = shift;
+  my $method = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
 
   $self->delay(
     sub {
       my ($delay) = @_;
 
-      $self->connection_list($delay->begin);
-      $self->conversation_list($delay->begin) if $full_page;
-      $self->notification_list($delay->begin) if $full_page;
-      $delay->begin->();
+      $self->conversation_list($delay->begin);
+      $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
       my ($delay) = @_;
@@ -171,13 +168,12 @@ sub edit_connection {
     sub {
       my ($delay) = @_;
 
+      $self->conversation_list($delay->begin);
+
       if ($full_page) {
         $self->_connection_state($delay->begin);
-        $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
-
-      $self->connection_list($delay->begin);
     },
     sub {
       my ($delay, $state) = @_;
@@ -222,7 +218,7 @@ sub edit_network {
       $self->param(name    => $name);
       $self->param(default => 1) if $default_network eq $name;
       $self->param(server  => join ':', @$network{qw( server port )});
-      $self->render(default_network => $default_network, name => $name, network => $network,);
+      $self->render(default_network => $default_network, name => $name, network => $network);
     },
   );
 }
@@ -263,7 +259,6 @@ sub wizard {
   my $self = shift;
 
   $self->stash(layout => 'tactile', template => 'connection/wizard',);
-
   $self->_add_connection_form;
 }
 
@@ -329,7 +324,7 @@ sub _add_connection_form {
       }
 
       $self->param(channels => $channels || $networks[0]{channels} || '');
-      $self->render(default_network => $default_network, networks => \@networks,);
+      $self->render(default_network => $default_network, select_networks => \@networks);
     },
   );
 }

@@ -57,30 +57,6 @@ See L<Convos::Core::Util/id_as>.
 
 See L<Convos::Core::Util/as_id>.
 
-=head2 connection_list
-
-Render the connections for a given user.
-
-=cut
-
-sub connection_list {
-  my ($self, $cb) = @_;
-  my $login = $self->session('login');
-
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $self->redis->smembers("user:$login:connections", $_[0]->begin);
-    },
-    sub {
-      my ($delay, $connections) = @_;
-
-      $self->stash(connections => $connections || []);
-      $self->$cb;
-    },
-  );
-}
-
 =head2 conversation_list
 
 Will render the conversation list for all conversations.
