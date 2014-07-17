@@ -416,9 +416,9 @@
   }
 
   var initShortcuts = function() {
-    $('body, input').bind('keydown', 'alt+shift+a shift+return', function() { $('nav a.conversations').click(); return false; });
-    $('body, input').bind('keydown', 'alt+shift+s', function() { $('nav a.notifications').click(); return false; });
-    $('body, input').bind('keydown', 'alt+shift+d', function() { $('nav a.sidebar').filter(':visible').click(); return false; });
+    $('body, input').bind('keydown', 'alt+shift+a shift+return', function() { $('nav a.conversations').trigger('tap'); return false; });
+    $('body, input').bind('keydown', 'alt+shift+s', function() { $('nav a.notifications').trigger('tap'); return false; });
+    $('body, input').bind('keydown', 'alt+shift+d', function() { $('nav a.sidebar').filter(':visible').trigger('tap'); return false; });
   };
 
   var nickList = function($data) {

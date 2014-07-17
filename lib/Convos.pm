@@ -342,6 +342,7 @@ sub _assets {
       /js/jquery.min.js
       /js/ws-reconnecting.js
       /js/jquery.hotkeys.js
+      /js/jquery.finger.js
       /js/jquery.pjax.js
       /js/jquery.notify.js
       /js/jquery.at-bottom.js
