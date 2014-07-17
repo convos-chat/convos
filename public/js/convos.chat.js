@@ -356,6 +356,7 @@
     });
 
     $input.removeAttr('disabled');
+    $input.on('doubletap', autocomplete);
     $input.bind('keydown', function(e) { if(e.keyCode !== 9) complete = false; }); // not tab
     $input.bind('keydown', 'tab', autocomplete);
     $input.bind('keydown', 'up', function(e) {
