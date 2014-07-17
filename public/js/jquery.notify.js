@@ -8,7 +8,7 @@
     if(has_focus) return this;
 
     if(Notification.permission == 'granted') {
-      var args = { iconUrl: icon, body: body, onclose: function() { clearTimeout(tid); } };
+      var args = { icon: icon || '', body: body, onclose: function() { clearTimeout(tid); } };
       var n = new Notification(title, args);
       var tid = setTimeout(function() { n.close(); }, 5000);
       n.onclick = function(x) { window.focus(); this.cancel(); };
@@ -69,7 +69,7 @@
 
 if(window.webkitNotifications) {
   window.Notification = function(title, args) {
-    var n = window.webkitNotifications.createNotification(args.iconUrl || '', title, args.body || '');
+    var n = window.webkitNotifications.createNotification(args.icon || '', title, args.body || '');
 
     try {
       if(args.onclose) n.onclose = args.onclose;
