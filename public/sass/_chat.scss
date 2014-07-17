@@ -133,7 +133,7 @@ div.messages {
   li.message-error, li.message.error, li.network-message.error {
     background: lighten($errorColor, 40%);
     div.timestamp { color: #fee; }
-    h3 { color: #333; font-style: italic; }
+    h3 { color: #333; }
   }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     background-color: #f9f7fa;
