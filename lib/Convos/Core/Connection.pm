@@ -710,14 +710,18 @@ sub err_nosuchchannel {
   my $channel = lc $message->{params}[1];
   my $name = as_id $self->name, $channel;
 
-  Scalar::Util::weaken($self);
-  $self->redis->zrem(
-    $self->{conversation_path},
-    $name,
-    sub {
-      $self->_publish(remove_conversation => {target => $channel});
-    }
-  );
+  if ($channel =~ /^[#&]/) {
+    Scalar::Util::weaken($self);
+    $self->redis->zrem(
+      $self->{conversation_path},
+      $name,
+      sub {
+        $self->_publish(remove_conversation => {target => $channel});
+      }
+    );
+  }
+
+  $self->_publish(server_message => {status => 400, message => qq(No such channel "$channel")});
 }
 
 =head2 err_nosuchnick
