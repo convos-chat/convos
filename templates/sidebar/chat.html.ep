@@ -2,13 +2,13 @@
   <h3>Actions</h3>
 </li>
 <li>
-  <button class="link ws-cmd" name="cmd" value="/topic">Get topic</button>
+  <a href="cmd:///topic">Get topic</a>
 </li>
 <li>
-  <button class="link ws-cmd" name="cmd" value="/close <%= $target %>">Close chat</button>
+  <a href="cmd:///close <%= $target%>">Close chat</a>
 </li>
 <li>
-  <button class="link ws-cmd" name="cmd" value="/help">Help</button>
+  <a href="cmd:///help">Help</a>
 </li>
 <li>
   <h3>Participants</h3>

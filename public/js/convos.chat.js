@@ -152,13 +152,6 @@
       $('nav ul.conversations').html($(this).find('ul.conversations').children());
     });
 
-    $('form.sidebar .ws-cmd').each(function() {
-      $(this).removeClass('ws-cmd').click(function(e) {
-        e.preventDefault();
-        $input.send(this.value);
-      });
-    });
-
     if (/^[#&]/.test($messages.hostAndTarget().target)) {
       $input.send('/names');
     }
@@ -445,10 +438,9 @@
     $ul.children('.nick').remove();
 
     if(nicks.length) {
-      $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-        var $a = $('<a href="cmd:///query ' + n + '" />').click(function() { $input.send('/query ' + n); return false; }).append(n);
-        $ul.append($('<li class="nick" />').append($a));
-      }).join('')
+      $.each(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
+        $ul.append('<li class="nick"><a href="cmd:///query ' + i + '">' + i + '</a></li>');
+      });
     }
   }
 
@@ -564,6 +556,14 @@
     drawSettings();
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
+
+    $(document).click(function(e) {
+      var cmd = (e.target.href || '').match(/^cmd:\/\/(.*)/);
+      if (!cmd) return;
+      e.preventDefault();
+      $input.send(cmd[1]);
+      $('body').hideSidebar();
+    });
 
     $('.notification-list').on('show', function(e) {
       var $n = $('nav a.notifications b');
