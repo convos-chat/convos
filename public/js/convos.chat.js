@@ -270,7 +270,7 @@
 
     var addGoto = function($li) {
       var href = $li.find('a').attr('href');
-      if(!href || location.href.indexOf(href) >= 0) return false;
+      if(!href || location.href.match(new RegExp(href + '$'))) return false;
       $li.find('a').focus(function() { $form.find('a.active').removeClass('active'); });
       $li.addClass('dynamic').get(0).filter_by = $.trim($li.text().toLowerCase());
       $form.find('li.add-dynamic-before-this').before($li);
@@ -311,11 +311,13 @@
       $form.find('li.dynamic').remove();
       $('nav ul.conversations li').slice(1).map(function() { // slice(1) == skip convos icon
         var $li = $(this).clone();
-        networks.push($li.find('a').attr('data-network'));
+        var network = $li.find('a').attr('data-network');
+        networks.push(network);
+        $li.find('a span').html($li.find('a span').text() + '<small> on ' + network + '</small>');
         addGoto($li);
       });
       $('form.sidebar li.nick').map(function() { addGoto($(this).clone()); });
-      $.each(networks.unique(), function() { addGoto($('<li><a href="' + $.url_for(this) + '">' + this + ' server</a></li>')); });
+      $.each(networks.unique(), function() { addGoto($('<li><a href="' + $.url_for(this) + '">' + this + ' <small>server</small></a></li>')); });
     });
 
     $form.find('li.create select').selectize({ create: false, openOnFocus: false });
