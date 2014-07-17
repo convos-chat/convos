@@ -466,6 +466,21 @@
     return args;
   };
 
+  var receiveHighlightMessage = function($message, to_current) {
+    var body = $message.find('.content').text() || '...';
+    var icon = $message.find('img').attr('src') || $.url_for('/images/icon-48.png');
+    var sender = $message.data('sender');
+    var what = /^[#&]/.test($message.data('target')) ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
+    var notified = $.notify([sender, what].join(' '), body, icon);
+
+    // Mark message as read if $message is sent to current conversation
+    $.get($.url_for('/chat/notifications'), noCache({ nid: !notified && to_current ? 0 : '' }), function(data) {
+      var $data = $(data);
+      $('nav a.notifications b').text($data.find('ul').data('notifications') || '');
+      $('.notification-list ul').html($data.find('li'));
+    });
+  };
+
   var receiveMessage = function(e) {
     var at_bottom = $win.atBottom();
     var $message = $(e.data);
@@ -490,11 +505,7 @@
     to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
 
     if($message.hasClass('highlight')) {
-      var sender = $message.data('sender');
-      var what = /^[#&]/.test($message.data('target')) ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
-      var reload_notification_list_args = {};
-      $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
-      reloadNotificationList(reload_notification_list_args);
+      receiveHighlightMessage($message, to_current);
     }
 
     if($message.hasClass('remove-conversation')) {
@@ -516,23 +527,6 @@
     }
 
     if(at_bottom) $win.scrollTo('bottom');
-  };
-
-  var reloadNotificationList = function(e) {
-    var $notification_list = $('div.notifications.container ul').parent();
-    var $n_notifications = $('nav a.notifications');
-    var reload_notification_list_args = {};
-    var n;
-
-    if(typeof e.clear_notification != 'undefined') {
-      reload_notification_list_args.notification = e.clear_notification;
-    }
-
-    $.get($.url_for('/chat/notifications'), noCache(reload_notification_list_args), function(data) {
-      $notification_list.html(data);
-      n = parseInt($notification_list.children('ul').data('notifications'), 10);
-      $n_notifications.children('b').text(n ? n : '');
-    });
   };
 
   $(document).ready(function() {
@@ -569,11 +563,18 @@
 
     $win.on('scroll', getHistoricMessages).on('resize', drawUI);
 
+    $('.notification-list').on('show', function(e) {
+      var $n = $('nav a.notifications b');
+      if($n.text().length) $.post($.url_for('/chat/notifications/clear'));
+      $n.text('');
+    });
+
     $('.messages').on('click', '.resend-message', function() {
       $input.data('socket').buffer = []; // need to clear buffer when resending messages
       $input.send($(this).parents('li').find('.content').text());
       $(this).parents('li').remove();
     });
+
     $('.messages').on('click','.remove-message', function() {
       $(this).parents('li').remove();
     });

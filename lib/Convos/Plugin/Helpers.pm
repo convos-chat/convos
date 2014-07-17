@@ -230,12 +230,7 @@ sub notification_list {
       }
 
       $self->stash(notification_list => $notification_list, n_notifications => $n_notifications);
-
-      return $self->$cb($notification_list) if $cb;
-      return $self->respond_to(
-        json => {json     => $self->stash('notification_list')},
-        html => {template => 'sidebar/notification_list'},
-      );
+      $self->$cb($notification_list);
     },
   );
 }

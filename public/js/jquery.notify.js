@@ -5,7 +5,7 @@
   var focus_tid;
 
   $.notify = function(title, body, icon) {
-    if(has_focus) return this;
+    if(has_focus) return false;
 
     if(Notification.permission == 'granted') {
       var args = { icon: icon || '', body: body, onclose: function() { clearTimeout(tid); } };
@@ -24,7 +24,7 @@
       document.title = current_title;
     }
 
-    return this;
+    return true;
   };
 
   $(document).ready(function() {

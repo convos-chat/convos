@@ -92,8 +92,8 @@ sub conversation {
       my $nick  = shift @{$_[0]};
       my $state = shift @{$_[0]};
 
-      if (defined $self->param('notification')) {
-        $self->_modify_notification($self->param('notification'), read => 1, sub { });
+      if (length $self->param('nid')) {
+        $self->_modify_notification($self->param('nid'), read => 1, sub { });
       }
 
       $state ||= 'disconnected';
@@ -160,6 +160,30 @@ sub clear_notifications {
 
       $self->render(json => {cleared => $i});
     }
+  );
+}
+
+=head2 notifications
+
+Render L<Convos::Plugin::Helpers/notification_list> as HTML or JSON.
+
+=cut
+
+sub notifications {
+  my $self = shift;
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+
+      $self->notification_list($delay->begin);
+      $self->_modify_notification($self->param('nid'), read => 1, $delay->begin) if length $self->param('nid');
+    },
+    sub {
+      my ($delay, $notification_list) = @_;
+
+      $self->respond_to(json => {json => $notification_list}, html => {template => 'sidebar/notification_list'},);
+    },
   );
 }
 

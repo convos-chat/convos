@@ -390,8 +390,7 @@ sub _private_routes {
 
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
-  $r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)
-    ->name('notification.list');
+  $r->get('/chat/notifications')->to('client#notifications', layout => undef)->name('notification.list');
   $r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
   $r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
   $r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
