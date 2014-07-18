@@ -113,8 +113,8 @@ function ReconnectingWebSocket(args) {
     }
 
     this.send = function(data) {
+      if (ws) {
         try {
-          if (!ws) throw 'Need to connect to WebSocket first';
           var sent = ws.send(data);
           if (sent === false) throw 'Could not to send data to websocket.';
           if (ws.readyState === WebSocket.CLOSED) throw 'WebSocket readyState is CLOSED';
@@ -124,10 +124,15 @@ function ReconnectingWebSocket(args) {
           console.error('ReconnectingWebSocket', 'send', data, 'fail', e);
           if (self.readyState != WebSocket.CONNECTING && self.readyState != WebSocket.OPEN) connect();
         };
+      }
+      else {
+        self.buffer.push(data);
+        connect();
+      }
     };
 
     this.close = function() {
-        if (self.debug) console.debug('ReconnectingWebSocket', 'close');
+        console.debug('ReconnectingWebSocket', 'close');
         reconnecting = false;
         if (ws.readyState != WebSocket.CLOSED) {
             forced_close = true;
@@ -141,13 +146,13 @@ function ReconnectingWebSocket(args) {
      * For example, if the app suspects bad data / missed heart beats, it can try to refresh.
      */
     this.refresh = function() {
-        if (self.debug) console.debug('ReconnectingWebSocket', 'refresh');
+        console.debug('ReconnectingWebSocket', 'refresh');
         if (ws.readyState != WebSocket.CLOSED) ws.close();
         delete self.waiting_for_pong;
     };
 
     var readyState = function(state) {
-      if (self.debug) console.debug('ReconnectingWebSocket', 'readyState', state);
+      console.debug('ReconnectingWebSocket', 'readyState', state);
       self.readyState = WebSocket[state];
     }
 
