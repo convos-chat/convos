@@ -6,6 +6,8 @@
   };
 
   $(document).ready(function() {
+    $('.sidebar-right').disableOuterScroll();
+
     $(document).on('click', function(e) {
       var $e = $(e.target);
       if ($e.closest('.sidebar-trigger-active').length) return;

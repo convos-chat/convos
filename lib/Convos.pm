@@ -346,6 +346,7 @@ sub _assets {
       /js/jquery.pjax.js
       /js/jquery.notify.js
       /js/jquery.at-bottom.js
+      /js/jquery.disableouterscroll.js
       /js/selectize.js
       /js/convos.loading-indicator.js
       /js/convos.sidebar.js
