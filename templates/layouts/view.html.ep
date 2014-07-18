@@ -11,7 +11,7 @@
     <title><%= config 'name' %> - <%= title %></title>
   % }
   </head>
-  <body class="chat" data-want-desktop-notifications="<%= session('desktop_notifications') // 1 %>">
+  <body class="chat" data-want-desktop-notifications="<%= session('desktop_notifications') // 1 %>" data-socket-url="<%= url_for('socket')->to_abs %>">
     %= include 'partials/nav'
     %= include 'partials/desktop-notifications-question'
 
@@ -27,8 +27,8 @@
       %= content
     </div>
 
-    %= form_for 'connection.control', { name => $network }, method => 'post', class => 'chat', 'data-socket-url' => url_for('socket')->to_abs, begin
-      <div class="input row">
+    %= form_for 'connection.control', { name => $network }, method => 'post', class => 'input', begin
+      <div class="row">
         %= hidden_field cmd => 'irc';
         %= text_field 'irc_cmd', placeholder => "Connecting to backend...", autocomplete => 'off', class => 'disabled', disabled => 'disabled'
       </div>

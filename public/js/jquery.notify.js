@@ -5,9 +5,9 @@
   var focus_tid;
 
   $.notify = function(title, body, icon) {
-    if(has_focus) return false;
+    if (has_focus) return false;
 
-    if(Notification.permission == 'granted') {
+    if (Notification.permission == 'granted') {
       var args = { icon: icon || '', body: body, onclose: function() { clearTimeout(tid); } };
       var n = new Notification(title, args);
       var tid = setTimeout(function() { n.close(); }, 5000);
@@ -15,9 +15,9 @@
     }
 
     current_title = title;
-    if(focus_tid) clearInterval(focus_tid);
+    if (focus_tid) clearInterval(focus_tid);
 
-    if(document.title == current_title || document.title == original_title) {
+    if (document.title == current_title || document.title == original_title) {
       document.title = [original_title, current_title].join(' - ');
     }
     else {
@@ -31,11 +31,11 @@
     var $question = $('.notification.question');
 
     $question.each(function() {
-      if(Notification.permission === 'granted') return false;
-      if(Notification.permission === 'denied') return false;
+      if (Notification.permission === 'granted') return false;
+      if (Notification.permission === 'denied') return false;
 
       $question.find('a.yes').off('click').click(function() {
-        if(Notification.permission === 'download') return true; // follow link
+        if (Notification.permission === 'download') return true; // follow link
 
         Notification.requestPermission(function() {
           n = new Notification('Notifications enabled.', {});
@@ -59,7 +59,7 @@
     $(window)
       .on('blur', function() { has_focus = false; })
       .on('focus', function() {
-        if(focus_tid) clearInterval(focus_tid);
+        if (focus_tid) clearInterval(focus_tid);
         focus_tid = setInterval(function() { document.title = original_title; }, 3000);
         has_focus = true;
       });
@@ -67,15 +67,15 @@
   });
 })(jQuery);
 
-if(window.webkitNotifications) {
+if (window.webkitNotifications) {
   window.Notification = function(title, args) {
     var n = window.webkitNotifications.createNotification(args.icon || '', title, args.body || '');
 
     try {
-      if(args.onclose) n.onclose = args.onclose;
-      if(args.onshow) n.ondisplay = args.onshow;
+      if (args.onclose) n.onclose = args.onclose;
+      if (args.onshow) n.ondisplay = args.onshow;
     } catch(e) {
-      if(window.console) console.log('[Notification] ' + e);
+      if (window.console) console.log('[Notification] ' + e);
     };
 
     n.show();
@@ -89,11 +89,11 @@ if(window.webkitNotifications) {
       cb(window.Notification.permission);
     });
   };
-  window.Notification.prototype.close = function() { if(this.onclose) this.onclose(); };
+  window.Notification.prototype.close = function() { if (this.onclose) this.onclose(); };
 }
-else if(!window.Notification) {
+else if (!window.Notification) {
   window.Notification = function(title, args) { return this; };
   window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'denied';
   window.Notification.requestPermission = function(cb) { cb('unsupported'); };
-  window.Notification.prototype.close = function() { if(this.onclose) this.onclose(); };
+  window.Notification.prototype.close = function() { if (this.onclose) this.onclose(); };
 }

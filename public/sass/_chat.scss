@@ -1,3 +1,14 @@
+body.loading {
+  .messages { @include opacity(0.4); }
+}
+
+body.ios-input-focus {
+  overflow: hidden;
+  nav.bar { display: none; }
+  div.messages { padding-bottom: 10px; }
+  form.input { position: static; }
+}
+
 nav.bar {
   background: #fafafa;
   position: fixed;
@@ -45,26 +56,23 @@ nav.bar {
   }
 }
 
-form.chat {
-  overflow: hidden;
+form.input {
+  background: #fff;
+  position: fixed;
+  bottom: 2px;
+  left: 0;
+  right: $nickListWidth;
+  padding-bottom: 2px;
 
-  .input {
-    position: fixed;
-    bottom: 2px;
-    left: 0;
-    right: 0;
+  input { background: #fafafa; width: 100%; padding: 8px; font-size: $fontSize + 1; }
+  input.disabled, input[disabled] { background-color: #eee; }
 
-    input { background: #fafafa; width: 100%; padding: 8px; font-size: $fontSize + 1; }
-    input.disabled, input[disabled] { background-color: #eee; }
-
-    @media (max-width: $responsiveWidth) {
-      bottom: 0;
-
-      input {
-        border: 0;
-        border-top: 2px solid darken(#fff, 40%);
-        @include border-radius(0);
-      }
+  @media (max-width: $responsiveWidth) {
+    & { right: 0; }
+    input {
+      border: 0;
+      border-top: 2px solid darken(#fff, 40%);
+      @include border-radius(0);
     }
   }
 }
@@ -123,8 +131,12 @@ div.messages {
     h3, div.content, div.embed { margin-left: 3px; }
   }
 
+  li.same-nick {
+    padding-top: 0;
+    h3, .avatar { display: none; }
+  }
+
   li.highlight { background: #fee; }
-  li.same-nick { padding-top: 0; }
   li.action.message div.content { padding-top: 20px; }
   li.action.message.same-nick div.content { padding-top: 0; }
   li.action.message div.content a { font-weight: normal; text-decoration: none; }
@@ -224,12 +236,10 @@ form.conversations {
     right: 0 !important;
     @include box-shadow(inset 2px -2px 2px rgba(180,180,180,.5));
   }
-  form.chat div.input { right: $nickListWidth; }
-  form.chat div.messages { margin-right: $nickListWidth; }
 }
 
 @media print {
-  nav, .sidebar-right, div.input {
+  nav, .sidebar-right, form.input {
     display: none;
     overflow: hidden;
     left: -1000px;

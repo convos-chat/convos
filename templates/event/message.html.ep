@@ -2,14 +2,12 @@
 % $highlight = 0 if $target =~ /^\w/;
 <li id="<%= $uuid %>" class="message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
   %= timestamp $timestamp
-% if($nick ne $prev_nick) {
   %= avatar { nick => $nick, host => $host, user => $user }, alt => '', class => 'avatar'
   % if($network eq 'convos') {
   <h3><%= link_to $nick, 'view.network' => { network => $nick } %></h3>
   % } else {
   <h3><%= link_to $nick, view => { network => $network, target => $nick }, class => 'autocomplete' %></h3>
   % }
-% }
   <div class="content whitespace"><%== $message %></div>
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>

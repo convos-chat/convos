@@ -345,11 +345,13 @@ sub _assets {
       /js/jquery.finger.js
       /js/jquery.pjax.js
       /js/jquery.notify.js
-      /js/jquery.at-bottom.js
       /js/jquery.disableouterscroll.js
       /js/selectize.js
-      /js/convos.loading-indicator.js
       /js/convos.sidebar.js
+      /js/convos.socket.js
+      /js/convos.input.js
+      /js/convos.nicklist.js
+      /js/convos.goto-anything.js
       /js/convos.chat.js
       )
   );
