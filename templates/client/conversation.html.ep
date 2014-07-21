@@ -8,7 +8,7 @@
 % }
 % if(stash 'got_more') {
   %= include 'event/historic_messages'
-% } elsif($state ne 'connected' and $full_page) {
+% } elsif($state ne 'connected') {
   %= include 'event/not_connected'
 % }
 </ul>

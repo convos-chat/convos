@@ -12,7 +12,6 @@
   % }
   </head>
   <body class="chat" data-want-desktop-notifications="<%= session('desktop_notifications') // 1 %>" data-socket-url="<%= url_for('socket')->to_abs %>">
-  % if(stash 'conversation_list') {
     %= include 'partials/nav'
     %= include 'partials/desktop-notifications-question'
 
@@ -23,22 +22,20 @@
     % end
 
     %= include "sidebar/goto_anything"
-  % }
 
     <div class="messages row">
       %= content
     </div>
 
-  % if(stash 'conversation_list') {
     %= form_for 'connection.control', { name => $network }, method => 'post', class => 'input', begin
       <div class="row">
         %= hidden_field cmd => 'irc';
         %= text_field 'irc_cmd', placeholder => "Connecting to backend...", autocomplete => 'off', class => 'disabled', disabled => 'disabled'
       </div>
     % end
-  % }
 
-  % if(stash 'notification_list') {
+  % if($full_page) {
+    %= include 'sidebar/add_conversation'
     %= include 'sidebar/notification_list'
   % }
   </body>
