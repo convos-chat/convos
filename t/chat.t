@@ -46,9 +46,9 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
     ->send_ok(
     '<div data-network="magnet" data-target="#test123" id="003cb6af-e826-e17d-6691-3cae034fac1a">/names</div>');
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.nicks[data-network="magnet"][data-target="#convos"]'), 'Got correct 6+#convos';
-  is $dom->at('a[href="/magnet/fooman"][data-nick="fooman"]')->text, 'fooman', 'got fooman';
-  is $dom->at('a[href="/magnet/woman"][data-nick="woman"]')->text,   '@woman', 'got woman';
+  ok $dom->at('li.nick-init[data-network="magnet"][data-target="#convos"]'), 'Got correct 6+#convos';
+  is $dom->at('a[href="cmd:///query fooman"]')->text, 'fooman', 'got fooman';
+  is $dom->at('a[href="cmd:///query woman"]')->text,  '@woman', 'got woman';
 }
 
 {
@@ -225,10 +225,12 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   ok $dom->at('li.remove-conversation[data-network="magnet"][data-target="#mojo"]'), 'remove conversation on 474';
 
   $connection->_irc->from_irc_server(":doe!user\@host 403 doe #mojo\r\n");
+  like $t->message_ok->message->[1], qr{No such channel}, 'No such channel on 403';
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.remove-conversation[data-network="magnet"][data-target="#mojo"]'), 'remove conversation on 403';
 
   $connection->_irc->from_irc_server(":doe!user\@host 442 doe #mojo\r\n");
+  like $t->message_ok->message->[1], qr{No such channel}, 'No such channel on 442';
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.remove-conversation[data-network="magnet"][data-target="#mojo"]'), 'remove conversation on 442';
 }

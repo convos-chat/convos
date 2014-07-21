@@ -4,7 +4,7 @@
   <span>
     % my $i = 0;
     % for my $nick (@$nicks) {
-      <a href="cmd:///query <%= $nick %>"><%= join('', @$nick{qw( mode nick )}) %></a><%= ++$i == @$nicks ? '.' : ', ' %>
+      <a href="cmd:///query <%= $nick->{nick} %>"><%= join('', @$nick{qw( mode nick )}) %></a><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
   </span>
 </li>

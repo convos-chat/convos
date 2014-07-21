@@ -710,6 +710,8 @@ sub err_nosuchchannel {
   my $channel = lc $message->{params}[1];
   my $name = as_id $self->name, $channel;
 
+  $self->_publish(server_message => {status => 400, message => qq(No such channel "$channel")});
+
   if ($channel =~ /^[#&]/) {
     Scalar::Util::weaken($self);
     $self->redis->zrem(
@@ -720,8 +722,6 @@ sub err_nosuchchannel {
       }
     );
   }
-
-  $self->_publish(server_message => {status => 400, message => qq(No such channel "$channel")});
 }
 
 =head2 err_nosuchnick
