@@ -102,10 +102,12 @@ sub conversation {
     },
     sub {
       my ($delay, $conversation) = @_;
+      my $historic = $self->param('from') || $self->param('to') || 0;
 
-      $self->conversation_list($delay->begin);
+      $self->conversation_list($delay->begin) if $full_page or !$historic;
       $self->notification_list($delay->begin) if $full_page;
       $self->stash(conversation => $conversation || []);
+      $delay->begin->();
     },
     sub {
       $self->render;
