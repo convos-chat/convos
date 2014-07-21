@@ -5,9 +5,12 @@
     var socket_url = $('body').attr('data-socket-url');
     convos.socket = new ReconnectingWebSocket({ url: socket_url, ping_protocol: [ 'PING', 'PONG' ] });
     convos.socket.onmessage = receiveMessage;
-    convos.socket.onclose = function() { convos.input.addClass('disabled'); };
-    convos.socket.onopen = function(e) { convos.input.removeClass('disabled'); if (e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true }); };
     convos.socket.onpong = function(e) { convos.input.attr('placeholder', 'What\'s on your mind ' + convos.current.nick + '?'); };
+    convos.socket.onclose = function() { convos.input.addClass('disabled'); };
+    convos.socket.onopen = function(e) {
+      convos.input.removeClass('disabled');
+      if (e.reconnected) $.pjax({ url: location.href, container: 'div.messages', fragment: 'div.messages'});
+    };
     convos.socket.send('PING'); // open socket
   };
 

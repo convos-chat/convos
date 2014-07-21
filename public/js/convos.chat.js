@@ -218,7 +218,7 @@
       var $n = $('nav a.notifications b');
       if ($n.text().length) $.post($.url_for('/chat/notifications/clear'));
       $n.text('');
-    }).find('li').on('click', function(e) { $(this).removeClass('unread'); })
+    }); // TODO: .find('li').on('click', function(e) { $(this).removeClass('unread'); })
   });
 
   $(window).load(function() {
