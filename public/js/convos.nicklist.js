@@ -2,16 +2,16 @@
   window.convos = window.convos || {}
 
   var template = function(nick) {
-    return '<li><a href="cmd:///query ' + nick + '">' + nick + '</a></li>';
+    return '<li class="nick"><a href="cmd:///query ' + nick + '">' + nick + '</a></li>';
   };
 
   convos.nicklist = {
-    init: function($e) { // convos.nicklist.init($('<div><a href="/query batman_">@batman_</a></div>'));
+    init: function($e) { // convos.nicklist.init($('<div><a href="cmd:///query batman_">@batman_</a></div>'));
       var $ul = $('form.sidebar ul');
-      var nicks = $e.find('[data-nick]').map(function() { return $(this).attr('data-nick'); }).get();
+      var nicks = $e.find('.content a').map(function() { return $(this).attr('href').split(' ')[1]; }).get();
       var senders = {};
 
-      $ul.children('[data-nick]').remove();
+      $ul.children('li.nick').remove();
       $.each(nicks.sortCaseInsensitive(), function(i, nick) { $ul.append(template(nick)); });
     },
     change: function($e) { // convos.nicklist.change($('<div><span class="nick">batman</span><span class="old">batman_</span></div>'));

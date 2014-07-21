@@ -6,7 +6,7 @@
     convos.socket = new ReconnectingWebSocket({ url: socket_url, ping_protocol: [ 'PING', 'PONG' ] });
     convos.socket.onmessage = receiveMessage;
     convos.socket.onclose = function() { convos.input.addClass('disabled'); };
-    convos.socket.onopen = function(e) { convos.input.removeClass('disabled'); if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true }); };
+    convos.socket.onopen = function(e) { convos.input.removeClass('disabled'); if (e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true }); };
     convos.socket.onpong = function(e) { convos.input.attr('placeholder', 'What\'s on your mind ' + convos.current.nick + '?'); };
     convos.socket.send('PING'); // open socket
   };
@@ -47,10 +47,10 @@
     var $message = $(e.data);
     var uuid = $message.attr('id');
     var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
-    var to_current = $message.data('target') == '' || $message.data('network') == convos.network && $message.data('target') == convos.target;
+    var to_current = toCurrent($message);
 
-    if($('#' + uuid).length) {
-      if($message.hasClass('error')) {
+    if ($('#' + uuid).length) {
+      if ($message.hasClass('error')) {
         messageFailed($message);
       }
       else {
@@ -58,24 +58,24 @@
       }
     }
 
-    if($message.hasClass('highlight')) {
+    if ($message.hasClass('highlight')) {
       receiveHighlightMessage($message, to_current);
     }
 
-    if($message.hasClass('remove-conversation')) {
+    if ($message.hasClass('remove-conversation')) {
       $('nav ul.conversations a').slice(1).each(function() {
         if(this.href.indexOf(url) >= 0) return;
         $(this).click();
         return false;
       });
     }
-    else if($message.hasClass('add-conversation')) {
+    else if ($message.hasClass('add-conversation')) {
       $.pjax({ url: url, container: 'div.messages', fragment: 'div.messages'})
     }
-    else if(to_current) {
+    else if (to_current) {
       $message.addToMessages();
     }
-    else if($message.hasClass('message')) {
+    else if ($message.hasClass('message')) {
       var $unread = $('nav ul.conversations').find('a[href="' + url + '"]').children('b');
       $unread.text(parseInt($unread.html() || 0) + 1);
     }
@@ -83,10 +83,18 @@
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
+  var toCurrent = function($e) {
+    if ($e.data('target') == '') return true;
+    if ($e.data('network') != convos.current.network) return false;
+    if ($e.data('target') != convos.current.target) return false;
+    return true;
+  };
+
   convos.send = function(message, attr) {
     if (!convos.socket) connect();
     if (message.length == 0) return;
     attr = attr || {};
+    $.each(['network', 'state', 'target'], function(k, i) { attr["data-" + k] = attr["data-" + k] || convos.current[k]; });
     attr['data-network'] = convos.current.network;
     attr['data-state'] = convos.current.state;
     attr['data-target'] = convos.current.target;

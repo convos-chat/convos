@@ -136,10 +136,10 @@ div.messages {
     h3, .avatar { display: none; }
   }
 
-  li.highlight { background: #fee; }
-  li.action.message div.content { padding-top: 20px; }
-  li.action.message.same-nick div.content { padding-top: 0; }
-  li.action.message div.content a { font-weight: normal; text-decoration: none; }
+  li.message.channel.highlight { background: #fee; }
+  li.message.action div.content { padding-top: 20px; }
+  li.message.action.same-nick div.content { padding-top: 0; }
+  li.message.action div.content a { font-weight: normal; text-decoration: none; }
   li.message-pending div.content { color: #999; }
   li.message-pending h3 { color: #ccc; }
   li.message-error, li.message.error, li.network-message.error {
@@ -225,6 +225,8 @@ div.notification-list {
 
 form.conversations {
   width: $nickListWidth + 60;
+  a { position: relative; }
+  a b { top: 9px; }
   .create { display: none; }
   .howto { padding: 1em 0; color: #666; font-size: 0.9em; }
 }

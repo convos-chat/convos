@@ -53,14 +53,16 @@
       var last_nick = $previous.data('sender') || '';
       var action;
 
-      if ($message.hasClass('message') && $previous.hasClass('message')) {
-        if (last_nick == $message.data('sender')) $message.addClass('same-nick');
+      if ($message.hasClass('message') && $previous.hasClass('message') && last_nick == $message.data('sender')) {
+        $message.addClass('same-nick');
       }
-      else if (action = $message.attr('class').match(/^nick-(\w+)/)) { // nick-change, -joined, -parted, -quit, -init
+      if (action = $message.attr('class').match(/^nick-(\w+)/)) { // nick-change, -joined, -parted, -quit, -init
         convos.nicklist[action[1]]($message);
       }
 
-      $messages[func || 'append']($message.fadeIn('fast'));
+      if (!$message.hasClass('nick-init')) {
+        $messages[func || 'append']($message.fadeIn('fast'));
+      }
     });
   };
 
@@ -216,7 +218,7 @@
       var $n = $('nav a.notifications b');
       if ($n.text().length) $.post($.url_for('/chat/notifications/clear'));
       $n.text('');
-    });
+    }).find('li').on('click', function(e) { $(this).removeClass('unread'); })
   });
 
   $(window).load(function() {

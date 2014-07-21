@@ -82,7 +82,8 @@
     });
     convos.input.closest('form').on('submit', function(e) {
       e.preventDefault();
-      convos.send(convos.input.val(), { 'data-convos.history': 1 }).val('');
+      convos.send(convos.input.val(), { 'data-convos.history': 1 });
+      convos.input.val('');
     });
   });
 })(jQuery);

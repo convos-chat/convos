@@ -1,10 +1,10 @@
 <li class="nick-init" data-network="<%= $network %>" data-target="<%= $target %>">
   %= timestamp $timestamp
-  <span class="prefix">Participants are</span>
-  <span>
+  <div class="content">
+    <span>Participants:</span>
     % my $i = 0;
     % for my $nick (@$nicks) {
       <a href="cmd:///query <%= $nick->{nick} %>"><%= join('', @$nick{qw( mode nick )}) %></a><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
-  </span>
+  </div>
 </li>

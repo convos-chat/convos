@@ -1,6 +1,9 @@
 % my $prev_nick = stash('prev_nick') || '';
-% $highlight = 0 if $target =~ /^\w/;
-<li id="<%= $uuid %>" class="message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
+% my @classes = qw( message );
+% push @classes, $target =~ /^\w/ ? 'private' : 'channel';
+% push @classes, 'highlight' if $highlight;
+% push @classes, 'same-nick' if $nick eq $prev_nick;
+<li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
   %= timestamp $timestamp
   %= avatar { nick => $nick, host => $host, user => $user }, alt => '', class => 'avatar'
   % if($network eq 'convos') {
