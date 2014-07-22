@@ -10,8 +10,8 @@
     init: function($e) { // convos.nicks.init($('<div><a href="cmd:///query batman_">@batman_</a></div>'));
       var $ul = $('form.sidebar ul');
 
-      if (!convos.nicks.list.length) $ul.children('li.nick').remove();
       $e.find('.content a').each(function() { convos.nicks.list.push($(this).attr('href').split(' ')[1]); });
+      $ul.children('li.nick').remove();
       $.each(convos.nicks.list.sortCaseInsensitive(), function(i, nick) { $ul.append(template(nick)); });
     },
     change: function($e) { // convos.nicks.change($('<div><span class="nick">batman</span><span class="old">batman_</span></div>'));
