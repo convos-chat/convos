@@ -57,7 +57,7 @@
         $message.addClass('same-nick');
       }
       if (action = $message.attr('class').match(/^nick-(\w+)/)) { // nick-change, -joined, -parted, -quit, -init
-        convos.nicklist[action[1]]($message);
+        convos.nicks[action[1]]($message);
       }
 
       if (!$message.hasClass('nick-init')) {
@@ -154,14 +154,13 @@
       var $messages = $('div.messages ul'); // injected to the document using pjax
       var draw = $doc.find('[data-draw]').attr('data-draw');
 
-      convos.current = {
-        end_time: parseFloat($messages.attr('data-end-time')),
-        start_time: parseFloat($messages.attr('data-start-time')),
-        nick: $messages.attr('data-nick') || '',
-        state: $messages.attr('data-state') || 'disconnected',
-        network: $messages.attr('data-network') || 'convos',
-        target: $messages.attr('data-target') || ''
-      };
+      convos.nicks.list = [];
+      convos.current.end_time = parseFloat($messages.attr('data-end-time'));
+      convos.current.start_time = parseFloat($messages.attr('data-start-time'));
+      convos.current.nick = $messages.attr('data-nick') || '';
+      convos.current.state = $messages.attr('data-state') || 'disconnected';
+      convos.current.network = $messages.attr('data-network') || 'convos';
+      convos.current.target = $messages.attr('data-target') || '';
 
       $messages.find('li').attachEventsToMessage();
       $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });

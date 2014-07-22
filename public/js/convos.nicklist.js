@@ -5,16 +5,18 @@
     return '<li class="nick"><a href="cmd:///query ' + nick + '">' + nick + '</a></li>';
   };
 
-  convos.nicklist = {
-    init: function($e) { // convos.nicklist.init($('<div><a href="cmd:///query batman_">@batman_</a></div>'));
+  convos.nicks = {
+    list: [],
+    init: function($e) { // convos.nicks.init($('<div><a href="cmd:///query batman_">@batman_</a></div>'));
       var $ul = $('form.sidebar ul');
-      var nicks = $e.find('.content a').map(function() { return $(this).attr('href').split(' ')[1]; }).get();
       var senders = {};
 
+      convos.nicks.list = $e.find('.content a').map(function() { return $(this).attr('href').split(' ')[1]; }).get();
+
       $ul.children('li.nick').remove();
-      $.each(nicks.sortCaseInsensitive(), function(i, nick) { $ul.append(template(nick)); });
+      $.each(convos.nicks.list.sortCaseInsensitive(), function(i, nick) { $ul.append(template(nick)); });
     },
-    change: function($e) { // convos.nicklist.change($('<div><span class="nick">batman</span><span class="old">batman_</span></div>'));
+    change: function($e) { // convos.nicks.change($('<div><span class="nick">batman</span><span class="old">batman_</span></div>'));
       var new_nick = $e.find('.nick').text();
       var old_nick = $e.find('.old').text();
       var re;
@@ -25,14 +27,15 @@
         $messages.data('nick', new_nick);
       }
       else {
-        convos.nicklist.parted($e);
-        convos.nicklist.joined($e);
+        convos.nicks.parted($e);
+        convos.nicks.joined($e);
       }
     },
-    joined: function($e) { // convos.nicklist.joined($('<div><span class="nick">batman</span></div>'))
+    joined: function($e) { // convos.nicks.joined($('<div><span class="nick">batman</span></div>'))
       var nick = $e.find('.nick').text();
       var $nicks = $('form.sidebar li[data-nick]');
 
+      convos.nicks.list.push(nick);
       $nicks.each(function() {
         var $li = $(this);
         var n = $li.attr('data-nick');
@@ -44,9 +47,9 @@
       if (nick) $li.after(template(nick));
     },
     quit: function($e) {
-      convos.nicklist.parted($e);
+      convos.nicks.parted($e);
     },
-    parted: function($e) { // convos.nicklist.parted($('<div><span class="nick">batman</span></div>'))
+    parted: function($e) { // convos.nicks.parted($('<div><span class="nick">batman</span></div>'))
       var nick = $e.find('.nick').text();
       $('form.sidebar li[data-nick="' + nick + '"]').remove();
     }

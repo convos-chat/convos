@@ -46,6 +46,7 @@
 
     $.each($('.messages h3 > a').get().reverse(), function() { matcher($(this).text()); });
     $('nav.bar a.conversation span').each(function() { matcher($(this).text()); });
+    $.each(convos.nicks.list, function() { matcher("" + this); }); // "" = force String object to string primitive
     $.each(commands, function() { matcher("" + this); }); // "" = force String object to string primitive
     suggestions.push(after);
     suggestions.push(convos.current.nick);
