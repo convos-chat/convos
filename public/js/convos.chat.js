@@ -112,7 +112,7 @@
 
   var focusFirst = function() {
     if (document.activeElement && $(document.activeElement).is(':input')) return;
-    if (convos.input) return convos.input.focus();
+    if (convos.input.length) return convos.input.focus();
     $('form input[type="text"]:visible').eq(0).focus();
   };
 
@@ -225,7 +225,7 @@
   });
 
   $(window).load(function() {
-    // render initial messages
-    $('div.messages').trigger('pjax:success', [ '', 'success', {}, {} ]);
+    $('div.messages').trigger('pjax:success', [ '', 'success', {}, {} ]); // render initial div.messages
+    if (!navigator.is_ios) focusFirst(); // need to focus even if we have no div.messages
   });
 })(jQuery);
