@@ -110,6 +110,13 @@
     return this;
   };
 
+  var focusFirst = function() {
+    console.log(document.activeElement);
+    if (document.activeElement && $(document.activeElement).is(':input')) return;
+    if (convos.input) return convos.input.focus();
+    $('form input[type="text"]:visible').eq(0).focus();
+  };
+
   var getHistoricMessages = function() {
     if (!convos.current.start_time) return;
     $.get(location.href.replace(/\?.*/, ''), { to: convos.current.start_time }, function(data) {
@@ -168,7 +175,7 @@
 
       if (location.href.indexOf('from=') > 0) getHistoricMessages();
       if (convos.isChannel(convos.current.target)) convos.send('/names');
-      if (!navigator.is_ios) convos.input.add('form input[type="text"]').eq(0).focus();
+      if (!navigator.is_ios) focusFirst();
       if (draw) convos.draw[draw](e);
       if (data) $('body').hideSidebar();
 
