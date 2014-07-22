@@ -1,6 +1,7 @@
 ;(function($) {
   window.convos = window.convos || {}
 
+  var history;
   var commands = [
     '/help',
     '/join #',
@@ -57,15 +58,22 @@
     this.suggestions.i = -1;
   };
 
+  history = [];
+  history.i = 0;
+  convos.addInputHistory = function(cmd) {
+    history = history.concat(cmd).unique();
+    history.i = history.length;
+  };
+
   $(document).ready(function() {
+    convos.input = $('form.input input[autocomplete="off"]');
+
+    if (!convos.input.length) return;
+
     $.get($.url_for('/chat/command-history'), $.noCache({}), function(data) {
-      convos.input.get(0).history = data.unique();
-      convos.input.get(0).history.i = convos.input.get(0).history.length;
+      convos.addInputHistory(data.unique());
     });
 
-    convos.input = $('form.input input[autocomplete="off"]');
-    convos.input.get(0).history = [];
-    convos.input.get(0).history.i = 0;
     convos.input.removeAttr('disabled');
     convos.input.on('doubletap', autocompleter);
     convos.input.bind('keydown', function(e) {
@@ -74,15 +82,15 @@
     });
     convos.input.bind('keydown', 'up', function(e) {
       e.preventDefault();
-      if (this.history.i == 0) return;
-      if (this.history.i == this.history.length) this.current_input_str = convos.input.val();
-      convos.input.val(this.history[--this.history.i]);
+      if (history.i == 0) return;
+      if (history.i == history.length) this.current_input_str = convos.input.val();
+      convos.input.val(history[--history.i]);
     });
     convos.input.bind('keydown', 'down', function(e) {
       e.preventDefault();
-      if (++this.history.i == this.history.length) return convos.input.val(this.current_input_str);
-      if (this.history.i > this.history.length) return this.history.i = this.history.length;
-      convos.input.val(this.history[this.history.i]);
+      if (++history.i == history.length) return convos.input.val(this.current_input_str);
+      if (history.i > history.length) return history.i = history.length;
+      convos.input.val(history[history.i]);
     });
     convos.input.closest('form').on('submit', function(e) {
       e.preventDefault();

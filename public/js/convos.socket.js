@@ -109,7 +109,7 @@
       $pendingMessage.addToMessages();
     }
     convos.socket.send($('<div/>').attr(attr).text(message).prop('outerHTML'));
-    if (attr['data-history']) convos.input.get(0).history.push(message);
+    if (attr['data-history']) convos.addInputHistory(message);
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 })(jQuery);
