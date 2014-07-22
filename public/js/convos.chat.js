@@ -145,6 +145,7 @@
     $(document).pjax('nav ul a', 'div.messages', { fragment: 'div.messages' });
     $(document).pjax('.sidebar-right a', 'div.messages', { fragment: 'div.messages' });
 
+    $('div.messages').on('pjax:beforeReplace', function(xhr, options) { $('body').removeClass('loading'); });
     $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
     $('div.messages').on('pjax:start', function(xhr, options) { $('body').addClass('loading'); });
 
@@ -162,7 +163,6 @@
         target: $messages.attr('data-target') || ''
       };
 
-      $('body').removeClass('loading');
       $messages.find('li').attachEventsToMessage();
       $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
       $doc.filter('nav').each(function() { $('nav ul.conversations').html($(this).find('ul.conversations').children()); });
@@ -173,9 +173,9 @@
       if (draw) convos.draw[draw](e);
       if (data) $('body').hideSidebar();
 
+      convos.at_bottom = true; // make convos.draw.ui scroll to bottom
       convos.draw.ui(e);
       convos.send(''); // open socket
-      $(window).scrollTo('bottom');
     });
   };
 
