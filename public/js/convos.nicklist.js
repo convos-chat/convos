@@ -9,11 +9,9 @@
     list: [],
     init: function($e) { // convos.nicks.init($('<div><a href="cmd:///query batman_">@batman_</a></div>'));
       var $ul = $('form.sidebar ul');
-      var senders = {};
 
-      convos.nicks.list = $e.find('.content a').map(function() { return $(this).attr('href').split(' ')[1]; }).get();
-
-      $ul.children('li.nick').remove();
+      if (!convos.nicks.list.length) $ul.children('li.nick').remove();
+      $e.find('.content a').each(function() { convos.nicks.list.push($(this).attr('href').split(' ')[1]); });
       $.each(convos.nicks.list.sortCaseInsensitive(), function(i, nick) { $ul.append(template(nick)); });
     },
     change: function($e) { // convos.nicks.change($('<div><span class="nick">batman</span><span class="old">batman_</span></div>'));

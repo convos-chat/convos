@@ -36,9 +36,9 @@
     var dup = {};
     var suggestions = [];
 
-    var matcher = function(v) {
+    var matcher = function(v, force) {
       if (dup[v]) return;
-      if (v == convos.current.nick) return;
+      if (v == convos.current.nick && !force) return;
       if (offset && v.indexOf('/') === 0) return;
       if (!re.test(v)) return;
       dup[v] = suggestions.push(offset ? v + ' ' : v.indexOf('/') === 0 ? v : v + ': ');
@@ -48,8 +48,8 @@
     $('nav.bar a.conversation span').each(function() { matcher($(this).text()); });
     $.each(convos.nicks.list, function() { matcher("" + this); }); // "" = force String object to string primitive
     $.each(commands, function() { matcher("" + this); }); // "" = force String object to string primitive
+    matcher(convos.current.nick, true);
     suggestions.push(after);
-    suggestions.push(convos.current.nick);
     console.log('makeSuggestions', e);
 
     this.before_suggestion = val.substr(0, offset);
