@@ -111,7 +111,6 @@
   };
 
   var focusFirst = function() {
-    console.log(document.activeElement);
     if (document.activeElement && $(document.activeElement).is(':input')) return;
     if (convos.input) return convos.input.focus();
     $('form input[type="text"]:visible').eq(0).focus();
