@@ -8,3 +8,5 @@ requires 'Mojo::Redis'                    => 0.9928;
 requires 'Parse::IRC'                     => 1.18;
 requires 'Time::Piece'                    => 1.20;
 requires 'Unicode::UTF8'                  => 0.58;
+
+test_requires 'Test::More' => '0.90';
