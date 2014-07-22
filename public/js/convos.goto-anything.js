@@ -53,7 +53,11 @@
         $li.find('a span').html($li.find('a span').text() + '<small> on ' + network + '</small>');
         addGoto($li, $g);
       });
-      $('form.sidebar li.nick').each(function() { addGoto($(this).clone(), $g); });
+      $('form.sidebar li.nick').each(function() {
+        var $li = $(this).clone();
+        $li.find('a').html($li.find('a').text() + '<small> in ' + convos.current.target + '</small>');
+        addGoto($li, $g);
+      });
       $.each(networks.unique(), function() { addGoto($('<li><a href="' + $.url_for(this) + '">' + this + ' <small>server</small></a></li>'), $g); });
     });
 
