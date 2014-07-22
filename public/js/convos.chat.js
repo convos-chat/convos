@@ -162,8 +162,6 @@
         target: $messages.attr('data-target') || ''
       };
 
-      console.log(convos.current);
-
       $('body').removeClass('loading');
       $messages.find('li').attachEventsToMessage();
       $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
@@ -179,7 +177,7 @@
       convos.send(''); // open socket
       $(window).scrollTo('bottom');
     });
-  }
+  };
 
   $(document).ready(function() {
     $.ajaxSetup({ error: function(jqXHR, exception) { console.log('ajax: ' + this.url + ' failed: ' + exception); } });
@@ -218,7 +216,7 @@
       var $n = $('nav a.notifications b');
       if ($n.text().length) $.post($.url_for('/chat/notifications/clear'));
       $n.text('');
-    }); // TODO: .find('li').on('click', function(e) { $(this).removeClass('unread'); })
+    }).find('a').on('click', function(e) { $(this).parent('.unread').removeClass('unread'); })
   });
 
   $(window).load(function() {

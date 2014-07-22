@@ -66,8 +66,6 @@ function ReconnectingWebSocket(args) {
     this.url = args.url;
     this.URL = args.url; // Public API
 
-    var guard = 1000; // TODO: Remove this
-
     function connect() {
         readyState('CONNECTING');
         emit('onconnecting', reconnecting);
@@ -75,8 +73,6 @@ function ReconnectingWebSocket(args) {
         ws = new WebSocket(self.url, self.protocols);
         connect_tid = setTimeout(function() { ws.close(); }, self.connect_timeout);
 
-        if(!guard--) throw 'GUARD IS DEAD';
-        
         ws.onopen = function(event) {
             clearTimeout(connect_tid);
             if (self.ping_protocol[0]) self.waiting_for_pong = false;
