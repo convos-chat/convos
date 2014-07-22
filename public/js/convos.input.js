@@ -38,14 +38,17 @@
 
     var matcher = function(v) {
       if (dup[v]) return;
+      if (v == convos.current.nick) return;
       if (offset && v.indexOf('/') === 0) return;
       if (!re.test(v)) return;
       dup[v] = suggestions.push(offset ? v + ' ' : v.indexOf('/') === 0 ? v : v + ': ');
     };
 
     $.each($('.messages h3 > a').get().reverse(), function() { matcher($(this).text()); });
+    $('nav.bar a.conversation span').each(function() { matcher($(this).text()); });
     $.each(commands, function() { matcher("" + this); }); // "" = force String object to string primitive
-    suggestions.push(val);
+    suggestions.push(after);
+    suggestions.push(convos.current.nick);
     console.log('makeSuggestions', e);
 
     this.before_suggestion = val.substr(0, offset);
@@ -65,7 +68,7 @@
     convos.input.removeAttr('disabled');
     convos.input.on('doubletap', autocompleter);
     convos.input.bind('keydown', function(e) {
-      if (String.fromCharCode(e.which).match(/^[\w\u0400-\u04FF]$/)) this.suggestions = false; // match(printable character)
+      if (String.fromCharCode(e.which).match(/^[ \b\w\u0400-\u04FF]$/)) this.suggestions = false; // match(printable character), space, backspace, word characters in ascii and utf8
       if (e.which == 9) autocompleter.call(this, e); // tab
     });
     convos.input.bind('keydown', 'up', function(e) {
