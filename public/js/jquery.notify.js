@@ -78,6 +78,7 @@ if (window.webkitNotifications) {
       if (window.console) console.log('[Notification] ' + e);
     };
 
+    n.close = function() { this.cancel(); if (this.onclose) this.onclose(); };
     n.show();
     return n;
   };
@@ -89,11 +90,12 @@ if (window.webkitNotifications) {
       cb(window.Notification.permission);
     });
   };
-  window.Notification.prototype.close = function() { if (this.onclose) this.onclose(); };
 }
 else if (!window.Notification) {
-  window.Notification = function(title, args) { return this; };
+  window.Notification = function(title, args) {
+    this.close = function() { if (this.onclose) this.onclose(); };
+    this.show = function() {};
+  };
   window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'denied';
   window.Notification.requestPermission = function(cb) { cb('unsupported'); };
-  window.Notification.prototype.close = function() { if (this.onclose) this.onclose(); };
 }
