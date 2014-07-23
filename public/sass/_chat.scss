@@ -1,11 +1,10 @@
 body.loading {
-  .messages { @include opacity(0.4); }
+  div.messages { @include opacity(0.4); }
 }
 
 body.ios-input-focus {
-  overflow: hidden;
   nav.bar { display: none; }
-  div.messages { padding-bottom: 10px; }
+  div.messages { padding-bottom: 5px; }
   form.input { position: static; }
 }
 
@@ -59,7 +58,7 @@ nav.bar {
 form.input {
   background: #fff;
   position: fixed;
-  bottom: 2px;
+  bottom: 0;
   left: 0;
   right: $nickListWidth;
   padding-bottom: 2px;
