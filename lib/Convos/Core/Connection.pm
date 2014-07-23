@@ -763,7 +763,7 @@ sub irc_rpl_namreply {
     push @nicks, {nick => $_, mode => $mode};
   }
 
-  $self->_publish(rpl_namreply => {nicks => \@nicks, target => lc $message->{params}[2],});
+  $self->_publish(rpl_namreply => {nicks => \@nicks, target => lc $message->{params}[2]});
 }
 
 =head2 irc_rpl_liststart
@@ -819,13 +819,13 @@ sub irc_mode {
   my $mode   = shift @{$message->{params}};
 
   if ($target eq lc $self->_irc->nick) {
-    my $data = {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode",};
+    my $data = {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode"};
 
     $self->_add_convos_message($data);
     $self->_publish(server_message => $data);
   }
   else {
-    $self->_publish(mode => {target => $target, mode => $mode, args => join(' ', @{$message->{params}}),},);
+    $self->_publish(mode => {target => $target, mode => $mode, args => join(' ', @{$message->{params}})});
   }
 }
 
