@@ -167,7 +167,7 @@
       convos.current.state = $messages.attr('data-state') || 'disconnected';
       convos.current.network = $messages.attr('data-network') || 'convos';
       convos.current.target = $messages.attr('data-target') || '';
-      convos.send(convos.isChannel(convos.current.target) ? '/names' : '');
+      convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
 
       $messages.find('li').attachEventsToMessage();
       $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
@@ -180,7 +180,6 @@
 
       convos.at_bottom = true; // make convos.draw.ui scroll to bottom
       convos.draw.ui(e);
-      convos.send(''); // open socket
     });
   };
 

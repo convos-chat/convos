@@ -101,6 +101,8 @@ div.messages {
     padding: 3px 0;
     overflow: hidden;
 
+    &.hidden { display: none !important; }
+
     div.question { padding-left: 50px; }
     button, .button { font-size: 0.9em; }
     img.avatar { float: left; max-width: 40px; }
@@ -140,9 +142,9 @@ div.messages {
   li.message.action div.content { padding-top: 20px; }
   li.message.action.same-nick div.content { padding-top: 0; }
   li.message.action div.content a { font-weight: normal; text-decoration: none; }
-  li.message-pending div.content { color: #999; }
-  li.message-pending h3 { color: #ccc; }
-  li.message-error, li.message.error, li.network-message.error {
+  li.message.pending div.content { color: #888; }
+  li.message.pending h3 { color: #ccc; }
+  li.message.error {
     background: lighten($errorColor, 40%);
     div.timestamp { color: #fee; }
     h3 { color: #333; }

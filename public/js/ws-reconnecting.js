@@ -137,16 +137,6 @@ function ReconnectingWebSocket(args) {
         delete self.waiting_for_pong;
     };
 
-    /**
-     * Additional public API method to refresh the connection if still open (close, re-open).
-     * For example, if the app suspects bad data / missed heart beats, it can try to refresh.
-     */
-    this.refresh = function() {
-        console.debug('ReconnectingWebSocket', 'refresh');
-        if (ws.readyState != WebSocket.CLOSED) ws.close();
-        delete self.waiting_for_pong;
-    };
-
     var readyState = function(state) {
       console.debug('ReconnectingWebSocket', 'readyState', state);
       self.readyState = WebSocket[state];

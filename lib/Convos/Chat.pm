@@ -8,6 +8,7 @@ Convos::Chat - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
+use Mojo::Util;
 use Convos::Core::Commands;
 use constant DEFAULT_RESPONSE => "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
 
@@ -51,6 +52,7 @@ sub socket {
         $self->_handle_socket_data($dom);
       }
       else {
+        $octets = Mojo::Util::xml_escape($octets);
         $self->_send_400($dom, "Invalid message ($octets)")->finish;
       }
     }
@@ -153,7 +155,7 @@ sub _send_400 {
 
   $self->send_partial(
     message   => $message,
-    network   => $args->{'data-network'} || 'any',
+    network   => $args->{'data-network'} || '',
     status    => 400,
     template  => 'event/server_message',
     timestamp => time,

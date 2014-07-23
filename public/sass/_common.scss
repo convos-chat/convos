@@ -23,7 +23,6 @@ hr {
 }
 
 @media (max-width: $responsiveWidth) {
-  .show-on-widescreen { display: none !important; }
   .row { padding: 0; }
 
   footer {
