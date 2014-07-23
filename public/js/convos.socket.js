@@ -88,10 +88,9 @@
   };
 
   var toCurrent = function($e) {
-    if ($e.data('target') == '') return true;
-    if ($e.data('network') != convos.current.network) return false;
-    if ($e.data('target') != convos.current.target) return false;
-    return true;
+    if ($e.data('network') == convos.current.network && $e.data('target') == '') return true;
+    if ($e.data('network') == convos.current.network && $e.data('target') == convos.current.target) return true;
+    return false;
   };
 
   convos.send = function(message, attr) {
