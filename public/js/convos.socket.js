@@ -1,16 +1,18 @@
 ;(function($) {
   window.convos = window.convos || {}
 
+  var socket;
   var connect = function() {
     var socket_url = $('body').attr('data-socket-url');
-    convos.socket = new ReconnectingWebSocket({ url: socket_url, ping_protocol: [ 'PING', 'PONG' ] });
-    convos.socket.onmessage = receiveMessage;
-    convos.socket.onpong = function(e) { convos.input.attr('placeholder', 'What\'s on your mind ' + convos.current.nick + '?'); };
-    convos.socket.onclose = function() { convos.input.addClass('disabled'); };
-    convos.socket.onopen = function(e) {
+    socket = new ReconnectingWebSocket({ url: socket_url, ping_protocol: [ 'PING', 'PONG' ] });
+    socket.onmessage = receiveMessage;
+    socket.onpong = function(e) { convos.input.attr('placeholder', 'What\'s on your mind ' + convos.current.nick + '?'); };
+    socket.onclose = function() { convos.input.addClass('disabled'); };
+    socket.onopen = function(e) {
       convos.input.removeClass('disabled');
       if (e.reconnected) $.pjax({ url: location.href, container: 'div.messages', fragment: 'div.messages'});
     };
+    convos.send.socket = socket;
   };
 
   var messageFailed = function($message) {
@@ -19,7 +21,7 @@
     var $pending = $('div.messages ul').find('#' + uuid).filter('.message-pending')
 
     $actions.find('button:first').on('click', function() {
-      convos.socket.buffer = []; // need to clear buffer when resending messages
+      socket.buffer = []; // need to clear buffer when resending messages
       convos.send($(this).parents('li').find('.content').text());
       $(this).parents('li').remove();
     });
@@ -93,8 +95,8 @@
   };
 
   convos.send = function(message, attr) {
-    if (!convos.socket) connect();
-    if (message.length == 0) return;
+    if (!socket) connect();
+    if (message.length == 0) return socket.send('PING');
     attr = attr || {};
     $.each(['network', 'state', 'target'], function(k, i) { attr["data-" + k] = attr["data-" + k] || convos.current[k]; });
     attr['data-network'] = convos.current.network;
@@ -107,7 +109,7 @@
       setTimeout(function() { messageFailed($pendingMessage); }, 10000);
       $pendingMessage.addToMessages();
     }
-    convos.socket.send($('<div/>').attr(attr).text(message).prop('outerHTML'));
+    socket.send($('<div/>').attr(attr).text(message).prop('outerHTML'));
     if (attr['data-history']) convos.addInputHistory(message);
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };

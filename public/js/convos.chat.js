@@ -167,17 +167,11 @@
       convos.current.state = $messages.attr('data-state') || 'disconnected';
       convos.current.network = $messages.attr('data-network') || 'convos';
       convos.current.target = $messages.attr('data-target') || '';
+      convos.send(convos.isChannel(convos.current.target) ? '/names' : '');
 
       $messages.find('li').attachEventsToMessage();
       $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
       $doc.filter('nav').each(function() { $('nav ul.conversations').html($(this).find('ul.conversations').children()); });
-
-      if (convos.isChannel(convos.current.target)) {
-        convos.send('/names');
-      }
-      else {
-        convos.socket.send('PING');
-      }
 
       if (location.href.indexOf('from=') > 0) getHistoricMessages();
       if (!navigator.is_ios) focusFirst();
