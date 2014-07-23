@@ -11,7 +11,6 @@
       convos.input.removeClass('disabled');
       if (e.reconnected) $.pjax({ url: location.href, container: 'div.messages', fragment: 'div.messages'});
     };
-    convos.socket.send('PING'); // open socket
   };
 
   var messageFailed = function($message) {

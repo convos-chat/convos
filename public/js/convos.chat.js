@@ -160,7 +160,7 @@
       var $messages = $('div.messages ul'); // injected to the document using pjax
       var draw = $doc.find('[data-draw]').attr('data-draw');
 
-      convos.nicks.list = [];
+      convos.nicks.reset();
       convos.current.end_time = parseFloat($messages.attr('data-end-time'));
       convos.current.start_time = parseFloat($messages.attr('data-start-time'));
       convos.current.nick = $messages.attr('data-nick') || '';
@@ -172,8 +172,14 @@
       $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
       $doc.filter('nav').each(function() { $('nav ul.conversations').html($(this).find('ul.conversations').children()); });
 
+      if (convos.isChannel(convos.current.target)) {
+        convos.send('/names');
+      }
+      else {
+        convos.socket.send('PING');
+      }
+
       if (location.href.indexOf('from=') > 0) getHistoricMessages();
-      if (convos.isChannel(convos.current.target)) convos.send('/names');
       if (!navigator.is_ios) focusFirst();
       if (draw) convos.draw[draw](e);
       if (data) $('body').hideSidebar();

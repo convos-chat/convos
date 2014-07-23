@@ -25,11 +25,3 @@ Array.prototype.unique = function() {
   }
   return r;
 };
-
-Array.prototype.sortCaseInsensitive = function() {
-  return this.sort(function(a, b) {
-    a = a.toLowerCase();
-    b = b.toLowerCase();
-    return a == b ? 0 : a > b ? 1 : -1;
-  });
-};

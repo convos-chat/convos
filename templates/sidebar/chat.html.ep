@@ -13,10 +13,9 @@
 <li>
   <h3>Participants</h3>
 </li>
-<li class="nick">
 % if ($target =~ /^[#&]/) {
-  <div class="form-group">Loading...</div>
+<li class="nick status"><a href="cmd:///query <%= $target %>">Loading...</a></li>
 % } else {
-  <div class="form-group"><%= $target %></div>
+<li class="nick"><a href="cmd:///query <%= $target %>"><%= $target %></a></li>
 % }
 </li>

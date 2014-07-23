@@ -1,20 +1,13 @@
 ;(function($) {
   window.convos = window.convos || {}
 
-  var template = function(nick) {
-    return '<li class="nick"><a href="cmd:///query ' + nick + '">' + nick + '</a></li>';
-  };
-
   convos.nicks = {
     list: [],
-    init: function($e) { // convos.nicks.init($('<div><a href="cmd:///query batman_">@batman_</a></div>'));
-      var $ul = $('form.sidebar ul');
-
-      $e.find('.content a').each(function() { convos.nicks.list.push($(this).attr('href').split(' ')[1]); });
-      $ul.children('li.nick').remove();
-      $.each(convos.nicks.list.sortCaseInsensitive(), function(i, nick) { $ul.append(template(nick)); });
+    init: function($e) {
+      $('form.sidebar ul li.nick.status').remove();
+      $e.find('[data-nick]').each(function() { convos.nicks.joined($(this)); });
     },
-    change: function($e) { // convos.nicks.change($('<div><span class="nick">batman</span><span class="old">batman_</span></div>'));
+    change: function($e) {
       var new_nick = $e.find('.nick').text();
       var old_nick = $e.find('.old').text();
       var re;
@@ -29,27 +22,35 @@
         convos.nicks.joined($e);
       }
     },
-    joined: function($e) { // convos.nicks.joined($('<div><span class="nick">batman</span></div>'))
-      var nick = $e.find('.nick').text();
-      var $nicks = $('form.sidebar li[data-nick]');
+    joined: function($e) {
+      var nick = $e.data('nick');
+      var $ul = $('form.sidebar ul');
+      var markup = '<li class="nick"><a href="cmd:///query ' + nick + '">' + nick + '</a></li>';
 
-      convos.nicks.list.push(nick);
-      $nicks.each(function() {
-        var $li = $(this);
-        var n = $li.attr('data-nick');
-        if (n < nick) return;
-        $li.before(template(nick));
+      $ul.find('li.nick').each(function() {
+        var n = $(this).find('a').text();
+        if (n == nick) return nick = false;
+        if (n.toLowerCase() < nick.toLowerCase()) return;
+        convos.nicks.list.push(nick);
+        $(this).before(markup);
         return nick = false; // stop each()
       });
 
-      if (nick) $li.after(template(nick));
+      if (nick) {
+        convos.nicks.list.push(nick);
+        $ul.append(markup);
+      }
     },
     quit: function($e) {
       convos.nicks.parted($e);
     },
-    parted: function($e) { // convos.nicks.parted($('<div><span class="nick">batman</span></div>'))
-      var nick = $e.find('.nick').text();
-      $('form.sidebar li[data-nick="' + nick + '"]').remove();
+    parted: function($e) {
+      var nick = $e.data('nick');
+      convos.nicks.list = $.grep(convos.nicks.list, function(n, i) { return n != nick; });
+      $('form.sidebar a[href="cmd:///query ' + nick + '"]').parent().remove();
+    },
+    reset: function() {
+      convos.nicks.list = [];
     }
   };
 })(jQuery);
