@@ -15,6 +15,12 @@
     convos.send.socket = socket;
   };
 
+  var addPendingMessage = function(message, attr) {
+    var $pending = $('<li><h3>' + convos.current.nick + '</h3><div class="content">' + message + '</div></li>').attr(attr);
+    $pending.addClass('message pending').addToMessages();
+    setTimeout(function() { messageFailed(attr['id']); }, 10000);
+  };
+
   var messageFailed = function(id, description) {
     var $pending = $('#' + id);
     var $actions = $('<span class="actions"><button>Resend</button> <button>&times;</button></span>');
@@ -101,10 +107,7 @@
     $.each(['network', 'state', 'target'], function(i) { attr["data-" + this] = attr["data-" + this] || convos.current[this]; });
 
     socket.send($('<div/>').attr(attr).text(message).prop('outerHTML'));
-
-    var $pending = $('<li><h3>' + convos.current.nick + '</h3><div class="content">' + message + '</div></li>').attr(attr);
-    $pending.addClass('message pending').addToMessages();
-    setTimeout(function() { messageFailed(attr['id']); }, 10000);
+    if (!message.match(/^\//)) addPendingMessage(message, attr);
     if (attr['data-history']) convos.addInputHistory(message);
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
