@@ -25,6 +25,8 @@
     var $pending = $('#' + id);
     var $actions = $('<span class="actions"><button>Resend</button> <button>&times;</button></span>');
 
+    if (!$pending.hasClass('pending')) return; // let's not mark messages as fail on timeout
+
     $actions.find('button:first').on('click', function() {
       socket.buffer = []; // need to clear buffer when resending messages
       convos.send($(this).parents('li').find('.content').text());
