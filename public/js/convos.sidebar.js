@@ -8,7 +8,7 @@
   $(document).ready(function() {
     $('.sidebar-right').disableOuterScroll();
 
-    $(document).on('click', function(e) {
+    $(window).on('tap', function(e) {
       var $e = $(e.target);
       if ($e.closest('.sidebar-trigger-active').length) return;
       if ($e.closest('.sidebar-right').length) return;
