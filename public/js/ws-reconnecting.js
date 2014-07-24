@@ -67,7 +67,7 @@ function ReconnectingWebSocket(args) {
     this.URL = args.url; // Public API
 
     function connect() {
-        readyState('CONNECTING');
+        readyState('CONNECTING', 'connect');
         emit('onconnecting', reconnecting);
         forced_close = false;
         ws = new WebSocket(self.url, self.protocols);
@@ -78,18 +78,18 @@ function ReconnectingWebSocket(args) {
             if (self.ping_protocol[0]) self.waiting_for_pong = false;
             event.reconnected = reconnecting;
             reconnecting = true;
-            readyState('OPEN');
+            readyState('OPEN', 'onopen');
             emit('onopen', event);
             while(self.buffer.length) self.send(self.buffer.shift());
         };
         ws.onclose = function(event) {
             clearTimeout(connect_tid);
-            ws = false;
+            delete self.waiting_for_pong;
             if (forced_close) {
-                readyState('CLOSED');
+                readyState('CLOSED', 'onclose');
                 emit('onclose', event);
             } else {
-                readyState('CONNECTING');
+                readyState('CONNECTING', 'onclose');
                 setTimeout(function() { connect(); }, self.reconnect_interval);
             }
         };
@@ -137,8 +137,8 @@ function ReconnectingWebSocket(args) {
         delete self.waiting_for_pong;
     };
 
-    var readyState = function(state) {
-      console.debug('ReconnectingWebSocket', 'readyState', state);
+    var readyState = function(state, from) {
+      console.debug('ReconnectingWebSocket', 'readyState', state, from);
       self.readyState = WebSocket[state];
     }
 
@@ -150,7 +150,7 @@ function ReconnectingWebSocket(args) {
     setInterval(
       function() {
         if (typeof self.waiting_for_pong == 'undefined') return;
-        if (self.waiting_for_pong) return self.refresh();
+        if (self.waiting_for_pong) return;
         self.send(self.ping_protocol[0]);
         self.waiting_for_pong = true;
       },
