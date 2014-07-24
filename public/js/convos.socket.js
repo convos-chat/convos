@@ -6,10 +6,10 @@
     var socket_url = $('body').attr('data-socket-url');
     socket = new ReconnectingWebSocket({ url: socket_url, ping_protocol: [ 'PING', 'PONG' ] });
     socket.onmessage = receiveMessage;
-    socket.onpong = function(e) { convos.input.attr('placeholder', 'What\'s on your mind ' + convos.current.nick + '?'); };
+    socket.onpong = enableInput;
     socket.onclose = function() { convos.input.addClass('disabled'); };
     socket.onopen = function(e) {
-      convos.input.removeClass('disabled');
+      enableInput();
       if (e.reconnected && !$('li.message').eq(-1).hasClass('error')) $.pjax({ url: location.href, container: 'div.messages', fragment: 'div.messages'});
     };
     convos.send.socket = socket;
@@ -19,6 +19,11 @@
     var $pending = $('<li><h3>' + convos.current.nick + '</h3><div class="content">' + message + '</div></li>').attr(attr);
     $pending.addClass('message pending').addToMessages();
     setTimeout(function() { messageFailed(attr['id']); }, 10000);
+  };
+
+  var enableInput = function() {
+    convos.input.attr('placeholder', 'What\'s on your mind ' + convos.current.nick + '?');
+    convos.input.removeClass('disabled');
   };
 
   var messageFailed = function(id, description) {
