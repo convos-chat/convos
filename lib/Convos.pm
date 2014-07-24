@@ -351,7 +351,8 @@ sub _assets {
       /js/convos.sidebar.js
       /js/convos.socket.js
       /js/convos.input.js
-      /js/convos.nicklist.js
+      /js/convos.conversations.js
+      /js/convos.nicks.js
       /js/convos.goto-anything.js
       /js/convos.chat.js
       )

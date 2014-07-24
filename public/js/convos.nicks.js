@@ -8,11 +8,12 @@
       $e.find('[data-nick]').each(function() { convos.nicks.joined($(this)); });
     },
     change: function($e) {
+      var $messages = $('ul[data-nick]');
       var new_nick = $e.find('.nick').text();
       var old_nick = $e.find('.old').text();
       var re;
 
-      if(old_nick == $messages.data('nick')) {
+      if (old_nick == $messages.data('nick')) {
         re = new RegExp('\\b' + old_nick + '\\b', 'i');
         convos.input.attr('placeholder', convos.input.attr('placeholder').replace(re, new_nick));
         $messages.data('nick', new_nick);
@@ -42,6 +43,8 @@
       }
     },
     quit: function($e) {
+      var nick = $e.data('nick');
+      $e.data('to_current', !!$.grep(convos.nicks.list, function(n, i) { return n == nick; }).length);
       convos.nicks.parted($e);
     },
     parted: function($e) {

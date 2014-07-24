@@ -45,7 +45,7 @@
     $pending.prepend($actions);
   };
 
-  var receiveHighlightMessage = function($message, to_current) {
+  var receiveHighlightMessage = function($message) {
     var body = $message.find('.content').text() || '...';
     var icon = $message.find('img').attr('src') || $.url_for('/images/icon-48.png');
     var sender = $message.data('sender');
@@ -53,7 +53,7 @@
     var notified = $.notify([sender, what].join(' '), body, icon);
 
     // Mark message as read if $message is sent to current conversation
-    $.get($.url_for('/chat/notifications'), $.noCache({ nid: !notified && to_current ? 0 : '' }), function(data) {
+    $.get($.url_for('/chat/notifications'), $.noCache({ nid: !notified && $message.data('to_current') ? 0 : '' }), function(data) {
       var $data = $(data);
       $('nav a.notifications b').text($data.find('ul').data('notifications') || '');
       $('.notification-list ul').html($data.find('li'));
@@ -62,8 +62,9 @@
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
-    var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
-    var to_current = toCurrent($message);
+    var action = $message.attr('class').match(/^(nick|conversation)-(\w+)/);
+
+    toCurrent($message);
 
     if ($message.hasClass('error')) {
       messageFailed($message.attr('id'));
@@ -72,36 +73,24 @@
       $('#' + $message.attr('id')).remove();
     }
 
-    if ($message.hasClass('highlight')) {
-      receiveHighlightMessage($message, to_current);
-    }
+    if ($message.hasClass('highlight')) receiveHighlightMessage($message);
+    if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
+    if (convos.at_bottom) $(window).scrollTo('bottom');
 
-    if ($message.hasClass('remove-conversation')) {
-      $('nav ul.conversations a').slice(1).each(function() {
-        if(this.href.indexOf(url) >= 0) return;
-        $(this).click();
-        return false;
-      });
-    }
-    else if ($message.hasClass('add-conversation')) {
-      $.pjax({ url: url, container: 'div.messages', fragment: 'div.messages'})
-    }
-    else if (to_current) {
+    if ($message.data('to_current')) {
       $message.addToMessages();
     }
     else if ($message.hasClass('message')) {
+      var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
       var $unread = $('nav ul.conversations').find('a[href="' + url + '"]').children('b');
       $unread.text(parseInt($unread.html() || 0) + 1);
     }
-
-    if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
   var toCurrent = function($e) {
-    if ($e.data('network') == convos.current.network && $e.data('target') == convos.current.target) return true;
-    if ($e.data('network') == convos.current.network && $e.data('target') == '') return true;
-    if ($e.data('network') == '' && $e.data('target') == '') return true;
-    return false;
+    if ($e.data('network') == convos.current.network && $e.data('target') == convos.current.target) $e.data('to_current', true);
+    if ($e.data('network') == convos.current.network && $e.data('target') == '') $e.data('to_current', true);
+    if ($e.data('network') == '' && $e.data('target') == '') $e.data('to_current', true);
   };
 
   convos.send = function(message, attr) {

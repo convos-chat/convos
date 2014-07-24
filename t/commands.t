@@ -20,15 +20,15 @@ $t->websocket_ok('/socket');
 {
   $t->send_ok(msg('/query ...'));
   $dom->parse($t->message_ok->message->[1]);
-  is $dom->at('li.network-message.error div.content')->text, 'Invalid target: ...', 'Invalid target';
+  is $dom->at('li.message.network.error div.content')->text, 'Invalid target: ...', 'Invalid target';
 
   $t->send_ok(msg('/query marcus'));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-network="irc.perl.org"][data-target="marcus"]'), 'QUERY marcus';
+  ok $dom->at('li.conversation-add[data-network="irc.perl.org"][data-target="marcus"]'), 'QUERY marcus';
 
   $t->send_ok(msg('/query #convos  '));
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-network="irc.perl.org"][data-target="#convos"]'), 'QUERY #convos';
+  ok $dom->at('li.conversation-add[data-network="irc.perl.org"][data-target="#convos"]'), 'QUERY #convos';
 }
 
 {
@@ -48,13 +48,13 @@ $t->websocket_ok('/socket');
   $t->send_ok(msg('/close'));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 PART #convos', 'abc-123 PART #convos';
-  ok $dom->at('li.remove-conversation[data-network="irc.perl.org"][data-target="#convos"]'), 'CLOSE';
+  ok $dom->at('li.conversation-remove[data-network="irc.perl.org"][data-target="#convos"]'), 'CLOSE';
 
   $ws = '';
   $t->send_ok(msg('/close   marcus    '));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, '', 'closing a pm will not send a message to backend';
-  ok $dom->at('li.remove-conversation[data-network="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
+  ok $dom->at('li.conversation-remove[data-network="irc.perl.org"][data-target="marcus"]'), 'CLOSE marcus';
 }
 
 $t->send_ok(msg('/reconnect    '));
@@ -64,7 +64,7 @@ for my $cmd (qw/ j join /) {
   $t->send_ok(msg("/$cmd #toocool  "));
   $dom->parse($t->message_ok->message->[1]);
   is $ws, 'abc-123 JOIN #toocool', 'abc-123 JOIN #toocool';
-  ok $dom->at('li.add-conversation[data-network="irc.perl.org"][data-target="#toocool"]'), 'JOIN #toocool';
+  ok $dom->at('li.conversation-add[data-network="irc.perl.org"][data-target="#toocool"]'), 'JOIN #toocool';
 }
 
 for my $cmd (qw/ t topic /) {

@@ -30,7 +30,7 @@ $t->websocket_ok('/socket');
   Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-network="magnet"][data-target="fooman"]'), 'new private message';
+  ok $dom->at('li.conversation-add[data-network="magnet"][data-target="fooman"]'), 'new private message';
 
   $connection->add_message({params => ['doe', 'really cool'], prefix => 'fooman!user@host'});
   Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });

@@ -1,4 +1,4 @@
-<li class="nick-init" data-network="<%= $network %>" data-target="<%= $target %>">
+<li class="nick-init hidden" data-network="<%= $network %>" data-target="<%= $target %>">
   %= timestamp $timestamp
   <div class="content">
     <span>Participants:</span>

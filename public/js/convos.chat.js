@@ -56,11 +56,7 @@
       if ($message.hasClass('message') && $previous.hasClass('message') && last_nick == $message.data('sender')) {
         $message.addClass('same-nick');
       }
-      if (action = $message.attr('class').match(/^nick-(\w+)/)) { // nick-change, -joined, -parted, -quit, -init
-        convos.nicks[action[1]]($message);
-      }
-
-      if (!$message.hasClass('nick-init')) {
+      if (!$message.hasClass('hidden')) {
         $messages[func || 'append']($message.fadeIn('fast'));
       }
     });
