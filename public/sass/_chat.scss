@@ -132,6 +132,10 @@ div.messages {
     h3, div.content, div.embed { margin-left: 3px; }
   }
 
+  li.history-starting-point {
+    border-top: 2px solid darken(#fee, 20%);
+  }
+
   li.same-nick {
     padding-top: 0;
     h3, .avatar { display: none; }

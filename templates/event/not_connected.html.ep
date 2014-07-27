@@ -2,10 +2,10 @@
   %= timestamp
 % if(@$conversation) {
   %= image '/image/avatar-convos.jpg', alt => '', class => 'avatar'
-  <h3><%= link_to 'convos', 'view.network', { network => 'convos' } %></h3>
+  <h3><%= link_to 'convos', 'view.network', { network => 'convos' }, class => 'internal' %></h3>
 % }
   <div class="content">
     You are <%= $state eq 'disconnected' ? 'not connected' : ucfirst $state %> to
-    %= link_to $network, 'view.network', { network => $network }
+    %= link_to $network, 'view.network', { network => $network }, class => 'internal'
   </div>
 </li>

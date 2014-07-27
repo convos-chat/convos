@@ -67,20 +67,16 @@
   };
 
   $.fn.attachEventsToMessage = function() {
-    // internal app links
-    this.find('a').not('.external').click(function(e) {
+    this.find('a.internal').click(function(e) {
       e.preventDefault();
-      if ($(this).hasClass('autocomplete')) {
-        var str = $(this).text();
-        convos.input.val(convos.input.val() ? convos.input.val().replace(/\s+$/, '') + ' ' + str + ' ' : str + ': ').focus();
-      }
-      else {
-        $.pjax.click(e, { container: 'div.messages', fragment: 'div.messages' });
-      }
+      $.pjax.click(e, { container: 'div.messages', fragment: 'div.messages' });
     });
-
-    // embed media
-    this.find('a.external').each(function() {
+    this.find('a.autocomplete').click(function(e) {
+      var str = $(this).text();
+      e.preventDefault();
+      convos.input.val(convos.input.val() ? convos.input.val().replace(/\s+$/, '') + ' ' + str + ' ' : str + ': ').focus();
+    });
+    this.find('a[href^="http"]').each(function(e) {
       var $a = $(this);
       $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
         var $embed_code = $(embed_code);
@@ -92,8 +88,7 @@
       });
     });
 
-    // actions
-    this.find('.close').click(function() { $(this).closest('li').remove(); });
+    this.find('.close').click(function(e) { $(this).closest('li').remove(); });
     this.filter('.historic-message').find('a.button.newer').click(getNewerMessages);
 
     return this;
@@ -118,15 +113,18 @@
 
   var getHistoricMessages = function() {
     if (!convos.current.start_time) return;
+    var $loading = $('<li class="message notice"><div class="content">Loading historic messages...</div></li>');
     $.get(location.href.replace(/\?.*/, ''), { to: convos.current.start_time }, function(data) {
       var $ul = $(data).find('ul[data-network]');
       var $li = $ul.children('li:lt(-1)');
       var height_before_prepend = $('body').height();
+      $loading.remove();
       if (!$li.length) return;
       convos.current.start_time = parseFloat($ul.data('start-time'));
       $($li.get().reverse()).addToMessages('prepend');
       $(window).scrollTop($('body').height() - height_before_prepend);
     });
+    $loading.addToMessages('prepend');
     convos.current.start_time = 0;
   };
 
@@ -135,9 +133,10 @@
     if (!convos.current.end_time) return;
     var $btn = $(this);
     $.get(location.href.replace(/\?.*/, ''), { from: convos.current.end_time }, function(data) {
-      var $ul = $(data);
+      var $ul = $(data).find('ul[data-network]');
       var $li = $ul.children('li:gt(0)');
       $btn.closest('li').remove();
+      $('body').removeClass('loading');
       if (!$li.length) return;
       convos.current.end_time = parseFloat($ul.data('end-time'));
       $li.addToMessages();
@@ -173,7 +172,11 @@
       $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
       $doc.filter('nav').each(function() { $('nav ul.conversations').html($(this).find('ul.conversations').children()); });
 
-      if (location.href.indexOf('from=') > 0) getHistoricMessages();
+      if (location.href.indexOf('from=') > 0) {
+        $messages.find('li:first').addClass('history-starting-point');
+        getHistoricMessages();
+      }
+
       if (!navigator.is_ios) focusFirst();
       if (draw) convos.draw[draw](e);
       if (data) $('body').hideSidebar();

@@ -18,4 +18,3 @@
 % } else {
 <li class="nick"><a href="cmd:///query <%= $target %>"><%= $target %></a></li>
 % }
-</li>
