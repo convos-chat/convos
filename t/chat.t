@@ -178,6 +178,22 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nick-joined[data-network="magnet"][data-target="#mojo"]'), 'user joined';
   is $dom->at('div.content')->all_text, 'fooman joined #mojo.', 'fooman joined #mojo';
+
+  $connection->_irc->from_irc_server(":doe!user\@host JOIN #mojo\r\n");
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.conversation-add[data-network="magnet"][data-target="#mojo"]'), 'self join #mojo' or diag $dom;
+
+  $connection->_irc->from_irc_server(":doe!user\@host JOIN #mojo\r\n");    # this is ignored
+
+  # run this later to make sure the second JOIN is ignored
+  Mojo::IOLoop->timer(0.01, sub { $connection->_irc->from_irc_server(":fooman!user\@host PART #mojo\r\n"); });
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.nick-parted[data-network="magnet"][data-target="#mojo"]'), 'user parted' or diag $dom;
+  is $dom->at('div.content')->all_text, 'fooman parted #mojo.', 'fooman parted #mojo';
+
+  $connection->_irc->from_irc_server(":doe!user\@host PART #mojo\r\n");
+  $dom->parse($t->message_ok->message->[1]);
+  ok $dom->at('li.conversation-remove[data-network="magnet"][data-target="#mojo"]'), 'self parted' or diag $dom;
 }
 
 {
@@ -186,17 +202,6 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   ok $dom->at('li.nick-change[data-network="magnet"][data-target=""]'), 'nick change';
   is $dom->at('b.old')->text,                           'fooman',   'got old nick';
   is $dom->at('a.nick[href="/magnet/new_nick"]')->text, 'new_nick', 'got new nick';
-}
-
-{
-  $connection->_irc->from_irc_server(":fooman!user\@host PART #mojo\r\n");
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.nick-parted[data-network="magnet"][data-target="#mojo"]'), 'user parted' or diag $dom;
-  is $dom->at('div.content')->all_text, 'fooman parted #mojo.', 'fooman parted #mojo';
-
-  $connection->_irc->from_irc_server(":doe!user\@host PART #mojo\r\n");
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.conversation-remove[data-network="magnet"][data-target="#mojo"]'), 'self parted' or diag $dom;
 }
 
 {

@@ -382,7 +382,7 @@ sub add_message {
       $data->{highlight} = 1;
     }
     if ($is_private_message) {
-      $self->_add_conversation($data);
+      $self->_add_conversation($data->{target});
     }
   }
 
@@ -396,8 +396,8 @@ sub add_message {
 }
 
 sub _add_conversation {
-  my ($self, $data) = @_;
-  my $name = as_id $self->name, $data->{target};
+  my ($self, $target) = @_;
+  my $name = as_id $self->name, $target;
 
   Mojo::IOLoop->delay(
     sub {
@@ -405,8 +405,8 @@ sub _add_conversation {
       $self->redis->zincrby($self->{conversation_path}, 0, $name, $delay->begin);
     },
     sub {
-      my ($delay, $new) = @_;
-      $new and return;    # has a score
+      my ($delay, $part_of_conversation_list) = @_;
+      $part_of_conversation_list and return;
       $self->redis->zrevrange($self->{conversation_path}, 0, 0, 'WITHSCORES', $delay->begin);
     },
     sub {
@@ -415,7 +415,7 @@ sub _add_conversation {
     },
     sub {
       my ($delay) = @_;
-      $self->_publish(add_conversation => {target => $data->{target}});
+      $self->_publish(add_conversation => {target => $target});
     },
   );
 }
@@ -604,8 +604,7 @@ sub irc_join {
   if ($nick eq $self->_irc->nick) {
     $self->redis->hset("$self->{path}:$channel", topic => '');
     $self->redis->hset("convos:host2convos" => $host => 'loopback');
-    $self->_publish(add_conversation => {target => $channel});
-    $self->_irc->write(TOPIC => $channel);    # fetch topic for channel
+    $self->_add_conversation($channel);
   }
   else {
     $self->_publish(nick_joined => {nick => $nick, target => $channel});
