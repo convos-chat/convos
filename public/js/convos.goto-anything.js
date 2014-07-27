@@ -37,9 +37,10 @@
 
     $g.on('submit', function(e) { // change or create conversation
       e.preventDefault();
+      var $input = $(this).find('input');
       var $first = $(this).find('a:visible:first').click();
-      if ($first.length == 0) convos.send('/query ' + this.value, { 'data-network': $g.find('li.create select').val() });
-      $(this).find('input').val('').keyup();
+      if ($first.length == 0) convos.send('/query ' + $input.val(), { 'data-network': $g.find('li.create select').val() });
+      $input.val('').keyup();
     });
 
     $g.on('show', function(e) {
