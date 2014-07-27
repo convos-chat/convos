@@ -19,6 +19,7 @@
     var $pending = $('<li><h3>' + convos.current.nick + '</h3><div class="content">' + message + '</div></li>').attr(attr);
     $pending.addClass('message pending').addToMessages();
     setTimeout(function() { messageFailed(attr['id']); }, 10000);
+    if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
   var enableInput = function() {
@@ -75,7 +76,6 @@
 
     if ($message.hasClass('highlight')) receiveHighlightMessage($message);
     if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
-    if (convos.at_bottom) $(window).scrollTo('bottom');
 
     if ($message.data('to_current')) {
       $message.addToMessages();
@@ -85,6 +85,8 @@
       var $unread = $('nav ul.conversations').find('a[href="' + url + '"]').children('b');
       $unread.text(parseInt($unread.html() || 0) + 1);
     }
+
+    if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
   var toCurrent = function($e) {
@@ -103,8 +105,7 @@
     $.each(['network', 'state', 'target'], function(i) { attr["data-" + this] = attr["data-" + this] || convos.current[this]; });
 
     socket.send($('<div/>').attr(attr).text(message).prop('outerHTML'));
-    if (!message.match(/^\//)) addPendingMessage(message, attr);
     if (attr['data-history']) convos.addInputHistory(message);
-    if (convos.at_bottom) $(window).scrollTo('bottom');
+    if (!message.match(/^\//)) addPendingMessage(message, attr);
   };
 })(jQuery);
