@@ -512,6 +512,9 @@ sub _start_backend_as_external_app {
     return;
   }
 
+  # make sure the backend does not listen to the hypnotoad socket
+  Mojo::IOLoop->reset;
+
   # start detaching new process from hypnotoad
   if (!POSIX::setsid) {
     $self->log->error("Can't start a new session for backend: $!");
