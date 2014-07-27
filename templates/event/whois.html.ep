@@ -11,7 +11,7 @@
   % my $i = 0;
   % for my $channel (@$channels) {
     % my $target = $channel; $target =~ s/^.\#/#/;
-    <%= link_to $channel, view => { network => $network, target => $target }, class => 'internal' %><%= ++$i == @$channels ? '.' : ', ' %>
+    <%= link_to $channel, view => { network => $network, target => $target }, class => 'internal channel' %><%= ++$i == @$channels ? '.' : ', ' %>
   % }
   </div>
 </li>

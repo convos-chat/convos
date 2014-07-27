@@ -90,12 +90,13 @@ my @ADD_SERVER_MESSAGE_EVENTS = qw/
   irc_rpl_welcome rpl_luserclient
   /;
 my @OTHER_EVENTS = qw/
-  irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
+  irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
   err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_error
+  irc_rpl_namreply irc_rpl_endofnames
   /;
 
 has _irc => sub {
@@ -746,24 +747,39 @@ sub err_notonchannel {
   shift->err_nosuchchannel(@_);
 }
 
+=head2 irc_rpl_endofnames
+
+Example message:
+
+  :magnet.llarian.net 366 somenick #channel :End of /NAMES list.
+
+=cut
+
+sub irc_rpl_endofnames {
+  my ($self, $message) = @_;
+  my $channel = lc $message->{params}[1] or return;
+  my $nicks = delete $self->{nicks}{$channel} || [];
+
+  $self->_publish(rpl_namreply => {nicks => $nicks, target => $channel});
+}
+
 =head2 irc_rpl_namreply
 
 Example message:
 
-:Budapest.Hu.Eu.Undernet.org 353 somenick = #html :somenick Indig0 Wildblue @HTML @CSS @Luch1an @Steaua_ Indig0_ Pilum @fade
+  :Budapest.Hu.Eu.Undernet.org 353 somenick = #channel :somenick Indig0 Wildblue @HTML @CSS @Luch1an @Steaua_ Indig0_ Pilum @fade
 
 =cut
 
 sub irc_rpl_namreply {
   my ($self, $message) = @_;
-  my @nicks;
+  my $channel = lc $message->{params}[2] or return;
+  my $nicks = $self->{nicks}{$channel} ||= [];
 
   for (sort { lc $a cmp lc $b } split /\s+/, $message->{params}[3]) {    # 3 = "+nick0 @nick1 nick2"
     my $mode = s/^(\W)// ? $1 : '';
-    push @nicks, {nick => $_, mode => $mode};
+    push @$nicks, {nick => $_, mode => $mode};
   }
-
-  $self->_publish(rpl_namreply => {nicks => \@nicks, target => lc $message->{params}[2]});
 }
 
 =head2 irc_rpl_liststart
