@@ -90,7 +90,7 @@ my @ADD_SERVER_MESSAGE_EVENTS = qw/
   irc_rpl_welcome rpl_luserclient
   /;
 my @OTHER_EVENTS = qw/
-  irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part
+  irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_479
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
@@ -590,6 +590,19 @@ sub irc_rpl_myinfo {
   $self->redis->hmset($self->{path}, map { $_, $message->{params}[$i++] // '' } @keys);
 }
 
+=head2 irc_479
+
+Invalid channel name.
+
+=cut
+
+sub irc_479 {
+  my ($self, $message) = @_;
+
+  # params => [ 'nickname', '1', 'Illegal channel name' ],
+  $self->_publish(server_message => {status => 400, message => $message->{params}[2] || 'Illegal channel name'});
+}
+
 =head2 irc_join
 
 See L<Mojo::IRC/irc_join>.
@@ -876,21 +889,6 @@ sub cmd_nick {
   }
   else {
     $self->_publish(server_message => {status => 400, message => 'Invalid nick'});
-  }
-}
-
-=head2 cmd_join
-
-Handle join commands from user. Add to channel set.
-
-=cut
-
-sub cmd_join {
-  my ($self, $message) = @_;
-  my $channel = lc $message->{params}[0] || '';
-
-  unless ($channel =~ /^[#&]+\w/) {
-    $self->_publish(server_message => {status => 400, message => 'Do not understand which channel to join'});
   }
 }
 
