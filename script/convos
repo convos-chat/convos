@@ -4,9 +4,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
-$ENV{MOJO_MODE} ||= 'production' if @ARGV and $ARGV[0] eq 'daemon';
-$ENV{MOJO_MODE} ||= 'production' if @ARGV and $ARGV[0] eq 'version';
-$ENV{MOJO_MODE} ||= 'production' if @ARGV and $ARGV[0] eq 'upgrade';
+$ENV{MOJO_MODE} ||= 'production' if @ARGV and grep { $_ eq $ARGV[0] } qw( backend daemon upgrade version );
 
 # Start commands for application
 require Mojolicious::Commands;
