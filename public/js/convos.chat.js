@@ -192,9 +192,15 @@
 
     initPjax();
 
-    $('body, input').bind('keydown', 'alt+shift+a shift+return', function() { $('nav a.conversations').trigger('tap'); return false; });
-    $('body, input').bind('keydown', 'alt+shift+s', function() { $('nav a.notifications').trigger('tap'); return false; });
-    $('body, input').bind('keydown', 'alt+shift+d', function() { $('nav a.sidebar').filter(':visible').trigger('tap'); return false; });
+    $('body, input').bind('keydown', 'shift+return', function(e) {
+      e.preventDefault();
+      if (document.activeElement && $(document.activeElement).closest('.input').length) return $('nav a.conversations').trigger('tap');
+      $(document).hideSidebar();
+      convos.input.focus();
+    });
+    $('body, input').bind('keydown', 'alt+shift+a', function(e) { e.preventDefault(); $('nav a.conversations').trigger('tap'); });
+    $('body, input').bind('keydown', 'alt+shift+s', function(e) { e.preventDefault(); $('nav a.notifications').trigger('tap'); });
+    $('body, input').bind('keydown', 'alt+shift+d', function(e) { e.preventDefault(); $('nav a.sidebar').filter(':visible').trigger('tap'); });
 
     if (navigator.is_ios) {
       $('input, textarea')
