@@ -888,13 +888,8 @@ Handle join commands from user. Add to channel set.
 sub cmd_join {
   my ($self, $message) = @_;
   my $channel = lc $message->{params}[0] || '';
-  my $name;
 
-  if ($channel =~ /^[#&]+\w/) {
-    $name = as_id $self->name, $channel;
-    $self->redis->zadd($self->{conversation_path}, time, $name);
-  }
-  else {
+  unless ($channel =~ /^[#&]+\w/) {
     $self->_publish(server_message => {status => 400, message => 'Do not understand which channel to join'});
   }
 }
