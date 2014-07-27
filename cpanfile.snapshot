@@ -188,10 +188,10 @@ DISTRIBUTIONS
       ojo undef
     requirements:
       ExtUtils::MakeMaker 0
-  Mojolicious-Plugin-AssetPack-0.18
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.18.tar.gz
+  Mojolicious-Plugin-AssetPack-0.19
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.19.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.18
+      Mojolicious::Plugin::AssetPack 0.19
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
