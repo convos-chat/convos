@@ -54,10 +54,10 @@ DISTRIBUTIONS
       File::Spec 0
       Test::More 0
       perl 5.006001
-  Mojo-IRC-0.08
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.08.tar.gz
+  Mojo-IRC-0.09
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.09.tar.gz
     provides:
-      Mojo::IRC 0.08
+      Mojo::IRC 0.09
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
