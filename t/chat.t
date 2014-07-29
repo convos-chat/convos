@@ -229,14 +229,6 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 }
 
 {
-  $connection->cmd_join({params => ['jalla']});
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.error[data-target=""]'), 'invalid join';
-  is $dom->at('div.content')->all_text, 'Do not understand which channel to join',
-    'do not understand which channel to join';
-}
-
-{
   $connection->_irc->from_irc_server(":doe!user\@host MODE #convos +o batman\r\n");
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.notice[data-network="magnet"][data-target="#convos"]'), 'mode to #convos';
