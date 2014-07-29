@@ -24,7 +24,7 @@ Convos requires a Redis server to function. If you are deploying on osx you can 
 
 To install convos we provide a simple script. All it requires in addition to redis is a working build environment with make, Perl and a C compiler. Copy/paste this to the command line:
 
-    $ curl -L http://convos.by/install.sh | bash -
+    $ curl -L https://convos.by/install.sh | bash -
 
 Then just follow the simple instructions. If you're worried about running a script directly from a web server, just download it and inspect it before you run it.
 
