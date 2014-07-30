@@ -61,7 +61,7 @@ sub conversation {
   }
 
   $self->session(name => $target ? $name : '');
-  $self->stash(target => $target, state => 'connected');
+  $self->stash(from_archive => 0, target => $target, state => 'connected');
 
   $self->delay(
     sub {
@@ -195,6 +195,7 @@ sub _conversation {
   my $key     = $target ? "user:$login:connection:$network:$target:msg" : "user:$login:connection:$network:msg";
 
   if (my $to = $self->param('to')) {    # to a timestamp
+    $self->stash(from_archive => 1);
     $self->redis->zrevrangebyscore(
       $key => $to,
       '-inf',
@@ -216,6 +217,7 @@ sub _conversation {
     );
   }
   elsif (my $from = $self->param('from')) {    # from at timestamp
+    $self->stash(from_archive => 1);
     $self->redis->zrangebyscore(
       $key => $from,
       '+inf',
