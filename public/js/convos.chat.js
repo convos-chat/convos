@@ -46,19 +46,17 @@
   };
 
   $.fn.addToMessages = function(func) { // func = {prepend,append}
-    if (!func) func = 'append';
     return this.attachEventsToMessage().each(function() {
       var $message = $(this);
       var $messages = $('div.messages ul');
-      var $previous = $messages.children('li').not('.message-pending').eq(func == 'append' ? -1 : 0);
-      var last_nick = $previous.data('sender') || '';
-      var action;
+      var $same = $messages.children('li').not('.message-pending').eq(func == 'prepend' ? 0 : -1);
+      var same_nick = $same.data('sender') || '';
 
-      if ($message.hasClass('message') && $previous.hasClass('message') && last_nick == $message.data('sender')) {
-        $message.addClass('same-nick');
+      if ($message.hasClass('message') && $same.hasClass('message') && same_nick == $message.data('sender')) {
+        $same.addClass('same-nick');
       }
       if (!$message.hasClass('hidden')) {
-        $messages[func]($message.fadeIn('fast'));
+        $messages[func || 'append']($message.fadeIn('fast'));
       }
     });
   };
