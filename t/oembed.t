@@ -5,7 +5,7 @@ use Mojo::DOM;
 redis_do([hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => ''],);
 
 # not logged in
-$t->get_ok('/oembed?url=http://google.com')->status_is(302)->header_like('Location', qr{/$});
+$t->get_ok('/oembed?url=http://google.com')->status_is(302)->header_is('Location', '/');
 
 # login
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);

@@ -1,9 +1,9 @@
-<li class="channel-list" data-network="<%= $network %>" data-target="any">
+<li class="channel-list" data-network="<%= $network %>" data-target="">
+  %= timestamp $timestamp
   <div class="content">
     % my $i = 0;
     % for my $c (sort { $a->{name} cmp $b->{name} } @$channel_list) {
-      <%= link_to $c->{name}, view => { network => $network, target => $c->{name} }, title => $c->{title} %><%= ++$i == @$nicks ? '.' : ', ' %>
+      <%= link_to $c->{name}, view => { network => $network, target => $c->{name} }, title => $c->{title}, class => 'internal' %><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
   </div>
-  %= timestamp_span($timestamp)
 </li>

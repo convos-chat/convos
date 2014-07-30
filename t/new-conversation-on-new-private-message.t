@@ -18,7 +18,7 @@ redis_do(
 $connection->redis($t->app->redis);
 $connection->_irc->nick('doe')->user('');
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})
-  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect to conversation');
+  ->header_is('Location', '/magnet/%23convos', 'Redirect to conversation');
 $t->websocket_ok('/socket');
 
 {
@@ -30,7 +30,7 @@ $t->websocket_ok('/socket');
   Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
   Mojo::IOLoop->start;
   $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.add-conversation[data-network="magnet"][data-target="fooman"]'), 'new private message';
+  ok $dom->at('li.conversation-add[data-network="magnet"][data-target="fooman"]'), 'new private message';
 
   $connection->add_message({params => ['doe', 'really cool'], prefix => 'fooman!user@host'});
   Mojo::IOLoop->timer(1, sub { Mojo::IOLoop->stop });
@@ -43,10 +43,9 @@ $t->websocket_ok('/socket');
 }
 
 {
-  $t->get_ok('/chat/conversations')->element_exists('li:nth-of-child(2) a[data-unread="0"][href="/magnet/%23convos"]')
-    ->element_exists('li:nth-of-child(3) a[data-unread="2"][href="/magnet/fooman"]')
-    ->element_exists('li.unread a[data-unread="2"][href="/magnet/fooman"]')
-    ->element_exists('li:nth-of-child(4) a[data-unread="0"][href="/magnet/batman"]');
+  $t->get_ok('/magnet/%23convos')->element_exists('nav li:nth-of-child(2) a[href="/magnet/%23convos"]')
+    ->text_is('nav li:nth-of-child(3) a[href="/magnet/fooman"] b', 2)->text_is('nav li a[href="/magnet/fooman"] b', 2)
+    ->element_exists('nav li:nth-of-child(4) a[href="/magnet/batman"]');
 }
 
 done_testing;

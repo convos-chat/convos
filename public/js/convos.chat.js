@@ -1,671 +1,234 @@
 ;(function($) {
+  window.convos = window.convos || {};
   window.link_embedder_text_gist_github_styled = 1; // custom gist styling
 
-  var $goto_bottom, $input, $win;
-  var $messages = $('<div/>'); // need to be defined
-  var nicks = new sortedSet();
-  var running_on_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
-  var conversation_list = [];
-  var min_width = 700;
-  var commands = [
-    '/help',
-    '/join #',
-    '/query ',
-    '/msg ',
-    '/me ',
-    '/say ',
-    '/nick ',
-    '/close',
-    '/part ',
-    '/names ',
-    '/mode ',
-    '/topic ',
-    '/reconnect',
-    '/whois ',
-    '/list'
-  ];
+  convos.at_bottom = true; // start ui scrolled to bottom
+  convos.at_bottom_threshold = !!('ontouchstart' in window) ? 110 : 40;
+  convos.current = {};
+  convos.draw = {};
+  convos.isChannel = function(str) { return str.match(/^[#&]/); };
 
-  window.convos = {
-    conversation_list: conversation_list,
-    messages: $messages,
-    nicks: nicks
-  };
-
-  $.fn.attachEventsToMessage = function() {
-    return this.each(function() {
-      var $message = $(this);
-
-      $message.find('h3 a').click(function(e) {
-        e.preventDefault();
-        if($(this).hasClass('goto-network')) {
-          $.pjax.click(e, { container: $('div.messages') });
-        }
-        else {
-          var n = $(this).text();
-          $input.val($input.val() ? $input.val().replace(/\s+$/, '') + ' ' + n + ' ' : n + ': ').focus();
-        }
-      });
-
-      // embed media
-      $message.find('a.embed').each(function() {
-        var $a = $(this);
-        $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
-          var at_bottom = $win.data('at_bottom');
-          var $embed_code = $(embed_code);
-          $a.closest('div').after($embed_code);
-          if(at_bottom) {
-            $win.scrollTo('bottom');
-            $embed_code.find('img').one('load', function() { $win.scrollTo('bottom') });
-          }
-        });
-      });
-
-      $message.find('.close').click(function() { $(this).closest('li').remove(); });
-      $message.filter('.historic-message').find('a.button.newer').click(getNewMessages);
-      $message.filter('.historic-message').find('a.button.current').click(function(e) {
-        return $.pjax.click(e, { container: 'div.messages' });
-      });
-    });
-  };
-
-  $.fn.appendToMessages = function() {
-    var $previous = $messages.children('li').not('.message-pending').eq(-1);
-    var last_nick = $previous.data('sender') || '';
-
-    this.attachEventsToMessage();
-
-    if(this.hasClass('message') && $previous.hasClass('message')) {
-      if(last_nick == this.data('sender')) {
-        this.addClass('same-nick').children('h3, .avatar, .timestamp').remove();
-      }
-    }
-    else if(this.hasClass('nick-change')) {
-      var new_nick = this.find('.nick').text();
-      var old_nick = this.find('.old').text();
-      var old_score = nicks.score(old_nick);
-      var re, txt;
-
-      console.log('new_nick=' + new_nick + ', old_nick=' + old_nick + ', old_score=' + old_score);
-
-      if(old_nick == $messages.data('nick')) {
-        re = new RegExp('\\b' + old_nick + '\\b', 'i');
-        txt = $input.attr('placeholder').replace(re, new_nick);
-        $input.attr('placeholder', txt).attr('title', txt);
-        $messages.data('nick', new_nick);
-      }
-      if(typeof old_score == 'undefined') {
-        return; // do not want to show joined when in other channel
-      }
-      else {
-        nicks.add(old_score, new_nick).rem(old_nick);
-        nickList($('<div/>'));
-      }
-    }
-    else if(this.hasClass('nick-joined')) {
-      nicks.add(0, this.find('.nick').text());
-      nickList($('<div/>'));
-    }
-    else if(this.hasClass('nick-parted')) {
-      nicks.rem(this.find('.nick').text());
-      nickList($('<div/>'));
-    }
-    else if(this.hasClass('nick-quit')) {
-      var nick = this.find('.nick').text();
-      if(nicks.score(nick)) {
-        nicks.rem(nick);
-        nickList($('<div/>'));
-      }
-      else {
-        return;
-      }
-    }
-    else if(this.hasClass('nicks')) {
-      nickList(this);
-      return;
-    }
-    else if(this.data('sender') && this.data('sender') != $messages.data('nick')) {
-      nicks.add(new Date().getTime(), this.data('sender'));
-    }
-
-    $messages.append(this.fadeIn('fast'));
-  };
-
-  $.fn.hostAndTarget = function($from) {
-    if($from) {
-      return this
-        .attr('data-network', $from.data('network')).attr('data-target', $from.data('target'))
-        .data('network', $from.data('network')).data('target', $from.data('target'))
-    }
-    else {
-      return { network: this.data('network'), target: this.data('target') };
-    }
-  };
-
-  var conversationLoaded = function(e, data, status_text, xhr, options) {
-    var $doc = $(data || '<div></div>');
-
-    $messages = $('div.messages ul');
-    $messages.end_time = parseFloat($messages.data('end-time') || 0);
-    $messages.start_time = parseFloat($messages.data('start-time') || 0);
-
-    $('body').attr('class', $messages.attr('class')).loadingIndicator('hide');
-    $messages.find('li').attachEventsToMessage();
-    nicks.clear();
-
-    $doc.filter('form.connection-control').each(function() {
-      $('form.connection-control').attr('action', this.action);
-    });
-    $doc.find('div.sidebar.container').each(function() {
-      $('div.sidebar.container ul').html($(this).find('ul:first').children());
-    });
-
-    if($messages.attr('data-target') && $messages.hasClass('with-sidebar')) {
-      $input.send('/names', 0);
-    }
-
-    if(location.href.indexOf('from=') > 0) { // link from notification list
-      $win.scrollTo(0);
-      getHistoricMessages();
-    }
-    else if($messages.length ) {
-      if(!$.supportsTouch) $input.focus();
-      $win.data('at_bottom', true); // required before drawUI() and scrollTo('bottom')
-    }
-
-    if(!Object.equals($input.hostAndTarget(), $messages.hostAndTarget())) {
-      reloadConversationList({});
-    }
-
-    if(initNotifications.asked == 'undefined') {
-      initNotifications();
-    }
-
-    $input.hostAndTarget($messages); // must be done after Object.equals(...) above
-    drawSettings();
-    drawUI();
-  };
-
-  var drawConversationMenu = function($message) {
-    var $conversations = $('ul.conversations li, div.conversations.container li');
-    var $dropdown = $('div.conversations.container ul');
-    var $menu = $('nav ul.conversations');
-    var available_width, used_width = 0, unread, $a;
-
-    $('nav a.conversations.toggler').show();
-    available_width = $('nav').width() - $('nav .right').outerWidth();
-
-    if($message) {
-      $a = $conversations.find('a[href="' + $.url_for($message.data('network'), $message.data('target')) + '"]');
-      unread = parseInt($a.attr('data-unread')) + 1;
-      $a.attr('data-unread', unread).attr('title', unread + " unread messages in " + $message.data('target'));
-      $a.closest('li').addClass('unread');
-    }
-
-    $conversations.each(function() {
-      var $li = $(this);
-      if(!$li.parent('ul').is('.conversations')) $menu.append($li);
-      var w = $li.find('a').outerWidth();
-      used_width += w;
-      if(used_width - w / 3 > available_width) $dropdown.append($li);
-    });
-
-    if(used_width < available_width) $('nav a.conversations.toggler').trigger('deactivate').hide();
-  };
-
-  var drawSettings = function() {
+  convos.draw['add-connection'] = function() {
     var channels = {};
-    var networkChange;
+    var s;
 
     $('select#name option').each(function() {
       channels[this.value] = ($(this).attr('data-channels') || '').split(' ');
     });
-
-    networkChange = function(val) {
-      var s = $('select#channels')[0].selectize
-      s.clearOptions();
-      s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
-      s.refreshOptions(false);
-      s.setValue(channels[val].join(' '));
-    };
-
     $('select#name').selectize({
       create: false,
       openOnFocus: true,
-      onChange: networkChange
+      onChange: function(val) {
+        s.clearOptions();
+        s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
+        s.refreshOptions(false);
+        s.setValue(channels[val].join(' '));
+      }
     }).trigger('change');
-
     $('input#channels').selectize({
       delimiter: ' ',
       persist: false,
       openOnFocus: true,
       create: function(value) {
-        if(!/^[#&]/.test(value)) value = '#' + value;
+        if (convos.isChannel(value)) value = '#' + value;
         return { value: value, text: value };
       }
     });
+
+    s = $('input#channels')[0].selectize;
   };
 
-  var drawUI = function() {
-    drawConversationMenu();
-
-    $('a[data-toggle]').filter('.active').trigger('activate');
-
-    if($('body').is('.without-sidebar, .historic')) {
-      $('div.sidebar.container').css({ left: '', height: '', display: 'none' });
-    }
-    else if($win.width() > min_width) {
-      $('a.sidebar.toggler').trigger('deactivate');
-      $('div.sidebar.container').css({ left: '', height: '', display: 'block' });
-    }
-    else if($('a.sidebar.toggler').is('.active')) {
-      $('div.sidebar.container').css({ display: 'block' });
-    }
-    else {
-      $('div.sidebar.container').css({ display: 'none' });
-    }
-
-    if($win.data('at_bottom')) $win.scrollTo('bottom');
+  convos.draw['ui'] = function() {
+    var menu_width = 0;
+    $('nav .right').add('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
+    $('nav a.conversations')[ menu_width > $('body').outerWidth() ? 'addClass' : 'removeClass' ]('overlapping');
+    if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
-  var getHistoricMessages = function() {
-    var $height_from = $(document).data('height_from')
-
-    $goto_bottom[$win.scrollTop() + $win.height() < $height_from.height() - 200 ? 'show' : 'hide']();
-
-    if($messages.start_time && $win.scrollTop() == 0) {
-      var end_time = $messages.end_time;
-      $.get(location.href.replace(/\?.*/, ''), { to: $messages.start_time }, function(data) {
-        var $ul = $(data).find('ul[data-network]');
-        var $li = $ul.children('li:lt(-1)');
-        var height_before_prepend = $height_from.height();
-        $messages.end_time = end_time;
-        if(!$li.length) return;
-        $messages.start_time = parseFloat($ul.data('start-time'));
-        $messages.prepend($li.attachEventsToMessage());
-        $win.scrollTop($height_from.height() - height_before_prepend);
-      });
-      $messages.start_time = $messages.end_time = 0;
-    }
-
-    return false;
-  };
-
-  var getNewMessages = function(e) {
+  convos.getNewerMessages = function(e) {
+    if (e) e.preventDefault();
+    if (!convos.current.end_time) return;
     var $btn = $(this);
-    var start_time = $messages.start_time;
-    if(!e.silent) {
-      $('body').loadingIndicator('show');
-    }
-    if($messages.end_time) {
-      $.get(location.href.replace(/\?.*/, ''), { from: $messages.end_time }, function(data) {
-        var $ul = $(data);
-        var $li = $ul.children('li:gt(0)');
-        if(!e.silent) $('body').loadingIndicator('hide');
-        $btn.closest('li').remove();
-        $messages.start_time = start_time;
-        if(!$li.length) return;
-        $messages.end_time = parseFloat($ul.data('end-time'));
-        $li.each(function() { $(this).appendToMessages(); });
-        if(!$li.filter('.historic-message').length) {
-          $('body').attr('class', /^[#&]/.test($messages.hostAndTarget().target) ? 'with-sidebar' : 'without-sidebar');
-          if(!e.goto_bottom) $win.data('at_bottom', false); // prevent scroll to bottom
-          drawUI();
+    $.get(location.href.replace(/\?.*/, ''), { from: convos.current.end_time }, function(data) {
+      var $ul = $(data).find('ul[data-network]');
+      var $li = $ul.children('li:gt(0)');
+      $btn.closest('li').remove();
+      $('body').removeClass('loading');
+      if (!$li.length) return;
+      convos.current.end_time = parseFloat($ul.data('end-time'));
+      $li.addToMessages();
+    });
+    convos.current.end_time = 0;
+    $('body').addClass('loading');
+  };
+
+  $.fn.addToMessages = function(func) { // func = {prepend,append}
+    return this.attachEventsToMessage().each(function() {
+      var $message = $(this);
+      var $messages = $('div.messages ul');
+      var $same = $messages.children('li').not('.message-pending').eq(func == 'prepend' ? 0 : -1);
+      var same_nick = $same.data('sender') || '';
+
+      if ($message.hasClass('message') && $same.hasClass('message') && same_nick == $message.data('sender')) {
+        $same.addClass('same-nick');
+      }
+      if (!$message.hasClass('hidden')) {
+        $messages[func || 'append']($message.fadeIn('fast'));
+      }
+    });
+  };
+
+  $.fn.attachEventsToMessage = function() {
+    this.find('a.internal').click(function(e) {
+      e.preventDefault();
+      $.pjax.click(e, { container: 'div.messages', fragment: 'div.messages' });
+    });
+    this.find('a.autocomplete').click(function(e) {
+      var str = $(this).text();
+      e.preventDefault();
+      convos.input.val(convos.input.val() ? convos.input.val().replace(/\s+$/, '') + ' ' + str + ' ' : str + ': ').focus();
+    });
+    this.find('a[href^="http"]').each(function(e) {
+      var $a = $(this);
+      $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
+        var $embed_code = $(embed_code);
+        $a.closest('div').after($embed_code);
+        if (convos.at_bottom) {
+          $(window).scrollTo('bottom');
+          $embed_code.find('img').one('load', function() { $(window).scrollTo('bottom') });
         }
       });
-    }
-    $messages.start_time = $messages.end_time = 0;
-    return false;
+    });
+
+    this.find('.close').click(function(e) { $(this).closest('li').remove(); });
+    this.filter('.historic-message').find('a.button.newer').click(convos.getNewerMessages);
+
+    return this;
   };
 
-  var initAddConversation = function() {
-    $('.add-conversation form').submit(function(e) {
-      var $form = $(this);
-      var network = $form.find('select[name="name"]').val();
-      var channel = $form.find('input[name="channel"]').val().replace(/^\s*#/, '');
-
-      e.preventDefault();
-      $input.send('/join #' + channel, { 'data-network': network });
-      $input.focus();
-      $('a[data-toggle]').filter('.active').trigger('deactivate');
-    });
-  };
-
-  var initInputField = function() {
-    var current = '';
-    var complete, val, offset, re;
-
-    var autocomplete = function(e) {
-      var val = $input.val();
-      var offset = val.lastIndexOf(' ') + 1;
-      var re = new RegExp('^' + RegExp.escape(val.substr(offset)), 'i');
-      complete = complete || {
-        i: 0,
-        prefix: val.substr(0, offset),
-        list: $.map(
-          $.grep(
-            nicks.revrange(0, -1).concat(conversation_list).concat(commands).unique(),
-            function(v, i) {
-              return offset && v.indexOf('/') === 0 ? false : re.test(v) ? true : false;
-            }
-          ),
-          function(v, i) {
-            return offset ? v + ' ' : v.indexOf('/') === 0 ? v : v + ': ';
-          }
-        ).concat(val.substr(offset))
-      };
-
-      $input.val(complete.prefix + complete.list[complete.i++]);
-      if(complete.i == complete.list.length) complete.i = 0;
-      return false;
-    };
-
-    $.get($.url_for('/chat/command-history'), noCache({}), function(data) {
-      $input.history = data;
-      $input.history_i = $input.history.length;
-    });
-
-    $input.doubletap(autocomplete);
-    $input.bind('keydown', function(e) { if(e.keyCode !== 9) complete = false; }); // not tab
-    $input.bind('keydown', 'tab', autocomplete);
-    $input.bind('keydown', 'up', function(e) {
-      e.preventDefault();
-      if($input.history_i == 0) return;
-      if($input.history_i == $input.history.length) current = $input.val();
-      $input.val($input.history[--$input.history_i]);
-    });
-    $input.bind('keydown', 'down', function(e) {
-      e.preventDefault();
-      if(++$input.history_i == $input.history.length) return $input.val(current);
-      if($input.history_i > $input.history.length) return $input.history_i = $input.history.length;
-      $input.val($input.history[$input.history_i]);
-    });
-    $input.closest('form').submit(function(e) {
-      e.preventDefault();
-      $input.send($input.val(), { 'data-history': 1 }).val('');
-    });
-  };
-
-  var initNotifications = function() {
-    if(Notification.permission === 'granted') return;
-    if(Notification.permission === 'unsupported') return;
-    if(Notification.permission === 'denied') return;
-
-    var $ask_for_notifications = $('div.notification.question');
-    initNotifications.asked = true;
-    $ask_for_notifications.find('a.yes').off('click').click(function() {
-      Notification.requestPermission(function() {});
-      $ask_for_notifications.hide();
-      return false;
-    });
-    $ask_for_notifications.find('a.no').off('click').click(function() {
-      $ask_for_notifications.fadeOut('fast');
-      return false;
-    });
-    $ask_for_notifications.show();
-  };
-
-  var initPjax = function() {
-    $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
-    $(document).pjax('nav a.conversation', 'div.messages', { fragment: 'div.messages' });
-    $(document).pjax('nav a.convos', 'div.messages', { fragment: 'div.messages' });
-    $(document).pjax('div.container a', 'div.messages', { fragment: 'div.messages' });
-
-    $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
-    $('div.messages').on('pjax:start', function(xhr, options) { $('body').loadingIndicator('show'); });
-    $('div.messages').on('pjax:success', conversationLoaded);
-  }
-
-  var initSocket = function() {
-    var url = $input.closest('form').data('socket-url');
-    if(!url) return;
-    var socket = $input.data('socket', new ReconnectingWebSocket({ url: url, ping_protocol: [ 'PING', 'PONG' ] })).data('socket');
-    $input.history = [];
-    $input.history_i = 0;
-    socket.onmessage = receiveMessage;
-    socket.onopen = function(e) {
-      $input.removeClass('disabled');
-      if(e.reconnected) getNewMessages.call(document, { goto_bottom: true, silent: true });
-    };
-    socket.onclose = function() { $input.addClass('disabled'); };
-    socket.send('PING'); // open socket
-    $input.send = function(message, attr) {
-      if(message.length == 0) return $input;
-      var uuid = window.guid();
-      attr = attr || {};
-      if(!message.match('^\/')) {
-        var $pendingMessage = $('<li class="message-pending"><div class="content"></div></li>').attr('id', uuid).hostAndTarget($messages);
-        $pendingMessage.find('.content').text(message);
-        setTimeout(function() { messageFailed($pendingMessage); }, 10000);
-        $pendingMessage.appendToMessages();
-        $win.scrollTo('bottom');
-      }
-      socket.send($('<div/>').hostAndTarget($messages).attr('id', uuid).attr(attr).text(message).prop('outerHTML'));
-      $input.addClass('sending').siblings('.menu').hide();
-      if(attr['data-history']) $input.history.push(message);
-      $input.history_i = $input.history.length;
-      return $input;
-    };
-  }
-
-  var initShortcuts = function() {
-    $('body').bind('keydown', 'esc', function(e) {
-      e.preventDefault();
-      var $active = $('a[data-toggle]').filter('.active');
-      if(!$active.length) return true;
-      $active.trigger('deactivate').focus();
-    });
-
-    $('body, input').bind('keydown', 'shift+return', function(e) {
-      e.preventDefault();
-      $('a[data-toggle]').not($win.width() < min_width ? 'whatever' : '.sidebar.toggler').trigger('deactivate');
-      if(document.activeElement == $input.get(0)) {
-        $('nav ul.conversations a').slice(0, 3).eq(-1).focus();
-      }
-      else {
-        $input.focus();
-      }
-    });
-
-    var upDown = function(method, page) {
-      var $e, i;
-      return function(e) {
-        $e = $(document.activeElement).closest('li');
-        if($e.length === 0) return true;
-        i = page ? parseInt($e.closest('div.container').height() / $e.height()) + 1 : 0;
-        $e = $e[method]();
-        if($e.length <= i) i = $e.length - 1;
-        $e.eq(i).find('a').focus();
-        return false;
-      };
-    };
-
-    $('body').bind('keydown', 'up', upDown('prevAll', 0));
-    $('body').bind('keydown', 'pageup', upDown('prevAll', 1));
-    $('body').bind('keydown', 'down', upDown('nextAll', 0));
-    $('body').bind('keydown', 'pagedown', upDown('nextAll', 1));
-  };
-
-  var nickList = function($data) {
-    var $nicks = $data.find('[data-nick]');
-    var network = $messages.data('network');
-    var senders = {};
-
-    if($nicks.length) {
-      $messages.find('li[data-sender]').each(function(i) {
-        senders[$(this).data('sender')] = i;
-      });
-
-      $nicks.each(function() {
-        var $a = $(this);
-        var n = $a.data('nick');
-        nicks.add(senders[n] || 1, n);
-      });
-    }
-
-    if(nicks.length) {
-      $('div.sidebar.container ul').html(
-        $.map(nicks.revrange(0, -1).sortCaseInsensitive(), function(n, i) {
-          return '<li><a href="' + $.url_for(network, n) + '">' + n + '</a></li>';
-        }).join('')
-      );
-    }
-  }
-
-  var messageFailed = function($message) {
-    var uuid = $message.attr('id');
-    $messages.find('#' + uuid)
-      .filter('.message-pending')
-      .addClass('message-error')
-      .removeClass('message-pending')
-      .prepend('<h3>Could not send message</h3>')
-      .prepend('<span class="actions"><button class="resend-message">Resend</button> <button class="remove-message">&times;</button></span>')
-      ;
-  }
-
-  var noCache = function(args) {
+  $.noCache = function(args) {
     args._ts = new Date().getTime();
     return args;
   };
 
-  var receiveMessage = function(e) {
-    var $message = $(e.data);
-    var at_bottom = $win.data('at_bottom');
-    var to_current = false;
-    var uuid = $message.attr('id');
-
-    if($messages.find('#' + uuid).length) {
-      if($message.hasClass('error')) {
-        messageFailed($message);
-      }
-      else {
-        $messages.find('#' + uuid).remove();
-      }
-    }
-
-    $input.removeClass('sending').siblings('.menu').show();
-
-    if($message.data('target') === 'any') {
-      $message.data('target', $messages.data('target'));
-      if(!$message.data('network')) $message.data('network', $messages.data('network'));
-    }
-    if($('body').attr('class').indexOf('-sidebar') > 0) {
-      to_current = Object.equals($message.hostAndTarget(), $messages.hostAndTarget());
-    }
-    if($message.hasClass('highlight')) {
-      var sender = $message.data('sender');
-      var what = /^[#&]/.test($message.data('target')) ? 'mentioned you in ' + $message.data('target') : 'sent you a message';
-      var reload_notification_list_args = {};
-      $.notify([sender, what].join(' '), $message.find('.content').text(), $message.find('img').attr('src'));
-      if($win.data('has_focus') && to_current) reload_notification_list_args.clear_notification = 0;
-      reloadNotificationList(reload_notification_list_args);
-    }
-
-    if($message.hasClass('remove-conversation')) {
-      reloadConversationList({ goto_current: to_current });
-    }
-    else if($message.hasClass('add-conversation')) {
-      reloadConversationList({ goto_current: true });
-    }
-    else if(to_current) {
-      $message.appendToMessages();
-    }
-    else if($message.hasClass('message')) {
-      drawConversationMenu($message);
-    }
-
-    if($win.data('at_bottom')) $win.scrollTo('bottom');
+  $.fn.scrollTo = function(pos) {
+    if(pos === 'bottom') { $(this).scrollTop($('body').height()); }
+    else { $(this).scrollTop(pos); }
+    return this;
   };
 
-  var reloadConversationList = function(e) {
-    var goto_current = e.goto_current;
-    $.get($.url_for('/chat/conversations'), noCache({}), function(data) {
-      $('ul.conversations').replaceWith(data);
-      $('div.conversations.container ul').html('');
-      if(goto_current) $('ul.conversations li.first a').click();
-      conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
-      drawConversationMenu();
+  var focusFirst = function() {
+    if (document.activeElement && $(document.activeElement).is(':input')) return;
+    if (convos.input.length) return convos.input.focus();
+    $('form input[type="text"]:visible').eq(0).focus();
+  };
+
+  var getHistoricMessages = function() {
+    if (!convos.current.start_time) return;
+    var $loading = $('<li class="message notice"><div class="content">Loading historic messages...</div></li>');
+    $.get(location.href.replace(/\?.*/, ''), { to: convos.current.start_time }, function(data) {
+      var $ul = $(data).find('ul[data-network]');
+      var $li = $ul.children('li:lt(-1)');
+      var height_before_prepend = $('body').height();
+      $loading.remove();
+      if (!$li.length) return;
+      convos.current.start_time = parseFloat($ul.data('start-time'));
+      $($li.get().reverse()).addToMessages('prepend');
+      $(window).scrollTop($('body').height() - height_before_prepend);
     });
+    $loading.addToMessages('prepend');
+    convos.current.start_time = 0;
   };
 
-  var reloadNotificationList = function(e) {
-    var $notification_list = $('div.notifications.container ul').parent();
-    var $n_notifications = $('a.notifications.toggler');
-    var reload_notification_list_args = {};
-    var n;
+  var initPjax = function() {
+    $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
+    $(document).pjax('nav ul a', 'div.messages', { fragment: 'div.messages' });
+    $(document).pjax('.sidebar-right a', 'div.messages', { fragment: 'div.messages' });
 
-    if(typeof e.clear_notification != 'undefined') {
-      reload_notification_list_args.notification = e.clear_notification;
-    }
+    $('div.messages').on('pjax:beforeReplace', function(xhr, options) { $('body').removeClass('loading'); });
+    $('div.messages').on('pjax:beforeSend', function(xhr, options) { return !$(this).hasClass('no-pjax'); });
+    $('div.messages').on('pjax:start', function(xhr, options) { $('body').addClass('loading'); });
 
-    $.get($.url_for('/chat/notifications'), noCache(reload_notification_list_args), function(data) {
-      $notification_list.html(data);
-      n = parseInt($notification_list.children('ul').data('notifications'), 10);
-      if(n==0) { n='' }
-      $n_notifications.children('b').text(n);
-      $n_notifications[n ? 'addClass' : 'removeClass']('alert');
+    $('div.messages').on('pjax:success', function(e, data, status_text, xhr, options) {
+      var $doc = data.match(/<\w/) ? $(data) : $('body');
+      var $messages = $('div.messages ul'); // injected to the document using pjax
+      var draw = $doc.find('[data-draw]').attr('data-draw');
+
+      convos.nicks.reset();
+      convos.current.end_time = parseFloat($messages.attr('data-end-time'));
+      convos.current.start_time = parseFloat($messages.attr('data-start-time'));
+      convos.current.nick = $messages.attr('data-nick') || '';
+      convos.current.state = $messages.attr('data-state') || 'disconnected';
+      convos.current.network = $messages.attr('data-network') || 'convos';
+      convos.current.target = $messages.attr('data-target') || '';
+      convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
+
+      $messages.find('li').attachEventsToMessage();
+      $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
+      $doc.filter('nav').each(function() { $('nav ul.conversations').html($(this).find('ul.conversations').children()); });
+
+      if (location.href.indexOf('from=') > 0) {
+        $messages.find('li:first').addClass('history-starting-point');
+        getHistoricMessages();
+      }
+
+      if (!navigator.is_ios) focusFirst();
+      if (draw) convos.draw[draw](e);
+      if (data) $('body').hideSidebar();
+
+      convos.at_bottom = true; // make convos.draw.ui scroll to bottom
+      convos.draw.ui(e);
     });
   };
 
   $(document).ready(function() {
-    $goto_bottom = $('div.goto-bottom a');
-    $input = $('footer form input[name="message"]');
-    $win = $(window);
-    conversation_list = $('ul.conversations a').map(function() { return $(this).text(); }).get();
-
-    if($input.length == 0) {
-      return;
-    }
-
+    $.ajaxSetup({ error: function(jqXHR, exception) { console.log('ajax: ' + this.url + ' failed: ' + exception); } });
     $.post($.url_for('/profile/timezone/offset'), { hour: new Date().getHours() });
-    $input.focus();
 
-    $.ajaxSetup({
-      error: function(jqXHR, exception) {
-        console.log('ajax: ' + this.url + ' failed: ' + exception);
-      }
+    initPjax();
+
+    $('body, input').bind('keydown', 'shift+return', function(e) {
+      e.preventDefault();
+      if (document.activeElement && $(document.activeElement).closest('.input').length) return $('nav a.conversations').trigger('tap');
+      $(document).hideSidebar();
+      convos.input.focus();
     });
+    $('body, input').bind('keydown', 'alt+shift+a', function(e) { e.preventDefault(); $('nav a.conversations').trigger('tap'); });
+    $('body, input').bind('keydown', 'alt+shift+s', function(e) { e.preventDefault(); $('nav a.notifications').trigger('tap'); });
+    $('body, input').bind('keydown', 'alt+shift+d', function(e) { e.preventDefault(); $('nav a.sidebar').filter(':visible').trigger('tap'); });
 
-    if(running_on_ios) {
-      $('input, textarea').on('click', function() {
-        $('nav.bar').hide();
-      }).on('focusout', function() {
-        $('nav.bar').show();
-      });
+    if (navigator.is_ios) {
+      $('input, textarea')
+        .on('click', function() { $('body').addClass('ios-input-focus'); $(window).scrollTo('bottom'); })
+        .on('blur, focusout', function() { $('body').removeClass('ios-input-focus'); });
     }
 
-    initShortcuts();
-    initSocket();
-    initPjax();
-    initInputField();
-    initAddConversation();
+    $(window).on('resize', convos.draw.ui);
 
-    $('nav a.notifications.toggler').on('activate', function() {
-      $.post($.url_for('/chat/notifications/clear'));
-      $(this).removeClass('alert').children('b').text('');
+    $(window).on('scroll', function(e) {
+      convos.at_bottom = $(this).scrollTop() + $(this).height() > $('body').height() - convos.at_bottom_threshold;
+      if ($(window).scrollTop() == 0) getHistoricMessages();
     });
 
-    $('nav a.toggler').initDropDown();
-    $('nav, div.container, div.goto-bottom').fastButton();
-    $('footer a.help').click(function(e) { $input.send('/help', { 'data-history': 0 }); return false; })
-    $goto_bottom.click(function(e) { e.preventDefault(); $win.scrollTo('bottom'); });
-    $win.on('scroll', getHistoricMessages).on('resize', drawUI);
-    $('.messages').on('click', '.resend-message', function() {
-      $input.data('socket').buffer = []; // need to clear buffer when resending messages
-      $input.send($(this).parents('li').find('.content').text());
-      $(this).parents('li').remove();
+    // handle cmd://... url
+    $(document).click(function(e) {
+      var cmd = (e.target.href || '').match(/^cmd:\/\/(.*)/);
+      if (!cmd) return;
+      e.preventDefault();
+      convos.send(decodeURI(cmd[1]));
+      $('body').hideSidebar();
     });
-    $('.messages').on('click','.remove-message', function() {
-      $(this).parents('li').remove();
-    });
-  });
 
-  $(document).ready(function() {
-    $('.login, .register').find('form input[type="text"]:first').focus();
-    if(!$input.length) drawSettings();
+    // clear notifications when showing notifications sidebar
+    $('.notification-list').on('show', function(e) {
+      var $n = $('nav a.notifications b');
+      if ($n.text().length) $.post($.url_for('/chat/notifications/clear'));
+      $n.text('');
+    }).find('a').on('click', function(e) { $(this).parent('.unread').removeClass('unread'); })
   });
 
   $(window).load(function() {
-    if($input.length) conversationLoaded();
+    $('div.messages').trigger('pjax:success', [ '', 'success', {}, {} ]); // render initial div.messages
+    if (!navigator.is_ios) focusFirst(); // need to focus even if we have no div.messages
   });
-
 })(jQuery);

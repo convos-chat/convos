@@ -12,38 +12,26 @@ redis_do(
 );
 
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})
-  ->header_like('Location', qr{/magnet/%23convos$}, 'Redirect to conversation');
+  ->header_is('Location', '/magnet/%23convos', 'Redirect to conversation');
 
 $t->get_ok($t->tx->res->headers->location)->status_is(200);
 
 $t->get_ok('/invalid/foo')->status_is(404);
 
-$t->get_ok('/bitlbee/&bitlbee')->status_is(200)->element_exists_not('body.without-sidebar')
-  ->element_exists('body.with-sidebar');
+$t->get_ok('/bitlbee/&bitlbee')->status_is(200);
 
-$t->get_ok('/magnet/batman')->status_is(200)->element_exists('body.without-sidebar')
-  ->element_exists_not('body.with-sidebar')->element_exists('head script')->element_exists('nav')
-  ->element_exists('.notifications.container')->element_exists('.add-conversation.container')
-  ->element_exists('.goto-bottom');
+$t->get_ok('/magnet/batman')->status_is(200)->element_exists('head script')->element_exists('nav')
+  ->element_exists('.notification-list.sidebar-right');
 
-$t->get_ok('/magnet/batman?_pjax=some.element')->status_is(200)->element_exists('body.without-sidebar')
-  ->element_exists_not('body.with-sidebar')->element_exists_not('head script')->element_exists_not('nav')
-  ->element_exists_not('.notifications.container')->element_exists_not('.add-conversation.container')
-  ->element_exists_not('.goto-bottom');
+$t->get_ok('/magnet/batman?_pjax=some.element')->status_is(200)->element_exists_not('head script')
+  ->element_exists('nav')->element_exists_not('.notifications.container');
 
-$t->get_ok('/')->header_like('Location', qr{/magnet/batman$}, 'Redirect on last conversation');
+$t->get_ok('/')->header_is('Location', '/magnet/batman', 'Redirect on last conversation');
 
 $t->get_ok('/chat/command-history')->status_is(200)->content_is('[]');
 
-$t->get_ok('/chat/conversations')->status_is(200)->element_exists('ul.conversations')
-  ->element_exists('li:nth-of-type(1) a[href="/convos"][data-unread="0"]')
-  ->element_exists('li:nth-of-type(2) a[href="/magnet/batman"][data-unread="0"]')
-  ->element_exists('li:nth-of-type(3) a[href="/magnet/%23convos"][data-unread="0"]')
-  ->element_exists('li:nth-of-type(4) a[href="/bitlbee/&bitlbee"][data-unread="0"]')
-  ->element_exists_not('li:nth-of-type(5)');
-
-$t->get_ok('/chat/notifications')->status_is(200)->element_exists('ul.notifications')
-  ->element_exists_not('li:nth-of-type(1)');
+$t->get_ok('/chat/notifications')->status_is(200)->element_exists('ul[data-notifications]')
+  ->text_is('ul h3', 'No notifications');
 
 $t->get_ok('/chat/notifications', {Accept => 'application/json'})->status_is(200)->content_type_is('application/json');
 

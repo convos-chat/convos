@@ -44,19 +44,21 @@ Used to render an avatar for a user.
 =cut
 
 sub avatar {
-  my $self = shift->render_later;
+  my $self = shift;
   my $host = $self->param('host');
 
-  $self->redis->hget(
-    'convos:host2convos',
-    $host,
+  $self->delay(
     sub {
-      my ($redis, $convos_url) = @_;
+      my ($delay) = @_;
+      $self->redis->hget('convos:host2convos', $host, $delay->begin);
+    },
+    sub {
+      my ($delay, $convos_url) = @_;
 
       return $self->_avatar_discover if !$convos_url;
       return $self->_avatar_local if $convos_url eq 'loopback';
       return $self->_avatar_remote($convos_url);
-    }
+    },
   );
 }
 
@@ -105,7 +107,7 @@ sub _avatar_local {
 
   $user =~ s!^~!!;    # somenick!~someuser@1.2.3.4
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->hmget("user:$user", qw( avatar email ), $delay->begin);
@@ -146,7 +148,7 @@ sub _avatar_remote {
     return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
   }
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
@@ -174,16 +176,21 @@ Show the login form. Also responds to JSON requests with login status.
 =cut
 
 sub login {
-  my $self = shift->render_later;
+  my $self = shift;
 
   unless ($self->app->config->{redis_version}) {
-    return $self->redis->info(
-      server => sub {
+    return $self->delay(
+      sub {
+        my ($delay) = @_;
+        $self->redis->info(server => $delay->begin);
+      },
+      sub {
+        my ($delay, $server_info) = @_;
         my $app = $self->app;
-        $app->config->{redis_version} = $_[1] =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
+        $app->config->{redis_version} = $server_info =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
         $app->log->info("Redis server version: @{[$app->config->{redis_version}]}");
         $self->login;
-      }
+      },
     );
   }
 
@@ -194,20 +201,20 @@ sub login {
     return $self->redirect_to('view');
   }
   if ($self->req->method ne 'POST') {
-    return $self->respond_to(html => {template => 'index'}, json => {json => {login => $self->session('login') || ''}},
-    );
+    return $self->respond_to(html => {template => 'index'}, json => {json => {login => $self->session('login') || ''}});
   }
 
-  $self->app->core->login(
-    $self->validation,
+  $self->delay(
     sub {
-      my ($core, $error) = @_;
-      my $login;
-
-      $error and return $self->render('index', status => 401);
-      $login = $self->validation->param('login');
+      my ($delay) = @_;
+      $self->app->core->login($self->validation, $delay->begin);
+    },
+    sub {
+      my ($delay, $error) = @_;
+      return $self->render('index', status => 401) if $error;
+      my $login = $self->validation->param('login');
       $self->session(login => $login);
-      $self->respond_to(html => sub { $self->redirect_last($login) }, json => {json => {login => $login}},);
+      $self->respond_to(html => sub { $self->redirect_last($login) }, json => {json => {login => $login}});
     },
   );
 }
@@ -219,7 +226,7 @@ See L</login>.
 =cut
 
 sub register {
-  my $self        = shift->render_later;
+  my $self        = shift;
   my $validation  = $self->validation;
   my $invite_code = $ENV{CONVOS_INVITE_CODE};
   my ($output);
@@ -231,7 +238,7 @@ sub register {
 
   $self->stash(form => 'register');
 
-  if ($invite_code and $invite_code ne ($validation->input->{invite} || '')) {
+  if ($invite_code and $invite_code ne ($self->param('invite') || '')) {
     return $self->render('index', form => 'invite_only', status => 400);
   }
   if ($self->req->method ne 'POST') {
@@ -244,7 +251,7 @@ sub register {
   $validation->required('password')->size(5, 255);
   $output = $validation->output;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my $delay = shift;
       $self->redis->sismember('users', $output->{login}, $delay->begin);
@@ -292,21 +299,16 @@ Change user profile.
 =cut
 
 sub edit {
-  my $self      = shift->render_later;
-  my $login     = $self->session('login');
-  my $method    = $self->req->method eq 'POST' ? '_edit' : 'render';
-  my $full_page = $self->stash('full_page');
+  my $self   = shift;
+  my $login  = $self->session('login');
+  my $method = $self->req->method eq 'POST' ? '_edit' : 'render';
 
-  $self->stash(body_class => 'convos with-sidebar');
-
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->hgetall("user:$login", $delay->begin) if $method eq 'render';
-      $self->connection_list($delay->begin);
-      $self->conversation_list($delay->begin) if $full_page;
-      $self->notification_list($delay->begin) if $full_page;
-      $delay->begin->();
+      $self->conversation_list($delay->begin);
+      $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
       my ($delay, $user) = @_;
@@ -342,7 +344,7 @@ sub _edit {
   $validation->has_error and return $self->render(status => 400);
   $validation->output->{avatar} ||= '';
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my $delay = shift;
       $self->redis->hmset("user:$login", $validation->output, $delay->begin);

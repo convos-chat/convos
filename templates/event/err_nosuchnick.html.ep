@@ -1,4 +1,4 @@
-<li class="network-message error" data-network="<%= $network %>" data-target="any">
+<li class="network message error" data-network="<%= $network %>" data-target="">
+  %= timestamp
   <div class="content">No such nick: <%= $nick %></div>
-  %= timestamp_span($timestamp || time)
 </li>

@@ -1,4 +1,4 @@
-<li class="nick-parted" data-network="<%= $network %>" data-target="<%= $target %>">
-  <div class="content"><b class="nick"><%= $nick %></b> parted <%= $target %></div>
-  %= timestamp_span($timestamp)
+<li class="nick-parted" data-network="<%= $network %>" data-target="<%= $target %>" data-nick="<%= $nick %>">
+  %= timestamp $timestamp
+  <div class="content"><b class="nick"><%= $nick %></b> parted <%= $target %>.</div>
 </li>

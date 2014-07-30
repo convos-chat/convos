@@ -1,6 +1,7 @@
-<li class="whois" data-network="<%= $network %>" data-target="any">
+<li class="whois" data-network="<%= $network %>" data-target="">
+  %= timestamp $timestamp
   <div class="content">
-  %= link_to $nick, view => { network => $network, target => $nick }, class => 'nick'
+  %= link_to $nick, view => { network => $network, target => $nick }, class => 'nick internal'
   (<%= $user %>@<%= $host %> - <%= $realname %>)
   % if ($idle) {
     has been idle for <b><%= $idle %></b> seconds in
@@ -10,8 +11,7 @@
   % my $i = 0;
   % for my $channel (@$channels) {
     % my $target = $channel; $target =~ s/^.\#/#/;
-    <%= link_to $channel, view => { network => $network, target => $target }, class => 'channel' %><%= ++$i == @$channels ? '.' : ', ' %>
+    <%= link_to $channel, view => { network => $network, target => $target }, class => 'internal channel' %><%= ++$i == @$channels ? '.' : ', ' %>
   % }
   </div>
-  %= timestamp_span($timestamp)
 </li>

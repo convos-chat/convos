@@ -1,10 +1,10 @@
 use t::Helper;
 
-$t->get_ok('/')->status_is(302)->header_like('Location' => qr{:\d+/register$});
+$t->get_ok('/')->status_is(302)->header_is('Location' => '/register');
 
 redis_do([sadd => 'users', 'some_username']);
 
-$t->get_ok('/')->status_is(302)->header_like('Location' => qr{:\d+/login$});
+$t->get_ok('/')->status_is(302)->header_is('Location' => '/login');
 
 $t->get_ok('/login')->status_is(200)->element_exists('input[name="login"][id="login"]')
   ->element_exists('input[type="password"][name="password"][id="password"]')

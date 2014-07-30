@@ -18,7 +18,7 @@ $t->post_ok('/login' => form => $form)->status_is('401', 'failed to log in');
 
 $form = {login => 'fooman', email => 'foobar@barbar.com', password => 'barbar', password_again => 'barbar',};
 $t->post_ok('/register' => form => $form)->status_is('302', 'first user gets to be admin')
-  ->header_like('Location', qr{/wizard$}, 'Redirect to settings page');
+  ->header_is('Location', '/wizard', 'Redirect to settings page');
 
 $t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Testing - Add connection')
   ->element_exists('form[action="/connection/add"][method="post"]')->element_exists('select[name="name"]')
@@ -34,14 +34,14 @@ $t->post_ok('/connection/add', form => $form)->status_is(200)->element_exists('d
 
 $form = {wizard => 1, name => 'freenode', nick => 'ice_cool', channels => ', #way #cool ,,,',};
 $t->post_ok('/connection/add', form => $form)->status_is('302')
-  ->header_like('Location', qr{/convos$}, 'Redirect back to settings page');
+  ->header_is('Location', '/convos', 'Redirect back to settings page');
 
 is_deeply \@ctrl, [qw( fooman freenode )], 'start connection';
 
 $t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Testing - convos')
   ->element_exists('div.messages ul li')->element_exists('div.messages ul li:first-child img[src^="/avatar"]')
-  ->text_is('div.messages ul li:first-child h3 a', 'convos')
-  ->text_is('div.messages ul li:first-child div',  'Hi fooman!');
+  ->text_is('div.messages ul li:first-child h3 a',        'convos')
+  ->text_is('div.messages ul li:first-child div.content', 'Hi fooman!');
 
 $t->get_ok('/profile')->status_is(200)->element_exists('form input[name="email"][value="foobar@barbar.com"]')
   ->element_exists('form input[name="avatar"][value="foobar@barbar.com"]');

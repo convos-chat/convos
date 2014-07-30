@@ -1,5 +1,31 @@
 ## 0.8
+- Fix asking for desktop notifications
+- Fix autocomplete: The autocomplete was reset because of keyCode 229 in Chrome
+- Fix autcomplete nick order #77
+- Fix avatar for localhost users
+- Fix creating a new conversation by typing an invalid URL is not possible anymore
+- Fix icon in desktop notifications
+- Fix login/register screen CSS
+- Fix navbar and other dynamic inputs is hidden when priting the conversation
+- Fix removing loading indicator even if loading document from cache
 - Fix starting convos with ./vendor/bin/carton exec script/convos daemon
+- Fix timestamp does not overlap conversation text #96
+- Fix will not remove private conversation on /topic in private conversation
+- Fix /names in a channel with just you
+- Fix "backend" from keeping the hypnotoad socket open
+- Add goto-anything #91
+- Add reload of conversation on websocket reconnect
+- Add Smooth scrolling for sidebar on iphone
+- Add timestamp to every message #96
+- Add event for invalid channel name
+- Will not re-arrange conversation list on reconnect
+- Allow going to historic notifications, even if not in that conversation list any more
+- Enable to remove conversations (channels) even if not connected to a network #73
+- Move the "help" icon from input field to sidebar: This makes it less buggy to type on an iPhone
+- New styling for too many tabs in nav.bar #91
+- Refactored javascript into more descriptive files
+- Replace drop down menus with slide-in sidebars
+- Requires Mojolicious 5.16
 
 ## 0.7 (2014-06-10)
 - Add embedding of GitHub gists

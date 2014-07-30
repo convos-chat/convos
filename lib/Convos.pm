@@ -132,6 +132,20 @@ on all session cookies.  Requires HTTPS.
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
 
+=item * MOJO_LISTEN
+
+List of one or more locations to listen on. This also works for
+L<hypnotoad|Mojo::Server::Hypnotoad>. Example:
+
+  MOJO_LISTEN="http://*:8080,https://*:8443"
+
+L<Mojo::Server::Daemon/listen>.
+
+=item * MOJO_REVERSE_PROXY
+
+Set this to a true value if you're using L<hypnotoad|Mojo::Server::Hypnotoad>
+behind a reverse proxy, such as nginx.
+
 =back
 
 =head2 HTTP headers
@@ -291,10 +305,12 @@ sub startup {
   $self->ua->max_redirects(2);             # support getting facebook pictures
   $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
+  $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets($config);
+  $self->_hypnotoad;
   $self->_public_routes;
   $self->_private_routes;
 
@@ -335,11 +351,26 @@ sub _assets {
   my ($self, $config) = @_;
 
   $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
-  $self->asset('convos.css', '/sass/convos.scss');
+  $self->asset('convos.css' => '/sass/convos.scss');
   $self->asset(
-    'convos.js',              '/js/jquery.min.js',     '/js/jquery.hotkeys.js', '/js/jquery.fastbutton.js',
-    '/js/jquery.pjax.js',     '/js/selectize.js',      '/js/globals.js',        '/js/jquery.doubletap.js',
-    '/js/ws-reconnecting.js', '/js/jquery.helpers.js', '/js/convos.chat.js',
+    'convos.js' => qw(
+      /js/globals.js
+      /js/jquery.min.js
+      /js/ws-reconnecting.js
+      /js/jquery.hotkeys.js
+      /js/jquery.finger.js
+      /js/jquery.pjax.js
+      /js/jquery.notify.js
+      /js/jquery.disableouterscroll.js
+      /js/selectize.js
+      /js/convos.sidebar.js
+      /js/convos.socket.js
+      /js/convos.input.js
+      /js/convos.conversations.js
+      /js/convos.nicks.js
+      /js/convos.goto-anything.js
+      /js/convos.chat.js
+      )
   );
 }
 
@@ -370,6 +401,13 @@ sub _from_cpan {
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
 }
 
+sub _hypnotoad {
+  my $self = shift;
+  my $config = $self->config->{hypnotoad} ||= {};
+
+  $config->{listen} = [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'] unless $config->{listen};
+}
+
 sub _private_routes {
   my $self = shift;
   my $r = $self->routes->route->bridge('/')->to('user#auth', layout => 'view');
@@ -379,10 +417,7 @@ sub _private_routes {
 
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
-  $r->get('/chat/conversations')->to(cb => sub { shift->conversation_list }, layout => undef)
-    ->name('conversation.list');
-  $r->get('/chat/notifications')->to(cb => sub { shift->notification_list }, layout => undef)
-    ->name('notification.list');
+  $r->get('/chat/notifications')->to('client#notifications', layout => undef)->name('notification.list');
   $r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
   $r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
   $r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
@@ -419,7 +454,7 @@ sub _set_secrets {
   my $self  = shift;
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->lrange('convos:secrets', 0, -1, $delay->begin);
@@ -445,7 +480,7 @@ sub _start_backend {
   my $self  = shift;
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->getset('convos:backend:lock' => 1, $delay->begin);
@@ -471,9 +506,9 @@ sub _start_backend {
         $self->core->start;
       }
       else {                                                    # morbo
+        $self->core->reset;
         $self->log->warn(
           'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend from morbo. (The backend is not running)');
-        $redis->del('convos:backend:lock');
       }
     },
   );
@@ -499,6 +534,9 @@ sub _start_backend_as_external_app {
     $self->log->error("Can't start external backend, fork failed: $!");
     return;
   }
+
+  # make sure the backend does not listen to the hypnotoad socket
+  Mojo::IOLoop->reset;
 
   # start detaching new process from hypnotoad
   if (!POSIX::setsid) {

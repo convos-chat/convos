@@ -28,7 +28,7 @@
 }
 .selectize-dropdown [data-selectable],
 .selectize-dropdown .optgroup-header {
-  padding: 6px 9px;
+  padding: $selectizeOptionPadding;
 }
 .selectize-dropdown .optgroup:first-child .optgroup-header {
   border-top: 0 none;
@@ -45,10 +45,10 @@
   color: #444;
 }
 .selectize-dropdown .active {
-  background: #f0f0f0;
+  background: darken(#fff, 13%);
 }
 .selectize-dropdown [data-selectable] .highlight {
-  background: rgba(255,237,40,0.4);
+  background: rgba(204, 100, 40, 0.4);
   @include border-radius(1px);
 }
 .selectize-input.disabled, .selectize-input.disabled * {

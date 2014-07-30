@@ -1,4 +1,4 @@
-<li class="nick-joined" data-network="<%= $network %>" data-target="<%= $target %>">
-  <div class="content"><%= link_to $nick, 'channel.view', { network => $network, target => $nick }, class => 'nick' %></b> joined <%= $target %></div>
-  %= timestamp_span($timestamp)
+<li class="nick-joined" data-network="<%= $network %>" data-target="<%= $target %>" data-nick="<%= $nick %>">
+  %= timestamp $timestamp
+  <div class="content"><%= link_to $nick, view => { network => $network, target => $nick }, class => 'autocomplete' %> joined <%= $target %>.</div>
 </li>

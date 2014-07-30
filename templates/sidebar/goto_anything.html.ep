@@ -1,0 +1,25 @@
+%= form_for 'connection.control', { name => stash('network') || $networks->[0] }, method => 'post', class => 'conversations sidebar-right', begin
+  <ul>
+    <li class="select">
+      <div class="form-group">
+        %= text_field 'goto', autocomplete => 'off', placeholder => 'Select or create conversation', autocorrect => 'off', autocapitalize => 'off'
+      </div>
+    </li>
+    <li class="add-dynamic-before-this"><%= link_to 'Convos', 'view.network', { network => 'convos' } %></li>
+    <li><%= link_to 'Edit profile', active_class('user.edit') %></li>
+    <li><%= link_to 'Add connection', active_class('connection.add') %></li>
+    <li class="create">
+      <hr>
+      <div class="form-group description"></div>
+      <div class="form-group"><%= select_field network => $networks %></div>
+      <div class="form-group"><button></button></div>
+    </li>
+    <li class="howto">
+      <hr>
+      <div class="form-group">
+        Start the conversation name with "#" to join a channel,
+        or just write the nick of the person you want to talk with.
+      </div>
+    </li>
+  </ul>
+% end
