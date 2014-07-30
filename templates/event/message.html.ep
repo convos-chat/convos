@@ -3,7 +3,7 @@
 % push @classes, $target =~ /^\w/ ? 'private' : 'channel';
 % push @classes, 'highlight' if $highlight;
 % push @classes, 'same-nick' if $nick eq $prev_nick;
-<li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
+<li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>" data-timestamp="<%= $timestamp %>">
   %= timestamp $timestamp
   %= avatar { nick => $nick, host => $host, user => $user }, alt => '', class => 'avatar'
   % if($network eq 'convos') {

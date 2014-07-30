@@ -20,7 +20,7 @@
       $g.find('a.active').removeClass('active');
       $g.find('a:first').addClass('active');
     }).on('keyup', function(e) { // filter conversation list
-      var v = this.value;
+      var v = this.value.toLowerCase();
       var channel = convos.isChannel(v);
       var exact;
 
@@ -39,7 +39,8 @@
       e.preventDefault();
       var $input = $(this).find('input');
       var $first = $(this).find('a:visible:first').click();
-      if ($first.length == 0) convos.send('/query ' + $input.val(), { 'data-network': $g.find('li.create select').val() });
+      var command = [convos.isChannel($input.val()) ? '/join' : '/query', $input.val()].join(' ');
+      if ($first.length == 0) convos.send(command, { 'data-network': $g.find('li.create select').val() });
       $input.val('').keyup();
     });
 

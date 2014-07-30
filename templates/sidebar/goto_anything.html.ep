@@ -2,7 +2,7 @@
   <ul>
     <li class="select">
       <div class="form-group">
-        %= text_field 'goto', autocomplete => 'off', placeholder => 'Select or create conversation'
+        %= text_field 'goto', autocomplete => 'off', placeholder => 'Select or create conversation', autocorrect => 'off', autocapitalize => 'off'
       </div>
     </li>
     <li class="add-dynamic-before-this"><%= link_to 'Convos', 'view.network', { network => 'convos' } %></li>

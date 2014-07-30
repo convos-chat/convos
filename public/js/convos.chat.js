@@ -45,16 +45,32 @@
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
+  convos.getNewerMessages = function(e) {
+    if (e) e.preventDefault();
+    if (!convos.current.end_time) return;
+    var $btn = $(this);
+    $.get(location.href.replace(/\?.*/, ''), { from: convos.current.end_time }, function(data) {
+      var $ul = $(data).find('ul[data-network]');
+      var $li = $ul.children('li:gt(0)');
+      $btn.closest('li').remove();
+      $('body').removeClass('loading');
+      if (!$li.length) return;
+      convos.current.end_time = parseFloat($ul.data('end-time'));
+      $li.addToMessages();
+    });
+    convos.current.end_time = 0;
+    $('body').addClass('loading');
+  };
+
   $.fn.addToMessages = function(func) { // func = {prepend,append}
     return this.attachEventsToMessage().each(function() {
       var $message = $(this);
       var $messages = $('div.messages ul');
-      var $previous = $messages.children('li').not('.message-pending').eq(-1);
-      var last_nick = $previous.data('sender') || '';
-      var action;
+      var $same = $messages.children('li').not('.message-pending').eq(func == 'prepend' ? 0 : -1);
+      var same_nick = $same.data('sender') || '';
 
-      if ($message.hasClass('message') && $previous.hasClass('message') && last_nick == $message.data('sender')) {
-        $message.addClass('same-nick');
+      if ($message.hasClass('message') && $same.hasClass('message') && same_nick == $message.data('sender')) {
+        $same.addClass('same-nick');
       }
       if (!$message.hasClass('hidden')) {
         $messages[func || 'append']($message.fadeIn('fast'));
@@ -85,7 +101,7 @@
     });
 
     this.find('.close').click(function(e) { $(this).closest('li').remove(); });
-    this.filter('.historic-message').find('a.button.newer').click(getNewerMessages);
+    this.filter('.historic-message').find('a.button.newer').click(convos.getNewerMessages);
 
     return this;
   };
@@ -122,23 +138,6 @@
     });
     $loading.addToMessages('prepend');
     convos.current.start_time = 0;
-  };
-
-  var getNewerMessages = function(e) {
-    e.preventDefault();
-    if (!convos.current.end_time) return;
-    var $btn = $(this);
-    $.get(location.href.replace(/\?.*/, ''), { from: convos.current.end_time }, function(data) {
-      var $ul = $(data).find('ul[data-network]');
-      var $li = $ul.children('li:gt(0)');
-      $btn.closest('li').remove();
-      $('body').removeClass('loading');
-      if (!$li.length) return;
-      convos.current.end_time = parseFloat($ul.data('end-time'));
-      $li.addToMessages();
-    });
-    convos.current.end_time = 0;
-    $('body').addClass('loading');
   };
 
   var initPjax = function() {
@@ -216,7 +215,7 @@
       var cmd = (e.target.href || '').match(/^cmd:\/\/(.*)/);
       if (!cmd) return;
       e.preventDefault();
-      convos.send(cmd[1]);
+      convos.send(decodeURI(cmd[1]));
       $('body').hideSidebar();
     });
 

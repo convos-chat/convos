@@ -1,6 +1,6 @@
 % title $target ? "$target on $network" : $network;
 % my $prev_nick = '';
-<ul data-network="<%= $network %>" data-target="<%= $target %>" data-state="<%= $state %>" data-nick="<%= $nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
+<ul data-network="<%= $network %>" data-target="<%= $target %>" data-state="<%= $state %>" data-nick="<%= $current_nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>">
   %= include 'event/empty_conversation' unless @$conversation;
 % for my $message (@$conversation) {
   %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
@@ -8,7 +8,7 @@
 % }
 % if(stash 'got_more') {
   %= include 'event/historic_messages'
-% } elsif($state ne 'connected' and $full_page) {
+% } elsif($state ne 'connected' and !$from_archive) {
   %= include 'event/not_connected'
 % }
 </ul>

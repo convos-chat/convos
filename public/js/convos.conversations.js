@@ -8,11 +8,17 @@
     },
     remove: function($e) {
       var url = $.url_for($e.attr('data-network'), encodeURIComponent($e.attr('data-target')));
-      $('nav ul.conversations a').slice(1).each(function() {
-        if(this.href.indexOf(url) >= 0) return;
-        $(this).click();
-        return false;
+      var active = false;
+
+      $('nav ul.conversations a').slice(1).each(function(i) {
+        if (this.href.indexOf(url) == -1) return;
+        if (!active) active = $(this).hasClass('active');
+        $(this).remove();
       });
+
+      if (active) {
+        $('nav ul.conversations a').slice(0, 2).get().reverse()[0].click();
+      }
     }
   };
 })(jQuery);

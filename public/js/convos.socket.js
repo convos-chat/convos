@@ -10,7 +10,8 @@
     socket.onclose = function() { convos.input.addClass('disabled'); };
     socket.onopen = function(e) {
       enableInput();
-      if (e.reconnected && !$('li.message').eq(-1).hasClass('error')) $.pjax({ url: location.href, container: 'div.messages', fragment: 'div.messages'});
+      convos.current.end_time = $('li.message[data-timestamp]:last').data('timestamp');
+      convos.getNewerMessages();
     };
     convos.send.socket = socket;
   };
