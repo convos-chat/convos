@@ -83,21 +83,22 @@ sub conversation {
         return $delay->begin(0)->([$login, 'connected']);
       }
 
-      $redis->hmget("user:$login:connection:$network", qw( nick state ), $delay->begin);
+      $redis->hmget("user:$login:connection:$network", qw( current_nick nick state ), $delay->begin);
       $redis->zadd("user:$login:conversations", $time + 0.001, $name)      if $score[0];
       $redis->zadd("user:$login:conversations", $time,         $prev_name) if $score[1];
     },
     sub {
-      my $delay = shift;
-      my $nick  = shift @{$_[0]};
-      my $state = shift @{$_[0]};
+      my $delay        = shift;
+      my $current_nick = shift @{$_[0]};
+      my $wanted_nick  = shift @{$_[0]};
+      my $state        = shift @{$_[0]};
 
       if (length $self->param('nid')) {
         $self->_modify_notification($self->param('nid'), read => 1, sub { });
       }
 
       $state ||= 'disconnected';
-      $self->stash(nick => $nick, state => $state);
+      $self->stash(current_nick => $current_nick || $wanted_nick, state => $state);
       $self->_conversation($delay->begin);
     },
     sub {
