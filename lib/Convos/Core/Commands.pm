@@ -19,11 +19,12 @@ use Convos::Core::Util 'as_id';
 sub close {
   my ($self, $target, $dom) = @_;
   my $login = $self->session('login');
+  my $state = $dom->{state};
   my $id;
 
   $target ||= $dom->{target};
 
-  if ($target =~ /^[#&]/) {
+  if ($target =~ /^[#&]/ and $state eq 'connected') {
     return "PART $target";
   }
   else {

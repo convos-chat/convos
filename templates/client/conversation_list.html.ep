@@ -1,19 +1,23 @@
+% my $target = stash('target') || '';
 <ul class="conversations">
+  % my @class = ('convos');
+  % push @class, 'active' unless $target;
   <li>
-    %= link_to 'view.network', { network => 'convos' }, class => 'convos', title => 'Status messages and settings', 'data-unread' => 0, begin
+    %= link_to 'view.network', { network => 'convos' }, class => join(' ', @class), title => 'Status messages and settings', begin
       %= image '/image/icon-navbar.png', alt => 'Convos'
     % end
   </li>
 % my $i = 0;
 % for my $c (@$conversation_list) {
   % my $text = $c->{network} ? $c->{target} : ucfirst $c->{target};
-  % my $title = $c->{topic} || "View conversation with $c->{target} on $c->{network}";
-  % my @class;
+  % my @class = ('conversation');
   % push @class, 'unread' if $c->{unread};
-  % push @class, 'first' if $i == 0;
-  % $title = "($c->{unread}) $title" if $c->{unread};
-  <li class="<%= join ' ', @class %>">
-    %= link_to $text, view => $c, class => 'conversation', title => $title, 'data-unread' => $c->{unread}
+  % push @class, 'active' if $text eq $target;
+  <li>
+    %= link_to view => $c, class => join(' ', @class), title => "$c->{target} on $c->{network}", 'data-network' => $c->{network}, begin
+      <span><%= $text %></span>
+      <b><%= $c->{unread} > 999 ? '999+' : $c->{unread} || '' %></b>
+    % end
   </li>
   % $i++;
 % }

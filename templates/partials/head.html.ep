@@ -8,3 +8,7 @@
 <link rel="shortcut icon" sizes="128x128" href="<%= url_for('/image/icon-128.png') %>">
 <link rel="apple-touch-icon" sizes="128x128" href="<%= url_for('/image/icon-128.png') %>">
 <link rel="apple-touch-icon-precomposed" sizes="128x128" href="<%= url_for('/image/icon-128.png') %>">
+
+<script type="text/javascript">
+jQuery.url_for=function(){var a=jQuery.makeArray(arguments);a.unshift('<%= $self->url_for('/') %>');return a.join('/').replace(/\/+/g, '/').replace(/#/g, '%23');};
+</script>

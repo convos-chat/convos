@@ -90,12 +90,13 @@ my @ADD_SERVER_MESSAGE_EVENTS = qw/
   irc_rpl_welcome rpl_luserclient
   /;
 my @OTHER_EVENTS = qw/
-  irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_rpl_namreply
+  irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_479
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
   err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_error
+  irc_rpl_namreply irc_rpl_endofnames
   /;
 
 has _irc => sub {
@@ -132,7 +133,7 @@ has _irc => sub {
         };
         $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
-        $self->redis->hset($self->{path}, state => 'reconneting');
+        $self->redis->hset($self->{path}, state => 'reconnecting');
         $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
       }
     }
@@ -148,7 +149,7 @@ has _irc => sub {
       $self->{stop} and return $self->redis->hset($self->{path}, state => 'error');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
-      $self->redis->hset($self->{path}, state => 'reconneting');
+      $self->redis->hset($self->{path}, state => 'reconnecting');
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -304,7 +305,7 @@ sub _connect {
           if ($error) {
             $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
             $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
-            $self->redis->hset($self->{path}, state => 'reconneting');
+            $self->redis->hset($self->{path}, state => 'reconnecting');
           }
           else {
             $self->redis->hmset($self->{path}, current_nick => $irc->nick, state => 'connected');
@@ -381,7 +382,7 @@ sub add_message {
       $data->{highlight} = 1;
     }
     if ($is_private_message) {
-      $self->_add_conversation($data);
+      $self->_add_conversation($data->{target});
     }
   }
 
@@ -395,8 +396,8 @@ sub add_message {
 }
 
 sub _add_conversation {
-  my ($self, $data) = @_;
-  my $name = as_id $self->name, $data->{target};
+  my ($self, $target) = @_;
+  my $name = as_id $self->name, $target;
 
   Mojo::IOLoop->delay(
     sub {
@@ -404,8 +405,8 @@ sub _add_conversation {
       $self->redis->zincrby($self->{conversation_path}, 0, $name, $delay->begin);
     },
     sub {
-      my ($delay, $new) = @_;
-      $new and return;    # has a score
+      my ($delay, $part_of_conversation_list) = @_;
+      $part_of_conversation_list and return;
       $self->redis->zrevrange($self->{conversation_path}, 0, 0, 'WITHSCORES', $delay->begin);
     },
     sub {
@@ -414,7 +415,7 @@ sub _add_conversation {
     },
     sub {
       my ($delay) = @_;
-      $self->_publish(add_conversation => {target => $data->{target}});
+      $self->_publish(add_conversation => {target => $target});
     },
   );
 }
@@ -589,6 +590,19 @@ sub irc_rpl_myinfo {
   $self->redis->hmset($self->{path}, map { $_, $message->{params}[$i++] // '' } @keys);
 }
 
+=head2 irc_479
+
+Invalid channel name.
+
+=cut
+
+sub irc_479 {
+  my ($self, $message) = @_;
+
+  # params => [ 'nickname', '1', 'Illegal channel name' ],
+  $self->_publish(server_message => {status => 400, message => $message->{params}[2] || 'Illegal channel name'});
+}
+
 =head2 irc_join
 
 See L<Mojo::IRC/irc_join>.
@@ -603,8 +617,7 @@ sub irc_join {
   if ($nick eq $self->_irc->nick) {
     $self->redis->hset("$self->{path}:$channel", topic => '');
     $self->redis->hset("convos:host2convos" => $host => 'loopback');
-    $self->_publish(add_conversation => {target => $channel});
-    $self->_irc->write(TOPIC => $channel);    # fetch topic for channel
+    $self->_add_conversation($channel);
   }
   else {
     $self->_publish(nick_joined => {nick => $nick, target => $channel});
@@ -710,14 +723,18 @@ sub err_nosuchchannel {
   my $channel = lc $message->{params}[1];
   my $name = as_id $self->name, $channel;
 
-  Scalar::Util::weaken($self);
-  $self->redis->zrem(
-    $self->{conversation_path},
-    $name,
-    sub {
-      $self->_publish(remove_conversation => {target => $channel});
-    }
-  );
+  $self->_publish(server_message => {status => 400, message => qq(No such channel "$channel")});
+
+  if ($channel =~ /^[#&]/) {
+    Scalar::Util::weaken($self);
+    $self->redis->zrem(
+      $self->{conversation_path},
+      $name,
+      sub {
+        $self->_publish(remove_conversation => {target => $channel});
+      }
+    );
+  }
 }
 
 =head2 err_nosuchnick
@@ -742,24 +759,39 @@ sub err_notonchannel {
   shift->err_nosuchchannel(@_);
 }
 
+=head2 irc_rpl_endofnames
+
+Example message:
+
+  :magnet.llarian.net 366 somenick #channel :End of /NAMES list.
+
+=cut
+
+sub irc_rpl_endofnames {
+  my ($self, $message) = @_;
+  my $channel = lc $message->{params}[1] or return;
+  my $nicks = delete $self->{nicks}{$channel} || [];
+
+  $self->_publish(rpl_namreply => {nicks => $nicks, target => $channel});
+}
+
 =head2 irc_rpl_namreply
 
 Example message:
 
-:Budapest.Hu.Eu.Undernet.org 353 somenick = #html :somenick Indig0 Wildblue @HTML @CSS @Luch1an @Steaua_ Indig0_ Pilum @fade
+  :Budapest.Hu.Eu.Undernet.org 353 somenick = #channel :somenick Indig0 Wildblue @HTML @CSS @Luch1an @Steaua_ Indig0_ Pilum @fade
 
 =cut
 
 sub irc_rpl_namreply {
   my ($self, $message) = @_;
-  my @nicks;
+  my $channel = lc $message->{params}[2] or return;
+  my $nicks = $self->{nicks}{$channel} ||= [];
 
   for (sort { lc $a cmp lc $b } split /\s+/, $message->{params}[3]) {    # 3 = "+nick0 @nick1 nick2"
     my $mode = s/^(\W)// ? $1 : '';
-    push @nicks, {nick => $_, mode => $mode};
+    push @$nicks, {nick => $_, mode => $mode};
   }
-
-  $self->_publish(rpl_namreply => {nicks => \@nicks, target => lc $message->{params}[2],});
 }
 
 =head2 irc_rpl_liststart
@@ -815,13 +847,13 @@ sub irc_mode {
   my $mode   = shift @{$message->{params}};
 
   if ($target eq lc $self->_irc->nick) {
-    my $data = {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode",};
+    my $data = {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode"};
 
     $self->_add_convos_message($data);
     $self->_publish(server_message => $data);
   }
   else {
-    $self->_publish(mode => {target => $target, mode => $mode, args => join(' ', @{$message->{params}}),},);
+    $self->_publish(mode => {target => $target, mode => $mode, args => join(' ', @{$message->{params}})});
   }
 }
 
@@ -860,26 +892,6 @@ sub cmd_nick {
   }
 }
 
-=head2 cmd_join
-
-Handle join commands from user. Add to channel set.
-
-=cut
-
-sub cmd_join {
-  my ($self, $message) = @_;
-  my $channel = lc $message->{params}[0] || '';
-  my $name;
-
-  if ($channel =~ /^[#&]+\w/) {
-    $name = as_id $self->name, $channel;
-    $self->redis->zadd($self->{conversation_path}, time, $name);
-  }
-  else {
-    $self->_publish(server_message => {status => 400, message => 'Do not understand which channel to join'});
-  }
-}
-
 sub _add_convos_message {
   my ($self, $data) = @_;
   my $login = $self->login;
@@ -891,7 +903,7 @@ sub _add_convos_message {
   local $data->{host}    = $self->name;
   local $data->{nick}    = $self->name;
   local $data->{network} = 'convos';                                        # make sure target in js works
-  local $data->{target}  = 'any';
+  local $data->{target}  = '';
   local $data->{user}    = 'convos';
   local $data->{uuid}    = Mojo::Util::md5_sum($data->{timestamp} . $$);    # not really an uuid
   $message = j $data;

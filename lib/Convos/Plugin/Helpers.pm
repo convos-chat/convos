@@ -57,30 +57,6 @@ See L<Convos::Core::Util/id_as>.
 
 See L<Convos::Core::Util/as_id>.
 
-=head2 connection_list
-
-Render the connections for a given user.
-
-=cut
-
-sub connection_list {
-  my ($self, $cb) = @_;
-  my $login = $self->session('login');
-
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      $self->redis->smembers("user:$login:connections", $_[0]->begin);
-    },
-    sub {
-      my ($delay, $connections) = @_;
-
-      $self->stash(connections => $connections || []);
-      $self->$cb;
-    },
-  );
-}
-
 =head2 conversation_list
 
 Will render the conversation list for all conversations.
@@ -91,7 +67,7 @@ sub conversation_list {
   my ($self, $cb) = @_;
   my $login = $self->session('login');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->zrevrange("user:$login:conversations", 0, -1, 'WITHSCORES', $delay->begin);
@@ -112,7 +88,6 @@ sub conversation_list {
           };
 
         $self->redis->zcount("user:$login:connection:$network:$target:msg", $timestamp, '+inf', $delay->begin);
-        $self->redis->hget("user:$login:connection:$network:$target", "topic", $delay->begin);
         $i++;
       }
 
@@ -125,7 +100,6 @@ sub conversation_list {
 
       for my $c (@$conversation_list) {
         $c->{unread} = shift @args || 0;
-        $c->{topic}  = shift @args || '';
       }
 
       return $self->$cb($conversation_list) if $cb;
@@ -156,6 +130,7 @@ sub format_conversation {
     push @{$c->{conversation}}, $message;
   }
 
+  $c->render_later;
   $c->{format_conversation}++;
 
   $delay->once(
@@ -180,7 +155,7 @@ sub _parse_message {
   URI::Find->new(
     sub {
       my $url = Mojo::Util::html_unescape(shift . '');
-      $c->link_to($url, $url, target => '_blank', class => 'embed');
+      $c->link_to($url, $url, target => '_blank');
     }
   )->find(\$message->{message});
 }
@@ -225,7 +200,7 @@ sub notification_list {
   my $login = $self->session('login');
   my $key   = "user:$login:notifications";
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->lrange($key, 0, 20, $delay->begin);
@@ -253,12 +228,7 @@ sub notification_list {
       }
 
       $self->stash(notification_list => $notification_list, n_notifications => $n_notifications);
-
-      return $self->$cb($notification_list) if $cb;
-      return $self->respond_to(
-        json => {json     => $self->stash('notification_list')},
-        html => {template => 'client/notification_list'},
-      );
+      $self->$cb($notification_list);
     },
   );
 }
@@ -275,23 +245,24 @@ sub send_partial {
   eval { $c->send($c->render_to_string(@_)->to_string) } or $c->app->log->error($@);
 }
 
-=head2 timestamp_span
+=head2 timestamp
 
-Returns a "E<lt>span>" tag with a timestamp.
+Returns a "E<lt>div>" tag with a timestamp.
 
 =cut
 
-sub timestamp_span {
+sub timestamp {
   my ($c, $timestamp) = @_;
   my $offset = $c->session('tz_offset') || 0;
   my $now    = time;
   my $format = '%e. %b %H:%M';
 
+  $timestamp ||= $now;
   $format = '%H:%M' if $timestamp > $now - 86400;
   $timestamp += $offset * 3600;    # offset is in hours
 
   $c->tag(
-    'span',
+    'div',
     class => 'timestamp',
     title => format_time($timestamp, '%e. %B %H:%M:%S'),
     format_time($timestamp, $format),
@@ -308,7 +279,7 @@ sub redirect_last {
   my ($self, $login) = @_;
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
@@ -323,7 +294,7 @@ sub redirect_last {
       }
 
       $self->redirect_to('wizard');
-    }
+    },
   );
 }
 
@@ -349,9 +320,9 @@ sub register {
   $app->helper(redis             => \&redis);
   $app->helper(as_id => sub { shift; Convos::Core::Util::as_id(@_) });
   $app->helper(id_as => sub { shift; Convos::Core::Util::id_as(@_) });
-  $app->helper(send_partial   => \&send_partial);
-  $app->helper(timestamp_span => \&timestamp_span);
-  $app->helper(redirect_last  => \&redirect_last);
+  $app->helper(send_partial  => \&send_partial);
+  $app->helper(timestamp     => \&timestamp);
+  $app->helper(redirect_last => \&redirect_last);
 }
 
 =head1 AUTHOR

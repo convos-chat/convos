@@ -12,8 +12,8 @@ redis_do(
   diag 'test sidebar links';
   $t->get_ok('/convos')->status_is(302);
   $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
-  $t->get_ok('/convos')->status_is(200)->element_exists('.sidebar.container a[href="/profile"]')
-    ->element_exists('.sidebar.container a[href="/logout"]');
+  $t->get_ok('/convos')->status_is(200)->element_exists('.sidebar a[href="/profile"]')
+    ->element_exists('.sidebar a[href="/logout"]');
 }
 
 {
@@ -25,9 +25,8 @@ redis_do(
 
 {
   diag 'test profile';
-  $t->get_ok('/profile')->status_is(200)->element_exists('.sidebar.container a[href="/profile"]')
-    ->element_exists('.sidebar.container a[href="/logout"]')
-    ->element_exists('a[href="http://gravatar.com"][target="_blank"]')
+  $t->get_ok('/profile')->status_is(200)->element_exists('.sidebar a[href="/profile"]')
+    ->element_exists('.sidebar a[href="/logout"]')->element_exists('a[href="http://gravatar.com"][target="_blank"]')
     ->element_exists('form[action="/profile"][method="post"]')
     ->element_exists('form input[name="email"][value="e1@convos.by"]')
     ->element_exists('form input[name="avatar"][value="a1@convos.by"]')->text_is('form .actions button', 'Update')

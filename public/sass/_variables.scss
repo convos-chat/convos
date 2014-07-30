@@ -4,16 +4,18 @@ $fontColor: #333;
 $linkColor: #00451f;
 $fontSize: 15px;
 $bodyGutter: 20px;
-$navHeight: 44px;
+$navHeight: 42px;
 $footerHeight: 50px;
 $responsiveWidth: 700px;
 $columnWidth: 8.333333%;
 $navBarIconWidth: 32px;
 $buttonBorderHover: 2px solid darken(#fff, 70%);
 $nickListWidth: 180px;
-$unreadColor: #a00;
 $navBarZindex: 1000;
 $errorColor: #d5000d;
+
+$sidebarBackground: #f4f4f4;
+$selectizeOptionPadding: 4px 8px;
 
 $FontAwesomePath: "../font";
 $borderColor: #eee;

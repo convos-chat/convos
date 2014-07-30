@@ -61,6 +61,41 @@ sub control {
   $self;
 }
 
+=head2 reset
+
+  $self = $self->reset;
+
+Used to reset connection stats when backend is restarted.
+
+=cut
+
+sub reset {
+  my $self  = shift;
+  my $redis = $self->redis;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $redis->del('convos:backend:lock');
+      $redis->del('convos:host2convos');
+      $redis->del('convos:loopback:names');    # clear loopback nick list
+      $redis->hset('convos:host2convos', localhost => 'loopback');
+      $redis->smembers('connections', $delay->begin);
+    },
+    sub {
+      my ($delay, $connections) = @_;
+
+      warn sprintf "[core] Reset %s connection(s)\n", int @$connections if DEBUG;
+      for my $conn (@$connections) {
+        my ($login, $name) = split /:/, $conn;
+        $redis->hmset("user:$login:connection:$name", state => "disconnected", current_nick => "");
+      }
+    },
+  );
+
+  return $self;
+}
+
 =head2 send_convos_message
 
   $self = $self->send_convos_message($login, $message);
@@ -119,9 +154,7 @@ sub start {
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-
-      $self->redis->del('convos:host2convos');
-      $self->redis->del('convos:loopback:names');    # clear loopback nick list
+      $self->reset;
       $self->redis->smembers('connections', $delay->begin);
     },
     sub {

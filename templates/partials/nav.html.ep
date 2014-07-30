@@ -1,19 +1,18 @@
 <nav class="bar">
-  % my @class;
   %= include 'client/conversation_list'
+% if ($full_page) {
+  % my $n_notifications = stash('n_notifications') || 0;
   <div class="right">
-    %= link_to 'conversation_list', class => 'conversations toggler', 'data-focus' => 'a', 'data-toggle' => 'div.conversations.container', begin
-      <i class="icon-chevron-down"></i>
-    % end
-    %= link_to 'add_conversation', title => 'Add conversation',  class => 'add-conversation toggler', 'data-focus' => 'input[name="channel"]', 'data-toggle' => 'div.add-conversation', begin
-      <i class="icon-plus">+</i>
-    % end
-    % @class = qw( notifications toggler );
-    % push @class, 'alert' if $n_notifications;
-    %= link_to 'conversation_list', title => 'List notifications', class => "@class", 'data-focus' => 'a', 'data-toggle' => 'div.notifications.container', begin
+    <a href="sidebar://form.conversations" title="Show conversations" class="conversations btn-sidebar">
+      <i class="icon-drop-down">☰</i>
+    </a>
+    <a href="sidebar://div.notification-list" title="List conversations" class="notifications btn-sidebar">
       <i class="icon-bullhorn"></i>
-      <b><%= ( $n_notifications > 999 ? '999+' : $n_notifications ) if $n_notifications %></b>
-    % end
-    <a href="#sidebar" title="Display nick list" class="sidebar toggler" data-focus="a" data-toggle="div.sidebar.container"><i class="icon-cog"></i></a>
+      <b><%= $n_notifications > 999 ? '999+' : $n_notifications || '' %></b>
+    </a>
+    <a href="sidebar://form.sidebar" title="Conversation settings" class="sidebar btn-sidebar hide-on-widescreen">
+      <i class="icon-cog"></i>
+    </a>
   </div>
+% }
 </nav>

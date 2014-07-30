@@ -1,12 +1,12 @@
 % my $prev_nick = stash('prev_nick') || '';
-<li id="<%= $uuid %>" class="action message<%= $highlight ? ' highlight' : '' %><%= $nick eq $prev_nick ? ' same-nick' : '' %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>">
-% if($nick ne $prev_nick) {
-  %= avatar { nick => $nick, host => $host, user => $user }, alt => $nick, class => 'avatar'
-% }
-  <div class="content whitespace">&#10023; <%= link_to $nick, view => { network => $network, target => $nick } %> <%== $message %></div>
-% if($nick ne $prev_nick) {
-  %= timestamp_span($timestamp)
-% }
+% my @classes = qw( message action );
+% push @classes, $target =~ /^\w/ ? 'private' : 'channel';
+% push @classes, 'highlight' if $highlight;
+% push @classes, 'same-nick' if $nick eq $prev_nick;
+<li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>" data-timestamp="<%= $timestamp %>">
+  %= timestamp $timestamp
+  %= avatar { nick => $nick, host => $host, user => $user }, alt => '', class => 'avatar'
+  <div class="content whitespace">&#10023; <%= link_to $nick, view => { network => $network, target => $nick }, class => 'autocomplete' %> <%== $message %></div>
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>
 % }

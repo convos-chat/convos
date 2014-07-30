@@ -1,4 +1,4 @@
-<li class="help info" data-target="any">
+<li class="help info" data-target="">
   <b class="close">&times;</b>
   <h3>Available commands</h3>
   <div class="content">
@@ -32,8 +32,12 @@
   <h3>Keyboard Shortcuts</h3>
   <div class="content">
     <dl>
-      <dt>shift+enter</dt>
-      <dd>Shift focus between chat input field and main menu</dd>
+      <dt>shift+enter, alt+shift+a</dt>
+      <dd>Shift focus between chat input and conversation sidebar</dd>
+      <dt>alt+shift+s</dt>
+      <dd>Shift focus between chat input and notifications sidebar</dd>
+      <dt>alt+shift+d</dt>
+      <dd>Shift focus between chat input and settings sidebar</dd>
       <dt>tab/shift+tab</dt>
       <dd>Navigate main menu when focused. Enter to choose.</dd>
       <dt>tab (When writing a message)</dt>

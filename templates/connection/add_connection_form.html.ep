@@ -1,6 +1,6 @@
 % my $wizard = stash 'wizard';
 % my $err;
-%= form_for 'connection.add', class => 'horizontal', method => 'post', begin
+%= form_for 'connection.add', class => 'horizontal', method => 'post', 'data-draw' => 'add-connection', begin
   <div class="form-group nick">
     <label for="nick">Nick</label>
     %= text_field 'nick', session('login'), id => 'nick'
@@ -12,7 +12,7 @@
   <div class="form-group name">
     <label for="name">Network</label>
     <select name="name" id="name">
-    % for my $network (@$networks) {
+    % for my $network (@$select_networks) {
       % my @selected = $network->{name} eq $default_network ? (selected => 'selected') : ();
       %= tag 'option', value => $network->{name}, 'data-channels' => $network->{channels} || '', @selected, begin
         %= $network->{name}

@@ -54,16 +54,16 @@ DISTRIBUTIONS
       File::Spec 0
       Test::More 0
       perl 5.006001
-  Mojo-IRC-0.07
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.07.tar.gz
+  Mojo-IRC-0.09
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.09.tar.gz
     provides:
-      Mojo::IRC 0.07
+      Mojo::IRC 0.09
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
       Mojolicious 4.30
       Parse::IRC 1.20
-      Test::More 0.98
+      Test::More 0.88
       Unicode::UTF8 0.59
   Mojo-Redis-0.9928
     pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9928.tar.gz
@@ -76,8 +76,8 @@ DISTRIBUTIONS
       Mojolicious 3.0
       Protocol::Redis 1.0
       Test::More 0.88
-  Mojolicious-5.05
-    pathname: S/SR/SRI/Mojolicious-5.05.tar.gz
+  Mojolicious-5.16
+    pathname: S/SR/SRI/Mojolicious-5.16.tar.gz
     provides:
       Mojo undef
       Mojo::Asset undef
@@ -140,7 +140,7 @@ DISTRIBUTIONS
       Mojo::UserAgent::Server undef
       Mojo::UserAgent::Transactor undef
       Mojo::Util undef
-      Mojolicious 5.05
+      Mojolicious 5.16
       Mojolicious::Command undef
       Mojolicious::Command::cgi undef
       Mojolicious::Command::cpanify undef
@@ -188,10 +188,10 @@ DISTRIBUTIONS
       ojo undef
     requirements:
       ExtUtils::MakeMaker 0
-  Mojolicious-Plugin-AssetPack-0.13
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.13.tar.gz
+  Mojolicious-Plugin-AssetPack-0.19
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.19.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.13
+      Mojolicious::Plugin::AssetPack 0.19
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
@@ -200,7 +200,7 @@ DISTRIBUTIONS
       IPC::Run3 0.04
       JavaScript::Minifier::XS 0.01
       Mojolicious 4.30
-      Test::More 0.90
+      Test::More 0.88
   Mojolicious-Plugin-LinkEmbedder-0.06
     pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.06.tar.gz
     provides:
@@ -289,6 +289,67 @@ DISTRIBUTIONS
       constant 0
       strict 0
       warnings 0
+  URI-1.60
+    pathname: G/GA/GAAS/URI-1.60.tar.gz
+    provides:
+      URI 1.60
+      URI::Escape 3.31
+      URI::Heuristic 4.20
+      URI::IRI undef
+      URI::QueryParam undef
+      URI::Split undef
+      URI::URL 5.04
+      URI::WithBase 2.20
+      URI::_foreign undef
+      URI::_generic undef
+      URI::_idna undef
+      URI::_ldap 1.12
+      URI::_login undef
+      URI::_punycode 0.04
+      URI::_query undef
+      URI::_segment undef
+      URI::_server undef
+      URI::_userpass undef
+      URI::data undef
+      URI::file 4.21
+      URI::file::Base undef
+      URI::file::FAT undef
+      URI::file::Mac undef
+      URI::file::OS2 undef
+      URI::file::QNX undef
+      URI::file::Unix undef
+      URI::file::Win32 undef
+      URI::ftp undef
+      URI::gopher undef
+      URI::http undef
+      URI::https undef
+      URI::ldap 1.12
+      URI::ldapi undef
+      URI::ldaps undef
+      URI::mailto undef
+      URI::mms undef
+      URI::news undef
+      URI::nntp undef
+      URI::pop undef
+      URI::rlogin undef
+      URI::rsync undef
+      URI::rtsp undef
+      URI::rtspu undef
+      URI::sip 0.11
+      URI::sips undef
+      URI::snews undef
+      URI::ssh undef
+      URI::telnet undef
+      URI::tn3270 undef
+      URI::urn undef
+      URI::urn::isbn undef
+      URI::urn::oid undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      MIME::Base64 2
+      Test 0
+      Test::More 0
+      perl 5.008001
   URI-Find-20111103
     pathname: M/MS/MSCHWERN/URI-Find-20111103.tar.gz
     provides:

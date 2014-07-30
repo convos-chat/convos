@@ -1,10 +1,10 @@
-<li class="nicks" data-network="<%= $network %>" data-target="<%= $target %>">
-  <span class="prefix">Participants are</span>
-  <span>
+<li class="nick-init hidden" data-network="<%= $network %>" data-target="<%= $target %>">
+  %= timestamp $timestamp
+  <div class="content">
+    <span>Participants:</span>
     % my $i = 0;
     % for my $n (@$nicks) {
-      <%= link_to join('', @$n{qw/mode nick/}), view => { network => $network, target => $n->{nick} }, 'data-nick' => $n->{nick} %><%= ++$i == @$nicks ? '.' : ', ' %>
+      <a href="cmd:///query <%= $n->{nick} %>" data-nick="<%= $n->{nick} %>"><%= join('', @$n{qw( mode nick )}) %></a><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
-  </span>
-  %= timestamp_span($timestamp)
+  </div>
 </li>

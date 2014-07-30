@@ -1,0 +1,8 @@
+<li class="message <%= $target ? 'notice' : 'error' %>">
+  %= timestamp
+  %= image '/image/avatar-convos.jpg', alt => '', class => 'avatar'
+  <h3><%= link_to 'convos', 'view.network', { network => 'convos' }, class => 'internal' %></h3>
+  <div class="content">
+    Welcome to <%= $target || $network %>. Start by typing "hi!" in the input field at the bottom of the page.
+  </div>
+</li>

@@ -1,0 +1,16 @@
+<div class="notification-list sidebar-right">
+  <ul data-notifications="<%= $n_notifications %>">
+    % for my $n (@$notification_list) {
+    <li class="<%= $n->{read} ? '' : 'unread' %>">
+      %= link_to url_for(view => %$n)->query(notification => $n->{index}, from => $n->{timestamp}), title => "View conversation with $n->{target}", begin
+        <b><%= $n->{nick} %></b>
+        <%= "in $n->{target}" if $n->{is_channel} %>
+        <span class="message"><%= $n->{message} %></span>
+      % end
+    </li>
+    % }
+    % unless(@$notification_list) {
+    <li class="center"><h3>No notifications</h3></li>
+    % }
+  </ul>
+</div>

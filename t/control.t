@@ -42,7 +42,7 @@ is_deeply(
 );
 
 {
-  $t->post_ok('/connection/magnet/control?cmd=start')->status_is(302)->header_like(Location => qr{:\d+/magnet$});
+  $t->post_ok('/connection/magnet/control?cmd=start')->status_is(302)->header_is(Location => '/magnet');
 }
 
 done_testing;

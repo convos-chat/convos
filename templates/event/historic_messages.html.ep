@@ -2,9 +2,8 @@
   <span class="actions">
     % my $more = url_for('view' => { network => $network, target => $target })->query(from => $conversation->[-1]{timestamp});
     %= link_to 'More...', $more, class => 'button newer'
-    %= link_to 'Chat', 'view' => { network => $network, target => $target }, class => 'button current'
   </span>
   <div class="content">
-    The above messages are from archive.
+    The messages above are from archive.
   </div>
 </li>

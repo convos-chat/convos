@@ -18,18 +18,15 @@ Add a new connection based on network name.
 =cut
 
 sub add_connection {
-  my $self      = shift->render_later;
-  my $full_page = $self->stash('full_page');
-  my $method    = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
+  my $self = shift;
+  my $method = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
-      $self->connection_list($delay->begin);
-      $self->conversation_list($delay->begin) if $full_page;
-      $self->notification_list($delay->begin) if $full_page;
-      $delay->begin->();
+      $self->conversation_list($delay->begin);
+      $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
       my ($delay) = @_;
@@ -47,7 +44,7 @@ NOTE: This method currently also does update.
 =cut
 
 sub add_network {
-  my $self       = shift->render_later;
+  my $self       = shift;
   my $validation = $self->validation;
   my @channels   = map { split /\s+/ } $self->param('channels');
   my ($is_default, $name, $redis, $referrer);
@@ -77,7 +74,7 @@ sub add_network {
   $is_default = $self->param('default') || 0;
   $referrer   = $self->param('referrer') || '/';
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
@@ -94,11 +91,6 @@ sub add_network {
 
 =head2 control
 
-  POST /:name/control/start
-  POST /:name/control/stop
-  POST /:name/control/restart
-  GET /:name/control/state
-
 Used to control a connection. See L<Convos::Core/control>.
 
 Special case is "state": It will return the state of the connection:
@@ -107,7 +99,7 @@ Special case is "state": It will return the state of the connection:
 =cut
 
 sub control {
-  my $self        = shift->render_later;
+  my $self        = shift;
   my $command     = $self->param('cmd') || 'state';
   my $name        = $self->stash('name');
   my $redirect_to = $self->url_for('view.network', {network => $name});
@@ -123,25 +115,42 @@ sub control {
   }
 
   if ($self->req->method ne 'POST') {
-    return $self->_invalid_control_request;
+    $self->_invalid_control_request;
   }
+  elsif ($command =~ m!^/! or $command eq 'irc') {
+    $self->delay(
+      sub {
+        my ($delay) = @_;
+        my $key = sprintf 'convos:user:%s:%s', $self->session('login'), $name;
+        $self->redis->publish($key => $self->param('irc_cmd') // $command, $delay->begin);
+      },
+      sub {
+        my ($delay, $sent) = @_;
+        $self->respond_to(
+          json => {json => {state => $sent ? 'sent' : 'error'}, status => $sent ? 200 : 500},
+          any => sub { shift->redirect_to($redirect_to) },
+        );
+      },
+    );
+  }
+  else {
+    $self->delay(
+      sub {
+        my ($delay) = @_;
+        $self->app->core->control($command, $self->session('login'), $name, $delay->begin);
+      },
+      sub {
+        my ($delay, $sent) = @_;
+        my $status = $sent ? 200 : 500;
+        my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
 
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      $self->app->core->control($command, $self->session('login'), $name, $delay->begin);
-    },
-    sub {
-      my ($delay, $sent) = @_;
-      my $status = $sent ? 200 : 500;
-      my $state = $command eq 'stop' ? 'stopping' : "${command}ing";
-
-      $self->respond_to(
-        json => {json => {state => $state}, status => $status},
-        any  => sub   { shift->redirect_to($redirect_to) },
-      );
-    },
-  );
+        $self->respond_to(
+          json => {json => {state => $state}, status => $status},
+          any  => sub   { shift->redirect_to($redirect_to) },
+        );
+      },
+    );
+  }
 }
 
 =head2 edit_connection
@@ -151,21 +160,20 @@ Used to edit a connection.
 =cut
 
 sub edit_connection {
-  my $self      = shift->render_later;
+  my $self      = shift;
   my $full_page = $self->stash('full_page');
   my $method    = $self->req->method eq 'POST' ? '_edit_connection' : '_edit_connection_form';
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
+      $self->conversation_list($delay->begin);
+
       if ($full_page) {
         $self->_connection_state($delay->begin);
-        $self->conversation_list($delay->begin);
         $self->notification_list($delay->begin);
       }
-
-      $self->connection_list($delay->begin);
     },
     sub {
       my ($delay, $state) = @_;
@@ -184,7 +192,7 @@ Used to edit settings for a network.
 =cut
 
 sub edit_network {
-  my $self = shift->render_later;
+  my $self = shift;
   my $name = $self->stash('name');
 
   $self->stash(layout => 'tactile');
@@ -196,7 +204,7 @@ sub edit_network {
     return;
   }
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
 
@@ -210,7 +218,7 @@ sub edit_network {
       $self->param(name    => $name);
       $self->param(default => 1) if $default_network eq $name;
       $self->param(server  => join ':', @$network{qw( server port )});
-      $self->render(default_network => $default_network, name => $name, network => $network,);
+      $self->render(default_network => $default_network, name => $name, network => $network);
     },
   );
 }
@@ -222,13 +230,13 @@ Delete a connection.
 =cut
 
 sub delete_connection {
-  my $self       = shift->render_later;
+  my $self       = shift;
   my $validation = $self->validation;
 
   $validation->input->{login} = $self->session('login');
   $validation->input->{name}  = $self->stash('name');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->app->core->delete_connection($validation, $delay->begin);
@@ -248,10 +256,9 @@ Render wizard page for first connection.
 =cut
 
 sub wizard {
-  my $self = shift->render_later;
+  my $self = shift;
 
   $self->stash(layout => 'tactile', template => 'connection/wizard',);
-
   $self->_add_connection_form;
 }
 
@@ -263,7 +270,7 @@ sub _add_connection {
   $validation->input->{channels} = [map { split /\s/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->redis->hgetall("irc:network:$name", $delay->begin);
@@ -288,7 +295,7 @@ sub _add_connection_form {
   my $login = $self->session('login');
   my $redis = $self->redis;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $redis->smembers("user:$login:connections", $delay->begin);
@@ -317,7 +324,7 @@ sub _add_connection_form {
       }
 
       $self->param(channels => $channels || $networks[0]{channels} || '');
-      $self->render(default_network => $default_network, networks => \@networks,);
+      $self->render(default_network => $default_network, select_networks => \@networks);
     },
   );
 }
@@ -341,7 +348,7 @@ sub _edit_connection {
   $validation->input->{server}   = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->app->core->update_connection($validation, $delay->begin);
@@ -359,7 +366,7 @@ sub _edit_connection_form {
   my $login = $self->session('login');
   my $name  = $self->stash('name');
 
-  Mojo::IOLoop->delay(
+  $self->delay(
     sub {
       my ($delay) = @_;
       $self->_connection_state($delay->begin);

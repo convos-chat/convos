@@ -1,7 +1,7 @@
 % title "Edit $name";
 % stash sidebar => 'convos';
-<ul class="with-sidebar">
-  <li>
+<ul>
+  <li class="with-padding">
     <h2>Edit <%= $name %></h2>
     %= form_for 'connection.edit', class => 'horizontal', method => 'post', begin
       % my $err;
@@ -23,7 +23,7 @@
       </div>
       <div class="form-group tls">
         <label for="tls">Secure</label>
-        %= check_box tls => 1
+        %= check_box tls => 1, id => 'tls'
         <p class="help">Chat over TLS for increased privacy. Require server support.</p>
       </div>
       <div class="actions">

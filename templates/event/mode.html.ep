@@ -1,7 +1,7 @@
 <li class="notice" data-network="<%= $network %>" data-target="<%= $target %>">
+  %= timestamp $timestamp
   <div class="content">
     <b><%= $mode %></b>
     <span><%= $args %></span>
   </div>
-  %= timestamp_span($timestamp)
 </li>

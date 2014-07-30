@@ -1,45 +1,12 @@
-html, body { height: 100%; }
+html { height: 100%; }
 
-div.wrapper {
-  min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  margin-bottom: -$footerHeight;
-
-  div.clear {
-    height: $footerHeight + 20;
-    clear: both;
-  }
-}
-
-footer {
-  height: $footerHeight;
+div.notification.question {
   width: 100%;
-  background: #fff;
-  color: #999;
-  clear: both;
-  padding: 0 ($bodyGutter - 5) 5px;
-  overflow: hidden;
+  z-index: $navBarZindex - 1;
   position: fixed;
-  bottom: 0;
-
-  form {
-    position: relative;
-    display: none;
-    input { font-family: inherit; font-size: 1.1em; width: 100%; padding: 8px; padding-right: 30px; }
-    input.sending { background: url(../image/loader-facebook.gif) no-repeat 99% 50%; }
-    input.disabled, input.sending.disabled { background-color: #eee; }
-    .menu {
-      position: absolute;
-      top: 5px;
-      right: 4px;
-      a { color: #555; font-size: 22px; text-decoration: none; display: block; padding: 4px; }
-    }
-  }
-
-  @media (max-width: $responsiveWidth) {
-    position: static;
-  }
+  top: 40px;
+  display: none;
+  button, .button { font-size: 0.9em; }
 }
 
 hr {
@@ -51,9 +18,15 @@ hr {
   padding-bottom: 1em;
 }
 
+@media (min-width: $responsiveWidth) {
+  .hide-on-widescreen { display: none !important; }
+}
+
 @media (max-width: $responsiveWidth) {
+  .row { padding: 0; }
+
   footer {
-    height: 42px;
+    height: $navHeight;
     input, input:focus {
       border-bottom: 0;
       border-right: 0;
