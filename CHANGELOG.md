@@ -1,4 +1,4 @@
-## 0.8
+## 0.8 (2014-07-30)
 - Fix asking for desktop notifications
 - Fix autocomplete: The autocomplete was reset because of keyCode 229 in Chrome
 - Fix autcomplete nick order #77
