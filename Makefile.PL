@@ -20,7 +20,7 @@ WriteMakefile(
     'Mojo::IRC'                         => '0.09',
     'Mojo::Redis'                       => '0.9928',
     'Mojolicious'                       => '5.16',
-    'Mojolicious::Plugin::AssetPack'    => '0.18',
+    'Mojolicious::Plugin::AssetPack'    => '0.19',
     'Mojolicious::Plugin::LinkEmbedder' => '0.06',
     'Parse::IRC'                        => '1.18',
     'Time::Piece'                       => '1.2',
