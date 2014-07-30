@@ -132,6 +132,20 @@ on all session cookies.  Requires HTTPS.
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
 
+=item * MOJO_LISTEN
+
+List of one or more locations to listen on. This also works for
+L<hypnotoad|Mojo::Server::Hypnotoad>. Example:
+
+  MOJO_LISTEN="http://*:8080,https://*:8443"
+
+L<Mojo::Server::Daemon/listen>.
+
+=item * MOJO_REVERSE_PROXY
+
+Set this to a true value if you're using L<hypnotoad|Mojo::Server::Hypnotoad>
+behind a reverse proxy, such as nginx.
+
 =back
 
 =head2 HTTP headers
@@ -296,6 +310,7 @@ sub startup {
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets($config);
+  $self->_hypnotoad;
   $self->_public_routes;
   $self->_private_routes;
 
@@ -384,6 +399,13 @@ sub _from_cpan {
   $self->home->parse($home);
   $self->static->paths->[0]   = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
+}
+
+sub _hypnotoad {
+  my $self = shift;
+  my $config = $self->config->{hypnotoad} ||= {};
+
+  $config->{listen} = [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'] unless $config->{listen};
 }
 
 sub _private_routes {
