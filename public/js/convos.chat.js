@@ -215,7 +215,7 @@
       var cmd = (e.target.href || '').match(/^cmd:\/\/(.*)/);
       if (!cmd) return;
       e.preventDefault();
-      convos.send(cmd[1]);
+      convos.send(decodeURI(cmd[1]));
       $('body').hideSidebar();
     });
 
