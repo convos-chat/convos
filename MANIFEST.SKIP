@@ -74,3 +74,4 @@
 ^\.env
 ^\.editorconfig
 ^\.travis.yml
+\.sass-cache
