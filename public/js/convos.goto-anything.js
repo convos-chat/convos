@@ -20,7 +20,7 @@
       $g.find('a.active').removeClass('active');
       $g.find('a:first').addClass('active');
     }).on('keyup', function(e) { // filter conversation list
-      var v = this.value;
+      var v = this.value.toLowerCase();
       var channel = convos.isChannel(v);
       var exact;
 
