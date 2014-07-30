@@ -29,11 +29,11 @@ sub data {
       $_[0] eq 'add_conversation'    ? (target => '#foo')
     : $_[0] eq 'remove_conversation' ? (target => '#foo')
     : $_[0] eq 'mode' ? (target => '#foo', mode => '+o', args => 'TODO')
-    : $_[0] eq 'nick_change' ? (old_nick => 'testman', new_nick => 'testwoman')
+    : $_[0] eq 'nick_change' ? (old_nick => 'bbb',     new_nick => 'testwoman')
     : $_[0] eq 'nick_joined' ? (nick     => 'testman', target   => '#foo')
     : $_[0] eq 'nick_parted' ? (nick     => 'testman', target   => '#foo')
     : $_[0] eq 'rpl_namreply'
-    ? (nicks => [{nick => 'yyy', mode => 'o'}, {nick => 'bbb', mode => '+'}], target => '#foo')
+    ? (nicks => [{nick => 'testman', mode => 'o'}, {nick => 'bbb', mode => '+'}], target => '#foo')
     : $_[0] eq 'nick_quit'      ? (nick   => 'testwoman',       message => 'Bye, bye love')
     : $_[0] eq 'server_message' ? (status => 200,               message => 'Some message')
     : $_[0] eq 'topic'          ? (topic  => 'Too cool topic!', target  => '#foo')
