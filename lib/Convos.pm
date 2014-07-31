@@ -237,11 +237,6 @@ our $VERSION = '0.8002';
 
 Holds a L<Convos::Core::Archive> object.
 
-=head2 cache
-
-Holds a L<Mojolicious::Static> object pointing to a cache dir.
-The directory is "/tmp/convos" by default.
-
 =head2 core
 
 Holds a L<Convos::Core> object.
@@ -255,16 +250,6 @@ Holds a L<Convos::Upgrader> object.
 has archive => sub {
   my $self = shift;
   Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
-};
-
-has cache => sub {
-  my $self = shift;
-  my $dir = $self->config->{cache_dir} ||= catfile(tmpdir, 'convos');
-
-  $self->log->info("Cache dir: $dir");
-  mkdir $dir or die "mkdir $dir: $!" unless -d $dir;
-
-  Mojolicious::Static->new(paths => [$dir]);
 };
 
 has core => sub {
@@ -303,7 +288,6 @@ sub startup {
   }
 
   $self->ua->max_redirects(2);             # support getting facebook pictures
-  $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
   $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->secrets([time]);                  # will be replaced by _set_secrets()

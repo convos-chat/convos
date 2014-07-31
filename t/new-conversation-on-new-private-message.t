@@ -43,7 +43,7 @@ $t->websocket_ok('/socket');
 }
 
 {
-  $t->get_ok('/magnet/%23convos')->element_exists('nav li:nth-of-child(2) a[href="/magnet/%23convos"]')
+  $t->get_ok('/magnet/%23convos')->status_is(200)->element_exists('nav li:nth-of-child(2) a[href="/magnet/%23convos"]')
     ->text_is('nav li:nth-of-child(3) a[href="/magnet/fooman"] b', 2)->text_is('nav li a[href="/magnet/fooman"] b', 2)
     ->element_exists('nav li:nth-of-child(4) a[href="/magnet/batman"]');
 }
