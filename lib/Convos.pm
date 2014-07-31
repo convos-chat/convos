@@ -177,6 +177,35 @@ with nginx:
 
 =back
 
+=head1 CUSTOM TEMPLATES
+
+Some parts of the Convos templates can include custom content. Example:
+
+  # Create a directory where you can store the templates
+  $ mkdir -p custom-convos/vendor
+
+  # Edit the template you want to customize
+  $ $EDITOR custom-convos/vendor/login_footer.html.ep
+
+  # Start convos with CONVOS_TEMPLATES set. Without /vendor at the end
+  $ CONVOS_TEMPLATES=$PWD/custom-convos convos daemon --listen http://*:5000
+
+Any changes to the templates require the server to restart.
+
+The templates that can be customized are:
+
+=over 4
+
+=item * vendor/login_footer.html.ep
+
+This template will be included below the form on the C</login> page.
+
+=item * vendor/register_footer.html.ep
+
+This template will be included below the form on the C</register> page.
+
+=back
+
 =head1 RESOURCES
 
 =over 4
@@ -316,11 +345,17 @@ sub startup {
     $ENV{CONVOS_REDIS_URL} = 'redis://127.0.0.1:6379/1';
     $self->log->info("Using default CONVOS_REDIS_URL=$ENV{CONVOS_REDIS_URL}");
   }
-
   if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
     $self->log->warn(
       "invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
     $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
+  }
+  if ($ENV{CONVOS_TEMPLATES}) {
+
+    # Using push() since I don't think it's a good idea for allowing the user
+    # to customize every template, at least not when the application is still
+    # unstable.
+    push @{$self->renderer->paths}, $ENV{CONVOS_TEMPLATES};
   }
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));

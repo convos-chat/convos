@@ -1,0 +1,12 @@
+<h2>About</h2>
+<p>
+  <%= link_to 'Convos', 'http://convos.by' %> is the simplest way to use IRC.
+  It is always online, and accessible to your web browser, both on desktop and mobile.
+  Run it on your home server, or cloud service easily.
+  It can be deployed to Heroku or Docker-based cloud services,
+  or you can just run it as a normal Mojolicious application,
+  using any of the <%= link_to 'Deployment Guides', 'http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT' %>.
+</p>
+<p>
+  %= image 'http://convos.by/images/screenshot.jpg', alt => 'Convos illustration'
+</p>
