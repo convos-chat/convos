@@ -2,15 +2,15 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
   NAME          => 'Convos',
-  AUTHOR        => 'Marcus <marcus@nordaaker.com>',
+  AUTHOR        => 'Jan Henning Thorsen <jhthorsen@cpan.org>',
   LICENSE       => 'artistic_2',
   ABSTRACT_FROM => 'lib/Convos.pm',
   VERSION_FROM  => 'lib/Convos.pm',
   EXE_FILES     => [qw( script/convos )],
   META_MERGE    => {
     resources => {
-      bugtracker => 'https://github.com/jhthorsen/convos/issues',
-      homepage   => 'https://github.com/jhthorsen/convos',
+      bugtracker => 'https://github.com/Nordaaker/convos/issues',
+      homepage   => 'http://convos.by/',
       repository => 'https://github.com/Nordaaker/convos.git',
     },
   },

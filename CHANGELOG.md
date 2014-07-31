@@ -1,3 +1,6 @@
+## 0.8002 (2014-07-31)
+- Fix UNAUTHORIZED release
+
 ## 0.8001 (2014-07-31)
 - Fix "same-nick" class was appended to wrong element
 - Squelch not connected message for 'convos' default network.
