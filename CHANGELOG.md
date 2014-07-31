@@ -1,6 +1,6 @@
-## 0.8001
+## 0.8001 (2014-07-31)
 - Fix "same-nick" class was appended to wrong element
-- Squelsh not connected message for 'convos' default network.
+- Squelch not connected message for 'convos' default network.
 
 ## 0.8 (2014-07-30)
 - Fix asking for desktop notifications
