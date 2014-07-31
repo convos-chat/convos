@@ -1,3 +1,7 @@
+## 0.8001 (2014-07-31)
+- Fix "same-nick" class was appended to wrong element
+- Squelch not connected message for 'convos' default network.
+
 ## 0.8 (2014-07-30)
 - Fix asking for desktop notifications
 - Fix autocomplete: The autocomplete was reset because of keyCode 229 in Chrome
