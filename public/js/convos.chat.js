@@ -70,7 +70,7 @@
       var same_nick = $same.data('sender') || '';
 
       if ($message.hasClass('message') && $same.hasClass('message') && same_nick == $message.data('sender')) {
-        $same.addClass('same-nick');
+        (func == 'prepend' ? $same : $message).addClass('same-nick');
       }
       if (!$message.hasClass('hidden')) {
         $messages[func || 'append']($message.fadeIn('fast'));

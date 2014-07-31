@@ -1,3 +1,6 @@
+## 0.8001
+- Fix "same-nick" class was appended to wrong element
+
 ## 0.8 (2014-07-30)
 - Fix asking for desktop notifications
 - Fix autocomplete: The autocomplete was reset because of keyCode 229 in Chrome
