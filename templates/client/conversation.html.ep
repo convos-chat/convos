@@ -8,7 +8,7 @@
 % }
 % if(stash 'got_more') {
   %= include 'event/historic_messages'
-% } elsif($state ne 'connected' and !$from_archive) {
+% } elsif($network ne 'convos' and $state ne 'connected' and !$from_archive) {
   %= include 'event/not_connected'
 % }
 </ul>
