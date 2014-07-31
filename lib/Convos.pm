@@ -309,7 +309,7 @@ sub startup {
   $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
-  $self->_assets($config);
+  $self->_assets;
   $self->_hypnotoad;
   $self->_public_routes;
   $self->_private_routes;
@@ -348,9 +348,9 @@ sub startup {
 }
 
 sub _assets {
-  my ($self, $config) = @_;
+  my $self = shift;
 
-  $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
+  $self->plugin('AssetPack');
   $self->asset('convos.css' => '/sass/convos.scss');
   $self->asset(
     'convos.js' => qw(
