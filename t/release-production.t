@@ -14,6 +14,8 @@ $ENV{MOJO_MODE} = 'production';
 my $t = Test::Mojo->new('Convos');
 my ($css, $js);
 
+$t->app->{hostname_is_set} = 1;
+
 {
   $t->get_ok('/login')->status_is(200)->element_exists(q(link[rel="stylesheet"][href^="/packed/convos-"]))
     ->element_exists(q(script[src^="/packed/convos-"]));

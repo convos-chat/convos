@@ -32,6 +32,10 @@ use constant DEBUG => $ENV{MOJO_IRC_DEBUG} ? 1 : 0;
 
 Cannot be set. Will always return "loopback".
 
+=head2 name
+
+The name of this IRC client. Defaults to "Convos".
+
 =head2 nick
 
 Holds the nick.
@@ -46,7 +50,7 @@ for compat reasons
 
 =cut
 
-
+has name => 'Convos';
 has nick => '';
 has 'pass';
 sub server {'loopback'}

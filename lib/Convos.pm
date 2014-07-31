@@ -330,17 +330,7 @@ sub startup {
   }
 
   $self->defaults(full_page => 1);
-  $self->hook(
-    before_dispatch => sub {
-      my $c = shift;
-
-      $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
-
-      if (my $base = $c->req->headers->header('X-Request-Base')) {
-        $c->req->url->base(Mojo::URL->new($base));
-      }
-    }
-  );
+  $self->hook(before_dispatch => \&_before_dispatch);
 
   Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
   Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
@@ -372,6 +362,19 @@ sub _assets {
       /js/convos.chat.js
       )
   );
+}
+
+sub _before_dispatch {
+  my $c = shift;
+
+  $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
+
+  if (my $base = $c->req->headers->header('X-Request-Base')) {
+    $c->req->url->base(Mojo::URL->new($base));
+  }
+  if (!$c->app->{hostname_is_set}++) {
+    $c->redis->set('convos:frontend:url' => $c->req->url->base->to_abs->to_string);
+  }
 }
 
 sub _check_version {
