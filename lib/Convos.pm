@@ -72,16 +72,6 @@ non-blocking webserver. Run the same command again, and the webserver
 will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
 loosing any connections.
 
-=head2 Configuration
-
-You can also customize the config by setting C<MOJO_CONFIG> before
-running any of the commands above. Example:
-
-  $ MOJO_CONFIG=$HOME/.convos.conf convos daemon
-
-You can use L<https://github.com/Nordaaker/convos/blob/release/convos.conf>
-as config file template.
-
 =head2 Environment
 
 Convos can be configured with the following environment variables:
@@ -101,6 +91,11 @@ Set CONVOS_DEBUG for extra debug output to STDERR.
 =item * CONVOS_MANUAL_BACKEND=1
 
 Disable the frontend from automatically starting the backend.
+
+=item * CONVOS_ORGANIZATION_NAME
+
+Set this to customize the organization name on the landing page, in the title
+tag and other various sites. The default is L<Nordaaker|http://nordaaker.com/>.
 
 =item * CONVOS_REDIS_URL
 
@@ -294,7 +289,7 @@ sub startup {
 
   $self->{convos_executable_path} = $0;    # required to work from within toadfarm
   $self->_from_cpan;
-  $config = $self->plugin('Config');
+  $config = $self->_config;
 
   if (my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
@@ -310,7 +305,6 @@ sub startup {
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets;
-  $self->_hypnotoad;
   $self->_public_routes;
   $self->_private_routes;
 
@@ -329,7 +323,7 @@ sub startup {
     $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
   }
 
-  $self->defaults(full_page => 1);
+  $self->defaults(full_page => 1, organization_name => $self->config('name'));
   $self->hook(
     before_dispatch => sub {
       my $c = shift;
@@ -390,6 +384,16 @@ sub _check_version {
   );
 }
 
+sub _config {
+  my $self = shift;
+  my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
+
+  $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
+  $config->{name} = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
+  $config->{name} ||= 'Nordaaker';
+  $config;
+}
+
 sub _from_cpan {
   my $self   = shift;
   my $home   = catdir dirname(__FILE__), 'Convos';
@@ -399,13 +403,6 @@ sub _from_cpan {
   $self->home->parse($home);
   $self->static->paths->[0]   = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
-}
-
-sub _hypnotoad {
-  my $self = shift;
-  my $config = $self->config->{hypnotoad} ||= {};
-
-  $config->{listen} = [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'] unless $config->{listen};
 }
 
 sub _private_routes {

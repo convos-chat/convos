@@ -8,7 +8,7 @@
   % if($full_page) {
     %= include 'partials/head', minimal_ui => 1
   % } else {
-    <title><%= config 'name' %> - <%= title %></title>
+    <title><%= $organization_name %> - <%= title %></title>
   % }
   </head>
   <body class="chat" data-want-desktop-notifications="<%= session('desktop_notifications') // 1 %>" data-socket-url="<%= url_for('socket')->to_abs %>">
