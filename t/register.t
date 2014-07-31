@@ -20,7 +20,7 @@ $form = {login => 'fooman', email => 'foobar@barbar.com', password => 'barbar', 
 $t->post_ok('/register' => form => $form)->status_is('302', 'first user gets to be admin')
   ->header_is('Location', '/wizard', 'Redirect to settings page');
 
-$t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Testing - Add connection')
+$t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Nordaaker - Add connection')
   ->element_exists('form[action="/connection/add"][method="post"]')->element_exists('select[name="name"]')
   ->element_exists('select[name="name"] option[value="efnet"]')->element_exists('input[name="nick"][id="nick"]')
   ->element_exists('input[name="channels"][id="channels"][value="#convos"]')
@@ -38,7 +38,7 @@ $t->post_ok('/connection/add', form => $form)->status_is('302')
 
 is_deeply \@ctrl, [qw( fooman freenode )], 'start connection';
 
-$t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Testing - convos')
+$t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Nordaaker - convos')
   ->element_exists('div.messages ul li')->element_exists('div.messages ul li:first-child img[src^="/avatar"]')
   ->text_is('div.messages ul li:first-child h3 a',        'convos')
   ->text_is('div.messages ul li:first-child div.content', 'Hi fooman!');

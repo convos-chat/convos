@@ -1,3 +1,7 @@
+## 0.9
+- Do not need config file anymore
+- Add support for CONVOS_ORGANIZATION_NAME
+
 ## 0.8002 (2014-07-31)
 - Fix UNAUTHORIZED release
 

@@ -4,7 +4,7 @@
   <header class="row">
     <h1>
       <span class="logo">Convos</span>
-      <small>for <%= config('name') || 'You' %></small>
+      <small>for <%= $organization_name %></small>
     </h1>
   </header>
 % if($redis_version and $redis_version < 2.6) {
