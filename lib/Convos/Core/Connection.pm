@@ -448,7 +448,7 @@ Event when a user wants to see the avatar of this user.
 
 sub ctcp_avatar {
   my ($self, $message) = @_;
-  my $nick = $message->{params}[0];
+  my ($nick, $user, $host) = IRC::Utils::parse_user($message->{prefix});
   my $url = $self->{convos_frontend_url} or return;
 
   $url = Mojo::URL->new($url)->query(user => $self->login);
