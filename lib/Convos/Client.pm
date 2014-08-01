@@ -9,7 +9,8 @@ Convos::Client - Mojolicious controller for IRC chat
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
 use Convos::Core::Util qw/ as_id id_as /;
-use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
+use constant TEST_IS_CHANNEL => $ENV{TEST_IS_CHANNEL} || 0;
+use constant DEBUG           => $ENV{CONVOS_DEBUG}    || 0;
 
 my $N_MESSAGES = $ENV{N_MESSAGES} || 30;
 
@@ -56,6 +57,9 @@ sub conversation {
   my $full_page = $self->stash('full_page');
   my @rearrange = ([zscore => "user:$login:conversations", $name]);
 
+  if (TEST_IS_CHANNEL) {
+    $self->res->headers->header('X-Is-Channel', $self->stash('is_channel'));
+  }
   if ($prev_name and $prev_name ne $name) {
     push @rearrange, [zscore => "user:$login:conversations", $prev_name];
   }
