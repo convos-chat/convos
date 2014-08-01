@@ -41,28 +41,6 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 }
 
 {
-  # Fix parsing links without a path part
-  $connection->_irc->from_irc_server(":fooman!user\@host PRIVMSG #mojo :http://convos.by is really cool\r\n");
-  $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://convos.by/"]')->text }, 'http://convos.by/', 'not with "is really cool"'
-    or diag $dom;
-
-  # Fix parsing github links
-  $connection->_irc->from_irc_server(
-    ":fooman!user\@host PRIVMSG #mojo :[\x{03}13convos\x{0f}] \x{03}15jhthorsen\x{0f} closed issue #132: /query is broken  \x{03}02\x{1f}http://git.io/saYuUg\x{0f}\r\n"
-  );
-  $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://git.io/saYuUg"]')->text }, 'http://git.io/saYuUg', 'without %OF' or diag $dom;
-
-  # Fix parsing multiple links in one message
-  $connection->_irc->from_irc_server(
-    ":fooman!user\@host PRIVMSG #mojo :this http://perl.org and https://github.com/jhthorsen is cool!\r\n");
-  $dom->parse($t->message_ok->message->[1]);
-  is $dom->at('div.content')->text, 'this and is cool!',
-    '<a href="http://perl.org" target="_blank">http://perl.org</a> https://github.<a href="https://github.com/jhthorsen" target="_blank">https://github.com/jhthorsen</a> yay!';
-}
-
-{
   $connection->_irc->from_irc_server(
     ":fooman!user\@host PRIVMSG #mojo :doe: see this &amp; link: http://convos.by?a=1&b=2#yikes # really cool\r\n");
   $dom->parse($t->message_ok->message->[1]);
@@ -260,21 +238,26 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   # Fix parsing links without a path part
   $connection->_irc->from_irc_server(":fooman!user\@host PRIVMSG #mojo :http://convos.by is really cool\r\n");
   $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://convos.by/"]')->text }, 'http://convos.by/', 'not with "is really cool"'
-    or diag $dom;
+  like eval { $dom->at('.content a')->text }, qr{^http://convos\.by/?$}, 'not with "is really cool"' or diag $dom;
 
   # Fix parsing github links
   $connection->_irc->from_irc_server(
-    ":fooman!user\@host PRIVMSG #mojo ::gh!~gh\@192.30.252.50 PRIVMSG #convos :[\x{03}13convos\x{0f}] \x{03}15jhthorsen\x{0f} closed issue #132: /query is broken  \x{03}02\x{1f}http://git.io/saYuUg\x{0f}\r\n"
+    ":fooman!user\@host PRIVMSG #mojo :[\x{03}13convos\x{0f}] \x{03}15jhthorsen\x{0f} closed issue #132: /query is broken  \x{03}02\x{1f}http://git.io/saYuUg\x{0f}\r\n"
   );
   $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://git.io/saYuUg"]')->text }, 'http://git.io/saYuUg', 'without %OF' or diag $dom;
+  like eval { $dom->at('.content a')->text }, qr{^http://git\.io/saYuUg$}, 'without %OF' or diag $dom;
 
   # Fix parsing links in parens
   $connection->_irc->from_irc_server(":fooman!user\@host PRIVMSG #mojo :This is cool (http://convos.pl)\r\n");
-
   $dom->parse($t->message_ok->message->[1]);
-  is eval { $dom->at('a[href="http://convos.pl/"]')->text }, 'http://convos.pl/', 'not with ")"' or diag $dom;
+  like eval { $dom->at('.content a')->text }, qr{^http://convos\.pl/?$}, 'not with ")"' or diag $dom;
+
+  # Fix parsing multiple links in one message
+  $connection->_irc->from_irc_server(
+    ":fooman!user\@host PRIVMSG #mojo :this http://perl.org and https://github.com/jhthorsen is cool!\r\n");
+  $dom->parse($t->message_ok->message->[1]);
+  is $dom->at('div.content')->text, 'this and is cool!',
+    '<a href="http://perl.org" target="_blank">http://perl.org</a> https://github.<a href="https://github.com/jhthorsen" target="_blank">https://github.com/jhthorsen</a> yay!';
 }
 
 done_testing;
