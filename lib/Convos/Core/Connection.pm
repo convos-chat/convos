@@ -144,7 +144,7 @@ has _irc => sub {
       my $data = {
         status => 500,
         message =>
-          "Connection to @{[$irc->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds. ($err)",
+          "Connection to @{[$self->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds. ($err)",
       };
       $self->{stop} and return $self->redis->hset($self->{path}, state => 'error');
       $self->_publish_and_save(server_message => $data);
@@ -238,7 +238,7 @@ sub _subscribe {
   $self->{messages}->on(
     error => sub {
       my ($sub, $error) = @_;
-      $self->log->warn("[$self->{path}] Re-subcribing to messages to @{[$irc->name]}. ($error)");
+      $self->log->warn("[$self->{path}] Re-subcribing to messages to @{[$self->name]}. ($error)");
       $self->_subscribe;
     },
   );
@@ -267,7 +267,7 @@ sub _subscribe {
 
           if ($error) {
             $self->_publish_and_save(server_message =>
-                {status => 500, message => "Could not send message to @{[$irc->name]}: $error", uuid => $uuid});
+                {status => 500, message => "Could not send message to @{[$self->name]}: $error", uuid => $uuid});
           }
           elsif ($message->{command} eq 'PRIVMSG') {
             $self->add_message($message);
