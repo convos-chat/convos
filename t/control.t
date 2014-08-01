@@ -8,7 +8,7 @@ redis_do(
   [del   => 'core:control'],
 );
 
-$t->get_ok('/connection/magnet/control/start.json')->status_is(403);
+$t->get_ok('/connection/magnet/control.json')->status_is(403);
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
 
 $t->get_ok('/connection/magnet/control.json?cmd=invalid')->status_is(400);
