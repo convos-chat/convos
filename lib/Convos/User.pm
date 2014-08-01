@@ -46,7 +46,7 @@ Used to render an avatar for a user.
 
 sub avatar {
   my $self = shift;
-  my $host = $self->param('host') or $self->render_not_found;
+  my $host = $self->param('host') || 'loopback';
 
   $self->delay(
     sub {
@@ -57,25 +57,25 @@ sub avatar {
     sub {
       my ($delay, $convos_url) = @_;
 
-      return $self->_avatar_discover if !$convos_url;
+      return $self->_avatar_fallback if !$convos_url;
       return $self->_avatar_local if $convos_url eq 'loopback';
       return $self->_avatar_remote($convos_url);
     },
   );
 }
 
-sub _avatar_discover {
+sub _avatar_fallback {
   my ($self, $cb) = @_;
-  my $host = $self->param('host');
-  my $user = $self->param('user');
+  my $host  = $self->param('host');
+  my $login = $self->session('login');
+  my $user  = $self->param('user');
 
-  unless ($self->session('login')) {
-    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
+  unless ($login and $host and $user) {
+    return $self->_avatar_error(500, 'Need login, host and user to discover avatar');
   }
 
-  # TODO: Need to do a WHOIS to see if the user has convos_url set
-  my $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host"));
-  $self->redirect_to($url);
+  # Convos::Core::Connection has not yet figured out the avatar
+  $self->redirect_to(sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host")));
 }
 
 sub _avatar_error {
@@ -87,8 +87,8 @@ sub _avatar_error {
 
 sub _avatar_local {
   my $self = shift;
-  my $host = $self->param('host');
-  my $user = $self->param('user');
+  my $host = $self->param('host') || 'loopback';
+  my $user = $self->param('user') || '';
 
   $user =~ s!^~!!;    # somenick!~someuser@1.2.3.4
 
@@ -128,7 +128,7 @@ sub _avatar_remote {
       my ($delay) = @_;
 
       push @{$url->path}, 'avatar';
-      $url->query(host => 'loopback', user => scalar $self->param('user'));
+      $url->query(user => scalar $self->param('user'));
 
       $self->logf(debug => 'Fetching remote avatar from %s', $url);
       $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar

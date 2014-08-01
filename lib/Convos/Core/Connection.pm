@@ -49,6 +49,7 @@ L</err_bannedfromchan>, l</irc_error> and L</irc_quit>.
 use Mojo::Base -base;
 use Mojo::IRC;
 use Mojo::JSON 'j';
+use Mojo::URL;
 no warnings 'utf8';
 use IRC::Utils;
 use Parse::IRC   ();
@@ -92,7 +93,7 @@ my @ADD_SERVER_MESSAGE_EVENTS = qw/
 my @OTHER_EVENTS = qw/
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_479
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
-  irc_rpl_topic irc_topic
+  irc_rpl_topic irc_topic ctcp_avatar
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
   err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_error
@@ -294,6 +295,7 @@ sub _connect {
     sub {
       my ($redis, $args, $url) = @_;
 
+      $self->{convos_frontend_url} = $url;
       $irc->name($url || 'Convos');
       $irc->nick($args->{nick} || $self->login);
       $irc->pass($args->{password}) if $args->{password};
@@ -373,14 +375,15 @@ sub add_message {
   my ($self, $message) = @_;
   my $current_nick       = $self->_irc->nick;
   my $is_private_message = $message->{params}[0] eq $current_nick;
-  my $data = {highlight => 0, message => $message->{params}[1], timestamp => time, uuid => $message->{uuid},};
+  my $data = {highlight => 0, message => $message->{params}[1], timestamp => time, uuid => $message->{uuid}};
 
   @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
   $data->{host} ||= 'localhost';
   $data->{user} ||= $self->_irc->user;
 
-  if ($data->{nick} && $data->{nick} ne $current_nick) {
+  if ($data->{nick} and $data->{nick} ne $current_nick) {
+    $self->_avatar_discover(@$data{qw( host nick )});
     if ($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
       $data->{highlight} = 1;
     }
@@ -436,6 +439,23 @@ sub disconnect {
 }
 
 =head1 EVENT HANDLERS
+
+=head2 ctcp_avatar
+
+Event when a user wants to see the avatar of this user.
+
+=cut
+
+sub ctcp_avatar {
+  my ($self, $message) = @_;
+  my $nick = $message->{params}[0];
+  my $url = $self->{convos_frontend_url} or return;
+
+  $url = Mojo::URL->new($url)->query(user => $self->login);
+  push @{$url->path}, 'avatar';
+
+  $self->_irc->write(NOTICE => $nick => $self->_irc->ctcp(AVATAR => $url));
+}
 
 =head2 irc_rpl_welcome
 
@@ -913,6 +933,14 @@ sub _add_convos_message {
 
   $self->redis->zadd($self->{convos_path}, $data->{timestamp}, $message);
   $self->redis->publish("convos:user:$login:out", $message);
+}
+
+sub _avatar_discover {
+  my ($self, $host, $nick) = @_;
+  my $irc = $self->_irc;
+
+  return if $self->{avatar_discover}{$host}++;                              # only try once pr hostname
+  return $irc->write(PRIVMSG => $nick => $irc->ctcp('AVATAR'));
 }
 
 sub _publish {

@@ -77,7 +77,6 @@ sub reset {
     sub {
       my ($delay) = @_;
       $redis->del('convos:backend:lock');
-      $redis->del('convos:host2convos');
       $redis->del('convos:loopback:names');    # clear loopback nick list
       $redis->hset('convos:host2convos', localhost => 'loopback');
       $redis->smembers('connections', $delay->begin);
