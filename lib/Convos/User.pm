@@ -162,6 +162,7 @@ sub _render_avatar {
       }
 
       $self->res->headers->last_modified(Mojo::Date->new(time));
+      $self->res->headers->expires(Mojo::Date->new(time + $cache_timeout));
       $self->render(data => $tx->res->body, status => $tx->res->code);
     },
   );
