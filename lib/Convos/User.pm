@@ -9,6 +9,7 @@ Convos::User - Mojolicious controller for user data
 use Mojo::Base 'Mojolicious::Controller';
 use Convos::Core::Util qw/ as_id id_as /;
 use Mojo::Asset::File;
+use Mojo::Date;
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
 use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
@@ -45,12 +46,13 @@ Used to render an avatar for a user.
 
 sub avatar {
   my $self = shift;
-  my $host = $self->param('host');
+  my $host = $self->param('host') or $self->render_not_found;
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $self->redis->hget('convos:host2convos', $host, $delay->begin);
+      return $delay->pass($host) if $host eq 'loopback';
+      return $self->redis->hget('convos:host2convos', $host, $delay->begin);
     },
     sub {
       my ($delay, $convos_url) = @_;
@@ -60,22 +62,6 @@ sub avatar {
       return $self->_avatar_remote($convos_url);
     },
   );
-}
-
-sub _avatar_cache_and_serve {
-  my ($self, $cache_name, $tx) = @_;
-  my $cache = $self->app->cache;
-
-  if (!$tx->res->code or $tx->res->code ne '200') {
-    return $self->_avatar_error(404);
-  }
-
-  open my $CACHE, '>', join('/', $cache->paths->[0], $cache_name)
-    or return $self->_avatar_error(500, "Write avatar $cache_name: $!");
-  syswrite $CACHE, $tx->res->body;
-  close $CACHE or return $self->_avatar_error(500, "Close avatar $cache_name: $!");
-  $cache->serve($self, $cache_name);
-  $self->rendered;
 }
 
 sub _avatar_discover {
@@ -103,11 +89,10 @@ sub _avatar_local {
   my $self = shift;
   my $host = $self->param('host');
   my $user = $self->param('user');
-  my $cache_name;
 
   $user =~ s!^~!!;    # somenick!~someuser@1.2.3.4
 
-  $self->delay(
+  $self->_render_avatar(
     sub {
       my ($delay) = @_;
       $self->redis->hmget("user:$user", qw( avatar email ), $delay->begin);
@@ -124,47 +109,60 @@ sub _avatar_local {
         $url = sprintf(DEFAULT_URL, $id);
       }
 
-      $cache_name = $url;
-      $cache_name =~ s![^\w]!_!g;
-      $cache_name = "$cache_name.jpg";
-
-      return $self->rendered if $self->app->cache->serve($self, $cache_name);
-      $self->app->log->debug("Getting avatar for $id: $url");
+      $self->logf(debug => 'Fetching local avatar for %s from %s', $id, $url);
       $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
-    },
-    sub {
-      $self->_avatar_cache_and_serve($cache_name, $_[1]);
     },
   );
 }
 
-
 sub _avatar_remote {
   my $self = shift;
   my $url  = Mojo::URL->new(shift);                  # Example $url = http://wirc.pl/
-  my $cache_name;
 
   unless ($self->session('login')) {
     return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
   }
 
-  $self->delay(
+  $self->_render_avatar(
     sub {
       my ($delay) = @_;
 
-      $url->path('/avatar');
-      $url->query(map { $_ => scalar $self->param($_) } qw( host user ));
+      push @{$url->path}, 'avatar';
+      $url->query(host => 'loopback', user => scalar $self->param('user'));
 
-      $cache_name = $url;
-      $cache_name =~ s![^\w]!_!g;
-      $cache_name = "$cache_name.jpg";
-
-      return $self->rendered if $self->app->cache->serve($self, $cache_name);
-      $self->app->log->debug("Getting remote avatar from $url");
+      $self->logf(debug => 'Fetching remote avatar from %s', $url);
       $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
     },
+  );
+}
+
+sub _render_avatar {
+  my $self          = shift;
+  my $cache_timeout = 600;                                      # 10 minutes
+  my $date          = $self->req->headers->if_modified_since;
+  my $since;
+
+  if ($date) {
+
+    # Avoid asking remote server too often
+    if ($since = Mojo::Date->new($date)->epoch and $since + $cache_timeout > time) {
+      $self->res->headers->last_modified($date);
+      return $self->render(text => '', status => 304);
+    }
+  }
+
+  $self->delay(
+    @_,    # steps for fetching the remote avatar
     sub {
-      $self->_avatar_cache_and_serve($cache_name, $_[1]);
+      my ($delay, $tx) = @_;
+
+      for my $k (qw( content_length content_type )) {
+        my $v = $tx->res->headers->$k // next;
+        $self->res->headers->$k($v);
+      }
+
+      $self->res->headers->last_modified(Mojo::Date->new(time));
+      $self->render(data => $tx->res->body, status => $tx->res->code);
     },
   );
 }

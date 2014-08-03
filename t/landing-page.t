@@ -21,4 +21,7 @@ $t->post_ok('/register', form => {login => 'yikes', email => 'whatever'})->statu
   ->element_exists('div.landing-page', 'still on landing page')->text_is('.register button', 'Register')
   ->element_exists('p.error');
 
+my $hostname = redis_do [get => 'convos:frontend:url'];
+like $hostname, qr{^http://\w+:\d+$}, 'convos:frontend:url is set';
+
 done_testing;
