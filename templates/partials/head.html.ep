@@ -1,4 +1,4 @@
-<title><%= config 'name' %> - <%= title %></title>
+<title><%= $organization_name %> - <%= title %></title>
 %= asset 'convos.css'
 %= asset 'convos.js'
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1<%= stash('minimal_ui') ? '; minimal-ui' : '' %>">
