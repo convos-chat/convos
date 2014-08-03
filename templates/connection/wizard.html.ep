@@ -3,7 +3,7 @@
   <header class="row">
     <h1>
       <span class="logo">Convos</span>
-      <small>Welcome to <%= config('name') || 'your' %> chat.</small>
+      <small>Welcome to <%= $organization_name %> chat.</small>
     </h1>
   </header>
   <div class="row">

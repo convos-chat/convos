@@ -21,12 +21,13 @@ ADD . /convos
 RUN gem install sass
 RUN cd /convos; ./vendor/bin/carton
 
-ENV MOJO_LISTEN "http://*:8080"
+ENV MOJO_LISTEN http://*:8080
 ENV MOJO_MODE production
 ENV MOJO_REVERSE_PROXY 0
 ENV CONVOS_REDIS_URL redis://127.0.0.1:6379/1
-ENV CONVOS_INVITE_CODE ""
 ENV CONVOS_SECURE_COOKIES 0
+ENV CONVOS_INVITE_CODE convos
 
 EXPOSE 8080
-ENTRYPOINT ["/usr/bin/supervisord"]
+CMD []
+ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -67,4 +67,5 @@
       <button>Register</button>
     </div>
   % end
+  %= include 'vendor/register_footer'
 </div>

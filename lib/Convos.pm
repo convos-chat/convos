@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.8001
+0.8002
 
 =head1 DESCRIPTION
 
@@ -72,16 +72,6 @@ non-blocking webserver. Run the same command again, and the webserver
 will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
 loosing any connections.
 
-=head2 Configuration
-
-You can also customize the config by setting C<MOJO_CONFIG> before
-running any of the commands above. Example:
-
-  $ MOJO_CONFIG=$HOME/.convos.conf convos daemon
-
-You can use L<https://github.com/Nordaaker/convos/blob/release/convos.conf>
-as config file template.
-
 =head2 Environment
 
 Convos can be configured with the following environment variables:
@@ -101,6 +91,11 @@ Set CONVOS_DEBUG for extra debug output to STDERR.
 =item * CONVOS_MANUAL_BACKEND=1
 
 Disable the frontend from automatically starting the backend.
+
+=item * CONVOS_ORGANIZATION_NAME
+
+Set this to customize the organization name on the landing page, in the title
+tag and other various sites. The default is L<Nordaaker|http://nordaaker.com/>.
 
 =item * CONVOS_REDIS_URL
 
@@ -182,6 +177,35 @@ with nginx:
 
 =back
 
+=head1 CUSTOM TEMPLATES
+
+Some parts of the Convos templates can include custom content. Example:
+
+  # Create a directory where you can store the templates
+  $ mkdir -p custom-convos/vendor
+
+  # Edit the template you want to customize
+  $ $EDITOR custom-convos/vendor/login_footer.html.ep
+
+  # Start convos with CONVOS_TEMPLATES set. Without /vendor at the end
+  $ CONVOS_TEMPLATES=$PWD/custom-convos convos daemon --listen http://*:5000
+
+Any changes to the templates require the server to restart.
+
+The templates that can be customized are:
+
+=over 4
+
+=item * vendor/login_footer.html.ep
+
+This template will be included below the form on the C</login> page.
+
+=item * vendor/register_footer.html.ep
+
+This template will be included below the form on the C</register> page.
+
+=back
+
 =head1 RESOURCES
 
 =over 4
@@ -229,7 +253,7 @@ use Convos::Core;
 use Convos::Core::Util ();
 use Convos::Upgrader;
 
-our $VERSION = '0.8001';
+our $VERSION = '0.8002';
 
 =head1 ATTRIBUTES
 
@@ -294,7 +318,7 @@ sub startup {
 
   $self->{convos_executable_path} = $0;    # required to work from within toadfarm
   $self->_from_cpan;
-  $config = $self->plugin('Config');
+  $config = $self->_config;
 
   if (my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
@@ -309,8 +333,7 @@ sub startup {
   $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
-  $self->_assets($config);
-  $self->_hypnotoad;
+  $self->_assets;
   $self->_public_routes;
   $self->_private_routes;
 
@@ -322,14 +345,20 @@ sub startup {
     $ENV{CONVOS_REDIS_URL} = 'redis://127.0.0.1:6379/1';
     $self->log->info("Using default CONVOS_REDIS_URL=$ENV{CONVOS_REDIS_URL}");
   }
-
   if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
     $self->log->warn(
       "invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
     $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
   }
+  if ($ENV{CONVOS_TEMPLATES}) {
 
-  $self->defaults(full_page => 1);
+    # Using push() since I don't think it's a good idea for allowing the user
+    # to customize every template, at least not when the application is still
+    # unstable.
+    push @{$self->renderer->paths}, $ENV{CONVOS_TEMPLATES};
+  }
+
+  $self->defaults(full_page => 1, organization_name => $self->config('name'));
   $self->hook(
     before_dispatch => sub {
       my $c = shift;
@@ -348,9 +377,9 @@ sub startup {
 }
 
 sub _assets {
-  my ($self, $config) = @_;
+  my $self = shift;
 
-  $self->plugin('AssetPack' => {rebuild => $config->{AssetPack}{rebuild} // 1});
+  $self->plugin('AssetPack');
   $self->asset('convos.css' => '/sass/convos.scss');
   $self->asset(
     'convos.js' => qw(
@@ -390,6 +419,16 @@ sub _check_version {
   );
 }
 
+sub _config {
+  my $self = shift;
+  my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
+
+  $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
+  $config->{name} = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
+  $config->{name} ||= 'Nordaaker';
+  $config;
+}
+
 sub _from_cpan {
   my $self   = shift;
   my $home   = catdir dirname(__FILE__), 'Convos';
@@ -399,13 +438,6 @@ sub _from_cpan {
   $self->home->parse($home);
   $self->static->paths->[0]   = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
-}
-
-sub _hypnotoad {
-  my $self = shift;
-  my $config = $self->config->{hypnotoad} ||= {};
-
-  $config->{listen} = [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'] unless $config->{listen};
 }
 
 sub _private_routes {
@@ -432,7 +464,10 @@ sub _private_routes {
   $r->get('/wizard')->to('connection#wizard')->name('wizard');
 
   $network_r = $r->route('/:network');
-  $network_r->get('/*target')->to('client#conversation')->name('view');
+  $network_r->get('/*target' => [target => qr/[\#\&][^\x07\x2C\s]{1,50}/])->to('client#conversation', is_channel => 1)
+    ->name('view');
+  $network_r->get('/*target' => [target => qr/[A-Za-z_\-\[\]\\\^\{\}\|\`][A-Za-z0-9_\-\[\]\\\^\{\}\|\`]{1,15}/])
+    ->to('client#conversation', is_channel => 0)->name('view');
   $network_r->get('/')->to('client#conversation')->name('view.network');
 }
 
