@@ -261,11 +261,6 @@ our $VERSION = '0.8002';
 
 Holds a L<Convos::Core::Archive> object.
 
-=head2 cache
-
-Holds a L<Mojolicious::Static> object pointing to a cache dir.
-The directory is "/tmp/convos" by default.
-
 =head2 core
 
 Holds a L<Convos::Core> object.
@@ -279,16 +274,6 @@ Holds a L<Convos::Upgrader> object.
 has archive => sub {
   my $self = shift;
   Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
-};
-
-has cache => sub {
-  my $self = shift;
-  my $dir = $self->config->{cache_dir} ||= catfile(tmpdir, 'convos');
-
-  $self->log->info("Cache dir: $dir");
-  mkdir $dir or die "mkdir $dir: $!" unless -d $dir;
-
-  Mojolicious::Static->new(paths => [$dir]);
 };
 
 has core => sub {
@@ -327,7 +312,6 @@ sub startup {
   }
 
   $self->ua->max_redirects(2);             # support getting facebook pictures
-  $self->cache;                            # make sure cache is ok
   $self->plugin('Convos::Plugin::Helpers');
   $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->secrets([time]);                  # will be replaced by _set_secrets()
@@ -359,17 +343,8 @@ sub startup {
   }
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
-  $self->hook(
-    before_dispatch => sub {
-      my $c = shift;
-
-      $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
-
-      if (my $base = $c->req->headers->header('X-Request-Base')) {
-        $c->req->url->base(Mojo::URL->new($base));
-      }
-    }
-  );
+  $self->defaults(full_page => 1);
+  $self->hook(before_dispatch => \&_before_dispatch);
 
   Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
   Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
@@ -401,6 +376,19 @@ sub _assets {
       /js/convos.chat.js
       )
   );
+}
+
+sub _before_dispatch {
+  my $c = shift;
+
+  $c->stash(full_page => !($c->req->is_xhr || $c->param('_pjax')));
+
+  if (my $base = $c->req->headers->header('X-Request-Base')) {
+    $c->req->url->base(Mojo::URL->new($base));
+  }
+  if (!$c->app->{hostname_is_set}++) {
+    $c->redis->set('convos:frontend:url' => $c->req->url->base->to_abs->to_string);
+  }
 }
 
 sub _check_version {
