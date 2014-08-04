@@ -20,4 +20,5 @@
       <button>Login</button>
     </div>
   % end
+  %= include 'vendor/login_footer'
 </div>

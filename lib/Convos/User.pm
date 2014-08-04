@@ -128,7 +128,7 @@ sub _avatar_remote {
       my ($delay) = @_;
 
       push @{$url->path}, 'avatar';
-      $url->query(user => scalar $self->param('user'));
+      $url->query(host => 'loopback', user => scalar $self->param('user'));
 
       $self->logf(debug => 'Fetching remote avatar from %s', $url);
       $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar

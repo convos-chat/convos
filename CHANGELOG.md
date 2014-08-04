@@ -1,3 +1,10 @@
+## 0.9
+- Fix typos in Docker file #114
+- Do not need config file anymore #102
+- Add support for CONVOS_ORGANIZATION_NAME #102
+- Add support for custom templates #102
+- Add more restrictive /:network/*target route #112
+
 ## 0.8002 (2014-07-31)
 - Fix UNAUTHORIZED release
 
