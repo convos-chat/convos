@@ -18,7 +18,7 @@
 
   var addPendingMessage = function(message, attr) {
     var $pending = $('<li><h3>' + convos.current.nick + '</h3><div class="content">' + message + '</div></li>').attr(attr);
-    $pending.addClass('message pending').addToMessages();
+    $pending.addClass('message pending').data('sender', convos.current.nick).addToMessages();
     setTimeout(function() { messageFailed(attr['id']); }, 10000);
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
