@@ -1,4 +1,4 @@
-## 0.81
+## 0.81 (2014-08-07)
 - Fix typos in Docker file #114
 - Do not need config file anymore #102
 - Add support for CONVOS_ORGANIZATION_NAME #102
@@ -63,7 +63,6 @@
 - Wrap head in &lt;head&gt;
 - Whois improvements
 - CTCP support
-++
 
 ## 0.4 (2014-01-28)
 
