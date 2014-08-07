@@ -48,12 +48,6 @@
 - New WebSocket keep alive code
 - Fix facebook avatars
 
-## 0.501 (2014-05-27)
-- Add missing static assets
-
-## 0.501 (2014-05-27)
-- Add missing static assets
-
 ## 0.5 (2014-05-24)
 
 - Fixed bug with querying people not opening a new tab
