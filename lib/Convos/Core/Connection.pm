@@ -288,10 +288,13 @@ sub _connect {
   my $irc  = $self->_irc;
 
   Scalar::Util::weaken($self);
-  $self->redis->hgetall(
-    $self->{path} => sub {
-      my ($redis, $args) = @_;
+  $self->redis->execute(
+    [hgetall => $self->{path}],
+    [get     => 'convos:frontend:url'],
+    sub {
+      my ($redis, $args, $url) = @_;
 
+      $irc->name($url || 'Convos');
       $irc->nick($args->{nick} || $self->login);
       $irc->pass($args->{password}) if $args->{password};
       $irc->server($args->{server} || $args->{host});
