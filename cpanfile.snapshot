@@ -201,14 +201,15 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.01
       Mojolicious 4.30
       Test::More 0.88
-  Mojolicious-Plugin-LinkEmbedder-0.06
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.06.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.07
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.07.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.06
+      Mojolicious::Plugin::LinkEmbedder 0.07
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
       Mojolicious::Plugin::LinkEmbedder::Link::Image undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Image::Imgur undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text::GistGithub undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text::Twitter undef
@@ -223,7 +224,7 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       File::Find 1.00
       Module::Find 0.10
-      Mojolicious 4.30
+      Mojolicious 5.00
       Test::More 0.90
   Parse-IRC-1.20
     pathname: B/BI/BINGOS/Parse-IRC-1.20.tar.gz
