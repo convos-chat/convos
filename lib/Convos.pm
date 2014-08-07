@@ -386,7 +386,7 @@ sub _before_dispatch {
   if (my $base = $c->req->headers->header('X-Request-Base')) {
     $c->req->url->base(Mojo::URL->new($base));
   }
-  if (!$c->app->{hostname_is_set}++) {
+  if (!$c->app->config->{hostname_is_set}++) {
     $c->redis->set('convos:frontend:url' => $c->req->url->base->to_abs->to_string);
   }
 }
@@ -418,14 +418,14 @@ sub _config {
 }
 
 sub _from_cpan {
-  my $self   = shift;
-  my $home   = catdir dirname(__FILE__), 'Convos';
-  my $config = catfile $home, 'convos.conf';
+  my $self = shift;
+  my $home = catdir dirname(__FILE__), 'Convos';
 
-  -r $config or return;
-  $self->home->parse($home);
-  $self->static->paths->[0]   = $self->home->rel_dir('public');
-  $self->renderer->paths->[0] = $self->home->rel_dir('templates');
+  if (-d catdir $home, 'templates') {
+    $self->home->parse($home);
+    $self->static->paths->[0]   = $self->home->rel_dir('public');
+    $self->renderer->paths->[0] = $self->home->rel_dir('templates');
+  }
 }
 
 sub _private_routes {
