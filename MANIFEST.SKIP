@@ -67,7 +67,6 @@
 ^cpanfile.snapshot
 ^docs
 ^public
-^script
 ^templates
 ^vendor
 ^\.perltidyrc
