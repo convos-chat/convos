@@ -4,7 +4,10 @@ Convos is the simplest way to use IRC. It is always online, and accessible to yo
 
 ![Screenshot](http://convos.by/images/screenshot.jpg)
 
-You can also check out our [live demo](http://demo.convos.by).
+You can check out our [live demo](http://demo.convos.by) or deploy it directly
+on Heroku.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 ## Features
 #### Always online

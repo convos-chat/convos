@@ -1,7 +1,5 @@
-use Test::More;
-use Test::Mojo;
 use File::Basename qw( basename );
-use Mojolicious::Plugin::AssetPack;
+use t::Helper;
 
 {
   my $ap = Mojolicious::Plugin::AssetPack->new;
@@ -42,7 +40,7 @@ SKIP: {
 
 {
   open my $FH, 'lib/Convos.pm' or skip 'Cannot read lib/Convos.pm', 1;
-  my ($version_scalar, $version_pod, $head) = ('s', 'p');
+  my ($version_scalar, $version_pod, $head) = ('s', 'p', '');
 
   while (<$FH>) {
     $head           = $1     if /^=head1 (\w+)/;
@@ -50,7 +48,7 @@ SKIP: {
     $version_pod = $1 + 0 if $head eq 'VERSION' and /^([\d\.]+)/;
   }
 
-  is $version_scalar, $version_pod, 'VERSION match';
+  is $version_scalar, $version_pod, 'VERSION from Convos.pm match in code and pod';
 }
 
 done_testing;
