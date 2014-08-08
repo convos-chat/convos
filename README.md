@@ -78,3 +78,5 @@ Marcus Ramberg - marcus@nordaaker.com
 Copyright (C) 2012-2014, Nordaaker.
 
 This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version 2.0.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
