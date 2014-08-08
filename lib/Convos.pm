@@ -104,7 +104,8 @@ This is the URL to the Redis backend, and should follow this format:
   redis://x:password@server:port/database_index
   redis://127.0.0.1:6379/1 # suggested value
 
-Convos will use C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> if
+Convos will use C<REDISCLOUD_URL>, C<REDISTOGO_URL>,
+C<DOTCLOUD_DATA_REDIS_URL> or default to "redis://127.0.0.1:6379/1" unless
 C<CONVOS_REDIS_URL> is not set.
 
 It is also possible to set C<CONVOS_REDIS_INDEX=2> to use the
@@ -320,15 +321,8 @@ sub startup {
   $self->_assets;
   $self->_public_routes;
   $self->_private_routes;
+  $self->_redis_url;
 
-  if (!eval { Convos::Plugin::Helpers::REDIS_URL() } and $config->{redis}) {
-    $self->log->warn("redis url from config file will be deprecated. Run 'perldoc Convos' for alternative setup.");
-    $ENV{CONVOS_REDIS_URL} = $config->{redis};
-  }
-  if (!$ENV{CONVOS_REDIS_URL} and $self->mode eq 'production') {
-    $ENV{CONVOS_REDIS_URL} = 'redis://127.0.0.1:6379/1';
-    $self->log->info("Using default CONVOS_REDIS_URL=$ENV{CONVOS_REDIS_URL}");
-  }
   if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
     $self->log->warn(
       "invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
@@ -471,6 +465,36 @@ sub _public_routes {
   $r->post('/register/:invite', {invite => ''})->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
   $r;
+}
+
+sub _redis_url {
+  my $self = shift;
+  my $url;
+
+  for my $k (qw( CONVOS_REDIS_URL REDISTOGO_URL REDISCLOUD_URL DOTCLOUD_DATA_REDIS_URL )) {
+    $url = $ENV{$k} or next;
+    $self->log->debug("Using $k environment variable as Redis connection URL.");
+    last;
+  }
+
+  unless ($url) {
+    if ($self->config('redis')) {
+      $self->log->warn("'redis' url from config file will be deprecated. Run 'perldoc Convos' for alternative setup.");
+      $url = $self->config('redis');
+    }
+    elsif ($self->mode eq 'production') {
+      $self->log->debug("Using default Redis connection URL redis://127.0.0.1:6379/1");
+      $url = 'redis://127.0.0.1:6379/1';
+    }
+    else {
+      $self->log->debug("Could not find CONVOS_REDIS_URL value.");
+      return;
+    }
+  }
+
+  $url = Mojo::URL->new($url);
+  $url->path($ENV{CONVOS_REDIS_INDEX}) if $ENV{CONVOS_REDIS_INDEX} and !$url->path->[0];
+  $ENV{CONVOS_REDIS_URL} = $url->to_string;
 }
 
 sub _set_secrets {

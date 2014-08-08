@@ -9,18 +9,8 @@ Convos::Plugin::Helpers - Mojo's little helpers
 use Mojo::Base 'Mojolicious::Plugin';
 use Mojo::JSON 'j';
 use Convos::Core::Util qw( format_time id_as);
-use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 use URI::Find;
-
-sub REDIS_URL {
-  $ENV{CONVOS_REDIS_URL} ||= do {
-    my $url = $ENV{REDISTOGO_URL} || $ENV{DOTCLOUD_DATA_REDIS_URL}
-      or die "CONVOS_REDIS_URL is not set. Run 'perldoc Convos' for details.\n";
-    $url = Mojo::URL->new($url);
-    $url->path($ENV{CONVOS_REDIS_INDEX}) if $ENV{CONVOS_REDIS_INDEX};
-    $url->to_string;
-  };
-}
 
 =head1 HELPERS
 
@@ -175,13 +165,13 @@ sub redis {
   my $cache_to = $c->{tx} ? 'stash' : sub { $c->app->defaults };
 
   $c->$cache_to->{redis} ||= do {
-    my $log = $c->app->log;
-    my $redis = Mojo::Redis->new(server => REDIS_URL);
+    my $log   = $c->app->log;
+    my $url   = $ENV{CONVOS_REDIS_URL} or die "CONVOS_REDIS_URL is not set. Run 'perldoc Convos' for details.\n";
+    my $redis = Mojo::Redis->new(server => $url);
 
     $redis->on(
       error => sub {
-        my ($redis, $err) = @_;
-        $log->error('[REDIS ERROR] ' . $err);
+        $log->error("[REDIS ERROR] $_[1]");
       }
     );
 
@@ -307,7 +297,7 @@ Will register the L</HELPERS> above.
 =cut
 
 sub register {
-  my ($self, $app) = @_;
+  my ($self, $app, $config) = @_;
 
   $app->helper(active_class        => \&active_class);
   $app->helper(avatar              => \&avatar);
