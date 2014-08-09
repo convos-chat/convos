@@ -1,5 +1,16 @@
-<h2>Register or <%=link_to 'Login', 'login' %></h2>
-<div class="alert">
-  <h2>Invite only installation.</h2>
-  Please ask your administrator for the invite URL
+% title 'Invite only';
+% my $invite = stash 'invite';
+% my $url = url_for(register => { invite => 'super_s3cret' })->to_abs;
+<div class="row register">
+  <h2 class="login-register">Register or <%= link_to 'Login', 'login' %></h2>
+  <p>
+  % if ($invite) {
+    Invalid invite code: "<%= $invite %>".
+    Please ask the Convos administrator for the valid invite URL.
+  % } else {
+    You can't register without an invitation.
+    Please ask the Convos administrator for the invite URL.
+    Example: <%= link_to $url, $url %>.
+  % }
+  </p>
 </div>

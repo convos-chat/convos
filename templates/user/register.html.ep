@@ -1,6 +1,6 @@
 % my $err;
 <div class="row register">
-  <h2 class="login-register">Register or <%=link_to 'Login', 'login' %></h2>
+  <h2 class="login-register">Register or <%= link_to 'Login', 'login' %></h2>
   %= form_for 'register' => { invite => param 'invite' }, class => 'horizontal', method => 'post', begin
     <div class="form-group login">
       %= label_for login => 'Username'
