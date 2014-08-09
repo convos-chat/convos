@@ -1,5 +1,13 @@
+use Mojo::Base -strict;
+use Mojolicious::Plugin::AssetPack;
 use File::Basename qw( basename );
-use t::Helper;
+use Test::More;
+use Test::Mojo;
+
+plan skip_all => 'Can only run on linux' unless $^O = 'linux';
+
+$ENV{CONVOS_REDIS_URL} = 'redis://invalid-host.localhost';
+$ENV{MOJO_MODE} = 'production';
 
 {
   my $ap = Mojolicious::Plugin::AssetPack->new;
@@ -7,12 +15,10 @@ use t::Helper;
   plan skip_all => 'Missing preprocessors for scss' unless $ap->preprocessors->has_subscribers('scss');
 }
 
-unlink glob 'public/packed/convos-*';
-$ENV{MOJO_MODE} = 'production';
 my $t = Test::Mojo->new('Convos');
 my ($css, $js);
 
-$t->app->{hostname_is_set} = 1;
+$t->app->config(redis_version => 1, hostname_is_set => 1);
 
 {
   $t->get_ok('/login')->status_is(200)->element_exists(q(link[rel="stylesheet"][href^="/packed/convos-"]))
@@ -25,7 +31,7 @@ $t->app->{hostname_is_set} = 1;
 }
 
 SKIP: {
-  my $packed = './public/packed';
+  my $packed = 'public/packed';
 
   $t->get_ok($css)->status_is(200);
   -d $packed or skip "Cannot look into $packed", 3;

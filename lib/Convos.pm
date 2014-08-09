@@ -415,11 +415,10 @@ sub _from_cpan {
   my $self = shift;
   my $home = catdir dirname(__FILE__), 'Convos';
 
-  if (-d catdir $home, 'templates') {
-    $self->home->parse($home);
-    $self->static->paths->[0]   = $self->home->rel_dir('public');
-    $self->renderer->paths->[0] = $self->home->rel_dir('templates');
-  }
+  return if -d 'templates';
+  $self->home->parse($home);
+  $self->static->paths->[0]   = $self->home->rel_dir('public');
+  $self->renderer->paths->[0] = $self->home->rel_dir('templates');
 }
 
 sub _private_routes {
