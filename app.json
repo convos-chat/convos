@@ -1,5 +1,3 @@
-// https://blog.heroku.com/archives/2014/8/7/heroku-button
-// https://devcenter.heroku.com/articles/app-json-schema
 {
   "name": "Convos",
   "description": "The simplest way to use IRC",
@@ -12,4 +10,8 @@
   "env": {
     "BUILDPACK_URL": "https://github.com/judofyr/perloku.git"
   },
+  "DOCUMENTATION": [
+    "https://blog.heroku.com/archives/2014/8/7/heroku-button",
+    "https://devcenter.heroku.com/articles/app-json-schema"
+  ]
 }
