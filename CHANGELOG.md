@@ -1,3 +1,7 @@
+## 0.90
+- Fix invite only template styling
+- Testing out Heroku deploy button, #120
+
 ## 0.81 (2014-08-07)
 - Fix typos in Docker file #114
 - Do not need config file anymore #102
