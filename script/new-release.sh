@@ -1,10 +1,10 @@
 #!/usr/bin/sh
 export CONVOS_REDIS_URL="test";
 
-rm public/packed/*;
+rm public/packed/c-*;
 prove -vl t/release-production.t;
 
-for i in public/packed/*; do
+for i in public/packed/c-*; do
   git add --force $i;
 done
 

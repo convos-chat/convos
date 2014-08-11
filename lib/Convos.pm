@@ -349,9 +349,9 @@ sub _assets {
   my $self = shift;
 
   $self->plugin('AssetPack');
-  $self->asset('convos.css' => '/sass/convos.scss');
+  $self->asset('c.css' => '/sass/convos.scss');
   $self->asset(
-    'convos.js' => qw(
+    'c.js' => qw(
       /js/globals.js
       /js/jquery.min.js
       /js/ws-reconnecting.js
