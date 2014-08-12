@@ -225,15 +225,15 @@ This template will be included below the form on the C</register> page.
 
 =over 4
 
-=item * L<Convos::Archive>
+=item * L<Convos::Controller::Archive>
 
 Mojolicious controller for IRC logs.
 
-=item * L<Convos::Client>
+=item * L<Convos::Controller::Client>
 
 Mojolicious controller for IRC chat.
 
-=item * L<Convos::User>
+=item * L<Convos::Controller::User>
 
 Mojolicious controller for user data.
 
@@ -274,7 +274,8 @@ Holds a L<Convos::Upgrader> object.
 
 has archive => sub {
   my $self = shift;
-  Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
+  Convos::Core::Archive->new($self->config->{archive}
+      || $self->path_to('archive'));
 };
 
 has core => sub {
@@ -302,20 +303,20 @@ sub startup {
   my $self = shift;
   my $config;
 
-  $self->{convos_executable_path} = $0;    # required to work from within toadfarm
+  $self->{convos_executable_path} = $0; # required to work from within toadfarm
   $self->_from_cpan;
   $config = $self->_config;
 
   if (my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
     $self->log->path($log->{file}) if $log->{file} ||= $log->{path};
-    delete $self->log->{handle};           # make sure it's fresh to file
+    delete $self->log->{handle};        # make sure it's fresh to file
   }
 
-  $self->ua->max_redirects(2);             # support getting facebook pictures
+  $self->ua->max_redirects(2);          # support getting facebook pictures
   $self->plugin('Convos::Plugin::Helpers');
   $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
-  $self->secrets([time]);                  # will be replaced by _set_secrets()
+  $self->secrets([time]);               # will be replaced by _set_secrets()
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets;
@@ -325,7 +326,8 @@ sub startup {
 
   if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
     $self->log->warn(
-      "invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
+      "invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead."
+    );
     $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
   }
   if ($ENV{CONVOS_TEMPLATES}) {
@@ -340,8 +342,10 @@ sub startup {
   $self->defaults(full_page => 1);
   $self->hook(before_dispatch => \&_before_dispatch);
 
-  Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
-  Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
+  Mojo::IOLoop->timer(
+    5 => sub { $ENV{CONVOS_MANUAL_BACKEND} or $self->_start_backend; });
+  Mojo::IOLoop->timer(
+    0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
   Mojo::IOLoop->timer(0 => sub { $self->_set_secrets });
 }
 
@@ -381,7 +385,8 @@ sub _before_dispatch {
     $c->req->url->base(Mojo::URL->new($base));
   }
   if (!$c->app->config->{hostname_is_set}++) {
-    $c->redis->set('convos:frontend:url' => $c->req->url->base->to_abs->to_string);
+    $c->redis->set(
+      'convos:frontend:url' => $c->req->url->base->to_abs->to_string);
   }
 }
 
@@ -405,8 +410,10 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
-  $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
-  $config->{name} = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
+  $config->{hypnotoad}{listen}
+    ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
+  $config->{name} = $ENV{CONVOS_ORGANIZATION_NAME}
+    if $ENV{CONVOS_ORGANIZATION_NAME};
   $config->{name} ||= 'Nordaaker';
   $config;
 }
@@ -430,25 +437,38 @@ sub _private_routes {
 
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
-  $r->get('/chat/notifications')->to('client#notifications', layout => undef)->name('notification.list');
-  $r->post('/chat/notifications/clear')->to('client#clear_notifications', layout => undef)->name('notifications.clear');
-  $r->any('/connection/add')->to('connection#add_connection')->name('connection.add');
-  $r->any('/connection/:name/control')->to('connection#control')->name('connection.control');
-  $r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
-  $r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
-  $r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
+  $r->get('/chat/notifications')->to('client#notifications', layout => undef)
+    ->name('notification.list');
+  $r->post('/chat/notifications/clear')
+    ->to('client#clear_notifications', layout => undef)
+    ->name('notifications.clear');
+  $r->any('/connection/add')->to('connection#add_connection')
+    ->name('connection.add');
+  $r->any('/connection/:name/control')->to('connection#control')
+    ->name('connection.control');
+  $r->any('/connection/:name/edit')->to('connection#edit_connection')
+    ->name('connection.edit');
+  $r->get('/connection/:name/delete')
+    ->to(template => 'connection/delete_connection', layout => 'tactile');
+  $r->post('/connection/:name/delete')->to('connection#delete_connection')
+    ->name('connection.delete');
   $r->any('/network/add')->to('connection#add_network')->name('network.add');
-  $r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
+  $r->any('/network/:name/edit')->to('connection#edit_network')
+    ->name('network.edit');
   $r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $r->any('/profile')->to('user#edit')->name('user.edit');
   $r->post('/profile/timezone/offset')->to('user#tz_offset');
   $r->get('/wizard')->to('connection#wizard')->name('wizard');
 
   $network_r = $r->route('/:network');
-  $network_r->get('/*target' => [target => qr/[\#\&][^\x07\x2C\s]{1,50}/])->to('client#conversation', is_channel => 1)
-    ->name('view');
-  $network_r->get('/*target' => [target => qr/[A-Za-z_\-\[\]\\\^\{\}\|\`][A-Za-z0-9_\-\[\]\\\^\{\}\|\`]{1,15}/])
-    ->to('client#conversation', is_channel => 0)->name('view');
+  $network_r->get('/*target' => [target => qr/[\#\&][^\x07\x2C\s]{1,50}/])
+    ->to('client#conversation', is_channel => 1)->name('view');
+  $network_r->get(
+    '/*target' => [
+      target =>
+        qr/[A-Za-z_\-\[\]\\\^\{\}\|\`][A-Za-z0-9_\-\[\]\\\^\{\}\|\`]{1,15}/
+    ]
+  )->to('client#conversation', is_channel => 0)->name('view');
   $network_r->get('/')->to('client#conversation')->name('view.network');
 }
 
@@ -460,7 +480,8 @@ sub _public_routes {
   $r->get('/avatar')->to('user#avatar')->name('avatar');
   $r->get('/login')->to('user#login')->name('login');
   $r->post('/login')->to('user#login');
-  $r->get('/register/:invite', {invite => ''})->to('user#register')->name('register');
+  $r->get('/register/:invite', {invite => ''})->to('user#register')
+    ->name('register');
   $r->post('/register/:invite', {invite => ''})->to('user#register');
   $r->get('/logout')->to('user#logout')->name('logout');
   $r;
@@ -470,19 +491,26 @@ sub _redis_url {
   my $self = shift;
   my $url;
 
-  for my $k (qw( CONVOS_REDIS_URL REDISTOGO_URL REDISCLOUD_URL DOTCLOUD_DATA_REDIS_URL )) {
+  for my $k (
+    qw( CONVOS_REDIS_URL REDISTOGO_URL REDISCLOUD_URL DOTCLOUD_DATA_REDIS_URL )
+    )
+  {
     $url = $ENV{$k} or next;
-    $self->log->debug("Using $k environment variable as Redis connection URL.");
+    $self->log->debug(
+      "Using $k environment variable as Redis connection URL.");
     last;
   }
 
   unless ($url) {
     if ($self->config('redis')) {
-      $self->log->warn("'redis' url from config file will be deprecated. Run 'perldoc Convos' for alternative setup.");
+      $self->log->warn(
+        "'redis' url from config file will be deprecated. Run 'perldoc Convos' for alternative setup."
+      );
       $url = $self->config('redis');
     }
     elsif ($self->mode eq 'production') {
-      $self->log->debug("Using default Redis connection URL redis://127.0.0.1:6379/1");
+      $self->log->debug(
+        "Using default Redis connection URL redis://127.0.0.1:6379/1");
       $url = 'redis://127.0.0.1:6379/1';
     }
     else {
@@ -492,7 +520,8 @@ sub _redis_url {
   }
 
   $url = Mojo::URL->new($url);
-  $url->path($ENV{CONVOS_REDIS_INDEX}) if $ENV{CONVOS_REDIS_INDEX} and !$url->path->[0];
+  $url->path($ENV{CONVOS_REDIS_INDEX})
+    if $ENV{CONVOS_REDIS_INDEX} and !$url->path->[0];
   $ENV{CONVOS_REDIS_URL} = $url->to_string;
 }
 
@@ -545,16 +574,18 @@ sub _start_backend {
       elsif ($SIG{USR2}) {    # hypnotoad
         $self->_start_backend_as_external_app;
       }
-      elsif ($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) {    # forced or ./script/convos daemon
+      elsif ($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT})
+      {                       # forced or ./script/convos daemon
         $self->log->debug('Starting embedded backend.');
         $redis->set('convos:backend:pid' => $$);
         $redis->del('convos:backend:lock');
         $self->core->start;
       }
-      else {                                                    # morbo
+      else {                  # morbo
         $self->core->reset;
         $self->log->warn(
-          'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend from morbo. (The backend is not running)');
+          'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend from morbo. (The backend is not running)'
+        );
       }
     },
   );
