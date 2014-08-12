@@ -10,8 +10,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
 use Mojo::Util;
 use Convos::Core::Commands;
-use constant DEFAULT_RESPONSE =>
-  "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
+use constant DEFAULT_RESPONSE => "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
 
 =head1 METHODS
 
@@ -49,8 +48,7 @@ sub socket {
 
       if ($dom and $dom->{'id'} and $dom->{'data-network'}) {
         @$dom{qw( network state target uuid )}
-          = map { delete $dom->{$_} // '' }
-          qw( data-network data-state data-target id );
+          = map { delete $dom->{$_} // '' } qw( data-network data-state data-target id );
         $self->_handle_socket_data($dom);
       }
       else {
@@ -80,11 +78,7 @@ sub socket {
         sub { j(shift @messages) },
         sub {
           my ($self, $messages) = @_;
-          $self->send_partial(
-            "event/$messages->[0]{event}",
-            target => '',
-            %{$messages->[0]}
-          );
+          $self->send_partial("event/$messages->[0]{event}", target => '', %{$messages->[0]});
         },
       );
     }
@@ -131,8 +125,7 @@ sub _handle_socket_data {
       $cmd = $self->$code($arg, $dom);
     }
     else {
-      return $self->_send_400($dom,
-        'Unknown command. Type /help to see available commands.');
+      return $self->_send_400($dom, 'Unknown command. Type /help to see available commands.');
     }
   }
   elsif ($dom->{network} eq 'convos') {
