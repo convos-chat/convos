@@ -1,4 +1,4 @@
-package Convos::Archive;
+package Convos::Controller::Archive;
 
 =head1 NAME
 

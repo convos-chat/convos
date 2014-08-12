@@ -1,4 +1,4 @@
-package Convos::Oembed;
+package Convos::Controller::Oembed;
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ sub generate {
   my $url     = $self->param('url');
   my $headers = $self->res->headers;
 
-  #$header->etag(Mojo::Util::md5_sum($self->req->url->to_abs)); # not sure if this is a good idea
+#$header->etag(Mojo::Util::md5_sum($self->req->url->to_abs)); # not sure if this is a good idea
   $headers->cache_control('max-age=3600, must-revalidate');
 
   if ($url =~ /^http/) {

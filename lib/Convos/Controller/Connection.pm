@@ -1,4 +1,4 @@
-package Convos::Connection;
+package Convos::Controller::Connection;
 
 =head1 NAME
 
@@ -19,7 +19,10 @@ Add a new connection based on network name.
 
 sub add_connection {
   my $self = shift;
-  my $method = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
+  my $method
+    = $self->req->method eq 'POST'
+    ? '_add_connection'
+    : '_add_connection_form';
 
   $self->delay(
     sub {
@@ -109,7 +112,10 @@ sub control {
   if ($command eq 'state') {
     return $self->_connection_state(
       sub {
-        $self->respond_to(json => {json => {state => $_[1]}}, any => {text => "$_[1]\n"},);
+        $self->respond_to(
+          json => {json => {state => $_[1]}},
+          any  => {text => "$_[1]\n"},
+        );
       }
     );
   }
@@ -122,12 +128,18 @@ sub control {
       sub {
         my ($delay) = @_;
         my $key = sprintf 'convos:user:%s:%s', $self->session('login'), $name;
-        $self->redis->publish($key => $self->param('irc_cmd') // $command, $delay->begin);
+        $self->redis->publish(
+          $key => $self->param('irc_cmd') // $command,
+          $delay->begin
+        );
       },
       sub {
         my ($delay, $sent) = @_;
         $self->respond_to(
-          json => {json => {state => $sent ? 'sent' : 'error'}, status => $sent ? 200 : 500},
+          json => {
+            json => {state => $sent ? 'sent' : 'error'},
+            status => $sent ? 200 : 500
+          },
           any => sub { shift->redirect_to($redirect_to) },
         );
       },
@@ -137,7 +149,8 @@ sub control {
     $self->delay(
       sub {
         my ($delay) = @_;
-        $self->app->core->control($command, $self->session('login'), $name, $delay->begin);
+        $self->app->core->control($command, $self->session('login'),
+          $name, $delay->begin);
       },
       sub {
         my ($delay, $sent) = @_;
@@ -146,7 +159,7 @@ sub control {
 
         $self->respond_to(
           json => {json => {state => $state}, status => $status},
-          any  => sub   { shift->redirect_to($redirect_to) },
+          any => sub { shift->redirect_to($redirect_to) },
         );
       },
     );
@@ -162,7 +175,10 @@ Used to edit a connection.
 sub edit_connection {
   my $self      = shift;
   my $full_page = $self->stash('full_page');
-  my $method    = $self->req->method eq 'POST' ? '_edit_connection' : '_edit_connection_form';
+  my $method
+    = $self->req->method eq 'POST'
+    ? '_edit_connection'
+    : '_edit_connection_form';
 
   $self->delay(
     sub {
@@ -208,17 +224,26 @@ sub edit_network {
     sub {
       my ($delay) = @_;
 
-      $self->redis->execute([get => 'irc:default:network'], [hgetall => "irc:network:$name"], $delay->begin);
+      $self->redis->execute(
+        [get     => 'irc:default:network'],
+        [hgetall => "irc:network:$name"],
+        $delay->begin
+      );
     },
     sub {
       my ($delay, $default_network, $network) = @_;
 
       $network->{server} or return $self->render_not_found;
-      $self->param($_ => $network->{$_} || '') for qw( channels password tls home_page );
-      $self->param(name    => $name);
+      $self->param($_ => $network->{$_} || '')
+        for qw( channels password tls home_page );
+      $self->param(name => $name);
       $self->param(default => 1) if $default_network eq $name;
-      $self->param(server  => join ':', @$network{qw( server port )});
-      $self->render(default_network => $default_network, name => $name, network => $network);
+      $self->param(server => join ':', @$network{qw( server port )});
+      $self->render(
+        default_network => $default_network,
+        name            => $name,
+        network         => $network
+      );
     },
   );
 }
@@ -267,7 +292,8 @@ sub _add_connection {
   my $validation = $self->validation;
   my $name       = $self->param('name') || '';
 
-  $validation->input->{channels} = [map { split /\s/ } $self->param('channels')];
+  $validation->input->{channels}
+    = [map { split /\s/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
 
   $self->delay(
@@ -284,8 +310,11 @@ sub _add_connection {
     sub {
       my ($delay, $errors, $conn) = @_;
 
-      return $self->redirect_to('view.network', network => 'convos') unless $errors;
-      return $self->param('wizard') ? $self->wizard : $self->_add_connection_form;
+      return $self->redirect_to('view.network', network => 'convos')
+        unless $errors;
+      return $self->param('wizard')
+        ? $self->wizard
+        : $self->_add_connection_form;
     },
   );
 }
@@ -320,11 +349,15 @@ sub _add_connection_form {
 
       for my $network (@networks) {
         $network->{name} = shift @$names;
-        $channels = $network->{channels} || '' if !$channels and $network->{name} eq $default_network;
+        $channels = $network->{channels} || ''
+          if !$channels and $network->{name} eq $default_network;
       }
 
       $self->param(channels => $channels || $networks[0]{channels} || '');
-      $self->render(default_network => $default_network, select_networks => \@networks);
+      $self->render(
+        default_network => $default_network,
+        select_networks => \@networks
+      );
     },
   );
 }
@@ -334,7 +367,10 @@ sub _connection_state {
   my $login = $self->session('login');
   my $name  = $self->stash('name');
 
-  $self->redis->hget("user:$login:connection:$name" => "state", sub { $cb->($_[0], $_[1] || 'disconnected') },);
+  $self->redis->hget(
+    "user:$login:connection:$name" => "state",
+    sub { $cb->($_[0], $_[1] || 'disconnected') },
+  );
 }
 
 sub _edit_connection {
@@ -342,10 +378,11 @@ sub _edit_connection {
   my $validation = $self->validation;
   my $full_page  = $self->stash('full_page');
 
-  $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
-  $validation->input->{login}    = $self->session('login');
-  $validation->input->{name}     = $self->stash('name');
-  $validation->input->{server}   = $self->req->body_params->param('server');
+  $validation->input->{channels}
+    = [map { split /\s+/ } $self->param('channels')];
+  $validation->input->{login}  = $self->session('login');
+  $validation->input->{name}   = $self->stash('name');
+  $validation->input->{server} = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
 
   $self->delay(
@@ -356,7 +393,8 @@ sub _edit_connection {
     sub {
       my ($delay, $errors, $changed) = @_;
       return $self->_edit_connection_form if $errors;
-      return $self->redirect_to('view.network', network => $self->stash('name'));
+      return $self->redirect_to('view.network',
+        network => $self->stash('name'));
     }
   );
 }
@@ -370,7 +408,8 @@ sub _edit_connection_form {
     sub {
       my ($delay) = @_;
       $self->_connection_state($delay->begin);
-      $self->redis->hgetall("user:$login:connection:$name", $delay->begin) unless $self->req->method eq 'POST';
+      $self->redis->hgetall("user:$login:connection:$name", $delay->begin)
+        unless $self->req->method eq 'POST';
     },
     sub {
       my ($delay, $state, $connection) = @_;
@@ -381,7 +420,10 @@ sub _edit_connection_form {
 }
 
 sub _invalid_control_request {
-  shift->respond_to(json => {json => {}, status => 400}, any => {text => "Invalid request\n", status => 400},);
+  shift->respond_to(
+    json => {json => {},                  status => 400},
+    any  => {text => "Invalid request\n", status => 400},
+  );
 }
 
 =head1 COPYRIGHT

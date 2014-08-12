@@ -1,4 +1,4 @@
-package Convos::Client;
+package Convos::Controller::Client;
 
 =head1 NAME
 
@@ -70,14 +70,16 @@ sub conversation {
   $self->delay(
     sub {
       my ($delay) = @_;
-      $redis->execute(@rearrange, $delay->begin);    # make sure conversations exists before doing zadd
+      $redis->execute(@rearrange, $delay->begin)
+        ;    # make sure conversations exists before doing zadd
     },
     sub {
       my ($delay, @score) = @_;
       my $time = time;
 
-      if ($target and !$score[0]) {                  # no such conversation
-        return $delay->begin(0)->([$login, 'connected']) if $self->param('from');
+      if ($target and !$score[0]) {    # no such conversation
+        return $delay->begin(0)->([$login, 'connected'])
+          if $self->param('from');
         return $self->stash(layout => 'tactile')->render_not_found;
       }
       if (!$target) {
@@ -87,9 +89,15 @@ sub conversation {
         return $delay->begin(0)->([$login, 'connected']);
       }
 
-      $redis->hmget("user:$login:connection:$network", qw( current_nick nick state ), $delay->begin);
-      $redis->zadd("user:$login:conversations", $time + 0.001, $name)      if $score[0];
-      $redis->zadd("user:$login:conversations", $time,         $prev_name) if $score[1];
+      $redis->hmget(
+        "user:$login:connection:$network",
+        qw( current_nick nick state ),
+        $delay->begin
+      );
+      $redis->zadd("user:$login:conversations", $time + 0.001, $name)
+        if $score[0];
+      $redis->zadd("user:$login:conversations", $time, $prev_name)
+        if $score[1];
     },
     sub {
       my $delay        = shift;
@@ -102,7 +110,10 @@ sub conversation {
       }
 
       $state ||= 'disconnected';
-      $self->stash(current_nick => $current_nick || $wanted_nick, state => $state);
+      $self->stash(
+        current_nick => $current_nick || $wanted_nick,
+        state => $state
+      );
       $self->_conversation($delay->begin);
     },
     sub {
@@ -182,12 +193,19 @@ sub notifications {
       my ($delay) = @_;
 
       $self->notification_list($delay->begin);
-      $self->_modify_notification($self->param('nid'), read => 1, $delay->begin) if length $self->param('nid');
+      $self->_modify_notification(
+        $self->param('nid'),
+        read => 1,
+        $delay->begin
+      ) if length $self->param('nid');
     },
     sub {
       my ($delay, $notification_list) = @_;
 
-      $self->respond_to(json => {json => $notification_list}, html => {template => 'sidebar/notification_list'},);
+      $self->respond_to(
+        json => {json     => $notification_list},
+        html => {template => 'sidebar/notification_list'},
+      );
     },
   );
 }
@@ -197,7 +215,10 @@ sub _conversation {
   my $login   = $self->session('login');
   my $network = $self->stash('network');
   my $target  = $self->stash('target');
-  my $key     = $target ? "user:$login:connection:$network:$target:msg" : "user:$login:connection:$network:msg";
+  my $key
+    = $target
+    ? "user:$login:connection:$network:$target:msg"
+    : "user:$login:connection:$network:msg";
 
   if (my $to = $self->param('to')) {    # to a timestamp
     $self->stash(from_archive => 1);

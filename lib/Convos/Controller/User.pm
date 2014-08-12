@@ -1,4 +1,4 @@
-package Convos::User;
+package Convos::Controller::User;
 
 =head1 NAME
 
@@ -11,8 +11,10 @@ use Convos::Core::Util qw/ as_id id_as /;
 use Mojo::Asset::File;
 use Mojo::Date;
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
-use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
-use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
+use constant DEFAULT_URL => $ENV{DEFAULT_AVATAR_URL}
+  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
+use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL}
+  || 'https://gravatar.com/avatar/%s?s=40&d=retro';
 
 =head1 METHODS
 
@@ -70,7 +72,8 @@ sub _avatar_discover {
   my $user = $self->param('user');
 
   unless ($self->session('login')) {
-    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
+    return $self->_avatar_error(500,
+      'Cannot discover avatar unless logged in');
   }
 
   # TODO: Need to do a WHOIS to see if the user has convos_url set
@@ -110,17 +113,19 @@ sub _avatar_local {
       }
 
       $self->logf(debug => 'Fetching local avatar for %s from %s', $id, $url);
-      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
+      $self->app->ua->get($url => $delay->begin)
+        ;    # get from either from facebook or gravatar
     },
   );
 }
 
 sub _avatar_remote {
   my $self = shift;
-  my $url  = Mojo::URL->new(shift);                  # Example $url = http://wirc.pl/
+  my $url  = Mojo::URL->new(shift);    # Example $url = http://wirc.pl/
 
   unless ($self->session('login')) {
-    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
+    return $self->_avatar_error(500,
+      'Cannot discover avatar unless logged in');
   }
 
   $self->_render_avatar(
@@ -131,7 +136,8 @@ sub _avatar_remote {
       $url->query(host => 'loopback', user => scalar $self->param('user'));
 
       $self->logf(debug => 'Fetching remote avatar from %s', $url);
-      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
+      $self->app->ua->get($url => $delay->begin)
+        ;    # get from either from facebook or gravatar
     },
   );
 }
@@ -145,7 +151,9 @@ sub _render_avatar {
   if ($date) {
 
     # Avoid asking remote server too often
-    if ($since = Mojo::Date->new($date)->epoch and $since + $cache_timeout > time) {
+    if (  $since = Mojo::Date->new($date)->epoch
+      and $since + $cache_timeout > time)
+    {
       $self->res->headers->last_modified($date);
       return $self->render(text => '', status => 304);
     }
@@ -185,8 +193,10 @@ sub login {
       sub {
         my ($delay, $server_info) = @_;
         my $app = $self->app;
-        $app->config->{redis_version} = $server_info =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
-        $app->log->info("Redis server version: @{[$app->config->{redis_version}]}");
+        $app->config->{redis_version}
+          = $server_info =~ /redis_version:(\d+\.\d+)/ ? $1 : '0e0';
+        $app->log->info(
+          "Redis server version: @{[$app->config->{redis_version}]}");
         $self->login;
       },
     );
@@ -199,7 +209,10 @@ sub login {
     return $self->redirect_to('view');
   }
   if ($self->req->method ne 'POST') {
-    return $self->respond_to(html => {template => 'index'}, json => {json => {login => $self->session('login') || ''}});
+    return $self->respond_to(
+      html => {template => 'index'},
+      json => {json     => {login => $self->session('login') || ''}}
+    );
   }
 
   $self->delay(
@@ -212,7 +225,10 @@ sub login {
       return $self->render('index', status => 401) if $error;
       my $login = $self->validation->param('login');
       $self->session(login => $login);
-      $self->respond_to(html => sub { $self->redirect_last($login) }, json => {json => {login => $login}});
+      $self->respond_to(
+        html => sub { $self->redirect_last($login) },
+        json => {json => {login => $login}}
+      );
     },
   );
 }
@@ -261,12 +277,16 @@ sub register {
       $validation->error(login => ['taken']) if $exists;
       return $self->render('index', status => 400) if $validation->has_error;
 
-      $self->logf(debug => '[reg] New user login=%s', $output->{login}) if DEBUG;
+      $self->logf(debug => '[reg] New user login=%s', $output->{login})
+        if DEBUG;
       $self->session(login => $output->{login});
       $self->app->core->start_convos_conversation($output->{login});
       $self->redis->hmset(
-        "user:$output->{login}" =>
-          {digest => $self->_digest($output->{password}), email => $output->{email}, avatar => $output->{email},},
+        "user:$output->{login}" => {
+          digest => $self->_digest($output->{password}),
+          email  => $output->{email},
+          avatar => $output->{email},
+        },
         $delay->begin
       );
       $self->redis->sadd(users => $output->{login}, $delay->begin);
@@ -304,7 +324,8 @@ sub edit {
   $self->delay(
     sub {
       my ($delay) = @_;
-      $self->redis->hgetall("user:$login", $delay->begin) if $method eq 'render';
+      $self->redis->hgetall("user:$login", $delay->begin)
+        if $method eq 'render';
       $self->conversation_list($delay->begin);
       $self->notification_list($delay->begin) if $self->stash('full_page');
     },
@@ -355,7 +376,8 @@ sub _edit {
 }
 
 sub _digest {
-  crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
+  crypt $_[1], join '',
+    ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
 =head1 COPYRIGHT
