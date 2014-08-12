@@ -2,7 +2,7 @@ package Convos::Controller::Client;
 
 =head1 NAME
 
-Convos::Client - Mojolicious controller for IRC chat
+Convos::Controller::Client - Mojolicious controller for IRC chat
 
 =cut
 

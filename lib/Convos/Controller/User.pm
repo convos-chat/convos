@@ -2,7 +2,7 @@ package Convos::Controller::User;
 
 =head1 NAME
 
-Convos::User - Mojolicious controller for user data
+Convos::Controller::User - Mojolicious controller for user data
 
 =cut
 

@@ -2,7 +2,7 @@ package Convos::Controller::Oembed;
 
 =head1 NAME
 
-Convos::Oembed - Generate oembed chunks.
+Convos::Controller::Oembed - Generate oembed chunks.
 
 =cut
 

@@ -2,7 +2,7 @@ package Convos::Controller::Connection;
 
 =head1 NAME
 
-Convos::Connection - Mojolicious controller for IRC connections
+Convos::Controller::Connection - Mojolicious controller for IRC connections
 
 =cut
 

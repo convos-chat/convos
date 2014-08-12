@@ -2,7 +2,7 @@ package Convos::Controller::Archive;
 
 =head1 NAME
 
-Convos::Archive - Mojolicious Controller for IRC logs
+Convos::Controller::Archive - Mojolicious Controller for IRC logs
 
 =cut
 
