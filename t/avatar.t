@@ -59,7 +59,7 @@ redis_do(
 }
 
 {
-  local $TODO = 'Convos::User::_avatar_discover()';
+  local $TODO = 'Convos::Controller::User::_avatar_discover()';
   diag 'discover remote avatar';
   $t->get_ok('/avatar?nick=batman&user=~jhthorsen&host=irc.example.com')->status_is(200)
     ->content_is('avatar by discover', 'avatar from remote convos')->header_like('Last-Modified', qr{\d});
