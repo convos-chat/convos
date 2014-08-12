@@ -1,7 +1,6 @@
 use t::Helper;
 
-my $server = $t->app->redis->subscribe('convos:user:fooman:magnet');
-my ($form, $tmp, @ctrl);
+my ($form, @ctrl);
 
 $t->app->core->start;
 

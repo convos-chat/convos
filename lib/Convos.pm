@@ -337,7 +337,6 @@ sub startup {
   }
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
-  $self->defaults(full_page => 1);
   $self->hook(before_dispatch => \&_before_dispatch);
 
   Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
