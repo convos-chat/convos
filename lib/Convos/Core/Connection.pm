@@ -895,6 +895,16 @@ sub cmd_nick {
   }
 }
 
+sub cmd_join {
+  my ($self, $message) = @_;
+
+  my $channel = $message->{params}[0];
+  if (my $key = $message->{params}[1]) {
+    warn "Should save key $key";
+    $self->redis->hset("$self->{path}:$channel", key => $key);
+  }
+}
+
 sub _add_convos_message {
   my ($self, $data) = @_;
   my $login = $self->login;
