@@ -453,7 +453,14 @@ sub irc_rpl_welcome {
     $self->{conversation_path},
     0, -1,
     sub {
-      $self->_irc->write(JOIN => $_) for $self->channels_from_conversations($_[1]);
+      for my $channel ($self->channels_from_conversations($_[1])) {
+        $self->redis->hget(
+          "$self->{path}:$channel",
+          key => sub {
+            $_[1] ? $self->_irc->write(JOIN => $channel, $_[1]) : $self->_irc->write(JOIN => $channel);
+          }
+        );
+      }
     }
   );
 }
@@ -900,7 +907,6 @@ sub cmd_join {
 
   my $channel = $message->{params}[0];
   if (my $key = $message->{params}[1]) {
-    warn "Should save key $key";
     $self->redis->hset("$self->{path}:$channel", key => $key);
   }
 }
