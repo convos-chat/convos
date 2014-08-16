@@ -4,10 +4,10 @@ use File::Basename qw( basename );
 use Test::More;
 use Test::Mojo;
 
-plan skip_all => 'Can only run on linux' unless $^O = 'linux';
+plan skip_all => 'Can only run on linux' unless $^O eq 'linux';
 
 $ENV{CONVOS_REDIS_URL} = 'redis://invalid-host.localhost';
-$ENV{MOJO_MODE} = 'production';
+$ENV{MOJO_MODE}        = 'production';
 
 {
   my $ap = Mojolicious::Plugin::AssetPack->new;
