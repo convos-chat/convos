@@ -27,17 +27,19 @@ sub route {
   my $login = $self->session('login');
 
   if ($login) {
-    $self->redirect_last($login);
+    return $self->redirect_last($login);
   }
-  else {
-    $self->redis->scard(
-      'users',
-      sub {
-        my ($redis, $n) = @_;
-        $self->redirect_to($n ? 'login' : 'register');
-      }
-    );
-  }
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->scard(users => $delay->begin);
+    },
+    sub {
+      my ($delay, $n) = @_;
+      $self->redirect_to($n ? 'login' : 'register');
+    },
+  );
 }
 
 =head2 conversation
