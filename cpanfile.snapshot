@@ -54,10 +54,10 @@ DISTRIBUTIONS
       File::Spec 0
       Test::More 0
       perl 5.006001
-  Mojo-IRC-0.09
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.09.tar.gz
+  Mojo-IRC-0.10
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.10.tar.gz
     provides:
-      Mojo::IRC 0.09
+      Mojo::IRC 0.10
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
@@ -76,8 +76,8 @@ DISTRIBUTIONS
       Mojolicious 3.0
       Protocol::Redis 1.0
       Test::More 0.88
-  Mojolicious-5.16
-    pathname: S/SR/SRI/Mojolicious-5.16.tar.gz
+  Mojolicious-5.30
+    pathname: S/SR/SRI/Mojolicious-5.30.tar.gz
     provides:
       Mojo undef
       Mojo::Asset undef
@@ -140,7 +140,7 @@ DISTRIBUTIONS
       Mojo::UserAgent::Server undef
       Mojo::UserAgent::Transactor undef
       Mojo::Util undef
-      Mojolicious 5.16
+      Mojolicious 5.30
       Mojolicious::Command undef
       Mojolicious::Command::cgi undef
       Mojolicious::Command::cpanify undef
@@ -188,6 +188,7 @@ DISTRIBUTIONS
       ojo undef
     requirements:
       ExtUtils::MakeMaker 0
+      Pod::Simple 3.09
   Mojolicious-Plugin-AssetPack-0.19
     pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.19.tar.gz
     provides:
