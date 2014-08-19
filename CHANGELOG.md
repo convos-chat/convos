@@ -1,5 +1,6 @@
 ## 0.82
 - Requires Mojolicious 5.16
+- Fix nicks starting with special character, #130
 - Fix jumpy text when sending a message
 - Fix invite only template styling
 - Testing out Heroku deploy button, #120
