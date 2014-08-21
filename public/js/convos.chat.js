@@ -39,7 +39,21 @@
   };
 
   convos.draw['profile'] = function() {
-    $('.form-group.notifications').find('input').val(Notification.permission);
+    var btn = $('.form-group.notifications').find('button');
+    var p = Notification.permission;
+
+    btn.text(p == 'granted' ? 'Enabled' : p);
+
+    if (Notification.permission == 'granted') {
+      btn.click(function(e) { $.notify.itWorks(); });
+    }
+    else {
+      Notification.requestPermission(function(s) {
+        if (s) Notification.permission = s;
+        btn.text(s);
+        $.notify.itWorks();
+      });
+    }
   };
 
   convos.draw['ui'] = function() {

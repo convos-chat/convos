@@ -27,6 +27,11 @@
     return true;
   };
 
+  $.notify.itWorks = function() {
+    var n = new Notification('Notifications enabled.', { icon: $.url_for('/images/icon-48.png'), body: 'It works!' });
+    setTimeout(function() { n.close(); }, 2000);
+  };
+
   $(document).ready(function() {
     var $question = $('.notification.question');
 
@@ -39,8 +44,7 @@
 
         Notification.requestPermission(function(s) {
           if (s) Notification.permission = s;
-          n = new Notification('Notifications enabled.', {});
-          setTimeout(function() { n.close(); }, 2000);
+          $.notify.itWorks();
         });
         $question.hide();
         return false;
