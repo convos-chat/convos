@@ -102,6 +102,6 @@ else if (!window.Notification) {
     this.close = function() { if (this.onclose) this.onclose(); };
     this.show = function() {};
   };
-  window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'not-supported';
-  window.Notification.requestPermission = function(cb) { cb('not-supported'); };
+  window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'denied'; // must be denied for iOS
+  window.Notification.requestPermission = function(cb) { cb('denied'); };
 }
