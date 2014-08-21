@@ -1,5 +1,6 @@
 ;(function(window) {
-  window.navigator.is_ios = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+  window.navigator.is_ios = /(iPad|iPhone|iPod)/.test(navigator.userAgent);
+  window.navigator.is_touch_device = /(iPad|iPhone|iPod|Android)/.test(navigator.userAgent); // don't want touch events if the device is a laptop with touch screen
 
   window.console = window.console || { log: function() { window.console.messages.push(arguments) }, messages: [] };
   window.console._debug = function() { if(window.DEBUG) window.console.log.apply(window.console, arguments) };

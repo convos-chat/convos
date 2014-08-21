@@ -176,7 +176,7 @@
         getHistoricMessages();
       }
 
-      if (!navigator.is_ios) focusFirst();
+      if (!navigator.is_touch_device) focusFirst();
       if (draw) convos.draw[draw](e);
       if (data) $('body').hideSidebar();
 
@@ -233,6 +233,6 @@
 
   $(window).load(function() {
     $('div.messages').trigger('pjax:success', [ '', 'success', {}, {} ]); // render initial div.messages
-    if (!navigator.is_ios) focusFirst(); // need to focus even if we have no div.messages
+    if (!navigator.is_touch_device) focusFirst(); // need to focus even if we have no div.messages
   });
 })(jQuery);
