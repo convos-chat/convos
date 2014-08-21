@@ -37,7 +37,8 @@
       $question.find('a.yes').off('click').click(function() {
         if (Notification.permission === 'download') return true; // follow link
 
-        Notification.requestPermission(function() {
+        Notification.requestPermission(function(s) {
+          if (s) Notification.permission = s;
           n = new Notification('Notifications enabled.', {});
           setTimeout(function() { n.close(); }, 2000);
         });
