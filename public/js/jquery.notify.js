@@ -97,6 +97,6 @@ else if (!window.Notification) {
     this.close = function() { if (this.onclose) this.onclose(); };
     this.show = function() {};
   };
-  window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'denied';
-  window.Notification.requestPermission = function(cb) { cb('unsupported'); };
+  window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'not-supported';
+  window.Notification.requestPermission = function(cb) { cb('not-supported'); };
 }

@@ -38,6 +38,10 @@
     s = $('input#channels')[0].selectize;
   };
 
+  convos.draw['profile'] = function() {
+    $('.form-group.notifications').find('input').val(Notification.permission);
+  };
+
   convos.draw['ui'] = function() {
     var menu_width = 0;
     $('nav .right').add('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
