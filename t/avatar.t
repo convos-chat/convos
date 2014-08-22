@@ -38,7 +38,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 {
   redis_do [hmset => 'user:jhthorsen', avatar => 'jhthorsen@cpan.org', email => ''];
   $connection->_irc->from_irc_server(
-    ":fooman!jhthorsen\@host PRIVMSG #mojo :doe: see this &amp; link: http://convos.by?a=1&b=2#yikes # really cool\r\n"
+    ":fooman!~jhthorsen\@host PRIVMSG #mojo :doe: see this &amp; link: http://convos.by?a=1&b=2#yikes # really cool\r\n"
   );
   $dom->parse($t->message_ok->message->[1]);
 

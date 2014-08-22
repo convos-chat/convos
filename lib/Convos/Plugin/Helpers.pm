@@ -129,6 +129,8 @@ sub _add_avatar {
   my $cache = $c->stash->{'convos.avatar_cache'} ||= {};
   my $user = $message->{user};
 
+  $user =~ s!^~!!;      # somenick!~someuser@1.2.3.4
+
   if ($cache->{$user}) {
     return $message->{avatar} = $cache->{$user};
   }
