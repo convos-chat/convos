@@ -37,8 +37,10 @@ SKIP: {
   -d $packed or skip "Cannot look into $packed", 3;
   opendir(my $PACKED, $packed);
 
-  my @packed = map { $_->[0] }
-    sort { $a->[1] cmp $b->[1] } grep { $_->[1] } map { /c-\w+\.(css|js)$/; [$_, $1] } readdir $PACKED;
+  my @packed
+    = map { $_->[0] }
+    sort { $b->[2][9] <=> $a->[2][9] || $a->[1] cmp $b->[1] }
+    grep { $_->[1] } map { /c-\w+\.(css|js)$/; [$_, $1, [stat "$packed/$_"]] } readdir $PACKED;
 
   is $packed[0], basename($css), 'found c.css file';
   is $packed[1], basename($js),  'found c.js file';

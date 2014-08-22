@@ -8,9 +8,11 @@ Convos::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use Mojo::JSON 'j';
-use Convos::Core::Util qw( format_time id_as);
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
+use Convos::Core::Util qw( format_time id_as );
 use URI::Find;
+use constant DEBUG        => $ENV{CONVOS_DEBUG}        || 0;
+use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
+use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
 
 =head1 HELPERS
 
@@ -25,18 +27,6 @@ sub active_class {
   my $url = $c->url_for(@_);
 
   return ($url, $url eq $c->req->url->path ? (class => 'active') : (),);
-}
-
-=head2 avatar
-
-Used to insert an image tag.
-
-=cut
-
-sub avatar {
-  my ($self, $avatar, @args) = @_;
-
-  $self->image($self->url_for('avatar')->query(%$avatar), alt => $avatar->{user}, @args);
 }
 
 =head2 id_as
@@ -114,9 +104,11 @@ sub format_conversation {
 
   while (my $message = $conversation->()) {
     $message->{embed} = '';
-    $message->{uuid} ||= '';
+    $message->{uuid}   ||= '';
+    $message->{avatar} ||= '';
 
     defined $message->{message} and _parse_message($c, $message, $delay);
+    defined $message->{user} and _add_avatar($c, $message, $delay);
     push @{$c->{conversation}}, $message;
   }
 
@@ -130,6 +122,36 @@ sub format_conversation {
   );
 
   $delay->begin->();    # need to do at least one step
+}
+
+sub _add_avatar {
+  my ($c, $message, $delay) = @_;
+  my $cache = $c->stash->{'convos.avatar_cache'} ||= {};
+  my $user = $message->{user};
+
+  if ($cache->{$user}) {
+    return $message->{avatar} = $cache->{$user};
+  }
+
+  my $cb = $delay->begin;
+  $c->redis->hmget(
+    "user:$user",
+    qw( avatar email ),
+    sub {
+      my ($redis, $data) = @_;
+      my $id = shift @$data || shift @$data || "$user\@$message->{host}";
+
+      if ($id =~ /\@/) {
+        $message->{avatar} = sprintf GRAVATAR_URL, Mojo::Util::md5_sum($id);
+      }
+      elsif ($id) {
+        $message->{avatar} = sprintf DEFAULT_URL, $id;
+      }
+
+      $cache->{$user} = $message->{avatar};
+      $cb->();
+    }
+  );
 }
 
 sub _parse_message {
@@ -300,7 +322,6 @@ sub register {
   my ($self, $app, $config) = @_;
 
   $app->helper(active_class        => \&active_class);
-  $app->helper(avatar              => \&avatar);
   $app->helper(format_conversation => \&format_conversation);
   $app->helper(connection_list     => \&connection_list);
   $app->helper(conversation_list   => \&conversation_list);
