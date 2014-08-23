@@ -43,7 +43,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $dom->parse($t->message_ok->message->[1]);
 
   ok $elem = $dom->at('li.message i.icon-user'), 'i';
-  is $elem->{'style'}, 'color:#ad6111;', 'i[style]';
+  is $elem->{'style'}, 'color:#ec305a;', 'i[style]';
   is $elem->{'data-avatar'}, 'https://gravatar.com/avatar/806800a3aeddbad6af673dade958933b?s=40&d=retro',
     'i[data-avatar]';
 }
