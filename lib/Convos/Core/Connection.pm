@@ -82,7 +82,7 @@ Holds a L<Mojo::Redis> object.
 has name  => '';
 has log   => sub { Mojo::Log->new };
 has login => 0;
-has redis => sub { Mojo::Redis->new };
+has redis => sub { die 'redis connection required' };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg ctcp_action /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/
@@ -901,6 +901,12 @@ sub cmd_nick {
     $self->_publish(server_message => {status => 400, message => 'Invalid nick'});
   }
 }
+
+=head2 cmd_join
+
+Store keys on channel join.
+
+=cut
 
 sub cmd_join {
   my ($self, $message) = @_;
