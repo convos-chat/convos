@@ -12,6 +12,8 @@
   $(document).ready(function() {
     var $g = $('form.conversations');
 
+    if (navigator.is_touch_device) $g.find('input').hide();
+
     $g.find('li').each(function() {
       this.filter_by = $.trim($(this).find('a').text().toLowerCase());
     });
