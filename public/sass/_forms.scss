@@ -82,9 +82,9 @@ form.edit-mode {
 button, .button {
   background: darken(#fff, 2%);
   color: #222;
-  font-size: $fontSize;
+  font-size: $fontSize - 1;
   text-decoration: none;
-  padding: 3px 6px;
+  padding: 4px 6px;
   border: 2px solid darken(#fff, 40%);
   @include border-radius(3px);
 }
