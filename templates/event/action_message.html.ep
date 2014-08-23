@@ -5,7 +5,7 @@
 % push @classes, 'same-nick' if $nick eq $prev_nick;
 <li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>" data-timestamp="<%= $timestamp %>">
   %= timestamp $timestamp
-  %= avatar { nick => $nick, host => $host, user => $user }, alt => '', class => 'avatar'
+  <i class="avatar icon-user" data-avatar="<%= $avatar %>" style="color:#<%= substr Mojo::Util::md5_sum($user.$nick), 0, 6 %>;"></i>
   <div class="content whitespace">&#10023; <%= link_to $nick, view => { network => $network, target => $nick }, class => 'autocomplete' %> <%== $message %></div>
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>

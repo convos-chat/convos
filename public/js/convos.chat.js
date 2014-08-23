@@ -38,6 +38,24 @@
     s = $('input#channels')[0].selectize;
   };
 
+  convos.draw['profile'] = function() {
+    var btn = $('.form-group.notifications').find('button');
+    var p = Notification.permission;
+
+    btn.text(p == 'granted' ? 'Enabled' : p);
+
+    if (Notification.permission == 'granted') {
+      btn.click(function(e) { $.notify.itWorks(); });
+    }
+    else {
+      Notification.requestPermission(function(s) {
+        if (s) Notification.permission = s;
+        btn.text(s);
+        $.notify.itWorks();
+      });
+    }
+  };
+
   convos.draw['ui'] = function() {
     var menu_width = 0;
     $('nav .right').add('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
@@ -98,6 +116,9 @@
           $embed_code.find('img').one('load', function() { $(window).scrollTo('bottom') });
         }
       });
+    });
+    this.find('[data-avatar^="http"]').each(function(e) {
+      $(this).replaceWith('<img src="' + $(this).attr('data-avatar') + '" class="avatar">');
     });
 
     this.find('.close').click(function(e) { $(this).closest('li').remove(); });
@@ -172,7 +193,7 @@
         getHistoricMessages();
       }
 
-      if (!navigator.is_ios) focusFirst();
+      if (!navigator.is_touch_device) focusFirst();
       if (draw) convos.draw[draw](e);
       if (data) $('body').hideSidebar();
 
@@ -229,6 +250,6 @@
 
   $(window).load(function() {
     $('div.messages').trigger('pjax:success', [ '', 'success', {}, {} ]); // render initial div.messages
-    if (!navigator.is_ios) focusFirst(); // need to focus even if we have no div.messages
+    if (!navigator.is_touch_device) focusFirst(); // need to focus even if we have no div.messages
   });
 })(jQuery);

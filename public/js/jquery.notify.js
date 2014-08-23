@@ -1,5 +1,6 @@
 ;(function($) {
   var original_title = document.title;
+  var close_after = /(iPad|iPhone|iPod|Android)/.test(navigator.userAgent) ? 60000 : 5000;
   var current_title = original_title;
   var has_focus = true;
   var focus_tid;
@@ -10,7 +11,7 @@
     if (Notification.permission == 'granted') {
       var args = { icon: icon || '', body: body, onclose: function() { clearTimeout(tid); } };
       var n = new Notification(title, args);
-      var tid = setTimeout(function() { n.close(); }, 5000);
+      var tid = setTimeout(function() { n.close(); }, close_after);
       n.onclick = function(x) { window.focus(); this.cancel(); };
     }
 
@@ -27,6 +28,11 @@
     return true;
   };
 
+  $.notify.itWorks = function() {
+    var n = new Notification('Notifications enabled.', { icon: $.url_for('/images/icon-48.png'), body: 'It works!' });
+    setTimeout(function() { n.close(); }, close_after);
+  };
+
   $(document).ready(function() {
     var $question = $('.notification.question');
 
@@ -37,9 +43,9 @@
       $question.find('a.yes').off('click').click(function() {
         if (Notification.permission === 'download') return true; // follow link
 
-        Notification.requestPermission(function() {
-          n = new Notification('Notifications enabled.', {});
-          setTimeout(function() { n.close(); }, 2000);
+        Notification.requestPermission(function(s) {
+          if (s) Notification.permission = s;
+          $.notify.itWorks();
         });
         $question.hide();
         return false;
@@ -96,6 +102,6 @@ else if (!window.Notification) {
     this.close = function() { if (this.onclose) this.onclose(); };
     this.show = function() {};
   };
-  window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'denied';
-  window.Notification.requestPermission = function(cb) { cb('unsupported'); };
+  window.Notification.permission = navigator.userAgent.match(/firefox/i) ? 'download' : 'denied'; // must be denied for iOS
+  window.Notification.requestPermission = function(cb) { cb('denied'); };
 }

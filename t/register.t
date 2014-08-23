@@ -43,7 +43,7 @@ $t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'No
   ->text_is('div.messages ul li:first-child div.content',
   'Welcome to freenode. Start by typing "hi!" in the input field at the bottom of the page.');
 $t->get_ok('/convos')->status_is(200)->text_is('title', 'Nordaaker - convos')->element_exists('div.messages ul li')
-  ->element_exists('div.messages ul li:first-child img[src^="/avatar"]');
+  ->element_exists('div.messages ul li:first-child .avatar');
 
 
 $t->get_ok('/profile')->status_is(200)->element_exists('form input[name="email"][value="foobar@barbar.com"]')

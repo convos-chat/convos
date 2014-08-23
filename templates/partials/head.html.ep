@@ -1,7 +1,7 @@
 <title><%= $organization_name %> - <%= title %></title>
 %= asset 'c.css'
 %= asset 'c.js'
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1<%= stash('minimal_ui') ? '; minimal-ui' : '' %>">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0<%= stash('minimal_ui') ? '; minimal-ui' : '' %>">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="shortcut icon" sizes="196x196" href="<%= url_for('/image/icon-196.png') %>">

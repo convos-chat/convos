@@ -11,8 +11,6 @@ use Convos::Core::Util qw/ as_id id_as /;
 use Mojo::Asset::File;
 use Mojo::Date;
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
-use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
-use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
 
 =head1 METHODS
 
@@ -36,135 +34,6 @@ sub auth {
   }
 
   return 0;
-}
-
-=head2 avatar
-
-Used to render an avatar for a user.
-
-=cut
-
-sub avatar {
-  my $self = shift;
-  my $host = $self->param('host') or $self->render_not_found;
-
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      return $delay->pass($host) if $host eq 'loopback';
-      return $self->redis->hget('convos:host2convos', $host, $delay->begin);
-    },
-    sub {
-      my ($delay, $convos_url) = @_;
-
-      return $self->_avatar_discover if !$convos_url;
-      return $self->_avatar_local if $convos_url eq 'loopback';
-      return $self->_avatar_remote($convos_url);
-    },
-  );
-}
-
-sub _avatar_discover {
-  my ($self, $cb) = @_;
-  my $host = $self->param('host');
-  my $user = $self->param('user');
-
-  unless ($self->session('login')) {
-    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
-  }
-
-  # TODO: Need to do a WHOIS to see if the user has convos_url set
-  my $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum("$user\@$host"));
-  $self->redirect_to($url);
-}
-
-sub _avatar_error {
-  my ($self, $code, $message) = @_;
-
-  $self->render_static("/image/avatar-$code.gif");
-  $self->app->log->error($message) if $message;
-}
-
-sub _avatar_local {
-  my $self = shift;
-  my $host = $self->param('host');
-  my $user = $self->param('user');
-
-  $user =~ s!^~!!;    # somenick!~someuser@1.2.3.4
-
-  $self->_render_avatar(
-    sub {
-      my ($delay) = @_;
-      $self->redis->hmget("user:$user", qw( avatar email ), $delay->begin);
-    },
-    sub {
-      my ($delay, $data) = @_;
-      my $id = shift @$data || shift @$data || "$user\@$host";
-      my $url;
-
-      if ($id =~ /\@/) {
-        $url = sprintf(GRAVATAR_URL, Mojo::Util::md5_sum($id));
-      }
-      else {
-        $url = sprintf(DEFAULT_URL, $id);
-      }
-
-      $self->logf(debug => 'Fetching local avatar for %s from %s', $id, $url);
-      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
-    },
-  );
-}
-
-sub _avatar_remote {
-  my $self = shift;
-  my $url  = Mojo::URL->new(shift);                  # Example $url = http://wirc.pl/
-
-  unless ($self->session('login')) {
-    return $self->_avatar_error(500, 'Cannot discover avatar unless logged in');
-  }
-
-  $self->_render_avatar(
-    sub {
-      my ($delay) = @_;
-
-      push @{$url->path}, 'avatar';
-      $url->query(host => 'loopback', user => scalar $self->param('user'));
-
-      $self->logf(debug => 'Fetching remote avatar from %s', $url);
-      $self->app->ua->get($url => $delay->begin);    # get from either from facebook or gravatar
-    },
-  );
-}
-
-sub _render_avatar {
-  my $self          = shift;
-  my $cache_timeout = 600;                                      # 10 minutes
-  my $date          = $self->req->headers->if_modified_since;
-  my $since;
-
-  if ($date) {
-
-    # Avoid asking remote server too often
-    if ($since = Mojo::Date->new($date)->epoch and $since + $cache_timeout > time) {
-      $self->res->headers->last_modified($date);
-      return $self->render(text => '', status => 304);
-    }
-  }
-
-  $self->delay(
-    @_,    # steps for fetching the remote avatar
-    sub {
-      my ($delay, $tx) = @_;
-
-      for my $k (qw( content_length content_type )) {
-        my $v = $tx->res->headers->$k // next;
-        $self->res->headers->$k($v);
-      }
-
-      $self->res->headers->last_modified(Mojo::Date->new(time));
-      $self->render(data => $tx->res->body, status => $tx->res->code);
-    },
-  );
 }
 
 =head2 login
@@ -266,7 +135,7 @@ sub register {
       $self->app->core->start_convos_conversation($output->{login});
       $self->redis->hmset(
         "user:$output->{login}" =>
-          {digest => $self->_digest($output->{password}), email => $output->{email}, avatar => $output->{email},},
+          {digest => $self->_digest($output->{password}), email => $output->{email}, avatar => $output->{email}},
         $delay->begin
       );
       $self->redis->sadd(users => $output->{login}, $delay->begin);
