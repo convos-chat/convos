@@ -117,6 +117,9 @@
         }
       });
     });
+    this.find('[data-avatar^="http"]').each(function(e) {
+      $(this).replaceWith('<img src="' + $(this).attr('data-avatar') + '" class="avatar">');
+    });
 
     this.find('.close').click(function(e) { $(this).closest('li').remove(); });
     this.filter('.historic-message').find('a.button.newer').click(convos.getNewerMessages);

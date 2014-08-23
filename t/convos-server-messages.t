@@ -31,7 +31,7 @@ $connection->redis->del('just:to:be:sure:data:has:been:stored', sub { Mojo::IOLo
 Mojo::IOLoop->start;
 
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
-$t->get_ok('/convos')->status_is(200)->element_exists('div.messages ul li:first-child img[src^="/avatar"]')
+$t->get_ok('/convos')->status_is(200)->element_exists('div.messages ul li:first-child .avatar')
   ->text_is('div.messages ul li:nth-of-child(1) h3 a', 'magnet')
   ->text_is('div.messages ul li:nth-of-child(1) div.content',
   'Welcome to the MAGnet Internet Relay Chat Network jhthorsen')
