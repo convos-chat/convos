@@ -12,7 +12,7 @@ $user->redis($t->app->redis);
 $user->cmd_join({params => ['#test', 'key']});
 $user->irc_rpl_welcome({});
 Mojo::IOLoop->timer(
-  0.02 => sub {
+  0.1 => sub {
     Mojo::IOLoop->stop;
   }
 );
