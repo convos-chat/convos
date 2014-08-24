@@ -9,6 +9,8 @@
       <dd>Used when you want to send a message starting with "/".</dd>
       <dt>/whois &lt;nick&gt;</dt>
       <dd>Show information about a user</dd>
+      <dt>/kick &lt;nick&gt;</dt>
+      <dd>Kick a user from the current channel</dd>
       <dt>/join &lt;#channel&gt;</dt>
       <dd>Join channel and open up a chat window</dd>
       <dt>/part &lt;#channel&gt;</dt>
