@@ -1,9 +1,14 @@
 ## 0.82
-- Requires Mojolicious 5.16
+- Requires IO::Socket::SSL 1.84
+- Requires Mojolicious 5.30
 - Fix nicks starting with special character, #130
 - Fix jumpy text when sending a message
 - Fix invite only template styling
-- Testing out Heroku deploy button, #120
+- Fix /help command and add click actions
+- Fix missing special characters in nicks, #130
+- Default to no CONVOS_INVITE_CODE in Dockerfile, #118
+- Improvements on Android, #132
+- Fetch avatar on client side, #133
 
 ## 0.81 (2014-08-07)
 - Fix typos in Docker file #114
