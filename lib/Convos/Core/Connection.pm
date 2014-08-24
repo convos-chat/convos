@@ -693,14 +693,7 @@ sub irc_kick {
   Scalar::Util::weaken($self);
   if ($nick eq $self->_irc->nick) {
     my $name = as_id $self->name, $channel;
-
-    $self->redis->zrem(
-      $self->{conversation_path},
-      $name,
-      sub {
-        $self->_publish(remove_conversation => {target => $channel});
-      }
-    );
+    $self->redis->zrem($self->{conversation_path}, $name, sub { });
   }
   $self->_publish(nick_kicked => {by => $nick, nick => $nick, target => $channel});
 }
