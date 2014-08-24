@@ -117,6 +117,8 @@ sub reconnect {
 
 =head2 topic
 
+=head2 kick
+
 =head2 w
 
 =head2 whois
