@@ -37,6 +37,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $connection->_irc->from_irc_server(":magnet.llarian.net 366 doe #convos :End of /NAMES list.\r\n");
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.nick-init[data-network="magnet"][data-target="#convos"]'), 'Got correct names for #convos';
+  like $dom, qr{\@woman.*\+man.*fooman}s, 'nicks are sorted';
   is $dom->at('a[href="cmd:///query fooman"][data-nick="fooman"]')->text,       'fooman',    'got fooman';
   is $dom->at('a[href="cmd:///query woman"][data-nick="woman"]')->text,         '@woman',    'got woman';
   is $dom->at('a[href="cmd:///query man"][data-nick="man"]')->text,             '+man',      'got man';

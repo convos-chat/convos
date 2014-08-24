@@ -19,6 +19,8 @@
       <dd>Show current topic, or set a new one</dd>
       <dt><a href="complete:///query" class="autocomplete">/query &lt;nick&gt;</a></dt>
       <dd>Open up a new chat window with nick</dd>
+      <dt><a href="complete:///names" class="autocomplete">/names</a></dt>
+      <dd>Retrieve nick list.</dd>
       <dt><a href="complete:///close" class="autocomplete">/close [&lt;nick&gt;]</a></dt>
       <dd>Close conversation with nick, defaults to current active.</dd>
       <dt><a href="complete:///msg" class="autocomplete">/msg &lt;nick&gt;</a></dt>
