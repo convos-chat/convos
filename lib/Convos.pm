@@ -88,6 +88,11 @@ with L<morbo|Mojo::Server::Morbo>.
 
 Set CONVOS_DEBUG for extra debug output to STDERR.
 
+=item * CONVOS_DISABLE_AUTO_EMBED=1
+
+Set CONVOS_DISABLE_AUTO_EMBED to disable links from expanding into images,
+movies or other dynamic content.
+
 =item * CONVOS_MANUAL_BACKEND=1
 
 Disable the frontend from automatically starting the backend.

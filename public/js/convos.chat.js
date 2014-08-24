@@ -109,7 +109,7 @@
       e.preventDefault();
       convos.input.val(convos.input.val().replace(/\s+$/, '') + str + ' ').focus();
     });
-    this.find('a[href^="http"]').each(function(e) {
+    this.find('a[href^="http"].external').each(function(e) {
       var $a = $(this);
       $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
         var $embed_code = $(embed_code);
