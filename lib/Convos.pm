@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.81
+0.82
 
 =head1 DESCRIPTION
 
@@ -254,7 +254,7 @@ use Convos::Core;
 use Convos::Core::Util ();
 use Convos::Upgrader;
 
-our $VERSION = '0.81';
+our $VERSION = '0.82';
 
 =head1 ATTRIBUTES
 

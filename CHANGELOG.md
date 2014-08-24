@@ -1,4 +1,4 @@
-## 0.82
+## 0.82 (2014-08-24)
 - Requires IO::Socket::SSL 1.84
 - Requires Mojolicious 5.30
 - Fix nicks starting with special character, #130

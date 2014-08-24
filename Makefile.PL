@@ -16,8 +16,9 @@ WriteMakefile(
   },
   BUILD_REQUIRES => {'Test::More' => '0.90'},
   PREREQ_PM      => {
+    'IO::Socket::SSL'                   => '1.84',
     'IRC::Utils'                        => '0.12',
-    'Mojo::IRC'                         => '0.09',
+    'Mojo::IRC'                         => '0.1',
     'Mojo::Redis'                       => '0.9928',
     'Mojolicious'                       => '5.3',
     'Mojolicious::Plugin::AssetPack'    => '0.19',
