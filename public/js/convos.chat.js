@@ -102,9 +102,12 @@
       $.pjax.click(e, { container: 'div.messages', fragment: 'div.messages' });
     });
     this.find('a.autocomplete').click(function(e) {
-      var str = $(this).text();
+      var str = this.href.match(/.*complete:\/\/(.+)/);
+      str = str ? str[1] : $(this).text();
+      if (str.indexOf('/') != 0 && convos.input.val().length == 0) str += ':';
+      if (convos.input.val().length) str = ' ' + str;
       e.preventDefault();
-      convos.input.val(convos.input.val() ? convos.input.val().replace(/\s+$/, '') + ' ' + str + ' ' : str + ': ').focus();
+      convos.input.val(convos.input.val().replace(/\s+$/, '') + str + ' ').focus();
     });
     this.find('a[href^="http"]').each(function(e) {
       var $a = $(this);
