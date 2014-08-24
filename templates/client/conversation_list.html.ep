@@ -1,3 +1,4 @@
+% my $network = stash('network') || '';
 % my $target = stash('target') || '';
 <ul class="conversations">
   % my @class = ('convos');
@@ -9,13 +10,12 @@
   </li>
 % my $i = 0;
 % for my $c (@$conversation_list) {
-  % my $text = $c->{network} ? $c->{target} : ucfirst $c->{target};
   % my @class = ('conversation');
   % push @class, 'unread' if $c->{unread};
-  % push @class, 'active' if $text eq $target;
+  % push @class, 'active' if $c->{target} eq $target and $c->{network} eq $network;
   <li>
     %= link_to view => $c, class => join(' ', @class), title => "$c->{target} on $c->{network}", 'data-network' => $c->{network}, begin
-      <span><%= $text %></span>
+      <span><%= $c->{target} %></span>
       <b><%= $c->{unread} > 999 ? '999+' : $c->{unread} || '' %></b>
     % end
   </li>

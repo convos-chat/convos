@@ -4,7 +4,8 @@ redis_do(
   [hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => ''],
   [
     zadd => 'user:doe:conversations',
-    time, 'magnet:00:23convos', time - 1, 'magnet:00batman', time - 2, 'bitlbee:00:26bitlbee'
+    time, 'magnet:00:23convos', time - 1, 'magnet:00batman', time - 2, 'bitlbee:00:26bitlbee', time - 3,
+    'bitlbee:00:23convos'
   ],
   [sadd => 'user:doe:connections', 'magnet', 'bitlbee'],
   [hmset => 'user:doe:connection:magnet',  nick => 'doe'],
@@ -15,6 +16,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})
   ->header_is('Location', '/magnet/%23convos', 'Redirect to conversation');
 
 $t->get_ok($t->tx->res->headers->location)->status_is(200);
+is $t->tx->res->dom->find('nav a.active')->contents->size, 1, 'only one active element';
 
 $t->get_ok('/invalid/foo')->status_is(404);
 
