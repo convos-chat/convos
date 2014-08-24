@@ -1,3 +1,8 @@
+## 0.83
+- Add number of participants, #136
+- Fix highlighting of multiple channels, #137
+- /names will now display status in current conversation, #138
+
 ## 0.82 (2014-08-24)
 - Requires IO::Socket::SSL 1.84
 - Requires Mojolicious 5.30
