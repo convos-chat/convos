@@ -9,6 +9,7 @@
 - Default to no CONVOS_INVITE_CODE in Dockerfile, #118
 - Improvements on Android, #132
 - Fetch avatar on client side, #133
+- Will remember channel key on "/join #channel s3cret", #127
 
 ## 0.81 (2014-08-07)
 - Fix typos in Docker file #114
