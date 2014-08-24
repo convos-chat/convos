@@ -95,7 +95,7 @@ my @OTHER_EVENTS = qw/
   irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
   err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
-  irc_rpl_listend irc_mode irc_quit irc_error
+  irc_rpl_listend irc_mode irc_quit irc_kick irc_error
   irc_rpl_namreply irc_rpl_endofnames
   /;
 
@@ -670,6 +670,34 @@ sub irc_quit {
   Scalar::Util::weaken($self);
   $self->_publish(nick_quit => {nick => $nick, message => $message->{params}[0]});
 }
+
+=head2 irc_kick
+
+         'raw_line' => ':testing!~marcus@home.means.no KICK #testmore :marcus_',
+          'params' => [
+                        '#testmore',
+                        'marcus_'
+                      ],
+          'command' => 'KICK',
+          'handled' => 1,
+          'prefix' => 'testing!~marcus@40.101.45.31.customer.cdi.no'
+
+=cut
+
+sub irc_kick {
+  my ($self, $message) = @_;
+  my ($by)    = IRC::Utils::parse_user($message->{prefix});
+  my $channel = lc $message->{params}[0];
+  my $nick    = $message->{params}[1];
+
+  Scalar::Util::weaken($self);
+  if ($nick eq $self->_irc->nick) {
+    my $name = as_id $self->name, $channel;
+    $self->redis->zrem($self->{conversation_path}, $name, sub { });
+  }
+  $self->_publish(nick_kicked => {by => $nick, nick => $nick, target => $channel});
+}
+
 
 =head2 irc_part
 

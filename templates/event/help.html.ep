@@ -9,6 +9,8 @@
       <dd>Used when you want to send a message starting with "/".</dd>
       <dt><a href="complete:///whois" class="autocomplete">/whois &lt;nick&gt;</a></dt>
       <dd>Show information about a user</dd>
+      <dt><a href="complete:///kick" class="autocomplete">/kick &lt;nick&gt;</a></dt>
+      <dd>Kick a user from the current channel</dd>
       <dt><a href="complete:///join" class="autocomplete">/join &lt;#channel&gt;</a></dt>
       <dd>Join channel and open up a chat window</dd>
       <dt><a href="complete:///part" class="autocomplete">/part &lt;#channel&gt;</a></dt>
