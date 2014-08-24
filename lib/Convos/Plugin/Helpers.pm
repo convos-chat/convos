@@ -13,6 +13,7 @@ use URI::Find;
 use constant DEBUG        => $ENV{CONVOS_DEBUG}        || 0;
 use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
 use constant GRAVATAR_URL => $ENV{GRAVATAR_AVATAR_URL} || 'https://gravatar.com/avatar/%s?s=40&d=retro';
+use constant DISABLE_AUTO_EMBED => $ENV{CONVOS_DISABLE_AUTO_EMBED} || 0;
 
 =head1 HELPERS
 
@@ -158,6 +159,7 @@ sub _add_avatar {
 
 sub _parse_message {
   my ($c, $message, $delay) = @_;
+  my @class = DISABLE_AUTO_EMBED ? () : (class => 'external');
 
   # http://www.mirc.com/colors.html
   $message->{message} =~ s/\x03\d{0,15}(,\d{0,15})?//g;
@@ -169,7 +171,7 @@ sub _parse_message {
   URI::Find->new(
     sub {
       my $url = Mojo::Util::html_unescape(shift . '');
-      $c->link_to($url, $url, target => '_blank');
+      $c->link_to($url, $url, target => '_blank', @class);
     }
   )->find(\$message->{message});
 }

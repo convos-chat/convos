@@ -53,8 +53,9 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
     'Got correct li.message from fooman';
   is $dom->at('h3 a[href="/magnet/fooman"]')->text, 'fooman', 'got message from fooman';
   is $dom->at('.content a')->text, 'http://convos.by?a=1&b=2#yikes', 'http://convos.by#yikes';
-  is $dom->at('div.content'),
-    '<div class="content whitespace">doe: see this &amp;amp; link: <a href="http://convos.by?a=1&amp;b=2#yikes" target="_blank">http://convos.by?a=1&amp;b=2#yikes</a> # really cool</div>',
+  ok $dom->at('a.external[target="_blank"]'), 'got external link';
+  like $dom->at('div.content'),
+    qr{<div class="content whitespace">doe: see this &amp;amp; link: <a.*href="http://convos\.by\?a=1&amp;b=2\#yikes".*>http://convos\.by\?a=1&amp;b=2\#yikes</a> \# really cool</div>},
     'got link and amp';
   like $dom->at('.timestamp')->text, qr/^\d{1,2}:\d{1,2}$/, 'got timestamp';
 
