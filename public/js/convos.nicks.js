@@ -45,6 +45,8 @@
         convos.nicks.list.push(nick);
         $ul.append(markup);
       }
+
+      convos.nicks.updateNumberOfNicks();
     },
     quit: function($e) {
       if ($e.data('network') != convos.current.network) return;
@@ -52,15 +54,21 @@
       $e.data('to_current', !!$.grep(convos.nicks.list, function(n, i) { return n == nick; }).length);
       convos.nicks.list = $.grep(convos.nicks.list, function(n, i) { return n != nick; });
       $('form.sidebar a[href="cmd:///query ' + nick + '"]').parent().remove();
+      convos.nicks.updateNumberOfNicks();
     },
     parted: function($e) {
       if (!$e.data('to_current')) return;
       var nick = $e.data('nick');
       convos.nicks.list = $.grep(convos.nicks.list, function(n, i) { return n != nick; });
       $('form.sidebar a[href="cmd:///query ' + nick + '"]').parent().remove();
+      convos.nicks.updateNumberOfNicks();
     },
     reset: function() {
       convos.nicks.list = [];
+      convos.nicks.updateNumberOfNicks();
+    },
+    updateNumberOfNicks: function() {
+      $('form.sidebar ul li.participants span').text(convos.nicks.list.length);
     }
   };
 })(jQuery);

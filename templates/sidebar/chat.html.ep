@@ -1,4 +1,4 @@
-<li>
+<li class="actions">
   <h3>Actions</h3>
 </li>
 <li>
@@ -10,8 +10,8 @@
 <li>
   <a href="cmd:///help">Help</a>
 </li>
-<li>
-  <h3>Participants</h3>
+<li class="participants">
+  <h3>Participants (<span>0</span>)</h3>
 </li>
 % if ($target =~ /^[#&]/) {
 <li class="nick status"><a href="cmd:///query <%= $target %>">Loading...</a></li>
