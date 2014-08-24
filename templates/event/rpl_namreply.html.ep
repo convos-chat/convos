@@ -3,8 +3,8 @@
   <div class="content">
     <span>Participants:</span>
     % my $i = 0;
-    % for my $n (@$nicks) {
-      <a href="cmd:///query <%= $n->{nick} %>" data-nick="<%= $n->{nick} %>"><%= join('', @$n{qw( mode nick )}) %></a><%= ++$i == @$nicks ? '.' : ', ' %>
+    % for my $n (sort { $b->{mode} cmp $a->{mode} || $a->{nick} cmp $b->{nick} } @$nicks) {
+      <a href="cmd:///query <%= $n->{nick} %>" data-nick="<%= $n->{nick} %>"><%= join '', @$n{qw( mode nick )} %></a><%= ++$i == @$nicks ? '.' : ', ' %>
     % }
   </div>
 </li>
