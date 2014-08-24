@@ -8,7 +8,7 @@
   </li>
 % } else {
   <li class="message">
-    %= image '/image/avatar-convos.jpg', class => 'avatar'
+    %= image '/image/avatar-convos.png', class => 'avatar'
     <h3><%= link_to 'convos', 'view.network', { network => 'convos' }, class => 'goto-network' %></h3>
     <div class="content">
       Hey <%= session 'login' %>!

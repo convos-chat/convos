@@ -18,6 +18,8 @@ All chats will be logged and indexed, which allow you to search in earlier conve
 
 ### Avatars
 The chat contains profile pictures which can be retrieved from Facebook or from gravatar.com.
+The avatar used when talking with Convos is lovingly delivered by
+[Robohash.org](http://robohash.org/convos.by).
 
 ### Include external resources
 Links to images and video will be displayed inline. No need to click on the link to view the data.
