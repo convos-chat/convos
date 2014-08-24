@@ -128,7 +128,6 @@ div.messages {
     dt { font-style: italic; float: left; width: auto; padding-right: 5px; }
     dd { color: #666; margin: 0; }
     dd:before { content: '- '; }
-    h3, div.content, div.embed { margin-left: 3px; }
   }
 
   li.history-starting-point {

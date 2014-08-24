@@ -1,4 +1,4 @@
-<li class="help info" data-target="">
+<li class="help info" data-network="" data-target="">
   <b class="close">&times;</b>
   <h3>Available commands</h3>
   <div class="content">
