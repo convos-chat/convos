@@ -1,0 +1,4 @@
+<li class="nick-parted" data-network="<%= $network %>" data-target="<%= $target %>" data-nick="<%= $nick %>">
+  %= timestamp $timestamp
+  <div class="content"><b class="nick"><%= $nick %></b> was kicked from <%= $target %> by <%= $by %>.</div>
+</li>

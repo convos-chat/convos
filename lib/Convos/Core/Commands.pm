@@ -124,6 +124,7 @@ sub reconnect {
 =cut
 
 sub join  {"JOIN $_[1]"}
+sub kick  {"KICK $_[2]->{target} $_[1]"}
 sub list  {"LIST"}
 sub me    {"PRIVMSG $_[2]->{target} :\x{1}ACTION $_[1]\x{1}"}
 sub mode  {"MODE $_[1]"}
