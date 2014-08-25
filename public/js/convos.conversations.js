@@ -21,4 +21,16 @@
       }
     }
   };
+
+  $(document).ready(function() {
+    var pos = 0;
+    $(window)
+      .on('blur', function() {
+        if (!pos) pos = $('div.messages li').length;
+      })
+      .on('focus', function() {
+        setTimeout(function() { pos = 0; }, 10000);
+        $('div.messages li').removeClass('history-starting-point').eq(pos).addClass('history-starting-point');
+      });
+  });
 })(jQuery);
