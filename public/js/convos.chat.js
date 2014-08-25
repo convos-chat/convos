@@ -150,7 +150,7 @@
   var getHistoricMessages = function() {
     if (!convos.current.start_time) return;
     var $loading = $('<li class="message notice"><div class="content">Loading historic messages...</div></li>');
-    $.get(location.href.replace(/\?.*/, ''), { to: convos.current.start_time }, function(data) {
+    $.get(location.href.replace(/\?.*/, ''), { 'last-read-time': convos.current.last_read_time, to: convos.current.start_time }, function(data) {
       var $ul = $(data).find('ul[data-network]');
       var $li = $ul.children('li:lt(-1)');
       var height_before_prepend = $('body').height();
@@ -181,6 +181,7 @@
       convos.nicks.reset();
       convos.current.end_time = parseFloat($messages.attr('data-end-time'));
       convos.current.start_time = parseFloat($messages.attr('data-start-time'));
+      convos.current.last_read_time = parseFloat($messages.attr('data-last-read-time'));
       convos.current.nick = $messages.attr('data-nick') || '';
       convos.current.state = $messages.attr('data-state') || 'disconnected';
       convos.current.network = $messages.attr('data-network') || 'convos';

@@ -49,37 +49,33 @@ Used to render the main IRC client conversation.
 =cut
 
 sub conversation {
-  my $self      = shift;
-  my $prev_name = $self->session('name') || '';
-  my $login     = $self->session('login');
-  my $network   = $self->stash('network');
-  my $target    = $self->stash('target') || '';
-  my $name      = as_id $network, $target;
-  my $redis     = $self->redis;
-  my $full_page = $self->stash('full_page');
-  my @rearrange = ([zscore => "user:$login:conversations", $name]);
+  my $self    = shift;
+  my $login   = $self->session('login');
+  my $network = $self->stash('network');
+  my $target  = $self->stash('target') || '';
+  my $name    = as_id $network, $target;
+  my $redis   = $self->redis;
 
-  if (TEST_IS_CHANNEL) {
-    $self->res->headers->header('X-Is-Channel', $self->stash('is_channel'));
-  }
-  if ($prev_name and $prev_name ne $name) {
-    push @rearrange, [zscore => "user:$login:conversations", $prev_name];
-  }
-
-  $self->session(name => $target ? $name : '');
+  $self->res->headers->header('X-Is-Channel', $self->stash('is_channel'));
   $self->stash(from_archive => 0, target => $target, state => 'connected');
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $redis->execute(@rearrange, $delay->begin);    # make sure conversations exists before doing zadd
+      my $nid = $self->param('nid') || undef;
+
+      # make sure conversations exists before doing zadd
+      $redis->zscore("user:$login:conversations", $name, $delay->begin);
+      $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
+      $self->_modify_notification($nid, read => 1, sub { }) if defined $nid;
     },
     sub {
-      my ($delay, @score) = @_;
-      my $time = time;
+      my ($delay, $last_read_time, $previous_name) = @_;
 
-      if ($target and !$score[0]) {                  # no such conversation
-        return $delay->begin(0)->([$login, 'connected']) if $self->param('from');
+      $self->stash(last_read_time => $self->param('last-read-time') || $last_read_time || 0);
+
+      if ($target and !$last_read_time) {    # no such conversation
+        return $delay->begin(0)->([$login, $login, 'connected']) if $self->param('from');
         return $self->stash(layout => 'tactile')->render_not_found;
       }
       if (!$target) {
@@ -88,10 +84,12 @@ sub conversation {
       if ($network eq 'convos') {
         return $delay->begin(0)->([$login, 'connected']);
       }
+      if ($last_read_time) {
+        $redis->zadd("user:$login:conversations", time, $previous_name->[0]) unless $name eq $previous_name->[0];
+        $redis->zadd("user:$login:conversations", time + 0.01, $name);
+      }
 
       $redis->hmget("user:$login:connection:$network", qw( current_nick nick state ), $delay->begin);
-      $redis->zadd("user:$login:conversations", $time + 0.001, $name)      if $score[0];
-      $redis->zadd("user:$login:conversations", $time,         $prev_name) if $score[1];
     },
     sub {
       my $delay        = shift;
@@ -99,23 +97,15 @@ sub conversation {
       my $wanted_nick  = shift @{$_[0]};
       my $state        = shift @{$_[0]};
 
-      if (length $self->param('nid')) {
-        $self->_modify_notification($self->param('nid'), read => 1, sub { });
-      }
-
       $state ||= 'disconnected';
       $self->stash(current_nick => $current_nick || $wanted_nick, state => $state);
       $self->_conversation($delay->begin);
-    },
-    sub {
-      my ($delay, $conversation) = @_;
-
       $self->conversation_list($delay->begin);
-      $self->notification_list($delay->begin) if $full_page;
-      $self->stash(conversation => $conversation || []);
+      $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
-      $self->render;
+      my ($delay, $conversation, $conversation_list, $notification_list) = @_;
+      $self->render(conversation => $conversation || []);
     },
   );
 }
