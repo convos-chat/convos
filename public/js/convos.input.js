@@ -88,8 +88,16 @@
     });
     convos.input.bind('keydown', 'down', function(e) {
       e.preventDefault();
-      if (++history.i == history.length) return convos.input.val(this.current_input_str);
-      if (history.i > history.length) return history.i = history.length;
+      if (history.i === history.length) {
+        if (convos.input.val().length) {
+          history[history.i++]=convos.input.val();
+          convos.input.val('');
+        }
+        return;
+      }
+      if (++history.i === history.length) {
+        return convos.input.val(this.current_input_str);
+      }
       convos.input.val(history[history.i]);
     });
     convos.input.closest('form').on('submit', function(e) {
