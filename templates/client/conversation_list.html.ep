@@ -16,7 +16,7 @@
   <li>
     %= link_to view => $c, class => join(' ', @class), title => "$c->{target} on $c->{network}", 'data-network' => $c->{network}, begin
       <span><%= $c->{target} %></span>
-      <b><%= $c->{unread} > 999 ? '999+' : $c->{unread} || '' %></b>
+      <b><%= $c->{unread} > 99 ? '99+' : $c->{unread} || '' %></b>
     % end
   </li>
   % $i++;

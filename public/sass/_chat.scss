@@ -77,8 +77,8 @@ form.input {
 
 // unread messages count
 nav.bar a b, form.conversations b {
-  background: #d53;
-  color: #fff;
+  background: #e5e5e5;
+  color: #888;
   font-size: 12px;
   line-height: 14px;
   font-weight: normal;
@@ -86,6 +86,11 @@ nav.bar a b, form.conversations b {
   position: absolute;
   right: 2px;
   @include border-radius(3px);
+}
+
+nav.bar a.mention b, form.conversations a.mention b {
+  background: #d53;
+  color: #fff;
 }
 
 div.messages {

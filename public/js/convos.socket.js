@@ -83,8 +83,10 @@
     }
     else if ($message.hasClass('message')) {
       var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
-      var $unread = $('nav ul.conversations').find('a[href="' + url + '"]').children('b');
+      var $a = $('nav ul.conversations').find('a[href="' + url + '"]');
+      var $unread = $a.children('b');
       $unread.text(parseInt($unread.html() || 0) + 1);
+      if ($message.hasClass('highlight')) $a.addClass('mention');
     }
 
     if (convos.at_bottom) $(window).scrollTo('bottom');
