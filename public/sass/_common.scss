@@ -23,7 +23,7 @@ hr {
 }
 
 @media (max-width: $responsiveWidth) {
-  .row { padding: 0; }
+  .row { padding: 0px; }
 
   footer {
     height: $navHeight;

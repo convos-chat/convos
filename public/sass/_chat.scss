@@ -108,9 +108,9 @@ div.messages {
     &.hidden { display: none !important; }
 
     div.question { padding-left: 50px; }
-    img.avatar, i.avatar { float: left; max-width: 40px; font-size: 40px; }
+    img.avatar, i.avatar { margin-left: 20px; float: left; max-width: 40px; font-size: 40px; }
     h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
-    h3, div.content, div.embed { margin-left: 50px; }
+    h3, div.content, div.embed { margin-left: 70px; }
     div.content { max-width: 40em; line-height:1.4em; }
     div.whitespace {  white-space: pre-wrap; }
     div.embed {
@@ -118,6 +118,7 @@ div.messages {
     }
     div.timestamp {
       float: right;
+      margin-right: 20px;
       height: 16px;
       overflow: visible;
       color: #999;
