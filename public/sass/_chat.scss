@@ -9,7 +9,7 @@ body.ios-input-focus {
 }
 
 nav.bar {
-  background: #fafafa;
+  background: $sidebarBackground;
   position: fixed;
   padding: 0 $bodyGutter;
   top: 0;
@@ -40,7 +40,6 @@ nav.bar {
   ul.conversations { height: $navHeight; }
 
   .right {
-    background: #fafafa;
     position: absolute;
     top: 0;
     right: $bodyGutter;
@@ -176,8 +175,9 @@ div.sidebar-right {
   overflow: auto;
   width: $nickListWidth;
   padding-bottom: 20px;
+  border-top: 1px solid #ddd;
   z-index: 2;
-  @include box-shadow(-2px 0 4px rgba(180,180,180,.5));
+  @include box-shadow(-2px 2px 4px rgba(180,180,180,.5));
 
   -webkit-overflow-scrolling: touch;
 
@@ -200,6 +200,8 @@ div.sidebar-right {
     background-color: darken(#eee, 5%);
     color: #000;
   }
+
+  a:focus { outline: 1px solid #ccc; }
 
   h3 { font-size: 1em; margin: 0; };
   h3, a, div.form-group {
@@ -239,7 +241,9 @@ form.conversations {
     background: #f8f8f8;
     display: block !important;
     right: 0 !important;
-    @include box-shadow(inset 2px -2px 2px rgba(180,180,180,.5));
+    border-left: 1px solid #ddd;
+    z-index: $navBarZindex - 10;
+    @include box-shadow(1px 0 1px 0 rgba(255,255,255,1));
   }
 }
 
