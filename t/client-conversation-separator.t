@@ -1,3 +1,4 @@
+BEGIN { $ENV{N_MESSAGES} = 3; }
 use t::Helper;
 use Mojo::Loader;
 my $loader = Mojo::Loader->new;
@@ -21,6 +22,18 @@ $t->get_ok('/magnet/whoever')->status_is(404);
 
 $t->get_ok('/magnet/%23convos')->status_is(200)->element_exists('ul[data-last-read-time="1392754563"]')
   ->element_exists('#70a73b3769a155c66d0b34e75b570cb7.history-starting-point');
+
+{    # on scroll back with two many new messages
+  my $last_read_time = 1392744006;
+  redis_do zadd => 'user:doe:conversations', $last_read_time, 'magnet:00:23convos';
+  $t->get_ok('/magnet/%23convos')->status_is(200)->element_exists(qq(ul[data-last-read-time="$last_read_time"]))
+    ->element_exists_not('.history-starting-point');
+
+  my $to = $t->tx->res->dom->at(qq(ul[data-last-read-time="$last_read_time"]))->{'data-start-time'};
+  $t->get_ok("/magnet/%23convos?last-read-time=$last_read_time&to=$to")->status_is(200)
+    ->element_exists(qq(ul[data-last-read-time="$last_read_time"]))
+    ->element_exists('#54a8992c25ea63c6d09274330e6d9433.history-starting-point');
+}
 
 done_testing;
 
