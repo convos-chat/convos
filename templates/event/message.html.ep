@@ -1,7 +1,7 @@
 % my $prev_nick = stash('prev_nick') || '';
 % my @classes = qw( message );
 % push @classes, $target =~ /^\w/ ? 'private' : 'channel';
-% push @classes, 'history-starting-point' if stash('separator') and delete stash->{last_read_time};
+% push @classes, 'history-starting-point' if stash 'separator';
 % push @classes, 'highlight' if $highlight;
 % push @classes, 'same-nick' if $nick eq $prev_nick;
 <li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>" data-timestamp="<%= $timestamp %>">
