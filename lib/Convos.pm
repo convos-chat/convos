@@ -420,7 +420,7 @@ sub _from_cpan {
   my $self = shift;
   my $home = catdir dirname(__FILE__), 'Convos';
 
-  return if -d 'templates';
+  return if -d $self->home->rel_dir('templates');
   $self->home->parse($home);
   $self->static->paths->[0]   = $self->home->rel_dir('public');
   $self->renderer->paths->[0] = $self->home->rel_dir('templates');
