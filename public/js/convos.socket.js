@@ -78,18 +78,19 @@
     if ($message.hasClass('highlight')) receiveHighlightMessage($message);
     if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
 
-    if ($message.data('to_current')) {
-      $message.addToMessages();
-    }
-    else if ($message.hasClass('message')) {
-      var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
-      var $a = $('nav ul.conversations').find('a[href="' + url + '"]');
-      var $unread = $a.children('b');
-      $unread.text(parseInt($unread.html() || 0) + 1);
-      if ($message.hasClass('highlight')) $a.addClass('mention');
-    }
+    if ($message.data('to_current')) { $message.addToMessages(); }
+    else if ($message.hasClass('message')) { receiveOtherMessage($message); }
 
     if (convos.at_bottom) $(window).scrollTo('bottom');
+  };
+
+  var receiveOtherMessage = function($message) {
+    var url = $.url_for($message.attr('data-network'), encodeURIComponent($message.attr('data-target')));
+    var $a = $('nav ul.conversations').find('a[href="' + url + '"]');
+    var $unread = $a.children('b');
+    var n = parseInt($unread.html() || 0) + 1;
+    $unread.text(n > 99 ? '99+' : n);
+    if ($message.hasClass('highlight')) $a.addClass('mention');
   };
 
   var toCurrent = function($e) {
