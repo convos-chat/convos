@@ -8,36 +8,6 @@
   convos.draw = {};
   convos.isChannel = function(str) { return str.match(/^[#&]/); };
 
-  convos.draw['add-connection'] = function() {
-    var channels = {};
-    var s;
-
-    $('select#name option').each(function() {
-      channels[this.value] = ($(this).attr('data-channels') || '').split(' ');
-    });
-    $('select#name').selectize({
-      create: false,
-      openOnFocus: true,
-      onChange: function(val) {
-        s.clearOptions();
-        s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
-        s.refreshOptions(false);
-        s.setValue(channels[val].join(' '));
-      }
-    }).trigger('change');
-    $('input#channels').selectize({
-      delimiter: ' ',
-      persist: false,
-      openOnFocus: true,
-      create: function(value) {
-        if (convos.isChannel(value)) value = '#' + value;
-        return { value: value, text: value };
-      }
-    });
-
-    s = $('input#channels')[0].selectize;
-  };
-
   convos.draw['profile'] = function() {
     var btn = $('.form-group.notifications').find('button');
     var p = Notification.permission;

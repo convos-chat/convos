@@ -453,8 +453,6 @@ sub _private_routes {
   $r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
   $r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
   $r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
-  $r->any('/network/add')->to('connection#add_network')->name('network.add');
-  $r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
   $r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $r->any('/profile')->to('user#edit')->name('user.edit');
   $r->post('/profile/timezone/offset')->to('user#tz_offset');
