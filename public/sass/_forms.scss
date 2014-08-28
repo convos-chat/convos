@@ -1,5 +1,5 @@
 form {
-  margin: 20px;
+  fieldset { margin: 20px; }
   label { display: block; margin-top: $bodyGutter; }
 
   select[multi] { height: 30px; }

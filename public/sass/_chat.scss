@@ -171,10 +171,10 @@ div.messages {
   li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
   }
+    li.with-padding { margin-left: 20px; }
 
   @media (max-width: $responsiveWidth) {
     margin-right: 0;
-    li.with-padding { margin-left: 5px; }
   }
 }
 
