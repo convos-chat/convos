@@ -59,11 +59,18 @@ form.input {
   background: #fff;
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 20px;
   right: $nickListWidth;
   padding-bottom: 2px;
 
-  input { background: #fafafa; width: 100%; padding: 8px; font-size: $fontSize + 1; }
+  input { 
+  background: #fafafa; 
+  width: -moz-calc(100% - 20px);
+  width: -webkit-calc(100% - 20px);
+  width: -o-calc(100% - 20px);
+  width: calc(100% - 20px);
+  padding: 8px; 
+  font-size: $fontSize + 1; }
   input.disabled, input[disabled] { background-color: #eee; }
 
   @media (max-width: $responsiveWidth) {
