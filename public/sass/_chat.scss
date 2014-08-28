@@ -156,8 +156,9 @@ div.messages {
     h3 { color: #333; }
   }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
-    background-color: #f9f7fa;
-    color: #888;
+    color: #999;
+    padding: 2px;
+    a { color: #999; }
   }
   li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
