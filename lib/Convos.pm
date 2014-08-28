@@ -88,6 +88,10 @@ with L<morbo|Mojo::Server::Morbo>.
 
 Set CONVOS_DEBUG for extra debug output to STDERR.
 
+=item * CONVOS_DEFAULT_CONNECTION
+
+The server to display in the connection wizard as the default connection.
+
 =item * CONVOS_DISABLE_AUTO_EMBED=1
 
 Set CONVOS_DISABLE_AUTO_EMBED to disable links from expanding into images,
@@ -210,6 +214,11 @@ This template will be included below the form on the C</login> page.
 
 This template will be included below the form on the C</register> page.
 
+=item * vendor/wizard.html.ep
+
+This template will be included below the form on the C</wizard> page that a
+new visitor sees after registering.
+
 =back
 
 =head1 RESOURCES
@@ -260,6 +269,8 @@ use Convos::Core::Util ();
 use Convos::Upgrader;
 
 our $VERSION = '0.82';
+
+$ENV{CONVOS_DEFAULT_CONNECTION} //= 'chat.freenode.net:6697';
 
 =head1 ATTRIBUTES
 
