@@ -189,7 +189,10 @@
       convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
 
       $messages.find('li').attachEventsToMessage();
-      $doc.filter('form.sidebar').each(function() { $('form.sidebar ul').html($(this).find('ul:first').children()); });
+      $doc.filter('form.sidebar').each(function() {
+        $('form.sidebar').attr('action', this.action);
+        $('form.sidebar ul').html($(this).find('ul:first').children());
+      });
       $doc.filter('nav').each(function() { $('nav ul.conversations').html($(this).find('ul.conversations').children()); });
 
       if (location.href.indexOf('from=') > 0) {
