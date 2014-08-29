@@ -1,12 +1,21 @@
 % title $target ? "$target on $network" : $network;
 % my $stash = stash;
 % my $prev_nick = '';
+% my $i = 0;
 <ul data-network="<%= $network %>" data-target="<%= $target %>" data-state="<%= $state %>" data-nick="<%= $current_nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>" data-last-read-time="<%= $last_read_time %>">
   %= include 'event/empty_conversation' unless @$conversation;
 % for my $message (@$conversation) {
-  % $message->{separator} = $stash->{last_read_time} && $message->{timestamp} > $stash->{last_read_time};
+  % if ($stash->{last_read_time} and $message->{timestamp} > $stash->{last_read_time}) {
+    % if ($i) {
+      % $message->{separator} = 1;
+    % } else {
+      % delete $stash->{last_read_time};
+    % }
+  % }
   %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
   % $prev_nick = $message->{nick};
+  % delete $stash->{last_read_time} if $message->{separator};
+  % $i++;
 % }
 % if(stash 'got_more') {
   %= include 'event/historic_messages'

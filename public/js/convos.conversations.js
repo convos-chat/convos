@@ -24,12 +24,14 @@
 
   $(document).ready(function() {
     var pos = 0;
+    var t;
     $(window)
       .on('blur', function() {
         if (!pos) pos = $('div.messages li').length;
+        clearTimeout(t);
       })
       .on('focus', function() {
-        setTimeout(function() { pos = 0; }, 10000);
+        t = setTimeout(function() { pos = 0; }, 10000);
         $('div.messages li').removeClass('history-starting-point').eq(pos).addClass('history-starting-point');
       });
   });
