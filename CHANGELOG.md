@@ -4,6 +4,9 @@
 - /names will now display status in current conversation, #138
 - Implement /kick command
 - Add support for kicked event
+- Add highlight for new messages since last time window had focus
+- Various UI improvements (Flatten, highlights/background go all out)
+- Day separator
 
 ## 0.82 (2014-08-24)
 - Requires IO::Socket::SSL 1.84
