@@ -205,10 +205,10 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       Pod::Simple 3.09
-  Mojolicious-Plugin-AssetPack-0.19
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.19.tar.gz
+  Mojolicious-Plugin-AssetPack-0.22
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.22.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.19
+      Mojolicious::Plugin::AssetPack 0.22
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
@@ -216,7 +216,16 @@ DISTRIBUTIONS
       File::Which 1.00
       IPC::Run3 0.04
       JavaScript::Minifier::XS 0.01
-      Mojolicious 4.30
+      Mojolicious 5.00
+      Test::More 0.88
+  Mojolicious-Plugin-FontAwesome4-4.1000
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-FontAwesome4-4.1000.tar.gz
+    provides:
+      Mojolicious::Plugin::FontAwesome4 4.1000
+    requirements:
+      ExtUtils::MakeMaker 0
+      Mojolicious 5.00
+      Mojolicious::Plugin::AssetPack 0.22
       Test::More 0.88
   Mojolicious-Plugin-LinkEmbedder-0.07
     pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.07.tar.gz
@@ -305,6 +314,14 @@ DISTRIBUTIONS
       Test::Builder::Tester 1.02
       Test::More 0.62
       blib 0
+  Time-Piece-1.27
+    pathname: R/RJ/RJBS/Time-Piece-1.27.tar.gz
+    provides:
+      Time::Piece 1.27
+      Time::Seconds 1.27
+    requirements:
+      Exporter 5.57
+      ExtUtils::MakeMaker 0
   Try-Tiny-0.18
     pathname: D/DO/DOY/Try-Tiny-0.18.tar.gz
     provides:
