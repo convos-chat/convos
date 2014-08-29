@@ -29,8 +29,8 @@ dl {
 }
 
 div.question { padding: 0.5em; @include border-radius(3px); }
-div.question, li.info { background: #def; color: #158; border: 1px solid #bde; }
-div.question .button { background: darken(#def, 10%); border: 2px solid darken(#def, 40%); }
-div.question .button.confirm { background: darken(#def, 10%); border: 2px solid #900; }
+div.question, li.info { background: $infoBackground; color: darker($infoBackground, 90%); border: 1px solid darker($infoBackground, 40%); }
+div.question .button { background: darker($infoBackground, 10%); border: 2px solid darker($infoBackground, 40%); }
+div.question .button.confirm { background: darker($infoBackground, 10%); border: 2px solid darker($errorColor, 10%); }
 
-a.active { background-color: darken(#fff, 10%); }
+a.active { background-color: darker($backgroundColor, 10%); }
