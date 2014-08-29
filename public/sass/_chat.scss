@@ -129,7 +129,7 @@ div.messages {
     }
   }
   @media (max-width: $responsiveWidth) {
-    li { padding: 4px $bodyGutterSmall 0 $bodyGutterSmall; }
+    li { padding: 4px $bodyGutterSmall; }
   }
 
   li.help {
