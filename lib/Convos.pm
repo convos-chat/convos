@@ -354,7 +354,8 @@ sub _assets {
   my $self = shift;
 
   $self->plugin('AssetPack');
-  $self->asset('c.css' => '/sass/convos.scss');
+  $self->plugin('FontAwesome4', css => []);
+  $self->asset('c.css' => qw( /scss/font-awesome.scss /sass/convos.scss ));
   $self->asset(
     'c.js' => qw(
       /js/globals.js

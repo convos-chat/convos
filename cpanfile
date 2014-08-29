@@ -4,6 +4,7 @@ requires 'URI::Find'                      => 20111103;
 requires 'Mojo::IRC'                      => 0.10;
 requires 'Mojolicious'                    => 5.30;
 requires 'Mojolicious::Plugin::AssetPack' => 0.19;
+requires 'Mojolicious::Plugin::FontAwesome4' => 4.10;
 requires 'Mojolicious::Plugin::LinkEmbedder' => 0.07;
 requires 'Mojo::Redis'                    => 0.9928;
 requires 'Parse::IRC'                     => 1.18;
