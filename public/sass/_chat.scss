@@ -50,8 +50,8 @@ nav.bar {
   a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
 
   @media (max-width: $responsiveWidth) {
-    padding: 0;
     .right { right: 0; }
+    & { padding-left: $bodyGutterSmall; padding-right: $bodyGutterSmall; }
   }
 }
 
@@ -102,7 +102,7 @@ div.messages {
   li {
     display: block;
     position: relative;
-    padding: 3px 0;
+    padding: 4px $bodyGutter 0 $bodyGutter;
     overflow: hidden;
 
     &.hidden { display: none !important; }
@@ -128,6 +128,9 @@ div.messages {
       padding-right: 2px;
     }
   }
+  @media (max-width: $responsiveWidth) {
+    li { padding: 4px $bodyGutterSmall 0 $bodyGutterSmall; }
+  }
 
   li.help {
     dt { float: left; width: auto; padding-right: 5px; }
@@ -145,7 +148,7 @@ div.messages {
   }
 
   li.message.channel.highlight { background: #fee; }
-  li.message.action div.content { padding-top: 20px; }
+  li.message.action div.content { padding-top: $bodyGutter; }
   li.message.action.same-nick div.content { padding-top: 0; }
   li.message.action div.content a { font-weight: normal; text-decoration: none; }
   li.message.pending div.content { color: #888; }
@@ -157,7 +160,7 @@ div.messages {
   }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     color: #999;
-    padding: 2px;
+    padding-top: 2px;
     a { color: #999; }
   }
   li.nick-change, li.nick-parted, li.nick-quit {
