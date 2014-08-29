@@ -102,7 +102,7 @@ div.messages {
   li {
     display: block;
     position: relative;
-    padding: 3px 0;
+    padding: 3px 20px 0 20px;
     overflow: hidden;
 
     &.hidden { display: none !important; }
@@ -127,6 +127,9 @@ div.messages {
       float: right;
       padding-right: 2px;
     }
+  }
+  @media (max-width: $responsiveWidth) {
+    li { padding: 4px 6px 0 6px; }
   }
 
   li.help {
