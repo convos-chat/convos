@@ -23,7 +23,7 @@
 
     %= include "sidebar/goto_anything"
 
-    <div class="messages row">
+    <div class="messages">
       %= content
     </div>
 
