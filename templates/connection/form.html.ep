@@ -1,11 +1,11 @@
-% my $wizard = stash 'wizard';
-%= form_for 'connection.add', class => 'horizontal', method => 'post', begin
+% my $in_storage = stash 'in_storage';
+%= form_for +($in_storage ? 'connection.edit' : 'connection.add'), class => 'horizontal', method => 'post', begin
   % my $err;
   <div class="form-group nick">
     <label for="nick">Nick</label>
     %= text_field 'nick', session('login'), id => 'nick'
     % if ($err = validation->error('nick')) {
-    <p class="error">Need to be a-z, 0-9, - and _.</p>
+    <p class="error">Must be shorter than 30 characters.</p>
     % }
     <p class="help">Handle to operate under.</p>
   </div>
@@ -21,7 +21,10 @@
     </p>
   </div>
   <div class="actions">
-  % if ($wizard) {
+  % if ($in_storage) {
+    %= hidden_field name => stash('name') || '';
+    <button type="submit">Update connection</button>
+  % } elsif (stash 'wizard') {
     %= hidden_field wizard => 1
     <button type="submit">Start chatting</button>
   % } else {

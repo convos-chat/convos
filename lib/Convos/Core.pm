@@ -229,16 +229,12 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my ($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login name server tls ));
+  my $validation = $self->_validation($input, qw( password login name nick server tls ));
 
   if ($validation->has_error) {
     $self->$cb($validation, undef);
     return $self;
   }
-
-  $validation->optional($_) for qw( nick user );
-  $validation->output->{nick} ||= $validation->output->{login};
-  $validation->output->{user} ||= $validation->output->{login};
 
   my ($login, $name) = $validation->param([qw( login name )]);
   my @channels = $self->_parse_channels(delete $validation->input->{channels});
@@ -301,9 +297,6 @@ sub update_connection {
     $self->$cb($validation, undef);
     return $self;
   }
-
-  $validation->optional('user');
-  $validation->output->{user} ||= $validation->output->{login};
 
   my ($login, $name) = $validation->param([qw( login name )]);
   my $conn  = Convos::Core::Connection->new(%{$validation->output});

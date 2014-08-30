@@ -11,7 +11,7 @@
       To get started you need to add a connection. Below you see a predefined
       connection, which you can change to your preferences.
     </p>
-    %= include 'connection/add_connection_form', wizard => 1
+    %= include 'connection/form', wizard => 1
     %= include 'vendor/wizard'
   </div>
   <div class="row footer">

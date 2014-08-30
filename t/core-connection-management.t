@@ -39,6 +39,7 @@ Mojo::IOLoop->start;
     password => 's3cret',
     login    => 'batman',
     name     => 'magnet',
+    nick     => 'batman',
     server   => 'irc.perl.org',
     tls      => 0,
   };
@@ -47,7 +48,6 @@ Mojo::IOLoop->start;
   Mojo::IOLoop->start;
   is $res[1], undef, 'add_connection() magnet';    # or diag Data::Dumper::Dumper($res[1]->{error});
   $conn->{nick} = 'batman';
-  $conn->{user} = 'batman';
   is_deeply $res[2], $conn, 'add_connection() returned connection details';
 
   Mojo::IOLoop->start;
@@ -71,14 +71,13 @@ Mojo::IOLoop->start;
 }
 
 {
-  my $conn = {login => 'batman', name => 'magnet', nick => 'bruce', server => 'irc.perl.org', tls => 0,};
+  my $conn = {login => 'batman', name => 'magnet', nick => 'bruce', server => 'irc.perl.org', tls => 0};
 
   @messages = ();
   $stop = sub {/NICK bruce/};
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
   is $res[1], undef, 'update_connection(normal) magnet' or diag Data::Dumper::Dumper($res[1]->{error});
-  $conn->{user} = 'batman';
   is_deeply $res[2], $conn, 'update_connection(normal) returned connection details';
 
   Mojo::IOLoop->start unless @messages == 3;
@@ -91,7 +90,6 @@ Mojo::IOLoop->start;
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
   is $res[1], undef, 'update_connection(change) change server' or diag Data::Dumper::Dumper($res[1]->{error});
-  $conn->{user} = 'batman';
   is_deeply $res[2], $conn, 'update_connection(change) returned connection details';
 
   Mojo::IOLoop->start;

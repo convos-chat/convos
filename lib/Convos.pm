@@ -91,6 +91,8 @@ Set CONVOS_DEBUG for extra debug output to STDERR.
 =item * CONVOS_DEFAULT_CONNECTION
 
 The server to display in the connection wizard as the default connection.
+This variable defaults to "chat.freenode.net:6697". (This might change
+in future)
 
 =item * CONVOS_DISABLE_AUTO_EMBED=1
 

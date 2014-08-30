@@ -19,18 +19,20 @@ Add a new connection based on network name.
 
 sub add_connection {
   my $self = shift;
-  my $method = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
+
+  if ($self->req->method eq 'POST') {
+    return $self->_add_connection;
+  }
 
   $self->delay(
     sub {
       my ($delay) = @_;
-
       $self->conversation_list($delay->begin);
       $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
       my ($delay) = @_;
-      $self->$method;
+      $self->render;
     },
   );
 }
@@ -166,73 +168,32 @@ Render wizard page for first connection.
 sub wizard {
   my $self = shift;
 
-  $self->stash(layout => 'tactile', template => 'connection/wizard',);
-  $self->_add_connection_form;
+  $self->stash(layout => 'tactile', template => 'connection/wizard');
 }
 
 sub _add_connection {
   my $self       = shift;
   my $validation = $self->validation;
-  my $name       = $self->param('name') || '';
+  my $name       = $self->param('server') || '';
 
-  $validation->input->{channels} = [map { split /\s/ } $self->param('channels')];
+  $name =~ s!^(irc|chat)\.!!;
+  $name =~ s!\.(\w{2,3})$!!;
+  $name =~ s![\W_]+!-!g;
+
   $validation->input->{login} = $self->session('login');
+  $validation->input->{name}  = $name;
+  $validation->input->{tls} //= 1;    # always try tls
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $self->redis->hgetall("irc:network:$name", $delay->begin);
-    },
-    sub {
-      my ($delay, $params) = @_;
-
-      $validation->input->{$_} ||= $params->{$_} for keys %$params;
       $self->app->core->add_connection($validation, $delay->begin);
     },
     sub {
       my ($delay, $errors, $conn) = @_;
 
       return $self->redirect_to('view.network', network => $conn->{name} || 'convos') unless $errors;
-      return $self->param('wizard') ? $self->wizard : $self->_add_connection_form;
-    },
-  );
-}
-
-sub _add_connection_form {
-  my $self  = shift;
-  my $login = $self->session('login');
-  my $redis = $self->redis;
-
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $redis->smembers("user:$login:connections", $delay->begin);
-      $redis->smembers("irc:networks",            $delay->begin);
-    },
-    sub {
-      my $delay    = shift;
-      my %existing = map { $_, 1 } sort @{shift || []};
-      my @names    = sort grep { !$existing{$_} } @{shift || []};
-
-      unless (@names) {
-        return $self->render(default_network => '', networks => []);
-      }
-
-      $delay->begin(0)->(\@names);
-      $redis->get('irc:default:network', $delay->begin);
-      $redis->hgetall("irc:network:$_", $delay->begin) for @names;
-    },
-    sub {
-      my ($delay, $names, $default_network, @networks) = @_;
-      my $channels = $self->param('channels');
-
-      for my $network (@networks) {
-        $network->{name} = shift @$names;
-        $channels = $network->{channels} || '' if !$channels and $network->{name} eq $default_network;
-      }
-
-      $self->param(channels => $channels || $networks[0]{channels} || '');
-      $self->render(default_network => $default_network, select_networks => \@networks);
+      return $self->param('wizard') ? $self->wizard->render : $self->render;
     },
   );
 }
@@ -250,10 +211,9 @@ sub _edit_connection {
   my $validation = $self->validation;
   my $full_page  = $self->stash('full_page');
 
-  $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
-  $validation->input->{login}    = $self->session('login');
-  $validation->input->{name}     = $self->stash('name');
-  $validation->input->{server}   = $self->req->body_params->param('server');
+  $validation->input->{login}  = $self->session('login');
+  $validation->input->{name}   = $self->stash('name');
+  $validation->input->{server} = $self->req->body_params->param('server');
   $validation->input->{tls} ||= 0;
 
   $self->delay(
