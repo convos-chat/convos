@@ -1,10 +1,10 @@
 ;(function($) {
-  window.convos = window.convos || {}
+  window.convos = window.convos || {};
 
   var socket;
   var connect = function() {
-    var socket_url = $('body').attr('data-socket-url');
-    socket = new ReconnectingWebSocket({ url: socket_url, ping_protocol: [ 'PING', 'PONG' ] });
+    var socketUrl = $('body').attr('data-socket-url');
+    socket = new ReconnectingWebSocket({ url: socketUrl, ping_protocol: [ 'PING', 'PONG' ] });
     socket.onmessage = receiveMessage;
     socket.onpong = enableInput;
     socket.onclose = function() { convos.input.addClass('disabled'); };
@@ -19,7 +19,7 @@
   var addPendingMessage = function(message, attr) {
     var $pending = $('<li><h3>' + convos.current.nick + '</h3><div class="content">' + message + '</div></li>').attr(attr);
     $pending.addClass('message pending').data('sender', convos.current.nick).addToMessages();
-    setTimeout(function() { messageFailed(attr['id']); }, 10000);
+    setTimeout(function() { messageFailed(attr.id); }, 10000);
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
@@ -95,17 +95,17 @@
 
   var toCurrent = function($e) {
     if ($e.data('network') == convos.current.network && $e.data('target') == convos.current.target) $e.data('to_current', true);
-    if ($e.data('network') == convos.current.network && $e.data('target') == '') $e.data('to_current', true);
-    if ($e.data('network') == '' && $e.data('target') == '') $e.data('to_current', true);
+    if ($e.data('network') == convos.current.network && $e.data('target') === '') $e.data('to_current', true);
+    if ($e.data('network') === '' && $e.data('target') === '') $e.data('to_current', true);
   };
 
   convos.send = function(message, attr) {
     if (!socket) connect();
-    if (message.length == 0) return socket.send('PING');
+    if (message.length === 0) return socket.send('PING');
 
     attr = attr || {};
-    attr['class'] = message.match('^\/') ? 'hidden' : '';
-    attr['id'] = window.guid();
+    attr.class = message.match('^\/') ? 'hidden' : '';
+    attr.id = window.guid();
     $.each(['network', 'state', 'target'], function(i) { attr["data-" + this] = attr["data-" + this] || convos.current[this]; });
     var encodedMsg = message.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
         return '&#' + i.charCodeAt(0) + ';';
