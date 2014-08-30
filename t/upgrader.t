@@ -49,16 +49,7 @@ unless ($ENV{LIVE_DATABASE}) {
 
   is $finish, 1,  'finished';
   is $err,    '', 'no error';
-  is redis_do(get => 'convos:version'), '0.3005', 'convos:version is set';
-}
-
-{    # v0_3002
-  is_deeply([sort @{redis_do(smembers => 'irc:networks') || []}], [qw( efnet freenode magnet )], 'irc:networks added',);
-  is_deeply(
-    redis_do(hgetall => 'irc:network:magnet'),
-    {home_page => "http://www.irc.perl.org", channels => '#convos', server => "irc.perl.org", port => 6667, tls => 0,},
-    'got network config for magnet',
-  );
+  is redis_do(get => 'convos:version'), '0.8400', 'convos:version is set';
 }
 
 {    # v0_3004
@@ -88,9 +79,15 @@ unless ($ENV{LIVE_DATABASE}) {
 
   is_deeply(
     redis_do(hgetall => 'user:jhthorsen'),
-    {email => 'jhthorsen@cpan.org', avatar => 'jhthorsen@cpan.org',},
+    {email => 'jhthorsen@cpan.org', avatar => 'jhthorsen@cpan.org'},
     'set avatar email to user email',
   );
+}
+
+{    # v0_8400
+  is(redis_do(exists => 'irc:default:network'), 0, 'no irc:networks');
+  is(redis_do(exists => 'irc:networks'),        0, 'no irc:networks');
+  is(redis_do(exists => 'irc:network:magnet'),  0, 'no irc:networks:magnet');
 }
 
 if ($ENV{SAVE_NEW_STATE}) {

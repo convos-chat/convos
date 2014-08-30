@@ -119,6 +119,7 @@ sub run {
       }
 
       if ($upgrade) {
+        $self->app->log->info("Upgrading database...");
         $self->app->upgrader->run($delay->begin);
       }
       else {
@@ -176,12 +177,13 @@ sub _backup {
 
 sub _stop_backend {
   my ($self, $cb) = @_;
+  my $redis  = $self->app->redis;
   my $killed = 0;
 
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->app->redis->get('convos:backend:pid', $delay->begin);
+      $redis->get('convos:backend:pid', $delay->begin);
     },
     sub {
       my ($delay, $pid) = @_;
@@ -196,7 +198,7 @@ sub _stop_backend {
         sleep 1;
       }
 
-      $self->app->redis->del('convos:backend:pid');
+      $redis->del('convos:backend:pid');
       $self->app->log->info("Backend is stopped");
       $self->$cb(1);
     },
