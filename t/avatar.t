@@ -29,8 +29,8 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
     ":fooman!user\@host PRIVMSG #mojo :doe: see this &amp; link: http://convos.by?a=1&b=2#yikes # really cool\r\n");
   $dom->parse($t->message_ok->message->[1]);
 
-  ok $elem = $dom->at('li.message i.icon-user'), 'i';
-  is $elem->{'style'}, 'color:#8bad7c;', 'i[style]';
+  ok $elem = $dom->at('li.message i.fa-user'), 'i';
+  is $elem->{'style'}, 'color:#8bad7c', 'i[style]';
   is $elem->{'data-avatar'}, 'https://gravatar.com/avatar/4cac29f5fcfe500bc7e9b88e503045b1?s=40&d=retro',
     'i[data-avatar]';
 }
@@ -42,8 +42,8 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   );
   $dom->parse($t->message_ok->message->[1]);
 
-  ok $elem = $dom->at('li.message i.icon-user'), 'i';
-  is $elem->{'style'}, 'color:#ec305a;', 'i[style]';
+  ok $elem = $dom->at('li.message i.fa-user'), 'i';
+  is $elem->{'style'}, 'color:#ec305a', 'i[style]';
   is $elem->{'data-avatar'}, 'https://gravatar.com/avatar/806800a3aeddbad6af673dade958933b?s=40&d=retro',
     'i[data-avatar]';
 }
@@ -53,8 +53,8 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $connection->_irc->from_irc_server(":fooman!doe\@host PRIVMSG #mojo :\x{1}ACTION is too cool\x{1}\r\n");
   $dom->parse($t->message_ok->message->[1]);
 
-  ok $elem = $dom->at('li.message i.icon-user'), 'i';
-  is $elem->{'style'}, 'color:#b43a22;', 'i[style]';
+  ok $elem = $dom->at('li.message i.fa-user'), 'i';
+  is $elem->{'style'}, 'color:#b43a22', 'i[style]';
   is $elem->{'data-avatar'}, 'https://graph.facebook.com/jhthorsen/picture?height=40&width=40', 'i[data-avatar]';
 }
 

@@ -1,10 +1,11 @@
 % title $target ? "$target on $network" : $network;
 % my $stash = stash;
-% my $prev_nick = '';
+% my $prev = { nick => '' };
 % my $i = 0;
 <ul data-network="<%= $network %>" data-target="<%= $target %>" data-state="<%= $state %>" data-nick="<%= $current_nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>" data-last-read-time="<%= $last_read_time %>">
   %= include 'event/empty_conversation' unless @$conversation;
 % for my $message (@$conversation) {
+  %= include "event/day_changed", %$message if day_changed $message->{timestamp}, $prev->{timestamp};
   % if ($stash->{last_read_time} and $message->{timestamp} > $stash->{last_read_time}) {
     % if ($i) {
       % $message->{separator} = 1;
@@ -12,11 +13,12 @@
       % delete $stash->{last_read_time};
     % }
   % }
-  %= include "event/$message->{event}", highlight => 0, prev_nick => $prev_nick, %$message
-  % $prev_nick = $message->{nick};
+  %= include "event/$message->{event}", highlight => 0, prev => $prev, %$message
+  % $prev = $message;
   % delete $stash->{last_read_time} if $message->{separator};
   % $i++;
 % }
+  %= include "event/day_changed", timestamp => param('to') if day_changed param('to'), $prev->{timestamp}
 % if(stash 'got_more') {
   %= include 'event/historic_messages'
 % } elsif($network ne 'convos' and $state ne 'connected' and !$from_archive) {
