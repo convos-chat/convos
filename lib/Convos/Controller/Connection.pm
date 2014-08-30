@@ -166,9 +166,20 @@ Render wizard page for first connection.
 =cut
 
 sub wizard {
-  my $self = shift;
+  my $self  = shift;
+  my $login = $self->session('login');
 
-  $self->stash(layout => 'tactile', template => 'connection/wizard');
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->srandmember("user:$login:connections", $delay->begin);
+    },
+    sub {
+      my ($delay, $network) = @_;
+      return $self->redirect_to('view.network', network => $network) if $network;
+      return $self->render(layout => 'tactile', template => 'connection/wizard');
+    },
+  );
 }
 
 sub _add_connection {
@@ -194,7 +205,7 @@ sub _add_connection {
       my ($delay, $errors, $conn) = @_;
 
       return $self->redirect_to('view.network', network => $conn->{name} || 'convos') unless $errors;
-      return $self->param('wizard') ? $self->wizard->render : $self->render;
+      return $self->param('wizard') ? $self->wizard : $self->render;
     },
   );
 }
