@@ -1,9 +1,9 @@
-% my $prev_nick = stash('prev_nick') || '';
+% my $prev = stash('prev') || { nick => '' };
 % my @classes = qw( message );
 % push @classes, $target =~ /^\w/ ? 'private' : 'channel';
 % push @classes, 'history-starting-point' if stash 'separator';
 % push @classes, 'highlight' if $highlight;
-% push @classes, 'same-nick' if $nick eq $prev_nick;
+% push @classes, 'same-nick' if $nick eq $prev->{nick};
 <li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>" data-timestamp="<%= $timestamp %>">
   %= timestamp $timestamp
   %= fa 'user', class => 'avatar', 'data-avatar' => $avatar, style => 'color:#' .substr(Mojo::Util::md5_sum($user.$nick), 0, 6 )

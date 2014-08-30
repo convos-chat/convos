@@ -89,6 +89,24 @@ sub conversation_list {
   );
 }
 
+=head2 day_changed
+
+  $bool = $c->day_changed($epoch_now, $epoch_prev);
+
+Returns true if day has changed between two events.
+
+=cut
+
+sub day_changed {
+  my $c          = shift;
+  my $epoch_now  = shift or return 0;
+  my $epoch_prev = shift or return 0;
+  my $today      = int($epoch_now - $epoch_now % 86400 + 86400);
+  my $yesterday  = int($epoch_prev - $epoch_prev % 86400 + 86400);
+
+  return $yesterday < $today;
+}
+
 =head2 format_conversation
 
   $c->format_conversation(\&iterator, \&callback);
@@ -329,6 +347,7 @@ sub register {
   $app->helper(format_conversation => \&format_conversation);
   $app->helper(connection_list     => \&connection_list);
   $app->helper(conversation_list   => \&conversation_list);
+  $app->helper(day_changed         => \&day_changed);
   $app->helper(logf                => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });
   $app->helper(notification_list => \&notification_list);
