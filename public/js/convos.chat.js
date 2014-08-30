@@ -66,7 +66,7 @@
       if (!$('nav .conversations a[data-network="' + conn.network + '"]').length) {
         convos.makeMessage('Hey, ' + conn.nick + '!').addToMessages();
         convos.makeMessage('You have not joined any channels on ' + conn.network + '.').addToMessages();
-        convos.makeMessage('To join a channel, type <b>"/join #channel"</b> followed by <b>enter</b> in the input in the bottom of this page.').addToMessages();
+        convos.makeMessage('To join a channel, type <b>"/join #channel"</b> followed by <b>enter</b> in the input at the bottom of this page.').addToMessages();
       }
     }
   };
