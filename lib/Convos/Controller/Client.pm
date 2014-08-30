@@ -56,7 +56,7 @@ sub conversation {
   my $name    = as_id $network, $target;
   my $redis   = $self->redis;
 
-  $self->res->headers->header('X-Is-Channel', $self->stash('is_channel'));
+  $self->res->headers->header('X-Is-Channel', $self->stash('is_channel') || 0);
   $self->stash(from_archive => 0, target => $target, state => 'connected');
 
   $self->delay(

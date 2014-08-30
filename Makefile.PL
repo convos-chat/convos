@@ -22,6 +22,7 @@ WriteMakefile(
     'Mojo::Redis'                       => '0.9928',
     'Mojolicious'                       => '5.3',
     'Mojolicious::Plugin::AssetPack'    => '0.19',
+    'Mojolicious::Plugin::FontAwesome4' => '4.10',
     'Mojolicious::Plugin::LinkEmbedder' => '0.07',
     'Parse::IRC'                        => '1.18',
     'Time::Piece'                       => '1.2',
