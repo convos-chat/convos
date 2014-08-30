@@ -176,9 +176,10 @@ sub _add_connection {
   my $validation = $self->validation;
   my $name       = $self->param('server') || '';
 
-  $name =~ s!^(irc|chat)\.!!;
-  $name =~ s!\.(\w{2,3})$!!;
-  $name =~ s![\W_]+!-!g;
+  $name =~ s!^(irc|chat)\.!!;    # remove common prefixes from server name
+  $name =~ s!:\d+$!!;            # remove port
+  $name =~ s!\.\w{2,3}$!!;       # remove .com, .no, ...
+  $name =~ s![\W_]+!-!g;         # make pretty url
 
   $validation->input->{login} = $self->session('login');
   $validation->input->{name}  = $name;

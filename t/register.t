@@ -31,7 +31,7 @@ $form = {wizard => 1, server => '', nick => ''};
 $t->post_ok('/connection/add', form => $form)->status_is(200)->element_exists('div.nick > .error')
   ->element_exists('div.server > .error')->element_exists('input[type="hidden"][name="wizard"][value="1"]');
 
-$form = {wizard => 1, server => 'chat.freenode.net', nick => 'ice_cool'};
+$form = {wizard => 1, server => 'chat.freenode.net:6697', nick => 'ice_cool'};
 $t->post_ok('/connection/add', form => $form)->status_is('302')
   ->header_is('Location', '/freenode', 'Redirect to connection page');
 
