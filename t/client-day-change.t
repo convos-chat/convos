@@ -21,10 +21,10 @@ $t->get_ok('/magnet/%23convos?from=1409435997.12178')->status_is(200)
   ->element_exists('.messages li:nth-of-type(2)[id="day-changed-1409443200.99998"]')
   ->element_exists('.messages li:nth-of-type(3)[id="54a8992c25ea63c6d09274330e6d9433"]')
   ->element_exists('.messages li:nth-of-type(4)[id="65e5dfe1-08e9-c0ce-9c69-426893cda9e9"]')
-  ->element_exists('.day-changed')->text_is('.messages li:nth-of-type(2) .content', 'Day changed to 31. august.');
+  ->element_exists('.day-changed')->text_like('.messages li:nth-of-type(2) .content', qr{Day changed to 31});
 
 $t->get_ok('/magnet/%23convos?to=1409443200.00001')->status_is(200)->element_exists('.day-changed')
-  ->text_is('.messages li:nth-of-type(2) .content', 'Day changed to 31. august.');
+  ->text_like('.messages li:nth-of-type(2) .content', qr{Day changed to 31});
 
 $t->get_ok('/magnet/%23convos?from=1409443201')->status_is(200)->element_exists_not('.day-changed');
 
