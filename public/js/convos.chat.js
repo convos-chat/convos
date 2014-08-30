@@ -50,6 +50,27 @@
     $('body').addClass('loading');
   };
 
+  convos.makeMessage = function(content) {
+    var $m = $('<li class="message" data-sender="convos"></li>');
+    $m.append('<img class="avatar" src="' + $.url_for('/image/avatar-convos.png') + '">');
+    $m.append('<h3>convos</h3>');
+    $m.append('<div class="content">' + content + '</div>');
+    return $m;
+  };
+
+  convos.setState = function(name, state) {
+    var conn = convos[name] || { network: '' };
+    conn.state = state || 'disconnected';
+
+    if (conn.state == 'connected') {
+      if (!$('nav .conversations a[data-network="' + conn.network + '"]').length) {
+        convos.makeMessage('Hey, ' + conn.nick + '!').addToMessages();
+        convos.makeMessage('You have not joined any channels on ' + conn.network + '.').addToMessages();
+        convos.makeMessage('To join a channel, type <b>"/join #channel"</b> followed by <b>enter</b> in the input in the bottom of this page.').addToMessages();
+      }
+    }
+  };
+
   $.fn.addToMessages = function(func) { // func = {prepend,append}
     return this.attachEventsToMessage().each(function() {
       var $message = $(this);
@@ -153,10 +174,11 @@
       convos.current.start_time = parseFloat($messages.attr('data-start-time'));
       convos.current.last_read_time = parseFloat($messages.attr('data-last-read-time'));
       convos.current.nick = $messages.attr('data-nick') || '';
-      convos.current.state = $messages.attr('data-state') || 'disconnected';
       convos.current.network = $messages.attr('data-network') || 'convos';
       convos.current.target = $messages.attr('data-target') || '';
       convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
+
+      convos.setState('current', $messages.attr('data-state'));
 
       $messages.find('li').attachEventsToMessage();
       $doc.filter('form.sidebar').each(function() {

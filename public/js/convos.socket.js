@@ -76,10 +76,16 @@
     }
 
     if ($message.hasClass('highlight')) receiveHighlightMessage($message);
+    if ($message.hasClass('connection-state')) convos.changeState($message.data());
     if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
 
-    if ($message.data('to_current')) { $message.addToMessages(); }
-    else if ($message.hasClass('message')) { receiveOtherMessage($message); }
+    if ($message.data('to_current')) {
+      if ($message.hasClass('connection-state')) convos.setState('current', $messages.attr('data-state'));
+      $message.addToMessages();
+    }
+    else if ($message.hasClass('message')) {
+      receiveOtherMessage($message);
+    }
 
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
