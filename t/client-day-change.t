@@ -1,4 +1,11 @@
-BEGIN { $ENV{TZ} = 'EDT'; $ENV{N_MESSAGES} = 4; }
+BEGIN {
+  $ENV{TZ}         = 'EDT';
+  $ENV{N_MESSAGES} = 4;
+  $ENV{TEST_TIME}  = 1409443199.9;    # Sun Aug 31 00:59:59.8 2014
+  require Convos::Controller::Chat;
+  *Convos::Controller::Chat::time = sub { $ENV{TEST_TIME} };
+}
+
 use t::Helper;
 use Mojo::Loader;
 my $loader = Mojo::Loader->new;
@@ -16,6 +23,10 @@ for (split /\n/, $loader->data(main => 'convos.log.ep')) {
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
 $t->post_ok("/profile/timezone/offset?hour=@{[(localtime)[2]]}");
 
+# ws day_changed
+$t->websocket_ok('/socket')->message_ok->message_like(qr{id="day-changed-1409443200});
+
+# html day_changed inside messages
 $t->get_ok('/magnet/%23convos?from=1409435997.12178')->status_is(200)
   ->element_exists('.messages li:nth-of-type(1)[id="28fa49597103a5ec05cd605f9074998e"]')
   ->element_exists('.messages li:nth-of-type(2)[id="day-changed-1409443200.99998"]')
@@ -23,9 +34,11 @@ $t->get_ok('/magnet/%23convos?from=1409435997.12178')->status_is(200)
   ->element_exists('.messages li:nth-of-type(4)[id="65e5dfe1-08e9-c0ce-9c69-426893cda9e9"]')
   ->element_exists('.day-changed')->text_like('.messages li:nth-of-type(2) .content', qr{Day changed to 31});
 
+# html day_changed at end of messages
 $t->get_ok('/magnet/%23convos?to=1409443200.00001')->status_is(200)->element_exists('.day-changed')
   ->text_like('.messages li:nth-of-type(2) .content', qr{Day changed to 31});
 
+# html day_changed not in messages
 $t->get_ok('/magnet/%23convos?from=1409443201')->status_is(200)->element_exists_not('.day-changed');
 
 done_testing;
