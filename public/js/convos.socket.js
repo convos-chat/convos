@@ -107,8 +107,11 @@
     attr['class'] = message.match('^\/') ? 'hidden' : '';
     attr['id'] = window.guid();
     $.each(['network', 'state', 'target'], function(i) { attr["data-" + this] = attr["data-" + this] || convos.current[this]; });
+    var encodedMsg = message.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+        return '&#' + i.charCodeAt(0) + ';';
+    });
 
-    socket.send($('<div/>').attr(attr).text(message).prop('outerHTML'));
+    socket.send($('<div/>').attr(attr).text(encodedMsg).prop('outerHTML'));
     if (attr['data-history']) convos.addInputHistory(message);
     if (!message.match(/^\//)) addPendingMessage(message, attr);
   };
