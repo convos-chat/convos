@@ -372,7 +372,7 @@ sub _assets {
   $self->asset(
     'c.js' => qw(
       /js/globals.js
-      /js/jquery.min.js
+      /js/jquery.js
       /js/ws-reconnecting.js
       /js/jquery.hotkeys.js
       /js/jquery.finger.js
