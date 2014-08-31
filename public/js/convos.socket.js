@@ -24,7 +24,7 @@
   };
 
   var enableInput = function() {
-    convos.input.attr('placeholder', 'What\'s on your mind ' + convos.current.nick + '?');
+    convos.input.attr('placeholder', 'What is on your mind, ' + convos.current.nick + '?');
     convos.input.removeClass('disabled');
   };
 
