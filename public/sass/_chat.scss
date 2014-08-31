@@ -132,10 +132,15 @@ div.messages {
     li { padding: 4px $bodyGutterSmall; }
   }
 
-  li.help {
+  li.help, li.channel-list {
     dt { float: left; width: auto; padding-right: 5px; }
     dd { color: #666; margin: 0; }
     dd:before { content: '- '; }
+  }
+
+  li.channel-list {
+    input { width: 100%; }
+    dd { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   }
 
   li.history-starting-point {

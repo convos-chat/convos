@@ -56,8 +56,8 @@ use Scalar::Util ();
 use Time::HiRes 'time';
 use Convos::Core::Util qw( as_id id_as );
 use Sys::Hostname ();
-use constant DEBUG    => $ENV{CONVOS_DEBUG}   ? 1 : 0;
-use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
+use constant CHANNEL_LIST_CACHE_TIMEOUT => 3600;    # TODO: Figure out how long to cache channel list
+use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 
 =head1 ATTRIBUTES
 
@@ -94,7 +94,7 @@ my @OTHER_EVENTS = qw/
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
-  err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
+  err_notonchannel err_bannedfromchan irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_kick irc_error
   irc_rpl_namreply irc_rpl_endofnames
   /;
@@ -839,18 +839,6 @@ sub irc_rpl_namreply {
   }
 }
 
-=head2 irc_rpl_liststart
-
-:servername 321 fooman Channel :Users  Name
-
-=cut
-
-sub irc_rpl_liststart {
-  my ($self, $message) = @_;
-
-  $self->{channel_list} = [];
-}
-
 =head2 irc_rpl_list
 
 :servername 322 somenick #channel 10 :[+n] some topic
@@ -859,12 +847,12 @@ sub irc_rpl_liststart {
 
 sub irc_rpl_list {
   my ($self, $message) = @_;
+  my $network = $self->name;
+  my $name    = $message->{params}[1];
+  my %info    = (name => $name, visible => $message->{params}[2], title => $message->{params}[3] // '');
 
-  # Will not force lowercase on channel name [1] here since it is only
-  # used for representation
-
-  push @{$self->{channel_list}},
-    {name => $message->{params}[1], visible => $message->{params}[2], title => $message->{params}[3] || 'No title',};
+  $self->_publish(channel_info => {name => $name, network => $network, info => \%info});
+  $self->redis->hset("convos:irc:$network:channels", $name => j \%info) if $self->{save_channels};
 }
 
 =head2 irc_rpl_listend
@@ -875,8 +863,9 @@ sub irc_rpl_list {
 
 sub irc_rpl_listend {
   my ($self, $message) = @_;
+  my $network = $self->name;
 
-  $self->_publish(channel_list => {channel_list => $self->{channel_list},},);
+  $self->redis->expire("convos:irc:$network:channels", CHANNEL_LIST_CACHE_TIMEOUT) if delete $self->{save_channels};
 }
 
 =head2 irc_mode
@@ -949,6 +938,25 @@ sub cmd_join {
   my $channel = $message->{params}[0];
   if (my $key = $message->{params}[1]) {
     $self->redis->hset("$self->{path}:$channel", key => $key);
+  }
+}
+
+=head2 cmd_list
+
+=cut
+
+sub cmd_list {
+  my ($self, $message) = @_;
+  my $network = $self->name;
+
+  $self->{channels} = {};
+
+  if (my $filter = $message->{params}[0] || '') {
+    $self->{channels}{lc($_)} = {name => $_, topic => '', not_found => 1} for split /,/, $filter;
+  }
+  else {
+    $self->redis->del("convos:irc:$network:channels");
+    $self->{save_channels} = 1;
   }
 }
 

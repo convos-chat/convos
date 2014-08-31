@@ -66,6 +66,10 @@
     var $message = $(e.data);
     var action = $message.attr('class').match(/^(nick|conversation)-(\w+)/);
 
+    if ($message.attr('class').match(/javascript/)) {
+      return;
+    }
+
     toCurrent($message);
 
     if ($message.hasClass('error')) {
@@ -80,8 +84,8 @@
     if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
 
     if ($message.data('to_current')) {
-      if ($message.hasClass('connection-state')) convos.setState('current', $messages.attr('data-state'));
       $message.addToMessages();
+      if ($message.hasClass('connection-state')) convos.setState('current', $messages.attr('data-state'));
     }
     else if ($message.hasClass('message')) {
       receiveOtherMessage($message);

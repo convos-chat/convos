@@ -33,6 +33,46 @@
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
+  convos.draw['channel-list'] = function($message) {
+    var $dl = $message.find('dl');
+
+    // remove existing
+    $('div.messages ul .channel-list').each(function() { if ($message[0] != this) $(this).remove(); });
+
+    $message.contents().each(function() {
+      if (this.nodeType == 8) convos.current.channels = jQuery.parseJSON(this.nodeValue);
+    });
+
+    $message.find('input').on('keyup', function(e) { // filter channel list
+      var re = new RegExp(this.value, 'i');
+      var names = [];
+      var i = 0;
+
+      for (name in convos.current.channels) {
+        if (name.match(re)) names.push(name);
+      }
+
+      $dl.html('');
+      $.each(names.sort(function(a, b) { return a.length - b.length; }), function() {
+        if (i++ > 10) return false;
+        var data = convos.current.channels[this];
+        $dl.append('<dt><a href="cmd:///join ' + this + '">' + data.name + '</a></dt><dd title="' + data.title + '">' + (data.title || 'No topic') + '</dd>');
+      });
+
+      if (!$dl.children().length) $dl.append('<dt>No matching channel names.</dt>');
+    }).focus();
+
+    $message.find('form').on('submit', function(e) {
+      e.preventDefault();
+      var a = $dl.find('a')[0];
+      if (a) a.click();
+    });
+
+    // prevent jumping when filtering
+    $message.height($message.height());
+    $(window).scrollTo('bottom');
+  };
+
   convos.getNewerMessages = function(e) {
     if (e) e.preventDefault();
     if (!convos.current.end_time) return;
@@ -48,6 +88,12 @@
     });
     convos.current.end_time = 0;
     $('body').addClass('loading');
+  };
+
+  convos.channelInfo = function(network, name, info) {
+    convos.current.channels = convos.current.channels || {};
+    convos.current.channels[name] = info;
+    $('div.messages ul .channel-list input').keyup();
   };
 
   convos.makeMessage = function(content) {
@@ -67,6 +113,7 @@
         convos.makeMessage('Hey, ' + conn.nick + '!').addToMessages();
         convos.makeMessage('You have not joined any channels on ' + conn.network + '.').addToMessages();
         convos.makeMessage('To join a channel, type <b>"/join #channel"</b> followed by <b>enter</b> in the input at the bottom of this page.').addToMessages();
+        convos.send('/list');
       }
     }
   };
@@ -76,13 +123,17 @@
       var $message = $(this);
       var $messages = $('div.messages ul');
       var $same = $messages.children('li').not('.message-pending').eq(func == 'prepend' ? 0 : -1);
+      var draw = $message.attr('data-draw');
       var same_nick = $same.data('sender') || '';
 
       if ($message.hasClass('message') && $same.hasClass('message') && same_nick == $message.data('sender')) {
         (func == 'prepend' ? $same : $message).addClass('same-nick');
       }
       if (!$message.hasClass('hidden')) {
-        $messages[func || 'append']($message.fadeIn('fast'));
+        $messages[func || 'append']($message);
+      }
+      if (draw) {
+        convos.draw[draw]($message);
       }
     });
   };
@@ -170,6 +221,7 @@
       var draw = $doc.find('[data-draw]').attr('data-draw');
 
       convos.nicks.reset();
+      convos.current.channels = {};
       convos.current.end_time = parseFloat($messages.attr('data-end-time'));
       convos.current.start_time = parseFloat($messages.attr('data-start-time'));
       convos.current.last_read_time = parseFloat($messages.attr('data-last-read-time'));
@@ -177,8 +229,6 @@
       convos.current.network = $messages.attr('data-network') || 'convos';
       convos.current.target = $messages.attr('data-target') || '';
       convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
-
-      convos.setState('current', $messages.attr('data-state'));
 
       $messages.find('li').attachEventsToMessage();
       $doc.filter('form.sidebar').each(function() {
@@ -197,6 +247,7 @@
       if (data) $('body').hideSidebar();
 
       convos.at_bottom = true; // make convos.draw.ui scroll to bottom
+      convos.setState('current', $messages.attr('data-state'));
       convos.draw.ui(e);
     });
   };

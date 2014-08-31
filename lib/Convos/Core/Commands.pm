@@ -8,6 +8,7 @@ Convos::Core::Commands - Translate to IRC commands
 
 use strict;
 use warnings;
+use Mojo::JSON;
 use Convos::Core::Util 'as_id';
 
 =head1 METHODS
@@ -55,6 +56,35 @@ sub help {
 =head2 join
 
 =head2 list
+
+=cut
+
+sub list {
+  my ($self, $filter, $dom) = @_;
+  my $login = $self->session('login');
+  my $state = $dom->{state};
+  my $id;
+
+  if ($filter) {
+    $self->send_partial('event/channel_list' => %$dom, channels => {});
+    return "LIST $filter";
+  }
+
+  $self->redis->hgetall(
+    "convos:irc:$dom->{network}:channels",
+    sub {
+      my ($redis, $channels) = @_;
+      $_ = Mojo::JSON::j($_) for values %$channels;
+      $self->send_partial('event/channel_list' => %$dom, channels => $channels);
+      return if %$channels;
+      my $key = "convos:user:$login:$dom->{network}";
+      $self->logf(debug => '[%s] < %s', $key, "$dom->{uuid} LIST");
+      $self->redis->publish($key, "$dom->{uuid} LIST");
+    }
+  );
+
+  return;
+}
 
 =head2 me
 
@@ -127,7 +157,6 @@ sub reconnect {
 
 sub join  {"JOIN $_[1]"}
 sub kick  {"KICK $_[2]->{target} $_[1]"}
-sub list  {"LIST"}
 sub me    {"PRIVMSG $_[2]->{target} :\x{1}ACTION $_[1]\x{1}"}
 sub mode  {"MODE $_[1]"}
 sub msg   { $_[1] =~ s!^(\w+)\s*!!; "PRIVMSG $1 :$_[1]" }
