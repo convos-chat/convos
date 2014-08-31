@@ -13,7 +13,7 @@
         % last if ++$i > 10;
         % my $info = $channels->{$name};
         %# Note: $name is lc($info->{name})
-        <dt><%= link_to $info->{name}, "cmd:///join $name" %></dt>
+        <dt><%= link_to $info->{name}, "cmd:///join $name" %> (<%= $info->{visible} || 0 %>)</dt>
         <dd title="<%= $info->{title} %>"><%= $info->{not_found} ? 'Channel does not exist' : $info->{title} || 'No topic' %></dd>
       % }
       </dl>

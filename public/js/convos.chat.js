@@ -56,7 +56,7 @@
       $.each(names.sort(function(a, b) { return a.length - b.length; }), function() {
         if (i++ > 10) return false;
         var data = convos.current.channels[this];
-        $dl.append('<dt><a href="cmd:///join ' + this + '">' + data.name + '</a></dt><dd title="' + data.title + '">' + (data.title || 'No topic') + '</dd>');
+        $dl.append('<dt><a href="cmd:///join ' + this + '">' + data.name + '</a> (' + data.visible +')</dt><dd title="' + data.title + '">' + (data.title || 'No topic') + '</dd>');
       });
 
       if (!$dl.children().length) $dl.append('<dt>No matching channel names.</dt>');
