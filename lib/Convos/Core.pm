@@ -219,7 +219,6 @@ sub _start_control_channel {
     name => $str,
     nick => $str,
     server => $str, # irc_server[:port]
-    tls => $bool,
   }, $callback);
 
 Add a new connection to redis. Will create a new connection id and
@@ -229,7 +228,7 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my ($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login name nick server tls ));
+  my $validation = $self->_validation($input, qw( password login name nick server ));
 
   if ($validation->has_error) {
     $self->$cb($validation, undef);
@@ -281,7 +280,6 @@ sub add_connection {
     name => $str,
     nick => $str,
     server => $str, # irc_server[:port]
-    tls => $bool,
   }, $callback);
 
 Update a connection's settings. This might issue a reconnect or issue
@@ -291,7 +289,7 @@ IRC commands to reflect the changes.
 
 sub update_connection {
   my ($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( login name nick password server tls ));
+  my $validation = $self->_validation($input, qw( login name nick password server ));
 
   if ($validation->has_error) {
     $self->$cb($validation, undef);
@@ -531,7 +529,6 @@ sub _validation {
     elsif ($k eq 'name')     { $validation->required('name')->like(qr{^[-a-z0-9]+$}) }    # network name
     elsif ($k eq 'nick')     { $validation->required('nick')->size(1, 30) }
     elsif ($k eq 'server') { $validation->required('server')->like($Convos::Core::Util::SERVER_NAME_RE) }
-    elsif ($k eq 'tls')    { $validation->required('tls')->in(0, 1) }
     else                   { $validation->required($k) }
   }
 

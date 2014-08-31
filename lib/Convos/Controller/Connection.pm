@@ -194,7 +194,6 @@ sub _add_connection {
 
   $validation->input->{login} = $self->session('login');
   $validation->input->{name}  = $name;
-  $validation->input->{tls} //= 1;    # always try tls
 
   $self->delay(
     sub {
@@ -226,7 +225,6 @@ sub _edit_connection {
   $validation->input->{login}  = $self->session('login');
   $validation->input->{name}   = $self->stash('name');
   $validation->input->{server} = $self->req->body_params->param('server');
-  $validation->input->{tls} ||= 0;
 
   $self->delay(
     sub {

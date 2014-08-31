@@ -301,11 +301,12 @@ sub _connect {
     sub {
       my ($redis, $args, $url) = @_;
 
+      $self->redis->hset($self->{path} => tls => $self->{disable_tls} ? 0 : 1);
       $irc->name($url || 'Convos');
       $irc->nick($args->{nick} || $self->login);
       $irc->pass($args->{password}) if $args->{password};
       $irc->server($args->{server} || $args->{host});
-      $irc->tls({}) if $args->{tls};
+      $irc->tls($self->{disable_tls} ? undef : {});
       $irc->user($self->login);
       $irc->connect(
         sub {
@@ -313,8 +314,16 @@ sub _connect {
           my $data;
 
           if ($error) {
+            if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
+
+     # SSL connect attempt failed with unknown error error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
+              $self->{disable_tls} = 1;
+              $self->_connect;
+            }
+            else {
+              $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
+            }
             $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
-            $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
             $self->_state('reconnecting');
           }
           else {
