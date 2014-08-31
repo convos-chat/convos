@@ -126,7 +126,7 @@ sub _handle_socket_data {
   if ($cmd =~ s!^/(\w+)\s*(.*)!!) {
     my ($action, $arg) = ($1, $2);
     $arg =~ s/\s+$//;
-    if (my $code = Convos::Core::Commands->can($action)) {
+    if (my $code = Convos::Core::Commands->can(lc($action))) {
       $cmd = $self->$code($arg, $dom);
     }
     else {
