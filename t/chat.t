@@ -3,12 +3,13 @@ use utf8;
 use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
+use File::Spec::Functions 'catfile';
+use Time::Piece ();
 
-my $dom        = Mojo::DOM->new;
-my $server     = $t->app->redis->subscribe('convos:user:doe:magnet');
-my $connection = Convos::Core::Connection->new(name => 'magnet', login => 'doe');
+my $ts = Time::Piece->new;
+my $log = catfile qw( irc_logs_test doe magnet ), $ts->year, $ts->strftime('%m-%d.log');
 
-$server->connect;
+unlink $log;
 
 redis_do(
   [hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => ''],
@@ -17,8 +18,8 @@ redis_do(
   [hmset => 'user:doe:connection:magnet', nick => 'doe'],
 );
 
-$connection->_irc->nick('doe');
-$connection->redis($t->app->redis);
+my $dom        = Mojo::DOM->new;
+my $connection = $t->app->core->ctrl_start(qw( doe magnet ));
 
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302)
   ->header_is('Location', '/magnet/%23convos', 'Redirect to conversation');
@@ -265,6 +266,10 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   is $dom->at('div.content')->text, 'this and is cool!',
     '<a href="http://perl.org" target="_blank">http://perl.org</a> https://github.<a href="https://github.com/jhthorsen" target="_blank">https://github.com/jhthorsen</a> yay!';
 }
+
+$log = Mojo::Util::slurp($log);
+is int scalar(() = $log =~ /\n/g), 14, 'lines in log file';
+like $log, qr{^\d+:\d+:\d+ :fooman\!user\@host http://convos\.by is really cool}m, 'log is really cool';
 
 done_testing;
 

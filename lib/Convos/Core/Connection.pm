@@ -46,7 +46,7 @@ L</err_bannedfromchan>, l</irc_error> and L</irc_quit>.
 
 =cut
 
-use Mojo::Base -base;
+use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::IRC;
 use Mojo::JSON 'j';
 no warnings 'utf8';
@@ -1005,6 +1005,8 @@ sub _publish_and_save {
   else {
     $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
   }
+
+  $self->emit_safe(save => $data);
 }
 
 sub DESTROY {

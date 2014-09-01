@@ -45,8 +45,6 @@ the link to view the data.
 
 =item * Use Redis to manage state / publish subscribe
 
-=item * Archive logs in plain text format, use ack to search them.
-
 =item * Bootstrap-based user interface
 
 =back
@@ -78,6 +76,11 @@ Convos can be configured with the following environment variables:
 
 =over 4
 
+=item * CONVOS_ARCHIVE_DIR
+
+Set this variable to a custom directory where Convos can store the IRC
+logs.
+
 =item * CONVOS_BACKEND_EMBEDDED=1
 
 Set CONVOS_MANUAL_BACKEND to a true value if you want to force the frontend
@@ -92,6 +95,15 @@ Set CONVOS_DEBUG for extra debug output to STDERR.
 
 Set CONVOS_DISABLE_AUTO_EMBED to disable links from expanding into images,
 movies or other dynamic content.
+
+=item * CONVOS_ELASTICSEARCH_URL
+
+Set CONVOS_ELASTICSEARCH_URL to the location of your
+L<Elasticsearch|http://www.elasticsearch.org>. server if you want Convos
+to archive messages to it. Example:
+C<CONVOS_ELASTICSEARCH_URL=http://localhost:9200>.
+
+This variable will override L<CONVOS_ARCHIVE_DIR>.
 
 =item * CONVOS_MANUAL_BACKEND=1
 
@@ -230,10 +242,6 @@ This template will be included below the form on the C</register> page.
 
 =over 4
 
-=item * L<Convos::Controller::Archive>
-
-Mojolicious controller for IRC logs.
-
 =item * L<Convos::Controller::Client>
 
 Mojolicious controller for IRC chat.
@@ -263,10 +271,6 @@ our $VERSION = '0.83';
 
 =head1 ATTRIBUTES
 
-=head2 archive
-
-Holds a L<Convos::Core::Archive> object.
-
 =head2 core
 
 Holds a L<Convos::Core> object.
@@ -277,17 +281,22 @@ Holds a L<Convos::Upgrader> object.
 
 =cut
 
-has archive => sub {
-  my $self = shift;
-  Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
-};
-
 has core => sub {
   my $self = shift;
   my $core = Convos::Core->new;
 
   $core->log($self->log);
   $core->redis->server($self->redis->server);
+
+  if ($ENV{CONVOS_ELASTICSEARCH_URL}) {
+    require Convos::Archive::ElasticSearch;
+    $core->archive(Convos::Archive::ElasticSearch->new);
+    $core->archive->url($ENV{CONVOS_ELASTICSEARCH_URL});
+  }
+  else {
+    $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
+  }
+
   $core;
 };
 

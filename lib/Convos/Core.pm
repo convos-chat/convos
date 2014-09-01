@@ -30,6 +30,10 @@ my %CONVOS_MESSAGE = (
 
 =head1 ATTRIBUTES
 
+=head2 archive
+
+Holds a L<Convos::Archive::File> object.
+
 =head2 log
 
 Holds a L<Mojo::Log> object.
@@ -40,8 +44,9 @@ Holds a L<Mojo::Redis> object.
 
 =cut
 
-has log   => sub { Mojo::Log->new };
-has redis => sub { Mojo::Redis->new };
+has archive => sub { require Convos::Archive::File; Convos::Archive::File->new; };
+has log     => sub { Mojo::Log->new };
+has redis   => sub { Mojo::Redis->new };
 
 =head1 METHODS
 
@@ -178,7 +183,9 @@ sub _connection {
   my $conn = $self->{connections}{$args{login}}{$args{name}};
 
   unless ($conn) {
+    Scalar::Util::weaken($self);
     $conn = Convos::Core::Connection->new(redis => $self->redis, log => $self->log, %args);
+    $conn->on(save => sub { $_[1]->{message} and $_[1]->{timestamp} and $self->archive->save(@_); });
     $self->{connections}{$args{login}}{$args{name}} = $conn;
   }
 
