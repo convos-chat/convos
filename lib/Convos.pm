@@ -380,6 +380,7 @@ sub _assets {
       /js/jquery.notify.js
       /js/jquery.disableouterscroll.js
       /js/selectize.js
+      /js/convos.events.js
       /js/convos.sidebar.js
       /js/convos.socket.js
       /js/convos.input.js
