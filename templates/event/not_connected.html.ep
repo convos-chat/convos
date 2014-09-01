@@ -1,11 +1,11 @@
-<li class="message error">
+<li class="message">
   %= timestamp
-% if(@$conversation) {
   %= image '/image/avatar-convos.png', alt => '', class => 'avatar'
   <h3><%= link_to 'convos', 'view.network', { network => 'convos' }, class => 'internal' %></h3>
-% }
   <div class="content">
-    You are <%= $state eq 'disconnected' ? 'not connected' : ucfirst $state %> to
-    %= link_to $network, 'view.network', { network => $network }, class => 'internal'
+    You are <%= $state eq 'disconnected' ? 'not yet connected' : ucfirst $state %> to
+    <%= link_to $network, 'view.network', { network => $network }, class => 'internal' %>.
+    If this status does not change soon, you should contact your system administrator and
+    let him/her know about the issue. Maybe the backend is not running?
   </div>
 </li>
