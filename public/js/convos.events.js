@@ -3,6 +3,7 @@
 
   convos.emit = function(name) {
     var c = convos.on[name];
+    console.log('emit', arguments);
     if (c) c.fireWith(this, $.makeArray(arguments).slice(1));
   };
 

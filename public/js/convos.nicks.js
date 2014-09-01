@@ -5,7 +5,7 @@
     list: [],
     init: function($e) {
       if (!$e.data('to_current')) return;
-      if (!convos.nicks.list.length) $e.data('to_current', false); // only show in conversation on manual "/list"
+      if (!convos.nicks.list.length && $('.messages li.message').length > 1) $e.data('to_current', false); // only show in conversation on manual "/list"
       $('form.sidebar ul li.nick.status').remove();
       $e.find('[data-nick]').each(function() { convos.nicks.joined($(this).data('to_current', true)); });
     },

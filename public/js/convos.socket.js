@@ -24,8 +24,14 @@
   };
 
   var enableInput = function() {
+    idleTimer();
     convos.input.attr('placeholder', 'What is on your mind, ' + convos.current.nick + '?');
     convos.input.removeClass('disabled');
+  };
+
+  var idleTimer = function() {
+    if (idleTimer.t) clearTimeout(idleTimer.t);
+    idleTimer.t = setTimeout(function() { convos.emit('idle'); }, 600);
   };
 
   var messageFailed = function(id, description) {
@@ -66,10 +72,9 @@
     var $message = $(e.data);
     var action = $message.attr('class').match(/^(nick|conversation)-(\w+)/);
 
-    if ($message.attr('class').match(/javascript/)) {
-      return;
-    }
+    if ($message.attr('class').match(/javascript/)) return;
 
+    idleTimer();
     toCurrent($message);
 
     if ($message.hasClass('error')) {
@@ -80,12 +85,11 @@
     }
 
     if ($message.hasClass('highlight')) receiveHighlightMessage($message);
-    if ($message.hasClass('connection-state')) convos.changeState($message.data());
     if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
 
     if ($message.data('to_current')) {
       $message.addToMessages();
-      if ($message.hasClass('connection-state')) convos.setState('current', $messages.attr('data-state'));
+      if ($message.hasClass('connection-state')) convos.emit('state', convos.current.network, $message.attr('data-state'));
     }
     else if ($message.hasClass('message')) {
       receiveOtherMessage($message);

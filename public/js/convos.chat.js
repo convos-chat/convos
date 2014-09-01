@@ -104,19 +104,19 @@
     return $m;
   };
 
-  convos.setState = function(name, state) {
-    var conn = convos[name] || { network: '' };
-    conn.state = state || 'disconnected';
-
-    if (conn.state == 'connected') {
-      if (!$('nav .conversations a[data-network="' + conn.network + '"]').length) {
-        convos.makeMessage('Hey, ' + conn.nick + '!').addToMessages();
-        convos.makeMessage('You have not joined any channels on ' + conn.network + '.').addToMessages();
-        convos.makeMessage('To join a channel, type <b>"/join #channel"</b> followed by <b>enter</b> in the input at the bottom of this page.').addToMessages();
-        convos.send('/list');
-      }
-    }
-  };
+  convos.on('state', function(network, state) {
+    if (state != 'connected') return;
+    if ($('nav .conversations a[data-network="' + network + '"]').length) return;
+    convos.send('/help');
+    convos.once('idle', function() {
+      convos.send('/list');
+      convos.makeMessage('Hey, ' + convos.current.nick + '. Welcome to ' + network + '!').addToMessages();
+      convos.makeMessage('Next up is to join a channel.').addToMessages();
+      convos.makeMessage('To make this simpler for you, I\'m fetching the list of available channels.').addToMessages();
+      convos.makeMessage('Please wait...').addToMessages();
+      $(window).scrollTo('bottom');
+    });
+  });
 
   $.fn.addToMessages = function(func) { // func = {prepend,append}
     return this.attachEventsToMessage().each(function() {
@@ -247,7 +247,7 @@
       if (data) $('body').hideSidebar();
 
       convos.at_bottom = true; // make convos.draw.ui scroll to bottom
-      convos.setState('current', $messages.attr('data-state'));
+      convos.emit('state', convos.current.network, $messages.attr('data-state'));
       convos.draw.ui(e);
     });
   };
