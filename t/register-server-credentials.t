@@ -9,10 +9,10 @@ my $form;
   $t->app->core->start;
 }
 
-$form = {login => 'fooman', email => 'foobar@barbar.com', password => 'barbar', password_again => 'barbar',};
+$form = {login => 'fooman', email => 'foobar@barbar.com', password => 'barbar', password_again => 'barbar'};
 $t->post_ok('/register' => form => $form)->status_is('302');
 
-$form = {wizard => 1, server => 'chat.freenode.net:6697', nick => 'ice_cool', password => 's3cret'};
+$form = {wizard => 1, server => 'chat.freenode.net:6697', nick => 'ice_cool', username => 'batman', password => 's3cret'};
 $t->post_ok('/connection/add', form => $form)->status_is('302');
 
 {
@@ -22,7 +22,7 @@ $t->post_ok('/connection/add', form => $form)->status_is('302');
   is $irc->nick,   'ice_cool',               'nick';
   is $irc->pass,   's3cret',                 'pass';
   is $irc->server, 'chat.freenode.net:6697', 'server';
-  is $irc->user,   'fooman',                 'user';
+  is $irc->user,   'batman',                 'user';
 }
 
 done_testing;

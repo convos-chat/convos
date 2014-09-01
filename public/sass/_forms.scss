@@ -1,3 +1,5 @@
+$inputWidth: 290px;
+
 form {
   margin: 0;
   label { display: block; margin-top: $bodyGutter; }
@@ -10,15 +12,14 @@ form {
     outline: none;
     border: 2px solid #ccc;
     padding: 4px;
-    width: 290px;
+    width: $inputWidth;
     @include border-radius(3px);
   }
   .selectize-input { padding: 2px; }
   .selectize-input.focus, input:focus { border: 2px solid darken(#ccc, 15%); }
   input[type="checkbox"] { width: auto; }
-  input.field-with-error, select.field-with-error {
-    border-color: $errorColor;
-  }
+  input.field-with-error, select.field-with-error { border-color: $errorColor; }
+  input.half-size { width: ($inputWidth / 2 - 2); }
   div.actions {
     margin-top: 2em;
     clear: left;
@@ -51,7 +52,7 @@ form.horizontal {
   }
   p.error {
     background: lighten($errorColor, 40%);
-    width: 290px;
+    width: $inputWidth;
     margin-top: -3px;
     padding: 4px;
     border: 2px solid $errorColor;

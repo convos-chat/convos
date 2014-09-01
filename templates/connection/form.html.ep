@@ -3,7 +3,7 @@
   % my $err;
   <div class="form-group nick">
     <label for="nick">Nick</label>
-    %= text_field 'nick', session('login'), id => 'nick'
+    %= text_field 'nick', session('login'), id => 'nick', placeholder => 'philip_j_fry'
     % if ($err = validation->error('nick')) {
     <p class="error">Must be shorter than 30 characters.</p>
     % }
@@ -11,7 +11,7 @@
   </div>
   <div class="form-group server">
     <label for="server">Server</label>
-    %= text_field 'server', $ENV{CONVOS_DEFAULT_CONNECTION}, id => 'server'
+    %= text_field 'server', $ENV{CONVOS_DEFAULT_CONNECTION}, id => 'server', placeholder => 'irc.example.com:6667'
     % if ($err = validation->error('server')) {
     <p class="error">Invalid server name.</p>
     % }
@@ -21,9 +21,10 @@
     </p>
   </div>
   <div class="form-group password">
-    <label for="password">Password</label>
-    %= text_field 'password', id => 'password'
-    <p class="help">Server password.</p>
+    <label for="password">Credentials</label>
+    %= text_field 'username', id => 'username', placeholder => 'Username', class => 'half-size'
+    %= text_field 'password', id => 'password', placeholder => 'Password', class => 'half-size'
+    <p class="help">Most servers only require a password, if anything.</p>
   </div>
   <div class="actions">
   % if ($in_storage) {

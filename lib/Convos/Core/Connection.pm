@@ -307,7 +307,7 @@ sub _connect {
       $irc->pass($args->{password}) if $args->{password};
       $irc->server($args->{server} || $args->{host});
       $irc->tls($self->{disable_tls} ? undef : {});
-      $irc->user($self->login);
+      $irc->user($args->{username} || $self->login);
       $irc->connect(
         sub {
           my ($irc, $error) = @_;
