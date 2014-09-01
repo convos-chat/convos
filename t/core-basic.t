@@ -30,14 +30,6 @@ my $redis = $t->app->redis;
 }
 
 {
-  is_deeply(
-    [$core->_parse_channels(['#foo', '#bar #baz ,,, stuff', '  #foo'])],
-    ['#bar', '#baz', '#foo', '#stuff'],
-    '_parse_channels()',
-  );
-}
-
-{
   my $upgraded = 0;
   my @res;
 

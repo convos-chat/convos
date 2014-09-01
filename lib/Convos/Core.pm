@@ -214,7 +214,6 @@ sub _start_control_channel {
 =head2 add_connection
 
   $self->add_connection({
-    channels => [ '#foo', '#bar', '...' ],
     login => $str,
     name => $str,
     nick => $str,
@@ -236,7 +235,6 @@ sub add_connection {
   }
 
   my ($login, $name) = $validation->param([qw( login name )]);
-  my @channels = $self->_parse_channels(delete $validation->input->{channels});
 
   warn "[core:$login] add ", _dumper($validation->output), "\n" if DEBUG;
   Scalar::Util::weaken($self);
@@ -258,7 +256,6 @@ sub add_connection {
         [sadd  => "connections",                  "$login:$name"],
         [sadd  => "user:$login:connections",      $name],
         [hmset => "user:$login:connection:$name", %{$validation->output}],
-        (map { [zadd => "user:$login:conversations", time, as_id $name, $_] } @channels),
         $delay->begin,
       );
     },
@@ -322,7 +319,6 @@ sub update_connection {
     },
     sub {
       my ($delay, $current, $conversations) = @_;
-      my %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
 
       $conn = $validation->output;    # get rid of the extra junk from Connection->new()
 
@@ -497,14 +493,6 @@ sub login {
       }
     }
   );
-}
-
-sub _parse_channels {
-  my $self = shift;
-  my $channels = shift || [];
-  my %dup;
-
-  sort grep { $_ !~ /^[#&]$/ and !$dup{$_}++ } map { /^[#&]/ ? $_ : "#$_" } map { split m/[\s,]+/ } @$channels;
 }
 
 sub _dumper {    # function
