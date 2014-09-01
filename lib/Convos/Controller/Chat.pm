@@ -8,8 +8,9 @@ Convos::Controller::Chat - Mojolicious controller for IRC chat
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'j';
-use Mojo::Util;
+use Mojo::Util qw( html_unescape xml_escape );
 use Convos::Core::Commands;
+use Time::HiRes 'time';
 use constant DEFAULT_RESPONSE => "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
 
 =head1 METHODS
@@ -25,6 +26,7 @@ sub socket {
   my $login = $self->session('login');
   my $key   = "convos:user:$login:out";
 
+  $self->_schedule_day_changed_event;
   $self->inactivity_timeout(60);
   Scalar::Util::weaken($self);
 
@@ -52,7 +54,7 @@ sub socket {
         $self->_handle_socket_data($dom);
       }
       else {
-        $octets = Mojo::Util::xml_escape($octets);
+        $octets = xml_escape $octets;
         $self->_send_400($dom, "Invalid message ($octets)")->finish;
       }
     }
@@ -60,7 +62,10 @@ sub socket {
 
   $self->on(
     finish => sub {
-      $self and delete $self->stash->{redis};
+      my $tid;
+      $self or return;
+      delete $self->stash->{redis};
+      Mojo::IOLoop->remove($tid) if $tid = $self->stash('day_changed_event_tid');
     }
   );
 
@@ -115,13 +120,13 @@ sub _convos_message {
 
 sub _handle_socket_data {
   my ($self, $dom) = @_;
-  my $cmd   = Mojo::Util::html_unescape($dom->text(0));
+  my $cmd   = html_unescape $dom->text(0);
   my $login = $self->session('login');
 
   if ($cmd =~ s!^/(\w+)\s*(.*)!!) {
     my ($action, $arg) = ($1, $2);
     $arg =~ s/\s+$//;
-    if (my $code = Convos::Core::Commands->can($action)) {
+    if (my $code = Convos::Core::Commands->can(lc($action))) {
       $cmd = $self->$code($arg, $dom);
     }
     else {
@@ -148,6 +153,22 @@ sub _handle_socket_data {
       $self->redis->ltrim("user:$login:cmd_history", -30, -1);
     }
   }
+}
+
+sub _schedule_day_changed_event {
+  my $self = shift;
+  my $t    = 86400 - time % 86400;
+
+  Scalar::Util::weaken($self);
+  $self->stash(
+    day_changed_event_tid => Mojo::IOLoop->timer(
+      $t => sub {
+        $self or return;
+        $self->send_partial('event/day_changed', timestamp => time + 1,);
+        $self->_schedule_day_changed_event;
+      }
+    )
+  );
 }
 
 sub _send_400 {

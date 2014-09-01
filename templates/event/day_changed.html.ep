@@ -1,0 +1,4 @@
+<li id="day-changed-<%= $timestamp %>" class="notice day-changed" data-network="" data-target="">
+  %= timestamp $timestamp
+  <div class="content">Day changed to <%= format_time $timestamp, '%e. %B' %>.</div>
+</li>

@@ -1,5 +1,5 @@
 ;(function($) {
-  window.convos = window.convos || {}
+  window.convos = window.convos || {};
 
   convos.conversations = {
     add: function($e) {

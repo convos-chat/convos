@@ -32,7 +32,7 @@ $t->websocket_ok('/socket');
 }
 
 {
-  $t->send_ok(msg('/help asdasd'));
+  $t->send_ok(msg('/HeLp asdasd'));
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.help[data-target=""] dl'), 'HELP';
 }
