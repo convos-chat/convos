@@ -1,4 +1,4 @@
-## 0.83
+## 0.83 (2014-09-01)
 - Fix highlighting of multiple channels #137
 - Fix connection actions in sidebar #157
 - Fix autocomplete will not match offline nicks #129
