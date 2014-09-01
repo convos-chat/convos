@@ -228,7 +228,7 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my ($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login name nick server ));
+  my $validation = $self->_validation($input, qw( login name nick password server ));
 
   if ($validation->has_error) {
     $self->$cb($validation, undef);

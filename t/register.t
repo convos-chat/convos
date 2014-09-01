@@ -41,6 +41,7 @@ $t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'No
   ->element_exists('div.messages ul li')->text_is('div.messages ul li:first-child h3 a', 'convos')
   ->text_is('div.messages ul li:first-child div.content',
   'Welcome to freenode. Start by typing "hi!" in the input field at the bottom of the page.');
+
 $t->get_ok('/convos')->status_is(200)->text_is('title', 'Nordaaker - convos')->element_exists('div.messages ul li')
   ->element_exists('div.messages ul li:first-child .avatar');
 

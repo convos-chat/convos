@@ -314,9 +314,10 @@ sub _connect {
           my $data;
 
           if ($error) {
-            if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
 
-     # SSL connect attempt failed with unknown error error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
+            # SSL connect attempt failed with unknown error
+            # error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
+            if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
               $self->{disable_tls} = 1;
               $self->_connect;
             }

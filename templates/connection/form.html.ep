@@ -20,6 +20,11 @@
       <br>Convos will autodetect if it is a <abbr title="By checking for TLS/SSL support">secure</abbr> port.
     </p>
   </div>
+  <div class="form-group password">
+    <label for="password">Password</label>
+    %= text_field 'password', id => 'password'
+    <p class="help">Server password.</p>
+  </div>
   <div class="actions">
   % if ($in_storage) {
     %= hidden_field name => stash('name') || '';
