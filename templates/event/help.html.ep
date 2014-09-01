@@ -1,5 +1,6 @@
-<li class="help info" data-network="" data-target="">
+<li class="help" data-network="" data-target="">
   <b class="close">&times;</b>
+  %= image '/image/avatar-convos.png', alt => '', class => 'avatar'
   <h3>Available commands</h3>
   <div class="content">
     <dl>
