@@ -513,7 +513,7 @@ sub _validation {
 
   for my $k (@names) {
     if    ($k eq 'password') { $validation->optional('password') }
-    if    ($k eq 'username') { $validation->optional('username') }
+    elsif ($k eq 'username') { $validation->optional('username') }
     elsif ($k eq 'login')    { $validation->required('login')->size(3, 30) }
     elsif ($k eq 'name')     { $validation->required('name')->like(qr{^[-a-z0-9]+$}) }    # network name
     elsif ($k eq 'nick')     { $validation->required('nick')->size(1, 30) }

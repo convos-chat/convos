@@ -1,4 +1,4 @@
 <li class="server notice connection-state" data-network="<%= $network %>" data-target="" data-state="<%= $state %>">
   %= timestamp $timestamp
-  <div class="content">Change connection state to <%= $state %></div>
+  <div class="content">Change connection state to <%= $state %>.</div>
 </li>

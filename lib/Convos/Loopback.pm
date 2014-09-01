@@ -40,13 +40,17 @@ The name of this IRC client. Defaults to "Convos".
 
 Holds the nick.
 
+=head2 pass
+
+Exists for L<Mojo::IRC> compat reasons.
+
+=head2 tls
+
+Exists for L<Mojo::IRC> compat reasons.
+
 =head2 user
 
 Alias for L</nick>.
-
-=head2  pass
-
-for compat reasons
 
 =cut
 
@@ -54,6 +58,7 @@ has name => 'Convos';
 has nick => '';
 has 'pass';
 sub server {'loopback'}
+sub tls    {undef}
 sub user   { shift->nick }
 
 =head2 ioloop

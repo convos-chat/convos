@@ -76,8 +76,8 @@ for my $cmd (qw/ t topic /) {
 }
 
 {
-  $t->send_ok(msg('/list whatvereasdja n '));
-  is ws(), 'abc-123 LIST', 'abc-123 LIST';
+  $t->send_ok(msg('/list #chnl '));
+  is ws(), 'abc-123 LIST #chnl', 'abc-123 LIST';
 
   $t->send_ok(msg('/me is too cool :) '));
   is ws(), "abc-123 PRIVMSG #convos :\x{1}ACTION is too cool :)\x{1}", '/me is too cool :)';

@@ -187,6 +187,7 @@ sub new {
   $self->{convos_path}       = "user:$self->{login}:connection:convos:msg";
   $self->{conversation_path} = "user:$self->{login}:conversations";
   $self->{path}              = "user:$self->{login}:connection:$self->{name}";
+  $self->{state}             = '';
   $self;
 }
 
@@ -233,7 +234,8 @@ sub _state {
   my ($self, $state) = @_;
 
   $self->redis->hset($self->{path}, state => $state);
-  $self->_publish(connection_state => {state => $state});
+  $self->_publish(connection_state => {state => $state}) unless $self->{state} eq $state;
+  $self->{state} = $state;
 }
 
 sub _subscribe {

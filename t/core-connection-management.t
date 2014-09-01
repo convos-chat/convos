@@ -34,15 +34,7 @@ Mojo::IOLoop->start;
 }
 
 {
-  my $conn = {
-    channels => ['#mojo'],
-    password => 's3cret',
-    login    => 'batman',
-    name     => 'magnet',
-    nick     => 'batman',
-    server   => 'irc.perl.org',
-    tls      => 0,
-  };
+  my $conn = {password => 's3cret', login => 'batman', name => 'magnet', nick => 'batman', server => 'irc.perl.org',};
 
   $core->add_connection($conn, cb());
   Mojo::IOLoop->start;
@@ -71,7 +63,7 @@ Mojo::IOLoop->start;
 }
 
 {
-  my $conn = {login => 'batman', name => 'magnet', nick => 'bruce', server => 'irc.perl.org', tls => 0};
+  my $conn = {login => 'batman', name => 'magnet', nick => 'bruce', server => 'irc.perl.org'};
 
   @messages = ();
   $stop = sub {/NICK bruce/};
@@ -85,7 +77,7 @@ Mojo::IOLoop->start;
 }
 
 {
-  my $conn = {login => 'batman', name => 'magnet', nick => 'bruce', server => 'irc.perl.org:1234', tls => 0,};
+  my $conn = {login => 'batman', name => 'magnet', nick => 'bruce', server => 'irc.perl.org:1234'};
 
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
