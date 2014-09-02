@@ -21,7 +21,7 @@ use Time::Piece;
 
 our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
 
-our @EXPORT_OK = qw( as_id id_as logf format_time $SERVER_NAME_RE );
+our @EXPORT_OK = qw( as_id format_time id_as logf pretty_server_name $SERVER_NAME_RE );
 
 =head1 FUNCTIONS
 
@@ -43,6 +43,19 @@ sub as_id {
     s/([^\w:-])/{ sprintf ':%02x', ord $1 }/ge;
     $_;
   } grep { length $_; } @_;
+}
+
+=head2 format_time
+
+  $str = format_time $timestamp, $format;
+
+=cut
+
+sub format_time {
+  my $date   = localtime shift;
+  my $format = shift;
+
+  return decode_utf8($date->strftime($format));
 }
 
 =head2 id_as
@@ -90,17 +103,34 @@ sub logf {
   $log->$level(sprintf $format, @args);
 }
 
-=head2 format_time
+=head2 pretty_server_name
 
-  $str = format_time $timestamp, $format;
+  $str = pretty_server_name($server);
+
+Removes "ssl\.", "irc.", "chat." from the beginning and ".com", ".org", ...
+from the end. Converts all non word and "_" to "-". Also removes the port.
+
+Also has special handling for $servers matching...
+
+  $server      | $str
+  -------------|-------
+  irc.perl.org | magnet
+  efnet        | efnet
 
 =cut
 
-sub format_time {
-  my $date   = localtime shift;
-  my $format = shift;
+sub pretty_server_name {
+  my ($name) = @_;
 
-  return decode_utf8($date->strftime($format));
+  return '' unless defined $name;
+  return 'magnet' if $name =~ /\birc\.perl\.org\b/i;    # also match ssl.irc.perl.org
+  return 'efnet'  if $name =~ /\befnet\b/i;
+
+  $name =~ s!^(irc|chat)\.!!;                           # remove common prefixes from server name
+  $name =~ s!:\d+$!!;                                   # remove port
+  $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
+  $name =~ s![\W_]+!-!g;                                # make pretty url
+  $name;
 }
 
 =head1 AUTHOR

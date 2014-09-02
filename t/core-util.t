@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 use Test::More;
-use Convos::Core::Util qw/ format_time as_id id_as /;
+use Convos::Core::Util qw( format_time as_id id_as pretty_server_name );
 
 {
   my $time = 1348308427;
@@ -17,6 +17,15 @@ use Convos::Core::Util qw/ format_time as_id id_as /;
   is_deeply [id_as(':23foo:3d123')], ['#foo=123'], 'id_as g_foo-61123';
   is_deeply [id_as('target:2e:22:004:00:23foo')],    ['target."',      '4', '#foo'], 'id_as g_target-46-34_4_foo';
   is_deeply [id_as('conver:3asation:004:00:23foo')], ['conver:sation', '4', '#foo'], 'id_as s_conversation_4_foo';
+}
+
+{
+  is pretty_server_name('irc.perl.org'),           'magnet',   'irc.perl.org';
+  is pretty_server_name('irc.perl.org:6667'),      'magnet',   'irc.perl.org:6667';
+  is pretty_server_name('ssl.irc.perl.org:7062'),  'magnet',   'irc.perl.org:7062';
+  is pretty_server_name('chat.freenode.net:6697'), 'freenode', 'chat.freenode.net:6697';
+  is pretty_server_name('irc.homelien.no'),        'homelien', 'irc.homelien.no';
+  is pretty_server_name('irc.efnet.pl'),           'efnet',    'irc.efnet.pl';
 }
 
 {

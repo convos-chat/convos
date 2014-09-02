@@ -7,7 +7,7 @@ Convos::Controller::Connection - Mojolicious controller for IRC connections
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Convos::Core::Util qw( as_id id_as );
+use Convos::Core::Util qw( as_id id_as pretty_server_name );
 
 =head1 METHODS
 
@@ -185,15 +185,9 @@ sub wizard {
 sub _add_connection {
   my $self       = shift;
   my $validation = $self->validation;
-  my $name       = $self->param('server') || '';
-
-  $name =~ s!^(irc|chat)\.!!;    # remove common prefixes from server name
-  $name =~ s!:\d+$!!;            # remove port
-  $name =~ s!\.\w{2,3}$!!;       # remove .com, .no, ...
-  $name =~ s![\W_]+!-!g;         # make pretty url
 
   $validation->input->{login} = $self->session('login');
-  $validation->input->{name}  = $name;
+  $validation->input->{name}  = pretty_server_name($self->param('server'));
 
   $self->delay(
     sub {
