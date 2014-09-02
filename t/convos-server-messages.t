@@ -2,8 +2,8 @@ use t::Helper;
 
 redis_do(
   [hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => ''],
-  [zadd => 'user:doe:conversations', time, 'magnet:00:23convos', time - 1, 'magnet:00batman'],
-  [sadd => 'user:doe:connections',   'magnet'],
+  [zadd => 'user:doe:conversations', time,     'magnet:00:23convos', time - 1, 'magnet:00batman'],
+  [sadd => 'user:doe:connections',   'magnet', 'need_to_be_two'],
   [hmset => 'user:doe:connection:magnet', nick => 'doe'],
   [del   => 'user:doe:connection:convos:msg'],
 );
