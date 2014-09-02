@@ -73,6 +73,10 @@
     $(window).scrollTo('bottom');
   };
 
+  convos.draw['help'] = function($message) {
+    $('div.messages ul .help').each(function() { if ($message[0] != this) $(this).remove(); });
+  };
+
   convos.getNewerMessages = function(e) {
     if (e) e.preventDefault();
     if (!convos.current.end_time) return;
@@ -112,8 +116,8 @@
       convos.send('/list');
       convos.makeMessage('Hey, ' + convos.current.nick + '. Welcome to ' + network + '!').addToMessages();
       convos.makeMessage('Next up is to join a channel.').addToMessages();
-      convos.makeMessage('To make this simpler for you, I\'m fetching the list of available channels.').addToMessages();
-      convos.makeMessage('Please wait...').addToMessages();
+      convos.makeMessage('To make this simpler for you, I\'m fetching the list of available channels. (It could take a while)').addToMessages();
+      convos.makeMessage('While you wait, try the help command: Type <b>/help</b> in the input field in the bottom on the page and hit enter. You can also use the &lt;tab> key to autocomplete commands and nicks.').addToMessages();
       $(window).scrollTo('bottom');
     });
   });
@@ -166,7 +170,6 @@
       $(this).replaceWith('<img src="' + $(this).attr('data-avatar') + '" class="avatar">');
     });
 
-    this.find('.close').click(function(e) { $(this).closest('li').remove(); });
     this.filter('.historic-message').find('a.button.newer').click(convos.getNewerMessages);
 
     return this;

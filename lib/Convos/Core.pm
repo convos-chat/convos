@@ -118,29 +118,6 @@ sub send_convos_message {
   $self;
 }
 
-=head2 start_convos_conversation
-
-  $self = $self->start_convos_conversation($login);
-
-Will add default messages to the convos conversation.
-
-=cut
-
-sub start_convos_conversation {
-  my ($self, $login) = @_;
-
-  for (
-    "Hi $login!",
-    "While convos is establishing a connection, you can try out the help command: Type '/help' in the input field in the bottom on the page and hit enter.",
-    "You can also use the <tab> key to autocomplete commands and nicks.",
-    )
-  {
-    $self->send_convos_message($login, $_);
-  }
-
-  return $self;
-}
-
 =head2 start
 
 Will fetch connection information from the database and try to connect to them.

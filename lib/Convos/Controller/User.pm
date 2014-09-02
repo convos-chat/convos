@@ -132,7 +132,6 @@ sub register {
 
       $self->logf(debug => '[reg] New user login=%s', $output->{login}) if DEBUG;
       $self->session(login => $output->{login});
-      $self->app->core->start_convos_conversation($output->{login});
       $self->redis->hmset(
         "user:$output->{login}" =>
           {digest => $self->_digest($output->{password}), email => $output->{email}, avatar => $output->{email}},
