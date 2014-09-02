@@ -1,3 +1,1 @@
-<script type="text/javascript" class="javascript">
-  convos.channelInfo("<%= $network %>", "<%= $name %>", <%== Mojo::JSON::j($info) %>);
-</script>
+<div class="hidden" data-event="channel-info" data-args="<%= Mojo::JSON::j([$network, $name, $info]) %>"></div>

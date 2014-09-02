@@ -121,7 +121,7 @@ has _irc => sub {
 
       if ($self->{stop}) {
         $data = {status => 200, message => 'Disconnected.'};
-        $self->_state('disconnect');
+        $self->_state('disconnected');
         $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
         return;
@@ -131,9 +131,9 @@ has _irc => sub {
           status  => 500,
           message => "Disconnected from @{[$self->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds."
         };
+        $self->_state('reconnecting');
         $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
-        $self->_state('reconnecting');
         $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
       }
     }
@@ -146,10 +146,10 @@ has _irc => sub {
         message =>
           "Connection to @{[$irc->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds. ($err)",
       };
-      $self->{stop} and return $self->_state('error');
+      $self->{stop} and return $self->_state('disconnected');
+      $self->_state('reconnecting');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
-      $self->_state('reconnecting');
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -187,7 +187,7 @@ sub new {
   $self->{convos_path}       = "user:$self->{login}:connection:convos:msg";
   $self->{conversation_path} = "user:$self->{login}:conversations";
   $self->{path}              = "user:$self->{login}:connection:$self->{name}";
-  $self->{state}             = '';
+  $self->{state}             = 'disconnected';
   $self;
 }
 
@@ -224,7 +224,6 @@ sub connect {
     }
   );
 
-  $self->_state('disconnected');
   $self->_connect;
   $self->_subscribe;
   $self;
@@ -233,9 +232,8 @@ sub connect {
 sub _state {
   my ($self, $state) = @_;
 
-  $self->redis->hset($self->{path}, state => $state);
-  $self->_publish(connection_state => {state => $state}) unless $self->{state} eq $state;
   $self->{state} = $state;
+  $self->redis->hset($self->{path}, state => $state);
 }
 
 sub _subscribe {
@@ -330,8 +328,8 @@ sub _connect {
             $self->_state('reconnecting');
           }
           else {
-            $self->_state('connected');
             $data = {status => 200, message => "Connected to IRC server"};
+            $self->_state('connected');
           }
 
           $self->_publish_and_save(server_message => $data);
@@ -375,9 +373,9 @@ sub add_server_message {
   $data->{message} = join ' ', @$params;
   $message->{command} ||= '';
 
+  $self->_state('connected');
   $self->_publish_and_save(server_message => $data);
   $self->_add_convos_message($data) if $message->{command} eq '001';
-  $self->_state('connected');
 }
 
 =head2 add_message
@@ -997,6 +995,8 @@ sub _publish {
   my $login = $self->login;
   my $name  = $self->name;
   my $message;
+
+  local $data->{state} = $self->{state};
 
   $data->{event}   = $event;
   $data->{network} = $name;

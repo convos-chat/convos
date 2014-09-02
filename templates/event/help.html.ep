@@ -1,4 +1,4 @@
-<li class="help" data-network="" data-target="" data-draw="help">
+<li class="help" data-network="" data-target="" data-event="help">
   %= image '/image/avatar-convos.png', alt => '', class => 'avatar'
   <h3>Available commands</h3>
   <div class="content">

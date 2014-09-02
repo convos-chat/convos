@@ -55,9 +55,10 @@ sub conversation {
   my $target  = $self->stash('target') || '';
   my $name    = as_id $network, $target;
   my $redis   = $self->redis;
+  my $time    = time;
 
   $self->res->headers->header('X-Is-Channel', $self->stash('is_channel') || 0);
-  $self->stash(from_archive => 0, target => $target, state => 'connected');
+  $self->stash(from_archive => 0, target => $target, state => 'connected', time => $time);
 
   $self->delay(
     sub {
@@ -83,9 +84,9 @@ sub conversation {
         $self->stash(sidebar => 'convos');
       }
       if ($last_read_time) {
-        $redis->zadd("user:$login:conversations", time, $previous_name->[0], $delay->begin)
+        $redis->zadd("user:$login:conversations", $time, $previous_name->[0], $delay->begin)
           unless $name eq $previous_name->[0];
-        $redis->zadd("user:$login:conversations", time + 0.01, $name, $delay->begin);
+        $redis->zadd("user:$login:conversations", $time + 0.01, $name, $delay->begin);
       }
     },
     sub {

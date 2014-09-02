@@ -113,11 +113,6 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 }
 
 {
-  $dom->parse($t->message_ok->message->[1]);
-  is $dom->at('div.content')->text, 'Change connection state to connected.', 'Change connection state to connected.';
-}
-
-{
   $connection->_irc->from_irc_server(":fooman!user\@host 311 doe doe john magnet * :Real name\r\n");
   $connection->_irc->from_irc_server(":fooman!user\@host 317 doe doe 7 :seconds idle\r\n");
   $connection->_irc->from_irc_server(":fooman!user\@host 319 doe doe :#other #convos\r\n");

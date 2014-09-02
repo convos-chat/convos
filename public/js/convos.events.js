@@ -10,6 +10,7 @@
   convos.on = function(name, cb) {
     if (!convos.on[name]) convos.on[name] = $.Callbacks();
     convos.on[name].add(cb);
+    return cb;
   };
 
   convos.once = function(name, cb) {
@@ -19,5 +20,11 @@
       cb.call(this, arguments);
     };
     convos.on[name].add(wrapper);
+    return cb;
+  };
+
+  convos.unsubscribe = function(name, cb) {
+    if (!convos.on[name]) return;
+    convos.on[name].remove(cb);
   };
 })(jQuery);

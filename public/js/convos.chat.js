@@ -33,7 +33,14 @@
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
-  convos.draw['channel-list'] = function($message) {
+  convos.on('channel-info', function(network, name, info) {
+    if (network != convos.current.network) return;
+    convos.current.channels = convos.current.channels || {};
+    convos.current.channels[name] = info;
+    $('div.messages ul .channel-list input').keyup();
+  });
+
+  convos.on('channel-list', function($message) {
     var $dl = $message.find('dl');
 
     // remove existing
@@ -69,13 +76,13 @@
     });
 
     // prevent jumping when filtering
-    $message.height($message.height());
+    $message.height($message.height() < 140 ? $message.height() * 5 : $message.height());
     $(window).scrollTo('bottom');
-  };
+  });
 
-  convos.draw['help'] = function($message) {
+  convos.on('help', function($message) {
     $('div.messages ul .help').each(function() { if ($message[0] != this) $(this).remove(); });
-  };
+  });
 
   convos.getNewerMessages = function(e) {
     if (e) e.preventDefault();
@@ -88,16 +95,11 @@
       $('body').removeClass('loading');
       if (!$li.length) return;
       convos.current.end_time = parseFloat($ul.data('end-time'));
+      convos.current.state = $ul.attr('data-state');
       $li.addToMessages();
     });
     convos.current.end_time = 0;
     $('body').addClass('loading');
-  };
-
-  convos.channelInfo = function(network, name, info) {
-    convos.current.channels = convos.current.channels || {};
-    convos.current.channels[name] = info;
-    $('div.messages ul .channel-list input').keyup();
   };
 
   convos.makeMessage = function(content) {
@@ -108,18 +110,17 @@
     return $m;
   };
 
-  convos.on('state', function(network, state) {
-    if (state != 'connected') return;
-    if ($('nav .conversations a[data-network="' + network + '"]').length) return;
-    convos.send('/help');
-    convos.once('idle', function() {
-      convos.send('/list');
-      convos.makeMessage('Hey, ' + convos.current.nick + '. Welcome to ' + network + '!').addToMessages();
-      convos.makeMessage('Next up is to join a channel.').addToMessages();
-      convos.makeMessage('To make this simpler for you, I\'m fetching the list of available channels. (It could take a while)').addToMessages();
-      convos.makeMessage('While you wait, try the help command: Type <b>/help</b> in the input field in the bottom on the page and hit enter. You can also use the &lt;tab> key to autocomplete commands and nicks.').addToMessages();
-      $(window).scrollTo('bottom');
-    });
+  var firstTimeConnected = convos.on('idle', function() {
+    if ($('nav .conversations a[data-network="' + convos.current.network + '"]').length) return convos.unsubscribe('idle', firstTimeConnected);
+    if (convos.current.state != 'connected') return;
+    convos.unsubscribe('idle', firstTimeConnected);
+    console.log('firstTimeConnected');
+    convos.makeMessage('Hey, ' + convos.current.nick + '. Welcome to ' + convos.current.network + '!').addToMessages();
+    convos.makeMessage('Next up is to join a channel.').addToMessages();
+    convos.makeMessage('To make this simpler for you, I\'m fetching the list of available channels. (It could take a while)').addToMessages();
+    convos.makeMessage('While you wait, try the help command: Type <b>/help</b> in the input field in the bottom on the page and hit enter. You can also use the &lt;tab> key to autocomplete commands and nicks.').addToMessages();
+    convos.send('/list');
+    $(window).scrollTo('bottom');
   });
 
   $.fn.addToMessages = function(func) { // func = {prepend,append}
@@ -230,6 +231,7 @@
       convos.current.last_read_time = parseFloat($messages.attr('data-last-read-time'));
       convos.current.nick = $messages.attr('data-nick') || '';
       convos.current.network = $messages.attr('data-network') || 'convos';
+      convos.current.state = $messages.attr('data-state');
       convos.current.target = $messages.attr('data-target') || '';
       convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
 
@@ -250,7 +252,6 @@
       if (data) $('body').hideSidebar();
 
       convos.at_bottom = true; // make convos.draw.ui scroll to bottom
-      convos.emit('state', convos.current.network, $messages.attr('data-state'));
       convos.draw.ui(e);
     });
   };

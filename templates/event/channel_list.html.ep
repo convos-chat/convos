@@ -3,7 +3,7 @@
 % my $json = Mojo::JSON::j($channels);
 % $json =~ s/</&lt;/g;
 % $json =~ s/>/&gt;/g;
-<li class="channel-list" data-network="<%= $network %>" data-target="" data-draw="channel-list">
+<li class="channel-list" data-network="<%= $network %>" data-target="" data-event="channel-list">
   <h3>Channels</h3>
   <div class="content">
     %= form_for 'connection.control', { name => $network }, method => 'post', begin

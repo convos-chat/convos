@@ -31,7 +31,8 @@
 
   var idleTimer = function() {
     if (idleTimer.t) clearTimeout(idleTimer.t);
-    idleTimer.t = setTimeout(function() { convos.emit('idle'); }, 600);
+    if (!convos.current.target) convos.getNewerMessages(); // make sure we have the newest server messages on register
+    idleTimer.t = setTimeout(function() { convos.emit('idle') }, 1500);
   };
 
   var messageFailed = function(id, description) {
@@ -70,9 +71,9 @@
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
+    var event_name = $message.attr('data-event') || 'message';
     var action = $message.attr('class').match(/^(nick|conversation)-(\w+)/);
-
-    if ($message.attr('class').match(/javascript/)) return;
+    var event_args = $message.attr('data-args');
 
     idleTimer();
     toCurrent($message);
@@ -88,14 +89,15 @@
     if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
 
     if ($message.data('to_current')) {
+      if ($message.attr('data-state')) convos.current.state = $message.attr('data-state');
       $message.addToMessages();
-      if ($message.hasClass('connection-state')) convos.emit('state', convos.current.network, $message.attr('data-state'));
     }
     else if ($message.hasClass('message')) {
       receiveOtherMessage($message);
     }
 
     if (convos.at_bottom) $(window).scrollTo('bottom');
+    convos.emit.apply(this, [event_name].concat(event_args ? $.parseJSON($('<textarea />').html(event_args).text()) : [$message]));
   };
 
   var receiveOtherMessage = function($message) {
