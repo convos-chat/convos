@@ -429,8 +429,7 @@ sub _from_cpan {
 
 sub _private_routes {
   my $self = shift;
-  my $r = $self->routes->route->bridge('/')->to('user#auth', layout => 'view');
-  my $network_r;
+  my $r = $self->routes->under('/')->to('user#auth', layout => 'view');
 
   $self->plugin('LinkEmbedder');
 
@@ -450,7 +449,7 @@ sub _private_routes {
   $r->post('/profile/timezone/offset')->to('user#tz_offset');
   $r->get('/wizard')->to('connection#wizard')->name('wizard');
 
-  $network_r = $r->route('/:network');
+  my $network_r = $r->any('/:network');
   $network_r->get('/*target' => [target => qr/[\#\&][^\x07\x2C\s]{1,50}/])->to('client#conversation', is_channel => 1)
     ->name('view');
   $network_r->get('/*target' => [target => qr/[A-Za-z_\-\[\]\\\^\{\}\|\`][A-Za-z0-9_\-\[\]\\\^\{\}\|\`]{1,15}/])
@@ -460,7 +459,7 @@ sub _private_routes {
 
 sub _public_routes {
   my $self = shift;
-  my $r = $self->routes->route->to(layout => 'tactile');
+  my $r = $self->routes->any->to(layout => 'tactile');
 
   $r->get('/')->to('client#route')->name('index');
   $r->get('/avatar')->to('user#avatar')->name('avatar');
