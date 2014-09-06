@@ -14,6 +14,6 @@
   </li>
   <li class="message network same-nick" data-network="<%= $network %>" data-target="">
     %= timestamp
-    <div class="content">Connection state is <%= param('state') || 'disconnected' %>.</div>
+    <div class="content">The connection is <%= param('state') || 'disconnected' %>.</div>
   </li>
 </ul>

@@ -115,10 +115,10 @@
     if (convos.current.state != 'connected') return;
     convos.unsubscribe('idle', firstTimeConnected);
     console.log('firstTimeConnected');
-    convos.makeMessage('Hey, ' + convos.current.nick + '. Welcome to ' + convos.current.network + '!').addToMessages();
-    convos.makeMessage('Next up is to join a channel.').addToMessages();
-    convos.makeMessage('To make this simpler for you, I\'m fetching the list of available channels. (It could take a while)').addToMessages();
-    convos.makeMessage('While you wait, try the help command: Type <b>/help</b> in the input field in the bottom on the page and hit enter. You can also use the &lt;tab> key to autocomplete commands and nicks.').addToMessages();
+    convos.makeMessage('Hi ' + convos.current.nick + '. You are now connected to ' + convos.current.network + '.').addToMessages();
+    convos.makeMessage('Already know what channel you want to go to? Press shift+enter or click the list icon next to the bell in the top menu, enter the channel name and click "Join" to add it to your connection.').addToMessages();
+    convos.makeMessage('Otherwise, please hold on while I try to fetch the server channel list for you. (It could take a while)').addToMessages();
+    convos.makeMessage('While you wait, try the help command: Type <b>/help</b> in the input field at the bottom on the page and hit enter. You can also use the &lt;tab> key to get suggestions for commands and nicks.').addToMessages();
     convos.send('/list');
     $(window).scrollTo('bottom');
   });

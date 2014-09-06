@@ -4,17 +4,17 @@
 % $json =~ s/</&lt;/g;
 % $json =~ s/>/&gt;/g;
 <li class="channel-list" data-network="<%= $network %>" data-target="" data-event="channel-list">
-  <h3>Channels</h3>
+  <h3>Server Channel List</h3>
   <div class="content">
     %= form_for 'connection.control', { name => $network }, method => 'post', begin
-      %= text_field 'goto', autocomplete => 'off', placeholder => 'Filter channel list', autocorrect => 'off', autocapitalize => 'off'
+      %= text_field 'goto', autocomplete => 'off', placeholder => 'Type to search', autocorrect => 'off', autocapitalize => 'off'
       <dl>
       % for my $name (@names) {
         % last if ++$i > 10;
         % my $info = $channels->{$name};
         %# Note: $name is lc($info->{name})
         <dt><%= link_to $info->{name}, "cmd:///join $name" %> (<%= $info->{visible} || 0 %>)</dt>
-        <dd title="<%= $info->{title} %>"><%= $info->{not_found} ? 'Channel does not exist' : $info->{title} || 'No topic' %></dd>
+        <dd title="<%= $info->{title} %>"><%= $info->{not_found} ? 'Channel not found in list' : $info->{title} || 'No topic' %></dd>
       % }
       </dl>
     % end

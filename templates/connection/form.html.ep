@@ -16,8 +16,8 @@
     <p class="error">Invalid server name.</p>
     % }
     <p class="help">
-      Add ":port" after the server name to force a port other than 6667.
-      <br>Convos will autodetect if it is a <abbr title="By checking for TLS/SSL support">secure</abbr> port.
+      Add ":port" after the server name to use a port other than 6667.
+      <br>Convos automatically supports <abbr title="By checking for TLS/SSL support">secure</abbr> connections.
     </p>
   </div>
   <div class="form-group password">
@@ -32,7 +32,7 @@
     <button type="submit">Update connection</button>
   % } elsif (stash 'wizard') {
     %= hidden_field wizard => 1
-    <button type="submit">Start chatting</button>
+    <button type="submit">Connect</button>
   % } else {
     <button type="submit">Add connection</button>
   % }
