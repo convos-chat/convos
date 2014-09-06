@@ -764,6 +764,12 @@ function cachePush(id, value) {
 //
 // Returns nothing.
 function cachePop(direction, id, value) {
+
+  // disable caching
+  if (!$.pjax.defaults.maxCacheLength) {
+    return;
+  }
+
   var pushStack, popStack
   cacheMapping[id] = value
 
