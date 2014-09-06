@@ -11,8 +11,8 @@ use File::Spec::Functions 'catfile';
 use Time::Piece ();
 
 my $ts          = Time::Piece->new;
-my $channel_log = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), '#mojo', $ts->strftime('%y-%m-%d.log');
-my $server_log  = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), 'server', $ts->strftime('%y-%m-%d.log');
+my $channel_log = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), '#mojo', $ts->strftime('%y/%m/%d.log');
+my $server_log  = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), $ts->strftime('%y/%m/%d.log');
 
 
 redis_do(

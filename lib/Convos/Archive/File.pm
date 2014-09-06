@@ -38,12 +38,13 @@ sub save {
   my ($self, $conn, $message) = @_;
   my $ts = Time::Piece->new($message->{timestamp});
 
-  # /username/connection/convo/
-  my $path = catdir($self->log_dir, $conn->login, $conn->name, $message->{target} || 'server');
+  my @base = ($self->log_dir, $conn->login, $conn->name);
+  push @base, $message->{target} if $message->{target};
+  push @base, $ts->strftime('%y'), $ts->strftime('%m');
+  my $path = catdir(@base);
   make_path $path unless $self->{paths}{$path}++;
 
-  # /username/connection/convo/{yyyy}-{mm}-{dd}.log
-  $path = catfile $path, $ts->strftime('%y-%m-%d.log');
+  $path = catfile $path, $ts->strftime('%d.log');
   open my $FH, '>>', $path or die "Cannot write to $path: $!";
   printf {$FH} "%s :%s!%s@%s %s\n", $ts->hms, map { $_ // '' } @{$message}{qw(nick user host message)};
   close $FH or die "Cannot close $path: $!";
