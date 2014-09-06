@@ -193,11 +193,14 @@ sub _add_connection {
     sub {
       my ($delay) = @_;
       $self->app->core->add_connection($validation, $delay->begin);
+      $self->notification_list($delay->begin) if $self->stash('full_page');
+      $self->conversation_list($delay->begin);
     },
     sub {
       my ($delay, $errors, $conn) = @_;
 
       return $self->redirect_to('view.network', network => $conn->{name} || 'convos') unless $errors;
+      warn "Got " . Data::Dumper::Dumper($errors);
       return $self->param('wizard') ? $self->wizard : $self->render;
     },
   );

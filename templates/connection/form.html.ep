@@ -15,6 +15,9 @@
     % if ($err = validation->error('server')) {
     <p class="error">Invalid server name.</p>
     % }
+    % if ($err = validation->error('name') ) {
+    <p class="error">You already have a connection to that server.</p>
+    %}
     <p class="help">
       Add ":port" after the server name to use a port other than 6667.
       <br>Convos automatically supports <abbr title="By checking for TLS/SSL support">secure</abbr> connections.
