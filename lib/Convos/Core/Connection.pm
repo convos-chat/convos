@@ -82,7 +82,7 @@ Holds a L<Mojo::Redis> object.
 has name  => '';
 has log   => sub { Mojo::Log->new };
 has login => 0;
-has redis => sub { die 'redis connection required' };
+has redis => sub { die 'redis connection required in constructor' };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg ctcp_action /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/

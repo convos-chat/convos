@@ -46,7 +46,7 @@ Holds a L<Mojo::Redis> object.
 
 has archive => sub { require Convos::Archive::File; Convos::Archive::File->new; };
 has log     => sub { Mojo::Log->new };
-has redis   => sub { Mojo::Redis->new };
+has redis   => sub { die 'redis connection required in constructor' };
 
 =head1 METHODS
 

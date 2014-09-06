@@ -283,10 +283,9 @@ Holds a L<Convos::Upgrader> object.
 
 has core => sub {
   my $self = shift;
-  my $core = Convos::Core->new;
+  my $core = Convos::Core->new(redis => $self->redis);
 
   $core->log($self->log);
-  $core->redis->server($self->redis->server);
 
   if ($ENV{CONVOS_ELASTICSEARCH_URL}) {
     require Convos::Archive::ElasticSearch;

@@ -32,7 +32,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 }
 
 {
-  $t->websocket_ok('/socket');
+  $t->websocket_ok('/socket')->send_ok('PING')->message_ok->message_is('PONG');    # make sure we are subscribing
   $connection->_irc->from_irc_server(
     ":magnet.llarian.net 353 doe = #convos :fooman {special} \@woman +man [special]\r\n");
   $connection->_irc->from_irc_server(":magnet.llarian.net 366 doe #convos :End of /NAMES list.\r\n");
