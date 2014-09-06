@@ -1,4 +1,8 @@
-BEGIN { $ENV{MOJO_IRC_OFFLINE} = 1 }
+BEGIN {
+  $ENV{MOJO_IRC_OFFLINE} = 1;
+  use File::Temp qw/tempdir/;
+  $ENV{CONVOS_ARCHIVE_DIR} = tempdir;
+}
 use utf8;
 use t::Helper;
 use Mojo::JSON;
@@ -7,7 +11,7 @@ use File::Spec::Functions 'catfile';
 use Time::Piece ();
 
 my $ts = Time::Piece->new;
-my $log = catfile qw( irc_logs_test doe magnet ), $ts->year, $ts->strftime('%m-%d.log');
+my $log = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), '#mojo', $ts->strftime('%y-%m-%d.log');
 
 unlink $log;
 
@@ -268,8 +272,7 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
 }
 
 $log = Mojo::Util::slurp($log);
-is int scalar(() = $log =~ /\n/g), 14, 'lines in log file';
+is int scalar(() = $log =~ /\n/g), 10, 'lines in log file';
 like $log, qr{^\d+:\d+:\d+ :fooman\!user\@host http://convos\.by is really cool}m, 'log is really cool';
 
 done_testing;
-
