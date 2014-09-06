@@ -6,6 +6,28 @@ use lib "$FindBin::Bin/../lib";
 
 $ENV{MOJO_MODE} ||= 'production' if @ARGV and grep { $_ eq $ARGV[0] } qw( backend daemon upgrade version );
 
+#
+# Prefixing CONVOS_REDIS_URL with "test" will automatically set development
+# environment variables. Example:
+# $ CONVOS_REDIS_URL=test morbo script/convos --listen http://*:5000
+# $ CONVOS_REDIS_URL=test script/convos backend
+#
+# Or with a custom redis server:
+# $ CONVOS_REDIS_URL=test://localhost/3 morbo script/convos
+#
+if ($ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)?,,) {
+  $ENV{CONVOS_DEBUG} //= 1;
+  $ENV{CONVOS_REDIS_URL} ||= 'localhost/13';
+  $ENV{MOJO_IRC_DEBUG} //= 1;
+  $ENV{MOJO_LOG_LEVEL} ||= 'debug';
+  $ENV{MOJO_REDIS_DEBUG} //= 1;
+
+  if (@ARGV and $ARGV[0] ne 'backend') {
+    $ENV{CONVOS_MANUAL_BACKEND}   //= 1;
+    $ENV{MOJO_ASSETPACK_NO_CACHE} //= 1;
+  }
+}
+
 # Start commands for application
 require Mojolicious::Commands;
 require Convos;
