@@ -10,10 +10,10 @@ use Mojo::DOM;
 use File::Spec::Functions 'catfile';
 use Time::Piece ();
 
-my $ts = Time::Piece->new;
-my $log = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), '#mojo', $ts->strftime('%y-%m-%d.log');
+my $ts          = Time::Piece->new;
+my $channel_log = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), '#mojo', $ts->strftime('%y-%m-%d.log');
+my $server_log  = catfile $ENV{CONVOS_ARCHIVE_DIR}, qw( doe magnet ), 'server', $ts->strftime('%y-%m-%d.log');
 
-unlink $log;
 
 redis_do(
   [hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => ''],
@@ -271,8 +271,11 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
     '<a href="http://perl.org" target="_blank">http://perl.org</a> https://github.<a href="https://github.com/jhthorsen" target="_blank">https://github.com/jhthorsen</a> yay!';
 }
 
-$log = Mojo::Util::slurp($log);
-is int scalar(() = $log =~ /\n/g), 10, 'lines in log file';
+my $log = Mojo::Util::slurp($channel_log);
+is int scalar(() = $log =~ /\n/g), 10, 'lines in channel log file';
 like $log, qr{^\d+:\d+:\d+ :fooman\!user\@host http://convos\.by is really cool}m, 'log is really cool';
+$log = Mojo::Util::slurp($server_log);
+is int scalar(() = $log =~ /\n/g), 4, 'lines in server log file';
+like $log, qr{Your host is Tampa.FL.US.Undernet.org};
 
 done_testing;
