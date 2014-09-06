@@ -38,11 +38,11 @@ sub save {
   my ($self, $conn, $message) = @_;
   my $ts = Time::Piece->new($message->{timestamp});
 
-  # /username/freenode/2014/
+  # /username/connection/convo/
   my $path = catdir($self->log_dir, $conn->login, $conn->name, $message->{target} || 'server');
   make_path $path unless $self->{paths}{$path}++;
 
-  # /username/freenode/2014/{01..12}-{01..31}.log
+  # /username/connection/convo/{yyyy}-{mm}-{dd}.log
   $path = catfile $path, $ts->strftime('%y-%m-%d.log');
   open my $FH, '>>', $path or die "Cannot write to $path: $!";
   printf {$FH} "%s :%s!%s@%s %s\n", $ts->hms, map { $_ // '' } @{$message}{qw(nick user host message)};
