@@ -318,13 +318,15 @@ sub _connect {
             # SSL connect attempt failed with unknown error
             # error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
             if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
+              $data = {status => 400, message => "This IRC network does not support SSL/TLS."};
               $self->{disable_tls} = 1;
               $self->_connect;
             }
             else {
+              $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
               $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
             }
-            $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
+
             $self->_state('reconnecting');
           }
           else {

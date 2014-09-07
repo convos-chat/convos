@@ -25,7 +25,7 @@ $t->get_ok('/wizard')->status_is(200)->text_is('title', 'Nordaaker - Add connect
   ->element_exists('form[action="/connection/add"][method="post"]')
   ->element_exists('input[name="nick"][id="nick"][value="fooman"]')
   ->element_exists('input[name="server"][id="server"][value="irc.perl.org:7062"]')
-  ->element_exists('input[type="hidden"][name="wizard"][value="1"]')->text_is('form button', 'Start chatting');
+  ->element_exists('input[type="hidden"][name="wizard"][value="1"]')->text_is('form button', 'Connect');
 
 $form = {wizard => 1, server => '', nick => ''};
 $t->post_ok('/connection/add', form => $form)->status_is(200)->element_exists('div.nick > .error')
