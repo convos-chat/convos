@@ -10,7 +10,7 @@
     </li>
     % }
     % unless(@$notification_list) {
-    <li class="center"><h3>No notifications</h3></li>
+    <li class="center"><h3>No Notifications</h3></li>
     % }
   </ul>
 </div>

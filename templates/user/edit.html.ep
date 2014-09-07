@@ -2,7 +2,7 @@
 % stash sidebar => 'convos';
 <ul>
   <li class="with-padding">
-    <h2>Edit profile</h2>
+    <h2>Edit Profile</h2>
     % my $err;
     %= form_for 'user.edit', method => 'post', class => 'horizontal', 'data-draw' => 'profile', begin
       <div class="form-group email">

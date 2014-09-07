@@ -2,7 +2,7 @@
 % stash sidebar => 'convos';
 <ul>
   <li class="with-padding">
-    <h2>Add connection</h2>
+    <h2>Add Connection</h2>
     %= include 'connection/form', wizard => 0
   </li>
 </ul>
