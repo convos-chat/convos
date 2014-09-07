@@ -200,7 +200,6 @@ sub _add_connection {
       my ($delay, $errors, $conn) = @_;
 
       return $self->redirect_to('view.network', network => $conn->{name} || 'convos') unless $errors;
-      warn "Got " . Data::Dumper::Dumper($errors);
       return $self->param('wizard') ? $self->wizard : $self->render;
     },
   );
