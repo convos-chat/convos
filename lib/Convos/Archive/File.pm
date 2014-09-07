@@ -34,9 +34,11 @@ See L<Convos::Archive/save>.
 
 =cut
 
+use Time::Piece qw/gmtime/;
+
 sub save {
   my ($self, $conn, $message) = @_;
-  my $ts = Time::Piece->new($message->{timestamp});
+  my $ts = gmtime($message->{timestamp});
 
   my @base = ($self->log_dir, $conn->login, $conn->name);
   push @base, $message->{target} if $message->{target};
