@@ -205,10 +205,13 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       Pod::Simple 3.09
-  Mojolicious-Plugin-AssetPack-0.22
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.22.tar.gz
+  Mojolicious-Plugin-AssetPack-0.23
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.23.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.22
+      Mojolicious::Plugin::AssetPack 0.23
+      Mojolicious::Plugin::AssetPack::Preprocessor undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::Sass undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::Scss undef
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
     requirements:
       CSS::Minifier::XS 0.01
