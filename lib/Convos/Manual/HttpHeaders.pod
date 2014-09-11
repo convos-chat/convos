@@ -1,0 +1,43 @@
+=head1 NAME
+
+Convos::Manual::HttpHeaders - HTTP headers for Convos
+
+=head1 HTTP HEADERS
+
+Convos acts on the following HTTP headers, set in a reverse proxy.
+
+=head2 X-Request-Base
+
+Set this header if you are mounting Convos under a custom path. Example
+with nginx:
+
+  # mount the application under /convos
+  location /convos {
+    # remove "/convos" from the forwarded request
+    rewrite ^/convos(.*)$ $1 break;
+
+    # generic headers for correct handling of ws and http
+    proxy_http_version 1.1;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Host $host;
+
+    # set this if you are running SSL
+    proxy_set_header X-Forwarded-HTTPS 1;
+
+    # inform Convos the full location where it is mounted
+    proxy_set_header X-Request-Base "https://some-domain.com/convos";
+
+    # tell nginx where Convos is running
+    proxy_pass http://10.0.0.10:8080;
+  }
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+Marcus Ramberg - C<marcus@nordaaker.com>
+
+=cut
