@@ -74,15 +74,18 @@ Try adding "-h" at the end for command line options.
 Running it with `hypnotoad` will start a full featured, UNIX optimized, preforking
 non-blocking webserver. Run the same command again, and the webserver will hot
 reload the source code without losing any connections. By default it will
-listen to `http://*:8080/` but you can easily configure this in convos.conf - It
-can even serve HTTPS directly.
+listen to `http://*:8080/` but you can easily change this using
+[environment variables](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Manual/Environment.pod#MOJO_LISTEN).
 
-See also the
-[Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT)
-for production deployment.
+See also:
+
+* [Environment variables](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Manual/Environment.pod)
+  for configuration
+* [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT)
+  for production deployment.
 
 For convenience, we include a Dockerfile so you can build a Docker image
-easily if you want a custom config, or  pull our image directly from the
+easily if you want a custom config, or pull our image directly from the
 [docker index](https://index.docker.io/u/nordaaker/convos/).
 
 If you are interested in deploying Convos on Digital Ocean, you should follow
