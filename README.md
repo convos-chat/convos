@@ -50,6 +50,13 @@ Copy/paste this to the command line:
 Then just follow the instructions. If you're worried about running a script
 directly from a web server, just download it and inspect it before you run it.
 
+It's also possible to run Convos from a checked out git repo:
+
+    $ git clone https://github.com/Nordaaker/convos.git
+    $ cd convos
+    $ ./vendor/bin/carton install
+    $ ./vendor/bin/carton exec script/convos daemon --listen http://*:8080
+
 ## Running convos in production
 
 You can either run convos as a single process or a in a preforked environment.
