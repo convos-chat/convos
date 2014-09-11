@@ -35,10 +35,11 @@ link to view the data.
 
 ## Installation
 
-Convos requires a Redis server to function. If you are deploying on osx you
-can use homebrew, or if you are on ubuntu or similar install redis-server
-using apt-get. Note that we require Redis 2.6+. If your distro version is too
-old, you can easily build redis from source.
+Convos requires a [Redis](http://redis.io/) server to function. If you are
+deploying on OSX you can use [homebrew](http://brew.sh/), or if you are on
+Ubuntu or similar install Redis using `apt-get install redis-server`. Note
+that we require Redis 2.6+. If your distro version is too old, you can easily
+build Redis from [source](http://redis.io/download).
 
 To install convos we provide a simple script. All it requires in addition to
 redis is a working build environment with make, Perl and a C compiler.
@@ -46,9 +47,8 @@ Copy/paste this to the command line:
 
     $ curl -L https://convos.by/install.sh | bash -
 
-Then just follow the simple instructions. If you're worried about running a
-script directly from a web server, just download it and inspect it before you
-run it.
+Then just follow the instructions. If you're worried about running a script
+directly from a web server, just download it and inspect it before you run it.
 
 ## Running convos in production
 
