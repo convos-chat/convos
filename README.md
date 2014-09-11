@@ -1,13 +1,10 @@
 ![Convos](http://convos.by/images/logo.png)
 
-Convos is the simplest way to use IRC. It is always online, and accessible to your web browser, both on desktop and mobile. Run in on your home server, or cloud service easily. It can be deployed to Heroku or Docker-based cloud services, or you can just run it as a normal Mojolicious application, using any of the Deployment Guides.
+Convos is the simplest way to use IRC. It is always online, and accessible to your web browser, both on desktop and mobile. Run in on your home server, or cloud service easily. It can be deployed to Docker-based cloud services, or you can just run it as a normal Mojolicious application, using any of the Deployment Guides.
 
 ![Screenshot](http://convos.by/images/screenshot.png)
 
-You can check out our [live demo](http://demo.convos.by) or deploy it directly
-on Heroku.
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+We got a [live demo](http://demo.convos.by) that is free to try.
 
 ## Features
 #### Always online
@@ -83,5 +80,3 @@ Marcus Ramberg - marcus@nordaaker.com
 Copyright (C) 2012-2014, Nordaaker.
 
 This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version 2.0.
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
