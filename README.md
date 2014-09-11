@@ -119,6 +119,10 @@ Marcus Ramberg - marcus@nordaaker.com
 
 ## Copyright & License
 
+The [Robot images](https://raw.githubusercontent.com/Nordaaker/convos/master/public/image/avatar-convos.png)
+are delivered by
+[Robohash.org](http://robohash.org/convos.by) under the CC-BY license.
+
 Copyright (C) 2012-2014, Nordaaker.
 
 This program is free software, you can redistribute it and/or modify it under
