@@ -5,7 +5,7 @@ html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquot
 article, aside, figure, footer, header, hgroup, nav, section, details, summary { display: block; }
 ul { list-style: none; }
 a { margin: 0; padding: 0; vertical-align: baseline; background: transparent; }
-abbr[title], dfn[title] { border-bottom: 1px dotted #000; cursor: help; }
+abbr[title], dfn[title] { border-bottom: 1px dotted darker($fontColor, 10%); cursor: help; }
 table { border-collapse: collapse; border-spacing: 0; }
 th { font-weight: bold; vertical-align: bottom; }
 td { font-weight: normal; vertical-align: top; }
@@ -23,7 +23,7 @@ button { width: auto; overflow: visible; }
 body { background-color: $backgroundColor; font-size: $fontSize; font-family: $fontFamily; -webkit-text-size-adjust: none; }
 body, select, input, textarea { color: $fontColor; }
 a, a:active { color: $linkColor; }
-a:hover { color: darken($linkColor, 20%); }
-input:-moz-placeholder { color: lighten($fontColor, 30%); }
-textarea:-moz-placeholder { color: lighten($fontColor, 30%); }
-li.separator { background: #eee; height: 1px; overflow: hidden; }
+a:hover { color: darker($linkColor, 20%); }
+input:-moz-placeholder { color: lighter($fontColor, 30%); }
+textarea:-moz-placeholder { color: lighter($fontColor, 30%); }
+li.separator { background: darker($backgroundColor, 7%); height: 1px; overflow: hidden; }

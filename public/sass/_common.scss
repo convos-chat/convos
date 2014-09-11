@@ -11,7 +11,7 @@ div.notification.question {
 
 hr {
   border: none;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid darker($backgroundColor, 15%);
   line-height: 1px;
   height: 1px;
   margin-top: 1em;

@@ -1,23 +1,26 @@
-$backgroundColor: #fff;
 $fontFamily: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+$backgroundColor: #fff;
+$sidebarBackground: #f4f4f4;
 $fontColor: #333;
 $linkColor: #00451f;
-$fontSize: 15px;
+$errorColor: #d5000d;
+$borderColor: #eee;
+$infoBackground: #def;
+$iconMuted: $borderColor;
+$buttonBorderHover: 2px solid darker($backgroundColor, 70%);
+$mentionsBackground: lighter($errorColor, 20%);
+
 $bodyGutter: 20px;
 $bodyGutterSmall: 6px;
-$navHeight: 42px;
-$footerHeight: 50px;
-$responsiveWidth: 700px;
 $columnWidth: 8.333333%;
+$fontSize: 15px;
+$footerHeight: 50px;
 $navBarIconWidth: 32px;
-$buttonBorderHover: 2px solid darken(#fff, 70%);
-$nickListWidth: 180px;
 $navBarZindex: 999;
-$errorColor: #d5000d;
-
-$sidebarBackground: #f4f4f4;
+$navHeight: 42px;
+$nickListWidth: 180px;
+$responsiveWidth: 700px;
 $selectizeOptionPadding: 4px 8px;
 
 $FontAwesomePath: "../font";
-$borderColor: #eee;
-$iconMuted: #eee;

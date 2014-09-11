@@ -42,3 +42,19 @@
     width: 100%;
   }
 }
+
+@function darker($property, $value) {
+  @if lightness($backgroundColor) > lightness($fontColor) {
+    @return darken($property, $value);
+  } @else {
+    @return lighten($property, $value);
+  }
+}
+
+@function lighter($property, $value) {
+  @if lightness($backgroundColor) > lightness($fontColor) {
+    @return lighten($property, $value);
+  } @else {
+    @return darken($property, $value);
+  }
+}

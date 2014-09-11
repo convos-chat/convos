@@ -1,3 +1,5 @@
+$navBoxShadow: rgba(darker($backgroundColor, 30%), 0.5);
+
 body.loading {
   div.messages { @include opacity(0.4); }
 }
@@ -18,12 +20,12 @@ nav.bar {
   height: $navHeight;
   z-index: $navBarZindex;
   overflow: hidden;
-  @include box-shadow(0 4px 4px -2px rgba(180,180,180,.5));
+  @include box-shadow(0 4px 4px -2px $navBoxShadow);
 
   img { vertical-align: middle; }
 
   a, a:active {
-    color: #000;
+    color: darker($fontColor, 10%);
     text-decoration: none;
     padding: 0 4px;
     height: $navHeight;
@@ -35,8 +37,8 @@ nav.bar {
 
   a b { bottom: 1px; }
 
-  a.conversation { color: #666; }
-  a.conversations.overlapping { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
+  a.conversation { color: lighter($fontColor, 15%); }
+  a.conversations.overlapping { @include box-shadow(-2px 0px 4px 0px rgba(darker($backgroundColor, 20%), 0.28)); }
   ul.conversations { height: $navHeight; }
 
   .right {
@@ -47,7 +49,7 @@ nav.bar {
     a, a:active { font-size: 1.2em; width: 2em; text-align: center; }
   }
 
-  a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
+  a:hover, a:active { background-color: darker($backgroundColor, 15%); color: darker($fontColor, 20%); }
 
   @media (max-width: $responsiveWidth) {
     .right { right: 0; }
@@ -56,21 +58,21 @@ nav.bar {
 }
 
 form.input {
-  background: #fff;
+  background: $backgroundColor;
   position: fixed;
   bottom: 0;
   left: 0;
   right: $nickListWidth;
   padding-bottom: 2px;
 
-  input { background: #fafafa; width: 100%; padding: 8px; font-size: $fontSize + 1; }
-  input.disabled, input[disabled] { background-color: #eee; }
+  input { background: darker($backgroundColor, 2%); width: 100%; padding: 8px; font-size: $fontSize + 1; }
+  input.disabled, input[disabled] { background-color: darker($backgroundColor, 7%); }
 
   @media (max-width: $responsiveWidth) {
     & { right: 0; }
     input {
       border: 0;
-      border-top: 2px solid darken(#fff, 40%);
+      border-top: 2px solid darker($backgroundColor, 20%);
       @include border-radius(0);
     }
   }
@@ -78,8 +80,8 @@ form.input {
 
 // unread messages count
 nav.bar a b, form.conversations b {
-  background: #e5e5e5;
-  color: #888;
+  background: darker($sidebarBackground, 10%);
+  color: darker($sidebarBackground, 20%);
   font-size: 12px;
   line-height: 14px;
   font-weight: normal;
@@ -90,8 +92,8 @@ nav.bar a b, form.conversations b {
 }
 
 nav.bar a.mention b, form.conversations a.mention b {
-  background: #d53;
-  color: #fff;
+  background: $mentionsBackground;
+  color: $backgroundColor;
 }
 
 div.messages {
@@ -109,18 +111,18 @@ div.messages {
 
     div.question { padding-left: 50px; }
     img.avatar, i.avatar { float: left; max-width: 40px; font-size: 40px; }
-    h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
+    h3 { font-size: 1em; color: $linkColor; line-height: 1.2em; margin: 0; }
     h3, div.content, div.embed { margin-left: 50px; }
     div.content { max-width: 40em; line-height:1.4em; }
     div.whitespace {  white-space: pre-wrap; }
     div.embed {
-      img { max-height: 220px; border: 2px solid #bbb; @include border-radius(20px); margin: 8px 0; }
+      img { max-height: 220px; border: 2px solid darker($backgroundColor, 30%); @include border-radius(20px); margin: 8px 0; }
     }
     div.timestamp {
       float: right;
       height: 16px;
       overflow: visible;
-      color: #999;
+      color: darker($backgroundColor, 20%);
       font-size: .85em;
     }
     span.actions {
@@ -134,12 +136,12 @@ div.messages {
 
   li.help {
     dt { float: left; width: auto; padding-right: 5px; }
-    dd { color: #666; margin: 0; }
+    dd { color: darker($backgroundColor, 50%); margin: 0; }
     dd:before { content: '- '; }
   }
 
   li.history-starting-point {
-    border-top: 2px dotted #eaa;
+    border-top: 2px dotted lighter($errorColor, 30%);
   }
 
   li.same-nick {
@@ -147,21 +149,21 @@ div.messages {
     h3, .avatar { display: none; }
   }
 
-  li.message.channel.highlight { background: #fee; }
+  li.message.channel.highlight { background: lighter($errorColor, 20%); }
   li.message.action div.content { padding-top: $bodyGutter; }
   li.message.action.same-nick div.content { padding-top: 0; }
   li.message.action div.content a { font-weight: normal; text-decoration: none; }
-  li.message.pending div.content { color: #888; }
-  li.message.pending h3 { color: #ccc; }
+  li.message.pending div.content { color: darker($backgroundColor, 45%); }
+  li.message.pending h3 { color: darker($backgroundColor, 30%); }
   li.message.error {
-    background: lighten($errorColor, 40%);
-    div.timestamp { color: #fee; }
-    h3 { color: #333; }
+    background: lighter($errorColor, 40%);
+    div.timestamp { color: darker($backgroundColor, 10%); }
+    h3 { color: $fontColor; }
   }
   li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
-    color: #999;
+    color: darker($backgroundColor, 40%);
     padding-top: 2px;
-    a { color: #999; }
+    a { color: darker($backgroundColor, 40%); }
   }
   li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
@@ -176,7 +178,7 @@ div.messages {
 form.sidebar-right,
 div.sidebar-right {
   background: $sidebarBackground;
-  color: #333333;
+  color: $fontColor;
   display: none;
   position: fixed;
   top: $navHeight;
@@ -185,9 +187,9 @@ div.sidebar-right {
   overflow: auto;
   width: $nickListWidth;
   padding-bottom: 20px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid darker($backgroundColor, 10%);
   z-index: 2;
-  @include box-shadow(-2px 2px 4px rgba(180,180,180,.5));
+  @include box-shadow(-2px 2px 4px $navBoxShadow);
 
   -webkit-overflow-scrolling: touch;
 
@@ -207,11 +209,11 @@ div.sidebar-right {
   hr { margin: $selectizeOptionPadding; padding: 0; }
 
   a:hover, a:focus, button.link:hover, button.link:focus {
-    background-color: darken(#eee, 5%);
-    color: #000;
+    background-color: darker($backgroundColor, 15%);
+    color: darker($fontColor, 20%);
   }
 
-  a:focus { outline: 1px solid #ccc; }
+  a:focus { outline: 1px solid darker($backgroundColor, 30%); }
 
   h3 { font-size: 1em; margin: 0; };
   h3, a, div.form-group {
@@ -233,10 +235,10 @@ div.sidebar-right {
 div.notification-list {
   width: 270px;
 
-  a { padding: 2px 8px; color: #666; }
+  a { padding: 2px 8px; color: darker($backgroundColor, 50%); }
   a span.message { font-size: 0.9em; padding: 0; @include ellipsis(); }
-  li.unread a { background-color: rgba(204, 100, 40, 0.18); color: #000; }
-  li.unread a:focus, li.unread a:hover { background-color: rgba(204, 100, 40, 0.10); }
+  li.unread a { background-color: rgba($errorColor, 0.18); color: darker($fontColor, 10%); }
+  li.unread a:focus, li.unread a:hover { background-color: rgba($errorColor, 0.10); }
 }
 
 form.conversations {
@@ -244,17 +246,17 @@ form.conversations {
   a { position: relative; }
   a b { top: 9px; }
   .create { display: none; }
-  .howto { padding: 1em 0; color: #666; font-size: 0.9em; }
+  .howto { padding: 1em 0; color: darker($backgroundColor, 50%); font-size: 0.9em; }
 }
 
 @media (min-width: $responsiveWidth) {
   form.sidebar {
-    background: #f8f8f8;
+    background: darker($backgroundColor, 3%);
     display: block !important;
     right: 0 !important;
-    border-left: 1px solid #ddd;
+    border-left: 1px solid darker($backgroundColor, 15%);
     z-index: $navBarZindex - 10;
-    @include box-shadow(1px 0 1px 0 rgba(255,255,255,1));
+    @include box-shadow(1px 0 1px 0 darker($backgroundColor, 2%));
   }
 }
 
