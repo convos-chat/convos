@@ -52,16 +52,23 @@ directly from a web server, just download it and inspect it before you run it.
 
 ## Running convos in production
 
-morbo is an excellent tool for testing, but hypnotoad should be used to run
-Convos in production:
+You can either run convos as a single process or a in a preforked environment.
+The single process is the simplest to maintain, but preforked is perfect when
+you need to scale.
 
+    # single process
+    $ ./vendor/bin/carton exec script/convos daemon
+
+    # prefork
     $ ./vendor/bin/carton exec hypnotoad script/convos
 
-The command above will start a full featured, UNIX optimized, preforking
+Try adding "-h" at the end for command line options.
+
+Running it with `hypnotoad` will start a full featured, UNIX optimized, preforking
 non-blocking webserver. Run the same command again, and the webserver will hot
 reload the source code without losing any connections. By default it will
 listen to `http://*:8080/` but you can easily configure this in convos.conf - It
-can even serve HTTPS directly if you install IO::Socket::SSL from CPAN.
+can even serve HTTPS directly.
 
 See also the
 [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT)
