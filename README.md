@@ -74,7 +74,7 @@ See also the
 [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT)
 for production deployment.
 
-For convenience, we also include a Dockerfile so you can build a Docker image
+For convenience, we include a Dockerfile so you can build a Docker image
 easily if you want a custom config, or  pull our image directly from the
 [docker index](https://index.docker.io/u/nordaaker/convos/).
 
@@ -84,16 +84,6 @@ If you are interested in deploying Convos on Digital Ocean, you should follow
 Note: By default Convos will use the Mojo IOLoop, which is pure perl. In
 production you might want to install [EV](https://metacpan.org/release/EV) -
 we automatically use it if it is installed, and it performs much better.
-
-### Running the backend separately.
-
-In production setups, you might want to start the backend separately from the
-web application, for various reasons. To do so, just turn off the 'embedded'
-flag in the backend section of the convos.conf file. The just start it up
-separately:
-
-    # Start up the backend
-    $ ./vendor/bin/carton exec script/convos backend &
 
 ## Upgrading Convos
 
