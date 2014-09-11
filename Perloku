@@ -1,3 +1,0 @@
-#!/bin/sh
-# Script for starting Convos on Heroku using https://github.com/judofyr/perloku.git
-./vendor/bin/carton exec script/convos daemon --listen http://*:$PORT --mode production
