@@ -211,6 +211,7 @@
   };
 
   var initPjax = function() {
+    $.pjax.defaults.maxCacheLength = 0; // Will refresh conversation when going back/forward, fixes #111
     $(document).on('pjax:timeout', function(e) { e.preventDefault(); });
     $(document).pjax('nav ul a', 'div.messages', { fragment: 'div.messages' });
     $(document).pjax('.sidebar-right a', 'div.messages', { fragment: 'div.messages' });
