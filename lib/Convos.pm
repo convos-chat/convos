@@ -153,13 +153,19 @@ use Convos::Upgrader;
 our $VERSION = '0.83';
 
 <<<< <<< HEAD
+<<<< <<< HEAD
 $ENV{CONVOS_DEFAULT_CONNECTION} //= 'irc.perl.org:7062';
 
 =======
 >>>>>>> master
 =head1 ATTRIBUTES
 
-  = head2 core
+  = head2 core == == == =
+
+=head1 ATTRIBUTES
+
+=head2 core
+>>>>>>> master
 
   Holds a L <Convos::Core> object .
 
@@ -169,27 +175,31 @@ Holds a L<Convos::Upgrader> object.
 
 =cut
 
+  <<<< <<< HEAD
   has core => sub {
+=======
+has core => sub {
+>>>>>>> master
   my $self = shift;
   my $core = Convos::Core->new(redis => $self->redis);
 
   $core->log($self->log);
 
   if ($ENV{CONVOS_ELASTICSEARCH_URL}) {
-    require Convos::Archive::ElasticSearch;
-    $core->archive(Convos::Archive::ElasticSearch->new);
-    $core->archive->url($ENV{CONVOS_ELASTICSEARCH_URL});
-  }
-  else {
-    $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
-  }
+  require Convos::Archive::ElasticSearch;
+  $core->archive(Convos::Archive::ElasticSearch->new);
+  $core->archive->url($ENV{CONVOS_ELASTICSEARCH_URL});
+}
+else {
+  $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
+}
 
-  $core;
-  };
+$core;
+};
 
 has upgrader => sub {
   Convos::Upgrader->new(redis => shift->redis);
-};
+  };
 
 =head1 METHODS
 
