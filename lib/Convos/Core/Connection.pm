@@ -847,7 +847,7 @@ sub irc_rpl_namreply {
   my $nicks = $self->{nicks}{$channel} ||= [];
 
   for my $nick (sort { lc $a cmp lc $b } split /\s+/, $message->{params}[3]) {    # 3 = "+nick0 @nick1 nick2"
-    my $mode = $nick =~ s/^([@+])// ? $1 : '';
+    my $mode = $nick =~ s/^([@~+*])// ? $1 : '';
     push @$nicks, {nick => $nick, mode => $mode};
   }
 }
