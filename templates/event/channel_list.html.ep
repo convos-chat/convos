@@ -1,9 +1,25 @@
-<li class="channel-list" data-network="<%= $network %>" data-target="">
-  %= timestamp $timestamp
+% my $i = 0;
+% my @names = keys %$channels;
+% my $json = Mojo::JSON::j($channels);
+% $json =~ s/</&lt;/g;
+% $json =~ s/>/&gt;/g;
+<li class="channel-list" data-network="<%= $network %>" data-target="" data-event="channel-list">
+  <h3>Server Channel List</h3>
   <div class="content">
-    % my $i = 0;
-    % for my $c (sort { $a->{name} cmp $b->{name} } @$channel_list) {
-      <%= link_to $c->{name}, view => { network => $network, target => $c->{name} }, title => $c->{title}, class => 'internal' %><%= ++$i == @$nicks ? '.' : ', ' %>
-    % }
+    %= form_for 'connection.control', { name => $network }, method => 'post', begin
+      %= text_field 'goto', autocomplete => 'off', placeholder => 'Type to search', autocorrect => 'off', autocapitalize => 'off'
+      <dl>
+      % for my $name (@names) {
+        % last if ++$i > 10;
+        % my $info = $channels->{$name};
+        %# Note: $name is lc($info->{name})
+        <dt><%= link_to $info->{name}, "cmd:///join $name" %> (<%= $info->{visible} || 0 %>)</dt>
+        <dd title="<%= $info->{title} %>"><%= $info->{not_found} ? 'Channel not found in list' : $info->{title} || 'No topic' %></dd>
+      % }
+      </dl>
+    % end
   </div>
+% if (@names) {
+  <!-- <%== $json %> -->
+% }
 </li>

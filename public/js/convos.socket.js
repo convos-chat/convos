@@ -24,8 +24,15 @@
   };
 
   var enableInput = function() {
+    idleTimer();
     convos.input.attr('placeholder', 'What is on your mind, ' + convos.current.nick + '?');
     convos.input.removeClass('disabled');
+  };
+
+  var idleTimer = function() {
+    if (idleTimer.t) clearTimeout(idleTimer.t);
+    if (!convos.current.target) convos.getNewerMessages(); // make sure we have the newest server messages on register
+    idleTimer.t = setTimeout(function() { convos.emit('idle') }, 1500);
   };
 
   var messageFailed = function(id, description) {
@@ -64,8 +71,11 @@
 
   var receiveMessage = function(e) {
     var $message = $(e.data);
+    var event_name = $message.attr('data-event') || 'message';
     var action = $message.attr('class').match(/^(nick|conversation)-(\w+)/);
+    var event_args = $message.attr('data-args');
 
+    idleTimer();
     toCurrent($message);
 
     if ($message.hasClass('error')) {
@@ -78,10 +88,16 @@
     if ($message.hasClass('highlight')) receiveHighlightMessage($message);
     if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
 
-    if ($message.data('to_current')) { $message.addToMessages(); }
-    else if ($message.hasClass('message')) { receiveOtherMessage($message); }
+    if ($message.data('to_current')) {
+      if ($message.attr('data-state')) convos.current.state = $message.attr('data-state');
+      $message.addToMessages();
+    }
+    else if ($message.hasClass('message')) {
+      receiveOtherMessage($message);
+    }
 
     if (convos.at_bottom) $(window).scrollTo('bottom');
+    convos.emit.apply(this, [event_name].concat(event_args ? $.parseJSON($('<textarea />').html(event_args).text()) : [$message]));
   };
 
   var receiveOtherMessage = function($message) {

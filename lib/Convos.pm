@@ -70,7 +70,7 @@ non-blocking webserver. Run the same command again, and the webserver
 will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
 loosing any connections.
 
-Convos is can be configured using L<Convos::Manual::Environment>
+Convos can be configured using L<Convos::Manual::Environment>
 and L<Convos::Manual::HttpHeaders>.
 
 =head1 CUSTOM TEMPLATES
@@ -99,6 +99,11 @@ This template will be included below the form on the C</login> page.
 =item * vendor/register_footer.html.ep
 
 This template will be included below the form on the C</register> page.
+
+=item * vendor/wizard.html.ep
+
+This template will be included below the form on the C</wizard> page that a
+new visitor sees after registering.
 
 =back
 
@@ -147,11 +152,22 @@ use Convos::Upgrader;
 
 our $VERSION = '0.83';
 
+<<<< <<< HEAD
+<<<< <<< HEAD
+$ENV{CONVOS_DEFAULT_CONNECTION} //= 'irc.perl.org:7062';
+
+=======
+>>>>>>> master
+=head1 ATTRIBUTES
+
+  = head2 core == == == =
+
 =head1 ATTRIBUTES
 
 =head2 core
+>>>>>>> master
 
-Holds a L<Convos::Core> object.
+  Holds a L <Convos::Core> object .
 
 =head2 upgrader
 
@@ -159,27 +175,31 @@ Holds a L<Convos::Upgrader> object.
 
 =cut
 
+  <<<< <<< HEAD
+  has core => sub {
+=======
 has core => sub {
+>>>>>>> master
   my $self = shift;
   my $core = Convos::Core->new(redis => $self->redis);
 
   $core->log($self->log);
 
   if ($ENV{CONVOS_ELASTICSEARCH_URL}) {
-    require Convos::Archive::ElasticSearch;
-    $core->archive(Convos::Archive::ElasticSearch->new);
-    $core->archive->url($ENV{CONVOS_ELASTICSEARCH_URL});
-  }
-  else {
-    $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
-  }
+  require Convos::Archive::ElasticSearch;
+  $core->archive(Convos::Archive::ElasticSearch->new);
+  $core->archive->url($ENV{CONVOS_ELASTICSEARCH_URL});
+}
+else {
+  $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
+}
 
-  $core;
+$core;
 };
 
 has upgrader => sub {
   Convos::Upgrader->new(redis => shift->redis);
-};
+  };
 
 =head1 METHODS
 
@@ -253,6 +273,7 @@ sub _assets {
       /js/jquery.notify.js
       /js/jquery.disableouterscroll.js
       /js/selectize.js
+      /js/convos.events.js
       /js/convos.sidebar.js
       /js/convos.socket.js
       /js/convos.input.js
@@ -328,8 +349,6 @@ sub _private_routes {
   $r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
   $r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
   $r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
-  $r->any('/network/add')->to('connection#add_network')->name('network.add');
-  $r->any('/network/:name/edit')->to('connection#edit_network')->name('network.edit');
   $r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $r->any('/profile')->to('user#edit')->name('user.edit');
   $r->post('/profile/timezone/offset')->to('user#tz_offset');

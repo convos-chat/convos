@@ -317,14 +317,18 @@ sub redirect_last {
     sub {
       my ($delay) = @_;
       $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
+      $redis->srandmember("user:$login:connections", $delay->begin);
     },
     sub {
-      my ($delay, $names) = @_;
+      my ($delay, $names, $network) = @_;
 
       if ($names and $names->[0]) {
         if (my ($network, $target) = id_as $names->[0]) {
           return $self->redirect_to('view', network => $network, target => $target);
         }
+      }
+      elsif ($network) {
+        return $self->redirect_to('view.network', network => $network);
       }
 
       $self->redirect_to('wizard');

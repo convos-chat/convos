@@ -3,13 +3,16 @@
   <header class="row">
     <h1>
       <span class="logo">Convos</span>
-      <small>Welcome to <%= $organization_name %> chat.</small>
+      <small>Convos for <%= $organization_name %>.</small>
     </h1>
   </header>
   <div class="row">
-    To get started you need to add a connection. Below you see a predefined
-    connection, which you can change to your preferences.
-    %= include 'connection/add_connection_form', wizard => 1
+    <p>
+      To get started you need to add a connection. We have filled in an example
+      connection, but you can connect to any server you like.
+    </p>
+    %= include 'connection/form', wizard => 1
+    %= include 'vendor/wizard'
   </div>
   <div class="row footer">
     <hr>

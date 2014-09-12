@@ -22,15 +22,14 @@ redis_do(
     ->element_exists('.sidebar a[href="/connection/magnet/delete"]')
     ->element_exists('form[action="/connection/magnet/edit"][method="post"]')
     ->element_exists('form input[name="server"][value="irc.perl.org"]')
-    ->element_exists('form input[name="nick"][value="doe"]')
-    ->element_exists('form input[name="tls"][value="1"][checked="checked"]')->text_is('form .actions button', 'Update');
+    ->element_exists('form input[name="nick"][value="doe"]')->text_is('form .actions button', 'Update connection');
 
   $form = {nick => '123456789012345678901234567890abcdef'};
   $t->post_ok('/connection/magnet/edit', form => $form)->element_exists('.sidebar a[href="/connection/magnet/edit"]')
     ->element_exists('.sidebar a[href="/connection/magnet/delete"]')->element_exists('.server .error')
-    ->element_exists('.nick .error')->text_is('form .actions button', 'Update');
+    ->element_exists('.nick .error')->text_is('form .actions button', 'Update connection');
 
-  $form = {server => 'irc.perl.org', nick => 'yay', tls => 1};
+  $form = {server => 'irc.perl.org', nick => 'yay'};
   $t->post_ok('/connection/magnet/edit', form => $form)->status_is(302)->header_is(Location => '/magnet');
 }
 

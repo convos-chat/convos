@@ -8,36 +8,6 @@
   convos.draw = {};
   convos.isChannel = function(str) { return str.match(/^[#&]/); };
 
-  convos.draw['add-connection'] = function() {
-    var channels = {};
-    var s;
-
-    $('select#name option').each(function() {
-      channels[this.value] = ($(this).attr('data-channels') || '').split(' ');
-    });
-    $('select#name').selectize({
-      create: false,
-      openOnFocus: true,
-      onChange: function(val) {
-        s.clearOptions();
-        s.addOption($.map(channels[val], function(i) { return { value: i, text: i,  }; }));
-        s.refreshOptions(false);
-        s.setValue(channels[val].join(' '));
-      }
-    }).trigger('change');
-    $('input#channels').selectize({
-      delimiter: ' ',
-      persist: false,
-      openOnFocus: true,
-      create: function(value) {
-        if (convos.isChannel(value)) value = '#' + value;
-        return { value: value, text: value };
-      }
-    });
-
-    s = $('input#channels')[0].selectize;
-  };
-
   convos.draw['profile'] = function() {
     var btn = $('.form-group.notifications').find('button');
     var p = Notification.permission;
@@ -63,6 +33,57 @@
     if (convos.at_bottom) $(window).scrollTo('bottom');
   };
 
+  convos.on('channel-info', function(network, name, info) {
+    if (network != convos.current.network) return;
+    convos.current.channels = convos.current.channels || {};
+    convos.current.channels[name] = info;
+    $('div.messages ul .channel-list input').keyup();
+  });
+
+  convos.on('channel-list', function($message) {
+    var $dl = $message.find('dl');
+
+    // remove existing
+    $('div.messages ul .channel-list').each(function() { if ($message[0] != this) $(this).remove(); });
+
+    $message.contents().each(function() {
+      if (this.nodeType == 8) convos.current.channels = jQuery.parseJSON(this.nodeValue);
+    });
+
+    $message.find('input').on('keyup', function(e) { // filter channel list
+      var re = new RegExp(this.value, 'i');
+      var names = [];
+      var i = 0;
+
+      for (name in convos.current.channels) {
+        if (name.match(re)) names.push(name);
+      }
+
+      $dl.html('');
+      $.each(names.sort(function(a, b) { return a.length - b.length; }), function() {
+        if (i++ > 10) return false;
+        var data = convos.current.channels[this];
+        $dl.append('<dt><a href="cmd:///join ' + this + '">' + data.name + '</a> (' + data.visible +')</dt><dd title="' + data.title + '">' + (data.title || 'No topic') + '</dd>');
+      });
+
+      if (!$dl.children().length) $dl.append('<dt>No matching channel names.</dt>');
+    }).focus();
+
+    $message.find('form').on('submit', function(e) {
+      e.preventDefault();
+      var a = $dl.find('a')[0];
+      if (a) a.click();
+    });
+
+    // prevent jumping when filtering
+    $message.height($message.height() < 140 ? $message.height() * 5 : $message.height());
+    $(window).scrollTo('bottom');
+  });
+
+  convos.on('help', function($message) {
+    $('div.messages ul .help').each(function() { if ($message[0] != this) $(this).remove(); });
+  });
+
   convos.getNewerMessages = function(e) {
     if (e) e.preventDefault();
     if (!convos.current.end_time) return;
@@ -74,24 +95,50 @@
       $('body').removeClass('loading');
       if (!$li.length) return;
       convos.current.end_time = parseFloat($ul.data('end-time'));
+      convos.current.state = $ul.attr('data-state');
       $li.addToMessages();
     });
     convos.current.end_time = 0;
     $('body').addClass('loading');
   };
 
+  convos.makeMessage = function(content) {
+    var $m = $('<li class="message" data-sender="convos"></li>');
+    $m.append('<img class="avatar" src="' + $.url_for('/image/avatar-convos.png') + '">');
+    $m.append('<h3>convos</h3>');
+    $m.append('<div class="content">' + content + '</div>');
+    return $m;
+  };
+
+  var firstTimeConnected = convos.on('idle', function() {
+    if ($('nav .conversations a[data-network="' + convos.current.network + '"]').length) return convos.unsubscribe('idle', firstTimeConnected);
+    if (convos.current.state != 'connected') return;
+    convos.unsubscribe('idle', firstTimeConnected);
+    console.log('firstTimeConnected');
+    convos.makeMessage('Hi ' + convos.current.nick + '. Welcome to ' + convos.current.network + '.').addToMessages();
+    convos.makeMessage('Already know what channel you want to talk in? Press shift+enter or click the list icon next to the bell in the top menu, enter the channel name and click "Join" to add it to your connection.').addToMessages();
+    convos.makeMessage('Otherwise, please hold on while I try to fetch the server channel list for you. (It could take a while)').addToMessages();
+    convos.makeMessage('While you wait, try the help command: Type <b>/help</b> in the input field at the bottom on the page and hit enter. You can also use the &lt;tab> key to get suggestions for commands and nicks.').addToMessages();
+    convos.send('/list');
+    $(window).scrollTo('bottom');
+  });
+
   $.fn.addToMessages = function(func) { // func = {prepend,append}
     return this.attachEventsToMessage().each(function() {
       var $message = $(this);
       var $messages = $('div.messages ul');
       var $same = $messages.children('li').not('.message-pending').eq(func == 'prepend' ? 0 : -1);
+      var draw = $message.attr('data-draw');
       var same_nick = $same.data('sender') || '';
 
       if ($message.hasClass('message') && $same.hasClass('message') && same_nick == $message.data('sender')) {
         (func == 'prepend' ? $same : $message).addClass('same-nick');
       }
       if (!$message.hasClass('hidden')) {
-        $messages[func || 'append']($message.fadeIn('fast'));
+        $messages[func || 'append']($message);
+      }
+      if (draw) {
+        convos.draw[draw]($message);
       }
     });
   };
@@ -124,7 +171,6 @@
       $(this).replaceWith('<img src="' + $(this).attr('data-avatar') + '" class="avatar">');
     });
 
-    this.find('.close').click(function(e) { $(this).closest('li').remove(); });
     this.filter('.historic-message').find('a.button.newer').click(convos.getNewerMessages);
 
     return this;
@@ -180,12 +226,13 @@
       var draw = $doc.find('[data-draw]').attr('data-draw');
 
       convos.nicks.reset();
+      convos.current.channels = {};
       convos.current.end_time = parseFloat($messages.attr('data-end-time'));
       convos.current.start_time = parseFloat($messages.attr('data-start-time'));
       convos.current.last_read_time = parseFloat($messages.attr('data-last-read-time'));
       convos.current.nick = $messages.attr('data-nick') || '';
-      convos.current.state = $messages.attr('data-state') || 'disconnected';
       convos.current.network = $messages.attr('data-network') || 'convos';
+      convos.current.state = $messages.attr('data-state');
       convos.current.target = $messages.attr('data-target') || '';
       convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
 

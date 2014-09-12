@@ -1,0 +1,1 @@
+<div class="hidden" data-event="channel-info" data-args="<%= Mojo::JSON::j([$network, $name, $info]) %>"></div>

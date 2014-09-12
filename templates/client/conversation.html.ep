@@ -2,8 +2,8 @@
 % my $stash = stash;
 % my $prev = { nick => '' };
 % my $i = 0;
-<ul data-network="<%= $network %>" data-target="<%= $target %>" data-state="<%= $state %>" data-nick="<%= $current_nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : 0 %>" data-last-read-time="<%= $last_read_time %>">
-  %= include 'event/empty_conversation' unless @$conversation;
+<ul data-network="<%= $network %>" data-target="<%= $target %>" data-state="<%= $state %>" data-nick="<%= $current_nick %>" data-start-time="<%= @$conversation ? $conversation->[0]{timestamp} : 0 %>" data-end-time="<%= @$conversation ? $conversation->[-1]{timestamp} : $time %>" data-last-read-time="<%= $last_read_time %>">
+  %= include 'event/empty_conversation' if $target and !@$conversation;
 % for my $message (@$conversation) {
   %= include "event/day_changed", %$message if day_changed $message->{timestamp}, $prev->{timestamp};
   % if ($stash->{last_read_time} and $message->{timestamp} > $stash->{last_read_time}) {

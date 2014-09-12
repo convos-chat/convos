@@ -1,27 +1,8 @@
 % title 'Add connection';
 % stash sidebar => 'convos';
 <ul>
-% if(@$networks) {
   <li class="with-padding">
-    <h2>Add connection</h2>
-    %= include 'connection/add_connection_form', wizard => 0
+    <h2>Add Connection</h2>
+    %= include 'connection/form', wizard => 0
   </li>
-% } else {
-  <li class="message">
-    %= image '/image/avatar-convos.png', class => 'avatar'
-    <h3><%= link_to 'convos', 'view.network', { network => 'convos' }, class => 'goto-network' %></h3>
-    <div class="content">
-      Hey <%= session 'login' %>!
-    </div>
-  </li>
-  <li class="message">
-    <div class="content">
-      You have joined all the networks that was predefined.
-    </div>
-  <li class="message">
-    <div class="content">
-      Do you want to <%= link_to 'add', 'network.add' %> a new network?
-    </div>
-  </li>
-% }
 </ul>

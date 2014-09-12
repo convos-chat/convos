@@ -56,8 +56,8 @@ use Scalar::Util ();
 use Time::HiRes 'time';
 use Convos::Core::Util qw( as_id id_as );
 use Sys::Hostname ();
-use constant DEBUG    => $ENV{CONVOS_DEBUG}   ? 1 : 0;
-use constant UNITTEST => $INC{'Test/More.pm'} ? 1 : 0;
+use constant CHANNEL_LIST_CACHE_TIMEOUT => 3600;    # TODO: Figure out how long to cache channel list
+use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
 
 =head1 ATTRIBUTES
 
@@ -94,7 +94,7 @@ my @OTHER_EVENTS = qw/
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
-  err_notonchannel err_bannedfromchan irc_rpl_liststart irc_rpl_list
+  err_notonchannel err_bannedfromchan irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_kick irc_error
   irc_rpl_namreply irc_rpl_endofnames
   /;
@@ -121,7 +121,7 @@ has _irc => sub {
 
       if ($self->{stop}) {
         $data = {status => 200, message => 'Disconnected.'};
-        $self->redis->hset($self->{path}, state => 'disconnected');
+        $self->_state('disconnected');
         $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
         return;
@@ -131,9 +131,9 @@ has _irc => sub {
           status  => 500,
           message => "Disconnected from @{[$self->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds."
         };
+        $self->_state('reconnecting');
         $self->_publish_and_save(server_message => $data);
         $self->_add_convos_message($data);
-        $self->redis->hset($self->{path}, state => 'reconnecting');
         $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
       }
     }
@@ -146,10 +146,10 @@ has _irc => sub {
         message =>
           "Connection to @{[$irc->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds. ($err)",
       };
-      $self->{stop} and return $self->redis->hset($self->{path}, state => 'error');
+      $self->{stop} and return $self->_state('disconnected');
+      $self->_state('reconnecting');
       $self->_publish_and_save(server_message => $data);
       $self->_add_convos_message($data);
-      $self->redis->hset($self->{path}, state => 'reconnecting');
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -187,6 +187,7 @@ sub new {
   $self->{convos_path}       = "user:$self->{login}:connection:convos:msg";
   $self->{conversation_path} = "user:$self->{login}:conversations";
   $self->{path}              = "user:$self->{login}:connection:$self->{name}";
+  $self->{state}             = 'disconnected';
   $self;
 }
 
@@ -224,10 +225,16 @@ sub connect {
     }
   );
 
-  $self->redis->hset($self->{path}, state => 'disconnected');
   $self->_connect;
   $self->_subscribe;
   $self;
+}
+
+sub _state {
+  my ($self, $state) = @_;
+
+  $self->{state} = $state;
+  $self->redis->hset($self->{path}, state => $state);
 }
 
 sub _subscribe {
@@ -295,25 +302,37 @@ sub _connect {
     sub {
       my ($redis, $args, $url) = @_;
 
+      $self->redis->hset($self->{path} => tls => $self->{disable_tls} ? 0 : 1);
       $irc->name($url || 'Convos');
       $irc->nick($args->{nick} || $self->login);
       $irc->pass($args->{password}) if $args->{password};
       $irc->server($args->{server} || $args->{host});
-      $irc->tls({}) if $args->{tls};
-      $irc->user($self->login);
+      $irc->tls($self->{disable_tls} ? undef : {});
+      $irc->user($args->{username} || $self->login);
       $irc->connect(
         sub {
           my ($irc, $error) = @_;
           my $data;
 
           if ($error) {
-            $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
-            $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
-            $self->redis->hset($self->{path}, state => 'reconnecting');
+
+            # SSL connect attempt failed with unknown error
+            # error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
+            if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
+              $data = {status => 400, message => "This IRC network does not support SSL/TLS."};
+              $self->{disable_tls} = 1;
+              $self->_connect;
+            }
+            else {
+              $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
+              $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
+            }
+
+            $self->_state('reconnecting');
           }
           else {
-            $self->redis->hmset($self->{path}, current_nick => $irc->nick, state => 'connected');
             $data = {status => 200, message => "Connected to IRC server"};
+            $self->_state('connected');
           }
 
           $self->_publish_and_save(server_message => $data);
@@ -357,9 +376,9 @@ sub add_server_message {
   $data->{message} = join ' ', @$params;
   $message->{command} ||= '';
 
+  $self->_state('connected');
   $self->_publish_and_save(server_message => $data);
   $self->_add_convos_message($data) if $message->{command} eq '001';
-  $self->redis->hset($self->{path}, state => 'connected');
 }
 
 =head2 add_message
@@ -833,18 +852,6 @@ sub irc_rpl_namreply {
   }
 }
 
-=head2 irc_rpl_liststart
-
-:servername 321 fooman Channel :Users  Name
-
-=cut
-
-sub irc_rpl_liststart {
-  my ($self, $message) = @_;
-
-  $self->{channel_list} = [];
-}
-
 =head2 irc_rpl_list
 
 :servername 322 somenick #channel 10 :[+n] some topic
@@ -853,12 +860,12 @@ sub irc_rpl_liststart {
 
 sub irc_rpl_list {
   my ($self, $message) = @_;
+  my $network = $self->name;
+  my $name    = $message->{params}[1];
+  my %info    = (name => $name, visible => $message->{params}[2], title => $message->{params}[3] // '');
 
-  # Will not force lowercase on channel name [1] here since it is only
-  # used for representation
-
-  push @{$self->{channel_list}},
-    {name => $message->{params}[1], visible => $message->{params}[2], title => $message->{params}[3] || 'No title',};
+  $self->_publish(channel_info => {name => $name, network => $network, info => \%info});
+  $self->redis->hset("convos:irc:$network:channels", $name => j \%info) if $self->{save_channels};
 }
 
 =head2 irc_rpl_listend
@@ -869,8 +876,9 @@ sub irc_rpl_list {
 
 sub irc_rpl_listend {
   my ($self, $message) = @_;
+  my $network = $self->name;
 
-  $self->_publish(channel_list => {channel_list => $self->{channel_list},},);
+  $self->redis->expire("convos:irc:$network:channels", CHANNEL_LIST_CACHE_TIMEOUT) if delete $self->{save_channels};
 }
 
 =head2 irc_mode
@@ -946,6 +954,25 @@ sub cmd_join {
   }
 }
 
+=head2 cmd_list
+
+=cut
+
+sub cmd_list {
+  my ($self, $message) = @_;
+  my $network = $self->name;
+
+  $self->{channels} = {};
+
+  if (my $filter = $message->{params}[0] || '') {
+    $self->{channels}{lc($_)} = {name => $_, topic => '', not_found => 1} for split /,/, $filter;
+  }
+  else {
+    $self->redis->del("convos:irc:$network:channels");
+    $self->{save_channels} = 1;
+  }
+}
+
 sub _add_convos_message {
   my ($self, $data) = @_;
   my $login = $self->login;
@@ -971,6 +998,8 @@ sub _publish {
   my $login = $self->login;
   my $name  = $self->name;
   my $message;
+
+  local $data->{state} = $self->{state};
 
   $data->{event}   = $event;
   $data->{network} = $name;

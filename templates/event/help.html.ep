@@ -1,6 +1,6 @@
-<li class="help info" data-network="" data-target="">
-  <b class="close">&times;</b>
-  <h3>Available commands</h3>
+<li class="help" data-network="" data-target="" data-event="help">
+  %= image '/image/avatar-convos.png', alt => '', class => 'avatar'
+  <h3>Available Commands</h3>
   <div class="content">
     <dl>
       <dt><a href="complete:///me" class="autocomplete">/me &lt;message&gt;</a></dt>

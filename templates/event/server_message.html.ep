@@ -1,4 +1,4 @@
-<li class="message network <%= $status < 400 ? 'notice' : 'error' %>" data-network="<%= $network %>" data-target="">
+<li class="message network <%= $status < 400 ? 'notice' : 'error' %>" data-network="<%= $network %>" data-target="" data-state="<%= stash('state') || '' %>">
   %= timestamp $timestamp
   <div class="content"><%== $message %></div>
 </li>

@@ -123,29 +123,6 @@ sub send_convos_message {
   $self;
 }
 
-=head2 start_convos_conversation
-
-  $self = $self->start_convos_conversation($login);
-
-Will add default messages to the convos conversation.
-
-=cut
-
-sub start_convos_conversation {
-  my ($self, $login) = @_;
-
-  for (
-    "Hi $login!",
-    "While convos is establishing a connection, you can try out the help command: Type '/help' in the input field in the bottom on the page and hit enter.",
-    "You can also use the <tab> key to autocomplete commands and nicks.",
-    )
-  {
-    $self->send_convos_message($login, $_);
-  }
-
-  return $self;
-}
-
 =head2 start
 
 Will fetch connection information from the database and try to connect to them.
@@ -221,12 +198,10 @@ sub _start_control_channel {
 =head2 add_connection
 
   $self->add_connection({
-    channels => [ '#foo', '#bar', '...' ],
     login => $str,
     name => $str,
     nick => $str,
     server => $str, # irc_server[:port]
-    tls => $bool,
   }, $callback);
 
 Add a new connection to redis. Will create a new connection id and
@@ -236,19 +211,14 @@ set all the keys in the %connection hash
 
 sub add_connection {
   my ($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( password login name server tls ));
+  my $validation = $self->_validation($input, qw( login name nick password server username ));
 
   if ($validation->has_error) {
     $self->$cb($validation, undef);
     return $self;
   }
 
-  $validation->optional($_) for qw( nick user );
-  $validation->output->{nick} ||= $validation->output->{login};
-  $validation->output->{user} ||= $validation->output->{login};
-
   my ($login, $name) = $validation->param([qw( login name )]);
-  my @channels = $self->_parse_channels(delete $validation->input->{channels});
 
   warn "[core:$login] add ", _dumper($validation->output), "\n" if DEBUG;
   Scalar::Util::weaken($self);
@@ -270,7 +240,6 @@ sub add_connection {
         [sadd  => "connections",                  "$login:$name"],
         [sadd  => "user:$login:connections",      $name],
         [hmset => "user:$login:connection:$name", %{$validation->output}],
-        (map { [zadd => "user:$login:conversations", time, as_id $name, $_] } @channels),
         $delay->begin,
       );
     },
@@ -292,7 +261,6 @@ sub add_connection {
     name => $str,
     nick => $str,
     server => $str, # irc_server[:port]
-    tls => $bool,
   }, $callback);
 
 Update a connection's settings. This might issue a reconnect or issue
@@ -302,15 +270,12 @@ IRC commands to reflect the changes.
 
 sub update_connection {
   my ($self, $input, $cb) = @_;
-  my $validation = $self->_validation($input, qw( login name nick password server tls ));
+  my $validation = $self->_validation($input, qw( login name nick password server username ));
 
   if ($validation->has_error) {
     $self->$cb($validation, undef);
     return $self;
   }
-
-  $validation->optional('user');
-  $validation->output->{user} ||= $validation->output->{login};
 
   my ($login, $name) = $validation->param([qw( login name )]);
   my $conn  = Convos::Core::Connection->new(%{$validation->output});
@@ -338,7 +303,6 @@ sub update_connection {
     },
     sub {
       my ($delay, $current, $conversations) = @_;
-      my %existing_channels = map { $_, 1 } $conn->channels_from_conversations($conversations);
 
       $conn = $validation->output;    # get rid of the extra junk from Connection->new()
 
@@ -515,14 +479,6 @@ sub login {
   );
 }
 
-sub _parse_channels {
-  my $self = shift;
-  my $channels = shift || [];
-  my %dup;
-
-  sort grep { $_ !~ /^[#&]$/ and !$dup{$_}++ } map { /^[#&]/ ? $_ : "#$_" } map { split m/[\s,]+/ } @$channels;
-}
-
 sub _dumper {    # function
   Data::Dumper->new([@_])->Indent(0)->Sortkeys(1)->Terse(1)->Dump;
 }
@@ -541,11 +497,11 @@ sub _validation {
 
   for my $k (@names) {
     if    ($k eq 'password') { $validation->optional('password') }
+    elsif ($k eq 'username') { $validation->optional('username') }
     elsif ($k eq 'login')    { $validation->required('login')->size(3, 30) }
     elsif ($k eq 'name')     { $validation->required('name')->like(qr{^[-a-z0-9]+$}) }    # network name
     elsif ($k eq 'nick')     { $validation->required('nick')->size(1, 30) }
     elsif ($k eq 'server') { $validation->required('server')->like($Convos::Core::Util::SERVER_NAME_RE) }
-    elsif ($k eq 'tls')    { $validation->required('tls')->in(0, 1) }
     else                   { $validation->required($k) }
   }
 

@@ -7,7 +7,7 @@ Convos::Controller::Connection - Mojolicious controller for IRC connections
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Convos::Core::Util qw( as_id id_as );
+use Convos::Core::Util qw( as_id id_as pretty_server_name );
 
 =head1 METHODS
 
@@ -19,72 +19,20 @@ Add a new connection based on network name.
 
 sub add_connection {
   my $self = shift;
-  my $method = $self->req->method eq 'POST' ? '_add_connection' : '_add_connection_form';
+
+  if ($self->req->method eq 'POST') {
+    return $self->_add_connection;
+  }
 
   $self->delay(
     sub {
       my ($delay) = @_;
-
       $self->conversation_list($delay->begin);
       $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
       my ($delay) = @_;
-      $self->$method;
-    },
-  );
-}
-
-=head2 add_network
-
-Add a new network.
-
-NOTE: This method currently also does update.
-
-=cut
-
-sub add_network {
-  my $self       = shift;
-  my $validation = $self->validation;
-  my @channels   = map { split /\s+/ } $self->param('channels');
-  my ($is_default, $name, $redis, $referrer);
-
-  $self->stash(layout => 'tactile', channels => \@channels);
-  $self->req->method eq 'POST' or return $self->render;
-
-  $validation->input->{tls}      ||= 0;
-  $validation->input->{password} ||= 0;
-  $validation->required('name')->like(qr{^[-a-z0-9]+$});
-  $validation->required('server')->like(qr{^[-a-z0-9_\.]+(:\d+)?$});
-  $validation->required('password')->in(0, 1);
-  $validation->required('tls')->in(0, 1);
-  $validation->optional('home_page')->like(qr{^https?://.});
-  $validation->has_error and return $self->render(status => 400);
-  $validation->output->{channels} = join ' ', @channels;
-
-  if ($validation->output->{server} =~ s!:(\d+)!!) {
-    $validation->output->{port} = $1;
-  }
-  else {
-    $validation->output->{port} = $validation->input->{tls} ? 6697 : 6667;
-  }
-
-  $redis      = $self->redis;
-  $name       = delete $validation->output->{name};
-  $is_default = $self->param('default') || 0;
-  $referrer   = $self->param('referrer') || '/';
-
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-
-      $redis->set("irc:default:network", $name, $delay->begin) if $is_default;
-      $redis->sadd("irc:networks", $name, $delay->begin);
-      $redis->hmset("irc:network:$name", $validation->output, $delay->begin);
-    },
-    sub {
-      my ($delay, @success) = @_;
-      $self->redirect_to($referrer);
+      $self->render;
     },
   );
 }
@@ -185,44 +133,6 @@ sub edit_connection {
   );
 }
 
-=head2 edit_network
-
-Used to edit settings for a network.
-
-=cut
-
-sub edit_network {
-  my $self = shift;
-  my $name = $self->stash('name');
-
-  $self->stash(layout => 'tactile');
-
-  if ($self->req->method eq 'POST') {
-    $self->param(referrer => $self->req->url->to_abs);
-    $self->validation->input->{name} = $name;
-    $self->add_network;
-    return;
-  }
-
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-
-      $self->redis->execute([get => 'irc:default:network'], [hgetall => "irc:network:$name"], $delay->begin);
-    },
-    sub {
-      my ($delay, $default_network, $network) = @_;
-
-      $network->{server} or return $self->render_not_found;
-      $self->param($_ => $network->{$_} || '') for qw( channels password tls home_page );
-      $self->param(name    => $name);
-      $self->param(default => 1) if $default_network eq $name;
-      $self->param(server  => join ':', @$network{qw( server port )});
-      $self->render(default_network => $default_network, name => $name, network => $network);
-    },
-  );
-}
-
 =head2 delete_connection
 
 Delete a connection.
@@ -256,75 +166,41 @@ Render wizard page for first connection.
 =cut
 
 sub wizard {
-  my $self = shift;
+  my $self  = shift;
+  my $login = $self->session('login');
 
-  $self->stash(layout => 'tactile', template => 'connection/wizard',);
-  $self->_add_connection_form;
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->srandmember("user:$login:connections", $delay->begin);
+    },
+    sub {
+      my ($delay, $network) = @_;
+      return $self->redirect_to('view.network', network => $network) if $network;
+      return $self->render(layout => 'tactile', template => 'connection/wizard');
+    },
+  );
 }
 
 sub _add_connection {
   my $self       = shift;
   my $validation = $self->validation;
-  my $name       = $self->param('name') || '';
 
-  $validation->input->{channels} = [map { split /\s/ } $self->param('channels')];
   $validation->input->{login} = $self->session('login');
+  $validation->input->{name}  = pretty_server_name($self->param('server'));
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $self->redis->hgetall("irc:network:$name", $delay->begin);
-    },
-    sub {
-      my ($delay, $params) = @_;
-
-      $validation->input->{$_} ||= $params->{$_} for keys %$params;
       $self->app->core->add_connection($validation, $delay->begin);
+      $self->notification_list($delay->begin) if $self->stash('full_page');
+      $self->conversation_list($delay->begin);
     },
     sub {
       my ($delay, $errors, $conn) = @_;
 
       return $self->redirect_to('view.network', network => $conn->{name} || 'convos') unless $errors;
-      return $self->param('wizard') ? $self->wizard : $self->_add_connection_form;
-    },
-  );
-}
-
-sub _add_connection_form {
-  my $self  = shift;
-  my $login = $self->session('login');
-  my $redis = $self->redis;
-
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $redis->smembers("user:$login:connections", $delay->begin);
-      $redis->smembers("irc:networks",            $delay->begin);
-    },
-    sub {
-      my $delay    = shift;
-      my %existing = map { $_, 1 } sort @{shift || []};
-      my @names    = sort grep { !$existing{$_} } @{shift || []};
-
-      unless (@names) {
-        return $self->render(default_network => '', networks => []);
-      }
-
-      $delay->begin(0)->(\@names);
-      $redis->get('irc:default:network', $delay->begin);
-      $redis->hgetall("irc:network:$_", $delay->begin) for @names;
-    },
-    sub {
-      my ($delay, $names, $default_network, @networks) = @_;
-      my $channels = $self->param('channels');
-
-      for my $network (@networks) {
-        $network->{name} = shift @$names;
-        $channels = $network->{channels} || '' if !$channels and $network->{name} eq $default_network;
-      }
-
-      $self->param(channels => $channels || $networks[0]{channels} || '');
-      $self->render(default_network => $default_network, select_networks => \@networks);
+      return $self->param('wizard') ? $self->wizard : $self->render;
     },
   );
 }
@@ -342,11 +218,9 @@ sub _edit_connection {
   my $validation = $self->validation;
   my $full_page  = $self->stash('full_page');
 
-  $validation->input->{channels} = [map { split /\s+/ } $self->param('channels')];
-  $validation->input->{login}    = $self->session('login');
-  $validation->input->{name}     = $self->stash('name');
-  $validation->input->{server}   = $self->req->body_params->param('server');
-  $validation->input->{tls} ||= 0;
+  $validation->input->{login}  = $self->session('login');
+  $validation->input->{name}   = $self->stash('name');
+  $validation->input->{server} = $self->req->body_params->param('server');
 
   $self->delay(
     sub {

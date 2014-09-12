@@ -55,9 +55,10 @@ sub conversation {
   my $target  = $self->stash('target') || '';
   my $name    = as_id $network, $target;
   my $redis   = $self->redis;
+  my $time    = time;
 
   $self->res->headers->header('X-Is-Channel', $self->stash('is_channel') || 0);
-  $self->stash(from_archive => 0, target => $target, state => 'connected');
+  $self->stash(from_archive => 0, target => $target, state => 'connected', time => $time);
 
   $self->delay(
     sub {
@@ -73,39 +74,49 @@ sub conversation {
       my ($delay, $last_read_time, $previous_name) = @_;
 
       $self->stash(last_read_time => $self->param('last-read-time') || $last_read_time || 0);
+      $delay->pass;    # make sure we get to the next step
 
       if ($target and !$last_read_time) {    # no such conversation
-        return $delay->begin(0)->([$login, $login, 'connected']) if $self->param('from');
+        return $delay->pass if $self->param('from');
         return $self->stash(layout => 'tactile')->render_not_found;
       }
       if (!$target) {
         $self->stash(sidebar => 'convos');
       }
-      if ($network eq 'convos') {
-        return $delay->begin(0)->([$login, 'connected']);
-      }
       if ($last_read_time) {
-        $redis->zadd("user:$login:conversations", time, $previous_name->[0]) unless $name eq $previous_name->[0];
-        $redis->zadd("user:$login:conversations", time + 0.01, $name);
+        $redis->zadd("user:$login:conversations", $time, $previous_name->[0], $delay->begin)
+          unless $name eq $previous_name->[0];
+        $redis->zadd("user:$login:conversations", $time + 0.01, $name, $delay->begin);
       }
-
-      $redis->hmget("user:$login:connection:$network", qw( current_nick nick state ), $delay->begin);
     },
     sub {
-      my $delay        = shift;
-      my $current_nick = shift @{$_[0]};
-      my $wanted_nick  = shift @{$_[0]};
-      my $state        = shift @{$_[0]};
-
-      $state ||= 'disconnected';
-      $self->stash(current_nick => $current_nick || $wanted_nick, state => $state);
-      $self->_conversation($delay->begin);
+      my $delay = shift;
       $self->conversation_list($delay->begin);
       $self->notification_list($delay->begin) if $self->stash('full_page');
     },
     sub {
-      my ($delay, $conversation, $conversation_list, $notification_list) = @_;
-      $self->render(conversation => $conversation || []);
+      my ($delay, $conversation_list, $notification_list) = @_;
+
+      if ($network eq 'convos') {
+        $network = $self->stash->{networks}[0] if @{$self->stash->{networks}} == 1;
+        $self->stash(network => $network);
+      }
+      if ($network eq 'convos') {
+        $delay->pass([$login, $login, 'connected']);
+      }
+      else {
+        $redis->hmget("user:$login:connection:$network", qw( current_nick nick state ), $delay->begin);
+      }
+
+      $self->_conversation($delay->begin);
+    },
+    sub {
+      my ($delay, $data, $conversation) = @_;
+      $self->render(
+        conversation => $conversation || [],
+        current_nick => $data->[0]    || $data->[1],
+        state        => $data->[2]    || 'disconnected'
+      );
     },
   );
 }
