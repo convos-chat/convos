@@ -217,7 +217,8 @@ sub connect {
         $self->{path},
         'nick',
         sub {
-          $irc->write(NICK => $_[1]) if $irc->nick ne $_[1];
+          my ($redis, $nick) = @_;
+          $irc->write(NICK => $nick) if $nick and $irc->nick ne $nick;
         }
       );
     }
