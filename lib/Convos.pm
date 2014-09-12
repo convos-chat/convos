@@ -45,8 +45,6 @@ the link to view the data.
 
 =item * Use Redis to manage state / publish subscribe
 
-=item * Archive logs in plain text format, use ack to search them.
-
 =item * Bootstrap-based user interface
 
 =back
@@ -72,122 +70,8 @@ non-blocking webserver. Run the same command again, and the webserver
 will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
 loosing any connections.
 
-=head2 Environment
-
-Convos can be configured with the following environment variables:
-
-=over 4
-
-=item * CONVOS_BACKEND_EMBEDDED=1
-
-Set CONVOS_MANUAL_BACKEND to a true value if you want to force the frontend
-to start the backend embedded. This is useful if you want to test L<Convos>
-with L<morbo|Mojo::Server::Morbo>.
-
-=item * CONVOS_DEBUG=1
-
-Set CONVOS_DEBUG for extra debug output to STDERR.
-
-=item * CONVOS_DEFAULT_CONNECTION
-
-The server to display in the connection wizard as the default connection.
-This variable defaults to "irc.perl.org". (This might change
-in future)
-
-=item * CONVOS_DISABLE_AUTO_EMBED=1
-
-Set CONVOS_DISABLE_AUTO_EMBED to disable links from expanding into images,
-movies or other dynamic content.
-
-=item * CONVOS_MANUAL_BACKEND=1
-
-Disable the frontend from automatically starting the backend.
-
-=item * CONVOS_ORGANIZATION_NAME
-
-Set this to customize the organization name on the landing page, in the title
-tag and other various sites. The default is L<Nordaaker|http://nordaaker.com/>.
-
-=item * CONVOS_REDIS_URL
-
-This is the URL to the Redis backend, and should follow this format:
-
-  redis://x:password@server:port/database_index
-  redis://127.0.0.1:6379/1 # suggested value
-
-Convos will use C<REDISCLOUD_URL>, C<REDISTOGO_URL>,
-C<DOTCLOUD_DATA_REDIS_URL> or default to "redis://127.0.0.1:6379/1" unless
-C<CONVOS_REDIS_URL> is not set.
-
-It is also possible to set C<CONVOS_REDIS_INDEX=2> to use the
-database index 2, instead of the default. This is useful when
-C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> does not contain
-the datbase index.
-
-=item * CONVOS_INVITE_CODE
-
-If set must be appended to register url. Example:
-
-  http://your.convos.by/register/some-secret-invite-code
-
-=item * CONVOS_SECURE_COOKIES=1
-
-Set CONVOS_SECURE_COOKIES to true in order to set the secure flag
-on all session cookies.  Requires HTTPS.
-
-=item * MOJO_IRC_DEBUG=1
-
-Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
-
-=item * MOJO_LISTEN
-
-List of one or more locations to listen on. This also works for
-L<hypnotoad|Mojo::Server::Hypnotoad>. Example:
-
-  MOJO_LISTEN="http://*:8080,https://*:8443"
-
-L<Mojo::Server::Daemon/listen>.
-
-=item * MOJO_REVERSE_PROXY
-
-Set this to a true value if you're using L<hypnotoad|Mojo::Server::Hypnotoad>
-behind a reverse proxy, such as nginx.
-
-=back
-
-=head2 HTTP headers
-
-=over 4
-
-=item * X-Request-Base
-
-Set this header if you are mounting Convos under a custom path. Example
-with nginx:
-
-  # mount the application under /convos
-  location /convos {
-    # remove "/convos" from the forwarded request
-    rewrite ^/convos(.*)$ $1 break;
-
-    # generic headers for correct handling of ws and http
-    proxy_http_version 1.1;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host $host;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Host $host;
-
-    # set this if you are running SSL
-    proxy_set_header X-Forwarded-HTTPS 1;
-
-    # inform Convos the full location where it is mounted
-    proxy_set_header X-Request-Base "https://some-domain.com/convos";
-
-    # tell nginx where Convos is running
-    proxy_pass http://10.0.0.10:8080;
-  }
-
-=back
+Convos can be configured using L<Convos::Manual::Environment>
+and L<Convos::Manual::HttpHeaders>.
 
 =head1 CUSTOM TEMPLATES
 
@@ -241,10 +125,6 @@ new visitor sees after registering.
 
 =over 4
 
-=item * L<Convos::Controller::Archive>
-
-Mojolicious controller for IRC logs.
-
 =item * L<Convos::Controller::Client>
 
 Mojolicious controller for IRC chat.
@@ -276,10 +156,6 @@ $ENV{CONVOS_DEFAULT_CONNECTION} //= 'irc.perl.org:7062';
 
 =head1 ATTRIBUTES
 
-=head2 archive
-
-Holds a L<Convos::Core::Archive> object.
-
 =head2 core
 
 Holds a L<Convos::Core> object.
@@ -290,17 +166,21 @@ Holds a L<Convos::Upgrader> object.
 
 =cut
 
-has archive => sub {
-  my $self = shift;
-  Convos::Core::Archive->new($self->config->{archive} || $self->path_to('archive'));
-};
-
 has core => sub {
   my $self = shift;
-  my $core = Convos::Core->new;
+  my $core = Convos::Core->new(redis => $self->redis);
 
   $core->log($self->log);
-  $core->redis->server($self->redis->server);
+
+  if ($ENV{CONVOS_ELASTICSEARCH_URL}) {
+    require Convos::Archive::ElasticSearch;
+    $core->archive(Convos::Archive::ElasticSearch->new);
+    $core->archive->url($ENV{CONVOS_ELASTICSEARCH_URL});
+  }
+  else {
+    $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
+  }
+
   $core;
 };
 

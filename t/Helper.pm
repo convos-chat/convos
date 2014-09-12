@@ -7,6 +7,7 @@ use Mojo::Redis;
 
 BEGIN {
   $ENV{MOJO_MODE} = 'testing';
+  $ENV{CONVOS_ARCHIVE_DIR} //= 'irc_logs_test';
   $ENV{CONVOS_DEBUG} //= $ENV{TEST_VERBOSE};
   $ENV{CONVOS_MANUAL_BACKEND} = 1;
   $ENV{CONVOS_REDIS_URL} //= '';

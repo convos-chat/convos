@@ -22,4 +22,5 @@ MANIFEST*
 /cover_db
 /script/toadfarm.pid
 /public/packed
+/irc_logs
 Convos-*.gz

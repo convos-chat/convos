@@ -1,0 +1,104 @@
+=head1 NAME
+
+Convos::Manual::Environment - Environment variables for Convos
+
+=head1 SYNOPSIS
+
+You can change the behavior of L<Convos> by setting environment variables:
+
+  $ CONVOS_REDIS_URL=localhost/12 ./script/convos
+
+=head1 ENVIRONMENT VARIABLES
+
+Convos can be configured with the following environment variables:
+
+=head2 CONVOS_ARCHIVE_DIR
+
+Set this variable to a custom directory where Convos can store the IRC
+logs.
+
+=head2 CONVOS_BACKEND_EMBEDDED
+
+Set CONVOS_MANUAL_BACKEND to a true value if you want to force the frontend
+to start the backend embedded. This is useful if you want to test L<Convos>
+with L<morbo|Mojo::Server::Morbo>.
+
+=head2 CONVOS_DEBUG
+
+Set CONVOS_DEBUG to a true value for extra debug output to STDERR.
+
+=head2 CONVOS_DISABLE_AUTO_EMBED
+
+Set CONVOS_DISABLE_AUTO_EMBED to a true value to disable links from expanding
+into images, movies or other dynamic content.
+
+=head2 CONVOS_ELASTICSEARCH_URL
+
+Set CONVOS_ELASTICSEARCH_URL to the location of your
+L<Elasticsearch|http://www.elasticsearch.org>. server if you want Convos
+to archive messages to it. Example:
+C<CONVOS_ELASTICSEARCH_URL=http://localhost:9200>.
+
+This variable will override L<CONVOS_ARCHIVE_DIR>.
+
+=head2 CONVOS_MANUAL_BACKEND
+
+Disable the frontend from automatically starting the backend.
+
+=head2 CONVOS_ORGANIZATION_NAME
+
+Set this to customize the organization name on the landing page, in the title
+tag and other various sites. The default is L<Nordaaker|http://nordaaker.com/>.
+
+=head2 CONVOS_REDIS_URL
+
+This is the URL to the Redis backend, and should follow this format:
+
+  redis://x:password@server:port/database_index
+  redis://127.0.0.1:6379/1 # suggested value
+
+Convos will use C<REDISCLOUD_URL>, C<REDISTOGO_URL>,
+C<DOTCLOUD_DATA_REDIS_URL> or default to "redis://127.0.0.1:6379/1" unless
+C<CONVOS_REDIS_URL> is not set.
+
+It is also possible to set C<CONVOS_REDIS_INDEX=2> to use the
+database index 2, instead of the default. This is useful when
+C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> does not contain
+the datbase index.
+
+=head2 CONVOS_INVITE_CODE
+
+If set must be appended to register url. Example:
+
+  http://your.convos.by/register/some-secret-invite-code
+
+=head2 CONVOS_SECURE_COOKIES
+
+Set CONVOS_SECURE_COOKIES to true in order to set the secure flag
+on all session cookies.  Requires HTTPS.
+
+=head2 MOJO_IRC_DEBUG
+
+Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
+
+=head2 MOJO_LISTEN
+
+List of one or more locations to listen on. This also works for
+L<hypnotoad|Mojo::Server::Hypnotoad>. Example:
+
+  MOJO_LISTEN="http://*:8080,https://*:8443"
+
+L<Mojo::Server::Daemon/listen>.
+
+=head2 MOJO_REVERSE_PROXY
+
+Set this to a true value if you're using L<hypnotoad|Mojo::Server::Hypnotoad>
+behind a reverse proxy, such as nginx.
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+Marcus Ramberg - C<marcus@nordaaker.com>
+
+=cut

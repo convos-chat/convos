@@ -46,7 +46,7 @@ L</err_bannedfromchan>, l</irc_error> and L</irc_quit>.
 
 =cut
 
-use Mojo::Base -base;
+use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::IRC;
 use Mojo::JSON 'j';
 no warnings 'utf8';
@@ -82,7 +82,7 @@ Holds a L<Mojo::Redis> object.
 has name  => '';
 has log   => sub { Mojo::Log->new };
 has login => 0;
-has redis => sub { die 'redis connection required' };
+has redis => sub { die 'redis connection required in constructor' };
 
 my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg ctcp_action /;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/
@@ -1034,6 +1034,8 @@ sub _publish_and_save {
   else {
     $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
   }
+
+  $self->emit_safe(save => $data);
 }
 
 sub DESTROY {
