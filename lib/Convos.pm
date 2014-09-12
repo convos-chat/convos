@@ -152,13 +152,16 @@ use Convos::Upgrader;
 
 our $VERSION = '0.83';
 
+<<<< <<< HEAD
 $ENV{CONVOS_DEFAULT_CONNECTION} //= 'irc.perl.org:7062';
 
+=======
+>>>>>>> master
 =head1 ATTRIBUTES
 
-=head2 core
+  = head2 core
 
-Holds a L<Convos::Core> object.
+  Holds a L <Convos::Core> object .
 
 =head2 upgrader
 
@@ -166,7 +169,7 @@ Holds a L<Convos::Upgrader> object.
 
 =cut
 
-has core => sub {
+  has core => sub {
   my $self = shift;
   my $core = Convos::Core->new(redis => $self->redis);
 
@@ -182,7 +185,7 @@ has core => sub {
   }
 
   $core;
-};
+  };
 
 has upgrader => sub {
   Convos::Upgrader->new(redis => shift->redis);
