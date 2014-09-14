@@ -1,3 +1,20 @@
+## 0.84
+- Fix update of current nick()
+- Fix refreshing conversation and navbar when clicking back/forward buttons in browser #111
+- Fix vendor/bin/carton can be run with Perl 5.12 #144
+- Fix commands are now case insensitive #168
+- Improved registration process #121
+- Improved README.md #182
+- Add auto-detect of TLS #121
+- Add prompt user to join a channel on connect #121
+- Add support for /list to show channel list #131
+- Add support for password protected server connection #159
+- Add support for archive of IRC log to disk or ElasticSearch #172
+- Change welcome message and prompt the user to join a channel on first connect #121
+- Change to showing server messages after first time register #121
+- Change to Mojolicious::Plugin::FontAwesome4 for icons #162
+- Remove support for Heroku #177
+
 ## 0.83 (2014-09-01)
 - Fix highlighting of multiple channels #137
 - Fix connection actions in sidebar #157
