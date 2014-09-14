@@ -275,7 +275,7 @@
 
     if (navigator.is_ios) {
       $('input, textarea')
-        .on('click', function() { $('body').addClass('ios-input-focus'); $(window).scrollTo('bottom'); })
+        .on('click focus', function() { $('body').addClass('ios-input-focus'); $(window).scrollTo('bottom'); })
         .on('blur, focusout', function() { $('body').removeClass('ios-input-focus'); });
     }
 
