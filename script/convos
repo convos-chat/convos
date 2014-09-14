@@ -22,7 +22,7 @@ if ($ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)
   $ENV{MOJO_LOG_LEVEL} ||= 'debug';
   $ENV{MOJO_REDIS_DEBUG} //= 1;
 
-  if (@ARGV and $ARGV[0] ne 'backend') {
+  if (!@ARGV or $ARGV[0] ne 'backend') {
     $ENV{CONVOS_MANUAL_BACKEND}   //= 1;
     $ENV{MOJO_ASSETPACK_NO_CACHE} //= 1;
   }
