@@ -101,28 +101,6 @@ sub reset {
   return $self;
 }
 
-=head2 send_convos_message
-
-  $self = $self->send_convos_message($login, $message);
-  $self = $self->send_convos_message($login, $message, $cb);
-
-Used to add a C<$message> to the user C<$login>.
-
-=cut
-
-sub send_convos_message {
-  my ($self, $login, $message, @cb) = @_;
-  my $time = time;
-
-  local $CONVOS_MESSAGE{message}   = $message;
-  local $CONVOS_MESSAGE{timestamp} = $time;
-  local $CONVOS_MESSAGE{uuid}      = Mojo::Util::md5_sum($time . $message);    # not really an uuid
-
-  $self->redis->zadd("user:$login:connection:convos:msg", $CONVOS_MESSAGE{timestamp}, j(\%CONVOS_MESSAGE), @cb);
-
-  $self;
-}
-
 =head2 start
 
 Will fetch connection information from the database and try to connect to them.
