@@ -1,4 +1,4 @@
-## 0.84
+## 0.84 (2014-09-14)
 - Fix update of current nick()
 - Fix refreshing conversation and navbar when clicking back/forward buttons in browser #111
 - Fix vendor/bin/carton can be run with Perl 5.12 #144

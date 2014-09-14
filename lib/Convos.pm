@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.83
+0.84
 
 =head1 DESCRIPTION
 
@@ -150,7 +150,7 @@ use Convos::Core;
 use Convos::Core::Util ();
 use Convos::Upgrader;
 
-our $VERSION = '0.83';
+our $VERSION = '0.84';
 
 $ENV{CONVOS_DEFAULT_CONNECTION} //= 'irc.perl.org:7062';
 
