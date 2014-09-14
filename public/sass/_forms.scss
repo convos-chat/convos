@@ -89,6 +89,13 @@ button, .button {
   border: 2px solid darken(#fff, 40%);
   @include border-radius(3px);
 }
+.error {
+  button, .button {
+    background-color: lighten($errorColor, 54%);
+    border-color: $errorColor;
+  }
+}
+
 button { vertical-align: baseline; } // make <a> and <button> align. at least in chrome
 button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
 button.confirm, a.confirm { color: #900; border: 2px solid #900; }
