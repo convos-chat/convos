@@ -13,6 +13,7 @@
     '/close',
     '/part ',
     '/names ',
+    '/list',
     '/mode ',
     '/topic ',
     '/reconnect',
