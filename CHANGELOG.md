@@ -14,6 +14,7 @@
 - Change to showing server messages after first time register #121
 - Change to Mojolicious::Plugin::FontAwesome4 for icons #162
 - Remove support for Heroku #177
+- Include NOTICE in messages
 
 ## 0.83 (2014-09-01)
 - Fix highlighting of multiple channels #137
