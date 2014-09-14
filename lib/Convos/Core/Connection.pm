@@ -84,7 +84,7 @@ has log   => sub { Mojo::Log->new };
 has login => 0;
 has redis => sub { die 'redis connection required in constructor' };
 
-my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg ctcp_action /;
+my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg ctcp_action irc_notice/;
 my @ADD_SERVER_MESSAGE_EVENTS = qw/
   irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd
   irc_rpl_welcome rpl_luserclient
