@@ -171,16 +171,7 @@ has core => sub {
   my $core = Convos::Core->new(redis => $self->redis);
 
   $core->log($self->log);
-
-  if ($ENV{CONVOS_ELASTICSEARCH_URL}) {
-    require Convos::Archive::ElasticSearch;
-    $core->archive(Convos::Archive::ElasticSearch->new);
-    $core->archive->url($ENV{CONVOS_ELASTICSEARCH_URL});
-  }
-  else {
-    $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
-  }
-
+  $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
   $core;
 };
 

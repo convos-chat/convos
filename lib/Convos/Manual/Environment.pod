@@ -32,15 +32,6 @@ Set CONVOS_DEBUG to a true value for extra debug output to STDERR.
 Set CONVOS_DISABLE_AUTO_EMBED to a true value to disable links from expanding
 into images, movies or other dynamic content.
 
-=head2 CONVOS_ELASTICSEARCH_URL
-
-Set CONVOS_ELASTICSEARCH_URL to the location of your
-L<Elasticsearch|http://www.elasticsearch.org>. server if you want Convos
-to archive messages to it. Example:
-C<CONVOS_ELASTICSEARCH_URL=http://localhost:9200>.
-
-This variable will override L<CONVOS_ARCHIVE_DIR>.
-
 =head2 CONVOS_MANUAL_BACKEND
 
 Disable the frontend from automatically starting the backend.
