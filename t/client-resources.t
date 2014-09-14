@@ -33,7 +33,7 @@ $t->get_ok('/')->header_is('Location', '/magnet/batman', 'Redirect on last conve
 $t->get_ok('/chat/command-history')->status_is(200)->content_is('[]');
 
 $t->get_ok('/chat/notifications')->status_is(200)->element_exists('ul[data-notifications]')
-  ->text_is('ul h3', 'No notifications');
+  ->text_is('ul h3', 'No Notifications');
 
 $t->get_ok('/chat/notifications', {Accept => 'application/json'})->status_is(200)->content_type_is('application/json');
 

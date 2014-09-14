@@ -74,4 +74,4 @@
 ^\.editorconfig
 ^\.travis.yml
 \.sass-cache
-^irc_logs_test
+^irc_logs
