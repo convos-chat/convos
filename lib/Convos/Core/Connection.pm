@@ -1036,7 +1036,7 @@ sub _publish_and_save {
     $self->redis->zadd("$self->{path}:msg", $data->{timestamp}, $message);
   }
 
-  $self->emit_safe(save => $data);
+  $self->emit(save => $data);
 }
 
 sub DESTROY {
