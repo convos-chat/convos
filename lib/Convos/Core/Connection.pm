@@ -101,16 +101,9 @@ my @OTHER_EVENTS = qw/
 
 has _irc => sub {
   my $self = shift;
-  my $irc;
+  my $irc = Mojo::IRC->new(debug_key => join ':', $self->login, $self->name);
 
-  if ($self->name eq 'loopback') {
-    require Convos::Loopback;
-    return Convos::Loopback->new(connection => $self);
-  }
-  else {
-    $irc = Mojo::IRC->new(debug_key => join ':', $self->login, $self->name);
-    $irc->parser(Parse::IRC->new(ctcp => 1));
-  }
+  $irc->parser(Parse::IRC->new(ctcp => 1));
 
   Scalar::Util::weaken($self);
   $irc->register_default_event_handlers;
