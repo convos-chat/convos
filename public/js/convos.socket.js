@@ -7,6 +7,9 @@
     socket = new ReconnectingWebSocket({ url: socketUrl, ping_protocol: [ 'PING', 'PONG' ] });
     socket.onmessage = receiveMessage;
     socket.onpong = enableInput;
+    socket.ontimeout = function() {
+      convos.makeMessage('I am unable to connect to Convos. Maybe you have lost connection to internet or there is a proxy blocking WebSockets? <a href="" class="button">Reconnect</a>').addClass('error').addToMessages();
+    };
     socket.onclose = function() { convos.input.addClass('disabled'); };
     socket.onopen = function(e) {
       enableInput();

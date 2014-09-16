@@ -107,6 +107,7 @@ div.messages {
 
     &.hidden { display: none !important; }
 
+    button, .button { padding: 2px 4px; }
     div.question { padding-left: 50px; }
     img.avatar, i.avatar { float: left; max-width: 40px; font-size: 40px; }
     h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
@@ -128,6 +129,7 @@ div.messages {
       padding-right: 2px;
     }
   }
+
   @media (max-width: $responsiveWidth) {
     li { padding: 4px $bodyGutterSmall; }
   }

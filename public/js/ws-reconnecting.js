@@ -57,7 +57,7 @@ function ReconnectingWebSocket(args) {
 
     // attributes
     this.buffer = []
-    this.connect_timeout = args.timeout || 2000;
+    this.connect_timeout = args.timeout || 10000;
     this.debug = args.debug || location.href.indexOf('ReconnectingWebSocketDebugAll=1') > 0;
     this.ping_protocol = args.ping_protocol || []; // example: [ 'PING', 'PONG' ];
     this.protocols = args.protocols || [];
@@ -71,7 +71,13 @@ function ReconnectingWebSocket(args) {
         emit('onconnecting', reconnecting);
         forced_close = false;
         ws = new WebSocket(self.url, self.protocols);
-        connect_tid = setTimeout(function() { ws.close(); }, self.connect_timeout);
+
+        if (!connect_tid) {
+          connect_tid = setTimeout(
+            function() { connect_tid = 0; forced_close = true; emit('ontimeout'); },
+            self.connect_timeout
+          );
+        }
 
         ws.onopen = function(event) {
             clearTimeout(connect_tid);
@@ -83,14 +89,13 @@ function ReconnectingWebSocket(args) {
             while(self.buffer.length) self.send(self.buffer.shift());
         };
         ws.onclose = function(event) {
-            clearTimeout(connect_tid);
             delete self.waiting_for_pong;
             if (forced_close) {
                 readyState('CLOSED', 'onclose');
                 emit('onclose', event);
             } else {
                 readyState('CONNECTING', 'onclose');
-                setTimeout(function() { connect(); }, self.reconnect_interval);
+                setTimeout(function() { if (!forced_close) connect(); }, self.reconnect_interval);
             }
         };
         ws.onmessage = function(event) {
@@ -144,7 +149,7 @@ function ReconnectingWebSocket(args) {
 
     var emit = function(name, args) {
       if (self.debug) console.debug('ReconnectingWebSocket', 'emit', name, args);
-      if (self[name]) self[name](args);
+      if (self[name]) self[name].call(self, args);
     };
 
     setInterval(
