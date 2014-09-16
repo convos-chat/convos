@@ -225,7 +225,8 @@
       var $messages = $('div.messages ul'); // injected to the document using pjax
       var draw = $doc.find('[data-draw]').attr('data-draw');
 
-      convos.nicks.reset();
+      convos.emit('conversation-loaded', $doc);
+
       convos.current.channels = {};
       convos.current.end_time = parseFloat($messages.attr('data-end-time'));
       convos.current.start_time = parseFloat($messages.attr('data-start-time'));

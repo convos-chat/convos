@@ -72,7 +72,6 @@
   var receiveMessage = function(e) {
     var $message = $(e.data);
     var event_name = $message.attr('data-event') || 'message';
-    var action = $message.attr('class').match(/^(nick|conversation)-(\w+)/);
     var event_args = $message.attr('data-args');
 
     idleTimer();
@@ -86,7 +85,9 @@
     }
 
     if ($message.hasClass('highlight')) receiveHighlightMessage($message);
-    if (action && convos[action[1] + 's']) convos[action[1] + 's'][action[2]]($message);
+
+    // could change "to_current"
+    convos.emit.apply(this, [event_name].concat(event_args ? $.parseJSON($('<textarea />').html(event_args).text()) : [$message]));
 
     if ($message.data('to_current')) {
       if ($message.attr('data-state')) convos.current.state = $message.attr('data-state');
@@ -97,7 +98,6 @@
     }
 
     if (convos.at_bottom) $(window).scrollTo('bottom');
-    convos.emit.apply(this, [event_name].concat(event_args ? $.parseJSON($('<textarea />').html(event_args).text()) : [$message]));
   };
 
   var receiveOtherMessage = function($message) {
