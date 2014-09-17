@@ -1,4 +1,4 @@
-<li class="nick-quit" data-network="<%= $network %>" data-target="" data-nick="<%= $nick %>">
+<li class="nick-quit" data-event="nick-quit" data-network="<%= $network %>" data-target="" data-nick="<%= $nick %>">
   %= timestamp $timestamp
   <div class="content">
     <b class="nick"><%= $nick %></b> quit.

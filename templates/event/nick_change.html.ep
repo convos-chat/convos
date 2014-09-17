@@ -1,4 +1,4 @@
-<li class="nick-change" data-network="<%= $network %>" data-target="">
+<li class="nick-change" data-event="nick-change" data-network="<%= $network %>" data-target="">
   %= timestamp $timestamp
   <div class="content"><b class="old"><%= $old_nick %></b> changed nick to <%= link_to $new_nick, view => { network => $network, target => $new_nick }, class => 'nick autocomplete' %>.</div>
 </li>
