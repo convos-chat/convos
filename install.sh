@@ -4,7 +4,7 @@ CURL=$(which curl);
 GIT=$(which git);
 PERL=$(which perl);
 WGET=$(which wget);
-REPO="git@github.com:Nordaaker/convos.git";
+REPO="https://github.com/Nordaaker/convos.git";
 TAR_GZ="https://codeload.github.com/Nordaaker/convos/tar.gz/release";
 
 if [ -z $PERL ]; then
