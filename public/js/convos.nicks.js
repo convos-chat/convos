@@ -71,6 +71,7 @@
     if (!convos.nicks.list.length && $('.messages li.message').length > 1) $message.data('to_current', false); // only show in conversation on manual "/list"
     $('form.sidebar ul li.nick.status').remove();
     $message.find('[data-nick]').each(function() { add($(this).data('nick')); });
+    updateNumberOfNicks();
   });
 
   convos.on('nick-quit', function($message) {
