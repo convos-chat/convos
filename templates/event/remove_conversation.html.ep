@@ -1,1 +1,1 @@
-<li data-event="conversation-remove" data-network="<%= $network %>" data-target="<%= $target %>"></li>
+<li class="conversation-remove" data-event="conversation-remove" data-network="<%= $network %>" data-target="<%= $target %>"></li>

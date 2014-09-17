@@ -163,18 +163,12 @@ div.messages {
     div.timestamp { color: #fee; }
     h3 { color: #333; }
   }
-  li[data-event~="nick-change"],
-  li[data-event~="nick-joined"],
-  li[data-event~="nick-parted"],
-  li[data-event~="nick-quit"],
-  li.notice, li.topic, li.whois {
+  li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     color: #999;
     padding-top: 2px;
     a { color: #999; }
   }
-  li[data-event~="nick-change"],
-  li[data-event~="nick-parted"],
-  li[data-event~="nick-quit"] {
+  li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
   }
 
