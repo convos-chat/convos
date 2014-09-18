@@ -185,8 +185,24 @@ Will delete data from session.
 
 sub logout {
   my $self = shift;
-  $self->session(login => undef);
-  $self->redirect_to('/');
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      return $delay->pass unless $self->session('kiosk');
+
+      # TODO: Need to add delete_user() to clean up connection on logout
+      # from kiosk mode account.
+      # https://github.com/Nordaaker/convos/issues/104
+      return $self->app->core->delete_user($self->session('login'), $delay->begin);
+    },
+    sub {
+      my ($delay, $error) = @_;
+      die $error if $error;
+      $self->session(login => undef);
+      $self->redirect_to('/');
+    },
+  );
 }
 
 =head2 edit
