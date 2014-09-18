@@ -16,6 +16,7 @@ use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
 use Time::HiRes qw( time );
+use constant TEMP_USER_TIMEOUT => $ENV{CONVOS_TEMP_USER_TIMEOUT} || 300;
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
 my %CONVOS_MESSAGE = (
