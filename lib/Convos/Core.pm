@@ -180,7 +180,9 @@ sub _start_control_channel {
     login => $str,
     name => $str,
     nick => $str,
+    password => $str,
     server => $str, # irc_server[:port]
+    username => $str,
   }, $callback);
 
 Add a new connection to redis. Will create a new connection id and

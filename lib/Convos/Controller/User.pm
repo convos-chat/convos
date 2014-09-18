@@ -59,10 +59,12 @@ sub kiosk {
 
   $login = sprintf 'kiosk:%s:%s:%s', time, $$, ++$KIOSK_USER;
   $input->{email} ||= "$login\@kiosk.convos.by";
+  $input->{nick}  ||= Convos::Core::Util::random_name();
   $input->{login}          = $login;
   $input->{name}           = pretty_server_name($input->{server}) if $input->{server};
   $input->{password}       = md5_sum $self->session->{login} . rand 1000;
   $input->{password_again} = $input->{password};
+  $input->{username}       = md5_sum $self->tx->remote_address;                          # make it easier to ban a user
 
   $self->delay(
     sub {
@@ -71,14 +73,15 @@ sub kiosk {
     },
     sub {
       my ($delay, $validation, $user) = @_;
-      return $self->render_exception('Generated values failed!') if $validation;
+      return $self->render_exception('Generated kiosk mode user values failed.') if $validation;
       return $self->app->core->add_connection($self->validation, $delay->begin);
     },
     sub {
       my ($delay, $validation, $conn) = @_;
+      warn Data::Dumper::Dumper($validation);
 
       # TODO: What to do on error?
-      return $self->render_exception('Generated values failed!') if $validation;
+      return $self->render_exception('Generated kiosk mode connection values failed.') if $validation;
       $self->session(login => $login, kiosk => 1);
       $self->redirect_to('view.network', network => $conn->{name} || 'convos');
     },
