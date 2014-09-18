@@ -78,7 +78,6 @@ sub kiosk {
     },
     sub {
       my ($delay, $validation, $conn) = @_;
-      warn Data::Dumper::Dumper($validation);
 
       # TODO: What to do on error?
       return $self->render_exception('Generated kiosk mode connection values failed.') if $validation;
