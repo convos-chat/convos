@@ -7,10 +7,13 @@ Convos::Controller::User - Mojolicious controller for user data
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Convos::Core::Util qw/ as_id id_as /;
+use Convos::Core::Util qw( as_id id_as pretty_server_name );
 use Mojo::Asset::File;
 use Mojo::Date;
+use Mojo::Util 'md5_sum';
 use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
+
+my $KIOSK_USER = 1;
 
 =head1 METHODS
 
@@ -34,6 +37,52 @@ sub auth {
   }
 
   return 0;
+}
+
+=head2 kiosk
+
+Used to chat with a temporay profile. Example URL:
+
+=cut
+
+sub kiosk {
+  my $self  = shift;
+  my $login = $self->session('login');
+  my $input = $self->validation->input;
+
+  if ($login) {
+    return $self->redirect_to('/');
+  }
+  if (!$input or !%$input) {
+    return $self->render(layout => 'tactile');
+  }
+
+  $login = sprintf 'kiosk:%s:%s:%s', time, $$, ++$KIOSK_USER;
+  $input->{email} ||= "$login\@kiosk.convos.by";
+  $input->{login}          = $login;
+  $input->{name}           = pretty_server_name($input->{server}) if $input->{server};
+  $input->{password}       = md5_sum $self->session->{login} . rand 1000;
+  $input->{password_again} = $input->{password};
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $self->app->core->add_user($self->validation, $delay->begin);
+    },
+    sub {
+      my ($delay, $validation, $user) = @_;
+      return $self->render_exception('Generated values failed!') if $validation;
+      return $self->app->core->add_connection($self->validation, $delay->begin);
+    },
+    sub {
+      my ($delay, $validation, $conn) = @_;
+
+      # TODO: What to do on error?
+      return $self->render_exception('Generated values failed!') if $validation;
+      $self->session(login => $login, kiosk => 1);
+      $self->redirect_to('view.network', network => $conn->{name} || 'convos');
+    },
+  );
 }
 
 =head2 login
@@ -94,7 +143,6 @@ See L</login>.
 
 sub register {
   my $self        = shift;
-  my $validation  = $self->validation;
   my $invite_code = $ENV{CONVOS_INVITE_CODE};
   my ($output);
 
@@ -112,35 +160,15 @@ sub register {
     return $self->render('index');
   }
 
-  $validation->required('login')->like(qr/^\w+$/)->size(3, 15);
-  $validation->required('email')->like(qr/.\@./);
-  $validation->required('password_again')->equal_to('password');
-  $validation->required('password')->size(5, 255);
-  $output = $validation->output;
-
   $self->delay(
     sub {
       my $delay = shift;
-      $self->redis->sismember('users', $output->{login}, $delay->begin);
-      $self->redis->scard('users', $delay->begin);
-    },
-    sub {    # Check invitation unless first user
-      my ($delay, $exists) = @_;
-
-      $validation->error(login => ['taken']) if $exists;
-      return $self->render('index', status => 400) if $validation->has_error;
-
-      $self->logf(debug => '[reg] New user login=%s', $output->{login}) if DEBUG;
-      $self->session(login => $output->{login});
-      $self->redis->hmset(
-        "user:$output->{login}" =>
-          {digest => $self->_digest($output->{password}), email => $output->{email}, avatar => $output->{email}},
-        $delay->begin
-      );
-      $self->redis->sadd(users => $output->{login}, $delay->begin);
+      $self->app->core->add_user($self->validation, $delay->begin);
     },
     sub {
-      my ($delay, @saved) = @_;
+      my ($delay, $validation, $user) = @_;
+      return $self->render('index', status => 400) if $validation;
+      $self->session(login => $user->{login});
       $self->redirect_to('wizard');
     }
   );
@@ -220,10 +248,6 @@ sub _edit {
       $self->render;
     },
   );
-}
-
-sub _digest {
-  crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
 =head1 COPYRIGHT

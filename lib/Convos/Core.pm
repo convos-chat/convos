@@ -232,6 +232,78 @@ sub add_connection {
   );
 }
 
+=head2 add_user
+
+  $self->add_connection(
+    {
+      login => $str,
+      email => $str,
+      password => $str,
+      password_again => $str,
+      temporary => 0,
+    },
+    sub {
+      my ($self, $validation, $user) = @_;
+      # ...
+    },
+  );
+
+Add a new user to redis.
+
+=cut
+
+sub add_user {
+  my ($self, $input, $cb) = @_;
+  my $validation = $self->_validation($input, qw( login ));
+  my $output;
+
+  $validation->required('email')->like(qr/.\@./);
+  $validation->required('password_again')->equal_to('password');
+  $validation->required('password')->size(5, 255);
+
+  if ($validation->has_error) {
+    $self->$cb($validation, undef);
+    return $self;
+  }
+
+  $output = $validation->output;
+
+  warn "[core:$output->{login}] add ", _dumper($output), "\n" if DEBUG;
+  Scalar::Util::weaken($self);
+  Mojo::IOLoop->delay(
+    sub {
+      my $delay = shift;
+      $self->redis->sismember('users', $output->{login}, $delay->begin);
+      $self->redis->scard('users', $delay->begin);
+    },
+    sub {
+      my ($delay, $exists) = @_;
+
+      $validation->error(login => ['taken']) if $exists;
+      return $self->$cb($validation, undef) if $validation->has_error;
+
+      local $output->{digest} = $self->_digest($output->{password});
+      local $output->{avatar} = $output->{email};
+      $self->redis->hmset("user:$output->{login}" => $output, $delay->begin);
+      $self->redis->sadd(users => $output->{login}, $delay->begin);
+
+      if ($validation->input->{temporary}) {
+
+        # The idea is that Core could check if the user still exists in
+        # database and clean up connections unless the user exists.
+        # The time-to-live could be moved input the future by Convos::Controller::Chat
+        $self->redis->expire("user:$output->{login}" => TEMP_USER_TIMEOUT, $delay->begin);
+      }
+    },
+    sub {
+      my ($delay, @saved) = @_;
+      $self->$cb(undef, $output);
+    },
+  );
+
+  return $self;
+}
+
 =head2 update_connection
 
   $self->update_connection({
@@ -455,6 +527,10 @@ sub login {
       }
     }
   );
+}
+
+sub _digest {
+  crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
 sub _dumper {    # function
