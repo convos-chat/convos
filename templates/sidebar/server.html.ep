@@ -7,9 +7,11 @@
 <li>
   <button class="link" name="cmd" value="restart">Restart</button>
 </li>
+% unless (session 'kiosk') {
 <li>
   %= link_to 'Edit', active_class('connection.edit', { name => $network })
 </li>
 <li>
   %= link_to 'Delete', active_class('connection.delete', { name => $network })
 </li>
+% }

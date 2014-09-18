@@ -4,9 +4,11 @@
 <li>
   <a href="cmd:///topic">Get topic</a>
 </li>
+% unless (session 'kiosk') {
 <li>
   <a href="cmd:///close <%= $target%>">Close chat</a>
 </li>
+% }
 <li>
   <a href="cmd:///help">Help</a>
 </li>

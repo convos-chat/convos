@@ -3,9 +3,11 @@
 % if ($full_page) {
   % my $n_notifications = stash('n_notifications') || 0;
   <div class="right">
+  % unless (session 'kiosk') {
     <a href="sidebar://form.conversations" title="Show conversations" class="conversations btn-sidebar">
       %= fa 'bars'
     </a>
+  % }
     <a href="sidebar://div.notification-list" title="Show notifications" class="mention notifications btn-sidebar">
       %= fa 'bell-o'
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications || '' %></b>
