@@ -3,7 +3,6 @@
 
   convos.nicks = { list: [] };
 
-  var timeout = 30 * 1000;
 
   var add = function(nick) {
     var $ul = $('form.sidebar ul');
@@ -56,14 +55,12 @@
       add(new_nick);
     }
 
-    setTimeout(function() { $message.fadeOut(); }, timeout);
   });
 
   convos.on('nick-joined', function($message) {
     if (!$message.data('to_current')) return;
     add($message.data('nick'));
     updateNumberOfNicks();
-    setTimeout(function() { $message.fadeOut(); }, timeout);
   });
 
   convos.on('nick-list', function($message) {
@@ -79,14 +76,12 @@
     $message.data('to_current', !!$.grep(convos.nicks.list, function(n, i) { return n == nick; }).length);
     remove(nick);
     updateNumberOfNicks();
-    setTimeout(function() { $message.fadeOut(); }, timeout);
   });
 
   convos.on('nick-parted', function($message) {
     if (!$message.data('to_current')) return;
     remove($message.data('nick'));
     updateNumberOfNicks();
-    setTimeout(function() { $message.fadeOut(); }, timeout);
   });
 
 })(jQuery);
