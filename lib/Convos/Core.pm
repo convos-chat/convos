@@ -354,6 +354,59 @@ sub delete_connection {
   );
 }
 
+=head2 delete_user
+
+  $self = $self->delete_user(
+            { login => $str },
+            sub { my ($self, $err) = @_; ... },
+          );
+
+This method will delete a user and all the conversations, connections, and
+related data. It will also stop all the connections.
+
+=cut
+
+sub delete_user {
+  my ($self, $input, $cb) = @_;
+  my $redis = $self->redis;
+  my $login = $input->{login};
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $redis->smembers("user:$login:connections", $delay->begin);
+      $redis->zrange("user:$login:conversations", $delay->begin);
+    },
+    sub {
+      my ($delay, $connections, $conversations) = @_;
+
+      $delay->pass;
+
+      for my $name (@$connections) {
+        $redis->srem("connections", "$login:$name", $delay->begin);
+        $redis->del("user:$login:connection:$name",     $delay->begin);
+        $redis->del("user:$login:connection:$name:msg", $delay->begin);
+      }
+      for my $name (@$conversations) {
+        $redis->del("user:$login:connection:$name",     $delay->begin);
+        $redis->del("user:$login:connection:$name:msg", $delay->begin);
+      }
+    },
+    sub {
+      my ($delay, @deleted) = @_;
+      $redis->del("user:$login:conversations", $delay->begin);
+      $redis->del("user:$login:connections",   $delay->begin);
+      $redis->del("user:$login",               $delay->begin);
+      $redis->srem("users", $login, $delay->begin);
+
+      delete $self->{connections}{$login};    # stop all connections
+      $self->$cb('');
+    },
+  );
+
+  return $self;
+}
+
 =head2 ctrl_stop
 
   $self->ctrl_stop($login, $server);
