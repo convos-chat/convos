@@ -31,6 +31,10 @@
       <dd>Change your wanted nick.</dd>
       <dt><a href="complete:///reconnect" class="autocomplete">/reconnect</a></dt>
       <dd>Restart the current connection.</dd>
+      <dt><a href="complete:///ignore" class="autocomplete">/ignore &lt;target&gt; &lt;type&gt;</a></dt>
+      <dd>Ignore ALL/MESSAGES/CTCP/ACTIONS/EVENTS from target (hostmask or channel). Send without argument to list current ignores.</dd>
+      <dt><a href="complete:///ignore" class="autocomplete">/ignore &lt;target&gt; &lt;type&gt;</a></dt>
+      <dd>Remove ignore matching type & target</dd>
     </dl>
   </div>
   <h3>Keyboard Shortcuts</h3>
