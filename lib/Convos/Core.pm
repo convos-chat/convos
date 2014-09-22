@@ -375,29 +375,21 @@ sub delete_user {
     sub {
       my ($delay) = @_;
       $redis->smembers("user:$login:connections", $delay->begin);
-      $redis->zrange("user:$login:conversations", $delay->begin);
+      $redis->keys("user:$login:*", $delay->begin);
     },
     sub {
-      my ($delay, $connections, $conversations) = @_;
+      my ($delay, $connections, $keys) = @_;
 
-      $delay->pass;
+      $redis->del(@$keys, $delay->begin) if @$keys;
+      $redis->del("user:$login", $delay->begin);
+      $redis->srem("users", $login, $delay->begin);
 
       for my $name (@$connections) {
         $redis->srem("connections", "$login:$name", $delay->begin);
-        $redis->del("user:$login:connection:$name",     $delay->begin);
-        $redis->del("user:$login:connection:$name:msg", $delay->begin);
-      }
-      for my $name (@$conversations) {
-        $redis->del("user:$login:connection:$name",     $delay->begin);
-        $redis->del("user:$login:connection:$name:msg", $delay->begin);
       }
     },
     sub {
       my ($delay, @deleted) = @_;
-      $redis->del("user:$login:conversations", $delay->begin);
-      $redis->del("user:$login:connections",   $delay->begin);
-      $redis->del("user:$login",               $delay->begin);
-      $redis->srem("users", $login, $delay->begin);
 
       delete $self->{connections}{$login};    # stop all connections
       $self->$cb('');
