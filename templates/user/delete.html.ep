@@ -1,0 +1,20 @@
+% title 'Delete profile';
+<div class="landing-page">
+  <header class="row">
+    <h1>
+      <span class="logo">Convos</span>
+      <small>Delete Profile</small>
+    </h1>
+  </header>
+  <div class="row">
+    %= form_for 'user.delete', method => 'post', begin
+      <p>
+        Are you sure you want to delete your profile and all associated data?
+      </p>
+      <div class="actions">
+        <button type="submit" class="confirm">Yes</button>
+        %= link_to 'No', 'index', class => 'button'
+      </div>
+    % end
+  </div>
+</div>

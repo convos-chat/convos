@@ -329,6 +329,7 @@ sub _private_routes {
   $r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
   $r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $r->any('/profile')->to('user#edit')->name('user.edit');
+  $r->any('/profile/delete')->to('user#delete')->name('user.delete');
   $r->post('/profile/timezone/offset')->to('user#tz_offset');
   $r->get('/wizard')->to('connection#wizard')->name('wizard');
 
