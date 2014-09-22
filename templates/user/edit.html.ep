@@ -1,7 +1,7 @@
 % title 'Edit user';
 % stash sidebar => 'convos';
 <ul>
-  <li class="with-padding" data-event="profile">
+  <li class="with-padding">
     <h2>Edit Profile</h2>
     % my $err;
     %= form_for 'user.edit', method => 'post', class => 'horizontal', begin
@@ -19,11 +19,6 @@
         <p class="error">Invalid avatar.</p>
       % }
         <p class="help">Enter your Facebook username or <%= link_to 'Gravatar', 'http://gravatar.com', target => '_blank' %> email.</p>
-      </div>
-      <div class="form-group notifications">
-        <label for="avatar">Notifications</label>
-        <button type="button">Unknown</button>
-        <p class="help">This setting need to be changed in your browser.</p>
       </div>
       <div class="actions">
         <button type="submit">Update</button>

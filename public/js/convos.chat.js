@@ -58,24 +58,6 @@
     $('div.messages ul .help').each(function() { if ($message[0] != this) $(this).remove(); });
   });
 
-  convos.on('profile', function($message) {
-    var btn = $message.find('.form-group.notifications').find('button');
-    var p = Notification.permission;
-
-    btn.text(p == 'granted' ? 'Enabled' : p);
-
-    if (Notification.permission == 'granted') {
-      btn.click(function(e) { $.notify.itWorks(); });
-    }
-    else {
-      Notification.requestPermission(function(s) {
-        if (s) Notification.permission = s;
-        btn.text(s);
-        $.notify.itWorks();
-      });
-    }
-  });
-
   convos.getNewerMessages = function(e) {
     if (e) e.preventDefault();
     if (!convos.current.end_time) return;
@@ -211,7 +193,6 @@
     $('div.messages').on('pjax:success', function(e, data, status_text, xhr, options) {
       var $doc = data.match(/<\w/) ? $(data) : $('body');
       var $messages = $('div.messages ul'); // injected to the document using pjax
-      var event_name = $message.attr('data-event');
 
       convos.emit('conversation-loaded', $doc);
 
@@ -238,7 +219,6 @@
       }
 
       if (!navigator.is_touch_device) focusFirst();
-      if (event_name) convos.emit.call(this, event_name, $doc);
       if (data) $('body').hideSidebar();
 
       convos.at_bottom = true; // make "resize" scroll to bottom
