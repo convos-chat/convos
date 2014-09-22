@@ -5,33 +5,7 @@
   convos.at_bottom = true; // start ui scrolled to bottom
   convos.at_bottom_threshold = !!('ontouchstart' in window) ? 110 : 40;
   convos.current = {};
-  convos.draw = {};
   convos.isChannel = function(str) { return str.match(/^[#&]/); };
-
-  convos.draw['profile'] = function() {
-    var btn = $('.form-group.notifications').find('button');
-    var p = Notification.permission;
-
-    btn.text(p == 'granted' ? 'Enabled' : p);
-
-    if (Notification.permission == 'granted') {
-      btn.click(function(e) { $.notify.itWorks(); });
-    }
-    else {
-      Notification.requestPermission(function(s) {
-        if (s) Notification.permission = s;
-        btn.text(s);
-        $.notify.itWorks();
-      });
-    }
-  };
-
-  convos.draw['ui'] = function() {
-    var menu_width = 0;
-    $('nav .right').add('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
-    $('nav a.conversations')[ menu_width > $('body').outerWidth() ? 'addClass' : 'removeClass' ]('overlapping');
-    if (convos.at_bottom) $(window).scrollTo('bottom');
-  };
 
   convos.on('channel-info', function(network, name, info) {
     if (network != convos.current.network) return;
@@ -84,6 +58,24 @@
     $('div.messages ul .help').each(function() { if ($message[0] != this) $(this).remove(); });
   });
 
+  convos.on('profile', function($message) {
+    var btn = $message.find('.form-group.notifications').find('button');
+    var p = Notification.permission;
+
+    btn.text(p == 'granted' ? 'Enabled' : p);
+
+    if (Notification.permission == 'granted') {
+      btn.click(function(e) { $.notify.itWorks(); });
+    }
+    else {
+      Notification.requestPermission(function(s) {
+        if (s) Notification.permission = s;
+        btn.text(s);
+        $.notify.itWorks();
+      });
+    }
+  });
+
   convos.getNewerMessages = function(e) {
     if (e) e.preventDefault();
     if (!convos.current.end_time) return;
@@ -128,7 +120,6 @@
       var $message = $(this);
       var $messages = $('div.messages ul');
       var $same = $messages.children('li').not('.message-pending').eq(func == 'prepend' ? 0 : -1);
-      var draw = $message.attr('data-draw');
       var same_nick = $same.data('sender') || '';
 
       if ($message.hasClass('message') && $same.hasClass('message') && same_nick == $message.data('sender')) {
@@ -136,9 +127,6 @@
       }
       if (!$message.hasClass('hidden')) {
         $messages[func || 'append']($message);
-      }
-      if (draw) {
-        convos.draw[draw]($message);
       }
     });
   };
@@ -223,7 +211,7 @@
     $('div.messages').on('pjax:success', function(e, data, status_text, xhr, options) {
       var $doc = data.match(/<\w/) ? $(data) : $('body');
       var $messages = $('div.messages ul'); // injected to the document using pjax
-      var draw = $doc.find('[data-draw]').attr('data-draw');
+      var event_name = $message.attr('data-event');
 
       convos.emit('conversation-loaded', $doc);
 
@@ -250,11 +238,11 @@
       }
 
       if (!navigator.is_touch_device) focusFirst();
-      if (draw) convos.draw[draw](e);
+      if (event_name) convos.emit.call(this, event_name, $doc);
       if (data) $('body').hideSidebar();
 
-      convos.at_bottom = true; // make convos.draw.ui scroll to bottom
-      convos.draw.ui(e);
+      convos.at_bottom = true; // make "resize" scroll to bottom
+      $(window).resize();
     });
   };
 
@@ -280,7 +268,12 @@
         .on('blur, focusout', function() { $('body').removeClass('ios-input-focus'); });
     }
 
-    $(window).on('resize', convos.draw.ui);
+    $(window).on('resize', function(e) {
+      var menu_width = 0;
+      $('nav .right').add('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
+      $('nav a.conversations')[ menu_width > $('body').outerWidth() ? 'addClass' : 'removeClass' ]('overlapping');
+      if (convos.at_bottom) $(window).scrollTo('bottom');
+    };
 
     $(window).on('scroll', function(e) {
       convos.at_bottom = $(this).scrollTop() + $(this).height() > $('body').height() - convos.at_bottom_threshold;

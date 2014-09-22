@@ -1,10 +1,10 @@
 % title 'Edit user';
 % stash sidebar => 'convos';
 <ul>
-  <li class="with-padding">
+  <li class="with-padding" data-event="profile">
     <h2>Edit Profile</h2>
     % my $err;
-    %= form_for 'user.edit', method => 'post', class => 'horizontal', 'data-draw' => 'profile', begin
+    %= form_for 'user.edit', method => 'post', class => 'horizontal', begin
       <div class="form-group email">
         <label for="email">Email</label>
         %= text_field 'email', id => 'email', placeholder => 'your-personal@email.com'
