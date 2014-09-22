@@ -390,8 +390,9 @@ sub delete_user {
     },
     sub {
       my ($delay, @deleted) = @_;
+      my $conns = delete $self->{connections}{$login};    # stop all connections
 
-      delete $self->{connections}{$login};    # stop all connections
+      $self->archive->flush($_) for values %$conns;
       $self->$cb('');
     },
   );

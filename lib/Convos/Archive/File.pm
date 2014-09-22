@@ -12,9 +12,9 @@ files on disk.
 =cut
 
 use Mojo::Base 'Convos::Archive';
-use File::Path 'make_path';
+use File::Path qw( make_path remove_tree );
 use File::Spec::Functions qw( catdir catfile );
-use Time::Piece ();
+use Time::Piece qw( gmtime );
 
 =head1 ATTRIBUTES
 
@@ -28,13 +28,23 @@ has log_dir => sub { die "log_dir() need to be defined in constructor"; };
 
 =head1 METHODS
 
+=head2 flush
+
+See L<Convos::Archive/flush>.
+
+=cut
+
+sub flush {
+  my ($self, $conn) = @_;
+  remove_tree(catdir $self->log_dir, $conn->login, $conn->name);
+  return $self;
+}
+
 =head2 save
 
 See L<Convos::Archive/save>.
 
 =cut
-
-use Time::Piece qw/gmtime/;
 
 sub save {
   my ($self, $conn, $message) = @_;
@@ -43,7 +53,7 @@ sub save {
   my @base = ($self->log_dir, $conn->login, $conn->name);
   push @base, $message->{target} if $message->{target};
   push @base, $ts->strftime('%y'), $ts->strftime('%m');
-  my $path = catdir(@base);
+  my $path = catdir @base;
   make_path $path unless $self->{paths}{$path}++;
 
   $path = catfile $path, $ts->strftime('%d.log');

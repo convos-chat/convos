@@ -15,6 +15,16 @@ use Mojo::Base -base;
 
 =head1 METHODS
 
+=head2 flush
+
+  $self = $self->flush($conn);
+
+Will flush all messages for a connection.
+
+=cut
+
+sub flush { $_[0]; }
+
 =head2 save
 
   $self = $self->save($connection, $data);
