@@ -131,6 +131,73 @@ sub query {
   return;
 }
 
+=head2 ignore <*|channel/mask> <ALL|CTCP|MESSAGES|ACTIONS|EVENTS>
+
+=cut
+
+sub ignore {
+  my ($self, $ignore, $dom) = @_;
+
+  my ($target, $type) = split /\s/, $ignore;
+  unless ($target) {
+
+    $self->redis->smembers(
+      "user:$login:ignores ",
+      sub {
+        my ($redis, $ignores) = @_;
+        $self->send_partial(
+          'event/server_message', %$dom,
+          status    => 400,
+          message   => "Ignores: <br>" . join("<br>", @$ignores),
+          timestamp => time
+        );
+      }
+    );
+    return;
+  }
+  $type ||= 'ALL';
+
+  # FIXME: NEED ACTUAL INPUT VALIDATION HERE
+
+  my $login = $self->session('login');
+  $self->redis->sadd(
+    "user:$login:ignores",
+    "$target $type",
+    sub {
+      $self->send_partial(
+        'event/server_message', %$dom,
+        status    => 400,
+        message   => "Added ignore for $type from $target",
+        timestamp => time
+      );
+    }
+  );
+  return;
+}
+
+=head2 unignore
+
+=cut
+
+sub unignore {
+  my ($self, $ignore, $dom) = @_;
+  my $login = $self->session('login');
+  $self->redis->srem(
+    "user:$login:ignores",
+    "$ignore",
+    sub {
+      my ($redis, $unig) = @_;
+      $self->send_partial(
+        'event/server_message', %$dom,
+        status    => 400,
+        message   => $unig ? "Unignored $ignore" : "Was not ignoring that",
+        timestamp => time
+      );
+    }
+  );
+  return;
+}
+
 =head2 reconnect
 
 =cut
