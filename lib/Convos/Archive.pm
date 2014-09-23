@@ -1,5 +1,7 @@
 package Convos::Archive;
 
+use Carp qw/croak/;
+
 =head1 NAME
 
 Convos::Archive - Convos message archiver
@@ -23,7 +25,7 @@ Will flush all messages for a connection.
 
 =cut
 
-sub flush { $_[0]; }
+sub flush { croak 'Method "flush" not implemented by subclass' }
 
 =head2 save
 
