@@ -2,6 +2,8 @@ use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
 
+is_deeply(redis_do('keys', 'user:doe*'), [], 'user:doe keys');
+
 redis_do(
   [hmset => 'user:doe',             digest => 'E2G3goEIb8gpw', email => 'e1@convos.by', avatar => 'a1@convos.by'],
   [sadd  => 'user:doe:connections', 'magnet'],
@@ -38,6 +40,16 @@ redis_do(
   $t->post_ok('/profile', form => {avatar => 'fbusername', email => 'e2@convos.by'})->status_is(200)
     ->element_exists('form input[name="email"][value="e2@convos.by"]')
     ->element_exists('form input[name="avatar"][value="fbusername"]');
+}
+
+{
+  diag 'test delete profile';
+
+  $t->get_ok('/profile/delete')->element_exists('form[action="/profile/delete"][method="post"]')
+    ->element_exists('button.confirm');
+
+  $t->post_ok('/profile/delete', form => {})->status_is(302)->header_is('Location', '/');
+  is_deeply(redis_do('keys', 'user:doe*'), [], 'user:doe keys after delete');
 }
 
 done_testing;

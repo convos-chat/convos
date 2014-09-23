@@ -87,6 +87,32 @@ sub kiosk {
   );
 }
 
+=head2 delete
+
+Render a delete user confirmation page on GET and deletes the logged in
+user on POST.
+
+=cut
+
+sub delete {
+  my $self = shift;
+
+  if ($self->req->method ne 'POST') {
+    return $self->render(layout => 'tactile');
+  }
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $self->app->core->delete_user({login => $self->session('login')}, $delay->begin);
+    },
+    sub {
+      my ($delay, $err) = @_;
+      $self->logout;
+    },
+  );
+}
+
 =head2 login
 
 Show the login form. Also responds to JSON requests with login status.
