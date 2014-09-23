@@ -24,6 +24,8 @@ our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
 our @EXPORT_OK = qw( as_id format_time id_as logf pretty_server_name $SERVER_NAME_RE );
 our @NAMES = map { split /\s+/ } <DATA>;
 
+my $LOGIN_ID = 1;
+
 =head1 FUNCTIONS
 
 =head2 as_id
@@ -57,6 +59,18 @@ sub format_time {
   my $format = shift;
 
   return decode_utf8($date->strftime($format));
+}
+
+=head2 generate_login_name
+
+  $str = generate_login_name();
+
+=cut
+
+sub generate_login_name {
+  my $name = pack('N', time) . pack('n', $$ % 0xffff);
+  $LOGIN_ID = ($LOGIN_ID + 1) % 0xffff;
+  unpack 'H*', $name . substr pack('V', $LOGIN_ID), 0, 3;
 }
 
 =head2 id_as

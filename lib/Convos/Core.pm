@@ -16,7 +16,6 @@ use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
 use Time::HiRes qw( time );
-use constant TEMP_USER_TIMEOUT => $ENV{CONVOS_TEMP_USER_TIMEOUT} || 300;
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
 my %CONVOS_MESSAGE = (
@@ -289,14 +288,6 @@ sub add_user {
       local $output->{avatar} = $output->{email};
       $self->redis->hmset("user:$output->{login}" => $output, $delay->begin);
       $self->redis->sadd(users => $output->{login}, $delay->begin);
-
-      if ($validation->input->{temporary}) {
-
-        # The idea is that Core could check if the user still exists in
-        # database and clean up connections unless the user exists.
-        # The time-to-live could be moved input the future by Convos::Controller::Chat
-        $self->redis->expire("user:$output->{login}" => TEMP_USER_TIMEOUT, $delay->begin);
-      }
     },
     sub {
       my ($delay, @saved) = @_;

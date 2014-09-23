@@ -11,9 +11,7 @@ use Convos::Core::Util qw( as_id id_as pretty_server_name );
 use Mojo::Asset::File;
 use Mojo::Date;
 use Mojo::Util 'md5_sum';
-use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
-
-my $KIOSK_USER = 1;
+use constant KIOSK_DISABLED => $ENV{CONVOS_KIOSK_SERVERS} ? 0 : 1;
 
 =head1 METHODS
 
@@ -41,46 +39,55 @@ sub auth {
 
 =head2 kiosk
 
-Used to chat with a temporay profile. Example URL:
+Used to chat with a temporary profile.
 
 =cut
 
 sub kiosk {
-  my $self  = shift;
-  my $login = $self->session('login');
-  my $input = $self->validation->input;
+  my $self          = shift;
+  my $login         = $self->session('login');
+  my $server        = $self->param('server') || '';
+  my $valid_servers = $ENV{CONVOS_KIOSK_SERVERS};
+  my $password      = md5_sum rand . time . $$;
 
+  if (KIOSK_DISABLED) {
+    return $self->render_not_found;
+  }
   if ($login) {
     return $self->redirect_to('/');
   }
-  if (!$input or !%$input) {
+  if ($server !~ /^(?:$valid_servers)$/) {
     return $self->render(layout => 'tactile');
   }
 
-  $login = sprintf 'kiosk:%s:%s:%s', time, $$, ++$KIOSK_USER;
-  $input->{email} ||= "$login\@kiosk.convos.by";
-  $input->{nick}  ||= Convos::Core::Util::random_name();
-  $input->{login}          = $login;
-  $input->{name}           = pretty_server_name($input->{server}) if $input->{server};
-  $input->{password}       = md5_sum $self->session->{login} . rand 1000;
-  $input->{password_again} = $input->{password};
-  $input->{username}       = md5_sum $self->tx->remote_address;                          # make it easier to ban a user
+  $login ||= Convos::Core::Util::generate_login_name();
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->add_user($self->validation, $delay->begin);
+      $self->app->core->add_user(
+        {email => "$login\@kiosk.convos.by", login => $login, password => $password, password_again => $password},
+        $delay->begin);
     },
     sub {
       my ($delay, $validation, $user) = @_;
-      return $self->render_exception('Generated kiosk mode user values failed.') if $validation;
-      return $self->app->core->add_connection($self->validation, $delay->begin);
+      return $self->render_exception('Kiosk mode add_user() failed.') if $validation;
+      $self->app->core->add_connection(
+        {
+          login    => $login,
+          name     => pretty_server_name($server),
+          nick     => $self->param('nick') || Convos::Core::Util::random_name(),
+          server   => $server,
+          username => md5_sum($self->tx->remote_address),
+        },
+        $delay->begin
+      );
     },
     sub {
       my ($delay, $validation, $conn) = @_;
 
       # TODO: What to do on error?
-      return $self->render_exception('Generated kiosk mode connection values failed.') if $validation;
+      return $self->render_exception('Kiosk mode add_connection() failed.') if $validation;
       $self->session(login => $login, kiosk => 1);
       $self->redirect_to('view.network', network => $conn->{name} || 'convos');
     },
@@ -141,7 +148,6 @@ sub login {
   $self->stash(form => 'login');
 
   if ($self->session('login')) {
-    $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
   if ($self->req->method ne 'POST') {
@@ -175,7 +181,6 @@ sub register {
   my ($output);
 
   if ($self->session('login')) {
-    $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
 
@@ -215,11 +220,7 @@ sub logout {
     sub {
       my ($delay) = @_;
       return $delay->pass unless $self->session('kiosk');
-
-      # TODO: Need to add delete_user() to clean up connection on logout
-      # from kiosk mode account.
-      # https://github.com/Nordaaker/convos/issues/104
-      return $self->app->core->delete_user($self->session('login'), $delay->begin);
+      return $self->app->core->delete_user({login => $self->session('login')}, $delay->begin);
     },
     sub {
       my ($delay, $error) = @_;

@@ -348,7 +348,7 @@ sub _public_routes {
   $r->get('/')->to('client#route')->name('index');
   $r->get('/avatar')->to('user#avatar')->name('avatar');
   $r->get('/login')->to('user#login')->name('login');
-  $r->get('/kiosk')->to('user#kiosk')->name('kiosk') if $ENV{CONVOS_KIOSK_MODE};
+  $r->get('/kiosk')->to('user#kiosk')->name('kiosk');
   $r->post('/login')->to('user#login');
   $r->get('/register/:invite', {invite => ''})->to('user#register')->name('register');
   $r->post('/register/:invite', {invite => ''})->to('user#register');
