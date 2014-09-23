@@ -47,6 +47,7 @@ sub kiosk {
   my $self          = shift;
   my $login         = $self->session('login');
   my $server        = $self->param('server') || '';
+  my $channel       = $self->param('channel') || '';
   my $valid_servers = $ENV{CONVOS_KIOSK_SERVERS};
   my $password      = md5_sum rand . time . $$;
 
@@ -56,11 +57,13 @@ sub kiosk {
   if ($login) {
     return $self->redirect_to('/');
   }
-  if ($server !~ /^(?:$valid_servers)$/) {
+  if (!$channel or $server !~ /^(?:$valid_servers)$/) {
     return $self->render(layout => 'tactile');
   }
 
   $login ||= Convos::Core::Util::generate_login_name();
+
+  warn "TODO: $channel is not yet in use";
 
   $self->delay(
     sub {
