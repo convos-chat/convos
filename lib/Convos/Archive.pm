@@ -1,5 +1,7 @@
 package Convos::Archive;
 
+use Carp qw/croak/;
+
 =head1 NAME
 
 Convos::Archive - Convos message archiver
@@ -14,6 +16,16 @@ from a storage on disk instead of in memory.
 use Mojo::Base -base;
 
 =head1 METHODS
+
+=head2 flush
+
+  $self = $self->flush($conn);
+
+Will flush all messages for a connection.
+
+=cut
+
+sub flush { croak 'Method "flush" not implemented by subclass' }
 
 =head2 save
 
