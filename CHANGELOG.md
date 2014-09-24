@@ -1,3 +1,11 @@
+## 0.85
+- Fix input field in iOS #167
+- Add feedback when websocket could not be established #192
+- Add /profile/delete #104
+- Change to "flat" design
+- Remove Convos::Loopback
+- Remove desktop notification status in profile #203
+
 ## 0.84 (2014-09-14)
 - Fix update of current nick()
 - Fix refreshing conversation and navbar when clicking back/forward buttons in browser #111
