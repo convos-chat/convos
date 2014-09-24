@@ -334,8 +334,8 @@ sub _private_routes {
   $r->get('/wizard')->to('connection#wizard')->name('wizard');
 
   my $network_r = $r->any('/:network');
-  $network_r->get('/*target' => [target => qr/[\#\&][^\x07\x2C\s]{1,50}/])->to('client#conversation', is_channel => 1)
-    ->name('view');
+  $network_r->get('/*target' => [target => $Convos::Core::Util::CHANNEL_RE])
+    ->to('client#conversation', is_channel => 1)->name('view');
   $network_r->get('/*target' => [target => qr/[A-Za-z_\-\[\]\\\^\{\}\|\`][A-Za-z0-9_\-\[\]\\\^\{\}\|\`]{1,15}/])
     ->to('client#conversation', is_channel => 0)->name('view');
   $network_r->get('/')->to('client#conversation')->name('view.network');

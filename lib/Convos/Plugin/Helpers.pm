@@ -8,7 +8,7 @@ Convos::Plugin::Helpers - Mojo's little helpers
 
 use Mojo::Base 'Mojolicious::Plugin';
 use Mojo::JSON 'j';
-use Convos::Core::Util qw( format_time id_as );
+use Convos::Core::Util qw( format_time id_as is_channel );
 use URI::Find;
 use constant DEBUG        => $ENV{CONVOS_DEBUG}        || 0;
 use constant DEFAULT_URL  => $ENV{DEFAULT_AVATAR_URL}  || 'https://graph.facebook.com/%s/picture?height=40&width=40';
@@ -64,9 +64,7 @@ sub conversation_list {
         my ($network, $target) = id_as $name;
 
         $target ||= '';
-        $conversation_list->[$i]
-          = {network => $network, is_channel => $target =~ /^[#&]/ ? 1 : 0, target => $target, timestamp => $timestamp,
-          };
+        $conversation_list->[$i] = {network => $network, target => $target, timestamp => $timestamp,};
 
         $self->redis->zcount("user:$login:connection:$network:$target:msg", $timestamp, '+inf', $delay->begin);
         $i++;
@@ -247,8 +245,8 @@ sub notification_list {
 
       while ($i < @$notification_list) {
         my $n = j $notification_list->[$i];
-        $n->{index} = $i;
-        $n->{is_channel} = $n->{target} =~ /^[#&]/ ? 1 : 0;
+        $n->{index}      = $i;
+        $n->{is_channel} = is_channel($n->{target});
 
         if (!$n->{is_channel} and $nick_seen{$n->{target}}++) {
           $self->redis->lrem($key, 1, $notification_list->[$i]);
@@ -352,7 +350,8 @@ sub register {
   $app->helper(connection_list     => \&connection_list);
   $app->helper(conversation_list   => \&conversation_list);
   $app->helper(day_changed         => \&day_changed);
-  $app->helper(logf                => \&Convos::Core::Util::logf);
+  $app->helper(is_channel => sub { is_channel($_[1]) });
+  $app->helper(logf => \&Convos::Core::Util::logf);
   $app->helper(format_time => sub { shift; format_time(@_); });
   $app->helper(notification_list => \&notification_list);
   $app->helper(redis             => \&redis);

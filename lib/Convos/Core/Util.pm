@@ -19,9 +19,10 @@ use Parse::IRC ();
 use Unicode::UTF8 'decode_utf8';
 use Time::Piece;
 
+our $CHANNEL_RE     = qr/[\#\&][^\x07\x2C\s]{1,50}/;
 our $SERVER_NAME_RE = qr{(?:\w+\.[^:/]+|localhost|loopback):?\d*};
 
-our @EXPORT_OK = qw( as_id format_time id_as logf pretty_server_name $SERVER_NAME_RE );
+our @EXPORT_OK = qw( as_id format_time id_as is_channel logf pretty_server_name $SERVER_NAME_RE );
 our @NAMES = map { split /\s+/ } <DATA>;
 
 my $LOGIN_ID = 1;
@@ -86,6 +87,19 @@ sub id_as {
     s/:(\w\w)/{ chr hex $1 }/ge;
     $_;
   } split /:00/, $_[0];
+}
+
+=head2 is_channel
+
+  $bool = is_channel($str);
+
+Used to check if C<$str> is a channel name.
+
+=cut
+
+sub is_channel {
+  return 1 if $_[0] and $_[0] =~ /^$CHANNEL_RE$/;
+  return 0;
 }
 
 =head2 logf
