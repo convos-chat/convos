@@ -253,7 +253,7 @@
       $('nav .right').add('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
       $('nav a.conversations')[ menu_width > $('body').outerWidth() ? 'addClass' : 'removeClass' ]('overlapping');
       if (convos.at_bottom) $(window).scrollTo('bottom');
-    };
+    });
 
     $(window).on('scroll', function(e) {
       convos.at_bottom = $(this).scrollTop() + $(this).height() > $('body').height() - convos.at_bottom_threshold;
