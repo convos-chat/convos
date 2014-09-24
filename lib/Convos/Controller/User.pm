@@ -7,7 +7,7 @@ Convos::Controller::User - Mojolicious controller for user data
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Convos::Core::Util qw( as_id id_as pretty_server_name );
+use Convos::Core::Util qw( as_id pretty_server_name );
 use Mojo::Asset::File;
 use Mojo::Date;
 use Mojo::Util 'md5_sum';
@@ -50,6 +50,7 @@ sub kiosk {
   my $channel       = $self->param('channel') || '';
   my $valid_servers = $ENV{CONVOS_KIOSK_SERVERS};
   my $password      = md5_sum rand . time . $$;
+  my ($conversation, $network);
 
   if (KIOSK_DISABLED) {
     return $self->render_not_found;
@@ -62,8 +63,8 @@ sub kiosk {
   }
 
   $login ||= Convos::Core::Util::generate_login_name();
-
-  warn "TODO: $channel is not yet in use";
+  $network = pretty_server_name $server;
+  $conversation = as_id $network, $channel;
 
   $self->delay(
     sub {
@@ -71,6 +72,7 @@ sub kiosk {
       $self->app->core->add_user(
         {email => "$login\@kiosk.convos.by", login => $login, password => $password, password_again => $password},
         $delay->begin);
+      $self->redis->zadd("user:$login:conversations", time, $conversation, $delay->begin);
     },
     sub {
       my ($delay, $validation, $user) = @_;
@@ -78,7 +80,7 @@ sub kiosk {
       $self->app->core->add_connection(
         {
           login    => $login,
-          name     => pretty_server_name($server),
+          name     => $network,
           nick     => $self->param('nick') || Convos::Core::Util::random_name(),
           server   => $server,
           username => md5_sum($self->tx->remote_address),
