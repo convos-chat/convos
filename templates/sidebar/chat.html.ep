@@ -12,6 +12,11 @@
 <li>
   <a href="cmd:///help">Help</a>
 </li>
+% if (session 'kiosk') {
+<li>
+  %= link_to 'Logout', 'logout', class => 'no-pjax'
+</li>
+% }
 <li class="participants">
   <h3>Participants (<span>0</span>)</h3>
 </li>
