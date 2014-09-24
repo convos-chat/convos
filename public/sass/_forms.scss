@@ -5,18 +5,17 @@ form {
   label { display: block; margin-top: $bodyGutter; }
 
   select[multi] { height: 30px; }
-  input[readonly] { background: #f6f6f6; color: #666; }
-  .selectize-input, input, select {
-    background: #fff;
+  input[readonly] { background: darken($backgroundColor, 10%); color: #666; }
+  input, select {
+    background: $backgroundColor;
     font-size: $fontSize - 1;
     outline: none;
-    border: 2px solid #ccc;
-    padding: 4px;
+    border: $formElementBorder;
+    padding: 6px 8px;
     width: $inputWidth;
-    @include border-radius(3px);
   }
   .selectize-input { padding: 2px; }
-  .selectize-input.focus, input:focus { border: 2px solid darken(#ccc, 15%); }
+  .selectize-input.focus, input:focus { border: $formElementFocusBorder; }
   input[type="checkbox"] { width: auto; }
   input.field-with-error, select.field-with-error { border-color: $errorColor; }
   input.half-size { width: ($inputWidth / 2 - 2); }
@@ -55,9 +54,8 @@ form.horizontal {
     width: $inputWidth;
     margin-top: -3px;
     padding: 4px;
-    border: 2px solid $errorColor;
+    border-color: $errorColor;
     border-top: 0;
-    @include border-radius(3px);
   }
   input.field-with-error, select.field-with-error {
     border-bottom: 0;
@@ -81,13 +79,14 @@ form.edit-mode {
 }
 
 button, .button {
-  background: darken(#fff, 2%);
+  background: darken($backgroundColor, 13%);
   color: #222;
   font-size: $fontSize - 1;
   text-decoration: none;
-  padding: 4px 6px;
-  border: 2px solid darken(#fff, 40%);
-  @include border-radius(3px);
+  padding: 8px;
+  border: $formElementBorder;
+  &:focus { outline: none; border: $formElementFocusBorder; }
+  &:hover { border: $formElementFocusBorder; }
 }
 .error {
   button, .button {
@@ -97,6 +96,5 @@ button, .button {
 }
 
 button { vertical-align: baseline; } // make <a> and <button> align. at least in chrome
-button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
-button.confirm, a.confirm { color: #900; border: 2px solid #900; }
-button:hover, .button:hover { border: $buttonBorderHover; }
+button:active, button.active, .button:active, .button.active { background: darken($backgroundColor, 20%); }
+button.confirm, a.confirm { color: #900; border-color: $errorColor; }

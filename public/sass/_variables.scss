@@ -10,14 +10,14 @@ $footerHeight: 50px;
 $responsiveWidth: 700px;
 $columnWidth: 8.333333%;
 $navBarIconWidth: 32px;
-$buttonBorderHover: 2px solid darken(#fff, 70%);
+$formElementBorder: 1px solid #bbb;
+$formElementFocusBorder: 1px solid #333;
+$formGroupPadding: 4px 8px;
 $nickListWidth: 180px;
 $navBarZindex: 999;
 $errorColor: #d5000d;
-
 $sidebarBackground: #f4f4f4;
 $selectizeOptionPadding: 4px 8px;
-
 $FontAwesomePath: "../font";
 $borderColor: #eee;
 $iconMuted: #eee;
