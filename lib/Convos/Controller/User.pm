@@ -52,15 +52,11 @@ sub kiosk {
   my $password      = md5_sum rand . time . $$;
   my ($conversation, $network);
 
-  if (KIOSK_DISABLED) {
-    return $self->render_not_found;
-  }
-  if ($login) {
-    return $self->redirect_to('/');
-  }
-  if (!$channel or $server !~ /^(?:$valid_servers)$/) {
-    return $self->render(layout => 'tactile');
-  }
+  return $self->render_not_found if KIOSK_DISABLED;
+  return $self->redirect_to('/') if $login;
+  return $self->render unless $server;
+  return $self->render(error => "Invalid server name $server.")   unless $server =~ /^(?:$valid_servers)$/;
+  return $self->render(error => "Invalid channel name $channel.") unless $self->is_channel($channel);
 
   $login ||= Convos::Core::Util::generate_login_name();
   $network = pretty_server_name $server;
@@ -76,7 +72,7 @@ sub kiosk {
     },
     sub {
       my ($delay, $validation, $user) = @_;
-      return $self->render_exception('Kiosk mode add_user() failed.') if $validation;
+      return $self->render(error => 'Kiosk mode add_user() failed.') if $validation;
       $self->app->core->add_connection(
         {
           login    => $login,

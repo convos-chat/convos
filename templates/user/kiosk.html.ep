@@ -1,3 +1,4 @@
+% my $error = stash 'error';
 <div class="landing-page">
   <header class="row">
     <h1>
@@ -10,6 +11,9 @@
     <p>
       Convos in kiosk mode is meant to be included in an &lt;iframe> with a fixed URL.
     </p>
+  % if ($error) {
+    <p class="error"><%= $error %></p>
+  % }
     <p>
       Example iframe:
     </p>

@@ -25,10 +25,16 @@ form {
     clear: left;
     padding: 0.5em 0;
   }
-  p.help {
+  p.help, p.error {
+    border-top: 0;
     color: #555;
     font-size: 0.9em;
     margin-top: 0.1em;
+  }
+  p.error {
+    margin-top: -3px;
+    width: $inputWidth;
+    margin: 2px 0 0 (8em / 0.9);
   }
 }
 
@@ -46,18 +52,9 @@ form.horizontal {
     margin-top: 1em;
     margin-left: 8em;
   }
-  p.help, p.error {
+  p.help {
     font-size: 0.9em;
     margin: 2px 0 0 (8em / 0.9);
-  }
-  p.error {
-    background: lighten($errorColor, 40%);
-    width: $inputWidth;
-    margin-top: -3px;
-    padding: 4px;
-    border: 2px solid $errorColor;
-    border-top: 0;
-    @include border-radius(3px);
   }
   input.field-with-error, select.field-with-error {
     border-bottom: 0;

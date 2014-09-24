@@ -226,7 +226,6 @@ sub startup {
   }
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
-  $self->defaults(full_page => 1);
   $self->hook(before_dispatch => \&_before_dispatch);
 
   Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
@@ -348,7 +347,7 @@ sub _public_routes {
   $r->get('/')->to('client#route')->name('index');
   $r->get('/avatar')->to('user#avatar')->name('avatar');
   $r->get('/login')->to('user#login')->name('login');
-  $r->get('/kiosk')->to('user#kiosk')->name('kiosk');
+  $r->get('/kiosk')->to('user#kiosk', layout => 'tactile')->name('kiosk');
   $r->post('/login')->to('user#login');
   $r->get('/register/:invite', {invite => ''})->to('user#register')->name('register');
   $r->post('/register/:invite', {invite => ''})->to('user#register');
