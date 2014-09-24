@@ -1,3 +1,5 @@
+$borderSeperator: 1px solid #ddd;
+
 body.loading {
   div.messages { @include opacity(0.4); }
 }
@@ -18,7 +20,7 @@ nav.bar {
   height: $navHeight;
   z-index: $navBarZindex;
   overflow: hidden;
-  @include box-shadow(0 4px 4px -2px rgba(180,180,180,.5));
+  border-bottom: $borderSeperator;
 
   img { vertical-align: middle; }
 
@@ -36,7 +38,7 @@ nav.bar {
   a b { bottom: 1px; }
 
   a.conversation { color: #666; }
-  a.conversations.overlapping { @include box-shadow(-2px 0px 4px 0px rgba(110, 110, 110, 0.28)); }
+  a.conversations.overlapping { border: $borderSeperator; }
   ul.conversations { height: $navHeight; }
 
   .right {
@@ -186,7 +188,7 @@ div.sidebar-right {
   color: #333333;
   display: none;
   position: fixed;
-  top: $navHeight;
+  top: ($navHeight - 1);
   right: 0;
   bottom: -3px;
   overflow: auto;
@@ -194,7 +196,7 @@ div.sidebar-right {
   padding-bottom: 20px;
   border-top: 1px solid #ddd;
   z-index: 2;
-  @include box-shadow(-2px 2px 4px rgba(180,180,180,.5));
+  border-left: $borderSeperator;
 
   -webkit-overflow-scrolling: touch;
 
@@ -259,9 +261,8 @@ form.conversations {
     background: #f8f8f8;
     display: block !important;
     right: 0 !important;
-    border-left: 1px solid #ddd;
+    border-left: $borderSeperator;
     z-index: $navBarZindex - 10;
-    @include box-shadow(1px 0 1px 0 rgba(255,255,255,1));
   }
 }
 
