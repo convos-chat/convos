@@ -3,6 +3,7 @@ BEGIN {
   $ENV{N_MESSAGES} = 4;
   $ENV{TEST_TIME}  = 1409443199.9;    # Sun Aug 31 00:59:59.8 2014
   require Convos::Controller::Chat;
+  no warnings qw/prototype/;
   *Convos::Controller::Chat::time = sub { $ENV{TEST_TIME} };
 }
 
