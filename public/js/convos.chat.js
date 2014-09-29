@@ -41,7 +41,7 @@
       });
 
       if (!$dl.children().length) $dl.append('<dt>No matching channel names.</dt>');
-    }).focus();
+    }).keyup().focus();
 
     $message.find('form').on('submit', function(e) {
       e.preventDefault();
@@ -50,7 +50,7 @@
     });
 
     // prevent jumping when filtering
-    $message.height($message.height() < 140 ? $message.height() * 5 : $message.height());
+    $message.on('addedToMessages', function() { $(this).height($(this).height() < 140 ? $(this).height() * 5 : $(this).height()); });
     $(window).scrollTo('bottom');
   });
 
@@ -110,6 +110,8 @@
       if (!$message.hasClass('hidden')) {
         $messages[func || 'append']($message);
       }
+
+      $message.trigger('addedToMessages');
     });
   };
 
