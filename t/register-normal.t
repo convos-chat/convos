@@ -12,6 +12,8 @@ $t->app->core->start;
 
 $form = {login => 'foobar', password => 'barbar'};
 
+$t->get_ok('/kiosk')->status_is('404', 'kiosk mode is disabled');
+
 $t->post_ok('/login' => form => $form)->status_is('401', 'failed to log in');
 
 # invalid register is tested in landing-page.t

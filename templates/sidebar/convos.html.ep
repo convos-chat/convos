@@ -1,4 +1,5 @@
 % my $network = stash('network') || '';
+% unless (session 'kiosk') {
 <li>
   <h3>User</h3>
 </li>
@@ -14,6 +15,11 @@
 <li>
   <h3>Connections</h3>
 </li>
+% } else {
+<li>
+  <h3>Connection</h3>
+</li>
+% }
 % for my $name (@$networks) {
 <li>
   %= link_to $name, active_class('view.network', { network => $name })

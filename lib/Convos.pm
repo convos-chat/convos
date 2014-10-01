@@ -226,7 +226,6 @@ sub startup {
   }
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
-  $self->defaults(full_page => 1);
   $self->hook(before_dispatch => \&_before_dispatch);
 
   Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
@@ -334,8 +333,8 @@ sub _private_routes {
   $r->get('/wizard')->to('connection#wizard')->name('wizard');
 
   my $network_r = $r->any('/:network');
-  $network_r->get('/*target' => [target => qr/[\#\&][^\x07\x2C\s]{1,50}/])->to('client#conversation', is_channel => 1)
-    ->name('view');
+  $network_r->get('/*target' => [target => $Convos::Core::Util::CHANNEL_RE])
+    ->to('client#conversation', is_channel => 1)->name('view');
   $network_r->get('/*target' => [target => qr/[A-Za-z_\-\[\]\\\^\{\}\|\`][A-Za-z0-9_\-\[\]\\\^\{\}\|\`]{1,15}/])
     ->to('client#conversation', is_channel => 0)->name('view');
   $network_r->get('/')->to('client#conversation')->name('view.network');
@@ -348,6 +347,7 @@ sub _public_routes {
   $r->get('/')->to('client#route')->name('index');
   $r->get('/avatar')->to('user#avatar')->name('avatar');
   $r->get('/login')->to('user#login')->name('login');
+  $r->get('/kiosk')->to('user#kiosk', layout => 'tactile')->name('kiosk');
   $r->post('/login')->to('user#login');
   $r->get('/register/:invite', {invite => ''})->to('user#register')->name('register');
   $r->post('/register/:invite', {invite => ''})->to('user#register');

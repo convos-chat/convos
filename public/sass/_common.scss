@@ -18,6 +18,13 @@ hr {
   padding-bottom: 1em;
 }
 
+p.error {
+  background: lighten($errorColor, 40%);
+  padding: 4px;
+  border: 2px solid $errorColor;
+  @include border-radius(3px);
+}
+
 @media (min-width: $responsiveWidth) {
   .hide-on-widescreen { display: none !important; }
 }

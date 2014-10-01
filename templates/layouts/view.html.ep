@@ -21,7 +21,9 @@
       </ul>
     % end
 
+  % unless (session 'kiosk') {
     %= include "sidebar/goto_anything"
+  % }
 
     <div class="messages">
       %= content

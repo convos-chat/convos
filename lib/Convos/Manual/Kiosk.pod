@@ -1,0 +1,49 @@
+=head1 NAME
+
+Convos::Manual::Kiosk - Embed Convos on your web page
+
+=head1 DESCRIPTION
+
+Convos in "kiosk mode" will enable users to use the chat without logging in
+or creating an account. This is useful if you want to have an interactive
+support channel on your web page.
+
+They way you can embed convos is by putting a kiosk URL inside an iframe:
+
+  <iframe src="https://convos.example.com/kiosk?server=chat.freenode.net&channel=%23support">
+    Message for browsers that does not support iframe.
+  </iframe>
+
+It is possible to specify these query params:
+
+=over 4
+
+=item * channel
+
+This is required and must be a valid channel name on the IRC server.
+
+=item * nick
+
+This is optional. A nick will be generated unless given as input.
+
+=item * server
+
+This is required. The value for the "server" param need to match what is put
+into the C<CONVOS_KIOSK_SERVERS> environment variable. It can also contain
+":port" if another port than the default "6667" port need to be used.
+
+=back
+
+=head1 SYNOPSIS
+
+You can start Convos in kiosk mode, by setting CONVOS_KIOSK_SERVERS:
+
+  $ CONVOS_KIOSK_SERVERS=chat.freenode.net ./script/convos
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+Marcus Ramberg - C<marcus@nordaaker.com>
+
+=cut

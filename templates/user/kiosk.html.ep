@@ -1,0 +1,30 @@
+% my $error = stash 'error';
+<div class="landing-page">
+  <header class="row">
+    <h1>
+      <span class="logo">Convos</span>
+      <small>for <%= $organization_name %></small>
+    </h1>
+  </header>
+  <div class="row">
+    <h2 class="login-register">Kiosk Mode</h2>
+    <p>
+      Convos in kiosk mode is meant to be included in an &lt;iframe> with a fixed URL.
+    </p>
+  % if ($error) {
+    <p class="error"><%= $error %></p>
+  % }
+    <p>
+      Example iframe:
+    </p>
+    <pre style="overflow:auto;width:100%;font-size:0.8em">
+&lt;iframe src="<%= url_for->query(server => $ENV{CONVOS_DEFAULT_CONNECTION}, channel => '#convos')->to_abs %>">
+Message for browsers that does not support iframe.
+&lt;/iframe></pre>
+  </div>
+  <div class="row footer">
+    <hr>
+    &copy; <%= link_to "Nordaaker", "http://nordaaker.com"%>
+    - <%= link_to "About", "http://convos.by" %>
+  </div>
+</div>

@@ -7,10 +7,11 @@ Convos::Controller::User - Mojolicious controller for user data
 =cut
 
 use Mojo::Base 'Mojolicious::Controller';
-use Convos::Core::Util qw/ as_id id_as /;
+use Convos::Core::Util qw( as_id pretty_server_name );
 use Mojo::Asset::File;
 use Mojo::Date;
-use constant DEBUG => $ENV{CONVOS_DEBUG} ? 1 : 0;
+use Mojo::Util 'md5_sum';
+use constant KIOSK_DISABLED => $ENV{CONVOS_KIOSK_SERVERS} ? 0 : 1;
 
 =head1 METHODS
 
@@ -34,6 +35,64 @@ sub auth {
   }
 
   return 0;
+}
+
+=head2 kiosk
+
+Used to chat with a temporary profile.
+
+=cut
+
+sub kiosk {
+  my $self          = shift;
+  my $login         = $self->session('login');
+  my $server        = $self->param('server') || '';
+  my $channel       = $self->param('channel') || '';
+  my $valid_servers = $ENV{CONVOS_KIOSK_SERVERS};
+  my $password      = md5_sum rand . time . $$;
+  my ($conversation, $network);
+
+  return $self->render_not_found if KIOSK_DISABLED;
+  return $self->redirect_to('/') if $login;
+  return $self->render unless $server;
+  return $self->render(error => "Invalid server name $server.")   unless $server =~ /^(?:$valid_servers)$/;
+  return $self->render(error => "Invalid channel name $channel.") unless $self->is_channel($channel);
+
+  $login ||= Convos::Core::Util::generate_login_name();
+  $network = pretty_server_name $server;
+  $conversation = as_id $network, $channel;
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $self->app->core->add_user(
+        {email => "$login\@kiosk.convos.by", login => $login, password => $password, password_again => $password},
+        $delay->begin);
+      $self->redis->zadd("user:$login:conversations", time, $conversation, $delay->begin);
+    },
+    sub {
+      my ($delay, $validation, $user) = @_;
+      return $self->render(error => 'Kiosk mode add_user() failed.') if $validation;
+      $self->app->core->add_connection(
+        {
+          login    => $login,
+          name     => $network,
+          nick     => $self->param('nick') || Convos::Core::Util::random_name(),
+          server   => $server,
+          username => md5_sum($self->tx->remote_address),
+        },
+        $delay->begin
+      );
+    },
+    sub {
+      my ($delay, $validation, $conn) = @_;
+
+      # TODO: What to do on error?
+      return $self->render_exception('Kiosk mode add_connection() failed.') if $validation;
+      $self->session(login => $login, kiosk => 1);
+      $self->redirect_to('view.network', network => $conn->{name} || 'convos');
+    },
+  );
 }
 
 =head2 delete
@@ -90,7 +149,6 @@ sub login {
   $self->stash(form => 'login');
 
   if ($self->session('login')) {
-    $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
   if ($self->req->method ne 'POST') {
@@ -120,12 +178,10 @@ See L</login>.
 
 sub register {
   my $self        = shift;
-  my $validation  = $self->validation;
   my $invite_code = $ENV{CONVOS_INVITE_CODE};
   my ($output);
 
   if ($self->session('login')) {
-    $self->logf(debug => '[reg] Already logged in') if DEBUG;
     return $self->redirect_to('view');
   }
 
@@ -138,35 +194,15 @@ sub register {
     return $self->render('index');
   }
 
-  $validation->required('login')->like(qr/^\w+$/)->size(3, 15);
-  $validation->required('email')->like(qr/.\@./);
-  $validation->required('password_again')->equal_to('password');
-  $validation->required('password')->size(5, 255);
-  $output = $validation->output;
-
   $self->delay(
     sub {
       my $delay = shift;
-      $self->redis->sismember('users', $output->{login}, $delay->begin);
-      $self->redis->scard('users', $delay->begin);
-    },
-    sub {    # Check invitation unless first user
-      my ($delay, $exists) = @_;
-
-      $validation->error(login => ['taken']) if $exists;
-      return $self->render('index', status => 400) if $validation->has_error;
-
-      $self->logf(debug => '[reg] New user login=%s', $output->{login}) if DEBUG;
-      $self->session(login => $output->{login});
-      $self->redis->hmset(
-        "user:$output->{login}" =>
-          {digest => $self->_digest($output->{password}), email => $output->{email}, avatar => $output->{email}},
-        $delay->begin
-      );
-      $self->redis->sadd(users => $output->{login}, $delay->begin);
+      $self->app->core->add_user($self->validation, $delay->begin);
     },
     sub {
-      my ($delay, @saved) = @_;
+      my ($delay, $validation, $user) = @_;
+      return $self->render('index', status => 400) if $validation;
+      $self->session(login => $user->{login});
       $self->redirect_to('wizard');
     }
   );
@@ -180,8 +216,20 @@ Will delete data from session.
 
 sub logout {
   my $self = shift;
-  $self->session(login => undef);
-  $self->redirect_to('/');
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      return $delay->pass unless $self->session('kiosk');
+      return $self->app->core->delete_user({login => $self->session('login')}, $delay->begin);
+    },
+    sub {
+      my ($delay, $error) = @_;
+      die $error if $error;
+      $self->session(login => undef);
+      $self->redirect_to('/');
+    },
+  );
 }
 
 =head2 edit
@@ -246,10 +294,6 @@ sub _edit {
       $self->render;
     },
   );
-}
-
-sub _digest {
-  crypt $_[1], join '', ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')[rand 64, rand 64];
 }
 
 =head1 COPYRIGHT
