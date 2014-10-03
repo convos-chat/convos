@@ -1,4 +1,4 @@
-%= form_for 'connection.control', { name => stash('network') || $networks->[0] }, method => 'post', class => 'conversations sidebar-right', begin
+%= form_for 'connection.control', { name => stash('network') || $networks->[0] }, method => 'post', class => 'goto-anything sidebar-right', begin
   <ul>
     <li class="select">
       <div class="form-group">

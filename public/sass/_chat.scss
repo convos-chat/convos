@@ -38,7 +38,7 @@ nav.bar {
   a b { bottom: 1px; }
 
   a.conversation { color: #666; }
-  a.conversations.overlapping { border: $borderSeperator; }
+  a.goto-anything.overlapping { border: $borderSeperator; }
   ul.conversations { height: $navHeight; }
 
   .right {
@@ -79,7 +79,7 @@ form.input {
 }
 
 // unread messages count
-nav.bar a b, form.conversations b {
+nav.bar a b, form.goto-anything b {
   background: #e5e5e5;
   color: #888;
   font-size: 12px;
@@ -91,7 +91,7 @@ nav.bar a b, form.conversations b {
   @include border-radius(3px);
 }
 
-nav.bar a.mention b, form.conversations a.mention b {
+nav.bar a.mention b, form.goto-anything a.mention b {
   background: #d53;
   color: #fff;
 }
@@ -248,7 +248,7 @@ div.notification-list {
   li.unread a:focus, li.unread a:hover { background-color: rgba(204, 100, 40, 0.10); }
 }
 
-form.conversations {
+form.goto-anything {
   width: $nickListWidth + 60;
   a { position: relative; }
   a b { top: 9px; }

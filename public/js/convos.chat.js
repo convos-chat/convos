@@ -85,7 +85,7 @@
   };
 
   var firstTimeConnected = convos.on('idle', function() {
-    if ($('nav .conversations a[data-network="' + convos.current.network + '"]').length) return convos.unsubscribe('idle', firstTimeConnected);
+    if ($('nav ul.conversations a[data-network="' + convos.current.network + '"]').length) return convos.unsubscribe('idle', firstTimeConnected);
     if (convos.current.state != 'connected') return;
     convos.unsubscribe('idle', firstTimeConnected);
     console.log('firstTimeConnected');
@@ -236,11 +236,11 @@
 
     $('body, input').bind('keydown', 'shift+return', function(e) {
       e.preventDefault();
-      if (document.activeElement && $(document.activeElement).closest('.input').length) return $('nav a.conversations').trigger('tap');
+      if (document.activeElement && $(document.activeElement).closest('.input').length) return $('nav a.goto-anything').trigger('tap');
       $(document).hideSidebar();
       convos.input.focus();
     });
-    $('body, input').bind('keydown', 'alt+shift+a', function(e) { e.preventDefault(); $('nav a.conversations').trigger('tap'); });
+    $('body, input').bind('keydown', 'alt+shift+a', function(e) { e.preventDefault(); $('nav a.goto-anything').trigger('tap'); });
     $('body, input').bind('keydown', 'alt+shift+s', function(e) { e.preventDefault(); $('nav a.notifications').trigger('tap'); });
     $('body, input').bind('keydown', 'alt+shift+d', function(e) { e.preventDefault(); $('nav a.sidebar').filter(':visible').trigger('tap'); });
 
@@ -253,7 +253,7 @@
     $(window).on('resize', function(e) {
       var menu_width = 0;
       $('nav .right').add('nav ul.conversations a').each(function() { menu_width += $(this).outerWidth(); });
-      $('nav a.conversations')[ menu_width > $('body').outerWidth() ? 'addClass' : 'removeClass' ]('overlapping');
+      $('nav a.goto-anything')[ menu_width > $('body').outerWidth() ? 'addClass' : 'removeClass' ]('overlapping');
       if (convos.at_bottom) $(window).scrollTo('bottom');
     });
 

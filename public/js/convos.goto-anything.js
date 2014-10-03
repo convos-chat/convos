@@ -10,7 +10,7 @@
   };
 
   $(document).ready(function() {
-    var $g = $('form.conversations');
+    var $g = $('form.goto-anything');
 
     if (navigator.is_touch_device) $g.find('input').hide();
 
