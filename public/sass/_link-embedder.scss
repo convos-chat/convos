@@ -1,0 +1,22 @@
+.link-embedder.text-html {
+  overflow: hidden;
+
+  .link-embedder-media {
+    float: left;
+    img { margin-right: 8px; }
+  }
+
+  h3 {
+    display: block;
+    margin: 8px 0 0 0;
+    padding: 0;
+  }
+
+  p {
+    margin: 0.5em 0;
+  }
+
+  .link-embedder-link {
+    display: none;
+  }
+}
