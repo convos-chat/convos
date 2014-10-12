@@ -132,11 +132,13 @@
       var $a = $(this);
       $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
         var $embed_code = $(embed_code);
+        var at_bottom = convos.at_bottom;
         $a.closest('div').after($embed_code);
-        if (convos.at_bottom) {
-          $(window).scrollTo('bottom');
-          $embed_code.find('img').one('load', function() { $(window).scrollTo('bottom') });
-        }
+        $embed_code.find('img').on('load', function() { if (at_bottom) $(window).scrollTo('bottom'); });
+        $embed_code.find('.text-gist-github').each(function() {
+          var self = this;
+          window[self.id] = function(g) { self.innerHTML = g.div; if (at_bottom) $(window).scrollTo('bottom'); };
+        });
       });
     });
     this.find('[data-avatar^="http"]').each(function(e) {
