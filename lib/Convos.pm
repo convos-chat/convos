@@ -242,6 +242,7 @@ sub _assets {
   $self->asset('c.css' => qw( /scss/font-awesome.scss /sass/convos.scss ));
   $self->asset(
     'c.js' => qw(
+      https://platform.twitter.com/widgets.js
       /js/globals.js
       /js/jquery.js
       /js/ws-reconnecting.js

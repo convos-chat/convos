@@ -7,6 +7,11 @@
   convos.current = {};
   convos.isChannel = function(str) { return str.match(/^[#&]/); };
 
+  twttr.events.bind('rendered', function(e) {
+    var $p = $(e.target).closest('li');
+    if ($p.data('at_bottom')) $(window).scrollTo('bottom');
+  });
+
   convos.on('channel-info', function(network, name, info) {
     if (network != convos.current.network) return;
     convos.current.channels = convos.current.channels || {};
@@ -133,12 +138,13 @@
       $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
         var $embed_code = $(embed_code);
         var at_bottom = convos.at_bottom;
-        $a.closest('div').after($embed_code);
-        $embed_code.find('img').on('load', function() { if (at_bottom) $(window).scrollTo('bottom'); });
+        $a.closest('div').after($embed_code).closest('li').data('at_bottom', at_bottom);
+        $embed_code.find('img').one('load', function() { if (at_bottom) $(window).scrollTo('bottom'); });
         $embed_code.find('.text-gist-github').each(function() {
           var self = this;
           window[self.id] = function(g) { self.innerHTML = g.div; if (at_bottom) $(window).scrollTo('bottom'); };
         });
+        if (at_bottom) $(window).scrollTo('bottom');
       });
     });
     this.find('[data-avatar^="http"]').each(function(e) {
@@ -249,7 +255,7 @@
     if (navigator.is_ios) {
       $('input, textarea')
         .on('click focus', function() { $('body').addClass('ios-input-focus'); $(window).scrollTo('bottom'); })
-        .on('blur, focusout', function() { $('body').removeClass('ios-input-focus'); });
+        .on('blur focusout', function() { $('body').removeClass('ios-input-focus'); });
     }
 
     $(window).on('resize', function(e) {
