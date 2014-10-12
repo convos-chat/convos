@@ -3,17 +3,26 @@
 
   .link-embedder-media {
     float: left;
-    img { margin-right: 8px; }
+    img {
+      max-height: 50px;
+      margin-right: 8px;
+      border: 0;
+      @include border-radius(0);
+    }
   }
 
   h3 {
+    font-size: 1em;
+    line-height: 1em;
     display: block;
     margin: 8px 0 0 0;
-    padding: 0;
   }
 
   p {
-    margin: 0.5em 0;
+    font-size: 0.9em;
+    line-height: 1.2em;
+    margin: 4px 0;
+    display: table-cell;
   }
 
   .link-embedder-link {
