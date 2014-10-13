@@ -205,14 +205,21 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       Pod::Simple 3.09
-  Mojolicious-Plugin-AssetPack-0.23
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.23.tar.gz
+  Mojolicious-Plugin-AssetPack-0.31
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-AssetPack-0.31.tar.gz
     provides:
-      Mojolicious::Plugin::AssetPack 0.23
+      Mojolicious::Plugin::AssetPack 0.31
       Mojolicious::Plugin::AssetPack::Preprocessor undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::CoffeeScript undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::Css undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::Fallback undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::JavaScript undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::Jsx undef
+      Mojolicious::Plugin::AssetPack::Preprocessor::Less undef
       Mojolicious::Plugin::AssetPack::Preprocessor::Sass undef
       Mojolicious::Plugin::AssetPack::Preprocessor::Scss undef
       Mojolicious::Plugin::AssetPack::Preprocessors 0.01
+      Mojolicious::Plugin::AssetPack::Preprocessors::CWD 0.01
     requirements:
       CSS::Minifier::XS 0.01
       ExtUtils::MakeMaker 0
@@ -221,19 +228,19 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.01
       Mojolicious 5.00
       Test::More 0.88
-  Mojolicious-Plugin-FontAwesome4-4.1000
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-FontAwesome4-4.1000.tar.gz
+  Mojolicious-Plugin-FontAwesome4-4.2003
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-FontAwesome4-4.2003.tar.gz
     provides:
-      Mojolicious::Plugin::FontAwesome4 4.1000
+      Mojolicious::Plugin::FontAwesome4 4.2003
     requirements:
       ExtUtils::MakeMaker 0
       Mojolicious 5.00
-      Mojolicious::Plugin::AssetPack 0.22
+      Mojolicious::Plugin::AssetPack 0.31
       Test::More 0.88
-  Mojolicious-Plugin-LinkEmbedder-0.07
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.07.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.09
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.09.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.07
+      Mojolicious::Plugin::LinkEmbedder 0.09
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
@@ -241,6 +248,7 @@ DISTRIBUTIONS
       Mojolicious::Plugin::LinkEmbedder::Link::Image::Imgur undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text::GistGithub undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text::HTML undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text::Twitter undef
       Mojolicious::Plugin::LinkEmbedder::Link::Video undef
       Mojolicious::Plugin::LinkEmbedder::Link::Video::Blip undef
@@ -317,14 +325,6 @@ DISTRIBUTIONS
       Test::Builder::Tester 1.02
       Test::More 0.62
       blib 0
-  Time-Piece-1.27
-    pathname: R/RJ/RJBS/Time-Piece-1.27.tar.gz
-    provides:
-      Time::Piece 1.27
-      Time::Seconds 1.27
-    requirements:
-      Exporter 5.57
-      ExtUtils::MakeMaker 0
   Try-Tiny-0.18
     pathname: D/DO/DOY/Try-Tiny-0.18.tar.gz
     provides:
