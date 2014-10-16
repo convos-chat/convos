@@ -18,10 +18,6 @@ hr {
   padding-bottom: 1em;
 }
 
-@media (min-width: $responsiveWidth) {
-  .hide-on-widescreen { display: none !important; }
-}
-
 @media (max-width: $responsiveWidth) {
   .row { padding: 0; }
 

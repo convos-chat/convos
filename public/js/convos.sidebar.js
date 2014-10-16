@@ -1,38 +1,43 @@
 ;(function($) {
+  var showing = false;
+  var $togglers = $();
+  var $main = $();
+
   $.fn.hideSidebar = function() {
-    $('.sidebar-trigger-active').trigger('tap');
+   $togglers.filter('.active').trigger('tap');
   };
 
   $(document).ready(function() {
+    $main = $('a[href^="sidebar://form.sidebar"]')
+    $togglers = $('a[href^="sidebar://"], button[value^="sidebar://"]');
+
     $('.sidebar-right').disableOuterScroll();
 
     $(window).on('tap', function(e) {
       var $e = $(e.target);
-      if ($e.closest('.sidebar-trigger-active').length) return;
+      if ($e.closest('.active').length) return;
       if ($e.closest('.sidebar-right').length) return;
       $(this).hideSidebar();
     });
 
-    $('a[href^="sidebar://"], button[value^="sidebar://"]').on('click', function(e) {
-      e.preventDefault();
-    }).on('tap', function(e) {
+    $togglers.on('click', function(e) { e.preventDefault(); });
+    $togglers.on('tap', function(e) {
       var $a = $(this);
       var $t = $((this.href || this.value).replace(/^sidebar:\/\//, ''));
-      var $hide;
 
-      if ($a.hasClass('sidebar-trigger-active')) {
-        if (e.originalEvent && e.originalEvent.type == 'focus') return false;
-        $a.removeClass('active sidebar-trigger-active');
-        $t.removeClass('active').css({ 'z-index': 1000 }).animate({ right: -($t.outerWidth() + 20) }, 100); // +20 to hide shadow
-        if (!$('.sidebar-trigger-active').length && !navigator.is_touch_device) convos.input.focus();
+      if ($a.hasClass('active')) {
+        $a.removeClass('active');
+        if (!showing) $togglers.filter('.keep-open').addClass('active');
+        if (!$a.hasClass('keep-open')) $t.removeClass('active');
+        if (!$togglers.filter('.active').length && !navigator.is_touch_device) convos.input.focus();
         return false;
       }
 
-      $hide = $('.sidebar-trigger-active').trigger('tap');
-      if ($t.is(':animated')) return; // supposed to just hide, not show
-      $a.addClass('active sidebar-trigger-active');
-      $t.addClass('active').css({ 'z-index': 999, right: $hide.length ? 0 : -$t.outerWidth() }).show().animate({ right: 0 }, 150);
-      $t.trigger('show');
+      showing = true;
+      $togglers.filter('.active').trigger('tap');
+      $t.addClass('active').trigger('show');
+      $a.addClass('active');
+      showing = false;
 
       if (navigator.is_touch_device) {
         $t.find('select').each(function() { var s = this.selectize; if(s) setTimeout(function() { s.show(); }, 50); });
@@ -41,5 +46,16 @@
         $t.find('a, button, input').eq(0).focus();
       }
     });
+
+    $(window).resize();
+  });
+
+  $(window).on('resize', function() {
+    if ($(document).width() < convos.responsiveWidth) {
+      if ($main.hasClass('keep-open')) $main.removeClass('keep-open').trigger('tap');
+    }
+    else {
+      if (!$main.hasClass('keep-open')) $main.addClass('keep-open').trigger('tap');
+    }
   });
 })(jQuery);

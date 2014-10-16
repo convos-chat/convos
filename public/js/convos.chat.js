@@ -2,6 +2,7 @@
   window.convos = window.convos || {};
   window.link_embedder_text_gist_github_styled = 1; // custom gist styling
 
+  convos.responsiveWidth = 700; // see _variables.scss
   convos.at_bottom = true; // start ui scrolled to bottom
   convos.at_bottom_threshold = !!('ontouchstart' in window) ? 110 : 40;
   convos.current = {};
