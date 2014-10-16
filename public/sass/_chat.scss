@@ -36,7 +36,7 @@ nav.bar {
   a b { bottom: 1px; }
 
   a.conversation { color: #666; }
-  a.goto-anything.overlapping { border: $borderSeperator; }
+  a.goto-anything.overlapping { border-left: $borderSeperator; }
   ul.conversations { height: $navHeight; }
 
   .right {
