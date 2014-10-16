@@ -39,10 +39,7 @@
       $a.addClass('active');
       showing = false;
 
-      if (navigator.is_touch_device) {
-        $t.find('select').each(function() { var s = this.selectize; if(s) setTimeout(function() { s.show(); }, 50); });
-      }
-      else {
+      if (!navigator.is_touch_device) {
         $t.find('a, button, input').eq(0).focus();
       }
     });

@@ -7,15 +7,16 @@ form {
   select[multi] { height: 30px; }
   input[readonly] { background: darken($backgroundColor, 10%); color: #666; }
   input, select {
-    background: $backgroundColor;
+    background: darken($backgroundColor, 2%);
     font-size: $fontSize - 1;
     outline: none;
     border: $formElementBorder;
     padding: 6px 8px;
     width: $inputWidth;
+
+    &:focus { outline: none; border: $formElementFocusBorder; }
   }
-  .selectize-input { padding: 2px; }
-  .selectize-input.focus, input:focus { border: $formElementFocusBorder; }
+
   input[type="checkbox"] { width: auto; }
   input.field-with-error, select.field-with-error { border-color: $errorColor; }
   input.half-size { width: ($inputWidth / 2 - 2); }
