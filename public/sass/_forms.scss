@@ -5,7 +5,7 @@ form {
   label { display: block; margin-top: $bodyGutter; }
 
   select[multi] { height: 30px; }
-  input[readonly] { background: darken($backgroundColor, 10%); color: #666; }
+  input[readonly] { background: darken($backgroundColor, 10%); color: lighten($fontColor, 20%); }
   input, select {
     background: darken($backgroundColor, 2%);
     font-size: $fontSize - 1;
@@ -62,7 +62,7 @@ form.horizontal {
     border-bottom: 0;
   }
 
-  @media (max-width: 400px) {
+  @media (max-width: $responsiveWidth + $sidebarWidth) {
     label {
       float: none;
       width: 100%;
@@ -73,29 +73,22 @@ form.horizontal {
   }
 }
 
-form.edit-mode {
-  a.edit-mode {
-    display: none;
-  }
-}
+button { vertical-align: baseline; } // make <a> and <button> align. at least in chrome
 
 button, .button {
-  background: darken($backgroundColor, 13%);
-  color: #222;
+  background-color: darken($backgroundColor, 13%);
+  color: lighten($fontColor, 2%);
   font-size: $fontSize - 1;
   text-decoration: none;
   padding: 8px;
   border: $formElementBorder;
+  &:active, &.active { background: darken($backgroundColor, 20%); }
   &:focus { outline: none; border: $formElementFocusBorder; }
   &:hover { border: $formElementFocusBorder; }
 }
-.error {
-  button, .button {
-    background-color: lighten($errorColor, 54%);
-    border-color: $errorColor;
-  }
-}
 
-button { vertical-align: baseline; } // make <a> and <button> align. at least in chrome
-button:active, button.active, .button:active, .button.active { background: darken($backgroundColor, 20%); }
-button.confirm, a.confirm { color: #900; border-color: $errorColor; }
+button.confirm, a.confirm {
+  background-color: lighten($errorColor, 52%);
+  color: $errorColor;
+  border-color: $errorColor;
+}

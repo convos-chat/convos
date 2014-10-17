@@ -26,7 +26,8 @@ Mojo::IOLoop->start;
 
 sub data {
   return (
-      $_[0] eq 'add_conversation'    ? (target => '#foo')
+      $_[0] eq 'add_conversation' ? (target => '#foo')
+    : $_[0] eq 'go_forward_in_history' ? (target => '#convos', conversation => [{timestamp => time}])
     : $_[0] eq 'remove_conversation' ? (target => '#foo')
     : $_[0] eq 'mode' ? (target => '#foo', mode => '+o', args => 'TODO')
     : $_[0] eq 'nick_change' ? (old_nick => 'bbb',     new_nick => 'testwoman')

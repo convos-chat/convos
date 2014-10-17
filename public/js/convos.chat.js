@@ -64,14 +64,13 @@
     $('div.messages ul .help').each(function() { if ($message[0] != this) $(this).remove(); });
   });
 
-  convos.getNewerMessages = function(e) {
+  convos.goForwardInHistory = function(e) {
+    $(this).closest('li').remove();
     if (e) e.preventDefault();
     if (!convos.current.end_time) return;
-    var $btn = $(this);
     $.get(location.href.replace(/\?.*/, ''), { from: convos.current.end_time }, function(data) {
       var $ul = $(data).find('ul[data-network]');
       var $li = $ul.children('li:gt(0)');
-      $btn.closest('li').remove();
       $('body').removeClass('loading');
       if (!$li.length) return;
       convos.current.end_time = parseFloat($ul.data('end-time'));
@@ -152,7 +151,7 @@
       $(this).replaceWith('<img src="' + $(this).attr('data-avatar') + '" class="avatar">');
     });
 
-    this.filter('.historic-message').find('a.button.newer').click(convos.getNewerMessages);
+    this.find('a.go-forward-in-history').click(convos.goForwardInHistory);
 
     return this;
   };
@@ -174,7 +173,7 @@
     $('form input[type="text"]:visible').eq(0).focus();
   };
 
-  var getHistoricMessages = function() {
+  var goBackwardInHistory = function() {
     if (!convos.current.start_time) return;
     var $loading = $('<li class="message notice"><div class="content">Loading historic messages...</div></li>');
     $.get(location.href.replace(/\?.*/, ''), { 'last-read-time': convos.current.last_read_time, to: convos.current.start_time }, function(data) {
@@ -226,7 +225,7 @@
 
       if (location.href.indexOf('from=') > 0) {
         $messages.find('li:first').addClass('history-starting-point');
-        getHistoricMessages();
+        goBackwardInHistory();
       }
 
       if (!navigator.is_touch_device) focusFirst();
@@ -268,7 +267,7 @@
 
     $(window).on('scroll', function(e) {
       convos.at_bottom = $(this).scrollTop() + $(this).height() > $('body').height() - convos.at_bottom_threshold;
-      if ($(window).scrollTop() == 0) getHistoricMessages();
+      if ($(window).scrollTop() == 0) goBackwardInHistory();
     });
 
     // handle cmd://... url

@@ -71,11 +71,7 @@ form.input {
 
   @media (min-width: $responsiveWidth) {
     height: $navHeight;
-
-    input {
-      padding-top: 10px;
-      padding-bottom: 10px;
-    }
+    input { padding-top: 10px; padding-bottom: 10px; }
   }
 }
 
@@ -98,6 +94,8 @@ nav.bar a.mention b, form.goto-anything a.mention b {
 }
 
 div.messages {
+  $avatarWidth: 40px;
+
   padding-top: $navHeight + 4;
   padding-bottom: $navHeight + 8;
 
@@ -111,13 +109,13 @@ div.messages {
 
     @media (min-width: $responsiveWidth) {
       padding-right: ($sidebarWidth + $bodyGutterSmall);
+      &.form { margin-left: $avatarWidth + $bodyGutterSmall; }
     }
 
-    button, .button { padding: 2px 4px; }
-    div.question { padding-left: 50px; }
-    img.avatar, i.avatar { float: left; max-width: 40px; font-size: 40px; }
+    div.question { padding-left: $avatarWidth + $bodyGutterSmall; }
+    img.avatar, i.avatar { float: left; max-width: $avatarWidth; font-size: $avatarWidth; }
     > h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
-    > h3, div.content, div.embed { margin-left: 50px; }
+    > h3, div.content, div.embed { margin-left: $avatarWidth + $bodyGutterSmall; }
     div.content { max-width: $messageWidth; line-height:1.4em; }
     div.whitespace {  white-space: pre-wrap; }
     div.embed {
@@ -129,10 +127,6 @@ div.messages {
       overflow: visible;
       color: #999;
       font-size: .85em;
-    }
-    span.actions {
-      float: right;
-      padding-right: 2px;
     }
   }
 
@@ -175,6 +169,8 @@ div.messages {
   li.nick-change, li.nick-parted, li.nick-quit {
     .content b { font-weight: normal; }
   }
+
+  li a.go-forward-in-history { display: block; float: left; }
 }
 
 form.sidebar-right,

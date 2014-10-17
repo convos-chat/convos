@@ -1,0 +1,7 @@
+<li class="historic-message" data-network="<%= $network %>" data-target="<%= $target %>">
+  %= image '/image/avatar-convos.png', alt => '', class => 'avatar'
+  <div class="content">
+    % my $more = url_for('view' => { network => $network, target => $target })->query(from => $conversation->[-1]{timestamp});
+    %= link_to 'Go forward in history', $more, class => 'button go-forward-in-history'
+  </div>
+</li>

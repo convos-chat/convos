@@ -14,7 +14,7 @@
     socket.onopen = function(e) {
       enableInput();
       convos.current.end_time = $('li.message[data-timestamp]:last').data('timestamp');
-      convos.getNewerMessages();
+      convos.goForwardInHistory();
     };
     convos.send.socket = socket;
   };
@@ -34,7 +34,7 @@
 
   var idleTimer = function() {
     if (idleTimer.t) clearTimeout(idleTimer.t);
-    if (!convos.current.target) convos.getNewerMessages(); // make sure we have the newest server messages on register
+    if (!convos.current.target) convos.goForwardInHistory(); // make sure we have the newest server messages on register
     idleTimer.t = setTimeout(function() { convos.emit('idle') }, 1500);
   };
 
