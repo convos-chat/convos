@@ -181,7 +181,7 @@ div.sidebar-right {
   width: $sidebarWidth;
   padding-bottom: $bodyGutter;
   border-top: 1px solid #ddd;
-  z-index: 2;
+  z-index: ($navBarZindex - 1);
   border-left: $borderSeperator;
 
   -webkit-overflow-scrolling: touch;
@@ -193,7 +193,7 @@ div.sidebar-right {
   @include prefix(transition-property, right);
   @include prefix(transition-duration, 200ms);
   @include prefix(transition-timing-function, ease);
-  &.active { right: 0; }
+  &.active { right: 0; z-index: ($navBarZindex - 2); }
 
   button.link {
     background: transparent;
