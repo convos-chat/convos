@@ -4,14 +4,13 @@ body.loading {
 
 body.ios-input-focus {
   nav.bar { display: none; }
-  div.messages { padding-bottom: 5px; }
+  div.messages { padding-bottom: $bodyGutterSmall; }
   form.input { position: static; }
 }
 
 nav.bar {
   background: $sidebarBackground;
   position: fixed;
-  padding: 0 $bodyGutterSmall 0 $bodyGutter;
   top: 0;
   left: 0;
   right: 0;
@@ -35,6 +34,7 @@ nav.bar {
 
   a b { bottom: 1px; }
 
+  a.convos { padding-left: $bodyGutterSmall; }
   a.conversation { color: #666; }
   a.goto-anything.overlapping { border-left: $borderSeperator; }
   ul.conversations { height: $navHeight; }
@@ -55,19 +55,27 @@ form.input {
   background: $sidebarBackground;
   position: fixed;
   bottom: 0;
-  left: -$bodyGutter;
-  right: -$bodyGutter;
-  height: $navHeight;
+  left: 0;
+  right: 0;
   border-top: $formElementBorder;
 
   input {
     background: $sidebarBackground;
     width: 100%;
-    padding: 10px $bodyGutter;
+    padding: $bodyGutterSmall;
     font-size: $fontSize + 2;
 
     &, :focus { border: 0; }
     &.disabled, &[disabled] { background-color: #eee; }
+  }
+
+  @media (min-width: $responsiveWidth) {
+    height: $navHeight;
+
+    input {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
   }
 }
 
@@ -96,13 +104,13 @@ div.messages {
   li {
     display: block;
     position: relative;
-    padding: 4px $bodyGutter;
+    padding: 4px $bodyGutterSmall;
     overflow: hidden;
 
     &.hidden { display: none !important; }
 
     @media (min-width: $responsiveWidth) {
-      padding-right: ($sidebarWidth + $bodyGutter);
+      padding-right: ($sidebarWidth + $bodyGutterSmall);
     }
 
     button, .button { padding: 2px 4px; }
