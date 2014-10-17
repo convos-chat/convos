@@ -52,6 +52,7 @@ nav.bar {
 }
 
 form.input {
+  background: $sidebarBackground;
   position: fixed;
   bottom: 0;
   left: -$bodyGutter;
