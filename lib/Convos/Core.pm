@@ -385,14 +385,14 @@ sub delete_user {
       $redis->srem("users", $login, $delay->begin);
 
       for my $name (@$connections) {
+        my $conn = $self->_connection(login => $login, name => $name);
+        $self->control(stop => $login, $name, $delay->begin);
+        $self->archive->flush($conn);
         $redis->srem("connections", "$login:$name", $delay->begin);
       }
     },
     sub {
       my ($delay, @deleted) = @_;
-      my $conns = delete $self->{connections}{$login};    # stop all connections
-
-      $self->archive->flush($_) for values %$conns;
       $self->$cb('');
     },
   );

@@ -1,13 +1,23 @@
 use t::Helper;
 use Mojo::JSON;
 use Mojo::DOM;
+use File::Basename 'dirname';
+use File::Path 'make_path';
+use File::Spec;
 
+my @ctrl;
+$t->app->core->start;
 is_deeply(redis_do('keys', 'user:doe*'), [], 'user:doe keys');
+
+{
+  no warnings 'redefine';
+  *Convos::Core::ctrl_stop = sub { shift; push @ctrl, stop => @_ };
+}
 
 redis_do(
   [hmset => 'user:doe',             digest => 'E2G3goEIb8gpw', email => 'e1@convos.by', avatar => 'a1@convos.by'],
-  [sadd  => 'user:doe:connections', 'magnet'],
-  [hmset => 'user:doe:connection:magnet', nick => 'doe'],
+  [sadd  => 'user:doe:connections', 'profirc'],
+  [hmset => 'user:doe:connection:profirc', nick => 'doe'],
 );
 
 {
@@ -44,12 +54,22 @@ redis_do(
 
 {
   diag 'test delete profile';
+  my $log_file = File::Spec->catfile(qw( irc_logs_test doe profirc whatever ));
+
+  is_deeply(\@ctrl, [], 'no instructions sent yet');
 
   $t->get_ok('/profile/delete')->element_exists('form[action="/profile/delete"][method="post"]')
     ->element_exists('button.confirm');
 
+  make_path(dirname($log_file));
+  Mojo::Util::spurt('whatever', $log_file);
+  ok -e $log_file, 'dummy log_file was created';
+
   $t->post_ok('/profile/delete', form => {})->status_is(302)->header_is('Location', '/');
   is_deeply(redis_do('keys', 'user:doe*'), [], 'user:doe keys after delete');
+
+  is_deeply(\@ctrl, [qw( stop doe profirc )], 'stopped connection');
+  ok !-e $log_file, 'dummy log_file was removed';
 }
 
 done_testing;
