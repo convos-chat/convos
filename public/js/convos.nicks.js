@@ -61,6 +61,14 @@
     $('form.sidebar ul li.participants span').text(numberOfNicks());
   });
 
+  convos.on('nick-kicked', function($message) {
+    if ($message.data('network') != convos.current.network) return;
+    var nick = $message.data('nick');
+    $message.data('to_current', !!$.grep(convos.nicks.list, function(n, i) { return n == nick; }).length);
+    remove(nick);
+    updateNumberOfNicks();
+  });
+
   convos.on('nick-list', function($message) {
     if (!$message.data('to_current')) return;
     if (!numberOfNicks() && $('.messages li.message').length > 1) $message.data('to_current', false); // only show in conversation on manual "/list"
