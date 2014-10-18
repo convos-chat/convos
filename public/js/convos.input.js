@@ -22,6 +22,7 @@
   ];
 
   var autocompleter = function(e) {
+    if (this.disabled) return;
     e.preventDefault();
     if (!this.suggestions) makeSuggestions.call(this, e);
     this.suggestions.i = e.shiftKey ? this.suggestions.i - 1 : this.suggestions.i + 1;

@@ -227,6 +227,14 @@
         $messages.find('li:first').addClass('history-starting-point');
         goBackwardInHistory();
       }
+      if (convos.current.nick) {
+        convos.input.removeAttr('disabled');
+        convos.input.attr('placeholder', 'What is on your mind, ' + convos.current.nick + '?');
+      }
+      else {
+        convos.input.attr('disabled', 'disabled');
+        convos.input.attr('placeholder', '');
+      }
 
       if (!navigator.is_touch_device) focusFirst();
       if (data) $('body').hideSidebar();

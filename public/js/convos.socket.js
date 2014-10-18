@@ -28,7 +28,6 @@
 
   var enableInput = function() {
     idleTimer();
-    convos.input.attr('placeholder', 'What is on your mind, ' + convos.current.nick + '?');
     convos.input.removeClass('disabled');
   };
 
