@@ -52,26 +52,23 @@ nav.bar {
 }
 
 form.input {
-  background: $sidebarBackground;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  border-top: $formElementBorder;
+  border-top: $borderSeperator;
 
   input {
     background: $sidebarBackground;
     width: 100%;
-    padding: $bodyGutterSmall;
+    padding: 8px $bodyGutterSmall;
     font-size: $fontSize + 2;
 
     &, :focus { border: 0; }
     &.disabled, &[disabled] { background-color: #eee; }
-  }
 
-  @media (min-width: $responsiveWidth) {
-    height: $navHeight;
-    input { padding-top: 10px; padding-bottom: 10px; }
+    @media (min-width: $responsiveWidth) { height: $navHeight; }
+    @media (max-width: $responsiveWidth) { &[disabled] { display: none; } }
   }
 }
 
@@ -178,13 +175,12 @@ div.sidebar-right {
   background: $sidebarBackground;
   color: #333333;
   position: fixed;
-  top: ($navHeight - 1);
+  top: $navHeight;
   right: -($sidebarWidth + 10);
-  bottom: $navHeight;
+  bottom: ($navHeight + 1);
   overflow: auto;
   width: $sidebarWidth;
   padding-bottom: $bodyGutter;
-  border-top: 1px solid #ddd;
   z-index: ($navBarZindex - 1);
   border-left: $borderSeperator;
 
