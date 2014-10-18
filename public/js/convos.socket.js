@@ -14,7 +14,7 @@
     socket.onopen = function(e) {
       enableInput();
       convos.current.end_time = $('li.message[data-timestamp]:last').data('timestamp');
-      convos.getNewerMessages();
+      convos.goForwardInHistory();
     };
     convos.send.socket = socket;
   };
@@ -28,19 +28,18 @@
 
   var enableInput = function() {
     idleTimer();
-    convos.input.attr('placeholder', 'What is on your mind, ' + convos.current.nick + '?');
     convos.input.removeClass('disabled');
   };
 
   var idleTimer = function() {
     if (idleTimer.t) clearTimeout(idleTimer.t);
-    if (!convos.current.target) convos.getNewerMessages(); // make sure we have the newest server messages on register
+    if (!convos.current.target) convos.goForwardInHistory(); // make sure we have the newest server messages on register
     idleTimer.t = setTimeout(function() { convos.emit('idle') }, 1500);
   };
 
   var messageFailed = function(id, description) {
     var $pending = $('#' + id);
-    var $actions = $('<span class="actions"><button>Resend</button> <button>&times;</button></span>');
+    var $actions = $('<span class="actions"><button class="confirm">Resend</button> <button class="confirm">&times;</button></span>');
 
     if (!$pending.hasClass('pending')) return; // let's not mark messages as fail on timeout
 

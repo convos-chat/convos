@@ -64,7 +64,5 @@
       });
       $.each(networks.unique(), function() { addGoto($('<li><a href="' + $.url_for(this) + '">' + this + ' <small>server</small></a></li>'), $g); });
     });
-
-    $g.find('li.create select').selectize({ create: false, openOnFocus: false });
   });
 })(jQuery);

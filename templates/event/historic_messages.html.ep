@@ -1,9 +1,0 @@
-<li class="notice historic-message" data-network="<%= $network %>" data-target="<%= $target %>">
-  <span class="actions">
-    % my $more = url_for('view' => { network => $network, target => $target })->query(from => $conversation->[-1]{timestamp});
-    %= link_to 'More...', $more, class => 'button newer'
-  </span>
-  <div class="content">
-    The messages above are from archive.
-  </div>
-</li>

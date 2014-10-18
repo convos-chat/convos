@@ -5,18 +5,18 @@ form {
   label { display: block; margin-top: $bodyGutter; }
 
   select[multi] { height: 30px; }
-  input[readonly] { background: #f6f6f6; color: #666; }
-  .selectize-input, input, select {
-    background: #fff;
+  input[readonly] { background: darken($backgroundColor, 10%); color: lighten($fontColor, 20%); }
+  input, select {
+    background: darken($backgroundColor, 2%);
     font-size: $fontSize - 1;
     outline: none;
-    border: 2px solid #ccc;
-    padding: 4px;
+    border: $formElementBorder;
+    padding: 6px 8px;
     width: $inputWidth;
-    @include border-radius(3px);
+
+    &:focus { outline: none; border: $formElementFocusBorder; }
   }
-  .selectize-input { padding: 2px; }
-  .selectize-input.focus, input:focus { border: 2px solid darken(#ccc, 15%); }
+
   input[type="checkbox"] { width: auto; }
   input.field-with-error, select.field-with-error { border-color: $errorColor; }
   input.half-size { width: ($inputWidth / 2 - 2); }
@@ -55,15 +55,14 @@ form.horizontal {
     width: $inputWidth;
     margin-top: -3px;
     padding: 4px;
-    border: 2px solid $errorColor;
+    border-color: $errorColor;
     border-top: 0;
-    @include border-radius(3px);
   }
   input.field-with-error, select.field-with-error {
     border-bottom: 0;
   }
 
-  @media (max-width: 400px) {
+  @media (max-width: $responsiveWidth + $sidebarWidth) {
     label {
       float: none;
       width: 100%;
@@ -74,29 +73,22 @@ form.horizontal {
   }
 }
 
-form.edit-mode {
-  a.edit-mode {
-    display: none;
-  }
-}
+button { vertical-align: baseline; } // make <a> and <button> align. at least in chrome
 
 button, .button {
-  background: darken(#fff, 2%);
-  color: #222;
+  background-color: darken($backgroundColor, 13%);
+  color: lighten($fontColor, 2%);
   font-size: $fontSize - 1;
   text-decoration: none;
-  padding: 4px 6px;
-  border: 2px solid darken(#fff, 40%);
-  @include border-radius(3px);
-}
-.error {
-  button, .button {
-    background-color: lighten($errorColor, 54%);
-    border-color: $errorColor;
-  }
+  padding: 8px;
+  border: $formElementBorder;
+  &:active, &.active { background: darken($backgroundColor, 20%); }
+  &:focus { outline: none; border: $formElementFocusBorder; }
+  &:hover { border: $formElementFocusBorder; }
 }
 
-button { vertical-align: baseline; } // make <a> and <button> align. at least in chrome
-button:active, button.active, .button:active, .button.active { background: darken(#fff, 20%); }
-button.confirm, a.confirm { color: #900; border: 2px solid #900; }
-button:hover, .button:hover { border: $buttonBorderHover; }
+button.confirm, a.confirm {
+  background-color: lighten($errorColor, 52%);
+  color: $errorColor;
+  border-color: $errorColor;
+}
