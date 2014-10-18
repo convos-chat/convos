@@ -84,12 +84,12 @@ has log   => sub { Mojo::Log->new };
 has login => 0;
 has redis => sub { die 'redis connection required in constructor' };
 
-my @ADD_MESSAGE_EVENTS        = qw/ irc_privmsg ctcp_action irc_notice/;
-my @ADD_SERVER_MESSAGE_EVENTS = qw/
+my @ADD_MESSAGE_EVENTS        = qw( irc_privmsg ctcp_action irc_notice );
+my @ADD_SERVER_MESSAGE_EVENTS = qw(
   irc_rpl_yourhost irc_rpl_motdstart irc_rpl_motd irc_rpl_endofmotd
   irc_rpl_welcome rpl_luserclient
-  /;
-my @OTHER_EVENTS = qw/
+);
+my @OTHER_EVENTS = qw(
   irc_rpl_welcome irc_rpl_myinfo irc_join irc_nick irc_part irc_479
   irc_rpl_whoisuser irc_rpl_whoisidle irc_rpl_whoischannels irc_rpl_endofwhois
   irc_rpl_topic irc_topic
@@ -97,7 +97,7 @@ my @OTHER_EVENTS = qw/
   err_notonchannel err_bannedfromchan irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_kick irc_error
   irc_rpl_namreply irc_rpl_endofnames
-  /;
+);
 
 has _irc => sub {
   my $self = shift;
@@ -388,18 +388,22 @@ sub add_message {
   my $is_private_message = $message->{params}[0] eq $current_nick;
   my $data = {highlight => 0, message => $message->{params}[1], timestamp => time, uuid => $message->{uuid},};
 
-  @$data{qw/ nick user host /} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
+  @$data{qw( nick user host )} = IRC::Utils::parse_user($message->{prefix}) if $message->{prefix};
   $data->{target} = lc($is_private_message ? $data->{nick} : $message->{params}[0]);
   $data->{host} ||= 'localhost';
-  $data->{user} ||= $self->_irc->user;
 
-  if ($data->{nick} && $data->{nick} ne $current_nick) {
-    if ($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
+  if ($data->{nick}) {
+    if ($data->{nick} eq $current_nick) {
+      $data->{user} ||= $self->_irc->user;
+    }
+    elsif ($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
+      $self->_add_conversation($data->{target}) if $is_private_message;
       $data->{highlight} = 1;
     }
-    if ($is_private_message) {
-      $self->_add_conversation($data->{target});
-    }
+  }
+
+  if (!$data->{user}) {    # server notice/message
+    return $self->add_server_message($message);
   }
 
   # need to take care of when the current user also writes /me...
