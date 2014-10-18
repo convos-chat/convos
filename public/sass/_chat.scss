@@ -118,7 +118,7 @@ div.messages {
     img.avatar, i.avatar { float: left; max-width: 40px; font-size: 40px; }
     > h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
     > h3, div.content, div.embed { margin-left: 50px; }
-    div.content { max-width: 40em; line-height:1.4em; }
+    div.content { max-width: $messageWidth; line-height:1.4em; }
     div.whitespace {  white-space: pre-wrap; }
     div.embed {
       img { max-height: 220px; border: 2px solid #bbb; @include border-radius(8px); margin: 8px 0; }
