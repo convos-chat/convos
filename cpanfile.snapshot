@@ -237,10 +237,10 @@ DISTRIBUTIONS
       Mojolicious 5.00
       Mojolicious::Plugin::AssetPack 0.31
       Test::More 0.88
-  Mojolicious-Plugin-LinkEmbedder-0.09
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.09.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.10
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.10.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.09
+      Mojolicious::Plugin::LinkEmbedder 0.10
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef
@@ -248,6 +248,7 @@ DISTRIBUTIONS
       Mojolicious::Plugin::LinkEmbedder::Link::Image::Imgur undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text::GistGithub undef
+      Mojolicious::Plugin::LinkEmbedder::Link::Text::Github undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text::HTML undef
       Mojolicious::Plugin::LinkEmbedder::Link::Text::Twitter undef
       Mojolicious::Plugin::LinkEmbedder::Link::Video undef
