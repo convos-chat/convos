@@ -11,7 +11,7 @@
       <b><%= $n_notifications > 999 ? '999+' : $n_notifications || '' %></b>
     </a>
     <a href="sidebar://form.sidebar" title="Conversation settings" class="sidebar btn-sidebar">
-      %= fa 'user'
+      %= fa 'cog'
     </a>
   </div>
 % }
