@@ -12,7 +12,7 @@ redis_do(
   [hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => ''],
   [zadd => 'user:doe:conversations', time, 'magnet:00:23convos', time - 1, 'magnet:00batman'],
   [sadd => 'user:doe:connections',   'magnet'],
-  [hmset => 'user:doe:connection:magnet', nick => 'doe'],
+  [hmset => 'user:doe:connection:magnet', nick => 'doe', state => 'disconnected'],
 );
 
 $connection->redis($t->app->redis);

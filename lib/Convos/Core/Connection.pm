@@ -116,7 +116,6 @@ has _irc => sub {
         $data = {status => 200, message => 'Disconnected.'};
         $self->_state('disconnected');
         $self->_publish_and_save(server_message => $data);
-        $self->_add_convos_message($data);
         return;
       }
       else {
@@ -126,7 +125,6 @@ has _irc => sub {
         };
         $self->_state('reconnecting');
         $self->_publish_and_save(server_message => $data);
-        $self->_add_convos_message($data);
         $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
       }
     }
@@ -142,7 +140,6 @@ has _irc => sub {
       $self->{stop} and return $self->_state('disconnected');
       $self->_state('reconnecting');
       $self->_publish_and_save(server_message => $data);
-      $self->_add_convos_message($data);
       $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
@@ -177,7 +174,6 @@ sub new {
 
   $self->{login} or die "login is required";
   $self->{name}  or die "name is required";
-  $self->{convos_path}       = "user:$self->{login}:connection:convos:msg";
   $self->{conversation_path} = "user:$self->{login}:conversations";
   $self->{path}              = "user:$self->{login}:connection:$self->{name}";
   $self->{state}             = 'disconnected';
@@ -329,7 +325,6 @@ sub _connect {
           }
 
           $self->_publish_and_save(server_message => $data);
-          $self->_add_convos_message($data);
         }
       );
     },
@@ -371,7 +366,6 @@ sub add_server_message {
 
   $self->_state('connected');
   $self->_publish_and_save(server_message => $data);
-  $self->_add_convos_message($data) if $message->{command} eq '001';
 }
 
 =head2 add_message
@@ -755,7 +749,6 @@ sub err_bannedfromchan {
   my $data    = {status => 401, message => $message->{params}[2]};
 
   $self->_publish_and_save(server_message => $data);
-  $self->_add_convos_message($data);
 
   Scalar::Util::weaken($self);
   $self->redis->zrem(
@@ -893,7 +886,6 @@ sub irc_mode {
   if ($target eq lc $self->_irc->nick) {
     my $data = {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode"};
 
-    $self->_add_convos_message($data);
     $self->_publish(server_message => $data);
   }
   else {
@@ -914,7 +906,6 @@ sub irc_error {
   my $data = {status => 500, message => join(' ', @{$message->{params}}),};
 
   $self->_publish_and_save(server_message => $data);
-  $self->_add_convos_message($data);
 }
 
 =head2 cmd_nick
@@ -968,26 +959,6 @@ sub cmd_list {
     $self->redis->del("convos:irc:$network:channels");
     $self->{save_channels} = 1;
   }
-}
-
-sub _add_convos_message {
-  my ($self, $data) = @_;
-  my $login = $self->login;
-  my $message;
-
-  $data->{status} ||= 200;
-  $data->{timestamp} ||= time;
-  local $data->{event}   = 'message';
-  local $data->{host}    = $self->name;
-  local $data->{nick}    = $self->name;
-  local $data->{network} = 'convos';                                        # make sure target in js works
-  local $data->{target}  = '';
-  local $data->{user}    = 'convos';
-  local $data->{uuid}    = Mojo::Util::md5_sum($data->{timestamp} . $$);    # not really an uuid
-  $message = j $data;
-
-  $self->redis->zadd($self->{convos_path}, $data->{timestamp}, $message);
-  $self->redis->publish("convos:user:$login:out", $message);
 }
 
 sub _publish {

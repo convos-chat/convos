@@ -4,7 +4,10 @@ use Mojo::Loader;
 my $loader = Mojo::Loader->new;
 my $time;
 
-redis_do hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => '';
+redis_do(
+  [hmset => 'user:doe',                   digest => 'E2G3goEIb8gpw', email => ''],
+  [hmset => 'user:doe:connection:magnet', nick   => 'doe',           state => 'disconnected'],
+);
 
 for (split /\n/, $loader->data(main => 'convos.log.ep')) {
   /"timestamp":([\d\.]+)/ or die "Invalid regexp for $_";

@@ -19,7 +19,7 @@ redis_do(
   [hmset => 'user:doe', digest => 'E2G3goEIb8gpw', email => ''],
   [zadd => 'user:doe:conversations', time, 'magnet:00:23convos', time - 1, 'magnet:00batman'],
   [sadd => 'user:doe:connections',   'magnet'],
-  [hmset => 'user:doe:connection:magnet', nick => 'doe'],
+  [hmset => 'user:doe:connection:magnet', nick => 'doe', state => 'disconnected'],
 );
 
 my $dom        = Mojo::DOM->new;
@@ -103,10 +103,6 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.message.network.error[data-network="magnet"][data-target=""]'), 'Got IRC error';
   is $dom->at('div.content')->text, 'some error message', 'some error message';
-
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-network="convos"][data-target=""]'), 'Got IRC error in convos conversation';
-  is $dom->at('div.content')->text, 'some error message', 'some error message in convos conversation';
 }
 
 {
@@ -198,10 +194,6 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.error[data-network="magnet"][data-target=""]'), 'magnet got banned error';
   is $dom->at('div.content')->all_text, 'Cannot join channel (+b)', 'magnet - Cannot join channel (+b)';
-
-  $dom->parse($t->message_ok->message->[1]);
-  ok $dom->at('li.message[data-network="convos"][data-target=""]'), 'convos got banned error';
-  is $dom->at('div.content')->text, 'Cannot join channel (+b)', 'convos: Cannot join channel (+b)';
 
   $dom->parse($t->message_ok->message->[1]);
   ok $dom->at('li.conversation-remove[data-network="magnet"][data-target="#mojo"]'), 'remove conversation on 474';

@@ -39,7 +39,7 @@ is_deeply \@ctrl, [qw( fooman magnet )], 'start connection';
 $t->get_ok($t->tx->res->headers->location)->status_is(200)->text_is('title', 'Nordaaker - magnet')
   ->element_exists('div.messages ul li')->text_is('div.messages ul li:first-child h3 a', 'convos');
 
-$t->get_ok('/convos')->status_is(200)->text_is('title', 'Nordaaker - magnet')->element_exists('div.messages ul li')
+$t->get_ok('/magnet')->status_is(200)->text_is('title', 'Nordaaker - magnet')->element_exists('div.messages ul li')
   ->element_exists('div.messages ul li:first-child .avatar');
 
 $t->get_ok('/profile')->status_is(200)->element_exists('form input[name="email"][value="foobar@barbar.com"]')

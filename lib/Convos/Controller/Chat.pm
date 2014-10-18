@@ -11,7 +11,6 @@ use Mojo::JSON 'j';
 use Mojo::Util qw( html_unescape xml_escape );
 use Convos::Core::Commands;
 use Time::HiRes 'time';
-use constant DEFAULT_RESPONSE => "Hey, I don't know how to respond to that. Try /help to see what I can so far.";
 
 =head1 METHODS
 
@@ -132,9 +131,6 @@ sub _handle_socket_data {
     else {
       return $self->_send_400($dom, 'Unknown command. Type /help to see available commands.');
     }
-  }
-  elsif ($dom->{network} eq 'convos') {
-    return $self->_convos_message($dom, $cmd, DEFAULT_RESPONSE);
   }
   elsif ($dom->{target}) {
     $cmd = "PRIVMSG $dom->{target} :$cmd";

@@ -1,5 +1,5 @@
 % my $nick = stash('nick') || '';
-% my $network = stash('network') || 'convos';
+% my $network = stash('network') || '';
 % my $target = stash('target') || 'any';
 % my $sidebar = stash('sidebar') || 'chat';
 <!DOCTYPE html>

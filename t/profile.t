@@ -17,21 +17,19 @@ is_deeply(redis_do('keys', 'user:doe*'), [], 'user:doe keys');
 redis_do(
   [hmset => 'user:doe',             digest => 'E2G3goEIb8gpw', email => 'e1@convos.by', avatar => 'a1@convos.by'],
   [sadd  => 'user:doe:connections', 'profirc'],
-  [hmset => 'user:doe:connection:profirc', nick => 'doe'],
+  [hmset => 'user:doe:connection:profirc', nick => 'doe', state => 'disconnected'],
 );
 
 {
   diag 'test sidebar links';
-  $t->get_ok('/convos')->status_is(302);
   $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
-  $t->get_ok('/convos')->status_is(200)->element_exists('.sidebar a[href="/profile"]')
+  $t->get_ok('/profirc')->status_is(200)->element_exists('.sidebar a[href="/profile"]')
     ->element_exists('.sidebar a[href="/logout"]');
 }
 
 {
   diag 'test logout';
   $t->get_ok('/logout')->status_is(302);
-  $t->get_ok('/convos')->status_is(302);
   $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
 }
 
@@ -42,7 +40,7 @@ redis_do(
     ->element_exists('form[action="/profile"][method="post"]')
     ->element_exists('form input[name="email"][value="e1@convos.by"]')
     ->element_exists('form input[name="avatar"][value="a1@convos.by"]')->text_is('form .actions button', 'Update')
-    ->text_is('form .actions a[href="/convos"][class="button"]', 'Cancel');
+    ->text_is('form .actions a[href="/"][class="button"]', 'Cancel');
 
   $t->post_ok('/profile', form => {email => 'foo@', avatar => 'ba'})->status_is(400)
     ->element_exists('form .form-group.email .error')->element_exists('form .form-group.avatar .error');

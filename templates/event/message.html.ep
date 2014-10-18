@@ -7,11 +7,7 @@
 <li id="<%= $uuid %>" class="<%= join ' ', @classes %>" data-network="<%= $network %>" data-target="<%= $target %>" data-sender="<%= $nick %>" data-timestamp="<%= $timestamp %>">
   %= timestamp $timestamp
   %= fa 'user', class => 'avatar', 'data-avatar' => $avatar, style => 'color:#' .substr(Mojo::Util::md5_sum($user.$nick), 0, 6 )
-  % if($network eq 'convos') {
-  <h3><%= link_to $nick, 'view.network' => { network => $nick }, class => 'autocomplete' %></h3>
-  % } else {
   <h3><%= link_to $nick, view => { network => $network, target => $nick }, class => 'autocomplete' %></h3>
-  % }
   <div class="content whitespace"><%== $message %></div>
 % if(my $embed = stash 'embed') {
   <div class="embed"><%== $embed %></div>
