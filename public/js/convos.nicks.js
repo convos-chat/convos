@@ -1,43 +1,41 @@
 ;(function($) {
   window.convos = window.convos || {};
 
-  convos.nicks = { list: [] };
+  convos.current = convos.current || {};
+  convos.current.nicks = {};
 
   var timeout = 30 * 1000;
 
-  var add = function(nick) {
-    var $ul = $('form.sidebar ul');
-    var markup = '<li class="nick"><a href="cmd:///query ' + nick + '">' + nick + '</a></li>';
+  var add = function(nick, fast) {
+    var markup = '<li class="nick" data-nick="' + nick.toLowerCase() + '"><a href="cmd:///query ' + nick + '">' + nick + '</a></li>';
+    convos.current.nicks[nick] = true;
+    $('form.sidebar ul').append(markup);
+    if (!fast) sort();
+  };
 
-    if (!nick) return;
-
-    $ul.find('li.nick').each(function() {
-      var n = $(this).find('a').text();
-      if (n == nick) return nick = false;
-      if (n.toLowerCase() < nick.toLowerCase()) return;
-      convos.nicks.list.push(nick);
-      $(this).before(markup);
-      return nick = false; // stop each()
-    });
-
-    if (nick) {
-      convos.nicks.list.push(nick);
-      $ul.append(markup);
-    }
+  var numberOfNicks = function() {
+    return Object.keys(convos.current.nicks).length;
   };
 
   var remove = function(nick) {
-    convos.nicks.list = $.grep(convos.nicks.list, function(n, i) { return n != nick; });
+    delete convos.current.nicks[nick];
     $('form.sidebar a[href="cmd:///query ' + nick + '"]').parent().remove();
   };
 
-  var updateNumberOfNicks = function() {
-    $('form.sidebar ul li.participants span').text(convos.nicks.list.length);
+  var sort = function() {
+    var $ul = $('form.sidebar ul');
+    $ul.append(
+      $ul.find('li.nick').remove().get().sort(function(a, b) {
+        if (a.dataset.nick > b.dataset.nick) return 1;
+        if (a.dataset.nick < b.dataset.nick) return -1;
+        return 0;
+      })
+    );
   };
 
   convos.on('conversation-loaded', function($doc) {
-    convos.nicks.list = [];
-    updateNumberOfNicks();
+    convos.current.nicks = {};
+    $('form.sidebar ul li.participants span').text(0);
   });
 
   convos.on('nick-change', function($message) {
@@ -51,7 +49,7 @@
       convos.input.attr('placeholder', convos.input.attr('placeholder').replace(re, new_nick));
       convos.current.nick = new_nick;
     }
-    else if($.grep(convos.nicks.list, function(n, i) { return n == old_nick; }).length) {
+    else if(convos.current.nicks[old_nick]) {
       remove(old_nick);
       add(new_nick);
     }
@@ -59,30 +57,31 @@
 
   convos.on('nick-joined', function($message) {
     if (!$message.data('to_current')) return;
-    add($message.data('nick'));
-    updateNumberOfNicks();
+    add($message.get(0).dataset.nick);
+    $('form.sidebar ul li.participants span').text(numberOfNicks());
   });
 
   convos.on('nick-list', function($message) {
     if (!$message.data('to_current')) return;
-    if (!convos.nicks.list.length && $('.messages li.message').length > 1) $message.data('to_current', false); // only show in conversation on manual "/list"
+    if (!numberOfNicks() && $('.messages li.message').length > 1) $message.data('to_current', false); // only show in conversation on manual "/list"
     $('form.sidebar ul li.nick.status').remove();
-    $message.find('[data-nick]').each(function() { add($(this).data('nick')); });
-    updateNumberOfNicks();
+    $message.find('[data-nick]').each(function() { add(this.dataset.nick, true); });
+    $('form.sidebar ul li.participants span').text(numberOfNicks());
+    sort();
   });
 
   convos.on('nick-quit', function($message) {
     if ($message.data('network') != convos.current.network) return;
-    var nick = $message.data('nick');
-    $message.data('to_current', !!$.grep(convos.nicks.list, function(n, i) { return n == nick; }).length);
+    var nick = $message.get(0).dataset.nick;
+    $message.data('to_current', !!$.grep(convos.current.nicks, function(n, i) { return n == nick; }).length);
     remove(nick);
-    updateNumberOfNicks();
+    $('form.sidebar ul li.participants span').text(numberOfNicks());
   });
 
   convos.on('nick-parted', function($message) {
     if (!$message.data('to_current')) return;
-    remove($message.data('nick'));
-    updateNumberOfNicks();
+    remove($message.get(0).dataset.nick);
+    $('form.sidebar ul li.participants span').text(numberOfNicks());
   });
 
 })(jQuery);

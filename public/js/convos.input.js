@@ -36,7 +36,6 @@
     var after = val.substr(offset);
     var re = new RegExp('^' + RegExp.escape(after), 'i');
     var dup = {};
-    var nicks = {};
     var suggestions = [];
 
     var matcher = function(v, force) {
@@ -47,15 +46,14 @@
       dup[v] = suggestions.push(offset ? v + ' ' : v.indexOf('/') === 0 ? v : v + ': ');
     };
 
-    $.each(convos.nicks.list, function() { nicks[this] = 1; });
     $.each($('.messages h3 > a').get().reverse(), function() {
       var target = $(this).text();
-      if (nicks[target] || offset > 1) matcher(target);
+      if (convos.current.nicks[target] || offset > 1) matcher(target);
     });
-    $.each(convos.nicks.list, function() { matcher("" + this); }); // "" = String object to string primitive
+    $.each(convos.current.nicks, function(k, v) { matcher("" + k); }); // "" = String object to string primitive
     $('nav.bar a.conversation span').each(function() {
       var target = $(this).text();
-      if (nicks[target] || convos.isChannel(target) || offset > 1) matcher(target);
+      if (convos.isChannel(target) || offset > 1) matcher(target);
     });
     $.each(commands, function() { matcher("" + this); }); // "" = String object to string primitive
     matcher(convos.current.nick, true);

@@ -16,7 +16,8 @@
     if (network != convos.current.network) return;
     convos.current.channels = convos.current.channels || {};
     convos.current.channels[name] = info;
-    $('div.messages ul .channel-list input').keyup();
+    if (convos.current.channels._timer) clearTimeout(convos.current.channels._timer);
+    convos.current.channels._timer = setTimeout(function() { $('div.messages ul .channel-list input').keyup(); }, 500);
   });
 
   convos.on('channel-list', function($message) {
