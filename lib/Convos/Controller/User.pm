@@ -143,6 +143,7 @@ sub register {
   $validation->required('password_again')->equal_to('password');
   $validation->required('password')->size(5, 255);
   $output = $validation->output;
+  $output->{login} = lc($output->{login} || '');
 
   $self->delay(
     sub {

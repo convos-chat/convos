@@ -1,7 +1,6 @@
 use t::Helper;
 
-my $server = $t->app->redis->subscribe('convos:user:fooman:magnet');
-my ($form, $tmp, @ctrl);
+my ($form, @ctrl);
 
 $t->app->core->start;
 
@@ -10,13 +9,13 @@ $t->app->core->start;
   *Convos::Core::ctrl_start = sub { shift; push @ctrl, @_ };
 }
 
-$form = {login => 'foobar', password => 'barbar'};
+$form = {login => 'FoObar', password => 'barbar'};
 
 $t->post_ok('/login' => form => $form)->status_is('401', 'failed to log in');
 
 # invalid register is tested in landing-page.t
 
-$form = {login => 'fooman', email => 'foobar@barbar.com', password => 'barbar', password_again => 'barbar',};
+$form = {login => 'fooMAN', email => 'foobar@barbar.com', password => 'barbar', password_again => 'barbar'};
 $t->post_ok('/register' => form => $form)->status_is('302', 'first user gets to be admin')
   ->header_is('Location', '/wizard', 'Redirect to settings page');
 
@@ -45,5 +44,11 @@ $t->get_ok('/convos')->status_is(200)->text_is('title', 'Nordaaker - magnet')->e
 
 $t->get_ok('/profile')->status_is(200)->element_exists('form input[name="email"][value="foobar@barbar.com"]')
   ->element_exists('form input[name="avatar"][value="foobar@barbar.com"]');
+
+$t->get_ok('/logout')->status_is(302)->header_is('Location', '/');
+$t->get_ok('/profile')->status_is(302)->header_is('Location', '/');
+
+$form = {login => 'FOOMAN', password => 'barbar'};
+$t->post_ok('/login', form => $form)->status_is(302)->header_is('Location', '/magnet');
 
 done_testing;
