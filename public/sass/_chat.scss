@@ -167,7 +167,7 @@ div.messages {
     div.timestamp { color: #fee; }
     > h3 { color: #333; }
   }
-  li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
+  li.nick-change, li.nick-joined, li.nick-kicked, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     color: #999;
     padding-top: 2px;
     a { color: #999; }

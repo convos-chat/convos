@@ -686,14 +686,11 @@ sub irc_quit {
 
 =head2 irc_kick
 
-         'raw_line' => ':testing!~marcus@home.means.no KICK #testmore :marcus_',
-          'params' => [
-                        '#testmore',
-                        'marcus_'
-                      ],
-          'command' => 'KICK',
-          'handled' => 1,
-          'prefix' => 'testing!~marcus@40.101.45.31.customer.cdi.no'
+  'raw_line' => ':testing!~marcus@home.means.no KICK #testmore :marcus_',
+  'params' => [ '#testmore', 'marcus_' ],
+  'command' => 'KICK',
+  'handled' => 1,
+  'prefix' => 'testing!~marcus@40.101.45.31.customer.cdi.no'
 
 =cut
 
@@ -703,14 +700,13 @@ sub irc_kick {
   my $channel = lc $message->{params}[0];
   my $nick    = $message->{params}[1];
 
-  Scalar::Util::weaken($self);
   if ($nick eq $self->_irc->nick) {
     my $name = as_id $self->name, $channel;
     $self->redis->zrem($self->{conversation_path}, $name, sub { });
   }
-  $self->_publish(nick_kicked => {by => $nick, nick => $nick, target => $channel});
-}
 
+  $self->_publish(nick_kicked => {by => $by, nick => $nick, target => $channel});
+}
 
 =head2 irc_part
 
