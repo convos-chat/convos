@@ -39,7 +39,7 @@
 
   var messageFailed = function(id, description) {
     var $pending = $('#' + id);
-    var $actions = $('<span class="actions"><button>Resend</button> <button>&times;</button></span>');
+    var $actions = $('<span class="actions"><button class="confirm">Resend</button> <button class="confirm">&times;</button></span>');
 
     if (!$pending.hasClass('pending')) return; // let's not mark messages as fail on timeout
 

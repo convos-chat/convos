@@ -118,6 +118,7 @@ div.messages {
     div.embed {
       img { max-height: 220px; border: 2px solid #bbb; @include border-radius(8px); margin: 8px 0; }
     }
+    div.actions { float: right; } // used in javascript
     div.timestamp {
       float: right;
       height: 16px;
