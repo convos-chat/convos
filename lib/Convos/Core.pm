@@ -471,6 +471,7 @@ either:
 sub login {
   my ($self, $input, $cb) = @_;
   my $validation = $self->_validation($input);
+  my $output;
 
   $validation->required('login');
   $validation->required('password');
@@ -480,10 +481,13 @@ sub login {
     return $self;
   }
 
+  $output = $validation->output;
+  $output->{login} = lc $output->{login};
+
   Mojo::IOLoop->delay(
     sub {
       my $delay = shift;
-      $self->redis->hget("user:" . $validation->param('login'), "digest", $delay->begin);
+      $self->redis->hget("user:$output->{login}", "digest", $delay->begin);
     },
     sub {
       my ($delay, $digest) = @_;
@@ -492,7 +496,7 @@ sub login {
         $self->$cb($validation);
       }
       elsif ($digest eq crypt scalar $validation->param('password'), $digest) {
-        warn "[core:@{[$validation->param('login')]}] Valid password\n" if DEBUG;
+        warn "[core:$output->{login}] Valid password\n" if DEBUG;
         $self->$cb(undef);
       }
       else {
