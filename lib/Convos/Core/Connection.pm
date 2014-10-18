@@ -96,7 +96,7 @@ my @OTHER_EVENTS = qw/
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
   err_notonchannel err_bannedfromchan irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_kick irc_error
-  irc_rpl_namreply irc_rpl_endofnames
+  irc_rpl_namreply irc_rpl_endofnames err_nicknameinuse
   /;
 
 has _irc => sub {
@@ -659,6 +659,7 @@ sub irc_nick {
   my $new_nick = $message->{params}[0];
 
   if ($new_nick eq $self->_irc->nick) {
+    delete $self->{supress}{err_nicknameinuse};
     $self->redis->hset($self->{path}, current_nick => $new_nick);
   }
 
@@ -761,6 +762,20 @@ sub err_bannedfromchan {
       $self->_publish(remove_conversation => {target => $channel});
     }
   );
+}
+
+=head2 err_nicknameinuse
+
+=cut
+
+sub err_nicknameinuse {
+  my ($self, $message) = @_;
+
+  if ($self->{supress}{err_nicknameinuse}++) {
+    return;
+  }
+
+  $self->_publish(server_message => {status => 500, message => $message->{params}[2],});
 }
 
 =head2 err_nosuchchannel
