@@ -92,7 +92,7 @@ sub conversation {
     sub {
       my $delay = shift;
       $self->conversation_list($delay->begin);
-      $self->notification_list($delay->begin) if $self->stash('full_page');
+      $self->notification_list($delay->begin);
     },
     sub {
       my ($delay, $conversation_list, $notification_list) = @_;
