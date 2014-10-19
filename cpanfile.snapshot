@@ -70,10 +70,10 @@ DISTRIBUTIONS
       File::Spec 0
       Test::More 0
       perl 5.006001
-  Mojo-IRC-0.11
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.11.tar.gz
+  Mojo-IRC-0.13
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.13.tar.gz
     provides:
-      Mojo::IRC 0.11
+      Mojo::IRC 0.13
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
@@ -81,10 +81,10 @@ DISTRIBUTIONS
       Parse::IRC 1.20
       Test::More 0.88
       Unicode::UTF8 0.59
-  Mojo-Redis-0.9928
-    pathname: J/JH/JHTHORSEN/Mojo-Redis-0.9928.tar.gz
+  Mojo-Redis-1.00
+    pathname: J/JH/JHTHORSEN/Mojo-Redis-1.00.tar.gz
     provides:
-      Mojo::Redis 0.9928
+      Mojo::Redis 1.00
       Mojo::Redis::Subscription undef
     requirements:
       Encode 0
@@ -228,19 +228,19 @@ DISTRIBUTIONS
       JavaScript::Minifier::XS 0.01
       Mojolicious 5.00
       Test::More 0.88
-  Mojolicious-Plugin-FontAwesome4-4.2003
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-FontAwesome4-4.2003.tar.gz
+  Mojolicious-Plugin-FontAwesome4-4.2004
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-FontAwesome4-4.2004.tar.gz
     provides:
-      Mojolicious::Plugin::FontAwesome4 4.2003
+      Mojolicious::Plugin::FontAwesome4 4.2004
     requirements:
       ExtUtils::MakeMaker 0
       Mojolicious 5.00
       Mojolicious::Plugin::AssetPack 0.31
       Test::More 0.88
-  Mojolicious-Plugin-LinkEmbedder-0.10
-    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.10.tar.gz
+  Mojolicious-Plugin-LinkEmbedder-0.12
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-LinkEmbedder-0.12.tar.gz
     provides:
-      Mojolicious::Plugin::LinkEmbedder 0.10
+      Mojolicious::Plugin::LinkEmbedder 0.12
       Mojolicious::Plugin::LinkEmbedder::Link undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game undef
       Mojolicious::Plugin::LinkEmbedder::Link::Game::_2play undef

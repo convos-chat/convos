@@ -1,9 +1,25 @@
 ## 0.85
 - Fix input field in iOS #167
+- Fix nick-list event #197
+- Fix rendering /list command with correct height #205
+- Fix wrong kick message #206
+- Fix scrolling to bottom when gist load #207
+- Fix sending server messages to server log, instead of opening new conversation #209
+- Fix uppercase characters in login name #211
+- Add delete_user() to Convos::Core #104
 - Add feedback when websocket could not be established #192
 - Add /profile/delete #104
+- Add detection if unable to connect to websocket #173
+- Add improved embed of media with Mojolicious::Plugin::LinkEmbedder 0.12
+  * Fix embedding YouTube video over https
+  * Fix video site that also contain meta information, but no video
+  * Add Github embedding of projects, issues and pull requests
+  * Add Open graph and Twitter meta information
+  * Faster loading of media using cache mechanism
+- Change to only show err_nicknameinuse message once #176
 - Change to "flat" design
 - Remove Convos::Loopback
+- Remove references to Heroku, closes #80
 - Remove desktop notification status in profile #203
 
 ## 0.84 (2014-09-14)
