@@ -10,8 +10,6 @@ redis_do(
 );
 
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
-
-$t->get_ok('/convos')->status_is(404);
 $t->get_ok('/magnet')->status_is(200)->element_exists('form.sidebar[action="/connection/magnet/control"]');
 $t->get_ok('/freenode')->status_is(200)->element_exists('form.sidebar[action="/connection/freenode/control"]');
 

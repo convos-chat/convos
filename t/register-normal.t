@@ -51,4 +51,7 @@ $t->get_ok('/profile')->status_is(302)->header_is('Location', '/');
 $form = {login => 'FOOMAN', password => 'barbar'};
 $t->post_ok('/login', form => $form)->status_is(302)->header_is('Location', '/magnet');
 
+# back compat
+$t->get_ok('/convos')->status_is(302)->header_is('Location', '/');
+
 done_testing;
