@@ -24,10 +24,16 @@ $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is
   $t->websocket_ok('/socket')->send_ok('PING')->message_ok->message_is('PONG');    # make sure we are subscribing
   $connection->_irc->from_irc_server(
     ":spectral.shadowcat.co.uk NOTICE doe :*** Connected securely via TLSv1 AES128-SHA-128\r\n");
+
   $dom->parse($t->message_ok->message->[1]);
   ok !$dom->at('.message.private.highlight'), 'not a private message';
   ok $dom->at('.message.network.notice'), 'server notice';
   is $dom->at('.content')->text, '*** Connected securely via TLSv1 AES128-SHA-128', 'correct notice';
+
+  # this is rather fragile, but it's the best I can come up with at the moment
+  Mojo::IOLoop->timer(0.1 => sub { Mojo::IOLoop->stop; });
+  Mojo::IOLoop->start;
+  $t->send_ok('PING')->message_ok->message_is('PONG', 'no add_conversation message');
 }
 
 done_testing;

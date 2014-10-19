@@ -225,6 +225,30 @@ sub startup {
     push @{$self->renderer->paths}, $ENV{CONVOS_TEMPLATES};
   }
 
+  my $redis = $self->redis;
+  $self->plugin(
+    LinkEmbedder => {
+      cache_cb => sub {
+        my $cb = pop;
+        my ($link_embedder, $url, $link) = @_;
+
+        if ($link) {    # set
+          $redis->set("convos:link:$url", Mojo::JSON::encode_json($link), sub { });
+          $redis->expire("convos:link:$url", Mojo::JSON::encode_json($link), 3600, sub { });
+          $link_embedder->$cb;
+        }
+        else {          # get
+          $redis->get(
+            "convos:link:$url",
+            sub {
+              $link_embedder->$cb(Mojo::JSON::decode_json($_[1] || '{}'));
+            }
+          );
+        }
+      },
+    },
+  );
+
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
   $self->defaults(full_page => 1);
   $self->hook(before_dispatch => \&_before_dispatch);
@@ -315,8 +339,6 @@ sub _from_cpan {
 sub _private_routes {
   my $self = shift;
   my $r = $self->routes->under('/')->to('user#auth', layout => 'view');
-
-  $self->plugin('LinkEmbedder');
 
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');

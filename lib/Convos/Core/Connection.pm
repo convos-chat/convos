@@ -97,7 +97,7 @@ my @OTHER_EVENTS = qw(
   err_notonchannel err_bannedfromchan irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_kick irc_error
   irc_rpl_namreply irc_rpl_endofnames err_nicknameinuse
-  );
+);
 
 has _irc => sub {
   my $self = shift;
@@ -391,7 +391,7 @@ sub add_message {
       $data->{user} ||= $self->_irc->user;
     }
     elsif ($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
-      $self->_add_conversation($data->{target}) if $is_private_message;
+      $self->_add_conversation($data->{target}) if $is_private_message and $data->{user};
       $data->{highlight} = 1;
     }
   }

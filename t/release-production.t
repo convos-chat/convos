@@ -9,11 +9,8 @@ plan skip_all => 'Can only run on linux' unless $^O eq 'linux';
 $ENV{CONVOS_REDIS_URL} = 'redis://invalid-host.localhost';
 $ENV{MOJO_MODE}        = 'production';
 
-{
-  my $ap = Mojolicious::Plugin::AssetPack->new;
-  $ap->preprocessors->detect;
-  plan skip_all => 'Missing preprocessors for scss' unless $ap->preprocessors->has_subscribers('scss');
-}
+my $ap = Mojolicious::Plugin::AssetPack->new;
+plan skip_all => 'Missing preprocessors for scss' unless $ap->preprocessors->can_process('scss');
 
 my $t = Test::Mojo->new('Convos');
 my ($css, $js);
