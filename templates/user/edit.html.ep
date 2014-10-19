@@ -1,7 +1,7 @@
 % title 'Edit user';
 % stash sidebar => 'convos';
 <ul>
-  <li class="with-padding">
+  <li class="form">
     <h2>Edit Profile</h2>
     % my $err;
     %= form_for 'user.edit', method => 'post', class => 'horizontal', begin

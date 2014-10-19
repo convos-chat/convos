@@ -1,4 +1,5 @@
 .link-embedder.text-html {
+  max-width: $messageWidth;
   overflow: hidden;
 
   .link-embedder-media {

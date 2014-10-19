@@ -96,8 +96,8 @@ my @OTHER_EVENTS = qw(
   irc_rpl_topicwhotime irc_rpl_notopic err_nosuchchannel err_nosuchnick
   err_notonchannel err_bannedfromchan irc_rpl_list
   irc_rpl_listend irc_mode irc_quit irc_kick irc_error
-  irc_rpl_namreply irc_rpl_endofnames
-);
+  irc_rpl_namreply irc_rpl_endofnames err_nicknameinuse
+  );
 
 has _irc => sub {
   my $self = shift;
@@ -657,6 +657,7 @@ sub irc_nick {
   my $new_nick = $message->{params}[0];
 
   if ($new_nick eq $self->_irc->nick) {
+    delete $self->{supress}{err_nicknameinuse};
     $self->redis->hset($self->{path}, current_nick => $new_nick);
   }
 
@@ -684,14 +685,11 @@ sub irc_quit {
 
 =head2 irc_kick
 
-         'raw_line' => ':testing!~marcus@home.means.no KICK #testmore :marcus_',
-          'params' => [
-                        '#testmore',
-                        'marcus_'
-                      ],
-          'command' => 'KICK',
-          'handled' => 1,
-          'prefix' => 'testing!~marcus@40.101.45.31.customer.cdi.no'
+  'raw_line' => ':testing!~marcus@home.means.no KICK #testmore :marcus_',
+  'params' => [ '#testmore', 'marcus_' ],
+  'command' => 'KICK',
+  'handled' => 1,
+  'prefix' => 'testing!~marcus@40.101.45.31.customer.cdi.no'
 
 =cut
 
@@ -701,14 +699,13 @@ sub irc_kick {
   my $channel = lc $message->{params}[0];
   my $nick    = $message->{params}[1];
 
-  Scalar::Util::weaken($self);
   if ($nick eq $self->_irc->nick) {
     my $name = as_id $self->name, $channel;
     $self->redis->zrem($self->{conversation_path}, $name, sub { });
   }
-  $self->_publish(nick_kicked => {by => $nick, nick => $nick, target => $channel});
-}
 
+  $self->_publish(nick_kicked => {by => $by, nick => $nick, target => $channel});
+}
 
 =head2 irc_part
 
@@ -758,6 +755,20 @@ sub err_bannedfromchan {
       $self->_publish(remove_conversation => {target => $channel});
     }
   );
+}
+
+=head2 err_nicknameinuse
+
+=cut
+
+sub err_nicknameinuse {
+  my ($self, $message) = @_;
+
+  if ($self->{supress}{err_nicknameinuse}++) {
+    return;
+  }
+
+  $self->_publish(server_message => {status => 500, message => $message->{params}[2],});
 }
 
 =head2 err_nosuchchannel

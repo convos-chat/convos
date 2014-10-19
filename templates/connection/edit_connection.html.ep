@@ -1,7 +1,7 @@
 % title "Edit $name";
 % stash sidebar => 'convos';
 <ul>
-  <li class="with-padding">
+  <li class="form">
     <h2>Edit <%= $name %></h2>
     %= include 'connection/form', in_storage => 1
   </li>

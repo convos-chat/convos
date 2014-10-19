@@ -1,19 +1,16 @@
-$borderSeperator: 1px solid #ddd;
-
 body.loading {
   div.messages { @include opacity(0.4); }
 }
 
 body.ios-input-focus {
   nav.bar { display: none; }
-  div.messages { padding-bottom: 5px; }
+  div.messages { padding-bottom: $bodyGutterSmall; }
   form.input { position: static; }
 }
 
 nav.bar {
   background: $sidebarBackground;
   position: fixed;
-  padding: 0 $bodyGutter;
   top: 0;
   left: 0;
   right: 0;
@@ -37,44 +34,41 @@ nav.bar {
 
   a b { bottom: 1px; }
 
+  a.convos { padding-left: $bodyGutterSmall; }
   a.conversation { color: #666; }
-  a.goto-anything.overlapping { border: $borderSeperator; }
+  a.goto-anything.overlapping { border-left: $borderSeperator; }
   ul.conversations { height: $navHeight; }
 
   .right {
     background: $sidebarBackground; // required when right overlap conversation list
     position: absolute;
     top: 0;
-    right: $bodyGutter;
+    right: 0;
     a, a:active { font-size: 1.2em; width: 2em; text-align: center; }
   }
 
-  a:hover, a:active { background-color: darken(#fff, 15%); color: #000; }
-
-  @media (max-width: $responsiveWidth) {
-    .right { right: 0; }
-    & { padding-left: $bodyGutterSmall; padding-right: $bodyGutterSmall; }
-  }
+  a:hover, a:active { background-color: $hoverBackground; }
+  a.active { background-color: $activeBackground; }
 }
 
 form.input {
-  background: #fff;
   position: fixed;
   bottom: 0;
   left: 0;
-  right: $nickListWidth;
-  padding-bottom: 2px;
+  right: 0;
+  border-top: $borderSeperator;
 
-  input { background: #fafafa; width: 100%; padding: 8px; font-size: $fontSize + 1; }
-  input.disabled, input[disabled] { background-color: #eee; }
+  input {
+    background: $sidebarBackground;
+    width: 100%;
+    padding: 8px $bodyGutterSmall;
+    font-size: $fontSize + 2;
 
-  @media (max-width: $responsiveWidth) {
-    & { right: 0; }
-    input {
-      border: 0;
-      border-top: 2px solid darken(#fff, 40%);
-      @include border-radius(0);
-    }
+    &, :focus { border: 0; }
+    &.disabled, &[disabled] { background-color: #eee; }
+
+    @media (min-width: $responsiveWidth) { height: $navHeight; }
+    @media (max-width: $responsiveWidth) { &[disabled] { display: none; } }
   }
 }
 
@@ -97,28 +91,34 @@ nav.bar a.mention b, form.goto-anything a.mention b {
 }
 
 div.messages {
+  $avatarWidth: 40px;
+
   padding-top: $navHeight + 4;
   padding-bottom: $navHeight + 8;
-  margin-right: 180px;
 
   li {
     display: block;
     position: relative;
-    padding: 4px $bodyGutter;
+    padding: 4px $bodyGutterSmall;
     overflow: hidden;
 
     &.hidden { display: none !important; }
 
-    button, .button { padding: 2px 4px; }
-    div.question { padding-left: 50px; }
-    img.avatar, i.avatar { float: left; max-width: 40px; font-size: 40px; }
+    @media (min-width: $responsiveWidth) {
+      padding-right: ($sidebarWidth + $bodyGutterSmall);
+      &.form { margin-left: $avatarWidth + $bodyGutterSmall; }
+    }
+
+    div.question { padding-left: $avatarWidth + $bodyGutterSmall; }
+    img.avatar, i.avatar { float: left; max-width: $avatarWidth; font-size: $avatarWidth; }
     > h3 { font-size: 1em; color: #467; line-height: 1.2em; margin: 0; }
-    > h3, div.content, div.embed { margin-left: 50px; }
-    div.content { max-width: 40em; line-height:1.4em; }
+    > h3, div.content, div.embed { margin-left: $avatarWidth + $bodyGutterSmall; }
+    div.content { max-width: $messageWidth; line-height:1.4em; }
     div.whitespace {  white-space: pre-wrap; }
     div.embed {
-      img { max-height: 220px; border: 2px solid #bbb; @include border-radius(20px); margin: 8px 0; }
+      img { max-height: 220px; border: 2px solid #bbb; @include border-radius(8px); margin: 8px 0; }
     }
+    div.actions { float: right; } // used in javascript
     div.timestamp {
       float: right;
       height: 16px;
@@ -126,14 +126,6 @@ div.messages {
       color: #999;
       font-size: .85em;
     }
-    span.actions {
-      float: right;
-      padding-right: 2px;
-    }
-  }
-
-  @media (max-width: $responsiveWidth) {
-    li { padding: 4px $bodyGutterSmall; }
   }
 
   li.help, li.channel-list {
@@ -167,7 +159,7 @@ div.messages {
     div.timestamp { color: #fee; }
     > h3 { color: #333; }
   }
-  li.nick-change, li.nick-joined, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
+  li.nick-change, li.nick-joined, li.nick-kicked, li.nick-parted, li.nick-quit, li.notice, li.topic, li.whois {
     color: #999;
     padding-top: 2px;
     a { color: #999; }
@@ -176,29 +168,33 @@ div.messages {
     .content b { font-weight: normal; }
   }
 
-  @media (max-width: $responsiveWidth) {
-    margin-right: 0;
-    li.with-padding { margin-left: 5px; }
-  }
+  li a.go-forward-in-history { display: block; float: left; }
 }
 
 form.sidebar-right,
 div.sidebar-right {
   background: $sidebarBackground;
   color: #333333;
-  display: none;
   position: fixed;
-  top: ($navHeight - 1);
-  right: 0;
-  bottom: -3px;
+  top: $navHeight;
+  right: -($sidebarWidth + 10);
+  bottom: ($navHeight + 1);
   overflow: auto;
-  width: $nickListWidth;
-  padding-bottom: 20px;
-  border-top: 1px solid #ddd;
-  z-index: 2;
+  width: $sidebarWidth;
+  padding-bottom: $bodyGutter;
+  z-index: ($navBarZindex - 1);
   border-left: $borderSeperator;
 
   -webkit-overflow-scrolling: touch;
+
+  @media (max-width: $responsiveWidth) {
+    bottom: 0;
+  }
+
+  @include prefix(transition-property, right);
+  @include prefix(transition-duration, 200ms);
+  @include prefix(transition-timing-function, ease);
+  &.active { right: 0; z-index: ($navBarZindex - 2); }
 
   button.link {
     background: transparent;
@@ -212,21 +208,31 @@ div.sidebar-right {
     -moz-user-select: text;
   }
 
-  select, input, .selectize-input { width: 100%; }
-  hr { margin: $selectizeOptionPadding; padding: 0; }
+  select, input { width: 100%; }
+  hr { margin: $formGroupPadding; padding: 0; }
+
+  a { padding: 2px 8px; color: #666; position: relative; }
+  a span.message { font-size: 0.9em; padding: 0; @include ellipsis(); }
+  a b { top: 9px; }
 
   a:hover, a:focus, button.link:hover, button.link:focus {
-    background-color: darken(#eee, 5%);
+    background-color: $hoverBackground;
     color: #000;
   }
 
   a:focus { outline: 1px solid #ccc; }
 
+  li.unread a { background-color: rgba(204, 100, 40, 0.18); color: #000; }
+  li.unread a:focus, li.unread a:hover { background-color: rgba(204, 100, 40, 0.10); }
+
+  .create { display: none; }
+  .howto { padding: 1em 0; color: #666; font-size: 0.9em; }
+
   h3 { font-size: 1em; margin: 0; };
   h3, a, div.form-group {
     text-decoration: none;
     display: block;
-    padding: $selectizeOptionPadding;
+    padding: $formGroupPadding;
   }
 
   ul ul li {
@@ -234,35 +240,8 @@ div.sidebar-right {
       background-image: url(../image/fa-caret-right.png);
       background-position: 9px 50%;
       background-repeat: no-repeat;
-      padding-left: 20px;
+      padding-left: $bodyGutter;
     }
-  }
-}
-
-div.notification-list {
-  width: 270px;
-
-  a { padding: 2px 8px; color: #666; }
-  a span.message { font-size: 0.9em; padding: 0; @include ellipsis(); }
-  li.unread a { background-color: rgba(204, 100, 40, 0.18); color: #000; }
-  li.unread a:focus, li.unread a:hover { background-color: rgba(204, 100, 40, 0.10); }
-}
-
-form.goto-anything {
-  width: $nickListWidth + 60;
-  a { position: relative; }
-  a b { top: 9px; }
-  .create { display: none; }
-  .howto { padding: 1em 0; color: #666; font-size: 0.9em; }
-}
-
-@media (min-width: $responsiveWidth) {
-  form.sidebar {
-    background: #f8f8f8;
-    display: block !important;
-    right: 0 !important;
-    border-left: $borderSeperator;
-    z-index: $navBarZindex - 10;
   }
 }
 
@@ -270,7 +249,7 @@ form.goto-anything {
   nav, .sidebar-right, form.input {
     display: none;
     overflow: hidden;
-    left: -1000px;
+    right: -1000px;
     width: 1px;
   }
 }
