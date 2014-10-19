@@ -212,7 +212,7 @@
       convos.current.start_time = parseFloat($messages.attr('data-start-time'));
       convos.current.last_read_time = parseFloat($messages.attr('data-last-read-time'));
       convos.current.nick = $messages.attr('data-nick') || '';
-      convos.current.network = $messages.attr('data-network') || 'convos';
+      convos.current.network = $messages.attr('data-network') || '';
       convos.current.state = $messages.attr('data-state');
       convos.current.target = $messages.attr('data-target') || '';
       convos.send(convos.isChannel(convos.current.target) ? '/names' : ''); // get nick list or open socket
@@ -223,6 +223,9 @@
         $('form.sidebar ul').html($(this).find('ul:first').children());
       });
       $doc.filter('nav').each(function() { $('nav ul.conversations').html($(this).find('ul.conversations').children()); });
+
+      // Do not want pjax to follow redirects. It makes the location bar act up
+      $('nav a.convos').attr('href', $.url_for($('nav a[data-network]:first').data('network')));
 
       if (location.href.indexOf('from=') > 0) {
         $messages.find('li:first').addClass('history-starting-point');

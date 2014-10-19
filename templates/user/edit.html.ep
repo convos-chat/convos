@@ -22,7 +22,7 @@
       </div>
       <div class="actions">
         <button type="submit">Update</button>
-        %= link_to 'Cancel', 'view.network', { network => 'convos' }, class => 'button'
+        %= link_to 'Cancel', 'index', class => 'button'
         %= link_to 'Delete', 'user.delete', class => 'button confirm'
       </div>
       % if ($self->req->method eq 'POST' and validation->is_valid) {

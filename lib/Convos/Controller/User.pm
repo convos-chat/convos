@@ -30,7 +30,7 @@ sub auth {
     $self->render(json => {}, status => 403);
   }
   else {
-    $self->redirect_to('/');
+    $self->redirect_to('index');
   }
 
   return 0;
@@ -182,7 +182,7 @@ Will delete data from session.
 sub logout {
   my $self = shift;
   $self->session(login => undef);
-  $self->redirect_to('/');
+  $self->redirect_to('index');
 }
 
 =head2 edit

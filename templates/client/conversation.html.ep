@@ -19,7 +19,7 @@
   % $i++;
 % }
   %= include "event/day_changed", timestamp => param('to') if day_changed param('to'), $prev->{timestamp}
-% if(stash 'got_more') {
+% if (stash 'got_more') {
   %= include 'event/go_forward_in_history'
 % } elsif($network ne 'convos' and $state ne 'connected' and !$from_archive) {
   %= include 'event/not_connected'

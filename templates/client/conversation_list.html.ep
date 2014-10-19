@@ -4,7 +4,7 @@
   % my @class = ('convos');
   % push @class, 'active' unless $target;
   <li>
-    %= link_to 'view.network', { network => 'convos' }, class => join(' ', @class), title => 'Status messages and settings', begin
+    %= link_to 'index', class => join(' ', @class), title => 'Status messages and settings', begin
       %= image '/image/icon-navbar.png', alt => 'Convos'
     % end
   </li>

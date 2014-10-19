@@ -217,7 +217,7 @@ sub add_connection {
       $self->redis->execute(
         [sadd  => "connections",                  "$login:$name"],
         [sadd  => "user:$login:connections",      $name],
-        [hmset => "user:$login:connection:$name", %{$validation->output}],
+        [hmset => "user:$login:connection:$name", %{$validation->output}, state => 'disconnected'],
         $delay->begin,
       );
     },

@@ -154,7 +154,7 @@ sub delete_connection {
     sub {
       my ($delay, $error) = @_;
       return $self->render_not_found if $error;
-      return $self->redirect_to('view.network', network => 'convos');
+      return $self->redirect_to('index');
     }
   );
 }
@@ -199,7 +199,7 @@ sub _add_connection {
     sub {
       my ($delay, $errors, $conn) = @_;
 
-      return $self->redirect_to('view.network', network => $conn->{name} || 'convos') unless $errors;
+      return $self->redirect_to('view.network', network => $conn->{name}) unless $errors;
       return $self->param('wizard') ? $self->wizard : $self->render;
     },
   );

@@ -7,7 +7,7 @@ my $form;
 redis_do(
   [hmset => 'user:doe',             digest => 'E2G3goEIb8gpw', email => 'e1@convos.by', avatar => 'a1@convos.by'],
   [sadd  => 'user:doe:connections', 'magnet'],
-  [hmset => 'user:doe:connection:magnet', nick => 'doe', server => 'irc.perl.org', tls => 1],
+  [hmset => 'user:doe:connection:magnet', nick => 'doe', server => 'irc.perl.org', tls => 1, state => 'disconnected'],
 );
 
 {
@@ -38,7 +38,7 @@ redis_do(
     ->element_exists('form[action="/connection/magnet/delete"][method="post"]')->text_is('form .actions button', 'Yes')
     ->text_is('form .actions a[href="/magnet"]', 'No');
 
-  $t->post_ok('/connection/magnet/delete')->status_is(302)->header_is(Location => '/convos');
+  $t->post_ok('/connection/magnet/delete')->status_is(302)->header_is(Location => '/');
 }
 
 done_testing;

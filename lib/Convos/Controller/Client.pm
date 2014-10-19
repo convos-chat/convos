@@ -66,14 +66,23 @@ sub conversation {
       my $nid = $self->param('nid') || undef;
 
       # make sure conversations exists before doing zadd
+      $redis->hgetall("user:$login:connection:$network", $delay->begin);
       $redis->zscore("user:$login:conversations", $name, $delay->begin);
       $redis->zrevrange("user:$login:conversations", 0, 1, $delay->begin);
       $self->_modify_notification($nid, read => 1, sub { }) if defined $nid;
     },
     sub {
-      my ($delay, $last_read_time, $previous_name) = @_;
+      my ($delay, $network, $last_read_time, $previous_name) = @_;
 
-      $self->stash(last_read_time => $self->param('last-read-time') || $last_read_time || 0);
+      unless ($network->{state}) {
+        return $self->stash(layout => 'tactile')->render_not_found;
+      }
+
+      $self->stash(
+        current_nick => $network->{current_nick} || $network->{nick},
+        state => $network->{state},
+        last_read_time => $self->param('last-read-time') || $last_read_time || 0
+      );
       $delay->pass;    # make sure we get to the next step
 
       if ($target and !$last_read_time) {    # no such conversation
@@ -97,26 +106,11 @@ sub conversation {
     sub {
       my ($delay, $conversation_list, $notification_list) = @_;
 
-      if ($network eq 'convos') {
-        $network = $self->stash->{networks}[0] if @{$self->stash->{networks}} == 1;
-        $self->stash(network => $network);
-      }
-      if ($network eq 'convos') {
-        $delay->pass([$login, $login, 'connected']);
-      }
-      else {
-        $redis->hmget("user:$login:connection:$network", qw( current_nick nick state ), $delay->begin);
-      }
-
       $self->_conversation($delay->begin);
     },
     sub {
-      my ($delay, $data, $conversation) = @_;
-      $self->render(
-        conversation => $conversation || [],
-        current_nick => $data->[0]    || $data->[1],
-        state        => $data->[2]    || 'disconnected'
-      );
+      my ($delay, $conversation) = @_;
+      $self->render(conversation => $conversation || []);
     },
   );
 }

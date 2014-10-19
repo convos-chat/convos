@@ -18,8 +18,8 @@ redis_do(
   [hmset => 'user:doe',               digest => 'E2G3goEIb8gpw', email => ''],
   [zadd  => 'user:doe:conversations', @conversations],
   [sadd => 'user:doe:connections', 'magnet', 'bitlbee'],
-  [hmset => 'user:doe:connection:magnet',  nick => 'doe'],
-  [hmset => 'user:doe:connection:bitlbee', nick => 'doe'],
+  [hmset => 'user:doe:connection:magnet',  nick => 'doe', state => 'disconnected'],
+  [hmset => 'user:doe:connection:bitlbee', nick => 'doe', state => 'disconnected'],
 );
 
 $t->post_ok('/login', form => {login => 'doe', password => 'barbar'})->status_is(302);
