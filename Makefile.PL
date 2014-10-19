@@ -23,7 +23,7 @@ WriteMakefile(
     'Mojolicious'                       => '5.3',
     'Mojolicious::Plugin::AssetPack'    => '0.31',
     'Mojolicious::Plugin::FontAwesome4' => '4.2002',
-    'Mojolicious::Plugin::LinkEmbedder' => '0.10',
+    'Mojolicious::Plugin::LinkEmbedder' => '0.12',
     'Parse::IRC'                        => '1.18',
     'Time::Piece'                       => '1.2',
     'URI::Find'                         => '20111103',
