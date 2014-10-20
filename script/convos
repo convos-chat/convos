@@ -40,11 +40,11 @@ sub usage {
 # Single process
 $0 daemon --listen http://*:8080
 
-# Seperate backend and single process frontend
+# Separate backend and single process frontend
 $0 backend start
 $0 daemon --listen http://*:8080
 
-# Seperate backend and preforked frontend
+# Separate backend and preforked frontend
 $0 backend start
 $0 prefork --listen http://*:8080
 
