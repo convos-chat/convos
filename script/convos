@@ -12,7 +12,7 @@ if (my $action = (grep { $_ eq $ARGV[0] } qw( backend daemon help upgrade versio
   exec File::Spec->catfile($FindBin::Bin, 'convos-backend') => do { shift @ARGV; @ARGV } if $action eq 'backend';
 }
 
-exit usage() if @ARGV == 1 and $ARGV[0] eq 'help';
+exit usage() if @ARGV == 1 and $ARGV[0] eq 'help' and !$ENV{MOJO_APP_LOADER};
 $ENV{CONVOS_BACKEND_EMBEDDED} //= 1 if $ARGV[0] eq 'daemon';
 $ENV{CONVOS_BACKEND_ONLY} = $ENV{CONVOS_REDIS_URL} = 'invalid://' if $ARGV[0] eq 'help';
 test_mode() if $ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)?,,;

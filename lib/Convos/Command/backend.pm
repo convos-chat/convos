@@ -86,7 +86,6 @@ sub run {
     return 0;
   }
 
-  $0 = "$0-backend" unless $0 =~ /-backend$/;    # easier to spot the process
   $daemon->pid($$);
   $daemon->write_pid;
   $self->{running} = 1;
