@@ -5,7 +5,7 @@ Convos::Manual::Running - How to start Convos
 
 =head1 DESCRIPTION
 
-L<Convos> can run in different modes, but we suggest running with a seperate
+L<Convos> can run in different modes, but we suggest running with a separate
 backend, since it allows you to restart the frontend without disconnecting
 from the IRC servers.
 
@@ -94,14 +94,14 @@ the following command:
 
 Run the same command again, and the webserver will
 L<hot reload|http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad#USR2> the source
-code without loosing any connections.
+code without losing any connections.
 
 We strongly suggest starting with L<MOJO_CONFIG|Convos::Manual::Environment/MOJO_CONFIG>
 set, so you can change the environment during L<hot reload|Mojo::Server::Hypnotoad/DESCRIPTION>.
 
   $ MOJO_CONFIG=/path/to/config.pl hynotoad script/convos
 
-L</Hypnotoad> mode require the backend to be started as a seperate process.
+L</Hypnotoad> mode require the backend to be started as a separate process.
  
 =head1 AUTHOR
 
