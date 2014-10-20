@@ -79,16 +79,16 @@ sub run {
     $self->_exit($daemon->run_command(@args));
   }
   if ($daemon->pid and $daemon->pid_running) {
-    $self->app->log->warn('Backend is already running');
+    $self->app->log->warn('Backend is already running.');
     return 0;
   }
 
   $daemon->pid($$);
   $daemon->write_pid;
   $self->{running} = 1;
-  $self->app->log->info('Starting convos backend');
+  $self->app->log->info('Starting convos backend.');
   $self->app->core->start;
-  Mojo::IOLoop->start;
+  Mojo::IOLoop->start unless $ENV{CONVOS_BACKEND_EMBEDDED};
 }
 
 sub DESTROY {

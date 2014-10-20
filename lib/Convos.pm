@@ -255,15 +255,11 @@ sub startup {
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
   $self->hook(before_dispatch => \&_before_dispatch);
+  $self->_embed_backend if $ENV{CONVOS_BACKEND_EMBEDDED};
 
+  Scalar::Util::weaken($self);
   Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
   Mojo::IOLoop->timer(0 => sub { $self->_set_secrets });
-
-  if ($ENV{CONVOS_BACKEND_EMBEDDED}) {
-    die "Cannot start embedded backend from hypnotoad" if $SIG{USR2};
-    $self->log->debug('Starting embedded backend.');
-    $self->core->start;
-  }
 }
 
 sub _assets {
@@ -332,6 +328,16 @@ sub _config {
   $config->{name} = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
   $config->{name} ||= 'Nordaaker';
   $config;
+}
+
+sub _embed_backend {
+  my $self = shift;
+
+  die "Cannot start embedded backend from hypnotoad" if $SIG{USR2};
+  require Convos::Command::backend;
+  $self->{backend} = Convos::Command::backend->new(app => $self);
+  $self->{backend}->run;
+  Scalar::Util::weaken($self->{backend}{app});
 }
 
 sub _from_cpan {
