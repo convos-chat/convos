@@ -8,10 +8,15 @@
 - Fix scrolling to bottom when gist load #207
 - Fix sending server messages to server log, instead of opening new conversation #209
 - Fix uppercase characters in login name #211
+- Fix backend from going bananas, using Daemon::Control #224
+  - Remove CONVOS_BACKEND_EMBEDDED as exposed variable
+  - Remove CONVOS_MANUAL_BACKEND
 - Add delete_user() to Convos::Core #104
 - Add feedback when websocket could not be established #192
 - Add /profile/delete #104
 - Add detection if unable to connect to websocket #173
+- Add Convos::Manual::Running #224
+  - https://github.com/Nordaaker/convos/blob/master/lib/Convos/Manual/Running.pod
 - Add improved embed of media with Mojolicious::Plugin::LinkEmbedder 0.12
   * Fix embedding YouTube video over https
   * Fix video site that also contain meta information, but no video
