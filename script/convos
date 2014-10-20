@@ -5,26 +5,27 @@ use FindBin;
 use File::Spec;
 use lib "$FindBin::Bin/../lib";
 
-$ENV{MOJO_MODE} ||= 'production' if @ARGV and grep { $_ eq $ARGV[0] } qw( backend daemon upgrade version );
+@ARGV = ('help') unless @ARGV;
 
-if (@ARGV and $ARGV[0] eq 'backend') {
-  shift @ARGV;
-  exec File::Spec->catfile($FindBin::Bin, 'convos-backend') => @ARGV;
-}
-if (@ARGV and $ARGV[0] eq 'daemon') {
-  $ENV{CONVOS_BACKEND_EMBEDDED} //= 1;
+if (my $action = (grep { $_ eq $ARGV[0] } qw( backend daemon help upgrade version ))[0]) {
+  $ENV{MOJO_MODE} ||= 'production';
+  exec File::Spec->catfile($FindBin::Bin, 'convos-backend') => do { shift @ARGV; @ARGV } if $action eq 'backend';
 }
 
-#
-# Prefixing CONVOS_REDIS_URL with "test" will automatically set development
-# environment variables. Example:
-# $ CONVOS_REDIS_URL=test morbo script/convos --listen http://*:5000
-# $ CONVOS_REDIS_URL=test script/convos backend
-#
-# Or with a custom redis server:
-# $ CONVOS_REDIS_URL=test://localhost/3 morbo script/convos
-#
-if ($ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)?,,) {
+exit usage() if @ARGV == 1 and $ARGV[0] eq 'help';
+$ENV{CONVOS_BACKEND_EMBEDDED} //= 1 if $ARGV[0] eq 'daemon';
+$ENV{CONVOS_BACKEND_ONLY} = $ENV{CONVOS_REDIS_URL} = 'invalid://' if $ARGV[0] eq 'help';
+test_mode() if $ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)?,,;
+
+require Mojolicious::Commands;
+require Convos;
+my $commands = Mojolicious::Commands->new(app => Convos->new);
+unshift @{$commands->namespaces}, 'Convos::Command';
+$commands->run(@ARGV);
+
+#=============================================================================
+
+sub test_mode {
   $ENV{CONVOS_DEBUG} //= 1;
   $ENV{CONVOS_REDIS_URL} ||= 'localhost/13';
   $ENV{MOJO_IRC_DEBUG} //= 1;
@@ -33,9 +34,30 @@ if ($ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)
   $ENV{MOJO_ASSETPACK_NO_CACHE} //= 1;
 }
 
-# Start commands for application
-require Mojolicious::Commands;
-require Convos;
-my $commands = Mojolicious::Commands->new(app => Convos->new);
-unshift @{$commands->namespaces}, 'Convos::Command';
-$commands->run(@ARGV);
+sub usage {
+  !print <<"USAGE";
+
+# Single process
+$0 daemon --listen http://*:8080
+
+# Seperate backend and single process frontend
+$0 backend start
+$0 daemon --listen http://*:8080
+
+# Seperate backend and preforked frontend
+$0 backend start
+$0 prefork --listen http://*:8080
+
+# Print relevant version information
+$0 version
+
+# More help
+$0 help
+$0 help backend
+$0 help daemon
+$0 help prefork
+
+https://github.com/Nordaaker/convos#readme
+
+USAGE
+}
