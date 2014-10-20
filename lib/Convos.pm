@@ -198,7 +198,7 @@ sub startup {
 
   if (my $log = $config->{log}) {
     $self->log->level($log->{level}) if $log->{level};
-    $self->log->path($log->{file}) if $log->{file} ||= $log->{path};
+    $self->log->path($log->{file}) if $log->{file} ||= $log->{path} || $ENV{CONVOS_FRONTEND_LOGFILE};
     delete $self->log->{handle};           # make sure it's fresh to file
   }
 
@@ -326,7 +326,10 @@ sub _config {
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
   $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
-  $config->{name} = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
+  $config->{hypnotoad}{pid_file} = $ENV{CONVOS_FRONTEND_PID_FILE} if $ENV{CONVOS_FRONTEND_PID_FILE};
+  $config->{hypnotoad}{group}    = $ENV{RUN_AS_GROUP}             if $ENV{RUN_AS_GROUP};
+  $config->{hypnotoad}{user}     = $ENV{RUN_AS_USER}              if $ENV{RUN_AS_USER};
+  $config->{name}                = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
   $config->{name} ||= 'Nordaaker';
   $config;
 }

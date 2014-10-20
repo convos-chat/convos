@@ -1,0 +1,42 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Daemon::Control;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+$ENV{CONVOS_FRONTEND_LOGFILE} ||= File::Spec->devnull;
+$ENV{CONVOS_FRONTEND_PID_FILE} ||= File::Spec->catfile(File::Spec->tmpdir, 'convos-frontend.pid');
+$ENV{MOJO_MODE} or die "You cannot invoke $0 directly. Use 'convos' instead\n";
+my ($ctrl, $convos);
+
+{
+  local $ENV{MOJO_LOG_LEVEL} = 'warn';
+  require Convos;
+  $convos = Convos->new;
+}
+
+$ctrl = Daemon::Control->new(
+  init_config => $ENV{CONVOS_INIT_CONFIG_FILE} || '/etc/default/convos',
+  init_code   => "MOJO_MODE='$ENV{MOJO_MODE}';",
+  name        => 'Convos frontend',
+  lsb_desc    => 'Start Convos frontend with hypnotoad',
+  lsb_sdesc   => 'Convos frontend',
+  reload_signal => 'USR2',
+
+  directory    => $convos->home,
+  program      => 'hypnotoad',
+  program_args => [File::Spec->catfile($FindBin::Bin, 'convos')],
+  pid_file     => $ENV{CONVOS_FRONTEND_PID_FILE},
+
+  stderr_file => $ENV{CONVOS_FRONTEND_LOGFILE},
+  stdout_file => $ENV{CONVOS_FRONTEND_LOGFILE},
+);
+
+if (@ARGV and $ARGV[0] eq 'start') {
+  system $ctrl->program, @{$ctrl->program_args};
+  exit $?;
+}
+else {
+  exit $ctrl->run_command(@ARGV);
+}

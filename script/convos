@@ -7,9 +7,10 @@ use lib "$FindBin::Bin/../lib";
 
 @ARGV = ('help') unless @ARGV;
 
-if (my $action = (grep { $_ eq $ARGV[0] } qw( backend daemon help upgrade version ))[0]) {
+if (my $action = (grep { $_ eq $ARGV[0] } qw( backend daemon frontend help upgrade version ))[0]) {
   $ENV{MOJO_MODE} ||= 'production';
-  exec File::Spec->catfile($FindBin::Bin, 'convos-backend') => do { shift @ARGV; @ARGV } if $action eq 'backend';
+  exec File::Spec->catfile($FindBin::Bin, 'convos-backend')  => do { shift @ARGV; @ARGV } if $action eq 'backend';
+  exec File::Spec->catfile($FindBin::Bin, 'convos-frontend') => do { shift @ARGV; @ARGV } if $action eq 'frontend';
 }
 
 exit usage() if @ARGV == 1 and $ARGV[0] eq 'help' and !$ENV{MOJO_APP_LOADER};
