@@ -1,3 +1,5 @@
+- Remove all reconnection code.
+
 ## 0.85
 - Fix input field in iOS #167
 - Fix nick-list event #197

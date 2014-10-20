@@ -111,36 +111,25 @@ has _irc => sub {
     close => sub {
       my $irc = shift;
       my $data;
-
+      $self->_state('disconnected');
       if ($self->{stop}) {
         $data = {status => 200, message => 'Disconnected.'};
-        $self->_state('disconnected');
         $self->_publish_and_save(server_message => $data);
         return;
       }
       else {
-        $data = {
-          status  => 500,
-          message => "Disconnected from @{[$self->name]}. Attempting reconnect in @{[$self->_reconnect_in]} seconds."
-        };
-        $self->_state('reconnecting');
+        $data = {status => 500, message => "Disconnected from @{[$self->name]}."};
         $self->_publish_and_save(server_message => $data);
-        $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
       }
     }
   );
   $irc->on(
     error => sub {
       my ($irc, $err) = @_;
-      my $data = {
-        status => 500,
-        message =>
-          "Connection to @{[$irc->name]} failed. Attempting reconnect in @{[$self->_reconnect_in]} seconds. ($err)",
-      };
+      my $data = {status => 500, message => "Connection to @{[$irc->name]} failed."};
       $self->{stop} and return $self->_state('disconnected');
-      $self->_state('reconnecting');
+      $self->_state('disconnected');
       $self->_publish_and_save(server_message => $data);
-      $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
     }
   );
 
@@ -156,10 +145,6 @@ has _irc => sub {
 
   $irc;
 };
-
-sub _reconnect_in {
-  10 + int rand 30;
-}
 
 =head1 METHODS
 
@@ -308,16 +293,16 @@ sub _connect {
             # SSL connect attempt failed with unknown error
             # error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
             if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
+              $self->_state('reconnecting');
               $data = {status => 400, message => "This IRC network does not support SSL/TLS."};
               $self->{disable_tls} = 1;
               $self->_connect;
             }
             else {
               $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
-              $irc->ioloop->timer($self->_reconnect_in, sub { $self and $self->_connect });
+              $self->_state('disconnected');
             }
 
-            $self->_state('reconnecting');
           }
           else {
             $data = {status => 200, message => "Connected to IRC server"};
