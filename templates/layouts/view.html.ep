@@ -32,9 +32,6 @@
       %= text_field 'irc_cmd', placeholder => "Connecting to backend...", autocomplete => 'off', class => 'disabled', disabled => 'disabled'
     % end
 
-  % if($full_page) {
-    %= include 'sidebar/add_conversation'
-    %= include 'sidebar/notification_list'
-  % }
+    %= include 'sidebar/notification_list' if stash 'notification_list'
   </body>
 </html>
