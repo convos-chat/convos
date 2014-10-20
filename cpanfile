@@ -1,3 +1,4 @@
+requires 'Daemon::Control'                => '0.001006';
 requires 'IO::Socket::SSL'                => 1.84;
 requires 'IRC::Utils'                     => 0.12;
 requires 'URI::Find'                      => 20111103;

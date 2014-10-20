@@ -28,6 +28,10 @@ if ($ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)
   }
 }
 
+if (@ARGV and $ARGV[0] eq 'backend') {
+  $ENV{CONVOS_BACKEND_ONLY} = 1;
+}
+
 # Start commands for application
 require Mojolicious::Commands;
 require Convos;

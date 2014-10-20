@@ -203,14 +203,18 @@ sub startup {
 
   $self->ua->max_redirects(2);             # support getting facebook pictures
   $self->plugin('Convos::Plugin::Helpers');
-  $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->secrets([time]);                  # will be replaced by _set_secrets()
+  $self->_redis_url;
+
+  return if $ENV{CONVOS_BACKEND_ONLY};     # set script/convos when started as backend
+
+  # frontend code
+  $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets;
   $self->_public_routes;
   $self->_private_routes;
-  $self->_redis_url;
 
   if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
     $self->log->warn(
@@ -250,7 +254,6 @@ sub startup {
   );
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
-  $self->defaults(full_page => 1);
   $self->hook(before_dispatch => \&_before_dispatch);
 
   Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
