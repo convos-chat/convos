@@ -44,7 +44,7 @@ In this mode, it will run the backend (The process that connects to the IRC
 servers) embedded. This might even be required, if you want to run Convos
 on a service similar to Heroku. (NOTE: Convos is not supported on Heroku)
 
-To start convos, simply start it with the command "daemon". Below, we have
+To start Convos, simply start it with the command "daemon". Below, we have
 also supplied the listen parameter which specifies which port to accept
 incoming HTTP connections on.
 
@@ -55,9 +55,9 @@ L<http://mojolicio.us/perldoc/Mojo/Server/Daemon>.
 
   $ convos help daemon
 
-=head2 Seperate backend
+=head2 Separate backend
 
-Starting up the backend seperately is a big win, since it allows you to
+Starting up the backend separately is a big win, since it allows you to
 upgrade and restart the frontend without tearing down the connections to the
 IRC servers. There are two ways to start the backend, either in foreground
 or fork to background:
