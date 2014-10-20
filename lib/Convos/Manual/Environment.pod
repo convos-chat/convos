@@ -17,13 +17,6 @@ Convos can be configured with the following environment variables:
 Set this variable to a custom directory where Convos can store the IRC
 logs.
 
-=head2 CONVOS_BACKEND_EMBEDDED
-
-Set this environment if you want to start Convos as a single process daemon,
-with the backend embedded. Example:
-
-  CONVOS_BACKEND_EMBEDDED=1 script/convos daemon --listen http://*:8080
-
 =head2 CONVOS_DEBUG
 
 Set CONVOS_DEBUG to a true value for extra debug output to STDERR.

@@ -11,6 +11,9 @@ if (@ARGV and $ARGV[0] eq 'backend') {
   shift @ARGV;
   exec File::Spec->catfile($FindBin::Bin, 'convos-backend') => @ARGV;
 }
+if (@ARGV and $ARGV[0] eq 'daemon') {
+  $ENV{CONVOS_BACKEND_EMBEDDED} //= 1;
+}
 
 #
 # Prefixing CONVOS_REDIS_URL with "test" will automatically set development
