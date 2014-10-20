@@ -54,9 +54,9 @@ has _daemon => sub {
 
     directory => $self->app->home,
     program   => -x $program ? $program : 'convos-backend',
-    pid_file  => $ENV{CONVOS_PID_FILE} || File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid'),
-    stderr_file => $ENV{CONVOS_LOGFILE} || File::Spec->devnull,
-    stdout_file => $ENV{CONVOS_LOGFILE} || File::Spec->devnull,
+    pid_file  => $ENV{CONVOS_BACKEND_PID_FILE} || File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid'),
+    stderr_file => $ENV{CONVOS_BACKEND_LOGFILE} || File::Spec->devnull,
+    stdout_file => $ENV{CONVOS_BACKEND_LOGFILE} || File::Spec->devnull,
 
     user  => $ENV{RUN_AS_USER},
     group => $ENV{RUN_AS_GROUP},

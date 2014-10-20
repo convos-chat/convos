@@ -4,9 +4,9 @@ use Convos::Command::backend;
 use Convos;
 use Cwd;
 
-$ENV{CONVOS_BACKEND_ONLY} = 1;
-$ENV{CONVOS_REDIS_URL}    = 'localhost:12345678';
-$ENV{CONVOS_PID_FILE}     = File::Spec->catfile(File::Spec->tmpdir, 'convos-test-backend.pid');
+$ENV{CONVOS_BACKEND_ONLY}     = 1;
+$ENV{CONVOS_BACKEND_PID_FILE} = File::Spec->catfile(File::Spec->tmpdir, 'convos-test-backend.pid');
+$ENV{CONVOS_REDIS_URL}        = 'localhost:12345678';
 
 my $backend = Convos::Command::backend->new(app => Convos->new);
 my $daemon = $backend->_daemon;
@@ -16,7 +16,7 @@ is $daemon->help,     $backend->usage,       'help';
 is $daemon->lsb_desc, $backend->description, 'lsb_desc';
 like $daemon->program, qr{script\W+convos-backend$}, 'program';
 ok -x $daemon->program, 'full path to program';
-is $daemon->pid_file, $ENV{CONVOS_PID_FILE}, 'pid_file';
+is $daemon->pid_file, $ENV{CONVOS_BACKEND_PID_FILE}, 'pid_file';
 is $daemon->init_config, '/etc/default/convos', 'init_config';
 is $daemon->directory, getcwd, 'directory';
 
