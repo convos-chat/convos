@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-Convos::Manual::Run - How to start Convos
+Convos::Manual::Running - How to start Convos
 
 =head1 DESCRIPTION
 
