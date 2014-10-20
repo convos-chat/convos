@@ -79,7 +79,7 @@ You can also generate an init script for the backend:
 
   $ convos backend get_init_file > /etc/init.d/convos-backend
 
-The backend can then be instructed with environment variables from
+The backend can then be supplied with environment variables from
 C</etc/default/convos>.
 
 =head2 Hypnotoad
