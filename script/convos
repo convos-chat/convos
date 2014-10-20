@@ -2,9 +2,15 @@
 use strict;
 use warnings;
 use FindBin;
+use File::Spec;
 use lib "$FindBin::Bin/../lib";
 
 $ENV{MOJO_MODE} ||= 'production' if @ARGV and grep { $_ eq $ARGV[0] } qw( backend daemon upgrade version );
+
+if (@ARGV and $ARGV[0] eq 'backend') {
+  shift @ARGV;
+  exec File::Spec->catfile($FindBin::Bin, 'convos-backend') => @ARGV;
+}
 
 #
 # Prefixing CONVOS_REDIS_URL with "test" will automatically set development
@@ -22,10 +28,6 @@ if ($ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)
   $ENV{MOJO_LOG_LEVEL} ||= 'debug';
   $ENV{MOJO_REDIS_DEBUG}        //= 1;
   $ENV{MOJO_ASSETPACK_NO_CACHE} //= 1;
-}
-
-if (@ARGV and $ARGV[0] eq 'backend') {
-  $ENV{CONVOS_BACKEND_ONLY} = 1;
 }
 
 # Start commands for application

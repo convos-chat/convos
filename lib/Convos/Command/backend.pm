@@ -41,23 +41,25 @@ EOF
 
 has _daemon => sub {
   my $self = shift;
-  my $program = File::Spec->catfile($self->app->home, qw( script convos ));
+  my $program = File::Spec->catfile($self->app->home, qw( script convos-backend ));
 
   return Daemon::Control->new(
-    fork      => 2,
-    help      => $self->usage,
-    name      => 'Convos backend',
-    lsb_desc  => $self->description,
-    lsb_sdesc => 'Convos backend',
-
-    program => -x $program ? $program : 'convos',
-    program_args => ['backend'],
-    pid_file     => $ENV{CONVOS_PID_FILE} || File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid'),
+    fork        => 2,
     init_config => $ENV{CONVOS_INIT_CONFIG_FILE} || '/etc/default/convos',
+    init_code   => "MOJO_MODE='$ENV{MOJO_MODE}';",
+    help        => $self->usage,
+    name        => 'Convos backend',
+    lsb_desc    => $self->description,
+    lsb_sdesc   => 'Convos backend',
 
-    directory   => $self->app->home,
+    directory => $self->app->home,
+    program   => -x $program ? $program : 'convos-backend',
+    pid_file  => $ENV{CONVOS_PID_FILE} || File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid'),
     stderr_file => $ENV{CONVOS_LOGFILE} || File::Spec->devnull,
     stdout_file => $ENV{CONVOS_LOGFILE} || File::Spec->devnull,
+
+    user  => $ENV{RUN_AS_USER},
+    group => $ENV{RUN_AS_GROUP},
   );
 };
 
@@ -76,13 +78,15 @@ sub run {
   $daemon->read_pid;
 
   if (@args) {
+    local $ENV{CONVOS_IS_CONTROLLED_BY_DC} = 1;
     $self->_exit($daemon->run_command(@args));
   }
-  if ($daemon->pid and $daemon->pid_running) {
+  if (!$ENV{CONVOS_IS_CONTROLLED_BY_DC} and $daemon->pid and $daemon->pid_running) {
     $self->app->log->warn('Backend is already running.');
     return 0;
   }
 
+  $0 = "$0-backend" unless $0 =~ /-backend$/;    # easier to spot the process
   $daemon->pid($$);
   $daemon->write_pid;
   $self->{running} = 1;
