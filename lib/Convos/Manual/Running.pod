@@ -82,6 +82,8 @@ You can also generate an init script for the backend:
 The backend can then be supplied with environment variables from
 C</etc/default/convos>.
 
+See also L</Init script>.
+
 =head2 Hypnotoad
 
 L<Hypnotoad|http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad> is a full
@@ -102,6 +104,18 @@ set, so you can change the environment during L<hot reload|Mojo::Server::Hypnoto
   $ MOJO_CONFIG=/path/to/config.pl hynotoad script/convos
 
 L</Hypnotoad> mode require the backend to be started as a separate process.
+
+=head2 Init script
+
+If you start Convos from an init script, you can provide a file which will be
+sourced before running C<convos>. The path to this file is
+C</etc/default/convos> and it can contain the given variables:
+
+  CONVOS_BACKEND_LOGFILE=/var/log/convos-backend.log
+  CONVOS_BACKEND_PID_FILE=/tmp/convos-backend.pid
+  CONVOS_REDIS_URL=redis://localhost:6397/1
+  RUN_AS_USER=convos
+  RUN_AS_GROUP=nobody
  
 =head1 AUTHOR
 
