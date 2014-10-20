@@ -8,7 +8,7 @@ use lib "$FindBin::Bin/../lib";
 $ENV{CONVOS_FRONTEND_LOGFILE} ||= File::Spec->devnull;
 $ENV{CONVOS_FRONTEND_PID_FILE} ||= File::Spec->catfile(File::Spec->tmpdir, 'convos-frontend.pid');
 $ENV{MOJO_MODE} or die "You cannot invoke $0 directly. Use 'convos' instead\n";
-my ($ctrl, $convos);
+my ($daemon, $convos);
 
 {
   local $ENV{MOJO_LOG_LEVEL} = 'warn';
@@ -16,7 +16,7 @@ my ($ctrl, $convos);
   $convos = Convos->new;
 }
 
-$ctrl = Daemon::Control->new(
+$daemon = Daemon::Control->new(
   init_config => $ENV{CONVOS_INIT_CONFIG_FILE} || '/etc/default/convos',
   init_code   => "MOJO_MODE='$ENV{MOJO_MODE}';",
   name        => 'Convos frontend',
@@ -34,9 +34,14 @@ $ctrl = Daemon::Control->new(
 );
 
 if (@ARGV and $ARGV[0] eq 'start') {
-  system $ctrl->program, @{$ctrl->program_args};
-  exit $?;
+  if ($daemon->read_pid and $daemon->pid and $daemon->pid_running) {
+    $daemon->pretty_print('Duplicate Running', 'red');
+  }
+  else {
+    system $daemon->program, @{$daemon->program_args};
+    exit $?;
+  }
 }
 else {
-  exit $ctrl->run_command(@ARGV);
+  exit $daemon->run_command(@ARGV);
 }

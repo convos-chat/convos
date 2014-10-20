@@ -13,11 +13,11 @@ NOTE! If you run convos from a checked out git repo, wou need to run the
 commands with C<./vendor/bin/carton exec> infront of the commands. Example:
 
   # This...
-  $ hynotoad script/convos
+  $ convos frontend start
   $ convos daemon
 
   # becomes...
-  $ ./vendor/bin/carton exec hypnotoad script/convos
+  $ ./vendor/bin/carton exec ./script/convos frontend start
   $ ./vendor/bin/carton exec ./script/convos daemon
 
 =head1 SEE ALSO
@@ -92,16 +92,25 @@ is what we suggest, since it can handle a lot more requests, than what
 L</Single process mode> can offer. Starting with Hypnotoad can be done with
 the following command:
 
-  $ hynotoad script/convos
+  $ convos frontend start
 
-Run the same command again, and the webserver will
-L<hot reload|http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad#USR2> the source
-code without losing any connections.
+It is possible to L<hot reload|http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad#USR2>
+the server, without losing any HTTP connections:
+
+  $ convos frontend reload
+
+Like the L<backend|/Separate backend>, you can also investigate the status of
+the process, stop or restart it:
+
+  $ convos frontend status
+  $ convos frontend stop
+  $ convos frontend restart
 
 We strongly suggest starting with L<MOJO_CONFIG|Convos::Manual::Environment/MOJO_CONFIG>
 set, so you can change the environment during L<hot reload|Mojo::Server::Hypnotoad/DESCRIPTION>.
+This can also be set in L</Init script> environment.
 
-  $ MOJO_CONFIG=/path/to/config.pl hynotoad script/convos
+  $ MOJO_CONFIG=/path/to/config.pl convos frontend start
 
 L</Hypnotoad> mode require the backend to be started as a separate process.
 
@@ -111,6 +120,7 @@ If you start Convos from an init script, you can provide a file which will be
 sourced before running C<convos>. The path to this file is
 C</etc/default/convos> and it can contain the given variables:
 
+  MOJO_CONFIG=/path/to/config.pl
   RUN_AS_USER=convos
   RUN_AS_GROUP=nobody
 
