@@ -89,7 +89,7 @@ sub run {
     die $self->usage;
   }
 
-  $ENV{CONVOS_MANUAL_BACKEND} = $ENV{CONVOS_SKIP_VERSION_CHECK} = 1;
+  $ENV{CONVOS_SKIP_VERSION_CHECK} = 1;
 
   # force log to STDERR if attached to terminal
   if (-t STDERR) {

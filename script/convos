@@ -20,12 +20,8 @@ if ($ENV{CONVOS_REDIS_URL} and $ENV{CONVOS_REDIS_URL} =~ s,^test\b(?![.-])(\://)
   $ENV{CONVOS_REDIS_URL} ||= 'localhost/13';
   $ENV{MOJO_IRC_DEBUG} //= 1;
   $ENV{MOJO_LOG_LEVEL} ||= 'debug';
-  $ENV{MOJO_REDIS_DEBUG} //= 1;
-
-  if (!@ARGV or $ARGV[0] ne 'backend') {
-    $ENV{CONVOS_MANUAL_BACKEND}   //= 1;
-    $ENV{MOJO_ASSETPACK_NO_CACHE} //= 1;
-  }
+  $ENV{MOJO_REDIS_DEBUG}        //= 1;
+  $ENV{MOJO_ASSETPACK_NO_CACHE} //= 1;
 }
 
 if (@ARGV and $ARGV[0] eq 'backend') {

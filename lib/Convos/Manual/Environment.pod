@@ -19,9 +19,10 @@ logs.
 
 =head2 CONVOS_BACKEND_EMBEDDED
 
-Set CONVOS_MANUAL_BACKEND to a true value if you want to force the frontend
-to start the backend embedded. This is useful if you want to test L<Convos>
-with L<morbo|Mojo::Server::Morbo>.
+Set this environment if you want to start Convos as a single process daemon,
+with the backend embedded. Example:
+
+  CONVOS_BACKEND_EMBEDDED=1 script/convos daemon --listen http://*:8080
 
 =head2 CONVOS_DEBUG
 
@@ -31,10 +32,6 @@ Set CONVOS_DEBUG to a true value for extra debug output to STDERR.
 
 Set CONVOS_DISABLE_AUTO_EMBED to a true value to disable links from expanding
 into images, movies or other dynamic content.
-
-=head2 CONVOS_MANUAL_BACKEND
-
-Disable the frontend from automatically starting the backend.
 
 =head2 CONVOS_ORGANIZATION_NAME
 
