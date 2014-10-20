@@ -1,89 +1,28 @@
-use t::Helper;
-use Mojo::Util qw( spurt );
+use Mojo::Base -base;
+use Test::More;
+use Convos;
 
-my $t_pid = $$;
-my @log;
-
-$t->app->log->on(message => sub { shift; shift; push @log, @_; });
+$ENV{CONVOS_BACKEND_PID_FILE} = File::Spec->catfile(File::Spec->tmpdir, 'convos-test-backend.pid');
+$ENV{CONVOS_REDIS_URL} = 'localhost:123456789';
 
 {
-  no warnings 'redefine';
-  *Convos::Core::start = sub {
-    my $core = shift;
-    $core->redis->incr('convos:backend:started');
-    Mojo::IOLoop->stop unless $$ == $t_pid;
+  local $SIG{USR2} = sub { };                # emulate hypnotoad (hackish)
+  local $ENV{CONVOS_BACKEND_EMBEDDED} = 1;
+  eval { Convos->new };
+  like $@, qr{Cannot start embedded backend from hypnotoad}, 'cannot start CONVOS_BACKEND_EMBEDDED with hypnotoad';
+}
+
+{
+  my ($start, $got_pid) = (0, 0);
+  local $ENV{CONVOS_BACKEND_EMBEDDED} = 1;
+  local *Convos::Core::start = sub {
+    $got_pid = -e $ENV{CONVOS_BACKEND_PID_FILE};
+    $start++;
   };
-}
-
-{
-  my $backend = $t->app->home->rel_file('backend.tmp');
-  like $t->app->{convos_executable_path}, qr{/start-with-embedded-server\.t$}, 'convos_executable_path';
-  $t->app->{convos_executable_path} = $backend;
-  spurt <<"  APP", $backend;
-#!$^X
-BEGIN { \$ENV{CONVOS_REDIS_URL} = "$ENV{CONVOS_REDIS_URL}" }
-use lib 'lib';
-use t::Helper;
-redis_do set => 'convos:backend:pid' => \$\$;
-sleep 4;
-  APP
-  chmod 0770, $backend;
-}
-
-{
-  local $SIG{QUIT} = 'DEFAULT';
-  local $SIG{USR2};
-  start_backend(0.1);
-  is redis_do(get => 'convos:backend:lock'),    undef, 'not started: lock is not set';
-  is redis_do(get => 'convos:backend:pid'),     undef, 'not started: pid is not set';
-  is redis_do(get => 'convos:backend:started'), undef, 'not started: backend was not started';
-  like $log[-1], qr{Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend},
-    'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend';
-}
-
-{
-  start_backend(0.1);
-  is redis_do(get => 'convos:backend:lock'), undef, 'embedded: lock is not set';
-  is redis_do(get => 'convos:backend:pid'), $$, 'embedded: pid is set';
-  is redis_do(get => 'convos:backend:started'), 1, 'embedded: core got started';
-}
-
-{
-  start_backend(0.1);
-  like $log[-1], qr{Backend \d+ is running}, 'Backend is running';
-}
-
-{
-  redis_do(set => 'convos:backend:lock' => 1);
-  redis_do(del => 'convos:backend:pid');
-  start_backend(0.1);
-  like $log[-1], qr{Another process is starting the backend}, 'Another process is starting the backend';
-}
-
-{
-  my $pid;
-  local $SIG{USR2} = 'DEFAULT';
-
-  redis_do(del => 'convos:backend:lock');
-  Mojo::IOLoop->recurring(
-    0.05 => sub {
-      $pid and Mojo::IOLoop->stop;
-      redis_do->get('convos:backend:pid' => sub { $pid = pop });
-    }
-  );
-  start_backend(1);
-
-  is redis_do(get => 'convos:backend:lock'), undef, 'external: lock is not set';
-  like $pid, qr{^\d+$}, 'external: pid is set';
-  ok kill(9, $pid), 'external: killed';
-
-  unlink 'backend.tmp';
+  eval { Convos->new };
+  is $start, 1, 'backend started';
+  ok !-e $ENV{CONVOS_BACKEND_PID_FILE}, 'pid file was cleaned up';
+  ok $got_pid, 'pid file was created';
 }
 
 done_testing;
-
-sub start_backend {
-  $t->app->_start_backend;
-  Mojo::IOLoop->timer(shift, sub { Mojo::IOLoop->stop });
-  Mojo::IOLoop->start;
-}

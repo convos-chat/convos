@@ -23,6 +23,7 @@
 - Remove Convos::Loopback
 - Remove references to Heroku, closes #80
 - Remove desktop notification status in profile #203
+- Remove /convos resource. Going directly to server log instead #220
 
 ## 0.84 (2014-09-14)
 - Fix update of current nick()

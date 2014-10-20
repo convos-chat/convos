@@ -57,21 +57,22 @@ able to just run it:
   # Install
   $ cpanm Convos
   # Run it
-  $ convos backend &
-  $ convos daemon
+  $ convos daemon --listen http://*:8080
 
-The above works, but if you have a lot of users you probably want to use
-L<hypnotoad|Mojo::Server::Hypnotoad> instead of C<daemon>:
+The steps above will install and run Convos in a single process. This is a
+very quick way to get started, but we incourage to run Convos as one backend
+and one frontend:
 
-  $ hypnotoad $(which convos)
+  # Start the backend first
+  $ convos backend start
 
-The command above will start a full featured, UNIX optimized, preforking
-non-blocking webserver. Run the same command again, and the webserver
-will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
-loosing any connections.
+  # Then start the frontend
+  $ convos daemon --listen http://*:8080
 
-Convos can be configured using L<Convos::Manual::Environment>
-and L<Convos::Manual::HttpHeaders>.
+This allow you to upgrade and restart the frontend, without having to
+reconnect to the IRC servers.
+
+See L<Convos::Manual::Running> for more details.
 
 =head1 CUSTOM TEMPLATES
 
@@ -203,14 +204,18 @@ sub startup {
 
   $self->ua->max_redirects(2);             # support getting facebook pictures
   $self->plugin('Convos::Plugin::Helpers');
-  $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->secrets([time]);                  # will be replaced by _set_secrets()
+  $self->_redis_url;
+
+  return if $ENV{CONVOS_BACKEND_ONLY};     # set script/convos when started as backend
+
+  # frontend code
+  $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets;
   $self->_public_routes;
   $self->_private_routes;
-  $self->_redis_url;
 
   if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
     $self->log->warn(
@@ -250,10 +255,10 @@ sub startup {
   );
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
-  $self->defaults(full_page => 1);
   $self->hook(before_dispatch => \&_before_dispatch);
+  $self->_embed_backend if $ENV{CONVOS_BACKEND_EMBEDDED};
 
-  Mojo::IOLoop->timer(5 => sub { $ENV{CONVOS_MANUAL_BACKEND}     or $self->_start_backend; });
+  Scalar::Util::weaken($self);
   Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
   Mojo::IOLoop->timer(0 => sub { $self->_set_secrets });
 }
@@ -324,6 +329,16 @@ sub _config {
   $config->{name} = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
   $config->{name} ||= 'Nordaaker';
   $config;
+}
+
+sub _embed_backend {
+  my $self = shift;
+
+  die "Cannot start embedded backend from hypnotoad" if $SIG{USR2};
+  require Convos::Command::backend;
+  $self->{backend} = Convos::Command::backend->new(app => $self);
+  $self->{backend}->run;
+  Scalar::Util::weaken($self->{backend}{app});
 }
 
 sub _from_cpan {
@@ -432,86 +447,6 @@ sub _set_secrets {
       $redis->del('convos:secrets:lock');
     },
   );
-}
-
-sub _start_backend {
-  my $self  = shift;
-  my $redis = $self->redis;
-
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $redis->getset('convos:backend:lock' => 1, $delay->begin);
-      $redis->get('convos:backend:pid', $delay->begin);
-      $redis->expire('convos:backend:lock' => 5);
-    },
-    sub {
-      my ($delay, $locked, $pid) = @_;
-
-      if ($pid and kill 0, $pid) {
-        $self->log->debug("Backend $pid is running.");
-      }
-      elsif ($locked) {
-        $self->log->debug('Another process is starting the backend.');
-      }
-      elsif ($SIG{USR2}) {    # hypnotoad
-        $self->_start_backend_as_external_app;
-      }
-      elsif ($ENV{CONVOS_BACKEND_EMBEDDED} or !$SIG{QUIT}) {    # forced or ./script/convos daemon
-        $self->log->debug('Starting embedded backend.');
-        $redis->set('convos:backend:pid' => $$);
-        $redis->del('convos:backend:lock');
-        $self->core->start;
-      }
-      else {                                                    # morbo
-        $self->core->reset;
-        $self->log->warn(
-          'Set CONVOS_BACKEND_EMBEDDED=1 to automatically start the backend from morbo. (The backend is not running)');
-      }
-    },
-  );
-}
-
-sub _start_backend_as_external_app {
-  my $self = shift;
-
-  local $0 = $self->{convos_executable_path};
-
-  if (!-x $0) {
-    $self->log->error("Cannot execute $0: Not executable");
-    return;
-  }
-
-  if (my $pid = fork) {
-    $self->log->debug("Starting $0 backend with double fork");
-    wait;    # wait for "fork and exit" below
-    $self->log->info("Detached $0 backend ($pid=$?)");
-    return $pid;    # parent process returns
-  }
-  elsif (!defined $pid) {
-    $self->log->error("Can't start external backend, fork failed: $!");
-    return;
-  }
-
-  # make sure the backend does not listen to the hypnotoad socket
-  Mojo::IOLoop->reset;
-
-  # start detaching new process from hypnotoad
-  if (!POSIX::setsid) {
-    $self->log->error("Can't start a new session for backend: $!");
-    exit $!;
-  }
-
-  # detach child from hypnotoad or die trying
-  defined(fork and exit) or die;
-
-  # replace fork with "convos backend" process
-  delete $ENV{MOJO_CONFIG} if $ENV{TOADFARM_APPLICATION_CLASS};
-  $ENV{CONVOS_BACKEND_EMBEDDED} = 1;
-  $self->log->debug("Replacing current process with $0 backend");
-  { exec $0 => 'backend' }
-  $self->log->error("Failed to replace current process: $!");
-  exit;
 }
 
 =head1 COPYRIGHT AND LICENSE

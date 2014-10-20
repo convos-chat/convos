@@ -17,12 +17,6 @@ Convos can be configured with the following environment variables:
 Set this variable to a custom directory where Convos can store the IRC
 logs.
 
-=head2 CONVOS_BACKEND_EMBEDDED
-
-Set CONVOS_MANUAL_BACKEND to a true value if you want to force the frontend
-to start the backend embedded. This is useful if you want to test L<Convos>
-with L<morbo|Mojo::Server::Morbo>.
-
 =head2 CONVOS_DEBUG
 
 Set CONVOS_DEBUG to a true value for extra debug output to STDERR.
@@ -31,10 +25,6 @@ Set CONVOS_DEBUG to a true value for extra debug output to STDERR.
 
 Set CONVOS_DISABLE_AUTO_EMBED to a true value to disable links from expanding
 into images, movies or other dynamic content.
-
-=head2 CONVOS_MANUAL_BACKEND
-
-Disable the frontend from automatically starting the backend.
 
 =head2 CONVOS_ORGANIZATION_NAME
 
@@ -67,6 +57,18 @@ If set must be appended to register url. Example:
 
 Set CONVOS_SECURE_COOKIES to true in order to set the secure flag
 on all session cookies.  Requires HTTPS.
+
+=head2 MOJO_CONFIG
+
+Path to a config file which will be sourced when L<Convos> starts. The file
+need to be valid Perl. Example:
+
+  # You can set environment variables inside the file:
+  $ENV{CONVOS_SECURE_COOKIES} = 1;
+  $ENV{MOJO_LISTEN} = "http://*:8080,https://*:8443";
+
+  # Do not forget this line at the end
+  {};
 
 =head2 MOJO_IRC_DEBUG
 

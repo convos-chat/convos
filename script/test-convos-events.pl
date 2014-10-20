@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 BEGIN {
-  $ENV{CONVOS_MANUAL_BACKEND} = 1;
+  $ENV{CONVOS_BACKEND_ONLY} = 1;    # less initialization on startup
   $ENV{CONVOS_REDIS_URL} ||= 'localhost';
   $ENV{MOJO_REDIS_DEBUG} //= 0;
 }
