@@ -1,0 +1,100 @@
+
+=head1 NAME
+
+Convos::Manual::Run - How to start Convos
+
+=head1 DESCRIPTION
+
+L<Convos> can run in different modes, but we suggest running with a seperate
+backend, since it allows you to restart the frontend without disconnecting
+from the IRC servers.
+
+NOTE! If you run convos from a checked out git repo, wou need to run the
+commands with C<./vendor/bin/carton exec> infront of the commands. Example:
+
+  # This...
+  $ hynotoad script/convos
+  $ convos daemon
+
+  # becomes...
+  $ ./vendor/bin/carton exec hypnotoad script/convos
+  $ ./vendor/bin/carton exec ./script/convos daemon
+
+=head1 SYNOPSIS
+
+  $ ./script/convos
+  $ ./script/convos [command] [options]
+
+=head1 MODES
+
+=head2 Single process mode
+
+Running Convos in single process mode is the simplest way to get started.
+In this mode, it will run the backend (The process that connects to the IRC
+servers) embedded. This might even be required, if you want to run Convos
+on a service similar to Heroku. (NOTE: Convos is not supported on Heroku)
+
+To start convos, simply start it with the command "daemon". Below, we have
+also supplied the listen parameter which specifies which port to accept
+incoming HTTP connections on.
+
+  $ convos daemon --listen http://*:8080
+
+For more details run "help daemon" or have a look at
+L<http://mojolicio.us/perldoc/Mojo/Server/Daemon>.
+
+  $ convos help daemon
+
+=head2 Seperate backend
+
+Starting up the backend seperately is a big win, since it allows you to
+upgrade and restart the frontend without tearing down the connections to the
+IRC servers. There are two ways to start the backend, either in foreground
+or fork to background:
+
+  # Start in foreground
+  $ convos backend
+
+  # Fork to background
+  $ convos backend start
+
+After you have forked to background, you can investigate the status of
+the process, stop or restart it:
+
+  $ convos backend status
+  $ convos backend stop
+  $ convos backend restart
+
+You can also generate an init script for the backend:
+
+  $ convos backend get_init_file > /etc/init.d/convos-backend
+
+The backend can then be instructed with environment variables from
+C</etc/default/convos>.
+
+=head2 Hypnotoad
+
+L<Hypnotoad|http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad> is a full
+featured, UNIX optimized, preforking non-blocking webserver. Using Hypnotoad
+is what we suggest, since it can handle a lot more requests, than what
+L</Single process mode> can offer. Starting with Hypnotoad can be done with
+the following command:
+
+  $ hynotoad script/convos
+
+Run the same command again, and the webserver will
+L<hot reload|http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad#USR2> the source
+code without loosing any connections.
+
+We strongly suggest starting with L<MOJO_CONFIG|Convos::Manual::Environment/MOJO_CONFIG>
+set, so you can change the environment during L<hot reload|Mojo::Server::Hypnotoad/DESCRIPTION>.
+
+  $ MOJO_CONFIG=/path/to/config.pl hynotoad script/convos
+
+L</Hypnotoad> mode require the backend to be started as a seperate process.
+ 
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+=cut

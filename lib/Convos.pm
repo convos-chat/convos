@@ -57,21 +57,22 @@ able to just run it:
   # Install
   $ cpanm Convos
   # Run it
-  $ convos backend &
-  $ convos daemon
+  $ convos daemon --listen http://*:8080
 
-The above works, but if you have a lot of users you probably want to use
-L<hypnotoad|Mojo::Server::Hypnotoad> instead of C<daemon>:
+The steps above will install and run Convos in a single process. This is a
+very quick way to get started, but we incourage to run Convos as one backend
+and one frontend:
 
-  $ hypnotoad $(which convos)
+  # Start the backend first
+  $ convos backend start
 
-The command above will start a full featured, UNIX optimized, preforking
-non-blocking webserver. Run the same command again, and the webserver
-will L<hot reload|Mojo::Server::Hypnotoad/USR2> the source code without
-loosing any connections.
+  # Then start the frontend
+  $ convos daemon --listen http://*:8080
 
-Convos can be configured using L<Convos::Manual::Environment>
-and L<Convos::Manual::HttpHeaders>.
+This allow you to upgrade and restart the frontend, without having to
+reconnect to the IRC servers.
+
+See L<Convos::Manual::Running> for more details.
 
 =head1 CUSTOM TEMPLATES
 

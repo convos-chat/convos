@@ -63,22 +63,13 @@ You can either run convos as a single process or a in a preforked environment.
 The single process is the simplest to maintain, but preforked is perfect when
 you need to scale.
 
-    # single process
-    $ ./vendor/bin/carton exec script/convos daemon
-
-    # prefork
-    $ ./vendor/bin/carton exec hypnotoad script/convos
-
-Try adding "-h" at the end for command line options.
-
-Running it with `hypnotoad` will start a full featured, UNIX optimized, preforking
-non-blocking webserver. Run the same command again, and the webserver will hot
-reload the source code without losing any connections. By default it will
-listen to `http://*:8080/` but you can easily change this using
-[environment variables](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Manual/Environment.pod#MOJO_LISTEN).
+    # Single process with embedded backend
+    $ ./vendor/bin/carton exec script/convos daemon --listen http://*:8080
 
 See also:
 
+* [Running Convos](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Manual/Running.pod)
+  for more details on how to start Convos.
 * [Environment variables](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Manual/Environment.pod)
   for configuration
 * [Mojolicious Guides](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT)

@@ -58,6 +58,18 @@ If set must be appended to register url. Example:
 Set CONVOS_SECURE_COOKIES to true in order to set the secure flag
 on all session cookies.  Requires HTTPS.
 
+=head2 MOJO_CONFIG
+
+Path to a config file which will be sourced when L<Convos> starts. The file
+need to be valid Perl. Example:
+
+  # You can set environment variables inside the file:
+  $ENV{CONVOS_SECURE_COOKIES} = 1;
+  $ENV{MOJO_LISTEN} = "http://*:8080,https://*:8443";
+
+  # Do not forget this line at the end
+  {};
+
 =head2 MOJO_IRC_DEBUG
 
 Set MOJO_IRC_DEBUG for extra IRC debug output to STDERR.
