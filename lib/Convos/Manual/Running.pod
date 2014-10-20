@@ -20,6 +20,16 @@ commands with C<./vendor/bin/carton exec> infront of the commands. Example:
   $ ./vendor/bin/carton exec hypnotoad script/convos
   $ ./vendor/bin/carton exec ./script/convos daemon
 
+=head1 SEE ALSO
+
+=over 4
+
+=item * L<Convos::Manual::Environment>
+
+=item * L<Convos::Manual::HttpHeaders>
+
+=back
+
 =head1 SYNOPSIS
 
   $ ./script/convos
