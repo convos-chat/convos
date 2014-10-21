@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     make \
     ruby \
     libio-socket-ssl-perl \
+    libssl-dev \
     supervisor \
     redis-server
 
