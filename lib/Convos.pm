@@ -149,7 +149,6 @@ use File::Spec::Functions qw( catdir catfile tmpdir );
 use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
-use Convos::Upgrader;
 
 our $VERSION = '0.84';
 
@@ -163,7 +162,7 @@ Holds a L<Convos::Core> object .
 
 =head2 upgrader
 
-Holds a L<Convos::Upgrader> object.
+DEPRECATED.
 
 =cut
 
@@ -176,9 +175,7 @@ has core => sub {
   $core;
 };
 
-has upgrader => sub {
-  Convos::Upgrader->new(redis => shift->redis);
-};
+has upgrader => sub { die "upgrader() is deprecated" };
 
 =head1 METHODS
 
@@ -259,7 +256,6 @@ sub startup {
   $self->_embed_backend if $ENV{CONVOS_BACKEND_EMBEDDED};
 
   Scalar::Util::weaken($self);
-  Mojo::IOLoop->timer(0 => sub { $ENV{CONVOS_SKIP_VERSION_CHECK} or $self->_check_version; });
   Mojo::IOLoop->timer(0 => sub { $self->_set_secrets });
 }
 
@@ -303,22 +299,6 @@ sub _before_dispatch {
   if (!$c->app->config->{hostname_is_set}++) {
     $c->redis->set('convos:frontend:url' => $c->req->url->base->to_abs->to_string);
   }
-}
-
-sub _check_version {
-  my $self = shift;
-  my $log  = $self->log;
-
-  $self->upgrader->running_latest(
-    sub {
-      my ($upgrader, $latest) = @_;
-      $latest and return;
-      $log->error(
-        "The database schema has changed.\nIt must be updated before we can start!\n\nRun '$self->{convos_executable_path} upgrade', then try again.\n\n"
-      );
-      exit;
-    },
-  );
 }
 
 sub _config {
