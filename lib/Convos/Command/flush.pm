@@ -15,7 +15,6 @@ use Mojo::Log;
 
 $ENV{MOJO_MODE}      ||= 'production';
 $ENV{MOJO_LOG_LEVEL} ||= 'info';
-$ENV{CONVOS_SKIP_VERSION_CHECK} = 1;
 
 =head1 ATTRIBUTES
 
