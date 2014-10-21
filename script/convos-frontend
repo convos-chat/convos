@@ -7,7 +7,7 @@ use lib "$FindBin::Bin/../lib";
 
 $ENV{CONVOS_FRONTEND_LOGFILE} ||= File::Spec->devnull;
 $ENV{CONVOS_FRONTEND_PID_FILE} ||= File::Spec->catfile(File::Spec->tmpdir, 'convos-frontend.pid');
-$ENV{MOJO_MODE} or die "You cannot invoke $0 directly. Use 'convos' instead\n";
+$ENV{MOJO_MODE} or die "You cannot invoke $0 directly. Use 'convos frontend' instead\n";
 my ($daemon, $convos);
 
 {
