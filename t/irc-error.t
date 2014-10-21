@@ -1,5 +1,7 @@
 use t::Helper;
 
+plan skip_all => 'Reconnect is disabled';
+
 my $port = Mojo::IOLoop::Server->generate_port;
 my $core = $t->app->core;
 my $conn;
