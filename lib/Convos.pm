@@ -153,7 +153,7 @@ use Convos::Upgrader;
 
 our $VERSION = '0.84';
 
-$ENV{CONVOS_DEFAULT_CONNECTION} //= 'chat.freenode.org:6697';
+$ENV{CONVOS_DEFAULT_CONNECTION} //= 'chat.freenode.net:6697';
 
 =head1 ATTRIBUTES
 
