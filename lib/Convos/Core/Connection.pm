@@ -183,26 +183,34 @@ sub connect {
   my ($self) = @_;
   my $irc = $self->_irc;
 
-  $self->{core_connect_timer} = 0;
-
-  # we will try to "steal" the nich we want every 60 second
   Scalar::Util::weaken($self);
-  $self->{keepnick_tid} ||= $irc->ioloop->recurring(
-    60,
+  $self->{core_connect_timer} = 0;
+  $self->{keepnick_tid} ||= $irc->ioloop->recurring(60 => sub { $self->_steal_nick });
+  $self->_subscribe;
+
+  $self->redis->execute(
+    [hgetall => $self->{path}],
+    [get     => 'convos:frontend:url'],
     sub {
-      $self->redis->hget(
-        $self->{path},
-        'nick',
+      my ($redis, $args, $url) = @_;
+      $self->redis->hset($self->{path} => tls => $self->{disable_tls} ? 0 : 1);
+      $irc->name($url || 'Convos');
+      $irc->nick($args->{nick} || $self->login);
+      $irc->pass($args->{password}) if $args->{password};
+      $irc->server($args->{server} || $args->{host});
+      $irc->tls($self->{disable_tls} ? undef : {});
+      $irc->user($args->{username} || $self->login);
+      $irc->connect(
         sub {
-          my ($redis, $nick) = @_;
-          $irc->write(NICK => $nick) if $nick and $irc->nick ne $nick;
-        }
+          my ($irc, $error) = @_;
+          $error and return $self->_connect_failed($error);
+          $self->_publish_and_save(server_message => {status => 200, message => "Connected to IRC server"});
+          $self->_state('connected');
+        },
       );
-    }
+    },
   );
 
-  $self->_connect;
-  $self->_subscribe;
   $self;
 }
 
@@ -212,6 +220,22 @@ sub _state {
   $self->{state} = $state;
   $self->redis->hset($self->{path}, state => $state);
   $self;
+}
+
+sub _steal_nick {
+  my $self = shift;
+
+  # We will try to "steal" the nich we really want every 60 second
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      $self->redis->hget($self->{path}, 'nick', $delay->begin);
+    },
+    sub {
+      my ($delay, $nick) = @_;
+      $self->_irc->write(NICK => $nick) if $nick and $self->_irc->nick ne $nick;
+    }
+  );
 }
 
 sub _subscribe {
@@ -266,57 +290,6 @@ sub _subscribe {
   );
 
   $self;
-}
-
-sub _connect {
-  my $self = shift;
-  my $irc  = $self->_irc;
-
-  Scalar::Util::weaken($self);
-  $self->redis->execute(
-    [hgetall => $self->{path}],
-    [get     => 'convos:frontend:url'],
-    sub {
-      my ($redis, $args, $url) = @_;
-
-      $self->redis->hset($self->{path} => tls => $self->{disable_tls} ? 0 : 1);
-      $irc->name($url || 'Convos');
-      $irc->nick($args->{nick} || $self->login);
-      $irc->pass($args->{password}) if $args->{password};
-      $irc->server($args->{server} || $args->{host});
-      $irc->tls($self->{disable_tls} ? undef : {});
-      $irc->user($args->{username} || $self->login);
-      $irc->connect(
-        sub {
-          my ($irc, $error) = @_;
-          my $data;
-
-          if ($error) {
-
-            # SSL connect attempt failed with unknown error
-            # error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
-            if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
-              $self->_state('reconnecting');
-              $data = {status => 400, message => "This IRC network does not support SSL/TLS."};
-              $self->{disable_tls} = 1;
-              $self->_connect;
-            }
-            else {
-              $data = {status => 500, message => "Could not connect to @{[$irc->server]}: $error"};
-              $self->_state('disconnected');
-            }
-
-          }
-          else {
-            $data = {status => 200, message => "Connected to IRC server"};
-            $self->_state('connected');
-          }
-
-          $self->_publish_and_save(server_message => $data);
-        }
-      );
-    },
-  );
 }
 
 =head2 channels_from_conversations
@@ -957,6 +930,25 @@ sub cmd_list {
   else {
     $self->redis->del("convos:irc:$network:channels");
     $self->{save_channels} = 1;
+  }
+}
+
+sub _connect_failed {
+  my ($self, $error) = @_;
+  my $server = $self->_irc->server;
+
+  # SSL connect attempt failed with unknown error
+  # error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol
+  if ($error =~ /SSL\d*_GET_SERVER_HELLO/) {
+    $self->_state('reconnecting');
+    $self->_publish_and_save(
+      server_message => {status => 400, message => "This IRC network ($server) does not support SSL/TLS."});
+    $self->{disable_tls}        = 1;
+    $self->{core_connect_timer} = 2;
+  }
+  else {
+    $self->_state('disconnected');
+    $self->_publish_and_save(server_message => {status => 500, message => "Could not connect to $server: $error"});
   }
 }
 
