@@ -107,31 +107,8 @@ has _irc => sub {
 
   Scalar::Util::weaken($self);
   $irc->register_default_event_handlers;
-  $irc->on(
-    close => sub {
-      my $irc = shift;
-      my $data;
-      $self->_state('disconnected');
-      if ($self->{stop}) {
-        $data = {status => 200, message => 'Disconnected.'};
-        $self->_publish_and_save(server_message => $data);
-        return;
-      }
-      else {
-        $data = {status => 500, message => "Disconnected from @{[$self->name]}."};
-        $self->_publish_and_save(server_message => $data);
-      }
-    }
-  );
-  $irc->on(
-    error => sub {
-      my ($irc, $err) = @_;
-      my $data = {status => 500, message => "Connection to @{[$irc->name]} failed."};
-      $self->{stop} and return $self->_state('disconnected');
-      $self->_state('disconnected');
-      $self->_publish_and_save(server_message => $data);
-    }
-  );
+  $irc->on(close => sub { $self->_irc_close });
+  $irc->on(error => sub { $self->_irc_error($_[1]) });
 
   for my $event (@ADD_MESSAGE_EVENTS) {
     $irc->on($event => sub { $self->add_message($_[1]) });
@@ -145,6 +122,31 @@ has _irc => sub {
 
   $irc;
 };
+
+sub _irc_close {
+  my $self = shift;
+  my $name = $self->_irc->name;
+
+  $self->_state('disconnected');
+
+  if ($self->{stop}) {
+    $self->_publish_and_save(server_message => {status => 200, message => 'Disconnected.'});
+    return;
+  }
+
+  $self->_publish_and_save(server_message => {status => 500, message => "Disconnected from $name."});
+  $self->{core_connect_timer} = 60 + int rand 60;
+}
+
+sub _irc_error {
+  my ($self, $error) = @_;
+  my $name = $self->_irc->name;
+
+  $self->{stop} and return $self->_state('disconnected');
+  $self->_state('disconnected');
+  $self->_publish_and_save(server_message => {status => 500, message => "Connection to $name failed: $error"});
+  $self->{core_connect_timer} = 60 + int rand 60;
+}
 
 =head1 METHODS
 
@@ -703,10 +705,9 @@ sub irc_part {
 sub err_bannedfromchan {
   my ($self, $message) = @_;
   my $channel = lc $message->{params}[1];
-  my $name    = as_id $self->name, $channel;
-  my $data    = {status => 401, message => $message->{params}[2]};
+  my $name = as_id $self->name, $channel;
 
-  $self->_publish_and_save(server_message => $data);
+  $self->_publish_and_save(server_message => {status => 401, message => $message->{params}[2]});
 
   Scalar::Util::weaken($self);
   $self->redis->zrem(
@@ -856,9 +857,8 @@ sub irc_mode {
   my $mode   = shift @{$message->{params}};
 
   if ($target eq lc $self->_irc->nick) {
-    my $data = {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode"};
-
-    $self->_publish(server_message => $data);
+    $self->_publish(
+      server_message => {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode"});
   }
   else {
     $self->_publish(mode => {target => $target, mode => $mode, args => join(' ', @{$message->{params}})});
@@ -875,9 +875,8 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 
 sub irc_error {
   my ($self, $message) = @_;
-  my $data = {status => 500, message => join(' ', @{$message->{params}}),};
 
-  $self->_publish_and_save(server_message => $data);
+  $self->_publish_and_save(server_message => {status => 500, message => join(' ', @{$message->{params}})});
 }
 
 =head2 cmd_nick
@@ -949,6 +948,7 @@ sub _connect_failed {
   else {
     $self->_state('disconnected');
     $self->_publish_and_save(server_message => {status => 500, message => "Could not connect to $server: $error"});
+    $self->{core_connect_timer} = 60 + int rand 60;
   }
 }
 
