@@ -1,3 +1,7 @@
+BEGIN {
+  $ENV{CONVOS_BACKEND_ONLY}     = 1;
+  $ENV{CONVOS_CONNECT_INTERVAL} = 0.01;
+}
 use t::Helper;
 use Convos::Core;
 
@@ -5,9 +9,6 @@ my $core = $t->app->core;
 my $sub  = $core->redis->subscribe(qw( convos:user:batman:magnet ));
 my $stop = sub {1};
 my (@messages, @res);
-
-$core->start(sub { Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
 
 {
   no warnings 'redefine';
@@ -27,6 +28,7 @@ Mojo::IOLoop->start;
 
 {
   my $conn = {};
+  $core->start;
   $core->add_connection($conn, cb());
   Mojo::IOLoop->start;
   is $res[2], undef, 'add_connection() failed on invalid input';
@@ -38,14 +40,14 @@ Mojo::IOLoop->start;
 
   $core->add_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'add_connection() magnet';    # or diag Data::Dumper::Dumper($res[1]->{error});
   $conn->{nick} = 'batman';
   is_deeply $res[2], $conn, 'add_connection() returned connection details';
 
+  # Mojo::IRC::connect will stop this
   Mojo::IOLoop->start;
-  is $core->{connections}{batman}{magnet}->_irc->nick,   'batman',       'irc nick';
-  is $core->{connections}{batman}{magnet}->_irc->server, 'irc.perl.org', 'irc server';
-  is $core->{connections}{batman}{magnet}->_irc->user,   'batman',       'irc user';
+  is $core->{connections}{"batman:magnet"}->_irc->nick,   'batman',       'irc nick';
+  is $core->{connections}{"batman:magnet"}->_irc->server, 'irc.perl.org', 'irc server';
+  is $core->{connections}{"batman:magnet"}->_irc->user,   'batman',       'irc user';
 
   $core->add_connection($conn, cb());
   Mojo::IOLoop->start;
@@ -69,7 +71,6 @@ Mojo::IOLoop->start;
   $stop = sub {/NICK bruce/};
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'update_connection(normal) magnet' or diag Data::Dumper::Dumper($res[1]->{error});
   is_deeply $res[2], $conn, 'update_connection(normal) returned connection details';
 
   Mojo::IOLoop->start unless @messages == 3;
@@ -81,13 +82,12 @@ Mojo::IOLoop->start;
 
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'update_connection(change) change server' or diag Data::Dumper::Dumper($res[1]->{error});
   is_deeply $res[2], $conn, 'update_connection(change) returned connection details';
 
   Mojo::IOLoop->start;
-  is $core->{connections}{batman}{magnet}->_irc->nick,   'bruce',             'irc nick bruce';
-  is $core->{connections}{batman}{magnet}->_irc->server, 'irc.perl.org:1234', 'irc server irc.perl.org:1234';
-  is $core->{connections}{batman}{magnet}->_irc->user,   'batman',            'irc user batman';
+  is $core->{connections}{"batman:magnet"}->_irc->nick,   'bruce',             'irc nick bruce';
+  is $core->{connections}{"batman:magnet"}->_irc->server, 'irc.perl.org:1234', 'irc server irc.perl.org:1234';
+  is $core->{connections}{"batman:magnet"}->_irc->user,   'batman',            'irc user batman';
 }
 
 done_testing;

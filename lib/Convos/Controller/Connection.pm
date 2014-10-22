@@ -199,7 +199,7 @@ sub _add_connection {
     sub {
       my ($delay, $errors, $conn) = @_;
 
-      return $self->redirect_to('view.network', network => $conn->{name}) unless $errors;
+      return $self->redirect_to('view.network', network => $conn->{name}) if $conn;
       return $self->param('wizard') ? $self->wizard : $self->render;
     },
   );

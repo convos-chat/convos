@@ -16,6 +16,7 @@ use Mojolicious::Validator;
 use Convos::Core::Connection;
 use Convos::Core::Util qw( as_id id_as );
 use Time::HiRes qw( time );
+use constant CONNECT_INTERVAL => $ENV{CONVOS_CONNECT_INTERVAL} || 2;
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
 my %CONVOS_MESSAGE = (
@@ -66,41 +67,6 @@ sub control {
   $self;
 }
 
-=head2 reset
-
-  $self = $self->reset;
-
-Used to reset connection stats when backend is restarted.
-
-=cut
-
-sub reset {
-  my $self  = shift;
-  my $redis = $self->redis;
-
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      $redis->del('convos:backend:lock');
-      $redis->del('convos:host2convos');
-      $redis->del('convos:loopback:names');    # clear loopback nick list
-      $redis->hset('convos:host2convos', localhost => 'loopback');
-      $redis->smembers('connections', $delay->begin);
-    },
-    sub {
-      my ($delay, $connections) = @_;
-
-      warn sprintf "[core] Reset %s connection(s)\n", int @$connections if DEBUG;
-      for my $conn (@$connections) {
-        my ($login, $name) = split /:/, $conn;
-        $redis->hmset("user:$login:connection:$name", state => "disconnected", current_nick => "");
-      }
-    },
-  );
-
-  return $self;
-}
-
 =head2 start
 
 Will fetch connection information from the database and try to connect to them.
@@ -108,43 +74,43 @@ Will fetch connection information from the database and try to connect to them.
 =cut
 
 sub start {
-  my ($self, $cb) = @_;
+  my $self = shift;
+
+  die "Convos::Core is already started" if $self->{start}++;
+
+  # TODO: Remove in future versions and/or move to Convos::Upgrader
+  $self->redis->del($_)
+    for qw( convos:backend:lock convos:backend:pid convos:backend:started convos:host2convos convos:loopback:names );
+
+  $self->redis->del('core:control');    # need to clear instructions queued while backend was stopped
+  $self->_start_control_channel;
 
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
     sub {
       my ($delay) = @_;
-      $self->reset;
       $self->redis->smembers('connections', $delay->begin);
     },
     sub {
       my ($delay, $connections) = @_;
-
-      warn sprintf "[core] Starting %s connection(s)\n", int @$connections if DEBUG;
-      for my $conn (@$connections) {
-        my ($login, $name) = split /:/, $conn;
-        $self->_connection(login => $login, name => $name)->connect;
+      for my $id (@$connections) {
+        $self->_connection($id)->_state('disconnected')->{core_connect_timer} = 1;
       }
-      $self->$cb if $cb;
     },
   );
 
-  $self->_start_control_channel;
-  $self;
-}
+  $self->{connect_tid} ||= Mojo::IOLoop->recurring(
+    CONNECT_INTERVAL,
+    sub {
+      for my $conn (values %{$self->{connections}}) {
+        next if --$conn->{core_connect_timer};
+        $conn->connect;
+        last;
+      }
+    }
+  );
 
-sub _connection {
-  my ($self, %args) = @_;
-  my $conn = $self->{connections}{$args{login}}{$args{name}};
-
-  unless ($conn) {
-    Scalar::Util::weaken($self);
-    $conn = Convos::Core::Connection->new(redis => $self->redis, log => $self->log, %args);
-    $conn->on(save => sub { $_[1]->{message} and $_[1]->{timestamp} and $self->archive->save(@_); });
-    $self->{connections}{$args{login}}{$args{name}} = $conn;
-  }
-
-  $conn;
+  return $self;
 }
 
 sub _start_control_channel {
@@ -167,8 +133,8 @@ sub _start_control_channel {
   $self->{control}->on(
     error => sub {
       my ($redis, $error) = @_;
-      $self->log->warn("[core:control] $error (reconnecting)");
-      Mojo::IOLoop->timer(0.5, sub { $self and $self->_start_control_channel });
+      $self->log->error("[core:control] Stopping Mojo::IOLoop on 'core:control' error: $error ");
+      Mojo::IOLoop->stop;
     },
   );
 }
@@ -227,7 +193,7 @@ sub add_connection {
     },
     sub {
       my ($delay, $started) = @_;
-      $self->$cb(undef, $validation->output);
+      $self->$cb($validation, $validation->output);
     },
   );
 }
@@ -385,7 +351,7 @@ sub delete_user {
       $redis->srem("users", $login, $delay->begin);
 
       for my $name (@$connections) {
-        my $conn = $self->_connection(login => $login, name => $name);
+        my $conn = $self->_connection("$login:$name");
         $self->control(stop => $login, $name, $delay->begin);
         $self->archive->flush($conn);
         $redis->srem("connections", "$login:$name", $delay->begin);
@@ -410,12 +376,11 @@ Stop a connection by connection id.
 
 sub ctrl_stop {
   my ($self, $login, $server) = @_;
+  my $id = join ':', $login, $server;
+  my $conn = $self->{connections}{$id} or return;
 
   Scalar::Util::weaken($self);
-
-  if (my $conn = $self->{connections}{$login}{$server}) {
-    $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
-  }
+  $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
 }
 
 =head2 ctrl_restart
@@ -426,16 +391,15 @@ Restart a connection by connection id.
 
 =cut
 
-
 sub ctrl_restart {
   my ($self, $login, $server) = @_;
+  my $id = join ':', $login, $server;
 
-  Scalar::Util::weaken($self);
-
-  if (my $conn = $self->{connections}{$login}{$server}) {
+  if (my $conn = $self->{connections}{$id}) {
+    Scalar::Util::weaken($self);
     $conn->disconnect(
       sub {
-        delete $self->{connections}{$login}{$server};
+        delete $self->{connections}{$id};
         $self->ctrl_start($login => $server);
       }
     );
@@ -453,7 +417,7 @@ Start a single connection by connection id.
 
 sub ctrl_start {
   my ($self, $login, $name) = @_;
-  $self->_connection(login => $login, name => $name)->connect;
+  $self->_connection("$login:$name")->connect;
 }
 
 =head2 login
@@ -507,6 +471,21 @@ sub login {
   );
 }
 
+sub _connection {
+  my ($self, $id) = @_;
+  my $conn = $self->{connections}{$id};
+
+  unless ($conn) {
+    my ($login, $name) = split /:/, $id;
+    Scalar::Util::weaken($self);
+    $conn = Convos::Core::Connection->new(redis => $self->redis, log => $self->log, login => $login, name => $name);
+    $conn->on(save => sub { $_[1]->{message} and $_[1]->{timestamp} and $self->archive->save(@_); });
+    $self->{connections}{$id} = $conn;
+  }
+
+  $conn;
+}
+
 sub _dumper {    # function
   Data::Dumper->new([@_])->Indent(0)->Sortkeys(1)->Terse(1)->Dump;
 }
@@ -538,7 +517,9 @@ sub _validation {
 
 sub DESTROY {
   my $self = shift;
-  delete $self->{$_} for qw/ control redis /;
+  my $tid;
+
+  Mojo::IOLoop->remove($tid) if $tid = $self->{connect_tid};
 }
 
 =head1 COPYRIGHT
