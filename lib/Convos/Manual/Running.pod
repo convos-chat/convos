@@ -120,15 +120,16 @@ If you start Convos from an init script, you can provide a file which will be
 sourced before running C<convos>. The path to this file is
 C</etc/default/convos> and it can contain the given variables:
 
-  MOJO_CONFIG=/path/to/config.pl
+  MOJO_CONFIG=/path/to/convos.conf
   RUN_AS_USER=convos
   RUN_AS_GROUP=nobody
 
-  CONVOS_FRONTEND_PID_FILE=/var/log/convos-frontend.log
-  CONVOS_FRONTEND_LOGFILE=/var/log/convos-frontend.log
+  CONVOS_FRONTEND_PID_FILE=/var/run/convos-frontend.log
+  CONVOS_FRONTEND_LOGFILE=/var/log/convos/frontend.log
 
-  CONVOS_BACKEND_LOGFILE=/var/log/convos-backend.log
-  CONVOS_BACKEND_PID_FILE=/tmp/convos-backend.pid
+  CONVOS_BACKEND_PID_FILE=/var/run/convos-backend.pid
+  CONVOS_BACKEND_LOGFILE=/var/log/convos/backend.log
+
   CONVOS_REDIS_URL=redis://localhost:6397/1
  
 =head1 AUTHOR
