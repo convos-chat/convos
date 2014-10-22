@@ -131,8 +131,8 @@ sub _start_control_channel {
   $self->{control}->on(
     error => sub {
       my ($redis, $error) = @_;
-      $self->log->warn("[core:control] $error (reconnecting)");
-      Mojo::IOLoop->timer(0.5, sub { $self and $self->_start_control_channel });
+      $self->log->error("[core:control] Stopping Mojo::IOLoop on 'core:control' error: $error ");
+      Mojo::IOLoop->stop;
     },
   );
 }
