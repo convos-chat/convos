@@ -19,16 +19,6 @@ use Time::HiRes qw( time );
 use constant CONNECT_INTERVAL => $ENV{CONVOS_CONNECT_INTERVAL} || 2;
 use constant DEBUG => $ENV{CONVOS_DEBUG} // 0;
 
-my %CONVOS_MESSAGE = (
-  event  => 'message',
-  host   => 'loopback',
-  nick   => 'convos',
-  server => 'loopback',
-  status => 200,
-  target => 'convos',
-  user   => 'convos',
-);
-
 =head1 ATTRIBUTES
 
 =head2 archive
