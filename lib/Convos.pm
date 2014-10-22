@@ -227,7 +227,6 @@ sub startup {
     push @{$self->renderer->paths}, $ENV{CONVOS_TEMPLATES};
   }
 
-  my $redis = $self->redis;
   $self->plugin(
     LinkEmbedder => {
       cache_cb => sub {
@@ -235,12 +234,12 @@ sub startup {
         my ($link_embedder, $url, $link) = @_;
 
         if ($link) {    # set
-          $redis->set("convos:link:$url", Mojo::JSON::encode_json($link), sub { });
-          $redis->expire("convos:link:$url", Mojo::JSON::encode_json($link), 3600, sub { });
+          $self->redis->set("convos:link:$url", Mojo::JSON::encode_json($link), sub { });
+          $self->redis->expire("convos:link:$url", Mojo::JSON::encode_json($link), 3600, sub { });
           $link_embedder->$cb;
         }
         else {          # get
-          $redis->get(
+          $self->redis->get(
             "convos:link:$url",
             sub {
               $link_embedder->$cb(Mojo::JSON::decode_json($_[1] || '{}'));
