@@ -857,8 +857,8 @@ sub irc_mode {
   my $mode   = shift @{$message->{params}};
 
   if ($target eq lc $self->_irc->nick) {
-    $self->_publish(
-      server_message => {target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode"});
+    $self->_publish(server_message =>
+        {status => 200, target => $self->name, message => "You are connected to @{[$self->name]} with mode $mode"});
   }
   else {
     $self->_publish(mode => {target => $target, mode => $mode, args => join(' ', @{$message->{params}})});
