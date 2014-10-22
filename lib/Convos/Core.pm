@@ -76,12 +76,14 @@ Will fetch connection information from the database and try to connect to them.
 sub start {
   my $self = shift;
 
+  die "Convos::Core is already started" if $self->{start}++;
+
   # TODO: Remove in future versions and/or move to Convos::Upgrader
   $self->redis->del($_)
     for qw( convos:backend:lock convos:backend:pid convos:backend:started convos:host2convos convos:loopback:names );
 
+  $self->redis->del('core:control');    # need to clear instructions queued while backend was stopped
   $self->_start_control_channel;
-  $self->{connections} ||= {};
 
   Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
@@ -191,7 +193,7 @@ sub add_connection {
     },
     sub {
       my ($delay, $started) = @_;
-      $self->$cb(undef, $validation->output);
+      $self->$cb($validation, $validation->output);
     },
   );
 }
@@ -374,12 +376,11 @@ Stop a connection by connection id.
 
 sub ctrl_stop {
   my ($self, $login, $server) = @_;
+  my $id = join ':', $login, $server;
+  my $conn = $self->{connections}{$id} or return;
 
   Scalar::Util::weaken($self);
-
-  if (my $conn = $self->{connections}{$login}{$server}) {
-    $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
-  }
+  $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
 }
 
 =head2 ctrl_restart
@@ -390,16 +391,15 @@ Restart a connection by connection id.
 
 =cut
 
-
 sub ctrl_restart {
   my ($self, $login, $server) = @_;
+  my $id = join ':', $login, $server;
 
-  Scalar::Util::weaken($self);
-
-  if (my $conn = $self->{connections}{$login}{$server}) {
+  if (my $conn = $self->{connections}{$id}) {
+    Scalar::Util::weaken($self);
     $conn->disconnect(
       sub {
-        delete $self->{connections}{$login}{$server};
+        delete $self->{connections}{$id};
         $self->ctrl_start($login => $server);
       }
     );

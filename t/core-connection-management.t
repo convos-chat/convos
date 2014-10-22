@@ -40,14 +40,11 @@ my (@messages, @res);
 
   $core->add_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'add_connection() magnet';    # or diag Data::Dumper::Dumper($res[1]->{error});
   $conn->{nick} = 'batman';
   is_deeply $res[2], $conn, 'add_connection() returned connection details';
 
   # Mojo::IRC::connect will stop this
-  diag 'connect() connection...';
   Mojo::IOLoop->start;
-  diag 'connectED!!';
   is $core->{connections}{"batman:magnet"}->_irc->nick,   'batman',       'irc nick';
   is $core->{connections}{"batman:magnet"}->_irc->server, 'irc.perl.org', 'irc server';
   is $core->{connections}{"batman:magnet"}->_irc->user,   'batman',       'irc user';
@@ -74,7 +71,6 @@ my (@messages, @res);
   $stop = sub {/NICK bruce/};
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'update_connection(normal) magnet' or diag Data::Dumper::Dumper($res[1]->{error});
   is_deeply $res[2], $conn, 'update_connection(normal) returned connection details';
 
   Mojo::IOLoop->start unless @messages == 3;
@@ -86,7 +82,6 @@ my (@messages, @res);
 
   $core->update_connection($conn, cb());
   Mojo::IOLoop->start;
-  is $res[1], undef, 'update_connection(change) change server' or diag Data::Dumper::Dumper($res[1]->{error});
   is_deeply $res[2], $conn, 'update_connection(change) returned connection details';
 
   Mojo::IOLoop->start;

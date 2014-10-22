@@ -135,7 +135,7 @@ sub _irc_close {
   }
 
   $self->_publish_and_save(server_message => {status => 500, message => "Disconnected from $name."});
-  $self->{core_connect_timer} = 60 + int rand 60;
+  $self->_reconnect;
 }
 
 sub _irc_error {
@@ -145,7 +145,7 @@ sub _irc_error {
   $self->{stop} and return $self->_state('disconnected');
   $self->_state('disconnected');
   $self->_publish_and_save(server_message => {status => 500, message => "Connection to $name failed: $error"});
-  $self->{core_connect_timer} = 60 + int rand 60;
+  $self->_reconnect;
 }
 
 =head1 METHODS
@@ -943,12 +943,12 @@ sub _connect_failed {
     $self->_publish_and_save(
       server_message => {status => 400, message => "This IRC network ($server) does not support SSL/TLS."});
     $self->{disable_tls}        = 1;
-    $self->{core_connect_timer} = 2;
+    $self->{core_connect_timer} = 1;
   }
   else {
     $self->_state('disconnected');
     $self->_publish_and_save(server_message => {status => 500, message => "Could not connect to $server: $error"});
-    $self->{core_connect_timer} = 60 + int rand 60;
+    $self->_reconnect;
   }
 }
 
@@ -996,6 +996,10 @@ sub _publish_and_save {
   }
 
   $self->emit(save => $data);
+}
+
+sub _reconnect {
+  shift->{core_connect_timer} = 30;    # CONNECT_INTERVAL * 30 = 60 seconds
 }
 
 sub DESTROY {
