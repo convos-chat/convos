@@ -27,8 +27,6 @@ Returns a string describing how to use this command.
 
 has description => "Start the Convos connection backend.\n";
 has usage       => <<"EOF";
-Usage:
-
 # Fork to background
 $0 backend start
 
@@ -36,7 +34,7 @@ $0 backend start
 $0 backend {restart|stop|status}
 
 # Run in foreground
-$0 backend
+$0 backend -f
 EOF
 
 has _daemon => sub {
@@ -52,9 +50,10 @@ has _daemon => sub {
     lsb_desc    => $self->description,
     lsb_sdesc   => 'Convos backend',
 
-    directory => $self->app->home,
-    program   => -x $program ? $program : 'convos-backend',
-    pid_file  => $ENV{CONVOS_BACKEND_PID_FILE} || File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid'),
+    directory    => $self->app->home,
+    program      => -x $program ? $program : 'convos-backend',
+    program_args => ['-f'],
+    pid_file     => $ENV{CONVOS_BACKEND_PID_FILE} || File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid'),
     stderr_file => $ENV{CONVOS_BACKEND_LOGFILE} || File::Spec->devnull,
     stdout_file => $ENV{CONVOS_BACKEND_LOGFILE} || File::Spec->devnull,
 
@@ -77,7 +76,7 @@ sub run {
 
   $daemon->read_pid;
 
-  if (@args) {
+  if (!@args or $args[0] ne '-f') {
     local $ENV{CONVOS_IS_CONTROLLED_BY_DC} = 1;
     $self->_exit($daemon->run_command(@args));
   }

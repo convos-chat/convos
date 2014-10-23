@@ -38,7 +38,7 @@ no warnings 'redefine';
     );
   };
 
-  $backend->run;
+  $backend->run('-f');
   is $started, 1, 'backend started in foreground';
   is $pid, $$, 'pid written by foreground process';
   ok -e $daemon->pid_file, 'pid_file exists';

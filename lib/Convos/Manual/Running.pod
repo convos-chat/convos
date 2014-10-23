@@ -63,7 +63,7 @@ IRC servers. There are two ways to start the backend, either in foreground
 or fork to background:
 
   # Start in foreground
-  $ convos backend
+  $ convos backend -f
 
   # Fork to background
   $ convos backend start
