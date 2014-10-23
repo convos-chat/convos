@@ -201,13 +201,13 @@ sub startup {
 
   $self->ua->max_redirects(2);             # support getting facebook pictures
   $self->plugin('Convos::Plugin::Helpers');
+  $self->plugin('LinkEmbedder');
   $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->_redis_url;
 
   return if $ENV{CONVOS_BACKEND_ONLY};     # set script/convos when started as backend
 
   # frontend code
-  $self->plugin('surveil') if $ENV{CONVOS_SURVEIL};
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets;
@@ -226,29 +226,6 @@ sub startup {
     # unstable.
     push @{$self->renderer->paths}, $ENV{CONVOS_TEMPLATES};
   }
-
-  $self->plugin(
-    LinkEmbedder => {
-      cache_cb => sub {
-        my $cb = pop;
-        my ($link_embedder, $url, $link) = @_;
-
-        if ($link) {    # set
-          $self->redis->set("convos:link:$url", Mojo::JSON::encode_json($link), sub { });
-          $self->redis->expire("convos:link:$url", Mojo::JSON::encode_json($link), 3600, sub { });
-          $link_embedder->$cb;
-        }
-        else {          # get
-          $self->redis->get(
-            "convos:link:$url",
-            sub {
-              $link_embedder->$cb(Mojo::JSON::decode_json($_[1] || '{}'));
-            }
-          );
-        }
-      },
-    },
-  );
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
   $self->hook(before_dispatch => \&_before_dispatch);
