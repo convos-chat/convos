@@ -39,6 +39,7 @@ if (@ARGV and $ARGV[0] eq 'start') {
   }
   else {
     system $daemon->program, @{$daemon->program_args};
+    $daemon->pretty_print($? ? ('Failed to start', 'red') : 'Started');
     exit $?;
   }
 }
