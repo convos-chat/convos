@@ -95,6 +95,7 @@ sub run {
 
 sub DESTROY {
   my $self = shift;
+  return unless $self->_daemon;
   my $file = $self->_daemon->pid_file;
 
   unlink $file if $self->{running} and -w $file;

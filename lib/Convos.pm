@@ -319,7 +319,7 @@ sub _embed_backend {
   die "Cannot start embedded backend from hypnotoad" if $SIG{USR2};
   require Convos::Command::backend;
   $self->{backend} = Convos::Command::backend->new(app => $self);
-  $self->{backend}->run;
+  $self->{backend}->run('-f');
   Scalar::Util::weaken($self->{backend}{app});
 }
 
