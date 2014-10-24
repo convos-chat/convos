@@ -1,4 +1,4 @@
-## 0.86
+## 0.86 (2014-10-24)
 - Fix sourcing /etc/default/convos from init script
 - Deprecated Convos::Command::backend
 - Deprecated Convos::Command::upgrade
