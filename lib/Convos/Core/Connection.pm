@@ -422,6 +422,8 @@ Example message:
 sub irc_rpl_welcome {
   my ($self, $message) = @_;
 
+  $self->{attempts} = 0;
+
   Scalar::Util::weaken($self);
   $self->redis->zrange(
     $self->{conversation_path},
@@ -876,6 +878,8 @@ ERROR :Closing Link: somenick by Tampa.FL.US.Undernet.org (Sorry, your connectio
 sub irc_error {
   my ($self, $message) = @_;
 
+  # Server dislikes us, we'll back off more
+  $self->{attempts} += 10;
   $self->_publish_and_save(server_message => {status => 500, message => join(' ', @{$message->{params}})});
 }
 
@@ -999,7 +1003,9 @@ sub _publish_and_save {
 }
 
 sub _reconnect {
-  shift->{core_connect_timer} = 30;    # CONNECT_INTERVAL * 30 = 60 seconds
+  my $self = shift;
+  $self->{attempts}++;
+  shift->{core_connect_timer} = 30 * $self->{attempts};    # CONNECT_INTERVAL * 30 = 60 seconds
 }
 
 sub DESTROY {
