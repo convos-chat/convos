@@ -1,48 +1,10 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Daemon::Control;
 use FindBin;
+use File::Spec;
 use lib "$FindBin::Bin/../lib";
-
-$ENV{CONVOS_FRONTEND_LOGFILE} ||= File::Spec->devnull;
 $ENV{CONVOS_FRONTEND_PID_FILE} ||= File::Spec->catfile(File::Spec->tmpdir, 'convos-frontend.pid');
 $ENV{MOJO_MODE} or die "You cannot invoke $0 directly. Use 'convos frontend' instead\n";
-my ($daemon, $convos);
-
-{
-  local $ENV{MOJO_LOG_LEVEL} = 'warn';
-  require Convos;
-  $convos = Convos->new;
-}
-
-$daemon = Daemon::Control->new(
-  init_config => $ENV{CONVOS_INIT_CONFIG_FILE} || '/etc/default/convos',
-  init_code   => "export MOJO_MODE='$ENV{MOJO_MODE}';",
-  name        => 'Convos frontend',
-  lsb_desc    => 'Start Convos frontend with hypnotoad',
-  lsb_sdesc   => 'Convos frontend',
-  reload_signal => 'USR2',
-
-  directory    => $convos->home,
-  program      => 'hypnotoad',
-  program_args => [File::Spec->catfile($FindBin::Bin, 'convos')],
-  pid_file     => $ENV{CONVOS_FRONTEND_PID_FILE},
-
-  stderr_file => $ENV{CONVOS_FRONTEND_LOGFILE},
-  stdout_file => $ENV{CONVOS_FRONTEND_LOGFILE},
-);
-
-if (@ARGV and $ARGV[0] eq 'start') {
-  if ($daemon->read_pid and $daemon->pid and $daemon->pid_running) {
-    $daemon->pretty_print('Duplicate Running', 'red');
-  }
-  else {
-    system $daemon->program, @{$daemon->program_args};
-    $daemon->pretty_print($? ? ('Failed to start', 'red') : 'Started');
-    exit $?;
-  }
-}
-else {
-  exit $daemon->run_command(@ARGV);
-}
+require Convos::Control::Frontend;
+exit Convos::Control::Frontend->new->run;

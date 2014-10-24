@@ -28,7 +28,7 @@ plan skip_all => "Cannot execute $convos" unless -x $convos;
   like $src, qr{^export MOJO_MODE='production';}m, 'MOJO_MODE is set for convos-frontend';
 
   delete $script->{handle};
-  like run($script->path, 'help'), qr{convos-frontend.*get_init_file},
+  like run($script->path, 'help'), qr{Usage: convos frontend.*start.*stop},
     'frontend init script can help and get_init_file';
 }
 
