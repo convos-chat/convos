@@ -1,3 +1,8 @@
+## 0.86
+- Fix sourcing /etc/default/convos from init script
+- Deprecated Convos::Command::backend
+- Deprecated Convos::Command::upgrade
+
 ## 0.85 (2014-10-24)
 - Fix input field in iOS #167
 - Fix nick-list event #197
