@@ -1,5 +1,3 @@
-- Remove all reconnection code.
-
 ## 0.85
 - Fix input field in iOS #167
 - Fix nick-list event #197
@@ -8,7 +6,8 @@
 - Fix scrolling to bottom when gist load #207
 - Fix sending server messages to server log, instead of opening new conversation #209
 - Fix uppercase characters in login name #211
-- Fix backend from going bananas, using Daemon::Control #224
+- Fix handling of nicks starting with "[" or "}" #219
+- Stop backend from going bananas, using Daemon::Control #224
   - Remove CONVOS_BACKEND_EMBEDDED as exposed variable
   - Remove CONVOS_MANUAL_BACKEND
 - Add delete_user() to Convos::Core #104
@@ -23,8 +22,11 @@
   * Add Github embedding of projects, issues and pull requests
   * Add Open graph and Twitter meta information
   * Faster loading of media using cache mechanism
+- Add backoff and throttling of connections #227
+- Convos can now generate init scripts for backend/frontend #225 #224
 - Change to only show err_nicknameinuse message once #176
 - Change to "flat" design
+- Change to reload notification list when reconnect to backend #221
 - Remove Convos::Loopback
 - Remove references to Heroku, closes #80
 - Remove desktop notification status in profile #203
