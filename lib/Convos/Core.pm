@@ -370,7 +370,7 @@ sub ctrl_stop {
   my $conn = $self->{connections}{$id} or return;
 
   Scalar::Util::weaken($self);
-  $conn->disconnect(sub { delete $self->{connections}{$login}{$server} });
+  $conn->disconnect(sub { delete $self->{connections}{$id} });
 }
 
 =head2 ctrl_restart
