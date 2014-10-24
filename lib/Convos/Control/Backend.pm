@@ -59,7 +59,6 @@ Default to C<RUN_AS_USER> environment variable or the current user.
 
 =cut
 
-has group => sub { $ENV{RUN_AS_GROUP} };
 has lsb_desc    => 'Start Convos backend';
 has lsb_sdesc   => 'Convos backend';
 has name        => 'Convos backend';
@@ -67,7 +66,23 @@ has program     => sub { \&_start_backend };
 has pid_file    => sub { $ENV{CONVOS_BACKEND_PID_FILE} };
 has stderr_file => sub { $ENV{CONVOS_BACKEND_LOGFILE} || File::Spec->devnull };
 has stdout_file => sub { $ENV{CONVOS_BACKEND_LOGFILE} || File::Spec->devnull };
-has user => sub { $ENV{RUN_AS_USER} };
+
+=head1 METHODS
+
+=head2 new
+
+Object constructor.
+
+=cut
+
+# This is required, since Daemon::Control::new() sets the defaults
+sub new {
+  my $self = shift->SUPER::new(@_);
+  $self->reload_signal('USR2');
+  $self->group($ENV{RUN_AS_GROUP}) unless defined $self->group;
+  $self->user($ENV{RUN_AS_USER})   unless defined $self->user;
+  $self;
+}
 
 sub _start_backend {
   local $ENV{CONVOS_BACKEND_ONLY} = 1;
