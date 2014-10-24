@@ -70,7 +70,7 @@ has directory => sub {
   return Convos->home;
 };
 
-has init_code => sub {"export MOJO_MODE='$ENV{MOJO_MODE}';"};
+has init_code => sub {"set -a;\nMOJO_MODE='$ENV{MOJO_MODE}';"};
 has init_config => sub { $ENV{CONVOS_INIT_CONFIG_FILE} || '/etc/default/convos' };
 has lsb_desc     => 'Start Convos frontend with hypnotoad';
 has lsb_sdesc    => 'Convos frontend';

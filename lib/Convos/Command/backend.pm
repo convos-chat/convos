@@ -44,7 +44,7 @@ has _daemon => sub {
   return Daemon::Control->new(
     fork        => 2,
     init_config => $ENV{CONVOS_INIT_CONFIG_FILE} || '/etc/default/convos',
-    init_code   => "export MOJO_MODE='$ENV{MOJO_MODE}';",
+    init_code   => "set -a;\nMOJO_MODE='$ENV{MOJO_MODE}';",
     help        => $self->usage,
     name        => 'Convos backend',
     lsb_desc    => $self->description,
