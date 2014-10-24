@@ -75,15 +75,6 @@ the process, stop or restart it:
   $ convos backend stop
   $ convos backend restart
 
-You can also generate an init script for the backend:
-
-  $ convos backend get_init_file > /etc/init.d/convos-backend
-
-The backend can then be supplied with environment variables from
-C</etc/default/convos>.
-
-See also L</Init script>.
-
 =head2 Hypnotoad
 
 L<Hypnotoad|http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad> is a full
@@ -116,9 +107,17 @@ L</Hypnotoad> mode require the backend to be started as a separate process.
 
 =head2 Init script
 
-If you start Convos from an init script, you can provide a file which will be
-sourced before running C<convos>. The path to this file is
-C</etc/default/convos> and it can contain the given variables:
+It's possible to generate init scripts for L<Convos> now. To do that, you can
+run these commands:
+
+  for i in frontend backend; do
+    convos $i get_init_file > /etc/init.d/convos-$i
+    chmod +x /etc/init.d/convos-$i
+    update-rc.d convos-$i defaults
+  done
+
+The backend and frontend can be supplied with environment variables from
+C</etc/default/convos>. Example:
 
   MOJO_CONFIG=/path/to/convos.conf
   RUN_AS_USER=convos
@@ -131,6 +130,9 @@ C</etc/default/convos> and it can contain the given variables:
   CONVOS_BACKEND_LOGFILE=/var/log/convos/backend.log
 
   CONVOS_REDIS_URL=redis://localhost:6397/1
+
+Note: L<Hypnotoad> only reads these environment variables on start/restart,
+and not on reload.
  
 =head1 AUTHOR
 
