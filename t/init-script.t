@@ -5,6 +5,7 @@ use File::Spec;
 use Test::More;
 
 my $convos = File::Spec->catfile(qw( script convos ));
+$ENV{CONVOS_INIT_CONFIG_FILE} = 't/etc/default/convos';
 plan skip_all => "Cannot execute $convos" unless -x $convos;
 
 {
@@ -17,7 +18,8 @@ plan skip_all => "Cannot execute $convos" unless -x $convos;
   like $src, qr{^set -a;}m,                 'export on for convos-frontend';
 
   delete $script->{handle};
-  like run($script->path, 'help'), qr{convos-backend.*get_init_file}, 'backend init script can help and get_init_file';
+  like run($script->path, 'help'), qr{Usage: convos backend.*start.*stop}, 'backend init script can help';
+  like run($script->path, 'env'), qr{CONVOS_WHATEVER=bar}, 'init script source environemnt variables';
 }
 
 {
@@ -30,8 +32,7 @@ plan skip_all => "Cannot execute $convos" unless -x $convos;
   like $src, qr{^set -a;}m,                 'export on for convos-backend';
 
   delete $script->{handle};
-  like run($script->path, 'help'), qr{Usage: convos frontend.*start.*stop},
-    'frontend init script can help and get_init_file';
+  like run($script->path, 'help'), qr{Usage: convos frontend.*start.*stop}, 'frontend init script can help';
 }
 
 done_testing;

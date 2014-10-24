@@ -2,11 +2,7 @@ package Convos::Command::flush;
 
 =head1 NAME
 
-Convos::Command::flush - Flush redis database
-
-=head1 DESCRIPTION
-
-TODO
+Convos::Command::upgrade - DEPRECATED
 
 =cut
 

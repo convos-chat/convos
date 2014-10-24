@@ -2,22 +2,16 @@ package Convos::Command::upgrade;
 
 =head1 NAME
 
-Convos::Command::upgrade - DISABLED
-
-=cut
-
-use Mojo::Base -base;
+Convos::Command::upgrade - DEPRECATED
 
 =head1 METHODS
 
 =head2 run
 
-Upgrading is disabled.
-
 =cut
 
 sub run {
-  die "'convos upgrade' is deprecated\n";
+  die "'Convos::Command::upgrade' is deprecated\n";
 }
 
 =head1 COPYRIGHT

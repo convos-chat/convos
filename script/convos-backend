@@ -2,13 +2,11 @@
 use strict;
 use warnings;
 use FindBin;
+use File::Spec;
 use lib "$FindBin::Bin/../lib";
 
-$ENV{CONVOS_BACKEND_ONLY} = 1;
+$ENV{CONVOS_BACKEND_PID_FILE} ||= File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid');
 $ENV{MOJO_MODE} or die "You cannot invoke $0 directly. Use 'convos backend' instead\n";
 
-require Mojolicious::Commands;
-require Convos;
-my $commands = Mojolicious::Commands->new(app => Convos->new);
-unshift @{$commands->namespaces}, 'Convos::Command';
-$commands->run(backend => @ARGV);
+require Convos::Control::Backend;
+exit Convos::Control::Backend->new->run;

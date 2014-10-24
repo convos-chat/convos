@@ -6,7 +6,7 @@ Convos::Control::Frontend - Extends Daemon::Control to control Convos frontend
 
 =head1 DESCRIPTION
 
-L<Convos::Control::Frontend> is a sub class of L<Daemon::Control> used to
+L<Convos::Control::Backend> is a sub class of L<Convos::Control> used to
 control L<hypnotoad|Mojo:Server::Hypnotoad>.
 
 =head1 SYNOPSIS
@@ -16,23 +16,9 @@ control L<hypnotoad|Mojo:Server::Hypnotoad>.
 
 =cut
 
-use Mojo::Base 'Daemon::Control';
-use File::Spec;
+use Mojo::Base 'Convos::Control';
 
 =head1 ATTRIBUTES
-
-=head2 directory
-
-Defaults to L<Convos home|Mojo::Home>.
-
-=head2 init_code
-
-Code to be injected into the init script.
-
-=head2 init_config
-
-File to source environment variables for init script. Default to
-"/etc/default/convos".
 
 =head2 lsb_desc
 
@@ -64,34 +50,14 @@ Array ref with one argument: The full path to C<convos> executable.
 
 =cut
 
-has directory => sub {
-  local $ENV{MOJO_LOG_LEVEL} = 'warn';
-  require Convos;
-  return Convos->home;
-};
-
-has init_code => sub {"set -a;\nMOJO_MODE='$ENV{MOJO_MODE}';"};
-has init_config => sub { $ENV{CONVOS_INIT_CONFIG_FILE} || '/etc/default/convos' };
 has lsb_desc     => 'Start Convos frontend with hypnotoad';
 has lsb_sdesc    => 'Convos frontend';
 has name         => 'Convos frontend';
 has pid_file     => sub { $ENV{CONVOS_FRONTEND_PID_FILE} };
 has program_args => sub { [File::Spec->catfile($FindBin::Bin, 'convos')] };
 has program      => 'hypnotoad';
-has reload_signal => sub {'Required in constructor'};
 
 =head1 METHODS
-
-=head2 do_help
-
-Will print help to screen.
-
-=cut
-
-sub do_help {
-  print "Usage: convos frontend {start|stop|reload|restart|foreground|status|get_init_file}\n";
-  return 0;
-}
 
 =head2 do_start
 

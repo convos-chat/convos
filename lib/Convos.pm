@@ -294,10 +294,21 @@ sub _embed_backend {
   my $self = shift;
 
   die "Cannot start embedded backend from hypnotoad" if $SIG{USR2};
-  require Convos::Command::backend;
-  $self->{backend} = Convos::Command::backend->new(app => $self);
-  $self->{backend}->run('-f');
-  Scalar::Util::weaken($self->{backend}{app});
+  require Convos::Control::Backend;
+  my $backend = Convos::Control::Backend->new;
+
+  $backend->read_pid;
+
+  if ($backend->pid and $backend->pid_running) {
+    $self->app->log->warn('Backend is already running.');
+  }
+  else {
+    $backend->pid($$);
+    $backend->write_pid;
+    $self->{pid_file} = $backend->pid_file;
+    $self->log->info('Starting convos backend.');
+    $self->core->start;
+  }
 }
 
 sub _from_cpan {
@@ -406,6 +417,13 @@ sub _set_secrets {
       $redis->del('convos:secrets:lock');
     },
   );
+}
+
+sub DESTROY {
+  my $self     = shift;
+  my $pid_file = $self->{pid_file};
+
+  unlink $pid_file if $pid_file and -r $pid_file;
 }
 
 =head1 COPYRIGHT AND LICENSE
