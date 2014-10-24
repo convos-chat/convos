@@ -6,7 +6,7 @@ Convos - Multiuser IRC proxy with web interface
 
 =head1 VERSION
 
-0.84
+0.85
 
 =head1 DESCRIPTION
 
@@ -150,7 +150,7 @@ use File::Basename qw( dirname );
 use Convos::Core;
 use Convos::Core::Util ();
 
-our $VERSION = '0.84';
+our $VERSION = '0.85';
 
 $ENV{CONVOS_DEFAULT_CONNECTION} //= 'chat.freenode.net:6697';
 

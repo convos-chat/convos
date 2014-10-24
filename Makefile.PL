@@ -6,7 +6,7 @@ WriteMakefile(
   LICENSE       => 'artistic_2',
   ABSTRACT_FROM => 'lib/Convos.pm',
   VERSION_FROM  => 'lib/Convos.pm',
-  EXE_FILES     => [qw( script/convos )],
+  EXE_FILES     => [qw( script/convos-backend script/convos script/convos-frontend )],
   META_MERGE    => {
     resources => {
       bugtracker => 'https://github.com/Nordaaker/convos/issues',
@@ -16,13 +16,14 @@ WriteMakefile(
   },
   BUILD_REQUIRES => {'Test::More' => '0.90'},
   PREREQ_PM      => {
+    'Daemon::Control'                   => '0.001006',
     'IO::Socket::SSL'                   => '1.84',
     'IRC::Utils'                        => '0.12',
-    'Mojo::IRC'                         => '0.11',
-    'Mojo::Redis'                       => '0.9928',
+    'Mojo::IRC'                         => '0.13',
+    'Mojo::Redis'                       => '1',
     'Mojolicious'                       => '5.3',
     'Mojolicious::Plugin::AssetPack'    => '0.31',
-    'Mojolicious::Plugin::FontAwesome4' => '4.2002',
+    'Mojolicious::Plugin::FontAwesome4' => '4.2004',
     'Mojolicious::Plugin::LinkEmbedder' => '0.12',
     'Parse::IRC'                        => '1.18',
     'Time::Piece'                       => '1.2',

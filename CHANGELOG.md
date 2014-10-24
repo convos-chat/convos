@@ -1,4 +1,4 @@
-## 0.85
+## 0.85 (2014-10-24)
 - Fix input field in iOS #167
 - Fix nick-list event #197
 - Fix rendering /list command with correct height #205
