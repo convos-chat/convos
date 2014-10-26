@@ -7,6 +7,9 @@ use Test::More;
 my $convos = File::Spec->catfile(qw( script convos ));
 $ENV{CONVOS_INIT_CONFIG_FILE} = 't/etc/default/convos';
 plan skip_all => "Cannot execute $convos" unless -x $convos;
+plan skip_all => "This test requires your Perl to to be the default one in your PATH.\n"
+  . "Set CONVOS_TEST_INIT=1 to run it"
+  unless $ENV{CONVOS_TEST_INIT};
 
 {
   my $script = get_init_file('backend');
