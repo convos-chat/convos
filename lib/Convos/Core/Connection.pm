@@ -1005,7 +1005,7 @@ sub _publish_and_save {
 sub _reconnect {
   my $self = shift;
   $self->{attempts}++;
-  shift->{core_connect_timer} = 30 * $self->{attempts};    # CONNECT_INTERVAL * 30 = 60 seconds
+  $self->{core_connect_timer} = 30 * $self->{attempts};    # CONNECT_INTERVAL * 30 = 60 seconds
 }
 
 sub DESTROY {
