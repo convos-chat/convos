@@ -1,4 +1,4 @@
-## 0.8601
+## 0.8601 (2014-10-26)
 
 - Fix error in reconnect method.
 - Disable init script tests by default

@@ -2,7 +2,7 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
   NAME          => 'Convos',
-  AUTHOR        => 'Jan Henning Thorsen <jhthorsen@cpan.org>',
+  AUTHOR        => 'Marcus <marcus@nordaaker.com>',
   LICENSE       => 'artistic_2',
   ABSTRACT_FROM => 'lib/Convos.pm',
   VERSION_FROM  => 'lib/Convos.pm',
