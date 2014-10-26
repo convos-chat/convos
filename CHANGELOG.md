@@ -1,3 +1,8 @@
+## 0.8601
+
+- Fix error in reconnect method.
+- Disable init script tests by default
+
 ## 0.86 (2014-10-24)
 - Fix sourcing /etc/default/convos from init script
 - Deprecated Convos::Command::backend
