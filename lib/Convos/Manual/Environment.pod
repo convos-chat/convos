@@ -42,6 +42,10 @@ Convos will use C<REDISCLOUD_URL>, C<REDISTOGO_URL>,
 C<DOTCLOUD_DATA_REDIS_URL> or default to "redis://127.0.0.1:6379/1" unless
 C<CONVOS_REDIS_URL> is not set.
 
+Note! The default value is only used when in "production" mode. This means
+that running L<Convos> with C<morbo> require the Redis URL to be set with
+the environment variable.
+
 It is also possible to set C<CONVOS_REDIS_INDEX=2> to use the
 database index 2, instead of the default. This is useful when
 C<REDISTOGO_URL> or C<DOTCLOUD_DATA_REDIS_URL> does not contain

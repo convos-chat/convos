@@ -1,5 +1,7 @@
-## 0.8601 (2014-10-26)
+## 0.8602 (2014-11-15)
+- Fix starting convos as "daemon" with embedded backend
 
+## 0.8601 (2014-10-26)
 - Fix error in reconnect method.
 - Disable init script tests by default
 
