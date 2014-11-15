@@ -1,4 +1,4 @@
-use Mojo::Base -base;
+use Mojo::Base -strict;
 use Mojo::Asset::File;
 use Mojo::Util 'spurt';
 use File::Spec;

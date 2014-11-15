@@ -5,6 +5,10 @@ use Test::More;
 {
   my $t = Test::Mojo->new('Convos');
   is_deeply $t->app->config->{hypnotoad}{listen}, [qw( http://*:8080 )], 'hypnotoad listen';
+
+  local $SIG{USR2} = sub { };
+  eval { $t->app->_embed_backend };
+  like $@, qr{Cannot start embedded backend}, 'cannot embed with hypnotoad';
 }
 
 {

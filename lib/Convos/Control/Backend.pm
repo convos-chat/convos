@@ -18,6 +18,8 @@ control the backend
 
 use Mojo::Base 'Convos::Control';
 
+$ENV{CONVOS_BACKEND_PID_FILE} ||= File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid');
+
 =head1 ATTRIBUTES
 
 =head2 group

@@ -5,7 +5,6 @@ use FindBin;
 use File::Spec;
 use lib "$FindBin::Bin/../lib";
 
-$ENV{CONVOS_BACKEND_PID_FILE} ||= File::Spec->catfile(File::Spec->tmpdir, 'convos-backend.pid');
 $ENV{MOJO_MODE} or die "You cannot invoke $0 directly. Use 'convos backend' instead\n";
 
 require Convos::Control::Backend;
