@@ -1,3 +1,6 @@
+## 0.8603 (2015-01-01)
+- Fix new Twitter javascript which could not be assetpacked
+
 ## 0.8602 (2014-11-15)
 - Fix starting convos as "daemon" with embedded backend
 
