@@ -137,7 +137,8 @@
     this.find('a[href^="http"].external').each(function(e) {
       var $a = $(this);
       $.get($.url_for('/oembed'), { url: this.href }, function(embed_code) {
-        var $embed_code = $(embed_code);
+        if (embed_code.match(/^\s*<a/)) return; // do not want to embed plain links
+        var $embed_code = $(embed_code).wrap('<div class="embed"></div>').parent();
         var at_bottom = convos.at_bottom;
         $a.closest('div').after($embed_code).closest('li').data('at_bottom', at_bottom);
         $embed_code.find('img').one('load', function() { if (at_bottom) $(window).scrollTo('bottom'); });

@@ -154,6 +154,11 @@ our $VERSION = '0.8603';
 
 $ENV{CONVOS_DEFAULT_CONNECTION} //= 'chat.freenode.net:6697';
 
+{    # required before Mojo::Redis 1.01
+  no warnings 'redefine';
+  *Mojo::Redis::emit_safe = sub { shift->emit(@_) };
+}
+
 =head1 ATTRIBUTES
 
 =head2 core
@@ -201,7 +206,6 @@ sub startup {
 
   $self->ua->max_redirects(2);             # support getting facebook pictures
   $self->plugin('Convos::Plugin::Helpers');
-  $self->plugin('LinkEmbedder');
   $self->secrets([time]);                  # will be replaced by _set_secrets()
   $self->_redis_url;
 
@@ -325,6 +329,8 @@ sub _private_routes {
   my $self = shift;
   my $r = $self->routes->under('/')->to('user#auth', layout => 'view');
 
+  $self->plugin('LinkEmbedder' => {route => $r->get('/oembed')->to(layout => undef)->name('oembed')});
+
   $r->websocket('/socket')->to('chat#socket')->name('socket');
   $r->get('/chat/command-history')->to('client#command_history');
   $r->get('/chat/notifications')->to('client#notifications', layout => undef)->name('notification.list');
@@ -334,7 +340,6 @@ sub _private_routes {
   $r->any('/connection/:name/edit')->to('connection#edit_connection')->name('connection.edit');
   $r->get('/connection/:name/delete')->to(template => 'connection/delete_connection', layout => 'tactile');
   $r->post('/connection/:name/delete')->to('connection#delete_connection')->name('connection.delete');
-  $r->get('/oembed')->to('oembed#generate', layout => undef)->name('oembed');
   $r->any('/profile')->to('user#edit')->name('user.edit');
   $r->any('/profile/delete')->to('user#delete')->name('user.delete');
   $r->post('/profile/timezone/offset')->to('user#tz_offset');
