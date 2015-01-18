@@ -154,6 +154,11 @@ our $VERSION = '0.8603';
 
 $ENV{CONVOS_DEFAULT_CONNECTION} //= 'chat.freenode.net:6697';
 
+{    # required before Mojo::Redis 1.01
+  no warnings 'redefine';
+  *Mojo::Redis::emit_safe = sub { shift->emit(@_) };
+}
+
 =head1 ATTRIBUTES
 
 =head2 core
