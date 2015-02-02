@@ -1,0 +1,15 @@
+~$
+*.bak
+*.old
+*.swp
+/blib/
+/cover_db
+/inc/
+/local
+/Makefile
+/Makefile.old
+/MANIFEST$
+/MANIFEST.bak
+/META*
+/MYMETA*
+/pm_to_blib
