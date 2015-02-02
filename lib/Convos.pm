@@ -1,0 +1,67 @@
+package Convos;
+
+=head1 NAME
+
+Convos - Multiuser chat application
+
+=head1 VERSION
+
+0.01
+
+=head1 DESCRIPTION
+
+L<Convos> is a multiuser chat application built with L<Mojolicious>.
+
+It currently support the IRC protocol, but can be extended to support
+other protocols as well.
+
+=head1 SYNOPSIS
+
+You can start convos by running one of the commands below.
+
+  $ convos daemon;
+  $ convos daemon --listen http://*:3000;
+
+You can then visit Convos in your browser, by going to the default
+address L<http://localhost:3000>.
+
+=cut
+
+use Mojo::Base 'Mojolicious';
+
+our $VERSION = '0.01';
+
+=head1 METHODS
+
+=head2 startup
+
+=cut
+
+sub startup {
+  my $self = shift;
+
+  $self->plugin(Swagger2 => {url => $self->home->rel_file('public/api.json')});
+  $self->routes->get('/')->to(template => 'app');
+  push @{$self->renderer->classes}, __PACKAGE__;
+}
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014, Jan Henning Thorsen
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Artistic License version 2.0.
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+=cut
+
+1;
+
+__DATA__
+@@ app.html.ep
+<!DOCTYPE html>
+<html>
+</html>
