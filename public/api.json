@@ -1,0 +1,575 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.87",
+    "title": "Convos API specification",
+    "description": "This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.",
+    "contact": {
+      "name": "Convos",
+      "url": "https://github.com/Nordaaker/convos"
+    },
+    "license": {
+      "name": "Artistic License version 2.0",
+      "url": "http://opensource.org/licenses/Artistic-2.0"
+    },
+    "termsOfService": "SSL (HTTPS) is highly suggested, since login credentials and session cookies are transmitted over this API."
+  },
+  "host": "demo.convos.by",
+  "basePath": "/1.0",
+  "schemes": [ "http" ],
+  "parameters": {
+    "connection_id": {
+      "name": "connection_id",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "A friendly name of the server"
+    },
+    "conversation_id": {
+      "name": "conversation_id",
+      "in": "path",
+      "default": "",
+      "required": false,
+      "type": "string",
+      "description": "The name of the person/chat room"
+    },
+    "email": {
+      "name": "ident",
+      "in": "body",
+      "required": true,
+      "type": "string",
+      "description": "User email"
+    },
+    "ident": {
+      "name": "ident",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "User email or server identity"
+    },
+    "nick": {
+      "name": "nick",
+      "in": "body",
+      "required": true,
+      "type": "string",
+      "description": "Nickname"
+    },
+    "password": {
+      "name": "password",
+      "in": "body",
+      "required": true,
+      "type": "string",
+      "description": "User password"
+    },
+    "server": {
+      "name": "server",
+      "in": "body",
+      "required": true,
+      "type": "string",
+      "description": "Server ip/hostname and port"
+    },
+    "session_cookie": {
+      "name": "X-Convos-Session",
+      "in": "header",
+      "required": false,
+      "type": "string",
+      "description": "User identification"
+    },
+    "username": {
+      "name": "username",
+      "in": "body",
+      "required": true,
+      "type": "string",
+      "description": "Username"
+    }
+  },
+  "paths": {
+    "/avatar/{connection_id}/{ident}": {
+      "get": {
+        "tags": [ "conversation" ],
+        "summary": "Get avatar for a user.",
+        "description": "Note: The response is not a JSON formatted document, but rather just the image data.",
+        "x-mojo-controller": "Convos::Controller::User",
+        "operationId": "avatar",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/ident" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "body": {
+                  "type": "string",
+                  "description": "Image binary data"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input.",
+            "schema": { "$ref": "#/definitions/BadRequest" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/command/{connection_id}/{conversation_id}": {
+      "post": {
+        "tags": [ "chat" ],
+        "summary": "Send a command to the server.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "command",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "schema": { "$ref": "#/definitions/Command" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/command/history": {
+      "get": {
+        "tags": [ "chat" ],
+        "summary": "Get last commands sent to the server.",
+        "description": "Commands are automatically added to the history once sent over to the server.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "commandHistory",
+        "parameters": [
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of commands.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Command" }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/commands": {
+      "get": {
+        "tags": [ "chat" ],
+        "summary": "Get list of available ommands.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "commandList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of commands.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Command" }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connection": {
+      "post": {
+        "tags": [ "connection" ],
+        "summary": "Add a connection.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "connectionAdd",
+        "parameters": [
+          { "$ref": "#/parameters/session_cookie" },
+          { "$ref": "#/parameters/nick" },
+          { "$ref": "#/parameters/password" },
+          { "$ref": "#/parameters/server" },
+          { "$ref": "#/parameters/username" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Connection information.",
+            "schema": {
+              "$ref": "#/definitions/Connection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connection/{connection_id}": {
+      "delete": {
+        "tags": [ "connection" ],
+        "summary": "Delete a connection and all assosiated data.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "connectionDelete",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a connection.",
+            "schema": {}
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "get": {
+        "tags": [ "connection" ],
+        "summary": "Get information about a connection.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "connection",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single connection.",
+            "schema": {
+              "$ref": "#/definitions/Connection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "post": {
+        "tags": [ "connection" ],
+        "summary": "Update a connection.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "connectionUpdate",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/session_cookie" },
+          { "$ref": "#/parameters/nick" },
+          { "$ref": "#/parameters/password" },
+          { "$ref": "#/parameters/server" },
+          { "$ref": "#/parameters/username" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Update a connection.",
+            "schema": {}
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connections": {
+      "get": {
+        "tags": [ "connection" ],
+        "summary": "Get all the connections for a user.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "connections",
+        "parameters": [
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of connections.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Connection" }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/conversation/{connection_id}/{conversation_id}": {
+      "get": {
+        "tags": [ "conversation" ],
+        "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "conversation",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messsages.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Message" }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/conversations": {
+      "get": {
+        "tags": [ "conversation" ],
+        "summary": "Get a list of all conversations.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "conversations",
+        "parameters": [
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messsages.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Conversation" }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": [ "chat" ],
+        "summary": "Get list of notications.",
+        "description": "A notification is added once your name is mentioned in a chat or someone sends a direct message.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "notifications",
+        "parameters": [
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of commands.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Notification" }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/notifications/seen": {
+      "post": {
+        "tags": [ "chat" ],
+        "summary": "Mark a notication as seen.",
+        "description": "TODO: Notification count vs red/green toggling of a single notification.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "notificationSeen",
+        "parameters": [
+          { "$ref": "#/parameters/session_cookie" },
+          {
+            "name": "ids",
+            "in": "body",
+            "type": "array",
+            "description": "List of notification IDs.",
+            "items": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of commands.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Notification" }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/user": {
+      "delete": {
+        "tags": [ "user" ],
+        "summary": "Delete a user.",
+        "x-mojo-controller": "Convos::Controller::User",
+        "operationId": "userDelete",
+        "parameters": [
+           { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+           "200": {
+           "description": "Successfully deleted.",
+           "schema": {}
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "get": {
+        "tags": [ "user" ],
+        "summary": "Get user data.",
+        "x-mojo-controller": "Convos::Controller::User",
+        "operationId": "user",
+        "parameters": [
+          { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile was retrieved.",
+            "schema": { "$ref": "#/definitions/User" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "post": {
+        "tags": [ "user" ],
+        "summary": "Register a new user or update an existing user.",
+        "x-mojo-controller": "Convos::Controller::User",
+        "operationId": "userSave",
+        "parameters": [
+           { "$ref": "#/parameters/email" },
+           { "$ref": "#/parameters/password" },
+           { "$ref": "#/parameters/session_cookie" }
+        ],
+        "responses": {
+           "200": {
+           "description": "Successfully updated.",
+           "schema": {
+              "session_cookie": {
+                "description": "Session cookie",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/user/authenticate": {
+      "post": {
+        "tags": [ "user" ],
+        "summary": "Authenticate a user based on email and password.",
+        "x-mojo-controller": "Convos::Controller::User",
+        "operationId": "userAuthenticate",
+        "parameters": [
+           { "$ref": "#/parameters/email" },
+           { "$ref": "#/parameters/password" }
+        ],
+        "responses": {
+          "200": {
+           "description": "Successfully logged in.",
+           "schema": {
+              "session_cookie": {
+                "description": "User identification",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BadRequest": {
+      "required": [ "code", "message" ],
+      "properties": {
+        "code": { "type": "integer", "format": "int32" },
+        "message": { "type": "string" }
+      }
+    },
+    "Command": {
+      "required": [ "id", "command" ],
+      "properties": {
+        "id": { "type": "string" },
+        "command": { "type": "string" }
+      }
+    },
+    "Connection": {
+      "required": [ "connection_id", "server", "nick" ],
+      "properties": {
+         "connection_id": { "type": "string" },
+         "nick": { "type": "string" },
+         "password": { "type": "string" },
+         "server": { "type": "string" },
+         "username": { "type": "string" }
+      }
+    },
+    "Conversation": {
+      "required": [ "connection_id", "conversation_id" ],
+      "properties": {
+         "connection_id": { "type": "string" },
+         "conversation_id": { "type": "string" }
+      }
+    },
+    "Error": {
+      "required": [ "code", "message" ],
+      "properties": {
+        "code": { "type": "integer", "format": "int32" },
+        "message": { "type": "string" }
+      }
+    },
+    "Message": {
+      "required": [ "id", "timestamp", "message" ],
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "integer", "format": "int32" },
+        "message": { "type": "string" }
+      }
+    },
+    "Notification": {
+      "required": [ "id", "timestamp", "message" ],
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "integer", "format": "int32" },
+        "message": { "type": "string" }
+      }
+    },
+    "User": {
+      "required": [ "email" ],
+      "properties": {
+        "avatar": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    }
+  }
+}
