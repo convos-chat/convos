@@ -1,0 +1,16 @@
+language: perl
+services:
+  - redis-server
+perl:
+  - "5.18"
+  - "5.16"
+  - "5.14"
+  - "5.12"
+  - "5.10"
+env:
+  - "HARNESS_OPTIONS=j1 TEST_POD=1 CONVOS_REDIS_URL=test"
+install:
+  - "cpanm -n Test::Pod Test::Pod::Coverage EV"
+  - "cpanm -n --installdeps ."
+notifications:
+  email: false
