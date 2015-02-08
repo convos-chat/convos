@@ -1,3 +1,7 @@
+## 0.8604
+* Up Mojo::IRC dependency to fix CTCP issues
+* Simpler OAuth embeds
+
 ## 0.8603 (2015-01-01)
 - Fix new Twitter javascript which could not be assetpacked
 
