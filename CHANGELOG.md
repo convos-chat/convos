@@ -1,4 +1,4 @@
-## 0.8604
+## 0.8604 (2015-02-09)
 * Up Mojo::IRC dependency to fix CTCP issues
 * Simpler OAuth embeds
 
