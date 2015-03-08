@@ -6,7 +6,7 @@ Convos::Control::Frontend - Extends Daemon::Control to control Convos frontend
 
 =head1 DESCRIPTION
 
-L<Convos::Control::Backend> is a sub class of L<Convos::Control> used to
+L<Convos::Control::Frontend> is a sub class of L<Convos::Control> used to
 control L<hypnotoad|Mojo:Server::Hypnotoad>.
 
 =head1 SYNOPSIS
