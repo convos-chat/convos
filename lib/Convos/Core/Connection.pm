@@ -353,7 +353,7 @@ sub add_message {
     if ($data->{nick} eq $current_nick) {
       $data->{user} ||= $self->_irc->user;
     }
-    elsif ($is_private_message or $data->{message} =~ /\b$current_nick\b/) {
+    elsif ($is_private_message or $data->{message} =~ /\b\Q$current_nick\E\b/) {
       $self->_add_conversation($data->{target}) if $is_private_message and $data->{user};
       $data->{highlight} = 1;
     }
