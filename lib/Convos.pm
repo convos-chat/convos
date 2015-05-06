@@ -36,6 +36,7 @@ address L<http://localhost:3000>.
 =cut
 
 use Mojo::Base 'Mojolicious';
+use Convos::Model;
 use Swagger2::Editor;
 
 our $VERSION = '0.01';
@@ -44,6 +45,14 @@ our $VERSION = '0.01';
 
 L<Convos> inherits all attributes from L<Mojolicious> and implements
 the following new ones.
+
+=head2 model
+
+Holds a L<Convos::Model> object.
+
+=cut
+
+has model => sub { Convos::Model->new };
 
 =head1 METHODS
 
@@ -64,6 +73,7 @@ sub startup {
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $swagger_file));
   $self->routes->get('/')->to(template => 'app');
   push @{$self->renderer->classes}, __PACKAGE__;
+  $self->model->share_dir;    # make sure we have a valid share_dir
 }
 
 =head1 COPYRIGHT AND LICENSE
