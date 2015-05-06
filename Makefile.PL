@@ -6,15 +6,15 @@ WriteMakefile(
   LICENSE       => 'artistic_2',
   ABSTRACT_FROM => 'lib/Convos.pm',
   VERSION_FROM  => 'lib/Convos.pm',
-  EXE_FILES     => [qw(  )],
+  EXE_FILES     => [qw( script/convos )],
   META_MERGE    => {
     resources => {
       bugtracker => 'https://github.com/jhthorsen/convos/issues',
       homepage   => 'https://github.com/jhthorsen/convos',
-      repository => 'https://github.com/jhthorsen/convos',
+      repository => 'https://github.com//home/repositories/convos.git/',
     },
   },
   BUILD_REQUIRES => {'Test::More' => '0.88'},
   PREREQ_PM      => {'perl'       => 'v5.10.0'},
-  test           => {TESTS        => 't/*.t'},
+  test           => {TESTS        => (-e 'META.yml' ? 't/*.t' : 't/*.t xt/*.t')},
 );
