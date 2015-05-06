@@ -1,0 +1,766 @@
+=head1 NAME
+
+Convos API specification
+
+=head1 VERSION
+
+0.87
+
+=head1 DESCRIPTION
+
+This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.
+
+=head1 TERMS OF SERVICE
+
+SSL (HTTPS) is highly suggested, since login credentials and session cookies are transmitted over this API.
+
+=head1 BASEURL
+
+L<http://demo.convos.by/1.0>
+
+=head1 RESOURCES
+
+=head2 avatar
+
+Get avatar for a user.
+
+Note: The response is not a JSON formatted document, but rather just the image data.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/avatar/{connection_id}/{ident}
+
+=head3 Parameters
+
+  .--------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                   |
+  |--------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A friendly name of the server |
+  | ident         | path | string | Yes      | User email or server identity |
+  '--------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+Image.
+
+  {
+    "body": string, // Image binary data
+  },
+
+=head4 400 - Bad Request
+
+Invalid input.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 command
+
+Send a command to the server.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/command/{connection_id}/{conversation_id}
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                      |
+  |----------------------------------------------------------------------------------|
+  | connection_id    | path   | string | Yes      | A friendly name of the server    |
+  | conversation_id  | path   | string | No       | The name of the person/chat room |
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now.       |
+  '----------------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+No description.
+
+  {
+    "command": string, // required
+    "id": string, // required
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 commandHistory
+
+Get last commands sent to the server.
+
+Commands are automatically added to the history once sent over to the server.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/command/history
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  '----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of commands.
+
+  [
+    {
+      "command": string, // required
+      "id": string, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 commandList
+
+Get list of available ommands.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/commands
+
+=head3 Parameters
+
+This resource takes no parameters.
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of commands.
+
+  [
+    {
+      "command": string, // required
+      "id": string, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 connection
+
+Get information about a connection.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/connection/{connection_id}
+
+=head3 Parameters
+
+  .-------------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                   |
+  |-------------------------------------------------------------------------------|
+  | connection_id    | path   | string | Yes      | A friendly name of the server |
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now.    |
+  '-------------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+A single connection.
+
+  {
+    "connection_id": string, // required
+    "nick": string, // required
+    "password": string, // No description.
+    "server": string, // required
+    "username": string, // No description.
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 connectionAdd
+
+Add a connection.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/connection
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  | body             | body   | schema | Yes      | No description.            |
+  '----------------------------------------------------------------------------'
+
+  body:
+
+  {
+    "connection_id": string, // required
+    "nick": string, // required
+    "password": string, // No description.
+    "server": string, // required
+    "username": string, // No description.
+  },
+
+=head3 Responses
+
+=head4 200 - OK
+
+Connection information.
+
+  {
+    "connection_id": string, // required
+    "nick": string, // required
+    "password": string, // No description.
+    "server": string, // required
+    "username": string, // No description.
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 connectionDelete
+
+Delete a connection and all assosiated data.
+
+=head3 Resource URL
+
+  DELETE http://demo.convos.by/1.0/connection/{connection_id}
+
+=head3 Parameters
+
+  .-------------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                   |
+  |-------------------------------------------------------------------------------|
+  | connection_id    | path   | string | Yes      | A friendly name of the server |
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now.    |
+  '-------------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+Delete a connection.
+
+  {
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 connectionUpdate
+
+Update a connection.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/connection/{connection_id}
+
+=head3 Parameters
+
+  .-------------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                   |
+  |-------------------------------------------------------------------------------|
+  | connection_id    | path   | string | Yes      | A friendly name of the server |
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now.    |
+  | body             | body   | schema | Yes      | No description.               |
+  '-------------------------------------------------------------------------------'
+
+  body:
+
+  {
+    "connection_id": string, // required
+    "nick": string, // required
+    "password": string, // No description.
+    "server": string, // required
+    "username": string, // No description.
+  },
+
+=head3 Responses
+
+=head4 200 - OK
+
+Update a connection.
+
+  {
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 connections
+
+Get all the connections for a user.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/connections
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  '----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of connections.
+
+  [
+    {
+      "connection_id": string, // required
+      "nick": string, // required
+      "password": string, // No description.
+      "server": string, // required
+      "username": string, // No description.
+    },
+    ...
+  ]
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 conversation
+
+Get a list of messages.
+
+Note: this resource require the user to be authenticated first.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/conversation/{connection_id}/{conversation_id}
+
+=head3 Parameters
+
+  .-------------------------------------------------------------------------------.
+  | Name            | In   | Type   | Required | Description                      |
+  |-------------------------------------------------------------------------------|
+  | connection_id   | path | string | Yes      | A friendly name of the server    |
+  | conversation_id | path | string | No       | The name of the person/chat room |
+  '-------------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of messsages.
+
+  [
+    {
+      "id": string, // required
+      "message": string, // required
+      "timestamp": int32, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Internal server error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 conversations
+
+Get a list of all conversations.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/conversations
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  '----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of messsages.
+
+  [
+    {
+      "connection_id": string, // required
+      "conversation_id": string, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Internal server error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 notificationSeen
+
+Mark a notication as seen.
+
+TODO: Notification count vs red/green toggling of a single notification.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/notifications/seen
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  | body             | body   | schema | Yes      | List of notification IDs.  |
+  '----------------------------------------------------------------------------'
+
+  body:
+
+  {
+  },
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of commands.
+
+  [
+    {
+      "id": string, // required
+      "message": string, // required
+      "timestamp": int32, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 notifications
+
+Get list of notications.
+
+A notification is added once your name is mentioned in a chat or someone sends a direct message.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/notifications
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  '----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of commands.
+
+  [
+    {
+      "id": string, // required
+      "message": string, // required
+      "timestamp": int32, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 user
+
+Get user data.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/user
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  '----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+User profile.
+
+  {
+    "avatar": string, // No description.
+    "email": email, // required
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 userAuthenticate
+
+Authenticate a user based on email and password.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/user/authenticate
+
+=head3 Parameters
+
+  .---------------------------------------------------.
+  | Name | In   | Type   | Required | Description     |
+  |---------------------------------------------------|
+  | body | body | schema | Yes      | No description. |
+  '---------------------------------------------------'
+
+  body:
+
+  {
+  },
+
+=head3 Responses
+
+=head4 200 - OK
+
+User profile.
+
+  {
+    "avatar": string, // No description.
+    "email": email, // required
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 userDelete
+
+Delete a user.
+
+=head3 Resource URL
+
+  DELETE http://demo.convos.by/1.0/user
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  '----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+Successfully deleted.
+
+  {
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+    "message": string, // No description.
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head2 userSave
+
+Register a new user or update an existing user.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/user
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  | body             | body   | schema | Yes      | No description.            |
+  '----------------------------------------------------------------------------'
+
+  body:
+
+  {
+    "avatar": string, // No description.
+    "email": email, // required
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+  },
+
+=head3 Responses
+
+=head4 200 - OK
+
+User profile.
+
+  {
+    "avatar": string, // No description.
+    "email": email, // required
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code": int32, // required
+    "message": string, // required
+  },
+
+=head1 COPYRIGHT AND LICENSE
+
+Convos - https://github.com/Nordaaker/convos
+
+Artistic License version 2.0 - http://opensource.org/licenses/Artistic-2.0
+
+=cut

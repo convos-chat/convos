@@ -47,40 +47,11 @@
       "type": "string",
       "description": "User email or server identity"
     },
-    "nick": {
-      "name": "nick",
-      "in": "body",
-      "required": true,
-      "type": "string",
-      "description": "Nickname"
-    },
-    "password": {
-      "name": "password",
-      "in": "body",
-      "required": true,
-      "type": "string",
-      "description": "User password"
-    },
-    "server": {
-      "name": "server",
-      "in": "body",
-      "required": true,
-      "type": "string",
-      "description": "Server ip/hostname and port"
-    },
-    "session_cookie": {
+    "session": {
       "name": "X-Convos-Session",
       "in": "header",
-      "required": false,
       "type": "string",
-      "description": "User identification"
-    },
-    "username": {
-      "name": "username",
-      "in": "body",
-      "required": true,
-      "type": "string",
-      "description": "Username"
+      "description": "TODO. Use cookies for now."
     }
   },
   "paths": {
@@ -128,7 +99,7 @@
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
@@ -149,7 +120,7 @@
         "x-mojo-controller": "Convos::Controller::Chat",
         "operationId": "commandHistory",
         "parameters": [
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
@@ -195,11 +166,13 @@
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connectionAdd",
         "parameters": [
-          { "$ref": "#/parameters/session_cookie" },
-          { "$ref": "#/parameters/nick" },
-          { "$ref": "#/parameters/password" },
-          { "$ref": "#/parameters/server" },
-          { "$ref": "#/parameters/username" }
+          { "$ref": "#/parameters/session" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Connection" }
+          }
         ],
         "responses": {
           "200": {
@@ -223,7 +196,7 @@
         "operationId": "connectionDelete",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
@@ -243,7 +216,7 @@
         "operationId": "connection",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
@@ -265,11 +238,12 @@
         "operationId": "connectionUpdate",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/session_cookie" },
-          { "$ref": "#/parameters/nick" },
-          { "$ref": "#/parameters/password" },
-          { "$ref": "#/parameters/server" },
-          { "$ref": "#/parameters/username" }
+          { "$ref": "#/parameters/session" },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": { "$ref": "#/definitions/Connection" }
+          }
         ],
         "responses": {
           "200": {
@@ -290,7 +264,7 @@
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connections",
         "parameters": [
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
@@ -339,7 +313,7 @@
         "x-mojo-controller": "Convos::Controller::Chat",
         "operationId": "conversations",
         "parameters": [
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
@@ -364,7 +338,7 @@
         "x-mojo-controller": "Convos::Controller::Chat",
         "operationId": "notifications",
         "parameters": [
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
@@ -389,9 +363,9 @@
         "x-mojo-controller": "Convos::Controller::Chat",
         "operationId": "notificationSeen",
         "parameters": [
-          { "$ref": "#/parameters/session_cookie" },
+          { "$ref": "#/parameters/session" },
           {
-            "name": "ids",
+            "name": "body",
             "in": "body",
             "type": "array",
             "description": "List of notification IDs.",
@@ -422,12 +396,12 @@
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "userDelete",
         "parameters": [
-           { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
-           "200": {
-           "description": "Successfully deleted.",
-           "schema": {}
+            "200": {
+            "description": "Successfully deleted.",
+            "schema": { "$ref": "#/definitions/Success" }
           },
           "default": {
             "description": "Error.",
@@ -441,11 +415,11 @@
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "user",
         "parameters": [
-          { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
-            "description": "User profile was retrieved.",
+            "description": "User profile.",
             "schema": { "$ref": "#/definitions/User" }
           },
           "default": {
@@ -460,19 +434,17 @@
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "userSave",
         "parameters": [
-           { "$ref": "#/parameters/email" },
-           { "$ref": "#/parameters/password" },
-           { "$ref": "#/parameters/session_cookie" }
+          { "$ref": "#/parameters/session" },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": { "$ref": "#/definitions/User" }
+          }
         ],
         "responses": {
-           "200": {
-           "description": "Successfully updated.",
-           "schema": {
-              "session_cookie": {
-                "description": "Session cookie",
-                "type": "string"
-              }
-            }
+            "200": {
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/User" }
           },
           "default": {
             "description": "Error.",
@@ -488,18 +460,17 @@
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "userAuthenticate",
         "parameters": [
-           { "$ref": "#/parameters/email" },
-           { "$ref": "#/parameters/password" }
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Authenticate" }
+          }
         ],
         "responses": {
           "200": {
-           "description": "Successfully logged in.",
-           "schema": {
-              "session_cookie": {
-                "description": "User identification",
-                "type": "string"
-              }
-            }
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/User" }
           },
           "default": {
             "description": "Error.",
@@ -564,11 +535,31 @@
         "message": { "type": "string" }
       }
     },
+    "Rel": {
+      "required": [ "rel", "href" ],
+      "properties": {
+        "rel": { "type": "string" },
+        "href": { "type": "string", "format": "url" }
+      }
+    },
+    "Success": {
+      "properties": {
+        "message": { "type": "string" },
+        "links": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Rel" }
+        }
+      }
+    },
     "User": {
       "required": [ "email" ],
       "properties": {
         "avatar": { "type": "string" },
-        "email": { "type": "string", "format": "email" }
+        "email": { "type": "string", "format": "email" },
+        "links": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Rel" }
+        }
       }
     }
   }
