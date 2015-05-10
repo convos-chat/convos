@@ -54,9 +54,32 @@ sub backend {
 L<Convos::Model> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
+=head2 connection
+
+  $connection = $self->connection($type => %attrs);
+
+Returns a connection object. C<$type> can either be a class name
+or a class moniker:
+
+  .-----------------------------------------------------------------.
+  | $type                          | Resolved class name            |
+  |--------------------------------|--------------------------------|
+  | IRC                            | Convos::Model::Connection::IRC |
+  | Convos::Model::Connection::IRC | Convos::Model::Connection::IRC |
+  '-----------------------------------------------------------------'
+
+=cut
+
+sub connection {
+  my $self = shift;
+  my $type = shift or die "Usage: $self->connection(\$type => ...)";
+  $type = "Convos::Model::Connection::$type" unless $type =~ /::/;
+  $self->_class_for($type)->new(@_);
+}
+
 =head2 user
 
-  $user = $self->user($email);
+  $user = $self->user(%attrs);
 
 Returns a L<Convos::Model::User> object.
 
@@ -64,8 +87,7 @@ Returns a L<Convos::Model::User> object.
 
 sub user {
   my $self = shift;
-  my $email = shift or die 'Usage: Convos::Model->user($email)';
-  $self->_class_for('Convos::Model::User')->new(@_, email => $email);
+  $self->_class_for('Convos::Model::User')->new(@_);
 }
 
 sub _class_for {
