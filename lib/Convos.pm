@@ -73,7 +73,6 @@ sub startup {
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $swagger_file));
   $self->routes->get('/')->to(template => 'app');
   push @{$self->renderer->classes}, __PACKAGE__;
-  $self->model->share_dir;    # make sure we have a valid share_dir
 }
 
 =head1 COPYRIGHT AND LICENSE

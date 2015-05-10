@@ -6,8 +6,14 @@ Convos::Model - Convos Models
 
 =head1 DESCRIPTION
 
-L<Convos::Model> is a class which is used to set up defaults and connect
-other Convos models.
+L<Convos::Model> is a class which is used to instantiate other model objects
+with proper defaults.
+
+=head1 SYNOPSIS
+
+  use Convos::Model;
+  my $model = Convos::Model->new;
+  my $user = $model->user($email);
 
 =head1 SEE ALSO
 
@@ -17,56 +23,31 @@ other Convos models.
 
 =back
 
-=head1 SYNOPSIS
-
-  use Convos::Model;
-  my $model = Convos::Model->new;
-  my $user = $model->user($email);
-
 =cut
 
 use Mojo::Base -base;
-use Mojo::Home;
 use Cwd           ();
 use File::HomeDir ();
-use File::Path 'make_path';
 use File::Spec;
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
-
-our $VERSION = '0.01';
+use Role::Tiny ();
 
 =head1 ATTRIBUTES
 
 L<Convos::Model> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
 
-=head2 share_dir
+=head2 backend
 
-  $str = $self->share_dir;
+The name of a L<role|Role::Tiny> which is used to store data persistently.
+Default to L<Convos::Model::Role::File>.
 
-Returns the location to where chat logs and user data is stored. This
-can be set manually with the environment variable C<CONVOS_SHARE_DIR>.
-
-Default is the ".local/share/convos" sub directory in L<File::HomeDir/my_home>.
+This attribute is read-only.
 
 =cut
 
-has share_dir => sub {
-  my $self = shift;
-  my $path = $ENV{CONVOS_SHARE_DIR};
-
-  unless ($path) {
-    my $home = File::HomeDir->my_home
-      || die 'Could not figure out CONVOS_SHARE_DIR. $HOME directory could not be found.';
-    $path = File::Spec->catdir($home, qw( .local share convos ));
-  }
-
-  $path = Cwd::abs_path($path);
-  warn "[CONVOS] share_dir=$path\n" if DEBUG;
-  make_path $path unless -d $path;
-  die "Cannot write to CONVOS_SHARE_DIR=$path\n" unless -w $path;
-  return Mojo::Home->new($path);
-};
+sub backend {
+  $_[0]->{backend} ||= do { require Convos::Model::Role::File; 'Convos::Model::Role::File' }
+}
 
 =head1 METHODS
 
@@ -84,8 +65,15 @@ Returns a L<Convos::Model::User> object.
 sub user {
   my $self = shift;
   my $email = shift or die 'Usage: Convos::Model->user($email)';
-  require Convos::Model::User;
-  Convos::Model::User->new(home => File::Spec->catdir($self->share_dir, $email), @_, email => $email);
+  $self->_class_for('Convos::Model::User')->new(@_, email => $email);
+}
+
+sub _class_for {
+  my ($self, $name) = @_;
+  $self->{class_for}{$name} ||= do {
+    eval "require $name;1" or die $@;
+    Role::Tiny->create_class_with_roles($name, $self->backend);
+  };
 }
 
 =head1 COPYRIGHT AND LICENSE

@@ -10,24 +10,23 @@ L<Convos::Model::User> is a class used to model a user in Convos.
 
 =head1 SYNOPSIS
 
-  use Convos::Model::User;
-  my $user = Convos::Model::User->new;
+  use Convos::Model;
+  my $user = Convos::Model->user(email => "jhthorsen@cpan.org");
+
+  $user->set_password("s3cret");
+  $user->save;
 
 =cut
 
 use Mojo::Base -base;
-use Mojo::JSON;
-use Crypt::Eksblowfish::Bcrypt ();
 use File::Path                 ();
-use File::Spec;
+use Crypt::Eksblowfish::Bcrypt ();
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
   my $nul = 'a';
   join '', '$2', $nul, '$', $cost, '$';
 };
-
-my @SETTING_KEYS = qw( avatar email password );
 
 =head1 ATTRIBUTES
 
@@ -42,10 +41,6 @@ Avatar identifier on either Facebook or Gravatar.
 
 Email address of user.
 
-=head2 home
-
-Path to where the user store settings and logs.
-
 =head2 password
 
 Encrypted password.
@@ -54,70 +49,12 @@ Encrypted password.
 
 has avatar   => '';
 has email    => sub { die 'email is required' };
-has home     => sub { die 'home is required' };
 has password => '';
 
 =head1 METHODS
 
 L<Convos::Model::User> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
-
-=head2 load
-
-  $self = $self->load(sub { my ($self, $err) = @_; });
-
-Used to load user settings from persistent storage. C<$err> is not set if
-if the user is not saved.
-
-=cut
-
-sub load {
-  my ($self, $cb) = @_;
-  my $settings_file = File::Spec->catfile($self->home, 'settings.json');
-  my $settings = {};
-
-  $cb ||= sub { die $_[1] if $_[1] };
-
-  if (-e $settings_file) {
-    eval {
-      $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($settings_file));
-      $self->{$_} = $settings->{$_} for grep { defined $settings->{$_} } @SETTING_KEYS;
-      1;
-    } or do {
-      $self->$cb($@);
-      return $self;
-    };
-  }
-
-  $self->$cb('');
-  $self;
-}
-
-=head2 save
-
-  $self = $self->load(sub { my ($self, $err) = @_; });
-
-Used to save user settings to persistent storage.
-
-=cut
-
-sub save {
-  my ($self, $cb) = @_;
-  my $settings_file = File::Spec->catfile($self->home, 'settings.json');
-
-  $cb ||= sub { die $_[1] if $_[1] };
-
-  eval {
-    File::Path::make_path($self->home) unless -d $self->home;
-    Mojo::Util::spurt(Mojo::JSON::encode_json({map { ($_, $_[0]->{$_}) } @SETTING_KEYS}), $settings_file);
-    $self->$cb('');
-    1;
-  } or do {
-    $self->$cb($@);
-  };
-
-  return $self;
-}
 
 =head2 set_password
 
@@ -149,7 +86,8 @@ sub validate_password {
 }
 
 sub TO_JSON {
-  my $json = {map { ($_, $_[0]->{$_}) } @SETTING_KEYS};
+  my $self = shift;
+  my $json = {map { ($_, $self->{$_}) } $self->_setting_keys};
   delete $json->{password};
   return $json;
 }
@@ -164,6 +102,9 @@ sub _bcrypt {
 
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
+
+sub _setting_keys {qw( avatar email password )}
+sub _sub_dir      { shift->email }
 
 =head1 COPYRIGHT AND LICENSE
 
