@@ -21,6 +21,9 @@ L<Convos::Model::User> is a class used to model a user in Convos.
 use Mojo::Base -base;
 use File::Path                 ();
 use Crypt::Eksblowfish::Bcrypt ();
+use Role::Tiny::With;
+
+with 'Convos::Model::Role::ClassFor';
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
@@ -103,8 +106,9 @@ sub _bcrypt {
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
 
-sub _setting_keys {qw( avatar email password )}
-sub _sub_dir      { shift->email }
+sub _compose_classes_with { }
+sub _setting_keys         {qw( avatar email password )}
+sub _sub_dir              { shift->email }
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -64,6 +64,8 @@ has home => sub {
   Mojo::Home->new($path);
 };
 
+around _compose_classes_with => sub { my $orig = shift; ($orig->(@_), __PACKAGE__) };
+
 =head1 METHODS
 
 =head2 load
