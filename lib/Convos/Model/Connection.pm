@@ -31,9 +31,14 @@ the following new ones.
 Holds the name of the connection.
 Need to be unique per L<user|Convos::Model::User>.
 
+=head2 user
+
+Holds a L<Convos::Model::User> object that owns this connection.
+
 =cut
 
 has name => sub { die 'name is required' };
+has user => sub { die 'user is required' };
 
 =head1 METHODS
 
@@ -47,8 +52,8 @@ sub TO_JSON {
   return {map { ($_, $_[0]->{$_}) } $self->_setting_keys};
 }
 
-sub _setting_keys { }
-sub _sub_dir { File::Spec->catdir('connection', shift->name) }
+sub _setting_keys {qw( name )}
+sub _sub_dir { File::Spec->catdir($_[0]->user->email, 'connection', $_[0]->name) }
 
 =head1 COPYRIGHT AND LICENSE
 

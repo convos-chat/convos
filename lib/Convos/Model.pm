@@ -29,7 +29,9 @@ use Mojo::Base -base;
 use Cwd           ();
 use File::HomeDir ();
 use File::Spec;
-use Role::Tiny ();
+use Role::Tiny::With;
+
+with 'Convos::Model::Role::ClassFor';
 
 =head1 ATTRIBUTES
 
@@ -54,29 +56,6 @@ sub backend {
 L<Convos::Model> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
-=head2 connection
-
-  $connection = $self->connection($type => %attrs);
-
-Returns a connection object. C<$type> can either be a class name
-or a class moniker:
-
-  .-----------------------------------------------------------------.
-  | $type                          | Resolved class name            |
-  |--------------------------------|--------------------------------|
-  | IRC                            | Convos::Model::Connection::IRC |
-  | Convos::Model::Connection::IRC | Convos::Model::Connection::IRC |
-  '-----------------------------------------------------------------'
-
-=cut
-
-sub connection {
-  my $self = shift;
-  my $type = shift or die "Usage: $self->connection(\$type => ...)";
-  $type = "Convos::Model::Connection::$type" unless $type =~ /::/;
-  $self->_class_for($type)->new(@_);
-}
-
 =head2 user
 
   $user = $self->user(%attrs);
@@ -90,13 +69,7 @@ sub user {
   $self->_class_for('Convos::Model::User')->new(@_);
 }
 
-sub _class_for {
-  my ($self, $name) = @_;
-  $self->{class_for}{$name} ||= do {
-    eval "require $name;1" or die $@;
-    Role::Tiny->create_class_with_roles($name, $self->backend);
-  };
-}
+sub _compose_classes_with { shift->backend }
 
 =head1 COPYRIGHT AND LICENSE
 

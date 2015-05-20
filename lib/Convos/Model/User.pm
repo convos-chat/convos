@@ -59,6 +59,33 @@ has password => '';
 L<Convos::Model::User> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
+=head2 connection
+
+  $connection = $self->connection($type => $name);
+
+Returns a connection object. C<$type> can either be a class name
+or a class moniker:
+
+  .-----------------------------------------------------------------.
+  | $type                          | Resolved class name            |
+  |--------------------------------|--------------------------------|
+  | IRC                            | Convos::Model::Connection::IRC |
+  | Convos::Model::Connection::IRC | Convos::Model::Connection::IRC |
+  '-----------------------------------------------------------------'
+
+=cut
+
+sub connection {
+  my ($self, $type, $name) = @_;
+
+  $type = "Convos::Model::Connection::$type" unless $type =~ /::/;
+  $self->{connections}{$type}{$name} ||= do {
+    my $connection = $self->_class_for($type)->new(name => $name, user => $self);
+    Scalar::Util::weaken($connection->{user});
+    $connection;
+  };
+}
+
 =head2 set_password
 
   $self = $self->set_password($plain);
