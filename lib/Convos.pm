@@ -177,6 +177,8 @@ has core => sub {
 
   $core->log($self->log);
   $core->archive->log_dir($ENV{CONVOS_ARCHIVE_DIR} || $self->home->rel_dir('irc_logs'));
+  $core->{forced_irc_server} = $self->config->{forced_irc_server}
+    if $self->config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER};
   $core;
 };
 

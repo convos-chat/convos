@@ -492,6 +492,11 @@ sub _validation {
     $validation->input($input);
   }
 
+  # this is just for demo.convos.by, so we won't get banned
+  if ($self->{forced_irc_server}) {
+    $validation->input->{server} = $self->{forced_irc_server};
+  }
+
   for my $k (@names) {
     if    ($k eq 'password') { $validation->optional('password') }
     elsif ($k eq 'username') { $validation->optional('username') }
