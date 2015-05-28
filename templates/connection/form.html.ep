@@ -11,7 +11,7 @@
   </div>
   <div class="form-group server">
     <label for="server">Server</label>
-    %= text_field 'server', $ENV{CONVOS_DEFAULT_CONNECTION}, id => 'server', placeholder => 'irc.example.com:6667'
+    %= text_field 'server', $c->app->config('default_connection'), id => 'server', placeholder => 'irc.example.com:6667'
     % if ($err = validation->error('server')) {
     <p class="error">Invalid server name.</p>
     % }

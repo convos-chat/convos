@@ -121,7 +121,7 @@ See L</login>.
 sub register {
   my $self        = shift;
   my $validation  = $self->validation;
-  my $invite_code = $ENV{CONVOS_INVITE_CODE};
+  my $invite_code = $self->app->config('invite_code');
   my ($output);
 
   if ($self->session('login')) {

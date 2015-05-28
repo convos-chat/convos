@@ -209,8 +209,9 @@ sub redis {
   my $cache_to = $c->{tx} ? 'stash' : sub { $c->app->defaults };
 
   $c->$cache_to->{redis} ||= do {
-    my $log   = $c->app->log;
-    my $url   = $ENV{CONVOS_REDIS_URL} or die "CONVOS_REDIS_URL is not set. Run 'perldoc Convos' for details.\n";
+    my $log = $c->app->log;
+    my $url = $c->app->config('redis') || $ENV{CONVOS_REDIS_URL}
+      or die "CONVOS_REDIS_URL is not set. Run 'perldoc Convos' for details.\n";
     my $redis = Mojo::Redis->new(server => $url);
 
     $redis->on(

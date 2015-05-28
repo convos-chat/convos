@@ -152,8 +152,6 @@ use Convos::Core::Util ();
 
 our $VERSION = '0.8604';
 
-$ENV{CONVOS_DEFAULT_CONNECTION} //= 'chat.freenode.net:6697';
-
 {    # required before Mojo::Redis 1.01
   no warnings 'redefine';
   *Mojo::Redis::emit_safe = sub { shift->emit(@_) };
@@ -215,22 +213,17 @@ sub startup {
 
   # frontend code
   $self->sessions->default_expiration(86400 * 30);
-  $self->sessions->secure(1) if $ENV{CONVOS_SECURE_COOKIES};
+  $self->sessions->secure(1) if $config->{secure_cookies} or $ENV{CONVOS_SECURE_COOKIES};
   $self->_assets;
   $self->_public_routes;
   $self->_private_routes;
 
-  if (!$ENV{CONVOS_INVITE_CODE} and $config->{invite_code}) {
-    $self->log->warn(
-      "invite_code from config file will be deprecated. Set the CONVOS_INVITE_CODE env variable instead.");
-    $ENV{CONVOS_INVITE_CODE} = $config->{invite_code};
-  }
-  if ($ENV{CONVOS_TEMPLATES}) {
+  if ($config->{template_dir}) {
 
     # Using push() since I don't think it's a good idea for allowing the user
     # to customize every template, at least not when the application is still
     # unstable.
-    push @{$self->renderer->paths}, $ENV{CONVOS_TEMPLATES};
+    push @{$self->renderer->paths}, $config->{template_dir};
   }
 
   $self->defaults(full_page => 1, organization_name => $self->config('name'));
@@ -287,12 +280,15 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
+  $config->{default_connection} ||= $ENV{CONVOS_DEFAULT_CONNECTION} || 'chat.freenode.net:6697';
+  $config->{invite_code}        ||= $ENV{CONVOS_INVITE_CODE};
+  $config->{template_dir}       ||= $ENV{CONVOS_TEMPLATES};
+
   $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
   $config->{hypnotoad}{pid_file} = $ENV{CONVOS_FRONTEND_PID_FILE} if $ENV{CONVOS_FRONTEND_PID_FILE};
   $config->{hypnotoad}{group}    = $ENV{RUN_AS_GROUP}             if $ENV{RUN_AS_GROUP};
   $config->{hypnotoad}{user}     = $ENV{RUN_AS_USER}              if $ENV{RUN_AS_USER};
-  $config->{name}                = $ENV{CONVOS_ORGANIZATION_NAME} if $ENV{CONVOS_ORGANIZATION_NAME};
-  $config->{name} ||= 'Nordaaker';
+  $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config;
 }
 
@@ -382,7 +378,6 @@ sub _redis_url {
 
   unless ($url) {
     if ($self->config('redis')) {
-      $self->log->warn("'redis' url from config file will be deprecated. Run 'perldoc Convos' for alternative setup.");
       $url = $self->config('redis');
     }
     elsif ($self->mode eq 'production') {
@@ -397,7 +392,7 @@ sub _redis_url {
 
   $url = Mojo::URL->new($url);
   $url->path($ENV{CONVOS_REDIS_INDEX}) if $ENV{CONVOS_REDIS_INDEX} and !$url->path->[0];
-  $ENV{CONVOS_REDIS_URL} = $url->to_string;
+  $self->config(redis => $url->to_string);
 }
 
 sub _set_secrets {
