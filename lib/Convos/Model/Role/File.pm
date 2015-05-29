@@ -39,6 +39,7 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
 use Mojo::Base -base;
 use Mojo::Home;
 use Mojo::JSON;
+use Fcntl ':flock';
 use File::Path ();
 use File::Spec;
 use Role::Tiny;
@@ -79,7 +80,7 @@ if C<$self> is not saved.
 
 sub load {
   my ($self, $cb) = @_;
-  my $storage_file = File::Spec->catfile($self->home, $self->_storage_file);
+  my $storage_file = File::Spec->catfile($self->home, $self->_storage_file('json'));
   my $settings = {};
 
   $cb ||= sub { die $_[1] if $_[1] };
@@ -99,6 +100,32 @@ sub load {
   $self;
 }
 
+=head2 log
+
+  $self->log($level => $message);
+
+This is an around method modifier, which will log the given message
+to disk. The current log format is:
+
+  $rfc_3339_datetime [$level] $message\n
+
+Note that the C<$rfc_3339_datetime> is created from C<gmtime>, and not
+C<localtime>.
+
+=cut
+
+around log => sub {
+  my ($next, $self, $level, $format, @args) = @_;
+  my $message = @args ? sprintf $format, map { $_ // '' } @args : $format;
+  my $fh = $self->_log_fh;
+
+  flock $fh, LOCK_EX;
+  printf {$fh} $self->_format_log_message($level, $message);
+  flock $fh, LOCK_UN;
+
+  return $self->$next($level => $message);
+};
+
 =head2 save
 
   $self = $self->load(sub { my ($self, $err) = @_; });
@@ -109,7 +136,7 @@ Used to save user settings to persistent storage.
 
 sub save {
   my ($self, $cb) = @_;
-  my $storage_file = File::Spec->catfile($self->home, $self->_storage_file);
+  my $storage_file = File::Spec->catfile($self->home, $self->_storage_file('json'));
 
   $cb ||= sub { die $_[1] if $_[1] };
 
@@ -123,6 +150,22 @@ sub save {
   };
 
   return $self;
+}
+
+sub _format_log_message {
+  my ($self, $level, $message) = @_;
+  my ($s, $m, $h, $day, $month, $year) = gmtime;
+  sprintf "%04d-%02d-%02dT%02d:%02d:%02d [%s] %s\n", $year + 1900, $month + 1, $day, $h, $m, $s, $level, $message;
+}
+
+# TODO: Add global caching of filehandle so we can have a pool
+# of filehandles. Maybe something like FileCache.pm?
+sub _log_fh {
+  my $self = shift;
+  return $self->{_log_fh} if $self->{_log_fh};
+  my $path = File::Spec->catfile($self->home, $self->_storage_file('log'));
+  open my $fh, '>>', $path or die "Could not open log file $path: $!";
+  $self->{_log_fh} = $fh;
 }
 
 # should probably be public
@@ -142,8 +185,8 @@ sub _share_dir {
 
 sub _storage_file {
   my ($class) = split /__WITH__/, ref $_[0];    # Convos::Model::User__WITH__Convos::Model::Role::File
-  $class =~ m!(\w+)\W*$!;
-  lc($1) . '.json';
+  return sprintf '%s.%s', lc($1), $_[1] if $class =~ m!(\w+)\W*$!;
+  die "Could not get _storage_file($_[1]) from $_[0]";
 }
 
 =head1 COPYRIGHT AND LICENSE
