@@ -133,7 +133,7 @@ sub _bcrypt {
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
 
-sub _compose_classes_with { }
+sub _compose_classes_with { }                             # will get role names from around modifiers
 sub _setting_keys         {qw( avatar email password )}
 sub _sub_dir              { shift->email }
 

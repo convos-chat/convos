@@ -75,6 +75,9 @@ sub TO_JSON {
   return {frozen => $self->frozen, id => $self->id, name => $self->name, topic => $self->topic, users => $self->users};
 }
 
+sub _sub_dir      { shift->id }
+sub _setting_keys {qw( id )}
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Jan Henning Thorsen
