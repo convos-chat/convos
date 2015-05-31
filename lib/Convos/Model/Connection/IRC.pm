@@ -34,6 +34,8 @@ has _irc => sub {
   my $nick = $self->_userinfo->[0];
   my $irc  = Mojo::IRC::UA->new(debug_key => join ':', $nick, $self->name);
 
+  $nick =~ s![^\w_]!_!g;
+
   $irc->name("Convos v$Convos::VERSION");
   $irc->nick($nick);
   $irc->parser(Parse::IRC->new(ctcp => 1));

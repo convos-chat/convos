@@ -4,14 +4,15 @@ use Test::More;
 
 local $ENV{CONVOS_SHARE_DIR} = 'convos-test-model-connection-irc';
 
-my $model        = Convos::Model->new_with_backend('File');
-my $user         = $model->user('jhthorsen@cpan.org');
-my $connection   = $user->connection(IRC => 'localhost');
-my $storage_file = File::Spec->catfile($ENV{CONVOS_SHARE_DIR}, 'jhthorsen@cpan.org', 'IRC-localhost', 'settings.json');
+my $model      = Convos::Model->new_with_backend('File');
+my $user       = $model->user('jan.henning.thorsen@example.com');
+my $connection = $user->connection(IRC => 'localhost');
+my $storage_file
+  = File::Spec->catfile($ENV{CONVOS_SHARE_DIR}, 'jan.henning.thorsen@example.com', 'IRC-localhost', 'settings.json');
 my $err;
 
 is $connection->name, 'localhost', 'connection.name';
-is $connection->user->email, 'jhthorsen@cpan.org', 'user.email';
+is $connection->user->email, 'jan.henning.thorsen@example.com', 'user.email';
 
 ok !-e $storage_file, 'no storage file';
 is $connection->save, $connection, 'save';
@@ -21,6 +22,8 @@ is_deeply($connection->TO_JSON, {name => 'localhost', rooms => [], state => 'con
 
 $connection->connect(sub { $err = $_[1] });
 like $err, qr{Invalid URL}, 'invalid url';
+
+is $connection->_irc->nick, 'jan_henning_thorsen', 'converted username to nick';
 
 $connection->url->parse('irc://127.0.0.1');
 no warnings qw( once redefine );
