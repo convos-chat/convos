@@ -75,8 +75,10 @@ sub TO_JSON {
   return {frozen => $self->frozen, id => $self->id, name => $self->name, topic => $self->topic, users => $self->users};
 }
 
-sub _sub_dir      { shift->id }
-sub _setting_keys {qw( id )}
+sub _build_home    { }
+sub _log_file      { $_[0]->home->rel_file($_[0]->id) }
+sub _setting_keys  {qw( id )}
+sub _settings_file { die "$_[0] cannot save settings" }
 
 =head1 COPYRIGHT AND LICENSE
 

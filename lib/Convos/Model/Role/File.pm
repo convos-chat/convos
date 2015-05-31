@@ -18,21 +18,27 @@ that want to be persisted to disk or store state to disk.
   # a list of accessors to persist to disk
   sub _setting_keys { qw( foo bar ) }
 
-  # in which directory to store the file, relative to $CONVOS_SHARE_DIR
-  sub _sub_dir { File::Spec->catdir("some", "dir");
-
   1;
 
-=head1 ENVIRONMENT
+=head1 Where to store data
 
-=head2 CONVOS_SHARE_DIR
-
-C<CONVOS_SHARE_DIR> can be set to specify where to save data from objects.
-The default directory on *nix systems is something like this:
+C<CONVOS_SHARE_DIR> can be set to specify the root location for where to save
+data from objects. The default directory on *nix systems is something like this:
 
   $HOME/.local/share/convos/
 
 C<$HOME> is figured out from L<File::HomeDir/my_home>.
+
+=head2 Directory structure
+
+  $CONVOS_SHARE_DIR/
+  $CONVOS_SHARE_DIR/joe@example.com/                       # one directory per user
+  $CONVOS_SHARE_DIR/joe@example.com/settings.json          # this works, since a connection can only have [\w_-]+
+  $CONVOS_SHARE_DIR/joe@example.com/freenode/              # one directory per connection
+  $CONVOS_SHARE_DIR/joe@example.com/freenode/settings.json # this works, since a log file ends on .log and not .json
+  $CONVOS_SHARE_DIR/joe@example.com/freenode/marcus.log    # private conversation log file
+  $CONVOS_SHARE_DIR/joe@example.com/freenode/#convos.log   # channel conversation log file
+  $CONVOS_SHARE_DIR/joe@example.com/freenode.log           # server log file
 
 =cut
 
@@ -43,9 +49,8 @@ use Fcntl ':flock';
 use File::Path ();
 use File::Spec;
 use Role::Tiny;
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-requires qw( _setting_keys _sub_dir );
+requires qw( _build_home _setting_keys );
 
 =head1 ATTRIBUTES
 
@@ -53,19 +58,9 @@ requires qw( _setting_keys _sub_dir );
 
 Holds a L<Mojo::Home> object which points to where the object can store data.
 
-The location is made up by L</CONVOS_SHARE_DIR> and C<_sub_dir()>.
-See L</SYNOPSIS> for more details.
-
 =cut
 
-has home => sub {
-  my $self = shift;
-  my $path = File::Spec->catdir($self->_share_dir, $self->_sub_dir);
-  File::Path::make_path($path) unless -d $path;
-  Mojo::Home->new($path);
-};
-
-around _compose_classes_with => sub { my $orig = shift; ($orig->(@_), __PACKAGE__) };
+has home => sub { shift->_build_home };
 
 =head1 METHODS
 
@@ -80,8 +75,8 @@ if C<$self> is not saved.
 
 sub load {
   my ($self, $cb) = @_;
-  my $storage_file = File::Spec->catfile($self->home, $self->_storage_file('json'));
-  my $settings = {};
+  my $storage_file = $self->_settings_file . '.json';
+  my $settings     = {};
 
   $cb ||= sub { die $_[1] if $_[1] };
 
@@ -128,7 +123,7 @@ around log => sub {
 
 =head2 save
 
-  $self = $self->load(sub { my ($self, $err) = @_; });
+  $self = $self->save(sub { my ($self, $err) = @_; });
 
 Used to save user settings to persistent storage.
 
@@ -136,12 +131,13 @@ Used to save user settings to persistent storage.
 
 sub save {
   my ($self, $cb) = @_;
-  my $storage_file = File::Spec->catfile($self->home, $self->_storage_file('json'));
+  my $storage_file = $self->_settings_file . '.json';
 
   $cb ||= sub { die $_[1] if $_[1] };
 
   eval {
-    File::Path::make_path($self->home) unless -d $self->home;
+    my $dir = File::Basename::dirname($storage_file);
+    File::Path::make_path($dir) unless -d $dir;
     Mojo::Util::spurt(Mojo::JSON::encode_json({map { ($_, $self->{$_}) } $self->_setting_keys}), $storage_file);
     $self->$cb('');
     1;
@@ -151,6 +147,8 @@ sub save {
 
   return $self;
 }
+
+around _compose_classes_with => sub { my $orig = shift; ($orig->(@_), __PACKAGE__) };
 
 sub _format_log_message {
   my ($self, $level, $message) = @_;
@@ -163,31 +161,13 @@ sub _format_log_message {
 sub _log_fh {
   my $self = shift;
   return $self->{_log_fh} if $self->{_log_fh};
-  my $path = File::Spec->catfile($self->home, $self->_storage_file('log'));
+  my $path = $self->_log_file . '.log';
   open my $fh, '>>', $path or die "Could not open log file $path: $!";
   $self->{_log_fh} = $fh;
 }
 
-# should probably be public
-sub _share_dir {
-  my $self = shift;
-  my $path = $ENV{CONVOS_SHARE_DIR};
-
-  unless ($path) {
-    my $home = File::HomeDir->my_home
-      || die 'Could not figure out CONVOS_SHARE_DIR. $HOME directory could not be found.';
-    $path = File::Spec->catdir($home, qw( .local share convos ));
-  }
-
-  warn "[CONVOS] share_dir=$path\n" if DEBUG;
-  Cwd::abs_path($path);
-}
-
-sub _storage_file {
-  my ($class) = split /__WITH__/, ref $_[0];    # Convos::Model::User__WITH__Convos::Model::Role::File
-  return sprintf '%s.%s', lc($1), $_[1] if $class =~ m!(\w+)\W*$!;
-  die "Could not get _storage_file($_[1]) from $_[0]";
-}
+sub _log_file      { shift->home->to_string }
+sub _settings_file { shift->home->rel_file('settings') }
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -71,20 +71,39 @@ sub new_with_backend {
 
 =head2 user
 
-  $user = $self->user(%attrs);
+  $user = $self->user($email);
 
 Returns a L<Convos::Model::User> object.
 
 =cut
 
 sub user {
+  my ($self, $email) = (shift, shift);
+
+  die "Invalid email $email. Need to match /.\@./." unless $email and $email =~ /.\@./;
+  $email = lc $email;
+  $self->{users}{$email} ||= do {
+    my $user = $self->_class_for('Convos::Model::User')->new(email => $email, model => $self);
+    Scalar::Util::weaken($user->{model});
+    $user;
+  };
+}
+
+sub _build_home {
   my $self = shift;
-  $self->_class_for('Convos::Model::User')->new(@_);
+  my $path = $ENV{CONVOS_SHARE_DIR};
+
+  unless ($path) {
+    my $home = File::HomeDir->my_home
+      || die 'Could not figure out CONVOS_SHARE_DIR. $HOME directory could not be found.';
+    $path = File::Spec->catdir($home, qw( .local share convos ));
+  }
+
+  Mojo::Home->new(Cwd::abs_path($path));
 }
 
 sub _compose_classes_with { }
 sub _setting_keys         { }
-sub _sub_dir              { }
 
 =head1 COPYRIGHT AND LICENSE
 

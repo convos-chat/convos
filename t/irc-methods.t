@@ -6,8 +6,8 @@ use Test::Deep;
 my $t              = Test::Mojo::IRC->new;
 my $server         = $t->start_server;
 my $model          = Convos::Model->new_with_backend('Memory');
-my $user           = $model->user(email => 'superman@example.com', avatar => 'whatever');
-my $connection     = $user->connection(IRC => $server);
+my $user           = $model->user('superman@example.com');
+my $connection     = $user->connection(IRC => 'localhost');
 my $stop_re        = qr{should_not_match};
 my $connection_log = '';
 

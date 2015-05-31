@@ -4,11 +4,10 @@ use Test::More;
 
 local $ENV{CONVOS_SHARE_DIR} = 'convos-test-model-connection-irc';
 
-my $model      = Convos::Model->new_with_backend('File');
-my $user       = $model->user(email => 'jhthorsen@cpan.org', avatar => 'whatever');
-my $connection = $user->connection(IRC => 'localhost');
-my $storage_file
-  = File::Spec->catfile($ENV{CONVOS_SHARE_DIR}, 'jhthorsen@cpan.org', 'connection', 'localhost', 'irc.json');
+my $model        = Convos::Model->new_with_backend('File');
+my $user         = $model->user('jhthorsen@cpan.org');
+my $connection   = $user->connection(IRC => 'localhost');
+my $storage_file = File::Spec->catfile($ENV{CONVOS_SHARE_DIR}, 'jhthorsen@cpan.org', 'IRC-localhost', 'settings.json');
 my $err;
 
 is $connection->name, 'localhost', 'connection.name';

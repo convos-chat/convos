@@ -282,6 +282,8 @@ sub _irc_message {    # TODO
 
 sub _is_current_nick { lc $_[0]->nick eq lc $_[1] }
 
+sub _moniker { sprintf 'IRC-%s', shift->name }
+
 # :hybrid8.debian.local 474 superman #convos :Cannot join channel (+b)
 _event err_bannedfromchan => sub {    # TODO
   my ($self,    $msg)    = @_;

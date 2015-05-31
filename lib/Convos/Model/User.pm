@@ -11,7 +11,7 @@ L<Convos::Model::User> is a class used to model a user in Convos.
 =head1 SYNOPSIS
 
   use Convos::Model;
-  my $user = Convos::Model->user(email => "jhthorsen@cpan.org");
+  my $user = Convos::Model->new->user("jhthorsen@cpan.org");
 
   $user->set_password("s3cret");
   $user->save;
@@ -78,6 +78,8 @@ or a class moniker:
 sub connection {
   my ($self, $type, $name) = @_;
 
+  die "Invalid name $name. Need to match /^[\\w_-]+\$/" unless $name and $name =~ /^[\w_-]+$/;
+  $name = lc $name;
   $type = "Convos::Model::Connection::$type" unless $type =~ /::/;
   $self->{connections}{$type}{$name} ||= do {
     my $connection = $self->_class_for($type)->new(name => $name, user => $self);
@@ -133,14 +135,13 @@ sub _bcrypt {
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
 
+sub _build_home { Mojo::Home->new($_[0]->{model}->home->rel_dir($_[0]->email)) }
 sub _compose_classes_with { }    # will get role names from around modifiers
 
 sub _setting_keys {
   $_[0]->{registered} ||= time;
   qw( avatar email password registered );
 }
-
-sub _sub_dir { shift->email }
 
 =head1 COPYRIGHT AND LICENSE
 

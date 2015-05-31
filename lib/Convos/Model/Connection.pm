@@ -118,6 +118,7 @@ sub room {
   if ($attr) {
     my $room = $self->{room}{$id} ||= $self->_class_for('Convos::Model::Room')->new(id => $id);
     $room->{$_} = $attr->{$_} for keys %$attr;
+    $room->{home} ||= $self->{home};    # ugly hack
     $self->emit(room => $room, $attr);
     return $room;
   }
@@ -179,9 +180,9 @@ Used to retrieve or set topic for a room.
 
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
+sub _build_home { Mojo::Home->new($_[0]->user->home->rel_dir($_[0]->_moniker)) }
 sub _compose_classes_with { }                  # will get role names from around modifiers
 sub _setting_keys         {qw( name state )}
-sub _sub_dir { File::Spec->catdir($_[0]->user->email, 'connection', $_[0]->name) }
 
 sub _userinfo {
   my $self = shift;
