@@ -73,6 +73,14 @@ sub startup {
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $swagger_file));
   $self->routes->get('/')->to(template => 'app');
   push @{$self->renderer->classes}, __PACKAGE__;
+
+  $self->hook(
+    before_dispatch => sub {
+      my $c = shift;
+      my $base = $c->req->headers->header('X-Request-Base') or return;
+      $c->req->url->base(Mojo::URL->new($base));
+    }
+  );
 }
 
 =head1 COPYRIGHT AND LICENSE
