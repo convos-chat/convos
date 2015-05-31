@@ -66,11 +66,11 @@ This method set up the application.
 =cut
 
 sub startup {
-  my $self         = shift;
-  my $swagger_file = $self->home->rel_file('public/api.json');
+  my $self   = shift;
+  my $config = $self->_config;
 
-  $self->plugin(Swagger2 => {url => $swagger_file});
-  $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $swagger_file));
+  $self->plugin(Swagger2 => {url => $config->{swagger_file}});
+  $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
   $self->routes->get('/')->to(template => 'app');
   push @{$self->renderer->classes}, __PACKAGE__;
 
@@ -81,6 +81,17 @@ sub startup {
       $c->req->url->base(Mojo::URL->new($base));
     }
   );
+}
+
+sub _config {
+  my $self = shift;
+  my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
+
+  $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
+  $config->{hypnotoad}{pid_file} = $ENV{CONVOS_FRONTEND_PID_FILE} if $ENV{CONVOS_FRONTEND_PID_FILE};
+  $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
+  $config->{swagger_file} ||= $self->home->rel_file('public/api.json');
+  $config;
 }
 
 =head1 COPYRIGHT AND LICENSE
