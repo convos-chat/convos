@@ -69,6 +69,7 @@ sub startup {
   my $self   = shift;
   my $config = $self->_config;
 
+  $self->_setup_secrets;
   $self->plugin(Swagger2 => {url => $config->{swagger_file}});
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
   $self->routes->get('/')->to(template => 'app');
@@ -92,6 +93,19 @@ sub _config {
   $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{swagger_file} ||= $self->home->rel_file('public/api.json');
   $config;
+}
+
+sub _setup_secrets {
+  my $app = shift;
+  my $secrets = $app->config('secrets') || [split /:/, $ENV{CONVOS_SECRETS} || ''];
+
+  unless (@$secrets) {
+    my $unsafe = join ':', $<, $(, $^X, qx{who -b 2>/dev/null}, $app->home;
+    $app->log->warn('Using default (unsafe) session secrets. (Config file was not set up)');
+    $secrets = [Mojo::Util::md5_sum($unsafe)];
+  }
+
+  $app->secrets($secrets);
 }
 
 =head1 COPYRIGHT AND LICENSE
