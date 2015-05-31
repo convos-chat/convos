@@ -22,6 +22,7 @@ use Mojo::Base -base;
 use File::Path                 ();
 use Crypt::Eksblowfish::Bcrypt ();
 use Role::Tiny::With;
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 with 'Convos::Model::Role::ClassFor';
 
@@ -83,6 +84,7 @@ sub connection {
   $type = "Convos::Model::Connection::$type" unless $type =~ /::/;
   $self->{connections}{$type}{$name} ||= do {
     my $connection = $self->_class_for($type)->new(name => $name, user => $self);
+    warn "[Convos::Model::User] New connection object for name=$name\n";
     Scalar::Util::weaken($connection->{user});
     $connection;
   };

@@ -31,6 +31,7 @@ use File::HomeDir ();
 use File::Spec;
 use Role::Tiny::With;
 use constant CONNECT_TIMER => $ENV{CONVOS_CONNECT_TIMER} || 3;
+use constant DEBUG         => $ENV{CONVOS_DEBUG}         || 0;
 
 with 'Convos::Model::Role::ClassFor';
 
@@ -65,6 +66,7 @@ currently:
 sub new_with_backend {
   my ($class, $backend) = (shift, shift);
   $backend = "Convos::Model::Role::$backend" unless $backend =~ /::/;
+  warn "[Convos::Model] Will use backend $backend\n" if DEBUG;
   Role::Tiny->create_class_with_roles($class, $backend)->new(@_);
 }
 
@@ -108,6 +110,7 @@ sub start {
   # 3. delay step
   push @steps, sub { $_[0]->ioloop->timer(CONNECT_TIMER, $_[0]->begin) };
 
+  warn "[Convos::Model] Starting backend.\n" if DEBUG;
   $delay->steps(@steps[0, 1, 2]);
   return $self;
 }
@@ -127,6 +130,7 @@ sub user {
   $email = lc $email;
   $self->{users}{$email} ||= do {
     my $user = $self->_class_for('Convos::Model::User')->new(email => $email, model => $self);
+    warn "[Convos::Model] New user object for email=$email\n" if DEBUG;
     Scalar::Util::weaken($user->{model});
     $user;
   };
@@ -142,6 +146,7 @@ sub _build_home {
     $path = File::Spec->catdir($home, qw( .local share convos ));
   }
 
+  warn "[Convos::Model] Home is $path\n" if DEBUG;
   Mojo::Home->new(Cwd::abs_path($path));
 }
 

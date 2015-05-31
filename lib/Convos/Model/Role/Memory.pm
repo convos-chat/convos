@@ -37,7 +37,6 @@ use Fcntl ':flock';
 use File::Path ();
 use File::Spec;
 use Role::Tiny;
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 ATTRIBUTES
 

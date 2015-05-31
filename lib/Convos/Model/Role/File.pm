@@ -49,6 +49,7 @@ use Fcntl ':flock';
 use File::Path ();
 use File::Spec;
 use Role::Tiny;
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 requires qw( _build_home _setting_keys );
 
@@ -86,6 +87,7 @@ sub load {
       $self->{$_} = $settings->{$_} for grep { defined $settings->{$_} } $self->_setting_keys;
       1;
     } or do {
+      warn "[@{[ref $self]}] load: $@\n" if DEBUG;
       $self->$cb($@);
       return $self;
     };
@@ -142,6 +144,7 @@ sub save {
     $self->$cb('');
     1;
   } or do {
+    warn "[@{[ref $self]}] save: $@\n" if DEBUG;
     $self->$cb($@);
   };
 
