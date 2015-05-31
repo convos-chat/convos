@@ -2,6 +2,9 @@ use Mojo::Base -strict;
 use Convos::Model;
 use Test::More;
 
+my $time = time - 10;
+no warnings qw( once redefine );
+*CORE::GLOBAL::time = sub {$time};
 local $ENV{CONVOS_SHARE_DIR} = 'convos-test-model-user-share-dir';
 
 my $model = Convos::Model->new;
@@ -19,7 +22,7 @@ is $user->save, $user, 'save';
 ok -e $storage_file, 'created storage file';
 is $model->user(email => 'jhthorsen@cpan.org')->load->avatar, 'whatever', 'avatar from storage file';
 
-is_deeply($user->TO_JSON, {avatar => 'whatever', email => 'jhthorsen@cpan.org'}, 'TO_JSON');
+is_deeply($user->TO_JSON, {avatar => 'whatever', email => 'jhthorsen@cpan.org', registered => $time}, 'TO_JSON');
 
 eval { $user->set_password('') };
 like $@, qr{Usage:.*plain}, 'set_password() require plain string';
