@@ -3,26 +3,19 @@ use Mojo::IOLoop;
 use Convos::Model;
 use Test::Deep;
 
-my $t      = Test::Mojo::IRC->new;
-my $server = $t->start_server;
-
-local $ENV{CONVOS_SHARE_DIR} = '/dev/null';    # test should not need share dir
-
-my $model      = Convos::Model->new;
-my $user       = $model->user(email => 'superman@example.com', avatar => 'whatever');
-my $connection = $user->connection(IRC => $server);
-my $stop_re    = qr{should_not_match};
-
-no warnings qw( once redefine );
-open my $CONNECTION_LOG_FH, '>', \my $connection_log;
-open my $ROOM_LOG_FH,       '>', \my $room_log;
-Mojo::Util::monkey_patch(ref($connection),                   _log_fh => sub {$CONNECTION_LOG_FH});
-Mojo::Util::monkey_patch(ref($connection->room('whatever')), _log_fh => sub {$ROOM_LOG_FH});
+my $t              = Test::Mojo::IRC->new;
+my $server         = $t->start_server;
+my $model          = Convos::Model->new_with_backend('Memory');
+my $user           = $model->user(email => 'superman@example.com', avatar => 'whatever');
+my $connection     = $user->connection(IRC => $server);
+my $stop_re        = qr{should_not_match};
+my $connection_log = '';
 
 $connection->on(
   log => sub {
     my ($self, $level, $message) = @_;
     diag "[$level] $message" if $ENV{HARNESS_IS_VERBOSE};
+    $connection_log .= "[$_[1]] $_[2]\n";
     Mojo::IOLoop->stop if $message =~ $stop_re;
   }
 );

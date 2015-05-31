@@ -52,7 +52,7 @@ Holds a L<Convos::Model> object.
 
 =cut
 
-has model => sub { Convos::Model->new };
+has model => sub { Convos::Model->new_with_backend($_[0]->config('backend')) };
 
 =head1 METHODS
 
@@ -91,6 +91,7 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
+  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Model::Role::File';
   $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
   $config->{hypnotoad}{pid_file} = $ENV{CONVOS_FRONTEND_PID_FILE} if $ENV{CONVOS_FRONTEND_PID_FILE};
   $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';

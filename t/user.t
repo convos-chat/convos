@@ -7,7 +7,7 @@ no warnings qw( once redefine );
 *CORE::GLOBAL::time = sub {$time};
 local $ENV{CONVOS_SHARE_DIR} = 'convos-test-model-user-share-dir';
 
-my $model = Convos::Model->new;
+my $model = Convos::Model->new_with_backend('File');
 
 my $user = $model->user(email => 'jhthorsen@cpan.org', avatar => 'whatever');
 my $storage_file = File::Spec->catfile($ENV{CONVOS_SHARE_DIR}, 'jhthorsen@cpan.org', 'user.json');

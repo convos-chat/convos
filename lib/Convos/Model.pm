@@ -38,23 +38,36 @@ with 'Convos::Model::Role::ClassFor';
 L<Convos::Model> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
 
-=head2 backend
-
-The name of a L<role|Role::Tiny> which is used to store data persistently.
-Default to L<Convos::Model::Role::File>.
-
-This attribute is read-only.
-
-=cut
-
-sub backend {
-  $_[0]->{backend} ||= do { require Convos::Model::Role::File; 'Convos::Model::Role::File' }
-}
-
 =head1 METHODS
 
 L<Convos::Model> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
+
+=head2 new_with_backend
+
+  $self = Convos::Model->new_with_backend($backend => %attrs);
+  $self = Convos::Model->new_with_backend($backend => \%attrs);
+
+Will create a new object with a given C<$backend>. Supported backends are
+currently:
+
+=over 4
+
+=item * L<Convos::Model::Role::File>
+
+=item * L<Convos::Model::Role::Memory>
+
+=back
+
+=cut
+
+sub new_with_backend {
+  my ($class, $backend) = (shift, shift);
+  $backend = "Convos::Model::Role::$backend" unless $backend =~ /::/;
+  my $self = Role::Tiny->create_class_with_roles($class, $backend)->new(@_);
+  $self->{backend} = $backend;
+  $self;
+}
 
 =head2 user
 
@@ -69,7 +82,9 @@ sub user {
   $self->_class_for('Convos::Model::User')->new(@_);
 }
 
-sub _compose_classes_with { shift->backend }
+sub _compose_classes_with { }
+sub _setting_keys         { }
+sub _sub_dir              { }
 
 =head1 COPYRIGHT AND LICENSE
 

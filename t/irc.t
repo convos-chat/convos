@@ -4,7 +4,7 @@ use Test::More;
 
 local $ENV{CONVOS_SHARE_DIR} = 'convos-test-model-connection-irc';
 
-my $model      = Convos::Model->new;
+my $model      = Convos::Model->new_with_backend('File');
 my $user       = $model->user(email => 'jhthorsen@cpan.org', avatar => 'whatever');
 my $connection = $user->connection(IRC => 'localhost');
 my $storage_file
