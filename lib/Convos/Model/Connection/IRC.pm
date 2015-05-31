@@ -88,6 +88,7 @@ sub connect {
 
   return $self->tap($cb, "Invalid URL: hostname is not defined.") unless $irc->server;
 
+  $self->state('connecting');
   $irc->connect(
     sub {
       my ($irc, $err) = @_;
@@ -96,7 +97,7 @@ sub connect {
         if $err =~ /SSL\d*_GET_SERVER_HELLO/ and !$self->{disable_tls}++;
       return $self->log(info => $err)->$cb($err) if $err;
       $self->{myinfo} ||= {};
-      $self->$cb('');
+      $self->state('connected')->$cb('');
     }
   );
 
@@ -251,6 +252,7 @@ sub whois {
 
 sub _event_irc_close {
   my ($self) = @_;
+  $self->state(delete $self->{disconnect} ? 'disconnected' : 'connecting');
   $self->log(
     info => 'You [%s@%s] have quit [Connection closed.]',
     $self->nick, $self->_irc->real_host || $self->url->host

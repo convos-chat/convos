@@ -150,6 +150,24 @@ Meant to be overloaded in a subclass.
 
 sub send { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "send" not implemented.') }
 
+=head2 state
+
+  $self = $self->state($str);
+  $str = $self->state;
+
+Holds the state of this object. Supported states are "disconnected",
+"connected" or "connecting" (default). "connecting" means that the object is
+in the process of connecting or that it want to connect.
+
+=cut
+
+sub state {
+  my ($self, $state) = @_;
+  return $self->{state} ||= 'connecting' unless $state;
+  $self->{state} = $state if grep { $state eq $_ } qw( connected connecting disconnected );
+  $self;
+}
+
 =head2 topic
 
   $self = $self->topic($room, sub { my ($self, $err, $topic) = @_; });
@@ -161,8 +179,8 @@ Used to retrieve or set topic for a room.
 
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
-sub _compose_classes_with { }            # will get role names from around modifiers
-sub _setting_keys         {qw( name )}
+sub _compose_classes_with { }                  # will get role names from around modifiers
+sub _setting_keys         {qw( name state )}
 sub _sub_dir { File::Spec->catdir($_[0]->user->email, 'connection', $_[0]->name) }
 
 sub _userinfo {
@@ -175,6 +193,7 @@ sub _userinfo {
 
 sub TO_JSON {
   my $self = shift;
+  $self->{state} ||= 'connecting';
   return {map { ($_, $self->{$_}) } $self->_setting_keys};
 }
 
