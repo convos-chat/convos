@@ -69,6 +69,7 @@ sub startup {
   my $self   = shift;
   my $config = $self->_config;
 
+  $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
   $self->_setup_secrets;
   $self->plugin(Swagger2 => {url => $config->{swagger_file}});
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
@@ -93,6 +94,14 @@ sub _config {
   $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{swagger_file} ||= $self->home->rel_file('public/api.json');
   $config;
+}
+
+sub _home_relative_to_lib {
+  my $self = shift;
+  my $home = File::Spec->catdir(File::Basename::dirname(__FILE__), 'Convos');
+
+  $self->home->parse($home);
+  $self->static->paths->[0] = $self->home->rel_dir('public');
 }
 
 sub _setup_secrets {
