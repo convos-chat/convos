@@ -75,6 +75,9 @@ sub save {
   $self;
 }
 
+sub _find_connections { }
+sub _find_users       { }
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Jan Henning Thorsen

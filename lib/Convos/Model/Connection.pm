@@ -65,7 +65,8 @@ Holds a list of rooms / channel names.
 
 =head2 url
 
-Holds a L<Mojo::URL> object which describes where to connect to.
+Holds a L<Mojo::URL> object which describes where to connect to. This
+attribute is read-only.
 
 =head2 user
 
@@ -75,8 +76,13 @@ Holds a L<Convos::Model::User> object that owns this connection.
 
 has name  => sub { die 'name is required' };
 has rooms => sub { [] };
-has url   => sub { Mojo::URL->new };
-has user  => sub { die 'user is required' };
+
+sub url {
+  return $_[0]->{url} if ref $_[0]->{url};
+  return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || '');
+}
+
+has user => sub { die 'user is required' };
 
 =head1 METHODS
 
@@ -181,8 +187,13 @@ Used to retrieve or set topic for a room.
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
 sub _build_home { Mojo::Home->new($_[0]->user->home->rel_dir($_[0]->_moniker)) }
-sub _compose_classes_with { }                  # will get role names from around modifiers
-sub _setting_keys         {qw( name state )}
+sub _compose_classes_with { }    # will get role names from around modifiers
+
+sub _setting_keys {
+  $_[0]->{rooms} ||= [];
+  $_[0]->{url}   ||= Mojo::URL->new;
+  return qw( name rooms state url );
+}
 
 sub _userinfo {
   my $self = shift;

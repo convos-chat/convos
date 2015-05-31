@@ -150,6 +150,29 @@ sub save {
 
 around _compose_classes_with => sub { my $orig = shift; ($orig->(@_), __PACKAGE__) };
 
+sub _find_connections {
+  my ($self, $cb) = @_;    # Convos::Model::User object
+  my $home = $self->home;
+
+  return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
+  return $self->tap(
+    $cb, '',
+    [
+      map { $self->connection(split /-/, $_, 2)->load }
+      sort grep { /^\w+-[\w-]+$/ and -r $home->rel_file("$_/settings.json") } readdir $DH
+    ]
+  );
+}
+
+sub _find_users {
+  my ($self, $cb) = @_;    # Convos::Model object
+  my $home = $self->home;
+
+  return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
+  return $self->tap($cb, '',
+    [map { $self->user($_)->load } sort grep { /.\@./ and -r $home->rel_file("$_/settings.json") } readdir $DH]);
+}
+
 sub _format_log_message {
   my ($self, $level, $message) = @_;
   my ($s, $m, $h, $day, $month, $year) = gmtime;

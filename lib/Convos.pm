@@ -85,6 +85,8 @@ sub startup {
       $c->req->url->base(Mojo::URL->new($base));
     }
   );
+
+  $self->model->start if $ENV{CONVOS_START_BACKEND} // 1;
 }
 
 sub _config {

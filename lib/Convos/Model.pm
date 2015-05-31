@@ -30,6 +30,7 @@ use Cwd           ();
 use File::HomeDir ();
 use File::Spec;
 use Role::Tiny::With;
+use constant CONNECT_TIMER => $ENV{CONVOS_CONNECT_TIMER} || 3;
 
 with 'Convos::Model::Role::ClassFor';
 
@@ -64,9 +65,51 @@ currently:
 sub new_with_backend {
   my ($class, $backend) = (shift, shift);
   $backend = "Convos::Model::Role::$backend" unless $backend =~ /::/;
-  my $self = Role::Tiny->create_class_with_roles($class, $backend)->new(@_);
-  $self->{backend} = $backend;
-  $self;
+  Role::Tiny->create_class_with_roles($class, $backend)->new(@_);
+}
+
+=head2 start
+
+  $self = $self->start;
+
+Will start the backend. This means finding any users and start known
+connections.
+
+=cut
+
+sub start {
+  my $self  = shift;
+  my $delay = Mojo::IOLoop->delay;
+  my @steps;
+
+  Scalar::Util::weaken($self);
+
+  # 0. get all users
+  push @steps, sub { $self and $self->_find_users(shift->begin) };
+
+  # 1. get connections for a user
+  push @steps, sub {
+    my ($delay, $err, $users) = @_;
+    $delay->data(users => $users) if $users;
+    $users ||= $delay->data('users') || [];    # required when called from connect/delay step
+    return $delay->remaining([@steps[3, 0, 1, 2]])->pass unless my $user = shift @$users;    # start over after delay
+    return $user->_find_connections($delay->begin);                                          # connect to connections
+  };
+
+  # 2. connect to connections
+  push @steps, sub {
+    my ($delay, $err, $conns) = @_;
+    return unless $self;
+    return $delay->remaining([@steps[3, 1, 2]])->pass unless my $c = shift @$conns;    # get connections for next user
+    $c->connect(sub { });                                                              # connect to this connection
+    $delay->remaining([@steps[3, 2]])->pass('', $conns);                               # connect to next connection
+  };
+
+  # 3. delay step
+  push @steps, sub { $_[0]->ioloop->timer(CONNECT_TIMER, $_[0]->begin) };
+
+  $delay->steps(@steps[0, 1, 2]);
+  return $self;
 }
 
 =head2 user

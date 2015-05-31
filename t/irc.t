@@ -17,7 +17,7 @@ ok !-e $storage_file, 'no storage file';
 is $connection->save, $connection, 'save';
 ok -e $storage_file, 'created storage file';
 
-is_deeply($connection->TO_JSON, {name => 'localhost', state => 'connecting'}, 'TO_JSON');
+is_deeply($connection->TO_JSON, {name => 'localhost', rooms => [], state => 'connecting', url => ''}, 'TO_JSON');
 
 $connection->connect(sub { $err = $_[1] });
 like $err, qr{Invalid URL}, 'invalid url';

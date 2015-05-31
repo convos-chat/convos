@@ -78,7 +78,7 @@ or a class moniker:
 sub connection {
   my ($self, $type, $name) = @_;
 
-  die "Invalid name $name. Need to match /^[\\w_-]+\$/" unless $name and $name =~ /^[\w_-]+$/;
+  die "Invalid name $name. Need to match /^[\\w-]+\$/" unless $name and $name =~ /^[\w-]+$/;
   $name = lc $name;
   $type = "Convos::Model::Connection::$type" unless $type =~ /::/;
   $self->{connections}{$type}{$name} ||= do {
