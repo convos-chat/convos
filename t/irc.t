@@ -33,10 +33,10 @@ no warnings qw( once redefine );
   $irc->$cb("SSL connect attempt failed error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol");
 };
 
-is $connection->{disable_tls}, undef, 'enable tls';
+is $connection->url->query->param('tls'), undef, 'enable tls';
 $connection->connect(sub { $err = $_[1] });
 is $err, '127.0.0.1 does not support SSL/TLS.', 'SSL connect attempt';
-is $connection->{disable_tls}, 1, 'disable tls';
+is $connection->url->query->param('tls'), 0, 'disable tls';
 
 $connection->send('', '0', sub { $err = $_[1] });
 like $err, qr{without target and message}, 'send: without target and message';

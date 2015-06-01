@@ -16,14 +16,22 @@ $connection->on(log => sub { $log .= "[$_[1]] $_[2]\n" });
 $room->on(log => sub { $room_log .= join ' ', shift->id, @_ });
 
 {
+  my @err = (
+    "SSL connect attempt failed error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol\n",
+    "IO::Socket::SSL 1.94+ required for TLS support",
+  );
   my $err;
   no warnings qw( once redefine );
   local *Mojo::IRC::UA::connect = sub {
     my ($irc, $cb) = @_;
-    $irc->$cb("SSL connect attempt failed error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol\n");
+    $irc->$cb(shift @err || 'Yikes!');
   };
   $connection->url->parse("irc://$server");
-  $connection->connect(sub { $err = $_[1] });
+  while (@err) {
+    $connection->url->query->remove('tls');
+    $connection->connect(sub { $err = $_[1] });
+    is $connection->url->query->param('tls'), 0, 'tls disabled automatically';
+  }
   like $log, qr{^\[warn\] \S+ does not support SSL/TLS\.$}m, 'logged tls';
 }
 

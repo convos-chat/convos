@@ -37,7 +37,7 @@ is $connection->nick, "Superman20001", 'changed nick attribute';
 {
   my $err;
   $connection->url->parse("irc://$server");
-  $connection->{disable_tls} = 1 unless $ENV{CONVOS_IRC_SSL};
+  $connection->url->query->param(tls => 0) unless $ENV{CONVOS_IRC_SSL};
   is $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; }), $connection, 'connect: async';
   Mojo::IOLoop->start;
   is $err, '', 'connect: success';

@@ -86,7 +86,7 @@ sub connect {
   $irc->pass($userinfo->[1]);
   $irc->server($url->host_port);
   $irc->user($userinfo->[0]);
-  $irc->tls($self->{disable_tls} ? undef : {});
+  $irc->tls(($url->query->param('tls') // 1) ? {} : undef);
 
   return $self->tap($cb, "Invalid URL: hostname is not defined.") unless $irc->server;
 
@@ -95,8 +95,9 @@ sub connect {
     sub {
       my ($irc, $err) = @_;
 
+      $url->query->param(tls => 0) if $err =~ /IO::Socket::SSL/;
       $err = "$irc->{server} does not support SSL/TLS."
-        if $err =~ /SSL\d*_GET_SERVER_HELLO/ and !$self->{disable_tls}++;
+        if $err =~ /SSL\d*_GET_SERVER_HELLO/ and $url->query->param(tls => 0);
       return $self->log(warn => $err)->$cb($err) if $err;
       $self->{myinfo} ||= {};
       $self->state('connected')->log(info => "Connected to $irc->{server}.")->$cb('');
