@@ -36,7 +36,7 @@ address L<http://localhost:3000>.
 =cut
 
 use Mojo::Base 'Mojolicious';
-use Convos::Model;
+use Convos::Core;
 use Swagger2::Editor;
 
 our $VERSION = '0.01';
@@ -46,13 +46,13 @@ our $VERSION = '0.01';
 L<Convos> inherits all attributes from L<Mojolicious> and implements
 the following new ones.
 
-=head2 model
+=head2 core 
 
-Holds a L<Convos::Model> object.
+Holds a L<Convos::Core> object.
 
 =cut
 
-has model => sub { Convos::Model->new_with_backend($_[0]->config('backend')) };
+has core => sub { Convos::Core->new_with_backend($_[0]->config('backend')) };
 
 =head1 METHODS
 
@@ -86,14 +86,14 @@ sub startup {
     }
   );
 
-  $self->model->start if $ENV{CONVOS_START_BACKEND} // 1;
+  $self->core->start if $ENV{CONVOS_START_BACKEND} // 1;
 }
 
 sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
-  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Model::Role::File';
+  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Role::File';
   $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
   $config->{hypnotoad}{pid_file} = $ENV{CONVOS_FRONTEND_PID_FILE} if $ENV{CONVOS_FRONTEND_PID_FILE};
   $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';

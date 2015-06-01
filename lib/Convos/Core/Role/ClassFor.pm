@@ -1,29 +1,29 @@
-package Convos::Model::Role::ClassFor;
+package Convos::Core::Role::ClassFor;
 
 =head1 NAME
 
-Convos::Model::Role::ClassFor - A role for making new classes
+Convos::Core::Role::ClassFor - A role for making new classes
 
 =head1 DESCRIPTION
 
-L<Convos::Model::Role::ClassFor> is a role which provide a C<_class_for()>
+L<Convos::Core::Role::ClassFor> is a role which provide a C<_class_for()>
 method which can generate new classes with properties similar to the C<$self>.
 
 =head1 SYNOPSIS
 
-  package Some::Awesome::Model;
+  package Some::Awesome::Core;
   use Role::Tiny::With;
-  with "Convos::Model::Role::ClassFor";
+  with "Convos::Core::Role::ClassFor";
 
-  # used by _class_for(), defined in Convos::Model::Role::File
-  sub _compose_classes_with { "Convos::Model::Role::File" }
+  # used by _class_for(), defined in Convos::Core::Role::File
+  sub _compose_classes_with { "Convos::Core::Role::File" }
 
   sub new_object {
     my $self = shift;
     my $obj = $self->_class_for("Convos::SomeClass")->new;
 
     # $obj->isa("Convos::SomeClass")          == true
-    # $obj->does("Convos::Model::Role::File") == true
+    # $obj->does("Convos::Core::Role::File") == true
   }
 
 =cut

@@ -1,11 +1,11 @@
 use Mojo::Base -strict;
-use Convos::Model;
+use Convos::Core;
 use Test::More;
 
-local $ENV{CONVOS_SHARE_DIR} = 'convos-test-model-connection-irc';
+local $ENV{CONVOS_SHARE_DIR} = 'convos-test-irc';
 
-my $model      = Convos::Model->new_with_backend('File');
-my $user       = $model->user('jan.henning.thorsen@example.com');
+my $core       = Convos::Core->new_with_backend('File');
+my $user       = $core->user('jan.henning.thorsen@example.com');
 my $connection = $user->connection(IRC => 'localhost');
 my $storage_file
   = File::Spec->catfile($ENV{CONVOS_SHARE_DIR}, 'jan.henning.thorsen@example.com', 'IRC-localhost', 'settings.json');

@@ -1,24 +1,24 @@
-package Convos::Model::Room;
+package Convos::Core::Room;
 
 =head1 NAME
 
-Convos::Model::Room - A convos chat room
+Convos::Core::Room - A convos chat room
 
 =head1 DESCRIPTION
 
-L<Convos::Model::Room> is a class describing a L<Convos> chat room.
+L<Convos::Core::Room> is a class describing a L<Convos> chat room.
 
 =head1 SYNOPSIS
 
-  use Convos::Model::Room;
-  my $room = Convos::Model::Room->new;
+  use Convos::Core::Room;
+  my $room = Convos::Core::Room->new;
 
 =cut
 
 use Mojo::Base 'Mojo::EventEmitter';
 use Role::Tiny::With;
 
-with 'Convos::Model::Role::Log';
+with 'Convos::Core::Role::Log';
 
 =head1 ATTRIBUTES
 

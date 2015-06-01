@@ -1,12 +1,12 @@
 use Test::Mojo::IRC -basic;
 use Mojo::IOLoop;
-use Convos::Model;
+use Convos::Core;
 use Test::Deep;
 
 my $t          = Test::Mojo::IRC->new;
 my $server     = $t->start_server;
-my $model      = Convos::Model->new_with_backend('Memory');
-my $user       = $model->user('superman@example.com');
+my $core       = Convos::Core->new_with_backend('Memory');
+my $user       = $core->user('superman@example.com');
 my $connection = $user->connection(IRC => 'localhost');
 my $log        = '';
 

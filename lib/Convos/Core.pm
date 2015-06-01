@@ -1,25 +1,25 @@
-package Convos::Model;
+package Convos::Core;
 
 =head1 NAME
 
-Convos::Model - Convos Models
+Convos::Core - Convos Models
 
 =head1 DESCRIPTION
 
-L<Convos::Model> is a class which is used to instantiate other model objects
+L<Convos::Core> is a class which is used to instantiate other core objects
 with proper defaults.
 
 =head1 SYNOPSIS
 
-  use Convos::Model;
-  my $model = Convos::Model->new;
-  my $user = $model->user($email);
+  use Convos::Core;
+  my $core = Convos::Core->new;
+  my $user = $core->user($email);
 
 =head1 SEE ALSO
 
 =over 4
 
-=item * L<Convos::Model::User>
+=item * L<Convos::Core::User>
 
 =back
 
@@ -33,31 +33,31 @@ use Role::Tiny::With;
 use constant CONNECT_TIMER => $ENV{CONVOS_CONNECT_TIMER} || 3;
 use constant DEBUG         => $ENV{CONVOS_DEBUG}         || 0;
 
-with 'Convos::Model::Role::ClassFor';
+with 'Convos::Core::Role::ClassFor';
 
 =head1 ATTRIBUTES
 
-L<Convos::Model> inherits all attributes from L<Mojo::Base> and implements
+L<Convos::Core> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
 
 =head1 METHODS
 
-L<Convos::Model> inherits all methods from L<Mojo::Base> and implements
+L<Convos::Core> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
 =head2 new_with_backend
 
-  $self = Convos::Model->new_with_backend($backend => %attrs);
-  $self = Convos::Model->new_with_backend($backend => \%attrs);
+  $self = Convos::Core->new_with_backend($backend => %attrs);
+  $self = Convos::Core->new_with_backend($backend => \%attrs);
 
 Will create a new object with a given C<$backend>. Supported backends are
 currently:
 
 =over 4
 
-=item * L<Convos::Model::Role::File>
+=item * L<Convos::Core::Role::File>
 
-=item * L<Convos::Model::Role::Memory>
+=item * L<Convos::Core::Role::Memory>
 
 =back
 
@@ -65,8 +65,8 @@ currently:
 
 sub new_with_backend {
   my ($class, $backend) = (shift, shift);
-  $backend = "Convos::Model::Role::$backend" unless $backend =~ /::/;
-  warn "[Convos::Model] Will use backend $backend\n" if DEBUG;
+  $backend = "Convos::Core::Role::$backend" unless $backend =~ /::/;
+  warn "[Convos::Core] Will use backend $backend\n" if DEBUG;
   Role::Tiny->create_class_with_roles($class, $backend)->new(@_);
 }
 
@@ -110,7 +110,7 @@ sub start {
   # 3. delay step
   push @steps, sub { $_[0]->ioloop->timer(CONNECT_TIMER, $_[0]->begin) };
 
-  warn "[Convos::Model] Starting backend.\n" if DEBUG;
+  warn "[Convos::Core] Starting backend.\n" if DEBUG;
   $delay->steps(@steps[0, 1, 2]);
   return $self;
 }
@@ -119,7 +119,7 @@ sub start {
 
   $user = $self->user($email);
 
-Returns a L<Convos::Model::User> object.
+Returns a L<Convos::Core::User> object.
 
 =cut
 
@@ -129,9 +129,9 @@ sub user {
   die "Invalid email $email. Need to match /.\@./." unless $email and $email =~ /.\@./;
   $email = lc $email;
   $self->{users}{$email} ||= do {
-    my $user = $self->_class_for('Convos::Model::User')->new(email => $email, model => $self);
-    warn "[Convos::Model] New user object for email=$email\n" if DEBUG;
-    Scalar::Util::weaken($user->{model});
+    my $user = $self->_class_for('Convos::Core::User')->new(core => $self, email => $email);
+    warn "[Convos::Core] New user object for email=$email\n" if DEBUG;
+    Scalar::Util::weaken($user->{core});
     $user;
   };
 }
@@ -146,7 +146,7 @@ sub _build_home {
     $path = File::Spec->catdir($home, qw( .local share convos ));
   }
 
-  warn "[Convos::Model] Home is $path\n" if DEBUG;
+  warn "[Convos::Core] Home is $path\n" if DEBUG;
   Mojo::Home->new(Cwd::abs_path($path));
 }
 

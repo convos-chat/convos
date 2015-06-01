@@ -1,19 +1,19 @@
-package Convos::Model::Role::Log;
+package Convos::Core::Role::Log;
 
 =head1 NAME
 
-Convos::Model::Role::Log - A role for logging
+Convos::Core::Role::Log - A role for logging
 
 =head1 DESCRIPTION
 
-L<Convos::Model::Role::Log> is a role which provide a L</log>
+L<Convos::Core::Role::Log> is a role which provide a L</log>
 method.
 
 =head1 SYNOPSIS
 
-  package Some::Awesome::Model;
+  package Some::Awesome::Core;
   use Role::Tiny::With;
-  with "Convos::Model::Role::Log";
+  with "Convos::Core::Role::Log";
 
   sub some_method {
     my $self = shift;

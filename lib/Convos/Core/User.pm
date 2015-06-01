@@ -1,17 +1,17 @@
-package Convos::Model::User;
+package Convos::Core::User;
 
 =head1 NAME
 
-Convos::Model::User - A Convos user
+Convos::Core::User - A Convos user
 
 =head1 DESCRIPTION
 
-L<Convos::Model::User> is a class used to model a user in Convos.
+L<Convos::Core::User> is a class used to model a user in Convos.
 
 =head1 SYNOPSIS
 
-  use Convos::Model;
-  my $user = Convos::Model->new->user("jhthorsen@cpan.org");
+  use Convos::Core;
+  my $user = Convos::Core->new->user("jhthorsen@cpan.org");
 
   $user->set_password("s3cret");
   $user->save;
@@ -24,7 +24,7 @@ use Crypt::Eksblowfish::Bcrypt ();
 use Role::Tiny::With;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-with 'Convos::Model::Role::ClassFor';
+with 'Convos::Core::Role::ClassFor';
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
@@ -34,12 +34,16 @@ use constant BCRYPT_BASE_SETTINGS => do {
 
 =head1 ATTRIBUTES
 
-L<Convos::Model::User> inherits all attributes from L<Mojo::Base> and implements
+L<Convos::Core::User> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
 
 =head2 avatar
 
 Avatar identifier on either Facebook or Gravatar.
+
+=head2 core
+
+Holds a L<Convos::Core> object.
 
 =head2 email
 
@@ -52,12 +56,13 @@ Encrypted password.
 =cut
 
 has avatar   => '';
-has email    => sub { die 'email is required' };
+has core     => sub { die 'core is required in constructor' };
+has email    => sub { die 'email is required in constructor' };
 has password => '';
 
 =head1 METHODS
 
-L<Convos::Model::User> inherits all methods from L<Mojo::Base> and implements
+L<Convos::Core::User> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
 =head2 connection
@@ -70,8 +75,8 @@ or a class moniker:
   .-----------------------------------------------------------------.
   | $type                          | Resolved class name            |
   |--------------------------------|--------------------------------|
-  | IRC                            | Convos::Model::Connection::IRC |
-  | Convos::Model::Connection::IRC | Convos::Model::Connection::IRC |
+  | IRC                            | Convos::Core::Connection::IRC |
+  | Convos::Core::Connection::IRC | Convos::Core::Connection::IRC |
   '-----------------------------------------------------------------'
 
 =cut
@@ -81,10 +86,10 @@ sub connection {
 
   die "Invalid name $name. Need to match /^[\\w-]+\$/" unless $name and $name =~ /^[\w-]+$/;
   $name = lc $name;
-  $type = "Convos::Model::Connection::$type" unless $type =~ /::/;
+  $type = "Convos::Core::Connection::$type" unless $type =~ /::/;
   $self->{connections}{$type}{$name} ||= do {
     my $connection = $self->_class_for($type)->new(name => $name, user => $self);
-    warn "[Convos::Model::User] New connection object for name=$name\n";
+    warn "[Convos::Core::User] New connection object for name=$name\n";
     Scalar::Util::weaken($connection->{user});
     $connection;
   };
@@ -99,7 +104,7 @@ Used to set L</password> to a crypted version of C<$plain>.
 =cut
 
 sub set_password {
-  die 'Usage: Convos::Model::User->set_password($plain)' unless $_[1];
+  die 'Usage: Convos::Core::User->set_password($plain)' unless $_[1];
   $_[0]->password($_[0]->_bcrypt($_[1]));
 }
 
@@ -137,7 +142,7 @@ sub _bcrypt {
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
 
-sub _build_home { Mojo::Home->new($_[0]->{model}->home->rel_dir($_[0]->email)) }
+sub _build_home { Mojo::Home->new($_[0]->core->home->rel_dir($_[0]->email)) }
 sub _compose_classes_with { }    # will get role names from around modifiers
 
 sub _setting_keys {

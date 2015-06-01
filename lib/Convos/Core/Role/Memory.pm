@@ -1,19 +1,19 @@
-package Convos::Model::Role::Memory;
+package Convos::Core::Role::Memory;
 
 =head1 NAME
 
-Convos::Model::Role::Memory - Role for storing objects in memory
+Convos::Core::Role::Memory - Role for storing objects in memory
 
 =head1 DESCRIPTION
 
-L<Convos::Model::Role::Memory> contains methods which is useful for objects
+L<Convos::Core::Role::Memory> contains methods which is useful for objects
 that only want to be stored in memory.
 
 =head1 SYNOPSIS
 
-  package Some::Awesome::Model;
+  package Some::Awesome::Core;
   use Role::Tiny::With;
-  with "Convos::Model::Role::Memory";
+  with "Convos::Core::Role::Memory";
 
   1;
 

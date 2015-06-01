@@ -1,19 +1,19 @@
-package Convos::Model::Connection;
+package Convos::Core::Connection;
 
 =head1 NAME
 
-Convos::Model::Connection - A Convos connection base class
+Convos::Core::Connection - A Convos connection base class
 
 =head1 DESCRIPTION
 
-L<Convos::Model::Connection> is a base class for L<Convos> connections.
+L<Convos::Core::Connection> is a base class for L<Convos> connections.
 
-See also L<Convos::Model::Connection::IRC>.
+See also L<Convos::Core::Connection::IRC>.
 
 =head1 SYNOPSIS
 
-  use Convos::Model::Connection::YourConnection;
-  use Mojo::Base "Convos::Model::Connection";
+  use Convos::Core::Connection::YourConnection;
+  use Mojo::Base "Convos::Core::Connection";
   # ...
   1;
 
@@ -23,7 +23,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::URL;
 use Role::Tiny::With;
 
-with qw( Convos::Model::Role::ClassFor Convos::Model::Role::Log );
+with qw( Convos::Core::Role::ClassFor Convos::Core::Role::Log );
 
 =head1 EVENTS
 
@@ -40,12 +40,12 @@ These messages could be stored to a persistent storage.
 
   $self->on(room => sub { my ($self, $room, $changed) = @_; });
 
-Emitted when a L<$room|Convos::Model::Room> change properties. C<$changed> is
+Emitted when a L<$room|Convos::Core::Room> change properties. C<$changed> is
 a hash-ref with the changed attributes.
 
 =head1 ATTRIBUTES
 
-L<Convos::Model::Connection> inherits all attributes from L<Mojo::Base> and implements
+L<Convos::Core::Connection> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
 
 =head2 name
@@ -54,7 +54,7 @@ the following new ones.
   $self = $self->name("localhost");
 
 Holds the name of the connection.
-Need to be unique per L<user|Convos::Model::User>.
+Need to be unique per L<user|Convos::Core::User>.
 
 =head2 rooms
 
@@ -70,7 +70,7 @@ attribute is read-only.
 
 =head2 user
 
-Holds a L<Convos::Model::User> object that owns this connection.
+Holds a L<Convos::Core::User> object that owns this connection.
 
 =cut
 
@@ -86,7 +86,7 @@ has user => sub { die 'user is required' };
 
 =head1 METHODS
 
-L<Convos::Model::Connection> inherits all methods from L<Mojo::Base> and implements
+L<Convos::Core::Connection> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
 =head2 connect
@@ -114,7 +114,7 @@ sub join_room { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "join_ro
   $room = $self->room($id);            # get
   $room = $self->room($id => \%attrs); # create/set
 
-Will return a L<Convos::Model::Room> object, identified by C<$id>.
+Will return a L<Convos::Core::Room> object, identified by C<$id>.
 
 =cut
 
@@ -122,14 +122,14 @@ sub room {
   my ($self, $id, $attr) = @_;
 
   if ($attr) {
-    my $room = $self->{room}{$id} ||= $self->_class_for('Convos::Model::Room')->new(id => $id);
+    my $room = $self->{room}{$id} ||= $self->_class_for('Convos::Core::Room')->new(id => $id);
     $room->{$_} = $attr->{$_} for keys %$attr;
     $room->{home} ||= $self->{home};    # ugly hack
     $self->emit(room => $room, $attr);
     return $room;
   }
   else {
-    return $self->{room}{$id} || $self->_class_for('Convos::Model::Room')->new(id => $id);
+    return $self->{room}{$id} || $self->_class_for('Convos::Core::Room')->new(id => $id);
   }
 }
 
@@ -137,7 +137,7 @@ sub room {
 
   $self = $self->room_list(sub { my ($self, $err, $list) = @_; });
 
-Used to retrieve a list of L<Convos::Model::Room> objects for the given
+Used to retrieve a list of L<Convos::Core::Room> objects for the given
 connection.
 
 =cut

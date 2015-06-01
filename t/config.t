@@ -4,7 +4,7 @@ use Convos;
 
 {
   my $convos = Convos->new;
-  is $convos->config->{backend}, 'Convos::Model::Role::File', 'default backend';
+  is $convos->config->{backend}, 'Convos::Core::Role::File', 'default backend';
   is $convos->config->{name}, 'Nordaaker', 'default name';
   is $convos->config->{swagger_file}, $convos->home->rel_file('public/api.json'), 'default swagger_file';
   is $convos->config->{hypnotoad}{listen}[0], 'http://*:8080', 'default listen';

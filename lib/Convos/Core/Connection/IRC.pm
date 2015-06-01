@@ -1,18 +1,18 @@
-package Convos::Model::Connection::IRC;
+package Convos::Core::Connection::IRC;
 
 =head1 NAME
 
-Convos::Model::Connection::IRC - IRC connection for Convos
+Convos::Core::Connection::IRC - IRC connection for Convos
 
 =head1 DESCRIPTION
 
-L<Convos::Model::Connection::IRC> is a connection class for L<Convos> which
+L<Convos::Core::Connection::IRC> is a connection class for L<Convos> which
 allow you to communicate over the IRC protocol.
 
 =cut
 
 no warnings 'utf8';
-use Mojo::Base 'Convos::Model::Connection';
+use Mojo::Base 'Convos::Core::Connection';
 use Mojo::IRC::UA;
 use Parse::IRC ();
 
@@ -24,7 +24,7 @@ sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 
 =head1 ATTRIBUTES
 
-L<Convos::Model::Connection::IRC> inherits all attributes from L<Convos::Model::Connection>
+L<Convos::Core::Connection::IRC> inherits all attributes from L<Convos::Core::Connection>
 and implements the following new ones.
 
 =cut
@@ -67,12 +67,12 @@ has _irc => sub {
 
 =head1 METHODS
 
-L<Convos::Model::Connection::IRC> inherits all methods from L<Convos::Model::Connection>
+L<Convos::Core::Connection::IRC> inherits all methods from L<Convos::Core::Connection>
 and implements the following new ones.
 
 =head2 connect
 
-See L<Convos::Model::Connection/connect>.
+See L<Convos::Core::Connection/connect>.
 
 =cut
 
@@ -108,7 +108,7 @@ sub connect {
 
 =head2 join_room
 
-See L<Convos::Model::Connection/join_room>.
+See L<Convos::Core::Connection/join_room>.
 
 =cut
 
@@ -142,7 +142,7 @@ sub nick {
 
 =head2 room
 
-Force C<$id> to be lowercase. See L<Convos::Model::Connection/room>.
+Force C<$id> to be lowercase. See L<Convos::Core::Connection/room>.
 
 =cut
 
@@ -153,7 +153,7 @@ sub room {
 
 =head2 room_list
 
-See L<Convos::Model::Connection/room_list>.
+See L<Convos::Core::Connection/room_list>.
 
 =cut
 
@@ -190,7 +190,7 @@ sub room_list {
 
 =head2 send
 
-See L<Convos::Model::Connection/send>.
+See L<Convos::Core::Connection/send>.
 
 =cut
 
@@ -226,7 +226,7 @@ sub send {
 
 =head2 topic
 
-See L<Convos::Model::Connection/topic>.
+See L<Convos::Core::Connection/topic>.
 
 =cut
 
@@ -240,7 +240,7 @@ sub topic {
 
 =head2 whois
 
-See L<Convos::Model::Connection/whois>.
+See L<Convos::Core::Connection/whois>.
 
 =cut
 

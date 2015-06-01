@@ -1,12 +1,12 @@
 use Test::Mojo::IRC -basic;
 use Mojo::IOLoop;
-use Convos::Model;
+use Convos::Core;
 use Test::Deep;
 
 my $t              = Test::Mojo::IRC->new;
 my $server         = $t->start_server;
-my $model          = Convos::Model->new_with_backend('Memory');
-my $user           = $model->user('superman@example.com');
+my $core           = Convos::Core->new_with_backend('Memory');
+my $user           = $core->user('superman@example.com');
 my $connection     = $user->connection(IRC => 'localhost');
 my $stop_re        = qr{should_not_match};
 my $connection_log = '';
@@ -50,7 +50,7 @@ $t->run(
     $connection->join_room("#Convos_irc_LIVE_20001", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is $err, '', "join_room: convos_irc_live_20001";
-    isa_ok($room, 'Convos::Model::Room');
+    isa_ok($room, 'Convos::Core::Room');
     is $room->name, "#Convos_irc_LIVE_20001", "room Convos_irc_LIVE_20001 in callback";
     cmp_deeply(
       $connection->room("#Convos_irc_live_20001")->TO_JSON,

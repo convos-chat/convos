@@ -1,19 +1,19 @@
-package Convos::Model::Role::File;
+package Convos::Core::Role::File;
 
 =head1 NAME
 
-Convos::Model::Role::File - Role for storing object to file
+Convos::Core::Role::File - Role for storing object to file
 
 =head1 DESCRIPTION
 
-L<Convos::Model::Role::File> contains methods which is useful for objects
+L<Convos::Core::Role::File> contains methods which is useful for objects
 that want to be persisted to disk or store state to disk.
 
 =head1 SYNOPSIS
 
-  package Some::Awesome::Model;
+  package Some::Awesome::Core;
   use Role::Tiny::With;
-  with "Convos::Model::Role::File";
+  with "Convos::Core::Role::File";
 
   # a list of accessors to persist to disk
   sub _setting_keys { qw( foo bar ) }
@@ -154,7 +154,7 @@ sub save {
 around _compose_classes_with => sub { my $orig = shift; ($orig->(@_), __PACKAGE__) };
 
 sub _find_connections {
-  my ($self, $cb) = @_;    # Convos::Model::User object
+  my ($self, $cb) = @_;    # Convos::Core::User object
   my $home = $self->home;
 
   return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
@@ -168,7 +168,7 @@ sub _find_connections {
 }
 
 sub _find_users {
-  my ($self, $cb) = @_;    # Convos::Model object
+  my ($self, $cb) = @_;    # Convos::Core object
   my $home = $self->home;
 
   return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
