@@ -23,8 +23,8 @@ my $connect = 0;
 
 diag 'restart core';
 $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-$core->start;
-*Mojo::IRC::UA::connect = sub { $connect++ unless shift->{connected}++ };
+$core->start for 0 .. 10;    # should only start once
+Mojo::Util::monkey_patch('Mojo::IRC::UA', connect => sub { $connect++ unless shift->{connected}++ });
 Mojo::IOLoop->timer(0.2 => sub { Mojo::IOLoop->stop });    # should be long enough
 Mojo::IOLoop->start;
 is $connect, 3, 'started connections, except disconnected';

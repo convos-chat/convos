@@ -8,12 +8,16 @@ my $server     = $t->start_server;
 my $core       = Convos::Core->new;
 my $user       = $core->user('superman@example.com');
 my $connection = $user->connection(IRC => 'localhost');
+my $room       = $connection->room('#convos' => {});
 my $log        = '';
+my $room_log   = '';
 
 $connection->on(log => sub { $log .= "[$_[1]] $_[2]\n" });
+$room->on(log => sub { $room_log .= join ' ', shift->id, @_ });
 
 {
   my $err;
+  no warnings qw( once redefine );
   local *Mojo::IRC::UA::connect = sub {
     my ($irc, $cb) = @_;
     $irc->$cb("SSL connect attempt failed error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol\n");
@@ -48,5 +52,9 @@ $connection->_irc->emit(irc_rpl_yourhost =>
     {params => [undef, 'Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2']});
 like $log, qr{^\[info\] \QYour host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2\E$}m,
   'logged irc_rpl_yourhost';
+
+$connection->_irc->emit(
+  irc_privmsg => {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'this is cool']});
+like $room_log, qr{^\#convos info \<Supergirl\> this is cool$}m, 'logged irc_privmsg';
 
 done_testing;

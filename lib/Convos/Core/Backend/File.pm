@@ -179,7 +179,7 @@ sub _log_fh {
   return $_[0]->{_log_fh} if $_[0]->{_log_fh};
   my ($self, $obj) = @_;
   my $path = $self->home->rel_file($obj->_path . '.log');
-  File::Path::make_path(File::Basename::dirname($obj->_path));
+  File::Path::make_path(File::Basename::dirname($path));
   open my $fh, '>>', $path or die "Could not open log file $path: $!";
   $obj->{_log_fh} = $fh;
 }
