@@ -5,7 +5,7 @@ use Test::Deep;
 
 my $t          = Test::Mojo::IRC->new;
 my $server     = $t->start_server;
-my $core       = Convos::Core->new_with_backend('Memory');
+my $core       = Convos::Core->new;
 my $user       = $core->user('superman@example.com');
 my $connection = $user->connection(IRC => 'localhost');
 my $log        = '';
@@ -20,7 +20,7 @@ $connection->on(log => sub { $log .= "[$_[1]] $_[2]\n" });
   };
   $connection->url->parse("irc://$server");
   $connection->connect(sub { $err = $_[1] });
-  like $log, qr{^\[info\] \S+ does not support SSL/TLS\.$}m, 'logged tls';
+  like $log, qr{^\[warn\] \S+ does not support SSL/TLS\.$}m, 'logged tls';
 }
 
 $connection->_irc->emit('close');

@@ -10,20 +10,12 @@ L<Convos::Core::Connection> is a base class for L<Convos> connections.
 
 See also L<Convos::Core::Connection::IRC>.
 
-=head1 SYNOPSIS
-
-  use Convos::Core::Connection::YourConnection;
-  use Mojo::Base "Convos::Core::Connection";
-  # ...
-  1;
-
 =cut
 
 use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::URL;
-use Role::Tiny::With;
-
-with qw( Convos::Core::Role::ClassFor Convos::Core::Role::Log );
+use Convos::Core::Room;
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 EVENTS
 
@@ -31,7 +23,7 @@ with qw( Convos::Core::Role::ClassFor Convos::Core::Role::Log );
 
   $self->on(log => sub { my ($self, $level, $message) = @_; });
 
-Emitted when a connection want to log a message. C<$level> has the same values
+Emitted when a connection want L</log> a message. C<$level> has the same values
 as the log levels defined in L<Mojo::Log>.
 
 These messages could be stored to a persistent storage.
@@ -51,10 +43,8 @@ the following new ones.
 =head2 name
 
   $str = $self->name;
-  $self = $self->name("localhost");
 
 Holds the name of the connection.
-Need to be unique per L<user|Convos::Core::User>.
 
 =head2 rooms
 
@@ -65,16 +55,20 @@ Holds a list of rooms / channel names.
 
 =head2 url
 
+  $url = $self->url;
+
 Holds a L<Mojo::URL> object which describes where to connect to. This
 attribute is read-only.
 
 =head2 user
 
+  $user = $self->user;
+
 Holds a L<Convos::Core::User> object that owns this connection.
 
 =cut
 
-has name  => sub { die 'name is required' };
+sub name { shift->{name} or die 'name is required in constructor' }
 has rooms => sub { [] };
 
 sub url {
@@ -109,10 +103,40 @@ Used to join a room. See also L</room> event.
 
 sub join_room { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "join_room" not implemented.'); }
 
+=head2 load
+
+  $self = $self->load(sub { my ($self, $err) = @_; });
+
+Will load L</ATTRIBUTES> from persistent storage.
+See L<Convos::Core::Backend/load_object> for details.
+
+=cut
+
+sub load {
+  my $self = shift;
+  $self->user->core->backend->load_object($self, @_);
+  $self;
+}
+
+=head2 log
+
+  $self = $self->log($level => $format, @args);
+
+This method will emit a L</log> event.
+
+=cut
+
+sub log {
+  my ($self, $level, $format, @args) = @_;
+  my $message = @args ? sprintf $format, map { $_ // '' } @args : $format;
+
+  $self->emit(log => $level => $message);
+}
+
 =head2 room
 
   $room = $self->room($id);            # get
-  $room = $self->room($id => \%attrs); # create/set
+  $room = $self->room($id => \%attrs); # create/update
 
 Will return a L<Convos::Core::Room> object, identified by C<$id>.
 
@@ -122,14 +146,18 @@ sub room {
   my ($self, $id, $attr) = @_;
 
   if ($attr) {
-    my $room = $self->{room}{$id} ||= $self->_class_for('Convos::Core::Room')->new(id => $id);
+    my $room = $self->{room}{$id} ||= do {
+      my $room = Convos::Core::Room->new(connection => $self, id => $id);
+      Scalar::Util::weaken($room->{connection});
+      warn "[Convos::Core::User] Emit room: id=$id\n" if DEBUG;
+      $self->user->core->backend->emit(room => $room);
+      $room;
+    };
     $room->{$_} = $attr->{$_} for keys %$attr;
-    $room->{home} ||= $self->{home};    # ugly hack
-    $self->emit(room => $room, $attr);
     return $room;
   }
   else {
-    return $self->{room}{$id} || $self->_class_for('Convos::Core::Room')->new(id => $id);
+    return $self->{room}{$id} || Convos::Core::Room->new(id => $id);
   }
 }
 
@@ -143,6 +171,21 @@ connection.
 =cut
 
 sub room_list { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "room_list" not implemented.', []); }
+
+=head2 save
+
+  $self = $self->save(sub { my ($self, $err) = @_; });
+
+Will save L</ATTRIBUTES> to persistent storage.
+See L<Convos::Core::Backend/save_object> for details.
+
+=cut
+
+sub save {
+  my $self = shift;
+  $self->user->core->backend->save_object($self, @_);
+  $self;
+}
 
 =head2 send
 
@@ -186,14 +229,7 @@ Used to retrieve or set topic for a room.
 
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
-sub _build_home { Mojo::Home->new($_[0]->user->home->rel_dir($_[0]->_moniker)) }
-sub _compose_classes_with { }    # will get role names from around modifiers
-
-sub _setting_keys {
-  $_[0]->{rooms} ||= [];
-  $_[0]->{url}   ||= Mojo::URL->new;
-  return qw( name rooms state url );
-}
+sub _path { join '/', $_[0]->user->_path, join '-', ref($_[0]) =~ /(\w+)$/, $_[0]->name }
 
 sub _userinfo {
   my $self = shift;
@@ -206,7 +242,7 @@ sub _userinfo {
 sub TO_JSON {
   my $self = shift;
   $self->{state} ||= 'connecting';
-  return {map { ($_, $self->{$_}) } $self->_setting_keys};
+  return {map { ($_, $self->$_) } qw( name rooms state url )};
 }
 
 =head1 COPYRIGHT AND LICENSE

@@ -16,11 +16,12 @@ L<Convos::Core::Room> is a class describing a L<Convos> chat room.
 =cut
 
 use Mojo::Base 'Mojo::EventEmitter';
-use Role::Tiny::With;
-
-with 'Convos::Core::Role::Log';
 
 =head1 ATTRIBUTES
+
+=head2 connection
+
+Holds a L<Convos::Core::Connection> object.
 
 =head2 frozen
 
@@ -52,13 +53,31 @@ Holds the topic (subject) for this room.
 
 =cut
 
+sub connection { shift->{connection} or die 'connection required in constructor' }
 has frozen => '';
-has id     => sub { die 'id required in constructor' };
-has name   => sub { shift->id };
-has topic  => '';
-has users  => sub { +{} };
+sub id { shift->{id} or die 'id required in constructor' }
+has name => sub { shift->id };
+has topic => '';
+has users => sub { +{} };
 
 =head1 METHODS
+
+=head2 log
+
+  $self = $self->log($level => $format, @args);
+
+This method will emit a "log" event:
+
+  $self->emit(log => $level => $message);
+
+=cut
+
+sub log {
+  my ($self, $level, $format, @args) = @_;
+  my $message = @args ? sprintf $format, map { $_ // '' } @args : $format;
+
+  $self->emit(log => $level => $message);
+}
 
 =head2 n_users
 
@@ -70,15 +89,12 @@ Returns the number of L</users>.
 
 sub n_users { int keys %{$_[0]->users} || $_[0]->{n_users} || 0 }
 
+sub _path { join '/', $_[0]->connection->_path, $_[0]->id }
+
 sub TO_JSON {
   my $self = shift;
   return {frozen => $self->frozen, id => $self->id, name => $self->name, topic => $self->topic, users => $self->users};
 }
-
-sub _build_home    { }
-sub _log_file      { $_[0]->home->rel_file($_[0]->id) }
-sub _setting_keys  {qw( id )}
-sub _settings_file { die "$_[0] cannot save settings" }
 
 =head1 COPYRIGHT AND LICENSE
 

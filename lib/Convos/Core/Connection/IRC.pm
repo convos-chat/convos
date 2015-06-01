@@ -97,9 +97,9 @@ sub connect {
 
       $err = "$irc->{server} does not support SSL/TLS."
         if $err =~ /SSL\d*_GET_SERVER_HELLO/ and !$self->{disable_tls}++;
-      return $self->log(info => $err)->$cb($err) if $err;
+      return $self->log(warn => $err)->$cb($err) if $err;
       $self->{myinfo} ||= {};
-      $self->state('connected')->$cb('');
+      $self->state('connected')->log(info => "Connected to $irc->{server}.")->$cb('');
     }
   );
 
@@ -321,14 +321,6 @@ _event irc_join => sub {
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
   my $room = $self->room($msg->{params}[0], {frozen => '', name => $msg->{params}[0]});
 
-  Scalar::Util::weaken($self);
-  $room->on(
-    log => sub {
-      my ($room, $level, $message) = @_;
-      $self->emit(room => $room, {log => [$level => $message]});
-    }
-  ) unless $room->{on_log_event_attached_from_connection};
-
   $room->users->{lc($nick)} ||= {name => $nick};
   $room->log(debug => '-!- %s [%s@%s] has joined %s', $nick, $user, $host, $room->name);    # same as irssi
 };
@@ -350,7 +342,7 @@ _event irc_kick => sub {
     delete $room->users->{lc($nick)};
   }
 
-  $self->emit(room => $room, {users => $room->users});
+  $room->emit(change => {users => $room->users});
 };
 
 # :superman!superman@i.love.debian.org MODE superman :+i
@@ -376,7 +368,7 @@ _event irc_nick => sub {
     $info->{name} = $new_nick;
     $room->{users}{lc($new_nick)} = $info;
     $room->log(debug => '-!- %s is now known as %s', $old_nick, $new_nick);    # same as irssi
-    $self->emit(room => $room, {users => $room->users});
+    $room->emit(change => {users => $room->users});
   }
 };
 
@@ -396,7 +388,7 @@ _event irc_part => sub {
   }
 
   delete $room->users->{lc($nick)};
-  $self->emit(room => $room, {users => $room->users});
+  $room->emit(change => {users => $room->users});
 };
 
 _event irc_quit => sub {
@@ -408,7 +400,7 @@ _event irc_quit => sub {
   for my $room (values %{$self->{room}}) {
     delete $room->users->{$nick_lc} or next;
     $room->log(debug => '-!- %s [%s@%s] has quit [%s]', $nick, $user, $host, $reason);    # same as irssi
-    $self->emit(room => $room, {users => $room->users});
+    $room->emit(change => {users => $room->users});
   }
 };
 
@@ -438,7 +430,7 @@ _event irc_rpl_endofnames => sub {
   }
 
   $room->{last_irc_rpl_endofnames} = time;
-  $self->emit(room => $room, {users => $users});
+  $room->emit(change => {users => $room->users});
 };
 
 # :hybrid8.debian.local 372 superman :too cool for school

@@ -8,23 +8,12 @@ Convos::Core::User - A Convos user
 
 L<Convos::Core::User> is a class used to model a user in Convos.
 
-=head1 SYNOPSIS
-
-  use Convos::Core;
-  my $user = Convos::Core->new->user("jhthorsen@cpan.org");
-
-  $user->set_password("s3cret");
-  $user->save;
-
 =cut
 
 use Mojo::Base -base;
 use File::Path                 ();
 use Crypt::Eksblowfish::Bcrypt ();
-use Role::Tiny::With;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
-
-with 'Convos::Core::Role::ClassFor';
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
@@ -39,26 +28,36 @@ the following new ones.
 
 =head2 avatar
 
+  $str = $self->avatar;
+  $self = $self->avatar($str);
+
 Avatar identifier on either Facebook or Gravatar.
 
 =head2 core
+
+  $obj = $self->core;
 
 Holds a L<Convos::Core> object.
 
 =head2 email
 
+  $str = $self->email;
+
 Email address of user.
 
 =head2 password
 
-Encrypted password.
+  $str = $self->password;
+
+Encrypted password. See L</set_password> for how to change the password and
+L</validate_password> for password authentication.
 
 =cut
 
-has avatar   => '';
-has core     => sub { die 'core is required in constructor' };
-has email    => sub { die 'email is required in constructor' };
-has password => '';
+has avatar => '';
+sub core  { shift->{core}  or die 'core is required in constructor' }
+sub email { shift->{email} or die 'email is required in constructor' }
+sub password { shift->{password} ||= '' }
 
 =head1 METHODS
 
@@ -69,15 +68,13 @@ the following new ones.
 
   $connection = $self->connection($type => $name);
 
-Returns a connection object. C<$type> can either be a class name
-or a class moniker:
+Returns a connection object. Every new object created will emit
+a "connection" event:
 
-  .-----------------------------------------------------------------.
-  | $type                          | Resolved class name            |
-  |--------------------------------|--------------------------------|
-  | IRC                            | Convos::Core::Connection::IRC |
-  | Convos::Core::Connection::IRC | Convos::Core::Connection::IRC |
-  '-----------------------------------------------------------------'
+  $self->core->backend->emit(connection => $connection);
+
+C<$type> should be the type of the connection class. Example "IRC" will be
+translated to L<Convos::Core::Connection::IRC>.
 
 =cut
 
@@ -86,26 +83,59 @@ sub connection {
 
   die "Invalid name $name. Need to match /^[\\w-]+\$/" unless $name and $name =~ /^[\w-]+$/;
   $name = lc $name;
-  $type = "Convos::Core::Connection::$type" unless $type =~ /::/;
   $self->{connections}{$type}{$name} ||= do {
-    my $connection = $self->_class_for($type)->new(name => $name, user => $self);
-    warn "[Convos::Core::User] New connection object for name=$name\n";
+    my $connection_class = "Convos::Core::Connection::$type";
+    eval "require $connection_class;1" or die $@;
+    my $connection = $connection_class->new(name => $name, user => $self);
     Scalar::Util::weaken($connection->{user});
+    warn "[Convos::Core::User] Emit connection name=$name\n" if DEBUG;
+    $self->core->backend->emit(connection => $connection);
     $connection;
   };
+}
+
+=head2 load
+
+  $self = $self->load(sub { my ($self, $err) = @_; });
+
+Will load L</ATTRIBUTES> from persistent storage.
+See L<Convos::Core::Backend/load_object> for details.
+
+=cut
+
+sub load {
+  my $self = shift;
+  $self->core->backend->load_object($self, @_);
+  $self;
+}
+
+=head2 save
+
+  $self = $self->save(sub { my ($self, $err) = @_; });
+
+Will save L</ATTRIBUTES> to persistent storage.
+See L<Convos::Core::Backend/save_object> for details.
+
+=cut
+
+sub save {
+  my $self = shift;
+  $self->core->backend->save_object($self, @_);
+  $self;
 }
 
 =head2 set_password
 
   $self = $self->set_password($plain);
 
-Used to set L</password> to a crypted version of C<$plain>.
+Will set L</password> to a crypted version of C<$plain>.
 
 =cut
 
 sub set_password {
   die 'Usage: Convos::Core::User->set_password($plain)' unless $_[1];
-  $_[0]->password($_[0]->_bcrypt($_[1]));
+  $_[0]->{password} = $_[0]->_bcrypt($_[1]);
+  $_[0];
 }
 
 =head2 validate_password
@@ -124,13 +154,6 @@ sub validate_password {
   return 0;
 }
 
-sub TO_JSON {
-  my $self = shift;
-  my $json = {map { ($_, $self->{$_}) } $self->_setting_keys};
-  delete $json->{password};
-  return $json;
-}
-
 sub _bcrypt {
   my ($self, $plain, $settings) = @_;
 
@@ -142,12 +165,14 @@ sub _bcrypt {
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
 
-sub _build_home { Mojo::Home->new($_[0]->core->home->rel_dir($_[0]->email)) }
-sub _compose_classes_with { }    # will get role names from around modifiers
+sub _path { shift->email }
 
-sub _setting_keys {
-  $_[0]->{registered} ||= time;
-  qw( avatar email password registered );
+sub TO_JSON {
+  my ($self, $all) = @_;
+  $self->{registered} ||= time;
+  my $json = {map { ($_, $self->{$_}) } qw( avatar email password registered )};
+  delete $json->{password} unless $all;
+  return $json;
 }
 
 =head1 COPYRIGHT AND LICENSE

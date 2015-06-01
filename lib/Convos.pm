@@ -52,7 +52,12 @@ Holds a L<Convos::Core> object.
 
 =cut
 
-has core => sub { Convos::Core->new_with_backend($_[0]->config('backend')) };
+has core => sub {
+  my $self    = shift;
+  my $backend = $self->config('backend');
+  eval "require $backend;1" or die $@;
+  Convos::Core->new(backend => $backend->new);
+};
 
 =head1 METHODS
 
@@ -86,19 +91,24 @@ sub startup {
     }
   );
 
-  $self->core->start if $ENV{CONVOS_START_BACKEND} // 1;
+  my $core    = $self->core;
+  my $plugins = $config->{plugins};
+  $core->backend->register_plugin($_, $core, $plugins->{$_}) for grep { $plugins->{$_} } keys %$plugins;
+  $core->start if $ENV{CONVOS_START_BACKEND} // 1;
 }
 
 sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
-  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Role::File';
+  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
   $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
   $config->{hypnotoad}{pid_file} = $ENV{CONVOS_FRONTEND_PID_FILE} if $ENV{CONVOS_FRONTEND_PID_FILE};
   $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
-  $config->{swagger_file} ||= $self->home->rel_file('public/api.json');
+  $config->{plugins} ||= {};
+  $config->{plugins}{$_} = $config for split /:/, +($ENV{CONVOS_PLUGINS} // '');
   $config->{secure_cookies} ||= $ENV{CONVOS_SECURE_COOKIES} || 0;
+  $config->{swagger_file} ||= $self->home->rel_file('public/api.json');
   $config;
 }
 

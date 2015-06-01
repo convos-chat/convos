@@ -1,14 +1,15 @@
 use Mojo::Base -strict;
 use Convos::Core;
+use Convos::Core::Backend::File;
 use Test::More;
 
-local $ENV{CONVOS_SHARE_DIR} = 'convos-test-irc';
+local $ENV{CONVOS_HOME} = 'convos-test-irc';
 
-my $core       = Convos::Core->new_with_backend('File');
+my $core       = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $user       = $core->user('jan.henning.thorsen@example.com');
 my $connection = $user->connection(IRC => 'localhost');
 my $storage_file
-  = File::Spec->catfile($ENV{CONVOS_SHARE_DIR}, 'jan.henning.thorsen@example.com', 'IRC-localhost', 'settings.json');
+  = File::Spec->catfile($ENV{CONVOS_HOME}, 'jan.henning.thorsen@example.com', 'IRC-localhost', 'settings.json');
 my $err;
 
 is $connection->name, 'localhost', 'connection.name';
@@ -43,5 +44,5 @@ like $err, qr{without target and message}, 'send: without target and message';
 $connection->send('#test_convos' => '0', sub { $err = $_[1] });
 like $err, qr{Not connected}i, 'send: not connected';
 
-File::Path::remove_tree($ENV{CONVOS_SHARE_DIR});
+File::Path::remove_tree($ENV{CONVOS_HOME});
 done_testing;
