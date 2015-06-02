@@ -61,8 +61,4 @@ $connection->_irc->emit(irc_rpl_yourhost =>
 like $log, qr{^\[info\] \QYour host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2\E$}m,
   'logged irc_rpl_yourhost';
 
-$connection->_irc->emit(
-  irc_privmsg => {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'this is cool']});
-like $room_log, qr{^\#convos info \<Supergirl\> this is cool$}m, 'logged irc_privmsg';
-
 done_testing;

@@ -273,10 +273,13 @@ sub _irc_message {    # TODO
   my ($self, $event, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my $format = $event eq 'irc_privmsg' ? '<%s> %s' : $event eq 'ctcp_action' ? '* %s %s' : '-%s- %s';
-  my $room = $self->room($msg->{params}[0]);
+  my $is_private_message = $self->_is_current_nick($msg->{params}[0]);
 
   if ($user) {
-    $room->log(info => $format, $nick, $msg->{params}[1]);
+    my $room = $self->room($is_private_message ? $nick : $msg->{params}[0], {});
+    my $highlight = $is_private_message || grep { $msg->{params}[1] =~ /\b\Q$_\E\b/ } $_[0]->nick,
+      @{$_[0]->url->query->every_param('highlight')};
+    $room->log(($highlight ? 'warn' : 'info'), $format, $nick, $msg->{params}[1]);
   }
   else {
     $self->log(info => $format, $msg->{prefix} // $self->_irc->server, $msg->{params}[1]);
