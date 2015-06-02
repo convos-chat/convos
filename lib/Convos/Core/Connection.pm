@@ -214,7 +214,8 @@ in the process of connecting or that it want to connect.
 sub state {
   my ($self, $state) = @_;
   return $self->{state} ||= 'connecting' unless $state;
-  $self->{state} = $state if grep { $state eq $_ } qw( connected connecting disconnected );
+  die "Invalid state: $state" unless grep { $state eq $_ } qw( connected connecting disconnected );
+  $self->{state} = $state;
   $self;
 }
 
@@ -240,9 +241,11 @@ sub _userinfo {
 }
 
 sub TO_JSON {
-  my $self = shift;
+  my ($self, $persist) = @_;
   $self->{state} ||= 'connecting';
-  return {map { ($_, $self->$_) } qw( name rooms state url )};
+  my $json = {map { ($_, $self->$_) } qw( name rooms state url )};
+  $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
+  $json;
 }
 
 =head1 COPYRIGHT AND LICENSE

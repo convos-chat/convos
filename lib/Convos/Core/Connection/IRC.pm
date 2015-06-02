@@ -15,6 +15,7 @@ no warnings 'utf8';
 use Mojo::Base 'Convos::Core::Connection';
 use Mojo::IRC::UA;
 use Parse::IRC ();
+use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
 
 require Convos;
 
@@ -31,13 +32,20 @@ and implements the following new ones.
 
 has _irc => sub {
   my $self = shift;
-  my $nick = $self->_userinfo->[0];
-  my $irc  = Mojo::IRC::UA->new(debug_key => join ':', $nick, $self->name);
+  my $url  = $self->url;
+  my $user = $self->_userinfo->[0];
+  my $irc  = Mojo::IRC::UA->new(debug_key => join ':', $user, $self->name);
+  my $nick;
 
-  $nick =~ s![^\w_]!_!g;
+  unless ($nick = $url->query->param('nick')) {
+    $nick = $user;
+    $nick =~ s![^\w_]!_!g;
+    $url->query->param(nick => $nick);
+  }
 
   $irc->name("Convos v$Convos::VERSION");
   $irc->nick($nick);
+  $irc->user($user);
   $irc->parser(Parse::IRC->new(ctcp => 1));
 
   Scalar::Util::weaken($self);
@@ -79,18 +87,19 @@ See L<Convos::Core::Connection/connect>.
 sub connect {
   my ($self, $cb) = @_;
   my $irc      = $self->_irc;
-  my $url      = $self->url;
   my $userinfo = $self->_userinfo;
+  my $url      = $self->url;
 
-  Scalar::Util::weaken($self);
-  $irc->pass($userinfo->[1]);
-  $irc->server($url->host_port);
   $irc->user($userinfo->[0]);
+  $irc->pass($userinfo->[1]);
+  $irc->server($url->host_port) unless $irc->server;
   $irc->tls(($url->query->param('tls') // 1) ? {} : undef);
 
   return $self->tap($cb, "Invalid URL: hostname is not defined.") unless $irc->server;
 
+  Scalar::Util::weaken($self);
   $self->state('connecting');
+  $self->{steal_nick_tid} ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
   $irc->connect(
     sub {
       my ($irc, $err) = @_;
@@ -137,10 +146,14 @@ L</nick>.
 =cut
 
 sub nick {
-  my $self = shift;
-  my $res  = $self->_irc->nick(@_);
-  return $res unless ref $res;    # nick accessor
-  return $self;
+  my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
+  my ($self, @nick) = @_;    # @nick will be empty list on "get"
+
+  return $self->_irc->nick(@nick) unless $cb;
+  Scalar::Util::weaken($self);
+  $self->url->query->param(nick => $nick[0]) if @nick;
+  $self->_irc->nick(@nick, sub { shift; $self->$cb(@_) });
+  $self;
 }
 
 =head2 room
@@ -260,7 +273,7 @@ sub _event_irc_close {
   $self->state(delete $self->{disconnect} ? 'disconnected' : 'connecting');
   $self->log(
     info => 'You [%s@%s] have quit [Connection closed.]',
-    $self->nick, $self->_irc->real_host || $self->url->host
+    $self->_irc->nick, $self->_irc->real_host || $self->url->host
   );
   delete $self->{_irc};
 }
@@ -274,13 +287,15 @@ sub _event_irc_error {
 sub _irc_message {    # TODO
   my ($self, $event, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
-  my $format = $event eq 'irc_privmsg' ? '<%s> %s' : $event eq 'ctcp_action' ? '* %s %s' : '-%s- %s';
-  my $is_private_message = $self->_is_current_nick($msg->{params}[0]);
+  my $format             = $event eq 'irc_privmsg' ? '<%s> %s' : $event eq 'ctcp_action' ? '* %s %s' : '-%s- %s';
+  my $target             = $msg->{params}[0];
+  my $current_nick       = $self->_irc->nick;
+  my $is_private_message = $self->_is_current_nick($target);
 
   if ($user) {
-    my $room = $self->room($is_private_message ? $nick : $msg->{params}[0], {});
-    my $highlight = $is_private_message || grep { $msg->{params}[1] =~ /\b\Q$_\E\b/ } $_[0]->nick,
-      @{$_[0]->url->query->every_param('highlight')};
+    my $room = $self->room($is_private_message ? $nick : $target, {});
+    my $highlight = $is_private_message || grep { $msg->{params}[1] =~ /\b\Q$_\E\b/ } $current_nick,
+      @{$self->url->query->every_param('highlight')};
     $room->log(($highlight ? 'warn' : 'info'), $format, $nick, $msg->{params}[1]);
   }
   else {
@@ -288,7 +303,13 @@ sub _irc_message {    # TODO
   }
 }
 
-sub _is_current_nick { lc $_[0]->nick eq lc $_[1] }
+sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
+
+sub _steal_nick {
+  my $self = shift;
+  my $nick = $self->url->query->param('nick');
+  $self->_irc->write("NICK $nick") if $nick and $self->_irc->nick ne $nick;
+}
 
 # :hybrid8.debian.local 474 superman #convos :Cannot join channel (+b)
 _event err_bannedfromchan => sub {    # TODO
@@ -297,7 +318,7 @@ _event err_bannedfromchan => sub {    # TODO
   my $room = $self->room($channel => {});
 
   $room->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel");
-  $room->log(warn => '-!- %s is banned from %s [%s]', $self->nick, $channel, $room->frozen);
+  $room->log(warn => '-!- %s is banned from %s [%s]', $self->_irc->nick, $channel, $room->frozen);
 };
 
 _event err_cannotsendtochan => sub {
@@ -310,7 +331,7 @@ _event err_nicknameinuse => sub {    # TODO
   my $nick_in_use = $msg->{params}[1];
 
   # do not want to flod frontend with these messages
-  $self->log(warn => 'Nickname %s is already in use.', $nick_in_use) unless $self->{err_nicknameinuse}++;
+  $self->log(warn => 'Nickname %s is already in use.', $nick_in_use) unless $self->{err_nicknameinuse}{$nick_in_use}++;
 };
 
 # :hybrid8.debian.local 401 Superman #no_such_channel_ :No such nick/channel
@@ -362,16 +383,16 @@ _event irc_nick => sub {
   my ($old_nick)  = IRC::Utils::parse_user($msg->{prefix});
   my $old_nick_lc = lc $old_nick;
   my $new_nick    = $msg->{params}[0];
+  my $wanted_nick = $self->url->query->param('nick');
 
-  if ($self->_is_current_nick($new_nick)) {
-    delete $self->{err_nicknameinuse};    # allow warning on next nick change
-  }
+  delete $self->{err_nicknameinuse} if $wanted_nick and $wanted_nick eq $new_nick;   # allow warning on next nick change
+  $self->emit(nick => $new_nick) if $self->_is_current_nick($new_nick);
 
   for my $room (values %{$self->{room}}) {
     my $info = delete $room->users->{$old_nick_lc} or next;
     $info->{name} = $new_nick;
     $room->{users}{lc($new_nick)} = $info;
-    $room->log(debug => '-!- %s is now known as %s', $old_nick, $new_nick);    # same as irssi
+    $room->log(debug => '-!- %s is now known as %s', $old_nick, $new_nick);          # same as irssi
     $self->emit(users => $room->id => $room->users);
   }
 };
@@ -493,6 +514,7 @@ _event irc_rpl_welcome => sub {
   my ($self, $msg) = @_;
   my $rooms = $self->rooms;
   $self->log(info => $msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
+  $self->emit(nick => $msg->{params}[0]);
   $self->join_room($_, sub { }) for @$rooms;
 };
 
@@ -501,6 +523,13 @@ _event irc_topic => sub {
   my ($self, $msg) = @_;
   $self->room($msg->{params}[0] => {topic => $msg->{params}[1]});
 };
+
+sub DESTROY {
+  my $self = shift;
+  my $ioloop = $self->{_irc}{ioloop} or return;
+  my $tid;
+  $ioloop->remove($tid) if $tid = $self->{steal_nick_tid};
+}
 
 =head1 COPYRIGHT AND LICENSE
 
