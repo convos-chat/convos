@@ -343,10 +343,10 @@ _event irc_kick => sub {
   }
   else {
     $room->log(debug => '-!- %s was kicked from %s by %s [%s]', $nick, $room->name, $by, $reason);    # same as irssi
-    delete $room->users->{lc($nick)};
   }
 
-  $room->emit(change => {users => $room->users});
+  delete $room->users->{lc($nick)};
+  $self->emit(users => $room->id => $room->users);
 };
 
 # :superman!superman@i.love.debian.org MODE superman :+i
@@ -372,7 +372,7 @@ _event irc_nick => sub {
     $info->{name} = $new_nick;
     $room->{users}{lc($new_nick)} = $info;
     $room->log(debug => '-!- %s is now known as %s', $old_nick, $new_nick);    # same as irssi
-    $room->emit(change => {users => $room->users});
+    $self->emit(users => $room->id => $room->users);
   }
 };
 
@@ -392,7 +392,7 @@ _event irc_part => sub {
   }
 
   delete $room->users->{lc($nick)};
-  $room->emit(change => {users => $room->users});
+  $self->emit(users => $room->id => $room->users);
 };
 
 _event irc_quit => sub {
@@ -404,7 +404,7 @@ _event irc_quit => sub {
   for my $room (values %{$self->{room}}) {
     delete $room->users->{$nick_lc} or next;
     $room->log(debug => '-!- %s [%s@%s] has quit [%s]', $nick, $user, $host, $reason);    # same as irssi
-    $room->emit(change => {users => $room->users});
+    $self->emit(users => $room->id => $room->users);
   }
 };
 
@@ -434,7 +434,7 @@ _event irc_rpl_endofnames => sub {
   }
 
   $room->{last_irc_rpl_endofnames} = time;
-  $room->emit(change => {users => $room->users});
+  $self->emit(users => $room->id => $room->users);
 };
 
 # :hybrid8.debian.local 372 superman :too cool for school
