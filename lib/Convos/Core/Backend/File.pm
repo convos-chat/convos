@@ -158,30 +158,31 @@ sub _build_home {
   Mojo::Home->new(Cwd::abs_path($path));
 }
 
-sub _format_log_message {
-  my ($self, $level, $message) = @_;
-  my ($s, $m, $h, $day, $month, $year) = gmtime;
-  sprintf "%04d-%02d-%02dT%02d:%02d:%02d [%s] %s\n", $year + 1900, $month + 1, $day, $h, $m, $s, $level, $message;
-}
-
 sub _log {
-  my $self = shift;
-  my $fh   = $self->_log_fh(shift);    # $obj
+  my ($self, $obj, $level, $message) = @_;
+  my ($s, $m, $h, $day, $month, $year) = gmtime;
+  my $fh;
+
+  $month += 1;
+  $year  += 1900;
+  $day   = "0$day"   if $day < 10;
+  $month = "0$month" if $month < 10;
+  $fh    = $self->{log}{$obj}{"$year-$month-$day"}{fh};
+
+  unless ($fh) {
+    delete $self->{log}{$obj};    # make sure we close filehandle from yesterday
+    $obj->_path =~ m!^(.*)/(.+)$! or die "Invalid _path() from $obj";    # _path() return unix style /dir/file
+    my $dirname = $self->home->rel_dir($1);
+    my $path    = catfile($dirname,
+      $obj->isa('Convos::Core::Connection') ? "$2/$year-$month-$day.log" : "$year-$month-$day-$2.log");
+    File::Path::make_path($dirname);
+    open $fh, '>>', $path or die "Could not open log file $path: $!";
+    $self->{log_fh}{$obj}{"$year-$month-$day"} = {fh => $fh};    # TODO: Add time() so we can purge old filehandles
+  }
 
   flock $fh, LOCK_EX;
-  printf {$fh} $self->_format_log_message(@_);    # ($level, $message)
+  printf {$fh} sprintf "%d-%d-%dT%02d:%02d:%02d [%s] %s\n", $year, $month, $day, $h, $m, $s, $level, $message;
   flock $fh, LOCK_UN;
-}
-
-# TODO: Add global caching of filehandle so we can have a pool
-# of filehandles. Maybe something like FileCache.pm?
-sub _log_fh {
-  return $_[0]->{_log_fh} if $_[0]->{_log_fh};
-  my ($self, $obj) = @_;
-  my $path = $self->home->rel_file($obj->_path . '.log');
-  File::Path::make_path(File::Basename::dirname($path));
-  open my $fh, '>>', $path or die "Could not open log file $path: $!";
-  $obj->{_log_fh} = $fh;
 }
 
 sub _setup {
