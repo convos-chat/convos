@@ -34,7 +34,7 @@ no warnings qw( once redefine );
 
 is $connection->url->query->param('tls'), undef, 'enable tls';
 $connection->connect(sub { $err = $_[1] });
-is $err, '127.0.0.1 does not support SSL/TLS.', 'SSL connect attempt';
+like $err, qr{\bSSL\b}, 'SSL connect attempt';
 is $connection->url->query->param('tls'), 0, 'disable tls';
 
 $connection->send('', '0', sub { $err = $_[1] });

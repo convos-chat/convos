@@ -32,7 +32,7 @@ $room->on(log => sub { $room_log .= join ' ', shift->id, @_ });
     $connection->connect(sub { $err = $_[1] });
     is $connection->url->query->param('tls'), 0, 'tls disabled automatically';
   }
-  like $log, qr{^\[warn\] \S+ does not support SSL/TLS\.$}m, 'logged tls';
+  like $log, qr{\bSSL\s}m, 'logged ssl error';
 }
 
 $connection->_irc->emit('close');

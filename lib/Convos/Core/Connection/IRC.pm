@@ -95,9 +95,11 @@ sub connect {
     sub {
       my ($irc, $err) = @_;
 
-      $url->query->param(tls => 0) if $err =~ /IO::Socket::SSL/;
-      $err = "$irc->{server} does not support SSL/TLS."
-        if $err =~ /SSL\d*_GET_SERVER_HELLO/ and $url->query->param(tls => 0);
+      if ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/) {
+        $url->query->param(tls => 0);
+        $self->save(sub { })    # save updated URL
+      }
+
       return $self->log(warn => $err)->$cb($err) if $err;
       $self->{myinfo} ||= {};
       $self->state('connected')->log(info => "Connected to $irc->{server}.")->$cb('');
