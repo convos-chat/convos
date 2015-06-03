@@ -495,13 +495,17 @@ _event irc_rpl_namreply => sub {
 # :hybrid8.debian.local 332 superman #convos :test123
 _event irc_rpl_topic => sub {
   my ($self, $msg) = @_;
-  $self->room($msg->{params}[1] => {topic => $msg->{params}[2]});
+  my $room = $self->room($msg->{params}[1] => {topic => $msg->{params}[2]});
+  $room->log(debug => '-!- Topic for %s: %s', $room->name, $room->topic);
 };
 
 # :hybrid8.debian.local 333 superman #convos jhthorsen!jhthorsen@i.love.debian.org 1432142279
 _event irc_rpl_topicwhotime => sub {
   my ($self, $msg) = @_;    # TODO
-  $self->room($msg->{params}[1] => {topic_by => $msg->{params}[2]});
+  my $room = $self->room($msg->{params}[1] => {topic_by => $msg->{params}[2]});
+
+  # irssi log message contains localtime(), but we already log to file with a timestamp
+  $room->log(debug => '-!- Topic set by %s', $msg->{params}[2]);
 };
 
 # :hybrid8.debian.local 002 superman :Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2
@@ -521,7 +525,11 @@ _event irc_rpl_welcome => sub {
 # :superman!superman@i.love.debian.org TOPIC #convos :cool
 _event irc_topic => sub {
   my ($self, $msg) = @_;
-  $self->room($msg->{params}[0] => {topic => $msg->{params}[1]});
+  my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
+  my $room = $self->room($msg->{params}[0] => {topic => $msg->{params}[1]});
+
+  return $room->log(debug => '-!- Topic unset by %s', $nick) unless $room->topic;
+  return $room->log(debug => '-!- %s changed the topic to: %s', $nick, $room->topic);
 };
 
 sub DESTROY {
