@@ -12,7 +12,7 @@ local $ENV{CONVOS_HOME} = 'convos-test-user';
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 
-my $user = $core->user('jhthorsen@cpan.org');
+my $user = $core->user('jhthorsen@cpan.org', {});
 my $storage_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'settings.json');
 is $user->avatar,   '',                   'avatar';
 is $user->email,    'jhthorsen@cpan.org', 'email';

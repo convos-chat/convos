@@ -76,9 +76,11 @@ sub startup {
 
   $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
   $self->_setup_secrets;
+  $self->_add_helpers;
   $self->plugin(Swagger2 => {url => $config->{swagger_file}});
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
   $self->routes->get('/')->to(template => 'app');
+  $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 30);
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
@@ -95,6 +97,38 @@ sub startup {
   my $plugins = $config->{plugins};
   $core->backend->register_plugin($_, $core, $plugins->{$_}) for grep { $plugins->{$_} } keys %$plugins;
   $core->start if $ENV{CONVOS_START_BACKEND} // 1;
+}
+
+sub _add_helpers {
+  my $self = shift;
+
+  $self->helper(
+    invalid_request => sub {
+      my ($c, $message, $path) = @_;
+      my @errors;
+
+      if (UNIVERSAL::isa($message, 'Mojolicious::Validator::Validation')) {
+        $path ||= '';
+        push @errors, map {
+          my $error = $message->error($_);
+          {message => $error->[0] eq 'required' ? 'Missing property.' : 'Invalid input.', path => "$path/$_"}
+        } sort keys %{$message->{error}};
+      }
+      else {
+        push @errors, {message => $message, path => $path || '/'};
+      }
+
+      return {valid => Mojo::JSON->false, errors => \@errors};
+    }
+  );
+
+  $self->helper(
+    'backend.user' => sub {
+      my $self = shift;
+      return undef unless $self->session('email');
+      return $self->app->core->user($self->session('email'));
+    }
+  );
 }
 
 sub _config {

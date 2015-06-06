@@ -3,7 +3,7 @@ use Test::More;
 use Convos::Core;
 
 my $core       = Convos::Core->new;
-my $user       = $core->user('test@example.com');
+my $user       = $core->user('test@example.com', {});
 my $connection = $user->connection(IRC => 'whatever');
 
 isa_ok($connection->room('#foo'), 'Convos::Core::Room');

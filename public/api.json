@@ -35,9 +35,10 @@
     },
     "email": {
       "name": "ident",
-      "in": "body",
+      "in": "formData",
       "required": true,
       "type": "string",
+      "format": "email",
       "description": "User email"
     },
     "ident": {
@@ -78,10 +79,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid input.",
-            "schema": { "$ref": "#/definitions/BadRequest" }
           },
           "default": {
             "description": "Error.",
@@ -168,8 +165,8 @@
         "parameters": [
           { "$ref": "#/parameters/session" },
           {
-            "name": "body",
-            "in": "body",
+            "name": "data",
+            "in": "formData",
             "required": true,
             "schema": { "$ref": "#/definitions/Connection" }
           }
@@ -240,8 +237,8 @@
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/session" },
           {
-            "name": "body",
-            "in": "body",
+            "name": "data",
+            "in": "formData",
             "schema": { "$ref": "#/definitions/Connection" }
           }
         ],
@@ -365,8 +362,8 @@
         "parameters": [
           { "$ref": "#/parameters/session" },
           {
-            "name": "body",
-            "in": "body",
+            "name": "data",
+            "in": "formData",
             "type": "array",
             "description": "List of notification IDs.",
             "items": {
@@ -430,15 +427,21 @@
       },
       "post": {
         "tags": [ "user" ],
-        "summary": "Register a new user or update an existing user.",
+        "summary": "Update an existing user.",
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "userSave",
         "parameters": [
           { "$ref": "#/parameters/session" },
           {
-            "name": "body",
-            "in": "body",
-            "schema": { "$ref": "#/definitions/User" }
+            "name": "data",
+            "in": "formData",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "avatar": { "type": "string", "description": "User avatar" },
+                "password": { "type": "string", "description": "User password", "minLength": 6 }
+              }
+            }
           }
         ],
         "responses": {
@@ -461,10 +464,16 @@
         "operationId": "userAuthenticate",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": { "$ref": "#/definitions/Authenticate" }
+            "name": "data",
+            "in": "formData",
+            "schema": {
+              "type": "object",
+              "required": true,
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true, "description": "User email" },
+                "password": { "type": "string", "required": true, "description": "User password" }
+              }
+            }
           }
         ],
         "responses": {
@@ -478,16 +487,41 @@
           }
         }
       }
+    },
+    "/user/register": {
+      "post": {
+        "tags": [ "user" ],
+        "summary": "Register a new user.",
+        "x-mojo-controller": "Convos::Controller::User",
+        "operationId": "userRegister",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "formData",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "avatar": { "type": "string", "description": "User avatar" },
+                "email": { "type": "string", "required": true, "format": "email", "description": "User email" },
+                "password": { "type": "string", "required": true, "minLength": 6, "description": "User password" }
+              }
+            }
+          }
+        ],
+        "responses": {
+            "200": {
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/User" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
     }
   },
   "definitions": {
-    "BadRequest": {
-      "required": [ "code", "message" ],
-      "properties": {
-        "code": { "type": "integer", "format": "int32" },
-        "message": { "type": "string" }
-      }
-    },
     "Command": {
       "required": [ "id", "command" ],
       "properties": {
@@ -515,8 +549,13 @@
     "Error": {
       "required": [ "code", "message" ],
       "properties": {
-        "code": { "type": "integer", "format": "int32" },
-        "message": { "type": "string" }
+        "errors": {
+          "type": "array",
+          "items": {
+            "message": { "type": "string" },
+            "path": { "type": "string" }
+          }
+        }
       }
     },
     "Message": {
@@ -552,10 +591,10 @@
       }
     },
     "User": {
-      "required": [ "email" ],
       "properties": {
+        "email": { "type": "string" },
         "avatar": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
+        "registered": { "type": "integer" },
         "links": {
           "type": "array",
           "items": { "$ref": "#/definitions/Rel" }

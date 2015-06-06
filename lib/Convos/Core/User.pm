@@ -170,7 +170,7 @@ sub _path { shift->email }
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{registered} ||= time;
-  my $json = {map { ($_, $self->{$_}) } qw( avatar email password registered )};
+  my $json = {map { ($_, $self->{$_} // '') } qw( avatar email password registered )};
   delete $json->{password} unless $persist;
   return $json;
 }

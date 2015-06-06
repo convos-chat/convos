@@ -6,7 +6,7 @@ use Convos::Core;
 my $t          = Test::Mojo::IRC->new;
 my $server     = $t->start_server;
 my $core       = Convos::Core->new;
-my $user       = $core->user('nick.young@example.com');
+my $user       = $core->user('nick.young@example.com', {});
 my $connection = $user->connection(IRC => 'localhost');
 my $nick;
 

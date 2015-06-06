@@ -49,22 +49,22 @@ Image.
     "body": string, // Image binary data
   },
 
-=head4 400 - Bad Request
-
-Invalid input.
-
-  {
-    "code": int32, // required
-    "message": string, // required
-  },
-
 =head4 Default
 
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 command
@@ -101,8 +101,17 @@ No description.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 commandHistory
@@ -142,8 +151,17 @@ List of commands.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 commandList
@@ -177,8 +195,17 @@ List of commands.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 connection
@@ -217,8 +244,17 @@ A single connection.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 connectionAdd
@@ -231,22 +267,12 @@ Add a connection.
 
 =head3 Parameters
 
-  .----------------------------------------------------------------------------.
-  | Name             | In     | Type   | Required | Description                |
-  |----------------------------------------------------------------------------|
-  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
-  | body             | body   | schema | Yes      | No description.            |
-  '----------------------------------------------------------------------------'
-
-  body:
-
-  {
-    "connection_id": string, // required
-    "nick": string, // required
-    "password": string, // No description.
-    "server": string, // required
-    "username": string, // No description.
-  },
+  .------------------------------------------------------------------------------.
+  | Name             | In       | Type   | Required | Description                |
+  |------------------------------------------------------------------------------|
+  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now. |
+  | data             | formData |        | Yes      | No description.            |
+  '------------------------------------------------------------------------------'
 
 =head3 Responses
 
@@ -267,8 +293,17 @@ Connection information.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 connectionDelete
@@ -302,8 +337,17 @@ Delete a connection.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 connectionUpdate
@@ -316,23 +360,13 @@ Update a connection.
 
 =head3 Parameters
 
-  .-------------------------------------------------------------------------------.
-  | Name             | In     | Type   | Required | Description                   |
-  |-------------------------------------------------------------------------------|
-  | connection_id    | path   | string | Yes      | A friendly name of the server |
-  | X-Convos-Session | header | string | No       | TODO. Use cookies for now.    |
-  | body             | body   | schema | Yes      | No description.               |
-  '-------------------------------------------------------------------------------'
-
-  body:
-
-  {
-    "connection_id": string, // required
-    "nick": string, // required
-    "password": string, // No description.
-    "server": string, // required
-    "username": string, // No description.
-  },
+  .---------------------------------------------------------------------------------.
+  | Name             | In       | Type   | Required | Description                   |
+  |---------------------------------------------------------------------------------|
+  | connection_id    | path     | string | Yes      | A friendly name of the server |
+  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now.    |
+  | data             | formData |        | No       | No description.               |
+  '---------------------------------------------------------------------------------'
 
 =head3 Responses
 
@@ -348,8 +382,17 @@ Update a connection.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 connections
@@ -390,8 +433,17 @@ List of connections.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 conversation
@@ -433,8 +485,17 @@ List of messsages.
 Internal server error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 conversations
@@ -472,8 +533,17 @@ List of messsages.
 Internal server error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 notificationSeen
@@ -488,17 +558,12 @@ TODO: Notification count vs red/green toggling of a single notification.
 
 =head3 Parameters
 
-  .----------------------------------------------------------------------------.
-  | Name             | In     | Type   | Required | Description                |
-  |----------------------------------------------------------------------------|
-  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
-  | body             | body   | schema | Yes      | List of notification IDs.  |
-  '----------------------------------------------------------------------------'
-
-  body:
-
-  {
-  },
+  .------------------------------------------------------------------------------.
+  | Name             | In       | Type   | Required | Description                |
+  |------------------------------------------------------------------------------|
+  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now. |
+  | data             | formData | array  | No       | List of notification IDs.  |
+  '------------------------------------------------------------------------------'
 
 =head3 Responses
 
@@ -520,8 +585,17 @@ List of commands.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 notifications
@@ -562,8 +636,17 @@ List of commands.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 user
@@ -590,7 +673,7 @@ User profile.
 
   {
     "avatar": string, // No description.
-    "email": email, // required
+    "email": string, // No description.
     "links":     [
       {
         "href": url, // required
@@ -598,6 +681,7 @@ User profile.
       },
       ...
     ]
+    "registered": integer, // No description.
   },
 
 =head4 Default
@@ -605,8 +689,17 @@ User profile.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 userAuthenticate
@@ -619,16 +712,11 @@ Authenticate a user based on email and password.
 
 =head3 Parameters
 
-  .---------------------------------------------------.
-  | Name | In   | Type   | Required | Description     |
-  |---------------------------------------------------|
-  | body | body | schema | Yes      | No description. |
-  '---------------------------------------------------'
-
-  body:
-
-  {
-  },
+  .-----------------------------------------------------.
+  | Name | In       | Type | Required | Description     |
+  |-----------------------------------------------------|
+  | data | formData |      | No       | No description. |
+  '-----------------------------------------------------'
 
 =head3 Responses
 
@@ -638,7 +726,7 @@ User profile.
 
   {
     "avatar": string, // No description.
-    "email": email, // required
+    "email": string, // No description.
     "links":     [
       {
         "href": url, // required
@@ -646,6 +734,7 @@ User profile.
       },
       ...
     ]
+    "registered": integer, // No description.
   },
 
 =head4 Default
@@ -653,8 +742,17 @@ User profile.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head2 userDelete
@@ -695,40 +793,34 @@ Successfully deleted.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
-  },
-
-=head2 userSave
-
-Register a new user or update an existing user.
-
-=head3 Resource URL
-
-  POST http://demo.convos.by/1.0/user
-
-=head3 Parameters
-
-  .----------------------------------------------------------------------------.
-  | Name             | In     | Type   | Required | Description                |
-  |----------------------------------------------------------------------------|
-  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
-  | body             | body   | schema | Yes      | No description.            |
-  '----------------------------------------------------------------------------'
-
-  body:
-
-  {
-    "avatar": string, // No description.
-    "email": email, // required
-    "links":     [
+    "code":     {// required
+      "required":     },
+    "errors":     [
       {
-        "href": url, // required
-        "rel": string, // required
+        "message": string, // No description.
+        "path": string, // No description.
       },
       ...
     ]
+    "message":     {// required
+      "required":     },
   },
+
+=head2 userRegister
+
+Register a new user.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/user/register
+
+=head3 Parameters
+
+  .-----------------------------------------------------.
+  | Name | In       | Type | Required | Description     |
+  |-----------------------------------------------------|
+  | data | formData |      | No       | No description. |
+  '-----------------------------------------------------'
 
 =head3 Responses
 
@@ -738,7 +830,7 @@ User profile.
 
   {
     "avatar": string, // No description.
-    "email": email, // required
+    "email": string, // No description.
     "links":     [
       {
         "href": url, // required
@@ -746,6 +838,7 @@ User profile.
       },
       ...
     ]
+    "registered": integer, // No description.
   },
 
 =head4 Default
@@ -753,8 +846,71 @@ User profile.
 Error.
 
   {
-    "code": int32, // required
-    "message": string, // required
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
+  },
+
+=head2 userSave
+
+Update an existing user.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/user
+
+=head3 Parameters
+
+  .------------------------------------------------------------------------------.
+  | Name             | In       | Type   | Required | Description                |
+  |------------------------------------------------------------------------------|
+  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now. |
+  | data             | formData |        | No       | No description.            |
+  '------------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+User profile.
+
+  {
+    "avatar": string, // No description.
+    "email": string, // No description.
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+    "registered": integer, // No description.
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
   },
 
 =head1 COPYRIGHT AND LICENSE

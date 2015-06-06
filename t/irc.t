@@ -5,9 +5,9 @@ use Test::More;
 
 local $ENV{CONVOS_HOME} = 'convos-test-irc';
 
-my $core         = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $user         = $core->user('test.user@example.com');
-my $connection   = $user->connection(IRC => 'localhost');
+my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
+my $user = $core->user('test.user@example.com', {});
+my $connection = $user->connection(IRC => 'localhost');
 my $storage_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'test.user@example.com', 'IRC-localhost', 'settings.json');
 my $err;
 

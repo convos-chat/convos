@@ -6,7 +6,7 @@ use Test::Deep;
 my $t              = Test::Mojo::IRC->new;
 my $server         = $t->start_server;
 my $core           = Convos::Core->new;
-my $user           = $core->user('superman@example.com');
+my $user           = $core->user('superman@example.com', {});
 my $connection     = $user->connection(IRC => 'localhost');
 my $stop_re        = qr{should_not_match};
 my $connection_log = '';

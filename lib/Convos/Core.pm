@@ -102,11 +102,45 @@ sub start {
   Scalar::Util::weaken($self);
   $self->backend->find_users(
     sub {
-      $self->_start(map { $self->user($_) } @{$_[2]});
+      $self->_start(map { $self->user($_, {}) } @{$_[2]});
     }
   );
 
   return $self;
+}
+
+=head2 user
+
+  $user = $self->user($email);         # get
+  $user = $self->user($email, \%attr); # create/update
+
+Returns a L<Convos::Core::User> object. Every new object created will emit
+a "user" event:
+
+  $self->backend->emit(user => $user);
+
+=cut
+
+sub user {
+  my ($self, $email, $attr) = @_;
+
+  die "Invalid email $email. Need to match /.\@./." unless $email and $email =~ /.\@./;
+  $email = lc $email;
+
+  if ($attr) {
+    my $user = $self->{user}{$email} ||= do {
+      my $user = Convos::Core::User->new(core => $self, email => $email);
+      Scalar::Util::weaken($user->{core});
+      warn "[Convos::Core::User] Emit user: email=$email\n" if DEBUG;
+      $self->backend->emit(user => $user);
+      $user;
+    };
+    $user->{$_} = $attr->{$_} for keys %$attr;
+    return $user;
+  }
+  else {
+    return $self->{user}{$email} || Convos::Core::User->new(core => $self, email => $email);
+  }
 }
 
 sub _start {
@@ -133,31 +167,6 @@ sub _start {
       }
     );
   }
-}
-
-=head2 user
-
-  $user = $self->user($email);
-
-Returns a L<Convos::Core::User> object. Every new object created will emit
-a "user" event:
-
-  $self->backend->emit(user => $user);
-
-=cut
-
-sub user {
-  my ($self, $email) = (shift, shift);
-
-  die "Invalid email $email. Need to match /.\@./." unless $email and $email =~ /.\@./;
-  $email = lc $email;
-  $self->{users}{$email} ||= do {
-    my $user = Convos::Core::User->new(core => $self, email => $email);
-    Scalar::Util::weaken($user->{core});
-    warn "[Convos::Core] Emit user email=$email\n" if DEBUG;
-    $self->backend->emit(user => $user);
-    $user;
-  };
 }
 
 =head1 COPYRIGHT AND LICENSE
