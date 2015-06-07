@@ -35,7 +35,7 @@
     },
     "email": {
       "name": "ident",
-      "in": "formData",
+      "in": "body",
       "required": true,
       "type": "string",
       "format": "email",
@@ -166,7 +166,7 @@
           { "$ref": "#/parameters/session" },
           {
             "name": "data",
-            "in": "formData",
+            "in": "body",
             "required": true,
             "schema": { "$ref": "#/definitions/Connection" }
           }
@@ -238,7 +238,7 @@
           { "$ref": "#/parameters/session" },
           {
             "name": "data",
-            "in": "formData",
+            "in": "body",
             "schema": { "$ref": "#/definitions/Connection" }
           }
         ],
@@ -363,7 +363,7 @@
           { "$ref": "#/parameters/session" },
           {
             "name": "data",
-            "in": "formData",
+            "in": "body",
             "type": "array",
             "description": "List of notification IDs.",
             "items": {
@@ -434,7 +434,7 @@
           { "$ref": "#/parameters/session" },
           {
             "name": "data",
-            "in": "formData",
+            "in": "body",
             "schema": {
               "type": "object",
               "properties": {
@@ -465,7 +465,7 @@
         "parameters": [
           {
             "name": "data",
-            "in": "formData",
+            "in": "body",
             "schema": {
               "type": "object",
               "required": true,
@@ -497,7 +497,7 @@
         "parameters": [
           {
             "name": "data",
-            "in": "formData",
+            "in": "body",
             "schema": {
               "type": "object",
               "properties": {
