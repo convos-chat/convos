@@ -23,7 +23,7 @@ See L<Convos::Manual::API/user>.
 
 sub user {
   my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->_unauthorized($cb);
+  my $user = $self->backend->user or return $self->unauthorized($cb);
 
   $self->$cb($user->TO_JSON, 200);
 }
@@ -54,7 +54,7 @@ See L<Convos::Manual::API/userDelete>.
 
 sub user_delete {
   my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->_unauthorized($cb);
+  my $user = $self->backend->user or return $self->unauthorized($cb);
 
   $self->delay(
     sub { $self->app->core->backend->find_users(shift->begin); },
@@ -112,7 +112,7 @@ See L<Convos::Manual::API/userSave>.
 
 sub user_save {
   my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->_unauthorized($cb);
+  my $user = $self->backend->user or return $self->unauthorized($cb);
 
   # TODO: Add support for changing email
 
@@ -131,11 +131,6 @@ sub user_save {
       $self->$cb($user->TO_JSON, 200);
     },
   );
-}
-
-sub _unauthorized {
-  my ($self, $cb) = @_;
-  return $self->$cb($self->invalid_request('Need to log in first.', '/X-Convos-Session'), 401);
 }
 
 =head1 COPYRIGHT AND LICENSE
