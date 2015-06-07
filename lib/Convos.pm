@@ -77,6 +77,7 @@ sub startup {
   $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
   $self->_setup_secrets;
   $self->_add_helpers;
+  $self->_setup_assets;
   $self->plugin(Swagger2 => {url => $config->{swagger_file}});
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
   $self->routes->get('/')->to(template => 'app');
@@ -154,6 +155,35 @@ sub _home_relative_to_lib {
   $self->static->paths->[0] = $self->home->rel_dir('public');
 }
 
+sub _setup_assets {
+  my $self       = shift;
+  my @javascript = qw(
+    http://code.jquery.com/jquery-1.11.3.min.js
+    http://cdnjs.cloudflare.com/ajax/libs/riot/2.1.0/riot.js
+    /js/window.js
+    /js/router.js
+    /js/materialize/hammer.min.js
+    /js/materialize/jquery.hammer.js
+    /js/materialize/velocity.min.js
+    /js/materialize/waves.js
+    /js/materialize/jquery.easing.1.3.js
+    /js/materialize/jquery.timeago.min.js
+    /js/materialize/global.js
+    /js/materialize/animation.js
+    /js/materialize/buttons.js
+    /js/materialize/dropdown.js
+    /js/materialize/forms.js
+    /js/materialize/tooltip.js
+    /js/materialize/animation.js
+  );
+
+  push @javascript, map {"/js/riot/$_"} sort { $a cmp $b } @{$self->home->list_files('public/js/riot')};
+
+  $self->plugin('riotjs');
+  $self->asset('convos.css' => 'sass/main.scss');
+  $self->asset('convos.js' => @javascript, '/js/main.js');
+}
+
 sub _setup_secrets {
   my $self = shift;
   my $secrets = $self->config('secrets') || [split /:/, $ENV{CONVOS_SECRETS} || ''];
@@ -186,4 +216,18 @@ __DATA__
 @@ app.html.ep
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Convos</title>
+    %= asset 'convos.css';
+  </head>
+  <body>
+    <div class="loading-convos valign-wrapper">
+      <div class="valign center">
+        <h5>Loading <a href="https://convos.by">Convos</a>...</h5>
+        <p class="grey-text">This should only take a few seconds.</p>
+      </div>
+    </div>
+    <div id="app"></div>
+    %= asset 'convos.js';
+  </body>
 </html>
