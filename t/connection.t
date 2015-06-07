@@ -14,7 +14,7 @@ is $room->n_users, 0, 'room->n_users';
 ok $connection->{room}{'#foo'}, 'room on create/update';
 
 $connection = Convos::Core::Connection->new;
-for my $method (qw( connect join_room room_list send topic)) {
+for my $method (qw( connect join_room all_rooms send topic)) {
   my $err;
   eval {
     $connection->$method(sub { $err = $_[1] });

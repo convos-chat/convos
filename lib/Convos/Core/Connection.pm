@@ -46,13 +46,6 @@ the following new ones.
 
 Holds the name of the connection.
 
-=head2 rooms
-
-  $array_ref = $self->rooms;
-  $self = $self->rooms(["#convos", "#channel with-key"]);
-
-Holds a list of rooms / channel names.
-
 =head2 url
 
   $url = $self->url;
@@ -69,7 +62,6 @@ Holds a L<Convos::Core::User> object that owns this connection.
 =cut
 
 sub name { shift->{name} or die 'name is required in constructor' }
-has rooms => sub { [] };
 
 sub url {
   return $_[0]->{url} if ref $_[0]->{url};
@@ -82,6 +74,30 @@ has user => sub { die 'user is required' };
 
 L<Convos::Core::Connection> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
+
+=head2 active_rooms
+
+  $objs = $self->active_rooms;
+
+Returns an array-ref of of L<Convos::Core::Room> objects.
+
+=cut
+
+sub active_rooms {
+  my $self = shift;
+  return [grep { $_->active } values %{$self->{room}}];
+}
+
+=head2 all_rooms
+
+  $self = $self->all_rooms(sub { my ($self, $err, $list) = @_; });
+
+Used to retrieve a list of L<Convos::Core::Room> objects for the given
+connection.
+
+=cut
+
+sub all_rooms { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "all_rooms" not implemented.', []); }
 
 =head2 connect
 
@@ -161,17 +177,6 @@ sub room {
   }
 }
 
-=head2 room_list
-
-  $self = $self->room_list(sub { my ($self, $err, $list) = @_; });
-
-Used to retrieve a list of L<Convos::Core::Room> objects for the given
-connection.
-
-=cut
-
-sub room_list { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "room_list" not implemented.', []); }
-
 =head2 save
 
   $self = $self->save(sub { my ($self, $err) = @_; });
@@ -243,7 +248,7 @@ sub _userinfo {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{state} ||= 'connecting';
-  my $json = {map { ($_, $self->$_) } qw( name rooms state url )};
+  my $json = {map { ($_, $self->$_) } qw( name state url )};
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
   $json;
 }

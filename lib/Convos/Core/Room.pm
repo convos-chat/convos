@@ -19,6 +19,12 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 =head1 ATTRIBUTES
 
+=head2 active
+
+  $bool = $self->active;
+
+True if this is a room which the L<user|Convos::Core::User> want to be part of.
+
 =head2 connection
 
 Holds a L<Convos::Core::Connection> object.
@@ -41,6 +47,12 @@ Unique identifier for this room.
 
 The name of this room.
 
+=head2 password
+
+  $str = $self->password;
+
+Holds a password required to join the room.
+
 =head2 topic
 
   $str = $self->topic;
@@ -51,14 +63,25 @@ Holds the topic (subject) for this room.
 
   $hash_ref = $self->users;
 
+Holds a hash-ref of users. Example:
+
+  {
+    $id => {nick => $str},
+    ...
+  }
+
+C<$id> is ofter lower case version of nick.
+
 =cut
 
+has active => 0;
 sub connection { shift->{connection} or die 'connection required in constructor' }
 has frozen => '';
 sub id { shift->{id} or die 'id required in constructor' }
 has name => sub { shift->id };
-has topic => '';
-has users => sub { +{} };
+has password => '';
+has topic    => '';
+has users    => sub { +{} };
 
 =head1 METHODS
 

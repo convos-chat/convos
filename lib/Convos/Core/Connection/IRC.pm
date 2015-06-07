@@ -78,6 +78,43 @@ has _irc => sub {
 L<Convos::Core::Connection::IRC> inherits all methods from L<Convos::Core::Connection>
 and implements the following new ones.
 
+=head2 all_rooms
+
+See L<Convos::Core::Connection/all_rooms>.
+
+=cut
+
+sub all_rooms {
+  my ($self, $cb) = @_;
+
+  if (time < ($self->{last_irc_rpl_listend} || 0) - 60) {
+    return $self->$cb('', [values %{$self->{room}}]);
+  }
+
+  Scalar::Util::weaken($self);
+  $self->_irc->channels(
+    sub {
+      my ($irc, $err, $channels) = @_;
+      my $last = $self->{last_irc_rpl_listend} || 0;
+      my $n = 0;
+
+      return $self->$cb($err, $channels) if $err;
+
+      for my $name (keys %$channels) {
+        my $id = lc $name;
+        my $room = $self->room($id, {name => $name});
+        $room->topic($channels->{$name}{topic}) unless $room->topic;
+        $room->{n_users} = $channels->{$name}{n_users};
+      }
+
+      $self->{last_irc_rpl_listend} = time;
+      $self->$cb('', [values %{$self->{room}}]);
+    },
+  );
+
+  return $self;
+}
+
 =head2 connect
 
 See L<Convos::Core::Connection/connect>.
@@ -125,10 +162,13 @@ See L<Convos::Core::Connection/join_room>.
 =cut
 
 sub join_room {
-  my ($self, $channel, $cb) = @_;
-  return $self->tap($cb, "", $self->room($channel)) if %{$self->room($channel)->users};
+  my ($self, $room, $cb) = @_;
+  my ($channel, $password) = split /\s/, $room, 2;
+
+  $room = $self->room($channel, {active => 1, password => $password // ''});
+  return $self->tap($cb, '', $room) if %{$room->users};
   Scalar::Util::weaken($self);
-  $self->_irc->join_channel($channel, sub { $self->$cb($_[1], $self->room($channel)); });
+  $self->_irc->join_channel($channel, sub { $self->$cb($_[1], $room); });
   $self;
 }
 
@@ -165,43 +205,6 @@ Force C<$id> to be lowercase. See L<Convos::Core::Connection/room>.
 sub room {
   my ($self, $id, @args) = @_;
   $self->SUPER::room(lc $id, @args);
-}
-
-=head2 room_list
-
-See L<Convos::Core::Connection/room_list>.
-
-=cut
-
-sub room_list {
-  my ($self, $cb) = @_;
-
-  if (time < ($self->{last_irc_rpl_listend} || 0) - 60) {
-    return $self->$cb('', [values %{$self->{room}}]);
-  }
-
-  Scalar::Util::weaken($self);
-  $self->_irc->channels(
-    sub {
-      my ($irc, $err, $channels) = @_;
-      my $last = $self->{last_irc_rpl_listend} || 0;
-      my $n = 0;
-
-      return $self->$cb($err, $channels) if $err;
-
-      for my $name (keys %$channels) {
-        my $id = lc $name;
-        my $room = $self->room($id, {name => $name});
-        $room->topic($channels->{$name}{topic}) unless $room->topic;
-        $room->{n_users} = $channels->{$name}{n_users};
-      }
-
-      $self->{last_irc_rpl_listend} = time;
-      $self->$cb('', [values %{$self->{room}}]);
-    },
-  );
-
-  return $self;
 }
 
 =head2 send
@@ -516,10 +519,10 @@ _event irc_rpl_yourhost => sub {
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 _event irc_rpl_welcome => sub {
   my ($self, $msg) = @_;
-  my $rooms = $self->rooms;
+  my $rooms = $self->active_rooms;
   $self->log(info => $msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->emit(nick => $msg->{params}[0]);
-  $self->join_room($_, sub { }) for @$rooms;
+  $self->join_room($_, sub { }) for map { $_->password ? join(' ', $_->name, $_->password) : $_->name } @$rooms;
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool
