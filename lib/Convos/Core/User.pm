@@ -80,18 +80,33 @@ translated to L<Convos::Core::Connection::IRC>.
 
 sub connection {
   my ($self, $type, $name) = @_;
+  my $connection;
 
   die "Invalid name $name. Need to match /^[\\w-]+\$/" unless $name and $name =~ /^[\w-]+$/;
-  $name = lc $name;
-  $self->{connections}{$type}{$name} ||= do {
-    my $connection_class = "Convos::Core::Connection::$type";
-    eval "require $connection_class;1" or die $@;
-    my $connection = $connection_class->new(name => $name, user => $self);
-    Scalar::Util::weaken($connection->{user});
-    warn "[Convos::Core::User] Emit connection name=$name\n" if DEBUG;
-    $self->core->backend->emit(connection => $connection);
-    $connection;
-  };
+  $name       = lc $name;
+  $connection = $self->{connection}{$type}{$name};
+  return $connection if $connection;
+
+  my $connection_class = "Convos::Core::Connection::$type";
+  eval "require $connection_class;1" or die $@;
+  $connection = $connection_class->new(name => $name, user => $self);
+  Scalar::Util::weaken($connection->{user});
+  warn "[Convos::Core::User] Emit connection for @{[$self->email]} type=$type name=$name\n" if DEBUG;
+  $self->core->backend->emit(connection => $connection);
+  return $self->{connection}{$type}{$name} = $connection;
+}
+
+=head2 connections
+
+  $objs = $self->connections;
+
+Returns an array-ref of of L<Convos::Core::Connection> objects.
+
+=cut
+
+sub connections {
+  my $self = shift;
+  return [map { values %{$self->{connection}{$_}} } keys %{$self->{connection}}];
 }
 
 =head2 load
@@ -108,6 +123,17 @@ sub load {
   $self->core->backend->load_object($self, @_);
   $self;
 }
+
+=head2 path
+
+  $str = $self->path;
+
+Returns a path to this object.
+Example: "/superman@example.com".
+
+=cut
+
+sub path { '/' . shift->email }
 
 =head2 save
 
@@ -165,14 +191,13 @@ sub _bcrypt {
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
 
-sub _path { shift->email }
-
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{registered} ||= time;
   my $json = {map { ($_, $self->{$_} // '') } qw( avatar email password registered )};
   delete $json->{password} unless $persist;
-  return $json;
+  $json->{path} = $self->path;
+  $json;
 }
 
 =head1 COPYRIGHT AND LICENSE

@@ -149,6 +149,19 @@ sub log {
   $self->emit(log => $level => $message);
 }
 
+=head2 path
+
+  $path = $self->path;
+
+Returns a path to this object.
+Example: "/superman@example.com/IRC/irc.perl.org".
+
+=cut
+
+sub path {
+  join '/', $_[0]->user->path, ref($_[0]) =~ /(\w+)$/, $_[0]->name;
+}
+
 =head2 room
 
   $room = $self->room($id);            # get
@@ -235,8 +248,6 @@ Used to retrieve or set topic for a room.
 
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
-sub _path { join '/', $_[0]->user->_path, join '-', ref($_[0]) =~ /(\w+)$/, $_[0]->name }
-
 sub _userinfo {
   my $self = shift;
   my @userinfo = split /:/, $self->url->userinfo // '';
@@ -250,6 +261,7 @@ sub TO_JSON {
   $self->{state} ||= 'connecting';
   my $json = {map { ($_, $self->$_) } qw( name state url )};
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
+  $json->{path} = $self->path;
   $json;
 }
 
