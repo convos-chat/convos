@@ -165,7 +165,7 @@ sub join_room {
   my ($self, $room, $cb) = @_;
   my ($channel, $password) = split /\s/, $room, 2;
 
-  $room = $self->room($channel, {active => 1, password => $password // ''});
+  $room = $self->room($channel, {active => 1, name => $channel, password => $password // ''});
   return $self->tap($cb, '', $room) if %{$room->users};
   Scalar::Util::weaken($self);
   $self->_irc->join_channel($channel, sub { $self->$cb($_[1], $room); });
