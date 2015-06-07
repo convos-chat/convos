@@ -1,0 +1,7 @@
+.alert {
+  background-color: color('red', 'lighten-1');
+  color: $body-bg;
+  padding: $card-padding / 2;
+  border-radius: 2px;
+  @extend .z-depth-1;
+}
