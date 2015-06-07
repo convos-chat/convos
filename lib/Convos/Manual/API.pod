@@ -73,7 +73,7 @@ Send a command to the server.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/1.0/command/{connection_id}/{conversation_id}
+  POST http://demo.convos.by/1.0/command/{connection_id}/{room_id}
 
 =head3 Parameters
 
@@ -81,7 +81,7 @@ Send a command to the server.
   | Name             | In     | Type   | Required | Description                      |
   |----------------------------------------------------------------------------------|
   | connection_id    | path   | string | Yes      | A friendly name of the server    |
-  | conversation_id  | path   | string | No       | The name of the person/chat room |
+  | room_id          | path   | string | No       | The name of the person/chat room |
   | X-Convos-Session | header | string | No       | TODO. Use cookies for now.       |
   '----------------------------------------------------------------------------------'
 
@@ -267,12 +267,22 @@ Add a connection.
 
 =head3 Parameters
 
-  .------------------------------------------------------------------------------.
-  | Name             | In       | Type   | Required | Description                |
-  |------------------------------------------------------------------------------|
-  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now. |
-  | data             | formData |        | Yes      | No description.            |
-  '------------------------------------------------------------------------------'
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  | data             | body   | schema | Yes      | No description.            |
+  '----------------------------------------------------------------------------'
+
+  data:
+
+  {
+    "connection_id": string, // required
+    "nick": string, // required
+    "password": string, // No description.
+    "server": string, // required
+    "username": string, // No description.
+  },
 
 =head3 Responses
 
@@ -360,13 +370,23 @@ Update a connection.
 
 =head3 Parameters
 
-  .---------------------------------------------------------------------------------.
-  | Name             | In       | Type   | Required | Description                   |
-  |---------------------------------------------------------------------------------|
-  | connection_id    | path     | string | Yes      | A friendly name of the server |
-  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now.    |
-  | data             | formData |        | No       | No description.               |
-  '---------------------------------------------------------------------------------'
+  .-------------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                   |
+  |-------------------------------------------------------------------------------|
+  | connection_id    | path   | string | Yes      | A friendly name of the server |
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now.    |
+  | data             | body   | schema | Yes      | No description.               |
+  '-------------------------------------------------------------------------------'
+
+  data:
+
+  {
+    "connection_id": string, // required
+    "nick": string, // required
+    "password": string, // No description.
+    "server": string, // required
+    "username": string, // No description.
+  },
 
 =head3 Responses
 
@@ -446,106 +466,6 @@ Error.
       "required":     },
   },
 
-=head2 conversation
-
-Get a list of messages.
-
-Note: this resource require the user to be authenticated first.
-
-=head3 Resource URL
-
-  GET http://demo.convos.by/1.0/conversation/{connection_id}/{conversation_id}
-
-=head3 Parameters
-
-  .-------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                      |
-  |-------------------------------------------------------------------------------|
-  | connection_id   | path | string | Yes      | A friendly name of the server    |
-  | conversation_id | path | string | No       | The name of the person/chat room |
-  '-------------------------------------------------------------------------------'
-
-=head3 Responses
-
-=head4 200 - OK
-
-List of messsages.
-
-  [
-    {
-      "id": string, // required
-      "message": string, // required
-      "timestamp": int32, // required
-    },
-    ...
-  ]
-
-=head4 Default
-
-Internal server error.
-
-  {
-    "code":     {// required
-      "required":     },
-    "errors":     [
-      {
-        "message": string, // No description.
-        "path": string, // No description.
-      },
-      ...
-    ]
-    "message":     {// required
-      "required":     },
-  },
-
-=head2 conversations
-
-Get a list of all conversations.
-
-=head3 Resource URL
-
-  GET http://demo.convos.by/1.0/conversations
-
-=head3 Parameters
-
-  .----------------------------------------------------------------------------.
-  | Name             | In     | Type   | Required | Description                |
-  |----------------------------------------------------------------------------|
-  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
-  '----------------------------------------------------------------------------'
-
-=head3 Responses
-
-=head4 200 - OK
-
-List of messsages.
-
-  [
-    {
-      "connection_id": string, // required
-      "conversation_id": string, // required
-    },
-    ...
-  ]
-
-=head4 Default
-
-Internal server error.
-
-  {
-    "code":     {// required
-      "required":     },
-    "errors":     [
-      {
-        "message": string, // No description.
-        "path": string, // No description.
-      },
-      ...
-    ]
-    "message":     {// required
-      "required":     },
-  },
-
 =head2 notificationSeen
 
 Mark a notication as seen.
@@ -558,12 +478,17 @@ TODO: Notification count vs red/green toggling of a single notification.
 
 =head3 Parameters
 
-  .------------------------------------------------------------------------------.
-  | Name             | In       | Type   | Required | Description                |
-  |------------------------------------------------------------------------------|
-  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now. |
-  | data             | formData | array  | No       | List of notification IDs.  |
-  '------------------------------------------------------------------------------'
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  | data             | body   | schema | Yes      | List of notification IDs.  |
+  '----------------------------------------------------------------------------'
+
+  data:
+
+  {
+  },
 
 =head3 Responses
 
@@ -649,6 +574,106 @@ Error.
       "required":     },
   },
 
+=head2 room
+
+Get a list of messages.
+
+Note: this resource require the user to be authenticated first.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/room/{connection_id}/{room_id}
+
+=head3 Parameters
+
+  .-----------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                      |
+  |-----------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A friendly name of the server    |
+  | room_id       | path | string | No       | The name of the person/chat room |
+  '-----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of messsages.
+
+  [
+    {
+      "id": string, // required
+      "message": string, // required
+      "timestamp": int32, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Internal server error.
+
+  {
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
+  },
+
+=head2 rooms
+
+Get a list of all rooms.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/rooms
+
+=head3 Parameters
+
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  '----------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+List of messsages.
+
+  [
+    {
+      "connection_id": string, // required
+      "room_id": string, // required
+    },
+    ...
+  ]
+
+=head4 Default
+
+Internal server error.
+
+  {
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
+  },
+
 =head2 user
 
 Get user data.
@@ -712,11 +737,18 @@ Authenticate a user based on email and password.
 
 =head3 Parameters
 
-  .-----------------------------------------------------.
-  | Name | In       | Type | Required | Description     |
-  |-----------------------------------------------------|
-  | data | formData |      | No       | No description. |
-  '-----------------------------------------------------'
+  .---------------------------------------------------.
+  | Name | In   | Type   | Required | Description     |
+  |---------------------------------------------------|
+  | data | body | schema | Yes      | No description. |
+  '---------------------------------------------------'
+
+  data:
+
+  {
+    "email": email, // User email
+    "password": string, // User password
+  },
 
 =head3 Responses
 
@@ -816,11 +848,19 @@ Register a new user.
 
 =head3 Parameters
 
-  .-----------------------------------------------------.
-  | Name | In       | Type | Required | Description     |
-  |-----------------------------------------------------|
-  | data | formData |      | No       | No description. |
-  '-----------------------------------------------------'
+  .---------------------------------------------------.
+  | Name | In   | Type   | Required | Description     |
+  |---------------------------------------------------|
+  | data | body | schema | Yes      | No description. |
+  '---------------------------------------------------'
+
+  data:
+
+  {
+    "avatar": string, // User avatar
+    "email": email, // User email
+    "password": string, // User password
+  },
 
 =head3 Responses
 
@@ -869,12 +909,19 @@ Update an existing user.
 
 =head3 Parameters
 
-  .------------------------------------------------------------------------------.
-  | Name             | In       | Type   | Required | Description                |
-  |------------------------------------------------------------------------------|
-  | X-Convos-Session | header   | string | No       | TODO. Use cookies for now. |
-  | data             | formData |        | No       | No description.            |
-  '------------------------------------------------------------------------------'
+  .----------------------------------------------------------------------------.
+  | Name             | In     | Type   | Required | Description                |
+  |----------------------------------------------------------------------------|
+  | X-Convos-Session | header | string | No       | TODO. Use cookies for now. |
+  | data             | body   | schema | Yes      | No description.            |
+  '----------------------------------------------------------------------------'
+
+  data:
+
+  {
+    "avatar": string, // User avatar
+    "password": string, // User password
+  },
 
 =head3 Responses
 
