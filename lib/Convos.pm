@@ -160,6 +160,7 @@ sub _setup_assets {
   my @javascript = qw(
     http://code.jquery.com/jquery-1.11.3.min.js
     http://cdnjs.cloudflare.com/ajax/libs/riot/2.1.0/riot.js
+    /js/storage.js
     /js/window.js
     /js/router.js
     /js/materialize/hammer.min.js
@@ -175,6 +176,9 @@ sub _setup_assets {
     /js/materialize/forms.js
     /js/materialize/tooltip.js
     /js/materialize/animation.js
+    /js/mixins/form.js
+    /js/mixins/http.js
+    /js/mixins/storage.js
   );
 
   push @javascript, map {"/js/riot/$_"} sort { $a cmp $b } @{$self->home->list_files('public/js/riot')};
@@ -219,6 +223,10 @@ __DATA__
   <head>
     <title>Convos</title>
     %= asset 'convos.css';
+    %= javascript begin
+      window.apiUrl = function(path){return ['<%= $self->url_for('/1.0')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
+      window.urlFor = function(path){return ['<%= $self->url_for('/')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
+    % end
   </head>
   <body>
     <div class="loading-convos valign-wrapper">
