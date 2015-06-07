@@ -1,4 +1,37 @@
-.alert {
+body {
+  background-color: $body-bg;
+}
+
+header, main, footer {
+  padding-left: $sidenav-width;
+
+  @media only screen and (max-width: $medium-screen) {
+    padding-left: 0;
+  }
+}
+
+.loading-convos {
+  height: 100vh;
+  h5 { border-bottom: 1px solid $collection-border-color; }
+  .valign { width: 100%; }
+}
+
+.material-tooltip {
+  border-radius: 4px;
+  padding: 8px 6px;
+  min-height: 30px;
+}
+
+.readable-width {
+  max-width: $readable-width;
+}
+
+li.alert {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+div.alert {
   background-color: color('red', 'lighten-1');
   color: $body-bg;
   padding: $card-padding / 2;
