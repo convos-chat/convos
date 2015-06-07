@@ -1,0 +1,35 @@
+body {
+  background-color: $body-bg;
+}
+
+.loading-convos {
+  height: 100vh;
+  h5 { border-bottom: 1px solid $collection-border-color; }
+  .valign { width: 100%; }
+}
+
+.material-tooltip {
+  border-radius: 4px;
+  padding: 8px 6px;
+  min-height: 30px;
+}
+
+body.user-login,
+body.user-register {
+  background-color: darken($body-bg, 10%);
+  padding-top: 2em;
+
+  form {
+    background: $body-bg;
+  }
+
+  h2 {
+    text-indent: -10000px;
+    background: url(../images/logo.svg) no-repeat;
+  }
+
+  .about {
+    &, a { color: color('grey', 'darken-1'); }
+    padding-top: 20px;
+  }
+}

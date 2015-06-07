@@ -176,6 +176,7 @@ sub _setup_assets {
     /js/materialize/forms.js
     /js/materialize/tooltip.js
     /js/materialize/animation.js
+    /js/mixins/convos.js
     /js/mixins/form.js
     /js/mixins/http.js
     /js/mixins/storage.js
