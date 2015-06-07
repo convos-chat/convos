@@ -9,7 +9,7 @@ my $connection = $user->connection(IRC => 'whatever');
 isa_ok($connection->room('#foo'), 'Convos::Core::Room');
 ok !$connection->{room}{'#foo'}, 'no room on get';
 my $room = $connection->room('#foo' => {});
-is $room->_path, 'test@example.com/IRC-whatever/#foo', 'room->_path';
+is $room->path, '/test@example.com/IRC/whatever/#foo', 'room->path';
 is $room->n_users, 0, 'room->n_users';
 ok $connection->{room}{'#foo'}, 'room on create/update';
 

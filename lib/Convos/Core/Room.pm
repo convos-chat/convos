@@ -112,11 +112,20 @@ Returns the number of L</users>.
 
 sub n_users { int keys %{$_[0]->users} || $_[0]->{n_users} || 0 }
 
-sub _path { join '/', $_[0]->connection->_path, $_[0]->id }
+=head2 path
+
+  $str = $self->path;
+
+Returns a path to this object.
+Example: "/superman@example.com/IRC/irc.perl.org/#convos".
+
+=cut
+
+sub path { join '/', $_[0]->connection->path, $_[0]->id }
 
 sub TO_JSON {
   my $self = shift;
-  return {frozen => $self->frozen, id => $self->id, name => $self->name, topic => $self->topic, users => $self->users};
+  return {map { ($_, $self->$_) } qw( frozen id name path topic users )};
 }
 
 =head1 COPYRIGHT AND LICENSE

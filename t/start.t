@@ -2,12 +2,11 @@ use Mojo::Base -strict;
 use Test::More;
 
 $ENV{CONVOS_HOME}          = 'convos-test-start';
-$ENV{CONVOS_CONNECT_TIMER} = 0.001;
+$ENV{CONVOS_CONNECT_TIMER} = 0.002;
 
 require Convos::Core;
 require Convos::Core::Backend::File;
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $connect = 0;
 
 {
   my $user = $core->user('jhthorsen@cpan.org')->save;
@@ -24,10 +23,12 @@ my $connect = 0;
 diag 'restart core';
 $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 $core->start for 0 .. 10;    # should only start once
-Mojo::Util::monkey_patch('Mojo::IRC::UA', connect => sub { $connect++ unless shift->{connected}++ });
+my %connect;
+Mojo::Util::monkey_patch('Mojo::IRC::UA', connect => sub { $connect{$_[0]->server}++ });
 Mojo::IOLoop->timer(0.2 => sub { Mojo::IOLoop->stop });    # should be long enough
 Mojo::IOLoop->start;
-is $connect, 3, 'started connections, except disconnected';
+is_deeply [sort keys %connect], [qw( chat.freenode.net:6697 irc.perl.org localhost )],
+  'started connections, except disconnected';
 
 File::Path::remove_tree($ENV{CONVOS_HOME});
 

@@ -21,13 +21,13 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
 =head2 Directory structure
 
   $CONVOS_HOME/
-  $CONVOS_HOME/joe@example.com/                       # one directory per user
-  $CONVOS_HOME/joe@example.com/settings.json          # this works, since a connection can only have [\w_-]+
-  $CONVOS_HOME/joe@example.com/freenode/              # one directory per connection
-  $CONVOS_HOME/joe@example.com/freenode/settings.json # this works, since a log file ends on .log and not .json
-  $CONVOS_HOME/joe@example.com/freenode/marcus.log    # private conversation log file
-  $CONVOS_HOME/joe@example.com/freenode/#convos.log   # channel conversation log file
-  $CONVOS_HOME/joe@example.com/freenode.log           # server log file
+  $CONVOS_HOME/joe@example.com/                             # one directory per user
+  $CONVOS_HOME/joe@example.com/user.json                    # this works, since a connection can only have [\w_-]+
+  $CONVOS_HOME/joe@example.com/IRC/freenode/                # one directory per connection
+  $CONVOS_HOME/joe@example.com/IRC/freenode/connection.json # this works, since a log file ends on .log and not .json
+  $CONVOS_HOME/joe@example.com/IRC/freenode/marcus.log      # private conversation log file
+  $CONVOS_HOME/joe@example.com/IRC/freenode/#convos.log     # channel conversation log file
+  $CONVOS_HOME/joe@example.com/IRC/freenode.log             # server log file
 
 =cut
 
@@ -69,10 +69,18 @@ See L<Convos::Core::Backend/find_connections>.
 sub find_connections {
   my ($self, $user, $cb) = @_;
   my $base = $self->home->rel_dir($user->email);
+  my @names;
 
-  return $self->tap($cb, $!, []) unless opendir(my $DH, $base);
-  return $self->tap($cb, '',
-    [map { [split /-/, $_, 2] } grep { /^\w+-[\w-]+$/ and -r catfile($base, $_, 'settings.json') } readdir $DH]);
+  return $self->$cb($!, \@names) unless opendir(my $TYPES, $base);
+
+  for my $type (grep {/^\w+$/} readdir $TYPES) {
+    opendir(my $CONNECTIONS, catdir $base, $type) or next;
+    for my $name (grep {/^\w+/} readdir $CONNECTIONS) {
+      push @names, [$type, $name] if -r catfile($base, $type, $name, 'connection.json');
+    }
+  }
+
+  return $self->tap($cb, '', \@names);
 }
 
 =head2 find_users
@@ -86,7 +94,7 @@ sub find_users {
   my $home = $self->home;
 
   return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
-  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/settings.json") } readdir $DH]);
+  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/user.json") } readdir $DH]);
 }
 
 =head2 load_object
@@ -97,7 +105,7 @@ See L<Convos::Core::Backend/load_object>.
 
 sub load_object {
   my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->_settings_file($obj);
+  my $storage_file = $self->_storage_file($obj);
   my $settings     = {};
 
   $cb ||= sub { die $_[1] if $_[1] };
@@ -126,7 +134,7 @@ See L<Convos::Core::Backend/save_object>.
 
 sub save_object {
   my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->_settings_file($obj);
+  my $storage_file = $self->_storage_file($obj);
 
   $cb ||= sub { die $_[1] if $_[1] };
 
@@ -171,7 +179,7 @@ sub _log {
 
   unless ($fh) {
     delete $self->{log}{$obj};    # make sure we close filehandle from yesterday
-    $obj->_path =~ m!^(.*)/(.+)$! or die "Invalid _path() from $obj";    # _path() return unix style /dir/file
+    $obj->path =~ m!^(.*)/(.+)$! or die "Invalid path() from $obj";    # path() return unix style /dir/file
     my $dirname = $self->home->rel_dir($1);
     my $path    = catfile($dirname,
       $obj->isa('Convos::Core::Connection') ? "$2/$year-$month-$day.log" : "$year-$month-$day-$2.log");
@@ -205,9 +213,9 @@ sub _setup {
   );
 }
 
-sub _settings_file {
+sub _storage_file {
   my ($self, $obj) = @_;
-  $self->home->rel_file(join '/', $obj->_path, 'settings.json');
+  $self->home->rel_file(sprintf '%s/%s.json', $obj->path, ref($obj) =~ /::(Connection|User)/ ? lc $1 : 'settings');
 }
 
 =head1 COPYRIGHT AND LICENSE

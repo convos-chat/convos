@@ -8,7 +8,7 @@ local $ENV{CONVOS_HOME} = 'convos-test-irc';
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $user = $core->user('test.user@example.com', {});
 my $connection = $user->connection(IRC => 'localhost');
-my $storage_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'test.user@example.com', 'IRC-localhost', 'settings.json');
+my $storage_file = File::Spec->catfile($ENV{CONVOS_HOME}, qw( test.user@example.com IRC localhost connection.json ));
 my $err;
 
 is $connection->name, 'localhost', 'connection.name';
@@ -18,7 +18,8 @@ ok !-e $storage_file, 'no storage file';
 is $connection->save, $connection, 'save';
 ok -e $storage_file, 'created storage file';
 
-is_deeply($connection->TO_JSON, {name => 'localhost', state => 'connecting', url => ''}, 'TO_JSON');
+is_deeply($connection->TO_JSON,
+  {name => 'localhost', path => '/test.user@example.com/IRC/localhost', state => 'connecting', url => ''}, 'TO_JSON');
 
 $connection->connect(sub { $err = $_[1] });
 like $err, qr{Invalid URL}, 'invalid url';
@@ -45,7 +46,7 @@ like $err, qr{Not connected}i, 'send: not connected';
 
 my ($s, $m, $h, $day, $month, $year) = gmtime;
 my $date = sprintf '%04d-%02d-%02d', $year + 1900, $month + 1, $day;
-my $log_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'test.user@example.com', 'IRC-localhost', "$date.log");
+my $log_file = File::Spec->catfile($ENV{CONVOS_HOME}, qw( test.user@example.com IRC localhost ), "$date.log");
 ok -e $log_file, $log_file;
 
 File::Path::remove_tree($ENV{CONVOS_HOME});
