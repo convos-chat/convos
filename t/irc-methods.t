@@ -47,7 +47,9 @@ $t->run(
   [qr{JOIN}, ['main', 'join-convos-irc-live.irc']],
   sub {
     my ($err, $room);
+    is_deeply($connection->active_rooms, [], 'no active rooms');
     $connection->join_room("#Convos_irc_LIVE_20001", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
+    is_deeply([map { $_->id } @{$connection->active_rooms}], ['#convos_irc_live_20001'], 'active rooms');
     Mojo::IOLoop->start;
     is $err, '', "join_room: convos_irc_live_20001";
     isa_ok($room, 'Convos::Core::Room');
@@ -70,10 +72,11 @@ $t->run(
   [qr{JOIN}, ['main', 'join-convos.irc']],
   sub {
     my ($err, $room);
-    $connection->join_room("#convos", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->join_room("#convos s3cret", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is $err, '', 'join_room: convos';
-    is $room->name, "#convos", "room convos in callback";
+    is $room->name,     "#convos", "room convos in callback";
+    is $room->password, 's3cret',  'convos password';
     cmp_deeply(
       $connection->room('#conVOS')->TO_JSON,
       {
@@ -106,9 +109,9 @@ $t->run(
   [qr{LIST}, ['main', 'channel-list.irc']],
   sub {
     my ($err, $list);
-    $connection->room_list(sub { ($err, $list) = (@_[1, 2]); Mojo::IOLoop->stop });
+    $connection->all_rooms(sub { ($err, $list) = (@_[1, 2]); Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
-    is $err, '', 'room_list';
+    is $err, '', 'all_rooms';
     ok @$list >= 2, 'list has at least two channels' or diag int @$list;
     $list = [grep { $_->id eq "#convos_irc_live_20001" } @$list];
     is $list->[0]{n_users}, 1, 'n_users=1';
