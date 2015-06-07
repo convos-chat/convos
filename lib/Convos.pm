@@ -155,16 +155,16 @@ sub _home_relative_to_lib {
 }
 
 sub _setup_secrets {
-  my $app = shift;
-  my $secrets = $app->config('secrets') || [split /:/, $ENV{CONVOS_SECRETS} || ''];
+  my $self = shift;
+  my $secrets = $self->config('secrets') || [split /:/, $ENV{CONVOS_SECRETS} || ''];
 
   unless (@$secrets) {
-    my $unsafe = join ':', $<, $(, $^X, qx{who -b 2>/dev/null}, $app->home;
-    $app->log->warn('Using default (unsafe) session secrets. (Config file was not set up)');
+    my $unsafe = join ':', $<, $(, $^X, qx{who -b 2>/dev/null}, $self->home;
+    $self->log->warn('Using default (unsafe) session secrets. (Config file was not set up)');
     $secrets = [Mojo::Util::md5_sum($unsafe)];
   }
 
-  $app->secrets($secrets);
+  $self->secrets($secrets);
 }
 
 =head1 COPYRIGHT AND LICENSE
