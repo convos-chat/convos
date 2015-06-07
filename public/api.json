@@ -25,8 +25,8 @@
       "type": "string",
       "description": "A friendly name of the server"
     },
-    "conversation_id": {
-      "name": "conversation_id",
+    "room_id": {
+      "name": "room_id",
       "in": "path",
       "default": "",
       "required": false,
@@ -58,7 +58,7 @@
   "paths": {
     "/avatar/{connection_id}/{ident}": {
       "get": {
-        "tags": [ "conversation" ],
+        "tags": [ "user" ],
         "summary": "Get avatar for a user.",
         "description": "Note: The response is not a JSON formatted document, but rather just the image data.",
         "x-mojo-controller": "Convos::Controller::User",
@@ -87,7 +87,7 @@
         }
       }
     },
-    "/command/{connection_id}/{conversation_id}": {
+    "/command/{connection_id}/{room_id}": {
       "post": {
         "tags": [ "chat" ],
         "summary": "Send a command to the server.",
@@ -95,7 +95,7 @@
         "operationId": "command",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/room_id" },
           { "$ref": "#/parameters/session" }
         ],
         "responses": {
@@ -278,15 +278,15 @@
         }
       }
     },
-    "/conversation/{connection_id}/{conversation_id}": {
+    "/room/{connection_id}/{room_id}": {
       "get": {
-        "tags": [ "conversation" ],
+        "tags": [ "room" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
         "x-mojo-controller": "Convos::Controller::Chat",
-        "operationId": "conversation",
+        "operationId": "room",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" }
+          { "$ref": "#/parameters/room_id" }
         ],
         "responses": {
           "200": {
@@ -303,12 +303,12 @@
         }
       }
     },
-    "/conversations": {
+    "/rooms": {
       "get": {
-        "tags": [ "conversation" ],
-        "summary": "Get a list of all conversations.",
+        "tags": [ "room" ],
+        "summary": "Get a list of all rooms.",
         "x-mojo-controller": "Convos::Controller::Chat",
-        "operationId": "conversations",
+        "operationId": "rooms",
         "parameters": [
           { "$ref": "#/parameters/session" }
         ],
@@ -317,7 +317,7 @@
             "description": "List of messsages.",
             "schema": {
               "type": "array",
-              "items": { "$ref": "#/definitions/Conversation" }
+              "items": { "$ref": "#/definitions/Room" }
             }
           },
           "default": {
@@ -539,11 +539,11 @@
          "username": { "type": "string" }
       }
     },
-    "Conversation": {
-      "required": [ "connection_id", "conversation_id" ],
+    "Room": {
+      "required": [ "connection_id", "room_id" ],
       "properties": {
          "connection_id": { "type": "string" },
-         "conversation_id": { "type": "string" }
+         "room_id": { "type": "string" }
       }
     },
     "Error": {
