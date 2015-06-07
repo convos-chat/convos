@@ -540,10 +540,7 @@
       }
     },
     "Room": {
-      "required": [ "connection_id", "room_id" ],
       "properties": {
-         "connection_id": { "type": "string" },
-         "room_id": { "type": "string" }
       }
     },
     "Error": {
