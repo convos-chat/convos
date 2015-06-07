@@ -541,6 +541,18 @@
     },
     "Room": {
       "properties": {
+        "name": { "type": "string" },
+        "path": { "type": "string" },
+        "topic": { "type": "string" },
+        "users": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the user"
+            }
+          }
+        }
       }
     },
     "Error": {
