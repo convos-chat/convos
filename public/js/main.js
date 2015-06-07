@@ -1,4 +1,5 @@
 (function($) {
+  Router.add(/^chat/,      'chat');
   Router.add(/^register$/, 'user-register');
   Router.add(/^login$/,    'user-login');
   Router.add(/.?/,         'user-login');
