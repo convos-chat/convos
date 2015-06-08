@@ -59,10 +59,8 @@
       {email: this.form_email.value, password: this.form_password.value},
       function(err, xhr) {
         this.httpInvalidInput(xhr.responseJSON);
-        convos.updateUser(xhr.responseJSON);
-        if (convos.email()) return Router.route('chat');
-        convos.afterRender();
-        this.update();
+        if (!err) convos.save(xhr.responseJSON);
+        convos.render(this);
       }
     );
   }
