@@ -48,9 +48,9 @@
       apiUrl('/user/authenticate'),
       {email: this.form_email.value, password: this.form_password.value},
       function(err, xhr) {
+        if (!err) convos.save(xhr.responseJSON);
         this.httpInvalidInput(xhr.responseJSON);
-        convos.afterRender();
-        this.update();
+        convos.render(this);
       }
     );
   }

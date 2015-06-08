@@ -4,7 +4,7 @@
     <li class="conversation link">
       <a href="#add-conversation" class="waves-effect waves-teal" onclick={addConversation}>
         <i class="mdi-content-add-circle-outline"></i>
-        Create conversation
+        Add conversation
       </a>
     </li>
     <li class="alert" if={!rooms.length}>

@@ -1,10 +1,10 @@
 <chat>
   <nav>
     <sidenav-search></sidenav-search>
-    <sidenav-settings if={activeSidebar('settings')}></sidenav-settings>
-    <sidenav-notifications if={activeSidebar('notifications')}></sidenav-notifications>
-    <sidenav-rooms if={activeSidebar('rooms')}></sidenav-rooms>
-    <sidenav-participants if={activeSidebar('participants')}></sidenav-participants>
+    <sidenav-settings show={activeSidebar('settings')}></sidenav-settings>
+    <sidenav-notifications show={activeSidebar('notifications')}></sidenav-notifications>
+    <sidenav-rooms show={activeSidebar('rooms')}></sidenav-rooms>
+    <sidenav-participants show={activeSidebar('participants')}></sidenav-participants>
     <ul class="actions">
       <sidenav-link href="#sidenav:settings" icon="mdi-action-settings" title="Settings" callback={changeSidebar} active={activeSidebar('settings')}></sidenav-link>
       <sidenav-link href="#sidenav:notifications" icon="mdi-social-notifications" title="Notifications" callback={changeSidebar} active={activeSidebar('notifications')}></sidenav-link>
@@ -13,11 +13,15 @@
     </ul>
   </nav>
   <main>
-    <conversation/>
+    <conversation each={rooms} target={id} show={current}></conversation>
+    <h2>Add connection</h2>
+    <p>Need some sort of startup wizard. Hopefully the same as "Add conversation".</p>.
     <user-input/>
   </main>
 
+  this.rooms   = [];
   this.sidenav = localStorage.getItem('sidenav') || 'rooms';
+  this.user    = window.convos;
 
   activeSidebar(name) {
     return name == this.sidenav;
@@ -30,4 +34,8 @@
     localStorage.setItem('sidenav', this.sidenav);
     this.update();
   }
+
+  this.on('mount', function() {
+    if (!this.user.email()) return Router.route('login');
+  });
 </chat>

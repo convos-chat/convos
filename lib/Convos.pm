@@ -183,9 +183,10 @@ sub _setup_assets {
     /js/materialize/forms.js
     /js/materialize/tooltip.js
     /js/materialize/animation.js
-    /js/mixins/convos.js
+    /js/mixins/base.js
     /js/mixins/form.js
     /js/mixins/http.js
+    /js/core/user.js
   );
 
   push @javascript, map {"/js/riot/$_"} sort { $a cmp $b } @{$self->home->list_files('public/js/riot')};
