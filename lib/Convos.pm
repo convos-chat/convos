@@ -186,7 +186,6 @@ sub _setup_assets {
     /js/mixins/convos.js
     /js/mixins/form.js
     /js/mixins/http.js
-    /js/mixins/storage.js
   );
 
   push @javascript, map {"/js/riot/$_"} sort { $a cmp $b } @{$self->home->list_files('public/js/riot')};
