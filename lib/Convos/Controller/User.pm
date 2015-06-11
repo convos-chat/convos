@@ -25,7 +25,7 @@ sub user {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 
-  $self->$cb($user->TO_JSON, 200);
+  $self->delay(sub { $user->load(shift->begin); }, sub { $_[1] and die $_[1]; $self->$cb($user->TO_JSON, 200); });
 }
 
 =head2 user_authenticate
@@ -38,12 +38,20 @@ sub user_authenticate {
   my ($self, $args, $cb) = @_;
   my $user = $self->app->core->user($args->{data}{email});
 
-  if ($user->validate_password($args->{data}{password})) {
-    $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
-  }
-  else {
-    $self->$cb($self->invalid_request('Invalid email or password.'), 400);
-  }
+  $self->delay(
+    sub { $user->load(shift->begin) },
+    sub {
+      my ($delay, $err) = @_;
+      die $err if $err;
+
+      if ($user->validate_password($args->{data}{password})) {
+        $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
+      }
+      else {
+        $self->$cb($self->invalid_request('Invalid email or password.'), 400);
+      }
+    },
+  );
 }
 
 =head2 user_delete
@@ -116,13 +124,14 @@ sub user_save {
 
   # TODO: Add support for changing email
 
-  $user->avatar($args->{data}{avatar})         if $args->{data}{avatar};
-  $user->set_password($args->{data}{password}) if $args->{data}{password};
-
   $self->delay(
+    sub { $user->load(shift->begin); },
     sub {
-      my ($delay) = @_;
-      return $delay->pass unless %{$args->{data}};
+      my ($delay, $err) = @_;
+      die $err if $err;
+      return $self->$cb($user->TO_JSON, 200) unless %{$args->{data} || {}};
+      $user->avatar($args->{data}{avatar})         if $args->{data}{avatar};
+      $user->set_password($args->{data}{password}) if $args->{data}{password};
       return $user->save($delay->begin);
     },
     sub {
