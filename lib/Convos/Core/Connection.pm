@@ -259,7 +259,7 @@ sub _userinfo {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{state} ||= 'connecting';
-  my $json = {map { ($_, $self->$_) } qw( name state url )};
+  my $json = {map { ($_, '' . $self->$_) } qw( name state url )};
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
   $json->{path} = $self->path;
   $json;

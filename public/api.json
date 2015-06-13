@@ -532,11 +532,10 @@
     "Connection": {
       "required": [ "connection_id", "server", "nick" ],
       "properties": {
-         "connection_id": { "type": "string" },
-         "nick": { "type": "string" },
-         "password": { "type": "string" },
-         "server": { "type": "string" },
-         "username": { "type": "string" }
+        "name": { "type": "string" },
+        "path": { "type": "string" },
+        "state": { "type": "string" },
+        "url": { "type": "string" }
       }
     },
     "Room": {
