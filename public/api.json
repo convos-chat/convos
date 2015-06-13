@@ -168,7 +168,15 @@
             "name": "data",
             "in": "body",
             "required": true,
-            "schema": { "$ref": "#/definitions/Connection" }
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": { "type": "string", "description": "Login password to server." },
+                "protocol": { "type": "string", "description": "Protocol to use. Example: IRC." },
+                "server": { "type": "string", "required": true, "description": "Either complete url or server:port. (Port is optional)" },
+                "username": { "type": "string", "required": "true", "description": "Login username to server." }
+              }
+            }
           }
         ],
         "responses": {
