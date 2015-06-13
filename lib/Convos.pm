@@ -181,11 +181,13 @@ sub _setup_assets {
     /js/materialize/buttons.js
     /js/materialize/dropdown.js
     /js/materialize/forms.js
+    /js/materialize/leanModal.js
     /js/materialize/tooltip.js
     /js/materialize/animation.js
     /js/mixins/base.js
     /js/mixins/form.js
     /js/mixins/http.js
+    /js/mixins/modal.js
     /js/core/user.js
   );
 
@@ -244,6 +246,7 @@ __DATA__
       </div>
     </div>
     <div id="app"></div>
+    <div id="modal_bottom_sheet" class="modal bottom-sheet"></div>
     %= asset 'convos.js';
   </body>
 </html>
