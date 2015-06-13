@@ -14,14 +14,22 @@
   </nav>
   <main>
     <conversation each={conversations} target={id} show={current}></conversation>
-    <h2>Add connection</h2>
-    <p>Need some sort of startup wizard. Hopefully the same as "Add conversation".</p>.
+    <div class="no-conversations valign-wrapper" if={!conversations.length}>
+      <div class="valign center-align">
+        <h5>No conversations</h5>
+        <p class="grey-text">
+          <!-- TODO: Highlight the item in the sidebar when the text below is clicked -->
+          Click the "<i class="mdi-content-add-circle-outline"></i> Add conversation" link in the sidebar to find someone to talk to.
+        </p>
+      </div>
+    </div>
     <user-input/>
   </main>
 
-  this.conversations   = [];
+  this.conversations = [];
+  this.modalBottomSheetShow = false;
   this.sidenav = localStorage.getItem('sidenav') || 'conversations';
-  this.user    = window.convos;
+  this.user = window.convos;
 
   activeSidebar(name) {
     return name == this.sidenav;

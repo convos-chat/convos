@@ -188,6 +188,7 @@ sub _setup_assets {
     /js/mixins/form.js
     /js/mixins/http.js
     /js/mixins/modal.js
+    /js/core/connection.js
     /js/core/user.js
   );
 

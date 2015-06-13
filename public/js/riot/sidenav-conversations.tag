@@ -7,31 +7,31 @@
         Add conversation
       </a>
     </li>
-    <li class="alert" if={!conversations.length}>
-      <div class="alert teal lighten-2">
-        Tip: Click the <i class="mdi-content-add-circle-outline"></i> above
-        to find someone to to talk to.
-      </div>
-    </li>
   </ul>
 
-  mixin.http(this);
+  mixin.modal(this);
   this.conversations = [];
+  this.addConversationTag = false;
 
   addConversation(e) {
     e.preventDefault();
-    window.TODO('addConversation');
+    convos.connections(function(err, connections) {
+      if (connections.length) {
+        this.openModal('add-conversation', {connections: connections});
+      }
+      else {
+        this.openModal('add-connection', {first: 1, next: 'add-conversation'});
+      }
+    }.bind(this));
   }
 
   this.on('mount', function() {
-    this.httpCachedGet(apiUrl('/conversations'), {}, function(err, xhr) {
-      if (Array.isArray(xhr.responseJSON)) {
-        xhr.responseJSON.forEach(function(conversation) {
-          conversation.icon = conversation['users'] ? 'mdi-social-group' : 'mdi-social-person';
-        });
-        this.conversations = xhr.responseJSON;
-        this.update();
-      }
-    });
+    convos.conversations(function(err, conversations) {
+      this.conversations = conversations;
+      conversations.forEach(function(conversation) {
+        conversation.icon = conversation['users'] ? 'mdi-social-group' : 'mdi-social-person';
+      });
+      this.update();
+    }.bind(this));
   });
 </sidenav-conversations>

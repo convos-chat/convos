@@ -3,7 +3,7 @@
     <form onsubmit={submitForm} method="post" class="col s10 offset-s1 m6 offset-m3 z-depth-1">
       <div class="row">
         <div class="col s12">
-          <h2 class="teal-text darken-4">Convos</h2>
+          <h2>Convos</h2>
           <p><i>- Collaberation done right.</i></p>
         </div>
       </div>
