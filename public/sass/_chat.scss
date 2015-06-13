@@ -13,6 +13,14 @@
   }
 }
 
+.no-conversations {
+  height: 100vh;
+  .valign {
+    width: 100%;
+    padding: 0 $card-padding 50px $card-padding;
+  }
+}
+
 .user-input {
   background: darken($body-bg, 5%);
   position: fixed;

@@ -14,23 +14,27 @@
   User.fresh = function() { this._method = 'httpGet'; return this; };
 
   // Get a single Convos.Connection object from client side
-  User.connection = function(type, name) {
+  User.connection = function(type, name, attrs) {
+    if (!type && typeof attrs == 'object') {
+      var path = attrs.path.split('/'); // /superman@example.com/IRC/localhost
+      type = path[2];
+      name = path[3];
+    }
     if (!this._connections[type]) this._connections[type] = {};
-    if (!this._connections[type][name]) this._connections[type][name] = Object.create(Convos.Connection)
-    return this._connections[type][name];
+    if (!attrs) return this._connections[type][name];
+    var connection = this._connections[type][name] || Object.create(Convos.Connection);
+    attrs.name = name;
+    attrs.type = type;
+    return this._connections[type][name] = connection.save(attrs);
   };
 
   // Get a list of Convos.Connection objects from backend
   // Use User.fresh().connections(function() { ... }) to get fresh data from server
   User.connections = function(cb) {
     this[this._method](apiUrl('/connections'), {}, function(err, xhr) {
-      if (err) return cb.call(this, err, this._connections);
-      xhr.responseJSON.forEach(function(item) {
-        var path = item.path.split('/'); // /superman@example.com/IRC/localhost
-        var connection = this.connection(path[2], path[3]);
-        Object.keys(item).forEach(function(k) { connection[k] = item[k]; });
-      });
-      cb.call(this, '', this._connections);
+      var connections = [];
+      if (!err) xhr.responseJSON.forEach(function(attrs) { connections.push(this.connection(false, false, attrs)); }.bind(this));
+      cb.call(this, err, connections);
     });
     return this.tap('_method', 'httpCachedGet');
   };
@@ -39,13 +43,14 @@
   // Use User.fresh().conversations(function() { ... }) to get fresh data from server
   User.conversations = function(cb) {
     this[this._method](apiUrl('/conversations'), {}, function(err, xhr) {
-      if (err) return cb.call(this, err, this._conversations);
-      xhr.responseJSON.forEach(function(r) {
-        var path = r.path.split('/'); // /superman@example.com/IRC/localhost/#convos
-        var connection = this.connection(path[2], path[3]);
-        connection.conversation(path[4], r);
-      });
-      cb.call(this, '', this._conversations);
+      if (!err) {
+        xhr.responseJSON.forEach(function(r) {
+          var path = r.path.split('/'); // /superman@example.com/IRC/localhost/#convos
+          var connection = this.connection(path[2], path[3]);
+          connection.conversation(path[4], r);
+        }.bind(this));
+      }
+      cb.call(this, err, $.map(this._conversations, function(v, k) { return v; }));
     });
     return this.tap('_method', 'httpCachedGet');
   };

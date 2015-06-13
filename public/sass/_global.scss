@@ -10,10 +10,18 @@ header, main, footer {
   }
 }
 
+h1, h2, h3, h4, h5 {
+  color: color('teal', 'darken-4');
+}
+
 .loading-convos {
   height: 100vh;
   h5 { border-bottom: 1px solid $collection-border-color; }
   .valign { width: 100%; }
+}
+
+.modal.bottom-sheet {
+  max-height: 70%;
 }
 
 .material-tooltip {
