@@ -4,7 +4,6 @@ var wideScreenWidth = 820;
 var wrapper;
 
 window.DEBUG = window.DEBUG || true;
-window.MULTI_USER_ROOM_RE = new RegExp('[\#\&]');
 
 var contentWrapper = function() {
   if (!wrapper || !wrapper.parentNode) wrapper = document.querySelector('.wrapper');

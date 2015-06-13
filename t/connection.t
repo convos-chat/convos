@@ -6,7 +6,7 @@ my $core       = Convos::Core->new;
 my $user       = $core->user('test@example.com', {});
 my $connection = $user->connection(IRC => 'whatever');
 
-isa_ok($connection->room('#foo'), 'Convos::Core::Room');
+isa_ok($connection->room('#foo'), 'Convos::Core::Conversation::Room');
 ok !$connection->{room}{'#foo'}, 'no room on get';
 my $room = $connection->room('#foo' => {});
 is $room->path, '/test@example.com/IRC/whatever/#foo', 'room->path';

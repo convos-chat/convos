@@ -1,6 +1,6 @@
 (function(window) {
   // user = Object.create(Convos.User);
-  var User = {_connections: {}, _method: 'httpCachedGet'};
+  var User = {_conversations: {}, _connections: {}, _method: 'httpCachedGet'};
 
   mixin.http(User);
 
@@ -35,6 +35,21 @@
     return this.tap('_method', 'httpCachedGet');
   };
 
+  // Get a list of Convos.Conversation objects from backend
+  // Use User.fresh().conversations(function() { ... }) to get fresh data from server
+  User.conversations = function(cb) {
+    this[this._method](apiUrl('/conversations'), {}, function(err, xhr) {
+      if (err) return cb.call(this, err, this._conversations);
+      xhr.responseJSON.forEach(function(r) {
+        var path = r.path.split('/'); // /superman@example.com/IRC/localhost/#convos
+        var connection = this.connection(path[2], path[3]);
+        connection.conversation(path[4], r);
+      });
+      cb.call(this, '', this._conversations);
+    });
+    return this.tap('_method', 'httpCachedGet');
+  };
+
   // Get user settings from server
   // Use User.fresh().load(function() { ... }) to get fresh data from server
   User.load = function(cb) {
@@ -56,21 +71,6 @@
     }).filter('[data-tooltip]').tooltip();
     Materialize.updateTextFields();
     $('select').material_select();
-  };
-
-  // Get a list of Convos.Room objects from backend
-  // Use User.fresh().rooms(function() { ... }) to get fresh data from server
-  User.rooms = function(cb) {
-    this[this._method](apiUrl('/rooms'), {}, function(err, xhr) {
-      if (err) return cb.call(this, err, this._rooms);
-      xhr.responseJSON.forEach(function(r) {
-        var path = r.path.split('/'); // /superman@example.com/IRC/localhost/#convos
-        var connection = this.connection(path[2], path[3]);
-        connection.room(path[4], r);
-      });
-      cb.call(this, '', this._rooms);
-    });
-    return this.tap('_method', 'httpCachedGet');
   };
 
   // Write user settings to server
