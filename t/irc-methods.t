@@ -52,7 +52,7 @@ $t->run(
     is_deeply([map { $_->id } @{$connection->active_rooms}], ['#convos_irc_live_20001'], 'active rooms');
     Mojo::IOLoop->start;
     is $err, '', "join_room: convos_irc_live_20001";
-    isa_ok($room, 'Convos::Core::Room');
+    isa_ok($room, 'Convos::Core::Conversation::Room');
     is $room->name, "#Convos_irc_LIVE_20001", "room Convos_irc_LIVE_20001 in callback";
     cmp_deeply(
       $connection->room("#Convos_irc_live_20001")->TO_JSON,

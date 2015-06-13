@@ -40,10 +40,13 @@ L<IRC|Convos::Core::Connection::IRC> server.
 
 =over 4
 
-=item * Has many L<Convos::Core::Room> objects.
+=item * Has many L<Convos::Core::Conversation::Direct> objects.
 
-This represents a conversation with other users. A room can contain zero
-users.
+This represents a conversation with a single user.
+
+=item * Has many L<Convos::Core::Conversation::Room> objects.
+
+This represents a conversation with other users.
 
 =back
 

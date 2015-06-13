@@ -15,13 +15,13 @@ use Mojo::Base 'Mojolicious::Controller';
 
 =head1 METHODS
 
-=head2 rooms
+=head2 conversations
 
-See L<Convos::Manual::API/rooms>.
+See L<Convos::Manual::API/conversations>.
 
 =cut
 
-sub rooms {
+sub conversations {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
   my @rooms;

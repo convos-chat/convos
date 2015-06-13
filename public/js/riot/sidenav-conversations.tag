@@ -1,13 +1,13 @@
-<sidenav-rooms>
+<sidenav-conversations>
   <ul class="sidenav">
-    <sidenav-link each={rooms} icon={icon} href={path}>{name}</sidenav-link>
+    <sidenav-link each={conversations} icon={icon} href={path}>{name}</sidenav-link>
     <li class="conversation link">
       <a href="#add-conversation" class="waves-effect waves-teal" onclick={addConversation}>
         <i class="mdi-content-add-circle-outline"></i>
         Add conversation
       </a>
     </li>
-    <li class="alert" if={!rooms.length}>
+    <li class="alert" if={!conversations.length}>
       <div class="alert teal lighten-2">
         Tip: Click the <i class="mdi-content-add-circle-outline"></i> above
         to find someone to to talk to.
@@ -16,7 +16,7 @@
   </ul>
 
   mixin.http(this);
-  this.rooms = [];
+  this.conversations = [];
 
   addConversation(e) {
     e.preventDefault();
@@ -24,14 +24,14 @@
   }
 
   this.on('mount', function() {
-    this.httpCachedGet(apiUrl('/rooms'), {}, function(err, xhr) {
+    this.httpCachedGet(apiUrl('/conversations'), {}, function(err, xhr) {
       if (Array.isArray(xhr.responseJSON)) {
-        xhr.responseJSON.forEach(function(room) {
-          room.icon = room.name.match(window.MULTI_USER_ROOM_RE) ? 'mdi-social-group' : 'mdi-social-person';
+        xhr.responseJSON.forEach(function(conversation) {
+          conversation.icon = conversation['users'] ? 'mdi-social-group' : 'mdi-social-person';
         });
-        this.rooms = xhr.responseJSON;
+        this.conversations = xhr.responseJSON;
         this.update();
       }
     });
   });
-</sidenav-rooms>
+</sidenav-conversations>

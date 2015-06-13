@@ -14,7 +14,8 @@ See also L<Convos::Core::Connection::IRC>.
 
 use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::URL;
-use Convos::Core::Room;
+use Convos::Core::Conversation::Direct;
+use Convos::Core::Conversation::Room;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 EVENTS
@@ -32,8 +33,8 @@ These messages could be stored to a persistent storage.
 
   $self->on(room => sub { my ($self, $room, $changed) = @_; });
 
-Emitted when a L<$room|Convos::Core::Room> change properties. C<$changed> is
-a hash-ref with the changed attributes.
+Emitted when a L<$room|Convos::Core::Conversation::Room> change properties.
+C<$changed> is a hash-ref with the changed attributes.
 
 =head1 ATTRIBUTES
 
@@ -79,7 +80,7 @@ the following new ones.
 
   $objs = $self->active_rooms;
 
-Returns an array-ref of of L<Convos::Core::Room> objects.
+Returns an array-ref of of L<Convos::Core::Conversation::Room> objects.
 
 =cut
 
@@ -92,8 +93,8 @@ sub active_rooms {
 
   $self = $self->all_rooms(sub { my ($self, $err, $list) = @_; });
 
-Used to retrieve a list of L<Convos::Core::Room> objects for the given
-connection.
+Used to retrieve a list of L<Convos::Core::Conversation::Room> objects for the
+given connection.
 
 =cut
 
@@ -167,7 +168,7 @@ sub path {
   $room = $self->room($id);            # get
   $room = $self->room($id => \%attrs); # create/update
 
-Will return a L<Convos::Core::Room> object, identified by C<$id>.
+Will return a L<Convos::Core::Conversation::Room> object, identified by C<$id>.
 
 =cut
 
@@ -176,7 +177,7 @@ sub room {
 
   if ($attr) {
     my $room = $self->{room}{$id} ||= do {
-      my $room = Convos::Core::Room->new(connection => $self, id => $id);
+      my $room = Convos::Core::Conversation::Room->new(connection => $self, id => $id);
       Scalar::Util::weaken($room->{connection});
       warn "[Convos::Core::User] Emit room: id=$id\n" if DEBUG;
       $self->user->core->backend->emit(room => $room);
@@ -186,7 +187,7 @@ sub room {
     return $room;
   }
   else {
-    return $self->{room}{$id} || Convos::Core::Room->new(id => $id);
+    return $self->{room}{$id} || Convos::Core::Conversation::Room->new(id => $id);
   }
 }
 

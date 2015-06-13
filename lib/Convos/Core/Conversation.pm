@@ -1,17 +1,14 @@
-package Convos::Core::Room;
+package Convos::Core::Conversation;
 
 =head1 NAME
 
-Convos::Core::Room - A convos chat room
+Convos::Core::Conversation - A convos conversation base class
 
 =head1 DESCRIPTION
 
-L<Convos::Core::Room> is a class describing a L<Convos> chat room.
-
-=head1 SYNOPSIS
-
-  use Convos::Core::Room;
-  my $room = Convos::Core::Room->new;
+L<Convos::Core::Conversation> is a base class for
+L<Convos::Core::Conversation::Direct> and
+L<Convos::Core::Conversation::Room>.
 
 =cut
 
@@ -23,65 +20,31 @@ use Mojo::Base 'Mojo::EventEmitter';
 
   $bool = $self->active;
 
-True if this is a room which the L<user|Convos::Core::User> want to be part of.
+True if this is a conversation which the L<user|Convos::Core::User> want to
+be part of.
 
 =head2 connection
 
 Holds a L<Convos::Core::Connection> object.
 
-=head2 frozen
-
-  $str = $self->frozen;
-
-Descrition of why you are not part of this room anymore.
-
 =head2 id
 
   $str = $self->id;
 
-Unique identifier for this room.
+Unique identifier for this conversation.
 
 =head2 name
 
   $str = $self->name;
 
-The name of this room.
-
-=head2 password
-
-  $str = $self->password;
-
-Holds a password required to join the room.
-
-=head2 topic
-
-  $str = $self->topic;
-
-Holds the topic (subject) for this room.
-
-=head2 users
-
-  $hash_ref = $self->users;
-
-Holds a hash-ref of users. Example:
-
-  {
-    $id => {nick => $str},
-    ...
-  }
-
-C<$id> is ofter lower case version of nick.
+The name of this conversation.
 
 =cut
 
 has active => 0;
 sub connection { shift->{connection} or die 'connection required in constructor' }
-has frozen => '';
-sub id { shift->{id} or die 'id required in constructor' }
+sub id         { shift->{id}         or die 'id required in constructor' }
 has name => sub { shift->id };
-has password => '';
-has topic    => '';
-has users    => sub { +{} };
 
 =head1 METHODS
 
@@ -102,16 +65,6 @@ sub log {
   $self->emit(log => $level => $message);
 }
 
-=head2 n_users
-
-  $int = $self->n_users;
-
-Returns the number of L</users>.
-
-=cut
-
-sub n_users { int keys %{$_[0]->users} || $_[0]->{n_users} || 0 }
-
 =head2 path
 
   $str = $self->path;
@@ -125,7 +78,7 @@ sub path { join '/', $_[0]->connection->path, $_[0]->id }
 
 sub TO_JSON {
   my $self = shift;
-  return {map { ($_, $self->$_) } qw( frozen id name path topic users )};
+  return {map { ($_, $self->$_) } qw( id name path )};
 }
 
 =head1 COPYRIGHT AND LICENSE

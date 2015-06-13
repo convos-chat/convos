@@ -25,13 +25,13 @@
       "type": "string",
       "description": "A friendly name of the server"
     },
-    "room_id": {
-      "name": "room_id",
+    "conversation_id": {
+      "name": "conversation_id",
       "in": "path",
       "default": "",
       "required": false,
       "type": "string",
-      "description": "The name of the person/chat room"
+      "description": "The name of the person/chat conversation"
     },
     "email": {
       "name": "ident",
@@ -87,7 +87,7 @@
         }
       }
     },
-    "/command/{connection_id}/{room_id}": {
+    "/command/{connection_id}/{conversation_id}": {
       "post": {
         "tags": [ "chat" ],
         "summary": "Send a command to the server.",
@@ -95,7 +95,7 @@
         "operationId": "command",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/room_id" },
+          { "$ref": "#/parameters/conversation_id" },
           { "$ref": "#/parameters/session" }
         ],
         "responses": {
@@ -278,15 +278,15 @@
         }
       }
     },
-    "/room/{connection_id}/{room_id}": {
+    "/conversation/{connection_id}/{conversation_id}": {
       "get": {
-        "tags": [ "room" ],
+        "tags": [ "conversation" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
         "x-mojo-controller": "Convos::Controller::Chat",
-        "operationId": "room",
+        "operationId": "messages",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/room_id" }
+          { "$ref": "#/parameters/conversation_id" }
         ],
         "responses": {
           "200": {
@@ -303,12 +303,12 @@
         }
       }
     },
-    "/rooms": {
+    "/conversations": {
       "get": {
-        "tags": [ "room" ],
-        "summary": "Get a list of all rooms.",
+        "tags": [ "conversation" ],
+        "summary": "Get a list of all conversations.",
         "x-mojo-controller": "Convos::Controller::Chat",
-        "operationId": "rooms",
+        "operationId": "conversations",
         "parameters": [
           { "$ref": "#/parameters/session" }
         ],
