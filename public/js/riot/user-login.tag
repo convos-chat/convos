@@ -45,7 +45,7 @@
     this.formError = ''; // clear error on post
     localStorage.setItem('email', this.form_email.value);
     this.httpPost(
-      apiUrl('/user/authenticate'),
+      apiUrl('/user/login'),
       {email: this.form_email.value, password: this.form_password.value},
       function(err, xhr) {
         if (!err) convos.save(xhr.responseJSON);

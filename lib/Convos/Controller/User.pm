@@ -28,13 +28,13 @@ sub user {
   $self->delay(sub { $user->load(shift->begin); }, sub { $_[1] and die $_[1]; $self->$cb($user->TO_JSON, 200); });
 }
 
-=head2 user_authenticate
+=head2 user_login
 
-See L<Convos::Manual::API/userAuthenticate>.
+See L<Convos::Manual::API/userLogin>.
 
 =cut
 
-sub user_authenticate {
+sub user_login {
   my ($self, $args, $cb) = @_;
   my $user = $self->app->core->user($args->{data}{email});
 
