@@ -21,7 +21,7 @@
         <input name="name" id="form_name" type="text" autocomplete="off" spellcheck="false">
         <div class="autocomplete">
           <ul>
-            <li each={obj, i in rooms} class="link" data-id={obj.id()}><a href={'#' + obj.name()}>{obj.name()} - {obj.title()}</a></li>
+            <li each={obj, i in rooms} class="link" data-id={obj.id()}><a href={'#join:' + obj.name()}>{obj.name()} - {obj.topic() || 'No topic'}</a></li>
             <li class="loading" if={!rooms.length}>{noRoomsDescription}</li>
           </ul>
         </div>
@@ -44,18 +44,16 @@
   </form>
   <script>
 
-  mixin.form(this.prototype);
-  mixin.http(this.prototype);
-  mixin.modal(this.prototype);
+  mixin.form(this);
+  mixin.http(this);
+  mixin.modal(this);
 
   this.noRoomsDescription = 'Loading rooms from ' + opts.connections[0].name() + '...';
   this.rooms = [];
 
   changeConnection() {
     var $option = $('option:selected, option:first', this.form_connection).eq(0);
-    console.log($option);
-    console.log($option.val());
-    this.opts.connections[$option.val()].allRooms(function(err, rooms) {
+    this.opts.connections[$option.val()].rooms(function(err, rooms) {
       if (err) throw err;
       this.rooms = rooms;
       this.noRoomsDescription = 'No rooms found.';

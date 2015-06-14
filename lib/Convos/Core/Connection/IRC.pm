@@ -103,7 +103,8 @@ sub all_rooms {
       for my $name (keys %$channels) {
         my $id = lc $name;
         my $room = $self->room($id, {name => $name});
-        $room->topic($channels->{$name}{topic}) unless $room->topic;
+        $channels->{$name}{topic} =~ s!^\[\S+\]\s?!!;    # remove channel modes, such as "[+nt]"
+        $room->topic($channels->{$name}{topic});
         $room->{n_users} = $channels->{$name}{n_users};
       }
 

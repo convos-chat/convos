@@ -8,6 +8,10 @@ div.autocomplete {
     line-height: 3rem;
     color: $off-black;
 
+    a, span {
+      display: block;
+    }
+
     a:hover, a.active {
       background-color: $dropdown-hover-bg-color;
     }

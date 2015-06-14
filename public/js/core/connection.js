@@ -47,13 +47,6 @@
     });
   };
 
-  // Send a message to a room or person on server
-  Connection.send = function(message, cb) {
-    this.httpPost(apiUrl(['connection', this.name(), 'message']), {message: message}, function(err, xhr) {
-      cb.call(this, err);
-    });
-  };
-
   // Change state to "connected" or "disconnected"
   // Can also be used to retrieve state: "connected", "disconnected" or "connecting"
   proto.state = function(state, cb) {
