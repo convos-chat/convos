@@ -1,22 +1,38 @@
-(window['mixin'] = window['mixin'] || {})['base'] = function(caller, attrs) {
-  var persistent = window.localStorage || {};
-  var hasPersistent = function(name) { return (persistent[name] || '').match(/^\[/); };
-  var data = {};
+(window['mixin'] = window['mixin'] || {})['base'] = function(proto, attributes) {
 
-  // allow obj.on("eventName", function() { ... });
-  riot.observable(caller);
+  // define attribute getter/setter
+  Object.keys(attributes || {}).forEach(function(n, i) {
+    var builder = attributes[n];
+    var name = n;
+    proto[name] = function(value) {
+      if (arguments.length) {
+        this['_' + name] = value;
+        if (this.trigger) this.trigger(name, value);
+        return this;
+      }
+      else {
+        return this.hasOwnProperty('_' + name) ? this['_' + name] : builder.call(this);
+      }
+    };
+  });
 
   // clear attribute
-  caller.clear = caller.clear || function(name) {
-    var value = data[name];
-    delete data[name];
+  proto.clear = function(name) {
+    var value = this['_' + name];
+    delete this['_' + name];
     return value;
-  }
+  };
+
+  // save attributes to object
+  proto.save = function(attrs) {
+    Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
+    return this;
+  };
 
   // allow chaining
   // obj.tap(function() { .... }) == obj
   // obj.tap("attrName", value) == obj
-  caller.tap = function(cb) {
+  proto.tap = function(cb) {
     if (typeof cb == 'string') {
       this[cb] = arguments[1];
     }
@@ -26,26 +42,5 @@
     return this;
   };
 
-  // define attributes
-  Object.keys(attrs).forEach(function(name) {
-    var def = attrs[name];
-
-    caller[name] = function(value) {
-      if (arguments.length) {
-        if (def[1]) persistent[name] = JSON.stringify([value]);
-        data[name] = value;
-        this.trigger(name, value);
-        return this;
-      }
-      else {
-        return (
-            data.hasOwnProperty(name) ? data[name]
-          : hasPersistent(name) ? JSON.parse(persistent[name])[0]
-          : def[0]()
-        );
-      }
-    };
-  });
-
-  return caller;
+  return proto;
 };

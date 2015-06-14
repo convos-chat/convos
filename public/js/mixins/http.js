@@ -1,4 +1,4 @@
-(window['mixin'] = window['mixin'] || {})['http'] = function(caller) {
+(window['mixin'] = window['mixin'] || {})['http'] = function(proto) {
   var cache = window.mixin.http.cache = window.mixin.http.cache || {}; // global cache
 
   var handlerError = function(xhr) {
@@ -12,10 +12,7 @@
     return [url, str.join('&')].join('?').replace(/\?$/, '');
   };
 
-  // trigger() is added by riot.observable()
-  if (!caller.trigger) riot.observable(caller);
-
-  caller.httpCachedGet = function(url, query, cb) {
+  proto.httpCachedGet = function(url, query, cb) {
     var xhr = cache[urlWithQueryString(url, query)];
     if (xhr) {
       cb.call(this, xhr.status == 200 ? '' : xhr.status, xhr);
@@ -24,11 +21,11 @@
       this.httpGet(url, query, function(err, xhr) {
         if (!err) cache[xhr.url] = xhr;
         cb.call(this, xhr.status == 200 ? '' : xhr.status, xhr);
-      });
+      }.bind(this));
     }
-  }.bind(caller);
+  };
 
-  caller.httpGet = function(url, query, cb) {
+  proto.httpGet = function(url, query, cb) {
     var xhr = new XMLHttpRequest();
     xhr.url = urlWithQueryString(url, query);
     xhr.open('GET', xhr.url);
@@ -41,9 +38,9 @@
       cb.call(this, xhr.status == 200 ? '' : xhr.status, xhr);
     }.bind(this);
     xhr.send(null);
-  }.bind(caller);
+  };
 
-  caller.httpPost = function(url, data, cb) {
+  proto.httpPost = function(url, data, cb) {
     var xhr = new XMLHttpRequest();
     xhr.url = url;
     xhr.open('POST', xhr.url);
@@ -55,22 +52,7 @@
       cb.call(this, xhr.status == 200 ? '' : xhr.status, xhr);
     }.bind(this);
     xhr.send(typeof data == 'object' ? JSON.stringify(data) : data);
-  }.bind(caller);
-
-  caller.httpRefresh = function(name, method) {
-    if (typeof name == 'object') name = name.target.getAttribute('data-refresh-name');
-    this[method || 'httpGet'].apply(
-      this,
-      this.fetchOnMount[name].concat(function(err, xhr) {
-        for (var k in xhr.responseJSON) this[k] = xhr.responseJSON[k];
-        this.update();
-      })
-    );
   };
 
-  caller.on('mount', function() {
-    for (var name in (this.fetchOnMount || {})) caller.httpRefresh(name, 'httpCachedGet');
-  });
-
-  return caller;
+  return proto;
 };
