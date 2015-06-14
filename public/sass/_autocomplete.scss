@@ -1,0 +1,19 @@
+div.autocomplete {
+  overflow: auto;
+  max-height: 8em;
+  margin-top: -15px;
+  border-bottom: 1px solid color('grey', 'lighten-1');
+
+  li {
+    line-height: 3rem;
+    color: $off-black;
+
+    a:hover, a.active {
+      background-color: $dropdown-hover-bg-color;
+    }
+
+    &.loading {
+      color: color('grey', 'lighten-1');
+    }
+  }
+}

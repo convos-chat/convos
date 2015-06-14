@@ -14,6 +14,8 @@ h1, h2, h3, h4, h5 {
   color: color('teal', 'darken-4');
 }
 
+ul, li { margin: 0; }
+
 .loading-convos {
   height: 100vh;
   h5 { border-bottom: 1px solid $collection-border-color; }
