@@ -41,8 +41,8 @@
   </div>
   <script>
 
-  mixin.form(this.prototype);
-  mixin.http(this.prototype);
+  mixin.form(this);
+  mixin.http(this);
 
   submitForm(e) {
     e.preventDefault();

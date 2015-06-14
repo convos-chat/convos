@@ -48,9 +48,9 @@
   </form>
   <script>
 
-  mixin.form(this.prototype);
-  mixin.http(this.prototype);
-  mixin.modal(this.prototype);
+  mixin.form(this);
+  mixin.http(this);
+  mixin.modal(this);
 
   this.defaultServer = 'localhost'; // 'chat.freenode.net:6697';
 

@@ -189,6 +189,7 @@ sub _setup_assets {
     /js/mixins/http.js
     /js/mixins/modal.js
     /js/core/connection.js
+    /js/core/room.js
     /js/core/user.js
   );
 

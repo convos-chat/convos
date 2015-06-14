@@ -54,6 +54,30 @@ sub connection_add {
   );
 }
 
+=head2 connection_rooms
+
+See L<Convos::Manual::API/connectionRooms>.
+
+=cut
+
+sub connection_rooms {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->connection($args->{protocol}, $args->{connection_id});
+
+  unless ($connection->url->host) {
+    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+  }
+
+  $self->delay(
+    sub { $connection->all_rooms(shift->begin) },
+    sub {
+      my ($delay, $err, $rooms) = @_;
+      $self->$cb([map { $_->TO_JSON } @$rooms], 200);
+    },
+  );
+}
+
 =head2 connections
 
 See L<Convos::Manual::API/connections>.
