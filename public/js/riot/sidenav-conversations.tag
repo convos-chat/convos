@@ -10,7 +10,7 @@
   </ul>
   <script>
 
-  mixin.modal(this);
+  mixin.modal(this.prototype);
   this.conversations = [];
   this.addConversationTag = false;
 

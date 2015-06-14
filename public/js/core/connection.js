@@ -1,28 +1,33 @@
 (function(window) {
-  // connection = Object.create(Convos.Connection);
-  var Connection = {_conversations: {}, _method: 'httpCachedGet', state: 'disconnected'};
+  Convos.Connection = function(attrs) {
+    if (attrs) this.save(attrs);
+    riot.observable(this);
+    this._method = 'httpCachedGet';
+    this.state = 'disconnected';
+  };
 
-  mixin.http(Connection);
+  var proto = Convos.Connection.prototype;
 
   // Define attributes
-  mixin.base(Connection, {
-    name: [function() {return ''}, false],
-    type: [function() {return ''}, false],
-    url: [function() {return ''}, false]
+  mixin.base(proto, {
+    name: function() { return ''; },
+    type: function() { return ''; },
+    url: function() { return ''; }
   });
 
+  mixin.http(proto);
+
   // Get list of available rooms on server
-  Connection.allRooms = function(cb) {
-    this[this._method](apiUrl(['connection', this.name(), 'rooms']), {}, function(err, xhr) {
-      if (err) return cb.call(this, err);
-      this.save(data);
-      cb.call(this, err);
+  proto.rooms = function(cb) {
+    this[this._method](apiUrl(['connection', this.type(), this.name(), 'rooms']), {}, function(err, xhr) {
+      if (err) return cb.call(this, err, []);
+      cb.call(this, err, $.map(xhr.responseJSON, function(attrs) { return new Convos.Room(attrs); }));
     });
   };
 
   // Get connection settings from server
-  // Use Connection.fresh().load(function() { ... }) to get fresh data from server
-  Connection.load = function(cb) {
+  // Use connection.fresh().load(function() { ... }) to get fresh data from server
+  proto.load = function(cb) {
     this[this._method](apiUrl('/connection'), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.avatar(xhr.responseJSON.avatar);
@@ -33,18 +38,11 @@
   };
 
   // Write connection settings to server
-  Connection.save = function(data, cb) {
-    if (!cb) {
-      if (typeof data.name != 'undefined') this.name(data.name);
-      if (typeof data.state != 'undefined') this.state = data.state;
-      if (typeof data.type != 'undefined') this.type(data.type);
-      if (typeof data.url != 'undefined') this.url(data.url);
-      return this;
-    }
-
-    this.httpPost(apiUrl(['connection', this.name()]), data, function(err, xhr) {
+  proto.save = function(attrs, cb) {
+    if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
+    return this.httpPost(apiUrl(['connection', this.name()]), attrs, function(err, xhr) {
       if (err) return cb.call(this, err);
-      this.save(data);
+      this.save(attrs);
       cb.call(this, err);
     });
   };
@@ -58,10 +56,8 @@
 
   // Change state to "connected" or "disconnected"
   // Can also be used to retrieve state: "connected", "disconnected" or "connecting"
-  Connection.state = function(state, cb) {
+  proto.state = function(state, cb) {
     if (!cb) return this.state;
     throw 'TODO';
   };
-
-  (window['Convos'] = window['Convos'] || {})['Connection'] = Connection;
 })(window);

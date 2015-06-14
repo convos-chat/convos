@@ -1,7 +1,7 @@
-(window['mixin'] = window['mixin'] || {})['form'] = function(caller) {
-  caller.submitting = false;
+(window['mixin'] = window['mixin'] || {})['form'] = function(proto) {
+  proto.submitting = false;
 
-  caller.httpInvalidInput = function(data) {
+  proto.httpInvalidInput = function(data) {
     var self = this;
     (data.errors || []).forEach(function(err) {
       var name = err.path.replace(/.+\//, '') || '';
@@ -17,7 +17,7 @@
     }.bind(this));
   };
 
-  caller.fieldHasInvalidValue = function(field) {
+  proto.fieldHasInvalidValue = function(field) {
     if (field.pattern && !field.value.match(new RegExp(field.pattern))) {
       field.classList.add('invalid');
       field.focus();
@@ -28,14 +28,14 @@
       field.title = '';
       return 0;
     }
-  }.bind(caller);
+  };
 
-  caller.formHasInvalidFields = function() {
+  proto.formHasInvalidFields = function() {
     var errors = 0;
-    var fields = caller.root.querySelectorAll('input');
+    var fields = proto.root.querySelectorAll('input');
     for (i = fields.length; i--;) errors += this.fieldHasInvalidValue(fields[i]);
     return errors;
-  }.bind(caller);
+  };
 
-  return caller;
+  return proto;
 };

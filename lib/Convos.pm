@@ -235,6 +235,7 @@ __DATA__
     <title>Convos</title>
     %= asset 'convos.css';
     %= javascript begin
+      window.Convos = {};
       window.apiUrl = function(path){return ['<%= $self->url_for('/1.0')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
       window.urlFor = function(path){return ['<%= $self->url_for('/')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
     % end

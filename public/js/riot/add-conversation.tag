@@ -44,9 +44,9 @@
   </form>
   <script>
 
-  mixin.form(this);
-  mixin.http(this);
-  mixin.modal(this);
+  mixin.form(this.prototype);
+  mixin.http(this.prototype);
+  mixin.modal(this.prototype);
 
   this.noRoomsDescription = 'Loading rooms from ' + opts.connections[0].name() + '...';
   this.rooms = [];

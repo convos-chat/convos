@@ -38,8 +38,8 @@
   </div>
   <script>
 
-  mixin.form(this);
-  mixin.http(this);
+  mixin.form(this.prototype);
+  mixin.http(this.prototype);
 
   submitForm(e) {
     e.preventDefault();

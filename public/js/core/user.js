@@ -1,20 +1,27 @@
 (function(window) {
-  // user = Object.create(Convos.User);
-  var User = {_conversations: {}, _connections: {}, _method: 'httpCachedGet'};
+  Convos.User = function(attrs) {
+    if (attrs) this.save(attrs);
+    riot.observable(this);
+    this._conversations = {};
+    this._connections = {};
+    this._method = 'httpCachedGet';
+  };
 
-  mixin.http(User);
+  var proto = Convos.User.prototype;
 
   // Define attributes
-  mixin.base(User, {
-    avatar: [function() {return ''}, false],
-    email:  [function() {return ''}, false]
+  mixin.base(proto, {
+    avatar: function() { return ''; },
+    email: function() { return ''; }
   });
 
+  mixin.http(proto);
+
   // Make the next http method fetch fresh data from server
-  User.fresh = function() { this._method = 'httpGet'; return this; };
+  proto.fresh = function() { this._method = 'httpGet'; return this; };
 
   // Get a single Convos.Connection object from client side
-  User.connection = function(type, name, attrs) {
+  proto.connection = function(type, name, attrs) {
     if (!type && typeof attrs == 'object') {
       var path = attrs.path.split('/'); // /superman@example.com/IRC/localhost
       type = path[2];
@@ -22,15 +29,12 @@
     }
     if (!this._connections[type]) this._connections[type] = {};
     if (!attrs) return this._connections[type][name];
-    var connection = this._connections[type][name] || Object.create(Convos.Connection);
-    attrs.name = name;
-    attrs.type = type;
-    return this._connections[type][name] = connection.save(attrs);
+    return this._connections[type][name] = new Convos.Connection(attrs).name(name).type(type);
   };
 
   // Get a list of Convos.Connection objects from backend
-  // Use User.fresh().connections(function() { ... }) to get fresh data from server
-  User.connections = function(cb) {
+  // Use user.fresh().connections(function() { ... }) to get fresh data from server
+  proto.connections = function(cb) {
     this[this._method](apiUrl('/connections'), {}, function(err, xhr) {
       var connections = [];
       if (!err) xhr.responseJSON.forEach(function(attrs) { connections.push(this.connection(false, false, attrs)); }.bind(this));
@@ -40,8 +44,8 @@
   };
 
   // Get a list of Convos.Conversation objects from backend
-  // Use User.fresh().conversations(function() { ... }) to get fresh data from server
-  User.conversations = function(cb) {
+  // Use user.fresh().conversations(function() { ... }) to get fresh data from server
+  proto.conversations = function(cb) {
     this[this._method](apiUrl('/conversations'), {}, function(err, xhr) {
       if (!err) {
         xhr.responseJSON.forEach(function(r) {
@@ -56,19 +60,18 @@
   };
 
   // Get user settings from server
-  // Use User.fresh().load(function() { ... }) to get fresh data from server
-  User.load = function(cb) {
+  // Use user.fresh().load(function() { ... }) to get fresh data from server
+  proto.load = function(cb) {
     this[this._method](apiUrl('/user'), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
-      this.avatar(xhr.responseJSON.avatar);
-      this.email(xhr.responseJSON.email);
+      this.save(xhr.responseJSON);
       cb.call(this, '');
     });
     return this.tap('_method', 'httpCachedGet');
   };
 
   // Update convos user interface
-  User.render = function(riotTag) {
+  proto.render = function(riotTag) {
     if (riotTag) riotTag.update();
     $('.tooltipped').each(function() {
       var $self = $(this);
@@ -79,19 +82,12 @@
   };
 
   // Write user settings to server
-  User.save = function(data, cb) {
-    if (!cb) {
-      if (typeof data.avatar != 'undefined') this.avatar(data.avatar);
-      if (typeof data.email  != 'undefined') this.email(data.email);
-      return this;
-    }
-
-    this.httpPost(apiUrl('/user'), data, function(err, xhr) {
+  proto.save = function(attrs, cb) {
+    if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
+    return this.httpPost(apiUrl('/user'), attrs, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.save(data);
       cb.call(this, err);
     });
   };
-
-  (window['Convos'] = window['Convos'] || {})['User'] = User;
 })(window);
