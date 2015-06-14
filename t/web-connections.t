@@ -8,7 +8,7 @@ my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@exampl
 
 $t->get_ok('/1.0/connections')->status_is(401);
 $t->post_ok('/1.0/connection', json => {protocol => '', server => ''})->status_is(401);
-$t->post_ok('/1.0/user/authenticate', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
+$t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
 $t->get_ok('/1.0/connections')->status_is(200)->content_is('[]');
 
 $t->post_ok('/1.0/connection', json => {protocol => 'IRC', server => 'localhost:3123'})->status_is(200)

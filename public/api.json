@@ -48,6 +48,13 @@
       "type": "string",
       "description": "User email or server identity"
     },
+    "protocol": {
+      "name": "protocol",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "The name of the connection protocol."
+    },
     "session": {
       "name": "X-Convos-Session",
       "in": "header",
@@ -56,84 +63,6 @@
     }
   },
   "paths": {
-    "/avatar/{connection_id}/{ident}": {
-      "get": {
-        "tags": [ "user" ],
-        "summary": "Get avatar for a user.",
-        "description": "Note: The response is not a JSON formatted document, but rather just the image data.",
-        "x-mojo-controller": "Convos::Controller::User",
-        "operationId": "avatar",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/ident" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Image.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "body": {
-                  "type": "string",
-                  "description": "Image binary data"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/command/{connection_id}/{conversation_id}": {
-      "post": {
-        "tags": [ "chat" ],
-        "summary": "Send a command to the server.",
-        "x-mojo-controller": "Convos::Controller::Chat",
-        "operationId": "command",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/session" }
-        ],
-        "responses": {
-          "200": {
-            "schema": { "$ref": "#/definitions/Command" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/command/history": {
-      "get": {
-        "tags": [ "chat" ],
-        "summary": "Get last commands sent to the server.",
-        "description": "Commands are automatically added to the history once sent over to the server.",
-        "x-mojo-controller": "Convos::Controller::Chat",
-        "operationId": "commandHistory",
-        "parameters": [
-          { "$ref": "#/parameters/session" }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of commands.",
-            "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Command" }
-            }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
     "/commands": {
       "get": {
         "tags": [ "chat" ],
@@ -193,32 +122,7 @@
         }
       }
     },
-    "/connection/{connection_id}/rooms": {
-      "get": {
-        "tags": [ "conversation" ],
-        "summary": "Get a list of all available chat rooms.",
-        "x-mojo-controller": "Convos::Controller::Connection",
-        "operationId": "rooms",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/session" }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of rooms.",
-            "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Room" }
-            }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connection/{connection_id}": {
+    "/connection/{protocol}/{connection_id}": {
       "delete": {
         "tags": [ "connection" ],
         "summary": "Delete a connection and all assosiated data.",
@@ -226,6 +130,7 @@
         "operationId": "connectionDelete",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" }
         ],
         "responses": {
@@ -246,6 +151,7 @@
         "operationId": "connection",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" }
         ],
         "responses": {
@@ -268,6 +174,7 @@
         "operationId": "connectionUpdate",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" },
           {
             "name": "data",
@@ -279,6 +186,80 @@
           "200": {
             "description": "Update a connection.",
             "schema": {}
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connection/{protocol}/{connection_id}/rooms": {
+      "get": {
+        "tags": [ "conversation" ],
+        "summary": "Get a list of all available chat rooms.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "connectionRooms",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/protocol" },
+          { "$ref": "#/parameters/session" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of rooms.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Room" }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connection/{protocol}/{connection_id}/conversation/{conversation_id}/messages": {
+      "get": {
+        "tags": [ "conversation" ],
+        "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "conversationMessages",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messsages.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Message" }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connection/{protocol}/{connection_id}/conversation/{conversation_id}/send": {
+      "post": {
+        "tags": [ "chat" ],
+        "summary": "Send a message to a target.",
+        "x-mojo-controller": "Convos::Controller::Chat",
+        "operationId": "conversationSend",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/protocol" },
+          { "$ref": "#/parameters/session" }
+        ],
+        "responses": {
+          "200": {
+            "schema": { "$ref": "#/definitions/Command" }
           },
           "default": {
             "description": "Error.",
@@ -306,31 +287,6 @@
           },
           "default": {
             "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/conversation/{connection_id}/{conversation_id}": {
-      "get": {
-        "tags": [ "conversation" ],
-        "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
-        "x-mojo-controller": "Convos::Controller::Chat",
-        "operationId": "messages",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of messsages.",
-            "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Message" }
-            }
-          },
-          "default": {
-            "description": "Internal server error.",
             "schema": { "$ref": "#/definitions/Error" }
           }
         }
@@ -489,12 +445,12 @@
         }
       }
     },
-    "/user/authenticate": {
+    "/user/login": {
       "post": {
         "tags": [ "user" ],
-        "summary": "Authenticate a user based on email and password.",
+        "summary": "Log in a user based on email and password.",
         "x-mojo-controller": "Convos::Controller::User",
-        "operationId": "userAuthenticate",
+        "operationId": "userLogin",
         "parameters": [
           {
             "name": "data",
