@@ -42,6 +42,7 @@
       </div>
     </div>
   </form>
+  <script>
 
   mixin.form(this);
   mixin.http(this);
@@ -87,4 +88,6 @@
     $('select', this.root).material_select();
     $(this.form_connection).change(this.changeConnection.bind(this)).change();
   });
+
+  </script>
 </add-conversation>

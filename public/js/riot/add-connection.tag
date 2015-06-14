@@ -46,6 +46,7 @@
       </div>
     </div>
   </form>
+  <script>
 
   mixin.form(this);
   mixin.http(this);
@@ -79,4 +80,6 @@
     $('select', this.root).material_select();
     setTimeout(function() { this.form_server.focus(); }.bind(this), 300);
   });
+
+  </script>
 </add-connection>
