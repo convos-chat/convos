@@ -157,7 +157,7 @@ sub _start {
     $self->backend->find_connections(
       $obj,
       sub {
-        $self->_start((map { $obj->connection(@$_) } @{$_[2]}), @objs);
+        $self->_start((map { $obj->connection(@$_, {}) } @{$_[2]}), @objs);
       }
     );
   }

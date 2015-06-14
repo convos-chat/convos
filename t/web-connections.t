@@ -19,7 +19,7 @@ $t->post_ok('/1.0/connection', json => {protocol => 'IRC', server => 'irc://irc.
 $t->post_ok('/1.0/connection', json => {protocol => 'Foo', server => 'irc://irc.perl.org:6667'})->status_is(400)
   ->json_is('/errors/0', {message => 'Could not find class from protocol.', path => '/data/protocol',});
 
-$user->connection(IRC => 'localhost')->state('connected');
+$user->connection(IRC => 'localhost', {})->state('connected');
 $t->get_ok('/1.0/connections')->status_is(200)->json_is(
   '/0',
   {

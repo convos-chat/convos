@@ -37,7 +37,7 @@ sub connection_add {
   eval {
     $url->userinfo(join ':', @userinfo)
       if grep {length} @userinfo;
-    $connection = $user->connection($args->{data}{protocol}, $name);
+    $connection = $user->connection($args->{data}{protocol}, $name, {});
     $connection->url->parse($url);
   } or do {
     warn $@ if DEBUG;
