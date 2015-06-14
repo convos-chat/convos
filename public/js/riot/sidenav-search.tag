@@ -19,6 +19,7 @@
       </a>
     </li>
   </ul>
+  <script>
 
   this.searchTerm = '';
   this.searchResults = [];
@@ -43,4 +44,6 @@
     if (this.tid) clearTimeout(this.tid);
     this.tid = setTimeout(runSearch.bind(this), 210);
   }
+
+  </script>
 </sidenav-search>

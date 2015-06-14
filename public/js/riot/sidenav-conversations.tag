@@ -8,6 +8,7 @@
       </a>
     </li>
   </ul>
+  <script>
 
   mixin.modal(this);
   this.conversations = [];
@@ -34,4 +35,6 @@
       this.update();
     }.bind(this));
   });
+
+  </script>
 </sidenav-conversations>

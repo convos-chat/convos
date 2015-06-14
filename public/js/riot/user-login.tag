@@ -36,6 +36,7 @@
       &copy; <a href="http://nordaaker.com">Nordaaker</a> - <a href="http://convos.by">About</a>
     </div>
   </div>
+  <script>
 
   mixin.form(this);
   mixin.http(this);
@@ -60,4 +61,6 @@
     this.form_email.value = localStorage.getItem('email');
     this.form_email.focus();
   });
+
+  </script>
 </user-login>

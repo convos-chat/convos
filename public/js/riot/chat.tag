@@ -25,6 +25,7 @@
     </div>
     <user-input/>
   </main>
+  <script>
 
   this.conversations = [];
   this.modalBottomSheetShow = false;
@@ -46,4 +47,6 @@
   this.on('mount', function() {
     if (!this.user.email()) return Router.route('login');
   });
+
+  </script>
 </chat>
