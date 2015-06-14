@@ -193,6 +193,31 @@
         }
       }
     },
+    "/connection/{connection_id}/rooms": {
+      "get": {
+        "tags": [ "conversation" ],
+        "summary": "Get a list of all available chat rooms.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "rooms",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/session" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of rooms.",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Room" }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/connection/{connection_id}": {
       "delete": {
         "tags": [ "connection" ],
