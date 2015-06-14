@@ -4,7 +4,7 @@ use Convos::Core;
 
 my $core       = Convos::Core->new;
 my $user       = $core->user('test@example.com', {});
-my $connection = $user->connection(IRC => 'whatever');
+my $connection = $user->connection(IRC => 'whatever', {});
 
 isa_ok($connection->room('#foo'), 'Convos::Core::Conversation::Room');
 ok !$connection->{room}{'#foo'}, 'no room on get';

@@ -6,7 +6,7 @@ use Test::More;
 
 my $core       = Convos::Core->new;
 my $user       = $core->user('superman@example.com', {});
-my $connection = $user->connection(IRC => 'localhost');
+my $connection = $user->connection(IRC => 'localhost', {});
 my @log;
 
 $core->backend->on(

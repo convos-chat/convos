@@ -7,7 +7,7 @@ my $t          = Test::Mojo::IRC->new;
 my $server     = $t->start_server;
 my $core       = Convos::Core->new;
 my $user       = $core->user('superman@example.com', {});
-my $connection = $user->connection(IRC => 'localhost');
+my $connection = $user->connection(IRC => 'localhost', {});
 my $room       = $connection->room('#convos' => {});
 my $log        = '';
 my $room_log   = '';

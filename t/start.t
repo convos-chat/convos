@@ -10,14 +10,15 @@ my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 
 {
   my $user = $core->user('jhthorsen@cpan.org')->save;
-  $user->connection(IRC => 'localhost')->tap(sub { shift->url->parse('irc://localhost') })->save;
+  $user->connection(IRC => 'localhost', {})->tap(sub { shift->url->parse('irc://localhost') })->save;
 }
 
 {
   my $user = $core->user('mramberg@cpan.org')->save;
-  $user->connection(IRC => 'freenode')->tap(sub  { shift->url->parse('irc://chat.freenode.net:6697') })->save;
-  $user->connection(IRC => 'localhost')->tap(sub { shift->url->parse('irc://127.0.0.1') })->state('disconnected')->save;
-  $user->connection(IRC => 'perlorg')->tap(sub   { shift->url->parse('irc://irc.perl.org') })->save;
+  $user->connection(IRC => 'freenode',  {})->tap(sub { shift->url->parse('irc://chat.freenode.net:6697') })->save;
+  $user->connection(IRC => 'localhost', {})->tap(sub { shift->url->parse('irc://127.0.0.1') })->state('disconnected')
+    ->save;
+  $user->connection(IRC => 'perlorg', {})->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
 }
 
 diag 'restart core';

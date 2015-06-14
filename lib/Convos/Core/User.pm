@@ -66,7 +66,8 @@ the following new ones.
 
 =head2 connection
 
-  $connection = $self->connection($type => $name);
+  $connection = $self->connection($type, $name);         # get
+  $connection = $self->connection($type, $name, \%attr); # create/update
 
 Returns a connection object. Every new object created will emit
 a "connection" event:
@@ -79,21 +80,28 @@ translated to L<Convos::Core::Connection::IRC>.
 =cut
 
 sub connection {
-  my ($self, $type, $name) = @_;
-  my $connection;
+  my ($self, $type, $name, $attr) = @_;
+  my $connection_class;
 
   die "Invalid name $name. Need to match /^[\\w-]+\$/" unless $name and $name =~ /^[\w-]+$/;
-  $name       = lc $name;
-  $connection = $self->{connection}{$type}{$name};
-  return $connection if $connection;
-
-  my $connection_class = "Convos::Core::Connection::$type";
+  $name             = lc $name;
+  $connection_class = "Convos::Core::Connection::$type";
   eval "require $connection_class;1" or die $@;
-  $connection = $connection_class->new(name => $name, user => $self);
-  Scalar::Util::weaken($connection->{user});
-  warn "[Convos::Core::User] Emit connection for @{[$self->email]} type=$type name=$name\n" if DEBUG;
-  $self->core->backend->emit(connection => $connection);
-  return $self->{connection}{$type}{$name} = $connection;
+
+  if ($attr) {
+    my $connection = $self->{connection}{$type}{$name} ||= do {
+      my $connection = $connection_class->new(name => $name, user => $self);
+      Scalar::Util::weaken($connection->{user});
+      warn "[Convos::Core::User] Emit connection for @{[$self->email]} type=$type name=$name\n" if DEBUG;
+      $self->core->backend->emit(connection => $connection);
+      $connection;
+    };
+    $connection->{$_} = $attr->{$_} for keys %$attr;
+    return $connection;
+  }
+  else {
+    return $self->{connection}{$type}{$name} || $connection_class->new(name => $name, user => $self);
+  }
 }
 
 =head2 connections

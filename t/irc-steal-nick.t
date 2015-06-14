@@ -7,7 +7,7 @@ my $t          = Test::Mojo::IRC->new;
 my $server     = $t->start_server;
 my $core       = Convos::Core->new;
 my $user       = $core->user('nick.young@example.com', {});
-my $connection = $user->connection(IRC => 'localhost');
+my $connection = $user->connection(IRC => 'localhost', {});
 my $nick;
 
 $connection->on(nick => sub { $nick = $_[1]; Mojo::IOLoop->stop; });
