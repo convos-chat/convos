@@ -170,6 +170,7 @@ sub _setup_assets {
     /js/storage.js
     /js/window.js
     /js/router.js
+    /js/jquery.autocomplete.js
     /js/materialize/hammer.min.js
     /js/materialize/jquery.hammer.js
     /js/materialize/velocity.min.js

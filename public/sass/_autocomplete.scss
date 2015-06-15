@@ -8,16 +8,9 @@ div.autocomplete {
     line-height: 3rem;
     color: $off-black;
 
-    a, span {
-      display: block;
-    }
-
-    a:hover, a.active {
-      background-color: $dropdown-hover-bg-color;
-    }
-
-    &.loading {
-      color: color('grey', 'lighten-1');
-    }
+    &:hover { background-color: $dropdown-hover-bg-color; }
+    &.active { background-color: darken($dropdown-hover-bg-color, 5%); }
+    a, span { display: block; }
+    &.loading { color: color('grey', 'lighten-1'); }
   }
 }
