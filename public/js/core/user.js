@@ -21,15 +21,15 @@
   proto.fresh = function() { this._method = 'httpGet'; return this; };
 
   // Get a single Convos.Connection object from client side
-  proto.connection = function(type, name, attrs) {
-    if (!type && typeof attrs == 'object') {
+  proto.connection = function(protocol, name, attrs) {
+    if (!protocol && typeof attrs == 'object') {
       var path = attrs.path.split('/'); // /superman@example.com/IRC/localhost
-      type = path[2];
+      protocol = path[2];
       name = path[3];
     }
-    if (!this._connections[type]) this._connections[type] = {};
-    if (!attrs) return this._connections[type][name];
-    return this._connections[type][name] = new Convos.Connection(attrs).name(name).type(type);
+    if (!this._connections[protocol]) this._connections[protocol] = {};
+    if (!attrs) return this._connections[protocol][name];
+    return this._connections[protocol][name] = new Convos.Connection(attrs).name(name).protocol(protocol);
   };
 
   // Get a list of Convos.Connection objects from backend
