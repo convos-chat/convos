@@ -171,6 +171,7 @@ sub _setup_assets {
     /js/window.js
     /js/router.js
     /js/jquery.autocomplete.js
+    /js/jquery.disableouterscroll.js
     /js/materialize/hammer.min.js
     /js/materialize/jquery.hammer.js
     /js/materialize/velocity.min.js

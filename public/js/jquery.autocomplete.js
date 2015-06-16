@@ -1,7 +1,7 @@
 ;(function($) {
   $.fn.autocomplete = function(opts) {
     var $input = this;
-    var $wrapper = $input.siblings('.autocomplete');
+    var $wrapper = $input.siblings('.autocomplete').disableOuterScroll();
     var n = 0;
 
     $wrapper.find('li:visible:first').addClass('active');
