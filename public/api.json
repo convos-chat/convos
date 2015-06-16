@@ -220,6 +220,50 @@
         }
       }
     },
+    "/connection/{protocol}/{connection_id}/conversation/{conversation_id}": {
+      "delete": {
+        "tags": [ "conversation" ],
+        "summary": "Remove (part) a conversation.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "conversationDelete",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/protocol" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A conversation.",
+            "schema": { "$ref": "#/definitions/Success" }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "post": {
+        "tags": [ "conversation" ],
+        "summary": "Add (join) a conversation.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "conversationAdd",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/protocol" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A conversation.",
+            "schema": { "$ref": "#/definitions/Room" }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/connection/{protocol}/{connection_id}/conversation/{conversation_id}/messages": {
       "get": {
         "tags": [ "conversation" ],
@@ -228,7 +272,8 @@
         "operationId": "conversationMessages",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" }
+          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/protocol" }
         ],
         "responses": {
           "200": {

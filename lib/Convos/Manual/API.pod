@@ -398,6 +398,110 @@ Error.
       "required":     },
   },
 
+=head2 conversationAdd
+
+Add (join) a conversation.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/1.0/connection/{protocol}/{connection_id}/conversation/{conversation_id}
+
+=head3 Parameters
+
+  .---------------------------------------------------------------------------------------.
+  | Name            | In   | Type   | Required | Description                              |
+  |---------------------------------------------------------------------------------------|
+  | connection_id   | path | string | Yes      | A friendly name of the server            |
+  | conversation_id | path | string | No       | The name of the person/chat conversation |
+  | protocol        | path | string | Yes      | The name of the connection protocol.     |
+  '---------------------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+A conversation.
+
+  {
+    "name": string, // No description.
+    "path": string, // No description.
+    "topic": string, // No description.
+    "users":     {
+      "name": string, // Name of the user
+    },
+  },
+
+=head4 Default
+
+Internal server error.
+
+  {
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
+  },
+
+=head2 conversationDelete
+
+Remove (part) a conversation.
+
+=head3 Resource URL
+
+  DELETE http://demo.convos.by/1.0/connection/{protocol}/{connection_id}/conversation/{conversation_id}
+
+=head3 Parameters
+
+  .---------------------------------------------------------------------------------------.
+  | Name            | In   | Type   | Required | Description                              |
+  |---------------------------------------------------------------------------------------|
+  | connection_id   | path | string | Yes      | A friendly name of the server            |
+  | conversation_id | path | string | No       | The name of the person/chat conversation |
+  | protocol        | path | string | Yes      | The name of the connection protocol.     |
+  '---------------------------------------------------------------------------------------'
+
+=head3 Responses
+
+=head4 200 - OK
+
+A conversation.
+
+  {
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+    "message": string, // No description.
+  },
+
+=head4 Default
+
+Internal server error.
+
+  {
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
+  },
+
 =head2 conversationMessages
 
 Get a list of messages.
@@ -415,6 +519,7 @@ Note: this resource require the user to be authenticated first.
   |---------------------------------------------------------------------------------------|
   | connection_id   | path | string | Yes      | A friendly name of the server            |
   | conversation_id | path | string | No       | The name of the person/chat conversation |
+  | protocol        | path | string | Yes      | The name of the connection protocol.     |
   '---------------------------------------------------------------------------------------'
 
 =head3 Responses
