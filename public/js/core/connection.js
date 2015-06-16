@@ -18,10 +18,10 @@
   mixin.http(proto);
 
   // Join a room or create a private conversation on the server
-  proto.createConversation = function(name, cb) {
+  proto.addConversation = function(name, cb) {
     this.httpPost(
-      apiUrl(['connection', this.protocol(), this.name(), 'rooms']),
-      {name: name},
+      apiUrl(['connection', this.protocol(), this.name(), 'conversation', name]),
+      {},
       function(err, xhr) { cb.call(this, err); }
     );
   };
