@@ -96,6 +96,41 @@ sub connections {
   $self->$cb(\@connections, 200);
 }
 
+=head2 conversation_add
+
+See L<Convos::Manual::API/conversationAdd>.
+
+=cut
+
+sub conversation_add {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->connection($args->{protocol}, $args->{connection_id});
+
+  $self->delay(
+    sub { $connection->add_conversation($args->{conversation_id}, shift->begin) },
+    sub {
+      my ($delay, $err) = @_;
+      return $self->$cb($self->invalid_request($err, '/conversation_id'), 400) if $err;
+      return $self->$cb({message => 'OK'}, 200);
+    },
+  );
+}
+
+=head2 conversation_delete
+
+See L<Convos::Manual::API/conversationDelete>.
+
+=cut
+
+sub conversation_delete {
+  my ($self, $args, $cb) = @_;
+
+  die 'TODO';
+
+  $self->$cb({message => ''}, 200);
+}
+
 sub _pretty_connection_name {
   my ($self, $name) = @_;
 

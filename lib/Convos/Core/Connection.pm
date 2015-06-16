@@ -89,6 +89,16 @@ sub active_rooms {
   return [grep { $_->active } values %{$self->{room}}];
 }
 
+=head2 add_conversation
+
+  $self = $self->add_conversation("#some_channel", sub { my ($self, $err) = @_; });
+
+Used to join a room. See also L</room> event.
+
+=cut
+
+sub add_conversation { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "add_conversation" not implemented.'); }
+
 =head2 all_rooms
 
   $self = $self->all_rooms(sub { my ($self, $err, $list) = @_; });
@@ -109,16 +119,6 @@ Used to connect to L</url>. Meant to be overloaded in a subclass.
 =cut
 
 sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" not implemented.'); }
-
-=head2 join_room
-
-  $self = $self->join_room("#some_channel", sub { my ($self, $err) = @_; });
-
-Used to join a room. See also L</room> event.
-
-=cut
-
-sub join_room { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "join_room" not implemented.'); }
 
 =head2 load
 

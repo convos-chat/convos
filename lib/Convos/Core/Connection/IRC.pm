@@ -78,6 +78,25 @@ has _irc => sub {
 L<Convos::Core::Connection::IRC> inherits all methods from L<Convos::Core::Connection>
 and implements the following new ones.
 
+=head2 add_conversation
+
+See L<Convos::Core::Connection/add_conversation>.
+
+=cut
+
+sub add_conversation {
+  my $cb   = pop;
+  my $self = shift;
+  my ($name, $password) = split /\s/, shift, 2;
+  my $room;
+
+  $room = $self->room($name, {active => 1, name => $name, password => $password // ''});
+  return $self->tap($cb, '', $room) if %{$room->users};
+  Scalar::Util::weaken($self);
+  $self->_irc->join_channel($name, sub { $self->$cb($_[1], $room); });
+  $self;
+}
+
 =head2 all_rooms
 
 See L<Convos::Core::Connection/all_rooms>.
@@ -154,23 +173,6 @@ sub connect {
   );
 
   return $self;
-}
-
-=head2 join_room
-
-See L<Convos::Core::Connection/join_room>.
-
-=cut
-
-sub join_room {
-  my ($self, $room, $cb) = @_;
-  my ($channel, $password) = split /\s/, $room, 2;
-
-  $room = $self->room($channel, {active => 1, name => $channel, password => $password // ''});
-  return $self->tap($cb, '', $room) if %{$room->users};
-  Scalar::Util::weaken($self);
-  $self->_irc->join_channel($channel, sub { $self->$cb($_[1], $room); });
-  $self;
 }
 
 =head2 nick
@@ -523,7 +525,7 @@ _event irc_rpl_welcome => sub {
   my $rooms = $self->active_rooms;
   $self->log(info => $msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->emit(nick => $msg->{params}[0]);
-  $self->join_room($_, sub { }) for map { $_->password ? join(' ', $_->name, $_->password) : $_->name } @$rooms;
+  $self->add_conversation($_, sub { }) for map { $_->password ? join(' ', $_->name, $_->password) : $_->name } @$rooms;
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool

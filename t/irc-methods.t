@@ -48,10 +48,10 @@ $t->run(
   sub {
     my ($err, $room);
     is_deeply($connection->active_rooms, [], 'no active rooms');
-    $connection->join_room("#Convos_irc_LIVE_20001", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->add_conversation("#Convos_irc_LIVE_20001", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
     is_deeply([map { $_->id } @{$connection->active_rooms}], ['#convos_irc_live_20001'], 'active rooms');
     Mojo::IOLoop->start;
-    is $err, '', "join_room: convos_irc_live_20001";
+    is $err, '', "add_conversation: convos_irc_live_20001";
     isa_ok($room, 'Convos::Core::Conversation::Room');
     is $room->name, "#Convos_irc_LIVE_20001", "room Convos_irc_LIVE_20001 in callback";
     cmp_deeply(
@@ -73,9 +73,9 @@ $t->run(
   [qr{JOIN}, ['main', 'join-convos.irc']],
   sub {
     my ($err, $room);
-    $connection->join_room("#convos s3cret", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->add_conversation("#convos s3cret", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
-    is $err, '', 'join_room: convos';
+    is $err, '', 'add_conversation: convos';
     is $room->name,     "#convos", "room convos in callback";
     is $room->password, 's3cret',  'convos password';
     cmp_deeply(
@@ -97,13 +97,13 @@ $t->run(
   [qr{JOIN}, ['main', 'join-invalid-name.irc']],
   sub {
     my ($err, $room);
-    $connection->join_room("#convos", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->add_conversation("#convos", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
     is $room->name, "#convos", "room convos in callback again";
-    is $err, '', 'join_room: convos again';
+    is $err, '', 'add_conversation: convos again';
 
-    $connection->join_room("#\2", sub { $err = $_[1]; Mojo::IOLoop->stop });
+    $connection->add_conversation("#\2", sub { $err = $_[1]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
-    is $err, 'Illegal channel name', 'join_room: invalid name';
+    is $err, 'Illegal channel name', 'add_conversation: invalid name';
   }
 );
 
