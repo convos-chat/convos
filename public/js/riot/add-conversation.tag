@@ -22,7 +22,7 @@
         <div class="autocomplete">
           <ul>
             <li each={obj, i in rooms} class="link"><a href={obj.name()} tabindex=-1>{obj.name()} - {obj.topic() || 'No topic'}</a></li>
-            <li class="loading" if={!rooms.length}>{noRoomsDescription}</li>
+            <li class="no-match">{noRoomsDescription}</li>
           </ul>
         </div>
         <label for="form_name">Name</label>

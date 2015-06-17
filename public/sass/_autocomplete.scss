@@ -10,7 +10,7 @@ div.autocomplete {
 
     &:hover { background-color: $dropdown-hover-bg-color; }
     &.active { background-color: darken($dropdown-hover-bg-color, 5%); }
+    &.no-match { color: color('grey', 'lighten-1'); }
     a, span { display: block; }
-    &.loading { color: color('grey', 'lighten-1'); }
   }
 }
