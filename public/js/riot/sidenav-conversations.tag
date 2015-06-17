@@ -1,8 +1,8 @@
 <sidenav-conversations>
   <ul class="sidenav">
-    <sidenav-link each={conversations} icon={icon} href={path}>{name}</sidenav-link>
+    <sidenav-link each={obj, i in conversations} active={i == parent.active} icon={obj.icon()} href={obj.url()}>{obj.name()}</sidenav-link>
     <li class="conversation link">
-      <a href="#add-conversation" class="waves-effect waves-teal" onclick={addConversation}>
+      <a href="#add/conversation" class="waves-effect waves-teal" onclick={addConversation}>
         <i class="mdi-content-add-circle-outline"></i>
         Add conversation
       </a>
@@ -11,8 +11,10 @@
   <script>
 
   mixin.modal(this);
-  this.conversations = [];
+
+  this.active = 0;
   this.addConversationTag = false;
+  this.conversations = [];
 
   addConversation(e) {
     e.preventDefault();
@@ -27,13 +29,8 @@
   }
 
   this.on('mount', function() {
-    convos.conversations(function(err, conversations) {
-      this.conversations = conversations;
-      conversations.forEach(function(conversation) {
-        conversation.icon = conversation['users'] ? 'mdi-social-group' : 'mdi-social-person';
-      });
-      this.update();
-    }.bind(this));
+    convos.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
+    convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
   });
 
   </script>

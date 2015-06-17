@@ -9,27 +9,25 @@
 
   // Define attributes
   mixin.base(proto, {
-    frozen: [function() {return ''}, false],
-    id: [function() {return ''}, false],
-    name: [function() {return ''}, false],
-    topic: [function() {return ''}, false]
+    frozen: function() { return '' },
+    icon: function() { return 'mdi-social-group' }, // mdi-social-person
+    id: function() { return '' },
+    name: function() { return '' },
+    path: function() { return '' },
+    topic: function() { return '' },
   });
 
   mixin.http(proto);
 
   // Send a message to a room
   proto.send = function(message, cb) {
-    this.httpPost(apiUrl(['connection', this.name(), 'message']), {message: message}, function(err, xhr) {
+    path = this.path().split('/');
+    this.httpPost(apiUrl(['connection', path[2], path[3], 'conversation', path[4], 'message']), {message: message}, function(err, xhr) {
       cb.call(this, err);
     });
   };
 
-  // Set attributes on client side
-  proto.save = function(attrs) {
-    if (typeof attrs.frozen != 'undefined') this.frozen(attrs.frozen);
-    if (typeof attrs.id != 'undefined') this.id = attrs.id;
-    if (typeof attrs.name != 'undefined') this.name(attrs.name);
-    if (typeof attrs.topic != 'undefined') this.topic(attrs.topic);
-    return this;
+  proto.url = function() {
+    return this.path().replace(/^\/[^\/]*\//, '#chat/');
   };
 })(window);

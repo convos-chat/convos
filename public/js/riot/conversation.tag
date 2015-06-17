@@ -1,10 +1,10 @@
 <conversation>
   <ul class="conversation collection">
-    <li each={conversations} class={'collection-item avatar ' + (level || 'debug')}">
-      <img src={avatar} alt={target} class="circle">
-      <a href={'#autocomplete:' + target} class="title">{target}</a>
-      <div>{message}</div>
-      <span class="secondary-content">{ts}</span>
+    <li each={message, i in conversation.messages} class={'collection-item avatar ' + (message.level || 'debug')}">
+      <img src={message.avatar} alt={message.target} class="circle">
+      <a href={'#autocomplete:' + message.target} class="title">{message.target}</a>
+      <div>{message.message}</div>
+      <span class="secondary-content">{message.ts}</span>
     </li>
   </ul>
 </conversation>

@@ -13,7 +13,7 @@
     </ul>
   </nav>
   <main>
-    <conversation each={conversations} target={id} show={current}></conversation>
+    <conversation each={conversation, i in conversations} target={conversation.id()} show={i == parent.active}></conversation>
     <div class="no-conversations valign-wrapper" if={!conversations.length}>
       <div class="valign center-align">
         <h5>No conversations</h5>
@@ -27,6 +27,7 @@
   </main>
   <script>
 
+  this.active = 0;
   this.conversations = [];
   this.modalBottomSheetShow = false;
   this.sidenav = localStorage.getItem('sidenav') || 'conversations';
@@ -46,6 +47,8 @@
 
   this.on('mount', function() {
     if (!this.user.email()) return Router.route('login');
+    convos.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
+    convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
   });
 
   </script>
