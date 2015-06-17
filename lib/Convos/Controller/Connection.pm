@@ -110,9 +110,9 @@ sub conversation_add {
   $self->delay(
     sub { $connection->add_conversation($args->{conversation_id}, shift->begin) },
     sub {
-      my ($delay, $err) = @_;
+      my ($delay, $err, $room) = @_;
       return $self->$cb($self->invalid_request($err, '/conversation_id'), 400) if $err;
-      return $self->$cb({message => 'OK'}, 200);
+      return $self->$cb($room->TO_JSON, 200);
     },
   );
 }
