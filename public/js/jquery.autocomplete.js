@@ -4,7 +4,8 @@
     var $wrapper = $input.siblings('.autocomplete').disableOuterScroll();
     var n = 0;
 
-    $wrapper.find('li:visible:first').addClass('active');
+    $wrapper.find('li:visible').not('.no-match').eq(0).addClass('active');
+    $wrapper.find('li.no-match')[$wrapper.find('li:visible').length ? 'hide' : 'show']();
     if (opts == 'update') return;
 
     $wrapper.on('click', 'li > a', function(e) {
@@ -23,7 +24,7 @@
     });
 
     $input.on('keyup', function(e) {
-      var $li = $wrapper.height($wrapper.height()).find('li');
+      var $li = $wrapper.height($wrapper.height()).find('li').not('.no-match');
       var re = new RegExp(this.value, 'i');
 
       switch (e.keyCode) {
@@ -52,7 +53,11 @@
       }
 
       if ($li.length) {
+        $wrapper.find('li.no-match').hide();
         $wrapper.scrollTo($li.eq(n).addClass('active'));
+      }
+      else {
+        $wrapper.find('li.no-match').show();
       }
     });
 
