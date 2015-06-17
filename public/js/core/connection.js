@@ -12,18 +12,18 @@
   mixin.base(proto, {
     name: function() { return ''; },
     protocol: function() { return ''; },
-    url: function() { return ''; }
+    url: function() { return ''; },
+    user: function() { return false; }
   });
 
   mixin.http(proto);
 
   // Join a room or create a private conversation on the server
   proto.addConversation = function(name, cb) {
-    this.httpPost(
-      apiUrl(['connection', this.protocol(), this.name(), 'conversation', name]),
-      {},
-      function(err, xhr) { cb.call(this, err); }
-    );
+    this.httpPost(apiUrl(['connection', this.protocol(), this.name(), 'conversation', name]), {}, function(err, xhr) {
+      if (!err) this.user().conversation(false, xhr.responseJSON);
+      cb.call(this, err, xhr.responseJSON);
+    });
   };
 
   // Get connection settings from server
@@ -47,7 +47,10 @@
 
   // Write connection settings to server
   proto.save = function(attrs, cb) {
-    if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
+    if (!cb) {
+      Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
+      return this;
+    }
     return this.httpPost(apiUrl(['connection', this.name()]), attrs, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.save(attrs);
