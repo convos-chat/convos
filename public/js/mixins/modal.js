@@ -7,7 +7,7 @@
 
   proto.openModal = function(riotTag, opts) {
     var $target = $('#modal_bottom_sheet');
-    if (modalTag) modalTag.unmount(true);
+    if (modalTag) modalTag[0].unmount(true);
     modalTag = riot.mountTo($target.get(0), riotTag, opts || {});
     if ($('.lean-overlay').length) return;
     $target.openModal({
