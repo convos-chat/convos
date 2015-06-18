@@ -10,9 +10,9 @@ $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', passwor
 $t->get_ok('/1.0/conversations')->status_is(200)->content_is('[]');
 
 # order does not matter
-$user->connection(IRC => 'localhost', {})->add_conversation('#private',       sub { });
-$user->connection(IRC => 'perl-org',  {})->add_conversation('#oslo.pm',       sub { });
-$user->connection(IRC => 'localhost', {})->add_conversation('#Convos s3cret', sub { });
+$user->connection(IRC => 'localhost', {})->join_conversation('#private',       sub { });
+$user->connection(IRC => 'perl-org',  {})->join_conversation('#oslo.pm',       sub { });
+$user->connection(IRC => 'localhost', {})->join_conversation('#Convos s3cret', sub { });
 
 $t->get_ok('/1.0/conversations')->status_is(200)->json_is(
   '/0',

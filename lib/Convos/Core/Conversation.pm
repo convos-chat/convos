@@ -16,13 +16,6 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 =head1 ATTRIBUTES
 
-=head2 active
-
-  $bool = $self->active;
-
-True if this is a conversation which the L<user|Convos::Core::User> want to
-be part of.
-
 =head2 connection
 
 Holds a L<Convos::Core::Connection> object.

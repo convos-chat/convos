@@ -20,10 +20,10 @@ $connection->on(
   }
 );
 $connection->on(
-  room => sub {
-    my ($self, $room, $changed) = @_;
+  conversation => sub {
+    my ($self, $conversation, $changed) = @_;
     if ($ENV{HARNESS_IS_VERBOSE}) {
-      diag "[room=$room->{id}] " . join ' ',
+      diag "[conversation=$conversation->{id}] " . join ' ',
         map { sprintf '%s=%s', $_, Data::Dumper->new([$changed->{$_}])->Indent(0)->Sortkeys(1)->Terse(1)->Dump }
         keys %$changed;
     }
@@ -46,16 +46,17 @@ is $connection->nick, "Superman20001", 'changed nick attribute';
 $t->run(
   [qr{JOIN}, ['main', 'join-convos-irc-live.irc']],
   sub {
-    my ($err, $room);
-    is_deeply($connection->active_rooms, [], 'no active rooms');
-    $connection->add_conversation("#Convos_irc_LIVE_20001", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
-    is_deeply([map { $_->id } @{$connection->active_rooms}], ['#convos_irc_live_20001'], 'active rooms');
+    my ($err, $conversation);
+    is_deeply($connection->conversations, [], 'no conversations');
+    $connection->join_conversation("#Convos_irc_LIVE_20001",
+      sub { ($err, $conversation) = @_[1, 2]; Mojo::IOLoop->stop });
+    is_deeply([map { $_->id } @{$connection->conversations}], ['#convos_irc_live_20001'], 'conversations');
     Mojo::IOLoop->start;
-    is $err, '', "add_conversation: convos_irc_live_20001";
-    isa_ok($room, 'Convos::Core::Conversation::Room');
-    is $room->name, "#Convos_irc_LIVE_20001", "room Convos_irc_LIVE_20001 in callback";
+    is $err, '', "join_conversation: convos_irc_live_20001";
+    isa_ok($conversation, 'Convos::Core::Conversation::Room');
+    is $conversation->name, "#Convos_irc_LIVE_20001", "conversation Convos_irc_LIVE_20001 in callback";
     cmp_deeply(
-      $connection->room("#Convos_irc_live_20001")->TO_JSON,
+      $connection->conversation("#Convos_irc_live_20001")->TO_JSON,
       {
         frozen => '',
         id     => "#convos_irc_live_20001",
@@ -72,14 +73,14 @@ $t->run(
 $t->run(
   [qr{JOIN}, ['main', 'join-convos.irc']],
   sub {
-    my ($err, $room);
-    $connection->add_conversation("#convos s3cret", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
+    my ($err, $conversation);
+    $connection->join_conversation("#convos s3cret", sub { ($err, $conversation) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
-    is $err, '', 'add_conversation: convos';
-    is $room->name,     "#convos", "room convos in callback";
-    is $room->password, 's3cret',  'convos password';
+    is $err, '', 'join_conversation: convos';
+    is $conversation->name,     "#convos", "conversation convos in callback";
+    is $conversation->password, 's3cret',  'convos password';
     cmp_deeply(
-      $connection->room('#conVOS')->TO_JSON,
+      $connection->conversation('#conVOS')->TO_JSON,
       {
         frozen => '',
         id     => '#convos',
@@ -96,14 +97,14 @@ $t->run(
 $t->run(
   [qr{JOIN}, ['main', 'join-invalid-name.irc']],
   sub {
-    my ($err, $room);
-    $connection->add_conversation("#convos", sub { ($err, $room) = @_[1, 2]; Mojo::IOLoop->stop });
-    is $room->name, "#convos", "room convos in callback again";
-    is $err, '', 'add_conversation: convos again';
+    my ($err, $conversation);
+    $connection->join_conversation("#convos", sub { ($err, $conversation) = @_[1, 2]; Mojo::IOLoop->stop });
+    is $conversation->name, "#convos", "conversation convos in callback again";
+    is $err, '', 'join_conversation: convos again';
 
-    $connection->add_conversation("#\2", sub { $err = $_[1]; Mojo::IOLoop->stop });
+    $connection->join_conversation("#\2", sub { $err = $_[1]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
-    is $err, 'Illegal channel name', 'add_conversation: invalid name';
+    is $err, 'Illegal channel name', 'join_conversation: invalid name';
   }
 );
 
@@ -111,9 +112,9 @@ $t->run(
   [qr{LIST}, ['main', 'channel-list.irc']],
   sub {
     my ($err, $list);
-    $connection->all_rooms(sub { ($err, $list) = (@_[1, 2]); Mojo::IOLoop->stop });
+    $connection->rooms(sub { ($err, $list) = (@_[1, 2]); Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
-    is $err, '', 'all_rooms';
+    is $err, '', 'rooms';
     ok @$list >= 2, 'list has at least two channels' or diag int @$list;
     $list = [grep { $_->id eq "#convos_irc_live_20001" } @$list];
     is $list->[0]{n_users}, 1, 'n_users=1';
@@ -134,14 +135,14 @@ $t->run(
     Mojo::IOLoop->start;
     is $err, '', 'set online nick';
 
-    $nick
-      = (map { $_->{name} } grep { $_->{name} ne "SupermanX20001" } values %{$connection->room('#convos')->users})[0];
+    $nick = (map { $_->{name} }
+        grep { $_->{name} ne "SupermanX20001" } values %{$connection->conversation('#convos')->users})[0];
     $connection->nick($nick, sub { $err = $_[1]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     like $err, qr{in use}, 'nick in use';
 
     cmp_deeply(
-      $connection->room('#conVOS')->TO_JSON->{users},
+      $connection->conversation('#conVOS')->TO_JSON->{users},
       superhashof(
         {
           "supermanx20001" => {name => "SupermanX20001", mode => '',       seen => re(qr/^\d{10}$/)},

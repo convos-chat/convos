@@ -24,15 +24,15 @@ See L<Convos::Manual::API/conversations>.
 sub conversations {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my @rooms;
+  my @conversations;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-    for my $room (sort { $a->id cmp $b->id } @{$connection->active_rooms}) {
-      push @rooms, $room->TO_JSON;
+    for my $conversation (sort { $a->id cmp $b->id } @{$connection->conversations}) {
+      push @conversations, $conversation->TO_JSON;
     }
   }
 
-  $self->$cb(\@rooms, 200);
+  $self->$cb(\@conversations, 200);
 }
 
 =head1 COPYRIGHT AND LICENSE

@@ -19,7 +19,7 @@
   mixin.http(proto);
 
   // Join a room or create a private conversation on the server
-  proto.addConversation = function(name, cb) {
+  proto.joinConversation = function(name, cb) {
     this.httpPost(apiUrl(['connection', this.protocol(), this.name(), 'conversation', name]), {}, function(err, xhr) {
       if (!err) this.user().conversation(false, xhr.responseJSON);
       cb.call(this, err, xhr.responseJSON);
@@ -41,7 +41,7 @@
   proto.rooms = function(cb) {
     this[this._method](apiUrl(['connection', this.protocol(), this.name(), 'rooms']), {}, function(err, xhr) {
       if (err) return cb.call(this, err, []);
-      cb.call(this, err, $.map(xhr.responseJSON, function(attrs) { return new Convos.Room(attrs); }));
+      cb.call(this, err, $.map(xhr.responseJSON, function(attrs) { return new Convos.ConversationRoom(attrs); }));
     });
   };
 

@@ -244,9 +244,9 @@
       },
       "post": {
         "tags": [ "conversation" ],
-        "summary": "Add (join) a conversation.",
+        "summary": "Join a conversation.",
         "x-mojo-controller": "Convos::Controller::Connection",
-        "operationId": "conversationAdd",
+        "operationId": "conversationJoin",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/conversation_id" },

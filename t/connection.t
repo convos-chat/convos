@@ -6,15 +6,17 @@ my $core       = Convos::Core->new;
 my $user       = $core->user('test@example.com', {});
 my $connection = $user->connection(IRC => 'whatever', {});
 
-isa_ok($connection->room('#foo'), 'Convos::Core::Conversation::Room');
-ok !$connection->{room}{'#foo'}, 'no room on get';
-my $room = $connection->room('#foo' => {});
-is $room->path, '/test@example.com/IRC/whatever/#foo', 'room->path';
-is $room->n_users, 0, 'room->n_users';
-ok $connection->{room}{'#foo'}, 'room on create/update';
+isa_ok($connection->conversation('#foo'),   'Convos::Core::Conversation::Room');
+isa_ok($connection->conversation('marcus'), 'Convos::Core::Conversation::Direct');
+ok !$connection->{conversation}{'#foo'}, 'no conversation on get';
+
+my $conversation = $connection->conversation('#foo' => {});
+is $conversation->path, '/test@example.com/IRC/whatever/#foo', 'conversation->path';
+is $conversation->n_users, 0, 'conversation->n_users';
+ok $connection->{conversations}{'#foo'}, 'conversation on create/update';
 
 $connection = Convos::Core::Connection->new;
-for my $method (qw( add_conversation all_rooms connect send topic)) {
+for my $method (qw( rooms join_conversation connect send topic)) {
   my $err;
   eval {
     $connection->$method(sub { $err = $_[1] });

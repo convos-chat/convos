@@ -70,7 +70,7 @@ sub connection_rooms {
   }
 
   $self->delay(
-    sub { $connection->all_rooms(shift->begin) },
+    sub { $connection->rooms(shift->begin) },
     sub {
       my ($delay, $err, $rooms) = @_;
       $self->$cb([map { $_->TO_JSON } @$rooms], 200);
@@ -96,19 +96,19 @@ sub connections {
   $self->$cb(\@connections, 200);
 }
 
-=head2 conversation_add
+=head2 conversation_join
 
-See L<Convos::Manual::API/conversationAdd>.
+See L<Convos::Manual::API/conversationJoin>.
 
 =cut
 
-sub conversation_add {
+sub conversation_join {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
   my $connection = $user->connection($args->{protocol}, $args->{connection_id});
 
   $self->delay(
-    sub { $connection->add_conversation($args->{conversation_id}, shift->begin) },
+    sub { $connection->join_conversation($args->{conversation_id}, shift->begin) },
     sub {
       my ($delay, $err, $room) = @_;
       return $self->$cb($self->invalid_request($err, '/conversation_id'), 400) if $err;
