@@ -68,7 +68,7 @@
   submitForm(e) {
     e.preventDefault();
     this.formError = ''; // clear error on post
-    this.selectedConnection().addConversation(this.form_name.value, function(err) {
+    this.selectedConnection().joinConversation(this.form_name.value, function(err) {
       if (!err) return this.closeModal();
       this.formError = err;
       this.update();

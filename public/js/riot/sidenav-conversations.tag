@@ -2,7 +2,7 @@
   <ul class="sidenav">
     <sidenav-link each={obj, i in conversations} active={i == parent.active} icon={obj.icon()} href={obj.url()}>{obj.name()}</sidenav-link>
     <li class="conversation link">
-      <a href="#add/conversation" class="waves-effect waves-teal" onclick={addConversation}>
+      <a href="#add/conversation" class="waves-effect waves-teal" onclick={joinConversation}>
         <i class="mdi-content-add-circle-outline"></i>
         Add conversation
       </a>
@@ -13,10 +13,9 @@
   mixin.modal(this);
 
   this.active = 0;
-  this.addConversationTag = false;
   this.conversations = [];
 
-  addConversation(e) {
+  joinConversation(e) {
     e.preventDefault();
     convos.connections(function(err, connections) {
       if (connections.length) {

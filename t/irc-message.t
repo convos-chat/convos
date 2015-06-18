@@ -10,13 +10,13 @@ my $connection = $user->connection(IRC => 'localhost', {});
 my @log;
 
 $core->backend->on(
-  room => sub {
-    my ($backend, $room) = @_;
-    push @log, sprintf "--- room %s\n", $room->id;
-    $room->on(
+  conversation => sub {
+    my ($backend, $conversation) = @_;
+    push @log, sprintf "--- conversation %s\n", $conversation->id;
+    $conversation->on(
       log => sub {
-        my ($room, $level, $message) = @_;
-        push @log, sprintf "%s [%s] %s\n", $room->id, $level, $message;
+        my ($conversation, $level, $message) = @_;
+        push @log, sprintf "%s [%s] %s\n", $conversation->id, $level, $message;
       }
     );
   }
@@ -24,7 +24,7 @@ $core->backend->on(
 
 $connection->_irc->emit(irc_privmsg =>
     {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'not a ssuperman highlight']});
-like "@log", qr{^--- room \#convos$}m, 'convos room';
+like "@log", qr{^--- conversation \#convos$}m, 'convos conversation';
 like "@log", qr{\#\Qconvos [info] <Supergirl> not a ssuperman highlight\E}m, 'normal message';
 
 $connection->_irc->emit(
@@ -33,7 +33,7 @@ like "@log", qr{\#\Qconvos [warn] <Supergirl> highlight -superman?\E}m, 'highlig
 
 $connection->_irc->emit(
   irc_privmsg => {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['superman', 'does this work?']});
-like "@log", qr{--- room supergirl}m, 'supergirl room';
+like "@log", qr{--- conversation supergirl}m, 'supergirl conversation';
 like "@log", qr{\Qsupergirl [warn] <Supergirl> does this work?\E}m, 'private message';
 
 $connection->_irc->emit(

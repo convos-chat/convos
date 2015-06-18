@@ -117,6 +117,15 @@ sub connections {
   return [map { values %{$self->{connection}{$_}} } keys %{$self->{connection}}];
 }
 
+=head2 conversations
+
+TODO: I think this have to be part of user, since a connection holds all
+conversations, while the user knows which to join..?
+
+=cut
+
+sub conversations { }
+
 =head2 load
 
   $self = $self->load(sub { my ($self, $err) = @_; });

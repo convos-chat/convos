@@ -1,11 +1,11 @@
 (function(window) {
-  Convos.Room = function(attrs) {
+  Convos.ConversationRoom = function(attrs) {
     if (attrs) this.save(attrs);
     riot.observable(this);
     this._method = 'httpCachedGet';
   };
 
-  var proto = Convos.Room.prototype;
+  var proto = Convos.ConversationRoom.prototype;
 
   // Define attributes
   mixin.base(proto, {

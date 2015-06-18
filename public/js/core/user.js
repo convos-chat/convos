@@ -48,19 +48,19 @@
     return this.tap('_method', 'httpCachedGet');
   };
 
-  // Get or create a single Convos.Conversation object on client side
+  // Get or create a single Convos.ConversationXxx object on client side
   // Get: user.conversation(id)
   // Create/update: user.conversation(id, attrs)
   proto.conversation = function(id, attrs) {
     if (!id && typeof attrs == 'object') id = attrs.id;
     if (!attrs) return this._conversations[id];
     if (this._conversations[id]) return this._conversations[id].save(attrs);
-    this._conversations[id] = new Convos.Room(attrs);
+    this._conversations[id] = new Convos[attrs.users ? 'ConversationRoom' : 'ConversationDirect'](attrs);
     this.trigger('conversation', this._conversations[id]);
     return this._conversations[id];
   };
 
-  // Get a list of Convos.Conversation objects from backend
+  // Get a list of Convos.ConversationXxx objects from backend
   // Use user.fresh().conversations(function() { ... }) to get fresh data from server
   proto.conversations = function(cb) {
     this[this._method](apiUrl('/conversations'), {}, function(err, xhr) {

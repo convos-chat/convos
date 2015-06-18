@@ -206,9 +206,9 @@ sub _setup {
   );
 
   $self->on(
-    room => sub {
-      my ($self, $room) = @_;
-      $room->on(log => sub { $self->_log(@_) });
+    conversation => sub {
+      my ($self, $conversation) = @_;
+      $conversation->on(log => sub { $self->_log(@_) });
     }
   );
 }

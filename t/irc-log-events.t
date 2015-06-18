@@ -3,17 +3,17 @@ use Mojo::IOLoop;
 use Convos::Core;
 use Test::Deep;
 
-my $t          = Test::Mojo::IRC->new;
-my $server     = $t->start_server;
-my $core       = Convos::Core->new;
-my $user       = $core->user('superman@example.com', {});
-my $connection = $user->connection(IRC => 'localhost', {});
-my $room       = $connection->room('#convos' => {});
-my $log        = '';
-my $room_log   = '';
+my $t                = Test::Mojo::IRC->new;
+my $server           = $t->start_server;
+my $core             = Convos::Core->new;
+my $user             = $core->user('superman@example.com', {});
+my $connection       = $user->connection(IRC => 'localhost', {});
+my $conversation     = $connection->conversation('#convos' => {});
+my $log              = '';
+my $conversation_log = '';
 
 $connection->on(log => sub { $log .= "[$_[1]] $_[2]\n" });
-$room->on(log => sub { $room_log .= join ' ', shift->id, @_ });
+$conversation->on(log => sub { $conversation_log .= join ' ', shift->id, @_ });
 
 {
   my @err = (

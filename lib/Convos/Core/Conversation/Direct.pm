@@ -12,7 +12,7 @@ conversation between two persons.
 =head1 SYNOPSIS
 
   use Convos::Core::Conversation::Direct;
-  my $room = Convos::Core::Conversation::Direct->new;
+  my $conversation = Convos::Core::Conversation::Direct->new;
 
 =cut
 

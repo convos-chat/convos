@@ -13,9 +13,9 @@ See also L<Convos::Core::Connection::IRC>.
 =cut
 
 use Mojo::Base 'Mojo::EventEmitter';
+use Mojo::Loader 'load_class';
 use Mojo::URL;
 use Convos::Core::Conversation::Direct;
-use Convos::Core::Conversation::Room;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 EVENTS
@@ -29,11 +29,11 @@ as the log levels defined in L<Mojo::Log>.
 
 These messages could be stored to a persistent storage.
 
-=head2 room
+=head2 conversation
 
-  $self->on(room => sub { my ($self, $room, $changed) = @_; });
+  $self->on(conversation => sub { my ($self, $conversation, $changed) = @_; });
 
-Emitted when a L<$room|Convos::Core::Conversation::Room> change properties.
+Emitted when a L<$conversation|Convos::Core::Conversation> change properties.
 C<$changed> is a hash-ref with the changed attributes.
 
 =head1 ATTRIBUTES
@@ -76,40 +76,6 @@ has user => sub { die 'user is required' };
 L<Convos::Core::Connection> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
-=head2 active_rooms
-
-  $objs = $self->active_rooms;
-
-Returns an array-ref of of L<Convos::Core::Conversation::Room> objects.
-
-=cut
-
-sub active_rooms {
-  my $self = shift;
-  return [grep { $_->active } values %{$self->{room}}];
-}
-
-=head2 add_conversation
-
-  $self = $self->add_conversation("#some_channel", sub { my ($self, $err) = @_; });
-
-Used to join a room. See also L</room> event.
-
-=cut
-
-sub add_conversation { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "add_conversation" not implemented.'); }
-
-=head2 all_rooms
-
-  $self = $self->all_rooms(sub { my ($self, $err, $list) = @_; });
-
-Used to retrieve a list of L<Convos::Core::Conversation::Room> objects for the
-given connection.
-
-=cut
-
-sub all_rooms { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "all_rooms" not implemented.', []); }
-
 =head2 connect
 
   $self = $self->connect(sub { my ($self, $err) = @_ });
@@ -119,6 +85,60 @@ Used to connect to L</url>. Meant to be overloaded in a subclass.
 =cut
 
 sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" not implemented.'); }
+
+=head2 conversation
+
+  $conversation = $self->conversation($id);            # get
+  $conversation = $self->conversation($id => \%attrs); # create/update
+
+Will return a L<Convos::Core::Conversation> object, identified by C<$id>.
+
+=cut
+
+sub conversation {
+  my ($self, $id, $attr) = @_;
+
+  if ($attr) {
+    my $conversation = $self->{conversations}{$id} ||= do {
+      my $conversation = $self->_conversation({connection => $self, id => $id});
+      Scalar::Util::weaken($conversation->{connection});
+      warn "[Convos::Core::User] Emit conversation: id=$id\n" if DEBUG;
+      $self->user->core->backend->emit(conversation => $conversation);
+      $conversation;
+    };
+    $conversation->{$_} = $attr->{$_} for keys %$attr;
+    return $conversation;
+  }
+  else {
+    return $self->{conversations}{$id} || $self->_conversation({id => $id});
+  }
+}
+
+=head2 conversations
+
+  $objs = $self->conversations;
+
+Returns an array-ref of of L<Convos::Core::Conversation> objects.
+
+=cut
+
+sub conversations {
+  my $self = shift;
+  return [values %{$self->{conversations} || {}}];
+}
+
+=head2 join_conversation
+
+  $self = $self->join_conversation("#some_channel", sub { my ($self, $err) = @_; });
+
+Used to create a new conversation. See also L</conversation> event.
+
+=cut
+
+sub join_conversation {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "join_conversation" not implemented.');
+}
 
 =head2 load
 
@@ -163,33 +183,16 @@ sub path {
   join '/', $_[0]->user->path, ref($_[0]) =~ /(\w+)$/, $_[0]->name;
 }
 
-=head2 room
+=head2 rooms
 
-  $room = $self->room($id);            # get
-  $room = $self->room($id => \%attrs); # create/update
+  $self = $self->rooms(sub { my ($self, $err, $list) = @_; });
 
-Will return a L<Convos::Core::Conversation::Room> object, identified by C<$id>.
+Used to retrieve a list of L<Convos::Core::Conversation::Room> objects for the
+given connection.
 
 =cut
 
-sub room {
-  my ($self, $id, $attr) = @_;
-
-  if ($attr) {
-    my $room = $self->{room}{$id} ||= do {
-      my $room = Convos::Core::Conversation::Room->new(connection => $self, id => $id);
-      Scalar::Util::weaken($room->{connection});
-      warn "[Convos::Core::User] Emit room: id=$id\n" if DEBUG;
-      $self->user->core->backend->emit(room => $room);
-      $room;
-    };
-    $room->{$_} = $attr->{$_} for keys %$attr;
-    return $room;
-  }
-  else {
-    return $self->{room}{$id} || Convos::Core::Conversation::Room->new(id => $id);
-  }
-}
+sub rooms { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "rooms" not implemented.', []); }
 
 =head2 save
 
@@ -211,7 +214,7 @@ sub save {
   $self = $self->send($target => $message, sub { my ($self, $err) = @_; });
 
 Used to send a C<$message> to C<$target>. C<$message> is a plain string and
-C<$target> can be a user or room name.
+C<$target> can be a user or room/channel name.
 
 Meant to be overloaded in a subclass.
 
@@ -240,14 +243,22 @@ sub state {
 
 =head2 topic
 
-  $self = $self->topic($room, sub { my ($self, $err, $topic) = @_; });
-  $self = $self->topic($room => $topic, sub { my ($self, $err) = @_; });
+  $self = $self->topic($conversation, sub { my ($self, $err, $topic) = @_; });
+  $self = $self->topic($conversation => $topic, sub { my ($self, $err) = @_; });
 
-Used to retrieve or set topic for a room.
+Used to retrieve or set topic for a conversation.
 
 =cut
 
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
+
+sub _conversation {
+  my ($self, $c) = @_;
+  die "Method '_conversation' not implemented" unless $c->{class};
+  my $e = load_class $c->{class};
+  die $e || "Not found: $c->{class}" if $e;
+  (delete $c->{class})->new($c);
+}
 
 sub _userinfo {
   my $self = shift;

@@ -23,6 +23,8 @@ require Convos;
 # "_event irc_topic => sub {}" vs "sub _event_irc_topic"
 sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 
+my $CHANNEL_RE = qr{[#&]};
+
 =head1 ATTRIBUTES
 
 L<Convos::Core::Connection::IRC> inherits all attributes from L<Convos::Core::Connection>
@@ -78,63 +80,6 @@ has _irc => sub {
 L<Convos::Core::Connection::IRC> inherits all methods from L<Convos::Core::Connection>
 and implements the following new ones.
 
-=head2 add_conversation
-
-See L<Convos::Core::Connection/add_conversation>.
-
-=cut
-
-sub add_conversation {
-  my $cb   = pop;
-  my $self = shift;
-  my ($name, $password) = split /\s/, shift, 2;
-  my $room;
-
-  $room = $self->room($name, {active => 1, name => $name, password => $password // ''});
-  return $self->tap($cb, '', $room) if %{$room->users};
-  Scalar::Util::weaken($self);
-  $self->_irc->join_channel($name, sub { $self->$cb($_[1], $room); });
-  $self;
-}
-
-=head2 all_rooms
-
-See L<Convos::Core::Connection/all_rooms>.
-
-=cut
-
-sub all_rooms {
-  my ($self, $cb) = @_;
-
-  if (time < ($self->{last_irc_rpl_listend} || 0) - 60) {
-    return $self->$cb('', [values %{$self->{room}}]);
-  }
-
-  Scalar::Util::weaken($self);
-  $self->_irc->channels(
-    sub {
-      my ($irc, $err, $channels) = @_;
-      my $last = $self->{last_irc_rpl_listend} || 0;
-      my $n = 0;
-
-      return $self->$cb($err, $channels) if $err;
-
-      for my $name (keys %$channels) {
-        my $id = lc $name;
-        my $room = $self->room($id, {name => $name});
-        $channels->{$name}{topic} =~ s!^\[\S+\]\s?!!;    # remove channel modes, such as "[+nt]"
-        $room->topic($channels->{$name}{topic});
-        $room->{n_users} = $channels->{$name}{n_users};
-      }
-
-      $self->{last_irc_rpl_listend} = time;
-      $self->$cb('', [values %{$self->{room}}]);
-    },
-  );
-
-  return $self;
-}
-
 =head2 connect
 
 See L<Convos::Core::Connection/connect>.
@@ -175,6 +120,26 @@ sub connect {
   return $self;
 }
 
+=head2 join_conversation
+
+See L<Convos::Core::Connection join_conversation>.
+
+=cut
+
+sub join_conversation {
+  my $cb   = pop;
+  my $self = shift;
+  my ($name, $password) = split /\s/, shift, 2;
+  my $conversation;
+
+  $conversation = $self->conversation($name, {active => 1, name => $name, password => $password // ''});
+  return $self->tap($cb, '', $conversation) if $conversation->isa('Convos::Core::Conversation::Direct');
+  return $self->tap($cb, '', $conversation) if %{$conversation->users};
+  Scalar::Util::weaken($self);
+  $self->_irc->join_channel($name, sub { $self->$cb($_[1], $conversation); });
+  $self;
+}
+
 =head2 nick
 
   $self = $self->nick($nick => sub { my ($self, $err) = @_; });
@@ -199,15 +164,52 @@ sub nick {
   $self;
 }
 
-=head2 room
+=head2 conversation
 
-Force C<$id> to be lowercase. See L<Convos::Core::Connection/room>.
+Force C<$id> to be lowercase. See L<Convos::Core::Connection/conversation>.
 
 =cut
 
-sub room {
+sub conversation {
   my ($self, $id, @args) = @_;
-  $self->SUPER::room(lc $id, @args);
+  $self->SUPER::conversation(lc $id, @args);
+}
+
+=head2 rooms
+
+See L<Convos::Core::Connection/rooms>.
+
+=cut
+
+sub rooms {
+  my ($self, $cb) = @_;
+
+  # TODO: Add fresh() to get new list of channels on the server
+  return $self->$cb('', $self->{rooms_cache}) if $self->{rooms_cache};
+
+  Scalar::Util::weaken($self);
+  $self->_irc->channels(
+    sub {
+      my ($irc, $err, $channels) = @_;
+      my $last = $self->{last_irc_rpl_listend} || 0;
+      my $n = 0;
+
+      return $self->$cb($err, $channels) if $err;
+
+      for my $name (keys %$channels) {
+        my $id           = lc $name;
+        my $conversation = $self->conversation($id);
+        $channels->{$name}{topic} =~ s!^\[\S+\]\s?!!;    # remove channel modes, such as "[+nt]"
+        $conversation->name($name)->topic($channels->{$name}{topic})->{n_users} = $channels->{$name}{n_users};
+        push @{$self->{rooms_cache}}, $conversation;
+      }
+
+      $self->{last_irc_rpl_listend} = time;
+      $self->$cb('', $self->{rooms_cache});
+    },
+  );
+
+  return $self;
 }
 
 =head2 send
@@ -274,6 +276,12 @@ sub whois {
   $self;
 }
 
+sub _conversation {
+  my ($self, $c) = @_;
+  $c->{class} = sprintf 'Convos::Core::Conversation::%s', $c->{id} =~ /^$CHANNEL_RE/ ? 'Room' : 'Direct' if $c->{id};
+  $self->SUPER::_conversation($c);
+}
+
 sub _event_irc_close {
   my ($self) = @_;
   $self->state(delete $self->{disconnect} ? 'disconnected' : 'connecting');
@@ -299,10 +307,10 @@ sub _irc_message {    # TODO
   my $is_private_message = $self->_is_current_nick($target);
 
   if ($user) {
-    my $room = $self->room($is_private_message ? $nick : $target, {});
+    my $conversation = $self->conversation($is_private_message ? $nick : $target, {});
     my $highlight = $is_private_message || grep { $msg->{params}[1] =~ /\b\Q$_\E\b/ } $current_nick,
       @{$self->url->query->every_param('highlight')};
-    $room->log(($highlight ? 'warn' : 'info'), $format, $nick, $msg->{params}[1]);
+    $conversation->log(($highlight ? 'warn' : 'info'), $format, $nick, $msg->{params}[1]);
   }
   else {
     $self->log(info => $format, $msg->{prefix} // $self->_irc->server, $msg->{params}[1]);
@@ -321,10 +329,10 @@ sub _steal_nick {
 _event err_bannedfromchan => sub {    # TODO
   my ($self,    $msg)    = @_;
   my ($channel, $reason) = @{$msg->{params}};
-  my $room = $self->room($channel => {});
+  my $conversation = $self->conversation($channel => {});
 
-  $room->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel");
-  $room->log(warn => '-!- %s is banned from %s [%s]', $self->_irc->nick, $channel, $room->frozen);
+  $conversation->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel");
+  $conversation->log(warn => '-!- %s is banned from %s [%s]', $self->_irc->nick, $channel, $conversation->frozen);
 };
 
 _event err_cannotsendtochan => sub {
@@ -350,37 +358,39 @@ _event err_nosuchnick => sub {
 _event irc_join => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
-  my $room = $self->room($msg->{params}[0], {frozen => '', name => $msg->{params}[0]});
+  my $conversation = $self->conversation($msg->{params}[0], {frozen => '', name => $msg->{params}[0]});
 
-  $room->users->{lc($nick)} ||= {name => $nick};
-  $room->log(debug => '-!- %s [%s@%s] has joined %s', $nick, $user, $host, $room->name);    # same as irssi
+  $conversation->users->{lc($nick)} ||= {name => $nick};
+  $conversation->log(debug => '-!- %s [%s@%s] has joined %s', $nick, $user, $host, $conversation->name); # same as irssi
 };
 
 # TODO
 _event irc_kick => sub {
   my ($self, $msg) = @_;
-  my ($by) = IRC::Utils::parse_user($msg->{prefix});
-  my $room = $self->room($msg->{params}[0]);
-  my $nick = $msg->{params}[1];
+  my ($by)         = IRC::Utils::parse_user($msg->{prefix});
+  my $conversation = $self->conversation($msg->{params}[0]);
+  my $nick         = $msg->{params}[1];
   my $reason = $msg->{params}[2] || '';
 
+  # logging is the same as irssi
+
   if ($self->_is_current_nick($nick)) {
-    $room->log(warn => '-!- %s was kicked from %s by %s [%s]', $nick, $room->name, $by, $reason);    # same as irssi
-    $room->frozen("Kicked by $by.");
+    $conversation->log(warn => '-!- %s was kicked from %s by %s [%s]', $nick, $conversation->name, $by, $reason);
+    $conversation->frozen("Kicked by $by.");
   }
   else {
-    $room->log(debug => '-!- %s was kicked from %s by %s [%s]', $nick, $room->name, $by, $reason);    # same as irssi
+    $conversation->log(debug => '-!- %s was kicked from %s by %s [%s]', $nick, $conversation->name, $by, $reason);
   }
 
-  delete $room->users->{lc($nick)};
-  $self->emit(users => $room->id => $room->users);
+  delete $conversation->users->{lc($nick)};
+  $self->emit(users => $conversation->id => $conversation->users);
 };
 
 # :superman!superman@i.love.debian.org MODE superman :+i
 # :superman!superman@i.love.debian.org MODE #convos superman :+o
 # :hybrid8.debian.local MODE #no_such_room +nt
 _event irc_mode => sub {
-  my ($self, $msg) = @_;                                                                              # TODO
+  my ($self, $msg) = @_;    # TODO
 };
 
 # :Superman12923!superman@i.love.debian.org NICK :Supermanx12923
@@ -394,32 +404,34 @@ _event irc_nick => sub {
   delete $self->{err_nicknameinuse} if $wanted_nick and $wanted_nick eq $new_nick;   # allow warning on next nick change
   $self->emit(nick => $new_nick) if $self->_is_current_nick($new_nick);
 
-  for my $room (values %{$self->{room}}) {
-    my $info = delete $room->users->{$old_nick_lc} or next;
+  for my $conversation (values %{$self->{conversations}}) {
+    my $info = delete $conversation->users->{$old_nick_lc} or next;
     $info->{name} = $new_nick;
-    $room->{users}{lc($new_nick)} = $info;
-    $room->log(debug => '-!- %s is now known as %s', $old_nick, $new_nick);          # same as irssi
-    $self->emit(users => $room->id => $room->users);
+    $conversation->{users}{lc($new_nick)} = $info;
+    $conversation->log(debug => '-!- %s is now known as %s', $old_nick, $new_nick);    # same as irssi
+    $self->emit(users => $conversation->id => $conversation->users);
   }
 };
 
 _event irc_part => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
-  my $room = $self->room($msg->{params}[0]);
+  my $conversation = $self->conversation($msg->{params}[0]);
   my $reason = $msg->{params}[1] || '';
 
+  # logging is the same as irssi
+
   if ($self->_is_current_nick($nick)) {
-    delete $self->{room}{$room->id};
-    $room->log(info => '-!- %s [%s@%s] has left %s [%s]', $nick, $user, $host, $room->name, $reason);    # same as irssi
-    $room->frozen('Parted.');
+    delete $self->{conversations}{$conversation->id};
+    $conversation->log(info => '-!- %s [%s@%s] has left %s [%s]', $nick, $user, $host, $conversation->name, $reason);
+    $conversation->frozen('Parted.');
   }
   else {
-    $room->log(debug => '-!- %s [%s@%s] has left %s [%s]', $nick, $user, $host, $room->name, $reason);   # same as irssi
+    $conversation->log(debug => '-!- %s [%s@%s] has left %s [%s]', $nick, $user, $host, $conversation->name, $reason);
   }
 
-  delete $room->users->{lc($nick)};
-  $self->emit(users => $room->id => $room->users);
+  delete $conversation->users->{lc($nick)};
+  $self->emit(users => $conversation->id => $conversation->users);
 };
 
 _event irc_quit => sub {
@@ -428,10 +440,10 @@ _event irc_quit => sub {
   my $nick_lc = lc $nick;
   my $reason = $msg->{params}[1] || '';
 
-  for my $room (values %{$self->{room}}) {
-    delete $room->users->{$nick_lc} or next;
-    $room->log(debug => '-!- %s [%s@%s] has quit [%s]', $nick, $user, $host, $reason);    # same as irssi
-    $self->emit(users => $room->id => $room->users);
+  for my $conversation (values %{$self->{conversations}}) {
+    delete $conversation->users->{$nick_lc} or next;
+    $conversation->log(debug => '-!- %s [%s@%s] has quit [%s]', $nick, $user, $host, $reason);    # same as irssi
+    $self->emit(users => $conversation->id => $conversation->users);
   }
 };
 
@@ -449,10 +461,10 @@ _event irc_rpl_endofmotd => sub {
 # See also _irc_rpl_namreply()
 _event irc_rpl_endofnames => sub {
   my ($self, $msg) = @_;
-  my $channel = $msg->{params}[1];
-  my $room    = $self->room($channel, {name => $channel});
-  my $users   = $room->users;
-  my $last    = $room->{last_irc_rpl_endofnames} || 0;
+  my $channel      = $msg->{params}[1];
+  my $conversation = $self->conversation($channel, {name => $channel});
+  my $users        = $conversation->users;
+  my $last         = $conversation->{last_irc_rpl_endofnames} || 0;
 
   for my $nick (keys %$users) {
     my $info = $users->{$nick};
@@ -460,8 +472,8 @@ _event irc_rpl_endofnames => sub {
     delete $users->{$nick};
   }
 
-  $room->{last_irc_rpl_endofnames} = time;
-  $self->emit(users => $room->id => $room->users);
+  $conversation->{last_irc_rpl_endofnames} = time;
+  $self->emit(users => $conversation->id => $conversation->users);
 };
 
 # :hybrid8.debian.local 372 superman :too cool for school
@@ -487,7 +499,7 @@ _event irc_rpl_myinfo => sub {
 # See also _irc_rpl_endofnames()
 _event irc_rpl_namreply => sub {
   my ($self, $msg) = @_;
-  my $users = $self->room($msg->{params}[2])->users;
+  my $users = $self->conversation($msg->{params}[2])->users;
 
   for my $nick (sort { lc $a cmp lc $b } split /\s+/, $msg->{params}[3]) {
     my $mode = $nick =~ s/^([@~+*])// ? $1 : '';
@@ -501,17 +513,17 @@ _event irc_rpl_namreply => sub {
 # :hybrid8.debian.local 332 superman #convos :test123
 _event irc_rpl_topic => sub {
   my ($self, $msg) = @_;
-  my $room = $self->room($msg->{params}[1] => {topic => $msg->{params}[2]});
-  $room->log(debug => '-!- Topic for %s: %s', $room->name, $room->topic);
+  my $conversation = $self->conversation($msg->{params}[1] => {topic => $msg->{params}[2]});
+  $conversation->log(debug => '-!- Topic for %s: %s', $conversation->name, $conversation->topic);
 };
 
 # :hybrid8.debian.local 333 superman #convos jhthorsen!jhthorsen@i.love.debian.org 1432142279
 _event irc_rpl_topicwhotime => sub {
   my ($self, $msg) = @_;    # TODO
-  my $room = $self->room($msg->{params}[1] => {topic_by => $msg->{params}[2]});
+  my $conversation = $self->conversation($msg->{params}[1] => {topic_by => $msg->{params}[2]});
 
   # irssi log message contains localtime(), but we already log to file with a timestamp
-  $room->log(debug => '-!- Topic set by %s', $msg->{params}[2]);
+  $conversation->log(debug => '-!- Topic set by %s', $msg->{params}[2]);
 };
 
 # :hybrid8.debian.local 002 superman :Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2
@@ -522,20 +534,24 @@ _event irc_rpl_yourhost => sub {
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 _event irc_rpl_welcome => sub {
   my ($self, $msg) = @_;
-  my $rooms = $self->active_rooms;
+  my $conversations = $self->user->conversations;
+
   $self->log(info => $msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->emit(nick => $msg->{params}[0]);
-  $self->add_conversation($_, sub { }) for map { $_->password ? join(' ', $_->name, $_->password) : $_->name } @$rooms;
+
+  # TODO:
+  $self->join_conversation($_, sub { })
+    for map { $_->password ? join(' ', $_->name, $_->password) : $_->name } grep { $_->{active} } @$conversations;
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool
 _event irc_topic => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
-  my $room = $self->room($msg->{params}[0] => {topic => $msg->{params}[1]});
+  my $conversation = $self->conversation($msg->{params}[0] => {topic => $msg->{params}[1]});
 
-  return $room->log(debug => '-!- Topic unset by %s', $nick) unless $room->topic;
-  return $room->log(debug => '-!- %s changed the topic to: %s', $nick, $room->topic);
+  return $conversation->log(debug => '-!- Topic unset by %s', $nick) unless $conversation->topic;
+  return $conversation->log(debug => '-!- %s changed the topic to: %s', $nick, $conversation->topic);
 };
 
 sub DESTROY {
