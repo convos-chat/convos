@@ -193,6 +193,7 @@ sub _setup_assets {
     /js/core/connection.js
     /js/core/conversation-room.js
     /js/core/conversation-direct.js
+    /js/core/path.js
     /js/core/user.js
   );
 
