@@ -22,7 +22,11 @@ var Router = {
   },
   render: function(riotTag, opts) {
     var tag, domNode = document.getElementById('app');
-    if (document.body.className == riotTag) return console.log('skip render: ' + riotTag);
+    if (document.body.className == riotTag) {
+      console.log('update: ' + riotTag);
+      Router.mountedNodes.forEach(function(node) { node.update(); });
+      return;
+    }
     document.body.className = riotTag;
     domNode.innerHTML = '';
     console.log('render: ' + riotTag);
@@ -37,10 +41,11 @@ var Router = {
   },
   start: function(cb) {
     if (cb) Router.afterRender = cb;
-    riot.route(Router.dispatch);
+    riot.route.stop();
+    window.addEventListener ? window.addEventListener('hashchange', Router.dispatch, false) : window.attachEvent('onhashchange', Router.dispatch);
   },
   url: function(url) {
-    if (!url) url = location.href.split('#')[1] || '';
+    if (!url) url = (location.href.match(/.*?\#(.*)/) || ['', ''])[1];
     var query = {};
     url = url.split('?');
     if (url[1]) url[1].replace(/\+/g, ' ').split('&').forEach(function(i) { var kv = i.split('='); query[kv[0]] = kv[1]; });
