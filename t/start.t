@@ -23,10 +23,10 @@ my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 
 diag 'restart core';
 $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-$core->start for 0 .. 10;    # should only start once
+$core->start for 0 .. 20;    # should only start once
 my %connect;
 Mojo::Util::monkey_patch('Mojo::IRC::UA', connect => sub { $connect{$_[0]->server}++ });
-Mojo::IOLoop->timer(0.2 => sub { Mojo::IOLoop->stop });    # should be long enough
+Mojo::IOLoop->timer(0.3 => sub { Mojo::IOLoop->stop });    # should be long enough
 Mojo::IOLoop->start;
 is_deeply [sort keys %connect], [qw( chat.freenode.net:6697 irc.perl.org localhost )],
   'started connections, except disconnected';
