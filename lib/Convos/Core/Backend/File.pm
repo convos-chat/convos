@@ -113,7 +113,7 @@ sub load_object {
   if (-e $storage_file) {
     eval {
       $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file));
-      $obj->{$_} = $settings->{$_} for keys %$settings;
+      $obj->INFLATE($settings);
       warn "[@{[ref $obj]}] Load success. ($storage_file)\n" if DEBUG;
       1;
     } or do {

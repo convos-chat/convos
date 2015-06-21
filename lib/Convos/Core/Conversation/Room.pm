@@ -76,8 +76,12 @@ Returns the number of L</users>.
 sub n_users { int keys %{$_[0]->users} || $_[0]->{n_users} || 0 }
 
 sub TO_JSON {
-  my $self = shift;
-  return {map { ($_, $self->$_) } qw( frozen id name path topic users )};
+  my ($self, $persist) = @_;
+  my $json = $self->SUPER::TO_JSON($persist);
+
+  $json->{$_} = $self->$_ for qw( frozen topic);
+  $json->{users} = $self->users unless $persist;
+  $json;
 }
 
 =head1 COPYRIGHT AND LICENSE

@@ -58,6 +58,7 @@ $t->run(
     cmp_deeply(
       $connection->conversation("#Convos_irc_live_20001")->TO_JSON,
       {
+        active => 1,
         frozen => '',
         id     => "#convos_irc_live_20001",
         name   => "#Convos_irc_LIVE_20001",
@@ -82,6 +83,7 @@ $t->run(
     cmp_deeply(
       $connection->conversation('#conVOS')->TO_JSON,
       {
+        active => 1,
         frozen => '',
         id     => '#convos',
         name   => re(qr{^\#convos$}i),
@@ -119,7 +121,6 @@ $t->run(
     $list = [grep { $_->id eq "#convos_irc_live_20001" } @$list];
     is $list->[0]{n_users}, 1, 'n_users=1';
     cmp_deeply($list->[0]{last_irc_rpl_endofnames}, num(time, 2), 'last_irc_rpl_endofnames');
-
   }
 );
 
@@ -208,6 +209,35 @@ $t->run(
     Mojo::IOLoop->start;
     is $err, "You're not channel operator", 'topic: not channel operator';
   }
+);
+
+cmp_deeply(
+  $connection->TO_JSON(1),
+  {
+    conversations => bag(
+      {
+        active => 1,
+        id     => '#convos',
+        name   => '#convos',
+        frozen => '',
+        path   => '/superman@example.com/IRC/localhost/#convos',
+        topic  => 'some cool topic',
+      },
+      {
+        active => 1,
+        id     => '#convos_irc_live_20001',
+        name   => '#Convos_irc_LIVE_20001',
+        frozen => '',
+        path   => '/superman@example.com/IRC/localhost/#convos_irc_live_20001',
+        topic  => 'Cool topic',
+      }
+    ),
+    name  => 'localhost',
+    path  => '/superman@example.com/IRC/localhost',
+    state => 'connecting',
+    url   => re(qr{^irc://.*\?tls=0}),
+  },
+  'TO_JSON'
 );
 
 done_testing;
