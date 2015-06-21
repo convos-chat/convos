@@ -28,7 +28,7 @@ sub conversations {
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
     for my $conversation (sort { $a->id cmp $b->id } @{$connection->conversations}) {
-      push @conversations, $conversation->TO_JSON;
+      push @conversations, $conversation->TO_JSON if $conversation->active;
     }
   }
 

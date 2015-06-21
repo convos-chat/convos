@@ -136,7 +136,14 @@ sub join_conversation {
   return $self->tap($cb, '', $conversation) if $conversation->isa('Convos::Core::Conversation::Direct');
   return $self->tap($cb, '', $conversation) if %{$conversation->users};
   Scalar::Util::weaken($self);
-  $self->_irc->join_channel($name, sub { $self->$cb($_[1], $conversation); });
+  $self->_irc->join_channel(
+    $name,
+    sub {
+      my ($irc, $err) = @_;
+      delete $self->{conversations}{$conversation->id} if $err;
+      $self->$cb($err, $conversation);
+    }
+  );
   $self;
 }
 
@@ -534,14 +541,10 @@ _event irc_rpl_yourhost => sub {
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 _event irc_rpl_welcome => sub {
   my ($self, $msg) = @_;
-  my $conversations = $self->user->conversations;
 
   $self->log(info => $msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->emit(nick => $msg->{params}[0]);
-
-  # TODO:
-  $self->join_conversation($_, sub { })
-    for map { $_->password ? join(' ', $_->name, $_->password) : $_->name } grep { $_->{active} } @$conversations;
+  $self->join_conversation(join(' ', $_->name, $_->password), sub { }) for grep { $_->active } @{$self->conversations};
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool

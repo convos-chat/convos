@@ -9,6 +9,10 @@ my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@exampl
 $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
 $t->get_ok('/1.0/conversations')->status_is(200)->content_is('[]');
 
+no warnings 'redefine';
+require Mojo::IRC::UA;
+*Mojo::IRC::UA::join_channel = sub { my ($irc, $channel, $cb) = @_; $irc->$cb('') };
+
 # order does not matter
 $user->connection(IRC => 'localhost', {})->join_conversation('#private',       sub { });
 $user->connection(IRC => 'perl-org',  {})->join_conversation('#oslo.pm',       sub { });
@@ -17,6 +21,7 @@ $user->connection(IRC => 'localhost', {})->join_conversation('#Convos s3cret', s
 $t->get_ok('/1.0/conversations')->status_is(200)->json_is(
   '/0',
   {
+    active => 1,
     topic  => '',
     frozen => '',
     name   => '#Convos',
@@ -27,6 +32,7 @@ $t->get_ok('/1.0/conversations')->status_is(200)->json_is(
   )->json_is(
   '/1',
   {
+    active => 1,
     topic  => '',
     frozen => '',
     name   => '#private',
@@ -37,6 +43,7 @@ $t->get_ok('/1.0/conversations')->status_is(200)->json_is(
   )->json_is(
   '/2',
   {
+    active => 1,
     topic  => '',
     frozen => '',
     name   => '#oslo.pm',

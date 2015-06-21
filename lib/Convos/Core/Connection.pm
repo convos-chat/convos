@@ -110,7 +110,7 @@ sub conversation {
     return $conversation;
   }
   else {
-    return $self->{conversations}{$id} || $self->_conversation({id => $id});
+    return $self->{conversations}{$id} || $self->_conversation({connection => $self, id => $id});
   }
 }
 
@@ -268,12 +268,28 @@ sub _userinfo {
   return \@userinfo;
 }
 
+sub INFLATE {
+  my ($self, $attrs) = @_;
+  $self->conversation($_->{id}, $_) for @{delete($attrs->{conversations}) || []};
+  $self->{$_} = $attrs->{$_} for keys %$attrs;
+}
+
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{state} ||= 'connecting';
   my $json = {map { ($_, '' . $self->$_) } qw( name state url )};
+
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
   $json->{path} = $self->path;
+
+  if ($persist) {
+    $json->{conversations} = [];
+    for my $conversation (values %{$self->{conversations} || {}}) {
+      next unless $conversation->active;
+      push @{$json->{conversations}}, $conversation->TO_JSON($persist);
+    }
+  }
+
   $json;
 }
 

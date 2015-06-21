@@ -20,6 +20,12 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 Holds a L<Convos::Core::Connection> object.
 
+=head2 active
+
+  $bool = $self->active;
+
+This is true if the user is currently active in the conversation.
+
 =head2 id
 
   $str = $self->id;
@@ -71,7 +77,7 @@ sub path { join '/', $_[0]->connection->path, $_[0]->id }
 
 sub TO_JSON {
   my $self = shift;
-  return {map { ($_, $self->$_) } qw( id name path )};
+  return {map { ($_, $self->$_) } qw( active id name path )};
 }
 
 =head1 COPYRIGHT AND LICENSE

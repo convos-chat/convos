@@ -112,7 +112,13 @@ sub conversation_join {
     sub {
       my ($delay, $err, $room) = @_;
       return $self->$cb($self->invalid_request($err, '/conversation_id'), 400) if $err;
-      return $self->$cb($room->TO_JSON, 200);
+      $connection->save($delay->begin);
+      $delay->pass($room);
+    },
+    sub {
+      my ($delay, $err, $room) = @_;
+      die $err if $err;
+      $self->$cb($room->TO_JSON, 200);
     },
   );
 }
