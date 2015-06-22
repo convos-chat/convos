@@ -514,13 +514,18 @@ Note: this resource require the user to be authenticated first.
 
 =head3 Parameters
 
-  .---------------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                              |
-  |---------------------------------------------------------------------------------------|
-  | connection_id   | path | string | Yes      | A friendly name of the server            |
-  | conversation_id | path | string | No       | The name of the person/chat conversation |
-  | protocol        | path | string | Yes      | The name of the connection protocol.     |
-  '---------------------------------------------------------------------------------------'
+  .------------------------------------------------------------------------------------------------.
+  | Name            | In    | Type    | Required | Description                                     |
+  |------------------------------------------------------------------------------------------------|
+  | connection_id   | path  | string  | Yes      | A friendly name of the server                   |
+  | conversation_id | path  | string  | No       | The name of the person/chat conversation        |
+  | protocol        | path  | string  | Yes      | The name of the connection protocol.            |
+  | after           | query | string  | No       | Find messages after a given ISO 8601 timestamp  |
+  | before          | query | string  | No       | Find messages before a given ISO 8601 timestamp |
+  | level           | query | string  | No       | debug, info (default), warn, error              |
+  | limit           | query | integer | No       | Max number of messages to retrieve              |
+  | match           | query | string  | No       | Messages must match this string                 |
+  '------------------------------------------------------------------------------------------------'
 
 =head3 Responses
 
@@ -530,9 +535,11 @@ List of messsages.
 
   [
     {
-      "id": string, // required
+      "avatar": string, // No description.
+      "level": string, // No description.
       "message": string, // required
-      "timestamp": int32, // required
+      "sender": string, // No description.
+      "timestamp": datetime, // required
     },
     ...
   ]
@@ -689,7 +696,7 @@ List of commands.
     {
       "id": string, // required
       "message": string, // required
-      "timestamp": int32, // required
+      "timestamp": datetime, // required
     },
     ...
   ]
@@ -740,7 +747,7 @@ List of commands.
     {
       "id": string, // required
       "message": string, // required
-      "timestamp": int32, // required
+      "timestamp": datetime, // required
     },
     ...
   ]

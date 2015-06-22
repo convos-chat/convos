@@ -274,11 +274,11 @@
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/conversation_id" },
           { "$ref": "#/parameters/protocol" },
-          { "name": "after", "in": "query", "type": "string", "format": "datetime" },
-          { "name": "before", "in": "query", "type": "string", "format": "datetime" },
-          { "name": "level", "in": "query", "type": "string" },
-          { "name": "limit", "in": "query", "type": "integer" },
-          { "name": "match", "in": "query", "type": "string" }
+          { "name": "after", "in": "query", "type": "string", "format": "datetime", "description": "Find messages after a given ISO 8601 timestamp" },
+          { "name": "before", "in": "query", "type": "string", "format": "datetime", "description": "Find messages before a given ISO 8601 timestamp" },
+          { "name": "level", "in": "query", "type": "string", "description": "debug, info (default), warn, error" },
+          { "name": "limit", "in": "query", "type": "integer", "description": "Max number of messages to retrieve" },
+          { "name": "match", "in": "query", "type": "string", "description": "Messages must match this string" }
         ],
         "responses": {
           "200": {
