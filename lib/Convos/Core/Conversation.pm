@@ -64,6 +64,23 @@ sub log {
   $self->emit(log => $level => $message);
 }
 
+=head2 messages
+
+  $self = $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
+
+Used to get messages which is logged to backend, using L</log>.
+
+See also L<Convos::Core::Backend/messages>.
+
+=cut
+
+sub messages {
+  my ($self, $query, $cb) = @_;
+  Scalar::Util::weaken($self);
+  $self->connection->user->core->backend->messages($self, $query, sub { $self->$cb(@_[1, 2]) });
+  $self;
+}
+
 =head2 path
 
   $str = $self->path;

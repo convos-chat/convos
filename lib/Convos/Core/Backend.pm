@@ -94,6 +94,30 @@ sub save_object {
   $self;
 }
 
+=head2 messages
+
+  $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
+
+Used to search for messages stored in backend.
+
+Possible C<%query>:
+
+  {
+    after  => $datetime, # find messages after a given ISO 8601 timestamp
+    before => $datetime, # find messages before a given ISO 8601 timestamp
+    level  => $str,      # debug, info (default), warn, error
+    limit  => $int,      # max number of messages to retrieve
+    match  => $regexp,   # filter messages by a regexp
+    path   => $str,      # find messages under a path (required)
+  }
+
+=cut
+
+sub messages {
+  my ($self, $query, $cb) = @_;
+  $self->tap($cb, '', []);
+}
+
 sub _setup { }
 
 =head1 COPYRIGHT AND LICENSE

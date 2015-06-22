@@ -1,10 +1,21 @@
 <conversation>
   <ul class="conversation collection">
-    <li each={message, i in conversation.messages} class={'collection-item avatar ' + (message.level || 'debug')}">
-      <img src={message.avatar} alt={message.target} class="circle">
-      <a href={'#autocomplete:' + message.target} class="title">{message.target}</a>
-      <div>{message.message}</div>
-      <span class="secondary-content">{message.ts}</span>
+    <li each={m, i in opts.messages} class="collection-item avatar">
+      <img src={parent.avatar(m)} alt={m.sender} class="circle">
+      <a href={'#autocomplete:' + m.sender} class="title">{m.sender}</a>
+      <div>{m.message}</div>
+      <span class="secondary-content timeago" title={m.timestamp + '+0000'}>{m.timestamp}</span>
     </li>
   </ul>
+  <script>
+
+  avatar(m) {
+    return m.avatar ? m.avatar : 'http://retroavatar.appspot.com/api?name=' + m.sender;
+  }
+
+  this.on('updated', function() {
+    $('.timeago', this.root).timeago();
+  });
+
+  </script>
 </conversation>
