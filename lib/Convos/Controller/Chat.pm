@@ -49,7 +49,7 @@ sub conversation_messages {
   my %query;
 
   # TODO:
-  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw( after before limit match );
+  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw( after before level limit match );
 
   $self->delay(
     sub { $conversation->messages(\%query, shift->begin) },
