@@ -35,6 +35,32 @@ sub conversations {
   $self->$cb(\@conversations, 200);
 }
 
+=head2 conversation_messages
+
+See L<Convos::Manual::API/conversationMessages>.
+
+=cut
+
+sub conversation_messages {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->connection($args->{protocol}, $args->{connection_id});
+  my $conversation = $connection->conversation($args->{conversation_id});
+  my %query;
+
+  # TODO:
+  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw( after before limit match );
+
+  $self->delay(
+    sub { $conversation->messages(\%query, shift->begin) },
+    sub {
+      my ($delay, $err, $messages) = @_;
+      die $err if $err;
+      $self->$cb($messages, 200);
+    },
+  );
+}
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Jan Henning Thorsen

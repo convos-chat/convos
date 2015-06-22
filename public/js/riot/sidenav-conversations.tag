@@ -1,6 +1,6 @@
 <sidenav-conversations>
   <ul class="sidenav">
-    <sidenav-link each={obj, i in conversations} active={i == parent.active} icon={obj.icon()} href={obj.url()}>{obj.name()}</sidenav-link>
+    <sidenav-link each={c, i in conversations} active={i == parent.parent.activeConversation} icon={c.icon()} href={c.url()}>{c.name()}</sidenav-link>
     <li class="conversation link">
       <a href="#add/conversation" class="waves-effect waves-teal" onclick={joinConversation}>
         <i class="mdi-content-add-circle-outline"></i>
@@ -12,7 +12,6 @@
 
   mixin.modal(this);
 
-  this.active = 0;
   this.conversations = [];
 
   joinConversation(e) {

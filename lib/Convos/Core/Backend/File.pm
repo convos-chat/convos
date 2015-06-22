@@ -38,7 +38,11 @@ use Cwd ();
 use Fcntl ':flock';
 use File::HomeDir ();
 use File::Path    ();
+use File::ReadBackwards;
 use File::Spec::Functions qw( catdir catfile );
+use Symbol;
+use Time::Piece;
+use Time::Seconds;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 ATTRIBUTES
@@ -126,6 +130,70 @@ sub load_object {
   $self;
 }
 
+=head2 messages
+
+See L<Convos::Core::Backend/messages>.
+
+=cut
+
+sub messages {
+  my ($self, $obj, $query, $cb) = @_;
+  my $level = $query->{level} || 'info|warn|error';
+  my $limit = $query->{limit} || 60;
+  my $re    = $query->{match} || qr{.};
+  my ($after, $before, $fh, @messages);
+
+  $after  = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{after})  if $query->{after};
+  $before = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{before}) if $query->{before};
+  $before = Time::Piece->strptime(gmtime->ymd . 'T23:59:59', '%Y-%m-%dT%H:%M:%S') if !$before and !$after;
+  $re = quotemeta $re unless ref $re;
+  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \[($level)\] (.*$re.*)$/;
+
+  local $!;
+
+SCAN:
+  while (1) {
+    my $path = $self->_path($before || $after, $obj);
+    my $fh = gensym;
+
+    warn "[@{[ref $obj]}] Messages from $path\n" if DEBUG;
+
+    if ($before and $before->hms eq '23:59:59') {
+      tie *$fh, 'File::ReadBackwards', $path or last SCAN;
+    }
+    else {
+      open $fh, '<', $path or return last SCAN;
+    }
+
+    while (<$fh>) {
+      next unless /$re/;
+      my $message = {timestamp => $1, level => $2, message => $3};
+      if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
+        @$message{qw( type sender )} = (privmsg => $1);
+      }
+      elsif ($message->{message} =~ s/^-([^\s\>]+)-\s//) {
+        @$message{qw( type sender )} = (notice => $1);
+      }
+      elsif ($message->{message} =~ s/^\* (\S+)\s//) {
+        @$message{qw( type sender )} = (action => $1);
+      }
+      elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
+        @$message{qw( type sender )} = (server => 'server');
+      }
+      push @messages, $message;
+      last SCAN if @messages == $limit;
+    }
+
+    $before -= ONE_DAY and next SCAN if $before;
+    $after += ONE_DAY and next SCAN if $after;
+  }
+
+  $! = 0 if @messages or $! == 2;    # 2 == No such file or directory
+  @messages = reverse @messages if $before and $before->hms eq '23:59:59';
+  $self->$cb($!, \@messages);
+  $self;
+}
+
 =head2 save_object
 
 See L<Convos::Core::Backend/save_object>.
@@ -168,29 +236,31 @@ sub _build_home {
 
 sub _log {
   my ($self, $obj, $level, $message) = @_;
-  my ($s, $m, $h, $day, $month, $year) = gmtime;
+  my $t   = gmtime;
+  my $ymd = $t->ymd;
   my $fh;
 
-  $month += 1;
-  $year  += 1900;
-  $day   = "0$day"   if $day < 10;
-  $month = "0$month" if $month < 10;
-  $fh    = $self->{log}{$obj}{"$year-$month-$day"}{fh};
+  $fh = $self->{log}{$obj}{$ymd}{fh};
 
   unless ($fh) {
     delete $self->{log}{$obj};    # make sure we close filehandle from yesterday
-    $obj->path =~ m!^(.*)/(.+)$! or die "Invalid path() from $obj";    # path() return unix style /dir/file
-    my $dirname = $self->home->rel_dir($1);
-    my $path    = catfile($dirname,
-      $obj->isa('Convos::Core::Connection') ? "$2/$year-$month-$day.log" : "$year-$month-$day-$2.log");
-    File::Path::make_path($dirname);
-    open $fh, '>>', $path or die "Could not open log file $path: $!";
-    $self->{log_fh}{$obj}{"$year-$month-$day"} = {fh => $fh};    # TODO: Add time() so we can purge old filehandles
+    open $fh, '>>', $self->_path($t, $obj) or die "Could not open log file: $!";
+    $self->{log_fh}{$obj}{$ymd} = {fh => $fh};    # TODO: Add time() so we can purge old filehandles
   }
 
   flock $fh, LOCK_EX;
-  printf {$fh} sprintf "%d-%d-%dT%02d:%02d:%02d [%s] %s\n", $year, $month, $day, $h, $m, $s, $level, $message;
+  printf {$fh} sprintf "%s [%s] %s\n", $t->datetime, $level, $message;
   flock $fh, LOCK_UN;
+}
+
+sub _path {
+  my ($self, $t, $obj) = @_;
+  my $ymd = $t->ymd;
+  $obj->path =~ m!^(.*)/(.+)$! or die "Invalid path() from $obj";    # path() return unix style /dir/file
+  my $dirname = $self->home->rel_dir($1);
+  my $path = catfile($dirname, $obj->isa('Convos::Core::Connection') ? "$2/$ymd.log" : "$ymd-$2.log");
+  File::Path::make_path($dirname);
+  return $path;
 }
 
 sub _setup {

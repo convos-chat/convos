@@ -601,19 +601,21 @@
       }
     },
     "Message": {
-      "required": [ "id", "timestamp", "message" ],
+      "required": [ "timestamp", "message" ],
       "properties": {
-        "id": { "type": "string" },
-        "timestamp": { "type": "integer", "format": "int32" },
-        "message": { "type": "string" }
+        "avatar": { "type": "string" },
+        "level": { "type": "string" },
+        "message": { "type": "string" },
+        "sender": { "type": "string" },
+        "timestamp": { "type": "string", "format": "datetime" }
       }
     },
     "Notification": {
       "required": [ "id", "timestamp", "message" ],
       "properties": {
         "id": { "type": "string" },
-        "timestamp": { "type": "integer", "format": "int32" },
-        "message": { "type": "string" }
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "datetime" }
       }
     },
     "Rel": {

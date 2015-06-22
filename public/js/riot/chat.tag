@@ -13,7 +13,7 @@
     </ul>
   </nav>
   <main>
-    <conversation each={conversation, i in conversations} target={conversation.id()} show={i == parent.active}></conversation>
+    <conversation each={c, i in conversations} messages={c.messages} show={i == parent.activeConversation}></conversation>
     <div class="no-conversations valign-wrapper" if={!conversations.length}>
       <div class="valign center-align">
         <h5>No conversations</h5>
@@ -27,7 +27,9 @@
   </main>
   <script>
 
-  this.active = 0;
+  mixin.http(this);
+
+  this.activeConversation = 0;
   this.conversations = [];
   this.modalBottomSheetShow = false;
   this.sidenav = localStorage.getItem('sidenav') || 'conversations';
@@ -45,10 +47,27 @@
     this.update();
   }
 
+  loadMessages() {
+    var conversation = this.conversations[this.activeConversation];
+    if (!conversation || conversation.messages) return;
+    var path = new Convos.Path(conversation.path());
+    conversation.messages = [];
+    this.httpGet(path.messagesUrl(), {}, function(err, data) {
+      if (err) throw err;
+      conversation.messages = data.responseJSON;
+      this.update();
+    });
+  }
+
   this.on('mount', function() {
     if (!this.user.email()) return Router.route('login');
-    convos.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
-    convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
+    convos.conversations(function(err, conversations) { this.conversations = conversations; this.loadMessages(); }.bind(this));
+    convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.loadMessages(); }.bind(this));
+  });
+
+  this.on('update', function() {
+    var p = Router.url().path.replace(/^chat/, '/' + convos.email());
+    this.conversations.forEach(function(c, i) { if (c.path() == p) this.activeConversation = i; }.bind(this));
   });
 
   </script>

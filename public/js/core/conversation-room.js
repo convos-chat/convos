@@ -21,8 +21,8 @@
 
   // Send a message to a room
   proto.send = function(message, cb) {
-    path = this.path().split('/');
-    this.httpPost(apiUrl(['connection', path[2], path[3], 'conversation', path[4], 'message']), {message: message}, function(err, xhr) {
+    var path = new Convos.Path(this.path());
+    this.httpPost(path.messagesUrl(), {message: message}, function(err, xhr) {
       cb.call(this, err);
     });
   };
