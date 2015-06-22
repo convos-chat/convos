@@ -1,0 +1,26 @@
+2015-06-22T09:12:10 [info] <mr22> Did you know that you can get useful notifications displayed at the bottom
+2015-06-22T09:12:11 [info] <mr22> 'etckeeper' allows you to save changes you make to /etc in a bazaar
+2015-06-22T09:12:12 [info] <mr22> The powernap package allows you to suspend servers which are not being used,
+2015-06-22T09:12:13 [info] <mr22> If you know you typed a command or password wrong, you can use ctrl + u to
+2015-06-22T09:12:14 [info] <mr22> For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
+2015-06-22T09:12:15 [info] <mr22> Keep your servers time in sync, use the ntpd package.
+2015-06-22T09:12:16 [info] <mr22> If you need to compile a piece of software, you may need to install the
+2015-06-22T09:12:17 [info] <mr22> The 'history' command will show you the commands you've used before.
+2015-06-22T09:12:18 [info] <mr22> Use 'dpkg --get-selections > selections.txt' to save a selection and 'dpkg
+2015-06-22T09:12:19 [info] <mr22> A for loop in bash syntax: 'for i in * ; do echo $i ; done'.
+2015-06-22T09:12:20 [info] <mr22> Use "pastebinit" to copy a file, or output of a command to a webpage
+2015-06-22T09:12:21 [warn] * mr22 Use "iotop" for measuring hard disk I/O (current read/write) usage per
+2015-06-22T09:12:22 [info] <mr22> To deactivate a service at boot, for example, apache2: 'sudo update-rc.d -f
+2015-06-22T10:12:23 [info] <mr22> Save time starting to type a command or file name, then press tab to
+2015-06-22T10:13:24 [info] <mr22> Need a little refresh on networking concept? Take a look at the networking
+2015-06-22T10:13:25 [info] -mr22- To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-22T10:13:26 [info] -mr22- If you want to download a file from a URL via the console, you can use the
+2015-06-22T10:13:27 [info] -mr22- Did you know that you can get useful notifications displayed at the bottom
+2015-06-22T10:13:28 [info] -mr22- If you executed a command and neglected to use sudo, you can execute "sudo
+2015-06-22T10:13:29 [info] <mr22> Two packages are recommended to perform backups of your clients and servers
+2015-06-22T10:23:30 [info] <mr22> Use the 'watch' command to repeat the same command a regular interval and
+2015-06-22T10:23:31 [info] <mr22> Use lsof to find out which process has open handles for a file. 'lsof +D
+2015-06-22T10:23:32 [info] <mr22> The column allows you to format output neatly. ex: 'mount | column -t' will
+2015-06-22T10:23:33 [info] <mr22> If you executed a command and neglected to use sudo, you can execute "sudo
+2015-06-22T10:23:44 [info] <mr22> You can use the text-based web browser w3m to browse the Internet in your
+2015-06-22T10:23:50 [info] <mr22> The powernap package allows you to suspend servers which are not being used,

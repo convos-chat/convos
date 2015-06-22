@@ -146,7 +146,7 @@ sub messages {
   $after  = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{after})  if $query->{after};
   $before = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{before}) if $query->{before};
   $before = Time::Piece->strptime(gmtime->ymd . 'T23:59:59', '%Y-%m-%dT%H:%M:%S') if !$before and !$after;
-  $re = quotemeta $re unless ref $re;
+  $re = qr{\Q$re\E}i unless ref $re;
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \[($level)\] (.*$re.*)$/;
 
   local $!;

@@ -273,7 +273,12 @@
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/protocol" }
+          { "$ref": "#/parameters/protocol" },
+          { "name": "after", "in": "query", "type": "string", "format": "datetime" },
+          { "name": "before", "in": "query", "type": "string", "format": "datetime" },
+          { "name": "level", "in": "query", "type": "string" },
+          { "name": "limit", "in": "query", "type": "integer" },
+          { "name": "match", "in": "query", "type": "string" }
         ],
         "responses": {
           "200": {

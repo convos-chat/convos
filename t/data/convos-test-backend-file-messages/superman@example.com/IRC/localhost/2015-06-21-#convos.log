@@ -1,0 +1,56 @@
+2015-06-21T10:12:20 [info] <Supergirl> For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
+2015-06-21T10:12:21 [info] <Supergirl> To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-21T10:12:22 [info] <Supergirl> The column allows you to format output neatly. ex: 'mount | column -t' will
+2015-06-21T10:12:23 [info] * jhthorsen To manage Apache modules use "a2enmod" to enable and "a2dismod" to disable.
+2015-06-21T10:12:24 [info] <jhthorsen> To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-21T10:12:25 [warn] <jhthorsen> Unsure if AppArmor might be causing an issue? Don't disable it, use the
+2015-06-21T10:12:26 [warn] <Supergirl> You can use the text-based web browser w3m to browse the Internet in your
+2015-06-21T10:12:27 [info] <mr22> If you know you typed a command or password wrong, you can use ctrl + u to
+2015-06-21T10:12:28 [info] <mr22> Reach the end-of-line with ctrl-e and the beginning of line with ctrl-a.
+2015-06-21T10:12:29 [info] -batman- Did you know that you can get useful notifications displayed at the bottom
+2015-06-21T10:12:30 [info] -batman- If you want to download a file from a URL via the console, you can use the
+2015-06-21T10:12:31 [info] * batman The powernap package allows you to suspend servers which are not being used,
+2015-06-21T10:13:32 [info] <batman> Use "iotop" for measuring hard disk I/O (current read/write) usage per
+2015-06-21T10:13:32 [info] <batman> The Ubuntu Server Team is an open community always looking for feedback and
+2015-06-21T10:13:34 [info] <batman> You can contact the Ubuntu Server team on IRC using chat.freenode.net in
+2015-06-21T10:13:40 [info] <batman> Having trouble with DNS records? dig, ping and named-checkzone are great
+2015-06-21T14:12:01 [info] <Supergirl> To restrict ssh logins to certain commands, have a look at the ForceCommand
+2015-06-21T14:12:11 [info] <Supergirl> Unsure if AppArmor might be causing an issue? Don't disable it, use the
+2015-06-21T14:12:12 [info] <Supergirl> An easy way to see what processes own which network connections: 'sudo
+2015-06-21T14:12:13 [info] <Supergirl> Use "iftop" to monitor current network activity connections per host.
+2015-06-21T14:12:14 [info] <superman> To find a package which name or description contains a keyword use:
+2015-06-21T14:12:15 [info] <superman> You can contact the Ubuntu Server team on IRC using chat.freenode.net in
+2015-06-21T14:12:17 [info] * superman Tired of repeatedly pressing 'y' through some shell process (e.g. fsck)? Try
+2015-06-21T14:12:17 [info] <superman> Use "top" to get a view of your server's performance such as processor,
+2015-06-21T14:12:18 [info] <superman> If you need to compile a piece of software, you may need to install the
+2015-06-21T14:12:19 [info] <superman> You can edit your network configuration in /etc/network/interfaces and
+2015-06-21T14:12:20 [info] <superman> The free command tells you the status of your memory and swap, how much you
+2015-06-21T14:12:21 [info] <superman> Tired of repeatedly pressing 'y' through some shell process (e.g. fsck)? Try
+2015-06-21T14:12:22 [info] -superman- An easy way to see what processes own which network connections: 'sudo
+2015-06-21T14:12:23 [info] -superman- Successive commands usually process the same argument. 'Alt-.' inserts the
+2015-06-21T14:12:24 [info] -Supergirl- For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
+2015-06-21T14:12:25 [info] -Supergirl- 'screen' can create multiple "windows" which you can detach and re-attach
+2015-06-21T14:12:26 [info] -Supergirl- To find in which file an event has been logged in use 'ls -ltr /var/log |
+2015-06-21T14:12:27 [info] <Supergirl> Reach the end-of-line with ctrl-e and the beginning of line with ctrl-a.
+2015-06-21T14:17:28 [info] <Supergirl> To find in which file an event has been logged in use 'ls -ltr /var/log |
+2015-06-21T14:17:29 [info] <Supergirl> Use "tail -f /var/log/some.log" to see new lines added to a log instantly in
+2015-06-21T14:17:30 [info] <Supergirl> If you want to download a file from a URL via the console, you can use the
+2015-06-21T14:17:37 [info] <batman> The powernap package allows you to suspend servers which are not being used,
+2015-06-21T14:17:38 [info] <batman> The powernap package allows you to suspend servers which are not being used,
+2015-06-21T14:17:39 [info] <batman> To restrict ssh logins to certain commands, have a look at the ForceCommand
+2015-06-21T14:17:40 [info] * batman You can add "| grep word" to search for a word in the output of a command.
+2015-06-21T15:12:41 [info] * batman If the empty file ~/.hushlogin exists on the server, login to the server
+2015-06-21T15:12:42 [info] <batman> Did you know that releases of Ubuntu labeled LTS are maintained for 5 years
+2015-06-21T15:12:43 [info] <Supergirl> Did you know that releases of Ubuntu labeled LTS are maintained for 5 years
+2015-06-21T15:12:44 [info] <Supergirl> If you want to download a file from a URL via the console, you can use the
+2015-06-21T15:12:45 [info] <Supergirl> Typing 'dmesg | tail' after you plug in usb storage will give you its
+2015-06-21T15:12:46 [info] <Supergirl> Keep your servers time in sync, use the ntpd package.
+2015-06-21T15:12:47 [info] <Supergirl> To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-21T15:12:48 [info] <Supergirl> Documentation and other resources pointers for Ubuntu Server Edition are
+2015-06-21T15:12:49 [info] <Supergirl> Edit the command line with cut and paste: ctrl-k for cut, and ctrl-y for
+2015-06-21T15:12:50 [info] -mr_fantastic- To have grep return the string you are looking for without checking for
+2015-06-21T15:12:51 [info] -mr_fantastic- If you need to perform a command a second time on a different file, you can
+2015-06-21T15:12:52 [info] -mr_fantastic- Use the 'watch' command to repeat the same command a regular interval and
+2015-06-21T15:12:53 [info] -mr_fantastic- If you know you typed a command or password wrong, you can use ctrl + u to
+2015-06-21T15:12:54 [info] -mr_fantastic- Edit the command line with cut and paste: ctrl-k for cut, and ctrl-y for
+2015-06-21T15:12:55 [info] <Supergirl> 'screen' can create multiple "windows" which you can detach and re-attach

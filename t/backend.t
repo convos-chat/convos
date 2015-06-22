@@ -20,4 +20,8 @@ is $backend->save_object($user), $backend, 'save_object sync';
 is $backend->save_object($user, sub { $err = "save_object @_" }), $backend, 'save_object async';
 like $err, qr{save_object main}, 'object saved';
 
+my $messages;
+is $backend->messages({}, sub { $messages = $_[2]; }), $backend, 'messages async';
+is_deeply $messages, [], 'messages';
+
 done_testing;
