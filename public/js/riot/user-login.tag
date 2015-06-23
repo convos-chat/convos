@@ -25,8 +25,7 @@
       <div class="row">
         <div class="input-field col s12">
           <button class="btn waves-effect waves-light" type="submit" name="action">
-            Log in
-            <i class="mdi-content-send right"></i>
+            Log in <i class="material-icons right">send</i>
           </button>
           <a href="#register" class="btn-flat waves-effect waves-light">Register</a>
         </div>
