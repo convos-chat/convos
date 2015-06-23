@@ -3,7 +3,7 @@
     <sidenav-link each={c, i in conversations} active={i == parent.parent.activeConversation} icon={c.icon()} href={c.url()}>{c.name()}</sidenav-link>
     <li class="conversation link">
       <a href="#add/conversation" class="waves-effect waves-teal" onclick={joinConversation}>
-        <i class="mdi-content-add-circle-outline"></i>
+        <i class="material-icons">add_circle</i>
         Add conversation
       </a>
     </li>

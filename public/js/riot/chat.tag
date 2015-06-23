@@ -6,10 +6,10 @@
     <sidenav-conversations show={activeSidebar('conversations')}></sidenav-conversations>
     <sidenav-participants show={activeSidebar('participants')}></sidenav-participants>
     <ul class="actions">
-      <sidenav-link href="#sidenav:settings" icon="mdi-action-settings" title="Settings" callback={changeSidebar} active={activeSidebar('settings')}></sidenav-link>
-      <sidenav-link href="#sidenav:notifications" icon="mdi-social-notifications" title="Notifications" callback={changeSidebar} active={activeSidebar('notifications')}></sidenav-link>
-      <sidenav-link href="#sidenav:conversations" icon="mdi-communication-forum" title="Conversations" callback={changeSidebar} active={activeSidebar('conversations')}></sidenav-link>
-      <sidenav-link href="#sidenav:participants" icon="mdi-communication-contacts" title="Participants" callback={changeSidebar} active={activeSidebar('participants')}></sidenav-link>
+      <sidenav-link href="#sidenav:settings" icon="settings" title="Settings" callback={changeSidebar} active={activeSidebar('settings')}></sidenav-link>
+      <sidenav-link href="#sidenav:notifications" icon="notifications" title="Notifications" callback={changeSidebar} active={activeSidebar('notifications')}></sidenav-link>
+      <sidenav-link href="#sidenav:conversations" icon="forum" title="Conversations" callback={changeSidebar} active={activeSidebar('conversations')}></sidenav-link>
+      <sidenav-link href="#sidenav:participants" icon="contacts" title="Participants" callback={changeSidebar} active={activeSidebar('participants')}></sidenav-link>
     </ul>
   </nav>
   <main>
@@ -19,7 +19,7 @@
         <h5>No conversations</h5>
         <p class="grey-text">
           <!-- TODO: Highlight the item in the sidebar when the text below is clicked -->
-          Click the "<i class="mdi-content-add-circle-outline"></i> Add conversation" link in the sidebar to find someone to talk to.
+          Click the "<i class="material-icons">add_circle</i> Add conversation" link in the sidebar to find someone to talk to.
         </p>
       </div>
     </div>

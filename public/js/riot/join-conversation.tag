@@ -34,7 +34,7 @@
     <div class="row">
       <div class="input-field col s12">
         <button class="btn waves-effect waves-light" type="submit">
-          Chat <i class="mdi-content-send right"></i>
+          Chat <i class="material-icons right">send</i>
         </button>
         <button class="btn-flat waves-effect waves-light modal-close" type="submit">
           Close

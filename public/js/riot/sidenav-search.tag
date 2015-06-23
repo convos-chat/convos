@@ -7,7 +7,7 @@
   <ul class="sidenav" if={searchTerm}>
     <li if={!searchResults.length}>
       <div class="alert">
-        <i class="mdi-alert-warning small"></i><br>
+        <i class="material-icons small">warning</i><br>
         Sorry, but our minions failed to find anything
         matching your search for "{searchTerm}".
       </div>

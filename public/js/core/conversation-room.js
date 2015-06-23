@@ -10,7 +10,7 @@
   // Define attributes
   mixin.base(proto, {
     frozen: function() { return '' },
-    icon: function() { return 'mdi-social-group' }, // mdi-social-person
+    icon: function() { return 'group' },
     id: function() { return '' },
     name: function() { return '' },
     path: function() { return '' },
