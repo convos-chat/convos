@@ -1,16 +1,15 @@
 <chat>
   <nav>
-    <sidenav-search></sidenav-search>
+    <ul class="navbar">
+      <li><a href="#sidenav:search" class={active: activeSidebar('search')} onclick={changeSidebar}><i class="material-icons">search</i></a></li>
+      <li><a href="#sidenav:notifications" class={active: activeSidebar('notifications')} onclick={changeSidebar}><i class="material-icons">notifications</i></a></li>
+      <li><a href="#sidenav:conversations" class={active: activeSidebar('conversations')} onclick={changeSidebar}><i class="material-icons">groups</i></a></li>
+      <li><a href="#sidenav:settings" class={active: activeSidebar('settings')} onclick={changeSidebar}><i class="material-icons">settings</i></a></li>
+    </ul>
+    <sidenav-search show={activeSidebar('search')}></sidenav-search>
     <sidenav-settings show={activeSidebar('settings')}></sidenav-settings>
     <sidenav-notifications show={activeSidebar('notifications')}></sidenav-notifications>
     <sidenav-conversations show={activeSidebar('conversations')}></sidenav-conversations>
-    <sidenav-participants show={activeSidebar('participants')}></sidenav-participants>
-    <ul class="actions">
-      <sidenav-link href="#sidenav:settings" icon="settings" title="Settings" callback={changeSidebar} active={activeSidebar('settings')}></sidenav-link>
-      <sidenav-link href="#sidenav:notifications" icon="notifications" title="Notifications" callback={changeSidebar} active={activeSidebar('notifications')}></sidenav-link>
-      <sidenav-link href="#sidenav:conversations" icon="forum" title="Conversations" callback={changeSidebar} active={activeSidebar('conversations')}></sidenav-link>
-      <sidenav-link href="#sidenav:participants" icon="contacts" title="Participants" callback={changeSidebar} active={activeSidebar('participants')}></sidenav-link>
-    </ul>
   </nav>
   <main>
     <conversation each={c, i in conversations} messages={c.messages} show={i == parent.activeConversation}></conversation>
@@ -23,7 +22,7 @@
         </p>
       </div>
     </div>
-    <user-input/>
+    <user-input conversation={conversations[activeConversation]} />
   </main>
   <script>
 

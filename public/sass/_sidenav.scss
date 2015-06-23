@@ -2,96 +2,61 @@ nav {
   background-color: $sidenav-bg-color;
   width: $sidenav-width;
   position: fixed;
-  left: -105%;
+  right: 0;
   top: 0;
   bottom: 0;
-  left: 0;
-  margin: 0;
-  padding: 60px 0;
-  z-index: $sidenav-z-index;
-  overflow: hidden;
+  @extend .z-depth-1;
 
-  //@extend .z-depth-1;
-  border-right: 1px solid $collection-border-color;
-  will-change: left;
-
-  h3.title, .search {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    padding: 0 $sidenav-padding-right;
+  &, a {
+    color: color('green', 'darken-3');
   }
 
-  .actions {
-    position: absolute;
-    bottom: 0;
-    width: ($sidenav-width + 2);
-    border: 0;
-    border-top: 1px solid darken($sidenav-bg-color, 15%);
-    height: 68px;
+  ul.navbar {
     margin: 0;
-    overflow: hidden;
 
-    li { float: left; }
-    a { padding: 10px 23px 14px 24px; }
-    i { font-size: 28px; }
+    li {
+      @include transition(background-color .3s);
+      float: left;
+      padding: 0;
+      overflow: hidden;
+      height: $navbar-height-mobile;
+
+      &:hover, &.active {
+        background-color: rgba(0,0,0,.1);
+      }
+    }
+
+    a {
+      display: block;
+      padding: 0 15px;
+    }
+
+    i {
+      display: block;
+      font-size: 2rem;
+      line-height: $navbar-height-mobile;
+    }
   }
 
-  li.link:hover {
-    background-color: $sidenav-hover-color;
-  }
+  .collection {
+    clear: both;
+    overflow-y: auto;
+    border: 0;
+    border-top: 1px solid $collection-border-color;
 
-  li.active {
-    background-color: lighten($sidenav-hover-color, 5%);
+    .collection-item {
+      background-color: $sidenav-bg-color;
+      border: 0;
+    }
+
+    i {
+      vertical-align: middle;
+      margin-right: 6px;
+    }
   }
 
   @media #{$medium-and-down} {
-    left: -105%;
-  }
-}
-
-.sidenav {
-  margin-top: 15px;
-  overflow-y: auto;
-
-  .collapsible {
-    margin: 0;
-  }
-
-  li {
-    float: none;
-    padding: 0 $sidenav-padding-right;
-  }
-
-  a {
-    color: #444;
-    display: block;
-    font-size: 1rem;
-    height: 54px;
-    line-height: 54px;
-
-    i {
-      font-size: 2rem;
-      vertical-align: middle;
-      margin-right: 5px;
-    }
-  }
-}
-
-// Touch interaction
-.drag-target {
-  height: 100%;
-  width: 10px;
-  position: fixed;
-  top: 0;
-  z-index: ($sidenav-z-index - 1);
-}
-
-.sidenav .collapsible-body li.active,
-.sidenav.fixed .collapsible-body li.active {
-  background-color: $primary-color;
-  a {
-    color: $sidenav-bg-color;
+    right: -105%;
   }
 }
 

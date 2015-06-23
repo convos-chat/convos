@@ -1,23 +1,20 @@
 <sidenav-search>
-  <form class="search" onsubmit={startSearch}>
-    <div class="input-field">
-      <input type="text" id="search_input" placeholder="Search and goto anything" autocomplete="off" spellcheck="false" onkeyup={startSearch}>
+  <div class="collection">
+    <div class="collection-item">
+      <form class="search sidenav" onsubmit={startSearch}>
+        <input type="text" id="search_input" placeholder="Search and goto anything" autocomplete="off" spellcheck="false" onkeyup={startSearch}>
+      </form>
     </div>
-  </form>
-  <ul class="sidenav" if={searchTerm}>
-    <li if={!searchResults.length}>
-      <div class="alert">
-        <i class="material-icons small">warning</i><br>
-        Sorry, but our minions failed to find anything
-        matching your search for "{searchTerm}".
-      </div>
-    </li>
-    <li each={searchResults} class="link">
-      <a href={href} class="waves-effect waves-teal">
+    <div class="collection-item" if={!searchResults.length && searchTerm}>
+      Sorry, but our minions failed to find anything
+      matching your search for "{searchTerm}".
+    </div>
+    <div each={searchResults} class="link">
+      <a href={href} class="waves-effect">
         <i class={icon} if={icon}></i>
         {text}
       </a>
-    </li>
+    </div>
   </ul>
   <script>
 
