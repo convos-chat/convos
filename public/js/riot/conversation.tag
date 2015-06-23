@@ -3,7 +3,7 @@
     <li each={m, i in opts.messages} class="collection-item avatar">
       <img src={parent.avatar(m)} alt={m.sender} class="circle">
       <a href={'#autocomplete:' + m.sender} class="title">{m.sender}</a>
-      <div>{m.message}</div>
+      <div class="message">{m.message}</div>
       <span class="secondary-content timeago" title={m.timestamp + '+0000'}>{m.timestamp}</span>
     </li>
   </ul>
