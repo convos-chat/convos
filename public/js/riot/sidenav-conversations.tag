@@ -1,13 +1,10 @@
 <sidenav-conversations>
-  <ul class="sidenav">
-    <sidenav-link each={c, i in conversations} active={i == parent.parent.activeConversation} icon={c.icon()} href={c.url()}>{c.name()}</sidenav-link>
-    <li class="conversation link">
-      <a href="#add/conversation" class="waves-effect waves-teal" onclick={joinConversation}>
-        <i class="material-icons">add_circle</i>
-        Add conversation
-      </a>
-    </li>
-  </ul>
+  <div class="collection">
+    <sidenav-link each={c, i in conversations} active={i == parent.parent.activeConversation} icon={c.icon()} href={c.url()} new={i}>{c.name()}</sidenav-link>
+    <a href="#add:conversation" class="collection-item" onclick={joinConversation}>
+      <i class="material-icons">add_circle</i> Create conversation
+    </a>
+  </div>
   <script>
 
   mixin.modal(this);

@@ -1,10 +1,11 @@
 $body-bg: #fff;
 $primary-color: color("green", "lighten-1");
 $secondary-color: color("green", "darken-4");
-$link-color: color("teal", "darken-1");
+$link-color: color("green", "darken-2");
 $medium-screen: 820px;
 $medium-screen-up: 821px;
+$sidenav-bg-color: darken($body-bg, 4%);
 $sidenav-width: 300px;
 $sidenav-z-index: 10;
 $sidenav-hover-color: #ddd;
-$readable-width: 40em;
+$readable-width: 820px;
