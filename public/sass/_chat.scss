@@ -1,6 +1,5 @@
 .conversation {
   border: 0;
-  max-width: $readable-width;
 
   .collection-item.avatar {
     min-height: 70px;
@@ -10,6 +9,9 @@
   }
   .collection-item.debug {
     @extend .grey-text;
+  }
+  .message {
+    max-width: $readable-width;
   }
 }
 
