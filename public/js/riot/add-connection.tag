@@ -55,15 +55,14 @@
   this.defaultServer = 'localhost'; // 'chat.freenode.net:6697';
 
   submitForm(e) {
-    e.preventDefault();
     this.formError = ''; // clear error on post
     this.httpPost(
       apiUrl('/connection'),
       {
-        password: this.form_password.value,
-        protocol: this.form_protocol.value,
-        server:   this.form_server.value,
-        username: this.form_username.value
+        password: this.password.value,
+        protocol: this.protocol.value,
+        server:   this.server.value,
+        username: this.username.value
       },
       function(err, xhr) {
         this.httpInvalidInput(xhr.responseJSON);
@@ -78,7 +77,7 @@
   this.on('mount', function() {
     Materialize.updateTextFields();
     $('select', this.root).material_select();
-    setTimeout(function() { this.form_server.focus(); }.bind(this), 300);
+    setTimeout(function() { this.server.focus(); }.bind(this), 300);
   });
 
   </script>

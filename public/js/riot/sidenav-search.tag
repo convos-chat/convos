@@ -37,7 +37,6 @@
   };
 
   startSearch(e) {
-    e.preventDefault();
     if (this.tid) clearTimeout(this.tid);
     this.tid = setTimeout(runSearch.bind(this), 210);
   }

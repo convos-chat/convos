@@ -61,14 +61,13 @@
   };
 
   selectedConnection() {
-    var $option = $('option:selected, option:first', this.form_connection).eq(0);
+    var $option = $('option:selected, option:first', this.connection).eq(0);
     return this.opts.connections[$option.val()];
   }
 
   submitForm(e) {
-    e.preventDefault();
     this.formError = ''; // clear error on post
-    this.selectedConnection().joinConversation(this.form_name.value, function(err) {
+    this.selectedConnection().joinConversation(this.name.value, function(err) {
       if (!err) return this.closeModal();
       this.formError = err;
       this.update();
@@ -76,11 +75,11 @@
   }
 
   this.on('mount', function() {
-    setTimeout(function() { this.form_name.focus(); }.bind(this), 300);
+    setTimeout(function() { this.name.focus(); }.bind(this), 300);
     Materialize.updateTextFields();
     $('input[name="name"]', this.root).autocomplete();
     $('select', this.root).material_select();
-    $(this.form_connection).change(this.changeConnection.bind(this)).change();
+    $(this.connection).change(this.changeConnection.bind(this)).change();
   });
 
   </script>
