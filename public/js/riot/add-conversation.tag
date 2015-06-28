@@ -2,7 +2,7 @@
   <form onsubmit={submitForm} method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">
-        <h4 class="green-text text-darken-3">Add conversation</h4>
+        <h4 class="green-text text-darken-3">Create conversation</h4>
         <p>
           A conversation is either the name of a person or a chat room.
         </p>
