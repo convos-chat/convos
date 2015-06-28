@@ -1,8 +1,12 @@
 <sidenav-conversations>
   <div class="collection">
-    <sidenav-link each={c, i in conversations} active={i == parent.parent.activeConversation} icon={c.icon()} href={c.url()} new={i}>{c.name()}</sidenav-link>
-    <a href="#add:conversation" class="collection-item" onclick={joinConversation}>
-      <i class="material-icons">add_circle</i> Create conversation
+    <a each={c, i in conversations} href={c.url()} class={parent.conversationClass(i)}>
+      <i class="material-icons">{c.icon()}</i> {c.name()}
+      <span class="badge new" if={c.new}>{c.new}</span>
+    </a>
+    <a href="#addConversation" onclick={addConversation} class="collection-item">
+      <i class="material-icons">add_circle</i> Create conversation...
+      <span class="badge new" if={c.new}>{c.new}</span>
     </a>
   </div>
   <script>
@@ -11,16 +15,19 @@
 
   this.conversations = [];
 
-  joinConversation(e) {
-    e.preventDefault();
+  addConversation(e) {
     convos.connections(function(err, connections) {
       if (connections.length) {
         this.openModal('add-conversation', {connections: connections});
       }
       else {
-        this.openModal('add-connection', {first: 1, next: 'add-conversation'});
+        this.openModal('add-connection', {first: true, next: 'add-conversation'});
       }
     }.bind(this));
+  }
+
+  conversationClass(i) {
+    return i == this.parent.activeConversation ? 'collection-item active' : 'collection-item';
   }
 
   this.on('mount', function() {

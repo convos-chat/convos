@@ -1,7 +1,8 @@
 (function($) {
   Router.add(/^chat/,      'chat');
-  Router.add(/^register$/, 'user-register');
   Router.add(/^login$/,    'user-login');
+  Router.add(/^logout$/,   function() { });
+  Router.add(/^register$/, 'user-register');
   Router.add(/.?/,         'user-login');
 
   jQuery.timeago.settings.strings = {
