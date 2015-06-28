@@ -26,7 +26,7 @@
     <div class="row">
       <div class="input-field col s12">
         <button class="btn waves-effect waves-light" type="submit">Save <i class="material-icons right">save</i></button>
-        <button class="btn-flat waves-effect waves-light modal-close" type="submit">Close</button>
+        <button class="btn-flat waves-effect waves-light modal-close" type="button">Close</button>
         <a href="#TODO" class="btn waves-effect waves-light red right"><i class="material-icons">delete</i></a>
       </div>
     </div>
