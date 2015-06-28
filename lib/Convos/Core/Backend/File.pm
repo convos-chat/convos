@@ -45,6 +45,9 @@ use Time::Piece;
 use Time::Seconds;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
+# copy/paste from File::ReadBackwards
+my $MAX_READ_SIZE = 1 << 13;
+
 =head1 ATTRIBUTES
 
 L<Convos::Core::Backend::File> inherits all attributes from
@@ -141,55 +144,56 @@ sub messages {
   my $level = $query->{level} || 'info|warn|error';
   my $limit = $query->{limit} || 60;
   my $re    = $query->{match} || qr{.};
-  my ($after, $before, $fh, @messages);
+  my $path  = $self->home->rel_dir($obj->path) . '.log';
+  my $FH    = gensym;
+  my ($after, $before, $pos, @messages);
 
   $after  = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{after})  if $query->{after};
   $before = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{before}) if $query->{before};
-  $before = Time::Piece->strptime(gmtime->ymd . 'T23:59:59', '%Y-%m-%dT%H:%M:%S') if !$before and !$after;
+  $before = gmtime if !$before and !$after;
   $re = qr{\Q$re\E}i unless ref $re;
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \[($level)\] (.*$re.*)$/;
 
   local $!;
 
-SCAN:
-  while (1) {
-    my $path = $self->_path($before || $after, $obj);
-    my $fh = gensym;
+  if ($before) {
+    $pos = $self->_pos($obj, $before, 1) // 0;
+    tie *$FH, 'File::ReadBackwards', $path or return $self->tap($cb, $!, \@messages);
 
-    warn "[@{[ref $obj]}] Messages from $path\n" if DEBUG;
-
-    if ($before and $before->hms eq '23:59:59') {
-      tie *$fh, 'File::ReadBackwards', $path or last SCAN;
+    # this is a very ugly thing to do
+    if ($pos) {
+      tied(*$FH)->{read_size} = $pos % $MAX_READ_SIZE || $MAX_READ_SIZE;
+      tied(*$FH)->{seek_pos} = $pos;
     }
-    else {
-      open $fh, '<', $path or return last SCAN;
-    }
-
-    while (<$fh>) {
-      next unless /$re/;
-      my $message = {timestamp => $1, level => $2, message => $3};
-      if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
-        @$message{qw( type sender )} = (privmsg => $1);
-      }
-      elsif ($message->{message} =~ s/^-([^\s\>]+)-\s//) {
-        @$message{qw( type sender )} = (notice => $1);
-      }
-      elsif ($message->{message} =~ s/^\* (\S+)\s//) {
-        @$message{qw( type sender )} = (action => $1);
-      }
-      elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
-        @$message{qw( type sender )} = (server => 'server');
-      }
-      push @messages, $message;
-      last SCAN if @messages == $limit;
-    }
-
-    $before -= ONE_DAY and next SCAN if $before;
-    $after += ONE_DAY and next SCAN if $after;
+  }
+  else {
+    $pos = $after ? $self->_pos($obj, $after, 0) : 0;
+    open $FH, '<', $path or return $self->tap($cb, '', \@messages);
+    seek $FH, $pos, 0;
   }
 
-  $! = 0 if @messages or $! == 2;    # 2 == No such file or directory
-  @messages = reverse @messages if $before and $before->hms eq '23:59:59';
+  warn "[@{[ref $obj]}] Messages from $path ($pos)\n" if DEBUG;
+
+  while (<$FH>) {
+    next unless /$re/;
+    my $message = {timestamp => $1, level => $2, message => $3};
+    if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
+      @$message{qw( type sender )} = (privmsg => $1);
+    }
+    elsif ($message->{message} =~ s/^-([^\s\>]+)-\s//) {
+      @$message{qw( type sender )} = (notice => $1);
+    }
+    elsif ($message->{message} =~ s/^\* (\S+)\s//) {
+      @$message{qw( type sender )} = (action => $1);
+    }
+    elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
+      @$message{qw( type sender )} = (server => 'server');
+    }
+    push @messages, $message;
+    last if @messages == $limit;
+  }
+
+  @messages = reverse @messages if $before;
   $self->$cb($!, \@messages);
   $self;
 }
@@ -238,29 +242,51 @@ sub _log {
   my ($self, $obj, $level, $message) = @_;
   my $t   = gmtime;
   my $ymd = $t->ymd;
-  my $fh;
+  my $FH;
 
-  $fh = $self->{log}{$obj}{$ymd}{fh};
-
-  unless ($fh) {
-    delete $self->{log}{$obj};    # make sure we close filehandle from yesterday
-    open $fh, '>>', $self->_path($t, $obj) or die "Could not open log file: $!";
-    $self->{log_fh}{$obj}{$ymd} = {fh => $fh};    # TODO: Add time() so we can purge old filehandles
+  unless ($FH = $self->{log_fh}{$obj}) {
+    my $path = $self->home->rel_dir($obj->path) . '.log';
+    open $FH, '>>', $path or die "Append $path: $!";
+    $self->{log_fh}{$obj} = $FH;
+  }
+  unless (defined $self->{pos}{$obj}{$ymd}) {
+    my $path = $self->home->rel_dir($obj->path) . '.log.ymd';
+    open my $POS, '>>', $path or die "Append $path: $!";
+    printf {$POS} "%s=%s\n", $ymd, ($self->{pos}{$obj}{$ymd} = tell $FH);
   }
 
-  flock $fh, LOCK_EX;
-  printf {$fh} sprintf "%s [%s] %s\n", $t->datetime, $level, $message;
-  flock $fh, LOCK_UN;
+  flock $FH, LOCK_EX;
+  printf {$FH} sprintf "%s [%s] %s\n", $t->datetime, $level, $message;
+  flock $FH, LOCK_UN;
 }
 
-sub _path {
-  my ($self, $t, $obj) = @_;
-  my $ymd = $t->ymd;
-  $obj->path =~ m!^(.*)/(.+)$! or die "Invalid path() from $obj";    # path() return unix style /dir/file
-  my $dirname = $self->home->rel_dir($1);
-  my $path = catfile($dirname, $obj->isa('Convos::Core::Connection') ? "$2/$ymd.log" : "$ymd-$2.log");
-  File::Path::make_path($dirname);
-  return $path;
+sub _pos {
+  my ($self, $obj, $t, $before) = @_;
+  my $pos = $self->{pos}{$obj};
+
+  if (!$pos) {
+    my $path = $self->home->rel_dir($obj->path) . '.log.ymd';
+    if (open my $FH, '<', $path) {
+      /^(.*)=(\d+)$/ and $pos->{$1} = $2 while <$FH>;
+    }
+  }
+
+  return $pos->{$t->ymd} if defined $pos->{$t->ymd};
+
+  if ($before) {
+    for my $k (sort { $a cmp $b } keys %$pos) {
+      my $match = Time::Piece->new($k);
+      return $pos->{$k} if $match >= $t;
+    }
+  }
+  else {
+    for my $k (sort { $b cmp $a } keys %$pos) {
+      my $match = Time::Piece->new($k);
+      return $pos->{$k} if $match <= $t;
+    }
+  }
+
+  return undef;
 }
 
 sub _setup {

@@ -44,9 +44,7 @@ like $err, qr{without target and message}, 'send: without target and message';
 $connection->send('#test_convos' => '0', sub { $err = $_[1] });
 like $err, qr{Not connected}i, 'send: not connected';
 
-my ($s, $m, $h, $day, $month, $year) = gmtime;
-my $date = sprintf '%04d-%02d-%02d', $year + 1900, $month + 1, $day;
-my $log_file = File::Spec->catfile($ENV{CONVOS_HOME}, qw( test.user@example.com IRC localhost ), "$date.log");
+my $log_file = File::Spec->catfile($ENV{CONVOS_HOME}, qw( test.user@example.com IRC localhost.log ));
 ok -e $log_file, $log_file;
 
 File::Path::remove_tree($ENV{CONVOS_HOME});
