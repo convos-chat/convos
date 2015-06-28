@@ -41,7 +41,6 @@
   mixin.http(this);
 
   submitForm(e) {
-    e.preventDefault();
     this.formError = ''; // clear error on post
     localStorage.setItem('email', this.form_email.value);
     this.httpPost(

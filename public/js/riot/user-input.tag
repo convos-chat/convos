@@ -28,7 +28,6 @@
   }
 
   sendMessage(e) {
-    e.preventDefault();
     console.log(this.message.value); // TODO
     this.canSend = false;
     this.message.value = '';

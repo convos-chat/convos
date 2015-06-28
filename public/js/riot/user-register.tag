@@ -44,7 +44,6 @@
   mixin.http(this);
 
   submitForm(e) {
-    e.preventDefault();
     localStorage.setItem('email', this.form_email.value);
 
     if (this.form_password.value != this.form_password_again.value) {

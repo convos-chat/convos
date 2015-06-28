@@ -4,7 +4,7 @@ var Router = {
     return Router.url().path.match(q);
   },
   add: function(re, fn) {
-    var handler = typeof fn == 'function' ? fn : function() { Router.render(fn); };
+    var handler = typeof fn == 'function' ? fn : function() { Router.render(fn, {}); };
     Router.routes.push({ re: re, handler: handler});
     return Router;
   },
@@ -31,8 +31,8 @@ var Router = {
     domNode.innerHTML = '';
     console.log('render: ' + riotTag);
     if (Router.mountedNodes) Router.mountedNodes.forEach(function(node) { node.unmount(true); });
-    tag = Router.mountedNodes = riot.mountTo(domNode, riotTag, opts || {});
-    Router.afterRender(opts);
+    tag = Router.mountedNodes = riot.mount(domNode, riotTag, opts);
+    Router.afterRender();
     return tag;
   },
   route: function(path) {
