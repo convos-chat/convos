@@ -19,10 +19,15 @@
 
   mixin.http(proto);
 
+  // Returns a path (URL) to the messages resource
+  proto.messagesUrl = function() {
+    var path = this.path().split('/');
+    return apiUrl(['connection', path[2], path[3], 'conversation', path[4], 'messages']);
+  };
+
   // Send a message to a room
   proto.send = function(message, cb) {
-    var path = new Convos.Path(this.path());
-    this.httpPost(path.messagesUrl(), {message: message}, function(err, xhr) {
+    this.httpPost(this.messagesUrl(), {message: message}, function(err, xhr) {
       cb.call(this, err);
     });
   };

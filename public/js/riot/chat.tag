@@ -49,9 +49,8 @@
   loadMessages() {
     var conversation = this.conversations[this.activeConversation];
     if (!conversation || conversation.messages) return;
-    var path = new Convos.Path(conversation.path());
     conversation.messages = [];
-    this.httpGet(path.messagesUrl(), {}, function(err, data) {
+    this.httpGet(conversation.messagesUrl(), {}, function(err, data) {
       if (err) throw err;
       conversation.messages = data.responseJSON;
       this.update();
