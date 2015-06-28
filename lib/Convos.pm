@@ -168,6 +168,7 @@ sub _setup_assets {
     http://code.jquery.com/jquery-1.11.3.min.js
     /js/riot.min.js
     /js/storage.js
+    /js/url.js
     /js/window.js
     /js/router.js
     /js/jquery.autocomplete.js
