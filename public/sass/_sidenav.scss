@@ -13,16 +13,20 @@ nav {
 
   ul.navbar {
     margin: 0;
+    overflow: hidden;
+    border-bottom: 1px solid color('grey', 'lighten-2');
 
     li {
-      @include transition(background-color .3s);
       float: left;
       padding: 0;
       overflow: hidden;
       height: $navbar-height-mobile;
 
-      &:hover, &.active {
+      &:hover {
         background-color: rgba(0,0,0,.1);
+      }
+      &.active {
+        border-bottom: 2px solid color('green', 'darken-3');
       }
     }
 
@@ -42,10 +46,9 @@ nav {
     clear: both;
     overflow-y: auto;
     border: 0;
-    border-top: 1px solid $collection-border-color;
+    margin: 0;
 
     .collection-item {
-      background-color: $sidenav-bg-color;
       border: 0;
     }
 

@@ -1,10 +1,10 @@
 <chat>
   <nav>
     <ul class="navbar">
-      <li><a href="#sidenav:search" class={active: activeSidebar('search')} onclick={changeSidebar}><i class="material-icons">search</i></a></li>
-      <li><a href="#sidenav:notifications" class={active: activeSidebar('notifications')} onclick={changeSidebar}><i class="material-icons">notifications</i></a></li>
-      <li><a href="#sidenav:conversations" class={active: activeSidebar('conversations')} onclick={changeSidebar}><i class="material-icons">groups</i></a></li>
-      <li><a href="#sidenav:settings" class={active: activeSidebar('settings')} onclick={changeSidebar}><i class="material-icons">settings</i></a></li>
+      <li class={active: activeSidebar('search')}><a href="#sidenav:search" onclick={changeSidebar}><i class="material-icons">search</i></a></li>
+      <li class={active: activeSidebar('notifications')}><a href="#sidenav:notifications" onclick={changeSidebar}><i class="material-icons">notifications</i></a></li>
+      <li class={active: activeSidebar('conversations')}><a href="#sidenav:conversations" onclick={changeSidebar}><i class="material-icons">groups</i></a></li>
+      <li class={active: activeSidebar('settings')}><a href="#sidenav:settings" onclick={changeSidebar}><i class="material-icons">settings</i></a></li>
     </ul>
     <sidenav-search show={activeSidebar('search')}></sidenav-search>
     <sidenav-settings show={activeSidebar('settings')}></sidenav-settings>
@@ -12,7 +12,9 @@
     <sidenav-conversations show={activeSidebar('conversations')}></sidenav-conversations>
   </nav>
   <main>
-    <conversation each={c, i in conversations} messages={c.messages} show={i == parent.activeConversation}></conversation>
+    <div each={c, i in conversations} messages={c.messages} show={i == parent.activeConversation}>
+      <conversation messages={c.messages} show={i == parent.activeConversation}></conversation>
+    </div>
     <div class="no-conversations valign-wrapper" if={!conversations.length}>
       <div class="valign center-align">
         <h5>No conversations</h5>
@@ -39,7 +41,6 @@
   }
 
   changeSidebar(e) {
-    e.preventDefault();
     var $a = $(e.target).closest('a');
     this.sidenav = $a.attr('href').split('sidenav:')[1];
     localStorage.setItem('sidenav', this.sidenav);

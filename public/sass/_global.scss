@@ -28,6 +28,17 @@ ul, li { margin: 0; }
   max-width: $readable-width;
 }
 
+.btn, .btn-large, .btn-flat {
+  padding: 0 1rem;
+}
+
+.col {
+  .btn, .btn-large, .btn-flat {
+    margin-right: 0.5rem;
+    &.right { margin-right: 0; }
+  }
+}
+
 li.alert {
   margin-top: 4px;
   margin-bottom: 4px;

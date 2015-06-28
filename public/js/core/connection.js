@@ -51,10 +51,10 @@
       Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
       return this;
     }
-    return this.httpPost(apiUrl(['connection', this.name()]), attrs, function(err, xhr) {
+    return this.httpPost(apiUrl(['connection', this.protocol(), this.name()]), attrs, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.save(attrs);
-      cb.call(this, err);
+      cb.call(this, err, xhr);
     });
   };
 
