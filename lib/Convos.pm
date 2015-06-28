@@ -166,7 +166,7 @@ sub _setup_assets {
   my $self       = shift;
   my @javascript = qw(
     http://code.jquery.com/jquery-1.11.3.min.js
-    http://cdnjs.cloudflare.com/ajax/libs/riot/2.1.0/riot.js
+    /js/riot.min.js
     /js/storage.js
     /js/window.js
     /js/router.js
