@@ -14,9 +14,10 @@
   mixin.modal(this);
 
   this.conversations = [];
+  this.convos = opts.convos;
 
   addConversation(e) {
-    convos.connections(function(err, connections) {
+    this.convos.connections(function(err, connections) {
       if (connections.length) {
         this.openModal('add-conversation', {connections: connections});
       }
@@ -31,8 +32,8 @@
   }
 
   this.on('mount', function() {
-    convos.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
-    convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
+    this.convos.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
+    this.convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
   });
 
   </script>

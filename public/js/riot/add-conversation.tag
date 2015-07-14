@@ -76,7 +76,7 @@
 
   this.on('mount', function() {
     setTimeout(function() { this.name.focus(); }.bind(this), 300);
-    Materialize.updateTextFields();
+    this.updateTextFields();
     $('input[name="name"]', this.root).autocomplete();
     $('select', this.root).material_select();
     $(this.connection).change(this.changeConnection.bind(this)).change();

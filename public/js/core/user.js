@@ -81,17 +81,6 @@
     return this.tap('_method', 'httpCachedGet');
   };
 
-  // Update convos user interface
-  proto.render = function(riotTag) {
-    if (riotTag) riotTag.update();
-    $('.tooltipped').each(function() {
-      var $self = $(this);
-      $self.attr('data-tooltip', $self.attr('title') || $self.attr('placeholder')).removeAttr('title');
-    }).filter('[data-tooltip]').tooltip();
-    Materialize.updateTextFields();
-    $('select').material_select();
-  };
-
   // Write user settings to server
   proto.save = function(attrs, cb) {
     if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));

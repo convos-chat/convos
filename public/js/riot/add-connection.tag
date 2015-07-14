@@ -52,6 +52,7 @@
   mixin.http(this);
   mixin.modal(this);
 
+  this.convos = opts.convos;
   this.defaultServer = 'localhost'; // 'chat.freenode.net:6697';
 
   submitForm(e) {
@@ -65,17 +66,16 @@
         username: this.username.value
       },
       function(err, xhr) {
-        this.httpInvalidInput(xhr.responseJSON);
-        convos.render(this);
+        if (err) return this.httpInvalidInput(err);
         if (!err) return;
-        convos.connection(false, false, xhr.responseJSON);
+        this.convos.connection(false, false, xhr.responseJSON);
         this.openModal(opts.next || 'edit-connection', xhr.responseJSON);
       }
     );
   }
 
   this.on('mount', function() {
-    Materialize.updateTextFields();
+    this.updateTextFields();
     $('select', this.root).material_select();
     setTimeout(function() { this.server.focus(); }.bind(this), 300);
   });

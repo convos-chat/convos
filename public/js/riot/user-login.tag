@@ -40,24 +40,26 @@
   mixin.form(this);
   mixin.http(this);
 
+  this.convos = opts.convos;
+
   submitForm(e) {
     this.formError = ''; // clear error on post
-    localStorage.setItem('email', this.form_email.value);
+    localStorage.setItem('email', this.email.value);
     this.httpPost(
       apiUrl('/user/login'),
-      {email: this.form_email.value, password: this.form_password.value},
+      {email: this.email.value, password: this.password.value},
       function(err, xhr) {
-        if (!err) convos.save(xhr.responseJSON);
-        this.httpInvalidInput(xhr.responseJSON);
-        convos.render(this);
+        if (!err) return this.convos.save(xhr.responseJSON);
+        err.forEach(function(i) { if (i.path == '/') i.path = '/email' });
+        this.httpInvalidInput(err);
       }
     );
   }
 
   this.on('mount', function() {
-    if (convos.email()) return Router.route('chat');
-    this.form_email.value = localStorage.getItem('email');
-    this.form_email.focus();
+    if (this.convos.email()) return Router.route('chat');
+    this.email.value = localStorage.getItem('email');
+    this.email.focus();
   });
 
   </script>

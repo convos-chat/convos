@@ -33,9 +33,18 @@
     $('.loading-convos p').not('.rendered').html(err || 'Maybe you have a browser from last century?').attr('class', 'red-text');
   };
 
-  window.convos = convos;
+  Router.defaults.convos = convos;
   convosFailedToload.tid = setTimeout(convosFailedToload, 5000);
-  Router.start(convos.render.bind(convos));
+
+  Router.on('afterDispatch', function() {
+    $('select').material_select();
+    $('.tooltipped').each(function() {
+      var $self = $(this);
+      $self.attr('data-tooltip', $self.attr('title') || $self.attr('placeholder')).removeAttr('title');
+    }).filter('[data-tooltip]').tooltip();
+  });
+
+  Router.start();
 
   // email is set after a successful login, either as a result from load()
   // below or when submitting a form from user-register.tag or user-login.tag.
