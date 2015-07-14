@@ -26,6 +26,7 @@
   // save attributes to object
   proto.save = function(attrs) {
     Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
+    if (this.trigger) this.trigger('updated');
     return this;
   };
 

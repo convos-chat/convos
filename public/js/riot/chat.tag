@@ -34,7 +34,7 @@
   this.conversations = [];
   this.modalBottomSheetShow = false;
   this.sidenav = localStorage.getItem('sidenav') || 'conversations';
-  this.user = window.convos;
+  this.user = this.convos || opts.convos;
 
   activeSidebar(name) {
     return name == this.sidenav;
@@ -60,12 +60,12 @@
 
   this.on('mount', function() {
     if (!this.user.email()) return Router.route('login');
-    convos.conversations(function(err, conversations) { this.conversations = conversations; this.loadMessages(); }.bind(this));
-    convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.loadMessages(); }.bind(this));
+    this.user.conversations(function(err, conversations) { this.conversations = conversations; this.loadMessages(); }.bind(this));
+    this.user.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.loadMessages(); }.bind(this));
   });
 
   this.on('update', function() {
-    var p = Router.url().path.replace(/^chat/, '/' + convos.email());
+    var p = Router.url().path.replace(/^chat/, '/' + this.user.email());
     this.conversations.forEach(function(c, i) { if (c.path() == p) this.activeConversation = i; }.bind(this));
   });
 

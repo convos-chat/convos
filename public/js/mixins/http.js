@@ -1,9 +1,11 @@
 (window['mixin'] = window['mixin'] || {})['http'] = function(proto) {
   var cache = window.mixin.http.cache = window.mixin.http.cache || {}; // global cache
 
-  var handlerError = function(xhr) {
-    this.errors = xhr.responseJSON.errors || [];
-    if (xhr.status != 200 && !this.errors.length) this.errors = [{message: 'Unknown error. (' + xhr.status + ')'}];
+  var err = function(xhr) {
+    var errors = xhr.responseJSON.errors || [];
+    if (xhr.status == 200) return false;
+    if (errors.length) return errors;
+    return [{message: "Ooops! Try again later. (" + xhr.status + ")", path: xhr.url}];
   };
 
   var urlWithQueryString = function(url, query) {
@@ -34,8 +36,7 @@
       xhr.responseJSON = xhr.responseText.match(/^[\[\{]/) ? JSON.parse(xhr.responseText) : {};
       if (window.DEBUG) console.log(['GET', xhr.url, xhr.status, xhr.responseJSON]);
       if (xhr.status == 200 && cache[xhr.url]) cache[xhr.url] = xhr;
-      handlerError.call(this, xhr);
-      cb.call(this, xhr.status == 200 ? '' : xhr.status, xhr);
+      cb.call(this, err(xhr), xhr);
     }.bind(this);
     xhr.send(null);
   };
@@ -48,8 +49,7 @@
       if (xhr.readyState != 4) return;
       xhr.responseJSON = xhr.responseText.match(/^[\[\{]/) ? JSON.parse(xhr.responseText) : {};
       if (window.DEBUG) console.log(['POST', xhr.url, xhr.status, xhr.responseJSON]);
-      handlerError.call(this, xhr);
-      cb.call(this, xhr.status == 200 ? '' : xhr.status, xhr);
+      cb.call(this, err(xhr), xhr);
     }.bind(this);
     xhr.send(typeof data == 'object' ? JSON.stringify(data) : data);
   };

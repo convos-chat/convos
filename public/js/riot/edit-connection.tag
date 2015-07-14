@@ -37,6 +37,7 @@
   mixin.modal(this);
 
   this.connection = opts.connection;
+  this.convos = opts.convos;
 
   submitForm(e) {
     var url = parseURL(this.connection.url());
@@ -51,16 +52,15 @@
       },
       function(err, xhr) {
         this.httpInvalidInput(xhr.responseJSON);
-        convos.render(this);
         if (!err) return;
-        convos.connection(false, false, xhr.responseJSON);
+        this.convos.connection(false, false, xhr.responseJSON);
         this.openModal(opts.next || 'edit-connection', xhr.responseJSON);
       }
     );
   }
 
   this.on('mount', function() {
-    Materialize.updateTextFields();
+    this.updateTextFields();
     setTimeout(function() { this.server.focus(); }.bind(this), 300);
   });
 

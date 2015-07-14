@@ -29,6 +29,8 @@
   mixin.form(this);
   mixin.http(this);
 
+  this.convos = opts.convos;
+
   submitForm(e) {
     localStorage.setItem('email', this.email.value);
 
@@ -43,15 +45,14 @@
       apiUrl('/user'),
       {avatar: this.avatar.value, password: this.password.value},
       function(err, xhr) {
-        this.httpInvalidInput(xhr.responseJSON);
-        if (!err) convos.save(xhr.responseJSON);
-        convos.render(this);
+        if (err) return this.httpInvalidInput(err);
+        this.convos.save(xhr.responseJSON);
       }
     );
   }
 
   this.on('mount', function() {
-    Materialize.updateTextFields();
+    this.updateTextFields();
     setTimeout(function() { this.email.focus(); }.bind(this), 300);
   });
 

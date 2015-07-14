@@ -18,6 +18,7 @@
   mixin.modal(this);
 
   this.connections = [];
+  this.convos = opts.convos;
 
   editConnection(e) {
     this.openModal(e.currentTarget.href.split('#')[1], e.item ? {connection: e.item} : {next: 'add-conversation'});
@@ -28,7 +29,7 @@
   }
 
   this.on('mount', function() {
-    convos.connections(function(err, connections) { this.connections = connections; this.update(); }.bind(this));
+    this.convos.connections(function(err, connections) { this.connections = connections; this.update(); }.bind(this));
   });
 
   </script>
