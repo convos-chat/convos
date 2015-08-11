@@ -65,6 +65,7 @@
                   <li><a href="badges.html">Badges</a></li>
                   <li><a href="buttons.html">Buttons</a></li>
                   <li><a href="cards.html">Cards</a></li>
+                  <li><a href="chips.html">Chips</a></li>
                   <li><a href="collections.html">Collections</a></li>
                   <li><a href="footer.html">Footer</a></li>
                   <li class="active"><a href="forms.html">Forms</a></li>
@@ -302,6 +303,8 @@
         <h2 class="header">Textarea</h2>
         <p>Textareas allow larger expandable user input. The border should light up simply and clearly indicating which field the user is currently editing. You must have a <code class="language-markup">.input-field</code> div wrapping your input and label. This helps our jQuery animate the label. This is only used in our Input and Textarea form elements.</p>
         <p><strong>Textareas will auto resize to the text inside.</strong></p>
+
+
         <div class="row">
           <form class="col s12">
             <div class="row">
@@ -323,7 +326,13 @@
       &lt;/div>
     &lt;/form>
   &lt;/div>
-        </code></pre><br>
+        </code></pre>
+        <p>advanced note: When dynamically changing the value of a textarea with methods like jQuery's <code class="language-markup">.val()</code>, you must trigger an autoresize on it afterwords because .val() does not automatically trigger the events we've binded to the textarea. </p>
+        <pre><code class="language-javascript">
+  $('#textarea1').val('New Text');
+  $('#textarea1').trigger('autoresize');
+        </code></pre>
+        <br>
 
         <h4>Icon Prefixes</h4>
         <p>You can add an icon prefix to make the form input label even more clear. Just add an icon with the class <code class="language-markup">prefix</code> before the input and label.</p><br>
@@ -344,7 +353,7 @@
     &lt;form class="col s12">
       &lt;div class="row">
         &lt;div class="input-field col s6">
-          &lt;i class="material-icons prefix">mode_edit</i>
+          &lt;i class="material-icons prefix">mode_edit&lt;/i>
           &lt;textarea id="icon_prefix2" class="materialize-textarea">&lt;/textarea>
           &lt;label for="icon_prefix2">First Name&lt;/label>
         &lt;/div>
@@ -647,10 +656,38 @@
         <pre><code class="language-markup">
   &lt;form action="#">
     &lt;div class="file-field input-field">
-      &lt;input class="file-path validate" type="text"/>
       &lt;div class="btn">
         &lt;span>File&lt;/span>
-        &lt;input type="file" />
+        &lt;input type="file">
+      &lt;/div>
+      &lt;div class="file-path-wrapper">
+        &lt;input class="file-path validate" type="text">
+      &lt;/div>
+    &lt;/div>
+  &lt;/form>
+        </code></pre>
+
+        <p>You can also use the <code class="language-markup">multiple</code> attribute to allow multiple file uploads. </p>
+        <form action="#">
+          <div class="file-field input-field">
+            <div class="btn">
+              <span>File</span>
+              <input type="file" multiple>
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Upload one or more files">
+            </div>
+          </div>
+        </form>
+        <pre><code class="language-markup">
+  &lt;form action="#">
+    &lt;div class="file-field input-field">
+      &lt;div class="btn">
+        &lt;span>File&lt;/span>
+        &lt;input type="file" multiple>
+      &lt;/div>
+      &lt;div class="file-path-wrapper">
+        &lt;input class="file-path validate" type="text" placeholder="Upload one or more files">
       &lt;/div>
     &lt;/div>
   &lt;/form>
