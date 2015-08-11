@@ -5,35 +5,14 @@
   Router.add(/^register$/, 'user-register');
   Router.add(/.?/,         'user-login');
 
-  jQuery.timeago.settings.strings = {
-    prefixAgo: null,
-    prefixFromNow: null,
-    suffixAgo: 'ago',
-    suffixFromNow: 'from now',
-    seconds: 'now',
-    minute: 'a minute',
-    minutes: '%d minutes',
-    hour: 'an hour',
-    hours: '%d hours',
-    day: 'a day',
-    days: '%d days',
-    month: 'a month',
-    months: '%d months',
-    year: 'a year',
-    years: '%d years',
-    wordSeparator: ' ',
-    numbers: []
-  };
-
   var loggedIn = false;
-  var convos = new Convos.User();
   var convosFailedToload = function(err) {
     clearTimeout(convosFailedToload.tid);
     $('.loading-convos h5').html('Oh noes! Convos failed to load :(').attr('class', 'red-text');
     $('.loading-convos p').not('.rendered').html(err || 'Maybe you have a browser from last century?').attr('class', 'red-text');
   };
 
-  Router.defaults.convos = convos;
+  window.convos = new Convos.User();
   convosFailedToload.tid = setTimeout(convosFailedToload, 5000);
 
   Router.on('afterDispatch', function() {
@@ -56,12 +35,8 @@
   });
 
   convos.load(function(err) {
-    if (err == 401) {
-      $('.loading-convos').remove();
-      Router.route('login');
-    }
-    else if (err) {
-      convosFailedToload('Could not get user data. (' + err + ')');
-    }
+    var path = Router.url().path;
+    $('.loading-convos').remove();
+    if (err) Router.route(path == 'register' ? path : 'login', {errors: err});
   });
 })(jQuery);

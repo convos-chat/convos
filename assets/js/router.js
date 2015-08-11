@@ -4,12 +4,12 @@ var Router = {
     return Router.url().path.match(q);
   },
   add: function(re, fn) {
-    var handler = typeof fn == 'function' ? fn : function() { Router.render(fn, Router.defaults); };
+    var handler = typeof fn == 'function' ? fn : function() { Router.render(fn, {}); };
     Router.routes.push({ re: re, handler: handler});
     return Router;
   },
-  defaults: {},
   dispatch: function() {
+    if (Router._lock) return;
     var url = Router.url();
     for (var i = 0; i < Router.routes.length; i++) {
       var match = url.path.match(Router.routes[i].re);
@@ -18,7 +18,7 @@ var Router = {
       Router.routes[i].handler.call({}, match, url.query);
       break;
     }
-    Router.trigger('afterDispatch');
+    Router.trigger('after_dispatch');
   },
   render: function(riotTag, opts) {
     var tag, domNode = document.getElementById('app');
@@ -36,12 +36,14 @@ var Router = {
   },
   route: function(path) {
     if (!path) return Router.dispatch();
+    Router._lock = true;
     window.location = window.location.href.split('#')[0] + '#' + path;
+    delete Router._lock;
+    Router.dispatch();
   },
   start: function() {
     riot.route.stop();
     window.addEventListener ? window.addEventListener('hashchange', Router.dispatch, false) : window.attachEvent('onhashchange', Router.dispatch);
-    Router.dispatch();
   },
   url: function(url) {
     if (!url) url = (location.href.match(/.*?\#(.*)/) || ['', ''])[1];

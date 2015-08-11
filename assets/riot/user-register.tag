@@ -43,12 +43,12 @@
   mixin.form(this);
   mixin.http(this);
 
-  this.convos = opts.convos;
+  this.convos = window.convos;
 
   submitForm(e) {
-    localStorage.setItem('email', this.email.value);
+    localStorage.setItem('email', this.form_email.value);
 
-    if (this.password.value != this.password_again.value) {
+    if (this.form_password.value != this.form_password_again.value) {
       $('[id^="form_password"]').addClass('invalid');
       this.formError = 'Passwords does not match';
       return;
@@ -57,7 +57,7 @@
     this.formError = ''; // clear error on post
     this.httpPost(
       apiUrl('/user/register'),
-      {email: this.email.value, password: this.password.value},
+      {email: this.form_email.value, password: this.form_poassword.value},
       function(err, xhr) {
         this.httpInvalidInput(xhr.responseJSON);
         if (!err) this.convos.save(xhr.responseJSON);
@@ -67,8 +67,8 @@
 
   this.on('mount', function() {
     if (this.convos.email()) return Router.route('chat');
-    this.email.value = localStorage.getItem('email');
-    this.email.focus();
+    this.form_email.value = localStorage.getItem('email');
+    this.form_email.focus();
   });
 
   </script>

@@ -52,7 +52,7 @@
   mixin.http(this);
   mixin.modal(this);
 
-  this.convos = opts.convos;
+  this.convos = window.convos;
   this.defaultServer = 'localhost'; // 'chat.freenode.net:6697';
 
   submitForm(e) {

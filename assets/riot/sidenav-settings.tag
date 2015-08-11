@@ -18,7 +18,7 @@
   mixin.modal(this);
 
   this.connections = [];
-  this.convos = opts.convos;
+  this.convos = window.convos;
 
   editConnection(e) {
     this.openModal(e.currentTarget.href.split('#')[1], e.item ? {connection: e.item} : {next: 'add-conversation'});

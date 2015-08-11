@@ -14,7 +14,7 @@
   mixin.modal(this);
 
   this.conversations = [];
-  this.convos = opts.convos;
+  this.convos = window.convos;
 
   addConversation(e) {
     this.convos.connections(function(err, connections) {
