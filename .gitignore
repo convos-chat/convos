@@ -15,5 +15,5 @@
 /pm_to_blib
 .perl-version
 public/packed/
-public/sass/.sass-cache/
+assets/sass/.sass-cache/
 node_modules/

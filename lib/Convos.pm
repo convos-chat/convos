@@ -150,7 +150,7 @@ sub _config {
   $config->{plugins} ||= {};
   $config->{plugins}{$_} = $config for split /:/, +($ENV{CONVOS_PLUGINS} // '');
   $config->{secure_cookies} ||= $ENV{CONVOS_SECURE_COOKIES} || 0;
-  $config->{swagger_file} ||= $self->home->rel_file('public/api.json');
+  $config->{swagger_file} ||= $self->home->rel_file('public/convos-api.json');
   $config;
 }
 
@@ -163,45 +163,40 @@ sub _home_relative_to_lib {
 }
 
 sub _setup_assets {
-  my $self       = shift;
-  my @javascript = qw(
-    http://code.jquery.com/jquery-1.11.3.min.js
-    /js/riot.min.js
-    /js/storage.js
-    /js/url.js
-    /js/window.js
-    /js/router.js
-    /js/jquery.autocomplete.js
-    /js/jquery.disableouterscroll.js
-    /js/materialize/hammer.min.js
-    /js/materialize/jquery.hammer.js
-    /js/materialize/velocity.min.js
-    /js/materialize/waves.js
-    /js/materialize/jquery.easing.1.3.js
-    /js/materialize/jquery.timeago.min.js
-    /js/materialize/global.js
-    /js/materialize/animation.js
-    /js/materialize/buttons.js
-    /js/materialize/dropdown.js
-    /js/materialize/forms.js
-    /js/materialize/leanModal.js
-    /js/materialize/tooltip.js
-    /js/materialize/animation.js
-    /js/mixins/base.js
-    /js/mixins/form.js
-    /js/mixins/http.js
-    /js/mixins/modal.js
-    /js/core/connection.js
-    /js/core/conversation-room.js
-    /js/core/conversation-direct.js
-    /js/core/user.js
-  );
+  my $self = shift;
 
-  push @javascript, map {"/js/riot/$_"} sort { $a cmp $b } @{$self->home->list_files('public/js/riot')};
-
-  $self->plugin('riotjs');
+  $self->plugin('AssetPack' => {proxy => 1, source_paths => [qw( assets vendor )]});
+  $self->plugin('Riotjs');
   $self->asset('convos.css' => 'sass/main.scss');
-  $self->asset('convos.js' => @javascript, '/js/main.js');
+  $self->asset(
+    'convos.js' => qw(
+      http://code.jquery.com/jquery-1.11.3.min.js
+      /js/riot.min.js
+      /js/storage.js
+      /js/url.js
+      /js/window.js
+      /js/router.js
+      /js/jquery.*.js
+      /materialize/js/hammer.min.js
+      /materialize/js/jquery.hammer.js
+      /materialize/js/velocity.min.js
+      /materialize/js/waves.js
+      /materialize/js/jquery.easing.1.3.js
+      /materialize/js/jquery.timeago.min.js
+      /materialize/js/global.js
+      /materialize/js/animation.js
+      /materialize/js/buttons.js
+      /materialize/js/dropdown.js
+      /materialize/js/forms.js
+      /materialize/js/leanModal.js
+      /materialize/js/tooltip.js
+      /materialize/js/animation.js
+      /js/mixins/*.js
+      /js/core/*.js
+      /riot/*.tag
+      /js/main.js
+      )
+  );
 }
 
 sub _setup_secrets {
