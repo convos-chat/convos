@@ -1,17 +1,23 @@
 (window['mixin'] = window['mixin'] || {})['base'] = function(proto, attributes) {
 
+  proto._attrs = {};
+
   // define attribute getter/setter
   Object.keys(attributes || {}).forEach(function(n, i) {
     var builder = attributes[n];
     var name = n;
+    proto._attrs[name] = true;
     proto[name] = function(value) {
       if (arguments.length) {
         this['_' + name] = value;
         if (this.trigger) this.trigger(name, value);
         return this;
       }
+      else if(this.hasOwnProperty('_' + name)) {
+        return this['_' + name];
+      }
       else {
-        return this.hasOwnProperty('_' + name) ? this['_' + name] : builder.call(this);
+        return this['_' + name] = builder.call(this);
       }
     };
   });
@@ -23,10 +29,13 @@
     return value;
   };
 
-  // save attributes to object
-  proto.save = function(attrs) {
-    Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
-    if (this.trigger) this.trigger('updated');
+  // update attributes to object
+  proto.update = function(attrs) {
+    var self = this;
+    Object.keys(attrs).forEach(function(k) {
+      return proto._attrs[k] ? self[k](attrs[k]) : console.log(self, ' missing attribute for ' + k);
+    });
+    if (this.trigger) this.trigger('updated', attrs);
     return this;
   };
 
@@ -41,6 +50,16 @@
       cb.apply(this, Array.prototype.slice.call(arguments, 1));
     }
     return this;
+  };
+
+  proto.DESTROY = function() {
+    for (k in this) {
+      if (!this.hasOwnProperty(k)) continue;
+      else if (typeof this[k] != 'object') continue;
+      else if (typeof this[k]['close'] == 'function') this[k].close();
+      else if (typeof this[k]['finish'] == 'function') this[k].finish();
+      else if (typeof this[k]['DESTROY'] == 'function') this[k].DESTROY();
+    }
   };
 
   return proto;

@@ -34,7 +34,7 @@
   this.conversations = [];
   this.modalBottomSheetShow = false;
   this.sidenav = localStorage.getItem('sidenav') || 'conversations';
-  this.user = this.convos || opts.convos;
+  this.user = this.convos || window.convos;
 
   activeSidebar(name) {
     return name == this.sidenav;

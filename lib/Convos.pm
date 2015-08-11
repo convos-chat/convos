@@ -171,18 +171,14 @@ sub _setup_assets {
   $self->asset(
     'convos.js' => qw(
       http://code.jquery.com/jquery-1.11.3.min.js
-      /js/riot.min.js
       /js/storage.js
       /js/url.js
       /js/window.js
-      /js/router.js
+      /js/riot.min.js
       /js/jquery.*.js
-      /materialize/js/hammer.min.js
-      /materialize/js/jquery.hammer.js
       /materialize/js/velocity.min.js
       /materialize/js/waves.js
       /materialize/js/jquery.easing.1.3.js
-      /materialize/js/jquery.timeago.min.js
       /materialize/js/global.js
       /materialize/js/animation.js
       /materialize/js/buttons.js
@@ -191,6 +187,7 @@ sub _setup_assets {
       /materialize/js/leanModal.js
       /materialize/js/tooltip.js
       /materialize/js/animation.js
+      /js/router.js
       /js/mixins/*.js
       /js/core/*.js
       /riot/*.tag

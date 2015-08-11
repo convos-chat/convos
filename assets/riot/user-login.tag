@@ -1,6 +1,6 @@
 <user-login>
   <div class="row">
-    <form onsubmit={submitForm} class="col s10 offset-s1 m6 offset-m3 z-depth-1">
+    <form onsubmit={login} class="col s10 offset-s1 m6 offset-m3 z-depth-1">
       <div class="row">
         <div class="col s12">
           <h2>Convos</h2>
@@ -40,14 +40,14 @@
   mixin.form(this);
   mixin.http(this);
 
-  this.convos = opts.convos;
+  this.convos = window.convos;
 
-  submitForm(e) {
+  login(e) {
     this.formError = ''; // clear error on post
-    localStorage.setItem('email', this.email.value);
+    localStorage.setItem('email', this.form_email.value);
     this.httpPost(
       apiUrl('/user/login'),
-      {email: this.email.value, password: this.password.value},
+      {email: this.form_email.value, password: this.form_password.value},
       function(err, xhr) {
         if (!err) return this.convos.save(xhr.responseJSON);
         err.forEach(function(i) { if (i.path == '/') i.path = '/email' });
@@ -58,8 +58,8 @@
 
   this.on('mount', function() {
     if (this.convos.email()) return Router.route('chat');
-    this.email.value = localStorage.getItem('email');
-    this.email.focus();
+    this.form_email.value = localStorage.getItem('email');
+    this.form_email.focus();
   });
 
   </script>

@@ -37,7 +37,7 @@
   mixin.modal(this);
 
   this.connection = opts.connection;
-  this.convos = opts.convos;
+  this.convos = window.convos;
 
   submitForm(e) {
     var url = parseURL(this.connection.url());

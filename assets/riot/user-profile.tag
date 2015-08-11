@@ -29,7 +29,7 @@
   mixin.form(this);
   mixin.http(this);
 
-  this.convos = opts.convos;
+  this.convos = window.convos;
 
   submitForm(e) {
     localStorage.setItem('email', this.email.value);
