@@ -194,6 +194,8 @@ sub _setup_assets {
       /js/main.js
       )
   );
+
+  $self->asset->purge if -d 'local'; # used to purge old assets while developing
 }
 
 sub _setup_secrets {
