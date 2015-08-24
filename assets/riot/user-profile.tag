@@ -2,7 +2,7 @@
   <form onsubmit={submitForm} method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">
-        <h4 class="green-text text-darken-3">Edit profile for {convos.email()}</h4>
+        <h4 class="green-text text-darken-3">Edit profile for {user.email()}</h4>
       </div>
     </div>
     <div class="row">
@@ -29,7 +29,7 @@
   mixin.form(this);
   mixin.http(this);
 
-  this.convos = window.convos;
+  this.user = opts.user;
 
   submitForm(e) {
     localStorage.setItem('email', this.email.value);
@@ -45,8 +45,8 @@
       apiUrl('/user'),
       {avatar: this.avatar.value, password: this.password.value},
       function(err, xhr) {
-        if (err) return this.httpInvalidInput(err);
-        this.convos.save(xhr.responseJSON);
+        if (err) return this.formInvalidInput(err);
+        this.user.save(xhr.responseJSON);
       }
     );
   }

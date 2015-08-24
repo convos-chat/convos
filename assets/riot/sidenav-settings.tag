@@ -17,19 +17,19 @@
 
   mixin.modal(this);
 
+  this.user = opts.user;
   this.connections = [];
-  this.convos = window.convos;
 
   editConnection(e) {
     this.openModal(e.currentTarget.href.split('#')[1], e.item ? {connection: e.item} : {next: 'add-conversation'});
   }
 
   editProfile(e) {
-    this.openModal('user-profile', {});
+    this.openModal('user-profile', {user: this.user});
   }
 
   this.on('mount', function() {
-    this.convos.connections(function(err, connections) { this.connections = connections; this.update(); }.bind(this));
+    this.user.connections(function(err, connections) { this.connections = connections; this.update(); }.bind(this));
   });
 
   </script>

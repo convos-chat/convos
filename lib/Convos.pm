@@ -172,9 +172,9 @@ sub _setup_assets {
     'convos.js' => qw(
       http://code.jquery.com/jquery-1.11.3.min.js
       /js/storage.js
-      /js/url.js
       /js/window.js
       /js/riot.min.js
+      /js/riot-url.js
       /js/jquery.*.js
       /materialize/js/velocity.min.js
       /materialize/js/waves.js
@@ -187,7 +187,6 @@ sub _setup_assets {
       /materialize/js/leanModal.js
       /materialize/js/tooltip.js
       /materialize/js/animation.js
-      /js/router.js
       /js/mixins/*.js
       /js/core/*.js
       /riot/*.tag
@@ -195,7 +194,7 @@ sub _setup_assets {
       )
   );
 
-  $self->asset->purge if -d 'local'; # used to purge old assets while developing
+  $self->asset->purge if -d 'local';    # used to purge old assets while developing
 }
 
 sub _setup_secrets {
@@ -234,18 +233,12 @@ __DATA__
     <title>Convos</title>
     %= asset 'convos.css';
     %= javascript begin
-      window.Convos = {};
-      window.apiUrl = function(path){return ['<%= $self->url_for('/1.0')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
-      window.urlFor = function(path){return ['<%= $self->url_for('/')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
+      window.Convos={loadTid:setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your web administrator.</h4>';app.className='valign-wrapper'},5000)};
+      window.apiUrl=function(path){return ['<%= $self->url_for('/1.0')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
+      window.urlFor=function(path){return ['<%= $self->url_for('/')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
     % end
   </head>
   <body>
-    <div class="loading-convos valign-wrapper">
-      <div class="valign center">
-        <h5>Loading <a href="https://convos.by">Convos</a>...</h5>
-        <p class="grey-text">This should only take a few seconds.</p>
-      </div>
-    </div>
     <div id="app"></div>
     <div id="modal_bottom_sheet" class="modal bottom-sheet"></div>
     %= asset 'convos.js';

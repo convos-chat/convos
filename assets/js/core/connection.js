@@ -1,6 +1,6 @@
 (function(window) {
   Convos.Connection = function(attrs) {
-    if (attrs) this.save(attrs);
+    if (attrs) this.update(attrs);
     riot.observable(this);
     this._method = 'httpCachedGet';
     this.state = 'disconnected';
@@ -31,7 +31,7 @@
   proto.load = function(cb) {
     this[this._method](apiUrl('/connection'), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
-      this.save(xhr.responseJSON);
+      this.update(xhr.responseJSON);
       cb.call(this, '');
     });
     return this.tap('_method', 'httpCachedGet');
@@ -53,7 +53,7 @@
     }
     return this.httpPost(apiUrl(['connection', this.protocol(), this.name()]), attrs, function(err, xhr) {
       if (err) return cb.call(this, err);
-      this.save(attrs);
+      this.update(attrs);
       cb.call(this, err, xhr);
     });
   };

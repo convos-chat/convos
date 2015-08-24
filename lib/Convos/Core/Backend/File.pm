@@ -292,7 +292,7 @@ sub _pos {
 sub _setup {
   my $self = shift;
 
-  $self->home($self->_build_home($self->home)) unless ref $self->home;
+  $self->home($self->_build_home($self->home)) unless ref $self->{home};
 
   $self->on(
     connection => sub {
