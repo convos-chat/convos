@@ -1,11 +1,10 @@
 (window['mixin'] = window['mixin'] || {})['form'] = function(proto) {
   proto.submitting = false;
 
-  proto.httpInvalidInput = function(err) {
-    var self = this;
-    err.forEach(function(err) {
-      var name = err.path.replace(/\//g, '') || '';
-      var field = self.root.querySelector('input[name="' + name + '"]');
+  proto.formInvalidInput = function(err) {
+    (err || []).forEach(function(err) {
+      var name = err.path.replace(/\/data\//g, '') || '';
+      var field = this.root.querySelector('input[name="' + name + '"]');
       if (field) {
         field.setAttribute('title', err.message);
         field.classList.add('invalid');
@@ -15,6 +14,7 @@
         this.formError = err.message;
       }
     }.bind(this));
+    return this;
   };
 
   proto.fieldHasInvalidValue = function(field) {

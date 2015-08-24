@@ -13,11 +13,11 @@
 
   mixin.modal(this);
 
+  this.user = opts.user;
   this.conversations = [];
-  this.convos = window.convos;
 
   addConversation(e) {
-    this.convos.connections(function(err, connections) {
+    this.user.connections(function(err, connections) {
       if (connections.length) {
         this.openModal('add-conversation', {connections: connections});
       }
@@ -32,8 +32,8 @@
   }
 
   this.on('mount', function() {
-    this.convos.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
-    this.convos.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
+    this.user.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
+    this.user.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
   });
 
   </script>

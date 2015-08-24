@@ -1,6 +1,6 @@
 (function(window) {
   Convos.ConversationDirect = function(attrs) {
-    if (attrs) this.save(attrs);
+    if (attrs) this.update(attrs);
     riot.observable(this);
     this._method = 'httpCachedGet';
   };

@@ -13,7 +13,7 @@
     if (xhr.status == 200) return false;
     if (errors.length) return errors;
     if (!xhr.status) xhr.status = 'No response';
-    return [{message: "Ooops! Try again later. (" + xhr.status + ")", path: xhr.url}];
+    return [{message: "Something very bad happened! Try again later. (" + xhr.status + ")", path: xhr.url}];
   };
 
   window.urlWithQueryString = window.urlWithQueryString || function(url, query) {
@@ -44,7 +44,7 @@
     xhr.onreadystatechange = function() {
       if (xhr.readyState != 4) return;
       xhr._ts = new Date().getTime() / 1000;
-      xhr.responseJSON = xhr.responseText.indexOf('{') == 0 ? JSON.parse(xhr.responseText) : {};
+      xhr.responseJSON = xhr.responseText.match(/^[\{\[]/) ? JSON.parse(xhr.responseText) : {};
       if (window.DEBUG) console.log(['GET', xhr.url, xhr.status, xhr.responseJSON || xhr.responseText]);
       if (xhr.status == 200) cache[xhr.url] = xhr;
       cb.call(this, makeErr(xhr), xhr);
@@ -62,7 +62,7 @@
     xhr.open('POST', xhr.url);
     xhr.onreadystatechange = function() {
       if (xhr.readyState != 4) return;
-      xhr.responseJSON = xhr.responseText.indexOf('{') == 0 ? JSON.parse(xhr.responseText) : {};
+      xhr.responseJSON = xhr.responseText.match(/^[\{\[]/) ? JSON.parse(xhr.responseText) : {};
       if (window.DEBUG) console.log(['POST', xhr.url, xhr.status, xhr.responseJSON || xhr.responseText]);
       cb.call(this, makeErr(xhr), xhr);
     }.bind(this);

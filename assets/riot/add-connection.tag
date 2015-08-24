@@ -52,7 +52,7 @@
   mixin.http(this);
   mixin.modal(this);
 
-  this.convos = window.convos;
+  this.user = opts.user;
   this.defaultServer = 'localhost'; // 'chat.freenode.net:6697';
 
   submitForm(e) {
@@ -60,15 +60,15 @@
     this.httpPost(
       apiUrl('/connection'),
       {
-        password: this.password.value,
-        protocol: this.protocol.value,
-        server:   this.server.value,
-        username: this.username.value
+        password: this.form_password.value,
+        protocol: this.form_protocol.value,
+        server:   this.form_server.value,
+        username: this.form_username.value
       },
       function(err, xhr) {
-        if (err) return this.httpInvalidInput(err);
+        if (err) return this.formInvalidInput(err);
         if (!err) return;
-        this.convos.connection(false, false, xhr.responseJSON);
+        this.user.connection(false, false, xhr.responseJSON);
         this.openModal(opts.next || 'edit-connection', xhr.responseJSON);
       }
     );

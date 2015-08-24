@@ -6,10 +6,10 @@
       <li class={active: activeSidebar('conversations')}><a href="#sidenav:conversations" onclick={changeSidebar}><i class="material-icons">groups</i></a></li>
       <li class={active: activeSidebar('settings')}><a href="#sidenav:settings" onclick={changeSidebar}><i class="material-icons">settings</i></a></li>
     </ul>
-    <sidenav-search show={activeSidebar('search')}></sidenav-search>
-    <sidenav-settings show={activeSidebar('settings')}></sidenav-settings>
-    <sidenav-notifications show={activeSidebar('notifications')}></sidenav-notifications>
-    <sidenav-conversations show={activeSidebar('conversations')}></sidenav-conversations>
+    <sidenav-search user={user} show={activeSidebar('search')}></sidenav-search>
+    <sidenav-settings user={user} show={activeSidebar('settings')}></sidenav-settings>
+    <sidenav-notifications user={user} show={activeSidebar('notifications')}></sidenav-notifications>
+    <sidenav-conversations user={user} show={activeSidebar('conversations')}></sidenav-conversations>
   </nav>
   <main>
     <div each={c, i in conversations} messages={c.messages} show={i == parent.activeConversation}>
@@ -20,7 +20,7 @@
         <h5>No conversations</h5>
         <p class="grey-text">
           <!-- TODO: Highlight the item in the sidebar when the text below is clicked -->
-          Click the "<i class="material-icons">add_circle</i> Add conversation" link in the sidebar to find someone to talk to.
+          Click the "Create conversation" link in the sidebar to find someone to talk to.
         </p>
       </div>
     </div>
@@ -34,7 +34,7 @@
   this.conversations = [];
   this.modalBottomSheetShow = false;
   this.sidenav = localStorage.getItem('sidenav') || 'conversations';
-  this.user = this.convos || window.convos;
+  this.user = opts.user;
 
   activeSidebar(name) {
     return name == this.sidenav;
@@ -59,13 +59,13 @@
   }
 
   this.on('mount', function() {
-    if (!this.user.email()) return Router.route('login');
+    if (!this.user.email()) return this.parent.update({render:'login'});
     this.user.conversations(function(err, conversations) { this.conversations = conversations; this.loadMessages(); }.bind(this));
     this.user.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.loadMessages(); }.bind(this));
   });
 
   this.on('update', function() {
-    var p = Router.url().path.replace(/^chat/, '/' + this.user.email());
+    var p = riot.url.path.replace(/^chat/, '/' + this.user.email());
     this.conversations.forEach(function(c, i) { if (c.path() == p) this.activeConversation = i; }.bind(this));
   });
 

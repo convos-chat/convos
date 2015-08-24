@@ -1,11 +1,5 @@
-body.user-login,
-body.user-register {
-  background-color: darken($body-bg, 10%);
+.not-logged-in-wrapper {
   padding-top: 3em;
-
-  form {
-    background: $body-bg;
-  }
 
   h2 {
     text-indent: -10000px;
@@ -13,7 +7,8 @@ body.user-register {
   }
 
   .about {
-    &, a { color: color('grey', 'darken-1'); }
-    padding-top: 20px;
+    &, a { @extend .grey-text, .text-lighten-1; }
+    a:hover { @extend .grey-text };
+    padding-top: 2em;
   }
 }

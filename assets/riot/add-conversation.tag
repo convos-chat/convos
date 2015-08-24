@@ -67,7 +67,7 @@
 
   submitForm(e) {
     this.formError = ''; // clear error on post
-    this.selectedConnection().joinConversation(this.name.value, function(err) {
+    this.selectedConnection().joinConversation(this.form_name.value, function(err) {
       if (!err) return this.closeModal();
       this.formError = err;
       this.update();
@@ -75,7 +75,7 @@
   }
 
   this.on('mount', function() {
-    setTimeout(function() { this.name.focus(); }.bind(this), 300);
+    setTimeout(function() { this.form_name.focus(); }.bind(this), 300);
     this.updateTextFields();
     $('input[name="name"]', this.root).autocomplete();
     $('select', this.root).material_select();

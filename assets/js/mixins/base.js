@@ -33,7 +33,7 @@
   proto.update = function(attrs) {
     var self = this;
     Object.keys(attrs).forEach(function(k) {
-      return proto._attrs[k] ? self[k](attrs[k]) : console.log(self, ' missing attribute for ' + k);
+      return proto._attrs[k] ? self[k](attrs[k]) : 0; // console.log(self, ' missing attribute for ' + k);
     });
     if (this.trigger) this.trigger('updated', attrs);
     return this;
@@ -53,6 +53,7 @@
   };
 
   proto.DESTROY = function() {
+    if (this.trigger) this.trigger('DESTROY');
     for (k in this) {
       if (!this.hasOwnProperty(k)) continue;
       else if (typeof this[k] != 'object') continue;

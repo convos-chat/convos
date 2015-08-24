@@ -37,7 +37,7 @@
   mixin.modal(this);
 
   this.connection = opts.connection;
-  this.convos = window.convos;
+  this.user = opts.user;
 
   submitForm(e) {
     var url = parseURL(this.connection.url());
@@ -51,9 +51,9 @@
         username: this.username.value
       },
       function(err, xhr) {
-        this.httpInvalidInput(xhr.responseJSON);
+        this.formInvalidInput(xhr.responseJSON);
         if (!err) return;
-        this.convos.connection(false, false, xhr.responseJSON);
+        this.user.connection(false, false, xhr.responseJSON);
         this.openModal(opts.next || 'edit-connection', xhr.responseJSON);
       }
     );

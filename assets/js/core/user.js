@@ -1,6 +1,6 @@
 (function(window) {
   Convos.User = function(attrs) {
-    if (attrs) this.save(attrs);
+    if (attrs) this.update(attrs);
     riot.observable(this);
     this._conversations = {};
     this._connections = {};
@@ -31,7 +31,7 @@
     }
     if (!this._connections[protocol]) this._connections[protocol] = {};
     if (!attrs) return this._connections[protocol][name];
-    if (this._connections[protocol][name]) return this._connections[protocol][name].save(attrs);
+    if (this._connections[protocol][name]) return this._connections[protocol][name].update(attrs);
     this._connections[protocol][name] = new Convos.Connection(attrs).name(name).protocol(protocol).user(this);
     this.trigger('connection', this._connections[protocol][name]);
     return this._connections[protocol][name];
@@ -54,7 +54,7 @@
   proto.conversation = function(id, attrs) {
     if (!id && typeof attrs == 'object') id = attrs.id;
     if (!attrs) return this._conversations[id];
-    if (this._conversations[id]) return this._conversations[id].save(attrs);
+    if (this._conversations[id]) return this._conversations[id].update(attrs);
     this._conversations[id] = new Convos[attrs.users ? 'ConversationRoom' : 'ConversationDirect'](attrs);
     this.trigger('conversation', this._conversations[id]);
     return this._conversations[id];
@@ -75,7 +75,7 @@
   proto.load = function(cb) {
     this[this._method](apiUrl('/user'), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
-      this.save(xhr.responseJSON);
+      this.update(xhr.responseJSON);
       cb.call(this, '');
     });
     return this.tap('_method', 'httpCachedGet');
@@ -86,7 +86,7 @@
     if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
     return this.httpPost(apiUrl('/user'), attrs, function(err, xhr) {
       if (err) return cb.call(this, err);
-      this.save(data);
+      this.update(data);
       cb.call(this, err);
     });
   };
