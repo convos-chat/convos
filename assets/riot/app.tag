@@ -4,22 +4,28 @@
   <user-register user={user} if={render == 'register'}/>
   <script>
 
+  var tag = this;
+
   this.errors = opts.errors;
   this.render = riot.url.path.split('/')[0] || 'chat';
   this.user = opts.user;
+  this.user.on('email', function(v) { tag.update({render: v ? 'chat' : 'login'}); });
 
-  var tag = this;
-
-  if (this.render == 'chat' && opts.errors.length) {
-    this.render = 'login';
+  logout() {
+    this.user.logout(function(err) {
+      tag.update({errors: err || [{message: 'Logged out.'}], render: 'login'});
+    });
   }
 
-  riot.url.on('update', function(url) {
-    var current = riot.url.path.split('/')[0];
+  renderView(url) {
+    var current = url.path.split('/')[0];
 
-    if (current != tag.render && (!current || current.match(/^(login|register)/))) {
+    if (current == 'logout') {
+      tag.logout();
+    }
+    else if (current != tag.render && (!current || current.match(/^(login|register)/))) {
       if (tag.user.email()) return riot.route('chat');
-      tag.update({render: current || 'login'});
+      tag.update({errors: [], render: current || 'login'});
     }
 
     $('select').material_select();
@@ -28,6 +34,9 @@
       $self.attr('data-tooltip', $self.attr('title') || $self.attr('placeholder')).removeAttr('title');
     }).filter('[data-tooltip]').tooltip();
   });
+
+  riot.url.on('update', function(url) { tag.renderView(url) });
+  this.renderView(riot.url);
 
   </script>
 </app>

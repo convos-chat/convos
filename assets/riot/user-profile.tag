@@ -14,8 +14,8 @@
         <input placeholder="Repeat password" id="form_password_again" type="password" class="validate">
       </div>
     </div>
-    <div class="row" if={formError}>
-      <div class="col s12"><div class="alert">{formError}</div></div>
+    <div class="row" if={errors.length}>
+      <div class="col s12"><div class="alert">{errors[0].message}</div></div>
     </div>
     <div class="row">
       <div class="input-field col s12">
@@ -36,11 +36,11 @@
 
     if (this.password.value != this.password_again.value) {
       $('[id^="form_password"]').addClass('invalid');
-      this.formError = 'Passwords does not match';
+      this.errors = [{message: 'Passwords does not match'}];
       return;
     }
 
-    this.formError = ''; // clear error on post
+    this.errors = []; // clear error on post
     this.httpPost(
       apiUrl('/user'),
       {avatar: this.avatar.value, password: this.password.value},

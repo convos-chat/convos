@@ -32,8 +32,8 @@
         <input name="password" id="form_password" placeholder="Password" type="password" autocomplete="off">
       </div>
     </div>
-    <div class="row" if={formError}>
-      <div class="col s12"><div class="alert">{formError}</div></div>
+    <div class="row" if={errors.length}>
+      <div class="col s12"><div class="alert">{errors[0].message}</div></div>
     </div>
     <div class="row">
       <div class="input-field col s12">
@@ -56,7 +56,7 @@
   this.defaultServer = 'localhost'; // 'chat.freenode.net:6697';
 
   submitForm(e) {
-    this.formError = ''; // clear error on post
+    this.errors = []; // clear error on post
     this.httpPost(
       apiUrl('/connection'),
       {

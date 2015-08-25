@@ -19,8 +19,8 @@
           <label for="form_password">Password</label>
         </div>
       </div>
-      <div class="row" if={formError}>
-        <div class="col s12"><div class="alert">{formError}</div></div>
+      <div class="row" if={errors.length}>
+        <div class="col s12"><div class="alert">{errors[0].message}</div></div>
       </div>
       <div class="row">
         <div class="input-field col s12">
@@ -42,24 +42,25 @@
   mixin.form(this);
   mixin.http(this);
 
+  this.errors = opts.errors;
   this.user = opts.user;
 
   login(e) {
-    this.formError = ''; // clear error on post
+    this.errors = []; // clear error on post
     localStorage.setItem('email', this.form_email.value);
     this.httpPost(
       apiUrl('/user/login'),
       {email: this.form_email.value, password: this.form_password.value},
       function(err, xhr) {
-        if (err) return this.update({formError: err[0].message});
+        if (err) return this.update({errors: err});
         this.user.update(xhr.responseJSON);
-        riot.route('chat');
+        riot.url.route('chat');
       }
     );
   }
 
   this.on('mount', function() {
-    if (this.user.email()) return Convos.url.route('chat', {user: user});
+    if (this.user.email()) return riot.url.route('chat');
     this.form_email.value = localStorage.getItem('email');
     this.form_email.focus();
   });

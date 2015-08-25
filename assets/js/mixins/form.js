@@ -11,7 +11,7 @@
         field.focus();
       }
       else {
-        this.formError = err.message;
+        this.errors = err;
       }
     }.bind(this));
     return this;
