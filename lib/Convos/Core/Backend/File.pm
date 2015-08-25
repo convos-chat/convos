@@ -227,15 +227,19 @@ sub save_object {
 
 sub _build_home {
   my $self = shift;
-  my $path = shift || $ENV{CONVOS_HOME};
+  my $home = shift || $ENV{CONVOS_HOME};
 
-  unless ($path) {
-    my $home = File::HomeDir->my_home || die 'Could not figure out CONVOS_HOME. $HOME directory could not be found.';
-    $path = catdir($home, qw( .local share convos ));
+  if (!$home) {
+    $home = File::HomeDir->my_home;
+    $home = catdir($home, qw( .local share convos )) if $home;
+  }
+  if ($home) {
+    $home = Cwd::abs_path($home) || $home;
   }
 
-  warn "[Convos::Core] Home is $path\n" if DEBUG;
-  Mojo::Home->new(Cwd::abs_path($path));
+  die 'Could not figure out CONVOS_HOME. $HOME directory could not be found.' unless $home;
+  warn "[Convos::Core] Home is $home\n" if DEBUG;
+  Mojo::Home->new($home);
 }
 
 sub _log {
@@ -292,7 +296,7 @@ sub _pos {
 sub _setup {
   my $self = shift;
 
-  $self->home($self->_build_home($self->home)) unless ref $self->{home};
+  $self->home($self->_build_home($self->{home})) unless ref $self->{home};
 
   $self->on(
     connection => sub {
