@@ -42,7 +42,7 @@
   proto.connections = function(cb) {
     this[this._method](apiUrl('/connections'), {}, function(err, xhr) {
       var connections = [];
-      if (!err) xhr.responseJSON.forEach(function(attrs) { connections.push(this.connection(false, false, attrs)); }.bind(this));
+      if (!err) xhr.responseJSON.connections.forEach(function(attrs) { connections.push(this.connection(false, false, attrs)); }.bind(this));
       cb.call(this, err, connections);
     });
     return this.tap('_method', 'httpCachedGet');
@@ -64,7 +64,7 @@
   // Use user.fresh().conversations(function() { ... }) to get fresh data from server
   proto.conversations = function(cb) {
     this[this._method](apiUrl('/conversations'), {}, function(err, xhr) {
-      if (!err) xhr.responseJSON.forEach(function(c) { this.conversation(false, c); }.bind(this));
+      if (!err) xhr.responseJSON.conversations.forEach(function(c) { this.conversation(false, c); }.bind(this));
       cb.call(this, err, $.map(this._conversations, function(v, k) { return v; }));
     });
     return this.tap('_method', 'httpCachedGet');
@@ -76,9 +76,18 @@
     this[this._method](apiUrl('/user'), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.update(xhr.responseJSON);
-      cb.call(this, '');
+      cb.call(this, false);
     });
     return this.tap('_method', 'httpCachedGet');
+  };
+
+  // Log out the user
+  proto.logout = function(cb) {
+    this.httpGet(apiUrl('/user/logout'), {}, function(err, xhr) {
+      if (err) return cb.call(this, err);
+      this.email('');
+      cb.call(this, false);
+    });
   };
 
   // Write user settings to server

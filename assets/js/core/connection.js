@@ -41,7 +41,7 @@
   proto.rooms = function(cb) {
     this[this._method](apiUrl(['connection', this.protocol(), this.name(), 'rooms']), {}, function(err, xhr) {
       if (err) return cb.call(this, err, []);
-      cb.call(this, err, $.map(xhr.responseJSON, function(attrs) { return new Convos.ConversationRoom(attrs); }));
+      cb.call(this, err, $.map(xhr.responseJSON.rooms, function(attrs) { return new Convos.ConversationRoom(attrs); }));
     });
   };
 

@@ -15,12 +15,23 @@
     if (!target) target = {};
     var base = url.indexOf('http') == 0 ? url.split('#') : ['', url];
     var str = (base[1] || '').split('?'); // ['some/path', 'a=1&b=2']
+    target._raw = base[1];
     target.base = base[0].replace(/\/$/, '');
     target.hash = base[2] || '';
     target.path = str[0];
     target.query = {};
     if (str[1]) str[1].split('&').forEach(function(i) { var kv = i.split('='); target.query[kv[0]] = kv[1]; });
     return target;
+  };
+
+  // same as riot.route(), but will always trigger "update"
+  riot.url.route = function(path) {
+    if (path == riot.url._raw) {
+      riot.url.trigger('update', riot.url);
+    }
+    else {
+      riot.route(path);
+    }
   };
 
   // Listen for changes in location and update riot

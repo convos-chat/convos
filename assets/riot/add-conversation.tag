@@ -28,8 +28,8 @@
         <label for="form_name">Name</label>
       </div>
     </div>
-    <div class="row" if={formError}>
-      <div class="col s12"><div class="alert">{formError}</div></div>
+    <div class="row" if={errors.length}>
+      <div class="col s12"><div class="alert">{errors[0].message}</div></div>
     </div>
     <div class="row">
       <div class="input-field col s12">
@@ -66,11 +66,10 @@
   }
 
   submitForm(e) {
-    this.formError = ''; // clear error on post
+    this.errors = []; // clear error on post
     this.selectedConnection().joinConversation(this.form_name.value, function(err) {
       if (!err) return this.closeModal();
-      this.formError = err;
-      this.update();
+      this.update({errors: err});
     }.bind(this));
   }
 
