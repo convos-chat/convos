@@ -527,6 +527,25 @@
         }
       }
     },
+    "/user/logout": {
+      "get": {
+        "tags": [ "user" ],
+        "summary": "Logout a user.",
+        "description": "This resource will delete any sessions cookies that might be stored in the client.",
+        "x-mojo-controller": "Convos::Controller::User",
+        "operationId": "userLogout",
+        "responses": {
+          "200": {
+            "description": "Successfully logged out.",
+            "schema": { "$ref": "#/definitions/Success" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/user/register": {
       "post": {
         "tags": [ "user" ],
