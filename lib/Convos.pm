@@ -150,7 +150,7 @@ sub _config {
   $config->{plugins} ||= {};
   $config->{plugins}{$_} = $config for split /:/, +($ENV{CONVOS_PLUGINS} // '');
   $config->{secure_cookies} ||= $ENV{CONVOS_SECURE_COOKIES} || 0;
-  $config->{swagger_file} ||= $self->home->rel_file('public/convos-api.json');
+  $config->{swagger_file} ||= $self->home->rel_file('public/api/convos-0.87.json');
   $config;
 }
 
