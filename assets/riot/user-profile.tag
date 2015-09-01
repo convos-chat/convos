@@ -6,8 +6,14 @@
       </div>
     </div>
     <div class="row">
+      <div class="input-field col s12">
+        <input id="form_avatar" type="text" class="validate" value={user.avatar()} placeholder="Gravatar username or URL to image">
+        <label for="form_avatar">Avatar</label>
+      </div>
+    </div>
+    <div class="row">
       <div class="input-field col s6">
-        <input placeholder="At least six characters" name="password" id="form_password" type="password" class="validate">
+        <input id="form_password" type="password" class="validate" placeholder="At least six characters">
         <label for="form_password">Password</label>
       </div>
       <div class="input-field col s6">
@@ -26,34 +32,36 @@
   </form>
   <script>
 
+  var tag = this;
+
   mixin.form(this);
   mixin.http(this);
 
   this.user = opts.user;
 
   submitForm(e) {
-    localStorage.setItem('email', this.email.value);
+    var attrs = {avatar: this.form_avatar.value, password: ''};
 
-    if (this.password.value != this.password_again.value) {
+    if (this.form_password.value == this.form_password_again.value) {
+      attrs.password = this.form_password_again.value;
+    }
+    else {
       $('[id^="form_password"]').addClass('invalid');
       this.errors = [{message: 'Passwords does not match'}];
       return;
     }
 
     this.errors = []; // clear error on post
-    this.httpPost(
-      apiUrl('/user'),
-      {avatar: this.avatar.value, password: this.password.value},
-      function(err, xhr) {
-        if (err) return this.formInvalidInput(err);
-        this.user.save(xhr.responseJSON);
-      }
-    );
+    this.user.save(attrs, function(err) {
+      if (err) return tag.formInvalidInput(err).update();
+      tag.user.update(attrs);
+      riot.url.route('chat');
+    });
   }
 
   this.on('mount', function() {
     this.updateTextFields();
-    setTimeout(function() { this.email.focus(); }.bind(this), 300);
+    this.form_avatar.focus();
   });
 
   </script>

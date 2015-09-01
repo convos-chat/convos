@@ -95,7 +95,7 @@
     if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
     return this.httpPost(apiUrl('/user'), attrs, function(err, xhr) {
       if (err) return cb.call(this, err);
-      this.update(data);
+      this.update(attrs);
       cb.call(this, err);
     });
   };
