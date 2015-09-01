@@ -21,20 +21,22 @@
   proto.fresh = function() { this._method = 'httpGet'; return this; };
 
   // Get or create a single Convos.Connection object on client side
-  // Get: user.connection(protocol, name)
-  // Create/update: user.connection(protocol, name, attrs)
+  // Get:        c = user.connection(protocol, name)
+  // Add/Update: c = user.connection(protocol, name, attrs)
   proto.connection = function(protocol, name, attrs) {
-    if (!protocol && typeof attrs == 'object') {
-      var path = attrs.path.split('/'); // /superman@example.com/IRC/localhost
-      protocol = path[2];
-      name = path[3];
+    var c = this._autovivificate('_connections', protocol, name, null);
+    if (attrs) {
+      if (c) return c.update(attrs);
+      attrs[name] = name;
+      attrs[user] = this;
+      c = new Convos.Connection(attrs);
+      this._connections[protocol][name] = c;
+      this.trigger('connection', c);
     }
-    if (!this._connections[protocol]) this._connections[protocol] = {};
-    if (!attrs) return this._connections[protocol][name];
-    if (this._connections[protocol][name]) return this._connections[protocol][name].update(attrs);
-    this._connections[protocol][name] = new Convos.Connection(attrs).name(name).protocol(protocol).user(this);
-    this.trigger('connection', this._connections[protocol][name]);
-    return this._connections[protocol][name];
+    else if(!c) {
+      c = new Convos.Connection({name: name, user: this});
+    }
+    return c;
   };
 
   // Get a list of Convos.Connection objects from backend
@@ -42,7 +44,12 @@
   proto.connections = function(cb) {
     this[this._method](apiUrl('/connections'), {}, function(err, xhr) {
       var connections = [];
-      if (!err) xhr.responseJSON.connections.forEach(function(attrs) { connections.push(this.connection(false, false, attrs)); }.bind(this));
+      if (!err) {
+        xhr.responseJSON.connections.forEach(function(attrs) {
+          var c = new Convos.Connection(attrs);
+          connections.push(this.connection(c.protocol(), c.name(), attrs));
+        }.bind(this));
+      }
       cb.call(this, err, connections);
     });
     return this.tap('_method', 'httpCachedGet');

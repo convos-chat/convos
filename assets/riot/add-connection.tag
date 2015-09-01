@@ -1,5 +1,5 @@
 <add-connection>
-  <form onsubmit={submitForm} method="post" class="modal-content readable-width">
+  <form onsubmit={addConnection} method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">
         <h4 class="green-text text-darken-3">Add connection</h4>
@@ -14,7 +14,7 @@
     <div class="row">
       <div class="input-field col s3">
         <select name="protocol" id="form_protocol">
-          <option value="IRC">IRC</option>
+          <option value="irc">IRC</option>
         </select>
         <label for="form_protocol">Protocol</label>
       </div>
@@ -47,37 +47,34 @@
     </div>
   </form>
   <script>
+  var tag = this;
 
   mixin.form(this);
-  mixin.http(this);
   mixin.modal(this);
 
   this.user = opts.user;
-  this.defaultServer = 'localhost'; // 'chat.freenode.net:6697';
+  this.defaultServer = Convos.settings.default_server;
+  this.nextModal = opts.next || 'edit-connection';
 
-  submitForm(e) {
+  addConnection(e) {
+    var c = new Convos.Connection();
+
+    c.url().hostPort(this.form_server.value);
+    c.url().scheme(this.form_protocol.value.toLowerCase());
+    c.url().userinfo(this.form_username.value, this.form_password.value);
+
     this.errors = []; // clear error on post
-    this.httpPost(
-      apiUrl('/connection'),
-      {
-        password: this.form_password.value,
-        protocol: this.form_protocol.value,
-        server:   this.form_server.value,
-        username: this.form_username.value
-      },
-      function(err, xhr) {
-        if (err) return this.formInvalidInput(err);
-        if (!err) return;
-        this.user.connection(false, false, xhr.responseJSON);
-        this.openModal(opts.next || 'edit-connection', xhr.responseJSON);
-      }
-    );
+    c.save(function(err) {
+      if (err) return this.formInvalidInput(err).update();
+      c = tag.user.connection(this.protocol(), this.name(), {url: this.url()});
+      tag.openModal(tag.nextModal, {connection: c, user: tag.user});
+    });
   }
 
   this.on('mount', function() {
     this.updateTextFields();
     $('select', this.root).material_select();
-    setTimeout(function() { this.server.focus(); }.bind(this), 300);
+    this.form_server.focus();
   });
 
   </script>

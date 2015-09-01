@@ -11,7 +11,7 @@
     <div class="row">
       <div class="input-field col s12">
         <select name="connection" id="form_connection">
-          <option each={obj, i in opts.connections} value={i}>{obj.protocol()} - {obj.name()}</option>
+          <option each={c, i in connections} value={i}>{c.protocol()} - {c.name()}</option>
         </select>
         <label for="form_connection">Connection</label>
       </div>
@@ -21,11 +21,11 @@
         <input name="name" id="form_name" type="text" autocomplete="off" spellcheck="false">
         <div class="autocomplete">
           <ul>
-            <li each={obj, i in rooms} class="link"><a href={obj.name()} tabindex=-1>{obj.name()} - {obj.topic() || 'No topic'}</a></li>
-            <li class="no-match">{noRoomsDescription}</li>
+            <li each={rooms} class="link"><a href={name()} tabindex=-1>{name()} - {topic() || 'No topic'}</a></li>
+            <li class="no-match" if={!rooms.length}>{noRoomsDescription}</li>
           </ul>
         </div>
-        <label for="form_name">Name</label>
+        <label for="form_name">Room/person</label>
       </div>
     </div>
     <div class="row" if={errors.length}>
@@ -43,26 +43,28 @@
     </div>
   </form>
   <script>
+  var tag = this;
 
   mixin.form(this);
   mixin.modal(this);
 
-  this.noRoomsDescription = 'Loading rooms from ' + opts.connections[0].name() + '...';
+  this.user = opts.user;
+  this.noRoomsDescription = 'Loading room list...';
+  this.connections = opts.connections ? opts.connections : opts.connection ? [opts.connection] : [];
   this.rooms = [];
 
   changeConnection() {
     this.selectedConnection().rooms(function(err, rooms) {
       if (err) throw err;
-      this.rooms = rooms;
-      this.noRoomsDescription = 'No rooms found.';
-      this.update();
+      tag.update({noRoomsDescription: 'No rooms found', rooms: rooms});
       $('input[name="name"]', this.root).autocomplete('update'); // need to happen after this.update()
     }.bind(this));
   };
 
   selectedConnection() {
     var $option = $('option:selected, option:first', this.connection).eq(0);
-    return this.opts.connections[$option.val()];
+    console.log($option.val());
+    return this.connections[$option.val()];
   }
 
   submitForm(e) {
@@ -76,6 +78,7 @@
   this.on('mount', function() {
     setTimeout(function() { this.form_name.focus(); }.bind(this), 300);
     this.updateTextFields();
+    this.user.connections(function(err, connections) { if (!err) tag.connections = connections; });
     $('input[name="name"]', this.root).autocomplete();
     $('select', this.root).material_select();
     $(this.connection).change(this.changeConnection.bind(this)).change();

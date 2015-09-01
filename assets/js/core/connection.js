@@ -1,9 +1,9 @@
 (function(window) {
   Convos.Connection = function(attrs) {
-    if (attrs) this.update(attrs);
-    riot.observable(this);
     this._method = 'httpCachedGet';
-    this.state = 'disconnected';
+    this._state = 'disconnected';
+    riot.observable(this);
+    if (attrs) this.update(attrs);
   };
 
   var proto = Convos.Connection.prototype;
@@ -11,8 +11,7 @@
   // Define attributes
   mixin.base(proto, {
     name: function() { return ''; },
-    protocol: function() { return ''; },
-    url: function() { return ''; },
+    url: function() { return new riot.Url(); },
     user: function() { return false; }
   });
 
@@ -29,12 +28,18 @@
   // Get connection settings from server
   // Use connection.fresh().load(function() { ... }) to get fresh data from server
   proto.load = function(cb) {
-    this[this._method](apiUrl('/connection'), {}, function(err, xhr) {
+    this[this._method](apiUrl(['connection', this.protocol(), this.name()]), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.update(xhr.responseJSON);
       cb.call(this, '');
     });
     return this.tap('_method', 'httpCachedGet');
+  };
+
+  proto.protocol = function() {
+    var url = this.url();
+    var r = url.scheme.apply(url, arguments);
+    return r == url ? this : r;
   };
 
   // Get list of available rooms on server
@@ -46,22 +51,38 @@
   };
 
   // Write connection settings to server
-  proto.save = function(attrs, cb) {
-    if (!cb) {
-      Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
-      return this;
+  proto.save = function(cb) {
+    var attrs = {url: this.url().toString()}; // It is currently not possible to specify "name"
+    if (this.name()) {
+      return this.httpPost(apiUrl(['connection', this.protocol(), this.name()]), attrs, function(err, xhr) {
+        if (err) return cb.call(this, err);
+        this.update(xhr.responseJSON);
+        cb.call(this, err);
+      });
     }
-    return this.httpPost(apiUrl(['connection', this.protocol(), this.name()]), attrs, function(err, xhr) {
-      if (err) return cb.call(this, err);
-      this.update(attrs);
-      cb.call(this, err, xhr);
-    });
+    else {
+      return this.httpPost(apiUrl('connections'), attrs, function(err, xhr) {
+        if (err) return cb.call(this, err);
+        this.update(xhr.responseJSON);
+        cb.call(this, err);
+      });
+    }
+  };
+
+  // override base.update() to make sure we don't mess up url()
+  var update = proto.update;
+  proto.update = function(attrs) {
+    var url = this.url();
+    update.call(this, attrs);
+    if (attrs.state) this._state = attrs.state;
+    if (attrs.url && typeof attrs.url == 'string') url.parse(attrs.url);
+    return this.url(url);
   };
 
   // Change state to "connected" or "disconnected"
   // Can also be used to retrieve state: "connected", "disconnected" or "connecting"
   proto.state = function(state, cb) {
-    if (!cb) return this.state;
+    if (!cb) return this._state;
     throw 'TODO';
   };
 })(window);

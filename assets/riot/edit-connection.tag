@@ -1,23 +1,23 @@
 <edit-connection>
-  <form onsubmit={submitForm} method="post" class="modal-content readable-width">
+  <form onsubmit={saveConnection} method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">
-        <h4 class="green-text text-darken-3">Edit {connection.protocol()} connection</h4>
+        <h4 class="green-text text-darken-3">Edit {protocol} connection</h4>
       </div>
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <input name="server" id="form_server" placeholder={connection.url()} value={parseURL(connection.url()).host_port} type="text">
+        <input id="form_server" value={url.hostPort()} type="text">
         <label for="form_server">Server</label>
       </div>
     </div>
     <div class="row">
       <div class="input-field col s6">
-        <input name="username" id="form_username" placeholder={connection.username()} value={connection.username()} type="text">
+        <input id="form_username" value={url.userinfo().split(':')[0]} type="text">
         <label for="form_username">Credentials</label>
       </div>
       <div class="input-field col s6">
-        <input name="password" id="form_password" placeholder="Password" type="password" autocomplete="off">
+        <input id="form_password" placeholder="Password" type="password" value={url.userinfo().split(':')[1]} autocomplete="off">
       </div>
     </div>
     <div class="row" if={errors.length}>
@@ -25,43 +25,38 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <button class="btn waves-effect waves-light" type="submit">Save <i class="material-icons right">save</i></button>
+        <button class="btn waves-effect waves-light" type="submit" disabled={saving}>Save <i class="material-icons right">save</i></button>
         <button class="btn-flat waves-effect waves-light modal-close" type="button">Close</button>
-        <a href="#TODO" class="btn waves-effect waves-light red right"><i class="material-icons">delete</i></a>
+        <a href="#TODO" class="btn waves-effect waves-light red right" disabled={saving}><i class="material-icons">delete</i></a>
       </div>
     </div>
   </form>
   <script>
+  var tag = this;
 
   mixin.form(this);
   mixin.modal(this);
 
   this.connection = opts.connection;
+  this.url = this.connection.url();
   this.user = opts.user;
 
-  submitForm(e) {
-    var url = parseURL(this.connection.url());
-    url.host = this.server.value.split(':')[0];
-    url.port = this.server.value.split(':')[1];
+  saveConnection(e) {
     this.errors = []; // clear error on post
-    this.connection.save(
-      {
-        password: this.password.value,
-        url:      url.toString(),
-        username: this.username.value
-      },
-      function(err, xhr) {
-        this.formInvalidInput(xhr.responseJSON);
-        if (!err) return;
-        this.user.connection(false, false, xhr.responseJSON);
-        this.openModal(opts.next || 'edit-connection', xhr.responseJSON);
-      }
-    );
+    this.saving = true;
+    this.connection.url().hostPort(this.form_server.value);
+    this.connection.url().userinfo(this.form_username.value, this.form_password.value);
+
+    this.connection.save(function(err) {
+      if (err) return tag.formInvalidInput(err).update();
+      tag.closeModal();
+      riot.update();
+    });
   }
 
   this.on('mount', function() {
     this.updateTextFields();
-    setTimeout(function() { this.server.focus(); }.bind(this), 300);
+    this.form_server.focus();
   });
 
   </script>

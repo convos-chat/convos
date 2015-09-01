@@ -1,7 +1,7 @@
 (function(window) {
   riot.Url = function(o) {
     riot.observable(this);
-    this.query = {};
+    this._query = {};
     if (typeof o == 'string') this.parse(o);
     if (typeof o == 'object') Object.keys(o).forEach(function(k) { this[k] = o[k]; }.bind(this));
   };
