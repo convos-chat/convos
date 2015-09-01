@@ -11,7 +11,7 @@ $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', passwor
 $t->get_ok('/1.0/connection/IRC/localhost/rooms')->status_is(404)
   ->json_is('/errors/0/message', 'Connection not found.');
 
-$t->post_ok('/1.0/connection', json => {protocol => 'IRC', server => 'localhost:3123'})->status_is(200);
-$t->get_ok('/1.0/connection/IRC/localhost/rooms')->status_is(200)->content_is('[]');
+$t->post_ok('/1.0/connections', json => {protocol => 'IRC', server => 'localhost:3123'})->status_is(200);
+$t->get_ok('/1.0/connection/IRC/localhost/rooms')->status_is(200)->json_is('/rooms', []);
 
 done_testing;

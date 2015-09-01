@@ -74,45 +74,10 @@
           "200": {
             "description": "List of commands.",
             "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Command" }
-            }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connection": {
-      "post": {
-        "tags": [ "connection" ],
-        "summary": "Add a connection.",
-        "x-mojo-controller": "Convos::Controller::Connection",
-        "operationId": "connectionAdd",
-        "parameters": [
-          { "$ref": "#/parameters/session" },
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
               "type": "object",
               "properties": {
-                "password": { "type": "string", "description": "Login password to server." },
-                "protocol": { "type": "string", "description": "Protocol to use. Example: IRC." },
-                "server": { "type": "string", "required": true, "description": "Either complete url or server:port. (Port is optional)" },
-                "username": { "type": "string", "required": "true", "description": "Login username to server." }
+                "commands": { "type": "array", "$ref": "#/definitions/Command" }
               }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Connection information.",
-            "schema": {
-              "$ref": "#/definitions/Connection"
             }
           },
           "default": {
@@ -209,8 +174,10 @@
           "200": {
             "description": "List of rooms.",
             "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Room" }
+              "type": "object",
+              "properties": {
+                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Room" } }
+              }
             }
           },
           "default": {
@@ -282,10 +249,12 @@
         ],
         "responses": {
           "200": {
-            "description": "List of messsages.",
+            "description": "List of messages.",
             "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Message" }
+              "type": "object",
+              "properties": {
+                "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
+              }
             }
           },
           "default": {
@@ -331,8 +300,45 @@
           "200": {
             "description": "List of connections.",
             "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Connection" }
+              "type": "object",
+              "properties": {
+                "connections": { "type": "array", "items": { "$ref": "#/definitions/Connection" } }
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "post": {
+        "tags": [ "connection" ],
+        "summary": "Add a connection.",
+        "x-mojo-controller": "Convos::Controller::Connection",
+        "operationId": "connectionAdd",
+        "parameters": [
+          { "$ref": "#/parameters/session" },
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": { "type": "string", "description": "Login password to server." },
+                "protocol": { "type": "string", "description": "Protocol to use. Example: IRC." },
+                "server": { "type": "string", "required": true, "description": "Either complete url or server:port. (Port is optional)" },
+                "username": { "type": "string", "description": "Login username to server." }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Connection information.",
+            "schema": {
+              "$ref": "#/definitions/Connection"
             }
           },
           "default": {
@@ -353,10 +359,12 @@
         ],
         "responses": {
           "200": {
-            "description": "List of messsages.",
+            "description": "List of messages.",
             "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Room" }
+              "type": "object",
+              "properties": {
+                "conversations": { "type": "array", "items": { "$ref": "#/definitions/Room" } }
+              }
             }
           },
           "default": {
@@ -380,8 +388,10 @@
           "200": {
             "description": "List of commands.",
             "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Notification" }
+              "type": "object",
+              "properties": {
+                "notifications": { "type": "array", "items": { "$ref": "#/definitions/Notification" } }
+              }
             }
           },
           "default": {
@@ -403,10 +413,9 @@
           {
             "name": "data",
             "in": "body",
-            "type": "array",
-            "description": "List of notification IDs.",
-            "items": {
-              "type": "integer"
+            "type": "object",
+            "properties": {
+              "ids": { "type": "array", "type": "integer" }
             }
           }
         ],
@@ -414,8 +423,8 @@
           "200": {
             "description": "List of commands.",
             "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Notification" }
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -478,7 +487,7 @@
               "type": "object",
               "properties": {
                 "avatar": { "type": "string", "description": "User avatar" },
-                "password": { "type": "string", "description": "User password", "minLength": 6 }
+                "password": { "type": "string", "description": "User password" }
               }
             }
           }
@@ -561,7 +570,7 @@
               "properties": {
                 "avatar": { "type": "string", "description": "User avatar" },
                 "email": { "type": "string", "required": true, "format": "email", "description": "User email" },
-                "password": { "type": "string", "required": true, "minLength": 6, "description": "User password" }
+                "password": { "type": "string", "required": true, "description": "User password" }
               }
             }
           }

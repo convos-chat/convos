@@ -10,8 +10,7 @@ $t->delete_ok('/1.0/user')->status_is(401)->json_is('/errors/0/message', 'Need t
 $t->post_ok('/1.0/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');
 
 $t->post_ok('/1.0/user/register', json => {email => 'superman', password => 'xyz'})->status_is(400)
-  ->json_is('/errors/0', {message => 'Does not match email format.', path => '/data/email'})
-  ->json_is('/errors/1', {message => 'String is too short: 3/6.',    path => '/data/password'});
+  ->json_is('/errors/0', {message => 'Does not match email format.', path => '/data/email'});
 
 $t->post_ok('/1.0/user/register', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200)
   ->json_is('/avatar', '')->json_is('/email', 'superman@example.com')->json_like('/registered', qr/^\d+$/);

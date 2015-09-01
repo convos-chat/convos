@@ -73,7 +73,7 @@ sub connection_rooms {
     sub { $connection->rooms(shift->begin) },
     sub {
       my ($delay, $err, $rooms) = @_;
-      $self->$cb([map { $_->TO_JSON } @$rooms], 200);
+      $self->$cb({rooms => [map { $_->TO_JSON } @$rooms]}, 200);
     },
   );
 }
@@ -93,7 +93,7 @@ sub connections {
     push @connections, $connection->TO_JSON;
   }
 
-  $self->$cb(\@connections, 200);
+  $self->$cb({connections => \@connections}, 200);
 }
 
 =head2 conversation_join

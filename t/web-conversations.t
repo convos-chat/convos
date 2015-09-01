@@ -7,7 +7,7 @@ my $t = Test::Mojo->new('Convos');
 my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret');
 
 $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
-$t->get_ok('/1.0/conversations')->status_is(200)->content_is('[]');
+$t->get_ok('/1.0/conversations')->status_is(200)->json_is('/conversations', []);
 
 no warnings 'redefine';
 require Mojo::IRC::UA;
@@ -19,7 +19,7 @@ $user->connection(IRC => 'perl-org',  {})->join_conversation('#oslo.pm',       s
 $user->connection(IRC => 'localhost', {})->join_conversation('#Convos s3cret', sub { });
 
 $t->get_ok('/1.0/conversations')->status_is(200)->json_is(
-  '/0',
+  '/conversations/0',
   {
     active => 1,
     topic  => '',
@@ -30,7 +30,7 @@ $t->get_ok('/1.0/conversations')->status_is(200)->json_is(
     users  => {}
   }
   )->json_is(
-  '/1',
+  '/conversations/1',
   {
     active => 1,
     topic  => '',
@@ -41,7 +41,7 @@ $t->get_ok('/1.0/conversations')->status_is(200)->json_is(
     users  => {}
   }
   )->json_is(
-  '/2',
+  '/conversations/2',
   {
     active => 1,
     topic  => '',
