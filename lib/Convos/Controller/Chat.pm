@@ -32,7 +32,7 @@ sub conversations {
     }
   }
 
-  $self->$cb(\@conversations, 200);
+  $self->$cb({conversations => \@conversations}, 200);
 }
 
 =head2 conversation_messages
@@ -56,7 +56,7 @@ sub conversation_messages {
     sub {
       my ($delay, $err, $messages) = @_;
       die $err if $err;
-      $self->$cb($messages, 200);
+      $self->$cb({messages => $messages}, 200);
     },
   );
 }
