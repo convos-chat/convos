@@ -33,4 +33,7 @@ $t->get_ok('/1.0/user')->status_is(200)->json_is(
 
 $t->delete_ok('/1.0/user')->status_is(400)->json_is('/errors/0/message', 'You are the only user left.');
 
+$t->get_ok('/1.0/user/logout')->status_is(200);
+$t->get_ok('/1.0/user')->status_is(401);
+
 done_testing;

@@ -54,6 +54,18 @@ sub user_login {
   );
 }
 
+=head2 user_logout
+
+See L<Convos::Manual::API/userLogout>.
+
+=cut
+
+sub user_logout {
+  my ($self, $args, $cb) = @_;
+  $self->session({expires => 1});
+  $self->$cb({}, 200);
+}
+
 =head2 user_delete
 
 See L<Convos::Manual::API/userDelete>.

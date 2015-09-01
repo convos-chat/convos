@@ -934,6 +934,55 @@ Error.
       "required":     },
   },
 
+=head2 userLogout
+
+Logout a user.
+
+This resource will delete any sessions cookies that might be stored in the client.
+
+=head3 Resource URL
+
+  GET http://demo.convos.by/1.0/user/logout
+
+=head3 Parameters
+
+This resource takes no parameters.
+
+=head3 Responses
+
+=head4 200 - OK
+
+Successfully logged out.
+
+  {
+    "links":     [
+      {
+        "href": url, // required
+        "rel": string, // required
+      },
+      ...
+    ]
+    "message": string, // No description.
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "code":     {// required
+      "required":     },
+    "errors":     [
+      {
+        "message": string, // No description.
+        "path": string, // No description.
+      },
+      ...
+    ]
+    "message":     {// required
+      "required":     },
+  },
+
 =head2 userRegister
 
 Register a new user.
