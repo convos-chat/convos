@@ -89,3 +89,9 @@ main {
     padding: 0 $card-padding 50px $card-padding;
   }
 }
+
+.material-icons {
+  &.state-connected { }
+  &.state-connecting { @extend .grey-text; }
+  &.state-disconnected { @extend .grey-text; }
+}

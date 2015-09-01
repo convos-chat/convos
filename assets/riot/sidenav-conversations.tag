@@ -1,12 +1,10 @@
 <sidenav-conversations>
   <div class="collection">
-    <a each={c, i in conversations} href={c.url()} class={parent.conversationClass(i)}>
-      <i class="material-icons">{c.icon()}</i> {c.name()}
-      <span class="badge new" if={c.new}>{c.new}</span>
+    <a each={conversations} href={url()} class={parent.conversationClass(i)}>
+      <i class="material-icons">{icon()}</i> {name()}
     </a>
     <a href="#addConversation" onclick={addConversation} class="collection-item">
       <i class="material-icons">add_circle</i> Create conversation...
-      <span class="badge new" if={c.new}>{c.new}</span>
     </a>
   </div>
   <script>
@@ -19,10 +17,10 @@
   addConversation(e) {
     this.user.connections(function(err, connections) {
       if (connections.length) {
-        this.openModal('add-conversation', {connections: connections});
+        this.openModal('add-conversation', {connections: connections, user: this.user});
       }
       else {
-        this.openModal('add-connection', {first: true, next: 'add-conversation'});
+        this.openModal('add-connection', {first: true, next: 'add-conversation', user: this.user});
       }
     }.bind(this));
   }

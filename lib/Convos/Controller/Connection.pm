@@ -95,9 +95,7 @@ sub connection_update {
   };
 
   if ($url->host) {
-    warn $url->scheme;
     $url->scheme($args->{protocol});
-    warn $url->scheme;
     $connection->url->parse($url);
   }
 

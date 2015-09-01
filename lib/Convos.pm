@@ -78,6 +78,7 @@ sub startup {
   $self->_setup_secrets;
   $self->_add_helpers;
   $self->_setup_assets;
+  $self->_setup_settings;
   $self->plugin(Swagger2 => {url => $config->{swagger_file}});
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
   $self->routes->get('/')->to(template => 'app');
@@ -210,6 +211,15 @@ sub _setup_secrets {
   $self->secrets($secrets);
 }
 
+sub _setup_settings {
+  my $self = shift;
+  my $settings = $self->defaults->{settings} = $self->config('settings') || {};
+
+  # This hash is exposed directy into the web page
+  $settings->{default_server}
+    ||= $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';    # chat.freenode.net:6697 instead of localhost?
+}
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Jan Henning Thorsen
@@ -233,7 +243,7 @@ __DATA__
     <title>Convos</title>
     %= asset 'convos.css';
     %= javascript begin
-      window.Convos={loadTid:setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your web administrator.</h4>';app.className='valign-wrapper'},5000)};
+      window.Convos={"settings":<%== Mojo::JSON::encode_json($settings) %>,"loadTid":setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your web administrator.</h4>';app.className='valign-wrapper'},5000)};
       window.apiUrl=function(path){return ['<%= $self->url_for('/1.0')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
       window.urlFor=function(path){return ['<%= $self->url_for('/')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
     % end

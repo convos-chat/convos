@@ -22,6 +22,17 @@
     };
   });
 
+  // node = this._autovivificate(k0, k1, ..., value);
+  proto._autovivificate = function() {
+    var i = 0, l = arguments.length, p = this;
+    while (i < l - 2) {
+      var k = arguments[i++];
+      p = p[k] = p[k] || {};
+    }
+    if (arguments[l - 1] !== null) p[arguments[l - 2]] = arguments[l - 1];
+    return p[arguments[l - 2]];
+  };
+
   // clear attribute
   proto.clear = function(name) {
     var value = this['_' + name];
