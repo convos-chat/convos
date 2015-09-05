@@ -1,12 +1,12 @@
-package Convos::Core::Connection::IRC;
+package Convos::Core::Connection::Irc;
 
 =head1 NAME
 
-Convos::Core::Connection::IRC - IRC connection for Convos
+Convos::Core::Connection::Irc - IRC connection for Convos
 
 =head1 DESCRIPTION
 
-L<Convos::Core::Connection::IRC> is a connection class for L<Convos> which
+L<Convos::Core::Connection::Irc> is a connection class for L<Convos> which
 allow you to communicate over the IRC protocol.
 
 =cut
@@ -27,7 +27,7 @@ my $CHANNEL_RE = qr{[#&]};
 
 =head1 ATTRIBUTES
 
-L<Convos::Core::Connection::IRC> inherits all attributes from L<Convos::Core::Connection>
+L<Convos::Core::Connection::Irc> inherits all attributes from L<Convos::Core::Connection>
 and implements the following new ones.
 
 =cut
@@ -77,7 +77,7 @@ has _irc => sub {
 
 =head1 METHODS
 
-L<Convos::Core::Connection::IRC> inherits all methods from L<Convos::Core::Connection>
+L<Convos::Core::Connection::Irc> inherits all methods from L<Convos::Core::Connection>
 and implements the following new ones.
 
 =head2 connect

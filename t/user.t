@@ -2,16 +2,13 @@ BEGIN {
   our $time = time - 10;
   *CORE::GLOBAL::time = sub {$time};
 }
-use Mojo::Base -strict;
+use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
-use Test::More;
 
 no warnings qw( once redefine );
-local $ENV{CONVOS_HOME} = 'convos-test-user';
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-
 my $user = $core->user('jhthorsen@cpan.org', {});
 my $storage_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'user.json');
 is $user->avatar,   '',                   'avatar';
@@ -25,9 +22,16 @@ is $user->save, $user, 'save';
 ok -e $storage_file, 'created storage file';
 is $core->user('jhthorsen@cpan.org')->load->avatar, 'whatever', 'avatar from storage file';
 
-is_deeply($user->TO_JSON,
-  {avatar => 'whatever', email => 'jhthorsen@cpan.org', path => '/jhthorsen@cpan.org', registered => $main::time},
-  'TO_JSON');
+is_deeply(
+  $user->TO_JSON,
+  {
+    avatar     => 'whatever',
+    email      => 'jhthorsen@cpan.org',
+    path       => '/jhthorsen@cpan.org',
+    registered => Mojo::Date->new($main::time)->to_datetime
+  },
+  'TO_JSON'
+);
 
 eval { $user->set_password('') };
 like $@, qr{Usage:.*plain}, 'set_password() require plain string';
@@ -41,5 +45,4 @@ ok $user->validate_password('s3cret'), 'validate_password';
 $user->save;
 is $core->user('jhthorsen@cpan.org')->load->password, $user->password, 'password from storage file';
 
-File::Path::remove_tree($ENV{CONVOS_HOME});
 done_testing;

@@ -11,6 +11,8 @@ L<Convos::Core::User> is a class used to model a user in Convos.
 =cut
 
 use Mojo::Base -base;
+use Mojo::Date;
+use Mojo::Util;
 use File::Path                 ();
 use Crypt::Eksblowfish::Bcrypt ();
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
@@ -74,8 +76,8 @@ a "connection" event:
 
   $self->core->backend->emit(connection => $connection);
 
-C<$type> should be the type of the connection class. Example "IRC" will be
-translated to L<Convos::Core::Connection::IRC>.
+C<$type> should be the type of the connection class. Example "irc" will be
+translated to L<Convos::Core::Connection::Irc>.
 
 =cut
 
@@ -83,8 +85,9 @@ sub connection {
   my ($self, $type, $name, $attr) = @_;
   my $connection_class;
 
-  die "Invalid name $name. Need to match /^[\\w-]+\$/" unless $name and $name =~ /^[\w-]+$/;
-  $name             = lc $name;
+  $name = lc($name || '');
+  $type = Mojo::Util::camelize($type || '');
+  die qq(Invalid name "$name". Need to match /^[\\w-]+\$/) unless $name and $name =~ /^[\w-]+$/;
   $connection_class = "Convos::Core::Connection::$type";
   eval "require $connection_class;1" or die $@;
 
@@ -206,7 +209,7 @@ sub INFLATE {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  $self->{registered} ||= time;
+  $self->{registered} ||= Mojo::Date->new->to_datetime;
   my $json = {map { ($_, $self->{$_} // '') } qw( avatar email password registered )};
   delete $json->{password} unless $persist;
   $json->{path} = $self->path;

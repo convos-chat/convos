@@ -1,6 +1,4 @@
-use Mojo::Base -strict;
-use Test::More;
-use Convos;
+use t::Helper;
 
 {
   my $convos = Convos->new;

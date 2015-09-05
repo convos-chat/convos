@@ -1,13 +1,13 @@
 use Test::Mojo::IRC -basic;
+use t::Helper;
 use Mojo::IOLoop;
 use Convos::Core;
-use Test::Deep;
 
 my $t              = Test::Mojo::IRC->new;
 my $server         = $t->start_server;
 my $core           = Convos::Core->new;
 my $user           = $core->user('superman@example.com', {});
-my $connection     = $user->connection(IRC => 'localhost', {});
+my $connection     = $user->connection(irc => 'localhost', {});
 my $stop_re        = qr{should_not_match};
 my $connection_log = '';
 
@@ -62,7 +62,7 @@ $t->run(
         frozen => '',
         id     => "#convos_irc_live_20001",
         name   => "#Convos_irc_LIVE_20001",
-        path   => '/superman@example.com/IRC/localhost/#convos_irc_live_20001',
+        path   => '/superman@example.com/irc/localhost/#convos_irc_live_20001',
         topic  => '',
         users  => superhashof({"superman20001" => {name => "Superman20001", mode => '@', seen => re(qr/^\d{10}$/)}}),
       },
@@ -87,7 +87,7 @@ $t->run(
         frozen => '',
         id     => '#convos',
         name   => re(qr{^\#convos$}i),
-        path   => '/superman@example.com/IRC/localhost/#convos',
+        path   => '/superman@example.com/irc/localhost/#convos',
         topic  => re(qr{.?}),
         users  => superhashof({"superman20001" => {name => "Superman20001", mode => '', seen => re(qr/^\d{10}$/)}}),
       },
@@ -220,7 +220,7 @@ cmp_deeply(
         id     => '#convos',
         name   => '#convos',
         frozen => '',
-        path   => '/superman@example.com/IRC/localhost/#convos',
+        path   => '/superman@example.com/irc/localhost/#convos',
         topic  => 'some cool topic',
       },
       {
@@ -228,12 +228,12 @@ cmp_deeply(
         id     => '#convos_irc_live_20001',
         name   => '#Convos_irc_LIVE_20001',
         frozen => '',
-        path   => '/superman@example.com/IRC/localhost/#convos_irc_live_20001',
+        path   => '/superman@example.com/irc/localhost/#convos_irc_live_20001',
         topic  => 'Cool topic',
       }
     ),
     name  => 'localhost',
-    path  => '/superman@example.com/IRC/localhost',
+    path  => '/superman@example.com/irc/localhost',
     state => 'connecting',
     url   => re(qr{^irc://.*\?tls=0}),
   },

@@ -1,9 +1,7 @@
-use Mojo::Base -strict;
-use Test::Mojo;
-use Test::More;
+use t::Helper;
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
-my $t = Test::Mojo->new('Convos');
+my $t = t::Helper->t;
 
 $t->get_ok('/1.0/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');
 $t->delete_ok('/1.0/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');
@@ -13,7 +11,7 @@ $t->post_ok('/1.0/user/register', json => {email => 'superman', password => 'xyz
   ->json_is('/errors/0', {message => 'Does not match email format.', path => '/data/email'});
 
 $t->post_ok('/1.0/user/register', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200)
-  ->json_is('/avatar', '')->json_is('/email', 'superman@example.com')->json_like('/registered', qr/^\d+$/);
+  ->json_is('/avatar', '')->json_is('/email', 'superman@example.com')->json_like('/registered', qr/^[\d-]+T[\d:]+Z$/);
 
 $t->post_ok('/1.0/user')->status_is(200)->json_is('/avatar', '');
 my $registered = $t->tx->res->json->{registered};

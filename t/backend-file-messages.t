@@ -1,14 +1,12 @@
-use Mojo::Base -strict;
+use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
-use Test::More;
-use Test::Deep;
 
-local $ENV{CONVOS_HOME} = File::Spec->catdir(qw( t data convos-test-backend-file-messages ));
+$ENV{CONVOS_HOME} = File::Spec->catdir(qw( t data convos-test-backend-file-messages ));
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $user = $core->user('superman@example.com', {});
-my $connection = $user->connection(IRC => 'localhost', {});
+my $connection = $user->connection(irc => 'localhost', {});
 my $conversation = $connection->conversation('#convos'), my ($err, $messages);
 
 $conversation->messages({}, sub { ($err, $messages) = @_[1, 2]; });
