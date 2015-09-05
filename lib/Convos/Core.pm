@@ -36,7 +36,7 @@ Represents a user of L<Convos>.
 =item * Has many L<Convos::Core::Connection> objects.
 
 Represents a connection to a remote chat server, such as an
-L<IRC|Convos::Core::Connection::IRC> server.
+L<IRC|Convos::Core::Connection::Irc> server.
 
 =over 4
 

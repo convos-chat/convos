@@ -1,5 +1,4 @@
-use Mojo::Base -strict;
-use Test::More;
+use t::Helper;
 use Convos::Core::Backend;
 
 my $backend = Convos::Core::Backend->new;

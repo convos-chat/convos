@@ -1,4 +1,5 @@
 use Test::Mojo::IRC -basic;
+use t::Helper;
 
 BEGIN { $ENV{CONVOS_STEAL_NICK_INTERVAL} = 0.01 }
 use Convos::Core;
@@ -7,7 +8,7 @@ my $t          = Test::Mojo::IRC->new;
 my $server     = $t->start_server;
 my $core       = Convos::Core->new;
 my $user       = $core->user('nick.young@example.com', {});
-my $connection = $user->connection(IRC => 'localhost', {});
+my $connection = $user->connection(irc => 'localhost', {});
 my $nick;
 
 $connection->on(nick => sub { $nick = $_[1]; Mojo::IOLoop->stop; });

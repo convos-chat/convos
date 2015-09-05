@@ -1,24 +1,21 @@
-use Mojo::Base -strict;
-use Test::More;
+BEGIN { $ENV{CONVOS_CONNECT_TIMER} = 0.002 }
+use t::Helper;
+use Convos::Core;
+use Convos::Core::Backend::File;
 
-$ENV{CONVOS_HOME}          = 'convos-test-start';
-$ENV{CONVOS_CONNECT_TIMER} = 0.002;
-
-require Convos::Core;
-require Convos::Core::Backend::File;
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 
 {
   my $user = $core->user('jhthorsen@cpan.org')->save;
-  $user->connection(IRC => 'localhost', {})->tap(sub { shift->url->parse('irc://localhost') })->save;
+  $user->connection(irc => 'localhost', {})->tap(sub { shift->url->parse('irc://localhost') })->save;
 }
 
 {
   my $user = $core->user('mramberg@cpan.org')->save;
-  $user->connection(IRC => 'freenode',  {})->tap(sub { shift->url->parse('irc://chat.freenode.net:6697') })->save;
-  $user->connection(IRC => 'localhost', {})->tap(sub { shift->url->parse('irc://127.0.0.1') })->state('disconnected')
+  $user->connection(irc => 'freenode',  {})->tap(sub { shift->url->parse('irc://chat.freenode.net:6697') })->save;
+  $user->connection(Irc => 'localhost', {})->tap(sub { shift->url->parse('irc://127.0.0.1') })->state('disconnected')
     ->save;
-  $user->connection(IRC => 'perlorg', {})->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
+  $user->connection(irc => 'perlorg', {})->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
 }
 
 diag 'restart core';
@@ -30,7 +27,5 @@ Mojo::IOLoop->timer(0.3 => sub { Mojo::IOLoop->stop });    # should be long enou
 Mojo::IOLoop->start;
 is_deeply [sort keys %connect], [qw( chat.freenode.net:6697 irc.perl.org localhost )],
   'started connections, except disconnected';
-
-File::Path::remove_tree($ENV{CONVOS_HOME});
 
 done_testing;

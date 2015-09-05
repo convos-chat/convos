@@ -8,7 +8,7 @@ Convos::Core::Connection - A Convos connection base class
 
 L<Convos::Core::Connection> is a base class for L<Convos> connections.
 
-See also L<Convos::Core::Connection::IRC>.
+See also L<Convos::Core::Connection::Irc>.
 
 =cut
 
@@ -175,12 +175,12 @@ sub log {
   $path = $self->path;
 
 Returns a path to this object.
-Example: "/superman@example.com/IRC/irc.perl.org".
+Example: "/superman@example.com/irc/irc.perl.org".
 
 =cut
 
 sub path {
-  join '/', $_[0]->user->path, ref($_[0]) =~ /(\w+)$/, $_[0]->name;
+  lc join '/', $_[0]->user->path, ref($_[0]) =~ /(\w+)$/, $_[0]->name;
 }
 
 =head2 rooms

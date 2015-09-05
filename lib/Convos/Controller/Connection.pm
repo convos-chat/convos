@@ -25,23 +25,20 @@ See L<Convos::Manual::API/connectionAdd>.
 sub connection_add {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my @userinfo = map { $_ // '' } @{$args->{data}}{qw( username password )};
-  my $url      = Mojo::URL->new($self->_connection_url(@{$args->{data}}{qw( protocol server )}));
-  my $name     = $self->_pretty_connection_name($url->host);
+  my $url  = Mojo::URL->new($args->{data}{url});
+  my $name = $args->{data}{name} || $self->_pretty_connection_name($url->host);
   my $connection;
 
   unless ($name) {
-    return $self->$cb($self->invalid_request('Server need a valid host.', '/data/server'), 400);
+    return $self->$cb($self->invalid_request('URL need a valid host.', '/data/url'), 400);
   }
 
   eval {
-    $url->userinfo(join ':', @userinfo)
-      if grep {length} @userinfo;
-    $connection = $user->connection($args->{data}{protocol}, $name, {});
+    $connection = $user->connection($url->scheme, $name, {});
     $connection->url->parse($url);
   } or do {
     warn $@ if DEBUG;
-    return $self->$cb($self->invalid_request('Could not find class from protocol.', '/data/protocol'), 400);
+    return $self->$cb($self->invalid_request('Could not find connection class from scheme.', '/data/url'), 400);
   };
 
   $self->delay(
@@ -63,7 +60,7 @@ See L<Convos::Manual::API/connectionRooms>.
 sub connection_rooms {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{protocol}, $args->{connection_id});
+  my $connection = $user->connection($args->{protocol}, $args->{connection_name});
 
   unless ($connection->url->host) {
     return $self->$cb($self->invalid_request('Connection not found.'), 404);
@@ -96,47 +93,6 @@ sub connections {
   $self->$cb({connections => \@connections}, 200);
 }
 
-=head2 conversation_join
-
-See L<Convos::Manual::API/conversationJoin>.
-
-=cut
-
-sub conversation_join {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{protocol}, $args->{connection_id});
-
-  $self->delay(
-    sub { $connection->join_conversation($args->{conversation_id}, shift->begin) },
-    sub {
-      my ($delay, $err, $room) = @_;
-      return $self->$cb($self->invalid_request($err, '/conversation_id'), 400) if $err;
-      $connection->save($delay->begin);
-      $delay->pass($room);
-    },
-    sub {
-      my ($delay, $err, $room) = @_;
-      die $err if $err;
-      $self->$cb($room->TO_JSON, 200);
-    },
-  );
-}
-
-=head2 conversation_delete
-
-See L<Convos::Manual::API/conversationDelete>.
-
-=cut
-
-sub conversation_delete {
-  my ($self, $args, $cb) = @_;
-
-  die 'TODO';
-
-  $self->$cb({message => ''}, 200);
-}
-
 sub _pretty_connection_name {
   my ($self, $name) = @_;
 
@@ -149,13 +105,6 @@ sub _pretty_connection_name {
   $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
   $name =~ s![\W_]+!-!g;                                # make pretty url
   $name;
-}
-
-sub _connection_url {
-  my ($self, $protocol, $server) = @_;
-
-  return $server if $server =~ m!^\w+://!;
-  return sprintf '%s://%s', lc $protocol, $server;
 }
 
 =head1 COPYRIGHT AND LICENSE

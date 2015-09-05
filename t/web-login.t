@@ -1,9 +1,7 @@
-use Mojo::Base -strict;
-use Test::Mojo;
-use Test::More;
+use t::Helper;
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
-my $t = Test::Mojo->new('Convos');
+my $t = t::Helper->t;
 
 $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret');
 
@@ -20,7 +18,7 @@ $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', passwor
 
 $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200)
   ->json_is('/avatar', 'avatar@example.com')->json_is('/email', 'superman@example.com')
-  ->json_like('/registered', qr/^\d+$/);
+  ->json_like('/registered', qr/^[\d-]+T[\d:]+Z$/);
 
 $t->get_ok('/1.0/user')->status_is(200);
 

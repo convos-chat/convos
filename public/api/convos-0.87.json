@@ -18,8 +18,8 @@
   "basePath": "/1.0",
   "schemes": [ "http" ],
   "parameters": {
-    "connection_id": {
-      "name": "connection_id",
+    "connection_name": {
+      "name": "connection_name",
       "in": "path",
       "required": true,
       "type": "string",
@@ -67,7 +67,7 @@
       "get": {
         "tags": [ "chat" ],
         "summary": "Get list of available ommands.",
-        "x-mojo-controller": "Convos::Controller::Chat",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "commandList",
         "parameters": [],
         "responses": {
@@ -87,21 +87,21 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_id}": {
+    "/connection/{protocol}/{connection_name}": {
       "delete": {
         "tags": [ "connection" ],
         "summary": "Delete a connection and all assosiated data.",
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connectionDelete",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" }
         ],
         "responses": {
           "200": {
             "description": "Delete a connection.",
-            "schema": {}
+            "schema": { "$ref": "#/definitions/Success" }
           },
           "default": {
             "description": "Error.",
@@ -115,7 +115,7 @@
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connection",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" }
         ],
@@ -138,7 +138,7 @@
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connectionUpdate",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" },
           {
@@ -150,7 +150,7 @@
         "responses": {
           "200": {
             "description": "Update a connection.",
-            "schema": {}
+            "schema": { "$ref": "#/definitions/Connection" }
           },
           "default": {
             "description": "Error.",
@@ -159,14 +159,14 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_id}/rooms": {
+    "/connection/{protocol}/{connection_name}/rooms": {
       "get": {
         "tags": [ "conversation" ],
         "summary": "Get a list of all available chat rooms.",
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connectionRooms",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" }
         ],
@@ -187,14 +187,14 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_id}/conversation/{conversation_id}": {
+    "/connection/{protocol}/{connection_name}/conversation/{conversation_id}": {
       "delete": {
         "tags": [ "conversation" ],
         "summary": "Remove (part) a conversation.",
-        "x-mojo-controller": "Convos::Controller::Connection",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "conversationDelete",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/conversation_id" },
           { "$ref": "#/parameters/protocol" }
         ],
@@ -212,10 +212,10 @@
       "post": {
         "tags": [ "conversation" ],
         "summary": "Join a conversation.",
-        "x-mojo-controller": "Convos::Controller::Connection",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "conversationJoin",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/conversation_id" },
           { "$ref": "#/parameters/protocol" }
         ],
@@ -231,14 +231,14 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_id}/conversation/{conversation_id}/messages": {
+    "/connection/{protocol}/{connection_name}/conversation/{conversation_id}/messages": {
       "get": {
         "tags": [ "conversation" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
-        "x-mojo-controller": "Convos::Controller::Chat",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "conversationMessages",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/conversation_id" },
           { "$ref": "#/parameters/protocol" },
           { "name": "after", "in": "query", "type": "string", "format": "datetime", "description": "Find messages after a given ISO 8601 timestamp" },
@@ -264,14 +264,14 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_id}/conversation/{conversation_id}/send": {
+    "/connection/{protocol}/{connection_name}/conversation/{conversation_id}/send": {
       "post": {
         "tags": [ "chat" ],
         "summary": "Send a message to a target.",
-        "x-mojo-controller": "Convos::Controller::Chat",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "conversationSend",
         "parameters": [
-          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/conversation_id" },
           { "$ref": "#/parameters/protocol" },
           { "$ref": "#/parameters/session" }
@@ -326,10 +326,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "password": { "type": "string", "description": "Login password to server." },
-                "protocol": { "type": "string", "description": "Protocol to use. Example: IRC." },
-                "server": { "type": "string", "required": true, "description": "Either complete url or server:port. (Port is optional)" },
-                "username": { "type": "string", "description": "Login username to server." }
+                "url": { "type": "string", "required": true, "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
               }
             }
           }
@@ -352,7 +349,7 @@
       "get": {
         "tags": [ "conversation" ],
         "summary": "Get a list of all conversations.",
-        "x-mojo-controller": "Convos::Controller::Chat",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "conversations",
         "parameters": [
           { "$ref": "#/parameters/session" }
@@ -379,7 +376,7 @@
         "tags": [ "chat" ],
         "summary": "Get list of notications.",
         "description": "A notification is added once your name is mentioned in a chat or someone sends a direct message.",
-        "x-mojo-controller": "Convos::Controller::Chat",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "notifications",
         "parameters": [
           { "$ref": "#/parameters/session" }
@@ -406,7 +403,7 @@
         "tags": [ "chat" ],
         "summary": "Mark a notication as seen.",
         "description": "TODO: Notification count vs red/green toggling of a single notification.",
-        "x-mojo-controller": "Convos::Controller::Chat",
+        "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "notificationSeen",
         "parameters": [
           { "$ref": "#/parameters/session" },
@@ -415,7 +412,7 @@
             "in": "body",
             "type": "object",
             "properties": {
-              "ids": { "type": "array", "type": "integer" }
+              "ids": { "type": "array", "type": "integer", "description": "A list of notification IDs to mark as seen/read" }
             }
           }
         ],
@@ -590,92 +587,69 @@
   },
   "definitions": {
     "Command": {
-      "required": [ "id", "command" ],
       "properties": {
-        "id": { "type": "string" },
-        "command": { "type": "string" }
+        "id": { "type": "string", "required": true, "description": "jhthorsen: Cannot remember what 'id' is." },
+        "command": { "type": "string", "required": true, "description": "A command to be sent to backend" }
       }
     },
     "Connection": {
-      "required": [ "connection_id", "server", "nick" ],
       "properties": {
-        "name": { "type": "string" },
-        "path": { "type": "string" },
-        "state": { "type": "string" },
-        "url": { "type": "string" }
+        "name": { "type": "string", "description": "Name/identifier for this connection" },
+        "path": { "type": "string", "description": "Unique path to this connection" },
+        "state": { "type": "string", "enum": ["connected", "connecting", "disconnected"], "description": "Connection state" },
+        "url": { "type": "string", "format": "uri", "required": true, "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
     },
     "Room": {
       "properties": {
-        "name": { "type": "string" },
-        "path": { "type": "string" },
-        "topic": { "type": "string" },
+        "name": { "type": "string", "required": true, "description": "Name of the room" },
+        "path": { "type": "string", "description": "Unique path to this room" },
+        "topic": { "type": "string", "description": "The subjec/topic for this room" },
         "users": {
           "type": "object",
           "properties": {
-            "name": {
-              "type": "string",
-              "description": "Name of the user"
-            }
+            "name": { "type": "string", "description": "Name of the user" }
           }
         }
       }
     },
     "Error": {
-      "required": [ "code", "message" ],
       "properties": {
         "errors": {
           "type": "array",
           "items": {
-            "message": { "type": "string" },
-            "path": { "type": "string" }
+            "message": { "type": "string", "required": true, "description": "Human readable description of the error" },
+            "path": { "type": "string", "description": "JSON pointer to the input data where the error occur" }
           }
         }
       }
     },
     "Message": {
-      "required": [ "timestamp", "message" ],
       "properties": {
-        "avatar": { "type": "string" },
-        "level": { "type": "string" },
-        "message": { "type": "string" },
-        "sender": { "type": "string" },
-        "timestamp": { "type": "string", "format": "datetime" }
+        "avatar": { "type": "string", "format": "uri", "description": "Location to an image which can be used as avatar" },
+        "level": { "type": "string", "default": "info", "enum": ["debug", "info", "warn"], "description": "How important this message is" },
+        "message": { "type": "string", "required": true, "description": "The message" },
+        "sender": { "type": "string", "required": true, "description": "Identifier for the sender on the chat server" },
+        "timestamp": { "type": "string", "format": "datetime", "required": true, "description": "Example: 2015-09-06T13:49:37Z" }
       }
     },
     "Notification": {
-      "required": [ "id", "timestamp", "message" ],
       "properties": {
-        "id": { "type": "string" },
-        "message": { "type": "string" },
-        "timestamp": { "type": "string", "format": "datetime" }
-      }
-    },
-    "Rel": {
-      "required": [ "rel", "href" ],
-      "properties": {
-        "rel": { "type": "string" },
-        "href": { "type": "string", "format": "url" }
+        "id": { "type": "string", "required": true, "description": "Identifier used when marking this as seen" },
+        "message": { "type": "string", "required": true, "description": "The message that resulted in a notification" },
+        "timestamp": { "type": "string", "format": "datetime", "required": true, "description": "Example: 2015-09-06T10:47:31Z" }
       }
     },
     "Success": {
       "properties": {
-        "message": { "type": "string" },
-        "links": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/Rel" }
-        }
+        "message": { "type": "string", "description": "Human readable description" }
       }
     },
     "User": {
       "properties": {
-        "email": { "type": "string" },
-        "avatar": { "type": "string" },
-        "registered": { "type": "integer" },
-        "links": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/Rel" }
-        }
+        "email": { "type": "string", "required": true, "description": "Unique email identifying a user in Convos" },
+        "avatar": { "type": "string", "description": "Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID" },
+        "registered": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
       }
     }
   }
