@@ -65,7 +65,7 @@
   });
 
   this.on('update', function() {
-    var p = riot.url.path.replace(/^chat/, '/' + this.user.email());
+    var p = riot.url.path().replace(/^chat/, '/' + this.user.email());
     this.conversations.forEach(function(c, i) { if (c.path() == p) this.activeConversation = i; }.bind(this));
   });
 
