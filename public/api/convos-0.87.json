@@ -144,7 +144,10 @@
           {
             "name": "data",
             "in": "body",
-            "schema": { "$ref": "#/definitions/Connection" }
+            "schema": {
+              "state": { "type": "string", "enum": ["connect", "disconnect"], "description": "Connection state" },
+              "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+            }
           }
         ],
         "responses": {
