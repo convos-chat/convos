@@ -81,6 +81,8 @@ sub startup {
   $self->_setup_settings;
   $self->plugin(Swagger2 => {url => $config->{swagger_file}});
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
+  $self->routes->websocket('/events/bi-directional')->to('events#bi_directional');
+  $self->routes->get('/events/event-source')->to('events#event_source');
   $self->routes->get('/')->to(template => 'app');
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
