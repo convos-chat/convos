@@ -37,4 +37,13 @@ $t->get_ok('/1.0/connections')->status_is(200)->json_is(
   }
   );
 
+$t->post_ok('/1.0/connection/irc/doesnotexist', json => {url => 'foo://perl.org:9999'})->status_is(404);
+$t->post_ok('/1.0/connection/irc/magnet',       json => {})->status_is(400);
+$t->post_ok('/1.0/connection/irc/localhost',    json => {url => 'foo://perl.org:9999'})->status_is(200)
+  ->json_is('/path' => '/superman@example.com/irc/localhost')->json_is('/name' => 'localhost')
+  ->json_is('/url' => 'irc://perl.org:9999');
+
+local $TODO = 'Should change to "connecting" after changing url';
+$t->json_is('/state' => 'connecting');
+
 done_testing;

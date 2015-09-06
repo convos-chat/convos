@@ -75,6 +75,42 @@ sub connection_rooms {
   );
 }
 
+=head2 connection_update
+
+See L<Convos::Manual::API/connectionUpdate>.
+
+=cut
+
+sub connection_update {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $url = Mojo::URL->new($args->{data}{url});
+  my $connection;
+
+  eval {
+    $connection = $user->connection($args->{protocol}, $args->{connection_name});
+    $connection->url->host or die 'Connection not found';
+  } or do {
+    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+  };
+
+  if ($url->host) {
+    warn $url->scheme;
+    $url->scheme($args->{protocol});
+    warn $url->scheme;
+    $connection->url->parse($url);
+  }
+
+  $self->delay(
+    sub { $connection->save(shift->begin) },
+    sub {
+      my ($delay, $err) = @_;
+      die $err if $err;
+      $self->$cb($connection->TO_JSON, 200);
+    },
+  );
+}
+
 =head2 connections
 
 See L<Convos::Manual::API/connections>.
