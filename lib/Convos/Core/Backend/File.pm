@@ -328,6 +328,7 @@ sub _setup {
   $self->on(
     connection => sub {
       my ($self, $connection) = @_;
+      Scalar::Util::weaken($self);
       $connection->on(log => sub { $self->_log(@_) });
     }
   );
@@ -335,6 +336,7 @@ sub _setup {
   $self->on(
     conversation => sub {
       my ($self, $conversation) = @_;
+      Scalar::Util::weaken($self);
       $conversation->on(log => sub { $self->_log(@_) });
     }
   );
