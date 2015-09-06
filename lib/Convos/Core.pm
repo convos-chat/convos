@@ -165,8 +165,13 @@ sub _start {
     $obj->load(
       sub {
         my ($connection, $err) = @_;
-        $connection->connect(sub { }) unless $connection->state eq 'disconnected';
-        Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->_start(@objs) });
+        if ($connection->state eq 'connecting') {
+          $connection->connect(sub { });
+          Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->_start(@objs) });
+        }
+        else {
+          $self->_start(@objs);
+        }
       }
     );
   }

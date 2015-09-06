@@ -34,10 +34,12 @@ sub connection_add {
   }
 
   eval {
+    die 'DUP' if $user->connection($url->scheme, $name)->url->host;
     $connection = $user->connection($url->scheme, $name, {});
     $connection->url->parse($url);
   } or do {
     warn $@ if DEBUG;
+    return $self->$cb($self->invalid_request('Connection already exists.', '/'), 400) if $@ =~ /^DUP\s/;
     return $self->$cb($self->invalid_request('Could not find connection class from scheme.', '/data/url'), 400);
   };
 
@@ -84,7 +86,8 @@ See L<Convos::Manual::API/connectionUpdate>.
 sub connection_update {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $url = Mojo::URL->new($args->{data}{url});
+  my $state = $args->{data}{state} || '';
+  my $url = Mojo::URL->new($args->{data}{url} || '');
   my $connection;
 
   eval {
@@ -96,14 +99,21 @@ sub connection_update {
 
   if ($url->host) {
     $url->scheme($args->{protocol});
+    $state = 'reconnect' if $url->to_string ne $connection->url->to_string;
     $connection->url->parse($url);
   }
 
   $self->delay(
-    sub { $connection->save(shift->begin) },
     sub {
-      my ($delay, $err) = @_;
+      my ($delay) = @_;
+      $connection->save($delay->begin);
+      $connection->disconnect($delay->begin) if $state eq 'disconnect' or $state eq 'reconnect';
+      $connection->state('connecting') if $state eq 'connect';
+    },
+    sub {
+      my ($delay, $err, $disconnected) = @_;
       die $err if $err;
+      $connection->state('connecting') if $state eq 'reconnect';
       $self->$cb($connection->TO_JSON, 200);
     },
   );

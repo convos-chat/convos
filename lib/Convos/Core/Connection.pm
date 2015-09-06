@@ -127,6 +127,16 @@ sub conversations {
   return [values %{$self->{conversations} || {}}];
 }
 
+=head2 disconnect
+
+  $self = $self->disconnect(sub { my ($self, $err) = @_ });
+
+Used to disconnect from server. Meant to be overloaded in a subclass.
+
+=cut
+
+sub disconnect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "disconnect" not implemented.'); }
+
 =head2 join_conversation
 
   $self = $self->join_conversation("#some_channel", sub { my ($self, $err) = @_; });

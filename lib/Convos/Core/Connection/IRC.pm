@@ -98,7 +98,7 @@ sub connect {
   $irc->tls(($url->query->param('tls') // 1) ? {} : undef);
 
   return $self->tap($cb, "Invalid URL: hostname is not defined.") unless $irc->server;
-
+  delete $self->{disconnect};
   Scalar::Util::weaken($self);
   $self->state('connecting');
   $self->{steal_nick_tid} ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
@@ -120,9 +120,23 @@ sub connect {
   return $self;
 }
 
+=head2 disconnect
+
+See L<Convos::Core::Connection/disconnect>.
+
+=cut
+
+sub disconnect {
+  my ($self, $cb) = @_;
+  Scalar::Util::weaken($self);
+  $self->{disconnect} = 1;
+  $self->_irc->disconnect(sub { $self->state('disconnected')->$cb($_[1] || '') });
+  $self;
+}
+
 =head2 join_conversation
 
-See L<Convos::Core::Connection join_conversation>.
+See L<Convos::Core::Connection/join_conversation>.
 
 =cut
 
