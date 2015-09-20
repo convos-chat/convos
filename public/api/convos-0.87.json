@@ -598,7 +598,6 @@
     "Connection": {
       "properties": {
         "name": { "type": "string", "description": "Name/identifier for this connection" },
-        "path": { "type": "string", "description": "Unique path to this connection" },
         "state": { "type": "string", "enum": ["connected", "connecting", "disconnected"], "description": "Connection state" },
         "url": { "type": "string", "format": "uri", "required": true, "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
@@ -606,7 +605,6 @@
     "Room": {
       "properties": {
         "name": { "type": "string", "required": true, "description": "Name of the room" },
-        "path": { "type": "string", "description": "Unique path to this room" },
         "topic": { "type": "string", "description": "The subjec/topic for this room" },
         "users": {
           "type": "object",

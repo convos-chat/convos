@@ -81,20 +81,20 @@ sub messages {
   $self;
 }
 
-=head2 path
+=head2 user
 
-  $str = $self->path;
+  $user = $self->user;
+  $user = $self->connection->user;
 
-Returns a path to this object.
-Example: "/superman@example.com/IRC/irc.perl.org/#convos".
+Shortcut.
 
 =cut
 
-sub path { join '/', $_[0]->connection->path, $_[0]->id }
+sub user { shift->connection->user }
 
 sub TO_JSON {
   my $self = shift;
-  return {map { ($_, $self->$_) } qw( active id name path )};
+  return {map { ($_, $self->$_) } qw( active id name )};
 }
 
 =head1 COPYRIGHT AND LICENSE

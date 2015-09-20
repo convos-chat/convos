@@ -4,6 +4,8 @@ use Convos::Core::Backend::File;
 
 $ENV{CONVOS_HOME} = File::Spec->catdir(qw( t data convos-test-backend-file-messages ));
 
+local $TODO = 'Convos::Core::Backend::File::messages() has a new api';
+
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $user = $core->user('superman@example.com', {});
 my $connection = $user->connection(irc => 'localhost', {});

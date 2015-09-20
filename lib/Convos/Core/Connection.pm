@@ -47,6 +47,12 @@ the following new ones.
 
 Holds the name of the connection.
 
+=head2 protocol
+
+  $str = $self->protocol;
+
+Holds the protocol name.
+
 =head2 url
 
   $url = $self->url;
@@ -63,6 +69,12 @@ Holds a L<Convos::Core::User> object that owns this connection.
 =cut
 
 sub name { shift->{name} or die 'name is required in constructor' }
+
+has protocol => sub {
+  my $proto = substr ref($_[0]), length __PACKAGE__;
+  $proto =~ s!^\W+!!;    # remove ::
+  Mojo::Util::decamelize($proto);
+};
 
 sub url {
   return $_[0]->{url} if ref $_[0]->{url};
@@ -180,19 +192,6 @@ sub log {
   $self->emit(log => $level => $message);
 }
 
-=head2 path
-
-  $path = $self->path;
-
-Returns a path to this object.
-Example: "/superman@example.com/irc/irc.perl.org".
-
-=cut
-
-sub path {
-  lc join '/', $_[0]->user->path, ref($_[0]) =~ /(\w+)$/, $_[0]->name;
-}
-
 =head2 rooms
 
   $self = $self->rooms(sub { my ($self, $err, $list) = @_; });
@@ -290,7 +289,6 @@ sub TO_JSON {
   my $json = {map { ($_, '' . $self->$_) } qw( name state url )};
 
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
-  $json->{path} = $self->path;
 
   if ($persist) {
     $json->{conversations} = [];

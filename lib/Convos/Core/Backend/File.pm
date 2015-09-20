@@ -9,7 +9,7 @@ Convos::Core::Backend::File - Backend for storing object to file
 L<Convos::Core::Backend::File> contains methods which is useful for objects
 that want to be persisted to disk or store state to disk.
 
-=head2 Where data is stored
+=head2 Where is data stored
 
 C<CONVOS_HOME> can be set to specify the root location for where to save
 data from objects. The default directory on *nix systems is something like this:
@@ -21,13 +21,12 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
 =head2 Directory structure
 
   $CONVOS_HOME/
-  $CONVOS_HOME/joe@example.com/                             # one directory per user
-  $CONVOS_HOME/joe@example.com/user.json                    # this works, since a connection can only have [\w_-]+
-  $CONVOS_HOME/joe@example.com/IRC/freenode/                # one directory per connection
-  $CONVOS_HOME/joe@example.com/IRC/freenode/connection.json # this works, since a log file ends on .log and not .json
-  $CONVOS_HOME/joe@example.com/IRC/freenode/marcus.log      # private conversation log file
-  $CONVOS_HOME/joe@example.com/IRC/freenode/#convos.log     # channel conversation log file
-  $CONVOS_HOME/joe@example.com/IRC/freenode.log             # server log file
+  $CONVOS_HOME/joe@example.com/                                 # one directory per user
+  $CONVOS_HOME/joe@example.com/settings.json                    # user settings
+  $CONVOS_HOME/joe@example.com/connections/irc/freenode.json    # connection settings
+  $CONVOS_HOME/joe@example.com/2015/02/irc/freenode.log         # connection log
+  $CONVOS_HOME/joe@example.com/2015/10/irc/freenode/marcus.log  # conversation log
+  $CONVOS_HOME/joe@example.com/2015/12/irc/freenode/#convos.log # conversation log
 
 =cut
 
@@ -75,15 +74,16 @@ See L<Convos::Core::Backend/find_connections>.
 
 sub find_connections {
   my ($self, $user, $cb) = @_;
-  my $base = $self->home->rel_dir($user->email);
+  my $base = $self->home->rel_dir(join '/', $user->email, 'connections');
   my @names;
 
   return $self->$cb($!, \@names) unless opendir(my $TYPES, $base);
 
-  for my $type (grep {/^\w+$/} readdir $TYPES) {
-    opendir(my $CONNECTIONS, catdir $base, $type) or next;
-    for my $name (grep {/^\w+/} readdir $CONNECTIONS) {
-      push @names, [$type, $name] if -r catfile($base, $type, $name, 'connection.json');
+  for my $protocol (grep {/^\w+$/} readdir $TYPES) {
+    opendir(my $CONNECTIONS, catdir $base, $protocol) or next;
+    for my $name (grep {/\.json$/} readdir $CONNECTIONS) {
+      $name =~ s!\.json$!!;
+      push @names, [$protocol, $name];
     }
   }
 
@@ -101,7 +101,7 @@ sub find_users {
   my $home = $self->home;
 
   return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
-  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/user.json") } readdir $DH]);
+  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/settings.json") } readdir $DH]);
 }
 
 =head2 load_object
@@ -144,9 +144,8 @@ sub messages {
   my $level = $query->{level} || 'info|warn|error';
   my $limit = $query->{limit} || 60;
   my $re    = $query->{match} || qr{.};
-  my $path  = $self->home->rel_dir($obj->path) . '.log';
-  my $FH    = gensym;
-  my ($after, $before, $pos, @messages);
+  my $found = 0;
+  my ($after, $before);
 
   $after  = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{after})  if $query->{after};
   $before = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{before}) if $query->{before};
@@ -154,25 +153,19 @@ sub messages {
   $re = qr{\Q$re\E}i unless ref $re;
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \[($level)\] (.*$re.*)$/;
 
-  local $!;
+  # TODO:
+  # Need to implement logic for searching in multiple files since the _log()
+  # method "rotate" files every month.
+  # The search should probably be done in a fork, using
+  # Mojo::IOLoop::ReadWriteFork. We cannot use Mojo::IOLoop::ForkCall,
+  # since that won't allow streaming of search results. With "streaming",
+  # I mean that I want the $cb to be called once for every search result,
+  # so the frontend can show results as soon as they are available.
+  # I think this will be a better user experience, but I might be adding
+  # complexity that is not required.
 
-  if ($before) {
-    $pos = $self->_pos($obj, $before, 1) // 0;
-    tie *$FH, 'File::ReadBackwards', $path or return $self->tap($cb, $!, \@messages);
-
-    # this is a very ugly thing to do
-    if ($pos) {
-      tied(*$FH)->{read_size} = $pos % $MAX_READ_SIZE || $MAX_READ_SIZE;
-      tied(*$FH)->{seek_pos} = $pos;
-    }
-  }
-  else {
-    $pos = $after ? $self->_pos($obj, $after, 0) : 0;
-    open $FH, '<', $path or return $self->tap($cb, '', \@messages);
-    seek $FH, $pos, 0;
-  }
-
-  warn "[@{[ref $obj]}] Messages from $path ($pos)\n" if DEBUG;
+  local $! = 0;
+  open my $FH, '/some/log/file' or return $self->$cb($!, undef);
 
   while (<$FH>) {
     next unless /$re/;
@@ -189,12 +182,11 @@ sub messages {
     elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
       @$message{qw( type sender )} = (server => 'server');
     }
-    push @messages, $message;
-    last if @messages == $limit;
+    $self->$cb('', $message);
+    last if ++$found == $limit;
   }
 
-  @messages = reverse @messages if $before;
-  $self->$cb($!, \@messages);
+  $self->$cb($!, undef);
   $self;
 }
 
@@ -244,53 +236,24 @@ sub _build_home {
 
 sub _log {
   my ($self, $obj, $level, $message) = @_;
-  my $t   = gmtime;
-  my $ymd = $t->ymd;
-  my $FH;
+  my $t  = gmtime;
+  my $ym = sprintf '%s/%02s', $t->year, $t->mon;
+  my $FH = $self->{log_fh}{$obj}{$ym};
 
-  unless ($FH = $self->{log_fh}{$obj}) {
-    my $path = $self->home->rel_dir($obj->path) . '.log';
-    open $FH, '>>', $path or die "Append $path: $!";
-    $self->{log_fh}{$obj} = $FH;
-  }
-  unless (defined $self->{pos}{$obj}{$ymd}) {
-    my $path = $self->home->rel_dir($obj->path) . '.log.ymd';
-    open my $POS, '>>', $path or die "Append $path: $!";
-    printf {$POS} "%s=%s\n", $ymd, ($self->{pos}{$obj}{$ymd} = tell $FH);
+  unless ($FH) {
+    my @path = ($obj->user->email, $ym);
+    push @path, map { ($_->protocol, $_->name) } $obj->isa('Convos::Core::Connection') ? $obj : $obj->connection;
+    push @path, $obj->name if $obj->isa('Convos::Core::Conversation');
+    my $path = $self->home->rel_file(join('/', @path) . '.log');
+    File::Path::make_path(File::Basename::dirname($path));
+    open $FH, '>>', $path or die "Can't open log file $path: $!";
+    $self->{log_fh}{$obj}{$ym} = $FH;
+    delete $self->{log_fh}{$obj};    # make sure we remove old file handles
   }
 
   flock $FH, LOCK_EX;
   printf {$FH} sprintf "%s [%s] %s\n", $t->datetime, $level, $message;
   flock $FH, LOCK_UN;
-}
-
-sub _pos {
-  my ($self, $obj, $t, $before) = @_;
-  my $pos = $self->{pos}{$obj};
-
-  if (!$pos) {
-    my $path = $self->home->rel_dir($obj->path) . '.log.ymd';
-    if (open my $FH, '<', $path) {
-      /^(.*)=(\d+)$/ and $pos->{$1} = $2 while <$FH>;
-    }
-  }
-
-  return $pos->{$t->ymd} if defined $pos->{$t->ymd};
-
-  if ($before) {
-    for my $k (sort { $a cmp $b } keys %$pos) {
-      my $match = Time::Piece->new($k);
-      return $pos->{$k} if $match >= $t;
-    }
-  }
-  else {
-    for my $k (sort { $b cmp $a } keys %$pos) {
-      my $match = Time::Piece->new($k);
-      return $pos->{$k} if $match <= $t;
-    }
-  }
-
-  return undef;
 }
 
 sub _setup {
@@ -315,7 +278,10 @@ sub _setup {
 
 sub _storage_file {
   my ($self, $obj) = @_;
-  $self->home->rel_file(sprintf '%s/%s.json', $obj->path, ref($obj) =~ /::(Connection|User)/ ? lc $1 : 'settings');
+
+  return $obj->isa('Convos::Core::Connection')
+    ? $self->home->rel_file(sprintf '%s/connections/%s/%s.json', $obj->user->email, $obj->protocol, $obj->name)
+    : return $self->home->rel_file(sprintf '%s/settings.json', $obj->email);
 }
 
 =head1 COPYRIGHT AND LICENSE
