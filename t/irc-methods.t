@@ -62,7 +62,6 @@ $t->run(
         frozen => '',
         id     => "#convos_irc_live_20001",
         name   => "#Convos_irc_LIVE_20001",
-        path   => '/superman@example.com/irc/localhost/#convos_irc_live_20001',
         topic  => '',
         users  => superhashof({"superman20001" => {name => "Superman20001", mode => '@', seen => re(qr/^\d{10}$/)}}),
       },
@@ -87,7 +86,6 @@ $t->run(
         frozen => '',
         id     => '#convos',
         name   => re(qr{^\#convos$}i),
-        path   => '/superman@example.com/irc/localhost/#convos',
         topic  => re(qr{.?}),
         users  => superhashof({"superman20001" => {name => "Superman20001", mode => '', seen => re(qr/^\d{10}$/)}}),
       },
@@ -215,25 +213,16 @@ cmp_deeply(
   $connection->TO_JSON(1),
   {
     conversations => bag(
-      {
-        active => 1,
-        id     => '#convos',
-        name   => '#convos',
-        frozen => '',
-        path   => '/superman@example.com/irc/localhost/#convos',
-        topic  => 'some cool topic',
-      },
+      {active => 1, id => '#convos', name => '#convos', frozen => '', topic => 'some cool topic',},
       {
         active => 1,
         id     => '#convos_irc_live_20001',
         name   => '#Convos_irc_LIVE_20001',
         frozen => '',
-        path   => '/superman@example.com/irc/localhost/#convos_irc_live_20001',
         topic  => 'Cool topic',
       }
     ),
     name  => 'localhost',
-    path  => '/superman@example.com/irc/localhost',
     state => 'connecting',
     url   => re(qr{^irc://.*\?tls=0}),
   },

@@ -2,6 +2,8 @@ use t::Helper;
 
 $ENV{CONVOS_HOME} = File::Spec->catdir(qw( t data convos-test-backend-file-messages ));
 
+local $TODO = 'Should be able to stream log messages over websocket or event stream';
+
 my $t = t::Helper->t;
 my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret');
 

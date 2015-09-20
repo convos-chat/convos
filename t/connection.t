@@ -10,7 +10,6 @@ isa_ok($connection->conversation('marcus'), 'Convos::Core::Conversation::Direct'
 ok !$connection->{conversation}{'#foo'}, 'no conversation on get';
 
 my $conversation = $connection->conversation('#foo' => {});
-is $conversation->path, '/test@example.com/irc/whatever/#foo', 'conversation->path';
 is $conversation->n_users, 0, 'conversation->n_users';
 ok $connection->{conversations}{'#foo'}, 'conversation on create/update';
 

@@ -135,17 +135,6 @@ sub load {
   $self;
 }
 
-=head2 path
-
-  $str = $self->path;
-
-Returns a path to this object.
-Example: "/superman@example.com".
-
-=cut
-
-sub path { '/' . shift->email }
-
 =head2 save
 
   $self = $self->save(sub { my ($self, $err) = @_; });
@@ -212,7 +201,6 @@ sub TO_JSON {
   $self->{registered} ||= Mojo::Date->new->to_datetime;
   my $json = {map { ($_, $self->{$_} // '') } qw( avatar email password registered )};
   delete $json->{password} unless $persist;
-  $json->{path} = $self->path;
   $json;
 }
 

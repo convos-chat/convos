@@ -58,6 +58,31 @@ sub find_users {
   $_[0]->tap($_[1], '', []);
 }
 
+=head2 messages
+
+  $self->messages(\%query, sub { my ($self, $err, $message) = @_; });
+
+Used to search for messages stored in backend. The callback is called once for
+every message found. An undef C<$message> will be used to define the end of
+the search.
+
+Possible C<%query>:
+
+  {
+    after  => $datetime, # find messages after a given ISO 8601 timestamp
+    before => $datetime, # find messages before a given ISO 8601 timestamp
+    level  => $str,      # debug, info (default), warn, error
+    limit  => $int,      # max number of messages to retrieve
+    match  => $regexp,   # filter messages by a regexp
+  }
+
+=cut
+
+sub messages {
+  my ($self, $query, $cb) = @_;
+  $self->tap($cb, '', undef);
+}
+
 =head2 new
 
 Will also call C<_setup()> after the object is created.
@@ -92,30 +117,6 @@ sub save_object {
   my ($self, $obj, $cb) = @_;
   $obj->$cb('') if $cb;
   $self;
-}
-
-=head2 messages
-
-  $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
-
-Used to search for messages stored in backend.
-
-Possible C<%query>:
-
-  {
-    after  => $datetime, # find messages after a given ISO 8601 timestamp
-    before => $datetime, # find messages before a given ISO 8601 timestamp
-    level  => $str,      # debug, info (default), warn, error
-    limit  => $int,      # max number of messages to retrieve
-    match  => $regexp,   # filter messages by a regexp
-    path   => $str,      # find messages under a path (required)
-  }
-
-=cut
-
-sub messages {
-  my ($self, $query, $cb) = @_;
-  $self->tap($cb, '', []);
 }
 
 sub _setup { }

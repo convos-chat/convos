@@ -18,15 +18,8 @@ my $registered = $t->tx->res->json->{registered};
 $t->post_ok('/1.0/user', json => {avatar => 'avatar@example.com'})->status_is(200)
   ->json_is('/avatar', 'avatar@example.com');
 
-$t->get_ok('/1.0/user')->status_is(200)->json_is(
-  '',
-  {
-    avatar     => 'avatar@example.com',
-    email      => 'superman@example.com',
-    path       => '/superman@example.com',
-    registered => $registered
-  }
-);
+$t->get_ok('/1.0/user')->status_is(200)
+  ->json_is('', {avatar => 'avatar@example.com', email => 'superman@example.com', registered => $registered});
 
 $t->delete_ok('/1.0/user')->status_is(400)->json_is('/errors/0/message', 'You are the only user left.');
 

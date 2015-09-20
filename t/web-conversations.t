@@ -16,39 +16,12 @@ $user->connection(irc => 'localhost', {})->join_conversation('#private',       s
 $user->connection(irc => 'perl-org',  {})->join_conversation('#oslo.pm',       sub { });
 $user->connection(irc => 'localhost', {})->join_conversation('#Convos s3cret', sub { });
 
-$t->get_ok('/1.0/conversations')->status_is(200)->json_is(
-  '/conversations/0',
-  {
-    active => 1,
-    topic  => '',
-    frozen => '',
-    name   => '#Convos',
-    path   => '/superman@example.com/irc/localhost/#convos',
-    id     => '#convos',
-    users  => {}
-  }
-  )->json_is(
-  '/conversations/1',
-  {
-    active => 1,
-    topic  => '',
-    frozen => '',
-    name   => '#private',
-    path   => '/superman@example.com/irc/localhost/#private',
-    id     => '#private',
-    users  => {}
-  }
-  )->json_is(
-  '/conversations/2',
-  {
-    active => 1,
-    topic  => '',
-    frozen => '',
-    name   => '#oslo.pm',
-    path   => '/superman@example.com/irc/perl-org/#oslo.pm',
-    id     => '#oslo.pm',
-    users  => {}
-  }
-  );
+$t->get_ok('/1.0/conversations')->status_is(200)
+  ->json_is('/conversations/0',
+  {active => 1, topic => '', frozen => '', name => '#Convos', id => '#convos', users => {}})
+  ->json_is('/conversations/1',
+  {active => 1, topic => '', frozen => '', name => '#private', id => '#private', users => {}})
+  ->json_is('/conversations/2',
+  {active => 1, topic => '', frozen => '', name => '#oslo.pm', id => '#oslo.pm', users => {}});
 
 done_testing;
