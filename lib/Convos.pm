@@ -83,7 +83,7 @@ sub startup {
   $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
   $self->routes->get('/')->to(template => 'app');
   $self->sessions->cookie_name('convos');
-  $self->sessions->default_expiration(86400 * 30);
+  $self->sessions->default_expiration(86400 * 7);
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
