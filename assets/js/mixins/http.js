@@ -37,6 +37,21 @@
     return this;
   };
 
+  proto.httpDelete = function(url, query, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.url = window.urlWithQueryString(url, query);
+    xhr.open('DELETE', xhr.url);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState != 4) return;
+      xhr._ts = new Date().getTime() / 1000;
+      xhr.responseJSON = xhr.responseText.match(/^[\{\[]/) ? JSON.parse(xhr.responseText) : {};
+      if (window.DEBUG) console.log(['DELETE', xhr.url, xhr.status, xhr.responseJSON || xhr.responseText]);
+      if (xhr.status == 200) cache[xhr.url] = xhr;
+      cb.call(this, makeErr(xhr), xhr);
+    }.bind(this);
+    xhr.send(null);
+  };
+
   proto.httpGet = function(url, query, cb) {
     var xhr = new XMLHttpRequest();
     xhr.url = window.urlWithQueryString(url, query);

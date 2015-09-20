@@ -1,8 +1,8 @@
 <edit-connection>
-  <form onsubmit={saveConnection} method="post" class="modal-content readable-width">
+  <form onsubmit={saveConnection} method="post" class="modal-content readable-width" if={!deleting}>
     <div class="row">
       <div class="col s12">
-        <h4 class="green-text text-darken-3">Edit {protocol} connection</h4>
+        <h4 class="green-text text-darken-3">Edit {connection.protocol()} connection</h4>
       </div>
     </div>
     <div class="row">
@@ -27,7 +27,22 @@
       <div class="input-field col s12">
         <button class="btn waves-effect waves-light" type="submit" disabled={saving}>Save <i class="material-icons right">save</i></button>
         <button class="btn-flat waves-effect waves-light modal-close" type="button">Close</button>
-        <a href="#TODO" class="btn waves-effect waves-light red right" disabled={saving}><i class="material-icons">delete</i></a>
+        <a href="#delete" onclick={deleteConnection} class="btn waves-effect waves-light red right" disabled={saving}><i class="material-icons">delete</i></a>
+      </div>
+    </div>
+  </form>
+  <form onsubmit={deleteConnection} method="post" class="modal-content readable-width" if={deleting}>
+    <div class="row">
+      <div class="col s12">
+        <h4 class="green-text text-darken-3">Delete {connection.protocol()} connection</h4>
+        <p>Are you sure you want to delete the connection?</p>
+        <p>Doing so will remove all conversation history and delete all settings.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s12 right-align">
+        <button type="button" class="btn waves-effect waves-light" disabled={saving} onclick={keepConnection}>No</button>
+        <button type="submit" class="btn waves-effect red waves-light" disabled={saving}>Yes <i class="material-icons right">delete</i></button>
       </div>
     </div>
   </form>
@@ -38,8 +53,25 @@
   mixin.modal(this);
 
   this.connection = opts.connection;
+  this.deleting = 0;
   this.url = this.connection.url();
   this.user = opts.user;
+
+  deleteConnection(e) {
+    if (!(this.deleting++)) return;
+    var c = this.connection;
+    this.errors = []; // clear error on post
+    this.saving = true;
+    this.user.removeConnection(c.protocol(), c.name(), function(err) {
+      if (err) return tag.formInvalidInput(err).update();
+      tag.closeModal();
+      riot.update();
+    });
+  }
+
+  keepConnection(e) {
+    this.deleting = 0;
+  }
 
   saveConnection(e) {
     this.errors = []; // clear error on post
