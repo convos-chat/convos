@@ -20,7 +20,7 @@
   // Make the next http method fetch fresh data from server
   proto.fresh = function() { this._method = 'httpGet'; return this; };
 
-  // Get or create a single Convos.Connection object on client side
+  // Add, get or delete a Convos.Connection object on client side
   // Get:        c = user.connection(protocol, name)
   // Add/Update: c = user.connection(protocol, name, attrs)
   proto.connection = function(protocol, name, attrs) {
@@ -95,6 +95,16 @@
       this.email('');
       cb.call(this, false);
     });
+  };
+
+  // Delete a connection on server side and remove it from the user object
+  proto.removeConnection = function(protocol, name, cb) {
+    this.httpDelete(apiUrl(['connection', protocol, name]), {}, function(err, xhr) {
+      if (err) return cb.call(this, err);
+      try { delete this._connections[protocol][name]; } catch(e) { console.log(e); };
+      cb.call(this, '');
+    });
+    return this.tap('_method', 'httpCachedGet');
   };
 
   // Write user settings to server
