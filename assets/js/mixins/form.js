@@ -17,6 +17,25 @@
     return this;
   };
 
+  proto.formSaved = function() {
+    this.saving = false;
+
+    if (!this._formSavedHandlerInstalled) {
+      this._formSavedHandlerInstalled = true;
+      $('input', this.root).change(function() {
+        $(this).closest('form').find('button[type="submit"]').each(function() {
+          $(this).html('Save <i class="material-icons right">save</i>');
+        });
+      });
+    }
+
+    $('button[type="submit"]', this.root).each(function() {
+      $(this).html('Saved <i class="material-icons right">done</i>');
+    });
+
+    return this;
+  };
+
   proto.fieldHasInvalidValue = function(field) {
     if (field.pattern && !field.value.match(new RegExp(field.pattern))) {
       field.classList.add('invalid');
