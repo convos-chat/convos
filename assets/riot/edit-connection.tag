@@ -49,7 +49,7 @@
 
     this.connection.save(function(err) {
       if (err) return tag.formInvalidInput(err).update();
-      tag.closeModal();
+      tag.formSaved();
       riot.update();
     });
   }
