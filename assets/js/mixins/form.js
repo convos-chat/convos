@@ -1,8 +1,8 @@
 (window['mixin'] = window['mixin'] || {})['form'] = function(proto) {
   proto.submitting = false;
 
-  proto.formInvalidInput = function(err) {
-    (err || []).forEach(function(err) {
+  proto.formInvalidInput = function(errors) {
+    (errors || []).forEach(function(err) {
       var name = err.path.replace(/\/data\//g, '') || '';
       var field = this.root.querySelector('input[name="' + name + '"]');
       if (field) {
@@ -11,7 +11,7 @@
         field.focus();
       }
       else {
-        this.errors = err;
+        this.errors = errors;
       }
     }.bind(this));
     return this;

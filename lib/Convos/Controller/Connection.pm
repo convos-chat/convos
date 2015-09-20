@@ -38,7 +38,6 @@ sub connection_add {
     $connection = $user->connection($url->scheme, $name, {});
     $connection->url->parse($url);
   } or do {
-    warn $@ if DEBUG;
     return $self->$cb($self->invalid_request('Connection already exists.', '/'), 400) if $@ =~ /^DUP\s/;
     return $self->$cb($self->invalid_request('Could not find connection class from scheme.', '/data/url'), 400);
   };

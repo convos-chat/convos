@@ -68,34 +68,34 @@ the following new ones.
 
 =head2 connection
 
-  $connection = $self->connection($type, $name);         # get
-  $connection = $self->connection($type, $name, \%attr); # create/update
+  $connection = $self->connection($protocol, $name);         # get
+  $connection = $self->connection($protocol, $name, \%attr); # create/update
 
 Returns a connection object. Every new object created will emit
 a "connection" event:
 
   $self->core->backend->emit(connection => $connection);
 
-C<$type> should be the type of the connection class. Example "irc" will be
+C<$protocol> should be the type of the connection class. Example "irc" will be
 translated to L<Convos::Core::Connection::Irc>.
 
 =cut
 
 sub connection {
-  my ($self, $type, $name, $attr) = @_;
+  my ($self, $protocol, $name, $attr) = @_;
   my $connection_class;
 
   $name = lc($name || '');
-  $type = Mojo::Util::camelize($type || '');
+  $protocol = Mojo::Util::camelize($protocol || '');
   die qq(Invalid name "$name". Need to match /^[\\w-]+\$/) unless $name and $name =~ /^[\w-]+$/;
-  $connection_class = "Convos::Core::Connection::$type";
+  $connection_class = "Convos::Core::Connection::$protocol";
   eval "require $connection_class;1" or die $@;
 
   if ($attr) {
-    my $connection = $self->{connection}{$type}{$name} ||= do {
+    my $connection = $self->{connection}{$protocol}{$name} ||= do {
       my $connection = $connection_class->new(name => $name, user => $self);
       Scalar::Util::weaken($connection->{user});
-      warn "[Convos::Core::User] Emit connection for @{[$self->email]} type=$type name=$name\n" if DEBUG;
+      warn "[Convos::Core::User] Emit connection for @{[$self->email]} protocol=$protocol name=$name\n" if DEBUG;
       $self->core->backend->emit(connection => $connection);
       $connection;
     };
@@ -103,7 +103,7 @@ sub connection {
     return $connection;
   }
   else {
-    return $self->{connection}{$type}{$name} || $connection_class->new(name => $name, user => $self);
+    return $self->{connection}{$protocol}{$name} || $connection_class->new(name => $name, user => $self);
   }
 }
 
