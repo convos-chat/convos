@@ -14,7 +14,7 @@ input from web, if websocket is supported by the browser.
 
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'encode_json';
-
+use constant DEBUG            => $ENV{CONVOS_DEBUG}            || 0;
 use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 30;
 
 =head1 METHODS
@@ -62,28 +62,23 @@ sub event_source {
 
 sub _send_event {
   my ($self, $event, $data) = @_;
-  $self->send({json => {event => $event, data => $data}});
+  $data->{event} = $event;
+  warn "[Convos::Controller::Events] @{[encode_json $data]}\n" if DEBUG == 2;
+  $self->send({json => $data});
 }
 
 sub _subscribe {
   my ($self, $method) = @_;
+  my $user = $self->backend->user;
   my $tid = Mojo::IOLoop->recurring(INACTIVE_TIMEOUT - 5, sub { $self->$method(keep_alive => {}); });
   my @cb;
 
   Scalar::Util::weaken($self);
-
-  # This feels a bit awkward. I think I have designed the whole emit()
-  # system wrong. Where is the best place to hook in to get events?
-  # 1. On each connection and every conversation (like I started on here)
-  # 2. Hook in on self->backend, and then filter away all the events that
-  #    doesn't belong to this user?
-  # 3. Something else?
-  # Seems like an awful lot to listen to...
-  for my $c (@{$self->backend->user->connections}) {
-    push @cb, $c, log => $c->on(
-      log => sub {
-        my ($c, $level, $message) = @_;
-        $self->$method(log => {level => $level, message => $message, name => $c->name, protocol => $c->protocol});
+  for my $event ($user->EVENTS) {
+    push @cb, $event, $user->on(
+      $event => sub {
+        my ($user, $target, @data) = @_;
+        $self->$method($event => {object => $target, data => \@data});
       }
     );
   }
@@ -93,8 +88,8 @@ sub _subscribe {
     finish => sub {
       Mojo::IOLoop->remove($tid);
       while (@cb) {
-        my ($obj, $event, $cb) = splice @cb, 0, 3, ();
-        $obj->unsubscribe($event => $cb) if $obj;    # out of scope
+        my ($event, $cb) = splice @cb, 0, 2, ();
+        $user->unsubscribe($event => $cb);
       }
     }
   );
@@ -103,6 +98,7 @@ sub _subscribe {
 sub _write_event {
   my ($self, $event, $data) = @_;
   $data = encode_json $data;
+  warn "[Convos::Controller::Events] event:$event\ndata:$data\n" if DEBUG == 2;
   $self->write("event:$event\ndata:$data\n\n");
 }
 

@@ -10,7 +10,7 @@ L<Convos::Core::User> is a class used to model a user in Convos.
 
 =cut
 
-use Mojo::Base -base;
+use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::Date;
 use Mojo::Util;
 use File::Path                 ();
@@ -22,6 +22,8 @@ use constant BCRYPT_BASE_SETTINGS => do {
   my $nul = 'a';
   join '', '$2', $nul, '$', $cost, '$';
 };
+
+sub EVENTS {qw( conversation me message state users )}
 
 =head1 ATTRIBUTES
 
@@ -74,7 +76,7 @@ the following new ones.
 Returns a connection object. Every new object created will emit
 a "connection" event:
 
-  $self->core->backend->emit(connection => $connection);
+  $self->emit(connection => $connection);
 
 C<$protocol> should be the type of the connection class. Example "irc" will be
 translated to L<Convos::Core::Connection::Irc>.
@@ -97,6 +99,10 @@ sub connection {
       Scalar::Util::weaken($connection->{user});
       warn "[Convos::Core::User] Emit connection for @{[$self->email]} protocol=$protocol name=$name\n" if DEBUG;
       $self->core->backend->emit(connection => $connection);
+      Scalar::Util::weaken($self);
+      for my $e ($self->EVENTS) {
+        $connection->on($e => sub { $self->emit($e => @_) });
+      }
       $connection;
     };
     $connection->{$_} = $attr->{$_} for keys %$attr;

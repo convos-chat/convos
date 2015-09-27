@@ -20,21 +20,62 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 EVENTS
 
-=head2 log
-
-  $self->on(log => sub { my ($self, $level, $message) = @_; });
-
-Emitted when a connection want L</log> a message. C<$level> has the same values
-as the log levels defined in L<Mojo::Log>.
-
-These messages could be stored to a persistent storage.
-
 =head2 conversation
 
-  $self->on(conversation => sub { my ($self, $conversation, $changed) = @_; });
+  $self->on(conversation => sub { my ($self, $conversation) = @_; });
 
-Emitted when a L<$conversation|Convos::Core::Conversation> change properties.
-C<$changed> is a hash-ref with the changed attributes.
+Emitted when a new L<$conversation|Convos::Core::Conversation> is created.
+
+=head2 me
+
+  $self->on(me => sub { my ($self, $me) = @_; });
+
+Emitted when information about the representation of L</user> changes. C<$me>
+contains:
+
+  {
+    nick                     => $str,
+    real_host                => $str,
+    version                  => $str,
+    available_user_modes     => $str,
+    available_channel_modes  => $str,
+  }
+
+Note that this hash is L<Convos::Core::Connection::Irc> specific.
+
+=head2 message
+
+  $self->on(message => sub { my ($self, $self, $msg) = @_; });
+  $self->on(message => sub { my ($self, $conversation, $msg) = @_; });
+
+Emitted when a connection or conversation receives a new message. C<$msg>
+will contain:
+
+  {
+    from      => $str,
+    highlight => $bool,
+    message   => $str,
+    type      => {action|notice|privmsg},
+  }
+
+=head2 state
+
+  $self->on(state => sub { my ($self, $state, $reason) = @_; });
+
+Emitted when the connection state change.
+
+=head2 users
+
+  $self->on(state => sub { my ($self, $conversation, $meta) = @_; });
+
+Emitted when the list of users change in a conversation. C<$meta> will contain
+information about the change:
+
+  {join => $nick}
+  {nick => $new_new, renamed_from => $old_nick_lc}
+  {part => $nick, message => $reason, kicker => $kicker}
+  {part => $nick, message => $reason}
+  {updated => true}
 
 =head1 ATTRIBUTES
 
@@ -115,7 +156,7 @@ sub conversation {
       my $conversation = $self->_conversation({connection => $self, id => $id});
       Scalar::Util::weaken($conversation->{connection});
       warn "[Convos::Core::User] Emit conversation: id=$id\n" if DEBUG;
-      $self->user->core->backend->emit(conversation => $conversation);
+      $self->emit(conversation => $conversation);
       $conversation;
     };
     $conversation->{$_} = $attr->{$_} for keys %$attr;
@@ -177,21 +218,6 @@ sub load {
   $self;
 }
 
-=head2 log
-
-  $self = $self->log($level => $format, @args);
-
-This method will emit a L</log> event.
-
-=cut
-
-sub log {
-  my ($self, $level, $format, @args) = @_;
-  my $message = @args ? sprintf $format, map { $_ // '' } @args : $format;
-
-  $self->emit(log => $level => $message);
-}
-
 =head2 rooms
 
   $self = $self->rooms(sub { my ($self, $err, $list) = @_; });
@@ -233,19 +259,21 @@ sub send { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "send" not im
 
 =head2 state
 
-  $self = $self->state($str);
-  $str = $self->state;
+  $self = $self->state($state, $description);
+  $state = $self->state;
 
-Holds the state of this object. Supported states are "disconnected",
-"connected" or "connecting" (default). "connecting" means that the object is
-in the process of connecting or that it want to connect.
+Holds the state of this object. C<$state> can be "disconnected", "connected"
+or "connecting" (default). "connecting" means that the object is in the
+process of connecting or that it want to connect.
 
 =cut
 
 sub state {
-  my ($self, $state) = @_;
+  my ($self, $state, $description) = @_;
+  my $old_state = $self->{state} || '';
   return $self->{state} ||= 'connecting' unless $state;
   die "Invalid state: $state" unless grep { $state eq $_ } qw( connected connecting disconnected );
+  $self->emit(state => $state => $description // '') unless $old_state eq $state;
   $self->{state} = $state;
   $self;
 }

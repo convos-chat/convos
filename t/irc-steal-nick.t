@@ -11,7 +11,7 @@ my $user       = $core->user('nick.young@example.com', {});
 my $connection = $user->connection(irc => 'localhost', {});
 my $nick;
 
-$connection->on(nick => sub { $nick = $_[1]; Mojo::IOLoop->stop; });
+$connection->on(me => sub { $nick = $_[1]->{nick}; Mojo::IOLoop->stop; });
 $connection->url->parse("irc://$server?tls=0");
 
 $t->run(

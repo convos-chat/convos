@@ -15,12 +15,12 @@ $tx->res->content->unsubscribe('read')->on(
   read => sub {
     my ($content, $chunk) = @_;
     $buffer .= $chunk;
-    $tx->res->error({message => 'Interrupted'}) if $buffer =~ /event:log\n.*\}/s;
+    $tx->res->error({message => 'Interrupted'}) if $buffer =~ /event:state\n.*\}/s;
   }
 );
 $t->ua->start($tx);
 is $tx->res->code, 200, '200 OK';
 is $tx->res->headers->content_type, 'text/event-stream', 'Content-Type: text/event-stream';
-like $buffer, qr/event:log\ndata:.*"protocol":"irc"/, 'got log event';
+like $buffer, qr/event:state\ndata:.*"state":"connecting"/, 'got state event';
 
 done_testing;
