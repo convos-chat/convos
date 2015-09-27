@@ -23,15 +23,32 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
   $CONVOS_HOME/
   $CONVOS_HOME/joe@example.com/                                 # one directory per user
   $CONVOS_HOME/joe@example.com/settings.json                    # user settings
-  $CONVOS_HOME/joe@example.com/connections/irc/freenode.json    # connection settings
-  $CONVOS_HOME/joe@example.com/2015/02/irc/freenode.log         # connection log
-  $CONVOS_HOME/joe@example.com/2015/10/irc/freenode/marcus.log  # conversation log
-  $CONVOS_HOME/joe@example.com/2015/12/irc/freenode/#convos.log # conversation log
+  $CONVOS_HOME/joe@example.com/irc/freenode/settings.json       # connection settings
+  $CONVOS_HOME/joe@example.com/irc/freenode/2015/02.log         # connection log
+  $CONVOS_HOME/joe@example.com/irc/freenode/2015/10/marcus.log  # conversation log
+  $CONVOS_HOME/joe@example.com/irc/freenode/2015/12/#convos.log # conversation log
+
+Notes about the structure:
+
+=over 4
+
+=item * Easy to delete a user and all associated data.
+
+=item * Easy to delete a connection and all associated data.
+
+=item * One log file per month should not cause too big files.
+
+=item * Hard to delete a conversation thread. Ex: all conversations with "marcus".
+
+=item * Hard to search for messages between connections for a given date.
+
+=back
 
 =cut
 
 use Mojo::Base 'Convos::Core::Backend';
 use Mojo::Home;
+use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
 use Cwd ();
 use Fcntl ':flock';
@@ -66,6 +83,32 @@ has home => sub { shift->_build_home };
 L<Convos::Core::Backend::File> inherits all methods from
 L<Convos::Core::Backend> and implements the following new ones.
 
+=head2 delete_object
+
+See L<Convos::Core::Backend/delete_object>.
+
+=cut
+
+sub delete_object {
+  my ($self, $obj, $cb) = @_;
+  my $method = $obj->isa('Convos::Core::User') ? '_delete_user' : '_delete_connection';
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      my $fc = $delay->data->{fc} = Mojo::IOLoop::ForkCall->new;
+      $fc->run(sub { $self->$method($obj) }, $delay->begin);
+    },
+    sub {
+      my ($delay, $err) = @_;
+      warn "[@{[ref $obj]}] Delete object: @{[$err || 'Success']}\n" if DEBUG;
+      $self->$cb($err || '');
+    },
+  );
+
+  return $self;
+}
+
 =head2 find_connections
 
 See L<Convos::Core::Backend/find_connections>.
@@ -74,16 +117,15 @@ See L<Convos::Core::Backend/find_connections>.
 
 sub find_connections {
   my ($self, $user, $cb) = @_;
-  my $base = $self->home->rel_dir(join '/', $user->email, 'connections');
+  my $user_dir = $self->home->rel_dir($user->email);
   my @names;
 
-  return $self->$cb($!, \@names) unless opendir(my $TYPES, $base);
+  return $self->$cb($!, \@names) unless opendir(my $PROTOCOLS, $user_dir);
 
-  for my $protocol (grep {/^\w+$/} readdir $TYPES) {
-    opendir(my $CONNECTIONS, catdir $base, $protocol) or next;
-    for my $name (grep {/\.json$/} readdir $CONNECTIONS) {
-      $name =~ s!\.json$!!;
-      push @names, [$protocol, $name];
+  for my $protocol (grep {/^\w/} readdir $PROTOCOLS) {
+    opendir(my $CONNECTIONS, catdir $user_dir, $protocol) or next;
+    for my $name (grep {/^\w/} readdir $CONNECTIONS) {
+      push @names, [$protocol, $name] if -e catfile $user_dir, $protocol, $name, 'settings.json';
     }
   }
 
@@ -101,7 +143,7 @@ sub find_users {
   my $home = $self->home;
 
   return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
-  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/settings.json") } readdir $DH]);
+  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/settings.json") } grep {/^\w/} readdir $DH]);
 }
 
 =head2 load_object
@@ -112,7 +154,7 @@ See L<Convos::Core::Backend/load_object>.
 
 sub load_object {
   my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->_storage_file($obj);
+  my $storage_file = $self->_settings_file($obj);
   my $settings     = {};
 
   $cb ||= sub { die $_[1] if $_[1] };
@@ -196,7 +238,7 @@ See L<Convos::Core::Backend/save_object>.
 
 sub save_object {
   my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->_storage_file($obj);
+  my $storage_file = $self->_settings_file($obj);
 
   $cb ||= sub { die $_[1] if $_[1] };
 
@@ -232,6 +274,18 @@ sub _build_home {
   Mojo::Home->new($home);
 }
 
+sub _delete_connection {
+  my ($self, $connection) = @_;
+  my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->protocol, $connection->name));
+  File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
+}
+
+sub _delete_user {
+  my ($self, $user) = @_;
+  my $path = $self->home->rel_dir($user->user->email);
+  File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
+}
+
 sub _log {
   my ($self, $obj, $level, $message) = @_;
   my $t  = gmtime;
@@ -239,8 +293,9 @@ sub _log {
   my $FH = $self->{log_fh}{$obj}{$ym};
 
   unless ($FH) {
-    my @path = ($obj->user->email, $ym);
+    my @path = ($obj->user->email);
     push @path, map { ($_->protocol, $_->name) } $obj->isa('Convos::Core::Connection') ? $obj : $obj->connection;
+    push @path, $ym;
     push @path, $obj->name if $obj->isa('Convos::Core::Conversation');
     my $path = $self->home->rel_file(join('/', @path) . '.log');
     File::Path::make_path(File::Basename::dirname($path));
@@ -252,6 +307,14 @@ sub _log {
   flock $FH, LOCK_EX;
   printf {$FH} sprintf "%s [%s] %s\n", $t->datetime, $level, $message;
   flock $FH, LOCK_UN;
+}
+
+sub _settings_file {
+  my ($self, $obj) = @_;
+
+  return $obj->isa('Convos::Core::Connection')
+    ? $self->home->rel_file(sprintf '%s/%s/%s/settings.json', $obj->user->email, $obj->protocol, $obj->name)
+    : return $self->home->rel_file(sprintf '%s/settings.json', $obj->email);
 }
 
 sub _setup {
@@ -272,14 +335,6 @@ sub _setup {
       $conversation->on(log => sub { $self->_log(@_) });
     }
   );
-}
-
-sub _storage_file {
-  my ($self, $obj) = @_;
-
-  return $obj->isa('Convos::Core::Connection')
-    ? $self->home->rel_file(sprintf '%s/connections/%s/%s.json', $obj->user->email, $obj->protocol, $obj->name)
-    : return $self->home->rel_file(sprintf '%s/settings.json', $obj->email);
 }
 
 =head1 COPYRIGHT AND LICENSE

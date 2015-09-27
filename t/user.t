@@ -10,16 +10,16 @@ no warnings qw( once redefine );
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $user = $core->user('jhthorsen@cpan.org', {});
-my $storage_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'settings.json');
+my $settings_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'settings.json');
 is $user->avatar,   '',                   'avatar';
 is $user->email,    'jhthorsen@cpan.org', 'email';
 is $user->password, '',                   'password';
 
 is $user->load, $user, 'load';
-ok !-e $storage_file, 'no storage file';
+ok !-e $settings_file, 'no storage file';
 $user->avatar('whatever');
 is $user->save, $user, 'save';
-ok -e $storage_file, 'created storage file';
+ok -e $settings_file, 'created storage file';
 is $core->user('jhthorsen@cpan.org')->load->avatar, 'whatever', 'avatar from storage file';
 
 is_deeply($user->TO_JSON,

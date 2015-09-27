@@ -34,6 +34,18 @@ has namespaces => sub { ['Convos::Core::Plugin'] };
 L<Convos::Core::Backend> inherits all methods from L<Mojolicious::Plugins>
 and implements the following new ones.
 
+=head2 delete_object
+
+  $self = $self->delete_object($obj, sub { my ($self, $err) = @_ });
+
+This method is called to remove a given object from persistent storage.
+
+=cut
+
+sub delete_object {
+  $_[0]->tap($_[2], '');
+}
+
 =head2 find_connections
 
   $self = $self->find_connections($user, sub { my ($self, $err, $connections) = @_ });

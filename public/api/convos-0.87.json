@@ -92,7 +92,7 @@
         "tags": [ "connection" ],
         "summary": "Delete a connection and all assosiated data.",
         "x-mojo-controller": "Convos::Controller::Connection",
-        "operationId": "connectionDelete",
+        "operationId": "connectionRemove",
         "parameters": [
           { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
@@ -100,7 +100,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Delete a connection.",
+            "description": "Remove a connection.",
             "schema": { "$ref": "#/definitions/Success" }
           },
           "default": {
