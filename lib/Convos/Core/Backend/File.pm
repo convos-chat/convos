@@ -156,13 +156,11 @@ sub messages {
   # TODO:
   # Need to implement logic for searching in multiple files since the _log()
   # method "rotate" files every month.
-  # The search should probably be done in a fork, using
-  # Mojo::IOLoop::ReadWriteFork. We cannot use Mojo::IOLoop::ForkCall,
-  # since that won't allow streaming of search results. With "streaming",
-  # I mean that I want the $cb to be called once for every search result,
-  # so the frontend can show results as soon as they are available.
-  # I think this will be a better user experience, but I might be adding
-  # complexity that is not required.
+  # The search should probably be done in a fork, using Mojo::IOLoop::ForkCall.
+  # We might want to add a requirement for both "before" and "after" to be set,
+  # so this method doesn't run forever.
+  $self->$cb('', []);    # TODO
+  return $self;
 
   local $! = 0;
   open my $FH, '/some/log/file' or return $self->$cb($!, undef);
@@ -182,11 +180,11 @@ sub messages {
     elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
       @$message{qw( type sender )} = (server => 'server');
     }
-    $self->$cb('', $message);
+
     last if ++$found == $limit;
   }
 
-  $self->$cb($!, undef);
+  $self->$cb($!, []);
   $self;
 }
 

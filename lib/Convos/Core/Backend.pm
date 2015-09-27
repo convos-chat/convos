@@ -60,11 +60,10 @@ sub find_users {
 
 =head2 messages
 
-  $self->messages(\%query, sub { my ($self, $err, $message) = @_; });
+  $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
 
-Used to search for messages stored in backend. The callback is called once for
-every message found. An undef C<$message> will be used to define the end of
-the search.
+Used to search for messages stored in backend. The callback will be called
+with the messages found.
 
 Possible C<%query>:
 
@@ -80,7 +79,7 @@ Possible C<%query>:
 
 sub messages {
   my ($self, $query, $cb) = @_;
-  $self->tap($cb, '', undef);
+  $self->tap($cb, '', []);
 }
 
 =head2 new
