@@ -110,6 +110,8 @@ sub new {
 
   $self->load_object($obj, sub { my ($obj, $err) = @_; });
 
+This method is called to load a given object from persistent storage.
+
 =cut
 
 sub load_object {
@@ -122,6 +124,7 @@ sub load_object {
 
   $self->save_object($obj, sub { my ($obj, $err) = @_; });
 
+This method is called to save a given object to persistent storage.
 =cut
 
 sub save_object {

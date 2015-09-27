@@ -34,7 +34,8 @@ $connection->connect(sub { $err = $_[1] });
 like $err, qr{\bSSL\b}, 'SSL connect attempt';
 is $connection->url->query->param('tls'), 0, 'disable tls';
 
-$connection->send('', '0', sub { $err = $_[1] });
+$connection->send('', '0', sub { $err = $_[1]; Mojo::IOLoop->stop });
+Mojo::IOLoop->start;
 like $err, qr{without target and message}, 'send: without target and message';
 
 $connection->send('#test_convos' => '0', sub { $err = $_[1]; Mojo::IOLoop->stop });
