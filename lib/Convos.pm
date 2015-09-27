@@ -73,6 +73,7 @@ This method set up the application.
 sub startup {
   my $self   = shift;
   my $config = $self->_config;
+  my $r      = $self->routes;
 
   $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
   $self->_setup_secrets;
@@ -80,14 +81,15 @@ sub startup {
   $self->_setup_assets;
   $self->_setup_settings;
   $self->plugin(Swagger2 => {url => $config->{swagger_file}});
-  $self->routes->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
-  $self->routes->websocket('/events/bi-directional')->to('events#bi_directional');
-  $self->routes->get('/events/event-source')->to('events#event_source');
-  $self->routes->get('/')->to(template => 'app');
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
+
+  $r->route('/spec')->detour(app => Swagger2::Editor->new(specification_file => $config->{swagger_file}));
+  $r->get('/events/event-source')->to('events#event_source');
+  $r->websocket('/events/bi-directional')->to('events#bi_directional');
+  $r->get('/')->to(template => 'app');
 
   $self->hook(
     before_dispatch => sub {

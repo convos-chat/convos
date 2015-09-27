@@ -48,11 +48,13 @@ JSON objects using L<Mojolicious::Guides::Cookbook/EventSource web service>.
 sub event_source {
   my $self = shift;
 
+  $self->res->headers->content_type('text/event-stream');
+
   unless ($self->backend->user) {
-    return $self->render(json => $self->invalid_request('Need to log in first.', '/X-Convos-Session'), 401);
+    return $self->render(text => qq(event:error\ndata:{"message":"Need to log in first."}\n\n), status => 401);
   }
 
-  $self->res->headers->content_type('text/event-stream');
+  $self->render_later;
   $self->_write_event(keep_alive => {});
   $self->_subscribe($self->can('_write_event'));
   $self->on(json => sub { warn "TODO: $_[1]"; });
@@ -81,8 +83,7 @@ sub _subscribe {
     push @cb, $c, log => $c->on(
       log => sub {
         my ($c, $level, $message) = @_;
-        $self->send(
-          {json => {event => 'log', level => $level, message => $message, name => $c->name, protocol => $c->protocol}});
+        $self->$method(log => {level => $level, message => $message, name => $c->name, protocol => $c->protocol});
       }
     );
   }
