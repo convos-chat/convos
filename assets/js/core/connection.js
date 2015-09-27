@@ -19,7 +19,7 @@
 
   // Join a room or create a private conversation on the server
   proto.joinConversation = function(name, cb) {
-    this.httpPost(apiUrl(['connection', this.protocol(), this.name(), 'conversation', name]), {}, function(err, xhr) {
+    this.httpPost(apiUrl(['connection', this.protocol(), this.name(), 'conversations']), {name: name}, function(err, xhr) {
       if (!err) this.user().conversation(false, xhr.responseJSON);
       cb.call(this, err, xhr.responseJSON);
     });

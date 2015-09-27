@@ -27,10 +27,10 @@ sub conversation_join {
   my $connection = $user->connection($args->{protocol}, $args->{connection_name});
 
   $self->delay(
-    sub { $connection->join_conversation($args->{conversation_id}, shift->begin) },
+    sub { $connection->join_conversation($args->{data}{name}, shift->begin) },
     sub {
       my ($delay, $err, $room) = @_;
-      return $self->$cb($self->invalid_request($err, '/conversation_id'), 400) if $err;
+      return $self->$cb($self->invalid_request($err, '/data/name'), 400) if $err;
       $connection->save($delay->begin);
       $delay->pass($room);
     },
