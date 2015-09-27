@@ -135,6 +135,46 @@ sub load {
   $self;
 }
 
+=head2 remove_connection
+
+  $self = $self->remove_connection($protocol, $name, sub { my ($self, $err) = @_; });
+
+Will remove a connection created by L</connection>. Removing a connection that
+does not exist is perfectly valid, and will not set C<$err>.
+
+=cut
+
+sub remove_connection {
+  my ($self, $protocol, $name, $cb) = @_;
+
+  $protocol = Mojo::Util::camelize($protocol || '');
+
+  if (my $connection = $self->{connection}{$protocol}{$name}) {
+    Scalar::Util::weaken($self);
+    Mojo::IOLoop->delay(
+      sub {
+        $connection->disconnect(shift->begin);
+      },
+      sub {
+        my ($delay, $err) = @_;
+        return $self->$cb($err) if $err;
+        return $self->core->backend->delete_object($connection, $delay->begin);
+      },
+      sub {
+        my ($delay, $err) = @_;
+        delete $self->{connection}{$protocol}{$name} unless $err;
+        $connection->user(undef);
+        $self->$cb($err);
+      }
+    );
+  }
+  else {
+    Mojo::IOLoop->next_tick(sub { $self->$cb(''); });
+  }
+
+  return $self;
+}
+
 =head2 save
 
   $self = $self->save(sub { my ($self, $err) = @_; });

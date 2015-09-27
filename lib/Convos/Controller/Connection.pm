@@ -52,6 +52,28 @@ sub connection_add {
   );
 }
 
+=head2 connection_remove
+
+See L<Convos::Manual::API/connectionRemove>.
+
+=cut
+
+sub connection_remove {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+
+  $self->delay(
+    sub {
+      $user->remove_connection($args->{protocol}, $args->{connection_name}, shift->begin);
+    },
+    sub {
+      my ($delay, $err) = @_;
+      die $err if $err;
+      $self->$cb({}, 200);
+    },
+  );
+}
+
 =head2 connection_rooms
 
 See L<Convos::Manual::API/connectionRooms>.

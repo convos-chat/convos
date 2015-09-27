@@ -30,4 +30,7 @@ $t->post_ok('/1.0/connection/irc/localhost',    json => {url => 'foo://perl.org:
   ->json_is('/name' => 'localhost')->json_is('/state' => 'connecting')
   ->json_is('/url' => 'irc://perl.org:9999?nick=superman');
 
+$t->delete_ok('/1.0/connection/irc/doesnotexist')->status_is(200);
+$t->delete_ok('/1.0/connection/irc/localhost')->status_is(200);
+
 done_testing;
