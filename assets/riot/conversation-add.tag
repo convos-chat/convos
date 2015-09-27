@@ -1,4 +1,4 @@
-<add-conversation>
+<conversation-add>
   <form onsubmit={submitForm} method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">
@@ -85,4 +85,4 @@
   });
 
   </script>
-</add-conversation>
+</conversation-add>

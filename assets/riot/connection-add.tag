@@ -1,4 +1,4 @@
-<add-connection>
+<connection-add>
   <form onsubmit={addConnection} method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">
@@ -54,7 +54,7 @@
 
   this.user = opts.user;
   this.defaultServer = Convos.settings.default_server;
-  this.nextModal = opts.next || 'edit-connection';
+  this.nextModal = opts.next || 'connection-edit';
 
   addConnection(e) {
     var c = new Convos.Connection();
@@ -78,4 +78,4 @@
   });
 
   </script>
-</add-connection>
+</connection-add>
