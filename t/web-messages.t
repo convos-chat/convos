@@ -11,7 +11,7 @@ $t->get_ok('/1.0/connection/irc/localhost/conversation/%23convos/messages')->sta
 $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
 
 $t->get_ok('/1.0/connection/irc/localhost/conversation/%23convos/messages')->status_is(200);
-is int @{$t->tx->res->json->{messages}}, 60, 'got max limit messages';
+is int @{$t->tx->res->json->{messages} || []}, 60, 'got max limit messages';
 
 $t->get_ok('/1.0/connection/irc/localhost/conversation/%23convos/messages?limit=1')->status_is(200)
   ->json_is('/messages/0/level',   'info')

@@ -111,9 +111,9 @@ sub connect {
         $self->save(sub { })    # save updated URL
       }
 
-      return $self->log(warn => $err)->$cb($err) if $err;
+      return $self->state(disconnected => $err)->$cb($err) if $err;
       $self->{myinfo} ||= {};
-      $self->state('connected')->log(info => "Connected to $irc->{server}.")->$cb('');
+      $self->state(connected => "Connected to $irc->{server}.")->$cb('');
     }
   );
 
@@ -313,9 +313,9 @@ sub _conversation {
 
 sub _event_irc_close {
   my ($self) = @_;
-  $self->state(delete $self->{disconnect} ? 'disconnected' : 'connecting');
-  $self->log(
-    info => 'You [%s@%s] have quit [Connection closed.]',
+  $self->state(
+    delete $self->{disconnect} ? 'disconnected' : 'connecting',
+    sprintf 'You [%s@%s] have quit.',
     $self->_irc->nick, $self->_irc->real_host || $self->url->host
   );
   delete $self->{_irc};
@@ -324,29 +324,52 @@ sub _event_irc_close {
 # Unhandled/unexpected error
 sub _event_irc_error {
   my ($self, $msg) = @_;
-  $self->log(error => join ' ', @{$msg->{params}});
+  $self->_notice(join(' ', @{$msg->{params}}), highlight => Mojo::JSON->true);
 }
 
-sub _irc_message {    # TODO
+sub _irc_message {
   my ($self, $event, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
-  my $format             = $event eq 'irc_privmsg' ? '<%s> %s' : $event eq 'ctcp_action' ? '* %s %s' : '-%s- %s';
-  my $target             = $msg->{params}[0];
-  my $current_nick       = $self->_irc->nick;
-  my $is_private_message = $self->_is_current_nick($target);
+  my $target = $msg->{params}[0];
 
   if ($user) {
-    my $conversation = $self->conversation($is_private_message ? $nick : $target, {});
-    my $highlight = $is_private_message || grep { $msg->{params}[1] =~ /\b\Q$_\E\b/ } $current_nick,
+    my $current_nick = $self->_irc->nick;
+    my $is_private   = $self->_is_current_nick($target);
+    my $highlight    = $is_private || grep { $msg->{params}[1] =~ /\b\Q$_\E\b/ } $current_nick,
       @{$self->url->query->every_param('highlight')};
-    $conversation->log(($highlight ? 'warn' : 'info'), $format, $nick, $msg->{params}[1]);
+
+    $self->emit(
+      message => $self->conversation($is_private ? $nick : $target, {}),
+      {
+        from      => $nick,
+        highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
+        message   => $msg->{params}[1],
+        type      => $event eq 'irc_privmsg' ? 'private' : $event eq 'ctcp_action' ? 'action' : 'notice',
+      }
+    );
   }
-  else {
-    $self->log(info => $format, $msg->{prefix} // $self->_irc->server, $msg->{params}[1]);
+  else {    # server message
+    $self->emit(
+      message => $self,
+      {
+        from => $msg->{prefix} // $self->_irc->server,
+        highlight => Mojo::JSON->false,
+        message   => $msg->{params}[1],
+        type      => $event eq 'irc_privmsg' ? 'private' : 'notice',
+      }
+    );
   }
 }
 
 sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
+
+sub _notice {
+  my ($self, $message) = (shift, shift);
+  $self->emit(
+    message => $self,
+    {from => $self->url->host, highlight => Mojo::JSON->false, type => 'notice', @_, message => $message}
+  );
+}
 
 sub _steal_nick {
   my $self = shift;
@@ -358,29 +381,31 @@ sub _steal_nick {
 _event err_bannedfromchan => sub {    # TODO
   my ($self,    $msg)    = @_;
   my ($channel, $reason) = @{$msg->{params}};
+  my $nick = $self->_irc->nick;
   my $conversation = $self->conversation($channel => {});
 
   $conversation->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel");
-  $conversation->log(warn => '-!- %s is banned from %s [%s]', $self->_irc->nick, $channel, $conversation->frozen);
+  $self->_notice("$nick is banned from $channel [$reason]", highlight => Mojo::JSON->true);
 };
 
 _event err_cannotsendtochan => sub {
   my ($self, $msg) = @_;
-  $self->log(debug => 'Cannot send to channel %s.', $msg->{params}[1]);
+  $self->_notice("Cannot send to channel $msg->{params}[1].", highlight => Mojo::JSON->true);
 };
 
 _event err_nicknameinuse => sub {    # TODO
   my ($self, $msg) = @_;
-  my $nick_in_use = $msg->{params}[1];
+  my $nick = $msg->{params}[1];
 
   # do not want to flod frontend with these messages
-  $self->log(warn => 'Nickname %s is already in use.', $nick_in_use) unless $self->{err_nicknameinuse}{$nick_in_use}++;
+  $self->_notice(qq(Nickname $nick is already in use.), highlight => Mojo::JSON->true)
+    unless $self->{err_nicknameinuse}{$nick}++;
 };
 
 # :hybrid8.debian.local 401 Superman #no_such_channel_ :No such nick/channel
 _event err_nosuchnick => sub {
   my ($self, $msg) = @_;
-  $self->log(debug => 'No such nick or channel %s.', $msg->{params}[1]);
+  $self->_notice("No such nick or channel $msg->{params}[1].");
 };
 
 # :superman!superman@i.love.debian.org JOIN :#convos
@@ -389,30 +414,20 @@ _event irc_join => sub {
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
   my $conversation = $self->conversation($msg->{params}[0], {frozen => '', name => $msg->{params}[0]});
 
-  $conversation->users->{lc($nick)} ||= {name => $nick};
-  $conversation->log(debug => '-!- %s [%s@%s] has joined %s', $nick, $user, $host, $conversation->name); # same as irssi
+  $conversation->users->{lc($nick)} ||= {host => $host, name => $nick, user => $user};
+  $self->emit(users => $conversation, {join => lc($nick)});
 };
 
 # TODO
 _event irc_kick => sub {
   my ($self, $msg) = @_;
-  my ($by)         = IRC::Utils::parse_user($msg->{prefix});
+  my ($kicker)     = IRC::Utils::parse_user($msg->{prefix});
   my $conversation = $self->conversation($msg->{params}[0]);
   my $nick         = $msg->{params}[1];
   my $reason = $msg->{params}[2] || '';
 
-  # logging is the same as irssi
-
-  if ($self->_is_current_nick($nick)) {
-    $conversation->log(warn => '-!- %s was kicked from %s by %s [%s]', $nick, $conversation->name, $by, $reason);
-    $conversation->frozen("Kicked by $by.");
-  }
-  else {
-    $conversation->log(debug => '-!- %s was kicked from %s by %s [%s]', $nick, $conversation->name, $by, $reason);
-  }
-
   delete $conversation->users->{lc($nick)};
-  $self->emit(users => $conversation->id => $conversation->users);
+  $self->emit(users => $conversation, {kicker => $kicker, part => lc($nick), message => $reason});
 };
 
 # :superman!superman@i.love.debian.org MODE superman :+i
@@ -422,7 +437,7 @@ _event irc_mode => sub {
   my ($self, $msg) = @_;    # TODO
 };
 
-# :Superman12923!superman@i.love.debian.org NICK :Supermanx12923
+# :Superman12923!superman@i.love.debian.org NICK :Supermanx
 _event irc_nick => sub {
   my ($self, $msg) = @_;
   my ($old_nick)  = IRC::Utils::parse_user($msg->{prefix});
@@ -431,14 +446,17 @@ _event irc_nick => sub {
   my $wanted_nick = $self->url->query->param('nick');
 
   delete $self->{err_nicknameinuse} if $wanted_nick and $wanted_nick eq $new_nick;   # allow warning on next nick change
-  $self->emit(nick => $new_nick) if $self->_is_current_nick($new_nick);
+
+  if ($self->_is_current_nick($new_nick)) {
+    $self->{myinfo}{nick} = $new_nick;
+    $self->emit(me => $self->{myinfo});
+  }
 
   for my $conversation (values %{$self->{conversations}}) {
     my $info = delete $conversation->users->{$old_nick_lc} or next;
     $info->{name} = $new_nick;
     $conversation->{users}{lc($new_nick)} = $info;
-    $conversation->log(debug => '-!- %s is now known as %s', $old_nick, $new_nick);    # same as irssi
-    $self->emit(users => $conversation->id => $conversation->users);
+    $self->emit(users => $conversation => {%$info, renamed_from => $old_nick_lc});
   }
 };
 
@@ -452,15 +470,11 @@ _event irc_part => sub {
 
   if ($self->_is_current_nick($nick)) {
     delete $self->{conversations}{$conversation->id};
-    $conversation->log(info => '-!- %s [%s@%s] has left %s [%s]', $nick, $user, $host, $conversation->name, $reason);
     $conversation->frozen('Parted.');
-  }
-  else {
-    $conversation->log(debug => '-!- %s [%s@%s] has left %s [%s]', $nick, $user, $host, $conversation->name, $reason);
   }
 
   delete $conversation->users->{lc($nick)};
-  $self->emit(users => $conversation->id => $conversation->users);
+  $self->emit(users => $conversation => {part => lc($nick), message => $reason});
 };
 
 _event irc_quit => sub {
@@ -471,8 +485,7 @@ _event irc_quit => sub {
 
   for my $conversation (values %{$self->{conversations}}) {
     delete $conversation->users->{$nick_lc} or next;
-    $conversation->log(debug => '-!- %s [%s@%s] has quit [%s]', $nick, $user, $host, $reason);    # same as irssi
-    $self->emit(users => $conversation->id => $conversation->users);
+    $self->emit(users => $conversation => {part => $nick_lc, message => $reason});
   }
 };
 
@@ -482,8 +495,7 @@ _event irc_rpl_away => sub {
 
 # :hybrid8.debian.local 376 superman :End of /MOTD command.
 _event irc_rpl_endofmotd => sub {
-  my ($self, $msg) = @_;
-  $self->log(info => $msg->{params}[1]);
+  $_[0]->_notice($_[1]->{params}[1]);
 };
 
 # :hybrid8.debian.local 366 superman #convos :End of /NAMES list.
@@ -502,23 +514,23 @@ _event irc_rpl_endofnames => sub {
   }
 
   $conversation->{last_irc_rpl_endofnames} = time;
-  $self->emit(users => $conversation->id => $conversation->users);
+  $self->emit(users => $conversation => {updated => Mojo::JSON->true});
 };
 
 # :hybrid8.debian.local 372 superman :too cool for school
 _event irc_rpl_motd => sub {
-  $_[0]->log(info => $_[1]->{params}[1]);
+  $_[0]->_notice($_[1]->{params}[1]);
 };
 
 # :hybrid8.debian.local 375 superman :- hybrid8.debian.local Message of the Day -
 _event irc_rpl_motdstart => sub {
-  $_[0]->log(info => $_[1]->{params}[1]);
+  $_[0]->_notice($_[1]->{params}[1]);
 };
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
 _event irc_rpl_myinfo => sub {
   my ($self, $msg) = @_;
-  my @keys = qw( current_nick real_host version available_user_modes available_channel_modes );
+  my @keys = qw( nick real_host version available_user_modes available_channel_modes );
   my $i    = 0;
 
   $self->{myinfo}{$_} = $msg->{params}[$i++] // '' for @keys;
@@ -543,7 +555,7 @@ _event irc_rpl_namreply => sub {
 _event irc_rpl_topic => sub {
   my ($self, $msg) = @_;
   my $conversation = $self->conversation($msg->{params}[1] => {topic => $msg->{params}[2]});
-  $conversation->log(debug => '-!- Topic for %s: %s', $conversation->name, $conversation->topic);
+  $self->_notice(sprintf 'Topic for %s: %s', $conversation->name, $conversation->topic);
 };
 
 # :hybrid8.debian.local 333 superman #convos jhthorsen!jhthorsen@i.love.debian.org 1432142279
@@ -552,20 +564,21 @@ _event irc_rpl_topicwhotime => sub {
   my $conversation = $self->conversation($msg->{params}[1] => {topic_by => $msg->{params}[2]});
 
   # irssi log message contains localtime(), but we already log to file with a timestamp
-  $conversation->log(debug => '-!- Topic set by %s', $msg->{params}[2]);
+  $self->_notice("Topic set by $msg->{params}[2]");
 };
 
 # :hybrid8.debian.local 002 superman :Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2
 _event irc_rpl_yourhost => sub {
-  $_[0]->log(info => $_[1]->{params}[1]);
+  $_[0]->_notice($_[1]->{params}[1]);
 };
 
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 _event irc_rpl_welcome => sub {
   my ($self, $msg) = @_;
 
-  $self->log(info => $msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
-  $self->emit(nick => $msg->{params}[0]);
+  $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
+  $self->{myinfo}{nick} = $msg->{params}[0];
+  $self->emit(me => $self->{myinfo});
   $self->join_conversation(join(' ', $_->name, $_->password), sub { }) for grep { $_->active } @{$self->conversations};
 };
 
@@ -575,8 +588,8 @@ _event irc_topic => sub {
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my $conversation = $self->conversation($msg->{params}[0] => {topic => $msg->{params}[1]});
 
-  return $conversation->log(debug => '-!- Topic unset by %s', $nick) unless $conversation->topic;
-  return $conversation->log(debug => '-!- %s changed the topic to: %s', $nick, $conversation->topic);
+  return $self->_notice("Topic unset by $nick") unless $conversation->topic;
+  return $self->_notice("$nick changed the topic to: " . $conversation->topic);
 };
 
 sub DESTROY {

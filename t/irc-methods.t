@@ -12,11 +12,11 @@ my $stop_re        = qr{should_not_match};
 my $connection_log = '';
 
 $connection->on(
-  log => sub {
-    my ($self, $level, $message) = @_;
-    diag "[$level] $message" if $ENV{HARNESS_IS_VERBOSE};
-    $connection_log .= "[$_[1]] $_[2]\n";
-    Mojo::IOLoop->stop if $message =~ $stop_re;
+  message => sub {
+    my ($self, $target, $data) = @_;
+    diag "[$data->{type}] $data->{message}" if $ENV{HARNESS_IS_VERBOSE};
+    $connection_log .= "[$data->{type}] $data->{message}\n";
+    Mojo::IOLoop->stop if $data->{message} =~ $stop_re;
   }
 );
 $connection->on(
@@ -63,7 +63,17 @@ $t->run(
         id     => "#convos_irc_live_20001",
         name   => "#Convos_irc_LIVE_20001",
         topic  => '',
-        users  => superhashof({"superman20001" => {name => "Superman20001", mode => '@', seen => re(qr/^\d{10}$/)}}),
+        users  => superhashof(
+          {
+            "superman20001" => {
+              host => 'i.love.debian.org',
+              name => "Superman20001",
+              mode => '@',
+              seen => re(qr/^\d{10}$/),
+              user => 'superman'
+            }
+          }
+        ),
       },
       "convos_irc_live_20001 after join"
     );
@@ -87,7 +97,17 @@ $t->run(
         id     => '#convos',
         name   => re(qr{^\#convos$}i),
         topic  => re(qr{.?}),
-        users  => superhashof({"superman20001" => {name => "Superman20001", mode => '', seen => re(qr/^\d{10}$/)}}),
+        users  => superhashof(
+          {
+            "superman20001" => {
+              host => 'i.love.debian.org',
+              name => "Superman20001",
+              mode => '',
+              seen => re(qr/^\d{10}$/),
+              user => 'superman'
+            }
+          }
+        ),
       },
       'convos after join'
     );
@@ -144,8 +164,14 @@ $t->run(
       $connection->conversation('#conVOS')->TO_JSON->{users},
       superhashof(
         {
-          "supermanx20001" => {name => "SupermanX20001", mode => '',       seen => re(qr/^\d{10}$/)},
-          lc($nick)        => {name => $nick,            mode => ignore(), seen => ignore()},
+          "supermanx20001" => {
+            host => 'i.love.debian.org',
+            name => "SupermanX20001",
+            mode => '',
+            seen => re(qr/^\d{10}$/),
+            user => 'superman'
+          },
+          lc($nick) => {name => $nick, mode => ignore(), seen => ignore()},
         }
       ),
       'updated users after nick change'

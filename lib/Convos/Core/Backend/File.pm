@@ -280,6 +280,7 @@ sub _build_home {
 sub _delete_connection {
   my ($self, $connection) = @_;
   my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->protocol, $connection->name));
+  $connection->unsubscribe($_) for qw( message state users );
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
@@ -290,25 +291,26 @@ sub _delete_user {
 }
 
 sub _log {
-  my ($self, $obj, $level, $message) = @_;
-  my $t  = gmtime;
+  my ($self, $obj, $message) = @_;
+  my $t = gmtime;
   my $ym = sprintf '%s/%02s', $t->year, $t->mon;
-  my $FH = $self->{log_fh}{$obj}{$ym};
+  my $FH;    # = $self->{log_fh}{$obj}{$ym};
 
   unless ($FH) {
     my @path = ($obj->user->email);
     push @path, map { ($_->protocol, $_->name) } $obj->isa('Convos::Core::Connection') ? $obj : $obj->connection;
     push @path, $ym;
     push @path, $obj->name if $obj->isa('Convos::Core::Conversation');
-    my $path = $self->home->rel_file(join('/', @path) . '.log');
-    File::Path::make_path(File::Basename::dirname($path));
-    open $FH, '>>', $path or die "Can't open log file $path: $!";
-    $self->{log_fh}{$obj}{$ym} = $FH;
+    my $file = $self->home->rel_file(join('/', @path) . '.log');
+    my $dir = File::Basename::dirname($file);
+    File::Path::make_path($dir) unless -d $dir;
     delete $self->{log_fh}{$obj};    # make sure we remove old file handles
+    open $FH, '>>', $file or die "Can't open log file $file: $!";
+    warn "[@{[ref $obj]}] log >> $file\n" if DEBUG == 2;
   }
 
   flock $FH, LOCK_EX;
-  printf {$FH} sprintf "%s [%s] %s\n", $t->datetime, $level, $message;
+  print $FH $t->datetime . " $message\n";
   flock $FH, LOCK_UN;
 }
 
@@ -323,21 +325,33 @@ sub _settings_file {
 sub _setup {
   my $self = shift;
 
+  Scalar::Util::weaken($self);
   $self->home($self->_build_home($self->{home})) unless ref $self->{home};
-
   $self->on(
     connection => sub {
       my ($self, $connection) = @_;
       Scalar::Util::weaken($self);
-      $connection->on(log => sub { $self->_log(@_) });
-    }
-  );
-
-  $self->on(
-    conversation => sub {
-      my ($self, $conversation) = @_;
-      Scalar::Util::weaken($self);
-      $conversation->on(log => sub { $self->_log(@_) });
+      $connection->on(
+        message => sub {
+          my ($connection, $target, $msg) = @_;
+          if ($msg->{type} eq 'private') {
+            $self->_log($target, sprintf '<%s> %s', @$msg{qw( from message )});
+          }
+          elsif ($msg->{type} eq 'action') {
+            $self->_log($target, sprintf '* %s %s', @$msg{qw( from message )});
+          }
+          else {
+            $self->_log($target, sprintf '-%s- %s', @$msg{qw( from message )});
+          }
+        }
+      );
+      $connection->on(state => sub { $self->_log($_[0], "-!- Change connection state to $_[1]. $_[2]") });
+      $connection->on(
+        users => sub {
+          my ($connection, $conversation, $data) = @_;
+          $self->_log($conversation, "--- x");
+        }
+      );
     }
   );
 }

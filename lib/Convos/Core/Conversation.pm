@@ -12,7 +12,7 @@ L<Convos::Core::Conversation::Room>.
 
 =cut
 
-use Mojo::Base 'Mojo::EventEmitter';
+use Mojo::Base -base;
 
 =head1 ATTRIBUTES
 
@@ -46,23 +46,6 @@ sub id         { shift->{id}         or die 'id required in constructor' }
 has name => sub { shift->id };
 
 =head1 METHODS
-
-=head2 log
-
-  $self = $self->log($level => $format, @args);
-
-This method will emit a "log" event:
-
-  $self->emit(log => $level => $message);
-
-=cut
-
-sub log {
-  my ($self, $level, $format, @args) = @_;
-  my $message = @args ? sprintf $format, map { $_ // '' } @args : $format;
-
-  $self->emit(log => $level => $message);
-}
 
 =head2 messages
 
