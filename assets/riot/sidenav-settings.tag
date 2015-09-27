@@ -1,6 +1,6 @@
 <sidenav-settings>
   <div class="collection">
-    <a href="#connection-edit" title={this.state()} onclick={parent.editConnection} class="collection-item" each={connections}>
+    <a href="#connection-edit" title={this.state()} onclick={parent.editConnection} class="collection-item" each={user.connections()}>
       <i class={parent.connectionClasses(this)}>device_hub</i> {this.protocol()} {this.name()}
     </a>
     <a href="#connection-add" onclick={editConnection} class="collection-item">
@@ -18,7 +18,6 @@
   mixin.modal(this);
 
   this.user = opts.user;
-  this.connections = [];
 
   connectionClasses(c) {
     return 'material-icons state-' + c.state();
@@ -33,10 +32,6 @@
   editProfile(e) {
     this.openModal('user-profile', {user: this.user});
   }
-
-  this.on('mount', function() {
-    this.user.connections(function(err, connections) { this.connections = connections; this.update(); }.bind(this));
-  });
 
   </script>
 </sidenav-settings>

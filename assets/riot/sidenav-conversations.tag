@@ -15,14 +15,12 @@
   this.conversations = [];
 
   addConversation(e) {
-    this.user.connections(function(err, connections) {
-      if (connections.length) {
-        this.openModal('conversation-add', {connections: connections, user: this.user});
-      }
-      else {
-        this.openModal('connection-add', {first: true, next: 'conversation-add', user: this.user});
-      }
-    }.bind(this));
+    if (this.user.connections().length) {
+      this.openModal('conversation-add', {user: this.user});
+    }
+    else {
+      this.openModal('connection-add', {first: true, next: 'conversation-add', user: this.user});
+    }
   }
 
   conversationClass(i) {

@@ -3,7 +3,6 @@
     if (attrs) this.update(attrs);
     riot.observable(this);
     this._conversations = {};
-    this._connections = {};
     this._method = 'httpCachedGet';
   };
 
@@ -12,6 +11,7 @@
   // Define attributes
   mixin.base(proto, {
     avatar: function() { return ''; },
+    connections: function() { return []; },
     email: function() { return ''; }
   });
 
@@ -20,39 +20,27 @@
   // Make the next http method fetch fresh data from server
   proto.fresh = function() { this._method = 'httpGet'; return this; };
 
-  // Add, get or delete a Convos.Connection object on client side
+  // Add, get or update a Convos.Connection object on client side
   // Get:        c = user.connection(protocol, name)
   // Add/Update: c = user.connection(protocol, name, attrs)
   proto.connection = function(protocol, name, attrs) {
-    var c = this._autovivificate('_connections', protocol, name, null);
+    var c, connections = this.connections();
+    for (var i = 0; i < connections.length; i++) {
+      var _c = connections[i];
+      if (_c.protocol() != protocol || _c.name() != name) { c = _c; break; }
+    }
     if (attrs) {
       if (c) return c.update(attrs);
       attrs[name] = name;
       attrs[user] = this;
       c = new Convos.Connection(attrs);
-      this._connections[protocol][name] = c;
+      this.connections().push(c);
       this.trigger('connection', c);
     }
-    else if(!c) {
+    else if (!c) {
       c = new Convos.Connection({name: name, user: this});
     }
     return c;
-  };
-
-  // Get a list of Convos.Connection objects from backend
-  // Use user.fresh().connections(function() { ... }) to get fresh data from server
-  proto.connections = function(cb) {
-    this[this._method](apiUrl('/connections'), {}, function(err, xhr) {
-      var connections = [];
-      if (!err) {
-        xhr.responseJSON.connections.forEach(function(attrs) {
-          var c = new Convos.Connection(attrs);
-          connections.push(this.connection(c.protocol(), c.name(), attrs));
-        }.bind(this));
-      }
-      cb.call(this, err, connections);
-    });
-    return this.tap('_method', 'httpCachedGet');
   };
 
   // Get or create a single Convos.ConversationXxx object on client side
@@ -70,10 +58,6 @@
   // Get a list of Convos.ConversationXxx objects from backend
   // Use user.fresh().conversations(function() { ... }) to get fresh data from server
   proto.conversations = function(cb) {
-    this[this._method](apiUrl('/conversations'), {}, function(err, xhr) {
-      if (!err) xhr.responseJSON.conversations.forEach(function(c) { this.conversation(false, c); }.bind(this));
-      cb.call(this, err, $.map(this._conversations, function(v, k) { return v; }));
-    });
     return this.tap('_method', 'httpCachedGet');
   };
 
@@ -83,6 +67,8 @@
     this[this._method](apiUrl('/user'), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.update(xhr.responseJSON);
+      this._loadConnections();
+      this._loadConversations();
       cb.call(this, false);
     });
     return this.tap('_method', 'httpCachedGet');
@@ -101,7 +87,11 @@
   proto.removeConnection = function(protocol, name, cb) {
     this.httpDelete(apiUrl(['connection', protocol, name]), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
-      try { delete this._connections[protocol][name]; } catch(e) { console.log(e); };
+      var connections = this.connections();
+      for (var i = 0; i < connections.length; i++) {
+        var c = connections[i];
+        if (c.protocol() == protocol && c.name() == name) connections.splice(i, 1);
+      }
       cb.call(this, '');
     });
     return this.tap('_method', 'httpCachedGet');
@@ -114,6 +104,22 @@
       if (err) return cb.call(this, err);
       this.update(attrs);
       cb.call(this, err);
+    });
+  };
+
+  proto._loadConnections = function() {
+    this.httpGet(apiUrl('/connections'), {}, function(err, xhr) {
+      if (err) return this.trigger('error', err);
+      this.connections(xhr.responseJSON.connections.map(function(attrs) { return new Convos.Connection(attrs); }));
+      riot.update();
+    });
+  };
+
+  proto._loadConversations = function() {
+    this.httpGet(apiUrl('/conversations'), {}, function(err, xhr) {
+      if (err) return this.trigger('error', err);
+      xhr.responseJSON.conversations.forEach(function(c) { this.conversation(false, c); }.bind(this));
+      riot.update();
     });
   };
 })(window);
