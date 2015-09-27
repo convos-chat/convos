@@ -29,7 +29,7 @@
       "name": "conversation_id",
       "in": "path",
       "default": "",
-      "required": false,
+      "required": true,
       "type": "string",
       "description": "The name of the person/chat conversation"
     },
@@ -211,27 +211,6 @@
             "schema": { "$ref": "#/definitions/Error" }
           }
         }
-      },
-      "post": {
-        "tags": [ "conversation" ],
-        "summary": "Join a conversation.",
-        "x-mojo-controller": "Convos::Controller::Conversation",
-        "operationId": "conversationJoin",
-        "parameters": [
-          { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/protocol" }
-        ],
-        "responses": {
-          "200": {
-            "description": "A conversation.",
-            "schema": { "$ref": "#/definitions/Room" }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
       }
     },
     "/connection/{protocol}/{connection_name}/conversation/{conversation_id}/messages": {
@@ -285,6 +264,45 @@
           },
           "default": {
             "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connection/{protocol}/{connection_name}/conversations": {
+      "post": {
+        "tags": [ "conversation" ],
+        "summary": "Join a conversation.",
+        "x-mojo-controller": "Convos::Controller::Conversation",
+        "operationId": "conversationJoin",
+        "parameters": [
+          { "$ref": "#/parameters/connection_name" },
+          { "$ref": "#/parameters/protocol" },
+          { "$ref": "#/parameters/session" },
+          {
+            "name": "data",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "required": true, "minLength": 3, "description": "Name of room or person" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A conversation.",
+            "schema": {
+              "anyOf": [
+                { "$ref": "#/definitions/Direct" },
+                { "$ref": "#/definitions/Room" }
+              ]
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
             "schema": { "$ref": "#/definitions/Error" }
           }
         }
@@ -363,7 +381,15 @@
             "schema": {
               "type": "object",
               "properties": {
-                "conversations": { "type": "array", "items": { "$ref": "#/definitions/Room" } }
+                "conversations": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      { "$ref": "#/definitions/Direct" },
+                      { "$ref": "#/definitions/Room" }
+                    ]
+                  }
+                }
               }
             }
           },
@@ -600,6 +626,11 @@
         "name": { "type": "string", "description": "Name/identifier for this connection" },
         "state": { "type": "string", "enum": ["connected", "connecting", "disconnected"], "description": "Connection state" },
         "url": { "type": "string", "format": "uri", "required": true, "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+      }
+    },
+    "Direct": {
+      "properties": {
+        "name": { "type": "string", "required": true, "description": "Name of a person" }
       }
     },
     "Room": {

@@ -263,7 +263,7 @@ sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not 
 
 sub _conversation {
   my ($self, $c) = @_;
-  die "Method '_conversation' not implemented" unless $c->{class};
+  die 'Cannot create conversation without class' unless $c->{class};
   my $e = load_class $c->{class};
   die $e || "Not found: $c->{class}" if $e;
   (delete $c->{class})->new($c);
