@@ -11,8 +11,8 @@ $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', passwor
 $t->post_ok('/1.0/connections', json => {state => 'connect', url => 'irc://localhost:3123'})->status_is(200);
 
 $t->websocket_ok('/events/bi-directional');
-$t->message_ok->json_message_is('/event', 'log')->json_message_is('/level', 'warn')
-  ->json_message_is('/message', 'Connection refused')->json_message_is('/name', 'localhost')
-  ->json_message_is('/protocol', 'irc');
+$t->message_ok->json_message_is('/event', 'log')->json_message_is('/data/level', 'warn')
+  ->json_message_is('/data/message', 'Connection refused')->json_message_is('/data/name', 'localhost')
+  ->json_message_is('/data/protocol', 'irc');
 
 done_testing;
