@@ -1,9 +1,9 @@
 <sidenav-settings>
   <div class="collection">
-    <a href="#edit-connection" title={this.state()} onclick={parent.editConnection} class="collection-item" each={connections}>
+    <a href="#connection-edit" title={this.state()} onclick={parent.editConnection} class="collection-item" each={connections}>
       <i class={parent.connectionClasses(this)}>device_hub</i> {this.protocol()} {this.name()}
     </a>
-    <a href="#add-connection" onclick={editConnection} class="collection-item">
+    <a href="#connection-add" onclick={editConnection} class="collection-item">
       <i class="material-icons">device_hub</i> Add connection...
     </a>
     <a href="#profile" onclick={editProfile} class="collection-item">
@@ -26,7 +26,7 @@
 
   editConnection(e) {
     var opts = {connection: e.item, user: this.user};
-    if (!e.item) opts.next = 'add-conversation';
+    if (!e.item) opts.next = 'conversation-add';
     this.openModal(e.currentTarget.href.split('#')[1], opts);
   }
 

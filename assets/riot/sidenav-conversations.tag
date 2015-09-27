@@ -17,10 +17,10 @@
   addConversation(e) {
     this.user.connections(function(err, connections) {
       if (connections.length) {
-        this.openModal('add-conversation', {connections: connections, user: this.user});
+        this.openModal('conversation-add', {connections: connections, user: this.user});
       }
       else {
-        this.openModal('add-connection', {first: true, next: 'add-conversation', user: this.user});
+        this.openModal('connection-add', {first: true, next: 'conversation-add', user: this.user});
       }
     }.bind(this));
   }
