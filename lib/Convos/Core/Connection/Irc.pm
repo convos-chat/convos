@@ -206,7 +206,10 @@ sub rooms {
   my ($self, $cb) = @_;
 
   # TODO: Add fresh() to get new list of channels on the server
-  return $self->$cb('', $self->{rooms_cache}) if $self->{rooms_cache};
+  if ($self->{rooms_cache}) {
+    Mojo::IOLoop->next_tick(sub { $self->$cb('', $self->{rooms_cache}); });
+    return $self;
+  }
 
   Scalar::Util::weaken($self);
   $self->_irc->channels(
@@ -243,9 +246,14 @@ sub send {
   my ($self, $target, $message, $cb) = @_;
   my $msg;
 
-  return $self->tap($cb, "Cannot send without target and message.")
-    unless length($target // '') and length($message // '');    # err_norecipient and err_notexttosend
-  return $self->tap($cb, "Cannot send message to target with spaces.") if $target =~ /\s/;
+  if (not length($target // '') or not length($message // '')) {    # err_norecipient and err_notexttosend
+    Mojo::IOLoop->next_tick(sub { $self->$cb('Cannot send without target and message.'); });
+    return $self;
+  }
+  if ($target =~ /\s/) {
+    Mojo::IOLoop->next_tick(sub { $self->$cb('Cannot send message to target with spaces.'); });
+    return $self;
+  }
 
   $msg = Parse::IRC::parse_irc(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $message);
 

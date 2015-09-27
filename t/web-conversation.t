@@ -2,7 +2,7 @@ use t::Helper;
 no warnings 'redefine';
 
 my $t = t::Helper->t;
-my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret');
+my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret')->save;
 
 $t->post_ok('/1.0/connection/irc/localhost/conversation/%23convos')->status_is(401);
 $t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);

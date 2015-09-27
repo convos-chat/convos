@@ -118,9 +118,12 @@ See L<Convos::Core::Backend/find_connections>.
 sub find_connections {
   my ($self, $user, $cb) = @_;
   my $user_dir = $self->home->rel_dir($user->email);
-  my @names;
+  my ($PROTOCOLS, @names);
 
-  return $self->$cb($!, \@names) unless opendir(my $PROTOCOLS, $user_dir);
+  unless (opendir $PROTOCOLS, $user_dir) {
+    Mojo::IOLoop->next_tick(sub { $self->$cb($!, \@names) });
+    return $self;
+  }
 
   for my $protocol (grep {/^\w/} readdir $PROTOCOLS) {
     opendir(my $CONNECTIONS, catdir $user_dir, $protocol) or next;
@@ -159,20 +162,19 @@ sub load_object {
 
   $cb ||= sub { die $_[1] if $_[1] };
 
-  if (-e $storage_file) {
-    eval {
-      $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file));
-      $obj->INFLATE($settings);
-      warn "[@{[ref $obj]}] Load success. ($storage_file)\n" if DEBUG;
-      1;
-    } or do {
-      warn "[@{[ref $obj]}] Load $@ ($storage_file)\n" if DEBUG;
-      $obj->$cb($@);
-    };
-  }
+  eval {
+    $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file));
+    $obj->INFLATE($settings);
+    warn "[@{[ref $obj]}] Load success. ($storage_file)\n" if DEBUG;
+    Mojo::IOLoop->next_tick(sub { $obj->$cb('') });
+    1;
+  } or do {
+    my $err = $@;
+    warn "[@{[ref $obj]}] Load $err ($storage_file)\n" if DEBUG;
+    Mojo::IOLoop->next_tick(sub { $obj->$cb($err) });
+  };
 
-  $obj->$cb('');
-  $self;
+  return $self;
 }
 
 =head2 messages
@@ -247,14 +249,15 @@ sub save_object {
     File::Path::make_path($dir) unless -d $dir;
     Mojo::Util::spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')), $storage_file);
     warn "[@{[ref $obj]}] Save success. ($storage_file)\n" if DEBUG;
-    $obj->$cb('');
+    Mojo::IOLoop->next_tick(sub { $obj->$cb('') });
     1;
   } or do {
-    warn "[@{[ref $obj]}] Save $@ ($storage_file)\n" if DEBUG;
-    $obj->$cb($@);
+    my $err = $@;
+    warn "[@{[ref $obj]}] Save $err ($storage_file)\n" if DEBUG;
+    Mojo::IOLoop->next_tick(sub { $obj->$cb($err) });
   };
 
-  $self;
+  return $self;
 }
 
 sub _build_home {
