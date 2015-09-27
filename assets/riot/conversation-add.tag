@@ -11,7 +11,7 @@
     <div class="row">
       <div class="input-field col s12">
         <select name="connection" id="form_connection">
-          <option each={c, i in connections} value={i}>{c.protocol()} - {c.name()}</option>
+          <option each={c, i in user.connections()} value={i}>{c.protocol()} - {c.name()}</option>
         </select>
         <label for="form_connection">Connection</label>
       </div>
@@ -33,12 +33,8 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <button class="btn waves-effect waves-light" type="submit">
-          Chat <i class="material-icons right">send</i>
-        </button>
-        <button class="btn-flat waves-effect waves-light modal-close" type="submit">
-          Close
-        </button>
+        <button class="btn waves-effect waves-light" type="submit">Chat <i class="material-icons right">send</i></button>
+        <button class="btn-flat waves-effect waves-light modal-close" type="button">Close</button>
       </div>
     </div>
   </form>
@@ -50,7 +46,6 @@
 
   this.user = opts.user;
   this.noRoomsDescription = 'Loading room list...';
-  this.connections = opts.connections ? opts.connections : opts.connection ? [opts.connection] : [];
   this.rooms = [];
 
   changeConnection() {
@@ -63,8 +58,7 @@
 
   selectedConnection() {
     var $option = $('option:selected, option:first', this.connection).eq(0);
-    console.log($option.val());
-    return this.connections[$option.val()];
+    return this.user.connections()[$option.val()];
   }
 
   submitForm(e) {
@@ -78,7 +72,6 @@
   this.on('mount', function() {
     setTimeout(function() { this.form_name.focus(); }.bind(this), 300);
     this.updateTextFields();
-    this.user.connections(function(err, connections) { if (!err) tag.connections = connections; });
     $('input[name="name"]', this.root).autocomplete();
     $('select', this.root).material_select();
     $(this.connection).change(this.changeConnection.bind(this)).change();
