@@ -33,14 +33,6 @@
       "type": "string",
       "description": "The name of the person/chat conversation"
     },
-    "email": {
-      "name": "ident",
-      "in": "body",
-      "required": true,
-      "type": "string",
-      "format": "email",
-      "description": "User email"
-    },
     "ident": {
       "name": "ident",
       "in": "path",
@@ -54,12 +46,6 @@
       "required": true,
       "type": "string",
       "description": "The name of the connection protocol."
-    },
-    "session": {
-      "name": "X-Convos-Session",
-      "in": "header",
-      "type": "string",
-      "description": "TODO. Use cookies for now."
     }
   },
   "paths": {
@@ -95,8 +81,7 @@
         "operationId": "connectionRemove",
         "parameters": [
           { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/protocol" },
-          { "$ref": "#/parameters/session" }
+          { "$ref": "#/parameters/protocol" }
         ],
         "responses": {
           "200": {
@@ -116,8 +101,7 @@
         "operationId": "connection",
         "parameters": [
           { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/protocol" },
-          { "$ref": "#/parameters/session" }
+          { "$ref": "#/parameters/protocol" }
         ],
         "responses": {
           "200": {
@@ -140,13 +124,15 @@
         "parameters": [
           { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
-          { "$ref": "#/parameters/session" },
           {
             "name": "data",
             "in": "body",
             "schema": {
-              "state": { "type": "string", "enum": ["connect", "disconnect"], "description": "Connection state" },
-              "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+              "type": "object",
+              "properties": {
+                "state": { "type": "string", "enum": ["connect", "disconnect"], "description": "Connection state" },
+                "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+              }
             }
           }
         ],
@@ -170,8 +156,7 @@
         "operationId": "connectionRooms",
         "parameters": [
           { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/protocol" },
-          { "$ref": "#/parameters/session" }
+          { "$ref": "#/parameters/protocol" }
         ],
         "responses": {
           "200": {
@@ -255,11 +240,11 @@
         "parameters": [
           { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/protocol" },
-          { "$ref": "#/parameters/session" }
+          { "$ref": "#/parameters/protocol" }
         ],
         "responses": {
           "200": {
+            "description": "TODO",
             "schema": { "$ref": "#/definitions/Command" }
           },
           "default": {
@@ -278,7 +263,6 @@
         "parameters": [
           { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
-          { "$ref": "#/parameters/session" },
           {
             "name": "data",
             "in": "body",
@@ -286,7 +270,7 @@
               "type": "object",
               "required": ["name"],
               "properties": {
-                "name": { "type": "string", "required": true, "minLength": 3, "description": "Name of room or person" }
+                "name": { "type": "string", "minLength": 3, "description": "Name of room or person" }
               }
             }
           }
@@ -294,12 +278,7 @@
         "responses": {
           "200": {
             "description": "A conversation.",
-            "schema": {
-              "anyOf": [
-                { "$ref": "#/definitions/Direct" },
-                { "$ref": "#/definitions/Room" }
-              ]
-            }
+            "schema": { "$ref": "#/definitions/Room" }
           },
           "default": {
             "description": "Internal server error.",
@@ -314,9 +293,6 @@
         "summary": "Get all the connections for a user.",
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connections",
-        "parameters": [
-          { "$ref": "#/parameters/session" }
-        ],
         "responses": {
           "200": {
             "description": "List of connections.",
@@ -339,15 +315,15 @@
         "x-mojo-controller": "Convos::Controller::Connection",
         "operationId": "connectionAdd",
         "parameters": [
-          { "$ref": "#/parameters/session" },
           {
             "name": "data",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
+              "required": ["url"],
               "properties": {
-                "url": { "type": "string", "required": true, "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+                "url": { "type": "string", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
               }
             }
           }
@@ -372,9 +348,6 @@
         "summary": "Get a list of all conversations.",
         "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "conversations",
-        "parameters": [
-          { "$ref": "#/parameters/session" }
-        ],
         "responses": {
           "200": {
             "description": "List of messages.",
@@ -383,12 +356,7 @@
               "properties": {
                 "conversations": {
                   "type": "array",
-                  "items": {
-                    "anyOf": [
-                      { "$ref": "#/definitions/Direct" },
-                      { "$ref": "#/definitions/Room" }
-                    ]
-                  }
+                  "items": { "$ref": "#/definitions/Room" }
                 }
               }
             }
@@ -407,9 +375,6 @@
         "description": "A notification is added once your name is mentioned in a chat or someone sends a direct message.",
         "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "notifications",
-        "parameters": [
-          { "$ref": "#/parameters/session" }
-        ],
         "responses": {
           "200": {
             "description": "List of commands.",
@@ -435,13 +400,14 @@
         "x-mojo-controller": "Convos::Controller::Conversation",
         "operationId": "notificationSeen",
         "parameters": [
-          { "$ref": "#/parameters/session" },
           {
             "name": "data",
             "in": "body",
-            "type": "object",
-            "properties": {
-              "ids": { "type": "array", "type": "integer", "description": "A list of notification IDs to mark as seen/read" }
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ids": { "type": "array", "type": "integer", "description": "A list of notification IDs to mark as seen/read" }
+              }
             }
           }
         ],
@@ -466,9 +432,6 @@
         "summary": "Delete a user.",
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "userDelete",
-        "parameters": [
-          { "$ref": "#/parameters/session" }
-        ],
         "responses": {
             "200": {
             "description": "Successfully deleted.",
@@ -485,9 +448,6 @@
         "summary": "Get user data.",
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "user",
-        "parameters": [
-          { "$ref": "#/parameters/session" }
-        ],
         "responses": {
           "200": {
             "description": "User profile.",
@@ -505,7 +465,6 @@
         "x-mojo-controller": "Convos::Controller::User",
         "operationId": "userSave",
         "parameters": [
-          { "$ref": "#/parameters/session" },
           {
             "name": "data",
             "in": "body",
@@ -543,9 +502,10 @@
             "schema": {
               "type": "object",
               "required": true,
+              "required": ["email", "password"],
               "properties": {
-                "email": { "type": "string", "format": "email", "required": true, "description": "User email" },
-                "password": { "type": "string", "required": true, "description": "User password" }
+                "email": { "type": "string", "format": "email", "description": "User email" },
+                "password": { "type": "string", "description": "User password" }
               }
             }
           }
@@ -593,10 +553,11 @@
             "in": "body",
             "schema": {
               "type": "object",
+              "required": ["email", "password"],
               "properties": {
                 "avatar": { "type": "string", "description": "User avatar" },
-                "email": { "type": "string", "required": true, "format": "email", "description": "User email" },
-                "password": { "type": "string", "required": true, "description": "User password" }
+                "email": { "type": "string", "format": "email", "description": "User email" },
+                "password": { "type": "string", "description": "User password" }
               }
             }
           }
@@ -616,26 +577,24 @@
   },
   "definitions": {
     "Command": {
+      "required": ["id", "command"],
       "properties": {
-        "id": { "type": "string", "required": true, "description": "jhthorsen: Cannot remember what 'id' is." },
-        "command": { "type": "string", "required": true, "description": "A command to be sent to backend" }
+        "id": { "type": "string", "description": "jhthorsen: Cannot remember what 'id' is." },
+        "command": { "type": "string", "description": "A command to be sent to backend" }
       }
     },
     "Connection": {
+      "required": ["url"],
       "properties": {
         "name": { "type": "string", "description": "Name/identifier for this connection" },
         "state": { "type": "string", "enum": ["connected", "connecting", "disconnected"], "description": "Connection state" },
-        "url": { "type": "string", "format": "uri", "required": true, "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
-      }
-    },
-    "Direct": {
-      "properties": {
-        "name": { "type": "string", "required": true, "description": "Name of a person" }
+        "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
     },
     "Room": {
+      "required": ["name"],
       "properties": {
-        "name": { "type": "string", "required": true, "description": "Name of the room" },
+        "name": { "type": "string", "description": "Name of the room or person" },
         "topic": { "type": "string", "description": "The subjec/topic for this room" },
         "users": {
           "type": "object",
@@ -650,26 +609,31 @@
         "errors": {
           "type": "array",
           "items": {
-            "message": { "type": "string", "required": true, "description": "Human readable description of the error" },
-            "path": { "type": "string", "description": "JSON pointer to the input data where the error occur" }
+            "required": ["message"],
+            "properties": {
+              "message": { "type": "string", "description": "Human readable description of the error" },
+              "path": { "type": "string", "description": "JSON pointer to the input data where the error occur" }
+            }
           }
         }
       }
     },
     "Message": {
+      "required": ["message", "sender", "timestamp"],
       "properties": {
         "avatar": { "type": "string", "format": "uri", "description": "Location to an image which can be used as avatar" },
         "level": { "type": "string", "default": "info", "enum": ["debug", "info", "warn"], "description": "How important this message is" },
-        "message": { "type": "string", "required": true, "description": "The message" },
-        "sender": { "type": "string", "required": true, "description": "Identifier for the sender on the chat server" },
-        "timestamp": { "type": "string", "format": "datetime", "required": true, "description": "Example: 2015-09-06T13:49:37Z" }
+        "message": { "type": "string", "description": "The message" },
+        "sender": { "type": "string", "description": "Identifier for the sender on the chat server" },
+        "timestamp": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T13:49:37Z" }
       }
     },
     "Notification": {
+      "required": ["id", "message", "timestamp"],
       "properties": {
-        "id": { "type": "string", "required": true, "description": "Identifier used when marking this as seen" },
-        "message": { "type": "string", "required": true, "description": "The message that resulted in a notification" },
-        "timestamp": { "type": "string", "format": "datetime", "required": true, "description": "Example: 2015-09-06T10:47:31Z" }
+        "id": { "type": "string", "description": "Identifier used when marking this as seen" },
+        "message": { "type": "string", "description": "The message that resulted in a notification" },
+        "timestamp": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
       }
     },
     "Success": {
@@ -678,8 +642,9 @@
       }
     },
     "User": {
+      "required": ["email"],
       "properties": {
-        "email": { "type": "string", "required": true, "description": "Unique email identifying a user in Convos" },
+        "email": { "type": "string", "description": "Unique email identifying a user in Convos" },
         "avatar": { "type": "string", "description": "Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID" },
         "registered": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
       }
