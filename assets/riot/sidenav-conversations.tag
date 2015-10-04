@@ -27,10 +27,5 @@
     return i == this.parent.activeConversation ? 'collection-item active' : 'collection-item';
   }
 
-  this.on('mount', function() {
-    this.user.conversations(function(err, conversations) { this.conversations = conversations; this.update(); }.bind(this));
-    this.user.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.update(); }.bind(this));
-  });
-
   </script>
 </sidenav-conversations>
