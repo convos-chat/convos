@@ -15,64 +15,13 @@ use Mojo::Base 'Mojolicious::Controller';
 
 =head1 METHODS
 
-=head2 user
+=head2 delete
 
-See L<Convos::Manual::API/user>.
-
-=cut
-
-sub user {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-
-  $self->delay(sub { $user->load(shift->begin); }, sub { $_[1] and die $_[1]; $self->$cb($user->TO_JSON, 200); });
-}
-
-=head2 user_login
-
-See L<Convos::Manual::API/userLogin>.
+See L<Convos::Manual::API/deleteUser>.
 
 =cut
 
-sub user_login {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->app->core->user($args->{data}{email});
-
-  $self->delay(
-    sub { $user->load(shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-
-      if ($user->validate_password($args->{data}{password})) {
-        $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
-      }
-      else {
-        $self->$cb($self->invalid_request('Invalid email or password.'), 400);
-      }
-    },
-  );
-}
-
-=head2 user_logout
-
-See L<Convos::Manual::API/userLogout>.
-
-=cut
-
-sub user_logout {
-  my ($self, $args, $cb) = @_;
-  $self->session({expires => 1});
-  $self->$cb({}, 200);
-}
-
-=head2 user_delete
-
-See L<Convos::Manual::API/userDelete>.
-
-=cut
-
-sub user_delete {
+sub delete {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 
@@ -93,13 +42,64 @@ sub user_delete {
   );
 }
 
-=head2 user_register
+=head2 get
 
-See L<Convos::Manual::API/userRegister>.
+See L<Convos::Manual::API/getUser>.
 
 =cut
 
-sub user_register {
+sub get {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+
+  $self->delay(sub { $user->load(shift->begin); }, sub { $_[1] and die $_[1]; $self->$cb($user->TO_JSON, 200); });
+}
+
+=head2 login
+
+See L<Convos::Manual::API/loginUser>.
+
+=cut
+
+sub login {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->app->core->user($args->{data}{email});
+
+  $self->delay(
+    sub { $user->load(shift->begin) },
+    sub {
+      my ($delay, $err) = @_;
+      die $err if $err;
+
+      if ($user->validate_password($args->{data}{password})) {
+        $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
+      }
+      else {
+        $self->$cb($self->invalid_request('Invalid email or password.'), 400);
+      }
+    },
+  );
+}
+
+=head2 logout
+
+See L<Convos::Manual::API/logoutUser>.
+
+=cut
+
+sub logout {
+  my ($self, $args, $cb) = @_;
+  $self->session({expires => 1});
+  $self->$cb({}, 200);
+}
+
+=head2 register
+
+See L<Convos::Manual::API/registerUser>.
+
+=cut
+
+sub register {
   my ($self, $args, $cb) = @_;
   my $user = $self->app->core->user($args->{data}{email});
 
@@ -124,13 +124,13 @@ sub user_register {
   );
 }
 
-=head2 user_save
+=head2 save
 
-See L<Convos::Manual::API/userSave>.
+See L<Convos::Manual::API/saveUser>.
 
 =cut
 
-sub user_save {
+sub save {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 

@@ -2,12 +2,12 @@ package Convos::Controller::Conversation;
 
 =head1 NAME
 
-Convos::Controller::Conversation - Convos chat actions
+Convos::Controller::Conversation - Convos conversations
 
 =head1 DESCRIPTION
 
 L<Convos::Controller::Conversation> is a L<Mojolicious::Controller> with
-user related actions.
+conversation related actions.
 
 =cut
 
@@ -15,13 +15,13 @@ use Mojo::Base 'Mojolicious::Controller';
 
 =head1 METHODS
 
-=head2 conversation_join
+=head2 join
 
-See L<Convos::Manual::API/conversationJoin>.
+See L<Convos::Manual::API/joinConversation>.
 
 =cut
 
-sub conversation_join {
+sub join {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
   my $connection = $user->connection($args->{protocol}, $args->{connection_name});
@@ -42,13 +42,33 @@ sub conversation_join {
   );
 }
 
-=head2 conversation_messages
+=head2 list
 
-See L<Convos::Manual::API/conversationMessages>.
+See L<Convos::Manual::API/listConversations>.
 
 =cut
 
-sub conversation_messages {
+sub list {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my @conversations;
+
+  for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
+    for my $conversation (sort { $a->id cmp $b->id } @{$connection->conversations}) {
+      push @conversations, $conversation->TO_JSON if $conversation->active;
+    }
+  }
+
+  $self->$cb({conversations => \@conversations}, 200);
+}
+
+=head2 messages
+
+See L<Convos::Manual::API/messagesForConversation>.
+
+=cut
+
+sub messages {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
   my $connection = $user->connection($args->{protocol}, $args->{connection_name}) or return $self->$cb({});
@@ -68,38 +88,28 @@ sub conversation_messages {
   );
 }
 
-=head2 conversation_delete
+=head2 remove
 
-See L<Convos::Manual::API/conversationDelete>.
+See L<Convos::Manual::API/removeConversation>.
 
 =cut
 
-sub conversation_delete {
+sub remove {
   my ($self, $args, $cb) = @_;
-
   die 'TODO';
-
   $self->$cb({message => ''}, 200);
 }
 
-=head2 conversations
+=head2 send
 
-See L<Convos::Manual::API/conversations>.
+See L<Convos::Manual::API/sendToConversation>.
 
 =cut
 
-sub conversations {
+sub send {
   my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my @conversations;
-
-  for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-    for my $conversation (sort { $a->id cmp $b->id } @{$connection->conversations}) {
-      push @conversations, $conversation->TO_JSON if $conversation->active;
-    }
-  }
-
-  $self->$cb({conversations => \@conversations}, 200);
+  die 'TODO';
+  $self->$cb({message => ''}, 200);
 }
 
 =head1 COPYRIGHT AND LICENSE

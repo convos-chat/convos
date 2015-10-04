@@ -16,13 +16,13 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 METHODS
 
-=head2 connection_add
+=head2 create
 
-See L<Convos::Manual::API/connectionAdd>.
+See L<Convos::Manual::API/createConnection>.
 
 =cut
 
-sub connection_add {
+sub create {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
   my $url  = Mojo::URL->new($args->{data}{url});
@@ -52,13 +52,31 @@ sub connection_add {
   );
 }
 
-=head2 connection_remove
+=head2 list
 
-See L<Convos::Manual::API/connectionRemove>.
+See L<Convos::Manual::API/listConnections>.
 
 =cut
 
-sub connection_remove {
+sub list {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my @connections;
+
+  for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
+    push @connections, $connection->TO_JSON;
+  }
+
+  $self->$cb({connections => \@connections}, 200);
+}
+
+=head2 remove
+
+See L<Convos::Manual::API/removeConnection>.
+
+=cut
+
+sub remove {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 
@@ -74,13 +92,13 @@ sub connection_remove {
   );
 }
 
-=head2 connection_rooms
+=head2 rooms
 
-See L<Convos::Manual::API/connectionRooms>.
+See L<Convos::Manual::API/roomsForConnection>.
 
 =cut
 
-sub connection_rooms {
+sub rooms {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
   my $connection = $user->connection($args->{protocol}, $args->{connection_name});
@@ -98,13 +116,13 @@ sub connection_rooms {
   );
 }
 
-=head2 connection_update
+=head2 update
 
-See L<Convos::Manual::API/connectionUpdate>.
+See L<Convos::Manual::API/updateConnection>.
 
 =cut
 
-sub connection_update {
+sub update {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
   my $state = $args->{data}{state} || '';
@@ -138,24 +156,6 @@ sub connection_update {
       $self->$cb($connection->TO_JSON, 200);
     },
   );
-}
-
-=head2 connections
-
-See L<Convos::Manual::API/connections>.
-
-=cut
-
-sub connections {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my @connections;
-
-  for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-    push @connections, $connection->TO_JSON;
-  }
-
-  $self->$cb({connections => \@connections}, 200);
 }
 
 sub _pretty_connection_name {
