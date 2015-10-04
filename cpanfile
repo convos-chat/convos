@@ -7,7 +7,7 @@ requires "Mojolicious"                    => "6.14";
 requires "Mojolicious::Plugin::AssetPack" => "0.58";
 requires "Mojolicious::Plugin::Riotjs"    => "0.03";
 requires "Parse::IRC"                     => "1.20";
-requires "Swagger2"                       => "0.47";
+requires "Swagger2"                       => "0.58";
 
 test_requires "Test::Deep" => "0.11";
 test_requires "Test::More" => "0.88";

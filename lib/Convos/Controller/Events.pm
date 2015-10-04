@@ -31,7 +31,7 @@ sub bi_directional {
   my $self = shift;
 
   unless ($self->backend->user) {
-    return $self->send({json => $self->invalid_request('Need to log in first.', '/X-Convos-Session')})->finish;
+    return $self->send({json => $self->invalid_request('Need to log in first.', '/')})->finish;
   }
 
   $self->_subscribe('_send_event');
