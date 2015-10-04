@@ -60,8 +60,6 @@
 
   this.on('mount', function() {
     if (!this.user.email()) return this.parent.update({render:'login'});
-    this.user.conversations(function(err, conversations) { this.conversations = conversations; this.loadMessages(); }.bind(this));
-    this.user.on('conversation', function(conversation) { this.conversations.unshift(conversation); this.loadMessages(); }.bind(this));
   });
 
   this.on('update', function() {

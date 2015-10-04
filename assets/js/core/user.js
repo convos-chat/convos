@@ -4,6 +4,12 @@
     riot.observable(this);
     this._conversations = {};
     this._method = 'httpCachedGet';
+
+    var prev = this.email();
+    this.on('email', function(value) {
+      if (value != prev && value) this.refresh();
+      prev = value;
+    });
   };
 
   var proto = Convos.User.prototype;
@@ -12,6 +18,7 @@
   mixin.base(proto, {
     avatar: function() { return ''; },
     connections: function() { return []; },
+    conversations: function() { return []; },
     email: function() { return ''; }
   });
 
@@ -55,20 +62,12 @@
     return this._conversations[id];
   };
 
-  // Get a list of Convos.ConversationXxx objects from backend
-  // Use user.fresh().conversations(function() { ... }) to get fresh data from server
-  proto.conversations = function(cb) {
-    return this.tap('_method', 'httpCachedGet');
-  };
-
   // Get user settings from server
   // Use user.fresh().load(function() { ... }) to get fresh data from server
   proto.load = function(cb) {
     this[this._method](apiUrl('/user'), {}, function(err, xhr) {
       if (err) return cb.call(this, err);
       this.update(xhr.responseJSON);
-      this._loadConnections();
-      this._loadConversations();
       cb.call(this, false);
     });
     return this.tap('_method', 'httpCachedGet');
@@ -97,6 +96,20 @@
     return this.tap('_method', 'httpCachedGet');
   };
 
+  // Refresh related data to the user
+  proto.refresh = function() {
+    this.httpGet(apiUrl('/connections'), {}, function(err, xhr) {
+      if (err) return this.trigger('error', err);
+      this.connections(xhr.responseJSON.connections.map(function(attrs) { return new Convos.Connection(attrs); }));
+      riot.update();
+    });
+    this.httpGet(apiUrl('/conversations'), {}, function(err, xhr) {
+      if (err) return this.trigger('error', err);
+      xhr.responseJSON.conversations.forEach(function(c) { this.conversation(false, c); }.bind(this));
+      riot.update();
+    });
+  };
+
   // Write user settings to server
   proto.save = function(attrs, cb) {
     if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
@@ -104,22 +117,6 @@
       if (err) return cb.call(this, err);
       this.update(attrs);
       cb.call(this, err);
-    });
-  };
-
-  proto._loadConnections = function() {
-    this.httpGet(apiUrl('/connections'), {}, function(err, xhr) {
-      if (err) return this.trigger('error', err);
-      this.connections(xhr.responseJSON.connections.map(function(attrs) { return new Convos.Connection(attrs); }));
-      riot.update();
-    });
-  };
-
-  proto._loadConversations = function() {
-    this.httpGet(apiUrl('/conversations'), {}, function(err, xhr) {
-      if (err) return this.trigger('error', err);
-      xhr.responseJSON.conversations.forEach(function(c) { this.conversation(false, c); }.bind(this));
-      riot.update();
     });
   };
 })(window);

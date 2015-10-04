@@ -7,7 +7,7 @@
   var tag = this;
 
   this.errors = opts.errors;
-  this.render = riot.url.fragment().split('/')[0] || 'chat';
+  this.render = riot.url.fragment().split('/')[0] || '';
   this.user = opts.user;
   this.user.on('email', function(v) { tag.update({render: v ? 'chat' : 'login'}); });
 
