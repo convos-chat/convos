@@ -139,7 +139,7 @@ sub _add_helpers {
   $self->helper(
     unauthorized => sub {
       my ($self, $cb) = @_;
-      $self->$cb($self->invalid_request('Need to log in first.', '/X-Convos-Session'), 401);
+      $self->$cb($self->invalid_request('Need to log in first.', '/'), 401);
     }
   );
 }
