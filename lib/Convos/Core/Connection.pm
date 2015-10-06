@@ -82,6 +82,12 @@ information about the change:
 L<Convos::Core::Connection> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
 
+=head2 loaded
+
+  $bool = $self->loaded;
+
+Returns true if this object is loaded from disk.
+
 =head2 name
 
   $str = $self->name;
@@ -108,6 +114,8 @@ attribute is read-only.
 Holds a L<Convos::Core::User> object that owns this connection.
 
 =cut
+
+sub loaded { shift->{loaded} || 0 }
 
 sub name { shift->{name} or die 'name is required in constructor' }
 
@@ -215,6 +223,7 @@ See L<Convos::Core::Backend/load_object> for details.
 sub load {
   my $self = shift;
   $self->user->core->backend->load_object($self, @_);
+  $self->{loaded} = 1;
   $self;
 }
 

@@ -162,18 +162,17 @@ sub _start {
     );
   }
   else {    # Convos::Core::Connection
-    $obj->load(
-      sub {
-        my ($connection, $err) = @_;
-        if ($connection->state eq 'connecting') {
-          $connection->connect(sub { });
-          Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->_start(@objs) });
-        }
-        else {
-          $self->_start(@objs);
-        }
+    my $cb = sub {
+      my ($connection, $err) = @_;
+      if ($connection->state eq 'connecting') {
+        $connection->connect(sub { });
+        Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->_start(@objs) });
       }
-    );
+      else {
+        $self->_start(@objs);
+      }
+    };
+    $obj->loaded ? $obj->$cb('') : $obj->load($cb);
   }
 }
 
