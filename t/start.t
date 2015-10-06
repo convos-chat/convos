@@ -16,6 +16,7 @@ my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
   $user->connection(Irc => 'localhost', {})->tap(sub { shift->url->parse('irc://127.0.0.1') })->state('disconnected')
     ->save;
   $user->connection(irc => 'perlorg', {})->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
+  ok !$user->connection(Irc => 'localhost', {})->loaded, 'connection not loaded';
 }
 
 diag 'restart core';
@@ -27,5 +28,7 @@ Mojo::IOLoop->timer(0.3 => sub { Mojo::IOLoop->stop });    # should be long enou
 Mojo::IOLoop->start;
 is_deeply [sort keys %connect], [qw( chat.freenode.net:6697 irc.perl.org localhost )],
   'started connections, except disconnected';
+
+ok $core->user('jhthorsen@cpan.org')->connection(Irc => 'localhost', {})->loaded, 'connection loaded';
 
 done_testing;

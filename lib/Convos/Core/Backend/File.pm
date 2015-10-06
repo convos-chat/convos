@@ -165,12 +165,12 @@ sub load_object {
   eval {
     $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file));
     $obj->INFLATE($settings);
-    warn "[@{[ref $obj]}] Load success. ($storage_file)\n" if DEBUG;
+    warn "[@{[ref $obj]}] Load success: $storage_file\n" if DEBUG;
     Mojo::IOLoop->next_tick(sub { $obj->$cb('') });
     1;
   } or do {
     my $err = $@;
-    warn "[@{[ref $obj]}] Load $err ($storage_file)\n" if DEBUG;
+    warn "[@{[ref $obj]}] Load $err: $storage_file\n" if DEBUG;
     Mojo::IOLoop->next_tick(sub { $obj->$cb($err) });
   };
 

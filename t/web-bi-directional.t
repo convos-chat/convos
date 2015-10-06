@@ -1,6 +1,7 @@
 BEGIN { $ENV{CONVOS_CONNECT_TIMER} = 0.1 }
 use t::Helper;
 
+File::Path::remove_tree($t::Helper::CONVOS_HOME) if -d $t::Helper::CONVOS_HOME;
 my $t = t::Helper->t;
 
 $t->websocket_ok('/events/bi-directional');
