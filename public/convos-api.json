@@ -15,7 +15,7 @@
     "termsOfService": "SSL (HTTPS) is highly suggested, since login credentials and session cookies are transmitted over this API."
   },
   "host": "demo.convos.by",
-  "basePath": "/1.0",
+  "basePath": "/api",
   "schemes": [ "http" ],
   "parameters": {
     "connection_name": {
@@ -77,8 +77,9 @@
           { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
           {
-            "name": "data",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -211,8 +212,9 @@
           { "$ref": "#/parameters/connection_name" },
           { "$ref": "#/parameters/protocol" },
           {
-            "name": "data",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "required": ["name"],
@@ -261,7 +263,7 @@
         "operationId": "createConnection",
         "parameters": [
           {
-            "name": "data",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
@@ -343,8 +345,9 @@
         "operationId": "seenNotification",
         "parameters": [
           {
-            "name": "data",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -402,11 +405,12 @@
       "post": {
         "tags": [ "user" ],
         "summary": "Update an existing user.",
-        "operationId": "saveUser",
+        "operationId": "updateUser",
         "parameters": [
           {
-            "name": "data",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -435,8 +439,9 @@
         "operationId": "loginUser",
         "parameters": [
           {
-            "name": "data",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "required": true,
@@ -485,8 +490,9 @@
         "operationId": "registerUser",
         "parameters": [
           {
-            "name": "data",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "required": ["email", "password"],

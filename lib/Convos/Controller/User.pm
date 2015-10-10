@@ -63,7 +63,7 @@ See L<Convos::Manual::API/loginUser>.
 
 sub login {
   my ($self, $args, $cb) = @_;
-  my $user = $self->app->core->user($args->{data}{email});
+  my $user = $self->app->core->user($args->{body}{email});
 
   $self->delay(
     sub { $user->load(shift->begin) },
@@ -71,7 +71,7 @@ sub login {
       my ($delay, $err) = @_;
       die $err if $err;
 
-      if ($user->validate_password($args->{data}{password})) {
+      if ($user->validate_password($args->{body}{password})) {
         $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
       }
       else {
@@ -101,19 +101,19 @@ See L<Convos::Manual::API/registerUser>.
 
 sub register {
   my ($self, $args, $cb) = @_;
-  my $user = $self->app->core->user($args->{data}{email});
+  my $user = $self->app->core->user($args->{body}{email});
 
   # TODO: Add support for invite code
 
   if ($user->password) {
-    return $self->$cb($self->invalid_request('Email is taken.', '/data/email'), 409);
+    return $self->$cb($self->invalid_request('Email is taken.', '/body/email'), 409);
   }
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->user($args->{data}{email}, {avatar => $args->{data}{avatar} || ''});
-      $user->set_password($args->{data}{password});
+      $self->app->core->user($args->{body}{email}, {avatar => $args->{body}{avatar} || ''});
+      $user->set_password($args->{body}{password});
       $user->save($delay->begin);
     },
     sub {
@@ -124,13 +124,13 @@ sub register {
   );
 }
 
-=head2 save
+=head2 update
 
-See L<Convos::Manual::API/saveUser>.
+See L<Convos::Manual::API/updateUser>.
 
 =cut
 
-sub save {
+sub update {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 
@@ -141,9 +141,9 @@ sub save {
     sub {
       my ($delay, $err) = @_;
       die $err if $err;
-      return $self->$cb($user->TO_JSON, 200) unless %{$args->{data} || {}};
-      $user->avatar($args->{data}{avatar})         if $args->{data}{avatar};
-      $user->set_password($args->{data}{password}) if $args->{data}{password};
+      return $self->$cb($user->TO_JSON, 200) unless %{$args->{body} || {}};
+      $user->avatar($args->{body}{avatar})         if $args->{body}{avatar};
+      $user->set_password($args->{body}{password}) if $args->{body}{password};
       return $user->save($delay->begin);
     },
     sub {

@@ -6,8 +6,8 @@ my $t = t::Helper->t;
 $t->get_ok('/events/event-source')->content_is(qq(event:error\ndata:{"message":"Need to log in first."}\n\n));
 
 my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret')->save;
-$t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
-$t->post_ok('/1.0/connections', json => {state => 'connect', url => 'irc://localhost:3123'})->status_is(200);
+$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
+$t->post_ok('/api/connections', json => {state => 'connect', url => 'irc://localhost:3123'})->status_is(200);
 
 my $tx = $t->ua->build_tx(GET => '/events/event-source');
 my $buffer = '';

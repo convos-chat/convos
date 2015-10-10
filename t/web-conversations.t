@@ -4,8 +4,8 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
 my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret');
 
-$t->post_ok('/1.0/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
-$t->get_ok('/1.0/conversations')->status_is(200)->json_is('/conversations', []);
+$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
+$t->get_ok('/api/conversations')->status_is(200)->json_is('/conversations', []);
 
 no warnings 'redefine';
 require Mojo::IRC::UA;
@@ -16,7 +16,7 @@ $user->connection(irc => 'localhost', {})->join_conversation('#private',       s
 $user->connection(irc => 'perl-org',  {})->join_conversation('#oslo.pm',       sub { });
 $user->connection(irc => 'localhost', {})->join_conversation('#Convos s3cret', sub { });
 
-$t->get_ok('/1.0/conversations')->status_is(200)
+$t->get_ok('/api/conversations')->status_is(200)
   ->json_is('/conversations/0',
   {active => 1, topic => '', frozen => '', name => '#Convos', id => '#convos', users => {}})
   ->json_is('/conversations/1',

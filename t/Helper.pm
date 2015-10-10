@@ -23,8 +23,8 @@ sub import {
   Mojo::Util::monkey_patch($caller => TRUE  => sub { Mojo::JSON->true });
 
   $script =~ s/\W/-/g;
-  $CONVOS_HOME = File::Spec->catdir("local", "test-$script");
-  $ENV{CONVOS_HOME} = $CONVOS_HOME;
+  $ENV{CONVOS_HOME} = $CONVOS_HOME = File::Spec->catdir("local", "test-$script");
+  File::Path::remove_tree($CONVOS_HOME) if -d $CONVOS_HOME;
 }
 
 END {
