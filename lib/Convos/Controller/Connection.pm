@@ -25,12 +25,12 @@ See L<Convos::Manual::API/createConnection>.
 sub create {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $url  = Mojo::URL->new($args->{data}{url});
-  my $name = $args->{data}{name} || $self->_pretty_connection_name($url->host);
+  my $url  = Mojo::URL->new($args->{body}{url});
+  my $name = $args->{body}{name} || $self->_pretty_connection_name($url->host);
   my $connection;
 
   unless ($name) {
-    return $self->$cb($self->invalid_request('URL need a valid host.', '/data/url'), 400);
+    return $self->$cb($self->invalid_request('URL need a valid host.', '/body/url'), 400);
   }
 
   eval {
@@ -39,7 +39,7 @@ sub create {
     $connection->url->parse($url);
   } or do {
     return $self->$cb($self->invalid_request('Connection already exists.', '/'), 400) if $@ =~ /^DUP\s/;
-    return $self->$cb($self->invalid_request('Could not find connection class from scheme.', '/data/url'), 400);
+    return $self->$cb($self->invalid_request('Could not find connection class from scheme.', '/body/url'), 400);
   };
 
   $self->delay(
@@ -125,8 +125,8 @@ See L<Convos::Manual::API/updateConnection>.
 sub update {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $state = $args->{data}{state} || '';
-  my $url = Mojo::URL->new($args->{data}{url} || '');
+  my $state = $args->{body}{state} || '';
+  my $url = Mojo::URL->new($args->{body}{url} || '');
   my $connection;
 
   eval {
