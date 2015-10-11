@@ -7,7 +7,7 @@
 
     var prev = this.email();
     this.on('email', function(value) {
-      if (value != prev && value) this.refresh();
+      if (value != prev && value) Convos.ws.open(function() { this.refresh(); }.bind(this));
       prev = value;
     });
   };
@@ -101,6 +101,7 @@
   // Refresh related data to the user
   proto.refresh = function() {
     var self = this;
+
     this._api.listConnections({}, function(err, xhr) {
       if (err) return self.trigger('error', err);
       self.connections(xhr.body.connections.map(function(attrs) { return new Convos.Connection(attrs); }));

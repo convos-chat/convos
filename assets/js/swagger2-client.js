@@ -7,6 +7,8 @@
     });
   */
   window.swaggerClient = function(spec, cb) {
+    this._id = 1;
+    this._xhr = {};
     if (typeof spec == 'object') return this.generate(spec);
     if (typeof spec == 'string') return this.load(spec, cb);
   };
@@ -48,6 +50,11 @@
             if (window.DEBUG) console.log('[Swagger] ' + xhr.url + ' is cached');
             setTimeout(function() { cb.call(this, null, xhr) }.bind(this), 0);
           }
+          else if(this._ws && this._ws.readyState == WebSocket.OPEN) {
+            this._ws.send({id: this._id, op: opSpec.operationId, params: input});
+            this._xhr[this._id++] = cb;
+            cb.op = opSpec.operationId;
+          }
           else {
             xhr = this.req(httpMethod, pathList, input, opSpec.parameters || []);
             this._fresh = false; // reset on each request
@@ -75,8 +82,7 @@
 
   // Load spec from URL
   // client = client.load(url, function(err) { ... });
-  proto.load = function(url, _cb) {
-    var cb = _cb;
+  proto.load = function(url, cb) {
     var xhr = new XMLHttpRequest();
 
     xhr.open('GET', url);
@@ -90,6 +96,22 @@
     xhr.send(null);
 
     return this;
+  };
+
+  proto.ws = function(ws) {
+    var self = this;
+    self._ws = ws;
+    ws.on('json', function(res) {
+      if (!res.id || !res.code) return;
+      var xhr = self._xhr[res.id];
+      if (!xhr) return;
+      delete self._xhr[res.id];
+      xhr.status = res.code;
+      xhr.body = res.body;
+      if (window.DEBUG) console.log('[Swagger] ' + xhr.op + ' ' + xhr.status + ' ' + JSON.stringify(xhr.body));
+      xhr.call(self, makeErr(xhr), xhr);
+    });
+    return self;
   };
 
   // Create XMLHttpRequest object

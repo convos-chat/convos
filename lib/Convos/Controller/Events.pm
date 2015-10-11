@@ -35,7 +35,13 @@ sub bi_directional {
   }
 
   $self->_subscribe('_send_event');
-  $self->on(message => sub { warn "WebSocket data! $_[1]"; });
+  $self->on(
+    json => sub {
+      my ($c, $data) = @_;
+      warn "[Convos::Controller::Events] <<< @{[Mojo::JSON::encode_json($data)]}\n" if DEBUG == 2;
+      return if $c->dispatch_to_swagger($data);
+    }
+  );
 }
 
 =head2 event_source
@@ -63,7 +69,7 @@ sub event_source {
 sub _send_event {
   my ($self, $event, $data) = @_;
   $data->{event} = $event;
-  warn "[Convos::Controller::Events] @{[encode_json $data]}\n" if DEBUG == 2;
+  warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG == 2;
   $self->send({json => $data});
 }
 
@@ -98,7 +104,7 @@ sub _subscribe {
 sub _write_event {
   my ($self, $event, $data) = @_;
   $data = encode_json $data;
-  warn "[Convos::Controller::Events] event:$event\ndata:$data\n" if DEBUG == 2;
+  warn "[Convos::Controller::Events] >>> event:$event\ndata:$data\n" if DEBUG == 2;
   $self->write("event:$event\ndata:$data\n\n");
 }
 
