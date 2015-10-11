@@ -28,8 +28,6 @@
   </main>
   <script>
 
-  mixin.http(this);
-
   this.activeConversation = 0;
   this.conversations = [];
   this.modalBottomSheetShow = false;
@@ -45,17 +43,6 @@
     this.sidenav = $a.attr('href').split('sidenav:')[1];
     localStorage.setItem('sidenav', this.sidenav);
     this.update();
-  }
-
-  loadMessages() {
-    var conversation = this.conversations[this.activeConversation];
-    if (!conversation || conversation.messages) return;
-    conversation.messages = [];
-    this.httpGet(conversation.messagesUrl(), {}, function(err, data) {
-      if (err) throw err;
-      conversation.messages = data.responseJSON;
-      this.update();
-    });
   }
 
   this.on('mount', function() {

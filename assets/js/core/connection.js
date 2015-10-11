@@ -1,7 +1,7 @@
 (function(window) {
   Convos.Connection = function(attrs) {
-    this._method = 'httpCachedGet';
     this._state = 'disconnected';
+    this._api = Convos.api;
     riot.observable(this);
     if (attrs) this.update(attrs);
   };
@@ -15,27 +15,20 @@
     user: function() { return false; }
   });
 
-  mixin.http(proto);
-
   // Join a room or create a private conversation on the server
   proto.joinConversation = function(name, cb) {
-    this.httpPost(apiUrl(['connection', this.protocol(), this.name(), 'conversations']), {name: name}, function(err, xhr) {
-      if (!err) this.user().conversation(false, xhr.responseJSON);
-      cb.call(this, err, xhr.responseJSON);
-    });
+    var self = this;
+    this._api.joinConversation(
+      {body: {name: name}, connection_name: this.name(), protocol: this.protocol()},
+      function(err, xhr) {
+        if (!err) self.user().conversation(false, xhr.responseJSON);
+        cb.call(self, err, xhr.responseJSON);
+      }
+    );
+    return this;
   };
 
-  // Get connection settings from server
-  // Use connection.fresh().load(function() { ... }) to get fresh data from server
-  proto.load = function(cb) {
-    this[this._method](apiUrl(['connection', this.protocol(), this.name()]), {}, function(err, xhr) {
-      if (err) return cb.call(this, err);
-      this.update(xhr.responseJSON);
-      cb.call(this, '');
-    });
-    return this.tap('_method', 'httpCachedGet');
-  };
-
+  // Return protocol (scheme) from url()
   proto.protocol = function() {
     var url = this.url();
     var r = url.scheme.apply(url, arguments);
@@ -44,29 +37,40 @@
 
   // Get list of available rooms on server
   proto.rooms = function(cb) {
-    this[this._method](apiUrl(['connection', this.protocol(), this.name(), 'rooms']), {}, function(err, xhr) {
-      if (err) return cb.call(this, err, []);
-      cb.call(this, err, $.map(xhr.responseJSON.rooms, function(attrs) { return new Convos.ConversationRoom(attrs); }));
-    });
+    var self = this;
+    this._api.roomsByConnection(
+      {connection_name: this.name(), protocol: this.protocol()},
+      function(err, xhr) {
+        if (err) return cb.call(self, err, []);
+        cb.call(self, err, $.map(xhr.responseJSON.rooms, function(attrs) { return new Convos.ConversationRoom(attrs); }));
+      }
+    );
+    return this;
   };
 
   // Write connection settings to server
   proto.save = function(cb) {
+    var self = this;
     var attrs = {url: this.url().toString()}; // It is currently not possible to specify "name"
+
     if (this.name()) {
-      return this.httpPost(apiUrl(['connection', this.protocol(), this.name()]), attrs, function(err, xhr) {
-        if (err) return cb.call(this, err);
-        this.update(xhr.responseJSON);
-        cb.call(this, err);
-      });
+      this._api.updateConnection(
+        {body: attrs, connection_name: this.name(), protocol: this.protocol()},
+        function(err, xhr) {
+          if (err) return cb.call(self, err);
+          self.update(xhr.responseJSON);
+          cb.call(self, err);
+        }
+      );
     }
     else {
-      return this.httpPost(apiUrl('connections'), attrs, function(err, xhr) {
-        if (err) return cb.call(this, err);
-        this.update(xhr.responseJSON);
-        cb.call(this, err);
+      this._api.createConnection({body: attrs}, function(err, xhr) {
+        if (err) return cb.call(self, err);
+        self.update(xhr.responseJSON);
+        cb.call(self, err);
       });
     }
+    return this;
   };
 
   // override base.update() to make sure we don't mess up url()

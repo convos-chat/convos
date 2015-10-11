@@ -3,7 +3,7 @@
 
   proto.formInvalidInput = function(errors) {
     (errors || []).forEach(function(err) {
-      var name = err.path.replace(/\/data\//g, '') || '';
+      var name = err.path.replace(/\/body\//g, '') || '';
       var field = this.root.querySelector('input[name="' + name + '"]');
       if (field) {
         field.setAttribute('title', err.message);

@@ -42,10 +42,9 @@
   </div>
   <script>
 
-  mixin.form(this);
-  mixin.http(this);
-
+  var tag = this;
   this.user = opts.user;
+  mixin.form(this);
 
   register(e) {
     localStorage.setItem('email', this.form_email.value);
@@ -57,12 +56,11 @@
     }
 
     this.errors = []; // clear error on post
-    this.httpPost(
-      apiUrl('/user/register'),
-      {email: this.form_email.value, password: this.form_password.value},
+    Convos.api.registerUser(
+      {body: {email: this.form_email.value, password: this.form_password.value}},
       function(err, xhr) {
-        if (err) return this.formInvalidInput(err).update();
-        this.user.update(xhr.responseJSON);
+        if (err) return tag.formInvalidInput(err).update();
+        tag.user.update(xhr.body);
         riot.url.route('chat');
       }
     );

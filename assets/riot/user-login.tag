@@ -39,21 +39,19 @@
   </div>
   <script>
 
-  mixin.form(this);
-  mixin.http(this);
-
+  var tag = this;
   this.errors = opts.errors;
   this.user = opts.user;
+  mixin.form(this);
 
   login(e) {
     this.errors = []; // clear error on post
     localStorage.setItem('email', this.form_email.value);
-    this.httpPost(
-      apiUrl('/user/login'),
-      {email: this.form_email.value, password: this.form_password.value},
+    Convos.api.loginUser(
+      {body: {email: this.form_email.value, password: this.form_password.value}},
       function(err, xhr) {
-        if (err) return this.update({errors: err});
-        this.user.update(xhr.responseJSON);
+        if (err) return tag.update({errors: err});
+        tag.user.update(xhr.body);
         riot.url.route('chat');
       }
     );
