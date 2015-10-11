@@ -79,15 +79,16 @@ sub startup {
   $self->_add_helpers;
   $self->_setup_assets;
   $self->_setup_settings;
-  $self->plugin(swagger2 => {ensure_swagger_response => {}, url => $self->static->file('convos-api.json')->path});
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
   $r->get('/events/event-source')->to('events#event_source')->name('event_source');
-  $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
   $r->get('/')->to(template => 'app');
+  my $ws = $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
+  $self->plugin(
+    swagger2 => {ensure_swagger_response => {}, url => $self->static->file('convos-api.json')->path, ws => $ws});
 
   $self->hook(
     before_dispatch => sub {
