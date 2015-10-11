@@ -44,13 +44,13 @@
     this._path = parser.pathname;
     this._port = parser.port;
     this._query = {};
-    this._scheme = scheme;
+    this._scheme = scheme || location.protocol.replace(/:/, '');
 
     if (parser.password) this._userinfo += ':' + parser.password;
 
     parser.search.replace(/^\?/, '').split('&').forEach(function(i) {
       var kv = i.split('=');
-      this._query[kv[0]] = kv[1];
+      if (typeof kv[1] != 'undefined') this._query[kv[0]] = kv[1];
     }.bind(this));
 
     return this;
@@ -68,6 +68,7 @@
     if (v = this.scheme()) str += v + '://';
     if (v = this.userinfo()) str += v + '@';
     if (v = this.hostPort()) str += v;
+    if (v = this.path()) str += v;
     if (Object.keys(q).length) str += '?' + Object.keys(q).map(function(k) { return k + '=' + q[k]; }).join('&');
     if (v = this.fragment()) str += '#' + v;
     return str;
