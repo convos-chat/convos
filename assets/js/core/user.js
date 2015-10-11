@@ -3,7 +3,7 @@
     if (attrs) this.update(attrs);
     riot.observable(this);
     this._conversations = {};
-    this._method = 'httpCachedGet';
+    this._api = Convos.api;
 
     var prev = this.email();
     this.on('email', function(value) {
@@ -22,10 +22,8 @@
     email: function() { return ''; }
   });
 
-  mixin.http(proto);
-
-  // Make the next http method fetch fresh data from server
-  proto.fresh = function() { this._method = 'httpGet'; return this; };
+  // Make the next api method fetch fresh data from server
+  proto.fresh = function() { this._api.fresh(); return this; };
 
   // Add, get or update a Convos.Connection object on client side
   // Get:        c = user.connection(protocol, name)
@@ -65,58 +63,66 @@
   // Get user settings from server
   // Use user.fresh().load(function() { ... }) to get fresh data from server
   proto.load = function(cb) {
-    this[this._method](apiUrl('/user'), {}, function(err, xhr) {
-      if (err) return cb.call(this, err);
-      this.update(xhr.responseJSON);
-      cb.call(this, false);
+    var self = this;
+    this._api.getUser({}, function(err, xhr) {
+      if (err) return cb.call(self, err);
+      self.update(xhr.body);
+      cb.call(self, false);
     });
-    return this.tap('_method', 'httpCachedGet');
+    return this;
   };
 
   // Log out the user
   proto.logout = function(cb) {
-    this.httpGet(apiUrl('/user/logout'), {}, function(err, xhr) {
-      if (err) return cb.call(this, err);
-      this.email('');
-      cb.call(this, false);
+    var self = this;
+    this._api.logoutUser({}, function(err, xhr) {
+      if (err) return cb.call(self, err);
+      self.email('');
+      cb.call(self, false);
     });
+    return this;
   };
 
   // Delete a connection on server side and remove it from the user object
   proto.removeConnection = function(protocol, name, cb) {
-    this.httpDelete(apiUrl(['connection', protocol, name]), {}, function(err, xhr) {
-      if (err) return cb.call(this, err);
-      var connections = this.connections();
+    var self = this;
+    this._api.removeConnection({name: name, protocol: protocol}, function(err, xhr) {
+      if (err) return cb.call(self, err);
+      var connections = self.connections();
       for (var i = 0; i < connections.length; i++) {
         var c = connections[i];
         if (c.protocol() == protocol && c.name() == name) connections.splice(i, 1);
       }
-      cb.call(this, '');
+      cb.call(self, '');
     });
-    return this.tap('_method', 'httpCachedGet');
+    return this;
   };
 
   // Refresh related data to the user
   proto.refresh = function() {
-    this.httpGet(apiUrl('/connections'), {}, function(err, xhr) {
-      if (err) return this.trigger('error', err);
-      this.connections(xhr.responseJSON.connections.map(function(attrs) { return new Convos.Connection(attrs); }));
+    var self = this;
+    this._api.listConnections({}, function(err, xhr) {
+      if (err) return self.trigger('error', err);
+      self.connections(xhr.body.connections.map(function(attrs) { return new Convos.Connection(attrs); }));
       riot.update();
     });
-    this.httpGet(apiUrl('/conversations'), {}, function(err, xhr) {
-      if (err) return this.trigger('error', err);
-      xhr.responseJSON.conversations.forEach(function(c) { this.conversation(false, c); }.bind(this));
+    this._api.listConversations({}, function(err, xhr) {
+      if (err) return self.trigger('error', err);
+      xhr.body.conversations.forEach(function(c) { self.conversation(false, c); });
       riot.update();
     });
+    return this;
   };
 
   // Write user settings to server
   proto.save = function(attrs, cb) {
+    var self = this;
     if (!cb) return Object.keys(attrs).forEach(function(k) { if (typeof this[k] == 'function') this[k](attrs[k]); }.bind(this));
-    return this.httpPost(apiUrl('/user'), attrs, function(err, xhr) {
-      if (err) return cb.call(this, err);
-      this.update(attrs);
-      cb.call(this, err);
+    this._api.updateUser({body: attrs}, function(err, xhr) {
+      if (err) return cb.call(self, err);
+      self.update(attrs);
+      cb.call(self, err);
     });
+    return this;
   };
 })(window);

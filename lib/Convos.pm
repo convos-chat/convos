@@ -85,8 +85,8 @@ sub startup {
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
-  $r->get('/events/event-source')->to('events#event_source');
-  $r->websocket('/events/bi-directional')->to('events#bi_directional');
+  $r->get('/events/event-source')->to('events#event_source')->name('event_source');
+  $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
   $r->get('/')->to(template => 'app');
 
   $self->hook(
@@ -178,6 +178,8 @@ sub _setup_assets {
       /js/riot.min.js
       /js/riot-url.js
       /js/jquery.*.js
+      /js/websocket.js
+      /js/swagger2-client.js
       /materialize/js/velocity.min.js
       /materialize/js/waves.js
       /materialize/js/jquery.easing.1.3.js
@@ -244,9 +246,12 @@ __DATA__
     <title>Convos</title>
     %= asset 'convos.css';
     %= javascript begin
-      window.Convos={"settings":<%== Mojo::JSON::encode_json($settings) %>,"loadTid":setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your web administrator.</h4>';app.className='valign-wrapper'},5000)};
-      window.apiUrl=function(path){return ['<%= $self->url_for('/1.0')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
-      window.urlFor=function(path){return ['<%= $self->url_for('/')->to_abs->userinfo(undef)->path %>'].concat(path).join('/').replace(/\/+/g, '/').replace(/#/g, '%23')};
+      window.Convos={
+        apiUrl:"<%= $self->url_for('convos_api_specification') %>",
+        wsUrl:"<%= $self->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
+        loadTid:setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your web administrator.</h4>';app.className='valign-wrapper'},5000),
+        settings:<%== Mojo::JSON::encode_json($settings) %>
+      };
     % end
   </head>
   <body>

@@ -1,14 +1,15 @@
 (function(window) {
   Convos.ConversationRoom = function(attrs) {
     if (attrs) this.update(attrs);
+    this._api = Convos.api;
     riot.observable(this);
-    this._method = 'httpCachedGet';
   };
 
   var proto = Convos.ConversationRoom.prototype;
 
   // Define attributes
   mixin.base(proto, {
+    connection: function() { throw 'connection() cannot be built'; },
     frozen: function() { return '' },
     icon: function() { return 'group' },
     id: function() { return '' },
@@ -17,22 +18,13 @@
     topic: function() { return '' },
   });
 
-  mixin.http(proto);
-
-  // Returns a path (URL) to the messages resource
-  proto.messagesUrl = function() {
-    var path = this.path().split('/');
-    return apiUrl(['connection', path[2], path[3], 'conversation', path[4], 'messages']);
-  };
-
   // Send a message to a room
   proto.send = function(message, cb) {
-    this.httpPost(this.messagesUrl(), {message: message}, function(err, xhr) {
-      cb.call(this, err);
-    });
-  };
-
-  proto.url = function() {
-    return this.path().replace(/^\/[^\/]*\//, '#chat/');
+    var self = this;
+    this._api.sendToConversation(
+      {body: {message: message}, connection_name: this.connection().name(), conversation_id: this.name()},
+      function(err, xhr) { cb.call(self, err); }
+    );
+    return this;
   };
 })(window);

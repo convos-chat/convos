@@ -40,7 +40,7 @@
   };
 
   // allow chaining
-  // obj.tap(function() { .... }) == obj
+  // obj.tap(function() { .... }, arg0, arg1, ...) == obj
   // obj.tap("attrName", value) == obj
   proto.tap = function(cb) {
     if (typeof cb == 'string') {

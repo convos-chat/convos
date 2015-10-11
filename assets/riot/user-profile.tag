@@ -33,11 +33,8 @@
   <script>
 
   var tag = this;
-
-  mixin.form(this);
-  mixin.http(this);
-
   this.user = opts.user;
+  mixin.form(this);
 
   submitForm(e) {
     var attrs = {avatar: this.form_avatar.value, password: ''};
