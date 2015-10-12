@@ -1,6 +1,6 @@
 nav {
-  background-color: $sidenav-bg-color;
-  width: $sidenav-width;
+  background-color: $sidebar-bg-color;
+  width: $sidebar-width;
   position: fixed;
   right: 0;
   top: 0;
@@ -63,7 +63,7 @@ nav {
   }
 }
 
-#sidenav-overlay {
+#sidebar-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -71,7 +71,7 @@ nav {
 
   height: 120vh;
   background-color: rgba(0,0,0,.5);
-  z-index: ($sidenav-z-index - 2);
+  z-index: ($sidebar-z-index - 2);
 
   will-change: opacity;
 }
