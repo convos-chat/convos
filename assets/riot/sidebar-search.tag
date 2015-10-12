@@ -1,7 +1,7 @@
-<sidenav-search>
+<sidebar-search>
   <div class="collection">
     <div class="collection-item">
-      <form class="search sidenav" onsubmit={startSearch}>
+      <form class="search sidebar" onsubmit={startSearch}>
         <input type="text" id="search_input" placeholder="Search and goto anything" autocomplete="off" spellcheck="false" onkeyup={startSearch}>
       </form>
     </div>
@@ -22,18 +22,19 @@
   this.searchResults = [];
 
   var runSearch = function() {
-    var previousSidenav = this.parent.sidenav;
+    var previous = this.parent.sidebar;
     this.searchTerm = this.search_input.value;
 
     if (this.searchTerm.length) {
-      if (!this.previousSidenav) this.previousSidenav = previousSidenav;
-      this.parent.sidenav = 'search';
+      if (!this.previous) this.previous = previous;
+      this.parent.sidebar = 'search';
     }
-    else {
-      if (this.previousSidenav) this.parent.sidenav = this.previousSidenav;
+    else if (this.previous) {
+      this.parent.sidebar = this.previous;
     }
-
-    if (this.parent.sidenav != previousSidenav) this.parent.update();
+    if (this.parent.sidebar != previous) {
+      this.parent.update();
+    }
   };
 
   startSearch(e) {
@@ -42,4 +43,4 @@
   }
 
   </script>
-</sidenav-search>
+</sidebar-search>

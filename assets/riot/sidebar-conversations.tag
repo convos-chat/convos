@@ -1,4 +1,4 @@
-<sidenav-conversations>
+<sidebar-conversations>
   <div class="collection">
     <a each={conversations} href={url()} class={parent.conversationClass(i)}>
       <i class="material-icons">{icon()}</i> {name()}
@@ -28,4 +28,4 @@
   }
 
   </script>
-</sidenav-conversations>
+</sidebar-conversations>

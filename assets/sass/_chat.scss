@@ -1,15 +1,15 @@
 main {
-  padding-right: ($sidenav-width + $card-padding);
+  padding-right: ($sidebar-width + $card-padding);
   padding-left: $card-padding;
   @media only screen and (max-width: $medium-screen) { padding-right: $card-padding; }
-  @media only screen and (min-width: $large-screen) { padding-left: ($large-screen - $readable-width - $sidenav-width - $card-padding); }
+  @media only screen and (min-width: $large-screen) { padding-left: ($large-screen - $readable-width - $sidebar-width - $card-padding); }
 }
 
 .user-input {
-  right: ($sidenav-width + $card-padding);
+  right: ($sidebar-width + $card-padding);
   left: $card-padding;
   @media only screen and (max-width: $medium-screen) { right: $card-padding; }
-  @media only screen and (min-width: $large-screen) { left: ($large-screen - $readable-width - $sidenav-width - $card-padding); }
+  @media only screen and (min-width: $large-screen) { left: ($large-screen - $readable-width - $sidebar-width - $card-padding); }
 
   background-color: $body-bg;
   border-top: 1px solid $collection-border-color;

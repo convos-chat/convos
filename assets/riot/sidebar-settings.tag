@@ -1,4 +1,4 @@
-<sidenav-settings>
+<sidebar-settings>
   <div class="collection">
     <a href="#connection-edit" title={this.state()} onclick={parent.editConnection} class="collection-item" each={user.connections()}>
       <i class={parent.connectionClasses(this)}>device_hub</i> {this.protocol()} {this.name()}
@@ -34,4 +34,4 @@
   }
 
   </script>
-</sidenav-settings>
+</sidebar-settings>
