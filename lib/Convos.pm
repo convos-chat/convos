@@ -220,6 +220,7 @@ sub _setup_settings {
   my $settings = $self->defaults->{settings} = $self->config('settings') || {};
 
   # This hash is exposed directy into the web page
+  $settings->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
   $settings->{default_server}
     ||= $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';    # chat.freenode.net:6697 instead of localhost?
 }
@@ -250,7 +251,7 @@ __DATA__
       window.Convos={
         apiUrl:"<%= $self->url_for('convos_api_specification') %>",
         wsUrl:"<%= $self->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
-        loadTid:setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your web administrator.</h4>';app.className='valign-wrapper'},5000),
+        loadTid:setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your <a href="<%= $settings->{contact} %>">convos administrator</a>.</h4>';app.className='valign-wrapper'},5000),
         settings:<%== Mojo::JSON::encode_json($settings) %>
       };
     % end
