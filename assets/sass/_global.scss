@@ -11,11 +11,12 @@ ul, li { margin: 0; }
 // something went wrong
 #app.valign-wrapper {
   height: 100vh;
-  h4 {
+  h4, a {
     color: color('red', 'darken-1');
     width: 100%;
     text-align: center;
   }
+  a { text-decoration: underline; }
 }
 
 .modal.bottom-sheet {
