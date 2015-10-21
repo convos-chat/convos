@@ -82,11 +82,11 @@ information about the change:
 L<Convos::Core::Connection> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
 
-=head2 loaded
+=head2 id
 
-  $bool = $self->loaded;
+  $str = $self->id;
 
-Returns true if this object is loaded from disk.
+Unique identifier for this connection.
 
 =head2 name
 
@@ -115,22 +115,16 @@ Holds a L<Convos::Core::User> object that owns this connection.
 
 =cut
 
-sub loaded { shift->{loaded} || 0 }
-
-sub name { shift->{name} or die 'name is required in constructor' }
-
-has protocol => sub {
-  my $proto = substr ref($_[0]), length __PACKAGE__;
-  $proto =~ s!^\W+!!;    # remove ::
-  Mojo::Util::decamelize($proto);
-};
+sub id { lc sprintf '%s-%s', $_[0]->protocol, $_[0]->name }
+sub name { shift->{name} }
+sub protocol { shift->{protocol} || 'null' }
 
 sub url {
   return $_[0]->{url} if ref $_[0]->{url};
   return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || '');
 }
 
-has user => sub { die 'user is required' };
+sub user { shift->{user} }
 
 =head1 METHODS
 
@@ -211,6 +205,32 @@ sub join_conversation {
   $self->tap($cb, 'Method "join_conversation" not implemented.');
 }
 
+=head2 new
+
+  $self = Convos::Core::Connection->new(\%attrs);
+
+Creates a new connection object. The returned object will be of a sub class,
+if L</protocol> is part of the input C<%attrs>.
+
+=cut
+
+sub new {
+  my $class = shift;
+  my $attrs = @_ > 1 ? {@_} : {%{$_[0]}};
+
+  if ($attrs->{protocol}) {
+    my $protocol = Mojo::Util::camelize($attrs->{protocol} || '');
+    $class = "Convos::Core::Connection::$protocol";
+    eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported.);
+  }
+  if ($attrs->{user}) {
+    Scalar::Util::weaken($attrs->{user});
+  }
+
+  return bless $attrs, $class;
+}
+
+
 =head2 load
 
   $self = $self->load(sub { my ($self, $err) = @_; });
@@ -223,7 +243,6 @@ See L<Convos::Core::Backend/load_object> for details.
 sub load {
   my $self = shift;
   $self->user->core->backend->load_object($self, @_);
-  $self->{loaded} = 1;
   $self;
 }
 
@@ -323,7 +342,7 @@ sub INFLATE {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{state} ||= 'connecting';
-  my $json = {map { ($_, '' . $self->$_) } qw( name state url )};
+  my $json = {map { ($_, '' . $self->$_) } qw( id name protocol state url )};
 
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
 

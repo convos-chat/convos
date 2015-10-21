@@ -33,10 +33,10 @@ Add a connection.
   .---------------------------------------------------.
   | Name | In   | Type   | Required | Description     |
   |---------------------------------------------------|
-  | data | body | schema | Yes      | No description. |
+  | body | body | schema | Yes      | No description. |
   '---------------------------------------------------'
 
-  data:
+  body:
 
   {
     "url": string, // Example: irc://user:pass@irc.perl.org?nick=superman
@@ -49,7 +49,8 @@ Add a connection.
 Connection information.
 
   {
-    "name": string, // Name/identifier for this connection
+    "id": string, // Unique identifier for this connection
+    "name": string, // Name for this connection
     "state": string, // Connection state
     "url": uri, // Example: irc://user:pass@irc.perl.org?nick=superman
   },
@@ -148,19 +149,18 @@ Join a conversation.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{protocol}/{connection_name}/conversations
+  POST http://demo.convos.by/api/connection/{connection_id}/conversations
 
 =head3 Parameters
 
-  .-----------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                          |
-  |-----------------------------------------------------------------------------------|
-  | connection_name | path | string | Yes      | A friendly name of the server        |
-  | protocol        | path | string | Yes      | The name of the connection protocol. |
-  | data            | body | schema | Yes      | No description.                      |
-  '-----------------------------------------------------------------------------------'
+  .---------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                    |
+  |---------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A unique connection identifier |
+  | body          | body | schema | Yes      | No description.                |
+  '---------------------------------------------------------------------------'
 
-  data:
+  body:
 
   {
     "name": string, // Name of room or person
@@ -173,6 +173,7 @@ Join a conversation.
 A conversation.
 
   {
+    "connection_id": string, // Unique identifier for the connection this conversation is part of
     "name": string, // Name of the room or person
     "topic": string, // The subjec/topic for this room
     "users":     {
@@ -215,7 +216,8 @@ List of connections.
   {
     "connections":     [
       {
-        "name": string, // Name/identifier for this connection
+        "id": string, // Unique identifier for this connection
+        "name": string, // Name for this connection
         "state": string, // Connection state
         "url": uri, // Example: irc://user:pass@irc.perl.org?nick=superman
       },
@@ -258,6 +260,7 @@ List of messages.
   {
     "conversations":     [
       {
+        "connection_id": string, // Unique identifier for the connection this conversation is part of
         "name": string, // Name of the room or person
         "topic": string, // The subjec/topic for this room
         "users":         {
@@ -340,10 +343,10 @@ Log in a user based on email and password.
   .---------------------------------------------------.
   | Name | In   | Type   | Required | Description     |
   |---------------------------------------------------|
-  | data | body | schema | Yes      | No description. |
+  | body | body | schema | Yes      | No description. |
   '---------------------------------------------------'
 
-  data:
+  body:
 
   {
     "email": email, // User email
@@ -422,16 +425,15 @@ Note: this resource require the user to be authenticated first.
 
 =head3 Resource URL
 
-  GET http://demo.convos.by/api/connection/{protocol}/{connection_name}/conversation/{conversation_id}/messages
+  GET http://demo.convos.by/api/connection/{connection_id}/conversation/{conversation_id}/messages
 
 =head3 Parameters
 
   .------------------------------------------------------------------------------------------------.
   | Name            | In    | Type    | Required | Description                                     |
   |------------------------------------------------------------------------------------------------|
-  | connection_name | path  | string  | Yes      | A friendly name of the server                   |
+  | connection_id   | path  | string  | Yes      | A unique connection identifier                  |
   | conversation_id | path  | string  | Yes      | The name of the person/chat conversation        |
-  | protocol        | path  | string  | Yes      | The name of the connection protocol.            |
   | after           | query | string  | No       | Find messages after a given ISO 8601 timestamp  |
   | before          | query | string  | No       | Find messages before a given ISO 8601 timestamp |
   | level           | query | string  | No       | debug, info (default), warn, error              |
@@ -485,10 +487,10 @@ Register a new user.
   .---------------------------------------------------.
   | Name | In   | Type   | Required | Description     |
   |---------------------------------------------------|
-  | data | body | schema | Yes      | No description. |
+  | body | body | schema | Yes      | No description. |
   '---------------------------------------------------'
 
-  data:
+  body:
 
   {
     "avatar": string, // User avatar
@@ -528,16 +530,15 @@ Delete a connection and all assosiated data.
 
 =head3 Resource URL
 
-  DELETE http://demo.convos.by/api/connection/{protocol}/{connection_name}
+  DELETE http://demo.convos.by/api/connection/{connection_id}
 
 =head3 Parameters
 
-  .-----------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                          |
-  |-----------------------------------------------------------------------------------|
-  | connection_name | path | string | Yes      | A friendly name of the server        |
-  | protocol        | path | string | Yes      | The name of the connection protocol. |
-  '-----------------------------------------------------------------------------------'
+  .---------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                    |
+  |---------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A unique connection identifier |
+  '---------------------------------------------------------------------------'
 
 =head3 Responses
 
@@ -569,16 +570,15 @@ Remove (part) a conversation.
 
 =head3 Resource URL
 
-  DELETE http://demo.convos.by/api/connection/{protocol}/{connection_name}/conversation/{conversation_id}
+  DELETE http://demo.convos.by/api/connection/{connection_id}/conversation/{conversation_id}
 
 =head3 Parameters
 
   .---------------------------------------------------------------------------------------.
   | Name            | In   | Type   | Required | Description                              |
   |---------------------------------------------------------------------------------------|
-  | connection_name | path | string | Yes      | A friendly name of the server            |
+  | connection_id   | path | string | Yes      | A unique connection identifier           |
   | conversation_id | path | string | Yes      | The name of the person/chat conversation |
-  | protocol        | path | string | Yes      | The name of the connection protocol.     |
   '---------------------------------------------------------------------------------------'
 
 =head3 Responses
@@ -611,16 +611,15 @@ Get a list of all available chat rooms.
 
 =head3 Resource URL
 
-  GET http://demo.convos.by/api/connection/{protocol}/{connection_name}/rooms
+  GET http://demo.convos.by/api/connection/{connection_id}/rooms
 
 =head3 Parameters
 
-  .-----------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                          |
-  |-----------------------------------------------------------------------------------|
-  | connection_name | path | string | Yes      | A friendly name of the server        |
-  | protocol        | path | string | Yes      | The name of the connection protocol. |
-  '-----------------------------------------------------------------------------------'
+  .---------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                    |
+  |---------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A unique connection identifier |
+  '---------------------------------------------------------------------------'
 
 =head3 Responses
 
@@ -631,6 +630,7 @@ List of rooms.
   {
     "rooms":     [
       {
+        "connection_id": string, // Unique identifier for the connection this conversation is part of
         "name": string, // Name of the room or person
         "topic": string, // The subjec/topic for this room
         "users":         {
@@ -644,55 +644,6 @@ List of rooms.
 =head4 Default
 
 Internal server error.
-
-  {
-    "errors":     [
-      {
-        "message": string, // Human readable description of the error
-        "path": string, // JSON pointer to the input data where the error occur
-      },
-      ...
-    ]
-  },
-
-=head2 saveUser
-
-Update an existing user.
-
-=head3 Resource URL
-
-  POST http://demo.convos.by/api/user
-
-=head3 Parameters
-
-  .---------------------------------------------------.
-  | Name | In   | Type   | Required | Description     |
-  |---------------------------------------------------|
-  | data | body | schema | Yes      | No description. |
-  '---------------------------------------------------'
-
-  data:
-
-  {
-    "avatar": string, // User avatar
-    "password": string, // User password
-  },
-
-=head3 Responses
-
-=head4 200 - OK
-
-User profile.
-
-  {
-    "avatar": string, // Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID
-    "email": string, // Unique email identifying a user in Convos
-    "registered": datetime, // Example: 2015-09-06T10:47:31Z
-  },
-
-=head4 Default
-
-Error.
 
   {
     "errors":     [
@@ -719,10 +670,10 @@ TODO: Notification count vs red/green toggling of a single notification.
   .---------------------------------------------------.
   | Name | In   | Type   | Required | Description     |
   |---------------------------------------------------|
-  | data | body | schema | Yes      | No description. |
+  | body | body | schema | Yes      | No description. |
   '---------------------------------------------------'
 
-  data:
+  body:
 
   {
     "ids": integer, // A list of notification IDs to mark as seen/read
@@ -757,16 +708,15 @@ Send a message to a target.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{protocol}/{connection_name}/conversation/{conversation_id}/send
+  POST http://demo.convos.by/api/connection/{connection_id}/conversation/{conversation_id}/send
 
 =head3 Parameters
 
   .---------------------------------------------------------------------------------------.
   | Name            | In   | Type   | Required | Description                              |
   |---------------------------------------------------------------------------------------|
-  | connection_name | path | string | Yes      | A friendly name of the server            |
+  | connection_id   | path | string | Yes      | A unique connection identifier           |
   | conversation_id | path | string | Yes      | The name of the person/chat conversation |
-  | protocol        | path | string | Yes      | The name of the connection protocol.     |
   '---------------------------------------------------------------------------------------'
 
 =head3 Responses
@@ -800,19 +750,18 @@ Update a connection.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{protocol}/{connection_name}
+  POST http://demo.convos.by/api/connection/{connection_id}
 
 =head3 Parameters
 
-  .-----------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                          |
-  |-----------------------------------------------------------------------------------|
-  | connection_name | path | string | Yes      | A friendly name of the server        |
-  | protocol        | path | string | Yes      | The name of the connection protocol. |
-  | data            | body | schema | Yes      | No description.                      |
-  '-----------------------------------------------------------------------------------'
+  .---------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                    |
+  |---------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A unique connection identifier |
+  | body          | body | schema | Yes      | No description.                |
+  '---------------------------------------------------------------------------'
 
-  data:
+  body:
 
   {
     "state": string, // Connection state
@@ -826,9 +775,59 @@ Update a connection.
 Update a connection.
 
   {
-    "name": string, // Name/identifier for this connection
+    "id": string, // Unique identifier for this connection
+    "name": string, // Name for this connection
     "state": string, // Connection state
     "url": uri, // Example: irc://user:pass@irc.perl.org?nick=superman
+  },
+
+=head4 Default
+
+Error.
+
+  {
+    "errors":     [
+      {
+        "message": string, // Human readable description of the error
+        "path": string, // JSON pointer to the input data where the error occur
+      },
+      ...
+    ]
+  },
+
+=head2 updateUser
+
+Update an existing user.
+
+=head3 Resource URL
+
+  POST http://demo.convos.by/api/user
+
+=head3 Parameters
+
+  .---------------------------------------------------.
+  | Name | In   | Type   | Required | Description     |
+  |---------------------------------------------------|
+  | body | body | schema | Yes      | No description. |
+  '---------------------------------------------------'
+
+  body:
+
+  {
+    "avatar": string, // User avatar
+    "password": string, // User password
+  },
+
+=head3 Responses
+
+=head4 200 - OK
+
+User profile.
+
+  {
+    "avatar": string, // Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID
+    "email": string, // Unique email identifying a user in Convos
+    "registered": datetime, // Example: 2015-09-06T10:47:31Z
   },
 
 =head4 Default

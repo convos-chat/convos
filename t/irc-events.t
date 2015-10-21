@@ -7,7 +7,7 @@ my $t          = Test::Mojo::IRC->new;
 my $server     = $t->start_server;
 my $core       = Convos::Core->new;
 my $user       = $core->user('superman@example.com', {});
-my $connection = $user->connection(Irc => 'localhost', {});
+my $connection = $user->connection({name => 'localhost', protocol => 'Irc'});
 my @captured;
 
 for my $e ($user->EVENTS) {

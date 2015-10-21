@@ -34,22 +34,22 @@ sub create {
   }
 
   eval {
-    die 'DUP' if $user->connection($url->scheme, $name)->url->host;
-    $connection = $user->connection($url->scheme, $name, {});
+    $connection = $user->connection({protocol => $url->scheme, name => $name});
     $connection->url->parse($url);
+    $self->delay(
+      sub { $connection->save(shift->begin) },
+      sub {
+        my ($delay, $err) = @_;
+        die $err if $err;
+        $self->$cb($connection->TO_JSON, 200);
+      },
+    );
+    1;
   } or do {
-    return $self->$cb($self->invalid_request('Connection already exists.', '/'), 400) if $@ =~ /^DUP\s/;
-    return $self->$cb($self->invalid_request('Could not find connection class from scheme.', '/body/url'), 400);
+    my $e = $@ || 'Unknwon error';
+    $e =~ s! at \S+.*!!s;
+    $self->$cb($self->invalid_request($e, '/'), 400);
   };
-
-  $self->delay(
-    sub { $connection->save(shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->$cb($connection->TO_JSON, 200);
-    },
-  );
 }
 
 =head2 list
@@ -82,7 +82,7 @@ sub remove {
 
   $self->delay(
     sub {
-      $user->remove_connection($args->{protocol}, $args->{connection_name}, shift->begin);
+      $user->remove_connection($args->{connection_id}, shift->begin);
     },
     sub {
       my ($delay, $err) = @_;
@@ -101,9 +101,9 @@ See L<Convos::Manual::API/roomsForConnection>.
 sub rooms {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{protocol}, $args->{connection_name});
+  my $connection = $user->connection($args->{connection_id});
 
-  unless ($connection->url->host) {
+  unless ($connection) {
     return $self->$cb($self->invalid_request('Connection not found.'), 404);
   }
 
@@ -130,7 +130,7 @@ sub update {
   my $connection;
 
   eval {
-    $connection = $user->connection($args->{protocol}, $args->{connection_name});
+    $connection = $user->connection($args->{connection_id});
     $connection->url->host or die 'Connection not found';
   } or do {
     return $self->$cb($self->invalid_request('Connection not found.'), 404);

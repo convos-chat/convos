@@ -15,6 +15,7 @@ no warnings 'utf8';
 use Mojo::Base 'Convos::Core::Connection';
 use Mojo::IRC::UA;
 use Parse::IRC ();
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
 
 require Convos;
@@ -96,6 +97,8 @@ sub connect {
   $irc->pass($userinfo->[1]);
   $irc->server($url->host_port) unless $irc->server;
   $irc->tls(($url->query->param('tls') // 1) ? {} : undef);
+
+  warn "[@{[$self->user->email]}/@{[$self->id]}] connect($irc->{server})\n" if DEBUG;
 
   return $self->tap($cb, "Invalid URL: hostname is not defined.") unless $irc->server;
   delete $self->{disconnect};

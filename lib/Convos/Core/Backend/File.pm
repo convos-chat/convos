@@ -22,11 +22,11 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
 
   $CONVOS_HOME/
   $CONVOS_HOME/joe@example.com/                                 # one directory per user
-  $CONVOS_HOME/joe@example.com/settings.json                    # user settings
-  $CONVOS_HOME/joe@example.com/irc/freenode/settings.json       # connection settings
-  $CONVOS_HOME/joe@example.com/irc/freenode/2015/02.log         # connection log
-  $CONVOS_HOME/joe@example.com/irc/freenode/2015/10/marcus.log  # conversation log
-  $CONVOS_HOME/joe@example.com/irc/freenode/2015/12/#convos.log # conversation log
+  $CONVOS_HOME/joe@example.com/user.json                        # user settings
+  $CONVOS_HOME/joe@example.com/irc-freenode/connection.json     # connection settings
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/02.log         # connection log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # conversation log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # conversation log
 
 Notes about the structure:
 
@@ -118,21 +118,20 @@ See L<Convos::Core::Backend/find_connections>.
 sub find_connections {
   my ($self, $user, $cb) = @_;
   my $user_dir = $self->home->rel_dir($user->email);
-  my ($PROTOCOLS, @names);
+  my ($CONNECTIONS, @connections);
 
-  unless (opendir $PROTOCOLS, $user_dir) {
-    Mojo::IOLoop->next_tick(sub { $self->$cb($!, \@names) });
+  unless (opendir $CONNECTIONS, $user_dir) {
+    Mojo::IOLoop->next_tick(sub { $self->$cb($!, \@connections) });
     return $self;
   }
 
-  for my $protocol (grep {/^\w/} readdir $PROTOCOLS) {
-    opendir(my $CONNECTIONS, catdir $user_dir, $protocol) or next;
-    for my $name (grep {/^\w/} readdir $CONNECTIONS) {
-      push @names, [$protocol, $name] if -e catfile $user_dir, $protocol, $name, 'settings.json';
-    }
+  for my $id (grep {/^\w/} readdir $CONNECTIONS) {
+    my $settings = catfile $user_dir, $id, 'connection.json';
+    next unless -e $settings;
+    push @connections, Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
   }
 
-  return $self->tap($cb, '', \@names);
+  return $self->tap($cb, '', \@connections);
 }
 
 =head2 find_users
@@ -146,7 +145,7 @@ sub find_users {
   my $home = $self->home;
 
   return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
-  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/settings.json") } grep {/^\w/} readdir $DH]);
+  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/user.json") } grep {/^\w/} readdir $DH]);
 }
 
 =head2 load_object
@@ -273,13 +272,13 @@ sub _build_home {
   }
 
   die 'Could not figure out CONVOS_HOME. $HOME directory could not be found.' unless $home;
-  warn "[Convos::Core] Home is $home\n" if DEBUG;
+  warn "[Convos] Home is $home\n" if DEBUG;
   Mojo::Home->new($home);
 }
 
 sub _delete_connection {
   my ($self, $connection) = @_;
-  my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->protocol, $connection->name));
+  my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->id));
   $connection->unsubscribe($_) for qw( message state users );
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
@@ -298,9 +297,10 @@ sub _log {
 
   unless ($FH) {
     my @path = ($obj->user->email);
-    push @path, map { ($_->protocol, $_->name) } $obj->isa('Convos::Core::Connection') ? $obj : $obj->connection;
+    push @path, $obj->id             if $obj->isa('Convos::Core::Connection');
+    push @path, $obj->connection->id if $obj->isa('Convos::Core::Conversation');
     push @path, $ym;
-    push @path, $obj->name if $obj->isa('Convos::Core::Conversation');
+    push @path, $obj->name           if $obj->isa('Convos::Core::Conversation');
     my $file = $self->home->rel_file(join('/', @path) . '.log');
     my $dir = File::Basename::dirname($file);
     File::Path::make_path($dir) unless -d $dir;
@@ -318,8 +318,8 @@ sub _settings_file {
   my ($self, $obj) = @_;
 
   return $obj->isa('Convos::Core::Connection')
-    ? $self->home->rel_file(sprintf '%s/%s/%s/settings.json', $obj->user->email, $obj->protocol, $obj->name)
-    : return $self->home->rel_file(sprintf '%s/settings.json', $obj->email);
+    ? $self->home->rel_file(sprintf '%s/%s/connection.json', $obj->user->email, $obj->id)
+    : return $self->home->rel_file(sprintf '%s/user.json', $obj->email);
 }
 
 sub _setup {

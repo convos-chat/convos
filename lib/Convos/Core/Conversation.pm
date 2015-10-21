@@ -77,7 +77,9 @@ sub user { shift->connection->user }
 
 sub TO_JSON {
   my $self = shift;
-  return {map { ($_, $self->$_) } qw( active id name )};
+  my %json = map { ($_, $self->$_) } qw( active id name );
+  $json{connection_id} = $self->connection->id;
+  return \%json;
 }
 
 =head1 COPYRIGHT AND LICENSE

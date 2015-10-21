@@ -3,8 +3,12 @@ use Mojo::IOLoop;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
+my @date = (localtime)[5, 4];
+$date[0] += 1900;
+$date[1]++;
+
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $connection = $core->user('superman@example.com', {})->connection(irc => 'localhost', {});
+my $connection = $core->user('superman@example.com', {})->connection({name => 'localhost', protocol => 'irc'});
 
 $connection->_irc->emit(irc_privmsg =>
     {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'not a ssuperman highlight']});
@@ -34,5 +38,5 @@ done_testing;
 
 sub slurp_log {
   Mojo::Util::slurp(
-    File::Spec->catfile(qw( local test-t-irc-message-t superman@example.com irc localhost 2015 10 ), "$_[0].log"));
+    File::Spec->catfile(qw( local test-t-irc-message-t superman@example.com irc-localhost ), @date, "$_[0].log"));
 }
