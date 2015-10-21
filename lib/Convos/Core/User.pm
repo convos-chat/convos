@@ -13,8 +13,9 @@ L<Convos::Core::User> is a class used to model a user in Convos.
 use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::Date;
 use Mojo::Util;
-use File::Path                 ();
+use Convos::Core::Connection;
 use Crypt::Eksblowfish::Bcrypt ();
+use File::Path                 ();
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 use constant BCRYPT_BASE_SETTINGS => do {
@@ -70,47 +71,37 @@ the following new ones.
 
 =head2 connection
 
-  $connection = $self->connection($protocol, $name);         # get
-  $connection = $self->connection($protocol, $name, \%attr); # create/update
+  $connection = $self->connection($id);          # get
+  $connection = $self->connection(\%connection); # add
 
 Returns a connection object. Every new object created will emit
 a "connection" event:
 
   $self->emit(connection => $connection);
 
-C<$protocol> should be the type of the connection class. Example "irc" will be
-translated to L<Convos::Core::Connection::Irc>.
-
 =cut
 
 sub connection {
-  my ($self, $protocol, $name, $attr) = @_;
-  my $connection_class;
+  my ($self, $obj) = @_;
 
-  $name = lc($name || '');
-  $protocol = Mojo::Util::camelize($protocol || '');
-  die qq(Invalid name "$name". Need to match /^[\\w-]+\$/) unless $name and $name =~ /^[\w-]+$/;
-  $connection_class = "Convos::Core::Connection::$protocol";
-  eval "require $connection_class;1" or die $@;
+  # Get
+  return $self->{connections}{$obj} unless ref $obj;
 
-  if ($attr) {
-    my $connection = $self->{connection}{$protocol}{$name} ||= do {
-      my $connection = $connection_class->new(name => $name, user => $self);
-      Scalar::Util::weaken($connection->{user});
-      warn "[Convos::Core::User] Emit connection for @{[$self->email]} protocol=$protocol name=$name\n" if DEBUG;
-      $self->core->backend->emit(connection => $connection);
-      Scalar::Util::weaken($self);
-      for my $e ($self->EVENTS) {
-        $connection->on($e => sub { $self->emit($e => @_) });
-      }
-      $connection;
-    };
-    $connection->{$_} = $attr->{$_} for keys %$attr;
-    return $connection;
+  # Add
+  $obj->{user} = $self;
+  $obj = Convos::Core::Connection->new($obj);
+
+  die "Connection already exists." if $self->{connections}{$obj->id};
+  $self->{connections}{$obj->id} = $obj;
+
+  Scalar::Util::weaken($self);
+  for my $e ($self->EVENTS) {
+    $obj->on($e => sub { $self->emit($e => @_) });
   }
-  else {
-    return $self->{connection}{$protocol}{$name} || $connection_class->new(name => $name, user => $self);
-  }
+
+  warn "[@{[$self->email]}] Emit connection for id=@{[$obj->id]}\n" if DEBUG;
+  $self->core->backend->emit(connection => $obj);
+  return $obj;
 }
 
 =head2 connections
@@ -121,10 +112,7 @@ Returns an array-ref of of L<Convos::Core::Connection> objects.
 
 =cut
 
-sub connections {
-  my $self = shift;
-  return [map { values %{$self->{connection}{$_}} } keys %{$self->{connection}}];
-}
+sub connections { return [values %{$_[0]->{connections}}] }
 
 =head2 load
 
@@ -143,7 +131,7 @@ sub load {
 
 =head2 remove_connection
 
-  $self = $self->remove_connection($protocol, $name, sub { my ($self, $err) = @_; });
+  $self = $self->remove_connection($id, sub { my ($self, $err) = @_; });
 
 Will remove a connection created by L</connection>. Removing a connection that
 does not exist is perfectly valid, and will not set C<$err>.
@@ -151,32 +139,28 @@ does not exist is perfectly valid, and will not set C<$err>.
 =cut
 
 sub remove_connection {
-  my ($self, $protocol, $name, $cb) = @_;
+  my ($self, $id, $cb) = @_;
+  my $connection = $self->{connections}{$id};
 
-  $protocol = Mojo::Util::camelize($protocol || '');
-
-  if (my $connection = $self->{connection}{$protocol}{$name}) {
-    Scalar::Util::weaken($self);
-    Mojo::IOLoop->delay(
-      sub {
-        $connection->disconnect(shift->begin);
-      },
-      sub {
-        my ($delay, $err) = @_;
-        return $self->$cb($err) if $err;
-        return $self->core->backend->delete_object($connection, $delay->begin);
-      },
-      sub {
-        my ($delay, $err) = @_;
-        delete $self->{connection}{$protocol}{$name} unless $err;
-        $connection->user(undef);
-        $self->$cb($err);
-      }
-    );
-  }
-  else {
+  unless ($connection) {
     Mojo::IOLoop->next_tick(sub { $self->$cb(''); });
+    return $self;
   }
+
+  Scalar::Util::weaken($self);
+  Mojo::IOLoop->delay(
+    sub { $connection->disconnect(shift->begin) },
+    sub {
+      my ($delay, $err) = @_;
+      return $self->$cb($err) if $err;
+      return $self->core->backend->delete_object($connection, $delay->begin);
+    },
+    sub {
+      my ($delay, $err) = @_;
+      delete $self->{connections}{$id} unless $err;
+      $self->$cb($err);
+    }
+  );
 
   return $self;
 }

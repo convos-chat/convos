@@ -24,7 +24,7 @@ See L<Convos::Manual::API/joinConversation>.
 sub join {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{protocol}, $args->{connection_name});
+  my $connection = $user->connection($args->{connection_id}) or return $self->$cb({}, 404);
 
   $self->delay(
     sub { $connection->join_conversation($args->{body}{name}, shift->begin) },
@@ -71,7 +71,7 @@ See L<Convos::Manual::API/messagesForConversation>.
 sub messages {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{protocol}, $args->{connection_name}) or return $self->$cb({});
+  my $connection = $user->connection($args->{connection_id}) or return $self->$cb({}, 404);
   my $conversation = $connection->conversation($args->{conversation_id});
   my %query;
 

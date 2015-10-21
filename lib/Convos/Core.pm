@@ -134,7 +134,7 @@ sub user {
     my $user = $self->{user}{$email} ||= do {
       my $user = Convos::Core::User->new(core => $self, email => $email);
       Scalar::Util::weaken($user->{core});
-      warn "[Convos::Core::User] Emit user: email=$email\n" if DEBUG;
+      warn "[$email] Emit user" if DEBUG;
       $self->backend->emit(user => $user);
       $user;
     };
@@ -148,31 +148,25 @@ sub user {
 
 sub _start {
   my ($self, @objs) = @_;
-  my $obj = shift @objs;
+  my $obj = shift @objs or return;    # done
 
-  if (!$obj) {
-    Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->start(1) });
-  }
-  elsif ($obj->isa('Convos::Core::User')) {
+  if ($obj->isa('Convos::Core::User')) {
     $self->backend->find_connections(
       $obj,
       sub {
-        $self->_start((map { $obj->connection(@$_, {}) } @{$_[2]}), @objs);
+        my ($backend, $err, $connections) = @_;
+        $self->_start((map { $obj->connection($_) } @$connections), @objs);
       }
     );
   }
-  else {    # Convos::Core::Connection
-    my $cb = sub {
-      my ($connection, $err) = @_;
-      if ($connection->state eq 'connecting') {
-        $connection->connect(sub { });
-        Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->_start(@objs) });
-      }
-      else {
-        $self->_start(@objs);
-      }
-    };
-    $obj->loaded ? $obj->$cb('') : $obj->load($cb);
+  else {                              # Convos::Core::Connection
+    if ($obj->state eq 'connecting') {
+      $obj->connect(sub { });
+      Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->_start(@objs) });
+    }
+    else {
+      $self->_start(@objs);
+    }
   }
 }
 

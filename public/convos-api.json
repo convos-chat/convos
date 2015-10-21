@@ -18,12 +18,12 @@
   "basePath": "/api",
   "schemes": [ "http" ],
   "parameters": {
-    "connection_name": {
-      "name": "connection_name",
+    "connection_id": {
+      "name": "connection_id",
       "in": "path",
       "required": true,
       "type": "string",
-      "description": "A friendly name of the server"
+      "description": "A unique connection identifier"
     },
     "conversation_id": {
       "name": "conversation_id",
@@ -39,24 +39,16 @@
       "required": true,
       "type": "string",
       "description": "User email or server identity"
-    },
-    "protocol": {
-      "name": "protocol",
-      "in": "path",
-      "required": true,
-      "type": "string",
-      "description": "The name of the connection protocol."
     }
   },
   "paths": {
-    "/connection/{protocol}/{connection_name}": {
+    "/connection/{connection_id}": {
       "delete": {
         "tags": [ "connection" ],
         "summary": "Delete a connection and all assosiated data.",
         "operationId": "removeConnection",
         "parameters": [
-          { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/protocol" }
+          { "$ref": "#/parameters/connection_id" }
         ],
         "responses": {
           "200": {
@@ -74,8 +66,7 @@
         "summary": "Update a connection.",
         "operationId": "updateConnection",
         "parameters": [
-          { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/protocol" },
+          { "$ref": "#/parameters/connection_id" },
           {
             "name": "body",
             "in": "body",
@@ -101,14 +92,13 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_name}/rooms": {
+    "/connection/{connection_id}/rooms": {
       "get": {
         "tags": [ "conversation" ],
         "summary": "Get a list of all available chat rooms.",
         "operationId": "roomsByConnection",
         "parameters": [
-          { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/protocol" }
+          { "$ref": "#/parameters/connection_id" }
         ],
         "responses": {
           "200": {
@@ -116,7 +106,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Room" } }
+                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Conversation" } }
               }
             }
           },
@@ -127,15 +117,14 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_name}/conversation/{conversation_id}": {
+    "/connection/{connection_id}/conversation/{conversation_id}": {
       "delete": {
         "tags": [ "conversation" ],
         "summary": "Remove (part) a conversation.",
         "operationId": "removeConversation",
         "parameters": [
-          { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/protocol" }
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" }
         ],
         "responses": {
           "200": {
@@ -149,15 +138,14 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_name}/conversation/{conversation_id}/messages": {
+    "/connection/{connection_id}/conversation/{conversation_id}/messages": {
       "get": {
         "tags": [ "conversation" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
         "operationId": "messagesByConversation",
         "parameters": [
-          { "$ref": "#/parameters/connection_name" },
+          { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/protocol" },
           { "name": "after", "in": "query", "type": "string", "format": "datetime", "description": "Find messages after a given ISO 8601 timestamp" },
           { "name": "before", "in": "query", "type": "string", "format": "datetime", "description": "Find messages before a given ISO 8601 timestamp" },
           { "name": "level", "in": "query", "type": "string", "description": "debug, info (default), warn, error" },
@@ -181,15 +169,14 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_name}/conversation/{conversation_id}/send": {
+    "/connection/{connection_id}/conversation/{conversation_id}/send": {
       "post": {
         "tags": [ "chat" ],
         "summary": "Send a message to a target.",
         "operationId": "sendToConversation",
         "parameters": [
-          { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/conversation_id" },
-          { "$ref": "#/parameters/protocol" }
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/conversation_id" }
         ],
         "responses": {
           "200": {
@@ -203,14 +190,13 @@
         }
       }
     },
-    "/connection/{protocol}/{connection_name}/conversations": {
+    "/connection/{connection_id}/conversations": {
       "post": {
         "tags": [ "conversation" ],
         "summary": "Join a conversation.",
         "operationId": "joinConversation",
         "parameters": [
-          { "$ref": "#/parameters/connection_name" },
-          { "$ref": "#/parameters/protocol" },
+          { "$ref": "#/parameters/connection_id" },
           {
             "name": "body",
             "in": "body",
@@ -227,7 +213,7 @@
         "responses": {
           "200": {
             "description": "A conversation.",
-            "schema": { "$ref": "#/definitions/Room" }
+            "schema": { "$ref": "#/definitions/Conversation" }
           },
           "default": {
             "description": "Internal server error.",
@@ -302,7 +288,7 @@
               "properties": {
                 "conversations": {
                   "type": "array",
-                  "items": { "$ref": "#/definitions/Room" }
+                  "items": { "$ref": "#/definitions/Conversation" }
                 }
               }
             }
@@ -526,16 +512,18 @@
       }
     },
     "Connection": {
-      "required": ["url"],
+      "required": ["id", "url"],
       "properties": {
-        "name": { "type": "string", "description": "Name/identifier for this connection" },
+        "id": { "type": "string", "description": "Unique identifier for this connection" },
+        "name": { "type": "string", "description": "Name for this connection" },
         "state": { "type": "string", "enum": ["connected", "connecting", "disconnected"], "description": "Connection state" },
         "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
     },
-    "Room": {
-      "required": ["name"],
+    "Conversation": {
+      "required": ["connection_id", "name"],
       "properties": {
+        "connection_id": { "type": "string", "description": "Unique identifier for the connection this conversation is part of" },
         "name": { "type": "string", "description": "Name of the room or person" },
         "topic": { "type": "string", "description": "The subjec/topic for this room" },
         "users": {

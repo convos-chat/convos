@@ -3,7 +3,7 @@ use Convos::Core;
 use Convos::Core::Backend::File;
 
 my $core = Convos::Core->new;
-my $connection = $core->user('test.user@example.com', {})->connection(irc => 'localhost', {});
+my $connection = $core->user('test.user@example.com', {})->connection({name => 'localhost', protocol => 'irc'});
 my ($err, @state);
 
 $connection->on(state => sub { push @state, $_[1] });

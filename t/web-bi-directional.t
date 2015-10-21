@@ -11,6 +11,9 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
 $t->post_ok('/api/connections', json => {state => 'connect', url => 'irc://localhost:3123'})->status_is(200);
 
 $t->websocket_ok('/events/bi-directional');
+
+# change from "connecting" got "disconnected"
+$user->connection('irc-localhost')->state('disconnected');
 $t->message_ok->json_message_is('/event', 'state')->json_message_is('/object/name', 'localhost')
   ->json_message_is('/object/state', 'connecting')->json_message_is('/data/0', 'disconnected');
 

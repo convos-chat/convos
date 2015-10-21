@@ -12,16 +12,43 @@ require Mojo::IRC::UA;
 *Mojo::IRC::UA::join_channel = sub { my ($irc, $channel, $cb) = @_; $irc->$cb('') };
 
 # order does not matter
-$user->connection(irc => 'localhost', {})->join_conversation('#private',       sub { });
-$user->connection(irc => 'perl-org',  {})->join_conversation('#oslo.pm',       sub { });
-$user->connection(irc => 'localhost', {})->join_conversation('#Convos s3cret', sub { });
+$user->connection({name => 'localhost', protocol => 'irc'})->join_conversation('#private', sub { });
+$user->connection({name => 'perl-org',  protocol => 'irc'})->join_conversation('#oslo.pm', sub { });
+$user->connection('irc-localhost')->join_conversation('#Convos s3cret', sub { });
 
-$t->get_ok('/api/conversations')->status_is(200)
-  ->json_is('/conversations/0',
-  {active => 1, topic => '', frozen => '', name => '#Convos', id => '#convos', users => {}})
-  ->json_is('/conversations/1',
-  {active => 1, topic => '', frozen => '', name => '#private', id => '#private', users => {}})
-  ->json_is('/conversations/2',
-  {active => 1, topic => '', frozen => '', name => '#oslo.pm', id => '#oslo.pm', users => {}});
+$t->get_ok('/api/conversations')->status_is(200)->json_is(
+  '/conversations/0',
+  {
+    active        => 1,
+    connection_id => 'irc-localhost',
+    topic         => '',
+    frozen        => '',
+    name          => '#Convos',
+    id            => '#convos',
+    users         => {}
+  }
+  )->json_is(
+  '/conversations/1',
+  {
+    active        => 1,
+    connection_id => 'irc-localhost',
+    topic         => '',
+    frozen        => '',
+    name          => '#private',
+    id            => '#private',
+    users         => {}
+  }
+  )->json_is(
+  '/conversations/2',
+  {
+    active        => 1,
+    connection_id => 'irc-perl-org',
+    topic         => '',
+    frozen        => '',
+    name          => '#oslo.pm',
+    id            => '#oslo.pm',
+    users         => {}
+  }
+  );
 
 done_testing;

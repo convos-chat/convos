@@ -29,7 +29,7 @@ sub import {
 
 END {
   # $ENV{CONVOS_HOME} might have been changed to a directory which should not be removed
-  if (!$ENV{TEST_KEEP_HOME} and $CONVOS_HOME and -d $CONVOS_HOME) {
+  if (!$ENV{CONVOS_DEBUG} and $CONVOS_HOME and -d $CONVOS_HOME) {
     Test::More::diag("remove_tree $CONVOS_HOME") if $ENV{HARNESS_IS_VERBOSE};
     File::Path::remove_tree($CONVOS_HOME);
   }

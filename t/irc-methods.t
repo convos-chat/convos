@@ -7,7 +7,7 @@ my $t              = Test::Mojo::IRC->new;
 my $server         = $t->start_server;
 my $core           = Convos::Core->new;
 my $user           = $core->user('superman@example.com', {});
-my $connection     = $user->connection(irc => 'localhost', {});
+my $connection     = $user->connection({name => 'localhost', protocol => 'irc'});
 my $stop_re        = qr{should_not_match};
 my $connection_log = '';
 
@@ -58,12 +58,13 @@ $t->run(
     cmp_deeply(
       $connection->conversation("#Convos_irc_live_20001")->TO_JSON,
       {
-        active => 1,
-        frozen => '',
-        id     => "#convos_irc_live_20001",
-        name   => "#Convos_irc_LIVE_20001",
-        topic  => '',
-        users  => superhashof(
+        active        => 1,
+        connection_id => 'irc-localhost',
+        frozen        => '',
+        id            => "#convos_irc_live_20001",
+        name          => "#Convos_irc_LIVE_20001",
+        topic         => '',
+        users         => superhashof(
           {
             "superman20001" => {
               host => 'i.love.debian.org',
@@ -92,12 +93,13 @@ $t->run(
     cmp_deeply(
       $connection->conversation('#conVOS')->TO_JSON,
       {
-        active => 1,
-        frozen => '',
-        id     => '#convos',
-        name   => re(qr{^\#convos$}i),
-        topic  => re(qr{.?}),
-        users  => superhashof(
+        active        => 1,
+        connection_id => 'irc-localhost',
+        frozen        => '',
+        id            => '#convos',
+        name          => re(qr{^\#convos$}i),
+        topic         => re(qr{.?}),
+        users         => superhashof(
           {
             "superman20001" => {
               host => 'i.love.debian.org',
@@ -239,18 +241,28 @@ cmp_deeply(
   $connection->TO_JSON(1),
   {
     conversations => bag(
-      {active => 1, id => '#convos', name => '#convos', frozen => '', topic => 'some cool topic',},
       {
-        active => 1,
-        id     => '#convos_irc_live_20001',
-        name   => '#Convos_irc_LIVE_20001',
-        frozen => '',
-        topic  => 'Cool topic',
+        active        => 1,
+        connection_id => 'irc-localhost',
+        id            => '#convos',
+        name          => '#convos',
+        frozen        => '',
+        topic         => 'some cool topic',
+      },
+      {
+        active        => 1,
+        connection_id => 'irc-localhost',
+        id            => '#convos_irc_live_20001',
+        name          => '#Convos_irc_LIVE_20001',
+        frozen        => '',
+        topic         => 'Cool topic',
       }
     ),
-    name  => 'localhost',
-    state => 'connecting',
-    url   => re(qr{^irc://.*\?tls=0}),
+    id       => 'irc-localhost',
+    name     => 'localhost',
+    protocol => 'irc',
+    state    => 'connecting',
+    url      => re(qr{^irc://.*\?tls=0}),
   },
   'TO_JSON'
 );
