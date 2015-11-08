@@ -29,7 +29,6 @@
   <script>
 
   this.activeConversation = 0;
-  this.conversations = [];
   this.modalBottomSheetShow = false;
   this.sidebar = localStorage.getItem('sidebar') || 'conversations';
   this.user = opts.user;
@@ -50,8 +49,10 @@
   });
 
   this.on('update', function() {
-    var p = riot.url.fragment().replace(/^chat/, '/' + this.user.email());
-    this.conversations.forEach(function(c, i) { if (c.path() == p) this.activeConversation = i; }.bind(this));
+    var p = riot.url.fragment().replace(/chat\//, '');
+    this.user.conversations().forEach(function(c, i) {
+      if (c.url() == p) this.activeConversation = i;
+    }.bind(this));
   });
 
   </script>

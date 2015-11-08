@@ -3,6 +3,7 @@
     if (attrs) this.update(attrs);
     riot.observable(this);
     this._conversations = {};
+    this._connections = {};
     this._api = Convos.api;
 
     var prev = this.email();
@@ -17,8 +18,6 @@
   // Define attributes
   mixin.base(proto, {
     avatar: function() { return ''; },
-    connections: function() { return []; },
-    conversations: function() { return []; },
     email: function() { return ''; }
   });
 
@@ -26,38 +25,39 @@
   proto.fresh = function() { this._api.fresh(); return this; };
 
   // Add, get or update a Convos.Connection object on client side
-  // Get:        c = user.connection(protocol, name)
-  // Add/Update: c = user.connection(protocol, name, attrs)
-  proto.connection = function(protocol, name, attrs) {
-    var c, connections = this.connections();
-    for (var i = 0; i < connections.length; i++) {
-      var _c = connections[i];
-      if (_c.protocol() != protocol || _c.name() != name) { c = _c; break; }
-    }
-    if (attrs) {
-      if (c) return c.update(attrs);
-      attrs[name] = name;
-      attrs[user] = this;
-      c = new Convos.Connection(attrs);
-      this.connections().push(c);
-      this.trigger('connection', c);
-    }
-    else if (!c) {
-      c = new Convos.Connection({name: name, user: this});
-    }
+  // Get:    c = user.connection(id)
+  // Create: c = user.connection(attrs)
+  proto.connection = function(obj) {
+    if (typeof obj != 'object') return this._connections[obj];
+    obj.user = this;
+    var c = new Convos.Connection(obj);
+    if (this._connections[c.id()]) throw 'Connection already exists.';
+    this._connections[c.id()] = c;
+    this.trigger('connection', c);
     return c;
   };
 
+  proto.connections = function() {
+    var c = this._connections;
+    return Object.keys(c).map(function(k) { return c[k]; });
+  };
+
   // Get or create a single Convos.ConversationXxx object on client side
-  // Get: user.conversation(id)
-  // Create/update: user.conversation(id, attrs)
-  proto.conversation = function(id, attrs) {
-    if (!id && typeof attrs == 'object') id = attrs.id;
-    if (!attrs) return this._conversations[id];
-    if (this._conversations[id]) return this._conversations[id].update(attrs);
-    this._conversations[id] = new Convos[attrs.users ? 'ConversationRoom' : 'ConversationDirect'](attrs);
-    this.trigger('conversation', this._conversations[id]);
-    return this._conversations[id];
+  // Get:    c = user.conversation(id)
+  // Create: c = user.conversation(attrs)
+  proto.conversation = function(obj) {
+    if (typeof obj != 'object') return this._conversations[obj];
+    obj.connection = this._connections[obj.connection_id];
+    var c = new Convos.Conversation(obj);
+    if (this._conversations[c.id()]) throw 'Conversation already exists.';
+    this._conversations[c.id()] = c;
+    this.trigger('conversation', c);
+    return c;
+  };
+
+  proto.conversations = function() {
+    var c = this._conversations;
+    return Object.keys(c).map(function(k) { return c[k]; });
   };
 
   // Get user settings from server
@@ -104,14 +104,14 @@
 
     this._api.listConnections({}, function(err, xhr) {
       if (err) return self.trigger('error', err);
-      self.connections(xhr.body.connections.map(function(attrs) { return new Convos.Connection(attrs); }));
-      riot.update();
+      xhr.body.connections.forEach(function(c) { self.connection(c); });
+      self._api.listConversations({}, function(err, xhr) {
+        if (err) return self.trigger('error', err);
+        xhr.body.conversations.forEach(function(c) { self.conversation(c); });
+        riot.update();
+      });
     });
-    this._api.listConversations({}, function(err, xhr) {
-      if (err) return self.trigger('error', err);
-      xhr.body.conversations.forEach(function(c) { self.conversation(false, c); });
-      riot.update();
-    });
+
     return this;
   };
 

@@ -91,7 +91,7 @@ sub connection {
   $obj->{user} = $self;
   $obj = Convos::Core::Connection->new($obj);
 
-  die "Connection already exists." if $self->{connections}{$obj->id};
+  die 'Connection already exists.' if $self->{connections}{$obj->id};
   $self->{connections}{$obj->id} = $obj;
 
   Scalar::Util::weaken($self);

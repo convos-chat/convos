@@ -1,7 +1,7 @@
 <sidebar-conversations>
   <div class="collection">
-    <a each={conversations} href={url()} class={parent.conversationClass(i)}>
-      <i class="material-icons">{icon()}</i> {name()}
+    <a href={'#chat/' + c.url()} class={parent.conversationClass(i)} each={c, i in user.conversations()}>
+      <i class="material-icons">{c.icon()}</i> {c.name()}
     </a>
     <a href="#addConversation" onclick={addConversation} class="collection-item">
       <i class="material-icons">add_circle</i> Create conversation...
@@ -12,7 +12,6 @@
   mixin.modal(this);
 
   this.user = opts.user;
-  this.conversations = [];
 
   addConversation(e) {
     if (this.user.connections().length) {
