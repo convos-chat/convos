@@ -10,6 +10,7 @@
 
   // Define attributes
   mixin.base(proto, {
+    id: function() { return ''; },
     name: function() { return ''; },
     url: function() { return new riot.Url(); },
     user: function() { return false; }
@@ -21,7 +22,7 @@
     this._api.joinConversation(
       {body: {name: name}, connection_name: this.name(), protocol: this.protocol()},
       function(err, xhr) {
-        if (!err) self.user().conversation(false, xhr.responseJSON);
+        if (!err) self.user().conversation(xhr.responseJSON);
         cb.call(self, err, xhr.responseJSON);
       }
     );

@@ -52,6 +52,12 @@
     return this;
   };
 
+  proto.DEFLATE = function() {
+    var attrs = {};
+    Object.keys(proto._attrs).map(function() { attrs[k] = this['_' + k]; }.bind(this));
+    return attrs;
+  };
+
   proto.DESTROY = function() {
     if (this.trigger) this.trigger('DESTROY');
     for (k in this) {

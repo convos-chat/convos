@@ -66,7 +66,7 @@
     this.errors = []; // clear error on post
     c.save(function(err) {
       if (err) return tag.formInvalidInput(err).update();
-      c = tag.user.connection(this.protocol(), this.name(), {url: this.url()});
+      c = tag.user.connection(this.id(), this.DEFLATE());
       tag.openModal(tag.nextModal, {connection: c, user: tag.user});
     });
   }

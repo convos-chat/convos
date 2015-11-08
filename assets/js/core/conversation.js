@@ -1,11 +1,11 @@
 (function(window) {
-  Convos.ConversationRoom = function(attrs) {
+  Convos.Conversation = function(attrs) {
     if (attrs) this.update(attrs);
     this._api = Convos.api;
     riot.observable(this);
   };
 
-  var proto = Convos.ConversationRoom.prototype;
+  var proto = Convos.Conversation.prototype;
 
   // Define attributes
   mixin.base(proto, {
@@ -14,7 +14,6 @@
     icon: function() { return 'group' },
     id: function() { return '' },
     name: function() { return '' },
-    path: function() { return '' },
     topic: function() { return '' },
   });
 
@@ -26,5 +25,9 @@
       function(err, xhr) { cb.call(self, err); }
     );
     return this;
+  };
+
+  proto.url = function() {
+    return [this.connection().id(), this.id()].join('/');
   };
 })(window);

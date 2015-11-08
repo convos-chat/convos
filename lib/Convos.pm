@@ -176,7 +176,7 @@ sub _setup_assets {
       http://code.jquery.com/jquery-1.11.3.min.js
       /js/storage.js
       /js/window.js
-      /js/riot.min.js
+      https://cdn.jsdelivr.net/riot/2.3/riot.min.js
       /js/riot-url.js
       /js/jquery.*.js
       /js/websocket.js
