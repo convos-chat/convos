@@ -1,6 +1,6 @@
 <sidebar-conversations>
   <div class="collection">
-    <a href={'#chat/' + c.url()} class={parent.conversationClass(i)} each={c, i in user.conversations()}>
+    <a href={'#' + c.url()} class={parent.conversationClass(i)} each={c, i in user.conversations()}>
       <i class="material-icons">{c.icon()}</i> {c.name()}
     </a>
     <a href="#addConversation" onclick={addConversation} class="collection-item">

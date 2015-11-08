@@ -1,5 +1,5 @@
 <app>
-  <chat user={user} if={render == 'chat'}/>
+  <chat user={user} if={!render.match(/login|register/)}/>
   <user-login user={user} errors={errors} if={render == 'login'}/>
   <user-register user={user} if={render == 'register'}/>
   <script>
@@ -24,7 +24,7 @@
       tag.logout();
     }
     else if (current != tag.render && (!current || current.match(/^(login|register)/))) {
-      if (tag.user.email()) return riot.route('chat');
+      if (tag.user.email()) return riot.route('');
       tag.update({errors: [], render: current || 'login'});
     }
 
