@@ -1,7 +1,7 @@
 <user-input>
   <div class="user-input">
     <form method="post" onsubmit={sendMessage}>
-      <textarea name="message" class="materialize-textarea" placeholder={placeholder} onkeydown={onChange}></textarea>
+      <textarea name="message" class="materialize-textarea" disabled={!enabled} placeholder={placeholder} onkeydown={onChange}></textarea>
       <button class="btn-flat tooltipped" type="submit" if={canSend}><i class="material-icons">send</i></button>
       <a class="btn-flat dropdown-button" href="#menu_for_conversation" data-activates="menu_for_conversation" if={!canSend}><i class="material-icons">more_vert</i></a>
     </form>
@@ -40,9 +40,14 @@
   });
 
   this.on('update', function() {
-    if (this.opts.conversation) {
-      this.disabled = false; // TODO: Should probably check if connected
-      this.placeholder = 'What do you want to say to ' + this.opts.conversation.name() + '?';
+    if (opts.conversation) {
+      var state = opts.conversation.connection().state();
+      if (this.enabled = state == 'connected') {
+        this.placeholder = 'What do you want to say to ' + this.opts.conversation.name() + '?';
+      }
+      else {
+        this.placeholder = 'State is "' + state + '".';
+      }
     }
   });
 
