@@ -24,7 +24,7 @@
         </p>
       </div>
     </div>
-    <user-input conversation={conversations[activeConversation]} />
+    <user-input conversation={user.conversations()[activeConversation]} />
   </main>
   <script>
 
