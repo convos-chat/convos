@@ -106,6 +106,7 @@ sub start {
   # before processing web requests.
   for my $user (@{$self->backend->users}) {
     $self->{users}{$user->email} = $user;
+    Scalar::Util::weaken($user->{core} = $self);
     for my $c (@{$self->backend->connections($user)}) {
       $user->{connections}{$c->id} = $c;
       $c->connect(sub { }) if $c->state ne 'disconnected';
