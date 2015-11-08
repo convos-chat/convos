@@ -83,6 +83,36 @@ has home => sub { shift->_build_home };
 L<Convos::Core::Backend::File> inherits all methods from
 L<Convos::Core::Backend> and implements the following new ones.
 
+=head2 connections
+
+See L<Convos::Core::Backend/connections>.
+
+=cut
+
+sub connections {
+  my ($self, $user, $cb) = @_;
+  my $user_dir = $self->home->rel_dir($user->email);
+  my ($CONNECTIONS, @connections);
+
+  unless (opendir $CONNECTIONS, $user_dir) {
+    die $! unless $cb;
+    Mojo::IOLoop->next_tick(sub { $self->$cb($!, []) });
+    return $self;
+  }
+
+  while (my $id = readdir $CONNECTIONS) {
+    next unless $id =~ /^\w+/;
+    my $settings = catfile $user_dir, $id, 'connection.json';
+    next unless -e $settings;
+    $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
+    push @connections,
+      Convos::Core::Connection->new({protocol => $settings->{protocol}, user => $user})->INFLATE($settings);
+  }
+
+  return \@connections unless $cb;
+  return $self->tap($cb, '', \@connections);
+}
+
 =head2 delete_object
 
 See L<Convos::Core::Backend/delete_object>.
@@ -105,73 +135,6 @@ sub delete_object {
       $self->$cb($err || '');
     },
   );
-
-  return $self;
-}
-
-=head2 find_connections
-
-See L<Convos::Core::Backend/find_connections>.
-
-=cut
-
-sub find_connections {
-  my ($self, $user, $cb) = @_;
-  my $user_dir = $self->home->rel_dir($user->email);
-  my ($CONNECTIONS, @connections);
-
-  unless (opendir $CONNECTIONS, $user_dir) {
-    Mojo::IOLoop->next_tick(sub { $self->$cb($!, \@connections) });
-    return $self;
-  }
-
-  for my $id (grep {/^\w/} readdir $CONNECTIONS) {
-    my $settings = catfile $user_dir, $id, 'connection.json';
-    next unless -e $settings;
-    push @connections, Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
-  }
-
-  return $self->tap($cb, '', \@connections);
-}
-
-=head2 find_users
-
-See L<Convos::Core::Backend/find_users>.
-
-=cut
-
-sub find_users {
-  my ($self, $cb) = @_;
-  my $home = $self->home;
-
-  return $self->tap($cb, $!, []) unless opendir(my $DH, $home);
-  return $self->tap($cb, '', [grep { /.\@./ and -r $home->rel_file("$_/user.json") } grep {/^\w/} readdir $DH]);
-}
-
-=head2 load_object
-
-See L<Convos::Core::Backend/load_object>.
-
-=cut
-
-sub load_object {
-  my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->_settings_file($obj);
-  my $settings     = {};
-
-  $cb ||= sub { die $_[1] if $_[1] };
-
-  eval {
-    $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file));
-    $obj->INFLATE($settings);
-    warn "[@{[ref $obj]}] Load success: $storage_file\n" if DEBUG;
-    Mojo::IOLoop->next_tick(sub { $obj->$cb('') });
-    1;
-  } or do {
-    my $err = $@;
-    warn "[@{[ref $obj]}] Load $err: $storage_file\n" if DEBUG;
-    Mojo::IOLoop->next_tick(sub { $obj->$cb($err) });
-  };
 
   return $self;
 }
@@ -257,6 +220,29 @@ sub save_object {
   };
 
   return $self;
+}
+
+=head2 users
+
+See L<Convos::Core::Backend/users>.
+
+=cut
+
+sub users {
+  my ($self, $cb) = @_;
+  my $home = $self->home;
+  my @users;
+
+  if (opendir(my $USERS, $home)) {
+    while (my $email = readdir $USERS) {
+      my $settings = $home->rel_file("$email/user.json");
+      next unless $email =~ /.\@./ and -e $settings;    # poor mans regex
+      push @users, Convos::Core::User->new->INFLATE(Mojo::JSON::decode_json(Mojo::Util::slurp($settings)));
+    }
+  }
+
+  return \@users unless $cb;
+  return $self->tap($cb, '', \@users);
 }
 
 sub _build_home {

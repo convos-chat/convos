@@ -155,7 +155,7 @@ sub conversation {
 
   if ($attr) {
     my $conversation = $self->{conversations}{$id} ||= do {
-      my $conversation = $self->_conversation({connection => $self, id => $id});
+      my $conversation = $self->_conversation({id => $id});
       Scalar::Util::weaken($conversation->{connection});
       warn "[Convos::Core::User] Emit conversation: id=$id\n" if DEBUG;
       $self->emit(conversation => $conversation);
@@ -165,7 +165,7 @@ sub conversation {
     return $conversation;
   }
   else {
-    return $self->{conversations}{$id} || $self->_conversation({connection => $self, id => $id});
+    return $self->{conversations}{$id} || $self->_conversation({id => $id});
   }
 }
 
@@ -228,22 +228,6 @@ sub new {
   }
 
   return bless $attrs, $class;
-}
-
-
-=head2 load
-
-  $self = $self->load(sub { my ($self, $err) = @_; });
-
-Will load L</ATTRIBUTES> from persistent storage.
-See L<Convos::Core::Backend/load_object> for details.
-
-=cut
-
-sub load {
-  my $self = shift;
-  $self->user->core->backend->load_object($self, @_);
-  $self;
 }
 
 =head2 rooms
@@ -318,11 +302,12 @@ Used to retrieve or set topic for a conversation.
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
 sub _conversation {
-  my ($self, $c) = @_;
-  die 'Cannot create conversation without class' unless $c->{class};
-  my $e = load_class $c->{class};
-  die $e || "Not found: $c->{class}" if $e;
-  (delete $c->{class})->new($c);
+  my ($self, $args) = @_;
+  die 'Cannot create conversation without class' unless $args->{class};
+  my $e = load_class $args->{class};
+  die $e || "Not found: $args->{class}" if $e;
+  $args->{connection} = $self;
+  (delete $args->{class})->new($args);
 }
 
 sub _userinfo {
@@ -337,6 +322,7 @@ sub INFLATE {
   my ($self, $attrs) = @_;
   $self->conversation($_->{id}, $_) for @{delete($attrs->{conversations}) || []};
   $self->{$_} = $attrs->{$_} for keys %$attrs;
+  $self;
 }
 
 sub TO_JSON {
@@ -347,11 +333,7 @@ sub TO_JSON {
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
 
   if ($persist) {
-    $json->{conversations} = [];
-    for my $conversation (values %{$self->{conversations} || {}}) {
-      next unless $conversation->active;
-      push @{$json->{conversations}}, $conversation->TO_JSON($persist);
-    }
+    $json->{conversations} = [map { $_->TO_JSON($persist) } @{$self->conversations}];
   }
 
   $json;

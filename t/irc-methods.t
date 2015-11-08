@@ -256,7 +256,15 @@ cmp_deeply(
         name          => '#Convos_irc_LIVE_20001',
         frozen        => '',
         topic         => 'Cool topic',
-      }
+      },
+      {
+        active        => 0,
+        connection_id => 'irc-localhost',
+        id            => '#no_such_channel_',
+        name          => '#no_such_channel_',
+        frozen        => '',
+        topic         => '',
+      },
     ),
     id       => 'irc-localhost',
     name     => 'localhost',
