@@ -52,13 +52,13 @@
       function(err, xhr) {
         if (err) return tag.update({errors: err});
         tag.user.update(xhr.body);
-        riot.url.route('chat');
+        riot.url.route('');
       }
     );
   }
 
   this.on('mount', function() {
-    if (this.user.email()) return riot.url.route('chat');
+    if (this.user.email()) return riot.url.route('');
     this.form_email.value = localStorage.getItem('email');
     this.form_email.focus();
   });

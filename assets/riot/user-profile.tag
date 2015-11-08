@@ -52,7 +52,7 @@
     this.user.save(attrs, function(err) {
       if (err) return tag.formInvalidInput(err).update();
       tag.user.update(attrs);
-      riot.url.route('chat');
+      riot.url.route('');
     });
   }
 

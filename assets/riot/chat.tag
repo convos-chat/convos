@@ -49,7 +49,7 @@
   });
 
   this.on('update', function() {
-    var p = riot.url.fragment().replace(/chat\//, '');
+    var p = riot.url.fragment();
     this.user.conversations().forEach(function(c, i) {
       if (c.url() == p) this.activeConversation = i;
     }.bind(this));
