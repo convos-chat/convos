@@ -92,8 +92,8 @@ the following new ones.
 
   $self = $self->start;
 
-Will start the backend. This means finding any users and start known
-connections.
+Will start the backend. This means finding all users and start connections
+if state is not "disconnected".
 
 =cut
 
@@ -102,12 +102,15 @@ sub start {
 
   return $self if !@_ and $self->{started}++;
 
-  Scalar::Util::weaken($self);
-  $self->backend->find_users(
-    sub {
-      $self->_start(map { $self->user($_, {}) } @{$_[2]});
+  # Want this method to be blocking to make sure everything is ready
+  # before processing web requests.
+  for my $user (@{$self->backend->users}) {
+    $self->{users}{$user->email} = $user;
+    for my $c (@{$self->backend->connections($user)}) {
+      $user->{connections}{$c->id} = $c;
+      $c->connect(sub { }) if $c->state ne 'disconnected';
     }
-  );
+  }
 
   return $self;
 }
@@ -131,7 +134,7 @@ sub user {
   $email = lc $email;
 
   if ($attr) {
-    my $user = $self->{user}{$email} ||= do {
+    my $user = $self->{users}{$email} ||= do {
       my $user = Convos::Core::User->new(core => $self, email => $email);
       Scalar::Util::weaken($user->{core});
       warn "[$email] Emit user" if DEBUG;
@@ -142,33 +145,19 @@ sub user {
     return $user;
   }
   else {
-    return $self->{user}{$email} || Convos::Core::User->new(core => $self, email => $email);
+    return $self->{users}{$email} || Convos::Core::User->new(core => $self, email => $email);
   }
 }
 
-sub _start {
-  my ($self, @objs) = @_;
-  my $obj = shift @objs or return;    # done
+=head2 users
 
-  if ($obj->isa('Convos::Core::User')) {
-    $self->backend->find_connections(
-      $obj,
-      sub {
-        my ($backend, $err, $connections) = @_;
-        $self->_start((map { $obj->connection($_) } @$connections), @objs);
-      }
-    );
-  }
-  else {                              # Convos::Core::Connection
-    if ($obj->state eq 'connecting') {
-      $obj->connect(sub { });
-      Mojo::IOLoop->timer(CONNECT_TIMER, sub { $self->_start(@objs) });
-    }
-    else {
-      $self->_start(@objs);
-    }
-  }
-}
+  $users = $self->users;
+
+Returns an array-ref of of L<Convos::Core::User> objects.
+
+=cut
+
+sub users { [values %{$_[0]->{users} || {}}] }
 
 =head1 COPYRIGHT AND LICENSE
 

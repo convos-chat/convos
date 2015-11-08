@@ -9,7 +9,8 @@ local $TODO = 'Convos::Core::Backend::File::messages() has a new api';
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $user = $core->user('superman@example.com', {});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $conversation = $connection->conversation('#convos'), my ($err, $messages);
+my $conversation = $connection->conversation('#convos', {});
+my ($err, $messages);
 
 $conversation->messages({}, sub { ($err, $messages) = @_[1, 2]; });
 is int @$messages, 60, 'got max limit messages';

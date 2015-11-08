@@ -63,8 +63,10 @@ captured_is(
     $connection->_irc->emit(err_nosuchnick => {params => [undef, '#channel_name']});
   },
   [
+    message => $connection->conversation('#channel_name'),
+    {from => '127.0.0.1', highlight => TRUE, message => 'No such nick or channel.', type => 'notice'},
     message => $connection,
-    {from => '127.0.0.1', highlight => FALSE, message => 'No such nick or channel #channel_name.', type => 'notice'}
+    {from => '127.0.0.1', highlight => FALSE, message => 'No such nick or channel #channel_name.', type => 'notice'},
   ],
   'err_nosuchnick'
 );

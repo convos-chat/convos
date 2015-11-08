@@ -25,19 +25,17 @@ sub delete {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 
+  if (@{$self->app->core->users} <= 1) {
+    return $self->$cb($self->invalid_request('You are the only user left.'), 400);
+  }
+
   $self->delay(
-    sub { $self->app->core->backend->find_users(shift->begin); },
-    sub {
-      my ($delay, $err, $users) = @_;
-      die $err if $err;
-      return $delay->pass('Delete user is not implemented.') if @$users > 1;
-      return $self->$cb($self->invalid_request('You are the only user left.'), 400);
-    },
+    sub { $self->app->core->backend->delete_object($user, shift->begin) },
     sub {
       my ($delay, $err) = @_;
       die $err if $err;
       delete $self->session->{email};
-      $self->$cb({message => 'User deleted.'}, 200);
+      $self->$cb({message => 'You have been erased.'}, 200);
     },
   );
 }
@@ -52,7 +50,7 @@ sub get {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 
-  $self->delay(sub { $user->load(shift->begin); }, sub { $_[1] and die $_[1]; $self->$cb($user->TO_JSON, 200); });
+  $self->$cb($user->TO_JSON, 200);
 }
 
 =head2 login
@@ -65,20 +63,12 @@ sub login {
   my ($self, $args, $cb) = @_;
   my $user = $self->app->core->user($args->{body}{email});
 
-  $self->delay(
-    sub { $user->load(shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-
-      if ($user->validate_password($args->{body}{password})) {
-        $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
-      }
-      else {
-        $self->$cb($self->invalid_request('Invalid email or password.'), 400);
-      }
-    },
-  );
+  if ($user->validate_password($args->{body}{password})) {
+    $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
+  }
+  else {
+    $self->$cb($self->invalid_request('Invalid email or password.'), 400);
+  }
 }
 
 =head2 logout
@@ -136,12 +126,13 @@ sub update {
 
   # TODO: Add support for changing email
 
+  unless (%{$args->{body} || {}}) {
+    return $self->$cb($user->TO_JSON, 200);
+  }
+
   $self->delay(
-    sub { $user->load(shift->begin); },
     sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      return $self->$cb($user->TO_JSON, 200) unless %{$args->{body} || {}};
+      my ($delay) = @_;
       $user->avatar($args->{body}{avatar})         if $args->{body}{avatar};
       $user->set_password($args->{body}{password}) if $args->{body}{password};
       return $user->save($delay->begin);

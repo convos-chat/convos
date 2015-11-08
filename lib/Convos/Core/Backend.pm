@@ -34,6 +34,19 @@ has namespaces => sub { ['Convos::Core::Plugin'] };
 L<Convos::Core::Backend> inherits all methods from L<Mojolicious::Plugins>
 and implements the following new ones.
 
+=head2 connections
+
+  $self = $self->connections($user, sub { my ($self, $err, $connections) = @_ });
+
+Used to find a list of connection names for a given L<$user|Convos::Core::User>.
+
+=cut
+
+sub connections {
+  return [] if @_ == 1;
+  $_[0]->tap($_[2], '', []);
+}
+
 =head2 delete_object
 
   $self = $self->delete_object($obj, sub { my ($self, $err) = @_ });
@@ -44,30 +57,6 @@ This method is called to remove a given object from persistent storage.
 
 sub delete_object {
   $_[0]->tap($_[2], '');
-}
-
-=head2 find_connections
-
-  $self = $self->find_connections($user, sub { my ($self, $err, $connections) = @_ });
-
-Used to find a list of connection names for a given L<$user|Convos::Core::User>.
-
-=cut
-
-sub find_connections {
-  $_[0]->tap($_[2], '', []);
-}
-
-=head2 find_users
-
-  $self = $self->find_users(sub { my ($self, $err, $users) = @_ });
-
-Used to find a list of user emails.
-
-=cut
-
-sub find_users {
-  $_[0]->tap($_[1], '', []);
 }
 
 =head2 messages
@@ -106,20 +95,6 @@ sub new {
   $self;
 }
 
-=head2 load_object
-
-  $self->load_object($obj, sub { my ($obj, $err) = @_; });
-
-This method is called to load a given object from persistent storage.
-
-=cut
-
-sub load_object {
-  my ($self, $obj, $cb) = @_;
-  $obj->$cb('') if $cb;
-  $self;
-}
-
 =head2 save_object
 
   $self->save_object($obj, sub { my ($obj, $err) = @_; });
@@ -131,6 +106,19 @@ sub save_object {
   my ($self, $obj, $cb) = @_;
   $obj->$cb('') if $cb;
   $self;
+}
+
+=head2 users
+
+  $self = $self->users(sub { my ($self, $err, $users) = @_ });
+
+Used to find a list of user emails.
+
+=cut
+
+sub users {
+  return [] if @_ == 1;
+  $_[0]->tap($_[1], '', []);
 }
 
 sub _setup { }

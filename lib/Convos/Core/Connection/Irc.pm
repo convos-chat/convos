@@ -309,9 +309,10 @@ sub whois {
 }
 
 sub _conversation {
-  my ($self, $c) = @_;
-  $c->{class} = sprintf 'Convos::Core::Conversation::%s', $c->{id} =~ /^$CHANNEL_RE/ ? 'Room' : 'Direct' if $c->{id};
-  $self->SUPER::_conversation($c);
+  my ($self, $args) = @_;
+  $args->{class} = sprintf 'Convos::Core::Conversation::%s', $args->{id} =~ /^$CHANNEL_RE/ ? 'Room' : 'Direct'
+    if $args->{id};
+  $self->SUPER::_conversation($args);
 }
 
 sub _event_irc_close {
@@ -384,10 +385,10 @@ sub _steal_nick {
 _event err_bannedfromchan => sub {    # TODO
   my ($self,    $msg)    = @_;
   my ($channel, $reason) = @{$msg->{params}};
-  my $nick = $self->_irc->nick;
-  my $conversation = $self->conversation($channel => {});
+  my $nick         = $self->_irc->nick;
+  my $conversation = $self->conversation($channel);
 
-  $conversation->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel");
+  $conversation->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel") if $conversation;
   $self->_notice("$nick is banned from $channel [$reason]", highlight => Mojo::JSON->true);
 };
 
@@ -408,6 +409,19 @@ _event err_nicknameinuse => sub {    # TODO
 # :hybrid8.debian.local 401 Superman #no_such_channel_ :No such nick/channel
 _event err_nosuchnick => sub {
   my ($self, $msg) = @_;
+
+  if (my $conversation = $self->conversation($msg->{params}[1])) {
+    $self->emit(
+      message => $conversation,
+      {
+        from      => $self->url->host,
+        highlight => Mojo::JSON->true,
+        message   => 'No such nick or channel.',
+        type      => 'notice',
+      }
+    );
+  }
+
   $self->_notice("No such nick or channel $msg->{params}[1].");
 };
 

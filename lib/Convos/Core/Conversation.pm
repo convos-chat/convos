@@ -51,7 +51,7 @@ has name => sub { shift->id };
 
   $self = $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
 
-Used to get messages which is logged to backend, using L</log>.
+Will fetch messages from persistent backend.
 
 See also L<Convos::Core::Backend/messages>.
 

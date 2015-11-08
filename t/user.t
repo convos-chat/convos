@@ -15,12 +15,11 @@ is $user->avatar,   '',                   'avatar';
 is $user->email,    'jhthorsen@cpan.org', 'email';
 is $user->password, '',                   'password';
 
-is $user->load, $user, 'load';
 ok !-e $settings_file, 'no storage file';
 $user->avatar('whatever');
 is $user->save, $user, 'save';
 ok -e $settings_file, 'created storage file';
-is $core->user('jhthorsen@cpan.org')->load->avatar, 'whatever', 'avatar from storage file';
+is $core->user('jhthorsen@cpan.org')->avatar, 'whatever', 'avatar from storage file';
 
 is_deeply($user->TO_JSON,
   {avatar => 'whatever', email => 'jhthorsen@cpan.org', registered => Mojo::Date->new($main::time)->to_datetime},
@@ -36,6 +35,6 @@ ok !$user->validate_password('s3crett'), 'invalid password';
 ok $user->validate_password('s3cret'), 'validate_password';
 
 $user->save;
-is $core->user('jhthorsen@cpan.org')->load->password, $user->password, 'password from storage file';
+is $core->user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
 
 done_testing;

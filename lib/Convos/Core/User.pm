@@ -112,22 +112,7 @@ Returns an array-ref of of L<Convos::Core::Connection> objects.
 
 =cut
 
-sub connections { return [values %{$_[0]->{connections}}] }
-
-=head2 load
-
-  $self = $self->load(sub { my ($self, $err) = @_; });
-
-Will load L</ATTRIBUTES> from persistent storage.
-See L<Convos::Core::Backend/load_object> for details.
-
-=cut
-
-sub load {
-  my $self = shift;
-  $self->core->backend->load_object($self, @_);
-  $self;
-}
+sub connections { [values %{$_[0]->{connections} || {}}] }
 
 =head2 remove_connection
 
@@ -168,6 +153,7 @@ sub remove_connection {
 =head2 save
 
   $self = $self->save(sub { my ($self, $err) = @_; });
+  $self = $self->save;
 
 Will save L</ATTRIBUTES> to persistent storage.
 See L<Convos::Core::Backend/save_object> for details.
@@ -224,6 +210,7 @@ sub _bcrypt {
 sub INFLATE {
   my ($self, $attrs) = @_;
   $self->{$_} = $attrs->{$_} for keys %$attrs;
+  $self;
 }
 
 sub TO_JSON {
