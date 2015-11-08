@@ -17,6 +17,10 @@ $user->connection('irc-localhost')->state('disconnected');
 $t->message_ok->json_message_is('/event', 'state')->json_message_is('/object/name', 'localhost')
   ->json_message_is('/object/state', 'connecting')->json_message_is('/data/0', 'disconnected');
 
+# update profile
+$t->send_ok({json => {id => 42, op => 'updateUser', params => {body => {avatar => '', password => ''}}}})
+  ->message_ok->json_message_is('/id', 42)->json_message_is('/body/avatar', '');
+
 # Test to make sure we don't leak events.
 # The get_ok() is just a hack to make sure the server has
 # emitted the "finish" event.

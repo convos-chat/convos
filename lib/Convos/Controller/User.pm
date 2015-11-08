@@ -133,9 +133,9 @@ sub update {
   $self->delay(
     sub {
       my ($delay) = @_;
-      $user->avatar($args->{body}{avatar})         if $args->{body}{avatar};
+      $user->avatar($args->{body}{avatar}) if defined $args->{body}{avatar};
       $user->set_password($args->{body}{password}) if $args->{body}{password};
-      return $user->save($delay->begin);
+      $user->save($delay->begin);
     },
     sub {
       my ($delay, $err) = @_;
