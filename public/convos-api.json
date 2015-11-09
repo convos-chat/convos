@@ -176,11 +176,17 @@
         "operationId": "sendToConversation",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" }
+          { "$ref": "#/parameters/conversation_id" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Command" }
+          }
         ],
         "responses": {
           "200": {
-            "description": "TODO",
+            "description": "Successfully sent a message",
             "schema": { "$ref": "#/definitions/Command" }
           },
           "default": {
@@ -505,9 +511,8 @@
   },
   "definitions": {
     "Command": {
-      "required": ["id", "command"],
+      "required": ["command"],
       "properties": {
-        "id": { "type": "string", "description": "jhthorsen: Cannot remember what 'id' is." },
         "command": { "type": "string", "description": "A command to be sent to backend" }
       }
     },
