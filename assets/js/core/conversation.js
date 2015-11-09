@@ -13,6 +13,7 @@
     frozen: function() { return '' },
     icon: function() { return 'group' },
     id: function() { return '' },
+    messages: function() { return []; },
     name: function() { return '' },
     topic: function() { return '' },
   });

@@ -5,6 +5,7 @@
     this._conversations = {};
     this._connections = {};
     this._api = Convos.api;
+    this._listenForEvents();
 
     var prev = this.email();
     this.on('email', function(value) {
@@ -18,7 +19,8 @@
   // Define attributes
   mixin.base(proto, {
     avatar: function() { return ''; },
-    email: function() { return ''; }
+    email: function() { return ''; },
+    ws: function() { throw 'ws cannot be build'; }
   });
 
   // Make the next api method fetch fresh data from server
@@ -125,5 +127,17 @@
       cb.call(self, err);
     });
     return this;
+  };
+
+  proto._listenForEvents = function() {
+    this.ws().on('json', function(e) {
+      switch (e.type) {
+        case 'message':
+          var c = this._conversations[e.object.id];
+          if (c) c.messages().push(e.data[0]);
+          riot.update();
+          break;
+      }
+    }.bind(this));
   };
 })(window);
