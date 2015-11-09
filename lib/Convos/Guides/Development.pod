@@ -1,0 +1,204 @@
+=head1 NAME
+
+Convos::Guides::Development - Guide for developers
+
+=head1 OVERVIEW
+
+This guide is for people who want to hack on L<Convos>. You can also have a
+look at L<http://thorsen.pm/perl/2015/08/31/convos-revamped.html> for more
+details.
+
+=head1 PREREQUISITES 
+
+It is helpful if you are familiar with L<git|http://git-scm.com>,
+L<Mojolicious> and basic L<Perl|http://perl.org> tools, such as
+L<prove|App::prove> and L<cpanm|https://cpanmin.us>.
+
+You also need L<npm|https://www.npmjs.com/> to do L<http://riotjs.com>
+development.
+
+=head1 TUTORIAL
+
+=head2 Getting the source code
+
+The first step is to clone the repository. You can either do this directly
+in L<github|https://github.com/Nordaaker/convos> or by running the command
+below:
+
+  $ git clone https://github.com/Nordaaker/convos.git
+
+The command above will create a "convos" directory in the current working
+directory. The following steps need to be run from the project root, meaning
+inside the "convos" directory.
+
+NOTE! The current development branch is "batcode":
+
+  $ git checkout -b batcode origin/batcode
+
+=head2 Installing the dependencies
+
+Once you have the source code you should install the dependencies:
+
+  $ cpanm --installdeps
+  $ npm install riot
+
+=head2 Starting the application
+
+The basics of getting the application running is the command below:
+
+  $ morbo script/convos
+
+...but there are some useful switches and environment variables that can be
+set:
+
+  $ MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 morbo script/convos -w assets/ -w lib/ -w public/convos-api.json
+
+L<MOJO_IRC_DEBUG|Mojo::IRC> will print IRC debug to STDERR and C<CONVOS_DEBUG>
+will print L<Convos> debug to STDERR. The C<-w> switch is for watching
+different files and directories for changes.
+
+=head2 Directory structure
+
+=over 4
+
+=item * convos/assets/
+
+The "assets" directory contains all JavaScript and Sass files, which will
+be used to generate the "public" files. The conversation is done with
+L<Mojolicious::Plugin::AssetPack>.
+
+The C<.tag> files require L<riot|http://riotjs.com> to be compiled into
+JavaScript.
+
+=item * convos/cpanfile
+
+The L<cpanfile> is used to document all the requirements, while the
+"Makefile.PL" file is generated from the content of the L<cpanfile>.
+
+=item * convos/lib/
+
+The "lib" directory contains all the Perl source code.
+
+=item * convos/node_modules
+
+The C<node_modules> directory will be generated when installing modules
+with the "npm" command. This directory is ignored by git.
+
+=item * convos/public
+
+The public directory contains fonts, images and
+L<packed|Mojolicious::Plugin::AssetPack> files, which can be downloaded
+through the L<Convos> web server.
+
+=item * convos/script
+
+The script directory contains the main application file ("convos") and
+helper scripts. The important part here is that every file which has the
+executable bit set will be part of the final CPAN distribution.
+
+=item * convos/t
+
+This directory contains the test files for the Perl code.
+
+TODO: Add JavaScript tests.
+
+=item * convos/vendor
+
+This directory contains projects which is tracked by other git repositories.
+
+TODO: Move this directory to "assets".
+
+=back
+
+=head2 Convos frontend
+
+                  .------.
+              ____| Core |
+  .--------._/    '------'
+  | Convos |
+  '--------'    .-------------.
+        \_______| Controllers |
+                '-------------'
+
+The frontend contains of a single template, embedded inside of C<Convos.pm>.
+The rest of the frontend consist of a JavaScript application, powered by
+L<http://riotjs.com>. This application gets its data from a L<Swagger2>
+API with a thin logical layer inside the controllers
+L<Convos::Controller::Connection>,
+L<Convos::Controller::Conversation>,
+L<Convos::Controller::Events>,
+L<Convos::Controller::Notifications> and
+L<Convos::Controller::User>.
+
+=head2 Convos core
+
+                .---------.
+            ____| Backend |
+  .------._/    '---------'
+  | Core |
+  '------'   .------.   .-------------.   .---------------.
+      \______| User |___| Connections |___| Conversations |
+             '------'   '-------------'   '---------------'
+
+L<Convos::Core> is the heart of L<Convos>. The core takes care of connections,
+conversations, can persist to a backend and provide hooks for plugins.
+
+The design makes L<Convos> a multi-user application, that can persist to any
+backend (memory, file storage, redis, ...) and connect to any chat server,
+as well as have keeping any number of conversations active.
+
+The way the “Backend” is hooked into the rest of the object graph is by
+events. Any user, connection or conversation can emit new events that the
+Backend can choose to persist to storage. The default backend is a
+file-based backend, which enables Convos to be started without any additional
+dependencies, except Perl and a couple of modules from CPAN.
+
+=head2 Make changes
+
+First you need to identify which part you want to contribute to. The current
+"batcode" branch is starting to take form. The API is pretty usable and
+tested, but the frontend is still infant.
+
+At this point it would be nice to...
+
+=over 4
+
+=item *
+
+Have a look at C<public/convos-api.json> and see if the API makes sense.
+
+=item *
+
+See if the documentation for the Perl modules are understandable.
+
+=item *
+
+Help with figuring out how to do automated JavaScript tests and make the
+frontend usable.
+
+=item *
+
+Extend the File backend with search feature.
+
+=item *
+
+Create a L<Mojo::Redis2> backend, compatible with the current Convos code.
+
+=back
+
+=head2 Talk to us
+
+Please give us feedback by joining the "#convos" channel on C<irc.freenode.net>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014, Jan Henning Thorsen
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Artistic License version 2.0.
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+=cut
