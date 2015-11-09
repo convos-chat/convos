@@ -335,6 +335,7 @@ sub _irc_message {
   my ($self, $event, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my $target = $msg->{params}[0];
+  my $ts     = Time::HiRes::time;
 
   if ($user) {
     my $current_nick = $self->_irc->nick;
@@ -348,6 +349,7 @@ sub _irc_message {
         from      => $nick,
         highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
         message   => $msg->{params}[1],
+        ts        => $ts,
         type      => $event eq 'irc_privmsg' ? 'private' : $event eq 'ctcp_action' ? 'action' : 'notice',
       }
     );
@@ -359,6 +361,7 @@ sub _irc_message {
         from => $msg->{prefix} // $self->_irc->server,
         highlight => Mojo::JSON->false,
         message   => $msg->{params}[1],
+        ts        => $ts,
         type      => $event eq 'irc_privmsg' ? 'private' : 'notice',
       }
     );
@@ -369,9 +372,10 @@ sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 
 sub _notice {
   my ($self, $message) = (shift, shift);
+  my $ts = Time::HiRes::time;
   $self->emit(
     message => $self,
-    {from => $self->url->host, highlight => Mojo::JSON->false, type => 'notice', @_, message => $message}
+    {from => $self->url->host, highlight => Mojo::JSON->false, type => 'notice', @_, message => $message, ts => $ts,}
   );
 }
 
@@ -409,6 +413,7 @@ _event err_nicknameinuse => sub {    # TODO
 # :hybrid8.debian.local 401 Superman #no_such_channel_ :No such nick/channel
 _event err_nosuchnick => sub {
   my ($self, $msg) = @_;
+  my $ts = Time::HiRes::time;
 
   if (my $conversation = $self->conversation($msg->{params}[1])) {
     $self->emit(
@@ -417,6 +422,7 @@ _event err_nosuchnick => sub {
         from      => $self->url->host,
         highlight => Mojo::JSON->true,
         message   => 'No such nick or channel.',
+        ts        => $ts,
         type      => 'notice',
       }
     );
