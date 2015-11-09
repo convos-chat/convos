@@ -108,8 +108,21 @@ See L<Convos::Manual::API/sendToConversation>.
 
 sub send {
   my ($self, $args, $cb) = @_;
-  die 'TODO';
-  $self->$cb({message => ''}, 200);
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->connection($args->{connection_id});
+
+  unless ($connection) {
+    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+  }
+
+  $self->delay(
+    sub { $connection->send($args->{conversation_id}, $args->{body}{command}, shift->begin); },
+    sub {
+      my ($delay, $err) = @_;
+      return $self->$cb($args->{body}, 200) unless $err;
+      return $self->$cb($self->invalid_request($err), 500);
+    },
+  );
 }
 
 =head1 COPYRIGHT AND LICENSE

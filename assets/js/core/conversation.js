@@ -18,10 +18,14 @@
   });
 
   // Send a message to a room
-  proto.send = function(message, cb) {
+  proto.send = function(command, cb) {
     var self = this;
     this._api.sendToConversation(
-      {body: {message: message}, connection_name: this.connection().name(), conversation_id: this.name()},
+      {
+        body: {command: command},
+        connection_id: this.connection().id(),
+        conversation_id: this.name()
+      },
       function(err, xhr) { cb.call(self, err); }
     );
     return this;
