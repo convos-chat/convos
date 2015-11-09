@@ -276,8 +276,8 @@ sub _delete_user {
 }
 
 sub _log {
-  my ($self, $obj, $message) = @_;
-  my $t = gmtime;
+  my ($self, $obj, $ts, $message) = @_;
+  my $t = gmtime($ts || time);
   my $ym = sprintf '%s/%02s', $t->year, $t->mon;
   my $FH;    # = $self->{log_fh}{$obj}{$ym};
 
@@ -321,21 +321,21 @@ sub _setup {
         message => sub {
           my ($connection, $target, $msg) = @_;
           if ($msg->{type} eq 'private') {
-            $self->_log($target, sprintf '<%s> %s', @$msg{qw( from message )});
+            $self->_log($target, $msg->{ts}, sprintf '<%s> %s', @$msg{qw( from message )});
           }
           elsif ($msg->{type} eq 'action') {
-            $self->_log($target, sprintf '* %s %s', @$msg{qw( from message )});
+            $self->_log($target, $msg->{ts}, sprintf '* %s %s', @$msg{qw( from message )});
           }
           else {
-            $self->_log($target, sprintf '-%s- %s', @$msg{qw( from message )});
+            $self->_log($target, $msg->{ts}, sprintf '-%s- %s', @$msg{qw( from message )});
           }
         }
       );
-      $connection->on(state => sub { $self->_log($_[0], "-!- Change connection state to $_[1]. $_[2]") });
+      $connection->on(state => sub { $self->_log($_[0], undef, "-!- Change connection state to $_[1]. $_[2]") });
       $connection->on(
         users => sub {
           my ($connection, $conversation, $data) = @_;
-          $self->_log($conversation, "--- x");
+          $self->_log($conversation, $data->{ts}, "--- x");
         }
       );
     }
