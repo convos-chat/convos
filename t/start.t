@@ -6,12 +6,12 @@ use Convos::Core::Backend::File;
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 
 {
-  my $user = $core->user('jhthorsen@cpan.org')->save;
+  my $user = $core->user({email => 'jhthorsen@cpan.org'})->save;
   $user->connection({name => 'localhost', protocol => 'irc'})->tap(sub { shift->url->parse('irc://localhost') })->save;
 }
 
 {
-  my $user = $core->user('mramberg@cpan.org')->save;
+  my $user = $core->user({email => 'mramberg@cpan.org'})->save;
   $user->connection({name => 'freenode', protocol => 'irc'})
     ->tap(sub { shift->url->parse('irc://chat.freenode.net:6697') })->save;
   $user->connection({name => 'localhost', protocol => 'Irc'})->tap(sub { shift->url->parse('irc://127.0.0.1') })

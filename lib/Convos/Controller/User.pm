@@ -63,7 +63,7 @@ sub login {
   my ($self, $args, $cb) = @_;
   my $user = $self->app->core->user($args->{body}{email});
 
-  if ($user->validate_password($args->{body}{password})) {
+  if ($user and $user->validate_password($args->{body}{password})) {
     $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
   }
   else {
@@ -95,14 +95,14 @@ sub register {
 
   # TODO: Add support for invite code
 
-  if ($user->password) {
+  if ($user) {
     return $self->$cb($self->invalid_request('Email is taken.', '/body/email'), 409);
   }
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $self->app->core->user($args->{body}{email}, {avatar => $args->{body}{avatar} || ''});
+      $user = $self->app->core->user($args->{body});
       $user->set_password($args->{body}{password});
       $user->save($delay->begin);
     },

@@ -68,7 +68,7 @@ sub event_source {
 
 sub _send_event {
   my ($self, $event, $data) = @_;
-  $data->{event} = $event;
+  $data->{type} = $event;
   warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG == 2;
   $self->send({json => $data});
 }
@@ -84,7 +84,13 @@ sub _subscribe {
     push @cb, $event, $user->on(
       $event => sub {
         my ($user, $target, @data) = @_;
-        $self->$method($event => {object => $target, data => \@data});
+        if ($event eq 'message') {
+          $target = shift(@data)->TO_JSON(1);
+          $self->$method($event => {object => $target, data => \@data});
+        }
+        else {
+          $self->$method($event => {object => $target, data => \@data});
+        }
       }
     );
   }

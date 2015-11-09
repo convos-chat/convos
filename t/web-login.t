@@ -3,7 +3,7 @@ use t::Helper;
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
 
-$t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret');
+$t->app->core->user({email => 'superman@example.com', avatar => 'avatar@example.com'})->set_password('s3cret');
 
 $t->get_ok('/api/user')->status_is(401);
 

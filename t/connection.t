@@ -2,7 +2,7 @@ use t::Helper;
 use Convos::Core;
 
 my $core       = Convos::Core->new;
-my $user       = $core->user('test@example.com', {});
+my $user       = $core->user({email => 'test@example.com'});
 my $connection = $user->connection({name => 'whatever', protocol => 'Irc'});
 
 isa_ok($connection->conversation('#foo'),   'Convos::Core::Conversation::Room');
