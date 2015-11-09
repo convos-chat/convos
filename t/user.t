@@ -9,7 +9,7 @@ use Convos::Core::Backend::File;
 no warnings qw( once redefine );
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $user = $core->user('jhthorsen@cpan.org', {});
+my $user = $core->user({email => 'jhthorsen@cpan.org'});
 my $settings_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'user.json');
 is $user->avatar,   '',                   'avatar';
 is $user->email,    'jhthorsen@cpan.org', 'email';

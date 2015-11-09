@@ -2,7 +2,8 @@ use t::Helper;
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
-my $user = $t->app->core->user('superman@example.com', {avatar => 'avatar@example.com'})->set_password('s3cret');
+my $user
+  = $t->app->core->user({email => 'superman@example.com', avatar => 'avatar@example.com'})->set_password('s3cret');
 
 $t->get_ok('/api/connections')->status_is(401);
 $t->post_ok('/api/connections', json => {url => 'irc://localhost:3123'})->status_is(401);

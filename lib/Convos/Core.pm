@@ -105,10 +105,9 @@ sub start {
   # Want this method to be blocking to make sure everything is ready
   # before processing web requests.
   for my $user (@{$self->backend->users}) {
-    $self->{users}{$user->email} = $user;
-    Scalar::Util::weaken($user->{core} = $self);
+    $self->user($user);
     for my $c (@{$self->backend->connections($user)}) {
-      $user->{connections}{$c->id} = $c;
+      $user->connection($c);
       $c->connect(sub { }) if $c->state ne 'disconnected';
     }
   }
@@ -118,8 +117,8 @@ sub start {
 
 =head2 user
 
-  $user = $self->user($email);         # get
-  $user = $self->user($email, \%attr); # create/update
+  $user = $self->user($email); # get
+  $user = $self->user(\%attr); # create
 
 Returns a L<Convos::Core::User> object. Every new object created will emit
 a "user" event:
@@ -129,25 +128,22 @@ a "user" event:
 =cut
 
 sub user {
-  my ($self, $email, $attr) = @_;
+  my ($self, $obj) = @_;
 
-  die "Invalid email $email. Need to match /.\@./." unless $email and $email =~ /.\@./;
-  $email = lc $email;
+  # Get
+  return $self->{users}{$obj} unless ref $obj;
 
-  if ($attr) {
-    my $user = $self->{users}{$email} ||= do {
-      my $user = Convos::Core::User->new(core => $self, email => $email);
-      Scalar::Util::weaken($user->{core});
-      warn "[$email] Emit user" if DEBUG;
-      $self->backend->emit(user => $user);
-      $user;
-    };
-    $user->{$_} = $attr->{$_} for keys %$attr;
-    return $user;
-  }
-  else {
-    return $self->{users}{$email} || Convos::Core::User->new(core => $self, email => $email);
-  }
+  # Add
+  Scalar::Util::weaken($obj->{core} = $self);
+  $obj = Convos::Core::User->new($obj) if ref $obj eq 'HASH';
+
+  die "Invalid email $obj->{email}. Need to match /.\@./." unless $obj->email =~ /.\@./;
+  die "User already exists." if $self->{users}{$obj->email};
+
+  $self->{users}{$obj->email} = $obj;
+  warn "[$obj->{email}] Emit user" if DEBUG;
+  $self->backend->emit(user => $obj);
+  return $obj;
 }
 
 =head2 users

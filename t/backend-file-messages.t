@@ -7,7 +7,7 @@ $ENV{CONVOS_HOME} = File::Spec->catdir(qw( t data convos-test-backend-file-messa
 local $TODO = 'Convos::Core::Backend::File::messages() has a new api';
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $user = $core->user('superman@example.com', {});
+my $user = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $conversation = $connection->conversation('#convos', {});
 my ($err, $messages);

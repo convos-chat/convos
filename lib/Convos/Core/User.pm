@@ -89,7 +89,7 @@ sub connection {
 
   # Add
   $obj->{user} = $self;
-  $obj = Convos::Core::Connection->new($obj);
+  $obj = Convos::Core::Connection->new($obj) if ref $obj eq 'HASH';
 
   die 'Connection already exists.' if $self->{connections}{$obj->id};
   $self->{connections}{$obj->id} = $obj;

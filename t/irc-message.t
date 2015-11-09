@@ -8,7 +8,7 @@ $date[0] += 1900;
 $date[1]++;
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $connection = $core->user('superman@example.com', {})->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $core->user({email => 'superman@example.com'})->connection({name => 'localhost', protocol => 'irc'});
 
 $connection->_irc->emit(irc_privmsg =>
     {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'not a ssuperman highlight']});
