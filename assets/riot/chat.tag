@@ -12,10 +12,7 @@
     <sidebar-conversations user={user} show={activeSidebar('conversations')}></sidebar-conversations>
   </nav>
   <main>
-    <div each={c, i in conversations} messages={c.messages} show={i == parent.activeConversation}>
-      <conversation messages={c.messages} show={i == parent.activeConversation}></conversation>
-    </div>
-    <div class="no-conversations valign-wrapper" if={!conversations.length}>
+    <div class="no-conversations valign-wrapper" if={!user.conversations().length}>
       <div class="valign center-align">
         <h5>No conversations</h5>
         <p class="grey-text">
@@ -24,11 +21,12 @@
         </p>
       </div>
     </div>
-    <user-input conversation={user.conversations()[activeConversation]} />
+    <conversation conversation={conversation} show={conversation}></conversation>
+    <user-input conversation={conversation} />
   </main>
   <script>
 
-  this.activeConversation = 0;
+  this.conversation = null;
   this.modalBottomSheetShow = false;
   this.sidebar = localStorage.getItem('sidebar') || 'conversations';
   this.user = opts.user;
@@ -51,7 +49,7 @@
   this.on('update', function() {
     var p = riot.url.fragment();
     this.user.conversations().forEach(function(c, i) {
-      if (c.url() == p) this.activeConversation = i;
+      if (c.url() == p) this.conversation = c;
     }.bind(this));
   });
 

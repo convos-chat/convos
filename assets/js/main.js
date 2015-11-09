@@ -1,7 +1,7 @@
 (function($) {
   Convos.api = new swaggerClient();
-  Convos.user = new Convos.User(); // Convos.user is only for debug purposes and must not be accessed by riot tags
   Convos.ws = new ReconnectingWebSocket(Convos.wsUrl);
+  Convos.user = new Convos.User({ws: Convos.ws}); // Convos.user is only for debug purposes and must not be accessed by riot tags
   Convos.api.ws(Convos.ws);
   Convos.api.load(Convos.apiUrl, function(err) {
     Convos.user.load(function(err) {

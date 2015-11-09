@@ -1,19 +1,23 @@
 <conversation>
   <ul class="conversation collection">
-    <li each={m, i in opts.messages} class="collection-item avatar">
-      <img src={parent.avatar(m)} alt={m.sender} class="circle">
-      <a href={'#autocomplete:' + m.sender} class="title">{m.sender}</a>
+    <li class="collection-item avatar" each={m, i in conversation.messages()}>
+      <img src={parent.avatar(m)} alt={m.from} class="circle">
+      <a href={'#autocomplete:' + m.from} class="title">{m.from}</a>
       <div class="message">{m.message}</div>
-      <span class="secondary-content ts" title={m.timestamp + '+0000'}>{timestring(m.timestamp)}</span>
+      <span class="secondary-content ts" title={m.ts * 1000}>{timestring(m.ts * 1000)}</span>
     </li>
   </ul>
   <script>
 
+  mixin.time(this);
+
   avatar(m) {
-    return m.avatar ? m.avatar : 'http://retroavatar.appspot.com/api?name=' + m.sender;
+    return m.avatar ? m.avatar : 'https://robohash.org/' + m.from + '.png';
   }
 
-  mixin.time(this);
+  this.on('update', function() {
+    this.conversation = opts.conversation;
+  });
 
   </script>
 </conversation>

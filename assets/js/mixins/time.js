@@ -51,7 +51,7 @@
       var self = this;
       $('.ts', this.root).each(function() {
         var $i = $(this);
-        $i.text(self.timestring($i.attr('title')));
+        $i.text(self.timestring(1 * $i.attr('title')));
       });
     });
   }
