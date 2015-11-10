@@ -3,6 +3,7 @@
 
   proto.closeModal = function(riotTag, opts) {
     $('#modal_bottom_sheet').closeModal();
+    riot.update();
   };
 
   proto.openModal = function(riotTag, opts) {

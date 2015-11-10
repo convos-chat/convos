@@ -57,7 +57,7 @@
   this.nextModal = opts.next || 'connection-edit';
 
   addConnection(e) {
-    var c = new Convos.Connection();
+    var c = new Convos.Connection({user: this.user});
 
     c.url().hostPort(this.form_server.value);
     c.url().scheme(this.form_protocol.value.toLowerCase());
@@ -66,8 +66,8 @@
     this.errors = []; // clear error on post
     c.save(function(err) {
       if (err) return tag.formInvalidInput(err).update();
-      c = tag.user.connection(this.id(), this.DEFLATE());
-      tag.openModal(tag.nextModal, {connection: c, user: tag.user});
+      tag.openModal(tag.nextModal, {connection: this, user: tag.user});
+      riot.update();
     });
   }
 

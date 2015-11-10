@@ -9,7 +9,7 @@
   this.errors = opts.errors;
   this.render = riot.url.fragment().split('/')[0] || 'chat';
   this.user = opts.user;
-  this.user.on('email', function(v) { tag.update({render: v ? 'chat' : 'login'}); });
+  this.user.one('refreshed', function(v) { tag.update({render: 'chat'}) });
 
   logout() {
     this.user.logout(function(err) {
@@ -33,10 +33,12 @@
       var $self = $(this);
       $self.attr('data-tooltip', $self.attr('title') || $self.attr('placeholder')).removeAttr('title');
     }).filter('[data-tooltip]').tooltip();
-  });
+  };
 
-  riot.url.on('update', function(url) { tag.renderView(url) });
-  this.renderView(riot.url);
+  this.on('mount', function() {
+    riot.url.on('update', function(url) { tag.renderView(url) });
+    this.renderView(riot.url);
+  });
 
   </script>
 </app>

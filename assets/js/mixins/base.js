@@ -54,7 +54,7 @@
 
   proto.DEFLATE = function() {
     var attrs = {};
-    Object.keys(proto._attrs).map(function() { attrs[k] = this['_' + k]; }.bind(this));
+    Object.keys(proto._attrs).map(function() { attrs[k] = this[k](); }.bind(this));
     return attrs;
   };
 

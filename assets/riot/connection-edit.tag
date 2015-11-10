@@ -62,10 +62,9 @@
     var c = this.connection;
     this.errors = []; // clear error on post
     this.saving = true;
-    this.user.removeConnection(c.protocol(), c.name(), function(err) {
+    this.user.removeConnection(c, function(err) {
       if (err) return tag.formInvalidInput(err).update();
       tag.closeModal();
-      riot.update();
     });
   }
 
