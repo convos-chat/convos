@@ -57,7 +57,7 @@ different files and directories for changes.
 
 =head2 Directory structure
 
-=over 4
+=over 2
 
 =item * convos/assets/
 
@@ -159,7 +159,7 @@ tested, but the frontend is still infant.
 
 At this point it would be nice to...
 
-=over 4
+=over 2
 
 =item *
 

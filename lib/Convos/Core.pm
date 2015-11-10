@@ -17,11 +17,11 @@ with proper defaults.
 
 =head1 OBJECT GRAPH
 
-=over 4
+=over 2
 
 =item * L<Convos::Core>
 
-=over 4
+=over 2
 
 =item * Has one L<Convos::Core::Backend> objects.
 
@@ -31,14 +31,14 @@ This object takes care of persisting data to disk.
 
 Represents a user of L<Convos>.
 
-=over 4
+=over 2
 
 =item * Has many L<Convos::Core::Connection> objects.
 
 Represents a connection to a remote chat server, such as an
 L<IRC|Convos::Core::Connection::Irc> server.
 
-=over 4
+=over 2
 
 =item * Has many L<Convos::Core::Conversation::Direct> objects.
 
