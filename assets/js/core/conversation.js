@@ -19,6 +19,12 @@
     topic: function() { return '' },
   });
 
+  proto.addMessage = function(message) {
+    this.messages().push(message);
+    riot.update();
+    if (window.isScrolledToBottom) window.scrollToBottom();
+  };
+
   // Send a message to a room
   proto.send = function(command, cb) {
     var self = this;
@@ -48,6 +54,7 @@
           if (err) return console.log(err);
           this.messages(xhr.body.messages);
           riot.update();
+          if (window.isScrolledToBottom) window.scrollToBottom();
         }.bind(this)
       );
     }
