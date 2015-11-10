@@ -14,7 +14,8 @@ allow you to communicate over the IRC protocol.
 no warnings 'utf8';
 use Mojo::Base 'Convos::Core::Connection';
 use Mojo::IRC::UA;
-use Parse::IRC ();
+use Parse::IRC  ();
+use Time::HiRes ();
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
 
@@ -25,6 +26,8 @@ require Convos;
 sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 
 my $CHANNEL_RE = qr{[#&]};
+
+sub TS {Time::HiRes::time}
 
 =head1 ATTRIBUTES
 
@@ -328,29 +331,25 @@ sub _event_irc_close {
 # Unhandled/unexpected error
 sub _event_irc_error {
   my ($self, $msg) = @_;
-  $self->_notice(join(' ', @{$msg->{params}}), highlight => Mojo::JSON->true);
+  $self->_notice(join ' ', @{$msg->{params}});
 }
 
 sub _irc_message {
   my ($self, $event, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my $target = $msg->{params}[0];
-  my $ts     = Time::HiRes::time;
 
   if ($user) {
     my $current_nick = $self->_irc->nick;
     my $is_private   = $self->_is_current_nick($target);
-    my $highlight    = $is_private || grep { $msg->{params}[1] =~ /\b\Q$_\E\b/ } $current_nick,
-      @{$self->url->query->every_param('highlight')};
 
     $self->emit(
       message => $self->conversation($is_private ? $nick : $target, {}),
       {
-        from      => $nick,
-        highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
-        message   => $msg->{params}[1],
-        ts        => $ts,
-        type      => $event eq 'irc_privmsg' ? 'private' : $event eq 'ctcp_action' ? 'action' : 'notice',
+        from    => $nick,
+        message => $msg->{params}[1],
+        ts      => TS(),
+        type    => $event eq 'irc_privmsg' ? 'private' : $event eq 'ctcp_action' ? 'action' : 'notice',
       }
     );
   }
@@ -359,10 +358,9 @@ sub _irc_message {
       message => $self,
       {
         from => $msg->{prefix} // $self->_irc->server,
-        highlight => Mojo::JSON->false,
-        message   => $msg->{params}[1],
-        ts        => $ts,
-        type      => $event eq 'irc_privmsg' ? 'private' : 'notice',
+        message => $msg->{params}[1],
+        ts      => TS(),
+        type    => $event eq 'irc_privmsg' ? 'private' : 'notice',
       }
     );
   }
@@ -372,11 +370,7 @@ sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 
 sub _notice {
   my ($self, $message) = (shift, shift);
-  my $ts = Time::HiRes::time;
-  $self->emit(
-    message => $self,
-    {from => $self->url->host, highlight => Mojo::JSON->false, type => 'notice', @_, message => $message, ts => $ts,}
-  );
+  $self->emit(message => $self, {from => $self->url->host, type => 'notice', @_, message => $message, ts => TS()});
 }
 
 sub _steal_nick {
@@ -393,12 +387,12 @@ _event err_bannedfromchan => sub {    # TODO
   my $conversation = $self->conversation($channel);
 
   $conversation->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel") if $conversation;
-  $self->_notice("$nick is banned from $channel [$reason]", highlight => Mojo::JSON->true);
+  $self->_notice("$nick is banned from $channel [$reason]");
 };
 
 _event err_cannotsendtochan => sub {
   my ($self, $msg) = @_;
-  $self->_notice("Cannot send to channel $msg->{params}[1].", highlight => Mojo::JSON->true);
+  $self->_notice("Cannot send to channel $msg->{params}[1].");
 };
 
 _event err_nicknameinuse => sub {    # TODO
@@ -406,25 +400,17 @@ _event err_nicknameinuse => sub {    # TODO
   my $nick = $msg->{params}[1];
 
   # do not want to flod frontend with these messages
-  $self->_notice(qq(Nickname $nick is already in use.), highlight => Mojo::JSON->true)
-    unless $self->{err_nicknameinuse}{$nick}++;
+  $self->_notice(qq(Nickname $nick is already in use.)) unless $self->{err_nicknameinuse}{$nick}++;
 };
 
 # :hybrid8.debian.local 401 Superman #no_such_channel_ :No such nick/channel
 _event err_nosuchnick => sub {
   my ($self, $msg) = @_;
-  my $ts = Time::HiRes::time;
 
   if (my $conversation = $self->conversation($msg->{params}[1])) {
     $self->emit(
       message => $conversation,
-      {
-        from      => $self->url->host,
-        highlight => Mojo::JSON->true,
-        message   => 'No such nick or channel.',
-        ts        => $ts,
-        type      => 'notice',
-      }
+      {from => $self->url->host, message => 'No such nick or channel.', ts => TS(), type => 'notice'}
     );
   }
 

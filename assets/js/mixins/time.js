@@ -42,7 +42,7 @@
 
     if (s > tomorrow + 86400)    return ts.getDate() + '. ' + ts.getAbbrMonth() + ' ' + ts.getHm();
     if (s > yesterday)           return ts.getHm();
-    if (s > now - ONE_DAY * 31)   return ts.getDate() + '. ' + ts.getAbbrMonth() + ' ' + ts.getHm();
+    if (s > now - ONE_DAY * 31)  return ts.getDate() + '. ' + ts.getAbbrMonth() + ' ' + ts.getHm();
     return ts.getDate() + '. ' + ts.getAbbrMonth() + ' ' + ts.getFullYear();
   };
 
@@ -51,7 +51,7 @@
       var self = this;
       $('.ts', this.root).each(function() {
         var $i = $(this);
-        $i.text(self.timestring(1 * $i.attr('title')));
+        $i.text(self.timestring($i.attr('title')));
       });
     });
   }

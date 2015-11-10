@@ -131,6 +131,7 @@
         case 'message':
           var c = this._conversations[e.object.id];
           if (c) c.messages().push(e.data[0]);
+          riot.update();
           break;
       }
     }.bind(this));
