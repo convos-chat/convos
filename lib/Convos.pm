@@ -18,6 +18,8 @@ starting points for Convos:
 
 =over 2
 
+=item * L<Convos::Guides::Running>
+
 =item * L<Convos::Guides::Development>
 
 =item * L<Convos::Guides::API>
@@ -81,16 +83,6 @@ This is the module and documentation structure of L<Convos>:
 =back
 
 =back
-
-=head1 SYNOPSIS
-
-You can start convos by running one of the commands below.
-
-  $ convos daemon;
-  $ convos daemon --listen http://*:3000;
-
-You can then visit Convos in your browser, by going to the default
-address L<http://localhost:3000>.
 
 =cut
 
@@ -217,10 +209,8 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
-  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
-  $config->{hypnotoad}{listen} ||= [split /,/, $ENV{MOJO_LISTEN} || 'http://*:8080'];
-  $config->{hypnotoad}{pid_file} = $ENV{CONVOS_FRONTEND_PID_FILE} if $ENV{CONVOS_FRONTEND_PID_FILE};
-  $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
+  $config->{backend} ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
+  $config->{name}    ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{plugins} ||= {};
   $config->{plugins}{$_} = $config for split /:/, +($ENV{CONVOS_PLUGINS} // '');
   $config->{secure_cookies} ||= $ENV{CONVOS_SECURE_COOKIES} || 0;
