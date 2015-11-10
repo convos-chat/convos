@@ -13,7 +13,18 @@ Convos - Multiuser chat application
 L<Convos> is a multiuser chat application built with L<Mojolicious>.
 
 It currently support the IRC protocol, but can be extended to support
-other protocols as well.
+other protocols as well. Below is a list of the main documentation
+starting points for Convos:
+
+=over 4
+
+=item * L<Convos::Guides::Development>
+
+=item * L<Convos::Guides::API>
+
+=item * L<Convos::Core>
+
+=back
 
 =head1 SYNOPSIS
 
@@ -24,14 +35,6 @@ You can start convos by running one of the commands below.
 
 You can then visit Convos in your browser, by going to the default
 address L<http://localhost:3000>.
-
-=head1 SEE ALSO
-
-=over 4
-
-=item * L<Convos::Manual::API>
-
-=back
 
 =cut
 
@@ -65,7 +68,7 @@ the following new ones.
 
 =head2 startup
 
-This method set up the application.
+This method sets up the application.
 
 =cut
 
@@ -84,11 +87,22 @@ sub startup {
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
-  $r->get('/events/event-source')->to('events#event_source')->name('event_source');
+  # Add basic routes
   $r->get('/')->to(template => 'app');
-  my $ws = $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
+  $r->get('/events/event-source')->to('events#event_source')->name('event_source');
+  $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
+
+  # Autogenerate routes from the Swagger specification
   $self->plugin(
-    swagger2 => {ensure_swagger_response => {}, url => $self->static->file('convos-api.json')->path, ws => $ws});
+    swagger2 => {
+      ensure_swagger_response => {},
+      url                     => $self->static->file('convos-api.json')->path,
+      ws                      => $r->find('bi_directional'),
+    }
+  );
+
+  # Add /perldoc route for documentation
+  $self->plugin('PODRenderer')->to(module => 'Convos');
 
   $self->hook(
     before_dispatch => sub {
@@ -227,7 +241,19 @@ sub _setup_settings {
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014, Jan Henning Thorsen
+=head2 Material design icons
+
+The icons used are provided by L<Google|https://www.google.com/design/icons>
+under the L<CC-BY license|https://creativecommons.org/licenses/by/4.0/>.
+
+=head2 Robot images
+
+Robots lovingly delivered by L<https://robohash.org> under the
+L<CC-BY license|https://creativecommons.org/licenses/by/4.0/>.
+
+=head2 Convos core and frontend
+
+Copyright (C) 2012-2015, Nordaaker.
 
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.
@@ -235,6 +261,8 @@ the terms of the Artistic License version 2.0.
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+Marcus Ramberg - C<marcus@nordaaker.com>
 
 =cut
 

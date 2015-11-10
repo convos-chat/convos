@@ -1,2 +1,2 @@
 #!sh
-mojo swagger2 pod public/convos-api.json > lib/Convos/Manual/API.pod
+mojo swagger2 pod public/convos-api.json > lib/Convos/Guides/API.pod
