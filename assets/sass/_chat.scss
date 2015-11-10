@@ -62,23 +62,32 @@ main {
   border: 0;
   padding-bottom: 70px;
 
+  .ts {
+    color: color('grey', 'darken-1');
+    font-size: 0.8rem;
+    position: absolute;
+    top: 16px;
+    right: 20px;
+  }
+  .collection-item.avatar, .collection-item.same {
+    border: 0;
+  }
+  .collection-item.avatar + .collection-item.same {
+    margin-top: -12px;
+  }
   .collection-item.avatar {
     min-height: 70px;
-
-    .ts {
-      color: color('grey', 'darken-1');
-      font-size: 0.8rem;
-      top: 12px;
-    }
+    i.circle { font-size: 22px; }
   }
-  .collection-item.avatar i.circle {
-    font-size: 22px;
-  }
-  .collection-item.debug {
-    @extend .grey-text;
+  .collection-item.same {
+    padding: 0 20px 3px 72px;
+    min-height: auto;
+    position: relative;
+    overflow: hidden;
   }
   .message {
     max-width: $readable-width;
+    &:hover { background-color: darken($body-bg, 2%); }
   }
 }
 
