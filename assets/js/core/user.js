@@ -130,8 +130,7 @@
       switch (e.type) {
         case 'message':
           var c = this._conversations[e.object.id];
-          if (c) c.messages().push(e.data[0]);
-          riot.update();
+          if (c) c.addMessage(e.data[0]);
           break;
       }
     }.bind(this));
