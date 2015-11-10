@@ -8,6 +8,9 @@ This guide is for people who want to hack on L<Convos>. You can also have a
 look at L<http://thorsen.pm/perl/2015/08/31/convos-revamped.html> for more
 details.
 
+The complete manual for L<Convos> and its dependencies are available
+from inside the application at L<http://localhost:3000/perldoc>.
+
 =head1 TUTORIAL
 
 It is helpful if you are familiar with L<git|http://git-scm.com>,
