@@ -30,7 +30,7 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
 
 Notes about the structure:
 
-=over 4
+=over 2
 
 =item * Easy to delete a user and all associated data.
 

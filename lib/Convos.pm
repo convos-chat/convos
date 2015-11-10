@@ -16,13 +16,69 @@ It currently support the IRC protocol, but can be extended to support
 other protocols as well. Below is a list of the main documentation
 starting points for Convos:
 
-=over 4
+=over 2
 
 =item * L<Convos::Guides::Development>
 
 =item * L<Convos::Guides::API>
 
+=back
+
+=head2 Reference
+
+This is the module and documentation structure of L<Convos>:
+
+=over 2
+
 =item * L<Convos::Core>
+
+=over 2
+
+=item * L<Convos::Core::Backend>
+
+=over 2
+
+=item * L<Convos::Core::Backend::File>
+
+=back
+
+=item * L<Convos::Core::Connection>
+
+=over 2
+
+=item * L<Convos::Core::Connection::Irc>
+
+=back
+
+=item * L<Convos::Core::Conversation>
+
+=over 2
+
+=item * L<Convos::Core::Conversation::Direct>
+
+=item * L<Convos::Core::Conversation::Room>
+
+=back
+
+=item * L<Convos::Core::User>
+
+=back
+
+=item * I<Convos::Controller>
+
+=over 2
+
+=item * L<Convos::Controller::Connection>
+
+=item * L<Convos::Controller::Conversation>
+
+=item * L<Convos::Controller::Events>
+
+=item * L<Convos::Controller::Notifications>
+
+=item * L<Convos::Controller::User>
+
+=back
 
 =back
 
