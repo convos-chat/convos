@@ -30,13 +30,7 @@ captured_is(
   },
   [
     message => $connection,
-    {
-      from      => '127.0.0.1',
-      highlight => TRUE,
-      message   => 'All the things went wrong',
-      ts        => re(qr{\d}),
-      type      => 'notice'
-    }
+    {from => '127.0.0.1', message => 'All the things went wrong', ts => re(qr{\d}), type => 'notice'}
   ],
   'error'
 );
@@ -47,13 +41,7 @@ captured_is(
   },
   [
     message => $connection,
-    {
-      from      => '127.0.0.1',
-      highlight => TRUE,
-      message   => 'Cannot send to channel #channel_name.',
-      ts        => re(qr{\d}),
-      type      => 'notice'
-    }
+    {from => '127.0.0.1', message => 'Cannot send to channel #channel_name.', ts => re(qr{\d}), type => 'notice'}
   ],
   'err_cannotsendtochan'
 );
@@ -65,13 +53,7 @@ captured_is(
   },
   [
     message => $connection,
-    {
-      from      => '127.0.0.1',
-      highlight => TRUE,
-      message   => 'Nickname cool_nick is already in use.',
-      ts        => re(qr{\d}),
-      type      => 'notice'
-    }
+    {from => '127.0.0.1', message => 'Nickname cool_nick is already in use.', ts => re(qr{\d}), type => 'notice'}
   ],
   'err_nicknameinuse twice, but only one event'
 );
@@ -82,15 +64,9 @@ captured_is(
   },
   [
     message => $connection->conversation('#channel_name'),
-    {from => '127.0.0.1', highlight => TRUE, message => 'No such nick or channel.', ts => re(qr{\d}), type => 'notice'},
+    {from => '127.0.0.1', message => 'No such nick or channel.', ts => re(qr{\d}), type => 'notice'},
     message => $connection,
-    {
-      from      => '127.0.0.1',
-      highlight => FALSE,
-      message   => 'No such nick or channel #channel_name.',
-      ts        => re(qr{\d}),
-      type      => 'notice'
-    },
+    {from => '127.0.0.1', message => 'No such nick or channel #channel_name.', ts => re(qr{\d}), type => 'notice'},
   ],
   'err_nosuchnick'
 );
@@ -102,9 +78,8 @@ captured_is(
   [
     message => $connection,
     {
-      from      => '127.0.0.1',
-      highlight => TRUE,
-      message   => 'Yikes! All the things went wrong',
+      from    => '127.0.0.1',
+      message => 'Yikes! All the things went wrong',
 
       ts   => re(qr{\d}),
       type => 'notice'
@@ -122,11 +97,10 @@ captured_is(
   [
     message => $connection,
     {
-      from      => '127.0.0.1',
-      highlight => FALSE,
-      message   => 'Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2',
-      ts        => re(qr{\d}),
-      type      => 'notice'
+      from    => '127.0.0.1',
+      message => 'Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2',
+      ts      => re(qr{\d}),
+      type    => 'notice'
     }
   ],
   'irc_rpl_yourhost'

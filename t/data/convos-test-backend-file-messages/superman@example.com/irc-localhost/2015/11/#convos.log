@@ -1,0 +1,82 @@
+2015-06-21T10:12:20 <Supergirl> For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
+2015-06-21T10:12:21 <Supergirl> To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-21T10:12:22 <Supergirl> The column allows you to format output neatly. ex: 'mount | column -t' will
+2015-06-21T10:12:23 * jhthorsen To manage Apache modules use "a2enmod" to enable and "a2dismod" to disable.
+2015-06-21T10:12:24 <jhthorsen> To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-21T10:12:25 <jhthorsen> Unsure if AppArmor might be causing an issue? Don't disable it, use the
+2015-06-21T10:12:26 <Supergirl> You can use the text-based web browser w3m to browse the Internet in your
+2015-06-21T10:12:27 <mr22> If you know you typed a command or password wrong, you can use ctrl + u to
+2015-06-21T10:12:28 <mr22> Reach the end-of-line with ctrl-e and the beginning of line with ctrl-a.
+2015-06-21T10:12:29 -batman- Did you know that you can get useful notifications displayed at the bottom
+2015-06-21T10:12:30 -batman- If you want to download a file from a URL via the console, you can use the
+2015-06-21T10:12:31 * batman The powernap package allows you to suspend servers which are not being used,
+2015-06-21T10:13:32 <batman> Use "iotop" for measuring hard disk I/O (current read/write) usage per
+2015-06-21T10:13:32 <batman> The Ubuntu Server Team is an open community always looking for feedback and
+2015-06-21T10:13:34 <batman> You can contact the Ubuntu Server team on IRC using chat.freenode.net in
+2015-06-21T10:13:40 <batman> Having trouble with DNS records? dig, ping and named-checkzone are great
+2015-06-21T14:12:01 <Supergirl> To restrict ssh logins to certain commands, have a look at the ForceCommand
+2015-06-21T14:12:11 <Supergirl> Unsure if AppArmor might be causing an issue? Don't disable it, use the
+2015-06-21T14:12:12 <Supergirl> An easy way to see what processes own which network connections: 'sudo
+2015-06-21T14:12:13 <Supergirl> Use "iftop" to monitor current network activity connections per host.
+2015-06-21T14:12:14 <superman> To find a package which name or description contains a keyword use:
+2015-06-21T14:12:15 <superman> You can contact the Ubuntu Server team on IRC using chat.freenode.net in
+2015-06-21T14:12:17 * superman Tired of repeatedly pressing 'y' through some shell process (e.g. fsck)? Try
+2015-06-21T14:12:17 <superman> Use "top" to get a view of your server's performance such as processor,
+2015-06-21T14:12:18 <superman> If you need to compile a piece of software, you may need to install the
+2015-06-21T14:12:19 <superman> You can edit your network configuration in /etc/network/interfaces and
+2015-06-21T14:12:20 <superman> The free command tells you the status of your memory and swap, how much you
+2015-06-21T14:12:21 <superman> Tired of repeatedly pressing 'y' through some shell process (e.g. fsck)? Try
+2015-06-21T14:12:22 -superman- An easy way to see what processes own which network connections: 'sudo
+2015-06-21T14:12:23 -superman- Successive commands usually process the same argument. 'Alt-.' inserts the
+2015-06-21T14:12:24 -Supergirl- For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
+2015-06-21T14:12:25 -Supergirl- 'screen' can create multiple "windows" which you can detach and re-attach
+2015-06-21T14:12:26 -Supergirl- To find in which file an event has been logged in use 'ls -ltr /var/log |
+2015-06-21T14:12:27 <Supergirl> Reach the end-of-line with ctrl-e and the beginning of line with ctrl-a.
+2015-06-21T14:17:28 <Supergirl> To find in which file an event has been logged in use 'ls -ltr /var/log |
+2015-06-21T14:17:29 <Supergirl> Use "tail -f /var/log/some.log" to see new lines added to a log instantly in
+2015-06-21T14:17:30 <Supergirl> If you want to download a file from a URL via the console, you can use the
+2015-06-21T14:17:37 <batman> The powernap package allows you to suspend servers which are not being used,
+2015-06-21T14:17:38 <batman> The powernap package allows you to suspend servers which are not being used,
+2015-06-21T14:17:39 <batman> To restrict ssh logins to certain commands, have a look at the ForceCommand
+2015-06-21T14:17:40 * batman You can add "| grep word" to search for a word in the output of a command.
+2015-06-21T15:12:41 * batman If the empty file ~/.hushlogin exists on the server, login to the server
+2015-06-21T15:12:42 <batman> Did you know that releases of Ubuntu labeled LTS are maintained for 5 years
+2015-06-21T15:12:43 <Supergirl> Did you know that releases of Ubuntu labeled LTS are maintained for 5 years
+2015-06-21T15:12:44 <Supergirl> If you want to download a file from a URL via the console, you can use the
+2015-06-21T15:12:45 <Supergirl> Typing 'dmesg | tail' after you plug in usb storage will give you its
+2015-06-21T15:12:46 <Supergirl> Keep your servers time in sync, use the ntpd package.
+2015-06-21T15:12:47 <Supergirl> To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-21T15:12:48 <Supergirl> Documentation and other resources pointers for Ubuntu Server Edition are
+2015-06-21T15:12:49 <Supergirl> Edit the command line with cut and paste: ctrl-k for cut, and ctrl-y for
+2015-06-21T15:12:50 -mr_fantastic- To have grep return the string you are looking for without checking for
+2015-06-21T15:12:51 -mr_fantastic- If you need to perform a command a second time on a different file, you can
+2015-06-21T15:12:52 -mr_fantastic- Use the 'watch' command to repeat the same command a regular interval and
+2015-06-21T15:12:53 -mr_fantastic- If you know you typed a command or password wrong, you can use ctrl + u to
+2015-06-21T15:12:54 -mr_fantastic- Edit the command line with cut and paste: ctrl-k for cut, and ctrl-y for
+2015-06-21T15:12:55 <Supergirl> 'screen' can create multiple "windows" which you can detach and re-attach
+2015-06-22T09:12:10 <mr22> Did you know that you can get useful notifications displayed at the bottom
+2015-06-22T09:12:11 <mr22> 'etckeeper' allows you to save changes you make to /etc in a bazaar
+2015-06-22T09:12:12 <mr22> The powernap package allows you to suspend servers which are not being used,
+2015-06-22T09:12:13 <mr22> If you know you typed a command or password wrong, you can use ctrl + u to
+2015-06-22T09:12:14 <mr22> For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
+2015-06-22T09:12:15 <mr22> Keep your servers time in sync, use the ntpd package.
+2015-06-22T09:12:16 <mr22> If you need to compile a piece of software, you may need to install the
+2015-06-22T09:12:17 <mr22> The 'history' command will show you the commands you've used before.
+2015-06-22T09:12:18 <mr22> Use 'dpkg --get-selections > selections.txt' to save a selection and 'dpkg
+2015-06-22T09:12:19 <mr22> A for loop in bash syntax: 'for i in * ; do echo $i ; done'.
+2015-06-22T09:12:20 <mr22> Use "pastebinit" to copy a file, or output of a command to a webpage
+2015-06-22T09:12:21 * mr22 Use "iotop" for measuring hard disk I/O (current read/write) usage per
+2015-06-22T09:12:22 <mr22> To deactivate a service at boot, for example, apache2: 'sudo update-rc.d -f
+2015-06-22T10:12:23 <mr22> Save time starting to type a command or file name, then press tab to
+2015-06-22T10:13:24 <mr22> Need a little refresh on networking concept? Take a look at the networking
+2015-06-22T10:13:25 -mr22- To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
+2015-06-22T10:13:26 -mr22- If you want to download a file from a URL via the console, you can use the
+2015-06-22T10:13:27 -mr22- Did you know that you can get useful notifications displayed at the bottom
+2015-06-22T10:13:28 -mr22- If you executed a command and neglected to use sudo, you can execute "sudo
+2015-06-22T10:13:29 <mr22> Two packages are recommended to perform backups of your clients and servers
+2015-06-22T10:23:30 <mr22> Use the 'watch' command to repeat the same command a regular interval and
+2015-06-22T10:23:31 <mr22> Use lsof to find out which process has open handles for a file. 'lsof +D
+2015-06-22T10:23:32 <mr22> The column allows you to format output neatly. ex: 'mount | column -t' will
+2015-06-22T10:23:33 <mr22> If you executed a command and neglected to use sudo, you can execute "sudo
+2015-06-22T10:23:44 <mr22> You can use the text-based web browser w3m to browse the Internet in your
+2015-06-22T10:23:50 <mr22> The powernap package allows you to suspend servers which are not being used,

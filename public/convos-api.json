@@ -554,21 +554,21 @@
       }
     },
     "Message": {
-      "required": ["message", "sender", "timestamp"],
+      "required": ["message", "from", "ts"],
       "properties": {
         "avatar": { "type": "string", "format": "uri", "description": "Location to an image which can be used as avatar" },
+        "from": { "type": "string", "description": "Identifier for who sent this message" },
         "level": { "type": "string", "default": "info", "enum": ["debug", "info", "warn"], "description": "How important this message is" },
         "message": { "type": "string", "description": "The message" },
-        "sender": { "type": "string", "description": "Identifier for the sender on the chat server" },
-        "timestamp": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T13:49:37Z" }
+        "ts": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T13:49:37Z" }
       }
     },
     "Notification": {
-      "required": ["id", "message", "timestamp"],
+      "required": ["id", "message", "ts"],
       "properties": {
         "id": { "type": "string", "description": "Identifier used when marking this as seen" },
         "message": { "type": "string", "description": "The message that resulted in a notification" },
-        "timestamp": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
+        "ts": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
       }
     },
     "Success": {

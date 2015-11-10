@@ -4,7 +4,7 @@
       <img src={parent.avatar(m)} alt={m.from} class="circle">
       <a href={'#autocomplete:' + m.from} class="title">{m.from}</a>
       <div class="message">{m.message}</div>
-      <span class="secondary-content ts" title={m.ts * 1000}>{timestring(m.ts * 1000)}</span>
+      <span class="secondary-content ts" title={m.ts}>{timestring(m.ts)}</span>
     </li>
   </ul>
   <script>
@@ -16,7 +16,9 @@
   }
 
   this.on('update', function() {
+    if (this.conversation == opts.conversation) return;
     this.conversation = opts.conversation;
+    this.conversation.trigger('show');
   });
 
   </script>

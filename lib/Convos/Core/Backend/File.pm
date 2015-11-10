@@ -61,9 +61,6 @@ use Time::Piece;
 use Time::Seconds;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-# copy/paste from File::ReadBackwards
-my $MAX_READ_SIZE = 1 << 13;
-
 =head1 ATTRIBUTES
 
 L<Convos::Core::Backend::File> inherits all attributes from
@@ -77,6 +74,12 @@ can be stored.
 =cut
 
 has home => sub { shift->_build_home };
+
+has _fc => sub {
+  my $fc = Mojo::IOLoop::ForkCall->new;
+  $fc->on(error => sub { warn "[fc] $_[1]" });
+  $fc;
+};
 
 =head1 METHODS
 
@@ -125,9 +128,7 @@ sub delete_object {
 
   Mojo::IOLoop->delay(
     sub {
-      my ($delay) = @_;
-      my $fc = $delay->data->{fc} = Mojo::IOLoop::ForkCall->new;
-      $fc->run(sub { $self->$method($obj) }, $delay->begin);
+      $self->_fc->run(sub { $self->$method($obj) }, shift->begin);
     },
     sub {
       my ($delay, $err) = @_;
@@ -147,51 +148,30 @@ See L<Convos::Core::Backend/messages>.
 
 sub messages {
   my ($self, $obj, $query, $cb) = @_;
-  my $level = $query->{level} || 'info|warn|error';
-  my $limit = $query->{limit} || 60;
-  my $re    = $query->{match} || qr{.};
-  my $found = 0;
-  my ($after, $before);
+  my $re = $query->{match} || qr{.};
+  my %args;
 
-  $after  = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{after})  if $query->{after};
-  $before = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{before}) if $query->{before};
-  $before = gmtime if !$before and !$after;
   $re = qr{\Q$re\E}i unless ref $re;
-  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \[($level)\] (.*$re.*)$/;
+  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (.*$re.*)$/;
 
-  # TODO:
-  # Need to implement logic for searching in multiple files since the _log()
-  # method "rotate" files every month.
-  # The search should probably be done in a fork, using Mojo::IOLoop::ForkCall.
-  # We might want to add a requirement for both "before" and "after" to be set,
-  # so this method doesn't run forever.
-  $self->$cb('', []);    # TODO
+  $args{after}  = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{after})  if $query->{after};
+  $args{before} = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{before}) if $query->{before};
+  $args{before} = gmtime if !$args{before} and !$args{after};
+  $args{limit}    = $query->{limit} || 60;
+  $args{messages} = [];
+  $args{re}       = $re;
+
+  Mojo::IOLoop->delay(
+    sub {
+      $self->_fc->run(sub { $self->_messages($obj, \%args) }, shift->begin);
+    },
+    sub {
+      my ($delay, $err, $messages) = @_;
+      $self->$cb($err, $messages || []);
+    },
+  );
+
   return $self;
-
-  local $! = 0;
-  open my $FH, '/some/log/file' or return $self->$cb($!, undef);
-
-  while (<$FH>) {
-    next unless /$re/;
-    my $message = {timestamp => $1, level => $2, message => $3};
-    if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
-      @$message{qw( type sender )} = (privmsg => $1);
-    }
-    elsif ($message->{message} =~ s/^-([^\s\>]+)-\s//) {
-      @$message{qw( type sender )} = (notice => $1);
-    }
-    elsif ($message->{message} =~ s/^\* (\S+)\s//) {
-      @$message{qw( type sender )} = (action => $1);
-    }
-    elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
-      @$message{qw( type sender )} = (server => 'server');
-    }
-
-    last if ++$found == $limit;
-  }
-
-  $self->$cb($!, []);
-  $self;
 }
 
 =head2 save_object
@@ -279,25 +259,76 @@ sub _log {
   my ($self, $obj, $ts, $message) = @_;
   my $t = gmtime($ts || time);
   my $ym = sprintf '%s/%02s', $t->year, $t->mon;
-  my $FH;    # = $self->{log_fh}{$obj}{$ym};
+  my $FH = $self->{log_fh}{$obj}{$ym};
 
   unless ($FH) {
-    my @path = ($obj->user->email);
-    push @path, $obj->id             if $obj->isa('Convos::Core::Connection');
-    push @path, $obj->connection->id if $obj->isa('Convos::Core::Conversation');
-    push @path, $ym;
-    push @path, $obj->name           if $obj->isa('Convos::Core::Conversation');
-    my $file = $self->home->rel_file(join('/', @path) . '.log');
+    my $file = $self->_log_file($obj, $ym);
     my $dir = File::Basename::dirname($file);
     File::Path::make_path($dir) unless -d $dir;
     delete $self->{log_fh}{$obj};    # make sure we remove old file handles
     open $FH, '>>', $file or die "Can't open log file $file: $!";
-    warn "[@{[ref $obj]}] log >> $file\n" if DEBUG == 2;
+    $self->{log_fh}{$obj}{$ym} = $FH;
+    warn "[@{[ref $obj]}] log >> $file\n" if DEBUG;
   }
 
   flock $FH, LOCK_EX;
   print $FH $t->datetime . " $message\n";
   flock $FH, LOCK_UN;
+}
+
+sub _log_file {
+  my ($self, $obj, $t) = @_;
+  my @path = ($obj->user->email);
+
+  push @path, $obj->id             if $obj->isa('Convos::Core::Connection');
+  push @path, $obj->connection->id if $obj->isa('Convos::Core::Conversation');
+  push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
+  push @path, $obj->name if $obj->isa('Convos::Core::Conversation');
+
+  return $self->home->rel_file(join('/', @path) . '.log');
+}
+
+# blocking method
+sub _messages {
+  my ($self, $obj, $args) = @_;
+  my $file = $self->_log_file($obj, $args->{before} || $args->{after});
+  my $pindex = $args->{before} ? 0 : -1;
+  my $FH = $pindex ? IO::File->new($file, 'r') : File::ReadBackwards->new($file);
+  my $found = 0;
+
+  unless ($FH) {
+    warn "[@{[ref $obj]}] Read $file: $!\n" if DEBUG;
+    return $args->{messages} if 1;    # TODO: How to search to the previous month log file?
+    return $self->_messages($obj, $args);
+  }
+
+  warn "[@{[ref $obj]}] Gettings messages from $file...\n" if DEBUG;
+  while (my $line = $FH->readline) {
+    next unless $line =~ $args->{re};
+    my $message = {message => $2, ts => $1};
+    if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
+      @$message{qw( type from )} = (privmsg => $1);
+    }
+    elsif ($message->{message} =~ s/^-([^\s\>]+)-\s//) {
+      @$message{qw( type from )} = (notice => $1);
+    }
+    elsif ($message->{message} =~ s/^\* (\S+)\s//) {
+      @$message{qw( type from )} = (action => $1);
+    }
+    elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
+      @$message{qw( type from )} = (server => 'server');
+    }
+
+    splice @{$args->{messages}}, $pindex, 0, $message;
+    last if ++$found == $args->{limit};
+  }
+
+  if ($found < $args->{limit}) {
+    $args->{before} -= ONE_MONTH;
+    return $self->_messages($obj, $args);
+  }
+
+  return $args->{messages};
 }
 
 sub _settings_file {
@@ -331,11 +362,12 @@ sub _setup {
           }
         }
       );
-      $connection->on(state => sub { $self->_log($_[0], undef, "-!- Change connection state to $_[1]. $_[2]") });
+      $connection->on(state => sub { $self->_log($_[0], time, "-!- Change connection state to $_[1]. $_[2]") });
       $connection->on(
         users => sub {
           my ($connection, $conversation, $data) = @_;
-          $self->_log($conversation, $data->{ts}, "--- x");
+
+          # TODO
         }
       );
     }

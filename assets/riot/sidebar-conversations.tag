@@ -1,6 +1,6 @@
 <sidebar-conversations>
   <div class="collection">
-    <a href={'#' + c.url()} class={parent.conversationClass(i)} each={c, i in user.conversations()}>
+    <a href={'#' + c.url()} class={parent.conversationClass(c)} each={c, i in user.conversations()}>
       <i class="material-icons">{c.icon()}</i> {c.name()}
     </a>
     <a href="#addConversation" onclick={addConversation} class="collection-item">
@@ -22,8 +22,8 @@
     }
   }
 
-  conversationClass(i) {
-    return i == this.parent.activeConversation ? 'collection-item active' : 'collection-item';
+  conversationClass(c) {
+    return c == this.parent.conversation ? 'collection-item active' : 'collection-item';
   }
 
   </script>

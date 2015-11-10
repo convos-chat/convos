@@ -86,6 +86,7 @@ sub _subscribe {
         my ($user, $target, @data) = @_;
         if ($event eq 'message') {
           $target = shift(@data)->TO_JSON(1);
+          local $data[0]{ts} = Mojo::Date->new($data[0]{ts})->to_datetime;    # must not touch input data
           $self->$method($event => {object => $target, data => \@data});
         }
         else {

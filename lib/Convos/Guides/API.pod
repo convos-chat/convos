@@ -310,7 +310,7 @@ List of commands.
       {
         "id": string, // Identifier used when marking this as seen
         "message": string, // The message that resulted in a notification
-        "timestamp": datetime, // Example: 2015-09-06T10:47:31Z
+        "ts": datetime, // Example: 2015-09-06T10:47:31Z
       },
       ...
     ]
@@ -454,7 +454,7 @@ List of messages.
         "level": string, // How important this message is
         "message": string, // The message
         "sender": string, // Identifier for the sender on the chat server
-        "timestamp": datetime, // Example: 2015-09-06T13:49:37Z
+        "ts": datetime, // Example: 2015-09-06T13:49:37Z
       },
       ...
     ]
