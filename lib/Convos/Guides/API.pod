@@ -717,17 +717,23 @@ Send a message to a target.
   |---------------------------------------------------------------------------------------|
   | connection_id   | path | string | Yes      | A unique connection identifier           |
   | conversation_id | path | string | Yes      | The name of the person/chat conversation |
+  | body            | body | schema | Yes      | No description.                          |
   '---------------------------------------------------------------------------------------'
+
+  body:
+
+  {
+    "command": string, // A command to be sent to backend
+  },
 
 =head3 Responses
 
 =head4 200 - OK
 
-TODO
+Successfully sent a message
 
   {
     "command": string, // A command to be sent to backend
-    "id": string, // jhthorsen: Cannot remember what 'id' is.
   },
 
 =head4 Default

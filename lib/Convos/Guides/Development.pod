@@ -8,7 +8,7 @@ This guide is for people who want to hack on L<Convos>. You can also have a
 look at L<http://thorsen.pm/perl/2015/08/31/convos-revamped.html> for more
 details.
 
-=head1 PREREQUISITES 
+=head1 TUTORIAL
 
 It is helpful if you are familiar with L<git|http://git-scm.com>,
 L<Mojolicious> and basic L<Perl|http://perl.org> tools, such as
@@ -16,8 +16,6 @@ L<prove|App::prove> and L<cpanm|https://cpanmin.us>.
 
 You also need L<npm|https://www.npmjs.com/> to do L<http://riotjs.com>
 development.
-
-=head1 TUTORIAL
 
 =head2 Getting the source code
 
@@ -147,7 +145,7 @@ The design makes L<Convos> a multi-user application, that can persist to any
 backend (memory, file storage, redis, ...) and connect to any chat server,
 as well as have keeping any number of conversations active.
 
-The way the “Backend” is hooked into the rest of the object graph is by
+The way the "Backend" is hooked into the rest of the object graph is by
 events. Any user, connection or conversation can emit new events that the
 Backend can choose to persist to storage. The default backend is a
 file-based backend, which enables Convos to be started without any additional
@@ -189,13 +187,6 @@ Create a L<Mojo::Redis2> backend, compatible with the current Convos code.
 =head2 Talk to us
 
 Please give us feedback by joining the "#convos" channel on C<irc.freenode.net>.
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2014, Jan Henning Thorsen
-
-This program is free software, you can redistribute it and/or modify it under
-the terms of the Artistic License version 2.0.
 
 =head1 AUTHOR
 
