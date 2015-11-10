@@ -13,17 +13,17 @@
     id: function() { return ''; },
     name: function() { return ''; },
     url: function() { return new riot.Url(); },
-    user: function() { return false; }
+    user: function() { throw 'user cannot be built'; }
   });
 
   // Join a room or create a private conversation on the server
   proto.joinConversation = function(name, cb) {
     var self = this;
     this._api.joinConversation(
-      {body: {name: name}, connection_name: this.name(), protocol: this.protocol()},
+      {body: {name: name}, connection_id: this.id()},
       function(err, xhr) {
-        if (!err) self.user().conversation(xhr.responseJSON);
-        cb.call(self, err, xhr.responseJSON);
+        if (!err) self.user().conversation(xhr.body);
+        cb.call(self, err, xhr.body);
       }
     );
     return this;
@@ -40,10 +40,10 @@
   proto.rooms = function(cb) {
     var self = this;
     this._api.roomsByConnection(
-      {connection_name: this.name(), protocol: this.protocol()},
+      {connection_id: this.id()},
       function(err, xhr) {
         if (err) return cb.call(self, err, []);
-        cb.call(self, err, $.map(xhr.responseJSON.rooms, function(attrs) { return new Convos.ConversationRoom(attrs); }));
+        cb.call(self, err, $.map(xhr.body.rooms, function(attrs) { return new Convos.ConversationRoom(attrs); }));
       }
     );
     return this;
@@ -54,12 +54,12 @@
     var self = this;
     var attrs = {url: this.url().toString()}; // It is currently not possible to specify "name"
 
-    if (this.name()) {
+    if (this.id()) {
       this._api.updateConnection(
-        {body: attrs, connection_name: this.name(), protocol: this.protocol()},
+        {body: attrs, connection_id: this.id()},
         function(err, xhr) {
           if (err) return cb.call(self, err);
-          self.update(xhr.responseJSON);
+          self.update(xhr.body);
           cb.call(self, err);
         }
       );
@@ -67,7 +67,8 @@
     else {
       this._api.createConnection({body: attrs}, function(err, xhr) {
         if (err) return cb.call(self, err);
-        self.update(xhr.responseJSON);
+        self.update(xhr.body);
+        self.user().connection(self);
         cb.call(self, err);
       });
     }

@@ -29,11 +29,11 @@
   // Add, get or update a Convos.Connection object on client side
   // Get:    c = user.connection(id)
   // Create: c = user.connection(attrs)
-  proto.connection = function(obj) {
-    if (typeof obj != 'object') return this._connections[obj];
-    obj.user = this;
-    var c = new Convos.Connection(obj);
+  proto.connection = function(c) {
+    if (typeof c != 'object') return this._connections[c];
+    if (!c.DEFLATE) c = new Convos.Connection(c);
     if (this._connections[c.id()]) throw 'Connection already exists.';
+    c.user(this);
     this._connections[c.id()] = c;
     this.trigger('connection', c);
     return c;
@@ -86,15 +86,11 @@
   };
 
   // Delete a connection on server side and remove it from the user object
-  proto.removeConnection = function(protocol, name, cb) {
+  proto.removeConnection = function(connection, cb) {
     var self = this;
-    this._api.removeConnection({name: name, protocol: protocol}, function(err, xhr) {
+    this._api.removeConnection({connection_id: connection.id()}, function(err, xhr) {
       if (err) return cb.call(self, err);
-      var connections = self.connections();
-      for (var i = 0; i < connections.length; i++) {
-        var c = connections[i];
-        if (c.protocol() == protocol && c.name() == name) connections.splice(i, 1);
-      }
+      delete self._connections[connection.id()];
       cb.call(self, '');
     });
     return this;
@@ -110,7 +106,7 @@
       self._api.listConversations({}, function(err, xhr) {
         if (err) return self.trigger('error', err);
         xhr.body.conversations.forEach(function(c) { self.conversation(c); });
-        riot.update();
+        self.trigger('refreshed');
       });
     });
 
@@ -135,7 +131,6 @@
         case 'message':
           var c = this._conversations[e.object.id];
           if (c) c.messages().push(e.data[0]);
-          riot.update();
           break;
       }
     }.bind(this));
