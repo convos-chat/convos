@@ -234,6 +234,7 @@ sub _setup_assets {
   $self->asset(
     'convos.js' => qw(
       http://code.jquery.com/jquery-1.11.3.min.js
+      /js/autolink.js
       /js/storage.js
       /js/window.js
       https://cdn.jsdelivr.net/riot/2.3/riot.min.js
@@ -252,6 +253,7 @@ sub _setup_assets {
       /materialize/js/leanModal.js
       /materialize/js/tooltip.js
       /materialize/js/animation.js
+      /materialize/js/materialbox.js
       /js/mixins/*.js
       /js/core/*.js
       /riot/*.tag

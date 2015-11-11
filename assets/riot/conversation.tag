@@ -3,7 +3,7 @@
     <li class="collection-item avatar" each={conversation}>
       <img src={parent.avatar(from)} alt="" class="circle">
       <a href={'#autocomplete:' + from} class="title">{from}</a>
-      <div class="message" title={parent.timestring(ts)} each={this.messages}>{message}</div>
+      <conversation-message ts={ts} message={message} each={messages}/>
       <span class="secondary-content ts" title={ts}>{parent.timestring(ts)}</span>
     </li>
   </ul>
