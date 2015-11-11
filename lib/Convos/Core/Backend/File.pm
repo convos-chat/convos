@@ -259,18 +259,12 @@ sub _log {
   my ($self, $obj, $ts, $message) = @_;
   my $t = gmtime($ts || time);
   my $ym = sprintf '%s/%02s', $t->year, $t->mon;
-  my $FH = $self->{log_fh}{$obj}{$ym};
+  my $file = $self->_log_file($obj, $ym);
+  my $dir = File::Basename::dirname($file);
 
-  unless ($FH) {
-    my $file = $self->_log_file($obj, $ym);
-    my $dir = File::Basename::dirname($file);
-    File::Path::make_path($dir) unless -d $dir;
-    delete $self->{log_fh}{$obj};    # make sure we remove old file handles
-    open $FH, '>>', $file or die "Can't open log file $file: $!";
-    $self->{log_fh}{$obj}{$ym} = $FH;
-    warn "[@{[ref $obj]}] log >> $file\n" if DEBUG;
-  }
-
+  File::Path::make_path($dir) unless -d $dir;
+  open my $FH, '>>', $file or die "Can't open log file $file: $!";
+  warn "[@{[ref $obj]}] $file <<< ($message)\n" if DEBUG == 2;
   flock $FH, LOCK_EX;
   print $FH $t->datetime . " $message\n";
   flock $FH, LOCK_UN;
