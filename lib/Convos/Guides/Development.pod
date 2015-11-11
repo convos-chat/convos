@@ -146,7 +146,7 @@ conversations, can persist to a backend and provide hooks for plugins.
 
 The design makes L<Convos> a multi-user application, that can persist to any
 backend (memory, file storage, redis, ...) and connect to any chat server,
-as well as have keeping any number of conversations active.
+as well as keeping any number of conversations active.
 
 The way the "Backend" is hooked into the rest of the object graph is by
 events. Any user, connection or conversation can emit new events that the
