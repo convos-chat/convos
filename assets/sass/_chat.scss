@@ -69,25 +69,12 @@ main {
     top: 16px;
     right: 20px;
   }
-  .collection-item.avatar, .collection-item.same {
-    border: 0;
-  }
-  .collection-item.avatar + .collection-item.same {
-    margin-top: -12px;
-  }
   .collection-item.avatar {
     min-height: 70px;
     i.circle { font-size: 22px; }
   }
-  .collection-item.same {
-    padding: 0 20px 3px 72px;
-    min-height: auto;
-    position: relative;
-    overflow: hidden;
-  }
   .message {
     max-width: $readable-width;
-    &:hover { background-color: darken($body-bg, 2%); }
   }
 }
 
