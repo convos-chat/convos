@@ -1,30 +1,40 @@
 <conversation>
   <ul class="conversation collection">
-    <li class={'collection-item': true, 'avatar': !parent.same(m, i), 'same': parent.same(m, i)} each={m, i in conversation.messages()}>
-      <img src={parent.avatar(m)} alt={m.from} class="circle" if={!parent.same(m, i)}>
-      <a href={'#autocomplete:' + m.from} class="title" if={!parent.same(m, i)}>{m.from}</a>
-      <div class="message" title={m.ts}>{m.message}</div>
-      <span class="secondary-content ts" title={m.ts} if={!parent.same(m, i)}>{timestring(m.ts)}</span>
+    <li class="collection-item avatar" each={conversation}>
+      <img src={parent.avatar(from)} alt="" class="circle">
+      <a href={'#autocomplete:' + from} class="title">{from}</a>
+      <div class="message" title={parent.timestring(ts)} each={this.messages}>{message}</div>
+      <span class="secondary-content ts" title={ts}>{parent.timestring(ts)}</span>
     </li>
   </ul>
   <script>
 
   mixin.time(this);
 
-  avatar(m) {
-    return m.avatar ? m.avatar : 'https://robohash.org/' + m.from + '.png';
-  }
+  var prev = null;
+  this.conversation = [];
+  this.n = 0;
 
-  same(m, i) {
-    if (i == 0) return false;
-    if (typeof m._same != 'undefined') return m._same;
-    return m._same = this.conversation.messages()[i - 1].from == m.from;
+  avatar(from) {
+    return 'https://robohash.org/' + from + '.png';
   }
 
   this.on('update', function() {
-    if (this.conversation == opts.conversation) return;
-    this.conversation = opts.conversation;
-    this.conversation.trigger('show');
+    var o_messages = opts.conversation.messages();
+    if (this._c != opts.conversation) this._c = opts.conversation.trigger('show');
+    if (this.n == o_messages.length) return;
+    this.conversation = [];
+    this.n = o_messages.length;
+    o_messages.forEach(function(m) {
+      if (prev && m.from == prev.from) {
+        prev.messages.push(m);
+      }
+      else {
+        this.conversation.push(m);
+        m.messages = [m];
+        prev = m;
+      }
+    }.bind(this));
   });
 
   </script>
