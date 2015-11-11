@@ -27,7 +27,7 @@ arguments. One useful switch is how to specify a listen port:
 
 =head2 Configuration
 
-L<Convos> can be configured with eithe a config file or environment variables.
+L<Convos> can be configured with either a config file or environment variables.
 
 =over 2
 
@@ -120,7 +120,7 @@ using the environment variables. Example config:
 
 =head2 Optional modules
 
-There are some optiona modules that can be installed to enhance the
+There are some optional modules that can be installed to enhance the
 experience. The command below will show if the modules are installed
 or not:
 
@@ -135,7 +135,7 @@ can be installed with the command below:
 
 It is not possible to run L<Convos> with L<hypnotoad|Mojo::Server::Hypntoad>,
 nor the L<prefork|Mojo::Server::Prefork> server. The reason for this is that
-L<Convos::Core> require shared memory, which a forked environment contradicts.
+L<Convos::Core> requires shared memory, which a forked environment contradicts.
 
 You need to run L<Convos> in single process, using L<Mojo::Server::Daemon>.
 
