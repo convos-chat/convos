@@ -109,6 +109,8 @@ has core => sub {
   Convos::Core->new(backend => $backend->new);
 };
 
+has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
+
 =head1 METHODS
 
 L<Convos> inherits all methods from L<Mojolicious> and implements
@@ -148,6 +150,10 @@ sub startup {
       ws                      => $r->find('bi_directional'),
     }
   );
+
+  # Expand links into rich content
+  $self->plugin('LinkEmbedder');
+  $r->get('/api/embed')->to('conversation#embed');
 
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');

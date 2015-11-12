@@ -15,6 +15,33 @@ use Mojo::Base 'Mojolicious::Controller';
 
 =head1 METHODS
 
+=head2 embed
+
+Used to expand a URL into markup, using L<Mojolicious::Plugin::LinkEmbedder>.
+
+=cut
+
+sub embed {
+  my $self = shift;
+  my $url  = $self->param('url');
+
+  if (!$url or !$self->backend->user) {
+    return $self->reply->not_found;
+  }
+  if (my $link = $self->app->_link_cache->get($url)) {
+    return $self->respond_to(json => {json => $link}, any => {text => $link->to_embed});
+  }
+
+  $self->delay(
+    sub { $self->embed_link($self->param('url'), shift->begin) },
+    sub {
+      my $link = $_[1];
+      $self->app->_link_cache->set($url => $link);
+      $self->respond_to(json => {json => $link}, any => {text => $link->to_embed});
+    },
+  );
+}
+
 =head2 join
 
 See L<Convos::Manual::API/joinConversation>.
