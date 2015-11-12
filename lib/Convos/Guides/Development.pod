@@ -191,6 +191,92 @@ Create a L<Mojo::Redis2> backend, compatible with the current Convos code.
 
 Please give us feedback by joining the "#convos" channel on C<irc.freenode.net>.
 
+=head1 TODO
+
+Here is a list of features that need to be implemented before "batware" can
+be tested.
+
+=head2 Core
+
+L<Convos::Core> need to be able to connect L<Convos::Core::Connections>
+objects with the state "connecting". This need to be done serialized
+(grouped by server), so we don't cause "flood connect".
+
+Add start up script/command, so it can be deployed properly.
+
+=head2 Backends
+
+=over 2
+
+=item * File backend
+
+L<Convos::Core::Backend::File> is starting to take form: It can log messages.
+
+Need to also log join/parted/quit events.
+
+Need to track notifications.
+
+=item * Redis backend
+
+Should to have a L<Mojo::Redis2> based backend, compatible with the old
+database.
+
+=back
+
+=head2 Connections
+
+=over 2
+
+=item * IRC
+
+L<Convos::Core::Connection::Irc> need to understand commands, such as "/me",
+"/join", "/part", "/nick", ...
+
+=back
+
+=head2 Frontends
+
+=over 2
+
+=item * Swagger based API
+
+L<Convos::Guides::API> need to be reviewed.
+
+=item * Websocket / event stream API
+
+More events from L<Mojo::Core::Backend> need to be streamed to the frontend.
+
+=item * Riot based user interface
+
+Need to understand "day changed". Need to draw a line since last time you
+looked at the conversation. Emit desktop notifications on mentions.
+
+Implement "search/goto anything".
+
+Display action/notice/privmsg differently.
+
+Show notifications.
+
+Show user list for a conversation and user count. (what about user modes?)
+
+Group conversations by connection.
+
+Sort conversations by name/last used/...?
+
+Add support for showing user defined avatar.
+
+Add support for arrow up/down in "user input field" for historical commands.
+
+Change appearance on small screens/phones.
+
+Proper styling/embedding of "pastebin links".
+
+Shortcuts for jumping between "user input" and "sidebars".
+
+Display topic when joining a conversation the first time.
+
+=back
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
