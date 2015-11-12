@@ -1,0 +1,39 @@
+img.embed, .link-embedder.text-html {
+  max-width: $readable-width;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+img.embed {
+  max-height: 220px;
+  &.active { max-height: none; }
+}
+
+.link-embedder.text-html {
+  .link-embedder-media {
+    float: left;
+    img {
+      max-height: 50px;
+      margin-right: 8px;
+      border: 0;
+    }
+  }
+
+  h3 {
+    font-size: 1em;
+    line-height: 1em;
+    display: block;
+    margin: 8px 0 0 0;
+  }
+
+  p {
+    font-size: 0.9em;
+    line-height: 1.2em;
+    margin: 4px 0;
+    display: table-cell;
+  }
+
+  .link-embedder-link {
+    display: none;
+  }
+}

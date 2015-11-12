@@ -78,11 +78,6 @@ main {
     a { color: inherit; text-decoration: underline; }
     a:hover { text-decoration: none; }
   }
-  .embed {
-    max-height: 220px;
-    margin: 8px 0;
-    &.active { max-height: none; }
-  }
 }
 
 .no-conversations {

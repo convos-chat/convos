@@ -26,6 +26,15 @@ window.addEventListener('scroll', function(e) {
   riot.update();
 });
 
+window.loadOffScreen = function(elem) {
+  $('img, iframe', elem).each(function() {
+    $(this).css('height', '1px').load(function() {
+      if (window.isScrolledToBottom) setTimeout(function() { window.scrollToBottom() }, 2);
+      $(this).css('height', 'auto');
+    });
+  });
+};
+
 window.nextTick = function(cb) { setTimeout(cb, 5); };
 
 window.isApple = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i);
@@ -35,7 +44,7 @@ window.isWideScreen = window.innerWidth > wideScreenWidth;
 window.TODO = function(message) { alert("TODO: " + message); };
 
 window.scrollToBottom = function() {
-  document.body.scrollTop = window.innerHeight;
+  document.body.scrollTop = window.innerHeight * 2;
   return this;
 };
 })(window);
