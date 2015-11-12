@@ -9,12 +9,14 @@
       after: function(url, id) {
         $.get('/api/embed?url=' + encodeURIComponent(url), function(html, textStatus, xhr) {
           if (html.match(/^<a\s/)) return;
-          window.loadOffScreen($('#' + id).after(html).parent());
+          var $html = $(html);
+          $html.filter('img').add($html.find('img')).addClass('embed materialboxed');
+          $('#' + id).parent().append($html).find('.materialboxed').materialbox();
+          window.loadOffScreen($html);
         });
         return null;
       }
     }));
-    $('.materialboxed', this.root).materialbox();
     window.loadOffScreen($(this.root));
   });
   </script>
