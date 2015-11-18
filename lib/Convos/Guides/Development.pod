@@ -42,6 +42,11 @@ Once you have the source code you should install the dependencies:
 
   $ cpanm --installdeps .
   $ npm install riot
+  $ npm info riot # see which version is installed
+
+Note! It seems like riot 2.3.1 has a bug which will cause failure. Please
+edit "node_modules/riot/lib/server/index.js" and comment out line 14:18 -
+meaning the body of the "extensions tag" function.
 
 =head2 Starting the application
 
