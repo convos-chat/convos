@@ -36,7 +36,7 @@ NOTE! The current development branch is "batcode":
 
   $ git checkout -b batcode origin/batcode
 
-=head2 Installing the dependencies
+=head2 Installing dependencies
 
 Once you have the source code you should install the dependencies:
 
@@ -53,6 +53,15 @@ L<CSS::Sass> is not required if the C<sass> executable is already available
 on your system. Have a look at
 L<Mojolicious::Plugin::AssetPack::Preprocessor::Scss/DESCRIPTION> for more
 details.
+
+=head2 Installing an IRC daemon
+
+It is highly suggested that you install an IRC daemon, since many networks
+will ban you if you reconnect to often. Any IRC compatible server will work,
+but L<http://www.ircd-hybrid.org> is a good alternative:
+
+  $ sudo apt-get install ircd-hybrid # ubuntu
+  $ brew install ircd-hybrid         # osx
 
 =head2 Starting the application
 
