@@ -40,7 +40,7 @@ NOTE! The current development branch is "batcode":
 
 Once you have the source code you should install the dependencies:
 
-  $ cpanm --installdeps
+  $ cpanm --installdeps .
   $ npm install riot
 
 =head2 Starting the application
