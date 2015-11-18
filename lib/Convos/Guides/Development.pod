@@ -41,12 +41,18 @@ NOTE! The current development branch is "batcode":
 Once you have the source code you should install the dependencies:
 
   $ cpanm --installdeps .
+  $ cpanm CSS::Sass
   $ npm install riot
   $ npm info riot # see which version is installed
 
 Note! It seems like riot 2.3.1 has a bug which will cause failure. Please
 edit "node_modules/riot/lib/server/index.js" and comment out line 14:18 -
 meaning the body of the "extensions tag" function.
+
+L<CSS::Sass> is not required if the C<sass> executable is already available
+on your system. Have a look at
+L<Mojolicious::Plugin::AssetPack::Preprocessor::Scss/DESCRIPTION> for more
+details.
 
 =head2 Starting the application
 
