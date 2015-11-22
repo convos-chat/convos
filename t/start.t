@@ -24,9 +24,9 @@ $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 
 my %connect;
 Mojo::Util::monkey_patch(
-  'Mojo::IRC::UA',
+  'Convos::Core::Connection::Irc',
   connect => sub {
-    $connect{$_[0]->server}++;
+    $connect{$_[0]->url->host_port}++;
     Mojo::IOLoop->stop if sum(values %connect) == 4;
   }
 );

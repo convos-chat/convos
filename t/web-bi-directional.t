@@ -15,14 +15,20 @@ $t->post_ok('/api/connections', json => {state => 'connect', url => "irc://local
 $t->websocket_ok('/events/bi-directional');
 
 # change from "connecting" got "disconnected"
-warn $user->connection('irc-localhost')->state;
 $user->connection('irc-localhost')->state('disconnected');
 $t->message_ok->json_message_is('/type', 'state')->json_message_is('/object/name', 'localhost')
   ->json_message_is('/object/state', 'connecting')->json_message_is('/data/0', 'disconnected');
 
 # update profile
-$t->send_ok({json => {id => 42, op => 'updateUser', params => {body => {avatar => '', password => ''}}}})
-  ->message_ok->json_message_is('/id', 42)->json_message_is('/body/avatar', '');
+$t->send_ok({json => {id => 42, op => 'updateUser', params => {body => {avatar => '', password => ''}}}});
+
+# need to skip connection events
+while (1) {
+  $t->message_ok;
+  $t->message->[1] =~ /avatar/ or next;
+  $t->json_message_is('/id', 42)->json_message_is('/body/avatar', '');
+  last;
+}
 
 # Test to make sure we don't leak events.
 # The get_ok() is just a hack to make sure the server has

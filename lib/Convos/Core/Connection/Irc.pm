@@ -95,31 +95,45 @@ sub connect {
   my $irc      = $self->_irc;
   my $userinfo = $self->_userinfo;
   my $url      = $self->url;
+  my $tls      = $url->query->param('tls') // 1;
 
   $irc->user($userinfo->[0]);
   $irc->pass($userinfo->[1]);
   $irc->server($url->host_port) unless $irc->server;
-  $irc->tls(($url->query->param('tls') // 1) ? {} : undef);
+  $irc->tls($tls ? {} : undef);
 
   warn "[@{[$self->user->email]}/@{[$self->id]}] connect($irc->{server})\n" if DEBUG;
 
-  return $self->tap($cb, "Invalid URL: hostname is not defined.") unless $irc->server;
+  unless ($irc->server) {
+    Mojo::IOLoop->next_tick(sub { $self->$cb("Invalid URL: hostname is not defined.") });
+    return $self;
+  }
+
   delete $self->{disconnect};
   Scalar::Util::weaken($self);
   $self->state('connecting');
   $self->{steal_nick_tid} ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
-  $irc->connect(
+
+  Mojo::IOLoop->next_tick(
     sub {
-      my ($irc, $err) = @_;
+      $irc->connect(
+        sub {
+          my ($irc, $err) = @_;
 
-      if ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/) {
-        $url->query->param(tls => 0);
-        $self->save(sub { })    # save updated URL
-      }
-
-      return $self->state(disconnected => $err)->$cb($err) if $err;
-      $self->{myinfo} ||= {};
-      $self->state(connected => "Connected to $irc->{server}.")->$cb('');
+          if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
+            $url->query->param(tls => 0);
+            $self->save(sub { });    # save updated URL
+            $self->connect($cb);
+          }
+          elsif ($err) {
+            $self->state(disconnected => $err)->$cb($err);
+          }
+          else {
+            $self->{myinfo} ||= {};
+            $self->state(connected => "Connected to $irc->{server}.")->$cb('');
+          }
+        }
+      );
     }
   );
 

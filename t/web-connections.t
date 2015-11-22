@@ -36,7 +36,7 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
     id       => 'irc-localhost',
     name     => 'localhost',
     protocol => 'irc',
-    state    => 'disconnected',
+    state    => 'connecting',
     url      => "irc://localhost:$port?nick=superman&tls=0"
   }
   );
