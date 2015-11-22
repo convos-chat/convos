@@ -65,8 +65,7 @@ use Mojolicious::Plugins;
 use Convos::Core::Backend;
 use Convos::Core::User;
 use List::Util 'pairmap';
-use constant CONNECT_TIMER => $ENV{CONVOS_CONNECT_TIMER} || 3;
-use constant DEBUG         => $ENV{CONVOS_DEBUG}         || 0;
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 ATTRIBUTES
 
@@ -88,6 +87,39 @@ sub backend { shift->{backend} ||= Convos::Core::Backend->new }
 L<Convos::Core> inherits all methods from L<Mojo::Base> and implements
 the following new ones.
 
+=head2 connect
+
+  $self->connect($connection);
+
+This method will call L<Convos::Core::Connection/connect> either at once
+or add the connection to a queue which will connect after an interval.
+
+The reason for queuing connections is to prevent flooding the server.
+
+Note: Connections to "localhost" will not be delayed.
+
+=cut
+
+sub connect {
+  my ($self, $connection) = @_;
+  my $host = $connection->url->host;
+
+  $connection->state('connecting');
+
+  if ($host eq 'localhost') {
+    $connection->connect(sub { });
+  }
+  elsif ($self->{connect_queue}{$host}) {
+    push @{$self->{connect_queue}{$host}}, $connection;
+  }
+  else {
+    $self->{connect_queue}{$host} = [];
+    $connection->connect(sub { });
+  }
+
+  return $self;
+}
+
 =head2 start
 
   $self = $self->start;
@@ -106,11 +138,22 @@ sub start {
   # before processing web requests.
   for my $user (@{$self->backend->users}) {
     $self->user($user);
-    for my $c (@{$self->backend->connections($user)}) {
-      $user->connection($c);
-      $c->connect(sub { }) if $c->state ne 'disconnected';
+    for my $connection (@{$self->backend->connections($user)}) {
+      $user->connection($connection);
+      $self->connect($connection) unless $connection->state eq 'disconnected';
     }
   }
+
+  Scalar::Util::weaken($self);
+  $self->{connect_tid} = Mojo::IOLoop->timer(
+    $ENV{CONVOS_CONNECT_DELAY} || 3,
+    sub {
+      for my $host (%{$self->{connect_queue} || {}}) {
+        my $connection = shift @{$self->{connect_queue}{$host}} or next;
+        $connection->connect(sub { }) if $connection->state ne 'disconnected' and $connection->url->host eq $host;
+      }
+    }
+  );
 
   return $self;
 }
@@ -155,6 +198,11 @@ Returns an array-ref of of L<Convos::Core::User> objects.
 =cut
 
 sub users { [values %{$_[0]->{users} || {}}] }
+
+sub DESTROY {
+  my $self = shift;
+  Mojo::IOLoop->remove($self->{connect_tid}) if $self->{connect_tid};
+}
 
 =head1 AUTHOR
 

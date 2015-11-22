@@ -37,7 +37,7 @@ Can be set to any class name that "is a" L<Convos::Core::Backend>.
 
 Defaults: "L<Convos::Core::Backend::File>".
 
-=item * CONVOS_CONNECT_TIMER
+=item * CONVOS_CONNECT_DELAY
 
 This variable decides how many seconds to wait between each user to connect
 to a chat server. The reason for this setting is that some servers will set

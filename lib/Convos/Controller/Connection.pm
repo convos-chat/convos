@@ -41,6 +41,7 @@ sub create {
       sub {
         my ($delay, $err) = @_;
         die $err if $err;
+        $self->app->core->connect($connection);
         $self->$cb($connection->TO_JSON, 200);
       },
     );
@@ -147,12 +148,11 @@ sub update {
       my ($delay) = @_;
       $connection->save($delay->begin);
       $connection->disconnect($delay->begin) if $state eq 'disconnect' or $state eq 'reconnect';
-      $connection->state('connecting') if $state eq 'connect';
     },
     sub {
       my ($delay, $err, $disconnected) = @_;
       die $err if $err;
-      $connection->state('connecting') if $state eq 'reconnect';
+      $self->app->core->connect($connection) if $state eq 'connect' or $state eq 'reconnect';
       $self->$cb($connection->TO_JSON, 200);
     },
   );
