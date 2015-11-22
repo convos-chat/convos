@@ -218,10 +218,6 @@ be tested.
 
 =head2 Core
 
-L<Convos::Core> need to be able to connect L<Convos::Core::Connections>
-objects with the state "connecting". This need to be done serialized
-(grouped by server), so we don't cause "flood connect".
-
 Add start up script/command, so it can be deployed properly.
 
 =head2 Backends
