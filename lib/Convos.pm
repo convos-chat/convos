@@ -130,7 +130,6 @@ sub startup {
   $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
   $self->_setup_secrets;
   $self->_add_helpers;
-  $self->_setup_assets;
   $self->_setup_settings;
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
@@ -157,6 +156,9 @@ sub startup {
 
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
+
+  $self->plugin(AssetPack => {pipes => [qw(Riotjs JavaScript Sass Css Combine)]});
+  $self->asset->process;
 
   $self->hook(
     before_dispatch => sub {
@@ -229,45 +231,6 @@ sub _home_relative_to_lib {
 
   $self->home->parse($home);
   $self->static->paths->[0] = $self->home->rel_dir('public');
-}
-
-sub _setup_assets {
-  my $self = shift;
-
-  $self->plugin('AssetPack' => {proxy => 1, source_paths => [qw( assets vendor )]});
-  $self->plugin('Riotjs');
-  $self->asset('convos.css' => 'sass/main.scss');
-  $self->asset(
-    'convos.js' => qw(
-      http://code.jquery.com/jquery-1.11.3.min.js
-      /js/autolink.js
-      /js/storage.js
-      /js/window.js
-      https://cdn.jsdelivr.net/riot/2.3/riot.min.js
-      /js/riot-url.js
-      /js/jquery.*.js
-      /js/websocket.js
-      /js/swagger2-client.js
-      /materialize/js/velocity.min.js
-      /materialize/js/waves.js
-      /materialize/js/jquery.easing.1.3.js
-      /materialize/js/global.js
-      /materialize/js/animation.js
-      /materialize/js/buttons.js
-      /materialize/js/dropdown.js
-      /materialize/js/forms.js
-      /materialize/js/leanModal.js
-      /materialize/js/tooltip.js
-      /materialize/js/animation.js
-      /materialize/js/materialbox.js
-      /js/mixins/*.js
-      /js/core/*.js
-      /riot/*.tag
-      /js/main.js
-      )
-  );
-
-  $self->asset->purge if -d 'local';    # used to purge old assets while developing
 }
 
 sub _setup_secrets {

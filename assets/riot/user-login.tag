@@ -9,13 +9,13 @@
       </div>
       <div class="row">
         <div class="input-field col s12">
-          <input placeholder="susan@example.com" name="email" id="form_email" type="email" class="tooltipped validate">
+          <input name="email" id="form_email" type="email" class="tooltipped validate">
           <label for="form_email">Email</label>
         </div>
       </div>
       <div class="row">
         <div class="input-field col s12">
-          <input placeholder="At least six characters" name="password" id="form_password" type="password" class="tooltipped validate">
+          <input name="password" id="form_password" type="password" class="tooltipped validate">
           <label for="form_password">Password</label>
         </div>
       </div>

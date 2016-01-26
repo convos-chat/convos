@@ -1,13 +1,4 @@
-<conversation>
-  <ul class="conversation collection">
-    <li class="collection-item avatar" each={conversation}>
-      <img src={parent.avatar(from)} alt="" class="circle">
-      <a href={'#autocomplete:' + from} class="title">{from}</a>
-      <conversation-message ts={ts} message={message} each={messages}/>
-      <span class="secondary-content ts" title={ts}>{parent.timestring(ts)}</span>
-    </li>
-  </ul>
-  <script>
+riot.tag2('conversation', '<ul class="conversation collection"> <li class="collection-item avatar" each="{conversation}"> <img riot-src="{parent.avatar(from)}" alt="" class="circle"> <a href="{\'#autocomplete:\' + from}" class="title">{from}</a> <conversation-message ts="{ts}" message="{message}" each="{messages}"></conversation-message> <span class="secondary-content ts" title="{ts}">{parent.timestring(ts)}</span> </li> </ul>', '', '', function(opts) {
 
   mixin.time(this);
 
@@ -15,9 +6,9 @@
   this.conversation = [];
   this.n = 0;
 
-  avatar(from) {
+  this.avatar = function(from) {
     return 'https://robohash.org/' + from + '.png';
-  }
+  }.bind(this)
 
   this.on('update', function() {
     if (!opts.conversation) return;
@@ -38,5 +29,4 @@
     }.bind(this));
   });
 
-  </script>
-</conversation>
+}, '{ }');

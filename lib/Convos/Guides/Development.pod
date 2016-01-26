@@ -41,7 +41,8 @@ NOTE! The current development branch is "batcode":
 Once you have the source code you should install the dependencies:
 
   $ cpanm --installdeps .
-  $ cpanm CSS::Sass
+  $ cpanm https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz
+  $ cpanm CSS::Minifier::XS CSS::Sass JavaScript::Minifier::XS
   $ npm install riot
   $ npm info riot # see which version is installed
 
@@ -49,10 +50,8 @@ Note! It seems like riot 2.3.1 has a bug which will cause failure. Please
 edit "node_modules/riot/lib/server/index.js" and comment out line 14:18 -
 meaning the body of the "extensions tag" function.
 
-L<CSS::Sass> is not required if the C<sass> executable is already available
-on your system. Have a look at
-L<Mojolicious::Plugin::AssetPack::Preprocessor::Scss/DESCRIPTION> for more
-details.
+L<CSS::Sass> is not required if the C<npm> or C<sass> executable is already
+available on your system.
 
 =head2 Installing an IRC daemon
 
@@ -86,7 +85,7 @@ different files and directories for changes.
 
 The "assets" directory contains all JavaScript and Sass files, which will
 be used to generate the "public" files. The conversation is done with
-L<Mojolicious::Plugin::AssetPack>.
+L<https://github.com/jhthorsen/mojolicious-plugin-assetpack>.
 
 The C<.tag> files require L<riot|http://riotjs.com> to be compiled into
 JavaScript.
@@ -107,9 +106,8 @@ with the "npm" command. This directory is ignored by git.
 
 =item * convos/public
 
-The public directory contains fonts, images and
-L<packed|Mojolicious::Plugin::AssetPack> files, which can be downloaded
-through the L<Convos> web server.
+The public directory contains fonts and images  which can be downloaded through
+the L<Convos> web server.
 
 =item * convos/script
 
@@ -290,6 +288,13 @@ Proper styling/embedding of "pastebin links".
 Shortcuts for jumping between "user input" and "sidebars".
 
 Display topic when joining a conversation the first time.
+
+=item * Clean up git history
+
+Want to remove all vendor files in git history, since they are not used after
+changing to AssetPack.
+
+  $ git filter-branch --tree-filter 'rm -rf vendor/' --prune-empty HEAD
 
 =back
 
