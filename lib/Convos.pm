@@ -153,8 +153,9 @@ use Convos::Core::Util ();
 our $VERSION = '0.8604';
 
 {    # required before Mojo::Redis 1.01
-  no warnings 'redefine';
+  no warnings qw(once redefine);
   *Mojo::Redis::emit_safe = sub { shift->emit(@_) };
+  Mojo::Redis::Subscription->attr(channels => sub { [] });
 }
 
 =head1 ATTRIBUTES
