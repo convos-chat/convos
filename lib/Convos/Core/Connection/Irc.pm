@@ -14,8 +14,8 @@ allow you to communicate over the IRC protocol.
 no warnings 'utf8';
 use Mojo::Base 'Convos::Core::Connection';
 use Mojo::IRC::UA;
-use Parse::IRC  ();
-use Time::HiRes ();
+use Parse::IRC ();
+use Time::HiRes 'time';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
 
@@ -26,8 +26,6 @@ require Convos;
 sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 
 my $CHANNEL_RE = qr{[#&]};
-
-sub TS {Time::HiRes::time}
 
 =head1 ATTRIBUTES
 
@@ -362,7 +360,7 @@ sub _irc_message {
       {
         from    => $nick,
         message => $msg->{params}[1],
-        ts      => TS(),
+        ts      => time,
         type    => $event eq 'irc_privmsg' ? 'private' : $event eq 'ctcp_action' ? 'action' : 'notice',
       }
     );
@@ -373,7 +371,7 @@ sub _irc_message {
       {
         from => $msg->{prefix} // $self->_irc->server,
         message => $msg->{params}[1],
-        ts      => TS(),
+        ts      => time,
         type    => $event eq 'irc_privmsg' ? 'private' : 'notice',
       }
     );
@@ -384,7 +382,7 @@ sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 
 sub _notice {
   my ($self, $message) = (shift, shift);
-  $self->emit(message => $self, {from => $self->url->host, type => 'notice', @_, message => $message, ts => TS()});
+  $self->emit(message => $self, {from => $self->url->host, type => 'notice', @_, message => $message, ts => time});
 }
 
 sub _steal_nick {
@@ -424,7 +422,7 @@ _event err_nosuchnick => sub {
   if (my $conversation = $self->conversation($msg->{params}[1])) {
     $self->emit(
       message => $conversation,
-      {from => $self->url->host, message => 'No such nick or channel.', ts => TS(), type => 'notice'}
+      {from => $self->url->host, message => 'No such nick or channel.', ts => time, type => 'notice'}
     );
   }
 
