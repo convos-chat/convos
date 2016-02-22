@@ -43,6 +43,12 @@ window.isTouchDevice = !!('ontouchstart' in window);
 window.isWideScreen = window.innerWidth > wideScreenWidth;
 window.TODO = function(message) { alert("TODO: " + message); };
 
+String.prototype.ucFirst = function() {
+  return this.replace(/^./, function (match) {
+    return match.toUpperCase();
+  });
+};
+
 window.scrollToBottom = function() {
   document.body.scrollTop = window.innerHeight * 2;
   return this;

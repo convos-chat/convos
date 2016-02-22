@@ -15,13 +15,18 @@
     icon: function() { return 'group' },
     id: function() { return '' },
     messages: function() { return []; },
-    name: function() { return '' },
+    name: function() { return 'Unknown' },
     topic: function() { return '' },
   });
 
   proto.addMessage = function(message) {
     this.messages().push(message);
     riot.update();
+  };
+
+  // Create a href for <a> tag
+  proto.href = function(action) {
+    return ['#conversation', this.connection().id(), this.name(), action].join('/');
   };
 
   // Send a message to a room
@@ -36,12 +41,6 @@
       function(err, xhr) { cb.call(self, err); }
     );
     return this;
-  };
-
-  // Returns a URL to this conversation
-  // Usable as fragment in window.location
-  proto.url = function() {
-    return [this.connection().id(), this.id()].join('/');
   };
 
   // Called when this conversation is visible in gui

@@ -19,13 +19,13 @@ riot.tag2('user-register', '<div class="row not-logged-in-wrapper"> <form onsubm
       function(err, xhr) {
         if (err) return tag.formInvalidInput(err).update();
         tag.user.update(xhr.body);
-        riot.url.route('');
+        riot.route('chat');
       }
     );
   }.bind(this)
 
   this.on('mount', function() {
-    if (this.user.email()) return riot.url.route('');
+    if (this.user.email()) return riot.route('chat');
     this.form_email.value = localStorage.getItem('email');
     this.form_email.focus();
   });

@@ -12,7 +12,7 @@
   // ws = ws.close(1000, reason);
   proto.close = function(code, reason) {
     if (this._tid) clearTimeout(this._tid);
-    if (this._ws  && self._ws.readyState != WebSocket.CLOSED) {
+    if (this._ws  && this._ws.readyState != WebSocket.CLOSED) {
       if (window.DEBUG) console.log('[ReconnectingWebSocket] Close ' + code + '/' + reason);
       this._ws.close(code || 1000, reason);
       this.readyState = WebSocket.CLOSING;

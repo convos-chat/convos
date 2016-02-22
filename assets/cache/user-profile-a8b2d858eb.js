@@ -20,7 +20,7 @@ riot.tag2('user-profile', '<form onsubmit="{submitForm}" method="post" class="mo
     this.user.save(attrs, function(err) {
       if (err) return tag.formInvalidInput(err).update();
       tag.user.update(attrs);
-      riot.url.route('');
+      riot.route('');
     });
   }.bind(this)
 

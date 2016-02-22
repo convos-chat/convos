@@ -1,19 +1,15 @@
 <user-input>
-  <div class="user-input">
-    <form method="post" onsubmit={sendMessage}>
-      <textarea name="message" class="materialize-textarea" disabled={!canSend} placeholder={placeholder} onkeydown={onChange}></textarea>
-      <a class="btn-flat dropdown-button" href="#menu_for_conversation" data-activates="menu_for_conversation"><i class="material-icons">more_vert</i></a>
-    </form>
-    <ul id="menu_for_conversation" class="dropdown-content">
-      <li><a href="#close:conversation">Close conversation</a></li>
-      <li><a href="#topic">Get topic</a></li>
-      <li><a href="#participants">Participants</a></li>
-    </ul>
-  </div>
+  <form method="post" onsubmit={sendMessage}>
+    <div class="actions">
+      <a href="#emoji"><i class="material-icons">insert_emoticon</i></a>
+      <a href="#attach"><i class="material-icons">attach_file</i></a>
+      <a href="#send"><i class="material-icons">send</i></a>
+    </div>
+    <textarea name="message" class="materialize-textarea" placeholder={placeholder} onkeydown={onChange}></textarea>
+  </form>
   <script>
 
-  this.placeholder = 'Not currently in a conversation.';
-  this.canSend = false;
+  this.placeholder = '';
 
   onChange(e) {
     switch (e.keyCode) {
@@ -40,15 +36,17 @@
   });
 
   this.on('update', function() {
-    if (opts.conversation) {
+    try {
       var state = opts.conversation.connection().state();
-      if (this.canSend = state == 'connected') {
+      if (state == 'connected') {
         this.placeholder = 'What do you want to say to ' + this.opts.conversation.name() + '?';
       }
       else {
         this.placeholder = 'State is "' + state + '".';
       }
-    }
+    } catch (err) {
+      this.placeholder = 'State is "disconnected".';
+    };
   });
 
   </script>

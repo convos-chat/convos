@@ -291,14 +291,12 @@ __DATA__
       window.Convos={
         apiUrl:"<%= $self->url_for('convos_api_specification') %>",
         wsUrl:"<%= $self->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
-        loadTid:setTimeout(function(){var app=document.getElementById('app');app.innerHTML='<h4 class="valign">Oh noes! Convos failed to load.<br>Please try again later or report to your <a href="<%= $settings->{contact} %>">convos administrator</a>.</h4>';app.className='valign-wrapper'},5000),
         settings:<%== Mojo::JSON::encode_json($settings) %>
       };
     % end
   </head>
   <body>
-    <div id="app"></div>
-    <div id="modal_bottom_sheet" class="modal bottom-sheet"></div>
+    <app><div class="centered"><div>Loading...</div></div></app>
     %= asset 'convos.js';
   </body>
 </html>

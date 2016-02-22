@@ -1,26 +1,19 @@
 <sidebar-conversations>
   <div class="collection">
-    <a href={'#' + c.url()} class={parent.conversationClass(c)} each={c, i in user.conversations()}>
+    <a href={c.href('activate')} class={parent.conversationClass(c)} each={c, i in user.conversations()}>
       <i class="material-icons">{c.icon()}</i> {c.name()}
+      <span class="on">{c.connection().protocol()}-{c.connection().name()}</span>
     </a>
-    <a href="#addConversation" onclick={addConversation} class="collection-item">
-      <i class="material-icons">add_circle</i> Create conversation...
+    <a href={c.href('activate')} class={parent.conversationClass(c)} each={c, i in user.connections()}>
+      <i class="material-icons">device_hub</i> {c.protocol()}-{c.name()}
+      <span class="on">{c.humanState()}</span>
+    </a>
+    <a href="#new-conversation" class="collection-item">
+      <i class="material-icons">add_circle</i> New conversation
     </a>
   </div>
   <script>
-
-  mixin.modal(this);
-
   this.user = opts.user;
-
-  addConversation(e) {
-    if (this.user.connections().length) {
-      this.openModal('conversation-add', {user: this.user});
-    }
-    else {
-      this.openModal('connection-add', {first: true, next: 'conversation-add', user: this.user});
-    }
-  }
 
   conversationClass(c) {
     return c == this.parent.conversation ? 'collection-item active' : 'collection-item';

@@ -1,8 +1,11 @@
 <sidebar-search>
   <div class="collection">
-    <div class="collection-item">
-      <form class="search sidebar" onsubmit={startSearch}>
-        <input type="text" id="search_input" placeholder="Search and goto anything" autocomplete="off" spellcheck="false" onkeyup={startSearch}>
+    <div class="collection-item search">
+      <form onsubmit={startSearch}>
+        <div class="input-field">
+          <input type="text" id="search_input" autocomplete="off" spellcheck="false" onkeyup={startSearch}>
+          <label for="search_input">Search and goto anything</label>
+        </div>
       </form>
     </div>
     <div class="collection-item" if={!searchResults.length && searchTerm}>

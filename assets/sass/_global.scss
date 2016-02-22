@@ -8,29 +8,26 @@ h1, h2, h3, h4, h5 {
 
 ul, li { margin: 0; }
 
-// something went wrong
-#app.valign-wrapper {
+not-found, .centered {
+  display: flex;
   height: 100vh;
-  h4, a {
-    color: color('red', 'darken-1');
-    width: 100%;
-    text-align: center;
-  }
-  a { text-decoration: underline; }
-}
+  align-items: center;
+  justify-content: center;
 
-.modal.bottom-sheet {
-  max-height: 70%;
+  > div {
+    text-align: center;
+    max-width: 50%;
+    padding-bottom: 30px;
+  }
+  i.material-icons {
+    vertical-align: middle
+  }
 }
 
 .material-tooltip {
   border-radius: 4px;
   padding: 8px 6px;
   min-height: 30px;
-}
-
-.readable-width {
-  max-width: $readable-width;
 }
 
 .btn, .btn-large, .btn-flat {
@@ -42,11 +39,6 @@ ul, li { margin: 0; }
     margin-right: 0.5rem;
     &.right { margin-right: 0; }
   }
-}
-
-li.alert {
-  margin-top: 4px;
-  margin-bottom: 4px;
 }
 
 div.alert {

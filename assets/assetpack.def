@@ -7,10 +7,9 @@
 < js/autolink.js
 < js/storage.js
 < js/window.js
-< https://cdn.jsdelivr.net/riot/2.3/riot.min.js
+< https://cdnjs.cloudflare.com/ajax/libs/riot/2.3.15/riot.min.js
 < js/jquery.autocomplete.js
 < js/jquery.disableouterscroll.js
-< js/riot-url.js
 < js/websocket.js
 < js/swagger2-client.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js
@@ -27,7 +26,6 @@
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/materialbox.js
 < js/mixins/base.js
 < js/mixins/form.js
-< js/mixins/modal.js
 < js/mixins/shortcuts.js
 < js/mixins/time.js
 < js/core/connection.js
@@ -39,7 +37,9 @@
 < riot/conversation-add.tag
 < riot/conversation-message.tag
 < riot/conversation.tag
+< riot/not-found.tag
 < riot/sidebar-conversations.tag
+< riot/sidebar-notifications.tag
 < riot/sidebar-search.tag
 < riot/sidebar-settings.tag
 < riot/user-input.tag

@@ -12,7 +12,7 @@
   mixin.base(proto, {
     id: function() { return ''; },
     name: function() { return ''; },
-    url: function() { return new riot.Url(); },
+    url: function() { return ''; },
     user: function() { throw 'user cannot be built'; }
   });
 
@@ -29,11 +29,20 @@
     return this;
   };
 
+  // Create a href for <a> tag
+  proto.href = function(action) {
+    return ['#connection', this.protocol(), this.name(), action].join('/');
+  };
+
+  // Human readable version of state()
+  proto.humanState = function() {
+    return this.state().ucFirst();
+  }
+
   // Return protocol (scheme) from url()
   proto.protocol = function() {
-    var url = this.url();
-    var r = url.scheme.apply(url, arguments);
-    return r == url ? this : r;
+    var protocol = this.url().match(/^(\w+):\/\//);
+    return protocol ? protocol[1] : 'unknown';
   };
 
   // Get list of available rooms on server
@@ -52,7 +61,7 @@
   // Write connection settings to server
   proto.save = function(cb) {
     var self = this;
-    var attrs = {url: this.url().toString()}; // It is currently not possible to specify "name"
+    var attrs = {url: this.url()}; // It is currently not possible to specify "name"
 
     if (this.id()) {
       this._api.updateConnection(
@@ -81,8 +90,8 @@
     var url = this.url();
     update.call(this, attrs);
     if (attrs.state) this._state = attrs.state;
-    if (attrs.url && typeof attrs.url == 'string') url.parse(attrs.url);
-    return this.url(url);
+    if (attrs.url && typeof attrs.url == 'string') this.url(attrs.url);
+    return this;
   };
 
   // Change state to "connected" or "disconnected"
