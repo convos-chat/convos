@@ -1,4 +1,9 @@
 package Convos::Core::Conversation::Direct;
+use Mojo::Base 'Convos::Core::Conversation';
+
+1;
+
+=encoding utf8
 
 =head1 NAME
 
@@ -13,10 +18,6 @@ conversation between two persons.
 
   use Convos::Core::Conversation::Direct;
   my $conversation = Convos::Core::Conversation::Direct->new;
-
-=cut
-
-use Mojo::Base 'Convos::Core::Conversation';
 
 =head1 ATTRIBUTES
 
@@ -33,5 +34,3 @@ L<Convos::Core::Conversation> and implements the following new ones.
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

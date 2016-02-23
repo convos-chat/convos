@@ -1,31 +1,8 @@
 package Convos::Controller::Events;
-
-=head1 NAME
-
-Convos::Controller::Events - Stream events from Convos::Core to web
-
-=head1 DESCRIPTION
-
-L<Convos::Controller::Stream> is a L<Mojolicious::Controller> which
-can stream events from the backend to frontend, and also act on
-input from web, if websocket is supported by the browser.
-
-=cut
-
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON 'encode_json';
 use constant DEBUG            => $ENV{CONVOS_DEBUG}            || 0;
 use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 30;
-
-=head1 METHODS
-
-=head2 bi_directional
-
-Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as
-JSON objects over a WebSocket connection, but also allows instructions from
-the client, since WebSockets are bi-directional.
-
-=cut
 
 sub bi_directional {
   my $self = shift;
@@ -43,13 +20,6 @@ sub bi_directional {
     }
   );
 }
-
-=head2 event_source
-
-Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as
-JSON objects using L<Mojolicious::Guides::Cookbook/EventSource web service>.
-
-=cut
 
 sub event_source {
   my $self = shift;
@@ -115,10 +85,35 @@ sub _write_event {
   $self->write("event:$event\ndata:$data\n\n");
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Convos::Controller::Events - Stream events from Convos::Core to web
+
+=head1 DESCRIPTION
+
+L<Convos::Controller::Stream> is a L<Mojolicious::Controller> which
+can stream events from the backend to frontend, and also act on
+input from web, if websocket is supported by the browser.
+
+=head1 METHODS
+
+=head2 bi_directional
+
+Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as
+JSON objects over a WebSocket connection, but also allows instructions from
+the client, since WebSockets are bi-directional.
+
+=head2 event_source
+
+Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as
+JSON objects using L<Mojolicious::Guides::Cookbook/EventSource web service>.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

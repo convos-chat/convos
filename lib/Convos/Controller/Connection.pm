@@ -1,26 +1,6 @@
 package Convos::Controller::Connection;
-
-=head1 NAME
-
-Convos::Controller::Connection - Convos connection actions
-
-=head1 DESCRIPTION
-
-L<Convos::Controller::Connection> is a L<Mojolicious::Controller> with
-user related actions.
-
-=cut
-
 use Mojo::Base 'Mojolicious::Controller';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
-
-=head1 METHODS
-
-=head2 create
-
-See L<Convos::Manual::API/createConnection>.
-
-=cut
 
 sub create {
   my ($self, $args, $cb) = @_;
@@ -53,12 +33,6 @@ sub create {
   };
 }
 
-=head2 list
-
-See L<Convos::Manual::API/listConnections>.
-
-=cut
-
 sub list {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
@@ -70,12 +44,6 @@ sub list {
 
   $self->$cb({connections => \@connections}, 200);
 }
-
-=head2 remove
-
-See L<Convos::Manual::API/removeConnection>.
-
-=cut
 
 sub remove {
   my ($self, $args, $cb) = @_;
@@ -92,12 +60,6 @@ sub remove {
     },
   );
 }
-
-=head2 rooms
-
-See L<Convos::Manual::API/roomsForConnection>.
-
-=cut
 
 sub rooms {
   my ($self, $args, $cb) = @_;
@@ -116,12 +78,6 @@ sub rooms {
     },
   );
 }
-
-=head2 update
-
-See L<Convos::Manual::API/updateConnection>.
-
-=cut
 
 sub update {
   my ($self, $args, $cb) = @_;
@@ -172,10 +128,43 @@ sub _pretty_connection_name {
   $name;
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Convos::Controller::Connection - Convos connection actions
+
+=head1 DESCRIPTION
+
+L<Convos::Controller::Connection> is a L<Mojolicious::Controller> with
+user related actions.
+
+=head1 METHODS
+
+=head2 create
+
+See L<Convos::Manual::API/createConnection>.
+
+=head2 list
+
+See L<Convos::Manual::API/listConnections>.
+
+=head2 remove
+
+See L<Convos::Manual::API/removeConnection>.
+
+=head2 rooms
+
+See L<Convos::Manual::API/roomsForConnection>.
+
+=head2 update
+
+See L<Convos::Manual::API/updateConnection>.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

@@ -1,4 +1,133 @@
 package Convos::Core::Connection;
+use Mojo::Base 'Mojo::EventEmitter';
+use Mojo::Loader 'load_class';
+use Mojo::URL;
+use Convos::Core::Conversation::Direct;
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
+
+sub id { lc sprintf '%s-%s', $_[0]->protocol, $_[0]->name }
+sub name { shift->{name} }
+sub protocol { shift->{protocol} || 'null' }
+
+sub url {
+  return $_[0]->{url} if ref $_[0]->{url};
+  return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || '');
+}
+
+sub user { shift->{user} }
+
+sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" not implemented.'); }
+
+sub conversation {
+  my ($self, $id, $attr) = @_;
+
+  if ($attr) {
+    my $conversation = $self->{conversations}{$id} ||= do {
+      my $conversation = $self->_conversation({id => $id});
+      Scalar::Util::weaken($conversation->{connection});
+      warn "[Convos::Core::User] Emit conversation: id=$id\n" if DEBUG;
+      $self->emit(conversation => $conversation);
+      $conversation;
+    };
+    $conversation->{$_} = $attr->{$_} for keys %$attr;
+    return $conversation;
+  }
+  else {
+    return $self->{conversations}{$id} || $self->_conversation({id => $id});
+  }
+}
+
+sub conversations {
+  my $self = shift;
+  return [values %{$self->{conversations} || {}}];
+}
+
+sub disconnect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "disconnect" not implemented.'); }
+
+sub join_conversation {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "join_conversation" not implemented.');
+}
+
+sub new {
+  my $class = shift;
+  my $attrs = @_ > 1 ? {@_} : {%{$_[0]}};
+
+  if ($attrs->{protocol}) {
+    my $protocol = Mojo::Util::camelize($attrs->{protocol} || '');
+    $class = "Convos::Core::Connection::$protocol";
+    eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported.);
+  }
+  if ($attrs->{user}) {
+    Scalar::Util::weaken($attrs->{user});
+  }
+
+  return bless $attrs, $class;
+}
+
+sub rooms { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "rooms" not implemented.', []); }
+
+sub save {
+  my $self = shift;
+  $self->user->core->backend->save_object($self, @_);
+  $self;
+}
+
+sub send { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "send" not implemented.') }
+
+sub state {
+  my ($self, $state, $description) = @_;
+  my $old_state = $self->{state} || '';
+  return $self->{state} ||= 'connecting' unless $state;
+  die "Invalid state: $state" unless grep { $state eq $_ } qw( connected connecting disconnected );
+  $self->emit(state => $state => $description // '') unless $old_state eq $state;
+  $self->{state} = $state;
+  $self;
+}
+
+sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
+
+sub _conversation {
+  my ($self, $args) = @_;
+  die 'Cannot create conversation without class' unless $args->{class};
+  my $e = load_class $args->{class};
+  die $e || "Not found: $args->{class}" if $e;
+  $args->{connection} = $self;
+  (delete $args->{class})->new($args);
+}
+
+sub _userinfo {
+  my $self = shift;
+  my @userinfo = split /:/, $self->url->userinfo // '';
+  $userinfo[0] ||= $self->user->email =~ /([^@]+)/ ? $1 : '';
+  $userinfo[1] ||= undef;
+  return \@userinfo;
+}
+
+sub INFLATE {
+  my ($self, $attrs) = @_;
+  $self->conversation($_->{id}, $_) for @{delete($attrs->{conversations}) || []};
+  $self->{$_} = $attrs->{$_} for keys %$attrs;
+  $self;
+}
+
+sub TO_JSON {
+  my ($self, $persist) = @_;
+  $self->{state} ||= 'connecting';
+  my $json = {map { ($_, '' . $self->$_) } qw( id name protocol state url )};
+
+  $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
+
+  if ($persist) {
+    $json->{conversations} = [map { $_->TO_JSON($persist) } @{$self->conversations}];
+  }
+
+  $json;
+}
+
+1;
+
+=encoding utf8
 
 =head1 NAME
 
@@ -9,14 +138,6 @@ Convos::Core::Connection - A Convos connection base class
 L<Convos::Core::Connection> is a base class for L<Convos> connections.
 
 See also L<Convos::Core::Connection::Irc>.
-
-=cut
-
-use Mojo::Base 'Mojo::EventEmitter';
-use Mojo::Loader 'load_class';
-use Mojo::URL;
-use Convos::Core::Conversation::Direct;
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 =head1 EVENTS
 
@@ -113,19 +234,6 @@ attribute is read-only.
 
 Holds a L<Convos::Core::User> object that owns this connection.
 
-=cut
-
-sub id { lc sprintf '%s-%s', $_[0]->protocol, $_[0]->name }
-sub name { shift->{name} }
-sub protocol { shift->{protocol} || 'null' }
-
-sub url {
-  return $_[0]->{url} if ref $_[0]->{url};
-  return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || '');
-}
-
-sub user { shift->{user} }
-
 =head1 METHODS
 
 L<Convos::Core::Connection> inherits all methods from L<Mojo::Base> and implements
@@ -137,10 +245,6 @@ the following new ones.
 
 Used to connect to L</url>. Meant to be overloaded in a subclass.
 
-=cut
-
-sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" not implemented.'); }
-
 =head2 conversation
 
   $conversation = $self->conversation($id);            # get
@@ -148,39 +252,11 @@ sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" 
 
 Will return a L<Convos::Core::Conversation> object, identified by C<$id>.
 
-=cut
-
-sub conversation {
-  my ($self, $id, $attr) = @_;
-
-  if ($attr) {
-    my $conversation = $self->{conversations}{$id} ||= do {
-      my $conversation = $self->_conversation({id => $id});
-      Scalar::Util::weaken($conversation->{connection});
-      warn "[Convos::Core::User] Emit conversation: id=$id\n" if DEBUG;
-      $self->emit(conversation => $conversation);
-      $conversation;
-    };
-    $conversation->{$_} = $attr->{$_} for keys %$attr;
-    return $conversation;
-  }
-  else {
-    return $self->{conversations}{$id} || $self->_conversation({id => $id});
-  }
-}
-
 =head2 conversations
 
   $objs = $self->conversations;
 
 Returns an array-ref of of L<Convos::Core::Conversation> objects.
-
-=cut
-
-sub conversations {
-  my $self = shift;
-  return [values %{$self->{conversations} || {}}];
-}
 
 =head2 disconnect
 
@@ -188,22 +264,11 @@ sub conversations {
 
 Used to disconnect from server. Meant to be overloaded in a subclass.
 
-=cut
-
-sub disconnect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "disconnect" not implemented.'); }
-
 =head2 join_conversation
 
   $self = $self->join_conversation("#some_channel", sub { my ($self, $err) = @_; });
 
 Used to create a new conversation. See also L</conversation> event.
-
-=cut
-
-sub join_conversation {
-  my ($self, $cb) = (shift, pop);
-  $self->tap($cb, 'Method "join_conversation" not implemented.');
-}
 
 =head2 new
 
@@ -212,24 +277,6 @@ sub join_conversation {
 Creates a new connection object. The returned object will be of a sub class,
 if L</protocol> is part of the input C<%attrs>.
 
-=cut
-
-sub new {
-  my $class = shift;
-  my $attrs = @_ > 1 ? {@_} : {%{$_[0]}};
-
-  if ($attrs->{protocol}) {
-    my $protocol = Mojo::Util::camelize($attrs->{protocol} || '');
-    $class = "Convos::Core::Connection::$protocol";
-    eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported.);
-  }
-  if ($attrs->{user}) {
-    Scalar::Util::weaken($attrs->{user});
-  }
-
-  return bless $attrs, $class;
-}
-
 =head2 rooms
 
   $self = $self->rooms(sub { my ($self, $err, $list) = @_; });
@@ -237,24 +284,12 @@ sub new {
 Used to retrieve a list of L<Convos::Core::Conversation::Room> objects for the
 given connection.
 
-=cut
-
-sub rooms { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "rooms" not implemented.', []); }
-
 =head2 save
 
   $self = $self->save(sub { my ($self, $err) = @_; });
 
 Will save L</ATTRIBUTES> to persistent storage.
 See L<Convos::Core::Backend/save_object> for details.
-
-=cut
-
-sub save {
-  my $self = shift;
-  $self->user->core->backend->save_object($self, @_);
-  $self;
-}
 
 =head2 send
 
@@ -265,10 +300,6 @@ C<$target> can be a user or room/channel name.
 
 Meant to be overloaded in a subclass.
 
-=cut
-
-sub send { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "send" not implemented.') }
-
 =head2 state
 
   $self = $self->state($state, $description);
@@ -278,18 +309,6 @@ Holds the state of this object. C<$state> can be "disconnected", "connected"
 or "connecting" (default). "connecting" means that the object is in the
 process of connecting or that it want to connect.
 
-=cut
-
-sub state {
-  my ($self, $state, $description) = @_;
-  my $old_state = $self->{state} || '';
-  return $self->{state} ||= 'connecting' unless $state;
-  die "Invalid state: $state" unless grep { $state eq $_ } qw( connected connecting disconnected );
-  $self->emit(state => $state => $description // '') unless $old_state eq $state;
-  $self->{state} = $state;
-  $self;
-}
-
 =head2 topic
 
   $self = $self->topic($conversation, sub { my ($self, $err, $topic) = @_; });
@@ -297,52 +316,8 @@ sub state {
 
 Used to retrieve or set topic for a conversation.
 
-=cut
-
-sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
-
-sub _conversation {
-  my ($self, $args) = @_;
-  die 'Cannot create conversation without class' unless $args->{class};
-  my $e = load_class $args->{class};
-  die $e || "Not found: $args->{class}" if $e;
-  $args->{connection} = $self;
-  (delete $args->{class})->new($args);
-}
-
-sub _userinfo {
-  my $self = shift;
-  my @userinfo = split /:/, $self->url->userinfo // '';
-  $userinfo[0] ||= $self->user->email =~ /([^@]+)/ ? $1 : '';
-  $userinfo[1] ||= undef;
-  return \@userinfo;
-}
-
-sub INFLATE {
-  my ($self, $attrs) = @_;
-  $self->conversation($_->{id}, $_) for @{delete($attrs->{conversations}) || []};
-  $self->{$_} = $attrs->{$_} for keys %$attrs;
-  $self;
-}
-
-sub TO_JSON {
-  my ($self, $persist) = @_;
-  $self->{state} ||= 'connecting';
-  my $json = {map { ($_, '' . $self->$_) } qw( id name protocol state url )};
-
-  $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
-
-  if ($persist) {
-    $json->{conversations} = [map { $_->TO_JSON($persist) } @{$self->conversations}];
-  }
-
-  $json;
-}
-
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

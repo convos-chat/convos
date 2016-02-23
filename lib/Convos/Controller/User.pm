@@ -1,25 +1,5 @@
 package Convos::Controller::User;
-
-=head1 NAME
-
-Convos::Controller::User - Convos user actions
-
-=head1 DESCRIPTION
-
-L<Convos::Controller::User> is a L<Mojolicious::Controller> with
-user related actions.
-
-=cut
-
 use Mojo::Base 'Mojolicious::Controller';
-
-=head1 METHODS
-
-=head2 delete
-
-See L<Convos::Manual::API/deleteUser>.
-
-=cut
 
 sub delete {
   my ($self, $args, $cb) = @_;
@@ -40,24 +20,12 @@ sub delete {
   );
 }
 
-=head2 get
-
-See L<Convos::Manual::API/getUser>.
-
-=cut
-
 sub get {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
 
   $self->$cb($user->TO_JSON, 200);
 }
-
-=head2 login
-
-See L<Convos::Manual::API/loginUser>.
-
-=cut
 
 sub login {
   my ($self, $args, $cb) = @_;
@@ -71,23 +39,11 @@ sub login {
   }
 }
 
-=head2 logout
-
-See L<Convos::Manual::API/logoutUser>.
-
-=cut
-
 sub logout {
   my ($self, $args, $cb) = @_;
   $self->session({expires => 1});
   $self->$cb({}, 200);
 }
-
-=head2 register
-
-See L<Convos::Manual::API/registerUser>.
-
-=cut
 
 sub register {
   my ($self, $args, $cb) = @_;
@@ -114,12 +70,6 @@ sub register {
   );
 }
 
-=head2 update
-
-See L<Convos::Manual::API/updateUser>.
-
-=cut
-
 sub update {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
@@ -145,10 +95,47 @@ sub update {
   );
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Convos::Controller::User - Convos user actions
+
+=head1 DESCRIPTION
+
+L<Convos::Controller::User> is a L<Mojolicious::Controller> with
+user related actions.
+
+=head1 METHODS
+
+=head2 delete
+
+See L<Convos::Manual::API/deleteUser>.
+
+=head2 get
+
+See L<Convos::Manual::API/getUser>.
+
+=head2 login
+
+See L<Convos::Manual::API/loginUser>.
+
+=head2 logout
+
+See L<Convos::Manual::API/logoutUser>.
+
+=head2 register
+
+See L<Convos::Manual::API/registerUser>.
+
+=head2 update
+
+See L<Convos::Manual::API/updateUser>.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

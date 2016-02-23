@@ -1,51 +1,4 @@
 package Convos::Core::Backend::File;
-
-=head1 NAME
-
-Convos::Core::Backend::File - Backend for storing object to file
-
-=head1 DESCRIPTION
-
-L<Convos::Core::Backend::File> contains methods which is useful for objects
-that want to be persisted to disk or store state to disk.
-
-=head2 Where is data stored
-
-C<CONVOS_HOME> can be set to specify the root location for where to save
-data from objects. The default directory on *nix systems is something like this:
-
-  $HOME/.local/share/convos/
-
-C<$HOME> is figured out from L<File::HomeDir/my_home>.
-
-=head2 Directory structure
-
-  $CONVOS_HOME/
-  $CONVOS_HOME/joe@example.com/                                 # one directory per user
-  $CONVOS_HOME/joe@example.com/user.json                        # user settings
-  $CONVOS_HOME/joe@example.com/irc-freenode/connection.json     # connection settings
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/02.log         # connection log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # conversation log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # conversation log
-
-Notes about the structure:
-
-=over 2
-
-=item * Easy to delete a user and all associated data.
-
-=item * Easy to delete a connection and all associated data.
-
-=item * One log file per month should not cause too big files.
-
-=item * Hard to delete a conversation thread. Ex: all conversations with "marcus".
-
-=item * Hard to search for messages between connections for a given date.
-
-=back
-
-=cut
-
 use Mojo::Base 'Convos::Core::Backend';
 use Mojo::Home;
 use Mojo::IOLoop::ForkCall ();
@@ -61,18 +14,6 @@ use Time::Piece;
 use Time::Seconds;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-=head1 ATTRIBUTES
-
-L<Convos::Core::Backend::File> inherits all attributes from
-L<Convos::Core::Backend> and implements the following new ones.
-
-=head2 home
-
-Holds a L<Mojo::Home> object which points to the root directory where data
-can be stored.
-
-=cut
-
 has home => sub { shift->_build_home };
 
 has _fc => sub {
@@ -80,17 +21,6 @@ has _fc => sub {
   $fc->on(error => sub { warn "[fc] $_[1]" });
   $fc;
 };
-
-=head1 METHODS
-
-L<Convos::Core::Backend::File> inherits all methods from
-L<Convos::Core::Backend> and implements the following new ones.
-
-=head2 connections
-
-See L<Convos::Core::Backend/connections>.
-
-=cut
 
 sub connections {
   my ($self, $user, $cb) = @_;
@@ -116,12 +46,6 @@ sub connections {
   return $self->tap($cb, '', \@connections);
 }
 
-=head2 delete_object
-
-See L<Convos::Core::Backend/delete_object>.
-
-=cut
-
 sub delete_object {
   my ($self, $obj, $cb) = @_;
   my $method = $obj->isa('Convos::Core::User') ? '_delete_user' : '_delete_connection';
@@ -139,12 +63,6 @@ sub delete_object {
 
   return $self;
 }
-
-=head2 messages
-
-See L<Convos::Core::Backend/messages>.
-
-=cut
 
 sub messages {
   my ($self, $obj, $query, $cb) = @_;
@@ -174,12 +92,6 @@ sub messages {
   return $self;
 }
 
-=head2 save_object
-
-See L<Convos::Core::Backend/save_object>.
-
-=cut
-
 sub save_object {
   my ($self, $obj, $cb) = @_;
   my $storage_file = $self->_settings_file($obj);
@@ -201,12 +113,6 @@ sub save_object {
 
   return $self;
 }
-
-=head2 users
-
-See L<Convos::Core::Backend/users>.
-
-=cut
 
 sub users {
   my ($self, $cb) = @_;
@@ -368,10 +274,91 @@ sub _setup {
   );
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Convos::Core::Backend::File - Backend for storing object to file
+
+=head1 DESCRIPTION
+
+L<Convos::Core::Backend::File> contains methods which is useful for objects
+that want to be persisted to disk or store state to disk.
+
+=head2 Where is data stored
+
+C<CONVOS_HOME> can be set to specify the root location for where to save
+data from objects. The default directory on *nix systems is something like this:
+
+  $HOME/.local/share/convos/
+
+C<$HOME> is figured out from L<File::HomeDir/my_home>.
+
+=head2 Directory structure
+
+  $CONVOS_HOME/
+  $CONVOS_HOME/joe@example.com/                                 # one directory per user
+  $CONVOS_HOME/joe@example.com/user.json                        # user settings
+  $CONVOS_HOME/joe@example.com/irc-freenode/connection.json     # connection settings
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/02.log         # connection log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # conversation log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # conversation log
+
+Notes about the structure:
+
+=over 2
+
+=item * Easy to delete a user and all associated data.
+
+=item * Easy to delete a connection and all associated data.
+
+=item * One log file per month should not cause too big files.
+
+=item * Hard to delete a conversation thread. Ex: all conversations with "marcus".
+
+=item * Hard to search for messages between connections for a given date.
+
+=back
+
+=head1 ATTRIBUTES
+
+L<Convos::Core::Backend::File> inherits all attributes from
+L<Convos::Core::Backend> and implements the following new ones.
+
+=head2 home
+
+Holds a L<Mojo::Home> object which points to the root directory where data
+can be stored.
+
+=head1 METHODS
+
+L<Convos::Core::Backend::File> inherits all methods from
+L<Convos::Core::Backend> and implements the following new ones.
+
+=head2 connections
+
+See L<Convos::Core::Backend/connections>.
+
+=head2 delete_object
+
+See L<Convos::Core::Backend/delete_object>.
+
+=head2 messages
+
+See L<Convos::Core::Backend/messages>.
+
+=head2 save_object
+
+See L<Convos::Core::Backend/save_object>.
+
+=head2 users
+
+See L<Convos::Core::Backend/users>.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

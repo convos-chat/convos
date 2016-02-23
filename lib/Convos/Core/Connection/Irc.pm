@@ -1,16 +1,5 @@
 package Convos::Core::Connection::Irc;
 
-=head1 NAME
-
-Convos::Core::Connection::Irc - IRC connection for Convos
-
-=head1 DESCRIPTION
-
-L<Convos::Core::Connection::Irc> is a connection class for L<Convos> which
-allow you to communicate over the IRC protocol.
-
-=cut
-
 no warnings 'utf8';
 use Mojo::Base 'Convos::Core::Connection';
 use Mojo::IRC::UA;
@@ -26,13 +15,6 @@ require Convos;
 sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 
 my $CHANNEL_RE = qr{[#&]};
-
-=head1 ATTRIBUTES
-
-L<Convos::Core::Connection::Irc> inherits all attributes from L<Convos::Core::Connection>
-and implements the following new ones.
-
-=cut
 
 has _irc => sub {
   my $self = shift;
@@ -76,17 +58,6 @@ has _irc => sub {
 
   $irc;
 };
-
-=head1 METHODS
-
-L<Convos::Core::Connection::Irc> inherits all methods from L<Convos::Core::Connection>
-and implements the following new ones.
-
-=head2 connect
-
-See L<Convos::Core::Connection/connect>.
-
-=cut
 
 sub connect {
   my ($self, $cb) = @_;
@@ -138,12 +109,6 @@ sub connect {
   return $self;
 }
 
-=head2 disconnect
-
-See L<Convos::Core::Connection/disconnect>.
-
-=cut
-
 sub disconnect {
   my ($self, $cb) = @_;
   Scalar::Util::weaken($self);
@@ -151,12 +116,6 @@ sub disconnect {
   $self->_irc->disconnect(sub { $self->state('disconnected')->$cb($_[1] || '') });
   $self;
 }
-
-=head2 join_conversation
-
-See L<Convos::Core::Connection/join_conversation>.
-
-=cut
 
 sub join_conversation {
   my $cb   = pop;
@@ -179,19 +138,6 @@ sub join_conversation {
   $self;
 }
 
-=head2 nick
-
-  $self = $self->nick($nick => sub { my ($self, $err) = @_; });
-  $self = $self->nick(sub { my ($self, $err, $nick) = @_; });
-  $nick = $self->nick;
-
-Used to set or get the nick for this connection. Setting this nick will change
-L</nick> and try to change the nick on server if connected. Getting this nick
-will retrieve the active nick on server if connected and fall back to returning
-L</nick>.
-
-=cut
-
 sub nick {
   my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
   my ($self, @nick) = @_;    # @nick will be empty list on "get"
@@ -203,22 +149,10 @@ sub nick {
   $self;
 }
 
-=head2 conversation
-
-Force C<$id> to be lowercase. See L<Convos::Core::Connection/conversation>.
-
-=cut
-
 sub conversation {
   my ($self, $id, @args) = @_;
   $self->SUPER::conversation(lc $id, @args);
 }
-
-=head2 rooms
-
-See L<Convos::Core::Connection/rooms>.
-
-=cut
 
 sub rooms {
   my ($self, $cb) = @_;
@@ -253,12 +187,6 @@ sub rooms {
 
   return $self;
 }
-
-=head2 send
-
-See L<Convos::Core::Connection/send>.
-
-=cut
 
 sub send {
   my ($self, $target, $message, $cb) = @_;
@@ -295,12 +223,6 @@ sub send {
   return $self;
 }
 
-=head2 topic
-
-See L<Convos::Core::Connection/topic>.
-
-=cut
-
 sub topic {
   my $cb   = pop;
   my $self = shift;
@@ -308,12 +230,6 @@ sub topic {
   $self->_irc->channel_topic(@_, sub { shift; $self->$cb(@_); });
   $self;
 }
-
-=head2 whois
-
-See L<Convos::Core::Connection/whois>.
-
-=cut
 
 sub whois {
   my ($self, $target, $cb) = @_;
@@ -620,10 +536,74 @@ sub DESTROY {
   $ioloop->remove($tid) if $tid = $self->{steal_nick_tid};
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Convos::Core::Connection::Irc - IRC connection for Convos
+
+=head1 DESCRIPTION
+
+L<Convos::Core::Connection::Irc> is a connection class for L<Convos> which
+allow you to communicate over the IRC protocol.
+
+=head1 ATTRIBUTES
+
+L<Convos::Core::Connection::Irc> inherits all attributes from L<Convos::Core::Connection>
+and implements the following new ones.
+
+=head1 METHODS
+
+L<Convos::Core::Connection::Irc> inherits all methods from L<Convos::Core::Connection>
+and implements the following new ones.
+
+=head2 connect
+
+See L<Convos::Core::Connection/connect>.
+
+=head2 disconnect
+
+See L<Convos::Core::Connection/disconnect>.
+
+=head2 join_conversation
+
+See L<Convos::Core::Connection/join_conversation>.
+
+=head2 nick
+
+  $self = $self->nick($nick => sub { my ($self, $err) = @_; });
+  $self = $self->nick(sub { my ($self, $err, $nick) = @_; });
+  $nick = $self->nick;
+
+Used to set or get the nick for this connection. Setting this nick will change
+L</nick> and try to change the nick on server if connected. Getting this nick
+will retrieve the active nick on server if connected and fall back to returning
+L</nick>.
+
+=head2 conversation
+
+Force C<$id> to be lowercase. See L<Convos::Core::Connection/conversation>.
+
+=head2 rooms
+
+See L<Convos::Core::Connection/rooms>.
+
+=head2 send
+
+See L<Convos::Core::Connection/send>.
+
+=head2 topic
+
+See L<Convos::Core::Connection/topic>.
+
+=head2 whois
+
+See L<Convos::Core::Connection/whois>.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

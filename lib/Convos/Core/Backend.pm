@@ -1,4 +1,44 @@
 package Convos::Core::Backend;
+use Mojo::Base 'Mojolicious::Plugins';
+
+has namespaces => sub { ['Convos::Core::Plugin'] };
+
+sub connections {
+  return [] if @_ == 1;
+  $_[0]->tap($_[2], '', []);
+}
+
+sub delete_object {
+  $_[0]->tap($_[2], '');
+}
+
+sub messages {
+  my ($self, $query, $cb) = @_;
+  $self->tap($cb, '', []);
+}
+
+sub new {
+  my $self = shift->SUPER::new(@_);
+  $self->_setup;
+  $self;
+}
+
+sub save_object {
+  my ($self, $obj, $cb) = @_;
+  $obj->$cb('') if $cb;
+  $self;
+}
+
+sub users {
+  return [] if @_ == 1;
+  $_[0]->tap($_[1], '', []);
+}
+
+sub _setup { }
+
+1;
+
+=encoding utf8
 
 =head1 NAME
 
@@ -8,10 +48,6 @@ Convos::Core::Backend - Convos storage backend
 
 L<Convos::Core::Backend> is a base class for storage backends. See
 L<Convos::Core::Backend::File> for code that actually perist data.
-
-=cut
-
-use Mojo::Base 'Mojolicious::Plugins';
 
 =head1 ATTRIBUTES
 
@@ -25,10 +61,6 @@ and implements the following new ones.
 
 Namespaces to load plugins from, defaults to C<Convos::Core::Plugin>.
 
-=cut
-
-has namespaces => sub { ['Convos::Core::Plugin'] };
-
 =head1 METHODS
 
 L<Convos::Core::Backend> inherits all methods from L<Mojolicious::Plugins>
@@ -40,24 +72,11 @@ and implements the following new ones.
 
 Used to find a list of connection names for a given L<$user|Convos::Core::User>.
 
-=cut
-
-sub connections {
-  return [] if @_ == 1;
-  $_[0]->tap($_[2], '', []);
-}
-
 =head2 delete_object
 
   $self = $self->delete_object($obj, sub { my ($self, $err) = @_ });
 
 This method is called to remove a given object from persistent storage.
-
-=cut
-
-sub delete_object {
-  $_[0]->tap($_[2], '');
-}
 
 =head2 messages
 
@@ -76,57 +95,23 @@ Possible C<%query>:
     match  => $regexp,   # filter messages by a regexp
   }
 
-=cut
-
-sub messages {
-  my ($self, $query, $cb) = @_;
-  $self->tap($cb, '', []);
-}
-
 =head2 new
 
 Will also call C<_setup()> after the object is created.
-
-=cut
-
-sub new {
-  my $self = shift->SUPER::new(@_);
-  $self->_setup;
-  $self;
-}
 
 =head2 save_object
 
   $self->save_object($obj, sub { my ($obj, $err) = @_; });
 
 This method is called to save a given object to persistent storage.
-=cut
-
-sub save_object {
-  my ($self, $obj, $cb) = @_;
-  $obj->$cb('') if $cb;
-  $self;
-}
-
 =head2 users
 
   $self = $self->users(sub { my ($self, $err, $users) = @_ });
 
 Used to find a list of user emails.
 
-=cut
-
-sub users {
-  return [] if @_ == 1;
-  $_[0]->tap($_[1], '', []);
-}
-
-sub _setup { }
-
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

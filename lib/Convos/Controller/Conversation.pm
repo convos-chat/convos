@@ -1,25 +1,5 @@
 package Convos::Controller::Conversation;
-
-=head1 NAME
-
-Convos::Controller::Conversation - Convos conversations
-
-=head1 DESCRIPTION
-
-L<Convos::Controller::Conversation> is a L<Mojolicious::Controller> with
-conversation related actions.
-
-=cut
-
 use Mojo::Base 'Mojolicious::Controller';
-
-=head1 METHODS
-
-=head2 embed
-
-Used to expand a URL into markup, using L<Mojolicious::Plugin::LinkEmbedder>.
-
-=cut
 
 sub embed {
   my $self = shift;
@@ -42,12 +22,6 @@ sub embed {
   );
 }
 
-=head2 join
-
-See L<Convos::Manual::API/joinConversation>.
-
-=cut
-
 sub join {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
@@ -69,12 +43,6 @@ sub join {
   );
 }
 
-=head2 list
-
-See L<Convos::Manual::API/listConversations>.
-
-=cut
-
 sub list {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
@@ -88,12 +56,6 @@ sub list {
 
   $self->$cb({conversations => \@conversations}, 200);
 }
-
-=head2 messages
-
-See L<Convos::Manual::API/messagesForConversation>.
-
-=cut
 
 sub messages {
   my ($self, $args, $cb) = @_;
@@ -115,23 +77,11 @@ sub messages {
   );
 }
 
-=head2 remove
-
-See L<Convos::Manual::API/removeConversation>.
-
-=cut
-
 sub remove {
   my ($self, $args, $cb) = @_;
   die 'TODO';
   $self->$cb({message => ''}, 200);
 }
-
-=head2 send
-
-See L<Convos::Manual::API/sendToConversation>.
-
-=cut
 
 sub send {
   my ($self, $args, $cb) = @_;
@@ -152,10 +102,47 @@ sub send {
   );
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Convos::Controller::Conversation - Convos conversations
+
+=head1 DESCRIPTION
+
+L<Convos::Controller::Conversation> is a L<Mojolicious::Controller> with
+conversation related actions.
+
+=head1 METHODS
+
+=head2 embed
+
+Used to expand a URL into markup, using L<Mojolicious::Plugin::LinkEmbedder>.
+
+=head2 join
+
+See L<Convos::Manual::API/joinConversation>.
+
+=head2 list
+
+See L<Convos::Manual::API/listConversations>.
+
+=head2 messages
+
+See L<Convos::Manual::API/messagesForConversation>.
+
+=head2 remove
+
+See L<Convos::Manual::API/removeConversation>.
+
+=head2 send
+
+See L<Convos::Manual::API/sendToConversation>.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

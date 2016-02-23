@@ -1,106 +1,8 @@
 package Convos;
-
-=head1 NAME
-
-Convos - Multiuser chat application
-
-=head1 VERSION
-
-0.01
-
-=head1 DESCRIPTION
-
-L<Convos> is a multiuser chat application built with L<Mojolicious>.
-
-It currently support the IRC protocol, but can be extended to support
-other protocols as well. Below is a list of the main documentation
-starting points for Convos:
-
-=over 2
-
-=item * L<Convos::Guides::Running>
-
-=item * L<Convos::Guides::Development>
-
-=item * L<Convos::Guides::API>
-
-=back
-
-=head2 Reference
-
-This is the module and documentation structure of L<Convos>:
-
-=over 2
-
-=item * L<Convos::Core>
-
-=over 2
-
-=item * L<Convos::Core::Backend>
-
-=over 2
-
-=item * L<Convos::Core::Backend::File>
-
-=back
-
-=item * L<Convos::Core::Connection>
-
-=over 2
-
-=item * L<Convos::Core::Connection::Irc>
-
-=back
-
-=item * L<Convos::Core::Conversation>
-
-=over 2
-
-=item * L<Convos::Core::Conversation::Direct>
-
-=item * L<Convos::Core::Conversation::Room>
-
-=back
-
-=item * L<Convos::Core::User>
-
-=back
-
-=item * I<Convos::Controller>
-
-=over 2
-
-=item * L<Convos::Controller::Connection>
-
-=item * L<Convos::Controller::Conversation>
-
-=item * L<Convos::Controller::Events>
-
-=item * L<Convos::Controller::Notifications>
-
-=item * L<Convos::Controller::User>
-
-=back
-
-=back
-
-=cut
-
 use Mojo::Base 'Mojolicious';
 use Convos::Core;
 
 our $VERSION = '0.01';
-
-=head1 ATTRIBUTES
-
-L<Convos> inherits all attributes from L<Mojolicious> and implements
-the following new ones.
-
-=head2 core 
-
-Holds a L<Convos::Core> object.
-
-=cut
 
 has core => sub {
   my $self    = shift;
@@ -110,17 +12,6 @@ has core => sub {
 };
 
 has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
-
-=head1 METHODS
-
-L<Convos> inherits all methods from L<Mojolicious> and implements
-the following new ones.
-
-=head2 startup
-
-This method sets up the application.
-
-=cut
 
 sub startup {
   my $self   = shift;
@@ -256,6 +147,112 @@ sub _setup_settings {
     ||= $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';    # chat.freenode.net:6697 instead of localhost?
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Convos - Multiuser chat application
+
+=head1 VERSION
+
+0.01
+
+=head1 DESCRIPTION
+
+L<Convos> is a multiuser chat application built with L<Mojolicious>.
+
+It currently support the IRC protocol, but can be extended to support
+other protocols as well. Below is a list of the main documentation
+starting points for Convos:
+
+=over 2
+
+=item * L<Convos::Guides::Running>
+
+=item * L<Convos::Guides::Development>
+
+=item * L<Convos::Guides::API>
+
+=back
+
+=head2 Reference
+
+This is the module and documentation structure of L<Convos>:
+
+=over 2
+
+=item * L<Convos::Core>
+
+=over 2
+
+=item * L<Convos::Core::Backend>
+
+=over 2
+
+=item * L<Convos::Core::Backend::File>
+
+=back
+
+=item * L<Convos::Core::Connection>
+
+=over 2
+
+=item * L<Convos::Core::Connection::Irc>
+
+=back
+
+=item * L<Convos::Core::Conversation>
+
+=over 2
+
+=item * L<Convos::Core::Conversation::Direct>
+
+=item * L<Convos::Core::Conversation::Room>
+
+=back
+
+=item * L<Convos::Core::User>
+
+=back
+
+=item * I<Convos::Controller>
+
+=over 2
+
+=item * L<Convos::Controller::Connection>
+
+=item * L<Convos::Controller::Conversation>
+
+=item * L<Convos::Controller::Events>
+
+=item * L<Convos::Controller::Notifications>
+
+=item * L<Convos::Controller::User>
+
+=back
+
+=back
+
+=head1 ATTRIBUTES
+
+L<Convos> inherits all attributes from L<Mojolicious> and implements
+the following new ones.
+
+=head2 core 
+
+Holds a L<Convos::Core> object.
+
+=head1 METHODS
+
+L<Convos> inherits all methods from L<Mojolicious> and implements
+the following new ones.
+
+=head2 startup
+
+This method sets up the application.
+
 =head1 COPYRIGHT AND LICENSE
 
 =head2 Material design icons
@@ -282,8 +279,6 @@ Jan Henning Thorsen - C<jhthorsen@cpan.org>
 Marcus Ramberg - C<marcus@nordaaker.com>
 
 =cut
-
-1;
 
 __DATA__
 @@ app.html.ep

@@ -1,4 +1,91 @@
 package Convos::Core;
+use Mojo::Base -base;
+use Mojolicious::Plugins;
+use Convos::Core::Backend;
+use Convos::Core::User;
+use List::Util 'pairmap';
+use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
+
+sub backend { shift->{backend} ||= Convos::Core::Backend->new }
+
+sub connect {
+  my ($self, $connection) = @_;
+  my $host = $connection->url->host;
+
+  $connection->state('connecting');
+
+  if ($host eq 'localhost') {
+    $connection->connect(sub { });
+  }
+  elsif ($self->{connect_queue}{$host}) {
+    push @{$self->{connect_queue}{$host}}, $connection;
+  }
+  else {
+    $self->{connect_queue}{$host} = [];
+    $connection->connect(sub { });
+  }
+
+  return $self;
+}
+
+sub start {
+  my $self = shift;
+
+  return $self if !@_ and $self->{started}++;
+
+  # Want this method to be blocking to make sure everything is ready
+  # before processing web requests.
+  for my $user (@{$self->backend->users}) {
+    $self->user($user);
+    for my $connection (@{$self->backend->connections($user)}) {
+      $user->connection($connection);
+      $self->connect($connection) unless $connection->state eq 'disconnected';
+    }
+  }
+
+  Scalar::Util::weaken($self);
+  $self->{connect_tid} = Mojo::IOLoop->timer(
+    $ENV{CONVOS_CONNECT_DELAY} || 3,
+    sub {
+      for my $host (%{$self->{connect_queue} || {}}) {
+        my $connection = shift @{$self->{connect_queue}{$host}} or next;
+        $connection->connect(sub { }) if $connection->state ne 'disconnected' and $connection->url->host eq $host;
+      }
+    }
+  );
+
+  return $self;
+}
+
+sub user {
+  my ($self, $obj) = @_;
+
+  # Get
+  return $self->{users}{$obj} unless ref $obj;
+
+  # Add
+  Scalar::Util::weaken($obj->{core} = $self);
+  $obj = Convos::Core::User->new($obj) if ref $obj eq 'HASH';
+
+  die "Invalid email $obj->{email}. Need to match /.\@./." unless $obj->email =~ /.\@./;
+  die "User already exists." if $self->{users}{$obj->email};
+
+  $self->{users}{$obj->email} = $obj;
+  warn "[$obj->{email}] Emit user" if DEBUG;
+  $self->backend->emit(user => $obj);
+  return $obj;
+}
+
+sub users { [values %{$_[0]->{users} || {}}] }
+
+sub DESTROY {
+  my $self = shift;
+  Mojo::IOLoop->remove($self->{connect_tid}) if $self->{connect_tid};
+}
+
+1;
+
+=encoding utf8
 
 =head1 NAME
 
@@ -58,15 +145,6 @@ This represents a conversation with other users.
 
 All the child objects have pointers back to the parent object.
 
-=cut
-
-use Mojo::Base -base;
-use Mojolicious::Plugins;
-use Convos::Core::Backend;
-use Convos::Core::User;
-use List::Util 'pairmap';
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
-
 =head1 ATTRIBUTES
 
 L<Convos::Core> inherits all attributes from L<Mojo::Base> and implements
@@ -77,10 +155,6 @@ the following new ones.
   $obj = $self->backend;
 
 Holds a L<Convos::Core::Backend> object.
-
-=cut
-
-sub backend { shift->{backend} ||= Convos::Core::Backend->new }
 
 =head1 METHODS
 
@@ -98,65 +172,12 @@ The reason for queuing connections is to prevent flooding the server.
 
 Note: Connections to "localhost" will not be delayed.
 
-=cut
-
-sub connect {
-  my ($self, $connection) = @_;
-  my $host = $connection->url->host;
-
-  $connection->state('connecting');
-
-  if ($host eq 'localhost') {
-    $connection->connect(sub { });
-  }
-  elsif ($self->{connect_queue}{$host}) {
-    push @{$self->{connect_queue}{$host}}, $connection;
-  }
-  else {
-    $self->{connect_queue}{$host} = [];
-    $connection->connect(sub { });
-  }
-
-  return $self;
-}
-
 =head2 start
 
   $self = $self->start;
 
 Will start the backend. This means finding all users and start connections
 if state is not "disconnected".
-
-=cut
-
-sub start {
-  my $self = shift;
-
-  return $self if !@_ and $self->{started}++;
-
-  # Want this method to be blocking to make sure everything is ready
-  # before processing web requests.
-  for my $user (@{$self->backend->users}) {
-    $self->user($user);
-    for my $connection (@{$self->backend->connections($user)}) {
-      $user->connection($connection);
-      $self->connect($connection) unless $connection->state eq 'disconnected';
-    }
-  }
-
-  Scalar::Util::weaken($self);
-  $self->{connect_tid} = Mojo::IOLoop->timer(
-    $ENV{CONVOS_CONNECT_DELAY} || 3,
-    sub {
-      for my $host (%{$self->{connect_queue} || {}}) {
-        my $connection = shift @{$self->{connect_queue}{$host}} or next;
-        $connection->connect(sub { }) if $connection->state ne 'disconnected' and $connection->url->host eq $host;
-      }
-    }
-  );
-
-  return $self;
-}
 
 =head2 user
 
@@ -168,46 +189,14 @@ a "user" event:
 
   $self->backend->emit(user => $user);
 
-=cut
-
-sub user {
-  my ($self, $obj) = @_;
-
-  # Get
-  return $self->{users}{$obj} unless ref $obj;
-
-  # Add
-  Scalar::Util::weaken($obj->{core} = $self);
-  $obj = Convos::Core::User->new($obj) if ref $obj eq 'HASH';
-
-  die "Invalid email $obj->{email}. Need to match /.\@./." unless $obj->email =~ /.\@./;
-  die "User already exists." if $self->{users}{$obj->email};
-
-  $self->{users}{$obj->email} = $obj;
-  warn "[$obj->{email}] Emit user" if DEBUG;
-  $self->backend->emit(user => $obj);
-  return $obj;
-}
-
 =head2 users
 
   $users = $self->users;
 
 Returns an array-ref of of L<Convos::Core::User> objects.
 
-=cut
-
-sub users { [values %{$_[0]->{users} || {}}] }
-
-sub DESTROY {
-  my $self = shift;
-  Mojo::IOLoop->remove($self->{connect_tid}) if $self->{connect_tid};
-}
-
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;
