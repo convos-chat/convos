@@ -70,10 +70,12 @@ DISTRIBUTIONS
       File::Spec 0
       Test::More 0
       perl 5.006001
-  Mojo-IRC-0.27
-    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.27.tar.gz
+  Mojo-IRC-0.25
+    pathname: J/JH/JHTHORSEN/Mojo-IRC-0.25.tar.gz
     provides:
-      Mojo::IRC 0.27
+      Mojo::IRC 0.25
+      Mojo::IRC::UA undef
+      Test::Mojo::IRC undef
     requirements:
       ExtUtils::MakeMaker 0
       IRC::Utils 0.12
