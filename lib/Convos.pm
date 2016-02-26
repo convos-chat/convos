@@ -43,7 +43,7 @@ sub startup {
 
   # Expand links into rich content
   $self->plugin('LinkEmbedder');
-  $r->get('/api/embed')->to('conversation#embed');
+  $r->get('/api/embed')->to('dialogue#embed');
 
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
@@ -203,15 +203,7 @@ This is the module and documentation structure of L<Convos>:
 
 =back
 
-=item * L<Convos::Core::Conversation>
-
-=over 2
-
-=item * L<Convos::Core::Conversation::Direct>
-
-=item * L<Convos::Core::Conversation::Room>
-
-=back
+=item * L<Convos::Core::Dialogue>
 
 =item * L<Convos::Core::User>
 
@@ -223,7 +215,7 @@ This is the module and documentation structure of L<Convos>:
 
 =item * L<Convos::Controller::Connection>
 
-=item * L<Convos::Controller::Conversation>
+=item * L<Convos::Controller::Dialogue>
 
 =item * L<Convos::Controller::Events>
 

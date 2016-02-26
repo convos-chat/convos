@@ -13,7 +13,7 @@ use constant BCRYPT_BASE_SETTINGS => do {
   join '', '$2', $nul, '$', $cost, '$';
 };
 
-sub EVENTS {qw( conversation me message state users )}
+sub EVENTS {qw(dialogue me message state users)}
 
 has avatar => '';
 sub core  { shift->{core}  or die 'core is required in constructor' }
@@ -112,7 +112,7 @@ sub INFLATE {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{registered} ||= Mojo::Date->new->to_datetime;
-  my $json = {map { ($_, $self->{$_} // '') } qw( avatar email password registered )};
+  my $json = {map { ($_, $self->{$_} // '') } qw(avatar email password registered)};
   delete $json->{password} unless $persist;
   $json;
 }

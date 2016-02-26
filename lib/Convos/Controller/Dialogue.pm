@@ -1,4 +1,4 @@
-package Convos::Controller::Conversation;
+package Convos::Controller::Dialogue;
 use Mojo::Base 'Mojolicious::Controller';
 
 sub embed {
@@ -28,7 +28,7 @@ sub join {
   my $connection = $user->connection($args->{connection_id}) or return $self->$cb({}, 404);
 
   $self->delay(
-    sub { $connection->join_conversation($args->{body}{name}, shift->begin) },
+    sub { $connection->join_dialogue($args->{body}{name}, shift->begin) },
     sub {
       my ($delay, $err, $room) = @_;
       return $self->$cb($self->invalid_request($err, '/body/name'), 400) if $err;
@@ -46,29 +46,29 @@ sub join {
 sub list {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my @conversations;
+  my @dialogues;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-    for my $conversation (sort { $a->id cmp $b->id } @{$connection->conversations}) {
-      push @conversations, $conversation->TO_JSON if $conversation->active;
+    for my $dialogue (sort { $a->id cmp $b->id } @{$connection->dialogues}) {
+      push @dialogues, $dialogue->TO_JSON if $dialogue->active;
     }
   }
 
-  $self->$cb({conversations => \@conversations}, 200);
+  $self->$cb({dialogues => \@dialogues}, 200);
 }
 
 sub messages {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection   = $user->connection($args->{connection_id})           or return $self->$cb({}, 404);
-  my $conversation = $connection->conversation($args->{conversation_id}) or return $self->$cb({}, 404);
+  my $connection = $user->connection($args->{connection_id})   or return $self->$cb({}, 404);
+  my $dialogue   = $connection->dialogue($args->{dialogue_id}) or return $self->$cb({}, 404);
   my %query;
 
   # TODO:
   $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw( after before level limit match );
 
   $self->delay(
-    sub { $conversation->messages(\%query, shift->begin) },
+    sub { $dialogue->messages(\%query, shift->begin) },
     sub {
       my ($delay, $err, $messages) = @_;
       die $err if $err;
@@ -93,7 +93,7 @@ sub send {
   }
 
   $self->delay(
-    sub { $connection->send($args->{conversation_id}, $args->{body}{command}, shift->begin); },
+    sub { $connection->send($args->{dialogue_id}, $args->{body}{command}, shift->begin); },
     sub {
       my ($delay, $err) = @_;
       return $self->$cb($args->{body}, 200) unless $err;
@@ -108,12 +108,12 @@ sub send {
 
 =head1 NAME
 
-Convos::Controller::Conversation - Convos conversations
+Convos::Controller::Dialogue - Convos dialogues
 
 =head1 DESCRIPTION
 
-L<Convos::Controller::Conversation> is a L<Mojolicious::Controller> with
-conversation related actions.
+L<Convos::Controller::Dialogue> is a L<Mojolicious::Controller> with
+dialogue related actions.
 
 =head1 METHODS
 
@@ -123,23 +123,23 @@ Used to expand a URL into markup, using L<Mojolicious::Plugin::LinkEmbedder>.
 
 =head2 join
 
-See L<Convos::Manual::API/joinConversation>.
+See L<Convos::Manual::API/joinDialogue>.
 
 =head2 list
 
-See L<Convos::Manual::API/listConversations>.
+See L<Convos::Manual::API/listDialogues>.
 
 =head2 messages
 
-See L<Convos::Manual::API/messagesForConversation>.
+See L<Convos::Manual::API/messagesForDialogue>.
 
 =head2 remove
 
-See L<Convos::Manual::API/removeConversation>.
+See L<Convos::Manual::API/removeDialogue>.
 
 =head2 send
 
-See L<Convos::Manual::API/sendToConversation>.
+See L<Convos::Manual::API/sendToDialogue>.
 
 =head1 AUTHOR
 

@@ -3,9 +3,7 @@ use Mojo::IOLoop;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-my @date = (localtime)[5, 4];
-$date[0] += 1900;
-$date[1]++;
+my @date = split '-', Time::Piece->new->strftime('%Y-%m');
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $connection = $core->user({email => 'superman@example.com'})->connection({name => 'localhost', protocol => 'irc'});

@@ -23,7 +23,7 @@
   }
 
   sendMessage(e) {
-    opts.conversation.send(this.message.value, function(err) {
+    opts.dialogue.send(this.message.value, function(err) {
       if (err) console.log(err);
     }.bind(this));
     this.message.value = '';
@@ -37,9 +37,9 @@
 
   this.on('update', function() {
     try {
-      var state = opts.conversation.connection().state();
+      var state = opts.dialogue.connection().state();
       if (state == 'connected') {
-        this.placeholder = 'What do you want to say to ' + this.opts.conversation.name() + '?';
+        this.placeholder = 'What do you want to say to ' + this.opts.dialogue.name() + '?';
       }
       else {
         this.placeholder = 'State is "' + state + '".';

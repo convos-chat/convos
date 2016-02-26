@@ -2,7 +2,7 @@
   Convos.User = function(attrs) {
     if (attrs) this.update(attrs);
     riot.observable(this);
-    this._conversations = {};
+    this._dialogues = {};
     this._connections = {};
     this._api = Convos.api;
     this._listenForEvents();
@@ -44,22 +44,22 @@
     return Object.keys(c).map(function(k) { return c[k]; });
   };
 
-  // Get or create a single Convos.ConversationXxx object on client side
-  // Get:    c = user.conversation(id)
-  // Create: c = user.conversation(attrs)
-  proto.conversation = function(obj) {
-    if (typeof obj != 'object') return this._conversations[obj];
+  // Get or create a single Convos.Dialogue object on client side
+  // Get:    d = user.dialogue(id)
+  // Create: d = user.dialogue(attrs)
+  proto.dialogue = function(obj) {
+    if (typeof obj != 'object') return this._dialogues[obj];
     obj.connection = this._connections[obj.connection_id];
-    var c = new Convos.Conversation(obj);
-    if (this._conversations[c.id()]) throw 'Conversation already exists.';
-    this._conversations[c.id()] = c;
-    this.trigger('conversation', c);
-    return c;
+    var d = new Convos.Dialogue(obj);
+    if (this._dialogues[d.id()]) throw 'Dialogue already exists.';
+    this._dialogues[d.id()] = d;
+    this.trigger('dialogue', d);
+    return d;
   };
 
-  proto.conversations = function() {
-    var c = this._conversations;
-    return Object.keys(c).map(function(k) { return c[k]; });
+  proto.dialogues = function() {
+    var d = this._dialogues;
+    return Object.keys(d).map(function(k) { return d[k]; });
   };
 
   // Get user settings from server
@@ -103,9 +103,9 @@
     this._api.listConnections({}, function(err, xhr) {
       if (err) return self.trigger('error', err);
       xhr.body.connections.forEach(function(c) { self.connection(c); });
-      self._api.listConversations({}, function(err, xhr) {
+      self._api.listDialogues({}, function(err, xhr) {
         if (err) return self.trigger('error', err);
-        xhr.body.conversations.forEach(function(c) { self.conversation(c); });
+        xhr.body.dialogues.forEach(function(d) { self.dialogue(d); });
         self.trigger('refreshed');
       });
     });
@@ -129,8 +129,8 @@
     this.ws().on('json', function(e) {
       switch (e.type) {
         case 'message':
-          var c = this._conversations[e.object.id];
-          if (c) c.addMessage(e.data[0]);
+          var d = this._dialogues[e.object.id];
+          if (d) d.addMessage(e.data[0]);
           break;
       }
     }.bind(this));

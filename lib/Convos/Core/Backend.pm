@@ -104,6 +104,7 @@ Will also call C<_setup()> after the object is created.
   $self->save_object($obj, sub { my ($obj, $err) = @_; });
 
 This method is called to save a given object to persistent storage.
+
 =head2 users
 
   $self = $self->users(sub { my ($self, $err, $users) = @_ });

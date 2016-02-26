@@ -4636,48 +4636,49 @@ chat {
   display: flex;
   flex-direction: row-reverse;
   height: 100vh; }
-  chat conversation {
+  chat dialogue {
     flex-grow: 1;
     display: flex;
-    flex-direction: column; }
-    chat conversation .conversation-container {
+    flex-direction: column;
+    max-width: 900px; }
+    chat dialogue .dialogue-container {
       flex-grow: 1; }
   chat nav {
     width: 300px;
     display: flex;
     flex-direction: column; }
-    chat nav sidebar-conversations {
+    chat nav sidebar-dialogues {
       flex-grow: 1; }
 
-conversation {
+dialogue {
   border-right: 1px solid #f0f0f0;
   padding: 15px 20px 0 20px; }
-  conversation .conversation-container {
+  dialogue .dialogue-container {
     position: relative; }
-    conversation .conversation-container > h5 {
+    dialogue .dialogue-container > h5 {
       margin-top: 0; }
-    conversation .conversation-container > .actions {
+    dialogue .dialogue-container > .actions {
       position: absolute;
       top: 0;
       right: -4px; }
-  conversation ol.conversation {
+  dialogue ol.dialogue {
     list-style-type: none;
     padding: 0;
     border: 0; }
-    conversation ol.conversation .collection-item {
+    dialogue ol.dialogue .collection-item {
       padding: 10px 0; }
-    conversation ol.conversation .ts {
+    dialogue ol.dialogue .ts {
       color: #757575;
       font-size: 0.8rem;
       position: absolute;
       top: 10px;
       right: 0px; }
-    conversation ol.conversation .message {
+    dialogue ol.dialogue .message {
       max-width: 820px; }
-      conversation ol.conversation .message a {
+      dialogue ol.dialogue .message a {
         color: inherit;
         text-decoration: underline; }
-      conversation ol.conversation .message a:hover {
+      dialogue ol.dialogue .message a:hover {
         text-decoration: none; }
 
 user-input .actions {
@@ -4700,12 +4701,12 @@ nav .collection {
   margin: 5px 0;
   border: 0; }
 
-nav sidebar-conversations,
+nav sidebar-dialogues,
 nav sidebar-notifications,
 nav sidebar-search {
   border-bottom: 4px solid #e5e5e5; }
 
-nav sidebar-conversations .on {
+nav sidebar-dialogues .on {
   display: block;
   font-size: 0.9rem;
   color: #777;

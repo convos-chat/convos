@@ -2,7 +2,7 @@ package Convos::Core::Connection;
 use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::Loader 'load_class';
 use Mojo::URL;
-use Convos::Core::Conversation::Direct;
+use Convos::Core::Dialogue;
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 sub id { lc sprintf '%s-%s', $_[0]->protocol, $_[0]->name }
@@ -18,35 +18,35 @@ sub user { shift->{user} }
 
 sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" not implemented.'); }
 
-sub conversation {
+sub dialogue {
   my ($self, $id, $attr) = @_;
 
   if ($attr) {
-    my $conversation = $self->{conversations}{$id} ||= do {
-      my $conversation = $self->_conversation({id => $id});
-      Scalar::Util::weaken($conversation->{connection});
-      warn "[Convos::Core::User] Emit conversation: id=$id\n" if DEBUG;
-      $self->emit(conversation => $conversation);
-      $conversation;
+    my $dialogue = $self->{dialogues}{$id} ||= do {
+      my $dialogue = $self->_dialogue({id => $id});
+      Scalar::Util::weaken($dialogue->{connection});
+      warn "[Convos::Core::User] Emit dialogue: id=$id\n" if DEBUG;
+      $self->emit(dialogue => $dialogue);
+      $dialogue;
     };
-    $conversation->{$_} = $attr->{$_} for keys %$attr;
-    return $conversation;
+    $dialogue->{$_} = $attr->{$_} for keys %$attr;
+    return $dialogue;
   }
   else {
-    return $self->{conversations}{$id} || $self->_conversation({id => $id});
+    return $self->{dialogues}{$id} || $self->_dialogue({id => $id});
   }
 }
 
-sub conversations {
+sub dialogues {
   my $self = shift;
-  return [values %{$self->{conversations} || {}}];
+  return [values %{$self->{dialogues} || {}}];
 }
 
 sub disconnect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "disconnect" not implemented.'); }
 
-sub join_conversation {
+sub join_dialogue {
   my ($self, $cb) = (shift, pop);
-  $self->tap($cb, 'Method "join_conversation" not implemented.');
+  $self->tap($cb, 'Method "join_dialogue" not implemented.');
 }
 
 sub new {
@@ -87,13 +87,10 @@ sub state {
 
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
-sub _conversation {
+sub _dialogue {
   my ($self, $args) = @_;
-  die 'Cannot create conversation without class' unless $args->{class};
-  my $e = load_class $args->{class};
-  die $e || "Not found: $args->{class}" if $e;
   $args->{connection} = $self;
-  (delete $args->{class})->new($args);
+  Convos::Core::Dialogue->new($args);
 }
 
 sub _userinfo {
@@ -106,7 +103,7 @@ sub _userinfo {
 
 sub INFLATE {
   my ($self, $attrs) = @_;
-  $self->conversation($_->{id}, $_) for @{delete($attrs->{conversations}) || []};
+  $self->dialogue($_->{id}, $_) for @{delete($attrs->{dialogues}) || []};
   $self->{$_} = $attrs->{$_} for keys %$attrs;
   $self;
 }
@@ -119,7 +116,7 @@ sub TO_JSON {
   $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
 
   if ($persist) {
-    $json->{conversations} = [map { $_->TO_JSON($persist) } @{$self->conversations}];
+    $json->{dialogues} = [map { $_->TO_JSON($persist) } @{$self->dialogues}];
   }
 
   $json;
@@ -141,11 +138,11 @@ See also L<Convos::Core::Connection::Irc>.
 
 =head1 EVENTS
 
-=head2 conversation
+=head2 dialogue
 
-  $self->on(conversation => sub { my ($self, $conversation) = @_; });
+  $self->on(dialogue => sub { my ($self, $dialogue) = @_; });
 
-Emitted when a new L<$conversation|Convos::Core::Conversation> is created.
+Emitted when a new L<$dialogue|Convos::Core::Dialogue> is created.
 
 =head2 me
 
@@ -167,9 +164,9 @@ Note that this hash is L<Convos::Core::Connection::Irc> specific.
 =head2 message
 
   $self->on(message => sub { my ($self, $self, $msg) = @_; });
-  $self->on(message => sub { my ($self, $conversation, $msg) = @_; });
+  $self->on(message => sub { my ($self, $dialogue, $msg) = @_; });
 
-Emitted when a connection or conversation receives a new message. C<$msg>
+Emitted when a connection or dialogue receives a new message. C<$msg>
 will contain:
 
   {
@@ -187,9 +184,9 @@ Emitted when the connection state change.
 
 =head2 users
 
-  $self->on(state => sub { my ($self, $conversation, $meta) = @_; });
+  $self->on(state => sub { my ($self, $dialogue, $meta) = @_; });
 
-Emitted when the list of users change in a conversation. C<$meta> will contain
+Emitted when the list of users change in a dialogue. C<$meta> will contain
 information about the change:
 
   {join => $nick}
@@ -245,18 +242,18 @@ the following new ones.
 
 Used to connect to L</url>. Meant to be overloaded in a subclass.
 
-=head2 conversation
+=head2 dialogue
 
-  $conversation = $self->conversation($id);            # get
-  $conversation = $self->conversation($id => \%attrs); # create/update
+  $dialogue = $self->dialogue($id);            # get
+  $dialogue = $self->dialogue($id => \%attrs); # create/update
 
-Will return a L<Convos::Core::Conversation> object, identified by C<$id>.
+Will return a L<Convos::Core::Dialogue> object, identified by C<$id>.
 
-=head2 conversations
+=head2 dialogues
 
-  $objs = $self->conversations;
+  $objs = $self->dialogues;
 
-Returns an array-ref of of L<Convos::Core::Conversation> objects.
+Returns an array-ref of of L<Convos::Core::Dialogue> objects.
 
 =head2 disconnect
 
@@ -264,11 +261,11 @@ Returns an array-ref of of L<Convos::Core::Conversation> objects.
 
 Used to disconnect from server. Meant to be overloaded in a subclass.
 
-=head2 join_conversation
+=head2 join_dialogue
 
-  $self = $self->join_conversation("#some_channel", sub { my ($self, $err) = @_; });
+  $self = $self->join_dialogue("#some_channel", sub { my ($self, $err) = @_; });
 
-Used to create a new conversation. See also L</conversation> event.
+Used to create a new dialogue. See also L</dialogue> event.
 
 =head2 new
 
@@ -281,7 +278,7 @@ if L</protocol> is part of the input C<%attrs>.
 
   $self = $self->rooms(sub { my ($self, $err, $list) = @_; });
 
-Used to retrieve a list of L<Convos::Core::Conversation::Room> objects for the
+Used to retrieve a list of L<Convos::Core::Dialogue> objects for the
 given connection.
 
 =head2 save
@@ -311,10 +308,10 @@ process of connecting or that it want to connect.
 
 =head2 topic
 
-  $self = $self->topic($conversation, sub { my ($self, $err, $topic) = @_; });
-  $self = $self->topic($conversation => $topic, sub { my ($self, $err) = @_; });
+  $self = $self->topic($dialogue, sub { my ($self, $err, $topic) = @_; });
+  $self = $self->topic($dialogue => $topic, sub { my ($self, $err) = @_; });
 
-Used to retrieve or set topic for a conversation.
+Used to retrieve or set topic for a dialogue.
 
 =head1 AUTHOR
 

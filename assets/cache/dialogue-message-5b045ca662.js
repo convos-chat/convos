@@ -1,4 +1,4 @@
-riot.tag2('conversation-message', '<div class="message" name="message" title="{timestring(ts)}"></div>', '', '', function(opts) {
+riot.tag2('dialogue-message', '<div class="message" name="message" title="{timestring(ts)}"></div>', '', '', function(opts) {
   mixin.time(this);
 
   this.on('mount', function() {

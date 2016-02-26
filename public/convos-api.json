@@ -25,13 +25,13 @@
       "type": "string",
       "description": "A unique connection identifier"
     },
-    "conversation_id": {
-      "name": "conversation_id",
+    "dialogue_id": {
+      "name": "dialogue_id",
       "in": "path",
       "default": "",
       "required": true,
       "type": "string",
-      "description": "The name of the person/chat conversation"
+      "description": "The name of the person or room"
     },
     "ident": {
       "name": "ident",
@@ -94,7 +94,7 @@
     },
     "/connection/{connection_id}/rooms": {
       "get": {
-        "tags": [ "conversation" ],
+        "tags": [ "dialogue" ],
         "summary": "Get a list of all available chat rooms.",
         "operationId": "roomsByConnection",
         "parameters": [
@@ -106,7 +106,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Conversation" } }
+                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Dialogue" } }
               }
             }
           },
@@ -117,18 +117,18 @@
         }
       }
     },
-    "/connection/{connection_id}/conversation/{conversation_id}": {
+    "/connection/{connection_id}/dialogue/{dialogue_id}": {
       "delete": {
-        "tags": [ "conversation" ],
-        "summary": "Remove (part) a conversation.",
-        "operationId": "removeConversation",
+        "tags": [ "dialogue" ],
+        "summary": "Remove (part) a dialogue.",
+        "operationId": "removeDialogue",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" }
+          { "$ref": "#/parameters/dialogue_id" }
         ],
         "responses": {
           "200": {
-            "description": "A conversation.",
+            "description": "A dialogue.",
             "schema": { "$ref": "#/definitions/Success" }
           },
           "default": {
@@ -138,14 +138,14 @@
         }
       }
     },
-    "/connection/{connection_id}/conversation/{conversation_id}/messages": {
+    "/connection/{connection_id}/dialogue/{dialogue_id}/messages": {
       "get": {
-        "tags": [ "conversation" ],
+        "tags": [ "dialogue" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
-        "operationId": "messagesByConversation",
+        "operationId": "messagesByDialogue",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/dialogue_id" },
           { "name": "after", "in": "query", "type": "string", "format": "datetime", "description": "Find messages after a given ISO 8601 timestamp" },
           { "name": "before", "in": "query", "type": "string", "format": "datetime", "description": "Find messages before a given ISO 8601 timestamp" },
           { "name": "level", "in": "query", "type": "string", "description": "debug, info (default), warn, error" },
@@ -169,14 +169,14 @@
         }
       }
     },
-    "/connection/{connection_id}/conversation/{conversation_id}/send": {
+    "/connection/{connection_id}/dialogue/{dialogue_id}/send": {
       "post": {
         "tags": [ "chat" ],
         "summary": "Send a message to a target.",
-        "operationId": "sendToConversation",
+        "operationId": "sendToDialogue",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/conversation_id" },
+          { "$ref": "#/parameters/dialogue_id" },
           {
             "name": "body",
             "in": "body",
@@ -196,11 +196,11 @@
         }
       }
     },
-    "/connection/{connection_id}/conversations": {
+    "/connection/{connection_id}/dialogues": {
       "post": {
-        "tags": [ "conversation" ],
-        "summary": "Join a conversation.",
-        "operationId": "joinConversation",
+        "tags": [ "dialogue" ],
+        "summary": "Join a dialogue.",
+        "operationId": "joinDialogue",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           {
@@ -218,8 +218,8 @@
         ],
         "responses": {
           "200": {
-            "description": "A conversation.",
-            "schema": { "$ref": "#/definitions/Conversation" }
+            "description": "A dialogue.",
+            "schema": { "$ref": "#/definitions/Dialogue" }
           },
           "default": {
             "description": "Internal server error.",
@@ -281,20 +281,20 @@
         }
       }
     },
-    "/conversations": {
+    "/dialogues": {
       "get": {
-        "tags": [ "conversation" ],
-        "summary": "Get a list of all conversations.",
-        "operationId": "listConversations",
+        "tags": [ "dialogue" ],
+        "summary": "Get a list of all dialogues.",
+        "operationId": "listDialogues",
         "responses": {
           "200": {
             "description": "List of messages.",
             "schema": {
               "type": "object",
               "properties": {
-                "conversations": {
+                "dialogues": {
                   "type": "array",
-                  "items": { "$ref": "#/definitions/Conversation" }
+                  "items": { "$ref": "#/definitions/Dialogue" }
                 }
               }
             }
@@ -525,10 +525,10 @@
         "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
     },
-    "Conversation": {
+    "Dialogue": {
       "required": ["connection_id", "name"],
       "properties": {
-        "connection_id": { "type": "string", "description": "Unique identifier for the connection this conversation is part of" },
+        "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialogue is part of" },
         "name": { "type": "string", "description": "Name of the room or person" },
         "topic": { "type": "string", "description": "The subjec/topic for this room" },
         "users": {

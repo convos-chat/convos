@@ -143,13 +143,13 @@ Error.
     ]
   },
 
-=head2 joinConversation
+=head2 joinDialogue
 
-Join a conversation.
+Join a dialogue.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{connection_id}/conversations
+  POST http://demo.convos.by/api/connection/{connection_id}/dialogues
 
 =head3 Parameters
 
@@ -170,10 +170,10 @@ Join a conversation.
 
 =head4 200 - OK
 
-A conversation.
+A dialogue.
 
   {
-    "connection_id": string, // Unique identifier for the connection this conversation is part of
+    "connection_id": string, // Unique identifier for the connection this dialogue is part of
     "name": string, // Name of the room or person
     "topic": string, // The subjec/topic for this room
     "users":     {
@@ -239,13 +239,13 @@ Error.
     ]
   },
 
-=head2 listConversations
+=head2 listDialogues
 
-Get a list of all conversations.
+Get a list of all dialogues.
 
 =head3 Resource URL
 
-  GET http://demo.convos.by/api/conversations
+  GET http://demo.convos.by/api/dialogues
 
 =head3 Parameters
 
@@ -258,9 +258,9 @@ This resource takes no parameters.
 List of messages.
 
   {
-    "conversations":     [
+    "dialogues":     [
       {
-        "connection_id": string, // Unique identifier for the connection this conversation is part of
+        "connection_id": string, // Unique identifier for the connection this dialogue is part of
         "name": string, // Name of the room or person
         "topic": string, // The subjec/topic for this room
         "users":         {
@@ -417,7 +417,7 @@ Error.
     ]
   },
 
-=head2 messagesByConversation
+=head2 messagesByDialogue
 
 Get a list of messages.
 
@@ -425,21 +425,21 @@ Note: this resource require the user to be authenticated first.
 
 =head3 Resource URL
 
-  GET http://demo.convos.by/api/connection/{connection_id}/conversation/{conversation_id}/messages
+  GET http://demo.convos.by/api/connection/{connection_id}/dialogue/{dialogue_id}/messages
 
 =head3 Parameters
 
-  .------------------------------------------------------------------------------------------------.
-  | Name            | In    | Type    | Required | Description                                     |
-  |------------------------------------------------------------------------------------------------|
-  | connection_id   | path  | string  | Yes      | A unique connection identifier                  |
-  | conversation_id | path  | string  | Yes      | The name of the person/chat conversation        |
-  | after           | query | string  | No       | Find messages after a given ISO 8601 timestamp  |
-  | before          | query | string  | No       | Find messages before a given ISO 8601 timestamp |
-  | level           | query | string  | No       | debug, info (default), warn, error              |
-  | limit           | query | integer | No       | Max number of messages to retrieve              |
-  | match           | query | string  | No       | Messages must match this string                 |
-  '------------------------------------------------------------------------------------------------'
+  .----------------------------------------------------------------------------------------------.
+  | Name          | In    | Type    | Required | Description                                     |
+  |----------------------------------------------------------------------------------------------|
+  | connection_id | path  | string  | Yes      | A unique connection identifier                  |
+  | dialogue_id   | path  | string  | Yes      | The name of the person or room                  |
+  | after         | query | string  | No       | Find messages after a given ISO 8601 timestamp  |
+  | before        | query | string  | No       | Find messages before a given ISO 8601 timestamp |
+  | level         | query | string  | No       | debug, info (default), warn, error              |
+  | limit         | query | integer | No       | Max number of messages to retrieve              |
+  | match         | query | string  | No       | Messages must match this string                 |
+  '----------------------------------------------------------------------------------------------'
 
 =head3 Responses
 
@@ -451,9 +451,9 @@ List of messages.
     "messages":     [
       {
         "avatar": uri, // Location to an image which can be used as avatar
+        "from": string, // Identifier for who sent this message
         "level": string, // How important this message is
         "message": string, // The message
-        "sender": string, // Identifier for the sender on the chat server
         "ts": datetime, // Example: 2015-09-06T13:49:37Z
       },
       ...
@@ -564,28 +564,28 @@ Error.
     ]
   },
 
-=head2 removeConversation
+=head2 removeDialogue
 
-Remove (part) a conversation.
+Remove (part) a dialogue.
 
 =head3 Resource URL
 
-  DELETE http://demo.convos.by/api/connection/{connection_id}/conversation/{conversation_id}
+  DELETE http://demo.convos.by/api/connection/{connection_id}/dialogue/{dialogue_id}
 
 =head3 Parameters
 
-  .---------------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                              |
-  |---------------------------------------------------------------------------------------|
-  | connection_id   | path | string | Yes      | A unique connection identifier           |
-  | conversation_id | path | string | Yes      | The name of the person/chat conversation |
-  '---------------------------------------------------------------------------------------'
+  .---------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                    |
+  |---------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A unique connection identifier |
+  | dialogue_id   | path | string | Yes      | The name of the person or room |
+  '---------------------------------------------------------------------------'
 
 =head3 Responses
 
 =head4 200 - OK
 
-A conversation.
+A dialogue.
 
   {
     "message": string, // Human readable description
@@ -630,7 +630,7 @@ List of rooms.
   {
     "rooms":     [
       {
-        "connection_id": string, // Unique identifier for the connection this conversation is part of
+        "connection_id": string, // Unique identifier for the connection this dialogue is part of
         "name": string, // Name of the room or person
         "topic": string, // The subjec/topic for this room
         "users":         {
@@ -702,23 +702,23 @@ Error.
     ]
   },
 
-=head2 sendToConversation
+=head2 sendToDialogue
 
 Send a message to a target.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{connection_id}/conversation/{conversation_id}/send
+  POST http://demo.convos.by/api/connection/{connection_id}/dialogue/{dialogue_id}/send
 
 =head3 Parameters
 
-  .---------------------------------------------------------------------------------------.
-  | Name            | In   | Type   | Required | Description                              |
-  |---------------------------------------------------------------------------------------|
-  | connection_id   | path | string | Yes      | A unique connection identifier           |
-  | conversation_id | path | string | Yes      | The name of the person/chat conversation |
-  | body            | body | schema | Yes      | No description.                          |
-  '---------------------------------------------------------------------------------------'
+  .---------------------------------------------------------------------------.
+  | Name          | In   | Type   | Required | Description                    |
+  |---------------------------------------------------------------------------|
+  | connection_id | path | string | Yes      | A unique connection identifier |
+  | dialogue_id   | path | string | Yes      | The name of the person or room |
+  | body          | body | schema | Yes      | No description.                |
+  '---------------------------------------------------------------------------'
 
   body:
 

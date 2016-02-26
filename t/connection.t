@@ -5,16 +5,16 @@ my $core       = Convos::Core->new;
 my $user       = $core->user({email => 'test@example.com'});
 my $connection = $user->connection({name => 'whatever', protocol => 'Irc'});
 
-isa_ok($connection->conversation('#foo'),   'Convos::Core::Conversation::Room');
-isa_ok($connection->conversation('marcus'), 'Convos::Core::Conversation::Direct');
-ok !$connection->{conversation}{'#foo'}, 'no conversation on get';
+ok !$connection->dialogue('#foo')->is_private, 'channel';
+ok $connection->dialogue('marcus')->is_private, 'person';
+ok !$connection->{dialogue}{'#foo'}, 'no dialogue on get';
 
-my $conversation = $connection->conversation('#foo' => {});
-is $conversation->n_users, 0, 'conversation->n_users';
-ok $connection->{conversations}{'#foo'}, 'conversation on create/update';
+my $dialogue = $connection->dialogue('#foo' => {});
+is $dialogue->n_users, 0, 'dialogue->n_users';
+ok $connection->{dialogues}{'#foo'}, 'dialogue on create/update';
 
 $connection = Convos::Core::Connection->new({});
-for my $method (qw( rooms join_conversation connect send topic)) {
+for my $method (qw( rooms join_dialogue connect send topic)) {
   my $err;
   eval {
     $connection->$method(sub { $err = $_[1] });

@@ -1,12 +1,12 @@
 (function(window) {
-  Convos.Conversation = function(attrs) {
+  Convos.Dialogue = function(attrs) {
     if (attrs) this.update(attrs);
     this._api = Convos.api;
     riot.observable(this);
     this.on('show', this._on_show);
   };
 
-  var proto = Convos.Conversation.prototype;
+  var proto = Convos.Dialogue.prototype;
 
   // Define attributes
   mixin.base(proto, {
@@ -26,28 +26,28 @@
 
   // Create a href for <a> tag
   proto.href = function(action) {
-    return ['#conversation', this.connection().id(), this.name(), action].join('/');
+    return ['#dialogue', this.connection().id(), this.name(), action].join('/');
   };
 
   // Send a message to a room
   proto.send = function(command, cb) {
     var self = this;
-    this._api.sendToConversation(
+    this._api.sendToDialogue(
       {
         body: {command: command},
         connection_id: this.connection().id(),
-        conversation_id: this.name()
+        dialogue_id: this.name()
       },
       function(err, xhr) { cb.call(self, err); }
     );
     return this;
   };
 
-  // Called when this conversation is visible in gui
+  // Called when this dialogue is visible in gui
   proto._on_show = function() {
     if (this.messages().length < 60) {
-      this._api.messagesByConversation(
-        { connection_id: this.connection().id(), conversation_id: this.name() },
+      this._api.messagesByDialogue(
+        { connection_id: this.connection().id(), dialogue_id: this.name() },
         function(err, xhr) {
           if (err) return console.log(err);
           this.messages(xhr.body.messages);

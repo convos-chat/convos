@@ -127,13 +127,9 @@ L<IRC|Convos::Core::Connection::Irc> server.
 
 =over 2
 
-=item * Has many L<Convos::Core::Conversation::Direct> objects.
+=item * Has many L<Convos::Core::Dialogue> objects.
 
-This represents a conversation with a single user.
-
-=item * Has many L<Convos::Core::Conversation::Room> objects.
-
-This represents a conversation with other users.
+This represents a dialogue with zero or more users.
 
 =back
 
