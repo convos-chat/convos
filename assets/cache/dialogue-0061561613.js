@@ -1,32 +1,24 @@
-riot.tag2('dialogue', '<div class="dialogue-container"> <div class="actions"> <a href="#settings"><i class="material-icons">more_horiz</i></a> <a href="#people"><i class="material-icons">people</i></a> <a href="#search"><i class="material-icons">search</i></a> <a href="#close"><i class="material-icons">close</i></a> </div> <h5>{dialogue.name()}</h5> <ol class="dialogue collection"> <li class="collection-item" each="{messages}"> <a href="{\'#autocomplete:\' + from}" class="title">{from}</a> <dialogue-message ts="{ts}" message="{message}" each="{messages}"></dialogue-message> <span class="secondary-content ts" title="{ts}">{parent.timestring(ts)}</span> </li> </ol> </div> <user-input dialogue="{dialogue}"></user-input>', '', '', function(opts) {
-
+riot.tag2('dialogue', '<div class="dialogue-container"> <div class="actions" if="{dialogue._connection}"> <a href="#settings"><i class="material-icons">more_horiz</i></a> <a href="#people"><i class="material-icons">people</i></a> <a href="#search"><i class="material-icons">search</i></a> <a href="#close"><i class="material-icons">close</i></a> </div> <div class="actions" if="{!dialogue._connection}"> <a href="#chat"><i class="material-icons">star_rate</i></a> </div> <h5>{dialogue.name()}</h5> <ol class="dialogue collection"> <li class="collection-item" each="{messages}"> <a href="{\'#autocomplete:\' + from}" class="title">{from}</a> <dialogue-message ts="{ts}" message="{message}" each="{nested_messages}"></dialogue-message> <span class="secondary-content ts" title="{ts.toISOString()}">{parent.timestring(ts)}</span> </li> </ol> </div> <user-input dialogue="{dialogue}"></user-input>', '', '', function(opts) {
   mixin.time(this);
 
-  var prev = null;
-  this.dialogue = opts.dialogue || new Convos.Dialogue();
+  this.dialogue = opts.dialogue;
   this.messages = [];
-  this.n = 0;
-
-  this.defaultMessages = function() {
-    return [
-      {from: 'convosbackend', message: 'Loading messages...', ts: new Date().toISOString()}
-    ];
-  }.bind(this)
+  this.last_number_of_messages = 0;
 
   this.on('update', function() {
-    var o_messages = this.dialogue.messages();
-    if (!o_messages.length) o_messages = this.defaultMessages();
-    if (this.n == o_messages.length) return;
+    var list = this.dialogue.messages();
+    var prev = null;
+    if (this.last_number_of_messages == list.length) return;
     this.messages = [];
-    this.n = o_messages.length;
-    o_messages.forEach(function(m) {
-      if (prev && m.from == prev.from) {
-        prev.messages.push(m);
+    this.last_number_of_messages = list.length;
+    list.forEach(function(msg) {
+      if (!msg.hr && prev && msg.from == msg.from && msg.ts.epoch() < prev.ts.epoch() + 120) {
+        prev.nested_messages.push(msg);
       }
       else {
-        this.messages.push(m);
-        m.messages = [m];
-        prev = m;
+        this.messages.push(msg);
+        msg.nested_messages = [msg];
+        prev = msg;
       }
     }.bind(this));
   });

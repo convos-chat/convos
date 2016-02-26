@@ -8,7 +8,7 @@
       <i class="material-icons">device_hub</i> {c.protocol()}-{c.name()}
       <span class="on">{c.humanState()}</span>
     </a>
-    <a href="#new-dialogue" class="collection-item">
+    <a href={href('settings/new-dialogue')} class={activeClass('settings/new-dialogue', 'collection-item')}>
       <i class="material-icons">add_circle</i> New dialogue
     </a>
   </div>
@@ -19,5 +19,12 @@
     return c == this.parent.dialogue ? 'collection-item active' : 'collection-item';
   }
 
+  activeClass(href, additional) {
+    return additional + (location.hash.indexOf(href) != -1 ? ' active' : '');
+  }
+
+  href(url) {
+    return '#' + (location.hash.indexOf(url) == -1 ? url : 'chat');
+  }
   </script>
 </sidebar-dialogues>

@@ -102,6 +102,7 @@
     this._api.listConnections({}, function(err, xhr) {
       if (err) return self.trigger('error', err);
       xhr.body.connections.forEach(function(c) { self.connection(c); });
+      if (!self.connections().length) return self.trigger('refreshed');
       self._api.listDialogues({}, function(err, xhr) {
         if (err) return self.trigger('error', err);
         xhr.body.dialogues.forEach(function(d) { self.dialogue(d); });

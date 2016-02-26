@@ -1,8 +1,9 @@
 <user-input>
   <form method="post" onsubmit={sendMessage}>
     <div class="actions">
-      <a href="#emoji"><i class="material-icons">insert_emoticon</i></a>
       <a href="#attach"><i class="material-icons">attach_file</i></a>
+      <a href="#webcam"><i class="material-icons">photo_camera</i></a>
+      <a href="#emoji"><i class="material-icons">insert_emoticon</i></a>
       <a href="#send"><i class="material-icons">send</i></a>
     </div>
     <textarea name="message" class="materialize-textarea" placeholder={placeholder} onkeydown={onChange}></textarea>
@@ -45,7 +46,7 @@
         this.placeholder = 'State is "' + state + '".';
       }
     } catch (err) {
-      this.placeholder = 'State is "disconnected".';
+      this.placeholder = 'Please enter commands as instructed.';
     };
   });
 

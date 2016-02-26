@@ -4635,20 +4635,42 @@ div.autocomplete {
 chat {
   display: flex;
   flex-direction: row-reverse;
-  height: 100vh; }
+  height: 100vh;
+  margin-right: 299px; }
+  chat connection-editor,
   chat dialogue {
     flex-grow: 1;
     display: flex;
-    flex-direction: column;
-    max-width: 900px; }
+    flex-direction: column; }
+    chat connection-editor .dialogue-container,
     chat dialogue .dialogue-container {
       flex-grow: 1; }
+  chat connection-editor {
+    width: 500px; }
+  chat dialogue {
+    max-width: 900px; }
   chat nav {
     width: 300px;
+    border-left: 1px solid #f0f0f0;
     display: flex;
-    flex-direction: column; }
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999; }
     chat nav sidebar-dialogues {
       flex-grow: 1; }
+
+connection-editor {
+  background: #f3f3f3;
+  position: relative;
+  padding: 3px 0; }
+  connection-editor .actions {
+    overflow: hidden;
+    position: absolute;
+    top: 14px;
+    right: 10px; }
 
 dialogue {
   border-right: 1px solid #f0f0f0;
@@ -4658,6 +4680,7 @@ dialogue {
     dialogue .dialogue-container > h5 {
       margin-top: 0; }
     dialogue .dialogue-container > .actions {
+      overflow: hidden;
       position: absolute;
       top: 0;
       right: -4px; }
@@ -4666,6 +4689,7 @@ dialogue {
     padding: 0;
     border: 0; }
     dialogue ol.dialogue .collection-item {
+      position: relative;
       padding: 10px 0; }
     dialogue ol.dialogue .ts {
       color: #757575;
@@ -4680,6 +4704,34 @@ dialogue {
         text-decoration: underline; }
       dialogue ol.dialogue .message a:hover {
         text-decoration: none; }
+
+nav {
+  color: #777; }
+  nav sidebar-dialogues,
+  nav sidebar-notifications,
+  nav sidebar-search {
+    border-bottom: 4px solid #e5e5e5; }
+  nav sidebar-dialogues .on {
+    display: block;
+    font-size: 0.9rem;
+    color: #777;
+    margin-left: 28px; }
+  nav sidebar-search .input-field label {
+    left: 0; }
+  nav sidebar-search #search_input {
+    margin: 0; }
+  nav sidebar-settings .collection {
+    margin-bottom: 0; }
+  nav .collection {
+    margin: 5px 0;
+    border: 0; }
+  nav .collection .collection-item {
+    border: 0; }
+  nav .collection .collection-item.active {
+    background-color: #f3f3f3;
+    color: #1B5E20; }
+  nav .material-icons {
+    vertical-align: bottom; }
 
 user-input .actions {
   text-align: right; }
@@ -4696,36 +4748,6 @@ user-input textarea.materialize-textarea {
   box-sizing: border-box; }
   user-input textarea.materialize-textarea:focus {
     border: 1px solid #ababab; }
-
-nav .collection {
-  margin: 5px 0;
-  border: 0; }
-
-nav sidebar-dialogues,
-nav sidebar-notifications,
-nav sidebar-search {
-  border-bottom: 4px solid #e5e5e5; }
-
-nav sidebar-dialogues .on {
-  display: block;
-  font-size: 0.9rem;
-  color: #777;
-  margin-left: 28px; }
-
-nav sidebar-search .collection-item .search {
-  border-bottom: 0; }
-
-nav sidebar-search .input-field label {
-  left: 0; }
-
-nav sidebar-search #search_input {
-  margin: 0; }
-
-nav sidebar-settings .collection {
-  margin-bottom: 0; }
-
-nav .material-icons {
-  vertical-align: bottom; }
 
 .collection-item.split {
   display: flex;

@@ -32,6 +32,7 @@
 < js/core/dialogue.js
 < js/core/user.js
 < riot/chat.tag
+< riot/connection-editor.tag
 < riot/dialogue-message.tag
 < riot/dialogue.tag
 < riot/not-found.tag

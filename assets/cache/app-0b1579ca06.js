@@ -1,8 +1,9 @@
-riot.tag2('app', '<chat user="{user}" if="{render == \'chat\'}"></chat> <user-login user="{user}" errors="{errors}" if="{render == \'login\'}"></user-login></user-login> <user-register user="{user}" if="{render == \'register\'}"></user-register> <not-found if="{render == \'not-found\'}"></not-found>', '', '', function(opts) {
+riot.tag2('app', '<chat user="{user}" modal="{modal}" if="{render == \'chat\'}"></chat> <user-login user="{user}" errors="{errors}" if="{render == \'login\'}"></user-login></user-login> <user-register user="{user}" if="{render == \'register\'}"></user-register> <not-found if="{render == \'not-found\'}"></not-found>', '', '', function(opts) {
 
   var tag = this;
 
   this.errors = opts.errors;
+  this.modal = '';
   this.render = '';
   this.user = opts.user;
 
@@ -26,7 +27,12 @@ riot.tag2('app', '<chat user="{user}" if="{render == \'chat\'}"></chat> <user-lo
 
   riot.route('/chat', function() {
     if (!tag.user.email()) return riot.route('login', 'Login', true);
-    tag.update({render: 'chat'});
+    tag.update({render: 'chat', modal: ''});
+  });
+
+  riot.route('/settings/*', function(modal) {
+    if (!tag.user.email()) return riot.route('login', 'Login', true);
+    tag.update({render: 'chat', modal: modal});
   });
 
   riot.route('/', function() {
@@ -38,7 +44,6 @@ riot.tag2('app', '<chat user="{user}" if="{render == \'chat\'}"></chat> <user-lo
   });
 
   this.on('mount', function() {
-    riot.route(this.user.email() ? 'chat' : 'login');
     riot.route.start(true);
   });
 

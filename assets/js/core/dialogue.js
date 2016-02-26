@@ -15,11 +15,14 @@
     icon: function() { return 'group' },
     id: function() { return '' },
     messages: function() { return []; },
-    name: function() { return 'Unknown' },
+    name: function() { return 'Convos' },
     topic: function() { return '' },
   });
 
   proto.addMessage = function(message) {
+    if (!message.from) message.from = 'Convos';
+    if (!message.ts) message.ts = new Date();
+    if (typeof message.ts == 'object') message.ts = new Date(message.ts);
     this.messages().push(message);
     riot.update();
   };
