@@ -5,8 +5,7 @@ $ENV{CONVOS_HOME} = File::Spec->catdir(qw( t data convos-test-backend-file-messa
 local $TODO = 'Should be able to stream log messages over websocket or event stream';
 
 my $t = t::Helper->t;
-my $user
-  = $t->app->core->user({email => 'superman@example.com', avatar => 'avatar@example.com'})->set_password('s3cret');
+my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
 $t->get_ok('/api/connection/irc/localhost/dialogue/%23convos/messages')->status_is(401);
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);

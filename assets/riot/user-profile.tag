@@ -6,12 +6,6 @@
       </div>
     </div>
     <div class="row">
-      <div class="input-field col s12">
-        <input id="form_avatar" type="text" class="validate" value={user.avatar()} placeholder="Gravatar username or URL to image">
-        <label for="form_avatar">Avatar</label>
-      </div>
-    </div>
-    <div class="row">
       <div class="input-field col s6">
         <input id="form_password" type="password" class="validate" placeholder="At least six characters">
         <label for="form_password">Password</label>
@@ -37,7 +31,7 @@
   mixin.form(this);
 
   submitForm(e) {
-    var attrs = {avatar: this.form_avatar.value, password: ''};
+    var attrs = {password: ''};
 
     if (this.form_password.value == this.form_password_again.value) {
       attrs.password = this.form_password_again.value;
@@ -58,7 +52,7 @@
 
   this.on('mount', function() {
     this.updateTextFields();
-    this.form_avatar.focus();
+    this.form_password.focus();
   });
 
   </script>

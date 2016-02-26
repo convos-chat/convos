@@ -4,8 +4,7 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
 
 my $port = $t->ua->server->nb_url->port;
-my $user
-  = $t->app->core->user({email => 'superman@example.com', avatar => 'avatar@example.com'})->set_password('s3cret');
+my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
 $t->get_ok('/api/connections')->status_is(401);
 $t->post_ok('/api/connections', json => {url => "irc://localhost:$port"})->status_is(401);

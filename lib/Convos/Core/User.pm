@@ -15,7 +15,6 @@ use constant BCRYPT_BASE_SETTINGS => do {
 
 sub EVENTS {qw(dialogue me message state users)}
 
-has avatar => '';
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 sub password { shift->{password} ||= '' }
@@ -112,7 +111,7 @@ sub INFLATE {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{registered} ||= Mojo::Date->new->to_datetime;
-  my $json = {map { ($_, $self->{$_} // '') } qw(avatar email password registered)};
+  my $json = {map { ($_, $self->{$_} // '') } qw(email password registered)};
   delete $json->{password} unless $persist;
   $json;
 }
@@ -133,13 +132,6 @@ L<Convos::Core::User> is a class used to model a user in Convos.
 
 L<Convos::Core::User> inherits all attributes from L<Mojo::Base> and implements
 the following new ones.
-
-=head2 avatar
-
-  $str = $self->avatar;
-  $self = $self->avatar($str);
-
-Avatar identifier on either Facebook or Gravatar.
 
 =head2 core
 

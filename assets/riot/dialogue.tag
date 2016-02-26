@@ -25,10 +25,6 @@
   this.messages = [];
   this.n = 0;
 
-  avatar(from) {
-    return 'https://robohash.org/' + from + '.png';
-  }
-
   defaultMessages() {
     return [
       {from: 'convosbackend', message: 'Loading messages...', ts: new Date().toISOString()}

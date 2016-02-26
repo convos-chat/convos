@@ -5,9 +5,7 @@ my $t = t::Helper->t;
 $t->get_ok('/events/event-source')->content_is(qq(event:error\ndata:{"message":"Need to log in first."}\n\n));
 
 my $port = $t->ua->server->nb_url->port;
-my $user
-  = $t->app->core->user({email => 'superman@example.com', avatar => 'avatar@example.com'})->set_password('s3cret')
-  ->save;
+my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
 $t->post_ok('/api/connections', json => {state => 'connect', url => "irc://localhost:$port"})->status_is(200);
 

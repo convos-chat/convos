@@ -7,10 +7,6 @@ riot.tag2('dialogue', '<div class="dialogue-container"> <div class="actions"> <a
   this.messages = [];
   this.n = 0;
 
-  this.avatar = function(from) {
-    return 'https://robohash.org/' + from + '.png';
-  }.bind(this)
-
   this.defaultMessages = function() {
     return [
       {from: 'convosbackend', message: 'Loading messages...', ts: new Date().toISOString()}

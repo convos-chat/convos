@@ -18,7 +18,6 @@
 
   // Define attributes
   mixin.base(proto, {
-    avatar: function() { return ''; },
     email: function() { return ''; },
     ws: function() { throw 'ws cannot be build'; }
   });

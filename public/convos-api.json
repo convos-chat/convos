@@ -406,7 +406,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "avatar": { "type": "string", "description": "User avatar" },
                 "password": { "type": "string", "description": "User password" }
               }
             }
@@ -489,7 +488,6 @@
               "type": "object",
               "required": ["email", "password"],
               "properties": {
-                "avatar": { "type": "string", "description": "User avatar" },
                 "email": { "type": "string", "format": "email", "description": "User email" },
                 "password": { "type": "string", "description": "User password" }
               }
@@ -556,7 +554,6 @@
     "Message": {
       "required": ["message", "from", "ts"],
       "properties": {
-        "avatar": { "type": "string", "format": "uri", "description": "Location to an image which can be used as avatar" },
         "from": { "type": "string", "description": "Identifier for who sent this message" },
         "level": { "type": "string", "default": "info", "enum": ["debug", "info", "warn"], "description": "How important this message is" },
         "message": { "type": "string", "description": "The message" },
@@ -580,7 +577,6 @@
       "required": ["email"],
       "properties": {
         "email": { "type": "string", "description": "Unique email identifying a user in Convos" },
-        "avatar": { "type": "string", "description": "Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID" },
         "registered": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
       }
     }

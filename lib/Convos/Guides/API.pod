@@ -124,7 +124,6 @@ This resource takes no parameters.
 User profile.
 
   {
-    "avatar": string, // Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID
     "email": string, // Unique email identifying a user in Convos
     "registered": datetime, // Example: 2015-09-06T10:47:31Z
   },
@@ -360,7 +359,6 @@ Log in a user based on email and password.
 User profile.
 
   {
-    "avatar": string, // Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID
     "email": string, // Unique email identifying a user in Convos
     "registered": datetime, // Example: 2015-09-06T10:47:31Z
   },
@@ -450,7 +448,6 @@ List of messages.
   {
     "messages":     [
       {
-        "avatar": uri, // Location to an image which can be used as avatar
         "from": string, // Identifier for who sent this message
         "level": string, // How important this message is
         "message": string, // The message
@@ -493,7 +490,6 @@ Register a new user.
   body:
 
   {
-    "avatar": string, // User avatar
     "email": email, // User email
     "password": string, // User password
   },
@@ -505,7 +501,6 @@ Register a new user.
 User profile.
 
   {
-    "avatar": string, // Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID
     "email": string, // Unique email identifying a user in Convos
     "registered": datetime, // Example: 2015-09-06T10:47:31Z
   },
@@ -820,7 +815,6 @@ Update an existing user.
   body:
 
   {
-    "avatar": string, // User avatar
     "password": string, // User password
   },
 
@@ -831,7 +825,6 @@ Update an existing user.
 User profile.
 
   {
-    "avatar": string, // Either an URL or a value that can be translated into an URL by Convos, such as gravatar ID
     "email": string, // Unique email identifying a user in Convos
     "registered": datetime, // Example: 2015-09-06T10:47:31Z
   },

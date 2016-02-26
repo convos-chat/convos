@@ -201,10 +201,10 @@ format=js
 minified=0
 mtime=1456500564
 [riot:riot/dialogue.tag]
-checksum=f0eaa79dab
+checksum=31c8032bf2
 format=js
 minified=0
-mtime=1456500655
+mtime=1456504119
 [riot:riot/not-found.tag]
 checksum=a5bc94267a
 format=js
@@ -241,10 +241,10 @@ format=js
 minified=0
 mtime=1456263485
 [riot:riot/user-profile.tag]
-checksum=1eb34eda68
+checksum=5c4e8c178a
 format=js
 minified=0
-mtime=1456247684
+mtime=1456504167
 [riot:riot/user-register.tag]
 checksum=2898c1be30
 format=js
