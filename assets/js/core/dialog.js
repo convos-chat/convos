@@ -3,7 +3,7 @@
     if (attrs) this.update(attrs);
     this._api = Convos.api;
     riot.observable(this);
-    this.on('show', this._on_show);
+    this.on('show', this._onShow);
   };
 
   var proto = Convos.Dialog.prototype;
@@ -22,9 +22,8 @@
   proto.addMessage = function(message) {
     if (!message.from) message.from = 'Convos';
     if (!message.ts) message.ts = new Date();
-    if (typeof message.ts == 'object') message.ts = new Date(message.ts);
+    if (typeof message.ts == 'string') message.ts = new Date(message.ts);
     this.messages().push(message);
-    riot.update();
   };
 
   // Create a href for <a> tag
@@ -32,7 +31,7 @@
     return ['#dialog', this.connection().id(), this.name(), action].join('/');
   };
 
-  // Send a message to a room
+  // Send a message to a dialog
   proto.send = function(command, cb) {
     var self = this;
     this._api.sendToDialog(
@@ -46,17 +45,24 @@
     return this;
   };
 
+  proto._initialMessages = function() {
+    var topic = this.topic().replace(/"/g, '');
+    this.addMessage({message: 'Welcome to ' + this.name() + '.'});
+    this.addMessage({message: 'The topic is "' + topic + '".'});
+  };
+
   // Called when this dialog is visible in gui
-  proto._on_show = function() {
-    if (this.messages().length < 60) {
-      this._api.messagesByDialog(
-        { connection_id: this.connection().id(), dialog_id: this.name() },
-        function(err, xhr) {
-          if (err) return console.log(err);
-          this.messages(xhr.body.messages);
-          riot.update();
-        }.bind(this)
-      );
-    }
+  proto._onShow = function() {
+    if (this.messages().length >= 60) return;
+    var self = this;
+    self._api.messagesByDialog(
+      { connection_id: self.connection().id(), dialog_id: self.name() },
+      function(err, xhr) {
+        if (err) return console.log(err);
+        xhr.body.messages.forEach(function(msg) { self.addMessage(msg) });
+        if (!self.messages().length) self._initialMessages();
+        riot.update();
+      }.bind(this)
+    );
   };
 })(window);

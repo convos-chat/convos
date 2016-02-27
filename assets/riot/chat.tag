@@ -6,7 +6,7 @@
   </nav>
   <connection-editor user={user} if={modal == 'connections'}></connection-editor>
   <new-dialog user={user} if={modal == 'new-dialog'}></new-dialog>
-  <dialog-container dialog={dialog}></dialog-container>
+  <dialog-container dialog={dialog} n_tabs={0}></dialog-container>
   <script>
   var tag = this;
 
@@ -28,16 +28,16 @@
       tag.dialog.addMessage({message: 'Is this your first time here?', hr: true});
       tag.dialog.addMessage({message: 'To add a connection, click "Edit connections" in the right side menu.'});
       tag.update({waitFor: 'settings/connections'});
+      tag.on('update', tag.wizard);
     }
     else if (!tag.user.dialogs().length) {
       tag.dialog.addMessage({message: 'You are not part of any dialogs.', hr: true});
       tag.dialog.addMessage({message: 'To join a dialog, click "New dialog" in the right side meny.'});
+      tag.on('update', tag.wizard);
     }
     else {
-      this.off('update', this.wizard);
+      tag.update({dialog: tag.user.dialogs()[0]});
     }
   });
-
-  this.on('update', this.wizard);
   </script>
 </chat>

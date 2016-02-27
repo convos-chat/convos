@@ -5,19 +5,23 @@ chat {
   flex-direction: row-reverse;
   height: 100vh;
   margin-right: $sidebar-width - 1;
+  overflow: hidden;
 
   connection-editor,
   dialog-container,
   new-dialog {
-    flex-grow: 1;
     display: flex;
+    flex-grow: 1;
     flex-direction: column;
   }
 
   connection-editor { max-width: 500px; }
   new-dialog { max-width: 420px; }
   dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
-  dialog-container main { flex-grow: 1; }
+  dialog-container main {
+    overflow: auto;
+    flex-grow: 1;
+  }
 
   nav {
     width: $sidebar-width;
@@ -60,11 +64,18 @@ dialog-container {
   border-right: 1px solid lighten($input-border-color, 32%);
   padding: 0 $gutter-width / 2 0 $gutter-width /2;
 
-  header, main { width: 100%; }
-
   header {
+    border-bottom: 1px solid lighten($input-border-color, 32%);
     position: relative;
     .actions { right: -4px; }
+    .topic {
+      color: color('grey', 'darken-1');
+      font-style: italic;
+      margin: -$gutter-width / 2 0 2px 0;
+    }
+    .topic:before {
+      content: "\2014\00a0";
+    }
   }
 
   main ol.collection {
@@ -132,8 +143,18 @@ nav {
 
 user-input {
   .actions {
-    position: static;
     text-align: right;
+    overflow: visible;
+    position: relative;
+    height: 0;
+    top: -34px;
+    right: 1px;
+    a {
+      display: inline-block;
+      margin-right: -4px;
+      padding: 4px 6px;
+    }
+    i { vertical-align: bottom; }
   }
 
   textarea.materialize-textarea {

@@ -8,6 +8,10 @@ h1, h2, h3, h4, h5 {
 
 ul, li { margin: 0; }
 
+a:hover {
+  color: darken($secondary-color, 10%);
+}
+
 button.btn[disabled] {
   @extend .disabled;
 }

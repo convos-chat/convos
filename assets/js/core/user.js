@@ -131,6 +131,7 @@
         case 'message':
           var d = this._dialogs[e.object.id];
           if (d) d.addMessage(e.data[0]);
+          riot.update();
           break;
       }
     }.bind(this));

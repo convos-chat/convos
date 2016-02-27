@@ -4584,6 +4584,9 @@ h1, h2, h3, h4, h5 {
 ul, li {
   margin: 0; }
 
+a:hover {
+  color: #103613; }
+
 not-found, .centered {
   display: flex;
   height: 100vh;
@@ -4645,12 +4648,13 @@ chat {
   display: flex;
   flex-direction: row-reverse;
   height: 100vh;
-  margin-right: 299px; }
+  margin-right: 299px;
+  overflow: hidden; }
   chat connection-editor,
   chat dialog-container,
   chat new-dialog {
-    flex-grow: 1;
     display: flex;
+    flex-grow: 1;
     flex-direction: column; }
   chat connection-editor {
     max-width: 500px; }
@@ -4659,6 +4663,7 @@ chat {
   chat dialog-container {
     max-width: 860px; }
   chat dialog-container main {
+    overflow: auto;
     flex-grow: 1; }
   chat nav {
     width: 300px;
@@ -4694,12 +4699,17 @@ new-dialog {
 dialog-container {
   border-right: 1px solid #f0f0f0;
   padding: 0 0.75rem 0 0.75rem; }
-  dialog-container header, dialog-container main {
-    width: 100%; }
   dialog-container header {
+    border-bottom: 1px solid #f0f0f0;
     position: relative; }
     dialog-container header .actions {
       right: -4px; }
+    dialog-container header .topic {
+      color: #757575;
+      font-style: italic;
+      margin: -0.75rem 0 2px 0; }
+    dialog-container header .topic:before {
+      content: "\2014\00a0"; }
   dialog-container main ol.collection {
     border: 0;
     padding: 0;
@@ -4748,8 +4758,18 @@ nav {
     vertical-align: bottom; }
 
 user-input .actions {
-  position: static;
-  text-align: right; }
+  text-align: right;
+  overflow: visible;
+  position: relative;
+  height: 0;
+  top: -34px;
+  right: 1px; }
+  user-input .actions a {
+    display: inline-block;
+    margin-right: -4px;
+    padding: 4px 6px; }
+  user-input .actions i {
+    vertical-align: bottom; }
 
 user-input textarea.materialize-textarea {
   height: 4rem;

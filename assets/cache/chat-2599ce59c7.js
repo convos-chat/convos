@@ -1,4 +1,4 @@
-riot.tag2('chat', '<nav> <sidebar-notifications user="{user}"></sidebar-notifications> <sidebar-dialogs user="{user}"></sidebar-dialogs> <sidebar-settings user="{user}"></sidebar-settings> </nav> <connection-editor user="{user}" if="{modal == \'connections\'}"></connection-editor> <new-dialog user="{user}" if="{modal == \'new-dialog\'}"></new-dialog> <dialog-container dialog="{dialog}"></dialog-container>', '', '', function(opts) {
+riot.tag2('chat', '<nav> <sidebar-notifications user="{user}"></sidebar-notifications> <sidebar-dialogs user="{user}"></sidebar-dialogs> <sidebar-settings user="{user}"></sidebar-settings> </nav> <connection-editor user="{user}" if="{modal == \'connections\'}"></connection-editor> <new-dialog user="{user}" if="{modal == \'new-dialog\'}"></new-dialog> <dialog-container dialog="{dialog}" n_tabs="{0}"></dialog-container>', '', '', function(opts) {
   var tag = this;
 
   this.user = opts.user;
@@ -19,15 +19,15 @@ riot.tag2('chat', '<nav> <sidebar-notifications user="{user}"></sidebar-notifica
       tag.dialog.addMessage({message: 'Is this your first time here?', hr: true});
       tag.dialog.addMessage({message: 'To add a connection, click "Edit connections" in the right side menu.'});
       tag.update({waitFor: 'settings/connections'});
+      tag.on('update', tag.wizard);
     }
     else if (!tag.user.dialogs().length) {
       tag.dialog.addMessage({message: 'You are not part of any dialogs.', hr: true});
       tag.dialog.addMessage({message: 'To join a dialog, click "New dialog" in the right side meny.'});
+      tag.on('update', tag.wizard);
     }
     else {
-      this.off('update', this.wizard);
+      tag.update({dialog: tag.user.dialogs()[0]});
     }
   });
-
-  this.on('update', this.wizard);
 }, '{ }');

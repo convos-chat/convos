@@ -25,6 +25,7 @@
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/animation.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/materialbox.js
 < js/mixins/base.js
+< js/mixins/bottom.js
 < js/mixins/form.js
 < js/mixins/shortcuts.js
 < js/mixins/time.js
