@@ -35,6 +35,7 @@
 < riot/connection-editor.tag
 < riot/dialog-container.tag
 < riot/dialog-message.tag
+< riot/new-dialog.tag
 < riot/not-found.tag
 < riot/sidebar-dialogs.tag
 < riot/sidebar-notifications.tag

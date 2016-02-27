@@ -1,4 +1,4 @@
-riot.tag2('chat', '<nav> <sidebar-notifications user="{user}"></sidebar-notifications> <sidebar-dialogs user="{user}"></sidebar-dialogs> <sidebar-settings user="{user}"></sidebar-settings> </nav> <connection-editor user="{user}" if="{modal == \'connections\'}"></connection-editor> <dialog-container dialog="{dialog}"></dialog-container>', '', '', function(opts) {
+riot.tag2('chat', '<nav> <sidebar-notifications user="{user}"></sidebar-notifications> <sidebar-dialogs user="{user}"></sidebar-dialogs> <sidebar-settings user="{user}"></sidebar-settings> </nav> <connection-editor user="{user}" if="{modal == \'connections\'}"></connection-editor> <new-dialog user="{user}" if="{modal == \'new-dialog\'}"></new-dialog> <dialog-container dialog="{dialog}"></dialog-container>', '', '', function(opts) {
   var tag = this;
 
   this.user = opts.user;
@@ -11,6 +11,8 @@ riot.tag2('chat', '<nav> <sidebar-notifications user="{user}"></sidebar-notifica
       this.waitFor = false;
     }
   }.bind(this)
+
+  this.user.on('refreshed', function() { riot.update() });
 
   this.user.one('refreshed', function() {
     if (!tag.user.connections().length) {

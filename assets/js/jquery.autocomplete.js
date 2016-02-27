@@ -2,17 +2,20 @@
   $.fn.autocomplete = function(opts) {
     var $input = this;
     var $wrapper = $input.siblings('.autocomplete').disableOuterScroll();
+    var onkeyup = opts.onkeyup;
+    var onselect = opts.onselect;
     var n = 0;
 
     $wrapper.find('li:visible').not('.no-match').eq(0).addClass('active');
     $wrapper.find('li.no-match')[$wrapper.find('li:visible').length ? 'hide' : 'show']();
-    if (opts == 'update') return;
+    if (opts == 'update') return this;
 
     $wrapper.on('click', 'li > a', function(e) {
       e.preventDefault()
       $input.val($(this).attr('href')).focus();
       n = $(this).closest('li').index();
       $wrapper.find('li:visible').removeClass('active').eq(n).addClass('active');
+      if (onselect) onselect.call(this, e);
     });
 
     $input.on('keydown', function(e) {
@@ -24,8 +27,13 @@
     });
 
     $input.on('keyup', function(e) {
-      var $li = $wrapper.height($wrapper.height()).find('li').not('.no-match');
+      var $li = $wrapper.find('li').not('.no-match');
       var re = new RegExp(this.value, 'i');
+
+      if (!$wrapper._fixedHeightSet && $wrapper.height() > 10) {
+        $wrapper._fixedHeightSet = true;
+        $wrapper.height($wrapper.height());
+      }
 
       switch (e.keyCode) {
         case 13: // enter
@@ -59,6 +67,8 @@
       else {
         $wrapper.find('li.no-match').show();
       }
+
+      if (onkeyup) onkeyup.call(this, e);
     });
 
     return this;

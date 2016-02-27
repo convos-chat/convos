@@ -3254,9 +3254,13 @@ small {
   vertical-align: middle;
   -webkit-tap-highlight-color: transparent; }
 
-.btn.disabled, .disabled.btn-large, .disabled.btn-delete,
+.btn.disabled, .disabled.btn-large, button.btn[disabled], button[disabled].btn-large, button[disabled].btn-delete, .disabled.btn-delete,
 .btn-floating.disabled,
+button.btn-floating.btn[disabled],
+button.btn-floating[disabled].btn-large,
+button.btn-floating[disabled].btn-delete,
 .btn-large.disabled,
+button.btn-large[disabled],
 .btn:disabled
 .btn-large:disabled, .btn-large:disabled .btn-large:disabled, .btn-delete:disabled .btn-large:disabled,
 .btn-floating:disabled {
@@ -3264,16 +3268,20 @@ small {
   box-shadow: none;
   color: #9F9F9F !important;
   cursor: default; }
-  .btn.disabled *, .disabled.btn-large *, .disabled.btn-delete *,
-  .btn-floating.disabled *,
-  .btn-large.disabled *,
+  .btn.disabled *, .disabled.btn-large *, button.btn[disabled] *, button[disabled].btn-large *, button[disabled].btn-delete *, .disabled.btn-delete *,
+  .btn-floating.disabled *, button.btn-floating.btn[disabled] *, button.btn-floating[disabled].btn-large *, button.btn-floating[disabled].btn-delete *,
+  .btn-large.disabled *, button.btn-large[disabled] *,
   .btn:disabled
 .btn-large:disabled *, .btn-large:disabled .btn-large:disabled *, .btn-delete:disabled .btn-large:disabled *,
   .btn-floating:disabled * {
     pointer-events: none; }
-  .btn.disabled:hover, .disabled.btn-large:hover, .disabled.btn-delete:hover,
+  .btn.disabled:hover, .disabled.btn-large:hover, button.btn[disabled]:hover, button[disabled].btn-large:hover, button[disabled].btn-delete:hover, .disabled.btn-delete:hover,
   .btn-floating.disabled:hover,
+  button.btn-floating.btn[disabled]:hover,
+  button.btn-floating[disabled].btn-large:hover,
+  button.btn-floating[disabled].btn-delete:hover,
   .btn-large.disabled:hover,
+  button.btn-large[disabled]:hover,
   .btn:disabled
 .btn-large:disabled:hover, .btn-large:disabled .btn-large:disabled:hover, .btn-delete:disabled .btn-large:disabled:hover,
   .btn-floating:disabled:hover {
@@ -3374,7 +3382,7 @@ button.btn-floating {
   background-color: transparent;
   color: #343434;
   cursor: pointer; }
-  .btn-flat.disabled {
+  .btn-flat.disabled, button.btn-flat.btn[disabled], button.btn-flat[disabled].btn-large, button.btn-flat[disabled].btn-delete {
     color: #b3b3b3;
     cursor: default; }
 
@@ -4639,52 +4647,58 @@ chat {
   height: 100vh;
   margin-right: 299px; }
   chat connection-editor,
-  chat dialog-container {
+  chat dialog-container,
+  chat new-dialog {
     flex-grow: 1;
     display: flex;
     flex-direction: column; }
   chat connection-editor {
-    width: 500px; }
+    max-width: 500px; }
+  chat new-dialog {
+    max-width: 420px; }
   chat dialog-container {
     max-width: 860px; }
   chat dialog-container main {
     flex-grow: 1; }
   chat nav {
     width: 300px;
-    border-left: 1px solid #f0f0f0;
     display: flex;
     flex-direction: column;
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 999; }
+    z-index: 900; }
     chat nav sidebar-dialogs {
       flex-grow: 1; }
 
-connection-editor {
+connection-editor h5,
+dialog-container h5,
+new-dialog h5 {
+  margin-top: 0;
+  padding-top: 0.75rem; }
+
+connection-editor .actions,
+dialog-container .actions,
+new-dialog .actions {
+  overflow: hidden;
+  position: absolute;
+  top: 0.6rem;
+  right: 0.45rem; }
+
+connection-editor,
+new-dialog {
   background: #f8f8f8;
-  position: relative;
-  padding: 3px 0; }
-  connection-editor .actions {
-    overflow: hidden;
-    position: absolute;
-    top: 14px;
-    right: 10px; }
+  position: relative; }
 
 dialog-container {
   border-right: 1px solid #f0f0f0;
-  padding: 1.5rem 1.5rem 0 1.5rem; }
+  padding: 0 0.75rem 0 0.75rem; }
   dialog-container header, dialog-container main {
     width: 100%; }
   dialog-container header {
     position: relative; }
-    dialog-container header h5 {
-      margin-top: 0; }
     dialog-container header .actions {
-      overflow: hidden;
-      position: absolute;
-      top: 0;
       right: -4px; }
   dialog-container main ol.collection {
     border: 0;
@@ -4706,6 +4720,7 @@ dialog-container {
       text-decoration: none; }
 
 nav {
+  border-left: 1px solid #f0f0f0;
   color: #777; }
   nav sidebar-dialogs,
   nav sidebar-notifications,
@@ -4715,7 +4730,8 @@ nav {
     display: block;
     font-size: 0.9rem;
     color: #777;
-    margin-left: 28px; }
+    margin-left: 28px;
+    margin-bottom: -5px; }
   nav sidebar-search .input-field label {
     left: 0; }
   nav sidebar-search #search_input {
@@ -4725,8 +4741,6 @@ nav {
   nav .collection {
     margin: 0;
     border: 0; }
-  nav .collection .collection-item {
-    border: 0; }
   nav .collection .collection-item.active {
     background-color: #f8f8f8;
     color: #1B5E20; }
@@ -4734,6 +4748,7 @@ nav {
     vertical-align: bottom; }
 
 user-input .actions {
+  position: static;
   text-align: right; }
 
 user-input textarea.materialize-textarea {
@@ -4757,7 +4772,10 @@ user-input textarea.materialize-textarea {
     flex-grow: 0.5;
     display: block;
     transition: .25s;
-    color: #1B5E20; }
+    color: #1B5E20;
+    border-right: 1px solid #e0e0e0; }
+    .collection-item.split > a:last {
+      border-right: 0; }
     .collection-item.split > a:not(.active):hover {
       background-color: #ddd; }
 

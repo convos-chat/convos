@@ -5,6 +5,7 @@
     <sidebar-settings user={user}></sidebar-settings>
   </nav>
   <connection-editor user={user} if={modal == 'connections'}></connection-editor>
+  <new-dialog user={user} if={modal == 'new-dialog'}></new-dialog>
   <dialog-container dialog={dialog}></dialog-container>
   <script>
   var tag = this;
@@ -19,6 +20,8 @@
       this.waitFor = false;
     }
   }
+
+  this.user.on('refreshed', function() { riot.update() });
 
   this.user.one('refreshed', function() {
     if (!tag.user.connections().length) {
