@@ -4655,7 +4655,8 @@ chat {
   chat new-dialog {
     display: flex;
     flex-grow: 1;
-    flex-direction: column; }
+    flex-direction: column;
+    overflow: auto; }
   chat connection-editor {
     max-width: 500px; }
   chat new-dialog {

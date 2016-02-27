@@ -211,10 +211,10 @@ format=js
 minified=0
 mtime=1456603056
 [riot:riot/new-dialog.tag]
-checksum=7a7e50e8c6
+checksum=b58400c480
 format=js
 minified=0
-mtime=1456588679
+mtime=1456606437
 [riot:riot/not-found.tag]
 checksum=a5bc94267a
 format=js
@@ -256,7 +256,7 @@ format=js
 minified=0
 mtime=1456263497
 [sass:sass/main.scss]
-checksum=b17801ecaa
+checksum=ef3f5da0f4
 format=css
 minified=
 mtime=1456475538

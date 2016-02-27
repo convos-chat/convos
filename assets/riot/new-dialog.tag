@@ -28,7 +28,7 @@
         <input name="name" id="form_name" type="text" autocomplete="off" spellcheck="false">
         <div class="autocomplete">
           <ul>
-            <li class="link" each={rooms}><a href={name()} tabindex=-1>{name()} - {topic() || 'No topic'}</a></li>
+            <li class="link truncate" each={rooms}><a href={name()} tabindex=-1>{name()} - {topic() || 'No topic'}</a></li>
             <li class="no-match" if={!rooms.length && noRoomsDescription}>{noRoomsDescription}</li>
           </ul>
         </div>

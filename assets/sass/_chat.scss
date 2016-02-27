@@ -13,6 +13,7 @@ chat {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
+    overflow: auto;
   }
 
   connection-editor { max-width: 500px; }
