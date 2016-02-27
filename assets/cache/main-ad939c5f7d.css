@@ -40,7 +40,7 @@
 .materialize-red-text.text-darken-1 {
   color: #d0181e !important; }
 
-.materialize-red.darken-2 {
+.materialize-red.darken-2, .materialize-red.btn-delete {
   background-color: #b9151b !important; }
 
 .materialize-red-text.text-darken-2 {
@@ -58,85 +58,85 @@
 .materialize-red-text.text-darken-4 {
   color: #8b1014 !important; }
 
-.red {
+.red, .btn-delete {
   background-color: #F44336 !important; }
 
 .red-text {
   color: #F44336 !important; }
 
-.red.lighten-5 {
+.red.lighten-5, .lighten-5.btn-delete {
   background-color: #FFEBEE !important; }
 
 .red-text.text-lighten-5 {
   color: #FFEBEE !important; }
 
-.red.lighten-4 {
+.red.lighten-4, .lighten-4.btn-delete {
   background-color: #FFCDD2 !important; }
 
 .red-text.text-lighten-4 {
   color: #FFCDD2 !important; }
 
-.red.lighten-3 {
+.red.lighten-3, .lighten-3.btn-delete {
   background-color: #EF9A9A !important; }
 
 .red-text.text-lighten-3 {
   color: #EF9A9A !important; }
 
-.red.lighten-2 {
+.red.lighten-2, .lighten-2.btn-delete {
   background-color: #E57373 !important; }
 
 .red-text.text-lighten-2 {
   color: #E57373 !important; }
 
-.red.lighten-1 {
+.red.lighten-1, .lighten-1.btn-delete {
   background-color: #EF5350 !important; }
 
 .red-text.text-lighten-1, .not-logged-in-wrapper .red-text.about, .not-logged-in-wrapper .about a.red-text {
   color: #EF5350 !important; }
 
-.red.darken-1 {
+.red.darken-1, .darken-1.btn-delete {
   background-color: #E53935 !important; }
 
 .red-text.text-darken-1 {
   color: #E53935 !important; }
 
-.red.darken-2 {
+.red.darken-2, .btn-delete {
   background-color: #D32F2F !important; }
 
 .red-text.text-darken-2 {
   color: #D32F2F !important; }
 
-.red.darken-3 {
+.red.darken-3, .darken-3.btn-delete {
   background-color: #C62828 !important; }
 
 .red-text.text-darken-3 {
   color: #C62828 !important; }
 
-.red.darken-4 {
+.red.darken-4, .darken-4.btn-delete {
   background-color: #B71C1C !important; }
 
 .red-text.text-darken-4 {
   color: #B71C1C !important; }
 
-.red.accent-1 {
+.red.accent-1, .accent-1.btn-delete {
   background-color: #FF8A80 !important; }
 
 .red-text.text-accent-1 {
   color: #FF8A80 !important; }
 
-.red.accent-2 {
+.red.accent-2, .accent-2.btn-delete {
   background-color: #FF5252 !important; }
 
 .red-text.text-accent-2 {
   color: #FF5252 !important; }
 
-.red.accent-3 {
+.red.accent-3, .accent-3.btn-delete {
   background-color: #FF1744 !important; }
 
 .red-text.text-accent-3 {
   color: #FF1744 !important; }
 
-.red.accent-4 {
+.red.accent-4, .accent-4.btn-delete {
   background-color: #D50000 !important; }
 
 .red-text.text-accent-4 {
@@ -184,7 +184,7 @@
 .pink-text.text-darken-1 {
   color: #d81b60 !important; }
 
-.pink.darken-2 {
+.pink.darken-2, .pink.btn-delete {
   background-color: #c2185b !important; }
 
 .pink-text.text-darken-2 {
@@ -268,7 +268,7 @@
 .purple-text.text-darken-1 {
   color: #8e24aa !important; }
 
-.purple.darken-2 {
+.purple.darken-2, .purple.btn-delete {
   background-color: #7b1fa2 !important; }
 
 .purple-text.text-darken-2 {
@@ -352,7 +352,7 @@
 .deep-purple-text.text-darken-1 {
   color: #5e35b1 !important; }
 
-.deep-purple.darken-2 {
+.deep-purple.darken-2, .deep-purple.btn-delete {
   background-color: #512da8 !important; }
 
 .deep-purple-text.text-darken-2 {
@@ -436,7 +436,7 @@
 .indigo-text.text-darken-1 {
   color: #3949ab !important; }
 
-.indigo.darken-2 {
+.indigo.darken-2, .indigo.btn-delete {
   background-color: #303f9f !important; }
 
 .indigo-text.text-darken-2 {
@@ -520,7 +520,7 @@
 .blue-text.text-darken-1 {
   color: #1E88E5 !important; }
 
-.blue.darken-2 {
+.blue.darken-2, .blue.btn-delete {
   background-color: #1976D2 !important; }
 
 .blue-text.text-darken-2 {
@@ -604,7 +604,7 @@
 .light-blue-text.text-darken-1 {
   color: #039be5 !important; }
 
-.light-blue.darken-2 {
+.light-blue.darken-2, .light-blue.btn-delete {
   background-color: #0288d1 !important; }
 
 .light-blue-text.text-darken-2 {
@@ -688,7 +688,7 @@
 .cyan-text.text-darken-1 {
   color: #00acc1 !important; }
 
-.cyan.darken-2 {
+.cyan.darken-2, .cyan.btn-delete {
   background-color: #0097a7 !important; }
 
 .cyan-text.text-darken-2 {
@@ -772,7 +772,7 @@
 .teal-text.text-darken-1 {
   color: #00897b !important; }
 
-.teal.darken-2 {
+.teal.darken-2, .teal.btn-delete {
   background-color: #00796b !important; }
 
 .teal-text.text-darken-2 {
@@ -856,7 +856,7 @@
 .green-text.text-darken-1 {
   color: #43A047 !important; }
 
-.green.darken-2 {
+.green.darken-2, .green.btn-delete {
   background-color: #388E3C !important; }
 
 .green-text.text-darken-2 {
@@ -940,7 +940,7 @@
 .light-green-text.text-darken-1 {
   color: #7cb342 !important; }
 
-.light-green.darken-2 {
+.light-green.darken-2, .light-green.btn-delete {
   background-color: #689f38 !important; }
 
 .light-green-text.text-darken-2 {
@@ -1024,7 +1024,7 @@
 .lime-text.text-darken-1 {
   color: #c0ca33 !important; }
 
-.lime.darken-2 {
+.lime.darken-2, .lime.btn-delete {
   background-color: #afb42b !important; }
 
 .lime-text.text-darken-2 {
@@ -1108,7 +1108,7 @@
 .yellow-text.text-darken-1 {
   color: #fdd835 !important; }
 
-.yellow.darken-2 {
+.yellow.darken-2, .yellow.btn-delete {
   background-color: #fbc02d !important; }
 
 .yellow-text.text-darken-2 {
@@ -1192,7 +1192,7 @@
 .amber-text.text-darken-1 {
   color: #ffb300 !important; }
 
-.amber.darken-2 {
+.amber.darken-2, .amber.btn-delete {
   background-color: #ffa000 !important; }
 
 .amber-text.text-darken-2 {
@@ -1276,7 +1276,7 @@
 .orange-text.text-darken-1 {
   color: #fb8c00 !important; }
 
-.orange.darken-2 {
+.orange.darken-2, .orange.btn-delete {
   background-color: #f57c00 !important; }
 
 .orange-text.text-darken-2 {
@@ -1360,7 +1360,7 @@
 .deep-orange-text.text-darken-1 {
   color: #f4511e !important; }
 
-.deep-orange.darken-2 {
+.deep-orange.darken-2, .deep-orange.btn-delete {
   background-color: #e64a19 !important; }
 
 .deep-orange-text.text-darken-2 {
@@ -1444,7 +1444,7 @@
 .brown-text.text-darken-1 {
   color: #6d4c41 !important; }
 
-.brown.darken-2 {
+.brown.darken-2, .brown.btn-delete {
   background-color: #5d4037 !important; }
 
 .brown-text.text-darken-2 {
@@ -1504,7 +1504,7 @@
 .blue-grey-text.text-darken-1 {
   color: #546e7a !important; }
 
-.blue-grey.darken-2 {
+.blue-grey.darken-2, .blue-grey.btn-delete {
   background-color: #455a64 !important; }
 
 .blue-grey-text.text-darken-2 {
@@ -1564,7 +1564,7 @@
 .grey-text.text-darken-1, .not-logged-in-wrapper .text-darken-1.about, .not-logged-in-wrapper .about a.text-darken-1 {
   color: #757575 !important; }
 
-.grey.darken-2 {
+.grey.darken-2, .grey.btn-delete {
   background-color: #616161 !important; }
 
 .grey-text.text-darken-2, .not-logged-in-wrapper .text-darken-2.about, .not-logged-in-wrapper .about a.text-darken-2 {
@@ -2088,10 +2088,10 @@ ul {
 .z-depth-0 {
   box-shadow: none !important; }
 
-.z-depth-1, .btn, .btn-large, .btn-floating, .dropdown-content, .collapsible, div.alert {
+.z-depth-1, .btn, .btn-large, .btn-delete, .btn-floating, .dropdown-content, .collapsible {
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12); }
 
-.z-depth-1-half, .btn:hover, .btn-large:hover, .btn-floating:hover {
+.z-depth-1-half, .btn:hover, .btn-large:hover, .btn-delete:hover, .btn-floating:hover {
   box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15); }
 
 .z-depth-2 {
@@ -3241,7 +3241,7 @@ small {
   transform-origin: 50% 10%;
   will-change: transform, opacity; }
 
-.btn, .btn-large,
+.btn, .btn-large, .btn-delete,
 .btn-flat {
   border: none;
   border-radius: 2px;
@@ -3254,40 +3254,40 @@ small {
   vertical-align: middle;
   -webkit-tap-highlight-color: transparent; }
 
-.btn.disabled, .disabled.btn-large,
+.btn.disabled, .disabled.btn-large, .disabled.btn-delete,
 .btn-floating.disabled,
 .btn-large.disabled,
 .btn:disabled
-.btn-large:disabled, .btn-large:disabled .btn-large:disabled,
+.btn-large:disabled, .btn-large:disabled .btn-large:disabled, .btn-delete:disabled .btn-large:disabled,
 .btn-floating:disabled {
   background-color: #DFDFDF !important;
   box-shadow: none;
   color: #9F9F9F !important;
   cursor: default; }
-  .btn.disabled *, .disabled.btn-large *,
+  .btn.disabled *, .disabled.btn-large *, .disabled.btn-delete *,
   .btn-floating.disabled *,
   .btn-large.disabled *,
   .btn:disabled
-.btn-large:disabled *, .btn-large:disabled .btn-large:disabled *,
+.btn-large:disabled *, .btn-large:disabled .btn-large:disabled *, .btn-delete:disabled .btn-large:disabled *,
   .btn-floating:disabled * {
     pointer-events: none; }
-  .btn.disabled:hover, .disabled.btn-large:hover,
+  .btn.disabled:hover, .disabled.btn-large:hover, .disabled.btn-delete:hover,
   .btn-floating.disabled:hover,
   .btn-large.disabled:hover,
   .btn:disabled
-.btn-large:disabled:hover, .btn-large:disabled .btn-large:disabled:hover,
+.btn-large:disabled:hover, .btn-large:disabled .btn-large:disabled:hover, .btn-delete:disabled .btn-large:disabled:hover,
   .btn-floating:disabled:hover {
     background-color: #DFDFDF !important;
     color: #9F9F9F !important; }
 
-.btn i, .btn-large i,
+.btn i, .btn-large i, .btn-delete i,
 .btn-floating i,
 .btn-large i,
 .btn-flat i {
   font-size: 1.3rem;
   line-height: inherit; }
 
-.btn, .btn-large {
+.btn, .btn-large, .btn-delete {
   text-decoration: none;
   color: #fff;
   background-color: #1B5E20;
@@ -3295,7 +3295,7 @@ small {
   letter-spacing: .5px;
   transition: .2s ease-out;
   cursor: pointer; }
-  .btn:hover, .btn-large:hover {
+  .btn:hover, .btn-large:hover, .btn-delete:hover {
     background-color: #217227; }
 
 .btn-floating {
@@ -3436,7 +3436,7 @@ button.btn-floating {
  * Released under the MIT license
  * https://github.com/fians/Waves/blob/master/LICENSE
  */
-.waves-effect {
+.waves-effect, .btn-delete {
   position: relative;
   cursor: pointer;
   display: inline-block;
@@ -3450,7 +3450,7 @@ button.btn-floating {
   z-index: 1;
   will-change: opacity, transform;
   transition: all .3s ease-out; }
-  .waves-effect .waves-ripple {
+  .waves-effect .waves-ripple, .btn-delete .waves-ripple {
     position: absolute;
     border-radius: 50%;
     width: 20px;
@@ -3463,21 +3463,21 @@ button.btn-floating {
     transition-property: transform, opacity;
     transform: scale(0);
     pointer-events: none; }
-  .waves-effect.waves-light .waves-ripple {
+  .waves-effect.waves-light .waves-ripple, .btn-delete .waves-ripple {
     background-color: rgba(255, 255, 255, 0.45); }
-  .waves-effect.waves-red .waves-ripple {
+  .waves-effect.waves-red .waves-ripple, .waves-red.btn-delete .waves-ripple {
     background-color: rgba(244, 67, 54, 0.7); }
-  .waves-effect.waves-yellow .waves-ripple {
+  .waves-effect.waves-yellow .waves-ripple, .waves-yellow.btn-delete .waves-ripple {
     background-color: rgba(255, 235, 59, 0.7); }
-  .waves-effect.waves-orange .waves-ripple {
+  .waves-effect.waves-orange .waves-ripple, .waves-orange.btn-delete .waves-ripple {
     background-color: rgba(255, 152, 0, 0.7); }
-  .waves-effect.waves-purple .waves-ripple {
+  .waves-effect.waves-purple .waves-ripple, .waves-purple.btn-delete .waves-ripple {
     background-color: rgba(156, 39, 176, 0.7); }
-  .waves-effect.waves-green .waves-ripple {
+  .waves-effect.waves-green .waves-ripple, .waves-green.btn-delete .waves-ripple {
     background-color: rgba(76, 175, 80, 0.7); }
-  .waves-effect.waves-teal .waves-ripple {
+  .waves-effect.waves-teal .waves-ripple, .waves-teal.btn-delete .waves-ripple {
     background-color: rgba(0, 150, 136, 0.7); }
-  .waves-effect input[type="button"], .waves-effect input[type="reset"], .waves-effect input[type="submit"] {
+  .waves-effect input[type="button"], .btn-delete input[type="button"], .waves-effect input[type="reset"], .btn-delete input[type="reset"], .waves-effect input[type="submit"], .btn-delete input[type="submit"] {
     border: 0;
     font-style: normal;
     font-size: inherit;
@@ -3512,7 +3512,7 @@ button.btn-floating {
   display: block; }
 
 /* Firefox Bug: link not triggered */
-a.waves-effect .waves-ripple {
+a.waves-effect .waves-ripple, a.btn-delete .waves-ripple {
   z-index: -1; }
 
 .collapsible {
@@ -4427,7 +4427,7 @@ select:disabled {
     padding-left: 10px; }
   .file-field input.file-path {
     width: 100%; }
-  .file-field .btn, .file-field .btn-large {
+  .file-field .btn, .file-field .btn-large, .file-field .btn-delete {
     float: left;
     height: 3rem;
     line-height: 3rem; }
@@ -4593,19 +4593,20 @@ not-found, .centered {
   padding: 8px 6px;
   min-height: 30px; }
 
-.btn, .btn-large, .btn-large, .btn-flat {
+.btn, .btn-large, .btn-delete, .btn-large, .btn-flat {
   padding: 0 1rem; }
 
-.col .btn, .col .btn-large, .col .btn-large, .col .btn-flat {
+.col .btn, .col .btn-large, .col .btn-delete, .col .btn-large, .col .btn-flat {
   margin-right: 0.5rem; }
-  .col .btn.right, .col .right.btn-large, .col .btn-large.right, .col .btn-flat.right {
+  .col .btn.right, .col .right.btn-large, .col .right.btn-delete, .col .btn-large.right, .col .btn-flat.right {
     margin-right: 0; }
 
 div.alert {
-  background-color: #EF5350;
-  color: #fff;
-  padding: 10px;
-  border-radius: 2px; }
+  background: #FFEBEE;
+  border: 1px solid #E57373;
+  border-radius: 2px;
+  color: #D32F2F;
+  padding: 10px; }
 
 div.autocomplete {
   overflow: auto;
@@ -4663,7 +4664,7 @@ chat {
       flex-grow: 1; }
 
 connection-editor {
-  background: #f3f3f3;
+  background: #f8f8f8;
   position: relative;
   padding: 3px 0; }
   connection-editor .actions {
@@ -4723,12 +4724,12 @@ nav {
   nav sidebar-settings .collection {
     margin-bottom: 0; }
   nav .collection {
-    margin: 5px 0;
+    margin: 0;
     border: 0; }
   nav .collection .collection-item {
     border: 0; }
   nav .collection .collection-item.active {
-    background-color: #f3f3f3;
+    background-color: #f8f8f8;
     color: #1B5E20; }
   nav .material-icons {
     vertical-align: bottom; }

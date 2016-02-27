@@ -196,10 +196,10 @@ format=js
 minified=0
 mtime=1456048158
 [riot:riot/connection-editor.tag]
-checksum=5a8a465567
+checksum=6ddf645ae8
 format=js
 minified=0
-mtime=1456528485
+mtime=1456539977
 [riot:riot/dialogue-message.tag]
 checksum=b27e0ea5c9
 format=js
@@ -256,7 +256,7 @@ format=js
 minified=0
 mtime=1456263497
 [sass:sass/main.scss]
-checksum=d45b4e03cf
+checksum=c4a6df4086
 format=css
 minified=
 mtime=1456475538

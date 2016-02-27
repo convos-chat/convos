@@ -1,4 +1,4 @@
-$settings-active-color: #f3f3f3;
+$settings-active-color: #f8f8f8;
 
 chat {
   display: flex;
@@ -113,15 +113,8 @@ nav {
     .collection { margin-bottom: 0; }
   }
 
-  .collection {
-    margin: 5px 0;
-    border: 0;
-  }
-
-  .collection .collection-item {
-    border: 0;
-  }
-
+  .collection { margin: 0; border: 0; }
+  .collection .collection-item { border: 0; }
   .collection .collection-item.active {
     background-color: $settings-active-color;
     color: #1B5E20;

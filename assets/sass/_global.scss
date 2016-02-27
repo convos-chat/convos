@@ -34,6 +34,10 @@ not-found, .centered {
   padding: 0 1rem;
 }
 
+.btn-delete {
+  @extend .btn, .waves-effect, .waves-light, .red, .darken-2;
+}
+
 .col {
   .btn, .btn-large, .btn-flat {
     margin-right: 0.5rem;
@@ -42,9 +46,9 @@ not-found, .centered {
 }
 
 div.alert {
-  background-color: color('red', 'lighten-1');
-  color: $body-bg;
-  padding: $card-padding / 2;
+  background: color('red', 'lighten-5');
+  border: 1px solid color('red', 'lighten-2');
   border-radius: 2px;
-  @extend .z-depth-1;
+  color: color('red', 'darken-2');
+  padding: $card-padding / 2;
 }

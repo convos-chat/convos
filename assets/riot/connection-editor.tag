@@ -1,5 +1,5 @@
 <connection-editor>
-  <form onsubmit={save}>
+  <form onsubmit={saveConnection}>
     <div class="row">
       <div class="col s12">
         <div class="actions">
@@ -21,16 +21,16 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <select name="connection" id="form_connection" onchange={connectionChanged}>
+        <select name="connection_id" id="form_connection_id" onchange={connectionChanged}>
           <option value="">Create new connection...</option>
-          <option value={c.id()} each={c, i in user.connections()}>{c.name()}</option>
+          <option selected={connection ? connection == c : !i} value={c.id()} each={c, i in user.connections()}>{c.protocol()}-{c.name()}</option>
         </select>
-        <label for="form_connection">Select connection</label>
+        <label for="form_connection_id">Select connection</label>
       </div>
     </div>
     <div class="row">
       <div class="input-field col s3">
-        <select name="protocol" id="form_protocol">
+        <select name="protocol" id="form_protocol" onchange={protocolChanged}>
           <option value="irc">IRC</option>
         </select>
         <label for="form_protocol">Protocol</label>
@@ -56,12 +56,18 @@
         <label for="form_password">Password</label>
       </div>
     </div>
+    <div class="row" if={errors.length}>
+      <div class="input-field col s12"><div class="alert">{errors[0].message}</div></div>
+    </div>
     <div class="row">
       <div class="input-field col s12">
         <button class="btn waves-effect waves-light" type="submit">
-          {form_connection.value ? 'Update' : 'Create'} <i class="material-icons right">save</i>
+          {connection ? 'Update' : 'Create'} <i class="material-icons right">save</i>
         </button>
-        <span class="grey-text text-darken-2">State: {form_connection.value ? c().state() : 'new'}.</span>
+        <a href="#delete" onclick={removeConnection} class="btn-delete right" if={connection}>
+          <i class="material-icons">delete</i>
+        </a>
+        <span class="grey-text text-darken-2">State: {connection ? connection.state() : 'new'}.</span>
       </div>
     </div>
   </form>
@@ -71,18 +77,20 @@
   mixin.form(this);
 
   this.user = opts.user;
+  this.connections = null;
   this.defaultServer = Convos.settings.default_server || '';
   this.showNickField = false;
 
-  c() {
-    return this.user.connection(this.form_connection.value);
-  }
+  this.user.one('refreshed', function() {
+    tag.update({connection: this.connections()[0]});
+  });
 
   connectionChanged(e) {
-    var c = this.c();
+    if (e) this.connection = this.user.connection(this.form_connection_id.value);
+    this.errors = [];
 
-    if (c) {
-      var url = c.url().parseUrl();
+    if (this.connection) {
+      var url = this.connection.url().parseUrl();
       this.form_nick.value = url.query.nick;
       this.form_password.value = url.userinfo[1] || '';
       this.form_url.value = url.hostPort;
@@ -98,8 +106,21 @@
     this.updateTextFields();
   }
 
-  save(e) {
-    var c = this.c() || new Convos.Connection({user: this.user});
+  protocolChanged() {
+    // TODO
+  }
+
+  removeConnection() {
+    this.user.removeConnection(this.connection, function(err) {
+      if (!err) tag.connection = this.connections()[0];
+      tag.connection = this.connections()[0];
+      tag.connectionChanged();
+      riot.update();
+    });
+  }
+
+  saveConnection(e) {
+    var c = this.connection || new Convos.Connection({user: this.user});
     var userinfo = [this.form_username.value, this.form_password.value].join(':');
     var url;
 
@@ -110,17 +131,16 @@
     this.errors = []; // clear error on post
     c.url(url).save(function(err) {
       if (err) return tag.formInvalidInput(err).update();
+      tag.connection = this;
+      tag.connectionChanged();
       riot.update();
     });
   }
 
-  this.on('mount', function() {
-    this.connectionChanged();
+  this.on('update', function() {
+    this.showNickField = this.form_protocol.value == 'irc';
     this.updateTextFields();
   });
 
-  this.on('update', function() {
-    this.showNickField = this.form_protocol.value == 'irc';
-  });
   </script>
 </connection-editor>
