@@ -38,7 +38,6 @@
 < riot/not-found.tag
 < riot/sidebar-dialogues.tag
 < riot/sidebar-notifications.tag
-< riot/sidebar-search.tag
 < riot/sidebar-settings.tag
 < riot/user-input.tag
 < riot/user-login.tag

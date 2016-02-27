@@ -181,10 +181,10 @@ format=js
 minified=0
 mtime=1456522134
 [riot:riot/chat.tag]
-checksum=d1f3c1567c
+checksum=fdb39dcde6
 format=js
 minified=0
-mtime=1456525609
+mtime=1456541772
 [riot:riot/connection-add.tag]
 checksum=fb2bfc6543
 format=js
@@ -225,11 +225,6 @@ checksum=aee61fdf80
 format=js
 minified=0
 mtime=1456469552
-[riot:riot/sidebar-search.tag]
-checksum=63d0f3f9f8
-format=js
-minified=0
-mtime=1456470886
 [riot:riot/sidebar-settings.tag]
 checksum=fa5538c7c6
 format=js

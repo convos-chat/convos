@@ -1,4 +1,4 @@
-riot.tag2('chat', '<nav> <sidebar-search user="{user}"></sidebar-search> <sidebar-notifications user="{user}"></sidebar-notifications> <sidebar-dialogues user="{user}"></sidebar-dialogues> <sidebar-settings user="{user}"></sidebar-settings> </nav> <connection-editor user="{user}" if="{modal == \'connections\'}"></connection-editor> <dialogue dialogue="{dialogue}"></dialogue>', '', '', function(opts) {
+riot.tag2('chat', '<nav> <sidebar-notifications user="{user}"></sidebar-notifications> <sidebar-dialogues user="{user}"></sidebar-dialogues> <sidebar-settings user="{user}"></sidebar-settings> </nav> <connection-editor user="{user}" if="{modal == \'connections\'}"></connection-editor> <dialogue dialogue="{dialogue}"></dialogue>', '', '', function(opts) {
   var tag = this;
 
   this.user = opts.user;
