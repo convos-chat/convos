@@ -2,7 +2,7 @@
   Convos.User = function(attrs) {
     if (attrs) this.update(attrs);
     riot.observable(this);
-    this._dialogues = {};
+    this._dialogs = {};
     this._connections = {};
     this._api = Convos.api;
     this._listenForEvents();
@@ -43,21 +43,21 @@
     return Object.keys(c).map(function(k) { return c[k]; });
   };
 
-  // Get or create a single Convos.Dialogue object on client side
-  // Get:    d = user.dialogue(id)
-  // Create: d = user.dialogue(attrs)
-  proto.dialogue = function(obj) {
-    if (typeof obj != 'object') return this._dialogues[obj];
+  // Get or create a single Convos.Dialog object on client side
+  // Get:    d = user.dialog(id)
+  // Create: d = user.dialog(attrs)
+  proto.dialog = function(obj) {
+    if (typeof obj != 'object') return this._dialogs[obj];
     obj.connection = this._connections[obj.connection_id];
-    var d = new Convos.Dialogue(obj);
-    if (this._dialogues[d.id()]) throw 'Dialogue already exists.';
-    this._dialogues[d.id()] = d;
-    this.trigger('dialogue', d);
+    var d = new Convos.Dialog(obj);
+    if (this._dialogs[d.id()]) throw 'Dialog already exists.';
+    this._dialogs[d.id()] = d;
+    this.trigger('dialog', d);
     return d;
   };
 
-  proto.dialogues = function() {
-    var d = this._dialogues;
+  proto.dialogs = function() {
+    var d = this._dialogs;
     return Object.keys(d).map(function(k) { return d[k]; });
   };
 
@@ -103,9 +103,9 @@
       if (err) return self.trigger('error', err);
       xhr.body.connections.forEach(function(c) { self.connection(c); });
       if (!self.connections().length) return self.trigger('refreshed');
-      self._api.listDialogues({}, function(err, xhr) {
+      self._api.listDialogs({}, function(err, xhr) {
         if (err) return self.trigger('error', err);
-        xhr.body.dialogues.forEach(function(d) { self.dialogue(d); });
+        xhr.body.dialogs.forEach(function(d) { self.dialog(d); });
         self.trigger('refreshed');
       });
     });
@@ -129,7 +129,7 @@
     this.ws().on('json', function(e) {
       switch (e.type) {
         case 'message':
-          var d = this._dialogues[e.object.id];
+          var d = this._dialogs[e.object.id];
           if (d) d.addMessage(e.data[0]);
           break;
       }

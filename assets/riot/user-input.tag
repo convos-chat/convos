@@ -24,7 +24,7 @@
   }
 
   sendMessage(e) {
-    opts.dialogue.send(this.message.value, function(err) {
+    opts.dialog.send(this.message.value, function(err) {
       if (err) console.log(err);
     }.bind(this));
     this.message.value = '';
@@ -38,9 +38,9 @@
 
   this.on('update', function() {
     try {
-      var state = opts.dialogue.connection().state();
+      var state = opts.dialog.connection().state();
       if (state == 'connected') {
-        this.placeholder = 'What do you want to say to ' + this.opts.dialogue.name() + '?';
+        this.placeholder = 'What do you want to say to ' + this.opts.dialog.name() + '?';
       }
       else {
         this.placeholder = 'State is "' + state + '".';

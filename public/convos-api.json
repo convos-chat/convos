@@ -25,8 +25,8 @@
       "type": "string",
       "description": "A unique connection identifier"
     },
-    "dialogue_id": {
-      "name": "dialogue_id",
+    "dialog_id": {
+      "name": "dialog_id",
       "in": "path",
       "default": "",
       "required": true,
@@ -94,7 +94,7 @@
     },
     "/connection/{connection_id}/rooms": {
       "get": {
-        "tags": [ "dialogue" ],
+        "tags": [ "dialog" ],
         "summary": "Get a list of all available chat rooms.",
         "operationId": "roomsByConnection",
         "parameters": [
@@ -106,7 +106,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Dialogue" } }
+                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Dialog" } }
               }
             }
           },
@@ -117,18 +117,18 @@
         }
       }
     },
-    "/connection/{connection_id}/dialogue/{dialogue_id}": {
+    "/connection/{connection_id}/dialog/{dialog_id}": {
       "delete": {
-        "tags": [ "dialogue" ],
-        "summary": "Remove (part) a dialogue.",
-        "operationId": "removeDialogue",
+        "tags": [ "dialog" ],
+        "summary": "Remove (part) a dialog.",
+        "operationId": "removeDialog",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/dialogue_id" }
+          { "$ref": "#/parameters/dialog_id" }
         ],
         "responses": {
           "200": {
-            "description": "A dialogue.",
+            "description": "A dialog.",
             "schema": { "$ref": "#/definitions/Success" }
           },
           "default": {
@@ -138,14 +138,14 @@
         }
       }
     },
-    "/connection/{connection_id}/dialogue/{dialogue_id}/messages": {
+    "/connection/{connection_id}/dialog/{dialog_id}/messages": {
       "get": {
-        "tags": [ "dialogue" ],
+        "tags": [ "dialog" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
-        "operationId": "messagesByDialogue",
+        "operationId": "messagesByDialog",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/dialogue_id" },
+          { "$ref": "#/parameters/dialog_id" },
           { "name": "after", "in": "query", "type": "string", "format": "datetime", "description": "Find messages after a given ISO 8601 timestamp" },
           { "name": "before", "in": "query", "type": "string", "format": "datetime", "description": "Find messages before a given ISO 8601 timestamp" },
           { "name": "level", "in": "query", "type": "string", "description": "debug, info (default), warn, error" },
@@ -169,14 +169,14 @@
         }
       }
     },
-    "/connection/{connection_id}/dialogue/{dialogue_id}/send": {
+    "/connection/{connection_id}/dialog/{dialog_id}/send": {
       "post": {
         "tags": [ "chat" ],
         "summary": "Send a message to a target.",
-        "operationId": "sendToDialogue",
+        "operationId": "sendToDialog",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/dialogue_id" },
+          { "$ref": "#/parameters/dialog_id" },
           {
             "name": "body",
             "in": "body",
@@ -196,11 +196,11 @@
         }
       }
     },
-    "/connection/{connection_id}/dialogues": {
+    "/connection/{connection_id}/dialogs": {
       "post": {
-        "tags": [ "dialogue" ],
-        "summary": "Join a dialogue.",
-        "operationId": "joinDialogue",
+        "tags": [ "dialog" ],
+        "summary": "Join a dialog.",
+        "operationId": "joinDialog",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           {
@@ -218,8 +218,8 @@
         ],
         "responses": {
           "200": {
-            "description": "A dialogue.",
-            "schema": { "$ref": "#/definitions/Dialogue" }
+            "description": "A dialog.",
+            "schema": { "$ref": "#/definitions/Dialog" }
           },
           "default": {
             "description": "Internal server error.",
@@ -281,20 +281,20 @@
         }
       }
     },
-    "/dialogues": {
+    "/dialogs": {
       "get": {
-        "tags": [ "dialogue" ],
-        "summary": "Get a list of all dialogues.",
-        "operationId": "listDialogues",
+        "tags": [ "dialog" ],
+        "summary": "Get a list of all dialogs.",
+        "operationId": "listDialogs",
         "responses": {
           "200": {
             "description": "List of messages.",
             "schema": {
               "type": "object",
               "properties": {
-                "dialogues": {
+                "dialogs": {
                   "type": "array",
-                  "items": { "$ref": "#/definitions/Dialogue" }
+                  "items": { "$ref": "#/definitions/Dialog" }
                 }
               }
             }
@@ -523,10 +523,10 @@
         "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
     },
-    "Dialogue": {
+    "Dialog": {
       "required": ["connection_id", "name"],
       "properties": {
-        "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialogue is part of" },
+        "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialog is part of" },
         "name": { "type": "string", "description": "Name of the room or person" },
         "topic": { "type": "string", "description": "The subjec/topic for this room" },
         "users": {

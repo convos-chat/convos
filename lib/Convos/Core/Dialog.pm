@@ -1,4 +1,4 @@
-package Convos::Core::Dialogue;
+package Convos::Core::Dialog;
 use Mojo::Base -base;
 
 has active     => 0;
@@ -36,11 +36,11 @@ sub TO_JSON {
 
 =head1 NAME
 
-Convos::Core::Dialogue - A convos dialogue base class
+Convos::Core::Dialog - A convos dialog base class
 
 =head1 DESCRIPTION
 
-L<Convos::Core::Dialogue> represents a dialogue (conversation) with one or
+L<Convos::Core::Dialog> represents a dialog (conversation) with one or
 more users.
 
 =head1 ATTRIBUTES
@@ -53,51 +53,51 @@ Holds a L<Convos::Core::Connection> object.
 
   $bool = $self->active;
 
-This is true if the user is currently active in the dialogue.
+This is true if the user is currently active in the dialog.
 
 =head2 frozen
 
   $str = $self->frozen;
 
-Will be set to a description if the dialogue is "frozen", which means you are
+Will be set to a description if the dialog is "frozen", which means you are
 no longer part of it.
 
 =head2 id
 
   $str = $self->id;
 
-Unique identifier for this dialogue.
+Unique identifier for this dialog.
 
 =head2 is_private
 
   $bool = $self->is_private;
 
 Returns true if you are only talking to a single user and no other
-users can join the dialogue.
+users can join the dialog.
 
 =head2 name
 
   $str = $self->name;
 
-The name of this dialogue.
+The name of this dialog.
 
 =head2 password
 
   $str = $self->password;
 
-The password used to join this dialogue.
+The password used to join this dialog.
 
 =head2 topic
 
   $str = $self->topic;
 
-The topic (subject) of the dialogue.
+The topic (subject) of the dialog.
 
 =head2 users
 
   $hash = $self->users;
 
-Holds information about the users in this dialogue.
+Holds information about the users in this dialog.
 
 =head1 METHODS
 
@@ -122,7 +122,7 @@ anyone.
   $user = $self->connection->user;
 
 Shortcut for accessing the L<Convos::Core::User> object associated with this
-dialogue.
+dialog.
 
 =head1 AUTHOR
 

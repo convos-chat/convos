@@ -5,19 +5,19 @@ my $t = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
-$t->get_ok('/api/dialogues')->status_is(200)->json_is('/dialogues', []);
+$t->get_ok('/api/dialogs')->status_is(200)->json_is('/dialogs', []);
 
 no warnings 'redefine';
 require Mojo::IRC::UA;
 *Mojo::IRC::UA::join_channel = sub { my ($irc, $channel, $cb) = @_; $irc->$cb('') };
 
 # order does not matter
-$user->connection({name => 'localhost', protocol => 'irc'})->join_dialogue('#private', sub { });
-$user->connection({name => 'perl-org',  protocol => 'irc'})->join_dialogue('#oslo.pm', sub { });
-$user->connection('irc-localhost')->join_dialogue('#Convos s3cret', sub { });
+$user->connection({name => 'localhost', protocol => 'irc'})->join_dialog('#private', sub { });
+$user->connection({name => 'perl-org',  protocol => 'irc'})->join_dialog('#oslo.pm', sub { });
+$user->connection('irc-localhost')->join_dialog('#Convos s3cret', sub { });
 
-$t->get_ok('/api/dialogues')->status_is(200)->json_is(
-  '/dialogues/0',
+$t->get_ok('/api/dialogs')->status_is(200)->json_is(
+  '/dialogs/0',
   {
     active        => 1,
     connection_id => 'irc-localhost',
@@ -28,7 +28,7 @@ $t->get_ok('/api/dialogues')->status_is(200)->json_is(
     users         => {}
   }
   )->json_is(
-  '/dialogues/1',
+  '/dialogs/1',
   {
     active        => 1,
     connection_id => 'irc-localhost',
@@ -39,7 +39,7 @@ $t->get_ok('/api/dialogues')->status_is(200)->json_is(
     users         => {}
   }
   )->json_is(
-  '/dialogues/2',
+  '/dialogs/2',
   {
     active        => 1,
     connection_id => 'irc-perl-org',

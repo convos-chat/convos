@@ -84,7 +84,7 @@ different files and directories for changes.
 =item * convos/assets/
 
 The "assets" directory contains all JavaScript and Sass files, which will
-be used to generate the "public" files. The dialogue is done with
+be used to generate the "public" files. The dialog is done with
 L<https://github.com/jhthorsen/mojolicious-plugin-assetpack>.
 
 The C<.tag> files require L<riot|http://riotjs.com> to be compiled into
@@ -144,7 +144,7 @@ The rest of the frontend consist of a JavaScript application, powered by
 L<http://riotjs.com>. This application gets its data from a L<Swagger2>
 API with a thin logical layer inside the controllers
 L<Convos::Controller::Connection>,
-L<Convos::Controller::Dialogue>,
+L<Convos::Controller::Dialog>,
 L<Convos::Controller::Events>,
 L<Convos::Controller::Notifications> and
 L<Convos::Controller::User>.
@@ -156,18 +156,18 @@ L<Convos::Controller::User>.
   .------._/    '---------'
   | Core |
   '------'   .------.   .-------------.   .-----------.
-      \______| User |___| Connections |___| Dialogues |
+      \______| User |___| Connections |___| Dialogs |
              '------'   '-------------'   '-----------'
 
 L<Convos::Core> is the heart of L<Convos>. The core takes care of connections,
-dialogues, can persist to a backend and provide hooks for plugins.
+dialogs, can persist to a backend and provide hooks for plugins.
 
 The design makes L<Convos> a multi-user application, that can persist to any
 backend (memory, file storage, redis, ...) and connect to any chat server,
-as well as keeping any number of dialogues active.
+as well as keeping any number of dialogs active.
 
 The way the "Backend" is hooked into the rest of the object graph is by
-events. Any user, connection or dialogue can emit new events that the
+events. Any user, connection or dialog can emit new events that the
 Backend can choose to persist to storage. The default backend is a
 file-based backend, which enables Convos to be started without any additional
 dependencies, except Perl and a couple of modules from CPAN.
@@ -263,7 +263,7 @@ More events from L<Mojo::Core::Backend> need to be streamed to the frontend.
 =item * Riot based user interface
 
 Need to understand "day changed". Need to draw a line since last time you
-looked at the dialogue. Emit desktop notifications on mentions.
+looked at the dialog. Emit desktop notifications on mentions.
 
 Implement "search/goto anything".
 
@@ -271,11 +271,11 @@ Display action/notice/privmsg differently.
 
 Show notifications.
 
-Show user list for a dialogue and user count. (what about user modes?)
+Show user list for a dialog and user count. (what about user modes?)
 
-Group dialogues by connection.
+Group dialogs by connection.
 
-Sort dialogues by name/last used/...?
+Sort dialogs by name/last used/...?
 
 Add support for showing user defined avatar.
 
@@ -287,7 +287,7 @@ Proper styling/embedding of "pastebin links".
 
 Shortcuts for jumping between "user input" and "sidebars".
 
-Display topic when joining a dialogue the first time.
+Display topic when joining a dialog the first time.
 
 =item * Clean up git history
 

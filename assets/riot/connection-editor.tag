@@ -7,7 +7,7 @@
         </div>
         <h5>Connection editor</h5>
         <p if={!user.connections().length}>
-          You need to add a connection before you can have a dialogue.
+          You need to add a connection before you can have a dialog.
           <span if={defaultServer}>
             We have filled in an example server, but you can connect to any server
             you like. "Username" and "password" are optional in most cases.

@@ -181,9 +181,9 @@ sub _log_file {
   my @path = ($obj->user->email);
 
   push @path, $obj->id             if $obj->isa('Convos::Core::Connection');
-  push @path, $obj->connection->id if $obj->isa('Convos::Core::Dialogue');
+  push @path, $obj->connection->id if $obj->isa('Convos::Core::Dialog');
   push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
-  push @path, $obj->name if $obj->isa('Convos::Core::Dialogue');
+  push @path, $obj->name if $obj->isa('Convos::Core::Dialog');
 
   return $self->home->rel_file(join('/', @path) . '.log');
 }
@@ -265,7 +265,7 @@ sub _setup {
       $connection->on(state => sub { $self->_log($_[0], time, "-!- Change connection state to $_[1]. $_[2]") });
       $connection->on(
         users => sub {
-          my ($connection, $dialogue, $data) = @_;
+          my ($connection, $dialog, $data) = @_;
 
           # TODO
         }
@@ -303,8 +303,8 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
   $CONVOS_HOME/joe@example.com/user.json                        # user settings
   $CONVOS_HOME/joe@example.com/irc-freenode/connection.json     # connection settings
   $CONVOS_HOME/joe@example.com/irc-freenode/2015/02.log         # connection log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # dialogue log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # dialogue log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # dialog log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # dialog log
 
 Notes about the structure:
 
@@ -316,7 +316,7 @@ Notes about the structure:
 
 =item * One log file per month should not cause too big files.
 
-=item * Hard to delete a dialogue thread. Ex: all dialogues with "marcus".
+=item * Hard to delete a dialog thread. Ex: all dialogs with "marcus".
 
 =item * Hard to search for messages between connections for a given date.
 

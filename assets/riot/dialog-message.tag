@@ -1,4 +1,4 @@
-<dialogue-message>
+<dialog-message>
   <div class="message" name="message" title={timestring(ts)}></div>
   <script>
   mixin.time(this);
@@ -20,4 +20,4 @@
     window.loadOffScreen($(this.root));
   });
   </script>
-</dialogue-message>
+</dialog-message>

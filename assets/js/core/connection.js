@@ -16,13 +16,13 @@
     user: function() { throw 'user cannot be built'; }
   });
 
-  // Join a room or create a private dialogue on the server
-  proto.joinDialogue = function(name, cb) {
+  // Join a room or create a private dialog on the server
+  proto.joinDialog = function(name, cb) {
     var self = this;
-    this._api.joinDialogue(
+    this._api.joinDialog(
       {body: {name: name}, connection_id: this.id()},
       function(err, xhr) {
-        if (!err) self.user().dialogue(xhr.body);
+        if (!err) self.user().dialog(xhr.body);
         cb.call(self, err, xhr.body);
       }
     );
@@ -52,7 +52,7 @@
       {connection_id: this.id()},
       function(err, xhr) {
         if (err) return cb.call(self, err, []);
-        cb.call(self, err, $.map(xhr.body.rooms, function(attrs) { return new Convos.Dialogue(attrs); }));
+        cb.call(self, err, $.map(xhr.body.rooms, function(attrs) { return new Convos.Dialog(attrs); }));
       }
     );
     return this;

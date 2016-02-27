@@ -142,13 +142,13 @@ Error.
     ]
   },
 
-=head2 joinDialogue
+=head2 joinDialog
 
-Join a dialogue.
+Join a dialog.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{connection_id}/dialogues
+  POST http://demo.convos.by/api/connection/{connection_id}/dialogs
 
 =head3 Parameters
 
@@ -169,10 +169,10 @@ Join a dialogue.
 
 =head4 200 - OK
 
-A dialogue.
+A dialog.
 
   {
-    "connection_id": string, // Unique identifier for the connection this dialogue is part of
+    "connection_id": string, // Unique identifier for the connection this dialog is part of
     "name": string, // Name of the room or person
     "topic": string, // The subjec/topic for this room
     "users":     {
@@ -238,13 +238,13 @@ Error.
     ]
   },
 
-=head2 listDialogues
+=head2 listDialogs
 
-Get a list of all dialogues.
+Get a list of all dialogs.
 
 =head3 Resource URL
 
-  GET http://demo.convos.by/api/dialogues
+  GET http://demo.convos.by/api/dialogs
 
 =head3 Parameters
 
@@ -257,9 +257,9 @@ This resource takes no parameters.
 List of messages.
 
   {
-    "dialogues":     [
+    "dialogs":     [
       {
-        "connection_id": string, // Unique identifier for the connection this dialogue is part of
+        "connection_id": string, // Unique identifier for the connection this dialog is part of
         "name": string, // Name of the room or person
         "topic": string, // The subjec/topic for this room
         "users":         {
@@ -415,7 +415,7 @@ Error.
     ]
   },
 
-=head2 messagesByDialogue
+=head2 messagesByDialog
 
 Get a list of messages.
 
@@ -423,7 +423,7 @@ Note: this resource require the user to be authenticated first.
 
 =head3 Resource URL
 
-  GET http://demo.convos.by/api/connection/{connection_id}/dialogue/{dialogue_id}/messages
+  GET http://demo.convos.by/api/connection/{connection_id}/dialog/{dialog_id}/messages
 
 =head3 Parameters
 
@@ -431,7 +431,7 @@ Note: this resource require the user to be authenticated first.
   | Name          | In    | Type    | Required | Description                                     |
   |----------------------------------------------------------------------------------------------|
   | connection_id | path  | string  | Yes      | A unique connection identifier                  |
-  | dialogue_id   | path  | string  | Yes      | The name of the person or room                  |
+  | dialog_id   | path  | string  | Yes      | The name of the person or room                  |
   | after         | query | string  | No       | Find messages after a given ISO 8601 timestamp  |
   | before        | query | string  | No       | Find messages before a given ISO 8601 timestamp |
   | level         | query | string  | No       | debug, info (default), warn, error              |
@@ -559,13 +559,13 @@ Error.
     ]
   },
 
-=head2 removeDialogue
+=head2 removeDialog
 
-Remove (part) a dialogue.
+Remove (part) a dialog.
 
 =head3 Resource URL
 
-  DELETE http://demo.convos.by/api/connection/{connection_id}/dialogue/{dialogue_id}
+  DELETE http://demo.convos.by/api/connection/{connection_id}/dialog/{dialog_id}
 
 =head3 Parameters
 
@@ -573,14 +573,14 @@ Remove (part) a dialogue.
   | Name          | In   | Type   | Required | Description                    |
   |---------------------------------------------------------------------------|
   | connection_id | path | string | Yes      | A unique connection identifier |
-  | dialogue_id   | path | string | Yes      | The name of the person or room |
+  | dialog_id   | path | string | Yes      | The name of the person or room |
   '---------------------------------------------------------------------------'
 
 =head3 Responses
 
 =head4 200 - OK
 
-A dialogue.
+A dialog.
 
   {
     "message": string, // Human readable description
@@ -625,7 +625,7 @@ List of rooms.
   {
     "rooms":     [
       {
-        "connection_id": string, // Unique identifier for the connection this dialogue is part of
+        "connection_id": string, // Unique identifier for the connection this dialog is part of
         "name": string, // Name of the room or person
         "topic": string, // The subjec/topic for this room
         "users":         {
@@ -697,13 +697,13 @@ Error.
     ]
   },
 
-=head2 sendToDialogue
+=head2 sendToDialog
 
 Send a message to a target.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{connection_id}/dialogue/{dialogue_id}/send
+  POST http://demo.convos.by/api/connection/{connection_id}/dialog/{dialog_id}/send
 
 =head3 Parameters
 
@@ -711,7 +711,7 @@ Send a message to a target.
   | Name          | In   | Type   | Required | Description                    |
   |---------------------------------------------------------------------------|
   | connection_id | path | string | Yes      | A unique connection identifier |
-  | dialogue_id   | path | string | Yes      | The name of the person or room |
+  | dialog_id   | path | string | Yes      | The name of the person or room |
   | body          | body | schema | Yes      | No description.                |
   '---------------------------------------------------------------------------'
 

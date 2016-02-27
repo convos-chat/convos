@@ -13,7 +13,7 @@ use constant BCRYPT_BASE_SETTINGS => do {
   join '', '$2', $nul, '$', $cost, '$';
 };
 
-sub EVENTS {qw(dialogue me message state users)}
+sub EVENTS {qw(dialog me message state users)}
 
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }

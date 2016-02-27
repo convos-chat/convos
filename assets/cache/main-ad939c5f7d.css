@@ -4639,17 +4639,16 @@ chat {
   height: 100vh;
   margin-right: 299px; }
   chat connection-editor,
-  chat dialogue {
+  chat dialog-container {
     flex-grow: 1;
     display: flex;
     flex-direction: column; }
-    chat connection-editor .dialogue-container,
-    chat dialogue .dialogue-container {
-      flex-grow: 1; }
   chat connection-editor {
     width: 500px; }
-  chat dialogue {
-    max-width: 900px; }
+  chat dialog-container {
+    max-width: 860px; }
+  chat dialog-container main {
+    flex-grow: 1; }
   chat nav {
     width: 300px;
     border-left: 1px solid #f0f0f0;
@@ -4660,7 +4659,7 @@ chat {
     right: 0;
     bottom: 0;
     z-index: 999; }
-    chat nav sidebar-dialogues {
+    chat nav sidebar-dialogs {
       flex-grow: 1; }
 
 connection-editor {
@@ -4673,46 +4672,46 @@ connection-editor {
     top: 14px;
     right: 10px; }
 
-dialogue {
+dialog-container {
   border-right: 1px solid #f0f0f0;
-  padding: 15px 20px 0 20px; }
-  dialogue .dialogue-container {
+  padding: 1.5rem 1.5rem 0 1.5rem; }
+  dialog-container header, dialog-container main {
+    width: 100%; }
+  dialog-container header {
     position: relative; }
-    dialogue .dialogue-container > h5 {
+    dialog-container header h5 {
       margin-top: 0; }
-    dialogue .dialogue-container > .actions {
+    dialog-container header .actions {
       overflow: hidden;
       position: absolute;
       top: 0;
       right: -4px; }
-  dialogue ol.dialogue {
-    list-style-type: none;
+  dialog-container main ol.collection {
+    border: 0;
     padding: 0;
-    border: 0; }
-    dialogue ol.dialogue .collection-item {
+    list-style-type: none; }
+    dialog-container main ol.collection .collection-item {
       position: relative;
       padding: 10px 0; }
-    dialogue ol.dialogue .ts {
+    dialog-container main ol.collection .ts {
       color: #757575;
       font-size: 0.8rem;
       position: absolute;
       top: 10px;
       right: 0px; }
-    dialogue ol.dialogue .message {
-      max-width: 820px; }
-      dialogue ol.dialogue .message a {
-        color: inherit;
-        text-decoration: underline; }
-      dialogue ol.dialogue .message a:hover {
-        text-decoration: none; }
+    dialog-container main ol.collection .message a {
+      color: inherit;
+      text-decoration: underline; }
+    dialog-container main ol.collection .message a:hover {
+      text-decoration: none; }
 
 nav {
   color: #777; }
-  nav sidebar-dialogues,
+  nav sidebar-dialogs,
   nav sidebar-notifications,
   nav sidebar-search {
     border-bottom: 4px solid #e5e5e5; }
-  nav sidebar-dialogues .on {
+  nav sidebar-dialogs .on {
     display: block;
     font-size: 0.9rem;
     color: #777;
