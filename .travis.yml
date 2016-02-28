@@ -1,15 +1,13 @@
+sudo: false
 language: perl
-services:
-  - redis-server
 perl:
-  - "5.18"
+  - "5.20"
   - "5.16"
-  - "5.14"
-  - "5.12"
   - "5.10"
 env:
-  - "HARNESS_OPTIONS=j1 TEST_POD=1 CONVOS_REDIS_URL=test"
+  - "HARNESS_OPTIONS=j1 TEST_POD=1"
 install:
+  - "cpanm -n https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz"
   - "cpanm -n Test::Pod Test::Pod::Coverage EV"
   - "cpanm -n --installdeps ."
 notifications:

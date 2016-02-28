@@ -583,6 +583,10 @@ and implements the following new ones.
 
 See L<Convos::Core::Connection/connect>.
 
+=head2 dialog
+
+Force C<$id> to be lowercase. See L<Convos::Core::Connection/dialog>.
+
 =head2 disconnect
 
 See L<Convos::Core::Connection/disconnect>.
@@ -602,9 +606,9 @@ L</nick> and try to change the nick on server if connected. Getting this nick
 will retrieve the active nick on server if connected and fall back to returning
 L</nick>.
 
-=head2 dialog
+=head2 part_dialog
 
-Force C<$id> to be lowercase. See L<Convos::Core::Connection/dialog>.
+See L<Convos::Core::Connection/dialog>.
 
 =head2 rooms
 
