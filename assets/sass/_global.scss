@@ -6,6 +6,15 @@ h1, h2, h3, h4, h5 {
   color: color('green', 'darken-3');
 }
 
+dl.horizontal {
+  margin: 0;
+  dt {
+    width: 10em;
+    float: left;
+    clear: left;
+  }
+}
+
 ul, li { margin: 0; }
 
 a:hover {

@@ -109,6 +109,21 @@
     return this;
   };
 
+  // Delete a dialog on server side and remove it from the user object
+  proto.removeDialog = function(dialog, cb) {
+    var self = this;
+    this._api.removeDialog(
+      {connection_id: dialog.connection().id(), dialog_id: dialog.id()},
+      function(err, xhr) {
+        if (err) return cb.call(self, err);
+        delete self._dialogs[dialog.id()];
+        cb.call(self, '');
+      }
+    );
+    return this;
+  };
+
+
   // Refresh related data to the user
   proto.refresh = function() {
     var self = this;

@@ -109,6 +109,11 @@ sub connect {
   return $self;
 }
 
+sub dialog {
+  my ($self, $id, @args) = @_;
+  $self->SUPER::dialog(lc $id, @args);
+}
+
 sub disconnect {
   my ($self, $cb) = @_;
   Scalar::Util::weaken($self);
@@ -149,9 +154,25 @@ sub nick {
   $self;
 }
 
-sub dialog {
-  my ($self, $id, @args) = @_;
-  $self->SUPER::dialog(lc $id, @args);
+sub part_dialog {
+  my ($self, $name, $cb) = @_;
+  my $dialog = $self->dialog($name);
+
+  if ($dialog->{connection}) {
+    $self->_irc->part_channel(
+      $name,
+      sub {
+        my ($irc, $err) = @_;
+        delete $self->{dialogs}{$dialog->id} unless $err;
+        $self->$cb($err);
+      }
+    );
+  }
+  else {
+    Mojo::IOLoop->next_tick(sub { $self->$cb(''); });
+  }
+
+  return $self;
 }
 
 sub rooms {

@@ -4581,6 +4581,13 @@ body {
 h1, h2, h3, h4, h5 {
   color: #2E7D32; }
 
+dl.horizontal {
+  margin: 0; }
+  dl.horizontal dt {
+    width: 10em;
+    float: left;
+    clear: left; }
+
 ul, li {
   margin: 0; }
 
@@ -4712,7 +4719,7 @@ dialog-container {
     padding: 0;
     list-style-type: none; }
     dialog-container main ol.collection h5.title {
-      font-size: 1rem;
+      font-size: 1.1rem;
       padding: 0;
       color: #000; }
     dialog-container main ol.collection .collection-item {

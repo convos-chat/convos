@@ -12,9 +12,9 @@
   mixin.base(proto, {
     connection: function() { throw 'connection() cannot be built'; },
     frozen: function() { return '' },
-    icon: function() { return 'group' },
+    icon: function() { return this.is_private() ? 'group' : 'person' },
     id: function() { return '' },
-    is_private: function() { return true; },
+    is_private: function() { return true; },
     messages: function() { return []; },
     name: function() { return 'Convos' },
     topic: function() { return '' },
@@ -38,8 +38,8 @@
     return ['#chat', this.connection().id(), this.name()].concat(path).join('/');
   };
 
-  proto.removeMessage = function(remove) {
-    this.messages(this.messages().filter(function(msg) { return msg != remove}));
+  proto.removeMessage = function(msg) {
+    this.messages(this.messages().filter(function(m) { return m != msg}));
     return this;
   };
 
@@ -76,6 +76,7 @@
 
   // Called when this dialog is visible in gui the first time
   proto._load = function() {
+    if (!this.hasConnection()) return;
     if (this.messages().length >= 60) return;
     var self = this;
     self._api.messagesByDialog(

@@ -1,4 +1,4 @@
-riot.tag2('dialog-container', '<header> <div class="actions" if="{dialog.hasConnection()}"> <a href="#settings"><i class="material-icons">more_horiz</i></a> <a href="#participants" onclick="{listParticipants}" class="tooltipped" title="List participants"><i class="material-icons">people</i></a> <a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a> <a href="#close" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a> </div> <div class="actions" if="{!dialog.hasConnection()}"> <a href="#chat"><i class="material-icons">star_rate</i></a> </div> <h5 class="tooltipped" title="{dialog.topic()}">{dialog.name()}</h5> </header> <main name="scrollElement"> <ol class="collection"> <li class="{\'collection-item\': true, special: special}" each="{messages}"> <a href="{\'#autocomplete:\' + from}" class="title" if="{!special}">{from}</a> <dialog-message msg="{m}" each="{m, i in nested_messages}"></dialog-message> <span class="secondary-content" if="{special}"> <a href="#close" onclick="{removeMessage}"><i class="material-icons">close</i></a> </span> <span class="secondary-content ts tooltipped" title="{ts.toLocaleString()}" if="{!special}"> {parent.timestring(ts)} </span> </li> </ol> </main> <user-input dialog="{dialog}"></user-input>', '', '', function(opts) {
+riot.tag2('dialog-container', '<header> <div class="actions" if="{dialog.hasConnection()}"> <a href="#settings" onclick="{getInfo}" class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a> <a href="#participants" onclick="{listParticipants}" class="tooltipped" title="List participants"><i class="material-icons">people</i></a> <a href="#close" onclick="{removeDialog}" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a> </div> <div class="actions" if="{!dialog.hasConnection()}"> <a href="#chat"><i class="material-icons">star_rate</i></a> </div> <h5 class="tooltipped" title="{dialog.topic() || \'No topic is set.\'}">{dialog.name()}</h5> </header> <main name="scrollElement"> <ol class="collection"> <li class="{\'collection-item\': true, special: special}" each="{messages}"> <a href="{\'#autocomplete:\' + from}" class="title" if="{!special}">{from}</a> <dialog-message dialog="{dialog}" msg="{m}" each="{m, i in nested_messages}"></dialog-message> <span class="secondary-content" if="{special}"> <a href="#close" onclick="{removeMessage}"><i class="material-icons">close</i></a> </span> <span class="secondary-content ts tooltipped" title="{ts.toLocaleString()}" if="{!special}"> {parent.timestring(ts)} </span> </li> </ol> </main> <user-input dialog="{dialog}"></user-input>', '', '', function(opts) {
   mixin.bottom(this);
   mixin.time(this);
 
@@ -8,8 +8,19 @@ riot.tag2('dialog-container', '<header> <div class="actions" if="{dialog.hasConn
   this.lastNumberOfMessages = 0;
   this.messages = [];
 
+  this.getInfo = function(e) {
+    this.dialog.addMessage({special: 'info'});
+  }.bind(this)
+
   this.listParticipants = function(e) {
-    this.dialog.addMessage({special: 'users', users: this.dialog.users()});
+    this.dialog.addMessage({special: 'users'});
+  }.bind(this)
+
+  this.removeDialog = function(e) {
+    this.user.removeDialog(this.dialog, function(err) {
+      if (err) this.dialog.addMessage({message: err[0].message});
+      riot.update();
+    });
   }.bind(this)
 
   this.removeMessage = function(e) {

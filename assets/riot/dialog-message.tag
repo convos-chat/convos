@@ -1,7 +1,15 @@
 <dialog-message>
   <div class="message" if={!msg.special}></div>
+  <div class="info" if={msg.special == 'info'}>
+    <h5 class="title">Information</h5>
+    <dl class="horizontal">
+      <dt>Connection</dt><dd>{dialog.connection().protocol()}-{dialog.connection().name()}</dd>
+      <dt>Topic</dt><dd>{dialog.topic() || 'No topic is set.'}</dd>
+      <dt>Private</dt><dd>{dialog.is_private() ? 'Yes' : 'No'}</dd>
+    </dl>
+  </div>
   <div class="users" if={msg.special == 'users'}>
-    <h5 class="title">Participants</h5>
+    <h5 class="title">Participants ({users.length})</h5>
     <span if={!users.length}>No participants. You need to join the dialog first.</span>
     <a href={'#autocomplete:' + u.name} each={u, i in users}>
       {u.mode}{u.name}{i+1 == users.length ? '.' : ', '}
@@ -10,14 +18,9 @@
   <script>
   var tag = this;
 
+  this.dialog = opts.dialog;
   this.msg = opts.msg;
   this.users = [];
-
-  if (opts.msg.users) {
-    Object.keys(opts.msg.users).sort().forEach(function(name) {
-      tag.users.push(opts.msg.users[name]);
-    });
-  }
 
   loadOffScreen(html, textStatus, xhr) {
     if (html.match(/^<a\s/)) return;
@@ -45,6 +48,12 @@
         }
       })
     );
+  });
+
+  this.on('update', function() {
+    if (this.msg.special != 'users') return;
+    var users = this.dialog.users()
+    this.users = Object.keys(users).sort().map(function(name) { return users[name]; });
   });
   </script>
 </dialog-message>

@@ -65,6 +65,11 @@ sub new {
   return bless $attrs, $class;
 }
 
+sub part_dialog {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "join_dialog" not implemented.');
+}
+
 sub rooms { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "rooms" not implemented.', []); }
 
 sub save {
@@ -273,6 +278,12 @@ Used to create a new dialog. See also L</dialog> event.
 
 Creates a new connection object. The returned object will be of a sub class,
 if L</protocol> is part of the input C<%attrs>.
+
+=head2 part_dialog
+
+  $self = $self->part_dialog("#some_channel", sub { my ($self, $err) = @_; });
+
+Used to part a dialog.
 
 =head2 rooms
 

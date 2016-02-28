@@ -1,21 +1,21 @@
 <dialog-container>
   <header>
     <div class="actions" if={dialog.hasConnection()}>
-      <a href="#settings"><i class="material-icons">more_horiz</i></a>
+      <a href="#settings" onclick={getInfo} class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a>
       <a href="#participants" onclick={listParticipants} class="tooltipped" title="List participants"><i class="material-icons">people</i></a>
-      <a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a>
-      <a href="#close" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a>
+      <!-- a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a -->
+      <a href="#close" onclick={removeDialog} class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a>
     </div>
     <div class="actions" if={!dialog.hasConnection()}>
       <a href="#chat"><i class="material-icons">star_rate</i></a>
     </div>
-    <h5 class="tooltipped" title={dialog.topic()}>{dialog.name()}</h5>
+    <h5 class="tooltipped" title={dialog.topic() || 'No topic is set.'}>{dialog.name()}</h5>
   </header>
   <main name="scrollElement">
     <ol class="collection">
       <li class={'collection-item': true, special: special} each={messages}>
         <a href={'#autocomplete:' + from} class="title" if={!special}>{from}</a>
-        <dialog-message msg={m} each={m, i in nested_messages}></dialog-message>
+        <dialog-message dialog={dialog} msg={m} each={m, i in nested_messages}></dialog-message>
         <span class="secondary-content" if={special}>
           <a href="#close" onclick={removeMessage}><i class="material-icons">close</i></a>
         </span>
@@ -36,8 +36,19 @@
   this.lastNumberOfMessages = 0;
   this.messages = [];
 
+  getInfo(e) {
+    this.dialog.addMessage({special: 'info'});
+  }
+
   listParticipants(e) {
-    this.dialog.addMessage({special: 'users', users: this.dialog.users()});
+    this.dialog.addMessage({special: 'users'});
+  }
+
+  removeDialog(e) {
+    this.user.removeDialog(this.dialog, function(err) {
+      if (err) this.dialog.addMessage({message: err[0].message});
+      riot.update();
+    });
   }
 
   removeMessage(e) {

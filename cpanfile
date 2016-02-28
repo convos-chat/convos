@@ -4,10 +4,10 @@ requires "File::HomeDir"                     => "1.00";
 requires "File::ReadBackwards"               => "1.05";
 requires "Mojo::IOLoop::ForkCall"            => "0.17";
 requires "Mojo::IRC"                         => "0.27";
-requires "Mojolicious"                       => "6.14";
+requires "Mojolicious"                       => "6.40";
 requires "Mojolicious::Plugin::LinkEmbedder" => "0.2301";
 requires "Parse::IRC"                        => "1.20";
-requires "Swagger2"                          => "0.59";
+requires "Swagger2"                          => "0.75";
 
 # cpanm https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz
 #requires "Mojolicious::Plugin::AssetPack"    => "0.70";

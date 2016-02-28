@@ -79,8 +79,21 @@ sub messages {
 
 sub remove {
   my ($self, $args, $cb) = @_;
-  die 'TODO';
-  $self->$cb({message => ''}, 200);
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->connection($args->{connection_id});
+
+  unless ($connection) {
+    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+  }
+
+  $self->delay(
+    sub { $connection->part_dialog($args->{dialog_id}, shift->begin); },
+    sub {
+      my ($delay, $err) = @_;
+      return $self->$cb({}, 200) unless $err;
+      return $self->$cb($self->invalid_request($err), 500);
+    },
+  );
 }
 
 sub send {
