@@ -27,9 +27,18 @@ String.prototype.parseUrl = function() {
 };
 
 String.prototype.ucFirst = function() {
-  return this.replace(/^./, function (match) {
-    return match.toUpperCase();
-  });
+  return this.replace(/^./, function(m) { return m.toUpperCase(); });
+};
+
+var xml = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  '\'': '&#39;'
+};
+String.prototype.xmlEscape = function() {
+  return this.replace(/[&<>"']/g, function(m) { return xml[m]; });
 };
 
 Date.prototype.epoch = function() {

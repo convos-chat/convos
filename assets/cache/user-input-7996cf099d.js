@@ -1,4 +1,4 @@
-riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <div class="actions"> <a href="#emoji" class="tooltipped" title="Insert emoji"><i class="material-icons">insert_emoticon</i></a> <a href="#send" class="tooltipped" title="Send message"><i class="material-icons">send</i></a> </div> <textarea name="message" class="materialize-textarea" placeholder="{placeholder}" onkeydown="{onChange}"></textarea> </form>', '', '', function(opts) {
+riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <div class="actions"> <a href="#send" onclick="{sendMessage}" class="tooltipped" title="Send message"><i class="material-icons">send</i></a> </div> <textarea name="message" class="materialize-textarea" placeholder="{placeholder}" onkeydown="{onChange}"></textarea> </form>', '', '', function(opts) {
 
   this.placeholder = '';
 
@@ -14,9 +14,9 @@ riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <div clas
   }.bind(this)
 
   this.sendMessage = function(e) {
-    opts.dialog.send(this.message.value, function(err) {
-      if (err) console.log(err);
-    }.bind(this));
+    var m = this.message.value;
+    if (!m.length) return;
+    opts.dialog.send(m, function(err) { if (err) console.log(err); }.bind(this));
     this.message.value = '';
     this.message.focus();
   }.bind(this)

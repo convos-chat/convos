@@ -22,8 +22,8 @@ riot.tag2('dialog-message', '<div class="message" if="{!msg.special}"></div> <di
 
   this.on('mount', function() {
     if (this.msg.special) return;
-    $('div', this.root).html(
-      this.msg.message.autoLink({
+    $('.message', this.root).html(
+      this.msg.message.xmlEscape().autoLink({
         target: '_blank',
         after: function(url, id) {
           $.get('/api/embed?url=' + encodeURIComponent(url), this.loadOffScreen);

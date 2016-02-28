@@ -3,8 +3,8 @@
     <div class="actions">
       <!-- a href="#attach" class="tooltipped" title="Attach file"><i class="material-icons">attach_file</i></a -->
       <!-- a href="#webcam" class="tooltipped" title="Take picture"><i class="material-icons">photo_camera</i></a -->
-      <a href="#emoji" class="tooltipped" title="Insert emoji"><i class="material-icons">insert_emoticon</i></a>
-      <a href="#send" class="tooltipped" title="Send message"><i class="material-icons">send</i></a>
+      <!-- a href="#emoji" class="tooltipped" title="Insert emoji"><i class="material-icons">insert_emoticon</i></a -->
+      <a href="#send" onclick={sendMessage} class="tooltipped" title="Send message"><i class="material-icons">send</i></a>
     </div>
     <textarea name="message" class="materialize-textarea" placeholder={placeholder} onkeydown={onChange}></textarea>
   </form>
@@ -24,9 +24,9 @@
   }
 
   sendMessage(e) {
-    opts.dialog.send(this.message.value, function(err) {
-      if (err) console.log(err);
-    }.bind(this));
+    var m = this.message.value;
+    if (!m.length) return;
+    opts.dialog.send(m, function(err) { if (err) console.log(err); }.bind(this));
     this.message.value = '';
     this.message.focus();
   }
