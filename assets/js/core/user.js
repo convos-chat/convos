@@ -72,7 +72,7 @@
 
   proto.dialogs = function() {
     var d = this._dialogs;
-    return Object.keys(d).map(function(k) { return d[k]; });
+    return Object.keys(d).sort().map(function(k) { return d[k]; });
   };
 
   // Get user settings from server
@@ -117,6 +117,8 @@
       function(err, xhr) {
         if (err) return cb.call(self, err);
         delete self._dialogs[dialog.id()];
+        var first = self.dialogs()[0];
+        if (first) self.currentDialog(first);
         cb.call(self, '');
       }
     );

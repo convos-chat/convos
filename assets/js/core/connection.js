@@ -22,8 +22,9 @@
     this._api.joinDialog(
       {body: {name: name}, connection_id: this.id()},
       function(err, xhr) {
-        if (!err) self.user().dialog(xhr.body);
-        cb.call(self, err, xhr.body);
+        var d;
+        if (!err) d = self.user().dialog(xhr.body);
+        cb.call(self, err, d, xhr.body);
       }
     );
     return this;

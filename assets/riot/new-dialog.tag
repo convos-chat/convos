@@ -65,8 +65,9 @@
   chat(e) {
     var name = this.form_name.value;
     if (!name.length) return;
-    this.connection.joinDialog(name, function(err) {
+    this.connection.joinDialog(name, function(err, dialog) {
       if (err) return tag.update({errors: err});
+      tag.user.currentDialog(dialog);
       riot.route('chat');
     });
   }
