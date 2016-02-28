@@ -64,13 +64,13 @@ textarea.materialize-textarea {
   }
 
   // Focused input style
-  &:focus:not([readonly]) {
+  &:focus {
     border-bottom: 1px solid $input-focus-color;
     box-shadow: 0 1px 0 0 $input-focus-color;
   }
 
   // Focused label style
-  &:focus:not([readonly])+label {
+  &:focus+label {
     color: $input-focus-color;
   }
 

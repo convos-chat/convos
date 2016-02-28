@@ -5,7 +5,7 @@
         <div class="actions">
           <a href="#chat"><i class="material-icons">close</i></a>
         </div>
-        <h5>New dialog</h5>
+        <h5>Create dialog</h5>
         <p>
           You can create a dialog with either a single user (by nick)
           or join a chat room (channel). Click "<a href="#load" onclick={load}>Load</a>"

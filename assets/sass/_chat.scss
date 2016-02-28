@@ -1,4 +1,4 @@
-$settings-active-color: #f8f8f8;
+$settings-active-color: #f6f6f6;
 
 chat {
   display: flex;
@@ -35,7 +35,10 @@ chat {
     bottom: 0;
     z-index: 900;
 
-    sidebar-dialogs { flex-grow: 1; }
+    sidebar-dialogs {
+      flex-grow: 1;
+      overflow: auto;
+    }
   }
 }
 
@@ -49,6 +52,10 @@ new-dialog {
   h5 {
     margin-top: 0;
     padding-top: $gutter-width / 2;
+  }
+
+  input[type=text] {
+    margin: 0;
   }
 
   .actions {
@@ -78,11 +85,9 @@ convos-help {
 }
 
 dialog-container {
-  border-right: 1px solid lighten($input-border-color, 32%);
   padding: 0 $gutter-width / 2 0 $gutter-width /2;
 
   header {
-    border-bottom: 1px solid lighten($input-border-color, 32%);
     position: relative;
     .actions { right: -4px; }
   }
@@ -116,26 +121,60 @@ dialog-container {
       }
     }
     .collection-item.special .secondary-content {
-      top: 2px;
+      top: 8px;
+      right: 4px;
+      i { font-size: 22px; }
     }
     .message {
       a { color: inherit; text-decoration: underline; }
       a:hover { text-decoration: none; }
     }
   }
+
+  user-input {
+    border-top: 1px solid lighten($input-border-color, 24%);
+
+    .actions {
+      text-align: right;
+      overflow: visible;
+      position: relative;
+      height: 0;
+      top: -34px;
+      right: 1px;
+      a {
+        display: inline-block;
+        margin-right: -4px;
+        padding: 4px 6px;
+      }
+      i { vertical-align: bottom; }
+    }
+
+    textarea.materialize-textarea {
+      max-height: 11.5rem;
+      margin: 8px 0;
+      padding: 0;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+  }
 }
 
 nav {
-  border-left: 1px solid lighten($input-border-color, 32%);
   color: #777;
 
   sidebar-dialogs,
-  sidebar-notifications,
-  sidebar-search {
-    border-bottom: 4px solid lighten($input-border-color, 28%);
+  sidebar-notifications {
+    > span, > a {
+      display: block;
+      padding: $element-top-margin $gutter-width / 2 $element-bottom-margin $gutter-width / 2;
+    }
   }
 
   sidebar-dialogs {
+    a.active {
+      color: darken($link-color, 15%);
+      font-weight: bold;
+    }
     .on {
       display: block;
       font-size: 0.9rem;
@@ -145,72 +184,22 @@ nav {
     }
   }
 
-  sidebar-search {
-    .input-field label { left: 0; }
-    #search_input { margin: 0; }
-  }
-
   sidebar-settings {
-    .collection { margin-bottom: 0; }
-  }
-
-  .collection { margin: 0; border: 0; }
-  .collection .collection-item.active {
-    background-color: $settings-active-color;
-    color: #1B5E20;
+    display: flex;
+    a {
+      position: relative;
+      display: block;
+      flex-grow: 1;
+      text-align: center;
+      padding: $gutter-width / 2 0;
+      height: 60px;
+      padding-bottom: $gutter-width;
+    }
+    a.active {
+      color: darken($link-color, 15%);
+      i { font-size: 28px; }
+    }
   }
 
   .material-icons { vertical-align: bottom; }
-}
-
-user-input {
-  .actions {
-    text-align: right;
-    overflow: visible;
-    position: relative;
-    height: 0;
-    top: -34px;
-    right: 1px;
-    a {
-      display: inline-block;
-      margin-right: -4px;
-      padding: 4px 6px;
-    }
-    i { vertical-align: bottom; }
-  }
-
-  textarea.materialize-textarea {
-    height: 4rem;
-    min-height: 4rem;
-    max-height: 11.5rem;
-    margin: 0;
-    padding: 1rem;
-    overflow: auto;
-    width: 100%;
-    border: 1px solid lighten($input-border-color, 25%);
-    box-sizing: border-box;
-
-    &:focus {
-      border: 1px solid lighten($input-border-color, 5%);
-    }
-  }
-}
-
-.collection-item.split {
-  display: flex;
-  padding: 0;
-  > a {
-    padding: 10px 20px;
-    flex-grow: 0.5;
-    display: block;
-    transition: .25s;
-    color: $collection-link-color;
-    border-right: 1px solid $collection-border-color;
-    &:last { border-right: 0; }
-    &:not(.active) {
-      &:hover {
-        background-color: $collection-hover-bg-color;
-      }
-    }
-  }
 }

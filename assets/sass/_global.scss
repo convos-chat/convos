@@ -3,7 +3,7 @@ body {
 }
 
 h1, h2, h3, h4, h5 {
-  color: color('green', 'darken-3');
+  color: $header-color;
 }
 
 dl.horizontal {
@@ -15,14 +15,20 @@ dl.horizontal {
   }
 }
 
-ul, li { margin: 0; }
-
 a:hover {
   color: darken($secondary-color, 10%);
 }
 
 button.btn[disabled] {
   @extend .disabled;
+}
+
+div.alert {
+  background: color('red', 'lighten-5');
+  border: 1px solid color('red', 'lighten-2');
+  border-radius: 2px;
+  color: color('red', 'darken-2');
+  padding: $card-padding / 2;
 }
 
 not-found, .centered {
@@ -60,12 +66,4 @@ not-found, .centered {
     margin-right: 0.5rem;
     &.right { margin-right: 0; }
   }
-}
-
-div.alert {
-  background: color('red', 'lighten-5');
-  border: 1px solid color('red', 'lighten-2');
-  border-radius: 2px;
-  color: color('red', 'darken-2');
-  padding: $card-padding / 2;
 }

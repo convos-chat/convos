@@ -168,11 +168,11 @@
     this.one('refreshed', function() {
       if (!this.connections().length) {
         d.addMessage({message: 'Is this your first time here?', hr: true});
-        d.addMessage({message: 'To add a connection, click "Edit connections" in the right side menu.'});
+        d.addMessage({message: 'To add a connection, click the "Edit connections" button in the lower right side menu.'});
       }
       else if (!this.dialogs().length) {
         d.addMessage({message: 'You are not part of any dialogs.', hr: true});
-        d.addMessage({message: 'To join a dialog, click "New dialog" in the right side meny.'});
+        d.addMessage({message: 'To join a dialog, click the "Create dialog" button in the lower right side meny.'});
       }
     });
   };

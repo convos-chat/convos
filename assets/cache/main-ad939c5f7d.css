@@ -2170,7 +2170,7 @@ video.responsive-video {
   display: inline-block;
   float: none; }
 
-@media only screen and (max-width: 820px) {
+@media only screen and (max-width: 992px) {
   .pagination {
     width: 100%; }
     .pagination li.prev,
@@ -2252,7 +2252,7 @@ ul.staggered-list li {
   .hide-on-small-only, .hide-on-small-and-down {
     display: none !important; } }
 
-@media only screen and (max-width: 820px) {
+@media only screen and (max-width: 992px) {
   .hide-on-med-and-down {
     display: none !important; } }
 
@@ -2260,19 +2260,19 @@ ul.staggered-list li {
   .hide-on-med-and-up {
     display: none !important; } }
 
-@media only screen and (min-width: 600px) and (max-width: 820px) {
+@media only screen and (min-width: 600px) and (max-width: 992px) {
   .hide-on-med-only {
     display: none !important; } }
 
-@media only screen and (min-width: 821px) {
+@media only screen and (min-width: 993px) {
   .hide-on-large-only {
     display: none !important; } }
 
-@media only screen and (min-width: 821px) {
+@media only screen and (min-width: 993px) {
   .show-on-large {
     display: block !important; } }
 
-@media only screen and (min-width: 600px) and (max-width: 820px) {
+@media only screen and (min-width: 600px) and (max-width: 992px) {
   .show-on-medium {
     display: block !important; } }
 
@@ -2284,7 +2284,7 @@ ul.staggered-list li {
   .show-on-medium-and-up {
     display: block !important; } }
 
-@media only screen and (max-width: 820px) {
+@media only screen and (max-width: 992px) {
   .show-on-medium-and-down {
     display: block !important; } }
 
@@ -2333,7 +2333,7 @@ td, th {
   vertical-align: middle;
   border-radius: 2px; }
 
-@media only screen and (max-width: 820px) {
+@media only screen and (max-width: 992px) {
   table.responsive-table {
     width: 100%;
     border-collapse: collapse;
@@ -2395,7 +2395,7 @@ td, th {
   overflow: hidden;
   position: relative; }
   .collection .collection-item {
-    background-color: transparent;
+    background-color: #fff;
     line-height: 1.5rem;
     padding: 10px 20px;
     margin: 0;
@@ -2440,7 +2440,7 @@ td, th {
     .collection a.collection-item:not(.active):hover {
       background-color: #ddd; }
   .collection.with-header .collection-header {
-    background-color: transparent;
+    background-color: #fff;
     border-bottom: 1px solid #e0e0e0;
     padding: 10px 20px; }
   .collection.with-header .collection-item {
@@ -2639,7 +2639,7 @@ input[type=range] + .thumb {
   .container {
     width: 85%; } }
 
-@media only screen and (min-width: 821px) {
+@media only screen and (min-width: 993px) {
   .container {
     width: 70%; } }
 
@@ -2936,7 +2936,7 @@ input[type=range] + .thumb {
         right: 100%; }
       .row .col.push-m12 {
         left: 100%; } }
-    @media only screen and (min-width: 821px) {
+    @media only screen and (min-width: 993px) {
       .row .col.l1 {
         width: 8.33333%;
         margin-left: auto;
@@ -3081,7 +3081,7 @@ html {
   @media only screen and (min-width: 0) {
     html {
       font-size: 14px; } }
-  @media only screen and (min-width: 820px) {
+  @media only screen and (min-width: 992px) {
     html {
       font-size: 14.5px; } }
   @media only screen and (min-width: 1200px) {
@@ -3740,34 +3740,34 @@ textarea.materialize-textarea {
   textarea.materialize-textarea:disabled + label,
   textarea.materialize-textarea[readonly="readonly"] + label {
     color: rgba(0, 0, 0, 0.26); }
-  input:not([type]):focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=text]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=password]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=email]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=url]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=time]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=date]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=datetime]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=datetime-local]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=tel]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=number]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  input[type=search]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]),
-  textarea.materialize-textarea:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) {
+  input:not([type]):focus,
+  input[type=text]:focus,
+  input[type=password]:focus,
+  input[type=email]:focus,
+  input[type=url]:focus,
+  input[type=time]:focus,
+  input[type=date]:focus,
+  input[type=datetime]:focus,
+  input[type=datetime-local]:focus,
+  input[type=tel]:focus,
+  input[type=number]:focus,
+  input[type=search]:focus,
+  textarea.materialize-textarea:focus {
     border-bottom: 1px solid #1B5E20;
     box-shadow: 0 1px 0 0 #1B5E20; }
-  input:not([type]):focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=text]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=password]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=email]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=url]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=time]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=date]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=datetime]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=datetime-local]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=tel]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=number]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  input[type=search]:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label,
-  textarea.materialize-textarea:focus:not([readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly], [readonly]) + label {
+  input:not([type]):focus + label,
+  input[type=text]:focus + label,
+  input[type=password]:focus + label,
+  input[type=email]:focus + label,
+  input[type=url]:focus + label,
+  input[type=time]:focus + label,
+  input[type=date]:focus + label,
+  input[type=datetime]:focus + label,
+  input[type=datetime-local]:focus + label,
+  input[type=tel]:focus + label,
+  input[type=number]:focus + label,
+  input[type=search]:focus + label,
+  textarea.materialize-textarea:focus + label {
     color: #1B5E20; }
   input:not([type]).valid, input:not([type]):focus.valid,
   input[type=text].valid,
@@ -3946,7 +3946,7 @@ textarea.materialize-textarea {
     padding-top: .8rem; }
   .input-field .prefix ~ label {
     margin-left: 3rem; }
-  @media only screen and (max-width: 820px) {
+  @media only screen and (max-width: 992px) {
     .input-field .prefix ~ input {
       width: 86%;
       width: calc(100% - 3rem); } }
@@ -4588,11 +4588,15 @@ dl.horizontal {
     float: left;
     clear: left; }
 
-ul, li {
-  margin: 0; }
-
 a:hover {
   color: #103613; }
+
+div.alert {
+  background: #FFEBEE;
+  border: 1px solid #E57373;
+  border-radius: 2px;
+  color: #D32F2F;
+  padding: 10px; }
 
 not-found, .centered {
   display: flex;
@@ -4618,13 +4622,6 @@ not-found, .centered {
   margin-right: 0.5rem; }
   .col .btn.right, .col .right.btn-large, .col .right.btn-delete, .col .btn-large.right, .col .btn-flat.right {
     margin-right: 0; }
-
-div.alert {
-  background: #FFEBEE;
-  border: 1px solid #E57373;
-  border-radius: 2px;
-  color: #D32F2F;
-  padding: 10px; }
 
 div.autocomplete {
   overflow: auto;
@@ -4684,7 +4681,8 @@ chat {
     bottom: 0;
     z-index: 900; }
     chat nav sidebar-dialogs {
-      flex-grow: 1; }
+      flex-grow: 1;
+      overflow: auto; }
 
 connection-editor,
 convos-help,
@@ -4698,6 +4696,11 @@ new-dialog {
   new-dialog h5 {
     margin-top: 0;
     padding-top: 0.75rem; }
+  connection-editor input[type=text],
+  convos-help input[type=text],
+  dialog-container input[type=text],
+  new-dialog input[type=text] {
+    margin: 0; }
   connection-editor .actions,
   convos-help .actions,
   dialog-container .actions,
@@ -4710,7 +4713,7 @@ new-dialog {
 connection-editor,
 convos-help,
 new-dialog {
-  background: #f8f8f8;
+  background: #f6f6f6;
   position: relative; }
 
 convos-help dl dd {
@@ -4723,10 +4726,8 @@ convos-help ul {
     list-style-type: inherit; }
 
 dialog-container {
-  border-right: 1px solid #f0f0f0;
   padding: 0 0.75rem 0 0.75rem; }
   dialog-container header {
-    border-bottom: 1px solid #f0f0f0;
     position: relative; }
     dialog-container header .actions {
       right: -4px; }
@@ -4755,82 +4756,69 @@ dialog-container {
       dialog-container main ol.collection .secondary-content i {
         vertical-align: bottom; }
     dialog-container main ol.collection .collection-item.special .secondary-content {
-      top: 2px; }
+      top: 8px;
+      right: 4px; }
+      dialog-container main ol.collection .collection-item.special .secondary-content i {
+        font-size: 22px; }
     dialog-container main ol.collection .message a {
       color: inherit;
       text-decoration: underline; }
     dialog-container main ol.collection .message a:hover {
       text-decoration: none; }
+  dialog-container user-input {
+    border-top: 1px solid #dbdbdb; }
+    dialog-container user-input .actions {
+      text-align: right;
+      overflow: visible;
+      position: relative;
+      height: 0;
+      top: -34px;
+      right: 1px; }
+      dialog-container user-input .actions a {
+        display: inline-block;
+        margin-right: -4px;
+        padding: 4px 6px; }
+      dialog-container user-input .actions i {
+        vertical-align: bottom; }
+    dialog-container user-input textarea.materialize-textarea {
+      max-height: 11.5rem;
+      margin: 8px 0;
+      padding: 0;
+      overflow: auto;
+      box-sizing: border-box; }
 
 nav {
-  border-left: 1px solid #f0f0f0;
   color: #777; }
-  nav sidebar-dialogs,
-  nav sidebar-notifications,
-  nav sidebar-search {
-    border-bottom: 4px solid #e5e5e5; }
+  nav sidebar-dialogs > span, nav sidebar-dialogs > a,
+  nav sidebar-notifications > span,
+  nav sidebar-notifications > a {
+    display: block;
+    padding: 0.5rem 0.75rem 1rem 0.75rem; }
+  nav sidebar-dialogs a.active {
+    color: #225725;
+    font-weight: bold; }
   nav sidebar-dialogs .on {
     display: block;
     font-size: 0.9rem;
     color: #777;
     margin-left: 28px;
     margin-bottom: -5px; }
-  nav sidebar-search .input-field label {
-    left: 0; }
-  nav sidebar-search #search_input {
-    margin: 0; }
-  nav sidebar-settings .collection {
-    margin-bottom: 0; }
-  nav .collection {
-    margin: 0;
-    border: 0; }
-  nav .collection .collection-item.active {
-    background-color: #f8f8f8;
-    color: #1B5E20; }
+  nav sidebar-settings {
+    display: flex; }
+    nav sidebar-settings a {
+      position: relative;
+      display: block;
+      flex-grow: 1;
+      text-align: center;
+      padding: 0.75rem 0;
+      height: 60px;
+      padding-bottom: 1.5rem; }
+    nav sidebar-settings a.active {
+      color: #225725; }
+      nav sidebar-settings a.active i {
+        font-size: 28px; }
   nav .material-icons {
     vertical-align: bottom; }
-
-user-input .actions {
-  text-align: right;
-  overflow: visible;
-  position: relative;
-  height: 0;
-  top: -34px;
-  right: 1px; }
-  user-input .actions a {
-    display: inline-block;
-    margin-right: -4px;
-    padding: 4px 6px; }
-  user-input .actions i {
-    vertical-align: bottom; }
-
-user-input textarea.materialize-textarea {
-  height: 4rem;
-  min-height: 4rem;
-  max-height: 11.5rem;
-  margin: 0;
-  padding: 1rem;
-  overflow: auto;
-  width: 100%;
-  border: 1px solid #dedede;
-  box-sizing: border-box; }
-  user-input textarea.materialize-textarea:focus {
-    border: 1px solid #ababab; }
-
-.collection-item.split {
-  display: flex;
-  padding: 0; }
-  .collection-item.split > a {
-    padding: 10px 20px;
-    flex-grow: 0.5;
-    display: block;
-    transition: .25s;
-    color: #1B5E20;
-    border-right: 1px solid #e0e0e0; }
-    .collection-item.split > a:last {
-      border-right: 0; }
-    .collection-item.split > a:not(.active):hover {
-      background-color: #ddd; }
 
 img.embed, .link-embedder.text-html {
   max-width: 820px;
