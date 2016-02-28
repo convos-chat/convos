@@ -47,9 +47,15 @@ sub start {
   $self->{connect_tid} = Mojo::IOLoop->timer(
     $ENV{CONVOS_CONNECT_DELAY} || 3,
     sub {
-      for my $host (%{$self->{connect_queue} || {}}) {
+      for my $host (keys %{$self->{connect_queue} || {}}) {
         my $connection = shift @{$self->{connect_queue}{$host}} or next;
-        $connection->connect(sub { }) if $connection->state ne 'disconnected' and $connection->url->host eq $host;
+        next if $connection->state eq 'disconnected' and $connection->url->host ne $host;
+        $connection->connect(
+          sub {
+            my ($connection, $err) = @_;
+            push @{$self->{connect_queue}{$host}}, $connection if $err;
+          }
+        );
       }
     }
   );
