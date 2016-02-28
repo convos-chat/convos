@@ -12,3 +12,4 @@ install:
   - "cpanm -n --installdeps ."
 notifications:
   email: false
+  irc: "chat.freenode.net#convos"
