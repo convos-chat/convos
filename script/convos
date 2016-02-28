@@ -1,5 +1,49 @@
 #!/usr/bin/env perl
+use strict;
 use FindBin;
-BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
+use File::Spec;
+
+my $cpanfile = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
+my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, qw(local lib perl5));
+
+unshift @INC, $local_lib if -d $local_lib;
+unshift @INC, File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'lib');
+
+if (-e $cpanfile) {
+  my $action = shift || '';
+  my $destination = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+  my ($n, @missing) = (0);
+
+  my %sources = (
+    'Mojolicious::Plugin::AssetPack' => 'https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz');
+
+  *main::test_requires = sub { };
+  *main::requires = sub {
+    my ($module, $version) = @_;
+    push @missing, [$module, $version] unless eval "use $module $version;1";
+    $n++;
+  };
+
+  do $cpanfile;
+  die "Could not source $cpanfile: $@" unless $n;
+
+  if (@missing) {
+    die "Got missing dependencies. Run '$0 install' to install them.\n\n"
+      . join("\n", map { sprintf "* %s %s", @$_ } @missing)
+      . "\n\nNote: 'cpanm' is required: https://cpanmin.us/\n"
+      unless $action eq 'install';
+
+    for my $m (@missing) {
+      my @cmd = qw(cpanm -n);
+      push @cmd, -l => $destination;
+      push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
+      push @cmd, $sources{$m->[0]} || $m->[0];
+      warn sprintf "\$ %s\n", join ' ', @cmd;
+      system @cmd;
+      die "cpanm failed!\n" if $?;
+    }
+  }
+}
+
 require Mojolicious::Commands;
 Mojolicious::Commands->start_app('Convos');
