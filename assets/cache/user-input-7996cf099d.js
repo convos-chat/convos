@@ -1,4 +1,4 @@
-riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <div class="actions"> <a href="#attach"><i class="material-icons">attach_file</i></a> <a href="#webcam"><i class="material-icons">photo_camera</i></a> <a href="#emoji"><i class="material-icons">insert_emoticon</i></a> <a href="#send"><i class="material-icons">send</i></a> </div> <textarea name="message" class="materialize-textarea" placeholder="{placeholder}" onkeydown="{onChange}"></textarea> </form>', '', '', function(opts) {
+riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <div class="actions"> <a href="#emoji" class="tooltipped" title="Insert emoji"><i class="material-icons">insert_emoticon</i></a> <a href="#send" class="tooltipped" title="Send message"><i class="material-icons">send</i></a> </div> <textarea name="message" class="materialize-textarea" placeholder="{placeholder}" onkeydown="{onChange}"></textarea> </form>', '', '', function(opts) {
 
   this.placeholder = '';
 

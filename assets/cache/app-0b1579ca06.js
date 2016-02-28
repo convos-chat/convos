@@ -1,11 +1,12 @@
-riot.tag2('app', '<chat user="{user}" modal="{modal}" if="{render == \'chat\'}"></chat> <user-login user="{user}" errors="{errors}" if="{render == \'login\'}"></user-login></user-login> <user-register user="{user}" if="{render == \'register\'}"></user-register> <not-found if="{render == \'not-found\'}"></not-found>', '', '', function(opts) {
-
+riot.tag2('app', '<chat if="{render == \'chat\'}"> <nav> <sidebar-notifications user="{user}"></sidebar-notifications> <sidebar-dialogs user="{user}"></sidebar-dialogs> <sidebar-settings user="{user}"></sidebar-settings> </nav> <connection-editor user="{user}" if="{modal == \'connections\'}"></connection-editor> <new-dialog user="{user}" if="{modal == \'new-dialog\'}"></new-dialog> <dialog-container user="{user}"></dialog-container> </chat> <user-login user="{user}" errors="{errors}" if="{render == \'login\'}"></user-login></user-login> <user-register user="{user}" if="{render == \'register\'}"></user-register> <not-found if="{render == \'not-found\'}"></not-found>', '', '', function(opts) {
   var tag = this;
 
   this.errors = opts.errors;
+  this.user = opts.user;
   this.modal = '';
   this.render = '';
-  this.user = opts.user;
+
+  this.user.on('refreshed', function() { riot.update() });
 
   riot.route('/logout', function() {
     if (!tag.user.email()) return tag.update({render: 'login'});

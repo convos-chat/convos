@@ -3,7 +3,7 @@
     if (attrs) this.update(attrs);
     this._api = Convos.api;
     riot.observable(this);
-    this.on('show', this._onShow);
+    this.one('show', this._load);
   };
 
   var proto = Convos.Dialog.prototype;
@@ -26,9 +26,14 @@
     this.messages().push(message);
   };
 
+  proto.hasConnection = function() {
+    return this._connection ? true : false;
+  };
+
   // Create a href for <a> tag
-  proto.href = function(action) {
-    return ['#dialog', this.connection().id(), this.name(), action].join('/');
+  proto.href = function() {
+    var path = Array.prototype.slice.call(arguments);
+    return ['#chat', this.connection().id(), this.name()].concat(path).join('/');
   };
 
   // Send a message to a dialog
@@ -51,8 +56,8 @@
     this.addMessage({message: 'The topic is "' + topic + '".'});
   };
 
-  // Called when this dialog is visible in gui
-  proto._onShow = function() {
+  // Called when this dialog is visible in gui the first time
+  proto._load = function() {
     if (this.messages().length >= 60) return;
     var self = this;
     self._api.messagesByDialog(

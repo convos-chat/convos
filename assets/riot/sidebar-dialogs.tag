@@ -1,10 +1,10 @@
 <sidebar-dialogs>
   <div class="collection">
-    <a href={c.href('activate')} class={parent.dialogClass(c)} each={c, i in user.dialogs()}>
-      <i class="material-icons">{c.icon()}</i> {c.name()}
-      <span class="on">{c.connection().protocol()}-{c.connection().name()}</span>
+    <a href={d.href()} onclick={setCurrentDialog} class={parent.dialogClass(d)} each={d, i in user.dialogs()}>
+      <i class="material-icons">{d.icon()}</i> {d.name()}
+      <span class="on">{d.connection().protocol()}-{d.connection().name()}</span>
     </a>
-    <a href={c.href('activate')} class={parent.dialogClass(c)} each={c, i in user.connections()}>
+    <a href='#settings/connections' class={parent.dialogClass(c)} each={c, i in user.connections()}>
       <i class="material-icons">device_hub</i> {c.protocol()}-{c.name()}
       <span class="on">{c.humanState()}</span>
     </a>
@@ -15,8 +15,13 @@
   <script>
   this.user = opts.user;
 
-  dialogClass(c) {
-    return c == this.parent.dialog ? 'collection-item active' : 'collection-item';
+  setCurrentDialog(e) {
+    this.user.currentDialog(e.item.d);
+    riot.update();
+  }
+
+  dialogClass(d) {
+    return d == this.user.currentDialog() ? 'collection-item active' : 'collection-item';
   }
 
   activeClass(href, additional) {

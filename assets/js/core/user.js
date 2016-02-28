@@ -6,6 +6,7 @@
     this._connections = {};
     this._api = Convos.api;
     this._listenForEvents();
+    this._initLocalDialog();
 
     var prev = this.email();
     this.on('email', function(value) {
@@ -41,6 +42,19 @@
   proto.connections = function() {
     var c = this._connections;
     return Object.keys(c).map(function(k) { return c[k]; });
+  };
+
+  proto.currentDialog = function(obj) {
+    if (obj) {
+      localStorage.setItem('activeDialog', obj.href());
+      return this;
+    }
+    else {
+      var href = localStorage.getItem('activeDialog') || 'chat';
+      var current;
+      this.dialogs().forEach(function(d) { if (d.href() == href) current = d });
+      return current || this._localDialog;
+    }
   };
 
   // Get or create a single Convos.Dialog object on client side
@@ -98,6 +112,7 @@
   // Refresh related data to the user
   proto.refresh = function() {
     var self = this;
+    var first;
 
     this._api.listConnections({}, function(err, xhr) {
       if (err) return self.trigger('error', err);
@@ -105,7 +120,8 @@
       if (!self.connections().length) return self.trigger('refreshed');
       self._api.listDialogs({}, function(err, xhr) {
         if (err) return self.trigger('error', err);
-        xhr.body.dialogs.forEach(function(d) { self.dialog(d); });
+        xhr.body.dialogs.forEach(function(d) { d = self.dialog(d); first = first || d });
+        if (!self.currentDialog().hasConnection() && first) self.currentDialog(first)
         self.trigger('refreshed');
       });
     });
@@ -123,6 +139,25 @@
       cb.call(self, err);
     });
     return this;
+  };
+
+  proto._initLocalDialog = function() {
+    var d = new Convos.Dialog();
+
+    this._localDialog = d;
+
+    d.addMessage({message: 'Please wait for connections and dialogs to be loaded...', hr: true});
+
+    this.one('refreshed', function() {
+      if (!this.connections().length) {
+        d.addMessage({message: 'Is this your first time here?', hr: true});
+        d.addMessage({message: 'To add a connection, click "Edit connections" in the right side menu.'});
+      }
+      else if (!this.dialogs().length) {
+        d.addMessage({message: 'You are not part of any dialogs.', hr: true});
+        d.addMessage({message: 'To join a dialog, click "New dialog" in the right side meny.'});
+      }
+    });
   };
 
   proto._listenForEvents = function() {

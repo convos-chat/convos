@@ -32,7 +32,6 @@
 < js/core/connection.js
 < js/core/dialog.js
 < js/core/user.js
-< riot/chat.tag
 < riot/connection-editor.tag
 < riot/dialog-container.tag
 < riot/dialog-message.tag

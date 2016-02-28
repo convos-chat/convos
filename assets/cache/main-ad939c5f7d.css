@@ -4705,12 +4705,6 @@ dialog-container {
     position: relative; }
     dialog-container header .actions {
       right: -4px; }
-    dialog-container header .topic {
-      color: #757575;
-      font-style: italic;
-      margin: -0.75rem 0 2px 0; }
-    dialog-container header .topic:before {
-      content: "\2014\00a0"; }
   dialog-container main ol.collection {
     border: 0;
     padding: 0;
