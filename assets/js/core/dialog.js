@@ -12,7 +12,7 @@
   mixin.base(proto, {
     connection: function() { throw 'connection() cannot be built'; },
     frozen: function() { return '' },
-    icon: function() { return this.is_private() ? 'group' : 'person' },
+    icon: function() { return this.is_private() ? 'person' : 'group' },
     id: function() { return '' },
     is_private: function() { return true; },
     messages: function() { return []; },
