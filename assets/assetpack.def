@@ -33,6 +33,7 @@
 < js/core/dialog.js
 < js/core/user.js
 < riot/connection-editor.tag
+< riot/convos-help.tag
 < riot/dialog-container.tag
 < riot/dialog-message.tag
 < riot/new-dialog.tag

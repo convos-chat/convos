@@ -7,9 +7,7 @@ chat {
   margin-right: $sidebar-width - 1;
   overflow: hidden;
 
-  connection-editor,
-  dialog-container,
-  new-dialog {
+  dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
@@ -17,7 +15,10 @@ chat {
   }
 
   connection-editor { max-width: 500px; min-width: 500px; }
+
+  convos-help,
   new-dialog { max-width: 420px; min-width: 420px; }
+
   dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
   dialog-container main {
     overflow: auto;
@@ -39,8 +40,12 @@ chat {
 }
 
 connection-editor,
+convos-help,
 dialog-container,
 new-dialog {
+  overflow: auto;
+  max-height: 100vh;
+
   h5 {
     margin-top: 0;
     padding-top: $gutter-width / 2;
@@ -55,10 +60,21 @@ new-dialog {
 }
 
 connection-editor,
+convos-help,
 new-dialog {
   background: $settings-active-color;
   position: relative;
+}
 
+convos-help {
+  dl dd {
+    margin: 0 0 $gutter-width * 0.3 $gutter-width;
+  }
+  ul {
+    list-style-type: square;
+    padding-left: $gutter-width;
+    li { list-style-type: inherit; }
+  }
 }
 
 dialog-container {

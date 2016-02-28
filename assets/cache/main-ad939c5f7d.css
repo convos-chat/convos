@@ -4657,9 +4657,7 @@ chat {
   height: 100vh;
   margin-right: 299px;
   overflow: hidden; }
-  chat connection-editor,
-  chat dialog-container,
-  chat new-dialog {
+  chat dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
@@ -4667,6 +4665,7 @@ chat {
   chat connection-editor {
     max-width: 500px;
     min-width: 500px; }
+  chat convos-help,
   chat new-dialog {
     max-width: 420px;
     min-width: 420px; }
@@ -4687,24 +4686,41 @@ chat {
     chat nav sidebar-dialogs {
       flex-grow: 1; }
 
-connection-editor h5,
-dialog-container h5,
-new-dialog h5 {
-  margin-top: 0;
-  padding-top: 0.75rem; }
-
-connection-editor .actions,
-dialog-container .actions,
-new-dialog .actions {
-  overflow: hidden;
-  position: absolute;
-  top: 0.6rem;
-  right: 0.45rem; }
+connection-editor,
+convos-help,
+dialog-container,
+new-dialog {
+  overflow: auto;
+  max-height: 100vh; }
+  connection-editor h5,
+  convos-help h5,
+  dialog-container h5,
+  new-dialog h5 {
+    margin-top: 0;
+    padding-top: 0.75rem; }
+  connection-editor .actions,
+  convos-help .actions,
+  dialog-container .actions,
+  new-dialog .actions {
+    overflow: hidden;
+    position: absolute;
+    top: 0.6rem;
+    right: 0.45rem; }
 
 connection-editor,
+convos-help,
 new-dialog {
   background: #f8f8f8;
   position: relative; }
+
+convos-help dl dd {
+  margin: 0 0 0.45rem 1.5rem; }
+
+convos-help ul {
+  list-style-type: square;
+  padding-left: 1.5rem; }
+  convos-help ul li {
+    list-style-type: inherit; }
 
 dialog-container {
   border-right: 1px solid #f0f0f0;

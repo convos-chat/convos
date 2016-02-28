@@ -6,6 +6,7 @@
       <sidebar-settings user={user}></sidebar-settings>
     </nav>
     <connection-editor user={user} if={modal == 'connections'}></connection-editor>
+    <convos-help user={user} if={modal == 'help'}></convos-help>
     <new-dialog user={user} if={modal == 'new-dialog'}></new-dialog>
     <dialog-container user={user}></dialog-container>
   </chat>
