@@ -124,6 +124,7 @@ sub join_dialog {
   my $dialog;
 
   $dialog = $self->dialog($name, {active => 1, name => $name, password => $password // ''});
+  $dialog->topic('');
   return $self->tap($cb, '', $dialog) if %{$dialog->users};
   Scalar::Util::weaken($self);
   $self->_irc->join_channel(

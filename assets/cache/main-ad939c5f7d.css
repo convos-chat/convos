@@ -4658,9 +4658,11 @@ chat {
     flex-direction: column;
     overflow: auto; }
   chat connection-editor {
-    max-width: 500px; }
+    max-width: 500px;
+    min-width: 500px; }
   chat new-dialog {
-    max-width: 420px; }
+    max-width: 420px;
+    min-width: 420px; }
   chat dialog-container {
     max-width: 860px; }
   chat dialog-container main {
@@ -4709,15 +4711,28 @@ dialog-container {
     border: 0;
     padding: 0;
     list-style-type: none; }
+    dialog-container main ol.collection h5.title {
+      font-size: 1rem;
+      padding: 0;
+      color: #000; }
     dialog-container main ol.collection .collection-item {
       position: relative;
       padding: 10px 0; }
-    dialog-container main ol.collection .ts {
-      color: #757575;
-      font-size: 0.8rem;
+    dialog-container main ol.collection .collection-item.special {
+      background: #f8faf8; }
+    dialog-container main ol.collection .secondary-content {
       position: absolute;
       top: 10px;
       right: 0px; }
+      dialog-container main ol.collection .secondary-content, dialog-container main ol.collection .secondary-content a {
+        color: #757575;
+        font-size: 0.8rem;
+        overflow: hidden;
+        display: block; }
+      dialog-container main ol.collection .secondary-content i {
+        vertical-align: bottom; }
+    dialog-container main ol.collection .collection-item.special .secondary-content {
+      top: 2px; }
     dialog-container main ol.collection .message a {
       color: inherit;
       text-decoration: underline; }

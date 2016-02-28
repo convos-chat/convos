@@ -2,9 +2,9 @@
   <header>
     <div class="actions" if={dialog.hasConnection()}>
       <a href="#settings"><i class="material-icons">more_horiz</i></a>
-      <a href="#people" class="tooltipped" title="List participants"><i class="material-icons">people</i></a>
+      <a href="#participants" onclick={listParticipants} class="tooltipped" title="List participants"><i class="material-icons">people</i></a>
       <a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a>
-      <a href="#close" class="tooltipped" title="Close dialog" if={n_tabs}><i class="material-icons">close</i></a>
+      <a href="#close" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a>
     </div>
     <div class="actions" if={!dialog.hasConnection()}>
       <a href="#chat"><i class="material-icons">star_rate</i></a>
@@ -13,10 +13,15 @@
   </header>
   <main name="scrollElement">
     <ol class="collection">
-      <li class="collection-item" each={messages}>
-        <a href={'#autocomplete:' + from} class="title">{from}</a>
-        <dialog-message ts={ts} message={message} each={nested_messages}></dialog-message>
-        <span class="secondary-content ts" title={ts.toISOString()}>{parent.timestring(ts)}</span>
+      <li class={'collection-item': true, special: special} each={messages}>
+        <a href={'#autocomplete:' + from} class="title" if={!special}>{from}</a>
+        <dialog-message msg={m} each={m, i in nested_messages}></dialog-message>
+        <span class="secondary-content" if={special}>
+          <a href="#close" onclick={removeMessage}><i class="material-icons">close</i></a>
+        </span>
+        <span class="secondary-content ts tooltipped" title={ts.toLocaleString()} if={!special}>
+          {parent.timestring(ts)}
+        </span>
       </li>
     </ol>
   </main>
@@ -31,12 +36,20 @@
   this.lastNumberOfMessages = 0;
   this.messages = [];
 
+  listParticipants(e) {
+    this.dialog.addMessage({special: 'users', users: this.dialog.users()});
+  }
+
+  removeMessage(e) {
+    this.dialog.removeMessage(e.item);
+  }
+
   this.on('update', function() {
     this.dialog = this.user.currentDialog();
 
     var list = this.dialog.messages();
     var messages = [];
-    var prev = null;
+    var prev = {ts: new Date()};
 
     if (this.dialog.id() != this.currentDialog) {
       this.currentDialog = this.dialog.id();
@@ -49,13 +62,15 @@
     this.messages = messages;
     this.lastNumberOfMessages = list.length;
     list.forEach(function(msg) {
-      if (!msg.hr && prev && msg.from == prev.from && msg.ts.epoch() < prev.ts.epoch() + 300) {
-        prev.nested_messages.push(msg);
+      if (msg.from != prev.from) msg.hr = true;
+      if (prev.ts.epoch() < msg.ts.epoch() - 300) msg.hr = true;
+      if (msg.hr || msg.special) {
+        msg.nested_messages = [msg];
+        messages.push(msg);
+        prev = msg;
       }
       else {
-        messages.push(msg);
-        msg.nested_messages = [msg];
-        prev = msg;
+        prev.nested_messages.push(msg);
       }
     });
   });

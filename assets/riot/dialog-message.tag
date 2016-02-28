@@ -1,11 +1,26 @@
 <dialog-message>
-  <div class="message" name="message" title={timestring(ts)}></div>
+  <div class="message" if={!msg.special}></div>
+  <div class="users" if={msg.special == 'users'}>
+    <h5 class="title">Participants</h5>
+    <span if={!users.length}>No participants. You need to join the dialog first.</span>
+    <a href={'#autocomplete:' + u.name} each={u, i in users}>
+      {u.mode}{u.name}{i+1 == users.length ? '.' : ', '}
+    </a>
+  </div>
   <script>
-  mixin.time(this);
+  var tag = this;
+
+  this.msg = opts.msg;
+  this.users = [];
+
+  if (opts.msg.users) {
+    Object.keys(opts.msg.users).sort().forEach(function(name) {
+      tag.users.push(opts.msg.users[name]);
+    });
+  }
 
   loadOffScreen(html, textStatus, xhr) {
     if (html.match(/^<a\s/)) return;
-    var tag = this;
     var $html = $(html);
     $html.filter('img').add($html.find('img')).addClass('embed materialboxed');
     $('#' + id).parent().append($html).find('.materialboxed').materialbox();
@@ -20,13 +35,16 @@
   }
 
   this.on('mount', function() {
-    $('div', this.root).html(opts.message.autoLink({
-      target: '_blank',
-      after: function(url, id) {
-        $.get('/api/embed?url=' + encodeURIComponent(url), this.loadOffScreen);
-        return null;
-      }
-    }));
+    if (this.msg.special) return;
+    $('div', this.root).html(
+      this.msg.message.autoLink({
+        target: '_blank',
+        after: function(url, id) {
+          $.get('/api/embed?url=' + encodeURIComponent(url), this.loadOffScreen);
+          return null;
+        }
+      })
+    );
   });
   </script>
 </dialog-message>

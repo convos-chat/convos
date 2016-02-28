@@ -3,14 +3,14 @@ use Mojo::Base -base;
 
 has active     => 0;
 has frozen     => '';
-has is_private => sub { Carp::confess('Not specified') };
+has is_private => sub { Carp::confess('is_private required in constructor') };
 has name       => sub { shift->id };
 has password   => '';
 has topic      => '';
 has users      => sub { +{} };
 
-sub connection { shift->{connection} or die 'connection required in constructor' }
-sub id         { shift->{id}         or die 'id required in constructor' }
+sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
+sub id         { shift->{id}         or Carp::confess('id required in constructor') }
 sub n_users { int keys %{$_[0]->users} || $_[0]->{n_users} || 0 }
 
 sub messages {
@@ -24,7 +24,7 @@ sub user { shift->connection->user }
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(active frozen id name topic);
+  my %json = map { ($_, $self->$_) } qw(active frozen id is_private n_users name topic);
   $json{connection_id} = $self->connection->id;
   $json{users} = $self->users unless $persist;
   return \%json;

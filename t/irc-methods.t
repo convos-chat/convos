@@ -61,6 +61,8 @@ $t->run(
         connection_id => 'irc-localhost',
         frozen        => '',
         id            => "#convos_irc_live_20001",
+        is_private    => 0,
+        n_users       => 1,
         name          => "#Convos_irc_LIVE_20001",
         topic         => '',
         users         => superhashof(
@@ -96,6 +98,8 @@ $t->run(
         connection_id => 'irc-localhost',
         frozen        => '',
         id            => '#convos',
+        is_private    => 0,
+        n_users       => 2,
         name          => re(qr{^\#convos$}i),
         topic         => re(qr{.?}),
         users         => superhashof(
@@ -236,35 +240,43 @@ $t->run(
   }
 );
 
+my $json = $connection->TO_JSON(1);
+$json->{dialogs} = [sort { length $a->{name} <=> length $b->{name} } @{$json->{dialogs}}];
 cmp_deeply(
-  $connection->TO_JSON(1),
+  $json,
   {
-    dialogs => bag(
+    dialogs => [
       {
         active        => 1,
         connection_id => 'irc-localhost',
+        frozen        => '',
         id            => '#convos',
+        is_private    => 0,
+        n_users       => 2,
         name          => '#convos',
-        frozen        => '',
         topic         => 'some cool topic',
-      },
-      {
-        active        => 1,
-        connection_id => 'irc-localhost',
-        id            => '#convos_irc_live_20001',
-        name          => '#Convos_irc_LIVE_20001',
-        frozen        => '',
-        topic         => 'Cool topic',
       },
       {
         active        => 0,
         connection_id => 'irc-localhost',
-        id            => '#no_such_channel_',
-        name          => '#no_such_channel_',
         frozen        => '',
+        id            => '#no_such_channel_',
+        is_private    => 0,
+        n_users       => 0,
+        name          => '#no_such_channel_',
         topic         => '',
       },
-    ),
+      {
+        active        => 1,
+        connection_id => 'irc-localhost',
+        frozen        => '',
+        id            => '#convos_irc_live_20001',
+        is_private    => 0,
+        n_users       => 1,
+        name          => '#Convos_irc_LIVE_20001',
+        topic         => 'Cool topic',
+      },
+    ],
     id       => 'irc-localhost',
     name     => 'localhost',
     protocol => 'irc',

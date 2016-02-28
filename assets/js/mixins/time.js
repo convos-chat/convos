@@ -17,15 +17,5 @@
     return ts.getDate() + '. ' + ts.getAbbrMonth() + ' ' + ts.getFullYear();
   };
 
-  if (proto['on']) {
-    proto.on('updated', function() {
-      var self = this;
-      $('.ts', this.root).each(function() {
-        var $i = $(this);
-        $i.text(self.timestring($i.attr('title')));
-      });
-    });
-  }
-
   return proto;
 };

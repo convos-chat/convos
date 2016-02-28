@@ -14,13 +14,15 @@
     frozen: function() { return '' },
     icon: function() { return 'group' },
     id: function() { return '' },
+    is_private: function() { return true; },
     messages: function() { return []; },
     name: function() { return 'Convos' },
     topic: function() { return '' },
+    users: function() { return {}; }
   });
 
   proto.addMessage = function(message) {
-    if (!message.from) message.from = 'Convos';
+    if (!message.from) message.from = 'convosbot';
     if (!message.ts) message.ts = new Date();
     if (typeof message.ts == 'string') message.ts = new Date(message.ts);
     this.messages().push(message);
@@ -34,6 +36,11 @@
   proto.href = function() {
     var path = Array.prototype.slice.call(arguments);
     return ['#chat', this.connection().id(), this.name()].concat(path).join('/');
+  };
+
+  proto.removeMessage = function(remove) {
+    this.messages(this.messages().filter(function(msg) { return msg != remove}));
+    return this;
   };
 
   // Send a message to a dialog
@@ -51,9 +58,20 @@
   };
 
   proto._initialMessages = function() {
-    var topic = this.topic().replace(/"/g, '');
-    this.addMessage({message: 'Welcome to ' + this.name() + '.'});
-    this.addMessage({message: 'The topic is "' + topic + '".'});
+    var topic = this.topic().replace(/"/g, '') || '';
+    this.addMessage({message: 'You have joined ' + this.name() + ', but no one has said anything as long as you have been here.'});
+    if (this.frozen()) {
+      this.addMessage({message: 'You are not part of this channel. The reason is: "' + this.frozen() + '".'});
+    }
+    else if (topic) {
+      this.addMessage({message: 'The topic is "' + topic + '".'});
+    }
+    else if(!this.is_private()) {
+      this.addMessage({message: 'This dialog has no topic.'});
+    }
+    if(!this.is_private()) {
+      this.addMessage({special: 'users', users: this.users()});
+    }
   };
 
   // Called when this dialog is visible in gui the first time

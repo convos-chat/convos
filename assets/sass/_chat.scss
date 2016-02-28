@@ -16,8 +16,8 @@ chat {
     overflow: auto;
   }
 
-  connection-editor { max-width: 500px; }
-  new-dialog { max-width: 420px; }
+  connection-editor { max-width: 500px; min-width: 500px; }
+  new-dialog { max-width: 420px; min-width: 420px; }
   dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
   dialog-container main {
     overflow: auto;
@@ -76,19 +76,32 @@ dialog-container {
     padding: 0;
     list-style-type: none;
 
+    h5.title { font-size: 1rem; padding: 0; color: #000; }
+
     .collection-item {
       position: relative;
       padding: 10px 0;
     }
-
-    .ts {
-      color: color('grey', 'darken-1');
-      font-size: 0.8rem;
+    .collection-item.special {
+      background: #f8faf8;
+    }
+    .secondary-content {
       position: absolute;
       top: 10px;
       right: 0px;
+      &, a {
+        color: color('grey', 'darken-1');
+        font-size: 0.8rem;
+        overflow: hidden;
+        display: block;
+      }
+      i {
+        vertical-align: bottom;
+      }
     }
-
+    .collection-item.special .secondary-content {
+      top: 2px;
+    }
     .message {
       a { color: inherit; text-decoration: underline; }
       a:hover { text-decoration: none; }

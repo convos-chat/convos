@@ -50,6 +50,7 @@ riot.tag2('app', '<chat if="{render == \'chat\'}"> <nav> <sidebar-notifications 
 
   this.on('updated', function() {
     $('select').material_select();
+    $('.material-tooltip').hide();
     $('.tooltipped').each(function() {
       var $self = $(this);
       $self.attr('data-tooltip', $self.attr('title') || $self.attr('placeholder')).removeAttr('title');

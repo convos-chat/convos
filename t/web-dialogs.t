@@ -25,6 +25,8 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
     frozen        => '',
     name          => '#Convos',
     id            => '#convos',
+    is_private    => 0,
+    n_users       => 0,
     users         => {}
   }
   )->json_is(
@@ -36,6 +38,8 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
     frozen        => '',
     name          => '#private',
     id            => '#private',
+    is_private    => 0,
+    n_users       => 0,
     users         => {}
   }
   )->json_is(
@@ -47,6 +51,8 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
     frozen        => '',
     name          => '#oslo.pm',
     id            => '#oslo.pm',
+    is_private    => 0,
+    n_users       => 0,
     users         => {}
   }
   );
