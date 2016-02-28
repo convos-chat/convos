@@ -1,49 +1,58 @@
 #!/usr/bin/env perl
+# Hidden actions:
+# Install dependencies:
+# $ script/convos install
+# Same as above, but also install dependencies required for development
+# $ script/convos install develop
+
 use strict;
 use FindBin;
 use File::Spec;
 
 my $cpanfile = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
 my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, qw(local lib perl5));
-
 unshift @INC, $local_lib if -d $local_lib;
 unshift @INC, File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'lib');
+exit ensure_dependencies($cpanfile, @ARGV) if @ARGV and $ARGV[0] eq 'install';
+ensure_dependencies($cpanfile, @ARGV) if __PACKAGE__ eq 'main' and -e $cpanfile;
+require Mojolicious::Commands;
+Mojolicious::Commands->start_app('Convos');
 
-if (-e $cpanfile) {
-  my $action = shift || '';
-  my $destination = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+sub ensure_dependencies {
+  return if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK};
+  my ($cpanfile, $action, $mode) = @_;
+  my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
-
   my %sources = (
     'Mojolicious::Plugin::AssetPack' => 'https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz');
 
-  *main::test_requires = sub { };
-  *main::requires = sub {
+  our $cpanfile_mode = 'default';
+  local *main::on = sub { local $cpanfile_mode = shift; shift->() };
+  local *main::test_requires = sub { };
+  local *main::requires = sub {
     my ($module, $version) = @_;
-    push @missing, [$module, $version] unless eval "use $module $version;1";
+    push @missing, [$module, $version, $cpanfile_mode] unless eval "use $module $version;1";
     $n++;
   };
 
   do $cpanfile;
   die "Could not source $cpanfile: $@" unless $n;
+  @missing = grep { $_->[2] ne 'develop' } @missing if $mode ne 'develop';
 
-  if (@missing) {
-    die "Got missing dependencies. Run '$0 install' to install them.\n\n"
-      . join("\n", map { sprintf "* %s %s", @$_ } @missing)
-      . "\n\nNote: 'cpanm' is required: https://cpanmin.us/\n"
-      unless $action eq 'install';
+  die join "\n", "\nFound missing dependencies!\n", "Run '$0 install' to install them to '$local_lib'.",
+    "Note: 'cpanm' is required. (https://cpanmin.us)\n", map({ sprintf "* %s %s (%s)", @$_ } @missing), "\n"
+    if @missing and $action ne 'install';
 
-    for my $m (@missing) {
-      my @cmd = qw(cpanm -n);
-      push @cmd, -l => $destination;
-      push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
-      push @cmd, $sources{$m->[0]} || $m->[0];
-      warn sprintf "\$ %s\n", join ' ', @cmd;
-      system @cmd;
-      die "cpanm failed!\n" if $?;
-    }
+  for my $m (@missing) {
+    my @cmd = qw(cpanm -n);
+    push @cmd, -l => $local_lib;
+    push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
+    push @cmd, $sources{$m->[0]} || $m->[0];
+    warn sprintf "\$ %s\n", join ' ', @cmd;
+    system @cmd;
+    die "cpanm failed!\n" if $?;
   }
-}
 
-require Mojolicious::Commands;
-Mojolicious::Commands->start_app('Convos');
+  warn "\nAll dependencies are installed.\n" if $action eq 'install';
+  return 0;
+}

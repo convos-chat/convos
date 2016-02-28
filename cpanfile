@@ -10,5 +10,11 @@ requires "Mojolicious::Plugin::LinkEmbedder" => "0.2301";
 requires "Parse::IRC"                        => "1.20";
 requires "Swagger2"                          => "0.75";
 
+on develop => sub {
+  requires "CSS::Minifier::XS"        => "0.09";
+  requires "JavaScript::Minifier::XS" => "0.11";
+  requires "CSS::Sass"                => "3.3.0";
+};
+
 test_requires "Test::Deep" => "0.11";
 test_requires "Test::More" => "0.88";

@@ -40,9 +40,7 @@ NOTE! The current development branch is "batcode":
 
 Once you have the source code you should install the dependencies:
 
-  $ cpanm --installdeps .
-  $ cpanm https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz
-  $ cpanm CSS::Minifier::XS CSS::Sass JavaScript::Minifier::XS
+  $ script/convos install develop
   $ npm install riot
   $ npm info riot # see which version is installed
 
