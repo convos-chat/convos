@@ -1,14 +1,21 @@
 riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <textarea name="message" class="materialize-textarea" placeholder="{placeholder}" onkeydown="{onChange}"></textarea> </form>', '', '', function(opts) {
+  mixin.autocomplete(this);
 
   this.placeholder = '';
 
   this.onChange = function(e) {
     switch (e.keyCode) {
+      case 9:
+        this.autocomplete(this.message, e.shiftKey);
+        return false;
       case 13:
         if (e.shiftKey) return true;
         this.sendMessage(e);
         return false;
+      case 16:
+        break;
       default:
+        this.autocompleteMatches = null;
         return true;
     }
   }.bind(this)

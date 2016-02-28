@@ -9,16 +9,23 @@
     <textarea name="message" class="materialize-textarea" placeholder={placeholder} onkeydown={onChange}></textarea>
   </form>
   <script>
+  mixin.autocomplete(this);
 
   this.placeholder = '';
 
   onChange(e) {
     switch (e.keyCode) {
-      case 13:
+      case 9:  // tab
+        this.autocomplete(this.message, e.shiftKey);
+        return false;
+      case 13: // enter
         if (e.shiftKey) return true;
         this.sendMessage(e);
         return false;
+      case 16: // shift key
+        break;
       default:
+        this.autocompleteMatches = null; // reset autocomplete() when character is pressed
         return true;
     }
   }
