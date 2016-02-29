@@ -4,24 +4,39 @@
 # $ script/convos install
 # Same as above, but also install dependencies required for development
 # $ script/convos install develop
-
 use strict;
 use FindBin;
 use File::Spec;
 
-my $cpanfile = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
-my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, qw(local lib perl5));
-unshift @INC, $local_lib if -d $local_lib;
-unshift @INC, File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'lib');
-exit ensure_dependencies($cpanfile, @ARGV) if @ARGV and $ARGV[0] eq 'install';
-ensure_dependencies($cpanfile, @ARGV) if __PACKAGE__ eq 'main' and -e $cpanfile;
+{
+  use Config;
+  my $cpanfile = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
+  my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+
+  # Where cpanm might have installed dependencies to
+  unshift @INC,
+    grep {-d}
+    map { File::Spec->catdir($FindBin::Bin, File::Spec->updir, qw(local lib perl5), @$_) }
+    [$Config{version}, $Config{archname}], [$Config{version}], [$Config{archname}], [];
+
+  # Where Convos lives
+  unshift @INC, File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'lib');
+
+  # Make sure the dependencies from cpanfile is installed
+  exit ensure_dependencies($cpanfile, @ARGV) if @ARGV and $ARGV[0] eq 'install';
+
+  # Note that "morbo script/convos" will not run ensure_dependencies()
+  ensure_dependencies($cpanfile, @ARGV) if __PACKAGE__ eq 'main' and -e $cpanfile;
+}
+
+# Start Convos
 require Mojolicious::Commands;
 Mojolicious::Commands->start_app('Convos');
 
 sub ensure_dependencies {
   return if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK};
   my ($cpanfile, $action, $mode) = @_;
-  my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+  my $opt_l = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
   my %sources = (
     'Mojolicious::Plugin::AssetPack' => 'https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz');
@@ -31,21 +46,24 @@ sub ensure_dependencies {
   local *main::test_requires = sub { };
   local *main::requires = sub {
     my ($module, $version) = @_;
-    push @missing, [$module, $version, $cpanfile_mode] unless eval "use $module $version;1";
-    $n++;
+    return if ++$n and eval "use $module $version;1";
+    my $e = do { local $_ = $@; s! at .*!!s; s! in \@INC.*!!s; $_ };
+    push @missing, [$module, $version, $e, $cpanfile_mode];
   };
 
   do $cpanfile;
   die "Could not source $cpanfile: $@" unless $n;
   @missing = grep { $_->[2] ne 'develop' } @missing if $mode ne 'develop';
+  pop @$_ for @missing;
 
-  die join "\n", "\nFound missing dependencies!\n", "Run '$0 install' to install them to '$local_lib'.",
+  die join "\n", "---\ndebug:", "  perl: $^X", '  INC:', map({"    - $_"} @INC),
+    "\n---\nFound missing dependencies!\n", "Run '$0 install' to install them to '$opt_l'.",
     "Note: 'cpanm' is required. (https://cpanmin.us)\n", map({ sprintf "* %s %s (%s)", @$_ } @missing), "\n"
     if @missing and $action ne 'install';
 
   for my $m (@missing) {
     my @cmd = qw(cpanm -n);
-    push @cmd, -l => $local_lib;
+    push @cmd, -l => $opt_l;
     push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
     push @cmd, $sources{$m->[0]} || $m->[0];
     warn sprintf "\$ %s\n", join ' ', @cmd;
