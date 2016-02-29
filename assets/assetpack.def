@@ -5,6 +5,7 @@
 ! convos.js
 < http://code.jquery.com/jquery-1.11.3.min.js
 < js/autolink.js
+< js/mdtohtml.js
 < js/storage.js
 < js/window.js
 < https://cdnjs.cloudflare.com/ajax/libs/riot/2.3.15/riot.min.js
