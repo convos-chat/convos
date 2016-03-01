@@ -206,10 +206,10 @@ format=js
 minified=0
 mtime=1456663191
 [riot:riot/dialog-message.tag]
-checksum=80d09974bc
+checksum=76b93ef296
 format=js
 minified=0
-mtime=1456670546
+mtime=1456787877
 [riot:riot/new-dialog.tag]
 checksum=f526f50501
 format=js
