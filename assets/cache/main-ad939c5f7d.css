@@ -4581,6 +4581,9 @@ body {
 h1, h2, h3, h4, h5 {
   color: #2E7D32; }
 
+strong {
+  font-weight: bold; }
+
 dl.horizontal {
   margin: 0; }
   dl.horizontal dt {

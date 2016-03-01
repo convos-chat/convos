@@ -6,6 +6,8 @@ h1, h2, h3, h4, h5 {
   color: $header-color;
 }
 
+strong { font-weight: bold; }
+
 dl.horizontal {
   margin: 0;
   dt {
