@@ -204,12 +204,12 @@ mtime=1456669315
 checksum=348f4da176
 format=js
 minified=0
-mtime=1456663191
+mtime=1456867203
 [riot:riot/dialog-message.tag]
-checksum=76b93ef296
+checksum=fab9f54aa9
 format=js
 minified=0
-mtime=1456860160
+mtime=1456867596
 [riot:riot/new-dialog.tag]
 checksum=f526f50501
 format=js

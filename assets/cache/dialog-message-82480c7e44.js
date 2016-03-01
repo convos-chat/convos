@@ -5,15 +5,15 @@ riot.tag2('dialog-message', '<div class="message" if="{!msg.special}"></div> <di
   this.msg = opts.msg;
   this.users = [];
 
-  this.loadOffScreen = function(html, textStatus, xhr) {
+  this.loadOffScreen = function(html, id) {
     if (html.match(/^<a\s/)) return;
     var $html = $(html);
     $html.filter('img').add($html.find('img')).addClass('embed materialboxed');
     $('#' + id).parent().append($html).find('.materialboxed').materialbox();
 
-    $html.find('img, iframe').each(function() {
+    $html.filter('img, iframe').each(function() {
       $(this).css('height', '1px').load(function() {
-
+        if (tag.parent.atBottom) window.nextTick(function() { tag.parent.gotoBottom(true) });
         $(this).css('height', 'auto');
         tag.parent.update();
       });
@@ -23,13 +23,15 @@ riot.tag2('dialog-message', '<div class="message" if="{!msg.special}"></div> <di
   this.on('mount', function() {
     if (this.msg.special) return;
     $('.message', this.root).html(
-      this.msg.message.xmlEscape().mdToHtml().autoLink({
+      this.msg.message.xmlEscape().autoLink({
         target: '_blank',
         after: function(url, id) {
-          $.get('/api/embed?url=' + encodeURIComponent(url), this.loadOffScreen);
+          $.get('/api/embed?url=' + encodeURIComponent(url), function(html, textStatus, xhr) {
+            tag.loadOffScreen(html, id);
+          });
           return null;
         }
-      })
+      }).mdToHtml()
     );
   });
 
