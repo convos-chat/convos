@@ -74,8 +74,7 @@ sub connect {
   warn "[@{[$self->user->email]}/@{[$self->id]}] connect($irc->{server})\n" if DEBUG;
 
   unless ($irc->server) {
-    Mojo::IOLoop->next_tick(sub { $self->$cb("Invalid URL: hostname is not defined.") });
-    return $self;
+    return $self->_next_tick($cb => 'Invalid URL: hostname is not defined.');
   }
 
   delete $self->{disconnect};
@@ -83,7 +82,7 @@ sub connect {
   $self->state('connecting');
   $self->{steal_nick_tid} ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
 
-  Mojo::IOLoop->next_tick(
+  return $self->_next_tick(
     sub {
       $irc->connect(
         sub {
@@ -105,8 +104,6 @@ sub connect {
       );
     }
   );
-
-  return $self;
 }
 
 sub dialog {
@@ -118,8 +115,7 @@ sub disconnect {
   my ($self, $cb) = @_;
   Scalar::Util::weaken($self);
   $self->{disconnect} = 1;
-  $self->_irc->disconnect(sub { $self->state('disconnected')->$cb($_[1] || '') });
-  $self;
+  $self->_proxy(disconnect => sub { $self->state('disconnected')->$cb($_[1] || '') });
 }
 
 sub join_dialog {
@@ -130,17 +126,16 @@ sub join_dialog {
 
   $dialog = $self->dialog($name, {active => 1, name => $name, password => $password // ''});
   $dialog->topic('');
-  return $self->tap($cb, '', $dialog) if %{$dialog->users};
+  return $self->_next_tick($cb, '', $dialog) if %{$dialog->users};
   Scalar::Util::weaken($self);
-  $self->_irc->join_channel(
-    $name,
+  return $self->_proxy(
+    join_channel => $name,
     sub {
       my ($irc, $err) = @_;
       delete $self->{dialogs}{$dialog->id} if $err;
       $self->$cb($err, $dialog);
     }
   );
-  $self;
 }
 
 sub nick {
@@ -158,21 +153,18 @@ sub part_dialog {
   my ($self, $name, $cb) = @_;
   my $dialog = $self->dialog($name);
 
-  if ($dialog->{connection}) {
-    $self->_irc->part_channel(
-      $name,
-      sub {
-        my ($irc, $err) = @_;
-        delete $self->{dialogs}{$dialog->id} unless $err;
-        $self->$cb($err);
-      }
-    );
-  }
-  else {
-    Mojo::IOLoop->next_tick(sub { $self->$cb(''); });
+  unless ($dialog->{connection}) {
+    return $self->_next_tick($cb => '');
   }
 
-  return $self;
+  return $self->_proxy(
+    part_channel => $name,
+    sub {
+      my ($irc, $err) = @_;
+      delete $self->{dialogs}{$dialog->id} unless $err;
+      $self->$cb($err);
+    }
+  );
 }
 
 sub rooms {
@@ -180,13 +172,12 @@ sub rooms {
 
   # TODO: Add fresh() to get new list of channels on the server
   if ($self->{rooms_cache}) {
-    Mojo::IOLoop->next_tick(sub { $self->$cb('', $self->{rooms_cache}); });
-    return $self;
+    return $self->_next_tick($cb => '', $self->{rooms_cache});
   }
 
   Scalar::Util::weaken($self);
-  $self->_irc->channels(
-    sub {
+  return $self->_proxy(
+    channels => sub {
       my ($irc, $err, $channels) = @_;
       my $last = $self->{last_irc_rpl_listend} || 0;
       my $n = 0;
@@ -205,59 +196,47 @@ sub rooms {
       $self->$cb('', $self->{rooms_cache});
     },
   );
-
-  return $self;
 }
 
 sub send {
   my ($self, $target, $message, $cb) = @_;
-  my $msg;
 
-  if (not length($target // '') or not length($message // '')) {    # err_norecipient and err_notexttosend
-    Mojo::IOLoop->next_tick(sub { $self->$cb('Cannot send without target and message.'); });
-    return $self;
+  $message //= '';
+  if ($message =~ s!^/!!) {
+    my ($cmd, $args) = split /\s/, $message, 2;
+    return $self->_next_tick($cb => 'Invalid IRC command.') unless $cmd =~ /^[A-Za-z]+$/;
+
+    $cmd = uc $cmd;
+    return $self->_proxy(channel_users => $target, $cb) if $cmd eq 'NAMES';
+    return $self->_send($target, "\x{1}ACTION $args\x{1}", $cb) if $cmd eq 'ME';
+    return $self->_send($target, $args, $cb) if $cmd eq 'SAY';
+    return $self->_send(split(/\s+/, $args, 2), $cb) if $cmd eq 'MSG';
+    return $self->connect($cb)    if $cmd eq 'CONNECT';
+    return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
+    return $self->join_dialog($args, $cb) if $cmd eq 'JOIN';
+    return $self->nick($args, $cb) if $cmd eq 'NICK';
+    return $self->part_dialog($args || $target, $cb) if $cmd eq 'CLOSE';
+    return $self->part_dialog($args || $target, $cb) if $cmd eq 'PART';
+    return $self->topic($target, $args ? ($args) : (), $cb) if $cmd eq 'TOPIC';
+    return $self->whois($args, $cb) if $cmd eq 'WHOIS';
+    return $self->_next_tick($cb => 'Unknown IRC command.');
   }
-  if ($target =~ /\s/) {
-    Mojo::IOLoop->next_tick(sub { $self->$cb('Cannot send message to target with spaces.'); });
-    return $self;
-  }
 
-  $msg = Parse::IRC::parse_irc(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $message);
-
-  # Seems like there is no way to know if a message is delivered
-  # Instead, there might be some errors occuring if the message had issues:
-  # err_cannotsendtochan, err_nosuchnick, err_notoplevel, err_toomanytargets,
-  # err_wildtoplevel, irc_rpl_away
-
-  Scalar::Util::weaken($self);
-  return $self->tap($cb, qq(Cannot send invalid message "$message" to $target.)) unless ref $msg;
-  $self->_irc->write(
-    $msg->{raw_line},
-    sub {
-      my ($irc, $err) = @_;
-      return $self->$cb($err) if $err;
-      $msg->{prefix} = sprintf '%s!%s@%s', $irc->nick, $irc->user, $irc->server;
-      $self->_irc_message(irc_privmsg => $msg);
-      $self->$cb('');
-    }
-  );
-  return $self;
+  return $self->_send($target, $message, $cb);
 }
 
 sub topic {
   my $cb   = pop;
   my $self = shift;
   Scalar::Util::weaken($self);
-  $self->_irc->channel_topic(@_, sub { shift; $self->$cb(@_); });
-  $self;
+  $self->_proxy(channel_topic => @_, sub { shift; $self->$cb(@_); });
 }
 
 sub whois {
   my ($self, $target, $cb) = @_;
   return $self->tap($cb, "Cannot retrieve whois without target.", {}) unless $target;    # err_nonicknamegiven
   Scalar::Util::weaken($self);
-  $self->_irc->whois($target, sub { shift; $self->$cb(@_); });
-  $self;
+  $self->_proxy(whois => $target, sub { shift; $self->$cb(@_); });
 }
 
 sub _dialog {
@@ -319,6 +298,48 @@ sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 sub _notice {
   my ($self, $message) = (shift, shift);
   $self->emit(message => $self, {from => $self->url->host, type => 'notice', @_, message => $message, ts => time});
+}
+
+sub _proxy {
+  my ($self, $method) = (shift, shift);
+  $self->_irc->$method(@_);
+  $self;
+}
+
+sub _send {
+  my ($self, $target, $message, $cb) = @_;
+  my $msg = $message;
+
+  if (!$target) {    # err_norecipient and err_notexttosend
+    return $self->_next_tick($cb => 'Cannot send without target.');
+  }
+  elsif ($target =~ /\s/) {
+    return $self->_next_tick($cb => 'Cannot send message to target with spaces.');
+  }
+  elsif (length $message) {
+    $msg = Parse::IRC::parse_irc(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $message);
+    return $self->_next_tick($cb => 'Unable to construct PRIVMSG.') unless ref $msg;
+  }
+  else {
+    return $self->_next_tick($cb => 'Cannot send empty message.');
+  }
+
+  # Seems like there is no way to know if a message is delivered
+  # Instead, there might be some errors occuring if the message had issues:
+  # err_cannotsendtochan, err_nosuchnick, err_notoplevel, err_toomanytargets,
+  # err_wildtoplevel, irc_rpl_away
+
+  Scalar::Util::weaken($self);
+  return $self->_proxy(
+    write => $msg->{raw_line},
+    sub {
+      my ($irc, $err) = @_;
+      return $self->$cb($err) if $err;
+      $msg->{prefix} = sprintf '%s!%s@%s', $irc->nick, $irc->user, $irc->server;
+      $self->_irc_message(irc_privmsg => $msg);
+      $self->$cb('');
+    }
+  );
 }
 
 sub _steal_nick {

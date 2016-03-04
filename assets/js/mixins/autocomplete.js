@@ -2,18 +2,18 @@
   var commands = [
     '/me ',
     '/msg ',
-    '/query ',
+    '/query ',   // TODO
     '/join #',
     '/say ',
     '/nick ',
+    '/whois ',
     '/close',
     '/part ',
     '/names ',
-    '/list',
-    '/mode ',
+    '/mode ',    // TODO
     '/topic ',
-    '/reconnect',
-    '/whois '
+    '/disconnect',
+    '/connect'
   ];
 
   var before, matches, needle;

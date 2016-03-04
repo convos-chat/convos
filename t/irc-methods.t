@@ -124,6 +124,7 @@ $t->run(
   sub {
     my ($err, $dialog);
     $connection->join_dialog("#convos", sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
+    Mojo::IOLoop->start;
     is $dialog->name, "#convos", "dialog convos in callback again";
     is $err, '', 'join_dialog: convos again';
 

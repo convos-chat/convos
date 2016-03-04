@@ -98,6 +98,12 @@ sub _dialog {
   Convos::Core::Dialog->new($args);
 }
 
+sub _next_tick {
+  my ($self, $method, @args) = @_;
+  Mojo::IOLoop->next_tick(sub { $self->$method(@args) });
+  $self;
+}
+
 sub _userinfo {
   my $self = shift;
   my @userinfo = split /:/, $self->url->userinfo // '';

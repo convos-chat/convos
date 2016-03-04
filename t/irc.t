@@ -18,9 +18,9 @@ ok -e $settings_file, 'created storage file';
 cmp_deeply($connection->TO_JSON,
   {id => ignore(), name => 'localhost', protocol => 'irc', state => 'connecting', url => 'irc://127.0.0.1'}, 'TO_JSON');
 
-$connection->send('', '0', sub { $err = $_[1]; Mojo::IOLoop->stop });
+$connection->send('', 'whatever', sub { $err = $_[1]; Mojo::IOLoop->stop });
 Mojo::IOLoop->start;
-like $err, qr{without target and message}, 'send: without target and message';
+like $err, qr{without target}, 'send: without target';
 
 $connection->send('#test_convos' => '0', sub { $err = $_[1]; Mojo::IOLoop->stop });
 Mojo::IOLoop->start;
