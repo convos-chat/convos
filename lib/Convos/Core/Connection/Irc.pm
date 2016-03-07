@@ -15,6 +15,7 @@ require Convos;
 sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 
 my $CHANNEL_RE = qr{[#&]};
+my $PARSER = Parse::IRC->new(ctcp => 1);
 
 has _irc => sub {
   my $self = shift;
@@ -39,7 +40,7 @@ has _irc => sub {
   $irc->on(close => sub { $self and $self->_event_irc_close });
   $irc->on(error => sub { $self and $self->_event_irc_error({params => [$_[1]]}) });
 
-  for my $event ('ctcp_action', 'irc_notice', 'irc_privmsg') {
+  for my $event (qw(ctcp_action irc_notice irc_privmsg)) {
     $irc->on($event => sub { $self->_irc_message($event => $_[1]) });
   }
 
@@ -317,7 +318,7 @@ sub _send {
     return $self->_next_tick($cb => 'Cannot send message to target with spaces.');
   }
   elsif (length $message) {
-    $msg = Parse::IRC::parse_irc(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $message);
+    $msg = $PARSER->parse(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $message);
     return $self->_next_tick($cb => 'Unable to construct PRIVMSG.') unless ref $msg;
   }
   else {
@@ -336,7 +337,7 @@ sub _send {
       my ($irc, $err) = @_;
       return $self->$cb($err) if $err;
       $msg->{prefix} = sprintf '%s!%s@%s', $irc->nick, $irc->user, $irc->server;
-      $self->_irc_message(irc_privmsg => $msg);
+      $self->_irc_message(lc($msg->{command}) => $msg);
       $self->$cb('');
     }
   );

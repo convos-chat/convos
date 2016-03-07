@@ -6,6 +6,16 @@ use File::Path ();
 
 our $CONVOS_HOME;
 
+sub connect_to_irc {
+  my ($class, $connection) = @_;
+  my $t      = Test::Mojo::IRC->new;
+  my $server = $t->start_server;
+  $connection->url->parse("irc://$server");
+  $connection->connect(sub { Mojo::IOLoop->stop; });
+  Mojo::IOLoop->start;
+  return $t;
+}
+
 sub t {
   require Test::Mojo;
   Test::Mojo->new('Convos');
