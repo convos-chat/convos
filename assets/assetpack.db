@@ -221,10 +221,10 @@ format=js
 minified=0
 mtime=1456261738
 [riot:riot/sidebar-dialogs.tag]
-checksum=b19f9a129d
+checksum=19dfab1f4c
 format=js
 minified=0
-mtime=1456687412
+mtime=1457358518
 [riot:riot/sidebar-notifications.tag]
 checksum=d98397acd0
 format=js
@@ -256,7 +256,7 @@ format=js
 minified=0
 mtime=1456263497
 [sass:sass/main.scss]
-checksum=e17c514aef
+checksum=9ec164b231
 format=css
 minified=
 mtime=1456864187

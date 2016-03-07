@@ -175,6 +175,9 @@ nav {
       color: darken($link-color, 15%);
       font-weight: bold;
     }
+    a.frozen {
+      color: color("red", "darken-4");
+    }
     .on {
       display: block;
       font-size: 0.9rem;

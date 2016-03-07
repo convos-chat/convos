@@ -4800,6 +4800,8 @@ nav {
   nav sidebar-dialogs a.active {
     color: #225725;
     font-weight: bold; }
+  nav sidebar-dialogs a.frozen {
+    color: #B71C1C; }
   nav sidebar-dialogs .on {
     display: block;
     font-size: 0.9rem;

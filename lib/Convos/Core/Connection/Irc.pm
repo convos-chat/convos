@@ -83,6 +83,10 @@ sub connect {
   $self->state('connecting');
   $self->{steal_nick_tid} ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
 
+  for my $dialog (@{$self->dialogs}) {
+    $dialog->frozen('Not fully connected.');
+  }
+
   return $self->_next_tick(
     sub {
       $irc->connect(
