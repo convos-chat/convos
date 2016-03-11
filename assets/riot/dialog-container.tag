@@ -12,32 +12,20 @@
     <h5 class="tooltipped" title={dialog.topic() || 'No topic is set.'}>{dialog.name()}</h5>
   </header>
   <main name="scrollElement">
-    <ol class="collection">
-      <li class={liClass(m)} each={m, i in messages}>
-        <dialog-message dialog={dialog} msg={nm} user={user} each={nm, i in m.nested_messages}></dialog-message>
-      </li>
-    </ol>
+    <dialog-message dialog={dialog} msg={msg} user={user} each={msg, i in messages}></dialog-message>
   </main>
   <user-input dialog={dialog} user={user}/>
   <script>
-  mixin.bottom(this);
+  mixin.bottom(this); // uses name="scrollElement"
   mixin.time(this);
 
   this.user = opts.user;
   this.dialog = this.user.currentDialog();
   this.currentDialog = this.dialog.id();
-  this.lastNumberOfMessages = 0;
   this.messages = [];
 
   getInfo(e) {
     this.dialog.addMessage({special: 'info'});
-  }
-
-  liClass(i) {
-    var c = ['collection-item'];
-    if (i.special) c.push('special') && c.push(i.special);
-    if (i.type) c.push(i.type);
-    return c.join(' ');
   }
 
   listParticipants(e) {
@@ -57,33 +45,14 @@
 
   this.on('update', function() {
     this.dialog = this.user.currentDialog();
-
-    var list = this.dialog.messages();
-    var messages = [];
-    var prev = {ts: new Date()};
+    this.messages = this.dialog.messages();
+    this.prevMessage = null;
+    console.log(1);
 
     if (this.dialog.id() != this.currentDialog) {
       this.currentDialog = this.dialog.id();
       this.dialog.trigger('show');
     }
-    if (this.lastNumberOfMessages == list.length) {
-      return;
-    }
-
-    this.messages = messages;
-    this.lastNumberOfMessages = list.length;
-    list.forEach(function(msg) {
-      if (msg.from != prev.from) msg.hr = true;
-      if (prev.ts.epoch() < msg.ts.epoch() - 300) msg.hr = true;
-      if (msg.hr || msg.special) {
-        msg.nested_messages = [msg];
-        messages.push(msg);
-        prev = msg;
-      }
-      else {
-        prev.nested_messages.push(msg);
-      }
-    });
   });
   </script>
 </dialog-container>

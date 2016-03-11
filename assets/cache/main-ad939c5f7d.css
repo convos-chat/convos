@@ -4672,6 +4672,7 @@ chat {
   chat dialog-container {
     max-width: 860px; }
   chat dialog-container main {
+    padding-bottom: 1.5rem;
     overflow: auto;
     flex-grow: 1; }
   chat nav {
@@ -4729,52 +4730,66 @@ convos-help ul {
     list-style-type: inherit; }
 
 dialog-container {
-  padding: 0 0.75rem 0 0.75rem; }
+  padding: 0 0.75rem; }
   dialog-container header {
     position: relative; }
     dialog-container header .actions {
       right: -4px; }
-  dialog-container main ol.collection {
-    border: 0;
-    padding: 0;
-    list-style-type: none; }
-    dialog-container main ol.collection h5.title {
-      font-size: 1.1rem;
-      padding: 0;
-      color: #000; }
-    dialog-container main ol.collection .collection-item {
-      position: relative;
-      padding: 10px 0; }
-    dialog-container main ol.collection .collection-item.action a {
-      color: rgba(0, 0, 0, 0.87); }
-    dialog-container main ol.collection .collection-item.action .message, dialog-container main ol.collection .collection-item.action .title {
+  dialog-container dialog-message {
+    display: block;
+    position: relative;
+    padding: 4px 0;
+    margin: 4px 0; }
+    dialog-container dialog-message:hover {
+      background: #fafafa; }
+    dialog-container dialog-message.action .message, dialog-container dialog-message.action a.title {
       font-style: italic;
       display: inline; }
-    dialog-container main ol.collection .collection-item.error {
-      background: #fbe9e9; }
-    dialog-container main ol.collection .collection-item.info {
+    dialog-container dialog-message.error {
+      color: #FF1744; }
+    dialog-container dialog-message.highlight .message {
+      color: #FF5252; }
+    dialog-container dialog-message.info {
       background: #f8faf8; }
-    dialog-container main ol.collection .secondary-content {
+    dialog-container dialog-message.notice {
+      padding: 0 0.75rem;
+      margin: 8px 0;
+      border-left: 1px solid #bdbdbd; }
+      dialog-container dialog-message.notice, dialog-container dialog-message.notice a {
+        color: #616161; }
+    dialog-container dialog-message.special {
+      background: #f8faf8; }
+      dialog-container dialog-message.special .secondary-content {
+        top: 8px;
+        right: 4px; }
+      dialog-container dialog-message.special i {
+        font-size: 22px; }
+    dialog-container dialog-message.hr + .same {
+      margin-top: -4px; }
+    dialog-container dialog-message.same {
+      padding: 0; }
+      dialog-container dialog-message.same a.title, dialog-container dialog-message.same .secondary-content {
+        display: none; }
+    dialog-container dialog-message h5.title {
+      font-size: 1.1rem;
+      padding: 0;
+      color: rgba(0, 0, 0, 0.87); }
+    dialog-container dialog-message .message a {
+      color: inherit;
+      text-decoration: underline; }
+    dialog-container dialog-message .message a:hover {
+      text-decoration: none; }
+    dialog-container dialog-message .secondary-content {
       position: absolute;
       top: 10px;
       right: 0px; }
-      dialog-container main ol.collection .secondary-content, dialog-container main ol.collection .secondary-content a {
+      dialog-container dialog-message .secondary-content, dialog-container dialog-message .secondary-content a {
         color: #757575;
         font-size: 0.8rem;
         overflow: hidden;
         display: block; }
-      dialog-container main ol.collection .secondary-content i {
+      dialog-container dialog-message .secondary-content i {
         vertical-align: bottom; }
-    dialog-container main ol.collection .collection-item.special .secondary-content {
-      top: 8px;
-      right: 4px; }
-      dialog-container main ol.collection .collection-item.special .secondary-content i {
-        font-size: 22px; }
-    dialog-container main ol.collection .message a {
-      color: inherit;
-      text-decoration: underline; }
-    dialog-container main ol.collection .message a:hover {
-      text-decoration: none; }
 
 user-input {
   border-top: 1px solid #dbdbdb; }

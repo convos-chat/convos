@@ -25,8 +25,16 @@
     if (!msg.from) msg.from = 'convosbot';
     if (!msg.ts) msg.ts = new Date();
     if (typeof msg.ts == 'string') msg.ts = new Date(msg.ts);
+    if (this._connection) this.connection().highlightMessage(msg);
     this.messages().push(msg);
   };
+
+  proto.groupedMessage = function(msg) {
+    var prev = this.prevMessage || {ts: new Date()};
+    this.prevMessage = msg;
+    if (msg.special) return false;
+    return msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch();
+  }
 
   proto.hasConnection = function() {
     return this._connection ? true : false;

@@ -1,34 +1,68 @@
+$dialog-spacing: 4px;
+
 dialog-container {
-  padding: 0 $gutter-width / 2 0 $gutter-width /2;
+  padding: 0 $gutter-width / 2;
 
   header {
     position: relative;
     .actions { right: -4px; }
   }
 
-  main ol.collection {
-    border: 0;
-    padding: 0;
-    list-style-type: none;
+  dialog-message {
+    display: block;
+    position: relative;
+    padding: $dialog-spacing 0;
+    margin: $dialog-spacing 0;
 
-    h5.title { font-size: 1.1rem; padding: 0; color: #000; }
-
-    .collection-item {
-      position: relative;
-      padding: 10px 0;
+    &:hover {
+      background: darken($body-bg, 2%);
     }
-    .collection-item.action {
-      a { color: $off-black; }
-      .message, .title {
+
+    &.action {
+      .message, a.title {
         font-style: italic;
-        display: inline; }
+        display: inline;
+      }
     }
-    .collection-item.error {
-      background: #fbe9e9;
+    &.error {
+      color: color('red', 'accent-3');
     }
-    .collection-item.info {
+    &.highlight .message {
+      color: color('red', 'accent-2');
+    }
+    &.info {
       background: #f8faf8;
     }
+    &.notice {
+      padding: 0 $gutter-width / 2;
+      margin: $dialog-spacing * 2 0;
+      border-left: 1px solid color('grey', 'lighten-1');
+      &, a {
+        color: color('grey', 'darken-2');
+      }
+    }
+    &.special {
+      background: #f8faf8;
+      .secondary-content { top: 8px; right: $dialog-spacing; }
+      i { font-size: 22px; }
+    }
+
+    &.hr + .same {
+      margin-top: -$dialog-spacing;
+    }
+
+    &.same {
+      padding: 0;
+      a.title, .secondary-content { display: none; }
+    }
+
+    h5.title { font-size: 1.1rem; padding: 0; color: $off-black; }
+
+    .message {
+      a { color: inherit; text-decoration: underline; }
+      a:hover { text-decoration: none; }
+    }
+
     .secondary-content {
       position: absolute;
       top: 10px;
@@ -42,15 +76,6 @@ dialog-container {
       i {
         vertical-align: bottom;
       }
-    }
-    .collection-item.special .secondary-content {
-      top: 8px;
-      right: 4px;
-      i { font-size: 22px; }
-    }
-    .message {
-      a { color: inherit; text-decoration: underline; }
-      a:hover { text-decoration: none; }
     }
   }
 }
@@ -67,8 +92,8 @@ user-input {
     right: 1px;
     a {
       display: inline-block;
-      margin-right: -4px;
-      padding: 4px 6px;
+      margin-right: -$dialog-spacing;
+      padding: $dialog-spacing 6px;
     }
     i { vertical-align: bottom; }
   }

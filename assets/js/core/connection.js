@@ -16,6 +16,15 @@
     user: function() { throw 'user cannot be built'; }
   });
 
+  proto.highlightMessage = function(msg) {
+    var query = this.url().parseUrl().query;
+    var highlight = [];
+    if (query.nick) highlight.push(query.nick);
+    if (query.highlight) highlight = highlight.concat(query.highlight.split(','));
+    highlight = new RegExp('\\b' + highlight.join('|') + '\\b');
+    msg.highlight = msg.message.match(highlight) ? true : false;
+  };
+
   // Join a room or create a private dialog on the server
   proto.joinDialog = function(name, cb) {
     var self = this;

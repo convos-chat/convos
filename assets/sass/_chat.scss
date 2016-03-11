@@ -19,6 +19,7 @@ chat {
 
   dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
   dialog-container main {
+    padding-bottom: $gutter-width;
     overflow: auto;
     flex-grow: 1;
   }

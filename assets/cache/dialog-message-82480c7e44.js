@@ -31,6 +31,15 @@ riot.tag2('dialog-message', '<span if="{msg.type == \'action\'}">✧</span> <a h
   }.bind(this)
 
   this.on('mount', function() {
+    var c = [];
+    if (this.msg.special) c.push('special') && c.push(this.msg.special);
+    if (this.msg.highlight) c.push('highlight');
+    if (this.msg.type) c.push(this.msg.type);
+    c.push(this.dialog.groupedMessage(this.msg) ? 'same' : 'hr');
+    $(this.root).addClass(c.join(' '));
+  });
+
+  this.on('mount', function() {
     if (this.msg.special) return;
     $('.message', this.root).html(
       this.msg.message.xmlEscape().autoLink({
