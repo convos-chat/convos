@@ -9,9 +9,19 @@
     <textarea name="message" class="materialize-textarea" placeholder={placeholder} onkeydown={onChange}></textarea>
   </form>
   <script>
+  var tag = this;
   mixin.autocomplete(this);
-
   this.placeholder = '';
+  this.user = opts.user;
+
+  // override autocompleteList() in "autocomplete" mixin
+  autocompleteList(before, needle, after) {
+    return Object.keys(opts.dialog.users()).map(function(str) {
+      if (before.length == 0) str = str + ': ';
+      if (after.match(/^\S/)) str = str + ' ';
+      return str;
+    });
+  };
 
   onChange(e) {
     switch (e.keyCode) {
@@ -61,5 +71,19 @@
     };
   });
 
+  this.user.on('insertIntoInput', function(str) {
+    var input = tag.message;
+    var pos = input.selectionStart;
+    var before = input.value.substring(0, pos);
+    var after = input.value.substring(pos);
+    if (before.length == 0) str = str + ': ';
+    if (before.match(/\S$/)) str = ' ' + str;
+    if (after.match(/^\S/)) str = str + ' ';
+    input.value = before + str + after;
+    input.focus();
+    pos += str.length;
+    input.selectionStart = pos;
+    input.selectionEnd = pos;
+  });
   </script>
 </user-input>

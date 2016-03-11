@@ -4,7 +4,12 @@ riot.tag2('dialog-message', '<span if="{msg.type == \'action\'}">✧</span> <a h
 
   this.dialog = opts.dialog;
   this.msg = opts.msg;
+  this.user = opts.user;
   this.users = [];
+
+  this.insertIntoInput = function(e) {
+    this.user.trigger('insertIntoInput', e.target.href.replace(/^.*#insert:/, ''));
+  }.bind(this)
 
   this.loadOffScreen = function(html, id) {
     if (html.match(/^<a\s/)) return;

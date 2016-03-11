@@ -18,7 +18,7 @@
       </li>
     </ol>
   </main>
-  <user-input dialog={dialog} />
+  <user-input dialog={dialog} user={user}/>
   <script>
   mixin.bottom(this);
   mixin.time(this);

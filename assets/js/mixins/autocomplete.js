@@ -1,4 +1,5 @@
 (window['mixin'] = window['mixin'] || {})['autocomplete'] = function(tag) {
+  var before, matches, needle;
   var commands = [
     '/me ',
     '/msg ',
@@ -16,11 +17,9 @@
     '/connect'
   ];
 
-  var before, matches, needle;
   tag.autocomplete = function(input, backwards) {
-    if (!this._autocompleteMatches) {
+    if (!this.autocompleteMatches) {
       before = input.value.substring(0, input.selectionStart);
-      matches = [];
       needle = '';
 
       this._autocompleteAfter = input.value.substring(input.selectionStart);
@@ -29,19 +28,14 @@
         return '';
       });
 
-      matches = matches.concat(this.autocompleteList());
-
-      if (!this._autocompleteBefore.length) {
-        matches = matches.concat(commands.filter(function(command) {
-          return command.indexOf(needle) == 0;
-        }));
-      }
-
-      this._autocompleteIndex = -1;
-      this._autocompleteMatches = matches;
+      matches = [needle].concat(this.autocompleteList(this._autocompleteBefore, needle, this._autocompleteAfter));
+      if (!this._autocompleteBefore.length) matches = matches.concat(commands);
+      matches = matches.filter(function(command) { return !command.indexOf(needle); });
+      this._autocompleteIndex = 0;
+      this.autocompleteMatches = matches;
     }
 
-    matches = this._autocompleteMatches;
+    matches = this.autocompleteMatches;
     if (!matches.length) return;
 
     this._autocompleteIndex += backwards ? -1 : 1;
@@ -51,8 +45,9 @@
     input.value = this._autocompleteBefore + matches[this._autocompleteIndex];
   }.bind(tag);
 
-  tag.autocompleteList = function() {
-    return []; // TODO: Return participants in conversation
+  // override this in consumer object
+  tag.autocompleteList = function(before, needle, after) {
+    return [];
   };
 
   return tag;

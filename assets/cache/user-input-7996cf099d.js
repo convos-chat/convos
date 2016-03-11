@@ -1,7 +1,16 @@
 riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <textarea name="message" class="materialize-textarea" placeholder="{placeholder}" onkeydown="{onChange}"></textarea> </form>', '', '', function(opts) {
+  var tag = this;
   mixin.autocomplete(this);
-
   this.placeholder = '';
+  this.user = opts.user;
+
+  this.autocompleteList = function(before, needle, after) {
+    return Object.keys(opts.dialog.users()).map(function(str) {
+      if (before.length == 0) str = str + ': ';
+      if (after.match(/^\S/)) str = str + ' ';
+      return str;
+    });
+  }.bind(this);
 
   this.onChange = function(e) {
     switch (e.keyCode) {
@@ -51,4 +60,18 @@ riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <textarea
     };
   });
 
+  this.user.on('insertIntoInput', function(str) {
+    var input = tag.message;
+    var pos = input.selectionStart;
+    var before = input.value.substring(0, pos);
+    var after = input.value.substring(pos);
+    if (before.length == 0) str = str + ': ';
+    if (before.match(/\S$/)) str = ' ' + str;
+    if (after.match(/^\S/)) str = str + ' ';
+    input.value = before + str + after;
+    input.focus();
+    pos += str.length;
+    input.selectionStart = pos;
+    input.selectionEnd = pos;
+  });
 }, '{ }');

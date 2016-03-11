@@ -30,7 +30,12 @@
 
   this.dialog = opts.dialog;
   this.msg = opts.msg;
+  this.user = opts.user;
   this.users = [];
+
+  insertIntoInput(e) {
+    this.user.trigger('insertIntoInput', e.target.href.replace(/^.*#insert:/, ''));
+  }
 
   loadOffScreen(html, id) {
     if (html.match(/^<a\s/)) return;
