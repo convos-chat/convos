@@ -4807,8 +4807,11 @@ nav {
   nav sidebar-notifications > a {
     display: block;
     padding: 0.5rem 0.75rem 1rem 0.75rem; }
+  nav sidebar-dialogs a {
+    border-right: 4px solid #fff; }
   nav sidebar-dialogs a.active {
     color: #225725;
+    border-color: #388E3C;
     font-weight: bold; }
   nav sidebar-dialogs a.frozen {
     color: #B71C1C; }
@@ -4821,15 +4824,15 @@ nav {
   nav sidebar-settings {
     display: flex; }
     nav sidebar-settings a {
+      text-align: center;
+      border-bottom: 3px solid #fff;
+      padding: 0.5rem 0 1rem 0;
+      margin: 0 4px;
       position: relative;
       display: block;
-      flex-grow: 1;
-      text-align: center;
-      padding: 0.75rem 0;
-      height: 60px;
-      padding-bottom: 1.5rem; }
-    nav sidebar-settings a.active i {
-      font-size: 28px; }
+      flex-grow: 1; }
+    nav sidebar-settings a.active {
+      border-color: #388E3C; }
 
 img.embed, .link-embedder.text-html {
   max-width: 820px;

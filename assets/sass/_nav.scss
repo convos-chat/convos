@@ -12,8 +12,12 @@ nav {
   }
 
   sidebar-dialogs {
+    a {
+      border-right: 4px solid $body-bg;
+    }
     a.active {
       color: darken($link-color, 15%);
+      border-color: $link-color;
       font-weight: bold;
     }
     a.frozen {
@@ -32,16 +36,16 @@ nav {
     display: flex;
 
     a {
+      text-align: center;
+      border-bottom: 3px solid $body-bg;
+      padding: $element-top-margin 0 $element-bottom-margin 0;
+      margin: 0 4px;
       position: relative;
       display: block;
       flex-grow: 1;
-      text-align: center;
-      padding: $gutter-width / 2 0;
-      height: 60px;
-      padding-bottom: $gutter-width;
     }
     a.active {
-      i { font-size: 28px; }
+      border-color: $link-color;
     }
   }
 }
