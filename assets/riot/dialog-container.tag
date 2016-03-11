@@ -13,15 +13,8 @@
   </header>
   <main name="scrollElement">
     <ol class="collection">
-      <li class={'collection-item': true, special: special} each={messages}>
-        <a href={'#autocomplete:' + from} class="title" if={!special}>{from}</a>
-        <dialog-message dialog={dialog} msg={m} each={m, i in nested_messages}></dialog-message>
-        <span class="secondary-content" if={special}>
-          <a href="#close" onclick={removeMessage}><i class="material-icons">close</i></a>
-        </span>
-        <span class="secondary-content ts tooltipped" title={ts.toLocaleString()} if={!special}>
-          {parent.timestring(ts)}
-        </span>
+      <li class={liClass(m)} each={m, i in messages}>
+        <dialog-message dialog={dialog} msg={nm} user={user} each={nm, i in m.nested_messages}></dialog-message>
       </li>
     </ol>
   </main>
@@ -38,6 +31,13 @@
 
   getInfo(e) {
     this.dialog.addMessage({special: 'info'});
+  }
+
+  liClass(i) {
+    var c = ['collection-item'];
+    if (i.special) c.push('special') && c.push(i.special);
+    if (i.type) c.push(i.type);
+    return c.join(' ');
   }
 
   listParticipants(e) {

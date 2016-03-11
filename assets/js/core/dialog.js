@@ -21,11 +21,11 @@
     users: function() { return {}; }
   });
 
-  proto.addMessage = function(message) {
-    if (!message.from) message.from = 'convosbot';
-    if (!message.ts) message.ts = new Date();
-    if (typeof message.ts == 'string') message.ts = new Date(message.ts);
-    this.messages().push(message);
+  proto.addMessage = function(msg) {
+    if (!msg.from) msg.from = 'convosbot';
+    if (!msg.ts) msg.ts = new Date();
+    if (typeof msg.ts == 'string') msg.ts = new Date(msg.ts);
+    this.messages().push(msg);
   };
 
   proto.hasConnection = function() {

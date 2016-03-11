@@ -103,7 +103,16 @@ dialog-container {
       position: relative;
       padding: 10px 0;
     }
-    .collection-item.special {
+    .collection-item.action {
+      a { color: $off-black; }
+      .message, .title {
+        font-style: italic;
+        display: inline; }
+    }
+    .collection-item.error {
+      background: #fbe9e9;
+    }
+    .collection-item.info {
       background: #f8faf8;
     }
     .secondary-content {

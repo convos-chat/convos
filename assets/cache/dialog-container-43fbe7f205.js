@@ -1,4 +1,4 @@
-riot.tag2('dialog-container', '<header> <div class="actions" if="{dialog.hasConnection()}"> <a href="#settings" onclick="{getInfo}" class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a> <a href="#participants" onclick="{listParticipants}" class="tooltipped" title="List participants"><i class="material-icons">people</i></a> <a href="#close" onclick="{removeDialog}" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a> </div> <div class="actions" if="{!dialog.hasConnection()}"> <a href="#chat"><i class="material-icons">star_rate</i></a> </div> <h5 class="tooltipped" title="{dialog.topic() || \'No topic is set.\'}">{dialog.name()}</h5> </header> <main name="scrollElement"> <ol class="collection"> <li class="{\'collection-item\': true, special: special}" each="{messages}"> <a href="{\'#autocomplete:\' + from}" class="title" if="{!special}">{from}</a> <dialog-message dialog="{dialog}" msg="{m}" each="{m, i in nested_messages}"></dialog-message> <span class="secondary-content" if="{special}"> <a href="#close" onclick="{removeMessage}"><i class="material-icons">close</i></a> </span> <span class="secondary-content ts tooltipped" title="{ts.toLocaleString()}" if="{!special}"> {parent.timestring(ts)} </span> </li> </ol> </main> <user-input dialog="{dialog}"></user-input>', '', '', function(opts) {
+riot.tag2('dialog-container', '<header> <div class="actions" if="{dialog.hasConnection()}"> <a href="#settings" onclick="{getInfo}" class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a> <a href="#participants" onclick="{listParticipants}" class="tooltipped" title="List participants"><i class="material-icons">people</i></a> <a href="#close" onclick="{removeDialog}" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a> </div> <div class="actions" if="{!dialog.hasConnection()}"> <a href="#chat"><i class="material-icons">star_rate</i></a> </div> <h5 class="tooltipped" title="{dialog.topic() || \'No topic is set.\'}">{dialog.name()}</h5> </header> <main name="scrollElement"> <ol class="collection"> <li class="{liClass(m)}" each="{m, i in messages}"> <dialog-message dialog="{dialog}" msg="{nm}" user="{user}" each="{nm, i in m.nested_messages}"></dialog-message> </li> </ol> </main> <user-input dialog="{dialog}"></user-input>', '', '', function(opts) {
   mixin.bottom(this);
   mixin.time(this);
 
@@ -10,6 +10,13 @@ riot.tag2('dialog-container', '<header> <div class="actions" if="{dialog.hasConn
 
   this.getInfo = function(e) {
     this.dialog.addMessage({special: 'info'});
+  }.bind(this)
+
+  this.liClass = function(i) {
+    var c = ['collection-item'];
+    if (i.special) c.push('special') && c.push(i.special);
+    if (i.type) c.push(i.type);
+    return c.join(' ');
   }.bind(this)
 
   this.listParticipants = function(e) {

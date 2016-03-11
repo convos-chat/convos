@@ -6,7 +6,6 @@
   var mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3', 'g');
   String.prototype.mdToHtml = function() {
     return this.replace(mdToHtmlRe, function(all, b, esc, tag, text) {
-      console.log(arguments);
       switch (tag.length) {
         case 1: return esc ? all.replace(/^\\/, '') : b + '<em>' + text + '</em>';
         case 2: return esc ? all.replace(/^\\/, '') : b + '<strong>' + text + '</strong>';

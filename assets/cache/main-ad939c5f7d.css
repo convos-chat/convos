@@ -4745,7 +4745,14 @@ dialog-container {
     dialog-container main ol.collection .collection-item {
       position: relative;
       padding: 10px 0; }
-    dialog-container main ol.collection .collection-item.special {
+    dialog-container main ol.collection .collection-item.action a {
+      color: rgba(0, 0, 0, 0.87); }
+    dialog-container main ol.collection .collection-item.action .message, dialog-container main ol.collection .collection-item.action .title {
+      font-style: italic;
+      display: inline; }
+    dialog-container main ol.collection .collection-item.error {
+      background: #fbe9e9; }
+    dialog-container main ol.collection .collection-item.info {
       background: #f8faf8; }
     dialog-container main ol.collection .secondary-content {
       position: absolute;
