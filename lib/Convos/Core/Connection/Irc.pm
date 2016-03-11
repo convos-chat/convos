@@ -281,7 +281,7 @@ sub _irc_message {
         from    => $nick,
         message => $msg->{params}[1],
         ts      => time,
-        type    => $event eq 'irc_privmsg' ? 'private' : $event eq 'ctcp_action' ? 'action' : 'notice',
+        type    => $event =~ /privmsg/ ? 'private' : $event =~ /action/ ? 'action' : 'notice',
       }
     );
   }

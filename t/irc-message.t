@@ -27,7 +27,11 @@ like slurp_log("#convos"), qr{\Q* jhthorsen will be back\E}m, 'ctcp_action';
 
 $connection->send("#convos" => "/me will be back again", sub { Mojo::IOLoop->stop });
 Mojo::IOLoop->start;
-like slurp_log("#convos"), qr{\Q* superman will be back again\E}m, 'local ctcp_action';
+like slurp_log("#convos"), qr{\Q* superman will be back again\E}m, 'loopback ctcp_action';
+
+$connection->send("#convos" => "some regular message", sub { Mojo::IOLoop->stop });
+Mojo::IOLoop->start;
+like slurp_log("#convos"), qr{\Q<superman> some regular message\E}m, 'loopback private';
 
 $connection->_irc->emit(
   irc_notice => {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['superman', "notice this?"]});
