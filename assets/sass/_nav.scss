@@ -1,0 +1,47 @@
+nav {
+  color: #777;
+
+  .material-icons { vertical-align: bottom; }
+
+  sidebar-dialogs,
+  sidebar-notifications {
+    > span, > a {
+      display: block;
+      padding: $element-top-margin $gutter-width / 2 $element-bottom-margin $gutter-width / 2;
+    }
+  }
+
+  sidebar-dialogs {
+    a.active {
+      color: darken($link-color, 15%);
+      font-weight: bold;
+    }
+    a.frozen {
+      color: color("red", "darken-4");
+    }
+    .on {
+      display: block;
+      font-size: 0.9rem;
+      color: #777;
+      margin-left: 28px;
+      margin-bottom: -5px;
+    }
+  }
+
+  sidebar-settings {
+    display: flex;
+
+    a {
+      position: relative;
+      display: block;
+      flex-grow: 1;
+      text-align: center;
+      padding: $gutter-width / 2 0;
+      height: 60px;
+      padding-bottom: $gutter-width;
+    }
+    a.active {
+      i { font-size: 28px; }
+    }
+  }
+}

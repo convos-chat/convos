@@ -4775,30 +4775,33 @@ dialog-container {
       text-decoration: underline; }
     dialog-container main ol.collection .message a:hover {
       text-decoration: none; }
-  dialog-container user-input {
-    border-top: 1px solid #dbdbdb; }
-    dialog-container user-input .actions {
-      text-align: right;
-      overflow: visible;
-      position: relative;
-      height: 0;
-      top: -34px;
-      right: 1px; }
-      dialog-container user-input .actions a {
-        display: inline-block;
-        margin-right: -4px;
-        padding: 4px 6px; }
-      dialog-container user-input .actions i {
-        vertical-align: bottom; }
-    dialog-container user-input textarea.materialize-textarea {
-      max-height: 11.5rem;
-      margin: 8px 0;
-      padding: 0;
-      overflow: auto;
-      box-sizing: border-box; }
+
+user-input {
+  border-top: 1px solid #dbdbdb; }
+  user-input .actions {
+    text-align: right;
+    overflow: visible;
+    position: relative;
+    height: 0;
+    top: -34px;
+    right: 1px; }
+    user-input .actions a {
+      display: inline-block;
+      margin-right: -4px;
+      padding: 4px 6px; }
+    user-input .actions i {
+      vertical-align: bottom; }
+  user-input textarea.materialize-textarea {
+    max-height: 11.5rem;
+    margin: 8px 0;
+    padding: 0;
+    overflow: auto;
+    box-sizing: border-box; }
 
 nav {
   color: #777; }
+  nav .material-icons {
+    vertical-align: bottom; }
   nav sidebar-dialogs > span, nav sidebar-dialogs > a,
   nav sidebar-notifications > span,
   nav sidebar-notifications > a {
@@ -4825,12 +4828,8 @@ nav {
       padding: 0.75rem 0;
       height: 60px;
       padding-bottom: 1.5rem; }
-    nav sidebar-settings a.active {
-      color: #225725; }
-      nav sidebar-settings a.active i {
-        font-size: 28px; }
-  nav .material-icons {
-    vertical-align: bottom; }
+    nav sidebar-settings a.active i {
+      font-size: 28px; }
 
 img.embed, .link-embedder.text-html {
   max-width: 820px;
