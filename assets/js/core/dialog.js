@@ -25,7 +25,7 @@
     if (!msg.from) msg.from = 'convosbot';
     if (!msg.ts) msg.ts = new Date();
     if (typeof msg.ts == 'string') msg.ts = new Date(msg.ts);
-    if (this._connection) this.connection().highlightMessage(msg);
+    if (msg.message && this._connection) this.connection().highlightMessage(msg);
     this.messages().push(msg);
   };
 

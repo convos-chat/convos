@@ -4758,7 +4758,8 @@ dialog-container {
       dialog-container dialog-message.notice, dialog-container dialog-message.notice a {
         color: #616161; }
     dialog-container dialog-message.special {
-      background: #f8faf8; }
+      background: #f8faf8;
+      border: 1px solid #e9efe9; }
       dialog-container dialog-message.special .secondary-content {
         top: 8px;
         right: 4px; }

@@ -43,6 +43,7 @@ dialog-container {
     }
     &.special {
       background: #f8faf8;
+      border: 1px solid darken(#f8faf8, 5%);
       .secondary-content { top: 8px; right: $dialog-spacing; }
       i { font-size: 22px; }
     }
