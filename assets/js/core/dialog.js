@@ -32,7 +32,7 @@
   proto.groupedMessage = function(msg) {
     var prev = this.prevMessage || {ts: new Date()};
     this.prevMessage = msg;
-    if (msg.special) return false;
+    if (!msg.message) return false;
     return msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch();
   }
 
@@ -78,7 +78,7 @@
       this.addMessage({message: 'This dialog has no topic.'});
     }
     if(!this.is_private()) {
-      this.addMessage({special: 'users', users: this.users()});
+      this.addMessage({type: 'users'});
     }
   };
 

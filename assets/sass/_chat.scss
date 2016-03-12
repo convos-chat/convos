@@ -45,6 +45,7 @@ connection-editor,
 convos-help,
 dialog-container,
 new-dialog {
+  display: block;
   overflow: auto;
   max-height: 100vh;
 

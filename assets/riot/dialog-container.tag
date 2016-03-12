@@ -12,7 +12,11 @@
     <h5 class="tooltipped" title={dialog.topic() || 'No topic is set.'}>{dialog.name()}</h5>
   </header>
   <main name="scrollElement">
-    <dialog-message dialog={dialog} msg={msg} user={user} each={msg, i in messages}></dialog-message>
+    <virtual each={msg, i in messages}>
+      <dialog-message dialog={parent.dialog} msg={msg} user={parent.user} if={msg.message} />
+      <dialog-message-info dialog={parent.dialog} msg={msg} user={parent.user} if={msg.type == 'info'} />
+      <dialog-message-users dialog={parent.dialog} msg={msg} user={parent.user} if={msg.type == 'users'} />
+    </virtual>
   </main>
   <user-input dialog={dialog} user={user}/>
   <script>
@@ -25,11 +29,11 @@
   this.messages = [];
 
   getInfo(e) {
-    this.dialog.addMessage({special: 'info'});
+    this.dialog.addMessage({type: 'info'});
   }
 
   listParticipants(e) {
-    this.dialog.addMessage({special: 'users'});
+    this.dialog.addMessage({type: 'users'});
   }
 
   removeDialog(e) {
@@ -47,7 +51,6 @@
     this.dialog = this.user.currentDialog();
     this.messages = this.dialog.messages();
     this.prevMessage = null;
-    console.log(1);
 
     if (this.dialog.id() != this.currentDialog) {
       this.currentDialog = this.dialog.id();

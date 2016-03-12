@@ -4692,6 +4692,7 @@ connection-editor,
 convos-help,
 dialog-container,
 new-dialog {
+  display: block;
   overflow: auto;
   max-height: 100vh; }
   connection-editor h5,
@@ -4735,11 +4736,52 @@ dialog-container {
     position: relative; }
     dialog-container header .actions {
       right: -4px; }
-  dialog-container dialog-message {
+  dialog-container dialog-message,
+  dialog-container dialog-message-info,
+  dialog-container dialog-message-users {
     display: block;
     position: relative;
-    padding: 4px 0;
-    margin: 4px 0; }
+    margin: 4px 0;
+    padding: 8px; }
+    dialog-container dialog-message .secondary-content,
+    dialog-container dialog-message-info .secondary-content,
+    dialog-container dialog-message-users .secondary-content {
+      position: absolute;
+      top: 10px;
+      right: 0px; }
+      dialog-container dialog-message .secondary-content, dialog-container dialog-message .secondary-content a,
+      dialog-container dialog-message-info .secondary-content,
+      dialog-container dialog-message-info .secondary-content a,
+      dialog-container dialog-message-users .secondary-content,
+      dialog-container dialog-message-users .secondary-content a {
+        color: #757575;
+        font-size: 0.8rem;
+        overflow: hidden;
+        display: block; }
+      dialog-container dialog-message .secondary-content i,
+      dialog-container dialog-message-info .secondary-content i,
+      dialog-container dialog-message-users .secondary-content i {
+        vertical-align: bottom; }
+  dialog-container dialog-message-info,
+  dialog-container dialog-message-users {
+    background: #f8faf8;
+    border: 1px solid #e9efe9; }
+    dialog-container dialog-message-info .secondary-content,
+    dialog-container dialog-message-users .secondary-content {
+      top: 4px;
+      right: 4px; }
+    dialog-container dialog-message-info h5.title,
+    dialog-container dialog-message-users h5.title {
+      font-size: 1.1rem;
+      padding: 0;
+      color: rgba(0, 0, 0, 0.87); }
+    dialog-container dialog-message-info i,
+    dialog-container dialog-message-users i {
+      font-size: 22px; }
+  dialog-container dialog-message-info {
+    background: #f8faf8; }
+  dialog-container dialog-message {
+    padding: 4px 0; }
     dialog-container dialog-message:hover {
       background: #fafafa; }
     dialog-container dialog-message.action .message, dialog-container dialog-message.action a.title {
@@ -4749,51 +4791,28 @@ dialog-container {
       color: #FF1744; }
     dialog-container dialog-message.highlight .message {
       color: #FF5252; }
-    dialog-container dialog-message.info {
-      background: #f8faf8; }
     dialog-container dialog-message.notice {
       padding: 0 0.75rem;
       margin: 8px 0;
       border-left: 1px solid #bdbdbd; }
       dialog-container dialog-message.notice, dialog-container dialog-message.notice a {
         color: #616161; }
-    dialog-container dialog-message.special {
-      background: #f8faf8;
-      border: 1px solid #e9efe9; }
-      dialog-container dialog-message.special .secondary-content {
-        top: 8px;
-        right: 4px; }
-      dialog-container dialog-message.special i {
-        font-size: 22px; }
-    dialog-container dialog-message.hr + .same {
+    dialog-container dialog-message.changed-user + .same-user {
       margin-top: -4px; }
-    dialog-container dialog-message.same {
+    dialog-container dialog-message.same-user {
       padding: 0; }
-      dialog-container dialog-message.same a.title, dialog-container dialog-message.same .secondary-content {
+      dialog-container dialog-message.same-user a.title, dialog-container dialog-message.same-user .secondary-content {
         display: none; }
-    dialog-container dialog-message h5.title {
-      font-size: 1.1rem;
-      padding: 0;
-      color: rgba(0, 0, 0, 0.87); }
     dialog-container dialog-message .message a {
       color: inherit;
       text-decoration: underline; }
     dialog-container dialog-message .message a:hover {
       text-decoration: none; }
-    dialog-container dialog-message .secondary-content {
-      position: absolute;
-      top: 10px;
-      right: 0px; }
-      dialog-container dialog-message .secondary-content, dialog-container dialog-message .secondary-content a {
-        color: #757575;
-        font-size: 0.8rem;
-        overflow: hidden;
-        display: block; }
-      dialog-container dialog-message .secondary-content i {
-        vertical-align: bottom; }
 
 user-input {
-  border-top: 1px solid #dbdbdb; }
+  border-top: 1px solid #dbdbdb;
+  box-sizing: content-box;
+  overflow: hidden; }
   user-input .actions {
     text-align: right;
     overflow: visible;
