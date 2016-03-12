@@ -4811,8 +4811,7 @@ dialog-container {
 
 user-input {
   border-top: 1px solid #dbdbdb;
-  box-sizing: content-box;
-  overflow: hidden; }
+  box-sizing: content-box; }
   user-input .actions {
     text-align: right;
     overflow: visible;
