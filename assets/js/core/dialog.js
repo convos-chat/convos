@@ -60,7 +60,28 @@
         connection_id: this.connection().id(),
         dialog_id: this.name()
       },
-      function(err, xhr) { cb.call(self, err); }
+      function(err, xhr) {
+        var action = command.match(/^\/(\w+)/);
+        if (cb) {
+          cb.call(self, err, xhr.body);
+        }
+        else if (err) {
+          self.addMessage({type: 'error', message: 'Could not send "' + command + '": ' + err[0].message});
+        }
+        else if (!action) {
+          return; // nothing to do
+        }
+        else {
+          var handler = '_on' + action[1].toLowerCase().ucFirst() + 'Event';
+          if (self[handler]) {
+            self[handler](xhr.body);
+          }
+          else {
+            console.log('Unable to handle response from "' + xhr.body.command + '".');
+          }
+        }
+        riot.update();
+      }
     );
     return this;
   };
@@ -96,5 +117,18 @@
         riot.update();
       }.bind(this)
     );
+  };
+
+  proto._onWhoisEvent = function(res) {
+    var channels = Object.keys(res.channels || {});
+    var id = [res.user];
+    if (res.name) id.push(res.name);
+    id = res.nick + ' (' + id.join(' - ') + ')';
+    this.addMessage({type: 'notice', message: id + ' has been ide for ' + res.idle_for + ' seconds in ' + channels.join(', ') + '.'});
+  };
+
+  proto._onTopicEvent = function(res) {
+    if (res.message) return this.addMessage({type: 'notice', message: 'Topic is: ' + res.message});
+    return this.addMessage({type: 'notice', message: 'No topic is set.'});
   };
 })(window);

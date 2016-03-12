@@ -53,6 +53,5 @@
       }).mdToHtml()
     );
   });
-
   </script>
 </dialog-message>

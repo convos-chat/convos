@@ -13,8 +13,7 @@ dialog-container {
   dialog-message-users {
     display: block;
     position: relative;
-    margin: $dialog-spacing 0;
-    padding: $dialog-spacing * 2;
+    margin: $dialog-spacing * 2 0;
 
     .secondary-content {
       position: absolute;
@@ -47,8 +46,6 @@ dialog-container {
   }
 
   dialog-message {
-    padding: $dialog-spacing 0;
-
     &:hover {
       background: darken($body-bg, 2%);
     }
@@ -59,25 +56,27 @@ dialog-container {
         display: inline;
       }
     }
+    &.error, &.notice {
+      padding-left: $gutter-width / 2;
+      padding-right: $gutter-width / 2;
+    }
     &.error {
-      color: color('red', 'accent-3');
+      border-left: 2px solid  color('red', 'accent-3');
+      color: lighten($off-black, 40%);
+      a { color: lighten($link-color, 20%); }
     }
     &.highlight .message {
       color: color('red', 'accent-2');
     }
     &.notice {
-      padding: 0 $gutter-width / 2;
-      margin: $dialog-spacing * 2 0;
-      border-left: 1px solid color('grey', 'lighten-1');
-      &, a {
-        color: color('grey', 'darken-2');
-      }
+      border-left: 2px solid color('grey', 'lighten-1');
+      color: lighten($off-black, 40%);
+      a { color: lighten($link-color, 20%); }
     }
-    &.changed-user + .same-user {
+    &.same-user {
       margin-top: -$dialog-spacing;
     }
     &.same-user {
-      padding: 0;
       a.title, .secondary-content { display: none; }
     }
 

@@ -32,11 +32,7 @@ riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <textarea
   this.sendMessage = function(e) {
     var m = this.message.value;
     if (!m.length) return;
-    opts.dialog.send(m, function(err) {
-      if (!err) return;
-      this.addMessage({type: 'error', message: 'Could not send "' + m + '": ' + err[0].message});
-      tag.parent.update();
-    });
+    opts.dialog.send(m);
     this.message.value = '';
     this.message.focus();
   }.bind(this)

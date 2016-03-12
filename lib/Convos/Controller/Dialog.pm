@@ -108,8 +108,9 @@ sub send {
   $self->delay(
     sub { $connection->send($args->{dialog_id}, $args->{body}{command}, shift->begin); },
     sub {
-      my ($delay, $err) = @_;
-      return $self->$cb($args->{body}, 200) unless $err;
+      my ($delay, $err, $res) = @_;
+      $res->{command} = $args->{body}{command};
+      return $self->$cb($res, 200) unless $err;
       return $self->$cb($self->invalid_request($err), 500);
     },
   );

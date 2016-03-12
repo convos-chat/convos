@@ -47,5 +47,4 @@ riot.tag2('dialog-message', '<span if="{msg.type == \'action\'}">✧</span> <a h
       }).mdToHtml()
     );
   });
-
 }, '{ }');

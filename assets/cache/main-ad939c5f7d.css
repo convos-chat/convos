@@ -4741,8 +4741,7 @@ dialog-container {
   dialog-container dialog-message-users {
     display: block;
     position: relative;
-    margin: 4px 0;
-    padding: 8px; }
+    margin: 8px 0; }
     dialog-container dialog-message .secondary-content,
     dialog-container dialog-message-info .secondary-content,
     dialog-container dialog-message-users .secondary-content {
@@ -4780,34 +4779,35 @@ dialog-container {
       font-size: 22px; }
   dialog-container dialog-message-info {
     background: #f8faf8; }
-  dialog-container dialog-message {
-    padding: 4px 0; }
-    dialog-container dialog-message:hover {
-      background: #fafafa; }
-    dialog-container dialog-message.action .message, dialog-container dialog-message.action a.title {
-      font-style: italic;
-      display: inline; }
-    dialog-container dialog-message.error {
-      color: #FF1744; }
-    dialog-container dialog-message.highlight .message {
-      color: #FF5252; }
-    dialog-container dialog-message.notice {
-      padding: 0 0.75rem;
-      margin: 8px 0;
-      border-left: 1px solid #bdbdbd; }
-      dialog-container dialog-message.notice, dialog-container dialog-message.notice a {
-        color: #616161; }
-    dialog-container dialog-message.changed-user + .same-user {
-      margin-top: -4px; }
-    dialog-container dialog-message.same-user {
-      padding: 0; }
-      dialog-container dialog-message.same-user a.title, dialog-container dialog-message.same-user .secondary-content {
-        display: none; }
-    dialog-container dialog-message .message a {
-      color: inherit;
-      text-decoration: underline; }
-    dialog-container dialog-message .message a:hover {
-      text-decoration: none; }
+  dialog-container dialog-message:hover {
+    background: #fafafa; }
+  dialog-container dialog-message.action .message, dialog-container dialog-message.action a.title {
+    font-style: italic;
+    display: inline; }
+  dialog-container dialog-message.error, dialog-container dialog-message.notice {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem; }
+  dialog-container dialog-message.error {
+    border-left: 2px solid #FF1744;
+    color: rgba(102, 102, 102, 0.87); }
+    dialog-container dialog-message.error a {
+      color: #68c46d; }
+  dialog-container dialog-message.highlight .message {
+    color: #FF5252; }
+  dialog-container dialog-message.notice {
+    border-left: 2px solid #bdbdbd;
+    color: rgba(102, 102, 102, 0.87); }
+    dialog-container dialog-message.notice a {
+      color: #68c46d; }
+  dialog-container dialog-message.same-user {
+    margin-top: -4px; }
+  dialog-container dialog-message.same-user a.title, dialog-container dialog-message.same-user .secondary-content {
+    display: none; }
+  dialog-container dialog-message .message a {
+    color: inherit;
+    text-decoration: underline; }
+  dialog-container dialog-message .message a:hover {
+    text-decoration: none; }
 
 user-input {
   border-top: 1px solid #dbdbdb;

@@ -181,13 +181,18 @@
             "name": "body",
             "in": "body",
             "required": true,
-            "schema": { "$ref": "#/definitions/Command" }
+            "schema": {
+              "required": ["command"],
+              "properties": {
+                "command": { "type": "string", "description": "A command to be sent to backend" }
+              }
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Successfully sent a message",
-            "schema": { "$ref": "#/definitions/Command" }
+            "schema": { "type": "object" }
           },
           "default": {
             "description": "Error.",
@@ -508,12 +513,6 @@
     }
   },
   "definitions": {
-    "Command": {
-      "required": ["command"],
-      "properties": {
-        "command": { "type": "string", "description": "A command to be sent to backend" }
-      }
-    },
     "Connection": {
       "required": ["id", "url"],
       "properties": {
