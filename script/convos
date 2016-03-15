@@ -8,6 +8,12 @@ use strict;
 use FindBin;
 use File::Spec;
 
+if (@ARGV and $ARGV[0] eq 'dev') {
+  shift @ARGV;
+  $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
+  exec morbo => qw(script/convos -w assets/riot -w assets/sass -w assets/js -w lib);
+}
+
 {
   use Config;
   my $cpanfile = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
