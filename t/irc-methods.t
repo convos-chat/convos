@@ -141,11 +141,11 @@ $t->run(
     my ($err, $list);
     $connection->rooms(sub { ($err, $list) = (@_[1, 2]); Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
+    @$list = sort { $a->{name} cmp $b->{name} } @$list;
     is $err, '', 'rooms';
-    ok @$list >= 2, 'list has at least two channels' or diag int @$list;
-    $list = [grep { $_->id eq "#convos_irc_live_20001" } @$list];
+    ok @$list == 3, 'list of rooms' or diag int @$list;
+    $list = [grep { $_->{name} eq "#Convos_irc_LIVE_20001" } @$list];
     is $list->[0]{n_users}, 1, 'n_users=1';
-    cmp_deeply($list->[0]{last_irc_rpl_endofnames}, num(time, 2), 'last_irc_rpl_endofnames');
   }
 );
 

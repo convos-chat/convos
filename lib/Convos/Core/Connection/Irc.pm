@@ -5,8 +5,10 @@ use Mojo::Base 'Convos::Core::Connection';
 use Mojo::IRC::UA;
 use Parse::IRC ();
 use Time::HiRes 'time';
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
+
+use constant DEBUG               => $ENV{CONVOS_DEBUG}               || 0;
 use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
+use constant ROOM_CACHE_TIMER    => $ENV{CONVOS_ROOM_CACHE_TIMER}    || 60;
 
 require Convos;
 
@@ -161,31 +163,18 @@ sub part_dialog {
 
 sub rooms {
   my ($self, $cb) = @_;
+  my $host = $self->url->host;
 
-  # TODO: Add fresh() to get new list of channels on the server
-  if ($self->{rooms_cache}) {
-    return $self->_next_tick($cb => '', $self->{rooms_cache});
-  }
+  state $cache = {};    # room list is shared between all connections
+  return $self->_next_tick($cb, '', $cache->{$host}) if $cache->{$host};
 
   Scalar::Util::weaken($self);
   return $self->_proxy(
     channels => sub {
-      my ($irc, $err, $channels) = @_;
-      my $last = $self->{last_irc_rpl_listend} || 0;
-      my $n = 0;
-
-      return $self->$cb($err, $channels) if $err;
-
-      for my $name (keys %$channels) {
-        my $id = lc $name;
-        my $dialog = $self->dialog({name => $id});
-        $channels->{$name}{topic} =~ s!^\[\S+\]\s?!!;    # remove channel modes, such as "[+nt]"
-        $dialog->name($name)->topic($channels->{$name}{topic})->{n_users} = $channels->{$name}{n_users};
-        push @{$self->{rooms_cache}}, $dialog;
-      }
-
-      $self->{last_irc_rpl_listend} = time;
-      $self->$cb('', $self->{rooms_cache});
+      my ($irc, $err, $map) = @_;
+      $cache->{$host} = [map { my $c = $map->{$_}; $c->{name} = $_; $c } keys %$map];
+      Mojo::IOLoop->timer(ROOM_CACHE_TIMER, sub { delete $cache->{$host} });
+      $self->$cb($err, $cache->{$host});
     },
   );
 }
