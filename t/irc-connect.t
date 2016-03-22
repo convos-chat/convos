@@ -15,7 +15,7 @@ like $err, qr{Invalid URL}, 'invalid url';
 is $connection->_irc->nick, 'test_user', 'converted username to nick';
 
 $connection->url->parse('irc://127.0.0.1');
-no warnings qw( once redefine );
+no warnings qw(once redefine);
 *Mojo::IRC::connect
   = sub { pop->($_[0], "SSL connect attempt failed error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol") };
 is $connection->url->query->param('tls'), undef, 'enable tls';

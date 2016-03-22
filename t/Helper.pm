@@ -6,6 +6,9 @@ use File::Path ();
 
 our $CONVOS_HOME;
 
+$ENV{CONVOS_SECRETS} = 'not-very-secret';
+$ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
+
 sub connect_to_irc {
   my ($class, $connection) = @_;
   my $t      = Test::Mojo::IRC->new;
@@ -29,11 +32,10 @@ sub import {
   eval "package $caller;use Mojo::Base -base;use Test::More;use Test::Deep;1" or die $@;
   strict->import;
   warnings->import;
-  Mojo::Util::monkey_patch($caller => FALSE => sub { Mojo::JSON->false });
-  Mojo::Util::monkey_patch($caller => TRUE  => sub { Mojo::JSON->true });
 
   $script =~ s/\W/-/g;
   $ENV{CONVOS_HOME} = $CONVOS_HOME = File::Spec->catdir("local", "test-$script");
+  Mojo::Util::monkey_patch($caller => diag => $ENV{HARNESS_IS_VERBOSE} ? \&Test::More::diag : sub { });
   File::Path::remove_tree($CONVOS_HOME) if -d $CONVOS_HOME;
 }
 

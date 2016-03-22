@@ -7,8 +7,8 @@ my $user = $t->app->core->user({email => 'superman@example.com'})->set_password(
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
 $t->get_ok('/api/dialogs')->status_is(200)->json_is('/dialogs', []);
 
-no warnings 'redefine';
 require Mojo::IRC::UA;
+no warnings qw(once redefine);
 *Mojo::IRC::UA::join_channel = sub { my ($irc, $channel, $cb) = @_; $irc->$cb('') };
 
 # order does not matter
