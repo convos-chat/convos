@@ -8,9 +8,9 @@
     '/say ',
     '/nick ',
     '/whois ',
+    '/names',
     '/close',
     '/part ',
-    '/names ',
     '/mode ',    // TODO
     '/topic ',
     '/disconnect',

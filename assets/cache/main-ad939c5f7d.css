@@ -4737,56 +4737,43 @@ dialog-container {
     dialog-container header .actions {
       right: -4px; }
   dialog-container dialog-message,
-  dialog-container dialog-message-info,
-  dialog-container dialog-message-users {
+  dialog-container dialog-info {
     display: block;
     position: relative;
     margin: 8px 0; }
+    dialog-container dialog-message:hover,
+    dialog-container dialog-info:hover {
+      background: #fafafa; }
     dialog-container dialog-message .secondary-content,
-    dialog-container dialog-message-info .secondary-content,
-    dialog-container dialog-message-users .secondary-content {
+    dialog-container dialog-info .secondary-content {
       position: absolute;
-      top: 10px;
-      right: 0px; }
+      top: 2px;
+      right: 0; }
       dialog-container dialog-message .secondary-content, dialog-container dialog-message .secondary-content a,
-      dialog-container dialog-message-info .secondary-content,
-      dialog-container dialog-message-info .secondary-content a,
-      dialog-container dialog-message-users .secondary-content,
-      dialog-container dialog-message-users .secondary-content a {
+      dialog-container dialog-info .secondary-content,
+      dialog-container dialog-info .secondary-content a {
         color: #757575;
         font-size: 0.8rem;
         overflow: hidden;
         display: block; }
       dialog-container dialog-message .secondary-content i,
-      dialog-container dialog-message-info .secondary-content i,
-      dialog-container dialog-message-users .secondary-content i {
+      dialog-container dialog-info .secondary-content i {
         vertical-align: bottom; }
-  dialog-container dialog-message-info,
-  dialog-container dialog-message-users {
-    background: #f8faf8;
-    border: 1px solid #e9efe9; }
-    dialog-container dialog-message-info .secondary-content,
-    dialog-container dialog-message-users .secondary-content {
-      top: 4px;
-      right: 4px; }
-    dialog-container dialog-message-info h5.title,
-    dialog-container dialog-message-users h5.title {
-      font-size: 1.1rem;
-      padding: 0;
-      color: rgba(0, 0, 0, 0.87); }
-    dialog-container dialog-message-info i,
-    dialog-container dialog-message-users i {
-      font-size: 22px; }
-  dialog-container dialog-message-info {
-    background: #f8faf8; }
-  dialog-container dialog-message:hover {
-    background: #fafafa; }
+  dialog-container dialog-message.error,
+  dialog-container dialog-message.notice,
+  dialog-container dialog-info {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    border-left: 2px solid #bdbdbd; }
+  dialog-container dialog-info h5.title {
+    font-size: 1.1rem;
+    padding: 0;
+    color: rgba(0, 0, 0, 0.87); }
+  dialog-container dialog-info i {
+    font-size: 22px; }
   dialog-container dialog-message.action .message, dialog-container dialog-message.action a.title {
     font-style: italic;
     display: inline; }
-  dialog-container dialog-message.error, dialog-container dialog-message.notice {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem; }
   dialog-container dialog-message.error {
     border-left: 2px solid #FF1744;
     color: rgba(102, 102, 102, 0.87); }

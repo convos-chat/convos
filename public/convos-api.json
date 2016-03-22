@@ -169,6 +169,43 @@
         }
       }
     },
+    "/connection/{connection_id}/dialog/{dialog_id}/participants": {
+      "get": {
+        "tags": [ "dialog" ],
+        "summary": "Get a list of participants.\n\nNote: this resource require the user to be authenticated first.",
+        "operationId": "participantsInDialog",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/dialog_id" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of participants.",
+            "schema": {
+              "type": "object",
+              "required" : ["participants"],
+              "properties": {
+                "participants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required" : ["name"],
+                    "properties": {
+                      "mode": { "type": "string" },
+                      "name": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/connection/{connection_id}/dialog/{dialog_id}/send": {
       "post": {
         "tags": [ "chat" ],
@@ -527,13 +564,7 @@
       "properties": {
         "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialog is part of" },
         "name": { "type": "string", "description": "Name of the room or person" },
-        "topic": { "type": "string", "description": "The subjec/topic for this room" },
-        "users": {
-          "type": "object",
-          "properties": {
-            "name": { "type": "string", "description": "Name of the user" }
-          }
-        }
+        "topic": { "type": "string", "description": "The subjec/topic for this room" }
       }
     },
     "Error": {

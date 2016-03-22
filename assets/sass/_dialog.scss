@@ -9,16 +9,17 @@ dialog-container {
   }
 
   dialog-message,
-  dialog-message-info,
-  dialog-message-users {
+  dialog-info {
     display: block;
     position: relative;
     margin: $dialog-spacing * 2 0;
 
+    &:hover { background: darken($body-bg, 2%); }
+
     .secondary-content {
       position: absolute;
-      top: 10px;
-      right: 0px;
+      top: 2px;
+      right: 0;
       &, a {
         color: color('grey', 'darken-1');
         font-size: 0.8rem;
@@ -31,34 +32,26 @@ dialog-container {
     }
   }
 
-  dialog-message-info,
-  dialog-message-users {
-    background: #f8faf8;
-    border: 1px solid darken(#f8faf8, 5%);
 
-    .secondary-content { top: $dialog-spacing; right: $dialog-spacing; }
+  dialog-message.error,
+  dialog-message.notice,
+  dialog-info {
+    padding-left: $gutter-width / 2;
+    padding-right: $gutter-width / 2;
+    border-left: 2px solid color('grey', 'lighten-1');
+  }
+
+  dialog-info {
     h5.title { font-size: 1.1rem; padding: 0; color: $off-black; }
     i { font-size: 22px; }
   }
 
-  dialog-message-info {
-    background: #f8faf8;
-  }
-
   dialog-message {
-    &:hover {
-      background: darken($body-bg, 2%);
-    }
-
     &.action {
       .message, a.title {
         font-style: italic;
         display: inline;
       }
-    }
-    &.error, &.notice {
-      padding-left: $gutter-width / 2;
-      padding-right: $gutter-width / 2;
     }
     &.error {
       border-left: 2px solid  color('red', 'accent-3');

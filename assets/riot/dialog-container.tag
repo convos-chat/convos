@@ -1,8 +1,7 @@
 <dialog-container>
   <header>
     <div class="actions" if={dialog.hasConnection()}>
-      <a href="#settings" onclick={getInfo} class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a>
-      <a href="#participants" onclick={listParticipants} class="tooltipped" title="List participants"><i class="material-icons">people</i></a>
+      <a href="#info" onclick={getInfo} class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a>
       <!-- a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a -->
       <a href="#close" onclick={removeDialog} class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a>
     </div>
@@ -14,8 +13,7 @@
   <main name="scrollElement">
     <virtual each={msg, i in messages}>
       <dialog-message dialog={parent.dialog} msg={msg} user={parent.user} if={msg.message} />
-      <dialog-message-info dialog={parent.dialog} msg={msg} user={parent.user} if={msg.type == 'info'} />
-      <dialog-message-users dialog={parent.dialog} msg={msg} user={parent.user} if={msg.type == 'users'} />
+      <dialog-info dialog={parent.dialog} msg={msg} user={parent.user} if={msg.type == 'info'} />
     </virtual>
   </main>
   <user-input dialog={dialog} user={user}/>
@@ -29,11 +27,12 @@
   this.messages = [];
 
   getInfo(e) {
+    this.dialog.participants(function(err, res) {});
     this.dialog.addMessage({type: 'info'});
   }
 
-  listParticipants(e) {
-    this.dialog.addMessage({type: 'users'});
+  removeMessage(e) {
+    this.dialog.removeMessage(e.item.msg);
   }
 
   removeDialog(e) {
@@ -41,10 +40,6 @@
       if (err) this.dialog.addMessage({message: err[0].message});
       riot.update();
     });
-  }
-
-  removeMessage(e) {
-    this.dialog.removeMessage(e.item);
   }
 
   this.on('update', function() {

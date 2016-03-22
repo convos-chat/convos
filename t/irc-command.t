@@ -100,16 +100,6 @@ $t->run(
 );
 
 $t->run(
-  [qr{NAMES}, ['main', 'names.irc']],
-  sub {
-    $connection->send("#convos" => "/names", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
-    Mojo::IOLoop->start;
-    is $err, '', 'cmd /names';
-    ok $res->{Superman20001}, 'res /names';
-  }
-);
-
-$t->run(
   [qr{TOPIC}, ['main', 'set-topic.irc']],
   sub {
     $connection->send(
@@ -187,6 +177,3 @@ __DATA__
 :hybrid8.debian.local 333 batman_ #Convos_irc_LIVE_20001 batman_!superman@i.love.debian.org 1433007153
 @@ set-topic.irc
 :batman_!superman@i.love.debian.org TOPIC #Convos_irc_LIVE_20001 :Cool topic
-@@ names.irc
-:hybrid8.debian.local 353 Superman20001 = #convos :Superman20001 @batman
-:hybrid8.debian.local 366 Superman20001 #convos :End of /NAMES list.

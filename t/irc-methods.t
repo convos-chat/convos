@@ -51,33 +51,20 @@ $t->run(
     is_deeply($connection->dialogs, [], 'no dialogs');
     $connection->join_dialog("#Convos_irc_LIVE_20001",
       sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
-    is_deeply([map { $_->id } @{$connection->dialogs}], ['#convos_irc_live_20001'], 'dialogs');
     Mojo::IOLoop->start;
-    is $err, '', "join_dialog: convos_irc_live_20001";
+    is_deeply([map { $_->id } @{$connection->dialogs}], ['#convos_irc_live_20001'], 'dialogs');
+    is $err, '', 'join_dialog: convos_irc_live_20001';
     ok !$dialog->is_private, 'dialog is a channel';
     is $dialog->name, "#Convos_irc_LIVE_20001", "dialog Convos_irc_LIVE_20001 in callback";
     cmp_deeply(
       $connection->get_dialog("#Convos_irc_live_20001")->TO_JSON,
       {
-        active        => 1,
         connection_id => 'irc-localhost',
         frozen        => '',
         id            => "#convos_irc_live_20001",
         is_private    => 0,
-        n_users       => 1,
         name          => "#Convos_irc_LIVE_20001",
         topic         => '',
-        users         => superhashof(
-          {
-            "superman20001" => {
-              host => 'i.love.debian.org',
-              name => "Superman20001",
-              mode => '@',
-              seen => re(qr/^\d{10}/),
-              user => 'superman'
-            }
-          }
-        ),
       },
       "convos_irc_live_20001 after join"
     );
@@ -98,25 +85,12 @@ $t->run(
     cmp_deeply(
       $connection->get_dialog('#conVOS')->TO_JSON,
       {
-        active        => 1,
         connection_id => 'irc-localhost',
         frozen        => '',
         id            => '#convos',
         is_private    => 0,
-        n_users       => 2,
         name          => re(qr{^\#convos$}i),
         topic         => re(qr{.?}),
-        users         => superhashof(
-          {
-            "superman20001" => {
-              host => 'i.love.debian.org',
-              name => "Superman20001",
-              mode => '',
-              seen => re(qr/^\d{10}/),
-              user => 'superman'
-            }
-          }
-        ),
       },
       'convos after join'
     );
@@ -148,7 +122,6 @@ $t->run(
     is $err, '', 'rooms';
     ok @$list == 3, 'list of rooms' or diag int @$list;
     $list = [grep { $_->{name} eq "#Convos_irc_LIVE_20001" } @$list];
-    is $list->[0]{n_users}, 1, 'n_users=1';
   }
 );
 
@@ -164,30 +137,9 @@ $t->run(
     Mojo::IOLoop->start;
     is $err, '', 'set online nick';
 
-    $nick
-      = (map { $_->{name} }
-      grep { $_->{name} ne "SupermanX20001" } values %{$connection->get_dialog('#convos')->users})
-      [0];
-    $connection->nick($nick, sub { $err = $_[1]; Mojo::IOLoop->stop });
+    $connection->nick(batman => sub { $err = $_[1]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     like $err, qr{in use}, 'nick in use';
-
-    cmp_deeply(
-      $connection->get_dialog('#conVOS')->TO_JSON->{users},
-      superhashof(
-        {
-          "supermanx20001" => {
-            host => 'i.love.debian.org',
-            name => "SupermanX20001",
-            mode => '',
-            seen => re(qr/^\d{10}/),
-            user => 'superman'
-          },
-          lc($nick) => {name => $nick, mode => ignore(), seen => ignore()},
-        }
-      ),
-      'updated users after nick change'
-    );
   }
 );
 
@@ -251,49 +203,45 @@ $t->run(
 );
 
 my $json = $connection->TO_JSON(1);
-$json->{dialogs} = [sort { length $a->{name} <=> length $b->{name} } @{$json->{dialogs}}];
 cmp_deeply(
   $json,
   {
-    dialogs => [
+    dialogs => bag(
       {
-        active        => 1,
         connection_id => 'irc-localhost',
         frozen        => '',
         id            => '#convos',
         is_private    => 0,
-        n_users       => 2,
         name          => '#convos',
+        password      => 's3cret',
         topic         => 'some cool topic',
       },
       {
-        active        => 0,
         connection_id => 'irc-localhost',
         frozen        => '',
         id            => '#no_such_channel_',
         is_private    => 0,
-        n_users       => 0,
         name          => '#no_such_channel_',
+        password      => '',
         topic         => '',
       },
       {
-        active        => 1,
         connection_id => 'irc-localhost',
         frozen        => '',
         id            => '#convos_irc_live_20001',
         is_private    => 0,
-        n_users       => 1,
         name          => '#Convos_irc_LIVE_20001',
+        password      => '',
         topic         => 'Cool topic',
       },
-    ],
+    ),
     id       => 'irc-localhost',
     name     => 'localhost',
     protocol => 'irc',
     state    => 'connecting',
     url      => re(qr{^irc://.*\?tls=0}),
   },
-  'TO_JSON'
+  'connection->TO_JSON(1)'
 );
 
 done_testing;

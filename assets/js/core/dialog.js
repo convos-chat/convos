@@ -17,8 +17,7 @@
     is_private: function() { return true; },
     messages: function() { return []; },
     name: function() { return 'Convos' },
-    topic: function() { return '' },
-    users: function() { return {}; }
+    topic: function() { return '' }
   });
 
   proto.addMessage = function(msg) {
@@ -44,6 +43,21 @@
   proto.href = function() {
     var path = Array.prototype.slice.call(arguments);
     return ['#chat', this.connection().id(), this.name()].concat(path).join('/');
+  };
+
+  proto.participants = function(cb) {
+    var self = this;
+    if (!cb) return this._participants;
+    this._api.participantsInDialog(
+      {
+        connection_id: this.connection().id(),
+        dialog_id: this.name()
+      },
+      function(err, xhr) {
+        if (!err) self._participants = xhr.body.participants;
+        cb.call(self, err, xhr.body);
+      }
+    );
   };
 
   proto.removeMessage = function(msg) {
@@ -92,14 +106,9 @@
     if (this.frozen()) {
       this.addMessage({message: 'You are not part of this channel. The reason is: "' + this.frozen() + '".'});
     }
-    else if (topic) {
-      this.addMessage({message: 'The topic is "' + topic + '".'});
-    }
-    else if(!this.is_private()) {
-      this.addMessage({message: 'This dialog has no topic.'});
-    }
     if(!this.is_private()) {
-      this.addMessage({type: 'users'});
+      this.participants(function(err, participants) { riot.update(); });
+      this.addMessage({type: 'info'});
     }
   };
 

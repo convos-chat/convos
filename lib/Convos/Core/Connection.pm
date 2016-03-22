@@ -54,6 +54,11 @@ sub part_dialog {
   $self->tap($cb, 'Method "join_dialog" not implemented.');
 }
 
+sub participants {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "participants" not implemented.', []);
+}
+
 sub rooms {
   my ($self, $cb) = (shift, pop);
   $self->tap($cb, 'Method "rooms" not implemented.', []);
@@ -65,7 +70,10 @@ sub save {
   $self;
 }
 
-sub send { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "send" not implemented.') }
+sub send {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "send" not implemented.', undef);
+}
 
 sub state {
   my ($self, $state, $description) = @_;
@@ -255,7 +263,7 @@ Returns a L<Convos::Core::Dialog> object or undef.
 
 =head2 join_dialog
 
-  $self = $self->join_dialog("#some_channel", sub { my ($self, $err) = @_; });
+  $self = $self->join_dialog("#target" => sub { my ($self, $err) = @_; });
 
 Used to create a new dialog. See also L</dialog> event.
 
@@ -267,9 +275,15 @@ Creates a new connection object.
 
 =head2 part_dialog
 
-  $self = $self->part_dialog("#some_channel", sub { my ($self, $err) = @_; });
+  $self = $self->part_dialog("#target" => sub { my ($self, $err) = @_; });
 
 Used to part a dialog.
+
+=head2 participants
+
+  $self = $self->participants("#target" => sub { my ($self, $err, $participants) = @_; });
+
+Retrieves a list of participants in a room.
 
 =head2 rooms
 
@@ -287,7 +301,7 @@ See L<Convos::Core::Backend/save_object> for details.
 
 =head2 send
 
-  $self = $self->send($target => $message, sub { my ($self, $err) = @_; });
+  $self = $self->send($target => $message, sub { my ($self, $err, $any) = @_; });
 
 Used to send a C<$message> to C<$target>. C<$message> is a plain string and
 C<$target> can be a user or room/channel name.

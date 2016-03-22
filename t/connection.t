@@ -10,11 +10,10 @@ ok $connection->dialog({name => 'marcus'})->is_private, 'person';
 ok !$connection->{dialog}{'#foo'}, 'no dialog on get';
 
 my $dialog = $connection->get_dialog('#foo');
-is $dialog->n_users, 0, 'dialog->n_users';
 ok $connection->{dialogs}{'#foo'}, 'dialog on create/update';
 
 $connection = Convos::Core::Connection->new({});
-for my $method (qw( rooms join_dialog connect send topic)) {
+for my $method (qw(rooms join_dialog connect participants send topic)) {
   my $err;
   eval {
     $connection->$method(sub { $err = $_[1] });

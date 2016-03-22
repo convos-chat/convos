@@ -18,44 +18,32 @@ $user->connection({name => 'perl-org',  protocol => 'irc'})->join_dialog('#oslo.
 $user->get_connection('irc-localhost')->join_dialog('#Convos s3cret', sub { });
 
 $t->get_ok('/api/dialogs')->status_is(200)->json_is(
-  '/dialogs/0',
-  {
-    active        => 1,
-    connection_id => 'irc-localhost',
-    topic         => '',
-    frozen        => '',
-    name          => '#Convos',
-    id            => '#convos',
-    is_private    => 0,
-    n_users       => 0,
-    users         => {}
-  }
-  )->json_is(
-  '/dialogs/1',
-  {
-    active        => 1,
-    connection_id => 'irc-localhost',
-    topic         => '',
-    frozen        => '',
-    name          => '#private',
-    id            => '#private',
-    is_private    => 0,
-    n_users       => 0,
-    users         => {}
-  }
-  )->json_is(
-  '/dialogs/2',
-  {
-    active        => 1,
-    connection_id => 'irc-perl-org',
-    topic         => '',
-    frozen        => '',
-    name          => '#oslo.pm',
-    id            => '#oslo.pm',
-    is_private    => 0,
-    n_users       => 0,
-    users         => {}
-  }
-  );
+  '/dialogs' => [
+    {
+      connection_id => 'irc-localhost',
+      topic         => '',
+      frozen        => '',
+      name          => '#Convos',
+      id            => '#convos',
+      is_private    => 0,
+    },
+    {
+      connection_id => 'irc-localhost',
+      topic         => '',
+      frozen        => '',
+      name          => '#private',
+      id            => '#private',
+      is_private    => 0,
+    },
+    {
+      connection_id => 'irc-perl-org',
+      topic         => '',
+      frozen        => '',
+      name          => '#oslo.pm',
+      id            => '#oslo.pm',
+      is_private    => 0,
+    }
+  ]
+);
 
 done_testing;

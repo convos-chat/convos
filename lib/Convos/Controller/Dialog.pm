@@ -50,7 +50,7 @@ sub list {
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
     for my $dialog (sort { $a->id cmp $b->id } @{$connection->dialogs}) {
-      push @dialogs, $dialog->TO_JSON if $dialog->active;
+      push @dialogs, $dialog;
     }
   }
 
@@ -73,6 +73,25 @@ sub messages {
       my ($delay, $err, $messages) = @_;
       die $err if $err;
       $self->$cb({messages => $messages}, 200);
+    },
+  );
+}
+
+sub participants {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->get_connection($args->{connection_id});
+
+  unless ($connection) {
+    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+  }
+
+  $self->delay(
+    sub { $connection->participants($args->{dialog_id}, shift->begin); },
+    sub {
+      my ($delay, $err, $participants) = @_;
+      return $self->$cb({participants => $participants}, 200) unless $err;
+      return $self->$cb($self->invalid_request($err), 500);
     },
   );
 }
@@ -146,6 +165,10 @@ See L<Convos::Manual::API/listDialogs>.
 =head2 messages
 
 See L<Convos::Manual::API/messagesForDialog>.
+
+=head2 participants
+
+See L<Convos::Manual::API/participantsInDialog>.
 
 =head2 remove
 

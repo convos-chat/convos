@@ -19,6 +19,6 @@ no warnings qw(once redefine);
 *Mojo::IRC::UA::join_channel = sub { my ($irc, $channel, $cb) = @_; $irc->$cb('') };
 $t->post_ok('/api/connection/irc-localhost/dialogs', json => {name => '#convos'})->status_is(200)
   ->json_is('/frozen', '')->json_is('/id', '#convos')->json_is('/name', '#convos')
-  ->json_is('/topic', '')->json_is('/users', {});
+  ->json_is('/topic', '');
 
 done_testing;

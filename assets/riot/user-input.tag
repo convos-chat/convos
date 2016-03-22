@@ -16,12 +16,18 @@
 
   // override autocompleteList() in "autocomplete" mixin
   autocompleteList(before, needle, after) {
-    return Object.keys(opts.dialog.users()).map(function(str) {
-      if (before.length == 0) str = str + ': ';
-      if (after.match(/^\S/)) str = str + ' ';
-      return str;
+    return opts.dialog.participants().map(function(p) { return p.name; }).map(function(n) {
+      if (before.length == 0) n = n + ': ';
+      if (after.match(/^\S/)) n = n + ' ';
+      return n;
     });
   };
+
+  localCmdNames(e) {
+    opts.dialog.participants(function(err, res) {});
+    opts.dialog.addMessage({type: 'info'});
+    riot.update();
+  }
 
   onChange(e) {
     switch (e.keyCode) {
@@ -42,10 +48,10 @@
 
   sendMessage(e) {
     var m = this.message.value;
-    if (!m.length) return;
-    opts.dialog.send(m);
+    var l = 'localCmd' + m.replace(/^\//, '').ucFirst();
     this.message.value = '';
-    this.message.focus();
+    if ('localCmd' + m != l && this[l]) return this[l](e);
+    if (m.length) return opts.dialog.send(m);
   }
 
   this.on('mount', function() {

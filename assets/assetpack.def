@@ -30,6 +30,7 @@
 < js/mixins/base.js
 < js/mixins/bottom.js
 < js/mixins/form.js
+< js/mixins/numbers.js
 < js/mixins/shortcuts.js
 < js/mixins/time.js
 < js/core/connection.js
@@ -39,8 +40,7 @@
 < riot/convos-help.tag
 < riot/dialog-container.tag
 < riot/dialog-message.tag
-< riot/dialog-message-info.tag
-< riot/dialog-message-users.tag
+< riot/dialog-info.tag
 < riot/new-dialog.tag
 < riot/not-found.tag
 < riot/sidebar-dialogs.tag
