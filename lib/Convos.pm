@@ -91,8 +91,8 @@ sub _add_helpers {
   $self->helper(
     'backend.user' => sub {
       my $self = shift;
-      return undef unless $self->session('email');
-      return $self->app->core->user($self->session('email'));
+      return undef unless my $email = $self->session('email');
+      return $self->app->core->get_user({email => $email});
     }
   );
 

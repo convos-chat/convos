@@ -1,17 +1,20 @@
 package Convos::Core::Dialog;
 use Mojo::Base -base;
 
+my $CHANNEL_RE = qr{[#&]};
+
 has active     => 0;
 has frozen     => '';
-has is_private => sub { Carp::confess('is_private required in constructor') };
-has name       => sub { shift->id };
-has password   => '';
-has topic      => '';
-has users      => sub { +{} };
+has is_private => sub { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 };
+has name => sub { Carp::confess('name required in constructor') };
+has password => '';
+has topic    => '';
+has users    => sub { +{} };
 
 sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
-sub id         { shift->{id}         or Carp::confess('id required in constructor') }
 sub n_users { int keys %{$_[0]->users} || $_[0]->{n_users} || 0 }
+
+sub id { lc +($_[1] || $_[0])->{name} }
 
 sub messages {
   my ($self, $query, $cb) = @_;
@@ -65,8 +68,9 @@ no longer part of it.
 =head2 id
 
   $str = $self->id;
+  $str = $class->id(\%attr);
 
-Unique identifier for this dialog.
+Returns a unique identifier for a dialog.
 
 =head2 is_private
 

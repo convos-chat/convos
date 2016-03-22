@@ -9,7 +9,7 @@ $ENV{CONVOS_HOME} = File::Spec->catdir(qw(t data convos-test-backend-file-messag
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 my $user = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $dialog = $connection->dialog('#convos', {});
+my $dialog = $connection->dialog({name => '#convos'});
 my ($err, $messages);
 
 $dialog->messages({}, sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });

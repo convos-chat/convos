@@ -3,8 +3,7 @@ use Mojo::Base -base;
 use Mojolicious::Plugins;
 use Convos::Core::Backend;
 use Convos::Core::User;
-use List::Util 'pairmap';
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
+use Convos::Util 'has_many';
 
 sub backend { shift->{backend} ||= Convos::Core::Backend->new }
 
@@ -35,10 +34,10 @@ sub start {
 
   # Want this method to be blocking to make sure everything is ready
   # before processing web requests.
-  for my $user (@{$self->backend->users}) {
-    $self->user($user);
-    for my $connection (@{$self->backend->connections($user)}) {
-      $user->connection($connection);
+  for (@{$self->backend->users}) {
+    my $user = $self->user($_);
+    for (@{$self->backend->connections($user)}) {
+      my $connection = $user->connection($_);
       $self->connect($connection) unless $connection->state eq 'disconnected';
     }
   }
@@ -63,26 +62,13 @@ sub start {
   return $self;
 }
 
-sub user {
-  my ($self, $obj) = @_;
-
-  # Get
-  return $self->{users}{$obj} unless ref $obj;
-
-  # Add
-  Scalar::Util::weaken($obj->{core} = $self);
-  $obj = Convos::Core::User->new($obj) if ref $obj eq 'HASH';
-
-  die "Invalid email $obj->{email}. Need to match /.\@./." unless $obj->email =~ /.\@./;
-  die "User already exists." if $self->{users}{$obj->email};
-
-  $self->{users}{$obj->email} = $obj;
-  warn "[$obj->{email}] Emit user" if DEBUG;
-  $self->backend->emit(user => $obj);
-  return $obj;
-}
-
-sub users { [values %{$_[0]->{users} || {}}] }
+has_many users => 'Convos::Core::User' => sub {
+  my ($self, $attrs) = @_;
+  my $user = Convos::Core::User->new($attrs);
+  die "Invalid email $user->{email}. Need to match /.\@./." unless $user->email =~ /.\@./;
+  Scalar::Util::weaken($user->{core} = $self);
+  return $user;
+};
 
 sub DESTROY {
   my $self = shift;
@@ -105,8 +91,8 @@ with proper defaults.
 =head1 SYNOPSIS
 
   use Convos::Core;
-  my $core = Convos::Core->new;
-  my $user = $core->user($email);
+  use Convos::Core::Backend::File;
+  my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
 
 =head1 OBJECT GRAPH
 
@@ -174,6 +160,13 @@ The reason for queuing connections is to prevent flooding the server.
 
 Note: Connections to "localhost" will not be delayed.
 
+=head2 get_user
+
+  $user = $self->get_user(\%attrs);
+  $user = $self->get_user($email);
+
+Returns a L<Convos::Core::User> object or undef.
+
 =head2 start
 
   $self = $self->start;
@@ -183,13 +176,9 @@ if state is not "disconnected".
 
 =head2 user
 
-  $user = $self->user($email); # get
-  $user = $self->user(\%attr); # create
+  $user = $self->user(\%attrs);
 
-Returns a L<Convos::Core::User> object. Every new object created will emit
-a "user" event:
-
-  $self->backend->emit(user => $user);
+Returns a new L<Convos::Core::User> object or updates an existing object.
 
 =head2 users
 

@@ -31,6 +31,6 @@ ok !$user->validate_password('s3crett'), 'invalid password';
 ok $user->validate_password('s3cret'), 'validate_password';
 
 $user->save;
-is $core->user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
+is $core->get_user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
 
 done_testing;

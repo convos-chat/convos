@@ -14,7 +14,7 @@ require Mojo::IRC::UA;
 # order does not matter
 $user->connection({name => 'localhost', protocol => 'irc'})->join_dialog('#private', sub { });
 $user->connection({name => 'perl-org',  protocol => 'irc'})->join_dialog('#oslo.pm', sub { });
-$user->connection('irc-localhost')->join_dialog('#Convos s3cret', sub { });
+$user->get_connection('irc-localhost')->join_dialog('#Convos s3cret', sub { });
 
 $t->get_ok('/api/dialogs')->status_is(200)->json_is(
   '/dialogs/0',

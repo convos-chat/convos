@@ -3,9 +3,8 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::Loader 'load_class';
 use Mojo::URL;
 use Convos::Core::Dialog;
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
+use Convos::Util 'has_many';
 
-sub id { lc sprintf '%s-%s', $_[0]->protocol, $_[0]->name }
 sub name { shift->{name} }
 sub protocol { shift->{protocol} || 'null' }
 
@@ -18,31 +17,19 @@ sub user { shift->{user} }
 
 sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" not implemented.'); }
 
-sub dialog {
-  my ($self, $id, $attr) = @_;
-
-  if ($attr) {
-    my $dialog = $self->{dialogs}{$id} ||= do {
-      my $dialog = $self->_dialog({id => $id});
-      Scalar::Util::weaken($dialog->{connection});
-      warn "[Convos::Core::User] Emit dialog: id=$id\n" if DEBUG;
-      $self->emit(dialog => $dialog);
-      $dialog;
-    };
-    $dialog->{$_} = $attr->{$_} for keys %$attr;
-    return $dialog;
-  }
-  else {
-    return $self->{dialogs}{$id} || $self->_dialog({id => $id});
-  }
-}
-
-sub dialogs {
-  my $self = shift;
-  return [values %{$self->{dialogs} || {}}];
-}
+has_many dialogs => 'Convos::Core::Dialog' => sub {
+  my ($self, $attrs) = @_;
+  my $dialog = Convos::Core::Dialog->new($attrs);
+  Scalar::Util::weaken($dialog->{connection} = $self);
+  return $dialog;
+};
 
 sub disconnect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "disconnect" not implemented.'); }
+
+sub id {
+  return lc join '-', @{$_[1]}{qw(protocol name)} if $_[1];
+  return lc join '-', @{$_[0]}{qw(protocol name)};
+}
 
 sub join_dialog {
   my ($self, $cb) = (shift, pop);
@@ -50,19 +37,9 @@ sub join_dialog {
 }
 
 sub new {
-  my $class = shift;
-  my $attrs = @_ > 1 ? {@_} : {%{$_[0]}};
-
-  if ($attrs->{protocol}) {
-    my $protocol = Mojo::Util::camelize($attrs->{protocol} || '');
-    $class = "Convos::Core::Connection::$protocol";
-    eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported.);
-  }
-  if ($attrs->{user}) {
-    Scalar::Util::weaken($attrs->{user});
-  }
-
-  return bless $attrs, $class;
+  my $self = shift->SUPER::new(@_);
+  $self->dialog($_) for @{delete($self->{dialogs}) || []};
+  $self;
 }
 
 sub part_dialog {
@@ -92,12 +69,6 @@ sub state {
 
 sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
-sub _dialog {
-  my ($self, $args) = @_;
-  $args->{connection} = $self;
-  Convos::Core::Dialog->new($args);
-}
-
 sub _next_tick {
   my ($self, $method, @args) = @_;
   Mojo::IOLoop->next_tick(sub { $self->$method(@args) });
@@ -110,13 +81,6 @@ sub _userinfo {
   $userinfo[0] ||= $self->user->email =~ /([^@]+)/ ? $1 : '';
   $userinfo[1] ||= undef;
   return \@userinfo;
-}
-
-sub INFLATE {
-  my ($self, $attrs) = @_;
-  $self->dialog($_->{id}, $_) for @{delete($attrs->{dialogs}) || []};
-  $self->{$_} = $attrs->{$_} for keys %$attrs;
-  $self;
 }
 
 sub TO_JSON {
@@ -214,8 +178,9 @@ the following new ones.
 =head2 id
 
   $str = $self->id;
+  $str = $class->id(\%attr);
 
-Unique identifier for this connection.
+Returns a unique identifier for a connection.
 
 =head2 name
 
@@ -255,10 +220,9 @@ Used to connect to L</url>. Meant to be overloaded in a subclass.
 
 =head2 dialog
 
-  $dialog = $self->dialog($id);            # get
-  $dialog = $self->dialog($id => \%attrs); # create/update
+  $dialog = $self->dialog(\%attrs);
 
-Will return a L<Convos::Core::Dialog> object, identified by C<$id>.
+Returns a new L<Convos::Core::Dialog> object or updates an existing object.
 
 =head2 dialogs
 
@@ -272,6 +236,13 @@ Returns an array-ref of of L<Convos::Core::Dialog> objects.
 
 Used to disconnect from server. Meant to be overloaded in a subclass.
 
+=head2 get_dialog
+
+  $dialog = $self->get_dialog($id);
+  $dialog = $self->get_dialog(\%attrs);
+
+Returns a L<Convos::Core::Dialog> object or undef.
+
 =head2 join_dialog
 
   $self = $self->join_dialog("#some_channel", sub { my ($self, $err) = @_; });
@@ -282,8 +253,7 @@ Used to create a new dialog. See also L</dialog> event.
 
   $self = Convos::Core::Connection->new(\%attrs);
 
-Creates a new connection object. The returned object will be of a sub class,
-if L</protocol> is part of the input C<%attrs>.
+Creates a new connection object.
 
 =head2 part_dialog
 

@@ -9,8 +9,11 @@ sub create {
   my $name = $args->{body}{name} || $self->_pretty_connection_name($url->host);
   my $connection;
 
-  unless ($name) {
+  if (!$name) {
     return $self->$cb($self->invalid_request('URL need a valid host.', '/body/url'), 400);
+  }
+  if ($user->get_connection({protocol => $url->scheme, name => $name})) {
+    return $self->$cb($self->invalid_request('Connection already exists.', '/'), 400);
   }
 
   eval {
@@ -29,6 +32,7 @@ sub create {
   } or do {
     my $e = $@ || 'Unknwon error';
     $e =~ s! at \S+.*!!s;
+    $e =~ s!:.*!.!s;
     $self->$cb($self->invalid_request($e, '/'), 400);
   };
 }
@@ -64,7 +68,7 @@ sub remove {
 sub rooms {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{connection_id});
+  my $connection = $user->get_connection($args->{connection_id});
 
   unless ($connection) {
     return $self->$cb($self->invalid_request('Connection not found.'), 404);
@@ -87,7 +91,7 @@ sub update {
   my $connection;
 
   eval {
-    $connection = $user->connection($args->{connection_id});
+    $connection = $user->get_connection($args->{connection_id});
     $connection->url->host or die 'Connection not found';
   } or do {
     return $self->$cb($self->invalid_request('Connection not found.'), 404);

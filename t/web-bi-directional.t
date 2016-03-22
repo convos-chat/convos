@@ -13,7 +13,7 @@ $t->post_ok('/api/connections', json => {state => 'connect', url => "irc://local
 $t->websocket_ok('/events/bi-directional');
 
 # change from "connecting" got "disconnected"
-$user->connection('irc-localhost')->state('disconnected');
+$user->get_connection('irc-localhost')->state('disconnected');
 $t->message_ok->json_message_is('/type', 'state')->json_message_is('/object/name', 'localhost')
   ->json_message_is('/object/state', 'connecting')->json_message_is('/data/0', 'disconnected');
 

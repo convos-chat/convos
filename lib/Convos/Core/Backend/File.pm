@@ -37,9 +37,7 @@ sub connections {
     next unless $id =~ /^\w+/;
     my $settings = catfile $user_dir, $id, 'connection.json';
     next unless -e $settings;
-    $settings = Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
-    push @connections,
-      Convos::Core::Connection->new({protocol => $settings->{protocol}, user => $user})->INFLATE($settings);
+    push @connections, Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
   }
 
   return \@connections unless $cb;
@@ -123,7 +121,7 @@ sub users {
     while (my $email = readdir $USERS) {
       my $settings = $home->rel_file("$email/user.json");
       next unless $email =~ /.\@./ and -e $settings;    # poor mans regex
-      push @users, Convos::Core::User->new->INFLATE(Mojo::JSON::decode_json(Mojo::Util::slurp($settings)));
+      push @users, Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
     }
   }
 
@@ -178,10 +176,15 @@ sub _log {
 
 sub _log_file {
   my ($self, $obj, $t) = @_;
-  my @path = ($obj->user->email);
+  my @path;
 
-  push @path, $obj->id             if $obj->isa('Convos::Core::Connection');
-  push @path, $obj->connection->id if $obj->isa('Convos::Core::Dialog');
+  if ($obj->isa('Convos::Core::Dialog')) {
+    push @path, $obj->connection->user->id, $obj->connection->id;
+  }
+  elsif ($obj->isa('Convos::Core::Connection')) {
+    push @path, $obj->user->id, $obj->id;
+  }
+
   push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
   push @path, $obj->name if $obj->isa('Convos::Core::Dialog');
 

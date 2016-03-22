@@ -25,7 +25,7 @@ sub embed {
 sub join {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{connection_id}) or return $self->$cb({}, 404);
+  my $connection = $user->get_connection($args->{connection_id}) or return $self->$cb({}, 404);
 
   $self->delay(
     sub { $connection->join_dialog($args->{body}{name}, shift->begin) },
@@ -60,8 +60,8 @@ sub list {
 sub messages {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{connection_id}) or return $self->$cb({}, 404);
-  my $dialog     = $connection->dialog($args->{dialog_id})   or return $self->$cb({}, 404);
+  my $connection = $user->get_connection($args->{connection_id}) or return $self->$cb({}, 404);
+  my $dialog     = $connection->get_dialog($args->{dialog_id})   or return $self->$cb({}, 404);
   my %query;
 
   # TODO:
@@ -80,7 +80,7 @@ sub messages {
 sub remove {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{connection_id});
+  my $connection = $user->get_connection($args->{connection_id});
 
   unless ($connection) {
     return $self->$cb($self->invalid_request('Connection not found.'), 404);
@@ -99,7 +99,7 @@ sub remove {
 sub send {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->connection($args->{connection_id});
+  my $connection = $user->get_connection($args->{connection_id});
 
   unless ($connection) {
     return $self->$cb($self->invalid_request('Connection not found.'), 404);

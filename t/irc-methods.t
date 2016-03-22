@@ -55,7 +55,7 @@ $t->run(
     ok !$dialog->is_private, 'dialog is a channel';
     is $dialog->name, "#Convos_irc_LIVE_20001", "dialog Convos_irc_LIVE_20001 in callback";
     cmp_deeply(
-      $connection->dialog("#Convos_irc_live_20001")->TO_JSON,
+      $connection->get_dialog("#Convos_irc_live_20001")->TO_JSON,
       {
         active        => 1,
         connection_id => 'irc-localhost',
@@ -89,10 +89,11 @@ $t->run(
     $connection->join_dialog("#convos s3cret", sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is $err, '', 'join_dialog: convos';
-    is $dialog->name,     "#convos", "dialog convos in callback";
-    is $dialog->password, 's3cret',  'convos password';
+    is $dialog->name,     "#convos",         "dialog convos in callback";
+    is $dialog->password, 's3cret',          'convos password';
+    is $dialog->topic,    'some cool topic', 'convos topic';
     cmp_deeply(
-      $connection->dialog('#conVOS')->TO_JSON,
+      $connection->get_dialog('#conVOS')->TO_JSON,
       {
         active        => 1,
         connection_id => 'irc-localhost',
@@ -161,13 +162,14 @@ $t->run(
     is $err, '', 'set online nick';
 
     $nick
-      = (map { $_->{name} } grep { $_->{name} ne "SupermanX20001" } values %{$connection->dialog('#convos')->users})[0];
+      = (map { $_->{name} } grep { $_->{name} ne "SupermanX20001" } values %{$connection->get_dialog('#convos')->users})
+      [0];
     $connection->nick($nick, sub { $err = $_[1]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     like $err, qr{in use}, 'nick in use';
 
     cmp_deeply(
-      $connection->dialog('#conVOS')->TO_JSON->{users},
+      $connection->get_dialog('#conVOS')->TO_JSON->{users},
       superhashof(
         {
           "supermanx20001" => {

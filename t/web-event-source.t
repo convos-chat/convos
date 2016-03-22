@@ -15,7 +15,7 @@ $tx->res->content->unsubscribe('read')->on(
   read => sub {
     my ($content, $chunk) = @_;
     $buffer .= $chunk;
-    $user->connection('irc-localhost')->state('disconnected');    # change from connecting to disconnected
+    $user->get_connection('irc-localhost')->state('disconnected');    # change from connecting to disconnected
     $tx->res->error({message => 'Interrupted'}) if $buffer =~ /event:state\n.*\}/s;
   }
 );

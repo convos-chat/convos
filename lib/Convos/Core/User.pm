@@ -3,9 +3,9 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::Date;
 use Mojo::Util;
 use Convos::Core::Connection;
+use Convos::Util qw(DEBUG has_many);
 use Crypt::Eksblowfish::Bcrypt ();
 use File::Path                 ();
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
@@ -19,30 +19,29 @@ sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 sub password { shift->{password} ||= '' }
 
-sub connection {
-  my ($self, $obj) = @_;
+has_many connections => 'Convos::Core::Connection' => sub {
+  my ($self, $attrs) = @_;
+  Scalar::Util::weaken($attrs->{user} = $self);
+  my $class = 'Convos::Core::Connection';
 
-  # Get
-  return $self->{connections}{$obj} unless ref $obj;
-
-  # Add
-  $obj->{user} = $self;
-  $obj = Convos::Core::Connection->new($obj) if ref $obj eq 'HASH';
-
-  die 'Connection already exists.' if $self->{connections}{$obj->id};
-  $self->{connections}{$obj->id} = $obj;
-
-  Scalar::Util::weaken($self);
-  for my $e ($self->EVENTS) {
-    $obj->on($e => sub { $self->emit($e => @_) });
+  if ($attrs->{protocol}) {
+    my $protocol = Mojo::Util::camelize($attrs->{protocol} || '');
+    $class = "Convos::Core::Connection::$protocol";
+    eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported: $@);
   }
 
-  warn "[@{[$self->email]}] Emit connection for id=@{[$obj->id]}\n" if DEBUG;
-  $self->core->backend->emit(connection => $obj);
-  return $obj;
-}
+  my $connection = $class->new($attrs);
+  warn "[@{[$self->email]}] Emit connection for id=@{[$connection->id]}\n" if DEBUG;
+  $self->core->backend->emit(connection => $connection);
 
-sub connections { [values %{$_[0]->{connections} || {}}] }
+  for my $e ($self->EVENTS) {
+    $connection->on($e => sub { $self->emit($e => @_) });
+  }
+
+  return $connection;
+};
+
+sub id { lc +($_[1] || $_[0])->{email} }
 
 sub remove_connection {
   my ($self, $id, $cb) = @_;
@@ -102,12 +101,6 @@ sub _bcrypt {
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
 }
 
-sub INFLATE {
-  my ($self, $attrs) = @_;
-  $self->{$_} = $attrs->{$_} for keys %$attrs;
-  $self;
-}
-
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{registered} ||= Mojo::Date->new->to_datetime;
@@ -159,19 +152,29 @@ the following new ones.
 
 =head2 connection
 
-  $connection = $self->connection($id);          # get
-  $connection = $self->connection(\%connection); # add
+  $connection = $self->connection(\%attrs);
 
-Returns a connection object. Every new object created will emit
-a "connection" event:
-
-  $self->emit(connection => $connection);
+Returns a new L<Convos::Core::Connection> object or updates an existing object.
 
 =head2 connections
 
   $objs = $self->connections;
 
 Returns an array-ref of of L<Convos::Core::Connection> objects.
+
+=head2 get_connection
+
+  $connection = $self->connection($id);
+  $connection = $self->connection(\%attrs);
+
+Returns a L<Convos::Core::Connection> object or undef.
+
+=head2 id
+
+  $str = $self->id;
+  $str = $class->id(\%attr);
+
+Returns a unique identifier for a user.
 
 =head2 remove_connection
 
