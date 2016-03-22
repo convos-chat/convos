@@ -1,18 +1,19 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
-use Mojo::Home;
-use Mojo::IOLoop::ForkCall ();
-use Mojo::JSON;
+
+use Convos::Util 'DEBUG';
 use Cwd ();
 use Fcntl ':flock';
 use File::HomeDir ();
 use File::Path    ();
 use File::ReadBackwards;
 use File::Spec::Functions qw( catdir catfile );
+use Mojo::Home;
+use Mojo::IOLoop::ForkCall ();
+use Mojo::JSON;
 use Symbol;
 use Time::Piece;
 use Time::Seconds;
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 has home => sub { shift->_build_home };
 
@@ -265,7 +266,8 @@ sub _setup {
           }
         }
       );
-      $connection->on(state => sub { $self->_log($_[0], time, "-!- Change connection state to $_[1]. $_[2]") });
+      $connection->on(
+        state => sub { $self->_log($_[0], time, "-!- Change connection state to $_[1]. $_[2]") });
       $connection->on(
         users => sub {
           my ($connection, $dialog, $data) = @_;

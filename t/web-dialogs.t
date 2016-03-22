@@ -4,7 +4,8 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
-$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
+$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
+  ->status_is(200);
 $t->get_ok('/api/dialogs')->status_is(200)->json_is('/dialogs', []);
 
 require Mojo::IRC::UA;

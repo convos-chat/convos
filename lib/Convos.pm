@@ -1,5 +1,6 @@
 package Convos;
 use Mojo::Base 'Mojolicious';
+
 use Convos::Core;
 
 our $VERSION = '0.01';
@@ -61,7 +62,8 @@ sub startup {
 
   my $core    = $self->core;
   my $plugins = $config->{plugins};
-  $core->backend->register_plugin($_, $core, $plugins->{$_}) for grep { $plugins->{$_} } keys %$plugins;
+  $core->backend->register_plugin($_, $core, $plugins->{$_})
+    for grep { $plugins->{$_} } keys %$plugins;
   $core->start if $ENV{CONVOS_START_BACKEND} // 1;
 }
 
@@ -77,7 +79,10 @@ sub _add_helpers {
         $path ||= '';
         push @errors, map {
           my $error = $message->error($_);
-          {message => $error->[0] eq 'required' ? 'Missing property.' : 'Invalid input.', path => "$path/$_"}
+          {
+            message => $error->[0] eq 'required' ? 'Missing property.' : 'Invalid input.',
+            path => "$path/$_"
+          }
         } sort keys %{$message->{error}};
       }
       else {
@@ -144,7 +149,7 @@ sub _setup_settings {
   # This hash is exposed directy into the web page
   $settings->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
   $settings->{default_server}
-    ||= $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';    # chat.freenode.net:6697 instead of localhost?
+    ||= $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';   # chat.freenode.net:6697 instead of localhost?
 }
 
 1;

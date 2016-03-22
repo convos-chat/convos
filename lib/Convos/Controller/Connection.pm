@@ -1,6 +1,5 @@
 package Convos::Controller::Connection;
 use Mojo::Base 'Mojolicious::Controller';
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 sub create {
   my ($self, $args, $cb) = @_;

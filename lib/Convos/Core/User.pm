@@ -1,11 +1,12 @@
 package Convos::Core::User;
 use Mojo::Base 'Mojo::EventEmitter';
-use Mojo::Date;
-use Mojo::Util;
+
 use Convos::Core::Connection;
 use Convos::Util qw(DEBUG has_many);
 use Crypt::Eksblowfish::Bcrypt ();
 use File::Path                 ();
+use Mojo::Date;
+use Mojo::Util;
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;

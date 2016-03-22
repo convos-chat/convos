@@ -1,9 +1,10 @@
 package Convos::Core;
 use Mojo::Base -base;
-use Mojolicious::Plugins;
+
 use Convos::Core::Backend;
 use Convos::Core::User;
 use Convos::Util 'has_many';
+use Mojolicious::Plugins;
 
 sub backend { shift->{backend} ||= Convos::Core::Backend->new }
 

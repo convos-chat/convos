@@ -2,7 +2,8 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-plan skip_all => 'Need to figure out a way to search for all files, even though they are way back in time';
+plan skip_all =>
+  'Need to figure out a way to search for all files, even though they are way back in time';
 
 $ENV{CONVOS_HOME} = File::Spec->catdir(qw(t data convos-test-backend-file-messages));
 
@@ -23,7 +24,8 @@ Mojo::IOLoop->start;
 is int @$messages, 2, 'two messages matching iotop' or diag $err;
 is $messages->[0]{ts}, '2015-06-21T10:13:32', 'first: 2015-06-21T10:13:32';
 
-$dialog->messages({limit => 2, match => qr{\bpacka\w+\b}}, sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
+$dialog->messages({limit => 2, match => qr{\bpacka\w+\b}},
+  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 is int @$messages, 2, 'two messages matching package because of limit' or diag $err;
 is $messages->[0]{ts}, '2015-06-22T10:13:29', 'first: 2015-06-22T10:13:29';

@@ -8,7 +8,8 @@ my $user = $t->app->core->user({email => 'superman@example.com'})->set_password(
 
 $t->get_ok('/api/connections')->status_is(401);
 $t->post_ok('/api/connections', json => {url => "irc://localhost:$port"})->status_is(401);
-$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
+$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
+  ->status_is(200);
 $t->get_ok('/api/connections')->status_is(200)->json_is('/connections', []);
 
 $t->post_ok('/api/connections', json => {url => "irc://localhost:$port"})->status_is(200);
@@ -32,10 +33,11 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
   )->json_is('/connections/1/id', 'irc-localhost')->json_is('/connections/1/name', 'localhost')
   ->json_is('/connections/1/url', "irc://localhost:$port?nick=superman&tls=0");
 
-$t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.com:9999'})->status_is(404);
+$t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.com:9999'})
+  ->status_is(404);
 $t->post_ok('/api/connection/irc-example', json => {})->status_is(200);
-$t->post_ok('/api/connection/irc-localhost', json => {url => 'foo://example.com:9999'})->status_is(200)
-  ->json_is('/name' => 'localhost')->json_is('/state' => 'connecting')
+$t->post_ok('/api/connection/irc-localhost', json => {url => 'foo://example.com:9999'})
+  ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connecting')
   ->json_like('/url' => qr{irc://example.com:9999\?nick=superman});
 
 $t->delete_ok('/api/connection/irc-doesnotexist')->status_is(200);

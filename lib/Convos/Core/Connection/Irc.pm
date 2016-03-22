@@ -1,12 +1,12 @@
 package Convos::Core::Connection::Irc;
+use Mojo::Base 'Convos::Core::Connection';
 
 no warnings 'utf8';
-use Mojo::Base 'Convos::Core::Connection';
+use Convos::Util 'DEBUG';
 use Mojo::IRC::UA;
 use Parse::IRC ();
 use Time::HiRes 'time';
 
-use constant DEBUG               => $ENV{CONVOS_DEBUG}               || 0;
 use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
 use constant ROOM_CACHE_TIMER    => $ENV{CONVOS_ROOM_CACHE_TIMER}    || 60;
 
@@ -82,7 +82,8 @@ sub connect {
   delete $self->{disconnect};
   Scalar::Util::weaken($self);
   $self->state('connecting');
-  $self->{steal_nick_tid} ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
+  $self->{steal_nick_tid}
+    ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
 
   for my $dialog (@{$self->dialogs}) {
     $dialog->frozen('Not fully connected.');
@@ -215,7 +216,8 @@ sub topic {
 
 sub whois {
   my ($self, $target, $cb) = @_;
-  return $self->tap($cb, "Cannot retrieve whois without target.", {}) unless $target;    # err_nonicknamegiven
+  return $self->tap($cb, "Cannot retrieve whois without target.", {})
+    unless $target;    # err_nonicknamegiven
   Scalar::Util::weaken($self);
   $self->_proxy(whois => $target, sub { shift; $self->$cb(@_); });
 }
@@ -272,7 +274,10 @@ sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 
 sub _notice {
   my ($self, $message) = (shift, shift);
-  $self->emit(message => $self, {from => $self->url->host, type => 'notice', @_, message => $message, ts => time});
+  $self->emit(
+    message => $self,
+    {from => $self->url->host, type => 'notice', @_, message => $message, ts => time}
+  );
 }
 
 sub _proxy {
@@ -330,7 +335,8 @@ _event err_bannedfromchan => sub {    # TODO
   my $nick   = $self->_irc->nick;
   my $dialog = $self->get_dialog($channel);
 
-  $dialog->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel") if $dialog;
+  $dialog->frozen($reason =~ s/channel/channel $channel/i ? $reason : "$reason $channel")
+    if $dialog;
   $self->_notice("$nick is banned from $channel [$reason]");
 };
 
@@ -354,7 +360,12 @@ _event err_nosuchnick => sub {
   if (my $dialog = $self->get_dialog($msg->{params}[1])) {
     $self->emit(
       message => $dialog,
-      {from => $self->url->host, message => 'No such nick or channel.', ts => time, type => 'notice'}
+      {
+        from    => $self->url->host,
+        message => 'No such nick or channel.',
+        ts      => time,
+        type    => 'notice'
+      }
     );
   }
 
@@ -398,7 +409,8 @@ _event irc_nick => sub {
   my $new_nick    = $msg->{params}[0];
   my $wanted_nick = $self->url->query->param('nick');
 
-  delete $self->{err_nicknameinuse} if $wanted_nick and $wanted_nick eq $new_nick;   # allow warning on next nick change
+  delete $self->{err_nicknameinuse}
+    if $wanted_nick and $wanted_nick eq $new_nick;    # allow warning on next nick change
 
   if ($self->_is_current_nick($new_nick)) {
     $self->{myinfo}{nick} = $new_nick;
@@ -532,7 +544,8 @@ _event irc_rpl_welcome => sub {
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(me => $self->{myinfo});
-  $self->join_dialog(join(' ', $_->name, $_->password), sub { }) for grep { $_->active } @{$self->dialogs};
+  $self->join_dialog(join(' ', $_->name, $_->password), sub { })
+    for grep { $_->active } @{$self->dialogs};
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool

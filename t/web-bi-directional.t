@@ -7,8 +7,10 @@ $t->message_ok->json_message_is('/errors/0/message', 'Need to log in first.')->f
 
 my $port = $t->ua->server->nb_url->port;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
-$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})->status_is(200);
-$t->post_ok('/api/connections', json => {state => 'connect', url => "irc://localhost:$port"})->status_is(200);
+$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
+  ->status_is(200);
+$t->post_ok('/api/connections', json => {state => 'connect', url => "irc://localhost:$port"})
+  ->status_is(200);
 
 $t->websocket_ok('/events/bi-directional');
 
@@ -18,7 +20,8 @@ $t->message_ok->json_message_is('/type', 'state')->json_message_is('/object/name
   ->json_message_is('/object/state', 'connecting')->json_message_is('/data/0', 'disconnected');
 
 # update profile
-$t->send_ok({json => {id => 42, op => 'updateUser', params => {body => {password => 'supersecret'}}}});
+$t->send_ok(
+  {json => {id => 42, op => 'updateUser', params => {body => {password => 'supersecret'}}}});
 
 # need to skip connection events
 while (1) {

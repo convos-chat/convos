@@ -1,5 +1,6 @@
 package Convos::Util;
 use Mojo::Base 'Exporter';
+
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 

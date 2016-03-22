@@ -1,7 +1,9 @@
 package Convos::Controller::Events;
 use Mojo::Base 'Mojolicious::Controller';
+
 use Mojo::JSON 'encode_json';
-use constant DEBUG            => $ENV{CONVOS_DEBUG}            || 0;
+use Convos::Util 'DEBUG';
+
 use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 30;
 
 sub bi_directional {
@@ -27,7 +29,10 @@ sub event_source {
   $self->res->headers->content_type('text/event-stream');
 
   unless ($self->backend->user) {
-    return $self->render(text => qq(event:error\ndata:{"message":"Need to log in first."}\n\n), status => 401);
+    return $self->render(
+      text   => qq(event:error\ndata:{"message":"Need to log in first."}\n\n),
+      status => 401
+    );
   }
 
   $self->render_later;
@@ -46,7 +51,8 @@ sub _send_event {
 sub _subscribe {
   my ($self, $method) = @_;
   my $user = $self->backend->user;
-  my $tid = Mojo::IOLoop->recurring(INACTIVE_TIMEOUT - 5, sub { $self->$method(keep_alive => {}); });
+  my $tid
+    = Mojo::IOLoop->recurring(INACTIVE_TIMEOUT - 5, sub { $self->$method(keep_alive => {}); });
   my @cb;
 
   Scalar::Util::weaken($self);
@@ -56,7 +62,8 @@ sub _subscribe {
         my ($user, $target, @data) = @_;
         if ($event eq 'message') {
           $target = shift(@data)->TO_JSON(1);
-          local $data[0]{ts} = Mojo::Date->new($data[0]{ts})->to_datetime;    # must not touch input data
+          local $data[0]{ts}
+            = Mojo::Date->new($data[0]{ts})->to_datetime;    # must not touch input data
           $self->$method($event => {object => $target, data => \@data});
         }
         else {

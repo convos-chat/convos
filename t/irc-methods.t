@@ -23,9 +23,10 @@ $connection->on(
   dialog => sub {
     my ($self, $dialog, $changed) = @_;
     if ($ENV{HARNESS_IS_VERBOSE}) {
-      diag "[dialog=$dialog->{id}] " . join ' ',
-        map { sprintf '%s=%s', $_, Data::Dumper->new([$changed->{$_}])->Indent(0)->Sortkeys(1)->Terse(1)->Dump }
-        keys %$changed;
+      diag "[dialog=$dialog->{id}] " . join ' ', map {
+        sprintf '%s=%s', $_,
+          Data::Dumper->new([$changed->{$_}])->Indent(0)->Sortkeys(1)->Terse(1)->Dump
+      } keys %$changed;
     }
   }
 );
@@ -48,7 +49,8 @@ $t->run(
   sub {
     my ($err, $dialog);
     is_deeply($connection->dialogs, [], 'no dialogs');
-    $connection->join_dialog("#Convos_irc_LIVE_20001", sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->join_dialog("#Convos_irc_LIVE_20001",
+      sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
     is_deeply([map { $_->id } @{$connection->dialogs}], ['#convos_irc_live_20001'], 'dialogs');
     Mojo::IOLoop->start;
     is $err, '', "join_dialog: convos_irc_live_20001";
@@ -86,7 +88,8 @@ $t->run(
   [qr{JOIN}, ['main', 'join-convos.irc']],
   sub {
     my ($err, $dialog);
-    $connection->join_dialog("#convos s3cret", sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->join_dialog("#convos s3cret",
+      sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is $err, '', 'join_dialog: convos';
     is $dialog->name,     "#convos",         "dialog convos in callback";
@@ -162,7 +165,8 @@ $t->run(
     is $err, '', 'set online nick';
 
     $nick
-      = (map { $_->{name} } grep { $_->{name} ne "SupermanX20001" } values %{$connection->get_dialog('#convos')->users})
+      = (map { $_->{name} }
+      grep { $_->{name} ne "SupermanX20001" } values %{$connection->get_dialog('#convos')->users})
       [0];
     $connection->nick($nick, sub { $err = $_[1]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
@@ -211,7 +215,8 @@ $t->run(
   [qr{TOPIC}, ['main', 'no-topic.irc']],
   sub {
     my ($err, $topic);
-    $connection->topic("#convos_irc_live_20001", sub { ($err, $topic) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->topic("#convos_irc_live_20001",
+      sub { ($err, $topic) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is $err, '', 'no topic error';
     is_deeply $topic, {message => ''}, 'no topic';
@@ -223,11 +228,13 @@ $t->run(
   sub {
     my ($err, $topic);
 
-    $connection->topic("#convos_irc_live_20001", "Cool topic", sub { $err = $_[1]; Mojo::IOLoop->stop });
+    $connection->topic("#convos_irc_live_20001", "Cool topic",
+      sub { $err = $_[1]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is $err, '', 'topic set error';
 
-    $connection->topic("#convos_irc_live_20001", sub { ($err, $topic) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->topic("#convos_irc_live_20001",
+      sub { ($err, $topic) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is_deeply $topic, {message => 'Cool topic'}, 'topic was changed';
   }

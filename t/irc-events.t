@@ -30,7 +30,12 @@ captured_is(
   },
   [
     message => $connection,
-    {from => '127.0.0.1', message => 'All the things went wrong', ts => re(qr{\d}), type => 'notice'}
+    {
+      from    => '127.0.0.1',
+      message => 'All the things went wrong',
+      ts      => re(qr{\d}),
+      type    => 'notice'
+    }
   ],
   'error'
 );
@@ -41,7 +46,12 @@ captured_is(
   },
   [
     message => $connection,
-    {from => '127.0.0.1', message => 'Cannot send to channel #channel_name.', ts => re(qr{\d}), type => 'notice'}
+    {
+      from    => '127.0.0.1',
+      message => 'Cannot send to channel #channel_name.',
+      ts      => re(qr{\d}),
+      type    => 'notice'
+    }
   ],
   'err_cannotsendtochan'
 );
@@ -53,7 +63,12 @@ captured_is(
   },
   [
     message => $connection,
-    {from => '127.0.0.1', message => 'Nickname cool_nick is already in use.', ts => re(qr{\d}), type => 'notice'}
+    {
+      from    => '127.0.0.1',
+      message => 'Nickname cool_nick is already in use.',
+      ts      => re(qr{\d}),
+      type    => 'notice'
+    }
   ],
   'err_nicknameinuse twice, but only one event'
 );
@@ -64,7 +79,12 @@ captured_is(
   },
   [
     message => $connection,
-    {from => '127.0.0.1', message => 'No such nick or channel #channel_name.', ts => re(qr{\d}), type => 'notice'},
+    {
+      from    => '127.0.0.1',
+      message => 'No such nick or channel #channel_name.',
+      ts      => re(qr{\d}),
+      type    => 'notice'
+    },
   ],
   'err_nosuchnick'
 );
@@ -88,17 +108,23 @@ captured_is(
 
 captured_is(
   sub {
-    $connection->_irc->emit(irc_rpl_yourhost =>
-        {params => [undef, 'Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2']}
+    $connection->_irc->emit(
+      irc_rpl_yourhost => {
+        params => [
+          undef,
+          'Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2'
+        ]
+      }
     );
   },
   [
     message => $connection,
     {
-      from    => '127.0.0.1',
-      message => 'Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2',
-      ts      => re(qr{\d}),
-      type    => 'notice'
+      from => '127.0.0.1',
+      message =>
+        'Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2',
+      ts   => re(qr{\d}),
+      type => 'notice'
     }
   ],
   'irc_rpl_yourhost'

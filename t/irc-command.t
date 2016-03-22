@@ -37,7 +37,10 @@ $t->run(
 $t->run(
   [qr{JOIN}, ['main', 'join-convos.irc']],
   sub {
-    $connection->send('#convos' => '/join #convos', sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      '#convos' => '/join #convos',
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, '', 'cmd /join convos';
     is $res->{topic}, 'some cool topic', 'res /join convos';
@@ -47,7 +50,10 @@ $t->run(
 $t->run(
   [qr{NICK}, ['main', 'nick-supermanx.irc']],
   sub {
-    $connection->send("#does_not_matter" => "/nick supermanx", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      "#does_not_matter" => "/nick supermanx",
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, '',    'cmd /nick supermanx';
     is $res, undef, 'res /nick supermanx';
@@ -57,7 +63,10 @@ $t->run(
 $t->run(
   [],
   sub {
-    $connection->send("#convos" => "/me is afk", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      "#convos" => "/me is afk",
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, '',    'cmd /say';
     is $res, undef, 'res /say';
@@ -67,7 +76,10 @@ $t->run(
 $t->run(
   [],
   sub {
-    $connection->send("#convos" => "/say /some/stuff", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      "#convos" => "/say /some/stuff",
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, '',    'cmd /say';
     is $res, undef, 'res /say';
@@ -77,7 +89,10 @@ $t->run(
 $t->run(
   [],
   sub {
-    $connection->send("#convos" => "/msg somebody /some/stuff", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      "#convos" => "/msg somebody /some/stuff",
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, '',    'cmd /say';
     is $res, undef, 'res /say';
@@ -97,7 +112,10 @@ $t->run(
 $t->run(
   [qr{TOPIC}, ['main', 'set-topic.irc']],
   sub {
-    $connection->send("#convos" => "/topic Cool topic", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      "#convos" => "/topic Cool topic",
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, '', 'cmd /topic set';
   }
@@ -116,7 +134,10 @@ $t->run(
 $t->run(
   [qr{PART}, ['main', 'part-does-not-matter.irc']],
   sub {
-    $connection->send("#does_not_matter" => "/part", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      "#does_not_matter" => "/part",
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, 'Illegal channel name', 'cmd /part does_not_matter';
     is $res, undef, 'res /part does_not_matter';
@@ -126,7 +147,10 @@ $t->run(
 $t->run(
   [qr{PART}, ['main', 'part-convos.irc']],
   sub {
-    $connection->send("#does_not_matter" => "/part #convos", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
+    $connection->send(
+      "#does_not_matter" => "/part #convos",
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
     Mojo::IOLoop->start;
     is $err, '',    'cmd /part convos';
     is $res, undef, 'res /part convos';

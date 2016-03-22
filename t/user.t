@@ -18,7 +18,8 @@ ok !-e $settings_file, 'no storage file';
 is $user->save, $user, 'save';
 ok -e $settings_file, 'created storage file';
 
-is_deeply($user->TO_JSON, {email => 'jhthorsen@cpan.org', registered => Mojo::Date->new($main::time)->to_datetime},
+is_deeply($user->TO_JSON,
+  {email => 'jhthorsen@cpan.org', registered => Mojo::Date->new($main::time)->to_datetime},
   'TO_JSON');
 
 eval { $user->set_password('') };

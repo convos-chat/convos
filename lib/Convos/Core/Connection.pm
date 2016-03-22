@@ -1,9 +1,10 @@
 package Convos::Core::Connection;
 use Mojo::Base 'Mojo::EventEmitter';
-use Mojo::Loader 'load_class';
-use Mojo::URL;
+
 use Convos::Core::Dialog;
 use Convos::Util 'has_many';
+use Mojo::Loader 'load_class';
+use Mojo::URL;
 
 sub name { shift->{name} }
 sub protocol { shift->{protocol} || 'null' }
@@ -15,7 +16,10 @@ sub url {
 
 sub user { shift->{user} }
 
-sub connect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "connect" not implemented.'); }
+sub connect {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "connect" not implemented.');
+}
 
 has_many dialogs => 'Convos::Core::Dialog' => sub {
   my ($self, $attrs) = @_;
@@ -24,7 +28,10 @@ has_many dialogs => 'Convos::Core::Dialog' => sub {
   return $dialog;
 };
 
-sub disconnect { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "disconnect" not implemented.'); }
+sub disconnect {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "disconnect" not implemented.');
+}
 
 sub id {
   return lc join '-', @{$_[1]}{qw(protocol name)} if $_[1];
@@ -47,7 +54,10 @@ sub part_dialog {
   $self->tap($cb, 'Method "join_dialog" not implemented.');
 }
 
-sub rooms { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "rooms" not implemented.', []); }
+sub rooms {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "rooms" not implemented.', []);
+}
 
 sub save {
   my $self = shift;
