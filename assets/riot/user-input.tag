@@ -23,6 +23,14 @@
     });
   };
 
+  localCmdHelp(e) {
+    riot.route('/settings/help');
+  }
+
+  localCmdJoin(e) {
+    riot.route('/settings/new-dialog');
+  }
+
   localCmdNames(e) {
     opts.dialog.participants(function(err, res) {});
     opts.dialog.addMessage({type: 'info'});

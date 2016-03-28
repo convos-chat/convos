@@ -12,6 +12,14 @@ riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <textarea
     });
   }.bind(this);
 
+  this.localCmdHelp = function(e) {
+    riot.route('/settings/help');
+  }.bind(this)
+
+  this.localCmdJoin = function(e) {
+    riot.route('/settings/new-dialog');
+  }.bind(this)
+
   this.localCmdNames = function(e) {
     opts.dialog.participants(function(err, res) {});
     opts.dialog.addMessage({type: 'info'});
