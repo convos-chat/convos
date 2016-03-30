@@ -28,8 +28,6 @@
         <dd>Send message as an action.</dd>
         <dt><a href="#autocomplete:/msg">/msg &lt;nick&gt;</a></dt>
         <dd>Send a direct message to nick.</dd>
-        <dt><a href="#autocomplete:/names">/names</a></dt>
-        <dd>Retrieve nick list.</dd>
         <dt><a href="#autocomplete:/nick">/nick &lt;nick&gt;</a></dt>
         <dd>Change your wanted nick.</dd>
         <dt><a href="#autocomplete:/part">/part &lt;#channel&gt;</a></dt>

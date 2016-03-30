@@ -11,14 +11,13 @@
     <h5 class="tooltipped" title={dialog.topic() || 'No topic is set.'}>{dialog.name()}</h5>
   </header>
   <main name="scrollElement">
-    <virtual each={msg, i in messages}>
-      <dialog-message dialog={parent.dialog} msg={msg} user={parent.user} if={msg.message} />
-      <dialog-info dialog={parent.dialog} msg={msg} user={parent.user} if={msg.type == 'info'} />
-    </virtual>
+    <dialog-message dialog={parent.dialog} msg={msg} user={parent.user} each={msg, i in messages}/>
   </main>
   <user-input dialog={dialog} user={user}/>
   <script>
+  var tag = this;
   mixin.bottom(this); // uses name="scrollElement"
+  mixin.numbers(this);
   mixin.time(this);
 
   this.user = opts.user;
@@ -27,17 +26,28 @@
   this.messages = [];
 
   getInfo(e) {
-    this.dialog.participants(function(err, res) {});
-    this.dialog.addMessage({type: 'info'});
-  }
+    this.dialog.participants(function(err, res) {
+      var participants = res.participants;
+      var message = err ? err[0].message : '';
 
-  removeMessage(e) {
-    this.dialog.removeMessage(e.item.msg);
+      if (!message) {
+        message += tag.numberAsString(participants.length).ucFirst();
+        message += ' participants in ' + this.name() + ' connected to ';
+        message += this.connection().name() + ': ';
+        message += participants.map(function(p, i) { return p.mode + p.name; }).join(', ');
+      }
+
+      this.trigger('message', {
+        type: err ? 'error' : 'notice',
+        from: this.connection().name(),
+        message: message
+      });
+    });
   }
 
   removeDialog(e) {
     this.user.removeDialog(this.dialog, function(err) {
-      if (err) this.dialog.addMessage({message: err[0].message});
+      if (err) this.dialog.trigger('message', {message: err[0].message});
       riot.update();
     });
   }

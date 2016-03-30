@@ -8,45 +8,18 @@ dialog-container {
     .actions { right: -4px; }
   }
 
-  dialog-message,
-  dialog-info {
+  dialog-message {
     display: block;
     position: relative;
     margin: $dialog-spacing * 2 0;
 
     &:hover { background: darken($body-bg, 2%); }
 
-    .secondary-content {
-      position: absolute;
-      top: 2px;
-      right: 0;
-      &, a {
-        color: color('grey', 'darken-1');
-        font-size: 0.8rem;
-        overflow: hidden;
-        display: block;
-      }
-      i {
-        vertical-align: bottom;
-      }
+    &.error, &.notice {
+      padding-left: $gutter-width / 2;
+      padding-right: $gutter-width / 2;
+      border-left: 2px solid color('grey', 'lighten-1');
     }
-  }
-
-
-  dialog-message.error,
-  dialog-message.notice,
-  dialog-info {
-    padding-left: $gutter-width / 2;
-    padding-right: $gutter-width / 2;
-    border-left: 2px solid color('grey', 'lighten-1');
-  }
-
-  dialog-info {
-    h5.title { font-size: 1.1rem; padding: 0; color: $off-black; }
-    i { font-size: 22px; }
-  }
-
-  dialog-message {
     &.action {
       .message, a.title {
         font-style: italic;
@@ -54,9 +27,9 @@ dialog-container {
       }
     }
     &.error {
-      border-left: 2px solid  color('red', 'accent-3');
+      border-left: 2px solid color('red', 'accent-3');
       color: lighten($off-black, 40%);
-      a { color: lighten($link-color, 20%); }
+      a { color: lighten(color('red', 'accent-3'), 20%); }
     }
     &.highlight .message {
       color: color('red', 'accent-2');
@@ -76,6 +49,21 @@ dialog-container {
     .message {
       a { color: inherit; text-decoration: underline; }
       a:hover { text-decoration: none; }
+    }
+
+    .secondary-content {
+      position: absolute;
+      top: 2px;
+      right: 0;
+      &, a {
+        color: color('grey', 'darken-1');
+        font-size: 0.8rem;
+        overflow: hidden;
+        display: block;
+      }
+      i {
+        vertical-align: bottom;
+      }
     }
   }
 }

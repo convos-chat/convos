@@ -40,7 +40,6 @@
 < riot/convos-help.tag
 < riot/dialog-container.tag
 < riot/dialog-message.tag
-< riot/dialog-info.tag
 < riot/new-dialog.tag
 < riot/not-found.tag
 < riot/sidebar-dialogs.tag

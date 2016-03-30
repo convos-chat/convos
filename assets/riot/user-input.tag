@@ -31,12 +31,6 @@
     riot.route('/settings/new-dialog');
   }
 
-  localCmdNames(e) {
-    opts.dialog.participants(function(err, res) {});
-    opts.dialog.addMessage({type: 'info'});
-    riot.update();
-  }
-
   onChange(e) {
     switch (e.keyCode) {
       case 9:  // tab

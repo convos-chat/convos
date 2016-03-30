@@ -3,6 +3,9 @@
     if (attrs) this.update(attrs);
     this._api = Convos.api;
     riot.observable(this);
+    this.on('message', this.addMessage);
+    this.on('message', function() { riot.update() });
+    this.on('users', this._onUsers);
     this.one('show', this._load);
   };
 
@@ -60,11 +63,6 @@
     );
   };
 
-  proto.removeMessage = function(msg) {
-    this.messages(this.messages().filter(function(m) { return m != msg}));
-    return this;
-  };
-
   // Send a message to a dialog
   proto.send = function(command, cb) {
     var self = this;
@@ -104,11 +102,10 @@
     var topic = this.topic().replace(/"/g, '') || '';
     this.addMessage({message: 'You have joined ' + this.name() + ', but no one has said anything as long as you have been here.'});
     if (this.frozen()) {
-      this.addMessage({message: 'You are not part of this channel. The reason is: "' + this.frozen() + '".'});
+      this.addMessage({message: 'You are not part of this channel. The reason is ' + this.frozen()});
     }
     if(!this.is_private()) {
       this.participants(function(err, participants) { riot.update(); });
-      this.addMessage({type: 'info'});
     }
   };
 
@@ -118,7 +115,7 @@
     if (this.messages().length >= 60) return;
     var self = this;
     self._api.messagesByDialog(
-      { connection_id: self.connection().id(), dialog_id: self.name() },
+      {connection_id: self.connection().id(), dialog_id: self.name()},
       function(err, xhr) {
         if (err) return console.log(err);
         xhr.body.messages.forEach(function(msg) { self.addMessage(msg) });
@@ -128,16 +125,31 @@
     );
   };
 
+  proto._onUsers = function(data) {
+    var msg = {from: this.connection().id(), ts: data.ts};
+    if (data.new_nick) {
+      msg.message = data.nick + ' changed nick to ' + data.new_nick + '.';
+    }
+    else if (data.message) {
+      msg.message = data.message;
+    }
+    else {
+      msg.message = JSON.encode(data);
+    }
+
+    this.trigger('message', msg);
+  };
+
   proto._onWhoisEvent = function(res) {
     var channels = Object.keys(res.channels || {});
     var id = [res.user];
     if (res.name) id.push(res.name);
     id = res.nick + ' (' + id.join(' - ') + ')';
-    this.addMessage({type: 'notice', message: id + ' has been ide for ' + res.idle_for + ' seconds in ' + channels.join(', ') + '.'});
+    this.trigger('message', {type: 'notice', message: id + ' has been ide for ' + res.idle_for + ' seconds in ' + channels.join(', ') + '.'});
   };
 
   proto._onTopicEvent = function(res) {
-    if (res.message) return this.addMessage({type: 'notice', message: 'Topic is: ' + res.message});
-    return this.addMessage({type: 'notice', message: 'No topic is set.'});
+    if (res.message) return this.trigger('message', {type: 'notice', message: 'Topic is: ' + res.message});
+    return this.trigger('message', {type: 'notice', message: 'No topic is set.'});
   };
 })(window);

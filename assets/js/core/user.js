@@ -46,11 +46,11 @@
 
   proto.currentDialog = function(obj) {
     if (obj) {
-      localStorage.setItem('activeDialog', obj.href());
+      localStorage.setItem('currentDialog', obj.href());
       return this;
     }
     else {
-      var href = localStorage.getItem('activeDialog') || 'chat';
+      var href = localStorage.getItem('currentDialog') || 'chat';
       var current;
       this.dialogs().forEach(function(d) { if (d.href() == href) current = d });
       return current || this._localDialog;
@@ -178,14 +178,10 @@
   };
 
   proto._listenForEvents = function() {
-    this.ws().on('json', function(e) {
-      switch (e.type) {
-        case 'message':
-          var d = this._dialogs[e.object.id];
-          if (d) d.addMessage(e.data[0]);
-          riot.update();
-          break;
-      }
+    this.ws().on('json', function(data) {
+      var target = this._dialogs[data.tid] || this._connections[data.cid];
+      if (target) target.trigger(data.type, data);
+      riot.update();
     }.bind(this));
   };
 })(window);

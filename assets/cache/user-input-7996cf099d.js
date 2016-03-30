@@ -20,12 +20,6 @@ riot.tag2('user-input', '<form method="post" onsubmit="{sendMessage}"> <textarea
     riot.route('/settings/new-dialog');
   }.bind(this)
 
-  this.localCmdNames = function(e) {
-    opts.dialog.participants(function(err, res) {});
-    opts.dialog.addMessage({type: 'info'});
-    riot.update();
-  }.bind(this)
-
   this.onChange = function(e) {
     switch (e.keyCode) {
       case 9:

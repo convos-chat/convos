@@ -4,6 +4,9 @@
     this._api = Convos.api;
     riot.observable(this);
     if (attrs) this.update(attrs);
+    this.on('me', this._onMe);
+    this.on('state', this._onState);
+    this.on('message', this._onMessage);
   };
 
   var proto = Convos.Connection.prototype;
@@ -12,6 +15,7 @@
   mixin.base(proto, {
     id: function() { return ''; },
     name: function() { return ''; },
+    nick: function() { this.url().parseUrl().query.nick || ''; },
     url: function() { return ''; },
     user: function() { throw 'user cannot be built'; }
   });
@@ -19,8 +23,9 @@
   proto.highlightMessage = function(msg) {
     var query = this.url().parseUrl().query;
     var highlight = [];
-    if (query.nick) highlight.push(query.nick);
-    if (query.highlight) highlight = highlight.concat(query.highlight.split(','));
+    if (this.nick()) highlight.push(this.nick());
+    if (query.highlight) highlight = highlight.concat(query.highlight.split(' '));
+    if (!highlight.length) return;
     highlight = new RegExp('\\b' + highlight.join('|') + '\\b');
     msg.highlight = msg.message.match(highlight) ? true : false;
   };
@@ -109,5 +114,26 @@
   proto.state = function(state, cb) {
     if (!cb) return this._state;
     throw 'TODO';
+  };
+
+  proto._onMe = function(data) {
+    console.log(data);
+    if (data.nick) this.nick(data.nick);
+  };
+
+  proto._onMessage = function(data) {
+    data.from = this.name();
+    data.type = 'notice';
+    this.user().currentDialog().trigger('message', data);
+  };
+
+  proto._onState = function(data) {
+    this.state(data.state);
+    this.user().currentDialog().trigger('message', {
+      from: this.name(),
+      message: data.message + ' (' + data.state + ')',
+      ts: data.ts,
+      type: 'notice'
+    });
   };
 })(window);
