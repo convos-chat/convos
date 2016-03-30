@@ -46,13 +46,12 @@ has _irc => sub {
   }
 
   for my $event (
-    'err_cannotsendtochan', 'err_nicknameinuse',
-    'err_nosuchnick',       'irc_error',
-    'irc_kick',             'irc_mode',
-    'irc_nick',             'irc_part',
-    'irc_quit',             'irc_rpl_away',
-    'irc_rpl_endofmotd',    'irc_rpl_motd',
-    'irc_rpl_motdstart',    'irc_rpl_myinfo',
+    'err_cannotsendtochan', 'err_erroneusnickname',
+    'err_nicknameinuse',    'err_nosuchnick',
+    'irc_error',            'irc_kick',
+    'irc_mode',             'irc_nick',
+    'irc_part',             'irc_quit',
+    'irc_rpl_away',         'irc_rpl_myinfo',
     'irc_rpl_topic',        'irc_rpl_topicwhotime',
     'irc_rpl_welcome',      'irc_rpl_yourhost',
     'irc_topic',
@@ -243,12 +242,11 @@ sub whois {
 
 sub _event_irc_close {
   my ($self) = @_;
-  $self->state(
-    delete $self->{disconnect} ? 'disconnected' : 'connecting',
-    sprintf 'You [%s@%s] have quit.',
-    $self->_irc->nick, $self->_irc->real_host || $self->url->host
-  );
+  my $state = delete $self->{disconnect} ? 'disconnected' : 'connecting';
+  $self->state($state, sprintf 'You [%s@%s] have quit.',
+    $self->_irc->nick, $self->_irc->real_host || $self->url->host);
   delete $self->{_irc};
+  $self->user->core->connect($self);
 }
 
 # Unhandled/unexpected error
@@ -352,12 +350,18 @@ _event err_cannotsendtochan => sub {
   $self->_notice("Cannot send to channel $msg->{params}[1].");
 };
 
+_event err_erroneusnickname => sub {
+  my ($self, $msg) = @_;
+  my $nick = $msg->{params}[1] || 'unknown';
+  $self->_notice("Invalid nickname $nick.");
+};
+
 _event err_nicknameinuse => sub {    # TODO
   my ($self, $msg) = @_;
   my $nick = $msg->{params}[1];
 
   # do not want to flod frontend with these messages
-  $self->_notice(qq(Nickname $nick is already in use.)) unless $self->{err_nicknameinuse}{$nick}++;
+  $self->_notice("Nickname $nick is already in use.") unless $self->{err_nicknameinuse}{$nick}++;
 };
 
 # :hybrid8.debian.local 401 Superman #no_such_channel_ :No such nick/channel
@@ -386,7 +390,10 @@ _event irc_kick => sub {
   my $nick   = $msg->{params}[1];
   my $reason = $msg->{params}[2] || '';
 
-  $self->emit(users => $dialog, {kicker => $kicker, part => $nick, message => $reason});
+  $self->emit(
+    users => $dialog,
+    {type => 'kick', kicker => $kicker, part => $nick, message => $reason},
+  );
 };
 
 # :superman!superman@i.love.debian.org MODE superman :+i
@@ -412,7 +419,8 @@ _event irc_nick => sub {
   }
 
   for my $dialog (values %{$self->{dialogs}}) {
-    $self->emit(users => $dialog => {new_nick => $new_nick, old_nick => $old_nick});
+    $self->emit(
+      users => $dialog => {type => 'nick_change', new_nick => $new_nick, nick => $old_nick});
   }
 };
 
@@ -429,7 +437,7 @@ _event irc_part => sub {
     $dialog->frozen('Parted.');
   }
 
-  $self->emit(users => $dialog => {part => $nick, message => $reason});
+  $self->emit(users => $dialog => {type => 'part', nick => $nick, message => $reason});
 };
 
 _event irc_quit => sub {
@@ -444,21 +452,6 @@ _event irc_quit => sub {
 
 _event irc_rpl_away => sub {
   my ($self, $msg) = @_;
-};
-
-# :hybrid8.debian.local 376 superman :End of /MOTD command.
-_event irc_rpl_endofmotd => sub {
-  $_[0]->_notice($_[1]->{params}[1]);
-};
-
-# :hybrid8.debian.local 372 superman :too cool for school
-_event irc_rpl_motd => sub {
-  $_[0]->_notice($_[1]->{params}[1]);
-};
-
-# :hybrid8.debian.local 375 superman :- hybrid8.debian.local Message of the Day -
-_event irc_rpl_motdstart => sub {
-  $_[0]->_notice($_[1]->{params}[1]);
 };
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh

@@ -7,13 +7,22 @@ use Fcntl ':flock';
 use File::HomeDir ();
 use File::Path    ();
 use File::ReadBackwards;
-use File::Spec::Functions qw( catdir catfile );
+use File::Spec::Functions qw(catdir catfile);
 use Mojo::Home;
 use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
 use Symbol;
 use Time::Piece;
 use Time::Seconds;
+
+my %FORMAT = (
+  action      => ['* %s %s',                   qw(from message)],
+  kick        => ['-!- %s kicked %s. %s',      qw(kicker part message)],
+  nick_change => ['-!- %s changed nick to %s', qw(nick new_nick)],
+  notice      => ['-%s- %s',                   qw(from message)],
+  part        => ['-!- %s parted. %s',         qw(nick message)],
+  private     => ['<%s> %s',                   qw(from message)],
+);
 
 has home => sub { shift->_build_home };
 
@@ -136,7 +145,7 @@ sub _build_home {
 
   if (!$home) {
     $home = File::HomeDir->my_home;
-    $home = catdir($home, qw( .local share convos )) if $home;
+    $home = catdir($home, qw(.local share convos)) if $home;
   }
   if ($home) {
     $home = Cwd::abs_path($home) || $home;
@@ -150,7 +159,7 @@ sub _build_home {
 sub _delete_connection {
   my ($self, $connection) = @_;
   my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->id));
-  $connection->unsubscribe($_) for qw( message state users );
+  $connection->unsubscribe($_) for qw(message state users);
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
@@ -162,10 +171,10 @@ sub _delete_user {
 
 sub _log {
   my ($self, $obj, $ts, $message) = @_;
-  my $t = gmtime($ts || time);
-  my $ym = sprintf '%s/%02s', $t->year, $t->mon;
+  my $t    = gmtime $ts;
+  my $ym   = sprintf '%s/%02s', $t->year, $t->mon;
   my $file = $self->_log_file($obj, $ym);
-  my $dir = File::Basename::dirname($file);
+  my $dir  = File::Basename::dirname($file);
 
   File::Path::make_path($dir) unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
@@ -211,16 +220,16 @@ sub _messages {
     next unless $line =~ $args->{re};
     my $message = {message => $2, ts => $1};
     if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
-      @$message{qw( type from )} = (privmsg => $1);
+      @$message{qw(type from)} = (private => $1);
     }
     elsif ($message->{message} =~ s/^-([^\s\>]+)-\s//) {
-      @$message{qw( type from )} = (notice => $1);
+      @$message{qw(type from)} = (notice => $1);
     }
     elsif ($message->{message} =~ s/^\* (\S+)\s//) {
-      @$message{qw( type from )} = (action => $1);
+      @$message{qw(type from)} = (action => $1);
     }
     elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
-      @$message{qw( type from )} = (server => 'server');
+      @$message{qw(type from)} = (server => '');
     }
 
     splice @{$args->{messages}}, $pindex, 0, $message;
@@ -251,28 +260,38 @@ sub _setup {
   $self->on(
     connection => sub {
       my ($self, $connection) = @_;
+      my $cid = $connection->id;
+      my $uid = $connection->user->id;
+
       Scalar::Util::weaken($self);
       $connection->on(
-        message => sub {
-          my ($connection, $target, $msg) = @_;
-          if ($msg->{type} eq 'private') {
-            $self->_log($target, $msg->{ts}, sprintf '<%s> %s', @$msg{qw( from message )});
-          }
-          elsif ($msg->{type} eq 'action') {
-            $self->_log($target, $msg->{ts}, sprintf '* %s %s', @$msg{qw( from message )});
-          }
-          else {
-            $self->_log($target, $msg->{ts}, sprintf '-%s- %s', @$msg{qw( from message )});
-          }
+        me => sub {
+          my ($connection, $info) = @_;
+          $self->emit("user:$uid", me => $info);
         }
       );
       $connection->on(
-        state => sub { $self->_log($_[0], time, "-!- Change connection state to $_[1]. $_[2]") });
+        message => sub {
+          my ($connection, $target, $msg) = @_;
+          my ($format, @keys) = @{$FORMAT{$msg->{type}}};
+          my @tid = $target->id eq $cid ? () : (tid => $target->id);
+          $self->_log($target, $msg->{ts}, sprintf $format, map { $msg->{$_} } @keys);
+          $self->emit("user:$uid", message => {cid => $cid, @tid, %$msg});
+        }
+      );
+      $connection->on(
+        state => sub {
+          my ($connection, $state, $message) = @_;
+          $self->_log($connection, time, sprintf '-!- %s. %s', ucfirst $state, $message);
+          $self->emit("user:$uid", state => {cid => $cid, message => $message, state => $state});
+        }
+      );
       $connection->on(
         users => sub {
-          my ($connection, $dialog, $data) = @_;
-
-          # TODO
+          my ($connection, $target, $data) = @_;
+          my ($format, @keys) = @{$FORMAT{$data->{type}}};
+          $self->_log($connection, time, sprintf $format, map { $data->{$_} } @keys);
+          $self->emit("user:$uid", users => {cid => $cid, tid => $target->id, %$data});
         }
       );
     }

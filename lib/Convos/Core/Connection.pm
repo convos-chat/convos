@@ -76,11 +76,11 @@ sub send {
 }
 
 sub state {
-  my ($self, $state, $description) = @_;
+  my ($self, $state, $message) = @_;
   my $old_state = $self->{state} || '';
   return $self->{state} ||= 'connecting' unless $state;
   die "Invalid state: $state" unless grep { $state eq $_ } qw( connected connecting disconnected );
-  $self->emit(state => $state => $description // '') unless $old_state eq $state;
+  $self->emit(state => $state => $message // '') unless $old_state eq $state;
   $self->{state} = $state;
   $self;
 }
@@ -163,10 +163,9 @@ Emitted when a connection or dialog receives a new message. C<$msg>
 will contain:
 
   {
-    from      => $str,
-    highlight => $bool,
-    message   => $str,
-    type      => {action|notice|privmsg},
+    from    => $str,
+    message => $str,
+    type    => {action|notice|privmsg},
   }
 
 =head2 state
@@ -310,7 +309,7 @@ Meant to be overloaded in a subclass.
 
 =head2 state
 
-  $self = $self->state($state, $description);
+  $self = $self->state($state, $message);
   $state = $self->state;
 
 Holds the state of this object. C<$state> can be "disconnected", "connected"

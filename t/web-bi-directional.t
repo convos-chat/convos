@@ -14,10 +14,9 @@ $t->post_ok('/api/connections', json => {state => 'connect', url => "irc://local
 
 $t->websocket_ok('/events/bi-directional');
 
-# change from "connecting" got "disconnected"
 $user->get_connection('irc-localhost')->state('disconnected');
-$t->message_ok->json_message_is('/type', 'state')->json_message_is('/object/name', 'localhost')
-  ->json_message_is('/object/state', 'connecting')->json_message_is('/data/0', 'disconnected');
+$t->message_ok->json_message_is('/type', 'state')->json_message_is('/cid', 'irc-localhost')
+  ->json_message_is('/state', 'disconnected');
 
 # update profile
 $t->send_ok(
@@ -34,9 +33,9 @@ while (1) {
 # Test to make sure we don't leak events.
 # The get_ok() is just a hack to make sure the server has
 # emitted the "finish" event.
-ok $user->has_subscribers($_), "subscribe $_" for $user->EVENTS;
+ok $user->core->backend->has_subscribers('user:superman@example.com'), 'subscribed';
 $t->finish_ok;
 $t->get_ok('/')->status_is(200);
-ok !$user->has_subscribers($_), "unsubscribe $_" for $user->EVENTS;
+ok !$user->core->backend->has_subscribers('user:superman@example.com'), 'unsubscribed';
 
 done_testing;

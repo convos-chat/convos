@@ -26,6 +26,6 @@ $tx->res->content->unsubscribe('read')->on(
 $t->ua->start($tx);
 is $tx->res->code, 200, '200 OK';
 is $tx->res->headers->content_type, 'text/event-stream', 'Content-Type: text/event-stream';
-like $buffer, qr/event:state\ndata:.*"state":"connecting"/, 'got state event';
+like $buffer, qr/event:state\ndata:.*"state":"disconnected"/, 'got state event';
 
 done_testing;

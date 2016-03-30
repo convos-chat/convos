@@ -14,8 +14,6 @@ use constant BCRYPT_BASE_SETTINGS => do {
   join '', '$2', $nul, '$', $cost, '$';
 };
 
-sub EVENTS {qw(dialog me message state users)}
-
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 sub password { shift->{password} ||= '' }
@@ -34,11 +32,6 @@ has_many connections => 'Convos::Core::Connection' => sub {
   my $connection = $class->new($attrs);
   warn "[@{[$self->email]}] Emit connection for id=@{[$connection->id]}\n" if DEBUG;
   $self->core->backend->emit(connection => $connection);
-
-  for my $e ($self->EVENTS) {
-    $connection->on($e => sub { $self->emit($e => @_) });
-  }
-
   return $connection;
 };
 

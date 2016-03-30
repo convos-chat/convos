@@ -36,9 +36,8 @@ sub event_source {
   }
 
   $self->render_later;
-  $self->_write_event(keep_alive => {});
+  $self->_write_event(noop => {});
   $self->_subscribe($self->can('_write_event'));
-  $self->on(json => sub { warn "TODO: $_[1]"; });
 }
 
 sub _send_event {
@@ -50,37 +49,24 @@ sub _send_event {
 
 sub _subscribe {
   my ($self, $method) = @_;
-  my $user = $self->backend->user;
-  my $tid
-    = Mojo::IOLoop->recurring(INACTIVE_TIMEOUT - 5, sub { $self->$method(keep_alive => {}); });
-  my @cb;
+  my $uid     = $self->backend->user->id;
+  my $backend = $self->app->core->backend;
 
   Scalar::Util::weaken($self);
-  for my $event ($user->EVENTS) {
-    push @cb, $event, $user->on(
-      $event => sub {
-        my ($user, $target, @data) = @_;
-        if ($event eq 'message') {
-          $target = shift(@data)->TO_JSON(1);
-          local $data[0]{ts}
-            = Mojo::Date->new($data[0]{ts})->to_datetime;    # must not touch input data
-          $self->$method($event => {object => $target, data => \@data});
-        }
-        else {
-          $self->$method($event => {object => $target, data => \@data});
-        }
-      }
-    );
-  }
+  my $tid = Mojo::IOLoop->recurring(INACTIVE_TIMEOUT - 5, sub { $self->$method(noop => {}); });
+  my $cb = $backend->on(
+    "user:$uid" => sub {
+      my ($backend, $event, $data) = @_;
+      my $ts = Mojo::Date->new($data->{ts} || time)->to_datetime;
+      $self->$method($event => {%$data, ts => $ts});
+    }
+  );
 
   $self->inactivity_timeout(INACTIVE_TIMEOUT);
   $self->on(
     finish => sub {
       Mojo::IOLoop->remove($tid);
-      while (@cb) {
-        my ($event, $cb) = splice @cb, 0, 2, ();
-        $user->unsubscribe($event => $cb);
-      }
+      $backend->unsubscribe("user:$uid" => $cb);
     }
   );
 }

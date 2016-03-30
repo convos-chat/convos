@@ -17,11 +17,7 @@ sub messages {
   $self->tap($cb, '', []);
 }
 
-sub new {
-  my $self = shift->SUPER::new(@_);
-  $self->_setup;
-  $self;
-}
+sub new { shift->SUPER::new(@_)->tap('_setup') }
 
 sub save_object {
   my ($self, $obj, $cb) = @_;
