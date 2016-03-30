@@ -77,7 +77,7 @@ sub rooms {
     sub { $connection->rooms(shift->begin) },
     sub {
       my ($delay, $err, $rooms) = @_;
-      $self->$cb({rooms => [map { $_->TO_JSON } @$rooms]}, 200);
+      $self->$cb({rooms => $rooms}, 200);
     },
   );
 }

@@ -106,7 +106,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "rooms": { "type": "array", "items": { "$ref": "#/definitions/Dialog" } }
+                "rooms": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string", "description": "Name of the room or person" },
+                      "topic": { "type": "string", "description": "The subjec/topic for this room" }
+                    }
+                  }
+                }
               }
             }
           },
