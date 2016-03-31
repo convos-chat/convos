@@ -126,7 +126,7 @@
   };
 
   proto._onUsers = function(data) {
-    var msg = {from: this.connection().id(), ts: data.ts};
+    var msg = {from: this.connection().id(), ts: data.ts, type: 'notice'};
     if (data.new_nick) {
       msg.message = data.nick + ' changed nick to ' + data.new_nick + '.';
     }

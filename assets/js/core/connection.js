@@ -122,7 +122,7 @@
   };
 
   proto._onMessage = function(data) {
-    data.from = this.name();
+    data.from = this.id();
     data.type = 'notice';
     this.user().currentDialog().trigger('message', data);
   };
@@ -130,7 +130,7 @@
   proto._onState = function(data) {
     this.state(data.state);
     this.user().currentDialog().trigger('message', {
-      from: this.name(),
+      from: this.id(),
       message: data.message + ' (' + data.state + ')',
       ts: data.ts,
       type: 'notice'
