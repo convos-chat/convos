@@ -12,7 +12,7 @@ sub connect {
   my ($self, $connection) = @_;
   my $host = $connection->url->host;
 
-  $connection->state('connecting');
+  $connection->state('queued');
 
   if ($host eq 'localhost') {
     $connection->connect(sub { });

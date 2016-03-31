@@ -84,7 +84,7 @@ sub connect {
 
   delete $self->{disconnect};
   Scalar::Util::weaken($self);
-  $self->state('connecting');
+  $self->state('queued');
   $_->frozen('Not connected.') for @{$self->dialogs};
   $self->{steal_nick_tid}
     ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
@@ -234,7 +234,7 @@ sub topic {
 
 sub _event_irc_close {
   my ($self) = @_;
-  my $state = delete $self->{disconnect} ? 'disconnected' : 'connecting';
+  my $state = delete $self->{disconnect} ? 'disconnected' : 'queued';
   $self->state($state, sprintf 'You [%s@%s] have quit.',
     $self->_irc->nick, $self->_irc->real_host || $self->url->host);
   delete $self->{_irc};

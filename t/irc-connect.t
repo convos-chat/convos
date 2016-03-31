@@ -26,7 +26,7 @@ no warnings qw(once redefine);
 is $connection->url->query->param('tls'), undef, 'enable tls';
 $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
-is_deeply \@state, [qw( connecting disconnected )], 'connecting => disconnected';
+is_deeply \@state, [qw(queued disconnected)], 'queued => disconnected';
 like $err, qr{\bSSL connect attempt failed\b}, 'SSL connect attempt';
 is $connection->url->query->param('tls'), 0, 'disable tls';
 
@@ -36,14 +36,12 @@ $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 like $err, qr{\bIO::Socket::SSL\b}, 'IO::Socket::SSL missing';
 is $connection->url->query->param('tls'), 0, 'disable tls';
-is_deeply \@state, [qw( connecting disconnected connecting disconnected )],
-  'connecting => disconnected';
+is_deeply \@state, [qw(queued disconnected queued disconnected)], 'queued => disconnected';
 
 *Mojo::IRC::connect = sub { pop->($_[0], '') };
 $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 is $err, '', 'no error';
-is_deeply \@state, [qw( connecting disconnected connecting disconnected connecting connected )],
-  'connected';
+is_deeply \@state, [qw(queued disconnected queued disconnected queued connected)], 'connected';
 
 done_testing;

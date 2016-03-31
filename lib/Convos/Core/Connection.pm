@@ -78,8 +78,8 @@ sub send {
 sub state {
   my ($self, $state, $message) = @_;
   my $old_state = $self->{state} || '';
-  return $self->{state} ||= 'connecting' unless $state;
-  die "Invalid state: $state" unless grep { $state eq $_ } qw( connected connecting disconnected );
+  return $self->{state} ||= 'queued' unless $state;
+  die "Invalid state: $state" unless grep { $state eq $_ } qw(connected queued disconnected);
   $self->emit(state => $state => $message // '') unless $old_state eq $state;
   $self->{state} = $state;
   $self;
@@ -103,10 +103,10 @@ sub _userinfo {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  $self->{state} ||= 'connecting';
+  $self->{state} ||= 'queued';
   my $json = {map { ($_, '' . $self->$_) } qw( id name protocol state url )};
 
-  $json->{state} = 'connecting' if $persist and $json->{state} eq 'connected';
+  $json->{state} = 'queued' if $persist and $json->{state} eq 'connected';
 
   if ($persist) {
     $json->{dialogs} = [map { $_->TO_JSON($persist) } @{$self->dialogs}];
@@ -313,7 +313,7 @@ Meant to be overloaded in a subclass.
   $state = $self->state;
 
 Holds the state of this object. C<$state> can be "disconnected", "connected"
-or "connecting" (default). "connecting" means that the object is in the
+or "queued" (default). "queued" means that the object is in the
 process of connecting or that it want to connect.
 
 =head2 topic

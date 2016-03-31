@@ -583,7 +583,7 @@
       "properties": {
         "id": { "type": "string", "description": "Unique identifier for this connection" },
         "name": { "type": "string", "description": "Name for this connection" },
-        "state": { "type": "string", "enum": ["connected", "connecting", "disconnected"], "description": "Connection state" },
+        "state": { "type": "string", "enum": ["connected", "queued", "disconnected"], "description": "Connection state" },
         "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
     },

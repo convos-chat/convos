@@ -238,7 +238,7 @@ cmp_deeply(
     id       => 'irc-localhost',
     name     => 'localhost',
     protocol => 'irc',
-    state    => 'connecting',
+    state    => 'queued',
     url      => re(qr{^irc://.*\?tls=0}),
   },
   'connection->TO_JSON(1)'

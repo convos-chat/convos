@@ -37,7 +37,7 @@ $t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.c
   ->status_is(404);
 $t->post_ok('/api/connection/irc-example', json => {})->status_is(200);
 $t->post_ok('/api/connection/irc-localhost', json => {url => 'foo://example.com:9999'})
-  ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connecting')
+  ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
   ->json_like('/url' => qr{irc://example.com:9999\?nick=superman});
 
 $t->delete_ok('/api/connection/irc-doesnotexist')->status_is(200);

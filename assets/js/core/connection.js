@@ -110,7 +110,7 @@
   };
 
   // Change state to "connected" or "disconnected"
-  // Can also be used to retrieve state: "connected", "disconnected" or "connecting"
+  // Can also be used to retrieve state: "connected", "disconnected" or "queued"
   proto.state = function(state, cb) {
     if (!cb) return this._state;
     throw 'TODO';

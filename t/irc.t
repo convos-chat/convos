@@ -23,7 +23,7 @@ cmp_deeply(
     id       => ignore(),
     name     => 'localhost',
     protocol => 'irc',
-    state    => 'connecting',
+    state    => 'queued',
     url      => 'irc://127.0.0.1'
   },
   'TO_JSON'
