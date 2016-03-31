@@ -51,7 +51,7 @@ sub new {
 
 sub part_dialog {
   my ($self, $cb) = (shift, pop);
-  $self->tap($cb, 'Method "join_dialog" not implemented.');
+  $self->tap($cb, 'Method "part_dialog" not implemented.');
 }
 
 sub participants {

@@ -13,19 +13,10 @@ my $t = t::Helper->connect_to_irc($connection);
 $connection->_irc->emit(
   irc_privmsg => {
     prefix => 'Supergirl!super.girl@i.love.debian.org',
-    params => ['#convos', 'not a ssuperman highlight']
+    params => ['#convos', 'not a superdupersuperman?']
   }
 );
-like slurp_log("#convos"), qr{\Q<Supergirl> not a ssuperman highlight\E}m, 'normal message';
-
-$connection->_irc->emit(
-  irc_privmsg => {
-    prefix => 'Supergirl!super.girl@i.love.debian.org',
-    params => ['#convos', 'highlight -superman?']
-  }
-);
-like slurp_log("#convos"), qr{\Q<Supergirl> highlight -superman?\E}m,
-  'highlight message in channel';
+like slurp_log("#convos"), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
 $connection->_irc->emit(irc_privmsg =>
     {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['superman', 'does this work?']}

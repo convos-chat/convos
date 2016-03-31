@@ -42,6 +42,25 @@
     }
   },
   "paths": {
+    "/embed": {
+      "get": {
+        "tags": [],
+        "summary": "Get information from a URL",
+        "operationId": "infoFromUrl",
+        "parameters": [
+          { "name": "url", "in": "query", "required": true, "type": "string", "description": "URL to resource" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about resource."
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/connection/{connection_id}": {
       "delete": {
         "tags": [ "connection" ],

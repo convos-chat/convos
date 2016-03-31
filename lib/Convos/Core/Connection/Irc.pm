@@ -218,7 +218,7 @@ sub send {
     return $self->part_dialog($args || $target, $cb) if $cmd eq 'CLOSE';
     return $self->part_dialog($args || $target, $cb) if $cmd eq 'PART';
     return $self->topic($target, $args ? ($args) : (), $cb) if $cmd eq 'TOPIC';
-    return $self->whois($args, $cb) if $cmd eq 'WHOIS';
+    return $self->_proxy(whois => $args, $cb) if $cmd eq 'WHOIS';
     return $self->_next_tick($cb => 'Unknown IRC command.');
   }
 
@@ -230,14 +230,6 @@ sub topic {
   my $self = shift;
   Scalar::Util::weaken($self);
   $self->_proxy(channel_topic => @_, sub { shift; $self->$cb(@_); });
-}
-
-sub whois {
-  my ($self, $target, $cb) = @_;
-  return $self->tap($cb, "Cannot retrieve whois without target.", {})
-    unless $target;    # err_nonicknamegiven
-  Scalar::Util::weaken($self);
-  $self->_proxy(whois => $target, sub { shift; $self->$cb(@_); });
 }
 
 sub _event_irc_close {
@@ -576,10 +568,6 @@ See L<Convos::Core::Connection/send>.
 =head2 topic
 
 See L<Convos::Core::Connection/topic>.
-
-=head2 whois
-
-See L<Convos::Core::Connection/whois>.
 
 =head1 AUTHOR
 

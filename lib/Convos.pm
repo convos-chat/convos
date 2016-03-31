@@ -44,7 +44,6 @@ sub startup {
 
   # Expand links into rich content
   $self->plugin('LinkEmbedder');
-  $r->get('/api/embed')->to('dialog#embed');
 
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
