@@ -13,7 +13,7 @@ install:
 notifications:
   email: false
   irc:
-    on_failure: always
-    on_success: never
+    on_failure: change
+    on_success: change
     channels:
       - "chat.freenode.net#convos"
