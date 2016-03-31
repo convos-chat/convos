@@ -196,7 +196,7 @@ sub _log_file {
   }
 
   push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
-  push @path, $obj->name if $obj->isa('Convos::Core::Dialog');
+  push @path, $obj->id if $obj->isa('Convos::Core::Dialog');
 
   return $self->home->rel_file(join('/', @path) . '.log');
 }
