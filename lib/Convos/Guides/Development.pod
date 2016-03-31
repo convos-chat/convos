@@ -153,9 +153,9 @@ L<Convos::Controller::User>.
             ____| Backend |
   .------._/    '---------'
   | Core |
-  '------'   .------.   .-------------.   .-----------.
+  '------'   .------.   .-------------.   .---------.
       \______| User |___| Connections |___| Dialogs |
-             '------'   '-------------'   '-----------'
+             '------'   '-------------'   '---------'
 
 L<Convos::Core> is the heart of L<Convos>. The core takes care of connections,
 dialogs, can persist to a backend and provide hooks for plugins.
@@ -170,42 +170,22 @@ Backend can choose to persist to storage. The default backend is a
 file-based backend, which enables Convos to be started without any additional
 dependencies, except Perl and a couple of modules from CPAN.
 
-=head2 Make changes
+=head2 Contribute
 
 First you need to identify which part you want to contribute to. The current
 "batcode" branch is starting to take form. The API is pretty usable and
-tested, but the frontend is still infant.
+tested, but the frontend is infant.
 
-At this point it would be nice to...
+We welcome pull requests on L<github|https://github.com/Nordaaker/convos/pulls>.
 
-=over 2
+=head2 Get in touch
 
-=item *
+We would love to hear from you!
 
-Have a look at C<public/convos-api.json> and see if the API makes sense.
+Please contact us in the #convos IRC channel on chat.freenode.net or send us
+a message on L<twitter|https://twitter.com/convosby>.
 
-=item *
-
-See if the documentation for the Perl modules are understandable.
-
-=item *
-
-Help with figuring out how to do automated JavaScript tests and make the
-frontend usable.
-
-=item *
-
-Extend the File backend with search feature.
-
-=item *
-
-Create a L<Mojo::Redis2> backend, compatible with the current Convos code.
-
-=back
-
-=head2 Talk to us
-
-Please give us feedback by joining the "#convos" channel on C<irc.freenode.net>.
+You can also send an email to C<jhthorsen@cpan.org> or C<marcus@nordaaker.com>.
 
 =head1 TODO
 
