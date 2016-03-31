@@ -1,0 +1,20 @@
+<template id="vue-sidebar-notifications">
+  <span v-show="!notifications.length">
+    <i class="material-icons">notifications_none</i> No notifications
+  </span>
+  <a v-for="n in notifications">
+    {{n.from}}: "{{n.message}}" @<span class="ts" title="{{n.ts}}">{{ts | timestring}}</span>
+  </a>
+</template>
+<script type="vue/component">
+// notifications is not yet implemented
+Vue.component("sidebar-notifications", {
+  template: Convos.tag("sidebar-notifications"),
+  props:    ["user"],
+  data:     function() {
+    return {
+      notifications: []
+    };
+  }
+});
+</script>

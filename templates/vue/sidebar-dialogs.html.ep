@@ -1,0 +1,41 @@
+<template id="vue-sidebar-dialogs">
+  <a href="{{d.href()}}" @click.prevent="setCurrentDialog(d)" title="{{d.frozen}}" :class="dialogClass(d)" v-for="d in dialogs">
+    <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
+    <span class="on">{{d.connection.protocol}}-{{d.connection.name}}</span>
+  </a>
+  <a href='#settings/connections' :class="dialogClass" v-for="c in connections">
+    <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
+    <span class="on">{{c.humanState()}}</span>
+  </a>
+</template>
+<script type="vue/component">
+Vue.component("sidebar-dialogs", {
+  template: Convos.tag("sidebar-dialogs"),
+  props:    ["user"],
+  data:     function() {
+    return {
+      connections: [],
+      dialogs:     []
+    };
+  },
+  methods: {
+    dialogClass: function(d) {
+      return {
+        active:     d == this.user.currentDialog(),
+        frozen:     d.frozen,
+        tooltipped: true
+      };
+    },
+    setCurrentDialog: function(d) {
+      this.user.currentDialog(d);
+    }
+  },
+  ready: function() {
+    var self = this;
+    this.user.on("refreshed", function() {
+      self.connections = this.connections();
+      self.dialogs     = this.dialogs();
+    });
+  }
+});
+</script>

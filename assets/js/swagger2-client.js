@@ -21,6 +21,12 @@
   // xhr = client.cached("listPets");
   proto.cached = function(operationId) { return cache[operationId]; };
 
+  proto.clearCache = function() { cache = {}; };
+
+  // Force using plain HTTP instead of WebSocket
+  // client.http().listPets({}, function(err, xhr) {});
+  proto.http = function() { this._http = true; return this; };
+
   // Force getting fresh data from server
   // client.fresh().listPets({}, function(err, xhr) {});
   proto.fresh = function() { this._fresh = true; return this; };
@@ -45,19 +51,22 @@
         if (window.DEBUG == 2) console.log('[Swagger] Add method ' + opSpec.operationId);
         self[opSpec.operationId] = function(input, cb) {
           var xhr = this._fresh ? false : this.cached(opSpec.operationId);
+          var http = this._http;
+
+          delete this._fresh; // reset on each request
+          delete this._http; // reset on each request
 
           if (xhr) {
             if (window.DEBUG) console.log('[Swagger] ' + xhr.url + ' is cached');
             setTimeout(function() { cb.call(this, null, xhr) }.bind(this), 0);
           }
-          else if(this._ws && this._ws.readyState == WebSocket.OPEN) {
+          else if(!http && this._ws && this._ws.readyState == WebSocket.OPEN) {
             this._ws.send({id: this._id, op: opSpec.operationId, params: input});
             this._xhr[this._id++] = cb;
             cb.op = opSpec.operationId;
           }
           else {
             xhr = this.req(httpMethod, pathList, input, opSpec.parameters || []);
-            this._fresh = false; // reset on each request
             if (xhr.errors) {
               setTimeout(function() { cb.call(this, xhr.errors, xhr) }.bind(this), 0);
             }

@@ -1,0 +1,39 @@
+<template id ="vue-sidebar-settings">
+  <a href="#create-dialog" @click.prevent="toggle('create-dialog')" :class="activeClass('create-dialog')" title="Create dialog" data-position="top">
+    <i class="material-icons">group_add</i>
+  </a>
+  <a href="#connection-editor" @click.prevent="toggle('connection-editor')" :class="activeClass('connection-editor')" title="Edit connections" data-position="top">
+    <i class="material-icons">device_hub</i>
+  </a>
+  <a href="#user-profile" @click.prevent="toggle('user-profile')" :class="activeClass('user-profile')" title="Edit profile" data-position="top">
+    <i class="material-icons">account_circle</i>
+  </a>
+  <a href="#help" @click.prevent="toggle('help')" :class="activeClass('help')" title="Help" data-position="top">
+    <i class="material-icons">help</i>
+  </a>
+  <a href="#logout" @click.prevent="logout" class="tooltipped btn-logout" title="Logout" data-position="top">
+    <i class="material-icons">power_settings_new</i>
+  </a>
+</template>
+<script type="vue/component">
+Vue.component("sidebar-settings", {
+  template: Convos.tag("sidebar-settings"),
+  props:    ["user", "visibleSection"],
+  methods:  {
+    activeClass: function(section) {
+      return {
+        active:     this.visibleSection == section,
+        tooltipped: true
+      };
+    },
+    logout: function(e) {
+      this.user.logout(function(err) {
+        if (err) return console.log(err);
+      });
+    },
+    toggle: function(section) {
+      this.visibleSection = this.visibleSection == section ? "" : section;
+    }
+  }
+});
+</script>

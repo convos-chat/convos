@@ -1,0 +1,74 @@
+<template id="vue-user-login">
+  <div class="row not-logged-in-wrapper">
+    <form @submit.prevent="login" class="col s10 offset-s1 m6 offset-m3">
+      <div class="row">
+        <div class="col s12">
+          <h2>Convos</h2>
+          <p><i>- Collaberation done right.</i></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input v-model="email" id="form_email" type="email" class="tooltipped validate">
+          <label for="form_email">Email</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input v-model="password" id="form_password" type="password" class="tooltipped validate">
+          <label for="form_password">Password</label>
+        </div>
+      </div>
+      <div class="row" v-if="errors.length">
+        <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <button class="btn waves-effect waves-light" type="submit">
+            Log in <i class="material-icons right">send</i>
+          </button>
+          <a href="#register" @click.prevent="render = 'register'" class="btn-flat waves-effect waves-light">Register</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12 about">
+          &copy; <a href="http://nordaaker.com">Nordaaker</a> - <a href="http://convos.by">About</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</template>
+<script type="vue/component">
+Vue.component("user-login", {
+  template: Convos.tag("user-login"),
+  props:    ["render", "user"],
+  data:     function() {
+    return {
+      email:  localStorage.getItem("email"),
+      errors: []
+    };
+  },
+  methods: {
+    login: function() {
+      var self = this;
+      this.errors = [];
+      localStorage.setItem("email", this.email);
+
+      Convos.api.loginUser(
+        {
+          body: {
+            email:    this.email,
+            password: this.password
+          }
+        }, function(err, xhr) {
+          if (err) return self.errors = err;
+          self.user.update(xhr.body);
+        }
+      );
+    }
+  },
+  ready: function() {
+    $("#form_email").focus();
+  }
+});
+</script>

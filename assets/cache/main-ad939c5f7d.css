@@ -4578,6 +4578,9 @@ input[type=range]:focus::-ms-fill-upper {
 body {
   background-color: #fff; }
 
+convos {
+  display: none; }
+
 h1, h2, h3, h4, h5 {
   color: #2E7D32; }
 
@@ -4601,16 +4604,16 @@ div.alert {
   color: #D32F2F;
   padding: 10px; }
 
-not-found, .centered {
+.centered {
   display: flex;
   height: 100vh;
   align-items: center;
   justify-content: center; }
-  not-found > div, .centered > div {
+  .centered > div {
     text-align: center;
     max-width: 50%;
     padding-bottom: 30px; }
-  not-found i.material-icons, .centered i.material-icons {
+  .centered i.material-icons {
     vertical-align: middle; }
 
 .material-tooltip {
@@ -4659,21 +4662,21 @@ chat {
   height: 100vh;
   margin-right: 299px;
   overflow: hidden; }
-  chat dialog-container {
+  chat .dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
     overflow: auto; }
-  chat connection-editor {
+  chat .connection-editor {
     max-width: 500px;
     min-width: 500px; }
-  chat convos-help,
-  chat new-dialog {
+  chat .convos-help,
+  chat .create-dialog {
     max-width: 420px;
     min-width: 420px; }
-  chat dialog-container {
+  chat .dialog-container {
     max-width: 860px; }
-  chat dialog-container main {
+  chat .dialog-container main {
     padding-bottom: 1.5rem;
     overflow: auto;
     flex-grow: 1; }
@@ -4686,121 +4689,121 @@ chat {
     right: 0;
     bottom: 0;
     z-index: 900; }
-    chat nav sidebar-dialogs {
+    chat nav .sidebar-dialogs {
       flex-grow: 1;
       overflow: auto; }
 
-connection-editor,
-convos-help,
-dialog-container,
-new-dialog {
+.connection-editor,
+.convos-help,
+.create-dialog,
+.dialog-container {
   display: block;
   overflow: auto;
   max-height: 100vh; }
-  connection-editor h5,
-  convos-help h5,
-  dialog-container h5,
-  new-dialog h5 {
+  .connection-editor h5,
+  .convos-help h5,
+  .create-dialog h5,
+  .dialog-container h5 {
     margin-top: 0;
     padding-top: 0.75rem; }
-  connection-editor input[type=text],
-  convos-help input[type=text],
-  dialog-container input[type=text],
-  new-dialog input[type=text] {
+  .connection-editor input[type=text],
+  .convos-help input[type=text],
+  .create-dialog input[type=text],
+  .dialog-container input[type=text] {
     margin: 0; }
-  connection-editor .actions,
-  convos-help .actions,
-  dialog-container .actions,
-  new-dialog .actions {
+  .connection-editor .actions,
+  .convos-help .actions,
+  .create-dialog .actions,
+  .dialog-container .actions {
     overflow: hidden;
     position: absolute;
     top: 0.6rem;
     right: 0.45rem; }
 
-connection-editor,
-convos-help,
-new-dialog {
+.connection-editor,
+.convos-help,
+.create-dialog {
   background: #f6f6f6;
   position: relative; }
 
-convos-help dl dd {
+.convos-help dl dd {
   margin: 0 0 0.45rem 1.5rem; }
 
-convos-help ul {
+.convos-help ul {
   list-style-type: square;
   padding-left: 1.5rem; }
-  convos-help ul li {
+  .convos-help ul li {
     list-style-type: inherit; }
 
-dialog-container {
+.dialog-container {
   padding: 0 0.75rem; }
-  dialog-container header {
+  .dialog-container header {
     position: relative; }
-    dialog-container header .actions {
+    .dialog-container header .actions {
       right: -4px; }
-  dialog-container dialog-message {
+  .dialog-container .dialog-message {
     display: block;
     position: relative;
     margin: 8px 0; }
-    dialog-container dialog-message:hover {
+    .dialog-container .dialog-message:hover {
       background: #fafafa; }
-    dialog-container dialog-message.error, dialog-container dialog-message.notice {
+    .dialog-container .dialog-message.error, .dialog-container .dialog-message.notice {
       padding-left: 0.75rem;
       padding-right: 0.75rem;
       border-left: 2px solid #bdbdbd; }
-    dialog-container dialog-message.action .message, dialog-container dialog-message.action a.title {
+    .dialog-container .dialog-message.action .message, .dialog-container .dialog-message.action a.title {
       font-style: italic;
       display: inline; }
-    dialog-container dialog-message.error {
+    .dialog-container .dialog-message.error {
       border-left: 2px solid #FF1744;
       color: rgba(102, 102, 102, 0.87); }
-      dialog-container dialog-message.error a {
+      .dialog-container .dialog-message.error a {
         color: #ff7d96; }
-    dialog-container dialog-message.highlight .message {
+    .dialog-container .dialog-message.highlight .message {
       color: #FF5252; }
-    dialog-container dialog-message.notice {
+    .dialog-container .dialog-message.notice {
       border-left: 2px solid #bdbdbd;
       color: rgba(102, 102, 102, 0.87); }
-      dialog-container dialog-message.notice a {
+      .dialog-container .dialog-message.notice a {
         color: #68c46d; }
-    dialog-container dialog-message.same-user {
+    .dialog-container .dialog-message.same-user {
       margin-top: -4px; }
-    dialog-container dialog-message.same-user a.title, dialog-container dialog-message.same-user .secondary-content {
+    .dialog-container .dialog-message.same-user a.title, .dialog-container .dialog-message.same-user .secondary-content {
       display: none; }
-    dialog-container dialog-message .message a {
+    .dialog-container .dialog-message .message a {
       color: inherit;
       text-decoration: underline; }
-    dialog-container dialog-message .message a:hover {
+    .dialog-container .dialog-message .message a:hover {
       text-decoration: none; }
-    dialog-container dialog-message .secondary-content {
+    .dialog-container .dialog-message .secondary-content {
       position: absolute;
       top: 2px;
       right: 0; }
-      dialog-container dialog-message .secondary-content, dialog-container dialog-message .secondary-content a {
+      .dialog-container .dialog-message .secondary-content, .dialog-container .dialog-message .secondary-content a {
         color: #757575;
         font-size: 0.8rem;
         overflow: hidden;
         display: block; }
-      dialog-container dialog-message .secondary-content i {
+      .dialog-container .dialog-message .secondary-content i {
         vertical-align: bottom; }
 
-user-input {
+.user-input {
   border-top: 1px solid #dbdbdb;
   box-sizing: content-box; }
-  user-input .actions {
+  .user-input .actions {
     text-align: right;
     overflow: visible;
     position: relative;
     height: 0;
     top: -34px;
     right: 1px; }
-    user-input .actions a {
+    .user-input .actions a {
       display: inline-block;
       margin-right: -4px;
       padding: 4px 6px; }
-    user-input .actions i {
+    .user-input .actions i {
       vertical-align: bottom; }
-  user-input textarea.materialize-textarea {
+  .user-input textarea.materialize-textarea {
     max-height: 11.5rem;
     margin: 8px 0;
     padding: 0;
@@ -4811,28 +4814,28 @@ nav {
   color: #777; }
   nav .material-icons {
     vertical-align: bottom; }
-  nav sidebar-dialogs > span, nav sidebar-dialogs > a,
-  nav sidebar-notifications > span,
-  nav sidebar-notifications > a {
+  nav .sidebar-dialogs > span, nav .sidebar-dialogs > a,
+  nav .sidebar-notifications > span,
+  nav .sidebar-notifications > a {
     display: block;
     padding: 0.5rem 0.75rem 1rem 0.75rem; }
-  nav sidebar-dialogs a {
+  nav .sidebar-dialogs a {
     border-right: 4px solid #fff; }
-  nav sidebar-dialogs a.active {
+  nav .sidebar-dialogs a.active {
     color: #225725;
     border-color: #388E3C;
     font-weight: bold; }
-  nav sidebar-dialogs a.frozen {
+  nav .sidebar-dialogs a.frozen {
     color: #B71C1C; }
-  nav sidebar-dialogs .on {
+  nav .sidebar-dialogs .on {
     display: block;
     font-size: 0.9rem;
     color: #777;
     margin-left: 28px;
     margin-bottom: -5px; }
-  nav sidebar-settings {
+  nav .sidebar-settings {
     display: flex; }
-    nav sidebar-settings a {
+    nav .sidebar-settings a {
       text-align: center;
       border-bottom: 3px solid #fff;
       padding: 0.5rem 0 1rem 0;
@@ -4840,7 +4843,7 @@ nav {
       position: relative;
       display: block;
       flex-grow: 1; }
-    nav sidebar-settings a.active {
+    nav .sidebar-settings a.active {
       border-color: #388E3C; }
 
 img.embed, .link-embedder.text-html {

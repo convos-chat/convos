@@ -3,15 +3,15 @@ nav {
 
   .material-icons { vertical-align: bottom; }
 
-  sidebar-dialogs,
-  sidebar-notifications {
+  .sidebar-dialogs,
+  .sidebar-notifications {
     > span, > a {
       display: block;
       padding: $element-top-margin $gutter-width / 2 $element-bottom-margin $gutter-width / 2;
     }
   }
 
-  sidebar-dialogs {
+  .sidebar-dialogs {
     a {
       border-right: 4px solid $body-bg;
     }
@@ -32,7 +32,7 @@ nav {
     }
   }
 
-  sidebar-settings {
+  .sidebar-settings {
     display: flex;
 
     a {

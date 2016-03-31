@@ -5,20 +5,20 @@ chat {
   margin-right: $sidebar-width - 1;
   overflow: hidden;
 
-  dialog-container {
+  .dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
     overflow: auto;
   }
 
-  connection-editor { max-width: 500px; min-width: 500px; }
+  .connection-editor { max-width: 500px; min-width: 500px; }
 
-  convos-help,
-  new-dialog { max-width: 420px; min-width: 420px; }
+  .convos-help,
+  .create-dialog { max-width: 420px; min-width: 420px; }
 
-  dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
-  dialog-container main {
+  .dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
+  .dialog-container main {
     padding-bottom: $gutter-width;
     overflow: auto;
     flex-grow: 1;
@@ -34,17 +34,17 @@ chat {
     bottom: 0;
     z-index: 900;
 
-    sidebar-dialogs {
+    .sidebar-dialogs {
       flex-grow: 1;
       overflow: auto;
     }
   }
 }
 
-connection-editor,
-convos-help,
-dialog-container,
-new-dialog {
+.connection-editor,
+.convos-help,
+.create-dialog,
+.dialog-container {
   display: block;
   overflow: auto;
   max-height: 100vh;
@@ -66,14 +66,14 @@ new-dialog {
   }
 }
 
-connection-editor,
-convos-help,
-new-dialog {
+.connection-editor,
+.convos-help,
+.create-dialog {
   background: $settings-active-color;
   position: relative;
 }
 
-convos-help {
+.convos-help {
   dl dd {
     margin: 0 0 $gutter-width * 0.3 $gutter-width;
   }

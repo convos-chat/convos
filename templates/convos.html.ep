@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html data-framework="vue">
+  <head>
+    <title>Convos</title>
+    %= asset 'convos.css';
+  </head>
+  <body>
+    <convos>
+      <user-login :user="user" :render.sync="render" v-show="render == 'login'"></user-login>
+      <user-register :user="user" :render.sync="render" v-show="render == 'register'"></user-register>
+      <chat v-show="render == 'chat'">
+        <nav>
+          <sidebar-notifications :user="user"></sidebar-notifications>
+          <sidebar-dialogs :user="user"></sidebar-dialogs>
+          <sidebar-settings :user="user" :visible-section.sync="visibleSection"></sidebar-settings>
+        </nav>
+        <create-dialog :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'create-dialog'"></create-dialog>
+        <connection-editor :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'connection-editor'"></connection-editor>
+        <user-profile :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'user-profile'"></user-profile>
+        <convos-help :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'help'"></convos-help>
+        <dialog-container :user="user"></dialog-container>
+      </chat>
+    </convos>
+
+    %= include 'vue/connection-editor'
+    %= include 'vue/convos-help'
+    %= include 'vue/create-dialog'
+    %= include 'vue/dialog-container'
+    %= include 'vue/dialog-message'
+    %= include 'vue/sidebar-dialogs'
+    %= include 'vue/sidebar-notifications'
+    %= include 'vue/sidebar-settings'
+    %= include 'vue/user-input'
+    %= include 'vue/user-login'
+    %# include 'vue/user-profile'
+    %= include 'vue/user-register'
+
+    %= javascript begin
+      window.Convos = {
+        apiUrl:   "<%= $c->url_for('convos_api_specification') %>",
+        wsUrl:    "<%= $c->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
+        mode:     "<%= app->mode %>",
+        settings: <%== Mojo::JSON::encode_json($settings) %>
+      };
+    % end
+    %= asset 'convos.js';
+  </body>
+</html>

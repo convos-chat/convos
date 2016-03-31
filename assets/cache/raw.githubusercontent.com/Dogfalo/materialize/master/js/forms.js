@@ -384,8 +384,7 @@
             activateOption(options, $(this));
             $select.find('option').eq(i).prop('selected', selected);
             // Trigger onchange() event
-            $select.get(0).onchange(e);
-            if (typeof callback !== 'undefined') callback();
+            if (typeof callback !== 'undefined') callback.call($select.get(0));
           }
 
           e.stopPropagation();

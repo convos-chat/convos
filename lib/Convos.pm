@@ -26,10 +26,9 @@ sub startup {
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
   $self->sessions->secure(1) if $config->{secure_cookies};
-  push @{$self->renderer->classes}, __PACKAGE__;
 
   # Add basic routes
-  $r->get('/')->to(template => 'app');
+  $r->get('/')->to(template => 'convos');
   $r->get('/events/event-source')->to('events#event_source')->name('event_source');
   $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
 
@@ -275,24 +274,3 @@ Jan Henning Thorsen - C<jhthorsen@cpan.org>
 Marcus Ramberg - C<marcus@nordaaker.com>
 
 =cut
-
-__DATA__
-@@ app.html.ep
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Convos</title>
-    %= asset 'convos.css';
-    %= javascript begin
-      window.Convos={
-        apiUrl:"<%= $self->url_for('convos_api_specification') %>",
-        wsUrl:"<%= $self->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
-        settings:<%== Mojo::JSON::encode_json($settings) %>
-      };
-    % end
-  </head>
-  <body>
-    <app><div class="centered"><div>Loading...</div></div></app>
-    %= asset 'convos.js';
-  </body>
-</html>

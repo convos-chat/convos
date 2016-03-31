@@ -2,6 +2,9 @@ body {
   background-color: $body-bg;
 }
 
+// will be visible by javascript
+convos { display: none; }
+
 h1, h2, h3, h4, h5 {
   color: $header-color;
 }
@@ -33,7 +36,7 @@ div.alert {
   padding: $card-padding / 2;
 }
 
-not-found, .centered {
+.centered {
   display: flex;
   height: 100vh;
   align-items: center;

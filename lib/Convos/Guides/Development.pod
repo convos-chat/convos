@@ -17,9 +17,6 @@ It is helpful if you are familiar with L<git|http://git-scm.com>,
 L<Mojolicious> and basic L<Perl|http://perl.org> tools, such as
 L<prove|App::prove> and L<cpanm|https://cpanmin.us>.
 
-You also need L<npm|https://www.npmjs.com/> to do L<http://riotjs.com>
-development.
-
 =head2 Getting the source code
 
 The first step is to clone the repository. You can either do this directly
@@ -45,9 +42,6 @@ Once you have the source code you should install the dependencies:
 C<--develop> will also install dependencies which is only required if you
 want to make changes to the files in the C<assets/> directory.
 
-Other dependencies (such as L<riot|http://riotjs.com/>) will be installed
-automatically when you start making changes in the C<assets/> directory.
-
 =head2 Installing an IRC daemon
 
 It is highly suggested that you install an IRC daemon, since many networks
@@ -69,7 +63,7 @@ The basics of getting the application running is the command below:
 The command above is the same as:
 
   $ MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 \
-    morbo script/convos -w assets/riot -w assets/sass -w assets/js -w public/convos-api.json
+    morbo script/convos -w assets/sass -w assets/js -w public/convos-api.json
 
 L<MOJO_IRC_DEBUG|Mojo::IRC> will print IRC debug to STDERR and C<CONVOS_DEBUG>
 will print L<Convos> debug to STDERR. The C<-w> switch is for watching
@@ -84,9 +78,6 @@ different files and directories for changes.
 The "assets" directory contains all JavaScript and Sass files, which will
 be used to generate the "public" files. The dialog is done with
 L<https://github.com/jhthorsen/mojolicious-plugin-assetpack>.
-
-The C<.tag> files require L<riot|http://riotjs.com> to be compiled into
-JavaScript.
 
 =item * ./cpanfile
 
@@ -139,7 +130,7 @@ TODO: Move this directory to "assets".
 
 The frontend contains of a single template, embedded inside of C<Convos.pm>.
 The rest of the frontend consist of a JavaScript application, powered by
-L<http://riotjs.com>. This application gets its data from a L<Swagger2>
+L<http://vuejs.org>. This application gets its data from a L<Swagger2>
 API with a thin logical layer inside the controllers
 L<Convos::Controller::Connection>,
 L<Convos::Controller::Dialog>,

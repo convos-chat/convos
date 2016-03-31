@@ -1,51 +1,47 @@
 (function(window) {
   Convos.Dialog = function(attrs) {
-    if (attrs) this.update(attrs);
+    EventEmitter(this);
     this._api = Convos.api;
-    riot.observable(this);
-    this.on('message', this.addMessage);
-    this.on('message', function() { riot.update() });
-    this.on('users', this._onUsers);
-    this.one('show', this._load);
+    this.messages = [];
+    this.on("message", this.addMessage);
+    this.on("message", function() {
+      this.connection.user.emit("message", this);
+    });
+    this.on("users", this._onUsers);
+    this.once("show", this._load);
+    if (attrs) this.update(attrs);
   };
 
   var proto = Convos.Dialog.prototype;
 
-  // Define attributes
-  mixin.base(proto, {
-    connection: function() { throw 'connection() cannot be built'; },
-    frozen: function() { return '' },
-    icon: function() { return this.is_private() ? 'person' : 'group' },
-    id: function() { return '' },
-    is_private: function() { return true; },
-    messages: function() { return []; },
-    name: function() { return 'Convos' },
-    topic: function() { return '' }
-  });
-
   proto.addMessage = function(msg) {
-    if (!msg.from) msg.from = 'convosbot';
-    if (!msg.ts) msg.ts = new Date();
-    if (typeof msg.ts == 'string') msg.ts = new Date(msg.ts);
-    if (msg.message && this._connection) this.connection().highlightMessage(msg);
-    this.messages().push(msg);
+    if (!msg.from)
+      msg.from = "convosbot";
+    if (!msg.ts)
+      msg.ts = new Date();
+    if (typeof msg.ts == "string")
+      msg.ts = new Date(msg.ts);
+    if (msg.message && this._connection) this.connection.highlightMessage(msg);
+    this.messages.push(msg);
   };
 
   proto.groupedMessage = function(msg) {
-    var prev = this.prevMessage || {ts: new Date()};
+    var prev = this.prevMessage || {
+      ts: new Date()
+    };
     this.prevMessage = msg;
     if (!msg.message) return false;
     return msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch();
-  }
-
-  proto.hasConnection = function() {
-    return this._connection ? true : false;
   };
 
   // Create a href for <a> tag
   proto.href = function() {
     var path = Array.prototype.slice.call(arguments);
-    return ['#chat', this.connection().id(), this.name()].concat(path).join('/');
+    return ["#chat", this.connection.id, this.name].concat(path).join("/");
+  };
+
+  proto.icon = function() {
+    return this.is_private ? "person" : "group";
   };
 
   proto.participants = function(cb) {
@@ -53,11 +49,11 @@
     if (!cb) return this._participants;
     this._api.participantsInDialog(
       {
-        connection_id: this.connection().id(),
-        dialog_id: this.name()
-      },
-      function(err, xhr) {
-        if (!err) self._participants = xhr.body.participants;
+        connection_id: this.connection.id,
+        dialog_id:     encodeURIComponent(self.id) // Convert "#" to "%23"
+      }, function(err, xhr) {
+        if (!err)
+          self._participants = xhr.body.participants;
         cb.call(self, err, xhr.body);
       }
     );
@@ -68,88 +64,114 @@
     var self = this;
     this._api.sendToDialog(
       {
-        body: {command: command},
-        connection_id: this.connection().id(),
-        dialog_id: this.name()
-      },
-      function(err, xhr) {
+        body: {
+          command: command
+        },
+        connection_id: this.connection.id,
+        dialog_id:     this.id
+      }, function(err, xhr) {
         var action = command.match(/^\/(\w+)/);
         if (cb) {
           cb.call(self, err, xhr.body);
-        }
-        else if (err) {
-          self.addMessage({type: 'error', message: 'Could not send "' + command + '": ' + err[0].message});
-        }
-        else if (!action) {
+        } else if (err) {
+          self.emit("message", {
+            type:    "error",
+            message: 'Could not send "' + command + '": ' + err[0].message
+          });
+        } else if (!action) {
           return; // nothing to do
-        }
-        else {
-          var handler = '_on' + action[1].toLowerCase().ucFirst() + 'Event';
+        } else {
+          var handler = "_on" + action[1].toLowerCase().ucFirst() + "Event";
           if (self[handler]) {
             self[handler](xhr.body);
-          }
-          else {
+          } else {
             console.log('Unable to handle response from "' + xhr.body.command + '".');
           }
         }
-        riot.update();
       }
     );
     return this;
   };
 
+  proto.update = function(attrs) {
+    var self = this;
+    Object.keys(attrs).forEach(function(n) {
+      self[n] = attrs[n];
+    });
+    this.emit("updated");
+  };
+
   proto._initialMessages = function() {
-    var topic = this.topic().replace(/"/g, '') || '';
-    this.addMessage({message: 'You have joined ' + this.name() + ', but no one has said anything as long as you have been here.'});
-    if (this.frozen()) {
-      this.addMessage({message: 'You are not part of this channel. The reason is ' + this.frozen()});
+    var topic = this.topic.replace(/"/g, "") || "";
+    this.addMessage({
+      message: "You have joined " + this.name + ", but no one has said anything as long as you have been here."
+    });
+    if (this.frozen) {
+      this.addMessage({
+        message: "You are not part of this channel. The reason is " + this.frozen
+      });
     }
-    if(!this.is_private()) {
-      this.participants(function(err, participants) { riot.update(); });
+    if (!this.is_private) {
+      this.participants(function(err, participants) {});
     }
   };
 
   // Called when this dialog is visible in gui the first time
   proto._load = function() {
-    if (!this.hasConnection()) return;
-    if (this.messages().length >= 60) return;
+    if (!this.connection) return;
+    if (this.messages.length >= 60) return;
     var self = this;
     self._api.messagesByDialog(
-      {connection_id: self.connection().id(), dialog_id: self.name()},
-      function(err, xhr) {
+      {
+        connection_id: self.connection.id,
+        dialog_id:     encodeURIComponent(self.id) // Convert "#" to "%23"
+      }, function(err, xhr) {
         if (err) return console.log(err);
-        xhr.body.messages.forEach(function(msg) { self.addMessage(msg) });
-        if (!self.messages().length) self._initialMessages();
-        riot.update();
+        xhr.body.messages.forEach(function(msg) {
+          self.addMessage(msg);
+        });
+        if (!self.messages.length) self._initialMessages();
+        self.connection.user.emit("message", self);
       }.bind(this)
     );
   };
 
-  proto._onUsers = function(data) {
-    var msg = {from: this.connection().id(), ts: data.ts, type: 'notice'};
+  proto._onUsers = function(data) {
+    var msg = {
+      from: this.connection.id,
+      ts:   data.ts,
+      type: "notice"
+    };
     if (data.new_nick) {
-      msg.message = data.nick + ' changed nick to ' + data.new_nick + '.';
-    }
-    else if (data.message) {
+      msg.message = data.nick + " changed nick to " + data.new_nick + ".";
+    } else if (data.message) {
       msg.message = data.message;
-    }
-    else {
+    } else {
       msg.message = JSON.encode(data);
     }
 
-    this.trigger('message', msg);
+    this.emit("message", msg);
   };
 
   proto._onWhoisEvent = function(res) {
     var channels = Object.keys(res.channels || {});
-    var id = [res.user];
+    var id       = [res.user];
     if (res.name) id.push(res.name);
-    id = res.nick + ' (' + id.join(' - ') + ')';
-    this.trigger('message', {type: 'notice', message: id + ' has been ide for ' + res.idle_for + ' seconds in ' + channels.join(', ') + '.'});
+    id = res.nick + " (" + id.join(" - ") + ")";
+    this.emit("message", {
+      type:    "notice",
+      message: id + " has been ide for " + res.idle_for + " seconds in " + channels.join(", ") + "."
+    });
   };
 
   proto._onTopicEvent = function(res) {
-    if (res.message) return this.trigger('message', {type: 'notice', message: 'Topic is: ' + res.message});
-    return this.trigger('message', {type: 'notice', message: 'No topic is set.'});
+    if (res.message) return this.emit("message", {
+        type:    "notice",
+        message: "Topic is: " + res.message
+      });
+    return this.emit("message", {
+      type:    "notice",
+      message: "No topic is set."
+    });
   };
 })(window);

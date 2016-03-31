@@ -1,0 +1,39 @@
+<template id="vue-dialog-message">
+  <span v-if="msg.type == 'action'">✧</span>
+  <a href="#insert:{{msg.from}}" class="title" @click="insertIntoInput">{{msg.from}}</a>
+  <div class="message" v-if="msg.type != 'error'">{{msg.message}}</div>
+  <div class="error" v-if="msg.type == 'error'">{{msg.message}}</div>
+  <span class="secondary-content ts tooltipped" :title="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
+</template>
+<script type="vue/component">
+Vue.component("dialog-message", {
+  template: Convos.tag("dialog-message"),
+  props:    ["dialog", "msg", "user"],
+  methods:  {
+    insertIntoInput: function() {
+      this.user.emit("insertIntoInput", e.target.href.replace(/^.*#insert:/, ""));
+    }
+  },
+  ready: function() {
+    var self = this;
+    var c    = [this.msg.type || "normal"];
+    if (this.msg.highlight) c.push("highlight");
+    c.push(this.dialog.groupedMessage(this.msg) ? "same-user" : "changed-user");
+    $(this.$el).addClass(c.join(" "));
+
+    this.$nextTick(function() {
+    $(".message", this.$el).html(
+      this.msg.message.xmlEscape().autoLink({
+        target: "_blank",
+        after:  function(url, id) {
+          $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
+            self.$dispatch("loadOffScreen", html, id);
+          });
+          return null;
+        }
+      }).mdToHtml()
+    );
+    });
+  }
+});
+</script>

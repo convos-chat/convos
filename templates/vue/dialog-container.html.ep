@@ -1,0 +1,120 @@
+<template id="vue-dialog-container">
+  <header>
+    <div class="actions" v-show="dialog.connection">
+      <!-- a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a -->
+      <a href="#info" @click.prevent="getInfo" class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a>
+      <a href="#close" @click.prevent="removeDialog" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a>
+    </div>
+    <div class="actions" v-show="!dialog.connection">
+      <a href="#chat"><i class="material-icons">star_rate</i></a>
+    </div>
+    <h5 class="tooltipped" :title="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
+  </header>
+  <main>
+    <dialog-message :dialog="dialog" :msg="msg" :user="user" v-for="msg in dialog.messages"></dialog-message>
+  </main>
+  <user-input :dialog="dialog" :user="{{user}}"></user-input>
+</template>
+<script type="vue/component">
+Vue.component("dialog-container", {
+  template: Convos.tag("dialog-container"),
+  props:    ["user"],
+  data:     function() {
+    return {
+      atBottom:          true,
+      atBottomThreshold: !!("ontouchstart" in window) ? 60 : 40,
+      dialog:            this.user.currentDialog(),
+      scrollElement:     null
+    };
+  },
+  events: {
+    loadOffScreen: function(html, id) {
+      if (html.match(/^<a\s/)) return;
+      var self  = this;
+      var $html = $(html);
+      $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
+      $("#" + id).parent().append($html).find(".materialboxed").materialbox();
+
+      $html.filter("img, iframe").each(function() {
+        $(this).css("height", "1px").load(function() {
+          if (self.atBottom) window.nextTick(function() {
+              self.scrollToBottom(true);
+            });
+          $(this).css("height", "auto");
+        });
+      });
+    }
+  },
+  methods: {
+    getInfo: function() {
+      this.dialog.participants(function(err, res) {
+        var participants = res.participants;
+        var message      = err ? err[0].message : "";
+
+        if (!message) {
+          message += String.prototype.numberAsString.call(participants.length).ucFirst();
+          message += " participants in " + this.name + " connected to ";
+          message += this.connection.name + ": ";
+          message += participants.map(function(p, i) {
+            return p.mode + p.name;
+          }).join(", ");
+        }
+
+        console.log(message);
+
+        this.emit("message", {
+          type:    err ? "error" : "notice",
+          from:    this.connection.id,
+          message: message
+        });
+      });
+    },
+    detectAtBottomOnScroll: function() {
+      var elem = this.scrollElement;
+      this.atBottom = elem.scrollHeight < elem.offsetHeight + this.atBottomThreshold + elem.scrollTop;
+    },
+    moveToBottomOnResize: function(e) {
+      if (this._atBottomTid) return;
+      var atBottom = this.atBottom;
+      this._atBottomTid = setTimeout(function() {
+        this.scrollToBottom(atBottom);
+        this._atBottomTid = 0;
+      }.bind(this),
+        300
+      );
+    },
+    removeDialog: function() {
+      this.user.removeDialog(this.dialog, function(err) {
+        if (err) this.dialog.emit("message", {
+            message: err[0].message
+          });
+      });
+    },
+    scrollToBottom: function(force) {
+      var elem = this.scrollElement;
+      if (this.atBottom || force) {
+        elem.scrollTop = elem.scrollHeight;
+      }
+    }
+  },
+  ready: function() {
+    this.scrollElement = $("main", this.$el)[0];
+    this.scrollElement.addEventListener("scroll", this.detectAtBottomOnScroll);
+    window.addEventListener("resize", this.moveToBottomOnResize);
+
+    this.user.on("dialogChanged", function(d) {
+      this.dialog = d;
+      d.emit("show");
+    }.bind(this));
+
+    this.user.on("message", function(d) {
+      var elem = this.scrollElement;
+      this.$nextTick(this.scrollToBottom);
+    }.bind(this));
+  },
+  beforeDestroy: function() {
+    window.removeEventListener("resize", this.moveToBottomOnResize);
+    this.scrollElement.removeEventListener("scroll", this.detectAtBottomOnScroll);
+  }
+});
+</script>
