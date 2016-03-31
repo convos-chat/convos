@@ -191,10 +191,10 @@ format=js
 minified=0
 mtime=1456048158
 [riot:riot/connection-editor.tag]
-checksum=8ea0d66840
+checksum=94c4933643
 format=js
 minified=0
-mtime=1456567598
+mtime=1459459604
 [riot:riot/convos-help.tag]
 checksum=6625a6d10a
 format=js

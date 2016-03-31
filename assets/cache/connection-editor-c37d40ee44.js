@@ -64,9 +64,9 @@ riot.tag2('connection-editor', '<form onsubmit="{saveConnection}"> <div class="r
     });
   }.bind(this)
 
+  this.on('mount', this.connectionChanged);
   this.on('update', function() {
     this.showNickField = this.form_protocol.value == 'irc';
     this.updateTextFields();
   });
-
 }, '{ }');

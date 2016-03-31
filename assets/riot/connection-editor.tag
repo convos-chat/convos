@@ -137,10 +137,10 @@
     });
   }
 
+  this.on('mount', this.connectionChanged);
   this.on('update', function() {
     this.showNickField = this.form_protocol.value == 'irc';
     this.updateTextFields();
   });
-
   </script>
 </connection-editor>
