@@ -1,9 +1,9 @@
 div.autocomplete {
   overflow: auto;
-  max-height: 8em;
-  margin-top: -15px;
+  max-height: 9em;
   border-bottom: 1px solid color('grey', 'lighten-1');
 
+  ul { margin: 0; padding: 0; }
   li {
     line-height: 3rem;
     color: $off-black;

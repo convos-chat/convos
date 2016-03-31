@@ -4628,9 +4628,11 @@ not-found, .centered {
 
 div.autocomplete {
   overflow: auto;
-  max-height: 8em;
-  margin-top: -15px;
+  max-height: 9em;
   border-bottom: 1px solid #bdbdbd; }
+  div.autocomplete ul {
+    margin: 0;
+    padding: 0; }
   div.autocomplete li {
     line-height: 3rem;
     color: rgba(0, 0, 0, 0.87); }
