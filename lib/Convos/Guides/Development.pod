@@ -40,16 +40,13 @@ NOTE! The current development branch is "batcode":
 
 Once you have the source code you should install the dependencies:
 
-  $ script/convos install develop
-  $ npm install riot
-  $ npm info riot # see which version is installed
+  $ script/convos install --develop
 
-Note! It seems like riot 2.3.1 has a bug which will cause failure. Please
-edit "node_modules/riot/lib/server/index.js" and comment out line 14:18 -
-meaning the body of the "extensions tag" function.
+C<--develop> will also install dependencies which is only required if you
+want to make changes to the files in the C<assets/> directory.
 
-L<CSS::Sass> is not required if the C<npm> or C<sass> executable is already
-available on your system.
+Other dependencies (such as L<riot|http://riotjs.com/>) will be installed
+automatically when you start making changes in the C<assets/> directory.
 
 =head2 Installing an IRC daemon
 
@@ -60,16 +57,19 @@ but L<http://www.ircd-hybrid.org> is a good alternative:
   $ sudo apt-get install ircd-hybrid # ubuntu
   $ brew install ircd-hybrid         # osx
 
+Please ask in L<irc://chat.freenode.net/#convos> if you want to use a common
+IRC server.
+
 =head2 Starting the application
 
 The basics of getting the application running is the command below:
 
-  $ morbo script/convos
+  $ script/convos dev
 
-...but there are some useful switches and environment variables that can be
-set:
+The command above is the same as:
 
-  $ MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 morbo script/convos -w assets/ -w lib/ -w public/convos-api.json
+  $ MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 \
+    morbo script/convos -w assets/riot -w assets/sass -w assets/js -w public/convos-api.json
 
 L<MOJO_IRC_DEBUG|Mojo::IRC> will print IRC debug to STDERR and C<CONVOS_DEBUG>
 will print L<Convos> debug to STDERR. The C<-w> switch is for watching
@@ -79,7 +79,7 @@ different files and directories for changes.
 
 =over 2
 
-=item * convos/assets/
+=item * ./assets/
 
 The "assets" directory contains all JavaScript and Sass files, which will
 be used to generate the "public" files. The dialog is done with
@@ -88,38 +88,38 @@ L<https://github.com/jhthorsen/mojolicious-plugin-assetpack>.
 The C<.tag> files require L<riot|http://riotjs.com> to be compiled into
 JavaScript.
 
-=item * convos/cpanfile
+=item * ./cpanfile
 
 The L<cpanfile> is used to document all the requirements, while the
 "Makefile.PL" file is generated from the content of the L<cpanfile>.
 
-=item * convos/lib/
+=item * ./lib/
 
 The "lib" directory contains all the Perl source code.
 
-=item * convos/node_modules
+=item * ./node_modules
 
 The C<node_modules> directory will be generated when installing modules
 with the "npm" command. This directory is ignored by git.
 
-=item * convos/public
+=item * ./public
 
 The public directory contains fonts and images  which can be downloaded through
 the L<Convos> web server.
 
-=item * convos/script
+=item * ./script
 
 The script directory contains the main application file ("convos") and
 helper scripts. The important part here is that every file which has the
 executable bit set will be part of the final CPAN distribution.
 
-=item * convos/t
+=item * ./t
 
 This directory contains the test files for the Perl code.
 
 TODO: Add JavaScript tests.
 
-=item * convos/vendor
+=item * ./vendor
 
 This directory contains projects which is tracked by other git repositories.
 
@@ -212,10 +212,6 @@ Please give us feedback by joining the "#convos" channel on C<irc.freenode.net>.
 Here is a list of features that need to be implemented before "batware" can
 be tested.
 
-=head2 Core
-
-Add start up script/command, so it can be deployed properly.
-
 =head2 Backends
 
 =over 2
@@ -241,8 +237,15 @@ database.
 
 =item * IRC
 
-L<Convos::Core::Connection::Irc> need to understand commands, such as "/me",
-"/join", "/part", "/nick", ...
+Better tests.
+
+Listen to more relevant IRC events.
+
+Nickserv password.
+
+On connect commands.
+
+Server password.
 
 =back
 
@@ -271,8 +274,6 @@ Show notifications.
 
 Show user list for a dialog and user count. (what about user modes?)
 
-Group dialogs by connection.
-
 Sort dialogs by name/last used/...?
 
 Add support for showing user defined avatar.
@@ -285,14 +286,17 @@ Proper styling/embedding of "pastebin links".
 
 Shortcuts for jumping between "user input" and "sidebars".
 
-Display topic when joining a dialog the first time.
+=back
 
-=item * Clean up git history
+=head2 Misc
 
-Want to remove all vendor files in git history, since they are not used after
-changing to AssetPack.
+=over 2
 
-  $ git filter-branch --tree-filter 'rm -rf vendor/' --prune-empty HEAD
+=item * Add support for embedded pastebin. (Triggered by multi line user input)
+
+=item * Add support for file (image, text, ...) upload.
+
+=item * Add support for emoji icons/selector, based on unicode.
 
 =back
 

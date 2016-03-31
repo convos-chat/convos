@@ -11,19 +11,22 @@ easy to get started, but you can also tweak many settings.
 
 You can start convos by running the command below:
 
-  $ convos daemon
+  $ git clone https://github.com/Nordaaker/convos.git
+  $ cd convos
+  $ git checkout -b batcode origin/batcode
+  $ ./script/convos daemon
 
 You can then visit Convos in your browser, by going to the default
 address L<http://localhost:3000>.
 
 =head2 Basics
 
-  $ convos daemon --help
+  $ ./script/convos daemon --help
 
 The command above will provide more information about command line
 arguments. One useful switch is how to specify a listen port:
 
-  $ /convos daemon --listen http://127.0.0.1:5000
+  $ ./script/convos daemon --listen http://127.0.0.1:5000
 
 =head2 Configuration
 
@@ -124,7 +127,7 @@ There are some optional modules that can be installed to enhance the
 experience. The command below will show if the modules are installed
 or not:
 
-  $ convos version
+  $ ./script/convos version
 
 One very useful addition is L<EV>, which makes L<Convos> faster. It
 can be installed with the command below:

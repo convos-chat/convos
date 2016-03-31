@@ -11,7 +11,7 @@ use File::Spec;
 if (@ARGV and $ARGV[0] eq 'dev') {
   shift @ARGV;
   $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
-  exec morbo => qw(script/convos -w assets/riot -w assets/sass -w assets/js -w lib);
+  exec qw(morbo script/convos -w assets/riot -w assets/sass -w assets/js -w public/convos-api.json);
 }
 
 {
@@ -44,8 +44,8 @@ sub ensure_dependencies {
   my ($cpanfile, $action, $mode) = @_;
   my $opt_l = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
-  my %sources = (
-    'Mojolicious::Plugin::AssetPack' => 'https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz');
+  my %sources = ('Mojolicious::Plugin::AssetPack' =>
+      'https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz');
 
   our $cpanfile_mode = 'default';
   local *main::on = sub { local $cpanfile_mode = shift; shift->() };
@@ -59,12 +59,13 @@ sub ensure_dependencies {
 
   do $cpanfile;
   die "Could not source $cpanfile: $@" unless $n;
-  @missing = grep { $_->[2] ne 'develop' } @missing if $mode ne 'develop';
+  @missing = grep { $_->[2] ne 'develop' } @missing if $mode ne '--develop';
   pop @$_ for @missing;
 
   die join "\n", "---\ndebug:", "  perl: $^X", '  INC:', map({"    - $_"} @INC),
     "\n---\nFound missing dependencies!\n", "Run '$0 install' to install them to '$opt_l'.",
-    "Note: 'cpanm' is required. (https://cpanmin.us)\n", map({ sprintf "* %s %s (%s)", @$_ } @missing), "\n"
+    "Note: 'cpanm' is required. (https://cpanmin.us)\n",
+    map({ sprintf "* %s %s (%s)", @$_ } @missing), "\n"
     if @missing and $action ne 'install';
 
   for my $m (@missing) {
