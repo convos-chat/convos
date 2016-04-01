@@ -9,9 +9,10 @@ use FindBin;
 use File::Spec;
 
 if (@ARGV and $ARGV[0] eq 'dev') {
-  shift @ARGV;
+  my @watch = qw(assets/sass assets/js lib public/convos-api.json templates);
   $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
-  exec qw(morbo script/convos -w assets/riot -w assets/sass -w assets/js -w public/convos-api.json);
+  shift @ARGV;
+  exec qw(morbo script/convos), @ARGV, map { ('-w', $_) } @watch;
 }
 
 {
