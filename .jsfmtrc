@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    "esformatter-align",
+    "esformatter-quotes",
+    "esformatter-remove-trailing-commas",
+    "esformatter-semicolons"
+  ],
+  "quotes": {
+    "avoidEscape": true,
+    "type": "double"
+  }
+}
