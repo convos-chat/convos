@@ -9,17 +9,18 @@
 
 # Getting Started 
 
-
 First we are going to need to install some dependencies:
 
-```  $ ./script/convos install
+```bash
+$ ./script/convos install
+```
 
 Once this is done can start Convos by running one of the commands below.
 
-```  $ ./script/convos daemon;
-   $ ./script/convos daemon --listen http://*:3000;
+```bash
+$ ./script/convos daemon;
+$ ./script/convos daemon --listen http://*:3000;
 ```
-
 
 And connect a browser to localhost:3000.
 
