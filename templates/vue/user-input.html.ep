@@ -9,7 +9,7 @@
     <textarea v-model="message"
       class="materialize-textarea"
       :placeholder="placeholder"
-      @keydown.enter.prevent="send"
+      @keyup.enter.prevent="send"
       @keydown.esc.prevent="unfocus"
       @keydown.down.prevent="history"
       @keydown.tab.prevent="autocomplete"
@@ -42,7 +42,6 @@ Vue.component("user-input", {
   template: Convos.tag("user-input"),
   props:    ["dialog", "user"],
   computed: {
-    message:     function() {},
     placeholder: function() {
       try {
         var state = this.dialog.connection.state;
@@ -55,6 +54,11 @@ Vue.component("user-input", {
         return "Please enter commands as instructed.";
       }
     }
+  },
+  data: function() {
+    return {
+      message: ""
+    };
   },
   methods: {
     autocomplete: function(e) {

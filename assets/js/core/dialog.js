@@ -66,6 +66,25 @@
   // Send a message to a dialog
   proto.send = function(command, cb) {
     var self = this;
+
+    if (!this.connection) {
+      var err = "Cannot send command without a connection.";
+      if (cb) {
+        window.nextTick(function() {
+          cb.call(self, [{
+            message: err,
+            path:    "/"
+          }], {});
+        });
+      } else {
+        self.emit("message", {
+          type:    "error",
+          message: 'Could not send "' + command + '": ' + err
+        });
+      }
+      return this;
+    }
+
     this._api.sendToDialog(
       {
         body: {
