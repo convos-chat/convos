@@ -13,7 +13,7 @@ You can start convos by running the command below:
 
   $ git clone https://github.com/Nordaaker/convos.git
   $ cd convos
-  $ git checkout -b batcode origin/batcode
+  $ git checkout -b one-point-oh origin/one-point-oh
   $ ./script/convos daemon
 
 You can then visit Convos in your browser, by going to the default

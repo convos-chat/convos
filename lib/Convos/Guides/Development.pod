@@ -32,9 +32,9 @@ The command above will create a "convos" directory in the current working
 directory. The following steps need to be run from the project root, meaning
 inside the "convos" directory.
 
-NOTE! The current development branch is "batcode":
+NOTE! The current development branch is "one-point-oh":
 
-  $ git checkout -b batcode origin/batcode
+  $ git checkout -b one-point-oh origin/one-point-oh
 
 =head2 Installing dependencies
 
@@ -173,7 +173,7 @@ dependencies, except Perl and a couple of modules from CPAN.
 =head2 Contribute
 
 First you need to identify which part you want to contribute to. The current
-"batcode" branch is starting to take form. The API is pretty usable and
+"one-point-oh" branch is starting to take form. The API is pretty usable and
 tested, but the frontend is infant.
 
 We welcome pull requests on L<github|https://github.com/Nordaaker/convos/pulls>.
