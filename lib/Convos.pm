@@ -47,7 +47,7 @@ sub startup {
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
 
-  $self->plugin(AssetPack => {pipes => [qw(Riotjs JavaScript Sass Css Combine)]});
+  $self->plugin(AssetPack => {pipes => [qw(JavaScript Sass Css Combine)]});
   $self->asset->process;
 
   $self->hook(

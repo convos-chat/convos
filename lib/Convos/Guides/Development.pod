@@ -232,7 +232,7 @@ L<Convos::Guides::API> need to be reviewed.
 
 More events from L<Mojo::Core::Backend> need to be streamed to the frontend.
 
-=item * Riot based user interface
+=item * Vuejs based user interface
 
 Need to understand "day changed". Need to draw a line since last time you
 looked at the dialog. Emit desktop notifications on mentions.
