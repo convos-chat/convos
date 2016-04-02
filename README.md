@@ -24,6 +24,6 @@ $ ./script/convos daemon --listen http://*:3000;
 
 And connect a browser to localhost:3000.
 
-To run Convos on a server, check out the relevant (Mojolicious Guides)[http://mojolicious.org/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT].
+To run Convos on a server, check out the relevant [Mojolicious Guides](http://mojolicious.org/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT).
 
 [![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=one-point-oh)](https://travis-ci.org/Nordaaker/convos)
