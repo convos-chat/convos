@@ -47,8 +47,10 @@ Vue.component("user-register", {
   props:    ["render", "user"],
   data:     function() {
     return {
-      email: localStorage.getItem("email"),
-      errors: []
+      email:         localStorage.getItem("email"),
+      errors:        [],
+      password:      "",
+      passwordAgain: "",
     };
   },
   methods: {

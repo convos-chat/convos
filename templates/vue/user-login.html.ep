@@ -44,8 +44,9 @@ Vue.component("user-login", {
   props:    ["render", "user"],
   data:     function() {
     return {
-      email:  localStorage.getItem("email"),
-      errors: []
+      email:    localStorage.getItem("email"),
+      errors:   [],
+      password: ""
     };
   },
   methods: {
