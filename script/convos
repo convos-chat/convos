@@ -58,6 +58,9 @@ sub ensure_dependencies {
     push @missing, [$module, $version, $e, $cpanfile_mode];
   };
 
+  # cpanm -M ... is required
+  main::requires('App::cpanminus', '1.7016');
+
   do $cpanfile;
   die "Could not source $cpanfile: $@" unless $n;
   @missing = grep { $_->[2] ne 'develop' } @missing if $mode ne '--develop';
