@@ -42,7 +42,7 @@ sub event_source {
 
 sub _send_event {
   my ($self, $event, $data) = @_;
-  $data->{type} = $event;
+  $data->{event} = $event;
   warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG == 2;
   $self->send({json => $data});
 }

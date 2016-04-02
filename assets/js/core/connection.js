@@ -127,7 +127,7 @@
   };
 
   proto._onMe = function(data) {
-    console.log(data);
+    console.log('[todo:event:me]', data);
     if (data.nick) this.nick(data.nick);
   };
 

@@ -118,6 +118,7 @@
     }, function(err, xhr) {
       if (err) return cb.call(self, err);
       delete self._connections[connection.id];
+      self.emit("refreshed");
       cb.call(self, "");
     });
     return this;
@@ -135,6 +136,7 @@
         delete self._dialogs[dialog.id];
         var first = self.dialogs()[0];
         if (first) self.currentDialog(first);
+        self.emit("refreshed");
         cb.call(self, "");
       }
     );

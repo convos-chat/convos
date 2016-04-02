@@ -15,7 +15,7 @@ $t->post_ok('/api/connections', json => {state => 'connect', url => "irc://local
 $t->websocket_ok('/events/bi-directional');
 
 $user->get_connection('irc-localhost')->state('disconnected');
-$t->message_ok->json_message_is('/type', 'state')->json_message_is('/cid', 'irc-localhost')
+$t->message_ok->json_message_is('/event', 'state')->json_message_is('/cid', 'irc-localhost')
   ->json_message_is('/state', 'disconnected');
 
 # update profile

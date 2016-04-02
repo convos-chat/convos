@@ -1,9 +1,9 @@
 <template id="vue-sidebar-dialogs">
-  <a href="{{d.href()}}" @click.prevent="setCurrentDialog(d)" title="{{d.frozen}}" :class="dialogClass(d)" v-for="d in dialogs">
+  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :title="d.frozen" :class="dialogClass(d)" v-for="d in dialogs">
     <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
     <span class="on">{{d.connection.protocol}}-{{d.connection.name}}</span>
   </a>
-  <a href='#settings/connections' :class="dialogClass" v-for="c in connections">
+  <a href='#settings/connections' @click.prevent="visibleSection = 'connection-editor'" :class="dialogClass(c)" v-for="c in connections">
     <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
     <span class="on">{{c.humanState()}}</span>
   </a>
@@ -11,17 +11,18 @@
 <script type="vue/component">
 Vue.component("sidebar-dialogs", {
   template: Convos.tag("sidebar-dialogs"),
-  props:    ["user"],
+  props:    ["user", "visibleSection"],
   data:     function() {
     return {
       connections: [],
+      currentDialogId: '',
       dialogs:     []
     };
   },
   methods: {
     dialogClass: function(d) {
       return {
-        active:     d == this.user.currentDialog(),
+        active:     d.id == this.currentDialogId,
         frozen:     d.frozen,
         tooltipped: true
       };
@@ -32,6 +33,9 @@ Vue.component("sidebar-dialogs", {
   },
   ready: function() {
     var self = this;
+    this.user.on("dialogChanged", function (d) {
+      self.currentDialogId = d.id;
+    });
     this.user.on("refreshed", function() {
       self.connections = this.connections();
       self.dialogs     = this.dialogs();

@@ -108,7 +108,10 @@
           if (self[handler]) {
             self[handler](xhr.body);
           } else {
-            console.log('Unable to handle response from "' + xhr.body.command + '".');
+            self.emit("message", {
+              type:    "error",
+              message: 'Unable to handle response from "' + xhr.body.command + '".'
+            });
           }
         }
       }
@@ -159,7 +162,7 @@
     );
   };
 
-  proto._onUsers = function(data) {
+  proto._onDialog = function(data) {
     var msg = {
       from: this.connection.id,
       ts:   data.ts,

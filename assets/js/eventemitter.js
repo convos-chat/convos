@@ -1,6 +1,6 @@
 var EventEmitter = function(obj) {
   obj._events = {};
-  ["emit", "hasSubscribers", "on", "once", "unsubscribe"].forEach(function(n) {
+  ["emit", "on", "once", "unsubscribe"].forEach(function(n) {
     obj[n] = EventEmitter.prototype[n];
   });
 };
@@ -12,25 +12,17 @@ EventEmitter.prototype.emit = function() {
 
   if (cb) {
     cb.forEach(function(i) {
-      try {
-        i.apply(this, args);
-      } catch ( e ) {
-        this.emit("error", e);
-      }
+      i.apply(this, args);
     }.bind(this));
   } else if (name == "error") {
-    throw JSON.stringify(args);
+    console.log('[EventEmitter]', this, args);
   }
 
   return this;
 };
 
-EventEmitter.prototype.hasSubscribers = function(name) {
-  var cb = this._events[name];
-  return cb && cb.length ? true : false;
-};
-
 EventEmitter.prototype.on = function(name, cb) {
+  if (!name || !cb) throw "Usage: EventEmitter.on(name, cb)";
   if (!this._events[name])
     this._events[name] = [];
   this._events[name].push(cb);
@@ -39,7 +31,8 @@ EventEmitter.prototype.on = function(name, cb) {
 
 EventEmitter.prototype.once = function(name, cb) {
   var wrapper = function() {
-    this.unsubscribe(name); cb.apply(this, arguments);
+    this.unsubscribe(name);
+    cb.apply(this, arguments);
   }.bind(this);
   this.on(name, wrapper);
 };

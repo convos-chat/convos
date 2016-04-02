@@ -60,8 +60,6 @@ Vue.component("dialog-container", {
           }).join(", ");
         }
 
-        console.log(message);
-
         this.emit("message", {
           type:    err ? "error" : "notice",
           from:    this.connection.id,
@@ -84,8 +82,9 @@ Vue.component("dialog-container", {
       );
     },
     removeDialog: function() {
-      this.user.removeDialog(this.dialog, function(err) {
-        if (err) this.dialog.emit("message", {
+      var d = this.dialog;
+      this.user.removeDialog(d, function(err) {
+        if (err) d.emit("message", {
             message: err[0].message
           });
       });
