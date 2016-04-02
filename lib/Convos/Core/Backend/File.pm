@@ -80,9 +80,10 @@ sub messages {
   $re = qr{\Q$re\E}i unless ref $re;
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (.*$re.*)$/;
 
-  $args{after}  = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{after})  if $query->{after};
-  $args{before} = Time::Piece->strptime('%Y-%m-%dT%H:%M:%S', $query->{before}) if $query->{before};
-  $args{before} = gmtime if !$args{before} and !$args{after};
+  $args{after}  = Time::Piece->strptime($query->{after},  '%Y-%m-%dT%H:%M:%S')if $query->{after};
+  $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S') if $query->{before};
+  # If neither before nor after are defined, search everything before now
+  $args{before} = gmtime if !$args{before} && !$args{after};
   $args{limit}    = $query->{limit} || 60;
   $args{messages} = [];
   $args{re}       = $re;
@@ -204,6 +205,8 @@ sub _log_file {
 # blocking method
 sub _messages {
   my ($self, $obj, $args) = @_;
+  # this code is running in a sub process, so "guard" does not have to be localised
+  return $args->{messages} if ++$self->{guard} > ($ENV{CONVOS_MAX_SEARCH_BACK_MONTHS} || 12);
   my $file = $self->_log_file($obj, $args->{before} || $args->{after});
   my $pindex = $args->{before} ? 0 : -1;
   my $FH = $pindex ? IO::File->new($file, 'r') : File::ReadBackwards->new($file);
@@ -211,7 +214,7 @@ sub _messages {
 
   unless ($FH) {
     warn "[@{[ref $obj]}] Read $file: $!\n" if DEBUG;
-    return $args->{messages} if 1;    # TODO: How to search to the previous month log file?
+    $args->{before} -= ONE_MONTH if $args->{before};
     return $self->_messages($obj, $args);
   }
 

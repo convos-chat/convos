@@ -2,9 +2,6 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-plan skip_all =>
-  'Need to figure out a way to search for all files, even though they are way back in time';
-
 $ENV{CONVOS_HOME} = File::Spec->catdir(qw(t data convos-test-backend-file-messages));
 
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
@@ -29,5 +26,10 @@ $dialog->messages({limit => 2, match => qr{\bpacka\w+\b}},
 Mojo::IOLoop->start;
 is int @$messages, 2, 'two messages matching package because of limit' or diag $err;
 is $messages->[0]{ts}, '2015-06-22T10:13:29', 'first: 2015-06-22T10:13:29';
+
+$ENV{CONVOS_MAX_SEARCH_BACK_MONTHS} = 3;
+$dialog->messages({}, sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
+Mojo::IOLoop->start;
+is int @$messages, 0, 'reached max search back months' or diag $err;
 
 done_testing;
