@@ -1,8 +1,12 @@
 (function(window) {
   Convos.Dialog = function(attrs) {
     EventEmitter(this);
-    this._api = Convos.api;
+    this.frozen   = "";
+    this.id       = "";
     this.messages = [];
+    this.name     = "";
+    this.topic    = "";
+    this._api     = Convos.api;
     this.on("message", this.addMessage);
     this.on("message", function() {
       if (this.connection) this.connection.user.emit("message", this);
