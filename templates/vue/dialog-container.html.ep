@@ -13,7 +13,7 @@
   <main>
     <dialog-message :dialog="dialog" :msg="msg" :user="user" v-for="msg in dialog.messages"></dialog-message>
   </main>
-  <user-input :dialog="dialog" :user="{{user}}"></user-input>
+  <user-input :dialog="dialog" :user="user"></user-input>
 </template>
 <script type="vue/component">
 Vue.component("dialog-container", {
