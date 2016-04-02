@@ -88,6 +88,7 @@ sub remove {
     sub { $connection->part_dialog($args->{dialog_id}, shift->begin); },
     sub {
       my ($delay, $err) = @_;
+      $connection->save($delay->begin);
       return $self->$cb({}, 200) unless $err;
       return $self->$cb($self->invalid_request($err), 500);
     },
