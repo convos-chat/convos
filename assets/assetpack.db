@@ -2,6 +2,10 @@
 format=js
 mtime=1430238058
 rel=cache/code.jquery.com/jquery-1.11.3.min.js
+[original:http://vuejs.org/js/vue.js]
+format=js
+mtime=1459386269
+rel=cache/vuejs.org/js/vue.js
 [original:http://vuejs.org/js/vue.min.js]
 format=js
 mtime=1459386269

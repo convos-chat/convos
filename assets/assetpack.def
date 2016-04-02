@@ -4,7 +4,7 @@
 
 ! convos.js
 < http://code.jquery.com/jquery-1.11.3.min.js
-< http://vuejs.org/js/vue.min.js
+< http://vuejs.org/js/vue.js
 < js/autolink.js
 < js/eventemitter.js
 < js/storage.js
