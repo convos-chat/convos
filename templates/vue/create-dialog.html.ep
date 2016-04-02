@@ -16,9 +16,9 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <select id="form_connection_id">
+        <select id="form_connection_id" v-model="connection_id">
           <option value="" v-if="!connections.length">No connections</option>
-          <option :selected="connection == c" :value="c.id" v-for="c in connections">{{c.protocol}}-{{c.name}}</option>
+          <option :selected="connection_id == c.id" :value="c.id" v-for="c in connections">{{c.protocol}}-{{c.name}}</option>
         </select>
         <label for="form_connection_id">Select connection</label>
       </div>
@@ -58,12 +58,15 @@ Vue.component("create-dialog", {
   computed: {
     connections: function() {
       return this.user.connections();
-    }
+    },
+    connection: function() {
+      return this.connections[this.connection_id];
+    },
   },
   data: function() {
     return {
       canSubmit:          false,
-      connection:         null,
+      connection_id:      0,
       dialogName:         "",
       errors:             [],
       noRoomsDescription: null,
@@ -94,15 +97,10 @@ Vue.component("create-dialog", {
         message: "You need to create a connection first."
       }];
     },
-    setConnection: function() {
-      var id = $("#form_connection_id", this.$el).val();
-      this.connection = this.user.connection(id);
-    }
   },
   ready: function() {
     var self = this;
-    this.setConnection();
-    $("#form_connection_id", this.$el).material_select(this.setConnection);
+    $("#form_connection_id", this.$el).material_select();
     $("#form_dialog_name").autocomplete({
       onkeyup: function(e) {
         self.canSubmit = self.dialogName.length;
