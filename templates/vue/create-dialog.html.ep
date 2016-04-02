@@ -36,7 +36,7 @@
         <p v-if="rooms.length">Found {{rooms.length}} room{{rooms.length == 1 ? '' : 's'}}.</p>
       </div>
     </div>
-    <div class="row" v-if={{errors.length}}>
+    <div class="row" v-if="errors.length">
       <div class="input-field col s12"><div class="alert">{{errors[0].message}}</div></div>
     </div>
     <div class="row">
