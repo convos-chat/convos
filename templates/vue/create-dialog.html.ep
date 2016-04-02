@@ -56,9 +56,6 @@ Vue.component("create-dialog", {
   template: Convos.tag("create-dialog"),
   props:    ["user", "visibleSection"],
   computed: {
-    connection: function() {
-      return this.user.currentDialog().connection;
-    },
     connections: function() {
       return this.user.connections();
     }
@@ -66,7 +63,9 @@ Vue.component("create-dialog", {
   data: function() {
     return {
       canSubmit:          false,
+      connection:         this.user.currentDialog().connection,
       dialogName:         "",
+      errors:             [],
       noRoomsDescription: null,
       rooms:              []
     };
@@ -74,16 +73,17 @@ Vue.component("create-dialog", {
   methods: {
     join: function(e) {
       if (!this.dialogName.length) return;
+      if (!this.connection) return this.error = [{message: "Please select a connection."}];
       this.connection.joinDialog(this.dialogName, function(err, dialog) {
         if (err) return this.errors = err;
         this.user.currentDialog(dialog);
       }.bind(this));
     },
     load: function(e) {
+      if (!this.connection) return this.error = [{message: "Please select a connection."}];
       this.noRoomsDescription = "Loading rooms from " + this.connection.id + "...";
       this.connection.rooms(function(err, rooms) {
         if (err) return this.noRoomsDescription = err[0];
-        console.log(rooms);
         this.rooms      = rooms;
         this.dialogName = "";
         $("#form_dialog_name").autocomplete("update");
