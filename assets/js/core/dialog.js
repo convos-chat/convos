@@ -91,7 +91,7 @@
           command: command
         },
         connection_id: this.connection.id,
-        dialog_id:     this.id
+        dialog_id:     encodeURIComponent(self.id) // Convert "#" to "%23"
       }, function(err, xhr) {
         var action = command.match(/^\/(\w+)/);
         if (cb) {
