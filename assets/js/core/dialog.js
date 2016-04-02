@@ -5,7 +5,7 @@
     this.messages = [];
     this.on("message", this.addMessage);
     this.on("message", function() {
-      this.connection.user.emit("message", this);
+      if (this.connection) this.connection.user.emit("message", this);
     });
     this.on("dialog", this._onDialog);
     this.once("show", this._load);

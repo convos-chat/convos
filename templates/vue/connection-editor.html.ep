@@ -89,35 +89,38 @@ Vue.component("connection-editor", {
     return {
       connection:       currentDialog.connection,
       defaultServer:    Convos.settings.default_server || "",
+      errors:           [],
       password:         "",
       nick:             "",
-      selectedProtocol: "",
+      selectedProtocol: "irc",
       server:           Convos.settings.default_server || "",
       username:         ""
     };
   },
   methods: {
     removeConnection: function() {
+      var self = this;
       this.user.removeConnection(this.connection, function(err) {
-        if (err) return this.errors = err;
-        this.connection = this.connections()[0];
-      }.bind(this));
+        if (err) return self.errors = err;
+        self.connection = this.connections()[0];
+      });
     },
     saveConnection: function() {
       var self       = this;
       var connection = this.connection || new Convos.Connection({});
       var userinfo   = [this.username, this.password].join(":");
-      var url;
 
       userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
-      url      = this.selectedProtocol + "://" + userinfo + this.server;
+      connection.user = this.user;
+      connection.url = this.selectedProtocol + "://" + userinfo + this.server;
 
       if (this.nick)
-        url += "?nick=" + this.nick;
+        connection.url += "?nick=" + this.nick;
 
       this.errors = []; // clear error on post
-      connection.user(this.user).url(url).save(function(err) {
-        if (err) return this.errors = err;
+      console.log(connection);
+      connection.save(function(err) {
+        if (err) return self.errors = err;
         self.updateForm(this);
       });
     },
