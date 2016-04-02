@@ -174,12 +174,12 @@ will contain:
 
 Emitted when the connection state change.
 
-=head2 users
+=head2 dialog
 
-  $self->on(state => sub { my ($self, $dialog, $meta) = @_; });
+  $self->on(dialog => sub { my ($self, $dialog, $info) = @_; });
 
-Emitted when the list of users change in a dialog. C<$meta> will contain
-information about the change:
+Emitted when the dialog change state. C<$info> will contain information about
+the change:
 
   {join => $nick}
   {nick => $new_new, renamed_from => $old_nick_lc}

@@ -159,7 +159,7 @@ sub _build_home {
 sub _delete_connection {
   my ($self, $connection) = @_;
   my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->id));
-  $connection->unsubscribe($_) for qw(message state users);
+  $connection->unsubscribe($_) for qw(dialog message state);
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
@@ -287,11 +287,11 @@ sub _setup {
         }
       );
       $connection->on(
-        users => sub {
+        dialog => sub {
           my ($connection, $target, $data) = @_;
           my ($format, @keys) = @{$FORMAT{$data->{type}}};
           $self->_log($connection, time, sprintf $format, map { $data->{$_} } @keys);
-          $self->emit("user:$uid", users => {cid => $cid, tid => $target->id, %$data});
+          $self->emit("user:$uid", dialog => {cid => $cid, tid => $target->id, %$data});
         }
       );
     }

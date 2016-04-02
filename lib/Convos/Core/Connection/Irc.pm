@@ -383,7 +383,7 @@ _event irc_kick => sub {
   my $reason = $msg->{params}[2] || '';
 
   $self->emit(
-    users => $dialog,
+    dialog => $dialog,
     {type => 'kick', kicker => $kicker, part => $nick, message => $reason},
   );
 };
@@ -412,7 +412,7 @@ _event irc_nick => sub {
 
   for my $dialog (values %{$self->{dialogs}}) {
     $self->emit(
-      users => $dialog => {type => 'nick_change', new_nick => $new_nick, nick => $old_nick});
+      dialog => $dialog => {type => 'nick_change', new_nick => $new_nick, nick => $old_nick});
   }
 };
 
@@ -429,7 +429,7 @@ _event irc_part => sub {
     $dialog->frozen('Parted.');
   }
 
-  $self->emit(users => $dialog => {type => 'part', nick => $nick, message => $reason});
+  $self->emit(dialog => $dialog => {type => 'part', nick => $nick, message => $reason});
 };
 
 _event irc_quit => sub {
@@ -438,7 +438,7 @@ _event irc_quit => sub {
   my $reason = $msg->{params}[1] || '';
 
   for my $dialog (values %{$self->{dialogs}}) {
-    $self->emit(users => $dialog => {part => $nick, message => $reason});
+    $self->emit(dialog => $dialog => {part => $nick, message => $reason});
   }
 };
 

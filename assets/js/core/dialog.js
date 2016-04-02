@@ -7,7 +7,7 @@
     this.on("message", function() {
       this.connection.user.emit("message", this);
     });
-    this.on("users", this._onUsers);
+    this.on("dialog", this._onDialog);
     this.once("show", this._load);
     if (attrs) this.update(attrs);
   };
