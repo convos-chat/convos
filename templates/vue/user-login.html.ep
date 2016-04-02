@@ -39,8 +39,7 @@
   </div>
 </template>
 <script type="vue/component">
-Vue.component("user-login", {
-  template: Convos.tag("user-login"),
+module.exports = {
   props:    ["render", "user"],
   data:     function() {
     return {
@@ -71,5 +70,5 @@ Vue.component("user-login", {
   ready: function() {
     $("#form_email").focus();
   }
-});
+};
 </script>

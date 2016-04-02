@@ -9,8 +9,7 @@
   </a>
 </template>
 <script type="vue/component">
-Vue.component("sidebar-dialogs", {
-  template: Convos.tag("sidebar-dialogs"),
+module.exports = {
   props:    ["user", "visibleSection"],
   data:     function() {
     return {
@@ -41,5 +40,5 @@ Vue.component("sidebar-dialogs", {
       self.dialogs     = this.dialogs();
     });
   }
-});
+};
 </script>

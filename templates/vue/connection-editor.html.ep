@@ -1,4 +1,4 @@
-<template id ="vue-connection-editor">
+<template id="vue-connection-editor">
   <form @submit.prevent="saveConnection">
     <div class="row">
       <div class="col s12">
@@ -73,8 +73,7 @@
   </form>
 </template>
 <script type="vue/component">
-Vue.component("connection-editor", {
-  template: Convos.tag("connection-editor"),
+module.exports = {
   props:    ["user", "visibleSection"],
   computed: {
     connections: function() {
@@ -148,5 +147,5 @@ Vue.component("connection-editor", {
 
     this.updateForm(this.connection);
   }
-});
+};
 </script>

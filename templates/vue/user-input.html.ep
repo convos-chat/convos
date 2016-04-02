@@ -38,8 +38,7 @@ var commands = [
   "/connect"
 ];
 
-Vue.component("user-input", {
-  template: Convos.tag("user-input"),
+module.exports = {
   props:    ["dialog", "user"],
   computed: {
     placeholder: function() {
@@ -122,5 +121,5 @@ Vue.component("user-input", {
       $("textarea", this.$el).focus();
     });
   }
-});
+};
 </script>

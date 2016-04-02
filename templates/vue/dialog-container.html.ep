@@ -16,8 +16,7 @@
   <user-input :dialog="dialog" :user="user"></user-input>
 </template>
 <script type="vue/component">
-Vue.component("dialog-container", {
-  template: Convos.tag("dialog-container"),
+module.exports = {
   props:    ["user"],
   data:     function() {
     return {
@@ -115,5 +114,5 @@ Vue.component("dialog-container", {
     window.removeEventListener("resize", this.moveToBottomOnResize);
     this.scrollElement.removeEventListener("scroll", this.detectAtBottomOnScroll);
   }
-});
+};
 </script>

@@ -1,4 +1,4 @@
-<template id ="vue-create-dialog">
+<template id="vue-create-dialog">
   <form @submit.prevent="join">
     <div class="row">
       <div class="col s12">
@@ -52,8 +52,7 @@
   </form>
 </template>
 <script type="vue/component">
-Vue.component("create-dialog", {
-  template: Convos.tag("create-dialog"),
+module.exports = {
   props:    ["user", "visibleSection"],
   computed: {
     connections: function() {
@@ -110,5 +109,5 @@ Vue.component("create-dialog", {
       }
     });
   }
-});
+};
 </script>

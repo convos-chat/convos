@@ -9,11 +9,6 @@
 
   Convos.api.ws(new ReconnectingWebSocket(Convos.wsUrl));
 
-  Convos.tag = function(name) {
-    var el = document.querySelector("#vue-" + name);
-    return '<div class="' + name + '">' + el.innerHTML + "</div>";
-  };
-
   Convos.user.on("updated", function() {
     if (!this.email && Convos.render != "register")
       Convos.render = "login";
@@ -27,7 +22,11 @@
   });
 
   document.querySelectorAll('script[type="vue/component"]').$forEach(function(el) {
-    eval(el.innerHTML);
+    var template = el.previousElementSibling;
+    var name     = template.id.replace(/^vue-/, "");
+    var module   = eval("(function(module){" + el.innerHTML + ";return module})({})");
+    module.exports.template = '<div class="' + name + '">' + template.innerHTML + "</div>";
+    Vue.component(name, module.exports);
   });
 
   Convos = new Vue({
@@ -41,7 +40,8 @@
   // TODO: Handle "err"
   Convos.api.load(Convos.apiUrl, function(err) {
     Convos.user.load(function(err) {
-      if (err) Convos.render = "login";
+      if (err)
+        Convos.render = "login";
     });
   });
 })(jQuery);

@@ -42,8 +42,7 @@
   </div>
 </template>
 <script type="vue/component">
-Vue.component("user-register", {
-  template: Convos.tag("user-register"),
+module.exports = {
   props:    ["render", "user"],
   data:     function() {
     return {
@@ -83,5 +82,5 @@ Vue.component("user-register", {
   ready: function() {
     $("#form_email").focus();
   }
-});
+};
 </script>

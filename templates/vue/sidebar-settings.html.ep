@@ -1,4 +1,4 @@
-<template id ="vue-sidebar-settings">
+<template id="vue-sidebar-settings">
   <a href="#create-dialog" @click.prevent="toggle('create-dialog')" :class="activeClass('create-dialog')" title="Create dialog" data-position="top">
     <i class="material-icons">group_add</i>
   </a>
@@ -16,8 +16,7 @@
   </a>
 </template>
 <script type="vue/component">
-Vue.component("sidebar-settings", {
-  template: Convos.tag("sidebar-settings"),
+module.exports = {
   props:    ["user", "visibleSection"],
   methods:  {
     activeClass: function(section) {
@@ -35,5 +34,5 @@ Vue.component("sidebar-settings", {
       this.visibleSection = this.visibleSection == section ? "" : section;
     }
   }
-});
+};
 </script>

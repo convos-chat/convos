@@ -6,8 +6,7 @@
   <span class="secondary-content ts tooltipped" :title="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
 </template>
 <script type="vue/component">
-Vue.component("dialog-message", {
-  template: Convos.tag("dialog-message"),
+module.exports = {
   props:    ["dialog", "msg", "user"],
   methods:  {
     insertIntoInput: function() {
@@ -35,5 +34,5 @@ Vue.component("dialog-message", {
     );
     });
   }
-});
+};
 </script>

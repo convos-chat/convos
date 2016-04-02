@@ -8,13 +8,12 @@
 </template>
 <script type="vue/component">
 // notifications is not yet implemented
-Vue.component("sidebar-notifications", {
-  template: Convos.tag("sidebar-notifications"),
-  props:    ["user"],
-  data:     function() {
+module.exports = {
+  props: ["user"],
+  data:  function() {
     return {
       notifications: []
     };
   }
-});
+};
 </script>

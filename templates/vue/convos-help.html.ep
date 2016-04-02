@@ -1,4 +1,4 @@
-<template id ="vue-convos-help">
+<template id="vue-convos-help">
   <div class="row">
     <div class="col s12">
       <div class="actions">
@@ -58,7 +58,5 @@
   </div>
 </template>
 <script type="vue/component">
-Vue.component("convos-help", {
-  template: Convos.tag("convos-help")
-});
+module.exports = {};
 </script>
