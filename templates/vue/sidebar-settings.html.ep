@@ -3,7 +3,7 @@
     <i class="material-icons">group_add</i>
   </a>
   <a href="#connection-editor" @click.prevent="toggle('connection-editor')" :class="activeClass('connection-editor')" title="Edit connections" data-position="top">
-    <i class="material-icons">device_hub</i>
+    <i class="material-icons">mode edit</i>
   </a>
   <a href="#user-profile" @click.prevent="toggle('user-profile')" :class="activeClass('user-profile')" title="Edit profile" data-position="top">
     <i class="material-icons">account_circle</i>
