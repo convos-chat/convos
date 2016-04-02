@@ -1,6 +1,7 @@
 (function(window) {
   Convos.User = function(attrs) {
     EventEmitter(this);
+    this.email        = "";
     this.ws           = new ReconnectingWebSocket(Convos.wsUrl);
     this._api         = Convos.api;
     this._connections = {};

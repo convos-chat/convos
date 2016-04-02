@@ -1,8 +1,11 @@
 (function(window) {
   Convos.Connection = function(attrs) {
     EventEmitter(this);
-    this._state = "disconnected";
-    this._api   = Convos.api;
+    this.id    = "";
+    this.name  = "";
+    this.state = "disconnected";
+    this.url   = "";
+    this._api  = Convos.api;
     this.on("me", this._onMe);
     this.on("state", this._onState);
     this.on("message", this._onMessage);
@@ -46,9 +49,9 @@
     return ["#connection", this.protocol(), this.name, action].join("/");
   };
 
-  // Human readable version of state()
+  // Human readable version of state
   proto.humanState = function() {
-    return this.state().ucFirst();
+    return this.state.ucFirst();
   };
 
   proto.nick = function() {
@@ -135,7 +138,7 @@
   };
 
   proto._onState = function(data) {
-    this.state(data.state);
+    this.state = data.state;
     this.user.currentDialog().emit("message", {
       from:    this.id,
       message: data.message + " (" + data.state + ")",
