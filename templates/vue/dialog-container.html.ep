@@ -1,4 +1,4 @@
-<template id="vue-dialog-container">
+<template class="vue-dialog-container">
   <header>
     <div class="actions" v-show="dialog.connection">
       <!-- a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a -->

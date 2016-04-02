@@ -1,4 +1,4 @@
-<template id="vue-user-register">
+<template class="vue-user-register">
   <div class="row not-logged-in-wrapper">
     <form @submit.prevent="register" class="col s10 offset-s1 m6 offset-m3">
       <div class="row">

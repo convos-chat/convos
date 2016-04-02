@@ -1,4 +1,4 @@
-<template id="vue-user-profile">
+<template class="vue-user-profile">
   <form @submit.prevent="submitForm" method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">

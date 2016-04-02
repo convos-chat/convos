@@ -1,4 +1,4 @@
-<template id="vue-sidebar-notifications">
+<template class="vue-sidebar-notifications">
   <span v-show="!notifications.length">
     <i class="material-icons">notifications_none</i> No notifications
   </span>

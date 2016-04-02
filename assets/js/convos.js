@@ -23,7 +23,7 @@
 
   document.querySelectorAll('script[type="vue/component"]').$forEach(function(el) {
     var template = el.previousElementSibling;
-    var name     = template.id.replace(/^vue-/, "");
+    var name     = template.className.replace(/^vue-/, "");
     var module   = eval("(function(module){" + el.innerHTML + ";return module})({})");
     module.exports.template = '<div class="' + name + '">' + template.innerHTML + "</div>";
     Vue.component(name, module.exports);

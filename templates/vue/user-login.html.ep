@@ -1,4 +1,4 @@
-<template id="vue-user-login">
+<template class="vue-user-login">
   <div class="row not-logged-in-wrapper">
     <form @submit.prevent="login" class="col s10 offset-s1 m6 offset-m3">
       <div class="row">

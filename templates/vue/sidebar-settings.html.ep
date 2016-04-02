@@ -1,4 +1,4 @@
-<template id="vue-sidebar-settings">
+<template class="vue-sidebar-settings">
   <a href="#create-dialog" @click.prevent="toggle('create-dialog')" :class="activeClass('create-dialog')" title="Create dialog" data-position="top">
     <i class="material-icons">group_add</i>
   </a>

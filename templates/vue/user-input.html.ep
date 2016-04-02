@@ -1,4 +1,4 @@
-<template id="vue-user-input">
+<template class="vue-user-input">
   <form method="post" @submit="send">
     <!-- div class="actions">
       <a href="#attach" class="tooltipped" title="Attach file"><i class="material-icons">attach_file</i></a>

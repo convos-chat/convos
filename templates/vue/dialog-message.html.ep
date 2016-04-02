@@ -1,4 +1,4 @@
-<template id="vue-dialog-message">
+<template class="vue-dialog-message">
   <span v-if="msg.type == 'action'">✧</span>
   <a href="#insert:{{msg.from}}" class="title" @click="insertIntoInput">{{msg.from}}</a>
   <div class="message" v-if="msg.type != 'error'">{{msg.message}}</div>
