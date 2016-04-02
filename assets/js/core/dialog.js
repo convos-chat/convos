@@ -54,7 +54,7 @@
     this._api.participantsInDialog(
       {
         connection_id: this.connection.id,
-        dialog_id:     encodeURIComponent(self.id) // Convert "#" to "%23"
+        dialog_id:     self.id
       }, function(err, xhr) {
         if (!err)
           self._participants = xhr.body.participants;
@@ -91,7 +91,7 @@
           command: command
         },
         connection_id: this.connection.id,
-        dialog_id:     encodeURIComponent(self.id) // Convert "#" to "%23"
+        dialog_id:     self.id
       }, function(err, xhr) {
         var action = command.match(/^\/(\w+)/);
         if (cb) {
@@ -147,9 +147,9 @@
     self._api.messagesByDialog(
       {
         connection_id: self.connection.id,
-        dialog_id:     encodeURIComponent(self.id) // Convert "#" to "%23"
+        dialog_id:     self.id
       }, function(err, xhr) {
-        if (err) return console.log(err);
+        if (err) return this.emit("error", err);
         xhr.body.messages.forEach(function(msg) {
           self.addMessage(msg);
         });
@@ -170,7 +170,7 @@
     } else if (data.message) {
       msg.message = data.message;
     } else {
-      msg.message = JSON.encode(data);
+      msg.message = JSON.stringify(data);
     }
 
     this.emit("message", msg);

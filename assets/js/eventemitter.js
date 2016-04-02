@@ -19,7 +19,7 @@ EventEmitter.prototype.emit = function() {
       }
     }.bind(this));
   } else if (name == "error") {
-    throw args[0];
+    throw JSON.stringify(args);
   }
 
   return this;

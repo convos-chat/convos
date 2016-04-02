@@ -7,6 +7,8 @@
   Convos.user           = new Convos.User({});
   Convos.visibleSection = "";
 
+  Convos.api.ws(new ReconnectingWebSocket(Convos.wsUrl));
+
   Convos.tag = function(name) {
     var el = document.querySelector("#vue-" + name);
     return '<div class="' + name + '">' + el.innerHTML + "</div>";

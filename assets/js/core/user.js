@@ -2,7 +2,6 @@
   Convos.User = function(attrs) {
     EventEmitter(this);
     this.email        = "";
-    this.ws           = new ReconnectingWebSocket(Convos.wsUrl);
     this._api         = Convos.api;
     this._connections = {};
     this._dialogs     = {};
@@ -13,9 +12,6 @@
       if (this.email && this.email == prev) return;
       prev = this.email;
       this._listenForEvents();
-      this.ws.open(function() {
-        this.refresh();
-      }.bind(this));
     });
   };
 
@@ -133,7 +129,7 @@
     this._api.removeDialog(
       {
         connection_id: dialog.connection.id,
-        dialog_id:     encodeURIComponent(dialog.id) // Convert "#" to "%23"
+        dialog_id:     dialog.id
       }, function(err, xhr) {
         if (err) return cb.call(self, err);
         delete self._dialogs[dialog.id];
@@ -227,9 +223,12 @@
   };
 
   proto._listenForEvents = function() {
-    this.ws.on("json", function(data) {
+    this._api.ws().on("json", function(data) {
       var target = this._dialogs[data.tid] || this._connections[data.cid];
       if (target) target.emit(data.type, data);
+    }.bind(this));
+    this._api.ws().open(function() {
+      this.refresh();
     }.bind(this));
   };
 })(window);

@@ -14,7 +14,7 @@
   };
 
   var proto = window.swaggerClient.prototype;
-  var cache = {}, makeErr;
+  var cache = {};
 
   // Get cached response
   // xhr = client.cached(operationId);
@@ -74,7 +74,7 @@
               xhr.onreadystatechange = function() {
                 if (xhr.readyState != 4) return;
                 if (httpMethod == 'GET' && xhr.status == 200) cache[httpMethod + ':' + xhr.url] = xhr;
-                if (window.DEBUG) console.log('[Swagger] ' + xhr.url + ' ' + xhr.status + ' ' + xhr.responseText);
+                if (window.DEBUG) console.log(['[Swagger]', httpMethod, xhr.url, xhr.status, xhr.responseText].join(' '));
                 xhr.body = xhr.responseText.match(/^[\{\[]/) ? JSON.parse(xhr.responseText) : xhr.responseText;
                 cb.call(this, makeErr(xhr), xhr);
               }.bind(this);
@@ -109,6 +109,7 @@
 
   proto.ws = function(ws) {
     var self = this;
+    if (!ws) return this._ws;
     self._ws = ws;
     ws.on('json', function(res) {
       if (!res.id || !res.code) return;
@@ -117,7 +118,7 @@
       delete self._xhr[res.id];
       xhr.status = res.code;
       xhr.body = res.body;
-      if (window.DEBUG) console.log('[Swagger] ' + xhr.op + ' ' + xhr.status + ' ' + JSON.stringify(xhr.body));
+      if (window.DEBUG) console.log(['[Swagger]', xhr.op, xhr.status, JSON.stringify(xhr.body)].join(' '));
       xhr.call(self, makeErr(xhr), xhr);
     });
     return self;
@@ -134,7 +135,7 @@
     pathList.forEach(function(p) {
       url.push(p.replace(/\{(\w+)\}/, function(m, n) {
         if (typeof input[n] == 'undefined') errors.push({message: 'Missing input: ' + n, path: '/' + n});
-        return input[n];
+        return encodeURIComponent(input[n]);
       }));
     });
 
@@ -198,6 +199,6 @@
     if (xhr.status == 200) return null;
     if (errors.length) return errors;
     if (!xhr.status) xhr.status = 408;
-    return [{message: "Something very bad happened! Try again later. (" + xhr.status + ")", path: xhr.url}];
+    return [{message: "Request failed (" + xhr.status + ")", path: xhr.url}];
   };
 })(window);
