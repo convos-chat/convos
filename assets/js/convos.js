@@ -20,12 +20,16 @@
     }
   });
 
+  ["convos-app", "convos-chat"].forEach(function(n) {
+    document.registerElement(n);
+  });
+
   document.querySelectorAll('script[type="vue/component"]').$forEach(function(el) {
     eval(el.innerHTML);
   });
 
   Convos = new Vue({
-    el:    "convos",
+    el:    "convos-app",
     data:  Convos,
     ready: function() {
       $(this.$el).show();

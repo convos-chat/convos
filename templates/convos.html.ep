@@ -5,10 +5,10 @@
     %= asset 'convos.css';
   </head>
   <body>
-    <convos>
+    <convos-app>
       <user-login :user="user" :render.sync="render" v-show="render == 'login'"></user-login>
       <user-register :user="user" :render.sync="render" v-show="render == 'register'"></user-register>
-      <chat v-show="render == 'chat'">
+      <convos-chat v-show="render == 'chat'">
         <nav>
           <sidebar-notifications :user="user"></sidebar-notifications>
           <sidebar-dialogs :user="user"></sidebar-dialogs>
@@ -19,8 +19,8 @@
         <user-profile :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'user-profile'"></user-profile>
         <convos-help :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'help'"></convos-help>
         <dialog-container :user="user"></dialog-container>
-      </chat>
-    </convos>
+      </convos-chat>
+    </convos-app>
 
     %= include 'vue/connection-editor'
     %= include 'vue/convos-help'

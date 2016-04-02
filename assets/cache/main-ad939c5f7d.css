@@ -4656,31 +4656,31 @@ div.autocomplete {
   .not-logged-in-wrapper .about {
     padding-top: 2em; }
 
-chat {
+convos-chat {
   display: flex;
   flex-direction: row-reverse;
   height: 100vh;
   margin-right: 299px;
   overflow: hidden; }
-  chat .dialog-container {
+  convos-chat .dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
     overflow: auto; }
-  chat .connection-editor {
+  convos-chat .connection-editor {
     max-width: 500px;
     min-width: 500px; }
-  chat .convos-help,
-  chat .create-dialog {
+  convos-chat .convos-help,
+  convos-chat .create-dialog {
     max-width: 420px;
     min-width: 420px; }
-  chat .dialog-container {
+  convos-chat .dialog-container {
     max-width: 860px; }
-  chat .dialog-container main {
+  convos-chat .dialog-container main {
     padding-bottom: 1.5rem;
     overflow: auto;
     flex-grow: 1; }
-  chat nav {
+  convos-chat nav {
     width: 300px;
     display: flex;
     flex-direction: column;
@@ -4689,7 +4689,7 @@ chat {
     right: 0;
     bottom: 0;
     z-index: 900; }
-    chat nav .sidebar-dialogs {
+    convos-chat nav .sidebar-dialogs {
       flex-grow: 1;
       overflow: auto; }
 
