@@ -63,7 +63,7 @@ Vue.component("create-dialog", {
   data: function() {
     return {
       canSubmit:          false,
-      connection:         this.user.currentDialog().connection,
+      connection:         null,
       dialogName:         "",
       errors:             [],
       noRoomsDescription: null,
@@ -73,14 +73,14 @@ Vue.component("create-dialog", {
   methods: {
     join: function(e) {
       if (!this.dialogName.length) return;
-      if (!this.connection) return this.error = [{message: "Please select a connection."}];
+      if (!this.connection) return this.missingConnectionError();
       this.connection.joinDialog(this.dialogName, function(err, dialog) {
         if (err) return this.errors = err;
         this.user.currentDialog(dialog);
       }.bind(this));
     },
     load: function(e) {
-      if (!this.connection) return this.error = [{message: "Please select a connection."}];
+      if (!this.connection) return this.missingConnectionError();
       this.noRoomsDescription = "Loading rooms from " + this.connection.id + "...";
       this.connection.rooms(function(err, rooms) {
         if (err) return this.noRoomsDescription = err[0];
@@ -88,13 +88,21 @@ Vue.component("create-dialog", {
         this.dialogName = "";
         $("#form_dialog_name").autocomplete("update");
       }.bind(this));
+    },
+    missingConnectionError: function() {
+      this.errors = [{
+        message: "You need to create a connection first."
+      }];
+    },
+    setConnection: function() {
+      var id = $("#form_connection_id", this.$el).val();
+      this.connection = this.user.connection(id);
     }
   },
   ready: function() {
     var self = this;
-    $("#form_connection_id", this.$el).material_select(function() {
-      self.connection = self.user.connection($(this).val());
-    });
+    this.setConnection();
+    $("#form_connection_id", this.$el).material_select(this.setConnection);
     $("#form_dialog_name").autocomplete({
       onkeyup: function(e) {
         self.canSubmit = self.dialogName.length;
