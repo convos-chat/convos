@@ -5,7 +5,11 @@ perl:
   - "5.16"
   - "5.10"
 env:
-  - "HARNESS_OPTIONS=j1 TEST_POD=1"
+  - "HARNESS_OPTIONS=j1 TEST_POD=1 TEST_PHANTOM=1"
+before_script:
+    - "export DISPLAY=:99.0" 
+    - "sh -e /etc/init.d/xvfb start"
+    - npm install
 install:
   - "cpanm -n https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz"
   - "cpanm -n Test::Pod Test::Pod::Coverage EV"
