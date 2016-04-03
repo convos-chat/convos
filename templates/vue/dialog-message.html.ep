@@ -7,31 +7,43 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["dialog", "msg", "user"],
-  methods:  {
+  props:   ["dialog", "msg", "user"],
+  methods: {
     insertIntoInput: function() {
       this.user.emit("insertIntoInput", e.target.href.replace(/^.*#insert:/, ""));
+    },
+    makeParticipantsMessage: function(list) {
+      return String.prototype.numberAsString.call(list.length).ucFirst()
+        + " participants in " + this.dialog.name + " connected to "
+        + this.dialog.connection.name + ": "
+        + list.map(function(p, i) {
+          return p.mode + p.name;
+        }).sort().join(", ");
     }
   },
   ready: function() {
     var self = this;
     var c    = [this.msg.type || "normal"];
+
+    if (this.msg.participants)
+      this.msg.message = this.makeParticipantsMessage(this.msg.participants);
+
     if (this.msg.highlight) c.push("highlight");
     c.push(this.dialog.groupedMessage(this.msg) ? "same-user" : "changed-user");
     $(this.$el).addClass(c.join(" "));
 
     this.$nextTick(function() {
-    $(".message", this.$el).html(
-      this.msg.message.xmlEscape().autoLink({
-        target: "_blank",
-        after:  function(url, id) {
-          $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
-            self.$dispatch("loadOffScreen", html, id);
-          });
-          return null;
-        }
-      }).mdToHtml()
-    );
+      $(".message", this.$el).html(
+        this.msg.message.xmlEscape().autoLink({
+          target: "_blank",
+          after:  function(url, id) {
+            $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
+              self.$dispatch("loadOffScreen", html, id);
+            });
+            return null;
+          }
+        }).mdToHtml()
+      );
     });
   }
 };

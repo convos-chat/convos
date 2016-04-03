@@ -6,7 +6,7 @@
           <a href="#chat" @click.prevent="visibleSection = 'chat'"><i class="material-icons">close</i></a>
         </div>
         <h5>Connection editor</h5>
-        <p v-if="connections.length">
+        <p v-if="user.connections.length">
           You need to add a connection before you can have a dialog.
           <span v-if="defaultServer">
             We have filled in an example server, but you can connect to any server
@@ -23,7 +23,7 @@
       <div class="input-field col s12">
         <select id="form_connection_id">
           <option value="">Create new connection...</option>
-          <option :selected="connection == c" :value="c.id" v-for="c in connections">{{c.protocol}}-{{c.name}}</option>
+          <option :selected="connection == c" :value="c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</option>
         </select>
         <label for="form_connection_id">Select connection</label>
       </div>
@@ -74,32 +74,28 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["user", "visibleSection"],
+  props:    ["settings", "user", "visibleSection"],
   computed: {
-    connections: function() {
-      return this.user.connections();
-    },
     showNickField: function() {
       return this.selectedProtocol == "irc";
     }
   },
   data: function() {
-    var currentDialog = this.user.currentDialog();
     return {
-      connection:       currentDialog.connection,
-      defaultServer:    Convos.settings.default_server || "",
+      connection:       this.user.connections[0],
+      defaultServer:    this.settings.default_server || "",
       errors:           [],
       password:         "",
       nick:             "",
       selectedProtocol: "irc",
-      server:           Convos.settings.default_server || "",
+      server:           this.settings.default_server || "",
       username:         ""
     };
   },
   methods: {
     removeConnection: function() {
       var self = this;
-      this.user.removeConnection(this.connection, function(err) {
+      removeConnection(this.connection, function(err) {
         if (err) return self.errors = err;
         self.connection = this.connections()[0];
       });
@@ -138,7 +134,7 @@ module.exports = {
     var self = this;
 
     $("#form_connection_id", this.$el).material_select(function() {
-      self.updateForm(self.user.connection($(this).val()));
+      self.updateForm(self.user.getConnection($(this).val()));
     });
 
     $("#form_protocol", this.$el).material_select(function() {

@@ -2,9 +2,6 @@ body {
   background-color: $body-bg;
 }
 
-// will be visible by javascript
-convos { display: none; }
-
 h1, h2, h3, h4, h5 {
   color: $header-color;
 }
@@ -49,6 +46,11 @@ div.alert {
   }
   i.material-icons {
     vertical-align: middle
+  }
+  p.error {
+    color: color('red', 'darken-2');
+    padding-bottom: $gutter-width;
+    border-bottom: 1px solid $input-border-color;
   }
 }
 

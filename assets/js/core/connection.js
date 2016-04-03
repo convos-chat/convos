@@ -1,4 +1,4 @@
-(function(window) {
+(function() {
   Convos.Connection = function(attrs) {
     EventEmitter(this);
     this.id    = "";
@@ -6,8 +6,6 @@
     this.state = "disconnected";
     this.url   = "";
     this._api  = Convos.api;
-    this.on("me", this._onMe);
-    this.on("state", this._onState);
     this.on("message", this._onMessage);
     if (attrs) this.update(attrs);
   };
@@ -25,26 +23,6 @@
     msg.highlight = msg.message.match(highlight) ? true : false;
   };
 
-  // Join a room or create a private dialog on the server
-  proto.joinDialog = function(dialogName, cb) {
-    var self = this;
-    this._api.joinDialog(
-      {
-        body: {
-          name: dialogName
-        },
-        connection_id: this.id
-      }, function(err, xhr) {
-        var d;
-        if (!err)
-          d = self.user.dialog(xhr.body);
-        cb.call(self, err, d, xhr.body);
-      }
-    );
-    return this;
-  };
-
-  // Create a href for <a> tag
   proto.href = function(action) {
     return ["#connection", this.protocol(), this.name, action].join("/");
   };
@@ -111,39 +89,67 @@
     return this;
   };
 
+  proto.send = function(command, dialog) {
+    var self = this;
+    this._api.commandFromUser(
+      {
+        body: {
+          command:       command,
+          connection_id: this.id,
+          dialog_id:     dialog ? dialog.id : ""
+        }
+      }, function(err, xhr) {
+        var action = command.match(/^\/(\w+)/);
+        if (err) {
+          self.emit("message", {
+            type:    "error",
+            message: 'Could not send "' + command + '": ' + err[0].message
+          });
+        } else if (action) {
+          var handler = "_on" + action[1].toLowerCase().ucFirst() + "Event";
+          return self[handler] ? self[handler](xhr.body) : console.log("No handler for " + handler);
+        }
+      }
+    );
+    return this;
+  };
+
   proto.update = function(attrs) {
     var self = this;
     Object.keys(attrs).forEach(function(n) {
       self[n] = attrs[n];
     });
-    this.emit("updated");
   };
 
-  // Change state to "connected" or "disconnected"
-  // Can also be used to retrieve state: "connected", "disconnected" or "queued"
-  proto.state = function(state, cb) {
-    if (!cb) return this._state;
-    throw "TODO";
-  };
-
-  proto._onMe = function(data) {
-    console.log('[todo:event:me]', data);
-    if (data.nick) this.nick(data.nick);
-  };
-
-  proto._onMessage = function(data) {
-    data.from = this.id;
-    data.type = "notice";
-    this.user.currentDialog().emit("message", data);
-  };
-
-  proto._onState = function(data) {
-    this.state = data.state;
-    this.user.currentDialog().emit("message", {
-      from:    this.id,
-      message: data.message + " (" + data.state + ")",
-      ts:      data.ts,
-      type:    "notice"
+  proto._onCloseEvent = function(data) {
+    this.user.refreshDialogs(function(err) {
+      var dialog = this.dialogs[0];
+      if (err) return;
+      if (!dialog) return;
+      this.dialogs.forEach(function(d) {
+        d.active(d.id == dialog.id ? true : false);
+      });
     });
   };
-})(window);
+
+  proto._onJoinEvent = function(data) {
+    this.user.refreshDialogs(function(err) {
+      if (err) return;
+      this.dialogs.forEach(function(d) {
+        d.active(d.id == data.id ? true : false);
+      });
+    });
+  };
+
+  proto._onJEvent = proto._onJoinEvent;
+  proto._onPartEvent = proto._onCloseEvent;
+
+  proto._onMessage = function(data) {
+    var self   = this;
+    var dialog = this.user.dialogs.filter(function(d) {
+      var c = d.connection;
+      return c && c.id == self.id && d.active();
+    })[0];
+    if (dialog) dialog.emit("message", data);
+  };
+})();

@@ -4578,9 +4578,6 @@ input[type=range]:focus::-ms-fill-upper {
 body {
   background-color: #fff; }
 
-convos {
-  display: none; }
-
 h1, h2, h3, h4, h5 {
   color: #2E7D32; }
 
@@ -4615,6 +4612,10 @@ div.alert {
     padding-bottom: 30px; }
   .centered i.material-icons {
     vertical-align: middle; }
+  .centered p.error {
+    color: #D32F2F;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #9e9e9e; }
 
 .material-tooltip {
   border-radius: 4px;
@@ -4656,31 +4657,31 @@ div.autocomplete {
   .not-logged-in-wrapper .about {
     padding-top: 2em; }
 
-convos-chat {
+.convos-chat {
   display: flex;
   flex-direction: row-reverse;
   height: 100vh;
   margin-right: 299px;
   overflow: hidden; }
-  convos-chat .dialog-container {
+  .convos-chat .dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
     overflow: auto; }
-  convos-chat .connection-editor {
+  .convos-chat .connection-editor {
     max-width: 500px;
     min-width: 500px; }
-  convos-chat .convos-help,
-  convos-chat .create-dialog {
+  .convos-chat .convos-help,
+  .convos-chat .create-dialog {
     max-width: 420px;
     min-width: 420px; }
-  convos-chat .dialog-container {
+  .convos-chat .dialog-container {
     max-width: 860px; }
-  convos-chat .dialog-container main {
+  .convos-chat .dialog-container main {
     padding-bottom: 1.5rem;
     overflow: auto;
     flex-grow: 1; }
-  convos-chat nav {
+  .convos-chat nav {
     width: 300px;
     display: flex;
     flex-direction: column;
@@ -4689,7 +4690,7 @@ convos-chat {
     right: 0;
     bottom: 0;
     z-index: 900; }
-    convos-chat nav .sidebar-dialogs {
+    .convos-chat nav .sidebar-dialogs {
       flex-grow: 1;
       overflow: auto; }
 
