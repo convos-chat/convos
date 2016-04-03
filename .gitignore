@@ -19,4 +19,5 @@ assets/sass/.sass-cache/
 node_modules/
 .DS_Store
 dist/
+src/components/
 
