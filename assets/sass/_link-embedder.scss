@@ -9,6 +9,20 @@ img.embed {
   &.active { max-height: none; }
 }
 
+.gist .gist-file {
+  /*
+   * position + z-index is a hack for making it render properly
+   * http://stackoverflow.com/questions/10522054/weird-rendering-bug-in-desktop-webkit-safari-chrome-with-absolutely-positioned
+   */
+  position: relative;
+  z-index: 1;
+  margin: 0 !important;
+}
+
+.gist .highlight {
+  background: $settings-active-color !important;
+}
+
 .link-embedder.text-html {
   .link-embedder-media {
     float: left;

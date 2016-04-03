@@ -24,6 +24,7 @@
     %= include 'vue/create-dialog'
     %= include 'vue/dialog-container'
     %= include 'vue/dialog-message'
+    %= include 'vue/embed-viewer'
     %= include 'vue/sidebar-dialogs'
     %= include 'vue/sidebar-notifications'
     %= include 'vue/sidebar-settings'

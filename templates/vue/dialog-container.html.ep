@@ -17,7 +17,7 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props: ["dialog", "user"],
+  props: ["dialog", "user", "visibleSection"],
   data:  function() {
     return {
       atBottom:          true,
@@ -29,17 +29,31 @@ module.exports = {
   events: {
     loadOffScreen: function(html, id) {
       if (html.match(/^<a\s/)) return;
-      var self  = this;
-      var $html = $(html);
-      $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
-      $("#" + id).parent().append($html).find(".materialboxed").materialbox();
+      var self   = this;
+      var $html  = $(html);
+      var $paste = $html.filter('.text-paste, .text-gist-github');
+      var $a     = $('#' + id);
 
-      $html.filter("img, iframe").each(function() {
+      $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
+      $a.parent().append($html).find(".materialboxed").materialbox();
+
+      $html.find("img, iframe").each(function() {
         $(this).css("height", "1px").load(function() {
           if (self.atBottom) self.scrollToBottom(true);
           $(this).css("height", "auto");
         });
       });
+
+      if ($paste.length) {
+        var $view = $('<a href="#view" class="tooltipped" title="View"><i class="material-icons">visibility</i></a>');
+        $paste.hide();
+        $a.after($view.click(function(e) {
+          e.preventDefault();
+          self.$root.embedViewerElement = $paste[0];
+          self.visibleSection = "embed-viewer";
+        }));
+        self.materializeComponent();
+      }
     }
   },
   methods: {

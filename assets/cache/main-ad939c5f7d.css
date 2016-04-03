@@ -4675,6 +4675,9 @@ div.autocomplete {
   .convos-chat .create-dialog {
     max-width: 420px;
     min-width: 420px; }
+  .convos-chat .embed-viewer {
+    max-width: 55%;
+    min-width: 55%; }
   .convos-chat .dialog-container {
     max-width: 860px; }
   .convos-chat .dialog-container main {
@@ -4697,33 +4700,39 @@ div.autocomplete {
 .connection-editor,
 .convos-help,
 .create-dialog,
-.dialog-container {
+.dialog-container,
+.embed-viewer {
   display: block;
   overflow: auto;
   max-height: 100vh; }
   .connection-editor h5,
   .convos-help h5,
   .create-dialog h5,
-  .dialog-container h5 {
+  .dialog-container h5,
+  .embed-viewer h5 {
     margin-top: 0;
     padding-top: 0.75rem; }
   .connection-editor input[type=text],
   .convos-help input[type=text],
   .create-dialog input[type=text],
-  .dialog-container input[type=text] {
+  .dialog-container input[type=text],
+  .embed-viewer input[type=text] {
     margin: 0; }
   .connection-editor .actions,
   .convos-help .actions,
   .create-dialog .actions,
-  .dialog-container .actions {
+  .dialog-container .actions,
+  .embed-viewer .actions {
     overflow: hidden;
     position: absolute;
     top: 0.6rem;
-    right: 0.45rem; }
+    right: 0.45rem;
+    z-index: 10; }
 
 .connection-editor,
 .convos-help,
-.create-dialog {
+.create-dialog,
+.embed-viewer {
   background: #f6f6f6;
   position: relative; }
 
@@ -4755,6 +4764,8 @@ div.autocomplete {
     .dialog-container .dialog-message.action .message, .dialog-container .dialog-message.action a.title {
       font-style: italic;
       display: inline; }
+    .dialog-container .dialog-message.action .link-embedder {
+      font-style: normal; }
     .dialog-container .dialog-message.error {
       border-left: 2px solid #FF1744;
       color: rgba(102, 102, 102, 0.87); }
@@ -4776,6 +4787,10 @@ div.autocomplete {
       text-decoration: underline; }
     .dialog-container .dialog-message .message a:hover {
       text-decoration: none; }
+    .dialog-container .dialog-message .message .material-icons {
+      vertical-align: text-top;
+      font-size: 18px;
+      margin-left: 4px; }
     .dialog-container .dialog-message .secondary-content {
       position: absolute;
       top: 2px;
@@ -4856,6 +4871,18 @@ img.embed {
   max-height: 220px; }
   img.embed.active {
     max-height: none; }
+
+.gist .gist-file {
+  /*
+   * position + z-index is a hack for making it render properly
+   * http://stackoverflow.com/questions/10522054/weird-rendering-bug-in-desktop-webkit-safari-chrome-with-absolutely-positioned
+   */
+  position: relative;
+  z-index: 1;
+  margin: 0 !important; }
+
+.gist .highlight {
+  background: #f6f6f6 !important; }
 
 .link-embedder.text-html .link-embedder-media {
   float: left; }

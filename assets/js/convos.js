@@ -22,9 +22,10 @@
     Convos.vm = new Vue({
       el:   "body",
       data: {
-        currentPage: "",
-        settings:    Convos.settings,
-        user:        new Convos.User()
+        currentPage:        "",
+        embedViewerElement: null,
+        settings:           Convos.settings,
+        user:               new Convos.User()
       },
       events: {
         login: function(data) {

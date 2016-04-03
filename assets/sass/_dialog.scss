@@ -25,6 +25,9 @@ $dialog-spacing: 4px;
         font-style: italic;
         display: inline;
       }
+      .link-embedder {
+        font-style: normal;
+      }
     }
     &.error {
       border-left: 2px solid color('red', 'accent-3');
@@ -49,6 +52,12 @@ $dialog-spacing: 4px;
     .message {
       a { color: inherit; text-decoration: underline; }
       a:hover { text-decoration: none; }
+
+      .material-icons {
+        vertical-align: text-top;
+        font-size: 18px;
+        margin-left: 4px;
+      }
     }
 
     .secondary-content {

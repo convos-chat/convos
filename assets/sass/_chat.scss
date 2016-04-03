@@ -17,6 +17,8 @@
   .convos-help,
   .create-dialog { max-width: 420px; min-width: 420px; }
 
+  .embed-viewer { max-width: 55%; min-width: 55%; }
+
   .dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
   .dialog-container main {
     padding-bottom: $gutter-width;
@@ -44,7 +46,8 @@
 .connection-editor,
 .convos-help,
 .create-dialog,
-.dialog-container {
+.dialog-container,
+.embed-viewer {
   display: block;
   overflow: auto;
   max-height: 100vh;
@@ -63,12 +66,14 @@
     position: absolute;
     top: $gutter-width * 0.4;
     right: $gutter-width * 0.3;
+    z-index: 10;
   }
 }
 
 .connection-editor,
 .convos-help,
-.create-dialog {
+.create-dialog,
+.embed-viewer {
   background: $settings-active-color;
   position: relative;
 }
