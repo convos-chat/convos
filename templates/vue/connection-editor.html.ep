@@ -74,7 +74,7 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["user", "visibleSection"],
+  props:    ["settings", "user", "visibleSection"],
   computed: {
     connections: function() {
       return this.user.connections();
@@ -87,12 +87,12 @@ module.exports = {
     var currentDialog = this.user.currentDialog();
     return {
       connection:       currentDialog.connection,
-      defaultServer:    Convos.settings.default_server || "",
+      defaultServer:    this.settings.default_server || "",
       errors:           [],
       password:         "",
       nick:             "",
       selectedProtocol: "irc",
-      server:           Convos.settings.default_server || "",
+      server:           this.settings.default_server || "",
       username:         ""
     };
   },
