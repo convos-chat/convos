@@ -40,6 +40,31 @@ sub event_source {
   $self->_subscribe($self->can('_write_event'));
 }
 
+sub send {
+
+  # TODO: This is really not nice, but I can't seem to figure out a better
+  # name for "sendEvents" in the API spec.
+  return shift->SUPER::send(@_) unless ref $_[2] eq 'CODE';
+
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->get_connection($args->{body}{connection_id});
+
+  unless ($connection) {
+    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+  }
+
+  $self->delay(
+    sub { $connection->send($args->{body}{dialog_id}, $args->{body}{command}, shift->begin); },
+    sub {
+      my ($delay, $err, $res) = @_;
+      $res->{command} = $args->{body}{command};
+      return $self->$cb($res, 200) unless $err;
+      return $self->$cb($self->invalid_request($err), 500);
+    },
+  );
+}
+
 sub _send_event {
   my ($self, $event, $data) = @_;
   $data->{event} = $event;
@@ -104,6 +129,10 @@ the client, since WebSockets are bi-directional.
 
 Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as
 JSON objects using L<Mojolicious::Guides::Cookbook/EventSource web service>.
+
+=head2 send
+
+See L<Convos::Manual::API/sendEvents>.
 
 =head1 AUTHOR
 

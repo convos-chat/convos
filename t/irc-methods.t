@@ -45,74 +45,6 @@ is $connection->nick, "Superman20001", 'changed nick attribute';
 }
 
 $t->run(
-  [qr{JOIN}, ['main', 'join-convos-irc-live.irc']],
-  sub {
-    my ($err, $dialog);
-    is_deeply($connection->dialogs, [], 'no dialogs');
-    $connection->join_dialog("#Convos_irc_LIVE_20001",
-      sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
-    Mojo::IOLoop->start;
-    is_deeply([map { $_->id } @{$connection->dialogs}], ['#convos_irc_live_20001'], 'dialogs');
-    is $err, '', 'join_dialog: convos_irc_live_20001';
-    ok !$dialog->is_private, 'dialog is a channel';
-    is $dialog->name, "#Convos_irc_LIVE_20001", "dialog Convos_irc_LIVE_20001 in callback";
-    cmp_deeply(
-      $connection->get_dialog("#Convos_irc_live_20001")->TO_JSON,
-      {
-        connection_id => 'irc-localhost',
-        frozen        => '',
-        id            => "#convos_irc_live_20001",
-        is_private    => 0,
-        name          => "#Convos_irc_LIVE_20001",
-        topic         => '',
-      },
-      "convos_irc_live_20001 after join"
-    );
-  }
-);
-
-$t->run(
-  [qr{JOIN}, ['main', 'join-convos.irc']],
-  sub {
-    my ($err, $dialog);
-    $connection->join_dialog("#convos s3cret",
-      sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
-    Mojo::IOLoop->start;
-    is $err, '', 'join_dialog: convos';
-    is $dialog->name,     "#convos",         "dialog convos in callback";
-    is $dialog->password, 's3cret',          'convos password';
-    is $dialog->topic,    'some cool topic', 'convos topic';
-    cmp_deeply(
-      $connection->get_dialog('#conVOS')->TO_JSON,
-      {
-        connection_id => 'irc-localhost',
-        frozen        => '',
-        id            => '#convos',
-        is_private    => 0,
-        name          => re(qr{^\#convos$}i),
-        topic         => re(qr{.?}),
-      },
-      'convos after join'
-    );
-  }
-);
-
-$t->run(
-  [qr{JOIN}, ['main', 'join-invalid-name.irc']],
-  sub {
-    my ($err, $dialog);
-    $connection->join_dialog("#convos", sub { ($err, $dialog) = @_[1, 2]; Mojo::IOLoop->stop });
-    Mojo::IOLoop->start;
-    is $dialog->name, "#convos", "dialog convos in callback again";
-    is $err, '', 'join_dialog: convos again';
-
-    $connection->join_dialog("#\2", sub { $err = $_[1]; Mojo::IOLoop->stop });
-    Mojo::IOLoop->start;
-    is $err, 'Illegal channel name', 'join_dialog: invalid name';
-  }
-);
-
-$t->run(
   [qr{LIST}, ['main', 'channel-list.irc']],
   sub {
     my ($err, $list);
@@ -213,8 +145,8 @@ cmp_deeply(
         id            => '#convos',
         is_private    => 0,
         name          => '#convos',
-        password      => 's3cret',
-        topic         => 'some cool topic',
+        password      => '',
+        topic         => '',
       },
       {
         connection_id => 'irc-localhost',
@@ -233,7 +165,7 @@ cmp_deeply(
         name          => '#Convos_irc_LIVE_20001',
         password      => '',
         topic         => 'Cool topic',
-      },
+      }
     ),
     id       => 'irc-localhost',
     name     => 'localhost',
@@ -247,19 +179,6 @@ cmp_deeply(
 done_testing;
 
 __DATA__
-@@ join-convos-irc-live.irc
-:Superman20001!superman@i.love.debian.org JOIN :#Convos_irc_LIVE_20001
-:hybrid8.debian.local MODE #Convos_irc_LIVE_20001 +nt
-:hybrid8.debian.local 353 Superman20001 = #Convos_irc_LIVE_20001 :@Superman20001
-:hybrid8.debian.local 366 Superman20001 #Convos_irc_LIVE_20001 :End of /NAMES list.
-@@ join-convos.irc
-:Superman20001!superman@i.love.debian.org JOIN :#convos
-:hybrid8.debian.local 332 Superman20001 #convos :some cool topic
-:hybrid8.debian.local 333 Superman20001 #convos jhthorsen!jhthorsen@i.love.debian.org 1432932059
-:hybrid8.debian.local 353 Superman20001 = #convos :Superman20001 @batman
-:hybrid8.debian.local 366 Superman20001 #convos :End of /NAMES list.
-@@ join-invalid-name.irc
-:hybrid8.debian.local 479 Superman20001 # :Illegal channel name
 @@ channel-list.irc
 :hybrid8.debian.local 321 Superman20001 Channel :Users  Name
 :hybrid8.debian.local 322 Superman20001 #Convos_irc_LIVE_20001 1 :[+nt]
