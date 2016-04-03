@@ -1,7 +1,7 @@
 <template class="vue-dialog-message">
   <span v-if="msg.type == 'action'">✧</span>
   <a href="#insert:{{msg.from}}" class="title" @click="insertIntoInput">{{msg.from}}</a>
-  <div class="message" v-if="msg.type != 'error'">{{msg.message}}</div>
+  <div class="message" v-if="msg.type != 'error'">{{{message() | markdown}}}</div>
   <div class="error" v-if="msg.type == 'error'">{{msg.message}}</div>
   <span class="secondary-content ts tooltipped" :title="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
 </template>
@@ -10,9 +10,23 @@ module.exports = {
   props:   ["dialog", "msg", "user"],
   methods: {
     insertIntoInput: function() {
-      this.user.emit("insertIntoInput", e.target.href.replace(/^.*#insert:/, ""));
+      this.$dispatch("insertIntoInput", e.target.href.replace(/^.*#insert:/, ""));
     },
-    makeParticipantsMessage: function(list) {
+    message: function() {
+      var self = this;
+      if (this.msg.participants) return this.makeParticipantsMessage();
+      return this.msg.message.xmlEscape().autoLink({
+        target: "_blank",
+        after:  function(url, id) {
+          $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
+            self.$dispatch("loadOffScreen", html, id);
+          });
+          return null;
+        }
+      });
+    },
+    makeParticipantsMessage: function() {
+      var list = this.msg.participants;
       return String.prototype.numberAsString.call(list.length).ucFirst()
         + " participants in " + this.dialog.name + " connected to "
         + this.dialog.connection.name + ": "
@@ -22,29 +36,10 @@ module.exports = {
     }
   },
   ready: function() {
-    var self = this;
-    var c    = [this.msg.type || "normal"];
-
-    if (this.msg.participants)
-      this.msg.message = this.makeParticipantsMessage(this.msg.participants);
-
+    var c = [this.msg.type || "normal"];
     if (this.msg.highlight) c.push("highlight");
     c.push(this.dialog.groupedMessage(this.msg) ? "same-user" : "changed-user");
     $(this.$el).addClass(c.join(" "));
-
-    this.$nextTick(function() {
-      $(".message", this.$el).html(
-        this.msg.message.xmlEscape().autoLink({
-          target: "_blank",
-          after:  function(url, id) {
-            $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
-              self.$dispatch("loadOffScreen", html, id);
-            });
-            return null;
-          }
-        }).mdToHtml()
-      );
-    });
   }
 };
 </script>
