@@ -213,7 +213,7 @@ sub send {
     return $self->_send(split(/\s+/, $args, 2), $cb) if $cmd eq 'MSG';
     return $self->connect($cb)    if $cmd eq 'CONNECT';
     return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
-    return $self->join_dialog($args, $cb) if $cmd eq 'JOIN';
+    return $self->join_dialog($args, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
     return $self->nick($args, $cb) if $cmd eq 'NICK';
     return $self->part_dialog($args || $target, $cb) if $cmd eq 'CLOSE';
     return $self->part_dialog($args || $target, $cb) if $cmd eq 'PART';

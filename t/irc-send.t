@@ -48,6 +48,19 @@ $t->run(
 );
 
 $t->run(
+  [qr{JOIN}, ['main', 'join-short.irc']],
+  sub {
+    $connection->send(
+      '#convos' => '/j #short',
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
+    Mojo::IOLoop->start;
+    is $err, '', 'cmd /j short';
+    is $res->{topic}, 'some short topic', 'res /j short';
+  }
+);
+
+$t->run(
   [qr{NICK}, ['main', 'nick-supermanx.irc']],
   sub {
     $connection->send(
@@ -166,6 +179,12 @@ __DATA__
 :hybrid8.debian.local 333 Superman20001 #convos jhthorsen!jhthorsen@i.love.debian.org 1432932059
 :hybrid8.debian.local 353 Superman20001 = #convos :Superman20001 @batman
 :hybrid8.debian.local 366 Superman20001 #convos :End of /NAMES list.
+@@ join-short.irc
+:Superman20001!superman@i.love.debian.org JOIN :#short
+:hybrid8.debian.local 332 Superman20001 #short :some short topic
+:hybrid8.debian.local 333 Superman20001 #short jhthorsen!jhthorsen@i.love.debian.org 1432932059
+:hybrid8.debian.local 353 Superman20001 = #short :Superman20001 @batman
+:hybrid8.debian.local 366 Superman20001 #short :End of /NAMES list.
 @@ part-does-not-matter.irc
 :hybrid8.debian.local 479 Superman20001 # :Illegal channel name
 @@ part-convos.irc
