@@ -1,0 +1,1 @@
+../../templates/vue/user-register.html.ep
