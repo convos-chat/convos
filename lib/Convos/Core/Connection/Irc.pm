@@ -16,8 +16,6 @@ require Convos;
 # "_event irc_topic => sub {}" vs "sub _event_irc_topic"
 sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 
-my $PARSER = Parse::IRC->new(ctcp => 1);
-
 has _irc => sub {
   my $self = shift;
   my $url  = $self->url;
@@ -164,8 +162,9 @@ sub rooms {
 sub send {
   my ($self, $target, $message, $cb) = @_;
 
-  $message //= '';
   $target  //= '';
+  $message //= '';
+  $message =~ s!\s+$!!;    # remove whitespace, \r, \n, .. at the end of message
 
   return $self->_send($target, $message, $cb) unless $message =~ s!^/!!;
 
@@ -302,7 +301,8 @@ sub _send {
     return $self->_next_tick($cb => 'Cannot send message to target with spaces.');
   }
   elsif (length $message) {
-    $msg = $PARSER->parse(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $message);
+    $msg = $self->_irc->parser->parse(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target,
+      $message);
     return $self->_next_tick($cb => 'Unable to construct PRIVMSG.') unless ref $msg;
   }
   else {
