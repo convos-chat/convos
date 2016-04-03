@@ -43,7 +43,7 @@ module.exports = {
   computed: {
     placeholder: function() {
       try {
-        var state = this.dialog.connection.state;
+        var state = this.dialog.connection ? this.dialog.connection.state : 'initializing';
         if (state == "connected") {
           return "What do you want to say to " + this.dialog.name + "?";
         } else {
@@ -108,9 +108,10 @@ module.exports = {
     send: function(e) {
       var m = this.message;
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
+      var c = this.dialog.connection || this.user.connections[0];
       this.message = "";
       if ("localCmd" + m != l && this[l]) return this[l](e);
-      if (m.length) return this.dialog.send(m);
+      if (c && m.length) c.send(m, this.dialog.connection ? this.dialog : '');
     },
     unfocus: function(e) {
       $("nav a:first").focus(); // TODO: Need better logic

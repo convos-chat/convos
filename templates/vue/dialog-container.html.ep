@@ -10,19 +10,25 @@
     </div>
     <h5 class="tooltipped" :title="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
   </header>
-  <main>
+  <main v-if="dialog">
     <dialog-message :dialog="dialog" :msg="msg" :user="user" v-for="msg in dialog.messages"></dialog-message>
+  </main>
+  <main v-if="!dialog">
+    <div class="centered">
+      <div>
+        Please wait while connections and dialogs are loading...
+      </div>
+    </div>
   </main>
   <user-input :dialog="dialog" :user="user"></user-input>
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["user"],
+  props:    ["dialog", "user"],
   data:     function() {
     return {
       atBottom:          true,
       atBottomThreshold: !!("ontouchstart" in window) ? 60 : 40,
-      dialog:            this.user.currentDialog(),
       scrollElement:     null
     };
   },
@@ -46,25 +52,7 @@ module.exports = {
   },
   methods: {
     getInfo: function() {
-      this.dialog.participants(function(err, res) {
-        var participants = res.participants;
-        var message      = err ? err[0].message : "";
-
-        if (!message) {
-          message += String.prototype.numberAsString.call(participants.length).ucFirst();
-          message += " participants in " + this.name + " connected to ";
-          message += this.connection.name + ": ";
-          message += participants.map(function(p, i) {
-            return p.mode + p.name;
-          }).join(", ");
-        }
-
-        this.emit("message", {
-          type:    err ? "error" : "notice",
-          from:    this.connection.id,
-          message: message
-        });
-      });
+      // TODO: Show topic and participants in channel
     },
     detectAtBottomOnScroll: function() {
       var elem = this.scrollElement;
@@ -99,16 +87,6 @@ module.exports = {
     this.scrollElement = $("main", this.$el)[0];
     this.scrollElement.addEventListener("scroll", this.detectAtBottomOnScroll);
     window.addEventListener("resize", this.moveToBottomOnResize);
-
-    this.user.on("dialogChanged", function(d) {
-      this.dialog = d;
-      d.emit("show");
-    }.bind(this));
-
-    this.user.on("message", function(d) {
-      var elem = this.scrollElement;
-      this.$nextTick(this.scrollToBottom);
-    }.bind(this));
   },
   beforeDestroy: function() {
     window.removeEventListener("resize", this.moveToBottomOnResize);

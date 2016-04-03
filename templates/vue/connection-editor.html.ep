@@ -76,17 +76,13 @@
 module.exports = {
   props:    ["settings", "user", "visibleSection"],
   computed: {
-    connections: function() {
-      return this.user.connections();
-    },
     showNickField: function() {
       return this.selectedProtocol == "irc";
     }
   },
   data: function() {
-    var currentDialog = this.user.currentDialog();
     return {
-      connection:       currentDialog.connection,
+      connection:       this.user.connections[0],
       defaultServer:    this.settings.default_server || "",
       errors:           [],
       password:         "",
@@ -99,7 +95,8 @@ module.exports = {
   methods: {
     removeConnection: function() {
       var self = this;
-      this.user.removeConnection(this.connection, function(err) {
+      this.$root.connections
+      removeConnection(this.connection, function(err) {
         if (err) return self.errors = err;
         self.connection = this.connections()[0];
       });

@@ -8,10 +8,15 @@
   <connection-editor :settings="settings" :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'connection-editor'"></connection-editor>
   <user-profile :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'user-profile'"></user-profile>
   <convos-help :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'help'"></convos-help>
-  <dialog-container :user="user"></dialog-container>
+  <dialog-container :dialog="d" :user="user" v-show="d.active()" v-for="d in user.dialogs"></dialog-container>
 </template>
 <script type="vue/component">
 module.exports = {
-  props: [ "connections", "dialogs", "currentPage", "settings", "user" ]
+  props: ["currentPage", "settings", "user"],
+  data:  function() {
+    return {
+      visibleSection: "chat"
+    };
+  }
 };
 </script>

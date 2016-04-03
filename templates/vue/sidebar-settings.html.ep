@@ -26,8 +26,10 @@ module.exports = {
       };
     },
     logout: function(e) {
-      this.user.logout(function(err) {
-        if (err) return console.log(err);
+      var self = this;
+      Convos.api.http().logoutUser({}, function(err, xhr) {
+        if (err) return console.log(err); // TODO: Display error message
+        self.$dispatch("user", {email: ""});
       });
     },
     toggle: function(section) {

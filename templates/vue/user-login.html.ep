@@ -62,7 +62,7 @@ module.exports = {
           }
         }, function(err, xhr) {
           if (err) return self.errors = err;
-          self.user.update(xhr.body);
+          self.$dispatch("login", xhr.body);
         }
       );
     }

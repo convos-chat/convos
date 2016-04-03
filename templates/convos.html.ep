@@ -14,8 +14,6 @@
     </div>
     <component
       :is="currentPage"
-      :connections="connections"
-      :dialogs="dialogs"
       :current-page.sync="currentPage"
       :settings="settings"
       :user="user"></component>
