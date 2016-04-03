@@ -16,9 +16,9 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <select id="form_connection_id" v-model="connection_id">
-          <option value="" v-if="!connections.length">No connections</option>
-          <option :selected="connection_id == c.id" :value="c.id" v-for="c in connections">{{c.protocol}}-{{c.name}}</option>
+        <select id="form_connection_id" v-model="connectionId">
+          <option value="" v-if="!user.connections.length">No connections</option>
+          <option :selected="connectionId == c.id" :value="c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</option>
         </select>
         <label for="form_connection_id">Select connection</label>
       </div>
@@ -55,17 +55,20 @@
 module.exports = {
   props:    ["user", "visibleSection"],
   computed: {
-    connections: function() {
-      return this.user.connections();
-    },
     connection: function() {
-      return this.connections[this.connection_id];
-    },
+      return this.user.connections.filter(function(c) {
+          return c.id == this.connectionId;
+        }.bind(this))[0] || this.user.dialogs.filter(function(d) {
+          return d.active();
+        }).map(function(d) {
+          return d.connection;
+        })[0];
+    }
   },
   data: function() {
     return {
       canSubmit:          false,
-      connection_id:      0,
+      connectionId:       "",
       dialogName:         "",
       errors:             [],
       noRoomsDescription: null,
@@ -76,10 +79,7 @@ module.exports = {
     join: function(e) {
       if (!this.dialogName.length) return;
       if (!this.connection) return this.missingConnectionError();
-      this.connection.joinDialog(this.dialogName, function(err, dialog) {
-        if (err) return this.errors = err;
-        this.user.currentDialog(dialog);
-      }.bind(this));
+      this.connection.send("/join " + this.dialogName);
     },
     load: function(e) {
       if (!this.connection) return this.missingConnectionError();
@@ -95,7 +95,7 @@ module.exports = {
       this.errors = [{
         message: "You need to create a connection first."
       }];
-    },
+    }
   },
   ready: function() {
     var self = this;

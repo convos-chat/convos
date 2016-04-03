@@ -181,55 +181,6 @@ Error.
     ]
   },
 
-=head2 joinDialog
-
-Join a dialog.
-
-=head3 Resource URL
-
-  POST http://demo.convos.by/api/connection/{connection_id}/dialogs
-
-=head3 Parameters
-
-  .---------------------------------------------------------------------------.
-  | Name          | In   | Type   | Required | Description                    |
-  |---------------------------------------------------------------------------|
-  | connection_id | path | string | Yes      | A unique connection identifier |
-  | body          | body | schema | Yes      | No description.                |
-  '---------------------------------------------------------------------------'
-
-  body:
-
-  {
-    "name": string, // Name of room or person
-  },
-
-=head3 Responses
-
-=head4 200 - OK
-
-A dialog.
-
-  {
-    "connection_id": string, // Unique identifier for the connection this dialog is part of
-    "name": string, // Name of the room or person
-    "topic": string, // The subjec/topic for this room
-  },
-
-=head4 Default
-
-Internal server error.
-
-  {
-    "errors":     [
-      {
-        "message": string, // Human readable description of the error
-        "path": string, // JSON pointer to the input data where the error occur
-      },
-      ...
-    ]
-  },
-
 =head2 listConnections
 
 Get all the connections for a user.
@@ -641,47 +592,6 @@ Error.
     ]
   },
 
-=head2 removeDialog
-
-Remove (part) a dialog.
-
-=head3 Resource URL
-
-  DELETE http://demo.convos.by/api/connection/{connection_id}/dialog/{dialog_id}
-
-=head3 Parameters
-
-  .---------------------------------------------------------------------------.
-  | Name          | In   | Type   | Required | Description                    |
-  |---------------------------------------------------------------------------|
-  | connection_id | path | string | Yes      | A unique connection identifier |
-  | dialog_id     | path | string | Yes      | The name of the person or room |
-  '---------------------------------------------------------------------------'
-
-=head3 Responses
-
-=head4 200 - OK
-
-A dialog.
-
-  {
-    "message": string, // Human readable description
-  },
-
-=head4 Default
-
-Internal server error.
-
-  {
-    "errors":     [
-      {
-        "message": string, // Human readable description of the error
-        "path": string, // JSON pointer to the input data where the error occur
-      },
-      ...
-    ]
-  },
-
 =head2 roomsByConnection
 
 Get a list of all available chat rooms.
@@ -775,28 +685,28 @@ Error.
     ]
   },
 
-=head2 sendToDialog
+=head2 sendEvents
 
-Send a message to a target.
+Send a message or command.
 
 =head3 Resource URL
 
-  POST http://demo.convos.by/api/connection/{connection_id}/dialog/{dialog_id}/send
+  POST http://demo.convos.by/api/send
 
 =head3 Parameters
 
-  .---------------------------------------------------------------------------.
-  | Name          | In   | Type   | Required | Description                    |
-  |---------------------------------------------------------------------------|
-  | connection_id | path | string | Yes      | A unique connection identifier |
-  | dialog_id     | path | string | Yes      | The name of the person or room |
-  | body          | body | schema | Yes      | No description.                |
-  '---------------------------------------------------------------------------'
+  .---------------------------------------------------.
+  | Name | In   | Type   | Required | Description     |
+  |---------------------------------------------------|
+  | body | body | schema | Yes      | No description. |
+  '---------------------------------------------------'
 
   body:
 
   {
     "command": string, // A command to be sent to backend
+    "connection_id": string, // Connection ID
+    "dialog_id": string, // Dialog ID
   },
 
 =head3 Responses

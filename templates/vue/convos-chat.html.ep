@@ -1,0 +1,22 @@
+<template class="vue-convos-chat">
+  <nav>
+    <sidebar-notifications :user="user"></sidebar-notifications>
+    <sidebar-dialogs :user="user" :visible-section.sync="visibleSection"></sidebar-dialogs>
+    <sidebar-settings :user="user" :visible-section.sync="visibleSection"></sidebar-settings>
+  </nav>
+  <create-dialog :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'create-dialog'"></create-dialog>
+  <connection-editor :settings="settings" :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'connection-editor'"></connection-editor>
+  <user-profile :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'user-profile'"></user-profile>
+  <convos-help :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'help'"></convos-help>
+  <dialog-container :dialog="d" :user="user" v-show="d.active()" v-for="d in user.dialogs"></dialog-container>
+</template>
+<script type="vue/component">
+module.exports = {
+  props: ["currentPage", "settings", "user"],
+  data:  function() {
+    return {
+      visibleSection: "chat"
+    };
+  }
+};
+</script>

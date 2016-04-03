@@ -38,20 +38,10 @@ sub id {
   return lc join '-', @{$_[0]}{qw(protocol name)};
 }
 
-sub join_dialog {
-  my ($self, $cb) = (shift, pop);
-  $self->tap($cb, 'Method "join_dialog" not implemented.');
-}
-
 sub new {
   my $self = shift->SUPER::new(@_);
   $self->dialog($_) for @{delete($self->{dialogs}) || []};
   $self;
-}
-
-sub part_dialog {
-  my ($self, $cb) = (shift, pop);
-  $self->tap($cb, 'Method "part_dialog" not implemented.');
 }
 
 sub participants {
@@ -260,23 +250,11 @@ Used to disconnect from server. Meant to be overloaded in a subclass.
 
 Returns a L<Convos::Core::Dialog> object or undef.
 
-=head2 join_dialog
-
-  $self = $self->join_dialog("#target" => sub { my ($self, $err) = @_; });
-
-Used to create a new dialog. See also L</dialog> event.
-
 =head2 new
 
   $self = Convos::Core::Connection->new(\%attrs);
 
 Creates a new connection object.
-
-=head2 part_dialog
-
-  $self = $self->part_dialog("#target" => sub { my ($self, $err) = @_; });
-
-Used to part a dialog.
 
 =head2 participants
 

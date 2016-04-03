@@ -145,27 +145,6 @@
         }
       }
     },
-    "/connection/{connection_id}/dialog/{dialog_id}": {
-      "delete": {
-        "tags": [ "dialog" ],
-        "summary": "Remove (part) a dialog.",
-        "operationId": "removeDialog",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/dialog_id" }
-        ],
-        "responses": {
-          "200": {
-            "description": "A dialog.",
-            "schema": { "$ref": "#/definitions/Success" }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
     "/connection/{connection_id}/dialog/{dialog_id}/messages": {
       "get": {
         "tags": [ "dialog" ],
@@ -226,70 +205,6 @@
                 }
               }
             }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connection/{connection_id}/dialog/{dialog_id}/send": {
-      "post": {
-        "tags": [ "chat" ],
-        "summary": "Send a message to a target.",
-        "operationId": "sendToDialog",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/dialog_id" },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "required": ["command"],
-              "properties": {
-                "command": { "type": "string", "description": "A command to be sent to backend" }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully sent a message",
-            "schema": { "type": "object" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connection/{connection_id}/dialogs": {
-      "post": {
-        "tags": [ "dialog" ],
-        "summary": "Join a dialog.",
-        "operationId": "joinDialog",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": ["name"],
-              "properties": {
-                "name": { "type": "string", "minLength": 3, "description": "Name of room or person" }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A dialog.",
-            "schema": { "$ref": "#/definitions/Dialog" }
           },
           "default": {
             "description": "Internal server error.",
@@ -425,6 +340,38 @@
               "type": "object",
               "properties": {}
             }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/send": {
+      "post": {
+        "tags": [ "chat" ],
+        "summary": "Send a message or command.",
+        "operationId": "sendEvents",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": ["connection_id", "command"],
+              "properties": {
+                "connection_id": { "type": "string", "description": "Connection ID" },
+                "dialog_id": { "type": "string", "description": "Dialog ID" },
+                "command": { "type": "string", "description": "A command to be sent to backend" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully sent a message",
+            "schema": { "type": "object" }
           },
           "default": {
             "description": "Error.",

@@ -27,7 +27,7 @@
           <button class="btn waves-effect waves-light" type="submit">
             Log in <i class="material-icons right">send</i>
           </button>
-          <a href="#register" @click.prevent="render = 'register'" class="btn-flat waves-effect waves-light">Register</a>
+          <a href="#register" @click.prevent="currentPage = 'user-register'" class="btn-flat waves-effect waves-light">Register</a>
         </div>
       </div>
       <div class="row">
@@ -40,7 +40,7 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["render", "user"],
+  props:    ["currentPage", "user"],
   data:     function() {
     return {
       email:    localStorage.getItem("email"),
@@ -62,7 +62,7 @@ module.exports = {
           }
         }, function(err, xhr) {
           if (err) return self.errors = err;
-          self.user.update(xhr.body);
+          self.$dispatch("login", xhr.body);
         }
       );
     }

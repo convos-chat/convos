@@ -6,8 +6,6 @@
     this.state = "disconnected";
     this.url   = "";
     this._api  = Convos.api;
-    this.on("me", this._onMe);
-    this.on("state", this._onState);
     this.on("message", this._onMessage);
     if (attrs) this.update(attrs);
   };
@@ -111,12 +109,36 @@
     return this;
   };
 
+  proto.send = function(command, dialog) {
+    var self = this;
+    this._api.sendEvents(
+      {
+        body: {
+          command:       command,
+          connection_id: this.id,
+          dialog_id:     dialog ? dialog.id : ""
+        }
+      }, function(err, xhr) {
+        var action = command.match(/^\/(\w+)/);
+        if (err) {
+          self.emit("message", {
+            type:    "error",
+            message: 'Could not send "' + command + '": ' + err[0].message
+          });
+        } else if (action) {
+          var handler = "_on" + action[1].toLowerCase().ucFirst() + "Event";
+          return self[handler] ? self[handler](xhr.body) : console.log("No handler for " + handler);
+        }
+      }
+    );
+    return this;
+  };
+
   proto.update = function(attrs) {
     var self = this;
     Object.keys(attrs).forEach(function(n) {
       self[n] = attrs[n];
     });
-    this.emit("updated");
   };
 
   // Change state to "connected" or "disconnected"
@@ -126,24 +148,18 @@
     throw "TODO";
   };
 
-  proto._onMe = function(data) {
-    console.log('[todo:event:me]', data);
-    if (data.nick) this.nick(data.nick);
+  proto._onJoinEvent = function(data) {
+    this.$root.refreshDialogs(function() {});
   };
+
+  proto._onJEvent = proto._onJoinEvent;
 
   proto._onMessage = function(data) {
-    data.from = this.id;
-    data.type = "notice";
-    this.user.currentDialog().emit("message", data);
-  };
-
-  proto._onState = function(data) {
-    this.state = data.state;
-    this.user.currentDialog().emit("message", {
-      from:    this.id,
-      message: data.message + " (" + data.state + ")",
-      ts:      data.ts,
-      type:    "notice"
-    });
+    var self   = this;
+    var dialog = this.user.dialogs.filter(function(d) {
+      var c = d.connection;
+      return c && c.id == self.id && d.active();
+    })[0];
+    if (dialog) dialog.emit("message", data);
   };
 })(window);

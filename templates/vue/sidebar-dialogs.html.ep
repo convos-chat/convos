@@ -1,44 +1,30 @@
 <template class="vue-sidebar-dialogs">
-  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :title="d.frozen" :class="dialogClass(d)" v-for="d in dialogs">
+  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :title="d.frozen" :class="dialogClass(d)" v-for="d in user.dialogs">
     <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
-    <span class="on">{{d.connection.protocol}}-{{d.connection.name}}</span>
+    <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
+    <span class="on" v-else>convos-local</span>
   </a>
-  <a href='#settings/connections' @click.prevent="visibleSection = 'connection-editor'" :class="dialogClass(c)" v-for="c in connections">
+  <a href='#settings/connections' @click.prevent="visibleSection = 'connection-editor'" v-for="c in user.connections">
     <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
     <span class="on">{{c.humanState()}}</span>
   </a>
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["user", "visibleSection"],
-  data:     function() {
-    return {
-      connections: [],
-      currentDialogId: '',
-      dialogs:     []
-    };
-  },
+  props:   ["user", "visibleSection"],
   methods: {
     dialogClass: function(d) {
       return {
-        active:     d.id == this.currentDialogId,
+        active:     d.active(),
         frozen:     d.frozen,
         tooltipped: true
       };
     },
-    setCurrentDialog: function(d) {
-      this.user.currentDialog(d);
+    setCurrentDialog: function(dialog) {
+      this.user.dialogs.forEach(function(d) {
+        d.active(dialog == d ? true : false);
+      });
     }
-  },
-  ready: function() {
-    var self = this;
-    this.user.on("dialogChanged", function (d) {
-      self.currentDialogId = d.id;
-    });
-    this.user.on("refreshed", function() {
-      self.connections = this.connections();
-      self.dialogs     = this.dialogs();
-    });
   }
 };
 </script>

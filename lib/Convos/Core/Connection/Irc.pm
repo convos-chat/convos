@@ -120,31 +120,6 @@ sub disconnect {
   $self->_proxy(disconnect => sub { $self->state('disconnected')->$cb($_[1] || '') });
 }
 
-sub join_dialog {
-  my $cb   = pop;
-  my $self = shift;
-  my ($name, $password) = split /\s/, shift, 2;
-  my $dialog = $self->get_dialog($name);
-
-  return $self->_next_tick($cb, '', $dialog) if $dialog and !$dialog->frozen;
-  Scalar::Util::weaken($self);
-  return $self->_proxy(
-    join_channel => $name,
-    sub {
-      my ($irc, $err) = @_;
-      $dialog ||= $self->dialog({name => $name});
-      if ($err) {
-        $self->remove_dialog($name);
-        $dialog->frozen($err);
-      }
-      else {
-        $dialog->frozen('')->password($password // '');
-      }
-      $self->$cb($err, $dialog);
-    }
-  );
-}
-
 sub nick {
   my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
   my ($self, @nick) = @_;    # @nick will be empty list on "get"
@@ -154,19 +129,6 @@ sub nick {
   $self->url->query->param(nick => $nick[0]) if @nick;
   $self->_irc->nick(@nick, sub { shift; $self->$cb(@_) });
   $self;
-}
-
-sub part_dialog {
-  my ($self, $name, $cb) = @_;
-
-  return $self->_proxy(
-    part_channel => $name,
-    sub {
-      my ($irc, $err) = @_;
-      $self->remove_dialog($name) unless $err;
-      $self->$cb($err);
-    }
-  );
 }
 
 sub participants {
@@ -203,26 +165,25 @@ sub send {
   my ($self, $target, $message, $cb) = @_;
 
   $message //= '';
-  if ($message =~ s!^/!!) {
-    my ($cmd, $args) = split /\s/, $message, 2;
-    return $self->_next_tick($cb => 'Invalid IRC command.') unless $cmd =~ /^[A-Za-z]+$/;
+  $target  //= '';
 
-    $cmd = uc $cmd;
-    return $self->_send($target, "\x{1}ACTION $args\x{1}", $cb) if $cmd eq 'ME';
-    return $self->_send($target, $args, $cb) if $cmd eq 'SAY';
-    return $self->_send(split(/\s+/, $args, 2), $cb) if $cmd eq 'MSG';
-    return $self->connect($cb)    if $cmd eq 'CONNECT';
-    return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
-    return $self->join_dialog($args, $cb) if $cmd eq 'JOIN';
-    return $self->nick($args, $cb) if $cmd eq 'NICK';
-    return $self->part_dialog($args || $target, $cb) if $cmd eq 'CLOSE';
-    return $self->part_dialog($args || $target, $cb) if $cmd eq 'PART';
-    return $self->topic($target, $args ? ($args) : (), $cb) if $cmd eq 'TOPIC';
-    return $self->_proxy(whois => $args, $cb) if $cmd eq 'WHOIS';
-    return $self->_next_tick($cb => 'Unknown IRC command.');
-  }
+  return $self->_send($target, $message, $cb) unless $message =~ s!^/!!;
 
-  return $self->_send($target, $message, $cb);
+  my ($cmd, $args) = split /\s/, $message, 2;
+  return $self->_next_tick($cb => 'Invalid IRC command.') unless $cmd =~ /^[A-Za-z]+$/;
+
+  $cmd = uc $cmd;
+  return $self->_send($target, "\x{1}ACTION $args\x{1}", $cb) if $cmd eq 'ME';
+  return $self->_send($target, $args, $cb) if $cmd eq 'SAY';
+  return $self->_send(split(/\s+/, $args, 2), $cb) if $cmd eq 'MSG';
+  return $self->connect($cb)    if $cmd eq 'CONNECT';
+  return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
+  return $self->_join_dialog($args, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
+  return $self->nick($args, $cb) if $cmd eq 'NICK';
+  return $self->_part_dialog($args || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
+  return $self->topic($target, $args ? ($args) : (), $cb) if $cmd eq 'TOPIC';
+  return $self->_proxy(whois => $args, $cb) if $cmd eq 'WHOIS';
+  return $self->_next_tick($cb => 'Unknown IRC command.');
 }
 
 sub topic {
@@ -250,42 +211,77 @@ sub _event_irc_error {
 sub _irc_message {
   my ($self, $event, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
-  my $target = $msg->{params}[0];
+  my ($from, $target);
 
   if ($user) {
-    my $current_nick = $self->_irc->nick;
-    my $is_private   = $self->_is_current_nick($target);
+    my $is_private = $self->_is_current_nick($msg->{params}[0]);
+    $target = $is_private ? $nick : $msg->{params}[0];
+    $target = $self->get_dialog($target) || $self->dialog({name => $target});
+    $from = $nick;
+  }
 
-    $self->emit(
-      message => $self->dialog({name => $is_private ? $nick : $target}),
-      {
-        from    => $nick,
-        message => $msg->{params}[1],
-        ts      => time,
-        type    => $event =~ /privmsg/ ? 'private' : $event =~ /action/ ? 'action' : 'notice',
-      }
-    );
-  }
-  else {    # server message
-    $self->emit(
-      message => $self,
-      {
-        from => $msg->{prefix} // $self->_irc->server,
-        message => $msg->{params}[1],
-        ts      => time,
-        type    => $event eq 'irc_privmsg' ? 'private' : 'notice',
-      }
-    );
-  }
+  $target ||= $self;
+  $from ||= $msg->{prefix} // $self->_irc->server;
+
+  # server message or message without a dialog
+  $self->emit(
+    message => $target,
+    {
+      from    => $from,
+      message => $msg->{params}[1],
+      ts      => time,
+      type    => $event =~ /privmsg/ ? 'private' : $event =~ /action/ ? 'action' : 'notice',
+    }
+  );
 }
 
 sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
+
+sub _join_dialog {
+  my $cb   = pop;
+  my $self = shift;
+  my ($name, $password) = split /\s/, shift, 2;
+  my $dialog = $self->get_dialog($name);
+
+  return $self->_next_tick($cb, '', $dialog) if $dialog and !$dialog->frozen;
+  Scalar::Util::weaken($self);
+  return $self->_proxy(
+    join_channel => $name,
+    sub {
+      my ($irc, $err) = @_;
+      $dialog ||= $self->dialog({name => $name});
+      if ($err) {
+        $self->remove_dialog($name);
+        $dialog->frozen($err);
+      }
+      else {
+        $self->save(sub { });
+        $dialog->frozen('')->password($password // '');
+      }
+      $self->$cb($err, $dialog);
+    }
+  );
+}
 
 sub _notice {
   my ($self, $message) = (shift, shift);
   $self->emit(
     message => $self,
     {from => $self->url->host, type => 'notice', @_, message => $message, ts => time}
+  );
+}
+
+sub _part_dialog {
+  my ($self, $name, $cb) = @_;
+
+  return $self->_proxy(
+    part_channel => $name,
+    sub {
+      my ($irc, $err) = @_;
+      $self->remove_dialog($name) unless $err;
+      $self->save(sub { });
+      $self->$cb($err);
+    }
   );
 }
 
@@ -411,6 +407,8 @@ _event irc_nick => sub {
   }
 
   for my $dialog (values %{$self->{dialogs}}) {
+
+    # TODO: Track users in channels so only the channels where the user is in gets this event.
     $self->emit(
       dialog => $dialog => {type => 'nick_change', new_nick => $new_nick, nick => $old_nick});
   }
@@ -438,6 +436,8 @@ _event irc_quit => sub {
   my $reason = $msg->{params}[1] || '';
 
   for my $dialog (values %{$self->{dialogs}}) {
+
+    # TODO: Track users in channels so only the channels where the user is in gets this event.
     $self->emit(dialog => $dialog => {part => $nick, message => $reason});
   }
 };
@@ -483,7 +483,7 @@ _event irc_rpl_welcome => sub {
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(me => $self->{myinfo});
-  $self->join_dialog(join(' ', $_->name, $_->password), sub { }) for @{$self->dialogs};
+  $self->_join_dialog(join(' ', $_->name, $_->password), sub { }) for @{$self->dialogs};
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool
@@ -534,10 +534,6 @@ See L<Convos::Core::Connection/connect>.
 
 See L<Convos::Core::Connection/disconnect>.
 
-=head2 join_dialog
-
-See L<Convos::Core::Connection/join_dialog>.
-
 =head2 nick
 
   $self = $self->nick($nick => sub { my ($self, $err) = @_; });
@@ -548,10 +544,6 @@ Used to set or get the nick for this connection. Setting this nick will change
 L</nick> and try to change the nick on server if connected. Getting this nick
 will retrieve the active nick on server if connected and fall back to returning
 L</nick>.
-
-=head2 part_dialog
-
-See L<Convos::Core::Connection/dialog>.
 
 =head2 participants
 

@@ -74,32 +74,29 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["user", "visibleSection"],
+  props:    ["settings", "user", "visibleSection"],
   computed: {
-    connections: function() {
-      return this.user.connections();
-    },
     showNickField: function() {
       return this.selectedProtocol == "irc";
     }
   },
   data: function() {
-    var currentDialog = this.user.currentDialog();
     return {
-      connection:       currentDialog.connection,
-      defaultServer:    Convos.settings.default_server || "",
+      connection:       this.user.connections[0],
+      defaultServer:    this.settings.default_server || "",
       errors:           [],
       password:         "",
       nick:             "",
       selectedProtocol: "irc",
-      server:           Convos.settings.default_server || "",
+      server:           this.settings.default_server || "",
       username:         ""
     };
   },
   methods: {
     removeConnection: function() {
       var self = this;
-      this.user.removeConnection(this.connection, function(err) {
+      this.$root.connections
+      removeConnection(this.connection, function(err) {
         if (err) return self.errors = err;
         self.connection = this.connections()[0];
       });
