@@ -1,6 +1,26 @@
 package Convos::Controller::User;
 use Mojo::Base 'Mojolicious::Controller';
 
+sub command {
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $connection = $user->get_connection($args->{body}{connection_id});
+
+  unless ($connection) {
+    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+  }
+
+  $self->delay(
+    sub { $connection->send($args->{body}{dialog_id}, $args->{body}{command}, shift->begin); },
+    sub {
+      my ($delay, $err, $res) = @_;
+      $res->{command} = $args->{body}{command};
+      return $self->$cb($res, 200) unless $err;
+      return $self->$cb($self->invalid_request($err), 500);
+    },
+  );
+}
+
 sub delete {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
@@ -106,6 +126,10 @@ L<Convos::Controller::User> is a L<Mojolicious::Controller> with
 user related actions.
 
 =head1 METHODS
+
+=head2 command
+
+See L<Convos::Manual::API/commandFromUser>.
 
 =head2 delete
 
