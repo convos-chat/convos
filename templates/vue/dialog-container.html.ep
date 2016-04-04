@@ -45,7 +45,7 @@ module.exports = {
       });
 
       if ($paste.length) {
-        var $view = $('<a href="#view" class="tooltipped" title="View"><i class="material-icons">visibility</i></a>');
+        var $view = $('<a href="#view" class="tooltipped" title="View"><i class="material-icons">open_in_browser</i></a>');
         $paste.hide();
         $a.after($view.click(function(e) {
           e.preventDefault();
