@@ -37,7 +37,7 @@
           Convos.api.ws().on("json", function(data) {
             if (!data.cid) return;
             var target = self.user.getDialog(data.tid) || self.user.getConnection(data.cid);
-            console.log(data.event, target ? target.id : data, data.type);
+            console.log(data.event, target ? target.id : data, data);
             if (target) target.emit(data.event, data);
           });
 

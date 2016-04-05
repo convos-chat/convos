@@ -4,7 +4,7 @@
     <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
     <span class="on" v-else>convos-local</span>
   </a>
-  <a href='#settings/connections' @click.prevent="visibleSection = 'connection-editor'" v-for="c in user.connections">
+  <a href='#settings/connections' @click.prevent="visibleSection = 'connection-editor'" :title="c.state" :class="connectionClass(c)" v-for="c in user.connections">
     <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
     <span class="on">{{c.humanState()}}</span>
   </a>
@@ -13,6 +13,12 @@
 module.exports = {
   props:   ["user", "visibleSection"],
   methods: {
+    connectionClass: function(c) {
+      return {
+        frozen:     c.state == 'connected' ? false : true,
+        tooltipped: true
+      };
+    },
     dialogClass: function(d) {
       return {
         active:     d.active(),

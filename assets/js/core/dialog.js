@@ -97,7 +97,7 @@
     });
     if (this.frozen) {
       this.addMessage({
-        message: "You are not part of this channel. The reason is " + this.frozen
+        message: "You are not part of this channel. " + this.frozen
       });
     }
   };

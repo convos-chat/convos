@@ -7,6 +7,7 @@
     this.url   = "";
     this._api  = Convos.api;
     this.on("message", this._onMessage);
+    this.on("state", this._onState);
     if (attrs) this.update(attrs);
   };
 
@@ -151,5 +152,14 @@
       return c && c.id == self.id && d.active();
     })[0];
     if (dialog) dialog.emit("message", data);
+  };
+
+  proto._onState = function(data) {
+    this.state = data.state;
+    data.message = data.message ? ' ' + data.message : '..';
+    this.emit("message", {
+      type:    "notice",
+      message: 'Connection state changed to "' + this.state + '".' + data.message
+    });
   };
 })();
