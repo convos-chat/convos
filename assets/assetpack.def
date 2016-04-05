@@ -13,6 +13,7 @@
 < js/string.js
 < js/jquery.autocomplete.js
 < js/jquery.disableouterscroll.js
+< js/materialbox.js
 < js/websocket.js
 < js/swagger2-client.js
 < js/vue/filter-markdown.js
@@ -29,7 +30,6 @@
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/leanModal.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/tooltip.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/animation.js
-< https://raw.githubusercontent.com/Dogfalo/materialize/master/js/materialbox.js
 < js/core/connection.js
 < js/core/dialog.js
 < js/core/user.js

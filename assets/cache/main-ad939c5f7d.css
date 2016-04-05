@@ -4865,12 +4865,10 @@ nav {
 img.embed, .link-embedder.text-html {
   max-width: 820px;
   overflow: hidden;
-  margin: 10px 0; }
+  margin: 6px 8px 6px 0; }
 
 img.embed {
   max-height: 220px; }
-  img.embed.active {
-    max-height: none; }
 
 .gist .gist-file {
   /*
@@ -4883,6 +4881,26 @@ img.embed {
 
 .gist .highlight {
   background: #f6f6f6 !important; }
+
+.materialbox-overlay {
+  background-color: #292929;
+  width: 0;
+  overflow: hidden;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  opacity: 0.01;
+  cursor: zoom-out;
+  transition: opacity .4s ease-in-out;
+  will-change: opacity; }
+  .materialbox-overlay img {
+    transition: width .3s ease-in-out, height .3s ease-in-out, left .3s ease-in-out,  top .3s ease-in-out; }
+  .materialbox-overlay.active {
+    display: block;
+    opacity: 0.98;
+    width: 100%; }
 
 .link-embedder.text-html .link-embedder-media {
   float: left; }
