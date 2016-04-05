@@ -80,8 +80,9 @@ sub messages {
   $re = qr{\Q$re\E}i unless ref $re;
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (.*$re.*)$/;
 
-  $args{after}  = Time::Piece->strptime($query->{after},  '%Y-%m-%dT%H:%M:%S')if $query->{after};
+  $args{after}  = Time::Piece->strptime($query->{after},  '%Y-%m-%dT%H:%M:%S') if $query->{after};
   $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S') if $query->{before};
+
   # If neither before nor after are defined, search everything before now
   $args{before} = gmtime if !$args{before} && !$args{after};
   $args{limit}    = $query->{limit} || 60;
@@ -170,6 +171,14 @@ sub _delete_user {
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
+sub _format {
+  my ($self, $key) = @_;
+  my $format = $FORMAT{$key};
+  return @$format if $format;
+  warn "No format defined for $key\n";
+  return;
+}
+
 sub _log {
   my ($self, $obj, $ts, $message) = @_;
   my $t    = gmtime $ts;
@@ -205,6 +214,7 @@ sub _log_file {
 # blocking method
 sub _messages {
   my ($self, $obj, $args) = @_;
+
   # this code is running in a sub process, so "guard" does not have to be localised
   return $args->{messages} if ++$self->{guard} > ($ENV{CONVOS_MAX_SEARCH_BACK_MONTHS} || 12);
   my $file = $self->_log_file($obj, $args->{before} || $args->{after});
@@ -276,25 +286,27 @@ sub _setup {
       $connection->on(
         message => sub {
           my ($connection, $target, $msg) = @_;
-          my ($format, @keys) = @{$FORMAT{$msg->{type}}};
-          my @tid = $target->id eq $cid ? () : (tid => $target->id);
+          my ($format, @keys) = $self->_format($msg->{type}) or return;
+          my @dialog_id = $target->id eq $cid ? () : (dialog_id => $target->id);
           $self->_log($target, $msg->{ts}, sprintf $format, map { $msg->{$_} } @keys);
-          $self->emit("user:$uid", message => {cid => $cid, @tid, %$msg});
+          $self->emit("user:$uid", message => {connection_id => $cid, @dialog_id, %$msg});
         }
       );
       $connection->on(
         state => sub {
           my ($connection, $state, $message) = @_;
           $self->_log($connection, time, sprintf '-!- %s. %s', ucfirst $state, $message);
-          $self->emit("user:$uid", state => {cid => $cid, message => $message, state => $state});
+          $self->emit("user:$uid",
+            state => {connection_id => $cid, message => $message, state => $state});
         }
       );
       $connection->on(
         dialog => sub {
           my ($connection, $target, $data) = @_;
-          my ($format, @keys) = @{$FORMAT{$data->{type}}};
+          $self->emit("user:$uid",
+            dialog => {connection_id => $cid, dialog_id => $target->id, %$data});
+          my ($format, @keys) = $self->_format($data->{type}) or return;
           $self->_log($connection, time, sprintf $format, map { $data->{$_} } @keys);
-          $self->emit("user:$uid", dialog => {cid => $cid, tid => $target->id, %$data});
         }
       );
     }

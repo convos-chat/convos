@@ -35,9 +35,9 @@
           this.currentPage = "convos-chat";
 
           Convos.api.ws().on("json", function(data) {
-            if (!data.cid) return;
-            var target = self.user.getDialog(data.tid) || self.user.getConnection(data.cid);
-            console.log(data.event, target ? target.id : data, data);
+            if (!data.connection_id) return;
+            var target = self.user.getDialog(data.dialog_id) || self.user.getConnection(data.connection_id);
+            // console.log(data.event, target ? target.id : data, data);
             if (target) target.emit(data.event, data);
           });
 

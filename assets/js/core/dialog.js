@@ -9,6 +9,7 @@
 
     EventEmitter(this);
     this.on("message", this.addMessage);
+    this.on("dialog", this._onDialog);
     this.once("show", this._load);
 
     if (attrs) this.update(attrs);
@@ -120,5 +121,13 @@
         this.emit("ready");
       }.bind(this)
     );
+  };
+
+  proto._onDialog = function(data) {
+    switch (data.type) {
+      case "frozen":
+        this.frozen = data.frozen;
+        break
+    }
   };
 })();

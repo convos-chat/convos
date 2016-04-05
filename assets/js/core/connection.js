@@ -43,6 +43,14 @@
     return protocol ? protocol[1] : "unknown";
   };
 
+  proto.notice = function(message) {
+    this.emit("message", {
+      from:    this.id,
+      type:    "notice",
+      message: message
+    });
+  };
+
   // Get list of available rooms on server
   proto.rooms = function(cb) {
     var self = this;
@@ -142,7 +150,7 @@
     });
   };
 
-  proto._onJEvent = proto._onJoinEvent;
+  proto._onJEvent    = proto._onJoinEvent;
   proto._onPartEvent = proto._onCloseEvent;
 
   proto._onMessage = function(data) {
@@ -151,15 +159,13 @@
       var c = d.connection;
       return c && c.id == self.id && d.active();
     })[0];
+    data.from = this.id;
     if (dialog) dialog.emit("message", data);
   };
 
   proto._onState = function(data) {
-    this.state = data.state;
-    data.message = data.message ? ' ' + data.message : '..';
-    this.emit("message", {
-      type:    "notice",
-      message: 'Connection state changed to "' + this.state + '".' + data.message
-    });
+    this.state   = data.state;
+    data.message = data.message ? " " + data.message : "..";
+    this.notice('Connection state changed to "' + this.state + '".' + data.message);
   };
 })();

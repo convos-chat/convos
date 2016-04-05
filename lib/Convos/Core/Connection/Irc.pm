@@ -82,10 +82,14 @@ sub connect {
 
   delete $self->{disconnect};
   Scalar::Util::weaken($self);
-  $self->state('queued');
-  $_->frozen('Not connected.') for @{$self->dialogs};
+  $self->state('queued', 'Connecting...');
   $self->{steal_nick_tid}
     ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
+
+  for my $dialog (@{$self->dialogs}) {
+    $dialog->frozen('Not connected.');
+    $self->emit(dialog => $dialog => {type => 'frozen', frozen => $dialog->frozen});
+  }
 
   return $self->_next_tick(
     sub {
@@ -258,6 +262,7 @@ sub _join_dialog {
         $dialog->frozen('')->password($password // '');
       }
       $self->$cb($err, $dialog);
+      $self->emit(dialog => $dialog => {type => 'frozen', frozen => $dialog->frozen});
     }
   );
 }
@@ -425,6 +430,7 @@ _event irc_part => sub {
   if ($self->_is_current_nick($nick)) {
     $self->remove_dialog($msg->{params}[0]);
     $dialog->frozen('Parted.');
+    $self->emit(dialog => $dialog => {type => 'frozen', frozen => $dialog->frozen});
   }
 
   $self->emit(dialog => $dialog => {type => 'part', nick => $nick, message => $reason});
