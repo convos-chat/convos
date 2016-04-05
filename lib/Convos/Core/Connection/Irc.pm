@@ -46,13 +46,13 @@ has _irc => sub {
   for my $event (
     'err_cannotsendtochan', 'err_erroneusnickname',
     'err_nicknameinuse',    'err_nosuchnick',
-    'irc_error',            'irc_kick',
-    'irc_mode',             'irc_nick',
-    'irc_part',             'irc_quit',
-    'irc_rpl_away',         'irc_rpl_myinfo',
-    'irc_rpl_topic',        'irc_rpl_topicwhotime',
-    'irc_rpl_welcome',      'irc_rpl_yourhost',
-    'irc_topic',
+    'irc_error',            'irc_join',
+    'irc_kick',             'irc_mode',
+    'irc_nick',             'irc_part',
+    'irc_quit',             'irc_rpl_away',
+    'irc_rpl_myinfo',       'irc_rpl_topic',
+    'irc_rpl_topicwhotime', 'irc_rpl_welcome',
+    'irc_rpl_yourhost',     'irc_topic',
     )
   {
     my $method = "_event_$event";
@@ -376,6 +376,14 @@ _event err_nosuchnick => sub {
   $self->_notice("No such nick or channel $msg->{params}[1].");
 };
 
+_event irc_join => sub {
+  my ($self, $msg) = @_;
+  my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
+  my $dialog = $self->get_dialog($msg->{params}[0]);
+
+  $self->emit(dialog => $dialog, {type => 'join', nick => $nick}) if $dialog;
+};
+
 _event irc_kick => sub {
   my ($self, $msg) = @_;
   my ($kicker) = IRC::Utils::parse_user($msg->{prefix});
@@ -444,7 +452,7 @@ _event irc_quit => sub {
   for my $dialog (values %{$self->{dialogs}}) {
 
     # TODO: Track users in channels so only the channels where the user is in gets this event.
-    $self->emit(dialog => $dialog => {part => $nick, message => $reason});
+    $self->emit(dialog => $dialog => {type => 'part', nick => $nick, message => $reason});
   }
 };
 

@@ -128,6 +128,12 @@
       case "frozen":
         this.frozen = data.frozen;
         break
+      case "join":
+        this.connection.notice(data.nick + " joined.");
+        break
+      case "part":
+        this.connection.notice(data.nick + " parted.");
+        break
     }
   };
 })();
