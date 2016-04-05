@@ -34,6 +34,16 @@
           this.user.email  = data.email;
           this.currentPage = "convos-chat";
 
+          Convos.api.ws().on("close", function() {
+            self.user.connections.forEach(function(c) {
+              c.state = "unreachable";
+            });
+            self.user.dialogs.forEach(function(d) {
+              if (d.connection)
+                d.frozen = "Websocket closed.";
+            });
+          });
+
           Convos.api.ws().on("json", function(data) {
             if (!data.connection_id) return;
             var target = self.user.getDialog(data.dialog_id) || self.user.getConnection(data.connection_id);
@@ -41,7 +51,7 @@
             if (target) target.emit(data.event, data);
           });
 
-          Convos.api.ws().open(function() {
+          Convos.api.ws().on("open", function(data) {
             self.user.refreshConnections(function(err) {
               if (err) return console.log(err); // TODO
               self.user.refreshDialogs(function(err) {
@@ -49,6 +59,8 @@
               });
             });
           });
+
+          Convos.api.ws().open();
         },
         logout: function() {
           Convos.api.ws().close();

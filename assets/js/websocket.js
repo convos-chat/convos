@@ -25,12 +25,9 @@
   // Open a connection to the WebSocket
   // ws = ws.open(function() { ... });
   // ws = ws.open();
-  proto.open = function(cb) {
-    if (this._ws && this._ws.readyState != WebSocket.CLOSED) {
-      if (cb && this._ws.readyState == WebSocket.OPEN) cb.call(this);
+  proto.open = function() {
+    if (this._ws && this._ws.readyState != WebSocket.CLOSED)
       return this;
-    }
-    if (cb) this.once("open", cb);
     if (window.DEBUG) console.log("[ReconnectingWebSocket] Open " + this.url);
 
     this.readyState = WebSocket.CONNECTING;
