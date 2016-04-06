@@ -110,12 +110,6 @@ This directory contains the test files for the Perl code.
 
 TODO: Add JavaScript tests.
 
-=item * ./vendor
-
-This directory contains projects which is tracked by other git repositories.
-
-TODO: Move this directory to "assets".
-
 =back
 
 =head2 Convos frontend
