@@ -168,4 +168,23 @@
     data.message = data.message ? " " + data.message : "..";
     this.notice('Connection state changed to "' + this.state + '".' + data.message);
   };
+
+  proto._onWhoisEvent = function(data) {
+    var channels = Object.keys(data.channels).sort();
+    data.message = data.nick;
+
+    if (data.idle_for) {
+      data.message += " has been idle for " + data.idle_for + " seconds in ";
+    } else {
+      data.message += " is active in ";
+    }
+
+    while (channels.length) {
+      var name = channels.shift();
+      var sep  = channels.length == 1 ? ' and ' : channels.length ? ", " : ".";
+      data.message += name + '' + sep;
+    }
+
+    this.notice(data.message);
+  };
 })();

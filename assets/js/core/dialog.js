@@ -30,7 +30,7 @@
 
   proto.addMessage = function(msg) {
     var prev = this.prevMessage || {};
-    msg.classNames = [];
+    msg.classNames = [msg.type];
 
     if (!msg.from)
       msg.from = "convosbot";
@@ -51,8 +51,7 @@
     if (prev.ts.getDate() != msg.ts.getDate())
       this.messages.push({
         classNames: ["day-changed"],
-        message:    "Day changed",
-        type:       "notice"
+        message:    "Day changed"
       });
 
     this.prevMessage = msg;

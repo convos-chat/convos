@@ -1,6 +1,6 @@
 <template class="vue-dialog-message">
   <span v-if="msg.type == 'action'">✧</span>
-  <a href="#insert:{{msg.from}}" class="title" @click="insertIntoInput">{{msg.from}}</a>
+  <a href="#insert:{{msg.from}}" class="title" @click.prevent="insertIntoInput(msg.from)">{{msg.from}}</a>
   <div class="message" v-if="msg.type != 'error'"><span>{{{message() | markdown}}}</span></div>
   <div class="error" v-if="msg.type == 'error'">{{msg.message}}</div>
   <span class="secondary-content ts tooltipped" :title="msg.ts.toLocaleString()" v-if="msg.ts">{{msg.ts | timestring}}</span>
@@ -9,8 +9,8 @@
 module.exports = {
   props:   ["dialog", "msg", "user"],
   methods: {
-    insertIntoInput: function() {
-      this.$dispatch("insertIntoInput", e.target.href.replace(/^.*#insert:/, ""));
+    insertIntoInput: function(str) {
+      this.$dispatch("insertIntoInput", str);
     },
     message: function() {
       var self = this;
@@ -31,13 +31,23 @@ module.exports = {
         + " participants in " + this.dialog.name + " connected to "
         + this.dialog.connection.name + ": "
         + list.map(function(p, i) {
-          return p.mode + p.name;
+          return '<a href="#whois:' + p.name + '">' + p.mode + p.name + "</a>";
         }).sort().join(", ");
     }
   },
   ready: function() {
-    var c = [this.msg.type || "normal"];
+    var self = this;
+    var c    = [this.msg.type || "normal"];
+
     $(this.$el).addClass(this.msg.classNames.join(" "));
+
+    // ugly hack since makeParticipantsMessage() makes dynamic html
+    this.$nextTick(function() {
+      $(this.$el).find('[href*="#whois:"]').click(function(e) {
+        e.preventDefault();
+        self.dialog.connection.send("/whois " + this.href.match(/whois:(.*)/)[1]);
+      });
+    });
   }
 };
 </script>

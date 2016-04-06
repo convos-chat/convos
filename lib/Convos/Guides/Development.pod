@@ -232,11 +232,7 @@ Emit desktop notifications on mentions.
 
 Implement "search/goto anything".
 
-Display action/notice/privmsg differently.
-
 Show notifications.
-
-Show user list for a dialog and user count. (what about user modes?)
 
 Sort dialogs by name/last used/...?
 
