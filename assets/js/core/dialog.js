@@ -29,23 +29,34 @@
   };
 
   proto.addMessage = function(msg) {
+    var prev = this.prevMessage || {};
+    msg.classNames = [];
+
     if (!msg.from)
       msg.from = "convosbot";
     if (!msg.ts)
       msg.ts = new Date();
     if (typeof msg.ts == "string")
       msg.ts = new Date(msg.ts);
-    if (msg.message && this._connection) this.connection.highlightMessage(msg);
-    this.messages.push(msg);
-  };
+    if (!prev.ts)
+      prev.ts = msg.ts;
 
-  proto.groupedMessage = function(msg) {
-    var prev = this.prevMessage || {
-      ts: new Date()
-    };
+    if (msg.message && this._connection) this.connection.highlightMessage(msg);
+    if (msg.highlight) msg.classNames.push("highlight");
+
+    msg.classNames.push(
+      msg.message && msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch()
+        ? "same-user" : "changed-user");
+
+    if (prev.ts.getDate() != msg.ts.getDate())
+      this.messages.push({
+        classNames: ["day-changed"],
+        message:    "Day changed",
+        type:       "notice"
+      });
+
     this.prevMessage = msg;
-    if (!msg.message) return false;
-    return msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch();
+    this.messages.push(msg);
   };
 
   // Create a href for <a> tag
@@ -127,13 +138,13 @@
     switch (data.type) {
       case "frozen":
         this.frozen = data.frozen;
-        break
+        break;
       case "join":
         this.connection.notice(data.nick + " joined.");
-        break
+        break;
       case "part":
         this.connection.notice(data.nick + " parted.");
-        break
+        break;
     }
   };
 })();

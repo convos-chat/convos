@@ -4766,6 +4766,17 @@ div.autocomplete {
       display: inline; }
     .dialog-container .dialog-message.action .link-embedder {
       font-style: normal; }
+    .dialog-container .dialog-message.day-changed {
+      color: rgba(102, 102, 102, 0.87);
+      text-align: center;
+      border-bottom: 1px solid #dbdbdb;
+      margin-bottom: 1.5rem;
+      height: 0.75rem; }
+      .dialog-container .dialog-message.day-changed:hover {
+        background: transparent; }
+      .dialog-container .dialog-message.day-changed span {
+        background: #fff;
+        padding: 0 8px; }
     .dialog-container .dialog-message.error {
       border-left: 2px solid #FF1744;
       color: rgba(102, 102, 102, 0.87); }
