@@ -9,7 +9,7 @@ use FindBin;
 use File::Spec;
 
 if (@ARGV and $ARGV[0] eq 'dev') {
-  my @watch = qw(assets/sass assets/js lib public/convos-api.json templates);
+  my @watch = qw(lib public/convos-api.json templates);
   $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
   shift @ARGV;
   exec qw(morbo script/convos), @ARGV, map { ('-w', $_) } @watch;
@@ -45,8 +45,6 @@ sub ensure_dependencies {
   my ($cpanfile, $action, $mode) = @_;
   my $opt_l = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
-  my %sources = ('Mojolicious::Plugin::AssetPack' =>
-      'https://github.com/jhthorsen/mojolicious-plugin-assetpack/archive/v2.tar.gz');
 
   our $cpanfile_mode = 'default';
   local *main::on = sub { local $cpanfile_mode = shift; shift->() };
@@ -76,7 +74,7 @@ sub ensure_dependencies {
     my @cmd = qw(cpanm -n);
     push @cmd, -l => $opt_l;
     push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
-    push @cmd, $sources{$m->[0]} || $m->[0];
+    push @cmd, $m->[0];
     warn sprintf "\$ %s\n", join ' ', @cmd;
     system @cmd;
     die "cpanm failed!\n" if $?;
