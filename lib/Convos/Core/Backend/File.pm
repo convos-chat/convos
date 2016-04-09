@@ -175,7 +175,7 @@ sub _format {
   my ($self, $key) = @_;
   my $format = $FORMAT{$key};
   return @$format if $format;
-  warn "No format defined for $key\n";
+  warn "[Convos::Core::Backend::File] No format defined for $key\n" if DEBUG;
   return;
 }
 
