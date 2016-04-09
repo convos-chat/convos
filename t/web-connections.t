@@ -26,6 +26,7 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
   {
     id       => 'irc-example',
     name     => 'example',
+    me       => {},
     protocol => 'irc',
     state    => 'disconnected',
     url      => 'irc://irc.example.com:6667?nick=superman'

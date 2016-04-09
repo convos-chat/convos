@@ -29,13 +29,22 @@ sub import {
   my $caller = caller;
   my $script = $0;
 
-  eval "package $caller;use Mojo::Base -base;use Test::More;use Test::Deep;1" or die $@;
+  eval <<"HERE" or die $@;
+package $caller;
+use Mojo::Base -base;
+use Test::More;
+use Test::Deep;
+use Mojo::JSON qw(false true);
+1;
+HERE
+
   strict->import;
   warnings->import;
 
   $script =~ s/\W/-/g;
   $ENV{CONVOS_HOME} = $CONVOS_HOME = File::Spec->catdir("local", "test-$script");
-  Mojo::Util::monkey_patch($caller => diag => $ENV{HARNESS_IS_VERBOSE} ? \&Test::More::diag : sub { });
+  Mojo::Util::monkey_patch(
+    $caller => diag => $ENV{HARNESS_IS_VERBOSE} ? \&Test::More::diag : sub { });
   File::Path::remove_tree($CONVOS_HOME) if -d $CONVOS_HOME;
 }
 

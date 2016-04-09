@@ -300,12 +300,6 @@ sub _setup {
 
       Scalar::Util::weaken($self);
       $connection->on(
-        me => sub {
-          my ($connection, $info) = @_;
-          $self->emit("user:$uid", me => $info);
-        }
-      );
-      $connection->on(
         message => sub {
           my ($connection, $target, $msg) = @_;
           my ($format, @keys) = $self->_format($msg->{type}) or return;
@@ -316,19 +310,8 @@ sub _setup {
       );
       $connection->on(
         state => sub {
-          my ($connection, $state, $message) = @_;
-          $self->_log($connection, time, sprintf '-!- %s. %s', ucfirst $state, $message);
-          $self->emit("user:$uid",
-            state => {connection_id => $cid, message => $message, state => $state});
-        }
-      );
-      $connection->on(
-        dialog => sub {
-          my ($connection, $target, $data) = @_;
-          $self->emit("user:$uid",
-            dialog => {connection_id => $cid, dialog_id => $target->id, %$data});
-          my ($format, @keys) = $self->_format($data->{type}) or return;
-          $self->_log($connection, time, sprintf $format, map { $data->{$_} } @keys);
+          my ($connection, $type, $args) = @_;
+          $self->emit("user:$uid", state => {connection_id => $cid, %$args, type => $type});
         }
       );
     }

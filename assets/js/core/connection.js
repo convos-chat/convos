@@ -1,8 +1,11 @@
 (function() {
   Convos.Connection = function(attrs) {
     EventEmitter(this);
-    this.id    = "";
-    this.name  = "";
+    this.id   = "";
+    this.name = "";
+    this.me   = {
+      nick: ""
+    };
     this.state = "disconnected";
     this.url   = "";
     this._api  = Convos.api;
@@ -34,7 +37,7 @@
   };
 
   proto.nick = function() {
-    this.url.parseUrl().query.nick || "";
+    return this.me.nick ? this.me.nick : this.url.parseUrl().query.nick || "";
   };
 
   // Return protocol (scheme) from url
@@ -46,8 +49,8 @@
   proto.notice = function(message) {
     this.emit("message", {
       from:    this.id,
-      type:    "notice",
-      message: message
+      message: message,
+      type:    "notice"
     });
   };
 
@@ -164,9 +167,26 @@
   };
 
   proto._onState = function(data) {
-    this.state   = data.state;
-    data.message = data.message ? " " + data.message : "..";
-    this.notice('Connection state changed to "' + this.state + '".' + data.message);
+    switch (data.type) {
+      case "connection":
+        this.state = data.state;
+        this.notice('Connection state changed to "' + data.state + '".' + data.message);
+      case "me":
+        this.me.nick = data.nick;
+        break;
+      case "nick_change":
+        this.user.dialogs.forEach(function(d) {
+          if (d.connection_id == data.connection_id) d.emit("state", data);
+        });
+        break;
+      case "part":
+        this.user.dialogs.forEach(function(d) {
+          if (d.connection_id == data.connection_id) d.emit("state", data);
+        });
+        break;
+      default:
+        console.log(data);
+    }
   };
 
   proto._onWhoisEvent = function(data) {
@@ -181,8 +201,8 @@
 
     while (channels.length) {
       var name = channels.shift();
-      var sep  = channels.length == 1 ? ' and ' : channels.length ? ", " : ".";
-      data.message += name + '' + sep;
+      var sep  = channels.length == 1 ? " and " : channels.length ? ", " : ".";
+      data.message += name + "" + sep;
     }
 
     this.notice(data.message);

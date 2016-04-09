@@ -7,7 +7,7 @@ my $connection = $core->user({email => 'test.user@example.com'})
   ->connection({name => 'localhost', protocol => 'irc'});
 my ($err, @state);
 
-$connection->on(state => sub { push @state, $_[1] });
+$connection->on(state => sub { push @state, $_[2]->{state} });
 
 $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;

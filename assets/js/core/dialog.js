@@ -1,15 +1,16 @@
 (function() {
   Convos.Dialog = function(attrs) {
-    this.frozen   = "";
-    this.id       = "";
-    this.messages = [];
-    this.name     = "";
-    this.topic    = "";
-    this._api     = Convos.api;
+    this.frozen        = "";
+    this.id            = "";
+    this.messages      = [];
+    this.name          = "";
+    this.topic         = "";
+    this._api          = Convos.api;
+    this._participants = {};
 
     EventEmitter(this);
     this.on("message", this.addMessage);
-    this.on("dialog", this._onDialog);
+    this.on("state", this._onState);
     this.once("show", this._load);
 
     if (attrs) this.update(attrs);
@@ -69,6 +70,14 @@
     return this.is_private ? "person" : "group";
   };
 
+  proto.notice = function(message) {
+    this.emit("message", {
+      from:    this.connection.id,
+      message: message,
+      type:    "notice"
+    });
+  };
+
   proto.participants = function(cb) {
     var self = this;
     Convos.api.participantsInDialog(
@@ -76,6 +85,12 @@
         connection_id: this.connection.id,
         dialog_id:     this.id
       }, function(err, xhr) {
+        if (!err) {
+          var participants = self._participants = {};
+          xhr.body.participants.forEach(function(p) {
+            participants[p.name] = p;
+          });
+        }
         return cb.call(self, err, xhr.body.participants);
       }
     );
@@ -118,6 +133,7 @@
     if (!this.connection) return this._convosMessages();
     if (this.messages.length >= 60) return;
     var self = this;
+    self.participants(function() {});
     self._api.messagesByDialog(
       {
         connection_id: self.connection.id,
@@ -133,17 +149,32 @@
     );
   };
 
-  proto._onDialog = function(data) {
+  proto._onState = function(data) {
     switch (data.type) {
       case "frozen":
         this.frozen = data.frozen;
         break;
       case "join":
-        this.connection.notice(data.nick + " joined.");
+        this._participants[data.nick] = {};
+        this.notice(data.nick + " joined.");
+        break;
+      case "nick_change":
+        if (this._participants[data.old_nick]) {
+          delete this._participants[data.old_nick];
+          this._participants[data.new_nick] = {};
+          this.notice(data.old_nick + " changed nick to " + data.new_nick + ".");
+        }
         break;
       case "part":
-        this.connection.notice(data.nick + " parted.");
+        if (this._participants[data.nick]) {
+          delete this._participants[data.nick];
+          if (!data.message)
+            data.message = data.kicker ? "Kicked." : "Bye.";
+          this.notice(data.nick + " left. " + data.message);
+        }
         break;
+      default:
+        console.log(data);
     }
   };
 })();

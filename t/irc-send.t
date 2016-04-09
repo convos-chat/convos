@@ -130,7 +130,7 @@ $t->run(
     $connection->send("#convos" => "/topic", sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is $err, '', 'cmd /topic get';
-    is $res->{message}, 'Cool topic', 'res /topic get';
+    is $res->{topic}, 'Cool topic', 'res /topic get';
   }
 );
 

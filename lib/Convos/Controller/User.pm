@@ -14,6 +14,7 @@ sub command {
     sub { $connection->send($args->{body}{dialog_id}, $args->{body}{command}, shift->begin); },
     sub {
       my ($delay, $err, $res) = @_;
+      $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
       $res->{command} = $args->{body}{command};
       return $self->$cb($res, 200) unless $err;
       return $self->$cb($self->invalid_request($err), 500);

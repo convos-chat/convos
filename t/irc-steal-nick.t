@@ -4,20 +4,20 @@ use t::Helper;
 BEGIN { $ENV{CONVOS_STEAL_NICK_INTERVAL} = 0.01 }
 use Convos::Core;
 
-my $t          = Test::Mojo::IRC->new;
-my $server     = $t->start_server;
+my $t          = Test::Mojo::IRC->start_server;
 my $core       = Convos::Core->new;
 my $user       = $core->user({email => 'nick.young@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $nick;
 
-$connection->on(me => sub { $nick = $_[1]->{nick}; Mojo::IOLoop->stop; });
-$connection->url->parse("irc://$server?tls=0");
+$connection->on(
+  state => sub { return unless $_[1] eq 'me'; $nick = $_[2]->{nick}; Mojo::IOLoop->stop; });
+$connection->url->parse(sprintf 'irc://%s?tls=0', $t->server);
 
 $t->run(
   [
-    qr{NICK nick_young} => ":hybrid8.debian.local 433 * nick_young :Nickname is already in use.\n",
-    qr{NICK nick_young} => ":hybrid8.debian.local 001 nick_young_ :Welcome\n",
+    qr{NICK nick_young}  => ":hybrid8.debian.local 433 * nick_young :Nickname is already in use.\n",
+    qr{NICK nick_young_} => ":hybrid8.debian.local 001 nick_young_ :Welcome\n",
   ],
   sub {
     is $connection->url->query->param('nick'), undef, 'no nick in connect url';

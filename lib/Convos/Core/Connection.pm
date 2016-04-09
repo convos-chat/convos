@@ -70,12 +70,11 @@ sub state {
   my $old_state = $self->{state} || '';
   return $self->{state} ||= 'queued' unless $state;
   die "Invalid state: $state" unless grep { $state eq $_ } qw(connected queued disconnected);
-  $self->emit(state => $state => $message // '') unless $old_state eq $state;
+  $self->emit(state => connection => {state => $state, message => $message // ''})
+    unless $old_state eq $state;
   $self->{state} = $state;
   $self;
 }
-
-sub topic { my ($self, $cb) = (shift, pop); $self->tap($cb, 'Method "topic" not implemented.') }
 
 sub _next_tick {
   my ($self, $method, @args) = @_;
@@ -94,7 +93,7 @@ sub _userinfo {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{state} ||= 'queued';
-  my $json = {map { ($_, '' . $self->$_) } qw( id name protocol state url )};
+  my $json = {map { ($_, '' . $self->$_) } qw(id name protocol state url)};
 
   $json->{state} = 'queued' if $persist and $json->{state} eq 'connected';
 
@@ -293,13 +292,6 @@ Meant to be overloaded in a subclass.
 Holds the state of this object. C<$state> can be "disconnected", "connected"
 or "queued" (default). "queued" means that the object is in the
 process of connecting or that it want to connect.
-
-=head2 topic
-
-  $self = $self->topic($dialog, sub { my ($self, $err, $topic) = @_; });
-  $self = $self->topic($dialog => $topic, sub { my ($self, $err) = @_; });
-
-Used to retrieve or set topic for a dialog.
 
 =head1 AUTHOR
 

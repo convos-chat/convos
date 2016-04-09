@@ -22,6 +22,7 @@ cmp_deeply(
   {
     id       => ignore(),
     name     => 'localhost',
+    me       => {},
     protocol => 'irc',
     state    => 'queued',
     url      => 'irc://127.0.0.1'
