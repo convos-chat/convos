@@ -80,15 +80,42 @@ sub messages {
   $re = qr{\Q$re\E}i unless ref $re;
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (.*$re.*)$/;
 
-  $args{after}  = Time::Piece->strptime($query->{after},  '%Y-%m-%dT%H:%M:%S') if $query->{after};
-  $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S') if $query->{before};
-
-  # If neither before nor after are defined, search everything before now
-  $args{before} = gmtime if !$args{before} && !$args{after};
   $args{limit}    = $query->{limit} || 60;
   $args{messages} = [];
   $args{re}       = $re;
 
+  # If both "before" and "after" are provided
+  if ( $query->{before} && $query->{after} ) {
+    $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
+    $args{after} = Time::Piece->strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
+  }
+  # If "before" is provided but not "after"
+  # Set "after" to 12 months before "before"
+  elsif ( $query->{before} && !$query->{after} ) {
+    $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
+    $args{after} = $args{before}->add_months(-12);
+  }
+  # If "after" is provided but not "before"
+  # Set "before" to 12 months after "after"
+  elsif ( !$query->{before} && $query->{after} ) {
+    $args{after} = Time::Piece->strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
+    $args{before} = $args{after}->add_months(12);
+  }
+  # If neither "before" nor "after" are provided
+  # Set "before" to now and "after" to 12 months before "before"
+  else {
+    $args{before} = gmtime;
+    $args{after} = $args{before}->add_months(-12);
+  }
+
+  # Do not search if the difference between "before" and "after" is more than 12 months
+  # This limits the amount of time that could be spent searching and it also prevents DoS attacks
+  return $self if $args{before} - $args{after} > $args{before} - $args{before}->add_months(-12);
+
+  # The {cursor} is used to walk through the month-hashed log files
+  $args{cursor} = $args{before};
+
+  warn "[@{[ref $obj]}] Searching $args{after} - $args{before}\n" if DEBUG;
   Mojo::IOLoop->delay(
     sub {
       $self->_fc->run(sub { $self->_messages($obj, \%args) }, shift->begin);
@@ -215,23 +242,23 @@ sub _log_file {
 sub _messages {
   my ($self, $obj, $args) = @_;
 
-  # this code is running in a sub process, so "guard" does not have to be localised
-  return $args->{messages} if ++$self->{guard} > ($ENV{CONVOS_MAX_SEARCH_BACK_MONTHS} || 12);
-  my $file = $self->_log_file($obj, $args->{before} || $args->{after});
-  my $pindex = $args->{before} ? 0 : -1;
-  my $FH = $pindex ? IO::File->new($file, 'r') : File::ReadBackwards->new($file);
-  my $found = 0;
+  return [] if $args->{after} > $args->{before};
+  return $args->{messages} if $args->{cursor} < $args->{after};
+  my $file = $self->_log_file($obj, $args->{cursor});
+  $args->{cursor} = $args->{cursor}->add_months(-1);
+  my $FH = File::ReadBackwards->new($file);
 
   unless ($FH) {
     warn "[@{[ref $obj]}] Read $file: $!\n" if DEBUG;
-    $args->{before} -= ONE_MONTH if $args->{before};
     return $self->_messages($obj, $args);
   }
 
   warn "[@{[ref $obj]}] Gettings messages from $file...\n" if DEBUG;
-  while (my $line = $FH->readline) {
+  while (my $line = $FH->getline) {
     next unless $line =~ $args->{re};
     my $message = {message => $2, ts => $1};
+    my $ts = Time::Piece->strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    next if $ts < $args->{after} || $ts > $args->{before};
     if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
       @$message{qw(type from)} = (private => $1);
     }
@@ -245,16 +272,11 @@ sub _messages {
       @$message{qw(type from)} = (server => '');
     }
 
-    splice @{$args->{messages}}, $pindex, 0, $message;
-    last if ++$found == $args->{limit};
+    unshift @{$args->{messages}}, $message;
+    return $args->{messages} if int @{$args->{messages}} == $args->{limit};
   }
 
-  if ($found < $args->{limit}) {
-    $args->{before} -= ONE_MONTH;
-    return $self->_messages($obj, $args);
-  }
-
-  return $args->{messages};
+  return $self->_messages($obj, $args);
 }
 
 sub _settings_file {
