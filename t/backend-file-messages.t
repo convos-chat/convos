@@ -4,10 +4,11 @@ use Convos::Core::Backend::File;
 
 $ENV{CONVOS_HOME} = File::Spec->catdir(qw(t data convos-test-backend-file-messages));
 
-my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $user = $core->user({email => 'superman@example.com'});
+my $backend    = Convos::Core::Backend::File->new;
+my $core       = Convos::Core->new(backend => $backend);
+my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $dialog = $connection->dialog({name => '#convos'});
+my $dialog     = $connection->dialog({name => '#convos'});
 my ($err, $messages);
 
 $dialog->messages({}, sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
@@ -20,6 +21,9 @@ Mojo::IOLoop->start;
 is int @$messages, 60, 'before: got max limit messages' or diag $err;
 is $messages->[0]{ts},  '2014-06-21T14:12:17', 'first: 2014-06-21T14:12:17';
 is $messages->[-1]{ts}, '2014-06-22T10:23:50', 'last: 2014-06-22T10:23:50';
+
+# trick to make Devel::Cover track calls to _messages()
+$backend->_fc(bless {}, 'NoForkCall');
 
 $dialog->messages({before => "2014-06-21T14:30:00"},
   sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
@@ -94,3 +98,13 @@ is int @$messages, 2, 'two messages matching package because of limit' or diag $
 is $messages->[0]{ts}, '2014-08-22T10:13:29', 'first: 2014-08-22T10:13:29';
 
 done_testing;
+
+BEGIN {
+
+  package NoForkCall;
+
+  sub run {
+    my ($self, $fork, $cb) = @_;
+    $self->$cb('', $fork->());
+  }
+}
