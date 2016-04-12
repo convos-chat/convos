@@ -4750,6 +4750,7 @@ div.autocomplete {
   .dialog-container header {
     position: relative; }
     .dialog-container header .actions {
+      top: 1rem;
       right: -4px; }
   .dialog-container .dialog-message {
     display: block;
@@ -4841,11 +4842,9 @@ nav {
   color: #777; }
   nav .material-icons {
     vertical-align: bottom; }
-  nav .sidebar-dialogs > span, nav .sidebar-dialogs > a,
-  nav .sidebar-notifications > span,
-  nav .sidebar-notifications > a {
+  nav .sidebar-dialogs > span, nav .sidebar-dialogs > a {
     display: block;
-    padding: 0.5rem 0.75rem 1rem 0.75rem; }
+    padding: 1rem 0.75rem 0.5rem; }
   nav .sidebar-dialogs a {
     border-right: 4px solid #fff; }
   nav .sidebar-dialogs a.active {
@@ -4864,14 +4863,21 @@ nav {
     display: flex; }
     nav .sidebar-settings a {
       text-align: center;
-      border-bottom: 3px solid #fff;
-      padding: 0.5rem 0 1rem 0;
-      margin: 0 4px;
+      border-bottom: 3px solid #eeeeee;
+      padding: 1rem 0 0.5rem 0;
+      margin: 0 4px 0.5rem 4px;
       position: relative;
       display: block;
       flex-grow: 1; }
     nav .sidebar-settings a.active {
       border-color: #388E3C; }
+    nav .sidebar-settings i.active {
+      position: relative;
+      left: -4px; }
+    nav .sidebar-settings b.n-notifications {
+      position: absolute;
+      bottom: 0px;
+      right: 4px; }
 
 img.embed, .link-embedder.text-html {
   max-width: 820px;

@@ -5,7 +5,10 @@ $dialog-spacing: 4px;
 
   header {
     position: relative;
-    .actions { right: -4px; }
+    .actions {
+      top: $element-bottom-margin;
+      right: -4px;
+    }
   }
 
   .dialog-message {

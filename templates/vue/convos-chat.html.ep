@@ -1,8 +1,7 @@
 <template class="vue-convos-chat">
   <nav>
-    <sidebar-notifications :user="user"></sidebar-notifications>
-    <sidebar-dialogs :user="user" :visible-section.sync="visibleSection"></sidebar-dialogs>
     <sidebar-settings :user="user" :visible-section.sync="visibleSection"></sidebar-settings>
+    <sidebar-dialogs :user="user" :visible-section.sync="visibleSection"></sidebar-dialogs>
   </nav>
   <embed-viewer :visible-section.sync="visibleSection" v-if="visibleSection == 'embed-viewer'"></embed-viewer>
   <create-dialog :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'create-dialog'"></create-dialog>

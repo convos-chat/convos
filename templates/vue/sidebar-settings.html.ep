@@ -1,23 +1,32 @@
 <template class="vue-sidebar-settings">
-  <a href="#create-dialog" @click.prevent="toggle('create-dialog')" :class="activeClass('create-dialog')" title="Create dialog" data-position="top">
+  <a href="#notifications" @onclick.prevent="toggle('notifications')">
+    <i class="material-icons" :class="notifications.length ? 'active' : ''">{{notifications.length ? "notifications_active" : "notifications_none"}}</i>
+    <b class="n-notifications" v-if="notifications.length">{{notifications.length < 100 ? notifications.length : "99+"}}</b>
+  </a>
+  <a href="#create-dialog" @click.prevent="toggle('create-dialog')" :class="activeClass('create-dialog')" title="Create dialog" data-position="bottom">
     <i class="material-icons">group_add</i>
   </a>
-  <a href="#connection-editor" @click.prevent="toggle('connection-editor')" :class="activeClass('connection-editor')" title="Edit connections" data-position="top">
+  <a href="#connection-editor" @click.prevent="toggle('connection-editor')" :class="activeClass('connection-editor')" title="Edit connections" data-position="bottom">
     <i class="material-icons">mode_edit</i>
   </a>
-  <a href="#user-profile" @click.prevent="toggle('user-profile')" :class="activeClass('user-profile')" title="Edit profile" data-position="top">
+  <a href="#user-profile" @click.prevent="toggle('user-profile')" :class="activeClass('user-profile')" title="Edit profile" data-position="bottom">
     <i class="material-icons">account_circle</i>
   </a>
-  <a href="#help" @click.prevent="toggle('help')" :class="activeClass('help')" title="Help" data-position="top">
+  <a href="#help" @click.prevent="toggle('help')" :class="activeClass('help')" title="Help" data-position="bottom">
     <i class="material-icons">help</i>
   </a>
-  <a href="#logout" @click.prevent="logout" class="tooltipped btn-logout" title="Logout" data-position="top">
+  <a href="#logout" @click.prevent="logout" class="tooltipped btn-logout" title="Logout" data-position="bottom">
     <i class="material-icons">power_settings_new</i>
   </a>
 </template>
 <script type="vue/component">
 module.exports = {
   props:    ["user", "visibleSection"],
+  data:  function() {
+    return {
+      notifications: []
+    };
+  },
   methods:  {
     activeClass: function(section) {
       return {

@@ -3,11 +3,10 @@ nav {
 
   .material-icons { vertical-align: bottom; }
 
-  .sidebar-dialogs,
-  .sidebar-notifications {
+  .sidebar-dialogs {
     > span, > a {
       display: block;
-      padding: $element-top-margin $gutter-width / 2 $element-bottom-margin $gutter-width / 2;
+      padding: $element-bottom-margin $gutter-width / 2 $element-top-margin;
     }
   }
 
@@ -37,15 +36,24 @@ nav {
 
     a {
       text-align: center;
-      border-bottom: 3px solid $body-bg;
-      padding: $element-top-margin 0 $element-bottom-margin 0;
-      margin: 0 4px;
+      border-bottom: 3px solid color("grey", "lighten-3");
+      padding: $element-bottom-margin 0 $element-top-margin 0;
+      margin: 0 4px ($element-bottom-margin - $element-top-margin) 4px;
       position: relative;
       display: block;
       flex-grow: 1;
     }
     a.active {
       border-color: $link-color;
+    }
+    i.active {
+      position: relative;
+      left: -4px;
+    }
+    b.n-notifications {
+      position: absolute;
+      bottom: 0px;
+      right: 4px;
     }
   }
 }
