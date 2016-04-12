@@ -31,7 +31,7 @@
     %= include 'vue/sidebar-settings'
     %= include 'vue/user-input'
     %= include 'vue/user-login'
-    %# include 'vue/user-profile'
+    %= include 'vue/user-profile'
     %= include 'vue/user-register'
 
     %= javascript begin

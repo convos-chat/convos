@@ -12,7 +12,8 @@
     overflow: auto;
   }
 
-  .connection-editor { max-width: 500px; min-width: 500px; }
+  .connection-editor,
+  .user-profile { max-width: 500px; min-width: 500px; }
 
   .convos-help,
   .create-dialog { max-width: 420px; min-width: 420px; }
@@ -47,7 +48,8 @@
 .convos-help,
 .create-dialog,
 .dialog-container,
-.embed-viewer {
+.embed-viewer,
+.user-profile {
   display: block;
   overflow: auto;
   max-height: 100vh;
@@ -73,7 +75,8 @@
 .connection-editor,
 .convos-help,
 .create-dialog,
-.embed-viewer {
+.embed-viewer,
+.user-profile {
   background: $settings-active-color;
   position: relative;
 }

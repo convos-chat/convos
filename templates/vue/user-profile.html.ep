@@ -2,7 +2,16 @@
   <form @submit.prevent="submitForm" method="post" class="modal-content readable-width">
     <div class="row">
       <div class="col s12">
-        <h4 class="green-text text-darken-3">Edit profile for {{user.email}}</h4>
+        <div class="actions">
+          <a href="#chat" @click.prevent="visibleSection = 'chat'"><i class="material-icons">close</i></a>
+        </div>
+        <h5>Edit profile</h5>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s12">
+        <input id="form_email" readonly="readonly" :value="user.email">
+        <!-- label for="form_email">Email (readonly)</label -->
       </div>
     </div>
     <div class="row">
@@ -25,3 +34,16 @@
     </div>
   </form>
 </template>
+<script type="vue/component">
+module.exports = {
+  props: ["user", "visibleSection"],
+  data:  function() {
+    return {
+      errors: []
+    };
+  },
+  methods: {
+    submitForm: function() {}
+  }
+};
+</script>

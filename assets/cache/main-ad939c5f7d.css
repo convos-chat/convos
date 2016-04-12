@@ -4668,7 +4668,8 @@ div.autocomplete {
     flex-grow: 1;
     flex-direction: column;
     overflow: auto; }
-  .convos-chat .connection-editor {
+  .convos-chat .connection-editor,
+  .convos-chat .user-profile {
     max-width: 500px;
     min-width: 500px; }
   .convos-chat .convos-help,
@@ -4701,7 +4702,8 @@ div.autocomplete {
 .convos-help,
 .create-dialog,
 .dialog-container,
-.embed-viewer {
+.embed-viewer,
+.user-profile {
   display: block;
   overflow: auto;
   max-height: 100vh; }
@@ -4709,20 +4711,23 @@ div.autocomplete {
   .convos-help h5,
   .create-dialog h5,
   .dialog-container h5,
-  .embed-viewer h5 {
+  .embed-viewer h5,
+  .user-profile h5 {
     margin-top: 0;
     padding-top: 0.75rem; }
   .connection-editor input[type=text],
   .convos-help input[type=text],
   .create-dialog input[type=text],
   .dialog-container input[type=text],
-  .embed-viewer input[type=text] {
+  .embed-viewer input[type=text],
+  .user-profile input[type=text] {
     margin: 0; }
   .connection-editor .actions,
   .convos-help .actions,
   .create-dialog .actions,
   .dialog-container .actions,
-  .embed-viewer .actions {
+  .embed-viewer .actions,
+  .user-profile .actions {
     overflow: hidden;
     position: absolute;
     top: 0.6rem;
@@ -4732,7 +4737,8 @@ div.autocomplete {
 .connection-editor,
 .convos-help,
 .create-dialog,
-.embed-viewer {
+.embed-viewer,
+.user-profile {
   background: #f6f6f6;
   position: relative; }
 
