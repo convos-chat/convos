@@ -3210,36 +3210,28 @@ small {
       font-size: 1.2rem; } }
 
 .material-tooltip {
-  padding: 10px 8px;
-  font-size: 1rem;
-  z-index: 2000;
-  background-color: transparent;
-  border-radius: 2px;
-  color: #fff;
-  min-height: 36px;
-  line-height: 120%;
-  opacity: 0;
-  display: none;
-  position: absolute;
-  text-align: center;
-  max-width: calc(100% - 4px);
-  overflow: hidden;
-  left: 0;
-  top: 0;
-  pointer-events: none;
-  will-change: top, left; }
-
-.backdrop {
-  position: absolute;
-  opacity: 0;
-  display: none;
-  height: 7px;
-  width: 14px;
-  border-radius: 0 0 14px 14px;
   background-color: #323232;
-  z-index: -1;
-  transform-origin: 50% 10%;
-  will-change: transform, opacity; }
+  color: #fff;
+  font-size: 1rem;
+  line-height: 120%;
+  text-align: center;
+  border-radius: 4px;
+  padding: 8px 6px;
+  max-width: calc(100% - 4px);
+  min-height: 30px;
+  transition: opacity 350ms;
+  transition-delay: 600ms;
+  position: absolute;
+  left: -2000px;
+  top: -2000px;
+  overflow: hidden;
+  opacity: 0;
+  z-index: 2000;
+  will-change: opacity;
+  pointer-events: none; }
+
+.material-tooltip.active {
+  opacity: 0.95; }
 
 .btn, .btn-large, .btn-delete,
 .btn-flat {
@@ -4616,11 +4608,6 @@ div.alert {
     color: #D32F2F;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #9e9e9e; }
-
-.material-tooltip {
-  border-radius: 4px;
-  padding: 8px 6px;
-  min-height: 30px; }
 
 .btn, .btn-large, .btn-delete, .btn-large, .btn-flat {
   padding: 0 1rem; }

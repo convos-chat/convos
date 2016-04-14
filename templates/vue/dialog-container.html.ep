@@ -1,14 +1,14 @@
 <template class="vue-dialog-container">
   <header>
     <div class="actions" v-show="dialog.connection">
-      <!-- a href="#search" class="tooltipped" title="Search"><i class="material-icons">search</i></a -->
-      <a href="#info" @click.prevent="getInfo" class="tooltipped" title="Get information"><i class="material-icons">info_outline</i></a>
-      <a href="#close" @click.prevent="closeDialog" class="tooltipped" title="Close dialog"><i class="material-icons">close</i></a>
+      <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
+      <a href="#info" @click.prevent="getInfo" data-hint="Get information"><i class="material-icons">info_outline</i></a>
+      <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
     </div>
     <div class="actions" v-show="!dialog.connection">
       <a href="#chat"><i class="material-icons">star_rate</i></a>
     </div>
-    <h5 class="tooltipped" :title="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
+    <h5 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
   </header>
   <main>
     <dialog-message :dialog="dialog" :msg="msg" :user="user" v-for="msg in dialog.messages"></dialog-message>
@@ -45,7 +45,7 @@ module.exports = {
       });
 
       if ($paste.length) {
-        var $view = $('<a href="#view" class="tooltipped" title="View"><i class="material-icons">open_in_browser</i></a>');
+        var $view = $('<a href="#view" data-hint="View"><i class="material-icons">open_in_browser</i></a>');
         $paste.hide();
         $a.after($view.click(function(e) {
           e.preventDefault();

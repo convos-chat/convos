@@ -1,5 +1,5 @@
 <template class="vue-sidebar-dialogs">
-  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-tooltip="d.frozen" :class="dialogClass(d)" v-for="d in user.dialogs">
+  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hintt sh="d.frozen" :class="dialogClass(d)" v-for="d in user.dialogs">
     <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
     <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
     <span class="on" v-else>convos-local</span>
@@ -15,15 +15,13 @@ module.exports = {
   methods: {
     connectionClass: function(c) {
       return {
-        frozen:     c.state == 'connected' ? false : true,
-        tooltipped: true
+        frozen: c.state == 'connected' ? false : true
       };
     },
     dialogClass: function(d) {
       return {
-        active:     d.active(),
-        frozen:     d.frozen,
-        tooltipped: true
+        active: d.active(),
+        frozen: d.frozen
       };
     },
     setCurrentDialog: function(dialog) {
