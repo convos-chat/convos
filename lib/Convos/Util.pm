@@ -4,7 +4,7 @@ use Mojo::Base 'Exporter';
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG has_many);
+our @EXPORT_OK = qw(DEBUG has_many next_tick);
 
 sub has_many {
   my $class = caller;
@@ -38,6 +38,12 @@ sub has_many {
     my $id = lc(ref $attrs ? $attrs->{id} || $related->id($attrs) : $attrs);
     return delete $self->{$accessor}{$id};
   };
+}
+
+sub next_tick {
+  my ($obj, $cb, @args) = @_;
+  Mojo::IOLoop->next_tick(sub { $obj->$cb(@args) });
+  $obj;
 }
 
 1;
@@ -89,6 +95,12 @@ The definition above results in the following methods:
   # Remove a user
   $user = $class->remove_user($id);
   $user = $class->remove_user(\%attrs);
+
+=head2 next_tick
+
+  $obj = next_tick $obj, sub { my ($obj, @args) = @_ }, @args;
+
+Wrapper around L<Mojo::IOLoop/next_tick>.
 
 =head1 SEE ALSO
 

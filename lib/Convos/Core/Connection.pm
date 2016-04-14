@@ -76,12 +76,6 @@ sub state {
   $self;
 }
 
-sub _next_tick {
-  my ($self, $method, @args) = @_;
-  Mojo::IOLoop->next_tick(sub { $self->$method(@args) });
-  $self;
-}
-
 sub _userinfo {
   my $self = shift;
   my @userinfo = split /:/, $self->url->userinfo // '';

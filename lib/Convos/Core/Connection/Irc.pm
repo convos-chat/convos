@@ -2,7 +2,7 @@ package Convos::Core::Connection::Irc;
 use Mojo::Base 'Convos::Core::Connection';
 
 no warnings 'utf8';
-use Convos::Util 'DEBUG';
+use Convos::Util qw(next_tick DEBUG);
 use Mojo::IRC::UA;
 use Parse::IRC ();
 use Time::HiRes 'time';
@@ -75,7 +75,7 @@ sub connect {
   warn "[@{[$self->user->email]}/@{[$self->id]}] connect($irc->{server})\n" if DEBUG;
 
   unless ($irc->server) {
-    return $self->_next_tick($cb => 'Invalid URL: hostname is not defined.');
+    return next_tick $self, $cb, 'Invalid URL: hostname is not defined.';
   }
 
   delete $self->{disconnect};
@@ -89,27 +89,26 @@ sub connect {
     $self->emit(state => frozen => {dialog_id => $dialog->id, frozen => $dialog->frozen});
   }
 
-  return $self->_next_tick(
+  Mojo::IOLoop->delay(
+    sub { $irc->connect(shift->begin) },
     sub {
-      $irc->connect(
-        sub {
-          my ($irc, $err) = @_;
+      my ($delay, $err) = @_;
 
-          if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
-            $url->query->param(tls => 0);
-            $self->connect($cb);
-          }
-          elsif ($err) {
-            $self->state(disconnected => $err)->$cb($err);
-          }
-          else {
-            $self->{myinfo} ||= {};
-            $self->state(connected => "Connected to $irc->{server}.")->$cb('');
-          }
-        }
-      );
+      if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
+        $url->query->param(tls => 0);
+        $self->connect($cb);
+      }
+      elsif ($err) {
+        $self->state(disconnected => $err)->$cb($err);
+      }
+      else {
+        $self->{myinfo} ||= {};
+        $self->state(connected => "Connected to $irc->{server}.")->$cb('');
+      }
     }
   );
+
+  return $self;
 }
 
 sub disconnect {
@@ -147,7 +146,7 @@ sub rooms {
   my $host = $self->url->host;
 
   state $cache = {};    # room list is shared between all connections
-  return $self->_next_tick($cb, '', $cache->{$host}) if $cache->{$host};
+  return next_tick $self, $cb, '', $cache->{$host} if $cache->{$host};
 
   Scalar::Util::weaken($self);
   return $self->_proxy(
@@ -170,7 +169,7 @@ sub send {
   return $self->_send($target, $message, $cb) unless $message =~ s!^/!!;
 
   my ($cmd, $args) = split /\s/, $message, 2;
-  return $self->_next_tick($cb => 'Invalid IRC command.') unless $cmd =~ /^[A-Za-z]+$/;
+  return next_tick $self, $cb => 'Invalid IRC command.' unless $cmd =~ /^[A-Za-z]+$/;
 
   $cmd = uc $cmd;
   return $self->_send($target, "\x{1}ACTION $args\x{1}", $cb) if $cmd eq 'ME';
@@ -183,7 +182,7 @@ sub send {
   return $self->_part_dialog($args || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_topic($target, $args, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $args, $cb) if $cmd eq 'WHOIS';
-  return $self->_next_tick($cb => 'Unknown IRC command.');
+  return next_tick $self, $cb => 'Unknown IRC command.';
 }
 
 sub _event_irc_close {
@@ -236,7 +235,7 @@ sub _join_dialog {
   my ($name, $password) = split /\s/, shift, 2;
   my $dialog = $self->get_dialog($name);
 
-  return $self->_next_tick($cb, '', $dialog) if $dialog and !$dialog->frozen;
+  return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
   Scalar::Util::weaken($self);
   return $self->_proxy(
     join_channel => $name,
@@ -288,18 +287,18 @@ sub _send {
   my $msg = $message;
 
   if (!$target) {    # err_norecipient and err_notexttosend
-    return $self->_next_tick($cb => 'Cannot send without target.');
+    return next_tick $self, $cb => 'Cannot send without target.';
   }
   elsif ($target =~ /\s/) {
-    return $self->_next_tick($cb => 'Cannot send message to target with spaces.');
+    return next_tick $self, $cb => 'Cannot send message to target with spaces.';
   }
   elsif (length $message) {
     $msg = $self->_irc->parser->parse(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target,
       $message);
-    return $self->_next_tick($cb => 'Unable to construct PRIVMSG.') unless ref $msg;
+    return next_tick $self, $cb => 'Unable to construct PRIVMSG.' unless ref $msg;
   }
   else {
-    return $self->_next_tick($cb => 'Cannot send empty message.');
+    return next_tick $self, $cb => 'Cannot send empty message.';
   }
 
   # Seems like there is no way to know if a message is delivered

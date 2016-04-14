@@ -1,7 +1,7 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
-use Convos::Util 'DEBUG';
+use Convos::Util qw(next_tick DEBUG);
 use Cwd ();
 use Fcntl ':flock';
 use File::HomeDir ();
@@ -39,8 +39,7 @@ sub connections {
 
   unless (opendir $CONNECTIONS, $user_dir) {
     die $! unless $cb;
-    Mojo::IOLoop->next_tick(sub { $self->$cb($!, []) });
-    return $self;
+    return next_tick $self, $cb, $!, [];
   }
 
   while (my $id = readdir $CONNECTIONS) {
@@ -143,15 +142,12 @@ sub save_object {
     File::Path::make_path($dir) unless -d $dir;
     Mojo::Util::spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')), $storage_file);
     warn "[@{[ref $obj]}] Save success. ($storage_file)\n" if DEBUG;
-    Mojo::IOLoop->next_tick(sub { $obj->$cb('') });
-    1;
-  } or do {
-    my $err = $@;
-    warn "[@{[ref $obj]}] Save $err ($storage_file)\n" if DEBUG;
-    Mojo::IOLoop->next_tick(sub { $obj->$cb($err) });
+    return next_tick $obj, $cb, '';
   };
 
-  return $self;
+  my $err = $@;
+  warn "[@{[ref $obj]}] Save $err ($storage_file)\n" if DEBUG;
+  return next_tick $obj, $cb, $err;
 }
 
 sub users {
