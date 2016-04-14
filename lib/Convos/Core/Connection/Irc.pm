@@ -97,7 +97,6 @@ sub connect {
 
           if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
             $url->query->param(tls => 0);
-            $self->save(sub { });    # save updated URL
             $self->connect($cb);
           }
           elsif ($err) {
@@ -249,8 +248,8 @@ sub _join_dialog {
         $dialog->frozen($err);
       }
       else {
-        $self->save(sub { });
-        $dialog->frozen('')->password($password // '');
+        $self->save(sub { }) if $dialog->password ne ($password //= '');
+        $dialog->frozen('')->password($password);
       }
       $self->$cb($err, $dialog);
     }
@@ -272,8 +271,7 @@ sub _part_dialog {
     part_channel => $name,
     sub {
       my ($irc, $err) = @_;
-      $self->remove_dialog($name) unless $err;
-      $self->save(sub { });
+      $self->tap(remove_dialog => $name)->save(sub { }) unless $err;
       $self->$cb($err);
     }
   );
