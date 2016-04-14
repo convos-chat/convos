@@ -30,6 +30,8 @@ $irc->run(
   [qr{JOIN}, ['join-convos.irc']],
   sub {
     send_ok(commandFromUser => {command => '/join #Convos', connection_id => $c->id});
+    $t->message_ok->json_message_is('/connection_id', $c->id)
+      ->json_message_is('/dialog_id', '#convos')->json_message_is('/frozen', '');
     $t->message_ok->json_message_is('/code', 200)
       ->json_message_is('/body/connection_id', 'irc-test')->json_message_is('/body/id', '#convos')
       ->json_message_is('/body/name', '#Convos')->json_message_is('/body/is_private', 0)
@@ -109,7 +111,7 @@ sub send_ok {
 
 __DATA__
 @@ join-convos.irc
-:Superman20001!superman@i.love.debian.org JOIN :#convos
+:superman!superman@i.love.debian.org JOIN :#convos
 :hybrid8.debian.local 332 superman #convos :some cool topic
 :hybrid8.debian.local 333 superman #convos jhthorsen!jhthorsen@i.love.debian.org 1432932059
 :hybrid8.debian.local 353 superman = #convos :Superman20001 @batman

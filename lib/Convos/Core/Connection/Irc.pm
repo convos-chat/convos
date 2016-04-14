@@ -85,6 +85,7 @@ sub connect {
     ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
 
   for my $dialog (@{$self->dialogs}) {
+    next if $dialog->is_private;    # TODO: Should private conversations be frozen as well?
     $dialog->frozen('Not connected.');
     $self->emit(state => frozen => {dialog_id => $dialog->id, frozen => $dialog->frozen});
   }
@@ -248,7 +249,7 @@ sub _join_dialog {
       }
       else {
         $self->save(sub { }) if $dialog->password ne ($password //= '');
-        $dialog->frozen('')->password($password);
+        $dialog->password($password);
       }
       $self->$cb($err, $dialog);
     }
@@ -353,10 +354,15 @@ _event err_nicknameinuse => sub {    # TODO
 _event irc_join => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
-  my $dialog = $self->get_dialog($msg->{params}[0]);
+  my $channel = $msg->{params}[0];
 
-  return if $self->_is_current_nick($nick);
-  return $self->emit(state => join => {dialog_id => $dialog->id, nick => $nick}) if $dialog;
+  if ($self->_is_current_nick($nick)) {
+    my $dialog = $self->dialog({name => $channel, frozen => ''});
+    $self->emit(state => frozen => {dialog_id => $dialog->id, frozen => $dialog->frozen});
+  }
+  elsif (my $dialog = $self->get_dialog($channel)) {
+    $self->emit(state => join => {dialog_id => $dialog->id, nick => $nick}) if $dialog;
+  }
 };
 
 _event irc_kick => sub {
