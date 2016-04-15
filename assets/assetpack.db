@@ -42,10 +42,6 @@ rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/js/leanModal.js
 format=js
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/js/materialbox.js
-[original:https://raw.githubusercontent.com/Dogfalo/materialize/master/js/tooltip.js]
-format=js
-mtime=1459461713
-rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/js/tooltip.js
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js]
 format=js
 mtime=1459461713
@@ -123,9 +119,6 @@ rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_toast.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_toast.scss
-[original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_tooltip.scss]
-mtime=1459461713
-rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_tooltip.scss
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_typography.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_typography.scss
@@ -172,7 +165,7 @@ rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/f
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/materialize.scss
 [sass:sass/main.scss]
-checksum=7c349d0f3d
+checksum=27c7c38461
 format=css
 minified=
-mtime=1460670497
+mtime=1460702018

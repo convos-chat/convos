@@ -1,27 +1,23 @@
 // Global mixin for rendering materialize components
 (function() {
-  var $tooltip = '<div class="material-tooltip"><span></span></div>';
-  var spacing  = 4;
+  var $hint   = '<div class="material-hint"><span></span></div>';
+  var spacing = 4;
+  var transitionDelay;
 
-  var showTooltip = function() {
-    if (typeof $tooltip == "string") {
-      $tooltip                 = $($tooltip).appendTo("body");
-      $tooltip.transitionDelay = $tooltip.css("transition-delay").replace(/s/, "");
-    }
-
+  var showHint = function() {
     var $el    = $(this);
     var offset = $el.offset();
     var css    = {};
 
-    $tooltip.text($el.attr("data-hint")).addClass("active");
+    $hint.text($el.attr("data-hint")).addClass("active");
 
-    css.right = "auto";
-    css.left  = offset.left - ($tooltip.outerWidth() - $el.outerWidth()) / 2;
-    css.top   = offset.top - $tooltip.outerHeight() - spacing;
+    css.right = "unset";
+    css.left  = offset.left - ($hint.outerWidth() - $el.outerWidth()) / 2;
+    css.top   = offset.top - $hint.outerHeight() - spacing;
 
     if (css.left < 0) {
       css.left = spacing;
-    } else if (css.left + $tooltip.outerWidth() + spacing > $(window).width()) {
+    } else if (css.left + $hint.outerWidth() + spacing > $(window).width()) {
       css.left  = "unset";
       css.right = spacing;
     }
@@ -35,28 +31,31 @@
         css[k] = css[k] + "px";
     });
 
-    $tooltip.css(css);
+    $hint.css(css);
   };
 
-  var hideToolTip = function() {
-    $tooltip.css("transition-delay", "100ms").removeClass("active");
+  var hideHint = function() {
+    $hint.css("transition-delay", "100ms").removeClass("active");
     setTimeout(function() {
-      $tooltip.css("transition-delay", $tooltip.transitionDelay + "s");
-    }, $tooltip.transitionDelay * 1000);
+      $hint.css("transition-delay", transitionDelay + "s");
+    }, transitionDelay * 1000);
   };
 
   Vue.mixin({
     methods: {
       materializeComponent: function() {
         this.$nextTick(function() {
-          this.overrideTooltips();
+          this.overrideHints();
           Materialize.updateTextFields();
         });
       },
-      overrideTooltips: function() {
+      overrideHints: function() {
         $("[data-hint]", this.$el).each(function() {
           var $el = $(this);
-          if (!$el.hasClass("tooltipped")) $el.hover(showTooltip, hideToolTip).addClass("tooltipped");
+          if (!$el.hasClass("js-hint")) $el.hover(showHint, hideHint).addClass("js-hint");
+          if (typeof $hint != "string") return;
+          $hint           = $($hint).appendTo("body");
+          transitionDelay = $hint.css("transition-delay").replace(/s/, "") || 500;
         });
       }
     },

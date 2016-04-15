@@ -68,3 +68,30 @@ div.alert {
     &.right { margin-right: 0; }
   }
 }
+
+.material-hint {
+  background-color: #323232;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 120%;
+  text-align: center;
+
+  border-radius: 4px;
+  padding: 8px 6px;
+  max-width: calc(100% - 4px);
+  min-height: 30px;
+
+  transition: opacity 350ms;
+  transition-delay: 600ms;
+
+  position: absolute;
+  left: -2000px;
+  top: -2000px;
+  overflow: hidden;
+  opacity: 0;
+  z-index: 2000;
+  will-change: opacity;
+  pointer-events: none;
+
+  &.active { opacity: 0.95; }
+}
