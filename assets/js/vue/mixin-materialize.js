@@ -6,10 +6,12 @@
 
   var showHint = function() {
     var $el    = $(this);
+    var text   = $el.attr("data-hint");
     var offset = $el.offset();
     var css    = {};
 
-    $hint.text($el.attr("data-hint")).addClass("active");
+    if (text.match(/^\s*$/)) return; // do not want to show empty tooltip
+    $hint.text(text).addClass("active");
 
     css.right = "unset";
     css.left  = offset.left - ($hint.outerWidth() - $el.outerWidth()) / 2;

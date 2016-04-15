@@ -1,10 +1,10 @@
 <template class="vue-sidebar-dialogs">
-  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hintt sh="d.frozen" :class="dialogClass(d)" v-for="d in user.dialogs">
+  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in user.dialogs">
     <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
     <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
     <span class="on" v-else>convos-local</span>
   </a>
-  <a href='#settings/connections' @click.prevent="visibleSection = 'connection-editor'" :class="connectionClass(c)" v-for="c in user.connections">
+  <a href="#settings/connections" @click.prevent="visibleSection = 'connection-editor'" :class="connectionClass(c)" v-for="c in user.connections">
     <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
     <span class="on">{{c.humanState()}}</span>
   </a>
@@ -18,7 +18,8 @@ module.exports = {
         frozen: c.state == 'connected' ? false : true
       };
     },
-    dialogClass: function(d) {
+    dialogClass: function(d, i) {
+      if (!i) this.$nextTick(this.overrideHints);
       return {
         active: d.active(),
         frozen: d.frozen
