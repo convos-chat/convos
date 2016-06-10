@@ -486,7 +486,7 @@ sub irc_rpl_whoisuser {
   my $nick   = $params->[1];
 
   $self->{whois}{$nick}{host}     = $params->[3];
-  $self->{whois}{$nick}{realname} = $params->[5];
+  $self->{whois}{$nick}{realname} = $params->[2];
   $self->{whois}{$nick}{user}     = $params->[2];
 }
 
