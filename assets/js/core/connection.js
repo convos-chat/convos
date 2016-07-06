@@ -169,8 +169,10 @@
   proto._onState = function(data) {
     switch (data.type) {
       case "connection":
+        var msg = data.state + '"';
         this.state = data.state;
-        this.notice('Connection state changed to "' + data.state + '".' + data.message);
+        msg += data.message ? ': ' + data.message : ".";
+        this.notice('Connection state changed to "' + msg);
       case "me":
         this.me.nick = data.nick;
         break;
