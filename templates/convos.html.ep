@@ -3,7 +3,6 @@
   <head>
     <title>Convos</title>
     %= asset 'convos.css';
-    %= asset 'reloader.js' if app->mode eq 'development';
   </head>
   <body>
     <div id="loader" class="centered">
