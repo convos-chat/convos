@@ -61,4 +61,8 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
   ]
 );
 
+$user->get_connection('irc-localhost')->state('disconnected');
+$t->post_ok('/api/command', json => {connection_id => 'irc-localhost', command => "/close #c"})
+  ->status_is(200)->json_is('/command', '/close #c');
+
 done_testing;

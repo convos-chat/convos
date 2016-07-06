@@ -267,12 +267,13 @@ sub _notice {
 sub _part_dialog {
   my ($self, $name, $cb) = @_;
 
+  return $self->tap(remove_dialog => $name)->save($cb) if $self->state eq 'disconnected';
   return $self->_proxy(
     part_channel => $name,
     sub {
       my ($irc, $err) = @_;
-      $self->tap(remove_dialog => $name)->save(sub { }) unless $err;
-      $self->$cb($err);
+      return $self->$cb($err) if $err;
+      return $self->tap(remove_dialog => $name)->save($cb);
     }
   );
 }
