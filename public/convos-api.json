@@ -185,8 +185,8 @@
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/dialog_id" },
-          { "name": "after", "in": "query", "type": "string", "format": "datetime", "description": "Find messages after a given ISO 8601 timestamp" },
-          { "name": "before", "in": "query", "type": "string", "format": "datetime", "description": "Find messages before a given ISO 8601 timestamp" },
+          { "name": "after", "in": "query", "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
+          { "name": "before", "in": "query", "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
           { "name": "level", "in": "query", "type": "string", "description": "debug, info (default), warn, error" },
           { "name": "limit", "in": "query", "type": "integer", "description": "Max number of messages to retrieve" },
           { "name": "match", "in": "query", "type": "string", "description": "Messages must match this string" }
@@ -562,7 +562,7 @@
         "from": { "type": "string", "description": "Identifier for who sent this message" },
         "level": { "type": "string", "default": "info", "enum": ["debug", "info", "warn"], "description": "How important this message is" },
         "message": { "type": "string", "description": "The message" },
-        "ts": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T13:49:37Z" }
+        "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T13:49:37Z" }
       }
     },
     "Notification": {
@@ -570,7 +570,7 @@
       "properties": {
         "id": { "type": "string", "description": "Identifier used when marking this as seen" },
         "message": { "type": "string", "description": "The message that resulted in a notification" },
-        "ts": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
+        "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" }
       }
     },
     "Success": {
@@ -582,7 +582,7 @@
       "required": ["email"],
       "properties": {
         "email": { "type": "string", "description": "Unique email identifying a user in Convos" },
-        "registered": { "type": "string", "format": "datetime", "description": "Example: 2015-09-06T10:47:31Z" }
+        "registered": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" }
       }
     }
   }
