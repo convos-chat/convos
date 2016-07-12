@@ -13,7 +13,7 @@
     10: "ten"
   };
   String.prototype.numberAsString = function() {
-    return numbers[this] || this;
+    return numbers[this] || "" + this;
   };
 
   var urlRe = new RegExp("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
