@@ -4874,7 +4874,7 @@ nav {
 img.embed, .link-embedder.text-html {
   max-width: 820px;
   overflow: hidden;
-  margin: 6px 8px 6px 0; }
+  margin: 6px 8px; }
 
 img.embed {
   max-height: 220px; }
