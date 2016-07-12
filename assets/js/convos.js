@@ -4,9 +4,9 @@
 
   document.querySelectorAll('script[type="vue/component"]').$forEach(function(el) {
     var template = el.previousElementSibling;
-    var name     = template.className.replace(/^vue-/, "");
+    var name     = template.className.split(" ")[0].replace(/^vue-/, "");
     var module   = eval("// " + name + "\n(function(module){" + el.innerHTML + ";return module})({})");
-    module.exports.template = '<div class="' + name + '">' + template.innerHTML + "</div>";
+    module.exports.template = template.className.indexOf('no-wrapper') == -1 ? '<div class="' + name + '">' + template.innerHTML + "</div>" : template.innerHTML;
     Vue.component(name, module.exports);
     el.$remove();
     template.$remove();

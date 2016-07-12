@@ -16,10 +16,10 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <select id="form_connection_id" v-model="connectionId">
-          <option value="" v-if="!user.connections.length">No connections</option>
-          <option :selected="connectionId == c.id" :value="c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</option>
-        </select>
+        <md-select id="form_connection_id" :value.sync="connectionId">
+          <md-option v-if="!user.connections.length">No connections</md-option>
+          <md-option :value="c.id" :selected="connectionId == c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
+        </md-select>
         <label for="form_connection_id">Select connection</label>
       </div>
     </div>
@@ -54,21 +54,22 @@
 <script type="vue/component">
 module.exports = {
   props:    ["user"],
-  computed: {
-    connection: function() {
-      return this.user.getConnection(this.connectionId);
-    }
-  },
   data: function() {
     var connection = this.user.connections[0];
     return {
       canSubmit:          false,
+      connection:         null,
       connectionId:       connection ? connection.id : "",
       dialogName:         "",
       errors:             [],
       noRoomsDescription: null,
       rooms:              []
     };
+  },
+  watch: {
+    connectionId: function() {
+      this.connection = this.user.getConnection(this.connectionId);
+    }
   },
   methods: {
     join: function(e) {
@@ -94,7 +95,6 @@ module.exports = {
   },
   ready: function() {
     var self = this;
-    $("#form_connection_id", this.$el).material_select();
     $("#form_dialog_name").autocomplete({
       onkeyup: function(e) {
         self.canSubmit = self.dialogName.length;
