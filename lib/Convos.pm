@@ -111,6 +111,7 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
+  $config->{disable_registration} ||= $ENV{CONVOS_DISABLE_REGISTRATION} || 0;
   $config->{backend} ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
   $config->{name}    ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{plugins} ||= {};

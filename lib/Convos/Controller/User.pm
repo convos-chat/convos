@@ -73,6 +73,8 @@ sub register {
 
   # TODO: Add support for invite code
 
+  return $self->$cb($self->invalid_request('Registration is closed.', '/'), 400)
+    if $self->app->config('disable_registration');
   return $self->$cb($self->invalid_request('Email is taken.', '/body/email'), 409) if $user;
   return $self->delay(
     sub {
