@@ -5,6 +5,7 @@
     this.messages      = [];
     this.name          = "";
     this.topic         = "";
+    this._active       = false;
     this._api          = Convos.api;
     this._participants = {};
 
@@ -21,11 +22,11 @@
 
   proto.active = function(bool) {
     if (typeof bool != "boolean") return this._active;
+    this._active = bool;
     if (bool) {
       localStorage.setItem("activeDialog", this.href());
       this.emit("show");
     }
-    this._active = bool;
     return this;
   };
 

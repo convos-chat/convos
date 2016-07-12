@@ -41,15 +41,18 @@
 
   proto.refreshDialogs = function(cb) {
     var self = this;
+    var hasActive = false;
     Convos.api.listDialogs({}, function(err, xhr) {
       if (err) return cb.call(self, err);
-      self.dialogs = [];
+      self.dialogs = [self.convosDialog];
       xhr.body.dialogs.forEach(function(d) {
         d.connection = self.getConnection(d.connection_id);
         d.user       = self;
-        self.dialogs.push(new Convos.Dialog(d));
+        d            = new Convos.Dialog(d); // need to be done after d.connection = and d.user =
+        if (d.active()) hasActive = true;
+        self.dialogs.push(d);
       });
-      self.dialogs.push(self.convosDialog);
+      if (!hasActive) self.dialogs[0].active(true);
       cb.call(self, err);
     });
   };
