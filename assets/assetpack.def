@@ -19,6 +19,7 @@
 < js/vue/filter-markdown.js
 < js/vue/filter-timestring.js
 < js/vue/mixin-materialize.js
+< js/vue/mixin-location.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/waves.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/jquery.easing.1.3.js

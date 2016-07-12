@@ -1,18 +1,12 @@
 <template class="vue-sidebar-settings">
-  <a href="#notifications" @onclick.prevent="toggle('notifications')" data-hint="Show notifications">
+  <a href="#notifications" @onclick.prevent="toggleLocation('notifications', 'chat')" data-hint="Show notifications">
     <i class="material-icons" :class="notifications.length ? 'active' : ''">{{notifications.length ? "notifications_active" : "notifications_none"}}</i>
     <b class="n-notifications" v-if="notifications.length">{{notifications.length < 100 ? notifications.length : "99+"}}</b>
   </a>
-  <a href="#create-dialog" @click.prevent="toggle('create-dialog')" :class="activeClass('create-dialog')" data-hint="Create dialog">
-    <i class="material-icons">group_add</i>
-  </a>
-  <a href="#connection-editor" @click.prevent="toggle('connection-editor')" :class="activeClass('connection-editor')" data-hint="Edit connections">
-    <i class="material-icons">mode_edit</i>
-  </a>
-  <a href="#user-profile" @click.prevent="toggle('user-profile')" :class="activeClass('user-profile')" data-hint="Edit profile">
+  <a href="#user-profile" @click.prevent="toggleLocation('user-profile', 'chat')" :class="activeClass('user-profile')" data-hint="Edit profile">
     <i class="material-icons">account_circle</i>
   </a>
-  <a href="#help" @click.prevent="toggle('help')" :class="activeClass('help')" data-hint="Help">
+  <a href="#help" @click.prevent="toggleLocation('help', 'chat')" :class="activeClass('help')" data-hint="Help">
     <i class="material-icons">help</i>
   </a>
   <a href="#logout" @click.prevent="logout" class="btn-logout" data-hint="Logout">
@@ -21,17 +15,14 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["user", "visibleSection"],
+  props:    ["user"],
   data:  function() {
-    return {
-      notifications: []
-    };
+    return {notifications: []};
   },
   methods:  {
     activeClass: function(section) {
-      return {
-        active: this.visibleSection == section
-      };
+      var hash = this.parseLocation();
+      return {active: hash[0] == section};
     },
     logout: function(e) {
       var self = this;
@@ -39,9 +30,6 @@ module.exports = {
         if (err) return console.log(err); // TODO: Display error message
         self.$dispatch("logout");
       });
-    },
-    toggle: function(section) {
-      this.visibleSection = this.visibleSection == section ? "" : section;
     }
   }
 };

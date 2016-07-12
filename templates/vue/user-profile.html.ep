@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col s12">
         <div class="actions">
-          <a href="#chat" @click.prevent="visibleSection = 'chat'"><i class="material-icons">close</i></a>
+          <a href="#chat"><i class="material-icons">close</i></a>
         </div>
         <h5>Edit profile</h5>
       </div>
@@ -36,11 +36,9 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props: ["user", "visibleSection"],
+  props: ["user"],
   data:  function() {
-    return {
-      errors: []
-    };
+    return {errors: []};
   },
   methods: {
     submitForm: function() {}

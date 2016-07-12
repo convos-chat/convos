@@ -1,12 +1,11 @@
 <template class="vue-embed-viewer">
   <div class="actions">
-    <a href="#chat" @click.prevent="visibleSection = 'chat'"><i class="material-icons">close</i></a>
+    <a href="#chat"><i class="material-icons">close</i></a>
   </div>
   <div class="embed-content">{{{content()}}}</div>
 </template>
 <script type="vue/component">
 module.exports = {
-  props: ["visibleSection"],
   methods: {
     content: function() {
       var el = this.$root.embedViewerElement; // this is one big ugly hack

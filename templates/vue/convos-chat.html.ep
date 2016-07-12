@@ -1,22 +1,26 @@
 <template class="vue-convos-chat">
   <nav>
-    <sidebar-settings :user="user" :visible-section.sync="visibleSection"></sidebar-settings>
-    <sidebar-dialogs :user="user" :visible-section.sync="visibleSection"></sidebar-dialogs>
+    <sidebar-settings :user="user"></sidebar-settings>
+    <sidebar-dialogs :user="user"></sidebar-dialogs>
   </nav>
-  <embed-viewer :visible-section.sync="visibleSection" v-if="visibleSection == 'embed-viewer'"></embed-viewer>
-  <create-dialog :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'create-dialog'"></create-dialog>
-  <connection-editor :settings="settings" :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'connection-editor'"></connection-editor>
-  <user-profile :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'user-profile'"></user-profile>
-  <convos-help :user="user" :visible-section.sync="visibleSection" v-if="visibleSection == 'help'"></convos-help>
-  <dialog-container :dialog="d" :user="user" v-show="d.active()" :visible-section.sync="visibleSection" v-for="d in user.dialogs"></dialog-container>
+  <embed-viewer v-if="page == 'embed-viewer'"></embed-viewer>
+  <create-dialog :user="user" v-if="page == 'create-dialog'"></create-dialog>
+  <connection-editor :settings="settings" :user="user" v-if="page == 'connections'"></connection-editor>
+  <user-profile :user="user" v-if="page == 'user-profile'"></user-profile>
+  <convos-help :user="user" v-if="page == 'help'"></convos-help>
+  <dialog-container :dialog="d" :user="user" v-show="d.active()" v-for="d in user.dialogs"></dialog-container>
 </template>
 <script type="vue/component">
 module.exports = {
   props: ["currentPage", "settings", "user"],
   data:  function() {
-    return {
-      visibleSection: "chat"
-    };
+    return {page: "chat"};
+  },
+  events: {
+    locationchange: function(hash) {
+      this.page = hash[0] || "chat";
+      return true;
+    }
   }
 };
 </script>

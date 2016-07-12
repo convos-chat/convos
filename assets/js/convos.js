@@ -73,6 +73,8 @@
       ready: function() {
         var self = this;
 
+        window.onhashchange = function() { self.$broadcast("locationchange", self.parseLocation()); }
+
         Convos.api.getUser({}, function(err, xhr) {
           if (!err) self.$emit("login", xhr.body);
           document.getElementById("loader").$remove();

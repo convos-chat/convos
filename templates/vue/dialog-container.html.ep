@@ -17,7 +17,7 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props: ["dialog", "user", "visibleSection"],
+  props: ["dialog", "user"],
   data:  function() {
     return {
       atBottom:          true,
@@ -50,7 +50,7 @@ module.exports = {
         $a.after($view.click(function(e) {
           e.preventDefault();
           self.$root.embedViewerElement = $paste[0];
-          self.visibleSection = "embed-viewer";
+          location.hash = "embed-viewer";
         }));
         self.materializeComponent();
       }

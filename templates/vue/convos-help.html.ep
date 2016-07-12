@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col s12">
       <div class="actions">
-        <a href="#chat" @click.prevent="visibleSection = 'chat'"><i class="material-icons">close</i></a>
+        <a href="#chat"><i class="material-icons">close</i></a>
       </div>
       <h5 v-if="!isTouchDevice">Shortcuts</h5>
       <p v-if="!isTouchDevice">These shortcuts are not yet implemented.</p>
@@ -58,7 +58,5 @@
   </div>
 </template>
 <script type="vue/component">
-module.exports = {
-  props: ["visibleSection"]
-};
+module.exports = {};
 </script>
