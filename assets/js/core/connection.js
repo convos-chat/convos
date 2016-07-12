@@ -54,6 +54,20 @@
     });
   };
 
+  // Remove this connection from the backend
+  proto.remove = function(cb) {
+    var self = this;
+    this._api.removeConnection({connection_id: this.id}, function(err, xhr) {
+      if (!err) {
+        self.user.connections = self.user.connections.filter(function(c) {
+          return c.id != self.id;
+        });
+      }
+      cb.call(self, err);
+    });
+    return this;
+  };
+
   // Get list of available rooms on server
   proto.rooms = function(cb) {
     var self = this;
@@ -94,7 +108,7 @@
       }, function(err, xhr) {
         if (err) return cb.call(self, err);
         self.update(xhr.body);
-        self.user.connection(self);
+        self.user.connections.push(self);
         cb.call(self, err);
       });
     }

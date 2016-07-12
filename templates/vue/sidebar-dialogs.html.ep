@@ -4,14 +4,21 @@
     <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
     <span class="on" v-else>convos-local</span>
   </a>
-  <a href="#settings/connections" @click.prevent="visibleSection = 'connection-editor'" :class="connectionClass(c)" v-for="c in user.connections">
+  <a href="#create-dialog">
+    <i class="material-icons">add</i> Create new dialog...
+  </a>
+  <div class="hr"><hr></div>
+  <a href="#connections/{{c.protocol}}-{{c.name}}" :class="connectionClass(c)" v-for="c in user.connections">
     <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
     <span class="on">{{c.humanState()}}</span>
+  </a>
+  <a href="#connections">
+    <i class="material-icons">add</i> Create new connection...
   </a>
 </template>
 <script type="vue/component">
 module.exports = {
-  props:   ["user", "visibleSection"],
+  props:   ["user"],
   methods: {
     connectionClass: function(c) {
       return {

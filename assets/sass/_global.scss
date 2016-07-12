@@ -69,6 +69,12 @@ div.alert {
   }
 }
 
+.hr {
+  height: 0px;
+  overflow: hidden;
+  border-bottom: 2px solid #ddd;
+}
+
 .material-hint {
   background-color: #323232;
   color: #fff;

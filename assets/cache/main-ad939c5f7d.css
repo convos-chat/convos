@@ -4593,6 +4593,11 @@ div.alert {
   .col .btn.right, .col .right.btn-large, .col .right.btn-delete, .col .btn-large.right, .col .btn-flat.right {
     margin-right: 0; }
 
+.hr {
+  height: 0px;
+  overflow: hidden;
+  border-bottom: 2px solid #ddd; }
+
 .material-hint {
   background-color: #323232;
   color: #fff;
@@ -4838,7 +4843,8 @@ nav {
     display: block;
     padding: 1rem 0.75rem 0.5rem; }
   nav .sidebar-dialogs a {
-    border-right: 4px solid #fff; }
+    border-right: 4px solid #fff;
+    min-height: 60px; }
   nav .sidebar-dialogs a.active {
     color: #225725;
     border-color: #388E3C;

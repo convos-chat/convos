@@ -3,10 +3,10 @@
     <div class="row">
       <div class="col s12">
         <div class="actions">
-          <a href="#chat" @click.prevent="visibleSection = 'chat'"><i class="material-icons">close</i></a>
+          <a href="#chat"><i class="material-icons">close</i></a>
         </div>
-        <h5>Connection editor</h5>
-        <p v-if="user.connections.length">
+        <h5>{{connection ? 'Edit "' + connection.name + '"' : "Create connection"}}</h5>
+        <p v-if="!user.connections.length">
           You need to add a connection before you can have a dialog.
           <span v-if="defaultServer">
             We have filled in an example server, but you can connect to any server
@@ -21,21 +21,6 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <select id="form_connection_id">
-          <option value="">Create new connection...</option>
-          <option :selected="connection == c" :value="c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</option>
-        </select>
-        <label for="form_connection_id">Select connection</label>
-      </div>
-    </div>
-    <div class="row">
-      <div class="input-field col s3">
-        <select id="form_protocol">
-          <option value="irc">IRC</option>
-        </select>
-        <label for="form_protocol">Protocol</label>
-      </div>
-      <div class="input-field col s9">
         <input name="server" v-model="server" id="form_server" type="text" class="validate">
         <label for="form_server">Server</label>
       </div>
@@ -62,7 +47,7 @@
     <div class="row">
       <div class="input-field col s12">
         <button class="btn waves-effect waves-light" type="submit">
-          {{connection ? 'Update' : 'Create'}} <i class="material-icons right">save</i>
+          {{connection && !deleted ? 'Update' : 'Create'}} <i class="material-icons right">save</i>
         </button>
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete right" v-if="connection">
           <i class="material-icons">delete</i>
@@ -74,15 +59,16 @@
 </template>
 <script type="vue/component">
 module.exports = {
-  props:    ["settings", "user", "visibleSection"],
+  props:    ["settings", "user"],
   computed: {
     showNickField: function() {
-      return this.selectedProtocol == "irc";
+      return this.selectedProtocol == "irc"; // will make this dynamic when there are more protocols in backend
     }
   },
   data: function() {
     return {
-      connection:       this.user.connections[0],
+      connection:       null,
+      deleted:          false,
       defaultServer:    this.settings.default_server || "",
       errors:           [],
       password:         "",
@@ -92,17 +78,25 @@ module.exports = {
       username:         ""
     };
   },
+  events: {
+    locationchange: function(hash) {
+      this.connection = this.user.getConnection(hash[1]);
+      this.updateForm(this.connection);
+      if (!this.connection) this.replaceLocation("connections");
+    }
+  },
   methods: {
     removeConnection: function() {
       var self = this;
-      removeConnection(this.connection, function(err) {
+      this.connection.remove(function(err) {
         if (err) return self.errors = err;
-        self.connection = this.connections()[0];
+        self.connection = null;
+        self.deleted = true;
       });
     },
     saveConnection: function() {
       var self       = this;
-      var connection = this.connection || new Convos.Connection({});
+      var connection = this.connection || new Convos.Connection({user: this.user});
       var userinfo   = [this.username, this.password].join(":");
 
       userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
@@ -113,35 +107,23 @@ module.exports = {
         connection.url += "?nick=" + this.nick;
 
       this.errors = []; // clear error on post
-      console.log(connection);
       connection.save(function(err) {
         if (err) return self.errors = err;
+        self.deleted = false;
         self.updateForm(this);
+        location.hash = "connections/" + this.id;
       });
     },
     updateForm: function(connection) {
       var url = connection ? connection.url.parseUrl() : null;
 
-      this.connection = connection,
-      this.password = url ? url.query.password || "" : "";
+      this.connection       = connection;
+      this.password         = url ? url.query.password || "" : "";
       this.nick             = url ? url.query.nick || "" : "";
       this.server           = url ? url.hostPort : this.defaultServer;
       this.selectedProtocol = url ? url.scheme || "" : this.selectedProtocol;
       this.username         = url ? url.query.username : "";
     }
-  },
-  ready: function() {
-    var self = this;
-
-    $("#form_connection_id", this.$el).material_select(function() {
-      self.updateForm(self.user.getConnection($(this).val()));
-    });
-
-    $("#form_protocol", this.$el).material_select(function() {
-      self.selectedProtocol = $(this).val();
-    });
-
-    this.updateForm(this.connection);
   }
 };
 </script>
