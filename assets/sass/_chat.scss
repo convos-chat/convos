@@ -12,14 +12,6 @@
     overflow: auto;
   }
 
-  .connection-editor,
-  .user-profile { max-width: 500px; min-width: 500px; }
-
-  .convos-help,
-  .create-dialog { max-width: 420px; min-width: 420px; }
-
-  .embed-viewer { max-width: 55%; min-width: 55%; }
-
   .dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
   .dialog-container main {
     padding-bottom: $gutter-width;
@@ -42,6 +34,8 @@
       overflow: auto;
     }
   }
+
+  .btn-toggle-menu { display: none; }
 }
 
 .connection-editor,
@@ -81,6 +75,14 @@
   position: relative;
 }
 
+.connection-editor,
+.user-profile { max-width: 500px; min-width: 500px; }
+
+.convos-help,
+.create-dialog { max-width: 420px; min-width: 420px; }
+
+.embed-viewer { max-width: 55%; min-width: 55%; }
+
 .convos-help {
   dl dd {
     margin: 0 0 $gutter-width * 0.3 $gutter-width;
@@ -89,5 +91,41 @@
     list-style-type: square;
     padding-left: $gutter-width;
     li { list-style-type: inherit; }
+  }
+}
+
+@media #{$medium-and-down} {
+  .convos-chat {
+    display: block;
+    margin-right: 0;
+
+    .btn-toggle-menu { display: inline; }
+
+    .dialog-container main {
+      margin-left: -10px;
+      margin-right: -10px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    nav {
+      background: $settings-active-color;
+      display: none;
+    }
+  }
+
+  .user-input textarea { margin-bottom: 0; }
+
+  .connection-editor,
+  .user-profile,
+  .convos-help,
+  .create-dialog,
+  .embed-viewer {
+    height: 100vh;
+    width: 100vw;
+    max-width: none;
+    min-width: initial;
+    position: absolute;
+    z-index: 999;
   }
 }

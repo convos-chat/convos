@@ -12,6 +12,9 @@
   <a href="#logout" @click.prevent="logout" class="btn-logout" data-hint="Logout">
     <i class="material-icons">power_settings_new</i>
   </a>
+  <a href="#menu" @click.prevent="toggleMenu" data-hint="Hide menu" class="btn-toggle-menu">
+    <i class="material-icons">close</i>
+  </a>
 </template>
 <script type="vue/component">
 module.exports = {
@@ -30,6 +33,9 @@ module.exports = {
         if (err) return console.log(err); // TODO: Display error message
         self.$dispatch("logout");
       });
+    },
+    toggleMenu: function() {
+      $("nav").hide();
     }
   }
 };

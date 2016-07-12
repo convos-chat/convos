@@ -4659,17 +4659,6 @@ div.autocomplete {
     flex-grow: 1;
     flex-direction: column;
     overflow: auto; }
-  .convos-chat .connection-editor,
-  .convos-chat .user-profile {
-    max-width: 500px;
-    min-width: 500px; }
-  .convos-chat .convos-help,
-  .convos-chat .create-dialog {
-    max-width: 420px;
-    min-width: 420px; }
-  .convos-chat .embed-viewer {
-    max-width: 55%;
-    min-width: 55%; }
   .convos-chat .dialog-container {
     max-width: 860px; }
   .convos-chat .dialog-container main {
@@ -4688,6 +4677,8 @@ div.autocomplete {
     .convos-chat nav .sidebar-dialogs {
       flex-grow: 1;
       overflow: auto; }
+  .convos-chat .btn-toggle-menu {
+    display: none; }
 
 .connection-editor,
 .convos-help,
@@ -4733,6 +4724,20 @@ div.autocomplete {
   background: #f6f6f6;
   position: relative; }
 
+.connection-editor,
+.user-profile {
+  max-width: 500px;
+  min-width: 500px; }
+
+.convos-help,
+.create-dialog {
+  max-width: 420px;
+  min-width: 420px; }
+
+.embed-viewer {
+  max-width: 55%;
+  min-width: 55%; }
+
 .convos-help dl dd {
   margin: 0 0 0.45rem 1.5rem; }
 
@@ -4742,10 +4747,40 @@ div.autocomplete {
   .convos-help ul li {
     list-style-type: inherit; }
 
+@media only screen and (max-width: 992px) {
+  .convos-chat {
+    display: block;
+    margin-right: 0; }
+    .convos-chat .btn-toggle-menu {
+      display: inline; }
+    .convos-chat .dialog-container main {
+      margin-left: -10px;
+      margin-right: -10px;
+      padding-left: 10px;
+      padding-right: 10px; }
+    .convos-chat nav {
+      background: #f6f6f6;
+      display: none; }
+  .user-input textarea {
+    margin-bottom: 0; }
+  .connection-editor,
+  .user-profile,
+  .convos-help,
+  .create-dialog,
+  .embed-viewer {
+    height: 100vh;
+    width: 100vw;
+    max-width: none;
+    min-width: initial;
+    position: absolute;
+    z-index: 999; } }
+
 .dialog-container {
   padding: 0 0.75rem; }
   .dialog-container header {
-    position: relative; }
+    position: relative;
+    height: 64px;
+    overflow: hidden; }
     .dialog-container header .actions {
       top: 1rem;
       right: -4px; }
@@ -4843,7 +4878,7 @@ nav {
     display: block;
     padding: 1rem 0.75rem 0.5rem; }
   nav .sidebar-dialogs a {
-    border-right: 4px solid #fff;
+    border-right: 4px solid transparent;
     min-height: 60px; }
   nav .sidebar-dialogs a.active {
     color: #225725;

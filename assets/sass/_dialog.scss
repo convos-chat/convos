@@ -5,6 +5,9 @@ $dialog-spacing: 4px;
 
   header {
     position: relative;
+    height: 64px;
+    overflow: hidden;
+
     .actions {
       top: $element-bottom-margin;
       right: -4px;

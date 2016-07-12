@@ -4,9 +4,11 @@
       <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
       <a href="#info" @click.prevent="getInfo" data-hint="Get information"><i class="material-icons">info_outline</i></a>
       <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
+      <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
     </div>
     <div class="actions" v-show="!dialog.connection">
       <a href="#chat"><i class="material-icons">star_rate</i></a>
+      <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
     </div>
     <h5 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
   </header>
@@ -93,6 +95,15 @@ module.exports = {
           elem.scrollTop = elem.scrollHeight;
         });
       }
+    },
+    toggleMenu: function(e) {
+      $("nav").show();
+      window.nextTick(function() {
+        $(document).one("click", function(e) {
+          if (!$(e.target).closest("nav").length) e.preventDefault();
+          $("nav").hide();
+        });
+      });
     }
   },
   ready: function() {

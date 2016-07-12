@@ -12,7 +12,7 @@ nav {
 
   .sidebar-dialogs {
     a {
-      border-right: 4px solid $body-bg;
+      border-right: 4px solid transparent;
       min-height: 60px;
     }
     a.active {
