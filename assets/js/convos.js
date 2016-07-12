@@ -8,6 +8,8 @@
     var module   = eval("// " + name + "\n(function(module){" + el.innerHTML + ";return module})({})");
     module.exports.template = '<div class="' + name + '">' + template.innerHTML + "</div>";
     Vue.component(name, module.exports);
+    el.$remove();
+    template.$remove();
   });
 
   Convos.error = function(err) {
