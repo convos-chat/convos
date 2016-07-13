@@ -5,7 +5,8 @@ $dialog-spacing: 4px;
 
   header {
     position: relative;
-    height: 64px;
+    height: 3.2em;
+    flex-shrink: 0;
     overflow: hidden;
 
     .actions {

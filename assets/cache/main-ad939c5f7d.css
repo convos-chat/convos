@@ -4779,7 +4779,8 @@ div.autocomplete {
   padding: 0 0.75rem; }
   .dialog-container header {
     position: relative;
-    height: 64px;
+    height: 3.2em;
+    flex-shrink: 0;
     overflow: hidden; }
     .dialog-container header .actions {
       top: 1rem;
