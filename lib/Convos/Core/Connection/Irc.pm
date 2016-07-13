@@ -81,8 +81,7 @@ sub connect {
   delete $self->{disconnect};
   Scalar::Util::weaken($self);
   $self->state('queued', 'Connecting...');
-  $self->{steal_nick_tid}
-    ||= $irc->ioloop->recurring(STEAL_NICK_INTERVAL, sub { $self->_steal_nick });
+  $self->{steal_nick_tid} //= $self->_steal_nick;
 
   for my $dialog (@{$self->dialogs}) {
     next if $dialog->is_private;    # TODO: Should private conversations be frozen as well?
@@ -323,8 +322,19 @@ sub _send {
 
 sub _steal_nick {
   my $self = shift;
-  my $nick = $self->url->query->param('nick');
-  $self->_irc->write("NICK $nick") if $nick and $self->_irc->nick ne $nick;
+  my $tid;
+
+  Scalar::Util::weaken($self);
+  $tid = $self->_irc->ioloop->recurring(
+    STEAL_NICK_INTERVAL,
+    sub {
+      return shift->remove($tid) unless $self;
+      return unless my $nick = $self->url->query->param('nick');
+      return $self->_irc->write("NICK $nick") if $self->_irc->nick ne $nick;
+    }
+  );
+
+  return $tid;
 }
 
 sub _topic {
