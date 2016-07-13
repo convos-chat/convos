@@ -82,7 +82,7 @@ module.exports = {
     locationchange: function(hash) {
       this.connection = this.user.getConnection(hash[1]);
       this.updateForm(this.connection);
-      if (!this.connection) this.replaceLocation("connections");
+      if (!this.connection && hash[0] == "connections") this.replaceLocation("connections");
     }
   },
   methods: {
