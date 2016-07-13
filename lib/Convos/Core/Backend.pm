@@ -19,6 +19,12 @@ sub messages {
 
 sub new { shift->SUPER::new(@_)->tap('_setup') }
 
+sub notifications {
+  my ($self, $user, $query, $cb) = @_;
+  $self->$cb('', []);
+  $self;
+}
+
 sub save_object {
   my ($self, $obj, $cb) = @_;
   $obj->$cb('') if $cb;
@@ -94,6 +100,12 @@ Possible C<%query>:
 =head2 new
 
 Will also call C<_setup()> after the object is created.
+
+=head2 notifications
+
+  $self->notifications($user, \%query, sub { my ($self, $err, $notifications) = @_; });
+
+This method will return notifications, in the same structure as L</messages>.
 
 =head2 save_object
 

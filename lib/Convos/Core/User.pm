@@ -37,6 +37,12 @@ has_many connections => 'Convos::Core::Connection' => sub {
 
 sub id { lc +($_[1] || $_[0])->{email} }
 
+sub notifications {
+  my ($self, $query, $cb) = @_;
+  $self->core->backend->notifications($self, $query, $cb);
+  $self;
+}
+
 sub remove_connection {
   my ($self, $id, $cb) = @_;
   my $connection = $self->{connections}{$id};
@@ -169,6 +175,13 @@ Returns a L<Convos::Core::Connection> object or undef.
   $str = $class->id(\%attr);
 
 Returns a unique identifier for a user.
+
+=head2 notifications
+
+  $self = $self->notifications($query, sub { my ($self, $err, $notifications) = @_; });
+
+Used to retrieve a list of notifications. See also
+L<Convos::Core::Backend/notifications>.
 
 =head2 remove_connection
 

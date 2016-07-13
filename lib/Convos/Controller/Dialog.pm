@@ -23,7 +23,7 @@ sub messages {
   my %query;
 
   # TODO:
-  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw( after before level limit match );
+  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw(after before level limit match);
 
   $self->delay(
     sub { $dialog->messages(\%query, shift->begin) },

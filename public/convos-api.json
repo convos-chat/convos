@@ -187,7 +187,6 @@
           { "$ref": "#/parameters/dialog_id" },
           { "name": "after", "in": "query", "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
           { "name": "before", "in": "query", "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
-          { "name": "level", "in": "query", "type": "string", "description": "debug, info (default), warn, error" },
           { "name": "limit", "in": "query", "type": "integer", "description": "Max number of messages to retrieve" },
           { "name": "match", "in": "query", "type": "string", "description": "Messages must match this string" }
         ],
@@ -327,11 +326,11 @@
       "get": {
         "tags": [ "chat" ],
         "summary": "Get list of notications.",
-        "description": "A notification is added once your name is mentioned in a chat or someone sends a direct message.",
+        "description": "A notification is added once your name is mentioned in a chat.",
         "operationId": "listNotifications",
         "responses": {
           "200": {
-            "description": "List of commands.",
+            "description": "List of notifications.",
             "schema": {
               "type": "object",
               "properties": {
@@ -560,17 +559,18 @@
       "required": ["message", "from", "ts"],
       "properties": {
         "from": { "type": "string", "description": "Identifier for who sent this message" },
-        "level": { "type": "string", "default": "info", "enum": ["debug", "info", "warn"], "description": "How important this message is" },
         "message": { "type": "string", "description": "The message" },
         "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T13:49:37Z" }
       }
     },
     "Notification": {
-      "required": ["id", "message", "ts"],
+      "required": ["message", "from", "ts"],
       "properties": {
-        "id": { "type": "string", "description": "Identifier used when marking this as seen" },
-        "message": { "type": "string", "description": "The message that resulted in a notification" },
-        "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" }
+        "connection_id": { "type": "string", "description": "Unique identifier for the connection this notification came from" },
+        "dialog_id": { "type": "string", "description": "Dialog ID" },
+        "from": { "type": "string", "description": "Identifier for who sent this message" },
+        "message": { "type": "string", "description": "The message" },
+        "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T13:49:37Z" }
       }
     },
     "Success": {

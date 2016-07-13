@@ -2,13 +2,25 @@ package Convos::Controller::Notifications;
 use Mojo::Base 'Mojolicious::Controller';
 
 sub list {
-  my ($self, $arg, $cb) = @_;
-  die 'TODO';
-  $self->$cb({notifications => []}, 200);
+  my ($self, $args, $cb) = @_;
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my %query;
+
+  # TODO:
+  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw(limit match);
+
+  $self->delay(
+    sub { $user->notifications(\%query, shift->begin) },
+    sub {
+      my ($delay, $err, $notifications) = @_;
+      die $err if $err;
+      $self->$cb({notifications => $notifications}, 200);
+    },
+  );
 }
 
 sub seen {
-  my ($self, $arg, $cb) = @_;
+  my ($self, $args, $cb) = @_;
   die 'TODO';
   $self->$cb({}, 200);
 }

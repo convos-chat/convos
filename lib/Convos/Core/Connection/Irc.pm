@@ -4,6 +4,7 @@ use Mojo::Base 'Convos::Core::Connection';
 no warnings 'utf8';
 use Convos::Util qw(next_tick DEBUG);
 use Mojo::IRC::UA;
+use Mojo::JSON;
 use Parse::IRC ();
 use Time::HiRes 'time';
 
@@ -203,26 +204,31 @@ sub _event_irc_error {
 sub _irc_message {
   my ($self, $event, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
-  my ($from, $target);
+  my ($from, $highlight, $target);
 
   if ($user) {
     my $is_private = $self->_is_current_nick($msg->{params}[0]);
-    $target = $is_private ? $nick : $msg->{params}[0];
-    $target = $self->get_dialog($target) || $self->dialog({name => $target});
-    $from = $nick;
+    $highlight = $is_private;
+    $target    = $is_private ? $nick : $msg->{params}[0];
+    $target    = $self->get_dialog($target) || $self->dialog({name => $target});
+    $from      = $nick;
   }
 
   $target ||= $self;
   $from ||= $msg->{prefix} // $self->_irc->server;
 
+  $highlight ||= grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
+    @{$self->url->query->every_param('highlight')};
+
   # server message or message without a dialog
   $self->emit(
     message => $target,
     {
-      from    => $from,
-      message => $msg->{params}[1],
-      ts      => time,
-      type    => $event =~ /privmsg/ ? 'private' : $event =~ /action/ ? 'action' : 'notice',
+      from      => $from,
+      highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
+      message   => $msg->{params}[1],
+      ts        => time,
+      type      => $event =~ /privmsg/ ? 'private' : $event =~ /action/ ? 'action' : 'notice',
     }
   );
 }

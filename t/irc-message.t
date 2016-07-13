@@ -19,6 +19,27 @@ $connection->_irc->emit(
 like slurp_log("#convos"), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
 $connection->_irc->emit(irc_privmsg =>
+    {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'Hey SUPERMAN!']});
+like slurp_log("#convos"), qr{\Q<Supergirl> Hey SUPERMAN!\E}m, 'notification';
+
+my $notifications;
+$core->get_user('superman@example.com')
+  ->notifications({}, sub { $notifications = pop; Mojo::IOLoop->stop; });
+Mojo::IOLoop->start;
+ok delete $notifications->[0]{ts}, 'notifications has timestamp';
+is_deeply $notifications,
+  [
+  {
+    connection_id => 'irc-localhost',
+    dialog_id     => '#convos',
+    from          => 'Supergirl',
+    message       => 'Hey SUPERMAN!',
+    type          => 'private'
+  }
+  ],
+  'notifications';
+
+$connection->_irc->emit(irc_privmsg =>
     {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['superman', 'does this work?']}
 );
 like slurp_log("supergirl"), qr{\Q<Supergirl> does this work?\E}m, 'private message';

@@ -50,7 +50,7 @@ sub connections {
   }
 
   return \@connections unless $cb;
-  return $self->tap($cb, '', \@connections);
+  return next_tick $self, $cb, '', \@connections;
 }
 
 sub delete_object {
@@ -131,6 +131,35 @@ sub messages {
   return $self;
 }
 
+sub notifications {
+  my ($self, $user, $query, $cb) = @_;
+  my $file = $self->_notifications_file($user);
+  my ($FH, $re, @notifications);
+
+  $query->{limit} ||= 40;
+
+  unless ($FH = File::ReadBackwards->new($file)) {
+    warn "[@{[ref $user]}] Read $file: $!\n" if DEBUG;
+    return next_tick $self, $cb, '', [];
+  }
+
+  $re = $query->{match} || qr{.};
+  $re = qr{\Q$re\E}i unless ref $re;
+  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\S+) (\S+) (.*$re.*)$/;
+
+  warn "[@{[ref $user]}] Gettings notifications from $file...\n" if DEBUG;
+  while (my $line = $FH->getline) {
+    next unless $line =~ $re;
+    my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
+    my $ts = Time::Piece->strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    $self->_message_type_from($message);
+    unshift @notifications, $message;
+    last if @notifications == $query->{limit};
+  }
+
+  return next_tick $self, $cb, '', \@notifications;
+}
+
 sub save_object {
   my ($self, $obj, $cb) = @_;
   my $storage_file = $self->_settings_file($obj);
@@ -164,7 +193,7 @@ sub users {
   }
 
   return \@users unless $cb;
-  return $self->tap($cb, '', \@users);
+  return next_tick $self, $cb, '', \@users;
 }
 
 sub _build_home {
@@ -237,6 +266,15 @@ sub _log_file {
   return $self->home->rel_file(join('/', @path) . '.log');
 }
 
+sub _message_type_from {
+  my ($self, $message) = @_;
+  return @$message{qw(type from)} = (private => $1) if $message->{message} =~ s/^<([^\s\>]+)>\s//;
+  return @$message{qw(type from)} = (notice  => $1) if $message->{message} =~ s/^-([^\s\>]+)-\s//;
+  return @$message{qw(type from)} = (action  => $1) if $message->{message} =~ s/^\* (\S+)\s//;
+  return @$message{qw(type from)} = (server  => '') if $message->{message} =~ s/^(?:-!-\s)?//;
+  return @$message{qw(type from)} = (unknown => '');
+}
+
 # blocking method
 sub _messages {
   my ($self, $obj, $args) = @_;
@@ -248,7 +286,7 @@ sub _messages {
   my $FH = File::ReadBackwards->new($file);
 
   unless ($FH) {
-    warn "[@{[ref $obj]}] Read $file: $!\n" if DEBUG;
+    warn "[@{[ref $obj]}] Read $file: $!\n" if DEBUG >= 2;
     return $self->_messages($obj, $args);
   }
 
@@ -257,25 +295,30 @@ sub _messages {
     next unless $line =~ $args->{re};
     my $message = {message => $2, ts => $1};
     my $ts = Time::Piece->strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
-    next if $ts < $args->{after} || $ts > $args->{before};
-    if ($message->{message} =~ s/^<([^\s\>]+)>\s//) {
-      @$message{qw(type from)} = (private => $1);
-    }
-    elsif ($message->{message} =~ s/^-([^\s\>]+)-\s//) {
-      @$message{qw(type from)} = (notice => $1);
-    }
-    elsif ($message->{message} =~ s/^\* (\S+)\s//) {
-      @$message{qw(type from)} = (action => $1);
-    }
-    elsif ($message->{message} =~ s/^(?:-!-\s)?//) {
-      @$message{qw(type from)} = (server => '');
-    }
+    next if $ts < $args->{after} or $ts > $args->{before};
+    $self->_message_type_from($message);
 
     unshift @{$args->{messages}}, $message;
     return $args->{messages} if int @{$args->{messages}} == $args->{limit};
   }
 
   return $self->_messages($obj, $args);
+}
+
+sub _notifications_file {
+  $_[0]->home->rel_file(join '/', $_[1]->id, 'notifications.log');
+}
+
+sub _save_notification {
+  my ($self, $obj, $ts, $message) = @_;
+  my $file = $self->_notifications_file($obj->connection->user);
+  my $t    = gmtime $ts;
+
+  open my $FH, '>>', $file or die "Can't open log file $file: $!";
+  warn "[@{[ref $obj]}] $file <<< ($message)\n" if DEBUG == 2;
+  flock $FH, LOCK_EX;
+  printf $FH "%s %s %s %s\n", $t->datetime, $obj->connection->id, $obj->id, $message;
+  flock $FH, LOCK_UN;
 }
 
 sub _settings_file {
@@ -302,9 +345,15 @@ sub _setup {
         message => sub {
           my ($connection, $target, $msg) = @_;
           my ($format, @keys) = $self->_format($msg->{type}) or return;
+          my $message = sprintf $format, map { $msg->{$_} } @keys;
           my @dialog_id = $target->id eq $cid ? () : (dialog_id => $target->id);
-          $self->_log($target, $msg->{ts}, sprintf $format, map { $msg->{$_} } @keys);
+          $self->_log($target, $msg->{ts}, $message);
           $self->emit("user:$uid", message => {connection_id => $cid, @dialog_id, %$msg});
+
+          if ($msg->{highlight} and $target->isa('Convos::Core::Dialog') and !$target->is_private) {
+            $self->_save_notification($target, $msg->{ts}, $message);
+            $self->emit("user:$uid", notification => {connection_id => $cid, @dialog_id, %$msg});
+          }
         }
       );
       $connection->on(
@@ -391,6 +440,10 @@ See L<Convos::Core::Backend/delete_object>.
 =head2 messages
 
 See L<Convos::Core::Backend/messages>.
+
+=head2 notifications
+
+See L<Convos::Core::Backend/notifications>.
 
 =head2 save_object
 
