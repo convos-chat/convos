@@ -70,9 +70,9 @@ div.alert {
 }
 
 .hr {
-  height: 0px;
+  height: 10px;
   overflow: hidden;
-  border-bottom: 2px solid #ddd;
+  hr { visibility: hidden; }
 }
 
 .material-hint {

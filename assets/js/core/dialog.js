@@ -108,8 +108,7 @@
     [
       "Please wait for connections and dialogs to be loaded...",
       "Is this your first time here?",
-      'To add a connection, click the "Edit connections" button in the lower right side menu.',
-      'Or click "Create dialog" button in the lower right side menu.'
+      'To add a connection, select the "Add connection" item in the right side menu, or "Join dialog" to chat with someone.',
     ].forEach(function(m) {
       this.emit("message", {
         message: m

@@ -5,7 +5,7 @@
     <span class="on" v-else>convos-local</span>
   </a>
   <a href="#create-dialog">
-    <i class="material-icons">add</i> Create new dialog...
+    <i class="material-icons">add</i> Join dialog...
   </a>
   <div class="hr"><hr></div>
   <a href="#connections/{{c.protocol}}-{{c.name}}" :class="connectionClass(c)" v-for="c in user.connections">
@@ -13,7 +13,7 @@
     <span class="on">{{c.humanState()}}</span>
   </a>
   <a href="#connections">
-    <i class="material-icons">add</i> Create new connection...
+    <i class="material-icons">add</i> Add connection...
   </a>
 </template>
 <script type="vue/component">

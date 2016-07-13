@@ -4594,9 +4594,10 @@ div.alert {
     margin-right: 0; }
 
 .hr {
-  height: 0px;
-  overflow: hidden;
-  border-bottom: 2px solid #ddd; }
+  height: 10px;
+  overflow: hidden; }
+  .hr hr {
+    visibility: hidden; }
 
 .material-hint {
   background-color: #323232;
@@ -4897,7 +4898,6 @@ nav {
     display: flex; }
     nav .sidebar-settings a {
       text-align: center;
-      border-bottom: 3px solid #eeeeee;
       padding: 1rem 0 0.5rem 0;
       margin: 0 4px 0.5rem 4px;
       position: relative;
