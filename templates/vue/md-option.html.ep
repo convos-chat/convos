@@ -11,6 +11,7 @@ module.exports = {
   props: ["disabled", "selected", "value"],
   methods: {
     text: function() {
+      if (!this.$el) return;
       return this.$el.querySelector('span').innerText.trim();
     },
     select: function() {
