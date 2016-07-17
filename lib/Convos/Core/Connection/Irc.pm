@@ -248,15 +248,8 @@ sub _join_dialog {
     sub {
       my ($irc, $err, $res) = @_;
       $dialog ||= $self->dialog({name => $name, topic => $res->{topic} // ''});
-      if ($err) {
-        $self->remove_dialog($name);
-        $dialog->frozen($err);
-      }
-      else {
-        $self->save(sub { }) if $dialog->password ne ($password //= '');
-        $dialog->password($password);
-      }
-      $self->$cb($err, $dialog);
+      $dialog->frozen($err || '')->password($password);
+      $self->save(sub { })->$cb($err, $dialog);
     }
   );
 }
