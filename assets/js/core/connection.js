@@ -16,17 +16,6 @@
 
   var proto = Convos.Connection.prototype;
 
-  proto.highlightMessage = function(msg) {
-    var query     = this.url().parseUrl().query;
-    var highlight = [];
-    if (this.nick()) highlight.push(this.nick());
-    if (query.highlight)
-      highlight = highlight.concat(query.highlight.split(" "));
-    if (!highlight.length) return;
-    highlight     = new RegExp("\\b" + highlight.join("|") + "\\b");
-    msg.highlight = msg.message.match(highlight) ? true : false;
-  };
-
   proto.href = function(action) {
     return ["#connection", this.protocol(), this.name, action].join("/");
   };

@@ -43,8 +43,10 @@
     if (!prev.ts)
       prev.ts = msg.ts;
 
-    if (msg.message && this._connection) this.connection.highlightMessage(msg);
-    if (msg.highlight) msg.classNames.push("highlight");
+    if (msg.highlight) {
+      msg.classNames.push("highlight");
+      this.connection.user.notifications.unshift(msg);
+    }
 
     msg.classNames.push(
       msg.message && msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch()

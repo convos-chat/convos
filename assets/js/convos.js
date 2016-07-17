@@ -54,6 +54,7 @@
           });
 
           Convos.api.ws().on("open", function(data) {
+            self.user.getNotifications(function(err) {});
             self.user.refreshConnections(function(err) {
               if (err) return console.log(err); // TODO
               self.user.refreshDialogs(function(err) {

@@ -22,6 +22,7 @@
     %= include 'vue/connection-editor'
     %= include 'vue/convos-chat'
     %= include 'vue/convos-help'
+    %= include 'vue/convos-notifications'
     %= include 'vue/create-dialog'
     %= include 'vue/dialog-container'
     %= include 'vue/dialog-message'

@@ -1,8 +1,9 @@
 (function() {
   Convos.User = function(attrs) {
-    this.connections = [];
-    this.dialogs     = [];
-    this.email       = "";
+    this.connections   = [];
+    this.dialogs       = [];
+    this.email         = "";
+    this.notifications = [];
 
     // Local chat bot. could probably be moved to backend
     // if we make Convos::Core::Connection::Convos
@@ -24,6 +25,14 @@
     return this.dialogs.filter(function(d) {
       return d.id == id;
     })[0];
+  };
+
+  proto.getNotifications = function(cb) {
+    var self = this;
+    Convos.api.listNotifications({}, function(err, xhr) {
+      if (!err) self.notifications = xhr.body.notifications.reverse();
+      cb.call(self, err);
+    });
   };
 
   proto.refreshConnections = function(cb) {

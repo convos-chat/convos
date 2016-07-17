@@ -8,6 +8,7 @@
   <connection-editor :settings="settings" :user="user" v-if="page == 'connections'"></connection-editor>
   <user-profile :user="user" v-if="page == 'user-profile'"></user-profile>
   <convos-help :user="user" v-if="page == 'help'"></convos-help>
+  <convos-notifications :user="user" v-if="page == 'notifications'"></convos-notifications>
   <dialog-container :dialog="d" :user="user" v-show="d.active()" v-for="d in user.dialogs"></dialog-container>
 </template>
 <script type="vue/component">

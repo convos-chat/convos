@@ -40,6 +40,7 @@
 
 .connection-editor,
 .convos-help,
+.convos-notifications,
 .create-dialog,
 .dialog-container,
 .embed-viewer,
@@ -68,6 +69,7 @@
 
 .connection-editor,
 .convos-help,
+.convos-notifications,
 .create-dialog,
 .embed-viewer,
 .user-profile {
@@ -79,9 +81,36 @@
 .user-profile { max-width: 500px; min-width: 500px; }
 
 .convos-help,
+.convos-notifications,
 .create-dialog { max-width: 420px; min-width: 420px; }
 
 .embed-viewer { max-width: 55%; min-width: 55%; }
+
+.convos-notifications .notification {
+  position: relative;
+  margin: $dialog-spacing * 2 0;
+  cursor: pointer;
+  margin-bottom: 10px;
+
+  .title {
+    color: $link-color;
+  }
+
+  .secondary-content {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    &, a {
+      color: color('grey', 'darken-1');
+      font-size: 0.8rem;
+      overflow: hidden;
+      display: block;
+    }
+    i {
+      vertical-align: bottom;
+    }
+  }
+}
 
 .convos-help {
   dl dd {
@@ -119,6 +148,7 @@
   .connection-editor,
   .user-profile,
   .convos-help,
+  .convos-notifications,
   .create-dialog,
   .embed-viewer {
     height: 100vh;

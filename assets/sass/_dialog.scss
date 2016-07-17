@@ -1,5 +1,3 @@
-$dialog-spacing: 4px;
-
 .dialog-container {
   padding: 0 $gutter-width / 2;
 
@@ -19,8 +17,6 @@ $dialog-spacing: 4px;
     display: block;
     position: relative;
     margin: $dialog-spacing * 2 0;
-
-    &:hover { background: darken($body-bg, 2%); }
 
     &.error, &.notice {
       padding-left: $gutter-width / 2;
@@ -51,7 +47,7 @@ $dialog-spacing: 4px;
       a { color: lighten(color('red', 'accent-3'), 20%); }
     }
     &.highlight .message {
-      color: color('red', 'accent-2');
+      background-color: color('red', 'lighten-5');
     }
     &.notice {
       border-left: 2px solid color('grey', 'lighten-1');
