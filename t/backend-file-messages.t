@@ -59,7 +59,7 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-0
 is int @{$t->tx->res->json->{messages} || []}, 56, 'after';
 
 $t->get_ok(
-  '/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51&before=2015-06-09T02:39:57'
+  '/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51&before=2015-06-09T02:39:58'
 )->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 3, 'after and before';
 

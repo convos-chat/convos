@@ -303,7 +303,7 @@ sub _messages {
     my $flag = $2 || '0';
     my $message = {message => $3, ts => $1};
     my $ts = Time::Piece->strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
-    next if $ts < $args->{after} or $ts > $args->{before};
+    next unless $ts < $args->{before} and $ts > $args->{after};
     $self->_message_type_from($message);
     $message->{highlight}
       = (ord($flag) - FLAG_OFFSET) & FLAG_HIGHLIGHT ? Mojo::JSON->true : Mojo::JSON->false;
