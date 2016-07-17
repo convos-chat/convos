@@ -15,6 +15,13 @@ use Symbol;
 use Time::Piece;
 use Time::Seconds;
 
+use constant FLAG_OFFSET    => 48;    # chr 48 == "0"
+use constant FLAG_NONE      => 0;
+use constant FLAG_HIGHLIGHT => 1;
+use constant FLAG_X         => 2;     # not yet in use
+use constant FLAG_Y         => 4;     # not yet in use
+use constant FLAG_Z         => 8;     # not yet in use
+
 my %FORMAT = (
   action      => ['* %s %s',                   qw(from message)],
   kick        => ['-!- %s kicked %s. %s',      qw(kicker part message)],
@@ -63,7 +70,7 @@ sub delete_object {
     },
     sub {
       my ($delay, $err) = @_;
-      warn "[@{[ref $obj]}] Delete object: @{[$err || 'Success']}\n" if DEBUG;
+      warn "[@{[$obj->id]}] Delete object: @{[$err || 'Success']}\n" if DEBUG;
       $self->$cb($err || '');
     },
   );
@@ -77,7 +84,7 @@ sub messages {
   my %args;
 
   $re = qr{\Q$re\E}i unless ref $re;
-  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (.*$re.*)$/;
+  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\d?)\s*(.*$re.*)$/;
 
   $args{limit}    = $query->{limit} || 60;
   $args{messages} = [];
@@ -117,7 +124,7 @@ sub messages {
   # The {cursor} is used to walk through the month-hashed log files
   $args{cursor} = $args{before};
 
-  warn "[@{[ref $obj]}] Searching $args{after} - $args{before}\n" if DEBUG;
+  warn "[@{[$obj->id]}] Searching $args{after} - $args{before}\n" if DEBUG;
   Mojo::IOLoop->delay(
     sub {
       $self->_fc->run(sub { $self->_messages($obj, \%args) }, shift->begin);
@@ -139,7 +146,7 @@ sub notifications {
   $query->{limit} ||= 40;
 
   unless ($FH = File::ReadBackwards->new($file)) {
-    warn "[@{[ref $user]}] Read $file: $!\n" if DEBUG;
+    warn "[@{[$user->id]}] Read $file: $!\n" if DEBUG;
     return next_tick $self, $cb, '', [];
   }
 
@@ -147,7 +154,7 @@ sub notifications {
   $re = qr{\Q$re\E}i unless ref $re;
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\S+) (\S+) (.*$re.*)$/;
 
-  warn "[@{[ref $user]}] Gettings notifications from $file...\n" if DEBUG;
+  warn "[@{[$user->id]}] Gettings notifications from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
     next unless $line =~ $re;
     my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
@@ -170,12 +177,12 @@ sub save_object {
     my $dir = File::Basename::dirname($storage_file);
     File::Path::make_path($dir) unless -d $dir;
     Mojo::Util::spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')), $storage_file);
-    warn "[@{[ref $obj]}] Save success. ($storage_file)\n" if DEBUG;
+    warn "[@{[$obj->id]}] Save success. ($storage_file)\n" if DEBUG;
     return next_tick $obj, $cb, '';
   };
 
   my $err = $@;
-  warn "[@{[ref $obj]}] Save $err ($storage_file)\n" if DEBUG;
+  warn "[@{[$obj->id]}] Save $err ($storage_file)\n" if DEBUG;
   return next_tick $obj, $cb, $err;
 }
 
@@ -243,7 +250,7 @@ sub _log {
 
   File::Path::make_path($dir) unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
-  warn "[@{[ref $obj]}] $file <<< ($message)\n" if DEBUG == 2;
+  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG == 2;
   flock $FH, LOCK_EX;
   print $FH $t->datetime . " $message\n";
   flock $FH, LOCK_UN;
@@ -286,18 +293,20 @@ sub _messages {
   my $FH = File::ReadBackwards->new($file);
 
   unless ($FH) {
-    warn "[@{[ref $obj]}] Read $file: $!\n" if DEBUG >= 2;
+    warn "[@{[$obj->id]}] $!: $file\n" if DEBUG >= 2;
     return $self->_messages($obj, $args);
   }
 
-  warn "[@{[ref $obj]}] Gettings messages from $file...\n" if DEBUG;
+  warn "[@{[$obj->id]}] Gettings messages from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
     next unless $line =~ $args->{re};
-    my $message = {message => $2, ts => $1};
+    my $flag = $2 || '0';
+    my $message = {message => $3, ts => $1};
     my $ts = Time::Piece->strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
     next if $ts < $args->{after} or $ts > $args->{before};
     $self->_message_type_from($message);
-
+    $message->{highlight}
+      = (ord($flag) - FLAG_OFFSET) & FLAG_HIGHLIGHT ? Mojo::JSON->true : Mojo::JSON->false;
     unshift @{$args->{messages}}, $message;
     return $args->{messages} if int @{$args->{messages}} == $args->{limit};
   }
@@ -314,8 +323,8 @@ sub _save_notification {
   my $file = $self->_notifications_file($obj->connection->user);
   my $t    = gmtime $ts;
 
-  open my $FH, '>>', $file or die "Can't open log file $file: $!";
-  warn "[@{[ref $obj]}] $file <<< ($message)\n" if DEBUG == 2;
+  open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
+  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG == 2;
   flock $FH, LOCK_EX;
   printf $FH "%s %s %s %s\n", $t->datetime, $obj->connection->id, $obj->id, $message;
   flock $FH, LOCK_UN;
@@ -347,13 +356,16 @@ sub _setup {
           my ($format, @keys) = $self->_format($msg->{type}) or return;
           my $message = sprintf $format, map { $msg->{$_} } @keys;
           my @dialog_id = $target->id eq $cid ? () : (dialog_id => $target->id);
-          $self->_log($target, $msg->{ts}, $message);
-          $self->emit("user:$uid", message => {connection_id => $cid, @dialog_id, %$msg});
+          my $flag = FLAG_NONE;
 
           if ($msg->{highlight} and $target->isa('Convos::Core::Dialog') and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
-            $self->emit("user:$uid", notification => {connection_id => $cid, @dialog_id, %$msg});
+            $flag |= FLAG_HIGHLIGHT;
           }
+
+          $self->emit("user:$uid", message => {connection_id => $cid, @dialog_id, %$msg});
+          $message = sprintf "%c %s", $flag + FLAG_OFFSET, $message;
+          $self->_log($target, $msg->{ts}, $message);
         }
       );
       $connection->on(

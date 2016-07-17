@@ -2,109 +2,80 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-$ENV{CONVOS_HOME} = File::Spec->catdir(qw(t data convos-test-backend-file-messages));
-
-my $backend    = Convos::Core::Backend::File->new;
-my $core       = Convos::Core->new(backend => $backend);
-my $user       = $core->user({email => 'superman@example.com'});
+my $t = t::Helper->t;
+my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $dialog     = $connection->dialog({name => '#convos'});
-my ($err, $messages);
-
-$dialog->messages({}, sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
-is int @$messages, 0, 'no messages in the past year' or diag $err;
-
-$dialog->messages({before => "2014-06-30T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
-is int @$messages, 60, 'before: got max limit messages' or diag $err;
-is $messages->[0]{ts},  '2014-06-21T14:12:17', 'first: 2014-06-21T14:12:17';
-is $messages->[-1]{ts}, '2014-06-22T10:23:50', 'last: 2014-06-22T10:23:50';
+my $target = $connection->dialog({name => '#convos'});
 
 # trick to make Devel::Cover track calls to _messages()
-$backend->_fc(bless {}, 'NoForkCall');
+$t->app->core->backend->_fc(bless {}, 'NoForkCall');
 
-$dialog->messages({before => "2014-06-21T14:30:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
-is int @$messages, 41, 'before: middle of the log' or diag $err;
-is $messages->[0]{ts},  '2014-06-21T10:12:20', 'first: 2014-06-21T10:12:20';
-is $messages->[-1]{ts}, '2014-06-21T14:17:40', 'last: 2014-06-21T14:17:40';
+$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages')->status_is(401);
+$t->get_ok('/api/notifications')->status_is(401);
+$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
+  ->status_is(200);
 
-$dialog->messages({after => "2014-06-30T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
-is int @$messages, 60, 'after: got max limit messages' or diag $err;
-is $messages->[0]{ts},  '2014-08-21T14:12:17', 'first: 2014-08-21T14:12:17';
-is $messages->[-1]{ts}, '2014-08-22T10:23:50', 'last: 2014-08-22T10:23:50';
+$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00')
+  ->status_is(200);
+is int @{$t->tx->res->json->{messages} || []}, 0, 'no messages';
 
-$dialog->messages({after => "2014-06-21T14:30:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
-is int @$messages, 60, 'after: middle of the log' or diag $err;
-is $messages->[0]{ts},  '2014-08-21T14:12:17', 'first: 2014-08-21T14:12:17';
-is $messages->[-1]{ts}, '2014-08-22T10:23:50', 'last: 2014-08-22T10:23:50';
+$connection->emit(message => $target => $_) for t::Helper->messages;
+$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00')
+  ->status_is(200);
+is int @{$t->tx->res->json->{messages} || []}, 60, 'got max limit messages';
 
-$dialog->messages({after => "2014-06-21T14:30:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
-is int @$messages, 60, 'span multiple log files to get max messages' or diag $err;
-is $messages->[0]{ts},  '2014-08-21T14:12:17', 'first: 2014-08-21T14:12:17';
-is $messages->[-1]{ts}, '2014-08-22T10:23:50', 'last: 2014-08-22T10:23:50';
+$t->get_ok(
+  '/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00&limit=1')
+  ->status_is(200)->json_is(
+  '/messages',
+  [
+    {
+      highlight => false,
+      message   => 'The powernap package allows you to suspend servers which are not being used,',
+      from      => 'mr22',
+      ts        => '2015-06-09T02:41:42',
+      type      => 'private',
+    }
+  ]
+  );
 
-$dialog->messages(
-  {before => "2014-04-01T00:00:00", after => "2014-04-01T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; }
+$t->get_ok(
+  '/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T04:37:00&limit=2&match=AppArmor'
+  )->status_is(200)->json_is(
+  '/messages',
+  [
+    {
+      highlight => false,
+      message   => 'Unsure if AppArmor might be causing an issue? Don\'t disable it, use the',
+      from      => 'jhthorsen',
+      ts        => '2015-06-09T02:39:12',
+      type      => 'private'
+    }
+  ]
+  );
+
+$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51')
+  ->status_is(200);
+is int @{$t->tx->res->json->{messages} || []}, 56, 'after';
+
+$t->get_ok(
+  '/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51&before=2015-06-09T02:39:57'
+)->status_is(200);
+is int @{$t->tx->res->json->{messages} || []}, 3, 'after and before';
+
+
+$t->get_ok('/api/notifications')->status_is(200)->json_is(
+  '/notifications',
+  [
+    {
+      connection_id => 'irc-localhost',
+      dialog_id     => '#convos',
+      from          => 'Supergirl',
+      message       => 'An easy way to see what SUPERMAN own',
+      ts            => '2015-06-09T02:39:36',
+      type          => 'private'
+    }
+  ]
 );
-Mojo::IOLoop->start;
-is int @$messages, 0, 'before and after: same' or diag $err;
-
-$dialog->messages(
-  {before => "2014-04-01T00:00:00", after => "2015-04-01T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; }
-);
-Mojo::IOLoop->start;
-is int @$messages, 0, 'before and after: "after" after "before"' or diag $err;
-
-$dialog->messages(
-  {before => "2015-04-01T00:00:00", after => "2013-04-01T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; }
-);
-Mojo::IOLoop->start;
-is int @$messages, 0, 'before and after: difference > 12 months' or diag $err;
-
-$dialog->messages(
-  {before => "2013-04-01T00:00:00", after => "2015-04-01T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; }
-);
-Mojo::IOLoop->start;
-is int @$messages, 0, 'before and after: difference > 12 months (2)' or diag $err;
-
-$dialog->messages(
-  {match => 'iotop', after => "2014-08-01T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; }
-);
-Mojo::IOLoop->start;
-is int @$messages, 2, 'two messages matching iotop' or diag $err;
-is $messages->[0]{ts}, '2014-08-21T10:13:32', 'first: 2014-08-21T10:13:32';
-
-$dialog->messages(
-  {limit => 2, match => qr{\bpacka\w+\b}, after => "2014-08-01T00:00:00"},
-  sub { ($err, $messages) = @_[1, 2]; Mojo::IOLoop->stop; }
-);
-Mojo::IOLoop->start;
-is int @$messages, 2, 'two messages matching package because of limit' or diag $err;
-is $messages->[0]{ts}, '2014-08-22T10:13:29', 'first: 2014-08-22T10:13:29';
 
 done_testing;
-
-BEGIN {
-
-  package NoForkCall;
-
-  sub run {
-    my ($self, $fork, $cb) = @_;
-    $self->$cb('', $fork->());
-  }
-}
