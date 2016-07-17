@@ -4623,9 +4623,10 @@ div.alert {
     opacity: 0.95; }
 
 div.autocomplete {
+  border-bottom: 1px solid #bdbdbd;
+  max-height: 8em;
   overflow: auto;
-  max-height: 9em;
-  border-bottom: 1px solid #bdbdbd; }
+  position: relative; }
   div.autocomplete ul {
     margin: 0;
     padding: 0; }

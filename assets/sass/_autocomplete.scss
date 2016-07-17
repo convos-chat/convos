@@ -1,7 +1,8 @@
 div.autocomplete {
-  overflow: auto;
-  max-height: 9em;
   border-bottom: 1px solid color('grey', 'lighten-1');
+  max-height: 8em;
+  overflow: auto;
+  position: relative;
 
   ul { margin: 0; padding: 0; }
   li {
