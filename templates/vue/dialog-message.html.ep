@@ -37,9 +37,13 @@ module.exports = {
   },
   ready: function() {
     var self = this;
-    var c    = [this.msg.type || "normal"];
+    var msg  = this.msg;
+    var prev = msg.prev;
 
-    $(this.$el).addClass(this.msg.classNames.join(" "));
+    $(this.$el).addClass(msg.classNames.join(" "));
+    $(this.$el).addClass(
+      msg.message && msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch()
+        ? "same-user" : "changed-user");
 
     // ugly hack since makeParticipantsMessage() makes dynamic html
     this.$nextTick(function() {

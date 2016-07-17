@@ -59,6 +59,9 @@ module.exports = {
     }
   },
   methods: {
+    closeDialog: function() {
+      this.dialog.connection.send("/close " + this.dialog.name);
+    },
     getInfo: function() {
       var self = this;
       self.dialog.participants(function(err, participants) {
@@ -71,10 +74,6 @@ module.exports = {
         });
       });
     },
-    detectAtBottomOnScroll: function() {
-      var elem = this.scrollElement;
-      this.atBottom = elem.scrollHeight < elem.offsetHeight + this.atBottomThreshold + elem.scrollTop;
-    },
     moveToBottomOnResize: function(e) {
       if (this._atBottomTid) return;
       var atBottom = this.atBottom;
@@ -85,8 +84,10 @@ module.exports = {
         300
       );
     },
-    closeDialog: function() {
-      this.dialog.connection.send("/close " + this.dialog.name);
+    onScroll: function() {
+      var elem = this.scrollElement;
+      this.atBottom = elem.scrollHeight < elem.offsetHeight + this.atBottomThreshold + elem.scrollTop;
+      if (!elem.scrollTop) this.dialog.previousMessages();
     },
     scrollToBottom: function(force) {
       var elem = this.scrollElement;
@@ -108,14 +109,14 @@ module.exports = {
   },
   ready: function() {
     this.scrollElement = $("main", this.$el)[0];
-    this.scrollElement.addEventListener("scroll", this.detectAtBottomOnScroll);
+    this.scrollElement.addEventListener("scroll", this.onScroll);
     window.addEventListener("resize", this.moveToBottomOnResize);
     this.dialog.on("message", this.scrollToBottom);
     this.dialog.on("ready", this.scrollToBottom);
   },
   beforeDestroy: function() {
     window.removeEventListener("resize", this.moveToBottomOnResize);
-    this.scrollElement.removeEventListener("scroll", this.detectAtBottomOnScroll);
+    this.scrollElement.removeEventListener("scroll", this.onScroll);
   }
 };
 </script>

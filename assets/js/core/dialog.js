@@ -30,36 +30,46 @@
     return this;
   };
 
-  proto.addMessage = function(msg) {
-    var prev = this.prevMessage || {};
+  proto.addMessage = function(msg, method) {
+    if (typeof msg == "string") msg = {message: msg};
+    if (!method) method = "push";
+    var prev = method == "unshift" ? this.messages[0] : this.prevMessage;
     msg.classNames = [msg.type];
 
-    if (!msg.from)
+    if (!msg.from) {
       msg.from = "convosbot";
-    if (!msg.ts)
+    }
+    if (!msg.ts) {
       msg.ts = new Date();
-    if (typeof msg.ts == "string")
+    }
+    if (typeof msg.ts == "string") {
       msg.ts = new Date(msg.ts);
-    if (!prev.ts)
-      prev.ts = msg.ts;
-
+    }
     if (msg.highlight) {
       msg.classNames.push("highlight");
       this.connection.user.notifications.unshift(msg);
     }
-
-    msg.classNames.push(
-      msg.message && msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch()
-        ? "same-user" : "changed-user");
-
-    if (prev.ts.getDate() != msg.ts.getDate())
-      this.messages.push({
+    if (!prev) {
+      prev = {from: msg.from, ts: msg.ts};
+    }
+    if (prev && prev.ts.getDate() != msg.ts.getDate()) {
+      this.messages[method]({
         classNames: ["day-changed"],
-        message:    "Day changed"
+        message:    "Day changed",
+        prev:       prev
       });
+    }
 
-    this.prevMessage = msg;
-    this.messages.push(msg);
+    if (method == "unshift") {
+      prev.prev = msg;
+      msg.prev = prev;
+    }
+    else {
+      msg.prev = prev;
+    }
+
+    if (method == "push") this.prevMessage = msg;
+    this.messages[method](msg);
   };
 
   // Create a href for <a> tag
@@ -99,11 +109,29 @@
     );
   };
 
-  proto.update = function(attrs) {
+  proto.previousMessages = function(args) {
+    if (!this.connection) return;
+    if (!this.messages.length) return;
+    if (this._loadingMessages) return;
     var self = this;
-    Object.keys(attrs).forEach(function(n) {
-      self[n] = attrs[n];
-    });
+    this._loadingMessages = true;
+    this._api.messagesByDialog(
+      {
+        before: this.messages[0].ts,
+        connection_id: this.connection.id,
+        dialog_id: this.id
+      },
+      function(err, xhr) {
+        self._loadingMessages = false;
+        if (err) return self.emit("error", err);
+        if (!xhr.body.messages.length) self._loadingMessages = true; // nothing more to load
+        xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, "unshift"); });
+      }
+    );
+  };
+
+  proto.update = function(attrs) {
+    Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
   };
 
   proto._convosMessages = function() {
@@ -111,23 +139,7 @@
       "Please wait for connections and dialogs to be loaded...",
       "Is this your first time here?",
       'To add a connection, select the "Add connection" item in the right side menu, or "Join dialog" to chat with someone.',
-    ].forEach(function(m) {
-      this.emit("message", {
-        message: m
-      });
-    }.bind(this));
-  };
-
-  proto._initialMessages = function() {
-    var topic = this.topic.replace(/"/g, "") || "";
-    this.addMessage({
-      message: "You have joined " + this.name + ", but no one has said anything as long as you have been here."
-    });
-    if (this.frozen) {
-      this.addMessage({
-        message: "You are not part of this channel. " + this.frozen
-      });
-    }
+    ].forEach(function(m) { this.emit("message", {message: m}); }.bind(this));
   };
 
   // Called when this dialog is visible in gui the first time
@@ -141,13 +153,21 @@
         connection_id: self.connection.id,
         dialog_id:     self.id
       }, function(err, xhr) {
-        if (err) return this.emit("error", err);
-        xhr.body.messages.forEach(function(msg) {
-          self.addMessage(msg);
-        });
-        if (!self.messages.length) self._initialMessages();
-        this.emit("ready");
-      }.bind(this)
+        if (err) return self.emit("error", err);
+        xhr.body.messages.forEach(function(msg) { self.addMessage(msg); });
+
+        if (!self.messages.length) {
+          self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.");
+        }
+        if (self.frozen) {
+          self.addMessage("You are not part of this channel. " + self.frozen);
+        }
+        else if (self.topic) {
+          self.addMessage("The topic is: " + self.topic.replace(/"/g, ""));
+        }
+
+        self.emit("ready");
+      }
     );
   };
 
