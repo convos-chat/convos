@@ -14,7 +14,6 @@ module.exports = {
     },
     message: function() {
       var self = this;
-      if (this.msg.participants) return this.makeParticipantsMessage();
       return this.msg.message.xmlEscape().autoLink({
         target: "_blank",
         after:  function(url, id) {
@@ -24,15 +23,6 @@ module.exports = {
           return null;
         }
       });
-    },
-    makeParticipantsMessage: function() {
-      var list = this.msg.participants;
-      return String.prototype.numberAsString.call(list.length).ucFirst()
-        + " participants in " + this.dialog.name + " connected to "
-        + this.dialog.connection.name + ": "
-        + list.map(function(p, i) {
-          return '<a href="#whois:' + p.name + '">' + p.mode + p.name + "</a>";
-        }).sort().join(", ");
     }
   },
   ready: function() {

@@ -4,6 +4,7 @@
     this.id            = "";
     this.messages      = [];
     this.name          = "";
+    this.participants  = {};
     this.topic         = "";
     this._active       = false;
     this._api          = Convos.api;
@@ -69,6 +70,7 @@
     }
 
     if (method == "push") this.prevMessage = msg;
+    this._addParticipant(msg.from, {seen: msg.ts});
     this.messages[method](msg);
   };
 
@@ -91,20 +93,21 @@
     });
   };
 
-  proto.participants = function(cb) {
+  proto.refreshParticipants = function(cb) {
     var self = this;
     Convos.api.participantsInDialog(
       {
         connection_id: this.connection.id,
         dialog_id:     this.id
       }, function(err, xhr) {
+        Object.keys(self.participants).forEach(function(k) { self.participants[k].online = false; });
         if (!err) {
-          var participants = self._participants = {};
           xhr.body.participants.forEach(function(p) {
-            participants[p.name] = p;
+            p.online = true;
+            self._addParticipant(p.name, p);
           });
         }
-        return cb.call(self, err, xhr.body.participants);
+        return cb.call(self, err);
       }
     );
   };
@@ -134,6 +137,13 @@
     Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
   };
 
+  proto._addParticipant = function(name, data) {
+    if (this.connection && name == this.connection.nick()) return;
+    var participants = this.participants;
+    if (!participants[name]) participants[name] = {name: name, seen: 0};
+    Object.keys(data).forEach(function(k) { participants[name][k] = data[k]; });
+  };
+
   proto._convosMessages = function() {
     [
       "Please wait for connections and dialogs to be loaded...",
@@ -147,7 +157,7 @@
     if (!this.connection) return this._convosMessages();
     if (this.messages.length >= 60) return;
     var self = this;
-    self.participants(function() {});
+    self.refreshParticipants(function() {});
     self._api.messagesByDialog(
       {
         connection_id: self.connection.id,

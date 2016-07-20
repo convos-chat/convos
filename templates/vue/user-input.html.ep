@@ -7,22 +7,18 @@
       <a href="#send" @click="send" data-hint="Send message"><i class="material-icons">send</i></a>
     </div -->
     <textarea v-model="message"
+      v-el:input
       class="materialize-textarea"
       :placeholder="placeholder"
       @keyup.enter.prevent="send"
-      @keydown.esc.prevent="unfocus"
-      @keydown.down.prevent="history"
-      @keydown.tab.prevent="autocomplete"
-      @keydown.up.prevent="history"
+      @keydown="autocomplete"
     ></textarea>
   </form>
 </template>
 <script type="vue/component">
-var before;
-var matches;
-var needle;
 var commands = [
   "/me ",
+  "/help ",
   "/msg ",
   "/query ", // TODO
   "/join #",
@@ -39,7 +35,7 @@ var commands = [
 ];
 
 module.exports = {
-  props:    ["dialog", "participants", "user"],
+  props:    ["dialog", "user"],
   computed: {
     placeholder: function() {
       try {
@@ -50,60 +46,67 @@ module.exports = {
           return 'State is "' + state + '".';
         }
       } catch ( err ) {
-        return "Please enter commands as instructed.";
+        return "Please read the instructions on screen.";
       }
     }
   },
   data: function() {
-    return {
-      message: ""
-    };
+    return {message: ""};
   },
   methods: {
     autocomplete: function(e) {
-      var input = $("textarea", this.$el);
-      if (!this.autocompleteMatches) {
-        before = this.message.substring(0, input.selectionStart);
+      var needle;
+
+      // tab or shift
+      if (e.keyCode != 9 && e.keyCode != 16) return delete this.matchList;
+      if (e.keyCode == 16) return;
+
+      e.preventDefault();
+
+      if (!this.matchList) {
+        this.pos = this.$els.input.selectionStart;
+        this.before = this.message.substring(0, this.pos);
         needle = "";
 
-        this._autocompleteAfter  = this.message.substring(input.selectionStart);
-        this._autocompleteBefore = before.replace(/(\S+)\s*$/, function(all, n) {
-          needle = n;
-          return "";
-        });
+        this.after = this.message.substring(this.pos);
+        this.before = this.before.replace(/(\S+)\s*$/, function(all, n) { needle = n; return ""; });
 
-        matches = [needle].concat(this.autocompleteList(this._autocompleteBefore, needle, this._autocompleteAfter));
-        if (!this._autocompleteBefore.length)
-          matches = matches.concat(commands);
-        matches = matches.filter(function(command) {
-          return !command.indexOf(needle);
-        });
-        this._autocompleteIndex  = 0;
-        this.autocompleteMatches = matches;
+        this.matchList = [needle].concat(this.participants());
+        if (!this.before.length) this.matchList = this.matchList.concat(commands);
+
+        this.matchIndex = 0;
+        if (needle) this.matchList = this.matchList.filter(function(m) { return !m.indexOf(needle); });
       }
 
-      matches = this.autocompleteMatches;
-      if (!matches.length) return;
+      this.matchIndex += e.shiftKey ? -1 : 1;
+      if (this.matchIndex < 0)
+        this.matchIndex = this.matchList.length - 1;
+      if (this.matchIndex == this.matchList.length)
+        this.matchIndex = 0;
 
-      this._autocompleteIndex += e.shiftKey ? -1 : 1;
-      if (this._autocompleteIndex < 0)
-        this._autocompleteIndex = matches.length - 1;
-      if (this._autocompleteIndex == matches.length)
-        this._autocompleteIndex = 0;
+      this.message = this.before + this.matchList[this.matchIndex] + this.after;
 
-      this.message = this._autocompleteBefore + matches[this._autocompleteIndex];
-    },
-    autocompleteList: function() {
-      return [];
-    },
-    history: function(e) {
-      console.log(e);
+      if (this.after.length) {
+        var pos = this.pos + this.matchList[this.matchIndex].length - 1;
+        this.$nextTick(function() { this.$els.input.setSelectionRange(pos, pos); });
+      }
     },
     localCmdHelp: function(e) {
       $("a.help").click();
     },
     localCmdJoin: function(e) {
       $("a.create-dialog").click();
+    },
+    participants: function() {
+      return Object.values(this.dialog.participants).sort(function(a, b) {
+        if (a.seen > b.seen) return -1;
+        if (a.seen < b.seen) return 1;
+        if (a.name > b.name) return -1;
+        if (a.name < b.name) return 1;
+        return 0;
+      }).map(function(p) {
+        return p.name + (this.after ? "" : this.before ? " " : ": ");
+      }.bind(this));
     },
     send: function(e) {
       var m = this.message;
@@ -112,9 +115,6 @@ module.exports = {
       this.message = "";
       if ("localCmd" + m != l && this[l]) return this[l](e);
       if (c && m.length) c.send(m, this.dialog.connection ? this.dialog : "");
-    },
-    unfocus: function(e) {
-      $("nav a:first").focus(); // TODO: Need better logic
     }
   },
   ready: function() {

@@ -15,7 +15,7 @@
   <main>
     <dialog-message :dialog="dialog" :msg="msg" :user="user" v-for="msg in dialog.messages"></dialog-message>
   </main>
-  <user-input :participants="participants" :dialog="dialog" :user="user"></user-input>
+  <user-input :dialog="dialog" :user="user"></user-input>
 </template>
 <script type="vue/component">
 module.exports = {
@@ -24,7 +24,6 @@ module.exports = {
     return {
       atBottom:          true,
       atBottomThreshold: !!("ontouchstart" in window) ? 60 : 40,
-      participants:      [],
       scrollElement:     null
     };
   },
@@ -64,13 +63,12 @@ module.exports = {
     },
     getInfo: function() {
       var self = this;
-      self.dialog.participants(function(err, participants) {
-        self.participants = participants;
-        this.emit("message", {
-          from:         this.connection.id,
-          message:      err ? err[0].message : "",
-          participants: err ? null : participants,
-          type:         err ? "error" : "notice"
+      self.dialog.refreshParticipants(function(err) {
+        if (!err) return this.emit("message", {type: "participants"});
+        return this.emit("message", {
+          from:    this.connection.id,
+          message: err ? err[0].message : "",
+          type:    err ? "error" : "notice"
         });
       });
     },

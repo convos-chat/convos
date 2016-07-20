@@ -14,4 +14,10 @@
   Element.prototype.$remove = function() {
     this.parentElement.removeChild(this);
   };
+
+  if (!Object.values) {
+    Object.values = function(obj) {
+      return Object.keys(obj).map(function(k) { return obj[k]; });
+    };
+  }
 })();
