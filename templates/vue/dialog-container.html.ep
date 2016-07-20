@@ -67,12 +67,12 @@ module.exports = {
       this.dialog.connection.send("/close " + this.dialog.name);
     },
     componentName: function(msg) {
-      return msg.type == "participants" ? "dialog-participants" : "dialog-message";
+      return msg.type == "info" ? "dialog-info" : "dialog-message";
     },
     getInfo: function() {
       var self = this;
       self.dialog.refreshParticipants(function(err) {
-        if (!err) return this.emit("message", {type: "participants"});
+        if (!err) return this.emit("message", {type: "info"});
         return this.emit("message", {
           from:    this.connection.id,
           message: err ? err[0].message : "",
