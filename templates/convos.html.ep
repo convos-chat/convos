@@ -26,6 +26,7 @@
     %= include 'vue/create-dialog'
     %= include 'vue/dialog-container'
     %= include 'vue/dialog-message'
+    %= include 'vue/dialog-participants'
     %= include 'vue/embed-viewer'
     %= include 'vue/md-autocomplete'
     %= include 'vue/md-option'

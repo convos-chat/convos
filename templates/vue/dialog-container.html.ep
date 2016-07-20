@@ -13,7 +13,12 @@
     <h5 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
   </header>
   <main>
-    <dialog-message :dialog="dialog" :msg="msg" :user="user" v-for="msg in dialog.messages"></dialog-message>
+    <component
+      :is="componentName(msg)"
+      :dialog="dialog"
+      :msg="msg"
+      :user="user"
+      v-for="msg in dialog.messages"></component>
   </main>
   <user-input :dialog="dialog" :user="user"></user-input>
 </template>
@@ -60,6 +65,9 @@ module.exports = {
   methods: {
     closeDialog: function() {
       this.dialog.connection.send("/close " + this.dialog.name);
+    },
+    componentName: function(msg) {
+      return msg.type == "participants" ? "dialog-participants" : "dialog-message";
     },
     getInfo: function() {
       var self = this;

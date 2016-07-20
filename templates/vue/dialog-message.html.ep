@@ -34,14 +34,6 @@ module.exports = {
     $(this.$el).addClass(
       msg.message && msg.from == prev.from && msg.ts.epoch() - 300 < prev.ts.epoch()
         ? "same-user" : "changed-user");
-
-    // ugly hack since makeParticipantsMessage() makes dynamic html
-    this.$nextTick(function() {
-      $(this.$el).find('[href*="#whois:"]').click(function(e) {
-        e.preventDefault();
-        self.dialog.connection.send("/whois " + this.href.match(/whois:(.*)/)[1]);
-      });
-    });
   }
 };
 </script>
