@@ -1,5 +1,5 @@
 <template class="vue-sidebar-settings">
-  <a href="#notifications" @onclick.prevent="toggleLocation('notifications', 'chat')" data-hint="Show notifications">
+  <a href="#notifications" @click.prevent="toggleLocation('notifications', 'chat')" data-hint="Show notifications">
     <i class="material-icons" :class="notifications.length ? 'active' : ''">{{notifications.length ? "notifications_active" : "notifications_none"}}</i>
     <b class="n-notifications" v-if="notifications.length">{{notifications.length < 100 ? notifications.length : "99+"}}</b>
   </a>
