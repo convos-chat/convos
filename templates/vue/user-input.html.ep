@@ -70,12 +70,14 @@ module.exports = {
 
         this.after = this.message.substring(this.pos);
         this.before = this.before.replace(/(\S+)\s*$/, function(all, n) { needle = n; return ""; });
-
-        this.matchList = [needle].concat(this.participants());
-        if (!this.before.length) this.matchList = this.matchList.concat(commands);
-
         this.matchIndex = 0;
-        if (needle) this.matchList = this.matchList.filter(function(m) { return !m.indexOf(needle); });
+        this.matchList = [needle].concat(this.participants());
+
+        if (!this.before.length) this.matchList = this.matchList.concat(commands);
+        if (needle) {
+          needle = new RegExp("^" + needle, "i");
+          this.matchList = this.matchList.filter(function(m) { return m.match(needle); });
+        }
       }
 
       this.matchIndex += e.shiftKey ? -1 : 1;
