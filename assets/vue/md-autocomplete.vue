@@ -1,19 +1,21 @@
-<template class="vue-md-autocomplete">
-  <input
-    :id="id"
-    v-model="value"
-    @keydown="keydown"
-    @keyup="keyup"
-    type="text" autocomplete="off" spellcheck="false">
-  <div class="autocomplete">
-    <ul>
-      <li :class="optionClass(o, $index)" v-for="o in filteredOptions" :data-hint="o.title">
-        <a href="option://{{o.value}}" class="truncate" @click="select(o)">{{o.text || o.value}}</a>
-      </li>
-    </ul>
+<template>
+  <div class="md-autocomplete">
+    <input
+      :id="id"
+      v-model="value"
+      @keydown="keydown"
+      @keyup="keyup"
+      type="text" autocomplete="off" spellcheck="false">
+    <div class="autocomplete">
+      <ul>
+        <li :class="optionClass(o, $index)" v-for="o in filteredOptions" :data-hint="o.title">
+          <a href="option://{{o.value}}" class="truncate" @click="select(o)">{{o.text || o.value}}</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props: ["id", "value", "options"],
   computed: {

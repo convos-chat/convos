@@ -1,28 +1,30 @@
-<template class="vue-dialog-container">
-  <header>
-    <div class="actions" v-show="dialog.connection">
-      <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
-      <a href="#info" @click.prevent="getInfo" data-hint="Get information"><i class="material-icons">info_outline</i></a>
-      <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
-      <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
-    </div>
-    <div class="actions" v-show="!dialog.connection">
-      <a href="#chat"><i class="material-icons">star_rate</i></a>
-      <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
-    </div>
-    <h5 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
-  </header>
-  <main>
-    <component
-      :is="componentName(msg)"
-      :dialog="dialog"
-      :msg="msg"
-      :user="user"
-      v-for="msg in dialog.messages"></component>
-  </main>
-  <user-input :dialog="dialog" :user="user"></user-input>
+<template>
+  <div class="covnos-dialog-container">
+    <header>
+      <div class="actions" v-show="dialog.connection">
+        <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
+        <a href="#info" @click.prevent="getInfo" data-hint="Get information"><i class="material-icons">info_outline</i></a>
+        <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
+        <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
+      </div>
+      <div class="actions" v-show="!dialog.connection">
+        <a href="#chat"><i class="material-icons">star_rate</i></a>
+        <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
+      </div>
+      <h5 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
+    </header>
+    <main>
+      <component
+        :is="componentName(msg)"
+        :dialog="dialog"
+        :msg="msg"
+        :user="user"
+        v-for="msg in dialog.messages"></component>
+    </main>
+    <convos-input :dialog="dialog" :user="user"></convos-input>
+  </div>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props: ["dialog", "user"],
   data:  function() {
@@ -67,7 +69,7 @@ module.exports = {
       this.dialog.connection.send("/close " + this.dialog.name);
     },
     componentName: function(msg) {
-      return msg.type == "info" ? "dialog-info" : "dialog-message";
+      return msg.type == "info" ? "convos-dialog-info" : "convos-message";
     },
     getInfo: function() {
       var self = this;

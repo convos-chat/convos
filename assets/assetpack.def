@@ -19,6 +19,7 @@
 < js/vue/filter-timestring.js
 < js/vue/mixin-materialize.js
 < js/vue/mixin-location.js
+
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/waves.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/jquery.easing.1.3.js
@@ -29,7 +30,31 @@
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/forms.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/leanModal.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/animation.js
+
 < js/core/connection.js
 < js/core/dialog.js
 < js/core/user.js
+
+< vue/md-autocomplete.vue
+< vue/md-option.vue
+< vue/md-select.vue
+
+< vue/convos-login.vue
+< vue/convos-register.vue
+
+< vue/convos-connection.vue
+< vue/convos-create-dialog.vue
+< vue/convos-dialogs.vue
+< vue/convos-embed.vue
+< vue/convos-help.vue
+< vue/convos-notifications.vue
+< vue/convos-profile.vue
+< vue/convos-settings.vue
+
+< vue/convos-message.vue
+< vue/convos-dialog-info.vue
+< vue/convos-dialog-container.vue
+< vue/convos-chat.vue
+< vue/convos-input.vue
+
 < js/convos.js

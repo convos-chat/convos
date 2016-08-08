@@ -1,4 +1,4 @@
-<template class="vue-md-select no-wrapper">
+<template>
   <div class="select-wrapper">
     <span class="caret">&#9660;</span>
     <input :value="textValue" :data-activates="guid" :disabled="disabled" readonly="true" class="select-dropdown" type="text">
@@ -10,7 +10,7 @@
     </select>
   </div>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props: ["id", "name", "value"],
   data: function() {

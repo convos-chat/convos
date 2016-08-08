@@ -47,7 +47,7 @@ sub startup {
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
 
-  $self->plugin(AssetPack => {pipes => [qw(JavaScript Sass Css Combine Reloader)]});
+  $self->plugin(AssetPack => {pipes => [qw(Vuejs JavaScript Sass Css Combine Reloader)]});
   $self->asset->process;
 
   $self->hook(

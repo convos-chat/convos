@@ -1,0 +1,28 @@
+<template>
+  <div class="convos-notifications">
+    <div class="row">
+      <div class="col s12">
+        <div class="actions">
+          <a href="#chat"><i class="material-icons">close</i></a>
+        </div>
+        <h5>Notifications</h5>
+        <p v-if="!user.notifications.length">No notifications.</p>
+        <div @click="gotoMessage(msg)" class="notification" v-for="msg in user.notifications">
+          <span class="title">{{msg.from}} in {{msg.dialog_id}}</span>
+          <div class="message"><span>{{msg.message}}</span></div>
+          <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+module.exports = {
+  props: ["user"],
+  methods: {
+    gotoMessage: function(msg) {
+      alert('TODO');
+    }
+  }
+};
+</script>

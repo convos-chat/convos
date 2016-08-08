@@ -12,6 +12,7 @@ if (@ARGV and $ARGV[0] eq 'dev') {
   my @watch = qw(lib assets public/convos-api.json templates);
   $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
   shift @ARGV;
+  warn sprintf "\$ morbo script/convos %s\n", join " ", @ARGV, map { ('-w', $_) } @watch;
   exec qw(morbo script/convos), @ARGV, map { ('-w', $_) } @watch;
 }
 

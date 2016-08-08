@@ -5,15 +5,15 @@
   margin-right: $sidebar-width - 1;
   overflow: hidden;
 
-  .dialog-container {
+  .convos-dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
     overflow: auto;
   }
 
-  .dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
-  .dialog-container main {
+  .convos-dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
+  .convos-dialog-container main {
     padding-bottom: $gutter-width;
     overflow: auto;
     flex-grow: 1;
@@ -38,13 +38,13 @@
   .btn-toggle-menu { display: none; }
 }
 
-.connection-editor,
+.convos-connection,
+.convos-create-dialog,
+.convos-dialog-container,
+.convos-embed,
 .convos-help,
 .convos-notifications,
-.create-dialog,
-.dialog-container,
-.embed-viewer,
-.user-profile {
+.convos-profile {
   display: block;
   overflow: auto;
   max-height: 100vh;
@@ -67,24 +67,24 @@
   }
 }
 
-.connection-editor,
+.convos-connection,
+.convos-create-dialog,
+.convos-embed,
 .convos-help,
 .convos-notifications,
-.create-dialog,
-.embed-viewer,
-.user-profile {
+.convos-profile {
   background: $settings-active-color;
   position: relative;
 }
 
-.connection-editor,
-.user-profile { max-width: 500px; min-width: 500px; }
+.convos-connection,
+.convos-profile { max-width: 500px; min-width: 500px; }
 
 .convos-help,
 .convos-notifications,
-.create-dialog { max-width: 420px; min-width: 420px; }
+.convos-create-dialog { max-width: 420px; min-width: 420px; }
 
-.embed-viewer { max-width: 55%; min-width: 55%; }
+.convos-embed { max-width: 55%; min-width: 55%; }
 
 .convos-notifications .notification {
   position: relative;
@@ -130,7 +130,7 @@
 
     .btn-toggle-menu { display: inline; }
 
-    .dialog-container main {
+    .convos-dialog-container main {
       margin-left: -10px;
       margin-right: -10px;
       padding-left: 10px;
@@ -143,14 +143,14 @@
     }
   }
 
-  .user-input textarea { margin-bottom: 0; }
+  .convos-input textarea { margin-bottom: 0; }
 
-  .connection-editor,
-  .user-profile,
+  .convos-connection,
+  .convos-create-dialog,
+  .convos-embed,
   .convos-help,
   .convos-notifications,
-  .create-dialog,
-  .embed-viewer {
+  .convos-profile {
     height: 100vh;
     width: 100vw;
     max-width: none;

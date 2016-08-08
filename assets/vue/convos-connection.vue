@@ -1,5 +1,5 @@
-<template class="vue-connection-editor">
-  <form @submit.prevent="saveConnection">
+<template>
+  <div class="convos-connection">
     <div class="row">
       <div class="col s12">
         <div class="actions">
@@ -46,7 +46,7 @@
     </div>
     <div class="row">
       <div class="input-field col s12">
-        <button class="btn waves-effect waves-light" type="submit">
+        <button @click="saveConnection" class="btn waves-effect waves-light" type="submit">
           {{connection && !deleted ? 'Update' : 'Create'}} <i class="material-icons right">save</i>
         </button>
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete right" v-if="connection">
@@ -57,7 +57,7 @@
     </div>
   </form>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props:    ["settings", "user"],
   computed: {

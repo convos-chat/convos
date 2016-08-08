@@ -18,27 +18,6 @@
       :current-page.sync="currentPage"
       :settings="settings"
       :user="user"></component>
-
-    %= include 'vue/connection-editor'
-    %= include 'vue/convos-chat'
-    %= include 'vue/convos-help'
-    %= include 'vue/convos-notifications'
-    %= include 'vue/create-dialog'
-    %= include 'vue/dialog-container'
-    %= include 'vue/dialog-info'
-    %= include 'vue/dialog-message'
-    %= include 'vue/embed-viewer'
-    %= include 'vue/md-autocomplete'
-    %= include 'vue/md-option'
-    %= include 'vue/md-select'
-    %= include 'vue/sidebar-dialogs'
-    %= include 'vue/sidebar-notifications'
-    %= include 'vue/sidebar-settings'
-    %= include 'vue/user-input'
-    %= include 'vue/user-login'
-    %= include 'vue/user-profile'
-    %= include 'vue/user-register'
-
     %= javascript begin
       window.Convos = {
         apiUrl:   "<%= $c->url_for('convos_api_specification') %>",

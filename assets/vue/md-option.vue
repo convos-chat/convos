@@ -1,4 +1,4 @@
-<template class="vue-md-option no-wrapper">
+<template>
   <li @click="select" class="{{selected ? 'active' : ''}}">
     <span>
       <input :checked="selected" :disabled="disabled" type="checkbox" v-if="$parent.multiple">
@@ -6,7 +6,7 @@
     </span>
   </li>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props: ["disabled", "selected", "value"],
   methods: {

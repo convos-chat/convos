@@ -1,0 +1,88 @@
+<template>
+  <div class="convos-register">
+    <div class="row not-logged-in-wrapper">
+      <form @submit.prevent="register" class="col s12 m6 offset-m3">
+        <div class="row">
+          <div class="col s12">
+            <h2>Convos</h2>
+            <p><i>- Collaboration done right.</i></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <input v-model="email" id="form_email" type="email" class="validate">
+            <label for="form_email">Email</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input v-model="password" id="form_password" type="password" class="validate">
+            <label for="form_password">Password</label>
+          </div>
+          <div class="input-field col s6">
+            <input v-model="passwordAgain" placeholder="Repeat password" id="form_password_again" type="password" class="validate">
+          </div>
+        </div>
+        <div class="row" v-if="errors.length">
+          <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <button class="btn waves-effect waves-light" type="submit">
+              Register <i class="material-icons right">send</i>
+            </button>
+            <a href="#login" @click.prevent="currentPage = 'convos-login'" class="btn-flat waves-effect waves-light">Log in</a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s12 about">
+            &copy; <a href="http://nordaaker.com">Nordaaker</a> - <a href="http://convos.by">About</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+<script>
+module.exports = {
+  props:    ["currentPage", "user"],
+  data:     function() {
+    return {
+      email:         localStorage.getItem("email"),
+      errors:        [],
+      password:      "",
+      passwordAgain: "",
+    };
+  },
+  methods: {
+    register: function() {
+      var self = this;
+      this.errors = [];
+      localStorage.setItem("email", this.email);
+
+      if (this.password != this.passwordAgain) {
+        $("#form_password").addClass("invalid");
+        this.errors = [{
+          message: "Passwords does not match"
+        }];
+        return;
+      }
+
+      Convos.api.registerUser(
+        {
+          body: {
+            email:    this.email,
+            password: this.password
+          }
+        }, function(err, xhr) {
+          if (err) return self.errors = err;
+          self.$dispatch("login", xhr.body);
+        }.bind(this)
+      );
+    }
+  },
+  ready: function() {
+    $("#form_email").focus();
+  }
+};
+</script>

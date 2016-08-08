@@ -1,10 +1,12 @@
-<template class="vue-embed-viewer">
-  <div class="actions">
-    <a href="#chat"><i class="material-icons">close</i></a>
+<template>
+  <div class="convos-embed">
+    <div class="actions">
+      <a href="#chat"><i class="material-icons">close</i></a>
+    </div>
+    <div class="embed-content">{{{content()}}}</div>
   </div>
-  <div class="embed-content">{{{content()}}}</div>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   methods: {
     content: function() {

@@ -1,5 +1,5 @@
-<template class="vue-user-profile">
-  <form @submit.prevent="submitForm" method="post" class="modal-content readable-width">
+<template>
+  <div class="convos-profile">
     <div class="row">
       <div class="col s12">
         <div class="actions">
@@ -29,19 +29,15 @@
     <div class="row">
       <div class="input-field col s12">
         <button class="btn waves-effect waves-light" type="submit">Update <i class="material-icons right">save</i></button>
-        <button class="btn-flat waves-effect waves-light modal-close" type="button">Close</button>
       </div>
     </div>
-  </form>
+  </div>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props: ["user"],
   data:  function() {
     return {errors: []};
-  },
-  methods: {
-    submitForm: function() {}
   }
 };
 </script>

@@ -1,5 +1,5 @@
-<template class="vue-user-input">
-  <form method="post" @submit="send">
+<template>
+  <div class="convos-input">
     <!-- div class="actions">
       <a href="#attach" data-hint="Attach file"><i class="material-icons">attach_file</i></a>
       <a href="#webcam" data-hint="Take picture"><i class="material-icons">photo_camera</i></a>
@@ -13,9 +13,9 @@
       @keyup.enter.prevent="send"
       @keydown="autocomplete"
     ></textarea>
-  </form>
+  </div>
 </template>
-<script type="vue/component">
+<script>
 var commands = [
   "/me ",
   "/help ",

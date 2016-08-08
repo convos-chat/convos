@@ -4656,14 +4656,14 @@ div.autocomplete {
   height: 100vh;
   margin-right: 299px;
   overflow: hidden; }
-  .convos-chat .dialog-container {
+  .convos-chat .convos-dialog-container {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
     overflow: auto; }
-  .convos-chat .dialog-container {
+  .convos-chat .convos-dialog-container {
     max-width: 860px; }
-  .convos-chat .dialog-container main {
+  .convos-chat .convos-dialog-container main {
     padding-bottom: 1.5rem;
     overflow: auto;
     flex-grow: 1; }
@@ -4682,67 +4682,67 @@ div.autocomplete {
   .convos-chat .btn-toggle-menu {
     display: none; }
 
-.connection-editor,
+.convos-connection,
+.convos-create-dialog,
+.convos-dialog-container,
+.convos-embed,
 .convos-help,
 .convos-notifications,
-.create-dialog,
-.dialog-container,
-.embed-viewer,
-.user-profile {
+.convos-profile {
   display: block;
   overflow: auto;
   max-height: 100vh; }
-  .connection-editor h5,
+  .convos-connection h5,
+  .convos-create-dialog h5,
+  .convos-dialog-container h5,
+  .convos-embed h5,
   .convos-help h5,
   .convos-notifications h5,
-  .create-dialog h5,
-  .dialog-container h5,
-  .embed-viewer h5,
-  .user-profile h5 {
+  .convos-profile h5 {
     margin-top: 0;
     padding-top: 0.75rem; }
-  .connection-editor input[type=text],
+  .convos-connection input[type=text],
+  .convos-create-dialog input[type=text],
+  .convos-dialog-container input[type=text],
+  .convos-embed input[type=text],
   .convos-help input[type=text],
   .convos-notifications input[type=text],
-  .create-dialog input[type=text],
-  .dialog-container input[type=text],
-  .embed-viewer input[type=text],
-  .user-profile input[type=text] {
+  .convos-profile input[type=text] {
     margin: 0; }
-  .connection-editor .actions,
+  .convos-connection .actions,
+  .convos-create-dialog .actions,
+  .convos-dialog-container .actions,
+  .convos-embed .actions,
   .convos-help .actions,
   .convos-notifications .actions,
-  .create-dialog .actions,
-  .dialog-container .actions,
-  .embed-viewer .actions,
-  .user-profile .actions {
+  .convos-profile .actions {
     overflow: hidden;
     position: absolute;
     top: 0.6rem;
     right: 0.45rem;
     z-index: 10; }
 
-.connection-editor,
+.convos-connection,
+.convos-create-dialog,
+.convos-embed,
 .convos-help,
 .convos-notifications,
-.create-dialog,
-.embed-viewer,
-.user-profile {
+.convos-profile {
   background: #f6f6f6;
   position: relative; }
 
-.connection-editor,
-.user-profile {
+.convos-connection,
+.convos-profile {
   max-width: 500px;
   min-width: 500px; }
 
 .convos-help,
 .convos-notifications,
-.create-dialog {
+.convos-create-dialog {
   max-width: 420px;
   min-width: 420px; }
 
-.embed-viewer {
+.convos-embed {
   max-width: 55%;
   min-width: 55%; }
 
@@ -4780,7 +4780,7 @@ div.autocomplete {
     margin-right: 0; }
     .convos-chat .btn-toggle-menu {
       display: inline; }
-    .convos-chat .dialog-container main {
+    .convos-chat .convos-dialog-container main {
       margin-left: -10px;
       margin-right: -10px;
       padding-left: 10px;
@@ -4788,14 +4788,14 @@ div.autocomplete {
     .convos-chat nav {
       background: #f6f6f6;
       display: none; }
-  .user-input textarea {
+  .convos-input textarea {
     margin-bottom: 0; }
-  .connection-editor,
-  .user-profile,
+  .convos-connection,
+  .convos-create-dialog,
+  .convos-embed,
   .convos-help,
   .convos-notifications,
-  .create-dialog,
-  .embed-viewer {
+  .convos-profile {
     height: 100vh;
     width: 100vw;
     max-width: none;
@@ -4803,94 +4803,94 @@ div.autocomplete {
     position: absolute;
     z-index: 999; } }
 
-.dialog-container {
+.convos-dialog-container {
   padding: 0 0.75rem; }
-  .dialog-container header {
+  .convos-dialog-container header {
     position: relative;
     height: 3.2em;
     flex-shrink: 0;
     overflow: hidden; }
-    .dialog-container header .actions {
+    .convos-dialog-container header .actions {
       top: 1rem;
       right: -4px; }
-  .dialog-container .dialog-message {
+  .convos-dialog-container .convos-message {
     display: block;
     position: relative;
     margin: 8px 0; }
-    .dialog-container .dialog-message.error, .dialog-container .dialog-message.notice {
+    .convos-dialog-container .convos-message.error, .convos-dialog-container .convos-message.notice {
       padding-left: 0.75rem;
       padding-right: 0.75rem;
       border-left: 2px solid #bdbdbd; }
-    .dialog-container .dialog-message.action .message, .dialog-container .dialog-message.action a.title {
+    .convos-dialog-container .convos-message.action .message, .convos-dialog-container .convos-message.action a.title {
       font-style: italic;
       display: inline; }
-    .dialog-container .dialog-message.action .link-embedder {
+    .convos-dialog-container .convos-message.action .link-embedder {
       font-style: normal; }
-    .dialog-container .dialog-message.day-changed {
+    .convos-dialog-container .convos-message.day-changed {
       color: rgba(102, 102, 102, 0.87);
       text-align: center;
       border-bottom: 1px solid #dbdbdb;
       margin-bottom: 1.5rem;
       height: 0.75rem; }
-      .dialog-container .dialog-message.day-changed:hover {
+      .convos-dialog-container .convos-message.day-changed:hover {
         background: transparent; }
-      .dialog-container .dialog-message.day-changed span {
+      .convos-dialog-container .convos-message.day-changed span {
         background: #fff;
         padding: 0 8px; }
-    .dialog-container .dialog-message.error {
+    .convos-dialog-container .convos-message.error {
       border-left: 2px solid #FF1744;
       color: rgba(102, 102, 102, 0.87); }
-      .dialog-container .dialog-message.error a {
+      .convos-dialog-container .convos-message.error a {
         color: #ff7d96; }
-    .dialog-container .dialog-message.highlight .message {
+    .convos-dialog-container .convos-message.highlight .message {
       background-color: #FFEBEE; }
-    .dialog-container .dialog-message.notice {
+    .convos-dialog-container .convos-message.notice {
       border-left: 2px solid #bdbdbd;
       color: rgba(102, 102, 102, 0.87); }
-      .dialog-container .dialog-message.notice a {
+      .convos-dialog-container .convos-message.notice a {
         color: #68c46d; }
-    .dialog-container .dialog-message.same-user {
+    .convos-dialog-container .convos-message.same-user {
       margin-top: -4px; }
-    .dialog-container .dialog-message.same-user a.title, .dialog-container .dialog-message.same-user .secondary-content {
+    .convos-dialog-container .convos-message.same-user a.title, .convos-dialog-container .convos-message.same-user .secondary-content {
       display: none; }
-    .dialog-container .dialog-message .message a {
+    .convos-dialog-container .convos-message .message a {
       color: inherit;
       text-decoration: underline; }
-    .dialog-container .dialog-message .message a:hover {
+    .convos-dialog-container .convos-message .message a:hover {
       text-decoration: none; }
-    .dialog-container .dialog-message .message .material-icons {
+    .convos-dialog-container .convos-message .message .material-icons {
       vertical-align: text-top;
       font-size: 18px;
       margin-left: 4px; }
-    .dialog-container .dialog-message .secondary-content {
+    .convos-dialog-container .convos-message .secondary-content {
       position: absolute;
       top: 2px;
       right: 0; }
-      .dialog-container .dialog-message .secondary-content, .dialog-container .dialog-message .secondary-content a {
+      .convos-dialog-container .convos-message .secondary-content, .convos-dialog-container .convos-message .secondary-content a {
         color: #757575;
         font-size: 0.8rem;
         overflow: hidden;
         display: block; }
-      .dialog-container .dialog-message .secondary-content i {
+      .convos-dialog-container .convos-message .secondary-content i {
         vertical-align: bottom; }
 
-.user-input {
+.convos-input {
   border-top: 1px solid #dbdbdb;
   box-sizing: content-box; }
-  .user-input .actions {
+  .convos-input .actions {
     text-align: right;
     overflow: visible;
     position: relative;
     height: 0;
     top: -34px;
     right: 1px; }
-    .user-input .actions a {
+    .convos-input .actions a {
       display: inline-block;
       margin-right: -4px;
       padding: 4px 6px; }
-    .user-input .actions i {
+    .convos-input .actions i {
       vertical-align: bottom; }
-  .user-input textarea.materialize-textarea {
+  .convos-input textarea.materialize-textarea {
     max-height: 11.5rem;
     margin: 8px 0;
     padding: 0;
@@ -4901,39 +4901,39 @@ nav {
   color: #777; }
   nav .material-icons {
     vertical-align: bottom; }
-  nav .sidebar-dialogs > span, nav .sidebar-dialogs > a {
+  nav .convos-dialogs > span, nav .convos-dialogs > a {
     display: block;
     padding: 1rem 0.75rem 0.5rem; }
-  nav .sidebar-dialogs a {
+  nav .convos-dialogs a {
     border-right: 4px solid transparent;
     min-height: 60px; }
-  nav .sidebar-dialogs a.active {
+  nav .convos-dialogs a.active {
     color: #225725;
     border-color: #388E3C;
     font-weight: bold; }
-  nav .sidebar-dialogs a.frozen {
+  nav .convos-dialogs a.frozen {
     color: #B71C1C; }
-  nav .sidebar-dialogs .on {
+  nav .convos-dialogs .on {
     display: block;
     font-size: 0.9rem;
     color: #777;
     margin-left: 28px;
     margin-bottom: -5px; }
-  nav .sidebar-settings {
+  nav .convos-settings {
     display: flex; }
-    nav .sidebar-settings a {
+    nav .convos-settings a {
       text-align: center;
       padding: 1rem 0 0.5rem 0;
       margin: 0 4px 0.5rem 4px;
       position: relative;
       display: block;
       flex-grow: 1; }
-    nav .sidebar-settings a.active {
+    nav .convos-settings a.active {
       border-color: #388E3C; }
-    nav .sidebar-settings i.active {
+    nav .convos-settings i.active {
       position: relative;
       left: -4px; }
-    nav .sidebar-settings b.n-notifications {
+    nav .convos-settings b.n-notifications {
       position: absolute;
       bottom: 0px;
       right: 4px; }

@@ -3,14 +3,14 @@ nav {
 
   .material-icons { vertical-align: bottom; }
 
-  .sidebar-dialogs {
+  .convos-dialogs {
     > span, > a {
       display: block;
       padding: $element-bottom-margin $gutter-width / 2 $element-top-margin;
     }
   }
 
-  .sidebar-dialogs {
+  .convos-dialogs {
     a {
       border-right: 4px solid transparent;
       min-height: 60px;
@@ -32,7 +32,7 @@ nav {
     }
   }
 
-  .sidebar-settings {
+  .convos-settings {
     display: flex;
 
     a {

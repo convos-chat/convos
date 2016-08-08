@@ -1,11 +1,13 @@
-<template class="vue-dialog-message">
-  <span v-if="msg.type == 'action'">✧</span>
-  <a href="#insert:{{msg.from}}" class="title" @click.prevent="insertIntoInput(msg.from)">{{msg.from}}</a>
-  <div class="message" v-if="msg.type != 'error'"><span>{{{message() | markdown}}}</span></div>
-  <div class="error" v-if="msg.type == 'error'">{{msg.message}}</div>
-  <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()" v-if="msg.ts">{{msg.ts | timestring}}</span>
+<template>
+  <div class="convos-message">
+    <span v-if="msg.type == 'action'">✧</span>
+    <a href="#insert:{{msg.from}}" class="title" @click.prevent="insertIntoInput(msg.from)">{{msg.from}}</a>
+    <div class="message" v-if="msg.type != 'error'"><span>{{{message() | markdown}}}</span></div>
+    <div class="error" v-if="msg.type == 'error'">{{msg.message}}</div>
+    <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()" v-if="msg.ts">{{msg.ts | timestring}}</span>
+  </div>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props:   ["dialog", "msg", "user"],
   methods: {

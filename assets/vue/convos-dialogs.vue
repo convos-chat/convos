@@ -1,4 +1,4 @@
-<template class="vue-sidebar-dialogs">
+<template>
   <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in user.dialogs">
     <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
     <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
@@ -8,15 +8,15 @@
     <i class="material-icons">add</i> Join dialog...
   </a>
   <div class="hr"><hr></div>
-  <a href="#connections/{{c.protocol}}-{{c.name}}" :class="connectionClass(c)" v-for="c in user.connections">
+  <a href="#connection/{{c.protocol}}-{{c.name}}" :class="connectionClass(c)" v-for="c in user.connections">
     <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
     <span class="on">{{c.humanState()}}</span>
   </a>
-  <a href="#connections">
+  <a href="#connection">
     <i class="material-icons">add</i> Add connection...
   </a>
 </template>
-<script type="vue/component">
+<script>
 module.exports = {
   props:   ["user"],
   methods: {
