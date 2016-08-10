@@ -6,13 +6,13 @@
       <a href="#emoji" data-hint="Insert emoji"><i class="material-icons">insert_emoticon</i></a>
       <a href="#send" @click="send" data-hint="Send message"><i class="material-icons">send</i></a>
     </div -->
+    <i @click="send" class="material-icons waves-effect waves-light">send</i>
     <textarea v-model="message"
       v-el:input
       class="materialize-textarea"
       :placeholder="placeholder"
       @keyup.enter.prevent="send"
-      @keydown="autocomplete"
-    ></textarea>
+      @keydown="autocomplete"></textarea>
   </div>
 </template>
 <script>
@@ -43,7 +43,7 @@ module.exports = {
         if (state == "connected") {
           return "What do you want to say to " + this.dialog.name + "?";
         } else {
-          return 'State is "' + state + '".';
+          return 'Cannot send any message, since ' + state + '.';
         }
       } catch ( err ) {
         return "Please read the instructions on screen.";
@@ -115,6 +115,7 @@ module.exports = {
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
       var c = this.dialog.connection || this.user.connections[0];
       this.message = "";
+      this.$els.input.focus();
       if ("localCmd" + m != l && this[l]) return this[l](e);
       if (c && m.length) c.send(m, this.dialog.connection ? this.dialog : "");
     }

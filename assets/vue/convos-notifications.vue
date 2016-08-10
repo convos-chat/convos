@@ -1,16 +1,12 @@
 <template>
-  <div class="convos-notifications">
-    <div class="row">
-      <div class="col s12">
-        <div class="actions">
-          <a href="#chat"><i class="material-icons">close</i></a>
-        </div>
-        <h5>Notifications</h5>
-        <p v-if="!user.notifications.length">No notifications.</p>
-        <div @click="gotoMessage(msg)" class="notification" v-for="msg in user.notifications">
-          <span class="title">{{msg.from}} in {{msg.dialog_id}}</span>
-          <div class="message"><span>{{msg.message}}</span></div>
+  <div class="convos-notifications is-sidebar">
+    <header><convos-menu :user="user"></convos-menu></header>
+    <div class="content">
+      <div class="row notification" @click="gotoMessage(msg)" v-for="msg in user.notifications">
+        <div class="col s12">
           <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
+          <h5>{{msg.from}} in {{msg.dialog_id}}</h5>
+          <div class="message">{{msg.message}}</div>
         </div>
       </div>
     </div>

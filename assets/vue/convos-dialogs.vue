@@ -1,20 +1,31 @@
 <template>
-  <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in user.dialogs">
-    <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
-    <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
-    <span class="on" v-else>convos-local</span>
-  </a>
-  <a href="#create-dialog">
-    <i class="material-icons">add</i> Join dialog...
-  </a>
-  <div class="hr"><hr></div>
-  <a href="#connection/{{c.protocol}}-{{c.name}}" :class="connectionClass(c)" v-for="c in user.connections">
-    <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
-    <span class="on">{{c.humanState()}}</span>
-  </a>
-  <a href="#connection">
-    <i class="material-icons">add</i> Add connection...
-  </a>
+  <div class="convos-dialogs">
+    <header>
+      <div class="input-field">
+        <input id="search" type="search" autocomplete="off" placeholder="Search...">
+        <label for="search"><i class="material-icons">search</i></label>
+        <!-- i class="material-icons">close</i -->
+      </div>
+    </header>
+    <div class="content">
+      <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in user.dialogs">
+        <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
+        <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
+        <span class="on" v-else>convos-local</span>
+      </a>
+      <a href="#create-dialog">
+        <i class="material-icons">add</i> Join dialog...
+      </a>
+      <div class="hr"><hr></div>
+      <a href="#connection/{{c.protocol}}-{{c.name}}" :class="connectionClass(c)" v-for="c in user.connections">
+        <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
+        <span class="on">{{c.humanState()}}</span>
+      </a>
+      <a href="#connection">
+        <i class="material-icons">add</i> Add connection...
+      </a>
+    </div>
+  </div>
 </template>
 <script>
 module.exports = {

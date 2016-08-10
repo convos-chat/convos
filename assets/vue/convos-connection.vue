@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-connection">
+  <div class="convos-connection is-sidebar">
     <div class="row">
       <div class="col s12">
         <div class="actions">

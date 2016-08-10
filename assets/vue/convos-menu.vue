@@ -12,15 +12,19 @@
   <a href="#logout" @click.prevent="logout" class="btn-logout" data-hint="Logout">
     <i class="material-icons">power_settings_new</i>
   </a>
-  <a href="#menu" @click.prevent="toggleMenu" data-hint="Hide menu" class="btn-toggle-menu">
-    <i class="material-icons">close</i>
-  </a>
 </template>
 <script>
 module.exports = {
   props:    ["user"],
   data:  function() {
     return {notifications: []};
+  },
+  events: {
+    locationchange: function(hash) {
+      var hash = hash[0] || 'chat';
+      $("header a").removeClass("active").filter('[href$="' + hash + '"]').addClass("active");
+      return true;
+    }
   },
   methods:  {
     activeClass: function(section) {
@@ -33,9 +37,6 @@ module.exports = {
         if (err) return console.log(err); // TODO: Display error message
         self.$dispatch("logout");
       });
-    },
-    toggleMenu: function() {
-      $("nav").hide();
     }
   }
 };

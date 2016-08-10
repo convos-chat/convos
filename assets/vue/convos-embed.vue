@@ -1,8 +1,6 @@
 <template>
-  <div class="convos-embed">
-    <div class="actions">
-      <a href="#chat"><i class="material-icons">close</i></a>
-    </div>
+  <div class="convos-embed is-sidebar">
+    <header><convos-menu :user="user"></convos-menu></header>
     <div class="embed-content">{{{content()}}}</div>
   </div>
 </template>

@@ -1,0 +1,36 @@
+.convos-dialog-container,
+.convos-dialogs,
+.is-sidebar {
+  header {
+    background-color: $primary-color;
+    height: $navbar-height-mobile;
+    flex-shrink: 0;
+
+    h2 { margin: 0; }
+    h2, a, i, [class^="mdi-"], [class*="mdi-"], i.material-icons {
+      color: $navbar-font-color;
+      display: inline-block;
+      font-size: 2rem;
+      height: $navbar-height-mobile;
+      line-height: $navbar-height-mobile;
+    }
+
+    a { padding-left: 14px; padding-right: 14px; }
+    a:hover { background: lighten($primary-color, 5%); }
+    a.active { background: darken($primary-color, 5%); }
+
+    @media #{$medium-and-up} {
+      height: $navbar-height;
+
+      h2, a, i, [class^="mdi-"], [class*="mdi-"], i.material-icons {
+        height: $navbar-height;
+        line-height: $navbar-height;
+      }
+    }
+
+    ::-webkit-input-placeholder { color: lighten($primary-color, 20%); }
+    :-moz-placeholder { color: lighten($primary-color, 20%); }
+    ::-moz-placeholder { color: lighten($primary-color, 20%); }
+    :-ms-input-placeholder { color: lighten($primary-color, 20%); }
+  }
+}

@@ -1,17 +1,12 @@
 <template>
-  <div class="covnos-dialog-container">
+  <div class="convos-dialog-container">
     <header>
-      <div class="actions" v-show="dialog.connection">
-        <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
-        <a href="#info" @click.prevent="getInfo" data-hint="Get information"><i class="material-icons">info_outline</i></a>
-        <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
-        <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
-      </div>
-      <div class="actions" v-show="!dialog.connection">
-        <a href="#chat"><i class="material-icons">star_rate</i></a>
-        <a href="#menu" @click.prevent="toggleMenu" data-hint="Show menu" class="btn-toggle-menu"><i class="material-icons">menu</i></a>
-      </div>
-      <h5 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h5>
+      <h2 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
+      <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
+      <a v-if="dialog.connection" href="#info" @click.prevent="getInfo" data-hint="Get information"><i class="material-icons">info_outline</i></a>
+      <a v-if="dialog.connection" href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
+      <a v-if="!dialog.connection" href="#chat"><i class="material-icons">star_rate</i></a>
+      <convos-menu :user="user" v-if="!sidebar"></convos-menu>
     </header>
     <main>
       <component
@@ -26,7 +21,7 @@
 </template>
 <script>
 module.exports = {
-  props: ["dialog", "user"],
+  props: ["dialog", "sidebar", "user"],
   data:  function() {
     return {
       atBottom:          true,

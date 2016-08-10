@@ -1,10 +1,7 @@
 <template>
-  <div class="convos-create-dialog">
+  <div class="convos-create-dialog is-sidebar">
     <div class="row">
       <div class="col s12">
-        <div class="actions">
-          <a href="#chat"><i class="material-icons">close</i></a>
-        </div>
         <h5>Create dialog</h5>
         <p v-if="!user.connections.length">
           You need to <a href="#connections">create a connection</a> before

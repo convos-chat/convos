@@ -40,9 +40,10 @@
 // @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/date_picker/default.time.scss";
 
 @import "global";
-@import "autocomplete";
 @import "login";
+
+@import "autocomplete";
 @import "chat";
-@import "dialog";
-@import "nav";
+@import "header";
 @import "link-embedder";
+@import "sidebar";

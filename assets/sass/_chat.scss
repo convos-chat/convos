@@ -1,161 +1,151 @@
 .convos-chat {
   display: flex;
-  flex-direction: row-reverse;
   height: 100vh;
-  margin-right: $sidebar-width - 1;
   overflow: hidden;
+}
 
-  .convos-dialog-container {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-    overflow: auto;
-  }
+.convos-dialog-container {
+  overflow: auto;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
 
-  .convos-dialog-container { max-width: $readable-width + 40; } // 40 is just a wild guess
-  .convos-dialog-container main {
-    padding-bottom: $gutter-width;
-    overflow: auto;
-    flex-grow: 1;
-  }
+  header {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-align: right;
 
-  nav {
-    width: $sidebar-width;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 900;
-
-    .sidebar-dialogs {
-      flex-grow: 1;
-      overflow: auto;
+    h2 {
+      float: left;
+      padding-left: $gutter-width / 2;
     }
   }
 
-  .btn-toggle-menu { display: none; }
-}
-
-.convos-connection,
-.convos-create-dialog,
-.convos-dialog-container,
-.convos-embed,
-.convos-help,
-.convos-notifications,
-.convos-profile {
-  display: block;
-  overflow: auto;
-  max-height: 100vh;
-
-  h5 {
-    margin-top: 0;
-    padding-top: $gutter-width / 2;
+  main {
+    padding: $gutter-width $gutter-width / 2;
+    overflow: auto;
+    flex-grow: 1;
   }
 
-  input[type=text] {
+  .convos-message {
+    display: block;
+    position: relative;
+    margin: $dialog-spacing * 2 0;
+
+    &.error, &.notice {
+      padding-left: $gutter-width / 2;
+      padding-right: $gutter-width / 2;
+      border-left: 2px solid color('grey', 'lighten-1');
+    }
+    &.action {
+      .message, a.title {
+        font-style: italic;
+        display: inline;
+      }
+      .link-embedder {
+        font-style: normal;
+      }
+    }
+    &.day-changed {
+      color: lighten($off-black, 40%);
+      text-align: center;
+      border-bottom: 1px solid lighten($input-border-color, 24%);
+      margin-bottom: $gutter-width;
+      height: $gutter-width / 2;
+      &:hover { background: transparent; }
+      span { background: #fff; padding: 0 8px; }
+    }
+    &.error {
+      border-left: 2px solid color('red', 'accent-3');
+      color: lighten($off-black, 40%);
+      a { color: lighten(color('red', 'accent-3'), 20%); }
+    }
+    &.highlight .message {
+      background-color: color('red', 'lighten-5');
+    }
+    &.notice {
+      border-left: 2px solid color('grey', 'lighten-1');
+      color: lighten($off-black, 40%);
+      a { color: lighten($link-color, 20%); }
+    }
+    &.same-user {
+      margin-top: -$dialog-spacing;
+    }
+    &.same-user {
+      a.title, .secondary-content { display: none; }
+    }
+
+    .message {
+      a { color: inherit; text-decoration: underline; }
+      a:hover { text-decoration: none; }
+
+      .material-icons {
+        vertical-align: text-top;
+        font-size: 18px;
+        margin-left: 4px;
+      }
+    }
+
+    .secondary-content {
+      position: absolute;
+      top: 2px;
+      right: 0;
+      &, a {
+        color: color('grey', 'darken-1');
+        font-size: 0.8rem;
+        overflow: hidden;
+        display: block;
+      }
+      i {
+        vertical-align: bottom;
+      }
+    }
+  }
+}
+
+.convos-input {
+  background-color: $body-bg;
+  border-top: 1px solid lighten($input-border-color, 20%);
+  padding: 0.5rem $gutter-width / 2 0 $gutter-width / 2;
+  box-sizing: content-box; // border-top makes an extra scrollbar appear without this
+  position: relative;
+
+  i {
+    font-size: 2rem;
+    width: 2rem;
+    position: absolute;
+    right: $gutter-width / 2;
+    transition: color .2s;
+    cursor: pointer;
+    &, &.active { color: $input-focus-color; }
+  }
+
+  textarea.materialize-textarea {
+    padding: 0;
     margin: 0;
+    box-shadow: none;
+    width: calc(100% - 2rem);
+    height: 2rem;
+    min-height: 2rem;
+    max-height: 9.5rem;
+    overflow: auto;
+
+    &, &:focus { border: 0; }
   }
 
   .actions {
-    overflow: hidden;
-    position: absolute;
-    top: $gutter-width * 0.4;
-    right: $gutter-width * 0.3;
-    z-index: 10;
-  }
-}
-
-.convos-connection,
-.convos-create-dialog,
-.convos-embed,
-.convos-help,
-.convos-notifications,
-.convos-profile {
-  background: $settings-active-color;
-  position: relative;
-}
-
-.convos-connection,
-.convos-profile { max-width: 500px; min-width: 500px; }
-
-.convos-help,
-.convos-notifications,
-.convos-create-dialog { max-width: 420px; min-width: 420px; }
-
-.convos-embed { max-width: 55%; min-width: 55%; }
-
-.convos-notifications .notification {
-  position: relative;
-  margin: $dialog-spacing * 2 0;
-  cursor: pointer;
-  margin-bottom: 10px;
-
-  .title {
-    color: $link-color;
-  }
-
-  .secondary-content {
-    position: absolute;
-    top: 2px;
-    right: 0;
-    &, a {
-      color: color('grey', 'darken-1');
-      font-size: 0.8rem;
-      overflow: hidden;
-      display: block;
+    text-align: right;
+    overflow: visible;
+    position: relative;
+    height: 0;
+    top: -34px;
+    right: 1px;
+    a {
+      display: inline-block;
+      margin-right: -$dialog-spacing;
+      padding: $dialog-spacing 6px;
     }
-    i {
-      vertical-align: bottom;
-    }
-  }
-}
-
-.convos-help {
-  dl dd {
-    margin: 0 0 $gutter-width * 0.3 $gutter-width;
-  }
-  ul {
-    list-style-type: square;
-    padding-left: $gutter-width;
-    li { list-style-type: inherit; }
-  }
-}
-
-@media #{$medium-and-down} {
-  .convos-chat {
-    display: block;
-    margin-right: 0;
-
-    .btn-toggle-menu { display: inline; }
-
-    .convos-dialog-container main {
-      margin-left: -10px;
-      margin-right: -10px;
-      padding-left: 10px;
-      padding-right: 10px;
-    }
-
-    nav {
-      background: $settings-active-color;
-      display: none;
-    }
-  }
-
-  .convos-input textarea { margin-bottom: 0; }
-
-  .convos-connection,
-  .convos-create-dialog,
-  .convos-embed,
-  .convos-help,
-  .convos-notifications,
-  .convos-profile {
-    height: 100vh;
-    width: 100vw;
-    max-width: none;
-    min-width: initial;
-    position: absolute;
-    z-index: 999;
+    i { vertical-align: bottom; }
   }
 }
