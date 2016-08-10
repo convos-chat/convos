@@ -12,9 +12,11 @@ module.exports = {
     return {
       sidebar: "",
       sidebars: {
-        help: true,
-        notifications: true,
-        profile: true
+        'create-dialog': true,
+        'connection': true,
+        'help': true,
+        'notifications': true,
+        'profile': true
       }
     };
   },

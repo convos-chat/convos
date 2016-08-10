@@ -1,61 +1,60 @@
 <template>
   <div class="convos-connection is-sidebar">
-    <div class="row">
-      <div class="col s12">
-        <div class="actions">
-          <a href="#chat"><i class="material-icons">close</i></a>
+    <header><convos-menu :user="user"></convos-menu></header>
+    <div class="content">
+      <div class="row">
+        <div class="col s12">
+          <h5>{{connection ? 'Edit "' + connection.name + '"' : "Create connection"}}</h5>
+          <p v-if="!user.connections.length">
+            You need to add a connection before you can have a dialog.
+            <span v-if="defaultServer">
+              We have filled in an example server, but you can connect to any server
+              you like. "Username" and "password" are optional in most cases.
+            </span>
+            <span v-else>
+              You need to fill in "server", but "username" and "password" are
+              optional in most cases.
+            </span>
+          </p>
         </div>
-        <h5>{{connection ? 'Edit "' + connection.name + '"' : "Create connection"}}</h5>
-        <p v-if="!user.connections.length">
-          You need to add a connection before you can have a dialog.
-          <span v-if="defaultServer">
-            We have filled in an example server, but you can connect to any server
-            you like. "Username" and "password" are optional in most cases.
-          </span>
-          <span v-else>
-            You need to fill in "server", but "username" and "password" are
-            optional in most cases.
-          </span>
-        </p>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input name="server" v-model="server" id="form_server" type="text" class="validate">
+          <label for="form_server">Server</label>
+        </div>
+      </div>
+      <div class="row" v-if="showNickField">
+        <div class="input-field col s12">
+          <input name="nick" v-model="nick" id="form_nick" type="text" class="validate">
+          <label for="form_nick">Nick</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <input name="username" v-model="username" id="form_username" type="text" class="validate">
+          <label for="form_username">Username</label>
+        </div>
+        <div class="input-field col s6">
+          <input name="password" v-model="password" id="form_password" type="password" autocomplete="off" class="validate">
+          <label for="form_password">Password</label>
+        </div>
+      </div>
+      <div class="row" v-if="errors.length">
+        <div class="input-field col s12"><div class="alert">{{errors[0].message}}</div></div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <button @click="saveConnection" class="btn waves-effect waves-light" type="submit">
+            {{connection && !deleted ? 'Update' : 'Create'}} <i class="material-icons right">save</i>
+          </button>
+          <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">
+            <i class="material-icons">delete</i>
+          </a>
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div class="input-field col s12">
-        <input name="server" v-model="server" id="form_server" type="text" class="validate">
-        <label for="form_server">Server</label>
-      </div>
-    </div>
-    <div class="row" v-if="showNickField">
-      <div class="input-field col s12">
-        <input name="nick" v-model="nick" id="form_nick" type="text" class="validate">
-        <label for="form_nick">Nick</label>
-      </div>
-    </div>
-    <div class="row">
-      <div class="input-field col s6">
-        <input name="username" v-model="username" id="form_username" type="text" class="validate">
-        <label for="form_username">Username</label>
-      </div>
-      <div class="input-field col s6">
-        <input name="password" v-model="password" id="form_password" type="password" autocomplete="off" class="validate">
-        <label for="form_password">Password</label>
-      </div>
-    </div>
-    <div class="row" v-if="errors.length">
-      <div class="input-field col s12"><div class="alert">{{errors[0].message}}</div></div>
-    </div>
-    <div class="row">
-      <div class="input-field col s12">
-        <button @click="saveConnection" class="btn waves-effect waves-light" type="submit">
-          {{connection && !deleted ? 'Update' : 'Create'}} <i class="material-icons right">save</i>
-        </button>
-        <a href="#delete" @click.prevent="removeConnection" class="btn-delete right" v-if="connection">
-          <i class="material-icons">delete</i>
-        </a>
-        <span class="grey-text text-darken-2">State: {{connection ? connection.state : 'new'}}.</span>
-      </div>
-    </div>
-  </form>
+  </div>
 </template>
 <script>
 module.exports = {
@@ -81,6 +80,7 @@ module.exports = {
   events: {
     locationchange: function(hash) {
       this.connection = this.user.getConnection(hash[1]);
+      this.errors = [];
       this.updateForm(this.connection);
       if (!this.connection && hash[0] == "connections") this.replaceLocation("connections");
     }
