@@ -12,7 +12,7 @@ module.exports = {
   props:   ["dialog", "msg", "user"],
   methods: {
     insertIntoInput: function(str) {
-      this.$dispatch("insertIntoInput", str);
+      this.dialog.emit("insertIntoInput", str);
     },
     message: function() {
       var self = this;

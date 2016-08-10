@@ -15,31 +15,31 @@
           <h5>Available commands</h5>
           <p>Commands are not yet supported.</p>
           <dl>
-            <dt><a href="#autocomplete:/help">/help</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/help">/help</a></dt>
             <dd>Show this help dialog.</dd>
-            <dt><a href="#autocomplete:/close">/close [&lt;nick&gt;]</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/close">/close [&lt;nick&gt;]</a></dt>
             <dd>Close conversation with nick, defaults to current active.</dd>
-            <dt><a href="#autocomplete:/join">/join &lt;#channel&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/join">/join &lt;#channel&gt;</a></dt>
             <dd>Join channel and open up a chat window.</dd>
-            <dt><a href="#autocomplete:/kick">/kick &lt;nick&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/kick">/kick &lt;nick&gt;</a></dt>
             <dd>Kick a user from the current channel.</dd>
-            <dt><a href="#autocomplete:/me">/me &lt;message&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/me">/me &lt;message&gt;</a></dt>
             <dd>Send message as an action.</dd>
-            <dt><a href="#autocomplete:/msg">/msg &lt;nick&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/msg">/msg &lt;nick&gt;</a></dt>
             <dd>Send a direct message to nick.</dd>
-            <dt><a href="#autocomplete:/nick">/nick &lt;nick&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/nick">/nick &lt;nick&gt;</a></dt>
             <dd>Change your wanted nick.</dd>
-            <dt><a href="#autocomplete:/part">/part &lt;#channel&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/part">/part &lt;#channel&gt;</a></dt>
             <dd>Leave channel, and close window.</dd>
-            <dt><a href="#autocomplete:/query">/query &lt;nick&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/query">/query &lt;nick&gt;</a></dt>
             <dd>Open up a new chat window with nick.</dd>
-            <dt><a href="#autocomplete:/reconnect">/reconnect</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/reconnect">/reconnect</a></dt>
             <dd>Restart the current connection.</dd>
-            <dt><a href="#autocomplete:/say">/say &lt;message&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/say">/say &lt;message&gt;</a></dt>
             <dd>Used when you want to send a message starting with "/".</dd>
-            <dt><a href="#autocomplete:/topic">/topic &lt;#channel&gt; [&lt;new topic&gt;]</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/topic">/topic &lt;#channel&gt; [&lt;new topic&gt;]</a></dt>
             <dd>Show current topic, or set a new one.</dd>
-            <dt><a href="#autocomplete:/whois">/whois &lt;nick&gt;</a></dt>
+            <dt><a @click.prevent="insert" href="#insert:/whois">/whois &lt;nick&gt;</a></dt>
             <dd>Show information about a user.</dd>
           </dl>
           <h5>Resources</h5>
@@ -58,5 +58,14 @@
   </div>
 </template>
 <script>
-module.exports = {};
+module.exports = {
+  props: ["user"],
+  methods: {
+    insert: function(e) {
+      var dialog = this.user.getActiveDialog();
+      var str = e.target.href.replace(/.*insert:/, '');
+      if (dialog) dialog.emit("insertIntoInput", str);
+    }
+  }
+};
 </script>

@@ -121,9 +121,14 @@ module.exports = {
     }
   },
   ready: function() {
-    this.$nextTick(function() {
-      $("textarea", this.$el).focus();
+    var self = this;
+    this.dialog.on("insertIntoInput", function(str) {
+      if (str.indexOf('/') == 0) return self.$els.input.value = str; // command
+      var val = self.$els.input.value.replace(/\s+$/, '');
+      if (val.length) val += " "
+      self.$els.input.value = val + str + " ";
     });
+    this.$nextTick(function() { $("textarea", this.$el).focus(); });
   }
 };
 </script>

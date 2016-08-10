@@ -4555,6 +4555,12 @@ strong {
 p {
   margin: 1rem 0; }
 
+dl dt {
+  margin: 0; }
+
+dl dd {
+  margin: 0 0 0.5rem 1rem; }
+
 dl.horizontal {
   margin: 0; }
   dl.horizontal dt {

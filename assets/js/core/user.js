@@ -15,16 +15,16 @@
 
   var proto = Convos.User.prototype;
 
+  proto.getActiveDialog = function(id) {
+    return this.dialogs.filter(function(d) { return d.active() })[0];
+  };
+
   proto.getConnection = function(id) {
-    return this.connections.filter(function(c) {
-      return c.id == id;
-    })[0];
+    return this.connections.filter(function(c) { return c.id == id; })[0];
   };
 
   proto.getDialog = function(id) {
-    return this.dialogs.filter(function(d) {
-      return d.id == id;
-    })[0];
+    return this.dialogs.filter(function(d) { return d.id == id; })[0];
   };
 
   proto.getNotifications = function(cb) {
