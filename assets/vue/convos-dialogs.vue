@@ -2,13 +2,13 @@
   <div class="convos-dialogs">
     <header>
       <div class="input-field">
-        <input id="search" type="search" autocomplete="off" placeholder="Search...">
-        <label for="search"><i class="material-icons">search</i></label>
+        <input v-model="search" @keydown.enter.prevent="goto" id="search_field" type="search" autocomplete="off" placeholder="Search...">
+        <label for="search_field"><i class="material-icons">search</i></label>
         <!-- i class="material-icons">close</i -->
       </div>
     </header>
     <div class="content">
-      <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in user.dialogs">
+      <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in dialogs()">
         <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
         <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
         <span class="on" v-else>convos-local</span>
@@ -30,6 +30,9 @@
 <script>
 module.exports = {
   props:   ["user"],
+  data: function() {
+    return {first: null, search: ""};
+  },
   methods: {
     connectionClass: function(c) {
       return {
@@ -43,10 +46,24 @@ module.exports = {
         frozen: d.frozen
       };
     },
-    setCurrentDialog: function(dialog) {
-      this.user.dialogs.forEach(function(d) {
-        d.active(dialog == d ? true : false);
+    dialogs: function() {
+      var self = this;
+      var dialogs = this.user.dialogs.filter(function(d) {
+        return self.search ? d.name.match(self.search) : true;
+      }).sort(function(a, b) {
+        return a.name > b.name
       });
+      this.first = dialogs[0];
+      return dialogs;
+    },
+    goto: function(e) {
+      if (e.shiftKey) return this.user.getActiveDialog().emit("focusInput");
+      if (this.first && this.search) this.setCurrentDialog(this.first);
+    },
+    setCurrentDialog: function(dialog) {
+      this.search = "";
+      this.user.dialogs.forEach(function(d) { d.active(dialog == d ? true : false); });
+      this.user.getActiveDialog().emit("focusInput");
     }
   }
 };

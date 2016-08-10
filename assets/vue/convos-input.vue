@@ -11,7 +11,7 @@
       v-el:input
       class="materialize-textarea"
       :placeholder="placeholder"
-      @keyup.enter.prevent="send"
+      @keydown.enter.prevent="send"
       @keydown="autocomplete"></textarea>
   </div>
 </template>
@@ -111,6 +111,7 @@ module.exports = {
       }.bind(this));
     },
     send: function(e) {
+      if (e.shiftKey) return setTimeout(function() { $("#search_field").focus(); }, 100);
       var m = this.message;
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
       var c = this.dialog.connection || this.user.connections[0];
@@ -122,6 +123,9 @@ module.exports = {
   },
   ready: function() {
     var self = this;
+    this.dialog.on("focusInput", function() {
+      self.$nextTick(function() { this.$els.input.focus(); });
+    });
     this.dialog.on("insertIntoInput", function(str) {
       if (str.indexOf('/') == 0) return self.$els.input.value = str; // command
       var val = self.$els.input.value.replace(/\s+$/, '');
