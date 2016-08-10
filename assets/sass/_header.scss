@@ -19,6 +19,11 @@
     a:hover { background: lighten($primary-color, 5%); }
     a.active { background: darken($primary-color, 5%); }
 
+    @media #{$medium-and-down} {
+      a { display: none; }
+      a.notifications { display: inline-block; }
+    }
+
     @media #{$medium-and-up} {
       height: $navbar-height;
 
@@ -32,5 +37,11 @@
     :-moz-placeholder { color: lighten($primary-color, 20%); }
     ::-moz-placeholder { color: lighten($primary-color, 20%); }
     :-ms-input-placeholder { color: lighten($primary-color, 20%); }
+  }
+}
+
+.is-sidebar {
+  header {
+    text-align: right;
   }
 }

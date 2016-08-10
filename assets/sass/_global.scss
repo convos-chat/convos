@@ -109,4 +109,8 @@ div.alert {
   pointer-events: none;
 
   &.active { opacity: 0.95; }
+
+  @media #{$medium-and-down} {
+    display: none !important;
+  }
 }

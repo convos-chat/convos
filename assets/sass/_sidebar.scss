@@ -11,6 +11,10 @@
   width: $dialogs-width;
   flex-shrink: 0;
 
+  @media #{$medium-and-down} {
+    display: none;
+  }
+
   header {
     .input-field {
       height: 100%;
@@ -75,17 +79,21 @@
   @media #{$medium-and-up} {
     width: $sidebar-width * 1.2;
   }
+}
 
-  header {
-    i.active { // notifications
-      position: relative;
-      left: -4px;
-    }
-    b.n-notifications {
-      position: absolute;
-      bottom: 0px;
-      right: 4px;
-    }
+header a.notifications {
+  position: relative;
+
+  i.active { // notifications
+    position: relative;
+  }
+  b.n-notifications {
+    color: darken($navbar-font-color, 10%);
+    font-size: 1rem;
+    line-height: 1rem;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
   }
 }
 
@@ -106,5 +114,16 @@
       line-height: 110%;
       margin: ($h6-fontsize / 2) 0 ($h6-fontsize / 2.5) 0;
     }
+  }
+}
+
+@media #{$medium-and-down} {
+  .convos-dialogs,
+  .is-sidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 900;
   }
 }
