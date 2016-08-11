@@ -15,6 +15,9 @@
 < js/materialbox.js
 < js/websocket.js
 < js/swagger2-client.js
+< js/vue/mixin-global.js
+< js/vue/mixin-materialize.js
+< js/vue/mixin-message.js
 < js/vue/filter-markdown.js
 < js/vue/filter-timestring.js
 < js/vue/mixin-materialize.js
@@ -51,8 +54,12 @@
 < vue/convos-notifications.vue
 < vue/convos-profile.vue
 
-< vue/convos-message.vue
-< vue/convos-dialog-info.vue
+< vue/convos-message-action.vue
+< vue/convos-message-day-changed.vue
+< vue/convos-message-error.vue
+< vue/convos-message-info.vue
+< vue/convos-message-notice.vue
+< vue/convos-message-private.vue
 < vue/convos-dialog-container.vue
 < vue/convos-chat.vue
 < vue/convos-input.vue

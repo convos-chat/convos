@@ -35,30 +35,15 @@
     if (typeof msg == "string") msg = {message: msg};
     if (!method) method = "push";
     var prev = method == "unshift" ? this.messages[0] : this.prevMessage;
-    msg.classNames = [msg.type];
 
-    if (!msg.from) {
-      msg.from = "convosbot";
-    }
-    if (!msg.ts) {
-      msg.ts = new Date();
-    }
-    if (typeof msg.ts == "string") {
-      msg.ts = new Date(msg.ts);
-    }
-    if (msg.highlight) {
-      msg.classNames.push("highlight");
-      this.connection.user.notifications.unshift(msg);
-    }
-    if (!prev) {
-      prev = {from: msg.from, ts: msg.ts};
-    }
+    if (!msg.from) msg.from = "convosbot";
+    if (!msg.type) msg.type = "notice";
+    if (!msg.ts) msg.ts = new Date();
+    if (typeof msg.ts == "string") msg.ts = new Date(msg.ts);
+    if (msg.highlight) this.connection.user.notifications.unshift(msg);
+    if (!prev) prev = {from: "", ts: msg.ts};
     if (prev && prev.ts.getDate() != msg.ts.getDate()) {
-      this.messages[method]({
-        classNames: ["day-changed"],
-        message:    "Day changed",
-        prev:       prev
-      });
+      this.messages[method]({type: "day-changed", prev: prev});
     }
 
     if (method == "unshift") {

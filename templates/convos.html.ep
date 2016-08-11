@@ -23,7 +23,8 @@
         apiUrl:   "<%= $c->url_for('convos_api_specification') %>",
         wsUrl:    "<%= $c->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
         mode:     "<%= app->mode %>",
-        settings: <%== Mojo::JSON::encode_json($settings) %>
+        settings: <%== Mojo::JSON::encode_json($settings) %>,
+        mixin:    {} // Vue.js mixins
       };
     % end
     %= asset 'convos.js';

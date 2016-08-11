@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-dialog-info">
+  <div class="convos-dialog-info convos-message notice">
     <a href="#chat" class="title">{{dialog.name}}</a>
     <div class="message">
       <span>
@@ -30,6 +30,7 @@ module.exports = {
       if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
       return 0;
     });
+
     return {
       nParticipants: String.prototype.numberAsString.call(participants.length),
       participants: participants
@@ -39,9 +40,6 @@ module.exports = {
     whois: function(p) {
       this.dialog.connection.send("/whois " + p.name);
     }
-  },
-  ready: function() {
-    $(this.$el).addClass("convos-message notice");
   }
 };
 </script>

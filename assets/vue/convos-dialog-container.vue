@@ -10,10 +10,11 @@
     </header>
     <main>
       <component
-        :is="componentName(msg)"
+        :is="'convos-message-' + msg.type"
         :dialog="dialog"
         :msg="msg"
         :user="user"
+        v-if="msg.type"
         v-for="msg in dialog.messages"></component>
     </main>
     <convos-input :dialog="dialog" :user="user"></convos-input>
@@ -29,45 +30,14 @@ module.exports = {
       scrollElement:     null
     };
   },
-  events: {
-    loadOffScreen: function(html, id) {
-      if (html.match(/^<a\s/)) return;
-      var self   = this;
-      var $html  = $(html);
-      var $paste = $html.filter('.text-paste, .text-gist-github');
-      var $a     = $('#' + id);
-
-      $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
-      $a.parent().append($html).find(".materialboxed").materialbox();
-
-      $html.find("img, iframe").each(function() {
-        $(this).css("height", "1px").load(function() {
-          if (self.atBottom) self.scrollToBottom(true);
-          $(this).css("height", "auto");
-        });
-      });
-
-      if ($paste.length) {
-        var $view = $('<a href="#view" data-hint="View"><i class="material-icons">open_in_browser</i></a>');
-        $paste.hide();
-        $a.after($view.click(function(e) {
-          e.preventDefault();
-          self.$root.embedViewerElement = $paste[0];
-          location.hash = "embed-viewer";
-        }));
-        self.materializeComponent();
-      }
-    }
-  },
   methods: {
     closeDialog: function() {
       this.dialog.connection.send("/close " + this.dialog.name);
     },
-    componentName: function(msg) {
-      return msg.type == "info" ? "convos-dialog-info" : "convos-message";
-    },
     getInfo: function() {
       var self = this;
+      // For debug purpose:
+      // console.log(JSON.stringify(this.dialog.messages.map(function(m) {return [m.type, m.message]})));
       self.dialog.refreshParticipants(function(err) {
         if (!err) return this.emit("message", {type: "info"});
         return this.emit("message", {
@@ -99,15 +69,6 @@ module.exports = {
           elem.scrollTop = elem.scrollHeight;
         });
       }
-    },
-    toggleMenu: function(e) {
-      $("nav").show();
-      window.nextTick(function() {
-        $(document).one("click", function(e) {
-          if (!$(e.target).closest("nav").length) e.preventDefault();
-          $("nav").hide();
-        });
-      });
     }
   },
   ready: function() {
