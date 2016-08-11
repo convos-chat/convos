@@ -57,7 +57,7 @@
         },
         logout: function() {
           Convos.api.ws().close();
-          this.currentPage      = "user-login";
+          this.currentPage      = "convos-login";
           this.user.connections = [];
           this.user.dialogs     = [];
           this.user.email       = "";
@@ -72,7 +72,7 @@
           if (!err) self.$emit("login", xhr.body);
           document.getElementById("loader").$remove();
           self.$el.style.display = "block";
-          self.currentPage       = err ? "user-login" : "convos-chat";
+          self.currentPage       = err ? "convos-login" : "convos-chat";
         });
       }
     });
