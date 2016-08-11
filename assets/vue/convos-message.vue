@@ -1,7 +1,7 @@
 <template>
   <div class="convos-message">
     <span v-if="msg.type == 'action'">✧</span>
-    <a href="#insert:{{msg.from}}" class="title" @click.prevent="insertIntoInput(msg.from)">{{msg.from}}</a>
+    <a href="#{{msg.from}}" class="title" @click.prevent="insertIntoInput">{{msg.from}}</a>
     <div class="message" v-if="msg.type != 'error'"><span>{{{message() | markdown}}}</span></div>
     <div class="error" v-if="msg.type == 'error'">{{msg.message}}</div>
     <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()" v-if="msg.ts">{{msg.ts | timestring}}</span>
@@ -11,9 +11,6 @@
 module.exports = {
   props:   ["dialog", "msg", "user"],
   methods: {
-    insertIntoInput: function(str) {
-      this.dialog.emit("insertIntoInput", str);
-    },
     message: function() {
       var self = this;
       return this.msg.message.xmlEscape().autoLink({
