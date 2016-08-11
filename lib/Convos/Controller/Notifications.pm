@@ -21,7 +21,8 @@ sub list {
 
 sub seen {
   my ($self, $args, $cb) = @_;
-  die 'TODO';
+  my $user = $self->backend->user or return $self->unauthorized($cb);
+  $user->unseen(0);
   $self->$cb({}, 200);
 }
 

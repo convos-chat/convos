@@ -6,8 +6,8 @@ use Convos::Core::Backend::File;
 
 my @date = split '-', Time::Piece->new->strftime('%Y-%m');
 my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
-my $connection = $core->user({email => 'superman@example.com'})
-  ->connection({name => 'localhost', protocol => 'irc'});
+my $user = $core->user({email => 'superman@example.com'});
+my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $t = t::Helper->connect_to_irc($connection);
 
 $connection->_irc->emit(
@@ -16,6 +16,7 @@ $connection->_irc->emit(
     params => ['#convos', 'not a superdupersuperman?']
   }
 );
+is($user->unseen, 0, 'No unseen messages');
 like slurp_log("#convos"), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
 $connection->_irc->emit(irc_privmsg =>
@@ -27,6 +28,7 @@ $core->get_user('superman@example.com')
   ->notifications({}, sub { $notifications = pop; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 ok delete $notifications->[0]{ts}, 'notifications has timestamp';
+is($user->unseen, 1, 'One unseen messages');
 is_deeply $notifications,
   [
   {

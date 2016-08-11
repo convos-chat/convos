@@ -17,6 +17,7 @@ use constant BCRYPT_BASE_SETTINGS => do {
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 sub password { shift->{password} ||= '' }
+sub unseen   { shift->{unseen}   ||= 0 }
 
 has_many connections => 'Convos::Core::Connection' => sub {
   my ($self, $attrs) = @_;
@@ -144,6 +145,10 @@ Email address of user.
 
 Encrypted password. See L</set_password> for how to change the password and
 L</validate_password> for password authentication.
+
+=head2 unseen
+
+Number of unseen notifications ofr user.
 
 =head1 METHODS
 
