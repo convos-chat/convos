@@ -18,9 +18,15 @@ ok !-e $settings_file, 'no storage file';
 is $user->save, $user, 'save';
 ok -e $settings_file, 'created storage file';
 
-is_deeply($user->TO_JSON,
-  {email => 'jhthorsen@cpan.org', registered => Mojo::Date->new($main::time)->to_datetime},
-  'TO_JSON');
+is_deeply(
+  $user->TO_JSON,
+  {
+    email      => 'jhthorsen@cpan.org',
+    registered => Mojo::Date->new($main::time)->to_datetime,
+    unseen     => ''
+  },
+  'TO_JSON'
+);
 
 eval { $user->set_password('') };
 like $@, qr{Usage:.*plain}, 'set_password() require plain string';
@@ -33,5 +39,10 @@ ok $user->validate_password('s3cret'), 'validate_password';
 
 $user->save;
 is $core->get_user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
+
+
+$user->{unseen} = 3;
+$user->save;
+is $core->get_user('jhthorsen@cpan.org')->unseen, 3, 'Unseen is persisted correctly';
 
 done_testing;
