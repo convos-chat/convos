@@ -22,9 +22,10 @@ sub messages {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(frozen id is_private name topic);
+  my %json = map { ($_, $self->$_) } qw(frozen is_private name topic);
   $json{connection_id} = $self->connection->id;
-  $json{password} = $self->password if $persist;
+  $json{dialog_id}     = $self->id;
+  $json{password}      = $self->password if $persist;
   return \%json;
 }
 

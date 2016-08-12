@@ -13,7 +13,7 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
 # Note: tls=0 is to avoid reconnecting to the test irc server
 send_ok(createConnection => {name => 'test', url => sprintf('irc://%s?tls=0', $irc->server)});
 $t->message_ok->json_message_is('/code', 200)->json_message_is('/id', id())
-  ->json_message_is('/body/id', 'irc-test')->json_message_is('/body/state', 'queued');
+  ->json_message_is('/body/connection_id', 'irc-test')->json_message_is('/body/state', 'queued');
 $t->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_like('/message', qr{Connected to})->json_message_is('/state', 'connected')
   ->json_message_is('/type', 'connection');
@@ -33,9 +33,10 @@ $irc->run(
     $t->message_ok->json_message_is('/connection_id', $c->id)
       ->json_message_is('/dialog_id', '#convos')->json_message_is('/frozen', '');
     $t->message_ok->json_message_is('/code', 200)
-      ->json_message_is('/body/connection_id', 'irc-test')->json_message_is('/body/id', '#convos')
-      ->json_message_is('/body/name', '#Convos')->json_message_is('/body/is_private', 0)
-      ->json_message_is('/body/topic', '')->json_message_is('/body/frozen', '');
+      ->json_message_is('/body/connection_id', 'irc-test')
+      ->json_message_is('/body/dialog_id',     '#convos')->json_message_is('/body/name', '#Convos')
+      ->json_message_is('/body/is_private',    0)->json_message_is('/body/topic', '')
+      ->json_message_is('/body/frozen',        '');
   }
 );
 

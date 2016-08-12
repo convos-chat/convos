@@ -20,12 +20,12 @@ ok -e $settings_file, 'created storage file';
 cmp_deeply(
   $connection->TO_JSON,
   {
-    id       => ignore(),
-    name     => 'localhost',
-    me       => {},
-    protocol => 'irc',
-    state    => 'queued',
-    url      => 'irc://127.0.0.1'
+    connection_id => ignore(),
+    name          => 'localhost',
+    me            => {},
+    protocol      => 'irc',
+    state         => 'queued',
+    url           => 'irc://127.0.0.1'
   },
   'TO_JSON'
 );

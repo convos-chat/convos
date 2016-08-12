@@ -105,8 +105,9 @@ sub _bcrypt {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{registered} ||= Mojo::Date->new->to_datetime;
-  my $json = {map { ($_, $self->{$_} // '') } qw(email password registered unseen)};
+  my $json = {map { ($_, $self->{$_} // '') } qw(email password registered)};
   delete $json->{password} unless $persist;
+  $json->{unseen} = $self->unseen;
   $json;
 }
 

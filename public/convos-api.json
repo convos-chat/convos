@@ -525,18 +525,19 @@
   },
   "definitions": {
     "Connection": {
-      "required": ["id", "url"],
+      "required": ["connection_id", "url"],
       "properties": {
-        "id": { "type": "string", "description": "Unique identifier for this connection" },
+        "connection_id": { "type": "string", "description": "Unique identifier for this connection" },
         "name": { "type": "string", "description": "Name for this connection" },
         "state": { "type": "string", "enum": ["connected", "queued", "disconnected"], "description": "Connection state" },
         "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
     },
     "Dialog": {
-      "required": ["connection_id", "name"],
+      "required": ["connection_id", "dialog_id", "name"],
       "properties": {
         "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialog is part of" },
+        "dialog_id": { "type": "string", "description": "Unique identifier for the dialog" },
         "name": { "type": "string", "description": "Name of the room or person" },
         "topic": { "type": "string", "description": "The subjec/topic for this room" }
       }

@@ -87,8 +87,9 @@ sub _userinfo {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{state} ||= 'queued';
-  my $json = {map { ($_, '' . $self->$_) } qw(id name protocol state url)};
+  my $json = {map { ($_, '' . $self->$_) } qw(name protocol state url)};
 
+  $json->{connection_id} = $self->id;
   $json->{state} = 'queued' if $persist and $json->{state} eq 'connected';
 
   if ($persist) {

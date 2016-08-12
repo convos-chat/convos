@@ -19,8 +19,8 @@ $user->connection({name => 'localhost', protocol => 'irc'})->state('connected');
 no warnings qw(once redefine);
 *Mojo::IRC::UA::join_channel = sub { my ($irc, $channel, $cb) = @_; $irc->$cb('') };
 $t->post_ok('/api/command', json => {connection_id => 'irc-localhost', command => "/join #Convos"})
-  ->status_is(200)->json_is('/frozen', '')->json_is('/id', '#convos')->json_is('/name', '#Convos')
-  ->json_is('/topic', '');
+  ->status_is(200)->json_is('/frozen', '')->json_is('/dialog_id', '#convos')
+  ->json_is('/name', '#Convos')->json_is('/topic', '');
 
 $t->get_ok('/api/connection/irc-not-found/dialog/not-found/participants')->status_is(404)
   ->json_is('/errors/0/message', 'Connection not found.');
@@ -55,7 +55,7 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
       topic         => '',
       frozen        => '',
       name          => '#Convos',
-      id            => '#convos',
+      dialog_id     => '#convos',
       is_private    => 0,
     },
   ]

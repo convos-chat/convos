@@ -23,7 +23,7 @@ is_deeply(
   {
     email      => 'jhthorsen@cpan.org',
     registered => Mojo::Date->new($main::time)->to_datetime,
-    unseen     => ''
+    unseen     => 0
   },
   'TO_JSON'
 );

@@ -24,15 +24,16 @@ $t->post_ok('/api/connections', json => {url => 'foo://example.com'})->status_is
 $t->get_ok('/api/connections')->status_is(200)->json_is(
   '/connections/0',
   {
-    id       => 'irc-example',
-    name     => 'example',
-    me       => {},
-    protocol => 'irc',
-    state    => 'disconnected',
-    url      => 'irc://irc.example.com:6667?nick=superman'
+    connection_id => 'irc-example',
+    name          => 'example',
+    me            => {},
+    protocol      => 'irc',
+    state         => 'disconnected',
+    url           => 'irc://irc.example.com:6667?nick=superman'
   }
-  )->json_is('/connections/1/id', 'irc-localhost')->json_is('/connections/1/name', 'localhost')
-  ->json_is('/connections/1/url', "irc://localhost:$port?nick=superman&tls=0");
+  )->json_is('/connections/1/connection_id', 'irc-localhost')
+  ->json_is('/connections/1/name', 'localhost')
+  ->json_is('/connections/1/url',  "irc://localhost:$port?nick=superman&tls=0");
 
 $t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.com:9999'})
   ->status_is(404);
