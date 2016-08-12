@@ -23,7 +23,7 @@ $connection->_irc->emit(irc_privmsg =>
     {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'Hey SUPERMAN!']});
 like slurp_log("#convos"), qr{\Q<Supergirl> Hey SUPERMAN!\E}m, 'notification';
 
-my $notifications;
+my ($err, $notifications);
 $core->get_user('superman@example.com')
   ->notifications({}, sub { $notifications = pop; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
@@ -50,9 +50,13 @@ $connection->_irc->emit(ctcp_action =>
     {prefix => 'jhthorsen!jhthorsen@i.love.debian.org', params => ['#convos', "will be back"]});
 like slurp_log("#convos"), qr{\Q* jhthorsen will be back\E}m, 'ctcp_action';
 
-# test stripping away \s at the end of message
-$connection->send("#convos" => "/me will be back again\n", sub { Mojo::IOLoop->stop });
+# test stripping away invalid characters in a message
+$connection->send(
+  "#convos" => "\n/me will be\a back again\n",
+  sub { $err = $_[1]; Mojo::IOLoop->stop }
+);
 Mojo::IOLoop->start;
+is $err, '', 'invalid characters was filtered';
 like slurp_log("#convos"), qr{\Q* superman will be back again\E}m, 'loopback ctcp_action';
 
 $connection->send("#convos" => "some regular message", sub { Mojo::IOLoop->stop });

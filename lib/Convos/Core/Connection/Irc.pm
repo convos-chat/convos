@@ -165,24 +165,21 @@ sub send {
 
   $target  //= '';
   $message //= '';
-  $message =~ s!\s+$!!;    # remove whitespace, \r, \n, .. at the end of message
+  $message =~ s![\x00-\x1f]!!g;    # remove invalid characters
 
-  return $self->_send($target, $message, $cb) unless $message =~ s!^/!!;
+  $message =~ s!^/([A-Za-z]+)\s*!! or return $self->_send($target, $message, $cb);
+  my $cmd = uc $1;
 
-  my ($cmd, $args) = split /\s/, $message, 2;
-  return next_tick $self, $cb => 'Invalid IRC command.' unless $cmd =~ /^[A-Za-z]+$/;
-
-  $cmd = uc $cmd;
-  return $self->_send($target, "\x{1}ACTION $args\x{1}", $cb) if $cmd eq 'ME';
-  return $self->_send($target, $args, $cb) if $cmd eq 'SAY';
-  return $self->_send(split(/\s+/, $args, 2), $cb) if $cmd eq 'MSG';
+  return $self->_send($target, "\x{1}ACTION $message\x{1}", $cb) if $cmd eq 'ME';
+  return $self->_send($target, $message, $cb) if $cmd eq 'SAY';
+  return $self->_send(split(/\s+/, $message, 2), $cb) if $cmd eq 'MSG';
   return $self->connect($cb)    if $cmd eq 'CONNECT';
   return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
-  return $self->_join_dialog($args, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
-  return $self->nick($args, $cb) if $cmd eq 'NICK';
-  return $self->_part_dialog($args || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
-  return $self->_topic($target, $args, $cb) if $cmd eq 'TOPIC';
-  return $self->_proxy(whois => $args, $cb) if $cmd eq 'WHOIS';
+  return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
+  return $self->nick($message, $cb) if $cmd eq 'NICK';
+  return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
+  return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
+  return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
   return next_tick $self, $cb => 'Unknown IRC command.';
 }
 
