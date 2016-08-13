@@ -87,7 +87,7 @@ sub connect {
   for my $dialog (@{$self->dialogs}) {
     next if $dialog->is_private;    # TODO: Should private conversations be frozen as well?
     $dialog->frozen('Not connected.');
-    $self->emit(state => frozen => {dialog_id => $dialog->id, frozen => $dialog->frozen});
+    $self->emit(state => frozen => $dialog->TO_JSON);
   }
 
   Mojo::IOLoop->delay(
@@ -365,7 +365,7 @@ _event irc_join => sub {
 
   if ($self->_is_current_nick($nick)) {
     my $dialog = $self->dialog({name => $channel, frozen => ''});
-    $self->emit(state => frozen => {dialog_id => $dialog->id, frozen => $dialog->frozen});
+    $self->emit(state => frozen => $dialog->TO_JSON);
   }
   elsif (my $dialog = $self->get_dialog($channel)) {
     $self->emit(state => join => {dialog_id => $dialog->id, nick => $nick}) if $dialog;
