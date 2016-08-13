@@ -27,20 +27,15 @@
           this.currentPage = "convos-chat";
 
           Convos.api.ws().on("close", function() {
-            self.user.connections.forEach(function(c) {
-              c.state = "unreachable";
-            });
-            self.user.dialogs.forEach(function(d) {
-              if (d.connection)
-                d.frozen = "Websocket closed.";
-            });
+            self.user.connections.forEach(function(c) { c.state = "unreachable"; });
+            self.user.dialogs.forEach(function(d) { d.frozen = "Websocket closed."; });
           });
 
           Convos.api.ws().on("json", function(data) {
             if (!data.connection_id) return;
-            var target = self.user.getDialog(data.dialog_id) || self.user.getConnection(data.connection_id);
-            // console.log(data.event, target ? target.id : data, data);
-            if (target) target.emit(data.event, data);
+            var target = self.user.getConnection(data.connection_id);
+            if (target) return target.emit(data.event, data);
+            console.log('json event without connection_id', data);
           });
 
           Convos.api.ws().on("open", function(data) {
@@ -48,6 +43,7 @@
             self.user.refreshConnections(function(err) {
               if (err) return console.log(err); // TODO
               self.user.refreshDialogs(function(err) {
+                self.user.initialized = true;
                 if (err) return console.log(err); // TODO
               });
             });

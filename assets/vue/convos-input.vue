@@ -39,7 +39,7 @@ module.exports = {
   computed: {
     placeholder: function() {
       try {
-        var state = this.dialog.connection ? this.dialog.connection.state : "connected";
+        var state = this.dialog.connection().state;
         if (state == "connected") {
           return "What do you want to say to " + this.dialog.name + "?";
         } else {
@@ -114,11 +114,10 @@ module.exports = {
       if (e.shiftKey) return setTimeout(function() { $("#search_field").focus(); }, 100);
       var m = this.message;
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
-      var c = this.dialog.connection || this.user.connections[0];
       this.message = "";
       this.$els.input.focus();
       if ("localCmd" + m != l && this[l]) return this[l](e);
-      if (c && m.length) c.send(m, this.dialog.connection ? this.dialog : "");
+      if (m.length) this.dialog.connection().send(m, this.dialog);
     }
   },
   ready: function() {
