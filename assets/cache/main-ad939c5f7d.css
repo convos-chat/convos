@@ -4896,6 +4896,18 @@ div.autocomplete {
 .is-sidebar header {
   text-align: right; }
 
+header a.notifications {
+  position: relative; }
+  header a.notifications i.active {
+    position: relative; }
+  header a.notifications b.n-notifications {
+    color: #e6e6e6;
+    font-size: 1rem;
+    line-height: 1rem;
+    position: absolute;
+    bottom: 5px;
+    right: 5px; }
+
 img.embed, .link-embedder.text-html {
   max-width: 50em;
   overflow: hidden;
@@ -5012,7 +5024,16 @@ img.embed {
       display: none; } }
   .convos-dialogs .content > a {
     display: block;
+    position: relative;
     padding: 1rem 0.75rem; }
+    .convos-dialogs .content > a b {
+      font-size: 1rem;
+      line-height: 1rem;
+      text-align: center;
+      width: 24px;
+      position: absolute;
+      bottom: 1rem;
+      left: 0.75rem; }
   .convos-dialogs .content a {
     min-height: 64px; }
   .convos-dialogs .content a.active {
@@ -5036,18 +5057,6 @@ img.embed {
   @media only screen and (min-width: 993px) {
     .is-sidebar {
       width: 336px; } }
-
-header a.notifications {
-  position: relative; }
-  header a.notifications i.active {
-    position: relative; }
-  header a.notifications b.n-notifications {
-    color: #e6e6e6;
-    font-size: 1rem;
-    line-height: 1rem;
-    position: absolute;
-    bottom: 5px;
-    right: 5px; }
 
 .convos-notifications .row {
   margin: 2px auto;

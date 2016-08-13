@@ -59,7 +59,18 @@
 
   .content > a {
     display: block;
+    position: relative;
     padding: $element-bottom-margin $gutter-width / 2;
+
+    b {
+      font-size: 1rem;
+      line-height: 1rem;
+      text-align: center;
+      width: 24px;
+      position: absolute;
+      bottom: 1rem;
+      left: $gutter-width / 2;
+    }
   }
   .content {
     a { min-height: 64px; }
@@ -88,22 +99,6 @@
 
   @media #{$large-and-up} {
     width: $sidebar-width * 1.2;
-  }
-}
-
-header a.notifications {
-  position: relative;
-
-  i.active { // notifications
-    position: relative;
-  }
-  b.n-notifications {
-    color: darken($navbar-font-color, 10%);
-    font-size: 1rem;
-    line-height: 1rem;
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
   }
 }
 

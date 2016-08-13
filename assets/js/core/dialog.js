@@ -5,6 +5,7 @@
     this.messages      = [];
     this.name          = "";
     this.participants  = {};
+    this.unread        = 0;
     this.topic         = "";
     this._api          = Convos.api;
     this._participants = {};
@@ -22,6 +23,7 @@
     if (!method) method = "push";
     var prev = method == "unshift" ? this.messages[0] : this.prevMessage;
 
+    if (this != this.user.getActiveDialog()) this.unread++;
     if (!msg.from) msg.from = "convosbot";
     if (!msg.type) msg.type = "private";
     if (!msg.ts) msg.ts = new Date();

@@ -12,7 +12,10 @@ module.exports = {
   methods: {
     showDialogContainer: function(d) {
       var visible = this.settings.main == d.href();
-      if (visible) d.emit("visible");
+      if (visible) {
+        d.unread = 0;
+        d.emit("visible");
+      }
       return visible;
     },
     showSettings: function() {
