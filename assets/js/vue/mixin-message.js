@@ -17,10 +17,13 @@
       },
       loadOffScreen: function(html, id) {
         if (html.match(/^<a\s/)) return;
-        var self   = this;
-        var $html  = $(html);
-        var $paste = $html.filter('.text-paste, .text-gist-github');
-        var $a     = $('#' + id);
+
+        // TODO: Add support for showing paste inline
+        if (html.match(/class=".*(text-paste|text-gist-github)/)) return;
+
+        var self = this;
+        var $html = $(html);
+        var $a = $('#' + id);
 
         $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
         $a.parent().append($html).find(".materialboxed").materialbox();
@@ -31,6 +34,8 @@
             $(this).css("height", "auto");
           });
         });
+
+        self.materializeComponent();
       },
       message: function() {
         var self = this;
@@ -38,7 +43,7 @@
           target: "_blank",
           after:  function(url, id) {
             $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
-              self.$dispatch("loadOffScreen", html, id);
+              self.loadOffScreen(html, id);
             });
             return null;
           }

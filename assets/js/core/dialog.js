@@ -12,7 +12,6 @@
 
     EventEmitter(this);
     if (attrs) this.update(attrs);
-    this.on("message", this.addMessage);
     this.once("visible", this._initialize);
   };
 
@@ -45,28 +44,31 @@
     if (method == "push") this.prevMessage = msg;
     this._addParticipant(msg.from, {seen: msg.ts});
     this.messages[method](msg);
+    if (method == "push") this.emit("message", msg);
   };
 
   proto.connection = function() {
     return this.user.getConnection(this.connection_id);
   };
 
-  proto.historicMessages = function(args) {
+  proto.historicMessages = function(args, cb) {
     if (!this.messages.length) return;
-    if (this._loadingMessages) return;
+    if (this.messages[0].loading) return;
     var self = this;
-    this._loadingMessages = true;
+    this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, "unshift");
     this._api.messagesByDialog(
       {
-        before: this.messages[0].ts,
+        before: this.messages[1].ts,
         connection_id: this.connection_id,
         dialog_id: this.id
       },
       function(err, xhr) {
-        self._loadingMessages = false;
-        if (err) return self.emit("error", err);
-        if (!xhr.body.messages.length) self._loadingMessages = true; // nothing more to load
-        xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, "unshift"); });
+        if (err) return cb(err, null);
+        if (!xhr.body.messages.length) return self.messages[0].message = "End of history.";
+        self.messages.shift();
+        cb(null, function() {
+          xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, "unshift"); });
+        })
       }
     );
   };

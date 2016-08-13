@@ -25,9 +25,9 @@ module.exports = {
   props: ["dialog", "user"],
   data:  function() {
     return {
-      atBottom:          true,
-      atBottomThreshold: !!("ontouchstart" in window) ? 60 : 40,
-      scrollElement:     null
+      atBottom: true,
+      scrollElement: null,
+      scrollThreshold: !!("ontouchstart" in window) ? 60 : 40
     };
   },
   watch: {
@@ -37,9 +37,7 @@ module.exports = {
       this._atBottomTid = setTimeout(function() {
         this.scrollToBottom({gotoBottom: atBottom});
         this._atBottomTid = 0;
-      }.bind(this),
-        300
-      );
+      }.bind(this), 300);
     }
   },
   methods: {
@@ -55,15 +53,20 @@ module.exports = {
     },
     onScroll: function() {
       var elem = this.scrollElement;
-      this.atBottom = elem.scrollHeight < elem.offsetHeight + this.atBottomThreshold + elem.scrollTop;
-      if (!elem.scrollTop) this.dialog.historicMessages();
+      this.atBottom = elem.scrollHeight < elem.offsetHeight + this.scrollThreshold + elem.scrollTop;
+      if (elem.scrollTop < this.scrollThreshold) {
+        this.dialog.historicMessages({}, function(err, cb) {
+          var scrollHeight = elem.scrollHeight;
+          if (err) return;
+          cb();
+          window.nextTick(function() { elem.scrollTop = elem.scrollHeight - scrollHeight - 100; });
+        });
+      }
     },
     scrollToBottom: function(args) {
       var elem = this.scrollElement;
       if (this.atBottom || args.gotoBottom) {
-        window.nextTick(function() {
-          elem.scrollTop = elem.scrollHeight;
-        });
+        window.nextTick(function() { elem.scrollTop = elem.scrollHeight; });
       }
     }
   },
@@ -72,6 +75,7 @@ module.exports = {
     this.scrollElement.addEventListener("scroll", this.onScroll);
     this.dialog.on("initialized", this.scrollToBottom);
     this.dialog.on("message", this.scrollToBottom);
+    this.dialog.on("visible", function() { this.scrollToBottom({gotoBottom: true}); }.bind(this));
   },
   beforeDestroy: function() {
     this.scrollElement.removeEventListener("scroll", this.onScroll);
