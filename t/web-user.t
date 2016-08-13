@@ -1,6 +1,7 @@
 use t::Helper;
 
-$ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
+$ENV{CONVOS_BACKEND}     = 'Convos::Core::Backend';
+$ENV{CONVOS_INVITE_CODE} = '';
 my $t = t::Helper->t;
 
 $t->get_ok('/api/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');

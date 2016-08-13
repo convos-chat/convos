@@ -505,6 +505,7 @@
               "required": ["email", "password"],
               "properties": {
                 "email": { "type": "string", "format": "email", "description": "User email" },
+                "invite_code": { "type": "string", "description": "Secret invite code set on server side." },
                 "password": { "type": "string", "description": "User password" }
               }
             }

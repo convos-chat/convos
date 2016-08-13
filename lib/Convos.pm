@@ -2,6 +2,7 @@ package Convos;
 use Mojo::Base 'Mojolicious';
 
 use Convos::Core;
+use Mojo::JSON qw(false true);
 
 our $VERSION = '0.01';
 
@@ -111,13 +112,20 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
-  $config->{disable_registration} ||= $ENV{CONVOS_DISABLE_REGISTRATION} || 0;
-  $config->{backend} ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
-  $config->{name}    ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
+  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
+  $config->{invite_code} ||= $ENV{CONVOS_INVITE_CODE} // $self->_generate_invite_code;
+  $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{plugins} ||= {};
   $config->{plugins}{$_} = $config for split /:/, +($ENV{CONVOS_PLUGINS} // '');
   $config->{secure_cookies} ||= $ENV{CONVOS_SECURE_COOKIES} || 0;
   $config;
+}
+
+sub _generate_invite_code {
+  my $self = shift;
+  my $code = Mojo::Util::md5_sum(join ':', $<, $(, $^X, $0);
+  $self->log->info(qq(Generated CONVOS_INVITE_CODE="$code"));
+  return $code;
 }
 
 sub _home_relative_to_lib {
@@ -146,6 +154,7 @@ sub _setup_settings {
   my $settings = $self->defaults->{settings} = $self->config('settings') || {};
 
   # This hash is exposed directy into the web page
+  $settings->{invite_code} = $self->config('invite_code') ? true : false;
   $settings->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
   $settings->{default_server}
     ||= $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';   # chat.freenode.net:6697 instead of localhost?

@@ -65,7 +65,8 @@
         var self = this;
 
         Convos.api.getUser({}, function(err, xhr) {
-          if (!err) self.$emit("login", xhr.body);
+          if (err) return self.currentPage = "convos-login";
+          self.$emit("login", xhr.body);
         });
       }
     });

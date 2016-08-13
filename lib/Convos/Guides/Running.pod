@@ -73,6 +73,15 @@ to store settings and log files.
 
 Default: "$HOME/.local/share/convos/".
 
+=item * CONVOS_INVITE_CODE
+
+This variable need to be used by the person who wants to register. It can be disabled
+by setting C<CONVOS_INVITE_CODE="">.
+
+Default: Semi-random string, which is written to log output:
+
+ [info] Generated CONVOS_INVITE_CODE="b34b9a3ad3f80479b9c218effa3a8190"
+
 =item * CONVOS_ORGANIZATION_NAME
 
 Should be set to the name of the organization running this instance of

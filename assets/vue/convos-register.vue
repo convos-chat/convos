@@ -23,6 +23,12 @@
             <input v-model="passwordAgain" placeholder="Repeat password" id="form_password_again" type="password" class="validate">
           </div>
         </div>
+        <div class="row" v-if="settings.invite_code">
+          <div class="input-field col s12">
+            <input v-model="invite_code" id="form_invite_code" type="password" class="validate">
+            <label for="form_email">Invite code</label>
+          </div>
+        </div>
         <div class="row" v-if="errors.length">
           <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
         </div>
@@ -48,6 +54,7 @@ module.exports = {
   props:    ["currentPage", "user"],
   data:     function() {
     return {
+      invite_code:   "",
       email:         localStorage.getItem("email"),
       errors:        [],
       password:      "",
@@ -71,7 +78,8 @@ module.exports = {
       Convos.api.registerUser(
         {
           body: {
-            email:    this.email,
+            invite_code: this.invite_code,
+            email: this.email,
             password: this.password
           }
         }, function(err, xhr) {

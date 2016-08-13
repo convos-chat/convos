@@ -69,13 +69,17 @@ sub logout {
 sub register {
   my ($self, $args, $cb) = @_;
   my $core = $self->app->core;
-  my $user = $core->get_user($args->{body});
+  my $user;
 
-  # TODO: Add support for invite code
+  if (my $invite_code = $self->app->config('invite_code')) {
+    if (!$args->{body}{invite_code} or $args->{body}{invite_code} ne $invite_code) {
+      return $self->$cb($self->invalid_request('Invalid invite code.', '/body/invite_code'), 400);
+    }
+  }
+  if ($core->get_user($args->{body})) {
+    return $self->$cb($self->invalid_request('Email is taken.', '/body/email'), 409);
+  }
 
-  return $self->$cb($self->invalid_request('Registration is closed.', '/'), 400)
-    if $self->app->config('disable_registration');
-  return $self->$cb($self->invalid_request('Email is taken.', '/body/email'), 409) if $user;
   return $self->delay(
     sub {
       my ($delay) = @_;
