@@ -4673,8 +4673,7 @@ div.autocomplete {
 
 .convos-chat {
   display: flex;
-  height: 100vh;
-  overflow: hidden; }
+  height: 100vh; }
 
 .convos-dialog-container,
 .convos-settings {
@@ -4983,6 +4982,7 @@ img.embed {
   flex-direction: column; }
   .convos-dialogs div.content,
   .is-sidebar div.content {
+    height: 100%;
     overflow: auto; }
   .convos-dialogs.hidden,
   .is-sidebar.hidden {
