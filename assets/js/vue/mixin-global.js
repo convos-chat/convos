@@ -4,6 +4,7 @@
   Convos.settings.main = localStorage.getItem("main") || "";
   Convos.settings.sidebar = localStorage.getItem("sidebar") || "";
   Convos.settings.dialogsVisible = false;
+  Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
 
   // screenHeight and screenWidth
   window.dispatchEvent(new Event('resize'));
@@ -15,6 +16,10 @@
     methods: {
       activeClass: function(href) {
         return {active: Convos.settings.main == href || Convos.settings.sidebar == href};
+      },
+      enableNotifications: function(enable) {
+        if (!enable) return this.settings.notifications = "denied";
+        Notification.requestPermission(function(s) { if (s) this.settings.notifications = s; }.bind(this));
       },
       insertIntoInput: function(e) {
         var dialog = this.user.getActiveDialog();

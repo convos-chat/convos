@@ -15,15 +15,20 @@
       el: "body",
       data: {currentPage: "", user: new Convos.User()},
       watch: {
-        'currentPage': function(v, o) {
+        "currentPage": function(v, o) {
           try { document.getElementById("loader").$remove() } catch(e) {};
         },
-        'settings.main': function(v, o) {
-          if (DEBUG && v != o) console.log('[loc:main] ' + (o || "null") + ' => ' + (v || "null"));
+        "settings.main": function(v, o) {
+          if (DEBUG && v != o) console.log("[loc:main] " + (o || "null") + " => " + (v || "null"));
           localStorage.setItem("main", v);
         },
-        'settings.sidebar': function(v, o) {
-          if (DEBUG && v != o) console.log('[loc:sidebar] ' + (o || "null") + ' => ' + (v || "null"));
+        "settings.notifications": function(v, o) {
+          if (DEBUG && v != o) console.log("[notifications] " + v);
+          if (v == "granted") Notification.simple("convosbot", "You have enabled notifications!");
+          localStorage.setItem("notifications", v);
+        },
+        "settings.sidebar": function(v, o) {
+          if (DEBUG && v != o) console.log("[loc:sidebar] " + (o || "null") + " => " + (v || "null"));
           localStorage.setItem("sidebar", v);
         }
       },

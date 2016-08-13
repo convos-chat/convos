@@ -11,6 +11,7 @@
 < js/window.js
 < js/date.js
 < js/string.js
+< js/notification.js
 < js/jquery.disableouterscroll.js
 < js/materialbox.js
 < js/websocket.js
@@ -56,6 +57,7 @@
 
 < vue/convos-message-action.vue
 < vue/convos-message-day-changed.vue
+< vue/convos-message-enable-notifications.vue
 < vue/convos-message-error.vue
 < vue/convos-message-info.vue
 < vue/convos-message-notice.vue

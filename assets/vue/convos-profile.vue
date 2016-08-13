@@ -20,6 +20,12 @@
           <input placeholder="Repeat password" id="form_password_again" type="password" class="validate">
         </div>
       </div>
+      <div class="row">
+        <div class="col s12">
+          <input v-model="notifications" type="checkbox" class="filled-in" id="form_notifications" :checked="settings.notifications == 'granted'" value="granted">
+          <label for="form_notifications">Enable notifications</label>
+        </div>
+      </div>
       <div class="row" v-if="errors.length">
         <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
       </div>
@@ -35,11 +41,16 @@
 module.exports = {
   props: ["user"],
   data:  function() {
-    return {errors: []};
+    return {errors: [], notifications: Notification.permission};
   },
   methods: {
     save: function() {
-      alert('Not implemented');
+      if (this.notifications && this.notifications != this.settings.notifications) {
+        this.enableNotifications(true);
+      }
+      if (!this.notifications) {
+        this.enableNotifications(false);
+      }
     }
   }
 };

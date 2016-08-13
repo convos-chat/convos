@@ -17,7 +17,7 @@
 
   var proto = Convos.Dialog.prototype;
 
-  proto.addMessage = function(msg, method) {
+  proto.addMessage = function(msg, method, disableNotifications) {
     if (typeof msg == "string") msg = {message: msg};
     if (!method) method = "push";
     var prev = method == "unshift" ? this.messages[0] : this.prevMessage;
@@ -27,6 +27,7 @@
     if (!msg.type) msg.type = "private";
     if (!msg.ts) msg.ts = new Date();
     if (typeof msg.ts == "string") msg.ts = new Date(msg.ts);
+    if (msg.highlight && !disableNotifications) Notification.simple(msg.from, msg.message);
     if (msg.highlight) this.connection().user.notifications.unshift(msg);
     if (!prev) prev = {from: "", ts: msg.ts};
     if (prev && prev.ts.getDate() != msg.ts.getDate()) {
@@ -67,7 +68,7 @@
         if (!xhr.body.messages.length) return self.messages[0].message = "End of history.";
         self.messages.shift();
         cb(null, function() {
-          xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, "unshift"); });
+          xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, "unshift", true); });
         })
       }
     );
@@ -125,13 +126,16 @@
         dialog_id:     self.id
       }, function(err, xhr) {
         if (err) return self.emit("error", err);
-        xhr.body.messages.forEach(function(msg) { self.addMessage(msg); });
+        xhr.body.messages.forEach(function(msg) { self.addMessage(msg, "push", true); });
 
         if (!self.messages.length) {
           self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.");
         }
         if (self.frozen) {
           self.addMessage("You are not part of this channel. " + self.frozen);
+        }
+        if (Convos.settings.notifications == "default") {
+          self.addMessage({type: "enable-notifications"});
         }
 
         self.emit("initialized", {gotoBottom: true});
