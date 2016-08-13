@@ -19,7 +19,7 @@ module.exports = {
       return visible;
     },
     showSettings: function() {
-      return this.settings.main.indexOf('chat') == -1;
+      return this.settings.main.indexOf('#chat') != 0;
     }
   }
 };

@@ -15,7 +15,7 @@
       el: "body",
       data: {currentPage: "", user: new Convos.User()},
       watch: {
-        'currentPage': function() {
+        'currentPage': function(v, o) {
           try { document.getElementById("loader").$remove() } catch(e) {};
         },
         'settings.main': function(v, o) {
@@ -30,35 +30,35 @@
       events: {
         login: function(data) {
           var self = this;
+          var user = this.user;
           var cache = {};
-          if (this.user.email) return console.log("Already logged in.");
+          if (user.email) return console.log("Already logged in.");
           this.user.email = data.email;
           this.settings.dialogsVisible = false;
 
           Convos.api.ws().on("close", function() {
-            self.user.connections.forEach(function(c) { c.state = "unreachable"; });
-            self.user.dialogs.forEach(function(d) { d.frozen = "Websocket closed."; });
+            user.connections.forEach(function(c) { c.state = "unreachable"; });
+            user.dialogs.forEach(function(d) { d.frozen = "Websocket closed."; });
           });
 
           Convos.api.ws().on("json", function(data) {
             if (!data.connection_id) return;
-            var c = self.user.getConnection(data.connection_id);
+            var c = user.getConnection(data.connection_id);
             if (c) return c.emit(data.event, data);
             if (!cache[data.connection_id]) cache[data.connection_id] = [];
             cache[data.connection_id].push(data);
           });
 
           Convos.api.ws().on("open", function(data) {
-            self.user.getNotifications(function(err) {});
-            self.user.refreshConnections(function(err) {
+            user.getNotifications(function(err) {});
+            user.refreshConnections(function(err) {
               if (err) return console.log(err); // TODO
-              self.user.refreshDialogs(function(err) {
-                if (!self.settings.main && self.user.dialogs.length)
-                  self.settings.main = self.user.dialogs[0].href();
+              user.refreshDialogs(function(err) {
+                user.makeSureLocationIsCorrect();
                 self.currentPage = "convos-chat";
                 Object.keys(cache).forEach(function(connection_id) {
                   var msg = cache[connection_id];
-                  var c = self.user.getConnection(connection_id);
+                  var c = user.getConnection(connection_id);
                   delete cache[connection_id];
                   if (c) msg.forEach(function(d) { c.emit(d.event, d); });
                 });

@@ -46,6 +46,13 @@
     });
   };
 
+  proto.makeSureLocationIsCorrect = function() {
+    var correct, loc = Convos.settings.main;
+    if (loc.indexOf("#chat") != 0) return;
+    this.dialogs.forEach(function(d) { if (d.href() == loc) correct = true; });
+    if (!correct) Convos.settings.main = this.dialogs.length ? this.dialogs[0].href() : "";
+  };
+
   proto.refreshConnections = function(cb) {
     var self = this;
     Convos.api.listConnections({}, function(err, xhr) {
