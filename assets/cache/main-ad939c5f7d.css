@@ -4751,15 +4751,13 @@ div.autocomplete {
   background-color: #fff;
   border-top: 1px solid #d1d1d1;
   padding: 0.5rem 0.75rem 0 0.75rem;
-  box-sizing: content-box;
-  position: relative; }
+  box-sizing: content-box; }
   .convos-input i {
     font-size: 2rem;
+    cursor: pointer;
     width: 2rem;
-    position: absolute;
-    right: 0.75rem;
-    transition: color .2s;
-    cursor: pointer; }
+    float: right;
+    transition: color .2s; }
     .convos-input i, .convos-input i.active {
       color: #1B5E20; }
   .convos-input textarea.materialize-textarea {
