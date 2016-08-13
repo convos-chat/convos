@@ -23,19 +23,19 @@
 <script>
 module.exports = {
   props: ["dialog", "msg", "user"],
-  data: function() {
-    var participants = Object.values(this.dialog.participants).filter(function(p) {
-      return p.online;
-    }).sort(function(a, b) {
-      if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-      if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
-      return 0;
-    });
-
-    return {
-      nParticipants: String.prototype.numberAsString.call(participants.length + 1),
-      participants: participants
-    };
+  computed: {
+    participants: function(){
+      return Object.values(this.dialog.participants).filter(function(p) {
+        return p.online;
+      }).sort(function(a, b) {
+        if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+        if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+        return 0;
+      });
+    },
+    nParticipants: function(){
+      return String.prototype.numberAsString.call(participants.length + 1);
+    },
   },
   methods: {
     whois: function(p) {
