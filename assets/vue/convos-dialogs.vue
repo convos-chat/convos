@@ -61,8 +61,9 @@ module.exports = {
     },
     dialogs: function() {
       var self = this;
+      var q = new RegExp(self.q, "i");
       var dialogs = this.user.dialogs.filter(function(d) {
-        return self.q ? d.name.match(self.q) : true;
+        return self.q ? d.name.match(q) : true;
       }).sort(function(a, b) {
         return a.name > b.name
       });
