@@ -212,7 +212,7 @@ sub _irc_message {
   }
 
   $target ||= $self;
-  $from ||= $msg->{prefix} // $self->_irc->server;
+  $from ||= $msg->{prefix} // $self->id;
 
   $highlight ||= grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
     @{$self->url->query->every_param('highlight')};
@@ -255,7 +255,7 @@ sub _notice {
   my ($self, $message) = (shift, shift);
   $self->emit(
     message => $self,
-    {from => $self->url->host, type => 'notice', @_, message => $message, ts => time}
+    {from => $self->id, type => 'notice', @_, message => $message, ts => time}
   );
 }
 

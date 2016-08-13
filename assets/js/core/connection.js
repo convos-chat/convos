@@ -8,7 +8,7 @@
     this.state    = "disconnected";
     this.url      = "";
     this._api     = Convos.api;
-    this.on("message", function(data) { this.user.ensureDialog(data).addMessage(data); });
+    this.on("message", this._onMessage);
     this.on("state", this._onState);
     if (attrs) this.update(attrs);
   };
@@ -21,8 +21,8 @@
     }.bind(this))[0];
   };
 
-  proto.href = function(action) {
-    return ["#connection", this.protocol, this.name, action].join("/");
+  proto.href = function() {
+    return ["#connection", this.protocol, this.name].join("/");
   };
 
   // Human readable version of state
@@ -35,11 +35,8 @@
   };
 
   proto.notice = function(message) {
-    this.emit("message", {
-      from:    this.id,
-      message: message,
-      type:    "notice"
-    });
+    var dialog = this.user.getActiveDialog();
+    if (dialog) dialog.addMessage({from: this.id, message: message, type: "notice"});
   };
 
   // Remove this connection from the backend
@@ -47,8 +44,12 @@
     var self = this;
     this._api.removeConnection({connection_id: this.id}, function(err, xhr) {
       if (!err) {
+        self.unsubscribe("message").unsubscribe("state");
         self.user.connections = self.user.connections.filter(function(c) {
           return c.id != self.id;
+        });
+        self.user.dialogs = self.user.dialogs.filter(function(d) {
+          return d.connection_id != self.id;
         });
       }
       cb.call(self, err);
@@ -96,6 +97,7 @@
       }, function(err, xhr) {
         if (err) return cb.call(self, err);
         self.update(xhr.body);
+        self.id = xhr.body.connection_id;
         self.user.connections.push(self);
         cb.call(self, err);
       });
@@ -169,14 +171,21 @@
     this.notice(data.message);
   };
 
+  proto._onMessage = function(msg) {
+    if (msg.dialog_id) return this.user.ensureDialog(msg).addMessage(msg);
+    var dialog = this.user.getActiveDialog();
+    if (dialog) dialog.addMessage(msg);
+  };
+
   proto._onState = function(data) {
-    if (DEBUG) console.log("[state:" + data.type + "] " + this.href() + ":" + data.type + " = " + JSON.stringify(data));
+    if (DEBUG) console.log("[state:" + data.type + "] " + this.href() + " = " + JSON.stringify(data));
     switch (data.type) {
       case "connection":
         var msg = data.state + '"';
-        this.state = data.state;
         msg += data.message ? ': ' + data.message : ".";
+        this.state = data.state;
         this.notice('Connection state changed to "' + msg);
+        break;
       case "frozen":
         this.user.ensureDialog(data).frozen = data.frozen;
         break;

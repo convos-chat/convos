@@ -18,7 +18,8 @@
     })[0];
 
     if (!dialog) {
-      if (data.connection) data.connection_id = data.connection.id;
+      if (data.connection && !data.connection_id) data.connection_id = data.connection.id;
+      if (!data.name) data.name = "convosbot";
       delete data.connection;
       data.id = data.dialog_id;
       data.user = this;

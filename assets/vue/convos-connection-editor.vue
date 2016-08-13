@@ -91,6 +91,7 @@ module.exports = {
         if (err) return self.errors = err;
         self.connection = null;
         self.deleted = true;
+        self.settings.main = '#connection';
       });
     },
     saveConnection: function() {
@@ -110,7 +111,7 @@ module.exports = {
         if (err) return self.errors = err;
         self.deleted = false;
         self.updateForm(this);
-        this.settings.main = this.user.dialogs.length ? 'connections/' + this.id : 'create-dialog';
+        self.settings.main = '#' + (this.user.dialogs.length ? 'connections/' + this.id : 'create-dialog');
       });
     },
     updateForm: function(connection) {

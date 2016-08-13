@@ -15,15 +15,24 @@
       el: "body",
       data: {currentPage: "", user: new Convos.User()},
       watch: {
-        'settings.main': function(v, o) { localStorage.setItem("main", v); },
-        'settings.sidebar': function(v, o) { localStorage.setItem("sidebar", v); }
+        'currentPage': function() {
+          try { document.getElementById("loader").$remove() } catch(e) {};
+        },
+        'settings.main': function(v, o) {
+          if (DEBUG && v != o) console.log('[loc:main] ' + (o || "null") + ' => ' + (v || "null"));
+          localStorage.setItem("main", v);
+        },
+        'settings.sidebar': function(v, o) {
+          if (DEBUG && v != o) console.log('[loc:sidebar] ' + (o || "null") + ' => ' + (v || "null"));
+          localStorage.setItem("sidebar", v);
+        }
       },
       events: {
         login: function(data) {
           var self = this;
+          var cache = {};
           if (this.user.email) return console.log("Already logged in.");
           this.user.email = data.email;
-          this.currentPage = "convos-chat";
           this.settings.dialogsVisible = false;
 
           Convos.api.ws().on("close", function() {
@@ -33,9 +42,10 @@
 
           Convos.api.ws().on("json", function(data) {
             if (!data.connection_id) return;
-            var target = self.user.getConnection(data.connection_id);
-            if (target) return target.emit(data.event, data);
-            console.log('json event without connection_id', data);
+            var c = self.user.getConnection(data.connection_id);
+            if (c) return c.emit(data.event, data);
+            if (!cache[data.connection_id]) cache[data.connection_id] = [];
+            cache[data.connection_id].push(data);
           });
 
           Convos.api.ws().on("open", function(data) {
@@ -43,10 +53,15 @@
             self.user.refreshConnections(function(err) {
               if (err) return console.log(err); // TODO
               self.user.refreshDialogs(function(err) {
-                try { document.getElementById("loader").$remove() } catch(e) {};
                 if (!self.settings.main && self.user.dialogs.length)
                   self.settings.main = self.user.dialogs[0].href();
                 self.currentPage = "convos-chat";
+                Object.keys(cache).forEach(function(connection_id) {
+                  var msg = cache[connection_id];
+                  var c = self.user.getConnection(connection_id);
+                  delete cache[connection_id];
+                  if (c) msg.forEach(function(d) { c.emit(d.event, d); });
+                });
               });
             });
           });

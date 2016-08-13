@@ -38,7 +38,6 @@
         e.preventDefault();
         Convos.settings.dialogsVisible = false;
         Convos.settings.main = e.currentTarget.href.replace(/.*?#/, "#");
-        if (DEBUG) console.log('[loc:main] ' + Convos.settings.main);
       });
     },
     update: function(v) {
@@ -55,7 +54,6 @@
         e.preventDefault();
         Convos.settings.dialogsVisible = false;
         Convos.settings.sidebar = Convos.settings.sidebar == href ? "" : href;
-        if (DEBUG) console.log('[loc:sidebar] ' + (Convos.settings.sidebar || "null"));
       });
     },
     update: function(v) {
