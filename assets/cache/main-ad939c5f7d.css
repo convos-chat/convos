@@ -2265,8 +2265,10 @@ ul.staggered-list li {
     display: none !important; } }
 
 @media only screen and (min-width: 993px) {
-  .hide-on-large-only, .convos-dialog-container header a.toggle-dialogs,
-  .convos-settings header a.toggle-dialogs {
+  .hide-on-large-only, .convos-dialog-container a.toggle-dialogs,
+  .convos-dialogs a.toggle-dialogs,
+  .convos-settings a.toggle-dialogs,
+  .is-sidebar a.toggle-dialogs {
     display: none !important; } }
 
 @media only screen and (min-width: 993px) {
@@ -4879,6 +4881,12 @@ div.autocomplete {
 .is-sidebar .convos-menu .toggle-dialogs {
   float: left; }
 
+.convos-dialog-container a.toggle-dialogs,
+.convos-dialogs a.toggle-dialogs,
+.convos-settings a.toggle-dialogs,
+.is-sidebar a.toggle-dialogs {
+  float: left; }
+
 .convos-dialog-container header,
 .convos-settings header {
   position: relative;
@@ -4889,9 +4897,6 @@ div.autocomplete {
     float: left;
     padding-left: 0.75rem;
     cursor: pointer; }
-  .convos-dialog-container header a.toggle-dialogs,
-  .convos-settings header a.toggle-dialogs {
-    float: left; }
 
 .is-sidebar header {
   text-align: right; }

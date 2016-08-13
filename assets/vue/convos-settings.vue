@@ -3,9 +3,7 @@
     <header>
       <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
       <h2 data-hint="Welcome to Convos!">{{header()}}</h2>
-      <convos-menu :toggle="true" :user="user">
-        <i class="material-icons">star_rate</i>
-      </convos-menu>
+      <convos-menu :toggle="true" :user="user"></convos-menu>
     </header>
     <div class="section" v-if="showWelcomeMessage()">
       <div class="row">

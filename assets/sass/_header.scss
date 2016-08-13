@@ -40,6 +40,11 @@
   }
 
   .convos-menu .toggle-dialogs { float: left; }
+
+  a.toggle-dialogs {
+    @extend .hide-on-large-only;
+    float: left;
+  }
 }
 
 .convos-dialog-container,
@@ -53,11 +58,6 @@
       float: left;
       padding-left: $gutter-width / 2;
       cursor: pointer;
-    }
-
-    a.toggle-dialogs {
-      @extend .hide-on-large-only;
-      float: left;
     }
   }
 }
