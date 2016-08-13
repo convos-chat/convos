@@ -2265,7 +2265,8 @@ ul.staggered-list li {
     display: none !important; } }
 
 @media only screen and (min-width: 993px) {
-  .hide-on-large-only {
+  .hide-on-large-only, .convos-dialog-container header a.toggle-dialogs,
+  .convos-settings header a.toggle-dialogs {
     display: none !important; } }
 
 @media only screen and (min-width: 993px) {
@@ -4614,12 +4615,6 @@ div.alert {
   overflow: hidden;
   padding-right: 0.75rem; }
 
-.hr {
-  height: 10px;
-  overflow: hidden; }
-  .hr hr {
-    visibility: hidden; }
-
 .material-hint {
   background-color: #323232;
   color: #fff;
@@ -4804,24 +4799,15 @@ div.autocomplete {
   .convos-settings header h2,
   .is-sidebar header h2 {
     margin: 0; }
-  .convos-dialog-container header h2, .convos-dialog-container header a, .convos-dialog-container header i, .convos-dialog-container header [class^="mdi-"], .convos-dialog-container header [class*="mdi-"], .convos-dialog-container header i.material-icons,
+  .convos-dialog-container header h2, .convos-dialog-container header a, .convos-dialog-container header i.material-icons,
   .convos-dialogs header h2,
   .convos-dialogs header a,
-  .convos-dialogs header i,
-  .convos-dialogs header [class^="mdi-"],
-  .convos-dialogs header [class*="mdi-"],
   .convos-dialogs header i.material-icons,
   .convos-settings header h2,
   .convos-settings header a,
-  .convos-settings header i,
-  .convos-settings header [class^="mdi-"],
-  .convos-settings header [class*="mdi-"],
   .convos-settings header i.material-icons,
   .is-sidebar header h2,
   .is-sidebar header a,
-  .is-sidebar header i,
-  .is-sidebar header [class^="mdi-"],
-  .is-sidebar header [class*="mdi-"],
   .is-sidebar header i.material-icons {
     color: #fff;
     display: inline-block;
@@ -4832,8 +4818,8 @@ div.autocomplete {
   .convos-dialogs header a,
   .convos-settings header a,
   .is-sidebar header a {
-    padding-left: 14px;
-    padding-right: 14px; }
+    padding-left: 10px;
+    padding-right: 10px; }
   .convos-dialog-container header a:hover,
   .convos-dialogs header a:hover,
   .convos-settings header a:hover,
@@ -4844,44 +4830,30 @@ div.autocomplete {
   .convos-settings header a.active,
   .is-sidebar header a.active {
     background: #54b359; }
-  @media only screen and (max-width: 992px) {
-    .convos-dialog-container header a,
-    .convos-dialogs header a,
-    .convos-settings header a,
-    .is-sidebar header a {
-      display: none; }
-    .convos-dialog-container header a.notifications,
-    .convos-dialogs header a.notifications,
-    .convos-settings header a.notifications,
-    .is-sidebar header a.notifications {
-      display: inline-block; } }
   @media only screen and (min-width: 601px) {
     .convos-dialog-container header,
     .convos-dialogs header,
     .convos-settings header,
     .is-sidebar header {
       height: 64px; }
-      .convos-dialog-container header h2, .convos-dialog-container header a, .convos-dialog-container header i, .convos-dialog-container header [class^="mdi-"], .convos-dialog-container header [class*="mdi-"], .convos-dialog-container header i.material-icons,
+      .convos-dialog-container header h2, .convos-dialog-container header a, .convos-dialog-container header i.material-icons,
       .convos-dialogs header h2,
       .convos-dialogs header a,
-      .convos-dialogs header i,
-      .convos-dialogs header [class^="mdi-"],
-      .convos-dialogs header [class*="mdi-"],
       .convos-dialogs header i.material-icons,
       .convos-settings header h2,
       .convos-settings header a,
-      .convos-settings header i,
-      .convos-settings header [class^="mdi-"],
-      .convos-settings header [class*="mdi-"],
       .convos-settings header i.material-icons,
       .is-sidebar header h2,
       .is-sidebar header a,
-      .is-sidebar header i,
-      .is-sidebar header [class^="mdi-"],
-      .is-sidebar header [class*="mdi-"],
       .is-sidebar header i.material-icons {
         height: 64px;
         line-height: 64px; } }
+  @media only screen and (max-width: 992px) {
+    .convos-dialog-container header a.visible-on-med-and-up,
+    .convos-dialogs header a.visible-on-med-and-up,
+    .convos-settings header a.visible-on-med-and-up,
+    .is-sidebar header a.visible-on-med-and-up {
+      display: none; } }
   .convos-dialog-container header ::-webkit-input-placeholder,
   .convos-dialogs header ::-webkit-input-placeholder,
   .convos-settings header ::-webkit-input-placeholder,
@@ -4903,16 +4875,25 @@ div.autocomplete {
   .is-sidebar header :-ms-input-placeholder {
     color: #addaaf; }
 
+.convos-dialog-container .convos-menu .toggle-dialogs,
+.convos-dialogs .convos-menu .toggle-dialogs,
+.convos-settings .convos-menu .toggle-dialogs,
+.is-sidebar .convos-menu .toggle-dialogs {
+  float: left; }
+
 .convos-dialog-container header,
 .convos-settings header {
   position: relative;
   flex-shrink: 0;
-  overflow: hidden;
   text-align: right; }
   .convos-dialog-container header h2,
   .convos-settings header h2 {
     float: left;
-    padding-left: 0.75rem; }
+    padding-left: 0.75rem;
+    cursor: pointer; }
+  .convos-dialog-container header a.toggle-dialogs,
+  .convos-settings header a.toggle-dialogs {
+    float: left; }
 
 .is-sidebar header {
   text-align: right; }
@@ -4988,14 +4969,19 @@ img.embed {
   .convos-dialogs div.content,
   .is-sidebar div.content {
     overflow: auto; }
+  .convos-dialogs.hidden,
+  .is-sidebar.hidden {
+    display: none !important; }
 
 .convos-dialogs {
   background-color: #f7f7f7;
-  width: 240px;
+  width: 100%;
   flex-shrink: 0; }
-  @media only screen and (max-width: 992px) {
+  @media only screen and (min-width: 993px) {
     .convos-dialogs {
-      display: none; } }
+      width: 240px; }
+      .convos-dialogs.show-on-large {
+        display: block !important; } }
   .convos-dialogs header .input-field {
     height: 100%;
     padding: 0 1.5rem;
@@ -5023,30 +5009,33 @@ img.embed {
         color: #fff; }
       .convos-dialogs header .input-field label.active {
         transform: translateY(0); }
+  @media only screen and (max-width: 992px) {
+    .convos-dialogs header .input-field {
+      display: none; } }
   .convos-dialogs .content > a {
     display: block;
     padding: 1rem 0.75rem; }
-  .convos-dialogs a {
+  .convos-dialogs .content a {
     min-height: 64px; }
-  .convos-dialogs a.active {
+  .convos-dialogs .content a.active {
     background-color: #fff;
     color: #225725;
     font-weight: bold; }
-  .convos-dialogs a.frozen {
+  .convos-dialogs .content a.frozen {
     color: #B71C1C; }
-  .convos-dialogs .on {
+  .convos-dialogs .content .on {
     display: block;
     font-size: 0.9rem;
     color: #777;
     margin-left: 28px;
     margin-bottom: -5px; }
-  .convos-dialogs .material-icons {
+  .convos-dialogs .content .material-icons {
     vertical-align: bottom; }
 
 .is-sidebar {
   background-color: #f7f7f7;
-  width: 280px; }
-  @media only screen and (min-width: 601px) {
+  width: 100%; }
+  @media only screen and (min-width: 993px) {
     .is-sidebar {
       width: 336px; } }
 
@@ -5081,8 +5070,11 @@ header a.notifications {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 100%;
-    z-index: 900; } }
+    z-index: 900; }
+  .convos-dialogs {
+    left: 0; }
+  .is-sidebar {
+    right: 0; } }
 
 .convos-settings .divider {
   margin: 2rem 0; }

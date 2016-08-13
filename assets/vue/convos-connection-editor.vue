@@ -125,13 +125,10 @@ module.exports = {
     }
   },
   ready: function() {
-    this.$nextTick(function() { $('#form_server', this.$el).focus(); });
+    this.$nextTick(function() { this.$el.querySelector('#form_server').focusOnDesktop() });
     this.connection = this.user.getConnection(this.settings.main.replace(/.*connection\//, ''));
     this.defaultServer = this.settings.default_server;
     this.server = this.settings.default_server;
-    this.user.on("initialized", function() {
-      this.connection = this.user.getConnection(this.settings.main.replace(/.*connection\//, ''));
-    }.bind(this));
   }
 };
 </script>

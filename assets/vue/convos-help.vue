@@ -1,6 +1,10 @@
 <template>
   <div class="convos-help is-sidebar">
-    <header><convos-menu :user="user"></convos-menu></header>
+    <header>
+      <convos-menu :user="user">
+        <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
+      </convos-menu>
+    </header>
     <div class="content">
       <div class="row">
         <div class="col s12">

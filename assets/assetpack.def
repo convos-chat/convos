@@ -52,6 +52,7 @@
 < vue/convos-help.vue
 < vue/convos-notifications.vue
 < vue/convos-profile.vue
+< vue/convos-toggle-dialogs.vue
 
 < vue/convos-message-action.vue
 < vue/convos-message-day-changed.vue

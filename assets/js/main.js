@@ -22,8 +22,9 @@
         login: function(data) {
           var self = this;
           if (this.user.email) return console.log("Already logged in.");
-          this.user.email  = data.email;
+          this.user.email = data.email;
           this.currentPage = "convos-chat";
+          this.settings.dialogsVisible = false;
 
           Convos.api.ws().on("close", function() {
             self.user.connections.forEach(function(c) { c.state = "unreachable"; });
@@ -42,8 +43,10 @@
             self.user.refreshConnections(function(err) {
               if (err) return console.log(err); // TODO
               self.user.refreshDialogs(function(err) {
-                self.user.emit("initialized");
-                if (err) return console.log(err); // TODO
+                try { document.getElementById("loader").$remove() } catch(e) {};
+                if (!self.settings.main && self.user.dialogs.length)
+                  self.settings.main = self.user.dialogs[0].href();
+                self.currentPage = "convos-chat";
               });
             });
           });
@@ -63,9 +66,6 @@
 
         Convos.api.getUser({}, function(err, xhr) {
           if (!err) self.$emit("login", xhr.body);
-          document.getElementById("loader").$remove();
-          self.$el.style.display = "block";
-          self.currentPage       = err ? "convos-login" : "convos-chat";
         });
       }
     });

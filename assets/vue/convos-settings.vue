@@ -1,7 +1,8 @@
 <template>
   <div class="convos-settings">
     <header>
-      <h2 data-hint="Welcome to Convos!">{{user.initialized ? 'Convos' : 'Loading...'}}</h2>
+      <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
+      <h2 data-hint="Welcome to Convos!">{{header()}}</h2>
       <convos-menu :toggle="true" :user="user">
         <i class="material-icons">star_rate</i>
       </convos-menu>
@@ -47,6 +48,11 @@ module.exports = {
     connectionLink: function() {
       var connections = this.user.connections;
       return '#connection' + (connections.length ? '/' + connections[0].id : '');
+    },
+    header: function() {
+      if (this.settings.main.indexOf('#connection') == 0) return "Connection";
+      if (this.settings.main.indexOf('#create-dialog') == 0) return "Dialog";
+      return "Convos";
     },
     showWelcomeMessage: function() {
       return this.settings.main.match(/\w/) ? false : true;

@@ -1,10 +1,10 @@
 <template>
   <div class="convos-dialog-container">
     <header>
-      <h2 :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
+      <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
+      <h2 @click.prevent="getInfo" :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
       <convos-menu :toggle="true" :user="user">
         <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
-        <a href="#info" @click.prevent="getInfo" data-hint="Get information"><i class="material-icons">info_outline</i></a>
         <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
       </convos-menu>
     </header>
@@ -30,6 +30,18 @@ module.exports = {
       scrollElement:     null
     };
   },
+  watch: {
+    'settings.windowHeight': function(v, o) {
+      if (this._atBottomTid) return;
+      var atBottom = this.atBottom;
+      this._atBottomTid = setTimeout(function() {
+        this.scrollToBottom({gotoBottom: atBottom});
+        this._atBottomTid = 0;
+      }.bind(this),
+        300
+      );
+    }
+  },
   methods: {
     closeDialog: function() {
       this.dialog.connection().send("/close " + this.dialog.name);
@@ -40,16 +52,6 @@ module.exports = {
         if (!err) return this.addMessage({type: "info"});
         this.addMessage({message: err[0].message, type: "error"});
       });
-    },
-    moveToBottomOnResize: function(e) {
-      if (this._atBottomTid) return;
-      var atBottom = this.atBottom;
-      this._atBottomTid = setTimeout(function() {
-        this.scrollToBottom({gotoBottom: atBottom});
-        this._atBottomTid = 0;
-      }.bind(this),
-        300
-      );
     },
     onScroll: function() {
       var elem = this.scrollElement;
@@ -68,12 +70,10 @@ module.exports = {
   ready: function() {
     this.scrollElement = $("main", this.$el)[0];
     this.scrollElement.addEventListener("scroll", this.onScroll);
-    window.addEventListener("resize", this.moveToBottomOnResize);
     this.dialog.on("initialized", this.scrollToBottom);
     this.dialog.on("message", this.scrollToBottom);
   },
   beforeDestroy: function() {
-    window.removeEventListener("resize", this.moveToBottomOnResize);
     this.scrollElement.removeEventListener("scroll", this.onScroll);
   }
 };
