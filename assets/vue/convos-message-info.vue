@@ -3,7 +3,7 @@
     <a href="#chat" class="title">{{msg.from}}</a>
     <div class="message">
       <span>
-        <template v-if="dialog.participants.length">{{nParticipants | capitalize}} participants</template>
+        <template v-if="participants.length">{{nParticipants | capitalize}} participants</template>
         <template v-else>You are the only participant</template>
         in {{dialog.name}}, connected to {{dialog.connection().name}}.
         <template v-for="p in participants">
