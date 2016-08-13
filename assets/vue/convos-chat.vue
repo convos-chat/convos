@@ -1,29 +1,18 @@
 <template>
   <div class="convos-chat">
     <convos-dialogs :user="user"></convos-dialogs>
-    <convos-dialog-container :dialog="d" :sidebar="sidebar" :user="user" v-show="d.active()" v-for="d in user.dialogs"></convos-dialog-container>
-    <component :is="sidebar" :settings="settings" :user="user" v-if="sidebar"></component>
+    <convos-dialog-container :dialog="d" :user="user" v-show="showDialogContainer(d)" v-for="d in user.dialogs"></convos-dialog-container>
+    <component :is="'convos-' + settings.sidebar" :user="user" v-if="settings.sidebar"></component>
   </div>
 </template>
 <script>
 module.exports = {
-  props: ["settings", "user"],
-  data:  function() {
-    return {
-      sidebar: "",
-      sidebars: {
-        'create-dialog': true,
-        'connection': true,
-        'help': true,
-        'notifications': true,
-        'profile': true
-      }
-    };
-  },
-  events: {
-    locationchange: function(hash) {
-      this.sidebar = hash[0] && this.sidebars[hash[0]] ? "convos-" + hash[0] : "";
-      return true;
+  props: ["user"],
+  methods: {
+    showDialogContainer: function(d) {
+      var visible = this.settings.main == d.href();
+      if (visible) d.emit("visible");
+      return visible;
     }
   }
 };

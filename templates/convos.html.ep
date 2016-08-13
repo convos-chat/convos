@@ -13,11 +13,7 @@
         <a href="">Reload <i class="material-icons">refresh</i></a>
       </div>
     </div>
-    <component
-      :is="currentPage"
-      :current-page.sync="currentPage"
-      :settings="settings"
-      :user="user"></component>
+    <component :is="currentPage" :current-page.sync="currentPage" :user="user"></component>
     %= javascript begin
       window.Convos = {
         apiUrl:   "<%= $c->url_for('convos_api_specification') %>",

@@ -12,12 +12,11 @@
     if (err) return Convos.error("Could not load API spec! " + err);
 
     Convos.vm = new Vue({
-      el:   "body",
-      data: {
-        currentPage:        "",
-        embedViewerElement: null,
-        settings:           Convos.settings,
-        user:               new Convos.User()
+      el: "body",
+      data: {currentPage: "", user: new Convos.User()},
+      watch: {
+        'settings.main': function(v, o) { localStorage.setItem("main", v); },
+        'settings.sidebar': function(v, o) { localStorage.setItem("sidebar", v); }
       },
       events: {
         login: function(data) {
@@ -61,8 +60,6 @@
       },
       ready: function() {
         var self = this;
-
-        window.onhashchange = function() { self.$broadcast("locationchange", self.parseLocation()); }
 
         Convos.api.getUser({}, function(err, xhr) {
           if (!err) self.$emit("login", xhr.body);

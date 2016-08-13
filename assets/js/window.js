@@ -3,7 +3,7 @@
   window.isTouchDevice   = !!("ontouchstart" in window);
   window.isWideScreen    = window.innerWidth > window.wideScreenWidth;
   window.wideScreenWidth = 820;
-  window.DEBUG           = window.DEBUG || true;
+  window.DEBUG           = window.DEBUG || true; // TODO: Should default to false?
 
   window.nextTick = function(cb) {
     setTimeout(cb, 1);

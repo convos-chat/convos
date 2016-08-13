@@ -2,26 +2,26 @@
   <div class="convos-dialogs">
     <header>
       <div class="input-field">
-        <input v-model="search" @keydown.enter.prevent="goto" id="search_field" type="search" autocomplete="off" placeholder="Search...">
+        <input v-model="q" @keydown.enter="search" id="search_field" type="search" autocomplete="off" placeholder="Search...">
         <label for="search_field"><i class="material-icons">search</i></label>
         <!-- i class="material-icons">close</i -->
       </div>
     </header>
     <div class="content">
-      <a :href="d.href()" @click.prevent="setCurrentDialog(d)" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in dialogs()">
+      <a v-link="d.href()" :data-hint="d.frozen" :class="dialogClass(d, i)" v-for="(i, d) in dialogs()">
         <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
-        <span class="on" v-if="d.connection">{{d.connection.protocol}}-{{d.connection.name}}</span>
+        <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
         <span class="on" v-else>convos-local</span>
       </a>
-      <a href="#create-dialog">
+      <a v-link.literal="#create-dialog" v-if="user.connections.length" :class="activeClass('#create-dialog')">
         <i class="material-icons">add</i> Join dialog...
       </a>
       <div class="hr"><hr></div>
-      <a href="#connection/{{c.protocol}}-{{c.name}}" :class="connectionClass(c)" v-for="c in user.connections">
+      <a v-link="'#connection/' + c.id" :class="connectionClass(c)" v-for="c in user.connections">
         <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
         <span class="on">{{c.humanState()}}</span>
       </a>
-      <a href="#connection">
+      <a v-link.literal="#connection" :class="activeClass('#connection')">
         <i class="material-icons">add</i> Add connection...
       </a>
     </div>
@@ -31,39 +31,34 @@
 module.exports = {
   props:   ["user"],
   data: function() {
-    return {first: null, search: ""};
+    return {first: null, q: ""};
   },
   methods: {
     connectionClass: function(c) {
-      return {
-        frozen: c.state == 'connected' ? false : true
-      };
+      var cn = this.activeClass('#connection/' + c.id);
+      cn.frozen = c.state == 'connected' ? false : true;
+      return cn;
     },
     dialogClass: function(d, i) {
       if (!i) this.$nextTick(this.overrideHints);
-      return {
-        active: d.active(),
-        frozen: d.frozen
-      };
+      var cn = this.activeClass(d.href());
+      cn.frozen = d.frozen ? true : false;
+      return cn;
     },
     dialogs: function() {
       var self = this;
       var dialogs = this.user.dialogs.filter(function(d) {
-        return self.search ? d.name.match(self.search) : true;
+        return self.q ? d.name.match(self.q) : true;
       }).sort(function(a, b) {
         return a.name > b.name
       });
       this.first = dialogs[0];
       return dialogs;
     },
-    goto: function(e) {
+    search: function(e) {
       if (e.shiftKey) return this.user.getActiveDialog().emit("focusInput");
-      if (this.first && this.search) this.setCurrentDialog(this.first);
-    },
-    setCurrentDialog: function(dialog) {
-      this.search = "";
-      this.user.dialogs.forEach(function(d) { d.active(dialog == d ? true : false); });
-      this.user.getActiveDialog().emit("focusInput");
+      if (this.first && this.q) this.settings.main = d.href();
+      this.q = "";
     }
   }
 };

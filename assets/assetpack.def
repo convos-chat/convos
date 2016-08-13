@@ -20,8 +20,6 @@
 < js/vue/mixin-message.js
 < js/vue/filter-markdown.js
 < js/vue/filter-timestring.js
-< js/vue/mixin-materialize.js
-< js/vue/mixin-location.js
 
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/waves.js
@@ -44,6 +42,7 @@
 
 < vue/convos-login.vue
 < vue/convos-register.vue
+< vue/convos-settings.vue
 
 < vue/convos-menu.vue
 < vue/convos-connection.vue
