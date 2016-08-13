@@ -3,8 +3,8 @@
     this.connections   = [];
     this.dialogs       = [];
     this.email         = "";
-    this.initialized   = false;
     this.notifications = [];
+    EventEmitter(this);
   };
 
   var proto = Convos.User.prototype;

@@ -2,6 +2,9 @@
   <div class="convos-notifications is-sidebar">
     <header><convos-menu :user="user"></convos-menu></header>
     <div class="content">
+      <div class="row" v-if="!user.notifications.length">
+        <h5 class="center">No notifications.</h5>
+      </div>
       <div class="row notification" @click="gotoMessage(msg)" v-for="msg in user.notifications">
         <div class="col s12">
           <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>

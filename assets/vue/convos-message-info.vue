@@ -13,7 +13,7 @@
           The topic is: {{dialog.topic}}
         </template>
         <template v-if="!dialog.topic">
-          This conversation has no topic.
+          This dialog has no topic.
         </template>
       </span>
     </div>

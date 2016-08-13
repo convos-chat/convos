@@ -45,7 +45,7 @@
 < vue/convos-settings.vue
 
 < vue/convos-menu.vue
-< vue/convos-connection.vue
+< vue/convos-connection-editor.vue
 < vue/convos-create-dialog.vue
 < vue/convos-dialogs.vue
 < vue/convos-embed.vue

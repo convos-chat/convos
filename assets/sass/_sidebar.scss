@@ -2,6 +2,7 @@
 .is-sidebar {
   position: relative;
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   div.content { overflow: auto; }
 }
@@ -101,10 +102,11 @@ header a.notifications {
   .row {
     margin: 2px auto;
     padding-bottom: $h6-fontsize / 2.5;
-    cursor: pointer;
   }
 
   .notification {
+    cursor: pointer;
+
     &:hover {
       background-color: darken($body-bg, 6%);
     }

@@ -4,30 +4,21 @@
   overflow: hidden;
 }
 
-.convos-dialog-container {
+.convos-dialog-container,
+.convos-settings {
   overflow: auto;
   display: flex;
   flex-grow: 1;
   flex-direction: column;
-
-  header {
-    position: relative;
-    flex-shrink: 0;
-    overflow: hidden;
-    text-align: right;
-
-    h2 {
-      float: left;
-      padding-left: $gutter-width / 2;
-    }
-  }
 
   main {
     padding: $gutter-width $gutter-width / 2;
     overflow: auto;
     flex-grow: 1;
   }
+}
 
+.convos-dialog-container {
   .convos-message {
     display: block;
     position: relative;

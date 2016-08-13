@@ -42,7 +42,7 @@
             self.user.refreshConnections(function(err) {
               if (err) return console.log(err); // TODO
               self.user.refreshDialogs(function(err) {
-                self.user.initialized = true;
+                self.user.emit("initialized");
                 if (err) return console.log(err); // TODO
               });
             });

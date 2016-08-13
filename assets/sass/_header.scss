@@ -1,5 +1,6 @@
 .convos-dialog-container,
 .convos-dialogs,
+.convos-settings,
 .is-sidebar {
   header {
     background-color: $primary-color;
@@ -37,6 +38,21 @@
     :-moz-placeholder { color: lighten($primary-color, 20%); }
     ::-moz-placeholder { color: lighten($primary-color, 20%); }
     :-ms-input-placeholder { color: lighten($primary-color, 20%); }
+  }
+}
+
+.convos-dialog-container,
+.convos-settings {
+  header {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-align: right;
+
+    h2 {
+      float: left;
+      padding-left: $gutter-width / 2;
+    }
   }
 }
 

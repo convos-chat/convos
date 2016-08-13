@@ -78,6 +78,20 @@ div.alert {
   }
 }
 
+.hidden { display: none; }
+
+.input-btn-right {
+  .btn {
+    float: right;
+    margin-right: 0;
+    margin-top: 0.5rem;
+  }
+  .input-left {
+    overflow: hidden;
+    padding-right: $gutter-width / 2;
+  }
+}
+
 .hr {
   height: 10px;
   overflow: hidden;
