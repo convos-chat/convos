@@ -29,8 +29,9 @@ sub has_many {
 
   monkey_patch $class => $getter => sub {
     my ($self, $attrs) = @_;
-    my $id = lc(ref $attrs ? $attrs->{id} || $related->id($attrs) : $attrs);
-    return $self->{$accessor}{$id};
+    my $id = ref $attrs ? $attrs->{id} || $related->id($attrs) : $attrs;
+    die "Could not build 'id' for $class" unless defined $id;
+    return $self->{$accessor}{lc($id)};
   };
 
   $class->can($remover) or monkey_patch $class => $remover => sub {

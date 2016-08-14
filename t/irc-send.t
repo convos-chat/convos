@@ -38,6 +38,18 @@ $t->run(
   [qr{JOIN}, ['main', 'join-convos.irc']],
   sub {
     $connection->send(
+      '#convos' => '/join ',    # join without a channel name
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
+    Mojo::IOLoop->start;
+    is $err, 'Command missing arguments.', 'cmd /join convos';
+  }
+);
+
+$t->run(
+  [qr{JOIN}, ['main', 'join-convos.irc']],
+  sub {
+    $connection->send(
       '#convos' => '/join #convos',
       sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
     );

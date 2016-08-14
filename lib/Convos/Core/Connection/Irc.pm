@@ -180,7 +180,7 @@ sub send {
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
-  return next_tick $self, $cb => 'Unknown IRC command.';
+  return next_tick $self, $cb => 'Unknown IRC command.', undef;
 }
 
 sub _event_irc_close {
@@ -236,8 +236,9 @@ sub _join_dialog {
   my $cb   = pop;
   my $self = shift;
   my ($name, $password) = split /\s/, shift, 2;
-  my $dialog = $self->get_dialog($name);
+  return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
 
+  my $dialog = $self->get_dialog($name);
   return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
   Scalar::Util::weaken($self);
   return $self->_proxy(
