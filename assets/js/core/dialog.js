@@ -26,12 +26,18 @@
     if (!msg.type) msg.type = "private";
     if (!msg.ts) msg.ts = new Date();
     if (typeof msg.ts == "string") msg.ts = new Date(msg.ts);
-    if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) this.unread++;
-    if (msg.highlight && !disableNotifications) Notification.simple(msg.from, msg.message);
-    if (msg.highlight) this.connection().user.notifications.unshift(msg);
     if (!prev) prev = {from: "", ts: msg.ts};
-    if (prev && prev.ts.getDate() != msg.ts.getDate()) {
-      this.messages[method]({type: "day-changed", prev: prev});
+
+    if (method == "push") {
+      this.prevMessage = msg;
+      if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) this.unread++;
+      if (msg.highlight) {
+        if (!disableNotifications) Notification.simple(msg.from, msg.message);
+        this.connection().user.notifications.unshift(msg);
+      }
+      if (prev && prev.ts.getDate() != msg.ts.getDate()) {
+        this.messages[method]({type: "day-changed", prev: prev, ts: msg.ts});
+      }
     }
 
     if (method == "unshift") {
@@ -42,7 +48,6 @@
       msg.prev = prev;
     }
 
-    if (method == "push") this.prevMessage = msg;
     this._addParticipant(msg.from, {seen: msg.ts});
     this.messages[method](msg);
     if (method == "push") this.emit("message", msg);
