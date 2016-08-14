@@ -1,6 +1,6 @@
 <template>
   <div class="convos-notifications is-sidebar">
-    <header><convos-menu :user="user"></convos-menu></header>
+    <header><convos-header-links :user="user"></convos-header-links></header>
     <div class="content">
       <div class="row" v-if="!user.notifications.length">
         <h5 class="center">No notifications.</h5>

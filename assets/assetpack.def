@@ -37,33 +37,40 @@
 < js/core/dialog.js
 < js/core/user.js
 
+# materialize elements
 < vue/md-autocomplete.vue
 < vue/md-option.vue
 < vue/md-select.vue
 
-< vue/convos-login.vue
-< vue/convos-register.vue
-< vue/convos-settings.vue
+# menus
+< vue/convos-header-links.vue
+< vue/convos-main-menu.vue
+< vue/convos-toggle-main-menu.vue
 
-< vue/convos-menu.vue
-< vue/convos-connection-editor.vue
-< vue/convos-create-dialog.vue
-< vue/convos-dialogs.vue
-< vue/convos-embed.vue
+# sidebars
 < vue/convos-help.vue
 < vue/convos-notifications.vue
 < vue/convos-profile.vue
-< vue/convos-toggle-dialogs.vue
 
+# chat
 < vue/convos-message-action.vue
 < vue/convos-message-day-changed.vue
+< vue/convos-message-dialog-info.vue
 < vue/convos-message-enable-notifications.vue
 < vue/convos-message-error.vue
-< vue/convos-message-info.vue
 < vue/convos-message-notice.vue
 < vue/convos-message-private.vue
-< vue/convos-dialog-container.vue
-< vue/convos-chat.vue
 < vue/convos-input.vue
+< vue/convos-dialog-container.vue
+
+# settings
+< vue/convos-connection-editor.vue
+< vue/convos-create-dialog.vue
+< vue/convos-settings.vue
+
+# main components
+< vue/convos-chat.vue
+< vue/convos-login.vue
+< vue/convos-register.vue
 
 < js/main.js

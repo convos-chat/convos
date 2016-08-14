@@ -1,7 +1,7 @@
 div.autocomplete {
+  @include overflow;
   border-bottom: 1px solid color('grey', 'lighten-1');
   max-height: 8em;
-  overflow: auto;
   position: relative;
 
   ul { margin: 0; padding: 0; }

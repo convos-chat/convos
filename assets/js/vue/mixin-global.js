@@ -6,6 +6,8 @@
   Convos.settings.dialogsVisible = false;
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
 
+  if (Convos.settings.sidebar) $('body').addClass('has-sidebar');
+
   // screenHeight and screenWidth
   window.dispatchEvent(new Event('resize'));
 
@@ -56,9 +58,11 @@
       var vm = this.vm;
       this.el.addEventListener("click", function(e) {
         var href = e.currentTarget.href.replace(/.*?#/, "");
+        var method = Convos.settings.sidebar == href ? "removeClass" : "addClass";
         e.preventDefault();
         Convos.settings.dialogsVisible = false;
         Convos.settings.sidebar = Convos.settings.sidebar == href ? "" : href;
+        $('body')[method]('has-sidebar');
       });
     },
     update: function(v) {

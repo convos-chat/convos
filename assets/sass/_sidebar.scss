@@ -1,59 +1,31 @@
-.convos-dialogs,
+.convos-main-menu,
 .is-sidebar {
-  position: relative;
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
-  div.content { height: 100%; overflow: auto; }
+  width: 100%; // small screens
+  background-color: darken($body-bg, 3%);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: $z-index-header + 1;
+
+  div.content {
+    @include under-header;
+    @include overflow;
+    overflow-x: hidden; // This fixes some weird horizontal scrolling in Chrome on iPhone
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
 
   &.hidden { display: none !important; }
 }
 
-.convos-dialogs {
-  background-color: darken($body-bg, 3%);
-  width: 100%;
-  flex-shrink: 0;
+.convos-main-menu {
+  left: 0; // small screen
 
   @media #{$large-and-up} {
-    width: $dialogs-width;
+    width: $main-menu-width;
     &.show-on-large {
       display: block !important;
-    }
-  }
-
-  header {
-    .input-field {
-      height: 100%;
-      padding: 0 $gutter-width;
-      margin: 0;
-
-      input {
-        font-size: 1.2rem;
-        height: 100%;
-        border: none;
-        margin: 0;
-        padding-left: 1rem;
-
-        &, &:focus { color: $navbar-font-color; }
-
-        &:focus, &[type=text]:valid {
-          background: transparent;
-          border: none;
-          box-shadow: none;
-        }
-      }
-      label {
-        top: 0;
-        left: $gutter-width / 2;
-
-        i { font-size: 24px; color: rgba(255,255,255,.7); transition: color .3s; }
-        &.active i { color: $navbar-font-color; }
-        &.active { transform: translateY(0); }
-      }
-    }
-
-    @media #{$medium-and-down} {
-      .input-field { display: none; }
     }
   }
 
@@ -61,6 +33,20 @@
     display: block;
     position: relative;
     padding: $element-bottom-margin $gutter-width / 2;
+
+    &.active {
+      background-color: $body-bg;
+      color: darken($link-color, 15%);
+      font-weight: bold;
+    }
+
+    &.frozen {
+      color: color("red", "darken-4");
+    }
+
+    &:hover, &.focus {
+      background-color: darken($body-bg, 6%);
+    }
 
     b {
       font-size: 1rem;
@@ -71,34 +57,24 @@
       bottom: 1rem;
       left: $gutter-width / 2;
     }
+
+    .material-icons { vertical-align: top; }
+    &.simple .material-icons { vertical-align: bottom; }
   }
-  .content {
-    a { min-height: 64px; }
-    a.active {
-      background-color: $body-bg;
-      color: darken($link-color, 15%);
-      font-weight: bold;
-    }
-    a.frozen {
-      color: color("red", "darken-4");
-    }
-    .on {
-      display: block;
-      font-size: 0.9rem;
-      color: #777;
-      margin-left: 28px;
-      margin-bottom: -5px;
-    }
-    .material-icons { vertical-align: bottom; }
+
+  .on {
+    display: block;
+    font-size: 0.9rem;
+    color: #777;
+    margin-left: 28px;
+    margin-bottom: -5px;
   }
 }
 
 .is-sidebar {
-  background-color: darken($body-bg, 3%);
-  width: 100%;
-
+  right: 0;
   @media #{$large-and-up} {
-    width: $sidebar-width * 1.2;
+    width: $sidebar-width;
   }
 }
 
@@ -123,14 +99,18 @@
   }
 }
 
-@media #{$medium-and-down} {
-  .convos-dialogs,
-  .is-sidebar {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 900;
+header a.notifications {
+  position: relative;
+
+  i.active { // notifications
+    position: relative;
   }
-  .convos-dialogs { left: 0; }
-  .is-sidebar { right: 0; }
+  b.n-notifications {
+    color: darken($navbar-font-color, 10%);
+    font-size: 1rem;
+    line-height: 1rem;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+  }
 }

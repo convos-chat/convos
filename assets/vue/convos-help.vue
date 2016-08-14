@@ -1,9 +1,8 @@
 <template>
   <div class="convos-help is-sidebar">
     <header>
-      <convos-menu :user="user">
-        <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
-      </convos-menu>
+      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
+      <convos-header-links :user="user"></convos-header-links>
     </header>
     <div class="content">
       <div class="row">

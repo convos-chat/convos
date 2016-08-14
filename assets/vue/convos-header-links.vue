@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-menu">
+  <div class="convos-header-links">
     <slot></slot>
     <template v-if="!toggle || !settings.sidebar">
       <a v-sidebar.literal="#notifications" data-hint="Show notifications" class="notifications" :class="activeClass('notifications')">
@@ -11,9 +11,6 @@
       </a>
       <a v-sidebar.literal="#help" data-hint="Help" :class="activeClass('help')" class="visible-on-med-and-up">
         <i class="material-icons">help</i>
-      </a>
-      <a href="#logout" @click.prevent="logout" class="btn-logout" data-hint="Logout" class="visible-on-med-and-up">
-        <i class="material-icons">power_settings_new</i>
       </a>
     </template>
   </div>

@@ -1,0 +1,21 @@
+@mixin input-placeholder-color($color) {
+  ::-webkit-input-placeholder { color: $color; }
+  :-moz-placeholder { color: $color; }
+  ::-moz-placeholder { color: $color; }
+  :-ms-input-placeholder { color: $color; }
+}
+
+@mixin overflow() {
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
+}
+
+@mixin under-header() {
+  position: absolute;
+  top: $navbar-height-mobile;
+  @include overflow;
+
+  @media #{$large-and-up} {
+    top: $navbar-height;
+  }
+}

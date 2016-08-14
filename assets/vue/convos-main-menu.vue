@@ -1,12 +1,12 @@
 <template>
-  <div class="convos-dialogs show-on-large" :class="settings.dialogsVisible ? '' : 'hidden'">
+  <div class="convos-main-menu show-on-large" :class="settings.dialogsVisible ? '' : 'hidden'">
     <header>
+      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
       <div class="input-field">
         <input v-model="q" @keydown.enter="search" id="search_field" type="search" autocomplete="off" placeholder="Search...">
         <label for="search_field"><i class="material-icons">search</i></label>
         <!-- i class="material-icons">close</i -->
       </div>
-      <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
     </header>
     <div class="content">
       <a v-link="d.href()" :data-hint="d.frozen || ''" :class="dialogClass(d, i)" v-for="(i, d) in dialogs()">
@@ -15,7 +15,7 @@
         <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
         <span class="on" v-else>convos-local</span>
       </a>
-      <a v-link.literal="#create-dialog" v-if="user.connections.length" :class="activeClass('#create-dialog')">
+      <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple" :class="activeClass('#create-dialog')">
         <i class="material-icons">add</i> Join dialog...
       </a>
 
@@ -24,18 +24,18 @@
         <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
         <span class="on">{{c.humanState()}}</span>
       </a>
-      <a v-link.literal="#connection" :class="activeClass('#connection')">
+      <a v-link.literal="#connection" class="simple" :class="activeClass('#connection')">
         <i class="material-icons">add</i> Add connection...
       </a>
 
-      <div class="divider hide-on-large-only"></div>
-      <a v-sidebar.literal="#profile" data-hint="Edit profile" class="hide-on-large-only">
-        <i class="material-icons">account_circle</i> Profile
+      <div class="divider"></div>
+      <a v-sidebar.literal="#profile" class="hide-on-large-only simple">
+        <i class="material-icons">account_circle</i> Edit profile
       </a>
-      <a v-sidebar.literal="#help" data-hint="Help" :class="activeClass" class="hide-on-large-only">
+      <a v-sidebar.literal="#help" :class="activeClass" class="hide-on-large-only simple">
         <i class="material-icons">help</i> Help
       </a>
-      <a href="#logout" @click.prevent="logout" class="btn-logout" data-hint="Logout" class="hide-on-large-only">
+      <a href="#logout" @click.prevent="logout" class="simple">
         <i class="material-icons">power_settings_new</i> Logout
       </a>
     </div>

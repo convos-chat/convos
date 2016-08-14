@@ -54,6 +54,7 @@
       overrideHints: function() {
         $("[data-hint]", this.$el).each(function() {
           var $el = $(this);
+          if (window.isMobile()) return;
           if (!$el.hasClass("js-hint")) $el.hover(showHint, hideHint).addClass("js-hint");
           if (typeof $hint != "string") return;
           $hint           = $($hint).appendTo("body");

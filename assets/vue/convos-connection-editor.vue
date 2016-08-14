@@ -2,7 +2,7 @@
   <div class="convos-connection-editor">
     <div class="row">
       <div class="col s12">
-        <h4>{{connection ? 'Edit "' + connection.name + '"' : "Create connection"}}</h4>
+        <h4>{{connection ? 'Edit "' + connection.name + '"' : "Add connection"}}</h4>
         <p>
           <template v-if="!user.connections.length">
             You need to add a connection before you can have a dialog.

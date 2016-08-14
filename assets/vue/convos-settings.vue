@@ -1,11 +1,11 @@
 <template>
   <div class="convos-settings">
     <header>
-      <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
-      <h2 data-hint="Welcome to Convos!">{{header()}}</h2>
-      <convos-menu :toggle="true" :user="user"></convos-menu>
+      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
+      <h2 data-hint="Welcome to Convos!">Convos</h2>
+      <convos-header-links :toggle="true" :user="user"></convos-header-links>
     </header>
-    <div class="section" v-if="showWelcomeMessage()">
+    <main v-if="showWelcomeMessage()">
       <div class="row">
         <div class="col s12">
           <h4>Welcome to Convos!</h4>
@@ -30,13 +30,13 @@
           </p>
         </div>
       </div>
-    </div>
-    <div class="section" v-if="this.settings.main.indexOf('#connection') == 0">
+    </main>
+    <main v-if="this.settings.main.indexOf('#connection') == 0">
       <convos-connection-editor :user="user"></convos-connection-editor>
-    </div>
-    <div class="section" v-if="this.settings.main.indexOf('#create-dialog') == 0">
+    </main>
+    <main v-if="this.settings.main.indexOf('#create-dialog') == 0">
       <convos-create-dialog :user="user"></convos-create-dialog>
-    </div>
+    </main>
   </div>
 </template>
 <script>
@@ -46,11 +46,6 @@ module.exports = {
     connectionLink: function() {
       var connections = this.user.connections;
       return '#connection' + (connections.length ? '/' + connections[0].id : '');
-    },
-    header: function() {
-      if (this.settings.main.indexOf('#connection') == 0) return "Connection";
-      if (this.settings.main.indexOf('#create-dialog') == 0) return "Dialog";
-      return "Convos";
     },
     showWelcomeMessage: function() {
       return this.settings.main.match(/\w/) ? false : true;

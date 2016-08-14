@@ -1,11 +1,5 @@
 <template>
   <div class="convos-input">
-    <!-- div class="actions">
-      <a href="#attach" data-hint="Attach file"><i class="material-icons">attach_file</i></a>
-      <a href="#webcam" data-hint="Take picture"><i class="material-icons">photo_camera</i></a>
-      <a href="#emoji" data-hint="Insert emoji"><i class="material-icons">insert_emoticon</i></a>
-      <a href="#send" @click="send" data-hint="Send message"><i class="material-icons">send</i></a>
-    </div -->
     <i @click="send" class="material-icons waves-effect waves-light">send</i>
     <textarea v-model="message"
       v-el:input
@@ -93,6 +87,9 @@ module.exports = {
         this.$nextTick(function() { this.$els.input.setSelectionRange(pos, pos); });
       }
     },
+    focusInput: function() {
+      if (!window.isMobile()) this.$nextTick(function() { this.$els.input.focus(); });
+    },
     localCmdHelp: function(e) {
       $("a.help").click();
     },
@@ -115,23 +112,23 @@ module.exports = {
       var m = this.message;
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
       this.message = "";
-      this.$els.input.focus();
+      this.focusInput();
       if ("localCmd" + m != l && this[l]) return this[l](e);
       if (m.length) this.dialog.connection().send(m, this.dialog);
     }
   },
   ready: function() {
     var self = this;
-    this.dialog.on("focusInput", function() {
-      self.$nextTick(function() { this.$els.input.focus(); });
-    });
+    this.dialog.on("focusInput", this.focusInput);
+    this.dialog.on("visible", this.focusInput);
     this.dialog.on("insertIntoInput", function(str) {
       if (str.indexOf('/') == 0) return self.$els.input.value = str; // command
       var val = self.$els.input.value.replace(/\s+$/, '');
       if (val.length) val += " "
       self.$els.input.value = val + str + " ";
+      self.focusInput();
     });
-    this.$nextTick(function() { $("textarea", this.$el).focus(); });
+    this.focusInput();
   }
 };
 </script>

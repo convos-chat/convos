@@ -1,14 +1,16 @@
 <template>
-  <div class="convos-dialog-info convos-message notice">
+  <div class="convos-message notice">
     <a href="#chat" class="title">{{msg.from}}</a>
     <div class="message">
       <span>
         <template v-if="participants.length">{{nParticipants | capitalize}} participants</template>
         <template v-else>You are the only participant</template>
-        in {{dialog.name}}, connected to {{dialog.connection().name}}.
+        in {{dialog.name}}, connected to {{dialog.connection().name}}<template v-if="participants.length">: You</template>
+        <template v-else>.</template>
         <template v-for="p in participants">
-          <a href="#whois:{{p.name}}" @click.prevent="whois(p)">{{p.mode}}{{p.name}}</a>{{$index + 1 == participants.length ? "." : ", "}}
-        </template>
+          {{$index + 1 == participants.length ? "and" : ", "}}
+          <a href="#whois:{{p.name}}" @click.prevent="whois(p)">{{p.mode}}{{p.name}}</a>
+        </template>.
         <template v-if="dialog.topic">
           The topic is: {{dialog.topic}}
         </template>

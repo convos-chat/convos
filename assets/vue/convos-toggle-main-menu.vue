@@ -5,7 +5,7 @@
 module.exports = {
   methods: {
     classNames: function() {
-      var cn = {"toggle-dialogs": true};
+      var cn = {"toggle-main-menu": true};
       if (this.settings.dialogsVisible) cn.active = true;
       return cn;
     },

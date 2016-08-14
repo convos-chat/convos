@@ -1,105 +1,54 @@
+$convos-input-height: 46px;
+
 .convos-chat {
-  display: flex;
+  position: relative;
+  width: 100vw;
   height: 100vh;
+  overflow: hidden; // This fixes some weird horizontal scrolling in Chrome on iPhone
 }
 
 .convos-dialog-container,
 .convos-settings {
-  overflow: auto;
-  display: flex;
-  flex-grow: 1;
-  flex-direction: column;
+  position: relative;
+  height: 100%;
+}
 
+@media #{$large-and-up} {
+  .convos-dialog-container, .convos-settings {
+    margin-left: $main-menu-width;
+  }
+  body.has-sidebar {
+    .convos-dialog-container, .convos-settings {
+      margin-right: $sidebar-width;
+    }
+  }
+}
+
+.convos-dialog-container,
+.convos-settings {
   main {
+    @include under-header;
+    width: 100%;
     padding: $gutter-width $gutter-width / 2;
-    overflow: auto;
-    flex-grow: 1;
+    z-index: 10;
   }
 }
 
-.convos-dialog-container {
-  .convos-message {
-    display: block;
-    position: relative;
-    margin: $dialog-spacing * 2 0;
-
-    &.error, &.notice {
-      padding-left: $gutter-width / 2;
-      padding-right: $gutter-width / 2;
-      border-left: 2px solid color('grey', 'lighten-1');
-    }
-    &.action {
-      .message, a.title {
-        font-style: italic;
-        display: inline;
-      }
-      .link-embedder {
-        font-style: normal;
-      }
-    }
-    &.day-changed {
-      color: lighten($off-black, 40%);
-      text-align: center;
-      border-bottom: 1px solid lighten($input-border-color, 24%);
-      margin-bottom: $gutter-width;
-      height: $gutter-width / 2;
-      &:hover { background: transparent; }
-      span { background: #fff; padding: 0 8px; }
-    }
-    &.error {
-      border-left: 2px solid color('red', 'accent-3');
-      color: lighten($off-black, 40%);
-      a { color: lighten(color('red', 'accent-3'), 20%); }
-    }
-    &.highlight .message {
-      background-color: color('red', 'lighten-5');
-    }
-    &.notice {
-      border-left: 2px solid color('grey', 'lighten-1');
-      color: lighten($off-black, 40%);
-      a { color: lighten($link-color, 20%); }
-    }
-    &.same-user {
-      margin-top: -$dialog-spacing;
-    }
-    &.same-user {
-      a.title, .secondary-content { display: none; }
-    }
-
-    .message {
-      a { color: inherit; text-decoration: underline; }
-      a:hover { text-decoration: none; }
-
-      .material-icons {
-        vertical-align: text-top;
-        font-size: 18px;
-        margin-left: 4px;
-      }
-    }
-
-    .secondary-content {
-      position: absolute;
-      top: 2px;
-      right: 0;
-      &, a {
-        color: color('grey', 'darken-1');
-        font-size: 0.8rem;
-        overflow: hidden;
-        display: block;
-      }
-      i {
-        vertical-align: bottom;
-      }
-    }
-  }
-}
+.convos-dialog-container main { bottom: $convos-input-height; }
+.convos-settings main { bottom: 0; }
 
 .convos-input {
   background-color: $body-bg;
   border-top: 1px solid lighten($input-border-color, 20%);
   padding: 0.5rem $gutter-width / 2 0 $gutter-width / 2;
-  box-sizing: content-box; // border-top makes an extra scrollbar appear without this
+  width: 100%;
+  height: $convos-input-height;
+  overflow: hidden;
+  position: absolute;
+  bottom: 0;
+  z-index: $z-index-header - 1;
 
+  // send button
   i {
     font-size: 2rem;
     cursor: pointer;
@@ -121,19 +70,84 @@
 
     &, &:focus { border: 0; }
   }
+}
 
-  .actions {
-    text-align: right;
-    overflow: visible;
-    position: relative;
-    height: 0;
-    top: -34px;
-    right: 1px;
-    a {
-      display: inline-block;
-      margin-right: -$dialog-spacing;
-      padding: $dialog-spacing 6px;
+.convos-settings {
+  main { max-width: $readable-width; }
+  .divider { margin: 2rem 0; }
+}
+
+.convos-message {
+  display: block;
+  position: relative;
+  margin: $dialog-spacing * 2 0;
+
+  &.error, &.notice {
+    padding-left: $gutter-width / 2;
+    padding-right: $gutter-width / 2;
+    border-left: 2px solid color('grey', 'lighten-1');
+  }
+  &.action {
+    .message, a.title {
+      font-style: italic;
+      display: inline;
     }
-    i { vertical-align: bottom; }
+    .link-embedder {
+      font-style: normal;
+    }
+  }
+  &.day-changed {
+    color: lighten($off-black, 40%);
+    text-align: center;
+    border-bottom: 1px solid lighten($input-border-color, 24%);
+    margin-bottom: $gutter-width;
+    height: $gutter-width / 2;
+    &:hover { background: transparent; }
+    span { background: #fff; padding: 0 8px; }
+  }
+  &.error {
+    border-left: 2px solid color('red', 'accent-3');
+    color: lighten($off-black, 40%);
+    a { color: lighten(color('red', 'accent-3'), 20%); }
+  }
+  &.highlight .message {
+    background-color: color('red', 'lighten-5');
+  }
+  &.notice {
+    border-left: 2px solid color('grey', 'lighten-1');
+    color: lighten($off-black, 40%);
+    a { color: lighten($link-color, 20%); }
+  }
+  &.same-user {
+    margin-top: -$dialog-spacing;
+  }
+  &.same-user {
+    a.title, .secondary-content { display: none; }
+  }
+
+  .message {
+    a { color: inherit; text-decoration: underline; }
+    a:hover { text-decoration: none; }
+
+    .material-icons {
+      vertical-align: text-top;
+      font-size: 18px;
+      margin-left: 4px;
+    }
+  }
+
+  .secondary-content {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    &, a {
+      color: color('grey', 'darken-1');
+      font-size: 0.8rem;
+      overflow: hidden;
+      display: block;
+    }
+    i {
+      vertical-align: bottom;
+    }
   }
 }

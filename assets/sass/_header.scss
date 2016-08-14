@@ -1,85 +1,90 @@
-.convos-dialog-container,
-.convos-dialogs,
-.convos-settings,
-.is-sidebar {
-  header {
-    background-color: $primary-color;
+header {
+  background-color: $primary-color;
+  height: $navbar-height-mobile;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $z-index-header;
+
+  h2 { margin: 0; }
+  h2, a, i.material-icons {
+    color: $navbar-font-color;
+    display: inline-block;
+    font-size: 2rem;
     height: $navbar-height-mobile;
-    flex-shrink: 0;
+    line-height: $navbar-height-mobile;
+  }
 
-    h2 { margin: 0; }
-    h2, a, i.material-icons {
-      color: $navbar-font-color;
-      display: inline-block;
-      font-size: 2rem;
-      height: $navbar-height-mobile;
-      line-height: $navbar-height-mobile;
-    }
+  a { padding-left: 10px; padding-right: 10px; }
+  a:hover { background: lighten($primary-color, 5%); }
+  a.active { background: darken($primary-color, 5%); }
 
-    a { padding-left: 10px; padding-right: 10px; }
-    a:hover { background: lighten($primary-color, 5%); }
-    a.active { background: darken($primary-color, 5%); }
+  .input-field {
+    height: 100%;
+    padding: 0 $gutter-width;
+    margin: 0;
 
-    @media #{$medium-and-up} {
-      height: $navbar-height;
+    @media #{$medium-and-down} { display: none; }
 
-      h2, a, i.material-icons {
-        height: $navbar-height;
-        line-height: $navbar-height;
+    input[type="search"] {
+      font-size: 1.2rem;
+      height: 100%;
+      border: none;
+      margin: 0;
+      padding-left: 1rem;
+
+      &, &:focus { color: $navbar-font-color; }
+
+      &:focus, &[type=text]:valid {
+        background: transparent;
+        border: none;
+        box-shadow: none;
       }
     }
 
-    @media #{$medium-and-down} {
-      a.visible-on-med-and-up { display: none; }
+    input[type="search"] + label {
+      top: 0;
+      left: $gutter-width / 2;
+
+      i { font-size: 24px; color: rgba(255,255,255,.7); transition: color .3s; }
+      &.active i { color: $navbar-font-color; }
+      &.active { transform: translateY(0); }
     }
-
-    ::-webkit-input-placeholder { color: lighten($primary-color, 20%); }
-    :-moz-placeholder { color: lighten($primary-color, 20%); }
-    ::-moz-placeholder { color: lighten($primary-color, 20%); }
-    :-ms-input-placeholder { color: lighten($primary-color, 20%); }
   }
 
-  .convos-menu .toggle-dialogs { float: left; }
+  @media #{$large-and-up} {
+    height: $navbar-height;
 
-  a.toggle-dialogs {
-    @extend .hide-on-large-only;
-    float: left;
+    h2, a, i.material-icons {
+      height: $navbar-height;
+      line-height: $navbar-height;
+    }
   }
+
+  @media #{$medium-and-down} {
+    a.visible-on-med-and-up { display: none; }
+  }
+
+  @include input-placeholder-color(lighten($primary-color, 20%));
+}
+
+a.toggle-main-menu {
+  @extend .hide-on-large-only;
+  float: left;
+}
+
+.convos-dialog-container,
+.convos-settings,
+.is-sidebar {
+  header { text-align: right; }
 }
 
 .convos-dialog-container,
 .convos-settings {
-  header {
-    position: relative;
-    flex-shrink: 0;
-    text-align: right;
-
-    h2 {
-      float: left;
-      padding-left: $gutter-width / 2;
-      cursor: pointer;
-    }
-  }
-}
-
-.is-sidebar {
-  header {
-    text-align: right;
-  }
-}
-
-header a.notifications {
-  position: relative;
-
-  i.active { // notifications
-    position: relative;
-  }
-  b.n-notifications {
-    color: darken($navbar-font-color, 10%);
-    font-size: 1rem;
-    line-height: 1rem;
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
+  header h2 {
+    float: left;
+    padding-left: $gutter-width / 2;
+    cursor: pointer; // click to get info
   }
 }

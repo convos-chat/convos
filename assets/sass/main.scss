@@ -2,7 +2,7 @@
 
 // Mixins
 @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/prefixer";
-@import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/mixins";
+// @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/mixins";
 @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/color";
 
 // Variables;
@@ -39,6 +39,7 @@
 // @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/date_picker/default.date.scss";
 // @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/date_picker/default.time.scss";
 
+@import "mixins";
 @import "global";
 @import "login";
 
@@ -47,4 +48,3 @@
 @import "header";
 @import "link-embedder";
 @import "sidebar";
-@import "settings";

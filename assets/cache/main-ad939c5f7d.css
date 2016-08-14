@@ -2265,10 +2265,7 @@ ul.staggered-list li {
     display: none !important; } }
 
 @media only screen and (min-width: 993px) {
-  .hide-on-large-only, .convos-dialog-container a.toggle-dialogs,
-  .convos-dialogs a.toggle-dialogs,
-  .convos-settings a.toggle-dialogs,
-  .is-sidebar a.toggle-dialogs {
+  .hide-on-large-only, a.toggle-main-menu {
     display: none !important; } }
 
 @media only screen and (min-width: 993px) {
@@ -4652,9 +4649,10 @@ div.alert {
     padding-top: 2em; }
 
 div.autocomplete {
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
   border-bottom: 1px solid #bdbdbd;
   max-height: 8em;
-  overflow: auto;
   position: relative; }
   div.autocomplete ul {
     margin: 0;
@@ -4672,87 +4670,52 @@ div.autocomplete {
       display: block; }
 
 .convos-chat {
-  display: flex;
-  height: 100vh; }
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; }
 
 .convos-dialog-container,
 .convos-settings {
-  overflow: auto;
-  display: flex;
-  flex-grow: 1;
-  flex-direction: column; }
-  .convos-dialog-container main,
-  .convos-settings main {
-    padding: 1.5rem 0.75rem;
-    overflow: auto;
-    flex-grow: 1; }
-
-.convos-dialog-container .convos-message {
-  display: block;
   position: relative;
-  margin: 8px 0; }
-  .convos-dialog-container .convos-message.error, .convos-dialog-container .convos-message.notice {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    border-left: 2px solid #bdbdbd; }
-  .convos-dialog-container .convos-message.action .message, .convos-dialog-container .convos-message.action a.title {
-    font-style: italic;
-    display: inline; }
-  .convos-dialog-container .convos-message.action .link-embedder {
-    font-style: normal; }
-  .convos-dialog-container .convos-message.day-changed {
-    color: rgba(102, 102, 102, 0.87);
-    text-align: center;
-    border-bottom: 1px solid #dbdbdb;
-    margin-bottom: 1.5rem;
-    height: 0.75rem; }
-    .convos-dialog-container .convos-message.day-changed:hover {
-      background: transparent; }
-    .convos-dialog-container .convos-message.day-changed span {
-      background: #fff;
-      padding: 0 8px; }
-  .convos-dialog-container .convos-message.error {
-    border-left: 2px solid #FF1744;
-    color: rgba(102, 102, 102, 0.87); }
-    .convos-dialog-container .convos-message.error a {
-      color: #ff7d96; }
-  .convos-dialog-container .convos-message.highlight .message {
-    background-color: #FFEBEE; }
-  .convos-dialog-container .convos-message.notice {
-    border-left: 2px solid #bdbdbd;
-    color: rgba(102, 102, 102, 0.87); }
-    .convos-dialog-container .convos-message.notice a {
-      color: #68c46d; }
-  .convos-dialog-container .convos-message.same-user {
-    margin-top: -4px; }
-  .convos-dialog-container .convos-message.same-user a.title, .convos-dialog-container .convos-message.same-user .secondary-content {
-    display: none; }
-  .convos-dialog-container .convos-message .message a {
-    color: inherit;
-    text-decoration: underline; }
-  .convos-dialog-container .convos-message .message a:hover {
-    text-decoration: none; }
-  .convos-dialog-container .convos-message .message .material-icons {
-    vertical-align: text-top;
-    font-size: 18px;
-    margin-left: 4px; }
-  .convos-dialog-container .convos-message .secondary-content {
-    position: absolute;
-    top: 2px;
-    right: 0; }
-    .convos-dialog-container .convos-message .secondary-content, .convos-dialog-container .convos-message .secondary-content a {
-      color: #757575;
-      font-size: 0.8rem;
-      overflow: hidden;
-      display: block; }
-    .convos-dialog-container .convos-message .secondary-content i {
-      vertical-align: bottom; }
+  height: 100%; }
+
+@media only screen and (min-width: 993px) {
+  .convos-dialog-container, .convos-settings {
+    margin-left: 240px; }
+  body.has-sidebar .convos-dialog-container, body.has-sidebar .convos-settings {
+    margin-right: 320px; } }
+
+.convos-dialog-container main,
+.convos-settings main {
+  position: absolute;
+  top: 56px;
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
+  width: 100%;
+  padding: 1.5rem 0.75rem;
+  z-index: 10; }
+  @media only screen and (min-width: 993px) {
+    .convos-dialog-container main,
+    .convos-settings main {
+      top: 64px; } }
+
+.convos-dialog-container main {
+  bottom: 46px; }
+
+.convos-settings main {
+  bottom: 0; }
 
 .convos-input {
   background-color: #fff;
   border-top: 1px solid #d1d1d1;
   padding: 0.5rem 0.75rem 0 0.75rem;
-  box-sizing: content-box; }
+  width: 100%;
+  height: 46px;
+  overflow: hidden;
+  position: absolute;
+  bottom: 0;
+  z-index: 899; }
   .convos-input i {
     font-size: 2rem;
     cursor: pointer;
@@ -4772,145 +4735,158 @@ div.autocomplete {
     overflow: auto; }
     .convos-input textarea.materialize-textarea, .convos-input textarea.materialize-textarea:focus {
       border: 0; }
-  .convos-input .actions {
-    text-align: right;
-    overflow: visible;
-    position: relative;
-    height: 0;
-    top: -34px;
-    right: 1px; }
-    .convos-input .actions a {
-      display: inline-block;
-      margin-right: -4px;
-      padding: 4px 6px; }
-    .convos-input .actions i {
+
+.convos-settings main {
+  max-width: 50em; }
+
+.convos-settings .divider {
+  margin: 2rem 0; }
+
+.convos-message {
+  display: block;
+  position: relative;
+  margin: 8px 0; }
+  .convos-message.error, .convos-message.notice {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    border-left: 2px solid #bdbdbd; }
+  .convos-message.action .message, .convos-message.action a.title {
+    font-style: italic;
+    display: inline; }
+  .convos-message.action .link-embedder {
+    font-style: normal; }
+  .convos-message.day-changed {
+    color: rgba(102, 102, 102, 0.87);
+    text-align: center;
+    border-bottom: 1px solid #dbdbdb;
+    margin-bottom: 1.5rem;
+    height: 0.75rem; }
+    .convos-message.day-changed:hover {
+      background: transparent; }
+    .convos-message.day-changed span {
+      background: #fff;
+      padding: 0 8px; }
+  .convos-message.error {
+    border-left: 2px solid #FF1744;
+    color: rgba(102, 102, 102, 0.87); }
+    .convos-message.error a {
+      color: #ff7d96; }
+  .convos-message.highlight .message {
+    background-color: #FFEBEE; }
+  .convos-message.notice {
+    border-left: 2px solid #bdbdbd;
+    color: rgba(102, 102, 102, 0.87); }
+    .convos-message.notice a {
+      color: #68c46d; }
+  .convos-message.same-user {
+    margin-top: -4px; }
+  .convos-message.same-user a.title, .convos-message.same-user .secondary-content {
+    display: none; }
+  .convos-message .message a {
+    color: inherit;
+    text-decoration: underline; }
+  .convos-message .message a:hover {
+    text-decoration: none; }
+  .convos-message .message .material-icons {
+    vertical-align: text-top;
+    font-size: 18px;
+    margin-left: 4px; }
+  .convos-message .secondary-content {
+    position: absolute;
+    top: 2px;
+    right: 0; }
+    .convos-message .secondary-content, .convos-message .secondary-content a {
+      color: #757575;
+      font-size: 0.8rem;
+      overflow: hidden;
+      display: block; }
+    .convos-message .secondary-content i {
       vertical-align: bottom; }
 
-.convos-dialog-container header,
-.convos-dialogs header,
-.convos-settings header,
-.is-sidebar header {
+header {
   background-color: #66BB6A;
   height: 56px;
-  flex-shrink: 0; }
-  .convos-dialog-container header h2,
-  .convos-dialogs header h2,
-  .convos-settings header h2,
-  .is-sidebar header h2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900; }
+  header h2 {
     margin: 0; }
-  .convos-dialog-container header h2, .convos-dialog-container header a, .convos-dialog-container header i.material-icons,
-  .convos-dialogs header h2,
-  .convos-dialogs header a,
-  .convos-dialogs header i.material-icons,
-  .convos-settings header h2,
-  .convos-settings header a,
-  .convos-settings header i.material-icons,
-  .is-sidebar header h2,
-  .is-sidebar header a,
-  .is-sidebar header i.material-icons {
+  header h2, header a, header i.material-icons {
     color: #fff;
     display: inline-block;
     font-size: 2rem;
     height: 56px;
     line-height: 56px; }
-  .convos-dialog-container header a,
-  .convos-dialogs header a,
-  .convos-settings header a,
-  .is-sidebar header a {
+  header a {
     padding-left: 10px;
     padding-right: 10px; }
-  .convos-dialog-container header a:hover,
-  .convos-dialogs header a:hover,
-  .convos-settings header a:hover,
-  .is-sidebar header a:hover {
+  header a:hover {
     background: #78c37b; }
-  .convos-dialog-container header a.active,
-  .convos-dialogs header a.active,
-  .convos-settings header a.active,
-  .is-sidebar header a.active {
+  header a.active {
     background: #54b359; }
-  @media only screen and (min-width: 601px) {
-    .convos-dialog-container header,
-    .convos-dialogs header,
-    .convos-settings header,
-    .is-sidebar header {
+  header .input-field {
+    height: 100%;
+    padding: 0 1.5rem;
+    margin: 0; }
+    @media only screen and (max-width: 992px) {
+      header .input-field {
+        display: none; } }
+    header .input-field input[type="search"] {
+      font-size: 1.2rem;
+      height: 100%;
+      border: none;
+      margin: 0;
+      padding-left: 1rem; }
+      header .input-field input[type="search"], header .input-field input[type="search"]:focus {
+        color: #fff; }
+      header .input-field input[type="search"]:focus, header .input-field input[type="search"][type=text]:valid {
+        background: transparent;
+        border: none;
+        box-shadow: none; }
+    header .input-field input[type="search"] + label {
+      top: 0;
+      left: 0.75rem; }
+      header .input-field input[type="search"] + label i {
+        font-size: 24px;
+        color: rgba(255, 255, 255, 0.7);
+        transition: color .3s; }
+      header .input-field input[type="search"] + label.active i {
+        color: #fff; }
+      header .input-field input[type="search"] + label.active {
+        transform: translateY(0); }
+  @media only screen and (min-width: 993px) {
+    header {
       height: 64px; }
-      .convos-dialog-container header h2, .convos-dialog-container header a, .convos-dialog-container header i.material-icons,
-      .convos-dialogs header h2,
-      .convos-dialogs header a,
-      .convos-dialogs header i.material-icons,
-      .convos-settings header h2,
-      .convos-settings header a,
-      .convos-settings header i.material-icons,
-      .is-sidebar header h2,
-      .is-sidebar header a,
-      .is-sidebar header i.material-icons {
+      header h2, header a, header i.material-icons {
         height: 64px;
         line-height: 64px; } }
   @media only screen and (max-width: 992px) {
-    .convos-dialog-container header a.visible-on-med-and-up,
-    .convos-dialogs header a.visible-on-med-and-up,
-    .convos-settings header a.visible-on-med-and-up,
-    .is-sidebar header a.visible-on-med-and-up {
+    header a.visible-on-med-and-up {
       display: none; } }
-  .convos-dialog-container header ::-webkit-input-placeholder,
-  .convos-dialogs header ::-webkit-input-placeholder,
-  .convos-settings header ::-webkit-input-placeholder,
-  .is-sidebar header ::-webkit-input-placeholder {
+  header ::-webkit-input-placeholder {
     color: #addaaf; }
-  .convos-dialog-container header :-moz-placeholder,
-  .convos-dialogs header :-moz-placeholder,
-  .convos-settings header :-moz-placeholder,
-  .is-sidebar header :-moz-placeholder {
+  header :-moz-placeholder {
     color: #addaaf; }
-  .convos-dialog-container header ::-moz-placeholder,
-  .convos-dialogs header ::-moz-placeholder,
-  .convos-settings header ::-moz-placeholder,
-  .is-sidebar header ::-moz-placeholder {
+  header ::-moz-placeholder {
     color: #addaaf; }
-  .convos-dialog-container header :-ms-input-placeholder,
-  .convos-dialogs header :-ms-input-placeholder,
-  .convos-settings header :-ms-input-placeholder,
-  .is-sidebar header :-ms-input-placeholder {
+  header :-ms-input-placeholder {
     color: #addaaf; }
 
-.convos-dialog-container .convos-menu .toggle-dialogs,
-.convos-dialogs .convos-menu .toggle-dialogs,
-.convos-settings .convos-menu .toggle-dialogs,
-.is-sidebar .convos-menu .toggle-dialogs {
-  float: left; }
-
-.convos-dialog-container a.toggle-dialogs,
-.convos-dialogs a.toggle-dialogs,
-.convos-settings a.toggle-dialogs,
-.is-sidebar a.toggle-dialogs {
+a.toggle-main-menu {
   float: left; }
 
 .convos-dialog-container header,
-.convos-settings header {
-  position: relative;
-  flex-shrink: 0;
-  text-align: right; }
-  .convos-dialog-container header h2,
-  .convos-settings header h2 {
-    float: left;
-    padding-left: 0.75rem;
-    cursor: pointer; }
-
+.convos-settings header,
 .is-sidebar header {
   text-align: right; }
 
-header a.notifications {
-  position: relative; }
-  header a.notifications i.active {
-    position: relative; }
-  header a.notifications b.n-notifications {
-    color: #e6e6e6;
-    font-size: 1rem;
-    line-height: 1rem;
-    position: absolute;
-    bottom: 5px;
-    right: 5px; }
+.convos-dialog-container header h2,
+.convos-settings header h2 {
+  float: left;
+  padding-left: 0.75rem;
+  cursor: pointer; }
 
 img.embed, .link-embedder.text-html {
   max-width: 50em;
@@ -4974,64 +4950,54 @@ img.embed {
 .link-embedder.text-html .link-embedder-link {
   display: none; }
 
-.convos-dialogs,
+.convos-main-menu,
 .is-sidebar {
-  position: relative;
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column; }
-  .convos-dialogs div.content,
+  width: 100%;
+  background-color: #f7f7f7;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 901; }
+  .convos-main-menu div.content,
   .is-sidebar div.content {
-    height: 100%;
-    overflow: auto; }
-  .convos-dialogs.hidden,
+    position: absolute;
+    top: 56px;
+    -webkit-overflow-scrolling: touch;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overflow: auto;
+    overflow-x: hidden;
+    bottom: 0;
+    left: 0;
+    right: 0; }
+    @media only screen and (min-width: 993px) {
+      .convos-main-menu div.content,
+      .is-sidebar div.content {
+        top: 64px; } }
+  .convos-main-menu.hidden,
   .is-sidebar.hidden {
     display: none !important; }
 
-.convos-dialogs {
-  background-color: #f7f7f7;
-  width: 100%;
-  flex-shrink: 0; }
+.convos-main-menu {
+  left: 0; }
   @media only screen and (min-width: 993px) {
-    .convos-dialogs {
+    .convos-main-menu {
       width: 240px; }
-      .convos-dialogs.show-on-large {
+      .convos-main-menu.show-on-large {
         display: block !important; } }
-  .convos-dialogs header .input-field {
-    height: 100%;
-    padding: 0 1.5rem;
-    margin: 0; }
-    .convos-dialogs header .input-field input {
-      font-size: 1.2rem;
-      height: 100%;
-      border: none;
-      margin: 0;
-      padding-left: 1rem; }
-      .convos-dialogs header .input-field input, .convos-dialogs header .input-field input:focus {
-        color: #fff; }
-      .convos-dialogs header .input-field input:focus, .convos-dialogs header .input-field input[type=text]:valid {
-        background: transparent;
-        border: none;
-        box-shadow: none; }
-    .convos-dialogs header .input-field label {
-      top: 0;
-      left: 0.75rem; }
-      .convos-dialogs header .input-field label i {
-        font-size: 24px;
-        color: rgba(255, 255, 255, 0.7);
-        transition: color .3s; }
-      .convos-dialogs header .input-field label.active i {
-        color: #fff; }
-      .convos-dialogs header .input-field label.active {
-        transform: translateY(0); }
-  @media only screen and (max-width: 992px) {
-    .convos-dialogs header .input-field {
-      display: none; } }
-  .convos-dialogs .content > a {
+  .convos-main-menu .content > a {
     display: block;
     position: relative;
     padding: 1rem 0.75rem; }
-    .convos-dialogs .content > a b {
+    .convos-main-menu .content > a.active {
+      background-color: #fff;
+      color: #225725;
+      font-weight: bold; }
+    .convos-main-menu .content > a.frozen {
+      color: #B71C1C; }
+    .convos-main-menu .content > a:hover, .convos-main-menu .content > a.focus {
+      background-color: #f0f0f0; }
+    .convos-main-menu .content > a b {
       font-size: 1rem;
       line-height: 1rem;
       text-align: center;
@@ -5039,29 +5005,22 @@ img.embed {
       position: absolute;
       bottom: 1rem;
       left: 0.75rem; }
-  .convos-dialogs .content a {
-    min-height: 64px; }
-  .convos-dialogs .content a.active {
-    background-color: #fff;
-    color: #225725;
-    font-weight: bold; }
-  .convos-dialogs .content a.frozen {
-    color: #B71C1C; }
-  .convos-dialogs .content .on {
+    .convos-main-menu .content > a .material-icons {
+      vertical-align: top; }
+    .convos-main-menu .content > a.simple .material-icons {
+      vertical-align: bottom; }
+  .convos-main-menu .on {
     display: block;
     font-size: 0.9rem;
     color: #777;
     margin-left: 28px;
     margin-bottom: -5px; }
-  .convos-dialogs .content .material-icons {
-    vertical-align: bottom; }
 
 .is-sidebar {
-  background-color: #f7f7f7;
-  width: 100%; }
+  right: 0; }
   @media only screen and (min-width: 993px) {
     .is-sidebar {
-      width: 336px; } }
+      width: 320px; } }
 
 .convos-notifications .row {
   margin: 2px auto;
@@ -5076,20 +5035,14 @@ img.embed {
     line-height: 110%;
     margin: 0.5rem 0 0.4rem 0; }
 
-@media only screen and (max-width: 992px) {
-  .convos-dialogs,
-  .is-sidebar {
+header a.notifications {
+  position: relative; }
+  header a.notifications i.active {
+    position: relative; }
+  header a.notifications b.n-notifications {
+    color: #e6e6e6;
+    font-size: 1rem;
+    line-height: 1rem;
     position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 900; }
-  .convos-dialogs {
-    left: 0; }
-  .is-sidebar {
-    right: 0; } }
-
-.convos-settings .divider {
-  margin: 2rem 0; }
-
-.convos-settings .section {
-  max-width: 50em; }
+    bottom: 5px;
+    right: 5px; }

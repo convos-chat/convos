@@ -2,7 +2,7 @@
   <div class="convos-create-dialog">
     <div class="row">
       <div class="col s12">
-        <h4>Create dialog</h4>
+        <h4>Join dialog</h4>
         <p v-if="!user.connections.length">
           You need to <a href="#connections">create a connection</a> before
           you can create or join any dialog.

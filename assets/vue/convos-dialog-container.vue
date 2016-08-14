@@ -1,12 +1,12 @@
 <template>
   <div class="convos-dialog-container">
     <header>
-      <convos-toggle-dialogs :user="user"></convos-toggle-dialogs>
+      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
       <h2 @click.prevent="getInfo" :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
-      <convos-menu :toggle="true" :user="user">
+      <convos-header-links :toggle="true" :user="user">
         <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
         <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
-      </convos-menu>
+      </convos-header-links>
     </header>
     <main>
       <component
@@ -47,7 +47,7 @@ module.exports = {
     getInfo: function() {
       var self = this;
       self.dialog.refreshParticipants(function(err) {
-        if (!err) return this.addMessage({type: "info"});
+        if (!err) return this.addMessage({type: "dialog-info"});
         this.addMessage({message: err[0].message, type: "error"});
       });
     },
@@ -73,7 +73,6 @@ module.exports = {
   ready: function() {
     this.scrollElement = $("main", this.$el)[0];
     this.scrollElement.addEventListener("scroll", this.onScroll);
-    this.dialog.on("initialized", this.scrollToBottom);
     this.dialog.on("message", this.scrollToBottom);
     this.dialog.on("visible", function() { this.scrollToBottom({gotoBottom: true}); }.bind(this));
   },
