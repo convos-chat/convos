@@ -163,7 +163,6 @@
       }, function(err, xhr) {
         if (err) return self.emit("error", err);
         xhr.body.messages.forEach(function(msg) { self.addMessage(msg, "push", true); });
-        if (xhr.body.end) self._endOfHistory();
 
         if (!self.messages.length) {
           self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.");
@@ -175,6 +174,7 @@
           self.addMessage({type: "enable-notifications"});
         }
 
+        if (xhr.body.end) self._endOfHistory();
         self.emit("initialized", {gotoBottom: true});
       }
     );
