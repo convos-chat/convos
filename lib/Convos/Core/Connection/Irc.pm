@@ -262,7 +262,10 @@ sub _notice {
 
 sub _part_dialog {
   my ($self, $name, $cb) = @_;
+  return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
 
+  my $dialog = $self->get_dialog($name);
+  return $self->tap(remove_dialog => $name)->save($cb) if $dialog and $dialog->is_private;
   return $self->tap(remove_dialog => $name)->save($cb) if $self->state eq 'disconnected';
   return $self->_proxy(
     part_channel => $name,
