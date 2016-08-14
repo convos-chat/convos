@@ -7,7 +7,7 @@
       </div>
       <div class="row notification" @click="gotoMessage(msg)" v-for="msg in user.notifications">
         <div class="col s12">
-          <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
+          <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
           <h5>{{msg.from}} in {{msg.dialog_id}}</h5>
           <div class="message">{{msg.message}}</div>
         </div>

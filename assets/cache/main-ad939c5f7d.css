@@ -4614,7 +4614,7 @@ div.alert {
   overflow: hidden;
   padding-right: 0.75rem; }
 
-.material-hint {
+#vue_tooltip {
   background-color: #323232;
   color: #fff;
   font-size: 1rem;
@@ -4625,7 +4625,7 @@ div.alert {
   max-width: calc(100% - 4px);
   min-height: 30px;
   transition: opacity 350ms;
-  transition-delay: 600ms;
+  transition-delay: 100ms;
   position: absolute;
   left: -2000px;
   top: -2000px;
@@ -4634,10 +4634,10 @@ div.alert {
   z-index: 2000;
   will-change: opacity;
   pointer-events: none; }
-  .material-hint.active {
+  #vue_tooltip.active {
     opacity: 0.95; }
   @media only screen and (max-width: 992px) {
-    .material-hint {
+    #vue_tooltip {
       display: none !important; } }
 
 .not-logged-in-wrapper {

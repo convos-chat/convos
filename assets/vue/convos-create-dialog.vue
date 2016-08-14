@@ -25,7 +25,7 @@
     </div>
     <div class="row">
       <div class="input-field input-btn-right col s12">
-        <a href="#load" @click.prevent="load" class="btn waves-effect waves-light" :data-hint="message">Load</a>
+        <a href="#load" @click.prevent="load" class="btn waves-effect waves-light" v-tooltip="message">Load</a>
         <div class="input-left">
           <md-autocomplete :options="rooms" :value.sync="dialogName" @select="join" id="form_dialog_name"></md-autocomplete>
           <label for="form_dialog_name">Room or nick</label>

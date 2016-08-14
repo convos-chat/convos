@@ -9,7 +9,7 @@
       </div>
     </header>
     <div class="content">
-      <a v-link="d.href()" :data-hint="d.frozen || ''" :class="dialogClass(d, i)" v-for="(i, d) in dialogs()">
+      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in user.dialogs">
         <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
         <b class="n-uread" v-if="d.unread">{{d.unread < 100 ? d.unread : "99+"}}</b>
         <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
@@ -58,17 +58,6 @@ module.exports = {
       var cn = this.activeClass(d.href());
       cn.frozen = d.frozen ? true : false;
       return cn;
-    },
-    dialogs: function() {
-      var self = this;
-      var q = new RegExp(self.q, "i");
-      var dialogs = this.user.dialogs.filter(function(d) {
-        return self.q ? d.name.match(q) : true;
-      }).sort(function(a, b) {
-        return a.name > b.name
-      });
-      this.first = dialogs[0];
-      return dialogs;
     },
     search: function(e) {
       if (e.shiftKey) return this.user.getActiveDialog().emit("focusInput");

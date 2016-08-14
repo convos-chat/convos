@@ -3,7 +3,7 @@
     <span>&star;</span>
     <a href="#{{msg.from}}" class="title" @click.prevent="insertIntoInput">{{msg.from}}</a>
     <div class="message"><span>{{{message() | markdown}}}</span></div>
-    <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
+    <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
   </div>
 </template>
 <script>

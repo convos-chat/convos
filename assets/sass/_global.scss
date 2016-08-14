@@ -92,7 +92,7 @@ div.alert {
   }
 }
 
-.material-hint {
+#vue_tooltip {
   background-color: #323232;
   color: #fff;
   font-size: 1rem;
@@ -105,7 +105,7 @@ div.alert {
   min-height: 30px;
 
   transition: opacity 350ms;
-  transition-delay: 600ms;
+  transition-delay: 100ms;
 
   position: absolute;
   left: -2000px;

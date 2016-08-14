@@ -2,11 +2,10 @@
   <div class="convos-dialog-container">
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <h2 @click.prevent="getInfo" :data-hint="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
+      <h2 @click.prevent="getInfo" v-tooltip="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
       <convos-header-links :toggle="true" :user="user">
-        <!-- a href="#search" data-hint="Search"><i class="material-icons">search</i></a -->
-        <a href="#info" @click.prevent="getInfo" data-hint="Information about dialog"><i class="material-icons">info</i></a>
-        <a href="#close" @click.prevent="closeDialog" data-hint="Close dialog"><i class="material-icons">close</i></a>
+        <a href="#info" @click.prevent="getInfo" v-tooltip.literal="Information about dialog"><i class="material-icons">info</i></a>
+        <a href="#close" @click.prevent="closeDialog" v-tooltip.literal="Close dialog"><i class="material-icons">close</i></a>
       </convos-header-links>
     </header>
     <main>

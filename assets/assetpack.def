@@ -16,11 +16,14 @@
 < js/materialbox.js
 < js/websocket.js
 < js/swagger2-client.js
+< js/vue/directive-link.js
+< js/vue/directive-sidebar.js
+< js/vue/directive-tooltip.js
+< js/vue/filter-markdown.js
+< js/vue/filter-timestring.js
 < js/vue/mixin-global.js
 < js/vue/mixin-materialize.js
 < js/vue/mixin-message.js
-< js/vue/filter-markdown.js
-< js/vue/filter-timestring.js
 
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/waves.js

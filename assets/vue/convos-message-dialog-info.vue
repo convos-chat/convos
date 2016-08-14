@@ -15,7 +15,7 @@
         This dialog has no topic.
       </template>
     </div>
-    <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
+    <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
   </div>
 </template>
 <script>
