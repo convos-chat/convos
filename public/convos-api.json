@@ -196,6 +196,7 @@
             "schema": {
               "type": "object",
               "properties": {
+                "end": { "type": "boolean", "description": "Indicates if historic messages can be received." },
                 "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
               }
             }

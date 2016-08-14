@@ -1,5 +1,6 @@
 package Convos::Controller::Dialog;
 use Mojo::Base 'Mojolicious::Controller';
+use Mojo::JSON qw(false true);
 
 sub list {
   my ($self, $args, $cb) = @_;
@@ -24,13 +25,15 @@ sub messages {
 
   # TODO:
   $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw(after before level limit match);
+  $query{limit} ||= 60;
+  $query{limit} = 200 if $query{limit} > 200;    # TODO: is this a good max?
 
   $self->delay(
     sub { $dialog->messages(\%query, shift->begin) },
     sub {
       my ($delay, $err, $messages) = @_;
       die $err if $err;
-      $self->$cb({messages => $messages}, 200);
+      $self->$cb({messages => $messages, end => @$messages < $query{limit} ? true : false}, 200);
     },
   );
 }

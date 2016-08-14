@@ -70,8 +70,12 @@
       },
       function(err, xhr) {
         if (err) return cb(err, null);
-        if (!xhr.body.messages.length) return self.messages[0].message = "End of history.";
-        self.messages.shift();
+        if (xhr.body.messages.length && xhr.body.end) {
+          self.messages.shift();
+        }
+        else {
+          self._endOfHistory();
+        }
         cb(null, function() {
           xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, "unshift", true); });
         })
@@ -138,6 +142,15 @@
     Object.keys(data).forEach(function(k) { participants[name][k] = data[k]; });
   };
 
+  proto._endOfHistory = function() {
+    if (this.messages[0].loading) {
+      this.messages[0].message = "End of history.";
+    }
+    else {
+      this.addMessage({loading: true, message: "End of history", type: "notice"}, "unshift");
+    }
+  };
+
   // Called when this dialog is visible in gui the first time
   proto._initialize = function() {
     if (this.messages.length >= 60) return;
@@ -150,6 +163,7 @@
       }, function(err, xhr) {
         if (err) return self.emit("error", err);
         xhr.body.messages.forEach(function(msg) { self.addMessage(msg, "push", true); });
+        if (xhr.body.end) self._endOfHistory();
 
         if (!self.messages.length) {
           self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.");

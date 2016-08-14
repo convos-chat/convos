@@ -52,13 +52,14 @@ module.exports = {
       });
     },
     onScroll: function() {
+      var self = this;
       var elem = this.scrollElement;
       this.atBottom = elem.scrollHeight < elem.offsetHeight + this.scrollThreshold + elem.scrollTop;
       if (elem.scrollTop < this.scrollThreshold) {
         this.dialog.historicMessages({}, function(err, cb) {
           var scrollHeight = elem.scrollHeight;
-          if (err) return;
-          cb();
+          if (cb) cb();
+          if (self.atBottom) return self.scrollToBottom({});
           window.nextTick(function() { elem.scrollTop = elem.scrollHeight - scrollHeight - 100; });
         });
       }
