@@ -155,22 +155,11 @@
   proto._completedMe = function(data) {};
 
   proto._completedWhois = function(data) {
-    var channels = Object.keys(data.channels).sort();
-    data.message = data.nick;
-
-    if (data.idle_for) {
-      data.message += " has been idle for " + data.idle_for + " seconds in ";
-    } else {
-      data.message += " is active in ";
-    }
-
-    while (channels.length) {
-      var name = channels.shift();
-      var sep  = channels.length == 1 ? " and " : channels.length ? ", " : ".";
-      data.message += name + "" + sep;
-    }
-
-    this.notice(data.message);
+    var dialog = this.user.getActiveDialog();
+    if (!dialog) return;
+    data.from = this.id;
+    data.type = "whois";
+    dialog.addMessage(data);
   };
 
   proto._onMessage = function(msg) {

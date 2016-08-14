@@ -60,6 +60,7 @@
 < vue/convos-message-error.vue
 < vue/convos-message-notice.vue
 < vue/convos-message-private.vue
+< vue/convos-message-whois.vue
 < vue/convos-input.vue
 < vue/convos-dialog-container.vue
 

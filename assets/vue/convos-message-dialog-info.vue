@@ -2,22 +2,20 @@
   <div class="convos-message notice">
     <a href="#chat" class="title">{{msg.from}}</a>
     <div class="message">
-      <span>
-        <template v-if="participants.length">{{nParticipants | capitalize}} participants</template>
-        <template v-else>You are the only participant</template>
-        in {{dialog.name}}, connected to {{dialog.connection().name}}<template v-if="participants.length">: You</template>
-        <template v-else>.</template>
-        <template v-for="p in participants">
-          {{$index + 1 == participants.length ? "and" : ", "}}
-          <a href="#whois:{{p.name}}" @click.prevent="whois(p)">{{p.mode}}{{p.name}}</a>
-        </template>.
-        <template v-if="dialog.topic">
-          The topic is: {{dialog.topic}}
-        </template>
-        <template v-if="!dialog.topic">
-          This dialog has no topic.
-        </template>
-      </span>
+      <template v-if="participants.length">{{nParticipants | capitalize}} participants</template>
+      <template v-else>You are the only participant</template>
+      in {{dialog.name}}, connected to {{dialog.connection().name}}<template v-if="participants.length">: You</template>
+      <template v-else>.</template>
+      <template v-for="p in participants">
+        {{$index + 1 == participants.length ? "and" : ", "}}
+        <a href="#whois:{{p.name}}" @click.prevent="whois(p)">{{p.mode}}{{p.name}}</a>
+      </template>.
+      <template v-if="dialog.topic">
+        The topic is: {{dialog.topic}}
+      </template>
+      <template v-if="!dialog.topic">
+        This dialog has no topic.
+      </template>
     </div>
     <span class="secondary-content ts" :data-hint="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
   </div>
