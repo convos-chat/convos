@@ -22,11 +22,11 @@
     if (!method) method = "push";
     var prev = method == "unshift" ? this.messages[0] : this.prevMessage;
 
-    if (this != this.user.getActiveDialog()) this.unread++;
     if (!msg.from) msg.from = "convosbot";
     if (!msg.type) msg.type = "private";
     if (!msg.ts) msg.ts = new Date();
     if (typeof msg.ts == "string") msg.ts = new Date(msg.ts);
+    if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) this.unread++;
     if (msg.highlight && !disableNotifications) Notification.simple(msg.from, msg.message);
     if (msg.highlight) this.connection().user.notifications.unshift(msg);
     if (!prev) prev = {from: "", ts: msg.ts};
@@ -85,6 +85,22 @@
     return this.is_private ? "person" : "group";
   };
 
+  proto.participant = function(data) {
+    if (data.type == "join") {
+      this._participants[data.nick] = {};
+      this.addMessage({message: data.nick + " joined.", from: this.connection.id, type: "notice"});
+    }
+    else if (data.type == "nick_change") {
+      delete this._participants[data.old_nick];
+      this._participants[data.new_nick] = {};
+      this.addMessage({message: data.old_nick + " changed nick to " + data.new_nick + ".", from: this.connection.id, type: "notice"});
+    }
+    else if(this._participants[data.nick]) { // part
+      delete this._participants[data.nick];
+      this.addMessage({message: data.nick + " parted.", from: this.connection.id, type: "notice"});
+    }
+  };
+
   proto.refreshParticipants = function(cb) {
     var self = this;
     Convos.api.participantsInDialog(
@@ -94,7 +110,9 @@
       }, function(err, xhr) {
         Object.keys(self.participants).forEach(function(k) { self.participants[k].online = false; });
         if (!err) {
+          var participants = self._participants = {};
           xhr.body.participants.forEach(function(p) {
+            participants[p.name] = p;
             p.online = true;
             self._addParticipant(p.name, p);
           });

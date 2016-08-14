@@ -152,6 +152,8 @@
     Convos.settings.main = this.user.ensureDialog(data).href();
   };
 
+  proto._completedMe = function(data) {};
+
   proto._completedWhois = function(data) {
     var channels = Object.keys(data.channels).sort();
     data.message = data.nick;
@@ -189,18 +191,18 @@
       case "frozen":
         this.user.ensureDialog(data).frozen = data.frozen;
         break;
-      case "me":
-        this.me.nick = data.nick;
+      case "join":
+      case "part":
+        this.user.ensureDialog(data).participant(data);
         break;
       case "nick_change":
         this.user.dialogs.forEach(function(d) {
-          if (d.connection_id == data.connection_id) d.emit("state", data);
+          if (d.connection_id == data.connection_id) d.participant(data);
         });
         break;
-      case "part":
-        this.user.dialogs.forEach(function(d) {
-          if (d.connection_id == data.connection_id) d.emit("state", data);
-        });
+        break;
+      case "me":
+        this.me.nick = data.nick;
         break;
     }
   };
