@@ -5,9 +5,7 @@
       <template v-if="participants.length">{{nParticipants | capitalize}} participants</template>
       <template v-else>You are the only participant</template>
       in {{dialog.name}}, connected to {{dialog.connection().name}}<template v-if="participants.length">: You</template>
-      <template v-else>.</template>
-      <template v-for="p in participants">
-        {{$index + 1 == participants.length ? "and" : ", "}}
+      <template v-else>.</template><template v-for="p in participants">{{$index + 1 == participants.length ? "and" : ", "}}
         <a href="#whois:{{p.name}}" @click.prevent="whois(p)">{{p.mode}}{{p.name}}</a>
       </template>.
       <template v-if="dialog.topic">
