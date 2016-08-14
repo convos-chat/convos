@@ -9,7 +9,7 @@
       </div>
     </header>
     <div class="content">
-      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in user.dialogs">
+      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in dialogs">
         <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
         <b class="n-uread" v-if="d.unread">{{d.unread < 100 ? d.unread : "99+"}}</b>
         <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
@@ -46,6 +46,15 @@ module.exports = {
   props:   ["user"],
   data: function() {
     return {first: null, q: ""};
+  },
+  computed: {
+    dialogs: function() {
+      return this.user.dialogs.sort(function(a, b) {
+        var ah = a.name.toLowerCase();
+        var bh = b.name.toLowerCase();
+        return ah < bh ? -1 : ah > bh ? 1 : 0;
+      });
+    }
   },
   methods: {
     connectionClass: function(c) {
