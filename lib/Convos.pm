@@ -27,6 +27,7 @@ sub startup {
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
   $self->sessions->secure(1) if $config->{secure_cookies};
+  push @{$self->renderer->classes}, __PACKAGE__;
 
   # Add basic routes
   $r->get('/')->to(template => 'convos');
@@ -284,3 +285,35 @@ Jan Henning Thorsen - C<jhthorsen@cpan.org>
 Marcus Ramberg - C<marcus@nordaaker.com>
 
 =cut
+
+__DATA__
+@@ convos.html.ep
+<!DOCTYPE html>
+<html data-framework="vue">
+  <head>
+    <title>Convos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    %= asset 'convos.css';
+  </head>
+  <body>
+    <div id="loader" class="centered">
+      <div>
+        <h4>Loading convos...</h4>
+        <p class="error">This should not take too long.</p>
+        <a href="">Reload <i class="material-icons">refresh</i></a>
+      </div>
+    </div>
+    <component :is="currentPage" :current-page.sync="currentPage" :user="user"></component>
+    <div id="vue_tooltip"><span></span></div>
+    %= javascript begin
+      window.Convos = {
+        apiUrl:   "<%= $c->url_for('convos_api_specification') %>",
+        wsUrl:    "<%= $c->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
+        mode:     "<%= app->mode %>",
+        settings: <%== Mojo::JSON::encode_json($settings) %>,
+        mixin:    {} // Vue.js mixins
+      };
+    % end
+    %= asset 'convos.js';
+  </body>
+</html>
