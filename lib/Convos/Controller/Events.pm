@@ -13,52 +13,21 @@ sub bi_directional {
     return $self->send({json => $self->invalid_request('Need to log in first.', '/')})->finish;
   }
 
-  $self->_subscribe('_send_event');
-  $self->on(
-    json => sub {
-      my ($c, $data) = @_;
-      warn "[Convos::Controller::Events] <<< @{[Mojo::JSON::encode_json($data)]}\n" if DEBUG == 2;
-      return if $c->dispatch_to_swagger($data);
-    }
-  );
-}
-
-sub event_source {
-  my $self = shift;
-
-  $self->res->headers->content_type('text/event-stream');
-
-  unless ($self->backend->user) {
-    return $self->render(
-      text   => qq(event:error\ndata:{"message":"Need to log in first."}\n\n),
-      status => 401
-    );
-  }
-
-  $self->render_later;
-  $self->_write_event(noop => {});
-  $self->_subscribe($self->can('_write_event'));
-}
-
-sub _send_event {
-  my ($self, $event, $data) = @_;
-  $data->{event} = $event;
-  warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG == 2;
-  $self->send({json => $data});
-}
-
-sub _subscribe {
-  my ($self, $method) = @_;
   my $uid     = $self->backend->user->id;
   my $backend = $self->app->core->backend;
 
   Scalar::Util::weaken($self);
-  my $tid = Mojo::IOLoop->recurring(INACTIVE_TIMEOUT - 5, sub { $self->$method(noop => {}); });
+
+  # Make sure the WebSocket does not time out
+  my $tid
+    = Mojo::IOLoop->recurring(INACTIVE_TIMEOUT - 5, sub { $self and $self->send({json => {}}); });
+
   my $cb = $backend->on(
     "user:$uid" => sub {
       my ($backend, $event, $data) = @_;
       my $ts = Mojo::Date->new($data->{ts} || time)->to_datetime;
-      $self->$method($event => {%$data, ts => $ts});
+      warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG == 2;
+      $self->send({json => {%$data, ts => $ts, event => $event}});
     }
   );
 
@@ -69,13 +38,13 @@ sub _subscribe {
       $backend->unsubscribe("user:$uid" => $cb);
     }
   );
-}
-
-sub _write_event {
-  my ($self, $event, $data) = @_;
-  $data = encode_json $data;
-  warn "[Convos::Controller::Events] >>> event:$event\ndata:$data\n" if DEBUG == 2;
-  $self->write("event:$event\ndata:$data\n\n");
+  $self->on(
+    json => sub {
+      my ($c, $data) = @_;
+      warn "[Convos::Controller::Events] <<< @{[Mojo::JSON::encode_json($data)]}\n" if DEBUG == 2;
+      $c->dispatch_to_swagger($data);
+    }
+  );
 }
 
 1;
@@ -99,11 +68,6 @@ input from web, if websocket is supported by the browser.
 Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as
 JSON objects over a WebSocket connection, but also allows instructions from
 the client, since WebSockets are bi-directional.
-
-=head2 event_source
-
-Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as
-JSON objects using L<Mojolicious::Guides::Cookbook/EventSource web service>.
 
 =head1 AUTHOR
 
