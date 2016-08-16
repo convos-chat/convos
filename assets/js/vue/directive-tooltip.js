@@ -6,6 +6,7 @@
     bind: function() {
       if (window.isMobile()) return;
       this.el.addEventListener("mouseover", function(e) {
+        var doc = this.ownerDocument || document.documentElement;
         var tip = document.getElementById("vue_tooltip")
         var offset = this.getBoundingClientRect();
         var css = {};
@@ -13,12 +14,15 @@
         // do not want to show empty tooltip
         if (this.vueTooltip.match(/^\s*$/)) return;
 
+        // the original object is read-only (immutable)
+        offset = {left: offset.left, top: offset.top};
+
         tip.childNodes[0].textContent = this.vueTooltip;
-        offset.left = offset.left + window.pageXOffset - this.ownerDocument.clientLeft;
-        offset.top = offset.top + window.pageYOffset - this.ownerDocument.clientTop;
-        css.right = "auto";
+        offset.left += (window.pageXOffset || doc.scrollLeft || 0);
+        offset.top += (window.pageYOffset || doc.scrollTop || 0);
         css.left = offset.left - (tip.offsetWidth - this.offsetWidth) / 2;
         css.top = offset.top - tip.offsetHeight - spacing;
+        css.right = "auto";
 
         if (css.left < 0) {
           css.left = spacing;
@@ -28,7 +32,7 @@
           css.right = spacing;
         }
 
-        if (css.top < spacing) {
+        if (css.top < (window.pageYOffset || doc.scrollTop || 0)) {
           css.top = this.offsetTop + this.offsetHeight + spacing;
         }
 
