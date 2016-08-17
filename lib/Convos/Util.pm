@@ -4,7 +4,9 @@ use Mojo::Base 'Exporter';
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG has_many next_tick);
+our @EXPORT_OK = qw(DEBUG ce has_many next_tick);
+
+sub ce { +{errors => [{message => $_[0], path => $_[1]}], status => $_[2] || 500}; }
 
 sub has_many {
   my $class = caller;
@@ -65,6 +67,14 @@ Convos::Util - Utility functions
 L<Convos::Util> is a utily module for L<Convos>.
 
 =head1 FUNCTIONS
+
+=head2 ce
+
+  $res = ce($message, $path, $status);
+
+Converts the input to:
+
+  $res = {errors => [{message => $message, path => $path}], status => $status}
 
 =head2 has_many
 

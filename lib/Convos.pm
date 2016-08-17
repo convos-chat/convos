@@ -30,18 +30,12 @@ sub startup {
   push @{$self->renderer->classes}, __PACKAGE__;
 
   # Add basic routes
-  $r->get('/')->to(template => 'convos');
-  $r->get('/events/event-source')->to('events#event_source')->name('event_source');
-  $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
+  $r->get('/')->to(template => 'convos')->name('index');
+  $r->get('/logout')->to('user#logout');
 
-  # Autogenerate routes from the Swagger specification
+  # WebSocket API
   $self->plugin(
-    swagger2 => {
-      ensure_swagger_response => {},
-      url                     => $self->static->file('convos-api.json')->path,
-      ws                      => $r->find('bi_directional'),
-    }
-  );
+    'Convos::Plugin::StructuredWS' => {spec => $self->static->file('convos-api.json')->path});
 
   # Expand links into rich content
   $self->plugin('LinkEmbedder');
@@ -71,29 +65,6 @@ sub _add_helpers {
   my $self = shift;
 
   $self->helper(
-    invalid_request => sub {
-      my ($c, $message, $path) = @_;
-      my @errors;
-
-      if (UNIVERSAL::isa($message, 'Mojolicious::Validator::Validation')) {
-        $path ||= '';
-        push @errors, map {
-          my $error = $message->error($_);
-          {
-            message => $error->[0] eq 'required' ? 'Missing property.' : 'Invalid input.',
-            path => "$path/$_"
-          }
-        } sort keys %{$message->{error}};
-      }
-      else {
-        push @errors, {message => $message, path => $path || '/'};
-      }
-
-      return {valid => Mojo::JSON->false, errors => \@errors};
-    }
-  );
-
-  $self->helper(
     'backend.user' => sub {
       my $self = shift;
       return undef unless my $email = $self->session('email');
@@ -104,7 +75,7 @@ sub _add_helpers {
   $self->helper(
     unauthorized => sub {
       my ($self, $cb) = @_;
-      $self->$cb($self->invalid_request('Need to log in first.', '/'), 401);
+      $self->$cb({errors => [{message => 'Need to log in first.', path => '/'}]}, 401);
     }
   );
 }

@@ -1,300 +1,191 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "version": "0.87",
-    "title": "Convos API specification",
-    "description": "This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.",
-    "contact": {
-      "name": "Convos",
-      "url": "https://github.com/Nordaaker/convos"
+  "resources": {
+    "url#embed": {
+      "summary": "Get information from a URL",
+      "parameters": {
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string", "description": "URL to resource" }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Information about resource.",
+          "schema": { "type": "object" }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
     },
-    "license": {
-      "name": "Artistic License version 2.0",
-      "url": "http://opensource.org/licenses/Artistic-2.0"
+    "user#command": {
+      "summary": "Send a message or command.",
+      "parameters": {
+        "required": ["connection_id", "command"],
+        "properties": {
+          "connection_id": { "type": "string", "description": "Connection ID" },
+          "dialog_id": { "type": "string", "description": "Dialog ID" },
+          "command": { "type": "string", "description": "A command to be sent to backend" }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successfully sent a message",
+          "schema": { "type": "object" }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
     },
-    "termsOfService": "SSL (HTTPS) is highly suggested, since login credentials and session cookies are transmitted over this API."
-  },
-  "host": "demo.convos.by",
-  "basePath": "/api",
-  "schemes": [ "http" ],
-  "parameters": {
-    "connection_id": {
-      "name": "connection_id",
-      "in": "path",
-      "required": true,
-      "type": "string",
-      "description": "A unique connection identifier"
+    "connection#delete": {
+      "summary": "Delete a connection and all assosiated data.",
+      "parameters": {
+        "required": ["connection_id"],
+        "properties": { 
+          "connection_id": { "$ref": "#/parameters/connection_id" }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Remove a connection.",
+          "schema": { "$ref": "#/definitions/Success" }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
     },
-    "dialog_id": {
-      "name": "dialog_id",
-      "in": "path",
-      "default": "",
-      "required": true,
-      "type": "string",
-      "description": "The name of the person or room"
+    "connection#save": {
+      "summary": "Update a connection.",
+      "parameters": {
+        "required": ["connection_id"],
+        "properties": {
+          "connection_id": { "$ref": "#/parameters/connection_id" },
+          "state": { "type": "string", "enum": ["connect", "disconnect"], "description": "Connection state" },
+          "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Update a connection.",
+          "schema": { "$ref": "#/definitions/Connection" }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
     },
-    "ident": {
-      "name": "ident",
-      "in": "path",
-      "required": true,
-      "type": "string",
-      "description": "User email or server identity"
+    "connection#rooms": {
+      "summary": "Get a list of all available chat rooms.",
+      "operationId": "roomsByConnection",
+      "parameters": {
+        "connection_id": { "$ref": "#/parameters/connection_id" }
+      },
+      "responses": {
+        "200": {
+          "description": "List of rooms.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string", "description": "Name of the room or person" },
+                    "topic": { "type": "string", "description": "The subjec/topic for this room" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "default": {
+          "description": "Internal server error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    },
+    "dialog#messages": {
+      "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
+      "parameters": {
+        "connection_id": { "$ref": "#/parameters/connection_id" },
+        "dialog_id": { "$ref": "#/parameters/dialog_id" },
+        "after": { "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
+        "before": { "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
+        "limit": { "type": "integer", "description": "Max number of messages to retrieve" },
+        "match": { "type": "string", "description": "Messages must match this string" }
+      },
+      "responses": {
+        "200": {
+          "description": "List of messages.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "end": { "type": "boolean", "description": "Indicates if historic messages can be received." },
+              "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
+            }
+          }
+        },
+        "default": {
+          "description": "Internal server error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
     }
-  },
-  "paths": {
-    "/embed": {
-      "get": {
-        "tags": [],
-        "summary": "Get information from a URL",
-        "operationId": "infoFromUrl",
-        "parameters": [
-          { "name": "url", "in": "query", "required": true, "type": "string", "description": "URL to resource" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Information about resource."
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/command": {
-      "post": {
-        "tags": [ "chat" ],
-        "summary": "Send a message or command.",
-        "operationId": "commandFromUser",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "required": ["connection_id", "command"],
-              "properties": {
-                "connection_id": { "type": "string", "description": "Connection ID" },
-                "dialog_id": { "type": "string", "description": "Dialog ID" },
-                "command": { "type": "string", "description": "A command to be sent to backend" }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully sent a message",
-            "schema": { "type": "object" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connection/{connection_id}": {
-      "delete": {
-        "tags": [ "connection" ],
-        "summary": "Delete a connection and all assosiated data.",
-        "operationId": "removeConnection",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Remove a connection.",
-            "schema": { "$ref": "#/definitions/Success" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
+    "dialog#participants": {
+      "summary": "Get a list of participants.\n\nNote: this resource require the user to be authenticated first.",
+      "parameters": {
+        "connection_id": { "$ref": "#/parameters/connection_id" },
+        "dialog_id": { "$ref": "#/parameters/dialog_id" }
       },
-      "post": {
-        "tags": [ "connection" ],
-        "summary": "Update a connection.",
-        "operationId": "updateConnection",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "state": { "type": "string", "enum": ["connect", "disconnect"], "description": "Connection state" },
-                "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Update a connection.",
-            "schema": { "$ref": "#/definitions/Connection" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connection/{connection_id}/rooms": {
-      "get": {
-        "tags": [ "dialog" ],
-        "summary": "Get a list of all available chat rooms.",
-        "operationId": "roomsByConnection",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of rooms.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "rooms": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": { "type": "string", "description": "Name of the room or person" },
-                      "topic": { "type": "string", "description": "The subjec/topic for this room" }
-                    }
+      "responses": {
+        "200": {
+          "description": "List of participants.",
+          "schema": {
+            "type": "object",
+            "required" : ["participants"],
+            "properties": {
+              "participants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required" : ["name"],
+                  "properties": {
+                    "mode": { "type": "string" },
+                    "name": { "type": "string" }
                   }
                 }
               }
             }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
+        },
+        "default": {
+          "description": "Internal server error.",
+          "schema": { "$ref": "#/definitions/Error" }
         }
       }
     },
-    "/connection/{connection_id}/dialog/{dialog_id}/messages": {
-      "get": {
-        "tags": [ "dialog" ],
-        "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
-        "operationId": "messagesByDialog",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/dialog_id" },
-          { "name": "after", "in": "query", "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
-          { "name": "before", "in": "query", "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
-          { "name": "limit", "in": "query", "type": "integer", "description": "Max number of messages to retrieve" },
-          { "name": "match", "in": "query", "type": "string", "description": "Messages must match this string" }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of messages.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "end": { "type": "boolean", "description": "Indicates if historic messages can be received." },
-                "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
-              }
-            }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connection/{connection_id}/dialog/{dialog_id}/participants": {
-      "get": {
-        "tags": [ "dialog" ],
-        "summary": "Get a list of participants.\n\nNote: this resource require the user to be authenticated first.",
-        "operationId": "participantsInDialog",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "$ref": "#/parameters/dialog_id" }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of participants.",
-            "schema": {
-              "type": "object",
-              "required" : ["participants"],
-              "properties": {
-                "participants": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required" : ["name"],
-                    "properties": {
-                      "mode": { "type": "string" },
-                      "name": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
-    "/connections": {
-      "get": {
-        "tags": [ "connection" ],
-        "summary": "Get all the connections for a user.",
-        "operationId": "listConnections",
-        "responses": {
-          "200": {
-            "description": "List of connections.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "connections": { "type": "array", "items": { "$ref": "#/definitions/Connection" } }
-              }
-            }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      },
-      "post": {
-        "tags": [ "connection" ],
-        "summary": "Add a connection.",
-        "operationId": "createConnection",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": ["url"],
-              "properties": {
-                "url": { "type": "string", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
-              }
+    "connection#list": {
+      "summary": "Get all the connections for a user.",
+      "responses": {
+        "200": {
+          "description": "List of connections.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "connections": { "type": "array", "items": { "$ref": "#/definitions/Connection" } }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Connection information.",
-            "schema": {
-              "$ref": "#/definitions/Connection"
-            }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
         }
       }
     },
@@ -523,6 +414,517 @@
           }
         }
       }
+    }
+  },
+  "parameters": {
+    "connection_id": {
+      "name": "connection_id",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "A unique connection identifier"
+    },
+    "dialog_id": {
+      "name": "dialog_id",
+      "in": "path",
+      "default": "",
+      "required": true,
+      "type": "string",
+      "description": "The name of the person or room"
+    },
+    "ident": {
+      "name": "ident",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "User email or server identity"
+    }
+  },
+  "definitions": {
+    "Connection": {
+      "required": ["connection_id", "url"],
+      "properties": {
+        "connection_id": { "type": "string", "description": "Unique identifier for this connection" },
+        "name": { "type": "string", "description": "Name for this connection" },
+        "state": { "type": "string", "enum": ["connected", "queued", "disconnected"], "description": "Connection state" },
+        "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+      }
+    },
+    "Dialog": {
+      "required": ["connection_id", "dialog_id", "name"],
+      "properties": {
+        "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialog is part of" },
+        "dialog_id": { "type": "string", "description": "Unique identifier for the dialog" },
+        "name": { "type": "string", "description": "Name of the room or person" },
+        "topic": { "type": "string", "description": "The subjec/topic for this room" }
+      }
+    },
+    "Error": {
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "required": ["message"],
+            "properties": {
+              "message": { "type": "string", "description": "Human readable description of the error" },
+              "path": { "type": "string", "description": "JSON pointer to the input data where the error occur" }
+            }
+          }
+        }
+      }
+    },
+    "Message": {
+      "required": ["message", "from", "ts"],
+      "properties": {
+        "from": { "type": "string", "description": "Identifier for who sent this message" },
+        "message": { "type": "string", "description": "The message" },
+        "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T13:49:37Z" }
+      }
+    },
+    "Notification": {
+      "required": ["message", "from", "ts"],
+      "properties": {
+        "connection_id": { "type": "string", "description": "Unique identifier for the connection this notification came from" },
+        "dialog_id": { "type": "string", "description": "Dialog ID" },
+        "from": { "type": "string", "description": "Identifier for who sent this message" },
+        "message": { "type": "string", "description": "The message" },
+        "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T13:49:37Z" }
+      }
+    },
+    "Success": {
+      "properties": {
+        "message": { "type": "string", "description": "Human readable description" }
+      }
+    },
+    "User": {
+      "required": ["email"],
+      "properties": {
+        "email": { "type": "string", "description": "Unique email identifying a user in Convos" },
+        "registered": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" }
+      }
+    }
+  }
+}
+
+    "user#command": {
+      "summary": "Send a message or command.",
+      "parameters": {
+        "required": ["connection_id", "command"],
+        "properties": {
+          "connection_id": { "type": "string", "description": "Connection ID" },
+          "dialog_id": { "type": "string", "description": "Dialog ID" },
+          "command": { "type": "string", "description": "A command to be sent to backend" }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successfully sent a message",
+          "schema": { "type": "object" }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    },
+    "connection#delete": {
+      "summary": "Delete a connection and all assosiated data.",
+      "parameters": {
+        "required": ["connection_id"],
+        "properties": { 
+          "connection_id": { "$ref": "#/parameters/connection_id" }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Remove a connection.",
+          "schema": { "$ref": "#/definitions/Success" }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    },
+    "connection#save": {
+      "summary": "Update a connection.",
+      "parameters": {
+        "required": ["connection_id"],
+        "properties": {
+          "connection_id": { "$ref": "#/parameters/connection_id" },
+          "state": { "type": "string", "enum": ["connect", "disconnect"], "description": "Connection state" },
+          "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Update a connection.",
+          "schema": { "$ref": "#/definitions/Connection" }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    },
+    "connection#rooms": {
+      "summary": "Get a list of all available chat rooms.",
+      "operationId": "roomsByConnection",
+      "parameters": {
+        "connection_id": { "$ref": "#/parameters/connection_id" }
+      },
+      "responses": {
+        "200": {
+          "description": "List of rooms.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string", "description": "Name of the room or person" },
+                    "topic": { "type": "string", "description": "The subjec/topic for this room" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "default": {
+          "description": "Internal server error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    },
+    "dialog#messages": {
+      "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
+      "parameters": {
+        "connection_id": { "$ref": "#/parameters/connection_id" },
+        "dialog_id": { "$ref": "#/parameters/dialog_id" },
+        "after": { "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
+        "before": { "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
+        "limit": { "type": "integer", "description": "Max number of messages to retrieve" },
+        "match": { "type": "string", "description": "Messages must match this string" }
+      },
+      "responses": {
+        "200": {
+          "description": "List of messages.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "end": { "type": "boolean", "description": "Indicates if historic messages can be received." },
+              "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
+            }
+          }
+        },
+        "default": {
+          "description": "Internal server error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    }
+    "dialog#participants": {
+      "summary": "Get a list of participants.\n\nNote: this resource require the user to be authenticated first.",
+      "parameters": {
+        "connection_id": { "$ref": "#/parameters/connection_id" },
+        "dialog_id": { "$ref": "#/parameters/dialog_id" }
+      },
+      "responses": {
+        "200": {
+          "description": "List of participants.",
+          "schema": {
+            "type": "object",
+            "required" : ["participants"],
+            "properties": {
+              "participants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required" : ["name"],
+                  "properties": {
+                    "mode": { "type": "string" },
+                    "name": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "default": {
+          "description": "Internal server error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    },
+    "connection#list": {
+      "summary": "Get all the connections for a user.",
+      "responses": {
+        "200": {
+          "description": "List of connections.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "connections": { "type": "array", "items": { "$ref": "#/definitions/Connection" } }
+            }
+          }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+    },
+    "/dialogs": {
+      "get": {
+        "tags": [ "dialog" ],
+        "summary": "Get a list of all dialogs.",
+        "operationId": "listDialogs",
+        "responses": {
+          "200": {
+            "description": "List of messages.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "dialogs": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Dialog" }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": [ "chat" ],
+        "summary": "Get list of notications.",
+        "description": "A notification is added once your name is mentioned in a chat.",
+        "operationId": "listNotifications",
+        "responses": {
+          "200": {
+            "description": "List of notifications.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "notifications": { "type": "array", "items": { "$ref": "#/definitions/Notification" } }
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/notifications/seen": {
+      "post": {
+        "tags": [ "chat" ],
+        "summary": "Mark a notication as seen.",
+        "description": "TODO: Notification count vs red/green toggling of a single notification.",
+        "operationId": "seenNotification",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ids": { "type": "array", "type": "integer", "description": "A list of notification IDs to mark as seen/read" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of commands.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/user": {
+      "delete": {
+        "tags": [ "user" ],
+        "summary": "Delete a user.",
+        "operationId": "deleteUser",
+        "responses": {
+            "200": {
+            "description": "Successfully deleted.",
+            "schema": { "$ref": "#/definitions/Success" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "get": {
+        "tags": [ "user" ],
+        "summary": "Get user data.",
+        "operationId": "getUser",
+        "responses": {
+          "200": {
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/User" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "post": {
+        "tags": [ "user" ],
+        "summary": "Update an existing user.",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": { "type": "string", "description": "User password" }
+              }
+            }
+          }
+        ],
+        "responses": {
+            "200": {
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/User" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": [ "user" ],
+        "summary": "Log in a user based on email and password.",
+        "operationId": "loginUser",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": true,
+              "required": ["email", "password"],
+              "properties": {
+                "email": { "type": "string", "format": "email", "description": "User email" },
+                "password": { "type": "string", "description": "User password" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/User" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/user/logout": {
+      "get": {
+        "tags": [ "user" ],
+        "summary": "Logout a user.",
+        "description": "This resource will delete any sessions cookies that might be stored in the client.",
+        "operationId": "logoutUser",
+        "responses": {
+          "200": {
+            "description": "Successfully logged out.",
+            "schema": { "$ref": "#/definitions/Success" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/user/register": {
+      "post": {
+        "tags": [ "user" ],
+        "summary": "Register a new user.",
+        "operationId": "registerUser",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["email", "password"],
+              "properties": {
+                "email": { "type": "string", "format": "email", "description": "User email" },
+                "invite_code": { "type": "string", "description": "Secret invite code set on server side." },
+                "password": { "type": "string", "description": "User password" }
+              }
+            }
+          }
+        ],
+        "responses": {
+            "200": {
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/User" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "connection_id": {
+      "name": "connection_id",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "A unique connection identifier"
+    },
+    "dialog_id": {
+      "name": "dialog_id",
+      "in": "path",
+      "default": "",
+      "required": true,
+      "type": "string",
+      "description": "The name of the person or room"
+    },
+    "ident": {
+      "name": "ident",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "User email or server identity"
     }
   },
   "definitions": {

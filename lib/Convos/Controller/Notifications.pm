@@ -43,14 +43,10 @@ notifications related actions.
 
 =head2 list
 
-See L<Convos::Manual::API/listNotifications>.
-
 =head2 seen
 
-See L<Convos::Manual::API/seenNotifications>.
+=head1 SEE ALSO
 
-=head1 AUTHOR
-
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos>
 
 =cut
