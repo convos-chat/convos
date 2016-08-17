@@ -17,10 +17,11 @@
 
   var proto = Convos.Dialog.prototype;
 
-  proto.addMessage = function(msg, method, disableNotifications) {
+  proto.addMessage = function(msg, args) {
+    if (!args) args = {};
     if (typeof msg == "string") msg = {message: msg};
-    if (!method) method = "push";
-    var prev = method == "unshift" ? this.messages[0] : this.prevMessage;
+    if (!args.method) args.method = "push";
+    var prev = args.method == "unshift" ? this.messages[0] : this.prevMessage;
 
     if (!msg.from) msg.from = "convosbot";
     if (!msg.type) msg.type = "private";
@@ -28,19 +29,19 @@
     if (typeof msg.ts == "string") msg.ts = new Date(msg.ts);
     if (!prev) prev = {from: "", ts: msg.ts};
 
-    if (method == "push") {
+    if (args.method == "push") {
       this.prevMessage = msg;
       if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) this.unread++;
-      if (msg.highlight && !disableNotifications) {
+      if (msg.highlight && !args.disableNotifications) {
         Notification.simple(msg.from, msg.message);
         this.connection().user.notifications.unshift(msg);
       }
       if (prev && prev.ts.getDate() != msg.ts.getDate()) {
-        this.messages[method]({type: "day-changed", prev: prev, ts: msg.ts});
+        this.messages[args.method]({type: "day-changed", prev: prev, ts: msg.ts});
       }
     }
 
-    if (method == "unshift") {
+    if (args.method == "unshift") {
       prev.prev = msg;
       msg.prev = prev;
     }
@@ -49,8 +50,8 @@
     }
 
     this._addParticipant(msg.from, {seen: msg.ts});
-    this.messages[method](msg);
-    if (method == "push") this.emit("message", msg);
+    this.messages[args.method](msg);
+    if (args.method == "push") this.emit("message", msg);
   };
 
   proto.connection = function() {
@@ -61,7 +62,7 @@
     if (!this.messages.length) return;
     if (this.messages[0].loading) return;
     var self = this;
-    this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, "unshift");
+    this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
     this._api.messagesByDialog(
       {
         before: this.messages[1].ts,
@@ -77,7 +78,7 @@
           self._endOfHistory();
         }
         cb(null, function() {
-          xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, "unshift", true); });
+          xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, {method: "unshift"}); });
         })
       }
     );
@@ -147,7 +148,7 @@
       this.messages[0].message = "End of history.";
     }
     else {
-      this.addMessage({loading: true, message: "End of history", type: "notice"}, "unshift");
+      this.addMessage({loading: true, message: "End of history", type: "notice"}, {method: "unshift"});
     }
   };
 
@@ -162,7 +163,7 @@
         dialog_id:     self.id
       }, function(err, xhr) {
         if (err) return self.emit("error", err);
-        xhr.body.messages.forEach(function(msg) { self.addMessage(msg, "push", true); });
+        xhr.body.messages.forEach(function(msg) { self.addMessage(msg, {method: "push", disableNotifications: true}); });
 
         if (!self.messages.length) {
           self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.");
