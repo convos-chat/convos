@@ -2,13 +2,13 @@
 requires "Crypt::Eksblowfish"                => "0.009";
 requires "File::HomeDir"                     => "1.00";
 requires "File::ReadBackwards"               => "1.05";
+requires "JSON::Validator"                   => "0.82";
 requires "Mojo::IOLoop::ForkCall"            => "0.17";
 requires "Mojo::IRC"                         => "0.31";
 requires "Mojolicious"                       => "6.40";
 requires "Mojolicious::Plugin::AssetPack"    => "1.19";
 requires "Mojolicious::Plugin::LinkEmbedder" => "0.2301";
 requires "Parse::IRC"                        => "1.20";
-requires "Swagger2"                          => "0.75";
 
 on develop => sub {
   requires "CSS::Minifier::XS"        => "0.09";

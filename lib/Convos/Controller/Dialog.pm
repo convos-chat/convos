@@ -1,5 +1,7 @@
 package Convos::Controller::Dialog;
 use Mojo::Base 'Mojolicious::Controller';
+
+use Convos::Util 'ce';
 use Mojo::JSON qw(false true);
 
 sub list {
@@ -13,14 +15,16 @@ sub list {
     }
   }
 
-  $self->$cb({dialogs => \@dialogs}, 200);
+  $self->$cb({data => {dialogs => \@dialogs}});
 }
 
 sub messages {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->get_connection($args->{connection_id}) or return $self->$cb({}, 404);
-  my $dialog     = $connection->get_dialog($args->{dialog_id})   or return $self->$cb({}, 404);
+  my $connection = $user->get_connection($args->{connection_id})
+    or return $self->$cb(ce 'Not found.', '/connection_id', 404);
+  my $dialog = $connection->get_dialog($args->{dialog_id})
+    or return $self->$cb(ce 'Not found.', '/dialog_id', 404);
   my %query;
 
   # TODO:
@@ -33,7 +37,8 @@ sub messages {
     sub {
       my ($delay, $err, $messages) = @_;
       die $err if $err;
-      $self->$cb({messages => $messages, end => @$messages < $query{limit} ? true : false}, 200);
+      $self->$cb(
+        {data => {messages => $messages, end => @$messages < $query{limit} ? true : false}});
     },
   );
 }
@@ -44,15 +49,15 @@ sub participants {
   my $connection = $user->get_connection($args->{connection_id});
 
   unless ($connection) {
-    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+    return $self->$cb(ce 'Connection not found.', '/connection_id', 404);
   }
 
   $self->delay(
     sub { $connection->participants($args->{dialog_id}, shift->begin); },
     sub {
       my ($delay, $err, $participants) = @_;
-      return $self->$cb({participants => $participants}, 200) unless $err;
-      return $self->$cb($self->invalid_request($err), 500);
+      return $self->$cb({data => {participants => $participants}}) unless $err;
+      return $self->$cb(ce $err, '/', 500);
     },
   );
 }
@@ -74,15 +79,9 @@ dialog related actions.
 
 =head2 list
 
-See L<Convos::Manual::API/listDialogs>.
-
 =head2 messages
 
-See L<Convos::Manual::API/messagesForDialog>.
-
 =head2 participants
-
-See L<Convos::Manual::API/participantsInDialog>.
 
 =head1 SEE ALSO
 

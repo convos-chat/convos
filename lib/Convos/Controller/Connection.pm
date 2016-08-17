@@ -1,18 +1,20 @@
 package Convos::Controller::Connection;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Convos::Util 'ce';
+
 sub create {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $url  = Mojo::URL->new($args->{body}{url});
-  my $name = $args->{body}{name} || $self->_pretty_connection_name($url->host);
+  my $url  = Mojo::URL->new($args->{url});
+  my $name = $args->{name} || $self->_pretty_connection_name($url->host);
   my $connection;
 
   if (!$name) {
-    return $self->$cb($self->invalid_request('URL need a valid host.', '/body/url'), 400);
+    return $self->$cb(ce 'URL need a valid host.', '/url', 400);
   }
   if ($user->get_connection({protocol => $url->scheme, name => $name})) {
-    return $self->$cb($self->invalid_request('Connection already exists.', '/'), 400);
+    return $self->$cb(ce 'Connection already exists.', '/', 400);
   }
 
   eval {
@@ -24,7 +26,7 @@ sub create {
         my ($delay, $err) = @_;
         die $err if $err;
         $self->app->core->connect($connection);
-        $self->$cb($connection->TO_JSON, 200);
+        $self->$cb({data => $connection->TO_JSON});
       },
     );
     1;
@@ -32,7 +34,7 @@ sub create {
     my $e = $@ || 'Unknwon error';
     $e =~ s! at \S+.*!!s;
     $e =~ s!:.*!.!s;
-    $self->$cb($self->invalid_request($e, '/'), 400);
+    $self->$cb(ce $e, '/', 400);
   };
 }
 
@@ -45,7 +47,7 @@ sub list {
     push @connections, $connection->TO_JSON;
   }
 
-  $self->$cb({connections => \@connections}, 200);
+  $self->$cb({data => {connections => \@connections}});
 }
 
 sub remove {
@@ -59,7 +61,7 @@ sub remove {
     sub {
       my ($delay, $err) = @_;
       die $err if $err;
-      $self->$cb({}, 200);
+      $self->$cb({data => {}}, 200);
     },
   );
 }
@@ -70,14 +72,14 @@ sub rooms {
   my $connection = $user->get_connection($args->{connection_id});
 
   unless ($connection) {
-    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+    return $self->$cb(ce 'Connection not found.', 404);
   }
 
   $self->delay(
     sub { $connection->rooms(shift->begin) },
     sub {
       my ($delay, $err, $rooms) = @_;
-      $self->$cb({rooms => $rooms}, 200);
+      $self->$cb({data => {rooms => $rooms}});
     },
   );
 }
@@ -85,15 +87,15 @@ sub rooms {
 sub update {
   my ($self, $args, $cb) = @_;
   my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $state = $args->{body}{state} || '';
-  my $url = Mojo::URL->new($args->{body}{url} || '');
+  my $state = $args->{state} || '';
+  my $url = Mojo::URL->new($args->{url} || '');
   my $connection;
 
   eval {
     $connection = $user->get_connection($args->{connection_id});
     $connection->url->host or die 'Connection not found';
   } or do {
-    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+    return $self->$cb(ce 'Connection not found.', 404);
   };
 
   if ($url->host) {
@@ -112,7 +114,7 @@ sub update {
       my ($delay, $err, $disconnected) = @_;
       die $err if $err;
       $self->app->core->connect($connection) if $state eq 'connect' or $state eq 'reconnect';
-      $self->$cb($connection->TO_JSON, 200);
+      $self->$cb({data => $connection->TO_JSON});
     },
   );
 }
@@ -148,26 +150,16 @@ user related actions.
 
 =head2 create
 
-See L<Convos::Manual::API/createConnection>.
-
 =head2 list
-
-See L<Convos::Manual::API/listConnections>.
 
 =head2 remove
 
-See L<Convos::Manual::API/removeConnection>.
-
 =head2 rooms
-
-See L<Convos::Manual::API/roomsForConnection>.
 
 =head2 update
 
-See L<Convos::Manual::API/updateConnection>.
+=head1 SEE ALSO
 
-=head1 AUTHOR
-
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos>
 
 =cut
