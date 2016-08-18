@@ -287,8 +287,7 @@
               "type": "object",
               "properties": {
                 "dialogs": {
-                  "type": "array",
-                  "items": { "$ref": "#/definitions/Dialog" }
+                  "type": "array", "items": { "$ref": "#/definitions/Dialog" }
                 }
               }
             }
@@ -381,6 +380,10 @@
         "summary": "Get user data.",
         "operationId": "getUser",
         "x-mojo-to": "user#get",
+        "parameters": [
+          { "name": "connections", "in": "query", "type": "boolean", "description": "Retrieve connection list." },
+          { "name": "dialogs", "in": "query", "type": "boolean", "description": "Retrieve dialog list." }
+        ],
         "responses": {
           "200": {
             "description": "User profile.",
@@ -570,7 +573,13 @@
       "required": ["email"],
       "properties": {
         "email": { "type": "string", "description": "Unique email identifying a user in Convos" },
-        "registered": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" }
+        "registered": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" },
+        "connections": {
+          "type": "array", "items": { "$ref": "#/definitions/Connection" }
+        },
+        "dialogs": {
+          "type": "array", "items": { "$ref": "#/definitions/Dialog" }
+        }
       }
     }
   }

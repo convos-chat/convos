@@ -25,8 +25,33 @@ sub delete {
 sub get {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
+  my $res  = $user->TO_JSON;
+  my (@connections, @dialogs);
 
-  $self->render(openapi => $user);
+  if ($self->param('connections') or $self->param('dialogs')) {
+    @connections = sort { $a->name cmp $b->name } @{$user->connections};
+  }
+  if ($self->param('dialogs')) {
+    for my $connection (@connections) {
+      @dialogs = sort { $a->id cmp $b->id } @{$connection->dialogs};
+    }
+    $res->{dialogs} = \@dialogs;
+  }
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      return $delay->pass unless $self->param('notifications');
+      return $user->notifications({}, $delay->begin);
+    },
+    sub {
+      my ($delay, $err, $notifications) = @_;
+      die $err if $err;
+      $res->{connections}   = \@connections  if $self->param('connections');
+      $res->{notifications} = $notifications if $notifications;
+      $self->render(openapi => $res);
+    }
+  );
 }
 
 sub login {

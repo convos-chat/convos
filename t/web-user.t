@@ -35,6 +35,18 @@ $t->post_ok('/api/user', json => {})->status_is(200);
 $t->get_ok('/api/user')->status_is(200)
   ->json_is('', {email => 'superman@example.com', registered => $registered, unseen => 0});
 
+$t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status_is(200)->json_is(
+  '',
+  {
+    connections   => [],
+    dialogs       => [],
+    notifications => [],
+    email         => 'superman@example.com',
+    registered    => $registered,
+    unseen        => 0
+  }
+);
+
 $t->delete_ok('/api/user')->status_is(400)
   ->json_is('/errors/0/message', 'You are the only user left.');
 
