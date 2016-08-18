@@ -43,7 +43,7 @@ sub messages {
 
 sub t {
   require Test::Mojo;
-  Test::Mojo->new('Convos');
+  Test::Mojo->new($_[1] || 'Convos');
 }
 
 sub import {

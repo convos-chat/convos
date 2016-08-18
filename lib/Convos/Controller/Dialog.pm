@@ -1,10 +1,12 @@
 package Convos::Controller::Dialog;
 use Mojo::Base 'Mojolicious::Controller';
+
+use Convos::Util 'E';
 use Mojo::JSON qw(false true);
 
 sub list {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
   my @dialogs;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
@@ -13,18 +15,21 @@ sub list {
     }
   }
 
-  $self->$cb({dialogs => \@dialogs}, 200);
+  $self->render(openapi => {dialogs => \@dialogs});
 }
 
 sub messages {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->get_connection($args->{connection_id}) or return $self->$cb({}, 404);
-  my $dialog     = $connection->get_dialog($args->{dialog_id})   or return $self->$cb({}, 404);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
+  my $connection = $user->get_connection($self->stash('connection_id'))
+    or return $self->render(openapi => E('Connection not found.'), status => 404);
+  my $dialog = $connection->get_dialog($self->stash('dialog_id'))
+    or return $self->render(openapi => E('Dialog not found.'), status => 404);
   my %query;
 
   # TODO:
-  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw(after before level limit match);
+  $query{$_} = $self->param($_)
+    for grep { defined $self->param($_) } qw(after before level limit match);
   $query{limit} ||= 60;
   $query{limit} = 200 if $query{limit} > 200;    # TODO: is this a good max?
 
@@ -33,26 +38,27 @@ sub messages {
     sub {
       my ($delay, $err, $messages) = @_;
       die $err if $err;
-      $self->$cb({messages => $messages, end => @$messages < $query{limit} ? true : false}, 200);
+      $self->render(
+        openapi => {messages => $messages, end => @$messages < $query{limit} ? true : false});
     },
   );
 }
 
 sub participants {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->get_connection($args->{connection_id});
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
+  my $connection = $user->get_connection($self->stash('connection_id'));
 
   unless ($connection) {
-    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+    return $self->render(openapi => E('Connection not found.'), status => 404);
   }
 
   $self->delay(
-    sub { $connection->participants($args->{dialog_id}, shift->begin); },
+    sub { $connection->participants($self->stash('dialog_id'), shift->begin); },
     sub {
       my ($delay, $err, $participants) = @_;
-      return $self->$cb({participants => $participants}, 200) unless $err;
-      return $self->$cb($self->invalid_request($err), 500);
+      return $self->render(openapi => E($err), status => 500) if $err;
+      return $self->render(openapi => {participants => $participants});
     },
   );
 }

@@ -1,33 +1,14 @@
 package Convos::Controller::User;
 use Mojo::Base 'Mojolicious::Controller';
 
-sub command {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->get_connection($args->{body}{connection_id});
-
-  unless ($connection) {
-    return $self->$cb($self->invalid_request('Connection not found.'), 404);
-  }
-
-  $self->delay(
-    sub { $connection->send($args->{body}{dialog_id}, $args->{body}{command}, shift->begin); },
-    sub {
-      my ($delay, $err, $res) = @_;
-      $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
-      $res->{command} = $args->{body}{command};
-      return $self->$cb($res, 200) unless $err;
-      return $self->$cb($self->invalid_request($err), 500);
-    },
-  );
-}
+use Convos::Util 'E';
 
 sub delete {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
 
   if (@{$self->app->core->users} <= 1) {
-    return $self->$cb($self->invalid_request('You are the only user left.'), 400);
+    return $self->render(openapi => E('You are the only user left.'), status => 400);
   }
 
   $self->delay(
@@ -36,85 +17,87 @@ sub delete {
       my ($delay, $err) = @_;
       die $err if $err;
       delete $self->session->{email};
-      $self->$cb({message => 'You have been erased.'}, 200);
+      $self->render(openapi => {message => 'You have been erased.'});
     },
   );
 }
 
 sub get {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
 
-  $self->$cb($user->TO_JSON, 200);
+  $self->render(openapi => $user);
 }
 
 sub login {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->app->core->get_user($args->{body});
+  my $self = shift->openapi->valid_input or return;
+  my $json = $self->req->json;
+  my $user = $self->app->core->get_user($json);
 
-  if ($user and $user->validate_password($args->{body}{password})) {
-    $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
+  if ($user and $user->validate_password($json->{password})) {
+    $self->session(email => $user->email)->render(openapi => $user);
   }
   else {
-    $self->$cb($self->invalid_request('Invalid email or password.'), 400);
+    $self->render(openapi => E('Invalid email or password.'), status => 400);
   }
 }
 
 sub logout {
-  my ($self, $args, $cb) = @_;
-  $self->session({expires => 1});
-  $self->$cb({}, 200);
+  shift->session({expires => 1})->redirect_to('index');
 }
 
 sub register {
-  my ($self, $args, $cb) = @_;
+  my $self = shift->openapi->valid_input or return;
+  my $json = $self->req->json;
   my $core = $self->app->core;
   my $user;
 
   if (my $invite_code = $self->app->config('invite_code')) {
-    if (!$args->{body}{invite_code} or $args->{body}{invite_code} ne $invite_code) {
-      return $self->$cb($self->invalid_request('Invalid invite code.', '/body/invite_code'), 400);
+    if (!$json->{invite_code} or $json->{invite_code} ne $invite_code) {
+      return $self->render(openapi => E('Invalid invite code.', '/body/invite_code'),
+        status => 400);
     }
   }
-  if ($core->get_user($args->{body})) {
-    return $self->$cb($self->invalid_request('Email is taken.', '/body/email'), 409);
+  if ($core->get_user($json)) {
+    return $self->render(openapi => E('Email is taken.', '/body/email'), status => 409);
   }
 
   return $self->delay(
     sub {
       my ($delay) = @_;
-      $user = $core->user($args->{body});
-      $user->set_password($args->{body}{password});
+      $user = $core->user($json);
+      $user->set_password($json->{password});
       $user->save($delay->begin);
     },
     sub {
       my ($delay, $err) = @_;
       die $err if $err;
-      $self->session(email => $user->email)->$cb($user->TO_JSON, 200);
+      $self->session(email => $user->email)->render(openapi => $user);
     },
   );
 }
 
 sub update {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $json = $self->req->json;
+  my $user = $self->backend->user or return $self->unauthorized;
 
   # TODO: Add support for changing email
 
-  unless (%{$args->{body} || {}}) {
-    return $self->$cb($user->TO_JSON, 200);
+  unless (%$json) {
+    return $self->render(openapi => $user);
   }
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $user->set_password($args->{body}{password}) if $args->{body}{password};
+      $user->set_password($json->{password}) if $json->{password};
       $user->save($delay->begin);
     },
     sub {
       my ($delay, $err) = @_;
       die $err if $err;
-      $self->$cb($user->TO_JSON, 200);
+      $self->render(openapi => $user);
     },
   );
 }
@@ -133,10 +116,6 @@ L<Convos::Controller::User> is a L<Mojolicious::Controller> with
 user related actions.
 
 =head1 METHODS
-
-=head2 command
-
-See L<Convos::Manual::API/commandFromUser>.
 
 =head2 delete
 
@@ -162,8 +141,8 @@ See L<Convos::Manual::API/registerUser>.
 
 See L<Convos::Manual::API/updateUser>.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos>.
 
 =cut

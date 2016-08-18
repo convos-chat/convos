@@ -1,18 +1,21 @@
 package Convos::Controller::Connection;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Convos::Util 'E';
+
 sub create {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $url  = Mojo::URL->new($args->{body}{url});
-  my $name = $args->{body}{name} || $self->_pretty_connection_name($url->host);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
+  my $json = $self->req->json;
+  my $url  = Mojo::URL->new($json->{url});
+  my $name = $json->{name} || $self->_pretty_connection_name($url->host);
   my $connection;
 
   if (!$name) {
-    return $self->$cb($self->invalid_request('URL need a valid host.', '/body/url'), 400);
+    return $self->render(openapi => E('URL need a valid host.', '/body/url'), status => 400);
   }
   if ($user->get_connection({protocol => $url->scheme, name => $name})) {
-    return $self->$cb($self->invalid_request('Connection already exists.', '/'), 400);
+    return $self->render(openapi => E('Connection already exists.'), status => 400);
   }
 
   eval {
@@ -24,80 +27,78 @@ sub create {
         my ($delay, $err) = @_;
         die $err if $err;
         $self->app->core->connect($connection);
-        $self->$cb($connection->TO_JSON, 200);
+        $self->render(openapi => $connection);
       },
     );
     1;
   } or do {
-    my $e = $@ || 'Unknwon error';
-    $e =~ s! at \S+.*!!s;
-    $e =~ s!:.*!.!s;
-    $self->$cb($self->invalid_request($e, '/'), 400);
+    $self->render(openapi => E($@ || 'Unknown error'), status => 400);
   };
 }
 
 sub list {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
   my @connections;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-    push @connections, $connection->TO_JSON;
+    push @connections, $connection;
   }
 
-  $self->$cb({connections => \@connections}, 200);
+  $self->render(openapi => {connections => \@connections});
 }
 
 sub remove {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
 
   $self->delay(
     sub {
-      $user->remove_connection($args->{connection_id}, shift->begin);
+      $user->remove_connection($self->stash('connection_id'), shift->begin);
     },
     sub {
       my ($delay, $err) = @_;
       die $err if $err;
-      $self->$cb({}, 200);
+      $self->render(openapi => {});
     },
   );
 }
 
 sub rooms {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $connection = $user->get_connection($args->{connection_id});
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
+  my $connection = $user->get_connection($self->stash('connection_id'));
 
   unless ($connection) {
-    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+    return $self->render(openapi => E('Connection not found.'), status => 404);
   }
 
   $self->delay(
     sub { $connection->rooms(shift->begin) },
     sub {
       my ($delay, $err, $rooms) = @_;
-      $self->$cb({rooms => $rooms}, 200);
+      $self->render(openapi => {rooms => $rooms});
     },
   );
 }
 
 sub update {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
-  my $state = $args->{body}{state} || '';
-  my $url = Mojo::URL->new($args->{body}{url} || '');
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
+  my $json = $self->req->json;
+  my $state = $json->{state} || '';
+  my $url = Mojo::URL->new($json->{url} || '');
   my $connection;
 
   eval {
-    $connection = $user->get_connection($args->{connection_id});
+    $connection = $user->get_connection($self->stash('connection_id'));
     $connection->url->host or die 'Connection not found';
   } or do {
-    return $self->$cb($self->invalid_request('Connection not found.'), 404);
+    return $self->render(openapi => E('Connection not found.'), status => 404);
   };
 
   if ($url->host) {
-    $url->scheme($args->{protocol});
+    $url->scheme($json->{protocol});
     $state = 'reconnect' if $url->to_string ne $connection->url->to_string;
     $connection->url->parse($url);
   }
@@ -112,7 +113,7 @@ sub update {
       my ($delay, $err, $disconnected) = @_;
       die $err if $err;
       $self->app->core->connect($connection) if $state eq 'connect' or $state eq 'reconnect';
-      $self->$cb($connection->TO_JSON, 200);
+      $self->render(openapi => $connection);
     },
   );
 }
@@ -166,8 +167,8 @@ See L<Convos::Manual::API/roomsForConnection>.
 
 See L<Convos::Manual::API/updateConnection>.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos>.
 
 =cut

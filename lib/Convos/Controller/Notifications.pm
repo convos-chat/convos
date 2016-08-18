@@ -2,28 +2,28 @@ package Convos::Controller::Notifications;
 use Mojo::Base 'Mojolicious::Controller';
 
 sub list {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
   my %query;
 
   # TODO:
-  $query{$_} = $args->{$_} for grep { defined $args->{$_} } qw(limit match);
+  $query{$_} = $self->param($_) for grep { defined $self->param($_) } qw(limit match);
 
   $self->delay(
     sub { $user->notifications(\%query, shift->begin) },
     sub {
       my ($delay, $err, $notifications) = @_;
       die $err if $err;
-      $self->$cb({notifications => $notifications}, 200);
+      $self->render(openapi => {notifications => $notifications});
     },
   );
 }
 
 sub seen {
-  my ($self, $args, $cb) = @_;
-  my $user = $self->backend->user or return $self->unauthorized($cb);
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
   $user->unseen(0);
-  $self->$cb({}, 200);
+  $self->render(openapi => {});
 }
 
 1;
@@ -49,8 +49,8 @@ See L<Convos::Manual::API/listNotifications>.
 
 See L<Convos::Manual::API/seenNotifications>.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos>.
 
 =cut

@@ -1,114 +1,129 @@
 use t::Helper;
 use Test::Mojo::IRC;
 
-my $t      = t::Helper->t;
-my $irc    = Test::Mojo::IRC->start_server;
-my $msg_id = 40;
-my $user   = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
+my $th   = t::Helper->t;
+my $ws   = t::Helper->t($th->app);
+my $irc  = Test::Mojo::IRC->start_server;
+my $user = $th->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 
-$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
-  ->status_is(200)->websocket_ok('/events/bi-directional');
+$ws->websocket_ok('/events')
+  ->message_ok->json_message_is('/errors/0/message', 'Need to log in first.')->finish_ok;
 
-# create + connect
+for my $t ($th, $ws) {
+  $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
+    ->status_is(200);
+}
+
+$ws->websocket_ok('/events');
+
 # Note: tls=0 is to avoid reconnecting to the test irc server
-send_ok(createConnection => {name => 'test', url => sprintf('irc://%s?tls=0', $irc->server)});
-$t->message_ok->json_message_is('/code', 200)->json_message_is('/id', id())
-  ->json_message_is('/body/connection_id', 'irc-test')->json_message_is('/body/state', 'queued');
-$t->message_ok->json_message_is('/connection_id', 'irc-test')
+$th->post_ok('/api/connections',
+  json => {name => 'test', url => sprintf('irc://%s?tls=0', $irc->server)})->status_is(200);
+my $c = $th->app->core->get_user('superman@example.com')->get_connection('irc-test');
+
+$ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_like('/message', qr{Connected to})->json_message_is('/state', 'connected')
   ->json_message_is('/type', 'connection');
 
 # irc welcome messages
-$t->message_ok->message_like(qr{Looking}i,  'Looking up your hostname');
-$t->message_ok->message_like(qr{Checking},  'Checking Ident');
-$t->message_ok->message_like(qr{Found},     'Found your hostname');
-$t->message_ok->message_like(qr{No Ident}i, 'No Ident response');
-
-my $c = $t->app->core->get_user('superman@example.com')->get_connection('irc-test');
+$ws->message_ok->message_like(qr{Looking}i,  'Looking up your hostname');
+$ws->message_ok->message_like(qr{Checking},  'Checking Ident');
+$ws->message_ok->message_like(qr{Found},     'Found your hostname');
+$ws->message_ok->message_like(qr{No Ident}i, 'No ident');
 
 $irc->run(
   [qr{JOIN}, ['join-convos.irc']],
   sub {
-    send_ok(commandFromUser => {command => '/join #Convos', connection_id => $c->id});
-    $t->message_ok->json_message_is('/connection_id', $c->id)
-      ->json_message_is('/dialog_id', '#convos')->json_message_is('/frozen', '');
-    $t->message_ok->json_message_is('/code', 200)
-      ->json_message_is('/body/connection_id', 'irc-test')
-      ->json_message_is('/body/dialog_id',     '#convos')->json_message_is('/body/name', '#Convos')
-      ->json_message_is('/body/is_private',    0)->json_message_is('/body/topic', '')
-      ->json_message_is('/body/frozen',        '');
+    # TODO: not ok 23 - send message
+    $ws->send_ok({json => {method => 'send', message => '/join #Convos', connection_id => $c->id}});
+    $ws->message_ok->json_message_is('/connection_id', $c->id)
+      ->json_message_is('/connection_id', 'irc-test')->json_message_is('/dialog_id', '#convos')
+      ->json_message_is('/event', 'state')->json_message_is('/frozen', '')
+      ->json_message_is('/is_private', 0)->json_message_is('/name', '#convos')
+      ->json_message_is('/topic', '')->json_message_has('/ts')->json_message_is('/type', 'frozen');
+    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
+      ->json_message_is('/event', 'sent')->json_message_is('/message', '/join #Convos')
+      ->json_message_is('/dialog_id', '#convos');
   }
 );
 
 $irc->run(
   [qr{NICK}, ['nick.irc']],
   sub {
-    send_ok(commandFromUser => {command => '/nick supergirl', connection_id => $c->id});
-    $t->message_ok->json_message_is('/event', 'state')
-      ->json_message_is('/connection_id', 'irc-test')->json_message_is('/nick', 'supergirl')
-      ->json_message_is('/type', 'me');
-    $t->message_ok->json_message_is('/code', 200)
-      ->json_message_is('/body/command', '/nick supergirl');
+    $ws->send_ok(
+      {json => {method => 'send', message => '/nick supergirl', connection_id => $c->id}});
+    $ws->message_ok->json_message_is('/event', 'state')
+      ->json_message_is('/connection_id', 'irc-test')->json_message_is('/event', 'state')
+      ->json_message_is('/nick',          'supergirl')->json_message_has('/ts')
+      ->json_message_is('/type',          'me');
+    $ws->message_ok->json_message_has('/id')->json_message_is('/message', '/nick supergirl');
   }
 );
 
 $irc->run(
   [qr{TOPIC}, ['topic-get.irc']],
   sub {
-    send_ok(commandFromUser => {command => '/topic', connection_id => $c->id});
-    $t->message_ok->json_message_is('/code', 500)->json_message_has('/body/errors/0/message');
+    $ws->send_ok({json => {method => 'send', message => '/topic', connection_id => $c->id}});
+    $ws->message_ok->json_message_like('/errors/0/message', qr{without channel name});
   }
 );
 
 $irc->run(
   [qr{TOPIC}, ['topic-get.irc']],
   sub {
-    send_ok(
-      commandFromUser => {command => '/topic', connection_id => $c->id, dialog_id => '#convos'});
-    $t->message_ok->json_message_is('/code', 200)->json_message_is('/body/command', '/topic')
-      ->json_message_is('/body/topic', 'Some cool topic');
+    $ws->send_ok(
+      {
+        json =>
+          {method => 'send', message => '/topic', connection_id => $c->id, dialog_id => '#convos'}
+      }
+    );
+    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
+      ->json_message_is('/message', '/topic')->json_message_is('/topic', 'Some cool topic');
   }
 );
 
 $c->_event_irc_part(
   {params => ['#convos', 'Bye'], prefix => 'batman!super.girl@i.love.debian.org'});
-$t->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/dialog_id', '#convos')->json_message_is('/message', 'Bye')
   ->json_message_is('/nick', 'batman')->json_message_is('/type', 'part');
 
 $c->_event_irc_quit(
   {params => ['#convos', 'So long!'], prefix => 'batman!super.girl@i.love.debian.org'});
-$t->message_ok->json_message_is('/connection_id', 'irc-test')->json_message_is('/dialog_id', undef)
-  ->json_message_is('/nick', 'batman')->json_message_is('/message', 'So long!')
-  ->json_message_is('/type', 'part');
+$ws->message_ok->json_message_is('/connection_id', 'irc-test')
+  ->json_message_is('/dialog_id', undef)->json_message_is('/nick', 'batman')
+  ->json_message_is('/message', 'So long!')->json_message_is('/type', 'part');
 
 $irc->run(
   [qr{PART}, ['part.irc']],
   sub {
-    send_ok(commandFromUser => {command => '/part #convos', connection_id => $c->id});
-    $t->message_ok->json_message_is('/code', 200)
-      ->json_message_is('/body/command', '/part #convos');
+    $ws->send_ok({json => {method => 'send', message => '/part #convos', connection_id => $c->id}});
+    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
+      ->json_message_is('/message', '/part #convos');
   }
 );
 
-send_ok(commandFromUser => {command => '/nope', connection_id => $c->id, dialog_id => '#convos'});
-$t->message_ok->json_message_is('/code', 500)
-  ->json_message_is('/body/errors/0/message', 'Unknown IRC command.');
+$ws->send_ok(
+  {json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}}
+);
+$ws->message_ok->json_message_is('/errors/0/message', 'Unknown IRC command.');
 
-send_ok(commandFromUser => {command => '/disconnect', connection_id => $c->id});
-$t->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->send_ok({json => {method => 'send', message => '/disconnect', connection_id => $c->id}});
+$ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/state', 'disconnected')->json_message_is('/type', 'connection')
   ->json_message_like('/message', qr{have quit});
-$t->message_ok->json_message_is('/body/command', '/disconnect')->json_message_is('/code', 200);
+$ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
+  ->json_message_is('/message', '/disconnect');
+
+# Test to make sure we don't leak events.
+# The get_ok() is just a hack to make sure the server has
+# emitted the "finish" event.
+ok $user->core->backend->has_subscribers('user:superman@example.com'), 'subscribed';
+$ws->finish_ok;
+$ws->get_ok('/')->status_is(200);
+ok !$user->core->backend->has_subscribers('user:superman@example.com'), 'unsubscribed';
 
 done_testing;
-
-sub id { $msg_id += $_[0] || 0; }
-
-sub send_ok {
-  my ($op, $params) = @_;
-  $t->send_ok({json => {id => id(1), op => $op, params => {body => $params}}}, $op);
-}
 
 __DATA__
 @@ join-convos.irc

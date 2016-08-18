@@ -2,8 +2,8 @@ package Convos::Controller::Url;
 use Mojo::Base 'Mojolicious::Controller';
 
 sub info {
-  my $self = shift;
-  my $url  = $self->param('url');
+  my $self = shift->openapi->valid_input or return;
+  my $url = $self->param('url');
 
   if (!$self->backend->user) {
     return $self->stash(status => 401)

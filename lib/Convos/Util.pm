@@ -1,10 +1,18 @@
 package Convos::Util;
 use Mojo::Base 'Exporter';
 
+use JSON::Validator::Error;
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG has_many next_tick);
+our @EXPORT_OK = qw(DEBUG E has_many next_tick);
+
+sub E {
+  my ($msg, $path) = @_;
+  $msg =~ s! at \S+.*!!s;
+  $msg =~ s!:.*!.!s;
+  return {errors => [JSON::Validator::Error->new($path, $msg)]};
+}
 
 sub has_many {
   my $class = caller;

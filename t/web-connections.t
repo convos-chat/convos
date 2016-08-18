@@ -8,10 +8,10 @@ my $user = $t->app->core->user({email => 'superman@example.com'})->set_password(
 
 $t->get_ok('/api/connections')->status_is(401);
 $t->post_ok('/api/connections', json => {url => "irc://localhost:$port"})->status_is(401);
+
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
   ->status_is(200);
 $t->get_ok('/api/connections')->status_is(200)->json_is('/connections', []);
-
 $t->post_ok('/api/connections', json => {url => "irc://localhost:$port"})->status_is(200);
 $t->post_ok('/api/connections', json => {url => 'irc://irc.example.com:6667'})->status_is(200);
 

@@ -2,6 +2,7 @@ package Convos;
 use Mojo::Base 'Mojolicious';
 
 use Convos::Core;
+use Convos::Util;
 use Mojo::JSON qw(false true);
 
 our $VERSION = '0.01';
@@ -24,24 +25,18 @@ sub startup {
   $self->_setup_secrets;
   $self->_add_helpers;
   $self->_setup_settings;
+  $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
   # Add basic routes
-  $r->get('/')->to(template => 'convos');
-  $r->get('/events/event-source')->to('events#event_source')->name('event_source');
-  $r->websocket('/events/bi-directional')->to('events#bi_directional')->name('bi_directional');
+  $r->get('/')->to(template => 'convos')->name('index');
+  $r->websocket('/events')->to('events#start')->name('events');
 
-  # Autogenerate routes from the Swagger specification
-  $self->plugin(
-    swagger2 => {
-      ensure_swagger_response => {},
-      url                     => $self->static->file('convos-api.json')->path,
-      ws                      => $r->find('bi_directional'),
-    }
-  );
+  # Autogenerate routes from the OpenAPI specification
+  $self->plugin(OpenAPI => {url => $self->static->file('convos-api.json')->path});
 
   # Expand links into rich content
   $self->plugin('LinkEmbedder');
@@ -71,29 +66,6 @@ sub _add_helpers {
   my $self = shift;
 
   $self->helper(
-    invalid_request => sub {
-      my ($c, $message, $path) = @_;
-      my @errors;
-
-      if (UNIVERSAL::isa($message, 'Mojolicious::Validator::Validation')) {
-        $path ||= '';
-        push @errors, map {
-          my $error = $message->error($_);
-          {
-            message => $error->[0] eq 'required' ? 'Missing property.' : 'Invalid input.',
-            path => "$path/$_"
-          }
-        } sort keys %{$message->{error}};
-      }
-      else {
-        push @errors, {message => $message, path => $path || '/'};
-      }
-
-      return {valid => Mojo::JSON->false, errors => \@errors};
-    }
-  );
-
-  $self->helper(
     'backend.user' => sub {
       my $self = shift;
       return undef unless my $email = $self->session('email');
@@ -103,8 +75,7 @@ sub _add_helpers {
 
   $self->helper(
     unauthorized => sub {
-      my ($self, $cb) = @_;
-      $self->$cb($self->invalid_request('Need to log in first.', '/'), 401);
+      shift->render(openapi => Convos::Util::E('Need to log in first.'), status => 401);
     }
   );
 }
@@ -292,7 +263,7 @@ __DATA__
 <html data-framework="vue">
   <head>
     <title>Convos</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     %= asset 'convos.css';
   </head>
   <body>
@@ -307,8 +278,8 @@ __DATA__
     <div id="vue_tooltip"><span></span></div>
     %= javascript begin
       window.Convos = {
-        apiUrl:   "<%= $c->url_for('convos_api_specification') %>",
-        wsUrl:    "<%= $c->url_for('bi_directional')->to_abs->userinfo(undef)->to_string %>",
+        apiUrl:   "<%= $c->url_for('api') %>",
+        wsUrl:    "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
         mode:     "<%= app->mode %>",
         settings: <%== Mojo::JSON::encode_json($settings) %>,
         mixin:    {} // Vue.js mixins

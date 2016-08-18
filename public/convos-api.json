@@ -46,7 +46,8 @@
       "get": {
         "tags": [],
         "summary": "Get information from a URL",
-        "operationId": "infoFromUrl",
+        "operationId": "embed",
+        "x-mojo-to": "url#info",
         "parameters": [
           { "name": "url", "in": "query", "required": true, "type": "string", "description": "URL to resource" }
         ],
@@ -61,43 +62,12 @@
         }
       }
     },
-    "/command": {
-      "post": {
-        "tags": [ "chat" ],
-        "summary": "Send a message or command.",
-        "operationId": "commandFromUser",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "required": ["connection_id", "command"],
-              "properties": {
-                "connection_id": { "type": "string", "description": "Connection ID" },
-                "dialog_id": { "type": "string", "description": "Dialog ID" },
-                "command": { "type": "string", "description": "A command to be sent to backend" }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully sent a message",
-            "schema": { "type": "object" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
     "/connection/{connection_id}": {
       "delete": {
         "tags": [ "connection" ],
         "summary": "Delete a connection and all assosiated data.",
         "operationId": "removeConnection",
+        "x-mojo-to": "connection#remove",
         "parameters": [
           { "$ref": "#/parameters/connection_id" }
         ],
@@ -116,6 +86,7 @@
         "tags": [ "connection" ],
         "summary": "Update a connection.",
         "operationId": "updateConnection",
+        "x-mojo-to": "connection#update",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           {
@@ -147,7 +118,8 @@
       "get": {
         "tags": [ "dialog" ],
         "summary": "Get a list of all available chat rooms.",
-        "operationId": "roomsByConnection",
+        "operationId": "rooms",
+        "x-mojo-to": "connection#rooms",
         "parameters": [
           { "$ref": "#/parameters/connection_id" }
         ],
@@ -181,7 +153,8 @@
       "get": {
         "tags": [ "dialog" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
-        "operationId": "messagesByDialog",
+        "operationId": "messages",
+        "x-mojo-to": "dialog#messages",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/dialog_id" },
@@ -212,7 +185,8 @@
       "get": {
         "tags": [ "dialog" ],
         "summary": "Get a list of participants.\n\nNote: this resource require the user to be authenticated first.",
-        "operationId": "participantsInDialog",
+        "operationId": "participants",
+        "x-mojo-to": "dialog#participants",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },
           { "$ref": "#/parameters/dialog_id" }
@@ -250,6 +224,7 @@
         "tags": [ "connection" ],
         "summary": "Get all the connections for a user.",
         "operationId": "listConnections",
+        "x-mojo-to": "connection#list",
         "responses": {
           "200": {
             "description": "List of connections.",
@@ -270,6 +245,7 @@
         "tags": [ "connection" ],
         "summary": "Add a connection.",
         "operationId": "createConnection",
+        "x-mojo-to": "connection#create",
         "parameters": [
           {
             "name": "body",
@@ -303,6 +279,7 @@
         "tags": [ "dialog" ],
         "summary": "Get a list of all dialogs.",
         "operationId": "listDialogs",
+        "x-mojo-to": "dialog#list",
         "responses": {
           "200": {
             "description": "List of messages.",
@@ -329,6 +306,7 @@
         "summary": "Get list of notications.",
         "description": "A notification is added once your name is mentioned in a chat.",
         "operationId": "listNotifications",
+        "x-mojo-to": "notifications#list",
         "responses": {
           "200": {
             "description": "List of notifications.",
@@ -352,6 +330,7 @@
         "summary": "Mark a notication as seen.",
         "description": "TODO: Notification count vs red/green toggling of a single notification.",
         "operationId": "seenNotification",
+        "x-mojo-to": "notification#seen",
         "parameters": [
           {
             "name": "body",
@@ -385,6 +364,7 @@
         "tags": [ "user" ],
         "summary": "Delete a user.",
         "operationId": "deleteUser",
+        "x-mojo-to": "user#delete",
         "responses": {
             "200": {
             "description": "Successfully deleted.",
@@ -400,6 +380,7 @@
         "tags": [ "user" ],
         "summary": "Get user data.",
         "operationId": "getUser",
+        "x-mojo-to": "user#get",
         "responses": {
           "200": {
             "description": "User profile.",
@@ -415,6 +396,7 @@
         "tags": [ "user" ],
         "summary": "Update an existing user.",
         "operationId": "updateUser",
+        "x-mojo-to": "user#update",
         "parameters": [
           {
             "name": "body",
@@ -445,6 +427,7 @@
         "tags": [ "user" ],
         "summary": "Log in a user based on email and password.",
         "operationId": "loginUser",
+        "x-mojo-to": "user#login",
         "parameters": [
           {
             "name": "body",
@@ -479,8 +462,9 @@
         "summary": "Logout a user.",
         "description": "This resource will delete any sessions cookies that might be stored in the client.",
         "operationId": "logoutUser",
+        "x-mojo-to": "user#logout",
         "responses": {
-          "200": {
+          "302": {
             "description": "Successfully logged out.",
             "schema": { "$ref": "#/definitions/Success" }
           },
@@ -496,6 +480,7 @@
         "tags": [ "user" ],
         "summary": "Register a new user.",
         "operationId": "registerUser",
+        "x-mojo-to": "user#register",
         "parameters": [
           {
             "name": "body",

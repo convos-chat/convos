@@ -37,7 +37,7 @@ has _irc => sub {
 
   Scalar::Util::weaken($self);
   $irc->register_default_event_handlers;
-  $irc->on(close => sub { $self and $self->_event_irc_close });
+  $irc->on(close => sub { $self and $self->_event_irc_close($_[0]) });
   $irc->on(error => sub { $self and $self->_event_irc_error({params => [$_[1]]}) });
 
   for my $event (qw(ctcp_action irc_notice irc_privmsg)) {
@@ -184,10 +184,10 @@ sub send {
 }
 
 sub _event_irc_close {
-  my ($self) = @_;
+  my ($self, $irc) = @_;
   my $state = delete $self->{disconnect} ? 'disconnected' : 'queued';
   $self->state($state, sprintf 'You [%s@%s] have quit.',
-    $self->_irc->nick, $self->_irc->real_host || $self->url->host);
+    $irc->nick, $irc->real_host || $self->url->host);
   delete $self->{_irc};
   $self->user->core->connect($self) if $state eq 'queued';
 }
