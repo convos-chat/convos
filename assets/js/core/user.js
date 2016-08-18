@@ -53,23 +53,15 @@
     if (!correct) Convos.settings.main = this.dialogs.length ? this.dialogs[0].href() : "";
   };
 
-  proto.refreshConnections = function(cb) {
+  proto.refresh = function(cb) {
     var self = this;
-    Convos.api.listConnections({}, function(err, xhr) {
+    Convos.api.getUser({connections: true, dialogs: true, notifications: true}, function(err, xhr) {
       if (err) return cb.call(self, err);
       self.connections = xhr.body.connections.map(function(c) {
         c.user = self;
         c.id = c.connection_id;
         return new Convos.Connection(c);
       });
-      cb.call(self, err);
-    });
-  };
-
-  proto.refreshDialogs = function(cb) {
-    var self = this;
-    Convos.api.listDialogs({}, function(err, xhr) {
-      if (err) return cb.call(self, err);
       self.dialogs = xhr.body.dialogs.map(function(d) { return self.ensureDialog(d) });
       cb.call(self, err);
     });

@@ -6,8 +6,8 @@
     document.querySelector("#loader .error").innerText = err;
   };
 
-  Convos.api = new swaggerClient();
-  Convos.api.ws(new ReconnectingWebSocket(Convos.wsUrl));
+  Convos.api = new openAPI();
+  Convos.ws = new ReconnectingWebSocket(Convos.wsUrl);
   Convos.api.load(Convos.apiUrl, function(err) {
     if (err) return Convos.error("Could not load API spec! " + err);
 
@@ -41,12 +41,12 @@
           this.user.email = data.email;
           this.settings.dialogsVisible = false;
 
-          Convos.api.ws().on("close", function() {
+          Convos.ws.on("close", function() {
             user.connections.forEach(function(c) { c.state = "unreachable"; });
             user.dialogs.forEach(function(d) { d.frozen = "Websocket closed."; });
           });
 
-          Convos.api.ws().on("json", function(data) {
+          Convos.ws.on("json", function(data) {
             if (!data.connection_id) return;
             var c = user.getConnection(data.connection_id);
             if (c) return c.emit(data.event, data);
@@ -54,24 +54,20 @@
             cache[data.connection_id].push(data);
           });
 
-          Convos.api.ws().on("open", function(data) {
-            user.getNotifications(function(err) {});
-            user.refreshConnections(function(err) {
-              if (err) return console.log(err); // TODO
-              user.refreshDialogs(function(err) {
-                user.makeSureLocationIsCorrect();
-                self.currentPage = "convos-chat";
-                Object.keys(cache).forEach(function(connection_id) {
-                  var msg = cache[connection_id];
-                  var c = user.getConnection(connection_id);
-                  delete cache[connection_id];
-                  if (c) msg.forEach(function(d) { c.emit(d.event, d); });
-                });
+          Convos.ws.on("open", function(data) {
+            user.refresh(function(err, res) {
+              user.makeSureLocationIsCorrect();
+              self.currentPage = "convos-chat";
+              Object.keys(cache).forEach(function(connection_id) {
+                var msg = cache[connection_id];
+                var c = user.getConnection(connection_id);
+                delete cache[connection_id];
+                if (c) msg.forEach(function(d) { c.emit(d.event, d); });
               });
             });
           });
 
-          Convos.api.ws().open();
+          Convos.ws.open();
         },
         logout: function() {
           Convos.api.ws().close();

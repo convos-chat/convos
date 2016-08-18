@@ -14,8 +14,8 @@
 < js/notification.js
 < js/jquery.disableouterscroll.js
 < js/materialbox.js
+< js/openapi.js
 < js/websocket.js
-< js/swagger2-client.js
 < js/vue/directive-link.js
 < js/vue/directive-sidebar.js
 < js/vue/directive-tooltip.js

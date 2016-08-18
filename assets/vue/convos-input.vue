@@ -35,11 +35,11 @@ module.exports = {
       try {
         var state = this.dialog.connection().state;
         if (state == "connected") {
-          return "What do you want to say to " + this.dialog.name + "?";
+          return "What's on your mind " + this.dialog.connection().me.nick + "?";
         } else {
           return 'Cannot send any message, since ' + state + '.';
         }
-      } catch ( err ) {
+      } catch (err) {
         return "Please read the instructions on screen.";
       }
     }

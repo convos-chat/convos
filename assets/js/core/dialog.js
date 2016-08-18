@@ -63,9 +63,9 @@
     if (this.messages[0].loading) return;
     var self = this;
     this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
-    this._api.messagesByDialog(
+    this._api.messages(
       {
-        before: this.messages[1].ts,
+        before: this.messages[1].ts.toISOString(),
         connection_id: this.connection_id,
         dialog_id: this.id
       },
@@ -113,7 +113,7 @@
 
   proto.refreshParticipants = function(cb) {
     var self = this;
-    Convos.api.participantsInDialog(
+    Convos.api.participants(
       {
         connection_id: this.connection_id,
         dialog_id:     this.id
@@ -157,7 +157,7 @@
     if (this.messages.length >= 60) return;
     var self = this;
     self.refreshParticipants(function() {});
-    self._api.messagesByDialog(
+    self._api.messages(
       {
         connection_id: self.connection_id,
         dialog_id:     self.id
