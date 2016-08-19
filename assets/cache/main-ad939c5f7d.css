@@ -4742,7 +4742,8 @@ div.autocomplete {
 .convos-message {
   display: block;
   position: relative;
-  margin: 8px 0; }
+  margin: 8px 0;
+  word-wrap: break-word; }
   .convos-message.error, .convos-message.notice {
     padding-left: 0.75rem;
     padding-right: 0.75rem;

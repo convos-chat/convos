@@ -81,6 +81,7 @@ $convos-input-height: 46px;
   display: block;
   position: relative;
   margin: $dialog-spacing * 2 0;
+  word-wrap: break-word;
 
   &.error, &.notice {
     padding-left: $gutter-width / 2;
