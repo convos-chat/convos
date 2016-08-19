@@ -22,6 +22,10 @@
     return this;
   };
 
+  proto.is = function(state) {
+    return _name(this.readyState) == state.toUpperCase();
+  };
+
   // Open a connection to the WebSocket
   // ws = ws.open(function() { ... });
   // ws = ws.open();

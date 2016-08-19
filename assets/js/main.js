@@ -6,8 +6,15 @@
     document.querySelector("#loader .error").innerText = err;
   };
 
-  Convos.api = new openAPI();
   Convos.ws = new ReconnectingWebSocket(Convos.wsUrl);
+  setInterval(
+    function() {
+      if (Convos.ws.is('open')) Convos.ws.send('{}');
+    },
+    10000
+  );
+
+  Convos.api = new openAPI();
   Convos.api.load(Convos.apiUrl, function(err) {
     if (err) return Convos.error("Could not load API spec! " + err);
 

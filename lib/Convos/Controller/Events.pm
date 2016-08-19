@@ -66,7 +66,7 @@ sub _event_send {
   );
 }
 
-sub _event_ping { $_[0]->send({json => {}}) }
+sub _event_ping { $_[0]->send({json => {ts => Mojo::Util::steady_time()}}) }
 
 1;
 
