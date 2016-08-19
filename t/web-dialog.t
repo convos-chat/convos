@@ -15,6 +15,7 @@ $t->get_ok('/api/connection/irc-not-found/dialog/not-found/participants')->statu
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/participants')->status_is(500)
   ->json_is('/errors/0/message', 'Not connected.');
 
+no warnings 'once';
 *Mojo::IRC::UA::channel_users = sub {
   my ($irc, $channel, $cb) = @_;
   $irc->$cb('', {test6851 => {mode => ''}, batman => {mode => '@'}});
@@ -22,23 +23,25 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/participants')->statu
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/participants')->status_is(200)
   ->json_has('/participants/0/mode')->json_has('/participants/0/name');
 
+my $last_read = Mojo::Date->new(1471623058)->to_datetime;
 $user->connection({name => 'localhost', protocol => 'irc'})
-  ->dialog({name => '#Convos', frozen => ''});
+  ->dialog({name => '#Convos', frozen => ''})->last_read($last_read);
 $t->get_ok('/api/dialogs')->status_is(200)->json_is(
   '/dialogs' => [
     {
       connection_id => 'irc-localhost',
-      topic         => '',
-      frozen        => '',
-      name          => '#Convos',
       dialog_id     => '#convos',
+      frozen        => '',
       is_private    => 0,
+      name          => '#Convos',
+      last_read     => '2016-08-19T16:10:58Z',
+      topic         => '',
     },
   ]
 );
 
 $user->connection({name => 'example', protocol => 'irc'})
-  ->dialog({name => '#superheroes', frozen => ''});
+  ->dialog({name => '#superheroes', frozen => ''})->last_read($last_read);
 $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
   '/connections',
   [
@@ -69,6 +72,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       frozen        => '',
       is_private    => 0,
       name          => '#Convos',
+      last_read     => '2016-08-19T16:10:58Z',
       topic         => '',
     },
     {
@@ -76,6 +80,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       dialog_id     => '#superheroes',
       frozen        => '',
       is_private    => 0,
+      last_read     => '2016-08-19T16:10:58Z',
       name          => '#superheroes',
       topic         => '',
     }

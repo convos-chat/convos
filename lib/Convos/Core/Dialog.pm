@@ -1,6 +1,8 @@
 package Convos::Core::Dialog;
 use Mojo::Base -base;
 
+use Mojo::Date;
+
 my $CHANNEL_RE = qr{[#&]};
 
 has frozen => '';
@@ -13,6 +15,8 @@ sub connection { shift->{connection} or Carp::confess('connection required in co
 
 sub id { lc +($_[1] || $_[0])->{name} }
 
+has last_read => sub { Mojo::Date->new->to_datetime };
+
 sub messages {
   my ($self, $query, $cb) = @_;
   Scalar::Util::weaken($self);
@@ -22,7 +26,7 @@ sub messages {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(frozen is_private name topic);
+  my %json = map { ($_, $self->$_) } qw(frozen is_private name last_read topic);
   $json{connection_id} = $self->connection->id;
   $json{dialog_id}     = $self->id;
   $json{password}      = $self->password if $persist;
@@ -74,6 +78,13 @@ participants can join the dialog.
   $str = $self->name;
 
 The name of this dialog.
+
+=head2 last_read
+
+  $datetime = $self->last_read;
+  $self = $self->last_read($datetime);
+
+Holds an datetime timestring of last time this dialog was active in frontend.
 
 =head2 password
 

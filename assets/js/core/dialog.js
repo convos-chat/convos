@@ -1,18 +1,43 @@
 (function() {
   Convos.Dialog = function(attrs) {
+    this.active        = false;
     this.frozen        = "";
     this.id            = "";
     this.messages      = [];
     this.name          = "";
+    this.lastRead      = attrs.last_read ? new Date(attrs.last_read) : new Date();
     this.participants  = {};
     this.unread        = 0;
     this.topic         = "";
-    this._api          = Convos.api;
     this._participants = {};
 
     EventEmitter(this);
     if (attrs) this.update(attrs);
-    this.once("visible", this._initialize);
+
+    this.once("active", function() { this.refreshParticipants(function() {}); });
+    this.on("active", function() {
+      this.user.dialogs.forEach(function(d) {
+        if (d.active) d.emit("inactive");
+      });
+      this.active = true;
+      this.unread = 0;
+    });
+
+    this.on("inactive", function() { this.active = false; });
+    this.on("inactive", function() {
+      var self = this;
+      Convos.api.setDialogLastRead(
+        {
+          connection_id: this.connection_id,
+          dialog_id:     this.id
+        }, function(err, xhr) {
+          if (err) return console.log('[setDialogLastRead] ' + JSON.stringify(err)); // TODO
+          self.lastRead = new Date(xhr.body.last_read);
+        }
+      );
+    });
+
+    this._initialize();
   };
 
   var proto = Convos.Dialog.prototype;
@@ -31,7 +56,12 @@
 
     if (args.method == "push") {
       this.prevMessage = msg;
-      if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) this.unread++;
+
+      if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) {
+        if (this.lastRead < msg.ts && !args.disableUnread) {
+          this.unread++;
+        }
+      }
       if (msg.highlight && !args.disableNotifications) {
         Notification.simple(msg.from, msg.message);
         this.user.unread++;
@@ -64,7 +94,7 @@
     if (this.messages[0].loading) return;
     var self = this;
     this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
-    this._api.messages(
+    Convos.api.messages(
       {
         before: this.messages[1].ts.toISOString(),
         connection_id: this.connection_id,
@@ -153,24 +183,25 @@
     }
   };
 
-  // Called when this dialog is visible in gui the first time
+  // Called when this dialog is active in gui the first time
   proto._initialize = function() {
     if (this.messages.length >= 60) return;
     var self = this;
-    self.refreshParticipants(function() {});
-    self._api.messages(
+    Convos.api.messages(
       {
         connection_id: self.connection_id,
         dialog_id:     self.id
       }, function(err, xhr) {
         if (err) return self.emit("error", err);
-        xhr.body.messages.forEach(function(msg) { self.addMessage(msg, {method: "push", disableNotifications: true}); });
+        xhr.body.messages.forEach(function(msg) {
+          self.addMessage(msg, {method: "push", disableNotifications: true});
+        });
 
         if (!self.messages.length) {
-          self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.");
+          self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.", {disableUnread: true});
         }
         if (self.frozen) {
-          self.addMessage("You are not part of this channel. " + self.frozen);
+          self.addMessage("You are not part of this channel. " + self.frozen, {disableUnread: true});
         }
         if (Convos.settings.notifications == "default") {
           self.addMessage({type: "enable-notifications"});

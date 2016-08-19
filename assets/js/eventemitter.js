@@ -31,7 +31,7 @@ EventEmitter.prototype.on = function(name, cb) {
 
 EventEmitter.prototype.once = function(name, cb) {
   var wrapper = function() {
-    this.unsubscribe(name);
+    this.unsubscribe(name, wrapper);
     cb.apply(this, arguments);
   }.bind(this);
   this.on(name, wrapper);

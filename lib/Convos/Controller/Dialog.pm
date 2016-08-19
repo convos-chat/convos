@@ -4,6 +4,29 @@ use Mojo::Base 'Mojolicious::Controller';
 use Convos::Util 'E';
 use Mojo::JSON qw(false true);
 
+sub last_read {
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->unauthorized;
+  my $connection = $user->get_connection($self->stash('connection_id'))
+    or return $self->render(openapi => E('Connection not found.'), status => 404);
+  my $dialog = $connection->get_dialog($self->stash('dialog_id'))
+    or return $self->render(openapi => E('Dialog not found.'), status => 404);
+  my $last_read = Mojo::Date->new->to_datetime;
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $dialog->last_read($last_read);
+      $connection->save($delay->begin);
+    },
+    sub {
+      my ($delay, $err) = @_;
+      die $err if $err;
+      $self->render(openapi => {last_read => $last_read});
+    }
+  );
+}
+
 sub list {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
@@ -77,6 +100,10 @@ L<Convos::Controller::Dialog> is a L<Mojolicious::Controller> with
 dialog related actions.
 
 =head1 METHODS
+
+=head2 last_read
+
+See L<Convos::Manual::API/setDialogLastRead>.
 
 =head2 list
 

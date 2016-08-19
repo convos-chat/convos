@@ -12,11 +12,10 @@ module.exports = {
   methods: {
     showDialogContainer: function(d) {
       // Not sure why, but this function is triggered whenever scrolling takes place.
-      // this.lastMain is here to prevent a gazillion "visible" events.
+      // this.lastMain is here to prevent a gazillion "active" events.
       if (this.settings.main != this.lastMain && this.settings.main == d.href()) {
         this.lastMain = this.settings.main;
-        d.unread = 0;
-        d.emit("visible");
+        d.emit("active");
       }
 
       return this.settings.main == d.href();

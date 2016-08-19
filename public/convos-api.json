@@ -149,6 +149,33 @@
         }
       }
     },
+    "/connection/{connection_id}/dialog/{dialog_id}/last-read": {
+      "post": {
+        "tags": [ "dialog" ],
+        "summary": "Set 'last_read' for a dialog.",
+        "operationId": "setDialogLastRead",
+        "x-mojo-to": "dialog#last_read",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "$ref": "#/parameters/dialog_id" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "last_read": { "type": "string", "format": "date-time" }
+              }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/connection/{connection_id}/dialog/{dialog_id}/messages": {
       "get": {
         "tags": [ "dialog" ],
@@ -512,10 +539,11 @@
       }
     },
     "Dialog": {
-      "required": ["connection_id", "dialog_id", "name"],
+      "required": ["connection_id", "dialog_id", "last_read", "name"],
       "properties": {
         "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialog is part of" },
         "dialog_id": { "type": "string", "description": "Unique identifier for the dialog" },
+        "last_read": { "type": "string", "format": "date-time" },
         "name": { "type": "string", "description": "Name of the room or person" },
         "topic": { "type": "string", "description": "The subjec/topic for this room" }
       }
@@ -564,10 +592,12 @@
         "registered": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" },
         "unread": { "type": "integer", "description": "Number of unread notifications" },
         "connections": {
-          "type": "array", "items": { "$ref": "#/definitions/Connection" }
+          "type": "array",
+          "items": { "$ref": "#/definitions/Connection" }
         },
         "dialogs": {
-          "type": "array", "items": { "$ref": "#/definitions/Dialog" }
+          "type": "array",
+          "items": { "$ref": "#/definitions/Dialog" }
         }
       }
     }

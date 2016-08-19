@@ -12,7 +12,6 @@
       </div>
       <div class="row notification read" v-if="!user.notifications.length">
         <div class="col s12">
-          <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{new Date() | timestring}}</span>
           <h5>convosbot</h5>
           <div class="message">No notifications.</div>
         </div>
