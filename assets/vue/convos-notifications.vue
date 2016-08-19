@@ -10,8 +10,12 @@
           </h5>
         </div>
       </div>
-      <div class="row" v-if="!user.notifications.length">
-        <h5 class="center">No notifications.</h5>
+      <div class="row notification read" v-if="!user.notifications.length">
+        <div class="col s12">
+          <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{new Date() | timestring}}</span>
+          <h5>convosbot</h5>
+          <div class="message">No notifications.</div>
+        </div>
       </div>
       <div class="row notification" :class="$index >= user.unread ? 'read' : ''" @click="gotoMessage(msg)" v-for="msg in user.notifications">
         <div class="col s12">
