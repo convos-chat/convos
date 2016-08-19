@@ -1,5 +1,6 @@
 (function() {
   Convos.User = function(attrs) {
+    this.connected     = false;
     this.connections   = [];
     this.dialogs       = [];
     this.email         = "";

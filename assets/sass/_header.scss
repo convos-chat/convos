@@ -19,6 +19,13 @@ header {
   a { padding-left: 10px; padding-right: 10px; }
   a:hover { background: lighten($primary-color, 5%); }
   a.active { background: darken($primary-color, 5%); }
+  a.btn-floating { vertical-align: text-bottom; }
+  a.btn-floating i {
+    font-size: 1em;
+    height: 1em;
+    width: 37px;
+    line-height: 37px;
+  }
 
   .input-field {
     height: 100%;

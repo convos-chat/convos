@@ -4823,6 +4823,13 @@ header {
     background: #78c37b; }
   header a.active {
     background: #54b359; }
+  header a.btn-floating {
+    vertical-align: text-bottom; }
+  header a.btn-floating i {
+    font-size: 1em;
+    height: 1em;
+    width: 37px;
+    line-height: 37px; }
   header .input-field {
     height: 100%;
     padding: 0 1.5rem;

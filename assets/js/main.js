@@ -49,8 +49,9 @@
           this.settings.dialogsVisible = false;
 
           Convos.ws.on("close", function() {
+            user.connected = false;
             user.connections.forEach(function(c) { c.state = "unreachable"; });
-            user.dialogs.forEach(function(d) { d.frozen = "Websocket closed."; });
+            user.dialogs.forEach(function(d) { d.frozen = "No internet connection?"; });
           });
 
           Convos.ws.on("json", function(data) {
@@ -62,6 +63,7 @@
           });
 
           Convos.ws.on("open", function(data) {
+            user.connected = true;
             user.refresh(function(err, res) {
               user.makeSureLocationIsCorrect();
               self.currentPage = "convos-chat";

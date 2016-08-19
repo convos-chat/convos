@@ -4,7 +4,7 @@
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
       <h2 @click.prevent="getInfo" v-tooltip="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
       <convos-header-links :toggle="true" :user="user">
-        <a href="#info" @click.prevent="getInfo" v-tooltip.literal="Information about dialog"><i class="material-icons">info</i></a>
+        <a href="#info" @click.prevent="getInfo" v-tooltip.literal="Information about dialog" :class="user.connected ? '' : 'btn-floating deep-orange'"><i class="material-icons">{{user.connected ? 'info' : 'info_outline'}}</i></a>
         <a href="#close" @click.prevent="closeDialog" v-tooltip.literal="Close dialog"><i class="material-icons">close</i></a>
       </convos-header-links>
     </header>
@@ -45,11 +45,15 @@ module.exports = {
       this.dialog.connection().send("/close " + this.dialog.name);
     },
     getInfo: function() {
-      var self = this;
-      self.dialog.refreshParticipants(function(err) {
-        if (!err) return this.addMessage({type: "dialog-info"});
-        this.addMessage({message: err[0].message, type: "error"});
-      });
+      if (this.user.connected) {
+        this.dialog.refreshParticipants(function(err) {
+          if (!err) return this.addMessage({type: "dialog-info"});
+          this.addMessage({message: err[0].message, type: "error"});
+        });
+      }
+      else {
+        this.dialog.addMessage({message: "Convos is connecting to the server...", type: "notice"});
+      }
     },
     onScroll: function() {
       var self = this;
