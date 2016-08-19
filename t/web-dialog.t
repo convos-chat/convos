@@ -37,4 +37,50 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
   ]
 );
 
+$user->connection({name => 'example', protocol => 'irc'})
+  ->dialog({name => '#superheroes', frozen => ''});
+$t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
+  '/connections',
+  [
+    {
+      connection_id => 'irc-example',
+      me            => {},
+      name          => 'example',
+      protocol      => 'irc',
+      state         => 'queued',
+      url           => '',
+    },
+    {
+      connection_id => 'irc-localhost',
+      me            => {},
+      name          => 'localhost',
+      protocol      => 'irc',
+      state         => 'connected',
+      url           => '?nick=superman',
+    }
+  ],
+  'user connections'
+  )->json_is(
+  '/dialogs',
+  [
+    {
+      connection_id => 'irc-localhost',
+      dialog_id     => '#convos',
+      frozen        => '',
+      is_private    => 0,
+      name          => '#Convos',
+      topic         => '',
+    },
+    {
+      connection_id => 'irc-example',
+      dialog_id     => '#superheroes',
+      frozen        => '',
+      is_private    => 0,
+      name          => '#superheroes',
+      topic         => '',
+    }
+  ],
+  'user dialogs'
+  )->json_hasnt('/notifications', 'user notifications');
+
 done_testing;

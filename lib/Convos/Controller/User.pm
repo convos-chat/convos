@@ -26,17 +26,6 @@ sub get {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my $res  = $user->TO_JSON;
-  my (@connections, @dialogs);
-
-  if ($self->param('connections') or $self->param('dialogs')) {
-    @connections = sort { $a->name cmp $b->name } @{$user->connections};
-  }
-  if ($self->param('dialogs')) {
-    for my $connection (@connections) {
-      @dialogs = sort { $a->id cmp $b->id } @{$connection->dialogs};
-    }
-    $res->{dialogs} = \@dialogs;
-  }
 
   $self->delay(
     sub {
@@ -46,9 +35,19 @@ sub get {
     },
     sub {
       my ($delay, $err, $notifications) = @_;
+      my (@connections, @dialogs);
       die $err if $err;
-      $res->{connections}   = \@connections  if $self->param('connections');
+
       $res->{notifications} = $notifications if $notifications;
+
+      if ($self->param('connections') or $self->param('dialogs')) {
+        @connections = sort { $a->name cmp $b->name } @{$user->connections};
+        $res->{connections} = \@connections if $self->param('connections');
+      }
+      if ($self->param('dialogs')) {
+        $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
+      }
+
       $self->render(openapi => $res);
     }
   );
