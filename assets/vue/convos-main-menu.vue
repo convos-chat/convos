@@ -35,7 +35,7 @@
       <a v-sidebar.literal="#help" :class="activeClass" class="hide-on-large-only simple">
         <i class="material-icons">help</i> Help
       </a>
-      <a href="#logout" @click.prevent="logout" class="simple">
+      <a v-link.literal="/api/user/logout" class="simple">
         <i class="material-icons">power_settings_new</i> Logout
       </a>
     </div>

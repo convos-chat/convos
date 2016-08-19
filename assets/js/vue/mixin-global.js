@@ -26,13 +26,6 @@
       insertIntoInput: function(e) {
         var dialog = this.user.getActiveDialog();
         if (dialog) dialog.emit("insertIntoInput", e.currentTarget.href.replace(/.*?#/, ""));
-      },
-      logout: function(e) {
-        var self = this;
-        Convos.api.http().logoutUser({}, function(err, xhr) {
-          if (err) return console.log(err); // TODO: Display error message
-          self.$dispatch("logout");
-        });
       }
     }
   });

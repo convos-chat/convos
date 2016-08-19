@@ -4,9 +4,16 @@
     bind: function() {
       var vm = this.vm;
       this.el.addEventListener("click", function(e) {
+        var href = e.currentTarget.getAttribute("href");
         e.preventDefault();
         Convos.settings.dialogsVisible = false;
-        Convos.settings.main = e.currentTarget.href.replace(/.*?#/, "#");
+
+        if (href.match(/^\#/)) {
+          Convos.settings.main = href.replace(/.*?#/, "#");
+        }
+        else {
+          window.location = Convos.indexUrl.replace(/\/+$/, '') + href;
+        }
       });
     },
     update: function(v) {

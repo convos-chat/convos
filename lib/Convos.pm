@@ -279,6 +279,7 @@ __DATA__
     %= javascript begin
       window.Convos = {
         apiUrl:   "<%= $c->url_for('api') %>",
+        indexUrl: "<%= $c->url_for('index') %>",
         wsUrl:    "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
         mode:     "<%= app->mode %>",
         settings: <%== Mojo::JSON::encode_json($settings) %>,
