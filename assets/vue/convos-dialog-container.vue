@@ -78,8 +78,8 @@ module.exports = {
   ready: function() {
     this.scrollElement = $("main", this.$el)[0];
     this.scrollElement.addEventListener("scroll", this.onScroll);
+    this.dialog.on("active", function() { this.scrollToBottom({gotoBottom: true}); }.bind(this));
     this.dialog.on("message", this.scrollToBottom);
-    this.dialog.on("visible", function() { this.scrollToBottom({gotoBottom: true}); }.bind(this));
   },
   beforeDestroy: function() {
     this.scrollElement.removeEventListener("scroll", this.onScroll);

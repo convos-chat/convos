@@ -119,8 +119,8 @@ module.exports = {
   },
   ready: function() {
     var self = this;
+    this.dialog.on("active", this.focusInput);
     this.dialog.on("focusInput", this.focusInput);
-    this.dialog.on("visible", this.focusInput);
     this.dialog.on("insertIntoInput", function(str) {
       if (str.indexOf('/') == 0) return self.$els.input.value = str; // command
       var val = self.$els.input.value.replace(/\s+$/, '');
