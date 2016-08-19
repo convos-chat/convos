@@ -22,18 +22,13 @@
 < js/vue/filter-markdown.js
 < js/vue/filter-timestring.js
 < js/vue/mixin-global.js
-< js/vue/mixin-materialize.js
 < js/vue/mixin-message.js
 
+< https://raw.githubusercontent.com/jackmoore/autosize/master/dist/autosize.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/waves.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/jquery.easing.1.3.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/global.js
-< https://raw.githubusercontent.com/Dogfalo/materialize/master/js/animation.js
-< https://raw.githubusercontent.com/Dogfalo/materialize/master/js/buttons.js
-< https://raw.githubusercontent.com/Dogfalo/materialize/master/js/dropdown.js
-< https://raw.githubusercontent.com/Dogfalo/materialize/master/js/forms.js
-< https://raw.githubusercontent.com/Dogfalo/materialize/master/js/leanModal.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/animation.js
 
 < js/core/connection.js
@@ -42,6 +37,7 @@
 
 # materialize elements
 < vue/md-autocomplete.vue
+< vue/md-input.vue
 < vue/md-option.vue
 < vue/md-select.vue
 

@@ -1,11 +1,10 @@
 <template>
   <input
-    :id="id"
-    :placeholder="placeholder"
-    v-model="value"
-    @keydown="keydown"
-    @keyup="keyup"
+    :id="id" :placeholder="placeholder" v-model="value"
+    @keydown="keydown" @keyup="keyup"
+    @focus="hasFocus=true" @blur="hasFocus=false"
     type="text" autocomplete="off" spellcheck="false">
+  <label :for="id" :class="{active:labelActive}"><slot></slot></label>
   <div class="autocomplete" :class="filteredOptions.length ? '' : 'hidden'">
     <ul>
       <li :class="optionClass(o, $index)" v-for="o in filteredOptions" v-tooltip="o.title">
@@ -21,10 +20,13 @@ module.exports = {
     filteredOptions: function() {
       var re = new RegExp(this.value, 'i');
       return this.options.filter(function(o) { return (o.text || o.value).match(re); });
+    },
+    labelActive: function() {
+      return this.value || this.placeholder || this.hasFocus;
     }
   },
   data: function() {
-    return {selected: -1};
+    return {hasFocus: false, selected: -1};
   },
   methods: {
     keydown: function(e) {
@@ -67,6 +69,9 @@ module.exports = {
     select: function(option) {
       this.$emit("select", option);
     }
+  },
+  ready: function() {
+    if (!this.id) this.id = Materialize.guid();
   }
 };
 </script>

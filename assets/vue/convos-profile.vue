@@ -11,13 +11,8 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-field col s12">
-          <input id="form_password" type="password" class="validate" placeholder="At least six characters">
-          <label for="form_password">Password</label>
-        </div>
-        <div class="input-field col s12">
-          <input placeholder="Repeat password" id="form_password_again" type="password" class="validate">
-        </div>
+        <md-input :value.sync="password" type="password" placeholder="At least six characters">Password</md-input>
+        <md-input :value.sync="passwordAgain" type="password">Repeat password</md-input>
       </div>
       <div class="row">
         <div class="col s12">
@@ -29,7 +24,7 @@
         <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
       </div>
       <div class="row">
-        <div class="input-field col s12">
+        <div class="col s12">
           <button @click="save" class="btn waves-effect waves-light" type="submit">Update <i class="material-icons right">save</i></button>
         </div>
       </div>
@@ -40,15 +35,23 @@
 module.exports = {
   props: ["user"],
   data:  function() {
-    return {errors: [], notifications: Notification.permission};
+    return {errors: [], password: "", passwordAgain: "", notifications: Notification.permission};
   },
   methods: {
     save: function() {
-      if (this.notifications && this.notifications != this.settings.notifications) {
+      var self = this;
+
+      if (this.password != this.passwordAgain)
+        return this.errors = [{message: "Passwords does not match"}];
+      if (this.notifications && this.notifications != this.settings.notifications)
         this.enableNotifications(true);
-      }
-      if (!this.notifications) {
+      if (!this.notifications)
         this.enableNotifications(false);
+
+      if (this.password) {
+        Convos.api.updateUser({body: {password: this.password}}, function(err, res) {
+          if (err) self.errors = err;
+        });
       }
     }
   }

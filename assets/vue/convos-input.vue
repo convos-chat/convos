@@ -1,12 +1,9 @@
 <template>
   <div class="convos-input">
     <i @click="send" class="material-icons waves-effect waves-light">send</i>
-    <textarea v-model="message"
-      v-el:input
-      class="materialize-textarea"
-      :placeholder="placeholder"
-      @keydown.enter.prevent="send"
-      @keydown="autocomplete"></textarea>
+    <textarea v-model="message" v-el:input
+      class="materialize-textarea" :placeholder="placeholder"
+      @keydown.enter.prevent="send" @keydown="autocomplete"></textarea>
   </div>
 </template>
 <script>
@@ -119,6 +116,7 @@ module.exports = {
   },
   ready: function() {
     var self = this;
+    autosize(this.$els.input);
     this.dialog.on("active", this.focusInput);
     this.dialog.on("focusInput", this.focusInput);
     this.dialog.on("insertIntoInput", function(str) {

@@ -9,22 +9,16 @@
           </div>
         </div>
         <div class="row">
-          <div class="input-field col s12">
-            <input v-model="email" id="form_email" type="email" class="validate">
-            <label for="form_email">Email</label>
-          </div>
+          <md-input :value.sync="email" type="email" :focus="!email">Email</md-input>
         </div>
         <div class="row">
-          <div class="input-field col s12">
-            <input v-model="password" id="form_password" type="password" class="validate">
-            <label for="form_password">Password</label>
-          </div>
+          <md-input :value.sync="password" type="password" :focus="!!email">Password</md-input>
         </div>
         <div class="row" v-if="errors.length">
           <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
         </div>
         <div class="row">
-          <div class="input-field col s12">
+          <div class="col s12">
             <button class="btn waves-effect waves-light" type="submit">
               Log in <i class="material-icons right">send</i>
             </button>
@@ -68,9 +62,6 @@ module.exports = {
         }
       );
     }
-  },
-  ready: function() {
-    $("#form_email").focus();
   }
 };
 </script>

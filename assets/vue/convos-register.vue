@@ -9,25 +9,14 @@
           </div>
         </div>
         <div class="row">
-          <div class="input-field col s12">
-            <input v-model="email" id="form_email" type="email" class="validate">
-            <label for="form_email">Email</label>
-          </div>
+          <md-input :value.sync="email" :focus="true">Email</md-input>
         </div>
         <div class="row">
-          <div class="input-field col s6">
-            <input v-model="password" id="form_password" type="password" class="validate">
-            <label for="form_password">Password</label>
-          </div>
-          <div class="input-field col s6">
-            <input v-model="passwordAgain" placeholder="Repeat password" id="form_password_again" type="password" class="validate">
-          </div>
+          <md-input :value.sync="password" cols="s6" type="password">Password</md-input>
+          <md-input :value.sync="passwordAgain" cols="s6" type="password" placeholder="Repeat password"></md-input>
         </div>
         <div class="row" v-if="settings.invite_code">
-          <div class="input-field col s12">
-            <input v-model="invite_code" id="form_invite_code" type="password" class="validate">
-            <label for="form_email">Invite code</label>
-          </div>
+          <md-input :value.sync="invite_code" type="password">Invite code</md-input>
         </div>
         <div class="row" v-if="errors.length">
           <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
@@ -67,12 +56,8 @@ module.exports = {
       this.errors = [];
       localStorage.setItem("email", this.email);
 
-      if (this.password != this.passwordAgain) {
-        $("#form_password").addClass("invalid");
-        this.errors = [{
-          message: "Passwords does not match"
-        }];
-        return;
+      if (!this.password || this.password != this.passwordAgain) {
+        return this.errors = [{message: "Passwords does not match"}];
       }
 
       Convos.api.registerUser(
@@ -88,9 +73,6 @@ module.exports = {
         }.bind(this)
       );
     }
-  },
-  ready: function() {
-    $("#form_email").focus();
   }
 };
 </script>

@@ -16,27 +16,23 @@
       </div>
     </div>
     <div class="row">
-      <div class="input-field col s12">
-        <md-select id="form_connection_id" :value.sync="connectionId">
-          <md-option :value="c.id" :selected="connectionId == c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
-        </md-select>
-        <label for="form_connection_id">Select connection</label>
-      </div>
+      <md-select id="form_connection_id" :value.sync="connectionId" label="Select connection">
+        <md-option :value="c.id" :selected="connectionId == c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
+      </md-select>
     </div>
     <div class="row">
       <div class="input-field input-btn-right col s12">
         <a href="#load" @click.prevent="load" class="btn waves-effect waves-light" v-tooltip="message">Load</a>
         <div class="input-left">
-          <md-autocomplete :options="rooms" :value.sync="dialogName" @select="join" id="form_dialog_name"></md-autocomplete>
-          <label for="form_dialog_name">Room or nick</label>
+          <md-autocomplete :options="rooms" :value.sync="dialogName" @select="join">Room or nick</md-autocomplete>
         </div>
       </div>
     </div>
     <div class="row" v-if="errors.length">
-      <div class="input-field col s12"><div class="alert">{{errors[0].message}}</div></div>
+      <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
     </div>
     <div class="row">
-      <div class="input-field col s12">
+      <div class="col s12">
         <a v-link="'#connection/' + connectionId" class="btn waves-effect waves-light" v-if="!user.dialogs.length">
           <i class="material-icons left">navigate_before</i>Back
         </a>

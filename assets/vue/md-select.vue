@@ -1,20 +1,20 @@
 <template>
-  <div class="select-wrapper">
-    <span class="caret">&#9660;</span>
-    <input :value="textValue" :data-activates="guid" :disabled="disabled" readonly="true" class="select-dropdown" type="text">
-    <ul class="dropdown-content select-dropdown" :id="guid">
-      <slot></slot>
-    </ul>
-    <select v-el:field :id="id" :name="name" :placeholder="placeholder">
-      <option :value="opt.value" :selected="opt.selected" v-for="opt in options">{{opt.content}}</option>
-    </select>
+  <div class="input-field col s12">
+    <div class="select-wrapper">
+      <span class="caret">&#9660;</span>
+      <input :value="textValue" @focus="activate()" :disabled="disabled" readonly="true" class="select-dropdown" type="text" v-el:input>
+      <ul class="dropdown-content select-dropdown" :class="{active: active}" v-el:dropdown>
+        <slot></slot>
+      </ul>
+    </div>
+    <label for="form_connection_id">{{label}}</label>
   </div>
 </template>
 <script>
 module.exports = {
-  props: ["id", "name", "value"],
+  props: ["id", "name", "label", "value"],
   data: function() {
-    return {active: false, guid: Materialize.guid(), textValue: "", options: []};
+    return {active: false, textValue: "", options: []};
   },
   events: {
     'option::added': function(opt) {
@@ -25,6 +25,7 @@ module.exports = {
       else if(!this.$children.filter(function(o) { return o.selected }).length) {
         this.setValue(this.$children[0]);
       }
+      this.activate(false);
       this.options.push({selected: opt.selected, value: opt.value});
     },
     'option::removed': function(opt) {
@@ -39,6 +40,7 @@ module.exports = {
       if (next) this.setValue(next);
     },
     'option::selected': function(opt) {
+      this.activate(false);
       if (opt.value == this.value) return;
       this.$children.forEach(function(o) { if (o != opt) o.selected = false; });
       this.options.forEach(function(o) { o.selected = opt.value == o.value; });
@@ -46,6 +48,11 @@ module.exports = {
     }
   },
   methods: {
+    activate: function() {
+      this.active = arguments.length ? arguments[0] : !this.active;
+      if (!this.active) return;
+      this.$els.dropdown.style.width = this.$els.input.offsetWidth + "px";
+    },
     setValue: function(opt) {
       this.value = opt ? opt.value : "";
       this.textValue = opt ? opt.text() || opt.value : "";

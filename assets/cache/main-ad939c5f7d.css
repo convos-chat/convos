@@ -4611,6 +4611,15 @@ div.alert {
   overflow: hidden;
   padding-right: 0.75rem; }
 
+.select-wrapper ul {
+  display: block;
+  margin-top: -54px;
+  transition: opacity 0.3s ease-in-out;
+  left: -2000px; }
+  .select-wrapper ul.active {
+    opacity: 1;
+    left: auto; }
+
 #vue_tooltip {
   background-color: #323232;
   color: #fff;
@@ -4706,9 +4715,8 @@ div.autocomplete {
 .convos-input {
   background-color: #fff;
   border-top: 1px solid #d1d1d1;
-  padding: 0.5rem 0.75rem 0 0.75rem;
+  padding: 8px 0.75rem 0 0.75rem;
   width: 100%;
-  height: 46px;
   overflow: hidden;
   position: absolute;
   bottom: 0;
@@ -4726,7 +4734,7 @@ div.autocomplete {
     margin: 0;
     box-shadow: none;
     width: calc(100% - 2rem);
-    height: 2rem;
+    height: 24px;
     min-height: 2rem;
     max-height: 9.5rem;
     overflow: auto; }

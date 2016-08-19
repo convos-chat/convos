@@ -5,7 +5,6 @@
       <div class="input-field">
         <input v-model="q" @keydown.enter="search" id="search_field" type="search" autocomplete="off" placeholder="Search...">
         <label for="search_field"><i class="material-icons">search</i></label>
-        <!-- i class="material-icons">close</i -->
       </div>
     </header>
     <div class="content">

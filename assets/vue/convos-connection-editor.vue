@@ -11,7 +11,7 @@
             You need to fill in "server", but "username" and "password" are
             optional in most cases.
           </template>
-          <template v-if="!user.connections.length && defaultServer">
+          <template v-if="!user.connections.length && settings.default_server">
             We have filled in example values, but you can change them if you like.
             In most cases, you can just hit "Create" in the bottom to get started.
           </template>
@@ -19,32 +19,20 @@
       </div>
     </div>
     <div class="row">
-      <div class="input-field col s12">
-        <input name="server" v-model="server" id="form_server" type="text" class="validate">
-        <label for="form_server">Server</label>
-      </div>
+      <md-input :value.sync="server" focus="">Server</md-input>
     </div>
     <div class="row" v-if="showNickField">
-      <div class="input-field col s12">
-        <input name="nick" v-model="nick" id="form_nick" type="text" class="validate" placeholder="A nick can be generated for you">
-        <label for="form_nick">Nick</label>
-      </div>
+      <md-input :value.sync="nick" placeholder="A nick can be generated for you">Nick</md-input>
     </div>
     <div class="row">
-      <div class="input-field col s6">
-        <input name="username" v-model="username" id="form_username" type="text" class="validate">
-        <label for="form_username">Username</label>
-      </div>
-      <div class="input-field col s6">
-        <input name="password" v-model="password" id="form_password" type="password" autocomplete="off" class="validate">
-        <label for="form_password">Password</label>
-      </div>
+      <md-input :value.sync="username" cols="s6">Username</md-input>
+      <md-input :value.sync="password" cols="s6" type="password">Password</md-input>
     </div>
     <div class="row" v-if="errors.length">
-      <div class="input-field col s12"><div class="alert">{{errors[0].message}}</div></div>
+      <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
     </div>
     <div class="row">
-      <div class="input-field col s12">
+      <div class="col s12">
         <a v-link.literal="#" class="btn waves-effect waves-light" v-if="!user.connections.length || !user.dialogs.length">
           <i class="material-icons left">navigate_before</i>Back
         </a>
@@ -70,7 +58,6 @@ module.exports = {
     return {
       connection:       null,
       deleted:          false,
-      defaultServer:    "",
       errors:           [],
       password:         "",
       nick:             "",
@@ -81,7 +68,8 @@ module.exports = {
   },
   watch: {
     'settings.main': function(v, o) {
-      this.connection = this.user.getConnection(v.replace(/.*connection\//, ''));
+      this.errors = [];
+      this.updateForm(this.user.getConnection(v.replace(/.*connection\//, '')));
     }
   },
   methods: {
@@ -111,7 +99,7 @@ module.exports = {
         if (err) return self.errors = err;
         self.deleted = false;
         self.updateForm(this);
-        self.settings.main = '#' + (this.user.dialogs.length ? 'connections/' + this.id : 'create-dialog');
+        self.settings.main = '#' + (this.user.dialogs.length ? 'connection/' + this.id : 'create-dialog');
       });
     },
     updateForm: function(connection) {
@@ -120,16 +108,13 @@ module.exports = {
       this.connection       = connection;
       this.password         = url ? url.query.password || "" : "";
       this.nick             = url ? url.query.nick || "" : "";
-      this.server           = url ? url.hostPort : this.defaultServer;
+      this.server           = url ? url.hostPort : this.settings.default_server;
       this.selectedProtocol = url ? url.scheme || "" : this.selectedProtocol;
       this.username         = url ? url.query.username : "";
     }
   },
   ready: function() {
-    this.$nextTick(function() { this.$el.querySelector('#form_server').focusOnDesktop() });
-    this.connection = this.user.getConnection(this.settings.main.replace(/.*connection\//, ''));
-    this.defaultServer = this.settings.default_server;
-    this.server = this.settings.default_server;
+    this.updateForm(this.user.getConnection(this.settings.main.replace(/.*connection\//, '')));
   }
 };
 </script>
