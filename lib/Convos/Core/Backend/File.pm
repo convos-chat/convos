@@ -360,7 +360,8 @@ sub _setup {
 
           if ($msg->{highlight} and $target->isa('Convos::Core::Dialog') and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
-            $connection->user->{unseen}++;
+            $connection->user->{unread}++;
+            $connection->user->save;
             $flag |= FLAG_HIGHLIGHT;
           }
 

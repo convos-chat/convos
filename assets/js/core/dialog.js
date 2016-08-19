@@ -34,6 +34,7 @@
       if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) this.unread++;
       if (msg.highlight && !args.disableNotifications) {
         Notification.simple(msg.from, msg.message);
+        this.user.unread++;
         this.connection().user.notifications.unshift(msg);
       }
       if (prev && prev.ts.getDate() != msg.ts.getDate()) {

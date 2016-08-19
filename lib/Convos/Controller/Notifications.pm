@@ -19,11 +19,18 @@ sub list {
   );
 }
 
-sub seen {
+sub read {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
-  $user->unseen(0);
-  $self->render(openapi => {});
+
+  $self->delay(
+    sub { $user->unread(0)->save(shift->begin) },
+    sub {
+      my ($delay, $err) = @_;
+      die $err if $err;
+      $self->render(openapi => {});
+    }
+  );
 }
 
 1;
@@ -45,9 +52,9 @@ notifications related actions.
 
 See L<Convos::Manual::API/listNotifications>.
 
-=head2 seen
+=head2 read
 
-See L<Convos::Manual::API/seenNotifications>.
+See L<Convos::Manual::API/readNotifications>.
 
 =head1 SEE ALSO
 

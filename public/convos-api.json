@@ -323,29 +323,16 @@
         }
       }
     },
-    "/notifications/seen": {
+    "/notifications/read": {
       "post": {
         "tags": [ "chat" ],
-        "summary": "Mark a notication as seen.",
+        "summary": "Mark notications as read.",
         "description": "TODO: Notification count vs red/green toggling of a single notification.",
-        "operationId": "seenNotification",
-        "x-mojo-to": "notification#seen",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "ids": { "type": "array", "type": "integer", "description": "A list of notification IDs to mark as seen/read" }
-              }
-            }
-          }
-        ],
+        "operationId": "readNotifications",
+        "x-mojo-to": "notifications#read",
         "responses": {
           "200": {
-            "description": "List of commands.",
+            "description": "Successful response.",
             "schema": {
               "type": "object",
               "properties": {}
@@ -382,7 +369,8 @@
         "x-mojo-to": "user#get",
         "parameters": [
           { "name": "connections", "in": "query", "type": "boolean", "description": "Retrieve connection list." },
-          { "name": "dialogs", "in": "query", "type": "boolean", "description": "Retrieve dialog list." }
+          { "name": "dialogs", "in": "query", "type": "boolean", "description": "Retrieve dialog list." },
+          { "name": "notifications", "in": "query", "type": "boolean", "description": "Retrieve notifications list." }
         ],
         "responses": {
           "200": {
@@ -570,10 +558,11 @@
       }
     },
     "User": {
-      "required": ["email"],
+      "required": ["email", "unread"],
       "properties": {
         "email": { "type": "string", "description": "Unique email identifying a user in Convos" },
         "registered": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" },
+        "unread": { "type": "integer", "description": "Number of unread notifications" },
         "connections": {
           "type": "array", "items": { "$ref": "#/definitions/Connection" }
         },

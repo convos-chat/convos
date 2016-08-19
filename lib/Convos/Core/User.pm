@@ -17,7 +17,7 @@ use constant BCRYPT_BASE_SETTINGS => do {
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 sub password { shift->{password} ||= '' }
-sub unseen   { shift->{unseen}   ||= 0 }
+has unread => sub {0};
 
 has_many connections => 'Convos::Core::Connection' => sub {
   my ($self, $attrs) = @_;
@@ -107,7 +107,7 @@ sub TO_JSON {
   $self->{registered} ||= Mojo::Date->new->to_datetime;
   my $json = {map { ($_, $self->{$_} // '') } qw(email password registered)};
   delete $json->{password} unless $persist;
-  $json->{unseen} = $self->unseen;
+  $json->{unread} = $self->unread;
   $json;
 }
 
@@ -147,9 +147,12 @@ Email address of user.
 Encrypted password. See L</set_password> for how to change the password and
 L</validate_password> for password authentication.
 
-=head2 unseen
+=head2 unread
 
-Number of unseen notifications ofr user.
+  $int = $self->unread;
+  $self = $self->unread(4);
+
+Number of unread notifications for user.
 
 =head1 METHODS
 

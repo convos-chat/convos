@@ -4,6 +4,7 @@
     this.dialogs       = [];
     this.email         = "";
     this.notifications = [];
+    this.unread        = 0;
     EventEmitter(this);
   };
 
@@ -38,14 +39,6 @@
     return this.connections.filter(function(c) { return c.id == id; })[0];
   };
 
-  proto.getNotifications = function(cb) {
-    var self = this;
-    Convos.api.listNotifications({}, function(err, xhr) {
-      if (!err) self.notifications = xhr.body.notifications.reverse();
-      cb.call(self, err);
-    });
-  };
-
   proto.makeSureLocationIsCorrect = function() {
     var correct, loc = Convos.settings.main;
     if (loc.indexOf("#chat") != 0) return;
@@ -63,6 +56,8 @@
         return new Convos.Connection(c);
       });
       self.dialogs = xhr.body.dialogs.map(function(d) { return self.ensureDialog(d) });
+      self.notifications = xhr.body.notifications.reverse();
+      self.unread = xhr.body.unread || 0;
       cb.call(self, err);
     });
   };

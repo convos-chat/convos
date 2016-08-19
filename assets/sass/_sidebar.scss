@@ -80,15 +80,27 @@
 
 .convos-notifications {
   .row {
-    margin: 2px auto;
-    padding-bottom: $h6-fontsize / 2.5;
+    margin: 0 auto;
+    border-bottom: 1px solid darken($body-bg, 6%);
+  }
+
+  .btn-floating {
+    float: right;
+    vertical-align: middle;
+    top: -6px;
   }
 
   .notification {
     cursor: pointer;
+    padding-top: 4px;
+    padding-bottom: 8px;
 
     &:hover {
       background-color: darken($body-bg, 6%);
+    }
+
+    &.read {
+      opacity: 0.7;
     }
 
     h5, .secondary-content {

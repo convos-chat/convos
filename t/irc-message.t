@@ -16,7 +16,7 @@ $connection->_irc->emit(
     params => ['#convos', 'not a superdupersuperman?']
   }
 );
-is($user->unseen, 0, 'No unseen messages');
+is($user->unread, 0, 'No unread messages');
 like slurp_log("#convos"), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
 $connection->_irc->emit(irc_privmsg =>
@@ -28,7 +28,7 @@ $core->get_user('superman@example.com')
   ->notifications({}, sub { $notifications = pop; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 ok delete $notifications->[0]{ts}, 'notifications has timestamp';
-is($user->unseen, 1, 'One unseen messages');
+is($user->unread, 1, 'One unread messages');
 is_deeply $notifications,
   [
   {

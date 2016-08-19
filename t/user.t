@@ -23,7 +23,7 @@ is_deeply(
   {
     email      => 'jhthorsen@cpan.org',
     registered => Mojo::Date->new($main::time)->to_datetime,
-    unseen     => 0
+    unread     => 0
   },
   'TO_JSON'
 );
@@ -41,8 +41,8 @@ $user->save;
 is $core->get_user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
 
 
-$user->{unseen} = 3;
+$user->{unread} = 3;
 $user->save;
-is $core->get_user('jhthorsen@cpan.org')->unseen, 3, 'Unseen is persisted correctly';
+is $core->get_user('jhthorsen@cpan.org')->unread, 3, 'Unseen is persisted correctly';
 
 done_testing;

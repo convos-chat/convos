@@ -63,10 +63,6 @@ div.alert {
   }
 }
 
-.btn, .btn-large, .btn-flat {
-  padding: 0 1rem;
-}
-
 .btn-delete {
   @extend .btn, .waves-effect, .waves-light, .red, .darken-2;
 }

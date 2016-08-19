@@ -33,8 +33,9 @@ my $registered = $t->tx->res->json->{registered};
 $t->post_ok('/api/user', json => {})->status_is(200);
 
 $t->get_ok('/api/user')->status_is(200)
-  ->json_is('', {email => 'superman@example.com', registered => $registered, unseen => 0});
+  ->json_is('', {email => 'superman@example.com', registered => $registered, unread => 0});
 
+$t->app->core->get_user('superman@example.com')->unread(4);
 $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status_is(200)->json_is(
   '',
   {
@@ -43,9 +44,11 @@ $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status
     notifications => [],
     email         => 'superman@example.com',
     registered    => $registered,
-    unseen        => 0
+    unread        => 4,
   }
 );
+
+$t->post_ok('/api/notifications/read')->status_is(200);
 
 $t->delete_ok('/api/user')->status_is(400)
   ->json_is('/errors/0/message', 'You are the only user left.');
