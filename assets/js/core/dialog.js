@@ -167,6 +167,7 @@
 
   proto.update = function(attrs) {
     Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
+    return this;
   };
 
   proto._addParticipant = function(name, data) {

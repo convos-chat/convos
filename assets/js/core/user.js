@@ -63,7 +63,7 @@
         c.id = c.connection_id;
         return new Convos.Connection(c);
       });
-      self.dialogs = xhr.body.dialogs.map(function(d) { return self.ensureDialog(d) });
+      self.dialogs = xhr.body.dialogs.map(function(d) { return self.ensureDialog(d).update(d) });
       self.notifications = xhr.body.notifications.reverse();
       self.unread = xhr.body.unread || 0;
       cb.call(self, err);
