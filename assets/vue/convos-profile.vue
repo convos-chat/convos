@@ -16,7 +16,13 @@
       </div>
       <div class="row">
         <div class="col s12">
-          <input v-model="notifications" type="checkbox" class="filled-in" id="form_notifications" :checked="settings.notifications == 'granted'" value="granted">
+          <input v-model="sortDialogsByRead" type="checkbox" class="filled-in" id="form_sort_by" :checked="settings.sortDialogsBy == 'lastRead'">
+          <label for="form_sort_by">Sort dialogs by "last read"</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          <input v-model="notifications" type="checkbox" class="filled-in" id="form_notifications" :checked="settings.notifications == 'granted'">
           <label for="form_notifications">Enable notifications</label>
         </div>
       </div>
@@ -35,7 +41,13 @@
 module.exports = {
   props: ["user"],
   data:  function() {
-    return {errors: [], password: "", passwordAgain: "", notifications: Notification.permission};
+    return {
+      errors: [],
+      password: "",
+      passwordAgain: "",
+      notifications: Notification.permission,
+      sortDialogsByRead: false
+    };
   },
   methods: {
     save: function() {
@@ -48,12 +60,17 @@ module.exports = {
       if (!this.notifications)
         this.enableNotifications(false);
 
+      this.settings.sortDialogsBy = this.sortDialogsByRead ? "lastRead" : "";
+
       if (this.password) {
         Convos.api.updateUser({body: {password: this.password}}, function(err, res) {
           if (err) self.errors = err;
         });
       }
     }
+  },
+  ready: function() {
+    this.sortDialogsByRead = this.settings.sortDialogsBy == "lastRead";
   }
 };
 </script>

@@ -5,6 +5,7 @@
   Convos.settings.sidebar = localStorage.getItem("sidebar") || "";
   Convos.settings.dialogsVisible = false;
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
+  Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
 
   if (Convos.settings.sidebar) $('body').addClass('has-sidebar');
 

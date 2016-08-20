@@ -41,8 +41,12 @@
           if (v == "granted") Notification.simple("convosbot", "You have enabled notifications!");
           localStorage.setItem("notifications", v);
         },
+        "settings.sortDialogsBy": function(v, o) {
+          if (DEBUG && v != o) console.log("[loc:sortDialogsBy] " + (o || "<unset>") + " => " + (v || "<unset>"));
+          localStorage.setItem("sortDialogsBy", v);
+        },
         "settings.sidebar": function(v, o) {
-          if (DEBUG && v != o) console.log("[loc:sidebar] " + (o || "null") + " => " + (v || "null"));
+          if (DEBUG && v != o) console.log("[loc:sidebar] " + (o || "<unset>") + " => " + (v || "<unset>"));
           localStorage.setItem("sidebar", v);
         }
       },

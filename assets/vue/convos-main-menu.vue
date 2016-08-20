@@ -49,13 +49,22 @@ module.exports = {
   computed: {
     dialogs: function() {
       var re = this.q ? new RegExp(RegExp.escape(this.q), 'i') : new RegExp('.');
-      return this.user.dialogs.filter(function(d) {
-        return d.name.match(re);
-      }).sort(function(a, b) {
-        var ah = a.name.toLowerCase();
-        var bh = b.name.toLowerCase();
-        return ah < bh ? -1 : ah > bh ? 1 : 0;
-      });
+      var sortBy;
+
+      if (this.settings.sortDialogsBy == "lastRead") {
+        sortBy = function(a, b) {
+          return b.active - a.active || b.lastRead - a.lastRead;
+        };
+      }
+      else {
+        sortBy = function(a, b) {
+          var ah = a.name.toLowerCase();
+          var bh = b.name.toLowerCase();
+          return ah < bh ? -1 : ah > bh ? 1 : 0;
+        };
+      }
+
+      return this.user.dialogs.filter(function(d) { return d.name.match(re) }).sort(sortBy);
     }
   },
   methods: {
