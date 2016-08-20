@@ -9,11 +9,14 @@ use FindBin;
 use File::Spec;
 
 if (@ARGV and $ARGV[0] eq 'dev') {
-  my @watch = qw(lib assets public/convos-api.json templates);
+  my @watch = qw(lib assets public/convos-api.json);
   $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
   shift @ARGV;
   warn sprintf "\$ morbo script/convos %s\n", join " ", @ARGV, map { ('-w', $_) } @watch;
   exec qw(morbo script/convos), @ARGV, map { ('-w', $_) } @watch;
+}
+if (grep { $_ eq 'daemon' } @ARGV) {
+  $ENV{MOJO_MODE} ||= 'production';
 }
 
 {
@@ -29,6 +32,7 @@ if (@ARGV and $ARGV[0] eq 'dev') {
 
   # Where Convos lives
   unshift @INC, File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'lib');
+  pop @INC if @INC[-1] eq '.';
 
   # Make sure the dependencies from cpanfile is installed
   exit ensure_dependencies($cpanfile, @ARGV) if @ARGV and $ARGV[0] eq 'install';
@@ -44,7 +48,8 @@ Mojolicious::Commands->start_app('Convos');
 sub ensure_dependencies {
   return if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK};
   my ($cpanfile, $action, $mode) = @_;
-  my $opt_l = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+  my @cpanm = ($^X, File::Spec->catfile(qw(script cpanm)));
+  my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
 
   our $cpanfile_mode = 'default';
@@ -53,34 +58,54 @@ sub ensure_dependencies {
   local *main::requires = sub {
     my ($module, $version) = @_;
     return if ++$n and eval "use $module $version;1";
-    my $e = do { local $_ = $@; s! at .*!!s; s! in \@INC.*!!s; $_ };
+    my $e = do {
+      local $_ = $@;
+      s! at .*!!s;
+      s! in \@INC.*!!s;
+      s!$module.*--.*?([\d\._]+).*!You have version $1!;
+      $_;
+    };
     push @missing, [$module, $version, $e, $cpanfile_mode];
   };
 
-  # cpanm -M ... is required
-  main::requires('App::cpanminus', '1.7016');
+  unless (-r $cpanm[1]) {
+    main::requires('App::cpanminus', '1.7016');    # cpanm -M ... is required
+    @cpanm = qw(cpanm);
+  }
 
   do $cpanfile;
   die "Could not source $cpanfile: $@" unless $n;
   @missing = grep { $_->[2] ne 'develop' } @missing if $mode ne '--develop';
   pop @$_ for @missing;
 
-  die join "\n", "---\ndebug:", "  perl: $^X", '  INC:', map({"    - $_"} @INC),
-    "\n---\nFound missing dependencies!\n", "Run '$0 install' to install them to '$opt_l'.",
-    "Note: 'cpanm' is required. (https://cpanmin.us)\n",
-    map({ sprintf "* %s %s (%s)", @$_ } @missing), "\n"
-    if @missing and $action ne 'install';
+  if (@missing and $action ne 'install') {
+    my @msg;
+    push @msg, "Perl executable:", "  $^X\n", "Perl \@INC:", map({"-  $_"} @INC)
+      if $ENV{CONVOS_DEBUG};
+    push @msg, "\nIs is not possible to start Convos at this point, since",
+      "there are some missing dependencies that need to be installed:\n",
+      map({ sprintf "-  %s %s # %s", @$_ } @missing),
+      qq(\nRun "$0 install" to install the missing dependencies above,),
+      qq(or run "CONVOS_DEBUG=1 $0 @ARGV" for more information.\n\n);
+    die join "", map {"\n$_"} @msg;
+  }
+
+  if (@missing) {
+  }
 
   for my $m (@missing) {
-    my @cmd = qw(cpanm -n);
-    push @cmd, -l => $opt_l;
+    my @cmd = (@cpanm, '-n', -l => $local_lib);
     push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
     push @cmd, $m->[0];
-    warn sprintf "\$ %s\n", join ' ', @cmd;
+    warn sprintf ">>> %s\n", join ' ', @cmd;
     system @cmd;
     die "cpanm failed!\n" if $?;
   }
 
-  warn "\nAll dependencies are installed.\n" if $action eq 'install';
+  if ($action eq 'install') {
+    warn join "\n", "\n-------------------------------", "All dependencies are installed!",
+      qq(\nYou can now run "$0 daemon --listen http://*:8000" to start Convos.\n\n);
+  }
+
   return 0;
 }
