@@ -85,7 +85,6 @@ module.exports = {
             value: r.name
           };
         });
-        self.materializeComponent();
       });
     },
     updateForm: function() {

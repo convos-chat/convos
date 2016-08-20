@@ -34,8 +34,6 @@
             $(this).css("height", "auto");
           });
         });
-
-        self.materializeComponent();
       },
       message: function() {
         var self = this;
