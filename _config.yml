@@ -1,0 +1,27 @@
+# Dependencies
+
+highlighter:      pygments
+
+# Permalinks
+permalink:        /:year/:i_month/:i_day/:slug.html
+
+# Setup
+title:            Convos
+tagline:          'A Jekyll theme'
+description:      'A multiuser chat application'
+url:              https://convos.by
+baseurl:          /
+
+author:
+  name:           'Nordaaker'
+  url:            https://twitter.com/convosby
+
+paginate:         5
+
+# Custom vars
+version:          1.0b
+
+github:
+  repo:           https://github.com/Nordaaker/convos
+
+gems: [jekyll-paginate]

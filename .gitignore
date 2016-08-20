@@ -21,3 +21,4 @@ MANIFEST*
 /script/toadfarm.pid
 /public/packed
 Convos-*.gz
+_site/
