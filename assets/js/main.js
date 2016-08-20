@@ -54,6 +54,7 @@
         var self = this;
 
         Convos.api.getUser({}, function(err, xhr) {
+          try { document.getElementById("loader").$remove() } catch(e) {};
           if (err) return self.user.currentPage = "convos-login";
           self.user.emit("login", xhr.body);
         });

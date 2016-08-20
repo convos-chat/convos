@@ -74,8 +74,6 @@
     var self = this;
     this._cache = {};
 
-    try { document.getElementById("loader").$remove() } catch(e) {};
-
     Convos.ws.on("close", function() {
       self.connected = false;
       self.connections.forEach(function(c) { c.state = "unreachable"; });

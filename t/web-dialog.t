@@ -15,7 +15,7 @@ $t->get_ok('/api/connection/irc-not-found/dialog/not-found/participants')->statu
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/participants')->status_is(500)
   ->json_is('/errors/0/message', 'Not connected.');
 
-no warnings 'once';
+no warnings qw(once redefine);
 *Mojo::IRC::UA::channel_users = sub {
   my ($irc, $channel, $cb) = @_;
   $irc->$cb('', {test6851 => {mode => ''}, batman => {mode => '@'}});
