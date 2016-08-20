@@ -215,7 +215,6 @@
           if (d.connection_id == data.connection_id) d.participant(data);
         });
         break;
-        break;
       case "me":
         if (this.me.nick != data.nick) this.notice('You changed nick to ' + data.nick + '.');
         this.me.nick = data.nick;

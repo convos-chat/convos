@@ -132,9 +132,11 @@
       this.addMessage({message: data.nick + " joined.", from: this.connection.id, type: "notice"});
     }
     else if (data.type == "nick_change") {
-      delete this._participants[data.old_nick];
-      this._participants[data.new_nick] = {};
-      this.addMessage({message: data.old_nick + " changed nick to " + data.new_nick + ".", from: this.connection.id, type: "notice"});
+      if (this._participants[data.old_nick]) {
+        delete this._participants[data.old_nick];
+        this._participants[data.new_nick] = {};
+        this.addMessage({message: data.old_nick + " changed nick to " + data.new_nick + ".", from: this.connection.id, type: "notice"});
+      }
     }
     else if(this._participants[data.nick]) { // part
       delete this._participants[data.nick];
