@@ -33,4 +33,8 @@
       return Object.keys(obj).map(function(k) { return obj[k]; });
     };
   }
+
+  RegExp.escape = function(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  };
 })();

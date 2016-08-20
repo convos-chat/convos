@@ -333,7 +333,7 @@ format=js
 minified=1
 mtime=1471598037
 [sass:sass/main.scss]
-checksum=0ad7f1e1b3
+checksum=23b73c89c3
 format=css
 minified=0
 mtime=1471181990

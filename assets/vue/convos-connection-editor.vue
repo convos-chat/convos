@@ -67,9 +67,9 @@ module.exports = {
     };
   },
   watch: {
-    'settings.main': function(v, o) {
+    "settings.main": function(v, o) {
       this.errors = [];
-      this.updateForm(this.user.getConnection(v.replace(/.*connection\//, '')));
+      this.updateForm(this.user.getConnection(v.replace(/.*connection\//, "")));
     }
   },
   methods: {
@@ -79,7 +79,7 @@ module.exports = {
         if (err) return self.errors = err;
         self.connection = null;
         self.deleted = true;
-        self.settings.main = '#connection';
+        self.settings.main = "#connection";
       });
     },
     saveConnection: function() {
@@ -99,7 +99,7 @@ module.exports = {
         if (err) return self.errors = err;
         self.deleted = false;
         self.updateForm(this);
-        self.settings.main = '#' + (this.user.dialogs.length ? 'connection/' + this.id : 'create-dialog');
+        self.settings.main = "#" + (this.user.dialogs.length ? "connection/" + this.id : "create-dialog");
       });
     },
     updateForm: function(connection) {
@@ -114,7 +114,7 @@ module.exports = {
     }
   },
   ready: function() {
-    this.updateForm(this.user.getConnection(this.settings.main.replace(/.*connection\//, '')));
+    this.updateForm(this.user.getConnection(this.settings.main.replace(/.*connection\//, "")));
   }
 };
 </script>

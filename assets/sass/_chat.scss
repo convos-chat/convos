@@ -35,6 +35,7 @@ $convos-input-height: 46px;
 }
 
 .convos-dialog-container main { bottom: $convos-input-height; }
+.convos-dialog-container.inactive { display: none; }
 .convos-settings main { bottom: 0; }
 
 .convos-input {

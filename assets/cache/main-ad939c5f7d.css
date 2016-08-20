@@ -4709,6 +4709,9 @@ div.autocomplete {
 .convos-dialog-container main {
   bottom: 46px; }
 
+.convos-dialog-container.inactive {
+  display: none; }
+
 .convos-settings main {
   bottom: 0; }
 
@@ -4865,10 +4868,10 @@ header {
         font-size: 24px;
         color: rgba(255, 255, 255, 0.7);
         transition: color .3s; }
-      header .input-field input[type="search"] + label.active i {
-        color: #fff; }
       header .input-field input[type="search"] + label.active {
         transform: translateY(0); }
+    header .input-field input[type="search"]:focus + label i {
+      color: #fff; }
   @media only screen and (min-width: 993px) {
     header {
       height: 64px; }

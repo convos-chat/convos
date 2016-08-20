@@ -55,8 +55,10 @@ header {
       left: $gutter-width / 2;
 
       i { font-size: 24px; color: rgba(255,255,255,.7); transition: color .3s; }
-      &.active i { color: $navbar-font-color; }
       &.active { transform: translateY(0); }
+    }
+    input[type="search"]:focus + label i {
+      color: $navbar-font-color;
     }
   }
 

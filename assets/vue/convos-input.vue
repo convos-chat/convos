@@ -3,7 +3,7 @@
     <i @click="send" class="material-icons waves-effect waves-light">send</i>
     <textarea v-model="message" v-el:input
       class="materialize-textarea" :placeholder="placeholder"
-      @keydown.enter.prevent="send" @keydown="autocomplete"></textarea>
+      @keydown.enter="sendMessage" @keydown="autocomplete"></textarea>
   </div>
 </template>
 <script>
@@ -104,8 +104,8 @@ module.exports = {
         return p.name + (this.after ? "" : this.before ? " " : ": ");
       }.bind(this));
     },
-    send: function(e) {
-      if (e.shiftKey) return setTimeout(function() { $("#search_field").focus(); }, 100);
+    sendMessage: function(e) {
+      e.preventDefault(); // cannot have lineshift in the input field
       var m = this.message;
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
       this.message = "";

@@ -1,6 +1,6 @@
 var EventEmitter = function(obj) {
   obj._events = {};
-  ["emit", "on", "once", "unsubscribe"].forEach(function(n) {
+  ["emit", "on", "once", "off"].forEach(function(n) {
     obj[n] = EventEmitter.prototype[n];
   });
 };
@@ -21,23 +21,7 @@ EventEmitter.prototype.emit = function() {
   return this;
 };
 
-EventEmitter.prototype.on = function(name, cb) {
-  if (!name || !cb) throw "Usage: EventEmitter.on(name, cb)";
-  if (!this._events[name])
-    this._events[name] = [];
-  this._events[name].push(cb);
-  return this;
-};
-
-EventEmitter.prototype.once = function(name, cb) {
-  var wrapper = function() {
-    this.unsubscribe(name, wrapper);
-    cb.apply(this, arguments);
-  }.bind(this);
-  this.on(name, wrapper);
-};
-
-EventEmitter.prototype.unsubscribe = function(name, cb) {
+EventEmitter.prototype.off = function(name, cb) {
   if (this._events[name]) {
     if (cb) {
       this._events[name] = this._events[name].filter(function(i) {
@@ -48,4 +32,20 @@ EventEmitter.prototype.unsubscribe = function(name, cb) {
     }
   }
   return this;
+};
+
+EventEmitter.prototype.on = function(name, cb) {
+  if (!name || !cb) throw "Usage: EventEmitter.on(name, cb)";
+  if (!this._events[name])
+    this._events[name] = [];
+  this._events[name].push(cb);
+  return this;
+};
+
+EventEmitter.prototype.once = function(name, cb) {
+  var wrapper = function() {
+    this.off(name, wrapper);
+    cb.apply(this, arguments);
+  }.bind(this);
+  this.on(name, wrapper);
 };

@@ -7,12 +7,22 @@
   };
 
   Convos.ws = new ReconnectingWebSocket(Convos.wsUrl);
-  setInterval(
-    function() {
-      if (Convos.ws.is('open')) Convos.ws.send('{}');
-    },
-    10000
-  );
+  setInterval(function() { if (Convos.ws.is("open")) Convos.ws.send('{}'); }, 10000);
+
+  // shift+enter is a global shortkey to jump between input fields and goto anything
+  document.addEventListener("keydown", function(e) {
+    if (e.shiftKey && e.keyCode == 13) { // shift+enter
+      e.preventDefault();
+      var el = document.activeElement || document.getElementById("goto_anything");
+      if (el.id == "goto_anything" || el.tagName.toLowerCase() == "body") {
+        document.querySelector('.convos-chat > div:not(.convos-main-menu):not(.inactive)')
+          .querySelector('input:not([type="hidden"]), textarea, select').focus();
+      }
+      else {
+        document.getElementById("goto_anything").focus();
+      }
+    }
+  });
 
   Convos.api = new openAPI();
   Convos.api.load(Convos.apiUrl, function(err) {

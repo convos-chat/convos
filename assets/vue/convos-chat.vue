@@ -1,7 +1,7 @@
 <template>
   <div class="convos-chat">
     <convos-main-menu :user="user"></convos-main-menu>
-    <convos-dialog-container :dialog="d" :user="user" v-show="showDialogContainer(d)" v-for="d in user.dialogs"></convos-dialog-container>
+    <convos-dialog-container :dialog="d" :user="user" :class="showDialogContainer(d) ? 'active' : 'inactive'" v-for="d in user.dialogs"></convos-dialog-container>
     <convos-settings :user="user" v-show="showSettings()"></convos-settings>
     <component :is="'convos-' + settings.sidebar" :user="user" v-if="settings.sidebar"></component>
   </div>

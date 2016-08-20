@@ -56,9 +56,8 @@ module.exports = {
     };
   },
   watch: {
-    connectionId: function() {
-      this.message = "";
-    }
+    "connectionId": function() { this.message = ""; },
+    "settings.main": function(v, o) { this.updateForm() }
   },
   methods: {
     connection: function() {
@@ -88,7 +87,14 @@ module.exports = {
         });
         self.materializeComponent();
       });
+    },
+    updateForm: function() {
+      var dialogName = this.settings.main.match(/create-dialog\/([^\/]+)/);
+      this.dialogName = dialogName ? dialogName[1] : "";
     }
+  },
+  ready: function() {
+    this.updateForm();
   }
 };
 </script>

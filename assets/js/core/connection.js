@@ -46,7 +46,7 @@
     var self = this;
     this._api.removeConnection({connection_id: this.id}, function(err, xhr) {
       if (!err) {
-        self.unsubscribe("message").unsubscribe("state");
+        self.off("message").off("state");
         self.user.connections = self.user.connections.filter(function(c) {
           return c.id != self.id;
         });

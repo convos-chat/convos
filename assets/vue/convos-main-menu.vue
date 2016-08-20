@@ -3,8 +3,8 @@
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
       <div class="input-field">
-        <input v-model="q" @keydown.enter="search" id="search_field" type="search" autocomplete="off" placeholder="Search...">
-        <label for="search_field"><i class="material-icons">search</i></label>
+        <input v-model="q" @keydown.enter="search" id="goto_anything" type="search" autocomplete="off" placeholder="Search...">
+        <label for="goto_anything"><i class="material-icons">search</i></label>
       </div>
     </header>
     <div class="content">
@@ -44,11 +44,14 @@
 module.exports = {
   props:   ["user"],
   data: function() {
-    return {first: null, q: ""};
+    return {q: ""};
   },
   computed: {
     dialogs: function() {
-      return this.user.dialogs.sort(function(a, b) {
+      var re = this.q ? new RegExp(RegExp.escape(this.q), 'i') : new RegExp('.');
+      return this.user.dialogs.filter(function(d) {
+        return d.name.match(re);
+      }).sort(function(a, b) {
         var ah = a.name.toLowerCase();
         var bh = b.name.toLowerCase();
         return ah < bh ? -1 : ah > bh ? 1 : 0;
@@ -68,8 +71,8 @@ module.exports = {
       return cn;
     },
     search: function(e) {
-      if (e.shiftKey) return this.user.getActiveDialog().emit("focusInput");
-      if (this.first && this.q) this.settings.main = d.href();
+      if (!this.q.length || e.shiftKey) return;
+      this.settings.main = this.dialogs.length ? this.dialogs[0].href() : "#create-dialog/" + this.q;
       this.q = "";
     }
   }
