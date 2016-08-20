@@ -31,7 +31,8 @@ module.exports = {
   props: ["user"],
   methods: {
     gotoMessage: function(msg) {
-      alert('TODO');
+      // TODO: Should also jump to the correct time
+      this.settings.main = "#chat/" + msg.connection_id + "/" + msg.dialog_id;
     },
     markAsRead: function() {
       var self = this;

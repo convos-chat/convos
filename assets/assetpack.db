@@ -428,10 +428,10 @@ format=js
 minified=1
 mtime=1471204078
 [js-min:vue/convos-notifications.vue]
-checksum=b2cd8ce0d9
+checksum=53e405166e
 format=js
 minified=1
-mtime=1471632031
+mtime=1471695931
 [js-min:vue/convos-profile.vue]
 checksum=77a1312615
 format=js
