@@ -26,7 +26,7 @@
             <button class="btn waves-effect waves-light" type="submit">
               Register <i class="material-icons right">send</i>
             </button>
-            <a href="#login" @click.prevent="currentPage = 'convos-login'" class="btn-flat waves-effect waves-light">Log in</a>
+            <a href="#login" @click.prevent="user.currentPage = 'convos-login'" class="btn-flat waves-effect waves-light">Log in</a>
           </div>
         </div>
         <div class="row">
@@ -40,7 +40,7 @@
 </template>
 <script>
 module.exports = {
-  props:    ["currentPage", "user"],
+  props:    ["user"],
   data:     function() {
     return {
       invite_code:   "",
@@ -69,7 +69,7 @@ module.exports = {
           }
         }, function(err, xhr) {
           if (err) return self.errors = err;
-          self.$dispatch("login", xhr.body);
+          self.user.emit("login", xhr.body);
         }.bind(this)
       );
     }

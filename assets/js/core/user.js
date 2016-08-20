@@ -2,11 +2,18 @@
   Convos.User = function(attrs) {
     this.connected     = false;
     this.connections   = [];
+    this.currentPage   = "";
     this.dialogs       = [];
     this.email         = "";
     this.notifications = [];
     this.unread        = 0;
     EventEmitter(this);
+
+    this.once("login", this._setupWebSocket);
+    this.on("login", function(data) {
+      Convos.settings.dialogsVisible = false;
+      this.email = data.email;
+    });
   };
 
   var proto = Convos.User.prototype;
@@ -61,5 +68,42 @@
       self.unread = xhr.body.unread || 0;
       cb.call(self, err);
     });
+  };
+
+  proto._setupWebSocket = function(data) {
+    var self = this;
+    this._cache = {};
+
+    try { document.getElementById("loader").$remove() } catch(e) {};
+
+    Convos.ws.on("close", function() {
+      self.connected = false;
+      self.connections.forEach(function(c) { c.state = "unreachable"; });
+      self.dialogs.forEach(function(d) { d.frozen = "No internet connection?"; });
+    });
+
+    Convos.ws.on("json", function(data) {
+      if (!data.connection_id) return console.log("[ws] json=" + JSON.stringify(data));
+      var c = self.getConnection(data.connection_id);
+      if (c) return c.emit(data.event, data);
+      if (!self._cache[data.connection_id]) self._cache[data.connection_id] = [];
+      self._cache[data.connection_id].push(data);
+    });
+
+    Convos.ws.on("open", function() {
+      self.connected = true;
+      self.refresh(function(err, res) {
+        self.makeSureLocationIsCorrect();
+        self.currentPage = "convos-chat";
+        Object.keys(self._cache).forEach(function(connection_id) {
+          var msg = self._cache[connection_id];
+          var c = self.getConnection(connection_id);
+          delete self._cache[connection_id];
+          if (c) msg.forEach(function(d) { c.emit(d.event, d); });
+        });
+      });
+    });
+
+    Convos.ws.open();
   };
 })();

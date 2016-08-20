@@ -22,7 +22,7 @@
             <button class="btn waves-effect waves-light" type="submit">
               Log in <i class="material-icons right">send</i>
             </button>
-            <a href="#register" @click.prevent="currentPage = 'convos-register'" class="btn-flat waves-effect waves-light">Register</a>
+            <a href="#register" @click.prevent="user.currentPage = 'convos-register'" class="btn-flat waves-effect waves-light">Register</a>
           </div>
         </div>
         <div class="row">
@@ -36,7 +36,7 @@
 </template>
 <script>
 module.exports = {
-  props:    ["currentPage", "user"],
+  props:    ["user"],
   data:     function() {
     return {
       email:    localStorage.getItem("email"),
@@ -58,7 +58,7 @@ module.exports = {
           }
         }, function(err, xhr) {
           if (err) return self.errors = err;
-          self.$dispatch("login", xhr.body);
+          self.user.emit("login", xhr.body);
         }
       );
     }

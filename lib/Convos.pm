@@ -274,7 +274,7 @@ __DATA__
         <a href="">Reload <i class="material-icons">refresh</i></a>
       </div>
     </div>
-    <component :is="currentPage" :current-page.sync="currentPage" :user="user"></component>
+    <component :is="user.currentPage" :current-page.sync="currentPage" :user="user"></component>
     <div id="vue_tooltip"><span></span></div>
     %= javascript begin
       window.Convos = {
