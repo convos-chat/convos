@@ -116,7 +116,6 @@
       function() {
         self.off("sent-" + id);
         self.user.getActiveDialog().addMessage({
-          from: "convosbot",
           type: "error",
           message: "Could not send message to " + (dialog ? dialog.name : this.id) + ": " + message,
         });
@@ -157,7 +156,14 @@
   proto._onSent = function(msg) {
     if (DEBUG) console.log("[sent] " + JSON.stringify(msg));
     clearTimeout(msg.id);
-    this.emit("sent-" + msg.id, msg);
+    if (msg.errors) {
+      var dialog = this.user.getActiveDialog();
+      if (dialog) dialog.addMessage({from: this.id, type: "error", message: msg.message + ": " + msg.errors[0].message});
+    }
+    else {
+      this.emit("sent-" + msg.id, msg);
+    }
+    this.off("sent-" + msg.id);
   };
 
   proto._sentClose = proto._sentPart = function(msg) {

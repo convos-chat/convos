@@ -50,19 +50,6 @@ textarea.materialize-textarea {
   box-sizing: content-box;
   transition: $input-transition;
 
-  // Disabled input style
-  &:disabled,
-  &[readonly="readonly"] {
-    color: $input-disabled-color;
-    border-bottom: $input-disabled-border;
-  }
-
-  // Disabled label style
-  &:disabled+label,
-  &[readonly="readonly"]+label {
-    color: $input-disabled-color;
-  }
-
   // Focused input style
   &:focus {
     border-bottom: 1px solid $input-focus-color;
@@ -72,6 +59,20 @@ textarea.materialize-textarea {
   // Focused label style
   &:focus+label {
     color: $input-focus-color;
+  }
+
+  // Disabled input style
+  &:disabled,
+  &[readonly] {
+    color: $input-disabled-color;
+    border-bottom: $input-disabled-border;
+    box-shadow: none;
+  }
+
+  // Disabled label style
+  &:disabled+label,
+  &[readonly]+label {
+    color: $input-disabled-color;
   }
 
   // Valid Input Style

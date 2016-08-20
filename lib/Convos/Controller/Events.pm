@@ -45,7 +45,8 @@ sub start {
 sub _err {
   my ($self, $msg, $data) = @_;
   my $res = E $msg;
-  $res->{id} = $data->{id} if $data->{id};
+  $res->{$_} = $data->{$_} for grep { $data->{$_} } qw(connection_id message id);
+  $res->{event} = 'sent';
   $self->send({json => $res});
 }
 

@@ -210,7 +210,6 @@
           self.addMessage({type: "enable-notifications"});
         }
 
-        if (xhr.body.end) self._endOfHistory();
         self.emit("initialized", {gotoBottom: true});
       }
     );
