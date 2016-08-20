@@ -78,4 +78,17 @@ $t->get_ok('/api/notifications')->status_is(200)->json_is(
   ]
 );
 
+$connection->emit(
+  message => $target => {
+    from      => 'someone',
+    highlight => Mojo::JSON->false,
+    message   => q(the character æ is unicode),
+    ts        => time,
+    type      => 'private',
+  }
+);
+
+$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=1&match=æ')
+  ->status_is(200)->json_is('/messages/0/message', q(the character æ is unicode));
+
 done_testing;

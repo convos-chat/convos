@@ -91,21 +91,21 @@ sub messages {
   $args{re}       = $re;
 
   # If both "before" and "after" are provided
-  if ($query->{before} && $query->{after}) {
+  if ($query->{before} and $query->{after}) {
     $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
     $args{after}  = Time::Piece->strptime($query->{after},  '%Y-%m-%dT%H:%M:%S');
   }
 
   # If "before" is provided but not "after"
   # Set "after" to 12 months before "before"
-  elsif ($query->{before} && !$query->{after}) {
+  elsif ($query->{before} and !$query->{after}) {
     $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
     $args{after} = $args{before}->add_months(-12);
   }
 
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
-  elsif (!$query->{before} && $query->{after}) {
+  elsif (!$query->{before} and $query->{after}) {
     $args{after} = Time::Piece->strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
     $args{before} = $args{after}->add_months(12);
   }
@@ -113,8 +113,8 @@ sub messages {
   # If neither "before" nor "after" are provided
   # Set "before" to now and "after" to 12 months before "before"
   else {
-    $args{before} = gmtime;
-    $args{after}  = $args{before}->add_months(-12);
+    $args{before} = gmtime() + 60;    # make sure we get the message sent right now as well
+    $args{after} = $args{before}->add_months(-12);
   }
 
   # Do not search if the difference between "before" and "after" is more than 12 months
@@ -248,11 +248,13 @@ sub _log {
   my $file = $self->_log_file($obj, $ym);
   my $dir  = File::Basename::dirname($file);
 
+  $message = Mojo::Util::encode('UTF-8', $message) if utf8::is_utf8($message);
+
   File::Path::make_path($dir) unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
   warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG == 2;
   flock $FH, LOCK_EX;
-  print $FH $t->datetime . " $message\n";
+  $FH->syswrite($t->datetime . " $message\n") or die "Write $file: $!";
   flock $FH, LOCK_UN;
 }
 
@@ -299,6 +301,7 @@ sub _messages {
 
   warn "[@{[$obj->id]}] Gettings messages from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
+    $line = Mojo::Util::decode('UTF-8', $line);
     next unless $line =~ $args->{re};
     my $flag = $2 || '0';
     my $message = {message => $3, ts => $1};

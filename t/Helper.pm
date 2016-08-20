@@ -53,15 +53,14 @@ sub import {
 
   eval <<"HERE" or die $@;
 package $caller;
-use Mojo::Base -base;
 use Test::More;
 use Test::Deep;
 use Mojo::JSON qw(false true);
 1;
 HERE
 
-  strict->import;
-  warnings->import;
+  $_->import for qw(strict warnings utf8);
+  feature->import(':5.10');
 
   $script =~ s/\W/-/g;
   $ENV{CONVOS_HOME} = $CONVOS_HOME = File::Spec->catdir("local", "test-$script");

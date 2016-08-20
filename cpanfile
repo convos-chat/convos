@@ -8,7 +8,7 @@ requires "Mojo::IRC"                         => "0.31";
 requires "Mojolicious"                       => "6.40";
 requires "Mojolicious::Plugin::AssetPack"    => "1.19";
 requires "Mojolicious::Plugin::LinkEmbedder" => "0.2301";
-requires "Mojolicious::Plugin::OpenAPI"      => "0.13";
+requires "Mojolicious::Plugin::OpenAPI"      => "0.14";
 requires "Parse::IRC"                        => "1.20";
 
 on develop => sub {
