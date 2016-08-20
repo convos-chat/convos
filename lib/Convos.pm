@@ -84,7 +84,8 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
-  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
+  $config->{backend}           ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
+  $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
   $config->{invite_code} ||= $ENV{CONVOS_INVITE_CODE} // $self->_generate_invite_code;
   $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{plugins} ||= {};
@@ -126,10 +127,11 @@ sub _setup_settings {
   my $settings = $self->defaults->{settings} = $self->config('settings') || {};
 
   # This hash is exposed directy into the web page
-  $settings->{invite_code} = $self->config('invite_code') ? true : false;
+  $settings->{forced_irc_server} = $self->config('forced_irc_server') ? true : false;
+  $settings->{invite_code}       = $self->config('invite_code')       ? true : false;
   $settings->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
   $settings->{default_server}
-    ||= $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';   # chat.freenode.net:6697 instead of localhost?
+    ||= $self->config('forced_irc_server') || $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';
 }
 
 1;

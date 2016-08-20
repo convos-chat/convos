@@ -2,6 +2,7 @@
   <div class="input-field col" :class="cols">
     <input lazy v-model="value" class="validate"
       :id="id" v-el:input :name="name" :placeholder="placeholder"
+      :readonly="readonly"
       :type="type" :disabled="disabled" :required="required"
       @focus="hasFocus=true" @blur="hasFocus=false">
     <label :for="id" :class="{active:labelActive}"><slot></slot></label>
@@ -9,7 +10,7 @@
 </template>
 <script>
 module.exports = {
-  props: ["cols", "disabled", "focus", "id", "name", "placeholder", "required", "type", "value"],
+  props: ["cols", "disabled", "focus", "id", "name", "placeholder", "readonly", "required", "type", "value"],
   data: function() {
     return {hasFocus: false, mdValue: ""};
   },

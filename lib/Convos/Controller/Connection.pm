@@ -7,7 +7,8 @@ sub create {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
-  my $url  = Mojo::URL->new($json->{url});
+  my $url  = $self->_validate_url($json->{url})
+    or return $self->render(openapi => E('Missing "host" in URL'), status => 400);
   my $name = $json->{name} || $self->_pretty_connection_name($url->host);
   my $connection;
 
@@ -87,7 +88,7 @@ sub update {
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
   my $state = $json->{state} || '';
-  my $url = Mojo::URL->new($json->{url} || '');
+  my $url = $json->{url} ? $self->_validate_url($json->{url}) : undef;
   my $connection;
 
   eval {
@@ -97,7 +98,7 @@ sub update {
     return $self->render(openapi => E('Connection not found.'), status => 404);
   };
 
-  if ($url->host) {
+  if ($url) {
     $url->scheme($json->{protocol});
     $state = 'reconnect' if $url->to_string ne $connection->url->to_string;
     $connection->url->parse($url);
@@ -130,6 +131,15 @@ sub _pretty_connection_name {
   $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
   $name =~ s![\W_]+!-!g;                                # make pretty url
   $name;
+}
+
+sub _validate_url {
+  my ($self, $url) = @_;
+  my $forced_irc_server = $self->app->config('forced_irc_server');
+  $url = Mojo::URL->new($url);
+  $url->host_port($forced_irc_server) if $forced_irc_server;
+  return undef unless $url->host;
+  $url;
 }
 
 1;

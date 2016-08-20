@@ -66,6 +66,14 @@ connection.
 
 Default: "localhost".
 
+=item * CONVOS_FORCED_IRC_SERVER
+
+Will force any L<Convos::Controller::Connection/create> to use this server
+instead of whatever was posted in. Note that this environment variable also
+overrride L</CONVOS_DEFAULT_SERVER>.
+
+This is disabled by default.
+
 =item * CONVOS_HOME
 
 This variable is used by L<Convos::Core::Backend::File> to figure out where

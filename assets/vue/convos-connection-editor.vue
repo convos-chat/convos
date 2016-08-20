@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="row">
-      <md-input :value.sync="server" focus="">Server</md-input>
+      <md-input :value.sync="server" focus="" :readonly="settings.forced_irc_server">Server</md-input>
     </div>
     <div class="row" v-if="showNickField">
       <md-input :value.sync="nick" placeholder="A nick can be generated for you">Nick</md-input>
