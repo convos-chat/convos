@@ -75,7 +75,7 @@ sub ensure_dependencies {
 
   do $cpanfile;
   die "Could not source $cpanfile: $@" unless $n;
-  @missing = grep { $_->[2] ne 'develop' } @missing if $mode ne '--develop';
+  @missing = grep { $_->[3] ne 'develop' } @missing if $mode ne '--develop';
   pop @$_ for @missing;
 
   if (@missing and $action ne 'install') {
