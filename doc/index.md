@@ -3,14 +3,19 @@ layout: page
 title: Documentation
 ---
 
-# Installing
+## Installing
 
 Check out the [installation](/doc/install.html) guide if you need help regarding
-how to download, install, and to start Convos.
+how to download, install, and run Convos.
+
+## Running
+
+Want more details about command line options and how to start Convos? Check
+out the [running](/doc/running.html) guide.
 
 ## Configuring
 
-The [configuring](/doc/config.html) guide explains how to customize Convos.
+The [configuration](/doc/config.html) guide explains how to customize Convos.
 Note that there is no need to configure Convos to get it running! Convos has
 sane defaults, which makes it a breeze to start.
 
@@ -33,4 +38,5 @@ You can join [#convos](irc://chat.freenode.net:6697/#convos) on
 [freenode.net](http://freenode.net/) for an interactive chat, send us a
 message on [twitter](https://twitter.com/convosby) or create an
 [issue](https://github.com/Nordaaker/convos/issues) on Github. If you're more
-of the email type, then send an email to jhthorsen@cpan.org.
+of the email type, then send an email to
+<a href="mailto:jhthorsen@cpan.org">jhthorsen@cpan.org</a>.

@@ -1,7 +1,5 @@
 # Dependencies
 
-highlighter:      pygments
-
 # Permalinks
 permalink:        /:year/:i_month/:i_day/:slug.html
 

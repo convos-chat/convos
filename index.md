@@ -4,19 +4,19 @@ title: About
 ---
 
 Convos is the simplest way to use [IRC](http://www.irchelp.org/). It is always
-online, and accessible to your web browser, both on desktop and mobile. Run in
+online, and accessible to your web browser, both on desktop and mobile. Run it
 on your home server, or [cloud service](https://www.digitalocean.com/) easily.
 It can be deployed to Docker-based cloud services, or you can just run it as a
 normal [Mojolicious](http://mojolicious.org/) application.
 
 Learn more about how to install and configure Convos in the
-[manual](/doc).
+[guides](/doc).
 
 ## Demo
 
 There is an online demo running at [demo.convos.by](http://demo.convos.by).
-Register with what-ever email you like and start poking around. There should
-be someone lurking in the "#test" channel.
+Register with your email address and try it out. There should be someone
+lurking in the "#test" channel.
 
 DISCLAIMER! There are no guaranties for the uptime or quality of that service.
 
@@ -38,12 +38,12 @@ archive.
 All chats will be logged and indexed, which allow you to search in earlier
 conversations.
 
-### Include external resources
+### Automatic Previews
 
 Links to images and video will be displayed inline. No need to click on the
 link to view the data.
 
-## Architecture principles
+## Design principles
 
 * Keep it easy to install.
 * Easy to run - Optional complexity.
