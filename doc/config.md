@@ -94,3 +94,12 @@ Should be set to true if Convos is served over HTTPS.
 Can hold the path to a config file, which is read by Convos instead of using
 the environment variables. See also the [running](/doc/running.html) guide
 for more details.
+
+### MOJO_REVERSE_PROXY
+
+The `MOJO_REVERSE_PROXY` environment variable can be used to enable proxy
+support, this allows Mojolicious to automatically pick up the
+`X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers.
+
+See also the [Nginx cookbook](https://metacpan.org/pod/distribution/Mojolicious/lib/Mojolicious/Guides/Cookbook.pod#Nginx)
+in the Mojolicious distribution for more information about these headers.
