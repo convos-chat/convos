@@ -198,8 +198,7 @@ issues. Below is a list of ideas
 
 * Redis backend
 
-  Should to have a Mojo::Redis2 based backend, compatible with the old
-  database.
+  Should have a Mojo::Redis2 based backend, compatible with the old database.
 
 * IRC
 
