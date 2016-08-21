@@ -20,7 +20,7 @@ be someone lurking in the "#test" channel.
 
 DISCLAIMER! There are no guaranties for the uptime or quality of that service.
 
-<video preload="auto" style="max-width:100%" controls>
+<video preload="auto" style="max-width:100%;border:1px solid #ccc" controls autoplay loop>
   <source src="https://s3.amazonaws.com/quickcast/28775/230166/quickcast-small.mp4?1471743889642" type="video/mp4">
   <source src="https://s3.amazonaws.com/quickcast/28775/230166/quickcast.webm?1471743889642" type="video/webm">
   <p>Sorry, your browser does not support the QuickCast video player</p>
