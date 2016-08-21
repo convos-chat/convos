@@ -1,10 +1,8 @@
 <div class="sidebar">
   <div class="container sidebar-sticky">
     <div class="sidebar-about">
-      <h1>
-        <a href="{{ site.baseurl }}">
-          {{ site.title }}
-        </a>
+      <h1 class="convos-logo">
+        <a href="{{ site.baseurl }}"><span>{{ site.title }}</span></a>
       </h1>
       <p class="lead">{{ site.description }}</p>
     </div>
@@ -15,7 +13,5 @@
       <a class="sidebar-nav-item{% if page.url == "/doc/") %} active{% endif %}" href="{{ site.baseurl }}doc">Documentation</a>
       <a class="sidebar-nav-item" href="{{ site.github.repo }}">GitHub project</a>
     </nav>
-
-    <p>&copy; {{ site.time | date: '%Y' }}. All rights reserved.</p>
   </div>
 </div>

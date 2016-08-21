@@ -54,8 +54,7 @@ html {
  */
 
 .sidebar {
-  text-align: center;
-  padding: 2rem 1rem;
+  padding: 1rem 0.2rem;
   color: rgba(255,255,255,.5);
   background-color: #222;
 }
@@ -67,6 +66,7 @@ html {
     bottom: 0;
     width: 18rem;
     text-align: left;
+    padding: 2rem 1rem;
   }
 }
 
@@ -84,12 +84,9 @@ html {
 }
 
 /* Sidebar nav */
-.sidebar-nav {
-  margin-bottom: 1rem;
-}
 .sidebar-nav-item {
-  display: block;
   line-height: 1.75;
+  margin-right: 0.2em;
 }
 a.sidebar-nav-item:hover,
 a.sidebar-nav-item:focus {
@@ -112,6 +109,8 @@ a.sidebar-nav-item:focus {
     bottom: 1rem;
     left:   1rem;
   }
+  .sidebar-nav { margin-bottom: 1rem; }
+  .sidebar-nav-item { display: block; }
 }
 
 
@@ -122,13 +121,14 @@ a.sidebar-nav-item:focus {
  */
 
 .content {
-  padding-top:    4rem;
-  padding-bottom: 4rem;
+  padding-top: 1rem;
+  padding-bottom: 6rem;
 }
 
 @media (min-width: 48em) {
   .content {
     max-width: 38rem;
+    padding-top: 4rem;
     margin-left: 20rem;
     margin-right: 2rem;
   }
@@ -263,9 +263,12 @@ a.sidebar-nav-item:focus {
   text-decoration: none;
 }
 
-h1.convos-logo {
+h1.convos-logo a {
   background: url(/public/convos-logo.png) no-repeat;
-  text-indent: -10000px;
+  background-size: contain;
   height: 52px;
-  margin-bottom: 1em;
+  display: block;
+}
+h1.convos-logo a span {
+  visibility: hidden;
 }

@@ -1,9 +1,7 @@
 ---
-layout: default
+layout: page
 title: About
 ---
-
-<h1 class="convos-logo">Convos</h1>
 
 Convos is the simplest way to use [IRC](http://www.irchelp.org/). It is always
 online, and accessible to your web browser, both on desktop and mobile. Run it
@@ -68,7 +66,7 @@ desktop notifications.
 
 ## Copyright & License
 
-Copyright (C) 2012-2016, Nordaaker.
+Copyright (C) 2012-{{ site.time | date: '%Y' }}, Nordaaker.
 
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.
