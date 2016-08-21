@@ -20,7 +20,11 @@ be someone lurking in the "#test" channel.
 
 DISCLAIMER! There are no guaranties for the uptime or quality of that service.
 
-<iframe name="quickcast" src="http://quick.as/embed/yzg6f8ze8" scrolling="no" frameborder="0" width="100%" allowfullscreen></iframe><script src="http://quick.as/embed/script/1.55"></script>
+<video preload="auto" style="max-width:100%" controls>
+  <source src="https://s3.amazonaws.com/quickcast/28775/230166/quickcast-small.mp4?1471743889642" type="video/mp4">
+  <source src="https://s3.amazonaws.com/quickcast/28775/230166/quickcast.webm?1471743889642" type="video/webm">
+  <p>Sorry, your browser does not support the QuickCast video player</p>
+</video>
 
 ## Features
 
