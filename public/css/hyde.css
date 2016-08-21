@@ -57,7 +57,7 @@ html {
   text-align: center;
   padding: 2rem 1rem;
   color: rgba(255,255,255,.5);
-  background-color: #388E3C;
+  background-color: #222;
 }
 @media (min-width: 48em) {
   .sidebar {
@@ -247,4 +247,25 @@ a.sidebar-nav-item:focus {
 .theme-base-0f .content a,
 .theme-base-0f .related-posts li a:hover {
   color: #8f5536;
+}
+
+/* Coovnos */
+.theme-base-convos .sidebar {
+  background-color: #388E3C;
+}
+.theme-base-convos .content a,
+.theme-base-convos .related-posts li a:hover {
+  color: #388E3C;
+  text-decoration: underline;
+}
+.theme-base-convos .content a:hover,
+.theme-base-convos .related-posts li a:hover {
+  text-decoration: none;
+}
+
+h1.convos-logo {
+  background: url(/public/convos-logo.png) no-repeat;
+  text-indent: -10000px;
+  height: 52px;
+  margin-bottom: 1em;
 }

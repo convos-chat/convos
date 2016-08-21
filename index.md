@@ -1,7 +1,10 @@
 ---
-layout: page
+layout: default
 title: About
 ---
+
+<div class="page">
+  <h1 class="convos-logo">Convos</h1>
 
 Convos is the simplest way to use [IRC](http://www.irchelp.org/). It is always
 online, and accessible to your web browser, both on desktop and mobile. Run it
@@ -70,3 +73,5 @@ Copyright (C) 2012-2016, Nordaaker.
 
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.
+
+</div>
