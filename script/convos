@@ -9,11 +9,15 @@ use FindBin;
 use File::Spec;
 
 if (@ARGV and $ARGV[0] eq 'dev') {
-  my @watch = qw(lib assets public/convos-api.json);
+  my @watch = qw(assets lib public/convos-api.json);
   $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
   shift @ARGV;
   warn sprintf "\$ morbo script/convos %s\n", join " ", @ARGV, map { ('-w', $_) } @watch;
   exec qw(morbo script/convos), @ARGV, map { ('-w', $_) } @watch;
+}
+if (@ARGV and -r $ARGV[0]) {
+  $ENV{MOJO_CONFIG} = shift @ARGV;
+  unshift @ARGV, 'daemon';
 }
 if (grep { $_ eq 'daemon' } @ARGV) {
   $ENV{MOJO_MODE} ||= 'production';

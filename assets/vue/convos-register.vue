@@ -31,7 +31,7 @@
         </div>
         <div class="row">
           <div class="col s12 about">
-            &copy; <a href="http://nordaaker.com">Nordaaker</a> - <a href="http://convos.by">About</a>
+            &copy; <a href="http://nordaaker.com">{{settings.organization_name}}</a> - <a href="http://convos.by">About</a>
           </div>
         </div>
       </form>

@@ -24,7 +24,6 @@ sub startup {
   $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
   $self->_setup_secrets;
   $self->_add_helpers;
-  $self->_setup_settings;
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
@@ -74,6 +73,19 @@ sub _add_helpers {
   );
 
   $self->helper(
+    settings => sub {
+      my $config = shift->app->config;
+      return {
+        contact           => $config->{contact},
+        default_server    => $config->{default_server},
+        forced_irc_server => $config->{forced_irc_server} ? true : false,
+        invite_code       => $config->{invite_code} ? true : false,
+        organization_name => $config->{organization_name},
+      };
+    }
+  );
+
+  $self->helper(
     unauthorized => sub {
       shift->render(openapi => Convos::Util::E('Need to log in first.'), status => 401);
     }
@@ -85,11 +97,14 @@ sub _config {
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
   $config->{backend}           ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
+  $config->{contact}           ||= $ENV{CONVOS_CONTACT}           || 'mailto:root@localhost';
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
+  $config->{default_server}
+    ||= $config->{forced_irc_server} || $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';
   $config->{invite_code} ||= $ENV{CONVOS_INVITE_CODE} // $self->_generate_invite_code;
-  $config->{name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
+  $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{plugins} ||= {};
-  $config->{plugins}{$_} = $config for split /:/, +($ENV{CONVOS_PLUGINS} // '');
+  $config->{plugins}{$_} = $config for split /,/, +($ENV{CONVOS_PLUGINS} // '');
   $config->{secure_cookies} ||= $ENV{CONVOS_SECURE_COOKIES} || 0;
   $config;
 }
@@ -111,7 +126,7 @@ sub _home_relative_to_lib {
 
 sub _setup_secrets {
   my $self = shift;
-  my $secrets = $self->config('secrets') || [split /:/, $ENV{CONVOS_SECRETS} || ''];
+  my $secrets = $self->config('secrets') || [split /,/, $ENV{CONVOS_SECRETS} || ''];
 
   unless (@$secrets) {
     my $unsafe = join ':', $<, $(, $^X, qx{who -b 2>/dev/null}, $self->home;
@@ -120,18 +135,6 @@ sub _setup_secrets {
   }
 
   $self->secrets($secrets);
-}
-
-sub _setup_settings {
-  my $self = shift;
-  my $settings = $self->defaults->{settings} = $self->config('settings') || {};
-
-  # This hash is exposed directy into the web page
-  $settings->{forced_irc_server} = $self->config('forced_irc_server') ? true : false;
-  $settings->{invite_code}       = $self->config('invite_code')       ? true : false;
-  $settings->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
-  $settings->{default_server}
-    ||= $self->config('forced_irc_server') || $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';
 }
 
 1;
@@ -284,7 +287,7 @@ __DATA__
         indexUrl: "<%= $c->url_for('index') %>",
         wsUrl:    "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
         mode:     "<%= app->mode %>",
-        settings: <%== Mojo::JSON::encode_json($settings) %>,
+        settings: <%== Mojo::JSON::encode_json(settings) %>,
         mixin:    {} // Vue.js mixins
       };
     % end
