@@ -1,6 +1,6 @@
 <template>
   <div class="convos-input">
-    <i @click="send" class="material-icons waves-effect waves-light">send</i>
+    <i @click="sendMessage" class="material-icons waves-effect waves-light">send</i>
     <textarea v-model="message" v-el:input
       class="materialize-textarea" :placeholder="placeholder"
       @keydown.enter="sendMessage" @keydown="autocomplete"></textarea>
