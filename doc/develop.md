@@ -66,7 +66,7 @@ $ brew install ircd-hybrid         # osx
 ```
 
 Please ask in [#convos on freenode.net](irc://chat.freenode.net/#convos) if
-you want to use the [demo](http://demo.convos.by) IRC server instead of
+you want to use the [demo](/#demo) IRC server instead of
 installing your own.
 
 ### Starting the application

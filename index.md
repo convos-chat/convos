@@ -16,9 +16,11 @@ Learn more about how to install and configure Convos in the
 
 There is an online demo running at [demo.convos.by](http://demo.convos.by).
 Register with your email address and try it out. There should be someone
-lurking in the "#test" channel.
+lurking in the `#demo` channel.
 
-DISCLAIMER! There are no guaranties for the uptime or quality of that service.
+Note that the demo is [locked](/doc/config.html#convosforcedircserver) to the
+IRC server running on localhost. This is to prevent the server from getting
+banned from IRC networks with strict limitiations.
 
 <video preload="auto" style="max-width:100%;border:1px solid #ccc" controls autoplay loop>
   <source src="https://s3.amazonaws.com/quickcast/28775/230166/quickcast-small.mp4?1471743889642" type="video/mp4">
@@ -42,6 +44,11 @@ conversations.
 
 Links to images and video will be displayed inline. No need to click on the
 link to view the data.
+
+### Notifications
+
+Convos will track whenever you are mentioned in a conversation and display
+desktop notifications.
 
 ## Design principles
 
