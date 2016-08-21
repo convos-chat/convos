@@ -12,8 +12,6 @@ normal [Mojolicious](http://mojolicious.org/) application.
 Learn more about how to install and configure Convos in the
 [manual](/doc).
 
-<iframe name="quickcast" src="http://quick.as/embed/yzg6f8ze8" scrolling="no" frameborder="0" width="100%" allowfullscreen></iframe><script src="http://quick.as/embed/script/1.55"></script>
-
 ## Demo
 
 There is an online demo running at [demo.convos.by](http://demo.convos.by).
@@ -21,6 +19,8 @@ Register with what-ever email you like and start poking around. There should
 be someone lurking in the "#test" channel.
 
 DISCLAIMER! There are no guaranties for the uptime or quality of that service.
+
+<iframe name="quickcast" src="http://quick.as/embed/yzg6f8ze8" scrolling="no" frameborder="0" width="100%" allowfullscreen></iframe><script src="http://quick.as/embed/script/1.55"></script>
 
 ## Features
 
