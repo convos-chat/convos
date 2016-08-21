@@ -4,7 +4,7 @@ title: Installing
 ---
 
 This guide will give an introduction on how to run Convos. It is very
-easy to get started, but you can also tweak many [settings](./configure.html).
+easy to get started, but you can also tweak many [settings](./config.html).
 
 ### Quick start guide
 

@@ -5,19 +5,19 @@ title: Documentation
 
 # Installing
 
-Check out the [installation](./install.html) guide if you need help regarding
+Check out the [installation](/doc/install.html) guide if you need help regarding
 how to download, install, and to start Convos.
 
 ## Configuring
 
-The [configuring](./configure.html) guide explains how to customize Convos.
+The [configuring](/doc/config.html) guide explains how to customize Convos.
 Note that there is no need to configure Convos to get it running! Convos has
 sane defaults, which makes it a breeze to start.
 
 ## Developing
 
 Are you interested in developing Convos? The check out the
-[develop](./develop.html) guide. We want _you_ on our team!
+[develop](/doc/develop.html) guide. We want _you_ on our team!
 
 ## API
 

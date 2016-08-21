@@ -7,7 +7,7 @@ permalink:        /:year/:i_month/:i_day/:slug.html
 
 # Setup
 title:            Convos
-tagline:          'A Jekyll theme'
+tagline:          'A multiuser chat application'
 description:      'A multiuser chat application'
 url:              https://convos.by
 baseurl:          /
@@ -17,6 +17,7 @@ author:
   url:            https://twitter.com/convosby
 
 paginate:         5
+paginate_path:    blog/posts/:num
 
 # Custom vars
 version:          1.0b

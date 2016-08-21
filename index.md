@@ -10,7 +10,9 @@ It can be deployed to Docker-based cloud services, or you can just run it as a
 normal [Mojolicious](http://mojolicious.org/) application.
 
 Learn more about how to install and configure Convos in the
-[manual](/documentation.html).
+[manual](/doc).
+
+<iframe name="quickcast" src="http://quick.as/embed/yzg6f8ze8" scrolling="no" frameborder="0" width="100%" allowfullscreen></iframe><script src="http://quick.as/embed/script/1.55"></script>
 
 ## Demo
 
