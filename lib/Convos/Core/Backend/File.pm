@@ -92,21 +92,21 @@ sub messages {
 
   # If both "before" and "after" are provided
   if ($query->{before} and $query->{after}) {
-    $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
-    $args{after}  = Time::Piece->strptime($query->{after},  '%Y-%m-%dT%H:%M:%S');
+    $args{before} = _strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
+    $args{after}  = _strptime($query->{after},  '%Y-%m-%dT%H:%M:%S');
   }
 
   # If "before" is provided but not "after"
   # Set "after" to 12 months before "before"
   elsif ($query->{before} and !$query->{after}) {
-    $args{before} = Time::Piece->strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
+    $args{before} = _strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
     $args{after} = $args{before}->add_months(-12);
   }
 
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
   elsif (!$query->{before} and $query->{after}) {
-    $args{after} = Time::Piece->strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
+    $args{after} = _strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
     $args{before} = $args{after}->add_months(12);
   }
 
@@ -158,7 +158,7 @@ sub notifications {
   while (my $line = $FH->getline) {
     next unless $line =~ $re;
     my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
-    my $ts = Time::Piece->strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    my $ts = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
     $self->_message_type_from($message);
     unshift @notifications, $message;
     last if @notifications == $query->{limit};
@@ -305,7 +305,7 @@ sub _messages {
     next unless $line =~ $args->{re};
     my $flag = $2 || '0';
     my $message = {message => $3, ts => $1};
-    my $ts = Time::Piece->strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    my $ts = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
     next unless $ts < $args->{before} and $ts > $args->{after};
     $self->_message_type_from($message);
     $message->{highlight}
@@ -381,6 +381,12 @@ sub _setup {
       );
     }
   );
+}
+
+sub _strptime {
+  local $_ = shift;
+  $_ =~ s!\.?0*Z$!!;
+  Time::Piece->strptime($_, '%Y-%m-%dT%H:%M:%S');
 }
 
 1;
