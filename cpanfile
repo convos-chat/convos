@@ -10,6 +10,7 @@ requires "Mojolicious::Plugin::AssetPack"    => "1.20";
 requires "Mojolicious::Plugin::LinkEmbedder" => "0.2301";
 requires "Mojolicious::Plugin::OpenAPI"      => "0.14";
 requires "Parse::IRC"                        => "1.20";
+requires "Time::Piece"                       => "1.20";
 
 on develop => sub {
   requires "CSS::Minifier::XS"        => "0.09";
