@@ -54,6 +54,13 @@
     return this.connections.filter(function(c) { return c.id == id; })[0];
   };
 
+  proto.makeSureLocationIsCorrect = function() {
+    var correct, loc = Convos.settings.main;
+    if (loc.indexOf("#chat") != 0) return;
+    this.dialogs.forEach(function(d) { if (d.href() == loc) correct = true; });
+    if (!correct) Convos.settings.main = this.dialogs.length ? this.dialogs[0].href() : "";
+  };
+
   proto.refresh = function() {
     var self = this;
     Convos.api.getUser(
@@ -69,6 +76,7 @@
         self.notifications = xhr.body.notifications.reverse();
         self.unread = xhr.body.unread || 0;
         self.currentPage = "convos-chat";
+        self.makeSureLocationIsCorrect();
       }
     );
   };
