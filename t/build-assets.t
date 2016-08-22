@@ -1,5 +1,7 @@
 use t::Helper;
 
+plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
+
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 
