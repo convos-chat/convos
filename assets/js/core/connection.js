@@ -8,7 +8,6 @@
     this.sendTimeout = 5000; // is this long enough?
     this.state       = "disconnected";
     this.url         = "";
-    this._api        = Convos.api;
     this.on("message", this._onMessage);
     this.on("sent", this._onSent);
     this.on("state", this._onState);
@@ -44,7 +43,7 @@
   // Remove this connection from the backend
   proto.remove = function(cb) {
     var self = this;
-    this._api.removeConnection({connection_id: this.id}, function(err, xhr) {
+    Convos.api.removeConnection({connection_id: this.id}, function(err, xhr) {
       if (!err) {
         self.off("message").off("state");
         self.user.connections = self.user.connections.filter(function(c) {
@@ -62,7 +61,7 @@
   // Get list of available rooms on server
   proto.rooms = function(cb) {
     var self = this;
-    this._api.rooms({connection_id: this.id}, function(err, xhr) {
+    Convos.api.rooms({connection_id: this.id}, function(err, xhr) {
       if (err) return cb.call(self, err, []);
       cb.call(self, err, xhr.body.rooms);
     });
@@ -79,7 +78,7 @@
     };
 
     if (this.id) {
-      this._api.updateConnection(
+      Convos.api.updateConnection(
         {
           body:          attrs,
           connection_id: this.id
@@ -90,7 +89,7 @@
         }
       );
     } else {
-      this._api.createConnection({
+      Convos.api.createConnection({
         body: attrs
       }, function(err, xhr) {
         if (err) return cb.call(self, err);

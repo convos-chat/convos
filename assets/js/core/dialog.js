@@ -1,16 +1,15 @@
 (function() {
   Convos.Dialog = function(attrs) {
-    this.active        = false;
-    this.frozen        = "";
-    this.id            = "";
-    this.activated     = 0;
-    this.messages      = [];
-    this.name          = "";
-    this.lastRead      = attrs.last_read ? new Date(attrs.last_read) : new Date();
-    this.participants  = {};
-    this.unread        = 0;
-    this.topic         = "";
-    this._participants = {};
+    this.active       = false;
+    this.frozen       = "";
+    this.id           = "";
+    this.activated    = 0;
+    this.messages     = [];
+    this.name         = "";
+    this.lastRead     = attrs.last_read ? new Date(attrs.last_read) : new Date();
+    this.participants = {};
+    this.unread       = 0;
+    this.topic        = "";
 
     EventEmitter(this);
     if (attrs) this.update(attrs);
@@ -77,8 +76,8 @@
       msg.prev = prev;
     }
 
-    this._addParticipant(msg.from, {seen: msg.ts});
     this.messages[args.method](msg);
+    this.participant({type: "maintain", name: msg.from, seen: msg.ts});
     if (args.method == "push") this.emit("message", msg);
   };
 
@@ -125,18 +124,23 @@
 
   proto.participant = function(data) {
     if (data.type == "join") {
-      this._participants[data.nick] = {};
+      this.participants[data.nick] = {name: data.nick, seen: new Date()};
       this.addMessage({message: data.nick + " joined.", from: this.connection.id, type: "notice"});
     }
     else if (data.type == "nick_change") {
-      if (this._participants[data.old_nick]) {
-        delete this._participants[data.old_nick];
-        this._participants[data.new_nick] = {};
+      if (this.participants[data.old_nick]) {
+        delete this.participants[data.old_nick];
+        this.participants[data.nick] = {name: data.nick, seen: new Date()};
         this.addMessage({message: data.old_nick + " changed nick to " + data.new_nick + ".", from: this.connection.id, type: "notice"});
       }
     }
-    else if(this._participants[data.nick]) { // part
-      delete this._participants[data.nick];
+    else if (data.type == "maintain") {
+      if (this.participants[data.nick || data.name]) {
+        this.participants[data.nick || data.name].seen = data.ts || new Date();
+      }
+    }
+    else if(this.participants[data.nick]) { // part
+      delete this.participants[data.nick];
       this.addMessage({message: data.nick + " parted.", from: this.connection.id, type: "notice"});
     }
   };
@@ -148,13 +152,10 @@
         connection_id: this.connection_id,
         dialog_id:     this.id
       }, function(err, xhr) {
-        Object.keys(self.participants).forEach(function(k) { self.participants[k].online = false; });
         if (!err) {
-          var participants = self._participants = {};
+          self.participants = {};
           xhr.body.participants.forEach(function(p) {
-            participants[p.name] = p;
-            p.online = true;
-            self._addParticipant(p.name, p);
+            self.participants[p.name] = {name: p.name, seen: new Date()};
           });
         }
         return cb.call(self, err);
@@ -165,13 +166,6 @@
   proto.update = function(attrs) {
     Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
     return this;
-  };
-
-  proto._addParticipant = function(name, data) {
-    if (this.connection() && name == this.connection().nick()) return;
-    var participants = this.participants;
-    if (!participants[name]) participants[name] = {name: name, seen: 0};
-    Object.keys(data).forEach(function(k) { participants[name][k] = data[k]; });
   };
 
   proto._endOfHistory = function() {
