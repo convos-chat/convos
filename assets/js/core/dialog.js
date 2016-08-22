@@ -3,6 +3,7 @@
     this.active        = false;
     this.frozen        = "";
     this.id            = "";
+    this.activated     = 0;
     this.messages      = [];
     this.name          = "";
     this.lastRead      = attrs.last_read ? new Date(attrs.last_read) : new Date();
@@ -14,18 +15,16 @@
     EventEmitter(this);
     if (attrs) this.update(attrs);
 
-    this.once("active", function() { this.refreshParticipants(function() {}); });
     this.on("active", function() {
-      this.user.dialogs.forEach(function(d) {
-        if (d.active) d.emit("inactive");
-      });
+      this.user.dialogs.forEach(function(d) { if (d.active) d.emit("inactive"); });
       this.active = true;
       this.unread = 0;
+      if (!this.activated++) this._load();
     });
 
-    this.on("inactive", function() { this.active = false; });
     this.on("inactive", function() {
       var self = this;
+      this.active = false;
       Convos.api.setDialogLastRead(
         {
           connection_id: this.connection_id,
@@ -36,8 +35,6 @@
         }
       );
     });
-
-    this._initialize();
   };
 
   var proto = Convos.Dialog.prototype;
@@ -186,16 +183,18 @@
     }
   };
 
-  // Called when this dialog is active in gui the first time
-  proto._initialize = function() {
-    if (this.messages.length >= 60) return;
+  proto._load = function() {
     var self = this;
+
+    this.refreshParticipants(function() {});
     Convos.api.messages(
       {
         connection_id: self.connection_id,
         dialog_id:     self.id
       }, function(err, xhr) {
         if (err) return self.emit("error", err);
+
+        self.messages = []; // clear old messages on ws reconnect
         xhr.body.messages.forEach(function(msg) {
           self.addMessage(msg, {method: "push", disableNotifications: true});
         });
@@ -209,8 +208,6 @@
         if (Convos.settings.notifications == "default") {
           self.addMessage({type: "enable-notifications"});
         }
-
-        self.emit("initialized", {gotoBottom: true});
       }
     );
   };

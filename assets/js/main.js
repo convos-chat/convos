@@ -6,9 +6,6 @@
     document.querySelector("#loader .error").innerText = err;
   };
 
-  Convos.ws = new ReconnectingWebSocket(Convos.wsUrl);
-  setInterval(function() { if (Convos.ws.is("open")) Convos.ws.send('{}'); }, 10000);
-
   // shift+enter is a global shortkey to jump between input fields and goto anything
   document.addEventListener("keydown", function(e) {
     if (e.shiftKey && e.keyCode == 13) { // shift+enter
@@ -24,8 +21,7 @@
     }
   });
 
-  Convos.api = new openAPI();
-  Convos.api.load(Convos.apiUrl, function(err) {
+  Convos.api = new openAPI(Convos.apiUrl, function(err) {
     if (err) return Convos.error("Could not load API spec! " + err);
 
     Convos.vm = new Vue({
@@ -51,13 +47,8 @@
         }
       },
       ready: function() {
-        var self = this;
-
-        Convos.api.getUser({}, function(err, xhr) {
-          try { document.getElementById("loader").$remove() } catch(e) {};
-          if (err) return self.user.currentPage = "convos-login";
-          self.user.emit("login", xhr.body);
-        });
+        this.user.refresh(); // Want to refresh dialogs even if WebSocket fails
+        this.user.ws.open();
       }
     });
   });

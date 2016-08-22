@@ -44,10 +44,17 @@ sub get {
         @connections = sort { $a->name cmp $b->name } @{$user->connections};
         $res->{connections} = \@connections if $self->param('connections');
       }
+
       if ($self->param('dialogs')) {
         $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
+        $_->calculate_unread($delay->begin) for @{$res->{dialogs}};
       }
 
+      $delay->pass;    # make sure we go to the next step even if there are no dialogs
+    },
+    sub {
+      my ($delay, @err);
+      die $err[0] if $err[0] = grep {$_} @err;
       $self->render(openapi => $res);
     }
   );

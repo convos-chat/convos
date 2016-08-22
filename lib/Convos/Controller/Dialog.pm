@@ -32,13 +32,24 @@ sub list {
   my $user = $self->backend->user        or return $self->unauthorized;
   my @dialogs;
 
-  for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-    for my $dialog (sort { $a->id cmp $b->id } @{$connection->dialogs}) {
-      push @dialogs, $dialog;
-    }
-  }
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $delay->pass;    # make sure we go to the next step even if there are no dialogs
 
-  $self->render(openapi => {dialogs => \@dialogs});
+      for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
+        for my $dialog (sort { $a->id cmp $b->id } @{$connection->dialogs}) {
+          push @dialogs, $dialog;
+          $dialog->calculate_unread($delay->begin);
+        }
+      }
+    },
+    sub {
+      my ($delay, @err) = @_;
+      die $err[0] if $err[0] = grep {$_} @err;
+      $self->render(openapi => {dialogs => \@dialogs});
+    },
+  );
 }
 
 sub messages {

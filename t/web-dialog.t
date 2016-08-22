@@ -24,8 +24,14 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/participants')->statu
   ->json_has('/participants/0/mode')->json_has('/participants/0/name');
 
 my $last_read = Mojo::Date->new(1471623058)->to_datetime;
-$user->connection({name => 'localhost', protocol => 'irc'})
-  ->dialog({name => '#Convos', frozen => ''})->last_read($last_read);
+my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+$connection->_irc->emit(
+  irc_privmsg => {
+    prefix => 'Supergirl!super.girl@i.love.debian.org',
+    params => ['#Convos', 'not a superdupersuperman?']
+  }
+);
+$connection->dialog({name => '#Convos', frozen => ''})->last_read($last_read);
 $t->get_ok('/api/dialogs')->status_is(200)->json_is(
   '/dialogs' => [
     {
@@ -36,6 +42,7 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
       name          => '#Convos',
       last_read     => '2016-08-19T16:10:58Z',
       topic         => '',
+      unread        => 1,
     },
   ]
 );
@@ -74,6 +81,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       name          => '#Convos',
       last_read     => '2016-08-19T16:10:58Z',
       topic         => '',
+      unread        => 1,
     },
     {
       connection_id => 'irc-example',
@@ -83,6 +91,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       last_read     => '2016-08-19T16:10:58Z',
       name          => '#superheroes',
       topic         => '',
+      unread        => 0,
     }
   ],
   'user dialogs'

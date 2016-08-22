@@ -272,14 +272,15 @@ __DATA__
     %= asset 'convos.css';
   </head>
   <body>
-    <div id="loader" class="centered">
-      <div>
-        <h4>Loading convos...</h4>
-        <p class="error">This should not take too long.</p>
-        <a href="">Reload <i class="material-icons">refresh</i></a>
+    <component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
+      <div id="loader" class="centered">
+        <div>
+          <h4>Loading convos...</h4>
+          <p class="error">This should not take too long.</p>
+          <a href="">Reload <i class="material-icons">refresh</i></a>
+        </div>
       </div>
-    </div>
-    <component :is="user.currentPage" :current-page.sync="currentPage" :user="user"></component>
+    </component>
     <div id="vue_tooltip"><span></span></div>
     %= javascript begin
       window.Convos = {

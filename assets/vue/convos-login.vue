@@ -58,7 +58,7 @@ module.exports = {
           }
         }, function(err, xhr) {
           if (err) return self.errors = err;
-          self.user.emit("login", xhr.body);
+          self.user.refresh();
         }
       );
     }

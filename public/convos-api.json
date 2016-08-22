@@ -539,13 +539,14 @@
       }
     },
     "Dialog": {
-      "required": ["connection_id", "dialog_id", "last_read", "name"],
+      "required": ["connection_id", "dialog_id", "last_read", "name", "unread"],
       "properties": {
         "connection_id": { "type": "string", "description": "Unique identifier for the connection this dialog is part of" },
         "dialog_id": { "type": "string", "description": "Unique identifier for the dialog" },
         "last_read": { "type": "string", "format": "date-time" },
         "name": { "type": "string", "description": "Name of the room or person" },
-        "topic": { "type": "string", "description": "The subjec/topic for this room" }
+        "topic": { "type": "string", "description": "The subjec/topic for this room" },
+        "unread": { "type": "integer", "description": "Number of unread messages" }
       }
     },
     "Error": {

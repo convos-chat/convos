@@ -32,11 +32,14 @@ module.exports = {
       try {
         var state = this.dialog.connection().state;
         if (state == "connected") {
-          return "What's on your mind " + this.dialog.connection().me.nick + "?";
-        } else {
+          var nick = this.dialog.connection().me.nick || this.user.email;
+          return "What's on your mind " + nick + "?";
+        }
+        else {
           return 'Cannot send any message, since ' + state + '.';
         }
       } catch (err) {
+        console.log('[convos-input]', err);
         return "Please read the instructions on screen.";
       }
     }

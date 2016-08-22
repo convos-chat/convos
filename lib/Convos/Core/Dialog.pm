@@ -24,12 +24,25 @@ sub messages {
   $self;
 }
 
+sub calculate_unread {
+  my ($self, $cb) = @_;
+  $self->messages(
+    {after => $self->last_read},
+    sub {
+      my ($self, $err, $messages) = @_;
+      $self->{unread} = $messages ? @$messages : 0;
+      $self->$cb($err);
+    }
+  );
+}
+
 sub TO_JSON {
   my ($self, $persist) = @_;
   my %json = map { ($_, $self->$_) } qw(frozen is_private name last_read topic);
   $json{connection_id} = $self->connection->id;
   $json{dialog_id}     = $self->id;
   $json{password}      = $self->password if $persist;
+  $json{unread}        = $self->{unread} || 0;
   return \%json;
 }
 
@@ -107,6 +120,14 @@ The topic (subject) of the dialog.
 Will fetch messages from persistent backend.
 
 See also L<Convos::Core::Backend/messages>.
+
+=head2 calculate_unread
+
+  $self = $self->calculate_unread(sub { my ($self, $err) = @_; });
+
+Used to find the number of unread messages after L</last_read>.
+
+EXPERIMENTAL!
 
 =head1 AUTHOR
 

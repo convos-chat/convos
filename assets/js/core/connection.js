@@ -129,7 +129,7 @@
       return self[handler] ? self[handler](msg) : console.log("No handler for " + handler);
     });
 
-    Convos.ws.send({
+    this.user.ws.send({
       id:            id,
       method:        "send",
       message:       message,

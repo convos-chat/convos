@@ -1,22 +1,29 @@
 (function() {
   Convos.User = function(attrs) {
-    this.connected     = false;
+    EventEmitter(this);
     this.connections   = [];
     this.currentPage   = "";
     this.dialogs       = [];
     this.email         = "";
     this.notifications = [];
     this.unread        = 0;
-    EventEmitter(this);
-
-    this.once("login", this._setupWebSocket);
-    this.on("login", function(data) {
-      Convos.settings.dialogsVisible = false;
-      this.email = data.email;
-    });
+    this._setupWebSocket();
   };
 
   var proto = Convos.User.prototype;
+
+  proto.ensureConnection = function(data) {
+    data.id = data.connection_id;
+    var connection = this.connections.filter(function(c) { return c.id == data.id; })[0];
+
+    if (!connection) {
+      data.user = this;
+      connection = new Convos.Connection(data);
+      this.connections.push(connection);
+    }
+
+    return connection.update(data);
+  };
 
   proto.ensureDialog = function(data) {
     if (!data.dialog_id) data.dialog_id = "convosbot"; // this is a hack to make sure we always have a fallback conversation
@@ -36,7 +43,7 @@
       this.dialogs.push(dialog);
     }
 
-    return dialog;
+    return dialog.update(data);
   };
 
   proto.getActiveDialog = function(id) {
@@ -47,61 +54,46 @@
     return this.connections.filter(function(c) { return c.id == id; })[0];
   };
 
-  proto.makeSureLocationIsCorrect = function() {
-    var correct, loc = Convos.settings.main;
-    if (loc.indexOf("#chat") != 0) return;
-    this.dialogs.forEach(function(d) { if (d.href() == loc) correct = true; });
-    if (!correct) Convos.settings.main = this.dialogs.length ? this.dialogs[0].href() : "";
+  proto.refresh = function() {
+    var self = this;
+    Convos.api.getUser(
+      {connections: true, dialogs: true, notifications: true},
+      function(err, xhr) {
+        if (err) return self.currentPage = "convos-login";
+        self.email = xhr.body.email;
+        xhr.body.connections.forEach(function(c) { self.ensureConnection(c) });
+        xhr.body.dialogs.forEach(function(d) {
+          d = self.ensureDialog(d);
+          if (d.active) d.emit("active");
+        });
+        self.notifications = xhr.body.notifications.reverse();
+        self.unread = xhr.body.unread || 0;
+        self.currentPage = "convos-chat";
+      }
+    );
   };
 
-  proto.refresh = function(cb) {
+  proto._setupWebSocket = function() {
     var self = this;
-    Convos.api.getUser({connections: true, dialogs: true, notifications: true}, function(err, xhr) {
-      if (err) return cb.call(self, err);
-      self.connections = xhr.body.connections.map(function(c) {
-        c.user = self;
-        c.id = c.connection_id;
-        return new Convos.Connection(c);
-      });
-      self.dialogs = xhr.body.dialogs.map(function(d) { return self.ensureDialog(d).update(d) });
-      self.notifications = xhr.body.notifications.reverse();
-      self.unread = xhr.body.unread || 0;
-      cb.call(self, err);
-    });
-  };
+    var ws = new ReconnectingWebSocket(Convos.wsUrl);
 
-  proto._setupWebSocket = function(data) {
-    var self = this;
-    this._cache = {};
+    this.ws = ws;
+    this._keepAlive = setInterval(function() { if (ws.is("open")) ws.send('{}'); }, 10000);
 
-    Convos.ws.on("close", function() {
-      self.connected = false;
+    this.ws.on("close", function() {
       self.connections.forEach(function(c) { c.state = "unreachable"; });
-      self.dialogs.forEach(function(d) { d.frozen = "No internet connection?"; });
+      self.dialogs.forEach(function(d) { d.frozen = "No internet connection?"; d.activated = 0; });
     });
 
-    Convos.ws.on("json", function(data) {
+    // Need to install the refresh handler after the first close event
+    this.ws.once("close", function() {
+      self.ws.on("open", self.refresh.bind(self));
+    });
+
+    this.ws.on("json", function(data) {
       if (!data.connection_id) return console.log("[ws] json=" + JSON.stringify(data));
       var c = self.getConnection(data.connection_id);
-      if (c) return c.emit(data.event, data);
-      if (!self._cache[data.connection_id]) self._cache[data.connection_id] = [];
-      self._cache[data.connection_id].push(data);
+      return c ? c.emit(data.event, data) : console.log("[ws:" + data.connection_id + "] json=" + JSON.stringify(data));
     });
-
-    Convos.ws.on("open", function() {
-      self.connected = true;
-      self.refresh(function(err, res) {
-        self.makeSureLocationIsCorrect();
-        self.currentPage = "convos-chat";
-        Object.keys(self._cache).forEach(function(connection_id) {
-          var msg = self._cache[connection_id];
-          var c = self.getConnection(connection_id);
-          delete self._cache[connection_id];
-          if (c) msg.forEach(function(d) { c.emit(d.event, d); });
-        });
-      });
-    });
-
-    Convos.ws.open();
   };
 })();
