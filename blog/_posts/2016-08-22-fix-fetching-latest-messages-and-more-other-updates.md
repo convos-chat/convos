@@ -15,13 +15,13 @@ been updated with major bugfixes:
 The "unread" count for the dialogs are now calculated on server side, instead
 of in the browser. This is a far better solution than what was introduced in
 [be445819cf01d22095b63e8a6dc10f3999c03d54](https://github.com/Nordaaker/convos/commit/be445819cf01d22095b63e8a6dc10f3999c03d54).
-The problem with that solution was even worse than what I expected: Seems like
-fetching participants and messages for a bunch of dialogs results in either
-the server or browser to drop some of the requests. I could be fooling myself,
-but that's what it looks like from browser dev console.
+The problem with the previous solution was even worse than what I expected:
+Seems like fetching participants and messages for a bunch of dialogs results
+in either the server or browser to drop some of the requests. I could be
+fooling myself, but that's what it looks like from browser dev console.
 
 So now instead, the code does one `/api/user` request which retrieves the
-connections, notififications and dilalogs _with_ the unread count.  Later the
+connections, notifications and dialogs _with_ the unread count.  Later the
 javascript lazy loads the messages from the backend when a dialog goes from
 "inactive" to "active" state and also handles websocket reconnects.
 
