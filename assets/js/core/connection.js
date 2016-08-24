@@ -144,7 +144,15 @@
     });
   };
 
+  proto._onError = function(msg) {
+    if (msg.errors) {
+      var dialog = this.user.getActiveDialog();
+      if (dialog) dialog.addMessage({from: this.connection_id, type: "error", message: msg.message + ": " + msg.errors[0].message});
+    }
+  };
+
   proto._onMessage = function(msg) {
+    if (msg.errors) return this._onError(msg);
     if (msg.dialog_id) return this.user.ensureDialog(msg).addMessage(msg);
     var dialog = this.user.getActiveDialog();
     if (dialog) dialog.addMessage(msg);
@@ -153,36 +161,41 @@
   proto._onSent = function(msg) {
     if (DEBUG) console.log("[sent] " + JSON.stringify(msg));
     clearTimeout(msg.id);
-    if (msg.errors) {
-      var dialog = this.user.getActiveDialog();
-      if (dialog) dialog.addMessage({from: this.id, type: "error", message: msg.message + ": " + msg.errors[0].message});
-    }
-    else {
-      this.emit("sent-" + msg.id, msg);
-    }
-    this.off("sent-" + msg.id);
+    this.emit("sent-" + msg.id, msg).off("sent-" + msg.id);
   };
 
-  proto._sentClose = proto._sentPart = function(msg) {
+  proto._sentClose = function(msg) {
+    if (msg.errors) return this._onError(msg);
     this.user.dialogs = this.user.dialogs.filter(function(d) {
       return d.connection_id != this.connection_id || d.dialog_id != msg.dialog_id;
     }.bind(this));
     Convos.settings.main = this.user.dialogs.length ? this.user.dialogs[0].href() : "";
   };
 
+  // part will not close the dialog
+  proto._sentPart = function(msg) {
+    if (msg.errors) return this._onError(msg);
+    this.user.getActiveDialog().addMessage({
+      "type": "notice",
+      "message": "You parted " + msg.dialog_id + "."
+    });
+  };
+
   proto._sentJoin = proto._sentJ = function(msg) {
-    Convos.settings.main = this.user.ensureDialog(msg).href();
+    var dialog = this.user.ensureDialog(msg);
+    dialog.emit("active").emit("join");
+    Convos.settings.main = dialog.href();
   };
 
   // "/nick ..." will result in {"event":"state","type":"me"}
-  proto._sentNick = function(msg) {};
+  proto._sentNick = proto._onError;
 
   proto._sentReconnect = function(msg) { this.notice('Reconnecting to ' + this.connection_id + '...'); };
 
   // No need to handle echo from messages
-  proto._sentMe = function(msg) {};
-  proto._sentMessage = function(msg) {};
-  proto._sentSay = function(msg) {};
+  proto._sentMe = proto._onError;
+  proto._sentMessage = proto._onError;
+  proto._sentSay = proto._onError;
 
   proto._sentWhois = function(data) {
     var dialog = this.user.getActiveDialog();
@@ -193,9 +206,9 @@
   };
 
   // TODO
-  proto._sentKick = function(msg) { console.log('TODO: _sentKick()'); };
-  proto._sentQuery = function(msg) { console.log('TODO: _sentQuery()'); };
-  proto._sentTopic = function(msg) { console.log('TODO: _sentTopic()'); };
+  proto._sentKick = proto._onError;
+  proto._sentQuery = proto._onError;
+  proto._sentTopic = proto._onError;
 
   proto._onState = function(data) {
     if (DEBUG) console.log("[state:" + data.type + "] " + this.href() + " = " + JSON.stringify(data));

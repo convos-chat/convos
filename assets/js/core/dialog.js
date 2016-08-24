@@ -34,6 +34,8 @@
         }
       );
     });
+
+    this.on("join", this._onJoin);
   };
 
   var proto = Convos.Dialog.prototype;
@@ -193,16 +195,33 @@
           self.addMessage(msg, {method: "push", disableNotifications: true});
         });
 
-        if (!self.messages.length) {
-          self.addMessage("You have joined " + self.name + ", but no one has said anything as long as you have been here.", {disableUnread: true});
-        }
-        if (self.frozen) {
-          self.addMessage("You are not part of this channel. " + self.frozen, {disableUnread: true});
-        }
-        if (Convos.settings.notifications == "default") {
-          self.addMessage({type: "enable-notifications"});
-        }
+        self.emit("join");
       }
     );
+  };
+
+  proto._onJoin = function() {
+    if (this.frozen) {
+      this.addMessage({
+        type: "error",
+        message: "You are not part of this channel. " + this.frozen
+      }, {
+        disableUnread: true
+      });
+    } else if (this.messages.length) {
+      this.addMessage({
+        type: "notice",
+        message: "You have joined " + this.name + "."
+      }, {
+        disableUnread: true
+      });
+    } else {
+      this.addMessage("You have joined " + this.name + ", but no one has said anything as long as you have been here.", {
+        disableUnread: true
+      });
+    }
+    if (Convos.settings.notifications == "default") {
+      this.addMessage({type: "enable-notifications"});
+    }
   };
 })();

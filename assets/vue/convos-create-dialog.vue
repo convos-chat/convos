@@ -21,12 +21,8 @@
       </md-select>
     </div>
     <div class="row">
-      <div class="input-field input-btn-right col s12">
-        <a href="#load" @click.prevent="load" class="btn waves-effect waves-light" v-tooltip="message">Load</a>
-        <div class="input-left">
-          <md-autocomplete :options="rooms" :value.sync="dialogName" @select="join">Room or nick</md-autocomplete>
-        </div>
-      </div>
+      <md-autocomplete cols="m8" :options="rooms" :value.sync="dialogName" @select="selected">Room or nick</md-autocomplete>
+      <md-input cols="m4" :value.sync="password" type="password">Password / key</md-input>
     </div>
     <div class="row" v-if="errors.length">
       <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
@@ -39,6 +35,7 @@
         <button @click="join" class="btn waves-effect waves-light" :disabled="!dialogName.length">
           Chat <i class="material-icons right">send</i>
         </button>
+        <a href="#load" @click.prevent="load" class="btn waves-effect waves-light" v-tooltip="message">Load dialogs</a>
       </div>
     </div>
   </div>
@@ -51,6 +48,7 @@ module.exports = {
       connectionId: "",
       dialogName:   "",
       message:      "",
+      password:     "",
       errors:       [],
       rooms:        []
     };
@@ -63,9 +61,13 @@ module.exports = {
     connection: function() {
       return this.user.getConnection(this.connectionId);
     },
+    selected: function(option) {
+      this.dialogName = option.value;
+    },
     join: function(option) {
-      var room = option.value || this.dialogName;
-      if (room) this.connection().send("/join " + room);
+      var command = this.dialogName;
+      if (this.password) command += " " + this.password;
+      if (this.dialogName) this.connection().send("/join " + command);
       this.dialogName = "";
     },
     load: function(e) {

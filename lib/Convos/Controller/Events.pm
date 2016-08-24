@@ -43,8 +43,8 @@ sub start {
 }
 
 sub _err {
-  my ($self, $msg, $data) = @_;
-  my $res = E $msg;
+  my ($self, $err, $data) = @_;
+  my $res = E $err;
   $res->{$_} = $data->{$_} for grep { $data->{$_} } qw(connection_id message id);
   $res->{event} = 'sent';
   $self->send({json => $res});
@@ -59,9 +59,11 @@ sub _event_send {
     sub { $connection->send($data->{dialog_id}, $data->{message}, shift->begin); },
     sub {
       my ($delay, $err, $res) = @_;
-      return $self->_err($err, $data) if $err;
       $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
-      @$res{qw(connection_id event id message)} = ($connection->id, 'sent', @$data{qw(id message)});
+      $res ||= {};
+      $res->{errors} = E($err)->{errors} if $err;
+      $res->{event} = 'sent';
+      $res->{$_} ||= $data->{$_} for keys %$data;
       $self->send({json => $res});
     },
   );

@@ -1,21 +1,23 @@
 <template>
-  <input
-    :id="id" :placeholder="placeholder" v-model="value"
-    @keydown="keydown" @keyup="keyup"
-    @focus="hasFocus=true" @blur="hasFocus=false"
-    type="text" autocomplete="off" spellcheck="false">
-  <label :for="id" :class="{active:labelActive}"><slot></slot></label>
-  <div class="autocomplete" :class="filteredOptions.length ? '' : 'hidden'">
-    <ul>
-      <li :class="optionClass(o, $index)" v-for="o in filteredOptions" v-tooltip="o.title">
-        <a href="option://{{o.value}}" class="truncate" @click="select(o)">{{o.text || o.value}}</a>
-      </li>
-    </ul>
+  <div class="input-field col" :class="cols">
+    <input
+      :id="id" :placeholder="placeholder" v-model="value"
+      @keydown="keydown" @keyup="keyup"
+      @focus="hasFocus=true" @blur="hasFocus=false"
+      type="text" autocomplete="off" spellcheck="false">
+    <label :for="id" :class="{active:labelActive}"><slot></slot></label>
+    <div class="autocomplete" :class="filteredOptions.length ? '' : 'hidden'">
+      <ul>
+        <li :class="optionClass(o, $index)" v-for="o in filteredOptions" v-tooltip="o.title">
+          <a href="option://{{o.value}}" class="truncate" @click="select(o)">{{o.text || o.value}}</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 <script>
 module.exports = {
-  props: ["id", "placeholder", "options", "value"],
+  props: ["cols", "id", "placeholder", "options", "value"],
   computed: {
     filteredOptions: function() {
       var re = new RegExp(this.value, 'i');
@@ -72,6 +74,7 @@ module.exports = {
   },
   ready: function() {
     if (!this.id) this.id = Materialize.guid();
+    if (!this.cols) this.cols = "s12";
   }
 };
 </script>

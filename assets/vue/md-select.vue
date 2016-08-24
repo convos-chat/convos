@@ -69,11 +69,6 @@ module.exports = {
       this.$children.forEach(function(o) { o.selected = o.value == this.value; }.bind(this));
       this.options.forEach(function(o) { o.selected = o.value == this.value; }.bind(this));
     }
-  },
-  ready: function() {
-    this.$nextTick(function() {
-      $('input:first', this.$el).dropdown({'hover': false, 'closeOnClick': false});
-    });
   }
 };
 </script>
