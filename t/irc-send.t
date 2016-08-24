@@ -158,6 +158,7 @@ $t->run(
     is $res, undef, 'res /part does_not_matter';
   }
 );
+exit;
 
 $t->run(
   [qr{PART}, ['main', 'part-convos.irc']],
@@ -198,13 +199,13 @@ __DATA__
 :hybrid8.debian.local 353 Superman20001 = #short :Superman20001 @batman
 :hybrid8.debian.local 366 Superman20001 #short :End of /NAMES list.
 @@ part-does-not-matter.irc
-:hybrid8.debian.local 479 Superman20001 # :Illegal channel name
+:hybrid8.debian.local 479 Superman20001 #does_not_matter :Illegal channel name
 @@ part-convos.irc
 :test21362!~test96908@0::1 PART #convos
 @@ nick-supermanx.irc
-:Superman20001!superman@i.love.debian.org NICK :SupermanX20001
+:Superman20001!superman@i.love.debian.org NICK :supermanx
 @@ get-topic.irc
-:hybrid8.debian.local 332 batman_ #Convos_irc_LIVE_20001 :Cool topic
-:hybrid8.debian.local 333 batman_ #Convos_irc_LIVE_20001 batman_!superman@i.love.debian.org 1433007153
+:hybrid8.debian.local 332 batman_ #convos :Cool topic
+:hybrid8.debian.local 333 batman_ #convos batman_!superman@i.love.debian.org 1433007153
 @@ set-topic.irc
-:batman_!superman@i.love.debian.org TOPIC #Convos_irc_LIVE_20001 :Cool topic
+:batman_!superman@i.love.debian.org TOPIC #convos :Cool topic
