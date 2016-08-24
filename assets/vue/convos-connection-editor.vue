@@ -99,7 +99,7 @@ module.exports = {
         if (err) return self.errors = err;
         self.deleted = false;
         self.updateForm(this);
-        self.settings.main = "#" + (this.user.dialogs.length ? "connection/" + this.id : "create-dialog");
+        self.settings.main = "#" + (this.user.dialogs.length ? "connection/" + this.connection_id : "create-dialog");
       });
     },
     updateForm: function(connection) {

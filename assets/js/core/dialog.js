@@ -1,8 +1,8 @@
 (function() {
   Convos.Dialog = function(attrs) {
     this.active       = false;
+    this.dialog_id    = "";
     this.frozen       = "";
-    this.id           = "";
     this.activated    = 0;
     this.messages     = [];
     this.name         = "";
@@ -27,7 +27,7 @@
       Convos.api.setDialogLastRead(
         {
           connection_id: this.connection_id,
-          dialog_id:     this.id
+          dialog_id: this.dialog_id,
         }, function(err, xhr) {
           if (err) return console.log('[setDialogLastRead] ' + JSON.stringify(err)); // TODO
           self.lastRead = new Date(xhr.body.last_read);
@@ -94,7 +94,7 @@
       {
         before: this.messages[1].ts.toISOString(),
         connection_id: this.connection_id,
-        dialog_id: this.id
+        dialog_id: this.dialog_id
       },
       function(err, xhr) {
         if (err) return cb(err, null);
@@ -125,13 +125,13 @@
   proto.participant = function(data) {
     if (data.type == "join") {
       this.participants[data.nick] = {name: data.nick, seen: new Date()};
-      this.addMessage({message: data.nick + " joined.", from: this.connection.id, type: "notice"});
+      this.addMessage({message: data.nick + " joined.", from: this.connection_id, type: "notice"});
     }
     else if (data.type == "nick_change") {
       if (this.participants[data.old_nick]) {
         delete this.participants[data.old_nick];
         this.participants[data.nick] = {name: data.nick, seen: new Date()};
-        this.addMessage({message: data.old_nick + " changed nick to " + data.new_nick + ".", from: this.connection.id, type: "notice"});
+        this.addMessage({message: data.old_nick + " changed nick to " + data.new_nick + ".", from: this.connection_id, type: "notice"});
       }
     }
     else if (data.type == "maintain") {
@@ -141,7 +141,7 @@
     }
     else if(this.participants[data.nick]) { // part
       delete this.participants[data.nick];
-      this.addMessage({message: data.nick + " parted.", from: this.connection.id, type: "notice"});
+      this.addMessage({message: data.nick + " parted.", from: this.connection_id, type: "notice"});
     }
   };
 
@@ -150,7 +150,7 @@
     Convos.api.participants(
       {
         connection_id: this.connection_id,
-        dialog_id:     this.id
+        dialog_id: this.dialog_id
       }, function(err, xhr) {
         if (!err) {
           self.participants = {};
@@ -183,8 +183,8 @@
     this.refreshParticipants(function() {});
     Convos.api.messages(
       {
-        connection_id: self.connection_id,
-        dialog_id:     self.id
+        connection_id: this.connection_id,
+        dialog_id: this.dialog_id
       }, function(err, xhr) {
         if (err) return self.emit("error", err);
 

@@ -13,8 +13,7 @@
   var proto = Convos.User.prototype;
 
   proto.ensureConnection = function(data) {
-    data.id = data.connection_id;
-    var connection = this.connections.filter(function(c) { return c.id == data.id; })[0];
+    var connection = this.connections.filter(function(c) { return c.connection_id == data.connection_id; })[0];
 
     if (!connection) {
       data.user = this;
@@ -30,11 +29,11 @@
     if (data.dialog_id) data.id = data.dialog_id;
 
     var dialog = this.dialogs.filter(function(d) {
-      return d.connection_id == data.connection_id && d.id == data.dialog_id;
+      return d.connection_id == data.connection_id && d.dialog_id == data.dialog_id;
     })[0];
 
     if (!dialog) {
-      if (data.connection && !data.connection_id) data.connection_id = data.connection.id;
+      if (data.connection && !data.connection_id) data.connection_id = data.connection.connection_id;
       if (!data.name) data.name = data.from || data.dialog_id;
       delete data.connection;
       data.id = data.dialog_id;
@@ -51,7 +50,7 @@
   };
 
   proto.getConnection = function(id) {
-    return this.connections.filter(function(c) { return c.id == id; })[0];
+    return this.connections.filter(function(c) { return c.connection_id == id; })[0];
   };
 
   proto.makeSureLocationIsCorrect = function() {

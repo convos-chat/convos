@@ -8,7 +8,7 @@
       </div>
     </header>
     <div class="content">
-      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in dialogs">
+      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d)" v-for="d in dialogs">
         <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
         <b class="n-uread" v-if="d.unread">{{d.unread < 100 ? d.unread : "99+"}}</b>
         <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
@@ -19,7 +19,7 @@
       </a>
 
       <div class="divider"></div>
-      <a v-link="'#connection/' + c.id" :class="connectionClass(c)" v-for="c in user.connections">
+      <a v-link="'#connection/' + c.connection_id" :class="connectionClass(c)" v-for="c in user.connections">
         <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
         <span class="on">{{c.humanState()}}</span>
       </a>
@@ -69,12 +69,11 @@ module.exports = {
   },
   methods: {
     connectionClass: function(c) {
-      var cn = this.activeClass('#connection/' + c.id);
+      var cn = this.activeClass('#connection/' + c.connection_id);
       cn.frozen = c.state == 'connected' ? false : true;
       return cn;
     },
-    dialogClass: function(d, i) {
-      if (!i) this.$nextTick(this.overrideHints);
+    dialogClass: function(d) {
       var cn = this.activeClass(d.href());
       cn.frozen = d.frozen ? true : false;
       return cn;

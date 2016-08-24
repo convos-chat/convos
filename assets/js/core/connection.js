@@ -1,13 +1,13 @@
 (function() {
   Convos.Connection = function(attrs) {
     EventEmitter(this);
-    this.id          = "";
-    this.name        = "";
-    this.me          = {nick: ""};
-    this.protocol    = "unknown";
-    this.sendTimeout = 5000; // is this long enough?
-    this.state       = "disconnected";
-    this.url         = "";
+    this.connection_id = "";
+    this.name          = "";
+    this.me            = {nick: ""};
+    this.protocol      = "unknown";
+    this.sendTimeout   = 5000; // is this long enough?
+    this.state         = "disconnected";
+    this.url           = "";
     this.on("message", this._onMessage);
     this.on("sent", this._onSent);
     this.on("state", this._onState);
@@ -18,7 +18,7 @@
 
   proto.getDialog = function(dialog_id) {
     return this.user.dialogs.filter(function(d) {
-      return d.connection_id == this.id && d.id == dialog_id;
+      return d.connection_id == this.connection_id && d.dialog_id == dialog_id;
     }.bind(this))[0];
   };
 
@@ -37,20 +37,20 @@
 
   proto.notice = function(message) {
     var dialog = this.user.getActiveDialog();
-    if (dialog) dialog.addMessage({from: this.id, message: message, type: "notice"});
+    if (dialog) dialog.addMessage({from: this.connection_id, message: message, type: "notice"});
   };
 
   // Remove this connection from the backend
   proto.remove = function(cb) {
     var self = this;
-    Convos.api.removeConnection({connection_id: this.id}, function(err, xhr) {
+    Convos.api.removeConnection({connection_id: this.connection_id}, function(err, xhr) {
       if (!err) {
         self.off("message").off("state");
         self.user.connections = self.user.connections.filter(function(c) {
-          return c.id != self.id;
+          return c.connection_id != self.connection_id;
         });
         self.user.dialogs = self.user.dialogs.filter(function(d) {
-          return d.connection_id != self.id;
+          return d.connection_id != self.connection_id;
         });
       }
       cb.call(self, err);
@@ -61,7 +61,7 @@
   // Get list of available rooms on server
   proto.rooms = function(cb) {
     var self = this;
-    Convos.api.rooms({connection_id: this.id}, function(err, xhr) {
+    Convos.api.rooms({connection_id: this.connection_id}, function(err, xhr) {
       if (err) return cb.call(self, err, []);
       cb.call(self, err, xhr.body.rooms);
     });
@@ -77,11 +77,11 @@
       url: this.url
     };
 
-    if (this.id) {
+    if (this.connection_id) {
       Convos.api.updateConnection(
         {
           body:          attrs,
-          connection_id: this.id
+          connection_id: this.connection_id
         }, function(err, xhr) {
           if (err) return cb.call(self, err);
           self.update(xhr.body);
@@ -94,7 +94,6 @@
       }, function(err, xhr) {
         if (err) return cb.call(self, err);
         self.update(xhr.body);
-        self.id = xhr.body.connection_id;
         self.user.connections.push(self);
         cb.call(self, err);
       });
@@ -116,7 +115,7 @@
         self.off("sent-" + id);
         self.user.getActiveDialog().addMessage({
           type: "error",
-          message: "Could not send message to " + (dialog ? dialog.name : this.id) + ": " + message,
+          message: "Could not send message to " + (dialog ? dialog.name : this.connection_id) + ": " + message,
         });
       },
       self.sendTimeout
@@ -124,7 +123,6 @@
 
     // Handle echo back from backend
     this.once("sent-" + id, function(msg) {
-      if (dialog) msg.dialog_id = dialog.id;
       return self[handler] ? self[handler](msg) : console.log("No handler for " + handler);
     });
 
@@ -132,8 +130,8 @@
       id:            id,
       method:        "send",
       message:       message,
-      connection_id: this.id,
-      dialog_id:     dialog ? dialog.id : ""
+      connection_id: this.connection_id,
+      dialog_id:     dialog ? dialog.dialog_id : ""
     });
 
     return this;
@@ -167,7 +165,7 @@
 
   proto._sentClose = proto._sentPart = function(msg) {
     this.user.dialogs = this.user.dialogs.filter(function(d) {
-      return d.connection_id != this.id || d.id != msg.dialog_id;
+      return d.connection_id != this.connection_id || d.dialog_id != msg.dialog_id;
     }.bind(this));
     Convos.settings.main = this.user.dialogs.length ? this.user.dialogs[0].href() : "";
   };
@@ -179,7 +177,7 @@
   // "/nick ..." will result in {"event":"state","type":"me"}
   proto._sentNick = function(msg) {};
 
-  proto._sentReconnect = function(msg) { this.notice('Reconnecting to ' + this.id + '...'); };
+  proto._sentReconnect = function(msg) { this.notice('Reconnecting to ' + this.connection_id + '...'); };
 
   // No need to handle echo from messages
   proto._sentMe = function(msg) {};
@@ -189,7 +187,7 @@
   proto._sentWhois = function(data) {
     var dialog = this.user.getActiveDialog();
     if (!dialog) return;
-    data.from = this.id;
+    data.from = this.connection_id;
     data.type = "whois";
     dialog.addMessage(data);
   };

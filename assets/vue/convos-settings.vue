@@ -45,7 +45,7 @@ module.exports = {
   methods: {
     connectionLink: function() {
       var connections = this.user.connections;
-      return '#connection' + (connections.length ? '/' + connections[0].id : '');
+      return '#connection' + (connections.length ? '/' + connections[0].connection_id : '');
     },
     showWelcomeMessage: function() {
       return this.settings.main.match(/\w/) ? false : true;

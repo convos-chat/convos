@@ -17,7 +17,7 @@
     </div>
     <div class="row">
       <md-select id="form_connection_id" :value.sync="connectionId" label="Select connection">
-        <md-option :value="c.id" :selected="connectionId == c.id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
+        <md-option :value="c.connection_id" :selected="connectionId == c.connection_id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
       </md-select>
     </div>
     <div class="row">
