@@ -47,10 +47,10 @@ $t->run(
 );
 
 $t->run(
-  [qr{JOIN}, ['main', 'join-convos.irc']],
+  [qr{JOIN \#convos key}, ['main', 'join-convos.irc']],
   sub {
     $connection->send(
-      '#convos' => '/join #convos',
+      '#convos' => '/join #convos key',
       sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
     );
     Mojo::IOLoop->start;

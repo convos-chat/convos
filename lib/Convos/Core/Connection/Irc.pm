@@ -233,16 +233,16 @@ sub _irc_message {
 sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 
 sub _join_dialog {
-  my $cb   = pop;
-  my $self = shift;
-  my ($name, $password) = split /\s/, shift, 2;
+  my $cb = pop;
+  my ($self, $command) = @_;
+  my ($name, $password) = split /\s/, ($command || ''), 2;
   return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
 
   my $dialog = $self->get_dialog($name);
   return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
   Scalar::Util::weaken($self);
   return $self->_proxy(
-    join_channel => $name,
+    join_channel => $command,
     sub {
       my ($irc, $err, $res) = @_;
       $dialog ||= $self->dialog({name => $name, topic => $res->{topic} // ''});
