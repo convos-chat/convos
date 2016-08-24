@@ -83,7 +83,7 @@
     var ws = new ReconnectingWebSocket(Convos.wsUrl);
 
     this.ws = ws;
-    this._keepAlive = setInterval(function() { if (ws.is("open")) ws.send('{}'); }, 10000);
+    this._keepAlive = setInterval(function() { if (ws.is("open")) ws.send('{}'); }, 20000);
 
     this.ws.on("close", function() {
       self.connections.forEach(function(c) { c.state = "unreachable"; });
