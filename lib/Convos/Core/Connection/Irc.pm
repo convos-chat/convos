@@ -271,7 +271,7 @@ sub _part_dialog {
     part_channel => $name,
     sub {
       my ($irc, $err) = @_;
-      return $self->$cb($err) if $err;
+      return $self->$cb($err) if $err and $err !~ /No such channel/i;
       return $self->tap(remove_dialog => $name)->save($cb);
     }
   );
