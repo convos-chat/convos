@@ -4,14 +4,28 @@
     <div class="message">
       Do you want desktop notifications for important messages?
       <p>
-        <button class="btn waves-effect waves-light" @click="enableNotifications(true)">Yes</button>
-        <button class="btn waves-effect waves-light grey" @click="enableNotifications(false)">No</button>
+        <button class="btn waves-effect waves-light" @click="enable(true)" :disabled="clicked">Yes</button>
+        <button class="btn waves-effect waves-light grey" @click="enable(false)" :disabled="clicked">No</button>
       </p>
     </div>
   </div>
 </template>
 <script>
 module.exports = {
-  props: ["dialog", "msg", "user"]
+  props: ["dialog", "msg", "user"],
+  data: function() {
+    return {clicked: false};
+  },
+  methods: {
+    enable: function(enable) {
+      var activated = enable ? "enabled" : "disabled";
+      this.enableNotifications(enable);
+      this.clicked = true;
+      this.user.getActiveDialog().addMessage({
+        type: "notice",
+        message: 'You have now ' + activated + ' notifications. This can be changed later in "Edit profile".'
+      });
+    }
+  }
 };
 </script>
