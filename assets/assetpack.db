@@ -223,10 +223,10 @@ format=js
 minified=1
 mtime=1470932010
 [js-min:js/core/connection.js]
-checksum=b1caa49103
+checksum=2dd813d907
 format=js
 minified=1
-mtime=1472071069
+mtime=1472109847
 [js-min:js/core/dialog.js]
 checksum=71efee68dd
 format=js
