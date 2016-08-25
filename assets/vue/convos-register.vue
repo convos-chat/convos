@@ -9,11 +9,11 @@
           </div>
         </div>
         <div class="row">
-          <md-input :value.sync="email" :focus="true">Email</md-input>
+          <md-input :value.sync="email" :focus="true" id="form_login_email">Email</md-input>
         </div>
         <div class="row">
-          <md-input :value.sync="password" cols="s6" type="password">Password</md-input>
-          <md-input :value.sync="passwordAgain" cols="s6" type="password" placeholder="Repeat password"></md-input>
+          <md-input :value.sync="password" cols="s6" type="password" id="form_login_password">Password</md-input>
+          <md-input :value.sync="passwordAgain" cols="s6" type="password" placeholder="Repeat password" id="form_login_password_again"></md-input>
         </div>
         <div class="row" v-if="settings.invite_code">
           <md-input :value.sync="invite_code" type="password">Invite code</md-input>

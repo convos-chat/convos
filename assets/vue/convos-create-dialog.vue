@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-create-dialog">
+  <form autocomplete="off" class="convos-create-dialog">
     <div class="row">
       <div class="col s12">
         <h4>Join dialog</h4>
@@ -38,7 +38,7 @@
         <a href="#load" @click.prevent="load" class="btn waves-effect waves-light" v-tooltip="message">Load dialogs</a>
       </div>
     </div>
-  </div>
+  </form>
 </template>
 <script>
 module.exports = {

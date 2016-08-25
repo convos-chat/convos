@@ -1,6 +1,6 @@
 <template>
   <div class="input-field col" :class="cols">
-    <input lazy v-model="value" class="validate" autocomplete="nope"
+    <input lazy v-model="value" class="validate" :autocomplete="autocomplete"
       :id="id" v-el:input :name="name" :placeholder="placeholder"
       :readonly="readonly"
       :type="type" :disabled="disabled" :required="required"
@@ -10,7 +10,7 @@
 </template>
 <script>
 module.exports = {
-  props: ["cols", "disabled", "focus", "id", "name", "placeholder", "readonly", "required", "type", "value"],
+  props: ["autocomplete", "cols", "disabled", "focus", "id", "name", "placeholder", "readonly", "required", "type", "value"],
   data: function() {
     return {hasFocus: false, mdValue: ""};
   },
@@ -20,6 +20,7 @@ module.exports = {
     }
   },
   ready: function() {
+    if (typeof this.autocomplete == "undefined" && !this.id) this.autocomplete = "new-password";
     if (!this.cols) this.cols = "s12";
     if (!this.type) this.type = "text";
     if (!this.id) this.id = Materialize.guid();

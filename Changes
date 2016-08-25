@@ -8,6 +8,7 @@ Revision history for perl distribution Convos
  - Fix starting "script/convos dev" after "script/convos install --develop"
  - Fix not show welcome message after log in in in a new browser
  - Fix running test suite with "script/convos test"
+ - Fix no autocomplete in "Join dialog" or "Add connection"
  - Add Mojo::IRC 0.33 as required module #267
  - Add IO::Socket::SSL as required module
    * Required to connect to TLS networks
@@ -16,7 +17,6 @@ Revision history for perl distribution Convos
  - Change WebSocket keep-alive interval
  - Change "Join dialog" will be shown after a new connection is created
  - Change <convos-message-enable-notifications/> buttons to be disabled on click
- - Change autocomplete is off in input fields
 
 0.99_05 2016-08-22T16:30:57+0200
  - Fix breaking long words inside a message template

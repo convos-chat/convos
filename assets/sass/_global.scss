@@ -96,6 +96,10 @@ div.alert {
     left: -2000px;
     &.active { opacity: 1; left: auto; }
   }
+
+  input.select-dropdown {
+    color: #000;
+  }
 }
 
 #vue_tooltip {

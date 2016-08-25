@@ -3229,8 +3229,7 @@ button.btn-floating[disabled].btn-large,
 button.btn-floating[disabled].btn-delete,
 .btn-large.disabled,
 button.btn-large[disabled],
-.btn:disabled
-.btn-large:disabled, .btn-large:disabled .btn-large:disabled, .btn-delete:disabled .btn-large:disabled,
+.btn:disabled .btn-large:disabled, .btn-large:disabled .btn-large:disabled, .btn-delete:disabled .btn-large:disabled,
 .btn-floating:disabled {
   background-color: #DFDFDF !important;
   box-shadow: none;
@@ -3239,8 +3238,7 @@ button.btn-large[disabled],
   .btn.disabled *, .disabled.btn-large *, button.btn[disabled] *, button[disabled].btn-large *, button[disabled].btn-delete *, .disabled.btn-delete *,
   .btn-floating.disabled *, button.btn-floating.btn[disabled] *, button.btn-floating[disabled].btn-large *, button.btn-floating[disabled].btn-delete *,
   .btn-large.disabled *, button.btn-large[disabled] *,
-  .btn:disabled
-.btn-large:disabled *, .btn-large:disabled .btn-large:disabled *, .btn-delete:disabled .btn-large:disabled *,
+  .btn:disabled .btn-large:disabled *, .btn-large:disabled .btn-large:disabled *, .btn-delete:disabled .btn-large:disabled *,
   .btn-floating:disabled * {
     pointer-events: none; }
   .btn.disabled:hover, .disabled.btn-large:hover, button.btn[disabled]:hover, button[disabled].btn-large:hover, button[disabled].btn-delete:hover, .disabled.btn-delete:hover,
@@ -3250,8 +3248,7 @@ button.btn-large[disabled],
   button.btn-floating[disabled].btn-delete:hover,
   .btn-large.disabled:hover,
   button.btn-large[disabled]:hover,
-  .btn:disabled
-.btn-large:disabled:hover, .btn-large:disabled .btn-large:disabled:hover, .btn-delete:disabled .btn-large:disabled:hover,
+  .btn:disabled .btn-large:disabled:hover, .btn-large:disabled .btn-large:disabled:hover, .btn-delete:disabled .btn-large:disabled:hover,
   .btn-floating:disabled:hover {
     background-color: #DFDFDF !important;
     color: #9F9F9F !important; }
@@ -4620,6 +4617,9 @@ div.alert {
   .select-wrapper ul.active {
     opacity: 1;
     left: auto; }
+
+.select-wrapper input.select-dropdown {
+  color: #000; }
 
 #vue_tooltip {
   background-color: #323232;
