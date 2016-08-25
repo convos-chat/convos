@@ -64,6 +64,7 @@
       {connections: true, dialogs: true, notifications: true},
       function(err, xhr) {
         if (err) return self.currentPage = "convos-login";
+        if(!self.email) self.ws.open();
         self.email = xhr.body.email;
         xhr.body.connections.forEach(function(c) { self.ensureConnection(c) });
         xhr.body.dialogs.forEach(function(d) {

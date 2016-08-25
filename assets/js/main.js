@@ -48,7 +48,6 @@
       },
       ready: function() {
         this.user.refresh(); // Want to refresh dialogs even if WebSocket fails
-        this.user.ws.open();
       }
     });
   });
