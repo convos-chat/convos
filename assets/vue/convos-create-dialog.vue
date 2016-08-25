@@ -1,5 +1,5 @@
 <template>
-  <form autocomplete="off" class="convos-create-dialog">
+  <form autocomplete="off" class="convos-create-dialog" @submit.prevent>
     <div class="row">
       <div class="col s12">
         <h4>Join dialog</h4>

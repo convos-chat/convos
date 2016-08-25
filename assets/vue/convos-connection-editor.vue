@@ -1,5 +1,5 @@
 <template>
-  <form autocomplete="off" class="convos-connection-editor">
+  <form autocomplete="off" class="convos-connection-editor" @submit.prevent>
     <div class="row">
       <div class="col s12">
         <h4>{{connection ? 'Edit "' + connection.name + '"' : "Add connection"}}</h4>
