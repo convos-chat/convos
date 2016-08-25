@@ -224,7 +224,9 @@
         break;
       case "join":
       case "part":
-        this.user.ensureDialog(data).participant(data);
+        this.user.dialogs.forEach(function(d) {
+          if (d.connection_id == data.connection_id) d.participant(data);
+        });
         break;
       case "nick_change":
         this.user.dialogs.forEach(function(d) {
