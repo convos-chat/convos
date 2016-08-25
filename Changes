@@ -13,6 +13,7 @@ Revision history for perl distribution Convos
  - Change WebSocket keep-alive interval
  - Change "Join dialog" will be shown after a new connection is created
  - Change <convos-message-enable-notifications/> buttons to be disabled on click
+ - Change autocomplete is off in input fields
 
 0.99_05 2016-08-22T16:30:57+0200
  - Fix breaking long words inside a message template
