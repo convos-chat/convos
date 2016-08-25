@@ -12,10 +12,16 @@ sub connect {
   my ($self, $connection) = @_;
   my $host = $connection->url->host;
 
+  Scalar::Util::weaken($self);
   $connection->state('queued');
 
   if ($host eq 'localhost') {
-    $connection->connect(sub { });
+    $connection->connect(
+      sub {
+        my ($connection, $err) = @_;
+        push @{$self->{connect_queue}{$host}}, $connection if $err;
+      }
+    );
   }
   elsif ($self->{connect_queue}{$host}) {
     push @{$self->{connect_queue}{$host}}, $connection;

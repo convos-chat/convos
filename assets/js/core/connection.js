@@ -4,6 +4,7 @@
     this.connection_id = "";
     this.name          = "";
     this.me            = {nick: ""};
+    this.message       = "";
     this.protocol      = "unknown";
     this.sendTimeout   = 5000; // is this long enough?
     this.state         = "disconnected";
@@ -212,11 +213,13 @@
 
   proto._onState = function(data) {
     if (DEBUG) console.log("[state:" + data.type + "] " + this.href() + " = " + JSON.stringify(data));
+
     switch (data.type) {
       case "connection":
         var msg = data.state + '"';
         msg += data.message ? ': ' + data.message : ".";
         this.state = data.state;
+        this.message = data.message;
         this.notice('Connection state changed to "' + msg);
         break;
       case "frozen":

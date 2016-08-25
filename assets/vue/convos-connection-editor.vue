@@ -42,6 +42,7 @@
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">
           <i class="material-icons">delete</i>
         </a>
+        <span v-if="connection && connection.state == 'disconnected'">{{connection.message || 'Click "update" to connect.'}}</span>
       </div>
     </div>
   </div>
