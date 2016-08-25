@@ -9,7 +9,7 @@
     <div class="autocomplete" :class="filteredOptions.length ? '' : 'hidden'">
       <ul>
         <li :class="optionClass(o, $index)" v-for="o in filteredOptions" v-tooltip="o.title">
-          <a href="option://{{o.value}}" class="truncate" @click="select(o)">{{o.text || o.value}}</a>
+          <a href="#{{o.value}}" class="truncate" @click.prevent="select(o)">{{o.text || o.value}}</a>
         </li>
       </ul>
     </div>
