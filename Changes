@@ -1,5 +1,115 @@
 Revision history for perl distribution Convos
 
-0.01 Not Released
- - Started project
+0.99_06 Not Released
+ - Fix tracking participants
+ - Fix joining channel with key in backend #268
+ - Fix joining channel with key in <convos-create-dialog/> #267
+ - Fix handling "part" events
+ - Add Mojo::IRC 0.33 as required module #267
+ - Add IO::Socket::SSL as required module
+   * Required to connect to TLS networks
+   * Required to fetch meta data from https resources
+ - Change calculation of dialog.unread to server side
+ - Change WebSocket keep-alive interval
+ - Change "Join dialog" will be shown after a new connection is created
+
+0.99_05 2016-08-22T16:30:57+0200
+ - Fix breaking long words inside a message template
+ - Fix only show nick change in the channels where the nick is active
+ - Fix goto anything
+ - Fix reading unicode (æøå) back from file
+ - Fix dialog.frozen after webscocket comes back online
+ - Fix skip installing dev deps by default
+ - Fix handling of config file values
+ - Fix "send" button in <convos-input/>
+ - Fix missing Time::Piece on redhat #266
+ - Add fetching connections, dialogs and notifications together with user object
+ - Add icon to indicate that the WebSocket is down
+ - Add last_read() to Convos::Core::Dialog
+ - Add sorting of dialogs by lastRead
+ - Add support for "forced_irc_server"
+ - Add clicking on a notitication takes you to the dialog
+ - Bundled cpanm, used by "script/convos install" (less dependencies)
+ - Change client to keep WebSocket alive instead of backend
+ - Converted Swagger2 to OpenAPI
+ - Converted jQuery dependencies to Vue components
+ - Converted Guides to gh-pages branch - http://convos.by/doc
+
+0.99_04 2016-08-15T16:33:45+0200
+ - Fix Could not send "\nsome message": Unable to construct PRIVMSG.
+ - Fix remove dialogs when connection is deleted
+ - Add search for dialogs
+ - Add jump between search and input field
+ - Add better rendering on small screens
+ - Add count of unseen notifications
+ - Add <convos-settings/> which includes wizard, connection editor and dialog creator
+ - Add support for invite code
+ - Add number of unread messages
+ - Add handling of join, nick_change and part events
+ - Add support for desktop notifications
+ - Change layout: Big green menu on top
+ - Change dialog list to be sorted alphabetically
+ - Converted vue templates to .vue files
+ - Converted data-hint="" to v-tooltip=""
+ - Remove hash/fragment navigation
+ - Remove EventSource. Going for WebSocket only.
+
+0.99_03 2016-07-21T17:10:57+0200
+ - Fix swagger spec: datetime != date-time
+ - Fix parting channel when not connected
+ - Fix appearance on small screens
+ - Fix saving list of dialogs on every join
+ - Fix autocomplete commands and nicks case insensitive
+ - Add messages in backend are stored with "highlight" flag
+ - Add notifications in frontend
+ - Add loading of more messages when scrolling to top
+
+0.99_02 2016-04-15T08:47:56+0200
+ - Fix automatic install require App::cpanminus 1.7016+
+ - Fix confusing edit connections icon
+ - Fix encode dialog.idvos to %23convos
+ - Fix searching for messages in backend
+ - Fix sending ACTION messages
+ - Fix marking dialogs/connections as disconnected on websocket close
+ - Add filter to render messages containing markdown
+ - Add "day changed" indicator
+ - Add whois action to user list and add whois data handler
+ - Using Mojolicious::Plugin::AssetPack 1.04
+ - Converted JavaScript from riot.js to vue.js
+
+0.99_01 2016-04-02T14:18:39+0200
+ - Fix embedding images
+ - Fix CTCP action messages on local echo
+ - Add "script/convos dev" sub-command
+ - Add "script/convos install" sub-command
+ - Add styling of mentions and notice
+ - Add handling of whois and topic reponses
+ - Add support for sending IRC commands
+ - Add /help command
+ - Add rendering of autocomplete room list
+ - Add autocomplete to <user-input/>
+
+0.99_01 2016-02-28T16:23:44+0200
+ - Add config file support
+ - Add default (insecure) secrets
+ - Add initial Swagger specification
+ - Add support for X-Request-Base
+ - Add support for setting secure cookies
+ - Add auto-detection of TLS/plain text IRC servers
+ - Add "steal nick" logic
+ - Add new layout with sidebars instead of top menu navigation
+ - Add riot.js to render web pages
+ - Add Convos::Core look-alike objects in JavaScript
+ - Add router which acts upon location hash (fragment)
+ - Add Swagger over WebSocket communication
+ - Add scrollToBottom() on new messages
+ - Add handling of highlighted messages in backend
+ - Add expanding links in chat to meta data
+ - Add Convos::Core
+ - Add Convos::Core::Connection::IRC
+ - Add Convos::Core::Room
+ - Add Convos::Core::User
+
+0.99_00 2015-02-02T15:40:40+0200
+ - Started rewriting Convos
 
