@@ -22,7 +22,7 @@ module.exports = {
   methods: {
     join: function(name) {
       var connection = this.dialog.connection();
-      var dialog = connection.getDialog(name);
+      var dialog = connection.getDialogs(name);
       if (dialog) return this.settings.main = dialog.href();
       connection.send('/join ' + name, this.dialog);
     }
