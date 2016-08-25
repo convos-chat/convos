@@ -39,7 +39,7 @@ $irc->run(
     $ws->message_ok->json_message_is('/connection_id', $c->id)
       ->json_message_is('/connection_id', 'irc-test')->json_message_is('/dialog_id', '#convos')
       ->json_message_is('/event', 'state')->json_message_is('/frozen', '')
-      ->json_message_is('/is_private', 0)->json_message_is('/name', '#convos')
+      ->json_message_is('/is_private', 0)->json_message_is('/name', '#Convos')
       ->json_message_is('/topic', '')->json_message_has('/ts')->json_message_is('/type', 'frozen');
     $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
       ->json_message_is('/event', 'sent')->json_message_is('/message', '/join #Convos')
@@ -127,11 +127,11 @@ done_testing;
 
 __DATA__
 @@ join-convos.irc
-:superman!superman@i.love.debian.org JOIN :#convos
-:hybrid8.debian.local 332 superman #convos :some cool topic
-:hybrid8.debian.local 333 superman #convos jhthorsen!jhthorsen@i.love.debian.org 1432932059
+:superman!superman@i.love.debian.org JOIN :#Convos
+:hybrid8.debian.local 332 superman #Convos :some cool topic
+:hybrid8.debian.local 333 superman #Convos jhthorsen!jhthorsen@i.love.debian.org 1432932059
 :hybrid8.debian.local 353 superman = #convos :Superman20001 @batman
-:hybrid8.debian.local 366 superman #convos :End of /NAMES list.
+:hybrid8.debian.local 366 superman #Convos :End of /NAMES list.
 @@ nick.irc
 :superman!test15044@i.love.debian.org NICK :supergirl
 @@ topic-get.irc

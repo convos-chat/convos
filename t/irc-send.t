@@ -158,7 +158,6 @@ $t->run(
     is $res, undef, 'res /part does_not_matter';
   }
 );
-exit;
 
 $t->run(
   [qr{PART}, ['main', 'part-convos.irc']],
