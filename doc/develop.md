@@ -14,7 +14,7 @@ the application at
 [http://localhost:3000/perldoc](http://localhost:3000/perldoc) - or whatever
 adddress you [start](/doc/running.html) Convos on.
 
-## Tuturial
+## Tutorial
 
 It is helpful if you are familiar with [git](http://git-scm.com).
 [Mojolicious](http://mojolicious.org) and basic [Perl](http://perl.org) tools,
