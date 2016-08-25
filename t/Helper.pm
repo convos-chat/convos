@@ -1,9 +1,12 @@
 package t::Helper;
 use Mojo::Base -strict;
+
+use Convos;
+use File::Basename 'basename';
+use File::Path ();
+use FindBin;
 use Mojo::Loader 'data_section';
 use Mojo::Util;
-use Convos;
-use File::Path ();
 
 our $CONVOS_HOME;
 
@@ -49,7 +52,7 @@ sub t {
 sub import {
   my $class  = shift;
   my $caller = caller;
-  my $script = $0;
+  my $script = basename $0;
 
   eval <<"HERE" or die $@;
 package $caller;
@@ -63,7 +66,8 @@ HERE
   feature->import(':5.10');
 
   $script =~ s/\W/-/g;
-  $ENV{CONVOS_HOME} = $CONVOS_HOME = File::Spec->catdir("local", "test-$script");
+  $ENV{CONVOS_HOME} = $CONVOS_HOME
+    = File::Spec->catdir($FindBin::Bin, File::Spec->updir, "local", "test-$script");
   Mojo::Util::monkey_patch(
     $caller => diag => $ENV{HARNESS_IS_VERBOSE} ? \&Test::More::diag : sub { });
   File::Path::remove_tree($CONVOS_HOME) if -d $CONVOS_HOME;

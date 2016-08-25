@@ -80,7 +80,8 @@ done_testing;
 sub slurp_log {
   Mojo::Util::slurp(
     File::Spec->catfile(
-      qw(local test-t-irc-message-t superman@example.com irc-localhost),
+      $FindBin::Bin, File::Spec->updir,
+      qw(local test-irc-message-t superman@example.com irc-localhost),
       @date, "$_[0].log"
     )
   );
