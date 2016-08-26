@@ -39,7 +39,7 @@ module.exports = {
   props:    ["user"],
   data:     function() {
     return {
-      email:    localStorage.getItem("email"),
+      email:    localStorage.getItem("email") || "",
       errors:   [],
       password: ""
     };

@@ -44,7 +44,7 @@ module.exports = {
   data:     function() {
     return {
       invite_code:   "",
-      email:         localStorage.getItem("email"),
+      email:         localStorage.getItem("email") || "",
       errors:        [],
       password:      "",
       passwordAgain: "",
