@@ -19,6 +19,12 @@
 
   NodeList.prototype.$forEach = Array.prototype.forEach;
 
+  Date.fromAPI = function(t) {
+    if (!t) return new Date();
+    if (!t.match(/Z$/)) t += "Z"
+    return new Date(t);
+  };
+
   Element.prototype.$remove = function() {
     this.parentElement.removeChild(this);
   };

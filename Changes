@@ -9,6 +9,7 @@ Revision history for perl distribution Convos
  - Fix not show welcome message after log in in in a new browser
  - Fix running test suite with "script/convos test"
  - Fix no autocomplete in "Join dialog" or "Add connection"
+ - Fix parsing UTC time in Firefox
  - Add Mojo::IRC 0.33 as required module #267
  - Add IO::Socket::SSL as required module
    * Required to connect to TLS networks

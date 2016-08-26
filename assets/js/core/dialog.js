@@ -6,7 +6,7 @@
     this.activated    = 0;
     this.messages     = [];
     this.name         = "";
-    this.lastRead     = attrs.last_read ? new Date(attrs.last_read) : new Date();
+    this.lastRead     = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
     this.participants = {};
     this.unread       = 0;
     this.topic        = "";
@@ -30,7 +30,7 @@
           dialog_id: this.dialog_id,
         }, function(err, xhr) {
           if (err) return console.log('[setDialogLastRead] ' + JSON.stringify(err)); // TODO
-          self.lastRead = new Date(xhr.body.last_read);
+          self.lastRead = Date.fromAPI(xhr.body.last_read);
         }
       );
     });
@@ -49,7 +49,7 @@
     if (!msg.from) msg.from = "convosbot";
     if (!msg.type) msg.type = "private";
     if (!msg.ts) msg.ts = new Date();
-    if (typeof msg.ts == "string") msg.ts = new Date(msg.ts);
+    if (typeof msg.ts == "string") msg.ts = Date.fromAPI(msg.ts);
     if (!prev) prev = {from: "", ts: msg.ts};
 
     if (args.method == "push") {
