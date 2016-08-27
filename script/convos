@@ -60,7 +60,7 @@ Mojolicious::Commands->start_app('Convos');
 sub ensure_dependencies {
   return if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK};
   my ($cpanfile, $action, $mode) = @_;
-  my @cpanm = ($^X, File::Spec->catfile(qw(script cpanm)));
+  my @cpanm = ($^X, File::Spec->catfile($FindBin::Bin, 'cpanm'));
   my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
 
