@@ -8,7 +8,7 @@ use strict;
 use FindBin;
 use File::Spec;
 
-if (@ARGV and -r $ARGV[0]) {
+if (@ARGV and -r $ARGV[0] and -f $ARGV[0]) {
   $ENV{MOJO_CONFIG} = shift @ARGV;
   unshift @ARGV, 'daemon';
 }
