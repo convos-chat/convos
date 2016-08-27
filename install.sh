@@ -43,5 +43,6 @@ missing () {
 
 find_bin perl || missing "perl";
 git_clone || fetch_tar || missing "git, curl or wget";
+echo "> $perl convos/script/convos install";
 $perl convos/script/convos install;
 exit $?;
