@@ -16,6 +16,7 @@ var commands = [
   "/say ",
   "/nick ",
   "/whois ",
+  "/kick ",
   "/names",
   "/close",
   "/part ",

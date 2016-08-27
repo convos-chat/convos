@@ -142,8 +142,13 @@
       }
     }
     else if(this.participants[data.nick]) { // part
+      var message = data.nick + " parted.";
       delete this.participants[data.nick];
-      this.addMessage({message: data.nick + " parted.", from: this.connection_id, type: "notice"});
+      if (data.kicker) {
+        message = data.nick + " was kicked by " + data.kicker + ".";
+        if (data.message) message += " Reason: " + data.message;
+      }
+      this.addMessage({message: message, from: this.connection_id, type: "notice"});
     }
   };
 

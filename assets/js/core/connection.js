@@ -216,7 +216,6 @@
         break;
       case "join":
       case "part":
-      // "connection_id":"irc-localhost","dialog_id":"#bar","event":"state","kicker":"x","message":"x","nick":"jan_henni","ts":"2016-08-27T14:11:07Z","type":"part"}
         this.user.dialogs.forEach(function(d) {
           if (d.connection_id == data.connection_id) d.participant(data);
         });

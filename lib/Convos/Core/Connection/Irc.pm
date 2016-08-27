@@ -166,6 +166,7 @@ sub send {
   $target  //= '';
   $message //= '';
   $message =~ s![\x00-\x1f]!!g;    # remove invalid characters
+  $message = Mojo::Util::trim($message);    # required for kick, mode, ...
 
   $message =~ s!^/([A-Za-z]+)\s*!! or return $self->_send($target, $message, $cb);
   my $cmd = uc $1;
@@ -176,6 +177,7 @@ sub send {
   return $self->connect($cb)    if $cmd eq 'CONNECT';
   return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
+  return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
   return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
@@ -253,6 +255,13 @@ sub _join_dialog {
   );
 }
 
+sub _kick {
+  my ($self, $target, $command, $cb) = @_;
+  my ($nick, $reason) = split /\s/, $command, 2;
+
+  return $self->_proxy(kick => "$target $nick :$reason", sub { $self->$cb(@_[1, 2]) });
+}
+
 sub _mode {
   my ($self, $target, $mode, $cb) = @_;
 
@@ -262,13 +271,7 @@ sub _mode {
     $mode = "$target $mode" if $mode =~ /^[eIO]\s*$/;       # /mode #channel I
   }
 
-  return $self->_proxy(
-    mode => $mode,
-    sub {
-      my ($irc, $err, $mode) = @_;
-      $self->$cb($err, {mode => $mode});
-    },
-  );
+  return $self->_proxy(mode => $mode, sub { $self->$cb(@_[1, 2]) });
 }
 
 sub _notice {
