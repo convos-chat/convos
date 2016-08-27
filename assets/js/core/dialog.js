@@ -42,7 +42,6 @@
 
   proto.addMessage = function(msg, args) {
     if (!args) args = {};
-    if (typeof msg == "string") msg = {message: msg};
     if (!args.method) args.method = "push";
     var prev = args.method == "unshift" ? this.messages[0] : this.prevMessage;
 
@@ -80,6 +79,7 @@
 
     this.messages[args.method](msg);
     this.participant({type: "maintain", name: msg.from, seen: msg.ts});
+    if (args.type == "participants") this._setParticipants(msg);
     if (args.method == "push") this.emit("message", msg);
   };
 
@@ -152,24 +152,6 @@
     }
   };
 
-  proto.refreshParticipants = function(cb) {
-    var self = this;
-    Convos.api.participants(
-      {
-        connection_id: this.connection_id,
-        dialog_id: this.dialog_id
-      }, function(err, xhr) {
-        if (!err) {
-          self.participants = {};
-          xhr.body.participants.forEach(function(p) {
-            self.participants[p.name] = {name: p.name, seen: new Date()};
-          });
-        }
-        return cb.call(self, err);
-      }
-    );
-  };
-
   proto.update = function(attrs) {
     Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
     return this;
@@ -187,7 +169,10 @@
   proto._load = function() {
     var self = this;
 
-    this.refreshParticipants(function() {});
+    this.user.ws.when("open", function() {
+      self.connection().send("/names", self, self._setParticipants.bind(self));
+    });
+
     Convos.api.messages(
       {
         connection_id: this.connection_id,
@@ -213,20 +198,24 @@
       }, {
         disableUnread: true
       });
-    } else if (this.messages.length) {
-      this.addMessage({
-        type: "notice",
-        message: "You have joined " + this.name + "."
-      }, {
-        disableUnread: true
-      });
-    } else {
-      this.addMessage("You have joined " + this.name + ", but no one has said anything as long as you have been here.", {
-        disableUnread: true
-      });
+    } else if (!this.messages.length) {
+      this.addMessage(
+        {
+          message: "You have joined " + this.name + ", but no one has said anything as long as you have been here.",
+          type: "notice"
+        },
+        {disableUnread: true}
+      );
     }
     if (Convos.settings.notifications == "default") {
       this.addMessage({type: "enable-notifications"});
     }
+  };
+
+  proto._setParticipants = function(msg) {
+    this.participants = {};
+    msg.participants.forEach(function(p) {
+      this.participants[p.name] = {name: p.name, seen: new Date()};
+    }.bind(this));
   };
 })();

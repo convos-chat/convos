@@ -2,10 +2,9 @@
   <div class="convos-dialog-container">
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <h2 @click.prevent="getInfo" v-tooltip="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
+      <h2 v-tooltip="dialog.topic || 'No topic is set.'">{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
       <convos-header-links :toggle="true" :user="user">
-        <a href="#info" @click.prevent="getInfo" v-tooltip.literal="Information about dialog" :class="user.ws.is('open') ? '' : 'btn-floating deep-orange'"><i class="material-icons">{{user.ws.is('open') ? 'info' : 'info_outline'}}</i></a>
-        <a href="#close" @click.prevent="closeDialog" v-tooltip.literal="Close dialog"><i class="material-icons">close</i></a>
+        <a v-dropdown.literal="settings_dropdown" v-tooltip.literal="Dialog settings"><i class="material-icons">settings</i></a>
       </convos-header-links>
     </header>
     <main>
@@ -18,6 +17,12 @@
         v-for="msg in dialog.messages"></component>
     </main>
     <convos-input :dialog="dialog" :user="user"></convos-input>
+    <ul class="dropdown-content" v-el:settings_dropdown>
+      <li><a href="#names" @click.prevent="send('/names')">List participants</a></li>
+      <li><a href="#topic" @click.prevent="send('/topic')">Get topic</a></li>
+      <li class="divider"></li>
+      <li><a href="#close" @click.prevent="send('/close')">Close dialog</a></li>
+    </ul>
   </div>
 </template>
 <script>
@@ -41,15 +46,6 @@ module.exports = {
     }
   },
   methods: {
-    closeDialog: function() {
-      this.dialog.connection().send("/close " + this.dialog.name);
-    },
-    getInfo: function() {
-      this.dialog.refreshParticipants(function(err) {
-        if (!err) return this.addMessage({type: "dialog-info"});
-        this.addMessage({message: err[0].message, type: "error"});
-      });
-    },
     onScroll: function() {
       var self = this;
       var elem = this.scrollElement;
@@ -68,6 +64,9 @@ module.exports = {
       if (this.atBottom || args.gotoBottom) {
         window.nextTick(function() { elem.scrollTop = elem.scrollHeight; });
       }
+    },
+    send: function(command) {
+      this.dialog.connection().send(command, this.dialog);
     }
   },
   ready: function() {

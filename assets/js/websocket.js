@@ -15,9 +15,9 @@
     if (this._ws && this._ws.readyState != WebSocket.CLOSED) {
       if (window.DEBUG) console.log("[ReconnectingWebSocket] Close " + code + "/" + reason);
       this._ws.close(code || 1000, reason);
-      this.readyState = WebSocket.CLOSING;
+      this._state(WebSocket.CLOSING);
     } else {
-      this.readyState = WebSocket.CLOSED;
+      this._state(WebSocket.CLOSED);
     }
     return this;
   };
@@ -34,7 +34,7 @@
       return this;
     if (window.DEBUG) console.log("[ReconnectingWebSocket] Open " + this.url);
 
-    this.readyState = WebSocket.CONNECTING;
+    this._state(WebSocket.CONNECTING);
     this._reconnect(true);
     this._ws         = new WebSocket(this.url);
     this._ws.onerror = function(e) {
@@ -46,12 +46,11 @@
     }.bind(this);
     this._ws.onopen = function() {
       this._reconnectIn = 500;
-      this.readyState   = WebSocket.OPEN;
-      this.emit("open");
+      this._state(WebSocket.OPEN);
     }.bind(this);
     this._ws.onclose = function(e) {
       var prevState = this.readyState;
-      this.readyState = this._ws.readyState == WebSocket.CLOSING ? WebSocket.CLOSED : WebSocket.CONNECTING;
+      this._state(this._ws.readyState == WebSocket.CLOSING ? WebSocket.CLOSED : WebSocket.CONNECTING);
       if (window.DEBUG) console.log("[ReconnectingWebSocket] " + _name(prevState) + " => " + _name(this.readyState), e);
       if (prevState == WebSocket.OPEN) this.emit("close", e);
       if (this.readyState == WebSocket.CONNECTING) this._reconnect(false);
@@ -72,6 +71,11 @@
     throw "Cannot send message when not connected.";
   };
 
+  proto.when = function(state, cb) {
+    state = state.toLowerCase();
+    return this.is(state) ? cb.call(this) : this.once(state, cb);
+  };
+
   proto._reconnect = function(force) {
     if (!force && this._tid) return;
     if (this._tid) clearTimeout(this._tid);
@@ -85,6 +89,11 @@
     this._reconnectIn += 1000;
   };
 
+  proto._state = function(state) {
+    this.readyState = state;
+    this.emit(_name(state).toLowerCase());
+  };
+
   var _name = function(s) {
     switch (s) {
       case WebSocket.CLOSED:
@@ -96,7 +105,7 @@
       case WebSocket.OPEN:
         return "OPEN";
       default:
-        return s;
+        return "" + s;
     }
   };
 })();

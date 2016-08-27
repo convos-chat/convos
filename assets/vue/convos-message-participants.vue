@@ -6,14 +6,7 @@
       <template v-else>You are the only participant</template>
       in {{dialog.name}}, connected to {{dialog.connection().name}}{{n > 1 ? ":" : "."}}
       <template v-for="p in participants">
-        <a href="#whois:{{p.name}}" @click.prevent="whois(p)">{{p.mode}}{{p.name}}</a>{{$index + 2 == n ? " and " : $index + 1 == n ? "" : ", "}}</template>.
-      <br>
-      <template v-if="dialog.topic">
-        The topic is: {{dialog.topic}}
-      </template>
-      <template v-if="!dialog.topic">
-        This dialog has no topic.
-      </template>
+        <a href="#query:{{p.name}}" @click.prevent="query(p)">{{p.mode}}{{p.name}}</a>{{$index + 2 == n ? " and " : $index + 1 == n ? "" : ", "}}</template>.
     </div>
     <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
   </div>
@@ -35,8 +28,8 @@ module.exports = {
     };
   },
   methods: {
-    whois: function(p) {
-      this.dialog.connection().send("/whois " + p.name);
+    query: function(p) {
+      this.dialog.connection().send("/query " + p.name);
     }
   }
 };

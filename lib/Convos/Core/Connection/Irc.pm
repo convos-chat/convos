@@ -136,8 +136,8 @@ sub participants {
   $self->_proxy(
     channel_users => $name => sub {
       my ($self, $err, $res) = @_;
-      $res = [map { +{%{$res->{$_}}, name => $_} } keys %$res] if ref $res;
-      $self->$cb($err, $res);
+      my @list = $err ? () : map { +{%{$res->{$_}}, name => $_} } keys %$res;
+      $self->$cb($err, {participants => \@list});
     }
   );
 }
@@ -179,8 +179,10 @@ sub send {
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
   return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
   return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
+  return $self->participants($target, $cb) if $cmd eq 'NAMES';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
+  return $self->_query($message, $cb) if $cmd eq 'QUERY';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
   return next_tick $self, $cb => 'Unknown IRC command.', undef;
@@ -303,6 +305,18 @@ sub _proxy {
   my ($self, $method) = (shift, shift);
   $self->_irc->$method(@_);
   $self;
+}
+
+sub _query {
+  my ($self, $name, $cb) = @_;
+
+  return $self->_proxy(whois => $name, $cb) if $name eq $self->_irc->nick;
+
+  my $target = $self->get_dialog($name);
+  return next_tick $self, $cb, '', {} if $target;
+
+  $target = $self->dialog({name => $name});
+  return $self->_proxy(whois => $name, $cb);
 }
 
 sub _send {

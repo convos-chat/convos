@@ -16,6 +16,7 @@
 < js/materialbox.js
 < js/openapi.js
 < js/websocket.js
+< js/vue/directive-dropdown.js
 < js/vue/directive-link.js
 < js/vue/directive-sidebar.js
 < js/vue/directive-tooltip.js
@@ -54,10 +55,10 @@
 # chat
 < vue/convos-message-action.vue
 < vue/convos-message-day-changed.vue
-< vue/convos-message-dialog-info.vue
 < vue/convos-message-enable-notifications.vue
 < vue/convos-message-error.vue
 < vue/convos-message-notice.vue
+< vue/convos-message-participants.vue
 < vue/convos-message-private.vue
 < vue/convos-message-whois.vue
 < vue/convos-input.vue

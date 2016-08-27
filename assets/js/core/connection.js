@@ -102,7 +102,7 @@
     return this;
   };
 
-  proto.send = function(message, dialog) {
+  proto.send = function(message, dialog, cb) {
     var self = this;
     var action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
     var handler = "_sent" + action[1].toLowerCase().ucFirst();
@@ -124,6 +124,7 @@
 
     // Handle echo back from backend
     this.once("sent-" + id, function(msg) {
+      if (cb) return cb.call(self, msg);
       self[self[handler] ? handler : "_onError"](msg);
     });
 
@@ -173,6 +174,12 @@
     Convos.settings.main = this.user.dialogs.length ? this.user.dialogs[0].href() : "";
   };
 
+  proto._sentNames = function(msg) {
+    if (msg.errors) return this._onError(msg);
+    msg.type = "participants";
+    this.user.ensureDialog(msg).addMessage(msg);
+  };
+
   // part will not close the dialog
   proto._sentPart = function(msg) {
     if (msg.errors) return this._onError(msg);
@@ -192,12 +199,26 @@
     this.notice('Reconnecting to ' + this.connection_id + '...');
   };
 
-  proto._sentWhois = function(data) {
+  proto._sentTopic = function(msg) {
+    if (msg.errors) return this._onError(msg);
+    if (!msg.hasOwnProperty("topic")) return;
+    var dialog = this.user.ensureDialog(msg);
+    var next = {from: this.connection_id, type: "notice"};
+    if (msg.topic) {
+      next.message = "Topic for " + dialog.name + " is: " + msg.topic;
+    }
+    else {
+      next.message = "There is no topic for " + dialog.name + ".";
+    }
+    dialog.addMessage(next);
+  };
+
+  proto._sentWhois = function(msg) {
     var dialog = this.user.getActiveDialog();
     if (!dialog) return;
-    data.from = this.connection_id;
-    data.type = "whois";
-    dialog.addMessage(data);
+    msg.from = this.connection_id;
+    msg.type = "whois";
+    dialog.addMessage(msg);
   };
 
   proto._onState = function(data) {
