@@ -9,26 +9,17 @@ See [convos.by](http://convos.by) for more details.
 
 # Quick start guide
 
-Fetch and extract Convos:
-
 ```bash
-$ curl -L https://github.com/Nordaaker/convos/archive/master.tar.gz | tar xvz
+curl https://convos.by/install.sh | sh -
+./convos/script/convos daemon;
 ```
 
-Install dependencies:
+That's it! After the two commands above, you can point your browser to
+[http://localhost:3000](http://localhost:3000) and start chatting.
 
-```bash
-$ cd convos-master
-$ ./script/convos install
-```
+Note that to register, you need a invitation code. This code is printed to
+screen as you start convos:
 
-Start Convos by running one of the commands below.
-
-```bash
-$ ./script/convos daemon;
-$ ./script/convos daemon --listen http://*:3000;
-```
-
-And connect a browser to [http://localhost:3000](http://localhost:3000).
+    [Sun Aug 21 11:18:03 2016] [info] Generated CONVOS_INVITE_CODE="b34b0ab873e80419b9a2170de8ca8190"
 
 [![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=one-point-oh)](https://travis-ci.org/Nordaaker/convos)
