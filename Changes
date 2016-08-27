@@ -1,6 +1,10 @@
 Revision history for perl distribution Convos
 
-0.99_06 Not Released
+0.99_07 Not Released
+ - Add basic support for "/mode ..."
+ - Add Mojo::IRC 0.35 as required module
+
+0.99_06 2016-08-27T12:27:13+0200
  - Fix tracking participants
  - Fix joining channel with key in backend #268
  - Fix joining channel with key in <convos-create-dialog/> #267

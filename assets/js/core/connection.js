@@ -124,7 +124,7 @@
 
     // Handle echo back from backend
     this.once("sent-" + id, function(msg) {
-      return self[handler] ? self[handler](msg) : console.log("No handler for " + handler);
+      self[self[handler] ? handler : "_onError"](msg);
     });
 
     this.user.ws.send({
@@ -188,15 +188,9 @@
     Convos.settings.main = dialog.href();
   };
 
-  // "/nick ..." will result in {"event":"state","type":"me"}
-  proto._sentNick = proto._onError;
-
-  proto._sentReconnect = function(msg) { this.notice('Reconnecting to ' + this.connection_id + '...'); };
-
-  // No need to handle echo from messages
-  proto._sentMe = proto._onError;
-  proto._sentMessage = proto._onError;
-  proto._sentSay = proto._onError;
+  proto._sentReconnect = function(msg) {
+    this.notice('Reconnecting to ' + this.connection_id + '...');
+  };
 
   proto._sentWhois = function(data) {
     var dialog = this.user.getActiveDialog();
@@ -205,11 +199,6 @@
     data.type = "whois";
     dialog.addMessage(data);
   };
-
-  // TODO
-  proto._sentKick = proto._onError;
-  proto._sentQuery = proto._onError;
-  proto._sentTopic = proto._onError;
 
   proto._onState = function(data) {
     if (DEBUG) console.log("[state:" + data.type + "] " + this.href() + " = " + JSON.stringify(data));
@@ -227,9 +216,15 @@
         break;
       case "join":
       case "part":
+      // "connection_id":"irc-localhost","dialog_id":"#bar","event":"state","kicker":"x","message":"x","nick":"jan_henni","ts":"2016-08-27T14:11:07Z","type":"part"}
         this.user.dialogs.forEach(function(d) {
           if (d.connection_id == data.connection_id) d.participant(data);
         });
+        break;
+      case "mode":
+        var message = data.from + ' set mode ' + data.mode;
+        if (data.nick) message += ' on ' + data.nick + '.';
+        this.user.ensureDialog(data).addMessage({type: "notice", message: message, ts: data.ts});
         break;
       case "nick_change":
         this.user.dialogs.forEach(function(d) {

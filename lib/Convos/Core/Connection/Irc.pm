@@ -176,6 +176,7 @@ sub send {
   return $self->connect($cb)    if $cmd eq 'CONNECT';
   return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
+  return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
@@ -249,6 +250,24 @@ sub _join_dialog {
       $dialog->frozen($err || '')->password($password);
       $self->save(sub { })->$cb($err, $dialog);
     }
+  );
+}
+
+sub _mode {
+  my ($self, $target, $mode, $cb) = @_;
+
+  if ($target) {
+    $mode = "$target $mode" if $mode =~ /^[+-]\S+\s+\S/;    # /mode #channel +o superman
+    $mode = "$target $mode" if $mode =~ /^[+-][bs]\s*$/;    # /mode #channel -s
+    $mode = "$target $mode" if $mode =~ /^[eIO]\s*$/;       # /mode #channel I
+  }
+
+  return $self->_proxy(
+    mode => $mode,
+    sub {
+      my ($irc, $err, $mode) = @_;
+      $self->$cb($err, {mode => $mode});
+    },
   );
 }
 
@@ -391,7 +410,14 @@ _event irc_kick => sub {
 # :superman!superman@i.love.debian.org MODE #convos superman :+o
 # :hybrid8.debian.local MODE #no_such_room +nt
 _event irc_mode => sub {
-  my ($self, $msg) = @_;    # TODO
+  my ($self, $msg) = @_;
+  my ($from) = IRC::Utils::parse_user($msg->{prefix});
+  my $dialog = $self->dialog({name => $msg->{params}[0]});
+  my $mode = $msg->{params}[1] || '';
+  my $nick = $msg->{params}[2] || '';
+
+  $self->emit(
+    state => mode => {dialog_id => $dialog->id, from => $from, mode => $mode, nick => $nick});
 };
 
 # :Superman12923!superman@i.love.debian.org NICK :Supermanx

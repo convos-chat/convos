@@ -69,7 +69,7 @@ module.exports = {
 
         if (!this.before.length) this.matchList = this.matchList.concat(commands);
         if (needle) {
-          needle = new RegExp("^" + needle, "i");
+          needle = new RegExp("^" + RegExp.escape(needle), "i");
           this.matchList = this.matchList.filter(function(m) { return m.match(needle); });
         }
       }
