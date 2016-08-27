@@ -3,32 +3,15 @@ layout: page
 title: Installing
 ---
 
-This guide will give an introduction on how to run Convos. It is very
-easy to get started, but you can also tweak many [settings](./config.html)
-afterwards to make it fit your needs.
+This guide will give an introduction on how to install and run Convos. It is
+very easy to get started, but you can also tweak many
+[settings](./config.html) afterwards to make Convos fit your needs.
 
-The first step is to fetch and extract Convos:
-
-```bash
-$ curl -L https://goo.gl/kDpvKZ | tar xvz
-$ cd convos-stable/
-```
-
-Have a look at the [development](/doc/develop.html) guide if you want to use
-`git` instead of `curl`.
-
-Check which dependencies are missing, and install them:
+The two commands below will download and start Convos:
 
 ```bash
-$ ./script/convos
-$ ./script/convos install
-```
-
-Start Convos by running one of the commands below.
-
-```bash
-$ ./script/convos daemon;
-$ ./script/convos daemon --listen http://*:3000;
+curl https://convos.by/install.sh | sh -
+./convos/script/convos daemon;
 ```
 
 That's it! After the commands above, you can point your browser to
@@ -49,14 +32,14 @@ experience. The command below will show if the modules are installed
 or not:
 
 ```bash
-$ ./script/convos version
+./script/convos version
 ```
 
 One very useful addition is [EV](https://metacpan.org/pod/distribution/Mojolicious/lib/Mojolicious/Guides/FAQ.pod#Why-doesnt-Mojolicious-have-any-dependencies),
 which makes Convos faster. It can be installed with the command below:
 
 ```bash
-$ perl script/cpanm --sudo EV
+perl script/cpanm --sudo EV
 ```
 
 ## Next

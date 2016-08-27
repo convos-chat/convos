@@ -1,64 +1,47 @@
 #!/bin/sh
-
-CURL=$(which curl);
-GIT=$(which git);
-PERL=$(which perl);
-WGET=$(which wget);
 REPO="https://github.com/Nordaaker/convos.git";
-TAR_GZ="https://codeload.github.com/Nordaaker/convos/tar.gz/release";
+TAR_GZ="https://github.com/Nordaaker/convos/archive/stable.tar.gz";
 
-if [ -z $PERL ]; then
-  echo "! Cannot install Convos: Cannot find 'perl' in PATH";
-  exit 2;
-fi
-
-deps () {
-  if ./vendor/bin/carton; then
-    echo "";
-    echo "# Convos was installed successfully!";
-    [ -n $GIT ] && git checkout cpanfile.snapshot
+fetch_tar () {
+  find_bin tar || return $?;
+  find_bin curl || find_bin wget || return $?;
+  mkdir convos;
+  if [ -n "$curl" ]; then
+    echo "> $curl -s -L $TAR_GZ | $tar xz -C convos --strip-components 1";
+    $curl -s -L $TAR_GZ | $tar xz -C convos --strip-components 1;
   else
-    EXIT_VALUE=$?
-    echo "! Carton could not install dependencies. ($EXIT_VALUE)";
-    exit $EXIT_VALUE;
+    echo "> $wget -q -O - $TAR_GZ | $tar xz -C convos --strip-components 1";
+    $wget -q -O - $TAR_GZ | $tar xz -C convos --strip-components 1;
   fi
 }
 
-post_message () {
-  echo "";
-  echo "# You can test convos by running the command below,";
-  echo "# and then open http://localhost:3000 in your favorite browser.";
-  echo "";
-  echo "  cd $PWD && ./vendor/bin/carton exec script/convos daemon --listen http://*:3000";
-  echo "";
-  echo "# Visit http://convos.by for more information.";
-  echo "";
-}
-
-if [ -n $GIT ]; then
-  if [ $(git init --help | grep repository | wc -l) -ge 1 ]; then
-    $GIT clone --branch release --depth 1 --progress $REPO;
+git_clone () {
+  find_bin git || return $?;
+  if [ -d convos ]; then
     cd convos;
+    echo "> $git pull origin stable";
+    $git pull origin stable;
+    cd ..;
   else
-    GIT="";
+    echo "> $git clone --branch stable $REPO";
+    $git clone --branch stable $REPO;
   fi
-fi
+}
 
-if [ -z $GIT ]; then
-  if [ -n $CURL ]; then
-    echo "! Could not find git. Will download Convos using curl";
-    curl $TAR_GZ | tar zxvf -
-  elif [ -n $WGET ]; then
-    echo "! Could not find git. Will download Convos using wget";
-    wget $TAR_GZ -O - | tar zxvf -
-  else
-    echo "! Cannot install Convos: Cannot find 'curl' or 'wget' in PATH";
-    exit 2;
-  fi
-  cd convos-release;
-fi
+find_bin () {
+  bin=$(which $1);
+  [ -z "$bin" ] && return 1;
+  export $1="$bin";
+}
 
-deps;
-post_message;
+missing () {
+  echo "";
+  echo "! Cannot install Convos: $1 is required.";
+  echo "";
+  exit 1;
+}
 
-exit 0;
+find_bin perl || missing "perl";
+git_clone || fetch_tar || missing "git, curl or wget";
+$perl convos/script/convos install;
+exit $?;
