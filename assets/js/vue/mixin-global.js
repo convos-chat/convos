@@ -9,8 +9,17 @@
 
   if (Convos.settings.sidebar) $('body').addClass('has-sidebar');
 
-  // screenHeight and screenWidth
-  window.dispatchEvent(new Event('resize'));
+  var resizeTid;
+  var measureWindow = function() {
+    resizeTid = null;
+    Convos.settings.screenHeight = window.innerHeight;
+    Convos.settings.screenWidth = window.innerWidth;
+  };
+
+  measureWindow();
+  window.addEventListener("resize", function() {
+    if (!resizeTid) resizeTid = setTimeout(measureWindow, 100);
+  });
 
   Vue.mixin({
     data: function() {
