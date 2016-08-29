@@ -42,9 +42,7 @@ sub startup {
 
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
-
-  $self->plugin(AssetPack => {pipes => [qw(Vuejs JavaScript Sass Css Combine Reloader)]});
-  $self->asset->process;
+  $self->_assets;
 
   $self->hook(
     before_dispatch => sub {
@@ -90,6 +88,17 @@ sub _add_helpers {
       shift->render(openapi => Convos::Util::E('Need to log in first.'), status => 401);
     }
   );
+}
+
+sub _assets {
+  my $self = shift;
+
+  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine Reloader)]});
+  $self->asset->pipe('Favicon')
+    ->api_key($ENV{REALFAVICONGENERATOR_API_KEY} || 'REALFAVICONGENERATOR_API_KEY=is_not_set')
+    ->design({desktop_browser => {}, ios => {}});
+  $self->asset->process('favicon.ico' => 'images/icon.svg');
+  $self->asset->process;
 }
 
 sub _config {
@@ -267,9 +276,11 @@ __DATA__
 <!DOCTYPE html>
 <html data-framework="vue">
   <head>
-    <title>Convos</title>
+    <title>Convos for <%= config 'organization_name' %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    %= asset 'convos.css';
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    %= asset 'favicon.ico'
+    %= asset 'convos.css'
   </head>
   <body>
     <component :is="user.currentPage" :current-page.sync="currentPage" :user="user">

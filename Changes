@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 0.99_07 Not Released
  - Add basic support for "/mode ..."
+ - Add favicon and app icons for iOS
  - Add support for "/kick ..."
  - Add Mojo::IRC 0.35 as required module
 
