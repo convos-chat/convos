@@ -238,7 +238,9 @@
       case "join":
       case "part":
         this.user.dialogs.forEach(function(d) {
-          if (d.connection_id == data.connection_id) d.participant(data);
+          if (d.connection_id == data.connection_id && d.dialog_id == data.dialog_id) {
+            d.participant(data);
+          }
         });
         break;
       case "mode":
