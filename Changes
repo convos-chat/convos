@@ -1,10 +1,15 @@
 Revision history for perl distribution Convos
 
-0.99_07 Not Released
- - Add basic support for "/mode ..."
+0.99_08 Not Released
+
+0.99_07 2016-08-30T10:51:25+0200
+ - Fix showing join/part messages in the correct channel
+ - Fix running Convos on Windows mobile #271
  - Add favicon and app icons for iOS
+ - Add basic support for "/mode ..."
  - Add support for "/kick ..."
- - Add Mojo::IRC 0.35 as required module
+ - Change "convos version" to also display running Convos version
+ - Replaced "info" button with "settings" button for dialogs
 
 0.99_06 2016-08-27T12:27:13+0200
  - Fix tracking participants
