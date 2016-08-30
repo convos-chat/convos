@@ -1,8 +1,8 @@
 # You can install this projct with curl -L http://cpanmin.us | perl - https://github.com/jhthorsen/convos/archive/master.tar.gz
+requires "IO::Socket::SSL"                   => "1.94";  # Need to installed first, so "cpanm -M" works
 requires "Crypt::Eksblowfish"                => "0.009";
 requires "File::HomeDir"                     => "1.00";
 requires "File::ReadBackwards"               => "1.05";
-requires "IO::Socket::SSL"                   => "2.025";
 requires "JSON::Validator"                   => "0.84";
 requires "Mojo::IOLoop::ForkCall"            => "0.17";
 requires "Mojo::IRC"                         => "0.35";

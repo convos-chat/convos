@@ -115,8 +115,9 @@ sub ensure_dependencies {
   }
 
   for my $m (@missing) {
+    $ENV{CPAN_MIRROR} //= 'https://cpan.metacpan.org' if eval 'require IO::Socket::SSL;1';
     my @cmd = (@cpanm, '-n', -l => $local_lib);
-    push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
+    push @cmd, -M => $ENV{CPAN_MIRROR} if $ENV{CPAN_MIRROR};
     push @cmd, $m->[0];
     warn sprintf ">>> %s\n", join ' ', @cmd;
     system @cmd;
