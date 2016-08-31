@@ -4782,7 +4782,9 @@ div.autocomplete {
     .convos-message.error a {
       color: #ff7d96; }
   .convos-message.highlight .message {
-    background-color: #FFEBEE; }
+    background-color: #FFEBEE;
+    margin-left: -0.5rem;
+    padding-left: 0.5rem; }
   .convos-message.notice {
     border-left: 2px solid #bdbdbd;
     color: rgba(102, 102, 102, 0.87); }
@@ -5073,3 +5075,6 @@ header a.notifications {
     position: absolute;
     bottom: 5px;
     right: 5px; }
+
+html {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
