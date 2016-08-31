@@ -108,6 +108,13 @@
     var handler = "_sent" + action[1].toLowerCase().ucFirst();
     var id;
 
+    if (action[1] == 'query') {
+      if (action[2]) {
+        Convos.settings.main = this.user.ensureDialog({connection_id: this.connection_id, dialog_id: action[2]}).href();
+      }
+      return;
+    }
+
     if (!dialog) dialog = this.getDialog(action[2]); // action = ["...", "close", "#foo" ]
     if (!dialog) dialog = this.user.getActiveDialog();
 
@@ -233,7 +240,8 @@
         this.notice('Connection state changed to "' + msg);
         break;
       case "frozen":
-        this.user.ensureDialog(data).frozen = data.frozen;
+      case "topic":
+        this.user.ensureDialog(data);
         break;
       case "join":
       case "part":

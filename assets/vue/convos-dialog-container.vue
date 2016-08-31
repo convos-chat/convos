@@ -3,9 +3,7 @@
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
       <h2 v-tooltip="dialog.topic || 'No topic is set.'">{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
-      <convos-header-links :toggle="true" :user="user">
-        <a v-dropdown.literal="settings_dropdown" v-tooltip.literal="Dialog settings"><i class="material-icons">settings</i></a>
-      </convos-header-links>
+      <convos-header-links :toggle="true" :user="user"></convos-header-links>
     </header>
     <main>
       <component
@@ -17,12 +15,6 @@
         v-for="msg in dialog.messages"></component>
     </main>
     <convos-input :dialog="dialog" :user="user"></convos-input>
-    <ul class="dropdown-content" v-el:settings_dropdown>
-      <li><a href="#names" @click.prevent="send('/names')">List participants</a></li>
-      <li><a href="#topic" @click.prevent="send('/topic')">Get topic</a></li>
-      <li class="divider"></li>
-      <li><a href="#close" @click.prevent="send('/close')">Close dialog</a></li>
-    </ul>
   </div>
 </template>
 <script>
@@ -64,9 +56,6 @@ module.exports = {
       if (this.atBottom || args.gotoBottom) {
         window.nextTick(function() { elem.scrollTop = elem.scrollHeight; });
       }
-    },
-    send: function(command) {
-      this.dialog.connection().send(command, this.dialog);
     }
   },
   ready: function() {

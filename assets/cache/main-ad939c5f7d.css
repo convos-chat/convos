@@ -4904,8 +4904,7 @@ a.toggle-main-menu {
 .convos-dialog-container header h2,
 .convos-settings header h2 {
   float: left;
-  padding-left: 0.75rem;
-  cursor: pointer; }
+  padding-left: 0.75rem; }
 
 img.embed, .link-embedder.text-html {
   max-width: 50em;
@@ -5041,28 +5040,51 @@ img.embed {
     .is-sidebar {
       width: 320px; } }
 
+.convos-dialog-settings .row,
 .convos-notifications .row {
-  margin: 0 auto;
-  border-bottom: 1px solid #f0f0f0; }
+  margin: 0 auto; }
 
+.convos-dialog-settings .btn-floating,
 .convos-notifications .btn-floating {
   box-shadow: none;
   vertical-align: middle;
   float: right;
   top: -6px; }
 
+.convos-dialog-settings .notification:hover,
+.convos-dialog-settings .participant:hover,
+.convos-notifications .notification:hover,
+.convos-notifications .participant:hover {
+  background-color: #f0f0f0; }
+
+.convos-dialog-settings .notification h5, .convos-dialog-settings .notification .secondary-content,
+.convos-dialog-settings .participant h5,
+.convos-dialog-settings .participant .secondary-content,
+.convos-notifications .notification h5,
+.convos-notifications .notification .secondary-content,
+.convos-notifications .participant h5,
+.convos-notifications .participant .secondary-content {
+  font-size: 1rem;
+  line-height: 110%;
+  margin: 0.5rem 0 0.4rem 0; }
+
+.convos-dialog-settings .notification,
 .convos-notifications .notification {
   cursor: pointer;
   padding-top: 4px;
-  padding-bottom: 8px; }
-  .convos-notifications .notification:hover {
-    background-color: #f0f0f0; }
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0; }
+  .convos-dialog-settings .notification.read,
   .convos-notifications .notification.read {
     opacity: 0.7; }
-  .convos-notifications .notification h5, .convos-notifications .notification .secondary-content {
-    font-size: 1rem;
-    line-height: 110%;
-    margin: 0.5rem 0 0.4rem 0; }
+
+.convos-dialog-settings .participant,
+.convos-notifications .participant {
+  padding: 4px 0;
+  border-top: 1px solid #f0f0f0; }
+  .convos-dialog-settings .participant .secondary-content,
+  .convos-notifications .participant .secondary-content {
+    margin: 0; }
 
 header a.notifications {
   position: relative; }

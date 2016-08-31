@@ -182,7 +182,6 @@ sub send {
   return $self->participants($target, $cb) if $cmd eq 'NAMES';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
-  return $self->_query($message, $cb) if $cmd eq 'QUERY';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
   return next_tick $self, $cb => 'Unknown IRC command.', undef;
@@ -305,18 +304,6 @@ sub _proxy {
   my ($self, $method) = (shift, shift);
   $self->_irc->$method(@_);
   $self;
-}
-
-sub _query {
-  my ($self, $name, $cb) = @_;
-
-  return $self->_proxy(whois => $name, $cb) if $name eq $self->_irc->nick;
-
-  my $target = $self->get_dialog($name);
-  return next_tick $self, $cb, '', {} if $target;
-
-  $target = $self->dialog({name => $name});
-  return $self->_proxy(whois => $name, $cb);
 }
 
 sub _send {
@@ -505,6 +492,8 @@ _event irc_topic => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my $dialog = $self->dialog({name => $msg->{params}[0], topic => $msg->{params}[1]});
+
+  $self->emit(state => topic => $dialog->TO_JSON)->save(sub { });
 
   return $self->_notice("Topic unset by $nick") unless $dialog->topic;
   return $self->_notice("$nick changed the topic to: " . $dialog->topic);

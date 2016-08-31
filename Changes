@@ -1,6 +1,11 @@
 Revision history for perl distribution Convos
 
-0.99_08 Not Released
+0.99_08 2016-09-01T22:35:25+0200
+ - Fix emitting topic changes to frontend
+ - Add dialog settings sidebar with topic and participants list
+ - Add support for "/query nick"
+ - Remove settings dropdown menu
+ - Replaced Roboto with system fonts
 
 0.99_07 2016-08-30T10:51:25+0200
  - Fix showing join/part messages in the correct channel

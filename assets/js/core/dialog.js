@@ -1,9 +1,10 @@
 (function() {
   Convos.Dialog = function(attrs) {
+    this.activated    = 0;
     this.active       = false;
     this.dialog_id    = "";
     this.frozen       = "";
-    this.activated    = 0;
+    this.is_private   = true;
     this.messages     = [];
     this.name         = "";
     this.lastRead     = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
@@ -178,13 +179,9 @@
         connection_id: this.connection_id,
         dialog_id: this.dialog_id
       }, function(err, xhr) {
-        if (err) return self.emit("error", err);
-
+        var messages = xhr.body.messages || [];
         self.messages = []; // clear old messages on ws reconnect
-        xhr.body.messages.forEach(function(msg) {
-          self.addMessage(msg, {method: "push", disableNotifications: true});
-        });
-
+        messages.forEach(function(msg) { self.addMessage(msg, {method: "push", disableNotifications: true}) });
         self.emit("join");
       }
     );
@@ -199,13 +196,8 @@
         disableUnread: true
       });
     } else if (!this.messages.length) {
-      this.addMessage(
-        {
-          message: "You have joined " + this.name + ", but no one has said anything as long as you have been here.",
-          type: "notice"
-        },
-        {disableUnread: true}
-      );
+      var message = this.is_private ? "What do you want to say to " + this.name + "?" : "You have joined " + this.name + ", but no one has said anything as long as you have been here.";
+      this.addMessage({message: message, type: "notice"}, {disableUnread: true});
     }
     if (Convos.settings.notifications == "default") {
       this.addMessage({type: "enable-notifications"});
@@ -215,7 +207,8 @@
   proto._setParticipants = function(msg) {
     this.participants = {};
     msg.participants.forEach(function(p) {
-      this.participants[p.name] = {name: p.name, seen: new Date()};
+      p.seen = new Date();
+      this.participants[p.name] = p;
     }.bind(this));
   };
 })();
