@@ -113,6 +113,8 @@ $convos-input-height: 46px;
   }
   &.highlight .message {
     background-color: color('red', 'lighten-5');
+    margin-left: -0.5rem;
+    padding-left: 0.5rem;
   }
   &.notice {
     border-left: 2px solid color('grey', 'lighten-1');
