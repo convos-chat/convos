@@ -48,3 +48,9 @@
 @import "header";
 @import "link-embedder";
 @import "sidebar";
+
+// Material-overrides
+
+html {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
