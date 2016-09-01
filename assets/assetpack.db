@@ -477,10 +477,10 @@ format=js
 minified=1
 mtime=1472758942
 [js-min:vue/convos-dialog-settings.vue]
-checksum=b777e2604c
+checksum=f2c676e753
 format=js
 minified=1
-mtime=1472761472
+mtime=1472765412
 [js-min:vue/convos-header-links.vue]
 checksum=7485f36fa4
 format=js
