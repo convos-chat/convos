@@ -5,7 +5,7 @@ permalink:        /:year/:i_month/:i_day/:slug.html
 
 # Setup
 title:            Convos
-tagline:          'A multiuser chat application.'
+tagline:          'Convos - Better group chat'
 description:      'A multiuser chat application.'
 url:              https://convos.by
 baseurl:          /
