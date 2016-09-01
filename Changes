@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_09 Not Released
+ - Fix sorting participants list
+
 0.99_08 2016-09-01T22:35:25+0200
  - Fix emitting topic changes to frontend
  - Add dialog settings sidebar with topic and participants list

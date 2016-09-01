@@ -5,7 +5,7 @@ use Convos::Core;
 use Convos::Util;
 use Mojo::JSON qw(false true);
 
-our $VERSION = '0.99_07';
+our $VERSION = '0.99_08';
 
 has core => sub {
   my $self    = shift;
@@ -156,7 +156,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_07
+0.99_08
 
 =head1 DESCRIPTION
 
