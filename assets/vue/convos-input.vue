@@ -7,24 +7,15 @@
   </div>
 </template>
 <script>
-var commands = [
-  "/me ",
-  "/help ",
-  "/msg ",
-  "/query ", // TODO
-  "/join #",
-  "/say ",
-  "/nick ",
-  "/whois ",
-  "/kick ",
-  "/names",
-  "/close",
-  "/part ",
-  "/mode ", // TODO
-  "/topic ",
-  "/disconnect",
-  "/connect"
-];
+var commands = Convos.commands.map(function(cmd) {
+  return "/" + cmd.command + " ";
+});
+
+Convos.commands.forEach(function(cmd) {
+  (cmd.aliases || []).forEach(function(a) {
+    commands.push("/" + a + " ");
+  });
+});
 
 module.exports = {
   props:    ["dialog", "user"],

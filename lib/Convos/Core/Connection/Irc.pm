@@ -176,7 +176,7 @@ sub send {
   return $self->_send(split(/\s+/, $message, 2), $cb) if $cmd eq 'MSG';
   return $self->connect($cb)    if $cmd eq 'CONNECT';
   return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
-  return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
+  return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN';
   return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
   return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
   return $self->participants($target, $cb) if $cmd eq 'NAMES';

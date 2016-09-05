@@ -15,7 +15,14 @@
     if (attrs) this.update(attrs);
   };
 
+  var aliases = {};
   var proto = Convos.Connection.prototype;
+
+  Convos.commands.forEach(function(cmd) {
+    (cmd.aliases || [cmd.command]).forEach(function(a) {
+      aliases[a] = cmd.alias_for || cmd.command;
+    });
+  });
 
   proto.getDialog = function(dialog_id) {
     return this.user.dialogs.filter(function(d) {
@@ -105,8 +112,12 @@
   proto.send = function(message, dialog, cb) {
     var self = this;
     var action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
-    var handler = "_sent" + action[1].toLowerCase().ucFirst();
     var id;
+
+    if (aliases[action[1]]) {
+      message = message.replace(/^\/(\w+)/, aliases[action[1]]);
+      action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
+    }
 
     if (action[1] == 'query') {
       if (action[2]) {
@@ -130,6 +141,7 @@
     );
 
     // Handle echo back from backend
+    var handler = "_sent" + action[1].toLowerCase().ucFirst();
     this.once("sent-" + id, function(msg) {
       if (cb) return cb.call(self, msg);
       self[self[handler] ? handler : "_onError"](msg);
@@ -196,7 +208,7 @@
     });
   };
 
-  proto._sentJoin = proto._sentJ = function(msg) {
+  proto._sentJoin = function(msg) {
     var dialog = this.user.ensureDialog(msg);
     dialog.emit("active").emit("join");
     Convos.settings.main = dialog.href();
