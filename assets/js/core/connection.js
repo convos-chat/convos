@@ -20,7 +20,7 @@
 
   Convos.commands.forEach(function(cmd) {
     (cmd.aliases || [cmd.command]).forEach(function(a) {
-      aliases[a] = cmd.alias_for || cmd.command;
+      aliases[a] = cmd.alias_for ? cmd.alias_for : "/" + cmd.command;
     });
   });
 
