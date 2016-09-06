@@ -337,10 +337,10 @@ format=js
 minified=1
 mtime=1473105950
 [js-min:js/core/connection.js]
-checksum=f78b113956
+checksum=8df9c0db83
 format=js
 minified=1
-mtime=1473105950
+mtime=1473144922
 [js-min:js/core/dialog.js]
 checksum=e818febbc8
 format=js
