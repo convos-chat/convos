@@ -3,18 +3,14 @@
     <i @click="sendMessage" class="material-icons waves-effect waves-light">send</i>
     <textarea v-model="message" v-el:input
       class="materialize-textarea" :placeholder="placeholder"
-      @keydown.enter="sendMessage" @keydown="autocomplete"></textarea>
+      @keydown.tab.prevent @keydown.enter="sendMessage"></textarea>
   </div>
 </template>
 <script>
-var commands = Convos.commands.map(function(cmd) {
-  return "/" + cmd.command + " ";
-});
+var commands = Convos.commands.map(function(cmd) { return cmd.command });
 
 Convos.commands.forEach(function(cmd) {
-  (cmd.aliases || []).forEach(function(a) {
-    commands.push("/" + a + " ");
-  });
+  (cmd.aliases || []).forEach(function(a) { commands.push(a); });
 });
 
 module.exports = {
@@ -28,56 +24,55 @@ module.exports = {
           return "What's on your mind " + nick + "?";
         }
         else {
-          return 'Cannot send any message, since ' + state + '.';
+          return "Cannot send any message, since " + state + ".";
         }
       } catch (err) {
-        console.log('[convos-input]', err);
+        console.log("[convos-input]", err);
         return "Please read the instructions on screen.";
       }
     }
   },
   data: function() {
-    return {message: ""};
+    return {completeVisible: false, message: ""};
   },
   methods: {
-    autocomplete: function(e) {
-      var needle;
-
-      // tab or shift
-      if (e.keyCode != 9 && e.keyCode != 16) return delete this.matchList;
-      if (e.keyCode == 16) return;
-
-      e.preventDefault();
-
-      if (!this.matchList) {
-        this.pos = this.$els.input.selectionStart;
-        this.before = this.message.substring(0, this.pos);
-        needle = "";
-
-        this.after = this.message.substring(this.pos);
-        this.before = this.before.replace(/(\S+)\s*$/, function(all, n) { needle = n; return ""; });
-        this.matchIndex = 0;
-        this.matchList = [needle].concat(this.participants());
-
-        if (!this.before.length) this.matchList = this.matchList.concat(commands);
-        if (needle) {
-          needle = new RegExp("^" + RegExp.escape(needle), "i");
-          this.matchList = this.matchList.filter(function(m) { return m.match(needle); });
+    autocompleteCommands: function() {
+      return {
+        match: /(^\/)(\S*)$/,
+        replace: function(cmd) { return "/" + cmd + " "; },
+        search: function(term, cb) {
+          cb($.map(commands, function(word) {
+            return word.indexOf(term) === 0 ? word : null;
+          }));
         }
-      }
-
-      this.matchIndex += e.shiftKey ? -1 : 1;
-      if (this.matchIndex < 0)
-        this.matchIndex = this.matchList.length - 1;
-      if (this.matchIndex == this.matchList.length)
-        this.matchIndex = 0;
-
-      this.message = this.before + this.matchList[this.matchIndex] + this.after;
-
-      if (this.after.length) {
-        var pos = this.pos + this.matchList[this.matchIndex].length - 1;
-        this.$nextTick(function() { this.$els.input.setSelectionRange(pos, pos); });
-      }
+      };
+    },
+    autocompleteEmoji: function() {
+      var emojis = Object.keys(emojione.emojioneList).filter(function(e) { return !e.match(/_tone/); }).sort();
+      return {
+        match: /(\B:)([\-+\w]*)$/,
+        replace: function(emoji) { return emoji + " "; },
+        template: function(emoji) { return emojione.toImage(emoji) + " " + emoji.replace(/:/g, ""); },
+        search: function(term, cb) {
+          cb($.map(emojis, function(emoji) {
+            return emoji.indexOf(term) === 1 ? emoji : null;
+          }));
+        },
+      };
+    },
+    autocompleteParticipants: function() {
+      var self = this;
+      return {
+        match: /(^|\s)(\w+)$/,
+        pre: "",
+        replace: function(p) { return this.pre + p + " "; },
+        search: function(term, cb, m) {
+          this.pre = m[0].match(/^\s/) ? " " : "";
+          cb($.map(self.participants(), function(word) {
+            return word.indexOf(term) === 0 ? word : null;
+          }));
+        }
+      };
     },
     focusInput: function() {
       if (!window.isMobile()) this.$nextTick(function() { this.$els.input.focus(); });
@@ -95,11 +90,10 @@ module.exports = {
         if (a.name > b.name) return -1;
         if (a.name < b.name) return 1;
         return 0;
-      }).map(function(p) {
-        return p.name + (this.after ? "" : this.before ? " " : ": ");
-      }.bind(this));
+      }).map(function(p) { return p.name });
     },
     sendMessage: function(e) {
+      if (this.completeVisible) return;
       e.preventDefault(); // cannot have lineshift in the input field
       var m = this.message;
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
@@ -112,15 +106,31 @@ module.exports = {
   ready: function() {
     var self = this;
     autosize(this.$els.input);
+
+    $(this.$els.input).textcomplete(
+      [
+        this.autocompleteCommands(),
+        this.autocompleteEmoji(),
+        this.autocompleteParticipants()
+      ],
+      {
+        dropdownClassName: "dropdown-content textcomplete-dropdown",
+        placement: "top",
+        zIndex: 901
+      }
+    ).on("textComplete:show", function() { self.completeVisible = true; }
+    ).on("textComplete:hide", function() { self.completeVisible = false; });
+
     this.dialog.on("active", this.focusInput);
     this.dialog.on("focusInput", this.focusInput);
     this.dialog.on("insertIntoInput", function(str) {
-      if (str.indexOf('/') == 0) return self.$els.input.value = str; // command
-      var val = self.$els.input.value.replace(/\s+$/, '');
+      if (str.indexOf("/") == 0) return self.$els.input.value = str; // command
+      var val = self.$els.input.value.replace(/\s+$/, "");
       if (val.length) val += " "
       self.$els.input.value = val + str + " ";
       self.focusInput();
     });
+
     this.focusInput();
   }
 };

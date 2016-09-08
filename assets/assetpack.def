@@ -7,6 +7,7 @@
 < http://code.jquery.com/jquery-1.11.3.min.js
 < http://vuejs.org/js/vue.js
 < http://cdn.jsdelivr.net/emojione/2.2.6/lib/js/emojione.min.js
+< https://github.com/yuku-t/jquery-textcomplete/raw/master/dist/jquery.textcomplete.min.js
 < js/autolink.js
 < js/eventemitter.js
 < js/storage.js

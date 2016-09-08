@@ -22,7 +22,6 @@
     });
 
     str = str.replace(codeToHtmlRe, function(all, esc, text) {
-      console.log(arguments);
       return esc ? all.replace(/^\\/, "") : "<code>" + text + "</code>";
     });
 

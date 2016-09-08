@@ -127,6 +127,10 @@ rel=cache/vuejs.org/js/vue.js
 format=js
 mtime=1459386269
 rel=cache/vuejs.org/js/vue.min.js
+[original:https://github.com/yuku-t/jquery-textcomplete/raw/master/dist/jquery.textcomplete.min.js]
+format=js
+mtime=1473358699
+rel=cache/github.com/yuku-t/jquery-textcomplete/raw/master/dist/jquery.textcomplete.min.js
 [js-min:https://raw.githubusercontent.com/Dogfalo/materialize/master/js/animation.js]
 checksum=78e4bae635
 format=js
@@ -460,7 +464,7 @@ format=js
 minified=1
 mtime=1472501152
 [sass:sass/main.scss]
-checksum=ff235b92a5
+checksum=0604b4a83f
 format=css
 minified=0
 mtime=1472668085

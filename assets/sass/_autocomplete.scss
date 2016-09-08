@@ -15,3 +15,10 @@ div.autocomplete {
     a, span { display: block; }
   }
 }
+
+ul.textcomplete-dropdown {
+  opacity: 1 !important;
+  margin-left: 15px;
+  li { min-height: auto; }
+  li > a { padding: 6px 16px; }
+}

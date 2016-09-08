@@ -7,6 +7,8 @@ Revision history for perl distribution Convos
  - Add clickable emails
  - Add support for markdown formatting for <code/>
  - Add support for rendering emojis #186
+ - Add support for autocomplete emoji in <convos-input/>
+ - Change autocomplete method for <convos-input/>
 
 0.99_08 2016-09-01T22:35:25+0200
  - Fix emitting topic changes to frontend

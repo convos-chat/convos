@@ -4676,6 +4676,14 @@ div.autocomplete {
     div.autocomplete li a, div.autocomplete li span {
       display: block; }
 
+ul.textcomplete-dropdown {
+  opacity: 1 !important;
+  margin-left: 15px; }
+  ul.textcomplete-dropdown li {
+    min-height: auto; }
+  ul.textcomplete-dropdown li > a {
+    padding: 6px 16px; }
+
 .convos-chat {
   position: relative;
   width: 100vw;
