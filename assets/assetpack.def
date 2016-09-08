@@ -1,10 +1,12 @@
 ! convos.css
 << https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/materialize.scss
+< http://cdn.jsdelivr.net/emojione/2.2.6/assets/css/emojione.min.css
 < sass/main.scss
 
 ! convos.js
 < http://code.jquery.com/jquery-1.11.3.min.js
 < http://vuejs.org/js/vue.js
+< http://cdn.jsdelivr.net/emojione/2.2.6/lib/js/emojione.min.js
 < js/autolink.js
 < js/eventemitter.js
 < js/storage.js

@@ -7,7 +7,7 @@
   var codeToHtmlRe = new RegExp("(\\\\?)`([^`]+)`", "g");
   var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
   Vue.filter("markdown", function(str) {
-    return str.replace(mdToHtmlRe, function(all, b, esc, md, text) {
+    str = str.replace(mdToHtmlRe, function(all, b, esc, md, text) {
       if (md.match(/^_/) && text.match(/^[A-Z]+$/)) return all; // Avoid __DATA__
       switch (md.length) {
         case 1:
@@ -19,9 +19,13 @@
         default:
           return all;
       }
-    }).replace(codeToHtmlRe, function(all, esc, text) {
+    });
+
+    str = str.replace(codeToHtmlRe, function(all, esc, text) {
       console.log(arguments);
       return esc ? all.replace(/^\\/, "") : "<code>" + text + "</code>";
     });
+
+    return emojione.toImage(str);
   });
 })();
