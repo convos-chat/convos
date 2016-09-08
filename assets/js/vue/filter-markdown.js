@@ -6,8 +6,9 @@
 
   var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
   Vue.filter("markdown", function(str) {
-    return str.replace(mdToHtmlRe, function(all, b, esc, tag, text) {
-      switch (tag.length) {
+    return str.replace(mdToHtmlRe, function(all, b, esc, md, text) {
+      if (md.match(/^_/) && text.match(/^[A-Z]+$/)) return all; // Avoid __DATA__
+      switch (md.length) {
         case 1:
           return esc ? all.replace(/^\\/, "") : b + "<em>" + text + "</em>";
         case 2:
