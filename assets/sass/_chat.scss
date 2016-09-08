@@ -139,6 +139,12 @@ $convos-input-height: 46px;
     }
   }
 
+  code {
+    background: darken($body-bg, 5%);
+    outline: 1px solid darken($body-bg, 15%);
+    padding: 1px 3px;
+  }
+
   .secondary-content {
     position: absolute;
     top: 2px;

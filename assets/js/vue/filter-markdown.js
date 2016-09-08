@@ -4,6 +4,7 @@
   // ***foo*** or ___foo___ = <em><strong>foo</strong></em>
   // \*foo*    or \_foo_    = *foo* or _foo_
 
+  var codeToHtmlRe = new RegExp("(\\\\?)`([^`]+)`", "g");
   var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
   Vue.filter("markdown", function(str) {
     return str.replace(mdToHtmlRe, function(all, b, esc, md, text) {
@@ -18,6 +19,9 @@
         default:
           return all;
       }
+    }).replace(codeToHtmlRe, function(all, esc, text) {
+      console.log(arguments);
+      return esc ? all.replace(/^\\/, "") : "<code>" + text + "</code>";
     });
   });
 })();
