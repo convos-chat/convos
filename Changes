@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix sorting participants list
  - Add support for /ns (/msg nickserv)
  - Add support for /cs (/msg chanserv)
+ - Add clickable emails
 
 0.99_08 2016-09-01T22:35:25+0200
  - Fix emitting topic changes to frontend
