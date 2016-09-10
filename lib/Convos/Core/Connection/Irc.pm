@@ -154,8 +154,9 @@ sub rooms {
     channels => sub {
       my ($irc, $err, $map) = @_;
       $cache->{$host} = [map { my $c = $map->{$_}; $c->{name} = $_; $c } keys %$map];
+      delete $cache->{$host} unless @{$cache->{$host}};
       Mojo::IOLoop->timer(ROOM_CACHE_TIMER, sub { delete $cache->{$host} });
-      $self->$cb($err, $cache->{$host});
+      $self->$cb($cache->{$host} ? $err : 'No rooms.', $cache->{$host} || []);
     },
   );
 }
