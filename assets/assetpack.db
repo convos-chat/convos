@@ -464,10 +464,10 @@ format=js
 minified=1
 mtime=1472501152
 [sass:sass/main.scss]
-checksum=0604b4a83f
+checksum=7058f37946
 format=css
 minified=0
-mtime=1472668085
+mtime=1473499835
 [sass-min:sass/main.scss]
 checksum=63cd4d6ba1
 format=css

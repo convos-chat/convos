@@ -37,7 +37,7 @@ module.exports = {
   },
   computed: {
     dialog: function() {
-      return this.user.getActiveDialog();
+      return this.user.getActiveDialog() || new Convos.Dialog({});
     },
     participants: function() {
       if (!this.dialog) return [];

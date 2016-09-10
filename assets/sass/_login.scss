@@ -7,8 +7,8 @@
   }
 
   .about {
-    &, a { @extend .grey-text, .text-lighten-1; }
-    a:hover { @extend .grey-text };
+    &, a { color: lighten($text-color, 40%); }
+    a:hover { color: $text-color; };
     padding-top: 2em;
   }
 }

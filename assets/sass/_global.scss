@@ -1,5 +1,6 @@
 body {
   background-color: $body-bg;
+  color: $text-color;
 }
 
 h1, h2, h3, h4, h5 {
@@ -35,8 +36,8 @@ button.btn[disabled] {
 }
 
 div.alert {
-  background: color('red', 'lighten-5');
-  border: 1px solid color('red', 'lighten-2');
+  background: $error-bg-color;
+  border: 1px solid $error-border-color;
   border-radius: 2px;
   color: color('red', 'darken-2');
   padding: $card-padding / 2;
@@ -88,6 +89,10 @@ div.alert {
   }
 }
 
+.dropdown-content li {
+  color: $text-color;
+}
+
 .select-wrapper {
   ul {
     display: block;
@@ -98,13 +103,13 @@ div.alert {
   }
 
   input.select-dropdown {
-    color: #000;
+    color: $text-color;
   }
 }
 
 #vue_tooltip {
   background-color: #323232;
-  color: #fff;
+  color: #fefefe;
   font-size: 1rem;
   line-height: 120%;
   text-align: center;

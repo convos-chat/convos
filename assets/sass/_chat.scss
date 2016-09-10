@@ -86,7 +86,7 @@ $convos-input-height: 46px;
   &.error, &.notice {
     padding-left: $gutter-width / 2;
     padding-right: $gutter-width / 2;
-    border-left: 2px solid color('grey', 'lighten-1');
+    border-left: 2px solid $input-border-color;
   }
   &.action {
     .message, a.title {
@@ -104,21 +104,21 @@ $convos-input-height: 46px;
     margin-bottom: $gutter-width;
     height: $gutter-width / 2;
     &:hover { background: transparent; }
-    span { background: #fff; padding: 0 8px; }
+    span { background: $body-bg; padding: 0 8px; }
   }
   &.error {
-    border-left: 2px solid color('red', 'accent-3');
-    color: lighten($off-black, 40%);
-    a { color: lighten(color('red', 'accent-3'), 20%); }
+    border-left: 2px solid $error-border-color;
+    color: $notice-text-color;
+    a { color: lighten($error-text-color, 20%); }
   }
   &.highlight .message {
-    background-color: color('red', 'lighten-5');
+    background-color: $highlight-bg-color;
     margin-left: -0.5rem;
     padding-left: 0.5rem;
   }
   &.notice {
-    border-left: 2px solid color('grey', 'lighten-1');
-    color: lighten($off-black, 40%);
+    border-left: 2px solid $notice-border-color;
+    color: lighten($text-color, 40%);
     a { color: lighten($link-color, 20%); }
   }
   &.same-user {
@@ -150,7 +150,7 @@ $convos-input-height: 46px;
     top: 2px;
     right: 0;
     &, a {
-      color: color('grey', 'darken-1');
+      color: lighten($text-color, 10%);
       font-size: 0.8rem;
       overflow: hidden;
       display: block;
