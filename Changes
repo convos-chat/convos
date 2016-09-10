@@ -4,10 +4,11 @@ Revision history for perl distribution Convos
  - Fix sorting participants list
  - Add support for /ns (/msg nickserv)
  - Add support for /cs (/msg chanserv)
- - Add clickable emails
+ - Add clickable emails #265
  - Add support for markdown formatting for <code/>
  - Add support for rendering emojis #186
- - Add support for autocomplete emoji in <convos-input/>
+ - Add support for autocomplete emoji in <convos-input/> #186
+ - Add support for custom color themes #161
  - Change autocomplete method for <convos-input/>
 
 0.99_08 2016-09-01T22:35:25+0200

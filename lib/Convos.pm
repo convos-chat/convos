@@ -7,13 +7,8 @@ use Mojo::JSON qw(false true);
 
 our $VERSION = '0.99_08';
 
-has core => sub {
-  my $self    = shift;
-  my $backend = $self->config('backend');
-  eval "require $backend;1" or die $@;
-  Convos::Core->new(backend => $backend->new);
-};
-
+has core => sub { Convos::Core->new(backend => shift->config('backend')) };
+has _custom_assets => sub { Mojolicious::Static->new };
 has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
 
 sub startup {
@@ -32,6 +27,7 @@ sub startup {
 
   # Add basic routes
   $r->get('/')->to(template => 'convos')->name('index');
+  $r->get('/custom/asset/*file' => \&_action_custom_asset);
   $r->websocket('/events')->to('events#start')->name('events');
 
   # Autogenerate routes from the OpenAPI specification
@@ -57,6 +53,19 @@ sub startup {
   $core->backend->register_plugin($_, $core, $plugins->{$_})
     for grep { $plugins->{$_} } keys %$plugins;
   $core->start if $ENV{CONVOS_START_BACKEND} // 1;
+}
+
+# Used internally to generate dynamic SASS files
+sub _action_custom_asset {
+  my $c      = shift;
+  my $static = $c->app->_custom_assets;
+  my $asset  = $static->file(Mojo::Path->new($c->stash('file'))->canonicalize);
+
+  # Can never render 404, since that will make AssetPack croak
+  return $c->render(text => "// not found\n", status => 200) unless $asset;
+  $c->app->log->info('Loading custom asset: ' . $asset->path);
+  $static->serve_asset($c, $asset);
+  $c->rendered;
 }
 
 sub _add_helpers {
@@ -91,9 +100,17 @@ sub _add_helpers {
 }
 
 sub _assets {
-  my $self = shift;
+  my $self          = shift;
+  my $custom_assets = $self->core->home->rel_dir('assets');
 
   $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine Reloader)]});
+
+  if (-d $custom_assets) {
+    $self->log->info("Including files from $custom_assets when building frontend.");
+    $self->_custom_assets->paths([$custom_assets]);
+    unshift @{$self->asset->store->paths}, $custom_assets;
+  }
+
   $self->asset->pipe('Favicon')
     ->api_key($ENV{REALFAVICONGENERATOR_API_KEY} || 'REALFAVICONGENERATOR_API_KEY=is_not_set')
     ->design({desktop_browser => {}, ios => {}});

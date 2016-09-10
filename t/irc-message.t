@@ -5,7 +5,7 @@ use Convos::Core;
 use Convos::Core::Backend::File;
 
 my @date = split '-', Time::Piece->new->strftime('%Y-%m');
-my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
+my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $t = t::Helper->connect_to_irc($connection);

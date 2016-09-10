@@ -6,6 +6,7 @@
 @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/color";
 
 // Variables;
+@import "http://local/custom/asset/sass/variables.scss"; // special case that AssetPack handles
 @import "variables";
 @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/variables";
 

@@ -4,7 +4,7 @@ use Convos::Core::Backend::File;
 use List::Util 'sum';
 use Time::HiRes 'time';
 
-my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
+my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user;
 
 diag 'jhthorsen connections';
@@ -37,7 +37,7 @@ $user->connection({name => 'magnet', protocol => 'irc'})
 my $expected = 5;
 
 diag 'restart core';
-$core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
+$core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 
 my %connect;
 Mojo::Util::monkey_patch(
