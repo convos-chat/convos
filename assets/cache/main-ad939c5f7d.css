@@ -5069,8 +5069,10 @@ img.embed {
   float: right;
   top: -6px; }
 
+.convos-dialog-settings .li-link:hover,
 .convos-dialog-settings .notification:hover,
 .convos-dialog-settings .participant:hover,
+.convos-notifications .li-link:hover,
 .convos-notifications .notification:hover,
 .convos-notifications .participant:hover {
   background-color: #f0f0f0; }
@@ -5088,18 +5090,38 @@ img.embed {
 
 .convos-dialog-settings .notification,
 .convos-notifications .notification {
+  display: block;
   cursor: pointer;
   padding-top: 4px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0; }
-  .convos-dialog-settings .notification.read,
-  .convos-notifications .notification.read {
-    opacity: 0.7; }
+
+.convos-dialog-settings .li-link,
+.convos-notifications .li-link {
+  padding-top: 4px;
+  padding-bottom: 4px; }
+  .convos-dialog-settings .li-link a,
+  .convos-notifications .li-link a {
+    display: block; }
+  .convos-dialog-settings .li-link i,
+  .convos-notifications .li-link i {
+    float: right; }
+
+.convos-dialog-settings .li-link,
+.convos-dialog-settings .participant,
+.convos-notifications .li-link,
+.convos-notifications .participant {
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: -1px; }
+
+.convos-dialog-settings .notification.read,
+.convos-notifications .notification.read {
+  opacity: 0.7; }
 
 .convos-dialog-settings .participant,
 .convos-notifications .participant {
-  padding: 4px 0;
-  border-top: 1px solid #f0f0f0; }
+  padding: 4px 0; }
   .convos-dialog-settings .participant .secondary-content,
   .convos-notifications .participant .secondary-content {
     margin: 0; }
