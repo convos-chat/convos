@@ -3,7 +3,7 @@
     this.activated    = 0;
     this.active       = false;
     this.dialog_id    = "";
-    this.frozen       = "";
+    this.frozen       = "Loading...";
     this.is_private   = true;
     this.messages     = [];
     this.name         = "";
@@ -154,7 +154,16 @@
   };
 
   proto.update = function(attrs) {
-    Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
+    var self = this;
+    var frozen = this.frozen;
+
+    Object.keys(attrs).forEach(function(n) { self[n] = attrs[n]; });
+    if (attrs.hasOwnProperty("frozen") && attrs.frozen == "" && frozen && !this.is_private) {
+      this.user.ws.when("open", function() {
+        self.connection().send("/names", self, self._setParticipants.bind(self));
+      });
+    }
+
     return this;
   };
 
@@ -170,10 +179,6 @@
   proto._load = function() {
     var self = this;
 
-    this.user.ws.when("open", function() {
-      self.connection().send("/names", self, self._setParticipants.bind(self));
-    });
-
     Convos.api.messages(
       {
         connection_id: this.connection_id,
@@ -182,7 +187,7 @@
         var messages = xhr.body.messages || [];
         self.messages = []; // clear old messages on ws reconnect
         messages.forEach(function(msg) { self.addMessage(msg, {method: "push", disableNotifications: true}) });
-        self.emit("join");
+        self._onJoin();
       }
     );
   };

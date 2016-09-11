@@ -4,15 +4,20 @@
     <div class="content">
       <div class="row">
         <div class="col s12">
-          <h5>
-            <a href="#close" @click.prevent="send('/close')" v-tooltip="closeTooltip()" class="btn-floating waves-effect waves-light green" v-if="dialog"><i class="material-icons">close</i></a>
-            Topic
-          </h5>
-          <p v-if="!dialog.is_private">{{dialog ? dialog.topic || 'No topic is set.' : 'No active dialog.'}}</p>
+          <h5>About {{dialog.name || 'Convos'}}</h5>
+          <p v-if="!dialog.is_private">{{{dialog ? dialog.topic || 'No topic is set.' : 'No active dialog.' | markdown mOpts}}}</p>
           <p v-if="dialog.is_private">You're in a private conversation.</p>
         </div>
       </div>
-      <div class="row" v-if="participants.length">
+      <div class="row">
+        <div class="col s12 li-link">
+          <a href="#close" @click.prevent="send('/close')" v-if="dialog">
+            <i class="material-icons">close</i>
+            {{closeTooltip()}}
+          </a>
+        </div>
+      </div>
+      <div class="row">
         <div class="col s12">
           <h5>Participants ({{participants.length}})</h5>
         </div>
@@ -33,7 +38,7 @@
 module.exports = {
   props: ["user"],
   data: function() {
-    return {modes: {'@': '+o', '+': '+v'}};
+    return {mOpts: {escape: true, links: true}, modes: {'@': '+o', '+': '+v'}};
   },
   computed: {
     dialog: function() {
@@ -41,9 +46,15 @@ module.exports = {
     },
     participants: function() {
       if (!this.dialog) return [];
-      return Object.keys(this.dialog.participants)
+
+      var nick = this.dialog.connection().nick();
+      var list = this.dialog.name == nick ? [nick]
+               : this.dialog.is_private ? [this.dialog.name, nick]
+               : Object.keys(this.dialog.participants);
+
+      return list
         .sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); })
-        .map(function(k) { return this.dialog.participants[k]; }.bind(this));
+        .map(function(k) { return this.dialog.participants[k] || {name: k}; }.bind(this));
     }
   },
   methods: {

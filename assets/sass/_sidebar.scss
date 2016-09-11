@@ -91,12 +91,16 @@
     top: -6px;
   }
 
+  .li-link,
   .notification,
   .participant {
     &:hover {
       background-color: darken($body-bg, 6%);
     }
+  }
 
+  .notification,
+  .participant {
     h5, .secondary-content {
       font-size: $h6-fontsize;
       line-height: 110%;
@@ -105,17 +109,33 @@
   }
 
   .notification {
+    display: block;
     cursor: pointer;
     padding-top: 4px;
     padding-bottom: 8px;
     border-bottom: 1px solid darken($body-bg, 6%);
+  }
 
+  .li-link {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    a { display: block; }
+    i { float: right; }
+  }
+
+  .li-link,
+  .participant {
+    border-top: 1px solid darken($body-bg, 6%);
+    border-bottom: 1px solid darken($body-bg, 6%);
+    margin-bottom: -1px;
+  }
+
+  .notification {
     &.read { opacity: 0.7; }
   }
 
   .participant {
     padding: 4px 0;
-    border-top: 1px solid darken($body-bg, 6%);
     .secondary-content { margin: 0; }
   }
 }

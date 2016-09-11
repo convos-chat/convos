@@ -6,7 +6,10 @@
 
   var codeToHtmlRe = new RegExp("(\\\\?)`([^`]+)`", "g");
   var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
-  Vue.filter("markdown", function(str) {
+  Vue.filter("markdown", function(str, args) {
+    if (!args) args = {emoji: true};
+    if (args.escape) str = str.xmlEscape();
+
     str = str.replace(mdToHtmlRe, function(all, b, esc, md, text) {
       if (md.match(/^_/) && text.match(/^[A-Z]+$/)) return all; // Avoid __DATA__
       switch (md.length) {
@@ -25,6 +28,9 @@
       return esc ? all.replace(/^\\/, "") : "<code>" + text + "</code>";
     });
 
-    return emojione.toImage(str);
+    if (args.emoji) str = emojione.toImage(str);
+    if (args.links) str = str.autoLink({target: "_blank"});
+
+    return str;
   });
 })();
