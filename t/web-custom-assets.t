@@ -2,6 +2,8 @@ use t::Helper;
 use File::Basename;
 use File::Path 'make_path';
 
+plan skip_all => 'cpanm CSS::Sass' unless eval 'use CSS::Sass 3.3.0;1';
+
 my $variables = File::Spec->catfile($ENV{CONVOS_HOME}, qw(assets sass _variables.scss));
 
 eval { make_path(dirname($variables)) } or diag $@;
