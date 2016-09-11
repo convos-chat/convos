@@ -51,7 +51,7 @@ sub start {
 
   Scalar::Util::weaken($self);
   $self->{connect_tid} = Mojo::IOLoop->recurring(
-    $ENV{CONVOS_CONNECT_DELAY} || 2,
+    $ENV{CONVOS_CONNECT_DELAY} || 3,
     sub {
       for my $host (keys %{$self->{connect_queue} || {}}) {
         my $connection = shift @{$self->{connect_queue}{$host}} or next;
