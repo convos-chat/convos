@@ -1,5 +1,6 @@
 <template>
   <div class="convos-message notice">
+    <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
     <a href="#chat" class="title">{{msg.from}}</a>
     <div class="message">
       <a href="#chat:{{msg.nick}}" @click.prevent="send('/query ' + msg.nick)">{{msg.nick}}</a>
@@ -10,7 +11,6 @@
         <a href="#join:{{name}}" @click.prevent="send('/join ' + name)">{{name}}</a>
       </template>.
     </div>
-    <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
   </div>
 </template>
 <script>

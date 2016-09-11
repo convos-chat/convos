@@ -1,5 +1,6 @@
 <template>
   <div class="convos-message notice">
+    <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
     <a href="#chat" class="title">{{msg.from}}</a>
     <div class="message">
       <template v-if="n > 1">{{nParticipants | capitalize}} participants</template>
@@ -8,7 +9,6 @@
       <template v-for="p in participants">
         <a href="#query:{{p.name}}" @click.prevent="query(p)">{{p.mode}}{{p.name}}</a>{{$index + 2 == n ? " and " : $index + 1 == n ? "" : ", "}}</template>.
     </div>
-    <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
   </div>
 </template>
 <script>
