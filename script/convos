@@ -79,8 +79,6 @@ sub ensure_dependencies {
   my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
 
-  die "usage: ./script/convos install [--develop]\n" if ($mode && $mode ne '--develop');
-
   our $cpanfile_mode = 'default';
   local *main::on = sub { local $cpanfile_mode = shift; shift->() };
   local *main::test_requires = sub { };
@@ -97,7 +95,10 @@ sub ensure_dependencies {
     push @missing, [$module, $version, $e, $cpanfile_mode];
   };
 
-  unless (-r $cpanm[1]) {
+  if ($action eq 'install' and $mode and $mode ne '--develop') {
+    die "Usage: $0 install [--develop]\n" if $mode and $mode ne '--develop';
+  }
+  if (!-r $cpanm[1]) {
     main::requires('App::cpanminus', '1.7016');    # cpanm -M ... is required
     @cpanm = qw(cpanm);
   }
