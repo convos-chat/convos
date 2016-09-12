@@ -79,5 +79,17 @@ Convos.commands = [
     alias_for: "/msg nickserv",
     description: 'Short for "/msg nickserv ...".',
     example: "/ns <msg>"
+  },
+  {
+    command: "hs",
+    alias_for: "/msg hostserv",
+    description: 'Short for "/msg hostserv ...".',
+    example: "/hs <msg>"
+  },
+    {
+    command: "bs",
+    alias_for: "/msg botserv",
+    description: 'Short for "/msg botserv ...".',
+    example: "/bs <msg>"
   }
 ];
