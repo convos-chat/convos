@@ -126,30 +126,30 @@
   };
 
   proto.participant = function(data) {
-    if (data.type == "join") {
-      this.participants[data.nick] = {name: data.nick, seen: new Date()};
-      this.addMessage({message: data.nick + " joined.", from: this.connection_id, type: "notice"});
-    }
-    else if (data.type == "nick_change") {
-      if (this.participants[data.old_nick]) {
-        delete this.participants[data.old_nick];
-        this.participants[data.nick] = {name: data.nick, seen: new Date()};
-        this.addMessage({message: data.old_nick + " changed nick to " + data.new_nick + ".", from: this.connection_id, type: "notice"});
-      }
-    }
-    else if (data.type == "maintain") {
-      if (this.participants[data.nick || data.name]) {
+    if (this.dialog_id != data.dialog_id) return;
+    if (!data.nick) data.nick = data.new_nick || data.name;
+
+    switch (data.type) {
+      case "join":
+        Vue.set(this.participants, data.nick, {name: data.nick, seen: new Date()});
+        this.addMessage({message: data.nick + " joined.", from: this.connection_id, type: "notice"});
+        break;
+      case "maintain":
         this.participants[data.nick || data.name].seen = data.ts || new Date();
-      }
-    }
-    else if(this.participants[data.nick]) { // part
-      var message = data.nick + " parted.";
-      delete this.participants[data.nick];
-      if (data.kicker) {
-        message = data.nick + " was kicked by " + data.kicker + ".";
+        break;
+      case "nick_change":
+        console.log("nick_change:::::::::::::", data);
+        Vue.delete(this.participants, data.old_nick);
+        Vue.set(this.participants, data.nick, {name: data.nick, seen: new Date()});
+        this.addMessage({message: data.old_nick + " changed nick to " + data.nick + ".", from: this.connection_id, type: "notice"});
+        break;
+      default: // part
+        if (!this.participants[data.nick]) return;
+        var message = data.nick + " parted.";
+        Vue.delete(this.participants, data.nick);
+        if (data.kicker) message = data.nick + " was kicked by " + data.kicker + ".";
         if (data.message) message += " Reason: " + data.message;
-      }
-      this.addMessage({message: message, from: this.connection_id, type: "notice"});
+        this.addMessage({message: message, from: this.connection_id, type: "notice"});
     }
   };
 

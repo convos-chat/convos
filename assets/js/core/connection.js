@@ -24,6 +24,11 @@
     });
   });
 
+  proto.dialogs = function() {
+    var id = this.connection_id;
+    return this.user.dialogs.filter(function(d) { return d.connection_id == id; });
+  };
+
   proto.getDialog = function(dialog_id) {
     return this.user.dialogs.filter(function(d) {
       return d.connection_id == this.connection_id && d.dialog_id == dialog_id;
@@ -258,25 +263,19 @@
         break;
       case "join":
       case "part":
-        this.user.dialogs.forEach(function(d) {
-          if (d.connection_id == data.connection_id && d.dialog_id == data.dialog_id) {
-            d.participant(data);
-          }
-        });
-        break;
-      case "mode":
-        var message = data.from + ' set mode ' + data.mode;
-        if (data.nick) message += ' on ' + data.nick + '.';
-        this.user.ensureDialog(data).addMessage({type: "notice", message: message, ts: data.ts});
-        break;
-      case "nick_change":
-        this.user.dialogs.forEach(function(d) {
-          if (d.connection_id == data.connection_id) d.participant(data);
-        });
+        this.dialogs().forEach(function(d) { d.participant(data); });
         break;
       case "me":
         if (this.me.nick != data.nick) this.notice('You changed nick to ' + data.nick + '.');
         this.me.nick = data.nick;
+        break;
+      case "mode":
+      case "nick_change":
+      case "quit":
+        this.dialogs().forEach(function(d) {
+          data.dialog_id = d.dialog_id;
+          d.participant(data);
+        });
         break;
     }
   };

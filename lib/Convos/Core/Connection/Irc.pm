@@ -460,7 +460,7 @@ _event irc_quit => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
 
-  $self->emit(state => part => {nick => $nick, message => $msg->{params}[1] // ''});
+  $self->emit(state => quit => {nick => $nick, message => join ' ', @{$msg->{params}}});
 };
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
