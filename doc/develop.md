@@ -159,7 +159,7 @@ powered JSON API with a thin logical layer inside the controllers:
 
 ### Convos core
 
-                .---------.
+                  .---------.
               ____| Backend |
     .------._/    '---------'
     | Core |
