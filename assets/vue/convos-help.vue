@@ -24,15 +24,7 @@
             </template>
           </dl>
           <h5>Resources</h5>
-          <ul>
-            <li><a target="_blank" href="http://convos.by">Project homepage</a></li>
-            <li><a target="_blank" href="https://github.com/Nordaaker/convos/issues">Bug/issue tracker</a></li>
-            <li><a target="_blank" href="https://github.com/Nordaaker/convos">Source code</a></li>
-          </ul>
-          <p>
-            It is also possible to chat with us in the "#convos" channel on
-            <a target="_blank" href="http://freenode.net/">irc.freenode.net</a>.
-          </p>
+          <convos-resources></convos-resources>
         </div>
       </div>
     </div>

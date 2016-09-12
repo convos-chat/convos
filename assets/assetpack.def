@@ -52,6 +52,7 @@
 
 # sidebars
 < vue/convos-help.vue
+< vue/convos-resources.vue
 < vue/convos-notifications.vue
 < vue/convos-dialog-settings.vue
 < vue/convos-profile.vue

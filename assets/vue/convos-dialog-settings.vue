@@ -1,10 +1,18 @@
 <template>
   <div class="convos-dialog-settings is-sidebar">
     <header><convos-header-links :user="user"></convos-header-links></header>
-    <div class="content">
+    <div class="content" v-if="!dialog">
       <div class="row">
         <div class="col s12">
-          <h5>About {{dialog.name || 'Convos'}}</h5>
+          <h5>About Convos</h5>
+          <convos-resources></convos-resources>
+        </div>
+      </div>
+    </div>
+    <div class="content" v-if="dialog">
+      <div class="row">
+        <div class="col s12">
+          <h5>About {{dialog.name}}</h5>
           <p v-if="!dialog.is_private">{{{dialog ? dialog.topic || 'No topic is set.' : 'No active dialog.' | markdown mOpts}}}</p>
           <p v-if="dialog.is_private">You're in a private conversation.</p>
         </div>
@@ -42,7 +50,7 @@ module.exports = {
   },
   computed: {
     dialog: function() {
-      return this.user.getActiveDialog() || new Convos.Dialog({});
+      return this.user.getActiveDialog();
     },
     participants: function() {
       if (!this.dialog) return [];
