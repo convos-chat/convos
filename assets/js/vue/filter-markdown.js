@@ -4,6 +4,13 @@
   // ***foo*** or ___foo___ = <em><strong>foo</strong></em>
   // \*foo*    or \_foo_    = *foo* or _foo_
 
+  var text2emoji = {
+    ":)": ":smile:",
+    ":(": ":disappointed:",
+    "&lt;3": ":heart:",
+    "<3": ":heart:"
+  };
+
   var codeToHtmlRe = new RegExp("(\\\\?)`([^`]+)`", "g");
   var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
   Vue.filter("markdown", function(str, args) {
@@ -28,7 +35,13 @@
       return esc ? all.replace(/^\\/, "") : "<code>" + text + "</code>";
     });
 
-    if (args.emoji) str = emojione.toImage(str);
+    if (args.emoji) {
+      str = str.replace(/(^|\s)(&lt;3|<3|\:[\(\)])(?=\s|$)/g, function(m, pre, emoji) {
+        return pre + (text2emoji[emoji] || emoji);
+      });
+      str = emojione.toImage(str);
+    }
+
     if (args.links) str = str.autoLink({target: "_blank"});
 
     return str;
