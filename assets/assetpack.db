@@ -348,10 +348,10 @@ format=js
 minified=1
 mtime=1473360257
 [js-min:js/core/commands.js]
-checksum=9f8441b22b
+checksum=68c1999296
 format=js
 minified=1
-mtime=1473370413
+mtime=1473700581
 [js-min:js/core/connection.js]
 checksum=8df9c0db83
 format=js
@@ -528,10 +528,10 @@ format=js
 minified=1
 mtime=1472064913
 [js-min:vue/convos-message-action.vue]
-checksum=58d5082ef4
+checksum=d1c0058981
 format=js
 minified=1
-mtime=1473626637
+mtime=1473712293
 [js-min:vue/convos-message-day-changed.vue]
 checksum=a931c56bca
 format=js
