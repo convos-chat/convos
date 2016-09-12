@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-0.99_09 Not Released
+0.99_09 2016-09-11T22:53:31+0200
  - Fix sorting participants list
  - Add support for /ns (/msg nickserv)
  - Add support for /cs (/msg chanserv)
@@ -9,6 +9,10 @@ Revision history for perl distribution Convos
  - Add support for rendering emojis #186
  - Add support for autocomplete emoji in <convos-input/> #186
  - Add support for custom color themes #161
+ - Change dialog settings less confusing
+   * Render dialog title with markdown formatting and links
+   * Getting participants list is more consistent after reconnect
+   * Changed rendering of "close" button into a list item
  - Change autocomplete method for <convos-input/>
 
 0.99_08 2016-09-01T22:35:25+0200
