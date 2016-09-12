@@ -79,6 +79,8 @@ sub ensure_dependencies {
   my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
 
+  die "usage: ./script/convos install [--develop]\n" if($mode && $mode ne '--develop') ;
+
   our $cpanfile_mode = 'default';
   local *main::on = sub { local $cpanfile_mode = shift; shift->() };
   local *main::test_requires = sub { };
