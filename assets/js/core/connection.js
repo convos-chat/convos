@@ -233,6 +233,7 @@
   };
 
   proto._sentWhois = function(msg) {
+    if (msg.errors) return this._onError(msg);
     var dialog = this.user.getActiveDialog();
     if (!dialog) return;
     msg.from = this.connection_id;

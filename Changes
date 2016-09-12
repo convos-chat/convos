@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_10 Not Released
+ - Fix handling of "/whois nick" when "nick" is offline
+
 0.99_09 2016-09-11T22:53:31+0200
  - Fix sorting participants list
  - Add support for /ns (/msg nickserv)
