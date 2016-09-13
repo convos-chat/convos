@@ -135,10 +135,15 @@
         this.addMessage({message: data.nick + " joined.", from: this.connection_id, type: "notice"});
         break;
       case "maintain":
-        this.participants[data.nick || data.name].seen = data.ts || new Date();
+        if (!this.participants[data.nick]) return;
+        this.participants[data.nick].seen = data.ts || new Date();
+        break;
+      case "mode":
+        if (!this.participants[data.nick]) return;
+        this.participants[data.nick].mode = data.mode;
         break;
       case "nick_change":
-        console.log("nick_change:::::::::::::", data);
+        if (!this.participants[data.nick]) return;
         Vue.delete(this.participants, data.old_nick);
         Vue.set(this.participants, data.nick, {name: data.nick, seen: new Date()});
         this.addMessage({message: data.old_nick + " changed nick to " + data.nick + ".", from: this.connection_id, type: "notice"});
