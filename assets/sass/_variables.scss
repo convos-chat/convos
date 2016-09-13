@@ -1,11 +1,20 @@
-$body-bg: #fff;
-$dialog-spacing: 4px;
-$primary-color: color("green", "lighten-1");
-$secondary-color: color("green", "darken-4");
-$header-color: color('green', 'darken-3');
-$link-color: color("green", "darken-2");
-$settings-active-color: #f6f6f6;
-$readable-width: 50em;
-$main-menu-width: 240px;
-$sidebar-width: 320px;
-$z-index-header: 900;
+$body-bg: #fff !default;
+$primary-color: color("green", "lighten-1") !default;
+$secondary-color: color("green", "darken-4") !default;
+$header-color: color('green', 'darken-3') !default;
+$link-color: color("green", "darken-2") !default;
+$text-color: rgba(0, 0, 0, 0.87) !default;
+
+$error-bg-color: color('red', 'lighten-5') !default;
+$error-border-color: color('red', 'lighten-2') !default;
+$error-text-color: color("red", "darken-4") !default;
+$highlight-bg-color: lighten(color('red', 'lighten-5'), 5%) !default;
+$notice-text-color: lighten($text-color, 40%) !default;
+$notice-border-color: color('grey', 'lighten-1') !default;
+$settings-active-color: #f6f6f6 !default;
+
+$dialog-spacing: 4px !default;
+$readable-width: 50em !default;
+$main-menu-width: 240px !default;
+$sidebar-width: 320px !default;
+$z-index-header: 900 !default;

@@ -90,9 +90,9 @@ sub participants {
   $self->delay(
     sub { $connection->participants($self->stash('dialog_id'), shift->begin); },
     sub {
-      my ($delay, $err, $participants) = @_;
+      my ($delay, $err, $res) = @_;
       return $self->render(openapi => E($err), status => 500) if $err;
-      return $self->render(openapi => {participants => $participants});
+      return $self->render(openapi => $res);
     },
   );
 }

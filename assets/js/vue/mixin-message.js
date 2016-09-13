@@ -43,7 +43,6 @@
             $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
               self.loadOffScreen(html, id);
             });
-            return null;
           }
         });
       }

@@ -1,1 +1,2 @@
 --ignore-dir=assets/cache
+--ignore-dir=local

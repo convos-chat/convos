@@ -4,6 +4,7 @@
     this.connection_id = "";
     this.name          = "";
     this.me            = {nick: ""};
+    this.message       = "";
     this.protocol      = "unknown";
     this.sendTimeout   = 5000; // is this long enough?
     this.state         = "disconnected";
@@ -14,7 +15,19 @@
     if (attrs) this.update(attrs);
   };
 
+  var aliases = {};
   var proto = Convos.Connection.prototype;
+
+  Convos.commands.forEach(function(cmd) {
+    (cmd.aliases || [cmd.command]).forEach(function(a) {
+      aliases[a] = cmd.alias_for ? cmd.alias_for : "/" + cmd.command;
+    });
+  });
+
+  proto.dialogs = function() {
+    var id = this.connection_id;
+    return this.user.dialogs.filter(function(d) { return d.connection_id == id; });
+  };
 
   proto.getDialog = function(dialog_id) {
     return this.user.dialogs.filter(function(d) {
@@ -101,11 +114,22 @@
     return this;
   };
 
-  proto.send = function(message, dialog) {
+  proto.send = function(message, dialog, cb) {
     var self = this;
     var action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
-    var handler = "_sent" + action[1].toLowerCase().ucFirst();
     var id;
+
+    if (aliases[action[1]]) {
+      message = message.replace(/^\/(\w+)/, aliases[action[1]]);
+      action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
+    }
+
+    if (action[1] == 'query') {
+      if (action[2]) {
+        Convos.settings.main = this.user.ensureDialog({connection_id: this.connection_id, dialog_id: action[2]}).href();
+      }
+      return;
+    }
 
     if (!dialog) dialog = this.getDialog(action[2]); // action = ["...", "close", "#foo" ]
     if (!dialog) dialog = this.user.getActiveDialog();
@@ -122,8 +146,10 @@
     );
 
     // Handle echo back from backend
+    var handler = "_sent" + action[1].toLowerCase().ucFirst();
     this.once("sent-" + id, function(msg) {
-      return self[handler] ? self[handler](msg) : console.log("No handler for " + handler);
+      if (cb) return cb.call(self, msg);
+      self[self[handler] ? handler : "_onError"](msg);
     });
 
     this.user.ws.send({
@@ -172,6 +198,12 @@
     Convos.settings.main = this.user.dialogs.length ? this.user.dialogs[0].href() : "";
   };
 
+  proto._sentNames = function(msg) {
+    if (msg.errors) return this._onError(msg);
+    msg.type = "participants";
+    this.user.ensureDialog(msg).addMessage(msg);
+  };
+
   // part will not close the dialog
   proto._sentPart = function(msg) {
     if (msg.errors) return this._onError(msg);
@@ -181,61 +213,69 @@
     });
   };
 
-  proto._sentJoin = proto._sentJ = function(msg) {
+  proto._sentJoin = function(msg) {
     var dialog = this.user.ensureDialog(msg);
     dialog.emit("active").emit("join");
     Convos.settings.main = dialog.href();
   };
 
-  // "/nick ..." will result in {"event":"state","type":"me"}
-  proto._sentNick = proto._onError;
-
-  proto._sentReconnect = function(msg) { this.notice('Reconnecting to ' + this.connection_id + '...'); };
-
-  // No need to handle echo from messages
-  proto._sentMe = proto._onError;
-  proto._sentMessage = proto._onError;
-  proto._sentSay = proto._onError;
-
-  proto._sentWhois = function(data) {
-    var dialog = this.user.getActiveDialog();
-    if (!dialog) return;
-    data.from = this.connection_id;
-    data.type = "whois";
-    dialog.addMessage(data);
+  proto._sentReconnect = function(msg) {
+    this.notice('Reconnecting to ' + this.connection_id + '...');
   };
 
-  // TODO
-  proto._sentKick = proto._onError;
-  proto._sentQuery = proto._onError;
-  proto._sentTopic = proto._onError;
+  proto._sentTopic = function(msg) {
+    if (msg.errors) return this._onError(msg);
+    if (!msg.hasOwnProperty("topic")) return;
+    var dialog = this.user.ensureDialog(msg);
+    var next = {from: this.connection_id, type: "notice"};
+    if (msg.topic) {
+      next.message = "Topic for " + dialog.name + " is: " + msg.topic;
+    }
+    else {
+      next.message = "There is no topic for " + dialog.name + ".";
+    }
+    dialog.addMessage(next);
+  };
+
+  proto._sentWhois = function(msg) {
+    if (msg.errors) return this._onError(msg);
+    var dialog = this.user.getActiveDialog();
+    if (!dialog) return;
+    msg.from = this.connection_id;
+    msg.type = "whois";
+    dialog.addMessage(msg);
+  };
 
   proto._onState = function(data) {
     if (DEBUG) console.log("[state:" + data.type + "] " + this.href() + " = " + JSON.stringify(data));
+
     switch (data.type) {
       case "connection":
         var msg = data.state + '"';
         msg += data.message ? ': ' + data.message : ".";
         this.state = data.state;
+        this.message = data.message;
         this.notice('Connection state changed to "' + msg);
         break;
       case "frozen":
-        this.user.ensureDialog(data).frozen = data.frozen;
+      case "topic":
+        this.user.ensureDialog(data);
         break;
       case "join":
       case "part":
-        this.user.dialogs.forEach(function(d) {
-          if (d.connection_id == data.connection_id) d.participant(data);
-        });
-        break;
-      case "nick_change":
-        this.user.dialogs.forEach(function(d) {
-          if (d.connection_id == data.connection_id) d.participant(data);
-        });
+        this.dialogs().forEach(function(d) { d.participant(data); });
         break;
       case "me":
         if (this.me.nick != data.nick) this.notice('You changed nick to ' + data.nick + '.');
         this.me.nick = data.nick;
+        break;
+      case "mode":
+      case "nick_change":
+      case "quit":
+        this.dialogs().forEach(function(d) {
+          data.dialog_id = d.dialog_id;
+          d.participant(data);
+        });
         break;
     }
   };

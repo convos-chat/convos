@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-connection-editor">
+  <form autocomplete="off" class="convos-connection-editor" @submit.prevent>
     <div class="row">
       <div class="col s12">
         <h4>{{connection ? 'Edit "' + connection.name + '"' : "Add connection"}}</h4>
@@ -42,9 +42,10 @@
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">
           <i class="material-icons">delete</i>
         </a>
+        <span v-if="connection && connection.state == 'disconnected'">{{connection.message || 'Click "update" to connect.'}}</span>
       </div>
     </div>
-  </div>
+  </form>
 </template>
 <script>
 module.exports = {

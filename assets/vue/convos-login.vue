@@ -9,10 +9,10 @@
           </div>
         </div>
         <div class="row">
-          <md-input :value.sync="email" type="email" :focus="!email">Email</md-input>
+          <md-input :value.sync="email" type="email" :focus="!email" id="form_login_email">Email</md-input>
         </div>
         <div class="row">
-          <md-input :value.sync="password" type="password" :focus="!!email">Password</md-input>
+          <md-input :value.sync="password" type="password" :focus="!!email" id="form_login_password">Password</md-input>
         </div>
         <div class="row" v-if="errors.length">
           <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
@@ -39,7 +39,7 @@ module.exports = {
   props:    ["user"],
   data:     function() {
     return {
-      email:    localStorage.getItem("email"),
+      email:    localStorage.getItem("email") || "",
       errors:   [],
       password: ""
     };

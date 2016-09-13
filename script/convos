@@ -5,21 +5,26 @@
 # Same as above, but also install dependencies required for development
 # $ script/convos install develop
 use strict;
-use FindBin;
-use File::Spec;
+use Config;
+my %seen;
 
-if (@ARGV and -r $ARGV[0]) {
+if ($ARGV[0] and -r $ARGV[0] and -f $ARGV[0]) {
   $ENV{MOJO_CONFIG} = shift @ARGV;
   unshift @ARGV, 'daemon';
 }
-if (grep { $_ eq 'daemon' } @ARGV) {
-  $ENV{MOJO_MODE} ||= 'production';
-}
 
-{
-  use Config;
+my $command = $ARGV[0] || '';
+$ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if $command eq 'version';
+$ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
+
+unless ($ENV{CONVOS_SETUP}++) {
+  eval "require $_;1" or die $@ for qw(FindBin File::Spec);
+  my $bin = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local', 'bin');
   my $cpanfile = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
   my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+
+  # Extra helper programs
+  $ENV{PATH} = join ':', grep {$_} $bin, $ENV{PATH} if -d $bin;
 
   # Where cpanm might have installed dependencies to
   unshift @INC,
@@ -29,38 +34,48 @@ if (grep { $_ eq 'daemon' } @ARGV) {
 
   # Where Convos lives
   unshift @INC, File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'lib');
-  pop @INC if @INC[-1] eq '.';
+
+  # Force PERL5LIB to be loaded before the custom @INC directories above
+  unshift @INC, split /:/, $ENV{PERL5LIB} if $ENV{PERL5LIB};
 
   # Make sure the dependencies from cpanfile is installed
-  exit ensure_dependencies($cpanfile, @ARGV) if @ARGV and $ARGV[0] eq 'install';
+  exit ensure_dependencies($cpanfile, @ARGV) if $command eq 'install';
 
   # Note that "morbo script/convos" will not run ensure_dependencies()
   ensure_dependencies($cpanfile, @ARGV) if __PACKAGE__ eq 'main' and -e $cpanfile;
 }
 
-my $bin = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local', 'bin');
+@INC = grep { !$seen{$_}++ } @INC;    # duplicates are caused by "dev" command
+pop @INC if @INC[-1] eq '.';          # don't care about current dir
 
-if (-d $bin) {
-  $ENV{PATH} = join ':', grep {$_} $bin, $ENV{PATH};
-}
-if (@ARGV and $ARGV[0] eq 'dev') {
+if ($command eq 'dev') {
   my @watch = qw(assets lib public/convos-api.json);
-  $ENV{PERL5LIB} = join ':', grep {$_} @INC, $ENV{PERL5LIB};
+  $ENV{PERL5LIB} = join ':', @INC;
   $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
   shift @ARGV;
   warn sprintf "\$ morbo script/convos %s\n", join " ", @ARGV, map { ('-w', $_) } @watch;
   exec qw(morbo script/convos), @ARGV, map { ('-w', $_) } @watch;
-  die $!;
+  die "Could not exec morbo @ARGV: $!\n";
 }
 
 # Start Convos
 require Mojolicious::Commands;
-Mojolicious::Commands->start_app('Convos');
+
+if ($command eq 'version') {
+  open my $STDOUT, '>', \(my $stdout = '');
+  select $STDOUT;
+  Mojolicious::Commands->start_app('Convos');
+  $stdout =~ s!CORE\s*!CORE\n  Convos      ($Convos::VERSION)\n  !s;
+  print STDOUT $stdout;
+}
+else {
+  Mojolicious::Commands->start_app('Convos');
+}
 
 sub ensure_dependencies {
   return if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK};
   my ($cpanfile, $action, $mode) = @_;
-  my @cpanm = ($^X, File::Spec->catfile(qw(script cpanm)));
+  my @cpanm = ($^X, File::Spec->catfile($FindBin::Bin, 'cpanm'));
   my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
 
@@ -80,7 +95,10 @@ sub ensure_dependencies {
     push @missing, [$module, $version, $e, $cpanfile_mode];
   };
 
-  unless (-r $cpanm[1]) {
+  if ($action eq 'install' and $mode and $mode ne '--develop') {
+    die "Usage: $0 install [--develop]\n" if $mode and $mode ne '--develop';
+  }
+  if (!-r $cpanm[1]) {
     main::requires('App::cpanminus', '1.7016');    # cpanm -M ... is required
     @cpanm = qw(cpanm);
   }
@@ -102,12 +120,10 @@ sub ensure_dependencies {
     die join "", map {"\n$_"} @msg;
   }
 
-  if (@missing) {
-  }
-
   for my $m (@missing) {
+    $ENV{CPAN_MIRROR} //= 'https://cpan.metacpan.org' if eval 'require IO::Socket::SSL;1';
     my @cmd = (@cpanm, '-n', -l => $local_lib);
-    push @cmd, -M => $ENV{CPAN_MIRROR} || 'https://cpan.metacpan.org';
+    push @cmd, -M => $ENV{CPAN_MIRROR} if $ENV{CPAN_MIRROR};
     push @cmd, $m->[0];
     warn sprintf ">>> %s\n", join ' ', @cmd;
     system @cmd;

@@ -88,11 +88,10 @@ $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/dialog_id', '#convos')->json_message_is('/message', 'Bye')
   ->json_message_is('/nick', 'batman')->json_message_is('/type', 'part');
 
-$c->_event_irc_quit(
-  {params => ['#convos', 'So long!'], prefix => 'batman!super.girl@i.love.debian.org'});
+$c->_event_irc_quit({params => ['So long!'], prefix => 'batman!super.girl@i.love.debian.org'});
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/dialog_id', undef)->json_message_is('/nick', 'batman')
-  ->json_message_is('/message', 'So long!')->json_message_is('/type', 'part');
+  ->json_message_is('/message', 'So long!')->json_message_is('/type', 'quit');
 
 $irc->run(
   [qr{PART}, ['part.irc']],

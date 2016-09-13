@@ -6,6 +6,7 @@
 @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/color";
 
 // Variables;
+@import "http://local/custom/asset/sass/variables.scss"; // special case that AssetPack handles
 @import "variables";
 @import "../cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/variables";
 
@@ -48,3 +49,9 @@
 @import "header";
 @import "link-embedder";
 @import "sidebar";
+
+// Material-overrides
+
+html {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}

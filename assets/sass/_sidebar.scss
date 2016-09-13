@@ -41,7 +41,7 @@
     }
 
     &.frozen {
-      color: color("red", "darken-4");
+      color: $error-text-color;
     }
 
     &:hover, &.focus {
@@ -65,7 +65,7 @@
   .on {
     display: block;
     font-size: 0.9rem;
-    color: #777;
+    color: lighten($text-color, 30%);
     margin-left: 28px;
     margin-bottom: -5px;
   }
@@ -78,10 +78,10 @@
   }
 }
 
+.convos-dialog-settings,
 .convos-notifications {
   .row {
     margin: 0 auto;
-    border-bottom: 1px solid darken($body-bg, 6%);
   }
 
   .btn-floating {
@@ -91,24 +91,52 @@
     top: -6px;
   }
 
-  .notification {
-    cursor: pointer;
-    padding-top: 4px;
-    padding-bottom: 8px;
-
+  .li-link,
+  .notification,
+  .participant {
     &:hover {
       background-color: darken($body-bg, 6%);
     }
+  }
 
-    &.read {
-      opacity: 0.7;
-    }
-
+  .notification,
+  .participant {
     h5, .secondary-content {
       font-size: $h6-fontsize;
       line-height: 110%;
       margin: ($h6-fontsize / 2) 0 ($h6-fontsize / 2.5) 0;
     }
+  }
+
+  .notification {
+    display: block;
+    cursor: pointer;
+    padding-top: 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid darken($body-bg, 6%);
+  }
+
+  .li-link {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    a { display: block; }
+    i { float: right; }
+  }
+
+  .li-link,
+  .participant {
+    border-top: 1px solid darken($body-bg, 6%);
+    border-bottom: 1px solid darken($body-bg, 6%);
+    margin-bottom: -1px;
+  }
+
+  .notification {
+    &.read { opacity: 0.7; }
+  }
+
+  .participant {
+    padding: 4px 0;
+    .secondary-content { margin: 0; }
   }
 }
 

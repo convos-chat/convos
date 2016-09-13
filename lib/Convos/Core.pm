@@ -3,19 +3,44 @@ use Mojo::Base -base;
 
 use Convos::Core::Backend;
 use Convos::Core::User;
-use Convos::Util 'has_many';
+use Convos::Util qw(DEBUG has_many);
+use File::Spec::Functions 'catdir';
+use Mojo::Home;
 use Mojolicious::Plugins;
 
-sub backend { shift->{backend} ||= Convos::Core::Backend->new }
+has backend => sub { Convos::Core::Backend->new };
+
+has home => sub {
+  my $self = shift;
+  my $home = shift || $ENV{CONVOS_HOME};
+
+  if (!$home) {
+    $home = File::HomeDir->my_home;
+    $home = catdir($home, qw(.local share convos)) if $home;
+  }
+  if ($home) {
+    $home = Cwd::abs_path($home) || $home;
+  }
+
+  die 'Could not figure out CONVOS_HOME. $HOME directory could not be found.' unless $home;
+  warn "[Convos] Home is $home\n" if DEBUG;
+  return Mojo::Home->new($home);
+};
 
 sub connect {
   my ($self, $connection) = @_;
   my $host = $connection->url->host;
 
+  Scalar::Util::weaken($self);
   $connection->state('queued');
 
   if ($host eq 'localhost') {
-    $connection->connect(sub { });
+    $connection->connect(
+      sub {
+        my ($connection, $err) = @_;
+        push @{$self->{connect_queue}{$host}}, $connection if $err;
+      }
+    );
   }
   elsif ($self->{connect_queue}{$host}) {
     push @{$self->{connect_queue}{$host}}, $connection;
@@ -23,6 +48,17 @@ sub connect {
   else {
     $self->{connect_queue}{$host} = [];
     $connection->connect(sub { });
+  }
+
+  return $self;
+}
+
+sub new {
+  my $self = shift->SUPER::new(@_);
+
+  if ($self->{backend} and !ref $self->{backend}) {
+    eval "require $self->{backend};1" or die $@;
+    $self->{backend} = $self->{backend}->new(home => $self->home);
   }
 
   return $self;
@@ -45,7 +81,7 @@ sub start {
 
   Scalar::Util::weaken($self);
   $self->{connect_tid} = Mojo::IOLoop->recurring(
-    $ENV{CONVOS_CONNECT_DELAY} || 2,
+    $ENV{CONVOS_CONNECT_DELAY} || 3,
     sub {
       for my $host (keys %{$self->{connect_queue} || {}}) {
         my $connection = shift @{$self->{connect_queue}{$host}} or next;
@@ -145,6 +181,13 @@ the following new ones.
 
 Holds a L<Convos::Core::Backend> object.
 
+=head2 home
+
+  $obj = $self->home;
+  $self = $self->home(Mojo::Home->new($ENV{CONVOS_HOME});
+
+Holds a L<Mojo::Home> object pointing to where convos store data.
+
 =head1 METHODS
 
 L<Convos::Core> inherits all methods from L<Mojo::Base> and implements
@@ -167,6 +210,13 @@ Note: Connections to "localhost" will not be delayed.
   $user = $self->get_user($email);
 
 Returns a L<Convos::Core::User> object or undef.
+
+=head2 new
+
+  $self = Convos::Core->new(%attrs);
+  $self = Convos::Core->new(\%attrs);
+
+Object constructor. Builds L</backend> if a classname is provided.
 
 =head2 start
 

@@ -1,10 +1,13 @@
 ! convos.css
 << https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/materialize.scss
+< http://cdn.jsdelivr.net/emojione/2.2.6/assets/css/emojione.min.css
 < sass/main.scss
 
 ! convos.js
 < http://code.jquery.com/jquery-1.11.3.min.js
 < http://vuejs.org/js/vue.js
+< http://cdn.jsdelivr.net/emojione/2.2.6/lib/js/emojione.min.js
+< https://github.com/yuku-t/jquery-textcomplete/raw/master/dist/jquery.textcomplete.min.js
 < js/autolink.js
 < js/eventemitter.js
 < js/storage.js
@@ -31,6 +34,7 @@
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/global.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/animation.js
 
+< js/core/commands.js
 < js/core/connection.js
 < js/core/dialog.js
 < js/core/user.js
@@ -48,16 +52,18 @@
 
 # sidebars
 < vue/convos-help.vue
+< vue/convos-resources.vue
 < vue/convos-notifications.vue
+< vue/convos-dialog-settings.vue
 < vue/convos-profile.vue
 
 # chat
 < vue/convos-message-action.vue
 < vue/convos-message-day-changed.vue
-< vue/convos-message-dialog-info.vue
 < vue/convos-message-enable-notifications.vue
 < vue/convos-message-error.vue
 < vue/convos-message-notice.vue
+< vue/convos-message-participants.vue
 < vue/convos-message-private.vue
 < vue/convos-message-whois.vue
 < vue/convos-input.vue

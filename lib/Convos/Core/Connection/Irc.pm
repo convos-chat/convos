@@ -136,8 +136,8 @@ sub participants {
   $self->_proxy(
     channel_users => $name => sub {
       my ($self, $err, $res) = @_;
-      $res = [map { +{%{$res->{$_}}, name => $_} } keys %$res] if ref $res;
-      $self->$cb($err, $res);
+      my @list = $err ? () : map { +{%{$res->{$_}}, name => $_} } keys %$res;
+      $self->$cb($err, {participants => \@list});
     }
   );
 }
@@ -154,8 +154,9 @@ sub rooms {
     channels => sub {
       my ($irc, $err, $map) = @_;
       $cache->{$host} = [map { my $c = $map->{$_}; $c->{name} = $_; $c } keys %$map];
+      delete $cache->{$host} unless @{$cache->{$host}};
       Mojo::IOLoop->timer(ROOM_CACHE_TIMER, sub { delete $cache->{$host} });
-      $self->$cb($err, $cache->{$host});
+      $self->$cb($cache->{$host} ? $err : 'No rooms.', $cache->{$host} || []);
     },
   );
 }
@@ -166,6 +167,7 @@ sub send {
   $target  //= '';
   $message //= '';
   $message =~ s![\x00-\x1f]!!g;    # remove invalid characters
+  $message = Mojo::Util::trim($message);    # required for kick, mode, ...
 
   $message =~ s!^/([A-Za-z]+)\s*!! or return $self->_send($target, $message, $cb);
   my $cmd = uc $1;
@@ -175,7 +177,10 @@ sub send {
   return $self->_send(split(/\s+/, $message, 2), $cb) if $cmd eq 'MSG';
   return $self->connect($cb)    if $cmd eq 'CONNECT';
   return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
-  return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN' or $cmd eq 'J';
+  return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN';
+  return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
+  return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
+  return $self->participants($target, $cb) if $cmd eq 'NAMES';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
@@ -250,6 +255,25 @@ sub _join_dialog {
       $self->save(sub { })->$cb($err, $dialog);
     }
   );
+}
+
+sub _kick {
+  my ($self, $target, $command, $cb) = @_;
+  my ($nick, $reason) = split /\s/, $command, 2;
+
+  return $self->_proxy(kick => "$target $nick :$reason", sub { $self->$cb(@_[1, 2]) });
+}
+
+sub _mode {
+  my ($self, $target, $mode, $cb) = @_;
+
+  if ($target) {
+    $mode = "$target $mode" if $mode =~ /^[+-]\S+\s+\S/;    # /mode #channel +o superman
+    $mode = "$target $mode" if $mode =~ /^[+-][bs]\s*$/;    # /mode #channel -s
+    $mode = "$target $mode" if $mode =~ /^[eIO]\s*$/;       # /mode #channel I
+  }
+
+  return $self->_proxy(mode => $mode, sub { $self->$cb(@_[1, 2]) });
 }
 
 sub _notice {
@@ -391,7 +415,14 @@ _event irc_kick => sub {
 # :superman!superman@i.love.debian.org MODE #convos superman :+o
 # :hybrid8.debian.local MODE #no_such_room +nt
 _event irc_mode => sub {
-  my ($self, $msg) = @_;    # TODO
+  my ($self, $msg) = @_;
+  my ($from) = IRC::Utils::parse_user($msg->{prefix});
+  my $dialog = $self->dialog({name => $msg->{params}[0]});
+  my $mode = $msg->{params}[1] || '';
+  my $nick = $msg->{params}[2] || '';
+
+  $self->emit(
+    state => mode => {dialog_id => $dialog->id, from => $from, mode => $mode, nick => $nick});
 };
 
 # :Superman12923!superman@i.love.debian.org NICK :Supermanx
@@ -429,7 +460,7 @@ _event irc_quit => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
 
-  $self->emit(state => part => {nick => $nick, message => $msg->{params}[1] // ''});
+  $self->emit(state => quit => {nick => $nick, message => join ' ', @{$msg->{params}}});
 };
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
@@ -462,6 +493,8 @@ _event irc_topic => sub {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my $dialog = $self->dialog({name => $msg->{params}[0], topic => $msg->{params}[1]});
+
+  $self->emit(state => topic => $dialog->TO_JSON)->save(sub { });
 
   return $self->_notice("Topic unset by $nick") unless $dialog->topic;
   return $self->_notice("$nick changed the topic to: " . $dialog->topic);

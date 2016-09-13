@@ -8,16 +8,13 @@
 
   window.nextTick = function(cb) { setTimeout(cb, 1); };
 
-  window.addEventListener("resize", function() {
-    if (window.resizeTid) return;
-    window.resizeTid = setTimeout(function() {
-      window.resizeTid = null;
-      Convos.settings.screenHeight = window.innerHeight;
-      Convos.settings.screenWidth = window.innerWidth;
-    }, 100);
-  });
-
   NodeList.prototype.$forEach = Array.prototype.forEach;
+
+  Date.fromAPI = function(t) {
+    if (!t) return new Date();
+    if (!t.match(/Z$/)) t += "Z"
+    return new Date(t);
+  };
 
   Element.prototype.$remove = function() {
     this.parentElement.removeChild(this);

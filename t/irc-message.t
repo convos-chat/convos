@@ -5,7 +5,7 @@ use Convos::Core;
 use Convos::Core::Backend::File;
 
 my @date = split '-', Time::Piece->new->strftime('%Y-%m');
-my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
+my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $t = t::Helper->connect_to_irc($connection);
@@ -80,7 +80,8 @@ done_testing;
 sub slurp_log {
   Mojo::Util::slurp(
     File::Spec->catfile(
-      qw(local test-t-irc-message-t superman@example.com irc-localhost),
+      $FindBin::Bin, File::Spec->updir,
+      qw(local test-irc-message-t superman@example.com irc-localhost),
       @date, "$_[0].log"
     )
   );

@@ -1,6 +1,6 @@
 div.autocomplete {
   @include overflow;
-  border-bottom: 1px solid color('grey', 'lighten-1');
+  border-bottom: $input-border;
   max-height: 8em;
   position: relative;
 
@@ -11,7 +11,13 @@ div.autocomplete {
 
     &:hover { background-color: $dropdown-hover-bg-color; }
     &.active { background-color: darken($dropdown-hover-bg-color, 5%); }
-    &.no-match { color: color('grey', 'lighten-1'); }
     a, span { display: block; }
   }
+}
+
+ul.textcomplete-dropdown {
+  opacity: 1 !important;
+  margin-left: 15px;
+  li { min-height: auto; }
+  li > a { padding: 6px 16px; }
 }

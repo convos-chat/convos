@@ -7,8 +7,7 @@ use Fcntl ':flock';
 use File::HomeDir ();
 use File::Path    ();
 use File::ReadBackwards;
-use File::Spec::Functions qw(catdir catfile);
-use Mojo::Home;
+use File::Spec::Functions 'catfile';
 use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
 use Symbol;
@@ -31,7 +30,7 @@ my %FORMAT = (
   private     => ['<%s> %s',                   qw(from message)],
 );
 
-has home => sub { shift->_build_home };
+has home => sub { Carp::confess('home() cannot be built') };
 
 has _fc => sub {
   my $fc = Mojo::IOLoop::ForkCall->new;
@@ -203,23 +202,6 @@ sub users {
   return next_tick $self, $cb, '', \@users;
 }
 
-sub _build_home {
-  my $self = shift;
-  my $home = shift || $ENV{CONVOS_HOME};
-
-  if (!$home) {
-    $home = File::HomeDir->my_home;
-    $home = catdir($home, qw(.local share convos)) if $home;
-  }
-  if ($home) {
-    $home = Cwd::abs_path($home) || $home;
-  }
-
-  die 'Could not figure out CONVOS_HOME. $HOME directory could not be found.' unless $home;
-  warn "[Convos] Home is $home\n" if DEBUG;
-  Mojo::Home->new($home);
-}
-
 sub _delete_connection {
   my ($self, $connection) = @_;
   my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->id));
@@ -345,7 +327,6 @@ sub _setup {
   my $self = shift;
 
   Scalar::Util::weaken($self);
-  $self->home($self->_build_home($self->{home})) unless ref $self->{home};
   $self->on(
     connection => sub {
       my ($self, $connection) = @_;
@@ -444,8 +425,7 @@ L<Convos::Core::Backend> and implements the following new ones.
 
 =head2 home
 
-Holds a L<Mojo::Home> object which points to the root directory where data
-can be stored.
+See L<Convos::Core/home>.
 
 =head1 METHODS
 

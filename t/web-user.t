@@ -5,7 +5,7 @@ $ENV{CONVOS_INVITE_CODE} = '';
 my $t = t::Helper->t;
 
 # Will always render the landing page
-$t->get_ok('/')->status_is(200)->text_is('title', 'Convos')
+$t->get_ok('/')->status_is(200)->text_is('title', 'Convos for Nordaaker')
   ->element_exists('link[rel="stylesheet"]')->element_exists('#loader')
   ->element_exists('#vue_tooltip')->element_exists('script')
   ->text_like('script', qr{apiUrl:\s*"/api"}m,          'apiUrl')

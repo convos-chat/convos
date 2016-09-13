@@ -2,11 +2,8 @@
   <div class="convos-dialog-container">
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <h2 @click.prevent="getInfo" v-tooltip="dialog.topic || 'No topic is set.'">{{dialog.name || 'Convos'}}</h2>
-      <convos-header-links :toggle="true" :user="user">
-        <a href="#info" @click.prevent="getInfo" v-tooltip.literal="Information about dialog" :class="user.ws.is('open') ? '' : 'btn-floating deep-orange'"><i class="material-icons">{{user.ws.is('open') ? 'info' : 'info_outline'}}</i></a>
-        <a href="#close" @click.prevent="closeDialog" v-tooltip.literal="Close dialog"><i class="material-icons">close</i></a>
-      </convos-header-links>
+      <h2 v-tooltip="dialog.topic || 'No topic is set.'">{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
+      <convos-header-links :toggle="true" :user="user"></convos-header-links>
     </header>
     <main>
       <component
@@ -41,15 +38,6 @@ module.exports = {
     }
   },
   methods: {
-    closeDialog: function() {
-      this.dialog.connection().send("/close " + this.dialog.name);
-    },
-    getInfo: function() {
-      this.dialog.refreshParticipants(function(err) {
-        if (!err) return this.addMessage({type: "dialog-info"});
-        this.addMessage({message: err[0].message, type: "error"});
-      });
-    },
     onScroll: function() {
       var self = this;
       var elem = this.scrollElement;

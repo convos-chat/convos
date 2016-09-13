@@ -1,10 +1,51 @@
 Revision history for perl distribution Convos
 
-0.99_06 Not Released
+0.99_10 Not Released
+ - Fix handling of "/whois nick" when "nick" is offline
+ - Fix tracking join/part/quit/nick change events #276
+ - Add translation for :), :( and <3 into emojis
+
+0.99_09 2016-09-11T22:53:31+0200
+ - Fix sorting participants list
+ - Add support for /ns (/msg nickserv)
+ - Add support for /cs (/msg chanserv)
+ - Add clickable emails #265
+ - Add support for markdown formatting for <code/>
+ - Add support for rendering emojis #186
+ - Add support for autocomplete emoji in <convos-input/> #186
+ - Add support for custom color themes #161
+ - Change dialog settings less confusing
+   * Render dialog title with markdown formatting and links
+   * Getting participants list is more consistent after reconnect
+   * Changed rendering of "close" button into a list item
+ - Change autocomplete method for <convos-input/>
+
+0.99_08 2016-09-01T22:35:25+0200
+ - Fix emitting topic changes to frontend
+ - Add dialog settings sidebar with topic and participants list
+ - Add support for "/query nick"
+ - Remove settings dropdown menu
+ - Replaced Roboto with system fonts
+
+0.99_07 2016-08-30T10:51:25+0200
+ - Fix showing join/part messages in the correct channel
+ - Fix running Convos on Windows mobile #271
+ - Add favicon and app icons for iOS
+ - Add basic support for "/mode ..."
+ - Add support for "/kick ..."
+ - Change "convos version" to also display running Convos version
+ - Replaced "info" button with "settings" button for dialogs
+
+0.99_06 2016-08-27T12:27:13+0200
  - Fix tracking participants
  - Fix joining channel with key in backend #268
  - Fix joining channel with key in <convos-create-dialog/> #267
  - Fix handling "part" events
+ - Fix starting "script/convos dev" after "script/convos install --develop"
+ - Fix not show welcome message after log in in in a new browser
+ - Fix running test suite with "script/convos test"
+ - Fix no autocomplete in "Join dialog" or "Add connection"
+ - Fix parsing UTC time in Firefox
  - Add Mojo::IRC 0.33 as required module #267
  - Add IO::Socket::SSL as required module
    * Required to connect to TLS networks
@@ -13,7 +54,6 @@ Revision history for perl distribution Convos
  - Change WebSocket keep-alive interval
  - Change "Join dialog" will be shown after a new connection is created
  - Change <convos-message-enable-notifications/> buttons to be disabled on click
- - Change autocomplete is off in input fields
 
 0.99_05 2016-08-22T16:30:57+0200
  - Fix breaking long words inside a message template

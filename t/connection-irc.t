@@ -2,7 +2,7 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-my $core = Convos::Core->new(backend => Convos::Core::Backend::File->new);
+my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user = $core->user({email => 'test.user@example.com'});
 my $connection
   = $user->connection({name => 'localhost', protocol => 'irc', url => 'irc://127.0.0.1'});
