@@ -6,7 +6,7 @@ use Convos::Util qw(DEBUG has_many);
 use Crypt::Eksblowfish::Bcrypt ();
 use File::Path                 ();
 use Mojo::Date;
-use Mojo::Util;
+use Mojo::Util 'trim';
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
@@ -36,7 +36,7 @@ has_many connections => 'Convos::Core::Connection' => sub {
   return $connection;
 };
 
-sub id { lc +($_[1] || $_[0])->{email} }
+sub id { trim lc +($_[1] || $_[0])->{email} }
 
 sub notifications {
   my ($self, $query, $cb) = @_;

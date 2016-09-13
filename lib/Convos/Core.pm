@@ -6,6 +6,7 @@ use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
 use File::Spec::Functions 'catdir';
 use Mojo::Home;
+use Mojo::Util 'trim';
 use Mojolicious::Plugins;
 
 has backend => sub { Convos::Core::Backend->new };
@@ -101,6 +102,7 @@ sub start {
 
 has_many users => 'Convos::Core::User' => sub {
   my ($self, $attrs) = @_;
+  $attrs->{email} = trim lc $attrs->{email} || '';
   my $user = Convos::Core::User->new($attrs);
   die "Invalid email $user->{email}. Need to match /.\@./." unless $user->email =~ /.\@./;
   Scalar::Util::weaken($user->{core} = $self);

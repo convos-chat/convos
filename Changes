@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 0.99_10 Not Released
  - Fix handling of "/whois nick" when "nick" is offline
  - Fix tracking join/part/quit/nick change events #276
+ - Normalizing email address for user
  - Add translation for :), :( and <3 into emojis
 
 0.99_09 2016-09-11T22:53:31+0200
