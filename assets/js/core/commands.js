@@ -61,6 +61,12 @@ Convos.commands = [
     example: "/kick <nick>"
   },
   {
+    command: "oper",
+    aliases: ["oper"],
+    description: "Verify your self as operator of the network.",
+    example: "/oper operid operpassword"
+  },
+  {
     command: "mode",
     description: "Change mode of yourself or a user"
   },
