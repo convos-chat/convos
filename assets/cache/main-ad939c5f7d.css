@@ -4570,6 +4570,9 @@ dl.horizontal {
 a:hover {
   color: #103613; }
 
+iframe {
+  display: block; }
+
 div.alert {
   background: #FFEBEE;
   border: 1px solid #E57373;
