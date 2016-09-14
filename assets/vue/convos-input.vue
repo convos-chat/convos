@@ -68,8 +68,9 @@ module.exports = {
         replace: function(p) { return this.pre + p + " "; },
         search: function(term, cb, m) {
           this.pre = m[0].match(/^\s/) ? " " : "";
+          var re = new RegExp(term, "i");
           cb($.map(self.participants(), function(word) {
-            return word.indexOf(term) === 0 ? word : null;
+            return word.match(re) ? word : null;
           }));
         }
       };
