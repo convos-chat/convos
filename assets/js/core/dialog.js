@@ -66,7 +66,8 @@
         this.connection().user.notifications.unshift(msg);
       }
       if (prev && prev.ts.getDate() != msg.ts.getDate()) {
-        this.messages[args.method]({type: "day-changed", prev: prev, ts: msg.ts});
+        prev = {type: "day-changed", prev: prev, ts: msg.ts};
+        this.messages[args.method](prev);
       }
     }
 

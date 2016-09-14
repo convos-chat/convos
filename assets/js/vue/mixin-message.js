@@ -6,7 +6,7 @@
         var msg = this.msg;
         var c = {highlight: this.msg.highlight ? true : false};
 
-        if (msg.type != "action" && msg.message && msg.from == msg.prev.from) {
+        if (msg.type == "private" && msg.message && msg.from == msg.prev.from) {
           c["same-user"] = true;
         }
         else {
