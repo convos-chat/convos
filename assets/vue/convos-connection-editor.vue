@@ -8,8 +8,8 @@
             You need to add a connection before you can have a dialog.
           </template>
           <template v-if="user.connections.length">
-            You need to fill in "server", but "username" and "password" are
-            optional in most cases.
+            Click on the "Advanced" button for more settings. In most cases
+            they are not requried to start chatting.
           </template>
           <template v-if="!user.connections.length && settings.default_server">
             We have filled in example values, but you can change them if you like.
@@ -24,10 +24,12 @@
     <div class="row" v-if="showNickField">
       <md-input :value.sync="nick" placeholder="A nick can be generated for you">Nick</md-input>
     </div>
-    <div class="row">
-      <md-input :value.sync="username" cols="s6">Username</md-input>
-      <md-input :value.sync="password" cols="s6" type="password">Password</md-input>
-    </div>
+    <template v-if="advanced">
+      <div class="row">
+        <md-input :value.sync="username" cols="s6">Username</md-input>
+        <md-input :value.sync="password" cols="s6" type="password">Password</md-input>
+      </div>
+    </template>
     <div class="row" v-if="errors.length">
       <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
     </div>
@@ -38,6 +40,9 @@
         </a>
         <button @click="saveConnection" class="btn waves-effect waves-light">
           {{connection && !deleted ? 'Update' : 'Create'}} <i class="material-icons right">save</i>
+        </button>
+        <button @click.prevent="toggleAdvanced()" class="btn waves-effect waves-light">
+          Advanced <i class="material-icons right">{{advanced ? "close" : "settings"}}</i>
         </button>
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">
           <i class="material-icons">delete</i>
@@ -57,6 +62,7 @@ module.exports = {
   },
   data: function() {
     return {
+      advanced:         false,
       connection:       null,
       deleted:          false,
       errors:           [],
@@ -103,6 +109,15 @@ module.exports = {
         if (self.settings.main.indexOf(this.connection_id) == -1) self.settings.main = "#create-dialog";
       });
     },
+    toggleAdvanced: function(e) {
+      this.advanced = !this.advanced;
+      if (this.advanced) {
+        var $main = $(this.$el).closest("main");
+        this.$nextTick(function() {
+          $main.animate({scrollTop: $main.height()}, "slow");
+        });
+      }
+    },
     updateForm: function(connection) {
       var url = connection ? connection.url.parseUrl() : null;
 
@@ -112,6 +127,7 @@ module.exports = {
       this.server           = url ? url.hostPort : this.settings.default_server;
       this.selectedProtocol = url ? url.scheme || "" : this.selectedProtocol;
       this.username         = url ? url.query.username : "";
+      this.advanced         = this.username ? true : false;
     }
   },
   ready: function() {

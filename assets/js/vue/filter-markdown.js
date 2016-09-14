@@ -21,7 +21,6 @@
   var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
 
   text2emojiRe = new RegExp("(^|\\s)(" + text2emojiRe + ")(?=\\s|$)", "i");
-  console.log(text2emojiRe);
 
   Vue.filter("markdown", function(str, args) {
     if (!args) args = {emoji: true};
