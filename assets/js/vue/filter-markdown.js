@@ -5,14 +5,24 @@
   // \*foo*    or \_foo_    = *foo* or _foo_
 
   var text2emoji = {
-    ":)": ":smile:",
-    ":(": ":disappointed:",
     "&lt;3": ":heart:",
+    ":(": ":disappointed:",
+    ":)": ":slight_smile:",
+    ":/": ":confused:",
+    ":D": ":smiley:",
+    ":P": ":stuck_out_tongue:",
+    ";)": ":wink:",
+    ";D": ":wink:",
     "<3": ":heart:"
   };
 
+  var text2emojiRe = Object.keys(text2emoji).map(function(s) { return s.replace(/([\(\)])/g, "\\$1"); }).join("|");
   var codeToHtmlRe = new RegExp("(\\\\?)`([^`]+)`", "g");
   var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
+
+  text2emojiRe = new RegExp("(^|\\s)(" + text2emojiRe + ")(?=\\s|$)", "i");
+  console.log(text2emojiRe);
+
   Vue.filter("markdown", function(str, args) {
     if (!args) args = {emoji: true};
     if (args.escape) str = str.xmlEscape();
@@ -36,7 +46,7 @@
     });
 
     if (args.emoji) {
-      str = str.replace(/(^|\s)(&lt;3|<3|\:[\(\)])(?=\s|$)/g, function(m, pre, emoji) {
+      str = str.replace(text2emojiRe, function(m, pre, emoji) {
         return pre + (text2emoji[emoji] || emoji);
       });
       str = emojione.toImage(str);
