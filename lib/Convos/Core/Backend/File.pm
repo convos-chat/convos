@@ -1,7 +1,7 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
-use Convos::Util qw(next_tick DEBUG);
+use Convos::Util qw(next_tick spurt DEBUG);
 use Cwd ();
 use Fcntl ':flock';
 use File::HomeDir ();
@@ -175,7 +175,7 @@ sub save_object {
   eval {
     my $dir = File::Basename::dirname($storage_file);
     File::Path::make_path($dir) unless -d $dir;
-    Mojo::Util::spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')), $storage_file);
+    spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')), $storage_file);
     warn "[@{[$obj->id]}] Save success. ($storage_file)\n" if DEBUG;
     return next_tick $obj, $cb, '';
   };

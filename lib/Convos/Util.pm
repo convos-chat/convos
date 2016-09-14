@@ -5,7 +5,7 @@ use JSON::Validator::Error;
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG E has_many next_tick);
+our @EXPORT_OK = qw(DEBUG E has_many next_tick spurt);
 
 sub E {
   my ($msg, $path) = @_;
@@ -53,6 +53,14 @@ sub next_tick {
   my ($obj, $cb, @args) = @_;
   Mojo::IOLoop->next_tick(sub { $obj->$cb(@args) });
   $obj;
+}
+
+sub spurt {
+  my ($content, $path) = @_;
+  Mojo::Util::spurt($content => "$path.tmp");
+  unlink $path or die "Can't delete old file: $path" if -e $path;
+  rename "$path.tmp" => $path;
+  return $content;
 }
 
 1;
@@ -110,6 +118,14 @@ The definition above results in the following methods:
   $obj = next_tick $obj, sub { my ($obj, @args) = @_ }, @args;
 
 Wrapper around L<Mojo::IOLoop/next_tick>.
+
+=head2 spurt
+
+  $bytes = spurt $bytes => $path;
+
+Write all C<$bytes> at to a temp file, and then replace C<$path> with the temp
+file. This is almost the same as L<Mojo::Util/spurt>, but will not truncate
+existing files, if the disk is full.
 
 =head1 SEE ALSO
 
