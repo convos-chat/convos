@@ -103,7 +103,7 @@ sub _assets {
   my $self          = shift;
   my $custom_assets = $self->core->home->rel_dir('assets');
 
-  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine Reloader)]});
+  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine)]});
 
   if (-d $custom_assets) {
     $self->log->info("Including files from $custom_assets when building frontend.");
