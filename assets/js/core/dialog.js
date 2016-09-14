@@ -165,12 +165,19 @@
 
     Object.keys(attrs).forEach(function(n) { self[n] = attrs[n]; });
     if (attrs.hasOwnProperty("frozen") && attrs.frozen == "" && frozen && !this.is_private) {
-      this.user.ws.when("open", function() {
-        self.connection().send("/names", self, self._setParticipants.bind(self));
+      this.when("active", function() {
+        this.user.ws.when("open", function() {
+          self.connection().send("/names", self, self._setParticipants.bind(self));
+        });
       });
     }
 
     return this;
+  };
+
+  proto.when = function(state, cb) {
+    if (state != "active") throw "Only active is supported for now";
+    return this.active ? cb.call(this) : this.once("active", cb);
   };
 
   proto._endOfHistory = function() {
