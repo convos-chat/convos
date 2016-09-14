@@ -19,7 +19,12 @@
       </div>
     </div>
     <div class="row">
-      <md-input :value.sync="server" focus="" :readonly="settings.forced_irc_server">Server</md-input>
+      <md-input :value.sync="server" focus="" :readonly="settings.forced_irc_server" cols="s8 m9">Server</md-input>
+      <md-select :value.sync="tls" label="Secure connection" cols="s4 m3">
+        <md-option :value="null" :selected="tls == null">Autodetect</md-option>
+        <md-option value="0" :selected="tls == 0">No</md-option>
+        <md-option value="1" :selected="tls == 1">Yes</md-option>
+      </md-select>
     </div>
     <div class="row" v-if="showNickField">
       <md-input :value.sync="nick" placeholder="A nick can be generated for you">Nick</md-input>
@@ -70,6 +75,7 @@ module.exports = {
       nick:             "",
       selectedProtocol: "irc",
       server:           "",
+      tls:              null,
       username:         ""
     };
   },
@@ -93,13 +99,15 @@ module.exports = {
       var self       = this;
       var connection = this.connection || new Convos.Connection({user: this.user});
       var userinfo   = [this.username, this.password].join(":");
+      var params     = [];
 
       userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
       connection.user = this.user;
       connection.url = this.selectedProtocol + "://" + userinfo + this.server;
 
-      if (this.nick)
-        connection.url += "?nick=" + this.nick;
+      if (this.nick) params.push("nick=" + this.nick);
+      if (this.tls !== null) params.push("tls=" + this.tls);
+      if (params.length) connection.url += "?" + params.join("&");
 
       this.errors = []; // clear error on post
       connection.save(function(err) {
@@ -126,6 +134,7 @@ module.exports = {
       this.nick             = url ? url.query.nick || "" : "";
       this.server           = url ? url.hostPort : this.settings.default_server;
       this.selectedProtocol = url ? url.scheme || "" : this.selectedProtocol;
+      this.tls              = url ? url.query.tls : null;
       this.username         = url ? url.query.username : "";
       this.advanced         = this.username ? true : false;
     }

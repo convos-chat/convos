@@ -97,7 +97,7 @@ sub connect {
 
       if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
         $url->query->param(tls => 0);
-        $self->connect($cb);
+        $self->save(sub { })->connect($cb);
       }
       elsif ($err) {
         $self->state(disconnected => $err)->$cb($err);

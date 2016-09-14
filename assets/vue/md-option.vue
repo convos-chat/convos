@@ -9,6 +9,11 @@
 <script>
 module.exports = {
   props: ["disabled", "selected", "value"],
+  watch: {
+    selected: function(v, o) {
+      if (v && !o) this.select();
+    }
+  },
   methods: {
     text: function() {
       if (!this.$el) return;

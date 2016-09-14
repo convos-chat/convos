@@ -1,5 +1,5 @@
 <template>
-  <div class="input-field col s12">
+  <div class="input-field col" :class="cols">
     <div class="select-wrapper">
       <span class="caret">&#9660;</span>
       <input :value="textValue" @focus="activate()" :disabled="disabled" readonly="true" class="select-dropdown" type="text" v-el:input>
@@ -12,7 +12,7 @@
 </template>
 <script>
 module.exports = {
-  props: ["id", "name", "label", "value"],
+  props: ["cols", "id", "name", "label", "value"],
   data: function() {
     return {active: false, textValue: "", options: []};
   },
@@ -41,7 +41,6 @@ module.exports = {
     },
     'option::selected': function(opt) {
       this.activate(false);
-      if (opt.value == this.value) return;
       this.$children.forEach(function(o) { if (o != opt) o.selected = false; });
       this.options.forEach(function(o) { o.selected = opt.value == o.value; });
       this.setValue(opt);
@@ -69,6 +68,9 @@ module.exports = {
       this.$children.forEach(function(o) { o.selected = o.value == this.value; }.bind(this));
       this.options.forEach(function(o) { o.selected = o.value == this.value; }.bind(this));
     }
+  },
+  ready: function() {
+    if (!this.cols) this.cols = "s12";
   }
 };
 </script>
