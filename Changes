@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+0.99_11 Not Released
+ - Fix "whois" for participant who is not in any channels
+ - Add more information to <convos-message-whois/>
+
 0.99_10 2016-09-14T23:35:31+0200
  - Fix handling of "/whois nick" when "nick" is offline
  - Fix tracking join/part/quit/nick change events #276
