@@ -3,6 +3,8 @@ layout: page
 title: Developing
 ---
 
+<ul class="toc"></ul>
+
 ## Overview
 
 This guide is for people who want to hack on Convos. You can also have a look

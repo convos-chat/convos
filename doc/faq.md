@@ -3,6 +3,8 @@ layout: page
 title: Frequently asked questions
 ---
 
+<ul class="toc"></ul>
+
 ## Can Convos be extended and customized?
 
 Yes. Convos supports plugins, but there have not yet been any plugins

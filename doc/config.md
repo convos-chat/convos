@@ -3,6 +3,10 @@ layout: page
 title: Configuration
 ---
 
+<ul class="toc"></ul>
+
+## Introduction
+
 Convos can be configured with either a config file or environment variables.
 
 Any of the settings below can be specified either in a configuration file or

@@ -3,6 +3,10 @@ layout: page
 title: Getting started
 ---
 
+<ul class="toc"></ul>
+
+## Quick start guide
+
 This guide will give an introduction on how to install and run Convos. It is
 very easy to get started, but you can also tweak many
 [settings](./config.html) afterwards to make Convos fit your needs.
