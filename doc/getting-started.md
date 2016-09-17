@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Installing
+title: Getting started
 ---
 
 This guide will give an introduction on how to install and run Convos. It is
@@ -11,7 +11,7 @@ The two commands below will download and start Convos:
 
 ```bash
 curl https://convos.by/install.sh | sh -
-./convos/script/convos daemon;
+./convos/script/convos daemon
 ```
 
 That's it! After the commands above, you can point your browser to
@@ -24,6 +24,20 @@ screen as you start convos:
 
 The invite code can be set to anything you like. Check out the
 [configuration](./config.html) guide for more details.
+
+## Running convos
+
+```bash
+$ ./script/convos daemon --help
+```
+
+The command above will provide more information about command line arguments.
+One useful switch is how to specify a listen port and make Convos bind to a
+specific address:
+
+```bash
+$ ./script/convos daemon --listen http://127.0.0.1:8080
+```
 
 ## Optional modules
 
@@ -42,7 +56,18 @@ which makes Convos faster. It can be installed with the command below:
 perl script/cpanm --sudo EV
 ```
 
+## Hypnotoad and Prefork
+
+It is *not* possible to run Convos with hypnotoad nor the prefork server. The
+reason for this is that the
+[Convos core](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Core.pm)
+requires shared memory, which a forked environment contradicts.
+
+You need to run Convos in single process, using the
+"[daemon](https://metacpan.org/pod/Mojo::Server::Daemon)" sub command shown
+above.
+
 ## Next
 
-Want to learn more? Check out the [running](/doc/running.html) guide, or the
+Want to learn more? Check out the [configuration](/doc/config.html) guide, or the
 [documentation index](/doc/).

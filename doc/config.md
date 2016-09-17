@@ -5,7 +5,52 @@ title: Configuration
 
 Convos can be configured with either a config file or environment variables.
 
-Here is a list of all the available settings:
+Any of the settings below can be specified either in a configuration file or
+as environment variables. Here is an example on how to specific environment
+variables:
+
+```bash
+$ CONVOS_INVITE_CODE=s3cret ./script/convos daemon
+```
+
+One way of setting a bunch of environment variables is by putting them all in
+a shell script:
+
+```bash
+#!/bin/sh
+export CONVOS_CONTACT=jhthorsen@cpan.org
+export CONVOS_HOME=/var/convos
+export CONVOS_INVITE_CODE=s3cret
+export MOJO_LOG_LEVEL=debug
+
+exec /home/www/convos-stable/script/convos \
+  daemon --listen http://*:3001            \
+  1>>/home/www/log/convos.log              \
+  2>>/home/www/log/convos.log
+```
+
+Instead of using environment variables, you can start convos with a config
+file:
+
+```bash
+$ /home/www/convos-stable/script/convos /path/to/convos.conf \
+    --listen http://*:3002
+
+$ cat /path/to/convos.conf
+{
+  backend           => "Convos::Core::Backend::File",
+  contact           => "mailto:root@localhost",
+  default_server    => "localhost:6667",
+  forced_irc_server => "localhost:6667",
+  invite_code       => "s3cret",
+  organization_name => "Awesome hackers",
+  plugins           => [],
+  secure_cookies    => 0,
+  session_secrets   => ["signed-cookie-secret"],
+}
+```
+
+## Configuration parameters
 
 ### CONVOS_BACKEND
 
