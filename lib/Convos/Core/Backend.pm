@@ -1,7 +1,5 @@
 package Convos::Core::Backend;
-use Mojo::Base 'Mojolicious::Plugins';
-
-has namespaces => sub { ['Convos::Core::Plugin'] };
+use Mojo::Base 'Mojo::EventEmitter';
 
 sub connections {
   return [] if @_ == 1;
@@ -53,20 +51,13 @@ L<Convos::Core::Backend::File> for code that actually perist data.
 
 =head1 ATTRIBUTES
 
-L<Convos::Core::Backend> inherits all attributes from L<Mojolicious::Plugins>
-and implements the following new ones.
-
-=head2 namespaces
-
-  my $namespaces = $plugins->namespaces;
-  $plugins       = $plugins->namespaces(["Convos::Core::Plugin"]);
-
-Namespaces to load plugins from, defaults to C<Convos::Core::Plugin>.
+L<Convos::Core::Backend> inherits all attributes from L<Mojo::EventEmitter> and
+implements the following new ones.
 
 =head1 METHODS
 
-L<Convos::Core::Backend> inherits all methods from L<Mojolicious::Plugins>
-and implements the following new ones.
+L<Convos::Core::Backend> inherits all methods from L<Mojo::EventEmitter> and
+implements the following new ones.
 
 =head2 connections
 

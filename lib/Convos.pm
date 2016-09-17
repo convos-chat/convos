@@ -17,8 +17,6 @@ sub startup {
   my $r      = $self->routes;
 
   $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
-  $self->_setup_secrets;
-  $self->_add_helpers;
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
@@ -29,6 +27,9 @@ sub startup {
   $r->get('/')->to(template => 'convos')->name('index');
   $r->get('/custom/asset/*file' => \&_action_custom_asset);
   $r->websocket('/events')->to('events#start')->name('events');
+
+  $self->_plugins;
+  $self->_setup_secrets;
 
   # Autogenerate routes from the OpenAPI specification
   $self->plugin(OpenAPI => {url => $self->static->file('convos-api.json')->path});
@@ -48,11 +49,7 @@ sub startup {
     }
   );
 
-  my $core    = $self->core;
-  my $plugins = $config->{plugins};
-  $core->backend->register_plugin($_, $core, $plugins->{$_})
-    for grep { $plugins->{$_} } keys %$plugins;
-  $core->start if $ENV{CONVOS_START_BACKEND} // 1;
+  $self->core->start if $ENV{CONVOS_START_BACKEND} // 1;
 }
 
 # Used internally to generate dynamic SASS files
@@ -66,24 +63,6 @@ sub _action_custom_asset {
   $c->app->log->info('Loading custom asset: ' . $asset->path);
   $static->serve_asset($c, $asset);
   $c->rendered;
-}
-
-sub _add_helpers {
-  my $self = shift;
-
-  $self->helper(
-    'backend.user' => sub {
-      my $self = shift;
-      return undef unless my $email = $self->session('email');
-      return $self->app->core->get_user({email => $email});
-    }
-  );
-
-  $self->helper(
-    unauthorized => sub {
-      shift->render(openapi => Convos::Util::E('Need to log in first.'), status => 401);
-    }
-  );
 }
 
 sub _assets {
@@ -143,6 +122,19 @@ sub _home_relative_to_lib {
 
   $self->home->parse($home);
   $self->static->paths->[0] = $self->home->rel_dir('public');
+}
+
+sub _plugins {
+  my $self    = shift;
+  my $plugins = $self->config('plugins');
+
+  unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
+
+  $ENV{CONVOS_PLUGINS} //= '';
+  $plugins ||= {};
+  $plugins->{'Convos::Plugin::Helpers'} = {};    # core plugin
+  $plugins->{$_} = {} for split /,/, $ENV{CONVOS_PLUGINS};
+  $self->plugin($_ => $plugins->{$_}) for grep { $plugins->{$_} } keys %$plugins;
 }
 
 sub _setup_secrets {

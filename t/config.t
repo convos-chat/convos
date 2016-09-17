@@ -5,7 +5,6 @@ my $convos = Convos->new;
 is $convos->config->{backend}, 'Convos::Core::Backend::File', 'default backend';
 is $convos->config->{organization_name}, 'Nordaaker', 'default name';
 is $convos->config->{hypnotoad}{pid_file}, undef, 'default pid_file';
-is_deeply $convos->config->{plugins}, {}, 'default plugins';
 ok !$convos->sessions->secure, 'insecure sessions';
 like $convos->secrets->[0], qr/^[a-z0-9]{32}$/, 'default secrets';
 
