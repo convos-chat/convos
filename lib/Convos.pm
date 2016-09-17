@@ -80,19 +80,6 @@ sub _add_helpers {
   );
 
   $self->helper(
-    settings => sub {
-      my $config = shift->app->config;
-      return {
-        contact           => $config->{contact},
-        default_server    => $config->{default_server},
-        forced_irc_server => $config->{forced_irc_server} ? true : false,
-        invite_code       => $config->{invite_code} ? true : false,
-        organization_name => $config->{organization_name},
-      };
-    }
-  );
-
-  $self->helper(
     unauthorized => sub {
       shift->render(openapi => Convos::Util::E('Need to log in first.'), status => 401);
     }
@@ -129,9 +116,17 @@ sub _config {
     ||= $config->{forced_irc_server} || $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';
   $config->{invite_code} ||= $ENV{CONVOS_INVITE_CODE} // $self->_generate_invite_code;
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
-  $config->{plugins} ||= {};
-  $config->{plugins}{$_} = $config for split /,/, +($ENV{CONVOS_PLUGINS} // '');
-  $config->{secure_cookies} ||= $ENV{CONVOS_SECURE_COOKIES} || 0;
+  $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
+
+  # public settings
+  $config->{settings} = {
+    contact           => $config->{contact},
+    default_server    => $config->{default_server},
+    forced_irc_server => $config->{forced_irc_server} ? true : false,
+    invite_code       => $config->{invite_code} ? true : false,
+    organization_name => $config->{organization_name},
+  };
+
   $config;
 }
 
@@ -311,7 +306,7 @@ __DATA__
         indexUrl: "<%= $c->url_for('index') %>",
         wsUrl:    "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
         mode:     "<%= app->mode %>",
-        settings: <%== Mojo::JSON::encode_json(settings) %>,
+        settings: <%== Mojo::JSON::to_json(app->config('settings')) %>,
         mixin:    {} // Vue.js mixins
       };
     % end
