@@ -268,11 +268,6 @@ This method sets up the application.
 The icons used are provided by L<Google|https://www.google.com/design/icons>
 under the L<CC-BY license|https://creativecommons.org/licenses/by/4.0/>.
 
-=head2 Robot images
-
-Robots lovingly delivered by L<https://robohash.org> under the
-L<CC-BY license|https://creativecommons.org/licenses/by/4.0/>.
-
 =head2 Convos core and frontend
 
 Copyright (C) 2012-2015, Nordaaker.
