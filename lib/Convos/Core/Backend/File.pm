@@ -77,6 +77,22 @@ sub delete_object {
   return $self;
 }
 
+sub load_object {
+  my ($self, $obj, $cb) = @_;
+  my $storage_file = $self->_settings_file($obj);
+  my $data;
+
+  -e $storage_file and eval {
+    $data = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file));
+    return $data unless $cb;
+    return next_tick $obj, $cb, '', $data;
+  };
+
+  return next_tick $obj, $cb, $@, {} if $cb;
+  return $data unless $@;
+  die $@;
+}
+
 sub messages {
   my ($self, $obj, $query, $cb) = @_;
   my $re = $query->{match} || qr{.};
@@ -318,9 +334,17 @@ sub _save_notification {
 sub _settings_file {
   my ($self, $obj) = @_;
 
-  return $obj->isa('Convos::Core::Connection')
-    ? $self->home->rel_file(sprintf '%s/%s/connection.json', $obj->user->email, $obj->id)
-    : return $self->home->rel_file(sprintf '%s/user.json', $obj->email);
+  if ($obj->isa('Convos::Core::Connection')) {
+    return $self->home->rel_file(sprintf '%s/%s/connection.json', $obj->user->email, $obj->id);
+  }
+  elsif ($obj->isa('Convos::Core::User')) {
+    return $self->home->rel_file(sprintf '%s/user.json', $obj->email);
+  }
+  elsif (ref($obj) =~ /::(\w+)$/) {
+    return $self->home->rel_file('%s.json', lc $1);
+  }
+
+  die "Cannot figure out path to settings file for $obj";
 }
 
 sub _setup {
@@ -439,6 +463,10 @@ See L<Convos::Core::Backend/connections>.
 =head2 delete_object
 
 See L<Convos::Core::Backend/delete_object>.
+
+=head2 load_object
+
+See L<Convos::Core::Backend/load_object>.
 
 =head2 messages
 

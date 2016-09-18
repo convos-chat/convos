@@ -10,6 +10,12 @@ sub delete_object {
   $_[0]->tap($_[2], '');
 }
 
+sub load_object {
+  my ($self, $obj, $cb) = @_;
+  return undef unless $cb;
+  return $self->tap($cb, '', []);
+}
+
 sub messages {
   my ($self, $query, $cb) = @_;
   $self->tap($cb, '', []);
@@ -70,6 +76,12 @@ Used to find a list of connection names for a given L<$user|Convos::Core::User>.
   $self = $self->delete_object($obj, sub { my ($self, $err) = @_ });
 
 This method is called to remove a given object from persistent storage.
+
+=head2 load_object
+
+  $self = $self->load_object($obj, sub { my ($self, $err, $data) = @_ });
+
+This method will load C<$data> for C<$obj>.
 
 =head2 messages
 

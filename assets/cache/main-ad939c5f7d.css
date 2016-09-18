@@ -4570,6 +4570,11 @@ dl.horizontal {
 a:hover {
   color: #103613; }
 
+svg {
+  width: 100%;
+  height: auto;
+  display: inline-block; }
+
 iframe {
   display: block; }
 
@@ -4653,6 +4658,10 @@ div.alert {
   @media only screen and (max-width: 992px) {
     #vue_tooltip {
       display: none !important; } }
+
+.scroll-element {
+  height: 100%;
+  overflow: auto; }
 
 .not-logged-in-wrapper {
   padding-top: 3em; }
@@ -4838,6 +4847,7 @@ ul.textcomplete-dropdown {
 
 header {
   background-color: #66BB6A;
+  text-align: right;
   height: 56px;
   position: absolute;
   top: 0;
@@ -4845,13 +4855,16 @@ header {
   right: 0;
   z-index: 900; }
   header h2 {
+    float: left;
     margin: 0; }
-  header h2, header a, header i.material-icons {
+  header h2, header a, header .material-icons {
     color: #fff;
     display: inline-block;
     font-size: 2rem;
     height: 56px;
     line-height: 56px; }
+  header a, header svg, header .material-icons {
+    vertical-align: middle; }
   header a {
     padding-left: 10px;
     padding-right: 10px; }
@@ -4899,7 +4912,7 @@ header {
   @media only screen and (min-width: 993px) {
     header {
       height: 64px; }
-      header h2, header a, header i.material-icons {
+      header h2, header a, header .material-icons {
         height: 64px;
         line-height: 64px; } }
   @media only screen and (max-width: 992px) {
@@ -4913,19 +4926,24 @@ header {
     color: #addaaf; }
   header :-ms-input-placeholder {
     color: #addaaf; }
+  header .convos-icon {
+    fill: #fff; }
 
 a.toggle-main-menu {
   float: left; }
 
-.convos-dialog-container header,
-.convos-settings header,
-.is-sidebar header {
-  text-align: right; }
-
 .convos-dialog-container header h2,
 .convos-settings header h2 {
-  float: left;
   padding-left: 0.75rem; }
+
+.under-main-menu {
+  padding-top: 56px; }
+  @media only screen and (min-width: 993px) {
+    .under-main-menu {
+      padding-top: 64px; } }
+  .under-main-menu.max-height {
+    height: 100vh;
+    overflow: hidden; }
 
 img.embed, .link-embedder.text-html {
   max-width: 50em;
