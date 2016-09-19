@@ -1,5 +1,7 @@
 use t::Helper;
 
+$ENV{CONVOS_PLUGINS} = 'ShareDialog';
+
 my $t = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 

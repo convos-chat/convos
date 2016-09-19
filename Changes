@@ -1,9 +1,10 @@
 Revision history for perl distribution Convos
 
-0.99_11 Not Released
+0.99_11 2016-09-19T23:05:31+0200
  - Fix "whois" for participant who is not in any channels
  - Fix removing IRC colors #281
  - Add more information to <convos-message-whois/>
+ - Add first optional plugin "ShareDialog" #280
 
 0.99_10 2016-09-14T23:35:31+0200
  - Fix handling of "/whois nick" when "nick" is offline
