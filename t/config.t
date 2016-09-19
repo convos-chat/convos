@@ -1,8 +1,6 @@
 use t::Helper;
 delete $ENV{CONVOS_SECRETS};
 
-use Carp::Always;
-
 my $convos = Convos->new;
 is $convos->config->{backend}, 'Convos::Core::Backend::File', 'default backend';
 is $convos->config->{organization_name}, 'Nordaaker', 'default name';
