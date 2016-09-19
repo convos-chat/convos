@@ -310,37 +310,42 @@ Marcus Ramberg - C<marcus@nordaaker.com>
 =cut
 
 __DATA__
-@@ convos.html.ep
+@@ layouts/convos.html.ep
 <!DOCTYPE html>
 <html data-framework="vue">
   <head>
-    <title>Convos for <%= config 'organization_name' %></title>
+    <title><%= title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     %= asset 'favicon.ico'
     %= asset 'convos.css'
   </head>
   <body>
-    <component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
-      <div id="loader" class="centered">
-        <div>
-          <h4>Loading convos...</h4>
-          <p class="error">This should not take too long.</p>
-          <a href="">Reload <i class="material-icons">refresh</i></a>
-        </div>
-      </div>
-    </component>
+    %= content
     <div id="vue_tooltip"><span></span></div>
     %= javascript begin
       window.Convos = {
         apiUrl:   "<%= $c->url_for('api') %>",
         indexUrl: "<%= $c->url_for('index') %>",
         wsUrl:    "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
+        mixin:    {}, // Vue.js mixins
         mode:     "<%= app->mode %>",
-        settings: <%== Mojo::JSON::to_json(app->config('settings')) %>,
-        mixin:    {} // Vue.js mixins
+        page:     "<%= stash('page') || '' %>",
+        settings: <%== Mojo::JSON::to_json(app->config('settings')) %>
       };
     % end
     %= asset 'convos.js';
   </body>
 </html>
+@@ convos.html.ep
+% layout 'convos';
+% title 'Convos for ' . config('organization_name');
+<component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
+  <div id="loader" class="centered">
+    <div>
+      <h4>Loading convos...</h4>
+      <p class="error">This should not take too long.</p>
+      <a href="">Reload <i class="material-icons">refresh</i></a>
+    </div>
+  </div>
+</component>

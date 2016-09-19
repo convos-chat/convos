@@ -1,5 +1,6 @@
 header {
   background-color: $primary-color;
+  text-align: right;
   height: $navbar-height-mobile;
   position: absolute;
   top: 0;
@@ -7,13 +8,17 @@ header {
   right: 0;
   z-index: $z-index-header;
 
-  h2 { margin: 0; }
-  h2, a, i.material-icons {
+  h2 { float: left; margin: 0; }
+  h2, a, .material-icons {
     color: $navbar-font-color;
     display: inline-block;
     font-size: 2rem;
     height: $navbar-height-mobile;
     line-height: $navbar-height-mobile;
+  }
+
+  a, svg, .material-icons {
+    vertical-align: middle;
   }
 
   a { padding-left: 10px; padding-right: 10px; }
@@ -65,7 +70,7 @@ header {
   @media #{$large-and-up} {
     height: $navbar-height;
 
-    h2, a, i.material-icons {
+    h2, a, .material-icons {
       height: $navbar-height;
       line-height: $navbar-height;
     }
@@ -76,6 +81,10 @@ header {
   }
 
   @include input-placeholder-color(lighten($primary-color, 20%));
+
+  .convos-icon {
+    fill: $navbar-font-color;
+  }
 }
 
 a.toggle-main-menu {
@@ -84,15 +93,21 @@ a.toggle-main-menu {
 }
 
 .convos-dialog-container,
-.convos-settings,
-.is-sidebar {
-  header { text-align: right; }
-}
-
-.convos-dialog-container,
 .convos-settings {
   header h2 {
-    float: left;
     padding-left: $gutter-width / 2;
+  }
+}
+
+.under-main-menu {
+  padding-top: $navbar-height-mobile;
+
+  @media #{$large-and-up} {
+    padding-top: $navbar-height;
+  }
+
+  &.max-height {
+    height: 100vh;
+    overflow: hidden;
   }
 }
