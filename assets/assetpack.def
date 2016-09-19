@@ -27,6 +27,7 @@
 < js/vue/filter-timestring.js
 < js/vue/mixin-global.js
 < js/vue/mixin-message.js
+< js/vue/mixin-messages.js
 
 < https://raw.githubusercontent.com/jackmoore/autosize/master/dist/autosize.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js
