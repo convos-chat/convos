@@ -208,6 +208,10 @@ sub _irc_message {
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my ($from, $highlight, $target);
 
+  # http://www.mirc.com/colors.html
+  $msg->{params}[1] =~ s/\x03\d{0,15}(,\d{0,15})?//g;
+  $msg->{params}[1] =~ s/[\x00-\x1f]//g;
+
   if ($user) {
     my $is_private = $self->_is_current_nick($msg->{params}[0]);
     $highlight = $is_private;

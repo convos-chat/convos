@@ -82,6 +82,19 @@ $irc->run(
   }
 );
 
+# http://www.mirc.com/colors.html
+$c->_irc_message(
+  irc_privmsg => {
+    prefix => 'batman!super.girl@i.love.debian.org',
+    params => [
+      'superduper',
+      "\x0313swagger2\x0f/\x0306master\x0f \x0314f70340b\x0f \x0315Jan Henning Thorsen\x0f: Released version 0.85..."
+    ]
+  }
+);
+$ws->message_ok->json_message_is('/message',
+  'swagger2/master f70340b Jan Henning Thorsen: Released version 0.85...');
+
 $c->_event_irc_part(
   {params => ['#convos', 'Bye'], prefix => 'batman!super.girl@i.love.debian.org'});
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
