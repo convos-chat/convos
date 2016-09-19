@@ -156,6 +156,10 @@ Convos::Plugin::ShareDialog - Convos plugin to share dialog messages
 L<Convos::Plugin::ShareDialog> is loaded by default and adds sharing
 functionality to Convos.
 
+=head1 SYNOPSIS
+
+You can enable this plugin by setting C<CONVOS_PLUGINS="SharePlugin">.
+
 =head1 METHODS
 
 =head2 register

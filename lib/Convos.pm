@@ -162,7 +162,7 @@ sub _plugins {
 
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
 
-  $ENV{CONVOS_PLUGINS} //= $plugins ? '' : 'ShareDialog';
+  $ENV{CONVOS_PLUGINS} //= '';
   $plugins ||= {};
   $plugins->{'Convos::Plugin::Helpers'} = {};    # core plugin
   $plugins->{$_} = {} for split /,/, $ENV{CONVOS_PLUGINS};
