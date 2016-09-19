@@ -5,19 +5,20 @@ use Convos::Util 'E';
 use Mojo::JSON qw(false true);
 
 sub last_read {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
-  my $connection = $user->get_connection($self->stash('connection_id'))
-    or return $self->render(openapi => E('Connection not found.'), status => 404);
-  my $dialog = $connection->get_dialog($self->stash('dialog_id'))
-    or return $self->render(openapi => E('Dialog not found.'), status => 404);
+  my $self      = shift->openapi->valid_input or return;
+  my $dialog    = $self->backend->dialog({});
   my $last_read = Mojo::Date->new->to_datetime;
+
+  unless ($dialog) {
+    return $self->unauthorized unless $self->backend->user;
+    return $self->render(openapi => E('Dialog not found.'), status => 404);
+  }
 
   $self->delay(
     sub {
       my ($delay) = @_;
       $dialog->last_read($last_read);
-      $connection->save($delay->begin);
+      $self->stash('connection')->save($delay->begin);
     },
     sub {
       my ($delay, $err) = @_;
@@ -54,12 +55,13 @@ sub list {
 
 sub messages {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
-  my $connection = $user->get_connection($self->stash('connection_id'))
-    or return $self->render(openapi => E('Connection not found.'), status => 404);
-  my $dialog = $connection->get_dialog($self->stash('dialog_id'))
-    or return $self->render(openapi => E('Dialog not found.'), status => 404);
+  my $dialog = $self->backend->dialog({});
   my %query;
+
+  unless ($dialog) {
+    return $self->unauthorized unless $self->backend->user;
+    return $self->render(openapi => E('Dialog not found.'), status => 404);
+  }
 
   # TODO:
   $query{$_} = $self->param($_)
