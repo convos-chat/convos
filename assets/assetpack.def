@@ -9,6 +9,7 @@
 < http://cdn.jsdelivr.net/emojione/2.2.6/lib/js/emojione.min.js
 < https://github.com/yuku-t/jquery-textcomplete/raw/master/dist/jquery.textcomplete.min.js
 < js/autolink.js
+< js/svg.js
 < js/eventemitter.js
 < js/storage.js
 < js/window.js
@@ -26,6 +27,7 @@
 < js/vue/filter-timestring.js
 < js/vue/mixin-global.js
 < js/vue/mixin-message.js
+< js/vue/mixin-messages.js
 
 < https://raw.githubusercontent.com/jackmoore/autosize/master/dist/autosize.min.js
 < https://raw.githubusercontent.com/Dogfalo/materialize/master/js/velocity.min.js

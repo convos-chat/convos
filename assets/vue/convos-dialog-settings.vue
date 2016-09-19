@@ -25,6 +25,14 @@
           </a>
         </div>
       </div>
+      <div class="row" v-if="settings.share_dialog">
+        <div class="col s12 li-link">
+          <a :href="shareUrl()" target="_blank">
+            <i class="material-icons">share</i>
+            Share conversation
+          </a>
+        </div>
+      </div>
       <div class="row">
         <div class="col s12">
           <h5>Participants ({{participants.length}})</h5>
@@ -68,6 +76,12 @@ module.exports = {
   methods: {
     closeTooltip: function() {
       return this.dialog.is_private ? 'Close conversation' : 'Part channel';
+    },
+    shareUrl: function() {
+      var dialog = this.dialog;
+      return ['', 'api', 'connection', dialog.connection_id, 'dialog', dialog.dialog_id, 'share']
+        .map(function(p) { return encodeURIComponent(p) })
+        .join('/');
     }
   }
 };

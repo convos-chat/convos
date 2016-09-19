@@ -24,9 +24,13 @@
   Convos.api = new openAPI(Convos.apiUrl, function(err) {
     if (err) return Convos.error("Could not load API spec! " + err);
 
+    var detail = {data: {user: new Convos.User()}, mixins: []};
+    document.dispatchEvent(new CustomEvent("beforeConvosStart", {detail: detail}));
+
     Convos.vm = new Vue({
       el: "body",
-      data: {user: new Convos.User()},
+      data: detail.data,
+      mixins: detail.mixins,
       watch: {
         "settings.main": function(v, o) {
           if (DEBUG && v != o) console.log("[loc:main] " + (o || "null") + " => " + (v || "null"));

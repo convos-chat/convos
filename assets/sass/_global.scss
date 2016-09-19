@@ -31,6 +31,12 @@ a:hover {
   color: darken($secondary-color, 10%);
 }
 
+svg {
+  width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
 iframe {
   display: block;
 }
@@ -140,4 +146,9 @@ div.alert {
   @media #{$medium-and-down} {
     display: none !important;
   }
+}
+
+.scroll-element {
+  height: 100%;
+  overflow: auto;
 }
