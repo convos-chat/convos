@@ -4,12 +4,43 @@ use Mojo::Base 'Mojolicious';
 use Convos::Core;
 use Convos::Util;
 use Mojo::JSON qw(false true);
+use Mojo::Util;
 
 our $VERSION = '0.99_08';
 
 has core => sub { Convos::Core->new(backend => shift->config('backend')) };
+
+has _api_spec => sub {
+  my $self = shift;
+  my $path = $self->static->file('convos-api.json')->path;
+  return Mojo::JSON::decode_json(Mojo::Util::slurp($path));
+};
+
 has _custom_assets => sub { Mojolicious::Static->new };
 has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
+
+sub extend_api_spec {
+  my ($self, $path) = (shift, shift);
+
+  while (@_) {
+    my ($method, $op) = (shift, shift);
+
+    $op->{responses}{default}
+      ||= {description => 'Error.', schema => {'$ref' => '#/definitions/Error'}};
+
+    if (my $cb = delete $op->{cb}) {
+      $self->{anon} ||= do { state $i; ++$i };
+      my $ctrl = "Convos::Controller::Anon$self->{anon}";
+      eval "package $ctrl; use Mojo::Base 'Mojolicious::Controller'; 1" or die $@;
+      Mojo::Util::monkey_patch($ctrl => $op->{operationId} => $cb);
+      $op->{'x-mojo-to'} = sprintf 'anon%s#%s', $self->{anon}, $op->{operationId};
+    }
+
+    $self->_api_spec->{paths}{$path}{$method} = $op;
+  }
+
+  return $self;
+}
 
 sub startup {
   my $self   = shift;
@@ -28,11 +59,12 @@ sub startup {
   $r->get('/custom/asset/*file' => \&_action_custom_asset);
   $r->websocket('/events')->to('events#start')->name('events');
 
+  $self->_api_spec;
   $self->_plugins;
   $self->_setup_secrets;
 
   # Autogenerate routes from the OpenAPI specification
-  $self->plugin(OpenAPI => {url => $self->static->file('convos-api.json')->path});
+  $self->plugin(OpenAPI => {url => delete $self->{_api_spec}});
 
   # Expand links into rich content
   $self->plugin('LinkEmbedder');
@@ -243,6 +275,13 @@ Holds a L<Convos::Core> object.
 
 L<Convos> inherits all methods from L<Mojolicious> and implements
 the following new ones.
+
+=head2 extend_api_spec
+
+  $self->extend_api_spec($path => \%spec);
+
+Used to add more paths to the OpenAPI specification. This is useful
+for plugins.
 
 =head2 startup
 
