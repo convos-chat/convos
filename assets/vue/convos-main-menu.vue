@@ -28,10 +28,10 @@
       </a>
 
       <div class="divider"></div>
-      <a v-sidebar.literal="#profile" class="hide-on-large-only simple">
+      <a v-sidebar.literal="#profile" class="simple">
         <i class="material-icons">account_circle</i> Edit profile
       </a>
-      <a v-sidebar.literal="#help" :class="activeClass" class="hide-on-large-only simple">
+      <a v-sidebar.literal="#help" :class="activeClass" class="simple">
         <i class="material-icons">help</i> Help
       </a>
       <a v-link.literal="/api/user/logout" class="simple">
