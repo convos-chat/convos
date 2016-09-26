@@ -50,14 +50,14 @@ Start convos:
 
 Set up nginx:
 
-    # host and port where convos is running
+    # Host and port where convos is running
     upstream convos { server 127.0.0.1:8080; }
 
     server {
       listen 80;
       server_name your-domain.com;
 
-      # mount convos under http://your-domain.com/whatever/convos
+      # Mount convos under http://your-domain.com/whatever/convos
       location /whatever/convos {
 
         # Pass requests on to the upstream defined above
@@ -69,9 +69,9 @@ Set up nginx:
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
 
-        # Enable Convos to construct correct URLs by passing on some custom
-        # variables. X-Request-Base is only required if "location" above is
-        # not "/"
+        # Enable Convos to construct correct URLs by passing on custom
+        # headers. X-Request-Base is only required if "location" above
+        # is not "/".
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
