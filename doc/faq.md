@@ -40,6 +40,26 @@ To sum up, the important things are:
 * "X-Forwarded-Proto" header must be set to either "http" or "https".
 * The web server need to support WebSockets.
 
+You also need to set the `X-Request-Base` header, if your application is not
+available from the root of your domain. Example nginx config:
+
+    upstream convos { server 127.0.0.1:8080; }
+
+    server {
+      listen 80;
+      server_name localhost;
+      location /whatever/convos {
+        proxy_pass http://convos;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Request-Base "https://example.com/whatever/convos";
+      }
+    }
+
 ## Why does Convos stop when I close putty/xterm/some terminal?
 
 Convos does not daemonize. It runs in foreground, so if you close a terminal

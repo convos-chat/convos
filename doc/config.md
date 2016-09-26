@@ -13,6 +13,9 @@ Any of the settings below can be specified either in a configuration file or
 as environment variables. Here is an example on how to specific environment
 variables:
 
+You might want to check out the [FAQ](./faq.html) for example configurations
+as well.
+
 ```bash
 $ CONVOS_INVITE_CODE=s3cret ./script/convos daemon
 ```
@@ -150,5 +153,5 @@ The `MOJO_REVERSE_PROXY` environment variable can be used to enable proxy
 support, this allows Mojolicious to automatically pick up the
 `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers.
 
-See also the [Nginx cookbook](https://metacpan.org/pod/distribution/Mojolicious/lib/Mojolicious/Guides/Cookbook.pod#Nginx)
-in the Mojolicious distribution for more information about these headers.
+The [FAQ](./faq.html#can-convos-run-behind-behind-my-favorite-web-server)
+has more details on how to set up Convos behind a reverse proxy server.
