@@ -38,25 +38,44 @@ To sum up, the important things are:
 
 * "Host" header must be set to the original request's "Host" header.
 * "X-Forwarded-Proto" header must be set to either "http" or "https".
+* "X-Request-Base" header must be set if your application is not available
+  from the root of your domain.
 * The web server need to support WebSockets.
 
-You also need to set the `X-Request-Base` header, if your application is not
-available from the root of your domain. Example nginx config:
+Here is a complete example:
 
+Start convos:
+
+    $ MOJO_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8080
+
+Set up nginx:
+
+    # host and port where convos is running
     upstream convos { server 127.0.0.1:8080; }
 
     server {
       listen 80;
-      server_name localhost;
+      server_name your-domain.com;
+
+      # mount convos under http://your-domain.com/whatever/convos
       location /whatever/convos {
+
+        # Pass requests on to the upstream defined above
         proxy_pass http://convos;
+
+        # Instruct Convos to do the right thing regarding
+        # HTTP and WebSockets
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+
+        # Enable Convos to construct correct URLs by passing on some custom
+        # variables. X-Request-Base is only required if "location" above is
+        # not "/"
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Request-Base "https://example.com/whatever/convos";
+        proxy_set_header X-Request-Base "$scheme://$host/whatever/convos";
       }
     }
 
