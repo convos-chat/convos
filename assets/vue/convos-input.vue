@@ -100,6 +100,7 @@ module.exports = {
       var l = "localCmd" + m.replace(/^\//, "").ucFirst();
       this.message = "";
       this.focusInput();
+      this.$nextTick(function() { autosize.update(this.$els.input); });
       if ("localCmd" + m != l && this[l]) return this[l](e);
       if (m.length) this.dialog.connection().send(m, this.dialog);
     }
