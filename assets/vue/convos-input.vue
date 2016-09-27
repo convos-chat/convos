@@ -108,6 +108,11 @@ module.exports = {
     var self = this;
     autosize(this.$els.input);
 
+    this.$nextTick(function() { this.$emit("resized"); });
+    this.$els.input.addEventListener("autosize:resized", function() {
+      self.$emit("resized");
+    });
+
     $(this.$els.input).textcomplete(
       [
         this.autocompleteCommands(),

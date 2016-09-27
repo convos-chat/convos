@@ -4,7 +4,7 @@
       return {
         atBottom: true,
         scrollElement: null,
-        scrollThreshold: !!("ontouchstart" in window) ? 60 : 40
+        scrollThreshold: 60
       };
     },
     watch: {
@@ -39,7 +39,7 @@
       }
     },
     ready: function() {
-      this.scrollElement = $(".scroll-element", this.$el)[0] || $("main", this.$el)[0];
+      this.scrollElement = $(".scroll-element", this.$el)[0];
       this.scrollElement.addEventListener("scroll", this.onScroll);
       this.dialog.on("active", function() { this.scrollToBottom({gotoBottom: true}); }.bind(this));
       this.dialog.on("message", this.scrollToBottom);

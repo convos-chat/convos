@@ -29,12 +29,12 @@ $convos-input-height: 46px;
   main {
     @include under-header;
     width: 100%;
-    padding: $gutter-width $gutter-width / 2;
+    padding: 0.5rem $gutter-width / 2;
     z-index: 10;
   }
 }
 
-.convos-dialog-container main { bottom: $convos-input-height; }
+.convos-dialog-container main { height: auto; bottom: $convos-input-height; }
 .convos-dialog-container.inactive { display: none; }
 .convos-settings main { bottom: 0; }
 

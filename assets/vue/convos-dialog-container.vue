@@ -5,7 +5,7 @@
       <h2 v-tooltip="dialog.topic || 'No topic is set.'">{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
       <convos-header-links :toggle="true" :user="user"></convos-header-links>
     </header>
-    <main>
+    <main class="scroll-element" v-el:main>
       <component
         :is="'convos-message-' + msg.type"
         :dialog="dialog"
@@ -14,12 +14,18 @@
         v-if="msg.type"
         v-for="msg in dialog.messages"></component>
     </main>
-    <convos-input :dialog="dialog" :user="user"></convos-input>
+    <convos-input :dialog="dialog" :user="user" @resized="draw" v-el:input></convos-input>
   </div>
 </template>
 <script>
 module.exports = {
   props: ["dialog", "user"],
-  mixins: [Convos.mixin.messages]
+  mixins: [Convos.mixin.messages],
+  methods: {
+    draw: function(e) {
+      this.$els.main.style.bottom = this.$els.input.offsetHeight + "px";
+      this.scrollToBottom({});
+    }
+  }
 };
 </script>
