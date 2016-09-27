@@ -9,7 +9,7 @@ requires "Mojo::IRC"                         => "0.39";
 requires "Mojolicious"                       => "7.00";
 requires "Mojolicious::Plugin::AssetPack"    => "1.24";
 requires "Mojolicious::Plugin::LinkEmbedder" => "0.2301";
-requires "Mojolicious::Plugin::OpenAPI"      => "0.14";
+requires "Mojolicious::Plugin::OpenAPI"      => "1.03";
 requires "Parse::IRC"                        => "1.20";
 requires "Time::Piece"                       => "1.20";
 
