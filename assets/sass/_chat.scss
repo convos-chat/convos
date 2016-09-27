@@ -125,7 +125,16 @@ $convos-input-height: 46px;
     margin-top: -$dialog-spacing;
   }
   &.same-user {
-    a.title, .secondary-content { display: none; }
+    a.title, .secondary-content {
+      opacity: 0;
+      transition: opacity 1000ms;
+    }
+    &:hover .secondary-content {
+      display: block;
+      opacity: 1;
+      color: lighten($text-color, 40%);
+      transition: opacity 300ms;
+    }
   }
 
   .message {
