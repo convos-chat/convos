@@ -88,7 +88,7 @@ $convos-input-height: 46px;
     border-left: 2px solid $input-border-color;
   }
   &.action {
-    .message, a.title {
+    .message, .title {
       font-style: italic;
       display: inline;
     }
@@ -124,10 +124,8 @@ $convos-input-height: 46px;
     margin-top: -$dialog-spacing;
   }
   &.same-user {
-    a.title, .secondary-content {
-      opacity: 0;
-      transition: opacity 1000ms;
-    }
+    .title { display: none; }
+    .secondary-content { opacity: 0; transition: opacity 1000ms; }
     &:hover .secondary-content {
       display: block;
       opacity: 1;
