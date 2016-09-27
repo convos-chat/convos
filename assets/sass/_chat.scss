@@ -85,7 +85,6 @@ $convos-input-height: 46px;
 
   &.error, &.notice {
     padding-left: $gutter-width / 2;
-    padding-right: $gutter-width / 2;
     border-left: 2px solid $input-border-color;
   }
   &.action {
@@ -155,9 +154,7 @@ $convos-input-height: 46px;
   }
 
   .secondary-content {
-    position: absolute;
-    top: 2px;
-    right: 0;
+    padding-top: 2px;
     &, a {
       color: lighten($text-color, 10%);
       font-size: 0.8rem;
