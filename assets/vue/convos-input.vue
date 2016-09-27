@@ -109,7 +109,6 @@ module.exports = {
     var self = this;
     autosize(this.$els.input);
 
-    this.$nextTick(function() { this.$emit("resized"); });
     this.$els.input.addEventListener("autosize:resized", function() {
       self.$emit("resized");
     });
@@ -129,6 +128,7 @@ module.exports = {
     ).on("textComplete:hide", function() { self.completeVisible = false; });
 
     this.dialog.on("active", this.focusInput);
+    this.dialog.on("active", function() { this.$emit("resized"); });
     this.dialog.on("focusInput", this.focusInput);
     this.dialog.on("insertIntoInput", function(str) {
       if (str.indexOf("/") == 0) return self.$els.input.value = str; // command
