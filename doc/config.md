@@ -31,7 +31,7 @@ export CONVOS_INVITE_CODE=s3cret
 export MOJO_LOG_LEVEL=debug
 
 exec /home/www/convos-stable/script/convos \
-  daemon --listen http://*:3001            \
+  daemon --listen http://*:8000            \
   1>>/home/www/log/convos.log              \
   2>>/home/www/log/convos.log
 ```
@@ -41,7 +41,7 @@ file:
 
 ```bash
 $ /home/www/convos-stable/script/convos /path/to/convos.conf \
-    --listen http://*:3002
+    --listen http://*:8000
 
 $ cat /path/to/convos.conf
 {
@@ -63,25 +63,26 @@ You can make convos listen to a variety of addresses:
 
 ```bash
 # Listen on all IPv4 interfaces
-$ ./script/convos daemon --listen http://*:3000
+$ ./script/convos daemon --listen http://*:8080
 
 # Listen on all IPv4 and IPv6 interfaces
-$ ./script/convos daemon --listen "http://[::]:3000"
+$ ./script/convos daemon --listen "http://[::]:8000"
 
 # Listen on a specific IPv4 and IPv6 interface
 $ ./script/convos daemon \
-  --listen "http://127.0.0.1:3000" \
-  --listen "http://[::1]:3000"
+  --listen "http://127.0.0.1:8080" \
+  --listen "http://[::1]:8080"
 
 # Listen on HTTPS with a default untrusted certificate
 $ ./script/convos daemon --listen https://*:4000
 
 # Use a custom certificate and key
 $ ./script/convos daemon --listen \
-  "https://*:3000?cert=/path/to/server.crt&key=/path/to/server.key"
+  "https://*:8000?cert=/path/to/server.crt&key=/path/to/server.key"
 
 # Make convos available behind a reverse proxy
-$ MOJO_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8001
+$ MOJO_REVERSE_PROXY=1 ./script/convos daemon \
+  --listen http://127.0.0.1:8080
 ```
 
 See [MOJO_REVERSE_PROXY](#mojoreverseproxy) for more details about setting
