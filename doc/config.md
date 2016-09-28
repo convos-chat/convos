@@ -57,6 +57,36 @@ $ cat /path/to/convos.conf
 }
 ```
 
+## Listen
+
+You can make convos listen to a variety of addresses:
+
+```bash
+# Listen on all IPv4 interfaces
+$ ./script/convos daemon --listen http://*:3000
+
+# Listen on all IPv4 and IPv6 interfaces
+$ ./script/convos daemon --listen "http://[::]:3000"
+
+# Listen on a specific IPv4 and IPv6 interface
+$ ./script/convos daemon \
+  --listen "http://127.0.0.1:3000" \
+  --listen "http://[::1]:3000"
+
+# Listen on HTTPS with a default untrusted certificate
+$ ./script/convos daemon --listen https://*:4000
+
+# Use a custom certificate and key
+$ ./script/convos daemon --listen \
+  "https://*:3000?cert=/path/to/server.crt&key=/path/to/server.key"
+
+# Make convos available behind a reverse proxy
+$ MOJO_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8001
+```
+
+See [MOJO_REVERSE_PROXY](#mojoreverseproxy) for more details about setting
+up Convos behind a reverse proxy.
+
 ## Configuration parameters
 
 ### CONVOS_BACKEND
@@ -152,6 +182,9 @@ for more details.
 The `MOJO_REVERSE_PROXY` environment variable can be used to enable proxy
 support, this allows Mojolicious to automatically pick up the
 `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers.
+
+Note that setting this environment variable without a reverse proxy in front
+will be a security issue.
 
 The [FAQ](./faq.html#can-convos-run-behind-behind-my-favorite-web-server)
 has more details on how to set up Convos behind a reverse proxy server.

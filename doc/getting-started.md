@@ -43,6 +43,9 @@ specific address:
 $ ./script/convos daemon --listen http://127.0.0.1:8080
 ```
 
+See also the [configuration guide](/doc/config.html#listen) for more
+`--listen` options.
+
 ## Optional modules
 
 There are some optional modules that can be installed to enhance the
