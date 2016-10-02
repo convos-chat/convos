@@ -7,6 +7,7 @@
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
   Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
 
+  if (window.isMobile) Convos.settings.sidebar = ""; // Don't want to remember sidebar when loading on mobile
   if (Convos.settings.sidebar) $('body').addClass('has-sidebar');
 
   var resizeTid;
