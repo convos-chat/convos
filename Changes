@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 0.99_12 Not Released
  - Less icons in header
  - Fix <convos-input/> from overlapping main area
+ - Add CustomEvent and dispatchEvent polyfill #282
  - Improved scrolling to bottom logic #269
 
 0.99_11 2016-09-19T23:05:31+0200
