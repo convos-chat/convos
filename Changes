@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 0.99_12 Not Released
  - Less icons in header
  - Fix <convos-input/> from overlapping main area
+ - Improved scrolling to bottom logic #269
 
 0.99_11 2016-09-19T23:05:31+0200
  - Fix "whois" for participant who is not in any channels

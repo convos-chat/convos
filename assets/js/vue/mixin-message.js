@@ -28,10 +28,10 @@
         $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
         $a.parent().append($html).find(".materialboxed").materialbox();
 
-        $html.find("img, iframe").each(function() {
-          $(this).css("height", "1px").load(function() {
-            if (self.$parent.atBottom) self.$parent.scrollToBottom(true);
-            $(this).css("height", "auto");
+        $html.filter("img, iframe").add($html.find("img, iframe")).each(function() {
+          $(this).css("max-height", "1px").load(function() {
+            self.$parent.scrollToBottom({});
+            $(this).css("max-height", "none");
           });
         });
       },
