@@ -32,8 +32,8 @@
           var $el = $(this);
           var maxHeight = $el.css("max-height") || "none";
           $el.css("max-height", "1px").load(function() {
-            self.$parent.scrollToBottom({});
             $el.css("max-height", maxHeight);
+            self.$parent.scrollToBottom({});
           });
         });
       },

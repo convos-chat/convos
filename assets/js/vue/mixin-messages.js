@@ -32,11 +32,10 @@
         }
       },
       scrollToBottom: function(args) {
-        var elem = this.scrollElement;
         if (!this.scrolling++ && (this.atBottom || args.gotoBottom)) {
           window.nextTick(function() {
               this.scrolling = 0;
-              elem.scrollTop = elem.scrollHeight;
+              this.scrollElement.scrollTop = this.scrollElement.scrollHeight;
           }.bind(this));
         }
       }
