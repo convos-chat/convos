@@ -4734,6 +4734,7 @@ ul.textcomplete-dropdown {
       top: 64px; } }
 
 .convos-dialog-container main {
+  height: auto;
   bottom: 46px; }
 
 .convos-dialog-container.inactive {
@@ -4784,9 +4785,8 @@ ul.textcomplete-dropdown {
   word-wrap: break-word; }
   .convos-message.error, .convos-message.notice {
     padding-left: 0.75rem;
-    padding-right: 0.75rem;
     border-left: 2px solid #9e9e9e; }
-  .convos-message.action .message, .convos-message.action a.title {
+  .convos-message.action .message, .convos-message.action .title {
     font-style: italic;
     display: inline; }
   .convos-message.action .link-embedder {
@@ -4818,8 +4818,16 @@ ul.textcomplete-dropdown {
       color: #68c46d; }
   .convos-message.same-user {
     margin-top: -4px; }
-  .convos-message.same-user a.title, .convos-message.same-user .secondary-content {
+  .convos-message.same-user .title {
     display: none; }
+  .convos-message.same-user .secondary-content {
+    opacity: 0;
+    transition: opacity 1000ms; }
+  .convos-message.same-user:hover .secondary-content {
+    display: block;
+    opacity: 1;
+    color: rgba(102, 102, 102, 0.87);
+    transition: opacity 300ms; }
   .convos-message .message a {
     color: inherit;
     text-decoration: underline; }
@@ -4834,9 +4842,7 @@ ul.textcomplete-dropdown {
     outline: 1px solid #d9d9d9;
     padding: 1px 3px; }
   .convos-message .secondary-content {
-    position: absolute;
-    top: 2px;
-    right: 0; }
+    padding-top: 2px; }
     .convos-message .secondary-content, .convos-message .secondary-content a {
       color: rgba(26, 26, 26, 0.87);
       font-size: 0.8rem;

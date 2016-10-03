@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-0.99_12 Not Released
+0.99_12 2016-10-03T09:31:02+0200
  - Less icons in header
  - Fix <convos-input/> from overlapping main area
  - Add CustomEvent and dispatchEvent polyfill #282
