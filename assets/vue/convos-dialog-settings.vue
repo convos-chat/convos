@@ -62,13 +62,7 @@ module.exports = {
     },
     participants: function() {
       if (!this.dialog) return [];
-
-      var nick = this.dialog.connection().nick();
-      var list = this.dialog.name == nick ? [nick]
-               : this.dialog.is_private ? [this.dialog.name, nick]
-               : Object.keys(this.dialog.participants);
-
-      return list
+      return Object.keys(this.dialog.participants)
         .sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); })
         .map(function(k) { return this.dialog.participants[k] || {name: k}; }.bind(this));
     }
