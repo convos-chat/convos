@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+0.99_13 2016-10-03T09:40:15+0200
+ - Fix clearing Convos.settings.sidebar on mobile
+ - Fix resetting max-height
+
 0.99_12 2016-10-03T09:31:02+0200
  - Less icons in header
  - Fix <convos-input/> from overlapping main area
