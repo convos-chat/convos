@@ -15,9 +15,15 @@ div.autocomplete {
   }
 }
 
-ul.textcomplete-dropdown {
+ul.complete-dropdown {
+  margin: 0;
+  position: absolute;
+  display: block !important;
   opacity: 1 !important;
-  margin-left: 15px;
+  max-height: 50vh;
+
   li { min-height: auto; }
-  li > a { padding: 6px 16px; }
+  li:hover { background: transparent; }
+  li.active:hover { background: $dropdown-hover-bg-color; }
+  li > a { padding: 6px 16px; cursor: default; }
 }

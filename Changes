@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+0.99_14 Not Released
+ - Autocomplete on nick will start from the beginning of the word
+ - Do not autocomplete on "enter"
+
 0.99_13 2016-10-03T09:40:15+0200
  - Fix clearing Convos.settings.sidebar on mobile
  - Fix resetting max-height
