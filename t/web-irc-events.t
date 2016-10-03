@@ -44,6 +44,8 @@ $irc->run(
     $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
       ->json_message_is('/event', 'sent')->json_message_is('/message', '/join #Convos')
       ->json_message_is('/dialog_id', '#convos');
+
+    is $c->get_dialog('#convos')->password, '', 'password is not undef';
   }
 );
 
