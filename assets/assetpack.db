@@ -458,10 +458,10 @@ format=js
 minified=1
 mtime=1471637625
 [js-min:js/vue/mixin-message.js]
-checksum=961a467b5c
+checksum=e335ec688f
 format=js
 minified=1
-mtime=1475416077
+mtime=1475480058
 [js-min:js/vue/mixin-messages.js]
 checksum=975182a6dd
 format=js

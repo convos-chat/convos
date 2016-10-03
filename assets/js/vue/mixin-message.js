@@ -29,9 +29,11 @@
         $a.parent().append($html).find(".materialboxed").materialbox();
 
         $html.filter("img, iframe").add($html.find("img, iframe")).each(function() {
-          $(this).css("max-height", "1px").load(function() {
+          var $el = $(this);
+          var maxHeight = $el.css("max-height") || "none";
+          $el.css("max-height", "1px").load(function() {
             self.$parent.scrollToBottom({});
-            $(this).css("max-height", "none");
+            $el.css("max-height", maxHeight);
           });
         });
       },
