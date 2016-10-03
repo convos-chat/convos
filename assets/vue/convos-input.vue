@@ -76,7 +76,7 @@ module.exports = {
       };
     },
     focusInput: function() {
-      if (!window.isMobile()) this.$nextTick(function() { this.$els.input.focus(); });
+      if (!window.isMobile) this.$nextTick(function() { this.$els.input.focus(); });
     },
     localCmdHelp: function(e) {
       $("a.help").click();

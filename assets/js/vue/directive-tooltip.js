@@ -4,7 +4,7 @@
   // <a v-tooltip.literal="Some helpful message">...</a>
   Vue.directive("tooltip", {
     bind: function() {
-      if (window.isMobile()) return;
+      if (window.isMobile) return;
       this.el.addEventListener("mouseover", function(e) {
         var doc = this.ownerDocument || document.documentElement;
         var offset = this.getBoundingClientRect();

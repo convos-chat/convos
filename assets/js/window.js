@@ -1,10 +1,7 @@
 (function() {
+  window.isMobile = navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i);
   window.isTouchDevice = !!("ontouchstart" in window);
   window.DEBUG = window.DEBUG || true; // TODO: Should default to false?
-
-  window.isMobile = function() {
-    return navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i);
-  };
 
   window.nextTick = function(cb) { setTimeout(cb, 1); };
 
@@ -22,7 +19,7 @@
 
   Element.prototype.focusOnDesktop = function() {
     var elem = this;
-    if (!isMobile()) window.nextTick(function() { elem.focus(); });
+    if (!isMobile) window.nextTick(function() { elem.focus(); });
   };
 
   if (!Object.values) {
