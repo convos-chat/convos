@@ -1,49 +1,56 @@
 (function() {
+  var offset = 60;
+
   Convos.mixin.messages = {
     data: function() {
-      return {
-        atBottom: true,
-        scrolling: 0,
-        scrollElement: null,
-        scrollThreshold: 60
-      };
+      return {atBottom: true, offsetElement: null, scrollElement: null};
     },
     watch: {
       'settings.screenHeight': function(v, o) {
-        if (!this.scrolling++) return;
-        var atBottom = this.atBottom;
-        setTimeout(function() {
-          this.scrolling = 0;
-          this.scrollToBottom({gotoBottom: atBottom});
-        }.bind(this), 300);
+        this.keepScrollPos({});
       }
     },
     methods: {
       onScroll: function() {
-        var self = this;
-        var elem = this.scrollElement;
-        this.atBottom = elem.scrollHeight < elem.offsetHeight + this.scrollThreshold + elem.scrollTop;
-        if (elem.scrollTop < this.scrollThreshold) {
-          this.dialog.historicMessages({}, function(err, cb) {
-            var scrollHeight = elem.scrollHeight;
-            if (cb) cb();
-            window.nextTick(function() { elem.scrollTop = elem.scrollHeight - scrollHeight - 100; });
-          });
-        }
+        if (this._scrollTid) return;
+        this._scrollTid = setTimeout(function() {
+          var self = this;
+          var el = this.scrollElement;
+
+          this._scrollTid = null;
+          this.atBottom = el.screenHeight < el.offsetHeight + offset + el.scrollTop;
+          this.trackVisibleMessage();
+
+          if (el.scrollTop < offset) {
+            this.dialog.historicMessages({}, function(err, body) { });
+          }
+        }.bind(this), 100);
       },
-      scrollToBottom: function(args) {
-        if (!this.scrolling++ && (this.atBottom || args.gotoBottom)) {
-          window.nextTick(function() {
-              this.scrolling = 0;
-              this.scrollElement.scrollTop = this.scrollElement.scrollHeight;
-          }.bind(this));
+      keepScrollPos: function() {
+        var self = this;
+        var el = this.scrollElement;
+
+        window.nextTick(function() {
+          if (self.atBottom) return el.scrollTop = el.scrollHeight;
+          if (self.offsetElement) return el.scrollTop = self.offsetElement.offsetTop - 10;
+        });
+      },
+      trackVisibleMessage: function() {
+        var messages = this.scrollElement.querySelectorAll(".convos-message");
+        var st = this.scrollElement.scrollTop;
+        var n = 0;
+        while (++n < messages.length) {
+          if (messages[n].offsetTop < st) continue;
+          this.offsetElement = messages[n];
+          break;
         }
       }
     },
     ready: function() {
       this.scrollElement = this.$el.querySelector(".scroll-element");
       this.scrollElement.addEventListener("scroll", this.onScroll);
-      this.dialog.on("message", this.scrollToBottom);
+      this.dialog.on("message", this.trackVisibleMessage);
+      this.dialog.on("message", this.keepScrollPos);
     },
     beforeDestroy: function() {
       this.scrollElement.removeEventListener("scroll", this.onScroll);

@@ -3,6 +3,8 @@ Revision history for perl distribution Convos
 0.99_14 Not Released
  - Autocomplete on nick will start from the beginning of the word
  - Do not autocomplete on "enter"
+ - Improved keeping scroll position to bottom #269
+ - Improved keeping scroll position when loading historic messages
 
 0.99_13 2016-10-03T09:40:15+0200
  - Fix clearing Convos.settings.sidebar on mobile

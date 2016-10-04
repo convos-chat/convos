@@ -82,7 +82,7 @@
     this.messages[args.method](msg);
     this.participant({type: "maintain", name: msg.from, seen: msg.ts});
     if (args.type == "participants") this._setParticipants(msg);
-    if (args.method == "push") this.emit("message", msg);
+    this.emit("message", msg);
   };
 
   proto.connection = function() {
@@ -92,8 +92,10 @@
   proto.historicMessages = function(args, cb) {
     if (!this.messages.length) return;
     if (this.messages[0].loading) return;
-    var self = this;
+
     this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
+
+    var self = this;
     Convos.api.messages(
       {
         before: this.messages[1].ts.toISOString(),
@@ -101,16 +103,12 @@
         dialog_id: this.dialog_id
       },
       function(err, xhr) {
-        if (err) return cb(err, null);
-        if (xhr.body.messages.length && xhr.body.end) {
-          self.messages.shift();
-        }
-        else {
-          self._endOfHistory();
-        }
-        cb(null, function() {
+        self.messages.shift(); // remove "Loading messages...";
+        if (xhr.body.messages) {
+          if (!xhr.body.messages.length) self._endOfHistory();
           xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, {method: "unshift"}); });
-        })
+        }
+        cb(err, xhr.body);
       }
     );
   };
