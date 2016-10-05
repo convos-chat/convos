@@ -7,7 +7,8 @@ use Mojo::Loader 'load_class';
 use Mojo::URL;
 
 sub name { shift->{name} }
-sub protocol { shift->{protocol} || 'null' }
+has on_connect_commands => sub { +[] };
+has protocol            => sub {'null'};
 
 sub url {
   return $_[0]->{url} if ref $_[0]->{url};
@@ -89,8 +90,9 @@ sub TO_JSON {
   $self->{state} ||= 'queued';
   my $json = {map { ($_, '' . $self->$_) } qw(name protocol state url)};
 
-  $json->{connection_id} = $self->id;
-  $json->{state} = 'queued' if $persist and $json->{state} eq 'connected';
+  $json->{connection_id}       = $self->id;
+  $json->{on_connect_commands} = $self->on_connect_commands;
+  $json->{state}               = 'queued' if $persist and $json->{state} eq 'connected';
 
   if ($persist) {
     $json->{dialogs} = [map { $_->TO_JSON($persist) } @{$self->dialogs}];

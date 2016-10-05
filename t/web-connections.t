@@ -24,12 +24,13 @@ $t->post_ok('/api/connections', json => {url => 'foo://example.com'})->status_is
 $t->get_ok('/api/connections')->status_is(200)->json_is(
   '/connections/0',
   {
-    connection_id => 'irc-example',
-    name          => 'example',
-    me            => {},
-    protocol      => 'irc',
-    state         => 'disconnected',
-    url           => 'irc://irc.example.com:6667?nick=superman'
+    connection_id       => 'irc-example',
+    name                => 'example',
+    me                  => {},
+    on_connect_commands => [],
+    protocol            => 'irc',
+    state               => 'disconnected',
+    url                 => 'irc://irc.example.com:6667?nick=superman'
   }
   )->json_is('/connections/1/connection_id', 'irc-localhost')
   ->json_is('/connections/1/name', 'localhost')

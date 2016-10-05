@@ -490,6 +490,14 @@ _event irc_rpl_welcome => sub {
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(state => me => $self->{myinfo});
   $self->_join_dialog(join(' ', $_->name, $_->password), sub { }) for @{$self->dialogs};
+
+  # TODO: This is very experimental
+  Scalar::Util::weaken($self);
+  my ($commands, $write) = ($self->on_connect_commands, undef);
+  $write = sub {
+    my $cmd = shift @$commands or return;
+    $self and $self->_irc->write($cmd, $write);
+  };
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool
