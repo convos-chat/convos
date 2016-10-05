@@ -24,7 +24,7 @@ module.exports = {
   methods: {
     draw: function(e) {
       this.$els.main.style.bottom = this.$els.input.offsetHeight + "px";
-      this.scrollToBottom({});
+      this.keepScrollPos();
     }
   }
 };
