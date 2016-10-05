@@ -18,8 +18,10 @@
           var el = this.scrollElement;
 
           this._scrollTid = null;
-          this.atBottom = el.screenHeight < el.offsetHeight + offset + el.scrollTop;
+          this.atBottom = el.scrollHeight < el.offsetHeight + offset + el.scrollTop;
           this.trackVisibleMessage();
+
+          console.log('atBottom', this.atBottom, el.scrollHeight, el.offsetHeight, offset, el.scrollTop);
 
           if (el.scrollTop < offset) {
             this.dialog.historicMessages({}, function(err, body) { });
