@@ -4694,13 +4694,21 @@ div.autocomplete {
     div.autocomplete li a, div.autocomplete li span {
       display: block; }
 
-ul.textcomplete-dropdown {
+ul.complete-dropdown {
+  margin: 0;
+  position: absolute;
+  display: block !important;
   opacity: 1 !important;
-  margin-left: 15px; }
-  ul.textcomplete-dropdown li {
+  max-height: 50vh; }
+  ul.complete-dropdown li {
     min-height: auto; }
-  ul.textcomplete-dropdown li > a {
-    padding: 6px 16px; }
+  ul.complete-dropdown li:hover {
+    background: transparent; }
+  ul.complete-dropdown li.active:hover {
+    background: #eee; }
+  ul.complete-dropdown li > a {
+    padding: 6px 16px;
+    cursor: default; }
 
 .convos-chat {
   position: relative;
@@ -4748,7 +4756,6 @@ ul.textcomplete-dropdown {
   border-top: 1px solid #d1d1d1;
   padding: 8px 0.75rem 0 0.75rem;
   width: 100%;
-  overflow: hidden;
   position: absolute;
   bottom: 0;
   z-index: 899; }
