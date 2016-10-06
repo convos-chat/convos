@@ -3,7 +3,7 @@
     <ul class="complete-dropdown dropdown-content" v-el:dropdown>
       <li :class="i == completeIndex ? 'active' : ''" v-for="(i, c) in completeList" v-if="completeList.length > 1">
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'command'">{{c}} - {{commands[c] ? commands[c].description : "Unknown command"}}</a>
-        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'emoji'">{{{c | markdown}}}</a>
+        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'emoji'">{{{c | markdown}}} {{i ? emojiDescription(c) : ''}}</a>
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'nick'">{{c}}</a>
       </li>
     </ul>
@@ -74,7 +74,7 @@ module.exports = {
         pos = ta.selectionStart;
         this.before = ta.value.substring(0, pos);
         this.after = ta.value.substring(pos);
-        this.complete = this.before.toLowerCase().match(/(\S)(\S*)$/);
+        this.complete = this.before.match(/(\S)(\S*)$/);
         this.completeIndex = 1;
         this.completeList = [];
 
@@ -86,7 +86,7 @@ module.exports = {
               break;
             case ":":
               this.completeFormat = "emoji";
-              this.completeList = _filter(emojis, this.complete[0]);
+              this.completeList = _filter(emojis, this.complete[0]).splice(0, 40);
               break;
             default:
               this.completeFormat = "nick";
@@ -115,7 +115,14 @@ module.exports = {
         pos = (this.before + word + padding).length;
         ta.value = this.before + word + padding + this.after;
         ta.setSelectionRange(pos, pos);
+        this.$nextTick(function() {
+          var $ul = $(ta).parent().find('ul');
+          $ul.animate({scrollTop: $ul.find('.active').get(0).offsetTop - $ul.height() / 2}, 'fast');
+        });
       }
+    },
+    emojiDescription: function(d) {
+      return d.replace(/:/g, '');
     },
     focusInput: function() {
       if (!window.isMobile) this.$nextTick(function() { this.$els.input.focus(); });
@@ -155,13 +162,13 @@ module.exports = {
       }).map(function(p) { return p.name });
     },
     sendMessage: function(e) {
-      var m = this.message;
-      var l = "localCmd" + m.replace(/^\//, "").ucFirst();
+      var msg = this.$els.input.value;
+      var l = "localCmd" + msg.replace(/^\//, "").ucFirst();
       this.message = "";
       this.focusInput();
       this.$nextTick(function() { autosize.update(this.$els.input); });
-      if ("localCmd" + m != l && this[l]) return this[l](e);
-      if (m.length) this.dialog.connection().send(m, this.dialog);
+      if ("localCmd" + msg != l && this[l]) return this[l](e);
+      if (msg.length) this.dialog.connection().send(msg, this.dialog);
     }
   },
   ready: function() {
