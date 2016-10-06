@@ -196,6 +196,11 @@ $t->run(
     $t->on($irc, irc_privmsg => sub { Mojo::IOLoop->stop });
     Mojo::IOLoop->start;
     is_deeply(\@e, [qw(irc_join irc_privmsg)], 'run through the correct events');
+    is_deeply(
+      $connection->on_connect_commands,
+      ['/msg NickServ identify s3cret'],
+      'on_connect_commands still has the same elements'
+    );
   }
 );
 

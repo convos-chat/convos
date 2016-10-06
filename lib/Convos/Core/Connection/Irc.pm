@@ -485,6 +485,8 @@ _event irc_rpl_yourhost => sub {
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 _event irc_rpl_welcome => sub {
   my ($self, $msg) = @_;
+  my @commands = @{$self->on_connect_commands};
+  my $write;
 
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->{myinfo}{nick} = $msg->{params}[0];
@@ -493,9 +495,8 @@ _event irc_rpl_welcome => sub {
 
   # TODO: This is very experimental
   Scalar::Util::weaken($self);
-  my ($commands, $write) = ($self->on_connect_commands, undef);
   $write = sub {
-    my $cmd = shift @$commands or return;
+    my $cmd = shift @commands or return;
     $self and $self->send('', $cmd, $write);
   };
   $write->();
