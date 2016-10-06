@@ -159,6 +159,15 @@ $t->run(
   }
 );
 
+# make sure we have a dialog
+$t->run(
+  [qr{JOIN \#convos}, ['main', 'join-convos.irc']],
+  sub {
+    $connection->send('#convos' => '/join #convos', sub { Mojo::IOLoop->stop });
+    Mojo::IOLoop->start;
+  }
+);
+
 $t->run(
   [],
   sub {
@@ -166,6 +175,27 @@ $t->run(
     Mojo::IOLoop->start;
     is $err, '',    'cmd /disconnect';
     is $res, undef, 'res /disconnect';
+    ok !$connection->{_irc}, 'disconnected from irc server';
+  }
+);
+
+$connection->on_connect_commands(['/msg NickServ identify s3cret']);
+
+$t->run(
+  [
+    qr{NICK supermanx}   => ['main', 'welcome.irc'],
+    qr{JOIN}             => ['main', 'join-convos.irc'],
+    qr{PRIVMSG NickServ} => ['main', 'identify.irc'],
+  ],
+  sub {
+    my $irc = $connection->_irc;
+    my @e;
+    $connection->connect(sub { });
+    $t->on($irc, irc_join    => sub { push @e, 'irc_join' });
+    $t->on($irc, irc_privmsg => sub { push @e, 'irc_privmsg' });
+    $t->on($irc, irc_privmsg => sub { Mojo::IOLoop->stop });
+    Mojo::IOLoop->start;
+    is_deeply(\@e, [qw(irc_join irc_privmsg)], 'run through the correct events');
   }
 );
 
@@ -189,3 +219,7 @@ __DATA__
 :hybrid8.debian.local 333 batman_ #convos batman_!superman@i.love.debian.org 1433007153
 @@ set-topic.irc
 :batman_!superman@i.love.debian.org TOPIC #convos :Cool topic
+@@ welcome.irc
+:hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
+@@ identify.irc
+:NickServ!clark.kent\@i.love.debian.org PRIVMSG #supermanx :You are now identified for batman

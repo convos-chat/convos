@@ -496,8 +496,9 @@ _event irc_rpl_welcome => sub {
   my ($commands, $write) = ($self->on_connect_commands, undef);
   $write = sub {
     my $cmd = shift @$commands or return;
-    $self and $self->_irc->write($cmd, $write);
+    $self and $self->send('', $cmd, $write);
   };
+  $write->();
 };
 
 # :superman!superman@i.love.debian.org TOPIC #convos :cool
