@@ -7,7 +7,7 @@
     },
     watch: {
       'settings.screenHeight': function(v, o) {
-        this.keepScrollPos({});
+        this.keepScrollPos();
       }
     },
     methods: {
@@ -53,6 +53,7 @@
       this.scrollElement.addEventListener("scroll", this.onScroll);
       this.dialog.on("message", this.trackVisibleMessage);
       this.dialog.on("message", this.keepScrollPos);
+      this.dialog.on("active", this.keepScrollPos);
     },
     beforeDestroy: function() {
       this.scrollElement.removeEventListener("scroll", this.onScroll);
