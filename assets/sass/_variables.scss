@@ -8,7 +8,7 @@ $text-color: rgba(0, 0, 0, 0.87) !default;
 $error-bg-color: color('red', 'lighten-5') !default;
 $error-border-color: color('red', 'lighten-2') !default;
 $error-text-color: color("red", "darken-4") !default;
-$highlight-bg-color: lighten(color('red', 'lighten-5'), 5%) !default;
+$highlight-bg-color: lighten(color("red", "lighten-4"), 2%) !default;
 $notice-text-color: lighten($text-color, 40%) !default;
 $notice-border-color: color('grey', 'lighten-1') !default;
 $settings-active-color: #f6f6f6 !default;

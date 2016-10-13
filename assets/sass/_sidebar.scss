@@ -32,7 +32,7 @@
   .content > a {
     display: block;
     position: relative;
-    padding: $element-bottom-margin $gutter-width / 2;
+    padding: $gutter-width / 2;
 
     &.active {
       background-color: $body-bg;
