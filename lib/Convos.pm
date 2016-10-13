@@ -6,7 +6,7 @@ use Convos::Util;
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
-our $VERSION = '0.99_13';
+our $VERSION = '0.99_15';
 
 has core => sub { Convos::Core->new(backend => shift->config('backend')) };
 
@@ -192,7 +192,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_13
+0.99_15
 
 =head1 DESCRIPTION
 

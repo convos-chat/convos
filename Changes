@@ -1,8 +1,11 @@
 Revision history for perl distribution Convos
 
-0.99_15 Not Released
+0.99_15 2016-10-13T22:51:01+0200
  - Fix IRC join channel redirect #284
  - Fix parting IRC channel, even if not in the channel
+ - Fix highlight color in chat
+ - Fix keeping on_connect_commands
+ - Improved keeping scroll position to bottom #269
 
 0.99_14 2016-10-06T22:42:15+0200
  - Autocomplete on nick will start from the beginning of the word
