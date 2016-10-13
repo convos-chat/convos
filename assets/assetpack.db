@@ -463,10 +463,10 @@ format=js
 minified=1
 mtime=1475616791
 [js-min:js/vue/mixin-messages.js]
-checksum=a33b834c69
+checksum=1a2f789d51
 format=js
 minified=1
-mtime=1475706539
+mtime=1476105744
 [js-min:js/websocket.js]
 checksum=ad8a18ff86
 format=js
@@ -478,12 +478,12 @@ format=js
 minified=1
 mtime=1475480169
 [sass:sass/main.scss]
-checksum=b968699d1c
+checksum=f3351ffe87
 format=css
 minified=0
 mtime=1473611747
 [sass-min:sass/main.scss]
-checksum=b968699d1c
+checksum=f3351ffe87
 format=css
 minified=1
 mtime=1473611747

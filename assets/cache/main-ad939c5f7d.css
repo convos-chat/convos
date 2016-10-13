@@ -4815,7 +4815,7 @@ ul.complete-dropdown {
     .convos-message.error a {
       color: #e55454; }
   .convos-message.highlight .message {
-    background-color: white;
+    background-color: #ffd7db;
     margin-left: -0.5rem;
     padding-left: 0.5rem; }
   .convos-message.notice {
@@ -5058,7 +5058,7 @@ img.embed {
   .convos-main-menu .content > a {
     display: block;
     position: relative;
-    padding: 1rem 0.75rem; }
+    padding: 0.75rem; }
     .convos-main-menu .content > a.active {
       background-color: #fff;
       color: #225725;

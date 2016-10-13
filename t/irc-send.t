@@ -141,7 +141,7 @@ $t->run(
       sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
     );
     Mojo::IOLoop->start;
-    is $err, 'Illegal channel name', 'cmd /part does_not_matter';
+    is $err, '',    'parting IRC channel, even if not in the channel';
     is $res, undef, 'res /part does_not_matter';
   }
 );

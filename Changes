@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 0.99_15 Not Released
  - Fix IRC join channel redirect #284
+ - Fix parting IRC channel, even if not in the channel
 
 0.99_14 2016-10-06T22:42:15+0200
  - Autocomplete on nick will start from the beginning of the word
