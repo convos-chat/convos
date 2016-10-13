@@ -204,6 +204,21 @@ $t->run(
   }
 );
 
+
+$t->run(
+  [qr{JOIN \#devops}, ['main', 'join-redirect.irc']],
+  sub {
+    $connection->send(
+      '#convos' => '/join #devops',
+      sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop }
+    );
+    Mojo::IOLoop->start;
+    is $err, '', 'cmd /join convos';
+    ok !$connection->get_dialog('#devops'), 'not #devops';
+    ok $connection->get_dialog('##devops'), 'but ##devops';
+  }
+);
+
 done_testing;
 
 __DATA__
@@ -228,3 +243,10 @@ __DATA__
 :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 @@ identify.irc
 :NickServ!clark.kent\@i.love.debian.org PRIVMSG #supermanx :You are now identified for batman
+@@ join-redirect.irc
+:hybrid8.debian.local 470 test_____ #devops ##devops :Forwarding to another channel
+:test_____!~test12120@somehost JOIN ##devops
+:hybrid8.debian.local 332 test21362 ##devops :some cool topic
+:hybrid8.debian.local 333 test21362 ##devops jhthorsen!jhthorsen@i.love.debian.org 143293
+:hybrid8.debian.local 353 test21362 @ ##devops :Test21362 @batman
+:hybrid8.debian.local 366 test21362 ##devops :End of /NAMES list.
