@@ -7,8 +7,9 @@ It's been a while since the last blog post, but that doesn't mean there aren't
 some cool things happening!
 
 Version [0.99_15](https://github.com/Nordaaker/convos/tree/stable) is just out
-with a bunch of updates. Run the [install](/doc/install.html) command to get
-up to speed!
+with a bunch of updates. Run the
+[install](/doc/getting-started.html#quick-start-guide) command to get up to
+speed!
 
 ### New shiny things
 
@@ -46,5 +47,5 @@ will correctly track the channel redirects.
 ### More?
 
 Want more details? Check out the
-[Changelog](https://github.com/Nordaaker/convos/blob/master/Changes) or come
+[Changelog](https://github.com/Nordaaker/convos/blob/master/Changes), or come
 and [talk to us](/doc#get-in-touch).
