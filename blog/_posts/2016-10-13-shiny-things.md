@@ -29,7 +29,7 @@ the dialog list.
 ### Major bug fix by a new contributor
 
 [@alilles](https://github.com/alilles) had an issue where Convos would
-truncate setting files when the disk is full. We tracked down the issue
+truncate setting files when the disk was full. We tracked down the issue
 and fixed it. The result is that Convos will now throw an error
 instead of nuking all the settings for the users.
 
