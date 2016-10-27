@@ -6,6 +6,10 @@
         var msg = this.msg;
         var c = {highlight: this.msg.highlight ? true : false};
 
+        if (!this.dialog.participants[msg.from]) {
+          c["inactive-user"] = true;
+        }
+
         if (msg.type == "private" && msg.message && msg.from == msg.prev.from) {
           c["same-user"] = true;
         }
@@ -47,6 +51,9 @@
             });
           }
         });
+      },
+      statusTooltip: function() {
+        return this.dialog.participants[this.msg.from] ? "" : "Not in this channel";
       }
     }
   };

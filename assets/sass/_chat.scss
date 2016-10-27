@@ -77,6 +77,8 @@ $convos-input-height: 46px;
 }
 
 .convos-message {
+  $dialog-spacing: 4px;
+
   display: block;
   position: relative;
   margin: $dialog-spacing * 2 0;
@@ -119,10 +121,17 @@ $convos-input-height: 46px;
     color: lighten($text-color, 40%);
     a { color: lighten($link-color, 20%); }
   }
-  &.same-user {
-    margin-top: -$dialog-spacing;
+  &.inactive-user {
+    &, .secondary-container {
+      color: lighten($text-color, 40%);
+    }
+    a.title {
+      color: lighten($link-color, 25%);
+      text-decoration: line-through;
+    }
   }
   &.same-user {
+    margin-top: -$dialog-spacing;
     .title { display: none; }
     .secondary-content { opacity: 0; transition: opacity 1000ms; }
     &:hover .secondary-content {
