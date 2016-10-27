@@ -125,7 +125,6 @@ sub _config {
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
   $config->{default_server}
     ||= $config->{forced_irc_server} || $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';
-  $config->{invite_code} ||= $ENV{CONVOS_INVITE_CODE} // $self->_generate_invite_code;
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
@@ -134,18 +133,10 @@ sub _config {
     contact           => $config->{contact},
     default_server    => $config->{default_server},
     forced_irc_server => $config->{forced_irc_server} ? true : false,
-    invite_code       => $config->{invite_code} ? true : false,
     organization_name => $config->{organization_name},
   };
 
   $config;
-}
-
-sub _generate_invite_code {
-  my $self = shift;
-  my $code = Mojo::Util::md5_sum(join ':', $<, $(, $^X, $0);
-  $self->log->info(qq(Generated CONVOS_INVITE_CODE="$code"));
-  return $code;
 }
 
 sub _home_relative_to_lib {
@@ -164,7 +155,10 @@ sub _plugins {
 
   $ENV{CONVOS_PLUGINS} //= '';
   $plugins ||= {};
-  $plugins->{'Convos::Plugin::Helpers'} = {};    # core plugin
+
+  # core plugins
+  $plugins->{$_} = {} for qw(Convos::Plugin::Auth Convos::Plugin::Helpers);
+
   $plugins->{$_} = {} for split /,/, $ENV{CONVOS_PLUGINS};
   $self->plugin($_ => $plugins->{$_}) for grep { $plugins->{$_} } keys %$plugins;
 }

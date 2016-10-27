@@ -62,48 +62,39 @@ sub get {
 
 sub login {
   my $self = shift->openapi->valid_input or return;
-  my $json = $self->req->json;
-  my $user = $self->app->core->get_user($json);
 
-  if ($user and $user->validate_password($json->{password})) {
-    $self->session(email => $user->email)->render(openapi => $user);
-  }
-  else {
-    $self->render(openapi => E('Invalid email or password.'), status => 400);
-  }
+  $self->delay(
+    sub { $self->auth->login($self->req->json, shift->begin) },
+    sub {
+      my ($delay, $err, $user) = @_;
+      return $self->render(openapi => E($err), status => 400) if $err;
+      return $self->session(email => $user->email)->render(openapi => $user);
+    },
+  );
 }
 
 sub logout {
-  shift->session({expires => 1})->redirect_to('index');
+  my $self = shift;
+
+  $self->delay(
+    sub { $self->auth->logout({}, shift->begin) },
+    sub {
+      my ($delay, $err) = @_;
+      return $self->render(openapi => E($err), status => 400) if $err;
+      return $self->session({expires => 1})->redirect_to('index');
+    },
+  );
 }
 
 sub register {
   my $self = shift->openapi->valid_input or return;
-  my $json = $self->req->json;
-  my $core = $self->app->core;
-  my $user;
 
-  if (my $invite_code = $self->app->config('invite_code')) {
-    if (!$json->{invite_code} or $json->{invite_code} ne $invite_code) {
-      return $self->render(openapi => E('Invalid invite code.', '/body/invite_code'),
-        status => 400);
-    }
-  }
-  if ($core->get_user($json)) {
-    return $self->render(openapi => E('Email is taken.', '/body/email'), status => 409);
-  }
-
-  return $self->delay(
+  $self->delay(
+    sub { $self->auth->register($self->req->json, shift->begin) },
     sub {
-      my ($delay) = @_;
-      $user = $core->user($json);
-      $user->set_password($json->{password});
-      $user->save($delay->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->session(email => $user->email)->render(openapi => $user);
+      my ($delay, $err, $user) = @_;
+      return $self->render(openapi => E($err), status => 400) if $err;
+      return $self->session(email => $user->email)->render(openapi => $user);
     },
   );
 }

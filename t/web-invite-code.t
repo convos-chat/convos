@@ -7,8 +7,7 @@ my %user = (email => 'superman@example.com', password => 's3cret');
 
 for my $code ('', 'invalid') {
   $t->post_ok('/api/user/register', json => {invite_code => $code, %user})->status_is(400)
-    ->json_is('/errors/0/message', 'Invalid invite code.')
-    ->json_is('/errors/0/path',    '/body/invite_code');
+    ->json_is('/errors/0/message', 'Invalid invite code.');
 }
 
 $user{invite_code} = $ENV{CONVOS_INVITE_CODE};
