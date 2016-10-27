@@ -4823,18 +4823,23 @@ ul.complete-dropdown {
     color: rgba(102, 102, 102, 0.87); }
     .convos-message.notice a {
       color: #68c46d; }
+  .convos-message.inactive-user, .convos-message.inactive-user .secondary-container {
+    color: rgba(102, 102, 102, 0.87); }
+  .convos-message.inactive-user a.title {
+    color: #7bcb7e;
+    text-decoration: line-through; }
   .convos-message.same-user {
     margin-top: -4px; }
-  .convos-message.same-user .title {
-    display: none; }
-  .convos-message.same-user .secondary-content {
-    opacity: 0;
-    transition: opacity 1000ms; }
-  .convos-message.same-user:hover .secondary-content {
-    display: block;
-    opacity: 1;
-    color: rgba(102, 102, 102, 0.87);
-    transition: opacity 300ms; }
+    .convos-message.same-user .title {
+      display: none; }
+    .convos-message.same-user .secondary-content {
+      opacity: 0;
+      transition: opacity 1000ms; }
+    .convos-message.same-user:hover .secondary-content {
+      display: block;
+      opacity: 1;
+      color: rgba(102, 102, 102, 0.87);
+      transition: opacity 300ms; }
   .convos-message .message a {
     color: inherit;
     text-decoration: underline; }

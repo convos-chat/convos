@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_16 Not Released
+ - Add custom styling for participants that are not currently in the channel
+
 0.99_15 2016-10-13T22:51:01+0200
  - Fix IRC join channel redirect #284
  - Fix parting IRC channel, even if not in the channel
