@@ -2,10 +2,8 @@ package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
 use Convos::Util qw(next_tick spurt DEBUG);
-use Cwd ();
 use Fcntl ':flock';
-use File::HomeDir ();
-use File::Path    ();
+use File::Path ();
 use File::ReadBackwards;
 use File::Spec::Functions 'catfile';
 use Mojo::IOLoop::ForkCall ();

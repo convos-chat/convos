@@ -1,14 +1,21 @@
 package Convos;
 use Mojo::Base 'Mojolicious';
 
+use Cwd ();
 use Convos::Core;
 use Convos::Util;
+use File::HomeDir ();
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
 our $VERSION = '0.99_15';
 
-has core => sub { Convos::Core->new(backend => shift->config('backend')) };
+has core => sub {
+  my $self = shift;
+  my $home = Cwd::abs_path($self->config('home')) || $self->config('home');
+
+  return Convos::Core->new(backend => $self->config('backend'), home => Mojo::Home->new($home));
+};
 
 has _api_spec => sub {
   my $self = shift;
@@ -120,11 +127,13 @@ sub _config {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
 
-  $config->{backend}           ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
-  $config->{contact}           ||= $ENV{CONVOS_CONTACT}           || 'mailto:root@localhost';
-  $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
+  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
+  $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
   $config->{default_server}
     ||= $config->{forced_irc_server} || $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';
+  $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
+  $config->{home}
+    ||= $ENV{CONVOS_HOME} || File::Spec->catdir(File::HomeDir->my_home, qw(.local share convos));
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 

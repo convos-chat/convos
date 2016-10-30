@@ -6,7 +6,7 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-no warnings qw( once redefine );
+no warnings qw(once redefine);
 
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 

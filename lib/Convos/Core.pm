@@ -4,29 +4,12 @@ use Mojo::Base -base;
 use Convos::Core::Backend;
 use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
-use File::Spec::Functions 'catdir';
 use Mojo::Home;
 use Mojo::Util 'trim';
 use Mojolicious::Plugins;
 
 has backend => sub { Convos::Core::Backend->new };
-
-has home => sub {
-  my $self = shift;
-  my $home = shift || $ENV{CONVOS_HOME};
-
-  if (!$home) {
-    $home = File::HomeDir->my_home;
-    $home = catdir($home, qw(.local share convos)) if $home;
-  }
-  if ($home) {
-    $home = Cwd::abs_path($home) || $home;
-  }
-
-  die 'Could not figure out CONVOS_HOME. $HOME directory could not be found.' unless $home;
-  warn "[Convos] Home is $home\n" if DEBUG;
-  return Mojo::Home->new($home);
-};
+has home    => sub { Mojo::Home->new($ENV{CONVOS_HOME}); };
 
 sub connect {
   my ($self, $connection) = @_;
@@ -188,7 +171,7 @@ Holds a L<Convos::Core::Backend> object.
   $obj = $self->home;
   $self = $self->home(Mojo::Home->new($ENV{CONVOS_HOME});
 
-Holds a L<Mojo::Home> object pointing to where convos store data.
+Holds a L<Mojo::Home> object pointing to where Convos store data.
 
 =head1 METHODS
 

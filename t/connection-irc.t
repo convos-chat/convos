@@ -6,8 +6,8 @@ my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user = $core->user({email => 'test.user@example.com'});
 my $connection
   = $user->connection({name => 'localhost', protocol => 'irc', url => 'irc://127.0.0.1'});
-my $settings_file = File::Spec->catfile($ENV{CONVOS_HOME},
-  qw( test.user@example.com irc-localhost connection.json ));
+my $settings_file
+  = File::Spec->catfile($ENV{CONVOS_HOME}, qw(test.user@example.com irc-localhost connection.json));
 my $err;
 
 is $connection->name, 'localhost', 'connection.name';
