@@ -1,16 +1,17 @@
 (function() {
   Convos.Dialog = function(attrs) {
-    this.activated    = 0;
-    this.active       = false;
-    this.dialog_id    = "";
-    this.frozen       = "Loading...";
-    this.is_private   = true;
-    this.messages     = [];
-    this.name         = "";
-    this.lastRead     = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
+    this.activated = 0;
+    this.active = false;
+    this.dialog_id = "";
+    this.frozen = "Loading...";
+    this.is_private = true;
+    this.messages = [];
+    this.messagesMethod = "dialogMessages";
+    this.name = "";
+    this.lastRead = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
     this.participants = {};
-    this.unread       = 0;
-    this.topic        = "";
+    this.unread = 0;
+    this.topic = "";
 
     EventEmitter(this);
     if (attrs) this.update(attrs);
@@ -96,7 +97,7 @@
     this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
 
     var self = this;
-    Convos.api.dialogMessages(
+    Convos.api[this.messagesMethod](
       {
         before: this.messages[1].ts.toISOString(),
         connection_id: this.connection_id,
@@ -121,7 +122,7 @@
   };
 
   proto.icon = function() {
-    return this.is_private ? "person" : "group";
+    return !this.dialog_id ? "device_hub" : this.is_private ? "person" : "group";
   };
 
   proto.participant = function(data) {
@@ -135,7 +136,7 @@
         break;
       case "maintain":
         if (!this.participants[data.nick]) return;
-        this.participants[data.nick].seen = data.ts || new Date();
+        this.participants[data.nick].seen = data.ts || new Date();
         break;
       case "mode":
         if (!this.participants[data.nick]) return;
@@ -196,12 +197,12 @@
   proto._load = function() {
     var self = this;
 
-    Convos.api.dialogMessages(
+    Convos.api[this.messagesMethod](
       {
         connection_id: this.connection_id,
         dialog_id: this.dialog_id
       }, function(err, xhr) {
-        var messages = xhr.body.messages || [];
+        var messages = xhr.body.messages || [];
         self.messages = []; // clear old messages on ws reconnect
         messages.forEach(function(msg) { self.addMessage(msg, {method: "push", disableNotifications: true}) });
         self._onJoin();
