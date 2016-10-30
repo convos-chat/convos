@@ -61,6 +61,9 @@
 
     .material-icons { vertical-align: top; }
     &.simple .material-icons { vertical-align: bottom; }
+    .btn-floating {
+      float: right;
+    }
   }
 
   .on {

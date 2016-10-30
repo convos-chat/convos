@@ -31,6 +31,16 @@ a:hover {
   color: darken($secondary-color, 10%);
 }
 
+a.btn-floating {
+  vertical-align: text-bottom;
+  i {
+    font-size: 1em !important;
+    height: 1em !important;
+    width: 37px !important;
+    line-height: 37px !important;
+  }
+}
+
 svg {
   width: 100%;
   height: auto;

@@ -55,6 +55,8 @@
 < vue/convos-help.vue
 < vue/convos-resources.vue
 < vue/convos-notifications.vue
+< vue/convos-connection-editor.vue
+< vue/convos-dialog-information.vue
 < vue/convos-dialog-settings.vue
 < vue/convos-profile.vue
 
@@ -71,7 +73,6 @@
 < vue/convos-dialog-container.vue
 
 # settings
-< vue/convos-connection-editor.vue
 < vue/convos-create-dialog.vue
 < vue/convos-settings.vue
 

@@ -14,10 +14,6 @@
         <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
         <span class="on" v-else>convos-local</span>
       </a>
-      <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple" :class="activeClass('#create-dialog')">
-        <i class="material-icons">add</i> Join dialog...
-      </a>
-
       <div class="divider"></div>
       <a v-sidebar.literal="#profile" class="simple">
         <i class="material-icons">account_circle</i> Edit profile
@@ -28,6 +24,7 @@
       <a v-link.literal="/api/user/logout" class="simple">
         <i class="material-icons">power_settings_new</i> Logout
       </a>
+      <a v-link.literal="#create-dialog" v-if="user.connections.length" class="btn-floating waves-effect waves-light"><i class="material-icons">add</i></a>
     </div>
   </div>
 </template>

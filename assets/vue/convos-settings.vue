@@ -14,25 +14,20 @@
             and accessible to your web browser, both on desktop and mobile.
           </p>
           <p>
-            Before you can start chatting, you need to create a connection.
-            You can have as many connections as you like, and you can add
-            more of them later on.
+            To get started, you need to create a connection and join a dialog.
+            You can have as many connections and dialogs as you like, and you can
+            add more of them later on.
           </p>
-            To add a connection, click on
-            "<a v-link.literal="#connection">Add connection</a>"
-            in the left side menu, or click "Continue" below.
+            Adding a new connection or dialog can be done by clicking on
+            "<a v-link.literal="#create-dialog">Join dialog</a>"
+            in the left side menu.
           </p>
           <div class="divider"></div>
           <p>
-            <a v-link.literal="#connection" class="btn waves-effect waves-light">
-              <i class="material-icons right">navigate_next</i>Continue
-            </a>
+            <a v-link.literal="#create-dialog" class="btn waves-effect waves-light">OK, I got it</a>
           </p>
         </div>
       </div>
-    </main>
-    <main v-if="this.settings.main.indexOf('#connection') == 0">
-      <convos-connection-editor :user="user"></convos-connection-editor>
     </main>
     <main v-if="this.settings.main.indexOf('#create-dialog') == 0">
       <convos-create-dialog :user="user"></convos-create-dialog>
