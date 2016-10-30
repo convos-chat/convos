@@ -255,6 +255,7 @@
         msg += data.message ? ': ' + data.message : ".";
         this.state = data.state;
         this.message = data.message;
+        this.getDialog("").frozen = data.state == "connected" ? "" : data.state;
         this.notice('Connection state changed to "' + msg);
         break;
       case "frozen":

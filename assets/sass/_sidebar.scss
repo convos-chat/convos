@@ -7,7 +7,8 @@
   bottom: 0;
   z-index: $z-index-header + 1;
 
-  div.content {
+  div.content,
+  form.content {
     @include under-header;
     @include overflow;
     overflow-x: hidden; // This fixes some weird horizontal scrolling in Chrome on iPhone
@@ -82,6 +83,11 @@
 .convos-notifications {
   .row {
     margin: 0 auto;
+  }
+
+  .submit {
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   .btn-floating {

@@ -6,11 +6,11 @@
         var msg = this.msg;
         var c = {highlight: this.msg.highlight ? true : false};
 
-        if (!this.dialog.participants[msg.from]) {
+        if (this.dialog.dialog_id && !this.dialog.participants[msg.from]) {
           c["inactive-user"] = true;
         }
 
-        if (msg.type == "private" && msg.message && msg.from == msg.prev.from) {
+        if ((!this.dialog.dialog_id || msg.type == "private") && msg.message && msg.from == msg.prev.from) {
           c["same-user"] = true;
         }
         else {

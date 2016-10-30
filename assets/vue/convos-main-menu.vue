@@ -19,15 +19,6 @@
       </a>
 
       <div class="divider"></div>
-      <a v-link="'#connection/' + c.connection_id" :class="connectionClass(c)" v-for="c in user.connections">
-        <i class="material-icons">device_hub</i> {{c.protocol}}-{{c.name}}
-        <span class="on">{{c.humanState()}}</span>
-      </a>
-      <a v-link.literal="#connection" class="simple" :class="activeClass('#connection')">
-        <i class="material-icons">add</i> Add connection...
-      </a>
-
-      <div class="divider"></div>
       <a v-sidebar.literal="#profile" class="simple">
         <i class="material-icons">account_circle</i> Edit profile
       </a>
@@ -51,16 +42,20 @@ module.exports = {
       var re = this.q ? new RegExp(RegExp.escape(this.q), 'i') : new RegExp('.');
       var sortBy;
 
+      var di = function(a, b) {
+        return (b.dialog_id.length ? 1 : 0) - (a.dialog_id.length ? 1 : 0);
+      };
+
       if (this.settings.sortDialogsBy == "lastRead") {
         sortBy = function(a, b) {
-          return b.active - a.active || b.lastRead - a.lastRead;
+          return b.active - a.active || di(a, b) || b.lastRead - a.lastRead;
         };
       }
       else {
         sortBy = function(a, b) {
           var ah = a.name.toLowerCase().replace(/^\W+/, '');
           var bh = b.name.toLowerCase().replace(/^\W+/, '');
-          return ah < bh ? -1 : ah > bh ? 1 : 0;
+          return di(a, b) || ah < bh ? -1 : ah > bh ? 1 : 0;
         };
       }
 
@@ -68,11 +63,6 @@ module.exports = {
     }
   },
   methods: {
-    connectionClass: function(c) {
-      var cn = this.activeClass('#connection/' + c.connection_id);
-      cn.frozen = c.state == 'connected' ? false : true;
-      return cn;
-    },
     dialogClass: function(d) {
       var cn = this.activeClass(d.href());
       cn.frozen = d.frozen ? true : false;

@@ -19,14 +19,19 @@
       data.user = this;
       connection = new Convos.Connection(data);
       this.connections.push(connection);
+      this.ensureDialog({
+        connection_id: connection.connection_id,
+        dialog_id: "",
+        name: connection.name,
+        frozen: connection.state == "connected" ? "" : connection.state,
+        messagesMethod: "connectionMessages"
+      });
     }
 
     return connection.update(data);
   };
 
   proto.ensureDialog = function(data) {
-    if (!data.dialog_id) return console.log("ensureDialog !!! ", data);
-
     var dialog = this.dialogs.filter(function(d) {
       return d.connection_id == data.connection_id && d.dialog_id == data.dialog_id;
     })[0];
