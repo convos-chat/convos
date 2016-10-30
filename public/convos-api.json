@@ -114,6 +114,63 @@
         }
       }
     },
+    "/connection/{connection_id}/last-read": {
+      "post": {
+        "tags": [ "connection" ],
+        "summary": "Set 'last_read' for a connection dialog.",
+        "operationId": "setConnectionLastRead",
+        "x-mojo-to": "dialog#last_read",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "last_read": { "type": "string", "format": "date-time" }
+              }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/connection/{connection_id}/messages": {
+      "get": {
+        "tags": [ "dialog" ],
+        "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
+        "operationId": "connectionMessages",
+        "x-mojo-to": "dialog#messages",
+        "parameters": [
+          { "$ref": "#/parameters/connection_id" },
+          { "name": "after", "in": "query", "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
+          { "name": "before", "in": "query", "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
+          { "name": "limit", "in": "query", "type": "integer", "description": "Max number of messages to retrieve" },
+          { "name": "match", "in": "query", "type": "string", "description": "Messages must match this string" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "end": { "type": "boolean", "description": "Indicates if historic messages can be received." },
+                "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
+              }
+            }
+          },
+          "default": {
+            "description": "Internal server error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/connection/{connection_id}/rooms": {
       "get": {
         "tags": [ "dialog" ],
@@ -180,7 +237,7 @@
       "get": {
         "tags": [ "dialog" ],
         "summary": "Get a list of messages.\n\nNote: this resource require the user to be authenticated first.",
-        "operationId": "messages",
+        "operationId": "dialogMessages",
         "x-mojo-to": "dialog#messages",
         "parameters": [
           { "$ref": "#/parameters/connection_id" },

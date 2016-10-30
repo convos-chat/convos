@@ -6,6 +6,13 @@ use Convos::Util 'has_many';
 use Mojo::Loader 'load_class';
 use Mojo::URL;
 
+has messages => sub {
+  my $self = shift;
+  my $dialog = Convos::Core::Dialog->new(id => '', name => '');
+  Scalar::Util::weaken($dialog->{connection} = $self);
+  return $dialog;
+};
+
 sub name { shift->{name} }
 has on_connect_commands => sub { +[] };
 has protocol            => sub {'null'};
@@ -184,6 +191,12 @@ the following new ones.
   $str = $class->id(\%attr);
 
 Returns a unique identifier for a connection.
+
+=head2 messages
+
+  $obj = $self->messages;
+
+Holds a L<Convos::Core::Dialog> object with the conversation to the server.
 
 =head2 name
 

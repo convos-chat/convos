@@ -196,7 +196,7 @@
   proto._load = function() {
     var self = this;
 
-    Convos.api.messages(
+    Convos.api.dialogMessages(
       {
         connection_id: this.connection_id,
         dialog_id: this.dialog_id

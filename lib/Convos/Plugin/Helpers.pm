@@ -14,13 +14,13 @@ sub register {
 sub _backend_dialog {
   my ($c, $args) = @_;
   my $user = $c->backend->user($args->{email}) or return;
-  my $connection = $user->get_connection($args->{connection_id} || $c->stash('connection_id'))
-    or return;
-  my $dialog = $connection->get_dialog($args->{dialog_id} || $c->stash('dialog_id'));
+  my $dialog_id = $args->{dialog_id} || $c->stash('dialog_id');
 
-  $c->stash(connection => $connection, dialog => $dialog);
+  my $connection = $user->get_connection($args->{connection_id} || $c->stash('connection_id'));
+  return unless $connection;
 
-  return $dialog;
+  my $dialog = $dialog_id ? $connection->get_dialog($dialog_id) : $connection->messages;
+  return $c->stash(connection => $connection, dialog => $dialog)->stash('dialog');
 }
 
 sub _backend_user {

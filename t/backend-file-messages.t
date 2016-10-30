@@ -102,4 +102,8 @@ $uniq{$_->{ts}}++ for @{$t->tx->res->json->{messages} || []};
 is int(grep { $_ != 1 } values %uniq), 0,
   'add_months(-1) hack https://github.com/Nordaaker/convos/pull/292';
 
+$connection->emit(message => $connection->messages => $_) for t::Helper->messages(time - 3600, 130);
+$t->get_ok('/api/connection/irc-localhost/messages')->status_is(200);
+is int @{$t->tx->res->json->{messages} || []}, 28, 'server messages';
+
 done_testing;

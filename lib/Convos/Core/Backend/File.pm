@@ -256,17 +256,10 @@ sub _log {
 
 sub _log_file {
   my ($self, $obj, $t) = @_;
-  my @path;
-
-  if ($obj->isa('Convos::Core::Dialog')) {
-    push @path, $obj->connection->user->id, $obj->connection->id;
-  }
-  elsif ($obj->isa('Convos::Core::Connection')) {
-    push @path, $obj->user->id, $obj->id;
-  }
+  my @path = ($obj->connection->user->id, $obj->connection->id);
 
   push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
-  push @path, $obj->id if $obj->isa('Convos::Core::Dialog');
+  push @path, $obj->id if $obj->id;
 
   return $self->home->rel_file(join('/', @path) . '.log');
 }
@@ -362,10 +355,10 @@ sub _setup {
           my ($connection, $target, $msg) = @_;
           my ($format, @keys) = $self->_format($msg->{type}) or return;
           my $message = sprintf $format, map { $msg->{$_} } @keys;
-          my @dialog_id = $target->id eq $cid ? () : (dialog_id => $target->id);
+          my @dialog_id = $target->id ? (dialog_id => $target->id) : ();
           my $flag = FLAG_NONE;
 
-          if ($msg->{highlight} and $target->isa('Convos::Core::Dialog') and !$target->is_private) {
+          if ($msg->{highlight} and @dialog_id and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
             $connection->user->{unread}++;
             $connection->user->save;

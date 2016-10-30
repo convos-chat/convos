@@ -220,7 +220,7 @@ sub _irc_message {
     $from      = $nick;
   }
 
-  $target ||= $self;
+  $target ||= $self->messages;
   $from ||= $msg->{prefix} // $self->id;
 
   $highlight ||= grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
@@ -283,7 +283,7 @@ sub _mode {
 sub _notice {
   my ($self, $message) = (shift, shift);
   $self->emit(
-    message => $self,
+    message => $self->messages,
     {from => $self->id, type => 'notice', @_, message => $message, ts => time}
   );
 }

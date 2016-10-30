@@ -23,6 +23,8 @@ sub has_many {
   $getter  = "get_$setter";
   $remover = "remove_$setter";
 
+  warn "[Convos::Util] Adding $accessor(), $setter() and $getter() to $class\n" if DEBUG >= 2;
+
   monkey_patch $class => $accessor => sub {
     return [values %{$_[0]->{$accessor} || {}}];
   };
