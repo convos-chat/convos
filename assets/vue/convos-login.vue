@@ -19,9 +19,7 @@
         </div>
         <div class="row">
           <div class="col s12">
-            <button class="btn waves-effect waves-light" type="submit">
-              Log in <i class="material-icons right">send</i>
-            </button>
+            <button class="btn waves-effect waves-light" type="submit">Log in</button>
             <a href="#register" @click.prevent="user.currentPage = 'convos-register'" class="btn-flat waves-effect waves-light">Register</a>
           </div>
         </div>

@@ -31,7 +31,7 @@
       </div>
       <div class="row">
         <div class="col s12">
-          <button @click="save" class="btn waves-effect waves-light" type="submit">Update <i class="material-icons right">save</i></button>
+          <button @click="save" class="btn waves-effect waves-light" type="submit">Save</button>
         </div>
       </div>
     </div>
