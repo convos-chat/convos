@@ -287,7 +287,11 @@ sub _messages {
   return [] if $args->{after} > $args->{before};
   return $args->{messages} if $args->{cursor} < $args->{after};
   my $file = $self->_log_file($obj, $args->{cursor});
-  $args->{cursor} = $args->{cursor}->add_months(-1);
+
+  # subtracting months at the end of months doesn't always work
+  my $mon = $args->{cursor}->mon;
+  $args->{cursor} = $args->{cursor}->add_months(-1)
+    while $args->{cursor}->mon == $mon;
   my $FH = File::ReadBackwards->new($file);
 
   unless ($FH) {
