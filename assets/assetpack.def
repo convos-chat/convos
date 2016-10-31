@@ -45,6 +45,7 @@
 < vue/md-input.vue
 < vue/md-option.vue
 < vue/md-select.vue
+< vue/md-textarea.vue
 
 # menus
 < vue/convos-header-links.vue
