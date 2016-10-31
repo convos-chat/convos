@@ -58,8 +58,8 @@ module.exports = {
       }
       else {
         sortBy = function(a, b) {
-          var ah = a.name.toLowerCase();
-          var bh = b.name.toLowerCase();
+          var ah = a.name.toLowerCase().replace(/^\W+/, '');
+          var bh = b.name.toLowerCase().replace(/^\W+/, '');
           return ah < bh ? -1 : ah > bh ? 1 : 0;
         };
       }
