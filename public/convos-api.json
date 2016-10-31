@@ -96,6 +96,7 @@
             "schema": {
               "type": "object",
               "properties": {
+                "on_connect_commands": { "type": "array", "description": "Commands to be run after the connection is established", "items": { "type": "string" } },
                 "state": { "type": "string", "enum": ["connect", "disconnect"], "description": "Connection state" },
                 "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
               }
@@ -282,6 +283,7 @@
               "type": "object",
               "required": ["url"],
               "properties": {
+                "on_connect_commands": { "type": "array", "description": "Commands to be run after the connection is established", "items": { "type": "string" } },
                 "url": { "type": "string", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
               }
             }
@@ -534,6 +536,7 @@
       "properties": {
         "connection_id": { "type": "string", "description": "Unique identifier for this connection" },
         "name": { "type": "string", "description": "Name for this connection" },
+        "on_connect_commands": { "type": "array", "description": "Commands to be run after the connection is established", "items": { "type": "string" } },
         "state": { "type": "string", "enum": ["connected", "queued", "disconnected"], "description": "Connection state" },
         "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
       }
