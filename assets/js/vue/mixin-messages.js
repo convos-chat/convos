@@ -8,6 +8,9 @@
     watch: {
       'settings.screenHeight': function(v, o) {
         this.keepScrollPos();
+      },
+      'settings.sidebar': function(v, o) {
+        this.keepScrollPos();
       }
     },
     methods: {
