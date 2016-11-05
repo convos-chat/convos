@@ -21,8 +21,6 @@
           this.atBottom = el.scrollHeight < el.offsetHeight + offset + el.scrollTop;
           this.trackVisibleMessage();
 
-          console.log('atBottom', this.atBottom, el.scrollHeight, el.offsetHeight, offset, el.scrollTop);
-
           if (el.scrollTop < offset) {
             this.dialog.historicMessages({}, function(err, body) { });
           }

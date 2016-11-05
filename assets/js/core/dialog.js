@@ -96,7 +96,7 @@
     this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
 
     var self = this;
-    Convos.api.messages(
+    Convos.api.dialogMessages(
       {
         before: this.messages[1].ts.toISOString(),
         connection_id: this.connection_id,
