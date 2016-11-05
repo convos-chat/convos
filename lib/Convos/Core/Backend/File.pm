@@ -126,7 +126,7 @@ sub messages {
   # If neither "before" nor "after" are provided
   # Set "before" to now and "after" to 12 months before "before"
   else {
-    $args{before} = gmtime() + 60;    # make sure we get the message sent right now as well
+    $args{before} = 60 + gmtime;    # make sure we get the message sent right now as well
     $args{after} = $args{before}->add_months(-12);
   }
 
@@ -248,7 +248,7 @@ sub _log {
 
   File::Path::make_path($dir) unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
-  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG == 2;
+  warn "[@{[$obj->id]}:@{[$t->datetime]}] $file <<< ($message)\n" if DEBUG == 2;
   flock $FH, LOCK_EX;
   $FH->syswrite($t->datetime . " $message\n") or die "Write $file: $!";
   flock $FH, LOCK_UN;
@@ -283,17 +283,14 @@ sub _message_type_from {
 # blocking method
 sub _messages {
   my ($self, $obj, $args) = @_;
+  my $cursor = $args->{cursor};
 
   return [] if $args->{after} > $args->{before};
-  return $args->{messages} if $args->{cursor} < $args->{after};
-  my $file = $self->_log_file($obj, $args->{cursor});
+  return $args->{messages} if $cursor < $args->{after};
+  $args->{cursor} = $args->{cursor}->add_months(-1) while $cursor->mon == $args->{cursor}->mon;
 
-  # subtracting months at the end of months doesn't always work
-  my $mon = $args->{cursor}->mon;
-  $args->{cursor} = $args->{cursor}->add_months(-1)
-    while $args->{cursor}->mon == $mon;
+  my $file = $self->_log_file($obj, $cursor);
   my $FH = File::ReadBackwards->new($file);
-
   unless ($FH) {
     warn "[@{[$obj->id]}] $!: $file\n" if DEBUG >= 2;
     return $self->_messages($obj, $args);

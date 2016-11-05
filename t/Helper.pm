@@ -24,13 +24,17 @@ sub connect_to_irc {
 }
 
 sub messages {
-  my $ts = 1433817540;    # 2015-06-09T04:39:00
+  my $class = shift;
+  my $ts    = shift || 1433817540;    # 2015-06-09T04:39:00
+  my $int   = shift || 2;
   my @messages;
+
+  $ts = Time::Piece->strptime($ts, '%Y-%m-%dT%H:%M:%S') if $ts =~ /T/;
 
   for (split /\n/, data_section qw(t::Helper messages.json)) {
     my ($from, $msg) = split / /, $_, 2;
     my $event = $from =~ s/^-// ? 'notice' : $from =~ s/^\*// ? 'action' : 'private';
-    $ts += 2;
+    $ts += $int;
     push @messages,
       {
       from      => $from,

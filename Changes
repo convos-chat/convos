@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 0.99_16 Not Released
+ - Fix getting historic messages, without duplicates #292
  - Add custom styling for participants that are not currently in the channel
  - Add EXPERIMENTAL support for pluggable authentication #89
  - Add support for setting CONVOS_HOME from config file as "home" #289

@@ -91,4 +91,15 @@ $connection->emit(
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=1&match=æ')
   ->status_is(200)->json_is('/messages/0/message', q(the character æ is unicode));
 
+$target = $connection->dialog({name => '#subtracting_months'});
+$connection->emit(message => $target => $_) for t::Helper->messages('2016-10-30T23:40:03', 130);
+$t->get_ok(
+  '/api/connection/irc-localhost/dialog/%23subtracting_months/messages?before=2016-10-31T00:02:03')
+  ->status_is(200);
+
+my %uniq;
+$uniq{$_->{ts}}++ for @{$t->tx->res->json->{messages} || []};
+is int(grep { $_ != 1 } values %uniq), 0,
+  'add_months(-1) hack https://github.com/Nordaaker/convos/pull/292';
+
 done_testing;
