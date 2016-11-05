@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-main-menu show-on-large" :class="settings.dialogsVisible ? '' : 'hidden'">
+  <div class="convos-main-menu show-on-large" :class="settings.mainMenuVisible ? '' : 'hidden'">
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
       <div class="input-field">

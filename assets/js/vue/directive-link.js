@@ -6,7 +6,7 @@
       this.el.addEventListener("click", function(e) {
         var href = e.currentTarget.getAttribute("href");
         e.preventDefault();
-        Convos.settings.dialogsVisible = false;
+        Convos.settings.mainMenuVisible = false;
 
         if (href.match(/^\#/)) {
           Convos.settings.main = href.replace(/.*?#/, "#");

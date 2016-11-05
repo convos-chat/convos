@@ -7,7 +7,7 @@
         var href = e.currentTarget.href.replace(/.*?#/, "");
         var method = Convos.settings.sidebar == href ? "removeClass" : "addClass";
         e.preventDefault();
-        Convos.settings.dialogsVisible = false;
+        Convos.settings.mainMenuVisible = false;
         Convos.settings.sidebar = Convos.settings.sidebar == href ? "" : href;
         $('body')[method]('has-sidebar');
       });

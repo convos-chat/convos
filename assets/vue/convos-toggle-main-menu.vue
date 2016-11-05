@@ -1,17 +1,17 @@
 <template>
-  <a href="#dialogs" @click.prevent="toggleDialogs" :class="classNames()"><i class="material-icons">dehaze</i></a>
+  <a href="#main-menu" @click.prevent="toggleMainMenu" :class="classNames()"><i class="material-icons">dehaze</i></a>
 </template>
 <script>
 module.exports = {
   methods: {
     classNames: function() {
       var cn = {"toggle-main-menu": true};
-      if (this.settings.dialogsVisible) cn.active = true;
+      if (this.settings.mainMenuVisible) cn.active = true;
       return cn;
     },
-    toggleDialogs: function() {
-      if (!Convos.settings.dialogsVisible) Convos.settings.sidebar = "";
-      Convos.settings.dialogsVisible = !Convos.settings.dialogsVisible;
+    toggleMainMenu: function() {
+      if (!this.settings.mainMenuVisible) this.settings.sidebar = "";
+      this.settings.mainMenuVisible = !this.settings.mainMenuVisible;
     }
   }
 };

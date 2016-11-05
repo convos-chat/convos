@@ -3,7 +3,7 @@
   // TODO: Should come up with better variable names than "main" and "sidebar"
   Convos.settings.main = localStorage.getItem("main") || "";
   Convos.settings.sidebar = localStorage.getItem("sidebar") || "";
-  Convos.settings.dialogsVisible = false;
+  Convos.settings.mainMenuVisible = false;
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
   Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
 
