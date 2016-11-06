@@ -39,7 +39,8 @@
         if (dialog) dialog.emit("insertIntoInput", e.currentTarget.href.replace(/.*?#/, ""));
       },
       send: function(command) {
-        this.dialog.connection().send(command, this.dialog);
+        var dialog = this.dialog || this.user.getActiveDialog();
+        dialog.connection().send(command, dialog);
       }
     }
   });

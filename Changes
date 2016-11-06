@@ -6,6 +6,7 @@ Revision history for perl distribution Convos
  - Add custom styling for participants that are not currently in the channel
  - Add EXPERIMENTAL support for pluggable authentication #89
  - Add support for setting CONVOS_HOME from config file as "home" #289
+ - "Help" is now shown inline in chat
 
 0.99_15 2016-10-13T22:51:01+0200
  - Fix IRC join channel redirect #284

@@ -119,6 +119,11 @@
     var action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
     var id;
 
+    if (dialog && action[1] == "help") {
+      dialog.addMessage({type: "help"});
+      return this;
+    }
+
     if (aliases[action[1]]) {
       message = message.replace(/^\/(\w+)/, aliases[action[1]]);
       action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
@@ -128,7 +133,7 @@
       if (action[2]) {
         Convos.settings.main = this.user.ensureDialog({connection_id: this.connection_id, dialog_id: action[2]}).href();
       }
-      return;
+      return this;
     }
 
     if (!dialog) dialog = this.getDialog(action[2]); // action = ["...", "close", "#foo" ]

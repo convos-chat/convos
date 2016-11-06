@@ -146,9 +146,6 @@ module.exports = {
           if (c >= 32) this.completeList = [];
       }
     },
-    localCmdHelp: function(e) {
-      $("a.help").click();
-    },
     localCmdJoin: function(e) {
       $("a.create-dialog").click();
     },
