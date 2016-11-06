@@ -507,11 +507,6 @@ checksum=f50037e30f
 format=js
 minified=1
 mtime=1475707041
-[js-min:vue/convos-dialog-settings.vue]
-checksum=b327bc28ae
-format=js
-minified=1
-mtime=1475520691
 [js-min:vue/convos-header-links.vue]
 checksum=e8231e208a
 format=js
