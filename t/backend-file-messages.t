@@ -106,4 +106,17 @@ $connection->emit(message => $connection->messages => $_) for t::Helper->message
 $t->get_ok('/api/connection/irc-localhost/messages')->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 28, 'server messages';
 
+$target = $connection->dialog({name => '#chicago.pm'});
+$connection->emit(
+  message => $target => {
+    from      => 'someone',
+    highlight => Mojo::JSON->false,
+    message   => q(the character æ is unicode),
+    ts        => time,
+    type      => 'private',
+  }
+);
+$t->get_ok('/api/connection/irc-localhost/dialog/%23chicago.pm/messages')->status_is(200);
+
+
 done_testing;
