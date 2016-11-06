@@ -254,8 +254,8 @@ sub _join_dialog {
     join_channel => $command,
     sub {
       my ($irc, $err, $res) = @_;
-      $dialog ||= $self->dialog({name => $res->{name}, topic => $res->{topic} // ''});
-      $dialog->frozen($err || '')->password($password // '');
+      $dialog ||= $self->dialog({name => $res->{name}});
+      $dialog->frozen($err || '')->password($password // '')->topic($res->{topic} // '');
       $self->save(sub { })->$cb($err, $dialog);
     }
   );
