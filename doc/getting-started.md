@@ -13,8 +13,8 @@ very easy to get started, but you can also tweak many
 
 The two commands below will download and start Convos:
 
-<pre class="highlight"><code>curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
-./convos/script/convos daemon</code></pre>
+<pre class="highlight"><code>$ curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
+$ ./convos/script/convos daemon</code></pre>
 
 That's it! After the commands above, you can point your browser to
 [http://localhost:3000](http://localhost:3000) and start chatting.
@@ -51,14 +51,14 @@ experience. The command below will show if the modules are installed
 or not:
 
 ```bash
-./script/convos version
+$ ./script/convos version
 ```
 
 One very useful addition is [EV](https://metacpan.org/pod/distribution/Mojolicious/lib/Mojolicious/Guides/FAQ.pod#Why-doesnt-Mojolicious-have-any-dependencies),
 which makes Convos faster. It can be installed with the command below:
 
 ```bash
-perl script/cpanm --sudo EV
+$ ./script/cpanm --sudo EV
 ```
 
 ## Hypnotoad and Prefork

@@ -86,7 +86,7 @@ application, such as putty it will also kill any running instance of Convos.
 
 To prevent this, you can run this command:
 
-    nohup script/convos daemon &
+    $ nohup script/convos daemon &
 
 The `&` at the end will send Convos to the background. `nohup` is mostly
 optional, but is usually a good idea.
