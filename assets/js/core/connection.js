@@ -2,13 +2,14 @@
   Convos.Connection = function(attrs) {
     EventEmitter(this);
     this.connection_id = "";
-    this.name          = "";
-    this.me            = {nick: ""};
-    this.message       = "";
-    this.protocol      = "unknown";
-    this.sendTimeout   = 5000; // is this long enough?
-    this.state         = "disconnected";
-    this.url           = "";
+    this.name = "";
+    this.me = {nick: ""};
+    this.message = "";
+    this.on_connect_commands = [];
+    this.protocol = "unknown";
+    this.sendTimeout = 5000; // is this long enough?
+    this.state = "disconnected";
+    this.url = "";
     this.on("message", this._onMessage);
     this.on("sent", this._onSent);
     this.on("state", this._onState);

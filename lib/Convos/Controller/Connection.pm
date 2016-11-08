@@ -2,6 +2,7 @@ package Convos::Controller::Connection;
 use Mojo::Base 'Mojolicious::Controller';
 
 use Convos::Util 'E';
+use Mojo::Util 'trim';
 
 sub create {
   my $self = shift->openapi->valid_input or return;
@@ -94,7 +95,6 @@ sub update {
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
   my $state = $json->{state} || '';
-  my $url = $json->{url} ? $self->_validate_url($json->{url}) : undef;
   my $connection;
 
   eval {
@@ -104,13 +104,14 @@ sub update {
     return $self->render(openapi => E('Connection not found.'), status => 404);
   };
 
-  if ($url) {
+  if (my $cmds = $json->{on_connect_commands}) {
+    $cmds = [map { trim $_} @$cmds];
+    $connection->on_connect_commands($cmds);
+  }
+  if (my $url = $self->_validate_url($json->{url})) {
     $url->scheme($json->{protocol});
     $state = 'reconnect' if $url->to_string ne $connection->url->to_string;
     $connection->url->parse($url);
-  }
-  if (my $cmds = $json->{on_connect_commands}) {
-    $connection->on_connect_commands($cmds);
   }
 
   $self->delay(
@@ -145,10 +146,9 @@ sub _pretty_connection_name {
 sub _validate_url {
   my ($self, $url) = @_;
   my $forced_irc_server = $self->app->config('forced_irc_server');
-  $url = Mojo::URL->new($url);
+  $url = Mojo::URL->new($url || '');
   $url->host_port($forced_irc_server) if $forced_irc_server;
-  return undef unless $url->host;
-  $url;
+  return $url->host ? $url : undef;
 }
 
 1;

@@ -43,6 +43,15 @@ $t->post_ok('/api/connection/irc-localhost', json => {url => 'foo://example.com:
   ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
   ->json_like('/url' => qr{irc://example.com:9999\?nick=superman});
 
+$t->post_ok('/api/connection/irc-localhost',
+  json => {on_connect_commands => [' /msg NickServ identify s3cret   ', '/msg too_cool 123']})
+  ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
+  ->json_is('/on_connect_commands', ['/msg NickServ identify s3cret', '/msg too_cool 123'])
+  ->json_like('/url' => qr{irc://example.com:9999\?nick=superman});
+
+$t->get_ok('/api/connections')->status_is(200)->json_is('/connections/1/on_connect_commands',
+  ['/msg NickServ identify s3cret', '/msg too_cool 123']);
+
 $t->delete_ok('/api/connection/irc-doesnotexist')->status_is(200);
 $t->delete_ok('/api/connection/irc-localhost')->status_is(200);
 
