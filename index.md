@@ -13,10 +13,8 @@ Learn more about how to install and configure Convos in the
 [guides](/doc) or just run the two commands below to
 [install](/doc/getting-started.html) Convos:
 
-```bash
-curl https://convos.by/install.sh | sh -
-./convos/script/convos daemon
-```
+<pre class="highlight">curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
+./convos/script/convos daemon</pre>
 
 ## Demo
 
