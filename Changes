@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-0.99_16 Not Released
+0.99_16 2016-11-08T13:37:58+0200
  - Fix getting historic messages, without duplicates #292
  - Fix getting messages from channel with "." in the name #293
  - Add custom styling for participants that are not currently in the channel
