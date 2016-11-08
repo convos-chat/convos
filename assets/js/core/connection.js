@@ -87,7 +87,8 @@
 
     // It is currently not possible to specify "name"
     var attrs = {
-      url: this.url
+      url: this.url,
+      on_connect_commands: this.on_connect_commands,
     };
 
     if (this.connection_id) {

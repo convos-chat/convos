@@ -20,7 +20,13 @@ sub create {
   }
 
   eval {
-    $connection = $user->connection({protocol => $url->scheme, name => $name});
+    $connection = $user->connection(
+      {
+        name                => $name,
+        on_connect_commands => $json->{on_connect_commands} || [],
+        protocol            => $url->scheme,
+      }
+    );
     $connection->url->parse($url);
     $self->delay(
       sub { $connection->save(shift->begin) },
@@ -102,6 +108,9 @@ sub update {
     $url->scheme($json->{protocol});
     $state = 'reconnect' if $url->to_string ne $connection->url->to_string;
     $connection->url->parse($url);
+  }
+  if (my $cmds = $json->{on_connect_commands}) {
+    $connection->on_connect_commands($cmds);
   }
 
   $self->delay(

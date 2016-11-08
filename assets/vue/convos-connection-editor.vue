@@ -34,6 +34,9 @@
         <md-input :value.sync="username" cols="s6">Username</md-input>
         <md-input :value.sync="password" cols="s6" type="password">Password</md-input>
       </div>
+      <div class="row">
+        <md-textarea :value.sync="on_connect">On Connect Commands (one per line)</md-textarea>
+      </div>
     </template>
     <div class="row" v-if="errors.length">
       <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
@@ -68,6 +71,7 @@ module.exports = {
   data: function() {
     return {
       advanced:         false,
+      on_connect:       "",
       connection:       null,
       deleted:          false,
       errors:           [],
@@ -104,6 +108,7 @@ module.exports = {
       userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
       connection.user = this.user;
       connection.url = this.selectedProtocol + "://" + userinfo + this.server;
+      connection.on_connect_commands = this.on_connect.split(/\n/);
 
       if (this.nick) params.push("nick=" + this.nick);
       if (this.tls !== null) params.push("tls=" + this.tls);
@@ -128,8 +133,10 @@ module.exports = {
     },
     updateForm: function(connection) {
       var url = connection ? connection.url.parseUrl() : null;
+      var on_connect = connection ? connection.on_connect_commands.join("\n") : "";
 
       this.connection       = connection;
+      this.on_connect       = on_connect;
       this.password         = url ? url.query.password || "" : "";
       this.nick             = url ? url.query.nick || "" : "";
       this.server           = url ? url.hostPort : this.settings.default_server;
