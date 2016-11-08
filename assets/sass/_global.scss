@@ -20,15 +20,10 @@ dl {
 
 dl.horizontal {
   margin: 0;
-  overflow: hidden;
   dt {
     width: 10em;
     float: left;
     clear: left;
-  }
-  dd {
-    float: left;
-    margin: 0;
   }
 }
 

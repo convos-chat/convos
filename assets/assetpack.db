@@ -512,6 +512,11 @@ checksum=e8231e208a
 format=js
 minified=1
 mtime=1474555239
+[js-min:vue/convos-help.vue]
+checksum=bc8281657c
+format=js
+minified=1
+mtime=1473715094
 [js-min:vue/convos-input.vue]
 checksum=ca46204c7d
 format=js

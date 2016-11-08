@@ -50,9 +50,6 @@
     update: function(v, o) {
       this.el.vueTooltip = typeof v == "undefined" ? "" : v;
       document.getElementById("vue_tooltip").style.left = "-2000px";
-    },
-    unbind: function() {
-      document.getElementById("vue_tooltip").style.left = "-2000px";
     }
   });
 })();
