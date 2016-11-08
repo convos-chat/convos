@@ -52,12 +52,11 @@
 < vue/convos-toggle-main-menu.vue
 
 # sidebars
-< vue/convos-dialog-info.vue
 < vue/convos-help.vue
-< vue/convos-notifications.vue
-< vue/convos-profile.vue
 < vue/convos-resources.vue
-< vue/convos-sidebar-info.vue
+< vue/convos-notifications.vue
+< vue/convos-dialog-settings.vue
+< vue/convos-profile.vue
 
 # chat
 < vue/convos-message-action.vue

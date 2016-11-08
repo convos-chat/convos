@@ -2,7 +2,7 @@
   <div class="convos-header-links">
     <slot></slot>
     <template v-if="!toggle || !settings.sidebar">
-      <a v-sidebar.literal="#sidebar-info" v-tooltip.literal="Dialog settings" :class="activeClass('sidebar-info')">
+      <a v-sidebar.literal="#dialog-settings" v-tooltip.literal="Dialog settings" :class="activeClass('dialog-settings')">
         <i class="material-icons">info</i>
       </a>
       <a v-sidebar.literal="#notifications" v-tooltip.literal="Show notifications" class="notifications" :class="activeClass('notifications')">
