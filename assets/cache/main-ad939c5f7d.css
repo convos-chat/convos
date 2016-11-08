@@ -5097,72 +5097,72 @@ img.embed {
     .is-sidebar {
       width: 320px; } }
 
-.convos-notifications .row,
-.convos-sidebar-info .row {
+.convos-dialog-settings .row,
+.convos-notifications .row {
   margin: 0 auto; }
 
-.convos-notifications .btn-floating,
-.convos-sidebar-info .btn-floating {
+.convos-dialog-settings .btn-floating,
+.convos-notifications .btn-floating {
   box-shadow: none;
   vertical-align: middle;
   float: right;
   top: -6px; }
 
+.convos-dialog-settings .li-link:hover,
+.convos-dialog-settings .notification:hover,
+.convos-dialog-settings .participant:hover,
 .convos-notifications .li-link:hover,
 .convos-notifications .notification:hover,
-.convos-notifications .participant:hover,
-.convos-sidebar-info .li-link:hover,
-.convos-sidebar-info .notification:hover,
-.convos-sidebar-info .participant:hover {
+.convos-notifications .participant:hover {
   background-color: #f0f0f0; }
 
-.convos-notifications .notification h5, .convos-notifications .notification .secondary-content,
+.convos-dialog-settings .notification h5, .convos-dialog-settings .notification .secondary-content,
+.convos-dialog-settings .participant h5,
+.convos-dialog-settings .participant .secondary-content,
+.convos-notifications .notification h5,
+.convos-notifications .notification .secondary-content,
 .convos-notifications .participant h5,
-.convos-notifications .participant .secondary-content,
-.convos-sidebar-info .notification h5,
-.convos-sidebar-info .notification .secondary-content,
-.convos-sidebar-info .participant h5,
-.convos-sidebar-info .participant .secondary-content {
+.convos-notifications .participant .secondary-content {
   font-size: 1rem;
   line-height: 110%;
   margin: 0.5rem 0 0.4rem 0; }
 
-.convos-notifications .notification,
-.convos-sidebar-info .notification {
+.convos-dialog-settings .notification,
+.convos-notifications .notification {
   display: block;
   cursor: pointer;
   padding-top: 4px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0; }
 
-.convos-notifications .li-link,
-.convos-sidebar-info .li-link {
+.convos-dialog-settings .li-link,
+.convos-notifications .li-link {
   padding-top: 4px;
   padding-bottom: 4px; }
-  .convos-notifications .li-link a,
-  .convos-sidebar-info .li-link a {
+  .convos-dialog-settings .li-link a,
+  .convos-notifications .li-link a {
     display: block; }
-  .convos-notifications .li-link i,
-  .convos-sidebar-info .li-link i {
+  .convos-dialog-settings .li-link i,
+  .convos-notifications .li-link i {
     float: right; }
 
+.convos-dialog-settings .li-link,
+.convos-dialog-settings .participant,
 .convos-notifications .li-link,
-.convos-notifications .participant,
-.convos-sidebar-info .li-link,
-.convos-sidebar-info .participant {
+.convos-notifications .participant {
   border-top: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
   margin-bottom: -1px; }
 
-.convos-notifications .notification.read,
-.convos-sidebar-info .notification.read {
+.convos-dialog-settings .notification.read,
+.convos-notifications .notification.read {
   opacity: 0.7; }
 
-.convos-notifications .participant,
-.convos-sidebar-info .participant {
+.convos-dialog-settings .participant,
+.convos-notifications .participant {
   padding: 4px 0; }
-  .convos-notifications .participant .secondary-content,
-  .convos-sidebar-info .participant .secondary-content {
+  .convos-dialog-settings .participant .secondary-content,
+  .convos-notifications .participant .secondary-content {
     margin: 0; }
 
 header a.notifications {
