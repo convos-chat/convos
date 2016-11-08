@@ -13,8 +13,8 @@ very easy to get started, but you can also tweak many
 
 The two commands below will download and start Convos:
 
-<pre class="highlight">curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
-./convos/script/convos daemon</pre>
+<pre class="highlight"><code>curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
+./convos/script/convos daemon</code></pre>
 
 That's it! After the commands above, you can point your browser to
 [http://localhost:3000](http://localhost:3000) and start chatting.
