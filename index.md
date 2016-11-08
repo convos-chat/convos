@@ -10,7 +10,13 @@ It can be deployed to Docker-based cloud services, or you can just run it as a
 normal [Mojolicious](http://mojolicious.org/) application.
 
 Learn more about how to install and configure Convos in the
-[guides](/doc).
+[guides](/doc) or just run the two commands below to
+[install](/doc/getting-started.html) Convos:
+
+```bash
+curl https://convos.by/install.sh | sh -
+./convos/script/convos daemon
+```
 
 ## Demo
 
