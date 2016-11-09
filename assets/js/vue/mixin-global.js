@@ -7,8 +7,13 @@
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
   Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
 
-  if (window.isMobile) Convos.settings.sidebar = ""; // Don't want to remember sidebar when loading on mobile
-  if (Convos.settings.sidebar) $('body').addClass('has-sidebar');
+  if (window.isMobile) {
+    Convos.settings.sidebar = ""; // Don't want to remember sidebar when loading on mobile
+  }
+  else if (Convos.settings.sidebar) {
+    if (Convos.settings.sidebar == "dialog-settings") Convos.settings.sidebar = "sidebar-info"; // back compat after rename
+    $('body').addClass('has-sidebar');
+  }
 
   var resizeTid;
   var measureWindow = function() {

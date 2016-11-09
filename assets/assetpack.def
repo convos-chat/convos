@@ -57,6 +57,7 @@
 < vue/convos-resources.vue
 < vue/convos-notifications.vue
 < vue/convos-dialog-settings.vue
+< vue/convos-sidebar-info.vue
 < vue/convos-profile.vue
 
 # chat

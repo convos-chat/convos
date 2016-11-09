@@ -79,15 +79,24 @@
   }
 }
 
-.convos-dialog-settings,
+.convos-sidebar-info,
 .convos-notifications {
   .row {
-    margin: 0 auto;
+    margin-bottom: $gutter-width / 2;
   }
 
-  .submit {
-    margin-top: 20px;
-    margin-bottom: 20px;
+  .menu-item {
+    border-top: 1px solid $collection-border-color;
+    border-bottom: 1px solid $collection-border-color;
+    margin-top: -1px; // hack for collapsing borders
+    padding: 0 $gutter-width / 2;
+    overflow: hidden;
+
+    &, i { line-height: 2.1rem;}
+    &:hover { background-color: darken($body-bg, 6%); }
+    .material-icons { vertical-align: text-bottom; }
+
+    > a:only-child { display: block; }
   }
 
   .btn-floating {
@@ -97,52 +106,20 @@
     top: -6px;
   }
 
-  .li-link,
-  .notification,
-  .participant {
-    &:hover {
-      background-color: darken($body-bg, 6%);
-    }
-  }
-
-  .notification,
-  .participant {
-    h5, .secondary-content {
-      font-size: $h6-fontsize;
-      line-height: 110%;
-      margin: ($h6-fontsize / 2) 0 ($h6-fontsize / 2.5) 0;
-    }
-  }
-
   .notification {
     display: block;
     cursor: pointer;
     padding-top: 4px;
     padding-bottom: 8px;
     border-bottom: 1px solid darken($body-bg, 6%);
-  }
 
-  .li-link {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    a { display: block; }
-    i { float: right; }
-  }
+    h5, .secondary-content {
+      font-size: $h6-fontsize;
+      line-height: 110%;
+      margin: ($h6-fontsize / 2) 0 ($h6-fontsize / 2.5) 0;
+    }
 
-  .li-link,
-  .participant {
-    border-top: 1px solid darken($body-bg, 6%);
-    border-bottom: 1px solid darken($body-bg, 6%);
-    margin-bottom: -1px;
-  }
-
-  .notification {
     &.read { opacity: 0.7; }
-  }
-
-  .participant {
-    padding: 4px 0;
-    .secondary-content { margin: 0; }
   }
 }
 
