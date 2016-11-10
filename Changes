@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+0.99_18 Not Released
+ - Server messages can be read in frontend
+ - Server settings can be edited in the "info" sidebar
+
 0.99_17 2016-11-11T09:58:54+0200
  - Add support for editing on_connect_commands
  - Add support for JSON config - https://convos.by/doc/config.html#introduction

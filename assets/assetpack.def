@@ -24,6 +24,7 @@
 < js/vue/directive-tooltip.js
 < js/vue/filter-markdown.js
 < js/vue/filter-timestring.js
+< js/vue/mixin-connection-editor.js
 < js/vue/mixin-global.js
 < js/vue/mixin-message.js
 < js/vue/mixin-messages.js
@@ -56,6 +57,7 @@
 < vue/convos-help.vue
 < vue/convos-resources.vue
 < vue/convos-notifications.vue
+< vue/convos-connection-settings.vue
 < vue/convos-dialog-settings.vue
 < vue/convos-sidebar-info.vue
 < vue/convos-profile.vue

@@ -9,7 +9,8 @@
         </div>
       </div>
     </div>
-    <convos-dialog-settings :dialog="dialog" :user="user" v-if="dialog"></convos-dialog-settings>
+    <convos-dialog-settings :dialog="dialog" :user="user" v-if="dialog && dialog.dialog_id"></convos-dialog-settings>
+    <convos-connection-settings :connection="dialog.connection()" :user="user" v-if="dialog && !dialog.dialog_id"></convos-connection-settings>
   </div>
 </template>
 <script>

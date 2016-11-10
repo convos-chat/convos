@@ -26,7 +26,7 @@
         <md-option value="1" :selected="tls == 1">Yes</md-option>
       </md-select>
     </div>
-    <div class="row" v-if="showNickField">
+    <div class="row">
       <md-input :value.sync="nick" placeholder="A nick can be generated for you">Nick</md-input>
     </div>
     <template v-if="advanced">
@@ -62,66 +62,22 @@
 </template>
 <script>
 module.exports = {
-  props: ["user"],
-  computed: {
-    showNickField: function() {
-      return this.selectedProtocol == "irc"; // will make this dynamic when there are more protocols in backend
-    }
-  },
+  mixins: [Convos.mixin.connectionEditor],
   data: function() {
     return {
-      advanced:         false,
+      advanced: false,
       onConnectCommands: "",
-      connection:       null,
-      deleted:          false,
-      errors:           [],
-      password:         "",
-      nick:             "",
-      selectedProtocol: "irc",
-      server:           "",
-      tls:              null,
-      username:         ""
+      connection: null,
+      deleted: false,
+      errors: [],
+      password: "",
+      nick: "",
+      server: "",
+      tls: null,
+      username: ""
     };
   },
-  watch: {
-    "settings.main": function(v, o) {
-      this.errors = [];
-      this.updateForm(this.user.getConnection(v.replace(/.*connection\//, "")));
-    }
-  },
   methods: {
-    removeConnection: function() {
-      var self = this;
-      this.connection.remove(function(err) {
-        if (err) return self.errors = err;
-        self.connection = null;
-        self.deleted = true;
-        self.settings.main = "#connection";
-      });
-    },
-    saveConnection: function() {
-      var self       = this;
-      var connection = this.connection || new Convos.Connection({user: this.user});
-      var userinfo   = [this.username, this.password].join(":");
-      var params     = [];
-
-      userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
-      connection.user = this.user;
-      connection.url = this.selectedProtocol + "://" + userinfo + this.server;
-      connection.on_connect_commands = this.onConnectCommands.split(/\n/).map(function(str) { return str.trim(); });
-
-      if (this.nick) params.push("nick=" + this.nick);
-      if (this.tls !== null) params.push("tls=" + this.tls);
-      if (params.length) connection.url += "?" + params.join("&");
-
-      this.errors = []; // clear error on post
-      connection.save(function(err) {
-        if (err) return self.errors = err;
-        self.deleted = false;
-        self.updateForm(this);
-        if (self.settings.main.indexOf(this.connection_id) == -1) self.settings.main = "#create-dialog";
-      });
-    },
     toggleAdvanced: function(e) {
       this.advanced = !this.advanced;
       if (this.advanced) {
@@ -130,22 +86,7 @@ module.exports = {
           $main.animate({scrollTop: $main.height()}, "slow");
         });
       }
-    },
-    updateForm: function(connection) {
-      var url = connection ? connection.url.parseUrl() : null;
-      this.connection = connection;
-      this.onConnectCommands = connection ? connection.on_connect_commands.join("\n") : "";
-      this.password = url ? url.query.password || "" : "";
-      this.nick = url ? url.query.nick || "" : "";
-      this.server = url ? url.hostPort : this.settings.default_server;
-      this.selectedProtocol = url ? url.scheme || "" : this.selectedProtocol;
-      this.tls = url ? url.query.tls : null;
-      this.username = url ? url.query.username : "";
-      this.advanced = this.username ? true : false;
     }
-  },
-  ready: function() {
-    this.updateForm(this.user.getConnection(this.settings.main.replace(/.*connection\//, "")));
   }
 };
 </script>
