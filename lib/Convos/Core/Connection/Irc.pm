@@ -45,20 +45,35 @@ has _irc => sub {
   }
 
   for my $event (
-    'err_cannotsendtochan', 'err_erroneusnickname',
-    'err_nicknameinuse',    'irc_error',
-    'irc_join',             'irc_kick',
-    'irc_mode',             'irc_nick',
-    'irc_part',             'irc_quit',
-    'irc_rpl_myinfo',       'irc_rpl_welcome',
-    'irc_rpl_yourhost',     'irc_topic',
+    qw(
+    err_cannotsendtochan err_erroneusnickname err_nicknameinuse irc_error
+    irc_join irc_kick irc_mode irc_nick irc_part irc_quit irc_rpl_myinfo
+    irc_rpl_welcome irc_topic
+    )
     )
   {
     my $method = "_event_$event";
-    $irc->on($event => sub { $self->$method($_[1]) unless $_[1]->{handled}++ });
+    $irc->on($event => sub { $self->$method($_[1]) });
   }
 
-  $irc;
+  for my $event (
+    qw(
+    err_nomotd err_nosuchserver irc_rpl_yourhost irc_rpl_endofinfo
+    irc_rpl_created irc_rpl_bounce irc_rpl_adminme irc_rpl_adminemail
+    irc_rpl_global_users irc_rpl_isupport irc_rpl_localusers irc_rpl_statsconn
+    irc_rpl_tryagain irc_rpl_endoflinks irc_rpl_endofmotd
+    irc_rpl_endofstats irc_rpl_info irc_rpl_links irc_rpl_luserchannels
+    irc_rpl_luserclient irc_rpl_luserme irc_rpl_luserop
+    irc_rpl_luserunkown irc_rpl_motd irc_rpl_motdstart irc_rpl_servlist
+    irc_rpl_servlistend irc_rpl_statscommands irc_rpl_statslinkinfo
+    irc_rpl_statsoline irc_rpl_statsuptime irc_rpl_time irc_rpl_version
+    )
+    )
+  {
+    $irc->on($event => sub { $self->_irc_any($_[1]) });
+  }
+
+  return $irc;
 };
 
 sub connect {
@@ -201,6 +216,24 @@ sub _event_irc_close {
 sub _event_irc_error {
   my ($self, $msg) = @_;
   $self->_notice(join ' ', @{$msg->{params}});
+}
+
+sub _irc_any {
+  my ($self, $msg) = @_;
+
+  return if grep { $msg->{command} eq $_ } qw(PONG);
+  shift @{$msg->{params}} if $msg->{params}[0] eq $self->nick;
+
+  $self->emit(
+    message => $self->messages,
+    {
+      from => $msg->{prefix} // $self->id,
+      highlight => Mojo::JSON->false,
+      message   => join(' ', @{$msg->{params}}),
+      ts        => time,
+      type      => 'private',
+    }
+  );
 }
 
 sub _irc_message {
@@ -474,11 +507,6 @@ _event irc_rpl_myinfo => sub {
 
   $self->{myinfo}{$_} = $msg->{params}[$i++] // '' for @keys;
   $self->emit(state => me => $self->{myinfo});
-};
-
-# :hybrid8.debian.local 002 superman :Your host is hybrid8.debian.local[0.0.0.0/6667], running version hybrid-1:8.2.0+dfsg.1-2
-_event irc_rpl_yourhost => sub {
-  $_[0]->_notice($_[1]->{params}[1]);
 };
 
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
