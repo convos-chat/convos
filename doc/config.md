@@ -51,7 +51,7 @@ $ cat /path/to/convos.conf
   forced_irc_server => "localhost:6667",
   invite_code       => "s3cret",
   organization_name => "Awesome hackers",
-  plugins           => [],
+  plugins           => {},
   secure_cookies    => 0,
   session_secrets   => ["signed-cookie-secret"],
 }
