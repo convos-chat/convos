@@ -44,7 +44,7 @@ the environment variables.
 $ /home/www/convos-stable/script/convos /path/to/convos.conf.json \
     --listen http://*:8000
 
-$ cat /path/to/convos.conf.
+$ cat /path/to/convos.conf.json
 {
   "backend":            "Convos::Core::Backend::File",
   "contact":            "mailto:root@localhost",
@@ -57,6 +57,9 @@ $ cat /path/to/convos.conf.
   "session_secrets":    ["signed-cookie-secret"]
 }
 ```
+
+Note: A config file can also be a plain Perl hash. If you want to use the perl
+format instead of JSON, then just drop the ".json" suffix on the file.
 
 ## Listen
 
