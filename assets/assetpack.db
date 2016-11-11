@@ -353,10 +353,10 @@ format=js
 minified=1
 mtime=1473700581
 [js-min:js/core/connection.js]
-checksum=bba853cbd5
+checksum=7b2929e07c
 format=js
 minified=1
-mtime=1473717221
+mtime=1478851908
 [js-min:js/core/dialog.js]
 checksum=e1a6755a2e
 format=js
@@ -493,10 +493,10 @@ format=js
 minified=1
 mtime=1471681919
 [js-min:vue/convos-connection-editor.vue]
-checksum=0ea8ec499f
+checksum=e7c27e6a5d
 format=js
 minified=1
-mtime=1473886136
+mtime=1478851908
 [js-min:vue/convos-create-dialog.vue]
 checksum=32e20ba0f6
 format=js
@@ -637,3 +637,8 @@ checksum=6d7246f64c
 format=js
 minified=1
 mtime=1473886136
+[js-min:vue/md-textarea.vue]
+checksum=a2a7b56ea0
+format=js
+minified=1
+mtime=1478707914
