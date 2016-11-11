@@ -1,4 +1,5 @@
 use t::Helper;
+use File::Spec::Functions 'catfile';
 delete $ENV{CONVOS_SECRETS};
 
 my $convos = Convos->new;
@@ -22,5 +23,17 @@ like $convos->config->{home},            qr{\W+\.local\W+share\W+convos$}, 'defa
 is $convos->config->{organization_name}, 'cool.org',                       'env name';
 ok $convos->sessions->secure, 'secure sessions';
 is_deeply($convos->secrets, [qw(super duper secret)], 'env secrets');
+
+delete $ENV{$_} for grep {/CONVOS/} keys %ENV;
+$ENV{MOJO_CONFIG} = catfile qw(t data config.json);
+$convos = Convos->new;
+is $convos->config->{organization_name}, 'Team JSON',             'json config name';
+is $convos->config->{contact},           'mailto:json@localhost', 'json config contact';
+
+delete $ENV{$_} for grep {/CONVOS/} keys %ENV;
+$ENV{MOJO_CONFIG} = catfile qw(t data config.conf);
+$convos = Convos->new;
+is $convos->config->{organization_name}, 'Team Perl',             'perl config name';
+is $convos->config->{contact},           'mailto:perl@localhost', 'perl config contact';
 
 done_testing;

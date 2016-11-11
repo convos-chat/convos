@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 0.99_16 Not Released
  - Add support for editing on_connect_commands
+ - Add support for JSON config - https://convos.by/doc/config.html#introduction
 
 0.99_16 2016-11-08T13:37:58+0200
  - Fix getting historic messages, without duplicates #292

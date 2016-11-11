@@ -124,8 +124,12 @@ sub _assets {
 }
 
 sub _config {
-  my $self = shift;
-  my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : $self->config;
+  my $self   = shift;
+  my $config = $self->config;
+
+  if (my $path = $ENV{MOJO_CONFIG}) {
+    $config = $path =~ /\.json$/ ? $self->plugin('JSONConfig') : $self->plugin('Config');
+  }
 
   $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
   $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
