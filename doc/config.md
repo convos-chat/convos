@@ -36,24 +36,25 @@ exec /home/www/convos-stable/script/convos \
   2>>/home/www/log/convos.log
 ```
 
-Instead of using environment variables, you can start convos with a config
-file:
+Instead of using environment variables, you can specify configuration settings
+in a JSON config file. Note that all the settings below is optional, just like
+the environment variables.
 
 ```bash
-$ /home/www/convos-stable/script/convos /path/to/convos.conf \
+$ /home/www/convos-stable/script/convos /path/to/convos.conf.json \
     --listen http://*:8000
 
-$ cat /path/to/convos.conf
+$ cat /path/to/convos.conf.
 {
-  backend           => "Convos::Core::Backend::File",
-  contact           => "mailto:root@localhost",
-  default_server    => "localhost:6667",
-  forced_irc_server => "localhost:6667",
-  invite_code       => "s3cret",
-  organization_name => "Awesome hackers",
-  plugins           => {},
-  secure_cookies    => 0,
-  session_secrets   => ["signed-cookie-secret"],
+  "backend":            "Convos::Core::Backend::File",
+  "contact":            "mailto:root@localhost",
+  "default_server":     "localhost:6667",
+  "forced_irc_server":  "localhost:6667",
+  "invite_code":        "s3cret",
+  "organization_name":  "Awesome hackers",
+  "plugins":            {},
+  "secure_cookies":     0,
+  "session_secrets":    ["signed-cookie-secret"]
 }
 ```
 
