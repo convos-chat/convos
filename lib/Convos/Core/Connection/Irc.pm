@@ -118,6 +118,7 @@ sub connect {
         $self->state(disconnected => $err)->$cb($err);
       }
       else {
+        $self->{delayed} = 0;
         $self->{myinfo} ||= {};
         $self->state(connected => "Connected to $irc->{server}.")->$cb('');
       }
@@ -209,7 +210,13 @@ sub _event_irc_close {
   $self->state($state, sprintf 'You [%s@%s] have quit.',
     $irc->nick, $irc->real_host || $self->url->host);
   delete $self->{_irc};
-  $self->user->core->connect($self) if $state eq 'queued';
+  Scalar::Util::weaken($self);
+  Mojo::IOLoop->timer(
+    ++$self->{delayed} < 60 ? $self->{delayed} : 60,
+    sub {
+      $self->user->core->connect($self) if $self and $self->state eq 'queued';
+    }
+  );
 }
 
 # Unhandled/unexpected error
