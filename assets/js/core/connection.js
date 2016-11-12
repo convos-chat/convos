@@ -181,9 +181,7 @@
 
   proto._onMessage = function(msg) {
     if (msg.errors) return this._onError(msg);
-    if (msg.dialog_id) return this.user.ensureDialog(msg).addMessage(msg);
-    var dialog = this.user.getActiveDialog();
-    if (dialog) dialog.addMessage(msg);
+    return this.user.ensureDialog(msg).addMessage(msg);
   };
 
   proto._onSent = function(msg) {
