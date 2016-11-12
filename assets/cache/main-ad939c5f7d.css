@@ -2390,7 +2390,7 @@ td, th {
 
 .collection {
   margin: 0.5rem 0 1rem 0;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e8e8e8;
   border-radius: 2px;
   overflow: hidden;
   position: relative; }
@@ -2399,7 +2399,7 @@ td, th {
     line-height: 1.5rem;
     padding: 10px 20px;
     margin: 0;
-    border-bottom: 1px solid #e0e0e0; }
+    border-bottom: 1px solid #e8e8e8; }
     .collection .collection-item.avatar {
       min-height: 84px;
       padding-left: 72px;
@@ -2441,7 +2441,7 @@ td, th {
       background-color: #ddd; }
   .collection.with-header .collection-header {
     background-color: #fff;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e8e8;
     padding: 10px 20px; }
   .collection.with-header .collection-item {
     padding-left: 30px; }
@@ -5034,7 +5034,9 @@ img.embed {
   bottom: 0;
   z-index: 901; }
   .convos-main-menu div.content,
-  .is-sidebar div.content {
+  .convos-main-menu form.content,
+  .is-sidebar div.content,
+  .is-sidebar form.content {
     position: absolute;
     top: 56px;
     -webkit-overflow-scrolling: touch;
@@ -5047,7 +5049,9 @@ img.embed {
     right: 0; }
     @media only screen and (min-width: 993px) {
       .convos-main-menu div.content,
-      .is-sidebar div.content {
+      .convos-main-menu form.content,
+      .is-sidebar div.content,
+      .is-sidebar form.content {
         top: 64px; } }
   .convos-main-menu.hidden,
   .is-sidebar.hidden {
@@ -5097,73 +5101,54 @@ img.embed {
     .is-sidebar {
       width: 320px; } }
 
-.convos-dialog-settings .row,
+.convos-sidebar-info .row,
 .convos-notifications .row {
-  margin: 0 auto; }
+  margin-bottom: 0.75rem; }
 
-.convos-dialog-settings .btn-floating,
+.convos-sidebar-info .menu-item,
+.convos-notifications .menu-item {
+  border-top: 1px solid #e8e8e8;
+  border-bottom: 1px solid #e8e8e8;
+  margin-top: -1px;
+  padding: 0 0.75rem;
+  overflow: hidden; }
+  .convos-sidebar-info .menu-item, .convos-sidebar-info .menu-item i,
+  .convos-notifications .menu-item,
+  .convos-notifications .menu-item i {
+    line-height: 2.1rem; }
+  .convos-sidebar-info .menu-item:hover,
+  .convos-notifications .menu-item:hover {
+    background-color: #f0f0f0; }
+  .convos-sidebar-info .menu-item .material-icons,
+  .convos-notifications .menu-item .material-icons {
+    vertical-align: text-bottom; }
+  .convos-sidebar-info .menu-item > a:only-child,
+  .convos-notifications .menu-item > a:only-child {
+    display: block; }
+
+.convos-sidebar-info .btn-floating,
 .convos-notifications .btn-floating {
   box-shadow: none;
   vertical-align: middle;
   float: right;
   top: -6px; }
 
-.convos-dialog-settings .li-link:hover,
-.convos-dialog-settings .notification:hover,
-.convos-dialog-settings .participant:hover,
-.convos-notifications .li-link:hover,
-.convos-notifications .notification:hover,
-.convos-notifications .participant:hover {
-  background-color: #f0f0f0; }
-
-.convos-dialog-settings .notification h5, .convos-dialog-settings .notification .secondary-content,
-.convos-dialog-settings .participant h5,
-.convos-dialog-settings .participant .secondary-content,
-.convos-notifications .notification h5,
-.convos-notifications .notification .secondary-content,
-.convos-notifications .participant h5,
-.convos-notifications .participant .secondary-content {
-  font-size: 1rem;
-  line-height: 110%;
-  margin: 0.5rem 0 0.4rem 0; }
-
-.convos-dialog-settings .notification,
+.convos-sidebar-info .notification,
 .convos-notifications .notification {
   display: block;
   cursor: pointer;
   padding-top: 4px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0; }
-
-.convos-dialog-settings .li-link,
-.convos-notifications .li-link {
-  padding-top: 4px;
-  padding-bottom: 4px; }
-  .convos-dialog-settings .li-link a,
-  .convos-notifications .li-link a {
-    display: block; }
-  .convos-dialog-settings .li-link i,
-  .convos-notifications .li-link i {
-    float: right; }
-
-.convos-dialog-settings .li-link,
-.convos-dialog-settings .participant,
-.convos-notifications .li-link,
-.convos-notifications .participant {
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: -1px; }
-
-.convos-dialog-settings .notification.read,
-.convos-notifications .notification.read {
-  opacity: 0.7; }
-
-.convos-dialog-settings .participant,
-.convos-notifications .participant {
-  padding: 4px 0; }
-  .convos-dialog-settings .participant .secondary-content,
-  .convos-notifications .participant .secondary-content {
-    margin: 0; }
+  .convos-sidebar-info .notification h5, .convos-sidebar-info .notification .secondary-content,
+  .convos-notifications .notification h5,
+  .convos-notifications .notification .secondary-content {
+    font-size: 1rem;
+    line-height: 110%;
+    margin: 0.5rem 0 0.4rem 0; }
+  .convos-sidebar-info .notification.read,
+  .convos-notifications .notification.read {
+    opacity: 0.7; }
 
 header a.notifications {
   position: relative; }
