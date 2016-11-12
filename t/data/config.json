@@ -5,7 +5,7 @@
   "forced_irc_server":  "localhost:1337",
   "invite_code":        "json_example",
   "organization_name":  "Team JSON",
-  "plugins":            {},
+  "plugins":            ["Plugin1", {"config": "parameter"}, "Plugin2", "Plugin3"],
   "secure_cookies":     0,
   "session_secrets":    ["signed-json-secret"]
 }

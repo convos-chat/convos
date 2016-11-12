@@ -163,17 +163,18 @@ sub _home_relative_to_lib {
 sub _plugins {
   my $self    = shift;
   my $plugins = $self->config('plugins');
+  my @plugins = !$plugins ? () : ref $plugins eq 'ARRAY' ? @$plugins : %$plugins;
+  my %uniq;
 
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
+  unshift @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
+  unshift @plugins, qw(Convos::Plugin::Auth Convos::Plugin::Helpers);
 
-  $ENV{CONVOS_PLUGINS} //= '';
-  $plugins ||= {};
-
-  # core plugins
-  $plugins->{$_} = {} for qw(Convos::Plugin::Auth Convos::Plugin::Helpers);
-
-  $plugins->{$_} = {} for split /,/, $ENV{CONVOS_PLUGINS};
-  $self->plugin($_ => $plugins->{$_}) for grep { $plugins->{$_} } keys %$plugins;
+  while (@plugins) {
+    my $name = shift @plugins or last;
+    my $config = ref $plugins[0] ? shift @plugins : {};
+    $self->plugin($name => $config) unless $uniq{$name}++;
+  }
 }
 
 sub _setup_secrets {
