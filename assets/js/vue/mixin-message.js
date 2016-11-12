@@ -46,9 +46,11 @@
         return this.msg.message.xmlEscape().autoLink({
           target: "_blank",
           after:  function(url, id) {
-            $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
-              self.loadOffScreen(html, id);
-            });
+            if (self.settings.expandUrls) {
+              $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
+                self.loadOffScreen(html, id);
+              });
+            }
           }
         });
       },

@@ -26,6 +26,12 @@
           <label for="form_notifications">Enable notifications</label>
         </div>
       </div>
+      <div class="row">
+        <div class="col s12">
+          <input v-model="settings.expandUrls" type="checkbox" class="filled-in" id="form_expand_urls">
+          <label for="form_expand_urls">Expand URL to media</label>
+        </div>
+      </div>
       <div class="row" v-if="errors.length">
         <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
       </div>

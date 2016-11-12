@@ -32,6 +32,9 @@
       data: detail.data,
       mixins: detail.mixins,
       watch: {
+        "settings.expandUrls": function(v, o) {
+          localStorage.setItem("expandUrls", v ? "true" : "false");
+        },
         "settings.main": function(v, o) {
           if (DEBUG && v != o) console.log("[loc:main] " + (o || "null") + " => " + (v || "null"));
           localStorage.setItem("main", v);
