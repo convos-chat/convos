@@ -355,17 +355,17 @@ sub _setup {
           my ($connection, $target, $msg) = @_;
           my ($format, @keys) = $self->_format($msg->{type}) or return;
           my $message = sprintf $format, map { $msg->{$_} } @keys;
-          my @dialog_id = $target->id ? (dialog_id => $target->id) : ();
           my $flag = FLAG_NONE;
 
-          if ($msg->{highlight} and @dialog_id and !$target->is_private) {
+          if ($msg->{highlight} and $target->id and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
             $connection->user->{unread}++;
             $connection->user->save;
             $flag |= FLAG_HIGHLIGHT;
           }
 
-          $self->emit("user:$uid", message => {connection_id => $cid, @dialog_id, %$msg});
+          $self->emit("user:$uid",
+            message => {connection_id => $cid, dialog_id => $target->id, %$msg});
           $message = sprintf "%c %s", $flag + FLAG_OFFSET, $message;
           $self->_log($target, $msg->{ts}, $message);
         }
