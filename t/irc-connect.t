@@ -13,7 +13,7 @@ $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 like $err, qr{Invalid URL}, 'invalid url';
 
-is $connection->_irc->nick, 'test_user', 'converted username to nick';
+is $connection->_irc->nick, 'testuser', 'converted username to nick';
 
 $connection->url->parse('irc://127.0.0.1');
 no warnings qw(once redefine);
