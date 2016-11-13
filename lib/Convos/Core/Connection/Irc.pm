@@ -26,7 +26,7 @@ has _irc => sub {
 
   unless ($nick = $url->query->param('nick')) {
     $nick = $user;
-    $nick =~ s![^\w_]!_!g;
+    $nick =~ s![^a-z]!!gi;
     $url->query->param(nick => $nick);
   }
 

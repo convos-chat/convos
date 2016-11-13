@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 0.99_18 Not Released
+ - Fix nick should be only contain [a-z] #296
  - Can disable expanding links
  - Server messages can be read in frontend
  - Server settings can be edited in the "info" sidebar

@@ -17,6 +17,9 @@ ok !-e $settings_file, 'no storage file';
 is $connection->save, $connection, 'save';
 ok -e $settings_file, 'created storage file';
 
+$connection->_irc;
+is $connection->url->query->param('nick'), 'testuser', 'built nick from email';
+
 cmp_deeply(
   $connection->TO_JSON,
   {
@@ -26,7 +29,7 @@ cmp_deeply(
     on_connect_commands => [],
     protocol            => 'irc',
     state               => 'queued',
-    url                 => 'irc://127.0.0.1'
+    url                 => 'irc://127.0.0.1?nick=testuser'
   },
   'TO_JSON'
 );
