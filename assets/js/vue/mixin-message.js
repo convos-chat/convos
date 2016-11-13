@@ -6,7 +6,7 @@
         var msg = this.msg;
         var c = {highlight: this.msg.highlight ? true : false};
 
-        if (this.dialog.dialog_id && !this.dialog.participants[msg.from]) {
+        if (msg.type != "notice" && this.dialog.dialog_id && !this.dialog.participants[msg.from]) {
           c["inactive-user"] = true;
         }
 
