@@ -1,4 +1,5 @@
 use Test::Mojo::IRC -basic;
+use lib '.';
 use t::Helper;
 
 BEGIN { $ENV{CONVOS_STEAL_NICK_INTERVAL} = 0.01 }

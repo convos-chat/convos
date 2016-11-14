@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;

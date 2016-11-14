@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 use File::Basename;
 use File::Path 'make_path';

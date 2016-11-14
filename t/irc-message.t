@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 use Test::Mojo::IRC -basic;
 use Mojo::IOLoop;
@@ -80,7 +81,6 @@ done_testing;
 sub slurp_log {
   Mojo::Util::slurp(
     File::Spec->catfile(
-      $FindBin::Bin, File::Spec->updir,
       qw(local test-irc-message-t superman@example.com irc-localhost),
       @date, "$_[0].log"
     )

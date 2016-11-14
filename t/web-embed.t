@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 my $t = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;

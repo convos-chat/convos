@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 use File::Spec::Functions 'catfile';
 delete $ENV{CONVOS_SECRETS};

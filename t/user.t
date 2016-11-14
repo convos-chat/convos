@@ -2,6 +2,7 @@ BEGIN {
   our $time = time - 10;
   *CORE::GLOBAL::time = sub {$time};
 }
+use lib '.';
 use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;

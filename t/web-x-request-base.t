@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 
 my $t = t::Helper->t;

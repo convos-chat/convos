@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 
 plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};

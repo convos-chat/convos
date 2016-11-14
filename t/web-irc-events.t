@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 use Test::Mojo::IRC;
 

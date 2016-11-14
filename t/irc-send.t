@@ -1,4 +1,5 @@
 use Test::Mojo::IRC -basic;
+use lib '.';
 use t::Helper;
 use Mojo::IOLoop;
 use Convos::Core;

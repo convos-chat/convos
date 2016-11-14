@@ -1,3 +1,4 @@
+use lib '.';
 use t::Helper;
 
 $ENV{CONVOS_BACKEND}           = 'Convos::Core::Backend';
