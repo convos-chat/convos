@@ -16,7 +16,7 @@
       </div>
       <div class="row">
         <div class="col s12">
-          <input v-model="sortDialogsByRead" type="checkbox" class="filled-in" id="form_sort_by" :checked="settings.sortDialogsBy == 'lastRead'">
+          <input v-model="sortDialogsByRead" type="checkbox" class="filled-in" id="form_sort_by">
           <label for="form_sort_by">Sort dialogs by "last read"</label>
         </div>
       </div>
@@ -55,6 +55,11 @@ module.exports = {
       sortDialogsByRead: false
     };
   },
+  watch: {
+    sortDialogsByRead: function(v, o) {
+      this.settings.sortDialogsBy = v ? "lastRead" : "";
+    }
+  },
   methods: {
     save: function() {
       var self = this;
@@ -66,11 +71,10 @@ module.exports = {
       if (!this.notifications)
         this.enableNotifications(false);
 
-      this.settings.sortDialogsBy = this.sortDialogsByRead ? "lastRead" : "";
-
       if (this.password) {
         Convos.api.updateUser({body: {password: this.password}}, function(err, res) {
-          if (err) self.errors = err;
+          if (!err) this.password = "";
+          self.errors = err || [];
         });
       }
     }
