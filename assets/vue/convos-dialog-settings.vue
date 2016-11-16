@@ -26,7 +26,7 @@
     </div>
     <div class="menu-item" v-for="p in participants">
       <span class="right">
-        +{{p.mode}}
+        {{p.mode ? '+' + p.mode : ''}}
         <a href="#info" @click.prevent="send('/whois ' + p.name)" class="waves-effect waves-light"><i class="material-icons">info</i></a>
       </span>
       <a href="#chat:{{p.name}}" @click.prevent="send('/query ' + p.name)">{{p.name}}</a>
