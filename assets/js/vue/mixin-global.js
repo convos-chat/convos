@@ -3,7 +3,7 @@
   // TODO: Should come up with better variable names than "main" and "sidebar"
   Convos.settings.expandUrls = localStorage.getItem("expandUrls") == "false" ? false : true;
   Convos.settings.main = localStorage.getItem("main") || "";
-  Convos.settings.sidebar = localStorage.getItem("sidebar") || "";
+  Convos.settings.sidebar = localStorage.getItem("sidebar");
   Convos.settings.mainMenuVisible = false;
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
   Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
@@ -13,6 +13,10 @@
   }
   else if (Convos.settings.sidebar) {
     if (Convos.settings.sidebar == "dialog-settings") Convos.settings.sidebar = "sidebar-info"; // back compat after rename
+    $('body').addClass('has-sidebar');
+  }
+  else if (typeof Convos.settings.sidebar == 'undefined') {
+    Convos.settings.sidebar = 'sidebar-info';
     $('body').addClass('has-sidebar');
   }
 
