@@ -11,4 +11,12 @@ install:
   - "cpanm -n https://github.com/jhthorsen/mojo-irc/archive/master.tar.gz"
   - "cpanm -n --installdeps ."
 notifications:
-  email: false
+  email:
+    recipients:
+      - jhthorsen@cpan.org
+    on_failure: always
+    on_success: change
+  irc:
+    channels: "chat.freenode.net#convos"
+    on_failure: always
+    on_success: change
