@@ -41,34 +41,38 @@ module.exports = {
   },
   computed: {
     dialogs: function() {
-      var dialogs = this.user.dialogs;
-      var sortBy;
-
       var di = function(a, b) {
         return (b.dialog_id.length ? 1 : 0) - (a.dialog_id.length ? 1 : 0);
       };
 
       if (this.q) {
         var re = new RegExp(RegExp.escape(this.q), 'i');
-        dialogs = dialogs.filter(function(d) { return d.name.match(re) });
-        sortBy = function(a, b) {
+        return this.user.dialogs.filter(function(d) {
+          return d.name.match(re);
+        }).sort(function(a, b) {
           return a.name.length - b.name.length;
-        };
+        });
       }
       else if (this.settings.sortDialogsBy == "lastRead") {
-        sortBy = function(a, b) {
+        var nTop = localStorage.getItem("lastReadnTop") || 3; // EXPERIMENTAL value
+        var dialogs = this.user.dialogs.sort(function(a, b) {
           return b.active - a.active || di(a, b) || b.lastRead - a.lastRead;
-        };
+        });
+        return dialogs.slice(0, nTop).concat(dialogs.slice(nTop).sort(function(a, b) {
+          return di(a, b)
+              || (b.unread ? 1 : 0) - (a.unread ? 1 : 0)
+              || b.lastActive - a.lastActive
+              || b.lastRead - a.lastRead
+              || a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        }));
       }
       else {
-        sortBy = function(a, b) {
+        return this.user.dialogs.sort(function(a, b) {
           var ah = a.name.toLowerCase().replace(/^\W+/, '');
           var bh = b.name.toLowerCase().replace(/^\W+/, '');
-          return di(a, b) || ah < bh ? -1 : ah > bh ? 1 : 0;
-        };
+          return di(a, b) || ah.localeCompare(bh);
+        });
       }
-
-      return dialogs.sort(sortBy);
     }
   },
   methods: {

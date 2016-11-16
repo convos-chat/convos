@@ -17,7 +17,7 @@
       <div class="row">
         <div class="col s12">
           <input v-model="sortDialogsByRead" type="checkbox" class="filled-in" id="form_sort_by">
-          <label for="form_sort_by">Sort dialogs by "last read"</label>
+          <label for="form_sort_by">Sort dialogs by last-read/activity</label>
         </div>
       </div>
       <div class="row">

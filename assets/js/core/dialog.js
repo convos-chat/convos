@@ -8,6 +8,7 @@
     this.messages = [];
     this.messagesMethod = "dialogMessages";
     this.name = "";
+    this.lastActive = 0;
     this.lastRead = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
     this.participants = {};
     this.unread = 0;
@@ -58,6 +59,7 @@
 
       if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) {
         if (this.lastRead < msg.ts && !args.disableUnread) {
+          this.lastActive = msg.ts.valueOf();
           this.unread++;
         }
       }

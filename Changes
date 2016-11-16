@@ -2,8 +2,12 @@ Revision history for perl distribution Convos
 
 0.99_18 Not Released
  - Fix IRC username cannot contain special characters #296
+ - Fix parsing IRC user modes dynamically #287
+ - Fix "Goto anything" sorts by dialog name length
+ - Fix queuing connections after connection errors
+ - Add EXPERIMENTAL sort by last-read/activity
  - Add Dockerfile
- - Can disable expanding links
+ - Add "disable expanding links" setting in profile
  - Server messages can be read in frontend
  - Server settings can be edited in the "info" sidebar
 
