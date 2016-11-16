@@ -5076,14 +5076,11 @@ img.embed {
       color: #B71C1C; }
     .convos-main-menu .content > a:hover, .convos-main-menu .content > a.focus {
       background-color: #f0f0f0; }
-    .convos-main-menu .content > a b {
-      font-size: 1rem;
-      line-height: 1rem;
-      text-align: center;
-      width: 24px;
+    .convos-main-menu .content > a .n-uread {
+      text-align: right;
       position: absolute;
-      bottom: 1rem;
-      left: 0.75rem; }
+      top: 0.75rem;
+      right: 0.75rem; }
     .convos-main-menu .content > a .material-icons {
       vertical-align: top; }
     .convos-main-menu .content > a.simple .material-icons {
