@@ -12,26 +12,27 @@ has backend => sub { Convos::Core::Backend->new };
 has home    => sub { Mojo::Home->new($ENV{CONVOS_HOME}); };
 
 sub connect {
-  my ($self, $connection) = @_;
+  my ($self, $connection, $cb) = @_;
   my $host = $connection->url->host;
 
   Scalar::Util::weaken($self);
   $connection->state('queued');
 
-  if ($host eq 'localhost') {
+  if ($host eq 'localhost' and !$cb) {
     $connection->connect(
       sub {
         my ($connection, $err) = @_;
-        push @{$self->{connect_queue}{$host}}, $connection if $err;
+        push @{$self->{connect_queue}{$host}}, [$connection, $cb] if $err;
+        $connection->$cb($err) if $cb;
       }
     );
   }
   elsif ($self->{connect_queue}{$host}) {
-    push @{$self->{connect_queue}{$host}}, $connection;
+    push @{$self->{connect_queue}{$host}}, [$connection, $cb];
   }
   else {
     $self->{connect_queue}{$host} = [];
-    $connection->connect(sub { });
+    $connection->connect($cb || sub { });
   }
 
   return $self;
@@ -64,21 +65,8 @@ sub start {
   }
 
   Scalar::Util::weaken($self);
-  $self->{connect_tid} = Mojo::IOLoop->recurring(
-    $ENV{CONVOS_CONNECT_DELAY} || 3,
-    sub {
-      for my $host (keys %{$self->{connect_queue} || {}}) {
-        my $connection = shift @{$self->{connect_queue}{$host}} or next;
-        next if $connection->state eq 'disconnected' and $connection->url->host ne $host;
-        $connection->connect(
-          sub {
-            my ($connection, $err) = @_;
-            push @{$self->{connect_queue}{$host}}, $connection if $err;
-          }
-        );
-      }
-    }
-  );
+  my $delay = $ENV{CONVOS_CONNECT_DELAY} || 3;
+  $self->{connect_tid} = Mojo::IOLoop->recurring($delay => sub { $self->_dequeue });
 
   return $self;
 }
@@ -91,6 +79,23 @@ has_many users => 'Convos::Core::User' => sub {
   Scalar::Util::weaken($user->{core} = $self);
   return $user;
 };
+
+sub _dequeue {
+  my $self = shift;
+
+  for my $host (keys %{$self->{connect_queue} || {}}) {
+    my $args = shift @{$self->{connect_queue}{$host}} or next;
+    my ($connection, $cb) = @$args;
+    next if $connection->state eq 'disconnected';
+    $connection->connect(
+      sub {
+        my ($connection, $err) = @_;
+        push @{$self->{connect_queue}{$host}}, $connection if $err;
+        $connection->$cb($err) if $cb;
+      }
+    );
+  }
+}
 
 sub DESTROY {
   my $self = shift;
@@ -180,14 +185,18 @@ the following new ones.
 
 =head2 connect
 
-  $self->connect($connection);
+  $self->connect($connection, $cb);
 
 This method will call L<Convos::Core::Connection/connect> either at once
 or add the connection to a queue which will connect after an interval.
 
 The reason for queuing connections is to prevent flooding the server.
 
-Note: Connections to "localhost" will not be delayed.
+Note: Connections to "localhost" will not be delayed, unless the first connect
+fails.
+
+C<$cb> is optional, but will be passed on to
+L<Convos::Core::Connection/connect> if defined.
 
 =head2 get_user
 

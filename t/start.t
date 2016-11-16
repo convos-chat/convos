@@ -56,8 +56,10 @@ $core->start for 0 .. 4;    # calling start() multiple times result in no-op
 cmp_deeply $core->{connect_queue},
   {
   'chat.freenode.net' => [],
-  'irc.perl.org' =>
-    [obj_isa('Convos::Core::Connection::Irc'), obj_isa('Convos::Core::Connection::Irc')]
+  'irc.perl.org'      => [
+    [obj_isa('Convos::Core::Connection::Irc'), undef],
+    [obj_isa('Convos::Core::Connection::Irc'), undef],
+  ]
   },
   'connect_queue';
 is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 1, 'localhost' => 1},

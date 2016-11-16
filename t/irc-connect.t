@@ -31,6 +31,7 @@ is_deeply \@state, [qw(queued disconnected)], 'queued => disconnected';
 like $err, qr{\bSSL connect attempt failed\b}, 'SSL connect attempt';
 is $connection->url->query->param('tls'), 0, 'disable tls';
 
+Mojo::IOLoop->recurring(0.1 => sub { $core->_dequeue });
 *Mojo::IRC::connect = sub { pop->($_[0], "IO::Socket::SSL 1.94+ required for TLS support") };
 $connection->url->query->remove('tls');
 $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });

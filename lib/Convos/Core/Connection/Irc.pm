@@ -112,7 +112,8 @@ sub connect {
 
       if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
         $url->query->param(tls => 0);
-        $self->save(sub { })->connect($cb);
+        $self->save(sub { });
+        $self->user->core->connect($self, $cb);    # let's queue up to make irc admins happy
       }
       elsif ($err) {
         $self->state(disconnected => $err)->$cb($err);
