@@ -8,15 +8,15 @@
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
   Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
 
+  var validSidebars = ["", "notifications", "sidebar-info"].filter(function(v) {
+    return Convos.settings.sidebar === v;
+  });
+
   if (window.isMobile) {
     Convos.settings.sidebar = ""; // Don't want to remember sidebar when loading on mobile
   }
   else if (Convos.settings.sidebar) {
-    if (Convos.settings.sidebar == "dialog-settings") Convos.settings.sidebar = "sidebar-info"; // back compat after rename
-    $('body').addClass('has-sidebar');
-  }
-  else if (typeof Convos.settings.sidebar == 'undefined') {
-    Convos.settings.sidebar = 'sidebar-info';
+    if (!validSidebars.length) Convos.settings.sidebar = "sidebar-info";
     $('body').addClass('has-sidebar');
   }
 
