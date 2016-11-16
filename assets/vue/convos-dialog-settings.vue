@@ -39,13 +39,7 @@ module.exports = {
   data: function() {
     return {
       markdownOptions: {escape: true, links: true},
-      modes: {
-        '%': '+h',
-        '&': '+a',
-        '+': '+v',
-        '@': '+o',
-        '~': '+q'
-      }
+      modes: {'@': '+o', '+': '+v'}
     };
   },
   computed: {
