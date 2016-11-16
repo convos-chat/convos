@@ -8,7 +8,7 @@
       </div>
     </header>
     <div class="content">
-      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d)" v-for="d in dialogs">
+      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in dialogs">
         <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
         <b class="n-uread" v-if="d.unread">{{d.unread < 100 ? d.unread : "99+"}}</b>
         <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
@@ -41,14 +41,21 @@ module.exports = {
   },
   computed: {
     dialogs: function() {
-      var re = this.q ? new RegExp(RegExp.escape(this.q), 'i') : new RegExp('.');
+      var dialogs = this.user.dialogs;
       var sortBy;
 
       var di = function(a, b) {
         return (b.dialog_id.length ? 1 : 0) - (a.dialog_id.length ? 1 : 0);
       };
 
-      if (this.settings.sortDialogsBy == "lastRead") {
+      if (this.q) {
+        var re = new RegExp(RegExp.escape(this.q), 'i');
+        dialogs = dialogs.filter(function(d) { return d.name.match(re) });
+        sortBy = function(a, b) {
+          return a.name.length - b.name.length;
+        };
+      }
+      else if (this.settings.sortDialogsBy == "lastRead") {
         sortBy = function(a, b) {
           return b.active - a.active || di(a, b) || b.lastRead - a.lastRead;
         };
@@ -61,11 +68,12 @@ module.exports = {
         };
       }
 
-      return this.user.dialogs.filter(function(d) { return d.name.match(re) }).sort(sortBy);
+      return dialogs.sort(sortBy);
     }
   },
   methods: {
-    dialogClass: function(d) {
+    dialogClass: function(d, i) {
+      if (this.q) return i ? "" : "active";
       var cn = this.activeClass(d.href());
       cn.frozen = d.frozen ? true : false;
       return cn;
