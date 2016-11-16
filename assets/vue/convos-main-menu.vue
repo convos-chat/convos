@@ -10,7 +10,7 @@
     <div class="content">
       <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in dialogs">
         <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
-        <b class="n-uread" v-if="d.unread">{{d.unread < 100 ? d.unread : "99+"}}</b>
+        <b class="n-uread" v-if="d.unread" v-tooltip="d.unread + ' unread messages'">{{d.unread < 100 ? d.unread : "99+"}}</b>
         <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
         <span class="on" v-else>convos-local</span>
       </a>

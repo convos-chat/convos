@@ -49,14 +49,11 @@
       background-color: darken($body-bg, 6%);
     }
 
-    b {
-      font-size: 1rem;
-      line-height: 1rem;
-      text-align: center;
-      width: 24px;
+    .n-uread {
+      text-align: right;
       position: absolute;
-      bottom: 1rem;
-      left: $gutter-width / 2;
+      top: $gutter-width / 2;
+      right: $gutter-width / 2;
     }
 
     .material-icons { vertical-align: top; }
