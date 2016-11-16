@@ -268,6 +268,8 @@ sub _irc_message {
   $highlight ||= grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
     @{$self->url->query->every_param('highlight')};
 
+  $target->last_active(Mojo::Date->new->to_datetime);
+
   # server message or message without a dialog
   $self->emit(
     message => $target,

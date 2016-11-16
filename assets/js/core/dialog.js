@@ -17,6 +17,11 @@
     EventEmitter(this);
     if (attrs) this.update(attrs);
 
+    if (this.last_active) {
+      this.lastActive = Date.fromAPI(this.last_active).valueOf();
+      delete this.last_active;
+    }
+
     this.on("active", function() {
       this.user.dialogs.forEach(function(d) { if (d.active) d.emit("inactive"); });
       this.active = true;

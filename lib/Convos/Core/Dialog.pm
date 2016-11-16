@@ -16,7 +16,8 @@ sub connection { shift->{connection} or Carp::confess('connection required in co
 
 sub id { lc +($_[1] || $_[0])->{name} }
 
-has last_read => sub { Mojo::Date->new->to_datetime };
+has last_active => sub { Mojo::Date->new->to_datetime };
+has last_read   => sub { Mojo::Date->new->to_datetime };
 
 sub messages {
   my ($self, $query, $cb) = @_;
@@ -41,7 +42,7 @@ sub stash { Convos::Util::_stash(stash => @_) }
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(frozen is_private name last_read topic);
+  my %json = map { ($_, $self->$_) } qw(frozen is_private name last_active last_read topic);
   $json{connection_id} = $self->connection->id;
   $json{dialog_id}     = $self->id;
   $json{password}      = $self->password if $persist;
@@ -95,6 +96,13 @@ participants can join the dialog.
   $str = $self->name;
 
 The name of this dialog.
+
+=head2 last_active
+
+  $datetime = $self->last_active;
+  $self = $self->last_active($datetime);
+
+Holds an datetime timestring of last time this dialog received a message.
 
 =head2 last_read
 
