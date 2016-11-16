@@ -26,9 +26,11 @@ has _irc => sub {
 
   unless ($nick = $url->query->param('nick')) {
     $nick = $user;
-    $nick =~ s![^a-z]!!gi;
+    $nick =~ s![^\w_]!_!g;
     $url->query->param(nick => $nick);
   }
+
+  $user =~ s![^a-z]!!gi;
 
   $irc->name("Convos v$Convos::VERSION");
   $irc->nick($nick);
@@ -83,7 +85,6 @@ sub connect {
   my $url      = $self->url;
   my $tls      = $url->query->param('tls') // 1;
 
-  $irc->user($userinfo->[0]);
   $irc->pass($userinfo->[1]);
   $irc->server($url->host_port) unless $irc->server;
   $irc->tls($tls ? {} : undef);

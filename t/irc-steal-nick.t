@@ -17,22 +17,22 @@ $connection->url->parse(sprintf 'irc://%s?tls=0', $t->server);
 
 $t->run(
   [
-    qr{NICK nickyoung}  => ":hybrid8.debian.local 433 * nickyoung :Nickname is already in use.\n",
-    qr{NICK nickyoung_} => ":hybrid8.debian.local 001 nickyoung_ :Welcome\n",
+    qr{NICK nick_young}  => ":hybrid8.debian.local 433 * nick_young :Nickname is already in use.\n",
+    qr{NICK nick_young_} => ":hybrid8.debian.local 001 nick_young_ :Welcome\n",
   ],
   sub {
     is $connection->url->query->param('nick'), undef, 'no nick in connect url';
     $connection->connect(sub { $_[1] and diag "connect: $_[1]" });
-    is $connection->url->query->param('nick'), 'nickyoung', 'nick set in connect url';
+    is $connection->url->query->param('nick'), 'nick_young', 'nick set in connect url';
     Mojo::IOLoop->start;
-    is $nick, 'nickyoung_', 'connection nick nickyoung_';
+    is $nick, 'nick_young_', 'connection nick nick_young_';
     $connection->connect(sub { });
-    is $connection->_irc->nick, 'nickyoung_', 'connect() does not change $irc->nick';
+    is $connection->_irc->nick, 'nick_young_', 'connect() does not change $irc->nick';
   }
 );
 
 $t->run(
-  [qr{NICK nickyoung} => ":superman!clark.kent\@i.love.debian.org PRIVMSG #convos :hey\n"],
+  [qr{NICK nick_young} => ":superman!clark.kent\@i.love.debian.org PRIVMSG #convos :hey\n"],
   sub {
     my $privmsg;
     $t->on($connection->_irc, irc_privmsg => sub { $privmsg++; Mojo::IOLoop->stop });
@@ -42,11 +42,11 @@ $t->run(
 );
 
 $t->run(
-  [qr{NICK nickyoung} => ":nickyoung_!superman\@i.love.debian.org NICK :nickyoung\n"],
+  [qr{NICK nick_young} => ":nick_young_!superman\@i.love.debian.org NICK :nick_young\n"],
   sub {
     Mojo::IOLoop->start;
-    is $connection->url->query->param('nick'), 'nickyoung', 'nick set in connect url';
-    is $nick, 'nickyoung', 'connection nick nickyoung';
+    is $connection->url->query->param('nick'), 'nick_young', 'nick set in connect url';
+    is $nick, 'nick_young', 'connection nick nick_young';
   }
 );
 
@@ -54,7 +54,7 @@ $t->run(
   [
     qr{NICK n2} => "",
     qr{NICK n2} => ":superman!clark.kent\@i.love.debian.org PRIVMSG #convos :me again\n",
-    qr{NICK n2} => ":nickyoung!superman\@i.love.debian.org NICK :n2\n"
+    qr{NICK n2} => ":nick_young!superman\@i.love.debian.org NICK :n2\n"
   ],
   sub {
     my $err;

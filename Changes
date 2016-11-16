@@ -1,7 +1,7 @@
 Revision history for perl distribution Convos
 
 0.99_18 Not Released
- - Fix nick should be only contain [a-z] #296
+ - Fix IRC username cannot contain special characters #296
  - Add Dockerfile
  - Can disable expanding links
  - Server messages can be read in frontend
