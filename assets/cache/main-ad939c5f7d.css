@@ -5077,6 +5077,8 @@ img.embed {
     .convos-main-menu .content > a:hover, .convos-main-menu .content > a.focus {
       background-color: #f0f0f0; }
     .convos-main-menu .content > a .n-uread {
+      font-size: 0.9rem;
+      font-weight: normal;
       text-align: right;
       position: absolute;
       top: 0.75rem;
