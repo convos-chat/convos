@@ -74,5 +74,5 @@ above.
 
 ## Next
 
-Want to learn more? Check out the [configuration](/doc/config.html) guide, or the
-[documentation index](/doc/).
+Want to learn more? Check out the [configuration](/doc/config.html) guide, the
+[FAQ](/doc/faq.html) or the [documentation index](/doc/).

@@ -61,6 +61,7 @@ Set up nginx:
       location /whatever/convos {
 
         # Pass requests on to the upstream defined above
+        rewrite ^/whatever/convos/?(.*)$ /$1 break;
         proxy_pass http://convos;
 
         # Instruct Convos to do the right thing regarding
