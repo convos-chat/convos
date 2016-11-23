@@ -39,7 +39,7 @@
       <div class="col s12">
         <button @click="saveConnection" class="btn waves-effect waves-light">Save</button>
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">Delete</a>
-        <p>{{connection.state == 'connected' ? 'Status: Connected.' : connection.message || 'Click "update" to connect.'}}</p>
+        <p>{{connection.state == 'connected' ? 'Status: Connected.' : connection.message || 'Click "save" to connect.'}}</p>
       </div>
     </div>
   </form>
@@ -49,18 +49,19 @@ module.exports = {
   props: ["connection", "user"],
   mixins: [Convos.mixin.connectionEditor],
   data: function() {
-    var url = this.connection.url.parseUrl();
     return {
       advancedSettings: false,
       errors: [],
-      url: url,
-      nick: url.query.nick || this.user.email.split("@")[0],
-      onConnectCommands: this.connection.on_connect_commands.join("\n"),
-      server: url.hostPort,
-      tls: url.query.tls ? true : false,
-      password: url.query.password,
-      username: url.query.username
+      nick: "",
+      onConnectCommands: "",
+      server: "",
+      tls: false,
+      password: "",
+      username: ""
     };
+  },
+  watch: {
+    connection: function(v, o) { this.updateForm() }
   },
   methods: {
     removeConnection: function() {
@@ -69,7 +70,20 @@ module.exports = {
         if (err) return self.errors = err;
         self.settings.main = "#connection";
       });
+    },
+    updateForm: function() {
+      var url = this.connection.url.parseUrl();
+      this.errors = [];
+      this.nick = url.query.nick || this.user.email.split("@")[0];
+      this.onConnectCommands = this.connection.on_connect_commands.join("\n");
+      this.server = url.hostPort;
+      this.tls = url.query.tls != false; // Need to use "==" instead of "===" http://dorey.github.io/JavaScript-Equality-Table/unified/
+      this.password = url.query.password;
+      this.username = url.query.username;
     }
+  },
+  ready: function() {
+    this.updateForm();
   }
 };
 </script>
