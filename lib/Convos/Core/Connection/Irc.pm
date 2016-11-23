@@ -117,6 +117,7 @@ sub connect {
         $self->user->core->connect($self, $cb);    # let's queue up to make irc admins happy
       }
       elsif ($err) {
+        $self->_notice($err);
         $self->state(disconnected => $err)->$cb($err);
       }
       else {

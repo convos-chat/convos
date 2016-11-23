@@ -37,6 +37,7 @@ Mojo::IOLoop->recurring(0.1 => sub { $core->_dequeue });
 $connection->url->query->remove('tls');
 $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
+cmp_deeply([values %{$core->{connect_queue}}], [[[$connection, undef]]], 'connect_queue');
 like $err, qr{\bIO::Socket::SSL\b}, 'IO::Socket::SSL missing';
 is $connection->url->query->param('tls'), 0, 'disable tls';
 is_deeply \@state, [qw(queued disconnected queued disconnected)], 'queued => disconnected';

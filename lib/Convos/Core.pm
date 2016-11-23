@@ -22,8 +22,7 @@ sub connect {
     $connection->connect(
       sub {
         my ($connection, $err) = @_;
-        push @{$self->{connect_queue}{$host}}, [$connection, $cb] if $err;
-        $connection->$cb($err) if $cb;
+        push @{$self->{connect_queue}{$host}}, [$connection, undef] if $err;
       }
     );
   }
@@ -90,7 +89,7 @@ sub _dequeue {
     $connection->connect(
       sub {
         my ($connection, $err) = @_;
-        push @{$self->{connect_queue}{$host}}, $connection if $err;
+        push @{$self->{connect_queue}{$host}}, [$connection, undef] if $err;
         $connection->$cb($err) if $cb;
       }
     );
