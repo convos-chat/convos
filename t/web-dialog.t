@@ -24,15 +24,17 @@ no warnings qw(once redefine);
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/participants')->status_is(200)
   ->json_has('/participants/0/mode')->json_has('/participants/0/name');
 
-my $last_read = Mojo::Date->new(1471623058)->to_datetime;
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $last_active = Mojo::Date->new(1471623050)->to_datetime;
+my $last_read   = Mojo::Date->new(1471623058)->to_datetime;
+my $connection  = $user->connection({name => 'localhost', protocol => 'irc'});
 $connection->_irc->emit(
   irc_privmsg => {
     prefix => 'Supergirl!super.girl@i.love.debian.org',
     params => ['#Convos', 'not a superdupersuperman?']
   }
 );
-$connection->dialog({name => '#Convos', frozen => ''})->last_read($last_read);
+$connection->dialog({name => '#Convos', frozen => ''})->last_read($last_read)
+  ->last_active($last_active);
 $t->get_ok('/api/dialogs')->status_is(200)->json_is(
   '/dialogs' => [
     {
@@ -41,7 +43,7 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
       frozen        => '',
       is_private    => 0,
       name          => '#Convos',
-      last_active   => '',
+      last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
       stash         => {},
       topic         => '',
@@ -51,7 +53,8 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
 );
 
 $user->connection({name => 'example', protocol => 'irc'})
-  ->dialog({name => '#superheroes', frozen => ''})->last_read($last_read);
+  ->dialog({name => '#superheroes', frozen => ''})->last_read($last_read)
+  ->last_active($last_active);
 $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
   '/connections',
   [
@@ -84,7 +87,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       frozen        => '',
       is_private    => 0,
       name          => '#Convos',
-      last_active   => '',
+      last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
       stash         => {},
       topic         => '',
@@ -95,7 +98,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       dialog_id     => '#superheroes',
       frozen        => '',
       is_private    => 0,
-      last_active   => '',
+      last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
       name          => '#superheroes',
       stash         => {},
