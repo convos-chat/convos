@@ -1,7 +1,7 @@
 <template>
   <div class="input-field col" :class="cols">
     <textarea lazy v-model="value" class="validate materialize-textarea"
-      :id="id" v-el:input :name="name"
+      :id="id" v-el:input :name="name" :placeholder="placeholder"
       :readonly="readonly"
       :disabled="disabled" :required="required"
       @focus="hasFocus=true" @blur="hasFocus=false">
@@ -11,13 +11,13 @@
 </template>
 <script>
 module.exports = {
-  props: ["cols", "disabled", "focus", "id", "name", "readonly", "required", "value"],
+  props: ["cols", "disabled", "focus", "id", "name", "placeholder", "readonly", "required", "value"],
   data: function() {
     return {hasFocus: false, mdValue: ""};
   },
   computed: {
     labelActive: function() {
-      return this.value || this.hasFocus;
+      return this.value || this.placeholder || this.hasFocus;
     }
   },
   ready: function() {

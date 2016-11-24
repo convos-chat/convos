@@ -9,10 +9,9 @@
     </header>
     <div class="content">
       <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in dialogs">
-        <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.name}}</span>
+        <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.dialog_id ? d.name : d.connection_id}}</span>
         <b class="n-uread" v-if="d.unread" v-tooltip="d.unread + ' unread messages'">{{d.unread < 100 ? d.unread : "99+"}}</b>
-        <span class="on" v-if="d.connection()">{{d.connection().protocol}}-{{d.connection().name}}</span>
-        <span class="on" v-else>convos-local</span>
+        <span class="on" v-if="d.dialog_id">{{d.connection().protocol}}-{{d.connection().name}}</span>
       </a>
       <div class="divider"></div>
       <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple" :class="activeClass('#create-dialog')">

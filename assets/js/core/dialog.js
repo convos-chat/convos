@@ -3,7 +3,7 @@
     this.activated = 0;
     this.active = false;
     this.dialog_id = "";
-    this.frozen = "Loading...";
+    this.frozen = "Initializing...";
     this.is_private = true;
     this.messages = [];
     this.messagesMethod = "dialogMessages";
@@ -125,7 +125,7 @@
   proto.href = function() {
     var path = Array.prototype.slice.call(arguments);
     if (!this.connection()) return "#chat/convos-local/convosbot";
-    return ["#chat", this.connection_id, this.name].concat(path).join("/");
+    return ["#chat", this.connection_id, this.dialog_id].concat(path).join("/");
   };
 
   proto.icon = function() {
@@ -221,7 +221,7 @@
     if (this.frozen) {
       this.addMessage({
         type: "error",
-        message: "You are not part of this channel. " + this.frozen
+        message: this.dialog_id ? "You are not part of this dialog. " + this.frozen.ucFirst() : this.frozen.ucFirst(),
       }, {
         disableUnread: true
       });

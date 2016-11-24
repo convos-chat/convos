@@ -122,6 +122,16 @@
   }
 }
 
+.on-connect-commands {
+  textarea.materialize-textarea {
+    padding: 0.6rem 0;
+    height: 1.6rem;
+    min-height: 1.6rem;
+    max-height: 9.5rem;
+    overflow: auto;
+  }
+}
+
 header a.notifications {
   position: relative;
 

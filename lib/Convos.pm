@@ -131,10 +131,9 @@ sub _config {
     $config = $path =~ /\.json$/ ? $self->plugin('JSONConfig') : $self->plugin('Config');
   }
 
-  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
-  $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
-  $config->{default_server}
-    ||= $config->{forced_irc_server} || $ENV{CONVOS_DEFAULT_SERVER} || 'localhost';
+  $config->{backend}           ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
+  $config->{contact}           ||= $ENV{CONVOS_CONTACT}           || 'mailto:root@localhost';
+  $config->{default_server}    ||= $config->{forced_irc_server}   || $ENV{CONVOS_DEFAULT_SERVER};
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
   $config->{home}
     ||= $ENV{CONVOS_HOME} || File::Spec->catdir(File::HomeDir->my_home, qw(.local share convos));

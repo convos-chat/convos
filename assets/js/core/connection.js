@@ -259,7 +259,7 @@
         this.notice('Connection state changed to "' + msg);
         break;
       case "frozen":
-      case "topic":
+        this.getDialog("").frozen = data.frozen;
         this.user.ensureDialog(data);
         break;
       case "join":
@@ -277,6 +277,9 @@
           data.dialog_id = d.dialog_id;
           d.participant(data);
         });
+        break;
+      case "topic":
+        this.user.ensureDialog(data);
         break;
     }
   };
