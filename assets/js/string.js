@@ -20,6 +20,7 @@
   String.prototype.parseUrl = function() {
     var m = this.match(urlRe);
     if (!m) return {};
+    m = m.map(function(v) { return typeof v == "undefined" ? "" : v; });
     var s = {
       input:     this,
       scheme:    m[2],
