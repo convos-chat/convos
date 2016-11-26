@@ -104,7 +104,7 @@ module.exports = {
         if (err) return self.errors = err;
         self.deleted = false;
         self.updateForm(this);
-        this.user.ensureDialog({connection_id: this.connection_id, name: this.connection_id});
+        this.user.ensureDialog({connection_id: this.connection_id, dialog_id: "", name: this.connection_id});
         self.settings.main = "#chat/" + this.connection_id + "/";
       });
     },
