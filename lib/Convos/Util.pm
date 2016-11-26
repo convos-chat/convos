@@ -54,7 +54,7 @@ sub has_many {
 sub next_tick {
   my ($obj, $cb, @args) = @_;
   Mojo::IOLoop->next_tick(sub { $obj->$cb(@args) });
-  $obj;
+  return $obj;
 }
 
 sub spurt {

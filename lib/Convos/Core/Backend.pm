@@ -112,7 +112,7 @@ This method will return notifications, in the same structure as L</messages>.
 
 =head2 save_object
 
-  $self->save_object($obj, sub { my ($obj, $err) = @_; });
+  $self->save_object($obj, sub { my ($self, $err) = @_; });
 
 This method is called to save a given object to persistent storage.
 

@@ -42,8 +42,8 @@ sub connections {
   my ($CONNECTIONS, @connections);
 
   unless (opendir $CONNECTIONS, $user_dir) {
-    die $! unless $cb;
-    return next_tick $self, $cb, $!, [];
+    return next_tick $self, $cb, $!, [] if $cb;
+    die $!;
   }
 
   while (my $id = readdir $CONNECTIONS) {
@@ -53,8 +53,8 @@ sub connections {
     push @connections, Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
   }
 
-  return \@connections unless $cb;
-  return next_tick $self, $cb, '', \@connections;
+  return next_tick $self, $cb, '', \@connections if $cb;
+  return \@connections;
 }
 
 sub delete_object {
@@ -78,17 +78,14 @@ sub delete_object {
 sub load_object {
   my ($self, $obj, $cb) = @_;
   my $storage_file = $self->_settings_file($obj);
-  my $data;
+  my $data         = {};
 
-  -e $storage_file and eval {
-    $data = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file));
-    return $data unless $cb;
-    return next_tick $obj, $cb, '', $data;
-  };
+  my $err = -e $storage_file
+    && eval { $data = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file)); } ? '' : $@;
 
-  return next_tick $obj, $cb, $@, {} if $cb;
-  return $data unless $@;
-  die $@;
+  return next_tick $self, $cb, $err, $data if $cb;
+  return $data unless $err;
+  die $err;
 }
 
 sub messages {
@@ -183,20 +180,22 @@ sub notifications {
 sub save_object {
   my ($self, $obj, $cb) = @_;
   my $storage_file = $self->_settings_file($obj);
-
-  $cb ||= sub { die $_[1] if $_[1] };
+  my $err          = '';
 
   eval {
     my $dir = File::Basename::dirname($storage_file);
     File::Path::make_path($dir) unless -d $dir;
     spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')), $storage_file);
     warn "[@{[$obj->id]}] Save success. ($storage_file)\n" if DEBUG;
-    return next_tick $obj, $cb, '';
+    1;
+  } or do {
+    $err = $@;
+    warn "[@{[$obj->id]}] Save $err ($storage_file)\n" if DEBUG;
   };
 
-  my $err = $@;
-  warn "[@{[$obj->id]}] Save $err ($storage_file)\n" if DEBUG;
-  return next_tick $obj, $cb, $err;
+  return next_tick $self, $cb, $err if $cb;
+  return $self unless $err;
+  die $err;
 }
 
 sub users {
@@ -212,8 +211,8 @@ sub users {
     }
   }
 
-  return \@users unless $cb;
-  return next_tick $self, $cb, '', \@users;
+  return next_tick $self, $cb, '', \@users if $cb;
+  return \@users;
 }
 
 sub _delete_connection {
@@ -225,7 +224,7 @@ sub _delete_connection {
 
 sub _delete_user {
   my ($self, $user) = @_;
-  my $path = $self->home->rel_dir($user->user->email);
+  my $path = $self->home->rel_dir($user->email);
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
