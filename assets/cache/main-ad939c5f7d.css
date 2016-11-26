@@ -3643,7 +3643,7 @@ textarea.materialize-textarea {
   border-bottom: 1px solid #9e9e9e;
   border-radius: 0;
   outline: none;
-  height: 3rem;
+  height: 2.8rem;
   width: 100%;
   font-size: 1rem;
   margin: 0 0 15px 0;
@@ -3888,7 +3888,7 @@ textarea.materialize-textarea {
   .input-field label {
     color: #9e9e9e;
     position: absolute;
-    top: 0.8rem;
+    top: 0.6rem;
     left: 0.75rem;
     font-size: 1rem;
     cursor: text;
@@ -3898,7 +3898,7 @@ textarea.materialize-textarea {
     transform: translateY(-140%); }
   .input-field .prefix {
     position: absolute;
-    width: 3rem;
+    width: 2.8rem;
     font-size: 2rem;
     transition: color .2s; }
     .input-field .prefix.active {
@@ -3951,7 +3951,7 @@ textarea.materialize-textarea {
 /* Textarea */
 textarea {
   width: 100%;
-  height: 3rem;
+  height: 2.8rem;
   background-color: transparent; }
   textarea.materialize-textarea {
     overflow-y: hidden;
@@ -3959,7 +3959,7 @@ textarea {
     padding: 1.6rem 0;
     /* prevents text jump on Enter keypress */
     resize: none;
-    min-height: 3rem; }
+    min-height: 2.8rem; }
 
 .hiddendiv {
   display: none;
@@ -4320,7 +4320,7 @@ select {
   padding: 5px;
   border: 1px solid #f2f2f2;
   border-radius: 2px;
-  height: 3rem; }
+  height: 2.8rem; }
 
 .select-label {
   position: absolute; }
@@ -4334,8 +4334,8 @@ select {
     border: none;
     border-bottom: 1px solid #9e9e9e;
     outline: none;
-    height: 3rem;
-    line-height: 3rem;
+    height: 2.8rem;
+    line-height: 2.8rem;
     width: 100%;
     font-size: 1rem;
     margin: 0 0 15px 0;
@@ -4403,8 +4403,8 @@ select:disabled {
     width: 100%; }
   .file-field .btn, .file-field .btn-large, .file-field .btn-delete {
     float: left;
-    height: 3rem;
-    line-height: 3rem; }
+    height: 2.8rem;
+    line-height: 2.8rem; }
   .file-field span {
     cursor: pointer; }
   .file-field input[type=file] {
@@ -5148,6 +5148,13 @@ img.embed {
   .convos-sidebar-info .notification.read,
   .convos-notifications .notification.read {
     opacity: 0.7; }
+
+.on-connect-commands textarea.materialize-textarea {
+  padding: 0.6rem 0;
+  height: 1.6rem;
+  min-height: 1.6rem;
+  max-height: 9.5rem;
+  overflow: auto; }
 
 header a.notifications {
   position: relative; }

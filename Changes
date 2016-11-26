@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Fix parsing IRC user modes dynamically #287
  - Fix "Goto anything" sorts by dialog name length
  - Fix queuing connections after connection errors
+ - Fix API URL when mounting Convos inside on non-root reverse proxy config
  - Add EXPERIMENTAL sort by last-read/activity
  - Add Dockerfile
  - Add "disable expanding links" setting in profile
