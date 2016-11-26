@@ -1,8 +1,8 @@
 <template>
   <div class="convos-input">
     <ul class="complete-dropdown dropdown-content" v-el:dropdown>
-      <li :class="i == completeIndex ? 'active' : ''" v-for="(i, c) in completeList" v-if="completeList.length > 1">
-        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'command'">{{c}} - {{commands[c] ? commands[c].description : "Unknown command"}}</a>
+      <li :class="i == completeIndex ? 'active' : ''" v-for="(i, c) in completeList" v-show="completeList.length">
+        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'command'">{{c}}{{commands[c] ? " - " + commands[c].description : ""}}</a>
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'emoji'">{{{c | markdown}}} {{i ? emojiDescription(c) : ''}}</a>
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'nick'">{{c}}</a>
       </li>
@@ -24,11 +24,6 @@ var _filter = function(list, match) {
 Convos.commands.forEach(function(cmd) {
   if (!commands["/" + cmd.command]) commandList.push("/" + cmd.command);
   commands["/" + cmd.command] = cmd;
-
-  (cmd.aliases || []).forEach(function(alias) {
-    if (!commands["/" + alias]) commandList.push("/" + alias);
-    commands["/" + alias] = cmd;
-  });
 });
 
 module.exports = {
@@ -95,9 +90,8 @@ module.exports = {
 
           this.before = this.before.substring(0, pos - this.complete[0].length);
 
-          if (this.completeList[0] != this.complete[0]) {
-            this.completeList.unshift(this.complete[0]);
-          }
+          var i = this.completeList.indexOf(this.complete[0]);
+          this.completeList.unshift(i == -1 ? this.complete[0] : this.completeList.splice(i, 1));
         }
 
         if (this.completeList.length > 1) {
