@@ -493,10 +493,10 @@ format=css
 minified=1
 mtime=1473611747
 [js-min:vue/convos-chat.vue]
-checksum=9e39313564
+checksum=c961e2eadf
 format=js
 minified=1
-mtime=1480235249
+mtime=1480235529
 [js-min:vue/convos-connection-editor.vue]
 checksum=38ee841b33
 format=js

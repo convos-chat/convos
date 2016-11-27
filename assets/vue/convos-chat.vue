@@ -28,7 +28,8 @@ module.exports = {
       for (i = 0; i < this.user.dialogs.length; i++) {
         var d = this.user.dialogs[i];
         if (d.href() != main) continue
-        this.dialog = d.emit("active");
+        this.dialog = d;
+        this.$nextTick(function() { d.emit("active"); });
         break;
       }
 
