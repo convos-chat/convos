@@ -52,12 +52,12 @@ $irc->run(
 
 $ws->send_ok(
   {json => {method => 'send', message => '/msg supergirl too cool', connection_id => $c->id}});
-$ws->message_ok->message_like(qr{xxxxxx})->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/dialog_id', 'supergirl')->json_message_is('/event', 'message')
-  ->json_message_is('/from',    'superman')->json_message_is('/highlight', 'false')
+  ->json_message_is('/from',    'superman')->json_message_is('/highlight', false)
   ->json_message_is('/message', 'too cool')->json_message_is('/name',      'supergirl')
   ->json_message_is('/type',    'private')->json_message_has('/ts');
-exit;
+$ws->message_ok->json_message_is('/event', 'sent');
 
 $irc->run(
   [qr{NICK}, ['nick.irc']],
