@@ -5,6 +5,14 @@
       <h2 v-tooltip.literal="Welcome to Convos!">Convos</h2>
       <convos-header-links :toggle="true" :user="user"></convos-header-links>
     </header>
+    <main v-if="show == 'error'">
+      <div class="row">
+        <div class="col s12">
+          <h4>{{error.title || "Not found"}}</h4>
+          <p>{{error.message}}</p>
+        </div>
+      </div>
+    </main>
     <main v-if="show == 'wizard'">
       <div class="row">
         <div class="col s12">
@@ -43,13 +51,13 @@
 </template>
 <script>
 module.exports = {
-  props: ["user"],
+  props: ["error", "user"],
   computed: {
     show: function() {
       return !this.user.connections.length                     ? "wizard"
            : this.settings.main.indexOf("#connection") == 0    ? "add_connection"
            : this.settings.main.indexOf("#create-dialog") == 0 ? "create_dialog"
-           :                                                     "wizard";
+           :                                                     "error";
     }
   }
 }
