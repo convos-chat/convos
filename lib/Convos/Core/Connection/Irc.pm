@@ -465,7 +465,7 @@ _event irc_kick => sub {
 _event irc_mode => sub {
   my ($self, $msg) = @_;
   my ($from) = IRC::Utils::parse_user($msg->{prefix});
-  my $dialog = $self->dialog({name => $msg->{params}[0]});
+  my $dialog = $self->get_dialog({name => $msg->{params}[0]}) or return;
   my $mode = $msg->{params}[1] || '';
   my $nick = $msg->{params}[2] || '';
 
