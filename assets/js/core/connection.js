@@ -181,6 +181,7 @@
 
   proto._onMessage = function(msg) {
     if (msg.errors) return this._onError(msg);
+    msg.frozen = "";
     return this.user.ensureDialog(msg).addMessage(msg);
   };
 

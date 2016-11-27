@@ -364,7 +364,8 @@ sub _setup {
           }
 
           $self->emit("user:$uid",
-            message => {connection_id => $cid, dialog_id => $target->id, %$msg});
+            message =>
+              {connection_id => $cid, dialog_id => $target->id, name => $target->name, %$msg});
           $message = sprintf "%c %s", $flag + FLAG_OFFSET, $message;
           $self->_log($target, $msg->{ts}, $message);
         }

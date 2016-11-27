@@ -16,6 +16,7 @@
     var connection = this.connections.filter(function(c) { return c.connection_id == data.connection_id; })[0];
 
     if (!connection) {
+      if (window.DEBUG == 2) console.log("[ensureConnection] ", JSON.serialize(data));
       data.user = this;
       connection = new Convos.Connection(data);
       this.connections.push(connection);
@@ -37,6 +38,7 @@
     })[0];
 
     if (!dialog) {
+      if (window.DEBUG == 2) console.log("[ensureDialog] ", JSON.serialize(data));
       if (data.connection && !data.connection_id) data.connection_id = data.connection.connection_id;
       if (!data.name) data.name = data.from || data.dialog_id;
       delete data.connection;
