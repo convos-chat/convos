@@ -15,8 +15,11 @@
   if (window.isMobile) {
     Convos.settings.sidebar = ""; // Don't want to remember sidebar when loading on mobile
   }
+  else if (!validSidebars.length) {
+    Convos.settings.sidebar = "sidebar-info";
+    $('body').addClass('has-sidebar');
+  }
   else if (Convos.settings.sidebar) {
-    if (!validSidebars.length) Convos.settings.sidebar = "sidebar-info";
     $('body').addClass('has-sidebar');
   }
 
