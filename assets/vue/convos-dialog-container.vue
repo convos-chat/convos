@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-dialog-container">
+  <div class="convos-dialog-container" :class="dialog.active ? 'active' : ''">
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
       <h2>{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
@@ -14,7 +14,7 @@
         v-if="msg.type"
         v-for="msg in dialog.messages"></component>
     </main>
-    <convos-input :dialog="dialog" :user="user" @resized="draw" v-el:input></convos-input>
+    <convos-input :dialog="dialog" :user="user" @resized="resized" v-el:input></convos-input>
   </div>
 </template>
 <script>
@@ -22,7 +22,7 @@ module.exports = {
   props: ["dialog", "user"],
   mixins: [Convos.mixin.messages],
   methods: {
-    draw: function(e) {
+    resized: function(e) {
       this.$els.main.style.bottom = this.$els.input.offsetHeight + "px";
       this.keepScrollPos();
     }

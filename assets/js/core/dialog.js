@@ -1,12 +1,11 @@
 (function() {
   Convos.Dialog = function(attrs) {
     this.activated = 0;
-    this.active = false;
+    this.active = undefined;
     this.dialog_id = "";
     this.frozen = "Initializing...";
     this.is_private = true;
     this.messages = [];
-    this.messagesMethod = "dialogMessages";
     this.name = "";
     this.lastActive = 0;
     this.lastRead = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
@@ -21,32 +20,49 @@
       this.lastActive = Date.fromAPI(this.last_active).valueOf();
       delete this.last_active;
     }
-
-    this.on("active", function() {
-      this.user.dialogs.forEach(function(d) { if (d.active) d.emit("inactive"); });
-      this.active = true;
-      this.unread = 0;
-      if (!this.activated++) this._load();
-    });
-
-    this.on("inactive", function() {
-      var self = this;
-      this.active = false;
-      Convos.api.setDialogLastRead(
-        {
-          connection_id: this.connection_id,
-          dialog_id: this.dialog_id,
-        }, function(err, xhr) {
-          if (err) return console.log('[setDialogLastRead] ' + JSON.stringify(err)); // TODO
-          self.lastRead = Date.fromAPI(xhr.body.last_read);
-        }
-      );
-    });
-
-    this.on("join", this._onJoin);
   };
 
   var proto = Convos.Dialog.prototype;
+
+  proto.activate = function() {
+    var self = this;
+
+    this.unread = 0;
+    this.user.ws.when("open", function() {
+      if (self.frozen || !self.dialog_id) return;
+      if (!self.is_private) self.connection().send("/names", self, self._setParticipants.bind(self));
+      if (self.is_private) self.connection().send("/whois ", + self.name, self); // TODO: Add handling of whois response. Set "frozen" if user is offline
+    });
+
+    if (this.messages.length) return;
+    Convos.api[this.dialog_id ? "dialogMessages" : "connectionMessages"](
+      {
+        connection_id: this.connection_id,
+        dialog_id: this.dialog_id
+      }, function(err, xhr) {
+        var frozen = self.frozen.ucFirst();
+        var messages = xhr.body.messages || [];
+
+        if (err) {
+          messages.push({message: err[0].message || "Unknown error.", type: "error"});
+        }
+        else if (frozen) {
+          messages.push({message: self.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
+        }
+        else if (!messages.length) {
+          messages.push({message: self.is_private ? "What do you want to say to " + self.name + "?" : "You have joined " + self.name + ", but no one has said anything as long as you have been here.", type: "notice"});
+        }
+
+        if (Convos.settings.notifications == "default") {
+          messages.push({type: "enable-notifications"});
+        }
+
+        messages.forEach(function(msg) {
+          self.addMessage(msg, {disableNotifications: true, disableUnread: true});
+        });
+      }
+    );
+  };
 
   proto.addMessage = function(msg, args) {
     if (!args) args = {};
@@ -104,7 +120,7 @@
     this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
 
     var self = this;
-    Convos.api[this.messagesMethod](
+    Convos.api[this.dialog_id ? "dialogMessages" : "connectionMessages"](
       {
         before: this.messages[1].ts.toISOString(),
         connection_id: this.connection_id,
@@ -165,18 +181,23 @@
     }
   };
 
+  proto.setLastRead = function() {
+    Convos.api[this.dialog_id ? "setDialogLastRead" : "setConnectionLastRead"](
+      {
+        connection_id: this.connection_id,
+        dialog_id: this.dialog_id
+      }, function(err, xhr) {
+        if (err) return console.log('[setDialogLastRead] ' + JSON.stringify(err)); // TODO
+        self.lastRead = Date.fromAPI(xhr.body.last_read);
+      }
+    );
+  };
+
   proto.update = function(attrs) {
     var self = this;
     var frozen = this.frozen;
 
     Object.keys(attrs).forEach(function(n) { self[n] = attrs[n]; });
-    if (attrs.hasOwnProperty("frozen") && attrs.frozen == "" && frozen && !this.is_private) {
-      this.when("active", function() {
-        this.user.ws.when("open", function() {
-          self.connection().send("/names", self, self._setParticipants.bind(self));
-        });
-      });
-    }
 
     if (this.is_private) {
       [this.name, this.connection().nick()].forEach(function(n) {
@@ -187,50 +208,12 @@
     return this;
   };
 
-  proto.when = function(state, cb) {
-    if (state != "active") throw "Only active is supported for now";
-    return this.active ? cb.call(this) : this.once("active", cb);
-  };
-
   proto._endOfHistory = function() {
     if (this.messages[0].loading) {
       this.messages[0].message = "End of history.";
     }
     else {
       this.addMessage({loading: true, message: "End of history", type: "notice"}, {method: "unshift"});
-    }
-  };
-
-  proto._load = function() {
-    var self = this;
-
-    Convos.api[this.messagesMethod](
-      {
-        connection_id: this.connection_id,
-        dialog_id: this.dialog_id
-      }, function(err, xhr) {
-        var messages = xhr.body.messages || [];
-        self.messages = []; // clear old messages on ws reconnect
-        messages.forEach(function(msg) { self.addMessage(msg, {method: "push", disableNotifications: true}) });
-        self._onJoin();
-      }
-    );
-  };
-
-  proto._onJoin = function() {
-    if (this.frozen) {
-      this.addMessage({
-        type: "error",
-        message: this.dialog_id ? "You are not part of this dialog. " + this.frozen.ucFirst() : this.frozen.ucFirst(),
-      }, {
-        disableUnread: true
-      });
-    } else if (!this.messages.length) {
-      var message = this.is_private ? "What do you want to say to " + this.name + "?" : "You have joined " + this.name + ", but no one has said anything as long as you have been here.";
-      this.addMessage({message: message, type: "notice"}, {disableUnread: true});
-    }
-    if (Convos.settings.notifications == "default") {
-      this.addMessage({type: "enable-notifications"});
     }
   };
 

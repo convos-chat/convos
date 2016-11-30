@@ -47,7 +47,7 @@
       <div class="col s12">
         <button @click="saveConnection" class="btn waves-effect waves-light">{{connection ? "Save" : "Create"}}</button>
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">Delete</a>
-        <p v-if="connection">{{connection.state == 'connected' ? 'Status: Connected.' : connection.message || 'Click "save" to connect.'}}</p>
+        <p v-if="connection">{{connection.state == 'connected' ? 'Status: Connected.' : connection.getDialog("").frozen || 'Click "save" to connect.'}}</p>
       </div>
     </div>
   </form>

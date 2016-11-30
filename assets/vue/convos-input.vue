@@ -54,6 +54,11 @@ module.exports = {
       message: ""
     };
   },
+  watch: {
+    "dialog.active": function(v, o) {
+      if (v === true) this.focusInput();
+    }
+  },
   methods: {
     autocomplete: function(args) {
       var ta = this.$els.input;
@@ -173,8 +178,6 @@ module.exports = {
       self.$emit("resized");
     });
 
-    this.dialog.on("active", this.focusInput);
-    this.dialog.on("focusInput", this.focusInput);
     this.dialog.on("insertIntoInput", function(str) {
       if (str.indexOf("/") == 0) return self.$els.input.value = str; // command
       var val = self.$els.input.value.replace(/\s+$/, "");

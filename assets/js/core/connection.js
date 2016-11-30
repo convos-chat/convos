@@ -4,7 +4,6 @@
     this.connection_id = "";
     this.name = "";
     this.me = {nick: ""};
-    this.message = "";
     this.on_connect_commands = [];
     this.protocol = "unknown";
     this.sendTimeout = 5000; // is this long enough?
@@ -216,7 +215,6 @@
 
   proto._sentJoin = function(msg) {
     var dialog = this.user.ensureDialog(msg);
-    dialog.emit("active").emit("join");
     Convos.settings.main = dialog.href();
   };
 
@@ -255,8 +253,7 @@
         var msg = data.state + '"';
         msg += data.message ? ': ' + data.message : ".";
         this.state = data.state;
-        this.message = data.message;
-        this.getDialog("").frozen = data.state == "connected" ? "" : data.state;
+        this.getDialog("").frozen = this.message || data.state == "connected" ? "" : data.state;
         this.notice('Connection state changed to "' + msg);
         break;
       case "frozen":

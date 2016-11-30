@@ -24,8 +24,7 @@
         connection_id: connection.connection_id,
         dialog_id: "",
         name: connection.name,
-        frozen: connection.state == "connected" ? "" : connection.state,
-        messagesMethod: "connectionMessages"
+        frozen: connection.state == "connected" ? "" : connection.state
       });
     }
 
@@ -64,13 +63,10 @@
       {connections: true, dialogs: true, notifications: true},
       function(err, xhr) {
         if (err) return self.currentPage = "convos-login";
-        if(!self.email) self.ws.open();
+        if (!self.email) self.ws.open(); // first time
         self.email = xhr.body.email;
         xhr.body.connections.forEach(function(c) { self.ensureConnection(c) });
-        xhr.body.dialogs.forEach(function(d) {
-          d = self.ensureDialog(d);
-          if (d.active) d.emit("active");
-        });
+        xhr.body.dialogs.forEach(function(d) { d = self.ensureDialog(d); });
         self.notifications = xhr.body.notifications.reverse();
         self.unread = xhr.body.unread || 0;
         self.currentPage = "convos-chat";

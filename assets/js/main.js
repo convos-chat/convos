@@ -12,7 +12,7 @@
       e.preventDefault();
       var el = document.activeElement || document.getElementById("goto_anything");
       if (el.id == "goto_anything" || el.tagName.toLowerCase() == "body") {
-        document.querySelector('.convos-chat > div:not(.convos-main-menu):not(.inactive)')
+        document.querySelector('.convos-dialog-container.active')
           .querySelector('input:not([type="hidden"]), textarea, select').focus();
       }
       else {
