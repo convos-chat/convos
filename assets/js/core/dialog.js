@@ -31,7 +31,7 @@
     this.user.ws.when("open", function() {
       if (self.frozen || !self.dialog_id) return;
       if (!self.is_private) self.connection().send("/names", self, self._setParticipants.bind(self));
-      if (self.is_private) self.connection().send("/whois ", + self.name, self); // TODO: Add handling of whois response. Set "frozen" if user is offline
+      if (self.is_private) self.connection().send("/whois " + self.name, self); // TODO: Add handling of whois response. Set "frozen" if user is offline
     });
 
     if (this.messages.length) return;
