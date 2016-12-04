@@ -55,7 +55,7 @@ module.exports = {
       else if (this.settings.sortDialogsBy == "lastRead") {
         var nTop = localStorage.getItem("lastReadnTop") || 3; // EXPERIMENTAL value
         var dialogs = this.user.dialogs.sort(function(a, b) {
-          return b.active - a.active || di(a, b) || b.lastRead - a.lastRead;
+          return (b.active || false) - (a.active || false) || di(a, b) || b.lastRead - a.lastRead;
         });
         return dialogs.slice(0, nTop).concat(dialogs.slice(nTop).sort(function(a, b) {
           return di(a, b)
