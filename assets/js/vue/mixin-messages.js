@@ -35,15 +35,16 @@
         var el = this.scrollElement;
         if (!this.atBottom) return;
         if (el.scrollTop > el.scrollHeight - el.offsetHeight - 10) return;
+        this.scrollTid = "lock"; // need to prevent the next onScroll() call triggered by scrollTop below
         el.scrollTop = el.scrollHeight;
       },
       onScroll: function() {
-        if (this._scrollTid) return;
-        this._scrollTid = setTimeout(function() {
-          var self = this;
+        if (this.scrollTid == "lock") return this.scrollTid = 0;
+        if (this.scrollTid) return;
+        this.scrollTid = setTimeout(function() {
           var msgEl, el = this.scrollElement;
 
-          this._scrollTid = null;
+          this.scrollTid = 0;
           this.atBottom = el.scrollTop > el.scrollHeight - el.offsetHeight - offset;
 
           if (el.scrollTop < offset) {
@@ -58,7 +59,8 @@
     ready: function() {
       this.scrollElement = this.$el.querySelector(".scroll-element");
       this.scrollElement.addEventListener("scroll", this.onScroll);
-      this.dialog.on("message", this.keepAtBottom);
+      // Need to use $nextTick, since the "message" event is triggered before the element is rendered on the page
+      this.dialog.on("message", function() { this.$nextTick(this.keepAtBottom); }.bind(this));
     },
     beforeDestroy: function() {
       this.scrollElement.removeEventListener("scroll", this.onScroll);
