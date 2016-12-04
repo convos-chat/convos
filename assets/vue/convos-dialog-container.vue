@@ -24,7 +24,6 @@ module.exports = {
   methods: {
     resized: function(e) {
       this.$els.main.style.bottom = this.$els.input.offsetHeight + "px";
-      this.keepScrollPos();
     }
   }
 };

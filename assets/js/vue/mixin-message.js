@@ -31,15 +31,6 @@
 
         $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
         $a.parent().append($html).find(".materialboxed").materialbox();
-
-        $html.filter("img, iframe").add($html.find("img, iframe")).each(function() {
-          var $el = $(this);
-          var maxHeight = $el.css("max-height") || "none";
-          $el.css("max-height", "1px").load(function() {
-            $el.css("max-height", maxHeight);
-            self.$parent.keepScrollPos();
-          });
-        });
       },
       message: function() {
         var self = this;
