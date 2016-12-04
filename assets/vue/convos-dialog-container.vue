@@ -2,7 +2,7 @@
   <div class="convos-dialog-container">
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <h2 v-tooltip="dialog.topic || 'No topic is set.'">{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
+      <h2>{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
       <convos-header-links :toggle="true" :user="user"></convos-header-links>
     </header>
     <main class="scroll-element" v-el:main>
