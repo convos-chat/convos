@@ -70,6 +70,8 @@
         self.notifications = xhr.body.notifications.reverse();
         self.unread = xhr.body.unread || 0;
         self.currentPage = "convos-chat";
+        self.connections.forEach(function(c) { c.emit("connect"); });
+        self.dialogs.forEach(function(d) { d.emit("connect"); });
       }
     );
   };
@@ -82,8 +84,8 @@
     this._keepAlive = setInterval(function() { if (ws.is("open")) ws.send('{}'); }, 20000);
 
     this.ws.on("close", function() {
-      self.connections.forEach(function(c) { c.state = "unreachable"; });
-      self.dialogs.forEach(function(d) { d.frozen = "No internet connection?"; d.activated = 0; });
+      self.connections.forEach(function(c) { c.update({state: "unreachable"}).emit("disconnect"); });
+      self.dialogs.forEach(function(d) { d.update({frozen: "No internet connection?"}).emit("disconnect"); });
     });
 
     // Need to install the refresh handler after the first close event

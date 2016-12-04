@@ -165,10 +165,8 @@
   };
 
   proto.update = function(attrs) {
-    var self = this;
-    Object.keys(attrs).forEach(function(n) {
-      self[n] = attrs[n];
-    });
+    Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
+    return this;
   };
 
   proto._onError = function(msg) {

@@ -49,7 +49,7 @@
 
           if (el.scrollTop < offset) {
             var msgEl = this.findVisibleMessage();
-            this.dialog.historicMessages({}, function(err, body) {
+            this.dialog.load({historic: true}, function(err, body) {
               if (msgEl) window.nextTick(function() { el.scrollTop = msgEl.offsetTop; });
             });
           }

@@ -1,6 +1,5 @@
 (function() {
   Convos.Dialog = function(attrs) {
-    this.activated = 0;
     this.active = undefined;
     this.dialog_id = "";
     this.frozen = "Initializing...";
@@ -20,48 +19,19 @@
       this.lastActive = Date.fromAPI(this.last_active).valueOf();
       delete this.last_active;
     }
+
+    this.on("connect", function() {
+      this.reset = true;
+      if (this.active) return this.load({});
+    });
   };
 
   var proto = Convos.Dialog.prototype;
 
   proto.activate = function() {
     var self = this;
-
     this.unread = 0;
-    this.user.ws.when("open", function() {
-      if (self.frozen || !self.dialog_id) return;
-      if (!self.is_private) self.connection().send("/names", self, self._setParticipants.bind(self));
-      if (self.is_private) self.connection().send("/whois " + self.name, self); // TODO: Add handling of whois response. Set "frozen" if user is offline
-    });
-
-    if (this.messages.length) return;
-    Convos.api[this.dialog_id ? "dialogMessages" : "connectionMessages"](
-      {
-        connection_id: this.connection_id,
-        dialog_id: this.dialog_id
-      }, function(err, xhr) {
-        var frozen = self.frozen.ucFirst();
-        var messages = xhr.body.messages || [];
-
-        if (err) {
-          messages.push({message: err[0].message || "Unknown error.", type: "error"});
-        }
-        else if (frozen) {
-          messages.push({message: self.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
-        }
-        else if (!messages.length) {
-          messages.push({message: self.is_private ? "What do you want to say to " + self.name + "?" : "You have joined " + self.name + ", but no one has said anything as long as you have been here.", type: "notice"});
-        }
-
-        if (Convos.settings.notifications == "default") {
-          messages.push({type: "enable-notifications"});
-        }
-
-        messages.forEach(function(msg) {
-          self.addMessage(msg, {disableNotifications: true, disableUnread: true});
-        });
-      }
-    );
+    if (this.reset) this.load({});
   };
 
   proto.addMessage = function(msg, args) {
@@ -113,30 +83,6 @@
     return this.user.getConnection(this.connection_id);
   };
 
-  proto.historicMessages = function(args, cb) {
-    if (!this.messages.length) return;
-    if (this.messages[0].loading) return;
-
-    this.addMessage({loading: true, message: "Loading messages...", type: "notice"}, {method: "unshift"});
-
-    var self = this;
-    Convos.api[this.dialog_id ? "dialogMessages" : "connectionMessages"](
-      {
-        before: this.messages[1].ts.toISOString(),
-        connection_id: this.connection_id,
-        dialog_id: this.dialog_id
-      },
-      function(err, xhr) {
-        self.messages.shift(); // remove "Loading messages...";
-        if (xhr.body.messages) {
-          if (!xhr.body.messages.length) self._endOfHistory();
-          xhr.body.messages.reverse().forEach(function(msg) { self.addMessage(msg, {method: "unshift"}); });
-        }
-        cb(err, xhr.body);
-      }
-    );
-  };
-
   // Create a href for <a> tag
   proto.href = function() {
     var path = Array.prototype.slice.call(arguments);
@@ -146,6 +92,38 @@
 
   proto.icon = function() {
     return !this.dialog_id ? "device_hub" : this.is_private ? "person" : "group";
+  };
+
+  proto.load = function(args, cb) {
+    var self = this;
+    var method = this.dialog_id ? "dialogMessages" : "connectionMessages";
+    if (this.messages.length && this.messages[0].loading) return;
+
+    if (args.historic && this.messages.length > 0) {
+      delete args.historic;
+      args.before = this.messages[0].ts.toISOString();
+    }
+
+    args.connection_id = this.connection_id;
+    args.dialog_id = this.dialog_id;
+
+    this.addMessage(
+      {loading: true, message: "Loading messages...", type: "notice"},
+      {method: "unshift"}
+    );
+
+    Convos.api[method](args, function(err, xhr) {
+      if (self.reset) self.messages = [];
+      self._processMessages(err, xhr.body.messages).reverse().forEach(function(msg) {
+        self.addMessage(msg, {method: "unshift", disableNotifications: true, disableUnread: true});
+      });
+      if (self.reset) {
+        if (!self.is_private) self.connection().send("/names", self, self._setParticipants.bind(self));
+        if (self.dialog_id && self.is_private) self.connection().send("/whois " + self.name, self); // TODO: Add handling of whois response. Set "frozen" if user is offline
+      }
+      if (cb) cb(err, xhr.body);
+      delete self.reset;
+    });
   };
 
   proto.participant = function(data) {
@@ -194,10 +172,8 @@
   };
 
   proto.update = function(attrs) {
-    var self = this;
     var frozen = this.frozen;
-
-    Object.keys(attrs).forEach(function(n) { self[n] = attrs[n]; });
+    Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
 
     if (this.is_private) {
       [this.name, this.connection().nick()].forEach(function(n) {
@@ -208,13 +184,31 @@
     return this;
   };
 
-  proto._endOfHistory = function() {
-    if (this.messages[0].loading) {
-      this.messages[0].message = "End of history.";
+  proto._processMessages = function(err, messages) {
+    var frozen = this.frozen.ucFirst();
+
+    if (err) {
+      messages = [{message: err[0].message || "Unknown error.", type: "error"}];
+    }
+    else if (frozen) {
+      messages.push({message: self.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
+    }
+    else if (this.reset && !messages.length) {
+      messages.push({message: self.is_private ? "What do you want to say to " + self.name + "?" : "You have joined " + self.name + ", but no one has said anything as long as you have been here.", type: "notice"});
+    }
+
+    if (messages.length) {
+      this.messages.shift(); // remove "Loading messages...";
     }
     else {
-      this.addMessage({loading: true, message: "End of history", type: "notice"}, {method: "unshift"});
+      this.messages[0].message = "End of history.";
     }
+
+    if (Convos.settings.notifications == "default") {
+      messages.push({type: "enable-notifications"});
+    }
+
+    return messages;
   };
 
   proto._setParticipants = function(msg) {

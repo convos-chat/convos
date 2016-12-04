@@ -71,11 +71,6 @@
     throw "Cannot send message when not connected.";
   };
 
-  proto.when = function(state, cb) {
-    state = state.toLowerCase();
-    return this.is(state) ? cb.call(this) : this.once(state, cb);
-  };
-
   proto._reconnect = function(force) {
     if (!force && this._tid) return;
     if (this._tid) clearTimeout(this._tid);
