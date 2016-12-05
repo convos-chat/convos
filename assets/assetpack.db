@@ -12,8 +12,10 @@ mtime=1430238058
 rel=cache/code.jquery.com/jquery-1.11.3.min.js
 [original:http://local/custom/asset/sass/_variables.scss]
 format=scss
-mtime=1473627189
 rel=cache/local/custom/asset/sass/_variables.scss
+[original:http://local/custom/asset/sass/variables.scss]
+format=scss
+rel=cache/local/custom/asset/sass/variables.scss
 [original:http://realfavicongenerator.net/files/092372d6d4a47b86b8179151cca57b077ae09036/package_files/apple-touch-icon-114x114.png]
 format=png
 mtime=1472457621
@@ -483,10 +485,9 @@ format=js
 minified=1
 mtime=1475480169
 [sass:sass/main.scss]
-checksum=764f0c3d43
+checksum=5e6aae6b01
 format=css
 minified=0
-mtime=1473611747
 [sass-min:sass/main.scss]
 checksum=764f0c3d43
 format=css

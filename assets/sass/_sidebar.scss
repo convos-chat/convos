@@ -30,18 +30,24 @@
     }
   }
 
-  .content > a {
+  .link {
     display: block;
     position: relative;
-    padding: $gutter-width / 2;
+
+    a {
+      padding: $gutter-width / 2;
+      display: block;
+    }
 
     &.active {
       background-color: $body-bg;
-      color: darken($link-color, 15%);
-      font-weight: bold;
+      a {
+        color: darken($link-color, 15%);
+        font-weight: bold;
+      }
     }
 
-    &.frozen {
+    &.frozen a {
       color: $error-text-color;
     }
 
@@ -49,13 +55,10 @@
       background-color: darken($body-bg, 6%);
     }
 
-    .n-uread {
-      font-size: 0.9rem;
-      font-weight: normal;
-      text-align: right;
-      position: absolute;
-      top: $gutter-width / 2;
-      right: $gutter-width / 2;
+    &.dialog:hover {
+      .close { display: block; }
+      .close:hover { background-color: darken($error-text-color, 10%); }
+      .n-unread { display: none; }
     }
 
     .material-icons { vertical-align: top; }
@@ -68,6 +71,29 @@
     color: lighten($text-color, 30%);
     margin-left: 28px;
     margin-bottom: -5px;
+  }
+
+  .close, .n-unread {
+    color: #fff;
+    font-weight: 300;
+    min-width: auto;
+    border-radius: 2px;
+    top: $gutter-width / 2 + 0.1rem;
+    right: $gutter-width / 2;
+  }
+
+  .n-unread {
+    background-color: $badge-bg-color;
+    font-size: 0.9rem;
+  }
+
+  .close {
+    background-color: $error-text-color;
+    font-size: 1.2rem;
+    line-height: 1.35rem;
+    padding: 0 4px;
+    cursor: pointer;
+    display: none;
   }
 }
 
@@ -138,6 +164,7 @@ header a.notifications {
   i.active { // notifications
     position: relative;
   }
+
   b.n-notifications {
     color: darken($navbar-font-color, 10%);
     font-size: 1rem;

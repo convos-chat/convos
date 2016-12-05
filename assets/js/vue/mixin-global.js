@@ -51,8 +51,9 @@
         var dialog = this.user.getActiveDialog();
         if (dialog) dialog.emit("insertIntoInput", e.currentTarget.href.replace(/.*?#/, ""));
       },
-      send: function(command) {
-        this.dialog.connection().send(command, this.dialog);
+      send: function(command, dialog) {
+        if (!dialog) dialog = this.dialog;
+        dialog.connection().send(command, dialog);
       }
     }
   });

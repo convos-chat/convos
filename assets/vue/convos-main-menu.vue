@@ -8,27 +8,40 @@
       </div>
     </header>
     <div class="content">
-      <a v-link="d.href()" v-tooltip="d.frozen" :class="dialogClass(d, $index)" v-for="d in dialogs">
-        <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.dialog_id ? d.name : d.connection_id}}</span>
-        <b class="n-uread" v-if="d.unread" v-tooltip="d.unread + ' unread messages'">{{d.unread < 100 ? d.unread : "99+"}}</b>
-        <span class="on" v-if="d.dialog_id">{{d.connection().protocol}}-{{d.connection().name}}</span>
-      </a>
+      <div :class="dialogClass(d, $index)" v-for="d in dialogs">
+        <a v-link="d.href()" v-tooltip="d.frozen">
+          <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.dialog_id ? d.name : d.connection_id}}</span>
+          <span class="n-unread badge" v-if="d.unread" v-tooltip="d.unread + ' unread messages'">{{d.unread < 100 ? d.unread : "99+"}}</span>
+          <span class="on" v-if="d.dialog_id">{{d.connection().protocol}}-{{d.connection().name}}</span>
+        </a>
+        <span class="close badge" @click.prevent="close(d)" v-if="d.dialog_id">&times;</span>
+      </div>
       <div class="divider"></div>
-      <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple" :class="activeClass('#create-dialog')">
-        <i class="material-icons">add</i> Join dialog...
-      </a>
-      <a v-link.literal="#connection" class="simple" :class="activeClass('#connection')">
-        <i class="material-icons">add</i> Add connection...
-      </a>
-      <a v-sidebar.literal="#profile" class="simple">
-        <i class="material-icons">account_circle</i> Edit profile
-      </a>
-      <a v-sidebar.literal="#help" :class="activeClass" class="simple">
-        <i class="material-icons">help</i> Help
-      </a>
-      <a v-link.literal="/api/user/logout" class="simple">
-        <i class="material-icons">power_settings_new</i> Logout
-      </a>
+      <div class="link">
+        <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple" :class="activeClass('#create-dialog')">
+          <i class="material-icons">add</i> Join dialog...
+        </a>
+      </div>
+      <div class="link">
+        <a v-link.literal="#connection" class="simple" :class="activeClass('#connection')">
+          <i class="material-icons">add</i> Add connection...
+        </a>
+      </div>
+      <div class="link">
+        <a v-sidebar.literal="#profile" class="simple">
+          <i class="material-icons">account_circle</i> Edit profile
+        </a>
+      </div>
+      <div class="link">
+        <a v-sidebar.literal="#help" :class="activeClass" class="simple">
+          <i class="material-icons">help</i> Help
+        </a>
+      </div>
+      <div class="link">
+        <a v-link.literal="/api/user/logout" class="simple">
+          <i class="material-icons">power_settings_new</i> Logout
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -75,9 +88,14 @@ module.exports = {
     }
   },
   methods: {
+    close: function(d) {
+      this.send('/close ' + d.name, d);
+    },
     dialogClass: function(d, i) {
-      if (this.q) return i ? "" : "active";
       var cn = this.activeClass(d.href());
+      cn.link = true;
+      cn.dialog = d.dialog_id ? true : false;
+      if (this.q) cn.active = i ? true : false;
       cn.frozen = d.frozen ? true : false;
       return cn;
     },

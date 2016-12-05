@@ -5064,28 +5064,30 @@ img.embed {
       width: 240px; }
       .convos-main-menu.show-on-large {
         display: block !important; } }
-  .convos-main-menu .content > a {
+  .convos-main-menu .link {
     display: block;
-    position: relative;
-    padding: 0.75rem; }
-    .convos-main-menu .content > a.active {
-      background-color: #fff;
-      color: #225725;
-      font-weight: bold; }
-    .convos-main-menu .content > a.frozen {
+    position: relative; }
+    .convos-main-menu .link a {
+      padding: 0.75rem;
+      display: block; }
+    .convos-main-menu .link.active {
+      background-color: #fff; }
+      .convos-main-menu .link.active a {
+        color: #225725;
+        font-weight: bold; }
+    .convos-main-menu .link.frozen a {
       color: #B71C1C; }
-    .convos-main-menu .content > a:hover, .convos-main-menu .content > a.focus {
+    .convos-main-menu .link:hover, .convos-main-menu .link.focus {
       background-color: #f0f0f0; }
-    .convos-main-menu .content > a .n-uread {
-      font-size: 0.9rem;
-      font-weight: normal;
-      text-align: right;
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem; }
-    .convos-main-menu .content > a .material-icons {
+    .convos-main-menu .link.dialog:hover .close {
+      display: block; }
+    .convos-main-menu .link.dialog:hover .close:hover {
+      background-color: #8b1515; }
+    .convos-main-menu .link.dialog:hover .n-unread {
+      display: none; }
+    .convos-main-menu .link .material-icons {
       vertical-align: top; }
-    .convos-main-menu .content > a.simple .material-icons {
+    .convos-main-menu .link.simple .material-icons {
       vertical-align: bottom; }
   .convos-main-menu .on {
     display: block;
@@ -5093,6 +5095,23 @@ img.embed {
     color: rgba(77, 77, 77, 0.87);
     margin-left: 28px;
     margin-bottom: -5px; }
+  .convos-main-menu .close, .convos-main-menu .n-unread {
+    color: #fff;
+    font-weight: 300;
+    min-width: auto;
+    border-radius: 2px;
+    top: 0.85rem;
+    right: 0.75rem; }
+  .convos-main-menu .n-unread {
+    background-color: #1B5E20;
+    font-size: 0.9rem; }
+  .convos-main-menu .close {
+    background-color: #B71C1C;
+    font-size: 1.2rem;
+    line-height: 1.35rem;
+    padding: 0 4px;
+    cursor: pointer;
+    display: none; }
 
 .is-sidebar {
   right: 0; }
