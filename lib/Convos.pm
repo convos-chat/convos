@@ -8,7 +8,7 @@ use File::HomeDir ();
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
-our $VERSION = '0.99_17';
+our $VERSION = '0.99_19';
 
 has core => sub {
   my $self = shift;
@@ -199,7 +199,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_17
+0.99_19
 
 =head1 DESCRIPTION
 

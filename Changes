@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-0.99_19 Not Released
+0.99_19 2016-12-06T14:43:43+0100
  - Fix loading message log after events have been received in background
 
 0.99_18 2016-12-04T20:39:43+0100
