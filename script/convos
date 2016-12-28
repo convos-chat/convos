@@ -49,12 +49,11 @@ unless ($ENV{CONVOS_SETUP}++) {
 pop @INC if @INC[-1] eq '.';          # don't care about current dir
 
 if ($command eq 'dev') {
-  my @watch = qw(assets/js assets/sass assets/vue lib public/convos-api.json);
+  $ENV{$_} = 1 for qw(MOJO_ASSETPACK_LAZY MOJO_IRC_DEBUG CONVOS_DEBUG);
   $ENV{PERL5LIB} = join ':', @INC;
-  $ENV{$_} = 1 for qw(MOJO_IRC_DEBUG CONVOS_DEBUG);
   shift @ARGV;
-  warn sprintf "\$ morbo script/convos %s\n", join " ", @ARGV, map { ('-w', $_) } @watch;
-  exec qw(morbo script/convos), @ARGV, map { ('-w', $_) } @watch;
+  warn "\$ morbo script/convos @ARGV\n";
+  exec qw(morbo script/convos), @ARGV;
   die "Could not exec morbo @ARGV: $!\n";
 }
 
