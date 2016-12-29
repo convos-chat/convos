@@ -20,12 +20,6 @@
       data.user = this;
       connection = new Convos.Connection(data);
       this.connections.push(connection);
-      this.ensureDialog({
-        connection_id: connection.connection_id,
-        dialog_id: "",
-        name: connection.name,
-        frozen: connection.state == "connected" ? "" : "Not connected."
-      });
     }
 
     return connection.update(data);

@@ -1,8 +1,8 @@
 (function() {
   Convos.Connection = function(attrs) {
     EventEmitter(this);
-    this.connection_id = "";
-    this.name = "";
+    this.connection_id = attrs.connection_id;
+    this.name = attrs.name;
     this.me = {nick: ""};
     this.on_connect_commands = [];
     this.protocol = "unknown";
@@ -12,7 +12,13 @@
     this.on("message", this._onMessage);
     this.on("sent", this._onSent);
     this.on("state", this._onState);
-    if (attrs) this.update(attrs);
+
+    attrs.user.ensureDialog({
+      connection_id: this.connection_id,
+      dialog_id: "",
+      name: this.name,
+      is_private: false
+    });
   };
 
   var aliases = {};
@@ -166,6 +172,11 @@
 
   proto.update = function(attrs) {
     Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
+
+    if (attrs.hasOwnProperty("state")) {
+        this.getDialog("").frozen = attrs.state == "connected" ? "" : "Not connected."
+    }
+
     return this;
   };
 
