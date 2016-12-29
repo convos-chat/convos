@@ -1,9 +1,11 @@
 Revision history for perl distribution Convos
 
-0.99_19 2016-12-06T14:43:43+0100
- - Fix loading message log after events have been received in background
+0.99_20 2016-12-29T21:00:43+0100
  - Fix will not reconnect without host/port change
  - Add "close" icon to main menu conversations
+
+0.99_19 2016-12-06T14:43:43+0100
+ - Fix loading message log after events have been received in background
 
 0.99_18 2016-12-04T20:39:43+0100
  - Fix IRC username cannot contain special characters #296
