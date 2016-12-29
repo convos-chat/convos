@@ -24,7 +24,7 @@
         connection_id: connection.connection_id,
         dialog_id: "",
         name: connection.name,
-        frozen: connection.state == "connected" ? "" : connection.state
+        frozen: connection.state == "connected" ? "" : "Not connected."
       });
     }
 
