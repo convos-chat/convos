@@ -94,7 +94,7 @@ sub update {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
-  my $state = $json->{state} || '';
+  my $state = $json->{state} || 'noop';
   my $connection;
 
   eval {
@@ -109,8 +109,9 @@ sub update {
     $connection->on_connect_commands($cmds);
   }
   if (my $url = $self->_validate_url($json->{url})) {
-    $url->scheme($json->{protocol});
-    $state = 'reconnect' if $url->to_string ne $connection->url->to_string;
+    $url->scheme($json->{protocol} || $connection->url->scheme || '');
+    $state = 'reconnect' if $url->host_port ne $connection->url->host_port;
+    $self->app->log->debug(sprintf '%s ne %s ?? %s', $url->to_string, $connection->url->to_string, $state);
     $connection->url->parse($url);
   }
 
