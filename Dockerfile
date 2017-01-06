@@ -2,18 +2,18 @@
 #
 # BUILD: docker build --no-cache --rm -t nordaaker/convos .
 # RUN:   docker run -it --rm -p 8080:3000 -v /var/convos/data:/data nordaaker/convos
-FROM alpine:3.4
+FROM alpine:3.5
 MAINTAINER jhthorsen@cpan.org
 
-WORKDIR /
+ARG port=3000
 
-RUN apk update && \
-  apk del wget && \
-  apk add perl perl-io-socket-ssl perl-dev g++ make openssl openssl-dev wget curl && \
-  curl -L https://github.com/Nordaaker/convos/archive/stable.tar.gz | tar xvz && \
+RUN \
+  apk add -U perl perl-io-socket-ssl && \
+  apk add -t builddeps build-base perl-dev wget && \
+  wget -q -O - https://github.com/Nordaaker/convos/archive/stable.tar.gz | tar xvz && \
   /convos-stable/script/convos install && \
-  apk del perl-dev g++ make openssl openssl-dev curl && \
-  rm -rf /root/.cpanm /usr/local/share/man/*
+  apk del builddeps && \
+  rm -rf /root/.cpanm /var/cache/apk/*
 
 #
 # See https://convos.by/doc/config.html for details about the environment variables
@@ -33,10 +33,11 @@ ENV MOJO_REVERSE_PROXY 0
 
 # Do not change these variables unless you know what you're doing
 ENV CONVOS_HOME /data
-ENV MOJO_LISTEN http://*:3000
+ENV MOJO_LISTEN http://*:$port
 ENV MOJO_MODE production
 
 VOLUME ["/data"]
-EXPOSE 3000
-CMD []
-ENTRYPOINT ["/convos-stable/script/convos", "daemon"]
+EXPOSE $port
+
+CMD ["daemon"]
+ENTRYPOINT ["/convos-stable/script/convos"]
