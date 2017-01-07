@@ -12,13 +12,6 @@
     this.on("message", this._onMessage);
     this.on("sent", this._onSent);
     this.on("state", this._onState);
-
-    attrs.user.ensureDialog({
-      connection_id: this.connection_id,
-      dialog_id: "",
-      name: this.name,
-      is_private: false
-    });
   };
 
   var aliases = {};

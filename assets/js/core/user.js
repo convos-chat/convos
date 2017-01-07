@@ -20,6 +20,12 @@
       data.user = this;
       connection = new Convos.Connection(data);
       this.connections.push(connection);
+      this.ensureDialog({
+        connection_id: connection.connection_id,
+        dialog_id: "",
+        name: connection.name,
+        is_private: false
+      });
     }
 
     return connection.update(data);
