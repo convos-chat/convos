@@ -100,6 +100,7 @@
     var self = this;
     var action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
     var msg = {method: "send", id: ++msgId, connection_id: this.connection_id};
+    var tid;
 
     if (aliases[action[1]]) {
       message = message.replace(/^\/(\w+)/, aliases[action[1]]);
@@ -116,17 +117,26 @@
     if (!dialog) dialog = this.getDialog(action[2]); // action = ["...", "close", "#foo" ]
     if (!dialog) dialog = this.user.getActiveDialog();
 
+    if (!cb) {
+      tid = setTimeout(
+        function() {
+          msg.type = "error";
+          msg.message = 'No response on "' + msg.message + '".';
+          this.off("sent-" + msg.id);
+          this.user.getActiveDialog().addMessage(msg);
+        }.bind(this),
+        5000
+      );
+      var handler = "_sent" + action[1].toLowerCase().ucFirst();
+      cb = this[handler] || this._onError;
+    }
+
     try {
       msg.message = message;
       msg.dialog_id = dialog ? dialog.dialog_id : "";
       this.user.send(msg);
-
-      // Handle echo back from backend
-      var handler = "_sent" + action[1].toLowerCase().ucFirst();
-      this.once("sent-" + msg.id, function(msg) {
-        if (cb) return cb.call(self, msg);
-        self[self[handler] ? handler : "_onError"](msg);
-      });
+      this.once("sent-" + msg.id, cb); // Handle echo back from backend
+      if (tid) this.once("sent-" + msg.id, function() { clearTimeout(tid) });
     } catch(e) {
       msg.type = "error";
       msg.message = e + " (" + message + ")";
@@ -148,10 +158,9 @@
   };
 
   proto._onError = function(msg) {
-    if (msg.errors) {
-      var dialog = this.user.getActiveDialog();
-      if (dialog) dialog.addMessage({from: this.connection_id, type: "error", message: msg.message + ": " + msg.errors[0].message});
-    }
+    if (!msg.errors) return;
+    var dialog = this.user.getActiveDialog();
+    if (dialog) dialog.addMessage({from: this.connection_id, type: "error", message: msg.message + ": " + msg.errors[0].message});
   };
 
   proto._onMessage = function(msg) {
