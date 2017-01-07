@@ -10,6 +10,9 @@ rel=cache/cdn.jsdelivr.net/emojione/2.2.6/lib/js/emojione.min.js
 format=js
 mtime=1430238058
 rel=cache/code.jquery.com/jquery-1.11.3.min.js
+[original:http://local/custom/asset/sass/_custom.scss]
+format=scss
+rel=cache/local/custom/asset/sass/_custom.scss
 [original:http://local/custom/asset/sass/_variables.scss]
 format=scss
 rel=cache/local/custom/asset/sass/_variables.scss
@@ -477,7 +480,7 @@ format=js
 minified=1
 mtime=1475480169
 [sass:sass/main.scss]
-checksum=5e6aae6b01
+checksum=84960fef5d
 format=css
 minified=0
 [sass-min:sass/main.scss]

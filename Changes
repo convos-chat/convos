@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Fix setting main dialog location on initial load
  - Fix not showing unread count for active channel
  - Fix parsing "/names" response #308
+ - Add support for CONVOS_ORGANIZATION_URL #307
  - Add "get_user" websocket method
 
 0.99_20 2016-12-29T21:00:43+0100

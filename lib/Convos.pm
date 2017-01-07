@@ -138,6 +138,7 @@ sub _config {
   $config->{home}
     ||= $ENV{CONVOS_HOME} || File::Spec->catdir(File::HomeDir->my_home, qw(.local share convos));
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
+  $config->{organization_url} ||= $ENV{CONVOS_ORGANIZATION_URL} || 'http://nordaaker.com';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
   # public settings

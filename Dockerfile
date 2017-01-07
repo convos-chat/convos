@@ -24,6 +24,7 @@ RUN \
 # ENV CONVOS_PLUGINS ShareDialog,OtherCustomPlugin
 ENV CONVOS_CONTACT mailto:root@localhost
 ENV CONVOS_ORGANIZATION_NAME Nordaaker
+ENV CONVOS_ORGANIZATION_URL http://nordaaker.com
 ENV CONVOS_SECURE_COOKIES 0
 
 # https://convos.by/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server
