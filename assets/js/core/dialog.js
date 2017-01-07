@@ -32,9 +32,10 @@
   var protectedKeys = ["participants"];
 
   proto.activate = function() {
-    var self = this;
     this.unread = 0;
     if (this.reset) this.load({});
+    if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
+    if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
   };
 
   proto.addMessage = function(msg, args) {
@@ -120,10 +121,6 @@
       self._processMessages(err, xhr.body.messages).reverse().forEach(function(msg) {
         self.addMessage(msg, {method: "unshift", disableNotifications: true, disableUnread: true});
       });
-      if (self.reset) {
-        if (!self.is_private) self.connection().send("/names", self, self._setParticipants.bind(self));
-        if (self.dialog_id && self.is_private) self.connection().send("/whois " + self.name, self); // TODO: Add handling of whois response. Set "frozen" if user is offline
-      }
       if (cb) cb(err, xhr.body);
       delete self.reset;
     });

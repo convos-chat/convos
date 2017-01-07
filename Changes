@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix race condition when creating the websocket connection
  - Fix setting main dialog location on initial load
  - Fix not showing unread count for active channel
+ - Fix sending "/names" on join #303
  - Fix parsing "/names" response #308
  - Add support for CONVOS_ORGANIZATION_URL #307
  - Add "get_user" websocket method
