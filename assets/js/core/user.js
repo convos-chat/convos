@@ -1,13 +1,12 @@
 (function() {
   Convos.User = function(attrs) {
     EventEmitter(this);
-    this.connections   = [];
-    this.currentPage   = "";
-    this.dialogs       = [];
-    this.email         = "";
+    this.connections = [];
+    this.currentPage = "";
+    this.dialogs = [];
+    this.email = "";
     this.notifications = [];
-    this.unread        = 0;
-    this._setupWebSocket();
+    this.unread = 0;
   };
 
   var proto = Convos.User.prototype;

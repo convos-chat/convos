@@ -34,15 +34,6 @@
     }.bind(this))[0];
   };
 
-  proto.href = function() {
-    return ["#connection", this.protocol, this.name].join("/");
-  };
-
-  // Human readable version of state
-  proto.humanState = function() {
-    return this.state.ucFirst();
-  };
-
   proto.nick = function() {
     return this.me.nick ? this.me.nick : this.url.parseUrl().query.nick || "";
   };
@@ -85,26 +76,17 @@
     var self = this;
 
     // It is currently not possible to specify "name"
-    var attrs = {
-      url: this.url,
-      on_connect_commands: this.on_connect_commands,
-    };
+    var attrs = {url: this.url, on_connect_commands: this.on_connect_commands};
 
     if (this.connection_id) {
-      Convos.api.updateConnection(
-        {
-          body:          attrs,
-          connection_id: this.connection_id
-        }, function(err, xhr) {
-          if (err) return cb.call(self, err);
-          self.update(xhr.body);
-          cb.call(self, err);
-        }
-      );
-    } else {
-      Convos.api.createConnection({
-        body: attrs
-      }, function(err, xhr) {
+      Convos.api.updateConnection({body: attrs, connection_id: this.connection_id}, function(err, xhr) {
+        if (err) return cb.call(self, err);
+        self.update(xhr.body);
+        cb.call(self, err);
+      });
+    }
+    else {
+      Convos.api.createConnection({body: attrs}, function(err, xhr) {
         if (err) return cb.call(self, err);
         self.update(xhr.body);
         self.user.connections.push(self);
@@ -248,7 +230,7 @@
   };
 
   proto._onState = function(data) {
-    if (DEBUG) console.log("[state:" + data.type + "] " + this.href() + " = " + JSON.stringify(data));
+    if (DEBUG) console.log("[state:" + data.type + "] " + this.connection_id + " = " + JSON.stringify(data));
 
     switch (data.type) {
       case "connection":

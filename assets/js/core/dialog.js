@@ -1,23 +1,23 @@
 (function() {
   Convos.Dialog = function(attrs) {
+    EventEmitter(this);
     this.active = undefined;
-    this.dialog_id = "";
-    this.frozen = "Initializing...";
-    this.is_private = true;
-    this.messages = [];
-    this.name = "";
+    this.connection_id = attrs.connection_id;
+    this.dialog_id = attrs.dialog_id;
+    this.frozen = attrs.frozen || "Initializing...";
+    this.is_private = attrs.is_private || false;
     this.lastActive = 0;
     this.lastRead = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
+    this.messages = [];
+    this.name = attrs.name || "";
     this.participants = {};
-    this.unread = 0;
-    this.topic = "";
+    this.reset = false;
+    this.topic = attrs.topic || "";
+    this.unread = attrs.unread || 0;
+    this.user = attrs.user || new Convos.User({});
 
-    EventEmitter(this);
-    if (attrs) this.update(attrs);
-
-    if (this.last_active) {
-      this.lastActive = Date.fromAPI(this.last_active).valueOf();
-      delete this.last_active;
+    if (attrs.last_active) {
+      this.lastActive = Date.fromAPI(attrs.last_active).valueOf();
     }
 
     this.on("connect", function() {
