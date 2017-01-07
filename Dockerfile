@@ -5,8 +5,6 @@
 FROM alpine:3.5
 MAINTAINER jhthorsen@cpan.org
 
-ARG port=3000
-
 RUN \
   apk add -U perl perl-io-socket-ssl && \
   apk add -t builddeps build-base perl-dev wget && \
@@ -33,11 +31,10 @@ ENV MOJO_REVERSE_PROXY 0
 
 # Do not change these variables unless you know what you're doing
 ENV CONVOS_HOME /data
-ENV MOJO_LISTEN http://*:$port
 ENV MOJO_MODE production
 
 VOLUME ["/data"]
-EXPOSE $port
+EXPOSE 3000
 
 CMD ["daemon"]
 ENTRYPOINT ["/convos-stable/script/convos"]
