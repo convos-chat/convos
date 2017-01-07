@@ -11,7 +11,7 @@
       <div :class="dialogClass(d, $index)" v-for="d in dialogs">
         <a v-link="d.href()" v-tooltip="d.frozen">
           <i class="material-icons">{{d.icon()}}</i> <span class="name">{{d.dialog_id ? d.name : d.connection_id}}</span>
-          <span class="n-unread badge" v-if="d.unread" v-tooltip="d.unread + ' unread messages'">{{d.unread < 50 ? d.unread : "50+"}}</span>
+          <span class="n-unread badge" v-if="d.unread && !d.active" v-tooltip="d.unread + ' unread messages'">{{d.unread < 50 ? d.unread : "50+"}}</span>
           <span class="on" v-if="showConnectionInfo(d)">{{d.connection().protocol}}-{{d.connection().name}}</span>
         </a>
         <span class="close badge" @click.prevent="close(d)" v-if="d.dialog_id">&times;</span>
