@@ -29,6 +29,7 @@
   };
 
   var proto = Convos.Dialog.prototype;
+  var protectedKeys = ["participants"];
 
   proto.activate = function() {
     var self = this;
@@ -175,7 +176,10 @@
 
   proto.update = function(attrs) {
     var frozen = this.frozen;
-    Object.keys(attrs).forEach(function(n) { this[n] = attrs[n]; }.bind(this));
+
+    Object.keys(attrs).forEach(function(n) {
+      if (protectedKeys.indexOf(n) == -1) this[n] = attrs[n];
+    }.bind(this));
 
     if (this.is_private) {
       [this.name, this.connection().nick()].forEach(function(n) {
