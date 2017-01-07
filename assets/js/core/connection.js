@@ -6,7 +6,6 @@
     this.me = {nick: ""};
     this.on_connect_commands = [];
     this.protocol = "unknown";
-    this.sendTimeout = 5000; // is this long enough?
     this.state = "disconnected";
     this.url = "";
     this.on("message", this._onMessage);
@@ -16,6 +15,7 @@
 
   var aliases = {};
   var proto = Convos.Connection.prototype;
+  var msgId = 0;
 
   Convos.commands.forEach(function(cmd) {
     (cmd.aliases || [cmd.command]).forEach(function(a) {
@@ -99,7 +99,7 @@
   proto.send = function(message, dialog, cb) {
     var self = this;
     var action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
-    var id;
+    var msg = {method: "send", id: ++msgId, connection_id: this.connection_id};
 
     if (aliases[action[1]]) {
       message = message.replace(/^\/(\w+)/, aliases[action[1]]);
@@ -116,31 +116,23 @@
     if (!dialog) dialog = this.getDialog(action[2]); // action = ["...", "close", "#foo" ]
     if (!dialog) dialog = this.user.getActiveDialog();
 
-    id = setTimeout(
-      function() {
-        self.off("sent-" + id);
-        self.user.getActiveDialog().addMessage({
-          type: "error",
-          message: "Could not send message to " + (dialog ? dialog.name : this.connection_id) + ": " + message,
-        });
-      },
-      self.sendTimeout
-    );
+    try {
+      msg.message = message;
+      msg.dialog_id = dialog ? dialog.dialog_id : "";
+      this.user.send(msg);
 
-    // Handle echo back from backend
-    var handler = "_sent" + action[1].toLowerCase().ucFirst();
-    this.once("sent-" + id, function(msg) {
-      if (cb) return cb.call(self, msg);
-      self[self[handler] ? handler : "_onError"](msg);
-    });
-
-    this.user.ws.send({
-      id:            id,
-      method:        "send",
-      message:       message,
-      connection_id: this.connection_id,
-      dialog_id:     dialog ? dialog.dialog_id : ""
-    });
+      // Handle echo back from backend
+      var handler = "_sent" + action[1].toLowerCase().ucFirst();
+      this.once("sent-" + msg.id, function(msg) {
+        if (cb) return cb.call(self, msg);
+        self[self[handler] ? handler : "_onError"](msg);
+      });
+    } catch(e) {
+      msg.type = "error";
+      msg.message = e + " (" + message + ")";
+      this.user.getActiveDialog().addMessage(msg);
+      return;
+    }
 
     return this;
   };
@@ -169,7 +161,6 @@
   };
 
   proto._onSent = function(msg) {
-    if (DEBUG) console.log("[sent] " + JSON.stringify(msg));
     clearTimeout(msg.id);
     this.emit("sent-" + msg.id, msg).off("sent-" + msg.id);
   };

@@ -25,36 +25,12 @@ sub delete {
 sub get {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
-  my $res  = $user->TO_JSON;
 
   $self->delay(
+    sub { $user->get($self->req->url->query->to_hash, shift->begin); },
     sub {
-      my ($delay) = @_;
-      return $delay->pass unless $self->param('notifications');
-      return $user->notifications({}, $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $notifications) = @_;
-      my (@connections, @dialogs);
+      my ($delay, $err, $res) = @_;
       die $err if $err;
-
-      $res->{notifications} = $notifications if $notifications;
-
-      if ($self->param('connections') or $self->param('dialogs')) {
-        @connections = sort { $a->name cmp $b->name } @{$user->connections};
-        $res->{connections} = \@connections if $self->param('connections');
-      }
-
-      if ($self->param('dialogs')) {
-        $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
-        $_->calculate_unread($delay->begin) for @{$res->{dialogs}};
-      }
-
-      $delay->pass;    # make sure we go to the next step even if there are no dialogs
-    },
-    sub {
-      my ($delay, @err);
-      die $err[0] if $err[0] = grep {$_} @err;
       $self->render(openapi => $res);
     }
   );

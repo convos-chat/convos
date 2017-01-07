@@ -36,6 +36,43 @@ has_many connections => 'Convos::Core::Connection' => sub {
   return $connection;
 };
 
+sub get {
+  my ($self, $args, $cb) = @_;
+  my $res  = $self->TO_JSON;
+
+  Mojo::IOLoop->delay(
+    sub {
+      my ($delay) = @_;
+      return $delay->pass unless $args->{notifications};
+      return $self->notifications({}, $delay->begin);
+    },
+    sub {
+      my ($delay, $err, $notifications) = @_;
+      my (@connections, @dialogs);
+      return $self->$cb($err, $res) if $err;
+
+      $res->{notifications} = $notifications if $notifications;
+
+      if ($args->{connections} or $args->{dialogs}) {
+        @connections = sort { $a->name cmp $b->name } @{$self->connections};
+        $res->{connections} = \@connections if $args->{connections};
+      }
+
+      if ($args->{dialogs}) {
+        $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
+        $_->calculate_unread($delay->begin) for @{$res->{dialogs}};
+      }
+
+      $delay->pass;    # make sure we go to the next step even if there are no dialogs
+    },
+    sub {
+      my ($delay, @err);
+      return $self->$cb($err[0], $res) if $err[0] = grep {$_} @err;
+      return $self->$cb('', $res);
+    }
+  );
+}
+
 sub id { trim lc +($_[1] || $_[0])->{email} }
 
 sub notifications {
@@ -177,6 +214,12 @@ Returns an array-ref of of L<Convos::Core::Connection> objects.
   $connection = $self->connection(\%attrs);
 
 Returns a L<Convos::Core::Connection> object or undef.
+
+=head2 get
+
+  $self = $self->get(\%args, sub { my ($self, $err, $res) = @_; });
+
+Used to retrive information about the current user.
 
 =head2 id
 

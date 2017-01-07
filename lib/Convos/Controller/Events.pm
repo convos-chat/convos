@@ -50,6 +50,20 @@ sub _err {
   $self->send({json => $res});
 }
 
+sub _event_get_user {
+  my ($self, $data) = @_;
+  my $user = $self->backend->user or return $self->_err('Need to log in. Session reset?', {})->finish;
+
+  $self->delay(
+    sub { $user->get($data, shift->begin); },
+    sub {
+      my ($delay, $err, $res) = @_;
+      return $self->_err($err, {})->finish if $err;
+      return $self->send({json => $res});
+    }
+  );
+}
+
 sub _event_send {
   my ($self, $data) = @_;
   my $connection = $self->backend->user->get_connection($data->{connection_id})
@@ -69,7 +83,9 @@ sub _event_send {
   );
 }
 
-sub _event_ping { $_[0]->send({json => {ts => Mojo::Util::steady_time()}}) }
+sub _event_ping {
+  $_[0]->send({json => {event => 'pong', ts => Mojo::Util::steady_time()}});
+}
 
 1;
 

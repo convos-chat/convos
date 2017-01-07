@@ -1,5 +1,7 @@
 (function() {
   Convos.Dialog = function(attrs) {
+    var self = this;
+
     EventEmitter(this);
     this.active = undefined;
     this.connection_id = attrs.connection_id;
@@ -20,9 +22,9 @@
       this.lastActive = Date.fromAPI(attrs.last_active).valueOf();
     }
 
-    this.on("connect", function() {
-      this.reset = true;
-      if (this.active) return this.load({});
+    this.user.on("ready", function() {
+      self.reset = true;
+      if (self.active) self.load({});
     });
   };
 

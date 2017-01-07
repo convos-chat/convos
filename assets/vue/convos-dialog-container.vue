@@ -2,7 +2,7 @@
   <div class="convos-dialog-container" :class="dialog.active ? 'active' : ''">
     <header>
       <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <h2>{{user.ws.is('open') ? dialog.name || 'Convos' : 'No internet connection?'}}</h2>
+      <h2>{{dialog.name || 'Convos'}}</h2>
       <convos-header-links :toggle="true" :user="user"></convos-header-links>
     </header>
     <main class="scroll-element" v-el:main>

@@ -1,5 +1,10 @@
 Revision history for perl distribution Convos
 
+0.99_21 Not Released
+ - Fix race condition when creating the websocket connection
+ - Fix setting main dialog location on initial load
+ - Add "get_user" websocket method
+
 0.99_20 2016-12-29T21:00:43+0100
  - Fix will not reconnect without host/port change
  - Add "close" icon to main menu conversations

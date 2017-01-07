@@ -471,11 +471,6 @@ checksum=6f12f7bacf
 format=js
 minified=1
 mtime=1480893566
-[js-min:js/websocket.js]
-checksum=55e94b43ea
-format=js
-minified=1
-mtime=1480891487
 [js-min:js/window.js]
 checksum=a2aa73fa3b
 format=js

@@ -18,7 +18,6 @@
 < js/jquery.disableouterscroll.js
 < js/materialbox.js
 < js/openapi.js
-< js/websocket.js
 < js/vue/directive-link.js
 < js/vue/directive-sidebar.js
 < js/vue/directive-tooltip.js

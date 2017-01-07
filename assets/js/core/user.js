@@ -1,6 +1,7 @@
 (function() {
   Convos.User = function(attrs) {
     EventEmitter(this);
+    setInterval(function() { if (this.ws) this.ws.send('{}') }.bind(this), 10000);
     this.connections = [];
     this.currentPage = "";
     this.dialogs = [];
@@ -58,44 +59,42 @@
 
   proto.refresh = function() {
     var self = this;
-    Convos.api.getUser(
-      {connections: true, dialogs: true, notifications: true},
-      function(err, xhr) {
-        if (err) return self.currentPage = "convos-login";
-        if (!self.email) self.ws.open(); // first time
-        self.email = xhr.body.email;
-        xhr.body.connections.forEach(function(c) { self.ensureConnection(c) });
-        xhr.body.dialogs.forEach(function(d) { d = self.ensureDialog(d); });
-        self.notifications = xhr.body.notifications.reverse();
-        self.unread = xhr.body.unread || 0;
-        self.currentPage = "convos-chat";
-        self.connections.forEach(function(c) { c.emit("connect"); });
-        self.dialogs.forEach(function(d) { d.emit("connect"); });
+
+    if (this._refreshTid) clearTimeout(this._refreshTid);
+    this.ws = new WebSocket(Convos.wsUrl);
+
+    this.ws.onopen = function() {
+      self.send({method: "get_user", connections: true, dialogs: true, notifications: true});
+    };
+
+    this.ws.onclose = this.ws.onerror = function(e) {
+      if (window.DEBUG) console.log("[WebSocket] ", e);
+      if (!self.email) return self.currentPage = "convos-login";
+      self._refreshTid = setTimeout(self.refresh.bind(self), 1000);
+      self.connections.forEach(function(c) { c.update({state: "unreachable"}); });
+      self.dialogs.forEach(function(d) { d.update({frozen: "No internet connection?"}); });
+    };
+
+    this.ws.onmessage = function(e) {
+      if (window.DEBUG) console.log("[WebSocket] " + e.data);
+      var data = JSON.parse(e.data);
+
+      if (data.connection_id && data.event) {
+        self.getConnection(data.connection_id).emit(data.event, data);
       }
-    );
+      else if (data.email) {
+        data.connections.forEach(function(c) { self.ensureConnection(c); });
+        data.dialogs.forEach(function(d) { self.ensureDialog(d); });
+        self.email = data.email;
+        self.notifications = data.notifications.reverse();
+        self.unread = data.unread || 0;
+        self.currentPage = "convos-chat";
+        self.emit("ready");
+      }
+    };
   };
 
-  proto._setupWebSocket = function() {
-    var self = this;
-    var ws = new ReconnectingWebSocket(Convos.wsUrl);
-
-    this.ws = ws;
-    this._keepAlive = setInterval(function() { if (ws.is("open")) ws.send('{}'); }, 20000);
-
-    this.ws.on("close", function() {
-      self.connections.forEach(function(c) { c.update({state: "unreachable"}).emit("disconnect"); });
-      self.dialogs.forEach(function(d) { d.update({frozen: "No internet connection?"}).emit("disconnect"); });
-    });
-
-    // Need to install the refresh handler after the first close event
-    this.ws.once("close", function() {
-      self.ws.on("open", self.refresh.bind(self));
-    });
-
-    this.ws.on("json", function(data) {
-      if (!data.connection_id) return console.log("[ws] json=" + JSON.stringify(data));
-      var c = self.getConnection(data.connection_id);
-      return c ? c.emit(data.event, data) : console.log("[ws:" + data.connection_id + "] json=" + JSON.stringify(data));
-    });
+  proto.send = function(data) {
+    this.ws.send(JSON.stringify(data));
   };
 })();

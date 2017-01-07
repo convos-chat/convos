@@ -27,9 +27,11 @@ module.exports = {
 
       for (i = 0; i < this.user.dialogs.length; i++) {
         var dialog = this.user.dialogs[i];
-        if (dialog.href() == main) {
+        if (dialog.href() == main || (i == 0 && !main)) {
+          Convos.settings.main = dialog.href(); // in case not already set
           dialog.active = true;
           this.show = "dialog";
+          this.error = {};
         }
         else if (dialog.active !== undefined) {
           dialog.active = false;
