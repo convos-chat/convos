@@ -54,7 +54,7 @@ sub startup {
   my $config = $self->_config;
   my $r      = $self->routes;
 
-  $self->_home_relative_to_lib unless -d $self->home->rel_dir('public');
+  $self->_home_relative_to_lib unless -d $self->home->rel_file('public');
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
@@ -106,7 +106,7 @@ sub _action_custom_asset {
 
 sub _assets {
   my $self          = shift;
-  my $custom_assets = $self->core->home->rel_dir('assets');
+  my $custom_assets = $self->core->home->rel_file('assets');
 
   $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine)]});
 
@@ -157,7 +157,7 @@ sub _home_relative_to_lib {
   my $home = File::Spec->catdir(File::Basename::dirname(__FILE__), 'Convos');
 
   $self->home->parse($home);
-  $self->static->paths->[0] = $self->home->rel_dir('public');
+  $self->static->paths->[0] = $self->home->rel_file('public');
 }
 
 sub _plugins {

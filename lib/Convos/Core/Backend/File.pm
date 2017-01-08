@@ -38,7 +38,7 @@ has _fc => sub {
 
 sub connections {
   my ($self, $user, $cb) = @_;
-  my $user_dir = $self->home->rel_dir($user->email);
+  my $user_dir = $self->home->rel_file($user->email);
   my ($CONNECTIONS, @connections);
 
   unless (opendir $CONNECTIONS, $user_dir) {
@@ -217,14 +217,14 @@ sub users {
 
 sub _delete_connection {
   my ($self, $connection) = @_;
-  my $path = $self->home->rel_dir(join('/', $connection->user->email, $connection->id));
+  my $path = $self->home->rel_file(join('/', $connection->user->email, $connection->id));
   $connection->unsubscribe($_) for qw(dialog message state);
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
 sub _delete_user {
   my ($self, $user) = @_;
-  my $path = $self->home->rel_dir($user->email);
+  my $path = $self->home->rel_file($user->email);
   File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
