@@ -1,13 +1,13 @@
 (function() {
   Convos.User = function(attrs) {
     EventEmitter(this);
-    setInterval(function() { if (this.ws) this.ws.send('{}') }.bind(this), 10000);
     this.connections = [];
     this.currentPage = "";
     this.dialogs = [];
     this.email = "";
     this.notifications = [];
     this.unread = 0;
+    this._keepAliveTid = setInterval(this._keepAlive(), 20000);
   };
 
   var proto = Convos.User.prototype;
@@ -60,8 +60,8 @@
   proto.refresh = function() {
     var self = this;
 
-    if (window.DEBUG) console.log("[WebSocket] readyState is " + WebSocketReadyState(this.ws));
-    if (WebSocketReadyState(this.ws) == "OPEN") return console.trace("[WebSocket] Already open!");
+    if (window.DEBUG) console.log("[WebSocket] readyState is " + this._wsState());
+    if (this._wsState() == "OPEN") return console.trace("[WebSocket] Already open!");
     if (this._refreshTid) clearTimeout(this._refreshTid);
 
     this.ws = new WebSocket(Convos.wsUrl);
@@ -102,9 +102,16 @@
     this.ws.send(JSON.stringify(data));
   };
 
-  var WebSocketReadyState = function(ws) {
-    if (!ws) return "UNDEFINED";
-    switch (ws.readyState) {
+  proto._keepAlive = function() {
+    var self = this;
+    return function() {
+      if (self._wsState() == "OPEN") self.ws.send('{}');
+    };
+  };
+
+  proto._wsState = function() {
+    if (!this.ws) return "UNDEFINED";
+    switch (this.ws.readyState) {
       case WebSocket.CLOSED:
         return "CLOSED";
       case WebSocket.CLOSING:
