@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_22 Not Released
+ - Tweaking colors
+
 0.99_21 2017-01-08T14:41:21+0100
  - Fix race condition when creating the websocket connection
  - Fix setting main dialog location on initial load

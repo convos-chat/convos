@@ -1,9 +1,10 @@
-$body-bg: #fff !default;
-$primary-color: color("green", "lighten-1") !default;
-$secondary-color: color("green", "darken-4") !default;
-$header-color: color('green', 'darken-3') !default;
-$link-color: color("green", "darken-2") !default;
-$text-color: rgba(0, 0, 0, 0.87) !default;
+$body-bg: #fffefd !default;
+$sidebar-bg: darken(#fff, 3%) !default;
+$primary-color: lighten(#2c5e2e, 10%) !default;
+$secondary-color: #2c5e2e !default;
+$header-color: lighten($primary-color, 5%) !default;
+$link-color: lighten($primary-color, 0%) !default;
+$text-color: #222 !default;
 
 $collection-border-color: darken($body-bg, 9%);
 
@@ -21,3 +22,5 @@ $sidebar-width: 320px !default;
 $z-index-header: 900 !default;
 
 $input-height: 2.8rem;
+$button-floating-background: lighten($primary-color, 5%) !default;
+$button-floating-background-hover: $primary-color !default;

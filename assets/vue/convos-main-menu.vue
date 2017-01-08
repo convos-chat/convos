@@ -17,23 +17,23 @@
         <span class="close badge" @click.prevent="close(d)" v-if="d.dialog_id">&times;</span>
       </div>
       <div class="divider"></div>
-      <div class="link">
-        <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple" :class="activeClass('#create-dialog')">
+      <div class="link" :class="activeClass('#create-dialog')">
+        <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple">
           <i class="material-icons">add</i> Join dialog...
         </a>
       </div>
-      <div class="link">
-        <a v-link.literal="#connection" class="simple" :class="activeClass('#connection')">
+      <div class="link" :class="activeClass('#connection')">
+        <a v-link.literal="#connection" class="simple">
           <i class="material-icons">add</i> Add connection...
         </a>
       </div>
-      <div class="link">
+      <div class="link" :class="activeClass('#profile')">
         <a v-sidebar.literal="#profile" class="simple">
           <i class="material-icons">account_circle</i> Edit profile
         </a>
       </div>
-      <div class="link">
-        <a v-sidebar.literal="#help" :class="activeClass" class="simple">
+      <div class="link" :class="activeClass('#help')">
+        <a v-sidebar.literal="#help" class="simple">
           <i class="material-icons">help</i> Help
         </a>
       </div>

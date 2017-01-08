@@ -1,7 +1,7 @@
 .convos-main-menu,
 .is-sidebar {
   width: 100%; // small screens
-  background-color: darken($body-bg, 3%);
+  background-color: $sidebar-bg;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -39,6 +39,10 @@
       display: block;
     }
 
+    &:hover, &.focus {
+      background-color: darken($sidebar-bg, 6%);
+    }
+
     &.active {
       background-color: $body-bg;
       a {
@@ -49,10 +53,6 @@
 
     &.frozen a {
       color: $error-text-color;
-    }
-
-    &:hover, &.focus {
-      background-color: darken($body-bg, 6%);
     }
 
     &.dialog:hover {
@@ -111,14 +111,14 @@
   }
 
   .menu-item {
-    border-top: 1px solid $collection-border-color;
-    border-bottom: 1px solid $collection-border-color;
+    border-top: 1px solid darken($sidebar-bg, 5%);
+    border-bottom: 1px solid darken($sidebar-bg, 5%);
     margin-top: -1px; // hack for collapsing borders
     padding: 0 $gutter-width / 2;
     overflow: hidden;
 
     &, i { line-height: 2.1rem;}
-    &:hover { background-color: darken($body-bg, 6%); }
+    &:hover { background-color: darken($sidebar-bg, 6%); }
     .material-icons { vertical-align: text-bottom; }
 
     > a:only-child { display: block; }
@@ -136,7 +136,7 @@
     cursor: pointer;
     padding-top: 4px;
     padding-bottom: 8px;
-    border-bottom: 1px solid darken($body-bg, 6%);
+    border-bottom: 1px solid darken($sidebar-bg, 6%);
 
     h5, .secondary-content {
       font-size: $h6-fontsize;

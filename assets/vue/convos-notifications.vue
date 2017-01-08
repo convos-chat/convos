@@ -5,7 +5,7 @@
       <div class="row">
         <div class="col s12">
           <h5>
-            <a href="#mark-as-read" v-tooltip="unreadTooltip()" @click.prevent="markAsRead()" class="btn-floating waves-effect waves-light green" :class="markAsReadClass()"><i class="material-icons">check</i></a>
+            <a href="#mark-as-read" v-tooltip="unreadTooltip()" @click.prevent="markAsRead()" class="btn-floating waves-effect waves-light" :class="markAsReadClass()"><i class="material-icons">check</i></a>
             Notifications
           </h5>
         </div>
