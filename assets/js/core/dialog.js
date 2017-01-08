@@ -179,6 +179,10 @@
       if (protectedKeys.indexOf(n) == -1) this[n] = attrs[n];
     }.bind(this));
 
+    if (attrs.hasOwnProperty("frozen") && !attrs.frozen) {
+      if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
+    }
+
     if (this.is_private) {
       [this.name, this.connection().nick()].forEach(function(n) {
         this.participants[n] = {name: n, seen: new Date()};

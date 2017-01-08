@@ -240,7 +240,7 @@
         this.notice('Connection state changed to "' + msg);
         break;
       case "frozen":
-        this.getDialog("").frozen = data.frozen;
+        this.getDialog("").update({frozen: data.frozen});
         this.user.ensureDialog(data);
         break;
       case "join":
