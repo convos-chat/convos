@@ -158,6 +158,13 @@ Convos.
 
 Default: `Nordaaker`
 
+### CONVOS_ORGANIZATION_NAME
+
+This variable will change the URL to the organization running this instance of
+Convos.
+
+Default: [http://nordaaker.com](http://nordaaker.com)
+
 ### CONVOS_PLUGINS
 
 A list (comma separated) of perl modules that can be loaded into the backend
