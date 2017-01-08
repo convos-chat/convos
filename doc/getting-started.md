@@ -27,7 +27,7 @@ screen as you start convos:
 The invite code can be set to anything you like. Check out the
 [configuration](./config.html) guide for more details.
 
-Have a look at [this blog post](/2016/12/04/convos-loves-docker.html) if you want to
+Have a look at [this blog post](/2016/12/4/convos-loves-docker.html) if you want to
 run Convos inside of Docker.
 
 ## Running convos
