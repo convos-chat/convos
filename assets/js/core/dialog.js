@@ -32,7 +32,6 @@
   var protectedKeys = ["participants"];
 
   proto.activate = function() {
-    this.unread = 0;
     if (!this.reset) return;
     if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
     if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
@@ -53,7 +52,7 @@
     if (args.method == "push") {
       this.prevMessage = msg;
 
-      if (msg.type.match(/action|private/) && this != this.user.getActiveDialog()) {
+      if (msg.type.match(/action|private|notice/) && this != this.user.getActiveDialog()) {
         if (this.lastRead < msg.ts && !args.disableUnread) {
           this.lastActive = msg.ts.valueOf();
           this.unread++;
@@ -161,6 +160,7 @@
   };
 
   proto.setLastRead = function() {
+    this.unread = 0;
     Convos.api[this.dialog_id ? "setDialogLastRead" : "setConnectionLastRead"](
       {
         connection_id: this.connection_id,
