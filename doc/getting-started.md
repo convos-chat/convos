@@ -28,7 +28,7 @@ The invite code can be set to anything you like. Check out the
 [configuration](./config.html) guide for more details.
 
 Have a look at [this blog post](/2016/12/4/convos-loves-docker.html) if you want to
-run Convos inside of Docker.
+run Convos inside Docker.
 
 ## Running convos
 
@@ -46,6 +46,15 @@ $ ./script/convos daemon --listen http://127.0.0.1:8080
 
 See also the [configuration guide](/doc/config.html#listen) for more
 `--listen` options.
+
+## Upgrading
+
+Upgrading Convos is as simple as installing it. Just need to stop Convos
+before fetching the latest version:
+
+    $ killall convos
+    $ curl https://convos.by/install.sh | sh -
+    $ ./convos/script/convos daemon
 
 ## Optional modules
 
