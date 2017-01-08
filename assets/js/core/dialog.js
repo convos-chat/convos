@@ -7,7 +7,7 @@
     this.connection_id = attrs.connection_id;
     this.dialog_id = attrs.dialog_id;
     this.frozen = attrs.frozen || "Initializing...";
-    this.is_private = attrs.is_private || false;
+    this.is_private = attrs.is_private || true;
     this.lastActive = 0;
     this.lastRead = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
     this.messages = [];
