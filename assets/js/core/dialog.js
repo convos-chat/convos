@@ -17,11 +17,15 @@
     this.topic = attrs.topic || "";
     this.unread = attrs.unread || 0;
     this.user = attrs.user || new Convos.User({});
-    this.user.on("ready", function() { self.reset = true; });
 
     if (attrs.last_active) {
       this.lastActive = Date.fromAPI(attrs.last_active).valueOf();
     }
+
+    this.user.on("ready", function() {
+      self.reset = true;
+      if (self.active) self.load({});
+    });
   };
 
   var proto = Convos.Dialog.prototype;

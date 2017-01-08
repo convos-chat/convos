@@ -362,7 +362,7 @@ checksum=3306ebb445
 format=js
 minified=1
 [js-min:js/core/dialog.js]
-checksum=6a3a233a66
+checksum=b909923b14
 format=js
 minified=1
 [js-min:js/core/user.js]
