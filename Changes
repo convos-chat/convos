@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 0.99_22 Not Released
+ - Fix use of CONVOS_ORGANIZATION_URL #307
  - Tweaking colors
 
 0.99_21 2017-01-08T14:41:21+0100

@@ -137,8 +137,8 @@ sub _config {
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
   $config->{home}
     ||= $ENV{CONVOS_HOME} || File::Spec->catdir(File::HomeDir->my_home, qw(.local share convos));
+  $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://nordaaker.com';
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
-  $config->{organization_url} ||= $ENV{CONVOS_ORGANIZATION_URL} || 'http://nordaaker.com';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
   # public settings
@@ -147,6 +147,7 @@ sub _config {
     default_server    => $config->{default_server},
     forced_irc_server => $config->{forced_irc_server} ? true : false,
     organization_name => $config->{organization_name},
+    organization_url  => $config->{organization_url},
   };
 
   $config;
