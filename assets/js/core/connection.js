@@ -170,7 +170,6 @@
   };
 
   proto._onSent = function(msg) {
-    clearTimeout(msg.id);
     this.emit("sent-" + msg.id, msg).off("sent-" + msg.id);
   };
 
