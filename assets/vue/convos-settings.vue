@@ -47,6 +47,12 @@
     <main v-if="show == 'create_dialog'">
       <convos-create-dialog :user="user"></convos-create-dialog>
     </main>
+    <main v-if="show == 'help'">
+      <convos-help :user="user"></convos-help>
+    </main>
+    <main v-if="show == 'profile'">
+      <convos-profile :user="user"></convos-profile>
+    </main>
   </div>
 </template>
 <script>
@@ -57,6 +63,8 @@ module.exports = {
       return !this.user.connections.length                     ? "wizard"
            : this.settings.main.indexOf("#connection") == 0    ? "add_connection"
            : this.settings.main.indexOf("#create-dialog") == 0 ? "create_dialog"
+           : this.settings.main.indexOf("#help") == 0          ? "help"
+           : this.settings.main.indexOf("#profile") == 0       ? "profile"
            :                                                     "error";
     }
   }

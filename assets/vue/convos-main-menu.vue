@@ -28,12 +28,12 @@
         </a>
       </div>
       <div class="link" :class="activeClass('#profile')">
-        <a v-sidebar.literal="#profile" class="simple">
+        <a v-link.literal="#profile" class="simple">
           <i class="material-icons">account_circle</i> Edit profile
         </a>
       </div>
       <div class="link" :class="activeClass('#help')">
-        <a v-sidebar.literal="#help" class="simple">
+        <a v-link.literal="#help" class="simple">
           <i class="material-icons">help</i> Help
         </a>
       </div>

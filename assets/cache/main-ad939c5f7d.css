@@ -4779,8 +4779,9 @@ ul.complete-dropdown {
     .convos-input textarea.materialize-textarea, .convos-input textarea.materialize-textarea:focus {
       border: 0; }
 
-.convos-settings main {
-  max-width: 50em; }
+.convos-settings main > div, .convos-settings main > form {
+  max-width: 50em;
+  margin-left: 0; }
 
 .convos-settings .divider {
   margin: 2rem 0; }
@@ -4862,6 +4863,18 @@ ul.complete-dropdown {
       display: block; }
     .convos-message .secondary-content i {
       vertical-align: bottom; }
+
+@media only screen and (min-width: 601px) {
+  .convos-help h5 {
+    clear: left; }
+  .convos-help dl {
+    overflow: hidden; }
+  .convos-help dl dt {
+    width: 15.5em;
+    clear: left;
+    float: left; }
+  .convos-help dl dd {
+    margin-left: 16em; } }
 
 header {
   background-color: #3c813f;

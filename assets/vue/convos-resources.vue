@@ -5,7 +5,7 @@
     <li><a target="_blank" href="https://github.com/Nordaaker/convos">Source code</a></li>
   </ul>
   <p>
-    It is also possible to chat with us in the "#convos" channel on
+    Wanna talk to us? Join the "#convos" channel on
     <a target="_blank" href="http://freenode.net/">irc.freenode.net</a>.
   </p>
 </template>

@@ -1,44 +1,38 @@
 <template>
-  <div class="convos-profile is-sidebar">
-    <header>
-      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <convos-header-links :user="user"></convos-header-links>
-    </header>
-    <div class="content">
-      <div class="row">
-        <div class="col s12">
-          <h5 class="truncate">{{user.email}}</h5>
-        </div>
+  <div class="convos-profile">
+    <div class="row">
+      <div class="col s12">
+        <h4>{{user.email}}</h4>
       </div>
-      <div class="row">
-        <md-input :value.sync="password" type="password" placeholder="At least six characters">Password</md-input>
-        <md-input :value.sync="passwordAgain" type="password">Repeat password</md-input>
+    </div>
+    <div class="row">
+      <md-input :value.sync="password" type="password" placeholder="At least six characters" cols="s6">Password</md-input>
+      <md-input :value.sync="passwordAgain" type="password" cols="s6">Repeat password</md-input>
+    </div>
+    <div class="row">
+      <div class="col s12">
+        <input v-model="sortDialogsByRead" type="checkbox" class="filled-in" id="form_sort_by">
+        <label for="form_sort_by">Sort dialogs by last-read/activity</label>
       </div>
-      <div class="row">
-        <div class="col s12">
-          <input v-model="sortDialogsByRead" type="checkbox" class="filled-in" id="form_sort_by">
-          <label for="form_sort_by">Sort dialogs by last-read/activity</label>
-        </div>
+    </div>
+    <div class="row">
+      <div class="col s12">
+        <input v-model="notifications" type="checkbox" class="filled-in" id="form_notifications" :checked="settings.notifications == 'granted'">
+        <label for="form_notifications">Enable notifications</label>
       </div>
-      <div class="row">
-        <div class="col s12">
-          <input v-model="notifications" type="checkbox" class="filled-in" id="form_notifications" :checked="settings.notifications == 'granted'">
-          <label for="form_notifications">Enable notifications</label>
-        </div>
+    </div>
+    <div class="row">
+      <div class="col s12">
+        <input v-model="settings.expandUrls" type="checkbox" class="filled-in" id="form_expand_urls">
+        <label for="form_expand_urls">Expand URL to media</label>
       </div>
-      <div class="row">
-        <div class="col s12">
-          <input v-model="settings.expandUrls" type="checkbox" class="filled-in" id="form_expand_urls">
-          <label for="form_expand_urls">Expand URL to media</label>
-        </div>
-      </div>
-      <div class="row" v-if="errors.length">
-        <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
-      </div>
-      <div class="row">
-        <div class="col s12">
-          <button @click="save" class="btn waves-effect waves-light" type="submit">Save</button>
-        </div>
+    </div>
+    <div class="row" v-if="errors.length">
+      <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
+    </div>
+    <div class="row">
+      <div class="col s12">
+        <button @click="save" class="btn waves-effect waves-light" type="submit">Save</button>
       </div>
     </div>
   </div>

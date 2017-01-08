@@ -72,7 +72,10 @@ $convos-input-height: 46px;
 }
 
 .convos-settings {
-  main { max-width: $readable-width; }
+  main > div, main > form {
+    max-width: $readable-width;
+    margin-left: 0;
+  }
   .divider { margin: 2rem 0; }
 }
 
@@ -169,6 +172,25 @@ $convos-input-height: 46px;
     }
     i {
       vertical-align: bottom;
+    }
+  }
+}
+
+.convos-help {
+  @media #{$medium-and-up} {
+    h5 {
+      clear: left;
+    }
+    dl {
+      overflow: hidden;
+    }
+    dl dt {
+      width: 15.5em;
+      clear: left;
+      float: left;
+    }
+    dl dd {
+      margin-left: 16em;
     }
   }
 }
