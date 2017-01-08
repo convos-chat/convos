@@ -60,7 +60,10 @@
   proto.refresh = function() {
     var self = this;
 
+    if (window.DEBUG) console.log("[WebSocket] readyState is " + WebSocketReadyState(this.ws));
+    if (WebSocketReadyState(this.ws) == "OPEN") return console.trace("[WebSocket] Already open!");
     if (this._refreshTid) clearTimeout(this._refreshTid);
+
     this.ws = new WebSocket(Convos.wsUrl);
 
     this.ws.onopen = function() {
@@ -83,6 +86,7 @@
         self.getConnection(data.connection_id).emit(data.event, data);
       }
       else if (data.email) {
+        if (window.DEBUG) console.log("[Convos] User " + data.email + " is logged in");
         data.connections.forEach(function(c) { self.ensureConnection(c); });
         data.dialogs.forEach(function(d) { self.ensureDialog(d); });
         self.email = data.email;
@@ -96,5 +100,21 @@
 
   proto.send = function(data) {
     this.ws.send(JSON.stringify(data));
+  };
+
+  var WebSocketReadyState = function(ws) {
+    if (!ws) return "UNDEFINED";
+    switch (ws.readyState) {
+      case WebSocket.CLOSED:
+        return "CLOSED";
+      case WebSocket.CLOSING:
+        return "CLOSING";
+      case WebSocket.CONNECTING:
+        return "CONNECTING";
+      case WebSocket.OPEN:
+        return "OPEN";
+      default:
+        return "" + s;
+    }
   };
 })();

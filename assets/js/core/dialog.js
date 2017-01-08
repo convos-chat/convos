@@ -6,26 +6,22 @@
     this.active = undefined;
     this.connection_id = attrs.connection_id;
     this.dialog_id = attrs.dialog_id;
-    this.frozen = attrs.frozen || "Initializing...";
+    this.frozen = attrs.frozen || "";
     this.is_private = attrs.is_private || true;
     this.lastActive = 0;
     this.lastRead = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
     this.messages = [];
-    this.name = attrs.name || "";
+    this.name = attrs.name || attrs.dialog_id.toLowerCase() || "";
     this.participants = {};
-    this.reset = false;
+    this.reset = true;
     this.topic = attrs.topic || "";
     this.unread = attrs.unread || 0;
     this.user = attrs.user || new Convos.User({});
+    this.user.on("ready", function() { self.reset = true; });
 
     if (attrs.last_active) {
       this.lastActive = Date.fromAPI(attrs.last_active).valueOf();
     }
-
-    this.user.on("ready", function() {
-      self.reset = true;
-      if (self.active) self.load({});
-    });
   };
 
   var proto = Convos.Dialog.prototype;
@@ -33,9 +29,10 @@
 
   proto.activate = function() {
     this.unread = 0;
-    if (this.reset) this.load({});
-    if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
+    if (!this.reset) return;
     if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
+    if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
+    this.load({});
   };
 
   proto.addMessage = function(msg, args) {
@@ -165,7 +162,7 @@
         connection_id: this.connection_id,
         dialog_id: this.dialog_id
       }, function(err, xhr) {
-        if (err) return console.log('[setDialogLastRead] ' + JSON.stringify(err)); // TODO
+        if (err) return console.log("[setDialogLastRead] " + JSON.stringify(err)); // TODO
         self.lastRead = Date.fromAPI(xhr.body.last_read);
       }
     );
@@ -194,10 +191,10 @@
       messages = [{message: err[0].message || "Unknown error.", type: "error"}];
     }
     else if (frozen) {
-      messages.push({message: self.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
+      messages.push({message: this.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
     }
-    else if (this.reset && !messages.length) {
-      messages.push({message: self.is_private ? "What do you want to say to " + self.name + "?" : "You have joined " + self.name + ", but no one has said anything as long as you have been here.", type: "notice"});
+    else if (!messages.length) {
+      messages.push({message: this.is_private ? "What do you want to say to " + this.name + "?" : "You have joined " + this.name + ", but no one has said anything as long as you have been here.", type: "notice"});
     }
 
     if (messages.length) {

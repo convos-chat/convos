@@ -60,7 +60,7 @@ sub messages {
 
   unless ($dialog) {
     return $self->unauthorized unless $self->backend->user;
-    return $self->render(openapi => E('Dialog not found.'), status => 404);
+    return $self->render(openapi => {messages => [], end => true});
   }
 
   # TODO:
