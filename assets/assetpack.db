@@ -480,7 +480,7 @@ checksum=701d17fa46
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=c1a7fd55e9
+checksum=701d17fa46
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
@@ -517,10 +517,9 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:vue/convos-help.vue]
-checksum=9cad44099c
+checksum=54210aeb7a
 format=js
 minified=1
-mtime=1479322228
 [js-min:vue/convos-input.vue]
 checksum=d251914db4
 format=js
@@ -531,7 +530,7 @@ checksum=b516f15aed
 format=js
 minified=1
 [js-min:vue/convos-main-menu.vue]
-checksum=c6de43ad0d
+checksum=0f02a3aad7
 format=js
 minified=1
 [js-min:vue/convos-message-action.vue]
@@ -584,7 +583,7 @@ checksum=da2b363c5a
 format=js
 minified=1
 [js-min:vue/convos-profile.vue]
-checksum=d7f46ef71b
+checksum=5ddbd2c13c
 format=js
 minified=1
 [js-min:vue/convos-register.vue]
@@ -592,12 +591,11 @@ checksum=ca5469eccf
 format=js
 minified=1
 [js-min:vue/convos-resources.vue]
-checksum=b613cf1344
+checksum=6db008e2f9
 format=js
 minified=1
-mtime=1473714830
 [js-min:vue/convos-settings.vue]
-checksum=4eecee664f
+checksum=0ad1c2f527
 format=js
 minified=1
 [js-min:vue/convos-sidebar-info.vue]
