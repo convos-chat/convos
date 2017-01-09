@@ -52,16 +52,12 @@
     if (args.method == "push") {
       this.prevMessage = msg;
 
-      if (msg.type.match(/action|private|notice/) && this != this.user.getActiveDialog()) {
-        if (this.lastRead < msg.ts && !args.disableUnread) {
-          this.lastActive = msg.ts.valueOf();
-          this.unread++;
-        }
+      if (this.lastRead < msg.ts && !args.disableUnread) {
+        this._increaseUnread(msg);
       }
       if (msg.highlight && !args.disableNotifications) {
         Notification.simple(msg.from, msg.message);
-        this.user.unread++;
-        this.connection().user.notifications.unshift(msg);
+        this.user.notifications.unshift(msg);
       }
       if (prev && prev.ts.getDate() != msg.ts.getDate()) {
         prev = {type: "day-changed", prev: prev, ts: msg.ts};
@@ -190,6 +186,16 @@
     }
 
     return this;
+  };
+
+  proto._increaseUnread = function(msg) {
+    if (this == this.user.getActiveDialog()) {
+      return;
+    }
+    else if (this.is_private || msg.type.match(/action|private/)) {
+      this.lastActive = msg.ts.valueOf();
+      this.unread++;
+    }
   };
 
   proto._processMessages = function(err, messages) {
