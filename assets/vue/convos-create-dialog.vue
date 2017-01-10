@@ -15,7 +15,7 @@
         </p>
       </div>
     </div>
-    <div class="row">
+    <div class="row" v-if="user.connections.length > 1">
       <md-select id="form_connection_id" :value.sync="connectionId" label="Select connection">
         <md-option :value="c.connection_id" :selected="connectionId == c.connection_id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
       </md-select>
