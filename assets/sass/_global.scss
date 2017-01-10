@@ -99,10 +99,6 @@ div.alert {
   }
 }
 
-.dropdown-content li {
-  color: $text-color;
-}
-
 .select-wrapper {
   ul {
     display: block;
@@ -115,6 +111,12 @@ div.alert {
   input.select-dropdown {
     color: $text-color;
   }
+}
+
+.dropdown-content li {
+  &:hover { background: $dropdown-hover-bg-color; }
+  &.disabled:hover { background: transparent; }
+  &.active { background: darken($dropdown-hover-bg-color, 5%); }
 }
 
 #vue_tooltip {

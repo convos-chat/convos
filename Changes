@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_23 Not Released
+ - Will close dropdown when clicking outside of the dropdown
+
 0.99_22 2017-01-10T23:32:19+0100
  - Fix use of CONVOS_ORGANIZATION_URL #307
  - Fix unread count should not be increased on join/part/quit/... messages

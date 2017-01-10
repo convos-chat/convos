@@ -4,6 +4,7 @@
       <span class="caret">&#9660;</span>
       <input :value="textValue" @focus="activate()" :disabled="disabled" readonly="true" class="select-dropdown" type="text" v-el:input>
       <ul class="dropdown-content select-dropdown" :class="{active: active}" v-el:dropdown>
+        <li class="disabled"><span>Choose your option</span></li>
         <slot></slot>
       </ul>
     </div>
@@ -47,10 +48,15 @@ module.exports = {
     }
   },
   methods: {
-    activate: function() {
+    activate: function(e) {
       this.active = arguments.length ? arguments[0] : !this.active;
       if (!this.active) return;
       this.$els.dropdown.style.width = this.$els.input.offsetWidth + "px";
+    },
+    deactivate: function(e) {
+      var $target = $(e.target);
+      if ($target.closest("li.disabled").length) this.active = false;
+      if (!$target.closest(this.$el).length) this.active = false;
     },
     setValue: function(opt) {
       this.value = opt ? opt.value : "";
@@ -69,8 +75,12 @@ module.exports = {
       this.options.forEach(function(o) { o.selected = o.value == this.value; }.bind(this));
     }
   },
+  detached: function() {
+    $(document).off("click", this.deactivate);
+  },
   ready: function() {
     if (!this.cols) this.cols = "s12";
+    $(document).on("click", this.deactivate);
   }
 };
 </script>

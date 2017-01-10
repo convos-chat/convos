@@ -4618,9 +4618,6 @@ div.alert {
   overflow: hidden;
   padding-right: 0.75rem; }
 
-.dropdown-content li {
-  color: #222; }
-
 .select-wrapper ul {
   display: block;
   margin-top: -54px;
@@ -4632,6 +4629,15 @@ div.alert {
 
 .select-wrapper input.select-dropdown {
   color: #222; }
+
+.dropdown-content li:hover {
+  background: #eee; }
+
+.dropdown-content li.disabled:hover {
+  background: transparent; }
+
+.dropdown-content li.active {
+  background: #e1e1e1; }
 
 #vue_tooltip {
   background-color: #323232;
