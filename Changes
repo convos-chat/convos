@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-0.99_22 Not Released
+0.99_22 2017-01-10T23:32:19+0100
  - Fix use of CONVOS_ORGANIZATION_URL #307
  - Fix unread count should not be increased on join/part/quit/... messages
  - Fix going from "disconnected" to "reconnect" on connection save
