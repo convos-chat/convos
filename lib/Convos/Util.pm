@@ -2,6 +2,7 @@ package Convos::Util;
 use Mojo::Base 'Exporter';
 
 use JSON::Validator::Error;
+use Mojo::File;
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
@@ -59,7 +60,7 @@ sub next_tick {
 
 sub spurt {
   my ($content, $path) = @_;
-  Mojo::Util::spurt($content => "$path.tmp");
+  Mojo::File->new("$path.tmp")->spurt($content);
   unlink $path or die "Can't delete old file: $path" if -e $path;
   rename "$path.tmp" => $path;
   return $content;

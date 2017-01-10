@@ -79,10 +79,6 @@ like slurp_log("#convos"), qr{\Q<superduper> foo-bar-baz, yes?\E}m, 'superduper'
 done_testing;
 
 sub slurp_log {
-  Mojo::Util::slurp(
-    File::Spec->catfile(
-      qw(local test-irc-message-t superman@example.com irc-localhost),
-      @date, "$_[0].log"
-    )
-  );
+  Mojo::File->new(qw(local test-irc-message-t superman@example.com irc-localhost),
+    @date, "$_[0].log")->slurp;
 }

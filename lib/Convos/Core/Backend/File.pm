@@ -5,9 +5,10 @@ use Convos::Util qw(next_tick spurt DEBUG);
 use Fcntl ':flock';
 use File::Path ();
 use File::ReadBackwards;
-use File::Spec::Functions 'catfile';
+use Mojo::File 'path';
 use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
+use Mojo::Util;
 use Symbol;
 use Time::Piece;
 use Time::Seconds;
@@ -48,9 +49,9 @@ sub connections {
 
   while (my $id = readdir $CONNECTIONS) {
     next unless $id =~ /^\w+/;
-    my $settings = catfile $user_dir, $id, 'connection.json';
+    my $settings = path($user_dir, $id, 'connection.json');
     next unless -e $settings;
-    push @connections, Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
+    push @connections, Mojo::JSON::decode_json(path($settings)->slurp);
   }
 
   return next_tick $self, $cb, '', \@connections if $cb;
@@ -80,8 +81,10 @@ sub load_object {
   my $storage_file = $self->_settings_file($obj);
   my $data         = {};
 
-  my $err = -e $storage_file
-    && eval { $data = Mojo::JSON::decode_json(Mojo::Util::slurp($storage_file)); } ? '' : $@;
+  my $err
+    = -e $storage_file && eval { $data = Mojo::JSON::decode_json(path($storage_file)->slurp); }
+    ? ''
+    : $@;
 
   return next_tick $self, $cb, $err, $data if $cb;
   return $data unless $err;
@@ -207,7 +210,7 @@ sub users {
     while (my $email = readdir $USERS) {
       my $settings = $home->rel_file("$email/user.json");
       next unless $email =~ /.\@./ and -e $settings;    # poor mans regex
-      push @users, Mojo::JSON::decode_json(Mojo::Util::slurp($settings));
+      push @users, Mojo::JSON::decode_json(path($settings)->slurp);
     }
   }
 

@@ -5,6 +5,7 @@ use Cwd ();
 use Convos::Core;
 use Convos::Util;
 use File::HomeDir ();
+use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
@@ -20,7 +21,7 @@ has core => sub {
 has _api_spec => sub {
   my $self = shift;
   my $path = $self->static->file('convos-api.json')->path;
-  return Mojo::JSON::decode_json(Mojo::Util::slurp($path));
+  return Mojo::JSON::decode_json(path($path)->slurp);
 };
 
 has _custom_assets => sub { Mojolicious::Static->new };
@@ -136,7 +137,7 @@ sub _config {
   $config->{default_server}    ||= $config->{forced_irc_server}   || $ENV{CONVOS_DEFAULT_SERVER};
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
   $config->{home}
-    ||= $ENV{CONVOS_HOME} || File::Spec->catdir(File::HomeDir->my_home, qw(.local share convos));
+    ||= $ENV{CONVOS_HOME} || path(File::HomeDir->my_home, qw(.local share convos))->to_string;
   $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://nordaaker.com';
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;

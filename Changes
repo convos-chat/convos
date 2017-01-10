@@ -7,6 +7,7 @@ Revision history for perl distribution Convos
  - Add connection state selector to connection editor
  - Change "Profile" to open in main dialog area
  - Change "Help" to open in main dialog area
+ - Compatible with Mojolicious 7.15
  - Tweaking colors
 
 0.99_21 2017-01-08T14:41:21+0100
