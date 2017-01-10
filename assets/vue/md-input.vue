@@ -1,6 +1,6 @@
 <template>
   <div class="input-field col" :class="cols">
-    <input lazy v-model="value" class="validate" :autocomplete="autocomplete"
+    <input v-model="value" class="validate" :autocomplete="autocomplete"
       :id="id" v-el:input :name="name" :placeholder="placeholder"
       :readonly="readonly"
       :type="type" :disabled="disabled" :required="required"

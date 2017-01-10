@@ -102,7 +102,7 @@ sub connect {
 
   for my $dialog (@{$self->dialogs}) {
     next if $dialog->is_private;    # TODO: Should private conversations be frozen as well?
-    $dialog->frozen('Not connected.');
+    $dialog->frozen('Not connected.') unless $dialog->frozen;
     $self->emit(state => frozen => $dialog->TO_JSON);
   }
 
@@ -299,6 +299,7 @@ sub _join_dialog {
     join_channel => $command,
     sub {
       my ($irc, $err, $res) = @_;
+      $err = 'Password protected' if $err =~ /\+k\b/;
       $dialog ||= $self->dialog({name => $res->{name}});
       $dialog->frozen($err || '')->password($password // '')->topic($res->{topic} // '');
       $self->save(sub { })->$cb($err, $dialog);
