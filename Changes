@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 0.99_22 Not Released
  - Fix use of CONVOS_ORGANIZATION_URL #307
  - Fix unread count should not be increased on join/part/quit/... messages
+ - Fix going from "disconnected" to "reconnect" on connection save
  - Change "Profile" to open in main dialog area
  - Change "Help" to open in main dialog area
  - Tweaking colors
