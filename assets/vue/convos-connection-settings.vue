@@ -9,6 +9,12 @@
       <div class="row">
         <md-input :value.sync="server" :placeholder="url.hostPort" :readonly="settings.forced_irc_server" cols="s12">Server</md-input>
       </div>
+      <div class="row" v-if="connection">
+        <md-select :value.sync="wantedState" label="State">
+          <md-option value="connect" :selected="'connected' == connection.state">Connected</md-option>
+          <md-option value="disconnect" :selected="'disconnected' == connection.state">Disconnected</md-option>
+        </md-select>
+      </div>
       <div class="row">
         <md-input :value.sync="nick" :placeholder="url.query.nick">Nick</md-input>
       </div>
@@ -47,7 +53,7 @@
       <div class="col s12">
         <button @click="saveConnection" class="btn waves-effect waves-light">{{connection ? "Save" : "Create"}}</button>
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">Delete</a>
-        <p v-if="connection">{{connection.state == 'connected' ? 'Status: Connected.' : connection.getDialog("").frozen || 'Click "save" to connect.'}}</p>
+        <p v-if="connection">{{humanState()}}</p>
       </div>
     </div>
   </form>
@@ -65,7 +71,8 @@ module.exports = {
       server: "",
       tls: null,
       password: "",
-      username: ""
+      username: "",
+      wantedState: ""
     };
   },
   watch: {
@@ -77,6 +84,11 @@ module.exports = {
     }
   },
   methods: {
+    humanState: function() {
+      if (this.connection.state == 'queued') return 'Connecting...';
+      if (this.connection.getDialog("").frozen) return this.connection.getDialog("").frozen;
+      return 'State: ' + this.connection.state.ucFirst();
+    },
     removeConnection: function() {
       var self = this;
       this.connection.remove(function(err) {
@@ -92,6 +104,7 @@ module.exports = {
 
       userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
       connection.user = this.user;
+      connection.wantedState = this.wantedState;
       connection.url = "irc://" + userinfo + this.server;
       connection.on_connect_commands = this.onConnectCommands.split(/\n/).map(function(str) { return str.trim(); });
 
@@ -111,6 +124,7 @@ module.exports = {
     updateForm: function() {
       var nick = this.user.email.split("@")[0].replace(/\W+/g, "_");
       var url = this.connection ? this.connection.url.parseUrl() : null;
+      this.wantedState = this.connection ? this.connection.wantedState : "connect";
       this.errors = [];
       this.url = url || {query: {nick: ""}};
       this.nick = url ? url.query.nick || nick : nick;
