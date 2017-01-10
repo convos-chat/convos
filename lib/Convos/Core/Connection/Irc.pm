@@ -110,6 +110,7 @@ sub connect {
     sub { $irc->connect(shift->begin) },
     sub {
       my ($delay, $err) = @_;
+      $self->_notice($err) if $err;
 
       if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
         $url->query->param(tls => 0);
@@ -117,7 +118,6 @@ sub connect {
         $self->user->core->connect($self, $cb);    # let's queue up to make irc admins happy
       }
       elsif ($err) {
-        $self->_notice($err);
         $self->state(disconnected => $err)->$cb($err);
       }
       else {
