@@ -158,7 +158,7 @@ sub _home_relative_to_lib {
   my $self = shift;
   my $home = File::Spec->catdir(File::Basename::dirname(__FILE__), 'Convos');
 
-  $self->home->parse($home);
+  ${$self->home} = $home;
   $self->static->paths->[0] = $self->home->rel_file('public');
 }
 
