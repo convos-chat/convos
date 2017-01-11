@@ -56,8 +56,9 @@
         this._increaseUnread(msg);
       }
       if (msg.highlight && !args.disableNotifications) {
-        Notification.simple(msg.from, msg.message);
+        this.user.unread++;
         this.user.notifications.unshift(msg);
+        Notification.simple(msg.from, msg.message);
       }
       if (prev && prev.ts.getDate() != msg.ts.getDate()) {
         prev = {type: "day-changed", prev: prev, ts: msg.ts};

@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 0.99_23 Not Released
+ - Fix adding notifications in frontend
  - Will close dropdown when clicking outside of the dropdown
  - Will ask for password if channel has mode +k
  - TODO: Stream "/LIST" output from server
