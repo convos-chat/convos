@@ -355,7 +355,7 @@ checksum=50bce262fd
 format=js
 minified=1
 [js-min:js/core/dialog.js]
-checksum=96f9f5f695
+checksum=6360c2b53c
 format=js
 minified=1
 [js-min:js/core/user.js]
@@ -458,7 +458,7 @@ checksum=1284e2816b
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=701d17fa46
+checksum=1284e2816b
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
@@ -475,7 +475,7 @@ checksum=bbeb133e96
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]
-checksum=32e20ba0f6
+checksum=0f40dfd1ab
 format=js
 minified=1
 [js-min:vue/convos-dialog-container.vue]
@@ -535,6 +535,10 @@ minified=1
 checksum=55b32a507d
 format=js
 minified=1
+[js-min:vue/convos-message-password.vue]
+checksum=a617749408
+format=js
+minified=1
 [js-min:vue/convos-message-private.vue]
 checksum=76fe11b995
 format=js
@@ -576,7 +580,7 @@ checksum=198ce7d2b7
 format=js
 minified=1
 [js-min:vue/md-input.vue]
-checksum=bfbfae7685
+checksum=6cf12ec934
 format=js
 minified=1
 [js-min:vue/md-option.vue]
@@ -584,7 +588,7 @@ checksum=0d169c90c1
 format=js
 minified=1
 [js-min:vue/md-select.vue]
-checksum=6d7246f64c
+checksum=1688b99f32
 format=js
 minified=1
 [js-min:vue/md-textarea.vue]
