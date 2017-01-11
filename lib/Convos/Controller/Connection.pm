@@ -111,6 +111,8 @@ sub update {
   if (my $url = $self->_validate_url($json->{url})) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
     $state ||= 'reconnect' if $url->host_port ne $connection->url->host_port;
+    $state ||= 'reconnect'
+      if $url->query->param("tls") // "0" ne $connection->url->query->param("tls") // "0";
     $self->app->log->debug(sprintf '%s ne %s ?? %s',
       $url->to_string, $connection->url->to_string, $state);
     $connection->url->parse($url);
