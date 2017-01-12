@@ -20,8 +20,10 @@ has core => sub {
 
 has _api_spec => sub {
   my $self = shift;
-  my $path = $self->static->file('convos-api.json')->path;
-  return Mojo::JSON::decode_json(path($path)->slurp);
+  my $file = $self->static->file('convos-api.json');
+  die "Could not find convos-api.json in static=@{$self->static->paths}, home=@{[$self->home]})"
+    unless $file;
+  return Mojo::JSON::decode_json(path($file->path)->slurp);
 };
 
 has _custom_assets => sub { Mojolicious::Static->new };
