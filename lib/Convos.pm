@@ -9,7 +9,7 @@ use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
-our $VERSION = '0.99_22';
+our $VERSION = '0.99_23';
 
 has core => sub {
   my $self = shift;
@@ -57,7 +57,7 @@ sub startup {
   my $config = $self->_config;
   my $r      = $self->routes;
 
-  $self->_home_relative_to_lib unless -d $self->home->rel_file('public');
+  $self->_home_in_share unless -d $self->home->rel_file('public');
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
@@ -156,12 +156,20 @@ sub _config {
   $config;
 }
 
-sub _home_relative_to_lib {
+sub _home_in_share {
   my $self = shift;
-  my $home = File::Spec->catdir(File::Basename::dirname(__FILE__), 'Convos');
+  my $rel  = path(qw(auto share dist Convos))->to_string;
 
-  ${$self->home} = $home;
-  $self->static->paths->[0] = $self->home->rel_file('public');
+  for my $inc (@INC) {
+    next if ref $inc or !$inc;
+    my $share = path($inc, $rel);
+    next unless -d $share and -r _;
+    ${$self->home} = $share->to_string;
+    $self->static->paths->[0] = $share->child('public')->to_string;
+    return $self;
+  }
+
+  die "Unable to find $rel in @INC";
 }
 
 sub _plugins {
@@ -204,7 +212,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_22
+0.99_23
 
 =head1 DESCRIPTION
 

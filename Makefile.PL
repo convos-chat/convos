@@ -11,10 +11,49 @@ WriteMakefile(
     resources => {
       bugtracker => 'https://github.com/jhthorsen/convos/issues',
       homepage   => 'https://github.com/jhthorsen/convos',
-      repository => 'https://github.com//home/repositories/convos.git/',
+      repository => 'https://github.com/Nordaaker/convos.git',
     },
   },
-  BUILD_REQUIRES => {'Test::More' => '0.88'},
-  PREREQ_PM      => {'perl'       => 'v5.10.0'},
-  test           => {TESTS        => (-e 'META.yml' ? 't/*.t' : 't/*.t xt/*.t')},
+  BUILD_REQUIRES => {'Test::Deep' => '0.11', 'Test::More' => '0.88'},
+  PREREQ_PM      => {
+    'Crypt::Eksblowfish'                => '0.009',
+    'File::HomeDir'                     => '1.00',
+    'File::ReadBackwards'               => '1.05',
+    'IO::Socket::SSL'                   => '1.94',
+    'JSON::Validator'                   => '0.91',
+    'Mojo::IOLoop::ForkCall'            => '0.17',
+    'Mojo::IRC'                         => '0.42',
+    'Mojolicious'                       => '7.18',
+    'Mojolicious::Plugin::AssetPack'    => '1.37',
+    'Mojolicious::Plugin::LinkEmbedder' => '0.2301',
+    'Mojolicious::Plugin::OpenAPI'      => '1.06',
+    'Parse::IRC'                        => '1.20',
+    'Time::Piece'                       => '1.20'
+  },
+  test => {TESTS => (-e 'META.yml' ? 't/*.t' : 't/*.t xt/*.t')},
 );
+
+package MY;
+use strict;
+use File::Basename ();
+use File::Find     ();
+
+sub postamble {
+  my $self       = shift;
+  my $autodir    = '$(INST_LIB)';
+  my $dist_dir   = File::Spec->catdir($autodir, qw(auto share dist), '$(DISTNAME)');
+  my $pm_to_blib = $self->oneliner("pm_to_blib({\@ARGV}, '$autodir')\n", ['-MExtUtils::Install']);
+  my %files;
+
+  my $wanted = sub {
+    return if -d;
+    my $file = File::Basename::basename($File::Find::name);
+    return unless $file =~ /^\w.*\.(\w{2,4})$/;
+    $files{$File::Find::name} = File::Spec->catfile($dist_dir, $File::Find::name);
+  };
+  File::Find::find({wanted => $wanted, no_chdir => 1}, qw(assets public));
+
+  my @cmds = $self->split_command($pm_to_blib, %files);
+
+  return join '', map {"\t\$(NOECHO) $_\n"} @cmds;
+}
