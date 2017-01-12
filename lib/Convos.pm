@@ -111,7 +111,7 @@ sub _assets {
   my $self          = shift;
   my $custom_assets = $self->core->home->rel_file('assets');
 
-  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine)]});
+  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine Reloader)]});
 
   if (-d $custom_assets) {
     $self->log->info("Including files from $custom_assets when building frontend.");
@@ -347,6 +347,7 @@ __DATA__
       };
     % end
     %= asset 'convos.js';
+    %= asset 'reloader.js' if app->mode eq 'development';
   </body>
 </html>
 @@ convos.html.ep
