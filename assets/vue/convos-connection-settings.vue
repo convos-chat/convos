@@ -99,8 +99,12 @@ module.exports = {
     saveConnection: function() {
       var self = this;
       var connection = this.connection || new Convos.Connection({user: this.user});
-      var userinfo = [this.username, this.password].join(":");
       var params = [];
+      var userinfo;
+
+      userinfo = [this.username, this.password].map(function(str) {
+        return encodeURIComponent(str)
+      }).join(":");
 
       userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
       connection.user = this.user;
@@ -124,6 +128,7 @@ module.exports = {
     updateForm: function() {
       var nick = this.user.email.split("@")[0].replace(/\W+/g, "_");
       var url = this.connection ? this.connection.url.parseUrl() : null;
+      var userinfo = url ? url.userinfo : [];
       this.wantedState = this.connection ? this.connection.wantedState : "connect";
       this.errors = [];
       this.url = url || {query: {nick: ""}};
@@ -131,8 +136,8 @@ module.exports = {
       this.onConnectCommands = url ? this.connection.on_connect_commands.join("\n") : "";
       this.server = url ? url.hostPort : Convos.settings.default_server || "";
       this.tls = url ? url.query.tls != false : null; // Need to use "==" instead of "===" http://dorey.github.io/JavaScript-Equality-Table/unified : ""/
-      this.password = url ? url.query.password : "";
-      this.username = url ? url.query.username : "";
+      this.password = "";
+      this.username = decodeURIComponent(userinfo[0] || "");
     }
   },
   ready: function() {

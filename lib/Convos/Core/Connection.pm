@@ -4,6 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Convos::Core::Dialog;
 use Convos::Util 'has_many';
 use Mojo::Loader 'load_class';
+use Mojo::Util 'url_escape';
 use Mojo::URL;
 
 has messages => sub {
@@ -18,8 +19,18 @@ has on_connect_commands => sub { +[] };
 has protocol            => sub {'null'};
 
 sub url {
-  return $_[0]->{url} if ref $_[0]->{url};
-  return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || '');
+  my ($self, $url) = @_;
+
+  if ($url) {
+    $self->{url} = $url;
+    return $self;
+  }
+  elsif (ref $_[0]->{url}) {
+    return $_[0]->{url};
+  }
+  else {
+    return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || '');
+  }
 }
 
 sub user { shift->{user} }
@@ -84,10 +95,35 @@ sub state {
   $self;
 }
 
+sub _url {
+  my ($self, $persist) = @_;
+  my $url = $self->url;
+  my $str = $self->protocol . '://';
+
+  if ($url->username) {
+    if ($persist) {
+      $str .= join(':', map { url_escape($_ // '') } $url->username, $url->password) . '@';
+    }
+    else {
+      $str .= url_escape($url->username) . '@';
+    }
+  }
+
+  $str .= $url->host_port || 'localhost:6667';
+  $str .= $url->path_query;
+
+  return $str;
+}
+
 sub _userinfo {
   my $self = shift;
   my @userinfo = split /:/, $self->url->userinfo // '';
-  $userinfo[0] ||= $self->user->email =~ /([^@]+)/ ? $1 : '';
+
+  unless ($userinfo[0]) {
+    $userinfo[0] = $self->user->email =~ /([^@]+)/ ? $1 : '';
+    $userinfo[0] =~ s![^a-z]!!gi;
+  }
+
   $userinfo[1] ||= undef;
   return \@userinfo;
 }
@@ -95,8 +131,9 @@ sub _userinfo {
 sub TO_JSON {
   my ($self, $persist) = @_;
   $self->{state} ||= 'queued';
-  my $json = {map { ($_, '' . $self->$_) } qw(name protocol state url)};
+  my $json = {map { ($_, '' . $self->$_) } qw(name protocol state)};
 
+  $json->{url}                 = $self->_url($persist);
   $json->{connection_id}       = $self->id;
   $json->{on_connect_commands} = $self->on_connect_commands;
   $json->{state}               = 'queued' if $persist and $json->{state} eq 'connected';

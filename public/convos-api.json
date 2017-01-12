@@ -596,7 +596,7 @@
         "name": { "type": "string", "description": "Name for this connection" },
         "on_connect_commands": { "type": "array", "description": "Commands to be run after the connection is established", "items": { "type": "string" } },
         "state": { "type": "string", "enum": ["connected", "queued", "disconnected"], "description": "Connection state" },
-        "url": { "type": "string", "format": "uri", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+        "url": { "type": "string", "format": "uri", "description": "Example: irc://user:@irc.perl.org?nick=superman (Note: Without password)" }
       }
     },
     "Dialog": {

@@ -395,7 +395,7 @@ checksum=5c4ef4e5e3
 format=js
 minified=1
 [js-min:js/string.js]
-checksum=c21ba319d2
+checksum=8aeda358c1
 format=js
 minified=1
 [js-min:js/svg.js]
@@ -471,7 +471,7 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:vue/convos-connection-settings.vue]
-checksum=bbeb133e96
+checksum=adb3806a0f
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]

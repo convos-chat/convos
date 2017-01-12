@@ -28,7 +28,7 @@ sub create {
         protocol            => $url->scheme,
       }
     );
-    $connection->url->parse($url);
+    $connection->url($url);
     $self->delay(
       sub { $connection->save(shift->begin) },
       sub {
@@ -110,19 +110,14 @@ sub update {
   }
   if (my $url = $self->_validate_url($json->{url})) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
-    $state ||= 'reconnect' if $url->host_port ne $connection->url->host_port;
-    $state ||= 'reconnect'
-      if $url->query->param("tls") // "0" ne $connection->url->query->param("tls") // "0";
-    $self->app->log->debug(sprintf '%s ne %s ?? %s',
-      $url->to_string, $connection->url->to_string, $state);
-    $connection->url->parse($url);
+    $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnect';
+    $connection->url($url);
   }
-
-  $state ||= 'reconnect' if $connection->state eq 'disconnected';
 
   $self->delay(
     sub {
       my ($delay) = @_;
+      $state = '' if $connection->state eq 'connected' and $state eq 'connect';
       $connection->save($delay->begin);
       $connection->disconnect($delay->begin) if $state eq 'disconnect' or $state eq 'reconnect';
     },
@@ -147,6 +142,19 @@ sub _pretty_connection_name {
   $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
   $name =~ s![\W_]+!-!g;                                # make pretty url
   $name;
+}
+
+sub _same_url {
+  my ($u1, $u2) = @_;
+  my $userinfo = $u1->password ? $u1->userinfo : $u1->username ? join ':', $u1->username,
+    $u2->password // '' : '';
+
+  $u1->userinfo($userinfo);
+
+  return 0 unless $u1->host_port eq $u2->host_port;
+  return 0 unless +($u1->query->param('tls') || '0') eq +($u2->query->param('tls') || '0');
+  return 0 unless $userinfo eq +($u2->userinfo // '');
+  return 1;
 }
 
 sub _validate_url {

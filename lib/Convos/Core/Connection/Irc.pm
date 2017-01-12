@@ -20,17 +20,15 @@ sub _event { Mojo::Util::monkey_patch(__PACKAGE__, "_event_$_[0]" => $_[1]); }
 has _irc => sub {
   my $self = shift;
   my $url  = $self->url;
+  my $nick = $url->query->param('nick');
   my $user = $self->_userinfo->[0];
   my $irc  = Mojo::IRC::UA->new(debug_key => join ':', $user, $self->name);
-  my $nick;
 
-  unless ($nick = $url->query->param('nick')) {
-    $nick = $user;
-    $nick =~ s![^\w_]!_!g;
+  unless ($nick) {
+    $nick = $self->user->email =~ /([^@]+)/ ? $1 : 'convos_user';
+    $nick =~ s!\W!_!g;
     $url->query->param(nick => $nick);
   }
-
-  $user =~ s![^a-z]!!gi;
 
   $irc->name("Convos v$Convos::VERSION");
   $irc->nick($nick);

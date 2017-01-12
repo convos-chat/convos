@@ -40,6 +40,7 @@
       var kv = i.split("=", 2);
       s.query[kv[0]] = kv[1];
     });
+
     return s;
   };
 
