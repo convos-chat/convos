@@ -14,7 +14,7 @@ notifications:
   email:
     recipients:
       - jhthorsen@cpan.org
-    on_failure: always
+    on_failure: change
     on_success: change
   irc:
     channels: "chat.freenode.net#convos"
