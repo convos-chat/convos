@@ -1,11 +1,10 @@
 Revision history for perl distribution Convos
 
-0.99_23 Not Released
+0.99_23 2017-01-13T23:05:39+0100
  - Fix adding notifications in frontend
  - Fix saving userinfo in connection URL
  - Will close dropdown when clicking outside of the dropdown
  - Will ask for password if channel has mode +k
- - TODO: Stream "/LIST" output from server
 
 0.99_22 2017-01-10T23:32:19+0100
  - Fix use of CONVOS_ORGANIZATION_URL #307
