@@ -10,7 +10,7 @@ sub create {
   my $json = $self->req->json;
   my $url  = $self->_validate_url($json->{url})
     or return $self->render(openapi => E('Missing "host" in URL'), status => 400);
-  my $name = $json->{name} || $self->_pretty_connection_name($url->host);
+  my $name = $json->{name} || $self->_pretty_connection_name($url);
   my $connection;
 
   if (!$name) {
@@ -131,7 +131,16 @@ sub update {
 }
 
 sub _pretty_connection_name {
-  my ($self, $name) = @_;
+  my ($self, $url) = @_;
+
+  my $name = $url->host;
+  my ($username) = split(':', $url->userinfo || '');
+
+  # Support ZNC style logins
+  # <user>@<useragent>/<network>
+  if (defined($username) && ($username =~ /^(?<name>[a-z0-9_\+-]+)@(?<useragent>[a-z0-9_\+-]+)\/(?<network>[a-z0-9_\+-]+)/i)) {
+    return $+{network} if ($+{network});
+  }
 
   return '' unless defined $name;
   return 'magnet' if $name =~ /\birc\.perl\.org\b/i;    # also match ssl.irc.perl.org
