@@ -28,7 +28,8 @@ my $last_active = Mojo::Date->new(1471623050)->to_datetime;
 my $last_read   = Mojo::Date->new(1471623058)->to_datetime;
 my $connection  = $user->connection({name => 'localhost', protocol => 'irc'});
 $connection->_irc->emit(
-  irc_privmsg => {
+  message => {
+    event  => 'privmsg',
     prefix => 'Supergirl!super.girl@i.love.debian.org',
     params => ['#Convos', 'not a superdupersuperman?']
   }

@@ -12,7 +12,8 @@ my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $t = t::Helper->connect_to_irc($connection);
 
 $connection->_irc->emit(
-  irc_privmsg => {
+  message => {
+    event  => 'privmsg',
     prefix => 'Supergirl!super.girl@i.love.debian.org',
     params => ['#convos', 'not a superdupersuperman?']
   }
@@ -20,8 +21,13 @@ $connection->_irc->emit(
 is($user->unread, 0, 'No unread messages');
 like slurp_log("#convos"), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
-$connection->_irc->emit(irc_privmsg =>
-    {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['#convos', 'Hey SUPERMAN!']});
+$connection->_irc->emit(
+  message => {
+    event  => 'privmsg',
+    prefix => 'Supergirl!super.girl@i.love.debian.org',
+    params => ['#convos', 'Hey SUPERMAN!']
+  }
+);
 like slurp_log("#convos"), qr{\Q<Supergirl> Hey SUPERMAN!\E}m, 'notification';
 
 my ($err, $notifications);
@@ -42,13 +48,22 @@ is_deeply $notifications,
   ],
   'notifications';
 
-$connection->_irc->emit(irc_privmsg =>
-    {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['superman', 'does this work?']}
+$connection->_irc->emit(
+  message => {
+    event  => 'privmsg',
+    prefix => 'Supergirl!super.girl@i.love.debian.org',
+    params => ['superman', 'does this work?']
+  }
 );
 like slurp_log("supergirl"), qr{\Q<Supergirl> does this work?\E}m, 'private message';
 
-$connection->_irc->emit(ctcp_action =>
-    {prefix => 'jhthorsen!jhthorsen@i.love.debian.org', params => ['#convos', "will be back"]});
+$connection->_irc->emit(
+  message => {
+    event  => 'ctcp_action',
+    prefix => 'jhthorsen!jhthorsen@i.love.debian.org',
+    params => ['#convos', "will be back"]
+  }
+);
 like slurp_log("#convos"), qr{\Q* jhthorsen will be back\E}m, 'ctcp_action';
 
 # test stripping away invalid characters in a message
@@ -64,12 +79,18 @@ $connection->send("#convos" => "some regular message", sub { Mojo::IOLoop->stop 
 Mojo::IOLoop->start;
 like slurp_log("#convos"), qr{\Q<superman> some regular message\E}m, 'loopback private';
 
-$connection->_irc->emit(irc_notice =>
-    {prefix => 'Supergirl!super.girl@i.love.debian.org', params => ['superman', "notice this?"]});
+$connection->_irc->emit(
+  message => {
+    event  => 'notice',
+    prefix => 'Supergirl!super.girl@i.love.debian.org',
+    params => ['superman', "notice this?"]
+  }
+);
 like slurp_log("supergirl"), qr{\Q-Supergirl- notice this?\E}m, 'irc_notice';
 
 $connection->_irc->emit(
-  irc_privmsg => {
+  message => {
+    event  => 'privmsg',
     prefix => 'superduper!super.duper@i.love.debian.org',
     params => ['#convos', 'foo-bar-baz, yes?']
   }

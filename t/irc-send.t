@@ -16,7 +16,6 @@ my ($err, $res);
 $connection->on(
   message => sub {
     my ($self, $target, $data) = @_;
-    diag "[$data->{type}] $data->{message}" if $ENV{HARNESS_IS_VERBOSE};
     $connection_log .= "[$data->{type}] $data->{message}\n";
     Mojo::IOLoop->stop if $data->{message} =~ $stop_re;
   }
@@ -180,8 +179,6 @@ $t->run(
   }
 );
 
-$connection->on_connect_commands(['/msg NickServ identify s3cret']);
-
 $t->run(
   [
     qr{NICK supermanx}   => ['main', 'welcome.irc'],
@@ -191,12 +188,27 @@ $t->run(
   sub {
     my $irc = $connection->_irc;
     my @e;
+
+    $_->frozen('Not joined') for @{$connection->dialogs};
+    $connection->on_connect_commands(['/msg NickServ identify s3cret']);
     $connection->connect(sub { });
-    $t->on($irc, irc_join    => sub { push @e, 'irc_join' });
-    $t->on($irc, irc_privmsg => sub { push @e, 'irc_privmsg' });
-    $t->on($irc, irc_privmsg => sub { Mojo::IOLoop->stop });
+
+    $t->on(
+      $irc,
+      message => sub {
+        my ($irc, $msg) = @_;
+        push @e, $msg->{event};
+        Mojo::IOLoop->stop if $msg->{event} eq 'privmsg';
+      }
+    );
     Mojo::IOLoop->start;
-    is_deeply(\@e, [qw(irc_join irc_privmsg)], 'run through the correct events');
+
+    is_deeply(
+      [grep { $_ !~ /nam|notice|topic/ } @e],
+      [qw(rpl_welcome join privmsg)],
+      'run through the correct events'
+    ) or diag join ' ', @e;
+
     is_deeply(
       $connection->on_connect_commands,
       ['/msg NickServ identify s3cret'],
