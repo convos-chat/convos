@@ -4825,6 +4825,9 @@ ul.complete-dropdown {
     background-color: #ffd7db;
     margin-left: -0.5rem;
     padding-left: 0.5rem; }
+  .convos-message.action.highlight .message {
+    margin-left: 0;
+    padding-left: 0; }
   .convos-message.notice {
     border-left: 2px solid #bdbdbd;
     color: #888888; }
@@ -4847,6 +4850,8 @@ ul.complete-dropdown {
       opacity: 1;
       color: #888888;
       transition: opacity 300ms; }
+  .convos-message.same-user.action .title {
+    display: inline; }
   .convos-message .message a {
     color: inherit;
     text-decoration: underline; }
@@ -5221,4 +5226,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../ed11ab0a9c/main.css.map */
+/*# sourceMappingURL=../1e33aba0df/main.css.map */

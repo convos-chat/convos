@@ -119,6 +119,10 @@ $convos-input-height: 46px;
     margin-left: -0.5rem;
     padding-left: 0.5rem;
   }
+  &.action.highlight .message {
+    margin-left: 0;
+    padding-left: 0;
+  }
   &.notice {
     border-left: 2px solid $notice-border-color;
     color: lighten($text-color, 40%);
@@ -143,6 +147,9 @@ $convos-input-height: 46px;
       color: lighten($text-color, 40%);
       transition: opacity 300ms;
     }
+  }
+  &.same-user.action {
+    .title { display: inline; }
   }
 
   .message {
