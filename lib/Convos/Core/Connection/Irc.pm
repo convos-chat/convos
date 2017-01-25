@@ -145,25 +145,6 @@ sub participants {
   );
 }
 
-sub rooms {
-  my ($self, $cb) = @_;
-  my $host = $self->url->host;
-
-  state $cache = {};    # room list is shared between all connections
-  return next_tick $self, $cb, '', $cache->{$host} if $cache->{$host};
-
-  Scalar::Util::weaken($self);
-  return $self->_proxy(
-    channels => sub {
-      my ($irc, $err, $map) = @_;
-      $cache->{$host} = [map { my $c = $map->{$_}; $c->{name} = $_; $c } keys %$map];
-      delete $cache->{$host} unless @{$cache->{$host}};
-      Mojo::IOLoop->timer(ROOM_CACHE_TIMER, sub { delete $cache->{$host} });
-      $self->$cb($cache->{$host} ? $err : 'No rooms.', $cache->{$host} || []);
-    },
-  );
-}
-
 sub send {
   my ($self, $target, $message, $cb) = @_;
 
@@ -614,10 +595,6 @@ L</nick>.
 =head2 participants
 
 See L<Convos::Core::Connection/participants>.
-
-=head2 rooms
-
-See L<Convos::Core::Connection/rooms>.
 
 =head2 send
 
