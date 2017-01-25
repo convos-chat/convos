@@ -156,8 +156,10 @@
 
   proto._onMessage = function(msg) {
     if (msg.errors) return this._onError(msg);
-    msg.frozen = "";
-    return this.user.ensureDialog(msg).addMessage(msg);
+    var dialog = msg.dialog_id ? this.user.ensureDialog(msg) : this.user.getActiveDialog();
+    if (!dialog) dialog = this.user.ensureDialog(msg);
+    if (dialog.frozen) msg.frozen = "";
+    dialog.addMessage(msg);
   };
 
   proto._onSent = function(msg) {

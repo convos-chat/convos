@@ -10,7 +10,7 @@
           c["inactive-user"] = true;
         }
 
-        if ((!this.dialog.dialog_id || msg.type == "private") && msg.message && msg.from == msg.prev.from) {
+        if (msg.message && msg.from == msg.prev.from) {
           c["same-user"] = true;
         }
         else {

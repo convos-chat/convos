@@ -351,7 +351,7 @@ checksum=68c1999296
 format=js
 minified=1
 [js-min:js/core/connection.js]
-checksum=50bce262fd
+checksum=0bc115a22b
 format=js
 minified=1
 [js-min:js/core/dialog.js]
