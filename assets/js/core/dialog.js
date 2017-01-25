@@ -211,14 +211,14 @@
     else if (frozen) {
       messages.push({message: this.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
     }
-    else if (!messages.length) {
+    else if (!messages.length && this.messages.length <= 1) {
       messages.push({message: this.is_private ? "What do you want to say to " + this.name + "?" : "You have joined " + this.name + ", but no one has said anything as long as you have been here.", type: "notice"});
     }
 
     if (messages.length) {
       this.messages.shift(); // remove "Loading messages...";
     }
-    else {
+    else if (this.messages.length) {
       this.messages[0].message = "End of history.";
     }
 
