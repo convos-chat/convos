@@ -23,7 +23,7 @@
 
     if (width > maxWidth) {
       height = height * maxWidth / width;
-      width  = windowWidth;
+      width  = maxWidth;
     }
     if (height > maxHeight) {
       width  = width * maxHeight / height;
