@@ -4982,10 +4982,22 @@ a.toggle-main-menu {
     height: 100vh;
     overflow: hidden; }
 
-img.embed, .link-embedder.text-html {
-  max-width: 50em;
+.link-embedder,
+.link-embedder.text-html,
+iframe.link-embedder,
+img.embed {
   overflow: hidden;
-  margin: 6px 8px; }
+  max-width: 98%;
+  max-height: 20rem;
+  margin: 6px 1%; }
+  @media only screen and (min-width: 601px) {
+    .link-embedder,
+    .link-embedder.text-html,
+    iframe.link-embedder,
+    img.embed {
+      max-width: 50em;
+      max-height: none;
+      margin: 6px 8px; } }
 
 img.embed {
   max-height: 220px; }
@@ -5209,4 +5221,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../3707223411/main.css.map */
+/*# sourceMappingURL=../ed11ab0a9c/main.css.map */

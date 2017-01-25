@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 0.99_24 Not Released
  - Can send/receive any IRC message #317
+ - Fix width of embedded youtube videos on small screens
  - Removed "roomsForConnection"
 
 0.99_23 2017-01-13T23:05:39+0100

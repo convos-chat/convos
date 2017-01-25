@@ -1,7 +1,17 @@
-img.embed, .link-embedder.text-html {
-  max-width: $readable-width;
+.link-embedder,
+.link-embedder.text-html,
+iframe.link-embedder,
+img.embed {
   overflow: hidden;
-  margin: 6px 8px;
+  max-width: 98%;
+  max-height: 20rem;
+  margin: 6px 1%;
+
+  @media #{$medium-and-up} {
+    max-width: $readable-width;
+    max-height: none;
+    margin: 6px 8px;
+  }
 }
 
 img.embed {
