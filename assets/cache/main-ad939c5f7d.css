@@ -3560,42 +3560,6 @@ a.waves-effect .waves-ripple, a.btn-delete .waves-ripple {
     box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
     margin: 16px 0; }
 
-.materialboxed {
-  display: block;
-  cursor: zoom-in;
-  position: relative;
-  transition: opacity .4s; }
-  .materialboxed:hover {
-    will-change: left, top, width, height; }
-    .materialboxed:hover:not(.active) {
-      opacity: .8; }
-
-.materialboxed.active {
-  cursor: zoom-out; }
-
-#materialbox-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #292929;
-  z-index: 1000;
-  will-change: opacity; }
-
-.materialbox-caption {
-  position: fixed;
-  display: none;
-  color: #fff;
-  line-height: 50px;
-  bottom: 0;
-  width: 100%;
-  text-align: center;
-  padding: 0% 15%;
-  height: 50px;
-  z-index: 1000;
-  -webkit-font-smoothing: antialiased; }
-
 select:focus {
   outline: 1px solid #a5d5a7; }
 
@@ -5019,6 +4983,14 @@ img.embed {
 .gist .highlight {
   background: #f6f6f6 !important; }
 
+.materialboxed {
+  cursor: zoom-in;
+  border-radius: 2px;
+  transition: box-shadow .3s;
+  box-shadow: 0; }
+  .materialboxed:hover {
+    box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.2); }
+
 .materialbox-overlay {
   background-color: #292929;
   width: 0;
@@ -5027,13 +4999,11 @@ img.embed {
   bottom: 0;
   left: 0;
   top: 0;
-  z-index: 1000;
+  z-index: 1001;
   opacity: 0.01;
-  cursor: zoom-out;
-  transition: opacity .4s ease-in-out;
-  will-change: opacity; }
+  cursor: zoom-out; }
   .materialbox-overlay img {
-    transition: width .3s ease-in-out, height .3s ease-in-out, left .3s ease-in-out,  top .3s ease-in-out; }
+    transition: width .3s ease-in-out, height .3s ease-in-out, left .3s ease-in-out, top .3s ease-in-out; }
   .materialbox-overlay.active {
     display: block;
     opacity: 0.98;
@@ -5226,4 +5196,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../1e33aba0df/main.css.map */
+/*# sourceMappingURL=../92e964d87e/main.css.map */

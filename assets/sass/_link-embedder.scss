@@ -32,6 +32,17 @@ img.embed {
   background: $settings-active-color !important;
 }
 
+.materialboxed {
+  cursor: zoom-in;
+  border-radius: 2px;
+  transition: box-shadow .3s;
+  box-shadow: 0;
+
+  &:hover {
+    box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.2);
+  }
+}
+
 .materialbox-overlay {
   background-color: #292929;
   width: 0;
@@ -40,18 +51,16 @@ img.embed {
   bottom: 0;
   left: 0;
   top: 0;
-  z-index: 1000;
+  z-index: 1001;
   opacity: 0.01;
   cursor: zoom-out;
-  transition: opacity .4s ease-in-out;
-  will-change: opacity;
 
   img {
     transition:
       width .3s ease-in-out,
       height .3s ease-in-out,
-      left .3s ease-in-out, 
-      top .3s ease-in-out; 
+      left .3s ease-in-out,
+      top .3s ease-in-out;
   }
 
   &.active {

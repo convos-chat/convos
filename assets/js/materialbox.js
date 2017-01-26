@@ -1,60 +1,59 @@
 (function($) {
-  var margin = 30;
-  var id     = 0;
+  var $materialbox, margin = 30;
 
   var close = function(e) {
-    $(this).removeClass("active");
+    $materialbox.removeClass("active");
   };
 
-  var open = function(e) {
-    var $origin      = $(this);
-    var $materialbox = $('<div class="materialbox-overlay"></div>');
-    var $clone       = $origin.clone().removeAttr("class");
-    var id           = $origin.attr("data-materialbox-id");
-    var offset       = $origin.offset();
-
-    $materialbox.attr("id", id).click(close).append($clone);
-    $("body").append($materialbox);
-
-    var maxWidth  = window.innerWidth - margin;
-    var maxHeight = window.innerHeight - margin;
-    var width     = $clone.width();
-    var height    = $clone.height();
-
-    if (width > maxWidth) {
-      height = height * maxWidth / width;
-      width  = maxWidth;
+  var materialbox = function() {
+    if (!$materialbox) {
+      $materialbox = $('<div class="materialbox-overlay"></div>').click(close);
+      $("body").append($materialbox);
     }
-    if (height > maxHeight) {
-      width  = width * maxHeight / height;
-      height = maxHeight;
+    return $materialbox;
+  }
+
+  var open = function(e) {
+    var $origin = $(this);
+    var $clone = $origin.clone().removeAttr("class");
+    var offset = $origin.offset();
+    var maxWidth = window.innerWidth - margin;
+    var maxHeight = window.innerHeight - margin;
+    var cloneWidth, cloneHeight;
+
+    materialbox().html($clone);
+    cloneWidth = $clone.width();
+    cloneHeight = $clone.height();
+
+    if (cloneWidth > maxWidth) {
+      cloneHeight = cloneHeight * maxWidth / cloneWidth;
+      cloneWidth = maxWidth;
+    }
+    if (cloneHeight > maxHeight) {
+      cloneWidth = cloneWidth * maxHeight / cloneHeight;
+      cloneHeight = maxHeight;
     }
 
     $clone.css({
       position: "absolute",
-      left:     offset.left,
-      top:      offset.top,
-      height:   $origin.height(),
-      width:    $origin.width()
+      left: offset.left,
+      top: offset.top,
+      height: $origin.height(),
+      width: $origin.width()
     });
 
+    materialbox().addClass("active");
     setTimeout(function() {
-      $materialbox.addClass("active");
       $clone.css({
-        left:   Math.floor(maxWidth / 2 - width / 2 + margin / 2) + "px",
-        top:    Math.floor(maxHeight / 2 - height / 2 + margin / 2) + "px",
-        width:  width,
-        height: height
+        left: Math.floor(maxWidth / 2 - cloneWidth / 2 + margin / 2) + "px",
+        top: Math.floor(maxHeight / 2 - cloneHeight / 2 + margin / 2) + "px",
+        width: cloneWidth,
+        height: cloneHeight
       });
     }, 1);
   };
 
   $.fn.materialbox = function() {
-    return this.each(function() {
-      var $origin = $(this);
-      if ($origin.attr("data-materialbox-id")) return;
-      $origin.attr("data-materialbox-id", "materialbox_overlay_" + (++id));
-      $origin.click(open);
-    });
+    return this.off("click", open).on("click", open);
   };
 }(jQuery));
