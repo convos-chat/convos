@@ -9,14 +9,17 @@
         </p>
       </div>
     </div>
-    <div class="row" v-if="user.connections.length > 1">
-      <md-select id="form_connection_id" :value.sync="connectionId" label="Select connection">
+    <div class="row">
+      <md-select :value.sync="connectionId" label="Select connection">
         <md-option :value="c.connection_id" :selected="connectionId == c.connection_id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
+        <md-option value="">Create new connection...</md-option>
       </md-select>
     </div>
     <div class="row">
-      <md-input cols="s8 m9" :value.sync="dialogName">Room or nick</md-input>
-      <div class="col input-field s4 m3">
+      <md-input cols="s12" :value.sync="dialogName" focus="true">Room or nick</md-input>
+    </div>
+    <div class="row">
+      <div class="col input-field s12">
         <button @click="join" class="btn waves-effect waves-light" :disabled="!dialogName.length">Chat</button>
       </div>
     </div>
@@ -36,6 +39,9 @@ module.exports = {
     };
   },
   watch: {
+    "connectionId": function(v, o) {
+      if (!v && o) this.settings.main = "#connection";
+    },
     "settings.main": function(v, o) {
       this.updateForm();
     }
