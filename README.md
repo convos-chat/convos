@@ -22,4 +22,30 @@ screen as you start convos:
 
     [Sun Aug 21 11:18:03 2016] [info] Generated CONVOS_INVITE_CODE="b34b0ab873e80419b9a2170de8ca8190"
 
-[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=one-point-oh)](https://travis-ci.org/Nordaaker/convos)
+# Branch overview
+
+## stable
+
+"[stable](https://github.com/Nordaaker/convos/tree/stable)" is the branch you
+should use, if you want to clone and run Convos, instead of just running the
+install command above.
+
+[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=stable)](https://travis-ci.org/Nordaaker/convos)
+
+## master
+
+"[master](https://github.com/Nordaaker/convos/tree/master)" is for developers.
+It's mostly stable, but might require extra tools and packages to run.
+
+[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
+
+## gh-pages
+
+"[gh-pages](https://github.com/Nordaaker/convos/tree/gh-pages)" is the source
+for [http://convos.by](http://convos.by), which is built with
+[github pages](https://pages.github.com/).
+
+## backup/convos-0.8604
+
+[backup/convos-0.8604](https://github.com/Nordaaker/convos/tree/backup/convos-0.8604)
+is a snapshot for the first iteration of Convos.
