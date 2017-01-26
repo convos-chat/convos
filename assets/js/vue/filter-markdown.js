@@ -18,7 +18,7 @@
 
   var text2emojiRe = Object.keys(text2emoji).map(function(s) { return s.replace(/([\(\)])/g, "\\$1"); }).join("|");
   var codeToHtmlRe = new RegExp("(\\\\?)`([^`]+)`", "g");
-  var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w.*?)\\3", "g");
+  var mdToHtmlRe = new RegExp("(^|\\s)(\\\\?)(\\*+|_+)(\\w[^<]*?)\\3", "g");
 
   text2emojiRe = new RegExp("(^|\\s)(" + text2emojiRe + ")(?=\\s|$)", "i");
 

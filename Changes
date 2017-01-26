@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Can send/receive any IRC message #317
  - Fix width of embedded youtube videos on small screens
  - Fix zooming images inline in chat
+ - Fix not matching markdown, because a link was injected
  - Removed "roomsForConnection"
 
 0.99_23 2017-01-13T23:05:39+0100
