@@ -3,6 +3,7 @@
 
   var close = function(e) {
     $materialbox.removeClass("active");
+    $(document).unbind('.keyup.closeBox');
   };
 
   var materialbox = function() {
@@ -33,6 +34,10 @@
       cloneWidth = cloneWidth * maxHeight / cloneHeight;
       cloneHeight = maxHeight;
     }
+    $(document).on('keyup.closeBox', function(e) {
+     if (e.keyCode == 27) { close(); }
+    });
+
 
     $clone.css({
       position: "absolute",

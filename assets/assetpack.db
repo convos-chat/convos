@@ -351,11 +351,11 @@ checksum=68c1999296
 format=js
 minified=1
 [js-min:js/core/connection.js]
-checksum=0bc115a22b
+checksum=59ea030d8b
 format=js
 minified=1
 [js-min:js/core/dialog.js]
-checksum=da76b21d4a
+checksum=05d8f2658f
 format=js
 minified=1
 [js-min:js/core/user.js]
@@ -379,7 +379,7 @@ checksum=587f43287e
 format=js
 minified=1
 [js-min:js/materialbox.js]
-checksum=87dd033eab
+checksum=8388ff2e8d
 format=js
 minified=1
 [js-min:js/notification.js]
@@ -420,7 +420,7 @@ checksum=4be174c8ad
 format=js
 minified=1
 [js-min:js/vue/filter-markdown.js]
-checksum=104ff73a69
+checksum=3c6f970c35
 format=js
 minified=1
 [js-min:js/vue/filter-timestring.js]
@@ -442,7 +442,7 @@ format=js
 minified=1
 mtime=1471637625
 [js-min:js/vue/mixin-message.js]
-checksum=10380781e1
+checksum=1bf6f79fd7
 format=js
 minified=1
 [js-min:js/vue/mixin-messages.js]
@@ -458,7 +458,7 @@ checksum=fc914ae675
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=1284e2816b
+checksum=fc914ae675
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
