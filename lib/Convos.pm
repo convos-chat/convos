@@ -9,7 +9,7 @@ use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
-our $VERSION = '0.99_23';
+our $VERSION = '0.99_24';
 
 has core => sub {
   my $self = shift;
@@ -212,7 +212,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_23
+0.99_24
 
 =head1 DESCRIPTION
 
