@@ -100,6 +100,11 @@ sub _debug {
   warn sprintf "[%s/%s] $msg\n", $self->user->email, $self->id, @args;
 }
 
+sub _rooms {
+  my ($self, $rooms) = @_;
+  return [splice @$rooms, 0, 60];
+}
+
 sub _url {
   my ($self, $persist) = @_;
   my $url = $self->url;

@@ -144,14 +144,14 @@ sub rooms {
 
       push @rooms, @by_topic;
       $self->$cb('',
-        {end => $store->{end}, n_rooms => int(@rooms), rooms => [splice @rooms, 0, 40]});
+        {end => $store->{end}, n_rooms => int(@rooms), rooms => $self->_rooms(\@rooms)});
     };
   }
   else {
     $generate = sub {
       @rooms = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{rooms}};
       $self->$cb('',
-        {end => $store->{end}, n_rooms => int(@rooms), rooms => [splice @rooms, 0, 40]});
+        {end => $store->{end}, n_rooms => int(@rooms), rooms => $self->_rooms(\@rooms)});
     };
   }
 
