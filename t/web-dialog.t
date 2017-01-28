@@ -75,7 +75,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       on_connect_commands => [],
       protocol            => 'irc',
       state               => 'connected',
-      url                 => 'irc://localhost:6667?nick=superman',
+      url                 => 'irc://localhost:6667',
     }
   ],
   'user connections'

@@ -26,24 +26,11 @@ my %IRC_PROXY_METHOD = (
 
 has _irc => sub {
   my $self = shift;
-  my $url  = $self->url;
-  my $nick = $url->query->param('nick');
-  my $user = $self->_userinfo->[0];
-  my $irc  = Mojo::IRC::UA->new(debug_key => join ':', $user, $self->name);
-
-  unless ($nick) {
-    $nick = $self->user->email =~ /([^@]+)/ ? $1 : 'convos_user';
-    $nick =~ s!\W!_!g;
-    $url->query->param(nick => $nick);
-  }
-
-  $irc->name("Convos v$Convos::VERSION");
-  $irc->nick($nick);
-  $irc->user($user);
-  $irc->parser(Parse::IRC->new(ctcp => 1));
+  my $irc = Mojo::IRC::UA->new(debug_key => join ':', $self->user->email, $self->name);
 
   Scalar::Util::weaken($self);
-  $irc->register_default_event_handlers;
+  $irc->name("Convos v$Convos::VERSION");
+  $irc->parser(Parse::IRC->new(ctcp => 1));
   $irc->unsubscribe('message');
   $irc->on(close => sub { $self and $self->_event_close($_[0]) });
   $irc->on(error => sub { $self and $self->_event_error({params => [$_[1]]}) });
@@ -52,9 +39,9 @@ has _irc => sub {
       my ($irc, $msg) = @_;
       my $method = "_event_$msg->{event}";
       my $proxy  = $IRC_PROXY_METHOD{$msg->{event}};
-      $self->_irc->$proxy($msg)                                   if $proxy;
-      warn "[@{[$self->user->email]}/@{[$self->id]}] $method()\n" if DEBUG >= 2;
-      return $self->$method($msg)                                 if $self->can($method);
+      $self->_irc->$proxy($msg)   if $proxy;
+      $self->_debug("$method()")  if DEBUG > 1;
+      return $self->$method($msg) if $self->can($method);
       return $self->_fallback($msg) unless $msg->{look_for};    # maybe handled by Mojo::IRC::UA
     }
   );
@@ -64,23 +51,11 @@ has _irc => sub {
 
 sub connect {
   my ($self, $cb) = @_;
-  my $irc      = $self->_irc;
-  my $userinfo = $self->_userinfo;
-  my $url      = $self->url;
-  my $tls      = $url->query->param('tls') // 1;
-
-  $irc->pass($userinfo->[1]);
-  $irc->server($url->host_port) unless $irc->server;
-  $irc->tls($tls ? {} : undef);
-
-  warn "[@{[$self->user->email]}/@{[$self->id]}] connect($irc->{server})\n" if DEBUG;
-
-  unless ($irc->server) {
-    return next_tick $self, $cb, 'Invalid URL: hostname is not defined.';
-  }
+  return $self->_maybe_reconnect($cb) if $self->state eq 'connected';
 
   delete $self->{disconnect};
-  Scalar::Util::weaken($self);
+  $self->_setup_irc;
+  $self->_debug('connect(%s) Connecting...', $self->_irc->server) if DEBUG;
   $self->state('queued', 'Connecting...');
   $self->{steal_nick_tid} //= $self->_steal_nick;
 
@@ -91,13 +66,15 @@ sub connect {
   }
 
   Mojo::IOLoop->delay(
-    sub { $irc->connect(shift->begin) },
+    sub { $self->_irc->connect(shift->begin) },
     sub {
       my ($delay, $err) = @_;
+
+      $self->_debug('connect(%s) %s', $self->_irc->server, $err || 'Success') if DEBUG;
       $self->_notice($err) if $err;
 
-      if ($tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
-        $url->query->param(tls => 0);
+      if ($self->_irc->tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
+        $self->url->query->param(tls => 0);
         $self->save(sub { });
         $self->user->core->connect($self, $cb);    # let's queue up to make irc admins happy
       }
@@ -107,7 +84,7 @@ sub connect {
       else {
         $self->{delayed} = 0;
         $self->{myinfo} ||= {};
-        $self->state(connected => "Connected to $irc->{server}.")->$cb('');
+        $self->state(connected => "Connected to @{[$self->_irc->server]}.")->$cb('');
       }
     }
   );
@@ -241,6 +218,20 @@ sub _kick {
   return $self->_proxy(kick => "$target $nick :$reason", sub { $self->$cb(@_[1, 2]) });
 }
 
+sub _maybe_reconnect {
+  my ($self, $cb) = @_;
+  my $irc = $self->_irc;
+
+  if ($self->url->host_port eq $irc->server) {
+    $self->_debug("connect(%s) Connected", $irc->server) if DEBUG;
+    return next_tick $self, $cb, '';
+  }
+  else {
+    $self->_debug("connect(%s) Reconnect", $irc->server) if DEBUG;
+    return $self->disconnect(sub { shift->connect($cb) });
+  }
+}
+
 sub _mode {
   my ($self, $target, $mode, $cb) = @_;
 
@@ -319,6 +310,27 @@ sub _send {
       $self->$cb('');
     }
   );
+}
+
+sub _setup_irc {
+  my $self     = shift;
+  my $url      = $self->url;
+  my $irc      = $self->_irc;
+  my $userinfo = $self->_userinfo;
+  my $nick     = $url->query->param('nick');
+  my $tls      = $url->query->param('tls') // 1;
+
+  unless ($nick) {
+    $nick = $self->user->email =~ /^([^@]+)/ ? $1 : 'convos_user';
+    $nick =~ s!\W!_!g;
+    $url->query->param(nick => $nick);
+  }
+
+  $irc->server($url->host_port || 'localhost:6667');
+  $irc->nick($nick);
+  $irc->user($userinfo->[0]);
+  $irc->pass($userinfo->[1]);
+  $irc->tls($tls ? {} : undef);
 }
 
 sub _steal_nick {

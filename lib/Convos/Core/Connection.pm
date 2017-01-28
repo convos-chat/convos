@@ -90,6 +90,11 @@ sub state {
   $self;
 }
 
+sub _debug {
+  my ($self, $msg, @args) = @_;
+  warn sprintf "[%s/%s] $msg\n", $self->user->email, $self->id, @args;
+}
+
 sub _url {
   my ($self, $persist) = @_;
   my $url = $self->url;
