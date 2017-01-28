@@ -351,7 +351,7 @@ checksum=68c1999296
 format=js
 minified=1
 [js-min:js/core/connection.js]
-checksum=59ea030d8b
+checksum=8a40c8479e
 format=js
 minified=1
 [js-min:js/core/dialog.js]
@@ -359,7 +359,7 @@ checksum=05d8f2658f
 format=js
 minified=1
 [js-min:js/core/user.js]
-checksum=9794c1d8b5
+checksum=d20ca0601f
 format=js
 minified=1
 [js-min:js/date.js]
@@ -427,6 +427,10 @@ minified=1
 checksum=0ccf65bd73
 format=js
 minified=1
+[js-min:js/vue/mixin-autocomplete.js]
+checksum=3e8275721f
+format=js
+minified=1
 [js-min:js/vue/mixin-connection-editor.js]
 checksum=ea11f1217b
 format=js
@@ -454,11 +458,11 @@ checksum=a2aa73fa3b
 format=js
 minified=1
 [sass:sass/main.scss]
-checksum=fc914ae675
+checksum=a265e55dd6
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=fc914ae675
+checksum=a265e55dd6
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
@@ -475,7 +479,11 @@ checksum=adb3806a0f
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]
-checksum=0f40dfd1ab
+checksum=a2fdeba714
+format=js
+minified=1
+[js-min:vue/convos-dialog-chooser.vue]
+checksum=513d5341ef
 format=js
 minified=1
 [js-min:vue/convos-dialog-container.vue]
@@ -580,7 +588,7 @@ checksum=198ce7d2b7
 format=js
 minified=1
 [js-min:vue/md-input.vue]
-checksum=6cf12ec934
+checksum=0a726f7b0e
 format=js
 minified=1
 [js-min:vue/md-option.vue]
@@ -588,7 +596,7 @@ checksum=0d169c90c1
 format=js
 minified=1
 [js-min:vue/md-select.vue]
-checksum=1688b99f32
+checksum=765054774a
 format=js
 minified=1
 [js-min:vue/md-textarea.vue]

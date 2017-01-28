@@ -18,7 +18,7 @@ module.exports = {
     return {active: false, textValue: "", options: []};
   },
   events: {
-    'option::added': function(opt) {
+    "option::added": function(opt) {
       if (opt.selected) {
         this.$children.forEach(function(o) { if (o != opt) o.selected = false; });
         this.setValue(opt);
@@ -29,7 +29,7 @@ module.exports = {
       this.activate(false);
       this.options.push({selected: opt.selected, value: opt.value});
     },
-    'option::removed': function(opt) {
+    "option::removed": function(opt) {
       var next;
       for (i = 0; i < this.$children.length; i++) {
         var o = this.$children[i];
@@ -40,7 +40,7 @@ module.exports = {
       this.options = this.options.filter(function(o) { return o.value != opt.value; });
       if (next) this.setValue(next);
     },
-    'option::selected': function(opt) {
+    "option::selected": function(opt) {
       this.activate(false);
       this.$children.forEach(function(o) { if (o != opt) o.selected = false; });
       this.options.forEach(function(o) { o.selected = opt.value == o.value; });
@@ -63,7 +63,7 @@ module.exports = {
       this.textValue = opt ? opt.text() || opt.value : "";
       this.allowChangeEvent = true;
       this.$nextTick(function() {
-        if (this.allowChangeEvent) this.$emit('change');
+        if (this.allowChangeEvent) this.$emit("change", this.value);
         this.allowChangeEvent = false; // avoid duplicates
       });
       return this; // allow chaining

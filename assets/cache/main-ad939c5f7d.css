@@ -4645,24 +4645,29 @@ div.alert {
     .not-logged-in-wrapper .about a:hover {
       color: #222; }
 
-div.autocomplete {
-  -webkit-overflow-scrolling: touch;
-  overflow: auto;
-  border-bottom: 1px solid #9e9e9e;
-  max-height: 8em;
-  position: relative; }
-  div.autocomplete ul {
-    margin: 0;
-    padding: 0; }
-  div.autocomplete li {
-    line-height: 3rem;
-    color: rgba(0, 0, 0, 0.87); }
-    div.autocomplete li:hover {
-      background-color: #eee; }
-    div.autocomplete li.active {
-      background-color: #e1e1e1; }
-    div.autocomplete li a, div.autocomplete li span {
-      display: block; }
+.convos-create-dialog .autocomplete a {
+  padding: 0.3rem;
+  border-bottom: 1px solid #eee;
+  display: block; }
+  .convos-create-dialog .autocomplete a:hover {
+    background-color: #eee; }
+  .convos-create-dialog .autocomplete a.active {
+    background-color: #e1e1e1; }
+
+.convos-create-dialog .autocomplete h6 {
+  color: #3c813f;
+  display: block;
+  margin: 0;
+  font-weight: bold; }
+
+.convos-create-dialog .autocomplete p {
+  color: #484848;
+  font-size: 0.9rem;
+  margin-top: 0.3rem; }
+
+.convos-create-dialog .autocomplete .badge .material-icons {
+  font-size: 1.1em;
+  vertical-align: middle; }
 
 ul.complete-dropdown {
   margin: 0;
@@ -5196,4 +5201,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../92e964d87e/main.css.map */
+/*# sourceMappingURL=../55c1bf5c77/main.css.map */

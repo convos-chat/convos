@@ -1,9 +1,9 @@
 <template>
   <div class="input-field col" :class="cols">
-    <input v-model="value" class="validate" :autocomplete="autocomplete"
-      :id="id" v-el:input :name="name" :placeholder="placeholder"
-      :readonly="readonly"
-      :type="type" :disabled="disabled" :required="required"
+    <input v-model="value" v-el:input class="validate"
+      :autocomplete="autocomplete" :disabled="disabled"
+      :id="id" :name="name" :placeholder="placeholder"
+      :readonly="readonly" :required="required" :type="type"
       @focus="hasFocus=true" @blur="hasFocus=false">
     <label :for="id" :class="{active:labelActive}"><slot></slot></label>
   </div>
