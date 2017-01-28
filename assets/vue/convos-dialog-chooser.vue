@@ -5,7 +5,7 @@
       @blur="hasFocus=false" @focus="hasFocus=true" @keydown="keydown" @keyup="keyup">
     <label :for="id" class="active">Dialog name</label>
     <div class="autocomplete" :class="filteredOptions.length ? '' : 'hidden'">
-      <a href="#join:{{room.name}}" class="title" :class="optionClass($index)" @click="select(room)" v-for="room in filteredOptions">
+      <a href="#join:{{room.name}}" class="title" :class="optionClass($index)" @click.prevent="select(room)" v-for="room in filteredOptions">
           <span class="badge"><i class="material-icons" v-if="room.n_users">person</i>{{room.n_users || "new"}}</span>
           <h6>{{room.name}}</h6>
           <p>{{topic(room.topic) | markdown}}</p>
@@ -21,7 +21,7 @@ module.exports = {
   },
   computed: {
     filteredOptions: function() {
-      var options = this.options;
+      var options = this.options || [];
 
       if (this.value) {
         options = [{name: this.value, topic: "Click here to create/join custom dialog"}].concat(options);

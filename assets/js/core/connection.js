@@ -81,16 +81,13 @@
     if (this.connection_id) {
       Convos.api.updateConnection({body: attrs, connection_id: this.connection_id}, function(err, xhr) {
         if (err) return cb.call(self, err);
-        self.update(xhr.body);
-        cb.call(self, err);
+        cb.call(self.user.ensureConnection(xhr.body), err);
       });
     }
     else {
       Convos.api.createConnection({body: attrs}, function(err, xhr) {
         if (err) return cb.call(self, err);
-        self.update(xhr.body);
-        self.user.connections.push(self);
-        cb.call(self, err);
+        cb.call(self.user.ensureConnection(xhr.body), err);
       });
     }
     return this;

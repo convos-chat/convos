@@ -161,8 +161,9 @@ sub rooms {
       sub { $self->_irc->write(LIST => shift->begin) },
       sub {
         my ($delay, $err) = @_;
-        return $self->$cb($err, {}) if $err;
-        return Mojo::IOLoop->timer(ROOMS_REPLY_DELAY, $generate);
+        return Mojo::IOLoop->timer(ROOMS_REPLY_DELAY, $generate) unless $err;
+        delete $store->{ts};
+        $self->$cb($err, {});
       },
     );
     return $self;

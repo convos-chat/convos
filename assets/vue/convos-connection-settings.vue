@@ -122,7 +122,7 @@ module.exports = {
         self.deleted = false;
         self.updateForm(this);
         this.user.ensureDialog({connection_id: this.connection_id, dialog_id: "", name: this.connection_id});
-        self.settings.main = "#chat/" + this.connection_id + "/";
+        self.settings.main = this.connection ? "#chat/" + this.connection_id + "/" : "#create-dialog";
       });
     },
     updateForm: function() {
@@ -134,7 +134,7 @@ module.exports = {
       this.url = url || {query: {nick: ""}};
       this.nick = url ? url.query.nick || nick : nick;
       this.onConnectCommands = url ? this.connection.on_connect_commands.join("\n") : "";
-      this.server = url ? url.hostPort : Convos.settings.default_server || "";
+      this.server = url ? url.hostPort : this.settings.default_server || "";
       this.tls = url ? url.query.tls != false : null; // Need to use "==" instead of "===" http://dorey.github.io/JavaScript-Equality-Table/unified : ""/
       this.password = "";
       this.username = decodeURIComponent(userinfo[0] || "");

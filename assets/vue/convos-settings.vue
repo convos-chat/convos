@@ -29,12 +29,12 @@
             If you don't have any special preferences, you can just hit "Create" to get started.
           </p>
           <p v-if="!settings.default_server">
-            Just fill in a <a href="https://en.wikipedia.org/wiki/Internet_Relay_Chat#Networks" target="_blank">server name</a>
+            Just fill in a <a href="#fillin" @click.prevent="fillIn">server name</a>
             and hit "Create" to get started.
           </p>
         </div>
       </div>
-      <convos-connection-settings :user="user"></convos-connection-settings>
+      <convos-connection-settings :user="user" v-ref:settings></convos-connection-settings>
     </main>
     <main v-if="show == 'add_connection'">
       <div class="row">
@@ -66,6 +66,12 @@ module.exports = {
            : this.settings.main.indexOf("#connection") == 0    ? "add_connection"
            : this.settings.main.indexOf("#create-dialog") == 0 ? "create_dialog"
            :                                                     "error";
+    }
+  },
+  methods: {
+    fillIn: function() {
+      this.$refs.settings.server = this.settings.default_server || "chat.freenode.net:6697";
+      this.$refs.settings.onConnectCommands = "/join #convos";
     }
   }
 }
