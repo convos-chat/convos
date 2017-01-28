@@ -3,28 +3,20 @@
     <div class="row">
       <div class="col s12">
         <h4>Join dialog</h4>
-        <p v-if="user.connections.length">
-          You can create a dialog with either a single user (by nick)
-          or join a chat room (channel).
+        <p>
+          Enter the name of a dialog to either search for the known dialogs,
+          or to create a new chat room.
         </p>
       </div>
     </div>
     <div class="row">
-      <md-select :value.sync="connectionId" label="Select connection">
-        <md-option :value="c.connection_id" :selected="connectionId == c.connection_id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
+      <md-select @change="updateForm" value="" label="Select connection">
+        <md-option :value="c.connection_id" :selected="connection == c" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
         <md-option value="">Create new connection...</md-option>
       </md-select>
     </div>
     <div class="row">
-      <md-input cols="s12" :value.sync="dialogName" focus="true">Room or nick</md-input>
-    </div>
-    <div class="row">
-      <div class="col input-field s12">
-        <button @click="join" class="btn waves-effect waves-light" :disabled="!dialogName.length">Chat</button>
-      </div>
-    </div>
-    <div class="row" v-if="errors.length">
-      <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
+      <convos-dialog-chooser :value.sync="dialogName" :options="rooms" @select="join"></convos-dialog-chooser>
     </div>
   </form>
 </template>
@@ -33,33 +25,39 @@ module.exports = {
   props: ["user"],
   data: function() {
     return {
-      connectionId: "",
+      connection: new Convos.Connection({}),
       dialogName: "",
-      errors: [],
+      rooms: []
     };
   },
   watch: {
-    "connectionId": function(v, o) {
-      if (!v && o) this.settings.main = "#connection";
+    "dialogName": function(v, o) {
+      this.refreshRooms();
     },
     "settings.main": function(v, o) {
       this.updateForm();
     }
   },
   methods: {
-    connection: function() {
-      return this.user.getConnection(this.connectionId);
-    },
     join: function(option) {
-      var command = this.dialogName;
-      if (this.dialogName) this.connection().send("/join " + command);
+      if (!option.name) return;
+      this.connection.send("/join " + option.name);
       this.dialogName = "";
     },
-    updateForm: function() {
+    refreshRooms: function() {
+      var self = this;
+      this.connection.rooms({match: this.dialogName}, function(err, res) {
+        if (!res.end) setTimeout(self.refreshRooms, 1500);
+        self.n_rooms = res.n_rooms;
+        self.rooms = res.rooms;
+      });
+    },
+    updateForm: function(connectionId) {
+      if (arguments.length && !connectionId) return this.settings.main = "#connection";
       var dialogName = this.settings.main.match(/create-dialog\/([^\/]+)/);
-      var connection = this.user.connections[0];
-      this.connectionId = connection ? connection.connection_id : "";
+      this.connection = this.user.getConnection(connectionId);
       this.dialogName = dialogName ? dialogName[1] : "";
+      this.refreshRooms();
     }
   },
   ready: function() {

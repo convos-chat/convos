@@ -1,17 +1,29 @@
-div.autocomplete {
-  @include overflow;
-  border-bottom: $input-border;
-  max-height: 8em;
-  position: relative;
-
-  ul { margin: 0; padding: 0; }
-  li {
-    line-height: 3rem;
-    color: $off-black;
+.convos-create-dialog .autocomplete {
+  a {
+    padding: 0.3rem;
+    border-bottom: 1px solid $dropdown-hover-bg-color;
+    display: block;
 
     &:hover { background-color: $dropdown-hover-bg-color; }
     &.active { background-color: darken($dropdown-hover-bg-color, 5%); }
-    a, span { display: block; }
+  }
+
+  h6 {
+    color: $link-color;
+    display: block;
+    margin: 0;
+    font-weight: bold;
+  }
+
+  p {
+    color: lighten($text-color, 15%);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+
+  .badge .material-icons {
+    font-size: 1.1em;
+    vertical-align: middle;
   }
 }
 

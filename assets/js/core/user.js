@@ -49,12 +49,22 @@
     return dialog.update(data);
   };
 
-  proto.getActiveDialog = function(id) {
+  proto.getActiveDialog = function() {
     return this.dialogs.filter(function(d) { return d.href() == Convos.settings.main; })[0];
   };
 
+  proto.getLastActiveDialog = function() {
+    return this.dialogs.sort(function(a, b) { return a.lastRead.valueOf - b.lastRead.valueOf; })[0];
+  };
+
   proto.getConnection = function(id) {
-    return this.connections.filter(function(c) { return c.connection_id == id; })[0];
+    if (typeof id == "undefined") {
+      var dialog = this.getLastActiveDialog();
+      return dialog ? dialog.connection() : this.connections[0];
+    }
+    else {
+      return this.connections.filter(function(c) { return c.connection_id == id; })[0];
+    }
   };
 
   proto.refresh = function() {

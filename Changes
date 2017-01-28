@@ -5,7 +5,7 @@ Revision history for perl distribution Convos
  - Fix width of embedded youtube videos on small screens
  - Fix zooming images inline in chat
  - Fix not matching markdown, because a link was injected
- - Removed "roomsForConnection"
+ - Add listing of available rooms to "Join dialog..." #309
 
 0.99_23 2017-01-13T23:05:39+0100
  - Fix adding notifications in frontend

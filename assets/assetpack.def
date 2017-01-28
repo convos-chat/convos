@@ -23,6 +23,7 @@
 < js/vue/directive-tooltip.js
 < js/vue/filter-markdown.js
 < js/vue/filter-timestring.js
+< js/vue/mixin-autocomplete.js
 < js/vue/mixin-global.js
 < js/vue/mixin-message.js
 < js/vue/mixin-messages.js
@@ -40,7 +41,6 @@
 < js/core/user.js
 
 # materialize elements
-< vue/md-autocomplete.vue
 < vue/md-input.vue
 < vue/md-option.vue
 < vue/md-select.vue
@@ -74,6 +74,7 @@
 < vue/convos-dialog-container.vue
 
 # settings
+< vue/convos-dialog-chooser.vue
 < vue/convos-create-dialog.vue
 < vue/convos-settings.vue
 

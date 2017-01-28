@@ -62,6 +62,15 @@
     return this;
   };
 
+  // Get list of available rooms on server
+  proto.rooms = function(args, cb) {
+    var self = this;
+    Convos.api.roomsForConnection({connection_id: this.connection_id, match: args.match}, function(err, xhr) {
+      cb.call(self, err, xhr.body);
+    });
+    return this;
+  };
+
   // Write connection settings to server
   proto.save = function(cb) {
     var self = this;
