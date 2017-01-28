@@ -1,11 +1,16 @@
 Revision history for perl distribution Convos
 
-0.99_24 Not Released
+0.99_24 2017-01-29T00:57:30+0100
  - Fix registration process
- - Can send/receive any IRC message #317
+ - Fix being able to show profile + help during wizard
  - Fix width of embedded youtube videos on small screens
  - Fix zooming images inline in chat
  - Fix not matching markdown, because a link was injected
+ - Fix "/me message your_nick" mention rendering
+ - Fix markdown rendering
+ - Improved materialbox rendering for huge images
+ - Can send/receive any IRC message #317
+ - Add "esc key" to close on materialbox
  - Add listing of available rooms to "Join dialog..." #309
 
 0.99_23 2017-01-13T23:05:39+0100
