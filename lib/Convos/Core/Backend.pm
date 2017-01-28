@@ -40,7 +40,39 @@ sub users {
   $_[0]->tap($_[1], '', []);
 }
 
-sub _setup { }
+sub _setup {
+  my $self = shift;
+
+  Scalar::Util::weaken($self);
+  $self->on(
+    connection => sub {
+      my ($self, $connection) = @_;
+      my $cid = $connection->id;
+      my $uid = $connection->user->id;
+
+      Scalar::Util::weaken($self);
+      $connection->on(
+        message => sub {
+          my ($connection, $target, $msg) = @_;
+
+          if ($msg->{highlight} and $target->id and !$target->is_private) {
+            $connection->user->{unread}++;
+          }
+
+          $self->emit("user:$uid",
+            message =>
+              {connection_id => $cid, dialog_id => $target->id, name => $target->name, %$msg});
+        }
+      );
+      $connection->on(
+        state => sub {
+          my ($connection, $type, $args) = @_;
+          $self->emit("user:$uid", state => {connection_id => $cid, %$args, type => $type});
+        }
+      );
+    }
+  );
+}
 
 1;
 
