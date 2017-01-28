@@ -483,7 +483,7 @@ checksum=a2fdeba714
 format=js
 minified=1
 [js-min:vue/convos-dialog-chooser.vue]
-checksum=2cb3925cca
+checksum=406859b96b
 format=js
 minified=1
 [js-min:vue/convos-dialog-container.vue]
