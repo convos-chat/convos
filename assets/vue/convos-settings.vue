@@ -60,11 +60,11 @@ module.exports = {
   props: ["error", "user"],
   computed: {
     show: function() {
-      return !this.user.connections.length                     ? "wizard"
+      return this.settings.main.indexOf("#help") == 0          ? "help"
+           : this.settings.main.indexOf("#profile") == 0       ? "profile"
+           : !this.user.connections.length                     ? "wizard"
            : this.settings.main.indexOf("#connection") == 0    ? "add_connection"
            : this.settings.main.indexOf("#create-dialog") == 0 ? "create_dialog"
-           : this.settings.main.indexOf("#help") == 0          ? "help"
-           : this.settings.main.indexOf("#profile") == 0       ? "profile"
            :                                                     "error";
     }
   }
