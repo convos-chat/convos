@@ -68,6 +68,11 @@ sub participants {
   $self->tap($cb, 'Method "participants" not implemented.', []);
 }
 
+sub rooms {
+  my ($self, $cb) = (shift, pop);
+  $self->tap($cb, 'Method "rooms" not implemented.', []);
+}
+
 sub save {
   my $self = shift;
   $self->user->core->backend->save_object($self, @_);
@@ -307,6 +312,13 @@ Creates a new connection object.
   $self = $self->participants("#target" => sub { my ($self, $err, $participants) = @_; });
 
 Retrieves a list of participants in a room.
+
+=head2 rooms
+
+  $self = $self->rooms({match => "name"}, sub { my ($self, $err, $list) = @_; });
+
+Used to retrieve a list of L<Convos::Core::Dialog> objects for the
+given connection.
 
 =head2 save
 

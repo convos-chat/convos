@@ -8,8 +8,9 @@ use Mojo::JSON;
 use Parse::IRC ();
 use Time::HiRes 'time';
 
+use constant ROOMS_CACHE_TIMER   => $ENV{CONVOS_ROOMS_CACHE_TIMER}   || 60 * 30;
+use constant ROOMS_REPLY_DELAY   => $ENV{CONVOS_ROOMS_REPLY_DELAY}   || 1;
 use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
-use constant ROOM_CACHE_TIMER    => $ENV{CONVOS_ROOM_CACHE_TIMER}    || 60;
 
 require Convos;
 
@@ -48,6 +49,9 @@ has _irc => sub {
 
   return $irc;
 };
+
+# room list is shared between all connections
+has _room_cache => sub { state $cache = {} };
 
 sub connect {
   my ($self, $cb) = @_;
@@ -122,6 +126,51 @@ sub participants {
   );
 }
 
+sub rooms {
+  my ($self, $args, $cb) = @_;
+  my $match = $args->{match};
+  my $host  = $self->url->host;
+  my $store = $self->_room_cache->{$host} ||= {rooms => {}, end => Mojo::JSON->false};
+  my ($generate, @rooms, @by_topic);
+
+  if ($match) {
+    $generate = sub {
+      $match = qr{$match}i;
+
+      for my $room (sort { $a->{name} cmp $b->{name} } values %{$store->{rooms}}) {
+        push @rooms,    $room and next if $room->{name} =~ $match;
+        push @by_topic, $room and next if $room->{topic} =~ $match;
+      }
+
+      push @rooms, @by_topic;
+      $self->$cb('',
+        {end => $store->{end}, n_rooms => int(@rooms), rooms => [splice @rooms, 0, 40]});
+    };
+  }
+  else {
+    $generate = sub {
+      @rooms = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{rooms}};
+      $self->$cb('',
+        {end => $store->{end}, n_rooms => int(@rooms), rooms => [splice @rooms, 0, 40]});
+    };
+  }
+
+  if (!$store->{ts} or $store->{ts} + ROOMS_CACHE_TIMER < time) {
+    $store->{ts} = time - ROOMS_CACHE_TIMER + 20;    # should get some data within 20 seconds
+    Mojo::IOLoop->delay(
+      sub { $self->_irc->write(LIST => shift->begin) },
+      sub {
+        my ($delay, $err) = @_;
+        return $self->$cb($err, {}) if $err;
+        return Mojo::IOLoop->timer(ROOMS_REPLY_DELAY, $generate);
+      },
+    );
+    return $self;
+  }
+
+  return next_tick $self, $generate;
+}
+
 sub send {
   my ($self, $target, $message, $cb) = @_;
 
@@ -146,7 +195,7 @@ sub send {
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
-  return $self->_proxy(write => "$cmd $message", sub { $self->$cb($_[1]); });
+  return $self->_proxy(write => "$cmd $message", sub { $self->$cb($_[1], {}); });
 }
 
 sub _event_close {
@@ -503,6 +552,23 @@ sub _event_quit {
   $self->emit(state => quit => {nick => $nick, message => join ' ', @{$msg->{params}}});
 }
 
+sub _event_rpl_list {
+  my ($self, $msg) = @_;
+  my $host  = $self->url->host;
+  my $store = $self->_room_cache->{$host} ||= {};
+  my $room  = {name => $msg->{params}[1], n_users => $msg->{params}[2], topic => $msg->{params}[3]};
+
+  $room->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
+  $store->{ts} = time;
+  $store->{rooms}{$room->{name}} = $room;
+}
+
+sub _event_rpl_listend {
+  my ($self, $msg) = @_;
+  my $host = $self->url->host;
+  $self->_room_cache->{$host}{end} = Mojo::JSON->true;
+}
+
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
 sub _event_rpl_myinfo {
   my ($self, $msg) = @_;
@@ -607,6 +673,10 @@ L</nick>.
 =head2 participants
 
 See L<Convos::Core::Connection/participants>.
+
+=head2 rooms
+
+See L<Convos::Core::Connection/rooms>.
 
 =head2 send
 
