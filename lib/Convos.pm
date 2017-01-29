@@ -149,6 +149,7 @@ sub _config {
     contact           => $config->{contact},
     default_server    => $config->{default_server},
     forced_irc_server => $config->{forced_irc_server} ? true : false,
+    hide => $config->{hide} || {},
     organization_name => $config->{organization_name},
     organization_url  => $config->{organization_url},
   };

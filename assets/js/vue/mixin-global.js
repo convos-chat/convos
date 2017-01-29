@@ -8,11 +8,18 @@
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
   Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
 
+  var hideParam = location.href.match(/hide=(.+)/);
+  var hide = {}
+  if (hideParam) hideParam[1].split(",").forEach(function(id) { hide[id] = true; });
+
+  if (hide.header) $('body').addClass('no-header');
+  if (hide.menu) $('body').addClass('no-menu');
+
   var validSidebars = ["", "notifications", "sidebar-info"].filter(function(v) {
     return Convos.settings.sidebar === v;
   });
 
-  if (window.isMobile) {
+  if (window.isMobile || hide.sidebar) {
     Convos.settings.sidebar = ""; // Don't want to remember sidebar when loading on mobile
   }
   else if (!validSidebars.length) {
@@ -54,6 +61,9 @@
       send: function(command, dialog) {
         if (!dialog) dialog = this.dialog;
         dialog.connection().send(command, dialog);
+      },
+      showElement: function(name) {
+        return Convos.settings.hide[name] || hide[name] ? false : true;
       }
     }
   });

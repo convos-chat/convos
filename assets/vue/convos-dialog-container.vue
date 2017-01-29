@@ -1,9 +1,9 @@
 <template>
   <div class="convos-dialog-container" :class="dialog.active ? 'active' : ''">
-    <header>
-      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
+    <header v-if="showElement('header')">
+      <convos-toggle-main-menu :user="user" v-if="showElement('menu')"></convos-toggle-main-menu>
       <h2>{{dialog.name || 'Convos'}}</h2>
-      <convos-header-links :toggle="true" :user="user"></convos-header-links>
+      <convos-header-links :toggle="true" :user="user" v-if="showElement('sidebar')"></convos-header-links>
     </header>
     <main class="scroll-element" v-el:main>
       <component

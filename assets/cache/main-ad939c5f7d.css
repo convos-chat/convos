@@ -4754,7 +4754,8 @@ ul.complete-dropdown {
     .convos-input textarea.materialize-textarea, .convos-input textarea.materialize-textarea:focus {
       border: 0; }
 
-.convos-settings main > div, .convos-settings main > form {
+.convos-settings main > div,
+.convos-settings main > form {
   max-width: 50em;
   margin-left: 0; }
 
@@ -4855,6 +4856,14 @@ ul.complete-dropdown {
     float: left; }
   .convos-help dl dd {
     margin-left: 16em; } }
+
+body.no-header .convos-dialog-container main,
+body.no-header .convos-settings main {
+  top: 0; }
+
+body.no-menu .convos-dialog-container,
+body.no-menu .convos-settings {
+  margin-left: 0; }
 
 header {
   background-color: #3c813f;
@@ -5201,4 +5210,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../55c1bf5c77/main.css.map */
+/*# sourceMappingURL=../05bee003c1/main.css.map */
