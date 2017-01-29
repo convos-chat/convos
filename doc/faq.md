@@ -92,6 +92,22 @@ To prevent this, you can run this command:
 The `&` at the end will send Convos to the background. `nohup` is mostly
 optional, but is usually a good idea.
 
+## Why doesn't Convos start after I upgraded my system?
+
+You might have gotten a new version of Perl which is not compatible with the
+modules you have already installed. To fix this issue, you can try to
+re-install Convos:
+
+    # Go to where you downloaded Convos
+    cd /path/to/convos/
+    # Purge all the installed packages
+    rm -rf local/{bin,lib,man}
+    # Reinstall packages
+    $ perl script/cpanm -n -l $PWD/local Module::Install
+    $ ./script/convos install
+
+Please [contact us](/doc/#get-in-touch) if the above instructions does not work.
+
 ## Why can't Convos do X?
 
 In most of the cases it's either because we haven't thought about it or

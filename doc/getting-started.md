@@ -56,6 +56,10 @@ before fetching the latest version:
     $ curl https://convos.by/install.sh | sh -
     $ ./convos/script/convos daemon
 
+See the
+[FAQ](/doc/faq.html#why-doesnt-convos-start-after-i-upgraded-my-system) for
+more information.
+
 ## Optional modules
 
 There are some optional modules that can be installed to enhance the
