@@ -16,7 +16,3 @@ notifications:
       - jhthorsen@cpan.org
     on_failure: change
     on_success: change
-  irc:
-    channels: "chat.freenode.net#convos"
-    on_failure: always
-    on_success: change
