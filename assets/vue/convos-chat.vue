@@ -1,9 +1,9 @@
 <template>
   <div class="convos-chat">
-    <convos-main-menu :user="user"></convos-main-menu>
+    <convos-main-menu :user="user" v-if="showElement('menu')"></convos-main-menu>
     <convos-dialog-container :dialog="d" :user="user" v-show="d.active" v-for="d in user.dialogs"></convos-dialog-container>
-    <convos-settings :error="error" :user="user" v-if="show == 'settings'"></convos-settings>
-    <component :is="'convos-' + settings.sidebar" :user="user" v-if="settings.sidebar"></component>
+    <convos-settings :error="error" :user="user" v-if="show == 'settings'" v-if="showElement('settings')"></convos-settings>
+    <component :is="'convos-' + settings.sidebar" :user="user" v-if="settings.sidebar" v-if="showElement('sidebar') && settings.sidebar"></component>
   </div>
 </template>
 <script>
