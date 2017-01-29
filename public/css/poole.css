@@ -430,3 +430,9 @@ a.pagination-item:hover {
     border-bottom-right-radius: 4px;
   }
 }
+
+.post img {
+  border-radius: 2px;
+  transition: box-shadow .3s;
+  box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.2);
+}
