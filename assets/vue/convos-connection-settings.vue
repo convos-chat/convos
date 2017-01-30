@@ -1,8 +1,29 @@
 <template>
   <form autocomplete="off" class="content" @submit.prevent>
-    <div class="row" v-if="connection">
+    <div class="row" v-if="user.connections.length">
       <div class="col s12">
-        <h5>Edit {{connection.name}}</h5>
+        <h5 v-if="connection">Edit {{connection.name}}</h5>
+        <h4 v-if="!connection">Add connection</h4>
+      </div>
+    </div>
+    <div class="row" v-if="!user.connections.length">
+      <div class="col s12">
+        <h4>Welcome to Convos!</h4>
+        <p>
+          Convos is the simplest way to use IRC. It is always online,
+          and accessible in your web browser, both on desktop and mobile.
+        </p>
+        <p>
+          Before you can start chatting, you need to create a connection.
+          You can add more connections later on if you need.
+        </p>
+        <p v-if="settings.default_server">
+          If you don't have any special preferences, you can just hit "Create" to get started.
+        </p>
+        <p v-if="!settings.default_server">
+          Just fill in a <a href="#fillin" @click.prevent="fillIn">server name</a>
+          and hit "Create" to get started.
+        </p>
       </div>
     </div>
     <template v-if="connection">

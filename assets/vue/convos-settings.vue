@@ -13,35 +13,7 @@
         </div>
       </div>
     </main>
-    <main v-if="show == 'wizard'">
-      <div class="row">
-        <div class="col s12">
-          <h4>Welcome to Convos!</h4>
-          <p>
-            Convos is the simplest way to use IRC. It is always online,
-            and accessible in your web browser, both on desktop and mobile.
-          </p>
-          <p>
-            Before you can start chatting, you need to create a connection.
-            You can add more connections later on if you need.
-          </p>
-          <p v-if="settings.default_server">
-            If you don't have any special preferences, you can just hit "Create" to get started.
-          </p>
-          <p v-if="!settings.default_server">
-            Just fill in a <a href="#fillin" @click.prevent="fillIn">server name</a>
-            and hit "Create" to get started.
-          </p>
-        </div>
-      </div>
-      <convos-connection-settings :user="user" v-ref:settings></convos-connection-settings>
-    </main>
     <main v-if="show == 'add_connection'">
-      <div class="row">
-        <div class="col s12">
-          <h4>Add connection</h4>
-        </div>
-      </div>
       <convos-connection-settings :connection="null" :user="user"></convos-connection-settings>
     </main>
     <main v-if="show == 'create_dialog'">
@@ -62,7 +34,7 @@ module.exports = {
     show: function() {
       return this.settings.main.indexOf("#help") == 0          ? "help"
            : this.settings.main.indexOf("#profile") == 0       ? "profile"
-           : !this.user.connections.length                     ? "wizard"
+           : !this.user.connections.length                     ? "add_connection"
            : this.settings.main.indexOf("#connection") == 0    ? "add_connection"
            : this.settings.main.indexOf("#create-dialog") == 0 ? "create_dialog"
            :                                                     "error";
