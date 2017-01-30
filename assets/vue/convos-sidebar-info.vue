@@ -18,7 +18,7 @@ module.exports = {
   props: ["user"],
   computed: {
     dialog: function() {
-      return this.user.getActiveDialog();
+      return this.user.activeDialog();
     }
   }
 };

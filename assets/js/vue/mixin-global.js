@@ -48,7 +48,7 @@
         Notification.requestPermission(function(s) { if (s) this.settings.notifications = s; }.bind(this));
       },
       insertIntoInput: function(e) {
-        var dialog = this.user.getActiveDialog();
+        var dialog = this.user.activeDialog();
         if (dialog) dialog.emit("insertIntoInput", e.currentTarget.href.replace(/.*?#/, ""));
       },
       send: function(command, dialog) {

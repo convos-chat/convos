@@ -74,7 +74,7 @@ sub connect {
     sub {
       my ($delay, $err) = @_;
 
-      $self->_debug('connect(%s) %s', $self->_irc->server, $err || 'Success') if DEBUG;
+      $self->_debug('connect(%s) == %s', $self->_irc->server, $err || 'Success') if DEBUG;
       $self->_notice($err) if $err;
 
       if ($self->_irc->tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
@@ -524,7 +524,7 @@ sub _event_privmsg {
   }
 
   $target ||= $self->messages;
-  $from ||= $msg->{prefix} // $self->id;
+  $from   ||= $self->id;
 
   $highlight ||= grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
     @{$self->url->query->every_param('highlight')};

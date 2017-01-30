@@ -45,6 +45,7 @@ module.exports = {
       this.dialogName = "";
     },
     refreshRooms: function() {
+      if (!this.connection) return;
       var self = this;
       this.connection.rooms({match: this.dialogName}, function(err, res) {
         if (!res.end) setTimeout(self.refreshRooms, 1500);

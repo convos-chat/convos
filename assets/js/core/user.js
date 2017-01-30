@@ -12,6 +12,12 @@
 
   var proto = Convos.User.prototype;
 
+  proto.activeDialog = function(key) {
+    var dialog = this.dialogs.filter(function(d) { return d.href() == Convos.settings.main; })[0];
+    if (dialog && key) return dialog.key;
+    return dialog;
+  };
+
   proto.ensureConnection = function(data) {
     var connection = this.connections.filter(function(c) { return c.connection_id == data.connection_id; })[0];
 
@@ -24,7 +30,7 @@
         connection_id: connection.connection_id,
         dialog_id: "",
         name: connection.name,
-        is_private: false
+        is_private: true
       });
     }
 
@@ -49,22 +55,8 @@
     return dialog.update(data);
   };
 
-  proto.getActiveDialog = function() {
-    return this.dialogs.filter(function(d) { return d.href() == Convos.settings.main; })[0];
-  };
-
-  proto.getLastActiveDialog = function() {
-    return this.dialogs.sort(function(a, b) { return a.lastRead.valueOf - b.lastRead.valueOf; })[0];
-  };
-
   proto.getConnection = function(id) {
-    if (typeof id == "undefined") {
-      var dialog = this.getLastActiveDialog();
-      return dialog ? dialog.connection() : this.connections[0];
-    }
-    else {
-      return this.connections.filter(function(c) { return c.connection_id == id; })[0];
-    }
+    return this.connections.filter(function(c) { return c.connection_id == id; })[0];
   };
 
   proto.refresh = function() {

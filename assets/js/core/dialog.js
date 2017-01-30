@@ -44,7 +44,7 @@
     var prev = args.method == "unshift" ? this.messages[0] : this.prevMessage;
 
     if (!msg.from) msg.from = "convosbot";
-    if (!msg.type) msg.type = "private";
+    if (!msg.type) msg.type = "notice";
     if (!msg.ts) msg.ts = new Date();
     if (typeof msg.ts == "string") msg.ts = Date.fromAPI(msg.ts);
     if (!prev) prev = {from: "", ts: msg.ts};
@@ -109,7 +109,7 @@
     args.dialog_id = this.dialog_id;
 
     this.addMessage(
-      {loading: true, message: "Loading messages...", type: "notice"},
+      {loading: true, message: "Loading messages..."},
       {method: "unshift"}
     );
 
@@ -130,7 +130,7 @@
     switch (data.type) {
       case "join":
         Vue.set(this.participants, data.nick, {name: data.nick, seen: new Date()});
-        this.addMessage({message: data.nick + " joined.", from: this.connection_id, type: "notice"});
+        this.addMessage({message: data.nick + " joined.", from: this.connection_id});
         break;
       case "maintain":
         if (!this.participants[data.nick]) return;
@@ -144,7 +144,7 @@
         if (!this.participants[data.nick]) return;
         Vue.delete(this.participants, data.old_nick);
         Vue.set(this.participants, data.nick, {name: data.nick, seen: new Date()});
-        this.addMessage({message: data.old_nick + " changed nick to " + data.nick + ".", from: this.connection_id, type: "notice"});
+        this.addMessage({message: data.old_nick + " changed nick to " + data.nick + ".", from: this.connection_id});
         break;
       default: // part
         if (!this.participants[data.nick]) return;
@@ -152,7 +152,7 @@
         Vue.delete(this.participants, data.nick);
         if (data.kicker) message = data.nick + " was kicked by " + data.kicker + ".";
         if (data.message) message += " Reason: " + data.message;
-        this.addMessage({message: message, from: this.connection_id, type: "notice"});
+        this.addMessage({message: message, from: this.connection_id});
     }
   };
 
@@ -190,7 +190,7 @@
   };
 
   proto._increaseUnread = function(msg) {
-    if (this == this.user.getActiveDialog()) {
+    if (this == this.user.activeDialog()) {
       return;
     }
     else if (this.is_private || msg.type.match(/action|private/)) {
@@ -212,7 +212,7 @@
       messages.push({message: this.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
     }
     else if (!messages.length && this.messages.length <= 1) {
-      messages.push({message: this.is_private ? "What do you want to say to " + this.name + "?" : "You have joined " + this.name + ", but no one has said anything as long as you have been here.", type: "notice"});
+      messages.push({message: this.is_private ? "What do you want to say to " + this.name + "?" : "You have joined " + this.name + ", but no one has said anything as long as you have been here."});
     }
 
     if (messages.length) {

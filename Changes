@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_25 Not Released
+ - Fix sending server messages to the right dialog
+
 0.99_24 2017-01-29T00:57:30+0100
  - Fix registration process
  - Fix being able to show profile + help during wizard

@@ -24,24 +24,28 @@
     });
   });
 
+  proto.addMessage = function(msg) {
+    var dialog = msg.dialog_id ? this.getDialog(msg.dialog_id) : this.getDialog("");
+    if (!dialog) dialog = this.user.activeDialog();
+    if (!msg.dialog_id) msg.type = "private";
+    if (!msg.from) msg.from = this.connection_id;
+    if (dialog) return dialog.addMessage(msg);
+    console.log("[Convos] Could not dispatch message from " + this.connection_id + ": ", msg);
+  };
+
   proto.dialogs = function() {
     var id = this.connection_id;
     return this.user.dialogs.filter(function(d) { return d.connection_id == id; });
   };
 
-  proto.getDialog = function(dialog_id) {
+  proto.getDialog = function(dialogId) {
     return this.user.dialogs.filter(function(d) {
-      return d.connection_id == this.connection_id && d.dialog_id == dialog_id;
+      return d.connection_id == this.connection_id && d.dialog_id == dialogId;
     }.bind(this))[0];
   };
 
   proto.nick = function() {
     return this.me.nick ? this.me.nick : this.url.parseUrl().query.nick || "";
-  };
-
-  proto.notice = function(message) {
-    var dialog = this.user.getActiveDialog();
-    if (dialog) dialog.addMessage({from: this.connection_id, message: message, type: "notice"});
   };
 
   // Remove this connection from the backend
@@ -112,7 +116,7 @@
     }
 
     if (!dialog) dialog = this.getDialog(action[2]); // action = ["...", "close", "#foo" ]
-    if (!dialog) dialog = this.user.getActiveDialog();
+    if (!dialog) dialog = this.user.activeDialog();
 
     if (!cb) {
       tid = setTimeout(
@@ -120,7 +124,7 @@
           msg.type = "error";
           msg.message = 'No response on "' + msg.message + '".';
           this.off("sent-" + msg.id);
-          this.user.getActiveDialog().addMessage(msg);
+          this.addMessage(msg);
         }.bind(this),
         5000
       );
@@ -129,15 +133,16 @@
     }
 
     try {
-      msg.message = message;
+      msg.connection_id = this.connection_id;
       msg.dialog_id = dialog ? dialog.dialog_id : "";
+      msg.message = message;
       this.user.send(msg);
       this.once("sent-" + msg.id, cb); // Handle echo back from backend
       if (tid) this.once("sent-" + msg.id, function() { clearTimeout(tid) });
     } catch(e) {
       msg.type = "error";
       msg.message = e + " (" + message + ")";
-      this.user.getActiveDialog().addMessage(msg);
+      this.addMessage(msg);
       return;
     }
 
@@ -156,16 +161,12 @@
 
   proto._onError = function(msg) {
     if (!msg.errors) return;
-    var dialog = this.user.getActiveDialog();
-    if (dialog) dialog.addMessage({from: this.connection_id, type: "error", message: msg.message + ": " + msg.errors[0].message});
+    this.addMessage({type: "error", message: msg.message + ": " + msg.errors[0].message});
   };
 
   proto._onMessage = function(msg) {
     if (msg.errors) return this._onError(msg);
-    var dialog = msg.dialog_id ? this.user.ensureDialog(msg) : this.user.getActiveDialog();
-    if (!dialog) dialog = this.user.ensureDialog(msg);
-    if (dialog.frozen) msg.frozen = "";
-    dialog.addMessage(msg);
+    this.user.ensureDialog(msg).addMessage(msg);
   };
 
   proto._onSent = function(msg) {
@@ -183,16 +184,15 @@
   proto._sentNames = function(msg) {
     if (msg.errors) return this._onError(msg);
     msg.type = "participants";
-    this.user.ensureDialog(msg).addMessage(msg);
+    this.addMessage(msg);
   };
 
   // part will not close the dialog
   proto._sentPart = function(msg) {
     if (msg.errors) return this._onError(msg);
-    this.user.getActiveDialog().addMessage({
-      "type": "notice",
-      "message": "You parted " + msg.dialog_id + "."
-    });
+    msg.type = "notice";
+    msg.message = "You parted " + msg.dialog_id + ".";
+    this.addMessage(msg);
   };
 
   proto._sentJoin = function(msg) {
@@ -201,30 +201,20 @@
   };
 
   proto._sentReconnect = function(msg) {
-    this.notice('Reconnecting to ' + this.connection_id + '...');
+    this.addMessage({message: "Reconnecting..."});
   };
 
   proto._sentTopic = function(msg) {
     if (msg.errors) return this._onError(msg);
-    if (!msg.hasOwnProperty("topic")) return;
-    var dialog = this.user.ensureDialog(msg);
-    var next = {from: this.connection_id, type: "notice"};
-    if (msg.topic) {
-      next.message = "Topic for " + dialog.name + " is: " + msg.topic;
-    }
-    else {
-      next.message = "There is no topic for " + dialog.name + ".";
-    }
-    dialog.addMessage(next);
+    msg.type = "notice";
+    msg.message = msg.topic ? "Topic for " + dialog.name + " is: " + msg.topic : "There is no topic for " + dialog.name + ".";
+    this.addMessage(msg);
   };
 
   proto._sentWhois = function(msg) {
     if (msg.errors) return this._onError(msg);
-    var dialog = this.user.getActiveDialog();
-    if (!dialog) return;
-    msg.from = this.connection_id;
     msg.type = "whois";
-    dialog.addMessage(msg);
+    this.user.ensureDialog(msg).addMessage(msg);
   };
 
   proto._onState = function(data) {
@@ -232,11 +222,11 @@
 
     switch (data.type) {
       case "connection":
-        var msg = data.state + '"';
-        msg += data.message ? ': ' + data.message : ".";
+        var message = "Connection state changed to " + data.state;
+        message += data.message ? ": " + data.message : ".";
         this.state = data.state;
-        this.getDialog("").frozen = this.message || data.state == "connected" ? "" : data.state;
-        this.notice('Connection state changed to "' + msg);
+        this.getDialog("").frozen = data.state == "connected" ? "" : data.message || data.state.ucFirst();
+        this.addMessage({message: message});
         break;
       case "frozen":
         this.getDialog("").update({frozen: data.frozen});
@@ -247,7 +237,7 @@
         this.dialogs().forEach(function(d) { d.participant(data); });
         break;
       case "me":
-        if (this.me.nick != data.nick) this.notice('You changed nick to ' + data.nick + '.');
+        if (this.me.nick && this.me.nick != data.nick) this.addMessage({message: "You changed nick to " + data.nick + "."});
         this.me.nick = data.nick;
         break;
       case "mode":

@@ -21,10 +21,7 @@ module.exports = {
       var activated = enable ? "enabled" : "disabled";
       this.enableNotifications(enable);
       this.clicked = true;
-      this.user.getActiveDialog().addMessage({
-        type: "notice",
-        message: 'You have now ' + activated + ' notifications. This can be changed later in "Edit profile".'
-      });
+      this.dialog.addMessage({message: "You have now " + activated + ' notifications. This can be changed later in "Edit profile".'});
     }
   }
 };
