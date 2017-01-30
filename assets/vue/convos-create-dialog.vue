@@ -10,59 +10,124 @@
       </div>
     </div>
     <div class="row">
-      <md-select @change="updateForm" value="" label="Select connection">
-        <md-option :value="c.connection_id" :selected="connection == c" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
+      <md-select @change="setConnection" :value="connectionId" label="Select connection">
+        <md-option :value="c.connection_id" v-for="c in user.connections">{{c.protocol}}-{{c.name}}</md-option>
         <md-option value="">Create new connection...</md-option>
       </md-select>
     </div>
     <div class="row">
-      <convos-dialog-chooser :value.sync="dialogName" :options="rooms" @select="join"></convos-dialog-chooser>
+      <div class="input-field col s12">
+        <input v-el:input v-model="autocompleteValue" autocomplete="off" class="validate"
+          debounce="200" placeholder="#channel_name" spellcheck="false" type="text"
+          :disabled="errors.length ? true : false" :id="id"
+          @blur="hasFocus=false" @focus="hasFocus=true" @keydown="keydown" @keyup="keyup">
+        <label :for="id" class="active">Dialog name</label>
+        <div class="alert" v-if="errors.length">
+          Could not load rooms from
+          <a v-link="connection.getDialog('').href()">{{connection.connection_id}}</a>:
+          {{errors[0].message}}
+        </div>
+        <div class="autocomplete" :class="autocompleteOptions.length ? '' : 'hidden'">
+          <a href="#join:{{room.name}}" class="title" :class="optionClass($index)" @click.prevent="select(room)" v-for="room in autocompleteOptions">
+              <span class="badge"><i class="material-icons" v-if="room.n_users">person</i>{{room.n_users || "new"}}</span>
+              <h6>{{room.name}}</h6>
+              <p>{{topic(room.topic) | markdown}}</p>
+          </a>
+        </div>
+        <p v-if="loaded"><small>Number of rooms: {{nRooms}}</small></p>
+        <p v-if="!loaded && !errors.length"><small>Loading rooms... ({{nRooms}})</small></p>
+      </div>
     </div>
   </form>
 </template>
 <script>
+var mainRe = new RegExp("create-dialog\/([^\/]+)\/?([^\/]*)");
 module.exports = {
+  mixins: [Convos.mixin.autocomplete],
   props: ["user"],
   data: function() {
     return {
-      connection: new Convos.Connection({}),
-      dialogName: "",
+      connectionId: "",
+      connection: null,
+      errors: [],
+      loaded: false,
+      hasFocus: false,
+      nRooms: 0,
       rooms: []
     };
   },
+  computed: {
+    autocompleteOptions: function() {
+      var rooms = this.rooms;
+
+      if (this.autocompleteValue) {
+        rooms = [{name: this.autocompleteValue, topic: "Click here to create/join custom dialog"}].concat(rooms);
+        if (rooms.length == 2) {
+          rooms[0] = rooms.splice(1, 1, rooms[0])[0];
+        }
+        else if (rooms.length > 1 && rooms[0].name == rooms[1].name) {
+          rooms.shift();
+        }
+      }
+
+      return rooms;
+    }
+  },
   watch: {
-    "dialogName": function(v, o) {
+    "autocompleteValue": function(v, o) {
       this.refreshRooms();
     },
     "settings.main": function(v, o) {
-      this.updateForm();
+      if (v.match(mainRe)) this.updateForm();
     }
   },
   methods: {
     join: function(option) {
-      if (!option.name) return;
+      if (!option.name || !this.connection) return;
       this.connection.send("/join " + option.name);
-      this.dialogName = "";
+      this.autocompleteValue = "";
     },
     refreshRooms: function() {
-      if (!this.connection) return;
       var self = this;
-      this.connection.rooms({match: this.dialogName}, function(err, res) {
-        if (!res.end) setTimeout(self.refreshRooms, 1500);
-        self.n_rooms = res.n_rooms;
+      if (this.tid) clearTimeout(this.tid);
+      if (!this.connection) return;
+      this.loaded = false;
+      this.connection.rooms({match: this.autocompleteValue}, function(err, res) {
+        if (err) return self.errors = err;
+        if (!res.end) self.tid = setTimeout(self.refreshRooms, 1500);
+        self.errors = [];
+        self.loaded = res.end;
+        self.nRooms = res.n_rooms;
         self.rooms = res.rooms;
       });
     },
-    updateForm: function(connectionId) {
-      if (arguments.length && !connectionId) return this.settings.main = "#connection";
-      var dialogName = this.settings.main.match(/create-dialog\/([^\/]+)/);
-      this.connection = this.user.getConnection(connectionId);
-      this.dialogName = dialogName ? dialogName[1] : "";
+    setConnection: function(cid, old) {
+      if (!cid) return this.settings.main = "#connection";
+      setTimeout(function() { this.updateForm(cid); }.bind(this), 500);
+    },
+    topic: function(str) {
+      if (!str) return "No topic.";
+      if (str.length < 200) return str;
+      return str.substr(0, 200).replace(/\S+$/, "") + "...";
+    },
+    updateForm: function(cid) {
+      var path = this.settings.main.match(mainRe);
+      this.connectionId = cid ? cid : path ? path[1] : "";
+      if (this.connectionId) this.connection = this.user.getConnection(this.connectionId);
+      this.autocompleteValue = path ? path[2] : "";
+      this.errors = [];
+      this.rooms = [];
+      this.nRooms = 0;
       this.refreshRooms();
     }
   },
   ready: function() {
+    this.id = Materialize.guid();
+    this.$els.input.focusOnDesktop();
     this.updateForm();
+  },
+  destroyed: function() {
+    if (this.tid) clearTimeout(this.tid);
   }
 };
 </script>

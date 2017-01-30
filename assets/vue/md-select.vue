@@ -23,7 +23,7 @@ module.exports = {
         this.$children.forEach(function(o) { if (o != opt) o.selected = false; });
         this.setValue(opt);
       }
-      else if(!this.$children.filter(function(o) { return o.selected }).length) {
+      else if (!this.$children.filter(function(o) { return o.selected }).length) {
         this.setValue(this.$children[0]);
       }
       this.activate(false);
@@ -70,9 +70,14 @@ module.exports = {
     }
   },
   watch: {
-    value: function () {
-      this.$children.forEach(function(o) { o.selected = o.value == this.value; }.bind(this));
-      this.options.forEach(function(o) { o.selected = o.value == this.value; }.bind(this));
+    value: function(v, o) {
+      var selected = false;
+      while (1) {
+        this.$children.forEach(function(o) { selected = selected || (o.selected = o.value == v); });
+        this.options.forEach(function(o) { selected = selected || (o.selected = o.value == v); });
+        if (selected || !this.options.length) break;
+        v = this.options[0].value;
+      }
     }
   },
   detached: function() {

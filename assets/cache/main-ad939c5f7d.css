@@ -4548,6 +4548,11 @@ div.alert {
   border-radius: 2px;
   color: #D32F2F;
   padding: 10px; }
+  div.alert a {
+    color: #C62828;
+    text-decoration: underline; }
+    div.alert a:hover {
+      text-decoration: none; }
 
 .centered {
   display: flex;
@@ -4646,7 +4651,7 @@ div.alert {
       color: #222; }
 
 .convos-create-dialog .autocomplete a {
-  padding: 0.3rem;
+  padding: 0.3rem 0;
   border-bottom: 1px solid #eee;
   display: block; }
   .convos-create-dialog .autocomplete a:hover {
@@ -5201,4 +5206,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../55c1bf5c77/main.css.map */
+/*# sourceMappingURL=../e940abd12c/main.css.map */

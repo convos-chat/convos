@@ -14,7 +14,7 @@
 
   proto.activeDialog = function(key) {
     var dialog = this.dialogs.filter(function(d) { return d.href() == Convos.settings.main; })[0];
-    if (dialog && key) return dialog.key;
+    if (dialog && key) return dialog[key];
     return dialog;
   };
 

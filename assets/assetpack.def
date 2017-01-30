@@ -74,7 +74,6 @@
 < vue/convos-dialog-container.vue
 
 # settings
-< vue/convos-dialog-chooser.vue
 < vue/convos-create-dialog.vue
 < vue/convos-settings.vue
 

@@ -1,12 +1,11 @@
 (function() {
   Convos.mixin.autocomplete = {
-    props: ["options", "value"],
     computed: {
-      filteredOptions: function() {
-        return this.options;
+      autocompleteOptions: function() {
+        return [];
       },
       labelActive: function() {
-        return this.value || this.placeholder || this.hasFocus;
+        return this.autocompleteValue || this.placeholder || this.hasFocus;
       }
     },
     data: function() {
@@ -27,23 +26,23 @@
       keyup: function(e) {
         switch (e.keyCode) {
           case 13: // enter
-            if (this.selected >= 0 && this.filteredOptions[this.selected]) {
-              this.select(this.filteredOptions[this.selected]);
+            if (this.selected >= 0 && this.autocompleteOptions[this.selected]) {
+              this.select(this.autocompleteOptions[this.selected]);
             }
-            else if (this.value.length) {
-              this.select({value: this.value});
+            else if (this.autocompleteValue.length) {
+              this.select({value: this.autocompleteValue});
             }
             break;
           case 38: // up
-            if (--this.selected < this.selectStart) this.selected = this.filteredOptions.length - 1;
+            if (--this.selected < this.selectStart) this.selected = this.autocompleteOptions.length - 1;
             this.scrollIntoView();
             break;
           case 40: // down
-            if (++this.selected >= this.filteredOptions.length) this.selected = 0;
+            if (++this.selected >= this.autocompleteOptions.length) this.selected = 0;
             this.scrollIntoView();
             break;
           default:
-            if (!this.value) this.selected = this.selectStart;
+            if (!this.autocompleteValue) this.selected = this.selectStart;
         }
       },
       optionClass: function(i) {

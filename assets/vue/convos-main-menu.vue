@@ -18,7 +18,7 @@
       </div>
       <div class="divider"></div>
       <div class="link" :class="activeClass('#create-dialog')">
-        <a v-link.literal="#create-dialog" v-if="user.connections.length" class="simple">
+        <a v-link="'#create-dialog/' + user.activeDialog('connection_id')" v-if="user.connections.length" class="simple">
           <i class="material-icons">add</i> Join dialog...
         </a>
       </div>
@@ -101,7 +101,7 @@ module.exports = {
     },
     search: function(e) {
       if (!this.q.length || e.shiftKey) return;
-      this.settings.main = this.dialogs.length ? this.dialogs[0].href() : "#create-dialog/" + this.q;
+      this.settings.main = this.dialogs.length ? this.dialogs[0].href() : "#create-dialog/" + user.activeDialog('connection_id') + "/" + this.q;
       this.q = "";
     },
     showConnectionInfo: function(d) {

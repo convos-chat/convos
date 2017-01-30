@@ -51,6 +51,15 @@ div.alert {
   border-radius: 2px;
   color: color('red', 'darken-2');
   padding: $card-padding / 2;
+
+  a {
+    color: color('red', 'darken-3');
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 .centered {
