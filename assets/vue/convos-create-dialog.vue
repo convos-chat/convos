@@ -28,7 +28,7 @@
           {{errors[0].message}}
         </div>
         <div class="autocomplete" :class="autocompleteOptions.length ? '' : 'hidden'">
-          <a href="#join:{{room.name}}" class="title" :class="optionClass($index)" @click.prevent="select(room)" v-for="room in autocompleteOptions">
+          <a href="#join:{{room.name}}" class="title" :class="optionClass($index)" @click.prevent="join(room)" v-for="room in autocompleteOptions">
               <span class="badge"><i class="material-icons" v-if="room.n_users">person</i>{{room.n_users || "new"}}</span>
               <h6>{{room.name}}</h6>
               <p>{{topic(room.topic) | markdown}}</p>
