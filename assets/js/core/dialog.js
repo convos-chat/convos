@@ -21,22 +21,10 @@
     if (attrs.last_active) {
       this.lastActive = Date.fromAPI(attrs.last_active).valueOf();
     }
-
-    this.user.on("ready", function() {
-      self.reset = true;
-      if (self.active) self.load({});
-    });
   };
 
   var proto = Convos.Dialog.prototype;
   var protectedKeys = ["participants"];
-
-  proto.activate = function() {
-    if (!this.reset) return;
-    if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
-    if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
-    this.load({});
-  };
 
   proto.addMessage = function(msg, args) {
     if (!args) args = {};
@@ -119,7 +107,7 @@
         self.addMessage(msg, {method: "unshift", disableNotifications: true, disableUnread: true});
       });
       if (cb) cb(err, xhr.body);
-      delete self.reset;
+      self.reset = false;
     });
   };
 
@@ -170,14 +158,20 @@
   };
 
   proto.update = function(attrs) {
-    var frozen = this.frozen;
+    var loadMaybe = attrs.hasOwnProperty("active") || attrs.hasOwnProperty("frozen");
 
     Object.keys(attrs).forEach(function(n) {
       if (protectedKeys.indexOf(n) == -1) this[n] = attrs[n];
     }.bind(this));
 
-    if (attrs.hasOwnProperty("frozen") && !attrs.frozen) {
+    if (attrs.hasOwnProperty("frozen") && this.frozen && !attrs.frozen) {
+      this.reset = true;
+    }
+
+    if (loadMaybe && !this.frozen && this.active) {
       if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
+      if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
+      if (this.active && this.reset) this.load({});
     }
 
     if (this.is_private) {
@@ -230,6 +224,7 @@
   };
 
   proto._setParticipants = function(msg) {
+    if (msg.errors) return this.addMessage({type: "error", message: msg.errors[0].message});
     this.participants = {};
     msg.participants.forEach(function(p) {
       p.seen = new Date();

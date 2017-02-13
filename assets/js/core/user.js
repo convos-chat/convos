@@ -95,7 +95,6 @@
         self.notifications = data.notifications.reverse();
         self.unread = data.unread || 0;
         self.currentPage = "convos-chat";
-        self.emit("ready");
       }
     };
   };

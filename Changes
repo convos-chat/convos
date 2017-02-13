@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 0.99_25 Not Released
  - Fix sending server messages to the right dialog
  - Fix joining a dialog by clicking on the dialog name
+ - Fix first shown channel shows all users inactive #321
  - Add better handling of "create dialog" errors
 
 0.99_24 2017-01-29T00:57:30+0100

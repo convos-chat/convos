@@ -29,12 +29,12 @@ module.exports = {
         var dialog = this.user.dialogs[i];
         if (dialog.href() == main || (i == 0 && !main)) {
           Convos.settings.main = dialog.href(); // in case not already set
-          dialog.active = true;
+          dialog.update({active: true});
           this.show = "dialog";
           this.error = {};
         }
         else if (dialog.active !== undefined) {
-          dialog.active = false;
+          dialog.update({active: false});
         }
       }
     }

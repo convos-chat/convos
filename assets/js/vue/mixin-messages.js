@@ -13,7 +13,6 @@
     },
     methods: {
       activate: function() {
-        this.dialog.activate();
         if (this._atBottomTid) return;
         this._atBottomTid = setInterval(this.keepAtBottom, 200);
       },
