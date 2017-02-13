@@ -4966,6 +4966,7 @@ a.toggle-main-menu {
 iframe.link-embedder,
 img.embed {
   overflow: hidden;
+  display: block;
   max-width: 98%;
   max-height: 20rem;
   margin: 6px 1%; }
@@ -5206,4 +5207,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../e940abd12c/main.css.map */
+/*# sourceMappingURL=../6ccd9b7127/main.css.map */
