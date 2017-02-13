@@ -1,6 +1,6 @@
 (function() {
   Convos.mixin.message = {
-    props:   ["dialog", "msg", "user"],
+    props: ["dialog", "msg", "user"],
     methods: {
       classNames: function() {
         var msg = this.msg;
@@ -33,21 +33,25 @@
         $a.parent().append($html).find(".materialboxed").materialbox();
       },
       message: function() {
-        var self = this;
-        return this.msg.message.xmlEscape().autoLink({
-          target: "_blank",
-          after:  function(url, id) {
-            if (self.settings.expandUrls) {
-              $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
-                self.loadOffScreen(html, id);
-              });
-            }
-          }
-        });
+        return this.msg.richMessage || this.msg.message.xmlEscape();
       },
       statusTooltip: function() {
         return this.dialog.participants[this.msg.from] ? "" : "Not in this channel";
       }
+    },
+    ready: function() {
+      this.$once("visible", function() {
+        var self = this;
+        if (!self.settings.expandUrls) return;
+        self.msg.richMessage = self.msg.message.xmlEscape().autoLink({
+          target: "_blank",
+          after: function(url, id) {
+            $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
+              self.loadOffScreen(html, id);
+            });
+          }
+        });
+      });
     }
   };
 })();

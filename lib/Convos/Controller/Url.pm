@@ -19,6 +19,7 @@ sub info {
     sub {
       my $link = $_[1];
       $self->app->_link_cache->set($url => $link);
+      $self->res->headers->cache_control('max-age=600');
       $self->respond_to(json => {json => $link}, any => {text => $link->to_embed});
     },
   );

@@ -1,5 +1,5 @@
 (function() {
-  var offset = 60;
+  var THRESHOLD = 60;
 
   Convos.mixin.messages = {
     data: function() {
@@ -13,56 +13,59 @@
     },
     methods: {
       activate: function() {
-        if (this._atBottomTid) return;
-        this._atBottomTid = setInterval(this.keepAtBottom, 200);
+        if (!this._atBottomTid) this._atBottomTid = setInterval(this.keepAtBottom, 200);
       },
       deactivate: function() {
         this.dialog.setLastRead();
         if (this._atBottomTid) clearTimeout(this._atBottomTid);
         delete this._atBottomTid;
       },
-      findVisibleMessage: function() {
-        var messages = this.scrollElement.querySelectorAll(".convos-message");
-        var st = this.scrollElement.scrollTop;
-        var n = 0;
-        while (++n < messages.length) {
-          if (messages[n].offsetTop >= st) return messages[n];
-        }
-        return null;
-      },
       keepAtBottom: function() {
-        var el = this.scrollElement;
         if (!this.atBottom) return;
+        var el = this.scrollElement;
         if (el.scrollTop > el.scrollHeight - el.offsetHeight - 10) return;
-        this.scrollTid = "lock"; // need to prevent the next onScroll() call triggered by scrollTop below
+        this.scrollTid = "lock"; // need to prevent the next detectVisibleMessages() call triggered by scrollTop below
         el.scrollTop = el.scrollHeight;
       },
-      onScroll: function() {
+      detectVisibleMessages: function() {
         if (this.scrollTid == "lock") return this.scrollTid = 0;
         if (this.scrollTid) return;
+
         this.scrollTid = setTimeout(function() {
-          var msgEl, el = this.scrollElement;
+          var children = this.$children.filter(function(c) { return c.loadOffScreen; });
+          var el =  this.scrollElement;
+          var scrollTop = el.scrollTop;
+          var innerHeight = window.innerHeight || document.documentElement.clientHeight;
+          var found = [];
 
           this.scrollTid = 0;
-          this.atBottom = el.scrollTop > el.scrollHeight - el.offsetHeight - offset;
+          this.atBottom = el.scrollTop > el.scrollHeight - el.offsetHeight - THRESHOLD;
 
-          if (el.scrollTop < offset) {
-            var msgEl = this.findVisibleMessage();
+          for (var i = 0; i < children.length; i++) {
+            var offsetTop = children[i].$el.offsetTop;
+            if (offsetTop > scrollTop + innerHeight) break;
+            if (offsetTop < scrollTop) continue;
+            children[i].$emit("visible");
+            found.push(children[i]);
+          }
+
+          if (scrollTop < THRESHOLD && found.length) {
             this.dialog.load({historic: true}, function(err, body) {
-              if (msgEl) window.nextTick(function() { el.scrollTop = msgEl.offsetTop; });
+              window.nextTick(function() { el.scrollTop = found[0].$el.offsetTop; });
             });
           }
-        }.bind(this), 100);
+        }.bind(this), 200);
       }
     },
     ready: function() {
-      this.scrollElement = this.$el.querySelector(".scroll-element");
-      this.scrollElement.addEventListener("scroll", this.onScroll);
+      var self = this;
       // Need to use $nextTick, since the "message" event is triggered before the element is rendered on the page
-      this.dialog.on("message", function() { this.$nextTick(this.keepAtBottom); }.bind(this));
+      this.dialog.on("message", function() { self.$nextTick(self.detectVisibleMessages); });
+      this.scrollElement = this.$el.querySelector(".scroll-element");
+      this.scrollElement.addEventListener("scroll", this.detectVisibleMessages);
     },
     beforeDestroy: function() {
-      this.scrollElement.removeEventListener("scroll", this.onScroll);
+      this.scrollElement.removeEventListener("scroll", this.detectVisibleMessages);
     }
   };
 })();

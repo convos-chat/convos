@@ -5,6 +5,8 @@ Revision history for perl distribution Convos
  - Fix joining a dialog by clicking on the dialog name
  - Fix first shown channel shows all users inactive #321
  - Add better handling of "create dialog" errors
+ - Add functionality to only enrich visible links
+ - Add better "rich link" caching
 
 0.99_24 2017-01-29T00:57:30+0100
  - Fix registration process

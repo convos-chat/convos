@@ -30,6 +30,7 @@
     if (!args) args = {};
     if (!args.method) args.method = "push";
     var prev = args.method == "unshift" ? this.messages[0] : this.prevMessage;
+    msg.richMessage = null;
 
     if (!msg.from) msg.from = "convosbot";
     if (!msg.type) msg.type = "notice";
