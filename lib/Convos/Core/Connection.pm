@@ -87,12 +87,23 @@ sub send {
 sub state {
   my ($self, $state, $message) = @_;
   my $old_state = $self->{state} || '';
+
   return $self->{state} ||= 'queued' unless $state;
   die "Invalid state: $state" unless grep { $state eq $_ } qw(connected queued disconnected);
-  $self->emit(state => connection => {state => $state, message => $message // ''})
-    unless $old_state eq $state;
-  $self->{state} = $state;
-  $self;
+
+  unless ($old_state eq $state) {
+    $self->{state} = $state;
+    $self->emit(state => connection => {state => $state, message => $message // ''});
+
+    if ($state eq 'disconnected') {
+      for my $dialog (@{$self->dialogs}) {
+        $dialog->frozen('Not connected.') unless $dialog->frozen;
+        $self->emit(state => frozen => $dialog->TO_JSON);
+      }
+    }
+  }
+
+  return $self;
 }
 
 sub _debug {
