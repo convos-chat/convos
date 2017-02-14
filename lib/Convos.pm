@@ -151,6 +151,7 @@ sub _config {
     forced_irc_server => $config->{forced_irc_server} ? true : false,
     organization_name => $config->{organization_name},
     organization_url  => $config->{organization_url},
+    version => $self->VERSION || '0.01',
   };
 
   $config;

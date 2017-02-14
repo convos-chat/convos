@@ -41,7 +41,7 @@
         }
       },
       onChange: function(e) {
-        if (DEBUG_VISIBLE_MESSAGES) console.log("atBottom:", this.atBottom, "scrollTid:", (this.scrollTid > 0 ? "active" : this.scrollTid));
+        if (DEBUG_VISIBLE_MESSAGES) console.log("[" + this.dialog.dialog_id + "] atBottom:", this.atBottom, "scrollTid:", (this.scrollTid > 0 ? "active" : this.scrollTid));
         if (!e) this.keepAtBottom();
         if (this.scrollTid == "lock") return this.scrollTid = 0;
         if (!this.scrollTid) this.scrollTid = setTimeout(this.detectVisibleMessages, 300);

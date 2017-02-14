@@ -8,6 +8,9 @@
     Wanna talk to us? Join the "#convos" channel on
     <a target="_blank" href="http://freenode.net/">irc.freenode.net</a>.
   </p>
+  <p>
+    Version <a target="_blank" href="https://github.com/Nordaaker/convos/tree/{{settings.version}}">{{settings.version}}</a>
+  </p>
 </template>
 <script>
 module.exports = {};
