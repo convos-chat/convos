@@ -169,10 +169,13 @@
       this.reset = true;
     }
 
+    if (this.reset && this.active) {
+      this.load({});
+    }
+
     if (loadMaybe && !this.frozen && this.active) {
       if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
       if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
-      if (this.active && this.reset) this.load({});
     }
 
     if (this.is_private) {

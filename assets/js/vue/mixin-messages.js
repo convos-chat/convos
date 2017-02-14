@@ -49,7 +49,7 @@
             found.push(children[i]);
           }
 
-          if (scrollTop < THRESHOLD && found.length) {
+          if (scrollTop < THRESHOLD && innerHeight < el.scrollHeight) {
             this.dialog.load({historic: true}, function(err, body) {
               window.nextTick(function() { el.scrollTop = found[0].$el.offsetTop; });
             });
