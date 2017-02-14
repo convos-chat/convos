@@ -29,7 +29,7 @@
         var $html = $(html);
         var $a = $('#' + id);
 
-        $html.filter("img").add($html.find("img")).addClass("embed materialboxed");
+        $html.filter("img").add($html.find("img")).addClass("embed materialboxed").on("error", function() { $(this).remove(); });
         $a.parent().append($html).find(".materialboxed").materialbox();
       },
       message: function() {
