@@ -355,7 +355,7 @@ checksum=fe5a69423a
 format=js
 minified=1
 [js-min:js/core/dialog.js]
-checksum=925fb5c84b
+checksum=9fd088daa8
 format=js
 minified=1
 [js-min:js/core/user.js]
@@ -446,15 +446,15 @@ format=js
 minified=1
 mtime=1471637625
 [js-min:js/vue/mixin-message.js]
-checksum=e2ad3836f1
+checksum=3ceec50c49
 format=js
 minified=1
 [js-min:js/vue/mixin-messages.js]
-checksum=1022054096
+checksum=3c7f2d06c3
 format=js
 minified=1
 [js-min:js/window.js]
-checksum=a2aa73fa3b
+checksum=c8c64490d0
 format=js
 minified=1
 [sass:sass/main.scss]
