@@ -87,7 +87,9 @@
   proto.load = function(args, cb) {
     var self = this;
     var method = this.dialog_id ? "dialogMessages" : "connectionMessages";
+
     if (this.messages.length && this.messages[0].loading) return;
+    if (window.DEBUG) console.log("[load:" + this.dialog_id + "] " + JSON.stringify(args)); // TODO
 
     if (args.historic && this.messages.length > 0) {
       delete args.historic;
@@ -152,7 +154,7 @@
         connection_id: this.connection_id,
         dialog_id: this.dialog_id
       }, function(err, xhr) {
-        if (err) return console.log("[setDialogLastRead] " + JSON.stringify(err)); // TODO
+        if (err) return console.log("[setDialogLastRead:" + self.dialog_id + "] " + JSON.stringify(err)); // TODO
         self.lastRead = Date.fromAPI(xhr.body.last_read);
       }
     );
@@ -161,13 +163,12 @@
   proto.update = function(attrs) {
     var loadMaybe = attrs.hasOwnProperty("active") || attrs.hasOwnProperty("frozen");
 
+    if (attrs.hasOwnProperty("active") && this.active && !attrs.active) this.setLastRead();
+    if (attrs.hasOwnProperty("frozen") && this.frozen && !attrs.frozen) this.reset = true;
+
     Object.keys(attrs).forEach(function(n) {
       if (protectedKeys.indexOf(n) == -1) this[n] = attrs[n];
     }.bind(this));
-
-    if (attrs.hasOwnProperty("frozen") && this.frozen && !attrs.frozen) {
-      this.reset = true;
-    }
 
     if (this.reset && this.active) {
       this.load({});
