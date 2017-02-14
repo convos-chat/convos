@@ -344,6 +344,7 @@ __DATA__
     %= content
     <div id="vue_tooltip"><span></span></div>
     %= javascript begin
+      window.DEBUG = <%= app->mode eq 'development' ? 'true' : 'false' %>;
       window.Convos = {
         apiUrl:   "<%= $c->url_for('api') %>",
         indexUrl: "<%= $c->url_for('index') %>",

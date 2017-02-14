@@ -1,7 +1,7 @@
 (function() {
   window.isMobile = navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i);
   window.isTouchDevice = !!("ontouchstart" in window);
-  window.DEBUG = window.DEBUG || true; // TODO: Should default to false?
+  window.DEBUG = window.DEBUG || location.href.match(/debug=/);
 
   window.nextTick = function(cb) { setTimeout(cb, 1); };
 
