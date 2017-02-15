@@ -44,7 +44,7 @@
         }
       },
       keepScrollPos: function() {
-        if (this.atBottom && !this.scrollTid) this.scrollEl.scrollTop = this.scrollEl.scrollHeight;
+        if (this.atBottom) this.scrollEl.scrollTop = this.scrollEl.scrollHeight;
       }
     },
     ready: function() {
