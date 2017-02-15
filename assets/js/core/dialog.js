@@ -101,7 +101,7 @@
 
     this.addMessage(
       {loading: true, message: "Loading messages..."},
-      {method: "unshift"}
+      {method: args.before ? "unshift" : "push"}
     );
 
     Convos.api[method](args, function(err, xhr) {
