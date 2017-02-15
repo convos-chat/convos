@@ -24,7 +24,7 @@
   };
 
   var proto = Convos.Dialog.prototype;
-  var protectedKeys = ["participants"];
+  var protectedKeys = ["connection_id", "dialog_id", "name", "participants", "user"];
 
   proto.addMessage = function(msg, args) {
     if (!args) args = {};
@@ -167,7 +167,7 @@
     if (attrs.hasOwnProperty("frozen") && this.frozen && !attrs.frozen) this.reset = true;
 
     Object.keys(attrs).forEach(function(n) {
-      if (protectedKeys.indexOf(n) == -1) this[n] = attrs[n];
+      if (this.hasOwnProperty(n) && protectedKeys.indexOf(n) == -1) this[n] = attrs[n];
     }.bind(this));
 
     if (this.reset && this.active) {
