@@ -90,7 +90,7 @@
       else if (data.email) {
         if (window.DEBUG) console.log("[Convos] User " + data.email + " is logged in");
         data.connections.forEach(function(c) { self.ensureConnection(c); });
-        data.dialogs.forEach(function(d) { self.ensureDialog(d); });
+        data.dialogs.forEach(function(d) { d.reset = true; self.ensureDialog(d); });
         self.email = data.email;
         self.notifications = data.notifications.reverse();
         self.unread = data.unread || 0;
