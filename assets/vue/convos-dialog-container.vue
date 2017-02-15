@@ -11,6 +11,7 @@
         :dialog="dialog"
         :msg="msg"
         :user="user"
+        v-ref:messages
         v-if="msg.type"
         v-for="msg in dialog.messages"></component>
     </main>
