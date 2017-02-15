@@ -44,7 +44,7 @@
     xhr.onreadystatechange = function() {
       if (xhr.readyState != 4) return;
       if (xhr.status != 200) return cb.call(this, xhr.status);
-      if (window.DEBUG) console.log("[OpenAPI] Generate methods from " + url);
+      if (DEBUG.info) console.log("[OpenAPI] Generate methods from " + url);
       this._generate(xhr.responseText.match(/^[\{\[]/) ? JSON.parse(xhr.responseText) : {});
       cb.call(this, "");
     }.bind(this);
@@ -67,7 +67,7 @@
         httpMethod = httpMethod.toUpperCase();
         pathList.shift(); // first element is empty string
 
-        if (window.DEBUG > 1) console.log("[OpenAPI] Add method " + opSpec.operationId);
+        if (DEBUG.api) console.log("[OpenAPI] Add method " + opSpec.operationId);
         self[opSpec.operationId] = function(input, cb) {
           var xhr = this._xhrReq(httpMethod, pathList, input, opSpec.parameters || []);
 
@@ -78,7 +78,7 @@
           } else {
             xhr.onreadystatechange = function() {
               if (xhr.readyState != 4) return;
-              if (window.DEBUG > 1) console.log("[OpenAPI] " + xhr.url + " " + xhr.status + " " + xhr.responseText);
+              if (DEBUG.api) console.log("[OpenAPI] " + xhr.url + " " + xhr.status + " " + xhr.responseText);
               xhr.body = xhr.responseText.match(/^[\{\[]/) ? JSON.parse(xhr.responseText) : xhr.responseText;
               cb.call(this, makeErr(xhr), xhr);
             }.bind(this);
@@ -152,7 +152,7 @@
     }
 
     if (errors.length) {
-      if (window.DEBUG) console.log("[OpenAPI] " + xhr.url + " = " + JSON.stringify(errors));
+      if (DEBUG.info) console.log("[OpenAPI] " + xhr.url + " = " + JSON.stringify(errors));
       xhr.errors = errors;
       return xhr;
     }
@@ -167,7 +167,7 @@
     if (json) {
       headers.unshift(["Content-Type", "application/json"]);
       xhr.body = JSON.stringify(json);
-      if (window.DEBUG > 1) console.log("[OpenAPI] " + xhr.url + " <<< " + xhr.body);
+      if (DEBUG.api) console.log("[OpenAPI] " + xhr.url + " <<< " + xhr.body);
     } else if (form.length) {
       str = [];
       headers.unshift(["Content-Type", "application/x-www-form-urlencoded"]);
@@ -175,7 +175,7 @@
         str.push(encodeURIComponent(i[0]) + "=" + encodeURIComponent(i[1]));
       });
       xhr.body = str.join("&");
-      if (window.DEBUG > 1) console.log("[OpenAPI] " + xhr.url + " <<< " + xhr.body);
+      if (DEBUG.api) console.log("[OpenAPI] " + xhr.url + " <<< " + xhr.body);
     }
 
     xhr.open(httpMethod, xhr.url);

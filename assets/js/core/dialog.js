@@ -89,7 +89,7 @@
     var method = this.dialog_id ? "dialogMessages" : "connectionMessages";
 
     if (this.messages.length && this.messages[0].loading) return;
-    if (window.DEBUG) console.log("[load:" + this.dialog_id + "] " + JSON.stringify(args)); // TODO
+    if (DEBUG.info) console.log("[load:" + this.dialog_id + "] " + JSON.stringify(args)); // TODO
 
     if (args.historic && this.messages.length > 0) {
       delete args.historic;

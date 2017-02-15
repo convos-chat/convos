@@ -58,6 +58,7 @@ sub startup {
   my $r      = $self->routes;
 
   $self->_home_in_share unless -d $self->home->rel_file('public');
+  $self->defaults(debug => $self->mode eq 'development' ? ['info'] : []);
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
@@ -332,6 +333,7 @@ Marcus Ramberg - C<marcus@nordaaker.com>
 
 __DATA__
 @@ layouts/convos.html.ep
+% use Mojo::JSON 'to_json';
 <!DOCTYPE html>
 <html data-framework="vue">
   <head>
@@ -345,7 +347,7 @@ __DATA__
     %= content
     <div id="vue_tooltip"><span></span></div>
     %= javascript begin
-      window.DEBUG = <%= app->mode eq 'development' ? 'true' : 'false' %>;
+      window.DEBUG = <%== to_json {map { ($_ => 1) } @$debug, split /,/, ($self->param('debug') || '')} %>;
       window.Convos = {
         apiUrl:   "<%= $c->url_for('api') %>",
         indexUrl: "<%= $c->url_for('index') %>",
@@ -353,7 +355,7 @@ __DATA__
         mixin:    {}, // Vue.js mixins
         mode:     "<%= app->mode %>",
         page:     "<%= stash('page') || '' %>",
-        settings: <%== Mojo::JSON::to_json(app->config('settings')) %>
+        settings: <%== to_json app->config('settings') %>
       };
     % end
     %= asset 'convos.js';

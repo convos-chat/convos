@@ -1,5 +1,4 @@
 (function() {
-  var DEBUG_SCROLLING = location.href.match(/debug=\w*,?\bscroll\b/);
   var THRESHOLD = 60;
 
   Convos.mixin.messages = {
@@ -11,7 +10,7 @@
     },
     methods: {
       onScroll: function(e) {
-        if (DEBUG_SCROLLING) console.log("[onScroll:" + this.dialog.dialog_id + "]", this.atBottom, this.scrollEl.scrollTop, this.scrollEl.scrollHeight - this.scrollEl.offsetHeight, this.scrollTid);
+        if (DEBUG.scroll) console.log("[onScroll:" + this.dialog.dialog_id + "]", this.atBottom, this.scrollEl.scrollTop, this.scrollEl.scrollHeight - this.scrollEl.offsetHeight, this.scrollTid);
         if (this.scrollTid == "skip") return this.scrollTid = undefined;
         if (!this.scrollTid) this.scrollTid = setTimeout(this.onScrollDelayed, 250);
       },

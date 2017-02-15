@@ -22,7 +22,7 @@
     var connection = this.connections.filter(function(c) { return c.connection_id == data.connection_id; })[0];
 
     if (!connection) {
-      if (window.DEBUG > 1) console.log("[ensureConnection] ", JSON.serialize(data));
+      if (DEBUG.user) console.log("[ensureConnection]", JSON.stringify(data));
       data.user = this;
       connection = new Convos.Connection(data);
       this.connections.push(connection);
@@ -43,7 +43,7 @@
     })[0];
 
     if (!dialog) {
-      if (window.DEBUG > 1) console.log("[ensureDialog] ", JSON.serialize(data));
+      if (DEBUG.user) console.log("[ensureDialog]", JSON.stringify(data));
       if (data.connection && !data.connection_id) data.connection_id = data.connection.connection_id;
       if (!data.name) data.name = data.from || data.dialog_id;
       delete data.connection;
@@ -62,7 +62,7 @@
   proto.refresh = function() {
     var self = this;
 
-    if (window.DEBUG) console.log("[WebSocket] readyState is " + this._wsState());
+    if (DEBUG.info) console.log("[WebSocket] readyState is " + this._wsState());
     if (this._wsState() == "OPEN") return console.trace("[WebSocket] Already open!");
     if (this._refreshTid) clearTimeout(this._refreshTid);
 
@@ -73,7 +73,7 @@
     };
 
     this.ws.onclose = this.ws.onerror = function(e) {
-      if (window.DEBUG) console.log("[WebSocket]", e);
+      if (DEBUG.info) console.log("[WebSocket]", e);
       if (!self.email) return self.currentPage = "convos-login";
       self._refreshTid = setTimeout(self.refresh.bind(self), 1000);
       self.connections.forEach(function(c) { c.update({state: "unreachable"}); });
@@ -81,14 +81,14 @@
     };
 
     this.ws.onmessage = function(e) {
-      if (window.DEBUG > 1) console.log("[WebSocket] " + e.data);
+      if (DEBUG.ws) console.log("[WebSocket] " + e.data);
       var data = JSON.parse(e.data);
 
       if (data.connection_id && data.event) {
         self.getConnection(data.connection_id).emit(data.event, data);
       }
       else if (data.email) {
-        if (window.DEBUG) console.log("[Convos] User " + data.email + " is logged in");
+        if (DEBUG.info) console.log("[Convos] User " + data.email + " is logged in");
         data.connections.forEach(function(c) { self.ensureConnection(c); });
         data.dialogs.forEach(function(d) { d.reset = true; self.ensureDialog(d); });
         self.email = data.email;

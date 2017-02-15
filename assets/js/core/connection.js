@@ -218,7 +218,7 @@
   };
 
   proto._onState = function(data) {
-    if (DEBUG) console.log("[state:" + data.type + "] " + this.connection_id + " = " + JSON.stringify(data));
+    if (DEBUG.info) console.log("[state:" + data.type + "] " + this.connection_id + " = " + JSON.stringify(data));
 
     switch (data.type) {
       case "connection":
