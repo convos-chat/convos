@@ -189,6 +189,7 @@ sub send {
   return $self->connect($cb)    if $cmd eq 'CONNECT';
   return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN';
+  return $self->_query_dialog($message, $cb) if $cmd eq 'QUERY';
   return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
   return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
   return $self->participants($target, $cb) if $cmd eq 'NAMES';
@@ -244,21 +245,50 @@ sub _join_dialog {
   my $cb = pop;
   my ($self, $command) = @_;
   my ($name, $password) = split /\s/, ($command || ''), 2;
-  return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
 
-  my $dialog = $self->get_dialog($name);
-  return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
-  Scalar::Util::weaken($self);
-  return $self->_proxy(
-    join_channel => $command,
+  Mojo::IOLoop->delay(
+    sub { $self->_query_dialog($name, shift->begin) },
     sub {
-      my ($irc, $err, $res) = @_;
+      my ($delay, $err, $dialog) = @_;
+      return $self->$cb($err, $dialog) if $err;
+      $delay->pass($dialog);
+      $self->_proxy(join_channel => $command, $delay->begin);
+    },
+    sub {
+      my ($delay, $dialog, $err, $res) = @_;
+
       $err = 'Password protected' if $err =~ /\+k\b/;
-      $dialog ||= $self->dialog({name => $res->{name}});
+      $res->{name} //= $name;
+
+      unless ($self->get_dialog($res->{name})) {
+        $self->remove_dialog($name);
+        $dialog = $self->dialog({name => $res->{name}});
+      }
+
+      $dialog->name($res->{name}) if length $res->{name};
       $dialog->frozen($err || '')->password($password // '')->topic($res->{topic} // '');
       $self->save(sub { })->$cb($err, $dialog);
-    }
+    },
   );
+
+  return $self;
+}
+
+sub _query_dialog {
+  my ($self, $name, $cb) = @_;
+  ($name) = split /\s/, $name, 2;
+
+  # Invalid input
+  return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
+
+  # Already in the dialog
+  my $dialog = $self->get_dialog($name);
+  return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
+
+  # New dialog
+  $dialog ||= $self->dialog({name => $name});
+  $dialog->frozen('Not active in this room.') if !$dialog->is_private and !$dialog->frozen;
+  return next_tick $self, $cb, '', $dialog;
 }
 
 sub _kick {

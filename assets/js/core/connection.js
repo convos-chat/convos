@@ -108,13 +108,6 @@
       action = message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', ''];
     }
 
-    if (action[1] == 'query') {
-      if (action[2]) {
-        Convos.settings.main = this.user.ensureDialog({connection_id: this.connection_id, dialog_id: action[2]}).href();
-      }
-      return;
-    }
-
     if (!dialog) dialog = this.getDialog(action[2]); // action = ["...", "close", "#foo" ]
     if (!dialog) dialog = this.user.activeDialog();
 
@@ -196,6 +189,11 @@
   };
 
   proto._sentJoin = function(msg) {
+    var dialog = this.user.ensureDialog(msg);
+    Convos.settings.main = dialog.href();
+  };
+
+  proto._sentQuery = function(msg) {
     var dialog = this.user.ensureDialog(msg);
     Convos.settings.main = dialog.href();
   };
