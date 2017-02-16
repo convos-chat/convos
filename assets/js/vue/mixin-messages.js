@@ -5,14 +5,14 @@
     watch: {
       "dialog.active": function(v, o) {
         if (v === false && this.scrollPosTid) clearTimeout(this.scrollPosTid);
-        if (v === true) this.scrollPosTid = setInterval(this.keepScrollPos, 200);
+        if (v === true) this.scrollPosTid = setInterval(this.keepScrollPos, 300);
       }
     },
     methods: {
       onScroll: function(e) {
         if (DEBUG.scroll) console.log("[onScroll:" + this.dialog.dialog_id + "]", this.atBottom, this.scrollEl.scrollTop, this.scrollEl.scrollHeight - this.scrollEl.offsetHeight, this.scrollTid);
         if (this.scrollTid == "skip") return this.scrollTid = undefined;
-        if (!this.scrollTid) this.scrollTid = setTimeout(this.onScrollDelayed, 250);
+        if (!this.scrollTid) this.scrollTid = setTimeout(this.onScrollDelayed, 150);
       },
       onScrollDelayed: function() {
         var self = this;
@@ -44,12 +44,12 @@
         }
       },
       keepScrollPos: function() {
-        if (this.atBottom) this.scrollEl.scrollTop = this.scrollEl.scrollHeight;
+        if (DEBUG.keepScrollPos) console.log("[keepScroll:" + this.dialog.dialog_id + "]", this.atBottom, this.scrollEl.scrollTop, this.scrollEl.scrollHeight - this.scrollEl.offsetHeight, this.scrollTid);
+        if (this.atBottom) this.scrollEl.scrollTop = this.scrollEl.scrollHeight - this.scrollEl.offsetHeight;
       }
     },
     ready: function() {
       this.atBottom = true;
-      this.scrollPos = 0;
       this.scrollEl = this.$el.querySelector(".scroll-element");
       this.scrollEl.addEventListener("scroll", this.onScroll);
       this.dialog.on("message", function() { this.$nextTick(this.keepScrollPos); }.bind(this));
