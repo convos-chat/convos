@@ -6,7 +6,7 @@ use Convos::Core::Backend::File;
 my $t = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $channel = $connection->dialog({name => '#convos'});
+my $target = $connection->dialog({name => '#convos'});
 
 # trick to make Devel::Cover track calls to _messages()
 $t->app->core->backend->_fc(bless {}, 'NoForkCall');
@@ -20,7 +20,7 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-
   ->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 0, 'no messages';
 
-$connection->emit(message => $channel => $_) for t::Helper->messages;
+$connection->emit(message => $target => $_) for t::Helper->messages;
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00')
   ->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 60, 'got max limit messages';
@@ -80,9 +80,9 @@ $t->get_ok('/api/notifications')->status_is(200)->json_is(
 );
 
 $connection->emit(
-  message => $channel => {
+  message => $target => {
     from      => 'someone',
-    highlight => false,
+    highlight => Mojo::JSON->false,
     message   => q(the character æ is unicode),
     ts        => time,
     type      => 'private',
@@ -92,8 +92,8 @@ $connection->emit(
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=1&match=æ')
   ->status_is(200)->json_is('/messages/0/message', q(the character æ is unicode));
 
-$channel = $connection->dialog({name => '#subtracting_months'});
-$connection->emit(message => $channel => $_) for t::Helper->messages('2016-10-30T23:40:03', 130);
+$target = $connection->dialog({name => '#subtracting_months'});
+$connection->emit(message => $target => $_) for t::Helper->messages('2016-10-30T23:40:03', 130);
 $t->get_ok(
   '/api/connection/irc-localhost/dialog/%23subtracting_months/messages?before=2016-10-31T00:02:03')
   ->status_is(200);
@@ -107,35 +107,17 @@ $connection->emit(message => $connection->messages => $_) for t::Helper->message
 $t->get_ok('/api/connection/irc-localhost/messages')->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 28, 'server messages';
 
-# Disable notifications on private messages
-# Works because of unread count ...at least for now.
-$t->get_ok('/api/notifications')->status_is(200);
-my $n = @{$t->tx->res->json->{notifications}};
-my $pm = $connection->dialog({name => 'batgirl'});
+$target = $connection->dialog({name => '#chicago.pm'});
+$connection->emit(
+  message => $target => {
+    from      => 'someone',
+    highlight => Mojo::JSON->false,
+    message   => q(the character æ is unicode),
+    ts        => time,
+    type      => 'private',
+  }
+);
+$t->get_ok('/api/connection/irc-localhost/dialog/%23chicago.pm/messages')->status_is(200);
 
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['jhthorsen', 'Hey! Do you get any notifications?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['jhthorsen', 'Hey jhthorsen! not even now?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['#convos', 'But... jhthorsen, what about in a channel?'],
-  }
-);
-
-$t->get_ok('/api/notifications')->status_is(200);
-is @{$t->tx->res->json->{notifications}}, $n + 1, 'only one new notification';
 
 done_testing;

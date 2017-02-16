@@ -359,7 +359,7 @@ sub _setup {
           my $message = sprintf $format, map { $msg->{$_} } @keys;
           my $flag = FLAG_NONE;
 
-          if ($msg->{highlight} and $target->id) {
+          if ($msg->{highlight} and $target->id and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
             $connection->user->{unread}++;
             $connection->user->save;
