@@ -4,28 +4,28 @@
   Convos.mixin.messages = {
     watch: {
       "dialog.active": function(v, o) {
-        if (v === false && this._trackTid) clearTimeout(this.trackViewPort);
+        if (v === false && this._trackTid) clearTimeout(this._trackTid);
         if (v === true) this._trackTid = setInterval(this.trackViewPort, 200);
       }
     },
     methods: {
       trackViewPort: function() {
         var self = this;
+        var messages = this.$refs.messages || [];
         var el = this.scrollEl;
         var scrollHeight = el.scrollHeight;
         var scrollTop = el.scrollTop;
+        var breakTop = scrollTop + (window.innerHeight || document.documentElement.clientHeight);
         var diff = {scrollHeight: scrollHeight - this.scrollHeight, scrollTop: scrollTop - this.scrollTop};
 
         if (!diff.scrollHeight && !diff.scrollTop) return;
         if (!diff.scrollHeight) this.atBottom = scrollHeight - el.offsetHeight < scrollTop + THRESHOLD;
-        if (DEBUG.scroll) console.log(["[scroll:" + this.dialog.dialog_id + "]", this.atBottom, this.$refs.messages.length, el.scrollTop + "-" + this.scrollTop, el.scrollHeight + "-" + this.scrollHeight].join(" "));
+        if (DEBUG.scroll) console.log(["[scroll:" + this.dialog.dialog_id + "]", this.atBottom, messages.length, el.scrollTop + "-" + this.scrollTop, el.scrollHeight + "-" + this.scrollHeight].join(" "));
         if (this.atBottom) el.scrollTop = scrollHeight;
 
         this.scrollHeight = scrollHeight;
         this.scrollTop = scrollTop;
 
-        var messages = this.$refs.messages;
-        var breakTop = this.scrollTop + (window.innerHeight || document.documentElement.clientHeight);
         for (var i = 0; i < messages.length; i++) {
           var offsetTop = messages[i].$el.offsetTop;
           if (offsetTop > breakTop) break;
@@ -46,6 +46,9 @@
       this.scrollTop = 0;
       this.scrollEl = this.$el.querySelector(".scroll-element");
       this.dialog.on("message", function() { this.$nextTick(this.trackViewPort); }.bind(this));
+    },
+    beforeDestroy: function() {
+      if (this._trackTid) clearTimeout(this._trackTid);
     }
   };
 })();
