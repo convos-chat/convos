@@ -1,4 +1,5 @@
 (function() {
+  window.hasFocus = true;
   window.isMobile = navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i);
   window.isTouchDevice = !!("ontouchstart" in window);
   window.DEBUG = window.DEBUG || location.href.match(/debug=/);
@@ -77,4 +78,9 @@
     CustomEvent.prototype = window.Event.prototype;
     window.CustomEvent = CustomEvent;
   }
+
+  window.onpageshow = window.onpagehide = window.onfocus = window.onblur = function(e) {
+    window.hasFocus = e.type.match(/blur|hide/) ? false : true;
+    if (DEBUG.debug) console.log("[focusChanged]", e.type, window.hasFocus);
+  };
 })();

@@ -6,6 +6,7 @@ Revision history for perl distribution Convos
  - Fix first shown channel shows all users inactive #321
  - Fix creating dialog on /QUERY
  - Fix private messages will not result in "highlight" event
+ - Fix notifications are disabled when window is active
  - Add better handling of "create dialog" errors
  - Add functionality to only enrich visible links
  - Add better "rich link" caching
