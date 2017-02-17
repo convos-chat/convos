@@ -44,7 +44,7 @@
       if (this.lastRead < msg.ts && !args.disableUnread) {
         this._increaseUnread(msg);
       }
-      if (msg.highlight && !args.disableNotifications) {
+      if (msg.highlight && !args.disableNotifications && !this.is_private) {
         this.user.unread++;
         this.user.notifications.unshift(msg);
         Notification.simple(msg.from, msg.message);
