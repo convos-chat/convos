@@ -6,6 +6,7 @@
       "dialog.active": function(v, o) {
         if (v === false && this._trackTid) clearTimeout(this._trackTid);
         if (v === true) this._trackTid = setInterval(this.trackViewPort, 200);
+        this.atBottom = true;
       }
     },
     methods: {
@@ -20,7 +21,7 @@
 
         if (!diff.scrollHeight && !diff.scrollTop) return;
         if (!diff.scrollHeight) this.atBottom = scrollHeight - el.offsetHeight < scrollTop + THRESHOLD;
-        if (DEBUG.scroll) console.log(["[scroll:" + this.dialog.dialog_id + "]", this.atBottom, messages.length, el.scrollTop + "-" + this.scrollTop, el.scrollHeight + "-" + this.scrollHeight].join(" "));
+        if (DEBUG.scroll) console.log(["[scroll:" + this.dialog.dialog_id + "]", this.atBottom, messages.length, scrollTop + "-" + this.scrollTop, scrollHeight + "-" + this.scrollHeight].join(" "));
         if (this.atBottom) el.scrollTop = scrollHeight;
 
         this.scrollHeight = scrollHeight;
