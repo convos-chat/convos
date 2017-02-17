@@ -1,5 +1,5 @@
 <template>
-  <form autocomplete="off" class="content" @submit.prevent>
+  <form autocomplete="off" class="convos-connection-settings" @submit.prevent>
     <div class="row" v-if="user.connections.length">
       <div class="col s12">
         <h5 v-if="connection">Edit {{connection.name}}</h5>
@@ -72,7 +72,7 @@
     </div>
     <div class="row">
       <div class="col s12">
-        <button @click="saveConnection" class="btn waves-effect waves-light">{{connection ? "Save" : "Create"}}</button>
+        <button type="submit" @click="saveConnection" class="btn waves-effect waves-light">{{connection ? "Save" : "Create"}}</button>
         <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">Delete</a>
         <p v-if="connection">{{humanState()}}</p>
       </div>

@@ -16,7 +16,7 @@
           <md-input :value.sync="passwordAgain" cols="s6" type="password" placeholder="Repeat password" id="form_login_password_again"></md-input>
         </div>
         <div class="row" v-if="settings.invite_code">
-          <md-input :value.sync="invite_code" type="password">Invite code</md-input>
+          <md-input :value.sync="invite_code" type="password" id="form_login_invite_code">Invite code</md-input>
         </div>
         <div class="row" v-if="errors.length">
           <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-message error">
+  <div class="convos-message convos-message-enable-notifications error">
     <a href="#chat" class="title">convosbot</a>
     <div class="message">
       Do you want desktop notifications for important messages?

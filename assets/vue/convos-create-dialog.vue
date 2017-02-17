@@ -93,8 +93,8 @@ module.exports = {
       if (!this.connection) return;
       this.loaded = false;
       this.connection.rooms({match: this.autocompleteValue}, function(err, res) {
-        if (err) return self.errors = err;
         if (!res.end) self.tid = setTimeout(self.refreshRooms, 1500);
+        if (err) return self.errors = err;
         self.errors = [];
         self.loaded = res.end;
         self.nRooms = res.n_rooms;
