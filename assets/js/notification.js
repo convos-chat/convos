@@ -1,4 +1,13 @@
 (function() {
+  var defaultIcon;
+
+  try {
+    var icon = document.querySelector('link[rel="apple-touch-icon"][sizes="76x76"]');
+    defaultIcon = icon.href;
+  } catch(e) {
+    console.log(e);
+  }
+
   if (window.webkitNotifications) {
     window.Notification = function(title, args) {
       var n = window.webkitNotifications.createNotification(args.icon || '', title, args.body || '');
@@ -35,6 +44,7 @@
   window.Notification.defaultCloseTimeout = 5000;
   window.Notification.simple = function(title, body, icon) {
     if (window.hasFocus) return false;
+    if (!icon) icon = defaultIcon;
 
     if (Notification.permission == 'granted') {
       var args = { icon: icon || '', body: body, onclose: function() { clearTimeout(tid); } };
