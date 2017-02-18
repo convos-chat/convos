@@ -15,12 +15,8 @@
     this.participants = {};
     this.reset = true;
     this.topic = attrs.topic || "";
-    this.unread = attrs.unread || 0;
+    this.unread = 0;
     this.user = attrs.user || new Convos.User({});
-
-    if (attrs.last_active) {
-      this.lastActive = Date.fromAPI(attrs.last_active).valueOf();
-    }
   };
 
   var proto = Convos.Dialog.prototype;
@@ -39,18 +35,9 @@
     if (!prev) prev = {from: "", ts: msg.ts};
 
     if (args.method == "push") {
+      this._updateFromMsg(msg);
       this.prevMessage = msg;
 
-      if (this.lastRead < msg.ts && !args.disableUnread) {
-        this._increaseUnread(msg);
-      }
-      if (msg.highlight && !args.disableNotifications) {
-        if (!this.is_private) {
-          this.user.unread++;
-          this.user.notifications.unshift(msg);
-        }
-        Notification.simple(msg.from, msg.message);
-      }
       if (prev && prev.ts.getDate() != msg.ts.getDate()) {
         prev = {type: "day-changed", prev: prev, ts: msg.ts};
         this.messages[args.method](prev);
@@ -108,10 +95,12 @@
 
     Convos.api[method](args, function(err, xhr) {
       if (self.reset) self.messages = [];
+      self._locked = true;
       self._processMessages(err, xhr.body.messages).reverse().forEach(function(msg) {
-        self.addMessage(msg, {method: "unshift", disableNotifications: true, disableUnread: true});
+        self.addMessage(msg, {method: "unshift"});
       });
       if (cb) cb(err, xhr.body);
+      self._locked = false;
       self.reset = false;
     });
   };
@@ -150,7 +139,6 @@
   };
 
   proto.setLastRead = function() {
-    this.unread = 0;
     Convos.api[this.dialog_id ? "setDialogLastRead" : "setConnectionLastRead"](
       {
         connection_id: this.connection_id,
@@ -165,6 +153,7 @@
   proto.update = function(attrs) {
     var loadMaybe = attrs.hasOwnProperty("active") || attrs.hasOwnProperty("frozen");
 
+    if (attrs.hasOwnProperty("active")) this.unread = 0;
     if (attrs.hasOwnProperty("active") && this.active && !attrs.active) this.setLastRead();
     if (attrs.hasOwnProperty("frozen") && this.frozen && !attrs.frozen) this.reset = true;
 
@@ -188,16 +177,6 @@
     }
 
     return this;
-  };
-
-  proto._increaseUnread = function(msg) {
-    if (this == this.user.activeDialog()) {
-      return;
-    }
-    else if (this.is_private || msg.type.match(/action|private/)) {
-      this.lastActive = msg.ts.valueOf();
-      this.unread++;
-    }
   };
 
   proto._processMessages = function(err, messages) {
@@ -237,5 +216,23 @@
       p.seen = new Date();
       this.participants[p.name] = p;
     }.bind(this));
+  };
+
+  proto._updateFromMsg = function(msg) {
+    var isMessage = this.is_private || msg.type.match(/action|private/);
+
+    this.lastActive = msg.ts.valueOf();
+
+    if (this.lastRead < msg.ts && isMessage) this.unread++;
+    if (this._locked) return;
+
+    if (msg.highlight) {
+      this.user.unread++;
+      this.user.notifications.unshift(msg);
+      Notification.simple(msg.from, msg.message);
+    }
+    else if (this.is_private) {
+      Notification.simple(msg.from, msg.message);
+    }
   };
 })();

@@ -107,35 +107,4 @@ $connection->emit(message => $connection->messages => $_) for t::Helper->message
 $t->get_ok('/api/connection/irc-localhost/messages')->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 28, 'server messages';
 
-# Disable notifications on private messages
-# Works because of unread count ...at least for now.
-$t->get_ok('/api/notifications')->status_is(200);
-my $n = @{$t->tx->res->json->{notifications}};
-my $pm = $connection->dialog({name => 'batgirl'});
-
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['jhthorsen', 'Hey! Do you get any notifications?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['jhthorsen', 'Hey jhthorsen! not even now?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['#convos', 'But... jhthorsen, what about in a channel?'],
-  }
-);
-
-$t->get_ok('/api/notifications')->status_is(200);
-is @{$t->tx->res->json->{notifications}}, $n + 1, 'only one new notification';
-
 done_testing;

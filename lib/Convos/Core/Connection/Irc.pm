@@ -47,7 +47,7 @@ has _irc => sub {
     }
   );
 
-  return $irc;
+  return $self->_setup_irc($irc);                               # make sure irc nick is correct
 };
 
 # room list is shared between all connections
@@ -394,8 +394,8 @@ sub _send {
 
 sub _setup_irc {
   my $self     = shift;
+  my $irc      = shift || $self->_irc;
   my $url      = $self->url;
-  my $irc      = $self->_irc;
   my $userinfo = $self->_userinfo;
   my $nick     = $url->query->param('nick');
   my $tls      = $url->query->param('tls') // 1;
@@ -546,17 +546,14 @@ sub _event_privmsg {
   $msg->{params}[1] =~ s/[\x00-\x1f]//g;
 
   if ($user) {
-    my $is_private = $self->_is_current_nick($msg->{params}[0]);
-    $highlight = $is_private;
-    $target    = $is_private ? $nick : $msg->{params}[0];
-    $target    = $self->get_dialog($target) || $self->dialog({name => $target});
-    $from      = $nick;
+    $target = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
+    $target = $self->get_dialog($target) || $self->dialog({name => $target});
+    $from = $nick;
   }
 
   $target ||= $self->messages;
   $from   ||= $self->id;
-
-  $highlight ||= grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
+  $highlight = grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
     @{$self->url->query->every_param('highlight')};
 
   $target->last_active(Mojo::Date->new->to_datetime);
