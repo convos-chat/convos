@@ -16,10 +16,31 @@ $t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-defaul
 $t->element_is_hidden('.convos-main-menu');
 $t->live_element_exists_not('.convos-notifications.is-sidebar');
 $t->live_element_exists_not('.convos-sidebar-info.is-sidebar');
-is $t->driver->execute_script(js_get_dialog('.atBottom')), 1, 'atBottom';
+
+my @messages = t::Helper->messages;
+$connection->emit(message => $dialog, $_) for splice @messages, 0, 3;
+is_at_bottom();
+
+$connection->emit(message => $dialog, $_) for @messages;
+run_for(0.5);
+is_at_bottom();
+
+#run_for(10);
+#is_at_bottom();
 
 done_testing;
 
-sub js_get_dialog {
-  return qq/return Convos.vm.user.getConnection("irc-default").getDialog("#test")$_[0]/;
+sub is_at_bottom {
+  my $s = $t->driver->execute_script(<<'HERE');
+var el = document.querySelector(".scroll-element");
+return {total: el.scrollHeight, offset: el.offsetHeight, scrolled: el.scrollTop};
+HERE
+
+  is $s->{scrolled} + $s->{offset}, $s->{total},
+    "scroll: $s->{scrolled} + $s->{offset} == $s->{total}";
+}
+
+sub run_for {
+  Mojo::IOLoop->timer($_[0] => sub { Mojo::IOLoop->stop });
+  Mojo::IOLoop->start;
 }
