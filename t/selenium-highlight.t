@@ -17,6 +17,16 @@ $t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-defaul
 $t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread');
 $t->click_ok('.convos-main-menu [href="#chat/irc-default/#test"]');
 
+$connection->_fallback(
+  {
+    command  => '266',
+    event    => 'RPL_GLOBALUSERS',
+    params   => [$NICK, 'Current global users: 23  Max: 82'],
+    prefix   => 'hybrid8.debian.local',
+    raw_line => ":hybrid8.debian.local 266 $NICK :Current global users: 23  Max: 82"
+  }
+);
+
 $connection->_event_privmsg(
   {
     event  => 'privmsg',
@@ -63,5 +73,8 @@ $t->live_text_is('.convos-header-links .n-notifications', '2');
 $t->click_ok('[href="#notifications"]');
 $t->click_ok('[href="#mark-as-read"]');
 $t->live_element_exists_not('.convos-header-links .n-notifications');
+
+# server messages should not result in notifications
+is $t->driver->execute_script('return window.Notification.simple.count'), 4, 'simple.count';
 
 done_testing;

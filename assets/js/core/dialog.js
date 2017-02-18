@@ -231,7 +231,7 @@
       this.user.notifications.unshift(msg);
       Notification.simple(msg.from, msg.message);
     }
-    else if (this.is_private) {
+    else if (this.is_private && this.dialog_id) {
       Notification.simple(msg.from, msg.message);
     }
   };

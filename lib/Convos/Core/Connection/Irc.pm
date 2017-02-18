@@ -225,7 +225,7 @@ sub _fallback {
   my ($self, $msg) = @_;
 
   return if grep { $msg->{command} eq $_ } qw(PONG);
-  shift @{$msg->{params}} if $self->nick eq ($msg->{params}[0] // '');
+  shift @{$msg->{params}} if $self->nick eq $msg->{params}[0];
 
   $self->emit(
     message => $self->messages,
