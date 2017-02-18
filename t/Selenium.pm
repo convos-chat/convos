@@ -17,7 +17,8 @@ sub selenium_init {
   my $t = Test::Mojo::WithRoles->new($app || 'Convos');
 
   $t->setup_or_skip_all;
-  $t->set_window_size([1024, 480])->navigate_ok('/');
+  $t->navigate_ok($args->{loc} || '/');
+  $class->set_window_size($t, 'desktop');
 
   if ($args->{lazy}) {
     my $user = $t->app->core->user({email => $class->email})->set_password('s3cret')->save;
@@ -41,6 +42,12 @@ sub selenium_login {
   $t->wait_until(sub { $_->find_element('.convos-login') });
   $t->send_keys_ok('#form_login_email',    [$class->email, \'tab']);
   $t->send_keys_ok('#form_login_password', ['s3cret',      \'enter']);
+}
+
+sub set_window_size {
+  my ($class, $t, $size) = @_;
+  my %SIZES = (desktop => [1024, 768], iphone6 => [375, 667]);
+  $t->set_window_size($SIZES{$size});
 }
 
 sub import {

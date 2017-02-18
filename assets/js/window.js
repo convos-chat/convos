@@ -1,6 +1,6 @@
 (function() {
   window.hasFocus = true;
-  window.isMobile = navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i);
+  window.isMobile = navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i) || location.href.match(/\bisMobile=1\b/)
   window.isTouchDevice = !!("ontouchstart" in window);
   window.DEBUG = window.DEBUG || location.href.match(/debug=/);
 
