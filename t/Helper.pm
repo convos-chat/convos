@@ -55,7 +55,7 @@ sub t {
 
 sub import {
   my $class  = shift;
-  my $caller = caller;
+  my $caller = shift || caller;
   my $script = basename $0;
 
   eval <<"HERE" or die $@;

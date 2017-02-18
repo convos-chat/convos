@@ -2,14 +2,14 @@ use lib '.';
 use t::Selenium;
 
 my $t          = t::Selenium->selenium_init('Convos', {lazy => 1, login => 1});
-my $user       = $t->app->core->get_user("t$$\@convos.by");
+my $user       = $t->app->core->get_user("$NICK\@convos.by");
 my $connection = $user->get_connection('irc-default');
 
 $connection->_event_privmsg(
   {
     event  => 'privmsg',
     prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ["t$$", 'What about a normal message in a channel?'],
+    params => [$NICK, 'What about a normal message in a channel?'],
   }
 );
 
@@ -21,7 +21,7 @@ $connection->_event_privmsg(
   {
     event  => 'privmsg',
     prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ["t$$", 'What about a normal message in a channel?'],
+    params => [$NICK, 'What about a normal message in a channel?'],
   }
 );
 
@@ -33,7 +33,7 @@ $connection->_event_privmsg(
   {
     event  => 'privmsg',
     prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ["t$$", "What if you are mentioned t$$?"],
+    params => [$NICK, "What if you are mentioned $NICK?"],
   }
 );
 
@@ -55,7 +55,7 @@ $connection->_event_privmsg(
   {
     event  => 'privmsg',
     prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ["#test", "Are you here t$$?"],
+    params => ["#test", "Are you here $NICK?"],
   }
 );
 

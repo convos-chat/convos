@@ -7,7 +7,7 @@ $t->wait_until(sub { $_->find_element('.convos-login') });
 $t->click_ok('[href="#register"]');
 
 $t->wait_until(sub { $_->find_element('.convos-register') });
-$t->send_keys_ok('#form_login_email',          ["t$$\@convos.by",         \'tab']);
+$t->send_keys_ok('#form_login_email',          [t::Selenium->email,       \'tab']);
 $t->send_keys_ok('#form_login_password',       ['secret',                 \'tab']);
 $t->send_keys_ok('#form_login_password_again', ['secret',                 \'tab']);
 $t->send_keys_ok('#form_login_invite_code',    [$ENV{CONVOS_INVITE_CODE}, \'enter']);
@@ -47,10 +47,10 @@ if ($ENV{CONVOS_DEFAULT_SERVER}) {
   $t->wait_until(sub { $_->find_element('.convos-main-menu .link.dialog') });
   $t->live_element_exists('.convos-message-enable-notifications');
   $t->live_text_is('header h2', '#test');
-  $t->send_keys_ok('.convos-input textarea', ["this is test $$", \"enter"]);
+  $t->send_keys_ok('.convos-input textarea', ["this is test $NICK", \"enter"]);
 
-  $t->wait_until(sub { $_->find_element(qq(.convos-message [href="#t$$"])) });
-  $t->live_text_like('.convos-message:last-child .message', qr{\bthis is test \d+\b});
+  $t->wait_until(sub { $_->find_element(qq(.convos-message [href="#$NICK"])) });
+  $t->live_text_like('.convos-message:last-child .message', qr/\bthis is test t\w{7}\b/);
 }
 
 done_testing;
