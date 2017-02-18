@@ -244,7 +244,7 @@ sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 sub _join_dialog {
   my $cb = pop;
   my ($self, $command) = @_;
-  my ($name, $password) = split /\s/, ($command || ''), 2;
+  my ($name, $password) = (split(/\s/, ($command || ''), 2), '', '');
 
   Mojo::IOLoop->delay(
     sub { $self->_query_dialog($name, shift->begin) },
@@ -276,10 +276,10 @@ sub _join_dialog {
 
 sub _query_dialog {
   my ($self, $name, $cb) = @_;
-  ($name) = split /\s/, $name, 2;
 
   # Invalid input
   return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
+  ($name) = split /\s/, $name, 2;
 
   # Already in the dialog
   my $dialog = $self->get_dialog($name);
@@ -613,19 +613,20 @@ sub _event_rpl_myinfo {
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 sub _event_rpl_welcome {
   my ($self, $msg) = @_;
-  my @commands = grep {/\S/} @{$self->on_connect_commands};
-  my $write;
+  my ($write, @commands);
+
+  push @commands, grep { !$_->is_private } @{$self->dialogs};
+  push @commands, grep {/\S/} @{$self->on_connect_commands};
 
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(state => me => $self->{myinfo});
-  $self->_join_dialog(join(' ', $_->name, $_->password), sub { }) for @{$self->dialogs};
 
-  # TODO: This is very experimental
   Scalar::Util::weaken($self);
   $write = sub {
-    my $cmd = shift @commands or return;
-    $self and $self->send('', $cmd, $write);
+    my $i = $self && shift @commands || return;
+    return $self->_join_dialog(join(' ', $i->name, $i->password), $write) if ref $i;
+    return $self->send('', $i, $write);
   };
 
   next_tick $self, $write;

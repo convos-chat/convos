@@ -22,11 +22,13 @@ $th->post_ok('/api/connections',
   json => {name => 'test', url => sprintf('irc://%s?tls=0', $irc->server)})->status_is(200);
 my $c = $th->app->core->get_user('superman@example.com')->get_connection('irc-test');
 
+note 'connected';
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_like('/message', qr{Connected to})->json_message_is('/state', 'connected')
   ->json_message_is('/type', 'connection');
 
 # irc welcome messages
+note 'welcome';
 $ws->message_ok->message_like(qr{Looking}i,  'Looking up your hostname');
 $ws->message_ok->message_like(qr{Checking},  'Checking Ident');
 $ws->message_ok->message_like(qr{Found},     'Found your hostname');
@@ -36,6 +38,7 @@ $irc->run(
   [qr{JOIN}, ['join-convos.irc']],
   sub {
     # TODO: not ok 23 - send message
+    note 'join';
     $ws->send_ok({json => {method => 'send', message => '/join #Convos', connection_id => $c->id}});
     $ws->message_ok->json_message_is('/connection_id', $c->id)
       ->json_message_is('/connection_id', 'irc-test')->json_message_is('/dialog_id', '#convos')
@@ -50,6 +53,7 @@ $irc->run(
   }
 );
 
+note 'msg';
 $ws->send_ok(
   {json => {method => 'send', message => '/msg supergirl too cool', connection_id => $c->id}});
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
@@ -59,6 +63,7 @@ $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/type',    'private')->json_message_has('/ts');
 $ws->message_ok->json_message_is('/event', 'sent');
 
+note 'nick';
 $irc->run(
   [qr{NICK}, ['nick.irc']],
   sub {
@@ -71,6 +76,7 @@ $irc->run(
   }
 );
 
+note 'get topic invalid';
 $irc->run(
   [qr{TOPIC}, ['topic-get.irc']],
   sub {
@@ -79,6 +85,7 @@ $irc->run(
   }
 );
 
+note 'get topic';
 $irc->run(
   [qr{TOPIC}, ['topic-get.irc']],
   sub {
@@ -93,7 +100,7 @@ $irc->run(
   }
 );
 
-# http://www.mirc.com/colors.html
+note 'http://www.mirc.com/colors.html';
 $c->_event_privmsg(
   {
     event  => 'privmsg',
@@ -107,16 +114,19 @@ $c->_event_privmsg(
 $ws->message_ok->json_message_is('/message',
   'swagger2/master f70340b Jan Henning Thorsen: Released version 0.85...');
 
+note 'part event';
 $c->_event_part({params => ['#convos', 'Bye'], prefix => 'batman!super.girl@i.love.debian.org'});
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/dialog_id', '#convos')->json_message_is('/message', 'Bye')
   ->json_message_is('/nick', 'batman')->json_message_is('/type', 'part');
 
+note 'quit event';
 $c->_event_quit({params => ['So long!'], prefix => 'batman!super.girl@i.love.debian.org'});
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/dialog_id', undef)->json_message_is('/nick', 'batman')
   ->json_message_is('/message', 'So long!')->json_message_is('/type', 'quit');
 
+note 'part command';
 $irc->run(
   [qr{PART}, ['part.irc']],
   sub {
@@ -137,6 +147,7 @@ $irc->run(
   $ws->message_ok->json_message_is('/errors/0/message', 'Unknown IRC command.');
 }
 
+note 'disconnect command';
 $ws->send_ok({json => {method => 'send', message => '/disconnect', connection_id => $c->id}});
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/state', 'disconnected')->json_message_is('/type', 'connection')
@@ -169,7 +180,6 @@ __DATA__
 :superman!test15044@i.love.debian.org NICK :supergirl
 @@ topic-get.irc
 :hybrid8.debian.local 332 supergirl #convos :Some cool topic
-:hybrid8.debian.local 333 supergirl #convos jhthorsen!jhthorsen@i.love.debian.org 1432932059
 @@ topic-set.irc
 :supergirl!test20949@i.love.debian.org TOPIC #convos :awesomeness
 @@ part.irc
