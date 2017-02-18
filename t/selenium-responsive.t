@@ -25,8 +25,17 @@ $connection->emit(message => $dialog, $_) for @messages;
 run_for(0.5);
 is_at_bottom();
 
-#run_for(10);
-#is_at_bottom();
+$t->click_ok('.toggle-main-menu');
+$t->element_is_displayed('.convos-main-menu');
+
+$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/"]') });
+$t->click_ok('[href="#chat/irc-default/"]');
+$t->element_is_hidden('.convos-main-menu');
+
+$t->click_ok('.toggle-main-menu');
+$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
+$t->click_ok('[href="#chat/irc-default/#test"]');
+is_at_bottom();
 
 done_testing;
 

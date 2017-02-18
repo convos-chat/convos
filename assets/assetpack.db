@@ -458,7 +458,7 @@ checksum=53c4c00d01
 format=js
 minified=1
 [sass:sass/main.scss]
-checksum=a11e432da8
+checksum=305c00cab3
 format=css
 minified=0
 [sass-min:sass/main.scss]

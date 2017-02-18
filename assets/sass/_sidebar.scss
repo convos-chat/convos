@@ -3,13 +3,16 @@
   width: 100%; // small screens
   background-color: $sidebar-bg;
   position: absolute;
-  top: 0;
+  top: $navbar-height-mobile;
   bottom: 0;
   z-index: $z-index-header + 1;
 
+  @media #{$large-and-up} {
+    top: $navbar-height;
+  }
+
   div.content,
   form.content {
-    @include under-header;
     @include overflow;
     overflow-x: hidden; // This fixes some weird horizontal scrolling in Chrome on iPhone
     bottom: 0;

@@ -4711,11 +4711,11 @@ ul.complete-dropdown {
 .convos-settings main {
   position: absolute;
   top: 56px;
-  -webkit-overflow-scrolling: touch;
-  overflow: auto;
   width: 100%;
   padding: 1.5rem 0.75rem;
-  z-index: 10; }
+  z-index: 10;
+  -webkit-overflow-scrolling: touch;
+  overflow: auto; }
   @media only screen and (min-width: 993px) {
     .convos-dialog-container main,
     .convos-settings main {
@@ -4898,13 +4898,16 @@ header {
   header .input-field {
     height: 100%;
     padding: 0 1.5rem;
-    margin: 0; }
+    margin: 0;
+    width: 240px;
+    float: left; }
     @media only screen and (max-width: 992px) {
       header .input-field {
         display: none; } }
     header .input-field input[type="search"] {
       font-size: 1.2rem;
       height: 100%;
+      width: 100%;
       border: none;
       margin: 0;
       padding-left: 1rem; }
@@ -4928,6 +4931,8 @@ header {
   @media only screen and (min-width: 993px) {
     header {
       height: 64px; }
+      header h2 {
+        margin-left: 20px; }
       header h2, header a, header .material-icons {
         height: 64px;
         line-height: 64px; } }
@@ -5047,29 +5052,23 @@ img.embed {
   width: 100%;
   background-color: #f7f7f7;
   position: absolute;
-  top: 0;
+  top: 56px;
   bottom: 0;
   z-index: 901; }
+  @media only screen and (min-width: 993px) {
+    .convos-main-menu,
+    .is-sidebar {
+      top: 64px; } }
   .convos-main-menu div.content,
   .convos-main-menu form.content,
   .is-sidebar div.content,
   .is-sidebar form.content {
-    position: absolute;
-    top: 56px;
-    -webkit-overflow-scrolling: touch;
-    overflow: auto;
     -webkit-overflow-scrolling: touch;
     overflow: auto;
     overflow-x: hidden;
     bottom: 0;
     left: 0;
     right: 0; }
-    @media only screen and (min-width: 993px) {
-      .convos-main-menu div.content,
-      .convos-main-menu form.content,
-      .is-sidebar div.content,
-      .is-sidebar form.content {
-        top: 64px; } }
   .convos-main-menu.hidden,
   .is-sidebar.hidden {
     display: none !important; }
@@ -5207,4 +5206,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../6ccd9b7127/main.css.map */
+/*# sourceMappingURL=../7dbf8a1e29/main.css.map */

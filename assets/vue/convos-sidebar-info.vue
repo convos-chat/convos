@@ -1,6 +1,5 @@
 <template>
   <div class="convos-sidebar-info is-sidebar">
-    <header><convos-header-links :user="user"></convos-header-links></header>
     <div class="content" v-if="!dialog">
       <div class="row">
         <div class="col s12">

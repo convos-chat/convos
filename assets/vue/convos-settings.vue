@@ -1,10 +1,5 @@
 <template>
   <div class="convos-settings">
-    <header>
-      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <h2 v-tooltip.literal="Welcome to Convos!">Convos</h2>
-      <convos-header-links :toggle="true" :user="user"></convos-header-links>
-    </header>
     <main v-if="show == 'error'">
       <div class="row">
         <div class="col s12">

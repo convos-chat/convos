@@ -46,12 +46,8 @@
 < vue/md-select.vue
 < vue/md-textarea.vue
 
-# menus
-< vue/convos-header-links.vue
-< vue/convos-main-menu.vue
-< vue/convos-toggle-main-menu.vue
-
 # sidebars
+< vue/convos-main-menu.vue
 < vue/convos-help.vue
 < vue/convos-resources.vue
 < vue/convos-notifications.vue

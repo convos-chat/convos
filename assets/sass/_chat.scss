@@ -27,10 +27,16 @@ $convos-input-height: 46px;
 .convos-dialog-container,
 .convos-settings {
   main {
-    @include under-header;
+    position: absolute;
+    top: $navbar-height-mobile;
     width: 100%;
     padding: $gutter-width $gutter-width / 2;
     z-index: 10;
+    @include overflow;
+
+    @media #{$large-and-up} {
+      top: $navbar-height;
+    }
   }
 }
 

@@ -9,13 +9,3 @@
   -webkit-overflow-scrolling: touch;
   overflow: auto;
 }
-
-@mixin under-header() {
-  position: absolute;
-  top: $navbar-height-mobile;
-  @include overflow;
-
-  @media #{$large-and-up} {
-    top: $navbar-height;
-  }
-}

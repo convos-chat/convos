@@ -1,12 +1,5 @@
 <template>
   <div class="convos-main-menu show-on-large" :class="settings.mainMenuVisible ? '' : 'hidden'">
-    <header>
-      <convos-toggle-main-menu :user="user"></convos-toggle-main-menu>
-      <div class="input-field">
-        <input v-model="q" @keydown.enter="search" id="goto_anything" type="search" autocomplete="off" placeholder="Search...">
-        <label for="goto_anything"><i class="material-icons">search</i></label>
-      </div>
-    </header>
     <div class="content">
       <div :class="dialogClass(d, $index)" v-for="d in dialogs">
         <a v-link="d.href()" v-tooltip="d.frozen">
@@ -47,18 +40,15 @@
 </template>
 <script>
 module.exports = {
-  props:   ["user"],
-  data: function() {
-    return {q: ""};
-  },
+  props: ["dialogFilter", "user"],
   computed: {
     dialogs: function() {
       var di = function(a, b) {
         return (b.dialog_id.length ? 1 : 0) - (a.dialog_id.length ? 1 : 0);
       };
 
-      if (this.q) {
-        var re = new RegExp(RegExp.escape(this.q), 'i');
+      if (this.dialogFilter) {
+        var re = new RegExp(RegExp.escape(this.dialogFilter), 'i');
         return this.user.dialogs.filter(function(d) {
           return d.name.match(re);
         }).sort(function(a, b) {
@@ -87,6 +77,11 @@ module.exports = {
       }
     }
   },
+  events: {
+    gotoDialog: function() {
+      this.settings.main = this.dialogs.length ? this.dialogs[0].href() : "#create-dialog/" + this.user.activeDialog('connection_id') + "/" + this.dialogFilter;
+    }
+  },
   methods: {
     close: function(d) {
       this.send('/close ' + d.name, d);
@@ -95,14 +90,14 @@ module.exports = {
       var cn = this.activeClass(d.href());
       cn.link = true;
       cn.dialog = d.dialog_id ? true : false;
-      if (this.q) cn.active = i ? true : false;
+      if (this.dialogFilter) cn.active = i ? true : false;
       cn.frozen = d.frozen ? true : false;
       return cn;
     },
     search: function(e) {
-      if (!this.q.length || e.shiftKey) return;
-      this.settings.main = this.dialogs.length ? this.dialogs[0].href() : "#create-dialog/" + user.activeDialog('connection_id') + "/" + this.q;
-      this.q = "";
+      if (!this.dialogFilter.length || e.shiftKey) return;
+      this.settings.main = this.dialogs.length ? this.dialogs[0].href() : "#create-dialog/" + user.activeDialog('connection_id') + "/" + this.dialogFilter;
+      this.dialogFilter = "";
     },
     showConnectionInfo: function(d) {
       return d.dialog_id && this.user.connections.length > 1;

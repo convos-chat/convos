@@ -1,6 +1,5 @@
 <template>
   <div class="convos-notifications is-sidebar">
-    <header><convos-header-links :user="user"></convos-header-links></header>
     <div class="content">
       <div class="row">
         <div class="col s12">
