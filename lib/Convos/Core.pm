@@ -59,7 +59,9 @@ sub start {
     my $user = $self->user($_);
     for (@{$self->backend->connections($user)}) {
       my $connection = $user->connection($_);
-      $self->connect($connection) unless $connection->state eq 'disconnected';
+      $self->connect($connection)
+        unless $ENV{CONVOS_SKIP_CONNECT}
+        or $connection->state eq 'disconnected';
     }
   }
 

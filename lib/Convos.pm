@@ -94,7 +94,7 @@ sub startup {
     }
   );
 
-  $self->core->start if $ENV{CONVOS_START_BACKEND} // 1;
+  $self->core->start;
 }
 
 # Used internally to generate dynamic SASS files
