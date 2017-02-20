@@ -21,7 +21,7 @@
     </div>
     <div class="link" :class="activeClass('#profile')">
       <a v-link.literal="#profile" class="simple">
-        <i class="material-icons">account_circle</i> Edit profile
+        <i class="material-icons">settings</i> Settings
       </a>
     </div>
     <div class="link" :class="activeClass('#help')">

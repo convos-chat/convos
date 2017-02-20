@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 0.99_26 Not Released
  - Fix scrolling of sidebars and main menu
+ - Change "Edit profile" to "Settings"
 
 0.99_25 2017-02-20T22:46:07+0100
  - Fix sending server messages to the right dialog
