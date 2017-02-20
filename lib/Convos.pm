@@ -82,7 +82,9 @@ sub startup {
 
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
-  $self->_assets;
+
+  # Skip building on travis
+  $ENV{TRAVIS_BUILD_ID} ? $self->helper(asset => sub { }) : $self->_assets;
 
   $self->hook(
     before_dispatch => sub {

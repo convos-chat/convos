@@ -4,9 +4,10 @@ use File::Basename;
 use File::Path 'make_path';
 
 plan skip_all => 'cpanm CSS::Sass' unless eval 'use CSS::Sass 3.3.0;1';
+plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
 
 my $variables = File::Spec->catfile($ENV{CONVOS_HOME}, qw(assets sass _variables.scss));
-my $custom = File::Spec->catfile($ENV{CONVOS_HOME}, qw(assets sass _custom.scss));
+my $custom    = File::Spec->catfile($ENV{CONVOS_HOME}, qw(assets sass _custom.scss));
 
 eval { make_path(dirname($variables)) } or diag $@;
 open my $FH, '>', $variables or plan skip_all => "Write $variables: $!";
