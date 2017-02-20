@@ -353,6 +353,7 @@ __DATA__
         indexUrl: "<%= $c->url_for('index') %>",
         wsUrl:    "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
         mixin:    {}, // Vue.js mixins
+        log:      [],
         mode:     "<%= app->mode %>",
         page:     "<%= stash('page') || '' %>",
         settings: <%== to_json app->config('settings') %>

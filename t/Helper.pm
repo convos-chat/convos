@@ -156,16 +156,10 @@ Supergirl Edit the command line with cut and paste: ctrl-k for cut, and ctrl-y f
 Supergirl 'screen' can create multiple "windows" which you can detach and re-attach
 mr22 Did you know that you can get useful notifications displayed at the bottom
 mr22 'etckeeper' allows you to save changes you make to /etc in a bazaar
-mr22 The powernap package allows you to suspend servers which are not being used,
+mr22 [convos] jhthorsen pushed 3 new commits to master: https://git.io/vD9nM
 mr22 If you know you typed a command or password wrong, you can use ctrl + u to
 mr22 For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
 mr22 Keep your servers time in sync, use the ntpd package.
-mr22 If you need to compile a piece of software, you may need to install the
-mr22 The 'history' command will show you the commands you've used before.
-mr22 Use 'dpkg --get-selections > selections.txt' to save a selection and 'dpkg
-mr22 A for loop in bash syntax: 'for i in *; do echo $i ; done'.
-mr22 Use "pastebinit" to copy a file, or output of a command to a webpage
-*mr22 Use "iotop" for measuring hard disk I/O (current read/write) usage per
 mr22 To deactivate a service at boot, for example, apache2: 'sudo update-rc.d -f
 mr22 Save time starting to type a command or file name, then press tab to
 mr22 Need a little refresh on networking concept? Take a look at the networking
@@ -180,3 +174,9 @@ mr22 The column allows you to format output neatly. ex: 'mount | column -t' will
 mr22 If you executed a command and neglected to use sudo, you can execute "sudo
 mr22 You can use the text-based web browser w3m to browse the Internet in your
 mr22 The powernap package allows you to suspend servers which are not being used,
+mr22 [convos] jhthorsen pushed 1 new commit to master: https://git.io/vDQJ7
+mr22 [mojo-irc] jhthorsen pushed https://github.com/Nordaaker/convos/commit/867b89321eb6f4131a394757a2a1017401533079
+mr22 http://convos.by/doc/
+mr22 A for loop in bash syntax: 'for i in *; do echo $i ; done'.
+*mr22 Use "iotop" for measuring hard disk I/O (current read/write) usage per
+mr22 [convos] jhthorsen pushed 1 new commit to master: https://git.io/vDF6H

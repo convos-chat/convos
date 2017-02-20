@@ -1,7 +1,8 @@
 use lib '.';
 use t::Selenium;
 
-my $t          = t::Selenium->selenium_init('Convos', {lazy => 1, loc => '/?isMobile=1'});
+my $t = t::Selenium->selenium_init('Convos',
+  {lazy => 1, loc => '/?isMobile=1&_assetpack_reload=false'});
 my $user       = $t->app->core->get_user("$NICK\@convos.by");
 my $connection = $user->get_connection('irc-default');
 my $dialog     = $connection->get_dialog('#test');
@@ -21,8 +22,9 @@ my @messages = t::Helper->messages;
 $connection->emit(message => $dialog, $_) for splice @messages, 0, 3;
 is_at_bottom();
 
-$connection->emit(message => $dialog, $_) for @messages;
-run_for(0.5);
+$connection->emit(message => $dialog, $_) for splice @messages, 0, 30;
+$connection->emit(message => $dialog, $messages[-1]);
+run_for(0.2);
 is_at_bottom();
 
 $t->click_ok('.toggle-main-menu');
@@ -32,14 +34,18 @@ $t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-defaul
 $t->click_ok('[href="#chat/irc-default/"]');
 $t->element_is_hidden('.convos-main-menu');
 
+$connection->emit(message => $dialog, $_) for @messages;
 $t->click_ok('.toggle-main-menu');
 $t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
 $t->click_ok('[href="#chat/irc-default/#test"]');
+run_for(0.2);
 is_at_bottom();
 
 done_testing;
 
 sub is_at_bottom {
+  t::Selenium->browser_log($t);
+
   my $s = $t->driver->execute_script(<<'HERE');
 var el = document.querySelector(".scroll-element");
 return {total: el.scrollHeight, offset: el.offsetHeight, scrolled: el.scrollTop};

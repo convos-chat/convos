@@ -7,6 +7,13 @@ use Sys::Hostname 'hostname';
 
 $ENV{MOJO_SELENIUM_DRIVER} ||= 'Selenium::Chrome';
 
+sub browser_log {
+  my ($class, $t) = @_;
+  my $log = $t->driver->execute_script('return Convos.log');
+  Test::More::note($_) for @$log;
+  $t->driver->execute_script('Convos.log = []');
+}
+
 sub email {
   $main::NICK ||= 't' . substr Mojo::Util::md5_sum(join ':', hostname(), $<, $0), 0, 7;
   return sprintf '%s@convos.by', $main::NICK;
@@ -17,7 +24,7 @@ sub selenium_init {
   my $t = Test::Mojo::WithRoles->new($app || 'Convos');
 
   $t->setup_or_skip_all;
-  $t->navigate_ok($args->{loc} || '/');
+  $t->navigate_ok($args->{loc} || '/?_assetpack_reload=false');
   $class->set_window_size($t, 'desktop');
 
   if ($args->{lazy}) {

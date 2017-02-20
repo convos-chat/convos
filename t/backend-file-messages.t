@@ -32,7 +32,7 @@ $t->get_ok(
   [
     {
       highlight => false,
-      message   => 'The powernap package allows you to suspend servers which are not being used,',
+      message   => '[convos] jhthorsen pushed 1 new commit to master: https://git.io/vDF6H',
       from      => 'mr22',
       ts        => '2015-06-09T02:41:42',
       type      => 'private',
