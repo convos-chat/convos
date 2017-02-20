@@ -6,7 +6,7 @@
   Convos.settings.sidebar = localStorage.getItem("sidebar");
   Convos.settings.mainMenuVisible = false;
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
-  Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "";
+  Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "lastRead";
 
   var validSidebars = ["", "notifications", "sidebar-info"].filter(function(v) {
     return Convos.settings.sidebar === v;

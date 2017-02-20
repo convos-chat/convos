@@ -10,6 +10,7 @@ Revision history for perl distribution Convos
  - Add functionality to only enrich visible links
  - Add better "rich link" caching
  - Add "Convos icon" to notification popup
+ - Change default sorting to "lastRead"
 
 0.99_24 2017-01-29T00:57:30+0100
  - Fix registration process

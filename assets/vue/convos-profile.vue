@@ -51,7 +51,7 @@ module.exports = {
   },
   watch: {
     sortDialogsByRead: function(v, o) {
-      this.settings.sortDialogsBy = v ? "lastRead" : "";
+      this.settings.sortDialogsBy = v ? "lastRead" : "default";
     }
   },
   methods: {
