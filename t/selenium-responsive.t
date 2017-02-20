@@ -24,7 +24,7 @@ is_at_bottom();
 
 $connection->emit(message => $dialog, $_) for splice @messages, 0, 30;
 $connection->emit(message => $dialog, $messages[-1]);
-run_for(0.2);
+t::Selenium->run_for(0.2);
 is_at_bottom();
 
 $t->click_ok('.toggle-main-menu');
@@ -38,7 +38,7 @@ $connection->emit(message => $dialog, $_) for @messages;
 $t->click_ok('.toggle-main-menu');
 $t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
 $t->click_ok('[href="#chat/irc-default/#test"]');
-run_for(0.3);
+t::Selenium->run_for(0.3);
 is_at_bottom();
 
 done_testing;
@@ -53,9 +53,4 @@ HERE
 
   is $s->{scrolled} + $s->{offset}, $s->{total},
     "scroll: $s->{scrolled} + $s->{offset} == $s->{total}";
-}
-
-sub run_for {
-  Mojo::IOLoop->timer($_[0] => sub { Mojo::IOLoop->stop });
-  Mojo::IOLoop->start;
 }

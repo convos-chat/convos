@@ -142,8 +142,8 @@ module.exports = {
         if (err) return self.errors = err;
         self.deleted = false;
         self.updateForm(this);
-        this.user.ensureDialog({connection_id: this.connection_id, dialog_id: "", name: this.connection_id});
-        self.settings.main = this.connection ? "#chat/" + this.connection_id + "/" : "#create-dialog";
+        self.user.ensureDialog({connection_id: this.connection_id, dialog_id: "", name: this.connection_id});
+        self.settings.main = self.connection ? "#chat/" + this.connection_id + "/" : "#create-dialog";
       });
     },
     updateForm: function() {
