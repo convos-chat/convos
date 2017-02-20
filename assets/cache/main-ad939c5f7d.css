@@ -5054,21 +5054,13 @@ img.embed {
   position: absolute;
   top: 56px;
   bottom: 0;
-  z-index: 901; }
+  z-index: 901;
+  -webkit-overflow-scrolling: touch;
+  overflow: auto; }
   @media only screen and (min-width: 993px) {
     .convos-main-menu,
     .is-sidebar {
       top: 64px; } }
-  .convos-main-menu div.content,
-  .convos-main-menu form.content,
-  .is-sidebar div.content,
-  .is-sidebar form.content {
-    -webkit-overflow-scrolling: touch;
-    overflow: auto;
-    overflow-x: hidden;
-    bottom: 0;
-    left: 0;
-    right: 0; }
   .convos-main-menu.hidden,
   .is-sidebar.hidden {
     display: none !important; }
@@ -5206,4 +5198,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../7dbf8a1e29/main.css.map */
+/*# sourceMappingURL=../2f6fa33086/main.css.map */

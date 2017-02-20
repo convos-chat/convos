@@ -6,18 +6,10 @@
   top: $navbar-height-mobile;
   bottom: 0;
   z-index: $z-index-header + 1;
+  @include overflow;
 
   @media #{$large-and-up} {
     top: $navbar-height;
-  }
-
-  div.content,
-  form.content {
-    @include overflow;
-    overflow-x: hidden; // This fixes some weird horizontal scrolling in Chrome on iPhone
-    bottom: 0;
-    left: 0;
-    right: 0;
   }
 
   &.hidden { display: none !important; }
