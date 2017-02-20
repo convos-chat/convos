@@ -16,6 +16,7 @@ use constant BCRYPT_BASE_SETTINGS => do {
 
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
+has highlight_keywords => sub { +[] };
 sub password { shift->{password} ||= '' }
 has unread => sub {0};
 
@@ -38,7 +39,7 @@ has_many connections => 'Convos::Core::Connection' => sub {
 
 sub get {
   my ($self, $args, $cb) = @_;
-  my $res  = $self->TO_JSON;
+  my $res = $self->TO_JSON;
 
   Mojo::IOLoop->delay(
     sub {
@@ -144,7 +145,8 @@ sub TO_JSON {
   $self->{registered} ||= Mojo::Date->new->to_datetime;
   my $json = {map { ($_, $self->{$_} // '') } qw(email password registered)};
   delete $json->{password} unless $persist;
-  $json->{unread} = $self->unread;
+  $json->{highlight_keywords} = $self->highlight_keywords;
+  $json->{unread}             = $self->unread;
   $json;
 }
 

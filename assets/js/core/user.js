@@ -5,6 +5,7 @@
     this.currentPage = "";
     this.dialogs = [];
     this.email = "";
+    this.highlightKeywords = [];
     this.notifications = [];
     this.unread = 0;
     this._keepAliveTid = setInterval(this._keepAlive(), 20000);
@@ -92,6 +93,7 @@
         data.connections.forEach(function(c) { self.ensureConnection(c); });
         data.dialogs.forEach(function(d) { d.reset = true; self.ensureDialog(d); });
         self.email = data.email;
+        self.highlightKeywords = data.highlight_keywords || [];
         self.notifications = data.notifications.reverse();
         self.unread = data.unread || 0;
         self.currentPage = "convos-chat";

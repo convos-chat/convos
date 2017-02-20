@@ -89,7 +89,8 @@ sub update {
   $self->delay(
     sub {
       my ($delay) = @_;
-      $user->set_password($json->{password}) if $json->{password};
+      $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
+      $user->set_password($json->{password})                 if $json->{password};
       $user->save($delay->begin);
     },
     sub {

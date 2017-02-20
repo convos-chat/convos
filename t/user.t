@@ -24,9 +24,10 @@ ok -e $settings_file, 'created storage file';
 is_deeply(
   $user->TO_JSON,
   {
-    email      => 'jhthorsen@cpan.org',
-    registered => Mojo::Date->new($main::time)->to_datetime,
-    unread     => 0
+    email              => 'jhthorsen@cpan.org',
+    highlight_keywords => [],
+    registered         => Mojo::Date->new($main::time)->to_datetime,
+    unread             => 0
   },
   'TO_JSON'
 );

@@ -57,4 +57,18 @@ is @{$t->tx->res->json->{notifications}}, $n + 1, 'only one new notification';
 is int(grep { $_->{highlight} } @events),  2, 'marked as highlight';
 is int(grep { !$_->{highlight} } @events), 2, 'not marked as highlight';
 
+$user->highlight_keywords(['normal', 'yikes']);
+$connection->_event_privmsg(
+  {
+    event  => 'privmsg',
+    prefix => 'batgirl!batgirl@i.love.debian.org',
+    params => ['#convos', 'Or what about a normal message in a channel?'],
+  }
+);
+
+$stop_at_n_events = 5;
+$ws->ua->ioloop->start;
+$t->get_ok('/api/notifications')->status_is(200);
+is @{$t->tx->res->json->{notifications}}, $n + 2, 'notification on custom keyword';
+
 done_testing;

@@ -10,6 +10,9 @@
       <md-input :value.sync="passwordAgain" type="password" cols="s6">Repeat password</md-input>
     </div>
     <div class="row">
+      <md-input :value.sync="highlightKeywords" placeholder="cats, superheroes, ..." cols="s12">Notification keywords</md-input>
+    </div>
+    <div class="row">
       <div class="col s12">
         <input v-model="sortDialogsByRead" type="checkbox" class="filled-in" id="form_sort_by">
         <label for="form_sort_by">Sort dialogs by last-read/activity</label>
@@ -43,6 +46,7 @@ module.exports = {
   data:  function() {
     return {
       errors: [],
+      highlightKeywords: "",
       password: "",
       passwordAgain: "",
       notifications: Notification.permission,
@@ -57,6 +61,7 @@ module.exports = {
   methods: {
     save: function() {
       var self = this;
+      var highlightKeywords = this.highlightKeywords.split(/[,\s]+/).filter(function(k) { return k.length; });
 
       if (this.password != this.passwordAgain)
         return this.errors = [{message: "Passwords does not match"}];
@@ -65,16 +70,15 @@ module.exports = {
       if (!this.notifications)
         this.enableNotifications(false);
 
-      if (this.password) {
-        Convos.api.updateUser({body: {password: this.password}}, function(err, res) {
-          if (!err) this.password = "";
-          self.errors = err || [];
-        });
-      }
+      Convos.api.updateUser({body: {highlight_keywords: highlightKeywords, password: this.password}}, function(err, res) {
+        if (!err) this.password = "";
+        self.errors = err || [];
+      });
     }
   },
   ready: function() {
     this.sortDialogsByRead = this.settings.sortDialogsBy == "lastRead";
+    this.highlightKeywords = this.user.highlightKeywords.join(", ");
   }
 };
 </script>

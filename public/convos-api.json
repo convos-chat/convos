@@ -664,6 +664,11 @@
         "email": { "type": "string", "description": "Unique email identifying a user in Convos" },
         "registered": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T10:47:31Z" },
         "unread": { "type": "integer", "description": "Number of unread notifications" },
+        "highlight_keywords": {
+          "description": "Extra keywords to highlight on",
+          "type": "array",
+          "items": { "type": "string" }
+        },
         "connections": {
           "type": "array",
           "items": { "$ref": "#/definitions/Connection" }

@@ -554,7 +554,7 @@ sub _event_privmsg {
   $target ||= $self->messages;
   $from   ||= $self->id;
   $highlight = grep { $msg->{params}[1] =~ /\b\Q$_\E\b/i } $self->_irc->nick,
-    @{$self->url->query->every_param('highlight')};
+    @{$self->user->highlight_keywords};
 
   $target->last_active(Mojo::Date->new->to_datetime);
 

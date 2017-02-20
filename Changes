@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 0.99_27 Not Released
  - Fix going to connection dialog after connection save
+ - Add support for notifications on keywords #142
 
 0.99_26 2017-02-20T23:11:01+0100
  - Fix scrolling of sidebars and main menu

@@ -36,19 +36,38 @@ my $registered = $t->tx->res->json->{registered};
 
 $t->post_ok('/api/user', json => {})->status_is(200);
 
-$t->get_ok('/api/user')->status_is(200)
-  ->json_is('', {email => 'superman@example.com', registered => $registered, unread => 0});
+$t->get_ok('/api/user')->status_is(200)->json_is(
+  '',
+  {
+    email              => 'superman@example.com',
+    highlight_keywords => [],
+    registered         => $registered,
+    unread             => 0
+  }
+);
+
+$t->post_ok('/api/user', json => {highlight_keywords => ['foo']})->status_is(200);
+$t->get_ok('/api/user')->status_is(200)->json_is(
+  '',
+  {
+    email              => 'superman@example.com',
+    highlight_keywords => ['foo'],
+    registered         => $registered,
+    unread             => 0
+  }
+);
 
 $t->app->core->get_user('superman@example.com')->unread(4);
 $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status_is(200)->json_is(
   '',
   {
-    connections   => [],
-    dialogs       => [],
-    notifications => [],
-    email         => 'superman@example.com',
-    registered    => $registered,
-    unread        => 4,
+    connections        => [],
+    dialogs            => [],
+    highlight_keywords => ['foo'],
+    notifications      => [],
+    email              => 'superman@example.com',
+    registered         => $registered,
+    unread             => 4,
   }
 );
 
