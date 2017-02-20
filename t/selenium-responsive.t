@@ -38,7 +38,7 @@ $connection->emit(message => $dialog, $_) for @messages;
 $t->click_ok('.toggle-main-menu');
 $t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
 $t->click_ok('[href="#chat/irc-default/#test"]');
-run_for(0.2);
+run_for(0.3);
 is_at_bottom();
 
 done_testing;
