@@ -7,26 +7,29 @@
       "dialog.active": function(active, prev) {
         if (!active) return;
         if (TRACKING_TID) clearTimeout(TRACKING_TID);
-        this.skip = true;
+        this.reset = true;
         TRACKING_TID = setInterval(this.trackViewPort, 166);
       }
     },
     methods: {
+      log: function(el, diff) {
+        console.log(["[scroll:" + this.dialog.dialog_id + "]", this.atBottom, this.$refs.messages.length, el.scrollTop + "-" + this.scrollTop, el.scrollHeight + "-" + this.totalHeight, JSON.stringify(diff)].join(" "));
+      },
       trackViewPort: function() {
         if (!this.$refs && this.$refs.messages) return; // setInterval() might go crazy
         var self = this;
-        var messages = this.$refs.messages || [];
+        var messages = this.$refs.messages;
         var el = this.scrollEl;
         var scrollTop = el.scrollTop;
         var totalHeight = el.scrollHeight;
         var breakTop = scrollTop + (window.innerHeight || document.documentElement.clientHeight);
         var diff = {totalHeight: totalHeight - this.totalHeight, scrollTop: scrollTop - this.scrollTop};
 
-        if (DEBUG.scroll && this.skip) console.log(this.atBottom, messages.length, scrollTop, el.offsetHeight, totalHeight, breakTop, THRESHOLD, diff);
-        if (this.skip) return this.skip = false;
+        if (DEBUG.scroll && this.reset) this.log(el, diff);
+        if (this.reset) return this.reset = !(el.scrollTop = totalHeight);
         if (!diff.totalHeight && !diff.scrollTop) return;
         if (!diff.totalHeight) this.atBottom = totalHeight - el.offsetHeight < scrollTop + THRESHOLD;
-        if (DEBUG.scroll) console.log(["[scroll:" + this.dialog.dialog_id + "]", this.atBottom, messages.length, el.offsetHeight, scrollTop + "-" + this.scrollTop, totalHeight + "-" + this.totalHeight].join(" "));
+        if (DEBUG.scroll) this.log(el);
         if (this.atBottom) el.scrollTop = totalHeight;
 
         this.scrollTop = scrollTop;
