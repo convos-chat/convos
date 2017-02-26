@@ -3,7 +3,7 @@
     <span>&#10022;</span>
     <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
     <a href="#{{msg.from}}" class="title" @click.prevent="insertIntoInput" v-tooltip="statusTooltip()">{{msg.from}}</a>
-    <div class="message">{{{message() | markdown}}}</div>
+    <div class="message" v-html="computedMessage"></div>
   </div>
 </template>
 <script>

@@ -31,7 +31,7 @@
           <a href="#join:{{room.name}}" class="title" :class="optionClass($index)" @click.prevent="join(room)" v-for="room in autocompleteOptions">
               <span class="badge"><i class="material-icons" v-if="room.n_users">person</i>{{room.n_users || "new"}}</span>
               <h6>{{room.name}}</h6>
-              <p>{{topic(room.topic) | markdown}}</p>
+              <p v-html="topic(room.topic)"></p>
           </a>
         </div>
         <p v-if="loaded"><small>Number of rooms: {{nRooms}}</small></p>
@@ -106,6 +106,7 @@ module.exports = {
       setTimeout(function() { this.updateForm(cid); }.bind(this), 500);
     },
     topic: function(str) {
+      str = str.rich();
       if (!str) return "No topic.";
       if (str.length < 200) return str;
       return str.substr(0, 200).replace(/\S+$/, "") + "...";

@@ -21,7 +21,6 @@
 < js/vue/directive-link.js
 < js/vue/directive-sidebar.js
 < js/vue/directive-tooltip.js
-< js/vue/filter-markdown.js
 < js/vue/filter-timestring.js
 < js/vue/mixin-autocomplete.js
 < js/vue/mixin-global.js

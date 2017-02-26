@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col s12">
       <h5>About {{dialog.name}}</h5>
-      <p v-if="!dialog.is_private">{{{dialog.topic || 'No topic is set.' | markdown markdownOptions}}}</p>
+      <p v-if="!dialog.is_private">{{{dialog.topic.rich() || "No topic is set."}}}</p>
       <p v-if="dialog.is_private">This is a private conversation.</p>
     </div>
   </div>
@@ -34,11 +34,6 @@
 <script>
 module.exports = {
   props: ["dialog", "user"],
-  data: function() {
-    return {
-      markdownOptions: {escape: true, links: true}
-    };
-  },
   computed: {
     participants: function() {
       if (!this.dialog) return [];

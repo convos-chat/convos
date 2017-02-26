@@ -419,10 +419,6 @@ minified=1
 checksum=4be174c8ad
 format=js
 minified=1
-[js-min:js/vue/filter-markdown.js]
-checksum=3c6f970c35
-format=js
-minified=1
 [js-min:js/vue/filter-timestring.js]
 checksum=0ccf65bd73
 format=js

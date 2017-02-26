@@ -3,7 +3,7 @@
     <ul class="complete-dropdown dropdown-content" v-el:dropdown>
       <li :class="i == completeIndex ? 'active' : ''" v-for="(i, c) in completeList" v-show="completeList.length">
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'command'">{{c}}{{commands[c] ? " - " + commands[c].description : ""}}</a>
-        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'emoji'">{{{c | markdown}}} {{i ? emojiDescription(c) : ''}}</a>
+        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'emoji'">{{{c.rich()}}} {{i ? emojiDescription(c) : ''}}</a>
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'nick'">{{c}}</a>
       </li>
     </ul>

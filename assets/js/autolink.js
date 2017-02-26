@@ -23,7 +23,7 @@
   email.pattern = /(\w[a-z_.-]+\@\S+\.\w+)/gi;
   url.pattern = /(^|\W|[\s\n]|<br\/?>)((?:https?|ftp):\/\/[\-A-Z0-9+\u0026\u2019@#\/%?=()~_|!:,.;]*[\-A-Z0-9+\u0026@#\/%=~_|])/gi;
 
-  String.prototype['autoLink'] = function(args) {
+  String.prototype.autoLink = function(args) {
     var k, linkAttributes, v;
 
     linkAttributes = ((function() {

@@ -1,6 +1,25 @@
 (function() {
   Convos.mixin.message = {
     props: ["dialog", "msg", "user"],
+    data: function() {
+      return {visible: false};
+    },
+    computed: {
+      computedMessage: function() {
+        var self = this;
+        return self.msg.message.rich({
+          after: function(url, id) {
+            if (!self.settings.expandUrls || !self.visible) return;
+            $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
+              self.loadOffScreen(html, id);
+            });
+          }
+        });
+      }
+    },
+    events: {
+      visible: function() { this.visible = true; }
+    },
     methods: {
       classNames: function() {
         var msg = this.msg;
@@ -32,26 +51,9 @@
         $html.filter("img").add($html.find("img")).addClass("embed materialboxed").on("error", function() { $(this).remove(); });
         $a.parent().append($html).find(".materialboxed").materialbox();
       },
-      message: function() {
-        return this.msg.richMessage || this.msg.message.xmlEscape();
-      },
       statusTooltip: function() {
         return this.dialog.participants[this.msg.from] ? "" : "Not in this channel";
       }
-    },
-    ready: function() {
-      this.$once("visible", function() {
-        var self = this;
-        if (!self.settings.expandUrls) return;
-        self.msg.richMessage = self.msg.message.xmlEscape().autoLink({
-          target: "_blank",
-          after: function(url, id) {
-            $.get("/api/embed?url=" + encodeURIComponent(url), function(html, textStatus, xhr) {
-              self.loadOffScreen(html, id);
-            });
-          }
-        });
-      });
     }
   };
 })();
