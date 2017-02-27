@@ -51,6 +51,14 @@ if ($ENV{CONVOS_DEFAULT_SERVER}) {
 
   $t->wait_until(sub { $_->find_element(qq(.convos-message [href="#$NICK"])) });
   $t->live_text_like('.convos-message:last-child .message', qr/\bthis is test t\w{7}\b/);
+
+  # test that hitting return joins a dialog
+  $t->click_ok('a[href^="#create-dialog/"]');
+  $t->wait_until(sub { $_->find_element('.convos-create-dialog') });
+  $t->send_keys_ok('[placeholder="#channel_name"]', ['tes']);
+  $t->wait_until(sub { $_->find_element('.autocomplete [href="#join:#test"]') });
+  $t->send_keys_ok('[placeholder="#channel_name"]', [\'enter']);
+  $t->live_text_is('header h2', '#test');
 }
 
 done_testing;

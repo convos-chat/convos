@@ -82,6 +82,9 @@ module.exports = {
     }
   },
   methods: {
+    autocompleted: function(option) {
+      this.join({name: option.name || option.value});
+    },
     join: function(option) {
       if (!option.name || !this.connection) return;
       this.connection.send("/join " + option.name);

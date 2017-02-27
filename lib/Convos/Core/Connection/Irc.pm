@@ -252,7 +252,7 @@ sub _join_dialog {
       my ($delay, $err, $dialog) = @_;
       return $self->$cb($err, $dialog) if $err;
       $delay->pass($dialog);
-      $self->_proxy(join_channel => $command, $delay->begin);
+      $self->_proxy(join_channel => $command, $delay->begin) if $dialog->frozen;
     },
     sub {
       my ($delay, $dialog, $err, $res) = @_;

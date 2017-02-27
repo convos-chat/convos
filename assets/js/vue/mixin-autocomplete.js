@@ -1,15 +1,24 @@
 (function() {
+  /* Required in consumer:
+  module.exports = {
+    computed: {
+      autocompleteOptions: function() { return [] }
+    },
+    methods: {
+      autocompleted: function(option) { ... }
+    }
+  };
+  */
+
   Convos.mixin.autocomplete = {
     computed: {
-      autocompleteOptions: function() {
-        return [];
-      },
       labelActive: function() {
         return this.autocompleteValue || this.placeholder || this.hasFocus;
       }
     },
     data: function() {
       return {
+        autocompleteValue: "",
         hasFocus: false,
         selected: -1,
         selectStart: 0
@@ -27,10 +36,10 @@
         switch (e.keyCode) {
           case 13: // enter
             if (this.selected >= 0 && this.autocompleteOptions[this.selected]) {
-              this.select(this.autocompleteOptions[this.selected]);
+              this.autocompleted(this.autocompleteOptions[this.selected]);
             }
             else if (this.autocompleteValue.length) {
-              this.select({value: this.autocompleteValue});
+              this.autocompleted({value: this.autocompleteValue});
             }
             break;
           case 38: // up
@@ -52,9 +61,6 @@
         var i = this.selected < 0 ? 0 : this.selected;
         var li = this.$el.querySelectorAll("li")[this.selected];
         if (li) this.$el.querySelector(".autocomplete").scrollTop = li.offsetTop;
-      },
-      select: function(option) {
-        this.$emit("select", option);
       }
     }
   };
