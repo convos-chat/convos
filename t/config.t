@@ -48,6 +48,7 @@ $convos = Convos->new;
 is $convos->config->{organization_name}, 'Team JSON',             'json config name';
 is $convos->config->{contact},           'mailto:json@localhost', 'json config contact';
 is $convos->config->{invite_code},       'json_example',          'invite_code from config file';
+is_deeply($convos->secrets, [qw(signed-json-secret)], 'config secrets');
 is $plugins[10], 'Plugin3', 'Plugin3';
 
 delete $ENV{$_} for grep {/CONVOS/} keys %ENV;
