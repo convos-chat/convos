@@ -62,27 +62,6 @@ div.alert {
   }
 }
 
-.centered {
-  display: flex;
-  height: 100vh;
-  align-items: center;
-  justify-content: center;
-
-  > div {
-    text-align: center;
-    max-width: 50%;
-    padding-bottom: 30px;
-  }
-  i.material-icons {
-    vertical-align: middle;
-  }
-  p.error {
-    color: color('red', 'darken-2');
-    padding-bottom: $gutter-width;
-    border-bottom: 1px solid $input-border-color;
-  }
-}
-
 .btn-delete {
   @extend .btn, .waves-effect, .waves-light, .red, .darken-2;
 }

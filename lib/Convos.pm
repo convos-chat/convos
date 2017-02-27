@@ -342,6 +342,17 @@ __DATA__
     <title><%= title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta content="https://convos.by/public/screenshots/2016-09-01-participants.png" name="twitter:image:src">
+    <meta content="https://convos.by/public/screenshots/2016-09-01-participants.png" property="og:image">
+    <meta content="@convosby" name="twitter:site">
+    <meta content="Convos" property="og:site_name">
+    <meta content="object" property="og:type">
+    <meta content="summary" name="twitter:card">
+    <meta content="Convos - Better group chat" name="twitter:description">
+    <meta content="Convos - Better group chat" property="og:description">
+    <meta content="<%= title %>" name="twitter:title">
+    <meta content="<%= title %>" property="og:title">
+    <meta content="/" property="og:url">
     %= asset 'favicon.ico'
     %= asset 'convos.css'
   </head>
@@ -369,11 +380,32 @@ __DATA__
 % layout 'convos';
 % title 'Convos for ' . config('organization_name');
 <component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
-  <div id="loader" class="centered">
-    <div>
-      <h4>Loading convos...</h4>
-      <p class="error">This should not take too long.</p>
-      <a href="">Reload <i class="material-icons">refresh</i></a>
+  <div id="loader">
+    <div class="row not-logged-in-wrapper">
+      <div class="col s12 m6 offset-m3">
+        <div class="row">
+          <div class="col s12">
+            <h1>Convos</h1>
+            <p><i>- Collaboration done right.</i></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s12">
+            <p class="error">Loading Convos should not take too long...</p>
+            <hr>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s12">
+            <a href="" class="btn waves-effect waves-light">Reload</a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s12 about">
+            <%= link_to config('organization_name'), config('organization_url') %> - <a href="http://convos.by">About</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </component>

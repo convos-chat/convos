@@ -21,6 +21,8 @@
     }
   });
 
+  if (location.href.match(/\b_vue=false\b/)) return;
+
   Convos.api = new openAPI(Convos.apiUrl, function(err) {
     if (err) return Convos.error("Could not load API spec! " + err);
 
