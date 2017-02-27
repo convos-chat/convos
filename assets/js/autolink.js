@@ -1,5 +1,5 @@
 // This code is based on https://github.com/bryanwoods/autolink-js
-// Originally writen by Bryan Woods.
+// Originally written by Bryan Woods.
 (function() {
   var n = 0;
 

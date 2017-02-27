@@ -6,6 +6,7 @@ Revision history for perl distribution Convos
  - Fix joining channel which you are already part of
  - Fix reading invite_code from config file #322
  - Will detect if Javascript is disabled and notify user
+ - Add support for embedding gist and other pasted text files
  - Add support for notifications on keywords #142
 
 0.99_26 2017-02-20T23:11:01+0100

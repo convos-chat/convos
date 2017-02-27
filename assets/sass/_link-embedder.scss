@@ -19,20 +19,6 @@ img.embed {
   max-height: 220px;
 }
 
-.gist .gist-file {
-  /*
-   * position + z-index is a hack for making it render properly
-   * http://stackoverflow.com/questions/10522054/weird-rendering-bug-in-desktop-webkit-safari-chrome-with-absolutely-positioned
-   */
-  position: relative;
-  z-index: 1;
-  margin: 0 !important;
-}
-
-.gist .highlight {
-  background: $settings-active-color !important;
-}
-
 .materialboxed {
   cursor: zoom-in;
   border-radius: 2px;
@@ -97,5 +83,52 @@ img.embed {
 
   .link-embedder-link {
     display: none;
+  }
+}
+
+.hljs {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 0.9rem;
+  line-height: 1.3rem;
+  white-space: pre;
+}
+
+.link-embedder.text-paste {
+  $paste-bg-color: #f8f8f8;
+
+  background: $paste-bg-color;
+  border: 1px solid darken($paste-bg-color, 10%);
+  max-height: 80px;
+  overflow: hidden;
+
+  .paste-meta {
+    background-color: darken($paste-bg-color, 10%);
+    color: $text-color;
+    padding: 0.2em 0.5rem;
+    margin: 0;
+    cursor: zoom-in;
+
+    &::before {
+      @extend .material-icons;
+      font-size: 1.6rem !important;
+      content: '\e313';
+      float: right;
+    }
+  }
+
+  ol {
+    margin: 0.2rem 0;
+  }
+
+  &.expanded {
+    max-height: none;
+    overflow-x: auto;
+
+    .paste-meta {
+      cursor: zoom-out;
+      &::before {
+        content: '\e316';
+      }
+    }
   }
 }

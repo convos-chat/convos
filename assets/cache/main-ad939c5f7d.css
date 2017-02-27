@@ -2188,7 +2188,9 @@ video.responsive-video {
   color: rgba(255, 255, 255, 0.7); }
   .breadcrumb i,
   .breadcrumb [class^="mdi-"], .breadcrumb [class*="mdi-"],
-  .breadcrumb i.material-icons {
+  .breadcrumb i.material-icons,
+  .breadcrumb .link-embedder.text-paste i.paste-meta::before, .link-embedder.text-paste
+  .breadcrumb i.paste-meta::before {
     display: inline-block;
     float: left;
     font-size: 24px; }
@@ -2610,7 +2612,7 @@ input[type=range] + .thumb {
   /* For IE6-8 */
   src: local("Material Icons"), local("MaterialIcons-Regular"), url(../../font/material-design-icons/MaterialIcons-Regular.woff2) format("woff2"), url(../../font/material-design-icons/MaterialIcons-Regular.woff) format("woff"), url(../../font/material-design-icons/MaterialIcons-Regular.ttf) format("truetype"); }
 
-.material-icons {
+.material-icons, .link-embedder.text-paste .paste-meta::before {
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
@@ -3900,12 +3902,16 @@ textarea.materialize-textarea {
     color: #444; }
     .input-field input[type=search]:focus + label i,
     .input-field input[type=search]:focus ~ .mdi-navigation-close,
-    .input-field input[type=search]:focus ~ .material-icons {
+    .input-field input[type=search]:focus ~ .material-icons,
+    .input-field .link-embedder.text-paste input[type=search]:focus ~ .paste-meta::before, .link-embedder.text-paste
+    .input-field input[type=search]:focus ~ .paste-meta::before {
       color: #444; }
   .input-field input[type=search] + label {
     left: 1rem; }
   .input-field input[type=search] ~ .mdi-navigation-close,
-  .input-field input[type=search] ~ .material-icons {
+  .input-field input[type=search] ~ .material-icons,
+  .input-field .link-embedder.text-paste input[type=search] ~ .paste-meta::before, .link-embedder.text-paste
+  .input-field input[type=search] ~ .paste-meta::before {
     position: absolute;
     top: 0;
     right: 1rem;
@@ -4526,6 +4532,10 @@ dl dt {
 dl dd {
   margin: 0 0 0.5rem 1rem; }
 
+pre {
+  margin: 0;
+  padding: 0; }
+
 dl.horizontal {
   margin: 0; }
   dl.horizontal dt {
@@ -4638,6 +4648,85 @@ div.alert {
     .not-logged-in-wrapper .about a:hover {
       color: #222; }
 
+/*
+
+github.com style (c) Vasily Polovnyov <vast@whiteants.net>
+
+*/
+.hljs {
+  display: block;
+  overflow-x: auto; }
+
+.hljs-comment,
+.hljs-quote {
+  color: #998;
+  font-style: italic; }
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #333;
+  font-weight: bold; }
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #008080; }
+
+.hljs-string,
+.hljs-doctag {
+  color: #d14; }
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #900;
+  font-weight: bold; }
+
+.hljs-subst {
+  font-weight: normal; }
+
+.hljs-type,
+.hljs-class .hljs-title {
+  color: #458;
+  font-weight: bold; }
+
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+  color: #000080;
+  font-weight: normal; }
+
+.hljs-regexp,
+.hljs-link {
+  color: #009926; }
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #990073; }
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #0086b3; }
+
+.hljs-meta {
+  color: #999;
+  font-weight: bold; }
+
+.hljs-deletion {
+  background: #fdd; }
+
+.hljs-addition {
+  background: #dfd; }
+
+.hljs-emphasis {
+  font-style: italic; }
+
+.hljs-strong {
+  font-weight: bold; }
+
 .convos-create-dialog .autocomplete a {
   padding: 0.3rem 0;
   border-bottom: 1px solid #eee;
@@ -4658,7 +4747,7 @@ div.alert {
   font-size: 0.9rem;
   margin-top: 0.3rem; }
 
-.convos-create-dialog .autocomplete .badge .material-icons {
+.convos-create-dialog .autocomplete .badge .material-icons, .convos-create-dialog .autocomplete .badge .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-create-dialog .autocomplete .badge .paste-meta::before {
   font-size: 1.1em;
   vertical-align: middle; }
 
@@ -4755,6 +4844,7 @@ ul.complete-dropdown {
   margin: 2rem 0; }
 
 .convos-message {
+  clear: both;
   display: block;
   position: relative;
   margin: 8px 0;
@@ -4819,7 +4909,7 @@ ul.complete-dropdown {
     text-decoration: underline; }
   .convos-message .message a:hover {
     text-decoration: none; }
-  .convos-message .message .material-icons {
+  .convos-message .message .material-icons, .convos-message .message .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-message .message .paste-meta::before {
     vertical-align: text-top;
     font-size: 18px;
     margin-left: 4px; }
@@ -4861,13 +4951,13 @@ header {
   header h2 {
     float: left;
     margin: 0; }
-  header h2, header a, header .material-icons {
+  header h2, header a, header .material-icons, header .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste header .paste-meta::before {
     color: #fff;
     display: inline-block;
     font-size: 2rem;
     height: 56px;
     line-height: 56px; }
-  header a, header svg, header .material-icons {
+  header a, header svg, header .material-icons, header .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste header .paste-meta::before {
     vertical-align: middle; }
   header a {
     padding-left: 10px;
@@ -4921,7 +5011,7 @@ header {
       height: 64px; }
       header h2 {
         margin-left: 20px; }
-      header h2, header a, header .material-icons {
+      header h2, header a, header .material-icons, header .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste header .paste-meta::before {
         height: 64px;
         line-height: 64px; } }
   @media only screen and (max-width: 992px) {
@@ -4975,18 +5065,6 @@ img.embed {
 img.embed {
   max-height: 220px; }
 
-.gist .gist-file {
-  /*
-   * position + z-index is a hack for making it render properly
-   * http://stackoverflow.com/questions/10522054/weird-rendering-bug-in-desktop-webkit-safari-chrome-with-absolutely-positioned
-   */
-  position: relative;
-  z-index: 1;
-  margin: 0 !important; }
-
-.gist .highlight {
-  background: #f6f6f6 !important; }
-
 .materialboxed {
   cursor: zoom-in;
   border-radius: 2px;
@@ -5035,6 +5113,37 @@ img.embed {
 .link-embedder.text-html .link-embedder-link {
   display: none; }
 
+.hljs {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 0.9rem;
+  line-height: 1.3rem;
+  white-space: pre; }
+
+.link-embedder.text-paste {
+  background: #f8f8f8;
+  border: 1px solid #dfdfdf;
+  max-height: 80px;
+  overflow: hidden; }
+  .link-embedder.text-paste .paste-meta {
+    background-color: #dfdfdf;
+    color: #222;
+    padding: 0.2em 0.5rem;
+    margin: 0;
+    cursor: zoom-in; }
+    .link-embedder.text-paste .paste-meta::before {
+      font-size: 1.6rem !important;
+      content: '\e313';
+      float: right; }
+  .link-embedder.text-paste ol {
+    margin: 0.2rem 0; }
+  .link-embedder.text-paste.expanded {
+    max-height: none;
+    overflow-x: auto; }
+    .link-embedder.text-paste.expanded .paste-meta {
+      cursor: zoom-out; }
+      .link-embedder.text-paste.expanded .paste-meta::before {
+        content: '\e316'; }
+
 .convos-main-menu,
 .is-sidebar {
   width: 100%;
@@ -5081,9 +5190,9 @@ img.embed {
       background-color: #8b1515; }
     .convos-main-menu .link.dialog:hover .n-unread {
       display: none; }
-    .convos-main-menu .link .material-icons {
+    .convos-main-menu .link .material-icons, .convos-main-menu .link .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-main-menu .link .paste-meta::before {
       vertical-align: top; }
-    .convos-main-menu .link.simple .material-icons {
+    .convos-main-menu .link.simple .material-icons, .convos-main-menu .link.simple .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-main-menu .link.simple .paste-meta::before {
       vertical-align: bottom; }
   .convos-main-menu .on {
     display: block;
@@ -5133,8 +5242,10 @@ img.embed {
   .convos-sidebar-info .menu-item:hover,
   .convos-notifications .menu-item:hover {
     background-color: #e8e8e8; }
-  .convos-sidebar-info .menu-item .material-icons,
-  .convos-notifications .menu-item .material-icons {
+  .convos-sidebar-info .menu-item .material-icons, .convos-sidebar-info .menu-item .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-sidebar-info .menu-item .paste-meta::before,
+  .convos-notifications .menu-item .material-icons,
+  .convos-notifications .menu-item .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste
+  .convos-notifications .menu-item .paste-meta::before {
     vertical-align: text-bottom; }
   .convos-sidebar-info .menu-item > a:only-child,
   .convos-notifications .menu-item > a:only-child {
@@ -5186,4 +5297,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../a42a14020c/main.css.map */
+/*# sourceMappingURL=../51b888ca9c/main.css.map */
