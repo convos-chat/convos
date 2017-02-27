@@ -10,7 +10,7 @@ my %seen;
 
 if ($ARGV[0] and -r $ARGV[0] and -f $ARGV[0]) {
   $ENV{MOJO_CONFIG} = shift @ARGV;
-  unshift @ARGV, 'daemon';
+  unshift @ARGV, 'daemon' unless $ARGV[0] and $ARGV[0] eq 'daemon';
 }
 
 my $command = $ARGV[0] || '';
