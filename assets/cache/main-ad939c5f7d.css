@@ -3090,11 +3090,11 @@ html {
     html {
       font-size: 15px; } }
 
-h1, h2, .not-logged-in-wrapper h1, .not-logged-in-wrapper h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
   line-height: 1.1; }
 
-h1 a, h2 a, .not-logged-in-wrapper h1 a, .not-logged-in-wrapper h2 a, h3 a, h4 a, h5 a, h6 a {
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
   font-weight: inherit; }
 
 h1 {
@@ -3102,7 +3102,7 @@ h1 {
   line-height: 110%;
   margin: 2.1rem 0 1.68rem 0; }
 
-h2, .not-logged-in-wrapper h1, .not-logged-in-wrapper h2 {
+h2 {
   font-size: 3.56rem;
   line-height: 110%;
   margin: 1.78rem 0 1.424rem 0; }
@@ -4511,7 +4511,7 @@ body {
   background-color: #fffefd;
   color: #222; }
 
-h1, h2, .not-logged-in-wrapper h1, .not-logged-in-wrapper h2, h3, h4, h5 {
+h1, h2, h3, h4, h5 {
   color: #449248; }
 
 strong {
@@ -4626,8 +4626,10 @@ div.alert {
 
 .not-logged-in-wrapper {
   padding-top: 3em; }
-  .not-logged-in-wrapper h1, .not-logged-in-wrapper h1, .not-logged-in-wrapper h2 {
+  .not-logged-in-wrapper h1 {
     text-indent: -10000px;
+    max-height: 55px;
+    margin: 0;
     background: url(../../images/logo.svg) no-repeat; }
   .not-logged-in-wrapper .about {
     padding-top: 2em; }
@@ -4856,10 +4858,10 @@ header {
   left: 0;
   right: 0;
   z-index: 900; }
-  header h2, header .not-logged-in-wrapper h1, .not-logged-in-wrapper header h1, header .not-logged-in-wrapper h2, .not-logged-in-wrapper header h2 {
+  header h2 {
     float: left;
     margin: 0; }
-  header h2, header .not-logged-in-wrapper h1, .not-logged-in-wrapper header h1, header .not-logged-in-wrapper h2, .not-logged-in-wrapper header h2, header a, header .material-icons {
+  header h2, header a, header .material-icons {
     color: #fff;
     display: inline-block;
     font-size: 2rem;
@@ -4917,9 +4919,9 @@ header {
   @media only screen and (min-width: 993px) {
     header {
       height: 64px; }
-      header h2, header .not-logged-in-wrapper h1, .not-logged-in-wrapper header h1, header .not-logged-in-wrapper h2, .not-logged-in-wrapper header h2 {
+      header h2 {
         margin-left: 20px; }
-      header h2, header .not-logged-in-wrapper h1, .not-logged-in-wrapper header h1, header .not-logged-in-wrapper h2, .not-logged-in-wrapper header h2, header a, header .material-icons {
+      header h2, header a, header .material-icons {
         height: 64px;
         line-height: 64px; } }
   @media only screen and (max-width: 992px) {
@@ -4939,10 +4941,8 @@ header {
 a.toggle-main-menu {
   float: left; }
 
-.convos-dialog-container header h2, .convos-dialog-container header .not-logged-in-wrapper h1, .not-logged-in-wrapper .convos-dialog-container header h1,
-.convos-settings header h2,
-.convos-settings header .not-logged-in-wrapper h1, .not-logged-in-wrapper
-.convos-settings header h1 {
+.convos-dialog-container header h2,
+.convos-settings header h2 {
   padding-left: 0.75rem; }
 
 .under-main-menu {
@@ -5186,4 +5186,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../d0c51325b4/main.css.map */
+/*# sourceMappingURL=../a42a14020c/main.css.map */

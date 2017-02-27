@@ -355,6 +355,7 @@ __DATA__
     <meta property="og:site_name" content="Convos">
     <meta property="og:title" content="<%= title %>">
     <meta property="og:url" content="<%= $c->req->url->to_abs %>">
+    <noscript><style>.if-js { display: none; }</style></noscript>
     %= asset 'favicon.ico'
     %= asset 'convos.css'
   </head>
@@ -393,7 +394,10 @@ __DATA__
         </div>
         <div class="row">
           <div class="col s12">
-            <p class="error">Loading Convos should not take too long...</p>
+            <p class="if-js">Loading Convos should not take too long...</p>
+            <noscript>
+              <p>Javascript is disabled, so Convos will never load. Please enable Javascript and try again.</p>
+            </noscript>
             <hr>
           </div>
         </div>

@@ -1,9 +1,10 @@
 .not-logged-in-wrapper {
   padding-top: 3em;
 
-  h1, h2 {
-    @extend h2;
+  h1 {
     text-indent: -10000px;
+    max-height: 55px;
+    margin: 0;
     background: url(../../images/logo.svg) no-repeat;
   }
 

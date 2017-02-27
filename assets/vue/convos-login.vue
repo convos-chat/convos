@@ -4,7 +4,7 @@
       <form @submit.prevent="login" class="col s12 m6 offset-m3">
         <div class="row">
           <div class="col s12">
-            <h2>Convos</h2>
+            <h1>Convos</h1>
             <p><i>- Collaboration done right.</i></p>
           </div>
         </div>
