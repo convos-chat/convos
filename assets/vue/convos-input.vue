@@ -152,7 +152,7 @@ module.exports = {
       $("a.create-dialog").click();
     },
     participants: function() {
-      return Object.values(this.dialog.participants).sort(function(a, b) {
+      return Object.$values(this.dialog.participants).sort(function(a, b) {
         if (a.seen > b.seen) return -1;
         if (a.seen < b.seen) return 1;
         if (a.name > b.name) return -1;

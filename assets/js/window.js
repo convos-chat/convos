@@ -23,11 +23,9 @@
     if (!isMobile) window.nextTick(function() { elem.focus(); });
   };
 
-  if (!Object.values) {
-    Object.values = function(obj) {
-      return Object.keys(obj).map(function(k) { return obj[k]; });
-    };
-  }
+  Object.$values = function(obj) {
+    return Object.keys(obj).sort().map(function(k) { return obj[k]; });
+  };
 
   RegExp.escape = function(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
