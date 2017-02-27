@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix going to connection dialog after connection save
  - Fix hitting enter/return inside the "Dialog name" field on "Join dialog"
  - Fix joining channel which you are already part of
+ - Fix reading invite_code from config file #322
  - Will detect if Javascript is disabled and notify user
  - Add support for notifications on keywords #142
 

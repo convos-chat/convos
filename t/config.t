@@ -10,6 +10,7 @@ is $convos->config->{organization_name}, 'Convos',           'default organizati
 is $convos->config->{organization_url},  'http://convos.by', 'default organization_url';
 is $convos->config->{hypnotoad}{pid_file}, undef, 'default pid_file';
 ok !$convos->sessions->secure, 'insecure sessions';
+like $convos->config->{invite_code}, qr/^\w{32}$/, 'generated invite_code';
 like $convos->secrets->[0], qr/^[a-z0-9]{32}$/, 'default secrets';
 
 my @plugins;
@@ -43,6 +44,7 @@ $ENV{MOJO_CONFIG} = path->child(qw(t data config.json));
 $convos = Convos->new;
 is $convos->config->{organization_name}, 'Team JSON',             'json config name';
 is $convos->config->{contact},           'mailto:json@localhost', 'json config contact';
+is $convos->config->{invite_code},       'json_example',          'invite_code from config file';
 is $plugins[6], 'Plugin3', 'Plugin3';
 
 delete $ENV{$_} for grep {/CONVOS/} keys %ENV;

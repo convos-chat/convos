@@ -20,6 +20,7 @@ sub _generate_invite_code {
   my ($self, $app) = @_;
   my $code = Mojo::Util::md5_sum(join ':', $<, $(, $^X, $0);
   $app->log->info(qq(Generated CONVOS_INVITE_CODE="$code"));
+  $app->config(invite_code => $code);
   return $code;
 }
 

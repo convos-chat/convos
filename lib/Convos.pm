@@ -188,7 +188,7 @@ sub _plugins {
 
   while (@plugins) {
     my $name = shift @plugins or last;
-    my $config = ref $plugins[0] ? shift @plugins : {};
+    my $config = ref $plugins[0] ? shift @plugins : $self->config;
     $self->plugin($name => $config) unless $uniq{$name}++;
   }
 }
