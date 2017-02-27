@@ -143,8 +143,8 @@ sub _config {
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
   $config->{home}
     ||= $ENV{CONVOS_HOME} || path(File::HomeDir->my_home, qw(.local share convos))->to_string;
-  $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://nordaaker.com';
-  $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Nordaaker';
+  $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
+  $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
   # public settings
@@ -408,7 +408,12 @@ __DATA__
         </div>
         <div class="row">
           <div class="col s12 about">
-            <%= link_to config('organization_name'), config('organization_url') %> - <a href="http://convos.by">About</a>
+          % if (config('organization_url') ne 'http://convos.by') {
+            <a href="<%= config('organization_url') %>"><%= config('organization_name') %></a> -
+          % }
+            <a href="http://convos.by">About</a> -
+            <a href="http://convos.by/doc">Documentation</a> -
+            <a href="http://convos.by/blog">Blog</a>
           </div>
         </div>
       </div>

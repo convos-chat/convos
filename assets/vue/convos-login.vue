@@ -25,7 +25,12 @@
         </div>
         <div class="row">
           <div class="col s12 about">
-            <a :href="settings.organization_url">{{settings.organization_name}}</a> - <a href="http://convos.by">About</a>
+            <template v-if="settings.organization_url != 'http://convos.by'">
+              <a :href="settings.organization_url">{{settings.organization_name}}</a> -
+            </template>
+            <a href="http://convos.by">About</a> -
+            <a href="http://convos.by/doc">Documentation</a> -
+            <a href="http://convos.by/blog">Blog</a>
           </div>
         </div>
       </form>
