@@ -1,11 +1,15 @@
 # Convos - Multiuser chat application
 
-Convos is a multiuser chat application built with Mojolicious.
+Convos is a multiuser chat application that runs in your web browser.
 
-It currently support the IRC protocol, but can be extended to support
-other protocols as well.
+The supported chat protocol is currently IRC, but Convos can be extended to
+support other protocols as well.
 
 See [convos.by](http://convos.by) for more details.
+
+The backend is powered by [Mojolicious](http://mojolicious.org), while the
+frontend is held together by the progressive JavaScript framework
+[Vue](https://vuejs.org/).
 
 # Quick start guide
 

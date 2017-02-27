@@ -336,7 +336,7 @@ Marcus Ramberg - C<marcus@nordaaker.com>
 __DATA__
 @@ layouts/convos.html.ep
 % use Mojo::JSON 'to_json';
-% my $description = "Convos - Better group chat";
+% my $description = "Convos is a chat application that runs in your web browser";
 <!DOCTYPE html>
 <html data-framework="vue">
   <head>
@@ -352,7 +352,7 @@ __DATA__
     <meta property="og:type" content="object">
     <meta property="og:description" content="<%= $description %>">
     <meta property="og:image" content="https://convos.by/public/screenshots/2016-09-01-participants.png">
-    <meta property="og:site_name" content="Convos">
+    <meta property="og:site_name" content="<%= config 'organization_name' %>">
     <meta property="og:title" content="<%= title %>">
     <meta property="og:url" content="<%= $c->req->url->to_abs %>">
     <noscript><style>.if-js { display: none; }</style></noscript>
@@ -381,7 +381,7 @@ __DATA__
 </html>
 @@ convos.html.ep
 % layout 'convos';
-% title 'Convos for ' . config('organization_name');
+% title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
 <component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
   <div id="loader">
     <div class="row not-logged-in-wrapper">
