@@ -3,6 +3,7 @@ use t::Helper;
 use Mojo::File 'path';
 delete $ENV{CONVOS_SECRETS};
 
+my $i      = 0;
 my $convos = Convos->new;
 is $convos->config->{backend}, 'Convos::Core::Backend::File', 'default backend';
 is $convos->config->{home}, $ENV{CONVOS_HOME}, 'home from ENV';
@@ -18,7 +19,7 @@ Mojo::Util::monkey_patch(
   Convos => plugin => sub {
     my $self = shift;
     return $self->Mojolicious::plugin(@_) unless $_[0] =~ /Plugin[A-Z\d]/;
-    push @plugins, @_;
+    push @plugins, ($i, @_);
   }
 );
 
@@ -30,6 +31,7 @@ $ENV{CONVOS_ORGANIZATION_URL}  = 'http://thorsen.pm';
 $ENV{CONVOS_SECRETS}           = 'super,duper,secret';
 $ENV{CONVOS_SECURE_COOKIES}    = 1;
 delete $ENV{CONVOS_HOME};
+$i++;
 $convos = Convos->new;
 is $convos->config->{backend},           'Convos::Core::Backend',          'env backend';
 like $convos->config->{home},            qr{\W+\.local\W+share\W+convos$}, 'default home';
@@ -37,18 +39,20 @@ is $convos->config->{organization_name}, 'cool.org',                       'env 
 is $convos->config->{organization_url},  'http://thorsen.pm',              'env organization_url';
 ok $convos->sessions->secure, 'secure sessions';
 is_deeply($convos->secrets, [qw(super duper secret)], 'env secrets');
-is $plugins[0], 'PluginX', 'PluginX';
+is $plugins[1], 'PluginX', 'PluginX';
 
 delete $ENV{$_} for grep {/CONVOS/} keys %ENV;
 $ENV{MOJO_CONFIG} = path->child(qw(t data config.json));
+$i++;
 $convos = Convos->new;
 is $convos->config->{organization_name}, 'Team JSON',             'json config name';
 is $convos->config->{contact},           'mailto:json@localhost', 'json config contact';
 is $convos->config->{invite_code},       'json_example',          'invite_code from config file';
-is $plugins[6], 'Plugin3', 'Plugin3';
+is $plugins[10], 'Plugin3', 'Plugin3';
 
 delete $ENV{$_} for grep {/CONVOS/} keys %ENV;
 $ENV{MOJO_CONFIG} = path->child(qw(t data config.conf));
+$i++;
 $convos = Convos->new;
 is $convos->config->{organization_name}, 'Team Perl',             'perl config name';
 is $convos->config->{contact},           'mailto:perl@localhost', 'perl config contact';
@@ -56,15 +60,21 @@ is $convos->config->{contact},           'mailto:perl@localhost', 'perl config c
 cmp_deeply(
   \@plugins,
   bag(
-    'PluginX' => {},
+    1,
+    'PluginX' => superhashof({organization_url => 'http://thorsen.pm'}),
+    2,
     'Plugin1' => {config => 'parameter'},
-    'Plugin2' => {},
-    'Plugin3' => {},
-    'Plugin2' => {config => "parameter"},
+    2,
+    'Plugin2' => superhashof({organization_url => 'http://convos.by'}),
+    2,
+    'Plugin3' => superhashof({organization_url => 'http://convos.by'}),
+    3,
     'Plugin1' => {},
-    'Plugin3' => {},
+    3,
+    'Plugin2' => {config => "parameter"},
+    3, 'Plugin3' => {},
   ),
   'plugins'
-);
+) or diag Data::Dumper::Dumper(\@plugins);
 
 done_testing;
