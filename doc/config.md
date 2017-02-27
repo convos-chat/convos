@@ -46,15 +46,15 @@ $ /home/www/convos-stable/script/convos /path/to/convos.conf.json \
 
 $ cat /path/to/convos.conf.json
 {
-  "backend":            "Convos::Core::Backend::File",
-  "contact":            "mailto:root@localhost",
-  "default_server":     "localhost:6667",
-  "forced_irc_server":  "localhost:6667",
-  "invite_code":        "s3cret",
-  "organization_name":  "Awesome hackers",
-  "plugins":            {},
-  "secure_cookies":     0,
-  "session_secrets":    ["signed-cookie-secret"]
+  "backend":           "Convos::Core::Backend::File",
+  "contact":           "mailto:root@localhost",
+  "default_server":    "localhost:6667",
+  "forced_irc_server": "localhost:6667",
+  "invite_code":       "s3cret",
+  "organization_name": "Awesome hackers",
+  "plugins":           {},
+  "secure_cookies":    0,
+  "secrets":           ["signed-cookie-secret"]
 }
 ```
 
