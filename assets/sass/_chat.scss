@@ -88,6 +88,7 @@ $convos-input-height: 46px;
 .convos-message {
   $dialog-spacing: 4px;
 
+  clear: both;
   display: block;
   position: relative;
   margin: $dialog-spacing * 2 0;
