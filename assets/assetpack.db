@@ -135,6 +135,10 @@ rel=cache/vuejs.org/js/vue.js
 format=js
 mtime=1459386269
 rel=cache/vuejs.org/js/vue.min.js
+[original:https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js]
+format=js
+mtime=1481700764
+rel=cache/cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js
 [original:https://github.com/yuku-t/jquery-textcomplete/raw/master/dist/jquery.textcomplete.min.js]
 format=js
 mtime=1473358699
