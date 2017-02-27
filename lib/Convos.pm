@@ -336,23 +336,25 @@ Marcus Ramberg - C<marcus@nordaaker.com>
 __DATA__
 @@ layouts/convos.html.ep
 % use Mojo::JSON 'to_json';
+% my $description = "Convos - Better group chat";
 <!DOCTYPE html>
 <html data-framework="vue">
   <head>
     <title><%= title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta content="https://convos.by/public/screenshots/2016-09-01-participants.png" name="twitter:image:src">
-    <meta content="https://convos.by/public/screenshots/2016-09-01-participants.png" property="og:image">
-    <meta content="@convosby" name="twitter:site">
-    <meta content="Convos" property="og:site_name">
-    <meta content="object" property="og:type">
-    <meta content="summary" name="twitter:card">
-    <meta content="Convos - Better group chat" name="twitter:description">
-    <meta content="Convos - Better group chat" property="og:description">
-    <meta content="<%= title %>" name="twitter:title">
-    <meta content="<%= title %>" property="og:title">
-    <meta content="/" property="og:url">
+    <meta name="description" content="<%= $description %>">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:description" content="<%= $description %>">
+    <meta name="twitter:image:src" content="https://convos.by/public/screenshots/2016-09-01-participants.png">
+    <meta name="twitter:site" content="@convosby">
+    <meta name="twitter:title" content="<%= title %>">
+    <meta property="og:type" content="object">
+    <meta property="og:description" content="<%= $description %>">
+    <meta property="og:image" content="https://convos.by/public/screenshots/2016-09-01-participants.png">
+    <meta property="og:site_name" content="Convos">
+    <meta property="og:title" content="<%= title %>">
+    <meta property="og:url" content="<%= $c->req->url->to_abs %>">
     %= asset 'favicon.ico'
     %= asset 'convos.css'
   </head>
