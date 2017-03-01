@@ -347,7 +347,7 @@ format=svg
 minified=0
 mtime=1472458020
 [js-min:js/autolink.js]
-checksum=beadaef52d
+checksum=69dfb99445
 format=js
 minified=1
 [js-min:js/core/commands.js]
@@ -446,15 +446,15 @@ format=js
 minified=1
 mtime=1471637625
 [js-min:js/vue/mixin-message.js]
-checksum=b6c10a0227
+checksum=38d87ff4a9
 format=js
 minified=1
 [js-min:js/vue/mixin-messages.js]
-checksum=09d4d5803d
+checksum=c1a213d53a
 format=js
 minified=1
 [js-min:js/window.js]
-checksum=0179c6531a
+checksum=dd7e5a6e30
 format=js
 minified=1
 [sass:sass/main.scss]
@@ -462,7 +462,7 @@ checksum=5efdb8dfeb
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=ba2c622ea2
+checksum=5efdb8dfeb
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
@@ -503,7 +503,7 @@ checksum=54210aeb7a
 format=js
 minified=1
 [js-min:vue/convos-input.vue]
-checksum=5bd4acb28e
+checksum=5c017f0957
 format=js
 minified=1
 [js-min:vue/convos-login.vue]
@@ -532,7 +532,7 @@ checksum=425d485be0
 format=js
 minified=1
 [js-min:vue/convos-message-error.vue]
-checksum=1087c6ae06
+checksum=77b466714f
 format=js
 minified=1
 [js-min:vue/convos-message-notice.vue]
@@ -540,7 +540,7 @@ checksum=5945fc58aa
 format=js
 minified=1
 [js-min:vue/convos-message-participants.vue]
-checksum=55b32a507d
+checksum=b2adebcf8f
 format=js
 minified=1
 [js-min:vue/convos-message-password.vue]

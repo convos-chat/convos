@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-0.99_27 Not Released
+0.99_27 2017-03-01T23:20:11+0100
  - Fix going to connection dialog after connection save
  - Fix hitting enter/return inside the "Dialog name" field on "Join dialog"
  - Fix joining channel which you are already part of
