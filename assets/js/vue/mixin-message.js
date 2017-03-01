@@ -80,7 +80,6 @@
           });
           hljs.highlightBlock(this);
           var code = this.innerHTML.split(/\n\r?|\r/);
-          console.log(code);
           $(this).replaceWith('<ol class="hljs"><li>' + code.join("</li><li>") + '</li></ol>');
         });
       },
