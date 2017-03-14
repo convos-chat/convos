@@ -35,7 +35,7 @@ module.exports = {
           self.errors = res.errors || [];
           if (self.errors.length) return;
           self.dialog.reset = true;
-          self.dialog.load({});
+          self.dialog.load({}, function() {});
         }
       );
     }

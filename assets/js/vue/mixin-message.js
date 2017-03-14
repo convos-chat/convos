@@ -48,18 +48,13 @@
     methods: {
       classNames: function() {
         var msg = this.msg;
-        var c = {highlight: this.msg.highlight ? true : false};
+        var i = this.dialog.messages.indexOf(msg);
+        var prev = i > 0 ? this.dialog.messages[i - 1] : {};
+        var c = {};
 
-        if (!msg.type.match(/^(notice|error)$/) && this.dialog.dialog_id && !this.dialog.participants[msg.from]) {
-          c["inactive-user"] = true;
-        }
-
-        if (msg.message && msg.from == msg.prev.from) {
-          c["same-user"] = true;
-        }
-        else {
-          c["changed-user"] = true;
-        }
+        c["highlight"] = this.msg.highlight;
+        c["inactive-user"] = !msg.type.match(/^(notice|error)$/) && this.dialog.dialog_id && !this.dialog.participants[msg.from];
+        c["same-user"] = prev.from == msg.from;
 
         return c;
       },

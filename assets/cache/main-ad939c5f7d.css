@@ -4513,6 +4513,12 @@ input[type=range]:focus::-ms-fill-lower {
 input[type=range]:focus::-ms-fill-upper {
   background: #ccc; }
 
+@keyframes background-position {
+  0% {
+    background-position: 0 0; }
+  100% {
+    background-position: 100% 0; } }
+
 body {
   background-color: #fffefd;
   color: #222; }
@@ -4816,6 +4822,19 @@ ul.complete-dropdown {
   position: absolute;
   bottom: 0;
   z-index: 899; }
+  .convos-input.loading {
+    background: repeating-linear-gradient(-45deg, #fffefd, #fffefd 10px, whitesmoke 10px, whitesmoke 20px, #fffefd 20px) top left;
+    background-position: 0 0;
+    background-size: 394px 100%;
+    animation: background-position 14s infinite linear; }
+    .convos-input.loading ::-webkit-input-placeholder {
+      color: #3c813f; }
+    .convos-input.loading :-moz-placeholder {
+      color: #3c813f; }
+    .convos-input.loading ::-moz-placeholder {
+      color: #3c813f; }
+    .convos-input.loading :-ms-input-placeholder {
+      color: #3c813f; }
   .convos-input i {
     font-size: 2rem;
     cursor: pointer;
@@ -5297,4 +5316,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../51b888ca9c/main.css.map */
+/*# sourceMappingURL=../666be752cc/main.css.map */

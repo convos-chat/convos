@@ -53,6 +53,11 @@ $convos-input-height: 46px;
   bottom: 0;
   z-index: $z-index-header - 1;
 
+  &.loading {
+    @include input-placeholder-color($primary-color);
+    @include progress-bar($body-bg, darken($sidebar-bg, 1%));
+  }
+
   // send button
   i {
     font-size: 2rem;

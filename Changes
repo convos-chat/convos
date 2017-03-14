@@ -2,6 +2,8 @@ Revision history for perl distribution Convos
 
 0.99_28 Not Released
  - Fix keeping scroll at bottom in Firefox #324
+ - Fix messages are grouped incorrectly on scrollback #301
+ - Fix showing "Day changed" in historic messages
  - Will not mark message as "highlight" if sent by yourself
 
 0.99_27 2017-03-01T23:20:11+0100

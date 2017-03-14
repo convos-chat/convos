@@ -2,7 +2,7 @@
   <div class="convos-message error" :class="classNames()">
     <span class="secondary-content ts" v-tooltip="msg.ts.toLocaleString()">{{msg.ts | timestring}}</span>
     <a href="#{{msg.from}}" class="title" @click.prevent="insertIntoInput">{{msg.from}}</a>
-    <div class="error" v-html="compiledMessage"></div>
+    <div class="error" v-html="computedMessage"></div>
   </div>
 </template>
 <script>

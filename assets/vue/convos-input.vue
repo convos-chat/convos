@@ -1,5 +1,5 @@
 <template>
-  <div class="convos-input">
+  <div class="convos-input" :class="dialog.loading ? 'loading' : ''">
     <ul class="complete-dropdown dropdown-content" v-el:dropdown>
       <li :class="i == completeIndex ? 'active' : ''" v-for="(i, c) in completeList" v-show="completeList.length">
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'command'">{{c}}{{commands[c] ? " - " + commands[c].description : ""}}</a>
@@ -32,7 +32,10 @@ module.exports = {
     placeholder: function() {
       try {
         var state = this.dialog.connection().state;
-        if (state == "connected") {
+        if (this.dialog.loading) {
+          return "Loading messages...";
+        }
+        else if (state == "connected") {
           var nick = this.dialog.connection().me.nick || this.user.email;
           return "What's on your mind " + nick + "?";
         }

@@ -10,6 +10,7 @@
     this.is_private = attrs.is_private || true;
     this.lastActive = 0;
     this.lastRead = attrs.last_read ? Date.fromAPI(attrs.last_read) : new Date();
+    this.loading = false;
     this.messages = [];
     this.name = attrs.name || attrs.dialog_id.toLowerCase() || "";
     this.participants = {};
@@ -25,36 +26,20 @@
   proto.addMessage = function(msg, args) {
     if (!args) args = {};
     if (!args.method) args.method = "push";
-    var prev = args.method == "unshift" ? this.messages[0] : this.prevMessage;
-    msg.richMessage = null;
-
     if (!msg.from) msg.from = "convosbot";
     if (!msg.type) msg.type = "notice";
     if (!msg.ts) msg.ts = new Date();
     if (typeof msg.ts == "string") msg.ts = Date.fromAPI(msg.ts);
-    if (!prev) prev = {from: "", ts: msg.ts};
+    if (args.method == "push") this._processNewMessage(msg);
+    if (args.type == "participants") this._setParticipants(msg);
 
-    if (args.method == "push") {
-      this._updateFromMsg(msg);
-      this.prevMessage = msg;
-
-      if (prev && prev.ts.getDate() != msg.ts.getDate()) {
-        prev = {type: "day-changed", prev: prev, ts: msg.ts};
-        this.messages[args.method](prev);
-      }
-    }
-
-    if (args.method == "unshift") {
-      prev.prev = msg;
-      msg.prev = prev;
-    }
-    else {
-      msg.prev = prev;
+    var prev = args.method == "unshift" ? this.messages[0] : this.messages.slice(-1)[0];
+    if (prev && prev.ts.getDate() != msg.ts.getDate()) {
+      this.messages[args.method]({type: "day-changed", ts: msg.ts});
     }
 
     this.messages[args.method](msg);
     this.participant({type: "maintain", name: msg.from, seen: msg.ts});
-    if (args.type == "participants") this._setParticipants(msg);
     this.emit("message", msg);
   };
 
@@ -76,30 +61,27 @@
   proto.load = function(args, cb) {
     var self = this;
     var method = this.dialog_id ? "dialogMessages" : "connectionMessages";
+    var processMethod = args.historic ? "_processHistoricMessages" : "_processMessages";
+    var first = this.messages.slice(0)[0];
 
-    if (this.messages.length && this.messages[0].loading) return;
+    if (this.loading) return cb(null, {});
+    if (first && first.end && args.historic) return cb(null, {});
     if (DEBUG.info) console.log("[load:" + this.dialog_id + "] " + JSON.stringify(args)); // TODO
+    if (args.historic && this.messages.length > 0) args.before = this.messages[0].ts.toISOString();
 
-    if (args.historic && this.messages.length > 0) {
-      delete args.historic;
-      args.before = this.messages[0].ts.toISOString();
-    }
-
+    delete args.historic;
     args.connection_id = this.connection_id;
     args.dialog_id = this.dialog_id;
-
-    this.addMessage(
-      {loading: true, message: "Loading messages..."},
-      {method: args.before ? "unshift" : "push"}
-    );
+    this.loading = true;
 
     Convos.api[method](args, function(err, xhr) {
       if (self.reset) self.messages = [];
+      self.loading = false;
       self._locked = true;
-      self._processMessages(err, xhr.body.messages).reverse().forEach(function(msg) {
+      self[processMethod](err, xhr.body.messages).reverse().forEach(function(msg) {
         self.addMessage(msg, {method: "unshift"});
       });
-      if (cb) cb(err, xhr.body);
+      cb(err, xhr.body);
       self._locked = false;
       self.reset = false;
     });
@@ -162,7 +144,7 @@
     }.bind(this));
 
     if (this.reset && this.active) {
-      this.load({});
+      this.load({}, function() {});
     }
 
     if (loadMaybe && !this.frozen && this.active) {
@@ -179,6 +161,17 @@
     return this;
   };
 
+  proto._processHistoricMessages = function(err, messages) {
+    if (err) {
+      messages = [{message: err[0].message || "Unknown error.", type: "error"}];
+    }
+    else if (this.messages.length && !messages.length) {
+      messages.unshift({end: true, message: "End of history."});
+    }
+
+    return messages;
+  };
+
   proto._processMessages = function(err, messages) {
     var frozen = this.frozen.ucFirst();
 
@@ -186,20 +179,13 @@
       messages = [{message: err[0].message || "Unknown error.", type: "error"}];
     }
     else if (frozen.match(/password/i)) {
-      this.addMessage({type: "password"});
+      messages.push({type: "password"});
     }
     else if (frozen) {
       messages.push({message: this.dialog_id ? "You are not part of this dialog. " + frozen : frozen, type: "error"});
     }
     else if (!messages.length && this.messages.length <= 1) {
       messages.push({message: this.is_private ? "What do you want to say to " + this.name + "?" : "You have joined " + this.name + ", but no one has said anything as long as you have been here."});
-    }
-
-    if (messages.length) {
-      this.messages.shift(); // remove "Loading messages...";
-    }
-    else if (this.messages.length) {
-      this.messages[0].message = "End of history.";
     }
 
     if (Convos.settings.notifications == "default") {
@@ -209,16 +195,7 @@
     return messages;
   };
 
-  proto._setParticipants = function(msg) {
-    if (msg.errors) return this.addMessage({type: "error", message: msg.errors[0].message});
-    this.participants = {};
-    msg.participants.forEach(function(p) {
-      p.seen = new Date();
-      this.participants[p.name] = p;
-    }.bind(this));
-  };
-
-  proto._updateFromMsg = function(msg) {
+  proto._processNewMessage = function(msg) {
     var isMessage = this.is_private || msg.type.match(/action|private/);
 
     this.lastActive = msg.ts.valueOf();
@@ -234,5 +211,14 @@
     else if (this.is_private && this.dialog_id) {
       Notification.simple(msg.from, msg.message);
     }
+  };
+
+  proto._setParticipants = function(msg) {
+    if (msg.errors) return this.addMessage({type: "error", message: msg.errors[0].message});
+    this.participants = {};
+    msg.participants.forEach(function(p) {
+      p.seen = new Date();
+      this.participants[p.name] = p;
+    }.bind(this));
   };
 })();
