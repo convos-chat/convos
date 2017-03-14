@@ -30,11 +30,11 @@
         if (!diff.totalHeight && !diff.scrollTop) return;
         if (!diff.totalHeight) this.atBottom = totalHeight - el.offsetHeight < scrollTop + THRESHOLD;
         if (DEBUG.scroll) this.log(el);
-        if (this.atBottom || el.scrollTo) el.scrollTop = el.scrollTo || totalHeight;
+        if (this.atBottom || el.nextTickScrollTop) el.scrollTop = el.nextTickScrollTop || totalHeight;
 
         this.scrollTop = scrollTop;
         this.totalHeight = totalHeight;
-        delete el.scrollTo;
+        delete el.nextTickScrollTop;
 
         for (var i = 0; i < messages.length; i++) {
           var offsetTop = messages[i].$el.offsetTop;

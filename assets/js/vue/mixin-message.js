@@ -76,7 +76,7 @@
           $container.find(".paste-meta").click(function() {
             var $message = $container.closest(".convos-message");
             $container.toggleClass("expanded");
-            $message.closest(".scroll-element").get(0).scrollTo = $message.get(0).offsetTop;
+            $message.closest(".scroll-element").get(0).nextTickScrollTop = $message.get(0).offsetTop;
           });
           hljs.highlightBlock(this);
           var code = this.innerHTML.split(/\n\r?|\r/);
