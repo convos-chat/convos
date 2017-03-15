@@ -1,5 +1,3 @@
-@import "http://local/custom/asset/sass/variables.scss";
-@import "http://local/custom/asset/sass/custom.scss";
 .materialize-red {
   background-color: #e51c23 !important; }
 
@@ -5319,4 +5317,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../a19220c68c/main.css.map */
+/*# sourceMappingURL=../a605ade0b3/main.css.map */
