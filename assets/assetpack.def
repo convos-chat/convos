@@ -9,14 +9,10 @@
 < http://cdn.jsdelivr.net/emojione/2.2.6/lib/js/emojione.min.js
 < https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js
 < js/autolink.js
-< js/svg.js
 < js/eventemitter.js
-< js/storage.js
 < js/window.js
-< js/date.js
 < js/string.js
 < js/notification.js
-< js/jquery.disableouterscroll.js
 < js/materialbox.js
 < js/openapi.js
 < js/vue/directive-link.js

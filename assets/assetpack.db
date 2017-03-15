@@ -366,10 +366,6 @@ minified=1
 checksum=9066a83e4e
 format=js
 minified=1
-[js-min:js/date.js]
-checksum=e32921454e
-format=js
-minified=1
 [js-min:js/eventemitter.js]
 checksum=a3d66533ac
 format=js
@@ -392,10 +388,6 @@ format=js
 minified=1
 [js-min:js/openapi.js]
 checksum=92afce406e
-format=js
-minified=1
-[js-min:js/storage.js]
-checksum=5c4ef4e5e3
 format=js
 minified=1
 [js-min:js/string.js]
@@ -458,7 +450,7 @@ checksum=dd7e5a6e30
 format=js
 minified=1
 [sass:sass/main.scss]
-checksum=0a5ad68fbc
+checksum=befe8d26f2
 format=css
 minified=0
 [sass-min:sass/main.scss]

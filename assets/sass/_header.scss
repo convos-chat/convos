@@ -36,6 +36,7 @@ header {
     height: 100%;
     padding: 0 $gutter-width;
     margin: 0;
+    margin-right: $gutter-width;
     width: $main-menu-width;
     float: left;
 
@@ -72,10 +73,6 @@ header {
 
   @media #{$large-and-up} {
     height: $navbar-height;
-
-    h2 {
-      margin-left: 20px;
-    }
 
     h2, a, .material-icons {
       height: $navbar-height;

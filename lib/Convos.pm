@@ -361,12 +361,12 @@ __DATA__
   </head>
   <body>
     %= content
-    %= asset 'reloader.js' if app->mode eq 'development';
     <div id="vue_tooltip"><span></span></div>
+    %= include 'javascript' if 200 == (stash('status') // 200);
+    %= asset 'reloader.js' if app->mode eq 'development';
   </body>
 </html>
 @@ convos.html.ep
-% use Mojo::JSON 'to_json';
 % layout 'convos';
 % title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
 <component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
@@ -392,6 +392,8 @@ __DATA__
     </div>
   </div>
 </component>
+@@ javascript.html.ep
+% use Mojo::JSON 'to_json';
 %= javascript begin
   window.DEBUG = <%== to_json {map { ($_ => 1) } @$debug, split /,/, ($self->param('debug') || '')} %>;
   window.Convos = {
