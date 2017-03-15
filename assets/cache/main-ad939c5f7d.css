@@ -4878,10 +4878,11 @@ ul.complete-dropdown {
     font-style: normal; }
   .convos-message.day-changed {
     color: rgba(102, 102, 102, 0.87);
+    font-size: 0.8rem;
     text-align: center;
     border-bottom: 1px solid #dbdbdb;
-    margin-bottom: 1.5rem;
-    height: 0.75rem; }
+    margin: -0.6rem 0 0 0;
+    height: 0.6rem; }
     .convos-message.day-changed:hover {
       background: transparent; }
     .convos-message.day-changed span {
@@ -5316,4 +5317,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../666be752cc/main.css.map */
+/*# sourceMappingURL=../a979bededd/main.css.map */
