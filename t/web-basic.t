@@ -23,8 +23,7 @@ $t->content_like(qr{mode:\s*"development"})->text_is('title', 'Convos - Better g
   ->element_exists(qq(meta[property="og:image"][content="$image"]))
   ->element_exists(qq(meta[property="og:site_name"][content="Convos"]))
   ->element_exists(qq(meta[property="og:title"][content="Convos - Better group chat"]))
-  ->element_exists(qq(meta[property="og:url"][content="$url"]))->element_exists('#loader')
-  ->element_exists('#vue_tooltip');
+  ->element_exists(qq(meta[property="og:url"][content="$url"]))->element_exists('#vue_tooltip');
 
 $t->text_like('noscript p', qr{javascript}i);
 $t->text_is('a[href="http://convos.by"]', 'About');
