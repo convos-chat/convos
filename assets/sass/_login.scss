@@ -8,6 +8,8 @@
     background: url(../../images/logo.svg) no-repeat;
   }
 
+  h2 { font-size: 2rem; }
+
   .about {
     &, a { color: lighten($text-color, 40%); }
     a:hover { color: $text-color; };

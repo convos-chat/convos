@@ -50,7 +50,7 @@ button.btn[disabled] {
   @extend .disabled;
 }
 
-div.alert {
+div.alert, p.alert {
   background: $error-bg-color;
   border: 1px solid $error-border-color;
   border-radius: 2px;

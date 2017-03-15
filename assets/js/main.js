@@ -3,7 +3,12 @@
   Vue.config.devtools = Convos.mode == "development";
 
   Convos.error = function(err) {
-    document.querySelector("#loader .error").innerText = err;
+    var h2 = document.querySelector("h2");
+    var p = document.querySelector("p.message");
+    h2.className = "";
+    h2.innerText = "Could not load Convos";
+    p.className = "alert";
+    p.innerText = err;
   };
 
   // shift+enter is a global shortkey to jump between input fields and goto anything
@@ -21,7 +26,9 @@
     }
   });
 
-  if (location.href.match(/\b_vue=false\b/)) return;
+  var m;
+  if (m = location.href.match(/\b_error=([^&]+)\b/)) return Convos.error(m[1]);
+  if (m = location.href.match(/\b_vue=false\b/)) return;
 
   Convos.api = new openAPI(Convos.apiUrl, function(err) {
     if (err) return Convos.error("Could not load API spec! " + err);
