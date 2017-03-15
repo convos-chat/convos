@@ -379,7 +379,7 @@ checksum=026e3b420d
 format=js
 minified=1
 [js-min:js/main.js]
-checksum=0a8c80d968
+checksum=dc9b0df7db
 format=js
 minified=1
 [js-min:js/materialbox.js]
@@ -458,11 +458,11 @@ checksum=dd7e5a6e30
 format=js
 minified=1
 [sass:sass/main.scss]
-checksum=f5c111c33f
+checksum=3fa7d27f32
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=f5c111c33f
+checksum=3fa7d27f32
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]

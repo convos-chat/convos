@@ -4560,16 +4560,16 @@ svg {
 iframe {
   display: block; }
 
-div.alert {
+div.alert, p.alert {
   background: #FFEBEE;
   border: 1px solid #E57373;
   border-radius: 2px;
   color: #D32F2F;
   padding: 10px; }
-  div.alert a {
+  div.alert a, p.alert a {
     color: #C62828;
     text-decoration: underline; }
-    div.alert a:hover {
+    div.alert a:hover, p.alert a:hover {
       text-decoration: none; }
 
 .col .btn, .col .btn-large, .col .btn-delete, .col .btn-large, .col .btn-flat {
@@ -4647,6 +4647,8 @@ div.alert {
     max-height: 55px;
     margin: 0;
     background: url(../../images/logo.svg) no-repeat; }
+  .not-logged-in-wrapper h2 {
+    font-size: 2rem; }
   .not-logged-in-wrapper .about {
     padding-top: 2em; }
     .not-logged-in-wrapper .about, .not-logged-in-wrapper .about a {
@@ -5317,4 +5319,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../a979bededd/main.css.map */
+/*# sourceMappingURL=../a19220c68c/main.css.map */
