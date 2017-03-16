@@ -19,12 +19,12 @@ sub register {
 
   # Render web page. Note that "dialog_id" is just here to help the visitor.
   # The actual "dialog_id" is stored in "shared"
-  $app->routes->get('/log/:id/:connection_id/:dialog_id')->to(cb => \&_action_messages)
+  $app->routes->get('/log/:id/:connection_id/*dialog_id')->to(cb => \&_action_messages)
     ->name('share_dialog.messages');
 
   my $set = {
     cb         => \&_action_set,
-    parameters => [{'$ref' => '#/parameters/connection_id'}, {'$ref' => '#/parameters/dialog_id'},],
+    parameters => [{'$ref' => '#/parameters/connection_id'}, {'$ref' => '#/parameters/dialog_id'}],
     responses  => {
       302 => {description => '', schema => {}},
       200 => {
@@ -180,8 +180,7 @@ __DATA__
 Convos.beforeCreate.push(function(data) {
   data.mixins.push(Convos.mixin.messages);
   data.dialog = new Convos.Dialog({
-    connection_id: "<%= $connection_id %>",
-    dialog_id: "<%= $dialog_id %>",
+    dialog_id: "",
     reset: false,
     user: data.user
   });
@@ -195,7 +194,7 @@ Convos.beforeCreate.push(function(data) {
 </script>
 <header>
   <div class="container">
-    <h2>{{dialog.dialog_id}}</h2>
+    <h2><%= $dialog_id %></h2>
     %= link_to 'index', 'v-tooltip.literal' => 'Chat', begin
       <i class="material-icons">chat</i>
     % end

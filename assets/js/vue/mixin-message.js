@@ -79,6 +79,7 @@
         });
       },
       statusTooltip: function() {
+        if (!this.dialog.dialog_id) return;
         return this.dialog.participants[this.msg.from] ? "" : "Not in this channel";
       }
     }
