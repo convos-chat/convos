@@ -14,13 +14,13 @@ sub add_backend_helpers {
 
   $app->helper(
     "$prefix.load" => sub {
-      shift->app->core->backend->load_object($self, @_);
+      return shift->app->core->backend->load_object($self, @_) || {};
     }
   );
 
   $app->helper(
     "$prefix.save" => sub {
-      shift->app->core->backend->save_object($self, @_);
+      return shift->app->core->backend->save_object($self, @_);
     }
   );
 }

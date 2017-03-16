@@ -11,6 +11,8 @@ use Mojo::Util;
 
 our $VERSION = '0.99_28';
 
+my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
+
 has core => sub {
   my $self = shift;
   my $home = Cwd::abs_path($self->config('home')) || $self->config('home');
@@ -35,16 +37,13 @@ sub extend_api_spec {
   while (@_) {
     my ($method, $op) = (shift, shift);
 
+    eval "package $ANON_API_CONTROLLER; use Mojo::Base 'Mojolicious::Controller'; 1"
+      unless $ANON_API_CONTROLLER->can('new');
+    Mojo::Util::monkey_patch($ANON_API_CONTROLLER => $op->{operationId} => delete $op->{cb});
+
+    $op->{'x-mojo-to'} = sprintf 'anon#%s', $op->{operationId};
     $op->{responses}{default}
       ||= {description => 'Error.', schema => {'$ref' => '#/definitions/Error'}};
-
-    if (my $cb = delete $op->{cb}) {
-      $self->{anon} ||= do { state $i; ++$i };
-      my $ctrl = "Convos::Controller::Anon$self->{anon}";
-      eval "package $ctrl; use Mojo::Base 'Mojolicious::Controller'; 1" or die $@;
-      Mojo::Util::monkey_patch($ctrl => $op->{operationId} => $cb);
-      $op->{'x-mojo-to'} = sprintf 'anon%s#%s', $self->{anon}, $op->{operationId};
-    }
 
     $self->_api_spec->{paths}{$path}{$method} = $op;
   }
@@ -358,11 +357,12 @@ __DATA__
     <noscript><style>.if-js { display: none; }</style></noscript>
     %= asset 'favicon.ico'
     %= asset 'convos.css'
+    %= include 'javascript' if 200 == (stash('status') // 200)
   </head>
   <body>
     %= content
     <div id="vue_tooltip"><span></span></div>
-    %= include 'javascript' if 200 == (stash('status') // 200);
+    %= asset 'convos.js' if 200 == (stash('status') // 200)
     %= asset 'reloader.js' if app->mode eq 'development';
   </body>
 </html>
@@ -373,21 +373,7 @@ __DATA__
   <div class="row not-logged-in-wrapper">
     <div class="col s12 m6 offset-m3">
       %= include 'partial/header'
-      <div class="row">
-        <div class="col s12">
-          <h2 class="hide"></h2>
-          <p class="if-js message">Loading Convos should not take too long...</p>
-          <noscript>
-            <p>Javascript is disabled, so Convos will never load. Please enable Javascript and try again.</p>
-          </noscript>
-          <hr>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col s12">
-          %= link_to 'Reload', 'index', class => 'btn waves-effect waves-light'
-        </div>
-      </div>
+      %= include 'partial/loader'
       %= include 'partial/footer'
     </div>
   </div>
@@ -398,6 +384,7 @@ __DATA__
   window.DEBUG = <%== to_json {map { ($_ => 1) } @$debug, split /,/, ($self->param('debug') || '')} %>;
   window.Convos = {
     apiUrl: "<%= $c->url_for('api') %>",
+    beforeCreate: [],
     indexUrl: "<%= $c->url_for('index') %>",
     wsUrl: "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
     mixin: {}, // Vue.js mixins
@@ -407,7 +394,6 @@ __DATA__
     settings: <%== to_json app->config('settings') %>
   };
 % end
-%= asset 'convos.js'
 @@ exception.production.html.ep
 %= include 'partial/error'
 @@ not_found.production.html.ep
@@ -458,5 +444,21 @@ __DATA__
   <div class="col s12">
     <h1>Convos</h1>
     <p><i>- Collaboration done right.</i></p>
+  </div>
+</div>
+@@ partial/loader.html.ep
+<div class="row">
+  <div class="col s12">
+    <h2 class="hide"></h2>
+    <p class="if-js message">Loading Convos should not take too long...</p>
+    <noscript>
+      <p>Javascript is disabled, so Convos will never load. Please enable Javascript and try again.</p>
+    </noscript>
+    <hr>
+  </div>
+</div>
+<div class="row">
+  <div class="col s12">
+    %= link_to 'Reload', 'index', class => 'btn waves-effect waves-light'
   </div>
 </div>

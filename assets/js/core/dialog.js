@@ -14,7 +14,7 @@
     this.messages = [];
     this.name = attrs.name || attrs.dialog_id.toLowerCase() || "";
     this.participants = {};
-    this.reset = true;
+    this.reset = attrs.hasOwnProperty("reset") ? attrs.reset : true;
     this.topic = attrs.topic || "";
     this.unread = 0;
     this.user = attrs.user || new Convos.User({});

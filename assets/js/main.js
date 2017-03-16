@@ -32,9 +32,16 @@
 
   Convos.api = new openAPI(Convos.apiUrl, function(err) {
     if (err) return Convos.error("Could not load API spec! " + err);
+
+    var data = {mixins: [], user: new Convos.User()};
+    Convos.beforeCreate.forEach(function(cb) { cb(data); });
+    var mixins = data.mixins;
+    delete data.mixins;
+
     Convos.vm = new Vue({
       el: "body",
-      data: {user: new Convos.User()},
+      data: data,
+      mixins: mixins,
       watch: {
         "settings.expandUrls": function(v, o) {
           localStorage.setItem("expandUrls", v ? "true" : "false");

@@ -5,18 +5,17 @@ use Convos::Util 'E';
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(sha1_sum steady_time);
 
-has _shared => sub { +{} };
-
 sub register {
   my ($self, $app, $config) = @_;
 
+  # Add $app->share_dialog->load() and $app->share_dialog->save()
+  # for loading/saving data using $self->TO_JSON()
   $self->add_backend_helpers($app);
-  $app->config->{settings}{share_dialog} = 1;
-  push @{$app->renderer->classes}, __PACKAGE__;
+  $app->helper('share_dialog.shared' => sub { $self->{shared} });
 
-  my $shared = ($app->share_dialog->load || {})->{shared} || {};
-  $self->_shared($shared);
-  $app->helper('share_dialog.shared' => sub {$shared});
+  push @{$app->renderer->classes}, __PACKAGE__;
+  $app->config->{settings}{share_dialog} = 1;
+  $self->{shared} = $app->share_dialog->load->{shared} || {};
 
   # Render web page. Note that "dialog_id" is just here to help the visitor.
   # The actual "dialog_id" is stored in "shared"
@@ -64,9 +63,9 @@ sub register {
 }
 
 sub _action_messages {
-  my $c      = shift;
-  my $shared = $c->share_dialog->shared->{$c->stash('id')} or return $c->reply->not_found;
-  my $dialog = $c->backend->dialog($shared);
+  my $c           = shift;
+  my $dialog_name = $c->share_dialog->shared->{$c->stash('id')} or return $c->reply->not_found;
+  my $dialog      = $c->backend->dialog($dialog_name);
   my %query;
 
   return $c->reply->not_found unless $dialog and $dialog->stash('share_dialog.id');
@@ -75,8 +74,8 @@ sub _action_messages {
 
   # TODO:
   $query{$_} = $c->param($_) for grep { defined $c->param($_) } qw(after before level limit match);
-  $query{limit} ||= 60;
-  $query{limit} = 200 if $query{limit} > 200;    # TODO: is this a good max?
+  $query{limit} ||= 400;
+  $query{limit} = 400 if $query{limit} > 400;
 
   $c->delay(
     sub { $dialog->messages(\%query, shift->begin) },
@@ -141,7 +140,7 @@ sub _action_status {
 
 sub _id { substr sha1_sum($^T . $_[0]->id . steady_time), 0, 10 }
 
-sub TO_JSON { +{shared => shift->_shared} }
+sub TO_JSON { +{shared => shift->{shared}}; }
 
 1;
 
@@ -174,29 +173,29 @@ L<Convos>
 
 __DATA__
 @@ plugin/share_dialog/messages.html.ep
+% use Mojo::JSON 'to_json';
 % layout 'convos';
 % title "$dialog_id - $connection_id";
 <script>
-document.addEventListener("beforeConvosStart", function(e) {
-  e.detail.mixins = [Convos.mixin.messages];
-  e.detail.data.dialog = new Convos.Dialog({
+Convos.beforeCreate.push(function(data) {
+  data.mixins.push(Convos.mixin.messages);
+  data.dialog = new Convos.Dialog({
     connection_id: "<%= $connection_id %>",
-    connection_name: "<%= (split '-', $connection_id)[1] %>",
     dialog_id: "<%= $dialog_id %>",
-    user: new Convos.User({})
+    reset: false,
+    user: data.user
   });
 
-% for my $msg (@$messages) {
-  e.detail.data.dialog.addMessage(
-    <%== Mojo::JSON::to_json($msg) %>,
-    {disableNotifications: true}
-  );
-% }
+  Vue.nextTick(function() {
+    <%== to_json $messages %>.forEach(function(msg) { data.dialog.addMessage(msg) });
+    data.dialog.load = function() {};
+    data.dialog.active = true;
+  });
 });
 </script>
 <header>
   <div class="container">
-    <h2>{{dialog.dialog_id}} - {{dialog.connection_name}}</h2>
+    <h2>{{dialog.dialog_id}}</h2>
     %= link_to 'index', 'v-tooltip.literal' => 'Chat', begin
       <i class="material-icons">chat</i>
     % end
@@ -213,15 +212,10 @@ document.addEventListener("beforeConvosStart", function(e) {
         :dialog="dialog"
         :msg="msg"
         :user="dialog.user"
+        v-ref:messages
         v-if="msg.type"
         v-for="msg in dialog.messages">
-        <div id="loader" class="centered">
-          <div>
-            <h4>Loading convos...</h4>
-            <p class="error">This should not take too long.</p>
-            <a href="">Reload <i class="material-icons">refresh</i></a>
-          </div>
-        </div>
+        %= include 'partial/loader'
       </component>
     </div>
   </div>
