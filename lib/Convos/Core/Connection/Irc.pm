@@ -585,9 +585,10 @@ sub _event_quit {
 
 sub _event_rpl_list {
   my ($self, $msg) = @_;
-  my $host  = $self->url->host;
+  my $host = $self->url->host;
   my $store = $self->_room_cache->{$host} ||= {};
-  my $room  = {name => $msg->{params}[1], n_users => $msg->{params}[2], topic => $msg->{params}[3]};
+  my $room
+    = {name => $msg->{params}[1], n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
 
   $room->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
   $store->{ts} = time;
