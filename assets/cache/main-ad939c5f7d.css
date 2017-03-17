@@ -5069,17 +5069,15 @@ iframe.link-embedder,
 img.embed {
   overflow: hidden;
   display: block;
-  max-width: 98%;
+  max-width: 100%;
   max-height: 20rem;
-  margin: 6px 1%; }
+  margin: 6px 0; }
   @media only screen and (min-width: 601px) {
     .link-embedder,
     .link-embedder.text-html,
     iframe.link-embedder,
     img.embed {
-      max-width: 50em;
-      max-height: none;
-      margin: 6px 8px; } }
+      max-height: none; } }
 
 img.embed {
   max-height: 220px; }
@@ -5142,6 +5140,7 @@ img.embed {
   background: #f8f8f8;
   border: 1px solid #dfdfdf;
   max-height: 80px;
+  max-width: 100%;
   overflow: hidden; }
   .link-embedder.text-paste .paste-meta {
     background-color: #dfdfdf;
@@ -5316,4 +5315,4 @@ header a.notifications {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../41775e6628/main.css.map */
+/*# sourceMappingURL=../f9d00af72a/main.css.map */

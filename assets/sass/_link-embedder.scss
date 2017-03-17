@@ -4,14 +4,12 @@ iframe.link-embedder,
 img.embed {
   overflow: hidden;
   display: block;
-  max-width: 98%;
+  max-width: 100%; // required to contain iframes on iphone
   max-height: 20rem;
-  margin: 6px 1%;
+  margin: 6px 0;
 
   @media #{$medium-and-up} {
-    max-width: $readable-width;
     max-height: none;
-    margin: 6px 8px;
   }
 }
 
@@ -99,6 +97,7 @@ img.embed {
   background: $paste-bg-color;
   border: 1px solid darken($paste-bg-color, 10%);
   max-height: 80px;
+  max-width: 100%;
   overflow: hidden;
 
   .paste-meta {
