@@ -17,3 +17,10 @@
 assets/sass/.sass-cache/
 node_modules/
 .DS_Store
+
+# snapcraft directories
+convos*.snap
+convos*_source.tar.bz2
+/parts/
+/prime/
+/stage/
