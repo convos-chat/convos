@@ -176,6 +176,11 @@ __DATA__
 % use Mojo::JSON 'to_json';
 % layout 'convos';
 % title "$dialog_id - $connection_id";
+<style>
+.convos-message.highlight .message {
+  background-color: transparent;
+}
+</style>
 <script>
 Convos.beforeCreate.push(function(data) {
   data.mixins.push(Convos.mixin.messages);
