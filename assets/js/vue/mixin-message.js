@@ -68,7 +68,9 @@
         $html.find("a").attr("target", "_blank");
         $html.find("pre").each(function() {
           var $container = $(this).closest(".link-embedder.text-paste");
-          $container.find(".paste-meta").click(function() {
+          $container.find("a:first").attr("href", $a.attr("href"));
+          $container.find(".paste-meta").click(function(e) {
+            if (e.target.href) return;
             var $message = $container.closest(".convos-message");
             $container.toggleClass("expanded");
             $message.closest(".scroll-element").get(0).nextTickScrollTop = $message.get(0).offsetTop;
