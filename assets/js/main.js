@@ -26,6 +26,10 @@
     }
   });
 
+  document.body.classList.add(window.isMobile ? "mobile" : "desktop");
+  document.body.classList.add(window.isTouchDevice ? "touch" : "notouch");
+  $('img[src$="svg"]').injectSVG();
+
   var m;
   if (m = location.href.match(/\b_error=([^&]+)\b/)) return Convos.error(m[1]);
   if (m = location.href.match(/\b_vue=false\b/)) return;
@@ -66,6 +70,7 @@
       },
       ready: function() {
         this.user.refresh();
+        $('img[src$="svg"]').injectSVG()
       }
     });
   });

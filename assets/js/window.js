@@ -1,9 +1,6 @@
 (function() {
   window.hasFocus = true;
   window.isMobile = navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i) || location.href.match(/\bisMobile=1\b/)
-  window.isTouchDevice = !!("ontouchstart" in window);
-  window.DEBUG = window.DEBUG || location.href.match(/debug=/);
-
   window.nextTick = function(cb) { setTimeout(cb, 1); };
 
   Date.fromAPI = function(t) {
@@ -37,16 +34,9 @@
     return [this.getHours(), this.getMinutes()].map(function(v) { return v < 10 ? '0' + v : v; }).join(':');
   };
 
-  Element.prototype.$remove = function() {
-    this.parentElement.removeChild(this);
-  };
-
   Element.prototype.focusOnDesktop = function() {
-    var elem = this;
-    if (!isMobile) window.nextTick(function() { elem.focus(); });
+    if (!isMobile) window.nextTick(function() { this.focus(); }.bind(this));
   };
-
-  NodeList.prototype.$forEach = Array.prototype.forEach;
 
   Object.$values = function(obj) {
     return Object.keys(obj).sort().map(function(k) { return obj[k]; });
@@ -61,10 +51,12 @@
     if (DEBUG.debug) console.log("[focusChanged]", e.type, window.hasFocus);
   };
 
-  $('img[src$="svg"]').each(function() {
-    var $img = $(this);
-    $.get($img.attr("src"), function(data) {
-      $img.replaceWith($(data).find("svg").removeAttr('xmlns:a').attr("class", $img.attr("class")));
+  $.fn.injectSVG = function() {
+    return this.each(function() {
+      var $img = $(this);
+      $.get($img.attr("src"), function(data) {
+        $img.replaceWith($(data).find("svg").removeAttr('xmlns:a').attr("class", $img.attr("class")));
+      });
     });
-  });
+  };
 })();
