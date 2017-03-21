@@ -74,7 +74,7 @@ sub _action_messages {
 
   # TODO:
   $query{$_} = $c->param($_) for grep { defined $c->param($_) } qw(after before level limit match);
-  $query{limit} ||= 400;
+  $query{limit} ||= 300;
   $query{limit} = 400 if $query{limit} > 400;
 
   $c->delay(
@@ -208,19 +208,17 @@ Convos.beforeCreate.push(function(data) {
     </a>
   </div>
 </header>
-<main class="under-main-menu max-height">
-  <div class="scroll-element">
-    <div class="container" style="padding-bottom: 40px;">
-      <component
-        :is="'convos-message-' + msg.type"
-        :dialog="dialog"
-        :msg="msg"
-        :user="dialog.user"
-        v-ref:messages
-        v-if="msg.type"
-        v-for="msg in dialog.messages">
-        %= include 'partial/loader'
-      </component>
-    </div>
-  </div>
-</main>
+<div class="under-main-menu max-height container">
+  <main class="scroll-element">
+    <component
+      :is="'convos-message-' + msg.type"
+      :dialog="dialog"
+      :msg="msg"
+      :user="dialog.user"
+      v-ref:messages
+      v-if="msg.type"
+      v-for="msg in dialog.messages">
+      %= include 'partial/loader'
+    </component>
+  </main>
+</div>

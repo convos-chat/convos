@@ -32,12 +32,15 @@ $convos-input-height: 46px;
     width: 100%;
     padding: $gutter-width $gutter-width / 2;
     z-index: 10;
-    @include overflow;
 
     @media #{$large-and-up} {
       top: $navbar-height;
     }
   }
+}
+
+.scroll-element {
+  @include overflow;
 }
 
 .convos-dialog-container main { height: auto; bottom: $convos-input-height; }

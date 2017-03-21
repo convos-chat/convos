@@ -4796,13 +4796,15 @@ ul.complete-dropdown {
   top: 56px;
   width: 100%;
   padding: 1.5rem 0.75rem;
-  z-index: 10;
-  -webkit-overflow-scrolling: touch;
-  overflow: auto; }
+  z-index: 10; }
   @media only screen and (min-width: 993px) {
     .convos-dialog-container main,
     .convos-settings main {
       top: 64px; } }
+
+.scroll-element {
+  -webkit-overflow-scrolling: touch;
+  overflow: auto; }
 
 .convos-dialog-container main {
   height: auto;
@@ -5319,4 +5321,4 @@ body.notouch .convos-main-menu .link.dialog:hover .n-unread {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../12311b1833/main.css.map */
+/*# sourceMappingURL=../b4f167b7cc/main.css.map */
