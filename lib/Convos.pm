@@ -9,7 +9,7 @@ use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
-our $VERSION = '0.99_28';
+our $VERSION = '0.99_29';
 
 my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
 
@@ -220,7 +220,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_28
+0.99_29
 
 =head1 DESCRIPTION
 

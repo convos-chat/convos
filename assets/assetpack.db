@@ -359,7 +359,7 @@ checksum=a751a72e20
 format=js
 minified=1
 [js-min:js/core/dialog.js]
-checksum=74caa2734f
+checksum=87c1a84df8
 format=js
 minified=1
 [js-min:js/core/user.js]
@@ -375,7 +375,7 @@ checksum=026e3b420d
 format=js
 minified=1
 [js-min:js/main.js]
-checksum=dc9b0df7db
+checksum=771733f867
 format=js
 minified=1
 [js-min:js/materialbox.js]
@@ -438,7 +438,7 @@ format=js
 minified=1
 mtime=1471637625
 [js-min:js/vue/mixin-message.js]
-checksum=6efec3fcc2
+checksum=860b2c266f
 format=js
 minified=1
 [js-min:js/vue/mixin-messages.js]
@@ -446,7 +446,7 @@ checksum=52c60933e8
 format=js
 minified=1
 [js-min:js/window.js]
-checksum=dd7e5a6e30
+checksum=7bd7fb26ed
 format=js
 minified=1
 [sass:sass/main.scss]
@@ -454,7 +454,7 @@ checksum=8e41f5d814
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=3fa7d27f32
+checksum=8e41f5d814
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
