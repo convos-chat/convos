@@ -4982,8 +4982,6 @@ header {
   header a {
     padding-left: 10px;
     padding-right: 10px; }
-  header a:hover {
-    background: #449248; }
   header a.active {
     background: #346f37; }
   header a.btn-floating {
@@ -4997,7 +4995,7 @@ header {
     height: 100%;
     padding: 0 1.5rem;
     margin: 0;
-    margin-right: 1.5rem;
+    margin-right: 0.75rem;
     width: 240px;
     float: left; }
     @media only screen and (max-width: 992px) {
@@ -5034,8 +5032,8 @@ header {
         height: 64px;
         line-height: 64px; } }
   @media only screen and (max-width: 992px) {
-    header a.visible-on-med-and-up {
-      display: none; } }
+    header a.toggle-main-menu {
+      margin-right: 0.75rem; } }
   header ::-webkit-input-placeholder {
     color: #6ab96d; }
   header :-moz-placeholder {
@@ -5062,6 +5060,9 @@ a.toggle-main-menu {
   .under-main-menu.max-height {
     height: 100vh;
     overflow: hidden; }
+
+body.notouch header a:hover {
+  background: #449248; }
 
 .link-embedder,
 .link-embedder.text-html,
@@ -5202,12 +5203,6 @@ img.embed {
         font-weight: bold; }
     .convos-main-menu .link.frozen a {
       color: #B71C1C; }
-    .convos-main-menu .link.dialog:hover .close {
-      display: block; }
-    .convos-main-menu .link.dialog:hover .close:hover {
-      background-color: #8b1515; }
-    .convos-main-menu .link.dialog:hover .n-unread {
-      display: none; }
     .convos-main-menu .link .material-icons, .convos-main-menu .link .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-main-menu .link .paste-meta::before {
       vertical-align: top; }
     .convos-main-menu .link.simple .material-icons, .convos-main-menu .link.simple .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-main-menu .link.simple .paste-meta::before {
@@ -5312,7 +5307,16 @@ header a.notifications {
     bottom: 5px;
     right: 5px; }
 
+body.notouch .convos-main-menu .link.dialog:hover .close {
+  display: block; }
+
+body.notouch .convos-main-menu .link.dialog:hover .close:hover {
+  background-color: #8b1515; }
+
+body.notouch .convos-main-menu .link.dialog:hover .n-unread {
+  display: none; }
+
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../f9d00af72a/main.css.map */
+/*# sourceMappingURL=../12311b1833/main.css.map */

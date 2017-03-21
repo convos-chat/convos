@@ -1,6 +1,7 @@
 (function() {
   window.hasFocus = true;
   window.isMobile = navigator.userAgent.match(/Android|iPad|iPhone|iPod|webOS|Windows Phone/i) || location.href.match(/\bisMobile=1\b/)
+  window.isTouchDevice = !!("ontouchstart" in window);
   window.nextTick = function(cb) { setTimeout(cb, 1); };
 
   Date.fromAPI = function(t) {

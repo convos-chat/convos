@@ -26,8 +26,8 @@
     }
   });
 
-  document.body.classList.add(window.isMobile ? "mobile" : "desktop");
-  document.body.classList.add(window.isTouchDevice ? "touch" : "notouch");
+  $("body").addClass(window.isMobile ? "mobile" : "desktop");
+  $("body").addClass(window.isTouchDevice ? "touch" : "notouch");
   $('img[src$="svg"]').injectSVG();
 
   var m;

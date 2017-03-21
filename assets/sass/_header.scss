@@ -22,7 +22,6 @@ header {
   }
 
   a { padding-left: 10px; padding-right: 10px; }
-  a:hover { background: lighten($primary-color, 5%); }
   a.active { background: darken($primary-color, 5%); }
   a.btn-floating { vertical-align: text-bottom; }
   a.btn-floating i {
@@ -36,7 +35,7 @@ header {
     height: 100%;
     padding: 0 $gutter-width;
     margin: 0;
-    margin-right: $gutter-width;
+    margin-right: $gutter-width / 2;
     width: $main-menu-width;
     float: left;
 
@@ -81,7 +80,7 @@ header {
   }
 
   @media #{$medium-and-down} {
-    a.visible-on-med-and-up { display: none; }
+    a.toggle-main-menu { margin-right: $gutter-width / 2; }
   }
 
   @include input-placeholder-color(lighten($primary-color, 20%));
@@ -114,4 +113,8 @@ a.toggle-main-menu {
     height: 100vh;
     overflow: hidden;
   }
+}
+
+body.notouch header {
+  a:hover { background: lighten($primary-color, 5%); }
 }

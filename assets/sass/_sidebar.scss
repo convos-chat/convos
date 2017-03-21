@@ -50,12 +50,6 @@
       color: $error-text-color;
     }
 
-    &.dialog:hover {
-      .close { display: block; }
-      .close:hover { background-color: darken($error-text-color, 10%); }
-      .n-unread { display: none; }
-    }
-
     .material-icons { vertical-align: top; }
     &.simple .material-icons { vertical-align: bottom; }
   }
@@ -167,5 +161,13 @@ header a.notifications {
     position: absolute;
     bottom: 5px;
     right: 5px;
+  }
+}
+
+body.notouch .convos-main-menu {
+  .link.dialog:hover {
+    .close { display: block; }
+    .close:hover { background-color: darken($error-text-color, 10%); }
+    .n-unread { display: none; }
   }
 }

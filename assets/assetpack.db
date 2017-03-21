@@ -450,7 +450,7 @@ checksum=dd7e5a6e30
 format=js
 minified=1
 [sass:sass/main.scss]
-checksum=cfafbff750
+checksum=ce9e9872b7
 format=css
 minified=0
 [sass-min:sass/main.scss]
