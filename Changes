@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix ShareDialog plugin
  - Fix custom assets with Mojolicious::Plugin::AssetPack 1.41
  - Add production 404 and 500 pages
+ - Add logging about CONVOS_HOME on startup
  - Remove "beforeConvosStart" JavaScript event
  - Bump Mojolicious version to 7.29
 

@@ -19,7 +19,8 @@ sub register {
 sub _generate_invite_code {
   my ($self, $app) = @_;
   my $code = Mojo::Util::md5_sum(join ':', $<, $(, $^X, $0);
-  $app->log->info(qq(Generated CONVOS_INVITE_CODE="$code"));
+  $app->log->info(
+    qq(CONVOS_INVITE_CODE="$code" # https://convos.by/doc/config.html#convos_invite_code));
   $app->config(invite_code => $code);
   return $code;
 }
