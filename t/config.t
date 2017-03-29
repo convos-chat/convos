@@ -5,7 +5,8 @@ delete $ENV{CONVOS_SECRETS};
 
 my $i      = 0;
 my $convos = Convos->new;
-is $convos->config->{backend}, 'Convos::Core::Backend::File', 'default backend';
+is $convos->config->{backend},        'Convos::Core::Backend::File', 'default backend';
+is $convos->config->{default_server}, 'chat.freenode.net:6697',      'default default_server';
 is $convos->config->{home}, $ENV{CONVOS_HOME}, 'home from ENV';
 is $convos->config->{organization_name}, 'Convos',           'default organization_name';
 is $convos->config->{organization_url},  'http://convos.by', 'default organization_url';
@@ -25,6 +26,7 @@ Mojo::Util::monkey_patch(
 
 $ENV{CONVOS_PLUGINS}           = 'PluginX';
 $ENV{CONVOS_BACKEND}           = 'Convos::Core::Backend';
+$ENV{CONVOS_DEFAULT_SERVER}    = 'irc.example.com';
 $ENV{CONVOS_FRONTEND_PID_FILE} = 'pidfile.pid';
 $ENV{CONVOS_ORGANIZATION_NAME} = 'cool.org';
 $ENV{CONVOS_ORGANIZATION_URL}  = 'http://thorsen.pm';
@@ -33,10 +35,12 @@ $ENV{CONVOS_SECURE_COOKIES}    = 1;
 delete $ENV{CONVOS_HOME};
 $i++;
 $convos = Convos->new;
-is $convos->config->{backend},           'Convos::Core::Backend',          'env backend';
-like $convos->config->{home},            qr{\W+\.local\W+share\W+convos$}, 'default home';
-is $convos->config->{organization_name}, 'cool.org',                       'env organization_name';
-is $convos->config->{organization_url},  'http://thorsen.pm',              'env organization_url';
+is $convos->config->{backend},        'Convos::Core::Backend',          'env backend';
+like $convos->config->{home},         qr{\W+\.local\W+share\W+convos$}, 'default home';
+is $convos->config->{default_server}, 'irc.example.com',                'env default_server';
+is $convos->config->{forced_irc_server}, '',                  'default forced_irc_server';
+is $convos->config->{organization_name}, 'cool.org',          'env organization_name';
+is $convos->config->{organization_url},  'http://thorsen.pm', 'env organization_url';
 ok $convos->sessions->secure, 'secure sessions';
 is_deeply($convos->secrets, [qw(super duper secret)], 'env secrets');
 is $plugins[1], 'PluginX', 'PluginX';
@@ -77,5 +81,12 @@ cmp_deeply(
   ),
   'plugins'
 ) or diag Data::Dumper::Dumper(\@plugins);
+
+delete $ENV{MOJO_CONFIG};
+$ENV{CONVOS_FORCED_IRC_SERVER} = 'localhost';
+$convos = Convos->new;
+is $convos->config->{default_server},    'localhost', 'forced default_server';
+is $convos->config->{forced_irc_server}, 'localhost', 'env forced_irc_server';
+is $convos->config->{settings}{forced_irc_server}, true, 'settings forced_irc_server';
 
 done_testing;

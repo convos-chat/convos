@@ -15,14 +15,15 @@
         </p>
         <p>
           Before you can start chatting, you need to create a connection.
-          You can add more connections later on if you need.
-        </p>
-        <p v-if="settings.default_server">
-          If you don't have any special preferences, you can just hit "Create" to get started.
-        </p>
-        <p v-if="!settings.default_server">
-          Just fill in a <a href="#fillin" @click.prevent="fillIn">server name</a>
-          and hit "Create" to get started.
+          <template v-if="settings.forced_irc_server">
+          This installation of Convos is locked to a specific "Server",
+          so just hit "Create" to start chatting.
+          </template>
+          <template v-else>
+          "Server" below has a default value, but you can change it to
+          <a href="http://www.irchelp.org/networks/" target="_blank">any server</a>
+          you want. Once a server is entered, you can hit "Create" to start chatting.
+          </template>
         </p>
       </div>
     </div>

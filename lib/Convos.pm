@@ -137,11 +137,12 @@ sub _config {
     $config = $path =~ /\.json$/ ? $self->plugin('JSONConfig') : $self->plugin('Config');
   }
 
-  $config->{backend}           ||= $ENV{CONVOS_BACKEND}           || 'Convos::Core::Backend::File';
-  $config->{contact}           ||= $ENV{CONVOS_CONTACT}           || 'mailto:root@localhost';
-  $config->{default_server}    ||= $config->{forced_irc_server}   || $ENV{CONVOS_DEFAULT_SERVER};
+  $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
+  $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
+  $config->{default_server}
+    ||= $ENV{CONVOS_FORCED_IRC_SERVER} || $ENV{CONVOS_DEFAULT_SERVER} || 'chat.freenode.net:6697';
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
-  $config->{home}              ||= $ENV{CONVOS_HOME}
+  $config->{home} ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
   $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';

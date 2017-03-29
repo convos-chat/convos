@@ -22,5 +22,6 @@ $sidebar-width: 320px !default;
 $z-index-header: 900 !default;
 
 $input-height: 2.8rem;
+$input-disabled-color: rgba(0, 0, 0, .50);
 $button-floating-background: lighten($primary-color, 5%) !default;
 $button-floating-background-hover: $primary-color !default;
