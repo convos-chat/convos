@@ -61,21 +61,20 @@ $connection->_irc->emit(
   message => {
     event  => 'ctcp_action',
     prefix => 'jhthorsen!jhthorsen@i.love.debian.org',
-    params => ['#convos', "will be back"]
+    params => ['#convos', "convos rocks"]
   }
 );
-like slurp_log("#convos"), qr{\Q* jhthorsen will be back\E}m, 'ctcp_action';
+like slurp_log("#convos"), qr{\Q* jhthorsen convos rocks\E}m, 'ctcp_action';
 
 # test stripping away invalid characters in a message
-$connection->send(
-  "#convos" => "\n/me will be\a back again\n",
-  sub { $err = $_[1]; Mojo::IOLoop->stop }
-);
+$connection->send("#convos" => "\n/me will be\a back\n", sub { $err = $_[1] });
+$connection->once(message => sub { Mojo::IOLoop->next_tick(\&Mojo::IOLoop::stop) });
 Mojo::IOLoop->start;
 is $err, '', 'invalid characters was filtered';
-like slurp_log("#convos"), qr{\Q* superman will be back again\E}m, 'loopback ctcp_action';
+like slurp_log("#convos"), qr{\Q* superman will be back\E}m, 'loopback ctcp_action';
 
-$connection->send("#convos" => "some regular message", sub { Mojo::IOLoop->stop });
+$connection->send("#convos" => "some regular message", sub { });
+$connection->once(message => sub { Mojo::IOLoop->next_tick(\&Mojo::IOLoop::stop) });
 Mojo::IOLoop->start;
 like slurp_log("#convos"), qr{\Q<superman> some regular message\E}m, 'loopback private';
 

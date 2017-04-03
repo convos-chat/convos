@@ -8,9 +8,10 @@ use Mojo::JSON;
 use Parse::IRC ();
 use Time::HiRes 'time';
 
-use constant ROOMS_CACHE_TIMER   => $ENV{CONVOS_ROOMS_CACHE_TIMER}   || 60 * 30;
-use constant ROOMS_REPLY_DELAY   => $ENV{CONVOS_ROOMS_REPLY_DELAY}   || 1;
-use constant STEAL_NICK_INTERVAL => $ENV{CONVOS_STEAL_NICK_INTERVAL} || 60;
+use constant MAX_BULK_MESSAGE_SIZE => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3;
+use constant ROOMS_CACHE_TIMER     => $ENV{CONVOS_ROOMS_CACHE_TIMER}     || 60 * 30;
+use constant ROOMS_REPLY_DELAY     => $ENV{CONVOS_ROOMS_REPLY_DELAY}     || 1;
+use constant STEAL_NICK_INTERVAL   => $ENV{CONVOS_STEAL_NICK_INTERVAL}   || 60;
 
 require Convos;
 
@@ -177,7 +178,7 @@ sub send {
 
   $target  //= '';
   $message //= '';
-  $message =~ s![\x00-\x1f]!!g;    # remove invalid characters
+  $message =~ s![\x00-\x09\x0b-\x1f]!!g;    # remove invalid characters
   $message = Mojo::Util::trim($message);    # required for kick, mode, ...
 
   $message =~ s!^/([A-Za-z]+)\s*!! or return $self->_send($target, $message, $cb);
@@ -364,13 +365,20 @@ sub _send {
   elsif ($target =~ /\s/) {
     return next_tick $self, $cb => 'Cannot send message to target with spaces.';
   }
-  elsif (length $message) {
-    $msg = $self->_irc->parser->parse(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target,
-      $message);
-    return next_tick $self, $cb => 'Unable to construct PRIVMSG.' unless ref $msg;
+
+  my @messages = split /\r?\n/, ($message // '');
+  return next_tick $self, $cb => 'Cannot send empty message.' unless @messages;
+
+  for (@messages) {
+    $_ = $self->_irc->parser->parse(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $_);
+    return next_tick $self, $cb => 'Unable to construct PRIVMSG.' unless ref $_;
   }
-  else {
-    return next_tick $self, $cb => 'Cannot send empty message.';
+
+  # TODO: Create paste
+  if (MAX_BULK_MESSAGE_SIZE < @messages) {
+    return next_tick $self,
+      $cb => sprintf "Too many newlines in message. (%s>%s)",
+      int(@messages), MAX_BULK_MESSAGE_SIZE;
   }
 
   # Seems like there is no way to know if a message is delivered
@@ -378,18 +386,22 @@ sub _send {
   # err_cannotsendtochan, err_nosuchnick, err_notoplevel, err_toomanytargets,
   # err_wildtoplevel, irc_rpl_away
 
-  Scalar::Util::weaken($self);
-  return $self->_proxy(
-    write => $msg->{raw_line},
-    sub {
-      my ($irc, $err) = @_;
-      return $self->$cb($err) if $err;
-      $msg->{prefix} = sprintf '%s!%s@%s', $irc->nick, $irc->user, $irc->server;
-      $msg->{event} = lc $msg->{command};
-      $self->_event_privmsg($msg);
-      $self->$cb('');
-    }
-  );
+  my $cb_called = 0;
+  for my $msg (@messages) {
+    $self->_proxy(
+      write => $msg->{raw_line},
+      sub {
+        my ($irc, $err) = @_;
+        return $self->$cb($err) if $err and !$cb_called++;
+        $msg->{prefix} = sprintf '%s!%s@%s', $irc->nick, $irc->user, $irc->server;
+        $msg->{event} = lc $msg->{command};
+        next_tick $self, _event_privmsg => $msg;
+        $self->$cb('') unless $cb_called++;
+      }
+    );
+  }
+
+  return $self;
 }
 
 sub _setup_irc {

@@ -53,16 +53,6 @@ $irc->run(
   }
 );
 
-note 'msg';
-$ws->send_ok(
-  {json => {method => 'send', message => '/msg supergirl too cool', connection_id => $c->id}});
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
-  ->json_message_is('/dialog_id', 'supergirl')->json_message_is('/event', 'message')
-  ->json_message_is('/from',    'superman')->json_message_is('/highlight', false)
-  ->json_message_is('/message', 'too cool')->json_message_is('/name',      'supergirl')
-  ->json_message_is('/type',    'private')->json_message_has('/ts');
-$ws->message_ok->json_message_is('/event', 'sent');
-
 note 'nick';
 $irc->run(
   [qr{NICK}, ['nick.irc']],
@@ -152,9 +142,7 @@ $ws->send_ok({json => {method => 'send', message => '/disconnect', connection_id
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/state', 'disconnected')->json_message_is('/type', 'connection')
   ->json_message_like('/message', qr{have quit});
-$ws->message_ok->json_message_like('/dialog_id', qr{super})
-  ->json_message_is('/frozen', 'Not connected.');
-$ws->message_ok->json_message_like('/dialog_id', qr{super})
+$ws->message_ok->json_message_is('/dialog_id', 'superduper')
   ->json_message_is('/frozen', 'Not connected.');
 $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/message', '/disconnect');
