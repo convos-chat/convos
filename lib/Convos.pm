@@ -86,8 +86,15 @@ sub startup {
   $self->hook(
     before_dispatch => sub {
       my $c = shift;
-      my $base = $c->req->headers->header('X-Request-Base') or return;
-      $c->req->url->base(Mojo::URL->new($base));
+
+      if (my $base = $c->req->headers->header('X-Request-Base')) {
+        $base = Mojo::URL->new($base);
+        $c->req->url->base($base);
+        $c->app->core->base_url($base);
+      }
+      else {
+        $c->app->core->base_url($c->req->url->to_abs->query(Mojo::Parameters->new)->path('/'));
+      }
     }
   );
 
