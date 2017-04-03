@@ -106,6 +106,8 @@ sub state {
   return $self;
 }
 
+sub uri { Mojo::Path->new(sprintf '%s/%s/connection.json', $_[0]->user->email, $_[0]->id) }
+
 sub _debug {
   my ($self, $msg, @args) = @_;
   warn sprintf "[%s/%s] $msg\n", $self->user->email, $self->id, @args;
@@ -360,6 +362,13 @@ Meant to be overloaded in a subclass.
 Holds the state of this object. C<$state> can be "disconnected", "connected"
 or "queued" (default). "queued" means that the object is in the
 process of connecting or that it want to connect.
+
+=head2 uri
+
+  $path = $self->uri;
+
+Holds a L<Mojo::Path> object, with the URI to where this object should be
+stored.
 
 =head1 AUTHOR
 

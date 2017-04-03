@@ -4,12 +4,12 @@ use Mojo::Base -base;
 use Convos::Core::Backend;
 use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
-use Mojo::Home;
+use Mojo::File;
 use Mojo::Util 'trim';
 use Mojolicious::Plugins;
 
 has backend => sub { Convos::Core::Backend->new };
-has home    => sub { Mojo::Home->new($ENV{CONVOS_HOME}); };
+has home => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
 
 sub connect {
   my ($self, $connection, $cb) = @_;
@@ -175,9 +175,9 @@ Holds a L<Convos::Core::Backend> object.
 =head2 home
 
   $obj = $self->home;
-  $self = $self->home(Mojo::Home->new($ENV{CONVOS_HOME});
+  $self = $self->home(Mojo::File->new($ENV{CONVOS_HOME});
 
-Holds a L<Mojo::Home> object pointing to where Convos store data.
+Holds a L<Mojo::File> object pointing to where Convos store data.
 
 =head1 METHODS
 

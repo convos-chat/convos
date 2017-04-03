@@ -121,6 +121,8 @@ sub set_password {
   $_[0];
 }
 
+sub uri { Mojo::Path->new(sprintf '%s/user.json', $_[0]->email) }
+
 sub validate_password {
   my ($self, $plain) = @_;
 
@@ -192,6 +194,13 @@ L</validate_password> for password authentication.
   $self = $self->unread(4);
 
 Number of unread notifications for user.
+
+=head2 uri
+
+  $path = $self->uri;
+
+Holds a L<Mojo::Path> object, with the URI to where this object should be
+stored.
 
 =head1 METHODS
 

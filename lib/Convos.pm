@@ -17,7 +17,7 @@ has core => sub {
   my $self = shift;
   my $home = Cwd::abs_path($self->config('home')) || $self->config('home');
 
-  return Convos::Core->new(backend => $self->config('backend'), home => Mojo::Home->new($home));
+  return Convos::Core->new(backend => $self->config('backend'), home => path(split '/', $home));
 };
 
 has _api_spec => sub {
@@ -25,7 +25,7 @@ has _api_spec => sub {
   my $file = $self->static->file('convos-api.json');
   die "Could not find convos-api.json in static=@{$self->static->paths}, home=@{[$self->home]})"
     unless $file;
-  return Mojo::JSON::decode_json(path($file->path)->slurp);
+  return Mojo::JSON::decode_json($file->slurp);
 };
 
 has _custom_assets => sub { Mojolicious::Static->new };
@@ -109,7 +109,7 @@ sub _action_custom_asset {
 
 sub _assets {
   my $self          = shift;
-  my $custom_assets = $self->core->home->rel_file('assets');
+  my $custom_assets = $self->core->home->child('assets');
 
   $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine Reloader)]});
 

@@ -3,7 +3,7 @@ use t::Helper;
 use Convos::Core::Backend::File;
 use Convos::Core::User;
 
-my $backend = Convos::Core::Backend::File->new(home => Mojo::Home->new($ENV{CONVOS_HOME}));
+my $backend = Convos::Core::Backend::File->new(home => Mojo::File->new($ENV{CONVOS_HOME}));
 my $user = Convos::Core::User->new(email => 'jhthorsen@cpan.org');
 my ($connections, $err, $users);
 

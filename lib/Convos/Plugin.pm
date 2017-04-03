@@ -2,14 +2,19 @@ package Convos::Plugin;
 use Mojo::Base 'Mojolicious::Plugin';
 
 use Convos::Util 'DEBUG';
-use Mojo::Util 'decamelize';
+use Mojo::Util;
 
-has id => sub { ref($_[0]) =~ /(\w+)$/ ? $1 : 'convos_plugin' };
+has uri => sub {
+  my $self = shift;
+  die "Cannot construct uri() from $self" unless ref($self) =~ /(\w+)$/;
+  return Mojo::Path->new(sprintf '%s.json', Mojo::Util::decamelize($1));
+};
 
 sub add_backend_helpers {
   my ($self, $app) = @_;
-  my $prefix = decamelize $self->id;
+  my $prefix = $self->uri->[0];
 
+  $prefix =~ s!\.json$!!;
   $app->log->debug("Adding backend helpers \$c->$prefix->load() and \$c->$prefix->save()") if DEBUG;
 
   $app->helper(
@@ -54,13 +59,12 @@ to inherit from.
 
 =head1 ATTRIBUTES
 
-=head2 id
+=head2 uri
 
-  $self = $self->id("MyPlugin");
-  $str = $self->id;
+  $path = $self->uri;
 
-An identifier for this plugin. Used as prefix for helpers and for debug
-purposes.
+Holds a L<Mojo::Path> object, with the URI to where this object should be
+stored.
 
 =head1 METHODS
 

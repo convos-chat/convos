@@ -3,9 +3,8 @@ use Mojo::Base 'Convos::Core::Backend';
 
 use Convos::Util qw(next_tick spurt DEBUG);
 use Fcntl ':flock';
-use File::Path ();
 use File::ReadBackwards;
-use Mojo::File 'path';
+use Mojo::File;
 use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
 use Mojo::Util;
@@ -39,7 +38,7 @@ has _fc => sub {
 
 sub connections {
   my ($self, $user, $cb) = @_;
-  my $user_dir = $self->home->rel_file($user->email);
+  my $user_dir = $self->home->child(@{$user->uri})->dirname;
   my ($CONNECTIONS, @connections);
 
   unless (opendir $CONNECTIONS, $user_dir) {
@@ -49,9 +48,9 @@ sub connections {
 
   while (my $id = readdir $CONNECTIONS) {
     next unless $id =~ /^\w+/;
-    my $settings = path($user_dir, $id, 'connection.json');
+    my $settings = $user_dir->child($id, 'connection.json');
     next unless -e $settings;
-    push @connections, Mojo::JSON::decode_json(path($settings)->slurp);
+    push @connections, Mojo::JSON::decode_json($settings->slurp);
   }
 
   return next_tick $self, $cb, '', \@connections if $cb;
@@ -60,11 +59,27 @@ sub connections {
 
 sub delete_object {
   my ($self, $obj, $cb) = @_;
-  my $method = $obj->isa('Convos::Core::User') ? '_delete_user' : '_delete_connection';
+
+  if ($obj->isa('Convos::Core::Connection')) {
+    $obj->unsubscribe($_) for qw(dialog message state);
+  }
 
   Mojo::IOLoop->delay(
     sub {
-      $self->_fc->run(sub { $self->$method($obj) }, shift->begin);
+      $self->_fc->run(
+        sub {
+          my $path = $self->home->child(@{$obj->uri});
+          $path = $path->dirname
+            if grep { $obj->isa($_) } qw(Convos::Core::Connection Convos::Core::User);
+          if (-d $path) {
+            $path->remove_tree({verbose => DEBUG});
+          }
+          else {
+            unlink $path or die "unlink $path: $!";
+          }
+        },
+        shift->begin,
+      );
     },
     sub {
       my ($delay, $err) = @_;
@@ -78,13 +93,14 @@ sub delete_object {
 
 sub load_object {
   my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->_settings_file($obj);
+  my $storage_file = $self->home->child(@{$obj->uri});
   my $data         = {};
+  my $err          = '';
 
-  my $err
-    = -e $storage_file && eval { $data = Mojo::JSON::decode_json(path($storage_file)->slurp); }
-    ? ''
-    : $@;
+  if (-e $storage_file) {
+    eval { $data = Mojo::JSON::decode_json($storage_file->slurp); };
+    $err = $@ || 'Unknown error' unless $data;
+  }
 
   return next_tick $self, $cb, $err, $data if $cb;
   return $data unless $err;
@@ -182,13 +198,13 @@ sub notifications {
 
 sub save_object {
   my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->_settings_file($obj);
+  my $storage_file = $self->home->child(@{$obj->uri});
   my $err          = '';
 
   eval {
-    my $dir = File::Basename::dirname($storage_file);
-    File::Path::make_path($dir) unless -d $dir;
-    spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')), $storage_file);
+    my $dir = $storage_file->dirname;
+    $dir->make_path($dir) unless -d $dir;
+    $storage_file->spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')));
     warn "[@{[$obj->id]}] Save success. ($storage_file)\n" if DEBUG;
     1;
   } or do {
@@ -208,27 +224,14 @@ sub users {
 
   if (opendir(my $USERS, $home)) {
     while (my $email = readdir $USERS) {
-      my $settings = $home->rel_file("$email/user.json");
+      my $settings = $home->child($email, 'user.json');
       next unless $email =~ /.\@./ and -e $settings;    # poor mans regex
-      push @users, Mojo::JSON::decode_json(path($settings)->slurp);
+      push @users, Mojo::JSON::decode_json($settings->slurp);
     }
   }
 
   return next_tick $self, $cb, '', \@users if $cb;
   return \@users;
-}
-
-sub _delete_connection {
-  my ($self, $connection) = @_;
-  my $path = $self->home->rel_file(join('/', $connection->user->email, $connection->id));
-  $connection->unsubscribe($_) for qw(dialog message state);
-  File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
-}
-
-sub _delete_user {
-  my ($self, $user) = @_;
-  my $path = $self->home->rel_file($user->email);
-  File::Path::remove_tree($path, {verbose => DEBUG}) if -d $path;
 }
 
 sub _format {
@@ -244,11 +247,11 @@ sub _log {
   my $t    = gmtime $ts;
   my $ym   = sprintf '%s/%02s', $t->year, $t->mon;
   my $file = $self->_log_file($obj, $ym);
-  my $dir  = File::Basename::dirname($file);
+  my $dir  = $file->dirname;
 
   $message = Mojo::Util::encode('UTF-8', $message) if utf8::is_utf8($message);
 
-  File::Path::make_path($dir) unless -d $dir;
+  $dir->make_path unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
   warn "[@{[$obj->id]}:@{[$t->datetime]}] $file <<< ($message)\n" if DEBUG == 2;
   flock $FH, LOCK_EX;
@@ -263,7 +266,8 @@ sub _log_file {
   push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
   push @path, $obj->id if $obj->id;
 
-  return $self->home->rel_file(join('/', @path) . '.log');
+  my $leaf = pop @path;
+  return $self->home->child(@path, "$leaf.log");
 }
 
 sub _message_type_from {
@@ -310,7 +314,7 @@ sub _messages {
 }
 
 sub _notifications_file {
-  $_[0]->home->rel_file(join '/', $_[1]->id, 'notifications.log');
+  $_[0]->home->child($_[1]->id, 'notifications.log');
 }
 
 sub _save_notification {
@@ -323,22 +327,6 @@ sub _save_notification {
   flock $FH, LOCK_EX;
   printf $FH "%s %s %s %s\n", $t->datetime, $obj->connection->id, $obj->id, $message;
   flock $FH, LOCK_UN;
-}
-
-sub _settings_file {
-  my ($self, $obj) = @_;
-
-  if ($obj->isa('Convos::Core::Connection')) {
-    return $self->home->rel_file(sprintf '%s/%s/connection.json', $obj->user->email, $obj->id);
-  }
-  elsif ($obj->isa('Convos::Core::User')) {
-    return $self->home->rel_file(sprintf '%s/user.json', $obj->email);
-  }
-  elsif (ref($obj) =~ /::(\w+)$/) {
-    return $self->home->rel_file('%s.json', lc $1);
-  }
-
-  die "Cannot figure out path to settings file for $obj";
 }
 
 sub _setup {
