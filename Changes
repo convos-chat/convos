@@ -1,6 +1,9 @@
 Revision history for perl distribution Convos
 
-0.99_29 Not Released
+0.99_30 Not Released
+ - Using LinkEmbedder instead of Mojolicious::Plugin::LinkEmbedder
+
+0.99_29 2017-03-21T23:35:17+0100
  - Fix ShareDialog plugin
  - Fix custom assets with Mojolicious::Plugin::AssetPack 1.41
  - Add production 404 and 500 pages

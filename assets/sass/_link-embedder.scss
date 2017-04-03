@@ -1,7 +1,5 @@
-.link-embedder,
-.link-embedder.text-html,
-iframe.link-embedder,
-img.embed {
+.le-rich,
+.le-photo {
   overflow: hidden;
   display: block;
   max-width: 100%; // required to contain iframes on iphone
@@ -13,7 +11,59 @@ img.embed {
   }
 }
 
-img.embed {
+blockquote.le-card,
+div.le-card {
+  background: lighten($sidebar-bg, 2%);
+  border: 1px solid darken($sidebar-bg, 5%);
+  padding: 0.5rem;
+  margin: 0.3rem 0;
+}
+
+.le-card,
+.le-rich {
+  .le-thumbnail-placeholder {
+    display: none;
+  }
+  .le-thumbnail, {
+    float: left;
+    img {
+      max-height: 50px;
+      margin-right: 8px;
+      border: 0;
+      box-shadow: none;
+      vertical-align: bottom;
+    }
+  }
+
+  h3 {
+    font-size: 1em;
+    line-height: 1em;
+    display: block;
+    margin: 0;
+  }
+
+  p {
+    font-size: 0.9em;
+    line-height: 1.2em;
+    margin: 4px 0;
+    display: table-cell;
+  }
+}
+
+.le-provider-link ~ .le-goto-link:before,
+.le-author-link ~ .le-goto-link:before {
+  content: "\2013\00a0";
+}
+
+.le-paste .le-provider-link:before {
+  content: "Hosted by ";
+}
+
+.le-image-card .le-goto-link {
+  display: none;
+}
+
+.le-photo img {
   max-height: 220px;
 }
 
@@ -21,7 +71,7 @@ img.embed {
   cursor: zoom-in;
   border-radius: 2px;
   transition: box-shadow .3s;
-  box-shadow: 0;
+  box-shadow: none;
 
   &:hover {
     box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.2);
@@ -55,35 +105,6 @@ img.embed {
   }
 }
 
-.link-embedder.text-html {
-  .link-embedder-media {
-    float: left;
-    img {
-      max-height: 50px;
-      margin-right: 8px;
-      border: 0;
-    }
-  }
-
-  h3 {
-    font-size: 1em;
-    line-height: 1em;
-    display: block;
-    margin: 8px 0 0 0;
-  }
-
-  p {
-    font-size: 0.9em;
-    line-height: 1.2em;
-    margin: 4px 0;
-    display: table-cell;
-  }
-
-  .link-embedder-link {
-    display: none;
-  }
-}
-
 .hljs {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 0.9rem;
@@ -91,7 +112,7 @@ img.embed {
   white-space: pre;
 }
 
-.link-embedder.text-paste {
+.le-paste {
   $paste-bg-color: #f8f8f8;
 
   background: $paste-bg-color;
@@ -100,7 +121,7 @@ img.embed {
   max-width: 100%;
   overflow: hidden;
 
-  .paste-meta {
+  .le-meta {
     background-color: darken($paste-bg-color, 10%);
     color: $text-color;
     padding: 0.2em 0.5rem;
@@ -123,7 +144,7 @@ img.embed {
     max-height: none;
     overflow-x: auto;
 
-    .paste-meta {
+    .le-meta {
       cursor: zoom-out;
       &::before {
         content: '\e316';

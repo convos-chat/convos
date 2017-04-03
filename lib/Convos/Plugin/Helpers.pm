@@ -2,12 +2,14 @@ package Convos::Plugin::Helpers;
 use Mojo::Base 'Convos::Plugin';
 
 use Convos::Util 'E';
+use LinkEmbedder;
 
 sub register {
   my ($self, $app, $config) = @_;
 
   $app->helper('backend.dialog' => \&_backend_dialog);
   $app->helper('backend.user'   => \&_backend_user);
+  $app->helper('linkembedder'   => sub { state $l = LinkEmbedder->new });
   $app->helper('unauthorized'   => \&_unauthorized);
 }
 

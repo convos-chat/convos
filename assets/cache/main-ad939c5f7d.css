@@ -2187,8 +2187,8 @@ video.responsive-video {
   .breadcrumb i,
   .breadcrumb [class^="mdi-"], .breadcrumb [class*="mdi-"],
   .breadcrumb i.material-icons,
-  .breadcrumb .link-embedder.text-paste i.paste-meta::before, .link-embedder.text-paste
-  .breadcrumb i.paste-meta::before {
+  .breadcrumb .le-paste i.le-meta::before, .le-paste
+  .breadcrumb i.le-meta::before {
     display: inline-block;
     float: left;
     font-size: 24px; }
@@ -2610,7 +2610,7 @@ input[type=range] + .thumb {
   /* For IE6-8 */
   src: local("Material Icons"), local("MaterialIcons-Regular"), url(../../font/material-design-icons/MaterialIcons-Regular.woff2) format("woff2"), url(../../font/material-design-icons/MaterialIcons-Regular.woff) format("woff"), url(../../font/material-design-icons/MaterialIcons-Regular.ttf) format("truetype"); }
 
-.material-icons, .link-embedder.text-paste .paste-meta::before {
+.material-icons, .le-paste .le-meta::before {
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
@@ -3901,15 +3901,15 @@ textarea.materialize-textarea {
     .input-field input[type=search]:focus + label i,
     .input-field input[type=search]:focus ~ .mdi-navigation-close,
     .input-field input[type=search]:focus ~ .material-icons,
-    .input-field .link-embedder.text-paste input[type=search]:focus ~ .paste-meta::before, .link-embedder.text-paste
-    .input-field input[type=search]:focus ~ .paste-meta::before {
+    .input-field .le-paste input[type=search]:focus ~ .le-meta::before, .le-paste
+    .input-field input[type=search]:focus ~ .le-meta::before {
       color: #444; }
   .input-field input[type=search] + label {
     left: 1rem; }
   .input-field input[type=search] ~ .mdi-navigation-close,
   .input-field input[type=search] ~ .material-icons,
-  .input-field .link-embedder.text-paste input[type=search] ~ .paste-meta::before, .link-embedder.text-paste
-  .input-field input[type=search] ~ .paste-meta::before {
+  .input-field .le-paste input[type=search] ~ .le-meta::before, .le-paste
+  .input-field input[type=search] ~ .le-meta::before {
     position: absolute;
     top: 0;
     right: 1rem;
@@ -4753,7 +4753,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
   font-size: 0.9rem;
   margin-top: 0.3rem; }
 
-.convos-create-dialog .autocomplete .badge .material-icons, .convos-create-dialog .autocomplete .badge .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-create-dialog .autocomplete .badge .paste-meta::before {
+.convos-create-dialog .autocomplete .badge .material-icons, .convos-create-dialog .autocomplete .badge .le-paste .le-meta::before, .le-paste .convos-create-dialog .autocomplete .badge .le-meta::before {
   font-size: 1.1em;
   vertical-align: middle; }
 
@@ -4931,7 +4931,7 @@ ul.complete-dropdown {
     text-decoration: underline; }
   .convos-message .message a:hover {
     text-decoration: none; }
-  .convos-message .message .material-icons, .convos-message .message .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-message .message .paste-meta::before {
+  .convos-message .message .material-icons, .convos-message .message .le-paste .le-meta::before, .le-paste .convos-message .message .le-meta::before {
     vertical-align: text-top;
     font-size: 18px;
     margin-left: 4px; }
@@ -4973,13 +4973,13 @@ header {
   header h2 {
     float: left;
     margin: 0; }
-  header h2, header a, header .material-icons, header .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste header .paste-meta::before {
+  header h2, header a, header .material-icons, header .le-paste .le-meta::before, .le-paste header .le-meta::before {
     color: #fff;
     display: inline-block;
     font-size: 2rem;
     height: 56px;
     line-height: 56px; }
-  header a, header svg, header .material-icons, header .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste header .paste-meta::before {
+  header a, header svg, header .material-icons, header .le-paste .le-meta::before, .le-paste header .le-meta::before {
     vertical-align: middle; }
   header a {
     padding-left: 10px;
@@ -5030,7 +5030,7 @@ header {
   @media only screen and (min-width: 993px) {
     header {
       height: 64px; }
-      header h2, header a, header .material-icons, header .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste header .paste-meta::before {
+      header h2, header a, header .material-icons, header .le-paste .le-meta::before, .le-paste header .le-meta::before {
         height: 64px;
         line-height: 64px; } }
   @media only screen and (max-width: 992px) {
@@ -5066,30 +5066,72 @@ a.toggle-main-menu {
 body.notouch header a:hover {
   background: #449248; }
 
-.link-embedder,
-.link-embedder.text-html,
-iframe.link-embedder,
-img.embed {
+.le-rich,
+.le-photo {
   overflow: hidden;
   display: block;
   max-width: 100%;
   max-height: 20rem;
   margin: 6px 0; }
   @media only screen and (min-width: 601px) {
-    .link-embedder,
-    .link-embedder.text-html,
-    iframe.link-embedder,
-    img.embed {
+    .le-rich,
+    .le-photo {
       max-height: none; } }
 
-img.embed {
+blockquote.le-card,
+div.le-card {
+  background: #fcfcfc;
+  border: 1px solid #ebebeb;
+  padding: 0.5rem;
+  margin: 0.3rem 0; }
+
+.le-card .le-thumbnail-placeholder,
+.le-rich .le-thumbnail-placeholder {
+  display: none; }
+
+.le-card .le-thumbnail,
+.le-rich .le-thumbnail {
+  float: left; }
+  .le-card .le-thumbnail img,
+  .le-rich .le-thumbnail img {
+    max-height: 50px;
+    margin-right: 8px;
+    border: 0;
+    box-shadow: none;
+    vertical-align: bottom; }
+
+.le-card h3,
+.le-rich h3 {
+  font-size: 1em;
+  line-height: 1em;
+  display: block;
+  margin: 0; }
+
+.le-card p,
+.le-rich p {
+  font-size: 0.9em;
+  line-height: 1.2em;
+  margin: 4px 0;
+  display: table-cell; }
+
+.le-provider-link ~ .le-goto-link:before,
+.le-author-link ~ .le-goto-link:before {
+  content: "\2013\00a0"; }
+
+.le-paste .le-provider-link:before {
+  content: "Hosted by "; }
+
+.le-image-card .le-goto-link {
+  display: none; }
+
+.le-photo img {
   max-height: 220px; }
 
 .materialboxed {
   cursor: zoom-in;
   border-radius: 2px;
   transition: box-shadow .3s;
-  box-shadow: 0; }
+  box-shadow: none; }
   .materialboxed:hover {
     box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.2); }
 
@@ -5111,58 +5153,36 @@ img.embed {
     opacity: 0.98;
     width: 100%; }
 
-.link-embedder.text-html .link-embedder-media {
-  float: left; }
-  .link-embedder.text-html .link-embedder-media img {
-    max-height: 50px;
-    margin-right: 8px;
-    border: 0; }
-
-.link-embedder.text-html h3 {
-  font-size: 1em;
-  line-height: 1em;
-  display: block;
-  margin: 8px 0 0 0; }
-
-.link-embedder.text-html p {
-  font-size: 0.9em;
-  line-height: 1.2em;
-  margin: 4px 0;
-  display: table-cell; }
-
-.link-embedder.text-html .link-embedder-link {
-  display: none; }
-
 .hljs {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 0.9rem;
   line-height: 1.3rem;
   white-space: pre; }
 
-.link-embedder.text-paste {
+.le-paste {
   background: #f8f8f8;
   border: 1px solid #dfdfdf;
   max-height: 80px;
   max-width: 100%;
   overflow: hidden; }
-  .link-embedder.text-paste .paste-meta {
+  .le-paste .le-meta {
     background-color: #dfdfdf;
     color: #222;
     padding: 0.2em 0.5rem;
     margin: 0;
     cursor: zoom-in; }
-    .link-embedder.text-paste .paste-meta::before {
+    .le-paste .le-meta::before {
       font-size: 1.6rem !important;
       content: '\e313';
       float: right; }
-  .link-embedder.text-paste ol {
+  .le-paste ol {
     margin: 0.2rem 0; }
-  .link-embedder.text-paste.expanded {
+  .le-paste.expanded {
     max-height: none;
     overflow-x: auto; }
-    .link-embedder.text-paste.expanded .paste-meta {
+    .le-paste.expanded .le-meta {
       cursor: zoom-out; }
-      .link-embedder.text-paste.expanded .paste-meta::before {
+      .le-paste.expanded .le-meta::before {
         content: '\e316'; }
 
 .convos-main-menu,
@@ -5205,9 +5225,9 @@ img.embed {
         font-weight: bold; }
     .convos-main-menu .link.frozen a {
       color: #B71C1C; }
-    .convos-main-menu .link .material-icons, .convos-main-menu .link .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-main-menu .link .paste-meta::before {
+    .convos-main-menu .link .material-icons, .convos-main-menu .link .le-paste .le-meta::before, .le-paste .convos-main-menu .link .le-meta::before {
       vertical-align: top; }
-    .convos-main-menu .link.simple .material-icons, .convos-main-menu .link.simple .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-main-menu .link.simple .paste-meta::before {
+    .convos-main-menu .link.simple .material-icons, .convos-main-menu .link.simple .le-paste .le-meta::before, .le-paste .convos-main-menu .link.simple .le-meta::before {
       vertical-align: bottom; }
   .convos-main-menu .on {
     display: block;
@@ -5257,10 +5277,10 @@ img.embed {
   .convos-sidebar-info .menu-item:hover,
   .convos-notifications .menu-item:hover {
     background-color: #e8e8e8; }
-  .convos-sidebar-info .menu-item .material-icons, .convos-sidebar-info .menu-item .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste .convos-sidebar-info .menu-item .paste-meta::before,
+  .convos-sidebar-info .menu-item .material-icons, .convos-sidebar-info .menu-item .le-paste .le-meta::before, .le-paste .convos-sidebar-info .menu-item .le-meta::before,
   .convos-notifications .menu-item .material-icons,
-  .convos-notifications .menu-item .link-embedder.text-paste .paste-meta::before, .link-embedder.text-paste
-  .convos-notifications .menu-item .paste-meta::before {
+  .convos-notifications .menu-item .le-paste .le-meta::before, .le-paste
+  .convos-notifications .menu-item .le-meta::before {
     vertical-align: text-bottom; }
   .convos-sidebar-info .menu-item > a:only-child,
   .convos-notifications .menu-item > a:only-child {
@@ -5321,4 +5341,4 @@ body.notouch .convos-main-menu .link.dialog:hover .n-unread {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../ce29f8d5a8/main.css.map */
+/*# sourceMappingURL=../48d0b75b8f/main.css.map */

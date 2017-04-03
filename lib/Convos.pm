@@ -77,9 +77,6 @@ sub startup {
   # Autogenerate routes from the OpenAPI specification
   $self->plugin(OpenAPI => {url => delete $self->{_api_spec}});
 
-  # Expand links into rich content
-  $self->plugin('LinkEmbedder');
-
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
 
@@ -399,6 +396,8 @@ __DATA__
     settings: <%== to_json app->config('settings') %>
   };
 % end
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script async src="//platform.instagram.com/en_US/embeds.js"></script>
 @@ exception.production.html.ep
 %= include 'partial/error'
 @@ not_found.production.html.ep

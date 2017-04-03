@@ -15,6 +15,7 @@
   }
 
   var open = function(e) {
+    if (e.preventDefault) e.preventDefault();
     var $origin = $(this);
     var $clone = $origin.clone().removeAttr("class");
     var offset = $origin.offset();

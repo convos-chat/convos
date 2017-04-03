@@ -11,16 +11,23 @@ sub info {
   }
   if (my $link = $self->app->_link_cache->get($url)) {
     $self->res->headers->header('X-Cached' => 1);    # for testing
-    return $self->respond_to(json => {json => $link}, any => {text => $link->to_embed});
+    return $self->respond_to(json => {json => $link}, any => {text => $link->html});
   }
 
   $self->delay(
-    sub { $self->embed_link($self->param('url'), shift->begin) },
+    sub { $self->linkembedder->get($self->param('url'), shift->begin) },
     sub {
-      my $link = $_[1];
-      $self->app->_link_cache->set($url => $link);
-      $self->res->headers->cache_control('max-age=600');
-      $self->respond_to(json => {json => $link}, any => {text => $link->to_embed});
+      my ($delay, $link) = @_;
+
+      if ($link->error) {
+        $self->stash(status => $link->error->{code} || 500);
+      }
+      else {
+        $self->app->_link_cache->set($url => $link);
+        $self->res->headers->cache_control('max-age=600');
+      }
+
+      $self->respond_to(json => {json => $link}, any => {text => $link->html});
     },
   );
 }
@@ -42,7 +49,7 @@ information about resources online.
 
 =head2 info
 
-Used to expand a URL into markup, using L<Mojolicious::Plugin::LinkEmbedder>.
+Used to expand a URL into markup, using L<LinkEmbedder>.
 
 =head1 SEE ALSO
 

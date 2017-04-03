@@ -16,6 +16,7 @@ $t->get_ok("/api/embed.json?url=http://$host_port")->status_is(200)->json_has('/
 
 # from chache
 $t->get_ok("/api/embed.json?url=http://$host_port")->status_is(200)->header_is('X-Cached' => 1)
-  ->json_has('/html');
+  ->json_is('/title', 'Convos - Better group chat')
+  ->json_like('/html', qr{Convos - Better group chat});
 
 done_testing;
