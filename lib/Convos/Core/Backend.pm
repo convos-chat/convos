@@ -10,6 +10,21 @@ sub delete_object {
   $_[0]->tap($_[2], '');
 }
 
+sub emit_single {
+  my ($self, $event, @args) = @_;
+  my $cb = ref $args[-1] eq 'CODE' ? pop : sub { die $_[1] };
+  my $subscribers = $self->subscribers($event);
+
+  if (@$subscribers == 1) {
+    $self->emit($event => @args);
+  }
+  else {
+    $self->$cb(qq(Unable to handle "$event".));
+  }
+
+  return $self;
+}
+
 sub load_object {
   my ($self, $obj, $cb) = @_;
   return undef unless $cb;
@@ -102,6 +117,15 @@ implements the following new ones.
   $self = $self->connections($user, sub { my ($self, $err, $connections) = @_ });
 
 Used to find a list of connection names for a given L<$user|Convos::Core::User>.
+
+=head2 emit_single
+
+  $self = $self->emit_single($event => @args, sub { my ($self, $err) = @_; });
+  $self = $self->emit_single($event => @args);
+
+Will L<Mojo::EventEmitter/emit> C<$event> to a single subscriber, if any. This
+method willC<die()> or pass an error to the callback, if none or more than one
+listens to C<$event>.
 
 =head2 delete_object
 

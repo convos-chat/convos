@@ -48,6 +48,6 @@ note 'message too many newlines';
 $ws->send_ok(
   {json => {method => 'send', message => "/msg supergirl 1\n2\n3\n4", connection_id => $c->id}});
 $ws->message_ok->json_message_is('/event', 'sent')
-  ->json_message_is('/errors/0/message', 'Too many newlines in message. (4>3)');
+  ->json_message_is('/errors/0/message', 'Unable to handle "multiline_message".');
 
 done_testing;
