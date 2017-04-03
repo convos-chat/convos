@@ -47,7 +47,17 @@ $ws->message_ok->json_message_is('/connection_id', 'irc-test')
 note 'message too many newlines';
 $ws->send_ok(
   {json => {method => 'send', message => "/msg supergirl 1\n2\n3\n4", connection_id => $c->id}});
-$ws->message_ok->json_message_is('/event', 'sent')
-  ->json_message_is('/errors/0/message', 'Unable to handle "multiline_message".');
+$ws->message_ok->json_message_is('/event', 'sent');
+$ws->message_ok->json_message_is('/event', 'message');
+
+my $url = $ws->message->[1] =~ /(http:[^"\s]+)/ ? $1 : $ws->message->[1];
+$url =~ s!\\/!/!g;
+$th->get_ok($url)->status_is(200)->text_like('h1', qr{^Paste created 20\d+-\d+-\d+T})
+  ->text_is('pre', "1\n2\n3\n4");
+
+$th->get_ok("/api/embed?url=$url")->status_is(200)->text_is('pre', "1\n2\n3\n4");
+
+#local $TODO = 'Need failing test';
+#  ->json_message_is('/errors/0/message', 'Unable to handle "multiline_message".');
 
 done_testing;

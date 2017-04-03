@@ -375,7 +375,15 @@ sub _send {
   }
 
   if (MAX_BULK_MESSAGE_SIZE < @messages) {
-    $self->user->core->backend->emit_single(multiline_message => $self, $message, $cb);
+    $self->user->core->backend->emit_single(
+      multiline_message => $self,
+      \$message,
+      sub {
+        my ($backend, $err, $file) = @_;
+        return $self->$cb($err) if $err;
+        return $self->_send($target, $self->user->core->web_url($file->public_uri)->to_abs, $cb);
+      }
+    );
     return $self;
   }
 

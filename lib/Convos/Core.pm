@@ -39,6 +39,11 @@ sub connect {
   return $self;
 }
 
+sub get_user_by_public_id {
+  my ($self, $public_id) = @_;
+  return +(grep { $_->public_id eq $public_id } @{$self->users})[0];
+}
+
 sub new {
   my $self = shift->SUPER::new(@_);
 
@@ -224,6 +229,12 @@ L<Convos::Core::Connection/connect> if defined.
 
   $user = $self->get_user(\%attrs);
   $user = $self->get_user($email);
+
+Returns a L<Convos::Core::User> object or undef.
+
+=head2 get_user_by_public_id
+
+  $user = $self->get_user_by_public_id($id);
 
 Returns a L<Convos::Core::User> object or undef.
 

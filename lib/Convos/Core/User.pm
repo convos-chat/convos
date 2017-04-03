@@ -82,6 +82,8 @@ sub notifications {
   $self;
 }
 
+sub public_id { substr Mojo::Util::sha1_sum(shift->email), 0, 20; }
+
 sub remove_connection {
   my ($self, $id, $cb) = @_;
   my $connection = $self->{connections}{$id};
@@ -187,6 +189,12 @@ Email address of user.
 
 Encrypted password. See L</set_password> for how to change the password and
 L</validate_password> for password authentication.
+
+=head2 public_id
+
+  $str = $self->public_id;
+
+Returns an anonymous ID for this user.
 
 =head2 unread
 

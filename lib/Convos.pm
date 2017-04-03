@@ -9,6 +9,8 @@ use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
+$ENV{CONVOS_PLUGINS} //= 'Convos::Plugin::Paste';
+
 our $VERSION = '0.99_29';
 
 my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
@@ -473,3 +475,29 @@ __DATA__
     %= link_to 'Reload', 'index', class => 'btn waves-effect waves-light'
   </div>
 </div>
+@@ paste.html.ep
+% layout 'convos';
+% title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
+<header>
+  <div class="container">
+    <h2><%= title %></h2>
+    %= link_to 'index', tooltip => 'Chat', begin
+      <i class="material-icons">chat</i>
+    % end
+    <a href="https://convos.by" tooltip="About Convos">
+      %= image '/images/icon.svg', class => 'material-icons'
+    </a>
+  </div>
+</header>
+<div class="container paste under-main-menu">
+  <h1>Paste created <%= $file->{created_at} %></h1>
+</div>
+<pre class="paste container"><%= $file->{content} %></pre>
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+  var $paste = $("pre");
+  hljs.highlightBlock($paste.get(0));
+  var code = $paste.remove().html().split(/\n\r?|\r/);
+  $(".paste > h1").after('<ol class="hljs"><li>' + code.join("</li><li>") + '</li></ol>');
+});
+</script>

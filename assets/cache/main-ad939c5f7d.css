@@ -5185,6 +5185,12 @@ div.le-card {
       .le-paste.expanded .le-meta::before {
         content: '\e316'; }
 
+div.paste {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #dfdfdf; }
+  div.paste h1 {
+    font-size: 2rem; }
+
 .convos-main-menu,
 .is-sidebar {
   width: 100%;
@@ -5341,4 +5347,4 @@ body.notouch .convos-main-menu .link.dialog:hover .n-unread {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../48d0b75b8f/main.css.map */
+/*# sourceMappingURL=../cfac144a0f/main.css.map */
