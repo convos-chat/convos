@@ -146,6 +146,30 @@ $t->run(
 );
 
 $t->run(
+  [qr{ISON someone}, ['main', 'is-not-on.irc']],
+  sub {
+    my $dialog = $connection->dialog({frozen => 'Whatever', name => 'someone'});
+    $connection->send('' => '/ison someone', sub { });
+    $connection->once(state => sub { Mojo::IOLoop->stop });
+    Mojo::IOLoop->start;
+    is $err, '', 'cmd /ison someone';
+    is $dialog->frozen, 'User is offline.', 'someone is offline';
+  }
+);
+
+$t->run(
+  [qr{ISON wonderwoman}, ['main', 'is-on.irc']],
+  sub {
+    my $dialog = $connection->dialog({frozen => 'Whatever', name => 'wonderwoman'});
+    $connection->send('' => '/ison wonderwoman', sub { });
+    $connection->once(state => sub { Mojo::IOLoop->stop });
+    Mojo::IOLoop->start;
+    is $err, '', 'cmd /ison wonderwoman';
+    is $dialog->frozen, '', 'wonderwoman is online';
+  }
+);
+
+$t->run(
   [],
   sub {
     $connection->send('' => '/disconnect', sub { ($err, $res) = @_[1, 2]; Mojo::IOLoop->stop });
@@ -183,8 +207,8 @@ __DATA__
 @@ nick-supermanx.irc
 :Superman20001!superman@i.love.debian.org NICK :supermanx
 @@ get-topic.irc
-:hybrid8.debian.local 332 batman_ #convos :Cool topic
-:hybrid8.debian.local 333 batman_ #convos batman_!superman@i.love.debian.org 1433007153
+:hybrid8.debian.local 332 Superman20001 #convos :Cool topic
+:hybrid8.debian.local 333 Superman20001 #convos batman_!superman@i.love.debian.org 1433007153
 @@ set-topic.irc
 :batman_!superman@i.love.debian.org TOPIC #convos :Cool topic
 @@ join-redirect.irc
@@ -194,3 +218,7 @@ __DATA__
 :hybrid8.debian.local 333 test21362 ##devops jhthorsen!jhthorsen@i.love.debian.org 143293
 :hybrid8.debian.local 353 test21362 @ ##devops :Test21362 @batman
 :hybrid8.debian.local 366 test21362 ##devops :End of /NAMES list.
+@@ is-on.irc
+:hybrid8.debian.local 303 test21362 :wonderwoman
+@@ is-not-on.irc
+:hybrid8.debian.local 303 test21362 :

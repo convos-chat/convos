@@ -61,12 +61,9 @@ sub connect {
   delete $self->{disconnect};
   $self->_setup_irc;
   $self->_debug('connect(%s) Connecting...', $self->_irc->server) if DEBUG;
+  $self->emit(state => frozen => $_->frozen('Not connected.')->TO_JSON)
+    for grep { !$_->frozen } @{$self->dialogs};
   $self->{steal_nick_tid} //= $self->_steal_nick;
-
-  for my $dialog (@{$self->dialogs}) {
-    next if $dialog->is_private or $dialog->frozen;
-    $self->emit(state => frozen => $dialog->frozen('Not joined.')->TO_JSON);
-  }
 
   Mojo::IOLoop->delay(
     sub { $self->_irc->connect(shift->begin) },
@@ -187,6 +184,7 @@ sub send {
   return $self->_send(split(/\s+/, $message, 2), $cb) if $cmd eq 'MSG';
   return $self->wanted_state(connected    => $cb) if $cmd eq 'CONNECT';
   return $self->wanted_state(disconnected => $cb) if $cmd eq 'DISCONNECT';
+  return $self->_is_online($message, $cb) if $cmd eq 'ISON';
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN';
   return $self->_query_dialog($message, $cb) if $cmd eq 'QUERY';
   return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
@@ -220,6 +218,13 @@ sub _event_error {
   $self->_notice(join ' ', @{$msg->{params}});
 }
 
+sub _event_rpl_ison {
+  my ($self, $msg) = @_;
+  my $dialog = $self->get_dialog($msg->{params}[1] || delete $self->{wait_for}{ison});
+  my $frozen = $msg->{params}[1] ? '' : 'User is offline.';
+  $self->emit(state => frozen => $dialog->frozen($frozen)->TO_JSON) if $dialog;
+}
+
 sub _fallback {
   my ($self, $msg) = @_;
 
@@ -239,6 +244,12 @@ sub _fallback {
 }
 
 sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
+
+sub _is_online {
+  my ($self, $dialog_id, $cb) = @_;
+  $self->{wait_for}{ison} = $dialog_id;
+  return $self->_proxy(write => "ISON $dialog_id", sub { $self->$cb($_[1], {}); });
+}
 
 sub _join_dialog {
   my $cb = pop;
@@ -632,7 +643,7 @@ sub _event_rpl_welcome {
   my ($self, $msg) = @_;
   my ($write, @commands);
 
-  push @commands, grep { !$_->is_private } @{$self->dialogs};
+  push @commands, map { $_->is_private ? "/ison $_->{name}" : $_ } @{$self->dialogs};
   push @commands, grep {/\S/} @{$self->on_connect_commands};
 
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
@@ -641,9 +652,9 @@ sub _event_rpl_welcome {
 
   Scalar::Util::weaken($self);
   $write = sub {
-    my $i = $self && shift @commands || return;
-    return $self->_join_dialog(join(' ', $i->name, $i->password), $write) if ref $i;
-    return $self->send('', $i, $write);
+    my $cmd = $self && shift @commands || return;
+    return $self->_join_dialog(join(' ', $cmd->name, $cmd->password), $write) if ref $cmd;
+    return $self->send('', $cmd, $write);
   };
 
   next_tick $self, $write;

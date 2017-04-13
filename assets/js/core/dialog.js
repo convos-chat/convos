@@ -133,7 +133,8 @@
   };
 
   proto.update = function(attrs) {
-    var loadMaybe = attrs.hasOwnProperty("active") || attrs.hasOwnProperty("frozen");
+    var stateChange = attrs.hasOwnProperty("active") || attrs.hasOwnProperty("frozen");
+    var wasInactive = this.active ? false : true;
 
     if (attrs.hasOwnProperty("active")) this.unread = 0;
     if (attrs.hasOwnProperty("active") && this.active && !attrs.active) this.setLastRead();
@@ -147,9 +148,11 @@
       this.load({}, function() {});
     }
 
-    if (loadMaybe && !this.frozen && this.active) {
-      if (!this.is_private) this.connection().send("/names", this, this._setParticipants.bind(this));
-      if (this.is_private && this.dialog_id) this.connection().send("/whois " + this.name, this);
+    if (!this.is_private && stateChange && !this.frozen && this.active) {
+      this.connection().send("/names", this, this._setParticipants.bind(this));
+    }
+    if (this.is_private && wasInactive && this.active) {
+      this.connection().send("/ison " + this.name, this);
     }
 
     if (this.is_private) {
