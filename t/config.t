@@ -5,6 +5,8 @@ delete $ENV{CONVOS_SECRETS};
 
 my $i      = 0;
 my $convos = Convos->new;
+my $secret = $convos->secrets->[0];
+
 is $convos->config->{backend},        'Convos::Core::Backend::File', 'default backend';
 is $convos->config->{default_server}, 'chat.freenode.net:6697',      'default default_server';
 is $convos->config->{home}, $ENV{CONVOS_HOME}, 'home from ENV';
@@ -13,7 +15,9 @@ is $convos->config->{organization_url},  'http://convos.by', 'default organizati
 is $convos->config->{hypnotoad}{pid_file}, undef, 'default pid_file';
 ok !$convos->sessions->secure, 'insecure sessions';
 like $convos->config->{invite_code}, qr/^\w{32}$/, 'generated invite_code';
-like $convos->secrets->[0], qr/^[a-z0-9]{32}$/, 'default secrets';
+like $secret, qr/^[a-z0-9]{40}$/, 'default secrets';
+
+is(Convos->new->secrets->[0], $secret, 'reusing generated secret');
 
 my @plugins;
 Mojo::Util::monkey_patch(

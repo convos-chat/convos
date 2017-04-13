@@ -2,6 +2,10 @@ Revision history for perl distribution Convos
 
 0.99_30 Not Released
  - Using LinkEmbedder instead of Mojolicious::Plugin::LinkEmbedder
+ - Add Convos::Plugin::Paste #328
+ - Add support for sending multiline IRC messages #328
+ - Will always have a default IRC server
+ - Will not use unsafe secrets anymore
 
 0.99_29 2017-03-21T23:35:17+0100
  - Fix ShareDialog plugin

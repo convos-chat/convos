@@ -204,14 +204,19 @@ sub _plugins {
 }
 
 sub _setup_secrets {
-  my $self = shift;
+  my $self    = shift;
   my $secrets = $self->config('secrets') || [split /,/, $ENV{CONVOS_SECRETS} || ''];
+  my $file    = $self->core->home->child('secrets');
 
   unless (@$secrets) {
-    my $unsafe = join ':', $<, $(, $^X, qx{who -b 2>/dev/null}, $self->home;
-    $self->log->warn(
-      'CONVOS_SECRETS="Default (unsafe)" # https://convos.by/doc/config.html#convos_secrets');
-    $secrets = [Mojo::Util::md5_sum($unsafe)];
+    $secrets = [split /‚/, $file->slurp] if -e $file;
+  }
+  unless (@$secrets) {
+    $secrets = [Mojo::Util::sha1_sum(join ':', rand(), $$, $<, $(, $^X, Time::HiRes::time())];
+    path($file->dirname)->make_path unless -d $file->dirname;
+    $file->spurt(join ',', @$secrets);
+    $self->log->info(
+      "CONVOS_SECRETS written to $file # https://convos.by/doc/config.html#convos_secrets");
   }
 
   $self->secrets($secrets);
