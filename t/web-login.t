@@ -8,6 +8,9 @@ $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
 $t->get_ok('/api/user')->status_is(401);
 
+# make sure this url does not exist from web
+$t->get_ok('/user/recover/superman@example.com')->status_is(404);
+
 $t->post_ok('/api/user/login')->status_is(400)
   ->json_is('/errors/0', {message => 'Expected object - got null.', path => '/body'});
 

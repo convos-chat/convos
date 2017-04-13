@@ -2,7 +2,6 @@
   // localStorage items are maintained in root Vue object, in main.js
   // TODO: Should come up with better variable names than "main" and "sidebar"
   Convos.settings.expandUrls = localStorage.getItem("expandUrls") == "false" ? false : true;
-  Convos.settings.main = localStorage.getItem("main") || "";
   Convos.settings.sidebar = localStorage.getItem("sidebar");
   Convos.settings.mainMenuVisible = false;
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
@@ -11,6 +10,10 @@
   var validSidebars = ["", "notifications", "sidebar-info"].filter(function(v) {
     return Convos.settings.sidebar === v;
   });
+
+  if (!Convos.settings.main) {
+    Convos.settings.main = localStorage.getItem("main") || "";
+  }
 
   if (window.isMobile) {
     Convos.settings.sidebar = ""; // Don't want to remember sidebar when loading on mobile

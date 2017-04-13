@@ -71,7 +71,9 @@
 
 # main components
 < vue/convos-chat.vue
+< vue/convos-not-logged-in.vue
 < vue/convos-login.vue
+< vue/convos-recover.vue
 < vue/convos-register.vue
 
 < js/main.js

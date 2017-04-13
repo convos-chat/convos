@@ -26,8 +26,9 @@ if ($ARGV[0] and -r $ARGV[0] and -f $ARGV[0]) {
 }
 
 my $command = $ARGV[0] || '';
-$ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if $command eq 'version';
-$ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
+$ENV{MOJO_LOG_LEVEL} ||= 'fatal' if grep { $command eq $_ } qw(get version);
+$ENV{MOJO_MODE} ||= 'production' if $command eq 'daemon';
+$ENV{CONVOS_COMMAND_LINE} //= 1 if $command eq 'get';
 
 unless ($ENV{CONVOS_SETUP}++) {
   eval "require $_;1" or die $@ for qw(FindBin File::Spec);
@@ -125,7 +126,7 @@ sub ensure_dependencies {
       if $ENV{CONVOS_DEBUG};
     push @msg, "\nIs is not possible to start Convos at this point, since",
       "there are some missing dependencies that need to be installed:\n",
-      map({sprintf "-  %s %s # %s", @$_} @missing),
+      map({ sprintf "-  %s %s # %s", @$_ } @missing),
       qq(\nRun "$0 install" to install the missing dependencies above,),
       qq(or run "CONVOS_DEBUG=1 $0 @ARGV" for more information.\n\n);
     die join "", map {"\n$_"} @msg;

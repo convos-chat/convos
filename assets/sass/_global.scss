@@ -23,6 +23,12 @@ pre {
   padding: 0;
 }
 
+pre.stylish {
+  padding: 0.2rem 0.5rem;
+  background: darken($body-bg, 4%);
+  margin: 0.3rem 0;
+}
+
 dl.horizontal {
   margin: 0;
   dt {
