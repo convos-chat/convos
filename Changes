@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 0.99_30 Not Released
+ - Fix scrolling on "Join dialog" and "Help" pages #331
  - Using LinkEmbedder instead of Mojolicious::Plugin::LinkEmbedder
  - Add Convos::Plugin::Paste #328
  - Add support for sending multiline IRC messages #328

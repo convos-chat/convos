@@ -62,7 +62,9 @@
       return pre + (text2emoji[emoji] || emoji);
     }));
 
-    str = str.autoLink({after: args.after, target: args.target || "_blank"});
+    if (args.autoLink !== false) {
+      str = str.autoLink({after: args.after, target: args.target || "_blank"});
+    }
 
     return str;
   };

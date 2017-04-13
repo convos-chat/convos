@@ -11,6 +11,7 @@ $convos-input-height: 46px;
 .convos-settings {
   position: relative;
   height: 100%;
+  overflow: auto;
 }
 
 @media #{$large-and-up} {

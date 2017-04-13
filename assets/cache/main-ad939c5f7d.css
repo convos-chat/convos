@@ -2328,7 +2328,8 @@ table {
 thead {
   border-bottom: 1px solid #d0d0d0; }
 
-td, th {
+td,
+th {
   padding: 15px 5px;
   display: table-cell;
   text-align: left;
@@ -3230,7 +3231,7 @@ button.btn-floating.btn[disabled],
 button.btn-floating[disabled].btn-large,
 button.btn-floating[disabled].btn-delete,
 .btn-large.disabled,
-button.btn-large[disabled],
+button.btn-large.btn[disabled],
 .btn:disabled .btn-large:disabled, .btn-large:disabled .btn-large:disabled, .btn-delete:disabled .btn-large:disabled,
 .btn-floating:disabled {
   background-color: #DFDFDF !important;
@@ -3239,7 +3240,7 @@ button.btn-large[disabled],
   cursor: default; }
   .btn.disabled *, .disabled.btn-large *, button.btn[disabled] *, button[disabled].btn-large *, button[disabled].btn-delete *, .disabled.btn-delete *,
   .btn-floating.disabled *, button.btn-floating.btn[disabled] *, button.btn-floating[disabled].btn-large *, button.btn-floating[disabled].btn-delete *,
-  .btn-large.disabled *, button.btn-large[disabled] *,
+  .btn-large.disabled *, button.btn-large.btn[disabled] *,
   .btn:disabled .btn-large:disabled *, .btn-large:disabled .btn-large:disabled *, .btn-delete:disabled .btn-large:disabled *,
   .btn-floating:disabled * {
     pointer-events: none; }
@@ -3249,7 +3250,7 @@ button.btn-large[disabled],
   button.btn-floating[disabled].btn-large:hover,
   button.btn-floating[disabled].btn-delete:hover,
   .btn-large.disabled:hover,
-  button.btn-large[disabled]:hover,
+  button.btn-large.btn[disabled]:hover,
   .btn:disabled .btn-large:disabled:hover, .btn-large:disabled .btn-large:disabled:hover, .btn-delete:disabled .btn-large:disabled:hover,
   .btn-floating:disabled:hover {
     background-color: #DFDFDF !important;
@@ -4782,10 +4783,12 @@ ul.complete-dropdown {
 .convos-dialog-container,
 .convos-settings {
   position: relative;
-  height: 100%; }
+  height: 100%;
+  overflow: auto; }
 
 @media only screen and (min-width: 993px) {
-  .convos-dialog-container, .convos-settings {
+  .convos-dialog-container,
+  .convos-settings {
     margin-left: 240px; }
   body.has-sidebar .convos-dialog-container, body.has-sidebar .convos-settings {
     margin-right: 320px; } }
@@ -5347,4 +5350,4 @@ body.notouch .convos-main-menu .link.dialog:hover .n-unread {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
 
-/*# sourceMappingURL=../cfac144a0f/main.css.map */
+/*# sourceMappingURL=../a81d5e57d5/main.css.map */
