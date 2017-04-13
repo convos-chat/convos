@@ -28,6 +28,8 @@ $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 is $connection->_irc->nick, 'test_user', 'converted username to nick';
 is $connection->_irc->user, 'testuser',  'username can only contain a-z';
 
+memory_cycle_ok($connection, 'no cycles after connecting');
+
 Mojo::IOLoop->start;
 is_deeply \@state, [qw(queued disconnected)], 'queued => disconnected' or diag join ' ', @state;
 like $err, qr{\bSSL connect attempt failed\b}, 'SSL connect failed';
@@ -49,5 +51,7 @@ $connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 is $err, '', 'no error';
 is_deeply \@state, [qw(queued disconnected queued disconnected queued connected)], 'connected';
+
+memory_cycle_ok($connection, 'no cycles after connecting again');
 
 done_testing;

@@ -99,7 +99,6 @@ sub connect {
 
 sub disconnect {
   my ($self, $cb) = @_;
-  Scalar::Util::weaken($self);
   $self->{disconnect} = 1;
   $self->_proxy(disconnect => sub { $self->state('disconnected')->$cb($_[1] || '') });
 }
@@ -109,7 +108,6 @@ sub nick {
   my ($self, @nick) = @_;    # @nick will be empty list on "get"
 
   return $self->_irc->nick(@nick) unless $cb;
-  Scalar::Util::weaken($self);
   $self->url->query->param(nick => $nick[0]) if @nick;
   $self->_irc->nick(@nick, sub { shift; $self->$cb(@_) });
   $self;
@@ -207,7 +205,6 @@ sub _event_close {
   $self->state($state, sprintf 'You [%s@%s] have quit.',
     $irc->nick, $irc->real_host || $self->url->host);
   delete $self->{_irc};
-  Scalar::Util::weaken($self);
   Mojo::IOLoop->timer(
     ++$self->{delayed} < 60 ? $self->{delayed} : 60,
     sub {
@@ -435,8 +432,7 @@ sub _steal_nick {
   my $self = shift;
   my $tid;
 
-  Scalar::Util::weaken($self);
-  $tid = $self->_irc->ioloop->recurring(
+  $tid = Mojo::IOLoop->recurring(
     STEAL_NICK_INTERVAL,
     sub {
       return shift->remove($tid) unless $self;
@@ -641,7 +637,6 @@ sub _event_rpl_welcome {
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(state => me => $self->{myinfo});
 
-  Scalar::Util::weaken($self);
   $write = sub {
     my $i = $self && shift @commands || return;
     return $self->_join_dialog(join(' ', $i->name, $i->password), $write) if ref $i;
@@ -664,10 +659,9 @@ sub _event_topic {
 }
 
 sub DESTROY {
-  my $self = shift;
-  my $ioloop = $self->{_irc}{ioloop} or return;
-  my $tid;
-  $ioloop->remove($tid) if $tid = $self->{steal_nick_tid};
+  my $self   = shift;
+  my $ioloop = Mojo::IOLoop->singleton;
+  $ioloop->remove($self->{steal_nick_tid}) if $ioloop and $self->{steal_nick_tid};
 }
 
 sub TO_JSON {

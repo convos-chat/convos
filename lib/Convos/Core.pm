@@ -17,7 +17,6 @@ sub connect {
   my ($self, $connection, $cb) = @_;
   my $host = $connection->url->host;
 
-  Scalar::Util::weaken($self);
   $connection->state('queued');
 
   if ($host eq 'localhost' and !$cb) {
@@ -72,7 +71,6 @@ sub start {
     }
   }
 
-  Scalar::Util::weaken($self);
   my $delay = $ENV{CONVOS_CONNECT_DELAY} || 3;
   $self->{connect_tid} = Mojo::IOLoop->recurring($delay => sub { $self->_dequeue });
 
@@ -82,8 +80,8 @@ sub start {
 has_many users => 'Convos::Core::User' => sub {
   my ($self, $attrs) = @_;
   $attrs->{email} = trim lc $attrs->{email} || '';
+  die "Invalid email $attrs->{email}. Need to match /.\@./." unless $attrs->{email} =~ /.\@./;
   my $user = Convos::Core::User->new($attrs);
-  die "Invalid email $user->{email}. Need to match /.\@./." unless $user->email =~ /.\@./;
   Scalar::Util::weaken($user->{core} = $self);
   return $user;
 };

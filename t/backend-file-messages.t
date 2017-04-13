@@ -107,4 +107,7 @@ $connection->emit(message => $connection->messages => $_) for t::Helper->message
 $t->get_ok('/api/connection/irc-localhost/messages')->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 28, 'server messages';
 
+memory_cycle_ok($t->app,       'no cycles in backend');
+memory_cycle_ok($t->app->core, 'no cycles in backend');
+
 done_testing;

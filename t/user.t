@@ -44,7 +44,6 @@ ok $user->validate_password('s3cret'), 'validate_password';
 $user->save;
 is $core->get_user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
 
-
 $user->{unread} = 3;
 $user->save;
 is $core->get_user('jhthorsen@cpan.org')->unread, 3, 'Unseen is persisted correctly';

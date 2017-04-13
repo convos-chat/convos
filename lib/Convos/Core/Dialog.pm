@@ -21,7 +21,6 @@ has last_read   => sub { Mojo::Date->new->to_datetime };
 
 sub messages {
   my ($self, $query, $cb) = @_;
-  Scalar::Util::weaken($self);
   $self->connection->user->core->backend->messages($self, $query, sub { $self->$cb(@_[1, 2]) });
   $self;
 }

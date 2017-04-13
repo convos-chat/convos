@@ -19,4 +19,9 @@ $t->get_ok("/api/embed.json?url=http://$host_port")->status_is(200)->header_is('
   ->json_is('/title', 'Convos - Better group chat')
   ->json_like('/html', qr{Convos - Better group chat});
 
+$t->get_ok("/api/embed?url=http://$host_port")->status_is(200)->content_like(qr{^<div});
+
+memory_cycle_ok($t->app,       'no cycles in app');
+memory_cycle_ok($t->app->core, 'no cycles in core');
+
 done_testing;

@@ -12,10 +12,14 @@ my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $stop_re    = qr{should_not_match};
 my @res;
 
+memory_cycle_ok($core, 'no cycles in core');
+
 $connection->url->parse("irc://$server");
 $connection->url->query->param(tls => 0) unless $ENV{CONVOS_IRC_SSL};
 $connection->dialog({name => '#convos',      frozen => 'Frozen'});
 $connection->dialog({name => 'private_ryan', frozen => 'Frozen'});
+
+memory_cycle_ok($core, 'no cycles in core after adding dialogs');
 
 $t->run(
   [
@@ -39,6 +43,8 @@ $t->run(
     Mojo::IOLoop->start;
   }
 );
+
+memory_cycle_ok($core, 'no cycles in core after connecting');
 
 is_deeply(
   [grep { $_ !~ /nam|notice|topic/ } @res],

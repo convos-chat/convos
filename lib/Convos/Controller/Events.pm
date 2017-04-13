@@ -11,8 +11,6 @@ sub start {
   my $self = shift;
   my $user = $self->backend->user or return $self->_err('Need to log in first.', {})->finish;
 
-  Scalar::Util::weaken($self);
-
   my $uid     = $user->id;
   my $backend = $self->app->core->backend;
   my $cb      = $backend->on(
@@ -52,7 +50,8 @@ sub _err {
 
 sub _event_get_user {
   my ($self, $data) = @_;
-  my $user = $self->backend->user or return $self->_err('Need to log in. Session reset?', {})->finish;
+  my $user = $self->backend->user
+    or return $self->_err('Need to log in. Session reset?', {})->finish;
 
   $self->delay(
     sub { $user->get($data, shift->begin); },
