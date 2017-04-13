@@ -2,9 +2,10 @@ Revision history for perl distribution Convos
 
 0.99_30 Not Released
  - Fix scrolling on "Join dialog" and "Help" pages #331
- - Using LinkEmbedder instead of Mojolicious::Plugin::LinkEmbedder
+ - Add support for generating "recover password" link #302 #323
  - Add Convos::Plugin::Paste #328
  - Add support for sending multiline IRC messages #328
+ - Using LinkEmbedder instead of Mojolicious::Plugin::LinkEmbedder
  - Will always have a default IRC server
  - Will not use unsafe secrets anymore
 
