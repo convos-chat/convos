@@ -55,6 +55,9 @@ $url =~ s!\\/!/!g;
 $th->get_ok($url)->status_is(200)->text_like('h1', qr{^Paste created 20\d+-\d+-\d+T})
   ->text_is('pre', "1\n2\n3\n4");
 
+my $id = $url =~ m!/(\d+)$! ? $1 : 'x';
+ok -s $ws->app->core->home->child('superman@example.com', 'upload', $id), "paste $id saved on disk";
+
 $th->get_ok("/api/embed?url=$url")->status_is(200)->text_is('pre', "1\n2\n3\n4");
 
 #local $TODO = 'Need failing test';

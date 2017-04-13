@@ -16,7 +16,7 @@ has id => sub {
 has user => undef;
 
 sub public_uri { Mojo::Path->new(join '/', 'paste', $_[0]->user->public_id, $_[0]->id); }
-sub uri { Mojo::Path->new(join '/', $_[0]->user->email, 'paste', $_[0]->id); }
+sub uri { Mojo::Path->new(join '/', $_[0]->user->email, 'upload', $_[0]->id); }
 
 sub TO_JSON {
   my ($self, $private) = @_;
