@@ -17,7 +17,7 @@
    ],
    "buildpacks": [
       {
-         "url": "https://github.com/faraco/perloku"
+         "url": "https://github.com/munepom/perloku"
       }
    ]
 }
