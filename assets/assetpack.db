@@ -391,7 +391,7 @@ checksum=771733f867
 format=js
 minified=1
 [js-min:js/materialbox.js]
-checksum=8388ff2e8d
+checksum=4cbdbaf406
 format=js
 minified=1
 [js-min:js/notification.js]
@@ -403,7 +403,7 @@ checksum=92afce406e
 format=js
 minified=1
 [js-min:js/string.js]
-checksum=317ae0e733
+checksum=1b7913805f
 format=js
 minified=1
 [js-min:js/svg.js]
@@ -441,7 +441,7 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:js/vue/mixin-global.js]
-checksum=701d37d40a
+checksum=80e07e1e79
 format=js
 minified=1
 [js-min:js/vue/mixin-materialize.js]
@@ -450,7 +450,7 @@ format=js
 minified=1
 mtime=1471637625
 [js-min:js/vue/mixin-message.js]
-checksum=860b2c266f
+checksum=a4f1008cb9
 format=js
 minified=1
 [js-min:js/vue/mixin-messages.js]
@@ -466,7 +466,7 @@ checksum=5fc09d2dc9
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=8e41f5d814
+checksum=5fc09d2dc9
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
@@ -479,11 +479,11 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:vue/convos-connection-settings.vue]
-checksum=f20c95aa7c
+checksum=90dd2f5676
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]
-checksum=f850649a70
+checksum=0df5d14b48
 format=js
 minified=1
 [js-min:vue/convos-dialog-chooser.vue]
@@ -511,7 +511,7 @@ checksum=d652473730
 format=js
 minified=1
 [js-min:vue/convos-login.vue]
-checksum=daff64bee1
+checksum=2f9f3e76c1
 format=js
 minified=1
 [js-min:vue/convos-main-menu.vue]
@@ -559,6 +559,10 @@ minified=1
 checksum=eb7ea2468d
 format=js
 minified=1
+[js-min:vue/convos-not-logged-in.vue]
+checksum=38236105e1
+format=js
+minified=1
 [js-min:vue/convos-notifications.vue]
 checksum=3a0743bb7b
 format=js
@@ -567,8 +571,12 @@ minified=1
 checksum=c9a788726c
 format=js
 minified=1
+[js-min:vue/convos-recover.vue]
+checksum=664b3e2e67
+format=js
+minified=1
 [js-min:vue/convos-register.vue]
-checksum=59c8992019
+checksum=947efcd3b4
 format=js
 minified=1
 [js-min:vue/convos-resources.vue]

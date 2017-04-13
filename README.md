@@ -32,6 +32,9 @@ screen as you start convos:
 - [Snappy](https://uappexplorer.com/app/convos.jhthorsen)
 - [![Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
+Note! "Heroku" should be deployed from the
+[stable](https://github.com/Nordaaker/convos/tree/stable) branch.
+
 # Branch overview
 
 ## stable
