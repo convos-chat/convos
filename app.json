@@ -3,7 +3,6 @@
    "website": "http://convos.by",
    "logo": "http://convos.by/public/convos-icon.png",
    "description": "Multiuser chat application that runs in your web browser.",
-   "repository": "https://github.com/Nordaaker/convos/tree/stable",
    "success_url": "/",
    "addons": [],
    "env": {},
