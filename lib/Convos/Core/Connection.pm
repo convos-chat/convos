@@ -16,7 +16,7 @@ has messages => sub {
 
 sub name { shift->{name} }
 has on_connect_commands => sub { +[] };
-has protocol            => sub {'null'};
+has protocol => 'null';
 
 sub url {
   my ($self, $url) = @_;
@@ -86,20 +86,18 @@ sub send {
 
 sub state {
   my ($self, $state, $message) = @_;
-  my $old_state = $self->{state} || '';
+  return $self->{state} ||= $self->wanted_state eq 'connected' ? 'queued' : 'disconnected'
+    unless $state;
+  return $self if +($self->{state} || '') eq $state;
 
-  return $self->{state} ||= 'queued' unless $state;
   die "Invalid state: $state" unless grep { $state eq $_ } qw(connected queued disconnected);
+  $self->{state} = $state;
+  $self->emit(state => connection => {state => $state, message => $message // ''});
 
-  unless ($old_state eq $state) {
-    $self->{state} = $state;
-    $self->emit(state => connection => {state => $state, message => $message // ''});
-
-    if ($state eq 'disconnected') {
-      for my $dialog (@{$self->dialogs}) {
-        $dialog->frozen('Not connected.') unless $dialog->frozen;
-        $self->emit(state => frozen => $dialog->TO_JSON);
-      }
+  if ($state eq 'disconnected') {
+    for my $dialog (@{$self->dialogs}) {
+      $dialog->frozen('Not connected.') unless $dialog->frozen;
+      $self->emit(state => frozen => $dialog->TO_JSON);
     }
   }
 
@@ -107,6 +105,17 @@ sub state {
 }
 
 sub uri { Mojo::Path->new(sprintf '%s/%s/connection.json', $_[0]->user->email, $_[0]->id) }
+
+sub wanted_state {
+  my ($self, $state, $cb) = @_;
+  return $self->{wanted_state} ||= 'connected' unless $state;
+  return $self if +($self->{wanted_state} || '') eq $state;
+
+  $self->{wanted_state} = $state;
+  $state =~ s!ed$!!;
+  $self->$state($cb) if $cb;
+  return $self;
+}
 
 sub _debug {
   my ($self, $msg, @args) = @_;
@@ -153,19 +162,20 @@ sub _userinfo {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  $self->{state} ||= 'queued';
-  my $json = {map { ($_, '' . $self->$_) } qw(name protocol state)};
+  my %json = map { ($_, $self->$_) } qw(name protocol wanted_state);
 
-  $json->{url}                 = $self->_url($persist);
-  $json->{connection_id}       = $self->id;
-  $json->{on_connect_commands} = $self->on_connect_commands;
-  $json->{state}               = 'queued' if $persist and $json->{state} eq 'connected';
+  $json{url}                 = $self->_url($persist);
+  $json{connection_id}       = $self->id;
+  $json{on_connect_commands} = $self->on_connect_commands;
 
   if ($persist) {
-    $json->{dialogs} = [map { $_->TO_JSON($persist) } @{$self->dialogs}];
+    $json{dialogs} = [map { $_->TO_JSON($persist) } @{$self->dialogs}];
+  }
+  else {
+    $json{state} = $self->state;
   }
 
-  $json;
+  return \%json;
 }
 
 1;
@@ -369,6 +379,14 @@ process of connecting or that it want to connect.
 
 Holds a L<Mojo::Path> object, with the URI to where this object should be
 stored.
+
+=head2 wanted_state
+
+  $str = $self->wanted_state;
+  $self = $self->wanted_state("connected"); # or "disconnected"
+
+The state that this connection should be in. L</state> on the other hand
+reflects which state the connection is actually in.
 
 =head1 AUTHOR
 

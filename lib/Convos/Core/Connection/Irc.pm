@@ -61,7 +61,6 @@ sub connect {
   delete $self->{disconnect};
   $self->_setup_irc;
   $self->_debug('connect(%s) Connecting...', $self->_irc->server) if DEBUG;
-  $self->state('queued', 'Connecting...');
   $self->{steal_nick_tid} //= $self->_steal_nick;
 
   for my $dialog (@{$self->dialogs}) {
@@ -187,8 +186,8 @@ sub send {
   return $self->_send($target, "\x{1}ACTION $message\x{1}", $cb) if $cmd eq 'ME';
   return $self->_send($target, $message, $cb) if $cmd eq 'SAY';
   return $self->_send(split(/\s+/, $message, 2), $cb) if $cmd eq 'MSG';
-  return $self->connect($cb)    if $cmd eq 'CONNECT';
-  return $self->disconnect($cb) if $cmd eq 'DISCONNECT';
+  return $self->wanted_state(connected    => $cb) if $cmd eq 'CONNECT';
+  return $self->wanted_state(disconnected => $cb) if $cmd eq 'DISCONNECT';
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN';
   return $self->_query_dialog($message, $cb) if $cmd eq 'QUERY';
   return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';

@@ -24,6 +24,8 @@ my $c = $th->app->core->get_user('superman@example.com')->get_connection('irc-te
 
 note 'connected';
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
+  ->json_message_like('/message', qr{Connecting soon})->json_message_is('/state', 'queued');
+$ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_like('/message', qr{Connected to})->json_message_is('/state', 'connected')
   ->json_message_is('/type', 'connection');
 

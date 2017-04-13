@@ -95,12 +95,14 @@ sub update {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
-  my $state = $json->{state} || '';
+  my $state = $json->{wanted_state} || '';
   my $connection;
 
   eval {
     $connection = $user->get_connection($self->stash('connection_id'));
     $connection->url->host or die 'Connection not found';
+    $connection->wanted_state($state) if $state;
+    1;
   } or do {
     return $self->render(openapi => E('Connection not found.'), status => 404);
   };
@@ -111,21 +113,21 @@ sub update {
   }
   if (my $url = $self->_validate_url($json->{url})) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
-    $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnect';
+    $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnected';
     $connection->url($url);
   }
 
   $self->delay(
     sub {
       my ($delay) = @_;
-      $state = '' if $connection->state eq 'connected' and $state eq 'connect';
+      $state = '' if $connection->state eq 'connected' and $state eq 'connected';
       $connection->save($delay->begin);
-      $connection->disconnect($delay->begin) if $state eq 'disconnect' or $state eq 'reconnect';
+      $connection->disconnect($delay->begin) if $state eq 'disconnected' or $state eq 'reconnect';
     },
     sub {
       my ($delay, $err, $disconnected) = @_;
       die $err if $err;
-      $self->app->core->connect($connection) if $state eq 'connect' or $state eq 'reconnect';
+      $self->app->core->connect($connection) if $state eq 'connected' or $state eq 'reconnect';
       $self->render(openapi => $connection);
     },
   );

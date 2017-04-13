@@ -7,7 +7,7 @@
     this.on_connect_commands = [];
     this.protocol = "unknown";
     this.state = "disconnected";
-    this.wantedState = "connect";
+    this.wanted_state = attrs.wanted_state || "connected";
     this.url = "";
     this.on("message", this._onMessage);
     this.on("sent", this._onSent);
@@ -80,7 +80,7 @@
     var self = this;
 
     // It is currently not possible to specify "name"
-    var attrs = {url: this.url, on_connect_commands: this.on_connect_commands, state: this.wantedState};
+    var attrs = {url: this.url, on_connect_commands: this.on_connect_commands, wanted_state: this.wanted_state};
 
     if (this.connection_id) {
       Convos.api.updateConnection({body: attrs, connection_id: this.connection_id}, function(err, xhr) {

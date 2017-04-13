@@ -18,7 +18,7 @@ sub connect {
   my $host = $connection->url->host;
 
   Scalar::Util::weaken($self);
-  $connection->state('queued');
+  $connection->state('queued', 'Connecting soon...');
 
   if ($host eq 'localhost' and !$cb) {
     $connection->connect(
@@ -67,8 +67,7 @@ sub start {
     for (@{$self->backend->connections($user)}) {
       my $connection = $user->connection($_);
       $self->connect($connection)
-        unless $ENV{CONVOS_SKIP_CONNECT}
-        or $connection->state eq 'disconnected';
+        if !$ENV{CONVOS_SKIP_CONNECT} and $connection->wanted_state eq 'connected';
     }
   }
 
@@ -106,8 +105,7 @@ sub _dequeue {
   for my $host (keys %{$self->{connect_queue} || {}}) {
     my $args = shift @{$self->{connect_queue}{$host}} or next;
     my ($connection, $cb) = @$args;
-    next if $connection->state eq 'disconnected';
-    $connection->connect(
+    $connection->wanted_state eq 'connected' and $connection->connect(
       sub {
         my ($connection, $err) = @_;
         push @{$self->{connect_queue}{$host}}, [$connection, undef] if $err;

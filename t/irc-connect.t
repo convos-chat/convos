@@ -45,7 +45,7 @@ is $connection->url->query->param('tls'), 0, 'disable tls';
 is_deeply \@state, [qw(queued disconnected queued disconnected)], 'queued => disconnected';
 
 monkey_patch('Mojo::IRC', connect => sub { pop->($_[0], '') });
-$connection->connect(sub { $err = $_[1]; Mojo::IOLoop->stop; });
+$core->connect($connection, sub { $err = $_[1]; Mojo::IOLoop->stop; });
 Mojo::IOLoop->start;
 is $err, '', 'no error';
 is_deeply \@state, [qw(queued disconnected queued disconnected queued connected)], 'connected';

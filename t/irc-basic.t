@@ -27,7 +27,8 @@ cmp_deeply(
     on_connect_commands => [],
     protocol            => 'irc',
     state               => 'queued',
-    url                 => 'irc://127.0.0.1'
+    url                 => 'irc://127.0.0.1',
+    wanted_state        => 'connected',
   },
   'TO_JSON'
 );

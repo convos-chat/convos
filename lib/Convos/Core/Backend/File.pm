@@ -51,6 +51,7 @@ sub connections {
     my $settings = $user_dir->child($id, 'connection.json');
     next unless -e $settings;
     push @connections, Mojo::JSON::decode_json($settings->slurp);
+    delete $connections[-1]{state};    # should not be stored in connection.json
   }
 
   return next_tick $self, $cb, '', \@connections if $cb;

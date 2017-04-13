@@ -26,7 +26,8 @@ $th->get_ok('/api/connection/irc-localhost/rooms')->status_is(500)
 my $irc = Test::Mojo::IRC->start_server;
 my $c   = $user->get_connection('irc-localhost');
 $th->post_ok('/api/connection/irc-localhost',
-  json => {state => 'connect', url => sprintf('irc://%s?tls=0', $irc->server)})->status_is(200);
+  json => {wanted_state => 'connected', url => sprintf('irc://%s?tls=0', $irc->server)})
+  ->status_is(200);
 
 for (1 .. 100) {
   $ws->message_ok;

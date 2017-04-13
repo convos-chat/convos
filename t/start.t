@@ -26,7 +26,7 @@ $user = $core->user({email => 'mramberg@cpan.org'})->save;
 
 # 0: will not be connected
 $user->connection({name => 'localhost', protocol => 'Irc'})
-  ->tap(sub { shift->url->parse('irc://127.0.0.1') })->state('disconnected')->save;
+  ->tap(sub { shift->url->parse('irc://127.0.0.1') })->wanted_state('disconnected')->save;
 
 # 2: instant or queued
 $user->connection({name => 'freenode', protocol => 'irc'})

@@ -32,9 +32,9 @@
         <md-input :value.sync="server" :placeholder="url.hostPort" :readonly="settings.forced_irc_server" cols="s12">Server</md-input>
       </div>
       <div class="row" v-if="connection">
-        <md-select :value.sync="wantedState" label="State">
-          <md-option value="connect" :selected="'connected' == connection.state">Connected</md-option>
-          <md-option value="disconnect" :selected="'disconnected' == connection.state">Disconnected</md-option>
+        <md-select :value.sync="wantedState" label="Wanted state">
+          <md-option value="connected" :selected="'connected' == wantedState">Connected</md-option>
+          <md-option value="disconnected" :selected="'disconnected' == wantedState">Disconnected</md-option>
         </md-select>
       </div>
       <div class="row">
@@ -129,10 +129,10 @@ module.exports = {
       }).join(":");
 
       userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
-      connection.user = this.user;
-      connection.wantedState = this.wantedState;
-      connection.url = "irc://" + userinfo + this.server;
       connection.on_connect_commands = this.onConnectCommands.split(/\n/).map(function(str) { return str.trim(); });
+      connection.url = "irc://" + userinfo + this.server;
+      connection.user = this.user;
+      connection.wanted_state = this.wantedState;
 
       if (this.nick) params.push("nick=" + this.nick);
       if (this.tls !== null) params.push("tls=" + (this.tls ? 1 : 0));
@@ -151,7 +151,7 @@ module.exports = {
       var nick = this.user.email.split("@")[0].replace(/\W+/g, "_");
       var url = this.connection ? this.connection.url.parseUrl() : null;
       var userinfo = url ? url.userinfo : [];
-      this.wantedState = this.connection ? this.connection.wantedState : "connect";
+      this.wantedState = this.connection ? this.connection.wanted_state : "connected";
       this.errors = [];
       this.url = url || {query: {nick: ""}};
       this.nick = url ? url.query.nick || nick : nick;
