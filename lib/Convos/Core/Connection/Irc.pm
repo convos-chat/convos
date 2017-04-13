@@ -30,7 +30,6 @@ has _irc => sub {
   my $self = shift;
   my $irc = Mojo::IRC::UA->new(debug_key => join ':', $self->user->email, $self->name);
 
-  Scalar::Util::weaken($self);
   $irc->name("Convos v$Convos::VERSION");
   $irc->parser(Parse::IRC->new(ctcp => 1));
   $irc->unsubscribe('message');
@@ -99,7 +98,6 @@ sub connect {
 
 sub disconnect {
   my ($self, $cb) = @_;
-  Scalar::Util::weaken($self);
   $self->{disconnect} = 1;
   $self->_proxy(disconnect => sub { $self->state('disconnected')->$cb($_[1] || '') });
 }
@@ -109,7 +107,6 @@ sub nick {
   my ($self, @nick) = @_;    # @nick will be empty list on "get"
 
   return $self->_irc->nick(@nick) unless $cb;
-  Scalar::Util::weaken($self);
   $self->url->query->param(nick => $nick[0]) if @nick;
   $self->_irc->nick(@nick, sub { shift; $self->$cb(@_) });
   $self;
@@ -207,7 +204,6 @@ sub _event_close {
   $self->state($state, sprintf 'You [%s@%s] have quit.',
     $irc->nick, $irc->real_host || $self->url->host);
   delete $self->{_irc};
-  Scalar::Util::weaken($self);
   Mojo::IOLoop->timer(
     ++$self->{delayed} < 60 ? $self->{delayed} : 60,
     sub {
@@ -435,7 +431,6 @@ sub _steal_nick {
   my $self = shift;
   my $tid;
 
-  Scalar::Util::weaken($self);
   $tid = $self->_irc->ioloop->recurring(
     STEAL_NICK_INTERVAL,
     sub {
@@ -641,7 +636,6 @@ sub _event_rpl_welcome {
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(state => me => $self->{myinfo});
 
-  Scalar::Util::weaken($self);
   $write = sub {
     my $i = $self && shift @commands || return;
     return $self->_join_dialog(join(' ', $i->name, $i->password), $write) if ref $i;

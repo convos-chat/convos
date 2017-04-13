@@ -22,7 +22,6 @@ has unread => sub {0};
 
 has_many connections => 'Convos::Core::Connection' => sub {
   my ($self, $attrs) = @_;
-  Scalar::Util::weaken($attrs->{user} = $self);
   my $class = 'Convos::Core::Connection';
 
   if ($attrs->{protocol}) {
@@ -31,6 +30,7 @@ has_many connections => 'Convos::Core::Connection' => sub {
     eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported: $@);
   }
 
+  $attrs->{user} = $self;
   my $connection = $class->new($attrs);
   warn "[@{[$self->email]}] Emit connection for id=@{[$connection->id]}\n" if DEBUG;
   $self->core->backend->emit(connection => $connection);
@@ -93,7 +93,6 @@ sub remove_connection {
     return $self;
   }
 
-  Scalar::Util::weaken($self);
   Mojo::IOLoop->delay(
     sub { $connection->disconnect(shift->begin) },
     sub {

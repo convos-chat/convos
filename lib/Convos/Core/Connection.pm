@@ -8,10 +8,7 @@ use Mojo::Util 'url_escape';
 use Mojo::URL;
 
 has messages => sub {
-  my $self = shift;
-  my $dialog = Convos::Core::Dialog->new(id => '', name => '');
-  Scalar::Util::weaken($dialog->{connection} = $self);
-  return $dialog;
+  return Convos::Core::Dialog->new(connection => $_[0], id => '', name => '');
 };
 
 sub name { shift->{name} }
@@ -42,9 +39,8 @@ sub connect {
 
 has_many dialogs => 'Convos::Core::Dialog' => sub {
   my ($self, $attrs) = @_;
-  my $dialog = Convos::Core::Dialog->new($attrs);
-  Scalar::Util::weaken($dialog->{connection} = $self);
-  return $dialog;
+  $attrs->{connection} = $self;
+  return Convos::Core::Dialog->new($attrs);
 };
 
 sub disconnect {

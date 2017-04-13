@@ -332,14 +332,12 @@ sub _save_notification {
 sub _setup {
   my $self = shift;
 
-  Scalar::Util::weaken($self);
   $self->on(
     connection => sub {
       my ($self, $connection) = @_;
       my $cid = $connection->id;
       my $uid = $connection->user->id;
 
-      Scalar::Util::weaken($self);
       $connection->on(
         message => sub {
           my ($connection, $target, $msg) = @_;
