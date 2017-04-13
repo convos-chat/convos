@@ -144,8 +144,6 @@ $ws->send_ok({json => {method => 'send', message => '/disconnect', connection_id
 $ws->message_ok->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/state', 'disconnected')->json_message_is('/type', 'connection')
   ->json_message_like('/message', qr{have quit});
-$ws->message_ok->json_message_is('/dialog_id', 'superduper')
-  ->json_message_is('/frozen', 'Not connected.');
 $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
   ->json_message_is('/message', '/disconnect');
 

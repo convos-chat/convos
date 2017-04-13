@@ -89,7 +89,7 @@ module.exports = {
       cn.link = true;
       cn.dialog = d.dialog_id ? true : false;
       if (this.dialogFilter) cn.active = i ? true : false;
-      cn.frozen = d.frozen ? true : false;
+      cn.frozen = d.frozen || d.connection().state != "connected" ? true : false;
       return cn;
     },
     search: function(e) {

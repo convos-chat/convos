@@ -94,13 +94,6 @@ sub state {
   $self->{state} = $state;
   $self->emit(state => connection => {state => $state, message => $message // ''});
 
-  if ($state eq 'disconnected') {
-    for my $dialog (@{$self->dialogs}) {
-      $dialog->frozen('Not connected.') unless $dialog->frozen;
-      $self->emit(state => frozen => $dialog->TO_JSON);
-    }
-  }
-
   return $self;
 }
 

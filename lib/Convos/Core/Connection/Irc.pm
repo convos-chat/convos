@@ -64,9 +64,8 @@ sub connect {
   $self->{steal_nick_tid} //= $self->_steal_nick;
 
   for my $dialog (@{$self->dialogs}) {
-    next if $dialog->is_private;    # TODO: Should private conversations be frozen as well?
-    $dialog->frozen('Not connected.') unless $dialog->frozen;
-    $self->emit(state => frozen => $dialog->TO_JSON);
+    next if $dialog->is_private or $dialog->frozen;
+    $self->emit(state => frozen => $dialog->frozen('Not joined.')->TO_JSON);
   }
 
   Mojo::IOLoop->delay(
