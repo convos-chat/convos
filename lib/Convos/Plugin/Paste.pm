@@ -32,6 +32,7 @@ sub _serve {
     sub {
       my ($delay, $err, $data) = @_;
       die $err if $err;
+      return $c->reply->not_found unless $data->{created_at};
       $data->{created_at} = Mojo::Date->new($data->{created_at})->to_datetime;
       $c->render(paste => file => $data, render_js => 0);
     }

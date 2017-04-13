@@ -63,4 +63,7 @@ $th->get_ok("/api/embed?url=$url")->status_is(200)->text_is('pre', "1\n2\n3\n4")
 #local $TODO = 'Need failing test';
 #  ->json_message_is('/errors/0/message', 'Unable to handle "multiline_message".');
 
+$url =~ s!(\d)$!{$1 + 1}!e;
+$th->get_ok($url)->status_is(404);
+
 done_testing;
