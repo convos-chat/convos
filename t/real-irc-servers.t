@@ -30,7 +30,7 @@ for my $host (sort keys %hosts) {
   my $connection = $user->connection({name => $name, protocol => 'irc'});
   $connection->url->parse("irc://$host");
   $connection->connect(sub { connected($host, @_) });
-  diag "connecting to $host ...";
+  note "connecting to $host ...";
 }
 
 Mojo::IOLoop->start;

@@ -8,7 +8,7 @@ use Time::HiRes 'time';
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user;
 
-diag 'jhthorsen connections';
+note 'jhthorsen connections';
 $user = $core->user({email => 'jhthorsen@cpan.org'})->save;
 
 # 1: localhost connects instantly
@@ -21,7 +21,7 @@ $user->connection({name => 'magnet', protocol => 'irc'})
 $user->connection({name => 'magnet2', protocol => 'irc'})
   ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
 
-diag 'mramberg connections';
+note 'mramberg connections';
 $user = $core->user({email => 'mramberg@cpan.org'})->save;
 
 # 0: will not be connected
@@ -37,7 +37,7 @@ $user->connection({name => 'magnet', protocol => 'irc'})
 # ^^ total connections to connect
 my $expected = 5;
 
-diag 'restart core';
+note 'restart core';
 $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 
 my %connect;
@@ -46,7 +46,7 @@ Mojo::Util::monkey_patch(
   connect => sub {
     my $host_port = $_[0]->url->host_port;
     $connect{$host_port}++;
-    diag "@{[time]} monkey_patch connect to $host_port\n" if $ENV{HARNESS_IS_VERBOSE};
+    note "@{[time]} monkey_patch connect to $host_port\n" if $ENV{HARNESS_IS_VERBOSE};
     Mojo::IOLoop->stop if sum(values %connect) == $expected;
   }
 );

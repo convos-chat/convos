@@ -72,15 +72,13 @@ HERE
   $script =~ s/\W/-/g;
   $ENV{CONVOS_HOME} = $CONVOS_HOME
     = File::Spec->catdir($FindBin::Bin, File::Spec->updir, "local", "test-$script");
-  Mojo::Util::monkey_patch(
-    $caller => diag => $ENV{HARNESS_IS_VERBOSE} ? \&Test::More::diag : sub { });
   File::Path::remove_tree($CONVOS_HOME) if -d $CONVOS_HOME;
 }
 
 END {
   # $ENV{CONVOS_HOME} might have been changed to a directory which should not be removed
   if (!$ENV{CONVOS_DEBUG} and $CONVOS_HOME and -d $CONVOS_HOME) {
-    Test::More::diag("remove_tree $CONVOS_HOME") if $ENV{HARNESS_IS_VERBOSE};
+    Test::More::note("remove_tree $CONVOS_HOME");
     File::Path::remove_tree($CONVOS_HOME);
   }
 }

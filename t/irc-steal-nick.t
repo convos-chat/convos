@@ -22,7 +22,7 @@ $t->run(
   ],
   sub {
     is $connection->url->query->param('nick'), undef, 'no nick in connect url';
-    $connection->connect(sub { $_[1] and diag "connect: $_[1]" });
+    $connection->connect(sub { $_[1] and note "connect: $_[1]" });
     is $connection->url->query->param('nick'), 'nick_young', 'nick_young set in connect url';
     Mojo::IOLoop->start;
     is $nick, 'nick_young_', 'connection nick nick_young_';
