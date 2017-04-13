@@ -9,10 +9,10 @@ use Mojo::Loader 'data_section';
 use Mojo::Util;
 
 our $CONVOS_HOME;
-our $TEST_MEMORY_CYCLE = eval 'require Test::Memory::Cycle;1';
 
-$ENV{CONVOS_SECRETS} = 'not-very-secret';
-$ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
+$ENV{CONVOS_SECRETS}    = 'not-very-secret';
+$ENV{MOJO_LOG_LEVEL}    = 'error' unless $ENV{HARNESS_IS_VERBOSE};
+$ENV{TEST_MEMORY_CYCLE} = eval 'require Test::Memory::Cycle;1';
 
 sub connect_to_irc {
   my ($class, $connection) = @_;
@@ -75,7 +75,7 @@ HERE
     = File::Spec->catdir($FindBin::Bin, File::Spec->updir, "local", "test-$script");
   File::Path::remove_tree($CONVOS_HOME) if -d $CONVOS_HOME;
 
-  Mojo::Util::monkey_patch($caller => memory_cycle_ok => $TEST_MEMORY_CYCLE
+  Mojo::Util::monkey_patch($caller => memory_cycle_ok => $ENV{TEST_MEMORY_CYCLE}
     ? \&Test::Memory::Cycle::memory_cycle_ok
     : sub { Test::More::diag('Test::Memory::Cycle is not available') });
 }

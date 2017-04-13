@@ -30,9 +30,9 @@ has_many connections => 'Convos::Core::Connection' => sub {
     eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported: $@);
   }
 
-  $attrs->{user} = $self;
   my $connection = $class->new($attrs);
   warn "[@{[$self->email]}] Emit connection for id=@{[$connection->id]}\n" if DEBUG;
+  Scalar::Util::weaken($connection->{user} = $self);
   $self->core->backend->emit(connection => $connection);
   return $connection;
 };

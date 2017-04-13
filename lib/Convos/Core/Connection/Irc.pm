@@ -30,6 +30,7 @@ has _irc => sub {
   my $self = shift;
   my $irc = Mojo::IRC::UA->new(debug_key => join ':', $self->user->email, $self->name);
 
+  Scalar::Util::weaken($self);
   $irc->name("Convos v$Convos::VERSION");
   $irc->parser(Parse::IRC->new(ctcp => 1));
   $irc->unsubscribe('message');
@@ -431,7 +432,7 @@ sub _steal_nick {
   my $self = shift;
   my $tid;
 
-  $tid = $self->_irc->ioloop->recurring(
+  $tid = Mojo::IOLoop->recurring(
     STEAL_NICK_INTERVAL,
     sub {
       return shift->remove($tid) unless $self;
@@ -658,10 +659,9 @@ sub _event_topic {
 }
 
 sub DESTROY {
-  my $self = shift;
-  my $ioloop = $self->{_irc}{ioloop} or return;
-  my $tid;
-  $ioloop->remove($tid) if $tid = $self->{steal_nick_tid};
+  my $self   = shift;
+  my $ioloop = Mojo::IOLoop->singleton;
+  $ioloop->remove($self->{steal_nick_tid}) if $ioloop and $self->{steal_nick_tid};
 }
 
 sub TO_JSON {

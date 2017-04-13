@@ -11,7 +11,7 @@ sub info {
   }
   if (my $link = $self->app->_link_cache->get($url)) {
     $self->res->headers->header('X-Cached' => 1);    # for testing
-    return $self->respond_to(json => {json => $link}, any => {text => $link->html});
+    return $self->respond_to(json => {json => $link}, any => {text => $link->{html} // ''});
   }
 
   $self->delay(
@@ -23,7 +23,7 @@ sub info {
         $self->stash(status => $link->error->{code} || 500);
       }
       else {
-        $self->app->_link_cache->set($url => $link);
+        $self->app->_link_cache->set($url => $link->TO_JSON);
         $self->res->headers->cache_control('max-age=600');
       }
 

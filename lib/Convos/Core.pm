@@ -79,10 +79,11 @@ sub start {
 
 has_many users => 'Convos::Core::User' => sub {
   my ($self, $attrs) = @_;
-  $attrs->{core} = $self;
   $attrs->{email} = trim lc $attrs->{email} || '';
   die "Invalid email $attrs->{email}. Need to match /.\@./." unless $attrs->{email} =~ /.\@./;
-  return Convos::Core::User->new($attrs);
+  my $user = Convos::Core::User->new($attrs);
+  Scalar::Util::weaken($user->{core} = $self);
+  return $user;
 };
 
 sub web_url {

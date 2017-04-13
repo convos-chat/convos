@@ -63,4 +63,6 @@ $t->run(
   }
 );
 
+memory_cycle_ok($core, 'no cycles in core');
+
 done_testing;

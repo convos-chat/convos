@@ -6,10 +6,11 @@ use List::Util 'sum';
 use Time::HiRes 'time';
 
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
-my $user;
+memory_cycle_ok($core, 'no cycles in plain core');
 
 note 'jhthorsen connections';
-$user = $core->user({email => 'jhthorsen@cpan.org'})->save;
+my $user = $core->user({email => 'jhthorsen@cpan.org'})->save;
+memory_cycle_ok($core, 'no cycles after adding a user');
 
 # 1: localhost connects instantly
 $user->connection({name => 'localhost', protocol => 'irc'})
@@ -20,9 +21,11 @@ $user->connection({name => 'magnet', protocol => 'irc'})
   ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
 $user->connection({name => 'magnet2', protocol => 'irc'})
   ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
+memory_cycle_ok($core, 'no cycles after adding connections');
 
 note 'mramberg connections';
 $user = $core->user({email => 'mramberg@cpan.org'})->save;
+memory_cycle_ok($core, 'no cycles after adding second user');
 
 # 0: will not be connected
 $user->connection({name => 'localhost', protocol => 'Irc'})
@@ -33,6 +36,7 @@ $user->connection({name => 'freenode', protocol => 'irc'})
   ->tap(sub { shift->url->parse('irc://chat.freenode.net:6697') })->save;
 $user->connection({name => 'magnet', protocol => 'irc'})
   ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save;
+memory_cycle_ok($core, 'no cycles after adding more connections');
 
 # ^^ total connections to connect
 my $expected = 5;
@@ -68,5 +72,7 @@ is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 1, 'local
 Mojo::IOLoop->start;
 is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 3, 'localhost' => 1},
   'started duplicate connection delayed';
+
+memory_cycle_ok($core, 'no cycles after starting core');
 
 done_testing;
