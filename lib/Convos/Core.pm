@@ -5,11 +5,13 @@ use Convos::Core::Backend;
 use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
 use Mojo::File;
+use Mojo::URL;
 use Mojo::Util 'trim';
 use Mojolicious::Plugins;
 
-has backend => sub { Convos::Core::Backend->new };
-has home => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
+has backend  => sub { Convos::Core::Backend->new };
+has base_url => sub { Mojo::URL->new };
+has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
 
 sub connect {
   my ($self, $connection, $cb) = @_;
@@ -35,6 +37,11 @@ sub connect {
   }
 
   return $self;
+}
+
+sub get_user_by_public_id {
+  my ($self, $public_id) = @_;
+  return +(grep { $_->public_id eq $public_id } @{$self->users})[0];
 }
 
 sub new {
@@ -80,6 +87,18 @@ has_many users => 'Convos::Core::User' => sub {
   Scalar::Util::weaken($user->{core} = $self);
   return $user;
 };
+
+sub web_url {
+  my $self = shift;
+  my $url  = Mojo::URL->new(shift);
+
+  $url->base($self->base_url->clone)->base->userinfo(undef);
+  my $base_path = $url->base->path;
+  unshift @{$url->path->parts}, @{$base_path->parts};
+  $base_path->parts([])->trailing_slash(0);
+
+  return $url;
+}
 
 sub _dequeue {
   my $self = shift;
@@ -172,6 +191,13 @@ the following new ones.
 
 Holds a L<Convos::Core::Backend> object.
 
+=head2 base_url
+
+  $url = $self->base_url;
+
+Holds a L<Mojo::URL> object that holds the public location of this Convos
+instance.
+
 =head2 home
 
   $obj = $self->home;
@@ -206,6 +232,12 @@ L<Convos::Core::Connection/connect> if defined.
 
 Returns a L<Convos::Core::User> object or undef.
 
+=head2 get_user_by_public_id
+
+  $user = $self->get_user_by_public_id($id);
+
+Returns a L<Convos::Core::User> object or undef.
+
 =head2 new
 
   $self = Convos::Core->new(%attrs);
@@ -231,6 +263,14 @@ Returns a new L<Convos::Core::User> object or updates an existing object.
   $users = $self->users;
 
 Returns an array-ref of of L<Convos::Core::User> objects.
+
+=head2 web_url
+
+  $url = $self->web_url($url);
+
+Takes a path, or complete URL, merges it with L</base_url> and returns a new
+L<Mojo::URL> object. Note that you need to call L</to_abs> on that object
+for an absolute URL.
 
 =head1 AUTHOR
 

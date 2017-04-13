@@ -374,11 +374,17 @@ sub _send {
     return next_tick $self, $cb => 'Unable to construct PRIVMSG.' unless ref $_;
   }
 
-  # TODO: Create paste
   if (MAX_BULK_MESSAGE_SIZE < @messages) {
-    return next_tick $self,
-      $cb => sprintf "Too many newlines in message. (%s>%s)",
-      int(@messages), MAX_BULK_MESSAGE_SIZE;
+    $self->user->core->backend->emit_single(
+      multiline_message => $self,
+      \$message,
+      sub {
+        my ($backend, $err, $file) = @_;
+        return $self->$cb($err) if $err;
+        return $self->_send($target, $self->user->core->web_url($file->public_uri)->to_abs, $cb);
+      }
+    );
+    return $self;
   }
 
   # Seems like there is no way to know if a message is delivered

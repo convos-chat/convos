@@ -113,8 +113,6 @@ div.le-card {
 }
 
 .le-paste {
-  $paste-bg-color: #f8f8f8;
-
   background: $paste-bg-color;
   border: 1px solid darken($paste-bg-color, 10%);
   max-height: 80px;
@@ -151,4 +149,11 @@ div.le-card {
       }
     }
   }
+}
+
+div.paste {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid darken($paste-bg-color, 10%);
+
+  h1 { font-size: 2rem; }
 }
