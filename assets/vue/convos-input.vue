@@ -4,7 +4,7 @@
       <li :class="i == completeIndex ? 'active' : ''" v-for="(i, c) in completeList" v-show="completeList.length">
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'command'">{{c}}{{commands[c] ? " - " + commands[c].description : ""}}</a>
         <a href="#{{c}}" @click.prevent v-if="completeFormat == 'emoji'">{{{c.rich()}}} {{i ? emojiDescription(c) : ''}}</a>
-        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'nick'">{{c}}</a>
+        <a href="#{{c}}" @click.prevent v-if="completeFormat == 'nick'">{{c || "&nbsp;"}}</a>
       </li>
     </ul>
     <i @click="sendMessage" class="material-icons waves-effect waves-light">send</i>
@@ -15,11 +15,6 @@
 var emojis = Object.keys(emojione.emojioneList).filter(function(e) { return !e.match(/_tone/); }).sort();
 var commandList = [];
 var commands = {};
-
-var _filter = function(list, match) {
-  match = match.toLowerCase();
-  return match.length ? list.filter(function(i) { return i.toLowerCase().indexOf(match) == 0; }) : list.slice(0);
-};
 
 Convos.commands.forEach(function(cmd) {
   if (!commands["/" + cmd.command]) commandList.push("/" + cmd.command);
@@ -66,7 +61,7 @@ module.exports = {
     autocomplete: function(args) {
       var ta = this.$els.input;
       var padding = "";
-      var pos, word;
+      var i, pos, re, word;
 
       if (this.completeList.length) {
         this.completeIndex = args.up ? this.completeIndex - 1 : this.completeIndex + 1;
@@ -77,30 +72,41 @@ module.exports = {
         pos = ta.selectionStart;
         this.before = ta.value.substring(0, pos);
         this.after = ta.value.substring(pos);
-        this.complete = this.before.match(/(\S)(\S*)$/);
+        this.complete = this.before.match(/(\S)(\S*)$/) || ["", "", ""];
         this.completeIndex = 1;
         this.completeList = [];
 
-        if (this.complete) {
-          switch (this.complete[1]) {
-            case "/":
+        switch (this.complete[1]) {
+          case "/":
+            if (this.before.match(/^\S+$/)) {
+              re = new RegExp("^" + this.complete[0], "i");
               this.completeFormat = "command";
-              if (this.before.match(/^\S+$/)) this.completeList = _filter(commandList, this.complete[0]);
-              break;
-            case ":":
-              this.completeFormat = "emoji";
-              this.completeList = _filter(emojis, this.complete[0]).splice(0, 40);
-              break;
-            default:
-              this.completeFormat = "nick";
-              this.completeList = _filter(this.participants(), this.complete[0]);
-          }
-
-          this.before = this.before.substring(0, pos - this.complete[0].length);
-
-          var i = this.completeList.indexOf(this.complete[0]);
-          this.completeList.unshift(i == -1 ? this.complete[0] : this.completeList.splice(i, 1));
+              this.completeList = commandList.filter(function(i) { return i.match(re); });
+            }
+            break;
+          case ":":
+            re = [new RegExp("^" + this.complete[0], "i"), new RegExp(this.complete[2], "i")];
+            this.completeFormat = "emoji";
+            for (i = 0; i < emojis.length; i++) {
+              if (emojis[i].match(re[0])) {
+                this.completeList.unshift(emojis[i]);
+                if (this.completeList.length > 30) break;
+              }
+              else if (emojis[i].match(re[1])) {
+                this.completeList.push(emojis[i]);
+                if (this.completeList.length > 30) break;
+              }
+            }
+            break;
+          default:
+            var re = new RegExp("^" + this.complete[0], "i");
+            this.completeFormat = "nick";
+            this.completeList = this.participants().filter(function(i) { return i.match(re); });
         }
+
+        this.before = this.before.substring(0, pos - this.complete[0].length);
+        i = this.completeList.indexOf(this.complete[0]);
+        this.completeList.unshift(i == -1 ? this.complete[0] : this.completeList.splice(i, 1));
 
         if (this.completeList.length > 1) {
           var el = this.$els.dropdown;
@@ -144,6 +150,9 @@ module.exports = {
           this.completeList = [];
           this.sendMessage();
           break;
+        case 27: // esc
+          this.completeList = [];
+          break;
         default:
           if (c >= 32) this.completeList = [];
       }
@@ -155,9 +164,9 @@ module.exports = {
       $("a.create-dialog").click();
     },
     participants: function() {
-      return Object.$values(this.dialog.participants).sort(function(a, b) {
-        if (a.seen > b.seen) return 1;
-        if (a.seen < b.seen) return -1;
+      return this.dialog.participants().sort(function(a, b) {
+        if (a.seen > b.seen) return -1;
+        if (a.seen < b.seen) return 1;
         if (a.name > b.name) return -1;
         if (a.name < b.name) return 1;
         return 0;

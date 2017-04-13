@@ -32,7 +32,7 @@
         var c = {};
 
         c["highlight"] = this.msg.highlight;
-        c["inactive-user"] = !msg.type.match(/^(notice|error)$/) && this.dialog.dialog_id && !this.dialog.participants[msg.from];
+        c["inactive-user"] = !msg.type.match(/^(notice|error)$/) && this.dialog.dialog_id && !this.dialog.participant(msg.from).online;
         c["same-user"] = prev.from == msg.from;
 
         return c;
@@ -62,7 +62,7 @@
       },
       statusTooltip: function() {
         if (!this.dialog.dialog_id) return;
-        return this.dialog.participants[this.msg.from] ? "" : "Not in this channel";
+        return this.dialog.participant(this.msg.from).online ? "" : "Not in this channel";
       }
     }
   };

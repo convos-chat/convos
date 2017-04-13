@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix rendering "404 not found" on unknown paste
  - Fix background colors for chat and embeds
  - Fix private dialogs used to be "in red" after reconnect
+ - Improved autocomplete logic for nicks and emojis
  - Add "wanted_state" to Core::Connection
  - Improved rendering of highlight messages
 

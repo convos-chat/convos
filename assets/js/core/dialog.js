@@ -13,11 +13,11 @@
     this.loading = false;
     this.messages = [];
     this.name = attrs.name || attrs.dialog_id.toLowerCase() || "";
-    this.participants = {};
     this.reset = attrs.hasOwnProperty("reset") ? attrs.reset : true;
     this.topic = attrs.topic || "";
     this.unread = 0;
     this.user = attrs.user || new Convos.User({});
+    this._participants = {};
   };
 
   var proto = Convos.Dialog.prototype;
@@ -39,7 +39,7 @@
     }
 
     this.messages[args.method](msg);
-    this.participant({type: "maintain", name: msg.from, seen: msg.ts});
+    this.participant({nick: msg.from, seen: msg.ts});
     this.emit("message", msg);
   };
 
@@ -88,36 +88,41 @@
   };
 
   proto.participant = function(data) {
-    if (this.dialog_id != data.dialog_id) return;
+    // get
+    if (typeof data == "string") return this._participants[data] || {};
+
+    // set
+    if (data.dialog_id && data.dialog_id != this.dialog_id) return;
     if (!data.nick) data.nick = data.new_nick || data.name;
+
+    var current = this._participants[data.nick] || {name: data.nick, seen: new Date(0)};
+    if (data.mode) current.mode = data.mode;
+    if (data.seen && current.seen < data.seen) current.seen = data.seen;
+    if (data.hasOwnProperty("online")) current.online = data.online;
 
     switch (data.type) {
       case "join":
-        Vue.set(this.participants, data.nick, {name: data.nick, seen: new Date()});
         this.addMessage({message: data.nick + " joined.", from: this.connection_id});
         break;
-      case "maintain":
-        if (!this.participants[data.nick]) return;
-        this.participants[data.nick].seen = data.ts || new Date();
-        break;
-      case "mode":
-        if (!this.participants[data.nick]) return;
-        this.participants[data.nick].mode = data.mode;
-        break;
       case "nick_change":
-        if (!this.participants[data.nick]) return;
-        Vue.delete(this.participants, data.old_nick);
-        Vue.set(this.participants, data.nick, {name: data.nick, seen: new Date()});
+        Vue.delete(this._participants, data.old_nick);
         this.addMessage({message: data.old_nick + " changed nick to " + data.nick + ".", from: this.connection_id});
         break;
-      default: // part
-        if (!this.participants[data.nick]) return;
+      case "part":
+      case "quit":
+        if (!this._participants[data.nick]) return;
         var message = data.nick + " parted.";
-        Vue.delete(this.participants, data.nick);
+        current.online = false;
         if (data.kicker) message = data.nick + " was kicked by " + data.kicker + ".";
         if (data.message) message += " Reason: " + data.message;
         this.addMessage({message: message, from: this.connection_id});
     }
+
+    Vue.set(this._participants, data.nick, current);
+  };
+
+  proto.participants = function() {
+    return Object.$values(this._participants);
   };
 
   proto.setLastRead = function() {
@@ -156,9 +161,8 @@
     }
 
     if (this.is_private) {
-      [this.name, this.connection().nick()].forEach(function(n) {
-        this.participants[n] = {name: n, seen: new Date()};
-      }.bind(this));
+      this.participant({nick: this.name});
+      this.participant({nick: this.connection().nick()});
     }
 
     return this;
@@ -218,10 +222,10 @@
 
   proto._setParticipants = function(msg) {
     if (msg.errors) return this.addMessage({type: "error", message: msg.errors[0].message});
-    this.participants = {};
+    this.participants().forEach(function(p) { p.online = false; });
     msg.participants.forEach(function(p) {
-      p.seen = new Date();
-      this.participants[p.name] = p;
+      p.online = true;
+      this.participant(p);
     }.bind(this));
   };
 })();

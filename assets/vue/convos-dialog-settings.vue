@@ -37,9 +37,9 @@ module.exports = {
   computed: {
     participants: function() {
       if (!this.dialog) return [];
-      return Object.keys(this.dialog.participants)
-        .sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); })
-        .map(function(k) { return this.dialog.participants[k] || {name: k}; }.bind(this));
+      return this.dialog.participants()
+        .filter(function(p) { return p.online })
+        .sort(function(a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
     }
   },
   methods: {
