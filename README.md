@@ -26,6 +26,12 @@ screen as you start convos:
 
     [Sun Aug 21 11:18:03 2016] [info] Generated CONVOS_INVITE_CODE="b34b0ab873e80419b9a2170de8ca8190"
 
+# Other deployment strategies
+
+- [Docker](https://hub.docker.com/r/nordaaker/convos/)
+- [Snappy](https://uappexplorer.com/apps?type=snappy&q=convos&sort=relevance)
+- [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
 # Branch overview
 
 ## stable
