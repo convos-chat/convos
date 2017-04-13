@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-0.99_30 Not Released
+0.99_30 2017-04-13T13:52:44+0200
  - Fix scrolling on "Join dialog" and "Help" pages #331
  - Add support for generating "recover password" link #302 #323
  - Add Convos::Plugin::Paste #328

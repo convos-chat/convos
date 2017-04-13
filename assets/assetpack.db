@@ -219,6 +219,9 @@ minified=1
 format=js
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/js/waves.js
+[original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_badges.scss]
+format=scss
+rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_badges.scss
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_buttons.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_buttons.scss
@@ -270,6 +273,9 @@ rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_preloader.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_preloader.scss
+[original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_pulse.scss]
+format=scss
+rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_pulse.scss
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_roboto.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_roboto.scss
@@ -285,6 +291,9 @@ rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_tabs.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_tabs.scss
+[original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_tapTarget.scss]
+format=scss
+rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_tapTarget.scss
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_toast.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_toast.scss
@@ -292,6 +301,9 @@ rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_
 format=scss
 mtime=1461098052
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_tooltip.scss
+[original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_transitions.scss]
+format=scss
+rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_transitions.scss
 [original:https://raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_typography.scss]
 mtime=1459461713
 rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/components/_typography.scss
