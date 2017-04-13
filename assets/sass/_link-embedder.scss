@@ -13,8 +13,8 @@
 
 blockquote.le-card,
 div.le-card {
-  background: lighten($sidebar-bg, 2%);
-  border: 1px solid darken($sidebar-bg, 5%);
+  background: darken($body-bg, 3%);
+  border: 1px solid darken($body-bg, 10%);
   padding: 0.5rem;
   margin: 0.3rem 0;
 }

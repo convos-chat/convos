@@ -462,7 +462,7 @@ checksum=7bd7fb26ed
 format=js
 minified=1
 [sass:sass/main.scss]
-checksum=5fc09d2dc9
+checksum=63f8bd6a67
 format=css
 minified=0
 [sass-min:sass/main.scss]
