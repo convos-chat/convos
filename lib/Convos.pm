@@ -67,23 +67,23 @@ sub startup {
   push @{$self->renderer->classes}, __PACKAGE__;
 
   # Add basic routes
-  $r->get('/')->to(template => 'convos')->name('index');
+  $r->get('/')->to(template => 'index')->name('index');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/custom/asset/*file' => \&_action_custom_asset);
+  $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
+  $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
   $r->websocket('/events')->to('events#start')->name('events');
 
   $self->_api_spec;
   $self->_plugins;
   $self->_setup_secrets;
+  $self->_assets;
 
   # Autogenerate routes from the OpenAPI specification
   $self->plugin(OpenAPI => {url => delete $self->{_api_spec}});
 
   # Add /perldoc route for documentation
   $self->plugin('PODRenderer')->to(module => 'Convos');
-
-  # Skip building on travis
-  $ENV{TRAVIS_BUILD_ID} ? $self->helper(asset => sub { }) : $self->_assets;
 
   $self->hook(
     before_dispatch => sub {
@@ -119,6 +119,11 @@ sub _action_custom_asset {
 sub _assets {
   my $self          = shift;
   my $custom_assets = $self->core->home->child('assets');
+
+  # Skip building on travis
+  if ($ENV{TRAVIS_BUILD_ID} or $ENV{CONVOS_COMMAND_LINE}) {
+    return $self->helper(asset => sub { });
+  }
 
   $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine Reloader)]});
 
@@ -382,7 +387,7 @@ __DATA__
     %= asset 'reloader.js' if app->mode eq 'development';
   </body>
 </html>
-@@ convos.html.ep
+@@ index.html.ep
 % layout 'convos';
 % title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
 <component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
@@ -409,6 +414,9 @@ __DATA__
     page: "<%= stash('page') || '' %>",
     settings: <%== to_json app->config('settings') %>
   };
+% if (my $main = flash 'main') {
+  window.Convos.settings.main = "<%= $main %>";
+% }
 % end
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 <script async src="//platform.instagram.com/en_US/embeds.js"></script>

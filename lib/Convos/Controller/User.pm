@@ -3,6 +3,8 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Convos::Util 'E';
 
+use constant RECOVERY_LINK_VALID_FOR => $ENV{CONVOS_RECOVERY_LINK_VALID_FOR} || 3600 * 6;
+
 sub delete {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
@@ -20,6 +22,15 @@ sub delete {
       $self->render(openapi => {message => 'You have been erased.'});
     },
   );
+}
+
+sub generate_recover_link {
+  my $self  = shift;
+  my $email = $self->stash('email');
+  my $exp   = time - int(rand 3600) + RECOVERY_LINK_VALID_FOR + 1800;
+  my $check = Mojo::Util::hmac_sha1_sum("$email/$exp", $self->app->secrets->[0]);
+
+  $self->render(text => $self->url_for(recover => {check => $check, exp => $exp}));
 }
 
 sub get {
@@ -60,6 +71,28 @@ sub logout {
       return $self->session({expires => 1})->redirect_to('index');
     },
   );
+}
+
+sub recover {
+  my $self  = shift;
+  my $email = $self->stash('email');
+  my $exp   = $self->stash('exp');
+  my $redirect_url;
+
+  # expired
+  return $self->render('index', status => 410) if $exp < time;
+
+  for my $secret (@{$self->app->secrets}) {
+    my $check = Mojo::Util::hmac_sha1_sum("$email/$exp", $secret);
+    next if $check ne $self->stash('check');
+    $redirect_url = $self->url_for('index');
+    last;
+  }
+
+  return $self->render('index', status => 400) unless $redirect_url;
+
+  $self->flash(main => '#profile');
+  $self->session(email => $email)->redirect_to($redirect_url);
 }
 
 sub register {
@@ -120,6 +153,10 @@ user related actions.
 
 See L<Convos::Manual::API/deleteUser>.
 
+=head2 generate_recover_link
+
+Used to generate a recover link when running Convos from the command line.
+
 =head2 get
 
 See L<Convos::Manual::API/getUser>.
@@ -131,6 +168,10 @@ See L<Convos::Manual::API/loginUser>.
 =head2 logout
 
 See L<Convos::Manual::API/logoutUser>.
+
+=head2 recover
+
+Will log in a user from a recovery link.
 
 =head2 register
 
