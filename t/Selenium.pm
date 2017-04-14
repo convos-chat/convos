@@ -29,7 +29,7 @@ sub selenium_init {
   my $t = Test::Mojo::WithRoles->new($app || 'Convos');
 
   $t->setup_or_skip_all;
-  $t->navigate_ok($args->{loc} || '/?_assetpack_reload=false');
+  $t->navigate_ok($args->{loc} || '/?_assetpack_reload=false&debug=info,user,watch,ws');
   $class->set_window_size($t, 'desktop');
 
   if ($args->{lazy}) {

@@ -7,6 +7,7 @@
     this.email = "";
     this.highlightKeywords = [];
     this.notifications = [];
+    this.refreshed = 0;
     this.unread = 0;
     this._keepAliveTid = setInterval(this._keepAlive(), 20000);
   };
@@ -62,11 +63,13 @@
 
   proto.refresh = function() {
     var self = this;
+    var r = this.refreshed;
 
-    if (DEBUG.info) console.log("[WebSocket] readyState is " + this._wsState());
-    if (this._wsState() == "OPEN") return console.trace("[WebSocket] Already open!");
+    if (DEBUG.ws) console.log("[WebSocket:" + r + "] readyState is " + this._wsState());
+    if (!this._wsState().match(/^(CLOSED|UNDEFINED)$/)) return;
     if (this._refreshTid) clearTimeout(this._refreshTid);
 
+    this.refreshed++;
     this.ws = new WebSocket(Convos.wsUrl);
 
     this.ws.onopen = function() {
@@ -74,7 +77,7 @@
     };
 
     this.ws.onclose = this.ws.onerror = function(e) {
-      if (DEBUG.info) console.log("[WebSocket]", e);
+      if (DEBUG.info) console.log("[WebSocket:" + r + "]", e);
       if (!self.email) return self.currentPage = "convos-login";
       self._refreshTid = setTimeout(self.refresh.bind(self), 1000);
       self.connections.forEach(function(c) { c.update({state: "unreachable"}); });
@@ -82,7 +85,7 @@
     };
 
     this.ws.onmessage = function(e) {
-      if (DEBUG.ws) console.log("[WebSocket] " + e.data);
+      if (DEBUG.ws) console.log("[WebSocket:" + r + "] " + e.data);
       var data = JSON.parse(e.data);
 
       if (data.connection_id && data.event) {
