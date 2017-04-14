@@ -1,10 +1,15 @@
 Revision history for perl distribution Convos
 
-0.99_31 Not Released
- - Fix rendering "404 not found" on unknown paste
+0.99_31 2017-04-14T13:40:04+0200
+ - Fix autocompleting nicks by "last seen"
  - Fix background colors for chat and embeds
+ - Fix online/offline state in private dialog using "/ison nick"
  - Fix private dialogs used to be "in red" after reconnect
+ - Fix race condition when opening websocket connection
+ - Fix rendering "404 not found" on unknown paste
+ - Fix unread count is not increased when a private dialog user join/parts
  - Improved autocomplete logic for nicks and emojis
+ - Add experimental MOTD (message of the day) handling
  - Add "wanted_state" to Core::Connection
  - Improved rendering of highlight messages
 
