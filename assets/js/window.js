@@ -39,10 +39,6 @@
     if (!isMobile) window.nextTick(function() { this.focus(); }.bind(this));
   };
 
-  Object.$values = function(obj) {
-    return Object.keys(obj).sort().map(function(k) { return obj[k]; });
-  };
-
   RegExp.escape = function(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   };

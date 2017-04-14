@@ -123,7 +123,8 @@
   };
 
   proto.participants = function() {
-    return Object.$values(this._participants);
+    var obj = this._participants;
+    return Object.keys(obj).sort().map(function(k) { return obj[k]; });
   };
 
   proto.setLastRead = function() {
@@ -154,16 +155,14 @@
       this.load({}, function() {});
     }
 
-    if (!this.is_private && stateChange && !this.frozen && this.active) {
-      this.connection().send("/names", this, this._setParticipants.bind(this));
-    }
-    if (this.is_private && wasInactive && this.active) {
-      this.connection().send("/ison " + this.name, this);
+    if (this.is_private) {
+      this.participant({online: this.frozen ? false : true, nick: this.name});
+      this.participant({online: true, nick: this.connection().nick()});
+      if (wasInactive && this.active) this.connection().send("/ison " + this.name, this);
     }
 
-    if (this.is_private) {
-      this.participant({nick: this.name});
-      this.participant({nick: this.connection().nick()});
+    if (!this.is_private && stateChange && !this.frozen && this.active) {
+      this.connection().send("/names", this, this._setParticipants.bind(this));
     }
 
     return this;

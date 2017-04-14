@@ -15,11 +15,13 @@
 module.exports = {
   props: ["dialog", "msg", "user"],
   data: function() {
-    var participants = Object.$values(this.dialog.participants).sort(function(a, b) {
-      if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-      if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
-      return 0;
-    });
+    var participants = this.dialog.participants()
+      .filter(function(p) { return p.online; })
+      .sort(function(a, b) {
+        if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+        if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+        return 0;
+      });
 
     return {
       n: participants.length,
