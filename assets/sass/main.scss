@@ -51,11 +51,5 @@
 @import "link-embedder";
 @import "sidebar";
 
-// Material-overrides
-
-html {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-}
-
 // Add your own rules in $CONVOS_HOME/assets/sass/custom.css
 @import "http://local/custom/asset/sass/custom.scss";;

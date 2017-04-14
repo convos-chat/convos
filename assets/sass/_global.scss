@@ -1,4 +1,5 @@
-body {
+html, body {
+  font-family: $font-family-default;
   background-color: $body-bg;
   color: $text-color;
 }

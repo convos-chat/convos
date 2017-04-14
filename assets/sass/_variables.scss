@@ -7,6 +7,9 @@ $link-color: lighten($primary-color, 0%) !default;
 $text-color: #222 !default;
 $paste-bg-color: #f8f8f8;
 
+$font-family-default: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+$font-family-monospace: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
 $collection-border-color: darken($body-bg, 9%);
 
 $error-bg-color: color('red', 'lighten-5') !default;

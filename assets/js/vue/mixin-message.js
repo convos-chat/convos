@@ -8,6 +8,7 @@
       computedMessage: function() {
         var m, self = this;
         return self.msg.message.rich({
+          markdown: this.msg.motd ? false : true,
           after: function(url, id) {
             if (!self.settings.expandUrls || !self.visible) {
               return;
@@ -33,6 +34,7 @@
 
         c["highlight"] = this.msg.highlight;
         c["inactive-user"] = !msg.type.match(/^(notice|error)$/) && this.dialog.dialog_id && !this.dialog.participant(msg.from).online;
+        c["motd"] = this.msg.motd;
         c["same-user"] = prev.from == msg.from;
 
         return c;

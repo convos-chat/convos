@@ -32,6 +32,7 @@
     if (typeof msg.ts == "string") msg.ts = Date.fromAPI(msg.ts);
     if (args.method == "push") this._processNewMessage(msg);
     if (args.type == "participants") this._setParticipants(msg);
+    if (!this.dialog_id) this._processNewServerMessage(msg);
 
     var prev = args.method == "unshift" ? this.messages[0] : this.messages.slice(-1)[0];
     if (prev && prev.ts.getDate() != msg.ts.getDate()) {
@@ -216,6 +217,11 @@
     else if (this.is_private && this.dialog_id) {
       Notification.simple(msg.from, msg.message);
     }
+  };
+
+  proto._processNewServerMessage = function(msg) {
+    if (msg.type == "notice") msg.type = "private";
+    if (msg.message.indexOf("- ") == 0) msg.motd = true; // experimental MOTD handling
   };
 
   proto._setParticipants = function(msg) {

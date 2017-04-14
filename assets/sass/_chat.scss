@@ -156,6 +156,14 @@ $convos-input-height: 46px;
       text-decoration: line-through;
     }
   }
+  &.motd .message {
+    font-family: $font-family-monospace;
+    font-size: 0.9rem;
+    div {
+      font-family: $font-family-default;
+      font-size: 1rem;
+    }
+  }
   &.same-user {
     margin-top: -$dialog-spacing;
     .title { display: none; }

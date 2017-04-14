@@ -4518,7 +4518,8 @@ input[type=range]:focus::-ms-fill-upper {
   100% {
     background-position: 100% 0; } }
 
-body {
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   background-color: #fafafa;
   color: #222; }
 
@@ -4923,6 +4924,12 @@ ul.complete-dropdown {
   .convos-message.inactive-user a.title {
     color: #7bc17e;
     text-decoration: line-through; }
+  .convos-message.motd .message {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9rem; }
+    .convos-message.motd .message div {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+      font-size: 1rem; }
   .convos-message.same-user {
     margin-top: -4px; }
     .convos-message.same-user .title {
@@ -5165,7 +5172,7 @@ div.le-card {
     width: 100%; }
 
 .hljs {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 0.9rem;
   line-height: 1.3rem;
   white-space: pre; }
@@ -5355,7 +5362,4 @@ body.notouch .convos-main-menu .link.dialog:hover .close:hover {
 body.notouch .convos-main-menu .link.dialog:hover .n-unread {
   display: none; }
 
-html {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
-
-/*# sourceMappingURL=../a488e31529/main.css.map */
+/*# sourceMappingURL=../aec2163d6e/main.css.map */
