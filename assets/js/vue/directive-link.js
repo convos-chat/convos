@@ -4,12 +4,15 @@
     bind: function() {
       var vm = this.vm;
       this.el.addEventListener("click", function(e) {
-        var href = e.currentTarget.getAttribute("href");
+        var m, href = e.currentTarget.getAttribute("href");
         e.preventDefault();
         Convos.settings.mainMenuVisible = false;
 
-        if (href.match(/^\#/)) {
-          Convos.settings.main = href.replace(/.*?#/, "#");
+        if (m = href.match(/^\#page:(.+)/)) {
+          vm.user.currentPage = "convos-" + m[1];
+        }
+        else if (m = href.match(/^(\#.+)/)) {
+          Convos.settings.main = m[1];
         }
         else {
           window.location = Convos.indexUrl.replace(/\/+$/, '') + href;

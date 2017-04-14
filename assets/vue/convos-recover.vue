@@ -12,7 +12,7 @@
     </div>
     <div class="row">
       <div class="col s12">
-        <a :href="'#login" @click.prevent="user.currentPage = 'convos-login'" class="btn waves-effect waves-light">Login</a>
+        <a v-link.literal="#page:login" class="btn waves-effect waves-light">Login</a>
       </div>
     </div>
   </convos-not-logged-in>

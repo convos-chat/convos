@@ -4,7 +4,7 @@ use t::Selenium;
 my $t = t::Selenium->selenium_init;
 
 $t->wait_until(sub { $_->find_element('.convos-login') });
-$t->click_ok('[href="#register"]');
+$t->click_ok('[href="#page:register"]');
 
 $t->wait_until(sub { $_->find_element('.convos-register') });
 $t->send_keys_ok('#form_login_email',          [t::Selenium->email,       \'tab']);

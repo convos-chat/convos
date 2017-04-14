@@ -9,13 +9,14 @@ $connection->_event_privmsg(
   {
     event  => 'privmsg',
     prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => [$NICK, 'What about a normal message in a channel?'],
+    params => ['#test', 'What about a normal message in a channel?'],
   }
 );
 
-$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/batgirl"]') });
-$t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread');
+$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
 $t->click_ok('.convos-main-menu [href="#chat/irc-default/#test"]');
+$t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread');
+$t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/batgirl"]');
 
 $connection->_fallback(
   {
@@ -31,7 +32,7 @@ $connection->_event_privmsg(
   {
     event  => 'privmsg',
     prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => [$NICK, 'What about a normal message in a channel?'],
+    params => [$NICK, 'What about a private message?'],
   }
 );
 
@@ -75,6 +76,6 @@ $t->click_ok('[href="#mark-as-read"]');
 $t->live_element_exists_not('.convos-header-links .n-notifications');
 
 # server messages should not result in notifications
-is $t->driver->execute_script('return window.Notification.simple.count'), 4, 'simple.count';
+is $t->driver->execute_script('return window.Notification.simple.count'), 3, 'simple.count';
 
 done_testing;

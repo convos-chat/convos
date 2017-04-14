@@ -9,12 +9,6 @@
           </div>
         </div>
         <slot></slot>
-        <div class="row" v-if="changeText">
-          <div class="col s12">
-            <button class="btn waves-effect waves-light" type="submit">{{screen.ucFirst()}}</button>
-            <a :href="'#' + screen" @click.prevent="changeScreen" class="btn-flat waves-effect waves-light">{{changeText}}</a>
-          </div>
-        </div>
         <div class="row">
           <div class="col s12 about">
             <template v-if="settings.organization_url != 'http://convos.by'">
@@ -31,16 +25,9 @@
   </div>
 </template>
 <script>
-var other = {login: "register", register: "login"};
 module.exports = {
   props: ["screen", "user"],
-  data: function() {
-    return {changeText: (other[this.screen] || "").ucFirst()};
-  },
   methods: {
-    changeScreen: function(e) {
-      this.user.currentPage = "convos-" + (other[this.screen] || "");
-    },
     submit: function(e) {
       this.$emit("submit", e)
     },

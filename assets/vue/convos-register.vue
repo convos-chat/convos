@@ -13,6 +13,12 @@
     <div class="row" v-if="errors.length">
       <div class="col s12"><div class="alert">{{errors[0].message}}</div></div>
     </div>
+    <div class="row">
+      <div class="col s12">
+        <button class="btn waves-effect waves-light" type="submit">Register</button>
+        <a v-link.literal="#page:login" class="btn-flat waves-effect waves-light">Login</a>
+      </div>
+    </div>
   </convos-not-logged-in>
 </template>
 <script>
