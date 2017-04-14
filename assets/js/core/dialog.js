@@ -205,7 +205,7 @@
   proto._processNewMessage = function(msg) {
     this.lastActive = msg.ts.valueOf();
 
-    if (this.lastRead < msg.ts && msg.type.match(/^(action|notice|private)$/)) this.unread++;
+    if (this.lastRead < msg.ts && msg.type.match(/^(action|private)$/)) this.unread++;
     if (this._locked) return;
 
     if (msg.highlight) {
