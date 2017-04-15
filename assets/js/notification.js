@@ -43,8 +43,6 @@
 
   window.Notification.defaultCloseTimeout = 5000;
   window.Notification.simple = function(title, body, icon) {
-    window.Notification.simple.count++; // for testing
-
     if (window.hasFocus) return false;
     if (!icon) icon = defaultIcon;
 

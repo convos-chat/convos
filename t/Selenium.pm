@@ -9,9 +9,19 @@ $ENV{MOJO_SELENIUM_DRIVER} ||= 'Selenium::Chrome';
 
 sub browser_log {
   my ($class, $t) = @_;
-  my $log = $t->driver->execute_script('return Convos.log');
+  my $log = $t->driver->execute_script('return H');
+  $t->driver->execute_script('H=[];');
+  return $log if defined wantarray;
   Test::More::note($_) for @$log;
-  $t->driver->execute_script('Convos.log = []');
+}
+
+sub desktop_notification_is {
+  my ($class, $t, $expected) = @_;
+  my $got   = $t->driver->execute_script('return N.pop()');
+  my $descr = $expected ? join ' ', @$expected : 'none';
+  my $ok    = Test::Deep::cmp_deeply($got, $expected, substr "Notification: $descr", 0, 40);
+  Test::More::diag(join ' ', @{$got || ['no notification']}) unless $ok;
+  return $ok;
 }
 
 sub email {
@@ -30,6 +40,9 @@ sub selenium_init {
 
   $t->setup_or_skip_all;
   $t->navigate_ok($args->{loc} || '/?_assetpack_reload=false&debug=info,user,watch,ws');
+  $t->driver->execute_script('H=[];console.log=function(){H.push(H.join.call(arguments," "))}');
+  $t->driver->execute_script('N=[];Notification.simple=function(t,b,i){N.push([t,b])}');
+  $t->driver->execute_script('window.Notification.simple.history=[]');
   $class->set_window_size($t, 'desktop');
 
   if ($args->{lazy}) {

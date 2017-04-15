@@ -213,7 +213,7 @@
       this.user.notifications.unshift(msg);
       Notification.simple(msg.from, msg.message);
     }
-    else if (this.is_private && this.dialog_id) {
+    else if (this.is_private && this.dialog_id && !msg.type.match(/^(notice)$/)) {
       Notification.simple(msg.from, msg.message);
     }
   };

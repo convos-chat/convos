@@ -596,9 +596,9 @@ sub _event_privmsg {
       highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
       message   => $msg->{params}[1],
       ts        => time,
-      type => $msg->{event} =~ /privmsg/ ? 'private'
-      : $msg->{event} =~ /action/ ? 'action'
-      :                             'notice',
+      type => $msg->{event} =~ /privmsg/i ? 'private'
+      : $msg->{event} =~ /action/i ? 'action'
+      :                              'notice',
     }
   );
 }
