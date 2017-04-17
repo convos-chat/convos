@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_32 2017-04-17T22:30:54+0200
+ - Fix annoying "unread" count increase on "notice"
+
 0.99_31 2017-04-14T13:40:04+0200
  - Fix autocompleting nicks by "last seen"
  - Fix background colors for chat and embeds
