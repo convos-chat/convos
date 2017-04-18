@@ -157,7 +157,7 @@
 
     if (this.is_private) {
       this.participant({online: this.frozen ? false : true, nick: this.name});
-      this.participant({online: true, nick: this.connection().nick()});
+      this.participant({online: true, nick: this.connection().me.nick || "me"});
       if (wasInactive && this.active) this.connection().send("/ison " + this.name, this);
     }
 

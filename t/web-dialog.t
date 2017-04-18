@@ -66,7 +66,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       on_connect_commands => [],
       protocol            => 'irc',
       state               => 'queued',
-      url                 => 'irc://localhost:6667',
+      url                 => 'irc://localhost',
       wanted_state        => 'connected',
     },
     {
@@ -76,7 +76,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       on_connect_commands => [],
       protocol            => 'irc',
       state               => 'connected',
-      url                 => 'irc://localhost:6667?nick=superman',
+      url                 => 'irc://localhost?nick=superman',
       wanted_state        => 'connected',
     }
   ],

@@ -47,7 +47,7 @@ $t->post_ok('/api/connection/irc-localhost', json => {url => "irc://localhost:$p
   ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connected');
 $t->post_ok('/api/connection/irc-localhost', json => {url => 'irc://example.com:9999'})
   ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
-  ->json_like('/url' => qr{irc://example.com:9999\?nick=superman});
+  ->json_like('/url' => qr{irc://example\.com:9999\?nick=superman});
 
 $connection->state('disconnected');
 $t->post_ok('/api/connection/irc-localhost',
@@ -68,21 +68,21 @@ $t->post_ok(
 
 $t->post_ok('/api/connection/irc-localhost',
   json => {url => 'irc://foo:bar@example.com:9999?nick=superman&tls=0'})->status_is(200)
-  ->json_is('/url'   => 'irc://foo@example.com:9999?nick=superman&tls=0')
+  ->json_is('/url'   => 'irc://foo:bar@example.com:9999?nick=superman&tls=0')
   ->json_is('/state' => 'queued');
 
 $connection->state('connected');
 $t->post_ok('/api/connection/irc-localhost',
   json =>
     {url => 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0', wanted_state => 'connected'})
-  ->status_is(200)->json_is('/url' => 'irc://foo@example.com:9999?nick=superman&tls=0')
+  ->status_is(200)->json_is('/url' => 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0')
   ->json_is('/state' => 'queued');
 
 is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0',
   'to json url';
 
 $t->post_ok('/api/connection/irc-localhost',
-  json => {url => 'irc://foo@example.com:9999?nick=superman&tls=0'})->status_is(200);
+  json => {url => 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0'})->status_is(200);
 is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0',
   'no change with same username';
 

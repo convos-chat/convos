@@ -24,7 +24,6 @@ module.exports = {
     if (!this.cols) this.cols = "s12";
     if (!this.type) this.type = "text";
     if (!this.id) this.id = Materialize.guid();
-    if (!this.name) this.name = this.id;
     if (this.focus) this.$els.input.focusOnDesktop();
   }
 };

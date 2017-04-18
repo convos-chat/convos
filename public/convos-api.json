@@ -352,7 +352,8 @@
               "required": ["url"],
               "properties": {
                 "on_connect_commands": { "type": "array", "description": "Commands to be run after the connection is established", "items": { "type": "string" } },
-                "url": { "type": "string", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" }
+                "url": { "type": "string", "description": "Example: irc://user:pass@irc.perl.org?nick=superman" },
+                "wanted_state": { "type": "string", "enum": ["connected", "disconnected"], "description": "Connection state" }
               }
             }
           }

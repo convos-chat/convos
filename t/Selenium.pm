@@ -33,7 +33,8 @@ sub selenium_init {
   if ($args->{lazy}) {
     my $user = $t->app->core->user({email => $class->email})->set_password('s3cret')->save;
     my $connection = $user->connection({name => 'default', protocol => 'irc'});
-    $connection->url("irc://$ENV{CONVOS_DEFAULT_SERVER}") if $ENV{CONVOS_DEFAULT_SERVER};
+    $connection->url(
+      $ENV{CONVOS_DEFAULT_SERVER} ? "irc://$ENV{CONVOS_DEFAULT_SERVER}" : 'irc://localhost');
     $connection->dialog({name => '#test'});
     $connection->save;
     $t->app->core->connect($connection) if $args->{connect};

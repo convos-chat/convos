@@ -29,7 +29,7 @@ sub url {
     return $_[0]->{url};
   }
   else {
-    return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || '');
+    return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || sprintf '%s://localhost', $self->protocol);
   }
 }
 
@@ -120,26 +120,6 @@ sub _rooms {
   return [splice @$rooms, 0, 60];
 }
 
-sub _url {
-  my ($self, $persist) = @_;
-  my $url = $self->url;
-  my $str = $self->protocol . '://';
-
-  if ($url->username) {
-    if ($persist) {
-      $str .= join(':', map { url_escape($_ // '') } $url->username, $url->password) . '@';
-    }
-    else {
-      $str .= url_escape($url->username) . '@';
-    }
-  }
-
-  $str .= $url->host_port || 'localhost:6667';
-  $str .= $url->path_query;
-
-  return $str;
-}
-
 sub _userinfo {
   my $self = shift;
   my @userinfo = split /:/, $self->url->userinfo // '';
@@ -157,9 +137,9 @@ sub TO_JSON {
   my ($self, $persist) = @_;
   my %json = map { ($_, $self->$_) } qw(name protocol wanted_state);
 
-  $json{url}                 = $self->_url($persist);
   $json{connection_id}       = $self->id;
   $json{on_connect_commands} = $self->on_connect_commands;
+  $json{url}                 = $self->url->to_unsafe_string;
 
   if ($persist) {
     $json{dialogs} = [map { $_->TO_JSON($persist) } @{$self->dialogs}];

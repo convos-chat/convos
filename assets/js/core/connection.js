@@ -44,11 +44,6 @@
     }.bind(this))[0];
   };
 
-  proto.nick = function() {
-    if (!this.me.nick) this.me.nick = new Url(this.url).param("nick");
-    return this.me.nick || "";
-  };
-
   // Remove this connection from the backend
   proto.remove = function(cb) {
     var self = this;
@@ -67,34 +62,25 @@
     return this;
   };
 
-  // Get list of available rooms on server
   proto.rooms = function(args, cb) {
     var self = this;
+
     Convos.api.roomsForConnection({connection_id: this.connection_id, match: args.match}, function(err, xhr) {
       cb.call(self, err, xhr.body);
     });
+
     return this;
   };
 
-  // Write connection settings to server
-  proto.save = function(cb) {
+  proto.save = function(attrs, cb) {
     var self = this;
+    var method = this.connection_id ? "updateConnection" : "createConnection";
 
-    // It is currently not possible to specify "name"
-    var attrs = {url: this.url, on_connect_commands: this.on_connect_commands, wanted_state: this.wanted_state};
+    Convos.api[method]({body: attrs, connection_id: this.connection_id}, function(err, xhr) {
+      if (err) return cb.call(self, err);
+      cb.call(self.user.ensureConnection(xhr.body), err);
+    });
 
-    if (this.connection_id) {
-      Convos.api.updateConnection({body: attrs, connection_id: this.connection_id}, function(err, xhr) {
-        if (err) return cb.call(self, err);
-        cb.call(self.user.ensureConnection(xhr.body), err);
-      });
-    }
-    else {
-      Convos.api.createConnection({body: attrs}, function(err, xhr) {
-        if (err) return cb.call(self, err);
-        cb.call(self.user.ensureConnection(xhr.body), err);
-      });
-    }
     return this;
   };
 

@@ -2,8 +2,8 @@
   <form autocomplete="off" class="convos-connection-settings" @submit.prevent>
     <div class="row" v-if="user.connections.length">
       <div class="col s12">
-        <h5 v-if="connection">Edit {{connection.name}}</h5>
-        <h4 v-if="!connection">Add connection</h4>
+        <h5 v-if="connection.url">Edit {{connection.name}}</h5>
+        <h4 v-if="!connection.url">Add connection</h4>
       </div>
     </div>
     <div class="row" v-if="!user.connections.length">
@@ -27,18 +27,18 @@
         </p>
       </div>
     </div>
-    <template v-if="connection">
+    <template v-if="connection.url">
       <div class="row">
-        <md-input :value.sync="server" :placeholder="url.hostPort" :readonly="settings.forced_irc_server" cols="s12">Server</md-input>
+        <md-input :value.sync="server" :placeholder="server" :readonly="settings.forced_irc_server" cols="s12" name="server">Server</md-input>
       </div>
-      <div class="row" v-if="connection">
+      <div class="row">
         <md-select :value.sync="wantedState" label="Wanted state">
           <md-option value="connected" :selected="'connected' == wantedState">Connected</md-option>
           <md-option value="disconnected" :selected="'disconnected' == wantedState">Disconnected</md-option>
         </md-select>
       </div>
       <div class="row">
-        <md-input :value.sync="nick" :placeholder="url.query.nick">Nick</md-input>
+        <md-input :value.sync="nick" :placeholder="defaultNick">Nick</md-input>
       </div>
       <div class="row">
         <div class="col s12">
@@ -47,9 +47,9 @@
         </div>
       </div>
     </template>
-    <template v-if="!connection">
+    <template v-if="!connection.url">
       <div class="row">
-        <md-input :value.sync="server" placeholder="Example: chat.freenode.net:6697" :readonly="settings.forced_irc_server" focus="true" cols="s6">Server</md-input>
+        <md-input :value.sync="settings.default_server" placeholder="Example: chat.freenode.net:6697" :readonly="settings.forced_irc_server" focus="true" cols="s6">Server</md-input>
         <md-input :value.sync="nick" placeholder="Example: jan_henning" cols="s6">Nick</md-input>
       </div>
     </template>
@@ -73,9 +73,9 @@
     </div>
     <div class="row">
       <div class="col s12">
-        <button type="submit" @click="saveConnection" class="btn waves-effect waves-light">{{connection ? "Save" : "Create"}}</button>
-        <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection">Delete</a>
-        <p v-if="connection">{{humanState()}}</p>
+        <button type="submit" @click="saveConnection" class="btn waves-effect waves-light">{{connection.url ? "Save" : "Create"}}</button>
+        <a href="#delete" @click.prevent="removeConnection" class="btn-delete" v-if="connection.url">Delete</a>
+        <p v-if="connection.url">{{humanState()}}</p>
       </div>
     </div>
   </form>
@@ -86,8 +86,8 @@ module.exports = {
   data: function() {
     return {
       advancedSettings: false,
+      defaultNick: this.user.email.split("@")[0].replace(/\W+/g, "_"),
       errors: [],
-      url: {query: {nick: ""}},
       nick: "",
       onConnectCommands: "",
       server: "",
@@ -121,25 +121,19 @@ module.exports = {
     saveConnection: function() {
       var self = this;
       var connection = this.connection || new Convos.Connection({user: this.user});
-      var params = [];
-      var userinfo;
+      var attrs = {url: new Url("irc://" + this.server)};
 
-      userinfo = [this.username, this.password].map(function(str) {
-        return encodeURIComponent(str)
-      }).join(":");
+      if (this.nick) attrs.url.param("nick", this.nick);
+      if (this.tls !== null) attrs.url.param("tls", this.tls ? 1 : 0);
 
-      userinfo = userinfo.match(/[^:]/) ? userinfo + "@" : "";
-      connection.on_connect_commands = this.onConnectCommands.split(/\n/).map(function(str) { return str.trim(); });
-      connection.url = "irc://" + userinfo + this.server;
-      connection.user = this.user;
-      connection.wanted_state = this.wantedState;
-
-      if (this.nick) params.push("nick=" + this.nick);
-      if (this.tls !== null) params.push("tls=" + (this.tls ? 1 : 0));
-      if (params.length) connection.url += "?" + params.join("&");
+      attrs.on_connect_commands = this.onConnectCommands.split(/\n/).map(function(str) { return str.trim(); });
+      attrs.url.user = this.username;
+      attrs.url.pass = this.password;
+      attrs.wanted_state = this.wantedState;
+      attrs.url = attrs.url.toString();
 
       this.errors = []; // clear error on post
-      connection.save(function(err) {
+      connection.save(attrs, function(err) {
         if (err) return self.errors = err;
         self.deleted = false;
         self.updateForm(this);
@@ -148,18 +142,15 @@ module.exports = {
       });
     },
     updateForm: function() {
-      var nick = this.user.email.split("@")[0].replace(/\W+/g, "_");
-      var url = this.connection ? this.connection.url.parseUrl() : null;
-      var userinfo = url ? url.userinfo : [];
-      this.wantedState = this.connection ? this.connection.wanted_state : "connected";
+      var url = this.connection ? new Url(this.connection.url) : new Url("//0.0.0.0");
       this.errors = [];
-      this.url = url || {query: {nick: ""}};
-      this.nick = url ? url.query.nick || nick : nick;
-      this.onConnectCommands = url ? this.connection.on_connect_commands.join("\n") : "";
-      this.server = url ? url.hostPort : this.settings.default_server || "";
-      this.tls = url ? url.query.tls != false : null; // Need to use "==" instead of "===" http://dorey.github.io/JavaScript-Equality-Table/unified : ""/
-      this.password = "";
-      this.username = decodeURIComponent(userinfo[0] || "");
+      this.nick = url.param("nick") || this.defaultNick;
+      this.onConnectCommands = this.connection.on_connect_commands.join("\n");
+      this.password = url.pass || "";
+      this.server = url.host || this.settings.default_server || "";
+      this.tls = url.param("tls") != false ? url.param("tls") : null; // Need to use "==" instead of "===" http://dorey.github.io/JavaScript-Equality-Table/unified : ""/
+      this.username = url.user || "";
+      this.wantedState = this.connection.wanted_state || "connected";
     }
   },
   ready: function() {

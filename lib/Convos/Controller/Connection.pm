@@ -153,7 +153,7 @@ sub _same_url {
   my $userinfo = $u1->password ? $u1->userinfo : $u1->username ? join ':', $u1->username,
     $u2->password // '' : '';
 
-  $u1->userinfo($userinfo);
+  $u1->userinfo($userinfo) if $userinfo;
 
   return 0 unless $u1->host_port eq $u2->host_port;
   return 0 unless +($u1->query->param('tls') || '0') eq +($u2->query->param('tls') || '0');
