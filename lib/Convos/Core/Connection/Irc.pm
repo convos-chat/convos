@@ -220,9 +220,21 @@ sub _event_error {
 
 sub _event_rpl_ison {
   my ($self, $msg) = @_;
-  my $dialog = $self->get_dialog($msg->{params}[1] || delete $self->{wait_for}{ison});
-  my $frozen = $msg->{params}[1] ? '' : 'User is offline.';
-  $self->emit(state => frozen => $dialog->frozen($frozen)->TO_JSON) if $dialog;
+  my $wait_for = $self->{wait_for}{ison} || {};
+
+  # is online
+  for my $dialog_id (map {lc} split /\s+/, +($msg->{params}[1] || '')) {
+    delete $wait_for->{$dialog_id};
+    my $dialog = $self->get_dialog($dialog_id) or next;
+    $self->emit(state => frozen => $dialog->frozen('')->TO_JSON);
+  }
+
+  # offline, as far as we can tell
+  for my $dialog_id (keys %$wait_for) {
+    my $dialog = $self->get_dialog(lc $dialog_id) or next;
+    delete $wait_for->{$dialog_id} unless --$wait_for->{$dialog_id};
+    $self->emit(state => frozen => $dialog->frozen('User is offline.')->TO_JSON);
+  }
 }
 
 sub _fallback {
@@ -247,7 +259,7 @@ sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 
 sub _is_online {
   my ($self, $dialog_id, $cb) = @_;
-  $self->{wait_for}{ison} = $dialog_id;
+  $self->{wait_for}{ison}{$dialog_id}++;
   return $self->_proxy(write => "ISON $dialog_id", sub { $self->$cb($_[1], {}); });
 }
 

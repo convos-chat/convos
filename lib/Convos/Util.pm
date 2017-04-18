@@ -41,7 +41,7 @@ sub has_many {
   monkey_patch $class => $getter => sub {
     my ($self, $attrs) = @_;
     my $id = ref $attrs ? $attrs->{id} || $related->id($attrs) : $attrs;
-    die "Could not build 'id' for $class" unless defined $id;
+    Carp::confess("Could not build 'id' for $class") unless defined $id;
     return $self->{$accessor}{lc($id)};
   };
 

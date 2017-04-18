@@ -146,26 +146,26 @@ $t->run(
 );
 
 $t->run(
-  [qr{ISON someone}, ['main', 'is-not-on.irc']],
+  [qr{ISON batgirl}, ['main', 'ison1.irc'], qr{ISON wonderwoman}, ['main', 'ison2.irc']],
   sub {
-    my $dialog = $connection->dialog({frozen => 'Whatever', name => 'someone'});
-    $connection->send('' => '/ison someone', sub { });
-    $connection->once(state => sub { Mojo::IOLoop->stop });
+    my $i           = 0;
+    my $batgirl     = $connection->dialog({frozen => 'Not connected.', name => 'batgirl'});
+    my $someone     = $connection->dialog({frozen => 'Not connected.', name => 'someone'});
+    my $superman    = $connection->dialog({frozen => 'Whatever.', name => 'superman'});
+    my $wonderwoman = $connection->dialog({frozen => 'Not connected.', name => 'wonderwoman'});
+    my $stop        = sub { ++$i == 5 and Mojo::IOLoop->stop };
+    $connection->send('' => '/ison batgirl',     sub { });
+    $connection->send('' => '/ison someone',     sub { });
+    $connection->send('' => '/ison superman',    sub { });
+    $connection->send('' => '/ison wonderwoman', sub { });
+    $connection->on(state => $stop);
     Mojo::IOLoop->start;
     is $err, '', 'cmd /ison someone';
-    is $dialog->frozen, 'User is offline.', 'someone is offline';
-  }
-);
-
-$t->run(
-  [qr{ISON wonderwoman}, ['main', 'is-on.irc']],
-  sub {
-    my $dialog = $connection->dialog({frozen => 'Whatever', name => 'wonderwoman'});
-    $connection->send('' => '/ison wonderwoman', sub { });
-    $connection->once(state => sub { Mojo::IOLoop->stop });
-    Mojo::IOLoop->start;
-    is $err, '', 'cmd /ison wonderwoman';
-    is $dialog->frozen, '', 'wonderwoman is online';
+    is $batgirl->frozen,     '',                 'batgirl is online';
+    is $someone->frozen,     'User is offline.', 'someone is offline';
+    is $superman->frozen,    '',                 'superman is online';
+    is $wonderwoman->frozen, 'User is offline.', 'wonderwoman is offline';
+    $connection->unsubscribe(state => $stop);
   }
 );
 
@@ -218,7 +218,9 @@ __DATA__
 :hybrid8.debian.local 333 test21362 ##devops jhthorsen!jhthorsen@i.love.debian.org 143293
 :hybrid8.debian.local 353 test21362 @ ##devops :Test21362 @batman
 :hybrid8.debian.local 366 test21362 ##devops :End of /NAMES list.
-@@ is-on.irc
-:hybrid8.debian.local 303 test21362 :wonderwoman
-@@ is-not-on.irc
+@@ ison1.irc
+:hybrid8.debian.local 303 test21362 :Batgirl
+@@ ison2.irc
 :hybrid8.debian.local 303 test21362 :
+:hybrid8.debian.local 303 test21362 :
+:hybrid8.debian.local 303 test21362 :superman
