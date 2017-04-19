@@ -69,7 +69,7 @@ $t->wait_until(
   sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread') });
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread',
   1, 'batgirl dialog unread++, desktop notifications++');
-t::Selenium->desktop_notification_is($t, ['batgirl', 'What about a private message?']);
+$t->desktop_notification_is(['batgirl', 'What about a private message?']);
 
 $n_highlight++;
 $connection->_event_privmsg(
@@ -83,8 +83,7 @@ $connection->_event_privmsg(
 $t->wait_until(sub { $_->find_element('.convos-header-links .n-notifications') });
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread',
   2, 'batgirl dialog unread++, desktop notifications++, got mentioned');
-t::Selenium->desktop_notification_is($t,
-  ["batgirl", "What if you, $NICK, are mentioned in a private dialog?"]);
+$t->desktop_notification_is(["batgirl", "What if you, $NICK, are mentioned in a private dialog?"]);
 
 $t->click_ok('.convos-main-menu [href="#chat/irc-default/batgirl"]');
 $t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread',
@@ -123,9 +122,8 @@ $t->live_text_is('.convos-header-links .n-notifications', $n_highlight);
 $t->click_ok('[href="#notifications"]');
 $t->click_ok('[href="#mark-as-read"]');
 $t->live_element_exists_not('.convos-header-links .n-notifications');
-t::Selenium->desktop_notification_is($t, ["batgirl", "Are you here $NICK?"]);
-t::Selenium->desktop_notification_is($t, undef);
-
-t::Selenium->browser_log($t);
+$t->desktop_notification_is(["batgirl", "Are you here $NICK?"]);
+$t->desktop_notification_is(undef);
+$t->browser_log;
 
 done_testing;

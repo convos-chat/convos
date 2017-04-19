@@ -44,7 +44,7 @@ is_at_bottom();
 done_testing;
 
 sub is_at_bottom {
-  t::Selenium->browser_log($t);
+  $t->browser_log;
 
   my $s = $t->driver->execute_script(<<'HERE');
 var el = document.querySelector(".scroll-element");
