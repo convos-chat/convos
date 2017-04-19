@@ -5,12 +5,12 @@ $secondary-color: #2c5e2e !default;
 $header-color: lighten($primary-color, 5%) !default;
 $link-color: lighten($primary-color, 0%) !default;
 $text-color: #222 !default;
-$paste-bg-color: #f8f8f8;
+$paste-bg-color: #f8f8f8 !default;
 
-$font-family-default: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-$font-family-monospace: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+$font-family-default: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !default;
+$font-family-monospace: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace !default;
 
-$collection-border-color: darken($body-bg, 9%);
+$collection-border-color: darken($body-bg, 9%) !default;
 
 $error-bg-color: color('red', 'lighten-5') !default;
 $error-border-color: color('red', 'lighten-2') !default;
@@ -25,7 +25,7 @@ $main-menu-width: 240px !default;
 $sidebar-width: 320px !default;
 $z-index-header: 900 !default;
 
-$input-height: 2.8rem;
-$input-disabled-color: rgba(0, 0, 0, .50);
+$input-height: 2.8rem !default;
+$input-disabled-color: rgba(0, 0, 0, .50) !default;
 $button-floating-background: lighten($primary-color, 5%) !default;
 $button-floating-background-hover: $primary-color !default;
