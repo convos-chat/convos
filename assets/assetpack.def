@@ -12,6 +12,7 @@
 < js/eventemitter.js
 < js/window.js
 < js/string.js
+< js/url.js
 < js/notification.js
 < js/materialbox.js
 < js/openapi.js

@@ -45,7 +45,8 @@
   };
 
   proto.nick = function() {
-    return this.me.nick ? this.me.nick : this.url.parseUrl().query.nick || "";
+    if (!this.me.nick) this.me.nick = new Url(this.url).param("nick");
+    return this.me.nick || "";
   };
 
   // Remove this connection from the backend
