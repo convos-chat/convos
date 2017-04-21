@@ -9,7 +9,7 @@ $$tmp->close;
 my $convos = Convos->new;
 
 is $convos->config->{log_file}, "$tmp", "log_file";
-$convos->log->info("this is a really cool log message");
+$convos->log->error("this is a really cool log message");
 like $tmp->slurp, qr{this is a really cool log message}, 'log file content';
 
 done_testing;
