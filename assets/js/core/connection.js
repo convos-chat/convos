@@ -141,7 +141,7 @@
 
   proto._onError = function(msg) {
     if (!msg.errors) return;
-    this.addMessage({type: "error", message: msg.message + ": " + msg.errors[0].message});
+    this.user.ensureDialog(msg).addMessage({type: "error", message: msg.message + ": " + msg.errors[0].message});
   };
 
   proto._onMessage = function(msg) {
