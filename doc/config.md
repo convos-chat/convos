@@ -195,7 +195,7 @@ Can be used to set up [listen](#listen) from an environment variable.
 
 Example:
 
-  MOJO_LISTEN="http://127.0.0.1:8080,http://[::1]:8080"
+    MOJO_LISTEN="http://127.0.0.1:8080,http://[::1]:8080"
 
 ### MOJO_REVERSE_PROXY
 
