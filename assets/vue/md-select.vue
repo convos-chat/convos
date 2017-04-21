@@ -2,7 +2,7 @@
   <div class="input-field col" :class="cols">
     <div class="select-wrapper">
       <span class="caret">&#9660;</span>
-      <input :value="textValue" @focus="activate()" :disabled="disabled" readonly="true" class="select-dropdown" type="text" v-el:input>
+      <input :value="textValue" @keydown="keydown" @focus="activate()" :disabled="disabled" readonly="true" class="select-dropdown" type="text" v-el:input>
       <ul class="dropdown-content select-dropdown" :class="{active: active}" v-el:dropdown>
         <li class="disabled"><span>Choose your option</span></li>
         <slot></slot>
@@ -57,6 +57,13 @@ module.exports = {
       var $target = $(e.target);
       if ($target.closest("li.disabled").length) this.active = false;
       if (!$target.closest(this.$el).length) this.active = false;
+    },
+    keydown: function(e) {
+      switch (e.keyCode) {
+        case 9: // tab
+          this.active = false;
+          break;
+      }
     },
     setValue: function(opt) {
       this.value = opt ? opt.value : "";
