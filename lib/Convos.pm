@@ -159,6 +159,11 @@ sub _config {
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
+  if ($config->{log_file} ||= $ENV{CONVOS_LOG_FILE}) {
+    $self->log->path($config->{log_file});
+    delete $self->log->{handle};
+  }
+
   $self->log->info(
     qq(CONVOS_HOME="$ENV{CONVOS_HOME}" # https://convos.by/doc/config.html#convos_home"));
 
