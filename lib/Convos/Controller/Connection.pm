@@ -114,6 +114,7 @@ sub update {
   if (my $url = $self->_validate_url($json->{url})) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
     $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnected';
+    $connection->nick($url->query->param("nick"), sub { }) if $url->query->param("nick");
     $connection->url($url);
   }
 
