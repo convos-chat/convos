@@ -96,16 +96,18 @@
     if (data.dialog_id && data.dialog_id != this.dialog_id) return;
     if (!data.nick) data.nick = data.new_nick || data.name;
 
-    var current = this._participants[data.nick] || {name: data.nick, seen: new Date(0)};
-    if (data.mode) current.mode = data.mode;
-    if (data.seen && current.seen < data.seen) current.seen = data.seen;
-    if (data.hasOwnProperty("online")) current.online = data.online;
+    var participant = this._participants[data.nick] || {name: data.nick, seen: new Date(0)};
+    if (data.mode) participant.mode = data.mode;
+    if (data.seen && participant.seen < data.seen) participant.seen = data.seen;
+    if (data.hasOwnProperty("online")) participant.online = data.online;
 
     switch (data.type) {
       case "join":
+        participant.online = true;
         this.addMessage({message: data.nick + " joined.", from: this.connection_id});
         break;
       case "nick_change":
+        participant.online = true;
         Vue.delete(this._participants, data.old_nick);
         this.addMessage({message: data.old_nick + " changed nick to " + data.nick + ".", from: this.connection_id});
         break;
@@ -113,13 +115,13 @@
       case "quit":
         if (!this._participants[data.nick]) return;
         var message = data.nick + " parted.";
-        current.online = false;
+        participant.online = false;
         if (data.kicker) message = data.nick + " was kicked by " + data.kicker + ".";
         if (data.message) message += " Reason: " + data.message;
         this.addMessage({message: message, from: this.connection_id});
     }
 
-    Vue.set(this._participants, data.nick, current);
+    Vue.set(this._participants, data.nick, participant);
   };
 
   proto.participants = function() {
