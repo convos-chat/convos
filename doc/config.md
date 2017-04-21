@@ -189,6 +189,14 @@ Can hold the path to a config file, which is read by Convos instead of using
 the environment variables. See also the [running](/doc/running.html) guide
 for more details.
 
+### MOJO_LISTEN
+
+Can be used to set up [listen](#listen) from an environment variable.
+
+Example:
+
+  MOJO_LISTEN="http://127.0.0.1:8080,http://[::1]:8080"
+
 ### MOJO_REVERSE_PROXY
 
 The `MOJO_REVERSE_PROXY` environment variable can be used to enable proxy
