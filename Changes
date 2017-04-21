@@ -2,6 +2,12 @@ Revision history for perl distribution Convos
 
 0.99_33 Not Released
  - Fix "/ison nick" handling #336
+ - Fix handling over server username/password #334
+ - Fix marking joined users as online
+ - Fix showing error messages from IRC commands
+ - Add missing "!default" to _variables.scss #313
+ - Add supoort for CONVOS_LOG_FILE #337
+ - Add nick changing feature from connection editor
 
 0.99_32 2017-04-17T22:30:54+0200
  - Fix annoying "unread" count increase on "notice"

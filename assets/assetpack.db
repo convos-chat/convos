@@ -367,11 +367,11 @@ checksum=68c1999296
 format=js
 minified=1
 [js-min:js/core/connection.js]
-checksum=4eca0cda1e
+checksum=ae09ef742a
 format=js
 minified=1
 [js-min:js/core/dialog.js]
-checksum=95681b2126
+checksum=8487ec7526
 format=js
 minified=1
 [js-min:js/core/user.js]
@@ -403,11 +403,15 @@ checksum=92afce406e
 format=js
 minified=1
 [js-min:js/string.js]
-checksum=286aee866c
+checksum=d86e053a32
 format=js
 minified=1
 [js-min:js/svg.js]
 checksum=d5c5e3add8
+format=js
+minified=1
+[js-min:js/url.js]
+checksum=ad57a37b1c
 format=js
 minified=1
 [js-min:js/vue/directive-dropdown.js]
@@ -466,7 +470,7 @@ checksum=487cf8ebae
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=adad77ab89
+checksum=487cf8ebae
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
@@ -479,7 +483,7 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:vue/convos-connection-settings.vue]
-checksum=9677de1a26
+checksum=788eea1fec
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]
@@ -584,7 +588,7 @@ checksum=ec8fb85fcd
 format=js
 minified=1
 [js-min:vue/convos-settings.vue]
-checksum=977a8f01b8
+checksum=9e03972b2b
 format=js
 minified=1
 [js-min:vue/convos-sidebar-info.vue]
@@ -600,7 +604,7 @@ checksum=198ce7d2b7
 format=js
 minified=1
 [js-min:vue/md-input.vue]
-checksum=0a726f7b0e
+checksum=a2b85787ff
 format=js
 minified=1
 [js-min:vue/md-option.vue]
@@ -608,7 +612,7 @@ checksum=0d169c90c1
 format=js
 minified=1
 [js-min:vue/md-select.vue]
-checksum=5e49851a63
+checksum=c974e6d1f5
 format=js
 minified=1
 [js-min:vue/md-textarea.vue]
