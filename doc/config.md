@@ -49,6 +49,7 @@ $ cat /path/to/convos.conf.json
   "backend":           "Convos::Core::Backend::File",
   "contact":           "mailto:root@localhost",
   "default_server":    "localhost:6667",
+  "log_file":          "/var/log/convos.log",
   "forced_irc_server": "localhost:6667",
   "invite_code":       "s3cret",
   "organization_name": "Awesome hackers",
@@ -150,6 +151,12 @@ register. It can be disabled by setting `CONVOS_INVITE_CODE=""`. Check out
 the [running](/doc/running.html) guide for more details.
 
 The default value is a semi-random string.
+
+### CONVOS_LOG_FILE
+
+This value can be used to specify where Convos should write the log messages
+to. This settings has no default value which makes Convos write the log to
+STDERR.
 
 ### CONVOS_ORGANIZATION_NAME
 
