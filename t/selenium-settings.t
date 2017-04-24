@@ -1,3 +1,4 @@
+#!perl
 use lib '.';
 use t::Selenium;
 

@@ -1,3 +1,4 @@
+#!perl
 use Test::More;
 use File::Find;
 

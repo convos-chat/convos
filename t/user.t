@@ -1,3 +1,4 @@
+#!perl
 BEGIN {
   our $time = time - 10;
   *CORE::GLOBAL::time = sub {$time};

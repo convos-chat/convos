@@ -1,3 +1,4 @@
+#!perl
 use Test::Mojo::IRC -basic;
 use lib '.';
 use t::Helper;

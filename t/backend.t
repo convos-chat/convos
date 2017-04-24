@@ -1,3 +1,4 @@
+#!perl
 use lib '.';
 use t::Helper;
 use Convos::Core::Backend;
