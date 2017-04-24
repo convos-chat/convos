@@ -15,8 +15,14 @@ sub _save {
   my ($self, $backend, $connection, $text, $cb) = @_;
   my $file = Convos::Plugin::Paste::File->new(content => $$text, user => $connection->user);
 
-  Mojo::IOLoop->delay(sub { $backend->save_object($file, shift->begin) },
-    sub { $backend->$cb($_[1], $file) });
+  Mojo::IOLoop->delay(
+    sub { $backend->save_object($file, shift->begin) },
+    sub {
+      my ($self, $err) = @_;
+      return $backend->$cb($err, undef) if $err;
+      return $backend->$cb('', $file->user->core->web_url($file->public_uri)->to_abs->to_string);
+    },
+  );
 
   return $backend;
 }
