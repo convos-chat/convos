@@ -3,6 +3,8 @@ use t::Selenium;
 
 my $t = t::Selenium->selenium_init;
 
+$ENV{CONVOS_DEFAULT_SERVER} ||= 'irc.convos.by';
+
 $t->wait_until(sub { $_->find_element('.convos-login') });
 $t->click_ok('[href="#page:register"]');
 
@@ -35,30 +37,28 @@ $t->live_element_exists_not('.convos-main-menu .link.dialog', 'no dialogs yet');
 $t->element_is_displayed('.convos-settings');
 
 # This part needs a running irc server and an existing channel called "#test"
-if ($ENV{CONVOS_DEFAULT_SERVER}) {
-  $t->click_ok('.convos-connection-settings [type="submit"]');
+$t->click_ok('.convos-connection-settings [type="submit"]');
 
-  $t->wait_until(sub { $_->find_element('.convos-create-dialog') });
-  $t->send_keys_ok('[placeholder="#channel_name"]', ['tes']);
+$t->wait_until(sub { $_->find_element('.convos-create-dialog') });
+$t->send_keys_ok('[placeholder="#channel_name"]', ['tes']);
 
-  $t->wait_until(sub { $_->find_element('.autocomplete [href="#join:#test"]') });
-  $t->click_ok('.autocomplete [href="#join:#test"]');
+$t->wait_until(sub { $_->find_element('.autocomplete [href="#join:#test"]') });
+$t->click_ok('.autocomplete [href="#join:#test"]');
 
-  $t->wait_until(sub { $_->find_element('.convos-main-menu .link.dialog') });
-  $t->live_element_exists('.convos-message-enable-notifications');
-  $t->live_text_is('header h2', '#test');
-  $t->send_keys_ok('.convos-input textarea', ["this is test $NICK", \"enter"]);
+$t->wait_until(sub { $_->find_element('.convos-main-menu .link.dialog') });
+$t->live_element_exists('.convos-message-enable-notifications');
+$t->live_text_is('header h2', '#test');
+$t->send_keys_ok('.convos-input textarea', ["this is test $NICK", \"enter"]);
 
-  $t->wait_until(sub { $_->find_element(qq(.convos-message [href="#$NICK"])) });
-  $t->live_text_like('.convos-message:last-child .message', qr/\bthis is test t\w{7}\b/);
+$t->wait_until(sub { $_->find_element(qq(.convos-message [href="#$NICK"])) });
+$t->live_text_like('.convos-message:last-child .message', qr/\bthis is test t\w{7}\b/);
 
-  # test that hitting return joins a dialog
-  $t->click_ok('a[href^="#create-dialog/"]');
-  $t->wait_until(sub { $_->find_element('.convos-create-dialog') });
-  $t->send_keys_ok('[placeholder="#channel_name"]', ['tes']);
-  $t->wait_until(sub { $_->find_element('.autocomplete [href="#join:#test"]') });
-  $t->send_keys_ok('[placeholder="#channel_name"]', [\'enter']);
-  $t->live_text_is('header h2', '#test');
-}
+# test that hitting return joins a dialog
+$t->click_ok('a[href^="#create-dialog/"]');
+$t->wait_until(sub { $_->find_element('.convos-create-dialog') });
+$t->send_keys_ok('[placeholder="#channel_name"]', ['tes']);
+$t->wait_until(sub { $_->find_element('.autocomplete [href="#join:#test"]') });
+$t->send_keys_ok('[placeholder="#channel_name"]', [\'enter']);
+$t->live_text_is('header h2', '#test');
 
 done_testing;
