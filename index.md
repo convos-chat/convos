@@ -20,7 +20,7 @@ $ ./convos/script/convos daemon</code></pre>
 
 There is an online demo running at [demo.convos.by](http://demo.convos.by).
 Register with your email address and try it out. There should be someone
-lurking in the `#demo` channel.
+lurking in the `#test` channel.
 
 Note that the demo is [locked](/doc/config.html#convosforcedircserver) to the
 IRC server running on localhost. This is to prevent the server from getting
