@@ -13,7 +13,7 @@ more details.
 
 The complete manual for Convos and its dependencies are available from inside
 the application at
-[http://localhost:3000/perldoc](http://dogfood.convos.by/perldoc/) - or whatever
+[http://localhost:3000/perldoc](http://demo.convos.by/perldoc/) - or whatever
 adddress you [start](/doc/running.html) Convos on.
 
 ## API
