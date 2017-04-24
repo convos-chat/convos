@@ -254,11 +254,13 @@ starting points for Convos:
 
 =over 2
 
-=item * L<Convos::Guides::Running>
+=item * L<Documentation index|https://convos.by/doc/>
 
-=item * L<Convos::Guides::Development>
+=item * L<Getting started|https://convos.by/doc/getting-started.html>
 
-=item * L<Convos::Guides::API>
+=item * L<Development guide|https://convos.by/doc/develop.html>
+
+=item * L<REST API reference|http://demo.convos.by/api.html>
 
 =back
 
