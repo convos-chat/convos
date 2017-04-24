@@ -25,7 +25,7 @@ is $connection->url->to_unsafe_string, "irc://:se%25!+cret\@localhost?nick=$NICK
   'url with password';
 
 $t->send_keys_ok('.convos-connection-settings [name="server"]', [(\'backspace') x 10]);
-$t->send_keys_ok('.convos-connection-settings [name="server"]', ['irc.example.com', \'tab']);
+$t->send_keys_ok('.convos-connection-settings [name="server"]', ['irc.example.com:6668', \'tab']);
 $t->send_keys_ok(undef, [\'tab']);                             # wanted state
 $t->send_keys_ok(undef, ['superduper', \'tab']);               # nick
 $t->send_keys_ok(undef, [\'tab']);                             # tls
@@ -38,7 +38,7 @@ $t->click_ok('.convos-connection-settings [type="submit"]');
 t::Selenium->run_for(0.2);
 
 is $connection->url->to_unsafe_string,
-  "irc://%3Cuser%3E:s3cr%23t\@irc.example.com?nick=superduper&tls=0",
+  "irc://%3Cuser%3E:s3cr%23t\@irc.example.com:6668?nick=superduper&tls=0",
   'url with username, password and nick';
 
 $t->driver->refresh;
@@ -52,7 +52,7 @@ $form
 is_deeply(
   $form,
   [
-    "irc.example.com", "Connected", "superduper", "on", "on", "<user>", "s3cr#t",
+    "irc.example.com:6668", "Connected", "superduper", "on", "on", "<user>", "s3cr#t",
     "/msg nickserv hey!\n/nick whatever"
   ],
   'form data'

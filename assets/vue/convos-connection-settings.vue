@@ -157,6 +157,8 @@ module.exports = {
       this.server = url.host || this.settings.default_server || "";
       this.tls = url.param("tls") != false ? url.param("tls") : null; // Need to use "==" instead of "===" http://dorey.github.io/JavaScript-Equality-Table/unified : ""/
       this.username = url.user || "";
+
+      if (url.port) this.server += ":" + url.port;
     }
   },
   created: function() {
