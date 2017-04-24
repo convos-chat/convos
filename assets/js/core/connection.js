@@ -7,6 +7,7 @@
     this.on_connect_commands = [];
     this.protocol = "unknown";
     this.state = "disconnected";
+    this.user = attrs.user;
     this.wanted_state = attrs.wanted_state || "connected";
     this.url = "";
     this.on("message", this._onMessage);
@@ -44,7 +45,6 @@
     }.bind(this))[0];
   };
 
-  // Remove this connection from the backend
   proto.remove = function(cb) {
     var self = this;
     Convos.api.removeConnection({connection_id: this.connection_id}, function(err, xhr) {

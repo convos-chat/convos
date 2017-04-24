@@ -1,9 +1,9 @@
 use lib '.';
 use t::Selenium;
 
-my $t = t::Selenium->selenium_init;
-
 $ENV{CONVOS_DEFAULT_SERVER} ||= 'irc.convos.by';
+
+my $t = t::Selenium->selenium_init;
 
 $t->wait_until(sub { $_->find_element('.convos-login') });
 $t->click_ok('[href="#page:register"]');

@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_34 Not Released
+ - Fix "create connection"
+
 0.99_33 2017-04-22T00:09:58+0200
  - Fix "/ison nick" handling #336
  - Fix handling saving server username/password #334

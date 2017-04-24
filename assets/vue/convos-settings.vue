@@ -9,7 +9,7 @@
       </div>
     </main>
     <main v-if="show == 'add_connection'">
-      <convos-connection-settings :connection="new Convos.Connection()" :user="user"></convos-connection-settings>
+      <convos-connection-settings :user="user"></convos-connection-settings>
     </main>
     <main v-if="show == 'create_dialog'">
       <convos-create-dialog :user="user"></convos-create-dialog>

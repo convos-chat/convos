@@ -82,10 +82,11 @@
 </template>
 <script>
 module.exports = {
-  props: ["connection", "user"],
+  props: ["user"],
   data: function() {
     return {
       advancedSettings: false,
+      connection: null,
       defaultNick: this.user.email.split("@")[0].replace(/\W+/g, "_"),
       errors: [],
       nick: "",
@@ -98,10 +99,10 @@ module.exports = {
     };
   },
   watch: {
-    advancedSettings: function(v, o) {
+    'advancedSettings': function(v, o) {
       if (v) autosize(this.$refs.occ.$els.input);
     },
-    connection: function(v, o) {
+    'settings.main': function(v, o) {
       this.updateForm();
     }
   },
@@ -120,7 +121,7 @@ module.exports = {
     },
     saveConnection: function() {
       var self = this;
-      var connection = this.connection || new Convos.Connection({user: this.user});
+      var connection = this.connection;
       var attrs = {url: new Url("irc://" + this.server)};
 
       if (this.nick) attrs.url.param("nick", this.nick);
@@ -138,22 +139,27 @@ module.exports = {
         self.deleted = false;
         self.updateForm(this);
         self.user.ensureDialog({connection_id: this.connection_id, dialog_id: "", name: this.connection_id});
-        self.settings.main = self.connection ? "#chat/" + this.connection_id + "/" : "#create-dialog";
+        self.settings.main = this == connection ? "#chat/" + this.connection_id + "/" : "#create-dialog";
       });
     },
     updateForm: function() {
-      var url = this.connection ? new Url(this.connection.url) : new Url("//0.0.0.0");
+      var url, dialog = this.user.activeDialog();
+      if (DEBUG.info) console.log("[editConnection]", dialog ? dialog.connection_id : "New connection");
+
+      this.connection = dialog ? dialog.connection() : new Convos.Connection({user: this.user});
       this.errors = [];
-      this.nick = url.param("nick") || this.defaultNick;
       this.onConnectCommands = this.connection.on_connect_commands.join("\n");
+      this.wantedState = this.connection.wanted_state || "connected";
+
+      url = new Url(this.connection.url || "//0.0.0.0");
+      this.nick = url.param("nick") || this.defaultNick;
       this.password = url.pass || "";
       this.server = url.host || this.settings.default_server || "";
       this.tls = url.param("tls") != false ? url.param("tls") : null; // Need to use "==" instead of "===" http://dorey.github.io/JavaScript-Equality-Table/unified : ""/
       this.username = url.user || "";
-      this.wantedState = this.connection.wanted_state || "connected";
     }
   },
-  ready: function() {
+  created: function() {
     this.updateForm();
   }
 };

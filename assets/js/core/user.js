@@ -14,10 +14,9 @@
 
   var proto = Convos.User.prototype;
 
-  proto.activeDialog = function(key) {
+  proto.activeDialog = function(dialogAttrName) {
     var dialog = this.dialogs.filter(function(d) { return d.href() == Convos.settings.main; })[0];
-    if (dialog && key) return dialog[key];
-    return dialog;
+    return !dialogAttrName ? dialog : dialog ? dialog[dialogAttrName] : null;
   };
 
   proto.ensureConnection = function(data) {
