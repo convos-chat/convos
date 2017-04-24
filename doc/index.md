@@ -33,3 +33,21 @@ message on [twitter](https://twitter.com/convosby) or create an
 [issue](https://github.com/Nordaaker/convos/issues) on Github. If you're more
 of the email type, then send an email to
 <a href="mailto:jhthorsen@cpan.org">jhthorsen@cpan.org</a>.
+
+## Statistics
+
+The backend of Convos is written in [Perl](https://www.perl.org/) and
+[Mojolicious](http://mojolicious.org/), while the frontend is written
+with [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+and [Vue](https://vuejs.org/).
+
+| Language        | Files |  Code | Comment                 |
+|-----------------|-------|-------|-------------------------|
+| Perl            |    21 |  2380 | Without couting tests   |
+| JavaScript      |    21 |  1613 | jQuery and vanilla      |
+| Vuejs Component |    30 |  1529 | Reactive web components |
+| Sass            |    12 |   947 | CSS / Sass              |
+| JSON            |     1 |   685 | OpenAPI specification   |
+| Total           |    85 |  7154 |                         |
+
+Updated 2017-04-24 using `cloc assets/{js,vue,sass}/ lib/`
