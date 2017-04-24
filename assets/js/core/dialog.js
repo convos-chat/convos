@@ -107,6 +107,7 @@
         this.addMessage({message: data.nick + " joined.", from: this.connection_id});
         break;
       case "nick_change":
+        if (!this._participants[data.old_nick]) return;
         participant.online = true;
         Vue.delete(this._participants, data.old_nick);
         this.addMessage({message: data.old_nick + " changed nick to " + data.nick + ".", from: this.connection_id});

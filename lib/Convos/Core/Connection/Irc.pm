@@ -509,7 +509,7 @@ sub _event_join {
     $self->emit(state => frozen => $dialog->TO_JSON);
   }
   elsif (my $dialog = $self->get_dialog($channel)) {
-    $self->emit(state => join => {dialog_id => $dialog->id, nick => $nick}) if $dialog;
+    $self->emit(state => join => {dialog_id => $dialog->id, nick => $nick});
   }
 }
 
