@@ -207,7 +207,8 @@
   proto._processNewMessage = function(msg) {
     this.lastActive = msg.ts.valueOf();
 
-    if (this.lastRead < msg.ts && msg.type.match(/^(action|private)$/)) this.unread++;
+    if (!msg.type.match(/^(action|private)$/)) return;
+    if (this.lastRead < msg.ts) this.unread++;
     if (this._locked) return;
 
     if (msg.highlight) {
@@ -215,7 +216,7 @@
       this.user.notifications.unshift(msg);
       Notification.simple(msg.from, msg.message);
     }
-    else if (this.is_private && this.dialog_id && !msg.type.match(/^(notice)$/)) {
+    else if (this.is_private && this.dialog_id) {
       Notification.simple(msg.from, msg.message);
     }
   };

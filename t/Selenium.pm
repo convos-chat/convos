@@ -81,7 +81,7 @@ sub _t_desktop_notification_is {
   my $got   = $t->driver->execute_script('return N.pop()');
   my $descr = $expected ? join ' ', @$expected : 'none';
   my $ok    = Test::Deep::cmp_deeply($got, $expected, substr "Notification: $descr", 0, 40);
-  Test::More::diag(join ' ', @{$got || ['no notification']}) unless $ok;
+  Test::More::diag("notification: " . join ' ', @{$got || ['no notification']}) unless $ok;
   return $ok;
 }
 
