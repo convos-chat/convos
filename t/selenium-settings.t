@@ -2,6 +2,9 @@
 use lib '.';
 use t::Selenium;
 
+# Needed for https://github.com/Nordaaker/convos/issues/344
+$ENV{CONVOS_DEFAULT_SERVER} = 'dummy.example.com:6697';
+
 my $t          = t::Selenium->selenium_init('Convos', {lazy => 1, login => 1});
 my $user       = $t->app->core->get_user("$NICK\@convos.by");
 my $connection = $user->get_connection('irc-default');
@@ -22,10 +25,10 @@ $t->send_keys_ok('.convos-connection-settings [type="password"]', ['se%!+cret', 
 $t->click_ok('.convos-connection-settings [type="submit"]');
 t::Selenium->run_for(0.2);
 
-is $connection->url->to_unsafe_string, "irc://:se%25!+cret\@localhost?nick=$NICK",
+is $connection->url->to_unsafe_string, "irc://:se%25!+cret\@dummy.example.com:6697?nick=$NICK",
   'url with password';
 
-$t->send_keys_ok('.convos-connection-settings [name="server"]', [(\'backspace') x 10]);
+$t->send_keys_ok('.convos-connection-settings [name="server"]', [(\'backspace') x 30]);
 $t->send_keys_ok('.convos-connection-settings [name="server"]', ['irc.example.com:6668', \'tab']);
 $t->send_keys_ok(undef, [\'tab']);                             # wanted state
 $t->send_keys_ok(undef, ['superduper', \'tab']);               # nick
@@ -45,21 +48,25 @@ is $connection->url->to_unsafe_string,
 $t->driver->refresh;
 $t->wait_for('.convos-sidebar-info [type="submit"]');
 $t->click_ok('.convos-connection-settings [for="form_advanced_settings"]');
+$t->send_keys_ok(undef, [\'tab']);                             # goto username
+$t->send_keys_ok(undef, [(\'backspace') x 30]);                # username
+$t->click_ok('.convos-connection-settings [type="submit"]');
 
 $form
   = $t->driver->execute_script(
-  'return [].map.call(document.querySelectorAll(".convos-connection-settings input, .convos-connection-settings textarea"), function(el) { return el.value });'
+  'return [].map.call(document.querySelectorAll(".convos-connection-settings input, .convos-connection-settings textarea"), function(el) { return el.type == "checkbox" && !el.checked ? "off" : el.value });'
   );
 is_deeply(
   $form,
   [
-    "irc.example.com:6668", "Connected", "superduper", "on", "on", "<user>", "s3cr#t",
+    "irc.example.com:6668", "Connected", "superduper", "off", "on", "", "s3cr#t",
     "/msg nickserv hey!\n/nick whatever"
   ],
   'form data'
 ) or diag join ", ", @$form;
 
-# TODO: test form fields
+is $connection->url->to_unsafe_string, "irc://:s3cr%23t\@irc.example.com:6668?nick=superduper",
+  'url without username';
 
 # $t->browser_log;
 
