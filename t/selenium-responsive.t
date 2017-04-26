@@ -8,11 +8,11 @@ my $user       = $t->app->core->get_user("$NICK\@convos.by");
 my $connection = $user->get_connection('irc-default');
 my $dialog     = $connection->get_dialog('#test');
 
-$t->wait_until(sub { $_->find_element('.convos-login') });
+$t->wait_for('.convos-login');
 t::Selenium->set_window_size($t, 'iphone6');
 t::Selenium->selenium_login($t);
 
-$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
+$t->wait_for('.convos-main-menu [href="#chat/irc-default/#test"]');
 
 # hidden on small screens
 $t->element_is_hidden('.convos-main-menu');
@@ -31,13 +31,13 @@ is_at_bottom();
 $t->click_ok('.toggle-main-menu');
 $t->element_is_displayed('.convos-main-menu');
 
-$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/"]') });
+$t->wait_for('.convos-main-menu [href="#chat/irc-default/"]');
 $t->click_ok('[href="#chat/irc-default/"]');
 $t->element_is_hidden('.convos-main-menu');
 
 $connection->emit(message => $dialog, $_) for @messages;
 $t->click_ok('.toggle-main-menu');
-$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
+$t->wait_for('.convos-main-menu [href="#chat/irc-default/#test"]');
 $t->click_ok('[href="#chat/irc-default/#test"]');
 t::Selenium->run_for(0.3);
 is_at_bottom();

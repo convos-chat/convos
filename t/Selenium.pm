@@ -50,7 +50,7 @@ sub selenium_init {
 sub selenium_login {
   my ($class, $t) = @_;
 
-  $t->wait_until(sub { $_->find_element('.convos-login') });
+  $t->wait_for('.convos-login');
   $t->send_keys_ok('#form_login_email',    [$class->email, \'tab']);
   $t->send_keys_ok('#form_login_password', ['s3cret',      \'enter']);
 }

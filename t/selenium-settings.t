@@ -7,10 +7,10 @@ my $user       = $t->app->core->get_user("$NICK\@convos.by");
 my $connection = $user->get_connection('irc-default');
 my $form;
 
-$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/"]'); });
+$t->wait_for('.convos-main-menu [href="#chat/irc-default/"]');
 $t->click_ok('.convos-main-menu [href="#chat/irc-default/"]');
 
-$t->wait_until(sub { $_->find_element('.convos-sidebar-info [type="submit"]'); });
+$t->wait_for('.convos-sidebar-info [type="submit"]');
 $t->click_ok('.convos-sidebar-info [type="submit"]');
 
 t::Selenium->run_for(0.2);
@@ -43,7 +43,7 @@ is $connection->url->to_unsafe_string,
   'url with username, password and nick';
 
 $t->driver->refresh;
-$t->wait_until(sub { $_->find_element('.convos-sidebar-info [type="submit"]'); });
+$t->wait_for('.convos-sidebar-info [type="submit"]');
 $t->click_ok('.convos-connection-settings [for="form_advanced_settings"]');
 
 $form

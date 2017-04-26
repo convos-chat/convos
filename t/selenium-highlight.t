@@ -8,7 +8,7 @@ my $connection = $user->get_connection('irc-default');
 
 my $n_highlight = 0;
 
-$t->wait_until(sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"]') });
+$t->wait_for('.convos-main-menu [href="#chat/irc-default/#test"]');
 $t->click_ok('.convos-main-menu [href="#help"]', 'unfocus test channel');
 
 $connection->_event_privmsg(
@@ -19,8 +19,7 @@ $connection->_event_privmsg(
   }
 );
 
-$t->wait_until(
-  sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread') });
+$t->wait_for('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread');
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread',
   1, 'test dialog unread++, no notifications, no highlight');
 
@@ -66,8 +65,7 @@ $connection->_event_privmsg(
   }
 );
 
-$t->wait_until(
-  sub { $_->find_element('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread') });
+$t->wait_for('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread');
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread',
   1, 'batgirl dialog unread++, desktop notifications++');
 $t->desktop_notification_is(['batgirl', 'What about a private message?']);
@@ -81,7 +79,7 @@ $connection->_event_privmsg(
   }
 );
 
-$t->wait_until(sub { $_->find_element('.convos-header-links .n-notifications') });
+$t->wait_for('.convos-header-links .n-notifications');
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread',
   2, 'batgirl dialog unread++, desktop notifications++, got mentioned');
 $t->desktop_notification_is(["batgirl", "What if you, $NICK, are mentioned in a private dialog?"]);
