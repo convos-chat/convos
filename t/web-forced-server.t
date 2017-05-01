@@ -16,12 +16,12 @@ $t->post_ok('/api/connections', json => {url => 'irc://chat.freenode.net'})->sta
 $t->get_ok('/api/connections')->status_is(200)
   ->json_is('/connections/0/connection_id', 'irc-example')
   ->json_is('/connections/0/name',          'example')
-  ->json_is('/connections/0/url',           'irc://chat.example.com:1234?nick=superman');
+  ->json_is('/connections/0/url',           'irc://chat.example.com:1234?forced=1&nick=superman');
 
 $t->post_ok('/api/connection/irc-example', json => {url => 'irc://irc.perl.org'})->status_is(200);
 $t->get_ok('/api/connections')->status_is(200)
   ->json_is('/connections/0/connection_id', 'irc-example')
   ->json_is('/connections/0/name',          'example')
-  ->json_is('/connections/0/url',           'irc://chat.example.com:1234');
+  ->json_is('/connections/0/url',           'irc://chat.example.com:1234?forced=1');
 
 done_testing;

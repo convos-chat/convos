@@ -62,7 +62,7 @@
     <template v-if="advancedSettings">
       <div class="row">
         <md-input :value.sync="username" cols="s6">Username</md-input>
-        <md-input :value.sync="password" cols="s6" type="password">Password</md-input>
+        <md-input :value.sync="password" cols="s6" type="password" :readonly="settings.forced_irc_server">Password</md-input>
       </div>
       <div class="row on-connect-commands">
         <md-textarea v-ref:occ :value.sync="onConnectCommands" placeholder="/msg NickServ identify supersecret">On Connect Commands (one per line)</md-textarea>

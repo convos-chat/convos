@@ -8,7 +8,6 @@ $ENV{CONVOS_DEFAULT_SERVER} = 'dummy.example.com:6697';
 my $t          = t::Selenium->selenium_init('Convos', {lazy => 1, login => 1});
 my $user       = $t->app->core->get_user("$NICK\@convos.by");
 my $connection = $user->get_connection('irc-default');
-my $form;
 
 $t->wait_for('.convos-main-menu [href="#chat/irc-default/"]');
 $t->click_ok('.convos-main-menu [href="#chat/irc-default/"]');
@@ -52,18 +51,13 @@ $t->send_keys_ok(undef, [\'tab']);                             # goto username
 $t->send_keys_ok(undef, [(\'backspace') x 30]);                # username
 $t->click_ok('.convos-connection-settings [type="submit"]');
 
-$form
-  = $t->driver->execute_script(
-  'return [].map.call(document.querySelectorAll(".convos-connection-settings input, .convos-connection-settings textarea"), function(el) { return el.type == "checkbox" && !el.checked ? "off" : el.value });'
-  );
-is_deeply(
-  $form,
+$t->t::Selenium::form_is(
+  '.convos-connection-settings input, .convos-connection-settings textarea',
   [
     "irc.example.com:6668", "Connected", "superduper", "off", "on", "", "s3cr#t",
     "/msg nickserv hey!\n/nick whatever"
   ],
-  'form data'
-) or diag join ", ", @$form;
+);
 
 is $connection->url->to_unsafe_string, "irc://:s3cr%23t\@irc.example.com:6668?nick=superduper",
   'url without username';

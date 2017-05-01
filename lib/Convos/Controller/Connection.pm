@@ -150,22 +150,25 @@ sub _pretty_connection_name {
 
 sub _same_url {
   my ($u1, $u2) = @_;
-  my $userinfo = $u1->password ? $u1->userinfo : $u1->username ? join ':', $u1->username,
-    $u2->password // '' : '';
-
-  $u1->userinfo($userinfo) if $userinfo;
 
   return 0 unless $u1->host_port eq $u2->host_port;
   return 0 unless +($u1->query->param('tls') || '0') eq +($u2->query->param('tls') || '0');
-  return 0 unless $userinfo eq +($u2->userinfo // '');
+  return 0 unless +($u1->userinfo // '') eq +($u2->userinfo // '');
   return 1;
 }
 
 sub _validate_url {
   my ($self, $url) = @_;
-  my $forced_irc_server = $self->app->config('forced_irc_server');
+
   $url = Mojo::URL->new($url || '');
-  $url->host_port($forced_irc_server) if $forced_irc_server;
+
+  my $f = $self->app->config('forced_irc_server');
+  if ($f->host) {
+    $url->host_port($f->host_port);
+    $url->userinfo(defined $f->password ? join ':', $url->username // '', $f->password : undef);
+    $url->query->param(forced => 1);
+  }
+
   return $url->host ? $url : undef;
 }
 

@@ -8,6 +8,19 @@ use Sys::Hostname 'hostname';
 
 $ENV{MOJO_SELENIUM_DRIVER} ||= 'Selenium::Chrome';
 
+sub form_is {
+  my ($t, $sel, $expected) = @_;
+
+  my $form = $t->driver->execute_script(
+    join '',
+    qq|return [].map.call(document.querySelectorAll("$sel"),|,
+    qq|function(el){return el.type=="checkbox" && !el.checked ? "off" : el.value})|,
+  );
+
+  Test::Deep::cmp_deeply($form, $expected, "form data for $sel")
+    or Test::More::diag(join ", ", @$form);
+}
+
 sub email {
   $main::NICK ||= 't' . substr Mojo::Util::md5_sum(join ':', hostname(), $<, $0), 0, 7;
   return sprintf '%s@convos.by', $main::NICK;

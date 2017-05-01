@@ -32,7 +32,7 @@ sub load_object {
 }
 
 sub messages {
-  my ($self, $query, $cb) = @_;
+  my ($self, $obj, $query, $cb) = @_;
   $self->tap($cb, '', []);
 }
 

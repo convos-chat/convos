@@ -20,7 +20,7 @@ is $backend->save_object($user, sub { $err = "save_object @_" }), $backend, 'sav
 like $err, qr{save_object main}, 'object saved';
 
 my $message;
-is $backend->messages({}, sub { $message = undef; }), $backend, 'messages async';
+is $backend->messages({}, {}, sub { $message = undef; }), $backend, 'messages async';
 is $message, undef, 'end of messages';
 
 done_testing;

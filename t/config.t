@@ -90,8 +90,8 @@ cmp_deeply(
 delete $ENV{MOJO_CONFIG};
 $ENV{CONVOS_FORCED_IRC_SERVER} = 'localhost';
 $convos = Convos->new;
-is $convos->config->{default_server},    'localhost', 'forced default_server';
-is $convos->config->{forced_irc_server}, 'localhost', 'env forced_irc_server';
+is $convos->config->{default_server},    'localhost',       'forced default_server';
+is $convos->config->{forced_irc_server}, 'irc://localhost', 'env forced_irc_server';
 is $convos->config->{settings}{forced_irc_server}, true, 'settings forced_irc_server';
 
 done_testing;

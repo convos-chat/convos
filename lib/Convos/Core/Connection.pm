@@ -135,11 +135,17 @@ sub _userinfo {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
+  my $url = $self->url;
   my %json = map { ($_, $self->$_) } qw(name protocol wanted_state);
 
   $json{connection_id}       = $self->id;
   $json{on_connect_commands} = $self->on_connect_commands;
-  $json{url}                 = $self->url->to_unsafe_string;
+  $json{url}                 = $url->to_unsafe_string;
+
+  if (!$persist and $url->query->param('forced')) {
+    my $password = $url->password // '';
+    $json{url} =~ s!:$password\@!@!;
+  }
 
   if ($persist) {
     $json{dialogs} = [map { $_->TO_JSON($persist) } @{$self->dialogs}];
