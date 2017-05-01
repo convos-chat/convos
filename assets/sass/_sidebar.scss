@@ -171,3 +171,18 @@ body.notouch .convos-main-menu {
     .n-unread { display: none; }
   }
 }
+
+body.no-header {
+  .convos-main-menu,
+  .is-sidebar {
+    top: 0;
+  }
+}
+
+body.no-menu {
+  .convos-main-menu { display: none !important; }
+}
+
+body.no-sidebar {
+  .is-sidebar { display: none !important; }
+}

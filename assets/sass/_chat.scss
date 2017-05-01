@@ -87,7 +87,8 @@ $convos-input-height: 46px;
 }
 
 .convos-settings {
-  main > div, main > form {
+  main > div,
+  main > form {
     max-width: $readable-width;
     margin-left: 0;
   }
@@ -226,5 +227,19 @@ $convos-input-height: 46px;
     dl dd {
       margin-left: 16em;
     }
+  }
+}
+
+body.no-header {
+  .convos-dialog-container,
+  .convos-settings {
+    main { top: 0; }
+  }
+}
+
+body.no-menu {
+  .convos-dialog-container,
+  .convos-settings {
+    margin-left: 0;
   }
 }

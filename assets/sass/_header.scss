@@ -118,3 +118,20 @@ a.toggle-main-menu {
 body.notouch header {
   a:hover { background: lighten($primary-color, 5%); }
 }
+
+body.no-header {
+  header {
+    display: none;
+  }
+}
+
+body.no-menu {
+  header {
+    padding-left: $gutter-width;
+    .input-field { display: none; }
+  }
+}
+
+body.no-sidebar {
+  .convos-header-links { display: none !important; }
+}

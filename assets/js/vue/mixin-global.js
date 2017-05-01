@@ -7,6 +7,10 @@
   Convos.settings.notifications = localStorage.getItem("notifications") || Notification.permission;
   Convos.settings.sortDialogsBy = localStorage.getItem("sortDialogsBy") || "lastRead";
 
+  var hideParam = location.href.match(/hide=(.+)/) || ["", ""];
+  hideParam[1].split(",").forEach(function(id) { Convos.settings.hide[id] = true; });
+  Object.keys(Convos.settings.hide).forEach(function(hide) { $('body').addClass("no-" + hide); });
+
   var validSidebars = ["", "notifications", "sidebar-info"].filter(function(v) {
     return Convos.settings.sidebar === v;
   });

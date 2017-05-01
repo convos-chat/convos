@@ -153,6 +153,7 @@ sub _config {
   $config->{default_server}
     ||= $ENV{CONVOS_FORCED_IRC_SERVER} || $ENV{CONVOS_DEFAULT_SERVER} || 'chat.freenode.net:6697';
   $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
+  $config->{hide}{$_} = 1 for split /,/, +($ENV{CONVOS_HIDE_ELEMENTS} || '');
   $config->{home} ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
   $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
@@ -172,9 +173,10 @@ sub _config {
     contact           => $config->{contact},
     default_server    => $config->{default_server},
     forced_irc_server => $config->{forced_irc_server} ? true : false,
+    hide => $config->{hide} ||= {},
     organization_name => $config->{organization_name},
     organization_url  => $config->{organization_url},
-    version => $self->VERSION || '0.01',
+    version           => $self->VERSION || '0.01',
   };
 
   $config;

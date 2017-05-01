@@ -4866,7 +4866,8 @@ ul.complete-dropdown {
     .convos-input textarea.materialize-textarea, .convos-input textarea.materialize-textarea:focus {
       border: 0; }
 
-.convos-settings main > div, .convos-settings main > form {
+.convos-settings main > div,
+.convos-settings main > form {
   max-width: 50em;
   margin-left: 0; }
 
@@ -4979,6 +4980,14 @@ ul.complete-dropdown {
   .convos-help dl dd {
     margin-left: 16em; } }
 
+body.no-header .convos-dialog-container main,
+body.no-header .convos-settings main {
+  top: 0; }
+
+body.no-menu .convos-dialog-container,
+body.no-menu .convos-settings {
+  margin-left: 0; }
+
 header {
   background-color: #3c813f;
   text-align: right;
@@ -5083,6 +5092,17 @@ a.toggle-main-menu {
 
 body.notouch header a:hover {
   background: #449248; }
+
+body.no-header header {
+  display: none; }
+
+body.no-menu header {
+  padding-left: 1.5rem; }
+  body.no-menu header .input-field {
+    display: none; }
+
+body.no-sidebar .convos-header-links {
+  display: none !important; }
 
 .le-rich,
 .le-photo {
@@ -5362,4 +5382,14 @@ body.notouch .convos-main-menu .link.dialog:hover .close:hover {
 body.notouch .convos-main-menu .link.dialog:hover .n-unread {
   display: none; }
 
-/*# sourceMappingURL=../09fa878896/main.css.map */
+body.no-header .convos-main-menu,
+body.no-header .is-sidebar {
+  top: 0; }
+
+body.no-menu .convos-main-menu {
+  display: none !important; }
+
+body.no-sidebar .is-sidebar {
+  display: none !important; }
+
+/*# sourceMappingURL=../6ed7806167/main.css.map */

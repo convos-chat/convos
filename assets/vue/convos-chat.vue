@@ -7,15 +7,15 @@
         <label for="goto_anything"><i class="material-icons">search</i></label>
       </div>
       <h2>{{header()}}</h2>
-    <div class="convos-header-links">
-      <a v-sidebar.literal="#sidebar-info" v-tooltip.literal="Dialog settings" :class="activeClass('sidebar-info')">
-        <i class="material-icons">info</i>
-      </a>
-      <a v-sidebar.literal="#notifications" v-tooltip.literal="Show notifications" class="notifications" :class="activeClass('notifications')">
-        <i class="material-icons" :class="user.unread ? 'active' : ''">{{user.unread ? "notifications_active" : "notifications_none"}}</i>
-        <b class="n-notifications" v-if="user.unread">{{user.unread < 100 ? user.unread : "99+"}}</b>
-      </a>
-    </div>
+      <div class="convos-header-links">
+        <a v-sidebar.literal="#sidebar-info" v-tooltip.literal="Dialog settings" :class="activeClass('sidebar-info')">
+          <i class="material-icons">info</i>
+        </a>
+        <a v-sidebar.literal="#notifications" v-tooltip.literal="Show notifications" class="notifications" :class="activeClass('notifications')">
+          <i class="material-icons" :class="user.unread ? 'active' : ''">{{user.unread ? "notifications_active" : "notifications_none"}}</i>
+          <b class="n-notifications" v-if="user.unread">{{user.unread < 100 ? user.unread : "99+"}}</b>
+        </a>
+      </div>
     </header>
     <convos-dialog-container :dialog="d" :user="user" v-show="d.active" v-for="d in user.dialogs"></convos-dialog-container>
     <convos-settings :error="error" :user="user" v-if="show == 'settings'"></convos-settings>
