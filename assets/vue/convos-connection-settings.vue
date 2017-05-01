@@ -29,7 +29,7 @@
     </div>
     <template v-if="connection.url">
       <div class="row">
-        <md-input :value.sync="server" :placeholder="server" :readonly="settings.forced_irc_server" cols="s12" name="server">Server</md-input>
+        <md-input :value.sync="server" placeholder="Example: chat.freenode.net:6697" :readonly="settings.forced_irc_server" cols="s12" name="server">Server</md-input>
       </div>
       <div class="row">
         <md-select :value.sync="wantedState" label="Wanted state">
@@ -49,7 +49,7 @@
     </template>
     <template v-if="!connection.url">
       <div class="row">
-        <md-input :value.sync="settings.default_server" placeholder="Example: chat.freenode.net:6697" :readonly="settings.forced_irc_server" focus="true" cols="s6">Server</md-input>
+        <md-input :value.sync="server" placeholder="Example: chat.freenode.net:6697" :readonly="settings.forced_irc_server" cols="s6" name="server">Server</md-input>
         <md-input :value.sync="nick" placeholder="Example: jan_henning" cols="s6">Nick</md-input>
       </div>
     </template>

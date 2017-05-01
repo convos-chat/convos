@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 0.99_35 Not Released
  - Fix showing ":port" when editing a connection #340
+ - Fix changing server from default server on "Create connection" #345
  - Fix not leaking nick change events to all conversations
 
 0.99_34 2017-04-24T10:04:55+0200
