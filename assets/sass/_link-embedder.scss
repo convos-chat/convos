@@ -59,6 +59,14 @@ div.le-card {
   content: "Hosted by ";
 }
 
+.le-video video {
+  background: darken($body-bg, 3%);
+  border: 1px solid darken($body-bg, 10%);
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .le-image-card .le-goto-link {
   display: none;
 }
