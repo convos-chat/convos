@@ -13,13 +13,27 @@ frontend is held together by the progressive JavaScript framework
 
 # Quick start guide
 
+## Snap Install
+
+Install Convos in seconds on [Ubuntu and other snap supported Linux distributions](https://snapcraft.io/docs/core/install) with:
+
+    snap install convos
+
+Installing a snap is very quick. Snaps are secure. They are isolated with all of their dependencies. Snaps also auto update when a new version is released.
+
+## Shell Install
+
 ```bash
 curl https://convos.by/install.sh | sh -
 ./convos/script/convos daemon;
 ```
 
+## Start the daemon
+
 That's it! After the two commands above, you can point your browser to
 [http://localhost:3000](http://localhost:3000) and start chatting.
+
+## Invitation code
 
 Note that to register, you need a invitation code. This code is printed to
 screen as you start convos:
