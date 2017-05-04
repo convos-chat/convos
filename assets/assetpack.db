@@ -371,7 +371,7 @@ checksum=83b78d901e
 format=js
 minified=1
 [js-min:js/core/dialog.js]
-checksum=a9049d9200
+checksum=78eb4e4fdb
 format=js
 minified=1
 [js-min:js/core/user.js]
@@ -445,7 +445,7 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:js/vue/mixin-global.js]
-checksum=80e07e1e79
+checksum=796f8b9161
 format=js
 minified=1
 [js-min:js/vue/mixin-materialize.js]
@@ -466,15 +466,15 @@ checksum=f11d4e7f05
 format=js
 minified=1
 [sass:sass/main.scss]
-checksum=5c35fb8ff9
+checksum=230d19e322
 format=css
 minified=0
 [sass-min:sass/main.scss]
-checksum=487cf8ebae
+checksum=230d19e322
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
-checksum=ad549f0d09
+checksum=e3cdbd62fe
 format=js
 minified=1
 [js-min:vue/convos-connection-editor.vue]
@@ -483,7 +483,7 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:vue/convos-connection-settings.vue]
-checksum=1c6e2fa694
+checksum=633becdbbf
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]

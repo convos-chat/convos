@@ -5159,6 +5159,13 @@ div.le-card {
 .le-paste .le-provider-link:before {
   content: "Hosted by "; }
 
+.le-video video {
+  background: #f2f2f2;
+  border: 1px solid #e1e1e1;
+  display: block;
+  width: 100%;
+  height: auto; }
+
 .le-image-card .le-goto-link {
   display: none; }
 
@@ -5392,4 +5399,4 @@ body.no-menu .convos-main-menu {
 body.no-sidebar .is-sidebar {
   display: none !important; }
 
-/*# sourceMappingURL=../6ed7806167/main.css.map */
+/*# sourceMappingURL=../9b345dff2a/main.css.map */
