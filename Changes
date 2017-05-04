@@ -1,9 +1,12 @@
 Revision history for perl distribution Convos
 
-0.99_35 Not Released
+0.99_35 2017-05-05T00:20:45+0200
  - Fix showing ":port" when editing a connection #340
  - Fix changing server from default server on "Create connection" #345
  - Fix not leaking nick change events to all conversations
+ - Fix video link embedder styling
+ - Add support for CONVOS_FORCED_IRC_SERVER="irc://:password@host:port" #343
+ - Add hiding of chat elements for better rendering in iframe #21 #320 #346
 
 0.99_34 2017-04-24T10:04:55+0200
  - Fix "create connection"
