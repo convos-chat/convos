@@ -13,11 +13,6 @@ sub email {
   return sprintf '%s@convos.by', $main::NICK;
 }
 
-sub run_for {
-  Mojo::IOLoop->timer($_[1] => sub { Mojo::IOLoop->stop });
-  Mojo::IOLoop->start;
-}
-
 sub selenium_init {
   my ($class, $app, $args) = @_;
   my $t = Test::Mojo::WithRoles->new($app || 'Convos');

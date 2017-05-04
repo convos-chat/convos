@@ -16,14 +16,14 @@ $t->click_ok('.convos-main-menu [href="#chat/irc-default/"]');
 $t->wait_for('.convos-sidebar-info [type="submit"]');
 $t->click_ok('.convos-sidebar-info [type="submit"]');
 
-t::Selenium->run_for(0.2);
+$t->wait_for(0.2);
 is $t->driver->execute_script('return Convos.settings.main'), "#chat/irc-default/",
   'still in connection settings';
 
 $t->click_ok('.convos-connection-settings [for="form_advanced_settings"]');
 $t->send_keys_ok('.convos-connection-settings [type="password"]', ['se%!+cret', \'tab']);
 $t->click_ok('.convos-connection-settings [type="submit"]');
-t::Selenium->run_for(0.2);
+$t->wait_for(0.2);
 
 is $connection->url->to_unsafe_string, "irc://:se%25!+cret\@dummy.example.com:6697?nick=$NICK",
   'url with password';
@@ -39,7 +39,7 @@ $t->send_keys_ok(undef, ['s3cr#t', \'tab']);                   # password
 $t->send_keys_ok(undef, [' /msg nickserv hey!', \'enter']);    # on connect commands
 $t->send_keys_ok(undef, ['/nick whatever  ', \'tab']);         # on connect commands
 $t->click_ok('.convos-connection-settings [type="submit"]');
-t::Selenium->run_for(0.2);
+$t->wait_for(0.2);
 
 is $connection->url->to_unsafe_string,
   "irc://%3Cuser%3E:s3cr%23t\@irc.example.com:6668?nick=superduper&tls=0",

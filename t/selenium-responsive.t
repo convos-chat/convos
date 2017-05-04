@@ -25,7 +25,7 @@ is_at_bottom();
 
 $connection->emit(message => $dialog, $_) for splice @messages, 0, 30;
 $connection->emit(message => $dialog, $messages[-1]);
-t::Selenium->run_for(0.2);
+$t->wait_for(0.2);
 is_at_bottom();
 
 $t->click_ok('.toggle-main-menu');
@@ -39,7 +39,7 @@ $connection->emit(message => $dialog, $_) for @messages;
 $t->click_ok('.toggle-main-menu');
 $t->wait_for('.convos-main-menu [href="#chat/irc-default/#test"]');
 $t->click_ok('[href="#chat/irc-default/#test"]');
-t::Selenium->run_for(0.3);
+$t->wait_for(0.3);
 is_at_bottom();
 
 done_testing;
