@@ -20,7 +20,7 @@ The pastebin works like this:
 
 Here is an example paste:
 
-![Example paste](../../public/screenshots/2017-05-09-pastebin.png)
+![Example paste](/public/screenshots/2017-05-09-pastebin.png)
 
 ## Multiline messages
 
