@@ -3,9 +3,9 @@ layout: post
 title: Convos got a built in pastebin
 ---
 
-Convos has a high focus on privacy. Convos can be be able to run on closed
-network, and no external resources on the public internet should ever be
-needed. This ideas was also taken into consideration when we decided bundle a
+Convos has a high focus on privacy. Convos can be run on closed network, and
+no external resources on the public internet should ever be needed. This ideas
+was also taken into consideration when we decided bundle a
 [pastebin](https://github.com/Nordaaker/convos/pull/329) with Convos. The
 pastebin implementation stores the data in
 [CONVOS_HOME](https://convos.by/doc/config.html#convos_home), meaning you are
