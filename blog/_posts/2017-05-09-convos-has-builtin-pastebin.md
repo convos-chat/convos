@@ -3,12 +3,6 @@ layout: post
 title: Convos got a built in pastebin
 ---
 
-Version [0.99_30](https://github.com/Nordaaker/convos/tree/0.99_30) of Convos
-was released with improved handling of multiline messages. Get it now by running the
-[install](/doc/getting-started.html#quick-start-guide) command!
-
-## Internal pastebin
-
 Convos has a high focus on privacy. Convos can be be able to run on closed
 network, and no external resources on the public internet should ever be
 needed. This ideas was also taken into consideration when we decided bundle a
