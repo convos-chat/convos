@@ -483,7 +483,7 @@ format=js
 minified=1
 mtime=1478968265
 [js-min:vue/convos-connection-settings.vue]
-checksum=8cc77e831f
+checksum=c462610c02
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]

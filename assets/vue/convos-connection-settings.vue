@@ -23,6 +23,8 @@
           "Server" below has a default value, but you can change it to
           <a href="http://www.irchelp.org/networks/" target="_blank">any server</a>
           you want. Once a server is entered, you can hit "Create" to start chatting.
+          Note that Convos automatically detects if the server supports TLS/SSL on the
+          port provided.
           </template>
         </p>
       </div>
