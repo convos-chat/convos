@@ -7,6 +7,8 @@ use Mojo::Loader 'load_class';
 use Mojo::Util 'url_escape';
 use Mojo::URL;
 
+$IO::Socket::SSL::DEBUG = $ENV{CONVOS_SSL_DEBUG} if $ENV{CONVOS_SSL_DEBUG};
+
 has messages => sub {
   my $self = shift;
   my $dialog = Convos::Core::Dialog->new(id => '', name => '');

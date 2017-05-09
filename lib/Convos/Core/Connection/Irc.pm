@@ -70,7 +70,7 @@ sub connect {
     sub {
       my ($delay, $err) = @_;
 
-      $self->_debug('connect(%s) == %s', $self->_irc->server, $err || 'Success') if DEBUG;
+      $self->_debug('connect(%s) == %s', $self->_irc->server, $err || 'Success') if DEBUG or $err;
       $self->_notice($err) if $err;
 
       if ($self->_irc->tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {

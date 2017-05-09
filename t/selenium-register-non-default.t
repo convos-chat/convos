@@ -25,6 +25,7 @@ $t->wait_for('.convos-create-dialog');
 my $user       = $t->app->core->get_user("$NICK\@convos.by");
 my $connection = $user->get_connection('irc-dummy-convos');
 ok $connection, 'created connection with non-standard server name';
-like $connection->url->to_unsafe_string, qr{irc://dummy\.convos\.by:6668}, 'non default url';
+is $connection->url->to_unsafe_string, "irc://dummy.convos.by:6668?nick=$NICK", 'non default url';
+is $connection->url->query->param('tls'), undef, 'tls detection enabled';
 
 done_testing;

@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_36 Not Released
+ - Fix TLS detection when creating a connection #344
+
 0.99_35 2017-05-05T00:20:45+0200
  - Fix showing ":port" when editing a connection #340
  - Fix changing server from default server on "Create connection" #345
