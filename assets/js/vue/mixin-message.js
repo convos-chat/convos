@@ -59,13 +59,21 @@
           var code = this.innerHTML.split(/\n\r?|\r/);
           $(this).replaceWith('<ol class="hljs"><li>' + code.join("</li><li>") + '</li></ol>');
         });
-        if (oembed.provider_name == 'Twitter') twttr.widgets.load();
-        if (oembed.provider_name == 'Instagram') instgrm.Embeds.process();
+        if (oembed.provider_name == 'Twitter') loadTwitter();
+        if (oembed.provider_name == 'Instagram') loadInstagram();
       },
       statusTooltip: function() {
         if (!this.dialog.dialog_id) return;
         return this.dialog.participant(this.msg.from).online ? "" : "Not in this channel";
       }
     }
+  };
+
+  var loadInstagram = function() {
+    return window.instgrm ? instgrm.Embeds.process() : loadScript("//platform.instagram.com/en_US/embeds.js");
+  };
+
+  var loadTwitter = function() {
+    return window.twttr ? twttr.widgets.load() : loadScript("//platform.twitter.com/widgets.js");
   };
 })();

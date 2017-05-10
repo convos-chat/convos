@@ -43,6 +43,13 @@
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   };
 
+  window.loadScript = function(src) {
+    var script = document.createElement("script");
+    script.id = src.replace(/\W/g, "_");
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  };
+
   window.onpageshow = window.onpagehide = window.onfocus = window.onblur = function(e) {
     window.hasFocus = e.type.match(/blur|hide/) ? false : true;
     if (DEBUG.debug) console.log("[focusChanged]", e.type, window.hasFocus);

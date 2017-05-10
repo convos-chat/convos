@@ -433,8 +433,6 @@ __DATA__
   window.Convos.settings.main = "<%= $main %>";
 % }
 % end
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<script async src="//platform.instagram.com/en_US/embeds.js"></script>
 @@ exception.production.html.ep
 %= include 'partial/error'
 @@ not_found.production.html.ep
