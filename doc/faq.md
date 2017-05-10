@@ -18,34 +18,31 @@ parameters that have to be set to load a plugin.
 
 ## Can Convos run behind behind my favorite web server?
 
-Yes, but it needs some addition configuration to understand how to behave.
+Yes, but Convos and the web server needs to be configured properly and
+[WebSockets](https://www.websocket.org/) need to be supported through the
+chain.
 
-There are two things you need to do if you want to run Convos behind a reverse
-proxy, such as Apache or nginx:
-
-The first thing is that
+The first thing is that the environment variable
 [MOJO_REVERSE_PROXY](/doc/config.html#MOJO_REVERSE_PROXY) must be set to a
 true value.
 
-The other thing is that the reverse proxy need to pass on some HTTP headers
-to Mojolicious/Convos to instruct it into behaving correctly. Below are
-two examples for setting up Convos behind nginx or Apache.
-
-To sum up, the important things are:
+The other thing is that the reverse proxy need to pass on some HTTP headers to
+Convos, so correct URLs will be generated. Below are two examples for
+setting up Convos behind nginx or Apache. Here are the important headers:
 
 * "Host" header must be set to the original request's "Host" header.
 * "X-Forwarded-Proto" header must be set to either "http" or "https".
 * "X-Request-Base" header must be set if your application is not available
   from the root of your domain.
-* The web server need to support WebSockets.
 
-Here is a complete example:
+Here is a complete example on how to start Convos, and configur either nginx
+or Apache:
 
-### Start convos behind a reverse proxy
+Start convos behind a reverse proxy:
 
     $ MOJO_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8080
 
-### Example nginx config
+Example nginx config:
 
     # Host and port where convos is running
     upstream convos { server 127.0.0.1:8080; }
@@ -77,7 +74,7 @@ Here is a complete example:
       }
     }
 
-### Example Apache config
+Example Apache config:
 
     <VirtualHost your-domain.com:80>
       ServerAdmin admin@your-domain.com
