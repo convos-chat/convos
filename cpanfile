@@ -14,9 +14,10 @@ requires "Parse::IRC"                     => "1.20";
 requires "Time::Piece"                    => "1.20";
 
 on develop => sub {
-  requires "CSS::Minifier::XS"        => "0.09";
-  requires "JavaScript::Minifier::XS" => "0.11";
-  requires "CSS::Sass"                => "3.3.0";
+  requires "CSS::Minifier::XS"          => "0.09";
+  requires "CSS::Sass"                  => "3.3.0";
+  requires "JavaScript::Minifier::XS"   => "0.11";
+  requires "Test::Mojo::Role::Selenium" => "0.09";
 };
 
 test_requires "Test::Deep" => "0.11";
