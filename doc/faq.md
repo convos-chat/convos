@@ -29,10 +29,7 @@ true value.
 
 The other thing is that the reverse proxy need to pass on some HTTP headers
 to Mojolicious/Convos to instruct it into behaving correctly. Below are
-links to cookbooks for setting up the reverse web server:
-
-* [nginx](http://mojolicious.org/perldoc/Mojolicious/Guides/Cookbook#Nginx)
-* [Apache](http://mojolicious.org/perldoc/Mojolicious/Guides/Cookbook#Apache-mod_proxy)
+two examples for setting up Convos behind nginx or Apache.
 
 To sum up, the important things are:
 
@@ -44,11 +41,11 @@ To sum up, the important things are:
 
 Here is a complete example:
 
-Start convos:
+### Start convos behind a reverse proxy
 
     $ MOJO_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8080
 
-Set up nginx:
+### Example nginx config
 
     # Host and port where convos is running
     upstream convos { server 127.0.0.1:8080; }
@@ -79,6 +76,28 @@ Set up nginx:
         proxy_set_header X-Request-Base "$scheme://$host/whatever/convos";
       }
     }
+
+### Example Apache config
+
+    <VirtualHost your-domain.com:80>
+      ServerAdmin admin@your-domain.com
+      ServerName your-domain.com
+
+      <Proxy *>
+        Order allow,deny
+        Allow from all
+      </Proxy>
+
+      # Enable Convos to construct correct URLs by passing on custom headers.
+      ProxyRequests Off
+      ProxyPreserveHost On
+      RequestHeader set X-Forwarded-Proto "http"
+
+      # Pass requests on to Convos
+      ProxyPass /events ws://localhost:8080/events
+      ProxyPass / http://localhost:8080/ keepalive=On
+      ProxyPassReverse / http://localhost:8080/
+    </VirtualHost>
 
 ## Why does Convos stop when I close putty/xterm/some terminal?
 
