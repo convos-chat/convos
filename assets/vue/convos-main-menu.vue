@@ -6,7 +6,6 @@
         <span class="n-unread badge" v-if="d.unread && !d.active" v-tooltip="d.unread + ' unread messages'">{{d.unread < 50 ? d.unread : "50+"}}</span>
         <span class="on" v-if="showConnectionInfo(d)">{{d.connection().protocol}}-{{d.connection().name}}</span>
       </a>
-      <span class="close badge" @click.prevent="close(d)" v-if="d.dialog_id">&times;</span>
     </div>
     <div class="divider"></div>
     <div class="link" :class="activeClass('#create-dialog')">

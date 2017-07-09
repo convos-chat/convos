@@ -427,7 +427,7 @@ checksum=364103422d
 format=js
 minified=1
 [js-min:vue/convos-main-menu.vue]
-checksum=5e1b0a7940
+checksum=97e10bc8d7
 format=js
 minified=1
 [js-min:vue/convos-message-action.vue]
