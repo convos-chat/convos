@@ -32,6 +32,14 @@ module.exports = {
   watch: {
     "settings.main": function(v, o) {
       this.calculateMainArea();
+    },
+    "settings.sidebar": function(v, o) {
+      if (v === "notifications" && Convos.settings.clearNotificationsOnOpen) {
+        var self = this;
+        Convos.api.readNotifications({}, function(err, xhr) {
+          if (!err) self.user.unread = 0;
+        });
+        }
     }
   },
   methods: {

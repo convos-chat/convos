@@ -50,6 +50,9 @@
         "settings.expandUrls": function(v, o) {
           localStorage.setItem("expandUrls", v ? "true" : "false");
         },
+        "settings.clearNotificationsOnOpen": function(v, o) {
+          localStorage.setItem("clearNotificationsOnOpen", v ? "true" : "false");
+        },
         "settings.main": function(v, o) {
           if (DEBUG.watch && v != o) console.log("[loc:main] " + (o || "null") + " => " + (v || "null"));
           localStorage.setItem("main", v);
