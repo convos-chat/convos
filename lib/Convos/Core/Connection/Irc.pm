@@ -377,7 +377,8 @@ sub _proxy {
 }
 
 sub _send {
-  my ($self, $target, $message, $cb) = @_;
+  my $cb = pop;
+  my ($self, $target, $message) = @_;
   my $msg = $message;
 
   if (!$target) {    # err_norecipient and err_notexttosend

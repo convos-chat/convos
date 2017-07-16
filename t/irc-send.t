@@ -78,10 +78,21 @@ $t->run(
   sub {
     $connection->send('#convos' => '/msg somebody /some/stuff', $stop);
     Mojo::IOLoop->start;
-    is $err, '',    'cmd /say';
-    is $res, undef, 'res /say';
+    is $err, '',    'cmd /msg';
+    is $res, undef, 'res /msg';
   }
 );
+
+$t->run(
+  [],
+  sub {
+    $connection->send('#convos' => '/msg somebody', $stop);
+    Mojo::IOLoop->start;
+    is $err, 'Cannot send empty message.',    'err /msg';
+    is $res, undef, 'res /msg';
+  }
+);
+
 
 $t->run(
   [qr{TOPIC}, ['main', 'set-topic.irc']],
