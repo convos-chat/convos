@@ -76,7 +76,6 @@ which makes Convos faster. It can be installed with the command below:
 
     ```bash
     $ ./script/cpanm --sudo EV
-    ```
 
 ## Snap Install
 
