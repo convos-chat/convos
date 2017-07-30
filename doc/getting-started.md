@@ -74,9 +74,9 @@ $ ./script/convos version
 One very useful addition is [EV](https://metacpan.org/pod/distribution/Mojolicious/lib/Mojolicious/Guides/FAQ.pod#Why-doesnt-Mojolicious-have-any-dependencies),
 which makes Convos faster. It can be installed with the command below:
 
-    ```bash
-    $ ./script/cpanm --sudo EV
-    ```
+```bash
+$ ./script/cpanm --sudo EV
+```
 
 ## Snap Install
 
