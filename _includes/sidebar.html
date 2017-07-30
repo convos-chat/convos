@@ -2,16 +2,16 @@
   <div class="container sidebar-sticky">
     <div class="sidebar-about">
       <h1 class="convos-logo">
-        <a href="{{ site.baseurl }}"><span>{{ site.title }}</span></a>
+        <a href="{{ site.url }}"><span>{{ site.title }}</span></a>
       </h1>
       <p class="lead">{{ site.description }}</p>
     </div>
 
     <nav class="sidebar-nav">
-      <a class="sidebar-nav-item{% if page.url == "/") %} active{% endif %}" href="{{ site.baseurl }}">About</a>
-      <a class="sidebar-nav-item{% if page.url == "/blog/") %} active{% endif %}" href="{{ site.baseurl }}blog">Blog</a>
-      <a class="sidebar-nav-item{% if page.url == "/doc/getting-started.html") %} active{% endif %}" href="{{ site.baseurl }}doc/getting-started.html">Install</a>
-      <a class="sidebar-nav-item{% if page.url == "/doc/") %} active{% endif %}" href="{{ site.baseurl }}doc">Documentation</a>
+      <a class="sidebar-nav-item{% if page.url == "/") %} active{% endif %}" href="{{ site.url }}">About</a>
+      <a class="sidebar-nav-item{% if page.url == "/blog/") %} active{% endif %}" href="{{ site.url }}/blog">Blog</a>
+      <a class="sidebar-nav-item{% if page.url == "/doc/getting-started.html") %} active{% endif %}" href="{{ site.url }}/doc/getting-started.html">Install</a>
+      <a class="sidebar-nav-item{% if page.url == "/doc/") %} active{% endif %}" href="{{ site.url }}/doc">Documentation</a>
       <a class="sidebar-nav-item" href="{{ site.github.repo }}">GitHub</a>
     </nav>
   </div>
