@@ -74,10 +74,17 @@ $ ./script/convos version
 One very useful addition is [EV](https://metacpan.org/pod/distribution/Mojolicious/lib/Mojolicious/Guides/FAQ.pod#Why-doesnt-Mojolicious-have-any-dependencies),
 which makes Convos faster. It can be installed with the command below:
 
-```bash
-$ ./script/cpanm --sudo EV
-```
+    ```bash
+    $ ./script/cpanm --sudo EV
 
+## Snap Install
+
+Install Convos in seconds on [Ubuntu and other snap supported Linux distributions](https://snapcraft.io/docs/core/install) with:
+
+    snap install convos
+
+Installing a snap is very quick. Snaps are secure. They are isolated with all of their dependencies. Snaps also auto update when a new version is released.
+ 
 ## Hypnotoad and Prefork
 
 It is *not* possible to run Convos with hypnotoad nor the prefork server. The
