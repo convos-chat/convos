@@ -24,7 +24,7 @@ $t->send_keys_ok('.convos-connection-settings [type="password"]', ['se%!+cret', 
 $t->click_ok('.convos-connection-settings [type="submit"]');
 $t->wait_for(0.2);
 
-is $connection->url->to_unsafe_string, "irc://:se%25!+cret\@dummy.example.com:6697?nick=$NICK",
+is $connection->url->to_unsafe_string, "irc://:se%25!+cret\@dummy.example.com:6697?nick=$NICK&tls=1",
   'url with password';
 
 $t->send_keys_ok('.convos-connection-settings [name="server"]', [(\'backspace') x 30]);
@@ -41,7 +41,7 @@ $t->click_ok('.convos-connection-settings [type="submit"]');
 $t->wait_for(0.2);
 
 is $connection->url->to_unsafe_string,
-  "irc://%3Cuser%3E:s3cr%23t\@irc.example.com:6668?nick=superduper&tls=0",
+  "irc://%3Cuser%3E:s3cr%23t\@irc.example.com:6668?nick=superduper&tls=1",
   'url with username, password and nick';
 
 $t->driver->refresh;
@@ -54,12 +54,12 @@ $t->click_ok('.convos-connection-settings [type="submit"]');
 $t->t::Selenium::form_is(
   '.convos-connection-settings input, .convos-connection-settings textarea',
   [
-    "irc.example.com:6668", "Connected", "superduper", "off", "on", "", "s3cr#t",
+    "irc.example.com:6668", "Connected", "superduper", "on", "on", "", "s3cr#t",
     "/msg nickserv hey!\n/nick whatever"
   ],
 );
 
-is $connection->url->to_unsafe_string, "irc://:s3cr%23t\@irc.example.com:6668?nick=superduper",
+is $connection->url->to_unsafe_string, "irc://:s3cr%23t\@irc.example.com:6668?nick=superduper&tls=1",
   'url without username';
 
 # $t->browser_log;
