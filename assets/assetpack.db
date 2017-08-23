@@ -299,7 +299,7 @@ checksum=026e3b420d
 format=js
 minified=1
 [js-min:js/main.js]
-checksum=771733f867
+checksum=114ba4b077
 format=js
 minified=1
 [js-min:js/materialbox.js]
@@ -355,7 +355,7 @@ checksum=ea11f1217b
 format=js
 minified=1
 [js-min:js/vue/mixin-global.js]
-checksum=796f8b9161
+checksum=984d8f0816
 format=js
 minified=1
 [js-min:js/vue/mixin-materialize.js]
@@ -383,7 +383,7 @@ checksum=230d19e322
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
-checksum=e3cdbd62fe
+checksum=3eb7df2681
 format=js
 minified=1
 [js-min:vue/convos-connection-editor.vue]
@@ -459,7 +459,7 @@ checksum=045f2dd5c1
 format=js
 minified=1
 [js-min:vue/convos-message-password.vue]
-checksum=655772947f
+checksum=2151c6ba7c
 format=js
 minified=1
 [js-min:vue/convos-message-private.vue]
@@ -479,7 +479,7 @@ checksum=3a0743bb7b
 format=js
 minified=1
 [js-min:vue/convos-profile.vue]
-checksum=c9a788726c
+checksum=be80bcd973
 format=js
 minified=1
 [js-min:vue/convos-recover.vue]

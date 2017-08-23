@@ -3,7 +3,7 @@
   "info": {
     "version": "0.87",
     "title": "Convos API specification",
-    "description": "This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.",
+    "description": "This document describes the API for Convos, a multi-user persistent IRC proxy with a web interface.",
     "contact": {
       "name": "Convos",
       "url": "https://github.com/Nordaaker/convos"
@@ -194,7 +194,7 @@
                   "description": "Total number of rooms"
                 },
                 "end": {
-                  "type": "boolean",
+                 "type": "boolean",
                   "description": "True if the backend has loaded all the rooms"
                 },
                 "rooms": {
