@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 0.99_36 Not Released
+ - Use password type for joining secret channels.
  - Fix TLS detection when creating a connection #344
  - Fix message with empty content.
 

@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="row">
-      <md-input :value.sync="password" @keydown="errors = []" @keyup.enter="join" cols="s8 m9" :focus="true">Password</md-input>
+      <md-input type="password" :value.sync="password" @keydown="errors = []" @keyup.enter="join" cols="s8 m9" :focus="true">Password</md-input>
       <div class="col input-field s4 m3">
         <button @click="join" class="btn waves-effect waves-light" :disabled="!password.length">Join</button>
       </div>
