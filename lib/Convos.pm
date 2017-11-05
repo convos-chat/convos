@@ -42,6 +42,7 @@ sub startup {
   $self->_home_in_share unless -d $self->home->rel_file('public');
   $self->defaults(debug => $self->mode eq 'development' ? ['info'] : []);
   $self->routes->namespaces(['Convos::Controller']);
+  push @{$self->commands->namespaces}, 'Convos::Command';
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
   $self->sessions->secure(1) if $config->{secure_cookies};

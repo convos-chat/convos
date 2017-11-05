@@ -81,8 +81,19 @@ sub connect {
       else {
         $self->{delayed} = 0;
         $self->{myinfo} ||= {};
-        $self->state(connected => "Connected to @{[$self->_irc->server]}.")->$cb('');
+
+        # hack in access to a private object
+        local *Mojo::IRC::stream = sub { shift->{stream} } unless Mojo::IRC->can('stream');
+        # add the local socket port to myinfo for ident purposes
+        if (my $stream = $self->_irc->stream) {
+          $self->{myinfo}{sockport} = $stream->handle->sockport;
+        }
+        $self->save($delay->begin);
+
       }
+    },
+    sub {
+      $self->state(connected => "Connected to @{[$self->_irc->server]}.")->$cb('');
     }
   );
 
