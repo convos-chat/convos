@@ -49,10 +49,11 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
       last_read     => '2016-08-19T16:10:58Z',
       stash         => {},
       topic         => '',
-      unread        => 1,
+      unread        => 0,
     },
   ]
 );
+note explain $t->tx->res->json;
 
 $user->connection({name => 'example', protocol => 'irc'})
   ->dialog({name => '#superheroes', frozen => ''})->last_read($last_read)
@@ -95,7 +96,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       last_read     => '2016-08-19T16:10:58Z',
       stash         => {},
       topic         => '',
-      unread        => 1,
+      unread        => 0,
     },
     {
       connection_id => 'irc-example',
