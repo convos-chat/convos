@@ -125,7 +125,7 @@ sub _assets {
     return $self->helper(asset => sub { });
   }
 
-  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine Reloader)]});
+  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine)]});
 
   if (-d $custom_assets) {
     $self->log->info("Including files from $custom_assets when building frontend.");
@@ -399,7 +399,6 @@ __DATA__
     %= content
     <div id="vue_tooltip"><span></span></div>
     %= asset 'convos.js' if 200 == (stash('status') // 200)
-    %= asset 'reloader.js' if app->mode eq 'development';
   </body>
 </html>
 @@ index.html.ep

@@ -1,8 +1,9 @@
 Revision history for perl distribution Convos
 
-0.99_36 Not Released
+0.99_36 2017-11-28T08:25:51+0200
  - Fix TLS detection when creating a connection #344
  - Fix message with empty content.
+ - Remove obsolete AssetPack Reloader.
 
 0.99_35 2017-05-05T00:20:45+0200
  - Fix showing ":port" when editing a connection #340
