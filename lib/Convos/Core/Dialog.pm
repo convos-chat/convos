@@ -6,11 +6,11 @@ use Mojo::Date;
 
 my $CHANNEL_RE = qr{[#&]};
 
-has frozen => '';
+has frozen     => '';
 has is_private => sub { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 };
-has name => sub { Carp::confess('name required in constructor') };
-has password => '';
-has topic    => '';
+has name       => sub { Carp::confess('name required in constructor') };
+has password   => '';
+has topic      => '';
 
 sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
 

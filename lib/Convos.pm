@@ -179,7 +179,7 @@ sub _config {
     contact           => $config->{contact},
     default_server    => $config->{default_server},
     forced_irc_server => $config->{forced_irc_server}->host ? true : false,
-    hide => $config->{hide} ||= {},
+    hide              => $config->{hide} ||= {},
     organization_name => $config->{organization_name},
     organization_url  => $config->{organization_url},
     version           => $self->VERSION || '0.01',

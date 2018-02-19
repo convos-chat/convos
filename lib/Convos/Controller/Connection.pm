@@ -21,13 +21,11 @@ sub create {
   }
 
   eval {
-    $connection = $user->connection(
-      {
-        name                => $name,
-        on_connect_commands => $json->{on_connect_commands} || [],
-        protocol            => $url->scheme,
-      }
-    );
+    $connection = $user->connection({
+      name                => $name,
+      on_connect_commands => $json->{on_connect_commands} || [],
+      protocol            => $url->scheme,
+    });
     $connection->url($url);
     $self->delay(
       sub { $connection->save(shift->begin) },

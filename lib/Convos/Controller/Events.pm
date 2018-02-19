@@ -52,7 +52,8 @@ sub _err {
 
 sub _event_get_user {
   my ($self, $data) = @_;
-  my $user = $self->backend->user or return $self->_err('Need to log in. Session reset?', {})->finish;
+  my $user = $self->backend->user
+    or return $self->_err('Need to log in. Session reset?', {})->finish;
 
   $self->delay(
     sub { $user->get($data, shift->begin); },

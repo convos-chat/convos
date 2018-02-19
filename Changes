@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+0.99_37 Not Released
+- Added -wn to perltidy for superior welding
+
 0.99_36 2017-11-28T08:25:51+0200
  - Fix TLS detection when creating a connection #344
  - Fix message with empty content.

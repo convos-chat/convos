@@ -11,13 +11,11 @@ my $n_highlight = 0;
 $t->wait_for('.convos-main-menu [href="#chat/irc-default/#test"]');
 $t->click_ok('.convos-main-menu [href="#help"]', 'unfocus test channel');
 
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['#test', 'What about a normal message in a channel?'],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['#test', 'What about a normal message in a channel?'],
+});
 
 $t->wait_for('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread');
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread',
@@ -29,13 +27,11 @@ $t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/#test"] 
 $t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/batgirl"]',
   'no messages from batgirl');
 
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['#test', 'What about a normal message in a channel?'],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['#test', 'What about a normal message in a channel?'],
+});
 
 $t->live_element_exists_not(
   '.convos-main-menu [href="#chat/irc-default/#test"] .n-unread',
@@ -43,27 +39,23 @@ $t->live_element_exists_not(
 );
 
 {
-  $connection->_fallback(
-    {
-      command  => '266',
-      event    => 'RPL_GLOBALUSERS',
-      params   => ['', 'Current global users: 23  Max: 82'],
-      prefix   => 'hybrid8.debian.local',
-      raw_line => ":hybrid8.debian.local 266 $NICK :Current global users: 23  Max: 82"
-    }
-  );
+  $connection->_fallback({
+    command  => '266',
+    event    => 'RPL_GLOBALUSERS',
+    params   => ['', 'Current global users: 23  Max: 82'],
+    prefix   => 'hybrid8.debian.local',
+    raw_line => ":hybrid8.debian.local 266 $NICK :Current global users: 23  Max: 82"
+  });
   local $TODO = 'should it not increase?';
   $t->live_text_is('.convos-main-menu [href="#chat/irc-default/"] .n-unread',
     1, 'server dialog unread++, no notifications, no highlight');
 }
 
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => [$NICK, 'What about a private message?'],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => [$NICK, 'What about a private message?'],
+});
 
 $t->wait_for('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread');
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread',
@@ -71,13 +63,11 @@ $t->live_text_is('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread
 $t->desktop_notification_is(['batgirl', 'What about a private message?']);
 
 $n_highlight++;
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => [$NICK, "What if you, $NICK, are mentioned in a private dialog?"],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => [$NICK, "What if you, $NICK, are mentioned in a private dialog?"],
+});
 
 $t->wait_for('.convos-header-links .n-notifications');
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/batgirl"] .n-unread',
@@ -89,13 +79,11 @@ $t->live_element_exists_not('.convos-main-menu [href="#chat/irc-default/batgirl"
   'clear unread on focus');
 
 note 'unread count is increased, but nothing else';
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ["#test", 'who is strongest: supergirl or wonderwoman?'],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ["#test", 'who is strongest: supergirl or wonderwoman?'],
+});
 
 $t->live_text_is('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread',
   1, 'test dialog unread++ on message');
@@ -109,13 +97,11 @@ $t->live_text_is('.convos-main-menu [href="#chat/irc-default/#test"] .n-unread',
 
 note 'desktop notification because nick is highlighted';
 $n_highlight++;
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ["#test", "Are you here $NICK?"],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ["#test", "Are you here $NICK?"],
+});
 
 $t->live_text_is('.convos-header-links .n-notifications', $n_highlight);
 $t->click_ok('[href="#notifications"]');

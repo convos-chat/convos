@@ -88,7 +88,7 @@ $t->run(
   sub {
     $connection->send('#convos' => '/msg somebody', $stop);
     Mojo::IOLoop->start;
-    is $err, 'Cannot send empty message.',    'err /msg';
+    is $err, 'Cannot send empty message.', 'err /msg';
     is $res, undef, 'res /msg';
   }
 );

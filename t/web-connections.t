@@ -35,7 +35,7 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
     url                 => 'irc://irc.example.com:6667?nick=superman',
     wanted_state        => 'connected',
   }
-  )->json_is('/connections/1/connection_id', 'irc-localhost')
+)->json_is('/connections/1/connection_id', 'irc-localhost')
   ->json_is('/connections/1/name', 'localhost')
   ->json_is('/connections/1/url',  "irc://localhost:$port?nick=superman&tls=0");
 
@@ -63,7 +63,7 @@ $t->post_ok(
     on_connect_commands => [' /msg NickServ identify s3cret   ', '/msg too_cool 123'],
     wanted_state        => 'connected'
   }
-  )->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connected')
+)->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connected')
   ->json_is('/on_connect_commands', ['/msg NickServ identify s3cret', '/msg too_cool 123'])
   ->json_is('/url' => 'irc://example.com:9999');
 

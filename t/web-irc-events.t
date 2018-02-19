@@ -82,28 +82,24 @@ note 'get topic';
 $irc->run(
   [qr{TOPIC}, ['topic-get.irc']],
   sub {
-    $ws->send_ok(
-      {
-        json =>
-          {method => 'send', message => '/topic', connection_id => $c->id, dialog_id => '#convos'}
-      }
-    );
+    $ws->send_ok({
+      json =>
+        {method => 'send', message => '/topic', connection_id => $c->id, dialog_id => '#convos'}
+    });
     $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
       ->json_message_is('/message', '/topic')->json_message_is('/topic', 'Some cool topic');
   }
 );
 
 note 'http://www.mirc.com/colors.html';
-$c->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batman!super.girl@i.love.debian.org',
-    params => [
-      'superduper',
-      "\x0313swagger2\x0f/\x0306master\x0f \x0314f70340b\x0f \x0315Jan Henning Thorsen\x0f: Released version 0.85..."
-    ]
-  }
-);
+$c->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batman!super.girl@i.love.debian.org',
+  params => [
+    'superduper',
+    "\x0313swagger2\x0f/\x0306master\x0f \x0314f70340b\x0f \x0315Jan Henning Thorsen\x0f: Released version 0.85..."
+  ]
+});
 $ws->message_ok->json_message_is('/message',
   'swagger2/master f70340b Jan Henning Thorsen: Released version 0.85...');
 
@@ -131,12 +127,9 @@ $irc->run(
 
 {
   local $TODO = 'How can we tell that something is an unknown command now?';
-  $ws->send_ok(
-    {
-      json =>
-        {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
-    }
-  );
+  $ws->send_ok({
+    json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
+  });
   $ws->message_ok->json_message_is('/errors/0/message', 'Unknown IRC command.');
 }
 

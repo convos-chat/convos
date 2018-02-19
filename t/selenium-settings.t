@@ -24,8 +24,8 @@ $t->send_keys_ok('.convos-connection-settings [type="password"]', ['se%!+cret', 
 $t->click_ok('.convos-connection-settings [type="submit"]');
 $t->wait_for(0.2);
 
-is $connection->url->to_unsafe_string, "irc://:se%25!+cret\@dummy.example.com:6697?nick=$NICK&tls=1",
-  'url with password';
+is $connection->url->to_unsafe_string,
+  "irc://:se%25!+cret\@dummy.example.com:6697?nick=$NICK&tls=1", 'url with password';
 
 $t->send_keys_ok('.convos-connection-settings [name="server"]', [(\'backspace') x 30]);
 $t->send_keys_ok('.convos-connection-settings [name="server"]', ['irc.example.com:6668', \'tab']);
@@ -59,8 +59,8 @@ $t->t::Selenium::form_is(
   ],
 );
 
-is $connection->url->to_unsafe_string, "irc://:s3cr%23t\@irc.example.com:6668?nick=superduper&tls=1",
-  'url without username';
+is $connection->url->to_unsafe_string,
+  "irc://:s3cr%23t\@irc.example.com:6668?nick=superduper&tls=1", 'url without username';
 
 # $t->browser_log;
 

@@ -30,31 +30,27 @@ $t->get_ok(
   '/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00&limit=1')
   ->status_is(200)->json_is(
   '/messages',
-  [
-    {
-      highlight => false,
-      message   => '[convos] jhthorsen pushed 1 new commit to master: https://git.io/vDF6H',
-      from      => 'mr22',
-      ts        => '2015-06-09T02:41:42',
-      type      => 'private',
-    }
-  ]
+  [{
+    highlight => false,
+    message   => '[convos] jhthorsen pushed 1 new commit to master: https://git.io/vDF6H',
+    from      => 'mr22',
+    ts        => '2015-06-09T02:41:42',
+    type      => 'private',
+  }]
   );
 
 $t->get_ok(
   '/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T04:37:00&limit=2&match=AppArmor'
-  )->status_is(200)->json_is(
+)->status_is(200)->json_is(
   '/messages',
-  [
-    {
-      highlight => false,
-      message   => 'Unsure if AppArmor might be causing an issue? Don\'t disable it, use the',
-      from      => 'jhthorsen',
-      ts        => '2015-06-09T02:39:12',
-      type      => 'private'
-    }
-  ]
-  );
+  [{
+    highlight => false,
+    message   => 'Unsure if AppArmor might be causing an issue? Don\'t disable it, use the',
+    from      => 'jhthorsen',
+    ts        => '2015-06-09T02:39:12',
+    type      => 'private'
+  }]
+);
 
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51')
   ->status_is(200);
@@ -68,16 +64,14 @@ is int @{$t->tx->res->json->{messages} || []}, 3, 'after and before';
 
 $t->get_ok('/api/notifications')->status_is(200)->json_is(
   '/notifications',
-  [
-    {
-      connection_id => 'irc-localhost',
-      dialog_id     => '#convos',
-      from          => 'Supergirl',
-      message       => 'An easy way to see what SUPERMAN own',
-      ts            => '2015-06-09T02:39:36',
-      type          => 'private'
-    }
-  ]
+  [{
+    connection_id => 'irc-localhost',
+    dialog_id     => '#convos',
+    from          => 'Supergirl',
+    message       => 'An easy way to see what SUPERMAN own',
+    ts            => '2015-06-09T02:39:36',
+    type          => 'private'
+  }]
 );
 
 $connection->emit(

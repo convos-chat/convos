@@ -246,7 +246,7 @@ sub _fallback {
   $self->emit(
     message => $self->messages,
     {
-      from => $msg->{prefix} ? +(IRC::Utils::parse_user($msg->{prefix}))[0] : $self->id,
+      from      => $msg->{prefix} ? +(IRC::Utils::parse_user($msg->{prefix}))[0] : $self->id,
       highlight => Mojo::JSON->false,
       message   => join(' ', @{$msg->{params}}),
       ts        => time,
@@ -609,7 +609,7 @@ sub _event_privmsg {
       highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
       message   => $msg->{params}[1],
       ts        => time,
-      type => $msg->{event} =~ /privmsg/i ? 'private'
+      type      => $msg->{event} =~ /privmsg/i ? 'private'
       : $msg->{event} =~ /action/i ? 'action'
       :                              'notice',
     }

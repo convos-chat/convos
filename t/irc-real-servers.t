@@ -41,7 +41,7 @@ sub connected {
   my ($host, $connection, $err) = @_;
   my $expected = delete $hosts{$host};
   my $got      = {
-    err => $err // '',
+    err   => $err // '',
     state => $connection->state,
     tls   => ($connection->url->query->param('tls') // 1) ? 1 : 0,
   };

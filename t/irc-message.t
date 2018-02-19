@@ -38,15 +38,13 @@ Mojo::IOLoop->start;
 ok delete $notifications->[0]{ts}, 'notifications has timestamp';
 is($user->unread, 1, 'One unread messages');
 is_deeply $notifications,
-  [
-  {
-    connection_id => 'irc-localhost',
-    dialog_id     => '#convos',
-    from          => 'Supergirl',
-    message       => 'Hey SUPERMAN!',
-    type          => 'private'
-  }
-  ],
+  [{
+  connection_id => 'irc-localhost',
+  dialog_id     => '#convos',
+  from          => 'Supergirl',
+  message       => 'Hey SUPERMAN!',
+  type          => 'private'
+  }],
   'notifications';
 
 $connection->_irc->emit(

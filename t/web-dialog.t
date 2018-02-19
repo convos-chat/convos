@@ -83,7 +83,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
     }
   ],
   'user connections'
-  )->json_is(
+)->json_is(
   '/dialogs',
   [
     {
@@ -112,6 +112,6 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
     }
   ],
   'user dialogs'
-  )->json_hasnt('/notifications', 'user notifications');
+)->json_hasnt('/notifications', 'user notifications');
 
 done_testing;

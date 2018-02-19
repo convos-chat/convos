@@ -21,41 +21,31 @@ $t->get_ok('/api/notifications')->status_is(200);
 my $n = @{$t->tx->res->json->{notifications}};
 my $pm = $connection->dialog({name => 'batgirl'});
 
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['superman', 'Hey! Do you get any notifications?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['superman', 'Hey superman! not even now?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'superman!superman@i.love.debian.org',
-    params => ['#convos', 'What if I mention myself as superman?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['#convos', 'But... superman, what about in a channel?'],
-  }
-);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['#convos', 'Or what about a normal message in a channel?'],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['superman', 'Hey! Do you get any notifications?'],
+});
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['superman', 'Hey superman! not even now?'],
+});
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'superman!superman@i.love.debian.org',
+  params => ['#convos', 'What if I mention myself as superman?'],
+});
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['#convos', 'But... superman, what about in a channel?'],
+});
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['#convos', 'Or what about a normal message in a channel?'],
+});
 
 $stop_at_n_events = 4;
 $ws->ua->ioloop->start;
@@ -66,13 +56,11 @@ is int(grep { $_->{highlight} } @events),  2, 'marked as highlight';
 is int(grep { !$_->{highlight} } @events), 3, 'not marked as highlight';
 
 $user->highlight_keywords(['normal', 'yikes']);
-$connection->_event_privmsg(
-  {
-    event  => 'privmsg',
-    prefix => 'batgirl!batgirl@i.love.debian.org',
-    params => ['#convos', 'Or what about a normal message in a channel?'],
-  }
-);
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['#convos', 'Or what about a normal message in a channel?'],
+});
 
 $stop_at_n_events = 5;
 $ws->ua->ioloop->start;
