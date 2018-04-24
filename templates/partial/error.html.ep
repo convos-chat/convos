@@ -1,0 +1,29 @@
+% my $message = Mojo::Message::Response->new->default_message($status);
+% layout 'convos';
+% title "$message ($status)";
+<div class="row not-logged-in-wrapper">
+  <div class="col s12 m6 offset-m3">
+    %= include 'partial/header'
+    <div class="row">
+      <div class="col s12">
+        <h2><%= $message %> (<%= $status %>)</h2>
+      % if ($status == 404) {
+        <p>Could not find the page you are looking for. Maybe you entered an invalid URL?</p>
+      % } else {
+        <p>
+          This should not happen.
+          Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
+          if the problem does not go away.
+        </p>
+      % }
+        <hr>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12">
+        %= link_to 'Go to landing page', 'index', class => 'btn waves-effect waves-light'
+      </div>
+    </div>
+    %= include 'partial/footer'
+  </div>
+</div>

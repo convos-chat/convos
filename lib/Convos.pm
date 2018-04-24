@@ -137,15 +137,8 @@ sub _assets {
     ->api_key($ENV{REALFAVICONGENERATOR_API_KEY} || 'REALFAVICONGENERATOR_API_KEY=is_not_set')
     ->design({
     desktop_browser => {},
-    android_chrome  => {
-      picture_aspect => "shadow",
-      manifest       => {name => "Convos", display => "standalone", orientation => "portrait"},
-      theme_color    => "#00451D"
-    },
     ios =>
       {picture_aspect => "background_and_margin", margin => "4", background_color => "#ffffff"},
-    safari_pinned_tab =>
-      {picture_aspect => "black_and_white", threshold => 60, theme_color => "#00451D"},
     });
   $self->asset->process('favicon.ico' => 'images/icon.svg');
   $self->asset->process;
@@ -338,7 +331,7 @@ This is the module and documentation structure of L<Convos>:
 L<Convos> inherits all attributes from L<Mojolicious> and implements
 the following new ones.
 
-=head2 core 
+=head2 core
 
 Holds a L<Convos::Core> object.
 
@@ -379,161 +372,3 @@ Jan Henning Thorsen - C<jhthorsen@cpan.org>
 Marcus Ramberg - C<marcus@nordaaker.com>
 
 =cut
-
-__DATA__
-@@ layouts/convos.html.ep
-% my $description = "A chat application that runs in your web browser";
-<!DOCTYPE html>
-<html data-framework="vue">
-  <head>
-    <title><%= title %></title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="description" content="<%= $description %>">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:description" content="<%= $description %>">
-    <meta name="twitter:image:src" content="https://convos.by/public/screenshots/2016-09-01-participants.png">
-    <meta name="twitter:site" content="@convosby">
-    <meta name="twitter:title" content="<%= title %>">
-    <meta property="og:type" content="object">
-    <meta property="og:description" content="<%= $description %>">
-    <meta property="og:image" content="https://convos.by/public/screenshots/2016-09-01-participants.png">
-    <meta property="og:site_name" content="<%= config 'organization_name' %>">
-    <meta property="og:title" content="<%= title %>">
-    <meta property="og:url" content="<%= $c->req->url->to_abs %>">
-    <noscript><style>.if-js { display: none; }</style></noscript>
-    %= asset 'favicon.ico'
-    %= asset 'convos.css'
-    %= include 'javascript' if 200 == (stash('status') // 200)
-  </head>
-  <body>
-    %= content
-    <div id="vue_tooltip"><span></span></div>
-    %= asset 'convos.js' if 200 == (stash('status') // 200)
-  </body>
-</html>
-@@ index.html.ep
-% layout 'convos';
-% title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
-<component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
-  <div class="row not-logged-in-wrapper">
-    <div class="col s12 m6 offset-m3">
-      %= include 'partial/header'
-      %= include 'partial/loader'
-      %= include 'partial/footer'
-    </div>
-  </div>
-</component>
-@@ javascript.html.ep
-% use Mojo::JSON 'to_json';
-%= javascript begin
-  window.DEBUG = <%== to_json {map { ($_ => 1) } @$debug, split /,/, ($self->param('debug') || '')} %>;
-  window.Convos = {
-    apiUrl: "<%= $c->url_for('api') %>",
-    beforeCreate: [],
-    indexUrl: "<%= $c->url_for('index') %>",
-    wsUrl: "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
-    mixin: {}, // Vue.js mixins
-    log: [],
-    mode: "<%= app->mode %>",
-    page: "<%= stash('page') || '' %>",
-    settings: <%== to_json app->config('settings') %>
-  };
-% if (my $main = flash 'main') {
-  window.Convos.settings.main = "<%= $main %>";
-% }
-% end
-@@ exception.production.html.ep
-%= include 'partial/error'
-@@ not_found.production.html.ep
-%= include 'partial/error'
-@@ partial/error.html.ep
-% my $message = Mojo::Message::Response->new->default_message($status);
-% layout 'convos';
-% title "$message ($status)";
-<div class="row not-logged-in-wrapper">
-  <div class="col s12 m6 offset-m3">
-    %= include 'partial/header'
-    <div class="row">
-      <div class="col s12">
-        <h2><%= $message %> (<%= $status %>)</h2>
-      % if ($status == 404) {
-        <p>Could not find the page you are looking for. Maybe you entered an invalid URL?</p>
-      % } else {
-        <p>
-          This should not happen.
-          Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
-          if the problem does not go away.
-        </p>
-      % }
-        <hr>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col s12">
-        %= link_to 'Go to landing page', 'index', class => 'btn waves-effect waves-light'
-      </div>
-    </div>
-    %= include 'partial/footer'
-  </div>
-</div>
-@@ partial/footer.html.ep
-<div class="row">
-  <div class="col s12 about">
-  % if (config('organization_url') ne 'http://convos.by') {
-    <a href="<%= config('organization_url') %>"><%= config('organization_name') %></a> -
-  % }
-    <a href="http://convos.by">About</a> -
-    <a href="http://convos.by/doc">Documentation</a> -
-    <a href="http://convos.by/blog">Blog</a>
-  </div>
-</div>
-@@ partial/header.html.ep
-<div class="row">
-  <div class="col s12">
-    <h1>Convos</h1>
-    <p><i>- Collaboration done right.</i></p>
-  </div>
-</div>
-@@ partial/loader.html.ep
-<div class="row">
-  <div class="col s12">
-    <h2 class="hide"></h2>
-    <p class="if-js message">Loading Convos should not take too long...</p>
-    <noscript>
-      <p>Javascript is disabled, so Convos will never load. Please enable Javascript and try again.</p>
-    </noscript>
-    <hr>
-  </div>
-</div>
-<div class="row">
-  <div class="col s12">
-    %= link_to 'Reload', 'index', class => 'btn waves-effect waves-light'
-  </div>
-</div>
-@@ paste.html.ep
-% layout 'convos';
-% title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
-<header>
-  <div class="container">
-    <h2><%= title %></h2>
-    %= link_to 'index', tooltip => 'Chat', begin
-      <i class="material-icons">chat</i>
-    % end
-    <a href="https://convos.by" tooltip="About Convos">
-      %= image '/images/icon.svg', class => 'material-icons'
-    </a>
-  </div>
-</header>
-<div class="container paste under-main-menu">
-  <h1>Paste created <%= $file->{created_at} %></h1>
-</div>
-<pre class="paste container"><%= $file->{content} %></pre>
-<script>
-document.addEventListener("DOMContentLoaded", function(e) {
-  var $paste = $("pre");
-  hljs.highlightBlock($paste.get(0));
-  var code = $paste.remove().html().split(/\n\r?|\r/);
-  $(".paste > h1").after('<ol class="hljs"><li>' + code.join("</li><li>") + '</li></ol>');
-});
-</script>
