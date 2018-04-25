@@ -69,6 +69,7 @@ sub startup {
   # Add basic routes
   $r->get('/')->to(template => 'index')->name('index');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
+  $r->get('/sw' =>  [ format => 'js']);
   $r->get('/custom/asset/*file' => \&_action_custom_asset);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
