@@ -1,7 +1,9 @@
 var CACHE_NAME = "convos-v1";
 var urlsToCache = [
   "/",
+  <%= asset->processed('favicon.ico')->map(sub{ sprintf '"%s"', $_->url_for($c)})->join(',') %>
   <%= asset->processed('convos.js')->map(sub{ sprintf '"%s"', $_->url_for($c)})->join(',') %>
+  <%= asset->processed('convos.css')->map(sub{ sprintf '"%s"', $_->url_for($c)})->join(',') %>
 ];
 
 self.addEventListener("install", function(event) {
