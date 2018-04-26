@@ -137,8 +137,15 @@ sub _assets {
     ->api_key($ENV{REALFAVICONGENERATOR_API_KEY} || 'REALFAVICONGENERATOR_API_KEY=is_not_set')
     ->design({
     desktop_browser => {},
+    android_chrome  => {
+      picture_aspect => "shadow",
+      manifest       => {name => "Convos", display => "standalone", orientation => "portrait"},
+      theme_color    => "#00451D"
+    },
     ios =>
       {picture_aspect => "background_and_margin", margin => "4", background_color => "#ffffff"},
+    safari_pinned_tab =>
+      {picture_aspect => "black_and_white", threshold => 60, theme_color => "#00451D"},
     });
   $self->asset->process('favicon.ico' => 'images/icon.svg');
   $self->asset->process;

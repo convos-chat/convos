@@ -266,6 +266,10 @@ rel=cache/raw.githubusercontent.com/Dogfalo/materialize/master/sass/materialize.
 [original:https://raw.githubusercontent.com/jackmoore/autosize/master/dist/autosize.min.js]
 format=js
 rel=cache/raw.githubusercontent.com/jackmoore/autosize/master/dist/autosize.min.js
+[android_chrome-desktop_browser-ios-safari_pinned_tab:images/icon.svg]
+checksum=5cbbe75fe7
+format=svg
+minified=0
 [desktop_browser-ios:images/icon.svg]
 checksum=5cbbe75fe7
 format=svg
