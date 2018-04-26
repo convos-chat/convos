@@ -1,22 +1,21 @@
-var CACHE_NAME = 'convos-v1';
+var CACHE_NAME = "convos-v1";
 var urlsToCache = [
-  '/',
-  '/styles/main.css',
-  '/script/main.js'
+  "/",
+  <%= asset->processed('convos.js')->map(sub{ sprintf '"%s"', $_->url_for($c)})->join(',') %>
 ];
 
-self.addEventListener('install', function(event) {
+self.addEventListener("install", function(event) {
   // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll('/');
+        console.log("Opened cache");
+        return cache.addAll("/");
       })
   );
 });
 
-self.addEventListener('fetch', function(event) {
+self.addEventListener("fetch", function(event) {
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
