@@ -1,6 +1,6 @@
 % my $description = "A chat application that runs in your web browser";
 <!DOCTYPE html>
-<html data-framework="vue">
+<html data-framework="vue" lang="en">
   <head>
     <title><%= title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -31,7 +31,6 @@
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('/sw.js').then(function(registration) {
             // Registration was successful
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
           }, function(err) {
             // registration failed :(
               console.log('ServiceWorker registration failed: ', err);

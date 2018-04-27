@@ -139,14 +139,39 @@ sub _assets {
     ->design({
     desktop_browser => {},
     android_chrome  => {
-      picture_aspect => "shadow",
-      manifest       => {name => "Convos", display => "standalone", orientation => "portrait"},
-      theme_color    => "#00451D"
+      picture_aspect => 'shadow',
+      manifest       => {name => 'Convos', display => 'standalone', orientation => 'portrait'},
+      theme_color    => '#00451D'
     },
+    firefox_app => {
+        picture_aspect=> 'circle',
+        keep_picture_in_circle=> 'true',
+        circle_inner_margin => '5',
+        background_color => '#ffffff',
+        manifest =>  {
+          app_name => 'Convos',
+          app_description => 'A better way to IRC',
+          developer_name => 'Nordaaker',
+          developer_url => 'http://nordaaker.com',
+        }
+      },
     ios =>
-      {picture_aspect => "background_and_margin", margin => "4", background_color => "#ffffff"},
+      {picture_aspect => 'background_and_margin', margin => '4', background_color => '#ffffff'},
     safari_pinned_tab =>
-      {picture_aspect => "black_and_white", threshold => 60, theme_color => "#00451D"},
+      {picture_aspect => 'black_and_white', threshold => 60, theme_color => '#00451D'},
+      windows => {
+        picture_aspect => "white_silhouette",
+        background_color => "#00451D",
+        assets => {
+          windows_80_ie_10_tile => \1,
+          windows_10_ie_11_edge_tiles => {
+            small => \0,
+            medium => \1,
+            big => \1,
+            rectangle => \0
+          }
+        }
+      },
     });
   $self->asset->process('favicon.ico' => 'images/icon.svg');
   $self->asset->process;
