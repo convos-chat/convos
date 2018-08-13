@@ -278,6 +278,10 @@ minified=0
 checksum=5cbbe75fe7
 format=svg
 minified=0
+[f5e8d3e907:images/icon.svg]
+checksum=5cbbe75fe7
+format=svg
+minified=0
 [js-min:js/autolink.js]
 checksum=69dfb99445
 format=js
