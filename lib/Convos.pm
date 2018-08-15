@@ -11,7 +11,7 @@ use Mojo::Util;
 
 $ENV{CONVOS_PLUGINS} //= 'Convos::Plugin::Paste';
 
-our $VERSION = '0.99_36';
+our $VERSION = '0.99_37';
 
 my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
 
@@ -58,6 +58,15 @@ sub startup {
   my $config = $self->_config;
   my $r      = $self->routes;
 
+
+  $self->helper(
+    delay => sub {
+      my $c     = shift;
+      my $tx    = $c->render_later->tx;
+      my $delay = Mojo::IOLoop->delay(@_);
+      $delay->catch(sub { $c->helpers->reply->exception(pop) and undef $tx })->wait;
+    }
+  );
   $self->_home_in_share unless -d $self->home->rel_file('public');
   $self->defaults(debug => $self->mode eq 'development' ? ['info'] : []);
   $self->routes->namespaces(['Convos::Controller']);
@@ -69,7 +78,7 @@ sub startup {
   # Add basic routes
   $r->get('/')->to(template => 'index')->name('index');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
-  $r->get('/sw' =>  [ format => 'js']);
+  $r->get('/sw' => [format => 'js']);
   $r->get('/custom/asset/*file' => \&_action_custom_asset);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
@@ -144,34 +153,29 @@ sub _assets {
       theme_color    => '#00451D'
     },
     firefox_app => {
-        picture_aspect=> 'circle',
-        keep_picture_in_circle=> 'true',
-        circle_inner_margin => '5',
-        background_color => '#ffffff',
-        manifest =>  {
-          app_name => 'Convos',
-          app_description => 'A better way to IRC',
-          developer_name => 'Nordaaker',
-          developer_url => 'http://nordaaker.com',
-        }
-      },
+      picture_aspect         => 'circle',
+      keep_picture_in_circle => 'true',
+      circle_inner_margin    => '5',
+      background_color       => '#ffffff',
+      manifest               => {
+        app_name        => 'Convos',
+        app_description => 'A better way to IRC',
+        developer_name  => 'Nordaaker',
+        developer_url   => 'http://nordaaker.com',
+      }
+    },
     ios =>
       {picture_aspect => 'background_and_margin', margin => '4', background_color => '#ffffff'},
     safari_pinned_tab =>
       {picture_aspect => 'black_and_white', threshold => 60, theme_color => '#00451D'},
-      windows => {
-        picture_aspect => "white_silhouette",
-        background_color => "#00451D",
-        assets => {
-          windows_80_ie_10_tile => \1,
-          windows_10_ie_11_edge_tiles => {
-            small => \0,
-            medium => \1,
-            big => \1,
-            rectangle => \0
-          }
-        }
-      },
+    windows => {
+      picture_aspect   => "white_silhouette",
+      background_color => "#00451D",
+      assets           => {
+        windows_80_ie_10_tile       => \1,
+        windows_10_ie_11_edge_tiles => {small => \0, medium => \1, big => \1, rectangle => \0}
+      }
+    },
     });
   $self->asset->process('favicon.ico' => 'images/icon.svg');
   $self->asset->process;
@@ -287,7 +291,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_36
+0.99_37
 
 =head1 DESCRIPTION
 

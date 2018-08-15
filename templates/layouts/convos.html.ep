@@ -26,6 +26,7 @@
     %= content
     <div id="vue_tooltip"><span></span></div>
     %= asset 'convos.js' if 200 == (stash('status') // 200)
+    % if(200 == (stash('status') // 200)) {
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -38,5 +39,6 @@
           });
       }
     </script>
+    % }
   </body>
 </html>
