@@ -26,12 +26,6 @@ Note that the demo is [locked](/doc/config.html#convosforcedircserver) to the
 IRC server running on localhost. This is to prevent the server from getting
 banned from IRC networks with strict limitations.
 
-<video preload="auto" style="max-width:100%;border:1px solid #ccc" controls autoplay loop>
-  <source src="https://s3.amazonaws.com/quickcast/28775/230166/quickcast-small.mp4?1471743889642" type="video/mp4">
-  <source src="https://s3.amazonaws.com/quickcast/28775/230166/quickcast.webm?1471743889642" type="video/webm">
-  <p>Sorry, your browser does not support the QuickCast video player</p>
-</video>
-
 ## Features
 
 ### Always online
