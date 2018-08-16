@@ -46,6 +46,10 @@
         <div class="col s12">
           <input type="checkbox" class="filled-in" id="form_tls" v-model="tls">
           <label for="form_tls">Secure connection (TLS)</label>
+          <template v-if="tls">
+            <input type="checkbox" class="filled-in" id="form_tls_verify" v-model="tls_verify">
+            <label for="form_tls_verify">Verify certificate (TLS)</label>
+          </template>
         </div>
       </div>
     </template>
@@ -95,6 +99,7 @@ module.exports = {
       onConnectCommands: "",
       server: "",
       tls: null,
+      tls_verify: true,
       password: "",
       username: "",
       wantedState: ""
@@ -128,6 +133,7 @@ module.exports = {
 
       if (this.nick) attrs.url.param("nick", this.nick);
       if (this.tls !== null) attrs.url.param("tls", this.tls ? 1 : 0);
+      if (this.tls) attrs.url.param("tls_verify", this.tls_verify ? 1 : 0);
 
       attrs.on_connect_commands = this.onConnectCommands.split(/\n/).map(function(str) { return str.trim(); });
       attrs.url.user = this.username;
@@ -158,6 +164,7 @@ module.exports = {
       this.password = url.pass || "";
       this.server = url.host || this.settings.default_server || "";
       this.tls = this.connection.url ? url.param("tls") : null;
+      this.tls_verify = this.connection.url ? Boolean(parseInt(url.param("tls_verify"))) : true;
       this.username = url.user || "";
 
       if (url.port) this.server += ":" + url.port;

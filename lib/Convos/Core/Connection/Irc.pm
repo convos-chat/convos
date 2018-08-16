@@ -439,6 +439,7 @@ sub _setup_irc {
   my $userinfo = $self->_userinfo;
   my $nick     = $url->query->param('nick');
   my $tls      = $url->query->param('tls') // 1;
+  my $verify   = $url->query->param('tls_verify') // $tls;
 
   unless ($nick) {
     $nick = $self->user->email =~ /^([^@]+)/ ? $1 : 'convos_user';
@@ -450,7 +451,7 @@ sub _setup_irc {
   $irc->nick($nick);
   $irc->user($userinfo->[0]);
   $irc->pass($userinfo->[1]);
-  $irc->tls($tls ? {} : undef);
+  $irc->tls($tls ? {insecure => !$verify} : undef);
 }
 
 sub _steal_nick {
