@@ -1,6 +1,8 @@
 Revision history for perl distribution Convos
 
-0.99_37 Not Released
+0.99_38 Not Released
+
+0.99_37 2018-08-16 11:43:00
 - Added -wn to perltidy for superior welding
 - Make convos a PWA
 - Add a delay helper until we can convert convos to promises
