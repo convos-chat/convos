@@ -1,5 +1,7 @@
 Revision history for perl distribution Convos
 
+0.99_39 Not Released
+
 0.99_38 2018-08-20 15:09:00
 - Add support for disabling tls verification per connection (jberger)
 

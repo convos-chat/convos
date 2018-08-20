@@ -60,3 +60,4 @@
 ^local/
 ^MANIFEST\.SKIP
 ^README\.pod
+\bnode_modules\b
