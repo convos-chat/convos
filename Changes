@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
-0.99_38 Not Released
+0.99_38 2018-08-20 15:09:00
+- Add support for disabling tls verification per connection (jberger)
 
 0.99_37 2018-08-16 11:43:00
 - Added -wn to perltidy for superior welding

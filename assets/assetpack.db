@@ -403,7 +403,7 @@ checksum=38ee841b33
 format=js
 minified=1
 [js-min:vue/convos-connection-settings.vue]
-checksum=2176e7423d
+checksum=c4b9e42cbb
 format=js
 minified=1
 [js-min:vue/convos-create-dialog.vue]

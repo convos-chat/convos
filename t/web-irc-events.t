@@ -125,13 +125,14 @@ $irc->run(
   }
 );
 
+$ws->send_ok({
+    json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
+});
+$ws->message_ok;
 {
   local $TODO = 'How can we tell that something is an unknown command now?';
-  $ws->send_ok({
-    json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
-  });
-  $ws->message_ok->json_message_is('/errors/0/message', 'Unknown IRC command.');
-}
+  $ws->json_message_is('/errors/0/message', 'Unknown IRC command.');
+};
 
 note 'disconnect command';
 $ws->send_ok({json => {method => 'send', message => '/disconnect', connection_id => $c->id}});
