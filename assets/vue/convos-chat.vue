@@ -17,7 +17,7 @@
         </a>
       </div>
     </header>
-    <convos-dialog-container :dialog="d" :user="user" v-show="d.active" v-for="d in user.dialogs"></convos-dialog-container>
+    <convos-dialog-container :dialog="user.activeDialog()" :user="user" v-if="user.activeDialog()"></convos-dialog-container>
     <convos-settings :error="error" :user="user" v-if="show == 'settings'"></convos-settings>
     <component :is="'convos-' + settings.sidebar" :user="user" v-if="settings.sidebar"></component>
     <convos-main-menu :user="user" :dialog-filter.sync="searchQuery" v-ref:mainmenu></convos-main-menu>
