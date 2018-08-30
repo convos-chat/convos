@@ -395,7 +395,7 @@ checksum=230d19e322
 format=css
 minified=1
 [js-min:vue/convos-chat.vue]
-checksum=e3cdbd62fe
+checksum=18443cab7e
 format=js
 minified=1
 [js-min:vue/convos-connection-editor.vue]
