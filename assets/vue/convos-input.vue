@@ -8,7 +8,8 @@
       </li>
     </ul>
     <i @click="sendMessage" class="material-icons waves-effect waves-light">send</i>
-    <textarea v-model="message" v-el:input class="materialize-textarea" :placeholder="placeholder" @keydown="keydown"></textarea>
+    <label for="message" class="hidden">Your message</label>
+    <textarea v-model="message" v-el:input name="message" class="materialize-textarea" :placeholder="placeholder" @keydown="keydown"></textarea>
   </div>
 </template>
 <script>
@@ -32,7 +33,7 @@ module.exports = {
         }
         else if (state == "connected") {
           var nick = this.dialog.connection().me.nick || this.user.email;
-          return "What's on your mind " + nick + "?";
+          return "What's on your mind, " + nick + "?";
         }
         else {
           return "Cannot send any message, since " + state + ".";

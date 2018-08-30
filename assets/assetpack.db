@@ -431,7 +431,7 @@ checksum=54210aeb7a
 format=js
 minified=1
 [js-min:vue/convos-input.vue]
-checksum=207a89c71b
+checksum=3493e25e4c
 format=js
 minified=1
 [js-min:vue/convos-login.vue]

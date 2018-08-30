@@ -1,6 +1,10 @@
 Revision history for perl distribution Convos
 
+0.99_40 Not Relased
+
 0.99_39 2018-08-30T10:40:39+0200
+
+- Only keep one conversation open at a time.
 
 0.99_38 2018-08-20 15:09:00
 - Add support for disabling tls verification per connection (jberger)
