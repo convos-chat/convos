@@ -6,8 +6,8 @@ FROM alpine:3.8
 MAINTAINER jhthorsen@cpan.org
 
 RUN \
-  apk add -U perl perl-io-socket-ssl && \
-  apk add -t builddeps build-base perl-dev wget && \
+  apk add --no-cache perl perl-io-socket-ssl && \
+  apk add --no-cache -t builddeps build-base perl-dev wget && \
   wget -q -O - https://github.com/Nordaaker/convos/archive/stable.tar.gz | tar xvz && \
   /convos-stable/script/convos install && \
   apk del builddeps && \
