@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 0.99_40 Not Released
 
 - Switch order of isconnect and ison to allow authentication with nickserv before join
+- Remove POD plugin which has been deprecated from Mojo core.
 
 0.99_39 2018-08-30T10:40:39+0200
 

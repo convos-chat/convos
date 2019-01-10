@@ -92,8 +92,6 @@ sub startup {
   # Autogenerate routes from the OpenAPI specification
   $self->plugin(OpenAPI => {url => delete $self->{_api_spec}});
 
-  # Add /perldoc route for documentation
-  $self->plugin('PODRenderer')->to(module => 'Convos');
 
   $self->hook(
     before_dispatch => sub {
