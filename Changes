@@ -4,6 +4,8 @@ Revision history for perl distribution Convos
 
 - Switch order of isconnect and ison to allow authentication with nickserv before join
 - Remove POD plugin which has been deprecated from Mojo core.
+- Update Alpine image
+- Fix duplicate key in schema
 
 0.99_39 2018-08-30T10:40:39+0200
 
