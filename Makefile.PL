@@ -34,16 +34,16 @@ my %WriteMakefileArgs = (
     'dynamic_config' => 0,
     'meta-spec'      => {version => 2},
     'resources'      => {
-      bugtracker => {web => 'https://github.com/jhthorsen/convos/issues'},
-      homepage   => 'https://github.com/jhthorsen/convos',
+      bugtracker => {web => 'https://github.com/Nordaaker/convos/issues'},
+      homepage   => 'https://github.com/Nordaaker/convos',
       repository => {
         type => 'git',
         url  => 'https://github.com/Nordaaker/convos.git',
-        web  => 'https://github.com/jhthorsen/convos',
+        web  => 'https://github.com/Nordaaker/convos',
       },
     },
   },
-  test => {S => (-e 'META.yml' ? 't/*.t' : 't/*.t xt/*.t')},
+  test => {TESTS => (-e 'META.yml' ? 't/*.t' : 't/*.t xt/*.t')},
 );
 
 unless (eval { ExtUtils::MakeMaker->VERSION('6.63_03') }) {
