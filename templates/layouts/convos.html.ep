@@ -25,10 +25,9 @@
   </head>
   <body>
     %= content
-    <div id="vue_tooltip"><span></span></div>
-    %= asset 'convos.js' if 200 == (stash('status') // 200)
-    % if(200 == (stash('status') // 200)) {
-    <script>
+    % if (200 == (stash('status') // 200)) {
+      %= asset 'convos.js'
+      %= javascript begin
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('/sw.js').then(function(registration) {
@@ -39,7 +38,7 @@
             });
           });
       }
-    </script>
+      % end
     % }
   </body>
 </html>

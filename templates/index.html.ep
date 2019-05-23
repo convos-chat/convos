@@ -1,11 +1,5 @@
 % layout 'convos';
 % title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
-<component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
-  <div class="row not-logged-in-wrapper">
-    <div class="col s12 m6 offset-m3">
-      %= include 'partial/header'
-      %= include 'partial/loader'
-      %= include 'partial/footer'
-    </div>
-  </div>
-</component>
+<p class="visible-before-loaded">
+  Loading...
+</p>

@@ -1,0 +1,11 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body.is-loaded {
+  .visible-before-loaded {
+    display: none;
+  }
+}
