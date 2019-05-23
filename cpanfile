@@ -8,8 +8,8 @@ requires "LinkEmbedder"                   => "0.05";
 requires "Mojo::IOLoop::ForkCall"         => "0.17";
 requires "Mojo::IRC"                      => "0.44";
 requires "Mojolicious"                    => "7.29";
-requires "Mojolicious::Plugin::AssetPack" => "2.05";
 requires "Mojolicious::Plugin::OpenAPI"   => "1.28";
+requires "Mojolicious::Plugin::Webpack"   => "0.09";
 requires "Parse::IRC"                     => "1.20";
 requires "Time::Piece"                    => "1.20";
 

@@ -18,7 +18,7 @@
     <meta property="og:title" content="<%= title %>">
     <meta property="og:url" content="<%= $c->req->url->to_abs %>">
     <noscript><style>.if-js { display: none; }</style></noscript>
-    %= asset 'favicon.ico'
+    %# asset 'favicon.ico'
     %= asset 'convos.css'
     <link rel="preload"  href="<%= $c->url_for("/font/material-design-icons/MaterialIcons-Regular.woff2")%>">
     %= include 'javascript' if 200 == (stash('status') // 200)

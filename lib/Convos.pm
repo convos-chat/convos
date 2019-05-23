@@ -30,7 +30,6 @@ has _api_spec => sub {
   return Mojo::JSON::decode_json($file->slurp);
 };
 
-has _custom_assets => sub { Mojolicious::Static->new };
 has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
 
 sub extend_api_spec {
@@ -58,7 +57,6 @@ sub startup {
   my $config = $self->_config;
   my $r      = $self->routes;
 
-
   $self->helper(
     delay => sub {
       my $c     = shift;
@@ -67,6 +65,7 @@ sub startup {
       $delay->catch(sub { $c->helpers->reply->exception(pop) and undef $tx })->wait;
     }
   );
+
   $self->_home_in_share unless -d $self->home->rel_file('public');
   $self->defaults(debug => $self->mode eq 'development' ? ['info'] : []);
   $self->routes->namespaces(['Convos::Controller']);
@@ -79,7 +78,6 @@ sub startup {
   $r->get('/')->to(template => 'index')->name('index');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/sw' => [format => 'js']);
-  $r->get('/custom/asset/*file' => \&_action_custom_asset);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
   $r->websocket('/events')->to('events#start')->name('events');
@@ -87,11 +85,18 @@ sub startup {
   $self->_api_spec;
   $self->_plugins;
   $self->_setup_secrets;
-  $self->_assets;
 
   # Autogenerate routes from the OpenAPI specification
   $self->plugin(OpenAPI => {url => delete $self->{_api_spec}});
 
+  # Process svelte assets using rollup.js
+  $ENV{MOJO_WEBPACK_CONFIG} = 'rollup.config.js';
+  $self->plugin(
+    Webpack => {
+      process      => ['svelte'],
+      dependencies => {core => 'rollup', svelte => [qw(rollup-plugin-svelte svelte)]}
+    }
+  );
 
   $self->hook(
     before_dispatch => sub {
@@ -109,74 +114,6 @@ sub startup {
   );
 
   $self->core->start;
-}
-
-# Used internally to generate dynamic SASS files
-sub _action_custom_asset {
-  my $c      = shift;
-  my $static = $c->app->_custom_assets;
-  my $asset  = $static->file(Mojo::Path->new($c->stash('file'))->canonicalize);
-
-  # Can never render 404, since that will make AssetPack croak
-  return $c->render(text => "// not found\n", status => 200) unless $asset;
-  $c->app->log->info('Loading custom asset: ' . $asset->path);
-  $static->serve_asset($c, $asset);
-  $c->rendered;
-}
-
-sub _assets {
-  my $self          = shift;
-  my $custom_assets = $self->core->home->child('assets');
-
-  # Skip building on travis
-  if ($ENV{TRAVIS_BUILD_ID} or $ENV{CONVOS_COMMAND_LINE}) {
-    return $self->helper(asset => sub { });
-  }
-
-  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine)]});
-
-  if (-d $custom_assets) {
-    $self->log->info("Including files from $custom_assets when building frontend.");
-    $self->_custom_assets->paths([$custom_assets]);
-    unshift @{$self->asset->store->paths}, $custom_assets;
-  }
-
-  $self->asset->pipe('Favicon')
-    ->api_key($ENV{REALFAVICONGENERATOR_API_KEY} || 'REALFAVICONGENERATOR_API_KEY=is_not_set')
-    ->design({
-    desktop_browser => {},
-    android_chrome  => {
-      picture_aspect => 'shadow',
-      manifest       => {name => 'Convos', display => 'standalone', orientation => 'portrait'},
-      theme_color    => '#00451D'
-    },
-    firefox_app => {
-      picture_aspect         => 'circle',
-      keep_picture_in_circle => 'true',
-      circle_inner_margin    => '5',
-      background_color       => '#ffffff',
-      manifest               => {
-        app_name        => 'Convos',
-        app_description => 'A better way to IRC',
-        developer_name  => 'Nordaaker',
-        developer_url   => 'http://nordaaker.com',
-      }
-    },
-    ios =>
-      {picture_aspect => 'background_and_margin', margin => '4', background_color => '#ffffff'},
-    safari_pinned_tab =>
-      {picture_aspect => 'black_and_white', threshold => 60, theme_color => '#00451D'},
-    windows => {
-      picture_aspect   => "white_silhouette",
-      background_color => "#00451D",
-      assets           => {
-        windows_80_ie_10_tile       => \1,
-        windows_10_ie_11_edge_tiles => {small => \0, medium => \1, big => \1, rectangle => \0}
-      }
-    },
-    });
-  $self->asset->process('favicon.ico' => 'images/icon.svg');
-  $self->asset->process;
 }
 
 sub _config {
