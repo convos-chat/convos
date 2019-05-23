@@ -1,0 +1,61 @@
+.text-field {
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  max-width: 24em;
+
+  label {
+    font-size: inherit;
+    display: block;
+  }
+
+  input {
+    font-size: inherit;
+    line-height: 2em;
+    height: 2em;
+    padding: 0.1em 0.5em;
+    border: 1px solid $text-field-border-color;
+    border-radius: 3px;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1), -1px 1px 2px rgba(0, 0, 0, 0.1); 
+    width: 100%;
+    display: block;
+
+    &:hover {
+      outline: 2px solid lighten($text-field-border-color, 10%);
+      outline-offset: -2px;
+    }
+
+    &:focus {
+      outline: 2px solid $text-field-border-color;
+      outline-offset: -2px;
+    }
+  }
+}
+
+.form-actions {
+  margin-top: $gutter;
+  padding: $gutter / 2 0;
+
+  button {
+    background: darken($theme-color, 20%);
+    color: white;
+    font-weight: 500;
+    font-size: inherit;
+    padding: 0.6em 1em;
+    border: 1px solid $text-field-border-color;
+    border-radius: 3px;
+    box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.1); 
+    display: inline-block;
+    cursor: pointer;
+
+    &:focus,
+    &:hover {
+      background: darken($theme-color, 10%);
+      box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.1); 
+    }
+
+    &:focus {
+      outline: 2px auto lighten($theme-color, 20%);
+      outline-offset: -2px;
+    }
+  }
+}
