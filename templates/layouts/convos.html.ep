@@ -25,21 +25,6 @@
   </head>
   <body class="no-js">
     %= content
-    % if (200 == (stash('status') // 200)) {
-      %= asset 'convos.js'
-      %= javascript begin
-      document.querySelector('body').classList.remove('no-js');
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(registration) {
-            // Registration was successful
-          }, function(err) {
-            // registration failed :(
-              console.log('ServiceWorker registration failed: ', err);
-            });
-          });
-      }
-      % end
-    % }
+    %= asset 'convos.js' if 200 == (stash('status') // 200);
   </body>
 </html>

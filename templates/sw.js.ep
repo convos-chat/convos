@@ -1,32 +1,20 @@
-var CACHE_NAME = "convos-v1";
+var CACHE_NAME = 'convos-v1';
 var urlsToCache = [
-  "/", "/images/logo.svg","/font/material-design-icons/MaterialIcons-Regular.woff2",
-  <%= asset->processed('favicon.ico')->map(sub{ sprintf '"%s"', $_->url_for($c)})->join(',') %>,
-  <%= asset->processed('convos.js')->map(sub{ sprintf '"%s"', $_->url_for($c)})->join(',') %>,
-  <%= asset->processed('convos.css')->map(sub{ sprintf '"%s"', $_->url_for($c)})->join(',') %>
+  '<%= url_for('/') %>',
+  '<%= url_for('/favicon.ico') %>',
+  '<%= asset url_for => 'convos.js' %>',
+  '<%= asset url_for => 'convos.css' %>',
 ];
 
-self.addEventListener("install", function(event) {
-  // Perform install steps
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log("Opened cache");
-        return cache.addAll(urlsToCache);
-      })
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener("fetch", function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  e.respondWith(
+    req.url.match(/\bdevelopment\b/) ? fetch(req) : caches.match(req).then(res => res || fetch(req))
+  )
 });
