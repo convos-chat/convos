@@ -5,18 +5,18 @@ export class Api {
     this.op = {};
   }
 
-  execute(operationId, params = {}) {
-    return this._api().then(api => {
-      const op = this.op[operationId];
-      if (!op) throw '[Api] Invalid operationId: ' + operationId;
+  async execute(operationId, params = {}) {
+    let api = await this._api();
+    const op = this.op[operationId];
+    if (!op) throw '[Api] Invalid operationId: ' + operationId;
 
-      const url = new URL(op._url);
-      const fetchParams = {
-        headers: {'Content-Type': 'application/json'},
-        method: op._method,
-      };
+    const url = new URL(op._url);
+    const fetchParams = {
+      headers: {'Content-Type': 'application/json'},
+      method: op._method,
+    };
 
-      (op.parameters || []).forEach(p => {
+    (op.parameters || []).forEach(p => {
         if (!this._hasProperty(params, p) && !p.required) {
           return;
         }
@@ -29,20 +29,19 @@ export class Api {
         else if (p.in == 'header') {
           fetchParams.header[p.name] = this._extractValue(params, p.name);
         }
-      });
-
-      if (this.debug) {
-        console.log('[Api]', operationId, '===', op);
-        console.log('[Api]', url.href, '<<<', fetchParams);
-      }
-
-      return fetch(url, fetchParams).then(res => Promise.all([res, res.json()])).then(([res, json]) => {
-        json.headers = res.headers;
-        if (String(res.status).indexOf('2') == 0) return json;
-        ['status', 'statusText'].forEach(k => { json[k] = res[k] });
-        throw json;
-      });
     });
+
+    if (this.debug) {
+      console.log('[Api]', operationId, '===', op);
+      console.log('[Api]', url.href, '<<<', fetchParams);
+    }
+
+    let res = await fetch(url, fetchParams);
+    let json = res.json();
+    json.headers = res.headers;
+    if (String(res.status).indexOf('2') == 0) return json;
+    ['status', 'statusText'].forEach(k => { json[k] = res[k] });
+    throw json;
   }
 
   _extractValue(params, p) {
