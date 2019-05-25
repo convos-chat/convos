@@ -23,11 +23,12 @@
     <link rel="preload"  href="<%= $c->url_for("/font/material-design-icons/MaterialIcons-Regular.woff2")%>">
     %= include 'javascript' if 200 == (stash('status') // 200)
   </head>
-  <body>
+  <body class="no-js">
     %= content
     % if (200 == (stash('status') // 200)) {
       %= asset 'convos.js'
       %= javascript begin
+      document.querySelector('body').classList.remove('no-js');
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('/sw.js').then(function(registration) {

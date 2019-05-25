@@ -1,5 +1,33 @@
 % layout 'convos';
 % title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
-<p class="visible-before-loaded">
-  Loading...
-</p>
+
+<div class="sidebar-wrapper js-remove">
+  <div class="sidebar is-logged-out">
+    <h1 class="sidebar__logo">
+      <Link href="/"><span><%=l 'Convos' %></span></Link>
+    </h1>
+    <p class="sidebar__about">A multiuser chat application.</p>
+
+    <nav class="sidebar__nav">
+      <a href="/" class="has-path"><%=l 'Login' %></a>
+      <a href="/register"><%=l 'Create account' %></Link>
+      <a href="https://convos.by/doc"><%=l 'Documentation' %></a>
+      <a href="https://github.com/Nordaaker/convos"><%=l 'GitHub' %></a>
+    </nav>
+  </div>
+</div>
+
+<main class="next-to-sidebar is-logged-out js-remove">
+  <div>
+    <p class="if-js"><%=l 'Initializing the application...' %></p>
+    <p class="if-js"><%=l 'This should not take too long.' %></p>
+
+    <noscript>
+      <p><%=l 'Javascript is disabled, so Convos will never load. Please enable Javascript and try again.' %></p>
+    </noscript>
+
+    <article>
+      <p><%=l 'Welcome message. Vivamus congue mauris eu aliquet pharetra. Nulla sit amet dictum.' %></p>
+    </article>
+  </div>
+</main>

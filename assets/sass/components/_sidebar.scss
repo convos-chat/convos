@@ -45,6 +45,7 @@
 
   &.is-logged-out {
     margin-left: calc(#{$sidebar-width} + #{$gutter * 3});
+    max-width: 38rem;
     min-height: 100vh;
     display: flex;
     flex-direction: column;

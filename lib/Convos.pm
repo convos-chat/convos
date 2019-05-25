@@ -57,6 +57,8 @@ sub startup {
   my $config = $self->_config;
   my $r      = $self->routes;
 
+  $self->helper(l => sub { $_[1] });    # TODO
+
   $self->helper(
     delay => sub {
       my $c     = shift;

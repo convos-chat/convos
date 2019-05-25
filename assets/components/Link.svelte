@@ -1,12 +1,13 @@
 <script>
 import {hrefToPathname, pathname} from '../store/router';
 
+export let className = '';
 export let href = '/';
 export let replace = false;
 
 let classNames = [];
 pathname.subscribe($pathname => {
-  classNames = [];
+  classNames = className ? [className] : [];
   if (href.indexOf($pathname) == 0) classNames = [...classNames, 'has-basepath'];
   if ($pathname == href.replace(/\#/, '')) classNames = [...classNames, 'has-path'];
   if ($pathname == href) classNames = [...classNames, 'is-exact'];
