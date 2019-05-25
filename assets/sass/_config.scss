@@ -1,10 +1,16 @@
 $theme-color: #388e3c !default;
+$body-bg: #fefefe !default;
+$text-color: #333 !default;
+$link-color: darken($theme-color, 10%) !default;
 $font-family: "PT Sans", Helvetica, Arial, sans-serif !default;
-$font-size: 16px;
+$font-size: 16px !default;
 $gutter: 1rem !default;
 
 $sidebar-bg: $theme-color !default;
 $sidebar-text: #fefefe !default;
 $sidebar-width: 18rem !default;
 
-$text-field-border-color: #888;
+$input-color: #555 !default;
+$input-border-color: #888 !default;
+$input-border-radius: 2px !default;
+$input-placeholder-color: #8e8e8e !default;

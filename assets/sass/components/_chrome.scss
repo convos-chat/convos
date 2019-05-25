@@ -4,8 +4,12 @@ body {
   margin: 0;
 }
 
-body.is-loaded {
-  .visible-before-loaded {
+body.no-js {
+  .if-js {
     display: none;
   }
+}
+
+.hide {
+  display: none !important;
 }

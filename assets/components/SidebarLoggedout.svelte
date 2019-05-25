@@ -12,6 +12,7 @@ import {l} from '../js/i18n';
 
     <nav class="sidebar__nav">
       <Link href="/">{l('Login')}</Link>
+      <Link href="/register">{l('Create account')}</Link>
       <Link href="/doc">{l('Documentation')}</Link>
       <Link href="https://github.com/Nordaaker/convos">{l('GitHub')}</Link>
     </nav>
