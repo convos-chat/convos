@@ -52,14 +52,14 @@ onMount(() => {
     <nav class="sidebar__nav">
       {#if connections.length}
         <h2>{l('Group dialogs')}</h2>
-        <ul class="sidebar__nav__servers">
+        <ul class="sidebar__nav__servers for-group-dialogs">
           {#each connections as connection}
             <li>
               <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
               <ul class="sidebar__nav__conversations is-channels">
                 {#each connection.channels as dialog}
                   <li>
-                    <Link href="/chat/{connection.connection_id}/{dialog.path}">{dialog.name}</Link>
+                    <Link href="/chat/{connection.connection_id}/{dialog.path}">{dialog.name.replace(/^\W/, '')}</Link>
                   </li>
                 {/each}
               </ul>
@@ -68,7 +68,7 @@ onMount(() => {
         </ul>
 
         <h2>{l('Private dialogs')}</h2>
-        <ul class="sidebar__nav__servers">
+        <ul class="sidebar__nav__servers for-private-dialogs">
           {#each connections as connection}
             <li>
               <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
@@ -85,10 +85,10 @@ onMount(() => {
       {/if}
 
       <h2>{email || l('Account')}</h2>
-      <Link href="/join">{l('Join channel...')}</Link>
-      <Link href="/connections">{l('Add connection...')}</Link>
-      <Link href="/settings">{l('Settings')}</Link>
-      <Link href="/logout">{l('Log out')}</Link>
+      <Link href="/join" className="sidebar__nav__join">{l('Join dialog...')}</Link>
+      <Link href="/connections" className="sidebar__nav__connections">{l('Add connection...')}</Link>
+      <Link href="/settings" className="sidebar__nav__settings">{l('Settings')}</Link>
+      <Link href="/logout" className="sidebar__nav__logout">{l('Log out')}</Link>
     </nav>
   </div>
 </div>

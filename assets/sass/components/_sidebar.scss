@@ -54,6 +54,15 @@
     line-height: 1.2rem;
     display: block;
 
+    &:before {
+      @extend .fa;
+      font-size: 1.1rem;
+      text-align: center;
+      padding-right: 0.3rem;
+      width: 1.8rem;
+      display: inline-block;
+    }
+
     &.is-heading {
       font-size: 1.1em;
       font-weight: 600;
@@ -80,9 +89,45 @@
 }
 
 .sidebar__nav__conversations {
-  a {
-    padding-left: $gutter;
+  &.is-channels a:before {
+    content: fa-content($fa-var-user-friends);
   }
+
+  &.is-private a:before {
+    content: fa-content($fa-var-user);
+  }
+}
+
+.sidebar__nav__servers {
+  > li > a:before {
+    content: fa-content($fa-var-network-wired);
+  }
+}
+
+.sidebar__nav__connections,
+.sidebar__nav__join,
+.sidebar__nav__logout,
+.sidebar__nav__settings {
+  &:before {
+    @extend .fas;
+    padding-right: 0.3rem;
+  }
+}
+
+.sidebar__nav__connections:before {
+  content: fa-content($fa-var-network-wired);
+}
+
+.sidebar__nav__join:before {
+  content: fa-content($fa-var-user-plus);
+}
+
+.sidebar__nav__logout:before {
+  content: fa-content($fa-var-power-off);
+}
+
+.sidebar__nav__settings:before {
+  content: fa-content($fa-var-cog);
 }
 
 .next-to-sidebar {
