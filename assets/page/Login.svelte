@@ -1,11 +1,17 @@
 <script>
 import {l} from '../js/i18n';
+import {getContext} from 'svelte';
+import {gotoUrl} from '../store/router';
 import FormActions from '../components/form/FormActions.svelte';
 import Link from '../components/Link.svelte';
+import PromiseStatus from '../components/PromiseStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
 
+const api = getContext('api');
+
+let promise = false;
 function onSubmit(e) {
   promise = api.execute('loginUser', e.target).then((res) => {
     document.cookie = res.headers['Set-Cookie'];
