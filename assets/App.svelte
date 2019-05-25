@@ -2,14 +2,18 @@
 import {Api} from './js/Api';
 import {historyListener, pathParts} from './store/router';
 import {onMount, setContext} from 'svelte';
+import Chat from './page/Chat.svelte';
 import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
 
-setContext('api', new Api('/api.json'));
+setContext('api', new Api('/api.json', {debug: true}));
 
 // Routing
 let currentPage = undefined;
 pathParts.subscribe($pathParts => {
+  if ($pathParts[0] == 'chat') {
+    return (currentPage = Chat);
+  }
   if ($pathParts[0] == 'register') {
     return (currentPage = Register);
   }

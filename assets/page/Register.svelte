@@ -20,7 +20,7 @@ function onChange(e) {
 function onSubmit(e) {
   promise = api.execute('registerUser', e.target).then((res) => {
     document.cookie = res.headers['Set-Cookie'];
-    gotoUrl('/');
+    gotoUrl('/chat');
   });
 }
 </script>
