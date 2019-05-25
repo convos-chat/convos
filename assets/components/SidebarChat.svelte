@@ -70,16 +70,18 @@ onMount(() => {
         <h2>{l('Private dialogs')}</h2>
         <ul class="sidebar__nav__servers for-private-dialogs">
           {#each connections as connection}
-            <li>
-              <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
-              <ul class="sidebar__nav__conversations is-private">
-                {#each connection.private as dialog}
-                  <li>
-                    <Link href="/chat/{connection.connection_id}/{dialog.path}">{dialog.name}</Link>
-                  </li>
-                {/each}
-              </ul>
-            </li>
+            {#if connection.private.length}
+              <li>
+                <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
+                <ul class="sidebar__nav__conversations is-private">
+                  {#each connection.private as dialog}
+                    <li>
+                      <Link href="/chat/{connection.connection_id}/{dialog.path}">{dialog.name}</Link>
+                    </li>
+                  {/each}
+                </ul>
+              </li>
+            {/if}
           {/each}
         </ul>
       {/if}
