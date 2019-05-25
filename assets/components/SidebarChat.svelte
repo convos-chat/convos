@@ -2,6 +2,7 @@
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
 import Link from './Link.svelte';
+import Unread from './Unread.svelte';
 
 let connections = [];
 let email = '';
@@ -59,7 +60,10 @@ onMount(() => {
               <ul class="sidebar__nav__conversations is-channels">
                 {#each connection.channels as dialog}
                   <li>
-                    <Link href="/chat/{connection.connection_id}/{dialog.path}">{dialog.name.replace(/^\W/, '')}</Link>
+                    <Link href="/chat/{connection.connection_id}/{dialog.path}">
+                      <span>{dialog.name.replace(/^\W/, '')}</span>
+                      <Unread unread={dialog.unread}/>
+                    </Link>
                   </li>
                 {/each}
               </ul>
@@ -76,7 +80,10 @@ onMount(() => {
                 <ul class="sidebar__nav__conversations is-private">
                   {#each connection.private as dialog}
                     <li>
-                      <Link href="/chat/{connection.connection_id}/{dialog.path}">{dialog.name}</Link>
+                      <Link href="/chat/{connection.connection_id}/{dialog.path}">
+                        <span>{dialog.name}</span>
+                        <Unread unread={dialog.unread}/>
+                      </Link>
                     </li>
                   {/each}
                 </ul>
