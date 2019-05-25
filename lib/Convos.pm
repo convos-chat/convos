@@ -56,8 +56,15 @@ sub startup {
   $r->get('/sw' => [format => 'js']);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
-  $r->get('/*p', {p => ''})->to(template => 'index')->name('index');
   $r->websocket('/events')->to('events#start')->name('events');
+
+  $r->get('/chat/*path', {path => ''})->to(template => 'index')->name('index');
+  $r->get($_)->to(template => 'index')->name('index')
+    for (qw(
+    /          /connections /help
+    /join      /login      /logout
+    /register  /settings
+    ));
 
   $self->_plugins;
   $self->_setup_secrets;
