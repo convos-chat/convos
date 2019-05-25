@@ -6,9 +6,11 @@ import PasswordField from '../components/form/PasswordField.svelte';
 import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
 
-function login(e) {
-  e.preventDefault();
-  console.log('TODO: Login');
+function onSubmit(e) {
+  promise = api.execute('loginUser', e.target).then((res) => {
+    document.cookie = res.headers['Set-Cookie'];
+    gotoUrl('/');
+  });
 }
 </script>
 
@@ -16,7 +18,7 @@ function login(e) {
 
 <main class="next-to-sidebar is-logged-out">
   <h1>{l('Log in')}</h1>
-  <form class="login" method="post" on:submit="{login}">
+  <form class="login" method="post" on:submit|preventDefault="{onSubmit}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>
