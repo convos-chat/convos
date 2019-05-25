@@ -20,6 +20,10 @@ export class Api {
         if (!this._hasProperty(params, p) && !p.required) {
           return;
         }
+        else if (p.in == 'path') {
+          const re = new RegExp('(%7B|\\{)' + p.name + '(%7D|\\})', 'i');
+          url.pathname = url.pathname.replace(re, this._extractValue(params, p));
+        }
         else if (p.in == 'query') {
           url.searchParams.set(p.name, this._extractValue(params, p));
         }
@@ -28,6 +32,9 @@ export class Api {
         }
         else if (p.in == 'header') {
           fetchParams.header[p.name] = this._extractValue(params, p.name);
+        }
+        else {
+          throw '[Api] Parameter in:' + p.in + ' is not supported.';
         }
     });
 
@@ -72,11 +79,21 @@ export class Api {
       this.apiPromise = fetch(this.url).then(res => res.json()).then(api => {
         Object.keys(api.paths).forEach(path => {
           Object.keys(api.paths[path]).forEach(method => {
-            const operationId = api.paths[path][method].operationId;
+            const op = api.paths[path][method];
+            const operationId = op.operationId;
             if (!operationId) return;
-            api.paths[path][method]._method = method.toUpperCase();
-            api.paths[path][method]._url = api.schemes[0] + '://' + api.host + api.basePath + path;
-            this.op[operationId] = api.paths[path][method];
+
+            op._method = method.toUpperCase();
+            op._url = api.schemes[0] + '://' + api.host + api.basePath + path;
+            op.parameters = (op.parameters || []).map(p => {
+              if (!p['$ref']) return p;
+              const refPath = p['$ref'].replace(/^\#\//, '').split('/');
+              let ref = api;
+              while (refPath.length) ref = ref[refPath.shift()];
+              return ref;
+            });
+
+            this.op[operationId] = op;
           });
         });
         return api;
