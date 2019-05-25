@@ -1,10 +1,10 @@
 <script>
 import {l} from '../js/i18n';
-import FormActions from './form/FormActions.svelte';
-import Link from './Link.svelte';
-import PasswordField from './form/PasswordField.svelte';
-import SidebarLoggedout from './SidebarLoggedout.svelte';
-import TextField from './form/TextField.svelte';
+import FormActions from '../components/form/FormActions.svelte';
+import Link from '../components/Link.svelte';
+import PasswordField from '../components/form/PasswordField.svelte';
+import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
+import TextField from '../components/form/TextField.svelte';
 
 function login(e) {
   e.preventDefault();

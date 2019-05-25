@@ -13,3 +13,22 @@ body.no-js {
 .hide {
   display: none !important;
 }
+
+.error,
+.loading {
+  border: 1px solid transparent;
+  padding: 0.5rem;
+  margin: $gutter 0;
+}
+
+.error {
+  background: #f7eaea;
+  color: #900;
+  border-color: #a26464;
+}
+
+.loading {
+  background: #eceeff;
+  color: #009;
+  border-color: #b6b9d2;
+}

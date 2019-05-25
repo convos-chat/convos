@@ -22,35 +22,7 @@ has core => sub {
   return Convos::Core->new(backend => $self->config('backend'), home => path(split '/', $home));
 };
 
-has _api_spec => sub {
-  my $self = shift;
-  my $file = $self->static->file('convos-api.json');
-  die "Could not find convos-api.json in static=@{$self->static->paths}, home=@{[$self->home]})"
-    unless $file;
-  return Mojo::JSON::decode_json($file->slurp);
-};
-
 has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
-
-sub extend_api_spec {
-  my ($self, $path) = (shift, shift);
-
-  while (@_) {
-    my ($method, $op) = (shift, shift);
-
-    eval "package $ANON_API_CONTROLLER; use Mojo::Base 'Mojolicious::Controller'; 1"
-      unless $ANON_API_CONTROLLER->can('new');
-    Mojo::Util::monkey_patch($ANON_API_CONTROLLER => $op->{operationId} => delete $op->{cb});
-
-    $op->{'x-mojo-to'} = sprintf 'anon#%s', $op->{operationId};
-    $op->{responses}{default}
-      ||= {description => 'Error.', schema => {'$ref' => '#/definitions/Error'}};
-
-    $self->_api_spec->{paths}{$path}{$method} = $op;
-  }
-
-  return $self;
-}
 
 sub startup {
   my $self   = shift;
@@ -76,6 +48,9 @@ sub startup {
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
+  # Autogenerate routes from the OpenAPI specification
+  $self->plugin(OpenAPI => {url => $self->static->file('convos-api.json')->path});
+
   # Add basic routes
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/sw' => [format => 'js']);
@@ -84,12 +59,8 @@ sub startup {
   $r->get('/*p', {p => ''})->to(template => 'index')->name('index');
   $r->websocket('/events')->to('events#start')->name('events');
 
-  $self->_api_spec;
   $self->_plugins;
   $self->_setup_secrets;
-
-  # Autogenerate routes from the OpenAPI specification
-  $self->plugin(OpenAPI => {url => delete $self->{_api_spec}});
 
   # Process svelte assets using rollup.js
   $ENV{MOJO_WEBPACK_CONFIG} = 'rollup.config.js';
@@ -313,13 +284,6 @@ Holds a L<Convos::Core> object.
 
 L<Convos> inherits all methods from L<Mojolicious> and implements
 the following new ones.
-
-=head2 extend_api_spec
-
-  $self->extend_api_spec($path => \%spec);
-
-Used to add more paths to the OpenAPI specification. This is useful
-for plugins.
 
 =head2 startup
 
