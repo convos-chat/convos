@@ -53,6 +53,7 @@
   a {
     line-height: 1.2rem;
     display: block;
+    position: relative;
 
     &:before {
       @extend .fa;
@@ -95,6 +96,17 @@
 
   &.is-private a:before {
     content: fa-content($fa-var-user);
+  }
+
+  .unread {
+    background-color: darken($sidebar-bg, 4%);
+    line-height: 1em;
+    border: 1px solid lighten($sidebar-bg, 10%);
+    border-radius: 50%;
+    padding: 0.15em 0.4em;
+    position: absolute;
+    top: 0.2em;
+    right: $gutter;
   }
 }
 
