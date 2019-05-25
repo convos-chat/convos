@@ -17,7 +17,7 @@ function onChange(e) {
   promise = false;
 }
 
-function onSubmit(e) {
+async function onSubmit(e) {
   promise = api.execute('registerUser', e.target).then((res) => {
     document.cookie = res.headers['Set-Cookie'];
     gotoUrl('/chat');

@@ -11,31 +11,30 @@ let unread = 0;
 const api = getContext('api');
 const byName = (a, b) => a.name.localeCompare(b.name);
 
-function loadConversations() {
-  api.execute('getUser', {
+async function loadConversations() {
+  let res = await api.execute('getUser', {
     connections: true,
     dialogs: true,
     notifications: false,
-  }).then(res => {
-    email = res.email;
-    unread = res.unread;
+  });
+  email = res.email;
+  unread = res.unread;
 
-    const map = {};
-    res.connections.forEach(conn => {
-      map[conn.connection_id] = {...conn, channels: [], private: []};
-    });
+  const map = {};
+  res.connections.forEach(conn => {
+    map[conn.connection_id] = {...conn, channels: [], private: []};
+  });
 
-    res.dialogs.forEach(dialog => {
-      const conn = map[dialog.connection_id] || {};
-      dialog.path = encodeURIComponent(dialog.dialog_id);
-      conn[dialog.is_private ? 'private' : 'channels'].push(dialog);
-    });
+  res.dialogs.forEach(dialog => {
+    const conn = map[dialog.connection_id] || {};
+    dialog.path = encodeURIComponent(dialog.dialog_id);
+    conn[dialog.is_private ? 'private' : 'channels'].push(dialog);
+  });
 
-    connections = Object.keys(map).sort().map(id => {
-      map[id].channels.sort(byName);
-      map[id].private.sort(byName);
-      return map[id];
-    });
+  connections = Object.keys(map).sort().map(id => {
+    map[id].channels.sort(byName);
+    map[id].private.sort(byName);
+    return map[id];
   });
 }
 
