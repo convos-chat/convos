@@ -88,6 +88,7 @@ onMount(() => {
       <Link href="/join" className="sidebar__nav__join">{l('Join dialog...')}</Link>
       <Link href="/connections" className="sidebar__nav__connections">{l('Add connection...')}</Link>
       <Link href="/settings" className="sidebar__nav__settings">{l('Settings')}</Link>
+      <Link href="/help" className="sidebar__nav__help">{l('Help')}</Link>
       <Link href="/logout" className="sidebar__nav__logout">{l('Log out')}</Link>
     </nav>
   </div>
