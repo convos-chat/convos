@@ -11,7 +11,7 @@ $: document.querySelector('body').classList[loading ? 'add' : 'remove']('is-load
 $: if (promise) {
   promise.then(
     (r) => { loading = false; err = undefined; res = r },
-    (e) => { loading = false; res = undefined; err = e  },
+    (e) => { loading = false; res = undefined; err = e },
   );
 }
 

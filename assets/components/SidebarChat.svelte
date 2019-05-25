@@ -1,46 +1,8 @@
 <script>
-import {getContext, onMount} from 'svelte';
+import {connectionsWithChannels, email} from '../store/user';
 import {l} from '../js/i18n';
 import Link from './Link.svelte';
 import Unread from './Unread.svelte';
-
-let connections = [];
-let email = '';
-let unread = 0;
-
-const api = getContext('api');
-const byName = (a, b) => a.name.localeCompare(b.name);
-
-async function loadConversations() {
-  let res = await api.execute('getUser', {
-    connections: true,
-    dialogs: true,
-    notifications: false,
-  });
-  email = res.email;
-  unread = res.unread;
-
-  const map = {};
-  res.connections.forEach(conn => {
-    map[conn.connection_id] = {...conn, channels: [], private: []};
-  });
-
-  res.dialogs.forEach(dialog => {
-    const conn = map[dialog.connection_id] || {};
-    dialog.path = encodeURIComponent(dialog.dialog_id);
-    conn[dialog.is_private ? 'private' : 'channels'].push(dialog);
-  });
-
-  connections = Object.keys(map).sort().map(id => {
-    map[id].channels.sort(byName);
-    map[id].private.sort(byName);
-    return map[id];
-  });
-}
-
-onMount(() => {
-  loadConversations();
-});
 </script>
 
 <div class="sidebar-wrapper">
@@ -50,10 +12,10 @@ onMount(() => {
     </h1>
 
     <nav class="sidebar__nav">
-      {#if connections.length}
+      {#if $connectionsWithChannels.length}
         <h2>{l('Group dialogs')}</h2>
         <ul class="sidebar__nav__servers for-group-dialogs">
-          {#each connections as connection}
+          {#each $connectionsWithChannels as connection}
             <li>
               <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
               <ul class="sidebar__nav__conversations is-channels">
@@ -72,7 +34,7 @@ onMount(() => {
 
         <h2>{l('Private dialogs')}</h2>
         <ul class="sidebar__nav__servers for-private-dialogs">
-          {#each connections as connection}
+          {#each $connectionsWithChannels as connection}
             {#if connection.private.length}
               <li>
                 <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
@@ -92,7 +54,7 @@ onMount(() => {
         </ul>
       {/if}
 
-      <h2>{email || l('Account')}</h2>
+      <h2>{$email || l('Account')}</h2>
       <Link href="/join" className="sidebar__nav__join">{l('Join dialog...')}</Link>
       <Link href="/connections" className="sidebar__nav__connections">{l('Add connection...')}</Link>
       <Link href="/settings" className="sidebar__nav__settings">{l('Settings')}</Link>
