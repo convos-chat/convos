@@ -15,7 +15,7 @@ let promise = false;
 function onSubmit(e) {
   promise = api.execute('loginUser', e.target).then((res) => {
     document.cookie = res.headers['Set-Cookie'];
-    gotoUrl('/');
+    gotoUrl('/chat');
   });
 }
 </script>
