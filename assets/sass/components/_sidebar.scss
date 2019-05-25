@@ -105,6 +105,7 @@
 }
 
 .sidebar__nav__connections,
+.sidebar__nav__help,
 .sidebar__nav__join,
 .sidebar__nav__logout,
 .sidebar__nav__settings {
@@ -116,6 +117,10 @@
 
 .sidebar__nav__connections:before {
   content: fa-content($fa-var-network-wired);
+}
+
+.sidebar__nav__help:before {
+  content: fa-content($fa-var-question-circle);
 }
 
 .sidebar__nav__join:before {
