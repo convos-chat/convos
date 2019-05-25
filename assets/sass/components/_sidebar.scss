@@ -148,7 +148,7 @@
 }
 
 .next-to-sidebar {
-  margin-left: calc(#{$sidebar-width} + #{$gutter});
+  margin-left: calc(#{$sidebar-width} + #{$gutter * 2});
   margin-right: $gutter;
 
   &.is-logged-out {
