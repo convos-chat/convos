@@ -1,10 +1,11 @@
 export class Api {
-  constructor(url) {
+  constructor(url, params = {}) {
+    this.debug = params.debug;
     this.url = url;
     this.op = {};
   }
 
-  execute(operationId, params) {
+  execute(operationId, params = {}) {
     return this._api().then(api => {
       const op = this.op[operationId];
       if (!op) throw '[Api] Invalid operationId: ' + operationId;
@@ -30,7 +31,11 @@ export class Api {
         }
       });
 
-      // console.log(url, fetchParams, op);
+      if (this.debug) {
+        console.log('[Api]', operationId, '===', op);
+        console.log('[Api]', url.href, '<<<', fetchParams);
+      }
+
       return fetch(url, fetchParams).then(res => Promise.all([res, res.json()])).then(([res, json]) => {
         json.headers = res.headers;
         if (String(res.status).indexOf('2') == 0) return json;
@@ -41,7 +46,7 @@ export class Api {
   }
 
   _extractValue(params, p) {
-    if (p.schema && params.tagName.toLowerCase() == 'form' ) {
+    if (p.schema && (params.tagName || '').toLowerCase() == 'form' ) {
       const body = {};
       Object.keys(p.schema.properties).forEach(k => { body[k] = params[k] && params[k].value });
       return JSON.stringify(body);
@@ -55,7 +60,7 @@ export class Api {
   }
 
   _hasProperty(params, p) {
-    if (params.tagName.toLowerCase() == 'form') {
+    if ((params.tagName || '').toLowerCase() == 'form') {
       return p.in == 'body' ? true : params[p.name] ? true : false;
     }
     else {

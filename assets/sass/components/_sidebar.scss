@@ -1,12 +1,13 @@
 .sidebar-wrapper {
   background: $sidebar-bg;
+  text-align: left;
   padding: $gutter;
   width: $sidebar-width;
+  overflow: auto;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  text-align: left;
 
   &, a {
     color: $sidebar-text;
@@ -15,6 +16,16 @@
 }
 
 .sidebar {
+  &.is-chatting {
+    margin-top: -($gutter / 2);
+    padding-bottom: ($gutter * 3);
+
+    h1 {
+      margin: 0;
+      margin-bottom: -($gutter / 2);
+    }
+  }
+
   &.is-logged-out {
     font-size: 1.1rem;
     padding: $gutter * 2;
@@ -22,20 +33,55 @@
     bottom: 0;
     left: 0;
   }
+
+  ul,
+  li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
 }
 
 .sidebar__nav {
-  a {
-    display: block;
-    line-height: 1.75em;
+  a,
+  h2 {
+    padding: 0.3rem ($gutter / 2);
+    margin-left: -($gutter / 2);
+    margin-right: -($gutter / 2);
+  }
 
+  a {
+    line-height: 1.2rem;
+    display: block;
+
+    &.is-heading {
+      font-size: 1.1em;
+      font-weight: 600;
+    }
+
+    &:focus,
     &:hover {
-      text-decoration: underline;
+      background-color: darken($sidebar-bg, 6%);
+      text-decoration: none;
     }
 
     &.has-path {
-      font-weight: bold;
+      background-color: darken($sidebar-bg, 4%);
     }
+  }
+
+  h2 {
+    font-size: 0.9rem;
+    font-weight: normal;
+    border-bottom: 1px solid $sidebar-text;
+    margin-bottom: 0.1rem;
+    margin-top: $gutter;
+  }
+}
+
+.sidebar__nav__conversations {
+  a {
+    padding-left: $gutter;
   }
 }
 
