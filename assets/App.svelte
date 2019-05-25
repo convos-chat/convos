@@ -1,12 +1,21 @@
 <script>
+import {Api} from './js/Api';
 import {historyListener, pathParts} from './store/router';
-import {onMount} from 'svelte';
-import Login from './components/Login.svelte';
+import {onMount, setContext} from 'svelte';
+import Login from './page/Login.svelte';
+import Register from './page/Register.svelte';
 
-let currentPage = Login;
+setContext('api', new Api('/api.json'));
 
+// Routing
+let currentPage = undefined;
 pathParts.subscribe($pathParts => {
-  currentPage = $pathParts ? Login : null; // TODO: Change currentPage based on $pathParts[0]
+  if ($pathParts[0] == 'register') {
+    return (currentPage = Register);
+  }
+  else {
+    return (currentPage = Login);
+  }
 });
 
 onMount(() => {

@@ -9,6 +9,11 @@ export function historyListener() {
   return () => window.removeEventListener('popstate', handleHistoryChange);
 }
 
+export function gotoUrl(url) {
+  if (hrefToPathname(url) === null) return (location.href = url);
+  history.pushState({}, document.title, url);
+}
+
 export function hrefToPathname(href) {
   const pathnameStart = href.indexOf('/') == 0 ? 0 : href.indexOf(baseUrl) + baseUrl.length;
   if (pathnameStart == baseUrl.length - 1) return null;
