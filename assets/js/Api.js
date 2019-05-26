@@ -6,7 +6,7 @@ export class Api {
   }
 
   async execute(operationId, params = {}) {
-    let api = await this._api();
+    let api = await this.spec();
     const op = this.op[operationId];
     if (!op) throw '[Api] Invalid operationId: ' + operationId;
 
@@ -17,25 +17,25 @@ export class Api {
     };
 
     (op.parameters || []).forEach(p => {
-        if (!this._hasProperty(params, p) && !p.required) {
-          return;
-        }
-        else if (p.in == 'path') {
-          const re = new RegExp('(%7B|\\{)' + p.name + '(%7D|\\})', 'i');
-          url.pathname = url.pathname.replace(re, this._extractValue(params, p));
-        }
-        else if (p.in == 'query') {
-          url.searchParams.set(p.name, this._extractValue(params, p));
-        }
-        else if (p.in == 'body') {
-          fetchParams.body = this._extractValue(params, p);
-        }
-        else if (p.in == 'header') {
-          fetchParams.header[p.name] = this._extractValue(params, p.name);
-        }
-        else {
-          throw '[Api] Parameter in:' + p.in + ' is not supported.';
-        }
+      if (!this._hasProperty(params, p) && !p.required) {
+        return;
+      }
+      else if (p.in == 'path') {
+        const re = new RegExp('(%7B|\\{)' + p.name + '(%7D|\\})', 'i');
+        url.pathname = url.pathname.replace(re, this._extractValue(params, p));
+      }
+      else if (p.in == 'query') {
+        url.searchParams.set(p.name, this._extractValue(params, p));
+      }
+      else if (p.in == 'body') {
+        fetchParams.body = this._extractValue(params, p);
+      }
+      else if (p.in == 'header') {
+        fetchParams.header[p.name] = this._extractValue(params, p.name);
+      }
+      else {
+        throw '[Api] Parameter in:' + p.in + ' is not supported.';
+      }
     });
 
     if (this.debug) {
@@ -44,7 +44,7 @@ export class Api {
     }
 
     let res = await fetch(url, fetchParams);
-    let json = res.json();
+    let json = await res.json();
     json.headers = res.headers;
     if (String(res.status).indexOf('2') == 0) return json;
     ['status', 'statusText'].forEach(k => { json[k] = res[k] });
@@ -74,31 +74,32 @@ export class Api {
     }
   }
 
-  _api() {
-    if (!this.apiPromise) {
-      this.apiPromise = fetch(this.url).then(res => res.json()).then(api => {
-        Object.keys(api.paths).forEach(path => {
-          Object.keys(api.paths[path]).forEach(method => {
-            const op = api.paths[path][method];
-            const operationId = op.operationId;
-            if (!operationId) return;
+  async spec() {
+    if (this._spec) return this._spec;
 
-            op._method = method.toUpperCase();
-            op._url = api.schemes[0] + '://' + api.host + api.basePath + path;
-            op.parameters = (op.parameters || []).map(p => {
-              if (!p['$ref']) return p;
-              const refPath = p['$ref'].replace(/^\#\//, '').split('/');
-              let ref = api;
-              while (refPath.length) ref = ref[refPath.shift()];
-              return ref;
-            });
+    const res = await fetch(this.url);
+    const api = await res.json();
 
-            this.op[operationId] = op;
-          });
+    Object.keys(api.paths).forEach(path => {
+      Object.keys(api.paths[path]).forEach(method => {
+        const op = api.paths[path][method];
+        const operationId = op.operationId;
+        if (!operationId) return;
+
+        op._method = method.toUpperCase();
+        op._url = api.schemes[0] + '://' + api.host + api.basePath + path;
+        op.parameters = (op.parameters || []).map(p => {
+          if (!p['$ref']) return p;
+          const refPath = p['$ref'].replace(/^\#\//, '').split('/');
+          let ref = api;
+          while (refPath.length) ref = ref[refPath.shift()];
+          return ref;
         });
-        return api;
+
+        this.op[operationId] = op;
       });
-    }
-    return this.apiPromise;
+    });
+
+    return (this._spec = api);
   }
 }
