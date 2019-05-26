@@ -55,11 +55,11 @@ import Unread from './Unread.svelte';
       {/if}
 
       <h2>{$email || l('Account')}</h2>
-      <Link href="/join" className="sidebar__nav__join">{l('Join dialog...')}</Link>
-      <Link href="/connections" className="sidebar__nav__connections">{l('Add connection...')}</Link>
-      <Link href="/settings" className="sidebar__nav__settings">{l('Settings')}</Link>
-      <Link href="/help" className="sidebar__nav__help">{l('Help')}</Link>
-      <Link href="/logout" className="sidebar__nav__logout">{l('Log out')}</Link>
+      <Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join dialog...')}</Link>
+      <Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link>
+      <Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link>
+      <Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link>
+      <Link href="/logout" className="sidebar__nav__logout"><Icon name="power-off"/> {l('Log out')}</Link>
     </nav>
   </div>
 </div>
