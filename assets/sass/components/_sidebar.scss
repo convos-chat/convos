@@ -62,11 +62,6 @@
       display: inline-block;
     }
 
-    &.is-heading {
-      font-size: 1.1em;
-      font-weight: 600;
-    }
-
     &:focus,
     &:hover {
       background: darken($sidebar-bg, 6%);
@@ -95,8 +90,12 @@
     font-size: 0.9rem;
     font-weight: normal;
     border-bottom: 1px solid $sidebar-text;
-    margin-bottom: 0.1rem;
+    margin-bottom: 0.3rem;
     margin-top: $gutter;
+  }
+
+  ul ul a {
+    padding-left: 0.5rem;
   }
 
   i.fa,
@@ -168,15 +167,6 @@
 }
 
 .next-to-sidebar {
-  margin-left: calc(#{$sidebar-width} + #{$gutter * 2});
+  margin-left: calc(#{$sidebar-width} + #{$gutter * 3});
   margin-right: $gutter;
-
-  &.is-logged-out {
-    margin-left: calc(#{$sidebar-width} + #{$gutter * 3});
-    max-width: 38rem;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
 }

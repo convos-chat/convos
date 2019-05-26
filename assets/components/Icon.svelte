@@ -1,5 +1,5 @@
 <script>
-export let className;
+export let className = '';
 export let family = '';
 export let name;
 
