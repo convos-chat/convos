@@ -4,11 +4,25 @@ input {
   color: $input-color;
 }
 
+.checkbox,
 .text-field {
-  font-size: 1.1rem;
   margin-bottom: 0.8rem;
   max-width: 24em;
+}
 
+.checkbox {
+  i {
+    font-size: 1.2rem;
+  }
+
+  input {
+    position: absolute;
+    left: -1000px;
+    opacity: 0;
+  }
+}
+
+.text-field {
   label {
     color: darken($input-border-color, 12%);
     font-size: inherit;
