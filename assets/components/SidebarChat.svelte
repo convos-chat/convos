@@ -1,17 +1,118 @@
 <script>
 import {connectionsWithChannels, email} from '../store/user';
+import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
+import {q, tagNameIs} from '../js/util';
+import Icon from './Icon.svelte';
 import Link from './Link.svelte';
+import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
+
+let activeLinkIndex = 0;
+let filter = '';
+let navEl;
+let searchInput;
+let visibleLinks = [];
+
+function clearFilter() {
+  setTimeout(() => {filter = ''}, 100);
+}
+
+function filterNav(filter) {
+  if (!navEl) return;
+
+  const filterRe = new RegExp('^\\W*' + filter, 'i');
+  const hasVisibleLinks = {};
+  const seen = {};
+
+  activeLinkIndex = 0;
+  visibleLinks = [];
+
+  // Show and hide navigation links
+  q(navEl, 'a', (aEl, i) => {
+    const aClassList = aEl.classList;
+    const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
+    const parentList = aEl.closest('.sidebar__nav__account, .sidebar__nav__servers');
+
+    if (makeVisible) {
+      if (parentList) hasVisibleLinks[parentList.className] = parentList;
+      visibleLinks.push(aEl);
+    }
+
+    if (!filter.length && aClassList.contains('has-path')) {
+      activeLinkIndex = i;
+    }
+
+    aClassList[makeVisible ? 'remove' : 'add']('hide');
+    aClassList.remove('has-focus');
+    seen[aEl.href] = true;
+  });
+
+  // Show and hide navigation headings
+  q(navEl, 'ul', listEl => {
+    const makeVisible = hasVisibleLinks[listEl.className] || false;
+    const headingEl = listEl.previousElementSibling;
+    if (headingEl && tagNameIs(headingEl, 'h2')) headingEl.classList[makeVisible ? 'remove' : 'add']('hide');
+  });
+}
+
+function onGlobalKeydown(e) {
+  if (e.shiftKey && e.keyCode == 13) { // Shift+Enter
+    e.preventDefault();
+    const targetEl = document.activeElement || searchInput;
+    if (targetEl == searchInput || tagNameIs(targetEl, 'body')) {
+      searchInput.focus(); // TODO: Focus chat text input
+    }
+    else {
+      searchInput.focus();
+    }
+  }
+}
+
+function onSearchKeyDown(e) {
+  // Go to the active link when Enter is pressed
+  if (e.keyCode == 13) {
+    e.preventDefault();
+    clearFilter();
+    if (visibleLinks[activeLinkIndex]) gotoUrl(visibleLinks[activeLinkIndex].href);
+    return;
+  }
+
+  // Move focus from/to a given navigation link
+  // TODO: Add support for j/k, with some sort of additional combination
+  // Currently only Up/Down array keys will update the focused link
+  const moveBy = e.keyCode == 38 ? -1 : e.keyCode == 40 ? 1 : 0;
+  if (moveBy) {
+    e.preventDefault();
+    if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.remove('has-focus');
+    activeLinkIndex += e.ctrlKey ? moveBy * 4 : moveBy;
+  }
+
+  // Make sure we do not try to focus a link that is not visible
+  if (activeLinkIndex < 0) activeLinkIndex = visibleLinks.length - 1;
+  if (activeLinkIndex >= visibleLinks.length) activeLinkIndex = 0;
+}
+
+$: filterNav(encodeURIComponent(filter));
+$: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 </script>
+
+<svelte:window on:keydown="{onGlobalKeydown}"/>
 
 <div class="sidebar-wrapper">
   <div class="sidebar is-chatting">
-    <h1 class="sidebar__logo">
-      <Link href="/chat"><span>{l('Convos')}</span></Link>
-    </h1>
+    <form class="sidebar__search">
+      <input type="text"
+        placeholder="{l('Convos')}"
+        bind:this="{searchInput}"
+        bind:value="{filter}"
+        on:blur="{clearFilter}"
+        on:focus="{filterNav}"
+        on:keydown="{onSearchKeyDown}">
+      <Icon name="search" on:click="{() => searchInput.focus()}"/>
+    </form>
 
-    <nav class="sidebar__nav">
+    <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
       {#if $connectionsWithChannels.length}
         <h2>{l('Group dialogs')}</h2>
         <ul class="sidebar__nav__servers for-group-dialogs">
@@ -55,11 +156,13 @@ import Unread from './Unread.svelte';
       {/if}
 
       <h2>{$email || l('Account')}</h2>
-      <Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join dialog...')}</Link>
-      <Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link>
-      <Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link>
-      <Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link>
-      <Link href="/logout" className="sidebar__nav__logout"><Icon name="power-off"/> {l('Log out')}</Link>
+      <ul class="sidebar__nav__account">
+        <li><Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join dialog...')}</Link></li>
+        <li><Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link></li>
+        <li><Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link></li>
+        <li><Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link></li>
+        <li><Link href="/logout" className="sidebar__nav__logout"><Icon name="power-off"/> {l('Log out')}</Link></li>
+      </ul>
     </nav>
   </div>
 </div>

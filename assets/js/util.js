@@ -5,3 +5,15 @@ export function uuidv4() {
     return v.toString(16);
   });
 };
+
+export function q(parentEl, sel, cb) {
+  const els = parentEl.querySelectorAll(sel);
+  if (!cb) return [].slice.call(els, 0);
+  const res = [];
+  for (let i = 0; i < els.length; i++) res.push(cb(els[i], i));
+  return res;
+}
+
+export function tagNameIs(el, tagName) {
+  return el && el.tagName && el.tagName.toLowerCase() === tagName;
+}
