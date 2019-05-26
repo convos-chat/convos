@@ -36,12 +36,25 @@ h2, h3, h4, h5, h6{
   line-height: 1;
 }
 
+dl,
+ol,
+ul,
 p {
   margin: 0.5rem 0 1rem 0;
+  line-height: 1.5;
 }
 
-p, ul, ol, dl, address {
-  line-height: 1.5;
+dt {
+  font-weight: 400;
+}
+
+dd {
+  margin: 0 0 0.3rem 1.5rem;
+}
+
+ol,
+ul {
+  padding-left: 1.5rem;
 }
 
 .main-header {
@@ -58,14 +71,5 @@ p, ul, ol, dl, address {
   small {
     font-size: 0.9rem;
     font-style: italic;
-    display: none;
-
-    &.has-subject {
-      display: inline-block;
-
-      &:before {
-        content: ' - ';
-      }
-    }
   }
 }

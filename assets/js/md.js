@@ -33,7 +33,11 @@ export function md(str, params = {}) {
   }
 
   if (params.links !== false) {
-    str = str.replace(linkRe, (url) => '<a href="' + url + '" target="_blank">' + url + '</a>');
+    str = str.replace(linkRe, (str) => {
+      const parts = str.match(/^(.*?)([.!?])?$/);
+      console.log(parts);
+      return '<a href="' + parts[1] + '" target="_blank">' + parts[1] + '</a>' + parts[2];
+    });
   }
 
   return str;

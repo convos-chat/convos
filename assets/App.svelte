@@ -5,6 +5,7 @@ import {historyListener, pathParts} from './store/router';
 import {onMount, setContext} from 'svelte';
 import Chat from './page/Chat.svelte';
 import Connections from './page/Connections.svelte';
+import Help from './page/Help.svelte';
 import Join from './page/Join.svelte';
 import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
@@ -18,6 +19,7 @@ let currentPage = undefined;
 const pages = {
   chat: Chat,
   connections: Connections,
+  help: Help,
   join: Join,
   login: Login,
   register: Register,

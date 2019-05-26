@@ -29,7 +29,7 @@ $: if (scrollDirection == 'down') window.scrollTo(0, height);
 <main class="main-app-pane" bind:offsetHeight="{height}">
   <h1 class="main-header">
     <span>{decodeURIComponent($pathParts[2] || $pathParts[1])}</span>
-    <small class:has-subject="{subject.length > 0}">{subject}</small>
+    <small>{subject || 'No subject.'}</small>
   </h1>
   {#each messages as message}
     <div class="message" class:is-hightlight="{message.highlight}">
