@@ -55,6 +55,8 @@
     display: block;
     position: relative;
 
+    i.fa,
+    i.fas,
     &:before {
       @extend .fa;
       font-size: 1.1rem;
@@ -87,6 +89,11 @@
     margin-bottom: 0.1rem;
     margin-top: $gutter;
   }
+
+  i.fa,
+  i.fas {
+    float: left;
+  }
 }
 
 .sidebar__nav__conversations {
@@ -114,37 +121,6 @@
   > li > a:before {
     content: fa-content($fa-var-network-wired);
   }
-}
-
-.sidebar__nav__connections,
-.sidebar__nav__help,
-.sidebar__nav__join,
-.sidebar__nav__logout,
-.sidebar__nav__settings {
-  &:before {
-    @extend .fas;
-    padding-right: 0.3rem;
-  }
-}
-
-.sidebar__nav__connections:before {
-  content: fa-content($fa-var-network-wired);
-}
-
-.sidebar__nav__help:before {
-  content: fa-content($fa-var-question-circle);
-}
-
-.sidebar__nav__join:before {
-  content: fa-content($fa-var-user-plus);
-}
-
-.sidebar__nav__logout:before {
-  content: fa-content($fa-var-power-off);
-}
-
-.sidebar__nav__settings:before {
-  content: fa-content($fa-var-cog);
 }
 
 .next-to-sidebar {
