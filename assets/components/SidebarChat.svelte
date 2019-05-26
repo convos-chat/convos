@@ -21,7 +21,7 @@ function clearFilter() {
 function filterNav(filter) {
   if (!navEl) return;
 
-  const filterRe = new RegExp('^\\W*' + filter, 'i');
+  const filterRe = new RegExp('\\b\\W*' + filter, 'i');
   const hasVisibleLinks = {};
   const seen = {};
 
@@ -114,11 +114,11 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
       {#if $connectionsWithChannels.length}
-        <h2>{l('Group dialogs')}</h2>
+        <h2>{l('Group conversations')}</h2>
         <ul class="sidebar__nav__servers for-group-dialogs">
           {#each $connectionsWithChannels as connection}
             <li>
-              <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
+              <Link href="/chat/{connection.connection_id}">{l(connection.name)}</Link>
               <ul class="sidebar__nav__conversations is-channels">
                 {#each connection.channels as dialog}
                   <li>
@@ -133,12 +133,12 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
           {/each}
         </ul>
 
-        <h2>{l('Private dialogs')}</h2>
+        <h2>{l('Private conversations')}</h2>
         <ul class="sidebar__nav__servers for-private-dialogs">
           {#each $connectionsWithChannels as connection}
             {#if connection.private.length}
               <li>
-                <Link href="/chat/{connection.connection_id}" className="is-heading">{l(connection.name)}</Link>
+                <Link href="/chat/{connection.connection_id}">{l(connection.name)}</Link>
                 <ul class="sidebar__nav__conversations is-private">
                   {#each connection.private as dialog}
                     <li>
@@ -157,7 +157,7 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
 
       <h2>{$email || l('Account')}</h2>
       <ul class="sidebar__nav__account">
-        <li><Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join dialog...')}</Link></li>
+        <li><Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join conversation...')}</Link></li>
         <li><Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link></li>
         <li><Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link></li>
         <li><Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link></li>

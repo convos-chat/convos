@@ -1,29 +1,16 @@
-.messages {
-  max-width: 48rem;
-  padding-bottom: 4rem;
-
-  > h1 {
-    background: $body-bg;
-    border-bottom: 1px solid #aaa;
-    padding: ($gutter / 2);
-    padding-bottom: 0.2rem;
-    margin: 0 (-$gutter / 2);
-    margin-bottom: $gutter;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-}
-
-.messages_message {
+.message {
   position: relative;
   margin-bottom: 0.2rem;
 
-  > a {
+  &:last-of-type {
+    padding-bottom: 5rem;
+  }
+
+  .message_link {
     text-decoration: none;
   }
 
-  > div {
+  .message_text {
     margin-bottom: 0.4rem;
 
     a {
@@ -35,27 +22,11 @@
     }
   }
 
-  > .ts {
+  .ts {
     color: lighten($text-color, 10%);
     font-size: 0.9rem;
     font-weight: normal;
     padding: 0.1rem;
     float: right;
-  }
-}
-
-.messages_subject {
-  small {
-    font-size: 0.9rem;
-    font-style: italic;
-    display: none;
-
-    &.has-subject {
-      display: inline-block;
-
-      &:before {
-        content: ' - ';
-      }
-    }
   }
 }

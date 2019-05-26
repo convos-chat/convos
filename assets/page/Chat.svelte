@@ -1,5 +1,4 @@
 <script>
-import {getUser} from '../store/user';
 import {getContext, onMount, tick} from 'svelte';
 import {md} from '../js/md';
 import {pathParts} from '../store/router';
@@ -23,22 +22,20 @@ pathParts.subscribe(async ($pathParts) => {
 });
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
-
-onMount(() => getUser(api));
 </script>
 
 <SidebarChat/>
 
-<main class="messages next-to-sidebar" bind:offsetHeight="{height}">
-  <h1 class="messages_subject">
+<main class="main-app-pane" bind:offsetHeight="{height}">
+  <h1 class="main-header">
     <span>{decodeURIComponent($pathParts[2] || $pathParts[1])}</span>
     <small class:has-subject="{subject.length > 0}">{subject}</small>
   </h1>
   {#each messages as message}
-    <div class="messages_message" class:is-hightlight="{message.highlight}">
+    <div class="message" class:is-hightlight="{message.highlight}">
       <Ts val="{message.ts}"/>
-      <Link href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
-      <div>{@html md(message.message)}</div>
+      <Link className="message_link" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
+      <div class="message_text">{@html md(message.message)}</div>
     </div>
   {/each}
 </main>

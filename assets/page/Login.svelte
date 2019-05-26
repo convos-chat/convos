@@ -22,9 +22,9 @@ function onSubmit(e) {
 
 <SidebarLoggedout/>
 
-<main class="next-to-sidebar is-logged-out">
+<main class="main-app-pane align-content-middle">
   <h1>{l('Log in')}</h1>
-  <form class="login" method="post" on:submit|preventDefault="{onSubmit}">
+  <form method="post" on:submit|preventDefault="{onSubmit}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>

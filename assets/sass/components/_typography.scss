@@ -3,7 +3,6 @@ body {
   font-family: $font-family;
   font-size: $font-size;
   color: $text-color;
-  min-height: 100vh;
 }
 
 a {
@@ -43,4 +42,30 @@ p {
 
 p, ul, ol, dl, address {
   line-height: 1.5;
+}
+
+.main-header {
+  background: $body-bg;
+  border-bottom: 1px solid #aaa;
+  padding: ($gutter / 2);
+  padding-bottom: 0.2rem;
+  margin: 0 (-$gutter / 2);
+  margin-bottom: $gutter;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  small {
+    font-size: 0.9rem;
+    font-style: italic;
+    display: none;
+
+    &.has-subject {
+      display: inline-block;
+
+      &:before {
+        content: ' - ';
+      }
+    }
+  }
 }

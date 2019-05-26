@@ -1,29 +1,32 @@
 <script>
 import {Api} from './js/Api';
+import {getUser} from './store/user';
 import {historyListener, pathParts} from './store/router';
 import {onMount, setContext} from 'svelte';
 import Chat from './page/Chat.svelte';
+import Join from './page/Join.svelte';
 import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
 
-setContext('api', new Api('/api.json', {debug: true}));
+const api = new Api('/api.json', {debug: true});
+setContext('api', api);
 
 // Routing
 let currentPage = undefined;
+const pages = {
+  chat: Chat,
+  join: Join,
+  login: Login,
+  register: Register,
+}
+
 pathParts.subscribe($pathParts => {
-  if ($pathParts[0] == 'chat') {
-    return (currentPage = Chat);
-  }
-  if ($pathParts[0] == 'register') {
-    return (currentPage = Register);
-  }
-  else {
-    return (currentPage = Login);
-  }
+  currentPage = pages[$pathParts[0]] || pages.login;
 });
 
 onMount(() => {
   const historyUnlistener = historyListener();
+  getUser(api);
 
   return () => {
     historyUnlistener();

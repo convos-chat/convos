@@ -32,3 +32,15 @@ body.no-js {
   color: #009;
   border-color: #b6b9d2;
 }
+
+.main-app-pane {
+  @extend .next-to-sidebar;
+  max-width: 48rem;
+}
+
+.align-content-middle {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
