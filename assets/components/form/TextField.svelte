@@ -5,6 +5,7 @@ export let className = '';
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let placeholder = '';
+export let readonly = false;
 export let value = '';
 
 $: classNames = ['text-field', className].filter(c => c.length);
@@ -12,5 +13,5 @@ $: classNames = ['text-field', className].filter(c => c.length);
 
 <div class="{classNames.join(' ')}">
   <label for="{id}"><slot name="label">Label</slot></label>
-  <input type="text" {name} {placeholder} {id} bind:value/>
+  <input type="text" {name} {placeholder} {id} {readonly} bind:value/>
 </div>

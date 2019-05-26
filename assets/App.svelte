@@ -8,6 +8,7 @@ import Connections from './page/Connections.svelte';
 import Join from './page/Join.svelte';
 import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
+import Settings from './page/Settings.svelte';
 
 const api = new Api('/api.json', {debug: true});
 setContext('api', api);
@@ -20,6 +21,7 @@ const pages = {
   join: Join,
   login: Login,
   register: Register,
+  settings: Settings,
 }
 
 pathParts.subscribe($pathParts => {
