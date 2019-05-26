@@ -3,6 +3,7 @@ import {getContext, onMount, tick} from 'svelte';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {pathParts} from '../store/router';
+import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import Ts from '../components/Ts.svelte';
@@ -11,7 +12,12 @@ const api = getContext('api');
 let height = 0;
 let messages = [];
 let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
+let settingsIsVisible = false;
 let subject = ''; // TODO: Get it from Api
+
+function toggleSettings(e) {
+  settingsIsVisible = !settingsIsVisible;
+}
 
 pathParts.subscribe(async ($pathParts) => {
   if (!$pathParts[1]) return;
@@ -26,10 +32,11 @@ $: fallbackSubject = !$pathParts[1] ? '' : $pathParts[2] ? 'No subject.' : 'Serv
 
 <SidebarChat/>
 
-<main class="main-app-pane" bind:offsetHeight="{height}">
+<main class="main-app-pane" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
   <h1 class="main-header">
     <span>{decodeURIComponent($pathParts[2] || $pathParts[1] || l('TODO'))}</span>
     <small>{subject || l(fallbackSubject)}</small>
+    <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="bars"/></a>
   </h1>
   {#each messages as message}
     <div class="message" class:is-hightlight="{message.highlight}">
@@ -38,4 +45,9 @@ $: fallbackSubject = !$pathParts[1] ? '' : $pathParts[2] ? 'No subject.' : 'Serv
       <div class="message_text">{@html md(message.message)}</div>
     </div>
   {/each}
+
+  <div class="settings-pane">
+    <h2>Settings for {$pathParts}</h2>
+    <p>Use svelte:component https://svelte.dev/docs#svelte_component.</p>
+  </div>
 </main>
