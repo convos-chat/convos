@@ -43,15 +43,11 @@
 }
 
 .sidebar__nav {
-  a,
-  h2 {
-    padding: 0.3rem ($gutter / 2);
-    margin-left: -($gutter / 2);
-    margin-right: -($gutter / 2);
-  }
-
   a {
     line-height: 1.2rem;
+    padding: 0.3rem 0.2rem;
+    margin-left: -0.2rem;
+    margin-right: -0.2rem;
     display: block;
     position: relative;
 
@@ -73,12 +69,25 @@
 
     &:focus,
     &:hover {
-      background-color: darken($sidebar-bg, 6%);
+      background: darken($sidebar-bg, 6%);
       text-decoration: none;
     }
 
     &.has-path {
-      background-color: darken($sidebar-bg, 4%);
+      background: darken($sidebar-bg, 4%);
+    }
+
+    &.has-focus {
+      background: darken($sidebar-bg, 6%);
+    }
+  }
+
+  &.is-filtering {
+    a.has-path {
+      background: transparent;
+    }
+    a.has-focus {
+      background: darken($sidebar-bg, 6%);
     }
   }
 
@@ -120,6 +129,41 @@
 .sidebar__nav__servers {
   > li > a:before {
     content: fa-content($fa-var-network-wired);
+  }
+}
+
+.sidebar__search {
+  position: relative;
+
+  input {
+    background: transparent;
+    color: $sidebar-text;
+    font-size: 2.4rem;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    width: 100%;
+
+    &::placeholder {
+      color: $sidebar-text;
+      font-weight: bold;
+    }
+
+    &:focus {
+      outline: 0;
+      border-bottom-color: $sidebar-text;
+
+      &::placeholder {
+        color: darken($sidebar-bg, 6%);
+      }
+    }
+  }
+
+  i {
+    font-size: 1.8rem;
+    position: absolute;
+    right: 0;
+    top: 0.4em;
+    cursor: pointer;
   }
 }
 

@@ -1,3 +1,9 @@
+input {
+  font-family: inherit;
+  font-size: inherit;
+  color: $input-color;
+}
+
 .text-field {
   font-size: 1.1rem;
   margin-bottom: 0.8rem;
@@ -20,8 +26,6 @@
   }
 
   input {
-    font-size: inherit;
-    color: $input-color;
     line-height: 2.2em;
     height: 2.2em;
     padding: 0.2em 0.5em;
