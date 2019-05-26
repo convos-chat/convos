@@ -12,13 +12,26 @@ input {
 
 .checkbox {
   i {
+    cursor: pointer;
     font-size: 1.2rem;
+  }
+
+  label {
+    cursor: pointer;
   }
 
   input {
     position: absolute;
     left: -1000px;
     opacity: 0;
+  }
+
+  &.is-disabled {
+    i,
+    label {
+      color: lighten($input-color, 10%);
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -40,6 +53,7 @@ input {
   }
 
   input {
+    background: $input-bg;
     line-height: 2.2em;
     height: 2.2em;
     padding: 0.2em 0.5em;
@@ -56,6 +70,13 @@ input {
     &:focus {
       outline: 2px solid $input-border-color;
       outline-offset: -2px;
+    }
+
+    &[readonly] {
+      background: darken($input-bg, 1%);
+      color: lighten($input-color, 10%);
+      outline: 0 !important;
+      cursor: not-allowed;
     }
   }
 

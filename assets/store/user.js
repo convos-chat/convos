@@ -13,6 +13,7 @@ export async function getUser(api, params = {}) {
   if (user.connections) connections.set(user.connections);
   if (user.dialogs) dialogs.set(user.dialogs);
   email.set(user.email);
+  highlightKeywords.set(user.highlight_keywords.join(', '));
   unread.set(user.unread);
 
   return user;
@@ -21,6 +22,9 @@ export async function getUser(api, params = {}) {
 export const connections = writable([]);
 export const dialogs = writable([]);
 export const email = writable('');
+export const enableNotifications = writable(Notification.permission);
+export const expandUrlToMedia = writable(false);
+export const highlightKeywords = writable('');
 export const unread = writable(0);
 
 export const connectionsWithChannels = derived([connections, dialogs], ([$connections, $dialogs]) => {
