@@ -9,9 +9,9 @@ export function historyListener() {
   return () => window.removeEventListener('popstate', handleHistoryChange);
 }
 
-export function gotoUrl(url) {
+export function gotoUrl(url, params = {}) {
   if (hrefToPathname(url) === null) return (location.href = url);
-  history.pushState({}, document.title, url);
+  history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
 }
 
 export function hrefToPathname(href) {
