@@ -16,12 +16,13 @@ export async function getUser(api, params = {}) {
   const user = await api.execute('getUser', {
     connections: true,
     dialogs: true,
-    notifications: false,
+    notifications: true,
     ...params,
   });
 
   if (user.connections) user.connections.forEach(ensureConnection);
   if (user.dialogs) user.dialogs.forEach(ensureDialog);
+  if (user.notifications) notifications.set(user.notifications);
   email.set(user.email);
   highlightKeywords.set(user.highlight_keywords.join(', '));
   unread.set(user.unread);
@@ -35,6 +36,7 @@ export const email = writable('');
 export const enableNotifications = writable(Notification.permission);
 export const expandUrlToMedia = writable(false);
 export const highlightKeywords = writable('');
+export const notifications = writable([]);
 export const unread = writable(0);
 
 export const connectionsWithChannels = derived([connections, dialogs], ([$connections, $dialogs]) => {
