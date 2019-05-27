@@ -20,6 +20,10 @@ let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
 let settingsIsVisible = false;
 let subject = ''; // TODO: Get it from Api
 
+function isSame(i) {
+  return i == 0 ? false : messages[i].from == messages[i - 1].from;
+}
+
 function toggleSettings(e) {
   settingsIsVisible = !settingsIsVisible;
 }
@@ -36,7 +40,8 @@ pathParts.subscribe(async ($pathParts) => {
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
 $: connection = $connections.filter(conn => conn.connection_id == $pathParts[1])[0] || {};
 $: dialog = $dialogs.filter(d => d.connection_id == $pathParts[1] && d.dialog_id == $pathParts[2])[0] || {};
-$: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
+$: fallbackSubject = dialog.frozen || (isDisconnected ? l('Disconnected.') : $pathParts[2] ? l('Private conversation.') : l('Server messages.'));
+$: isDisconnected = connection.state == 'disconnected';
 $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
 </script>
 
@@ -50,10 +55,10 @@ $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
     <StateIcon obj="{dialog.dialog_id ? dialog : connection}"/>
   </h1>
 
-  {#each messages as message}
-    <div class="message" class:is-hightlight="{message.highlight}">
+  {#each messages as message, i}
+    <div class="message" class:is-same="{isSame(i)}" class:is-hightlight="{message.highlight}">
       <Ts val="{message.ts}"/>
-      <Link className="message_link" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
+      <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
       <div class="message_text">{@html md(message.message)}</div>
     </div>
   {/each}

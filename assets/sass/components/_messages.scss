@@ -6,7 +6,7 @@
     padding-bottom: 4rem;
   }
 
-  .message_link {
+  .message_from {
     text-decoration: none;
   }
 
@@ -28,6 +28,21 @@
     font-weight: normal;
     padding: 0.1rem;
     float: right;
+  }
+
+  &.is-same {
+    .message_from {
+      display: none;
+    }
+
+    .ts {
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    &:hover .ts {
+      opacity: 0.8 ease-in-out;
+    }
   }
 }
 
