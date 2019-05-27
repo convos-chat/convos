@@ -95,6 +95,10 @@ input {
 .form-actions {
   margin-top: $gutter;
   padding: $gutter / 2 0;
+
+  > * {
+    vertical-align: middle;
+  }
 }
 
 .btn {

@@ -2,6 +2,7 @@
 export let className = '';
 export let family = '';
 export let name;
+export let title = '';
 
 const familyToClassName = {
   regular: 'far',
@@ -17,4 +18,4 @@ $: {
 }
 </script>
 
-<i class="{classNames.join(' ')}" on:click/>
+<i class="{classNames.join(' ')}" {title} on:click/>

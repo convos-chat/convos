@@ -35,14 +35,16 @@
   background: $body-bg;
   border: 1px solid $input-border-color;
   box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
-  padding: ($gutter / 2);
+  padding: $gutter;
+  padding-top: 0;
   margin: 0 (-$gutter / 2);
   width: 100%;
   max-width: calc(48rem + #{$gutter});
-  opacity: 0;
   position: fixed;
-  top: -1000px;
-  transition: top 0.3s ease-in-out, opacity 0.4s ease-in-out;
+  top: 4.3rem;
+  transform: rotateX(90deg);
+  transform-origin: top;
+  transition: transform 0.3s ease-in-out;
   z-index: 1;
 }
 
@@ -72,6 +74,36 @@
   }
 }
 
+.state-icon {
+  &.fa-check-circle {
+    color: $success;
+  }
+
+  &.fa-circle-notch {
+    animation: rotate 1.2s linear infinite;
+  }
+
+  &.fa-sync-alt {
+    animation: rotate 1.2s linear infinite;
+  }
+
+  &.fa-unlink {
+    color: $error;
+  }
+}
+
+.form-actions .state-icon {
+  font-size: 1.4rem;
+  padding: 0.3rem;
+}
+
+.main-header .state-icon {
+  font-size: 0.95rem;
+  position: absolute;
+  right: 2.2rem;
+  bottom: 1.15rem;
+}
+
 .has-visible-settings {
   .main-header_settings-toggle {
     i:before {
@@ -86,7 +118,6 @@
   }
 
   .settings-pane {
-    opacity: 0.95;
-    top: 4.3rem;
+    transform: rotateX(0deg);
   }
 }

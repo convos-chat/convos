@@ -40,7 +40,7 @@ export class Api {
 
     if (this.debug) {
       console.log('[Api]', operationId, '===', op);
-      console.log('[Api]', url.href, '<<<', fetchParams);
+      console.log('[Api]', url.href, '<<<', fetchParams, params);
     }
 
     let res = await fetch(url, fetchParams);
@@ -60,14 +60,22 @@ export class Api {
     else if (params[p.name] && params[p.name].tagName) {
       return params[p.name].value;
     }
+    else if (p.schema) {
+      const body = {};
+      Object.keys(p.schema.properties).forEach(k => { body[k] = params[k] });
+      return JSON.stringify(body);
+    }
     else {
       return params[p.name];
     }
   }
 
   _hasProperty(params, p) {
-    if ((params.tagName || '').toLowerCase() == 'form') {
-      return p.in == 'body' ? true : params[p.name] ? true : false;
+    if (p.in == 'body') {
+      return true;
+    }
+    else if ((params.tagName || '').toLowerCase() == 'form') {
+      return params[p.name] ? true : false;
     }
     else {
       return params.hasOwnProperty(p.name);
