@@ -2,6 +2,7 @@
 import {dialogs} from '../store/user';
 import {l} from '../js/i18n';
 import {pathParts} from '../store/router';
+import DialogSubject from '../components/DialogSubject.svelte';
 import FormActions from '../components/form/FormActions.svelte';
 import StateIcon from '../components/StateIcon.svelte';
 
@@ -17,15 +18,13 @@ $: dialog = $dialogs.filter(d => d.connection_id == connectionId && d.dialog_id 
 
 <div class="settings-pane">
   <h2>{l('Dialog info')}</h2>
-
-  {#if dialog.frozen}
-    <p>
+  <p>
+    {#if dialog.frozen}
       <StateIcon obj="{dialog}"/>
-      {l(dialog.frozen)}
-    </p>
-  {/if}
-
+    {/if}
+    <DialogSubject obj="{dialog}"/>
+  </p>
   <FormActions>
-    <a href="#close" class="btn" on:click|preventDefault="{partDialog}">{l('Close converstaion')}</a>
+    <a href="#close" class="btn" on:click|preventDefault="{partDialog}">{l('Close conversation')}</a>
   </FormActions>
 </div>
