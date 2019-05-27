@@ -5,6 +5,7 @@ import {md} from '../js/md';
 import {connections, dialogs} from '../store/user';
 import {pathParts} from '../store/router';
 import DialogSettings from '../components/DialogSettings.svelte';
+import DialogSubject from '../components/DialogSubject.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import ServerSettings from '../components/ServerSettings.svelte';
@@ -50,7 +51,7 @@ $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
 <main class="main-app-pane" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
   <h1 class="main-header">
     <span>{$pathParts[2] || $pathParts[1] || l('TODO')}</span>
-    <small>{subject || l(fallbackSubject)}</small>
+    <small><DialogSubject obj="{dialog.dialog_id ? dialog : connection}"/></small>
     <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
     <StateIcon obj="{dialog.dialog_id ? dialog : connection}"/>
   </h1>
