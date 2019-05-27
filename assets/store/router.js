@@ -26,7 +26,7 @@ export const baseUrl = '//' + location.host; // TODO: Add support for example.co
 export const pathname = writable(location.pathname);
 
 export const pathParts = derived(pathname, ($pathname) => {
-  return $pathname.split('/').filter(p => p.length);
+  return $pathname.split('/').filter(p => p.length).map(decodeURIComponent);
 });
 
 export const queryString = writable(location.search);

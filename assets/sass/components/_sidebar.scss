@@ -1,3 +1,12 @@
+@mixin sidebarTypeIcon {
+  @extend .fa;
+  font-size: 1.1rem;
+  text-align: center;
+  padding-right: 0.3rem;
+  width: 1.8rem;
+  display: inline-block;
+}
+
 .sidebar-wrapper {
   background: $sidebar-bg;
   text-align: left;
@@ -58,15 +67,8 @@
     display: block;
     position: relative;
 
-    i.fa,
-    i.fas,
     &:before {
-      @extend .fa;
-      font-size: 1.1rem;
-      text-align: center;
-      padding-right: 0.3rem;
-      width: 1.8rem;
-      display: inline-block;
+      @include sidebarTypeIcon;
     }
 
     &:focus,
@@ -102,11 +104,25 @@
   }
 
   ul ul a {
-    padding-left: 0.5rem;
+    padding-left: 0.6rem;
   }
 
+  i.state-icon {
+    font-size: 0.9rem;
+    position: absolute;
+    right: ($gutter / 2);
+    top: 0.5rem;
+
+    &.fa-unlink {
+      opacity: 0.5;
+    }
+  }
+}
+
+.sidebar__nav__account {
   i.fa,
   i.fas {
+    @include sidebarTypeIcon;
     float: left;
   }
 }

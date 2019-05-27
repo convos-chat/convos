@@ -5,6 +5,7 @@ import {l} from '../js/i18n';
 import {q, tagNameIs} from '../js/util';
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
+import StateIcon from '../components/StateIcon.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
 
@@ -118,13 +119,17 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
         <ul class="sidebar__nav__servers for-group-dialogs">
           {#each $connectionsWithChannels as connection}
             <li>
-              <Link href="/chat/{connection.connection_id}">{l(connection.name)}</Link>
+              <Link href="/chat/{connection.connection_id}">
+                {l(connection.name)}
+                <StateIcon obj="{connection}"/>
+              </Link>
               <ul class="sidebar__nav__conversations is-channels">
                 {#each connection.channels as dialog}
                   <li>
                     <Link href="/chat/{connection.connection_id}/{dialog.path}">
                       <span>{dialog.name.replace(/^\W/, '')}</span>
                       <Unread unread={dialog.unread}/>
+                      <StateIcon obj="{dialog}"/>
                     </Link>
                   </li>
                 {/each}
@@ -138,13 +143,17 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
           {#each $connectionsWithChannels as connection}
             {#if connection.private.length}
               <li>
-                <Link href="/chat/{connection.connection_id}">{l(connection.name)}</Link>
+                <Link href="/chat/{connection.connection_id}">
+                  {l(connection.name)}
+                  <StateIcon obj="{connection}"/>
+                </Link>
                 <ul class="sidebar__nav__conversations is-private">
                   {#each connection.private as dialog}
                     <li>
                       <Link href="/chat/{connection.connection_id}/{dialog.path}">
                         <span>{dialog.name}</span>
                         <Unread unread={dialog.unread}/>
+                        <StateIcon obj="{dialog}"/>
                       </Link>
                     </li>
                   {/each}
