@@ -1,6 +1,16 @@
-import {derived, writable} from 'svelte/store';
+import {derived, get, writable} from 'svelte/store';
+import ConnURL from '../js/ConnURL';
 
 const byName = (a, b) => a.name.localeCompare(b.name);
+
+export function ensureConnection(conn) {
+  conn.url = typeof conn.url == 'string' ? new ConnURL(conn.url) : conn.url;
+  connections.set(get(connections).filter(c => c.connection_id != conn.connection_id).concat(conn));
+}
+
+export function ensureDialog(dialog) {
+  dialogs.set(get(dialogs).filter(d => d.dialog_id != dialog.dialog_id).concat(dialog));
+}
 
 export async function getUser(api, params = {}) {
   const user = await api.execute('getUser', {
@@ -10,8 +20,8 @@ export async function getUser(api, params = {}) {
     ...params,
   });
 
-  if (user.connections) connections.set(user.connections);
-  if (user.dialogs) dialogs.set(user.dialogs);
+  if (user.connections) user.connections.forEach(ensureConnection);
+  if (user.dialogs) user.dialogs.forEach(ensureDialog);
   email.set(user.email);
   highlightKeywords.set(user.highlight_keywords.join(', '));
   unread.set(user.unread);
@@ -36,7 +46,7 @@ export const connectionsWithChannels = derived([connections, dialogs], ([$connec
   });
 
   $dialogs.forEach(dialog => {
-    const conn = map[dialog.connection_id] || {};
+    const conn = map[dialog.connection_id];
     dialog.path = encodeURIComponent(dialog.dialog_id);
     conn[dialog.is_private ? 'private' : 'channels'].push(dialog);
   });

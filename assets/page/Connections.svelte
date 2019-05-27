@@ -3,6 +3,7 @@ import {getContext, tick} from 'svelte';
 import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
 import Checkbox from '../components/form/Checkbox.svelte';
+import ConnURL from '../js/ConnURL';
 import FormActions from '../components/form/FormActions.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import PromiseStatus from '../components/PromiseStatus.svelte';
@@ -20,17 +21,9 @@ function onChange(e) {
 
 async function onSubmit(e) {
   const form = e.target;
-  const connectionUrl = new URL('irc://' + form.server.value);
-
-  if (form.nick.value.length) connectionUrl.searchParams.append('nick', form.nick.value);
-  connectionUrl.password = form.password.value;
-  connectionUrl.username = form.username.value;
-  url = connectionUrl.href;
+  url = new ConnURL('irc://localhost:6667').fromForm(form).toString();
   await tick(); // Wait for url to update in form
-
-  promise = api.execute('createConnection', form).then(res => {
-    gotoUrl('/chat/' + res.connection_id);
-  });
+  promise = api.execute('createConnection', form).then(res => { gotoUrl('/chat/' + res.connection_id) });
 }
 </script>
 
