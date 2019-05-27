@@ -15,7 +15,7 @@ $: if (promise) {
   );
 }
 
-function extactError(err) {
+function extractError(err) {
   if (Array.isArray(err.errors) && err.errors.length) {
     const first = err.errors[0];
     return (first.path && first.path.match(/\w/) ? first.path.split('/').pop() + ': ' : '') + first.message;
@@ -29,5 +29,5 @@ function extactError(err) {
 {#if loading}
 <div class="loading"><slot name="loading">{l('Loading...')}</slot></div>
 {:else if promise && err}
-<div class="error"><slot name="error">{l(extactError(err))}</slot></div>
+<div class="error"><slot name="error">{l(extractError(err))}</slot></div>
 {/if}
