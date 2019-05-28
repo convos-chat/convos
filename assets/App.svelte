@@ -15,7 +15,7 @@ const api = new Api('/api.json', {debug: true});
 setContext('api', api);
 
 // Routing
-let currentPage = undefined;
+let currentPage = Login;
 const pages = {
   chat: Chat,
   connections: Connections,
@@ -29,7 +29,7 @@ const pages = {
 const Convos = window.Convos || {};
 
 pathParts.subscribe($pathParts => {
-  currentPage = pages[$pathParts[0]] || pages.login;
+  currentPage = pages[$pathParts[0]] || (Convos.loggedInAs ? pages.chat : pages.login);
 });
 
 onMount(() => {
