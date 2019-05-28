@@ -26,13 +26,15 @@ const pages = {
   settings: Settings,
 }
 
+const Convos = window.Convos || {};
+
 pathParts.subscribe($pathParts => {
   currentPage = pages[$pathParts[0]] || pages.login;
 });
 
 onMount(() => {
   const historyUnlistener = historyListener();
-  getUser(api);
+  if (Convos.loggedInAs) getUser(api);
 
   return () => {
     historyUnlistener();
