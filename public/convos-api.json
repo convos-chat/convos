@@ -552,7 +552,7 @@
         "operationId": "logoutUser",
         "x-mojo-to": "user#logout",
         "responses": {
-          "302": {
+          "200": {
             "description": "Successfully logged out.",
             "schema": { "$ref": "#/definitions/Success" }
           },

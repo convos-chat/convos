@@ -1,5 +1,6 @@
 <script>
 import {connectionsWithChannels, email} from '../store/user';
+import {getContext} from 'svelte';
 import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
 import {q, tagNameIs} from '../js/util';
@@ -8,6 +9,8 @@ import Link from './Link.svelte';
 import StateIcon from '../components/StateIcon.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
+
+const api = getContext('api');
 
 let activeLinkIndex = 0;
 let filter = '';
@@ -55,6 +58,10 @@ function filterNav(filter) {
     const headingEl = listEl.previousElementSibling;
     if (headingEl && tagNameIs(headingEl, 'h2')) headingEl.classList[makeVisible ? 'remove' : 'add']('hide');
   });
+}
+
+function logout(e) {
+  api.execute('logoutUser').then(() => gotoUrl('/'));
 }
 
 function onGlobalKeydown(e) {
@@ -170,7 +177,7 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
         <li><Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link></li>
         <li><Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link></li>
         <li><Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link></li>
-        <li><Link href="/logout" className="sidebar__nav__logout"><Icon name="power-off"/> {l('Log out')}</Link></li>
+        <li><a href="/logout" className="sidebar__nav__logout" on:click|preventDefault="{logout}"><Icon name="power-off"/> {l('Log out')}</a></li>
       </ul>
     </nav>
   </div>

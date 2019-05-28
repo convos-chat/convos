@@ -61,14 +61,14 @@ sub login {
 }
 
 sub logout {
-  my $self = shift;
+  my $self = shift->openapi->valid_input or return;
 
   $self->delay(
     sub { $self->auth->logout({}, shift->begin) },
     sub {
       my ($delay, $err) = @_;
       return $self->render(openapi => E($err), status => 500) if $err;
-      return $self->session({expires => 1})->redirect_to('index');
+      return $self->session({expires => 1})->render(openapi => {message => 'Logged out.'});
     },
   );
 }

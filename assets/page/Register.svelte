@@ -1,6 +1,7 @@
 <script>
 import {getContext} from 'svelte';
 import {gotoUrl} from '../store/router';
+import {getUser} from '../store/user';
 import {l} from '../js/i18n';
 import FormActions from '../components/form/FormActions.svelte';
 import Link from '../components/Link.svelte';
@@ -20,6 +21,7 @@ function onChange(e) {
 async function onSubmit(e) {
   promise = api.execute('registerUser', e.target).then((res) => {
     document.cookie = res.headers['Set-Cookie'];
+    getUser(api);
     gotoUrl('/chat');
   });
 }
