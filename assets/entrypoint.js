@@ -4,11 +4,8 @@ import App from './App.svelte';
 console.log('[Convos] Initializing application.');
 
 const body = document.querySelector('body');
-const removeEls = document.querySelectorAll('.js-remove');
 const app = new App({target: document.body});
-
 body.classList.remove('no-js');
-for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', e => {

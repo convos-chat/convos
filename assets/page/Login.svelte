@@ -1,32 +1,21 @@
 <script>
 import {l} from '../js/i18n';
 import {getContext} from 'svelte';
-import {getUser} from '../store/user';
-import {gotoUrl} from '../store/router';
 import FormActions from '../components/form/FormActions.svelte';
 import Link from '../components/Link.svelte';
-import PromiseStatus from '../components/PromiseStatus.svelte';
+import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
 
-const api = getContext('api');
-
-let promise = false;
-function onSubmit(e) {
-  promise = api.execute('loginUser', e.target).then((res) => {
-    document.cookie = res.headers['Set-Cookie'];
-    getUser(api);
-    gotoUrl('/chat');
-  });
-}
+const user = getContext('user');
 </script>
 
 <SidebarLoggedout/>
 
 <main class="main-app-pane align-content-middle">
   <h1>{l('Log in')}</h1>
-  <form method="post" on:submit|preventDefault="{onSubmit}">
+  <form method="post" on:submit|preventDefault="{e => user.login.execute(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>
@@ -36,6 +25,7 @@ function onSubmit(e) {
     <FormActions>
       <button class="btn">{l('Log in')}</button>
     </FormActions>
+    <OperationStatus op="{user.login}"/>
   </form>
   <article>
     <p>{l('Welcome message. Vivamus congue mauris eu aliquet pharetra. Nulla sit amet dictum.')}</p>

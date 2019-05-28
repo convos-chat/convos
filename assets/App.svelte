@@ -1,8 +1,10 @@
 <script>
-import {Api} from './js/Api';
-import {getUser} from './store/user';
-import {historyListener, pathParts} from './store/router';
+import {gotoUrl, historyListener, pathParts} from './store/router';
 import {onMount, setContext} from 'svelte';
+import Api from './js/Api';
+import User from './store/User';
+
+// Pages
 import Chat from './page/Chat.svelte';
 import Connections from './page/Connections.svelte';
 import Help from './page/Help.svelte';
@@ -11,11 +13,7 @@ import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
 import Settings from './page/Settings.svelte';
 
-const api = new Api('/api.json', {debug: true});
-setContext('api', api);
-
 // Routing
-let currentPage = Login;
 const pages = {
   chat: Chat,
   connections: Connections,
@@ -27,14 +25,33 @@ const pages = {
 }
 
 const Convos = window.Convos || {};
+const api = new Api(Convos.apiUrl, {debug: true});
+const user = new User({api});
+setContext('user', user);
 
-pathParts.subscribe($pathParts => {
-  currentPage = pages[$pathParts[0]] || (Convos.loggedInAs ? pages.chat : pages.login);
-});
+$: currentPage = pages[$pathParts[0]] || ($user.email ? pages.chat : pages.login);
 
-onMount(() => {
+const login = user.login;
+$: if ($login.is('success')) {
+  document.cookie = $user.login.res.headers['Set-Cookie'];
+  user.login.reset();
+  user.execute();
+  gotoUrl('/chat');
+}
+
+const logout = user.logout;
+$: if ($logout.is('success')) {
+  user.logout.reset();
+  user.reset();
+  gotoUrl('/');
+}
+
+onMount(async () => {
+  await user.execute();
+
   const historyUnlistener = historyListener();
-  if (Convos.loggedInAs) getUser(api);
+  const removeEls = document.querySelectorAll('.js-remove');
+  for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
 
   return () => {
     historyUnlistener();
