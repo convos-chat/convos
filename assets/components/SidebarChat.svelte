@@ -1,5 +1,4 @@
 <script>
-import {connectionsWithChannels, email} from '../store/user';
 import {getContext} from 'svelte';
 import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
@@ -10,9 +9,10 @@ import StateIcon from '../components/StateIcon.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
 
-const api = getContext('api');
+const user = getContext('user');
 
 let activeLinkIndex = 0;
+let connectionsWithChannels = user.connectionsWithChannels;
 let filter = '';
 let navEl;
 let searchInput;
@@ -58,10 +58,6 @@ function filterNav(filter) {
     const headingEl = listEl.previousElementSibling;
     if (headingEl && tagNameIs(headingEl, 'h2')) headingEl.classList[makeVisible ? 'remove' : 'add']('hide');
   });
-}
-
-function logout(e) {
-  api.execute('logoutUser').then(() => gotoUrl('/'));
 }
 
 function onGlobalKeydown(e) {
@@ -171,13 +167,13 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
         </ul>
       {/if}
 
-      <h2>{$email || l('Account')}</h2>
+      <h2>{$user.email || l('Account')}</h2>
       <ul class="sidebar__nav__account">
         <li><Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join conversation...')}</Link></li>
         <li><Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link></li>
         <li><Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link></li>
         <li><Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link></li>
-        <li><a href="/logout" className="sidebar__nav__logout" on:click|preventDefault="{logout}"><Icon name="power-off"/> {l('Log out')}</a></li>
+        <li><a href="/logout" className="sidebar__nav__logout" on:click|preventDefault="{e => user.logout.execute()}"><Icon name="power-off"/> {l('Log out')}</a></li>
       </ul>
     </nav>
   </div>

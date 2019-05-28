@@ -5,25 +5,23 @@ import {l} from '../js/i18n';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
 import FormActions from '../components/form/FormActions.svelte';
+import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
-import PromiseStatus from '../components/PromiseStatus.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 
-const api = getContext('api');
-let promise = false;
+const user = getContext('user');
+const createConnectionOp = user.api.operation('createConnection');
+
 let showAdvancedSettings = false;
 let url = '';
 
-function onChange(e) {
-  promise = false;
-}
-
-async function onSubmit(e) {
-  const form = e.target;
-  url = new ConnURL('irc://localhost:6667').fromForm(form).toString();
+async function createConnectionFromForm(e) {
+  url = new ConnURL('irc://localhost:6667').fromForm(e.target).toString();
   await tick(); // Wait for url to update in form
-  promise = api.execute('createConnection', form).then(res => { gotoUrl('/chat/' + res.connection_id) });
+  const conn = await createConnectionOp.execute(e.target);
+  user.ensureConnection(conn);
+  gotoUrl('/chat/' + conn.connection_id);
 }
 </script>
 
@@ -31,7 +29,7 @@ async function onSubmit(e) {
 
 <main class="main-app-pane align-content-middle">
   <h1>{l('Add connection')}</h1>
-  <form method="post" on:change={onChange} on:submit|preventDefault="{onSubmit}">
+  <form method="post" on:submit|preventDefault="{createConnectionFromForm}">
     <input type="hidden" name="url" value="{url}">
     <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}">
       <span slot="label">{l('Server and port')}</span>
@@ -51,6 +49,6 @@ async function onSubmit(e) {
     <FormActions>
       <button class="btn">{l('Add connection')}</button>
     </FormActions>
-    <PromiseStatus promise={promise}/>
+    <OperationStatus op={createConnectionOp}/>
   </form>
 </main>

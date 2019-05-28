@@ -3,10 +3,9 @@
   window.DEBUG = <%== to_json {map { ($_ => 1) } @$debug, split /,/, ($self->param('debug') || '')} %>;
   window.Convos = {
     apiUrl: "<%= $c->url_for('api') %>",
-    loggedInAs: "<%= $c->session('email') || '' %>",
-    wsUrl: "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>",
     mode: "<%= app->mode %>",
-    settings: <%== to_json app->config('settings') %>
+    settings: <%== to_json app->config('settings') %>,
+    wsUrl: "<%= $c->url_for('events')->to_abs->userinfo(undef)->to_string %>"
   };
 % if (my $main = flash 'main') {
   window.Convos.settings.main = "<%= $main %>";

@@ -1,24 +1,21 @@
 <script>
 import {getContext, tick} from 'svelte';
-import {email, enableNotifications, expandUrlToMedia, highlightKeywords} from '../store/user';
-import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
 import Checkbox from '../components/form/Checkbox.svelte';
 import FormActions from '../components/form/FormActions.svelte';
+import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
-import PromiseStatus from '../components/PromiseStatus.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 
-const api = getContext('api');
+const user = getContext('user');
+const enableNotifications = user.enableNotifications;
+const expandUrlToMedia = user.expandUrlToMedia;
+const updateUserOp = user.api.operation('updateUser');
+
 let formEl;
-let promise = false;
 
-function onChange(e) {
-  promise = false;
-}
-
-async function onSubmit(e) {
+async function updateUserFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
@@ -27,31 +24,29 @@ async function onSubmit(e) {
   }
   else if ($enableNotifications != 'granted') {
     $enableNotifications = 'pending';
-    Notification.requestPermission(status => {
-      $enableNotifications = status;
-    });
+    Notification.requestPermission(status => { $enableNotifications = status });
   }
 
   if (passwords.join('').length && passwords[0] != passwords[1]) {
-    return (promise = Promise.reject({errors: [{message: l('Passwords does not match.')}]}));
+    return updateUserOp.error('Passwords does not match.');
   }
 
   $expandUrlToMedia = form.expand_url.checked;
-  promise = api.execute('updateUser', form);
+  updateUserOp.execute(e.target);
 }
 
 // TODO: Figure out a better way to uncheck
 $: if (formEl && $enableNotifications == 'granted' && !formEl.notifications.checked) formEl.notifications.click();
 $: if (formEl && $enableNotifications == 'denied' && formEl.notifications.checked) formEl.notifications.click();
-$: if (formEl && $highlightKeywords) formEl.highlight_keywords.value = $highlightKeywords;
+$: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.value = $user.res.body.highlightKeywords;
 </script>
 
 <SidebarChat/>
 
 <main class="main-app-pane align-content-middle">
   <h1>{l('Settings')}</h1>
-  <form method="post" on:change={onChange} on:submit|preventDefault="{onSubmit}" bind:this="{formEl}">
-    <TextField name="email" value="{$email}" readonly>
+  <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
+    <TextField name="email" value="{$user.email}" readonly>
       <span slot="label">{l('Email')}</span>
     </TextField>
     <TextField name="highlight_keywords">
@@ -77,6 +72,6 @@ $: if (formEl && $highlightKeywords) formEl.highlight_keywords.value = $highligh
     <FormActions>
       <button class="btn">{l('Save settings')}</button>
     </FormActions>
-    <PromiseStatus promise={promise}/>
+    <OperationStatus op={updateUserOp}/>
   </form>
 </main>

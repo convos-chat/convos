@@ -1,37 +1,22 @@
 <script>
 import {getContext} from 'svelte';
-import {gotoUrl} from '../store/router';
-import {getUser} from '../store/user';
 import {l} from '../js/i18n';
 import FormActions from '../components/form/FormActions.svelte';
 import Link from '../components/Link.svelte';
+import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
-import PromiseStatus from '../components/PromiseStatus.svelte';
 import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
 
 const inviteCodeRequired = true;
-const api = getContext('api');
-
-let promise = false;
-function onChange(e) {
-  promise = false;
-}
-
-async function onSubmit(e) {
-  promise = api.execute('registerUser', e.target).then((res) => {
-    document.cookie = res.headers['Set-Cookie'];
-    getUser(api);
-    gotoUrl('/chat');
-  });
-}
+const user = getContext('user');
 </script>
 
 <SidebarLoggedout/>
 
 <main class="main-app-pane align-content-middle">
   <h1>{l('Create account')}</h1>
-  <form method="post" on:change={onChange} on:submit|preventDefault="{onSubmit}">
+  <form method="post" on:submit|preventDefault="{e => user.register.execute(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>
@@ -46,7 +31,7 @@ async function onSubmit(e) {
     <FormActions>
       <button class="btn">{l('Register')}</button>
     </FormActions>
-    <PromiseStatus promise={promise}/>
+    <OperationStatus op={user.register}/>
   </form>
   <article>
     <p>{l('By creating an account, you agree to the use of cookies.')}</p>
