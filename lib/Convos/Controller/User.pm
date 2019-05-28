@@ -67,7 +67,7 @@ sub logout {
     sub { $self->auth->logout({}, shift->begin) },
     sub {
       my ($delay, $err) = @_;
-      return $self->render(openapi => E($err), status => 400) if $err;
+      return $self->render(openapi => E($err), status => 500) if $err;
       return $self->session({expires => 1})->redirect_to('index');
     },
   );
@@ -93,6 +93,15 @@ sub recover {
 
   $self->flash(main => '#profile');
   $self->session(email => $email)->redirect_to($redirect_url);
+}
+
+sub require_login {
+  my $self = shift;
+  my $user = $self->backend->user;
+
+  return $self->stash(user => $user) if $user;
+  $self->redirect_to('index');
+  return undef;
 }
 
 sub register {
@@ -172,6 +181,10 @@ See L<Convos::Manual::API/logoutUser>.
 =head2 recover
 
 Will log in a user from a recovery link.
+
+=head2 require_login
+
+TODO
 
 =head2 register
 

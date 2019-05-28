@@ -27,7 +27,6 @@ has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_S
 sub startup {
   my $self   = shift;
   my $config = $self->_config;
-  my $r      = $self->routes;
 
   $self->helper(l => sub { $_[1] });    # TODO
 
@@ -52,19 +51,18 @@ sub startup {
   $self->plugin(OpenAPI => {url => $self->static->file('convos-api.json')->path});
 
   # Add basic routes
+  my $r = $self->routes;
+  $r->get('/')->to(template => 'index')->name('index');
+  $r->get("/$_")->to(template => 'index')->name($_) for qw(login logout register);
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/sw' => [format => 'js']);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
-  $r->websocket('/events')->to('events#start')->name('events');
 
-  $r->get('/chat/*path', {path => ''})->to(template => 'index')->name('index');
-  $r->get($_)->to(template => 'index')->name('index')
-    for (qw(
-    /          /connections /help
-    /join      /login      /logout
-    /register  /settings
-    ));
+  my $auth_r = $r->under('/')->to('user#require_login');
+  $auth_r->websocket('/events')->to('events#start')->name('events');
+  $auth_r->get("/$_")->to(template => 'index')->name($_) for (qw(connections help join settings));
+  $auth_r->get('/chat/*path', {path => ''})->to(template => 'index')->name('chat');
 
   $self->_plugins;
   $self->_setup_secrets;
