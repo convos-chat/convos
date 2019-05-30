@@ -43,7 +43,7 @@
 
   window.Notification.defaultCloseTimeout = 5000;
   window.Notification.simple = function(title, body, icon) {
-    if (window.hasFocus) return false;
+    if (window.document.hasFocus) return false;
     if (!icon) icon = defaultIcon;
 
     if (Notification.permission == 'granted') {
