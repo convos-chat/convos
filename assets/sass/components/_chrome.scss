@@ -36,7 +36,7 @@ body.no-js {
 .main-app-pane {
   @extend .next-to-sidebar;
   padding-bottom: ($gutter * 2);
-  max-width: 48rem;
+  max-width: $main-max-width;
 }
 
 .align-content-middle {

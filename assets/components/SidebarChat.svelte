@@ -73,7 +73,7 @@ function onGlobalKeydown(e) {
   }
 }
 
-function onSearchKeyDown(e) {
+function onSearchKeydown(e) {
   // Go to the active link when Enter is pressed
   if (e.keyCode == 13) {
     e.preventDefault();
@@ -112,7 +112,7 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
         bind:value="{filter}"
         on:blur="{clearFilter}"
         on:focus="{filterNav}"
-        on:keydown="{onSearchKeyDown}">
+        on:keydown="{onSearchKeydown}">
       <Icon name="search" on:click="{() => searchInput.focus()}"/>
     </form>
 
