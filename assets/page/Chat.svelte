@@ -3,6 +3,7 @@ import {getContext, tick} from 'svelte';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {pathParts} from '../store/router';
+import ChatInput from '../components/ChatInput.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
 import Icon from '../components/Icon.svelte';
@@ -73,6 +74,10 @@ $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
       <div class="message_text">{@html md(message.message)}</div>
     </div>
   {/each}
+
+  {#if connection.connection_id}
+  <ChatInput connectionId="{$pathParts[1]}" dialogId="{$pathParts[2]}"/>
+  {/if}
 
   <svelte:component this={settingComponent} connectionId="{$pathParts[1]}" dialogId="{$pathParts[2]}"/>
 </main>
