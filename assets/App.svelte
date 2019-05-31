@@ -22,7 +22,7 @@ const pages = {
   login: Login,
   register: Register,
   settings: Settings,
-}
+};
 
 const Convos = window.Convos || {};
 const api = new Api(Convos.apiUrl, {debug: true});

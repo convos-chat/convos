@@ -55,7 +55,7 @@ module.exports = {
     'new-cap': 0,
     'new-parens': 0,
     'newline-after-var': 0,
-    'no-alert': 2,
+    'no-alert': 0,
     'no-array-constructor': 0,
     'no-bitwise': 0,
     'no-caller': 2,

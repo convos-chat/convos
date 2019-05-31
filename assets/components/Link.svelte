@@ -9,7 +9,7 @@ let classNames = [];
 pathname.subscribe($pathname => {
   classNames = className ? [className] : [];
   if (href.indexOf($pathname) == 0) classNames = [...classNames, 'has-basepath'];
-  if ($pathname == href.replace(/\#/, '')) classNames = [...classNames, 'has-path'];
+  if ($pathname == href.replace(/#/, '')) classNames = [...classNames, 'has-path'];
   if ($pathname == href) classNames = [...classNames, 'is-exact'];
 });
 
