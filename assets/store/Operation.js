@@ -29,7 +29,7 @@ export default class Operation {
     }
   }
 
-  async execute(params) {
+  async perform(params) {
     const opSpec = await this.api.spec(this.id);
     if (!opSpec) return this.error('Invalid operationId "' + this.id + '".');
 

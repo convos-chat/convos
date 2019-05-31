@@ -20,7 +20,7 @@ let url = '';
 
 async function setConnectionState(e) {
   const clone = {...connection, wanted_state: isDisconnected ? 'connected' : 'disconnected'};
-  await updateConnectionOp.execute(clone);
+  await updateConnectionOp.perform(clone);
   user.ensureConnection(updateConnectionOp.res.body);
 }
 
@@ -31,7 +31,7 @@ async function deleteConnection(e) {
 async function updateConnectionFromForm(e) {
   url = new ConnURL('irc://localhost:6667').fromForm(e.target).toString();
   await tick(); // Wait for url to update in form
-  await updateConnectionOp.execute(e.target);
+  await updateConnectionOp.perform(e.target);
   user.ensureConnection(updateConnectionOp.res.body);
 }
 

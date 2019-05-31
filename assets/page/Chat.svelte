@@ -36,7 +36,7 @@ pathParts.subscribe(async ($pathParts) => {
   settingsIsVisible = false;
   if (!$pathParts[1]) return (messages = $user.notifications);
   const operationId = $pathParts[2] ? 'dialogMessages' : 'connectionMessages';
-  const res = await user.api.execute(operationId, {connection_id: $pathParts[1], dialog_id: $pathParts[2]});
+  const res = await user.api.perform(operationId, {connection_id: $pathParts[1], dialog_id: $pathParts[2]});
   messages = res.messages || [];
 });
 

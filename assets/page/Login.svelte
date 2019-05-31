@@ -15,7 +15,7 @@ const user = getContext('user');
 
 <main class="main-app-pane align-content-middle">
   <h1>{l('Log in')}</h1>
-  <form method="post" on:submit|preventDefault="{e => user.login.execute(e.target)}">
+  <form method="post" on:submit|preventDefault="{e => user.login.perform(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>

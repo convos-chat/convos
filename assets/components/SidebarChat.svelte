@@ -173,7 +173,7 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
         <li><Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link></li>
         <li><Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link></li>
         <li><Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link></li>
-        <li><a href="/logout" className="sidebar__nav__logout" on:click|preventDefault="{e => user.logout.execute()}"><Icon name="power-off"/> {l('Log out')}</a></li>
+        <li><a href="/logout" className="sidebar__nav__logout" on:click|preventDefault="{e => user.logout.perform()}"><Icon name="power-off"/> {l('Log out')}</a></li>
       </ul>
     </nav>
   </div>
