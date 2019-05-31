@@ -6,9 +6,9 @@
     "dev": "PERL5LIB=$PWD/lib ./script/convos webpack --listen http://*:4000"
   },
   "devDependencies": {
-    "rollup-plugin-bundle-html": "^0.2.0",
+    "rollup-plugin-bundle-html": "^0.2.1",
     "rollup-plugin-commonjs": "^10.0.0",
-    "rollup-plugin-node-resolve": "^5.0.0",
+    "rollup-plugin-node-resolve": "^5.0.1",
     "rollup-plugin-scss": "^1.0.1",
     "rollup-plugin-svelte": "^5.0.3",
     "rollup-plugin-terser": "^5.0.0"
@@ -16,7 +16,9 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.8.2",
     "emojione": "^4.5.0",
+    "eslint-plugin-svelte3": "^1.2.3",
     "rollup": "^1.12.3",
+    "rollup-plugin-eslint": "^6.0.0",
     "svelte": "^3.4.2"
   }
 }

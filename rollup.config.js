@@ -2,6 +2,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
 import scss from 'rollup-plugin-scss';
 import svelte from 'rollup-plugin-svelte';
+import {eslint} from 'rollup-plugin-eslint';
 import {terser} from 'rollup-plugin-terser';
 
 // The html plugin generates a file that M::P::Webpack reads to generate the
@@ -27,6 +28,8 @@ export default {
     sourcemap: true,
   },
   plugins: [
+    !production && eslint(),
+
     // https://svelte.dev/ specific plugin config
     svelte({
       dev: !production,
