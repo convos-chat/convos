@@ -98,7 +98,7 @@ export class Api {
         op._url = api.schemes[0] + '://' + api.host + api.basePath + path;
         op.parameters = (op.parameters || []).map(p => {
           if (!p['$ref']) return p;
-          const refPath = p['$ref'].replace(/^\#\//, '').split('/');
+          const refPath = p['$ref'].replace(/^#\//, '').split('/');
           let ref = api;
           while (refPath.length) ref = ref[refPath.shift()];
           return ref;

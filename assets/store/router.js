@@ -17,7 +17,7 @@ export function gotoUrl(url, params = {}) {
 export function hrefToPathname(href) {
   const pathnameStart = href.indexOf('/') == 0 ? 0 : href.indexOf(baseUrl) + baseUrl.length;
   if (pathnameStart == baseUrl.length - 1) return null;
-  const val = href.substring(pathnameStart)
+  const val = href.substring(pathnameStart);
   pathname.set(val);
   return val;
 }

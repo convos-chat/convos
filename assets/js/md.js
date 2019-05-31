@@ -44,7 +44,7 @@ export function md(str, params = {}) {
 
 export function text2emoji(str, emoji) {
   text2emojiMap[str] = emoji;
-  text2emojiRe = Object.keys(text2emojiMap).map(s => s.replace(/([\(\)])/g, '\\$1')).join('|');
+  text2emojiRe = Object.keys(text2emojiMap).map(s => s.replace(/([()])/g, '\\$1')).join('|');
   text2emojiRe = new RegExp('(^|\\s)(' + text2emojiRe + ')(?=\\s|$)', 'i');
 }
 
@@ -53,7 +53,6 @@ const xmlEscapeMap = {
   '<': '&lt;',
   '>': '&gt;',
   "'": '&quot;',
-  "'": '&#39;',
 };
 
 export function xmlEscape(str) {
