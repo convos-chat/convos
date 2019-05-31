@@ -16,7 +16,7 @@ const user = getContext('user');
 
 <main class="main-app-pane align-content-middle">
   <h1>{l('Create account')}</h1>
-  <form method="post" on:submit|preventDefault="{e => user.register.execute(e.target)}">
+  <form method="post" on:submit|preventDefault="{e => user.register.perform(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>

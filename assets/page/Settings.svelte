@@ -32,7 +32,7 @@ async function updateUserFromForm(e) {
   }
 
   $expandUrlToMedia = form.expand_url.checked;
-  updateUserOp.execute(e.target);
+  updateUserOp.perform(e.target);
 }
 
 // TODO: Figure out a better way to uncheck
