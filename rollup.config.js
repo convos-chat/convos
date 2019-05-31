@@ -1,6 +1,6 @@
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
-import scss from 'rollup-plugin-scss';
+import sass from 'rollup-plugin-sass';
 import svelte from 'rollup-plugin-svelte';
 import {eslint} from 'rollup-plugin-eslint';
 import {terser} from 'rollup-plugin-terser';
@@ -41,11 +41,7 @@ export default {
     resolve(),
     commonjs(),
     production && terser(),
-
-    scss({
-      failOnError: true,
-      output: outPath('convos.[hash].css'),
-    }),
+    sass({output: outPath('convos.[hash].css')}),
 
     html({
       dest,
