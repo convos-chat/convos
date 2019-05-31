@@ -3,7 +3,9 @@
   "description": "",
   "version": "0.99.40",
   "scripts": {
-    "dev": "PERL5LIB=$PWD/lib ./script/convos webpack --listen http://*:4000"
+    "build": "rollup -c",
+    "dev": "PERL5LIB=$PWD/lib ./script/convos webpack --listen http://*:4000",
+    "lint": "ROLLUP_WATCH=yes rollup -c"
   },
   "devDependencies": {
     "rollup-plugin-bundle-html": "^0.2.1",

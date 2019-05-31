@@ -28,20 +28,20 @@ export default {
     sourcemap: true,
   },
   plugins: [
-    !production && eslint(),
+    !production && eslint({exclude: ['assets/sass/**', 'node_modules/**']}),
 
     // https://svelte.dev/ specific plugin config
     svelte({
       dev: !production,
       css: (css) => {
         css.write(outPath('convos.[hash].css'));
-      }
+      },
     }),
 
     resolve(),
     commonjs(),
-    production && terser(),
     sass({output: outPath('convos.[hash].css')}),
+    production && terser(),
 
     html({
       dest,
