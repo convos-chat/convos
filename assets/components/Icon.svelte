@@ -7,7 +7,7 @@ export let title = '';
 const familyToClassName = {
   regular: 'far',
   solid: 'fas',
-}
+};
 
 let classNames = [];
 
