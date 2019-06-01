@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "rollup-plugin-bundle-html": "^0.2.1",
+    "rollup-plugin-collect-sass": "^1.0.9",
     "rollup-plugin-commonjs": "^10.0.0",
     "rollup-plugin-node-resolve": "^5.0.1",
     "rollup-plugin-svelte": "^5.0.3",
@@ -20,7 +21,6 @@
     "eslint-plugin-svelte3": "^1.2.3",
     "rollup": "^1.12.3",
     "rollup-plugin-eslint": "^6.0.0",
-    "rollup-plugin-sass": "^1.2.2",
     "svelte": "^3.4.2"
   }
 }
