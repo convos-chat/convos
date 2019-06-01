@@ -27,16 +27,16 @@ export function md(str, params = {}) {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });
 
-  if (params.emoji !== false) {
-    str = str.replace(text2emojiRe, (all, pre, emoji) => pre + (text2emoji[emoji] || emoji));
-    str = emojione.toImage(str);
-  }
-
   if (params.links !== false) {
     str = str.replace(linkRe, (str) => {
       const parts = str.match(/^(.*?)([.!?])?$/);
       return '<a href="' + parts[1] + '" target="_blank">' + parts[1] + '</a>' + parts[2];
     });
+  }
+
+  if (params.emoji !== false) {
+    str = str.replace(text2emojiRe, (all, pre, emoji) => pre + (text2emoji[emoji] || emoji));
+    str = emojione.toImage(str);
   }
 
   return str;
