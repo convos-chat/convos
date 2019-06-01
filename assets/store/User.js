@@ -27,6 +27,7 @@ export default class User extends Operation {
     this.login = this.api.operation('loginUser');
     this.logout = this.api.operation('logoutUser');
     this.register = this.api.operation('registerUser');
+    this.readNotifications = this.api.operation('readNotifications');
 
     // "User" is a store, but it has sub svelte stores that can be watched
     this.connectionsWithChannels = writable([]);
