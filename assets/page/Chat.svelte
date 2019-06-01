@@ -20,10 +20,6 @@ let messages = [];
 let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
 let settingsIsVisible = false;
 
-async function clearNotifications(e) {
-  alert('TODO');
-}
-
 function isSameMessage(i) {
   return i == 0 ? false : messages[i].from == messages[i - 1].from;
 }
@@ -59,7 +55,7 @@ $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
       <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
       <StateIcon obj="{dialog.dialog_id ? dialog : connection}"/>
     {:else}
-      <a href="#clear" class="main-header_settings-toggle" on:click|preventDefault="{clearNotifications}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
+      <a href="#clear" class="main-header_settings-toggle" on:click|preventDefault="{e => user.readNotifications.perform(e.target)}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
     {/if}
   </h1>
 
