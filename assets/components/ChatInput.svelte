@@ -1,4 +1,5 @@
 <script>
+import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import emojione from 'emojione';
@@ -12,6 +13,8 @@ let autocompleteCategory = 'chat';
 let maxNumMatches = 20;
 let inputEl;
 let pos;
+
+const user = getContext('user');
 
 // TODO: Allow user to select tone in settings
 const emojis = {};
@@ -85,7 +88,18 @@ function focusAutocompleteItem(e, moveBy) {
 }
 
 function sendMessage() {
-  console.log('TODO: sendMessage', inputEl.value);
+  const msg = {
+    connection_id: connection.id,
+    dialog_id: dialog.isDialog ? dialog.id : '',
+    message: inputEl.value,
+    method: 'send',
+  };
+
+  // TODO: Improve handling of "/action ..."
+  const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
+  console.log('TODO', action);
+
+  if (msg.message.length) user.send(msg);
   inputEl.value = '';
 }
 
