@@ -6,12 +6,13 @@ export let href = '/';
 export let replace = false;
 
 let classNames = [];
-pathname.subscribe($pathname => {
+
+function calculateClassNames($pathname) {
   classNames = className ? [className] : [];
   if (href.indexOf($pathname) == 0) classNames = [...classNames, 'has-basepath'];
   if ($pathname == href.replace(/#/, '')) classNames = [...classNames, 'has-path'];
   if ($pathname == href) classNames = [...classNames, 'is-exact'];
-});
+}
 
 function onClick(e) {
   const aEl = e.target.closest('a');
@@ -19,6 +20,8 @@ function onClick(e) {
   e.preventDefault();
   history[replace ? 'replaceState' : 'pushState']({}, document.title, aEl.href);
 }
+
+$: calculateClassNames($pathname);
 </script>
 
 <a {href} on:click={onClick} class={classNames.join(' ')}><slot/></a>
