@@ -26,7 +26,7 @@ const pages = {
 
 const Convos = window.Convos || {};
 const api = new Api(Convos.apiUrl, {debug: true});
-const user = new User({api});
+const user = new User({api, wsUrl: Convos.wsUrl});
 setContext('user', user);
 
 $: currentPage = pages[$pathParts[0]] || ($user.email ? pages.chat : pages.login);

@@ -26,6 +26,9 @@ export default class User extends Operation {
     this.register = this.api.operation('registerUser');
     this.readNotifications = this.api.operation('readNotifications');
 
+    this.msgId = 0;
+    this.wsUrl = params.wsUrl;
+
     // "User" is a store, but it has sub svelte stores that can be watched
     this.connectionsWithChannels = writable([]);
     this.enableNotifications = writable(Notification.permission);
@@ -55,16 +58,24 @@ export default class User extends Operation {
     return this;
   }
 
+  async send(msg) {
+    const ws = await this._ws();
+    if (!msg.id) msg.id = (++this.msgId);
+    ws.send(JSON.stringify(msg));
+  }
+
   _calculateConnectionsWithChannels() {
     const map = {};
     this.connections.forEach(conn => {
       conn.channels = [];
+      conn.messages = [];
       conn.private = [];
       map[conn.id] = conn;
     });
 
     this.dialogs.forEach(dialog => {
       const conn = map[dialog.connection_id];
+      dialog.messages = [];
       dialog.path = encodeURIComponent(dialog.id);
       conn[dialog.is_private ? 'private' : 'channels'].push(dialog);
     });
@@ -76,5 +87,40 @@ export default class User extends Operation {
     }));
 
     return this._notifySubscribers();
+  }
+
+  async _ws() {
+    if (this.ws && [0, 1].indexOf(this.ws.readyState) != -1) return this.ws; // [CONNECTING, OPEN, CLOSING, CLOSED]
+    if (this._wsReconnectTid) clearTimeout(this._wsReconnectTid);
+
+    const ws = new WebSocket(this.wsUrl);
+    if (!this.ws) this.ws = ws;
+
+    let handled = false;
+    return new Promise((resolve, reject) => {
+      ws.onopen = () => {
+        if (![handled, (handled = true)][0]) resolve((this.ws = ws));
+      };
+
+      ws.onclose = (e) => {
+        this._wsReconnectTid = setTimeout(() => this._ws(), 1000);
+        this.connections.forEach(conn => { conn.status = 'Unreachable' });
+        this.dialogs.forEach(dialog => { dialog.frozen = 'No internet connection?' });
+        if (![handled, (handled = true)][0]) reject(e);
+      };
+
+      ws.onerror = ws.onclose;
+
+      ws.onmessage = (e) => {
+        var data = JSON.parse(e.data);
+
+        if (data.connection_id && data.event) {
+          console.log('TODO', data);
+        }
+        else if (data.email) {
+          this.parse({body: data});
+        }
+      };
+    });
   }
 }
