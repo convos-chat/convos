@@ -38,8 +38,8 @@ pathParts.subscribe(async ($pathParts) => {
 });
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
-$: connection = $user.connections.filter(conn => conn.connection_id == $pathParts[1])[0] || {};
-$: dialog = $user.dialogs.filter(d => d.connection_id == $pathParts[1] && d.dialog_id == $pathParts[2])[0] || {};
+$: connection = $user.connections.filter(conn => conn.id == $pathParts[1])[0] || {};
+$: dialog = $user.dialogs.filter(d => d.connection_id == $pathParts[1] && d.id == $pathParts[2])[0] || {};
 $: fallbackSubject = dialog.frozen || (isDisconnected ? l('Disconnected.') : $pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: isDisconnected = connection.state == 'disconnected';
 $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
@@ -50,17 +50,17 @@ $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
 <main class="main-app-pane" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
   <h1 class="main-header">
     <span>{$pathParts[2] || $pathParts[1] || l('Notifications')}</span>
-    {#if connection.connection_id}
-      <small><DialogSubject obj="{dialog.dialog_id ? dialog : connection}"/></small>
+    {#if connection.id}
+      <small><DialogSubject dialog="{dialog.isDialog ? dialog : connection}"/></small>
       <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
-      <StateIcon obj="{dialog.dialog_id ? dialog : connection}"/>
+      <StateIcon obj="{dialog.isDialog ? dialog : connection}"/>
     {:else}
       <a href="#clear" class="main-header_settings-toggle" on:click|preventDefault="{e => user.readNotifications.perform(e.target)}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
     {/if}
   </h1>
 
   {#if messages.length == 0}
-    <h2>{l(connection.connection_id ? 'No messages.' : 'No notifications.')}</h2>
+    <h2>{l(connection.id ? 'No messages.' : 'No notifications.')}</h2>
   {/if}
 
   {#each messages as message, i}
@@ -71,9 +71,9 @@ $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
     </div>
   {/each}
 
-  {#if connection.connection_id}
-  <ChatInput connectionId="{$pathParts[1]}" dialogId="{$pathParts[2]}"/>
+  {#if connection.id}
+  <ChatInput connection="{connection}" dialog="{dialog}"/>
   {/if}
 
-  <svelte:component this={settingComponent} connectionId="{$pathParts[1]}" dialogId="{$pathParts[2]}"/>
+  <svelte:component this={settingComponent} connection="{connection}" dialog="{dialog}"/>
 </main>

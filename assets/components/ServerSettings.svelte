@@ -9,7 +9,7 @@ import PasswordField from '../components/form/PasswordField.svelte';
 import StateIcon from '../components/StateIcon.svelte';
 import TextField from '../components/form/TextField.svelte';
 
-export let connectionId;
+export let connection = {};
 
 const user = getContext('user');
 const updateConnectionOp = user.api.operation('updateConnection');
@@ -35,7 +35,6 @@ async function updateConnectionFromForm(e) {
   user.ensureConnection(updateConnectionOp.res.body);
 }
 
-$: connection = $user.connections.filter(c => c.connection_id == connectionId)[0] || {};
 $: isDisconnected = connection.state == 'disconnected';
 
 $: if (connection.url && formEl) {
@@ -50,7 +49,7 @@ $: if (connection.url && formEl) {
 <div class="settings-pane">
   <h2>{l('Connection settings')}</h2>
   <form method="post" bind:this="{formEl}" on:submit|preventDefault="{updateConnectionFromForm}">
-    <input type="hidden" name="connection_id" value="{connectionId}">
+    <input type="hidden" name="connection_id" value="{connection.id}">
     <input type="hidden" name="url" value="{url}">
     <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}">
       <span slot="label">{l('Server and port')}</span>

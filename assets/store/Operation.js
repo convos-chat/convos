@@ -106,7 +106,7 @@ export default class Operation {
     }
   }
 
-  _notifySubscribers(status) {
+  _notifySubscribers(status = this._status) {
     if (!validStatus[status]) throw 'Invalid status: ' + status;
     this._status = status;
     this.subscribers.forEach(cb => cb(this));
