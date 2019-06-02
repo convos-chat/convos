@@ -4,6 +4,9 @@ import {md} from '../js/md';
 import emojione from 'emojione';
 import Icon from '../components/Icon.svelte';
 
+export let connection = {};
+export let dialog = {};
+
 let activeAutocompleteIndex = 0;
 let autocompleteCategory = 'chat';
 let maxNumMatches = 20;
@@ -26,8 +29,8 @@ function calculateAutocompleteOptions([before, key, afterKey, after]) {
     autocompleteCategory = 'emoji';
     [':', '_'].map(p => p + afterKey.substring(0, 1)).filter(group => emojis[group]).forEach(group => {
       for (let i = 0; i < emojis[group].length; i++) {
-        if (emojis[group][i].indexOf(afterKey) >= 0) opts.push({val: emojis[group][i], text: md(emojis[group][i])});
         if (opts.length >= maxNumMatches) break;
+        if (emojis[group][i].indexOf(afterKey) >= 0) opts.push({val: emojis[group][i], text: md(emojis[group][i])});
       }
     });
   }
@@ -38,9 +41,13 @@ function calculateAutocompleteOptions([before, key, afterKey, after]) {
     console.log('TODO: Autocomplete private conversations ' + afterKey);
     autocompleteCategory = 'nick';
   }
-  else if ((key == '#' || key == '&') && afterKey.length) { // Group connversations
-    console.log('TODO: Autocomplete group conversations ' + afterKey);
+  else if ((key == '#' || key == '&')) { // Group connversations
     autocompleteCategory = 'channel';
+    for (let i = 0; i < connection.channels.length; i++) {
+      const dialog = connection.channels[i];
+      if (opts.length >= maxNumMatches) break;
+      if (dialog.name.toLowerCase().indexOf(key + afterKey) != -1) opts.push({text: dialog.name, val: dialog.id});
+    }
   }
 
   activeAutocompleteIndex = 0;
