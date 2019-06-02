@@ -63,7 +63,7 @@ $: getMessages($pathParts);
       <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
       <StateIcon obj="{dialog.isDialog ? dialog : connection}"/>
     {:else}
-      <a href="#clear" class="main-header_settings-toggle" on:click|preventDefault="{e => user.readNotifications.perform(e.target)}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
+      <a href="#clear" class="main-header_settings-toggle" on:click|preventDefault="{e => user.readNotifications.perform()}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
     {/if}
   </h1>
 
