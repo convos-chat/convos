@@ -14,11 +14,27 @@ import StateIcon from '../components/StateIcon.svelte';
 import Ts from '../components/Ts.svelte';
 
 const user = getContext('user');
+const connectionMessagesOp = user.api.operation('connectionMessages');
+const dialogMessagesOp = user.api.operation('dialogMessages');
 
 let height = 0;
 let messages = [];
 let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
 let settingsIsVisible = false;
+
+async function getMessages($pathParts) {
+  messages = [];
+  settingsIsVisible = false;
+
+  if ($pathParts[1]) {
+    const op = $pathParts[2] ? dialogMessagesOp : connectionMessagesOp;
+    await op.perform({connection_id: $pathParts[1], dialog_id: $pathParts[2]});
+    messages = op.res.body.messages || [];
+  }
+  else {
+    messages = $user.notifications;
+  }
+}
 
 function isSameMessage(i) {
   return i == 0 ? false : messages[i].from == messages[i - 1].from;
@@ -28,21 +44,13 @@ function toggleSettings(e) {
   settingsIsVisible = !settingsIsVisible;
 }
 
-pathParts.subscribe(async ($pathParts) => {
-  messages = [];
-  settingsIsVisible = false;
-  if (!$pathParts[1]) return (messages = $user.notifications);
-  const operationId = $pathParts[2] ? 'dialogMessages' : 'connectionMessages';
-  const res = await user.api.perform(operationId, {connection_id: $pathParts[1], dialog_id: $pathParts[2]});
-  messages = res.messages || [];
-});
-
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
 $: connection = $user.connections.filter(conn => conn.id == $pathParts[1])[0] || {};
 $: dialog = $user.dialogs.filter(d => d.connection_id == $pathParts[1] && d.id == $pathParts[2])[0] || {};
 $: fallbackSubject = dialog.frozen || (isDisconnected ? l('Disconnected.') : $pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: isDisconnected = connection.state == 'disconnected';
 $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
+$: getMessages($pathParts);
 </script>
 
 <SidebarChat/>
