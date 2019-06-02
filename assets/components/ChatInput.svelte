@@ -11,16 +11,22 @@ let inputEl;
 let pos;
 
 // TODO: Allow user to select tone in settings
-const emojis = Object.keys(emojione.emojioneList).filter(i => !i.match(/_tone/)).sort();
+const emojis = {};
+Object.keys(emojione.emojioneList).filter(i => !i.match(/_tone/)).sort().forEach(emoji => {
+  emoji.match(/(_|:)\w/g).forEach(k => {
+    if (!emojis[k]) emojis[k] = [];
+    emojis[k].push(emoji);
+  });
+});
 
 function calculateAutocompleteOptions([before, key, afterKey, after]) {
   const opts = [];
 
   if (key == ':' && afterKey.length) { // Emojis
     autocompleteCategory = 'emoji';
-    [new RegExp('^:' + afterKey), new RegExp('_' + afterKey)].forEach(re => {
-      for (let i = 0; i < emojis.length; i++) {
-        if (emojis[i].match(re)) opts.push({val: emojis[i], text: md(emojis[i])});
+    [':', '_'].map(p => p + afterKey.substring(0, 1)).filter(group => emojis[group]).forEach(group => {
+      for (let i = 0; i < emojis[group].length; i++) {
+        if (emojis[group][i].indexOf(afterKey) >= 0) opts.push({val: emojis[group][i], text: md(emojis[group][i])});
         if (opts.length >= maxNumMatches) break;
       }
     });
