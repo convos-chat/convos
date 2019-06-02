@@ -14,10 +14,7 @@ export default class User extends Operation {
 
     // Define proxy properties into this.res.body
     ['connections', 'dialogs', 'notifications'].forEach(name => {
-      Object.defineProperty(this, name, {
-        get: () => { return this.res.body[name] || [] },
-        set: (val) => { this.res.body[name] = val },
-      });
+      Object.defineProperty(this, name, {get: () => { return this.res.body[name] || [] }});
     });
 
     Object.defineProperty(this, 'email', {get: () => this.res.body.email || ''});
@@ -35,36 +32,40 @@ export default class User extends Operation {
     this.expandUrlToMedia = writable(false);
   }
 
-  ensureConnection(conn) {
-    conn.url = typeof conn.url == 'string' ? new ConnURL(conn.url) : conn.url;
-    this.connections = this.connections.filter(c => c.connection_id != conn.connection_id).concat(conn);
-    this._calculateConnectionsWithChannels();
+  ensureConnection(obj, params = {}) {
+    obj.url = typeof obj.url == 'string' ? new ConnURL(obj.url) : obj.url;
+    Object.defineProperty(obj, 'id', {get: () => obj.connection_id || ''});
+    Object.defineProperty(obj, 'isConnection', {get: () => true});
+    this.res.body.connections = this.connections.filter(c => c.id != obj.id).concat(obj);
+    if (params.calculate !== false) this._calculateConnectionsWithChannels();
   }
 
-  ensureDialog(dialog) {
-    this.dialogs = this.dialogs.filter(d => d.dialog_id != dialog.dialog_id).concat(dialog);
-    this._calculateConnectionsWithChannels();
+  ensureDialog(obj, params = {}) {
+    Object.defineProperty(obj, 'id', {get: () => obj.dialog_id || ''});
+    Object.defineProperty(obj, 'isDialog', {get: () => true});
+    this.res.body.dialogs = this.dialogs.filter(d => d.id != obj.id).concat(obj);
+    if (params.calculate !== false) this._calculateConnectionsWithChannels();
   }
 
   parse(res, body = res.body) {
     Operation.prototype.parse.call(this, res, body);
-    if (body.connections) body.connections.forEach(c => this.ensureConnection(c));
-    if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
+    if (body.connections) body.connections.forEach(c => this.ensureConnection(c, {calculate: false}));
+    if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d, {calculate: false}));
     if (this.is('success')) this._calculateConnectionsWithChannels();
     return this;
   }
 
   _calculateConnectionsWithChannels() {
     const map = {};
-    (this.res.body.connections || []).forEach(conn => {
+    this.connections.forEach(conn => {
       conn.channels = [];
       conn.private = [];
-      map[conn.connection_id] = conn;
+      map[conn.id] = conn;
     });
 
-    (this.res.body.dialogs || []).forEach(dialog => {
+    this.dialogs.forEach(dialog => {
       const conn = map[dialog.connection_id];
-      dialog.path = encodeURIComponent(dialog.dialog_id);
+      dialog.path = encodeURIComponent(dialog.id);
       conn[dialog.is_private ? 'private' : 'channels'].push(dialog);
     });
 
@@ -73,5 +74,7 @@ export default class User extends Operation {
       map[id].private.sort(byName);
       return map[id];
     }));
+
+    return this._notifySubscribers();
   }
 }

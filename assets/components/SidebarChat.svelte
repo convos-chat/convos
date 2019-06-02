@@ -122,14 +122,15 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
         <ul class="sidebar__nav__servers for-group-dialogs">
           {#each $connectionsWithChannels as connection}
             <li>
-              <Link href="/chat/{connection.connection_id}">
+              <Link href="/chat/{connection.id}">
                 {l(connection.name)}
                 <StateIcon obj="{connection}"/>
               </Link>
+
               <ul class="sidebar__nav__conversations is-channels">
                 {#each connection.channels as dialog}
                   <li>
-                    <Link href="/chat/{connection.connection_id}/{dialog.path}">
+                    <Link href="/chat/{connection.id}/{dialog.path}">
                       <span>{dialog.name.replace(/^\W/, '')}</span>
                       <Unread unread={dialog.unread}/>
                       <StateIcon obj="{dialog}"/>
@@ -146,14 +147,14 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
           {#each $connectionsWithChannels as connection}
             {#if connection.private.length}
               <li>
-                <Link href="/chat/{connection.connection_id}">
+                <Link href="/chat/{connection.id}">
                   {l(connection.name)}
                   <StateIcon obj="{connection}"/>
                 </Link>
                 <ul class="sidebar__nav__conversations is-private">
                   {#each connection.private as dialog}
                     <li>
-                      <Link href="/chat/{connection.connection_id}/{dialog.path}">
+                      <Link href="/chat/{connection.id}/{dialog.path}">
                         <span>{dialog.name}</span>
                         <Unread unread={dialog.unread}/>
                         <StateIcon obj="{dialog}"/>

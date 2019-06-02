@@ -2,20 +2,20 @@
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 
-export let obj;
+export let dialog = {};
 </script>
 
-{#if !obj || !obj.connection_id}
+{#if !dialog || !dialog.id}
   <!-- Waiting for dialog -->
-{:else if obj.frozen}
-  {l(obj.frozen)}
-{:else if obj.topic}
-  {md(obj.topic)}
-{:else if obj.state == 'disconnected'}
+{:else if dialog.frozen}
+  {l(dialog.frozen)}
+{:else if dialog.topic}
+  {md(dialog.topic)}
+{:else if dialog.state == 'disconnected'}
   {l('Disconnected.')}
-{:else if obj.is_private}
+{:else if dialog.is_private}
   {l('Private conversation.')}
-{:else if !obj.dialog_id}
+{:else if dialog.isConnection}
   {l('Server messages.')}
 {:else}
   {l('No topic is set.')}

@@ -21,7 +21,7 @@ async function createConnectionFromForm(e) {
   await tick(); // Wait for url to update in form
   const conn = await createConnectionOp.perform(e.target);
   user.ensureConnection(conn);
-  gotoUrl('/chat/' + conn.connection_id);
+  gotoUrl('/chat/' + conn.id);
 }
 </script>
 
