@@ -1,10 +1,10 @@
+.messages-container {
+  min-height: calc(100vh - 11rem); // TODO: Make 11rem more dynamic
+}
+
 .message {
   position: relative;
   margin-bottom: 0.2rem;
-
-  &:last-of-type {
-    padding-bottom: 4rem;
-  }
 
   .message_from {
     text-decoration: none;
@@ -28,6 +28,10 @@
     font-weight: normal;
     padding: 0.1rem;
     float: right;
+  }
+
+  &.is-hightlighted {
+    background-color: #ffd7db;
   }
 
   &.is-same {
@@ -140,11 +144,10 @@
 .chat-input {
   background: $input-bg;
   border-top: 1px solid $input-border-color;
-  margin: 0 (-$gutter / 2);
-  width: 100%;
+  margin: ($gutter * 2) (-$gutter / 2) 0 (-$gutter / 2);
   max-width: calc(#{$main-max-width} + #{$gutter});
   display: flex;
-  position: fixed;
+  position: sticky;
   bottom: 0;
 
   textarea {

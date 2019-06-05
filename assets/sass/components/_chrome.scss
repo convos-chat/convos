@@ -37,6 +37,10 @@ body.no-js {
   @extend .next-to-sidebar;
   padding-bottom: ($gutter * 2);
   max-width: $main-max-width;
+
+  &.without-padding {
+    padding-bottom: 0;
+  }
 }
 
 .align-content-middle {

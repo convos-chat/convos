@@ -42,7 +42,7 @@ $: messages.load();
 
 <SidebarChat/>
 
-<main class="main-app-pane" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
+<div class="main-app-pane without-padding" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
   <h1 class="main-header">
     <span>{$pathParts[2] || $pathParts[1] || l('Notifications')}</span>
     {#if connection.id}
@@ -54,21 +54,23 @@ $: messages.load();
     {/if}
   </h1>
 
-  {#if $messages.length == 0}
-    <h2>{l(connection.id ? 'No messages.' : 'No notifications.')}</h2>
-  {/if}
+  <main class="messages-container">
+    {#if $messages.length == 0}
+      <h2>{l(connection.id ? 'No messages.' : 'No notifications.')}</h2>
+    {/if}
 
-  {#each $messages as message, i}
-    <div class="message" class:is-same="{isSameMessage(i)}" class:is-hightlight="{message.highlight}">
-      <Ts val="{message.ts}"/>
-      <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
-      <div class="message_text">{@html md(message.message)}</div>
-    </div>
-  {/each}
+    {#each $messages as message, i}
+      <div class="message" class:is-same="{isSameMessage(i)}" class:is-hightlighted="{message.highlight}">
+        <Ts val="{message.ts}"/>
+        <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
+        <div class="message_text">{@html md(message.message)}</div>
+      </div>
+    {/each}
+  </main>
 
   {#if connection.id}
   <ChatInput connection="{connection}" dialog="{dialog}"/>
   {/if}
 
   <svelte:component this={settingComponent} connection="{connection}" dialog="{dialog}"/>
-</main>
+</div>

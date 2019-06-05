@@ -121,17 +121,19 @@ export default class User extends Operation {
         if (![handled, (handled = true)][0]) reject(e);
       };
 
-      ws.onerror = ws.onclose;
+      ws.onerror = (e) => reject(e); // TODO
 
       ws.onmessage = (e) => {
-        var data = JSON.parse(e.data);
+        const data = JSON.parse(e.data);
 
-        if (data.connection_id && data.event) {
-          console.log('TODO', data);
+        if (data.event == 'message') {
+          const dialog = this.dialogs.filter(d => d.connection_id == data.connection_id && d.id == data.dialog_id)[0];
+          if (dialog) return dialog.messages.add(data);
+          const connection = this.connections.filter(conn => conn.id == data.connection_id)[0];
+          if (connection) return connection.messages.add(data);
         }
-        else if (data.email) {
-          this.parse({body: data});
-        }
+
+        console.log('TODO: Handle WebSocket message', data);
       };
     });
   }
