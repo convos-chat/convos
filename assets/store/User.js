@@ -58,6 +58,11 @@ export default class User extends Operation {
     if (params.calculate !== false) this._calculateConnectionsWithChannels();
   }
 
+  async load() {
+    await this.perform();
+    if (this.email) await this.send({});
+  }
+
   parse(res, body = res.body) {
     Operation.prototype.parse.call(this, res, body);
     if (body.connections) body.connections.forEach(c => this.ensureConnection(c, {calculate: false}));

@@ -35,7 +35,7 @@ const login = user.login;
 $: if ($login.is('success')) {
   document.cookie = $user.login.res.headers['Set-Cookie'];
   user.login.reset();
-  user.perform();
+  user.load();
   gotoUrl('/chat');
 }
 
@@ -47,7 +47,7 @@ $: if ($logout.is('success')) {
 }
 
 onMount(async () => {
-  await user.perform();
+  await user.load();
 
   const historyUnlistener = historyListener();
   const removeEls = document.querySelectorAll('.js-remove');
