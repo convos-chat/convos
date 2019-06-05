@@ -1,4 +1,5 @@
 import ConnURL from '../js/ConnURL';
+import Messages from './Messages';
 import Operation from '../store/Operation';
 import {writable} from 'svelte/store';
 
@@ -13,7 +14,7 @@ export default class User extends Operation {
     });
 
     // Define proxy properties into this.res.body
-    ['connections', 'dialogs', 'notifications'].forEach(name => {
+    ['connections', 'dialogs'].forEach(name => {
       Object.defineProperty(this, name, {get: () => { return this.res.body[name] || [] }});
     });
 
@@ -27,6 +28,8 @@ export default class User extends Operation {
     this.readNotifications = this.api.operation('readNotifications');
 
     this.msgId = 0;
+    this.notifications = this._messages({});
+    this.notifications.messages = this.res.body.notifications || [];
     this.wsUrl = params.wsUrl;
 
     // "User" is a store, but it has sub svelte stores that can be watched
@@ -37,6 +40,9 @@ export default class User extends Operation {
 
   ensureConnection(obj, params = {}) {
     obj.url = typeof obj.url == 'string' ? new ConnURL(obj.url) : obj.url;
+    obj.channels = [];
+    obj.private = [];
+    obj.messages = this._messages(obj);
     Object.defineProperty(obj, 'id', {get: () => obj.connection_id || ''});
     Object.defineProperty(obj, 'isConnection', {get: () => true});
     this.res.body.connections = this.connections.filter(c => c.id != obj.id).concat(obj);
@@ -46,6 +52,8 @@ export default class User extends Operation {
   ensureDialog(obj, params = {}) {
     Object.defineProperty(obj, 'id', {get: () => obj.dialog_id || ''});
     Object.defineProperty(obj, 'isDialog', {get: () => true});
+    obj.messages = this._messages(obj);
+    obj.path = encodeURIComponent(obj.id);
     this.res.body.dialogs = this.dialogs.filter(d => d.id != obj.id).concat(obj);
     if (params.calculate !== false) this._calculateConnectionsWithChannels();
   }
@@ -66,18 +74,13 @@ export default class User extends Operation {
 
   _calculateConnectionsWithChannels() {
     const map = {};
+
     this.connections.forEach(conn => {
-      conn.channels = [];
-      conn.messages = [];
-      conn.private = [];
       map[conn.id] = conn;
     });
 
     this.dialogs.forEach(dialog => {
-      const conn = map[dialog.connection_id];
-      dialog.messages = [];
-      dialog.path = encodeURIComponent(dialog.id);
-      conn[dialog.is_private ? 'private' : 'channels'].push(dialog);
+      map[dialog.connection_id][dialog.is_private ? 'private' : 'channels'].push(dialog);
     });
 
     this.connectionsWithChannels.set(Object.keys(map).sort().map(id => {
@@ -87,6 +90,10 @@ export default class User extends Operation {
     }));
 
     return this._notifySubscribers();
+  }
+
+  _messages(params) {
+    return new Messages({...params, api: this.api});
   }
 
   async _ws() {
