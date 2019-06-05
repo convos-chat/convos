@@ -19,7 +19,8 @@ let showAdvancedSettings = false;
 let url = '';
 
 async function setConnectionState(e) {
-  const clone = {...connection, wanted_state: isDisconnected ? 'connected' : 'disconnected'};
+  const aEl = e.target.closest('a') || e.target;
+  const clone = {...connection, wanted_state: aEl.href.replace(/.*\#/, '')};
   await updateConnectionOp.perform(clone);
   user.ensureConnection(updateConnectionOp.res.body);
 }
@@ -35,7 +36,7 @@ async function updateConnectionFromForm(e) {
   user.ensureConnection(updateConnectionOp.res.body);
 }
 
-$: isDisconnected = connection.state == 'disconnected';
+$: isNotDisconnected = connection.state != 'disconnected';
 
 $: if (connection.url && formEl) {
   formEl.server.value = connection.url.host;
@@ -68,7 +69,7 @@ $: if (connection.url && formEl) {
     </PasswordField>
     <FormActions>
       <button class="btn">{l('Update connection')}</button>
-      <a href="#{isDisconnected ? 'connect' : 'disconnect'}" class="btn" on:click|preventDefault="{setConnectionState}">{l(isDisconnected ? 'Connect' : 'Disconnect')}</a>
+      <a href="#{isNotDisconnected ? 'connected' : 'disconnected'}" class="btn" on:click|preventDefault="{setConnectionState}">{l(isNotDisconnected ? 'Connect' : 'Disconnect')}</a>
       <a href="#delete" class="btn" on:click|preventDefault="{deleteConnection}">{l('Delete')}</a>
       <StateIcon obj="{connection}"/>
     </FormActions>
