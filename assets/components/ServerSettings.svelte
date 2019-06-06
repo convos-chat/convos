@@ -20,7 +20,7 @@ let url = '';
 
 async function setConnectionState(e) {
   const aEl = e.target.closest('a') || e.target;
-  const clone = {...connection, wanted_state: aEl.href.replace(/.*\#/, '')};
+  const clone = {...connection, wanted_state: aEl.href.replace(/.*#/, '')};
   await updateConnectionOp.perform(clone);
   user.ensureConnection(updateConnectionOp.res.body);
 }
