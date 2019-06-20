@@ -9,7 +9,7 @@ import PasswordField from '../components/form/PasswordField.svelte';
 import StateIcon from '../components/StateIcon.svelte';
 import TextField from '../components/form/TextField.svelte';
 
-export let connection = {};
+export let dialog = {};
 
 const user = getContext('user');
 const updateConnectionOp = user.api.operation('updateConnection');
@@ -22,7 +22,7 @@ async function setConnectionState(e) {
   const aEl = e.target.closest('a') || e.target;
   const clone = {...connection, wanted_state: aEl.href.replace(/.*#/, '')};
   await updateConnectionOp.perform(clone);
-  user.ensureConnection(updateConnectionOp.res.body);
+  user.ensureDialog(updateConnectionOp.res.body);
 }
 
 async function deleteConnection(e) {
@@ -33,9 +33,10 @@ async function updateConnectionFromForm(e) {
   url = new ConnURL('irc://localhost:6667').fromForm(e.target).toString();
   await tick(); // Wait for url to update in form
   await updateConnectionOp.perform(e.target);
-  user.ensureConnection(updateConnectionOp.res.body);
+  user.ensureDialog(updateConnectionOp.res.body);
 }
 
+$: connection = user.findDialog({connection_id: dialog.connection_id}) || {};
 $: isNotDisconnected = connection.state != 'disconnected';
 
 $: if (connection.url && formEl) {

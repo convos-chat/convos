@@ -28,11 +28,9 @@ function toggleSettings(e) {
   settingsIsVisible = !settingsIsVisible;
 }
 
-$: connection = $user.connections.filter(conn => conn.id == $pathParts[1])[0] || {};
-$: dialog = $user.dialogs.filter(d => d.connection_id == $pathParts[1] && d.id == $pathParts[2])[0] || {};
-$: fallbackSubject = dialog.frozen || (isDisconnected ? l('Disconnected.') : $pathParts[2] ? l('Private conversation.') : l('Server messages.'));
-$: isDisconnected = connection.state == 'disconnected';
-$: messages = dialog.messages || connection.messages || user.notifications;
+$: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
+$: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
+$: messages = dialog.messages;
 $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
@@ -45,10 +43,10 @@ $: messages.load();
 <div class="main-app-pane without-padding" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
   <h1 class="main-header">
     <span>{$pathParts[2] || $pathParts[1] || l('Notifications')}</span>
-    {#if connection.id}
-      <small><DialogSubject dialog="{dialog.isDialog ? dialog : connection}"/></small>
+    {#if dialog.id}
+      <small><DialogSubject dialog="{dialog}"/></small>
       <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
-      <StateIcon obj="{dialog.isDialog ? dialog : connection}"/>
+      <StateIcon obj="{dialog}"/>
     {:else}
       <a href="#clear" class="main-header_settings-toggle" on:click|preventDefault="{e => user.readNotifications.perform()}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
     {/if}
@@ -56,7 +54,7 @@ $: messages.load();
 
   <main class="messages-container">
     {#if $messages.length == 0}
-      <h2>{l(connection.id ? 'No messages.' : 'No notifications.')}</h2>
+      <h2>{l(dialog.id ? 'No messages.' : 'No notifications.')}</h2>
     {/if}
 
     {#each $messages as message, i}
@@ -68,9 +66,9 @@ $: messages.load();
     {/each}
   </main>
 
-  {#if connection.id}
-  <ChatInput connection="{connection}" dialog="{dialog}"/>
+  {#if dialog.id}
+  <ChatInput dialog="{dialog}"/>
   {/if}
 
-  <svelte:component this={settingComponent} connection="{connection}" dialog="{dialog}"/>
+  <svelte:component this={settingComponent} dialog="{dialog}"/>
 </div>
