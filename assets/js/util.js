@@ -14,6 +14,14 @@ export function q(parentEl, sel, cb) {
   return res;
 }
 
+export function ro(obj, name, val) {
+  Object.defineProperty(obj, name, typeof val == 'function' ? {get: val} : {value: val, writable: false});
+}
+
+export function sortByName(a, b) {
+  return a.name.localeCompare(b.name);
+}
+
 export function tagNameIs(el, tagName) {
   return el && el.tagName && el.tagName.toLowerCase() === tagName;
 }

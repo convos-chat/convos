@@ -5,7 +5,6 @@ import {md} from '../js/md';
 import emojione from 'emojione';
 import Icon from '../components/Icon.svelte';
 
-export let connection = {};
 export let dialog = {};
 
 let activeAutocompleteIndex = 0;
@@ -46,10 +45,11 @@ function calculateAutocompleteOptions([before, key, afterKey, after]) {
   }
   else if ((key == '#' || key == '&')) { // Group connversations
     autocompleteCategory = 'channel';
-    for (let i = 0; i < connection.channels.length; i++) {
-      const dialog = connection.channels[i];
+    const channels = user.findDialog({connection_id: dialog.connection_id}).channels;
+    for (let i = 0; i < channels.length; i++) {
       if (opts.length >= maxNumMatches) break;
-      if (dialog.name.toLowerCase().indexOf(key + afterKey) != -1) opts.push({text: dialog.name, val: dialog.id});
+      if (channels[i].name.toLowerCase().indexOf(key + afterKey) == -1) continue;
+      opts.push({text: channels[i].name, val: channels[i].id});
     }
   }
 
@@ -89,7 +89,7 @@ function focusAutocompleteItem(e, moveBy) {
 
 function sendMessage() {
   const msg = {
-    connection_id: connection.id,
+    connection_id: dialog.connection_id,
     dialog_id: dialog.isDialog ? dialog.id : '',
     message: inputEl.value,
     method: 'send',

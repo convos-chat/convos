@@ -1,9 +1,8 @@
-import ConnURL from '../js/ConnURL';
-import Messages from './Messages';
-import Operation from '../store/Operation';
-import {writable} from 'svelte/store';
-
-const byName = (a, b) => a.name.localeCompare(b.name);
+import Connection from './Connection';
+import Dialog from './Dialog';
+import Operation from './Operation';
+import {get, writable} from 'svelte/store';
+import {ro, sortByName} from '../js/util';
 
 export default class User extends Operation {
   constructor(params) {
@@ -13,49 +12,42 @@ export default class User extends Operation {
       id: 'getUser',
     });
 
-    // Define proxy properties into this.res.body
-    ['connections', 'dialogs'].forEach(name => {
-      Object.defineProperty(this, name, {get: () => { return this.res.body[name] || [] }});
-    });
+    this.msgId = 0;
+    ro(this, 'email', () => this.res.body.email || '');
+    ro(this, 'wsUrl', params.wsUrl);
 
-    Object.defineProperty(this, 'email', {get: () => this.res.body.email || ''});
+    // "User" is a store, but it has sub svelte stores that can be watched
+    ro(this, 'connections', writable([]));
+    ro(this, 'enableNotifications', writable(Notification.permission));
+    ro(this, 'expandUrlToMedia', writable(false));
+    ro(this, 'notifications', new Dialog({api: this.api, name: 'Notifications'}));
 
     // Add operations that will affect the "User" object
     // TODO: Make operations bubble into the User object. Require changes in App.svelte
-    this.login = this.api.operation('loginUser');
-    this.logout = this.api.operation('logoutUser');
-    this.register = this.api.operation('registerUser');
-    this.readNotifications = this.api.operation('readNotifications');
-
-    this.msgId = 0;
-    this.notifications = this._messages({});
-    this.notifications.messages = this.res.body.notifications || [];
-    this.wsUrl = params.wsUrl;
-
-    // "User" is a store, but it has sub svelte stores that can be watched
-    this.connectionsWithChannels = writable([]);
-    this.enableNotifications = writable(Notification.permission);
-    this.expandUrlToMedia = writable(false);
+    ro(this, 'login', this.api.operation('loginUser'));
+    ro(this, 'logout', this.api.operation('logoutUser'));
+    ro(this, 'readNotifications', this.api.operation('readNotifications'));
+    ro(this, 'register', this.api.operation('registerUser'));
   }
 
-  ensureConnection(obj, params = {}) {
-    obj.url = typeof obj.url == 'string' ? new ConnURL(obj.url) : obj.url;
-    obj.channels = [];
-    obj.private = [];
-    obj.messages = this._messages(obj);
-    Object.defineProperty(obj, 'id', {get: () => obj.connection_id || ''});
-    Object.defineProperty(obj, 'isConnection', {get: () => true});
-    this.res.body.connections = this.connections.filter(c => c.id != obj.id).concat(obj);
-    if (params.calculate !== false) this._calculateConnectionsWithChannels();
+  ensureDialog(params) {
+    // Ensure channel or private conversation
+    if (params.dialog_id) return this.ensureDialog({connection_id: params.connection_id}).ensureDialog(params);
+
+    // Find connection
+    let conn = this.findDialog(params);
+    if (conn) return conn.update(params);
+
+    // Create connection
+    conn = new Connection({...params, api: this.api});
+    this.connections.set(get(this.connections).concat(conn).sort(sortByName));
+    return conn;
   }
 
-  ensureDialog(obj, params = {}) {
-    Object.defineProperty(obj, 'id', {get: () => obj.dialog_id || ''});
-    Object.defineProperty(obj, 'isDialog', {get: () => true});
-    obj.messages = this._messages(obj);
-    obj.path = encodeURIComponent(obj.id);
-    this.res.body.dialogs = this.dialogs.filter(d => d.id != obj.id).concat(obj);
-    if (params.calculate !== false) this._calculateConnectionsWithChannels();
+  findDialog(params) {
+    if (!params.dialog_id) return get(this.connections).filter(conn => conn.id == params.connection_id)[0];
+    const conn = this.findDialog({connection_id: params.connection_id});
+    return conn && conn.findDialog(params)
   }
 
   async load() {
@@ -65,40 +57,25 @@ export default class User extends Operation {
 
   parse(res, body = res.body) {
     Operation.prototype.parse.call(this, res, body);
-    if (body.connections) body.connections.forEach(c => this.ensureConnection(c, {calculate: false}));
-    if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d, {calculate: false}));
-    if (this.is('success')) this._calculateConnectionsWithChannels();
+    if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
+    if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
     return this;
+  }
+
+  removeDialog(params) {
+    if (params.dialog_id) {
+      const conn = this.findDialog({connection_id: params.connection_id});
+      if (conn) conn.removeDialog(params);
+    }
+    else {
+      this.connections.set(get(this.connections).filter(conn => conn.id != params.connection_id));
+    }
   }
 
   async send(msg) {
     const ws = await this._ws();
     if (!msg.id) msg.id = (++this.msgId);
     ws.send(JSON.stringify(msg));
-  }
-
-  _calculateConnectionsWithChannels() {
-    const map = {};
-
-    this.connections.forEach(conn => {
-      map[conn.id] = conn;
-    });
-
-    this.dialogs.forEach(dialog => {
-      map[dialog.connection_id][dialog.is_private ? 'private' : 'channels'].push(dialog);
-    });
-
-    this.connectionsWithChannels.set(Object.keys(map).sort().map(id => {
-      map[id].channels.sort(byName);
-      map[id].private.sort(byName);
-      return map[id];
-    }));
-
-    return this._notifySubscribers();
-  }
-
-  _messages(params) {
-    return new Messages({...params, api: this.api});
   }
 
   async _ws() {
@@ -116,21 +93,16 @@ export default class User extends Operation {
 
       ws.onclose = (e) => {
         this._wsReconnectTid = setTimeout(() => this._ws(), 1000);
-        this.connections.forEach(conn => { conn.status = 'Unreachable' });
-        this.dialogs.forEach(dialog => { dialog.frozen = 'No internet connection?' });
+        get(this.connections).forEach(conn => { conn.status = 'Unreachable.' });
         if (![handled, (handled = true)][0]) reject(e);
       };
 
       ws.onerror = (e) => reject(e); // TODO
-
       ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
 
         if (data.event == 'message') {
-          const dialog = this.dialogs.filter(d => d.connection_id == data.connection_id && d.id == data.dialog_id)[0];
-          if (dialog) return dialog.messages.add(data);
-          const connection = this.connections.filter(conn => conn.id == data.connection_id)[0];
-          if (connection) return connection.messages.add(data);
+          this.ensureDialog(data).messages.add(data);
         }
 
         console.log('TODO: Handle WebSocket message', data);

@@ -12,7 +12,7 @@ import Unread from './Unread.svelte';
 const user = getContext('user');
 
 let activeLinkIndex = 0;
-let connectionsWithChannels = user.connectionsWithChannels;
+let connections = user.connections;
 let filter = '';
 let navEl;
 let searchInput;
@@ -117,12 +117,12 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
     </form>
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
-      {#if $connectionsWithChannels.length}
+      {#if $connections.length}
         <h2>{l('Group conversations')}</h2>
         <ul class="sidebar__nav__servers for-group-dialogs">
-          {#each $connectionsWithChannels as connection}
+          {#each $connections as connection}
             <li>
-              <Link href="/chat/{connection.id}">
+              <Link href="/chat/{connection.path}">
                 {l(connection.name)}
                 <StateIcon obj="{connection}"/>
               </Link>
@@ -130,7 +130,7 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
               <ul class="sidebar__nav__conversations is-channels">
                 {#each connection.channels as dialog}
                   <li>
-                    <Link href="/chat/{connection.id}/{dialog.path}">
+                    <Link href="/chat/{dialog.path}">
                       <span>{dialog.name.replace(/^\W/, '')}</span>
                       <Unread unread={dialog.unread}/>
                       <StateIcon obj="{dialog}"/>
@@ -144,17 +144,17 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
 
         <h2>{l('Private conversations')}</h2>
         <ul class="sidebar__nav__servers for-private-dialogs">
-          {#each $connectionsWithChannels as connection}
+          {#each $connections as connection}
             {#if connection.private.length}
               <li>
-                <Link href="/chat/{connection.id}">
+                <Link href="/chat/{connection.path}">
                   {l(connection.name)}
                   <StateIcon obj="{connection}"/>
                 </Link>
                 <ul class="sidebar__nav__conversations is-private">
                   {#each connection.private as dialog}
                     <li>
-                      <Link href="/chat/{connection.id}/{dialog.path}">
+                      <Link href="/chat/{dialog.path}">
                         <span>{dialog.name}</span>
                         <Unread unread={dialog.unread}/>
                         <StateIcon obj="{dialog}"/>

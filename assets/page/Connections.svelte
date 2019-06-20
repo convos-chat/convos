@@ -20,7 +20,7 @@ async function createConnectionFromForm(e) {
   url = new ConnURL('irc://localhost:6667').fromForm(e.target).toString();
   await tick(); // Wait for url to update in form
   const conn = await createConnectionOp.perform(e.target);
-  user.ensureConnection(conn);
+  user.ensureDialog(conn);
   gotoUrl('/chat/' + conn.id);
 }
 </script>

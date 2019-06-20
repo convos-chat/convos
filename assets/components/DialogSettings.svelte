@@ -5,7 +5,6 @@ import DialogSubject from '../components/DialogSubject.svelte';
 import FormActions from '../components/form/FormActions.svelte';
 import StateIcon from '../components/StateIcon.svelte';
 
-export let connection = {};
 export let dialog = {};
 
 const user = getContext('user');
