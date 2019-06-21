@@ -12,7 +12,6 @@ import Unread from './Unread.svelte';
 const user = getContext('user');
 
 let activeLinkIndex = 0;
-let connections = user.connections;
 let filter = '';
 let navEl;
 let searchInput;
@@ -99,6 +98,7 @@ function onSearchKeydown(e) {
 
 $: filterNav(encodeURIComponent(filter));
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
+$: connections = $user.connections;
 </script>
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
@@ -117,10 +117,10 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
     </form>
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
-      {#if $connections.length}
+      {#if connections.length}
         <h2>{l('Group conversations')}</h2>
         <ul class="sidebar__nav__servers for-group-dialogs">
-          {#each $connections as connection}
+          {#each connections as connection}
             <li>
               <Link href="/chat/{connection.path}">
                 {l(connection.name)}
@@ -144,7 +144,7 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
 
         <h2>{l('Private conversations')}</h2>
         <ul class="sidebar__nav__servers for-private-dialogs">
-          {#each $connections as connection}
+          {#each connections as connection}
             {#if connection.private.length}
               <li>
                 <Link href="/chat/{connection.path}">

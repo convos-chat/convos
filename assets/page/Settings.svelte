@@ -9,8 +9,6 @@ import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 
 const user = getContext('user');
-const enableNotifications = user.enableNotifications;
-const expandUrlToMedia = user.expandUrlToMedia;
 const updateUserOp = user.api.operation('updateUser');
 
 let formEl;
@@ -20,24 +18,24 @@ async function updateUserFromForm(e) {
   const passwords = [form.password.value, form.password_again.value];
 
   if (!form.notifications.checked) {
-    $enableNotifications = 'default';
+    user.update({enableNotifications: 'default'});
   }
-  else if ($enableNotifications != 'granted') {
-    $enableNotifications = 'pending';
-    Notification.requestPermission(status => { $enableNotifications = status });
+  else if (user.enableNotifications != 'granted') {
+    user.update({enableNotifications: 'pending'});
+    Notification.requestPermission(status => { user.update({enableNotifications: status}) });
   }
 
   if (passwords.join('').length && passwords[0] != passwords[1]) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  $expandUrlToMedia = form.expand_url.checked;
+  user.update({expandUrlToMedia: form.expand_url.checked});
   updateUserOp.perform(e.target);
 }
 
 // TODO: Figure out a better way to uncheck
-$: if (formEl && $enableNotifications == 'granted' && !formEl.notifications.checked) formEl.notifications.click();
-$: if (formEl && $enableNotifications == 'denied' && formEl.notifications.checked) formEl.notifications.click();
+$: if (formEl && $user.enableNotifications == 'granted' && !formEl.notifications.checked) formEl.notifications.click();
+$: if (formEl && $user.enableNotifications == 'denied' && formEl.notifications.checked) formEl.notifications.click();
 $: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.value = $user.res.body.highlightKeywords;
 </script>
 
@@ -53,7 +51,7 @@ $: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.val
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 
-    <Checkbox name="notifications" disabled="{$enableNotifications == 'denied'}">
+    <Checkbox name="notifications" disabled="{$user.enableNotifications == 'denied'}">
       <span slot="label">{l('Enable notifications')}</span>
     </Checkbox>
 

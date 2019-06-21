@@ -16,12 +16,11 @@ import Ts from '../components/Ts.svelte';
 const user = getContext('user');
 
 let height = 0;
-let messages = user.notifications;
 let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
 let settingsIsVisible = false;
 
 function isSameMessage(i) {
-  return i == 0 ? false : $messages[i].from == $messages[i - 1].from;
+  return i == 0 ? false : messages[i].from == messages[i - 1].from;
 }
 
 function toggleSettings(e) {
@@ -29,13 +28,13 @@ function toggleSettings(e) {
 }
 
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
+$: dialog.load();
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
-$: messages = dialog.messages;
+$: messages = $dialog.messages;
 $: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
 $: settingsIsVisible = $pathParts && false; // Force to false when path changes
-$: messages.load();
 </script>
 
 <SidebarChat/>
@@ -43,7 +42,7 @@ $: messages.load();
 <div class="main-app-pane without-padding" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
   <h1 class="main-header">
     <span>{$pathParts[2] || $pathParts[1] || l('Notifications')}</span>
-    {#if dialog.id}
+    {#if dialog.connection_id}
       <small><DialogSubject dialog="{dialog}"/></small>
       <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
       <StateIcon obj="{dialog}"/>
@@ -53,11 +52,18 @@ $: messages.load();
   </h1>
 
   <main class="messages-container">
-    {#if $messages.length == 0}
-      <h2>{l(dialog.id ? 'No messages.' : 'No notifications.')}</h2>
+    {#if messages.length == 0}
+      {#if !$pathParts[1]}
+        <h2>{l('No notifications.')}</h2>
+      {:else if $pathParts[1] == dialog.connection_id}
+        <h2>{l(dialog.loading ? 'Loading messages...' : 'No messages.')}</h2>
+        <p>{dialog.frozen}</p>
+      {:else}
+        <h2>{l('You are not part of this dialog.')}</h2>
+      {/if}
     {/if}
 
-    {#each $messages as message, i}
+    {#each messages as message, i}
       <div class="message" class:is-same="{isSameMessage(i)}" class:is-hightlighted="{message.highlight}">
         <Ts val="{message.ts}"/>
         <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
@@ -66,7 +72,7 @@ $: messages.load();
     {/each}
   </main>
 
-  {#if dialog.id}
+  {#if dialog.connection_id}
   <ChatInput dialog="{dialog}"/>
   {/if}
 

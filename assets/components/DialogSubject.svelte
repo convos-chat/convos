@@ -5,7 +5,7 @@ import {md} from '../js/md';
 export let dialog = {};
 </script>
 
-{#if !dialog || !dialog.id}
+{#if !dialog.connection_id}
   <!-- Waiting for dialog -->
 {:else if dialog.frozen}
   {l(dialog.frozen)}
@@ -15,8 +15,8 @@ export let dialog = {};
   {l('Disconnected.')}
 {:else if dialog.is_private}
   {l('Private conversation.')}
-{:else if dialog.isConnection}
-  {l('Server messages.')}
-{:else}
+{:else if dialog.dialog_id}
   {l('No topic is set.')}
+{:else}
+  {l('Server messages.')}
 {/if}

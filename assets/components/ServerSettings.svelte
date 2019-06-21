@@ -51,7 +51,7 @@ $: if (connection.url && formEl) {
 <div class="settings-pane">
   <h2>{l('Connection settings')}</h2>
   <form method="post" bind:this="{formEl}" on:submit|preventDefault="{updateConnectionFromForm}">
-    <input type="hidden" name="connection_id" value="{connection.id}">
+    <input type="hidden" name="connection_id" value="{connection.connection_id}">
     <input type="hidden" name="url" value="{url}">
     <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}">
       <span slot="label">{l('Server and port')}</span>
