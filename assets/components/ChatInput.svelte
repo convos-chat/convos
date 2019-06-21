@@ -49,7 +49,7 @@ function calculateAutocompleteOptions([before, key, afterKey, after]) {
     for (let i = 0; i < channels.length; i++) {
       if (opts.length >= maxNumMatches) break;
       if (channels[i].name.toLowerCase().indexOf(key + afterKey) == -1) continue;
-      opts.push({text: channels[i].name, val: channels[i].id});
+      opts.push({text: channels[i].name, val: channels[i].dialog_id});
     }
   }
 
@@ -90,7 +90,7 @@ function focusAutocompleteItem(e, moveBy) {
 function sendMessage() {
   const msg = {
     connection_id: dialog.connection_id,
-    dialog_id: dialog.isDialog ? dialog.id : '',
+    dialog_id: dialog.dialog_id,
     message: inputEl.value,
     method: 'send',
   };
@@ -128,12 +128,13 @@ const keys = {
 };
 
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
+$: connection = user.findDialog({connection_id: dialog.connection_id});
 $: inputParts = pos && calculateInputParts(pos) || ['', '', '', ''];
 </script>
 
 <div class="chat-input">
   <textarea
-    placeholder="{l('What is on your mind?')}"
+    placeholder="{l('What is on your mind %1?', $connection.nick)}"
     bind:this="{inputEl}"
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
     on:keyup="{e => keys.Release(e)}"></textarea>

@@ -1,8 +1,9 @@
 import Connection from './Connection';
 import Dialog from './Dialog';
 import Operation from './Operation';
-import {get, writable} from 'svelte/store';
-import {ro, sortByName} from '../js/util';
+import {sortByName} from '../js/util';
+
+let msgId = 0;
 
 export default class User extends Operation {
   constructor(params) {
@@ -12,42 +13,47 @@ export default class User extends Operation {
       id: 'getUser',
     });
 
-    this.msgId = 0;
-    ro(this, 'email', () => this.res.body.email || '');
-    ro(this, 'wsUrl', params.wsUrl);
+    this._readOnlyAttr('email', () => this.res.body.email || '');
+    this._readOnlyAttr('notifications', new Dialog({api: this.api, name: 'Notifications'}));
+    this._readOnlyAttr('wsUrl', params.wsUrl);
 
-    // "User" is a store, but it has sub svelte stores that can be watched
-    ro(this, 'connections', writable([]));
-    ro(this, 'enableNotifications', writable(Notification.permission));
-    ro(this, 'expandUrlToMedia', writable(false));
-    ro(this, 'notifications', new Dialog({api: this.api, name: 'Notifications'}));
+    this._updateableAttr('connections', []);
+    this._updateableAttr('enableNotifications', Notification.permission);
+    this._updateableAttr('expandUrlToMedia', true);
 
     // Add operations that will affect the "User" object
     // TODO: Make operations bubble into the User object. Require changes in App.svelte
-    ro(this, 'login', this.api.operation('loginUser'));
-    ro(this, 'logout', this.api.operation('logoutUser'));
-    ro(this, 'readNotifications', this.api.operation('readNotifications'));
-    ro(this, 'register', this.api.operation('registerUser'));
+    this._readOnlyAttr('login', this.api.operation('loginUser'));
+    this._readOnlyAttr('logout', this.api.operation('logoutUser'));
+    this._readOnlyAttr('readNotifications', this.api.operation('readNotifications'));
+    this._readOnlyAttr('register', this.api.operation('registerUser'));
   }
 
   ensureDialog(params) {
-    // Ensure channel or private conversation
-    if (params.dialog_id) return this.ensureDialog({connection_id: params.connection_id}).ensureDialog(params);
+    // Ensure channel or private dialog
+    if (params.dialog_id) {
+      const dialog = this.ensureDialog({connection_id: params.connection_id}).ensureDialog(params);
+      this.update({});
+      return dialog;
+    }
 
     // Find connection
     let conn = this.findDialog(params);
-    if (conn) return conn.update(params);
+    if (conn) {
+      this.update({});
+      return conn.update(params);
+    }
 
     // Create connection
     conn = new Connection({...params, api: this.api});
-    this.connections.set(get(this.connections).concat(conn).sort(sortByName));
+    this.update({connections: this.connections.concat(conn).sort(sortByName)});
     return conn;
   }
 
   findDialog(params) {
-    if (!params.dialog_id) return get(this.connections).filter(conn => conn.id == params.connection_id)[0];
+    if (!params.dialog_id) return this.connections.filter(conn => conn.connection_id == params.connection_id)[0];
     const conn = this.findDialog({connection_id: params.connection_id});
-    return conn && conn.findDialog(params)
+    return conn && conn.findDialog(params);
   }
 
   async load() {
@@ -57,6 +63,7 @@ export default class User extends Operation {
 
   parse(res, body = res.body) {
     Operation.prototype.parse.call(this, res, body);
+    if (body.notifications) this.notifications.update({messages: body.notifications}); // Need to be done before this.update()
     if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
     if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
     return this;
@@ -66,15 +73,16 @@ export default class User extends Operation {
     if (params.dialog_id) {
       const conn = this.findDialog({connection_id: params.connection_id});
       if (conn) conn.removeDialog(params);
+      this.update({});
     }
     else {
-      this.connections.set(get(this.connections).filter(conn => conn.id != params.connection_id));
+      this.update({connections: this.connections.filter(conn => conn.connection_id != params.connection_id)});
     }
   }
 
   async send(msg) {
     const ws = await this._ws();
-    if (!msg.id) msg.id = (++this.msgId);
+    if (!msg.id) msg.id = (++msgId);
     ws.send(JSON.stringify(msg));
   }
 
@@ -93,19 +101,15 @@ export default class User extends Operation {
 
       ws.onclose = (e) => {
         this._wsReconnectTid = setTimeout(() => this._ws(), 1000);
-        get(this.connections).forEach(conn => { conn.status = 'Unreachable.' });
+        this.connections.forEach(conn => { conn.status = 'Unreachable.' });
+        this.update({});
         if (![handled, (handled = true)][0]) reject(e);
       };
 
       ws.onerror = (e) => reject(e); // TODO
       ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
-
-        if (data.event == 'message') {
-          this.ensureDialog(data).messages.add(data);
-        }
-
-        console.log('TODO: Handle WebSocket message', data);
+        console.log('TODO: Add an eventDispatcher', data);
       };
     });
   }

@@ -1,23 +1,23 @@
-const validStatus = {error: true, loading: true, pending: true, success: true};
+import Reactive from '../js/Reactive';
 
-export default class Operation {
+const validStatus = ['error', 'loading', 'pending', 'success'];
+
+export default class Operation extends Reactive {
   constructor(params) {
-    // Read-only properties
-    ['api', 'defaultParams', 'id'].forEach(name => {
-      Object.defineProperty(this, name, {value: params[name], writable: false});
-    });
+    super();
 
-    this.err = null;
-    this.res = {body: {}, headers: {}};
-    this.req = {body: null, headers: {}};
-    this.subscribers = [];
-    this._status = 'pending';
+    this._readOnlyAttr('api', params.api);
+    this._readOnlyAttr('defaultParams', params.defaultParams || {});
+    this._readOnlyAttr('id', params.id);
+    this._readOnlyAttr('req', {body: null, headers: {}});
+    this._readOnlyAttr('res', {body: {}, headers: {}});
+    this._updateableAttr('err', null);
+    this._updateableAttr('status', 'pending');
   }
 
   error(err) {
     if (err) { // Set error
-      this.err = Array.isArray(err) ? err : [{message: err}];
-      return this._notifySubscribers('error');
+      return this.update({err: Array.isArray(err) ? err : [{message: err}], status: 'error'});
     }
     else if (!this.err || !this.err.length) { // No error
       return '';
@@ -33,7 +33,7 @@ export default class Operation {
     const opSpec = await this.api.spec(this.id);
     if (!opSpec) return this.error('Invalid operationId "' + this.id + '".');
 
-    this._notifySubscribers('loading');
+    this.update({status: 'loading'});
     const [url, req] = await this._paramsToRequest(opSpec, params || this.defaultParams);
     const res = await fetch(url, req);
     const json = await res.json();
@@ -41,9 +41,8 @@ export default class Operation {
   }
 
   is(status) {
-    const statusIs = this._status == status;
-    if (!validStatus[status]) throw 'Invalid status: ' + status;
-    return statusIs;
+    if (validStatus.indexOf(status) == -1) throw 'Invalid status: ' + status;
+    return this.status == status;
   }
 
   parse(res, body = res.body) {
@@ -52,27 +51,19 @@ export default class Operation {
     this.res.statusText = res.statusText;
     if (res.headers) this.res.headers = res.headers;
 
-    if (String(this.res.status).match(/^[23]/)) {
-      this.err = null;
-      return this._notifySubscribers('success');
+    let err = null;
+    if (!String(this.res.status).match(/^[23]/)) {
+      err = body && body.errors ? body.errors : [{message: res.statusText || 'Unknown error.'}];
     }
-    else {
-      this.err = body && body.errors ? body.errors : [{message: res.statusText || 'Unknown error.'}];
-      return this._notifySubscribers('error');
-    }
+
+    return this.update({err, status: err ? 'error' : 'success'});
   }
 
   reset() {
-    this.res = {body: {}, headers: {}};
-    this.err = null;
-    this._notifySubscribers('pending');
-  }
-
-  // This is used by https://svelte.dev/docs#svelte_store
-  subscribe(cb) {
-    this.subscribers.push(cb);
-    cb(this);
-    return () => this.subscribers.filter(i => (i != cb));
+    this.res.body = {};
+    this.res.headers = {};
+    this.res.status = 0;
+    return this.update({err: null, status: 'pending'});
   }
 
   _extractValue(params, p) {
@@ -104,13 +95,6 @@ export default class Operation {
     else {
       return params.hasOwnProperty(p.name);
     }
-  }
-
-  _notifySubscribers(status = this._status) {
-    if (!validStatus[status]) throw 'Invalid status: ' + status;
-    this._status = status;
-    this.subscribers.forEach(cb => cb(this));
-    return this;
   }
 
   _paramsToRequest(opSpec, params) {
