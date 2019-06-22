@@ -113,6 +113,10 @@
     right: ($gutter / 2);
     top: 0.5rem;
 
+    &.fa-check-circle {
+      display: none;
+    }
+
     &.fa-unlink {
       opacity: 0.5;
     }
@@ -137,14 +141,15 @@
   }
 
   .unread {
-    background-color: darken($sidebar-bg, 4%);
-    line-height: 1em;
-    border: 1px solid lighten($sidebar-bg, 10%);
-    border-radius: 50%;
+    background-color: lighten($success, 5%);
+    color: $sidebar-bg;
+    font-size: 0.9rem;
+    line-height: 0.9rem;
+    border-radius: 0.5em;
     padding: 0.15em 0.4em;
     position: absolute;
-    top: 0.2em;
-    right: $gutter;
+    top: 0.4em;
+    right: 0.3em;
   }
 }
 
