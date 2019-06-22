@@ -7,7 +7,7 @@ export let replace = false;
 
 let classNames = [];
 
-function calculateClassNames($pathname) {
+function calculateClassNames(href, $pathname) {
   classNames = className ? [className] : [];
   if (href.indexOf($pathname) == 0) classNames = [...classNames, 'has-basepath'];
   if ($pathname == href.replace(/#/, '')) classNames = [...classNames, 'has-path'];
@@ -21,7 +21,7 @@ function onClick(e) {
   history[replace ? 'replaceState' : 'pushState']({}, document.title, aEl.href);
 }
 
-$: calculateClassNames($pathname);
+$: calculateClassNames(href, $pathname);
 </script>
 
 <a {href} on:click={onClick} class={classNames.join(' ')}><slot/></a>
