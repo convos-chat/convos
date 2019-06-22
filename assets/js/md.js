@@ -35,7 +35,7 @@ export function md(str, params = {}) {
   }
 
   if (params.emoji !== false) {
-    str = str.replace(text2emojiRe, (all, pre, emoji) => pre + (text2emoji[emoji] || emoji));
+    str = str.replace(text2emojiRe, (all, pre, emoji) => pre + (text2emojiMap[emoji] || emoji));
     str = emojione.toImage(str);
   }
 
