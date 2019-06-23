@@ -1,59 +1,28 @@
 <script>
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
-import {md} from '../js/md';
-import emojione from 'emojione';
+import autocomplete from '../js/autocomplete';
 import Icon from '../components/Icon.svelte';
 
 export let dialog = {};
 
 let activeAutocompleteIndex = 0;
-let autocompleteCategory = 'chat';
-let maxNumMatches = 20;
+let autocompleteCategory = 'none';
 let inputEl;
 let pos;
 
 const user = getContext('user');
 
-// TODO: Allow user to select tone in settings
-const emojis = {};
-Object.keys(emojione.emojioneList).filter(i => !i.match(/_tone/)).sort().forEach(emoji => {
-  emoji.match(/(_|:)\w/g).forEach(k => {
-    if (!emojis[k]) emojis[k] = [];
-    emojis[k].push(emoji);
-  });
-});
-
 function calculateAutocompleteOptions([before, key, afterKey, after]) {
-  const opts = [];
-
-  if (key == ':' && afterKey.length) { // Emojis
-    autocompleteCategory = 'emoji';
-    [':', '_'].map(p => p + afterKey.substring(0, 1)).filter(group => emojis[group]).forEach(group => {
-      for (let i = 0; i < emojis[group].length; i++) {
-        if (opts.length >= maxNumMatches) break;
-        if (emojis[group][i].indexOf(afterKey) >= 0) opts.push({val: emojis[group][i], text: md(emojis[group][i])});
-      }
-    });
-  }
-  else if (key == '/' && afterKey.length) { // Commands
-    console.log('TODO: Autocomplete commands ' + afterKey);
-  }
-  else if (key == '@' && afterKey.length) { // Private conversations
-    console.log('TODO: Autocomplete private conversations ' + afterKey);
-    autocompleteCategory = 'nick';
-  }
-  else if ((key == '#' || key == '&')) { // Group connversations
-    autocompleteCategory = 'channel';
-    const channels = user.findDialog({connection_id: dialog.connection_id}).channels;
-    for (let i = 0; i < channels.length; i++) {
-      if (opts.length >= maxNumMatches) break;
-      if (channels[i].name.toLowerCase().indexOf(key + afterKey) == -1) continue;
-      opts.push({text: channels[i].name, val: channels[i].dialog_id});
-    }
-  }
+  autocompleteCategory =
+      key == ':' && afterKey.length ? 'emojis'
+    : key == '/' && !before.length  ? 'commands'
+    : key == '@' && afterKey.length ? 'nicks'
+    : key == '#' || key == '&'      ? 'channels'
+    :                                 'none';
 
   activeAutocompleteIndex = 0;
+  const opts = autocomplete(autocompleteCategory, {dialog, query: key + afterKey, user});
   if (opts.length) opts.unshift({val: key + afterKey});
   return opts;
 }
