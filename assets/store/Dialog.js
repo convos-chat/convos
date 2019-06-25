@@ -45,4 +45,10 @@ export default class Dialog extends Reactive {
     await this.op.perform(this);
     this.update({messages: this.op.res.body.messages || []});
   }
+
+  participant(id, params = {}) {
+    if (!this.participants[id]) this.participants[id] = {ts: new Date()};
+    Object.keys(params).forEach(k => { this.participants[id][k] = params[k] });
+    return this.participants[id];
+  }
 }

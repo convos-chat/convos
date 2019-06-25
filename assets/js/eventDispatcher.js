@@ -4,29 +4,25 @@ function on(eventNames, cb) {
   eventNames.split('|').forEach(name => { on[name] = cb });
 }
 
-on('close|part', (params, {user}) => {
-  user.removeDialog(params);
-
+on('connection', ({params}, {user}) => {
   const conn = user.findDialog({connection_id: params.connection_id});
-  const dialog = conn.dialogs().sort((a, b) => b.last_active.localeCompare(a.last_active))[0];
-  const path = ['', 'chat', params.connection_id];
-  if (dialog) path.push(dialog.dialog_id);
-  gotoUrl(path.map(encodeURIComponent).join('/'));
+  conn.update({frozen: params.message || '', state: params.state});
 });
 
 on('frozen', (params, {user}) => {
-  const dialog = user.findDialog(params);
-  if (dialog) return dialog.update(params);
-  return console.log('TODO: Handle frozen if the dialog does not exist', params);
+  const conn = user.findDialog({connection_id: params.connection_id});
+  const existing = user.findDialog(params);
+  user.ensureDialog(params).participant(conn.nick, {me: true});
+  if (!existing) gotoUrl(['', 'chat', params.connection_id, params.dialog_id].map(encodeURIComponent).join('/'));
 });
 
 on('join', (params, {user}) => {
-  user.ensureDialog(params);
-  gotoUrl(['', 'chat', params.connection_id, params.dialog_id].map(encodeURIComponent).join('/'));
+  const dialog = user.findDialog(params);
+  dialog.participant(params.nick, {});
+  dialog.update({});
 });
 
 on('me', (params, {user}) => {
-  console.log('TODO: Improve handling of "me" event.', params);
   const conn = user.ensureDialog({connection_id: params.connection_id});
   conn.update({nick: params.nick});
 });
@@ -39,8 +35,37 @@ on('message', (params, {user}) => {
   if (conn) return conn.addMessage(params);
 });
 
+on('mode', (params, {user}) => {
+  const dialog = user.findDialog(params);
+  dialog.participant(params.nick, {mode: params.mode});
+  dialog.update({});
+});
+
 on('nick_change', (params, {user}) => {
-  console.log('TODO: Handle nick_change', params);
+  const dialog = user.findDialog(params);
+  dialog.participant(params.new_nick, dialog.participants[params.old_nick] || {});
+  delete dialog.participants[params.old_nick];
+  dialog.update({});
+});
+
+on('part', (params, {user}) => {
+  const dialog = user.findDialog(params);
+  const participant = dialog.participants[params.nick] || {};
+
+  if (participant.me) {
+    user.removeDialog(params);
+
+    // Change active conversation
+    const conn = user.findDialog({connection_id: params.connection_id});
+    const nextDialog = conn.dialogs().sort((a, b) => b.last_active.localeCompare(a.last_active))[0];
+    const path = ['', 'chat', params.connection_id];
+    if (nextDialog) path.push(nextDialog.dialog_id);
+    gotoUrl(path.map(encodeURIComponent).join('/'));
+  }
+  else {
+    delete dialog.participants[params.nick];
+    dialog.update({});
+  }
 });
 
 on('pong', (params, {user}) => {
@@ -48,9 +73,7 @@ on('pong', (params, {user}) => {
 });
 
 on('sent', (params, {user}) => {
-  const message = (params.message || '').toLowerCase().match(/^\/(\S+)\s*(.*)/) || ['', ''];
-  if (on[message[1]]) return on[message[1]](params, {user});
-  return console.log('TODO: Handle sent event:', params);
+  console.log('TODO: Handle sent event:', params);
 });
 
 on('quit', (params, {user}) => {
@@ -58,8 +81,7 @@ on('quit', (params, {user}) => {
 });
 
 on('topic', (params, {user}) => {
-  const dialog = user.findDialog(params);
-  if (dialog) dialog.update({topic: params.topic});
+  user.ensureDialog(params).update({topic: params.topic});
 });
 
 export default function eventDispatcher(params, {user}) {
