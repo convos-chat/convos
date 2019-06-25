@@ -2,6 +2,7 @@ import Connection from './Connection';
 import Dialog from './Dialog';
 import Operation from './Operation';
 import eventDispatcher from '../js/eventDispatcher';
+import eventMessages from '../js/eventMessages';
 import {sortByName} from '../js/util';
 
 let msgId = 0;
@@ -108,7 +109,11 @@ export default class User extends Operation {
       };
 
       ws.onerror = (e) => reject(e); // TODO
-      ws.onmessage = (e) => eventDispatcher(JSON.parse(e.data), {user: this});
+      ws.onmessage = (e) => {
+        const event = JSON.parse(e.data);
+        eventDispatcher(event, {user: this});
+        eventMessages(event, {user: this});
+      };
     });
   }
 }
