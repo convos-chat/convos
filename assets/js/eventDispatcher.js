@@ -1,7 +1,7 @@
 import {gotoUrl} from '../store/router';
 
-function on(eventNames, cb) {
-  eventNames.split('|').forEach(name => { on[name] = cb });
+function on(name, cb) {
+  on[name] = cb;
 }
 
 on('connection', ({params}, {user}) => {
@@ -25,14 +25,6 @@ on('join', (params, {user}) => {
 on('me', (params, {user}) => {
   const conn = user.ensureDialog({connection_id: params.connection_id});
   conn.update({nick: params.nick});
-});
-
-on('message', (params, {user}) => {
-  const dialog = user.findDialog(params);
-  if (dialog) return dialog.addMessage(params);
-
-  const conn = user.ensureDialog({connection_id: params.connection_id});
-  if (conn) return conn.addMessage(params);
 });
 
 on('mode', (params, {user}) => {
@@ -86,6 +78,5 @@ on('topic', (params, {user}) => {
 
 export default function eventDispatcher(params, {user}) {
   const method = on[params.event == 'state' ? params.type : params.event];
-  if (method) return method(params, {user});
-  console.log('TODO: Cannot dispatch event', params);
+  if (method) method(params, {user});
 }

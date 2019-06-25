@@ -1,4 +1,5 @@
 import Reactive from '../js/Reactive';
+import {l} from '../js/i18n';
 
 export default class Dialog extends Reactive {
   constructor(params) {
@@ -34,9 +35,11 @@ export default class Dialog extends Reactive {
     }
   }
 
-  addMessage(message) {
-    if (!message.ts) message.ts = new Date().toISOString();
-    this.messages.push(message);
+  addMessage(msg) {
+    if (!msg.ts) msg.ts = new Date().toISOString();
+    if (!msg.from) msg.from = this.connection_id || 'Convos';
+    if (msg.vars) msg.message = l(msg.message, ...msg.vars);
+    this.messages.push(msg);
     this.update({});
   }
 
