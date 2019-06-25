@@ -28,7 +28,7 @@ my %IRC_PROXY_METHOD = (
 
 has _irc => sub {
   my $self = shift;
-  my $irc = Mojo::IRC::UA->new(debug_key => join ':', $self->user->email, $self->name);
+  my $irc  = Mojo::IRC::UA->new(debug_key => join ':', $self->user->email, $self->name);
 
   Scalar::Util::weaken($self);
   $irc->name("Convos v$Convos::VERSION");
@@ -359,13 +359,13 @@ sub _part_dialog {
   return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
 
   my $dialog = $self->get_dialog($name);
-  return $self->tap(remove_dialog => $name)->save($cb) if $dialog and $dialog->is_private;
-  return $self->tap(remove_dialog => $name)->save($cb) if $self->state eq 'disconnected';
+  return $self->_remove_dialog($name)->save($cb) if $dialog and $dialog->is_private;
+  return $self->_remove_dialog($name)->save($cb) if $self->state eq 'disconnected';
   return $self->_proxy(
     part_channel => $name,
     sub {
       my ($irc, $err) = @_;
-      $self->tap(remove_dialog => $name)->save($cb);
+      $self->_remove_dialog($name)->save($cb);
     }
   );
 }
@@ -374,6 +374,13 @@ sub _proxy {
   my ($self, $method) = (shift, shift);
   $self->_irc->$method(@_);
   $self;
+}
+
+sub _remove_dialog {
+  my ($self, $name) = @_;
+  my $dialog = $self->remove_dialog($name);
+  $self->emit(state => part => {dialog_id => lc $name, nick => $self->_irc->nick});
+  return $self;
 }
 
 sub _send {
@@ -422,7 +429,7 @@ sub _send {
         my ($irc, $err) = @_;
         return $self->$cb($err) if $err and !$cb_called++;
         $msg->{prefix} = sprintf '%s!%s@%s', $irc->nick, $irc->user, $irc->server;
-        $msg->{event} = lc $msg->{command};
+        $msg->{event}  = lc $msg->{command};
         next_tick $self, _event_privmsg => $msg;
         $self->$cb('') unless $cb_called++;
       }
@@ -589,7 +596,7 @@ sub _event_privmsg {
   if ($user) {
     $target = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
     $target = $self->get_dialog($target) || $self->dialog({name => $target});
-    $from = $nick;
+    $from   = $nick;
   }
 
   $target ||= $self->messages;
@@ -626,7 +633,7 @@ sub _event_quit {
 
 sub _event_rpl_list {
   my ($self, $msg) = @_;
-  my $host = $self->url->host;
+  my $host  = $self->url->host;
   my $store = $self->_room_cache->{$host} ||= {};
   my $room
     = {name => $msg->{params}[1], n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
@@ -687,7 +694,7 @@ sub _event_topic {
 }
 
 sub DESTROY {
-  my $self = shift;
+  my $self   = shift;
   my $ioloop = $self->{_irc}{ioloop} or return;
   my $tid;
   $ioloop->remove($tid) if $tid = $self->{steal_nick_tid};

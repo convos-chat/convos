@@ -10,16 +10,11 @@ export default class Connection extends Dialog {
     this._updateableAttr('state', params.state || 'queued');
     this._updateableAttr('wanted_state', params.wanted_state || 'connected');
     this._updateableAttr('url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
+    this._updateableAttr('nick', params.nick || this.url.searchParams.get('nick') || '');
 
     // Dialogs by category
     this._updateableAttr('channels', []);
     this._updateableAttr('private', []);
-
-    // Proxy attribute
-    Object.defineProperty(this, 'nick', {
-      get: () => this.url.searchParams.get('nick') || '',
-      set: (val) => { this.url.searchParams.set('nick', val); this.update({}) },
-    });
   }
 
   dialogs() {
