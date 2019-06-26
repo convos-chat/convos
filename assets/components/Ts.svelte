@@ -10,7 +10,7 @@ function renderHuman(date) {
   return hms.join(':');
 }
 
-$: date = new Date(val.replace(/T/, ' '));
+$: date = new Date(val);
 $: human = renderHuman(date);
 </script>
 
