@@ -4,13 +4,11 @@ import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {pathParts} from '../store/router';
 import ChatInput from '../components/ChatInput.svelte';
-import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import ServerSettings from '../components/ServerSettings.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
-import StateIcon from '../components/StateIcon.svelte';
 import Ts from '../components/Ts.svelte';
 
 const user = getContext('user');
@@ -23,6 +21,10 @@ function isSameMessage(i) {
   return i == 0 ? false : messages[i].from == messages[i - 1].from;
 }
 
+function partDialog() {
+  user.send({message: '/part', method: 'send', dialog});
+}
+
 function toggleSettings(e) {
   settingsIsVisible = !settingsIsVisible;
 }
@@ -31,7 +33,6 @@ $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathPart
 $: dialog.load();
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: messages = $dialog.messages;
-$: settingComponent = $pathParts[2] ? DialogSettings : ServerSettings;
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
 $: settingsIsVisible = $pathParts && false; // Force to false when path changes
@@ -40,16 +41,18 @@ $: settingsIsVisible = $pathParts && false; // Force to false when path changes
 <SidebarChat/>
 
 <div class="main-app-pane without-padding" class:has-visible-settings="{settingsIsVisible}" bind:offsetHeight="{height}">
-  <h1 class="main-header">
-    <span>{$pathParts[2] || $pathParts[1] || l('Notifications')}</span>
-    {#if dialog.connection_id}
+  <header class="main-header">
+    <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
+    {#if dialog.dialog_id}
       <small><DialogSubject dialog="{dialog}"/></small>
-      <a href="#settings" class="main-header_settings-toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
-      <StateIcon obj="{dialog}"/>
+      <a href="#close" class="main-header_toggle" on:click|preventDefault="{partDialog}"><Icon name="times"/></a>
+    {:else if dialog.connection_id}
+      <small><DialogSubject dialog="{dialog}"/></small>
+      <a href="#settings" class="main-header_toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
     {:else}
-      <a href="#clear" class="main-header_settings-toggle" on:click|preventDefault="{e => user.readNotifications.perform()}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
+      <a href="#clear" class="main-header_toggle" on:click|preventDefault="{e => user.readNotifications.perform()}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
     {/if}
-  </h1>
+  </header>
 
   <main class="messages-container">
     {#if messages.length == 0}
@@ -76,5 +79,5 @@ $: settingsIsVisible = $pathParts && false; // Force to false when path changes
   <ChatInput dialog="{dialog}"/>
   {/if}
 
-  <svelte:component this={settingComponent} dialog="{dialog}"/>
+  <ServerSettings dialog="{dialog}"/>
 </div>

@@ -85,6 +85,8 @@ export default class User extends Operation {
   async send(msg) {
     const ws = await this._ws();
     if (!msg.id) msg.id = (++msgId);
+    if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] });
+    delete msg.dialog;
     ws.send(JSON.stringify(msg));
   }
 
