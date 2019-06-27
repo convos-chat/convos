@@ -6,7 +6,7 @@ function on(name, cb) {
   on[name] = cb;
 }
 
-on('connection', ({params}, {user}) => {
+on('connection', (params, {user}) => {
   const dialog = user.findDialog({connection_id: params.connection_id});
   dialog.addMessage(params.message
     ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}

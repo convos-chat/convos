@@ -4,7 +4,7 @@ function on(name, cb) {
   on[name] = cb;
 }
 
-on('connection', ({params}, {user}) => {
+on('connection', (params, {user}) => {
   const conn = user.findDialog({connection_id: params.connection_id});
   conn.update({frozen: params.message || '', state: params.state});
 });

@@ -20,7 +20,7 @@ let url = '';
 
 async function setConnectionState(e) {
   const aEl = e.target.closest('a') || e.target;
-  const clone = {...connection, wanted_state: aEl.href.replace(/.*#/, '')};
+  const clone = {connection_id: dialog.connection_id, wanted_state: aEl.href.replace(/.*#/, '')};
   await updateConnectionOp.perform(clone);
   user.ensureDialog(updateConnectionOp.res.body);
 }
@@ -36,7 +36,7 @@ async function updateConnectionFromForm(e) {
   user.ensureDialog(updateConnectionOp.res.body);
 }
 
-$: connection = user.findDialog({connection_id: dialog.connection_id}) || {};
+$: connection = $user.findDialog({connection_id: dialog.connection_id}) || {};
 $: isNotDisconnected = connection.state != 'disconnected';
 
 $: if (connection.url && formEl) {
@@ -70,7 +70,7 @@ $: if (connection.url && formEl) {
     </PasswordField>
     <FormActions>
       <button class="btn">{l('Update connection')}</button>
-      <a href="#{isNotDisconnected ? 'connected' : 'disconnected'}" class="btn" on:click|preventDefault="{setConnectionState}">{l(isNotDisconnected ? 'Connect' : 'Disconnect')}</a>
+      <a href="#{isNotDisconnected ? 'disconnected' : 'connected'}" class="btn" on:click|preventDefault="{setConnectionState}">{l(isNotDisconnected ? 'Disconnect' : 'Connect')}</a>
       <a href="#delete" class="btn" on:click|preventDefault="{deleteConnection}">{l('Delete')}</a>
       <StateIcon obj="{connection}"/>
     </FormActions>

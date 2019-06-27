@@ -45,4 +45,9 @@ export default class Connection extends Dialog {
       private: this.private.filter(d => d.dialog_id != params.dialog_id),
     });
   }
+
+  update(params) {
+    if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
+    return super.update(params);
+  }
 }
