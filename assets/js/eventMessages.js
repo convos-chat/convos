@@ -23,11 +23,8 @@ on('join', (params, {user}) => {
 });
 
 on('message', (params, {user}) => {
-  const dialog = user.findDialog(params);
+  const dialog = user.ensureDialog(params);
   if (dialog) return dialog.addMessage(params);
-
-  const conn = user.ensureDialog({connection_id: params.connection_id});
-  if (conn) return conn.addMessage(params);
 });
 
 on('mode', (params, {user}) => {
