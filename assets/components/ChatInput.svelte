@@ -57,13 +57,7 @@ function focusAutocompleteItem(e, moveBy) {
 }
 
 function sendMessage() {
-  const msg = {
-    connection_id: dialog.connection_id,
-    dialog_id: dialog.dialog_id,
-    message: inputEl.value,
-    method: 'send',
-  };
-
+  const msg = {message: inputEl.value, method: 'send', dialog};
   const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
   console.log('TODO: Improve handling of "/action ..."', action);
 
