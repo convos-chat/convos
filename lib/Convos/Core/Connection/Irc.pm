@@ -96,7 +96,13 @@ sub disconnect {
   my ($self, $cb) = @_;
   Scalar::Util::weaken($self);
   $self->{disconnect} = 1;
-  $self->_proxy(disconnect => sub { $self->state('disconnected')->$cb($_[1] || '') });
+  $self->_proxy(
+    disconnect => sub {
+      $self->emit(state => frozen => $_->frozen('Not connected.')->TO_JSON)
+        for grep { !$_->frozen } @{$self->dialogs};
+      $self->state('disconnected')->$cb($_[1] || '');
+    }
+  );
 }
 
 sub nick {
