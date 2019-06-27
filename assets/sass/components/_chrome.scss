@@ -4,6 +4,21 @@ body {
   margin: 0;
 }
 
+body.with-grid::after {
+  content: '';
+  background-image: repeating-linear-gradient(0deg, #f00 0px, #f00 1px, transparent 1px, transparent 21px);
+  background-size: 40px 40px;
+  background-position-y: 0px;
+  height: 100vh;
+  width: 100vw;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  opacity: 0.4;
+}
+
 body.no-js {
   .if-js {
     display: none;
