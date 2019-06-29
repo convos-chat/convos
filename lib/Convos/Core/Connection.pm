@@ -10,15 +10,15 @@ use Mojo::URL;
 $IO::Socket::SSL::DEBUG = $ENV{CONVOS_SSL_DEBUG} if $ENV{CONVOS_SSL_DEBUG};
 
 has messages => sub {
-  my $self = shift;
-  my $dialog = Convos::Core::Dialog->new(id => '', name => '');
+  my $self   = shift;
+  my $dialog = Convos::Core::Dialog->new(id => '', name => $self->name);
   Scalar::Util::weaken($dialog->{connection} = $self);
   return $dialog;
 };
 
 sub name { shift->{name} }
 has on_connect_commands => sub { +[] };
-has protocol => 'null';
+has protocol            => 'null';
 
 sub url {
   my ($self, $url) = @_;
@@ -123,7 +123,7 @@ sub _rooms {
 }
 
 sub _userinfo {
-  my $self = shift;
+  my $self     = shift;
   my @userinfo = split /:/, $self->url->userinfo // '';
 
   unless ($userinfo[0]) {
@@ -137,7 +137,7 @@ sub _userinfo {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my $url = $self->url;
+  my $url  = $self->url;
   my %json = map { ($_, $self->$_) } qw(name protocol wanted_state);
 
   $json{connection_id}       = $self->id;
