@@ -1,8 +1,7 @@
 import Connection from './Connection';
 import Dialog from './Dialog';
+import Events from '../js/Events';
 import Operation from './Operation';
-import eventDispatcher from '../js/eventDispatcher';
-import eventMessages from '../js/eventMessages';
 import {sortByName} from '../js/util';
 
 let msgId = 0;
@@ -18,6 +17,7 @@ export default class User extends Operation {
     this._readOnlyAttr('email', () => this.res.body.email || '');
     this._readOnlyAttr('notifications', new Dialog({api: this.api, name: 'Notifications'}));
     this._readOnlyAttr('wsUrl', params.wsUrl);
+    this._readOnlyAttr('events', new Events({user: this}));
 
     this._updateableAttr('connections', []);
     this._updateableAttr('enableNotifications', Notification.permission);
@@ -85,7 +85,7 @@ export default class User extends Operation {
   async send(msg) {
     const ws = await this._ws();
     if (msg.method == 'ping') return this._ping();
-    if (!msg.id) msg.id = (++msgId);
+    if (!msg.id) msg.id = (this.source || 'user') + (++msgId);
     if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] });
     delete msg.dialog;
     ws.send(JSON.stringify(msg));
@@ -117,11 +117,7 @@ export default class User extends Operation {
       };
 
       ws.onerror = (e) => reject(e); // TODO
-      ws.onmessage = (e) => {
-        const event = JSON.parse(e.data);
-        eventMessages(event, {user: this});
-        eventDispatcher(event, {user: this});
-      };
+      ws.onmessage = (e) => this.events.dispatch(JSON.parse(e.data));
     });
 
     return (this._wsPromise = p);
