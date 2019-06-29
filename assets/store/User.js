@@ -60,7 +60,7 @@ export default class User extends Operation {
 
   async load() {
     await this.perform();
-    if (this.email) await this.send({});
+    if (this.email) await this.send({method: 'ping'});
   }
 
   parse(res, body = res.body) {
@@ -84,27 +84,33 @@ export default class User extends Operation {
 
   async send(msg) {
     const ws = await this._ws();
+    if (msg.method == 'ping') return this._ping();
     if (!msg.id) msg.id = (++msgId);
     if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] });
     delete msg.dialog;
     ws.send(JSON.stringify(msg));
   }
 
+  _ping() {
+    if (this.ws && this.ws.readyState == 1) this.ws.send('{"method":"ping"}');
+  }
+
   async _ws() {
-    if (this.ws && [0, 1].indexOf(this.ws.readyState) != -1) return this.ws; // [CONNECTING, OPEN, CLOSING, CLOSED]
+    if (this._wsPromise) return this._wsPromise;
     if (this._wsReconnectTid) clearTimeout(this._wsReconnectTid);
 
     const ws = new WebSocket(this.wsUrl);
-    if (!this.ws) this.ws = ws;
+    if (!this._wsTid) this._wsTid = setInterval(() => this._ping(), 15000);
 
     let handled = false;
-    return new Promise((resolve, reject) => {
+    const p = new Promise((resolve, reject) => {
       ws.onopen = () => {
         if (![handled, (handled = true)][0]) resolve((this.ws = ws));
       };
 
       ws.onclose = (e) => {
-        this._wsReconnectTid = setTimeout(() => this._ws(), 1000);
+        delete this._wsPromise;
+        this._wsReconnectTid = setTimeout(() => this._ws(), 20000);
         this.connections.forEach(conn => { conn.status = 'Unreachable.' });
         this.update({});
         if (![handled, (handled = true)][0]) reject(e);
@@ -117,5 +123,7 @@ export default class User extends Operation {
         eventDispatcher(event, {user: this});
       };
     });
+
+    return (this._wsPromise = p);
   }
 }
