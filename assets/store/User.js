@@ -113,8 +113,8 @@ export default class User extends Operation {
       ws.onerror = (e) => reject(e); // TODO
       ws.onmessage = (e) => {
         const event = JSON.parse(e.data);
-        eventDispatcher(event, {user: this});
         eventMessages(event, {user: this});
+        eventDispatcher(event, {user: this});
       };
     });
   }
