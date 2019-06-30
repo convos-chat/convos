@@ -1,14 +1,23 @@
 export default class Reactive {
   constructor() {
     this._reactive = {};
-    this._subscribers = [];
+    this._on = {message: [], update: []};
+  }
+
+  emit(event, params) {
+    this._on[event].forEach(cb => cb(params));
+  }
+
+  on(event, cb) {
+    this._on[event].push(cb);
+    return () => this._on[event].filter(i => (i != cb));
   }
 
   // This is used by https://svelte.dev/docs#svelte_store
   subscribe(cb) {
-    this._subscribers.push(cb);
+    this._on.update.push(cb);
     cb(this);
-    return () => this._subscribers.filter(i => (i != cb));
+    return () => this._on.update.filter(i => (i != cb));
   }
 
   update(params) {
@@ -22,7 +31,7 @@ export default class Reactive {
 
   _notify() {
     delete this._notifyTid;
-    this._subscribers.forEach(cb => cb(this));
+    this._on.update.forEach(cb => cb(this));
   }
 
   _readOnlyAttr(name, val) {
