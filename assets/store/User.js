@@ -48,6 +48,7 @@ export default class User extends Operation {
 
     // Create connection
     conn = new Connection({...params, api: this.api});
+    conn.on('message', params => this.send({source: 'connection', ...params}));
     this.update({connections: this.connections.concat(conn).sort(sortByName)});
     return conn;
   }
