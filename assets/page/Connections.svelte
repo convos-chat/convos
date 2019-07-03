@@ -27,7 +27,7 @@ async function createConnectionFromForm(e) {
 
 <SidebarChat/>
 
-<main class="main-app-pane align-content-middle">
+<main class="main align-content-middle">
   <h1>{l('Add connection')}</h1>
   <form method="post" on:submit|preventDefault="{createConnectionFromForm}">
     <input type="hidden" name="url" value="{url}">

@@ -9,6 +9,8 @@ import StateIcon from '../components/StateIcon.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
 
+export let visible = false;
+
 const user = getContext('user');
 
 let activeLinkIndex = 0;
@@ -103,7 +105,7 @@ $: connections = $user.connections;
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
 
-<div class="sidebar-wrapper">
+<div class="sidebar-wrapper {visible ? 'is-visible' : ''}">
   <div class="sidebar is-chatting">
     <form class="sidebar__search">
       <input type="text"

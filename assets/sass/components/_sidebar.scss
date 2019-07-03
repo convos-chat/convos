@@ -9,14 +9,8 @@
 
 .sidebar-wrapper {
   background: $sidebar-bg;
-  text-align: left;
   padding: $gutter;
-  width: $sidebar-width;
   overflow: auto;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
 
   &, a {
     color: $sidebar-text;
@@ -192,9 +186,4 @@
     top: 0.4em;
     cursor: pointer;
   }
-}
-
-.next-to-sidebar {
-  margin-left: calc(#{$sidebar-width} + #{$gutter * 3});
-  margin-right: $gutter;
 }

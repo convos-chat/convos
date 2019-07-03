@@ -17,7 +17,7 @@
   </div>
 </div>
 
-<main class="main-app-pane align-content-middle js-remove">
+<main class="main align-content-middle js-remove">
   <div>
     <p class="if-js"><%=l 'Initializing the application...' %></p>
     <p class="if-js"><%=l 'This should not take too long.' %></p>

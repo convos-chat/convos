@@ -13,7 +13,7 @@ const user = getContext('user');
 
 <SidebarLoggedout/>
 
-<main class="main-app-pane align-content-middle">
+<main class="main align-content-middle">
   <h1>{l('Log in')}</h1>
   <form method="post" on:submit|preventDefault="{e => user.login.perform(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">

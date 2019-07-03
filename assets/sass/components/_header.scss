@@ -1,0 +1,82 @@
+.header {
+  background: $body-bg;
+  border-bottom: 1px solid #aaa;
+  box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
+  padding: $gutter;
+  padding-bottom: 0;
+  margin-bottom: $gutter;
+  max-height: 4rem;
+  position: relative;
+  overflow: hidden;
+
+  @include if_screen("<=full") {
+    background: $sidebar-bg;
+    border-bottom: 0;
+    padding-top: 0.2rem;
+    max-height: $nav-small-height;
+
+    h1,
+    small {
+      color: $sidebar-text;
+    }
+  }
+
+  h1 {
+    margin: 0;
+    float: left;
+
+    @include if_screen("<=full") {
+      margin-left: 2rem;
+    }
+  }
+
+  small {
+    font-size: 0.9rem;
+    font-style: italic;
+    display: block;
+    padding-top: 0.9rem;
+
+    &::before {
+      content: '';
+      padding-right: 1rem;
+    }
+  }
+
+  form {
+    background: $body-bg;
+    margin: 0 (-$gutter);
+    padding: $gutter;
+    clear: both;
+  }
+}
+
+.header__hamburger,
+.header__toggle {
+  font-size: 1.4rem;
+  position: absolute;
+  right: $gutter;
+  top: 1.8rem;
+}
+
+.header__hamburger {
+  display: none;
+}
+
+@include if_screen("<=full") {
+  .header__hamburger,
+  .header__toggle {
+    display: block;
+    color: $sidebar-text;
+    top: 0.7rem;
+  }
+
+  .header__toggle {
+    right: auto;
+    left: $gutter;
+  }
+}
+
+.header.has-visible-settings {
+  border-bottom: 1px solid #aaa;
+  max-height: 100vh;
+}

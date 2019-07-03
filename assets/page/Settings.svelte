@@ -41,13 +41,13 @@ $: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.val
 
 <SidebarChat/>
 
-<main class="main-app-pane align-content-middle">
+<main class="main align-content-middle">
   <h1>{l('Settings')}</h1>
   <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
     <TextField name="email" value="{$user.email}" readonly>
       <span slot="label">{l('Email')}</span>
     </TextField>
-    <TextField name="highlight_keywords">
+    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}">
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 
@@ -59,8 +59,7 @@ $: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.val
       <span slot="label">{l('Expand URL to media')}</span>
     </Checkbox>
 
-    <h2>{l('New password')}</h2>
-    <PasswordField name="password">
+    <PasswordField name="password" placeholder="{l('It is optional to change passwords')}">
       <span slot="label">{l('Password')}</span>
     </PasswordField>
     <PasswordField name="password_again">
