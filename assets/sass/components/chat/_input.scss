@@ -1,0 +1,69 @@
+.chat-input {
+  background: $input-bg;
+  border-top: 1px solid $input-border-color;
+  display: flex;
+
+  textarea {
+    background: transparent;
+    border: 0;
+    height: 3.5em;
+    padding: $gutter / 2;
+    width: 100%;
+    display: block;
+    resize: none;
+
+    &::placeholder {
+      color: $input-placeholder-color;
+      font-size: 1.2rem;
+      font-weight: 400;
+    }
+
+    &:focus {
+      outline: 0;
+
+      &::placeholder {
+        color: $input-bg;
+      }
+    }
+  }
+
+  .btn-send {
+    font-size: 1.5rem;
+    padding: 0.5em $gutter / 2;
+    display: block;
+  }
+}
+
+.chat-input_autocomplete {
+  background: rgba(darken($body-bg, 1%), 0.95);
+  border: 1px solid $input-border-color;
+  box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
+  margin-bottom: -1px;
+  min-width: 50%;
+  position: absolute;
+  bottom: 100%;
+
+  a {
+    text-decoration: none;
+    padding: 0.2em 0.5em;
+    display: block;
+
+    &.has-focus {
+      background: darken($body-bg, 10%);
+    }
+  }
+
+  img {
+    height: 1.5em;
+  }
+}
+
+.chat-input_autocomplete_emojis {
+  a {
+    display: inline-block;
+
+    &:first-of-type {
+      display: block;
+    }
+  }
+}

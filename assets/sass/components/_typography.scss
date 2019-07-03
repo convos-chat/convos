@@ -21,7 +21,11 @@ h3 {
 }
 
 h1 {
-  font-size: 2.4rem;
+  font-size: 2rem;
+
+  @include if_screen(">full") {
+    font-size: 2.4rem;
+  }
 }
 
 h2 {

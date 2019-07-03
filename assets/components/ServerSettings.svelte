@@ -6,7 +6,6 @@ import ConnURL from '../js/ConnURL';
 import FormActions from '../components/form/FormActions.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
-import StateIcon from '../components/StateIcon.svelte';
 import TextField from '../components/form/TextField.svelte';
 
 export let dialog = {};
@@ -48,32 +47,28 @@ $: if (connection.url && formEl) {
 }
 </script>
 
-<div class="settings-pane">
-  <h2>{l('Connection settings')}</h2>
-  <form method="post" bind:this="{formEl}" on:submit|preventDefault="{updateConnectionFromForm}">
-    <input type="hidden" name="connection_id" value="{connection.connection_id}">
-    <input type="hidden" name="url" value="{url}">
-    <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}">
-      <span slot="label">{l('Server and port')}</span>
-    </TextField>
-    <TextField name="nick" placeholder="{l('Ex: your-name')}">
-      <span slot="label">{l('Nickname')}</span>
-    </TextField>
-    <Checkbox bind:checked="{showAdvancedSettings}">
-      <span slot="label">{l('Show advanced settings')}</span>
-    </Checkbox>
-    <TextField name="username" className="{showAdvancedSettings ? '' : 'hide'}">
-      <span slot="label">{l('Username')}</span>
-    </TextField>
-    <PasswordField name="password" className="{showAdvancedSettings ? '' : 'hide'}">
-      <span slot="label">{l('Password')}</span>
-    </PasswordField>
-    <FormActions>
-      <button class="btn">{l('Update connection')}</button>
-      <a href="#{isNotDisconnected ? 'disconnected' : 'connected'}" class="btn" on:click|preventDefault="{setConnectionState}">{l(isNotDisconnected ? 'Disconnect' : 'Connect')}</a>
-      <a href="#delete" class="btn" on:click|preventDefault="{deleteConnection}">{l('Delete')}</a>
-      <StateIcon obj="{connection}"/>
-    </FormActions>
-    <OperationStatus op={updateConnectionOp}/>
-  </form>
-</div>
+<form method="post" bind:this="{formEl}" on:submit|preventDefault="{updateConnectionFromForm}">
+  <input type="hidden" name="connection_id" value="{connection.connection_id}">
+  <input type="hidden" name="url" value="{url}">
+  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}">
+    <span slot="label">{l('Server and port')}</span>
+  </TextField>
+  <TextField name="nick" placeholder="{l('Ex: your-name')}">
+    <span slot="label">{l('Nickname')}</span>
+  </TextField>
+  <Checkbox bind:checked="{showAdvancedSettings}">
+    <span slot="label">{l('Show advanced settings')}</span>
+  </Checkbox>
+  <TextField name="username" className="{showAdvancedSettings ? '' : 'hide'}">
+    <span slot="label">{l('Username')}</span>
+  </TextField>
+  <PasswordField name="password" className="{showAdvancedSettings ? '' : 'hide'}">
+    <span slot="label">{l('Password')}</span>
+  </PasswordField>
+  <FormActions>
+    <button class="btn">{l('Update')}</button>
+    <a href="#{isNotDisconnected ? 'disconnected' : 'connected'}" class="btn" on:click|preventDefault="{setConnectionState}">{l(isNotDisconnected ? 'Disconnect' : 'Connect')}</a>
+    <a href="#delete" class="btn" on:click|preventDefault="{deleteConnection}">{l('Delete')}</a>
+  </FormActions>
+  <OperationStatus op={updateConnectionOp}/>
+</form>

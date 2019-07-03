@@ -8,8 +8,8 @@ import SidebarChat from '../components/SidebarChat.svelte';
 
 <SidebarChat/>
 
-<main class="main-app-pane">
-  <header class="main-header"><h1>{l('Join conversation')}</h1></header>
+<main class="main">
+  <header class="header"><h1>{l('Join conversation')}</h1></header>
   <p>TODO: {@html md('https://github.com/Nordaaker/convos/blob/3a612b1d2081e566caa33039c5b2642864c1903d/assets/vue/convos-create-dialog.vue')}</p>
   <ol>
     <li>Choose connection or use last active connection.</li>

@@ -3,8 +3,9 @@
 @import 'components/reset';
 @import 'components/fonts';
 @import 'components/typography';
+@import 'components/helpers';
 @import 'components/form';
-@import 'components/chrome';
 @import 'components/sidebar';
-@import 'components/main-header';
-@import 'components/messages';
+@import 'components/header';
+@import 'components/chrome';
+@import 'components/chat';

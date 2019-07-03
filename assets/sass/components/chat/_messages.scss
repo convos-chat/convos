@@ -1,0 +1,70 @@
+.message {
+  position: relative;
+  margin-bottom: 0.2rem;
+
+  .emojione {
+    height: 1.5rem;
+    vertical-align: bottom;
+  }
+
+  .message_from {
+    text-decoration: none;
+  }
+
+  .message_text {
+    margin-bottom: 0.4rem;
+
+    a {
+      color: $text-color;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
+  .ts {
+    color: lighten($text-color, 10%);
+    font-size: 0.9rem;
+    font-weight: normal;
+    padding: 0.1rem;
+    float: right;
+  }
+
+  &.is-hightlighted {
+    background-color: #ffd7db;
+  }
+
+  &.is-same {
+    .message_from {
+      display: none;
+    }
+
+    .ts {
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    &:hover .ts {
+      opacity: 0.8 ease-in-out;
+    }
+  }
+}
+
+.state-icon {
+  &.fa-check-circle {
+    color: $success;
+  }
+
+  &.fa-circle-notch {
+    animation: rotate 1.2s linear infinite;
+  }
+
+  &.fa-sync-alt {
+    animation: rotate 1.2s linear infinite;
+  }
+
+  &.fa-unlink {
+    color: $error;
+  }
+}
