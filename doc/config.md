@@ -165,7 +165,7 @@ Convos.
 
 Default: `Nordaaker`
 
-### CONVOS_ORGANIZATION_NAME
+### CONVOS_ORGANIZATION_URL
 
 This variable will change the URL to the organization running this instance of
 Convos.
