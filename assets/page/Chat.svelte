@@ -1,7 +1,6 @@
 <script>
 import {getContext, tick} from 'svelte';
 import {l} from '../js/i18n';
-import {md} from '../js/md';
 import {pathParts} from '../store/router';
 import ChatInput from '../components/ChatInput.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
@@ -79,7 +78,7 @@ $: settingsIsVisible = $pathParts && false; // Force to false when path changes
     <div class="message" class:is-same="{isSameMessage(i)}" class:is-hightlighted="{message.highlight}">
       <Ts val="{message.ts}"/>
       <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
-      <div class="message_text">{@html md(message.message)}</div>
+      <div class="message_text">{@html message.markdown}</div>
     </div>
   {/each}
 </main>

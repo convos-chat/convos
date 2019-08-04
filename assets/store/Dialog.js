@@ -1,5 +1,6 @@
 import Reactive from '../js/Reactive';
 import {l} from '../js/i18n';
+import {md} from '../js/md';
 
 export default class Dialog extends Reactive {
   constructor(params) {
@@ -39,14 +40,22 @@ export default class Dialog extends Reactive {
     if (!msg.ts) msg.ts = new Date().toISOString();
     if (!msg.from) msg.from = this.connection_id || 'Convos';
     if (msg.vars) msg.message = l(msg.message, ...msg.vars);
+    msg.markdown = md(msg.message);
     this.messages.push(msg);
     this.update({});
   }
 
   async load() {
-    if (!this.op) return;
+    if (!this.op || this.loaded) return;
     await this.op.perform(this);
-    this.update({messages: this.op.res.body.messages || []});
+
+    const messages = (this.op.res.body.messages || []).map(msg => {
+      msg.markdown = md(msg.message);
+      return msg;
+    });
+
+    this.loaded = true;
+    this.update({messages});
   }
 
   participant(id, params = {}) {
