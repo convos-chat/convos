@@ -12,6 +12,6 @@ $: icon = checked ? 'check-square' : 'minus-square';
 
 <div class="checkbox" class:is-disabled="{disabled}">
   <input type="checkbox" {disabled} {name} {id} bind:checked="{checked}"/>
-  <Icon name="{icon}" on:click="{() => { checked = !checked }}"/>
+  <Icon name="{icon}" on:click="{() => { disabled || (checked = !checked) }}"/>
   <label for="{id}"><slot name="label">Label</slot></label>
 </div>
