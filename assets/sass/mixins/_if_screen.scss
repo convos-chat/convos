@@ -1,0 +1,27 @@
+@mixin if_screen($size) {
+  @if $size == "<=small" {
+    @media (max-width: $breakpoint-small) {
+      @content;
+    }
+  }
+  @else if $size == "<=full" {
+    @media (max-width: $breakpoint-full) {
+      @content;
+    }
+  }
+  @else if $size == ">small" {
+    @media (min-width: ($breakpoint-small + 1)) {
+      @content;
+    }
+  }
+  @else if $size == ">full" {
+    @media (min-width: ($breakpoint-full + 1)) {
+      @content;
+    }
+  }
+  @else {
+    @media #{$size} {
+      @content
+    }
+  }
+}

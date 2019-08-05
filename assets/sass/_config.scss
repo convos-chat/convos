@@ -9,12 +9,19 @@ $gutter: 1rem !default;
 $error: #900 !default;
 $success: #090 !default;
 
+$nav-small-height: 2.9rem !default;
+
 $sidebar-bg: $theme-color !default;
 $sidebar-text: #fefefe !default;
-$sidebar-width: 18rem !default;
+$sidebar-width: 300px !default;
 
 $input-bg: #fff;
 $input-color: #555 !default;
 $input-border-color: #888 !default;
 $input-border-radius: 2px !default;
 $input-placeholder-color: #8e8e8e !default;
+
+// TODO: Figure out better values for breakpoints
+$breakpoint-small: 400px !default;
+$breakpoint-full: 970px !default;
+$breakpoint-max-width: 800px !default;

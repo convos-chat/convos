@@ -8,17 +8,58 @@ body.no-js .if-js {
   display: none;
 }
 
-.main-app-pane {
-  padding-bottom: ($gutter * 2);
+.main {
+  padding: 0 $gutter ($gutter * 2) $gutter;
+}
 
-  &.without-padding {
-    padding-bottom: 0;
+.header {
+  margin-left: -$gutter;
+  margin-right: -$gutter;
+}
+
+.sidebar-wrapper {
+  width: $sidebar-width;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.chat-input,
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.chat-input {
+  top: auto;
+  bottom: 0;
+}
+
+@include if_screen(">full") {
+  .chat-input,
+  .main {
+    margin-left: calc(#{$sidebar-width} + #{$gutter});
+    margin-right: $gutter;
+    max-width: $breakpoint-max-width;
   }
 }
 
-.align-content-middle {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+@include if_screen("<=full") {
+  .sidebar-wrapper {
+    display: none;
+    right: 0;
+    left: auto;
+
+    .sidebar__search {
+      display: none;
+    }
+
+    &.is-visible {
+      top: $nav-small-height * 0.9;
+      display: block;
+    }
+  }
 }

@@ -2,6 +2,5 @@
 @import './chat/messages';
 
 .messages-container {
-  padding: $gutter;
   min-height: calc(100vh - 11rem); // TODO: Make 11rem more dynamic
 }
