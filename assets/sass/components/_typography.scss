@@ -1,12 +1,12 @@
 html,
 body {
-  font-family: $font-family;
-  font-size: $font-size;
-  color: $text-color;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  color: var(--text-color);
 }
 
 a {
-  color: $link-color;
+  color: var(--link-color);
 }
 
 h1,

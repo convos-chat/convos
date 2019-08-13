@@ -1,5 +1,6 @@
 html,
 body {
+  background: var(--body-bg);
   padding: 0;
   margin: 0;
 }
@@ -9,16 +10,16 @@ body.no-js .if-js {
 }
 
 .main {
-  padding: 0 $gutter ($gutter * 2) $gutter;
+  padding: 0 var(--gutter) calc(var(--gutter) * 2) var(--gutter);
 }
 
 .header {
-  margin-left: -$gutter;
-  margin-right: -$gutter;
+  margin-left: calc(var(--gutter) * -1);
+  margin-right: calc(var(--gutter) * -1);
 }
 
 .sidebar-wrapper {
-  width: $sidebar-width;
+  width: var(--sidebar-width);
   height: 100vh;
   position: fixed;
   top: 0;
@@ -41,8 +42,8 @@ body.no-js .if-js {
 @include if_screen(">full") {
   .chat-input,
   .main {
-    margin-left: calc(#{$sidebar-width} + #{$gutter});
-    margin-right: $gutter;
+    margin-left: calc(var(--sidebar-width) + var(--gutter));
+    margin-right: var(--gutter);
     max-width: $breakpoint-max-width;
   }
 }
@@ -58,7 +59,7 @@ body.no-js .if-js {
     }
 
     &.is-visible {
-      top: $nav-small-height * 0.9;
+      top: calc(var(--nav-small-height) * 0.9);
       display: block;
     }
   }

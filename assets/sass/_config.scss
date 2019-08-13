@@ -1,4 +1,4 @@
-$theme-color: #388e3c !default;
+$theme-color: #5f8961 !default;
 $body-bg: #fefefe !default;
 $text-color: #333 !default;
 $link-color: darken($theme-color, 10%) !default;
@@ -25,3 +25,51 @@ $input-placeholder-color: #8e8e8e !default;
 $breakpoint-small: 400px !default;
 $breakpoint-full: 970px !default;
 $breakpoint-max-width: 800px !default;
+
+:root {
+  --body-bg: #{$body-bg};
+  --font-family: #{$font-family};
+  --font-size: #{$font-size};
+  --text-color: #{$text-color};
+  --link-color: #{$link-color};
+
+  --gutter: #{$gutter};
+  --gutter-small: #{$gutter / 2};
+  --gutter-big: #{$gutter * 2};
+
+  --error-color: #{$error};
+  --success-color: #{$success};
+
+  --button-bg: #{darken($theme-color, 20%)};
+  --button-color: #fff;
+  --button-border: 1px solid #{darken($theme-color, 20%)};
+  --button-focus-outline: 2px solid #{lighten($theme-color, 20%)};
+  --button-hover-bg: #{darken($theme-color, 10%)};
+
+  --label-color: #{darken($input-border-color, 12%)};
+
+  --input-bg: #{$input-bg};
+  --input-border: 1px solid #{$input-border-color};
+  --input-border-radius: #{$input-border-radius};
+  --input-color: #{$input-color};
+  --input-hover-outline: #{lighten($input-border-color, 10%)};
+  --input-disabled-bg: #{darken($input-bg, 1%)};
+  --input-disabled-color: #{lighten($input-color, 10%)};
+  --input-placeholder-color: #{$input-placeholder-color};
+
+  --autocomplete-bg: #{darken($body-bg, 1%)};
+  --autocomplete-border: 1px solid #{$input-border-color};
+  --autocomplete-focus-bg: #{darken($body-bg, 10%)};
+
+  --ts-color: #{lighten($text-color, 10%)};
+  --ts-font-size: 0.9rem;
+
+  --nav-small-height: #{$nav-small-height};
+
+  --sidebar-bg: #{$sidebar-bg};
+  --sidebar-text: #{$sidebar-text};
+  --sidebar-width: #{$sidebar-width};
+  --sidebar-border-bottom: #{$sidebar-text};
+  --sidebar-search-placeholder-color: #{darken($sidebar-bg, 6%)};
+  --sidebar-search-focus-bg: #{darken($sidebar-bg, 6%)};
+}

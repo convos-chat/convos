@@ -2,7 +2,7 @@ input,
 textarea {
   font-family: inherit;
   font-size: inherit;
-  color: $input-color;
+  color: var(--input-color);
 }
 
 .checkbox,
@@ -30,7 +30,7 @@ textarea {
   &.is-disabled {
     i,
     label {
-      color: lighten($input-color, 10%);
+      color: var(--input-disabled-color);
       cursor: not-allowed;
     }
   }
@@ -38,13 +38,13 @@ textarea {
 
 .text-field {
   label {
-    color: darken($input-border-color, 12%);
+    color: var(--label-color);
     font-size: inherit;
     line-height: 1em;
     display: block;
 
     span {
-      background: $body-bg;
+      background: var(--body-bg);
       padding: 0 3px;
       display: inline-block;
       position: relative;
@@ -54,48 +54,45 @@ textarea {
   }
 
   input {
-    background: $input-bg;
+    background: var(--input-bg);
     line-height: 2.2em;
     height: 2.2em;
     padding: 0.2em 0.5em;
-    border: 1px solid $input-border-color;
-    border-radius: $input-border-radius;
+    border: var(--input-border);
+    border-radius: var(--input-border-radius);
     box-shadow: inset -1px 1px 3px rgba(0, 0, 0, 0.1), -1px 1px 2px rgba(0, 0, 0, 0.1);
     width: 100%;
     display: block;
 
     &::placeholder {
-      color: $input-placeholder-color;
+      color: var(--input-placeholder-color);
     }
 
     &:focus {
-      outline: 2px solid $input-border-color;
+      outline: var(--input-border);
+      outline-width: 2px;
       outline-offset: -2px;
     }
 
     &[readonly] {
-      background: darken($input-bg, 1%);
-      color: lighten($input-color, 10%);
+      background: var(--input-disabled-bg);
+      color: var(--input-disabled-color);
       outline: 0 !important;
       cursor: not-allowed;
     }
   }
 
   &:hover {
-    label {
-      color: darken($input-border-color, 15%);
-    }
-
     input {
-      outline: 2px solid lighten($input-border-color, 10%);
+      outline: 2px solid var(--input-hover-outline);
       outline-offset: -2px;
     }
   }
 }
 
 .form-actions {
-  margin-top: $gutter;
-  padding: $gutter / 2 0;
+  margin-top: var(--gutter);
+  padding: var(--gutter-small) 0;
 
   > * {
     vertical-align: middle;
@@ -103,27 +100,27 @@ textarea {
 }
 
 .btn {
-  background: darken($theme-color, 20%);
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-color);
   font-weight: 500;
   font-size: inherit;
   text-decoration: none;
   padding: 0.6em 1em;
   height: 2.4em;
-  border: 1px solid $input-border-color;
-  border-radius: $input-border-radius;
+  border: var(--button-border);
+  border-radius: var(--input-border-radius);
   box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.1);
   display: inline-block;
   cursor: pointer;
 
   &:focus,
   &:hover {
-    background: darken($theme-color, 10%);
+    background: var(--button-hover-bg);
     box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.1);
   }
 
   &:focus {
-    outline: 2px auto lighten($theme-color, 20%);
+    outline: var(--button-focus-outline);
     outline-offset: -2px;
   }
 }

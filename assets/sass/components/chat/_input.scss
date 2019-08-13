@@ -1,19 +1,19 @@
 .chat-input {
-  background: $input-bg;
-  border-top: 1px solid $input-border-color;
+  background: var(--input-bg);
+  border-top: var(--input-border);
   display: flex;
 
   textarea {
     background: transparent;
     border: 0;
     height: 3.5em;
-    padding: $gutter / 2;
+    padding: var(--gutter-small);
     width: 100%;
     display: block;
     resize: none;
 
     &::placeholder {
-      color: $input-placeholder-color;
+      color: var(--input-placeholder-color);
       font-size: 1.2rem;
       font-weight: 400;
     }
@@ -22,21 +22,21 @@
       outline: 0;
 
       &::placeholder {
-        color: $input-bg;
+        color: var(--input-bg);
       }
     }
   }
 
   .btn-send {
     font-size: 1.5rem;
-    padding: 0.5em $gutter / 2;
+    padding: 0.5em var(--gutter-small);
     display: block;
   }
 }
 
 .chat-input_autocomplete {
-  background: rgba(darken($body-bg, 1%), 0.95);
-  border: 1px solid $input-border-color;
+  background: rgba(var(--autocomplete-bg), 0.95);
+  border: var(--autocomplete-border);
   box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
   margin-bottom: -1px;
   min-width: 50%;
@@ -49,7 +49,7 @@
     display: block;
 
     &.has-focus {
-      background: darken($body-bg, 10%);
+      background: var(--autocomplete-focus-bg);
     }
   }
 
