@@ -8,30 +8,30 @@
 }
 
 .sidebar-wrapper {
-  background: $sidebar-bg;
-  padding: $gutter;
+  background: var(--sidebar-bg);
+  padding: var(--gutter);
   overflow: auto;
 
   &, a {
-    color: $sidebar-text;
+    color: var(--sidebar-text);
     text-decoration: none;
   }
 }
 
 .sidebar {
   &.is-chatting {
-    padding-bottom: ($gutter * 3);
-    margin-top: -($gutter / 2);
+    padding-bottom: 6rem;
+    margin-top: var(--gutter-small);
 
     h1 {
       margin: 0;
-      margin-bottom: -($gutter / 2);
+      margin-bottom: var(--gutter-small);
     }
   }
 
   &.is-logged-out {
     font-size: 1.1rem;
-    padding: $gutter * 2;
+    padding: var(--gutter-big);
     position: absolute;
     bottom: 0;
     left: 0;
@@ -45,7 +45,7 @@
   }
 
   form {
-    background: $sidebar-bg;
+    background: var(--sidebar-bg);
     position: sticky;
     top: 0;
     z-index: 2;
@@ -67,16 +67,16 @@
 
     &:focus,
     &:hover {
-      background: darken($sidebar-bg, 6%);
+      background: var(--sidebar-search-focus-bg);
       text-decoration: none;
     }
 
     &.has-path {
-      background: darken($sidebar-bg, 4%);
+      background: var(--sidebar-search-focus-bg);
     }
 
     &.has-focus {
-      background: darken($sidebar-bg, 6%);
+      background: var(--sidebar-search-focus-bg);
     }
   }
 
@@ -85,16 +85,16 @@
       background: transparent;
     }
     a.has-focus {
-      background: darken($sidebar-bg, 6%);
+      background: var(--sidebar-search-focus-bg);
     }
   }
 
   h2 {
     font-size: 0.9rem;
     font-weight: normal;
-    border-bottom: 1px solid $sidebar-text;
+    border-bottom: 1px solid var(--sidebar-border-bottom);
     margin-bottom: 0.3rem;
-    margin-top: $gutter;
+    margin-top: var(--gutter);
   }
 
   ul ul a {
@@ -104,7 +104,7 @@
   i.state-icon {
     font-size: 0.9rem;
     position: absolute;
-    right: ($gutter / 2);
+    right: var(--gutter-small);
     top: 0.5rem;
 
     &.fa-check-circle {
@@ -135,8 +135,7 @@
   }
 
   .unread {
-    background-color: lighten($success, 5%);
-    color: $sidebar-bg;
+    color: var(--sidebar-bg);
     font-size: 0.9rem;
     line-height: 0.9rem;
     border-radius: 0.5em;
@@ -158,23 +157,23 @@
 
   input {
     background: transparent;
-    color: $sidebar-text;
+    color: var(--sidebar-text);
     font-size: 2.4rem;
     border: 0;
     border-bottom: 2px solid transparent;
     width: 100%;
 
     &::placeholder {
-      color: $sidebar-text;
+      color: var(--sidebar-text);
       font-weight: bold;
     }
 
     &:focus {
       outline: 0;
-      border-bottom-color: $sidebar-text;
+      border-bottom-color: var(--sidebar-text);
 
       &::placeholder {
-        color: darken($sidebar-bg, 6%);
+        color: var(--sidebar-search-placeholder-color);
       }
     }
   }

@@ -15,7 +15,7 @@
     margin-bottom: 0.4rem;
 
     a {
-      color: $text-color;
+      color: var(--text-color);
 
       &:hover {
         text-decoration: none;
@@ -24,8 +24,8 @@
   }
 
   .ts {
-    color: lighten($text-color, 10%);
-    font-size: 0.9rem;
+    color: var(--ts-color);
+    font-size: var(--ts-font-size);
     font-weight: normal;
     padding: 0.1rem;
     float: right;
@@ -53,7 +53,7 @@
 
 .state-icon {
   &.fa-check-circle {
-    color: $success;
+    color: var(--success-color);
   }
 
   &.fa-circle-notch {
@@ -65,6 +65,6 @@
   }
 
   &.fa-unlink {
-    color: $error;
+    color: var(--error-color);
   }
 }
