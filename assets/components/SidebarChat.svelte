@@ -172,6 +172,13 @@ $: connections = $user.connections;
 
       <h2>{$user.email || l('Account')}</h2>
       <ul class="sidebar__nav__account">
+        <li>
+          <Link href="/chat" className="sidebar__nav__notifications">
+            <span>{l('Notifications')}</span>
+            <Unread unread={user.unread}/>
+            <Icon name="{user.unread ? 'bell' : 'bell-slash'}"/>
+          </Link>
+        </li>
         <li><Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join conversation...')}</Link></li>
         <li><Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link></li>
         <li><Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link></li>
