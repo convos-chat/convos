@@ -59,6 +59,15 @@ export default class User extends Operation {
     return conn && conn.findDialog(params);
   }
 
+  isDialogOperator(params) {
+    // TODO: No idea if this actually works
+    const conn = this.findDialog({connection_id: params.connection_id});
+    const dialog = this.findDialog(params);
+    if (!conn || !dialog) return false;
+    var myself = dialog.findParticipants({nick: conn.nick})[0];
+    return myself && myself.mode.indexOf('@') != -1;
+  }
+
   async load() {
     await this.perform();
     if (this.email) await this.send({method: 'ping'});

@@ -4,6 +4,7 @@ import {l} from '../js/i18n';
 import {pathParts} from '../store/router';
 import ChatInput from '../components/ChatInput.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
+import DialogSettings from '../components/DialogSettings.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import ServerSettings from '../components/ServerSettings.svelte';
@@ -14,25 +15,15 @@ const user = getContext('user');
 
 let height = 0;
 let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
-let settingsIsVisible = false;
-let sidebarIsVisible = false;
+let visibleSection = '';
 
 function isSameMessage(i) {
   return i == 0 ? false : messages[i].from == messages[i - 1].from;
 }
 
-function partDialog() {
-  user.send({message: '/part', method: 'send', dialog});
-}
-
-function toggleSettings(e) {
-  sidebarIsVisible = false;
-  settingsIsVisible = !settingsIsVisible;
-}
-
-function toggleSidebar(e) {
-  settingsIsVisible = false;
-  sidebarIsVisible = !sidebarIsVisible;
+function toggleVisibility(e) {
+  const what = e.target.closest('a').href.replace(/.*#/, '');
+  visibleSection = visibleSection == what ? '' : what;
 }
 
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
@@ -41,26 +32,31 @@ $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.'
 $: messages = $dialog.messages;
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
-$: settingsIsVisible = $pathParts && false; // Force to false when path changes
+$: visibleSection = $pathParts && ''; // Force to false when path changes
 </script>
 
-<SidebarChat visible="{sidebarIsVisible}"/>
+<SidebarChat visible="{visibleSection == 'sidebar'}"/>
 
 <main class="main messages-container" bind:offsetHeight="{height}">
-  <header class="header" class:has-visible-settings="{settingsIsVisible}">
+  <header class="header" class:has-visible-settings="{visibleSection.match(/Settings$/)}">
     <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
     {#if dialog.dialog_id}
       <small><DialogSubject dialog="{dialog}"/></small>
-      <a href="#close" class="header__toggle" on:click|preventDefault="{partDialog}"><Icon name="times"/></a>
+      <a href="#dialogSettings" class="header__toggle" on:click|preventDefault="{toggleVisibility}"><Icon name="sliders-h"/></a>
     {:else if dialog.connection_id}
       <small><DialogSubject dialog="{dialog}"/></small>
-      <a href="#settings" class="header__toggle" on:click|preventDefault="{toggleSettings}"><Icon name="sliders-h"/></a>
+      <a href="#serverSettings" class="header__toggle" on:click|preventDefault="{toggleVisibility}"><Icon name="sliders-h"/></a>
     {:else}
       <a href="#clear" class="header__toggle" on:click|preventDefault="{e => user.readNotifications.perform()}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
     {/if}
 
-    <a href="#menu" class="header__hamburger" on:click|preventDefault="{toggleSidebar}"><Icon name="bars"/></a>
-    <ServerSettings dialog="{dialog}"/>
+    <a href="#menu" class="header__hamburger" on:click|preventDefault="{toggleVisibility}"><Icon name="bars"/></a>
+    {#if visibleSection == 'dialogSettings'}
+      <DialogSettings dialog="{dialog}"/>
+    {/if}
+    {#if visibleSection == 'serverSettings'}
+      <ServerSettings dialog="{dialog}"/>
+    {/if}
   </header>
 
   {#if messages.length == 0}

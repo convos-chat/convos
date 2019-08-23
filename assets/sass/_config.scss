@@ -45,6 +45,9 @@ $breakpoint-max-width: 800px !default;
   --button-border: 1px solid #{darken($theme-color, 20%)};
   --button-focus-outline: 2px solid #{lighten($theme-color, 20%)};
   --button-hover-bg: #{darken($theme-color, 10%)};
+  --button-disabled-bg: #{lighten($theme-color, 30%)};
+  --button-disabled-color: #fff;
+  --button-disabled-border: #fff;
 
   --label-color: #{darken($input-border-color, 12%)};
 

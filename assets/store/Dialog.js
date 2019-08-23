@@ -45,6 +45,24 @@ export default class Dialog extends Reactive {
     this.update({});
   }
 
+  findParticipants(params) {
+    var participantIds = Object.keys(this.participants).sort();
+    const needleKeys = Object.keys(params);
+    const found = [];
+
+    PARTICIPANT:
+    for (let pi = 0; pi < participantIds.length; pi++) {
+      const participant = this.participants[participantIds[pi]];
+      for (let ni = 0; ni < needleKeys.length; i++) {
+        const needleKey = params[needleKeys[ni]];
+        if (params[needleKey] != participant[needleKey]) continue PARTICIPANT;
+      }
+      found.push(participant);
+    }
+
+    return found;
+  }
+
   async load() {
     if (!this.op || this.loaded) return;
     await this.op.perform(this);
