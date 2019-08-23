@@ -6,6 +6,7 @@ textarea {
 }
 
 .checkbox,
+.text-area,
 .text-field {
   margin-bottom: 0.8rem;
   max-width: 24em;
@@ -36,6 +37,7 @@ textarea {
   }
 }
 
+.text-area,
 .text-field {
   label {
     color: var(--label-color);
@@ -53,7 +55,8 @@ textarea {
     }
   }
 
-  input {
+  input,
+  textarea {
     background: var(--input-bg);
     line-height: 2.2em;
     height: 2.2em;
@@ -90,6 +93,12 @@ textarea {
   }
 }
 
+.text-area {
+  textarea {
+    min-height: 4rem;
+  }
+}
+
 .form-actions {
   margin-top: var(--gutter);
   padding: var(--gutter-small) 0;
@@ -122,5 +131,13 @@ textarea {
   &:focus {
     outline: var(--button-focus-outline);
     outline-offset: -2px;
+  }
+
+  &[disabled] {
+    background: var(--button-disabled-bg);
+    color: var(--button-disabled-color);
+    border: var(--button-disabled-border);
+    box-shadow: none;
+    cursor: not-allowed;
   }
 }
