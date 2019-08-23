@@ -1,3 +1,11 @@
+export function closestEl(el, needle) {
+  while (el) {
+    if (needle.tagName ? el == needle : el.matches ? el.matches(needle) : false) return el;
+    el = el.parentNode;
+  }
+  return null;
+}
+
 export function epoch() {
   return new Date().getTime();
 }
