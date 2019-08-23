@@ -44,8 +44,7 @@
 
   form {
     background: var(--body-bg);
-    margin: 0 var(--gutter);
-    padding: var(--gutter);
+    padding: var(--gutter) 0;
     clear: both;
   }
 }
