@@ -1,6 +1,7 @@
 <script>
 import {getContext, tick} from 'svelte';
 import {l} from '../js/i18n';
+import Button from '../components/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
 import FormActions from '../components/form/FormActions.svelte';
@@ -15,14 +16,8 @@ const updateConnectionOp = user.api.operation('updateConnection');
 
 let formEl;
 let showAdvancedSettings = false;
+let wantToBeConnected = false;
 let url = '';
-
-async function setConnectionState(e) {
-  const aEl = e.target.closest('a') || e.target;
-  const clone = {connection_id: dialog.connection_id, wanted_state: aEl.href.replace(/.*#/, '')};
-  await updateConnectionOp.perform(clone);
-  user.ensureDialog(updateConnectionOp.res.body);
-}
 
 async function deleteConnection(e) {
   alert('TODO');
@@ -44,6 +39,7 @@ $: if (connection.url && formEl) {
   formEl.password.value = connection.url.password;
   formEl.username.value = connection.url.username;
   formEl.url.value = connection.url.toString();
+  wantToBeConnected = connection.wanted_state == 'connected';
 }
 </script>
 
@@ -56,6 +52,9 @@ $: if (connection.url && formEl) {
   <TextField name="nick" placeholder="{l('Ex: your-name')}">
     <span slot="label">{l('Nickname')}</span>
   </TextField>
+  <Checkbox bind:checked="{wantToBeConnected}">
+    <span slot="label">{l('Want to be connected')} ({l('Is currently %1', connection.state || 'disconnected')})</span>
+  </Checkbox>
   <Checkbox bind:checked="{showAdvancedSettings}">
     <span slot="label">{l('Show advanced settings')}</span>
   </Checkbox>
@@ -66,9 +65,8 @@ $: if (connection.url && formEl) {
     <span slot="label">{l('Password')}</span>
   </PasswordField>
   <FormActions>
-    <button class="btn">{l('Update')}</button>
-    <a href="#{isNotDisconnected ? 'disconnected' : 'connected'}" class="btn" on:click|preventDefault="{setConnectionState}">{l(isNotDisconnected ? 'Disconnect' : 'Connect')}</a>
-    <a href="#delete" class="btn" on:click|preventDefault="{deleteConnection}">{l('Delete')}</a>
+    <Button icon="save">{l('Update')}</Button>
+    <Button icon="trash" on:click|preventDefault="{deleteConnection}">{l('Delete')}</Button>
   </FormActions>
   <OperationStatus op={updateConnectionOp}/>
 </form>

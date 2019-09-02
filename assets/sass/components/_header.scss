@@ -2,28 +2,22 @@
   background: var(--body-bg);
   border-bottom: 1px solid #aaa;
   box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
-  padding: var(--gutter);
+  padding: 0 var(--gutter);
   padding-bottom: 0;
   margin-bottom: var(--gutter);
-  max-height: 4rem;
+  min-height: var(--nav-regular-height);
+  max-height: var(--nav-regular-height);
   position: relative;
-  overflow: hidden;
 
-  @include if_screen("<=full") {
-    background: var(--sidebar-bg);
-    border-bottom: 0;
-    padding-top: 0.2rem;
-    max-height: var(--nav-small-height);
-
-    h1,
-    small {
-      color: var(--sidebar-text);
-    }
+  h1,
+  small {
+    line-height: var(--nav-regular-height);
   }
 
   h1 {
     margin: 0;
     float: left;
+    cursor: pointer;
 
     @include if_screen("<=full") {
       margin-left: 2rem;
@@ -33,8 +27,11 @@
   small {
     font-size: 0.9rem;
     font-style: italic;
+    text-overflow: ellipsis;
+    white-space: pre;
+    margin-right: 2rem;
+    overflow: hidden;
     display: block;
-    padding-top: 0.9rem;
 
     &::before {
       content: '';
@@ -43,18 +40,35 @@
   }
 
   form {
-    background: var(--body-bg);
     padding: var(--gutter) 0;
     clear: both;
+  }
+
+  @include if_screen("<=full") {
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    border-bottom: 0;
+    min-height: var(--nav-small-height);
+    max-height: var(--nav-small-height);
+
+    h1,
+    small {
+      line-height: var(--nav-small-height);
+    }
   }
 }
 
 .header__hamburger,
 .header__toggle {
+  color: inherit;
   font-size: 1.4rem;
   position: absolute;
   right: var(--gutter);
   top: 1.8rem;
+
+  i {
+    transition: transform 0.3s;
+  }
 }
 
 .header__hamburger {
@@ -65,7 +79,6 @@
   .header__hamburger,
   .header__toggle {
     display: block;
-    color: var(--sidebar-text);
     top: 0.7rem;
   }
 
@@ -78,4 +91,9 @@
 .header.has-visible-settings {
   border-bottom: 1px solid #aaa;
   max-height: 100vh;
+  box-shadow: 0 4px 3px -2px rgba(50, 50, 50, 0.14);
+
+  .header__toggle i {
+    transform: rotate(180deg);
+  }
 }

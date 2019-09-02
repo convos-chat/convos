@@ -9,8 +9,6 @@ $gutter: 1rem !default;
 $error: #900 !default;
 $success: #090 !default;
 
-$nav-small-height: 2.9rem !default;
-
 $sidebar-bg: $theme-color !default;
 $sidebar-text: #fefefe !default;
 $sidebar-width: 300px !default;
@@ -44,10 +42,11 @@ $breakpoint-max-width: 800px !default;
   --button-color: #fff;
   --button-border: 1px solid #{darken($theme-color, 20%)};
   --button-focus-outline: 2px solid #{lighten($theme-color, 20%)};
-  --button-hover-bg: #{darken($theme-color, 10%)};
   --button-disabled-bg: #{lighten($theme-color, 30%)};
   --button-disabled-color: #fff;
   --button-disabled-border: #fff;
+  --button-danger-bg: #9c2626;
+  --button-danger-color: #fff;
 
   --input-bg: #{$input-bg};
   --input-border: 1px solid #{$input-border-color};
@@ -65,7 +64,8 @@ $breakpoint-max-width: 800px !default;
   --ts-color: #{lighten($text-color, 10%)};
   --ts-font-size: 0.9rem;
 
-  --nav-small-height: #{$nav-small-height};
+  --nav-regular-height: 4.5rem;
+  --nav-small-height: 2.9rem;
 
   --sidebar-bg: #{$sidebar-bg};
   --sidebar-text: #{$sidebar-text};

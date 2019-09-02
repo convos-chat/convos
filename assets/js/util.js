@@ -14,6 +14,12 @@ export function tagNameIs(el, tagName) {
   return el && el.tagName && el.tagName.toLowerCase() === tagName;
 }
 
+export function timer(t, success = true) {
+  return new Promise((resolve, reject) => {
+    setTimeout(success ? resolve : reject, t);
+  });
+}
+
 // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
 export function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
