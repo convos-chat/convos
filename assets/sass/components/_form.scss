@@ -109,13 +109,14 @@ textarea {
   border: var(--button-border);
   border-radius: var(--input-border-radius);
   box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.1);
+  transition: filter 0.25s ease-in-out;
   display: inline-block;
   cursor: pointer;
 
   &:focus,
   &:hover {
-    background: var(--button-hover-bg);
     box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.1);
+    filter: brightness(1.3);
   }
 
   &:focus {
@@ -128,6 +129,16 @@ textarea {
     color: var(--button-disabled-color);
     border: var(--button-disabled-border);
     box-shadow: none;
+    filter: none;
     cursor: not-allowed;
+  }
+
+  &.for-trash {
+    background: var(--button-danger-bg);
+  }
+
+  .fa,
+  .far {
+    margin-left: 0.2em;
   }
 }

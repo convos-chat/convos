@@ -11,6 +11,7 @@
   background: var(--sidebar-bg);
   padding: var(--gutter);
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 
   &, a {
     color: var(--sidebar-text);

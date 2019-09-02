@@ -1,6 +1,7 @@
 <script>
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
+import Button from '../components/Button.svelte';
 import FormActions from '../components/form/FormActions.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 
@@ -26,7 +27,7 @@ async function updateDialogFromForm(e) {
     <span slot="label">{l('Topic')}</span>
   </TextArea>
   <FormActions>
-    <button class="btn" disabled="{!user.isDialogOperator(dialog)}">{l('Update')}</button>
-    <button class="btn" on:click|preventDefault="{partDialog}">{l('Close')}</button>
+    <Button icon="save" disabled="{!user.isDialogOperator(dialog)}">{l('Update')}</Button>
+    <Button icon="sign-out-alt" on:click|preventDefault="{partDialog}">{l('Part')}</Button>
   </FormActions>
 </form>

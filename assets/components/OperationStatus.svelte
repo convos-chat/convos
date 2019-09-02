@@ -10,7 +10,7 @@ export let op = new Operation({});
 {:else if $op.is('error')}
   <slot name="error"><div class="error">{l($op.error())}</div></slot>
 {:else if $op.is('pending')}
-  <slot name="pending"/>
+  <slot name="pending"></slot>
 {:else}
-  <slot name="success"/>
+  <slot name="success"><div class="loading">{l('Done.')}</div></slot>
 {/if}
