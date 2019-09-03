@@ -28,9 +28,9 @@ export function md(str, params = {}) {
   });
 
   if (params.links !== false) {
-    str = str.replace(linkRe, str => {
-      const parts = str.match(/^(.*?)([.!?])?$/);
-      return '<a href="' + parts[1] + '" target="_blank">' + parts[1] + '</a>' + (parts[2] || '');
+    str = str.replace(linkRe, url => {
+      const parts = url.match(/^(.*?)([.!?])?$/);
+      return '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '</a>' + (parts[2] || '');
     });
   }
 
