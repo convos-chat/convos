@@ -6,8 +6,10 @@ export default class ConnURL extends URL {
   }
 
   fromForm(form) {
-    if (form.nick.value.length) this.searchParams.append('nick', form.nick.value);
     const server = form.server.value;
+    if (form.nick.value.length) this.searchParams.append('nick', form.nick.value);
+    this.searchParams.append('tls', form.tls.checked ? '1' : '0');
+    this.searchParams.append('tls_verify', form.tls_verify && form.tls_verify.checked ? '1' : '0');
     this.host = server.match(/:\d+$/) ? server : server + ':6667';
     this.password = form.password.value;
     this.username = form.username.value;

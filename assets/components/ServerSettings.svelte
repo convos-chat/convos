@@ -1,5 +1,5 @@
 <script>
-import {getContext, tick} from 'svelte';
+import {getContext, onMount, tick} from 'svelte';
 import {l} from '../js/i18n';
 import Button from '../components/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
@@ -16,8 +16,10 @@ const updateConnectionOp = user.api.operation('updateConnection');
 
 let formEl;
 let showAdvancedSettings = false;
-let wantToBeConnected = false;
 let url = '';
+let useTls = false;
+let verifyTls = false;
+let wantToBeConnected = false;
 
 async function deleteConnection(e) {
   alert('TODO');
@@ -33,14 +35,18 @@ async function updateConnectionFromForm(e) {
 $: connection = $user.findDialog({connection_id: dialog.connection_id}) || {};
 $: isNotDisconnected = connection.state != 'disconnected';
 
-$: if (connection.url && formEl) {
+onMount(async () => {
+  if (!formEl) await tick();
   formEl.server.value = connection.url.host;
   formEl.nick.value = connection.url.searchParams.get('nick') || '';
   formEl.password.value = connection.url.password;
   formEl.username.value = connection.url.username;
   formEl.url.value = connection.url.toString();
+  useTls = connection.url.searchParams.get('tls') && true || false;
+  verifyTls = connection.url.searchParams.get('tls_verify') && true || false;
   wantToBeConnected = connection.wanted_state == 'connected';
-}
+  console.log('A', useTls);
+});
 </script>
 
 <form method="post" bind:this="{formEl}" on:submit|preventDefault="{updateConnectionFromForm}">
@@ -53,8 +59,16 @@ $: if (connection.url && formEl) {
     <span slot="label">{l('Nickname')}</span>
   </TextField>
   <Checkbox bind:checked="{wantToBeConnected}">
-    <span slot="label">{l('Want to be connected')} ({l('Is currently %1', connection.state || 'disconnected')})</span>
+    <span slot="label">{l('Want to be connected')} ({l('Currently %1', connection.state || 'disconnected')})</span>
   </Checkbox>
+  <Checkbox name="tls" bind:checked="{useTls}">
+    <span slot="label">{l('Secure connection (TLS)')}</span>
+  </Checkbox>
+  {#if useTls}
+    <Checkbox name="tls_verify" bind:checked="{verifyTls}">
+      <span slot="label">{l('Verify certificate (TLS)')}</span>
+    </Checkbox>
+  {/if}
   <Checkbox bind:checked="{showAdvancedSettings}">
     <span slot="label">{l('Show advanced settings')}</span>
   </Checkbox>
