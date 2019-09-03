@@ -49,8 +49,6 @@ $breakpoint-max-width: 800px !default;
   --button-disabled-color: #fff;
   --button-disabled-border: #fff;
 
-  --label-color: #{darken($input-border-color, 12%)};
-
   --input-bg: #{$input-bg};
   --input-border: 1px solid #{$input-border-color};
   --input-border-radius: #{$input-border-radius};
