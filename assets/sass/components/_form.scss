@@ -40,19 +40,9 @@ textarea {
 .text-area,
 .text-field {
   label {
-    color: var(--label-color);
     font-size: inherit;
-    line-height: 1em;
+    padding: 0.1rem 0.4em;
     display: block;
-
-    span {
-      background: var(--body-bg);
-      padding: 0 3px;
-      display: inline-block;
-      position: relative;
-      top: 0.3em;
-      left: 0.4em;
-    }
   }
 
   input,
