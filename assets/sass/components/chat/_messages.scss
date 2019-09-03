@@ -13,6 +13,7 @@
 
   .message_text {
     margin-bottom: 0.4rem;
+    overflow-wrap: break-word;
 
     a {
       color: var(--text-color);
