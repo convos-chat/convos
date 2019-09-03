@@ -3,25 +3,20 @@
   border-bottom: 1px solid #aaa;
   box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
   padding: 0 var(--gutter);
-  padding-bottom: 0;
+  padding-top: var(--gutter);
   margin-bottom: var(--gutter);
-  min-height: var(--nav-regular-height);
-  max-height: var(--nav-regular-height);
+  overflow: hidden;
   position: relative;
+  display: flex;
+  align-items: baseline;
 
-  h1,
-  small {
-    line-height: var(--nav-regular-height);
+  @include if_screen("<=full") {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
   }
 
   h1 {
     margin: 0;
-    float: left;
-    cursor: pointer;
-
-    @include if_screen("<=full") {
-      margin-left: 2rem;
-    }
   }
 
   small {
@@ -48,13 +43,6 @@
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
     border-bottom: 0;
-    min-height: var(--nav-small-height);
-    max-height: var(--nav-small-height);
-
-    h1,
-    small {
-      line-height: var(--nav-small-height);
-    }
   }
 }
 
@@ -85,15 +73,5 @@
   .header__toggle {
     right: auto;
     left: var(--gutter);
-  }
-}
-
-.header.has-visible-settings {
-  border-bottom: 1px solid #aaa;
-  max-height: 100vh;
-  box-shadow: 0 4px 3px -2px rgba(50, 50, 50, 0.14);
-
-  .header__toggle i {
-    transform: rotate(180deg);
   }
 }

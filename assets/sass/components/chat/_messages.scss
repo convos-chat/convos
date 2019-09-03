@@ -51,21 +51,3 @@
     }
   }
 }
-
-.state-icon {
-  &.fa-check-circle {
-    color: var(--success-color);
-  }
-
-  &.fa-circle-notch {
-    animation: rotate 1.2s linear infinite;
-  }
-
-  &.fa-sync-alt {
-    animation: rotate 1.2s linear infinite;
-  }
-
-  &.fa-unlink {
-    color: var(--error-color);
-  }
-}

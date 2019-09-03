@@ -64,12 +64,10 @@ $breakpoint-max-width: 800px !default;
   --ts-color: #{lighten($text-color, 10%)};
   --ts-font-size: 0.9rem;
 
-  --nav-regular-height: 4.5rem;
-  --nav-small-height: 2.9rem;
-
   --sidebar-bg: #{$sidebar-bg};
   --sidebar-text: #{$sidebar-text};
   --sidebar-width: #{$sidebar-width};
+  --sidebar-outline: #8ece93 auto 3px;
   --sidebar-border-bottom: #{$sidebar-text};
   --sidebar-search-placeholder-color: #{darken($sidebar-bg, 6%)};
   --sidebar-search-focus-bg: #{darken($sidebar-bg, 6%)};
