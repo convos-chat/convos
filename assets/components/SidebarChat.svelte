@@ -4,8 +4,7 @@ import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
 import {q, tagNameIs} from '../js/util';
 import Icon from './Icon.svelte';
-import Link from './Link.svelte';
-import StateIcon from '../components/StateIcon.svelte';
+import SidebarItem from '../components/SidebarItem.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
 
@@ -16,10 +15,12 @@ const user = getContext('user');
 let activeLinkIndex = 0;
 let filter = '';
 let navEl;
+let searchHasFocus = false;
 let searchInput;
 let visibleLinks = [];
 
 function clearFilter() {
+  searchHasFocus = false;
   setTimeout(() => {filter = ''}, 100);
 }
 
@@ -31,6 +32,7 @@ function filterNav(filter) {
   const seen = {};
 
   activeLinkIndex = 0;
+  searchHasFocus = true;
   visibleLinks = [];
 
   // Show and hide navigation links
@@ -57,7 +59,7 @@ function filterNav(filter) {
   q(navEl, 'ul', listEl => {
     const makeVisible = hasVisibleLinks[listEl.className] || false;
     const headingEl = listEl.previousElementSibling;
-    if (headingEl && tagNameIs(headingEl, 'h2')) headingEl.classList[makeVisible ? 'remove' : 'add']('hide');
+    if (headingEl && tagNameIs(headingEl, 'h3')) headingEl.classList[makeVisible ? 'remove' : 'add']('hide');
   });
 }
 
@@ -107,9 +109,9 @@ $: connections = $user.connections;
 
 <div class="sidebar-wrapper {visible ? 'is-visible' : ''}">
   <div class="sidebar is-chatting">
-    <form class="sidebar__search">
+    <form class="sidebar__header">
       <input type="text"
-        placeholder="{l('Convos')}"
+        placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
         bind:this="{searchInput}"
         bind:value="{filter}"
         on:blur="{clearFilter}"
@@ -120,71 +122,45 @@ $: connections = $user.connections;
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
       {#if connections.length}
-        <h2>{l('Group conversations')}</h2>
-        <ul class="sidebar__nav__servers for-group-dialogs">
-          {#each connections as connection}
-            <li>
-              <Link href="/chat/{connection.path}">
-                {l(connection.name)}
-                <StateIcon obj="{connection}"/>
-              </Link>
-
-              <ul class="sidebar__nav__conversations is-channels">
-                {#each connection.channels as dialog}
-                  <li>
-                    <Link href="/chat/{dialog.path}">
-                      <span>{dialog.name.replace(/^\W/, '')}</span>
-                      <Unread unread={dialog.unread}/>
-                      <StateIcon obj="{dialog}"/>
-                    </Link>
-                  </li>
-                {/each}
-              </ul>
-            </li>
+        <h3>{l('Group conversations')}</h3>
+        {#each connections as connection}
+          <SidebarItem dialog="{connection}"/>
+          {#each connection.channels as dialog}
+            <SidebarItem {dialog}/>
           {/each}
-        </ul>
+        {/each}
 
-        <h2>{l('Private conversations')}</h2>
-        <ul class="sidebar__nav__servers for-private-dialogs">
-          {#each connections as connection}
-            {#if connection.private.length}
-              <li>
-                <Link href="/chat/{connection.path}">
-                  {l(connection.name)}
-                  <StateIcon obj="{connection}"/>
-                </Link>
-                <ul class="sidebar__nav__conversations is-private">
-                  {#each connection.private as dialog}
-                    <li>
-                      <Link href="/chat/{dialog.path}">
-                        <span>{dialog.name}</span>
-                        <Unread unread={dialog.unread}/>
-                        <StateIcon obj="{dialog}"/>
-                      </Link>
-                    </li>
-                  {/each}
-                </ul>
-              </li>
-            {/if}
-          {/each}
-        </ul>
+        <h3>{l('Private conversations')}</h3>
+        {#each connections as connection}
+          {#if connection.private.length}
+            <SidebarItem dialog="{connection}"/>
+            {#each connection.private as dialog}
+              <SidebarItem {dialog}/>
+            {/each}
+          {/if}
+        {/each}
       {/if}
 
-      <h2>{$user.email || l('Account')}</h2>
-      <ul class="sidebar__nav__account">
-        <li>
-          <Link href="/chat" className="sidebar__nav__notifications">
-            <span>{l('Notifications')}</span>
-            <Unread unread={user.unread}/>
-            <Icon name="{user.unread ? 'bell' : 'bell-slash'}"/>
-          </Link>
-        </li>
-        <li><Link href="/join" className="sidebar__nav__join"><Icon name="user-plus"/> {l('Join conversation...')}</Link></li>
-        <li><Link href="/connections" className="sidebar__nav__connections"><Icon name="network-wired"/> {l('Add connection...')}</Link></li>
-        <li><Link href="/settings" className="sidebar__nav__settings"><Icon name="cog"/> {l('Settings')}</Link></li>
-        <li><Link href="/help" className="sidebar__nav__help"><Icon name="question-circle"/> {l('Help')}</Link></li>
-        <li><a href="/logout" className="sidebar__nav__logout" on:click|preventDefault="{e => user.logout.perform()}"><Icon name="power-off"/> {l('Log out')}</a></li>
-      </ul>
+      <h3>{$user.email || l('Account')}</h3>
+      <SidebarItem href="/chat" icon="{user.unread ? 'bell' : 'bell-slash'}">
+        <span>{l('Notifications')}</span>
+        <Unread unread="{user.unread}"/>
+      </SidebarItem>
+      <SidebarItem href="/join" icon="user-plus">
+        <span>{l('Join conversation')}</span>
+      </SidebarItem>
+      <SidebarItem href="/connections" icon="network-wired">
+        <span>{l('Add connection')}</span>
+      </SidebarItem>
+      <SidebarItem href="/settings" icon="cog">
+        <span>{l('Settings')}</span>
+      </SidebarItem>
+      <SidebarItem href="/help" icon="question-circle">
+        <span>{l('Help')}</span>
+      </SidebarItem>
+      <SidebarItem href="/logout" icon="power-off">
+        <span>{l('Log out')}</span>
+      </SidebarItem>
     </nav>
   </div>
 </div>

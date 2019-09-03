@@ -5,7 +5,10 @@ export let className = '';
 export let href = '/';
 export let replace = false;
 
+export const focus = () => el.focus();
+
 let classNames = [];
+let el;
 
 function calculateClassNames(href, $pathname) {
   classNames = className ? [className] : [];
@@ -24,4 +27,4 @@ function onClick(e) {
 $: calculateClassNames(href, $pathname);
 </script>
 
-<a {href} on:click={onClick} class={classNames.join(' ')}><slot/></a>
+<a {href} on:click={onClick} class={classNames.join(' ')} bind:this="{el}"><slot/></a>

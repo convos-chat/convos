@@ -1,15 +1,10 @@
-@mixin sidebarTypeIcon {
-  @extend .fa;
-  font-size: 1.1rem;
-  text-align: center;
-  padding-right: 0.3rem;
-  width: 1.8rem;
-  display: inline-block;
-}
+$sidebar-item-indent: 0.3rem;
+$sidebar-item-dialog-indent: 0.6rem;
+$sidebar-item-icon-width: 1.8rem;
 
 .sidebar-wrapper {
   background: var(--sidebar-bg);
-  padding: var(--gutter);
+  padding: 0 var(--gutter) 6rem var(--gutter);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 
@@ -21,8 +16,6 @@
 
 .sidebar {
   &.is-chatting {
-    padding-bottom: 6rem;
-
     h1 {
       margin: 0;
       margin-bottom: var(--gutter-small);
@@ -36,39 +29,20 @@
     bottom: 0;
     left: 0;
   }
-
-  ul,
-  li {
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-
-  form {
-    background: var(--sidebar-bg);
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
 }
 
 .sidebar__nav {
   a {
     line-height: 1.2rem;
-    padding: 0.3rem 0.2rem;
-    margin-left: -0.2rem;
-    margin-right: -0.2rem;
+    padding: $sidebar-item-indent 0.3rem;
     display: block;
-    position: relative;
-
-    &:before {
-      @include sidebarTypeIcon;
-    }
+    transition: background-color 0.15s ease-in-out;
 
     &:focus,
     &:hover {
       background: var(--sidebar-search-focus-bg);
       text-decoration: none;
+      filter: brightness(0.9);
     }
 
     &.has-path {
@@ -89,80 +63,77 @@
     }
   }
 
-  h2 {
+  h3 {
     font-size: 0.9rem;
     font-weight: normal;
     border-bottom: 1px solid var(--sidebar-border-bottom);
     margin-bottom: 0.3rem;
     margin-top: var(--gutter);
   }
-
-  ul ul a {
-    padding-left: 0.6rem;
-  }
-
-  i.state-icon {
-    font-size: 0.9rem;
-    position: absolute;
-    right: var(--gutter-small);
-    top: 0.5rem;
-
-    &.fa-check-circle {
-      display: none;
-    }
-
-    &.fa-unlink {
-      opacity: 0.5;
-    }
-  }
 }
 
-.sidebar__nav__account {
-  i.fa,
-  i.fas {
-    @include sidebarTypeIcon;
-    float: left;
-  }
-}
-
-.sidebar__nav__conversations {
-  &.is-channels a:before {
-    content: fa-content($fa-var-user-friends);
-  }
-
-  &.is-private a:before {
-    content: fa-content($fa-var-user);
-  }
-
-  .unread {
-    color: var(--sidebar-bg);
-    font-size: 0.9rem;
-    line-height: 0.9rem;
-    border-radius: 0.5em;
-    padding: 0.15em 0.4em;
-    position: absolute;
-    top: 0.4em;
-    right: 0.3em;
-  }
-}
-
-.sidebar__nav__servers {
-  > li > a:before {
-    content: fa-content($fa-var-network-wired);
-  }
-}
-
-.sidebar__search {
+.sidebar__item {
   position: relative;
 
+  &.has-settings {
+    .sidebar__item__link {
+      padding-left: $sidebar-item-icon-width + $sidebar-item-indent;
+    }
+
+    &:hover .sidebar__item__settings i:before {
+      content: fa-content($fa-var-ellipsis-h);
+    }
+  }
+
+  &.for-dialog {
+    .sidebar__item__link {
+      padding-left: $sidebar-item-icon-width + $sidebar-item-indent + $sidebar-item-dialog-indent;
+    }
+
+    .sidebar__item__settings {
+      left: $sidebar-item-dialog-indent;
+    }
+  }
+}
+
+.sidebar__item__link {
+  i {
+    text-align: center;
+    width: $sidebar-item-icon-width;
+  }
+}
+
+.sidebar__item__settings {
+  text-align: center;
+  width: $sidebar-item-icon-width;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.sidebar__header {
+  background: var(--sidebar-bg);
+  padding-top: var(--gutter);
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  h2,
   input {
     background: transparent;
     color: var(--sidebar-text);
     font-size: 2.4rem;
+    line-height: 2.4rem;
+    height: 2.4rem;
+    width: 100%;
     border: 0;
     border-bottom: 2px solid transparent;
-    width: 100%;
+    margin-top: 0;
+  }
 
+  input {
     &::placeholder {
       color: var(--sidebar-text);
       font-weight: bold;
@@ -182,7 +153,17 @@
     font-size: 1.8rem;
     position: absolute;
     right: 0;
-    top: 0.4em;
+    top: calc(var(--gutter) + 0.2rem);
     cursor: pointer;
+  }
+
+  &.for-settings {
+    &:focus {
+      outline: 0;
+
+      i:before {
+        outline: var(--sidebar-outline);
+      }
+    }
   }
 }

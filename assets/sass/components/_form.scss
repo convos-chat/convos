@@ -13,12 +13,16 @@ textarea {
 }
 
 .checkbox {
+  display: flex;
+
   i {
     cursor: pointer;
     font-size: 1.2rem;
+    padding-right: 0.3rem;
   }
 
   label {
+    padding-top: 0.05rem;
     cursor: pointer;
   }
 
@@ -61,17 +65,16 @@ textarea {
       color: var(--input-placeholder-color);
     }
 
+    &[readonly] {
+      background: var(--input-disabled-bg);
+      color: var(--input-disabled-color);
+      cursor: not-allowed;
+    }
+
     &:focus {
       outline: var(--input-border);
       outline-width: 2px;
       outline-offset: -2px;
-    }
-
-    &[readonly] {
-      background: var(--input-disabled-bg);
-      color: var(--input-disabled-color);
-      outline: 0 !important;
-      cursor: not-allowed;
     }
   }
 

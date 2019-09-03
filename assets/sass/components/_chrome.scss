@@ -54,12 +54,12 @@ body.no-js .if-js {
     right: 0;
     left: auto;
 
-    .sidebar__search {
+    .sidebar__header {
       display: none;
     }
 
     &.is-visible {
-      top: calc(var(--nav-small-height) * 0.9);
+      top: 2.6rem; // TODO: Should be a dynamic value
       display: block;
     }
   }
