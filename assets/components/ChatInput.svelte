@@ -103,7 +103,7 @@ $: inputParts = pos && calculateInputParts(pos) || ['', '', '', ''];
 
   <a href="#send" on:click|preventDefault="{sendMessage}" class="btn-send"><Icon name="paper-plane"/></a>
 
-  <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory} {autocompleteOptions.length ? '' : 'hide'}">
+  <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
     {#each autocompleteOptions as opt, i}
       <a href="#{opt.value}" class:has-focus="{i == activeAutocompleteIndex}" tabindex="-1" on:click|preventDefault="{e => fillinAutocompeteOption({space: ''})}">{@html opt.text || opt.val}</a>
     {/each}

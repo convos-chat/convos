@@ -72,10 +72,10 @@ onMount(async () => {
   <Checkbox bind:checked="{showAdvancedSettings}">
     <span slot="label">{l('Show advanced settings')}</span>
   </Checkbox>
-  <TextField name="username" className="{showAdvancedSettings ? '' : 'hide'}">
+  <TextField name="username" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Username')}</span>
   </TextField>
-  <PasswordField name="password" className="{showAdvancedSettings ? '' : 'hide'}">
+  <PasswordField name="password" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Password')}</span>
   </PasswordField>
   <FormActions>
