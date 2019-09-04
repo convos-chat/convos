@@ -1,3 +1,7 @@
+export function hidden(bool) {
+  return bool ? 'hidden' : '';
+}
+
 export function q(parentEl, sel, cb) {
   const els = parentEl.querySelectorAll(sel);
   if (!cb) return [].slice.call(els, 0);

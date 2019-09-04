@@ -48,8 +48,8 @@ function filterNav(filter) {
       activeLinkIndex = i;
     }
 
-    aClassList[makeVisible ? 'remove' : 'add']('hide');
     aClassList.remove('has-focus');
+    aEl[makeVisible ? 'removeAttribute' : 'setAttbribute']('hidden', true);
     seen[aEl.href] = true;
   });
 
