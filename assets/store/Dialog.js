@@ -53,7 +53,7 @@ export default class Dialog extends Reactive {
     PARTICIPANT:
     for (let pi = 0; pi < participantIds.length; pi++) {
       const participant = this.participants[participantIds[pi]];
-      for (let ni = 0; ni < needleKeys.length; i++) {
+      for (let ni = 0; ni < needleKeys.length; ni++) {
         const needleKey = params[needleKeys[ni]];
         if (params[needleKey] != participant[needleKey]) continue PARTICIPANT;
       }
