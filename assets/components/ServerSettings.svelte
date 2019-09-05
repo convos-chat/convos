@@ -22,6 +22,19 @@ let useTls = false;
 let verifyTls = false;
 let wantToBeConnected = false;
 
+function connectionToForm() {
+  if (connectionToForm.url == connection.url) return;
+  formEl.server.value = connection.url.host;
+  formEl.nick.value = connection.url.searchParams.get('nick') || '';
+  formEl.password.value = connection.url.password;
+  formEl.username.value = connection.url.username;
+  formEl.url.value = connection.url.toString();
+  useTls = connection.url.searchParams.get('tls') == '1' && true || false;
+  verifyTls = connection.url.searchParams.get('tls_verify') == '1' && true || false;
+  wantToBeConnected = connection.wanted_state == 'connected';
+  connectionToForm.url = connection.url;
+}
+
 async function deleteConnection(e) {
   alert('TODO');
 }
@@ -31,32 +44,32 @@ async function updateConnectionFromForm(e) {
   await tick(); // Wait for url to update in form
   await updateConnectionOp.perform(e.target);
   user.ensureDialog(updateConnectionOp.res.body);
+  connectionToForm();
 }
 
 $: connection = $user.findDialog({connection_id: dialog.connection_id}) || {};
 $: connectionHost = connection.url && connection.url.host;
 $: isNotDisconnected = connection.state != 'disconnected';
-
-$: if (connection.url && formEl) {
-  formEl.server.value = connection.url.host;
-  formEl.nick.value = connection.url.searchParams.get('nick') || '';
-  formEl.password.value = connection.url.password;
-  formEl.username.value = connection.url.username;
-  formEl.url.value = connection.url.toString();
-  useTls = connection.url.searchParams.get('tls') && true || false;
-  verifyTls = connection.url.searchParams.get('tls_verify') && true || false;
-  wantToBeConnected = connection.wanted_state == 'connected';
-}
+$: connection.url && formEl && connectionToForm();
+$: wantedState = wantToBeConnected ? 'connected' : 'disconnected';
 </script>
 
 <div class="sidebar-wrapper is-visible">
   <SettingsHeader {dialog}/>
 
-  <p>{l('Currently %1 from %2.', connection.state || 'disconnected', connectionHost)}</p>
+  {#if connection.state == 'disconnected'}
+    <p>{l('Currently disconnected from %1.', connectionHost)}</p>
+  {:else if connection.state == 'connected'}
+    <p>{l('Currently connected to %1.', connectionHost)}</p>
+  {:else}
+    <p>{l('Currently connecting to %1.', connectionHost)}</p>
+  {/if}
 
   <form method="post" bind:this="{formEl}" on:submit|preventDefault="{updateConnectionFromForm}">
     <input type="hidden" name="connection_id" value="{connection.connection_id}">
     <input type="hidden" name="url" value="{url}">
+    <input type="hidden" name="wanted_state" value="{wantedState}">
+
     <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}">
       <span slot="label">{l('Server and port')}</span>
     </TextField>
