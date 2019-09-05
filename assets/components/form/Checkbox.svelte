@@ -8,11 +8,11 @@ export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let value = 1;
 
-$: icon = checked ? 'check-square' : 'minus-square';
+$: icon = checked ? 'check-square' : 'square';
 </script>
 
 <div class="checkbox" class:is-disabled="{disabled}">
   <input type="checkbox" {disabled} {name} {id} {value} bind:checked="{checked}"/>
-  <Icon name="{icon}" on:click="{() => { disabled || (checked = !checked) }}"/>
+  <Icon family="regular" name="{icon}" on:click="{() => { disabled || (checked = !checked) }}"/>
   <label for="{id}"><slot name="label">Label</slot></label>
 </div>
