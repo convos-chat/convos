@@ -2,6 +2,7 @@
 import {getContext, tick} from 'svelte';
 import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
+import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
 import FormActions from '../components/form/FormActions.svelte';
@@ -27,8 +28,10 @@ async function createConnectionFromForm(e) {
 
 <SidebarChat/>
 
-<main class="main align-content-middle">
-  <h1>{l('Add connection')}</h1>
+<main class="main">
+  <ChatHeader>
+    <h1>{l('Add connection')}</h1>
+  </ChatHeader>
 
   <form method="post" on:submit|preventDefault="{createConnectionFromForm}">
     <input type="hidden" name="url" value="{url}">

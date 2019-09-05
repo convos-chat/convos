@@ -27,6 +27,7 @@ export function hrefToPathname(href) {
 export const baseUrl = '//' + location.host; // TODO: Add support for example.com/whatever/convos/
 export const fragment = writable(location.hash.substring(1));
 export const pathname = writable(location.pathname);
+export const showMenu = writable(false);
 
 export const pathParts = derived(pathname, ($pathname) => {
   return $pathname.split('/').filter(p => p.length).map(decodeURIComponent);

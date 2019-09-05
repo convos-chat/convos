@@ -61,7 +61,8 @@ sub startup {
 
   my $auth_r = $r->under('/')->to('user#require_login');
   $auth_r->websocket('/events')->to('events#start')->name('events');
-  $auth_r->get("/$_")->to(template => 'index')->name($_) for (qw(connections help join settings));
+  $auth_r->get("/$_")->to(template => 'index')->name($_)        for (qw(help join settings));
+  $auth_r->get("/create/$_")->to(template => 'index')->name($_) for (qw(connection conversation));
   $auth_r->get('/chat/*path', {path => ''})->to(template => 'index')->name('chat');
 
   $self->_plugins;
@@ -169,7 +170,7 @@ sub _plugins {
   unshift @plugins, qw(Convos::Plugin::Auth Convos::Plugin::Helpers);
 
   while (@plugins) {
-    my $name = shift @plugins or last;
+    my $name   = shift @plugins or last;
     my $config = ref $plugins[0] ? shift @plugins : $self->config;
     $self->plugin($name => $config) unless $uniq{$name}++;
   }

@@ -6,7 +6,7 @@ import User from './store/User';
 
 // Pages
 import Chat from './page/Chat.svelte';
-import Connections from './page/Connections.svelte';
+import ConnectionCreate from './page/ConnectionCreate.svelte';
 import Help from './page/Help.svelte';
 import Join from './page/Join.svelte';
 import Login from './page/Login.svelte';
@@ -16,9 +16,9 @@ import Settings from './page/Settings.svelte';
 // Routing
 const pages = {
   chat: Chat,
-  connections: Connections,
+  'create/connection': ConnectionCreate,
+  'create/conversation': Join,
   help: Help,
-  join: Join,
   login: Login,
   register: Register,
   settings: Settings,
@@ -29,7 +29,7 @@ const api = new Api(Convos.apiUrl, {debug: true});
 const user = new User({api, wsUrl: Convos.wsUrl});
 setContext('user', user);
 
-$: currentPage = pages[$pathParts[0]] || ($user.email ? pages.chat : pages.login);
+$: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]] || ($user.email ? pages.chat : pages.login);
 
 const login = user.login;
 $: if ($login.is('success')) {
