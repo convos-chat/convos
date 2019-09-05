@@ -94,6 +94,16 @@ $sidebar-item-icon-width: 1.8rem;
       left: $sidebar-item-dialog-indent;
     }
   }
+
+  .unread {
+    font-size: 0.9rem;
+    line-height: 0.9rem;
+    border-radius: 0.5em;
+    padding: 0.15em 0.4em;
+    position: absolute;
+    top: 0.4em;
+    right: 0.3em;
+  }
 }
 
 .sidebar__item__link {
