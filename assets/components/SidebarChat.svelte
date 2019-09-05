@@ -1,14 +1,12 @@
 <script>
 import {getContext} from 'svelte';
-import {gotoUrl} from '../store/router';
+import {gotoUrl, showMenu} from '../store/router';
 import {l} from '../js/i18n';
 import {q, tagNameIs} from '../js/util';
 import Icon from './Icon.svelte';
 import SidebarItem from '../components/SidebarItem.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
-
-export let visible = false;
 
 const user = getContext('user');
 
@@ -107,7 +105,7 @@ $: connections = $user.connections;
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
 
-<div class="sidebar-wrapper {visible ? 'is-visible' : ''}">
+<div class="sidebar-wrapper {$showMenu ? 'is-visible' : ''}">
   <div class="sidebar is-chatting">
     <form class="sidebar__header">
       <input type="text"
@@ -146,10 +144,10 @@ $: connections = $user.connections;
         <span>{l('Notifications')}</span>
         <Unread unread="{user.unread}"/>
       </SidebarItem>
-      <SidebarItem href="/join" icon="user-plus">
-        <span>{l('Join conversation')}</span>
+      <SidebarItem href="/create/conversation" icon="user-plus">
+        <span>{l('Add conversation')}</span>
       </SidebarItem>
-      <SidebarItem href="/connections" icon="network-wired">
+      <SidebarItem href="/create/connection" icon="network-wired">
         <span>{l('Add connection')}</span>
       </SidebarItem>
       <SidebarItem href="/settings" icon="cog">

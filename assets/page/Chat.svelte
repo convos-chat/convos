@@ -3,10 +3,10 @@ import {fragment, gotoUrl, pathParts} from '../store/router';
 import {getContext, tick} from 'svelte';
 import {l} from '../js/i18n';
 import {timer} from '../js/util';
+import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
-import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import ServerSettings from '../components/ServerSettings.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
@@ -16,20 +16,9 @@ const user = getContext('user');
 
 let height = 0;
 let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
-let showMenu = false;
 
 function isSameMessage(i) {
   return i == 0 ? false : messages[i].from == messages[i - 1].from;
-}
-
-function toggleMenu() {
-  if (settingsComponent) {
-    showMenu = true;
-    gotoUrl(location.href.replace(/\#.*/, ''));
-  }
-  else {
-    showMenu = !showMenu;
-  }
 }
 
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
@@ -41,22 +30,24 @@ $: settingsComponent = $fragment != 'settings' ? null : dialog.dialog_id ? Dialo
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
 </script>
 
-<SidebarChat visible="{showMenu}"/>
+<SidebarChat/>
 
 <svelte:component dialog="{dialog}" this="{settingsComponent}"/>
 
 <main class="main messages-container" bind:offsetHeight="{height}">
-  <header class="header">
-    <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
+  <ChatHeader>
     {#if dialog.dialog_id || dialog.connection_id}
+      <h1>{$pathParts[2] || $pathParts[1]}</h1>
       <small><DialogSubject dialog="{dialog}"/></small>
     {:else}
-      <a href="#clear" class="header__toggle" on:click|preventDefault="{e => user.readNotifications.perform()}"><Icon name="{$user.unread ? 'bell' : 'bell-slash'}"/></a>
+      <h1>
+        {l('Notifications')}
+        <a href="#clear:notifications" on:click|preventDefault="{e => user.readNotifications.perform()}">
+          ({dialog.unread})
+        </a>
+      </h1>
     {/if}
-
-    <!-- hamburger for small screens -->
-    <a href="#SidebarChat" class="header__hamburger" on:click|preventDefault="{toggleMenu}"><Icon name="bars"/></a>
-  </header>
+  </ChatHeader>
 
   {#if messages.length == 0}
     {#if !$pathParts[1]}

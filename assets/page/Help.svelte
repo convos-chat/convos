@@ -1,5 +1,6 @@
 <script>
 import {l, lmd} from '../js/i18n';
+import ChatHeader from '../components/ChatHeader.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 
 const version = '1.0.0'; // TODO: Extract version from package.json
@@ -8,7 +9,9 @@ const version = '1.0.0'; // TODO: Extract version from package.json
 <SidebarChat/>
 
 <main class="main">
-  <header class="header"><h1>{l('Help')}</h1><small>v{version}</small></header>
+  <ChatHeader>
+    <h1>{l('Help')}</h1><small>v{version}</small>
+  </ChatHeader>
 
   <p>
     {@html lmd('Got any questions? Come and talk to us in the "#convos" channel on http://freenode.net.')}

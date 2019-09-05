@@ -46,8 +46,7 @@
   }
 }
 
-.header__hamburger,
-.header__toggle {
+.header__hamburger {
   color: inherit;
   font-size: 1.4rem;
   position: absolute;
@@ -64,14 +63,8 @@
 }
 
 @include if_screen("<=full") {
-  .header__hamburger,
-  .header__toggle {
+  .header__hamburger {
     display: block;
     top: 0.7rem;
-  }
-
-  .header__toggle {
-    right: auto;
-    left: var(--gutter);
   }
 }

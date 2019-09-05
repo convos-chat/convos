@@ -1,6 +1,7 @@
 <script>
 import {getContext, tick} from 'svelte';
 import {l} from '../js/i18n';
+import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import FormActions from '../components/form/FormActions.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
@@ -41,8 +42,11 @@ $: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.val
 
 <SidebarChat/>
 
-<main class="main align-content-middle">
-  <h1>{l('Settings')}</h1>
+<main class="main">
+  <ChatHeader>
+    <h1>{l('Settings')}</h1>
+  </ChatHeader>
+
   <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
     <TextField name="email" value="{$user.email}" readonly>
       <span slot="label">{l('Email')}</span>
