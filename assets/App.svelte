@@ -15,9 +15,9 @@ import Settings from './page/Settings.svelte';
 
 // Routing
 const pages = {
+  'add/connection': ConnectionCreate,
+  'add/conversation': Join,
   chat: Chat,
-  'create/connection': ConnectionCreate,
-  'create/conversation': Join,
   help: Help,
   login: Login,
   register: Register,

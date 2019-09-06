@@ -1,7 +1,7 @@
 export default class Reactive {
   constructor() {
     this._reactive = {};
-    this._on = {message: [], update: []};
+    this._on = {loaded: [], message: [], update: []};
   }
 
   emit(event, params) {
@@ -9,8 +9,10 @@ export default class Reactive {
   }
 
   on(event, cb) {
+    const p = cb ? null : new Promise(resolve => { cb = resolve }).finally(unsubscribe);
+    const unsubscribe = () => this._on[event].filter(i => (i != cb));
     this._on[event].push(cb);
-    return () => this._on[event].filter(i => (i != cb));
+    return p || unsubscribe;
   }
 
   // This is used by https://svelte.dev/docs#svelte_store
@@ -32,6 +34,7 @@ export default class Reactive {
   _notify() {
     delete this._notifyTid;
     this._on.update.forEach(cb => cb(this));
+    if (this.status != 'loading' && this.status != 'pending') this.emit('loaded', this);
   }
 
   _readOnlyAttr(name, val) {

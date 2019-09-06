@@ -10,11 +10,11 @@ let classNames = [];
 
 $: {
   classNames = ['btn'];
-  classNames.push('for-' + (type || icon || 'default'));
+  classNames.push('for-' + (icon || 'default'));
 }
 </script>
 
-<button class="{classNames.join(' ')}" {disabled} on:click>
+<button class="{classNames.join(' ')}" {disabled} {type} on:click>
   <slot/>
   <Icon name="{icon}"/>
 </button>

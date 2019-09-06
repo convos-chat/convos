@@ -144,10 +144,10 @@ $: connections = $user.connections;
         <span>{l('Notifications')}</span>
         <Unread unread="{user.unread}"/>
       </SidebarItem>
-      <SidebarItem href="/create/conversation" icon="user-plus">
+      <SidebarItem href="/add/conversation" icon="user-plus">
         <span>{l('Add conversation')}</span>
       </SidebarItem>
-      <SidebarItem href="/create/connection" icon="network-wired">
+      <SidebarItem href="/add/connection" icon="network-wired">
         <span>{l('Add connection')}</span>
       </SidebarItem>
       <SidebarItem href="/settings" icon="cog">

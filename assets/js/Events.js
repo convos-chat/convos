@@ -17,9 +17,10 @@ export default class Events {
   }
 
   onConnection(params) {
-    this._findDialog({connection_id: params.connection_id})
-      .update({frozen: params.message || '', state: params.state})
-      .addMessage(params.message
+    const conn = this._findDialog({connection_id: params.connection_id});
+    if (!conn) return;
+    conn.update({frozen: params.message || '', state: params.state});
+    conn.addMessage(params.message
         ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
         : {message: 'Connection state changed to %1.', vars: [params.state]}
       );

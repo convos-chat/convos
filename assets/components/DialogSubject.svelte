@@ -18,5 +18,5 @@ export let dialog = {};
 {:else if dialog.dialog_id}
   {l('No topic is set.')}
 {:else}
-  {l('Server messages.')}
+  {l('Connection messages.')}
 {/if}
