@@ -9,10 +9,10 @@ export default class Reactive {
   }
 
   on(event, cb) {
-    const p = cb ? null : new Promise(resolve => { cb = resolve }).finally(unsubscribe);
+    const p = cb ? null : new Promise(resolve => { cb = resolve });
     const unsubscribe = () => this._on[event].filter(i => (i != cb));
     this._on[event].push(cb);
-    return p || unsubscribe;
+    return p ? p.finally(unsubscribe) : unsubscribe;
   }
 
   // This is used by https://svelte.dev/docs#svelte_store

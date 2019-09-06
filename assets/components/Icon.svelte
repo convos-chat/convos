@@ -1,4 +1,5 @@
 <script>
+export let animation = '';
 export let className = '';
 export let family = '';
 export let name;
@@ -14,7 +15,8 @@ let classNames = [];
 $: {
   classNames = [familyToClassName[family] || 'fa'];
   classNames.push('fa-' + (name || 'default'));
-  if (className) classNames.push(className);
+  if (animation) classNames = classNames.concat(animation.split(' ').map(a => 'fa-' + a));
+  if (className) classNames = classNames.concat(className.split(' '));
 }
 </script>
 

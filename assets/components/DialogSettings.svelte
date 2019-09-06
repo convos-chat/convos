@@ -1,7 +1,7 @@
 <script>
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
-import Button from '../components/Button.svelte';
+import Button from '../components/form/Button.svelte';
 import FormActions from '../components/form/FormActions.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';

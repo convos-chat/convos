@@ -23,7 +23,7 @@ const user = getContext('user');
       <span slot="label">{l('Password')}</span>
     </PasswordField>
     <FormActions>
-      <button class="btn">{l('Log in')}</button>
+      <button class="btn" op="{user.login}">{l('Log in')}</button>
     </FormActions>
     <OperationStatus op="{user.login}"/>
   </form>
