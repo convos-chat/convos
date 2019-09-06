@@ -69,8 +69,12 @@ export default class User extends Operation {
   }
 
   async load() {
+    if (this.is('loading')) await this.on('loaded');
+    if (this.is('success')) return this;
+    this.update({status: 'loading'});
     await this.perform();
     if (this.email) await this.send({method: 'ping'});
+    return this;
   }
 
   parse(res, body = res.body) {

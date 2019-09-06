@@ -5,10 +5,10 @@ import {l} from '../js/i18n';
 import {timer} from '../js/util';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
+import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
 import Link from '../components/Link.svelte';
-import ServerSettings from '../components/ServerSettings.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import Ts from '../components/Ts.svelte';
 
@@ -25,7 +25,7 @@ $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathPart
 $: dialog.load();
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: messages = $dialog.messages;
-$: settingsComponent = $fragment != 'settings' ? null : dialog.dialog_id ? DialogSettings : ServerSettings;
+$: settingsComponent = $fragment != 'settings' ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
 </script>
@@ -36,7 +36,7 @@ $: if (scrollDirection == 'down') window.scrollTo(0, height);
 
 <main class="main messages-container" bind:offsetHeight="{height}">
   <ChatHeader>
-    {#if dialog.dialog_id || dialog.connection_id}
+    {#if $pathParts[1]}
       <h1>{$pathParts[2] || $pathParts[1]}</h1>
       <small><DialogSubject dialog="{dialog}"/></small>
     {:else}
@@ -56,7 +56,7 @@ $: if (scrollDirection == 'down') window.scrollTo(0, height);
       <h2>{l(dialog.loading ? 'Loading messages...' : 'No messages.')}</h2>
       <p>{dialog.frozen}</p>
     {:else}
-      <h2>{l('You are not part of this dialog.')}</h2>
+      <h2>{l(dialog.dialog_id ? 'You are not part of this dialog.' : 'Connection does not exist.')}</h2>
     {/if}
   {/if}
 

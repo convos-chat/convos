@@ -12,6 +12,6 @@ onMount(() => linkEl.focus());
 </script>
 
 <Link href="/chat/{dialog.path}" className="sidebar__header for-settings" bind:this="{linkEl}">
-  <h2>{l(dialog.dialog_id ? 'Conversation' : 'Server')}</h2>
+  <h2>{l(dialog.dialog_id ? 'Conversation' : 'Connection')}</h2>
   <Icon name="times-circle"/>
 </Link>
