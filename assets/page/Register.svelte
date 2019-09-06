@@ -29,7 +29,7 @@ const user = getContext('user');
     </TextField>
   {/if}
     <FormActions>
-      <button class="btn">{l('Register')}</button>
+      <button class="btn" op={user.register}>{l('Register')}</button>
     </FormActions>
     <OperationStatus op={user.register}/>
   </form>

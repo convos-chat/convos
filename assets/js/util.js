@@ -1,3 +1,7 @@
+export function epoch() {
+  return new Date().getTime();
+}
+
 export function hidden(bool) {
   return bool ? 'hidden' : '';
 }

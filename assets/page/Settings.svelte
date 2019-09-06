@@ -2,6 +2,7 @@
 import {getContext, tick} from 'svelte';
 import {l} from '../js/i18n';
 import ChatHeader from '../components/ChatHeader.svelte';
+import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import FormActions from '../components/form/FormActions.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
@@ -71,8 +72,9 @@ $: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.val
     </PasswordField>
 
     <FormActions>
-      <button class="btn">{l('Save settings')}</button>
+      <Button icon="save" op="{updateUserOp}">{l('Save settings')}</Button>
     </FormActions>
+
     <OperationStatus op={updateUserOp}/>
   </form>
 </main>

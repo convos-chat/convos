@@ -2,7 +2,7 @@
 import {getContext, onMount, tick} from 'svelte';
 import {gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
-import Button from '../components/Button.svelte';
+import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
 import FormActions from '../components/form/FormActions.svelte';
@@ -112,11 +112,13 @@ onMount(async () => {
   </PasswordField>
   <FormActions>
     {#if connection.url}
-      <Button icon="save">{l('Update')}</Button>
-      <Button icon="trash" type="button" on:click|preventDefault="{removeConnection}">{l('Delete')}</Button>
+      <Button icon="save" op="{updateConnectionOp}">{l('Update')}</Button>
+      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click|preventDefault="{removeConnection}">{l('Delete')}</Button>
     {:else}
-      <Button icon="save">{l('Create')}</Button>
+      <Button icon="save" op="{createConnectionOp}">{l('Create')}</Button>
     {/if}
   </FormActions>
-  <OperationStatus op={updateConnectionOp}/>
+  <OperationStatus op="{createConnectionOp}"/>
+  <OperationStatus op="{removeConnectionOp}"/>
+  <OperationStatus op="{updateConnectionOp}"/>
 </form>
