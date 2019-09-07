@@ -1,5 +1,5 @@
 <script>
-import {hrefToPathname, pathname} from '../store/router';
+import {gotoUrl, hrefToPathname, pathname} from '../store/router';
 
 export let className = '';
 export let href = '/';
@@ -21,7 +21,7 @@ function onClick(e) {
   const aEl = e.target.closest('a');
   if (hrefToPathname(aEl.href) === null) return;
   e.preventDefault();
-  history[replace ? 'replaceState' : 'pushState']({}, document.title, aEl.href);
+  gotoUrl(aEl.href, {replace})
 }
 
 $: calculateClassNames(href, $pathname);
