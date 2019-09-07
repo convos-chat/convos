@@ -1,5 +1,5 @@
 <script>
-import {gotoUrl, historyListener, pathParts} from './store/router';
+import {gotoUrl, historyListener, pathname, pathParts} from './store/router';
 import {onMount, setContext} from 'svelte';
 import Api from './js/Api';
 import User from './store/User';
@@ -29,14 +29,14 @@ const api = new Api(Convos.apiUrl, {debug: true});
 const user = new User({api, wsUrl: Convos.wsUrl});
 setContext('user', user);
 
-$: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]] || ($user.email ? pages.chat : pages.login);
+$: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
+$: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname);
 
 const login = user.login;
 $: if ($login.is('success')) {
   document.cookie = $user.login.res.headers['Set-Cookie'];
   user.login.reset();
-  user.load();
-  gotoUrl('/chat');
+  user.load().then(gotoDefaultPage);
 }
 
 const logout = user.logout;
@@ -46,8 +46,14 @@ $: if ($logout.is('success')) {
   gotoUrl('/');
 }
 
+function gotoDefaultPage() {
+  const lastUrl = localStorage.getItem('lastUrl');
+  gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'));
+}
+
 onMount(async () => {
   await user.load();
+  if (!currentPage) gotoDefaultPage();
 
   const historyUnlistener = historyListener();
   const removeEls = document.querySelectorAll('.js-remove');
