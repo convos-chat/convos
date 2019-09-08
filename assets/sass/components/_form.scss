@@ -209,8 +209,9 @@ textarea {
 
   a {
     background: var(--input-bg);
-    display: block;
+    text-decoration: none;
     padding: 0em 0.5em;
+    display: block;
 
     &.is-active {
       background: #eee;

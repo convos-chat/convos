@@ -64,8 +64,8 @@ export default class User extends Operation {
     const conn = this.findDialog({connection_id: params.connection_id});
     const dialog = this.findDialog(params);
     if (!conn || !dialog) return false;
-    var myself = dialog.findParticipants({nick: conn.nick})[0];
-    return myself && myself.mode.indexOf('@') != -1;
+    const myself = dialog.findParticipants({nick: conn.nick})[0];
+    return myself && myself.mode && myself.mode.indexOf('o') != -1;
   }
 
   async load() {
@@ -99,7 +99,7 @@ export default class User extends Operation {
   async send(msg) {
     const ws = await this._ws();
     if (msg.method == 'ping') return this._ping();
-    if (!msg.id) msg.id = (this.source || 'user') + (++msgId);
+    if (!msg.id) msg.id = (msg.source || 'user') + (++msgId);
     if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] });
     delete msg.dialog;
     ws.send(JSON.stringify(msg));
@@ -125,7 +125,7 @@ export default class User extends Operation {
       ws.onclose = (e) => {
         delete this._wsPromise;
         this._wsReconnectTid = setTimeout(() => this._ws(), 20000);
-        this.connections.forEach(conn => { conn.status = 'Unreachable.' });
+        this.connections.forEach(conn => conn.update({frozen: 'Unreachable.'}));
         this.update({});
         if (![handled, (handled = true)][0]) reject(e);
       };

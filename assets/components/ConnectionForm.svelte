@@ -1,6 +1,6 @@
 <script>
 import {getContext, onMount, tick} from 'svelte';
-import {gotoUrl} from '../store/router';
+import {gotoUrl, urlToForm} from '../store/router';
 import {l} from '../js/i18n';
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
@@ -31,6 +31,7 @@ function defaultsToForm() {
   formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   useTls = true;
   wantToBeConnected = true;
+  urlToForm(formEl);
 }
 
 function connectionToForm() {
@@ -70,6 +71,7 @@ async function submitForm(e) {
 
 onMount(async () => {
   await user.load();
+  if (!formEl) return; // if unMounted while loading user data
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
   return connection.url ? connectionToForm() : defaultsToForm();
 });

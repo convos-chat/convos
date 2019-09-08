@@ -1,5 +1,5 @@
 <script>
-import {gotoUrl, hrefToPathname, pathname} from '../store/router';
+import {gotoUrl, pathname} from '../store/router';
 
 export let className = '';
 export let href = '/';
@@ -17,11 +17,8 @@ function calculateClassNames(href, $pathname) {
   if ($pathname == href) classNames = [...classNames, 'is-exact'];
 }
 
-function onClick(e) {
-  const aEl = e.target.closest('a');
-  if (hrefToPathname(aEl.href) === null) return;
-  e.preventDefault();
-  gotoUrl(aEl.href, {replace})
+function onClick(event) {
+  gotoUrl(event.target.closest('a').href, {event, replace})
 }
 
 $: calculateClassNames(href, $pathname);
