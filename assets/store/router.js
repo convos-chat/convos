@@ -1,7 +1,13 @@
-import {derived, writable} from 'svelte/store';
+import {derived, get, writable} from 'svelte/store';
+
+function indexOfNull(str, searchValue) {
+  const i = str.indexOf(searchValue);
+  return i == -1 ? null : i;
+}
 
 function handleHistoryChange(e) {
-  hrefToPathname(location.href);
+  parseUrl(location.href);
+  currentUrl.set(new URL(location.href));
 }
 
 export function historyListener() {
@@ -10,22 +16,38 @@ export function historyListener() {
 }
 
 export function gotoUrl(url, params = {}) {
-  if (hrefToPathname(url) === null) return (location.href = url);
+  if (!parseUrl(url)) return (location.href = url);
+  if (params.event) params.event.preventDefault();
   history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+  currentUrl.set(new URL(location.href));
 }
 
-export function hrefToPathname(href) {
+function parseUrl(href) {
   const pathnameStart = href.indexOf('/') == 0 ? 0 : href.indexOf(baseUrl) + baseUrl.length;
-  const pathnameStop = href.indexOf('#') == -1 ? href.length : href.indexOf('#');
-  if (pathnameStart == baseUrl.length - 1) return null;
-  const val = href.substring(pathnameStart, pathnameStop);
-  fragment.set(href.substring(pathnameStop + 1));
-  pathname.set(val);
-  return val;
+  const hashPos = indexOfNull(href, '#');
+  const queryPos = indexOfNull(href, '?');
+  if (pathnameStart == baseUrl.length - 1) return false;
+  const pathpart = href.substring(pathnameStart, queryPos || hashPos || href.length);
+  pathname.set(pathpart);
+  return true;
+}
+
+export function urlToForm(formEl, url = get(currentUrl)) {
+  url.searchParams.forEach((val, name) => {
+    const inputEl = formEl[name];
+    if (!(inputEl && inputEl.tagName)) {
+      return;
+    }
+    else if (inputEl.type == 'checkbox') {
+      inputEl.checked = val ? true : false;
+    }
+    else {
+      formEl[name].value = val;
+    }
+  });
 }
 
 export const baseUrl = '//' + location.host; // TODO: Add support for example.com/whatever/convos/
-export const fragment = writable(location.hash.substring(1));
 export const pathname = writable(location.pathname);
 export const showMenu = writable(false);
 
@@ -33,4 +55,4 @@ export const pathParts = derived(pathname, ($pathname) => {
   return $pathname.split('/').filter(p => p.length).map(decodeURIComponent);
 });
 
-export const queryString = writable(location.search);
+export const currentUrl = writable(new URL(location.href));

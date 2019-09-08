@@ -25,6 +25,11 @@ $: visibleOptions = filterOptions(options, typed);
 $: if (visible == true) activeIndex = 0;
 $: if (visible == false) typed = '';
 
+$: if (humanEl && !humanEl.value && humanEl != document.activeElement) {
+  const found = options.find(opt => opt[0] == hiddenEl.value);
+  if (found) humanEl.value = found[1] || found[0];
+}
+
 function filterOptions(options, needle) {
   let re = new RegExp('(?:^|\\s|-)' + needle, 'i'); // TODO: needle need to be safe string
   let found = [];
@@ -81,6 +86,7 @@ function toggle() {
 
 onMount(() => {
   humanEl.addEventListener('blur', () => setTimeout(() => { visible = false }, 100));
+  value = hiddenEl.value;
 });
 </script>
 
@@ -89,7 +95,6 @@ onMount(() => {
   <input type="hidden" {name} bind:this="{hiddenEl}" bind:value on:keydown="{keydown}"/>
   <input type="text" {placeholder} {id} {readonly} autocomplete="off"
     bind:this="{humanEl}"
-    bind:value
     on:keydown="{keydown}"
     on:keyup="{keyup}"/>
   <div class="select-field__options">

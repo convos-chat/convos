@@ -1,6 +1,6 @@
 <script>
-import {fragment, gotoUrl, pathParts} from '../store/router';
 import {getContext, tick} from 'svelte';
+import {gotoUrl, pathParts, currentUrl} from '../store/router';
 import {l} from '../js/i18n';
 import {timer} from '../js/util';
 import ChatHeader from '../components/ChatHeader.svelte';
@@ -25,7 +25,7 @@ $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathPart
 $: dialog.load();
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: messages = $dialog.messages;
-$: settingsComponent = $fragment != 'settings' ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
+$: settingsComponent = $currentUrl.hash != '#settings' ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
 
 $: if (scrollDirection == 'down') window.scrollTo(0, height);
 </script>
@@ -55,8 +55,20 @@ $: if (scrollDirection == 'down') window.scrollTo(0, height);
     {:else if $pathParts[1] == dialog.connection_id}
       <h2>{l(dialog.loading ? 'Loading messages...' : 'No messages.')}</h2>
       <p>{dialog.frozen}</p>
-    {:else}
-      <h2>{l(dialog.dialog_id ? 'You are not part of this dialog.' : 'Connection does not exist.')}</h2>
+    {:else if $pathParts[2] && !dialog.dialog_id}
+      <h2>{l('You are not part of this conversation.')}</h2>
+      <p>Do you want to add the conversation?</p>
+      <p>
+        <Link href="/add/conversation?connection_id={encodeURIComponent($pathParts[1])}&dialog_id={encodeURIComponent($pathParts[2])}" className="btn">{l('Yes')}</Link>
+        <Link href="/chat" className="btn">{l('No')}</Link>
+      </p>
+    {:else if $pathParts[1] && !dialog.connection_id}
+      <h2>{l('Connection does not exist.')}</h2>
+      <p>{l('Do you want to make a new connection?')}</p>
+      <p>
+        <Link href="/add/connection?server={encodeURIComponent($pathParts[1])}" className="btn">{l('Yes')}</Link>
+        <Link href="/chat" className="btn">{l('No')}</Link>
+      </p>
     {/if}
   {/if}
 

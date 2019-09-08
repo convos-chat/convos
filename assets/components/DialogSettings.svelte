@@ -12,6 +12,8 @@ const user = getContext('user');
 
 let formEl;
 
+$: if (formEl && dialog.hasOwnProperty('topic')) formEl.topic.value = dialog.topic;
+
 async function partDialog(e) {
   user.send({message: '/part', method: 'send', dialog});
 }

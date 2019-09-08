@@ -46,7 +46,7 @@ export default class Dialog extends Reactive {
   }
 
   findParticipants(params) {
-    var participantIds = Object.keys(this.participants).sort();
+    const participantIds = Object.keys(this.participants).sort();
     const needleKeys = Object.keys(params);
     const found = [];
 
