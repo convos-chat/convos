@@ -4,8 +4,6 @@ import Events from '../js/Events';
 import Operation from './Operation';
 import {sortByName} from '../js/util';
 
-let msgId = 0;
-
 export default class User extends Operation {
   constructor(params) {
     super({
@@ -16,8 +14,7 @@ export default class User extends Operation {
 
     this._readOnlyAttr('email', () => this.res.body.email || '');
     this._readOnlyAttr('notifications', new Dialog({api: this.api, name: 'Notifications'}));
-    this._readOnlyAttr('wsUrl', params.wsUrl);
-    this._readOnlyAttr('events', new Events({user: this}));
+    this._readOnlyAttr('events', this._createEvents());
 
     this._updateableAttr('connections', []);
     this._updateableAttr('enableNotifications', Notification.permission);
@@ -48,7 +45,7 @@ export default class User extends Operation {
 
     // Create connection
     conn = new Connection({...params, api: this.api});
-    conn.on('message', params => this.send({source: 'connection', ...params}));
+    conn.on('message', params => this.send(params));
     this.update({connections: this.connections.concat(conn).sort(sortByName)});
     return conn;
   }
@@ -96,44 +93,31 @@ export default class User extends Operation {
     }
   }
 
-  async send(msg) {
-    const ws = await this._ws();
-    if (msg.method == 'ping') return this._ping();
-    if (!msg.id) msg.id = (msg.source || 'user') + (++msgId);
-    if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] });
-    delete msg.dialog;
-    ws.send(JSON.stringify(msg));
+  send(msg) {
+    return this.events.send(msg);
   }
 
-  _ping() {
-    if (this.ws && this.ws.readyState == 1) this.ws.send('{"method":"ping"}');
+  wsEventMe(params) {
+    this.ensureDialog({connection_id: params.connection_id}).update(params);
   }
 
-  async _ws() {
-    if (this._wsPromise) return this._wsPromise;
-    if (this._wsReconnectTid) clearTimeout(this._wsReconnectTid);
+  wsEventPong(params) {
+    this.wsPongTimestamp = params.ts;
+  }
 
-    const ws = new WebSocket(this.wsUrl);
-    if (!this._wsTid) this._wsTid = setInterval(() => this._ping(), 15000);
+  _createEvents() {
+    const events = new Events();
 
-    let handled = false;
-    const p = new Promise((resolve, reject) => {
-      ws.onopen = () => {
-        if (![handled, (handled = true)][0]) resolve((this.ws = ws));
-      };
-
-      ws.onclose = (e) => {
-        delete this._wsPromise;
-        this._wsReconnectTid = setTimeout(() => this._ws(), 20000);
-        this.connections.forEach(conn => conn.update({frozen: 'Unreachable.'}));
-        this.update({});
-        if (![handled, (handled = true)][0]) reject(e);
-      };
-
-      ws.onerror = (e) => reject(e); // TODO
-      ws.onmessage = (e) => this.events.dispatch(JSON.parse(e.data));
+    events.on('message', params => {
+      const conn = this.findDialog({connection_id: params.connection_id});
+      if (conn && conn[params.dispatchTo]) conn[params.dispatchTo](params);
+      if (this[params.dispatchTo]) this[params.dispatchTo](params);
     });
 
-    return (this._wsPromise = p);
+    events.on('update', events => {
+      if (events.state == 'closed') this.connections.forEach(conn => conn.update({frozen: 'Unreachable.'}));
+    });
+
+    return events;
   }
 }

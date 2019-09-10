@@ -1,6 +1,9 @@
 import Reactive from '../js/Reactive';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
+import {sortByName} from '../js/util';
+
+const modes = {o: '@'};
 
 export default class Dialog extends Reactive {
   constructor(params) {
@@ -80,5 +83,58 @@ export default class Dialog extends Reactive {
     if (!this.participants[id]) this.participants[id] = {ts: new Date()};
     Object.keys(params).forEach(k => { this.participants[id][k] = params[k] });
     return this.participants[id];
+  }
+
+  wsEventMode(params) {
+    this.participant(params.nick, {mode: params.mode});
+    this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
+  }
+
+  wsEventNickChange(params) {
+    if (!this.participants[params.old_nick]) return;
+    this.participant(params.new_nick, this.participants[params.old_nick] || {});
+    this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
+  }
+
+  wsEventPart(params) {
+    const participant = this.participants[params.nick] || {};
+    this.addMessage(this._partMessage(params));
+
+    if (!participant.me) {
+      delete this.participants[params.nick];
+      dialog.update({});
+    }
+  }
+
+  wsEventParticipants(params) {
+    const msg = {message: 'Participants: %1', vars: []};
+
+    const participants = params.participants.sort(sortByName).map(p => {
+      this.participant(p.name, p);
+      return (modes[p.mode] || '') + p.name;
+    });
+
+    if (participants.length > 1) {
+      msg.message += ' and %2.';
+      msg.vars[1] = participants.pop();
+    }
+
+    msg.vars[0] = participants.join(', ');
+    this.addMessage(msg);
+  }
+
+  _partMessage(params) {
+    const msg = {message: '%1 parted.', vars: [params.nick]};
+    if (params.kicker) {
+      msg.message = '%1 was kicked by %2' + (params.message ? ': %3' : '');
+      msg.vars.push(params.kicked);
+      msg.vars.push(params.message);
+    }
+    else if (params.message) {
+      msg.message += ' Reason: %2';
+      msg.vars.push(params.message);
+    }
+
+    return msg;
   }
 }

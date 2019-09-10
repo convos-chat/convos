@@ -1,5 +1,6 @@
 import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
+import {gotoUrl} from '../store/router';
 import {sortByName} from '../js/util';
 
 export default class Connection extends Dialog {
@@ -30,7 +31,7 @@ export default class Connection extends Dialog {
     }
 
     dialog = new Dialog({...params, api: this.api});
-    dialog.on('message', params => this.emit('message', {source: 'dialog', ...params}));
+    dialog.on('message', params => this.emit('message', params));
     const listName = dialog.is_private ? 'private' : 'channels';
     this.update({[listName]: this[listName].concat(dialog).sort(sortByName)});
     return dialog;
@@ -50,5 +51,73 @@ export default class Connection extends Dialog {
   update(params) {
     if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
     return super.update(params);
+  }
+
+  wsEventConnection(params) {
+    this.update({frozen: params.message || '', state: params.state});
+    this.addMessage(params.message
+        ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
+        : {message: 'Connection state changed to %1.', vars: [params.state]}
+      );
+  }
+
+  wsEventFrozen(params) {
+    const existing = this.findDialog(params);
+    this.ensureDialog(params).participant(this.nick, {me: true});
+    if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
+    if (!existing) gotoUrl(['', 'chat', params.connection_id, params.dialog_id].map(encodeURIComponent).join('/'));
+  }
+
+  wsEventJoin(params) {
+    const dialog = this.findDialog(params);
+    dialog.addMessage({message: '%1 joined.', vars: [params.nick]});
+    dialog.participant(params.nick, {});
+  }
+
+  wsEventMessage(params) {
+    return params.dialog_id ? this.ensureDialog(params).addMessage(params) : this.addMessage(params);
+  }
+
+  wsEventMode(params) {
+    if (params.nick) this._forwardEventToDialog('wsEventMode', params);
+  }
+
+  wsEventNickChange(params) {
+    this.dialogs().forEach(dialog => dialog.wsEventNickChange(params));
+  }
+
+  wsEventPart(params) {
+    this._forwardEventToDialog('wsEventPart', params);
+
+    const participant = this.participants[params.nick] || {};
+    if (participant.me) {
+      this.removeDialog(params);
+
+      // Change active conversation
+      const nextDialog = this.dialogs().sort((a, b) => b.last_active.localeCompare(a.last_active))[0];
+      const path = ['', 'chat', params.connection_id];
+      if (nextDialog) path.push(nextDialog.dialog_id);
+      gotoUrl(path.map(encodeURIComponent).join('/'));
+    }
+  }
+
+  wsEventParticipants(params) {
+    this._forwardEventToDialog('wsEventParticipants', params);
+  }
+
+  onTopic(params) {
+    this.ensureDialog(params).addMessage(params.topic
+      ? {message: 'Topic is: %1', vars: [params.topic]}
+      : {message: 'No topic is set.', vars: []}
+    );
+  }
+
+  onQuit(params) {
+    this.wsEventPart(params);
+  }
+
+  _forwardEventToDialog(method, params) {
+    const dialog = this.findDialog(params);
+    if (dialog) dialog[method](params);
   }
 }
