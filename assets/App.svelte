@@ -26,7 +26,7 @@ const pages = {
 
 const Convos = window.Convos || {};
 const api = new Api(Convos.apiUrl, {debug: true});
-const user = new User({api, wsUrl: Convos.wsUrl});
+const user = new User({api});
 setContext('user', user);
 
 $: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
