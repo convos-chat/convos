@@ -35,11 +35,12 @@
 }
 
 .chat-input_autocomplete {
-  background: rgba(var(--autocomplete-bg), 0.95);
+  background: var(--autocomplete-bg);
   border: var(--autocomplete-border);
   box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
   margin-bottom: -1px;
   min-width: 50%;
+  opacity: 0.95;
   position: absolute;
   bottom: 100%;
 
