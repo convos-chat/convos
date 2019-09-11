@@ -70,25 +70,6 @@ sub remove {
   );
 }
 
-sub rooms {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
-  my $connection = $user->get_connection($self->stash('connection_id'));
-
-  unless ($connection) {
-    return $self->render(openapi => E('Connection not found.'), status => 404);
-  }
-
-  $self->delay(
-    sub { $connection->rooms({match => $self->param('match')}, shift->begin) },
-    sub {
-      my ($delay, $err, $res) = @_;
-      return $self->render(openapi => $res) unless $err;
-      return $self->render(openapi => E($err), status => 500);
-    },
-  );
-}
-
 sub update {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
@@ -196,10 +177,6 @@ See L<Convos::Manual::API/listConnections>.
 =head2 remove
 
 See L<Convos::Manual::API/removeConnection>.
-
-=head2 rooms
-
-See L<Convos::Manual::API/roomsForConnection>.
 
 =head2 update
 

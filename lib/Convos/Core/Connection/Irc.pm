@@ -9,8 +9,7 @@ use Parse::IRC ();
 use Time::HiRes 'time';
 
 use constant MAX_BULK_MESSAGE_SIZE => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3;
-use constant ROOMS_CACHE_TIMER     => $ENV{CONVOS_ROOMS_CACHE_TIMER}     || 60 * 30;
-use constant ROOMS_REPLY_DELAY     => $ENV{CONVOS_ROOMS_REPLY_DELAY}     || 1;
+use constant ROOMS_REPLY_TIMEOUT   => $ENV{CONVOS_ROOMS_REPLY_TIMEOUT}   || 120;
 use constant STEAL_NICK_INTERVAL   => $ENV{CONVOS_STEAL_NICK_INTERVAL}   || 60;
 
 require Convos;
@@ -50,9 +49,6 @@ has _irc => sub {
 
   return $self->_setup_irc($irc);                               # make sure irc nick is correct
 };
-
-# room list is shared between all connections
-has _room_cache => sub { state $cache = {} };
 
 sub connect {
   my ($self, $cb) = @_;
@@ -128,52 +124,6 @@ sub participants {
   );
 }
 
-sub rooms {
-  my ($self, $args, $cb) = @_;
-  my $match = $args->{match};
-  my $host  = $self->url->host;
-  my $store = $self->_room_cache->{$host} ||= {rooms => {}, end => Mojo::JSON->false};
-  my ($generate, @rooms, @by_topic);
-
-  if ($match) {
-    $generate = sub {
-      $match = qr{$match}i;
-
-      for my $room (sort { $a->{name} cmp $b->{name} } values %{$store->{rooms}}) {
-        push @rooms,    $room and next if $room->{name} =~ $match;
-        push @by_topic, $room and next if $room->{topic} =~ $match;
-      }
-
-      push @rooms, @by_topic;
-      $self->$cb('',
-        {end => $store->{end}, n_rooms => int(@rooms), rooms => $self->_rooms(\@rooms)});
-    };
-  }
-  else {
-    $generate = sub {
-      @rooms = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{rooms}};
-      $self->$cb('',
-        {end => $store->{end}, n_rooms => int(@rooms), rooms => $self->_rooms(\@rooms)});
-    };
-  }
-
-  if (!$store->{ts} or $store->{ts} + ROOMS_CACHE_TIMER < time) {
-    $store->{ts} = time - ROOMS_CACHE_TIMER + 20;    # should get some data within 20 seconds
-    Mojo::IOLoop->delay(
-      sub { $self->_irc->write(LIST => shift->begin) },
-      sub {
-        my ($delay, $err) = @_;
-        return Mojo::IOLoop->timer(ROOMS_REPLY_DELAY, $generate) unless $err;
-        delete $store->{ts};
-        $self->$cb($err, {});
-      },
-    );
-    return $self;
-  }
-
-  return next_tick $self, $generate;
-}
-
 sub send {
   my ($self, $target, $message, $cb) = @_;
 
@@ -198,6 +148,7 @@ sub send {
   return $self->participants($target, $cb) if $cmd eq 'NAMES';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
+  return $self->_rooms($message, $cb) if $cmd eq 'LIST';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
   return $self->_proxy(write => "$cmd $message", sub { $self->$cb($_[1], {}); });
@@ -389,6 +340,49 @@ sub _remove_dialog {
   return $self;
 }
 
+sub _room_store {
+  my $self = shift;
+  state $cache = {};    # Rooms are shared between users
+  return $cache->{$self->url->host} ||= {rooms => {}, done => Mojo::JSON->false};
+}
+
+sub _rooms {
+  my ($self, $extra, $cb) = @_;
+
+  if ($extra =~ m!/(\W?[\w-]+)/(\S*)!) {
+
+    # Search for a specific channel - only works for cached channels
+    # IMPORTANT! Make sure the filter cannot execute code inside the regex!
+    my ($filter, $re_modifiers, $by, @by_name, @by_topic) = ($1, $2);
+    my $store = $self->_room_store;
+
+    $re_modifiers = 'i' unless $re_modifiers;
+    $by           = $re_modifiers =~ s!([nt])!! ? $1 : 'nt';    # name or topic
+    $filter       = qr{(?$re_modifiers:$filter)} if $filter;    # (?i:foo_bar)
+
+    for my $room (sort { $a->{name} cmp $b->{name} } values %{$store->{rooms}}) {
+      push @by_name,  $room and next if $room->{name} =~ $filter;
+      push @by_topic, $room and next if $room->{topic} =~ $filter;
+    }
+
+    return next_tick $self, $cb, '',
+      {
+      done    => $store->{done},
+      dialogs => [$by =~ /n/ ? @by_name : (), $by =~ /t/ ? @by_topic : ()]
+      };
+  }
+  elsif ($extra =~ m!\S!) {
+    return next_tick $self, $cb => 'Invalid argument.', {};
+  }
+  else {
+    my $waiting = {cb => $cb};
+    Mojo::IOLoop->timer(ROOMS_REPLY_TIMEOUT,
+      sub { $self->$cb('Timeout!', {}) unless $waiting->{done}++ });
+    push @{$self->{event_rpl_listend_cb}}, $waiting;
+    $self->_irc->write('LIST');
+  }
+}
+
 sub _send {
   my $cb = pop;
   my ($self, $target, $message) = @_;
@@ -531,9 +525,9 @@ sub _event_join {
 sub _event_kick {
   my ($self, $msg) = @_;
   my ($kicker) = IRC::Utils::parse_user($msg->{prefix});
-  my $dialog = $self->dialog({name => $msg->{params}[0]});
-  my $nick   = $msg->{params}[1];
-  my $reason = $msg->{params}[2] || '';
+  my $dialog   = $self->dialog({name => $msg->{params}[0]});
+  my $nick     = $msg->{params}[1];
+  my $reason   = $msg->{params}[2] || '';
 
   $self->emit(state => part =>
       {dialog_id => $dialog->id, kicker => $kicker, nick => $nick, message => $reason});
@@ -639,20 +633,35 @@ sub _event_quit {
 
 sub _event_rpl_list {
   my ($self, $msg) = @_;
-  my $host  = $self->url->host;
-  my $store = $self->_room_cache->{$host} ||= {};
+  my $store = $self->_room_store;
   my $room
     = {name => $msg->{params}[1], n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
 
+  $room->{dialog_id}  = lc $room->{name};
+  $room->{is_private} = 0;
   $room->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
-  $store->{ts} = time;
+
   $store->{rooms}{$room->{name}} = $room;
+  $self->emit(state => dialog_info => {%$room, done => Mojo::JSON->false});
 }
 
 sub _event_rpl_listend {
   my ($self, $msg) = @_;
-  my $host = $self->url->host;
-  $self->_room_cache->{$host}{end} = Mojo::JSON->true;
+  my $store        = $self->_room_store;
+  my $waiting_list = delete $self->{event_rpl_listend_cb} || [];
+
+  $store->{done} = Mojo::JSON->true;
+  $self->emit(state => dialog_info => {done => $store->{done}});
+
+  for my $waiting (@$waiting_list) {
+    my $cb = $waiting->{cb};
+    $self->$cb('', {done => $store->{done}}) unless $waiting->{done}++;
+  }
+}
+
+sub _event_rpl_liststart {
+  my ($self, $msg) = @_;
+  $self->_room_store->{done} = Mojo::JSON->false;
 }
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
@@ -670,7 +679,7 @@ sub _event_rpl_welcome {
   my ($self, $msg) = @_;
   my ($write, @commands);
 
-  push @commands, map { $_->is_private ? "/ison $_->{name}" : $_ } @{$self->dialogs};
+  push @commands, map  { $_->is_private ? "/ison $_->{name}" : $_ } @{$self->dialogs};
   push @commands, grep {/\S/} @{$self->on_connect_commands};
 
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
@@ -760,10 +769,6 @@ L</nick>.
 =head2 participants
 
 See L<Convos::Core::Connection/participants>.
-
-=head2 rooms
-
-See L<Convos::Core::Connection/rooms>.
 
 =head2 send
 
