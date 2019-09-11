@@ -15,7 +15,7 @@ my $dialog = $connection->get_dialog('#foo');
 ok $connection->{dialogs}{'#foo'}, 'dialog on create/update';
 
 $connection = Convos::Core::Connection->new({});
-for my $method (qw(connect disconnect participants rooms send)) {
+for my $method (qw(connect disconnect participants send)) {
   my $err;
   eval {
     $connection->$method(sub { $err = $_[1] });

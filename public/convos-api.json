@@ -173,51 +173,6 @@
         }
       }
     },
-    "/connection/{connection_id}/rooms": {
-      "get": {
-        "tags": [ "dialog" ],
-        "summary": "Get a list of all available chat rooms.",
-        "operationId": "roomsForConnection",
-        "x-mojo-to": "connection#rooms",
-        "parameters": [
-          { "$ref": "#/parameters/connection_id" },
-          { "name": "match", "in": "query", "type": "string", "description": "Rooms must match this string to be returned" }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of rooms.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "n_rooms": {
-                  "type": "integer",
-                  "description": "Total number of rooms"
-                },
-                "end": {
-                  "type": "boolean",
-                  "description": "True if the backend has loaded all the rooms"
-                },
-                "rooms": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": { "type": "string", "description": "Name of the room or person" },
-                      "n_users": { "type": "integer", "description": "Number of participants in the room" },
-                      "topic": { "type": "string", "description": "The subjec/topic for this room" }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
-          }
-        }
-      }
-    },
     "/connection/{connection_id}/dialog/{dialog_id}/last-read": {
       "post": {
         "tags": [ "dialog" ],
