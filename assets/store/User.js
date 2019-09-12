@@ -93,8 +93,8 @@ export default class User extends Operation {
     }
   }
 
-  send(msg) {
-    return this.events.send(msg);
+  send(msg, cb) {
+    return this.events.send(msg, cb);
   }
 
   wsEventMe(params) {

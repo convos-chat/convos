@@ -4,3 +4,33 @@
 .messages-container {
   min-height: calc(100vh - 11rem); // TODO: Make 11rem more dynamic
 }
+
+.dialog-list {
+  a {
+    background-color: var(--body-bg);
+    text-decoration: none;
+    padding: 0.2rem;
+    margin: calc(var(--gutter) / 2) 0;
+    display: block;
+
+    &:hover {
+      filter: brightness(0.9);
+    }
+  }
+}
+
+.dialog-list__name {
+  font-size: 1.1rem;
+  text-decoration: underline;
+  display: block;
+}
+
+.dialog-list__n-users {
+  float: right;
+}
+
+.dialog-list__title {
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+  display: block;
+}

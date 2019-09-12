@@ -1,19 +1,23 @@
 import Reactive from './Reactive';
+import {camelize} from '../js/util';
 
 let msgId = 0;
 
 export default class Events extends Reactive {
   constructor() {
     super();
+    this._cb = {}; // Add logic to clean up old callbacks
     this.debug = 0;
     this._readOnlyAttr('wsUrl', Convos.wsUrl); // TODO: Should probably be input parameter
     this._updateableAttr('state', 'pending');
   }
 
   dispatch(params) {
-    const eventName = params.event == 'state' ? params.type : params.event;
-    const dispatchTo = 'wsEvent' + eventName.replace(/(^|_)(\w)/g, (a, b, c) => c.toUpperCase());
+    const dispatchTo = camelize('wsEvent_' + this._getEventNameFromParamw(params));
     if (this.debug) this._debug(dispatchTo, params);
+
+    const cb = this._cb[params.id || ''];
+    if (cb) cb(params);
 
     this.emit('message', {...params, dispatchTo});
 
@@ -23,12 +27,14 @@ export default class Events extends Reactive {
     }
   }
 
-  async send(msg) {
+  async send(msg, cb) {
     const ws = await this._ws();
-    if (!msg.id && !msg.method == 'ping') msg.id = ++msgId;
-    if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] });
+    if (!msg.id && msg.method != 'ping') msg.id = ++msgId;
+    if (!msg.method && msg.message) msg.method = 'send';
+    if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] || '' });
     delete msg.dialog;
     if (this.debug) this._debug('send', msg);
+    if (cb) this._cb[msg.id] = cb;
     ws.send(JSON.stringify(msg));
   }
 
@@ -39,6 +45,21 @@ export default class Events extends Reactive {
     else if (this.debug >= 2) {
       console.debug('[Events:' + (method || 'data') + ']', params);
     }
+  }
+
+  _getEventNameFromParamw(params) {
+    if (params.event == 'state') {
+      return params.type;
+    }
+
+    if (params.event == 'sent' && params.message.match(/\/\S+/)) {
+      const [command, args] = params.message.split(' ', 2);
+      params.args = args;
+      params.command = command.substring(1);
+      return 'sent_' + params.command;
+    }
+
+    return params.event;
   }
 
   _ping() {

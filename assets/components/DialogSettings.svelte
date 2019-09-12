@@ -15,11 +15,11 @@ let formEl;
 $: if (formEl && dialog.hasOwnProperty('topic')) formEl.topic.value = dialog.topic;
 
 async function partDialog(e) {
-  user.send({message: '/part', method: 'send', dialog});
+  user.send({message: '/part', dialog});
 }
 
 async function updateDialogFromForm(e) {
-  user.send({message: '/topic ' + formEl.topic.value, method: 'send', dialog});
+  user.send({message: '/topic ' + formEl.topic.value, dialog});
 }
 </script>
 

@@ -105,15 +105,23 @@ export default class Connection extends Dialog {
     this._forwardEventToDialog('wsEventParticipants', params);
   }
 
-  onTopic(params) {
+  wsEventQuit(params) {
+    this.wsEventPart(params);
+  }
+
+  wsEventSentList(params) {
+    const args = params.args || '/*/';
+    this.addMessage(params.done
+      ? {message: 'Found %1 of %2 dialogs from %3.', vars: [params.dialogs.length, params.n_dialogs, args]}
+      : {message: 'Found %1 of %2 dialogs from %3, but dialogs are still loading.', vars: [params.dialogs.length, params.n_dialogs, args]}
+    );
+  }
+
+  wsEventTopic(params) {
     this.ensureDialog(params).addMessage(params.topic
       ? {message: 'Topic is: %1', vars: [params.topic]}
       : {message: 'No topic is set.', vars: []}
     );
-  }
-
-  onQuit(params) {
-    this.wsEventPart(params);
   }
 
   _forwardEventToDialog(method, params) {
