@@ -8,9 +8,9 @@ use Mojo::JSON;
 use Parse::IRC ();
 use Time::HiRes 'time';
 
-use constant MAX_BULK_MESSAGE_SIZE => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3;
-use constant ROOMS_REPLY_TIMEOUT   => $ENV{CONVOS_ROOMS_REPLY_TIMEOUT}   || 120;
-use constant STEAL_NICK_INTERVAL   => $ENV{CONVOS_STEAL_NICK_INTERVAL}   || 60;
+use constant DIALOG_SEARCH_INTERVAL => $ENV{CONVOS_DIALOG_SEARCH_INTERVAL} || 0.5;
+use constant MAX_BULK_MESSAGE_SIZE  => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE}  || 3;
+use constant STEAL_NICK_INTERVAL    => $ENV{CONVOS_STEAL_NICK_INTERVAL}    || 60;
 
 require Convos;
 
@@ -147,11 +147,17 @@ sub send {
   return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
   return $self->participants($target, $cb) if $cmd eq 'NAMES';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
+  return $self->_list_dialogs($message, $cb) if $cmd eq 'LIST';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
-  return $self->_rooms($message, $cb) if $cmd eq 'LIST';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
   return $self->_proxy(write => "$cmd $message", sub { $self->$cb($_[1], {}); });
+}
+
+sub _available_dialogs {
+  my $self = shift;
+  state $cache = {};    # Rooms are shared between users
+  return $cache->{$self->url->host} ||= {};
 }
 
 sub _event_close {
@@ -277,6 +283,47 @@ sub _kick {
   return $self->_proxy(kick => "$target $nick :$reason", sub { $self->$cb(@_[1, 2]) });
 }
 
+sub _list_dialogs {
+  my ($self, $extra, $cb) = @_;
+  my $store = $self->_available_dialogs;
+  my @found;
+
+  # Refresh dialog list
+  if ($extra =~ m!\brefresh\b! or !$store->{ts}) {
+    $store->{dialogs} = {};
+    $store->{done}    = Mojo::JSON->false;
+    $store->{ts}      = time;
+    $self->_irc->write('LIST');
+  }
+
+  # Search for a specific channel - only works for cached channels
+  # IMPORTANT! Make sure the filter cannot execute code inside the regex!
+  if ($extra =~ m!/(\W?[\w-]+)/(\S*)!) {
+    my ($filter, $re_modifiers, $by, @by_name, @by_topic) = ($1, $2);
+
+    $re_modifiers = 'i' unless $re_modifiers;
+    $by           = $re_modifiers =~ s!([nt])!! ? $1 : 'nt';    # name or topic
+    $filter       = qr{(?$re_modifiers:$filter)} if $filter;    # (?i:foo_bar)
+
+    for my $dialog (sort { $a->{name} cmp $b->{name} } values %{$store->{dialogs}}) {
+      push @by_name,  $dialog and next if $dialog->{name} =~ $filter;
+      push @by_topic, $dialog and next if $dialog->{topic} =~ $filter;
+    }
+
+    @found = ($by =~ /n/ ? @by_name : (), $by =~ /t/ ? @by_topic : ());
+  }
+  else {
+    @found = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{dialogs}};
+  }
+
+  return next_tick $self, $cb, '', {
+    n_dialogs => int(keys %{$store->{dialogs}}),
+    dialogs   => [splice @found, 0, 200],          # TODO: Figure out a good max result number
+    done      => $store->{done},
+    ts        => $store->{ts},
+  };
+}
+
 sub _maybe_reconnect {
   my ($self, $cb) = @_;
   my $irc = $self->_irc;
@@ -338,49 +385,6 @@ sub _remove_dialog {
   my $dialog = $self->remove_dialog($name);
   $self->emit(state => part => {dialog_id => lc $name, nick => $self->_irc->nick});
   return $self;
-}
-
-sub _room_store {
-  my $self = shift;
-  state $cache = {};    # Rooms are shared between users
-  return $cache->{$self->url->host} ||= {rooms => {}, done => Mojo::JSON->false};
-}
-
-sub _rooms {
-  my ($self, $extra, $cb) = @_;
-
-  if ($extra =~ m!/(\W?[\w-]+)/(\S*)!) {
-
-    # Search for a specific channel - only works for cached channels
-    # IMPORTANT! Make sure the filter cannot execute code inside the regex!
-    my ($filter, $re_modifiers, $by, @by_name, @by_topic) = ($1, $2);
-    my $store = $self->_room_store;
-
-    $re_modifiers = 'i' unless $re_modifiers;
-    $by           = $re_modifiers =~ s!([nt])!! ? $1 : 'nt';    # name or topic
-    $filter       = qr{(?$re_modifiers:$filter)} if $filter;    # (?i:foo_bar)
-
-    for my $room (sort { $a->{name} cmp $b->{name} } values %{$store->{rooms}}) {
-      push @by_name,  $room and next if $room->{name} =~ $filter;
-      push @by_topic, $room and next if $room->{topic} =~ $filter;
-    }
-
-    return next_tick $self, $cb, '',
-      {
-      done    => $store->{done},
-      dialogs => [$by =~ /n/ ? @by_name : (), $by =~ /t/ ? @by_topic : ()]
-      };
-  }
-  elsif ($extra =~ m!\S!) {
-    return next_tick $self, $cb => 'Invalid argument.', {};
-  }
-  else {
-    my $waiting = {cb => $cb};
-    Mojo::IOLoop->timer(ROOMS_REPLY_TIMEOUT,
-      sub { $self->$cb('Timeout!', {}) unless $waiting->{done}++ });
-    push @{$self->{event_rpl_listend_cb}}, $waiting;
-    $self->_irc->write('LIST');
-  }
 }
 
 sub _send {
@@ -633,36 +637,21 @@ sub _event_quit {
 
 sub _event_rpl_list {
   my ($self, $msg) = @_;
-  my $store = $self->_room_store;
-  my $room
-    = {name => $msg->{params}[1], n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
+  my $dialog = {is_private => 0, n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
 
-  $room->{dialog_id}  = lc $room->{name};
-  $room->{is_private} = 0;
-  $room->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
-
-  $store->{rooms}{$room->{name}} = $room;
-  $self->emit(state => dialog_info => {%$room, done => Mojo::JSON->false});
+  $dialog->{name}      = $msg->{params}[1];
+  $dialog->{dialog_id} = lc $dialog->{name};
+  $dialog->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
+  $self->_available_dialogs->{dialogs}{$dialog->{name}} = $dialog;
 }
 
 sub _event_rpl_listend {
   my ($self, $msg) = @_;
-  my $store        = $self->_room_store;
-  my $waiting_list = delete $self->{event_rpl_listend_cb} || [];
-
-  $store->{done} = Mojo::JSON->true;
-  $self->emit(state => dialog_info => {done => $store->{done}});
-
-  for my $waiting (@$waiting_list) {
-    my $cb = $waiting->{cb};
-    $self->$cb('', {done => $store->{done}}) unless $waiting->{done}++;
-  }
+  $self->_available_dialogs->{done} = Mojo::JSON->true;
 }
 
-sub _event_rpl_liststart {
-  my ($self, $msg) = @_;
-  $self->_room_store->{done} = Mojo::JSON->false;
-}
+# Prevent _fallback() to be called
+sub _event_rpl_liststart { }
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
 sub _event_rpl_myinfo {
