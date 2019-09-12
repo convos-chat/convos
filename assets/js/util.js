@@ -1,3 +1,7 @@
+export function camelize(str) {
+  return str.replace(/_(\w)/g, (a, b) => b.toUpperCase());
+}
+
 export function closestEl(el, needle) {
   while (el) {
     if (needle.tagName ? el == needle : el.matches ? el.matches(needle) : false) return el;
