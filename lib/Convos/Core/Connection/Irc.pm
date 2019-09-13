@@ -288,6 +288,10 @@ sub _list_dialogs {
   my $store = $self->_available_dialogs;
   my @found;
 
+  if ($self->state ne 'connected') {
+    return next_tick $self, $cb, 'Cannot fetch dialogs when not connected.', {};
+  }
+
   # Refresh dialog list
   if ($extra =~ m!\brefresh\b! or !$store->{ts}) {
     $store->{dialogs} = {};
