@@ -38,6 +38,8 @@ $breakpoint-max-width: 800px !default;
   --error-color: #{$error};
   --success-color: #{$success};
 
+  --hr-border: 1px solid #eee;
+
   --button-bg: #{darken($theme-color, 20%)};
   --button-color: #fff;
   --button-border: 1px solid #{darken($theme-color, 20%)};
