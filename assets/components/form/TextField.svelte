@@ -10,13 +10,10 @@ export let placeholder = '';
 export let readonly = false;
 export let value = '';
 
-$: classNames = ['text-field', className].filter(c => c.length);
-
 let inputEl;
 
-onMount(() => {
-  value = inputEl.value;
-});
+$: classNames = ['text-field', className].filter(c => c.length);
+$: if (inputEl) inputEl.value = value;
 </script>
 
 <div class="{classNames.join(' ')}" hidden="{hidden}">

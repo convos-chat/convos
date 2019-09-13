@@ -24,6 +24,7 @@ $: classNames = ['select-field', 'text-field', className].filter(c => c.length).
 $: visibleOptions = filterOptions(options, typed);
 $: if (visible == true) activeIndex = 0;
 $: if (visible == false) typed = '';
+$: if (hiddenEl && hiddenEl.value !== value) hiddenEl.value = value;
 
 $: if (humanEl && !humanEl.value && humanEl != document.activeElement) {
   const found = options.find(opt => opt[0] == hiddenEl.value);
