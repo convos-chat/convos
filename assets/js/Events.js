@@ -48,9 +48,8 @@ export default class Events extends Reactive {
   }
 
   _getEventNameFromParamw(params) {
-    if (params.event == 'state') {
-      return params.type;
-    }
+    if (params.errors) return 'error';
+    if (params.event == 'state') return params.type;
 
     if (params.event == 'sent' && params.message.match(/\/\S+/)) {
       const [command, args] = params.message.split(' ', 2);

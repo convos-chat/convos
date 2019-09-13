@@ -1,4 +1,5 @@
 <script>
+import {extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
 import {getContext, onMount} from 'svelte';
 import {md} from '../js/md';
@@ -30,8 +31,9 @@ function loadConversations() {
   let message = '/list';
   if (availableDialogs.dialogs.length) message += ' refresh';
   user.send({connection_id: connectionId, message}, (params) => {
-    availableDialogs = params;
-    if (!params.done) setTimeout(loadConversations, 500);
+    const error = extractErrorMessage(params);
+    availableDialogs = error ? {dialogs: [], done: null, n_dialogs: 0, error} : params;
+    if (!error && !params.done) setTimeout(loadConversations, 500);
   });
 }
 
@@ -64,6 +66,10 @@ onMount(() => urlToForm(formEl));
       </TextField>
       <Button icon="comment" disabled="{!connectionId || !dialogId}">{l('Add')}</Button>
     </div>
+
+    {#if availableDialogs.error}
+      <p class="error">{connectionId}: {availableDialogs.error}</p>
+    {/if}
 
     {#if availableDialogs.done !== null}
       <p>

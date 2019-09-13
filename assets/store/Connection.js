@@ -1,7 +1,7 @@
 import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
+import {extractErrorMessage, sortByName} from '../js/util';
 import {gotoUrl} from '../store/router';
-import {sortByName} from '../js/util';
 
 export default class Connection extends Dialog {
   constructor(params) {
@@ -84,6 +84,13 @@ export default class Connection extends Dialog {
 
   wsEventNickChange(params) {
     this.dialogs().forEach(dialog => dialog.wsEventNickChange(params));
+  }
+
+  wsEventError(params) {
+    this.addMessage({
+      message: extractErrorMessage(params) || 'Unknown error from %1.',
+      vars: params.command || params.message,
+    });
   }
 
   wsEventPart(params) {
