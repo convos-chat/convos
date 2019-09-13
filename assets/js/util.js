@@ -14,6 +14,11 @@ export function epoch() {
   return new Date().getTime();
 }
 
+export function extractErrorMessage(params) {
+  const errors = params.errors;
+  return errors && errors[0] ? errors[0].message || 'Unknown error.' : '';
+}
+
 export function hidden(bool) {
   return bool ? 'hidden' : '';
 }
