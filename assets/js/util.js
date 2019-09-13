@@ -1,3 +1,13 @@
+export function debounce(cb, delay) {
+  let timeout;
+
+  return function(...args) {
+    const self = this; // eslint-disable-line no-invalid-this
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(function() { cb.apply(self, args) }, delay);
+  };
+}
+
 export function camelize(str) {
   return str.replace(/_(\w)/g, (a, b) => b.toUpperCase());
 }

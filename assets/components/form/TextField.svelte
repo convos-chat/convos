@@ -2,6 +2,7 @@
 import {onMount} from 'svelte';
 import {uuidv4} from '../../js/util';
 
+export let autocomplete = null;
 export let className = '';
 export let hidden = false;
 export let name = '';
@@ -18,5 +19,5 @@ $: if (inputEl) inputEl.value = value;
 
 <div class="{classNames.join(' ')}" hidden="{hidden}">
   <label for="{id}"><slot name="label">Label</slot></label>
-  <input type="text" {name} {placeholder} {id} {readonly} bind:this="{inputEl}" bind:value/>
+  <input type="text" {autocomplete} {name} {placeholder} {id} {readonly} bind:this="{inputEl}" bind:value on:keyup/>
 </div>

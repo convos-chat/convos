@@ -1,5 +1,5 @@
 <script>
-import {extractErrorMessage} from '../js/util';
+import {debounce, extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
 import {getContext, onMount} from 'svelte';
 import {md} from '../js/md';
@@ -18,18 +18,29 @@ let connectionId = '';
 let dialogId = '';
 let formEl;
 
+const debouncedLoadConversations = debounce(loadConversations, 250);
+
 $: connectionOptions = $user.connections.map(c => [c.connection_id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
 
 function joinDialog(e) {
+  const aEl = e && e.target && e.target.closest('a');
+  if (aEl && aEl.href) dialogId = aEl.href.replace(/.*#join:/, '');
   if (!connectionId || !dialogId) return;
   const message = dialogId.match(/^[a-z]/i) ? `/query ${dialogId}` : `/join ${dialogId}`;
   user.send({connection_id: connectionId, message});
 }
 
-function loadConversations() {
+function loadConversations(e) {
   let message = '/list';
-  if (availableDialogs.dialogs.length) message += ' refresh';
+
+  if (e) {
+    message += dialogId.length ? ' /' + dialogId + '/' : '';
+  }
+  else if (availableDialogs.dialogs.length) {
+    message += ' refresh';
+  }
+
   user.send({connection_id: connectionId, message}, (params) => {
     const error = extractErrorMessage(params);
     availableDialogs = error ? {dialogs: [], done: null, n_dialogs: 0, error} : params;
@@ -61,7 +72,9 @@ onMount(() => urlToForm(formEl));
     </div>
 
     <div class="inputs-side-by-side">
-      <TextField name="dialog_id" bind:value="{dialogId}" placeholder="{l('#room or nick')}">
+      <TextField name="dialog_id" placeholder="{l('#room or nick')}" autocomplete="off"
+        bind:value="{dialogId}"
+        on:keyup="{debouncedLoadConversations}">
         <span slot="label">{l('Conversation name')}</span>
       </TextField>
       <Button icon="comment" disabled="{!connectionId || !dialogId}">{l('Add')}</Button>

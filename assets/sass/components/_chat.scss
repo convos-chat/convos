@@ -9,12 +9,12 @@
   a {
     background-color: var(--body-bg);
     text-decoration: none;
-    padding: 0.2rem;
-    margin: calc(var(--gutter) / 2) 0;
+    border-bottom: var(--hr-border);
+    padding: 0.3rem 0.2rem;
     display: block;
 
     &:hover {
-      filter: brightness(0.9);
+      filter: brightness(0.95);
     }
   }
 }
@@ -26,10 +26,21 @@
 }
 
 .dialog-list__n-users {
+  color: var(--text-color);
+  text-align: right;
   float: right;
+  opacity: 0.9;
+  display: block;
+
+  &:after {
+    @extend .fas;
+    content: fa-content($fa-var-user-friends);
+    display: block;
+  }
 }
 
 .dialog-list__title {
+  color: var(--text-color);
   font-size: 0.9rem;
   margin-top: 0.2rem;
   display: block;
