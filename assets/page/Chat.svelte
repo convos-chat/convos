@@ -1,8 +1,8 @@
 <script>
+import {debounce, timer} from '../js/util';
 import {getContext, tick} from 'svelte';
 import {gotoUrl, pathParts, currentUrl} from '../store/router';
 import {l} from '../js/i18n';
-import {timer} from '../js/util';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
@@ -13,9 +13,28 @@ import SidebarChat from '../components/SidebarChat.svelte';
 import Ts from '../components/Ts.svelte';
 
 const user = getContext('user');
+const w = window;
 
 let height = 0;
-let scrollDirection = 'down'; // TODO: Change it to up, when scrolling up
+let lastHeight = 0;
+let scrollPos = 'bottom';
+
+const onScroll = debounce(e => {
+  const windowH = w.innerHeight;
+  const scrollY = w.scrollY;
+  const last = scrollPos;
+
+  scrollPos = windowH > height || scrollY + 20 > height - windowH ? 'bottom'
+            : scrollY < 100 ? 'top'
+            : 'middle';
+
+  if (scrollPos == last || !dialog.dialog_id) return;
+
+  if (scrollPos == 'top' && !dialog.op.is('loading')) {
+    lastHeight = height;
+    dialog.loadHistoric();
+  }
+}, 20);
 
 function isSameMessage(i) {
   return i == 0 ? false : messages[i].from == messages[i - 1].from;
@@ -27,8 +46,15 @@ $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.'
 $: messages = $dialog.messages;
 $: settingsComponent = $currentUrl.hash != '#settings' ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
 
-$: if (scrollDirection == 'down') window.scrollTo(0, height);
+$: if (scrollPos == 'bottom') w.scrollTo(0, height);
+
+$: if (lastHeight && lastHeight < height) {
+  w.scrollTo(0, height - lastHeight);
+  lastHeight = 0;
+}
 </script>
+
+<svelte:window on:scroll="{onScroll}"/>
 
 <SidebarChat/>
 

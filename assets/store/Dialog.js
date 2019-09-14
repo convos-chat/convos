@@ -40,11 +40,7 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
-    if (!msg.ts) msg.ts = new Date().toISOString();
-    if (!msg.from) msg.from = this.connection_id || 'Convos';
-    if (msg.vars) msg.message = l(msg.message, ...msg.vars);
-    msg.markdown = md(msg.message);
-    this.messages.push(msg);
+    this.messages.push(this._processMessage(msg));
     this.update({});
   }
 
@@ -77,6 +73,20 @@ export default class Dialog extends Reactive {
 
     this.loaded = true;
     this.update({messages});
+  }
+
+  async loadHistoric() {
+    const first = this.messages[0];
+    if (!first || first.end) return;
+
+    await this.op.perform({
+      before: first.ts,
+      connection_id: this.connection_id,
+      dialog_id: this.dialog_id,
+    });
+
+    const messages = (this.op.res.body.messages || []).map(msg => this._processMessage(msg));
+    if (messages.length) this.update({messages: messages.concat(this.messages)});
   }
 
   participant(id, params = {}) {
@@ -135,6 +145,14 @@ export default class Dialog extends Reactive {
       msg.vars.push(params.message);
     }
 
+    return msg;
+  }
+
+  _processMessage(msg) {
+    if (!msg.ts) msg.ts = new Date().toISOString();
+    if (!msg.from) msg.from = this.connection_id || 'Convos';
+    if (msg.vars) msg.message = l(msg.message, ...msg.vars);
+    msg.markdown = md(msg.message);
     return msg;
   }
 }
