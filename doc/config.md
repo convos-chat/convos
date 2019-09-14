@@ -10,7 +10,7 @@ title: Configuration
 Convos can be configured with either a config file or environment variables.
 
 Any of the settings below can be specified either in a configuration file or
-as environment variables. Here is an example on how to specific environment
+as environment variables. Here is an example on how to specify environment
 variables:
 
 You might want to check out the [FAQ](./faq.html) for example configurations
@@ -37,7 +37,7 @@ exec /home/www/convos-stable/script/convos \
 ```
 
 Instead of using environment variables, you can specify configuration settings
-in a JSON config file. Note that all the settings below is optional, just like
+in a JSON config file. Note that all the settings below are optional, just like
 the environment variables.
 
 ```bash
@@ -146,9 +146,10 @@ Default: `$HOME/.local/share/convos/`
 
 ### CONVOS_INVITE_CODE
 
-The value of this setting need to be used by the person who wants to
-register. It can be disabled by setting `CONVOS_INVITE_CODE=""`. Check out
-the [running](/doc/running.html) guide for more details.
+Anyone who wishes to register as a user will have to use the value of this
+setting to create an account. It can be disabled by setting
+`CONVOS_INVITE_CODE=""`. Check out the [running](/doc/running.html) guide for
+more details.
 
 The default value is a semi-random string.
 
@@ -181,8 +182,8 @@ There are currently no plugins loaded by default.
 
 ### CONVOS_SECRETS
 
-Should be set to list (comma separated) of random strings. This value is used
-to secure the Cookies written to the client.
+Should be set to a comma-separated list of random strings. These values will
+be used to secure the Cookies written to the client.
 
 The default value is a semi-random secret.
 
@@ -198,7 +199,8 @@ for more details.
 
 ### MOJO_LISTEN
 
-Can be used to set up [listen](#listen) from an environment variable.
+Can be used to set the address Convos will [listen](#listen) to from an
+environment variable.
 
 Example:
 

@@ -43,7 +43,7 @@ and [Vue](https://vuejs.org/).
 
 | Language        | Files |  Code | Comment                 |
 |-----------------|-------|-------|-------------------------|
-| Perl            |    21 |  2380 | Without couting tests   |
+| Perl            |    21 |  2380 | Without counting tests  |
 | JavaScript      |    21 |  1613 | jQuery and vanilla      |
 | Vuejs Component |    30 |  1529 | Reactive web components |
 | Sass            |    12 |   947 | CSS / Sass              |
