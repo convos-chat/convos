@@ -35,6 +35,7 @@ const onScroll = debounce(e => {
   }
 }, 20);
 
+$: connection = $user.findDialog({connection_id: $pathParts[1]}) || {nick: ''};
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
 $: isLoading = dialog.op && dialog.op.is('loading') || false;
 $: dialog.load();
@@ -84,7 +85,7 @@ $: if (lastHeight && lastHeight < height) {
         <Link href="/add/conversation?connection_id={encodeURIComponent($pathParts[1])}&dialog_id={encodeURIComponent($pathParts[2])}" className="btn">{l('Yes')}</Link>
         <Link href="/chat" className="btn">{l('No')}</Link>
       </p>
-    {:else if $pathParts[1] && !dialog.connection_id}
+    {:else if $pathParts[1] && !connection}
       <h2>{l('Connection does not exist.')}</h2>
       <p>{l('Do you want to make a new connection?')}</p>
       <p>
@@ -106,6 +107,7 @@ $: if (lastHeight && lastHeight < height) {
     {/if}
 
     <div class="message is-type-{message.type || 'notice'}"
+      class:is-sent-by-you="{message.from == currentNick}"
       class:is-hightlighted="{message.highlight}"
       class:is-same="{message.isSameSender && !message.dayChanged}">
       <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
