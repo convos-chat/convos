@@ -8,6 +8,7 @@ import ChatInput from '../components/ChatInput.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
+import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 
@@ -107,9 +108,11 @@ $: if (lastHeight && lastHeight < height) {
     {/if}
 
     <div class="message is-type-{message.type || 'notice'}"
-      class:is-sent-by-you="{message.from == currentNick}"
+      class:is-sent-by-you="{message.from == connection.nick}"
       class:is-hightlighted="{message.highlight}"
-      class:is-same="{message.isSameSender && !message.dayChanged}">
+      class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
+      class:has-same-from="{message.isSameSender && !message.dayChanged}">
+      <Icon name="{message.from == connection.nick ? user.icon : user.otherIcon}"/>
       <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
       <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
       <div class="message_text">{@html message.markdown}</div>
