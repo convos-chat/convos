@@ -1,7 +1,7 @@
 <script>
-import {epoch} from '../../js/util';
 import Icon from '../Icon.svelte';
 import Operation from '../../store/Operation';
+import Time from '../../js/Time';
 
 export let className = '';
 export let disabled = false;
@@ -17,7 +17,7 @@ let forceDisable = false;
 let t0 = 0;
 
 $: $op.is('loading') && loadingState(true);
-$: $op.is('loading') || setTimeout(() => loadingState(false), minLoadingTime - (epoch() - t0));
+$: $op.is('loading') || setTimeout(() => loadingState(false), minLoadingTime - (new Time().toEpoch() - t0));
 $: disabledProp = disabled || forceDisable;
 
 $: {
@@ -26,7 +26,7 @@ $: {
 }
 
 function loadingState(loading) {
-  if (loading) t0 = epoch();
+  if (loading) t0 = new Time().toEpoch();
   animation = loading ? 'spin' : '';
   forceDisable = loading;
 }
