@@ -35,14 +35,14 @@ function parseUrl(href) {
 export function urlToForm(formEl, url = get(currentUrl)) {
   url.searchParams.forEach((val, name) => {
     const inputEl = formEl[name];
-    if (!(inputEl && inputEl.tagName)) {
+    if (!inputEl || !inputEl.tagName) {
       return;
     }
     else if (inputEl.type == 'checkbox') {
       inputEl.checked = val ? true : false;
     }
     else {
-      formEl[name].value = val;
+      inputEl.value = val;
     }
   });
 }

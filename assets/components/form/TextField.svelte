@@ -14,7 +14,6 @@ export let value = '';
 let inputEl;
 
 $: classNames = ['text-field', className].filter(c => c.length);
-$: if (inputEl) inputEl.value = value;
 </script>
 
 <div class="{classNames.join(' ')}" hidden="{hidden}">
