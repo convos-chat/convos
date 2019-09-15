@@ -26,6 +26,24 @@
   position: relative;
   margin-bottom: 0.2rem;
 
+  blockquote {
+    quotes: "\201C" "\201D";
+    background: var(--body-bg);
+    font-style: italic;
+    margin: 0.2em 0;
+    padding: 0.6em 0.5em 0.4em 0.1em;
+    filter: brightness(0.96);
+
+    &:before {
+      color: #ccc;
+      content: open-quote;
+      font-size: 3em;
+      line-height: 0.1em;
+      margin-right: 0.15em;
+      vertical-align: -0.35em;
+    }
+  }
+
   .emojione {
     height: 1.5rem;
     vertical-align: bottom;

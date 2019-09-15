@@ -14,7 +14,9 @@ let text2emojiRe;
 export function md(str, params = {}) {
   if (params.escape !== false) str = xmlEscape(str);
 
-  str = str.replace(mdToHtmlRe, (all, b, esc, md, text) => {
+  str = str.replace(/^&gt;\s(.*)/, (all, quote) => {
+    return '<blockquote>' + quote + '</blockquote>';
+  }).replace(mdToHtmlRe, (all, b, esc, md, text) => {
     if (md.match(/^_/) && text.match(/^[A-Z]+$/)) return all; // Avoid turning __DATA__ into <strong>DATA</strong>
     const len = md.length;
     if (len == 1) return esc ? all.replace(/^\\/, '') : b + '<em>' + text + '</em>';
