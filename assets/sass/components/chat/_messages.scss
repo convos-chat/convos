@@ -92,4 +92,22 @@
       opacity: 0.8 ease-in-out;
     }
   }
+
+  &.is-type-action {
+    .message_from,
+    .message_text {
+      font-style: italic;
+    }
+
+    .message_from {
+      margin-right: 0.2em;
+      float: left;
+      display: block;
+
+      &:before {
+        content: '✦';
+        margin-right: 0.3em;
+      }
+    }
+  }
 }
