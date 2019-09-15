@@ -105,7 +105,9 @@ $: if (lastHeight && lastHeight < height) {
       <div class="status-line for-day-changed"><span>{l('Day changed')}</span></div>
     {/if}
 
-    <div class="message" class:is-same="{message.isSameSender && !message.dayChanged}" class:is-hightlighted="{message.highlight}">
+    <div class="message is-type-{message.type || 'notice'}"
+      class:is-hightlighted="{message.highlight}"
+      class:is-same="{message.isSameSender && !message.dayChanged}">
       <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
       <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
       <div class="message_text">{@html message.markdown}</div>
