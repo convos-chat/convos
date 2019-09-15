@@ -2,7 +2,7 @@
   font-size: 0.8rem;
   text-align: center;
   border-bottom: var(--hr-border);
-  margin: 0rem 0 0.8rem 0;
+  margin: 0 0 0.8rem 0;
   height: 0.8rem;
 
   span {
@@ -24,13 +24,13 @@
 
 .message {
   position: relative;
-  margin-bottom: 0.2rem;
+  padding: 4px 2px;
 
   blockquote {
     quotes: "\201C" "\201D";
     background: var(--body-bg);
     font-style: italic;
-    margin: 0.2em 0;
+    margin: 0;
     padding: 0.6em 0.5em 0.4em 0.1em;
     filter: brightness(0.96);
 
@@ -54,7 +54,6 @@
   }
 
   .message_text {
-    margin-bottom: 0.4rem;
     overflow-wrap: break-word;
 
     a {
@@ -75,10 +74,10 @@
   }
 
   &.is-hightlighted {
-    background-color: #ffd7db;
+    background-color: #fbe4e6;
   }
 
-  &.is-same {
+  &.has-same-from {
     .message_from {
       display: none;
     }
@@ -90,6 +89,12 @@
 
     &:hover .ts {
       opacity: 0.8 ease-in-out;
+    }
+  }
+
+  &.is-sent-by-you {
+    .message_from {
+      color: var(--text-color);
     }
   }
 
@@ -109,5 +114,16 @@
         margin-right: 0.3em;
       }
     }
+  }
+
+  &.has-same-from,
+  &.is-type-action {
+    i {
+      display: none;
+    }
+  }
+
+  &.has-not-same-from {
+    margin-top: 0.5rem;
   }
 }
