@@ -10,7 +10,6 @@ import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
-import Ts from '../components/Ts.svelte';
 
 const user = getContext('user');
 const w = window;
@@ -30,17 +29,14 @@ const onScroll = debounce(e => {
 
   if (scrollPos == last || !dialog.dialog_id) return;
 
-  if (scrollPos == 'top' && !dialog.op.is('loading')) {
+  if (scrollPos == 'top' && !isLoading) {
     lastHeight = height;
     dialog.loadHistoric();
   }
 }, 20);
 
-function isSameMessage(i) {
-  return i == 0 ? false : messages[i].from == messages[i - 1].from;
-}
-
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
+$: isLoading = dialog.op && dialog.op.is('loading') || false;
 $: dialog.load();
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: messages = $dialog.messages;
@@ -79,7 +75,7 @@ $: if (lastHeight && lastHeight < height) {
     {#if !$pathParts[1]}
       <h2>{l('No notifications.')}</h2>
     {:else if $pathParts[1] == dialog.connection_id}
-      <h2>{l(dialog.loading ? 'Loading messages...' : 'No messages.')}</h2>
+      <h2>{l(isLoading ? 'Loading messages...' : 'No messages.')}</h2>
       <p>{dialog.frozen}</p>
     {:else if $pathParts[2] && !dialog.dialog_id}
       <h2>{l('You are not part of this conversation.')}</h2>
@@ -98,13 +94,27 @@ $: if (lastHeight && lastHeight < height) {
     {/if}
   {/if}
 
+  {#if isLoading && scrollPos == 'top'}
+    <div class="status-line for-loading"><span>{l('Loading messages...')}</span></div>
+  {/if}
+
   {#each messages as message, i}
-    <div class="message" class:is-same="{isSameMessage(i)}" class:is-hightlighted="{message.highlight}">
-      <Ts val="{message.ts}"/>
+    {#if message.endOfHistory}
+      <div class="status-line for-end-of-history"><span>{l('End of history')}</span></div>
+    {:else if message.dayChanged}
+      <div class="status-line for-day-changed"><span>{l('Day changed')}</span></div>
+    {/if}
+
+    <div class="message" class:is-same="{message.isSameSender && !message.dayChanged}" class:is-hightlighted="{message.highlight}">
+      <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
       <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
       <div class="message_text">{@html message.markdown}</div>
     </div>
   {/each}
+
+  {#if isLoading && scrollPos != 'top'}
+    <div class="status-line for-loading"><span>{l('Loading messages...')}</span></div>
+  {/if}
 </main>
 
 {#if dialog.connection_id}

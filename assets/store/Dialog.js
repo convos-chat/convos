@@ -1,4 +1,5 @@
 import Reactive from '../js/Reactive';
+import Time from '../js/Time';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {sortByName} from '../js/util';
@@ -13,7 +14,7 @@ export default class Dialog extends Reactive {
              : params.connection_id ? params.api.operation('connectionMessages')
              : null;
 
-    const now = new Date().toISOString();
+    const now = new Time().toISOString();
     const path = [];
     if (params.connection_id) path.push(params.connection_id);
     if (params.dialog_id) path.push(params.dialog_id);
@@ -28,6 +29,7 @@ export default class Dialog extends Reactive {
     this._updateableAttr('frozen', params.frozen || '');
     this._updateableAttr('last_active', params.last_active || now);
     this._updateableAttr('last_read', params.last_read || now);
+    this._updateableAttr('loaded', false);
     this._updateableAttr('messages', []);
     this._updateableAttr('name', params.name || 'Unknown');
     this._updateableAttr('topic', params.topic || '');
@@ -40,8 +42,7 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
-    this.messages.push(this._processMessage(msg));
-    this.update({});
+    this.update({messages: this.messages.concat(msg)});
   }
 
   findParticipants(params) {
@@ -65,14 +66,7 @@ export default class Dialog extends Reactive {
   async load() {
     if (!this.op || this.loaded) return;
     await this.op.perform(this);
-
-    const messages = (this.op.res.body.messages || []).map(msg => {
-      msg.markdown = md(msg.message);
-      return msg;
-    });
-
-    this.loaded = true;
-    this.update({messages});
+    this.update({loaded: true, messages: this.op.res.body.messages || []});
   }
 
   async loadHistoric() {
@@ -85,14 +79,21 @@ export default class Dialog extends Reactive {
       dialog_id: this.dialog_id,
     });
 
-    const messages = (this.op.res.body.messages || []).map(msg => this._processMessage(msg));
-    if (messages.length) this.update({messages: messages.concat(this.messages)});
+    const messages = this.op.res.body.messages || [];
+    if (!messages.length && this.messages.length) this.messages[0].endOfHistory = true;
+    this.update({messages: messages.concat(this.messages)});
   }
 
   participant(id, params = {}) {
-    if (!this.participants[id]) this.participants[id] = {ts: new Date()};
+    if (!this.participants[id]) this.participants[id] = {ts: new Time()};
     Object.keys(params).forEach(k => { this.participants[id][k] = params[k] });
     return this.participants[id];
+  }
+
+  update(params) {
+    if (params.messages) this._processMessages(params.messages);
+    if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
+    return super.update(params);
   }
 
   wsEventMode(params) {
@@ -148,11 +149,17 @@ export default class Dialog extends Reactive {
     return msg;
   }
 
-  _processMessage(msg) {
-    if (!msg.ts) msg.ts = new Date().toISOString();
-    if (!msg.from) msg.from = this.connection_id || 'Convos';
-    if (msg.vars) msg.message = l(msg.message, ...msg.vars);
-    msg.markdown = md(msg.message);
-    return msg;
+  _processMessages(messages) {
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      if (msg.dt) continue; // Already processed
+      if (!msg.ts) msg.ts = new Time().toISOString();
+      if (!msg.from) msg.from = this.connection_id || 'Convos';
+      if (msg.vars) msg.message = l(msg.message, ...msg.vars);
+      msg.dt = new Time(msg.ts);
+      msg.dayChanged = i == 0 ? false : msg.dt.getDate() != messages[i - 1].dt.getDate();
+      msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
+      msg.markdown = md(msg.message);
+    }
   }
 }

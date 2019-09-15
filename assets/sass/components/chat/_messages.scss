@@ -1,3 +1,27 @@
+.status-line {
+  font-size: 0.8rem;
+  text-align: center;
+  border-bottom: var(--hr-border);
+  margin: 0rem 0 0.8rem 0;
+  height: 0.8rem;
+
+  span {
+    background: var(--body-bg);
+    padding: 0 var(--gutter);
+    filter: brightness(1.2);
+    position: relative;
+    top: 0.3rem;
+  }
+
+  &.for-end-of-history {
+    color: var(--error-color);
+  }
+
+  &.for-loading {
+    color: var(--success);
+  }
+}
+
 .message {
   position: relative;
   margin-bottom: 0.2rem;
