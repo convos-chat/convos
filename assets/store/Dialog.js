@@ -160,6 +160,20 @@ export default class Dialog extends Reactive {
       msg.dayChanged = i == 0 ? false : msg.dt.getDate() != messages[i - 1].dt.getDate();
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
+
+      (msg.message.match(/https:\/\/(\S+)/g) || []).forEach(async (url) => {
+        url = url.replace(/([.!?])?$/, '');
+        const op = this.api.operation('embed');
+        op.raw = true;
+        await op.perform({url});
+        msg.embed = {html: op.res.body, url};
+
+        if (!msg.embed.html.match(/<a.*href/)) {
+          msg.embed.html = `<a href="${url}" target="_blank">${msg.embed.html}</a>`;
+        }
+
+        this.update({messages: this.messages});
+      });
     }
   }
 }

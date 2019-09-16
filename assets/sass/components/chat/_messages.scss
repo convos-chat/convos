@@ -31,22 +31,36 @@
     background: var(--body-bg);
     font-style: italic;
     margin: 0;
-    padding: 0.6em 0.5em 0.4em 0.1em;
+    padding: 0.4em 0.5em 0.4em 1.7em;
     filter: brightness(0.96);
 
     &:before {
       color: #ccc;
       content: open-quote;
       font-size: 3em;
-      line-height: 0.1em;
-      margin-right: 0.15em;
-      vertical-align: -0.35em;
+      position: absolute;
+      top: 0.2rem;
+      left: 0.2rem;
     }
   }
 
   .emojione {
     height: 1.5rem;
     vertical-align: bottom;
+  }
+
+  .message_embed {
+    text-decoration: none;
+    margin-top: 0.2rem;
+    cursor: pointer;
+
+    > a {
+      display: inline-block;
+    }
+
+    &:hover {
+      filter: brightness(0.97);
+    }
   }
 
   .message_from {

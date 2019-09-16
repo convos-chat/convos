@@ -116,6 +116,10 @@ $: if (lastHeight && lastHeight < height) {
       <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
       <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
       <div class="message_text">{@html message.markdown}</div>
+
+      {#if message.embed}
+        <div class="message_embed">{@html message.embed.html}</div>
+      {/if}
     </div>
   {/each}
 
