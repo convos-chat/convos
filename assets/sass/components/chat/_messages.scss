@@ -26,21 +26,25 @@
   position: relative;
   padding: 4px 2px;
 
+  &:hover {
+    background: var(--body-bg);
+    filter: brightness(0.97);
+  }
+
   blockquote {
     quotes: "\201C" "\201D";
-    background: var(--body-bg);
     font-style: italic;
     margin: 0;
-    padding: 0.4em 0.5em 0.4em 1.7em;
-    filter: brightness(0.96);
+    padding: 0.4em 0.4em 0.1em 1.1em;
+    position: relative;
 
     &:before {
       color: #ccc;
       content: open-quote;
       font-size: 3em;
       position: absolute;
-      top: 0.2rem;
-      left: 0.2rem;
+      top: 0.1rem;
+      left: -0.3rem;
     }
   }
 
@@ -63,7 +67,12 @@
   }
 
   .message_from {
+    font-size: 1.1rem;
     text-decoration: none;
+  }
+
+  > i {
+    font-size: 1.2rem;
   }
 
   .message_text {
@@ -86,8 +95,10 @@
     float: right;
   }
 
-  &.is-hightlighted {
-    background-color: #fbe4e6;
+  &.is-hightlighted .message_text {
+    background-color: var(--highlight-color);
+    border: 3px solid var(--highlight-color);
+    margin: 0 -3px;
   }
 
   &.has-same-from {
@@ -97,23 +108,18 @@
 
     .ts {
       opacity: 0;
-      transition: opacity 0.5s;
+      transition: opacity 0.3s;
     }
 
     &:hover .ts {
-      opacity: 0.8 ease-in-out;
-    }
-  }
-
-  &.is-sent-by-you {
-    .message_from {
-      color: var(--text-color);
+      opacity: 0.8;
     }
   }
 
   &.is-type-action {
     .message_from,
     .message_text {
+      font-size: 1rem;
       font-style: italic;
     }
 

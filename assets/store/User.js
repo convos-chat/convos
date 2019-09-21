@@ -32,8 +32,7 @@ export default class User extends Operation {
     this._updateableAttr('connections', []);
     this._updateableAttr('enableNotifications', Notification.permission);
     this._updateableAttr('expandUrlToMedia', true);
-    this._updateableAttr('icon', 'user-secret');
-    this._updateableAttr('otherIcon', 'user-astronaut');
+    this._updateableAttr('icon', 'user-circle');
 
     // Add operations that will affect the "User" object
     // TODO: Make operations bubble into the User object. Require changes in App.svelte

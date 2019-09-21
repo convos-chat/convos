@@ -2,7 +2,7 @@ import Reactive from '../js/Reactive';
 import Time from '../js/Time';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
-import {q, sortByName} from '../js/util';
+import {q, sortByName, str2color} from '../js/util';
 
 const modes = {o: '@'};
 
@@ -179,6 +179,7 @@ export default class Dialog extends Reactive {
       if (!msg.from) msg.from = this.connection_id || 'Convos';
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
+      msg.color = str2color(msg.from);
       msg.dt = new Time(msg.ts);
       msg.dayChanged = i == 0 ? false : msg.dt.getDate() != messages[i - 1].dt.getDate();
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;

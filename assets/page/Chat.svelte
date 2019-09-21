@@ -1,6 +1,6 @@
 <script>
 import {afterUpdate, getContext, onMount, tick} from 'svelte';
-import {debounce, q, timer} from '../js/util';
+import {debounce, q} from '../js/util';
 import {gotoUrl, pathParts, currentUrl} from '../store/router';
 import {l} from '../js/i18n';
 import ChatHeader from '../components/ChatHeader.svelte';
@@ -146,9 +146,9 @@ afterUpdate(() => {
       class:has-same-from="{message.isSameSender && !message.dayChanged}"
       data-index="{i}">
 
-      <Icon name="{message.from == connection.nick ? user.icon : user.otherIcon}"/>
+      <Icon name="{message.from == connection.nick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
       <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
-      <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
+      <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}" style="color:{message.color}">{message.from}</Link>
       <div class="message_text">{@html message.markdown}</div>
     </div>
   {/each}
