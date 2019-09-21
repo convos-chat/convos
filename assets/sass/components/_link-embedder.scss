@@ -7,12 +7,6 @@
   margin: 6px 0;
 }
 
-blockquote.le-card,
-div.le-card {
-  background: var(--body-bg);
-  border: var(--hr-border);
-}
-
 .le-card,
 .le-rich {
   .le-thumbnail-placeholder {
@@ -98,4 +92,9 @@ div.le-card {
       cursor: zoom-out;
     }
   }
+}
+
+.instagram-media {
+  box-shadow: none !important;
+  max-width: 400px !important;
 }

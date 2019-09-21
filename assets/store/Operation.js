@@ -37,7 +37,7 @@ export default class Operation extends Reactive {
     const [url, req] = await this._paramsToRequest(opSpec, params || this.defaultParams);
     const res = await fetch(url, req);
 
-    return this.raw ? this.parse(res, await res.text()) : this.parse(res, await res.json());
+    return this.parse(res, await res.json());
   }
 
   is(status) {

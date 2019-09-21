@@ -4,6 +4,19 @@ import Events from '../js/Events';
 import Operation from './Operation';
 import {sortByName} from '../js/util';
 
+const providers = {
+  instagram: {
+    isLoaded() { return window.instgrm },
+    reload() { window.instgrm.Embeds.process() },
+    url: '//platform.instagram.com/en_US/embeds.js',
+  },
+  twitter: {
+    isLoaded() { return window.twttr },
+    reload() { window.twttr.widgets.load() },
+    url: '//platform.twitter.com/widgets.js',
+  },
+};
+
 export default class User extends Operation {
   constructor(params) {
     super({
@@ -74,6 +87,17 @@ export default class User extends Operation {
     await this.perform();
     if (this.email) await this.send({method: 'ping'});
     return this;
+  }
+
+  loadProvider(name) {
+    // TODO: Allow providers to be disabled
+    const provider = providers[name];
+    if (!provider) return;
+    if (provider.isLoaded()) return provider.reload();
+    const el = document.createElement('script');
+    el.id = provider.url.replace(/\W/g, '_');
+    el.src = provider.url;
+    document.getElementsByTagName('head')[0].appendChild(el);
   }
 
   parse(res, body = res.body) {
