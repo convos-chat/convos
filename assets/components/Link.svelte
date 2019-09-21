@@ -19,7 +19,7 @@ function calculateClassNames(href, $pathname) {
 }
 
 function onClick(event) {
-  gotoUrl(event.target.closest('a').href, {event, replace})
+  gotoUrl(event.target.closest('a').href, {event, replace});
 }
 
 $: calculateClassNames(href, $pathname);
