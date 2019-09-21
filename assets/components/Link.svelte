@@ -4,6 +4,7 @@ import {gotoUrl, pathname} from '../store/router';
 export let className = '';
 export let href = '/';
 export let replace = false;
+export let style = '';
 
 export const focus = () => el.focus();
 
@@ -24,4 +25,4 @@ function onClick(event) {
 $: calculateClassNames(href, $pathname);
 </script>
 
-<a {href} on:click={onClick} class={classNames.join(' ')} bind:this="{el}"><slot/></a>
+<a {href} on:click={onClick} class={classNames.join(' ')} style="{style}" bind:this="{el}"><slot/></a>
