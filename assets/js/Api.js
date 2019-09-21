@@ -28,7 +28,7 @@ export default class Api {
         if (!operationId) return;
 
         op.method = method.toUpperCase();
-        op.url = spec.schemes[0] + '://' + spec.host + spec.basePath + path;
+        op.url = spec.schemes[0] + '://' + spec.host + spec.basePath + path + '.json';
         op.parameters = (op.parameters || []).map(p => {
           if (!p['$ref']) return p;
           const refPath = p['$ref'].replace(/^#\//, '').split('/');

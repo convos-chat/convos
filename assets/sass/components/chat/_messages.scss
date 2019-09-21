@@ -51,15 +51,14 @@
 
   .message_embed {
     text-decoration: none;
-    margin-top: 0.2rem;
-    cursor: pointer;
+    margin-top: 0.8rem;
 
     > a {
       display: inline-block;
-    }
 
-    &:hover {
-      filter: brightness(0.97);
+      &:hover {
+        filter: brightness(0.97);
+      }
     }
   }
 

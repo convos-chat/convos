@@ -2,7 +2,7 @@ import Reactive from '../js/Reactive';
 import Time from '../js/Time';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
-import {sortByName} from '../js/util';
+import {q, sortByName} from '../js/util';
 
 const modes = {o: '@'};
 
@@ -67,6 +67,28 @@ export default class Dialog extends Reactive {
     if (!this.op || this.loaded) return;
     await this.op.perform(this);
     this.update({loaded: true, messages: this.op.res.body.messages || []});
+  }
+
+  async loadEmbeds(message) {
+    for (let i = 0; i < message.embeds.length; i++) {
+      const embed = message.embeds[i];
+      if (embed.el || embed.op) continue;
+
+      embed.op = this.api.operation('embed', {}, {raw: true});
+      await embed.op.perform(embed);
+
+      let html = embed.op.res.body.html;
+      if (!html) continue;
+      if (!html.match(/<a.*href/)) html = `<a href="${embed.url}">${html}</a>`;
+
+      embed.el = document.createElement('div');
+      embed.el.className = 'message_embed';
+      embed.el.innerHTML = html;
+      embed.provider = (embed.op.res.body.provider_name || '').toLowerCase();
+      delete embed.op;
+
+      q(embed.el, 'a', aEl => { aEl.target = '_blank' });
+    }
   }
 
   async loadHistoric() {
@@ -156,23 +178,14 @@ export default class Dialog extends Reactive {
       if (!msg.ts) msg.ts = new Time().toISOString();
       if (!msg.from) msg.from = this.connection_id || 'Convos';
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
+
       msg.dt = new Time(msg.ts);
       msg.dayChanged = i == 0 ? false : msg.dt.getDate() != messages[i - 1].dt.getDate();
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
 
-      (msg.message.match(/https:\/\/(\S+)/g) || []).forEach(async (url) => {
-        url = url.replace(/([.!?])?$/, '');
-        const op = this.api.operation('embed');
-        op.raw = true;
-        await op.perform({url});
-        msg.embed = {html: op.res.body, url};
-
-        if (!msg.embed.html.match(/<a.*href/)) {
-          msg.embed.html = `<a href="${url}" target="_blank">${msg.embed.html}</a>`;
-        }
-
-        this.update({messages: this.messages});
+      msg.embeds = (msg.message.match(/https:\/\/(\S+)/g) || []).map(url => {
+        return {url: url.replace(/([.!?])?$/, '')};
       });
     }
   }

@@ -1,6 +1,6 @@
 <script>
-import {debounce, timer} from '../js/util';
-import {getContext, tick} from 'svelte';
+import {afterUpdate, getContext, onMount, tick} from 'svelte';
+import {debounce, q, timer} from '../js/util';
 import {gotoUrl, pathParts, currentUrl} from '../store/router';
 import {l} from '../js/i18n';
 import ChatHeader from '../components/ChatHeader.svelte';
@@ -17,6 +17,7 @@ const w = window;
 
 let height = 0;
 let lastHeight = 0;
+let observer;
 let scrollPos = 'bottom';
 
 const onScroll = debounce(e => {
@@ -36,6 +37,27 @@ const onScroll = debounce(e => {
   }
 }, 20);
 
+function observed(entries, observer) {
+  entries.forEach(async ({isIntersecting, target}) => {
+    if (!isIntersecting) return;
+
+    const message = messages[target.dataset.index];
+    const tsClass = 'has-ts-' + message.dt.toEpoch();
+    await $dialog.loadEmbeds(message);
+
+    q(target, '.message_embed', embedEl => {
+      if (!embedEl.classList.contains(tsClass)) embedEl.remove();
+    });
+
+    message.embeds.forEach(embed => {
+      if (!embed.el || target.querySelector('.' + tsClass)) return;
+      if (embed.provider) $user.loadProvider(embed.provider);
+      target.appendChild(embed.el);
+      embed.el.classList.add(tsClass);
+    });
+  });
+}
+
 $: connection = $user.findDialog({connection_id: $pathParts[1]}) || {nick: ''};
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
 $: isLoading = dialog.op && dialog.op.is('loading') || false;
@@ -50,6 +72,16 @@ $: if (lastHeight && lastHeight < height) {
   w.scrollTo(0, height - lastHeight);
   lastHeight = 0;
 }
+
+onMount(() => {
+  // Clean up any embeds added from a previous chat
+  q(document, '.message_embed', embedEl => embedEl.remove());
+});
+
+afterUpdate(() => {
+  observer = observer || new IntersectionObserver(observed, {rootMargin: '0px'});
+  q(document, '.message', messageEl => observer.observe(messageEl));
+});
 </script>
 
 <svelte:window on:scroll="{onScroll}"/>
@@ -111,15 +143,13 @@ $: if (lastHeight && lastHeight < height) {
       class:is-sent-by-you="{message.from == connection.nick}"
       class:is-hightlighted="{message.highlight}"
       class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
-      class:has-same-from="{message.isSameSender && !message.dayChanged}">
+      class:has-same-from="{message.isSameSender && !message.dayChanged}"
+      data-index="{i}">
+
       <Icon name="{message.from == connection.nick ? user.icon : user.otherIcon}"/>
       <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
       <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}">{message.from}</Link>
       <div class="message_text">{@html message.markdown}</div>
-
-      {#if message.embed}
-        <div class="message_embed">{@html message.embed.html}</div>
-      {/if}
     </div>
   {/each}
 
