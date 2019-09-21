@@ -34,30 +34,32 @@ function filterNav(filter) {
   visibleLinks = [];
 
   // Show and hide navigation links
-  q(navEl, 'a', (aEl, i) => {
+  q(navEl, '.sidebar__item__link', (aEl, i) => {
     const aClassList = aEl.classList;
-    const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
-    const parentList = aEl.closest('.sidebar__nav__account, .sidebar__nav__servers');
-
-    if (makeVisible) {
-      if (parentList) hasVisibleLinks[parentList.className] = parentList;
-      visibleLinks.push(aEl);
-    }
-
-    if (!filter.length && aClassList.contains('has-path')) {
-      activeLinkIndex = i;
-    }
-
+    if (!filter.length && aClassList.contains('has-path')) activeLinkIndex = i;
     aClassList.remove('has-focus');
-    aEl[makeVisible ? 'removeAttribute' : 'setAttbribute']('hidden', true);
+
+    const listItem = aEl.parentNode;
+    const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
+    if (makeVisible) visibleLinks.push(aEl);
+    makeVisible ? listItem.removeAttribute('hidden') : listItem.setAttribute('hidden', true);
+
     seen[aEl.href] = true;
   });
 
   // Show and hide navigation headings
-  q(navEl, 'ul', listEl => {
-    const makeVisible = hasVisibleLinks[listEl.className] || false;
-    const headingEl = listEl.previousElementSibling;
-    if (headingEl && tagNameIs(headingEl, 'h3')) headingEl.classList[makeVisible ? 'remove' : 'add']('hide');
+  q(navEl, 'h3', h3 => {
+    let el = h3;
+    let makeVisible = false;
+
+    while ((el = el.nextElementSibling)) {
+      if (tagNameIs(el, 'h3')) break;
+      if (el.hasAttribute('hidden')) continue;
+      makeVisible = true;
+      break;
+    }
+
+    makeVisible ? h3.removeAttribute('hidden') : h3.setAttribute('hidden', true);
   });
 }
 

@@ -18,7 +18,7 @@ $: settingsIcon = !dialog.connection_id ? null
                 :                         'user-friends';
 </script>
 
-<div class={classNames.join(' ')}>
+<div class="{classNames.join(' ')}">
   {#if settingsIcon}
     <Link href="/chat/{dialog.path}#settings" className="sidebar__item__settings">
       <Icon name="{settingsIcon}"/>
