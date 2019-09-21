@@ -1,79 +1,49 @@
-$theme-color: #5f8961 !default;
-$body-bg: #fefefe !default;
-$text-color: #333 !default;
-$link-color: darken($theme-color, 10%) !default;
-$font-family: "PT Sans", Helvetica, Arial, sans-serif !default;
-$font-size: 16px !default;
-$gutter: 1rem !default;
-
-$error: #900 !default;
-$success: #090 !default;
-
-$sidebar-bg: $theme-color !default;
-$sidebar-text: #fefefe !default;
-$sidebar-width: 300px !default;
-
-$input-bg: #fff;
-$input-color: #555 !default;
-$input-border-color: #888 !default;
-$input-border-radius: 2px !default;
-$input-placeholder-color: #8e8e8e !default;
-
 // TODO: Figure out better values for breakpoints
 $breakpoint-small: 400px !default;
 $breakpoint-full: 970px !default;
 $breakpoint-max-width: 800px !default;
 
 :root {
-  --body-bg: #{$body-bg};
-  --font-family: #{$font-family};
-  --font-size: #{$font-size};
-  --text-color: #{$text-color};
-  --link-color: #{$link-color};
-
-  --gutter: #{$gutter};
-  --gutter-small: #{$gutter / 2};
-  --gutter-big: #{$gutter * 2};
-
-  --error-color: #{$error};
-  --success-color: #{$success};
-
+  --body-bg: #fefefe;
+  --font-family: PT Sans, Helvetica, Arial, sans-serif;
+  --font-size: 16px;
+  --text-color: #333;
+  --link-color: #4a6b4c;
+  --gutter: 1rem;
+  --gutter-small: 0.5rem;
+  --gutter-big: 2rem;
+  --error-color: #900;
+  --success-color: #090;
   --highlight-color: #fbe4e6;
-
   --hr-border: 1px solid #eee;
-
-  --button-bg: #{darken($theme-color, 20%)};
+  --button-bg: #354d36;
   --button-color: #fff;
-  --button-border: 1px solid #{darken($theme-color, 20%)};
-  --button-focus-outline: 2px solid #{lighten($theme-color, 20%)};
-  --button-disabled-bg: #{lighten($theme-color, 30%)};
+  --button-border: 1px solid #354d36;
+  --button-focus-outline: 2px solid #97b799;
+  --button-disabled-bg: #b5ccb6;
   --button-disabled-color: #fff;
   --button-disabled-border: #fff;
   --button-danger-bg: #9c2626;
   --button-danger-color: #fff;
-
-  --input-bg: #{$input-bg};
+  --input-bg: #fff;
   --input-gutter: 0.8rem;
-  --input-border: 1px solid #{$input-border-color};
-  --input-border-radius: #{$input-border-radius};
-  --input-color: #{$input-color};
-  --input-hover-outline: #{lighten($input-border-color, 10%)};
-  --input-disabled-bg: #{darken($input-bg, 1%)};
-  --input-disabled-color: #{lighten($input-color, 10%)};
-  --input-placeholder-color: #{$input-placeholder-color};
-
-  --autocomplete-bg: #{darken($body-bg, 1%)};
-  --autocomplete-border: 1px solid #{$input-border-color};
-  --autocomplete-focus-bg: #{darken($body-bg, 10%)};
-
-  --ts-color: #{lighten($text-color, 10%)};
+  --input-border: 1px solid #888;
+  --input-border-radius: 2px;
+  --input-color: #555;
+  --input-hover-outline: #a2a2a2;
+  --input-disabled-bg: #fcfcfc;
+  --input-disabled-color: #6f6f6f;
+  --input-placeholder-color: #8e8e8e;
+  --autocomplete-bg: #fbfbfb;
+  --autocomplete-border: 1px solid #888;
+  --autocomplete-focus-bg: #e5e5e5;
+  --ts-color: #4d4d4d;
   --ts-font-size: 0.9rem;
-
-  --sidebar-bg: #{$sidebar-bg};
-  --sidebar-text: #{$sidebar-text};
-  --sidebar-width: #{$sidebar-width};
+  --sidebar-bg: #5f8961;
+  --sidebar-text: #fefefe;
+  --sidebar-width: 300px;
   --sidebar-outline: #8ece93 auto 3px;
-  --sidebar-border-bottom: #{$sidebar-text};
-  --sidebar-search-placeholder-color: #{darken($sidebar-bg, 6%)};
-  --sidebar-search-focus-bg: #{darken($sidebar-bg, 6%)};
+  --sidebar-border-bottom: #fefefe;
+  --sidebar-search-placeholder-color: #527754;
+  --sidebar-search-focus-bg: #527754;
 }
