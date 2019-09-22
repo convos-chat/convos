@@ -6,8 +6,8 @@ import User from './store/User';
 
 // Pages
 import Chat from './page/Chat.svelte';
-import ConnectionCreate from './page/ConnectionCreate.svelte';
-import ConversationAdd from './page/ConversationAdd.svelte';
+import ConnectionAdd from './page/ConnectionAdd.svelte';
+import DialogAdd from './page/DialogAdd.svelte';
 import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
@@ -15,8 +15,8 @@ import Settings from './page/Settings.svelte';
 
 // Routing
 const pages = {
-  'add/connection': ConnectionCreate,
-  'add/conversation': ConversationAdd,
+  'add/connection': ConnectionAdd,
+  'add/conversation': DialogAdd,
   chat: Chat,
   help: Help,
   login: Login,
