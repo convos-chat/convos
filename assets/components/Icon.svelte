@@ -21,7 +21,6 @@ $: {
 }
 
 const randomIcons = [
-  'address-card',
   'atom',
   'balance-scale',
   'baseball-ball',
