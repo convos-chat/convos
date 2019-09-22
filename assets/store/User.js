@@ -1,7 +1,7 @@
 import Connection from './Connection';
 import Dialog from './Dialog';
 import Events from '../js/Events';
-import Operation from './Operation';
+import Reactive from '../js/Reactive';
 import {sortByName} from '../js/util';
 
 const providers = {
@@ -17,16 +17,14 @@ const providers = {
   },
 };
 
-export default class User extends Operation {
+export default class User extends Reactive {
   constructor(params) {
-    super({
-      api: params.api,
-      defaultParams: {connections: true, dialogs: true, notifications: true},
-      id: 'getUser',
-    });
+    super();
 
-    this._readOnlyAttr('email', () => this.res.body.email || '');
-    this._readOnlyAttr('notifications', new Dialog({api: this.api, name: 'Notifications'}));
+    this._readOnlyAttr('api', () => this.op.api);
+    this._readOnlyAttr('email', () => this.op.res.body.email || '');
+    this._readOnlyAttr('notifications', new Dialog({api: params.api, name: 'Notifications'}));
+    this._readOnlyAttr('op', params.api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this._readOnlyAttr('events', this._createEvents());
 
     this._updateableAttr('connections', []);
@@ -83,7 +81,8 @@ export default class User extends Operation {
     if (this.is('loading')) await this.on('loaded');
     if (this.is('success')) return this;
     this.update({status: 'loading'});
-    await this.perform();
+    await this.op.perform();
+    this._parseGetUser(this.op.res.body);
     if (this.email) await this.send({method: 'ping'});
     return this;
   }
@@ -97,14 +96,6 @@ export default class User extends Operation {
     el.id = provider.url.replace(/\W/g, '_');
     el.src = provider.url;
     document.getElementsByTagName('head')[0].appendChild(el);
-  }
-
-  parse(res, body = res.body) {
-    Operation.prototype.parse.call(this, res, body);
-    if (body.notifications) this.notifications.update({messages: body.notifications}); // Need to be done before this.update()
-    if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
-    if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
-    return this;
   }
 
   removeDialog(params) {
@@ -144,5 +135,12 @@ export default class User extends Operation {
     });
 
     return events;
+  }
+
+  _parseGetUser(body) {
+    if (body.notifications) this.notifications.update({messages: body.notifications}); // Need to be done before this.update()
+    if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
+    if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
+    return this;
   }
 }

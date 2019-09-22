@@ -60,7 +60,7 @@ function observed(entries, observer) {
 
 $: connection = $user.findDialog({connection_id: $pathParts[1]}) || {nick: ''};
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
-$: isLoading = dialog.op && dialog.op.is('loading') || false;
+$: isLoading = dialog.op && dialog.is('loading') || false;
 $: dialog.load();
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: messages = $dialog.messages;
