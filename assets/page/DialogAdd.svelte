@@ -24,12 +24,10 @@ $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0]
 
 onMount(() => urlToForm(formEl));
 
-function joinDialog(e) {
+function addDialog(e) {
   const aEl = e && e.target && e.target.closest('a');
-  if (aEl && aEl.href) dialogId = aEl.href.replace(/.*#join:/, '');
-  if (!connectionId || !dialogId) return;
-  const message = dialogId.match(/^[a-z]/i) ? `/query ${dialogId}` : `/join ${dialogId}`;
-  user.send({connection_id: connectionId, message});
+  if (aEl && aEl.href) dialogId = aEl.href.replace(/.*#add:/, '');
+  if (connectionId && dialogId) user.findDialog({connection_id: connectionId}).addDialog(dialogId);
 }
 
 function loadConversations(e) {
@@ -54,7 +52,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
 
 <SidebarChat/>
 
-<main class="main join-conversation-container">
+<main class="main">
   <ChatHeader>
     <h1>{l('Add conversation')}</h1>
   </ChatHeader>
@@ -64,7 +62,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
     {l('It is also possible to load in all existing conversations for a given connection.')}
   </p>
 
-  <form method="post" bind:this="{formEl}" on:submit|preventDefault="{joinDialog}">
+  <form method="post" bind:this="{formEl}" on:submit|preventDefault="{addDialog}">
     <div class="inputs-side-by-side">
       <SelectField name="connection_id" options="{connectionOptions}" placeholder="{l('Select...')}" bind:value="{connectionId}">
         <span slot="label">{l('Connection')}</span>
@@ -96,7 +94,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
 
       <div class="dialog-list">
         {#each availableDialogs.dialogs as dialog}
-          <a href="#join:{dialog.name}" on:click|preventDefault="{joinDialog}">
+          <a href="#add:{dialog.name}" on:click|preventDefault="{addDialog}">
             <span class="dialog-list__n-users">{dialog.n_users}</span>
             <b class="dialog-list__name">{dialog.name}</b>
             <i class="dialog-list__title">{dialog.topic || 'No topic.'}</i>

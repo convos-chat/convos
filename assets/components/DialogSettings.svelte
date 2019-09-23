@@ -47,7 +47,7 @@ function updateDialogFromForm(e) {
       {#if !dialog.is_private}
         <Button icon="save" disabled="{!user.isDialogOperator(dialog)}">{l('Update')}</Button>
       {/if}
-      <Button icon="sign-out-alt" on:click|preventDefault="{partDialog}">{l('Part')}</Button>
+      <Button type="button" on:click|preventDefault="{partDialog}" icon="sign-out-alt">{l('Part')}</Button>
     </div>
   </form>
 </div>

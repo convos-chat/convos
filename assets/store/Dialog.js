@@ -21,6 +21,7 @@ export default class Dialog extends Reactive {
 
     this._readOnlyAttr('api', params.api);
     this._readOnlyAttr('connection_id', params.connection_id || '');
+    this._readOnlyAttr('events', params.events);
     this._readOnlyAttr('is_private', params.is_private || false);
     this._readOnlyAttr('op', op);
     this._readOnlyAttr('participants', {});
@@ -112,6 +113,10 @@ export default class Dialog extends Reactive {
     return this.participants[id];
   }
 
+  send(message) {
+    this.events.send({connection_id: this.connection_id, dialog_id: this.dialog_id || '', message});
+  }
+
   update(params) {
     if (params.messages) this._processMessages(params.messages);
     if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
@@ -135,7 +140,7 @@ export default class Dialog extends Reactive {
 
     if (!participant.me) {
       delete this.participants[params.nick];
-      dialog.update({});
+      this.update({});
     }
   }
 
