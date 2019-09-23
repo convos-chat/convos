@@ -4,7 +4,6 @@ import {l} from '../js/i18n';
 import ChatHeader from '../components/ChatHeader.svelte';
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
-import FormActions from '../components/form/FormActions.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
@@ -71,9 +70,9 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Repeat password')}</span>
     </PasswordField>
 
-    <FormActions>
+    <div class="form-actions">
       <Button icon="save" op="{updateUserOp}">{l('Save settings')}</Button>
-    </FormActions>
+    </div>
 
     <OperationStatus op={updateUserOp}/>
   </form>

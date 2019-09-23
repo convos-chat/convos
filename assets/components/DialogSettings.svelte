@@ -2,7 +2,6 @@
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 import Button from '../components/form/Button.svelte';
-import FormActions from '../components/form/FormActions.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 
@@ -44,11 +43,11 @@ function updateDialogFromForm(e) {
         <span slot="label">{l('Topic')}</span>
       </TextArea>
     {/if}
-    <FormActions>
+    <div class="form-actions">
       {#if !dialog.is_private}
         <Button icon="save" disabled="{!user.isDialogOperator(dialog)}">{l('Update')}</Button>
       {/if}
       <Button icon="sign-out-alt" on:click|preventDefault="{partDialog}">{l('Part')}</Button>
-    </FormActions>
+    </div>
   </form>
 </div>

@@ -1,7 +1,6 @@
 <script>
 import {l} from '../js/i18n';
 import {getContext} from 'svelte';
-import FormActions from '../components/form/FormActions.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
@@ -22,9 +21,9 @@ const user = getContext('user');
     <PasswordField name="password">
       <span slot="label">{l('Password')}</span>
     </PasswordField>
-    <FormActions>
+    <div class="form-actions">
       <button class="btn" op="{user.login}">{l('Log in')}</button>
-    </FormActions>
+    </div>
     <OperationStatus op="{user.login}"/>
   </form>
   <article>
