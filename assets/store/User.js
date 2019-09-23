@@ -24,9 +24,11 @@ export default class User extends Reactive {
 
     this._readOnlyAttr('api', () => this.op.api);
     this._readOnlyAttr('email', () => this.op.res.body.email || '');
-    this._readOnlyAttr('notifications', new Dialog({api: params.api, name: 'Notifications'}));
     this._readOnlyAttr('op', params.api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this._readOnlyAttr('events', this._createEvents());
+
+    // Need to come after "api" and "events"
+    this._readOnlyAttr('notifications', new Dialog({api: this.api, events: this.events, name: 'Notifications'}));
 
     this._updateableAttr('connections', writable([]));
     this._updateableAttr('enableNotifications', Notification.permission);
@@ -57,9 +59,12 @@ export default class User extends Reactive {
     }
 
     // Create connection
-    conn = new Connection({...params, api: this.api});
-    conn.on('message', params => this.send(params));
-    conn.on('update', this.connections.set(this._connections().sort(sortByName)));
+    conn = new Connection({...params, api: this.api, events: this.events});
+    conn.on('update', () => {
+      this.connections.set(this._connections().sort(sortByName));
+      this.update({}); // TODO: Figure out how to update Chat.svelte, without updating the user object
+    });
+
     this.connections.set(this._connections().concat(conn).sort(sortByName));
     return conn;
   }

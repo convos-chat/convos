@@ -20,13 +20,16 @@ let lastHeight = 0;
 let observer;
 let scrollPos = 'bottom';
 
-$: connection = $user.findDialog({connection_id: $pathParts[1]}) || {nick: ''};
+$: connection = $user.findDialog({connection_id: $pathParts[1]});
+$: currentNick = connection ? connection.nick : user.email;
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
+$: hasValidPath = $pathParts.slice(1).join('/') == decodeURIComponent(dialog.path);
 $: isLoading = dialog.op && dialog.is('loading') || false;
-$: dialog.load();
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
-$: messages = $dialog.messages;
-$: settingsComponent = $currentUrl.hash != '#settings' ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
+$: messages = hasValidPath ? $dialog.messages : [];
+$: settingsComponent = $currentUrl.hash != '#settings' || !hasValidPath ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
+
+$: if (dialog.connection_id) dialog.load();
 
 $: if (scrollPos == 'bottom') w.scrollTo(0, height);
 
@@ -45,11 +48,17 @@ afterUpdate(() => {
   q(document, '.message', messageEl => observer.observe(messageEl));
 });
 
+function addDialog(e) {
+  if (connection) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
+}
+
 function observed(entries, observer) {
   entries.forEach(async ({isIntersecting, target}) => {
     if (!isIntersecting) return;
 
     const message = messages[target.dataset.index];
+    if (!message) return;
+
     const tsClass = 'has-ts-' + message.dt.toEpoch();
     await $dialog.loadEmbeds(message);
 
@@ -111,21 +120,23 @@ const onScroll = debounce(e => {
     {:else if $pathParts[1] == dialog.connection_id}
       <h2>{l(isLoading ? 'Loading messages...' : 'No messages.')}</h2>
       <p>{dialog.frozen}</p>
-    {:else if $pathParts[2] && !dialog.dialog_id}
-      <h2>{l('You are not part of this conversation.')}</h2>
-      <p>Do you want to add the conversation?</p>
-      <p>
-        <Link href="/add/conversation?connection_id={encodeURIComponent($pathParts[1])}&dialog_id={encodeURIComponent($pathParts[2])}" className="btn">{l('Yes')}</Link>
-        <Link href="/chat" className="btn">{l('No')}</Link>
-      </p>
-    {:else if $pathParts[1] && !connection}
-      <h2>{l('Connection does not exist.')}</h2>
-      <p>{l('Do you want to make a new connection?')}</p>
-      <p>
-        <Link href="/add/connection?server={encodeURIComponent($pathParts[1])}" className="btn">{l('Yes')}</Link>
-        <Link href="/chat" className="btn">{l('No')}</Link>
-      </p>
     {/if}
+  {/if}
+
+  {#if $pathParts[2] && !dialog.dialog_id}
+    <h2>{l('You are not part of this conversation.')}</h2>
+    <p>Do you want to add the conversation?</p>
+    <p>
+      <a href="#add:{$pathParts[2]}" on:click={addDialog} class="btn">Yes</a>
+      <Link href="/chat" className="btn">{l('No')}</Link>
+    </p>
+  {:else if $pathParts[1] && !connection}
+    <h2>{l('Connection does not exist.')}</h2>
+    <p>{l('Do you want to make a new connection?')}</p>
+    <p>
+      <Link href="/add/connection?server={encodeURIComponent($pathParts[1])}" className="btn">{l('Yes')}</Link>
+      <Link href="/chat" className="btn">{l('No')}</Link>
+    </p>
   {/if}
 
   {#if isLoading && scrollPos == 'top'}
@@ -140,13 +151,13 @@ const onScroll = debounce(e => {
     {/if}
 
     <div class="message is-type-{message.type || 'notice'}"
-      class:is-sent-by-you="{message.from == connection.nick}"
+      class:is-sent-by-you="{message.from == currentNick}"
       class:is-hightlighted="{message.highlight}"
       class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
       class:has-same-from="{message.isSameSender && !message.dayChanged}"
       data-index="{i}">
 
-      <Icon name="{message.from == connection.nick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
+      <Icon name="{message.from == currentNick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
       <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
       <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}" style="color:{message.color}">{message.from}</Link>
       <div class="message_text">{@html message.markdown}</div>

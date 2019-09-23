@@ -1,7 +1,6 @@
 import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
 import {extractErrorMessage, sortByName} from '../js/util';
-import {gotoUrl} from '../store/router';
 
 export default class Connection extends Dialog {
   constructor(params) {
@@ -18,6 +17,11 @@ export default class Connection extends Dialog {
     this._updateableAttr('private', []);
   }
 
+  addDialog(dialogId) {
+    const isPrivate = dialogId.match(/^[a-z]/i);
+    this.send(isPrivate ? `/query ${dialogId}` : `/join ${dialogId}`);
+  }
+
   dialogs() {
     return this.channels.concat(this.private);
   }
@@ -26,14 +30,16 @@ export default class Connection extends Dialog {
     let dialog = this.dialogs().filter(dialog => dialog.dialog_id == params.dialog_id)[0];
 
     if (dialog) {
+      dialog.update(params);
       this.update({});
-      return dialog.update(params);
+    }
+    else {
+      dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
+      dialog.on('message', params => this.emit('message', params));
+      const listName = dialog.is_private ? 'private' : 'channels';
+      this.update({[listName]: this[listName].concat(dialog).sort(sortByName)});
     }
 
-    dialog = new Dialog({...params, api: this.api});
-    dialog.on('message', params => this.emit('message', params));
-    const listName = dialog.is_private ? 'private' : 'channels';
-    this.update({[listName]: this[listName].concat(dialog).sort(sortByName)});
     return dialog;
   }
 
@@ -65,7 +71,6 @@ export default class Connection extends Dialog {
     const existing = this.findDialog(params);
     this.ensureDialog(params).participant(this.nick, {me: true});
     if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
-    if (!existing) gotoUrl(['', 'chat', params.connection_id, params.dialog_id].map(encodeURIComponent).join('/'));
   }
 
   wsEventJoin(params) {
@@ -95,17 +100,7 @@ export default class Connection extends Dialog {
 
   wsEventPart(params) {
     this._forwardEventToDialog('wsEventPart', params);
-
-    const participant = this.participants[params.nick] || {};
-    if (participant.me) {
-      this.removeDialog(params);
-
-      // Change active conversation
-      const nextDialog = this.dialogs().sort((a, b) => b.last_active.localeCompare(a.last_active))[0];
-      const path = ['', 'chat', params.connection_id];
-      if (nextDialog) path.push(nextDialog.dialog_id);
-      gotoUrl(path.map(encodeURIComponent).join('/'));
-    }
+    if (params.nick == this.nick) this.removeDialog(params);
   }
 
   wsEventParticipants(params) {
@@ -122,6 +117,10 @@ export default class Connection extends Dialog {
       ? {message: 'Found %1 of %2 dialogs from %3.', vars: [params.dialogs.length, params.n_dialogs, args]}
       : {message: 'Found %1 of %2 dialogs from %3, but dialogs are still loading.', vars: [params.dialogs.length, params.n_dialogs, args]}
     );
+  }
+
+  wsEventSentQuery(params) {
+    this.ensureDialog(params);
   }
 
   wsEventTopic(params) {
