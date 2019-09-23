@@ -13,6 +13,10 @@ let pos;
 
 const user = getContext('user');
 
+$: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
+$: connection = user.findDialog({connection_id: dialog.connection_id});
+$: inputParts = pos && calculateInputParts(pos) || ['', '', '', ''];
+
 function calculateAutocompleteOptions([before, key, afterKey, after]) {
   autocompleteCategory =
       key == ':' && afterKey.length ? 'emojis'
@@ -87,10 +91,6 @@ const keys = {
     if (e.key.length == 1 || updatePosKeys.indexOf(e.key) != -1) pos = inputEl.selectionStart;
   },
 };
-
-$: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
-$: connection = user.findDialog({connection_id: dialog.connection_id});
-$: inputParts = pos && calculateInputParts(pos) || ['', '', '', ''];
 </script>
 
 <div class="chat-input">

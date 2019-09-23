@@ -3,6 +3,8 @@ import {gotoUrl, showMenu} from '../store/router';
 import {onMount} from 'svelte';
 import Icon from '../components/Icon.svelte';
 
+onMount(() => { $showMenu = false });
+
 function toggleMenu() {
   if (location.href.indexOf('#settings') != -1) {
     $showMenu = true;
@@ -12,8 +14,6 @@ function toggleMenu() {
     $showMenu = !$showMenu;
   }
 }
-
-onMount(() => {$showMenu = false});
 </script>
 
 <header class="header">

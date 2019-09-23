@@ -6,20 +6,6 @@ export let name;
 export let style = '';
 export let title = '';
 
-const familyToClassName = {
-  regular: 'far',
-  solid: 'fas',
-};
-
-let classNames = [];
-
-$: {
-  classNames = [familyToClassName[family] || 'fa'];
-  classNames.push('fa-' + (name && name.indexOf('random:') == 0 ? randomIcon(name) : name));
-  if (animation) classNames = classNames.concat(animation.split(' ').map(a => 'fa-' + a));
-  if (className) classNames = classNames.concat(className.split(' '));
-}
-
 const randomIcons = [
   'atom',
   'balance-scale',
@@ -49,6 +35,17 @@ const randomIcons = [
   'user-secret',
   'walking',
 ];
+
+const familyToClassName = {regular: 'far', solid: 'fas'};
+
+let classNames = [];
+
+$: {
+  classNames = [familyToClassName[family] || 'fa'];
+  classNames.push('fa-' + (name && name.indexOf('random:') == 0 ? randomIcon(name) : name));
+  if (animation) classNames = classNames.concat(animation.split(' ').map(a => 'fa-' + a));
+  if (className) classNames = classNames.concat(className.split(' '));
+}
 
 function randomIcon(str) {
   let hash = 0;

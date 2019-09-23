@@ -14,11 +14,11 @@ let formEl;
 
 $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
-async function partDialog(e) {
+function partDialog(e) {
   user.send({message: '/part', dialog});
 }
 
-async function updateDialogFromForm(e) {
+function updateDialogFromForm(e) {
   user.send({message: '/topic ' + formEl.topic.value, dialog});
 }
 </script>

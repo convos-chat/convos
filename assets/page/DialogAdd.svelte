@@ -19,10 +19,10 @@ let connectionId = '';
 let dialogId = '';
 let formEl;
 
-const debouncedLoadConversations = debounce(loadConversations, 250);
-
 $: connectionOptions = $connections.map(c => [c.connection_id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
+
+onMount(() => urlToForm(formEl));
 
 function joinDialog(e) {
   const aEl = e && e.target && e.target.closest('a');
@@ -49,7 +49,7 @@ function loadConversations(e) {
   });
 }
 
-onMount(() => urlToForm(formEl));
+const debouncedLoadConversations = debounce(loadConversations, 250);
 </script>
 
 <SidebarChat/>
