@@ -12,6 +12,7 @@ import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 
 const user = getContext('user');
+const connections = user.connections;
 
 let availableDialogs = {dialogs: [], done: null, n_dialogs: 0};
 let connectionId = '';
@@ -20,7 +21,7 @@ let formEl;
 
 const debouncedLoadConversations = debounce(loadConversations, 250);
 
-$: connectionOptions = $user.connections.map(c => [c.connection_id]);
+$: connectionOptions = $connections.map(c => [c.connection_id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
 
 function joinDialog(e) {
