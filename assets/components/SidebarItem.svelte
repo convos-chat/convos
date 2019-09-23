@@ -4,7 +4,7 @@ import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import Unread from './Unread.svelte';
 
-export let dialog = {};
+export let dialog = {name: ''};
 export let href = false;
 export let icon = 'cog';
 
