@@ -2,6 +2,7 @@ import Connection from './Connection';
 import Dialog from './Dialog';
 import Events from '../js/Events';
 import Reactive from '../js/Reactive';
+import {get, writable} from 'svelte/store';
 import {sortByName} from '../js/util';
 
 const providers = {
@@ -27,7 +28,7 @@ export default class User extends Reactive {
     this._readOnlyAttr('op', params.api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this._readOnlyAttr('events', this._createEvents());
 
-    this._updateableAttr('connections', []);
+    this._updateableAttr('connections', writable([]));
     this._updateableAttr('enableNotifications', Notification.permission);
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
@@ -58,12 +59,13 @@ export default class User extends Reactive {
     // Create connection
     conn = new Connection({...params, api: this.api});
     conn.on('message', params => this.send(params));
-    this.update({connections: this.connections.concat(conn).sort(sortByName)});
+    conn.on('update', this.connections.set(this._connections().sort(sortByName)));
+    this.connections.set(this._connections().concat(conn).sort(sortByName));
     return conn;
   }
 
   findDialog(params) {
-    if (!params.dialog_id) return this.connections.filter(conn => conn.connection_id == params.connection_id)[0];
+    if (!params.dialog_id) return this._connections().filter(conn => conn.connection_id == params.connection_id)[0];
     const conn = this.findDialog({connection_id: params.connection_id});
     return conn && conn.findDialog(params);
   }
@@ -105,7 +107,7 @@ export default class User extends Reactive {
       this.update({});
     }
     else {
-      this.update({connections: this.connections.filter(conn => conn.connection_id != params.connection_id)});
+      this.connections.set(this._connections().filter(conn => conn.connection_id != params.connection_id));
     }
   }
 
@@ -121,6 +123,10 @@ export default class User extends Reactive {
     this.wsPongTimestamp = params.ts;
   }
 
+  _connections() {
+    return get(this.connections);
+  }
+
   _createEvents() {
     const events = new Events();
 
@@ -131,7 +137,7 @@ export default class User extends Reactive {
     });
 
     events.on('update', events => {
-      if (events.state == 'closed') this.connections.forEach(conn => conn.update({frozen: 'Unreachable.'}));
+      if (events.state == 'closed') this._connections().forEach(conn => conn.update({frozen: 'Unreachable.'}));
     });
 
     return events;

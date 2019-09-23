@@ -27,19 +27,21 @@ const pages = {
 const Convos = window.Convos || {};
 const api = new Api(Convos.apiUrl, {debug: true});
 const user = new User({api});
+const connections = user.connections;
+const login = user.login;
+const logout = user.logout;
+
 setContext('user', user);
 
 $: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
 $: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname);
 
-const login = user.login;
 $: if ($login.is('success')) {
   document.cookie = $user.login.res.headers['Set-Cookie'];
   user.login.reset();
   user.load().then(gotoDefaultPage);
 }
 
-const logout = user.logout;
 $: if ($logout.is('success')) {
   user.logout.reset();
   user.reset();
@@ -48,7 +50,7 @@ $: if ($logout.is('success')) {
 
 function gotoDefaultPage() {
   const lastUrl = localStorage.getItem('lastUrl');
-  gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'));
+  gotoUrl(lastUrl || ($connections.length ? '/chat' : '/add/connection'));
 }
 
 onMount(async () => {
@@ -65,4 +67,4 @@ onMount(async () => {
 });
 </script>
 
-<svelte:component this={currentPage}/>
+<svelte:component this="{currentPage}"/>

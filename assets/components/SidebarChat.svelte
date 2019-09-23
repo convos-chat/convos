@@ -9,6 +9,7 @@ import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
 
 const user = getContext('user');
+const connections = user.connections;
 
 let activeLinkIndex = 0;
 let filter = '';
@@ -16,6 +17,9 @@ let navEl;
 let searchHasFocus = false;
 let searchInput;
 let visibleLinks = [];
+
+$: filterNav(encodeURIComponent(filter));
+$: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
 function clearFilter() {
   searchHasFocus = false;
@@ -99,10 +103,6 @@ function onSearchKeydown(e) {
   if (activeLinkIndex < 0) activeLinkIndex = visibleLinks.length - 1;
   if (activeLinkIndex >= visibleLinks.length) activeLinkIndex = 0;
 }
-
-$: filterNav(encodeURIComponent(filter));
-$: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
-$: connections = $user.connections;
 </script>
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
@@ -121,9 +121,9 @@ $: connections = $user.connections;
     </form>
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
-      {#if connections.length}
+      {#if $connections.length}
         <h3>{l('Group conversations')}</h3>
-        {#each connections as connection}
+        {#each $connections as connection}
           <SidebarItem dialog="{connection}"/>
           {#each connection.channels as dialog}
             <SidebarItem {dialog}/>
@@ -131,7 +131,7 @@ $: connections = $user.connections;
         {/each}
 
         <h3>{l('Private conversations')}</h3>
-        {#each connections as connection}
+        {#each $connections as connection}
           {#if connection.private.length}
             <SidebarItem dialog="{connection}"/>
             {#each connection.private as dialog}
