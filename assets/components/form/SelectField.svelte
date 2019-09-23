@@ -24,12 +24,21 @@ $: classNames = ['select-field', 'text-field', className].filter(c => c.length).
 $: visibleOptions = filterOptions(options, typed);
 $: if (visible == true) activeIndex = 0;
 $: if (visible == false) typed = '';
-$: if (hiddenEl && hiddenEl.value !== value) hiddenEl.value = value;
+
+$: if (hiddenEl && !hiddenEl.syncValue) {
+  hiddenEl.syncValue = function() { value = this.value };
+  hiddenEl.syncValue();
+}
 
 $: if (humanEl && !humanEl.value && humanEl != document.activeElement) {
   const found = options.find(opt => opt[0] == hiddenEl.value);
   if (found) humanEl.value = found[1] || found[0];
 }
+
+onMount(() => {
+  humanEl.addEventListener('blur', () => setTimeout(() => { visible = false }, 100));
+  value = hiddenEl.value;
+});
 
 function filterOptions(options, needle) {
   let re = new RegExp('(?:^|\\s|-)' + needle, 'i'); // TODO: needle need to be safe string
@@ -84,11 +93,6 @@ async function selectOption(e) {
 function toggle() {
   visible = !visible;
 }
-
-onMount(() => {
-  humanEl.addEventListener('blur', () => setTimeout(() => { visible = false }, 100));
-  value = hiddenEl.value;
-});
 </script>
 
 <div class="{classNames.join(' ')}" hidden="{hidden}" bind:this="{wrapperEl}" on:click|preventDefault="{toggle}">

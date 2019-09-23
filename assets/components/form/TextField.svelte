@@ -1,5 +1,4 @@
 <script>
-import {onMount} from 'svelte';
 import {uuidv4} from '../../js/util';
 
 export let autocomplete = null;
@@ -14,6 +13,11 @@ export let value = '';
 let inputEl;
 
 $: classNames = ['text-field', className].filter(c => c.length);
+
+$: if (inputEl && !inputEl.syncValue) {
+  inputEl.syncValue = function() { value = this.value };
+  inputEl.syncValue();
+}
 </script>
 
 <div class="{classNames.join(' ')}" hidden="{hidden}">
