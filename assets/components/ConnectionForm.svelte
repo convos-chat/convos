@@ -27,6 +27,13 @@ let wantToBeConnected = false;
 
 $: if (formEl) formEl.wanted_state.value = wantToBeConnected ? 'connected' : 'disconnected';
 
+onMount(async () => {
+  await user.load();
+  if (!formEl) return; // if unMounted while loading user data
+  connection = user.findDialog({connection_id: dialog.connection_id}) || {};
+  return connection.url ? connectionToForm() : defaultsToForm();
+});
+
 function defaultsToForm() {
   formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   useTls = true;
@@ -68,13 +75,6 @@ async function submitForm(e) {
     gotoUrl('/chat/' + conn.path);
   }
 }
-
-onMount(async () => {
-  await user.load();
-  if (!formEl) return; // if unMounted while loading user data
-  connection = user.findDialog({connection_id: dialog.connection_id}) || {};
-  return connection.url ? connectionToForm() : defaultsToForm();
-});
 </script>
 
 <form method="post" bind:this="{formEl}" on:submit|preventDefault="{submitForm}">

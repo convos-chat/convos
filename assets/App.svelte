@@ -48,11 +48,6 @@ $: if ($logout.is('success')) {
   gotoUrl('/');
 }
 
-function gotoDefaultPage() {
-  const lastUrl = localStorage.getItem('lastUrl');
-  gotoUrl(lastUrl || ($connections.length ? '/chat' : '/add/connection'));
-}
-
 onMount(async () => {
   await user.load();
   if (!currentPage) gotoDefaultPage();
@@ -65,6 +60,11 @@ onMount(async () => {
     historyUnlistener();
   };
 });
+
+function gotoDefaultPage() {
+  const lastUrl = localStorage.getItem('lastUrl');
+  gotoUrl(lastUrl || ($connections.length ? '/chat' : '/add/connection'));
+}
 </script>
 
 <svelte:component this="{currentPage}"/>

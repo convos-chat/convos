@@ -20,44 +20,6 @@ let lastHeight = 0;
 let observer;
 let scrollPos = 'bottom';
 
-const onScroll = debounce(e => {
-  const windowH = w.innerHeight;
-  const scrollY = w.scrollY;
-  const last = scrollPos;
-
-  scrollPos = windowH > height || scrollY + 20 > height - windowH ? 'bottom'
-            : scrollY < 100 ? 'top'
-            : 'middle';
-
-  if (scrollPos == last || !dialog.dialog_id) return;
-
-  if (scrollPos == 'top' && !isLoading) {
-    lastHeight = height;
-    dialog.loadHistoric();
-  }
-}, 20);
-
-function observed(entries, observer) {
-  entries.forEach(async ({isIntersecting, target}) => {
-    if (!isIntersecting) return;
-
-    const message = messages[target.dataset.index];
-    const tsClass = 'has-ts-' + message.dt.toEpoch();
-    await $dialog.loadEmbeds(message);
-
-    q(target, '.message_embed', embedEl => {
-      if (!embedEl.classList.contains(tsClass)) embedEl.remove();
-    });
-
-    message.embeds.forEach(embed => {
-      if (!embed.el || target.querySelector('.' + tsClass)) return;
-      if (embed.provider) $user.loadProvider(embed.provider);
-      target.appendChild(embed.el);
-      embed.el.classList.add(tsClass);
-    });
-  });
-}
-
 $: connection = $user.findDialog({connection_id: $pathParts[1]}) || {nick: ''};
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
 $: isLoading = dialog.op && dialog.is('loading') || false;
@@ -82,6 +44,44 @@ afterUpdate(() => {
   observer = observer || new IntersectionObserver(observed, {rootMargin: '0px'});
   q(document, '.message', messageEl => observer.observe(messageEl));
 });
+
+function observed(entries, observer) {
+  entries.forEach(async ({isIntersecting, target}) => {
+    if (!isIntersecting) return;
+
+    const message = messages[target.dataset.index];
+    const tsClass = 'has-ts-' + message.dt.toEpoch();
+    await $dialog.loadEmbeds(message);
+
+    q(target, '.message_embed', embedEl => {
+      if (!embedEl.classList.contains(tsClass)) embedEl.remove();
+    });
+
+    message.embeds.forEach(embed => {
+      if (!embed.el || target.querySelector('.' + tsClass)) return;
+      if (embed.provider) $user.loadProvider(embed.provider);
+      target.appendChild(embed.el);
+      embed.el.classList.add(tsClass);
+    });
+  });
+}
+
+const onScroll = debounce(e => {
+  const windowH = w.innerHeight;
+  const scrollY = w.scrollY;
+  const last = scrollPos;
+
+  scrollPos = windowH > height || scrollY + 20 > height - windowH ? 'bottom'
+            : scrollY < 100 ? 'top'
+            : 'middle';
+
+  if (scrollPos == last || !dialog.dialog_id) return;
+
+  if (scrollPos == 'top' && !isLoading) {
+    lastHeight = height;
+    dialog.loadHistoric();
+  }
+}, 20);
 </script>
 
 <svelte:window on:scroll="{onScroll}"/>

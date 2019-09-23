@@ -15,7 +15,12 @@ const updateUserOp = user.api.operation('updateUser');
 
 let formEl;
 
-async function updateUserFromForm(e) {
+// TODO: Figure out a better way to uncheck
+$: if (formEl && $user.enableNotifications == 'granted' && !formEl.notifications.checked) formEl.notifications.click();
+$: if (formEl && $user.enableNotifications == 'denied' && formEl.notifications.checked) formEl.notifications.click();
+$: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.value = $user.res.body.highlightKeywords;
+
+function updateUserFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
@@ -34,11 +39,6 @@ async function updateUserFromForm(e) {
   user.update({expandUrlToMedia: form.expand_url.checked});
   updateUserOp.perform(e.target);
 }
-
-// TODO: Figure out a better way to uncheck
-$: if (formEl && $user.enableNotifications == 'granted' && !formEl.notifications.checked) formEl.notifications.click();
-$: if (formEl && $user.enableNotifications == 'denied' && formEl.notifications.checked) formEl.notifications.click();
-$: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.value = $user.res.body.highlightKeywords;
 </script>
 
 <SidebarChat/>

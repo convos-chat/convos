@@ -11,6 +11,8 @@ export const focus = () => el.focus();
 let classNames = [];
 let el;
 
+$: calculateClassNames(href, $pathname);
+
 function calculateClassNames(href, $pathname) {
   classNames = className ? [className] : [];
   if (href.indexOf($pathname) == 0) classNames = [...classNames, 'has-basepath'];
@@ -21,8 +23,6 @@ function calculateClassNames(href, $pathname) {
 function onClick(event) {
   gotoUrl(event.target.closest('a').href, {event, replace});
 }
-
-$: calculateClassNames(href, $pathname);
 </script>
 
 <a {href} on:click={onClick} class={classNames.join(' ')} style="{style}" bind:this="{el}"><slot/></a>

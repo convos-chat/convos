@@ -9,6 +9,7 @@ export let href = false;
 export let icon = 'cog';
 
 const classNames = ['sidebar__item'];
+
 if (dialog.dialog_id) classNames.push('for-dialog');
 if (dialog.connection_id) classNames.push('has-settings');
 
