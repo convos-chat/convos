@@ -1,7 +1,6 @@
 <script>
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
-import FormActions from '../components/form/FormActions.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
@@ -28,9 +27,9 @@ const user = getContext('user');
       <span slot="label">{l('Invite code')}</span>
     </TextField>
   {/if}
-    <FormActions>
+    <div class="form-actions">
       <button class="btn" op={user.register}>{l('Register')}</button>
-    </FormActions>
+    </div>
     <OperationStatus op={user.register}/>
   </form>
   <article>

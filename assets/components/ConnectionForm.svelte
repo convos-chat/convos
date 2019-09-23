@@ -5,7 +5,6 @@ import {l} from '../js/i18n';
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
-import FormActions from '../components/form/FormActions.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
@@ -112,14 +111,14 @@ async function submitForm(e) {
   <PasswordField name="password" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Password')}</span>
   </PasswordField>
-  <FormActions>
+  <div class="form-actions">
     {#if connection.url}
       <Button icon="save" op="{updateConnectionOp}">{l('Update')}</Button>
       <Button icon="trash" type="button" op="{removeConnectionOp}" on:click|preventDefault="{removeConnection}">{l('Delete')}</Button>
     {:else}
       <Button icon="save" op="{createConnectionOp}">{l('Create')}</Button>
     {/if}
-  </FormActions>
+  </div>
   <OperationStatus op="{createConnectionOp}"/>
   <OperationStatus op="{removeConnectionOp}"/>
   <OperationStatus op="{updateConnectionOp}"/>
