@@ -11,7 +11,11 @@ export let value = '';
 let inputEl;
 
 $: classNames = ['text-area', className].filter(c => c.length);
-$: if (inputEl) inputEl.value = value;
+
+$: if (inputEl && !inputEl.syncValue) {
+  inputEl.syncValue = function() { value = this.value };
+  inputEl.syncValue();
+}
 </script>
 
 <div class="{classNames.join(' ')}">
