@@ -19,6 +19,7 @@ let searchInput;
 let visibleLinks = [];
 
 $: filterNav(encodeURIComponent(filter));
+
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
 function clearFilter() {
@@ -123,18 +124,18 @@ function onSearchKeydown(e) {
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
       {#if $connections.length}
         <h3>{l('Group conversations')}</h3>
-        {#each $connections as connection}
+        {#each $connections.all() as connection}
           <SidebarItem dialog="{connection}"/>
-          {#each connection.channels as dialog}
+          {#each connection.publicDialogs as dialog}
             <SidebarItem {dialog}/>
           {/each}
         {/each}
 
         <h3>{l('Private conversations')}</h3>
-        {#each $connections as connection}
-          {#if connection.private.length}
+        {#each $connections.all() as connection}
+          {#if connection.privateDialogs.length}
             <SidebarItem dialog="{connection}"/>
-            {#each connection.private as dialog}
+            {#each connection.privateDialogs as dialog}
               <SidebarItem {dialog}/>
             {/each}
           {/if}

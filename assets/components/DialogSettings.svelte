@@ -12,7 +12,7 @@ const user = getContext('user');
 
 let formEl;
 
-$: participants = $dialog.findParticipants();
+$: participants = $dialog.participants;
 $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
 function partDialog(e) {
@@ -54,9 +54,9 @@ function updateDialogFromForm(e) {
   </form>
 
   <nav class="sidebar__nav">
-    <h3>{l('Participants (%1)', participants.length)}</h3>
-    {#if participants.length}
-      {#each participants as participant}
+    <h3>{l('Participants (%1)', $participants.length)}</h3>
+    {#if $participants.length}
+      {#each $participants.all() as participant}
         <Link href="/chat/{dialog.connection_id}/{participant.id}">{participant.mode}{participant.nick}</Link>
       {/each}
     {:else}

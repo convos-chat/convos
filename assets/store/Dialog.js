@@ -1,8 +1,9 @@
 import Reactive from '../js/Reactive';
+import ReactiveList from '../store/ReactiveList.js';
 import Time from '../js/Time';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
-import {q, sortByName, str2color} from '../js/util';
+import {q, str2color} from '../js/util';
 
 const modes = {o: '@'};
 
@@ -20,7 +21,7 @@ export default class Dialog extends Reactive {
     this._readOnlyAttr('events', params.events);
     this._readOnlyAttr('is_private', params.is_private || false);
     this._readOnlyAttr('mesagesOp', this._createMessagesOp(params));
-    this._readOnlyAttr('participants', {});
+    this._readOnlyAttr('participants', new ReactiveList());
     this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this._updateableAttr('frozen', params.frozen || '');
@@ -44,21 +45,18 @@ export default class Dialog extends Reactive {
   }
 
   findParticipants(params) {
-    const participantIds = Object.keys(this.participants).sort();
-    if (!params) return participantIds.map(id => this.participants[id]);
+    if (!params) return this.participants;
 
     const needleKeys = Object.keys(params);
     const found = [];
 
-    PARTICIPANT:
-    for (let pi = 0; pi < participantIds.length; pi++) {
-      const participant = this.participants[participantIds[pi]];
+    this.participants.map(participant => {
       for (let ni = 0; ni < needleKeys.length; ni++) {
         const needleKey = params[needleKeys[ni]];
-        if (params[needleKey] != participant[needleKey]) continue PARTICIPANT;
+        if (params[needleKey] != participant[needleKey]) return;
       }
       found.push(participant);
-    }
+    });
 
     return found;
   }
@@ -116,10 +114,19 @@ export default class Dialog extends Reactive {
 
   participant(nick, params = {}) {
     const id = this._participantId(nick);
-    if (!this.participants[id]) this.participants[id] = {id, ts: new Time()};
-    Object.keys(params).forEach(k => { this.participants[id][k] = params[k] });
-    this.participants[id].nick = nick;
-    return this.participants[id];
+    params.nick = nick;
+
+    const participant = this.participants.find(p => p.id == id);
+    if (participant) {
+      Object.keys(params).forEach(k => { participant[k] = params[k] });
+      this.participants.update({});
+    }
+    else {
+      this.participants.add({...params, id, name: nick, ts: new Time()});
+      this.participants.sort();
+    }
+
+    return participant;
   }
 
   send(message, methodName) {
@@ -144,7 +151,7 @@ export default class Dialog extends Reactive {
     this._updateParticipants(params);
 
     const msg = {message: 'Participants (%1): %2', vars: []};
-    const participants = params.participants.sort(sortByName).map(p => (modes[p.mode] || '') + p.name);
+    const participants = this.participants.map(p => (modes[p.mode] || '') + p.name);
     if (participants.length > 1) {
       msg.message += ' and %3.';
       msg.vars[2] = participants.pop();
@@ -157,18 +164,18 @@ export default class Dialog extends Reactive {
 
   wsEventNickChange(params) {
     const oldId = this._participantId(params.old_nick);
-    this.participant(params.new_nick, this.participants[oldId] || {});
-    delete this.participants[oldId];
+    const participant = this.participant(params.new_nick, this.participants.find(p => p.nick == oldId) || {});
+    if (participant.id != oldId) this.participants.remove({id: oldId});
     this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
   }
 
   wsEventPart(params) {
     const participantId = this._participantId(params.nick);
-    const participant = this.participants[participantId] || {};
+    const participant = this.participants.find(p => p.id == participantId) || {};
     this.addMessage(this._partMessage(params));
 
     if (!participant.me) {
-      delete this.participants[participantId];
+      this.participants.remove({id: participantId});
       this.update({});
     }
   }
@@ -227,7 +234,6 @@ export default class Dialog extends Reactive {
 
   _updateParticipants(params) {
     params.stopPropagation();
-    params.participants.forEach(p => this.participant(p.name, {mode: p.mode}));
-    this.update({});
+    params.participants.map(p => this.participant(p.name, {mode: p.mode}));
   }
 }

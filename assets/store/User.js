@@ -2,8 +2,7 @@ import Connection from './Connection';
 import Dialog from './Dialog';
 import Events from '../js/Events';
 import Reactive from '../js/Reactive';
-import {get, writable} from 'svelte/store';
-import {sortByName} from '../js/util';
+import ReactiveList from '../store/ReactiveList';
 
 const providers = {
   instagram: {
@@ -24,13 +23,13 @@ export default class User extends Reactive {
 
     const api = params.api;
     this._readOnlyAttr('api', () => api);
+    this._readOnlyAttr('connections', new ReactiveList());
     this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
     this._readOnlyAttr('events', this._createEvents());
 
     // Need to come after "api" and "events"
     this._readOnlyAttr('notifications', new Dialog({api, events: this.events, name: 'Notifications'}));
 
-    this._updateableAttr('connections', writable([]));
     this._updateableAttr('enableNotifications', Notification.permission);
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
@@ -61,17 +60,16 @@ export default class User extends Reactive {
 
     // Create connection
     conn = new Connection({...params, api: this.api, events: this.events});
-    conn.on('update', () => {
-      this.connections.set(this._connections().sort(sortByName));
-      this.update({}); // TODO: Figure out how to update Chat.svelte, without updating the user object
-    });
 
-    this.connections.set(this._connections().concat(conn).sort(sortByName));
+    // TODO: Figure out how to update Chat.svelte, without updating the user object
+    conn.on('update', () => this.update({}));
+
+    this.connections.add(conn).sort();
     return conn;
   }
 
   findDialog(params) {
-    if (!params.dialog_id) return this._connections().filter(conn => conn.connection_id == params.connection_id)[0];
+    if (!params.dialog_id) return this.connections.find(conn => conn.connection_id == params.connection_id);
     const conn = this.findDialog({connection_id: params.connection_id});
     return conn && conn.findDialog(params);
   }
@@ -111,7 +109,7 @@ export default class User extends Reactive {
       this.update({});
     }
     else {
-      this.connections.set(this._connections().filter(conn => conn.connection_id != params.connection_id));
+      this.connections.remove(conn => conn.connection_id != params.connection_id);
     }
   }
 
@@ -127,10 +125,6 @@ export default class User extends Reactive {
     this.wsPongTimestamp = params.ts;
   }
 
-  _connections() {
-    return get(this.connections);
-  }
-
   _createEvents() {
     const events = new Events();
 
@@ -142,7 +136,7 @@ export default class User extends Reactive {
     events.on('update', events => {
       if (events.ready) return;
       this.getUserOp.update({status: 'pending'});
-      this._connections().forEach(conn => conn.update({frozen: 'Unreachable.'}));
+      this.connections.map(conn => conn.update({frozen: 'Unreachable.'}));
     });
 
     return events;
@@ -160,7 +154,7 @@ export default class User extends Reactive {
   }
 
   _parseGetUser(body) {
-    this.connections.set([]);
+    this.connections.clear();
     if (body.notifications) this.notifications.update({messages: body.notifications}); // Need to be done before this.update()
     if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
     if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));

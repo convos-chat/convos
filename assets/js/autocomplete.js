@@ -10,7 +10,7 @@ export default function autocomplete(category, params) {
 }
 
 autocomplete.channels = ({dialog, query, user}) => {
-  const channels = user.findDialog({connection_id: dialog.connection_id}).channels;
+  const channels = user.findDialog({connection_id: dialog.connection_id}).publicDialogs;
   const opts = [];
 
   for (let i = 0; i < channels.length; i++) {

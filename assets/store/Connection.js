@@ -1,20 +1,21 @@
 import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
-import {extractErrorMessage, sortByName} from '../js/util';
+import ReactiveList from '../store/ReactiveList.js';
+import {extractErrorMessage} from '../js/util';
 
 export default class Connection extends Dialog {
   constructor(params) {
     super(params);
+
+    this._readOnlyAttr('dialogs', new ReactiveList());
+    this._readOnlyAttr('privateDialogs', () => this.dialogs.filter(d => d.is_private));
+    this._readOnlyAttr('publicDialogs', () => this.dialogs.filter(d => !d.is_private));
 
     this._updateableAttr('on_connect_commands', params.on_connect_commands || '');
     this._updateableAttr('state', params.state || 'queued');
     this._updateableAttr('wanted_state', params.wanted_state || 'connected');
     this._updateableAttr('url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
     this._updateableAttr('nick', params.nick || this.url.searchParams.get('nick') || '');
-
-    // Dialogs by category
-    this._updateableAttr('channels', []);
-    this._updateableAttr('private', []);
   }
 
   addDialog(dialogId) {
@@ -22,12 +23,8 @@ export default class Connection extends Dialog {
     this.send(isPrivate ? `/query ${dialogId}` : `/join ${dialogId}`);
   }
 
-  dialogs() {
-    return this.channels.concat(this.private);
-  }
-
   ensureDialog(params) {
-    let dialog = this.dialogs().filter(dialog => dialog.dialog_id == params.dialog_id)[0];
+    let dialog = this.dialogs.find(dialog => dialog.dialog_id == params.dialog_id);
 
     if (dialog) {
       dialog.update(params);
@@ -36,22 +33,19 @@ export default class Connection extends Dialog {
     else {
       dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
       dialog.on('message', params => this.emit('message', params));
-      const listName = dialog.is('private') ? 'private' : 'channels';
-      this.update({[listName]: this[listName].concat(dialog).sort(sortByName)});
+      this.dialogs.add(dialog).sort();
     }
 
     return dialog;
   }
 
   findDialog(params) {
-    return this.dialogs().filter(dialog => dialog.dialog_id == params.dialog_id)[0];
+    return this.dialogs.find(dialog => dialog.dialog_id == params.dialog_id);
   }
 
   removeDialog(params) {
-    return this.update({
-      channels: this.channels.filter(d => d.dialog_id != params.dialog_id),
-      private: this.private.filter(d => d.dialog_id != params.dialog_id),
-    });
+    this.dialogs.remove(d => d.dialog_id != params.dialog_id);
+    return this;
   }
 
   update(params) {
@@ -84,7 +78,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventNickChange(params) {
-    this.dialogs().forEach(dialog => dialog.wsEventNickChange(params));
+    this.dialogs.map(dialog => dialog.wsEventNickChange(params));
   }
 
   wsEventError(params) {
