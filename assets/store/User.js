@@ -136,8 +136,7 @@ export default class User extends Reactive {
     const events = new Events();
 
     events.on('message', params => {
-      const conn = this.findDialog({connection_id: params.connection_id});
-      if (conn && conn[params.dispatchTo]) conn[params.dispatchTo](params);
+      this._dispatchMessageToDialog(params);
       if (this[params.dispatchTo]) this[params.dispatchTo](params);
     });
 
@@ -146,6 +145,17 @@ export default class User extends Reactive {
     });
 
     return events;
+  }
+
+  _dispatchMessageToDialog(params) {
+    const conn = this.findDialog({connection_id: params.connection_id});
+    if (!conn) return;
+    if (conn[params.dispatchTo]) conn[params.dispatchTo](params);
+    if (!params.bubbles) return;
+
+    const dialog = conn.findDialog(params);
+    if (!dialog) return;
+    if (dialog[params.dispatchTo]) dialog[params.dispatchTo](params);
   }
 
   _parseGetUser(body) {

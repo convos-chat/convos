@@ -83,10 +83,6 @@ export default class Connection extends Dialog {
     return params.dialog_id ? this.ensureDialog(params).addMessage(params) : this.addMessage(params);
   }
 
-  wsEventMode(params) {
-    if (params.nick) this._forwardEventToDialog('wsEventMode', params);
-  }
-
   wsEventNickChange(params) {
     this.dialogs().forEach(dialog => dialog.wsEventNickChange(params));
   }
@@ -99,12 +95,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventPart(params) {
-    this._forwardEventToDialog('wsEventPart', params);
     if (params.nick == this.nick) this.removeDialog(params);
-  }
-
-  wsEventParticipants(params) {
-    this._forwardEventToDialog('wsEventParticipants', params);
   }
 
   wsEventQuit(params) {
@@ -128,10 +119,5 @@ export default class Connection extends Dialog {
       ? {message: 'Topic is: %1', vars: [params.topic]}
       : {message: 'No topic is set.', vars: []}
     );
-  }
-
-  _forwardEventToDialog(method, params) {
-    const dialog = this.findDialog(params);
-    if (dialog) dialog[method](params);
   }
 }

@@ -128,23 +128,7 @@ export default class Dialog extends Reactive {
     this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
   }
 
-  wsEventNickChange(params) {
-    if (!this.participants[params.old_nick]) return;
-    this.participant(params.new_nick, this.participants[params.old_nick] || {});
-    this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
-  }
-
-  wsEventPart(params) {
-    const participant = this.participants[params.nick] || {};
-    this.addMessage(this._partMessage(params));
-
-    if (!participant.me) {
-      delete this.participants[params.nick];
-      this.update({});
-    }
-  }
-
-  wsEventParticipants(params) {
+  wsEventSentNames(params) {
     const msg = {message: 'Participants: %1', vars: []};
 
     const participants = params.participants.sort(sortByName).map(p => {
@@ -159,6 +143,22 @@ export default class Dialog extends Reactive {
 
     msg.vars[0] = participants.join(', ');
     this.addMessage(msg);
+  }
+
+  wsEventNickChange(params) {
+    if (!this.participants[params.old_nick]) return;
+    this.participant(params.new_nick, this.participants[params.old_nick] || {});
+    this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
+  }
+
+  wsEventPart(params) {
+    const participant = this.participants[params.nick] || {};
+    this.addMessage(this._partMessage(params));
+
+    if (!participant.me) {
+      delete this.participants[params.nick];
+      this.update({});
+    }
   }
 
   _partMessage(params) {

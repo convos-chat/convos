@@ -6,8 +6,8 @@ let msgId = 0;
 export default class Events extends Reactive {
   constructor() {
     super();
-    this._cb = {}; // Add logic to clean up old callbacks
     this.debug = 0;
+    this.waiting = {}; // Add logic to clean up old callbacks
     this._readOnlyAttr('wsUrl', Convos.wsUrl); // TODO: Should probably be input parameter
     this._updateableAttr('state', 'pending');
   }
@@ -16,15 +16,12 @@ export default class Events extends Reactive {
     const dispatchTo = camelize('wsEvent_' + this._getEventNameFromParamw(params));
     if (this.debug) this._debug(dispatchTo, params);
 
-    const cb = this._cb[params.id || ''];
+    params.bubbles = true;
+    params.stopPropagation = () => { params.bubbles = false };
+
+    const cb = this.waiting[params.id];
     if (cb) cb(params);
-
-    this.emit('message', {...params, dispatchTo});
-
-    // Make sure we update participants list
-    if (params.participants && dispatchTo != 'wsEventParticipants') {
-      this.emit('message', {...params, dispatchTo: 'wsEventParticipants'});
-    }
+    if (params.bubbles) this.emit('message', {...params, dispatchTo});
   }
 
   async send(msg, cb) {
@@ -34,7 +31,7 @@ export default class Events extends Reactive {
     if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] || '' });
     delete msg.dialog;
     if (this.debug) this._debug('send', msg);
-    if (cb) this._cb[msg.id] = cb;
+    if (cb) this.waiting[msg.id] = cb;
     ws.send(JSON.stringify(msg));
   }
 
