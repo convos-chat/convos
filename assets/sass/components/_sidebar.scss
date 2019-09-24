@@ -12,6 +12,10 @@ $sidebar-item-icon-width: 1.8rem;
     color: var(--sidebar-text);
     text-decoration: none;
   }
+
+  > :last-child {
+    padding-bottom: 8rem;
+  }
 }
 
 .sidebar {

@@ -35,6 +35,8 @@ export default class Dialog extends Reactive {
       this._readOnlyAttr('dialog_id', params.dialog_id);
       Object.defineProperty(this, 'state', {get: () => this._reactive.frozen});
     }
+
+    this.events.on('update', this._loadParticipants.bind(this));
   }
 
   addMessage(msg) {
@@ -43,6 +45,8 @@ export default class Dialog extends Reactive {
 
   findParticipants(params) {
     const participantIds = Object.keys(this.participants).sort();
+    if (!params) return participantIds.map(id => this.participants[id]);
+
     const needleKeys = Object.keys(params);
     const found = [];
 
@@ -110,14 +114,19 @@ export default class Dialog extends Reactive {
     this.update({messages: messages.concat(this.messages)});
   }
 
-  participant(id, params = {}) {
-    if (!this.participants[id]) this.participants[id] = {ts: new Time()};
+  participant(nick, params = {}) {
+    const id = this._participantId(nick);
+    if (!this.participants[id]) this.participants[id] = {id, ts: new Time()};
     Object.keys(params).forEach(k => { this.participants[id][k] = params[k] });
+    this.participants[id].nick = nick;
     return this.participants[id];
   }
 
-  send(message) {
-    this.events.send({connection_id: this.connection_id, dialog_id: this.dialog_id || '', message});
+  send(message, methodName) {
+    this.events.send(
+      {connection_id: this.connection_id, dialog_id: this.dialog_id || '', message},
+      methodName ? this[methodName].bind(this) : null,
+    );
   }
 
   update(params) {
@@ -132,34 +141,34 @@ export default class Dialog extends Reactive {
   }
 
   wsEventSentNames(params) {
-    const msg = {message: 'Participants: %1', vars: []};
+    this._updateParticipants(params);
 
-    const participants = params.participants.sort(sortByName).map(p => {
-      this.participant(p.name, p);
-      return (modes[p.mode] || '') + p.name;
-    });
-
+    const msg = {message: 'Participants (%1): %2', vars: []};
+    const participants = params.participants.sort(sortByName).map(p => (modes[p.mode] || '') + p.name);
     if (participants.length > 1) {
-      msg.message += ' and %2.';
-      msg.vars[1] = participants.pop();
+      msg.message += ' and %3.';
+      msg.vars[2] = participants.pop();
     }
 
-    msg.vars[0] = participants.join(', ');
+    msg.vars[0] = participants.length;
+    msg.vars[1] = participants.join(', ');
     this.addMessage(msg);
   }
 
   wsEventNickChange(params) {
-    if (!this.participants[params.old_nick]) return;
-    this.participant(params.new_nick, this.participants[params.old_nick] || {});
+    const oldId = this._participantId(params.old_nick);
+    this.participant(params.new_nick, this.participants[oldId] || {});
+    delete this.participants[oldId];
     this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
   }
 
   wsEventPart(params) {
-    const participant = this.participants[params.nick] || {};
+    const participantId = this._participantId(params.nick);
+    const participant = this.participants[participantId] || {};
     this.addMessage(this._partMessage(params));
 
     if (!participant.me) {
-      delete this.participants[params.nick];
+      delete this.participants[participantId];
       this.update({});
     }
   }
@@ -168,6 +177,17 @@ export default class Dialog extends Reactive {
     if (params.dialog_id) return params.api.operation('dialogMessages');
     if (params.connection_id) return params.api.operation('connectionMessages');
     return null;
+  }
+
+  _loadParticipants() {
+    if (!this.mesagesOp || !this.mesagesOp.is('success')) return;
+    if (!this.events.ready || this._participantsLoaded) return;
+    if (this.dialog_id && !this.is('private') && !this.is('frozen')) this.send('/names', '_updateParticipants');
+    this._participantsLoaded = true;
+  }
+
+  _participantId(name) {
+    return name.toLowerCase();
   }
 
   _partMessage(params) {
@@ -203,5 +223,11 @@ export default class Dialog extends Reactive {
         return {url: url.replace(/([.!?])?$/, '')};
       });
     }
+  }
+
+  _updateParticipants(params) {
+    params.stopPropagation();
+    params.participants.forEach(p => this.participant(p.name, {mode: p.mode}));
+    this.update({});
   }
 }
