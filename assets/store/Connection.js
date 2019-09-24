@@ -36,7 +36,7 @@ export default class Connection extends Dialog {
     else {
       dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
       dialog.on('message', params => this.emit('message', params));
-      const listName = dialog.is_private ? 'private' : 'channels';
+      const listName = dialog.is('private') ? 'private' : 'channels';
       this.update({[listName]: this[listName].concat(dialog).sort(sortByName)});
     }
 

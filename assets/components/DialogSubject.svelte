@@ -13,7 +13,7 @@ export let dialog = {};
   {@html md(dialog.topic)}
 {:else if dialog.state == 'disconnected'}
   {l('Disconnected.')}
-{:else if dialog.is_private}
+{:else if dialog.is('private')}
   {l('Private conversation.')}
 {:else if dialog.dialog_id}
   {l('No topic is set.')}

@@ -64,6 +64,13 @@ export default class Dialog extends Reactive {
     return found;
   }
 
+  is(status) {
+    if (status == 'frozen') return this.frozen && true;
+    if (status == 'private') return this.is_private;
+    if (status == 'unread') return this.unread && true;
+    return this.mesagesOp && this.mesagesOp.is(status);
+  }
+
   async load() {
     if (!this.op || this.loaded) return;
     await this.op.perform(this);
