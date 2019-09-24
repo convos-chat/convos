@@ -14,7 +14,7 @@ const user = getContext('user');
 
 <main class="main align-content-middle">
   <h1>{l('Log in')}</h1>
-  <form method="post" on:submit|preventDefault="{e => user.login.perform(e.target)}">
+  <form method="post" on:submit|preventDefault="{e => user.loginOp.perform(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>
@@ -22,9 +22,9 @@ const user = getContext('user');
       <span slot="label">{l('Password')}</span>
     </PasswordField>
     <div class="form-actions">
-      <button class="btn" op="{user.login}">{l('Log in')}</button>
+      <button class="btn" op="{user.loginOp}">{l('Log in')}</button>
     </div>
-    <OperationStatus op="{user.login}"/>
+    <OperationStatus op="{user.loginOp}"/>
   </form>
   <article>
     <p>{l('Welcome message. Vivamus congue mauris eu aliquet pharetra. Nulla sit amet dictum.')}</p>

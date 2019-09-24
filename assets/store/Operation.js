@@ -29,15 +29,18 @@ export default class Operation extends Reactive {
     }
   }
 
-  async perform(params) {
-    const opSpec = await this.api.spec(this.id);
-    if (!opSpec) return this.error('Invalid operationId "' + this.id + '".');
+  perform(params) {
+    // this._promise is used as a locking mechanism so you can only call perform() once
+    return this._promise || (this._promise = new Promise(async (resolve) => {
+      const opSpec = await this.api.spec(this.id);
+      if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".'));
 
-    this.update({status: 'loading'});
-    const [url, req] = await this._paramsToRequest(opSpec, params || this.defaultParams);
-    const res = await fetch(url, req);
-
-    return this.parse(res, await res.json());
+      this.update({status: 'loading'});
+      const [url, req] = await this._paramsToRequest(opSpec, params || this.defaultParams);
+      const res = await fetch(url, req);
+      delete this._promise;
+      resolve(this.parse(res, await res.json()));
+    }));
   }
 
   is(status) {

@@ -74,6 +74,6 @@ function updateUserFromForm(e) {
       <Button icon="save" op="{updateUserOp}">{l('Save settings')}</Button>
     </div>
 
-    <OperationStatus op={updateUserOp}/>
+    <OperationStatus op="{updateUserOp}"/>
   </form>
 </main>
