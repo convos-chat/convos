@@ -15,7 +15,7 @@ const user = getContext('user');
 
 <main class="main align-content-middle">
   <h1>{l('Create account')}</h1>
-  <form method="post" on:submit|preventDefault="{e => user.register.perform(e.target)}">
+  <form method="post" on:submit|preventDefault="{e => user.registerOp.perform(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>
@@ -28,9 +28,9 @@ const user = getContext('user');
     </TextField>
   {/if}
     <div class="form-actions">
-      <button class="btn" op={user.register}>{l('Register')}</button>
+      <button class="btn" op="{user.registerOp}">{l('Register')}</button>
     </div>
-    <OperationStatus op={user.register}/>
+    <OperationStatus op="{user.registerOp}"/>
   </form>
   <article>
     <p>{l('By creating an account, you agree to the use of cookies.')}</p>

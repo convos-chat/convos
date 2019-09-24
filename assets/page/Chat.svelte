@@ -107,7 +107,7 @@ const onScroll = debounce(e => {
     {:else}
       <h1>
         {l('Notifications')}
-        <a href="#clear:notifications" on:click|preventDefault="{e => user.readNotifications.perform()}">
+        <a href="#clear:notifications" on:click|preventDefault="{e => user.readNotificationsOp.perform()}">
           ({dialog.unread})
         </a>
       </h1>

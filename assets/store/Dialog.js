@@ -10,10 +10,6 @@ export default class Dialog extends Reactive {
   constructor(params) {
     super();
 
-    const op = params.dialog_id     ? params.api.operation('dialogMessages')
-             : params.connection_id ? params.api.operation('connectionMessages')
-             : null;
-
     const now = new Time().toISOString();
     const path = [];
     if (params.connection_id) path.push(params.connection_id);
@@ -23,14 +19,13 @@ export default class Dialog extends Reactive {
     this._readOnlyAttr('connection_id', params.connection_id || '');
     this._readOnlyAttr('events', params.events);
     this._readOnlyAttr('is_private', params.is_private || false);
-    this._readOnlyAttr('op', op);
+    this._readOnlyAttr('mesagesOp', this._createMessagesOp(params));
     this._readOnlyAttr('participants', {});
     this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this._updateableAttr('frozen', params.frozen || '');
     this._updateableAttr('last_active', params.last_active || now);
     this._updateableAttr('last_read', params.last_read || now);
-    this._updateableAttr('loaded', false);
     this._updateableAttr('messages', []);
     this._updateableAttr('name', params.name || 'Unknown');
     this._updateableAttr('topic', params.topic || '');
@@ -72,9 +67,10 @@ export default class Dialog extends Reactive {
   }
 
   async load() {
-    if (!this.op || this.loaded) return;
-    await this.op.perform(this);
-    this.update({loaded: true, messages: this.op.res.body.messages || []});
+    if (!this.mesagesOp || this.mesagesOp.is('success')) return this;
+    await this.mesagesOp.perform(this);
+    this._loadParticipants();
+    return this.update({messages: this.mesagesOp.res.body.messages || []});
   }
 
   async loadEmbeds(message) {
@@ -103,13 +99,13 @@ export default class Dialog extends Reactive {
     const first = this.messages[0];
     if (!first || first.end) return;
 
-    await this.op.perform({
+    await this.mesagesOp.perform({
       before: first.ts,
       connection_id: this.connection_id,
       dialog_id: this.dialog_id,
     });
 
-    const messages = this.op.res.body.messages || [];
+    const messages = this.mesagesOp.res.body.messages || [];
     if (!messages.length && this.messages.length) this.messages[0].endOfHistory = true;
     this.update({messages: messages.concat(this.messages)});
   }
@@ -166,6 +162,12 @@ export default class Dialog extends Reactive {
       delete this.participants[params.nick];
       this.update({});
     }
+  }
+
+  _createMessagesOp(params) {
+    if (params.dialog_id) return params.api.operation('dialogMessages');
+    if (params.connection_id) return params.api.operation('connectionMessages');
+    return null;
   }
 
   _partMessage(params) {

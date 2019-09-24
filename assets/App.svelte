@@ -28,22 +28,22 @@ const Convos = window.Convos || {};
 const api = new Api(Convos.apiUrl, {debug: true});
 const user = new User({api});
 const connections = user.connections;
-const login = user.login;
-const logout = user.logout;
+const loginOp = user.loginOp;
+const logoutOp = user.logoutOp;
 
 setContext('user', user);
 
 $: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
 $: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname);
 
-$: if ($login.is('success')) {
-  document.cookie = $user.login.res.headers['Set-Cookie'];
-  user.login.reset();
+$: if ($loginOp.is('success')) {
+  document.cookie = loginOp.res.headers['Set-Cookie'];
+  loginOp.reset();
   user.load().then(gotoDefaultPage);
 }
 
-$: if ($logout.is('success')) {
-  user.logout.reset();
+$: if ($logoutOp.is('success')) {
+  logoutOp.reset();
   user.reset();
   gotoUrl('/');
 }

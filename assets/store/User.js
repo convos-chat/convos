@@ -22,13 +22,13 @@ export default class User extends Reactive {
   constructor(params) {
     super();
 
-    this._readOnlyAttr('api', () => this.op.api);
-    this._readOnlyAttr('email', () => this.op.res.body.email || '');
-    this._readOnlyAttr('op', params.api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
+    const api = params.api;
+    this._readOnlyAttr('api', () => api);
+    this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
     this._readOnlyAttr('events', this._createEvents());
 
     // Need to come after "api" and "events"
-    this._readOnlyAttr('notifications', new Dialog({api: this.api, events: this.events, name: 'Notifications'}));
+    this._readOnlyAttr('notifications', new Dialog({api, events: this.events, name: 'Notifications'}));
 
     this._updateableAttr('connections', writable([]));
     this._updateableAttr('enableNotifications', Notification.permission);
@@ -37,10 +37,11 @@ export default class User extends Reactive {
 
     // Add operations that will affect the "User" object
     // TODO: Make operations bubble into the User object. Require changes in App.svelte
-    this._readOnlyAttr('login', this.api.operation('loginUser'));
-    this._readOnlyAttr('logout', this.api.operation('logoutUser'));
-    this._readOnlyAttr('readNotifications', this.api.operation('readNotifications'));
-    this._readOnlyAttr('register', this.api.operation('registerUser'));
+    this._readOnlyAttr('getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
+    this._readOnlyAttr('loginOp', api.operation('loginUser'));
+    this._readOnlyAttr('logoutOp', api.operation('logoutUser'));
+    this._readOnlyAttr('readNotificationsOp', api.operation('readNotifications'));
+    this._readOnlyAttr('registerOp', api.operation('registerUser'));
   }
 
   ensureDialog(params) {
@@ -85,11 +86,9 @@ export default class User extends Reactive {
   }
 
   async load() {
-    if (this.is('loading')) await this.on('loaded');
-    if (this.is('success')) return this;
-    this.update({status: 'loading'});
-    await this.op.perform();
-    this._parseGetUser(this.op.res.body);
+    if (this.getUserOp.is('success')) return this;
+    await this.getUserOp.perform();
+    this._parseGetUser(this.getUserOp.res.body);
     if (this.email) await this.send({method: 'ping'});
     return this;
   }
@@ -141,7 +140,9 @@ export default class User extends Reactive {
     });
 
     events.on('update', events => {
-      if (events.state == 'closed') this._connections().forEach(conn => conn.update({frozen: 'Unreachable.'}));
+      if (events.ready) return;
+      this.getUserOp.update({status: 'pending'});
+      this._connections().forEach(conn => conn.update({frozen: 'Unreachable.'}));
     });
 
     return events;
@@ -159,6 +160,7 @@ export default class User extends Reactive {
   }
 
   _parseGetUser(body) {
+    this.connections.set([]);
     if (body.notifications) this.notifications.update({messages: body.notifications}); // Need to be done before this.update()
     if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
     if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
