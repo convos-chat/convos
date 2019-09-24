@@ -24,7 +24,7 @@ $: connection = $user.findDialog({connection_id: $pathParts[1]});
 $: currentNick = connection ? connection.nick : user.email;
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
 $: hasValidPath = $pathParts.slice(1).join('/') == decodeURIComponent(dialog.path);
-$: isLoading = dialog.op && dialog.is('loading') || false;
+$: isLoading = dialog.is('loading');
 $: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: messages = hasValidPath ? $dialog.messages : [];
 $: settingsComponent = $currentUrl.hash != '#settings' || !hasValidPath ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
@@ -127,7 +127,7 @@ const onScroll = debounce(e => {
     <h2>{l('You are not part of this conversation.')}</h2>
     <p>Do you want to add the conversation?</p>
     <p>
-      <a href="#add:{$pathParts[2]}" on:click={addDialog} class="btn">Yes</a>
+      <a href="#add:{$pathParts[2]}" on:click="{addDialog}" class="btn">Yes</a>
       <Link href="/chat" className="btn">{l('No')}</Link>
     </p>
   {:else if $pathParts[1] && !connection}

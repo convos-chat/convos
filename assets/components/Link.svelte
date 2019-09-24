@@ -25,4 +25,4 @@ function onClick(event) {
 }
 </script>
 
-<a {href} on:click={onClick} class={classNames.join(' ')} style="{style}" bind:this="{el}"><slot/></a>
+<a {href} on:click="{onClick}" class="{classNames.join(' ')}" style="{style}" bind:this="{el}"><slot/></a>

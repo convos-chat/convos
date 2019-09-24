@@ -15,7 +15,7 @@ if (dialog.connection_id) classNames.push('has-settings');
 
 $: settingsIcon = !dialog.connection_id ? null
                 : !dialog.dialog_id     ? 'network-wired'
-                : dialog.is_private     ? 'user'
+                : dialog.is('private')  ? 'user'
                 :                         'user-friends';
 </script>
 

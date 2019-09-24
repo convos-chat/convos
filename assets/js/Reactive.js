@@ -8,10 +8,6 @@ export default class Reactive {
     this._on[event].forEach(cb => cb(params));
   }
 
-  is(status) {
-    return this.op && this.op.is(status);
-  }
-
   on(event, cb) {
     const p = cb ? null : new Promise(resolve => { cb = resolve });
     const unsubscribe = () => this._on[event].filter(i => (i != cb));
