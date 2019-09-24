@@ -9,11 +9,11 @@ export default class Events extends Reactive {
     this.debug = 0;
     this.waiting = {}; // Add logic to clean up old callbacks
     this._readOnlyAttr('wsUrl', Convos.wsUrl); // TODO: Should probably be input parameter
-    this._updateableAttr('state', 'pending');
+    this._updateableAttr('ready', false);
   }
 
   dispatch(params) {
-    const dispatchTo = camelize('wsEvent_' + this._getEventNameFromParamw(params));
+    const dispatchTo = camelize('wsEvent_' + this._getEventNameFromParam(params));
     if (this.debug) this._debug(dispatchTo, params);
 
     params.bubbles = true;
@@ -44,7 +44,7 @@ export default class Events extends Reactive {
     }
   }
 
-  _getEventNameFromParamw(params) {
+  _getEventNameFromParam(params) {
     if (params.errors) return 'error';
     if (params.event == 'state') return params.type;
 
@@ -77,13 +77,13 @@ export default class Events extends Reactive {
     const p = new Promise((resolve, reject) => {
       ws.onopen = () => {
         if (![handled, (handled = true)][0]) resolve((this.ws = ws));
-        //this.update({state: 'open'});
+        this.update({ready: true});
       };
 
       ws.onclose = (e) => {
         delete this._wsPromise;
         this._wsReconnectTid = setTimeout(() => this._ws(), 20000);
-        //this.update({state: 'closed'});
+        this.update({ready: false});
         if (![handled, (handled = true)][0]) reject(e);
       };
 
