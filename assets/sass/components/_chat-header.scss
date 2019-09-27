@@ -1,14 +1,16 @@
-.header {
+.chat-header {
   background: var(--body-bg);
   border-bottom: 1px solid #aaa;
   box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
-  padding: 0 var(--gutter);
   padding-top: var(--gutter);
   margin-bottom: var(--gutter);
   overflow: hidden;
   position: relative;
   display: flex;
   align-items: baseline;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 
   @include if_screen("<=full") {
     padding-top: 0.2rem;
@@ -47,7 +49,7 @@
   }
 }
 
-.header__hamburger {
+.chat-header__hamburger {
   color: inherit;
   font-size: 1.4rem;
   position: absolute;
@@ -59,12 +61,12 @@
   }
 }
 
-.header__hamburger {
+.chat-header__hamburger {
   display: none;
 }
 
 @include if_screen("<=full") {
-  .header__hamburger {
+  .chat-header__hamburger {
     display: block;
     top: 0.7rem;
   }

@@ -40,7 +40,7 @@ $: if (lastHeight && lastHeight < height) {
 
 onMount(() => {
   // Clean up any embeds added from a previous chat
-  q(document, '.message_embed', embedEl => embedEl.remove());
+  q(document, '.message__embed', embedEl => embedEl.remove());
 });
 
 afterUpdate(() => {
@@ -62,7 +62,7 @@ function observed(entries, observer) {
     const tsClass = 'has-ts-' + message.dt.toEpoch();
     await $dialog.loadEmbeds(message);
 
-    q(target, '.message_embed', embedEl => {
+    q(target, '.message__embed', embedEl => {
       if (!embedEl.classList.contains(tsClass)) embedEl.remove();
     });
 
@@ -140,14 +140,14 @@ const onScroll = debounce(e => {
   {/if}
 
   {#if isLoading && scrollPos == 'top'}
-    <div class="status-line for-loading"><span>{l('Loading messages...')}</span></div>
+    <div class="message-status-line for-loading"><span>{l('Loading messages...')}</span></div>
   {/if}
 
   {#each messages as message, i}
     {#if message.endOfHistory}
-      <div class="status-line for-end-of-history"><span>{l('End of history')}</span></div>
+      <div class="message-status-line for-end-of-history"><span>{l('End of history')}</span></div>
     {:else if message.dayChanged}
-      <div class="status-line for-day-changed"><span>{l('Day changed')}</span></div>
+      <div class="message-status-line for-day-changed"><span>{l('Day changed')}</span></div>
     {/if}
 
     <div class="message is-type-{message.type || 'notice'}"
@@ -158,17 +158,13 @@ const onScroll = debounce(e => {
       data-index="{i}">
 
       <Icon name="{message.from == currentNick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
-      <b class="ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
-      <Link className="message_from" href="/chat/{$pathParts[1]}/{message.from}" style="color:{message.color}">{message.from}</Link>
-      <div class="message_text">{@html message.markdown}</div>
+      <b class="message__ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
+      <Link className="message__from" href="/chat/{$pathParts[1]}/{message.from}" style="color:{message.color}">{message.from}</Link>
+      <div class="message__text">{@html message.markdown}</div>
     </div>
   {/each}
 
-  {#if isLoading && scrollPos != 'top'}
-    <div class="status-line for-loading"><span>{l('Loading messages...')}</span></div>
+  {#if dialog.connection_id}
+    <ChatInput dialog="{dialog}"/>
   {/if}
 </main>
-
-{#if dialog.connection_id}
-<ChatInput dialog="{dialog}"/>
-{/if}

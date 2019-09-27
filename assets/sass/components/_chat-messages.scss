@@ -1,0 +1,155 @@
+.messages-container {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.message {
+  position: relative;
+  padding: 4px 2px;
+
+  &:hover {
+    background: var(--body-bg);
+    filter: brightness(0.97);
+  }
+
+  > i {
+    font-size: 1.2rem;
+  }
+
+  .emojione {
+    height: 1.5rem;
+    vertical-align: bottom;
+  }
+
+  &.is-hightlighted .message__text {
+    background-color: var(--highlight-color);
+    border: 3px solid var(--highlight-color);
+    margin: 0 -3px;
+  }
+
+  &.has-same-from {
+    .message__from {
+      display: none;
+    }
+
+    .message__ts {
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    &:hover .message__ts {
+      opacity: 0.8;
+    }
+  }
+
+  &.is-type-action {
+    .message__from,
+    .message__text {
+      font-size: 1rem;
+      font-style: italic;
+    }
+
+    .message__from {
+      margin-right: 0.2em;
+      float: left;
+      display: block;
+
+      &:before {
+        content: '✦';
+        margin-right: 0.3em;
+      }
+    }
+  }
+
+  &.has-same-from,
+  &.is-type-action {
+    i {
+      display: none;
+    }
+  }
+
+  &.has-not-same-from {
+    margin-top: 0.5rem;
+  }
+}
+
+.message blockquote {
+  quotes: "\201C" "\201D";
+  font-style: italic;
+  margin: 0;
+  padding: 0.4em 0.4em 0.1em 1.1em;
+  position: relative;
+
+  &:before {
+    color: #ccc;
+    content: open-quote;
+    font-size: 3em;
+    position: absolute;
+    top: 0.1rem;
+    left: -0.3rem;
+  }
+}
+
+.message__embed {
+  text-decoration: none;
+  margin-top: 0.8rem;
+
+  > a {
+    display: inline-block;
+
+    &:hover {
+      filter: brightness(0.97);
+    }
+  }
+}
+
+.message__from {
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.message__text {
+  overflow-wrap: break-word;
+
+  a {
+    color: var(--text-color);
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.message__ts {
+  color: var(--ts-color);
+  font-size: var(--ts-font-size);
+  font-weight: normal;
+  padding: 0.1rem;
+  float: right;
+}
+
+.message-status-line {
+  font-size: 0.8rem;
+  text-align: center;
+  border-bottom: var(--hr-border);
+  margin: 0 0 0.8rem 0;
+  height: 0.8rem;
+
+  span {
+    background: var(--body-bg);
+    padding: 0 var(--gutter);
+    filter: brightness(1.2);
+    position: relative;
+    top: 0.3rem;
+  }
+
+  &.for-end-of-history {
+    color: var(--error-color);
+  }
+
+  &.for-loading {
+    color: var(--success);
+  }
+}
