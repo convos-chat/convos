@@ -16,8 +16,8 @@ function toggleMenu() {
 }
 </script>
 
-<header class="header">
+<header class="chat-header">
   <slot/>
-  <a href="#toggle:menu" class="header__hamburger" on:click|preventDefault="{toggleMenu}"><Icon name="bars"/></a>
+  <a href="#toggle:menu" class="chat-header__hamburger" on:click|preventDefault="{toggleMenu}"><Icon name="bars"/></a>
 </header>
 

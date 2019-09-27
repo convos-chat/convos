@@ -92,12 +92,12 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
         {/if}
       </p>
 
-      <div class="dialog-list">
+      <div class="dialog-add-list">
         {#each availableDialogs.dialogs as dialog}
           <a href="#add:{dialog.name}" on:click|preventDefault="{addDialog}">
-            <span class="dialog-list__n-users">{dialog.n_users}</span>
-            <b class="dialog-list__name">{dialog.name}</b>
-            <i class="dialog-list__title">{dialog.topic || 'No topic.'}</i>
+            <span class="dialog-add-list__n-users">{dialog.n_users}</span>
+            <b class="dialog-add-list__name">{dialog.name}</b>
+            <i class="dialog-add-list__title">{dialog.topic || 'No topic.'}</i>
           </a>
         {/each}
       </div>

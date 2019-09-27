@@ -10,57 +10,13 @@ body.no-js .if-js {
 }
 
 .main {
-  padding: 0 var(--gutter) calc(var(--gutter) * 2) var(--gutter);
-}
-
-.header {
-  margin-left: calc(var(--gutter) * -1);
-  margin-right: calc(var(--gutter) * -1);
-}
-
-.sidebar-wrapper {
-  width: var(--sidebar-width);
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 2;
-}
-
-.chat-input,
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.chat-input {
-  top: auto;
-  bottom: 0;
+  padding: 0 var(--gutter);
+  max-width: $breakpoint-max-width;
 }
 
 @include if_screen(">full") {
-  .chat-input,
   .main {
-    margin-left: calc(var(--sidebar-width) + var(--gutter));
-    margin-right: var(--gutter);
-    max-width: $breakpoint-max-width;
-  }
-}
-
-@include if_screen("<=full") {
-  .sidebar-wrapper {
-    display: none;
-    right: 0;
-    left: auto;
-
-    .sidebar__header {
-      display: none;
-    }
-
-    &.is-visible {
-      top: 2.6rem; // TODO: Should be a dynamic value
-      display: block;
-    }
+    padding: 0 calc(var(--gutter) * 2);
+    margin-left: var(--sidebar-width);
   }
 }

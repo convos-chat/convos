@@ -4,8 +4,14 @@ $sidebar-item-icon-width: 1.8rem;
 
 .sidebar-wrapper {
   background: var(--sidebar-bg);
-  padding: 0 var(--gutter) 6rem var(--gutter);
+  padding: 0 var(--gutter);
+  width: var(--sidebar-width);
   overflow: auto;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
   -webkit-overflow-scrolling: touch;
 
   &, a {
@@ -15,6 +21,25 @@ $sidebar-item-icon-width: 1.8rem;
 
   > :last-child {
     padding-bottom: 8rem;
+  }
+
+  @include if_screen(">full") {
+    padding-right: calc(var(--gutter) * 2);
+  }
+
+  @include if_screen("<=full") {
+    display: none;
+    right: 0;
+    left: auto;
+
+    .sidebar__header {
+      display: none;
+    }
+
+    &.is-visible {
+      top: 2.6rem; // TODO: Should be a dynamic value
+      display: block;
+    }
   }
 }
 

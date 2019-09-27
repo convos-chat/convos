@@ -90,7 +90,7 @@ export default class Dialog extends Reactive {
       if (!html.match(/<a.*href/)) html = `<a href="${embed.url}">${html}</a>`;
 
       embed.el = document.createElement('div');
-      embed.el.className = 'message_embed';
+      embed.el.className = 'message__embed';
       embed.el.innerHTML = html;
       embed.provider = (embed.op.res.body.provider_name || '').toLowerCase();
       delete embed.op;
