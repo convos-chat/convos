@@ -15,8 +15,7 @@ import SidebarChat from '../components/SidebarChat.svelte';
 const user = getContext('user');
 const w = window;
 
-let height = 0;
-let lastHeight = 0;
+let messagesEl;
 let observer;
 let scrollPos = 'bottom';
 
@@ -31,13 +30,6 @@ $: settingsComponent = $currentUrl.hash != '#settings' || !hasValidPath ? null :
 
 $: if (dialog.connection_id) dialog.load();
 
-$: if (scrollPos == 'bottom') w.scrollTo(0, height);
-
-$: if (lastHeight && lastHeight < height) {
-  w.scrollTo(0, height - lastHeight);
-  lastHeight = 0;
-}
-
 onMount(() => {
   // Clean up any embeds added from a previous chat
   q(document, '.message__embed', embedEl => embedEl.remove());
@@ -46,6 +38,7 @@ onMount(() => {
 afterUpdate(() => {
   observer = observer || new IntersectionObserver(observed, {rootMargin: '0px'});
   q(document, '.message', messageEl => observer.observe(messageEl));
+  if (scrollPos == 'bottom') messagesEl.scrollTop = messagesEl.scrollHeight;
 });
 
 function addDialog(e) {
@@ -76,30 +69,25 @@ function observed(entries, observer) {
 }
 
 const onScroll = debounce(e => {
-  const windowH = w.innerHeight;
-  const scrollY = w.scrollY;
+  const offsetHeight = messagesEl.offsetHeight;
+  const scrollHeight = messagesEl.scrollHeight;
+  const scrollTop = messagesEl.scrollTop;
   const last = scrollPos;
 
-  scrollPos = windowH > height || scrollY + 20 > height - windowH ? 'bottom'
-            : scrollY < 100 ? 'top'
+  scrollPos = offsetHeight > scrollHeight || scrollTop + 20 > scrollHeight - offsetHeight ? 'bottom'
+            : scrollTop < 100 ? 'top'
             : 'middle';
 
   if (scrollPos == last || !dialog.dialog_id) return;
-
-  if (scrollPos == 'top' && !isLoading) {
-    lastHeight = height;
-    dialog.loadHistoric();
-  }
+  if (scrollPos == 'top' && !isLoading) dialog.loadHistoric();
 }, 20);
 </script>
-
-<svelte:window on:scroll="{onScroll}"/>
 
 <SidebarChat/>
 
 <svelte:component dialog="{dialog}" this="{settingsComponent}"/>
 
-<main class="main messages-container" bind:offsetHeight="{height}">
+<main class="main messages-container" bind:this="{messagesEl}" on:scroll="{onScroll}">
   <ChatHeader>
     {#if $pathParts[1]}
       <h1>{$pathParts[2] || $pathParts[1]}</h1>
