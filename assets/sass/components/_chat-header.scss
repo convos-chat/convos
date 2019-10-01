@@ -12,11 +12,6 @@
   top: 0;
   z-index: 2;
 
-  @include if_screen("<=full") {
-    padding-top: 0.2rem;
-    padding-bottom: 0.2rem;
-  }
-
   h1 {
     margin: 0;
     white-space: pre;
@@ -46,6 +41,9 @@
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
     border-bottom: 0;
+    padding: 0.2rem var(--gutter);
+    margin-left: calc(-1 * var(--gutter));
+    margin-right: calc(-1 * var(--gutter));
   }
 }
 
@@ -63,10 +61,8 @@
 
 .chat-header__hamburger {
   display: none;
-}
 
-@include if_screen("<=full") {
-  .chat-header__hamburger {
+  @include if_screen("<=full") {
     display: block;
     top: 0.7rem;
   }
