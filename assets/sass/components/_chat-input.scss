@@ -1,10 +1,16 @@
 .chat-input {
   background: var(--input-bg);
   border-top: var(--input-border);
+  margin-top: var(--gutter);
   display: flex;
   position: sticky;
   bottom: 0;
   z-index: 1;
+
+  @include if_screen("<=full") {
+    margin-left: calc(-1 * var(--gutter));
+    margin-right: calc(-1 * var(--gutter));
+  }
 
   textarea {
     background: transparent;
@@ -14,6 +20,10 @@
     width: 100%;
     display: block;
     resize: none;
+
+    @include if_screen("<=full") {
+      padding: var(--gutter-small) var(--gutter);
+    }
 
     &::placeholder {
       color: var(--input-placeholder-color);
@@ -34,6 +44,10 @@
     font-size: 1.5rem;
     padding: 0.5em var(--gutter-small);
     display: block;
+
+    @include if_screen("<=full") {
+      padding-right: var(--gutter);
+    }
   }
 }
 
