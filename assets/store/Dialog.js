@@ -3,7 +3,7 @@ import ReactiveList from '../store/ReactiveList.js';
 import Time from '../js/Time';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
-import {q, str2color} from '../js/util';
+import {str2color} from '../js/util';
 
 const modes = {o: '@'};
 
@@ -79,21 +79,12 @@ export default class Dialog extends Reactive {
     for (let i = 0; i < message.embeds.length; i++) {
       const embed = message.embeds[i];
       if (embed.el || embed.op) continue;
-
       embed.op = this.api.operation('embed', {}, {raw: true});
       await embed.op.perform(embed);
-
-      let html = embed.op.res.body.html;
-      if (!html) continue;
-      if (!html.match(/<a.*href/)) html = `<a href="${embed.url}">${html}</a>`;
-
-      embed.el = document.createElement('div');
-      embed.el.className = 'message__embed';
-      embed.el.innerHTML = html;
-      embed.provider = (embed.op.res.body.provider_name || '').toLowerCase();
+      const body = embed.op.res.body;
+      embed.html = body.html || '';
+      embed.provider = (body.provider_name || '').toLowerCase();
       delete embed.op;
-
-      q(embed.el, 'a', aEl => { aEl.target = '_blank' });
     }
   }
 
@@ -226,7 +217,7 @@ export default class Dialog extends Reactive {
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
 
-      msg.embeds = (msg.message.match(/https:\/\/(\S+)/g) || []).map(url => {
+      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => {
         return {url: url.replace(/([.!?])?$/, '')};
       });
     }

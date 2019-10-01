@@ -2,6 +2,7 @@ dependencies:
   '@fortawesome/fontawesome-free': 5.11.2
   emojione: 4.5.0
   eslint-plugin-svelte3: 1.2.3_svelte@3.12.1
+  highlight.js: 9.15.10
   node-sass: 4.12.0
   rollup: 1.22.0
   rollup-plugin-eslint: 6.0.0
@@ -783,6 +784,10 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-UqMvq4Vp1BymmmH/GiFPjrfIvTk=
+  /highlight.js/9.15.10:
+    dev: false
+    resolution:
+      integrity: sha512-RoV7OkQm0T3os3Dd2VHLNMoaoDVx77Wygln3n9l5YV172XonWG6rgQD3XnF/BuFFZw9A0TJgmMSO8FEWQgvcXw==
   /hosted-git-info/2.8.4:
     resolution:
       integrity: sha512-pzXIvANXEFrc5oFFXRMkbLPQ2rXRoDERwDLyrcUxGhaZhgP54BBSl9Oheh7Vv0T090cszWBxPjkQQ5Sq1PbBRQ==
@@ -2009,6 +2014,7 @@ specifiers:
   '@fortawesome/fontawesome-free': ^5.8.2
   emojione: ^4.5.0
   eslint-plugin-svelte3: ^1.2.3
+  highlight.js: ^9.15.10
   node-sass: ^4.12.0
   rollup: ^1.12.3
   rollup-plugin-bundle-html: ^0.2.1

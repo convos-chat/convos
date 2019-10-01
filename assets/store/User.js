@@ -4,19 +4,6 @@ import Events from '../js/Events';
 import Reactive from '../js/Reactive';
 import ReactiveList from '../store/ReactiveList';
 
-const providers = {
-  instagram: {
-    isLoaded() { return window.instgrm },
-    reload() { window.instgrm.Embeds.process() },
-    url: '//platform.instagram.com/en_US/embeds.js',
-  },
-  twitter: {
-    isLoaded() { return window.twttr },
-    reload() { window.twttr.widgets.load() },
-    url: '//platform.twitter.com/widgets.js',
-  },
-};
-
 export default class User extends Reactive {
   constructor(params) {
     super();
@@ -89,17 +76,6 @@ export default class User extends Reactive {
     this._parseGetUser(this.getUserOp.res.body);
     if (this.email) await this.send({method: 'ping'});
     return this;
-  }
-
-  loadProvider(name) {
-    // TODO: Allow providers to be disabled
-    const provider = providers[name];
-    if (!provider) return;
-    if (provider.isLoaded()) return provider.reload();
-    const el = document.createElement('script');
-    el.id = provider.url.replace(/\W/g, '_');
-    el.src = provider.url;
-    document.getElementsByTagName('head')[0].appendChild(el);
   }
 
   removeDialog(params) {
