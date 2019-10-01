@@ -8,10 +8,12 @@ import ChatInput from '../components/ChatInput.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
+import EmbedMaker from '../js/EmbedMaker';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 
+const embedMaker = new EmbedMaker({});
 const user = getContext('user');
 const w = window;
 
@@ -56,6 +58,7 @@ function addDialog(e) {
 
 function observed(entries, observer) {
   entries.forEach(async ({isIntersecting, target}) => {
+    if (embedMaker.disableAll) return;
     if (!isIntersecting) return;
 
     const message = messages[target.dataset.index];
@@ -69,8 +72,8 @@ function observed(entries, observer) {
     });
 
     message.embeds.forEach(embed => {
-      if (!embed.el || target.querySelector('.' + tsClass)) return;
-      if (embed.provider) $user.loadProvider(embed.provider);
+      if (!embed.provider || target.querySelector('.' + tsClass)) return;
+      if (!embed.el) embed.el = embedMaker.renderEl(embed);
       target.appendChild(embed.el);
       embed.el.classList.add(tsClass);
     });

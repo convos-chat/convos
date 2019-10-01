@@ -67,16 +67,23 @@
 
 .le-paste {
   background: var(--body-bg);
+  font-size: 0.9rem;
   border: var(--hr-border);
   max-height: 80px;
   max-width: 100%;
   overflow: hidden;
 
+  .hljs {
+    background: transparent;
+    margin: 0;
+  }
+
   .le-meta {
     background: var(--body-bg);
     color: var(--text-color);
-    padding: 0.2em 0.5rem;
+    padding: var(--gutter-small);
     margin: 0;
+    filter: brightness(0.95);
     cursor: zoom-in;
   }
 
@@ -84,7 +91,7 @@
     margin: 0.2rem 0;
   }
 
-  &.expanded {
+  &.is-expanded {
     max-height: none;
     overflow-x: auto;
 
