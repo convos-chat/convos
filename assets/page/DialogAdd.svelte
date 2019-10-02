@@ -67,7 +67,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
       <SelectField name="connection_id" options="{connectionOptions}" placeholder="{l('Select...')}" bind:value="{connectionId}">
         <span slot="label">{l('Connection')}</span>
       </SelectField>
-      <Button type="button" icon="sync-alt" on:click|preventDefault="{loadConversations}" disabled="{!connectionId}">{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</Button>
+      <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId}">{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</Button>
     </div>
 
     <div class="inputs-side-by-side">
