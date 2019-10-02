@@ -114,7 +114,7 @@ async function submitForm(e) {
   <div class="form-actions">
     {#if connection.url}
       <Button icon="save" op="{updateConnectionOp}">{l('Update')}</Button>
-      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click|preventDefault="{removeConnection}">{l('Delete')}</Button>
+      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}">{l('Delete')}</Button>
     {:else}
       <Button icon="save" op="{createConnectionOp}">{l('Create')}</Button>
     {/if}

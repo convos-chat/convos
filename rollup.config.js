@@ -1,6 +1,6 @@
-import collectSass from 'rollup-plugin-collect-sass'
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
+import scss from 'rollup-plugin-scss'
 import svelte from 'rollup-plugin-svelte';
 import {eslint} from 'rollup-plugin-eslint';
 import {terser} from 'rollup-plugin-terser';
@@ -31,16 +31,11 @@ export default {
     !production && eslint({exclude: ['assets/sass/**', 'node_modules/**']}),
 
     // https://svelte.dev/ specific plugin config
-    svelte({
-      dev: !production,
-      css: (css) => {
-        css.write(outPath('convos.[hash].css'));
-      },
-    }),
+    svelte({dev: !production}),
 
     resolve(),
     commonjs(),
-    collectSass({extract: outPath('convos.[hash].css')}),
+    scss({output: outPath('convos.[hash].css')}),
     production && terser(),
 
     html({
