@@ -29,7 +29,7 @@ export default class Time extends Date {
   }
 
   toEpoch() {
-    return this.getTime() / 1000;
+    return parseInt(this.getTime() / 1000, 10);
   }
 
   toHuman() {
