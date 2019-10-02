@@ -2,6 +2,7 @@
 import {gotoUrl, historyListener, pathname, pathParts} from './store/router';
 import {onMount, setContext} from 'svelte';
 import Api from './js/Api';
+import EmbedMaker from './js/EmbedMaker';
 import User from './store/User';
 
 // Pages
@@ -26,11 +27,13 @@ const pages = {
 
 const Convos = window.Convos || {};
 const api = new Api(Convos.apiUrl, {debug: true});
+const embedMaker = new EmbedMaker({api});
 const user = new User({api});
 const connections = user.connections;
 const loginOp = user.loginOp;
 const logoutOp = user.logoutOp;
 
+setContext('embedMaker', embedMaker);
 setContext('user', user);
 
 $: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
