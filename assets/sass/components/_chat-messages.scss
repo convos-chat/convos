@@ -9,11 +9,6 @@
   position: relative;
   padding: 4px 2px;
 
-  &:hover {
-    background: var(--body-bg);
-    filter: brightness(0.97);
-  }
-
   > i {
     font-size: 1.2rem;
   }
