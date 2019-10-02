@@ -75,19 +75,6 @@ export default class Dialog extends Reactive {
     return this.update({messages: this.mesagesOp.res.body.messages || []});
   }
 
-  async loadEmbeds(message) {
-    for (let i = 0; i < message.embeds.length; i++) {
-      const embed = message.embeds[i];
-      if (embed.el || embed.op) continue;
-      embed.op = this.api.operation('embed', {}, {raw: true});
-      await embed.op.perform(embed);
-      const body = embed.op.res.body;
-      embed.html = body.html || '';
-      embed.provider = (body.provider_name || '').toLowerCase();
-      delete embed.op;
-    }
-  }
-
   async loadHistoric() {
     const first = this.messages[0];
     if (!first || first.end) return;
@@ -214,12 +201,9 @@ export default class Dialog extends Reactive {
       msg.color = str2color(msg.from);
       msg.dt = new Time(msg.ts);
       msg.dayChanged = i == 0 ? false : msg.dt.getDate() != messages[i - 1].dt.getDate();
+      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/([.!?])?$/, ''));
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
-
-      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => {
-        return {url: url.replace(/([.!?])?$/, '')};
-      });
     }
   }
 

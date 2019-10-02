@@ -8,12 +8,11 @@ import ChatInput from '../components/ChatInput.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import DialogSubject from '../components/DialogSubject.svelte';
-import EmbedMaker from '../js/EmbedMaker';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 
-const embedMaker = new EmbedMaker({});
+const embedMaker = getContext('embedMaker');
 const user = getContext('user');
 const w = window;
 
@@ -57,26 +56,9 @@ function addDialog(e) {
 }
 
 function observed(entries, observer) {
-  entries.forEach(async ({isIntersecting, target}) => {
-    if (embedMaker.disableAll) return;
+  entries.forEach(({isIntersecting, target}) => {
     if (!isIntersecting) return;
-
-    const message = messages[target.dataset.index];
-    if (!message) return;
-
-    const tsClass = 'has-ts-' + message.dt.toEpoch();
-    await $dialog.loadEmbeds(message);
-
-    q(target, '.message__embed', embedEl => {
-      if (!embedEl.classList.contains(tsClass)) embedEl.remove();
-    });
-
-    message.embeds.forEach(embed => {
-      if (!embed.provider || target.querySelector('.' + tsClass)) return;
-      if (!embed.el) embed.el = embedMaker.renderEl(embed);
-      target.appendChild(embed.el);
-      embed.el.classList.add(tsClass);
-    });
+    embedMaker.render((messages[target.dataset.index] || {}).embeds || [], target);
   });
 }
 
