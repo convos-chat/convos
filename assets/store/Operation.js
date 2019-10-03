@@ -1,4 +1,5 @@
 import Reactive from '../js/Reactive';
+import {regexpEscape} from '../js/util';
 
 const validStatus = ['error', 'loading', 'pending', 'success'];
 
@@ -109,7 +110,7 @@ export default class Operation extends Reactive {
         return;
       }
       else if (p.in == 'path') {
-        const re = new RegExp('(%7B|\\{)' + p.name + '(%7D|\\})', 'i');
+        const re = new RegExp('(%7B|\\{)' + regexpEscape(p.name) + '(%7D|\\})', 'i');
         url.pathname = url.pathname.replace(re, this._extractValue(params, p));
       }
       else if (p.in == 'query') {

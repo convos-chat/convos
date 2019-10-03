@@ -39,6 +39,10 @@ export function q(parentEl, sel, cb) {
   return res;
 }
 
+export function regexpEscape(str) {
+  return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 export function sortByName(a, b) {
   return a.name.localeCompare(b.name);
 }
