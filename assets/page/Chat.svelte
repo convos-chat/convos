@@ -143,7 +143,7 @@ const onScroll = debounce(e => {
         data-index="{i}">
 
         <Icon name="{message.from == currentNick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
-        <b class="message__ts" title="{message.dt.toLocaleString()}">{message.dt.toHuman()}</b>
+        <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.toHuman()}</b>
         <Link className="message__from" href="/chat/{$pathParts[1]}/{message.from}" style="color:{message.color}">{message.from}</Link>
         <div class="message__text">{@html message.markdown}</div>
       </div>

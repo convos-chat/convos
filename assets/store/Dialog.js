@@ -80,7 +80,7 @@ export default class Dialog extends Reactive {
     if (!first || first.end) return;
 
     await this.mesagesOp.perform({
-      before: first.ts,
+      before: first.ts.toISOString(),
       connection_id: this.connection_id,
       dialog_id: this.dialog_id,
     });
@@ -193,14 +193,13 @@ export default class Dialog extends Reactive {
   _processMessages(messages) {
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
-      if (msg.dt) continue; // Already processed
-      if (!msg.ts) msg.ts = new Time().toISOString();
+      if (msg.hasOwnProperty('markdown')) continue; // Already processed
       if (!msg.from) msg.from = this.connection_id || 'Convos';
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
       msg.color = str2color(msg.from);
-      msg.dt = new Time(msg.ts);
-      msg.dayChanged = i == 0 ? false : msg.dt.getDate() != messages[i - 1].dt.getDate();
+      msg.ts = new Time(msg.ts);
+      msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
       msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/([.!?])?$/, ''));
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
