@@ -1,6 +1,7 @@
 <script>
 import {closestEl, uuidv4} from '../../js/util';
 import {onMount, tick} from 'svelte';
+import {regexpEscape} from '../../js/util';
 
 export let className = '';
 export let hidden = false;
@@ -41,7 +42,7 @@ onMount(() => {
 });
 
 function filterOptions(options, needle) {
-  let re = new RegExp('(?:^|\\s|-)' + needle, 'i'); // TODO: needle need to be safe string
+  let re = new RegExp('(?:^|\\s|-)' + regexpEscape(needle), 'i'); // TODO: needle need to be safe string
   let found = [];
   if (!found.length) found = options.filter(opt => opt[0] == needle);
   if (!found.length) found = options.filter(opt => opt[0].match(re));

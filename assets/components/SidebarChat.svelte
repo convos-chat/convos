@@ -1,12 +1,13 @@
 <script>
-import {getContext} from 'svelte';
-import {gotoUrl, showMenu} from '../store/router';
-import {l} from '../js/i18n';
-import {q, tagNameIs} from '../js/util';
 import Icon from './Icon.svelte';
 import SidebarItem from '../components/SidebarItem.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
+import {getContext} from 'svelte';
+import {gotoUrl, showMenu} from '../store/router';
+import {l} from '../js/i18n';
+import {q, tagNameIs} from '../js/util';
+import {regexpEscape} from '../js/util';
 
 const user = getContext('user');
 const connections = user.connections;
@@ -30,7 +31,7 @@ function clearFilter() {
 function filterNav(filter) {
   if (!navEl) return;
 
-  const filterRe = new RegExp('\\b\\W*' + filter, 'i');
+  const filterRe = new RegExp('\\b\\W*' + regexpEscape(filter), 'i');
   const hasVisibleLinks = {};
   const seen = {};
 
