@@ -1,5 +1,6 @@
 export default class Reactive {
   constructor() {
+    this._syncWithLocalStorage = {};
     this._reactive = {};
     this._on = {loaded: [], message: [], update: []};
   }
@@ -23,12 +24,19 @@ export default class Reactive {
   }
 
   update(params) {
-    Object.keys(params).forEach(param => {
-      if (this._reactive.hasOwnProperty(param)) this._reactive[param] = params[param];
+    Object.keys(params).forEach(name => {
+      if (this._reactive.hasOwnProperty(name)) this._reactive[name] = params[name];
+      if (this._syncWithLocalStorage[name]) localStorage.setItem(name, JSON.stringify(this._reactive[name]));
     });
 
     if (!this._notifyTid) this._notifyTid = setTimeout(this._notify.bind(this), 0);
     return this;
+  }
+
+  _localStorageAttr(name, val) {
+    this._updateableAttr(name, val);
+    this._syncWithLocalStorage[name] = true;
+    if (localStorage.hasOwnProperty(name)) this._reactive[name] = JSON.parse(localStorage.getItem(name));
   }
 
   _notify() {

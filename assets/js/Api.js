@@ -2,7 +2,6 @@ import Operation from '../store/Operation';
 
 export default class Api {
   constructor(url, params = {}) {
-    this.debug = params.debug;
     this.url = url;
   }
 

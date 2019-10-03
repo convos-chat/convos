@@ -17,7 +17,6 @@ export default class User extends Reactive {
     // Need to come after "api" and "events"
     this._readOnlyAttr('notifications', new Dialog({api, events: this.events, name: 'Notifications'}));
 
-    this._updateableAttr('enableNotifications', Notification.permission);
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
 
