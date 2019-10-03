@@ -17,6 +17,7 @@ const ONE_DAY = 60 * 60 * 24;
 
 export default class Time extends Date {
   constructor(params) {
+    if (typeof params == 'string' && !params.match(/Z$/)) params += 'Z';
     super(params || new Date());
   }
 
