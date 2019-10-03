@@ -41,6 +41,7 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
+    if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
     this.update({messages: this.messages.concat(msg)});
   }
 

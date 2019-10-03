@@ -10,31 +10,30 @@ import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 
 const user = getContext('user');
+const events = user.events;
 const updateUserOp = user.api.operation('updateUser');
 
 let formEl;
-
-// TODO: Figure out a better way to uncheck
-$: if (formEl && $user.enableNotifications == 'granted' && !formEl.notifications.checked) formEl.notifications.click();
-$: if (formEl && $user.enableNotifications == 'denied' && formEl.notifications.checked) formEl.notifications.click();
-$: if (formEl && $user.res.body.highlightKeywords) formEl.highlight_keywords.value = $user.res.body.highlightKeywords;
+let notificationsDisabled = Notification.permission == 'denied';
+let wantNotifications = events.wantNotifications;
 
 function updateUserFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
-  if (!form.notifications.checked) {
-    user.update({enableNotifications: 'default'});
-  }
-  else if (user.enableNotifications != 'granted') {
-    user.update({enableNotifications: 'pending'});
-    Notification.requestPermission(status => { user.update({enableNotifications: status}) });
+  if (wantNotifications && Notification.permission != 'granted') {
+    Notification.requestPermission(status => {
+      if (status != 'denied') return;
+      wantNotifications = false;
+      notificationsDisabled = true;
+    });
   }
 
   if (passwords.join('').length && passwords[0] != passwords[1]) {
     return updateUserOp.error('Passwords does not match.');
   }
 
+  events.update({wantNotifications});
   user.update({expandUrlToMedia: form.expand_url.checked});
   updateUserOp.perform(e.target);
 }
@@ -55,9 +54,13 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 
-    <Checkbox name="notifications" disabled="{$user.enableNotifications == 'denied'}">
+    <Checkbox name="notifications" bind:checked="{wantNotifications}">
       <span slot="label">{l('Enable notifications')}</span>
     </Checkbox>
+
+    {#if notificationsDisabled}
+      <p class="error">{l('You cannot receive notifications, because it is denied in your browser settings.')}</p>
+    {/if}
 
     <Checkbox name="expand_url">
       <span slot="label">{l('Expand URL to media')}</span>
