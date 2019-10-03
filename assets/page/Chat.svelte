@@ -20,6 +20,7 @@ let messagesHeight = 0;
 let messagesHeightLast = 0;
 let messagesEl;
 let observer;
+let previousPath = $pathParts;
 let scrollPos = 'bottom';
 
 $: connection = $user.findDialog({connection_id: $pathParts[1]});
@@ -27,7 +28,6 @@ $: currentNick = connection ? connection.nick : user.email;
 $: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
 $: hasValidPath = $pathParts.slice(1).join('/') == decodeURIComponent(dialog.path);
 $: isLoading = $dialog.is('loading');
-$: fallbackSubject = dialog.frozen || ($pathParts[2] ? l('Private conversation.') : l('Server messages.'));
 $: messages = hasValidPath ? $dialog.messages : [];
 $: settingsComponent = $currentUrl.hash != '#settings' || !hasValidPath ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
 
@@ -39,9 +39,16 @@ onMount(() => {
 });
 
 afterUpdate(() => {
-  observer = observer || new IntersectionObserver(observed, {rootMargin: '0px'});
-  q(document, '.message', messageEl => observer.observe(messageEl));
+  observeMessages();
+  keepScrollPosition();
+  markAsRead();
+});
 
+function addDialog(e) {
+  if (connection) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
+}
+
+function keepScrollPosition() {
   if (scrollPos == 'bottom') {
     messagesEl.scrollTop = messagesHeight;
   }
@@ -49,10 +56,13 @@ afterUpdate(() => {
     messagesEl.scrollTop = messagesHeight - messagesHeightLast;
     messagesHeightLast = 0;
   }
-});
+}
 
-function addDialog(e) {
-  if (connection) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
+function markAsRead() {
+  if (previousPath.join('/') == $pathParts.join('/')) return;
+  const previousDialog = $user.findDialog({connection_id: previousPath[1], dialog_id: previousPath[2]});
+  if (previousDialog) previousDialog.markAsRead();
+  previousPath = $pathParts;
 }
 
 function observed(entries, observer) {
@@ -60,6 +70,11 @@ function observed(entries, observer) {
     if (!isIntersecting) return;
     embedMaker.render((messages[target.dataset.index] || {}).embeds || [], target);
   });
+}
+
+function observeMessages() {
+  observer = observer || new IntersectionObserver(observed, {rootMargin: '0px'});
+  q(document, '.message', messageEl => observer.observe(messageEl));
 }
 
 const onScroll = debounce(e => {
@@ -73,8 +88,8 @@ const onScroll = debounce(e => {
             : 'middle';
 
   if (scrollPos == 'top' && !isLoading) {
+    if (messages.length && !messages[0].endOfHistory) dialog.loadHistoric();
     messagesHeightLast = messagesHeight;
-    dialog.loadHistoric();
   }
 }, 20);
 </script>
@@ -133,6 +148,10 @@ const onScroll = debounce(e => {
         <div class="message-status-line for-end-of-history"><span>{l('End of history')}</span></div>
       {:else if message.dayChanged}
         <div class="message-status-line for-day-changed"><span>{message.ts.getHumanDate()}</span></div>
+      {/if}
+
+      {#if i == messages.length - dialog.unread}
+        <div class="message-status-line for-last-read"><span>{l('New messages')}</span></div>
       {/if}
 
       <div class="message is-type-{message.type || 'notice'}"

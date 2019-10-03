@@ -11,7 +11,6 @@ export default class Dialog extends Reactive {
   constructor(params) {
     super();
 
-    const now = new Time().toISOString();
     const path = [];
     if (params.connection_id) path.push(params.connection_id);
     if (params.dialog_id) path.push(params.dialog_id);
@@ -20,13 +19,12 @@ export default class Dialog extends Reactive {
     this._readOnlyAttr('connection_id', params.connection_id || '');
     this._readOnlyAttr('events', params.events);
     this._readOnlyAttr('is_private', params.is_private || false);
-    this._readOnlyAttr('mesagesOp', this._createMessagesOp(params));
     this._readOnlyAttr('participants', new ReactiveList());
     this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this._updateableAttr('frozen', params.frozen || '');
-    this._updateableAttr('last_active', params.last_active || now);
-    this._updateableAttr('last_read', params.last_read || now);
+    this._updateableAttr('last_active', new Time(params.last_active));
+    this._updateableAttr('last_read', new Time(params.last_read));
     this._updateableAttr('messages', []);
     this._updateableAttr('name', params.name || 'Unknown');
     this._updateableAttr('topic', params.topic || '');
@@ -38,6 +36,7 @@ export default class Dialog extends Reactive {
     }
 
     this.events.on('update', this._loadParticipants.bind(this));
+    this._addOperations();
   }
 
   addMessage(msg) {
@@ -89,6 +88,12 @@ export default class Dialog extends Reactive {
     const messages = this.mesagesOp.res.body.messages || [];
     if (!messages.length && this.messages.length) this.messages[0].endOfHistory = true;
     this.update({messages: messages.concat(this.messages)});
+  }
+
+  async markAsRead() {
+    if (!this.lastReadOp) return;
+    await this.lastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
+    this.update(this.lastReadOp.res.body); // Update last_read
   }
 
   participant(nick, params = {}) {
@@ -159,10 +164,10 @@ export default class Dialog extends Reactive {
     }
   }
 
-  _createMessagesOp(params) {
-    if (params.dialog_id) return params.api.operation('dialogMessages');
-    if (params.connection_id) return params.api.operation('connectionMessages');
-    return null;
+  _addOperations() {
+    if (!this.dialog_id) return;
+    this._readOnlyAttr('lastReadOp', this.api.operation('setDialogLastRead'));
+    this._readOnlyAttr('mesagesOp', this.api.operation('dialogMessages'));
   }
 
   _loadParticipants() {
