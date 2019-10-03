@@ -76,6 +76,10 @@ $sidebar-item-icon-width: 1.8rem;
 
     &.has-path {
       background: var(--sidebar-search-focus-bg);
+
+      .unread {
+        display: none;
+      }
     }
 
     &.has-focus {

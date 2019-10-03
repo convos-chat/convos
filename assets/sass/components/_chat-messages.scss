@@ -140,7 +140,8 @@
     top: 0.3rem;
   }
 
-  &.for-end-of-history {
+  &.for-end-of-history,
+  &.for-last-read {
     color: var(--error-color);
   }
 

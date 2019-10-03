@@ -114,4 +114,9 @@ export default class Connection extends Dialog {
       : {message: 'No topic is set.', vars: []}
     );
   }
+
+  _addOperations() {
+    this._readOnlyAttr('lastReadOp', this.api.operation('setConnectionLastRead'));
+    this._readOnlyAttr('mesagesOp', this.api.operation('connectionMessages'));
+  }
 }
