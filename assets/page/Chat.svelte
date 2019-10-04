@@ -132,7 +132,7 @@ const onScroll = debounce(e => {
       {#if message.endOfHistory}
         <div class="message-status-line for-end-of-history"><span>{l('End of history')}</span></div>
       {:else if message.dayChanged}
-        <div class="message-status-line for-day-changed"><span>{l('Day changed')}</span></div>
+        <div class="message-status-line for-day-changed"><span>{message.ts.getHumanDate()}</span></div>
       {/if}
 
       <div class="message is-type-{message.type || 'notice'}"

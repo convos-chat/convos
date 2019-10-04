@@ -21,6 +21,10 @@ export default class Time extends Date {
     super(params || new Date());
   }
 
+  getHumanDate() {
+    return this.getDate() + '. ' + this.getMonthAbbr();
+  }
+
   getHM() {
     return [this.getHours(), this.getMinutes()].map(v => v < 10 ? '0' + v : v).join(':');
   }
