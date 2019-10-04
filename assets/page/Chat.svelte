@@ -16,11 +16,13 @@ const embedMaker = getContext('embedMaker');
 const user = getContext('user');
 const w = window;
 
+let containerHeight = 0;
 let messagesHeight = 0;
 let messagesHeightLast = 0;
 let messagesEl;
 let observer;
 let previousPath = $pathParts;
+let scrollingClass = 'has-no-scrolling';
 let scrollPos = 'bottom';
 
 $: connection = $user.findDialog({connection_id: $pathParts[1]});
@@ -32,6 +34,7 @@ $: messages = hasValidPath ? $dialog.messages : [];
 $: settingsComponent = $currentUrl.hash != '#settings' || !hasValidPath ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
 
 $: if (dialog.connection_id) dialog.load();
+$: calculateScrollingClass(messagesHeight > containerHeight);
 
 onMount(() => {
   // Clean up any embeds added from a previous chat
@@ -47,6 +50,10 @@ afterUpdate(() => {
 function addDialog(e) {
   if (connection) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
 }
+
+const calculateScrollingClass = debounce(hasScrolling => {
+  scrollingClass = hasScrolling ? 'has-scrolling' : 'has-no-scrolling';
+}, 100);
 
 function keepScrollPosition() {
   if (scrollPos == 'bottom') {
@@ -94,11 +101,13 @@ const onScroll = debounce(e => {
 }, 20);
 </script>
 
+<svelte:window bind:innerHeight="{containerHeight}"/>
+
 <SidebarChat/>
 
 <svelte:component this="{settingsComponent}" dialog="{dialog}"/>
 
-<div class="main messages-wrapper" bind:this="{messagesEl}" on:scroll="{onScroll}">
+<div class="main messages-wrapper {scrollingClass}" bind:this="{messagesEl}" on:scroll="{onScroll}">
   <main class="messages-container" bind:offsetHeight="{messagesHeight}">
     <ChatHeader>
       {#if $pathParts[1]}
@@ -145,7 +154,7 @@ const onScroll = debounce(e => {
 
     {#each messages as message, i}
       {#if message.endOfHistory}
-        <div class="message-status-line for-end-of-history"><span>{l('End of history')}</span></div>
+        <div class="message-status-line for-start-of-history"><span>{l('Start of history')}</span></div>
       {:else if message.dayChanged}
         <div class="message-status-line for-day-changed"><span>{message.ts.getHumanDate()}</span></div>
       {/if}
