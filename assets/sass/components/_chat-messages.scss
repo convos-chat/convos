@@ -5,6 +5,10 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.messages-container {
+  min-height: 100vh;
+}
+
 .message {
   position: relative;
   padding: 4px 2px;
@@ -140,8 +144,8 @@
     top: 0.3rem;
   }
 
-  &.for-end-of-history,
-  &.for-last-read {
+  &.for-last-read,
+  &.for-start-of-history {
     color: var(--error-color);
   }
 

@@ -85,3 +85,15 @@
     }
   }
 }
+
+.messages-wrapper.has-no-scrolling {
+  .chat-input {
+    position: absolute;
+    right: 0;
+    left: 0;
+  }
+
+  .messages-container {
+    padding-bottom: 4rem; // Enough for the height of the .chat-input
+  }
+}
