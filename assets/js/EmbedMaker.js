@@ -1,5 +1,7 @@
 import hljs from 'highlight.js';
-import {q} from './util';
+import {ensureChildNode, q, removeChildNodes} from './util';
+
+const d = document;
 
 export default class EmbedMaker {
   constructor(params) {
@@ -40,19 +42,29 @@ export default class EmbedMaker {
     });
   }
 
+  renderPhoto(embedEl) {
+    q(embedEl, 'img', img => img.addEventListener('click', () => this.showMedia(img)));
+  }
+
   renderTwitter(embedEl) {
     if (this.disableTwitter) return;
     if (window.twttr) window.twttr.widgets.load();
     this._loadScript('//platform.twitter.com/widgets.js');
   }
 
+  showMedia(el) {
+    const mediaWrapper = ensureChildNode(d.querySelector('body'), 'fullscreen-media-wrapper', el => {
+      el.addEventListener('click', e => { e.target == el && el.setAttribute('hidden', '') });
+      el.setAttribute('hidden', '');
+    });
+
+    removeChildNodes(mediaWrapper);
+    mediaWrapper.appendChild(el.cloneNode());
+    mediaWrapper.removeAttribute('hidden');
+  }
+
   _ensureEmbedEl(url) {
-    let el = this.embeds[url].el;
-    if (el) return el;
-    el = document.createElement('div');
-    el.className = 'message__embed';
-    el.dataset.url = url;
-    return (this.embeds[url].el = el);
+    return this.embeds[url].el || (this.embeds[url].el = ensureChildNode(null, 'message__embed', el => { el.dataset.url = url }));
   }
 
   _loadAndRender(url) {
@@ -69,14 +81,16 @@ export default class EmbedMaker {
 
       const types = (embedEl.firstChild.className || '').split(/\s+/);
       if (types.indexOf('le-paste') != -1) return this.renderPasteEl(embedEl);
+
+      q(embedEl, '.le-photo, .le-thumbnail', el => this.renderPhoto(embedEl));
     });
   }
 
   _loadScript(src) {
     const id = src.replace(/\W/g, '_');
-    if (document.getElementById(id)) return;
-    const el = document.createElement('script');
+    if (d.getElementById(id)) return;
+    const el = d.createElement('script');
     [el.id, el.src] = [id, src];
-    document.getElementsByTagName('head')[0].appendChild(el);
+    d.getElementsByTagName('head')[0].appendChild(el);
   }
 }

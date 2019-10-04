@@ -22,6 +22,16 @@ export function closestEl(el, needle) {
   return null;
 }
 
+export function ensureChildNode(parent, className, cb) {
+  let childNode = parent && parent.querySelector(className);
+  if (childNode) return childNode;
+  childNode = document.createElement('div');
+  childNode.className = className;
+  if (parent) parent.appendChild(childNode);
+  if (cb) cb(childNode);
+  return childNode;
+}
+
 export function extractErrorMessage(params) {
   const errors = params.errors;
   return errors && errors[0] ? errors[0].message || 'Unknown error.' : '';
@@ -41,6 +51,10 @@ export function q(parentEl, sel, cb) {
 
 export function regexpEscape(str) {
   return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+export function removeChildNodes(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
 }
 
 export function sortByName(a, b) {
