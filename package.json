@@ -34,7 +34,7 @@
     "@babel/plugin-transform-runtime": "^7.6.2",
     "@babel/runtime": "^7.6.2",
     "@fortawesome/fontawesome-free": "^5.8.2",
-    "emojione": "^4.5.0",
+    "emoji-toolkit": "^5.0.5",
     "highlight.js": "^9.15.10"
   }
 }
