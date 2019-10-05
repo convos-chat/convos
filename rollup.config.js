@@ -1,7 +1,10 @@
+import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
+import postcss from 'rollup-plugin-postcss'
+import postcssPresetEnv from 'postcss-preset-env';
 import resolve from 'rollup-plugin-node-resolve';
-import scss from 'rollup-plugin-scss'
 import svelte from 'rollup-plugin-svelte';
+import visualizer from 'rollup-plugin-visualizer';
 import {eslint} from 'rollup-plugin-eslint';
 import {terser} from 'rollup-plugin-terser';
 
@@ -12,12 +15,45 @@ import html from 'rollup-plugin-bundle-html';
 
 // The output file need to contain a hash for M::P::Webpack to find it
 const dest = process.env.WEBPACK_OUT_DIR || 'public/asset';
-const production = !process.env.ROLLUP_WATCH;
-function outPath(fn) {
-  const filename = production ? fn : fn.replace(/\[hash\]/, 'development');
+const development = process.env.ROLLUP_WATCH ? true : false;
+const ts = parseInt((new Date().getTime() / 1000), 10).toString(16);
+
+function outPath(name) {
+  const filename = name.replace(/\[hash\]/, development ? 'development' : ts);
   return [dest, filename].join('/');
 }
 
+// Define plugins
+const plugins = [
+  svelte({dev: development}),
+  resolve(),
+  commonjs(),
+  postcss({extract: true, plugins: [postcssPresetEnv({})]}),
+];
+
+if (development) {
+  plugins.unshift(eslint({exclude: ['assets/sass/**', 'node_modules/**']}));
+}
+else {
+  plugins.push(babel({
+    exclude: 'node_modules/**',
+    plugins: ['@babel/plugin-transform-runtime'],
+    presets: ['@babel/env'],
+    runtimeHelpers: true,
+  }));
+
+  plugins.push(terser());
+  plugins.push(visualizer({filename: 'public/docs/js-modules-visualized.html', title: 'Convos JavaScript modules visualized'}));
+}
+
+plugins.push(html({
+  dest,
+  filename: 'webpack.' + (development ? 'development' : 'production') + '.html',
+  inject: 'head',
+  template: '<html><head></head><body></body></html>',
+}));
+
+// Define config
 export default {
   input: 'assets/entrypoint.js',
   output: {
@@ -27,24 +63,7 @@ export default {
     name: 'convos',
     sourcemap: true,
   },
-  plugins: [
-    !production && eslint({exclude: ['assets/sass/**', 'node_modules/**']}),
-
-    // https://svelte.dev/ specific plugin config
-    svelte({dev: !production}),
-
-    resolve(),
-    commonjs(),
-    scss({output: outPath('convos.[hash].css')}),
-    production && terser(),
-
-    html({
-      dest,
-      filename: 'webpack.' + (production ? 'production' : 'development') + '.html',
-      inject: 'head',
-      template: '<html><head></head><body></body></html>',
-    }),
-  ],
+  plugins,
   watch: {
     clearScreen: false,
   },
