@@ -18,7 +18,7 @@ parameters that have to be set to load a plugin.
 
 ## Can Convos run behind behind my favorite web server?
 
-Yes, but Convos and the web server needs to be configured properly and
+Yes, but Convos and the web server need to be configured properly and
 [WebSockets](https://www.websocket.org/) need to be supported through the
 chain.
 
@@ -26,7 +26,7 @@ The first thing is that the environment variable
 [MOJO_REVERSE_PROXY](/doc/config.html#MOJO_REVERSE_PROXY) must be set to a
 true value.
 
-The other thing is that the reverse proxy need to pass on some HTTP headers to
+The other thing is that the reverse proxy needs to pass on some HTTP headers to
 Convos, so correct URLs will be generated. Below are two examples for
 setting up Convos behind nginx or Apache. Here are the important headers:
 
@@ -99,7 +99,7 @@ Example Apache config:
 ## Why does Convos stop when I close putty/xterm/some terminal?
 
 Convos does not daemonize. It runs in foreground, so if you close a terminal
-application, such as putty it will also kill any running instance of Convos.
+application, such as putty, it will also kill any running instance of Convos.
 
 To prevent this, you can run this command:
 
@@ -122,15 +122,15 @@ re-install Convos:
     $ perl script/cpanm -n -l $PWD/local Module::Install
     $ ./script/convos install
 
-Please [contact us](/doc/#get-in-touch) if the above instructions does not work.
+Please [contact us](/doc/#get-in-touch) if the above instructions do not work.
 
 ## Why can't Convos do X?
 
-In most of the cases it's either because we haven't thought about it or
-haven't had time to implement it yet. It might also be because we do not want
-to implement certain features. We do not want Convos to support every weird
-feature, since we want both the user experience and code base to be clean.
+In most cases it's either because we haven't thought about it or haven't had
+time to implement it yet. It might also be because we do not want to implement
+certain features. We do not want Convos to support every weird feature, since
+we want both the user experience and code base to be clean.
 
 Please submit an [issue](https://github.com/Nordaaker/convos/issues), come
 and talk with us in [#convos](irc://chat.freenode.net:6697/#convos) on
-Freeenode or send a tweet to [@convosby](https://twitter.com/convosby).
+Freenode or send a tweet to [@convosby](https://twitter.com/convosby).

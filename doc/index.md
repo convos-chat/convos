@@ -43,11 +43,11 @@ and [Vue](https://vuejs.org/).
 
 | Language        | Files |  Code | Comment                 |
 |-----------------|-------|-------|-------------------------|
-| Perl            |    21 |  2380 | Without couting tests   |
-| JavaScript      |    21 |  1613 | jQuery and vanilla      |
-| Vuejs Component |    30 |  1529 | Reactive web components |
-| Sass            |    12 |   947 | CSS / Sass              |
-| JSON            |     1 |   685 | OpenAPI specification   |
-| Total           |    85 |  7154 |                         |
+| Perl            |    21 |  2430 | Without counting tests  |
+| JavaScript      |    21 |  1628 | jQuery and vanilla      |
+| Vuejs Component |    30 |  1539 | Reactive web components |
+| Sass            |    12 |   993 | CSS / Sass              |
+| JSON            |     1 |   684 | OpenAPI specification   |
+| Total           |    85 |  7274 |                         |
 
-Updated 2017-04-24 using `cloc assets/{js,vue,sass}/ lib/`
+Updated 2019-09-14 using `cloc assets/{js,vue,sass}/ lib/`

@@ -11,7 +11,7 @@ This guide is for people who want to hack on Convos. You can also have a look
 at the "[Convos revamped!](/2015/8/31/convos-revamped.html)" blog post for
 more details.
 
-The complete manual for Convos and its dependencies are available from inside
+The complete manual for Convos and its dependencies is available from inside
 the application at
 [http://localhost:3000/perldoc](http://demo.convos.by/perldoc/) - or whatever
 adddress you [start](/doc/running.html) Convos on.
@@ -19,7 +19,7 @@ adddress you [start](/doc/running.html) Convos on.
 ## API
 
 Convos has an OpenAPI powered REST API. The specification is used to both
-generate perl code for valication, and to generate documentation. Resources:
+generate perl code for validation, and to generate documentation. Resources:
 
 * [Documentation](http://demo.convos.by/api.html)
 * [Specification](https://github.com/Nordaaker/convos/blob/master/public/convos-api.json)
@@ -71,7 +71,7 @@ $ cpanm --installdeps .
 ### Installing an IRC daemon
 
 It is highly suggested that you install an IRC daemon, since many networks
-will ban you if you reconnect to often. Any IRC compatible server will work,
+will ban you if you reconnect too often. Any IRC compatible server will work,
 but [ircd](http://www.ircd-hybrid.org) is a good alternative:
 
 ```bash
