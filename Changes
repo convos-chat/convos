@@ -1,23 +1,21 @@
 Revision history for perl distribution Convos
 
 0.99_40 2019-02-08T23:05:00+0100
-
-- Switch order of isconnect and ison to allow authentication with nickserv before join
-- Remove POD plugin which has been deprecated from Mojo core.
-- Update Alpine image
-- Fix duplicate key in schema
+ - Switch order of isconnect and ison to allow authentication with nickserv before join
+ - Remove POD plugin which has been deprecated from Mojo core.
+ - Update Alpine image
+ - Fix duplicate key in schema
 
 0.99_39 2018-08-30T10:40:39+0200
-
-- Only keep one conversation open at a time.
+ - Only keep one conversation open at a time.
 
 0.99_38 2018-08-20 15:09:00
-- Add support for disabling tls verification per connection (jberger)
+ - Add support for disabling tls verification per connection (jberger)
 
 0.99_37 2018-08-16 11:43:00
-- Added -wn to perltidy for superior welding
-- Make convos a PWA
-- Add a delay helper until we can convert convos to promises
+ - Added -wn to perltidy for superior welding
+ - Make convos a PWA
+ - Add a delay helper until we can convert convos to promises
 
 0.99_36 2017-11-28T08:25:51+0200
  - Fix TLS detection when creating a connection #344
@@ -364,4 +362,3 @@ Revision history for perl distribution Convos
 
 0.99_00 2015-02-02T15:40:40+0200
  - Started rewriting Convos
-
