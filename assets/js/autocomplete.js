@@ -1,4 +1,4 @@
-import emojione from 'emojione';
+import joypixels from 'emoji-toolkit';
 import {md} from '../js/md';
 
 const commands = [];
@@ -53,7 +53,7 @@ autocomplete.nicks = ({dialog, query}) => {
 };
 
 // TODO: Allow user to select tone in settings
-Object.keys(emojione.emojioneList).filter(i => !i.match(/_tone/)).sort().forEach(emoji => {
+Object.keys(joypixels.emojiList).filter(i => !i.match(/_tone/)).sort().forEach(emoji => {
   emoji.match(/(_|:)\w/g).forEach(k => {
     if (!emojis[k]) emojis[k] = [];
     emojis[k].push(emoji);

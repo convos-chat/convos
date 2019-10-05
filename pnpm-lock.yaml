@@ -2,7 +2,7 @@ dependencies:
   '@babel/plugin-transform-runtime': 7.6.2_@babel+core@7.6.2
   '@babel/runtime': 7.6.2
   '@fortawesome/fontawesome-free': 5.11.2
-  emojione: 4.5.0
+  emoji-toolkit: 5.0.5
   highlight.js: 9.15.10
 devDependencies:
   '@babel/core': 7.6.2
@@ -1538,10 +1538,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-CwBLREIQ7LvYFB0WyRvwhq5N5qPhc6PMjD6bYggFlI5YyDgl+0vxq5VHbMOFqLg7hfWzmu8T5Z1QofhmTIhItA==
-  /emojione/4.5.0:
+  /emoji-toolkit/5.0.5:
     dev: false
     resolution:
-      integrity: sha512-Tq55Y3UgPOnayFDN+Qd6QMP0rpoH10a1nhSFN27s8gXW3qymgFIHiXys2ECYYAI134BafmI3qP9ni2rZOe9BjA==
+      integrity: sha512-I57/yzEll8mIczqUCv2DaBhF61eBKtOwUN/7bxFPjwtwoVB9FnkRoabQRLZS6+KeSZNscw0av8o/N7tfy59PUg==
   /emojis-list/2.1.0:
     dev: true
     engines:
@@ -4612,7 +4612,7 @@ specifiers:
   '@babel/preset-env': ^7.6.2
   '@babel/runtime': ^7.6.2
   '@fortawesome/fontawesome-free': ^5.8.2
-  emojione: ^4.5.0
+  emoji-toolkit: ^5.0.5
   eslint-plugin-svelte3: ^1.2.3
   highlight.js: ^9.15.10
   node-sass: ^4.12.0

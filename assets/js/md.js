@@ -3,7 +3,7 @@
 // ***foo*** or ___foo___ = <em><strong>foo</strong></em>
 // \*foo*    or \_foo_    = *foo* or _foo_
 
-import emojione from 'emojione';
+import joypixels from 'emoji-toolkit';
 
 const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
 const linkRe = new RegExp('https?://\\S+', 'g');
@@ -38,7 +38,7 @@ export function md(str, params = {}) {
 
   if (params.emoji !== false) {
     str = str.replace(text2emojiRe, (all, pre, emoji) => pre + (text2emojiMap[emoji] || emoji));
-    str = emojione.toImage(str);
+    str = joypixels.toImage(str);
   }
 
   return str;
