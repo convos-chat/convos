@@ -1,4 +1,4 @@
-import hljs from 'highlight.js';
+import hljs from './hljs';
 import {ensureChildNode, q, removeChildNodes} from './util';
 
 const d = document;
