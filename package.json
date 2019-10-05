@@ -7,22 +7,34 @@
     "dev": "MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 PERL5LIB=$PWD/lib ./script/convos webpack --listen http://*:4000",
     "lint": "ROLLUP_WATCH=yes rollup -c"
   },
+  "browserslist": [
+    "ie >= 11",
+    ">1%"
+  ],
   "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "eslint-plugin-svelte3": "^1.2.3",
+    "node-sass": "^4.12.0",
+    "postcss": "^7.0.18",
+    "postcss-preset-env": "^6.7.0",
+    "rollup": "^1.12.3",
+    "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-bundle-html": "^0.2.1",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-eslint": "^6.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-scss": "^1.0.2",
+    "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-svelte": "^5.1.0",
-    "rollup-plugin-terser": "^5.1.2"
+    "rollup-plugin-terser": "^5.1.2",
+    "rollup-plugin-visualizer": "^2.6.0",
+    "svelte": "^3.4.2"
   },
   "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/runtime": "^7.6.2",
     "@fortawesome/fontawesome-free": "^5.8.2",
     "emojione": "^4.5.0",
-    "eslint-plugin-svelte3": "^1.2.3",
-    "highlight.js": "^9.15.10",
-    "node-sass": "^4.12.0",
-    "rollup": "^1.12.3",
-    "rollup-plugin-eslint": "^6.0.0",
-    "svelte": "^3.4.2"
+    "highlight.js": "^9.15.10"
   }
 }

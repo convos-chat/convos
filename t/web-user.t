@@ -61,7 +61,7 @@ $t->post_ok('/api/notifications/read')->status_is(200);
 $t->delete_ok('/api/user')->status_is(400)
   ->json_is('/errors/0/message', 'You are the only user left.');
 
-$t->get_ok('/api/user/logout')->status_is(302);
+$t->get_ok('/api/user/logout')->status_is(200);
 $t->get_ok('/api/user')->status_is(401);
 
 done_testing;
