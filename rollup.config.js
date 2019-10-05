@@ -1,5 +1,6 @@
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
+import cssnano from 'cssnano';
 import postcss from 'rollup-plugin-postcss'
 import postcssPresetEnv from 'postcss-preset-env';
 import resolve from 'rollup-plugin-node-resolve';
@@ -23,14 +24,15 @@ function outPath(name) {
   return [dest, filename].join('/');
 }
 
-// Define plugins
+// Define default plugins
 const plugins = [
   svelte({dev: development}),
   resolve(),
   commonjs(),
-  postcss({extract: true, plugins: [postcssPresetEnv({})]}),
+  postcss({extract: true, plugins: [postcssPresetEnv(), cssnano()]}),
 ];
 
+// Define development/production plugins
 if (development) {
   plugins.unshift(eslint({exclude: ['assets/sass/**', 'node_modules/**']}));
 }
