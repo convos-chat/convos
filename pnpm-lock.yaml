@@ -7,6 +7,7 @@ dependencies:
 devDependencies:
   '@babel/core': 7.6.2
   '@babel/preset-env': 7.6.2_@babel+core@7.6.2
+  cssnano: 4.1.10
   eslint-plugin-svelte3: 1.2.3_svelte@3.12.1
   node-sass: 4.12.0
   postcss: 7.0.18
@@ -4612,6 +4613,7 @@ specifiers:
   '@babel/preset-env': ^7.6.2
   '@babel/runtime': ^7.6.2
   '@fortawesome/fontawesome-free': ^5.8.2
+  cssnano: ^4.1.10
   emoji-toolkit: ^5.0.5
   eslint-plugin-svelte3: ^1.2.3
   highlight.js: ^9.15.10
