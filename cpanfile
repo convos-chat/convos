@@ -9,7 +9,7 @@ requires "Mojo::IOLoop::ForkCall"         => "0.17";
 requires "Mojo::IRC"                      => "0.44";
 requires "Mojolicious"                    => "8.23";
 requires "Mojolicious::Plugin::OpenAPI"   => "2.16";
-requires "Mojolicious::Plugin::Webpack"   => "0.10";
+requires "Mojolicious::Plugin::Webpack"   => "0.11";
 requires "Parse::IRC"                     => "1.20";
 requires "Time::Piece"                    => "1.20";
 
