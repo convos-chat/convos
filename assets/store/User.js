@@ -1,6 +1,6 @@
 import Connection from './Connection';
-import Dialog from './Dialog';
 import Events from '../js/Events';
+import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import ReactiveList from '../store/ReactiveList';
 
@@ -14,9 +14,6 @@ export default class User extends Reactive {
     this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
     this._readOnlyAttr('events', this._createEvents());
 
-    // Need to come after "api" and "events"
-    this._readOnlyAttr('notifications', new Dialog({api, events: this.events, name: 'Notifications'}));
-
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
 
@@ -26,6 +23,8 @@ export default class User extends Reactive {
     this._readOnlyAttr('loginOp', api.operation('loginUser'));
     this._readOnlyAttr('logoutOp', api.operation('logoutUser'));
     this._readOnlyAttr('registerOp', api.operation('registerUser'));
+
+    this._readOnlyAttr('notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
   }
 
   ensureDialog(params) {
