@@ -3,11 +3,10 @@ import Icon from './Icon.svelte';
 import SidebarItem from '../components/SidebarItem.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
-import {getContext} from 'svelte';
-import {gotoUrl, showMenu} from '../store/router';
+import {closestEl, q, regexpEscape, tagNameIs} from '../js/util';
+import {getContext, onMount} from 'svelte';
+import {activeMenu, gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
-import {q, tagNameIs} from '../js/util';
-import {regexpEscape} from '../js/util';
 
 const user = getContext('user');
 const connections = user.connections;
@@ -22,6 +21,11 @@ let visibleLinks = [];
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
 
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
+
+onMount(() => {
+  document.addEventListener('click', hideMenu);
+  return () => document.removeEventListener('click', hideMenu);
+});
 
 function clearFilter() {
   searchHasFocus = false;
@@ -75,6 +79,12 @@ function filterNav() {
   });
 }
 
+function hideMenu(e) {
+  if (closestEl(e.target, '.chat-header')) return;
+  if (closestEl(e.target, '.sidebar-wrapper')) return;
+  $activeMenu = '';
+}
+
 function onGlobalKeydown(e) {
   if (e.shiftKey && e.keyCode == 13) { // Shift+Enter
     e.preventDefault();
@@ -115,7 +125,7 @@ function onSearchKeydown(e) {
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
 
-<div class="sidebar-wrapper {$showMenu ? 'is-visible' : ''}">
+<div class="sidebar-wrapper {$activeMenu ? 'is-visible' : ''}">
   <div class="sidebar is-chatting">
     <form class="sidebar__header">
       <input type="text"

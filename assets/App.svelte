@@ -1,5 +1,5 @@
 <script>
-import {gotoUrl, historyListener, pathname, pathParts} from './store/router';
+import {activeMenu, gotoUrl, historyListener, pathname, pathParts} from './store/router';
 import {onMount, setContext} from 'svelte';
 import Api from './js/Api';
 import EmbedMaker from './js/EmbedMaker';
@@ -71,3 +71,5 @@ function gotoDefaultPage() {
 </script>
 
 <svelte:component this="{currentPage}"/>
+
+<div class="overlay" class:is-visible="{$activeMenu}">&nbsp;</div>

@@ -1,23 +1,19 @@
 <script>
-import {gotoUrl, showMenu} from '../store/router';
-import {onMount} from 'svelte';
 import Icon from '../components/Icon.svelte';
+import {activeMenu, gotoUrl} from '../store/router';
+import {onMount} from 'svelte';
 
-onMount(() => { $showMenu = false });
+$: if (!$activeMenu && location.href.indexOf('#settings') != -1) {
+  gotoUrl(location.href.replace(/#settings/, ''));
+}
 
 function toggleMenu() {
-  if (location.href.indexOf('#settings') != -1) {
-    $showMenu = true;
-    gotoUrl(location.href.replace(/#.*/, ''));
-  }
-  else {
-    $showMenu = !$showMenu;
-  }
+  $activeMenu = $activeMenu == 'nav' ? '' : 'nav';
 }
 </script>
 
 <header class="chat-header">
   <slot/>
-  <a href="#toggle:menu" class="chat-header__hamburger" on:click|preventDefault="{toggleMenu}"><Icon name="bars"/></a>
+  <a href="#toggle:menu" class="chat-header__hamburger" on:click|preventDefault="{toggleMenu}"><Icon name="{$activeMenu ? 'times-circle' : 'bars'}"/></a>
 </header>
 

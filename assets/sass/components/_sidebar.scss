@@ -11,7 +11,7 @@ $sidebar-item-icon-width: 1.8rem;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 2;
+  z-index: 900;
   -webkit-overflow-scrolling: touch;
 
   &, a {
@@ -28,17 +28,22 @@ $sidebar-item-icon-width: 1.8rem;
   }
 
   @include if_screen("<=full") {
-    display: none;
+    width: 0;
+    max-width: var(--sidebar-width);
+    top: 2.6rem; // TODO: Should be a dynamic value
     right: 0;
     left: auto;
+    overflow: hidden;
+    transform: translateX(100%);
+    transition: transform .2s ease-in-out, width .2s ease-in-out;
 
     .sidebar__header {
       display: none;
     }
 
     &.is-visible {
-      top: 2.6rem; // TODO: Should be a dynamic value
-      display: block;
+      width: 100vw;
+      transform: translateX(0);
     }
   }
 }

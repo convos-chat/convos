@@ -1,8 +1,9 @@
 <script>
-import {l} from '../js/i18n';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import Unread from './Unread.svelte';
+import {activeMenu} from '../store/router';
+import {l} from '../js/i18n';
 
 export let dialog = {name: ''};
 export let href = false;
@@ -18,9 +19,15 @@ $: settingsIcon = !dialog.connection_id ? null
                 : !dialog.dialog_id     ? 'network-wired'
                 : dialog.is('private')  ? 'user'
                 :                         'user-friends';
+
+function clicked(e) {
+  const aEl = e.target.closest('a');
+  if (aEl && aEl.classList.contains('sidebar__item__link')) $activeMenu = '';
+}
+
 </script>
 
-<div class="{classNames.join(' ')}">
+<div class="{classNames.join(' ')}" on:click="{clicked}">
   {#if settingsIcon}
     <Link href="/chat/{dialog.path}#settings" className="sidebar__item__settings">
       <Icon name="{settingsIcon}"/>
