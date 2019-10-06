@@ -19,7 +19,7 @@ let searchHasFocus = false;
 let searchInput;
 let visibleLinks = [];
 
-$: filterNav(encodeURIComponent(filter));
+$: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
 
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
@@ -28,7 +28,7 @@ function clearFilter() {
   setTimeout(() => {filter = ''}, 100);
 }
 
-function filterNav(filter) {
+function filterNav() {
   if (!navEl) return;
 
   const filterRe = new RegExp('\\b\\W*' + regexpEscape(filter), 'i');
@@ -48,24 +48,30 @@ function filterNav(filter) {
     const listItem = aEl.parentNode;
     const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
     if (makeVisible) visibleLinks.push(aEl);
-    makeVisible ? listItem.removeAttribute('hidden') : listItem.setAttribute('hidden', true);
-
+    makeVisible ? listItem.removeAttribute('hidden') : listItem.setAttribute('hidden', '');
     seen[aEl.href] = true;
   });
 
-  // Show and hide navigation headings
+  // Show connections
+  q(navEl, '.for-connection', connEl => {
+    let el = connEl;
+    while ((el = el.nextElementSibling)) {
+      if (!el.classList.contains('for-dialog')) break;
+      if (el.hasAttribute('hidden')) continue;
+      return connEl.removeAttribute('hidden');
+    }
+  });
+
+  // Show headings
   q(navEl, 'h3', h3 => {
     let el = h3;
-    let makeVisible = false;
-
     while ((el = el.nextElementSibling)) {
       if (tagNameIs(el, 'h3')) break;
       if (el.hasAttribute('hidden')) continue;
-      makeVisible = true;
-      break;
+      return h3.removeAttribute('hidden');
     }
 
-    makeVisible ? h3.removeAttribute('hidden') : h3.setAttribute('hidden', true);
+    h3.setAttribute('hidden', '');
   });
 }
 

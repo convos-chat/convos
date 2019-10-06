@@ -10,8 +10,9 @@ export let icon = 'cog';
 
 const classNames = ['sidebar__item'];
 
-if (dialog.dialog_id) classNames.push('for-dialog');
-if (dialog.connection_id) classNames.push('has-settings');
+$: if (dialog.connection_id) classNames.push('has-settings');
+$: if (dialog.connection_id && !dialog.dialog_id) classNames.push('for-connection');
+$: if (dialog.dialog_id) classNames.push('for-dialog');
 
 $: settingsIcon = !dialog.connection_id ? null
                 : !dialog.dialog_id     ? 'network-wired'
