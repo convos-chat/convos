@@ -50,6 +50,7 @@ export function urlToForm(formEl, url = get(currentUrl)) {
 
 export const activeMenu = writable('');
 export const baseUrl = '//' + location.host; // TODO: Add support for example.com/whatever/convos/
+export const docTitle = writable(document.title);
 export const pathname = writable(location.pathname);
 
 export const pathParts = derived(pathname, ($pathname) => {

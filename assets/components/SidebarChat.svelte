@@ -10,6 +10,7 @@ import {l} from '../js/i18n';
 
 const user = getContext('user');
 const connections = user.connections;
+const notifications = user.notifications;
 
 let activeLinkIndex = 0;
 let filter = '';
@@ -160,9 +161,9 @@ function onSearchKeydown(e) {
       {/if}
 
       <h3>{$user.email || l('Account')}</h3>
-      <SidebarItem href="/chat" icon="{user.unread ? 'bell' : 'bell-slash'}">
+      <SidebarItem href="/chat" icon="{$notifications.unread ? 'bell' : 'bell-slash'}">
         <span>{l('Notifications')}</span>
-        <Unread unread="{user.unread}"/>
+        <Unread unread="{$notifications.unread}"/>
       </SidebarItem>
       <SidebarItem href="/add/conversation" icon="comment">
         <span>{l('Add conversation')}</span>
