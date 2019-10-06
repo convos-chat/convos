@@ -40,8 +40,32 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
-    if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
-    this.update({messages: this.messages.concat(msg)});
+    return this.addMessages('push', [msg]);
+  }
+
+  addMessages(method, messages) {
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      if (msg.hasOwnProperty('markdown')) continue; // Already processed
+      if (!msg.from) msg.from = this.connection_id || 'Convos';
+      if (msg.vars) msg.message = l(msg.message, ...msg.vars);
+      if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
+
+      msg.color = str2color(msg.from);
+      msg.ts = new Time(msg.ts);
+      msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
+      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/([.!?])?$/, ''));
+      msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
+      msg.markdown = md(msg.message);
+    }
+
+    switch (method) {
+      case 'push': this.update({messages: this.messages.concat(messages)}); break;
+      case 'set': this.update({messages}); break;
+      case 'unshift': this.update({messages: messages.concat(this.messages)}); break;
+    }
+
+    return this;
   }
 
   findParticipants(params) {
@@ -72,7 +96,7 @@ export default class Dialog extends Reactive {
     if (!this.messagesOp || this.messagesOp.is('success')) return this;
     await this.messagesOp.perform(this);
     this._loadParticipants();
-    return this.update({messages: this.messagesOp.res.body.messages || []});
+    return this.addMessages('set', this.messagesOp.res.body.messages || []);
   }
 
   async loadHistoric() {
@@ -86,8 +110,8 @@ export default class Dialog extends Reactive {
     });
 
     const messages = this.messagesOp.res.body.messages || [];
-    if (!messages.length && this.messages.length) this.messages[0].endOfHistory = true;
-    this.update({messages: messages.concat(this.messages)});
+    if (!messages.length && this.messages.length) first.endOfHistory = true;
+    return this.addMessages('unshift', messsages);
   }
 
   participant(nick, params = {}) {
@@ -118,12 +142,6 @@ export default class Dialog extends Reactive {
     if (!this.setLastReadOp) return;
     await this.setLastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
     this.update(this.setLastReadOp.res.body); // Update last_read
-  }
-
-  update(params) {
-    if (params.messages) this._processMessages(params.messages);
-    if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
-    return super.update(params);
   }
 
   wsEventMode(params) {
@@ -193,22 +211,6 @@ export default class Dialog extends Reactive {
     }
 
     return msg;
-  }
-
-  _processMessages(messages) {
-    for (let i = 0; i < messages.length; i++) {
-      const msg = messages[i];
-      if (msg.hasOwnProperty('markdown')) continue; // Already processed
-      if (!msg.from) msg.from = this.connection_id || 'Convos';
-      if (msg.vars) msg.message = l(msg.message, ...msg.vars);
-
-      msg.color = str2color(msg.from);
-      msg.ts = new Time(msg.ts);
-      msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
-      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/([.!?])?$/, ''));
-      msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
-      msg.markdown = md(msg.message);
-    }
   }
 
   _updateParticipants(params) {

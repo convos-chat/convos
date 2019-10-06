@@ -1,8 +1,8 @@
 <script>
-import {afterUpdate, getContext, onMount, tick} from 'svelte';
+import {afterUpdate, getContext, onDestroy, onMount, tick} from 'svelte';
 import {debounce, q} from '../js/util';
-import {gotoUrl, pathParts, currentUrl} from '../store/router';
 import {l} from '../js/i18n';
+import {pathParts, currentUrl} from '../store/router';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
@@ -14,27 +14,27 @@ import SidebarChat from '../components/SidebarChat.svelte';
 
 const embedMaker = getContext('embedMaker');
 const user = getContext('user');
-const w = window;
 
+// Elements
+let messagesEl;
+let settingsComponent = null;
+
+// Variables for scrolling
 let containerHeight = 0;
 let messagesHeight = 0;
 let messagesHeightLast = 0;
-let messagesEl;
 let observer;
-let previousPath = $pathParts;
 let scrollingClass = 'has-no-scrolling';
 let scrollPos = 'bottom';
 
-$: connection = $user.findDialog({connection_id: $pathParts[1]});
-$: currentNick = connection ? connection.nick : user.email;
-$: dialog = $user.findDialog({connection_id: $pathParts[1], dialog_id: $pathParts[2]}) || user.notifications;
-$: hasValidPath = $pathParts.slice(1).join('/') == decodeURIComponent(dialog.path);
-$: isLoading = $dialog.is('loading');
-$: messages = hasValidPath ? $dialog.messages : [];
-$: settingsComponent = $currentUrl.hash != '#settings' || !hasValidPath ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
+// Variables for calculating active connection and dialog
+let connection = {};
+let dialog = user.notifications;
+let previousPath = '';
+let unsubscribeDialog;
 
-$: if (dialog.connection_id) dialog.load();
-$: calculateScrollingClass(messagesHeight > containerHeight);
+$: calculateDialog($user, $pathParts);
+$: calculateSettingsComponent($currentUrl);
 
 onMount(() => {
   // Clean up any embeds added from a previous chat
@@ -44,11 +44,40 @@ onMount(() => {
 afterUpdate(() => {
   observeMessages();
   keepScrollPosition();
-  isRead();
+});
+
+onDestroy(() =>  {
+  if (unsubscribeDialog) unsubscribeDialog();
 });
 
 function addDialog(e) {
-  if (connection) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
+  if (connection.connection_id) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
+}
+
+function calculateDialog(user, pathParts) {
+  if (previousPath == pathParts.join('/')) return;
+
+  const d = pathParts.length == 1 ? user.notifications : user.findDialog({connection_id: pathParts[1], dialog_id: $pathParts[2]});
+  if (!d) return;
+  if (d == dialog && previousPath) return;
+  if (unsubscribeDialog) unsubscribeDialog();
+  if (previousPath && dialog.setLastRead) dialog.setLastRead();
+
+  connection = user.findDialog({connection_id: pathParts[1]}) || {};
+  dialog = d;
+  previousPath = pathParts.join('/');
+  unsubscribeDialog = dialog.subscribe(d => { dialog = d });
+  dialog.load();
+  calculateSettingsComponent($currentUrl);
+}
+
+function calculateSettingsComponent(currentUrl) {
+  if (currentUrl.hash == '#settings' && dialog.connection_id) {
+    settingsComponent = dialog.dialog_id ? DialogSettings : ConnectionSettings;
+  }
+  else {
+    settingsComponent = null;
+  }
 }
 
 const calculateScrollingClass = debounce(hasScrolling => {
@@ -65,17 +94,10 @@ function keepScrollPosition() {
   }
 }
 
-function isRead() {
-  if (previousPath.join('/') == $pathParts.join('/')) return;
-  const previousDialog = $user.findDialog({connection_id: previousPath[1], dialog_id: previousPath[2]});
-  if (previousDialog) previousDialog.isRead();
-  previousPath = $pathParts;
-}
-
 function observed(entries, observer) {
   entries.forEach(({isIntersecting, target}) => {
     if (!isIntersecting) return;
-    embedMaker.render((messages[target.dataset.index] || {}).embeds || [], target);
+    embedMaker.render((dialog.messages[target.dataset.index] || {}).embeds || [], target);
   });
 }
 
@@ -94,8 +116,8 @@ const onScroll = debounce(e => {
             : scrollTop < 100 ? 'top'
             : 'middle';
 
-  if (scrollPos == 'top' && !isLoading) {
-    if (messages.length && !messages[0].endOfHistory) dialog.loadHistoric();
+  if (scrollPos == 'top' && !dialog.is('loading')) {
+    if (dialog.messages.length && !dialog.messages[0].endOfHistory) dialog.loadHistoric();
     messagesHeightLast = messagesHeight;
   }
 }, 20);
@@ -114,20 +136,15 @@ const onScroll = debounce(e => {
         <h1>{$pathParts[2] || $pathParts[1]}</h1>
         <small><DialogSubject dialog="{dialog}"/></small>
       {:else}
-        <h1>
-          {l('Notifications')}
-          <a href="#clear:notifications" on:click|preventDefault="{e => user.notifications.isReadOp.perform()}">
-            ({dialog.unread})
-          </a>
-        </h1>
+        <h1>{l('Notifications')}</h1>
       {/if}
     </ChatHeader>
 
-    {#if messages.length == 0}
+    {#if dialog.messages.length == 0}
       {#if !$pathParts[1]}
         <h2>{l('No notifications.')}</h2>
       {:else if $pathParts[1] == dialog.connection_id}
-        <h2>{l(isLoading ? 'Loading messages...' : 'No messages.')}</h2>
+        <h2>{l(dialog.is('loading') ? 'Loading messages...' : 'No messages.')}</h2>
         <p>{dialog.frozen}</p>
       {/if}
     {/if}
@@ -139,7 +156,7 @@ const onScroll = debounce(e => {
         <a href="#add:{$pathParts[2]}" on:click="{addDialog}" class="btn">Yes</a>
         <Link href="/chat" className="btn">{l('No')}</Link>
       </p>
-    {:else if $pathParts[1] && !connection}
+    {:else if $pathParts[1] && !connection.connection_id}
       <h2>{l('Connection does not exist.')}</h2>
       <p>{l('Do you want to make a new connection?')}</p>
       <p>
@@ -148,29 +165,29 @@ const onScroll = debounce(e => {
       </p>
     {/if}
 
-    {#if isLoading && scrollPos == 'top'}
+    {#if dialog.is('loading')}
       <div class="message-status-line for-loading"><span>{l('Loading messages...')}</span></div>
     {/if}
 
-    {#each messages as message, i}
+    {#each dialog.messages as message, i}
       {#if message.endOfHistory}
         <div class="message-status-line for-start-of-history"><span>{l('Start of history')}</span></div>
       {:else if message.dayChanged}
         <div class="message-status-line for-day-changed"><span>{message.ts.getHumanDate()}</span></div>
       {/if}
 
-      {#if i == messages.length - dialog.unread}
+      {#if i && i == dialog.messages.length - dialog.unread}
         <div class="message-status-line for-last-read"><span>{l('New messages')}</span></div>
       {/if}
 
       <div class="message is-type-{message.type || 'notice'}"
-        class:is-sent-by-you="{message.from == currentNick}"
+        class:is-sent-by-you="{message.from == connection.nick}"
         class:is-hightlighted="{message.highlight}"
         class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
         class:has-same-from="{message.isSameSender && !message.dayChanged}"
         data-index="{i}">
 
-        <Icon name="{message.from == currentNick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
+        <Icon name="{message.from == connection.nick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
         <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.toHuman()}</b>
         <Link className="message__from" href="/chat/{$pathParts[1]}/{message.from}" style="color:{message.color}">{message.from}</Link>
         <div class="message__text">{@html message.markdown}</div>
