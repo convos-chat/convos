@@ -48,9 +48,9 @@ export function urlToForm(formEl, url = get(currentUrl)) {
   });
 }
 
+export const activeMenu = writable('');
 export const baseUrl = '//' + location.host; // TODO: Add support for example.com/whatever/convos/
 export const pathname = writable(location.pathname);
-export const showMenu = writable(false);
 
 export const pathParts = derived(pathname, ($pathname) => {
   return $pathname.split('/').filter(p => p.length).map(decodeURIComponent);

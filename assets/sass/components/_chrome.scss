@@ -11,12 +11,29 @@ body.no-js .if-js {
 
 .main {
   padding: 0 var(--gutter);
-  max-width: $breakpoint-max-width;
+}
+
+.overlay {
+  background: #000;
+  z-index: 800;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+
+  &.is-visible {
+    opacity: 0.3;
+  }
 }
 
 @include if_screen(">full") {
   .main {
     padding: 0 calc(var(--gutter) * 2);
     margin-left: var(--sidebar-width);
+    max-width: $breakpoint-max-width;
   }
 }
