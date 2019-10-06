@@ -68,6 +68,12 @@ export default class Dialog extends Reactive {
     return this.mesagesOp && this.mesagesOp.is(status);
   }
 
+  async isRead() {
+    if (!this.isReadOp) return;
+    await this.isReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
+    this.update(this.isReadOp.res.body); // Update last_read
+  }
+
   async load() {
     if (!this.mesagesOp || this.mesagesOp.is('success')) return this;
     await this.mesagesOp.perform(this);
@@ -88,12 +94,6 @@ export default class Dialog extends Reactive {
     const messages = this.mesagesOp.res.body.messages || [];
     if (!messages.length && this.messages.length) this.messages[0].endOfHistory = true;
     this.update({messages: messages.concat(this.messages)});
-  }
-
-  async markAsRead() {
-    if (!this.lastReadOp) return;
-    await this.lastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
-    this.update(this.lastReadOp.res.body); // Update last_read
   }
 
   participant(nick, params = {}) {
@@ -165,9 +165,13 @@ export default class Dialog extends Reactive {
   }
 
   _addOperations() {
-    if (!this.dialog_id) return;
-    this._readOnlyAttr('lastReadOp', this.api.operation('setDialogLastRead'));
-    this._readOnlyAttr('mesagesOp', this.api.operation('dialogMessages'));
+    if (this.dialog_id) {
+      this._readOnlyAttr('isReadOp', this.api.operation('setDialogLastRead'));
+      this._readOnlyAttr('mesagesOp', this.api.operation('dialogMessages'));
+    }
+    else {
+      this._readOnlyAttr('isReadOp', this.api.operation('readNotifications'));
+    }
   }
 
   _loadParticipants() {

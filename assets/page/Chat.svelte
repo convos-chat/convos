@@ -44,7 +44,7 @@ onMount(() => {
 afterUpdate(() => {
   observeMessages();
   keepScrollPosition();
-  markAsRead();
+  isRead();
 });
 
 function addDialog(e) {
@@ -65,10 +65,10 @@ function keepScrollPosition() {
   }
 }
 
-function markAsRead() {
+function isRead() {
   if (previousPath.join('/') == $pathParts.join('/')) return;
   const previousDialog = $user.findDialog({connection_id: previousPath[1], dialog_id: previousPath[2]});
-  if (previousDialog) previousDialog.markAsRead();
+  if (previousDialog) previousDialog.isRead();
   previousPath = $pathParts;
 }
 
@@ -116,7 +116,7 @@ const onScroll = debounce(e => {
       {:else}
         <h1>
           {l('Notifications')}
-          <a href="#clear:notifications" on:click|preventDefault="{e => user.readNotificationsOp.perform()}">
+          <a href="#clear:notifications" on:click|preventDefault="{e => user.notifications.isReadOp.perform()}">
             ({dialog.unread})
           </a>
         </h1>

@@ -25,7 +25,6 @@ export default class User extends Reactive {
     this._readOnlyAttr('getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this._readOnlyAttr('loginOp', api.operation('loginUser'));
     this._readOnlyAttr('logoutOp', api.operation('logoutUser'));
-    this._readOnlyAttr('readNotificationsOp', api.operation('readNotifications'));
     this._readOnlyAttr('registerOp', api.operation('registerUser'));
   }
 
@@ -130,7 +129,7 @@ export default class User extends Reactive {
 
   _parseGetUser(body) {
     this.connections.clear();
-    if (body.notifications) this.notifications.update({messages: body.notifications}); // Need to be done before this.update()
+    if (body.notifications) this.notifications.update({messages: body.notifications, unread: body.unread}); // Need to be done before this.update()
     if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
     if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
     return this;
