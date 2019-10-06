@@ -128,9 +128,10 @@ export default class User extends Reactive {
 
   _parseGetUser(body) {
     this.connections.clear();
-    if (body.notifications) this.notifications.update({messages: body.notifications, unread: body.unread}); // Need to be done before this.update()
-    if (body.connections) body.connections.forEach(c => this.ensureDialog(c));
-    if (body.dialogs) body.dialogs.forEach(d => this.ensureDialog(d));
+    this.notifications.addMessages('set', body.notifications || []);
+    this.notifications.update({unread: body.unread || 0});
+    body.connections.forEach(c => this.ensureDialog(c));
+    body.dialogs.forEach(d => this.ensureDialog(d));
     return this;
   }
 }
