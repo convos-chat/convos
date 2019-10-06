@@ -75,7 +75,7 @@ One very useful addition is [EV](https://metacpan.org/pod/distribution/Mojolicio
 which makes Convos faster. It can be installed with the command below:
 
 ```bash
-$ ./script/cpanm --sudo EV
+$ perl ./script/cpanm --sudo EV
 ```
 
 ## Snap Install

@@ -64,8 +64,8 @@ globally or in your `$HOME/perl5` directy, then use one of these command
 instead:
 
 ```
-$ cpanm --installdeps --sudo .
-$ cpanm --installdeps .
+$ perl ./script/cpanm --installdeps --sudo .
+$ perl ./script/cpanm --installdeps .
 ```
 
 ### Installing an IRC daemon
