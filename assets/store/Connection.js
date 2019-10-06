@@ -116,7 +116,7 @@ export default class Connection extends Dialog {
   }
 
   _addOperations() {
-    this._readOnlyAttr('isReadOp', this.api.operation('setConnectionLastRead'));
-    this._readOnlyAttr('mesagesOp', this.api.operation('connectionMessages'));
+    this._readOnlyAttr('setLastReadOp', this.api.operation('setConnectionLastRead'));
+    this._readOnlyAttr('messagesOp', this.api.operation('connectionMessages'));
   }
 }
