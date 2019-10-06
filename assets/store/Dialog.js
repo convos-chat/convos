@@ -65,33 +65,27 @@ export default class Dialog extends Reactive {
     if (status == 'frozen') return this.frozen && true;
     if (status == 'private') return this.is_private;
     if (status == 'unread') return this.unread && true;
-    return this.mesagesOp && this.mesagesOp.is(status);
-  }
-
-  async isRead() {
-    if (!this.isReadOp) return;
-    await this.isReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
-    this.update(this.isReadOp.res.body); // Update last_read
+    return this.messagesOp && this.messagesOp.is(status);
   }
 
   async load() {
-    if (!this.mesagesOp || this.mesagesOp.is('success')) return this;
-    await this.mesagesOp.perform(this);
+    if (!this.messagesOp || this.messagesOp.is('success')) return this;
+    await this.messagesOp.perform(this);
     this._loadParticipants();
-    return this.update({messages: this.mesagesOp.res.body.messages || []});
+    return this.update({messages: this.messagesOp.res.body.messages || []});
   }
 
   async loadHistoric() {
     const first = this.messages[0];
     if (!first || first.end) return;
 
-    await this.mesagesOp.perform({
+    await this.messagesOp.perform({
       before: first.ts.toISOString(),
       connection_id: this.connection_id,
       dialog_id: this.dialog_id,
     });
 
-    const messages = this.mesagesOp.res.body.messages || [];
+    const messages = this.messagesOp.res.body.messages || [];
     if (!messages.length && this.messages.length) this.messages[0].endOfHistory = true;
     this.update({messages: messages.concat(this.messages)});
   }
@@ -118,6 +112,12 @@ export default class Dialog extends Reactive {
       {connection_id: this.connection_id, dialog_id: this.dialog_id || '', message},
       methodName ? this[methodName].bind(this) : null,
     );
+  }
+
+  async setLastRead() {
+    if (!this.setLastReadOp) return;
+    await this.setLastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
+    this.update(this.setLastReadOp.res.body); // Update last_read
   }
 
   update(params) {
@@ -165,17 +165,12 @@ export default class Dialog extends Reactive {
   }
 
   _addOperations() {
-    if (this.dialog_id) {
-      this._readOnlyAttr('isReadOp', this.api.operation('setDialogLastRead'));
-      this._readOnlyAttr('mesagesOp', this.api.operation('dialogMessages'));
-    }
-    else {
-      this._readOnlyAttr('isReadOp', this.api.operation('readNotifications'));
-    }
+    this._readOnlyAttr('setLastReadOp', this.api.operation('setDialogLastRead'));
+    this._readOnlyAttr('messagesOp', this.api.operation('dialogMessages'));
   }
 
   _loadParticipants() {
-    if (!this.mesagesOp || !this.mesagesOp.is('success')) return;
+    if (!this.messagesOp || !this.messagesOp.is('success')) return;
     if (!this.events.ready || this._participantsLoaded) return;
     if (this.dialog_id && !this.is('private') && !this.is('frozen')) this.send('/names', '_updateParticipants');
     this._participantsLoaded = true;
