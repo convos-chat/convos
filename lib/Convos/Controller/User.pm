@@ -61,14 +61,17 @@ sub login {
 }
 
 sub logout {
-  my $self = shift->openapi->valid_input or return;
+  my $self   = shift->openapi->valid_input or return;
+  my $format = $self->stash('format') || 'json';
 
   $self->delay(
     sub { $self->auth->logout({}, shift->begin) },
     sub {
       my ($delay, $err) = @_;
       return $self->render(openapi => E($err), status => 500) if $err;
-      return $self->session({expires => 1})->render(openapi => {message => 'Logged out.'});
+      $self->session({expires => 1});
+      return $self->redirect_to('/') if $format eq 'html';
+      return $self->render(openapi => {message => 'Logged out.'});
     },
   );
 }
