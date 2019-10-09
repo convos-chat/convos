@@ -177,9 +177,12 @@ function onSearchKeydown(e) {
       <SidebarItem href="/help" icon="question-circle">
         <span>{l('Help')}</span>
       </SidebarItem>
-      <SidebarItem href="/logout" icon="power-off">
-        <span>{l('Log out')}</span>
-      </SidebarItem>
+      <div class="sidebar__item">
+        <a href="/api/user/logout.html" class="sidebar__item__link">
+          <Icon name="power-off"/>
+          <span>{l('Log out')}</span>
+        </a>
+      </div>
     </nav>
   </div>
 </div>

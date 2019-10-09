@@ -21,7 +21,6 @@ export default class User extends Reactive {
     // TODO: Make operations bubble into the User object. Require changes in App.svelte
     this._readOnlyAttr('getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this._readOnlyAttr('loginOp', api.operation('loginUser'));
-    this._readOnlyAttr('logoutOp', api.operation('logoutUser'));
     this._readOnlyAttr('registerOp', api.operation('registerUser'));
 
     this._readOnlyAttr('notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
@@ -56,6 +55,10 @@ export default class User extends Reactive {
     if (!params.dialog_id) return this.connections.find(conn => conn.connection_id == params.connection_id);
     const conn = this.findDialog({connection_id: params.connection_id});
     return conn && conn.findDialog(params);
+  }
+
+  is(status) {
+    return this.getUserOp.is(status);
   }
 
   isDialogOperator(params) {
@@ -130,8 +133,8 @@ export default class User extends Reactive {
     this.connections.clear();
     this.notifications.addMessages('set', body.notifications || []);
     this.notifications.update({unread: body.unread || 0});
-    body.connections.forEach(c => this.ensureDialog(c));
-    body.dialogs.forEach(d => this.ensureDialog(d));
-    return this;
+    (body.connections || []).forEach(c => this.ensureDialog(c));
+    (body.dialogs || []).forEach(d => this.ensureDialog(d));
+    return this.update({});
   }
 }

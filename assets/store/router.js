@@ -28,7 +28,7 @@ function parseUrl(href) {
   const queryPos = indexOfNull(href, '?');
   if (pathnameStart == baseUrl.length - 1) return false;
   const pathpart = href.substring(pathnameStart, queryPos || hashPos || href.length);
-  pathname.set(pathpart);
+  setTimeout(() => pathname.set(pathpart), 0);
   return true;
 }
 

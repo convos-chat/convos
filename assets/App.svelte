@@ -32,7 +32,6 @@ const user = new User({api});
 const connections = user.connections;
 const notifications = user.notifications;
 const loginOp = user.loginOp;
-const logoutOp = user.logoutOp;
 
 setContext('embedMaker', embedMaker);
 setContext('user', user);
@@ -41,26 +40,21 @@ $: if (document) document.title = $notifications.unread ? '(' + $notifications.u
 $: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
 $: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname);
 
+$: if ($loginOp.is('error') || $user.is('error')) {
+  gotoUrl('/login', {replace: true});
+}
+
 $: if ($loginOp.is('success')) {
   document.cookie = loginOp.res.headers['Set-Cookie'];
   loginOp.reset();
   user.load().then(gotoDefaultPage);
 }
 
-$: if ($logoutOp.is('success')) {
-  logoutOp.reset();
-  user.reset();
-  gotoUrl('/');
-}
-
 onMount(async () => {
-  await user.load();
-  if (!currentPage) gotoDefaultPage();
-
   const historyUnlistener = historyListener();
   const removeEls = document.querySelectorAll('.js-remove');
   for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-
+  user.load();
   return () => {
     historyUnlistener();
   };
@@ -68,7 +62,7 @@ onMount(async () => {
 
 function gotoDefaultPage() {
   const lastUrl = localStorage.getItem('lastUrl');
-  gotoUrl(lastUrl || ($connections.length ? '/chat' : '/add/connection'));
+  gotoUrl(lastUrl || ($connections.length ? '/chat' : '/add/connection'), {replace: true});
 }
 </script>
 
