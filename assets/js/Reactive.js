@@ -1,19 +1,28 @@
 export default class Reactive {
   constructor() {
-    this._syncWithLocalStorage = {};
+    this._on = {};
     this._reactive = {};
-    this._on = {message: [], update: []};
+    this._syncWithLocalStorage = {};
   }
 
   emit(event, params) {
-    this._on[event].forEach(cb => cb(params));
+    const subscribers = this._on[event];
+    if (!subscribers) return this;
+    for (let i = 0; i < subscribers.length; i++) subscribers[i][0](params);
     return this;
   }
 
   on(event, cb) {
     const p = cb ? null : new Promise(resolve => { cb = resolve });
-    const unsubscribe = () => { this._on[event] = this._on[event].filter(i => { i != cb }) };
-    this._on[event].push(cb);
+    const subscribers = this._on[event] || (this._on[event] = []);
+    const subscriber = [cb]; // Make sure each element is unique
+    subscribers.push(subscriber);
+
+    const unsubscribe = () => {
+      const index = subscribers.indexOf(subscriber);
+      if (index != -1) subscribers.splice(index, 1);
+    };
+
     return p ? p.finally(unsubscribe) : unsubscribe;
   }
 
@@ -24,12 +33,23 @@ export default class Reactive {
   }
 
   update(params) {
-    Object.keys(params).forEach(name => {
-      if (this._reactive.hasOwnProperty(name)) this._reactive[name] = params[name];
-      if (this._syncWithLocalStorage[name]) localStorage.setItem(name, JSON.stringify(this._reactive[name]));
-    });
+    let paramNames = Object.keys(params);
+    let updated = 0;
 
-    return this.emit('update', this);
+    for (let i = 0; i < paramNames.length; i++) {
+      const name = paramNames[i];
+
+      if (this._reactive.hasOwnProperty(name) && this._reactive[name] !== params[name]) {
+        this._reactive[name] = params[name];
+        updated++;
+      }
+
+      if (this._syncWithLocalStorage[name]) {
+        localStorage.setItem(name, JSON.stringify(this._reactive[name]));
+      }
+    }
+
+    return updated || paramNames.length == 0 ? this.emit('update', this) : this;
   }
 
   _localStorageAttr(name, val) {
