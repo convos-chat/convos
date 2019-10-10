@@ -17,6 +17,10 @@ export default class Notifications extends Dialog {
   async load() { }
   async loadHistoric() { }
 
+  topicOrStatus() {
+    return this.frozen || '';
+  }
+
   _addOperations() {
     this._readOnlyAttr('setLastReadOp', this.api.operation('readNotifications'));
   }
