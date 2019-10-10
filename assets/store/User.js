@@ -2,7 +2,7 @@ import Connection from './Connection';
 import Events from '../js/Events';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
-import ReactiveList from '../store/ReactiveList';
+import {sortByName} from '../js/util';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -10,10 +10,10 @@ export default class User extends Reactive {
 
     const api = params.api;
     this._readOnlyAttr('api', () => api);
-    this._readOnlyAttr('connections', new ReactiveList());
     this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
     this._readOnlyAttr('events', this._createEvents());
 
+    this._updateableAttr('connections', []);
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
 
@@ -47,7 +47,9 @@ export default class User extends Reactive {
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('update', () => this.update({}));
 
-    this.connections.add(conn).sort();
+    this.connections.push(conn);
+    this.connections.sort(sortByName);
+    this.update({});
     return conn;
   }
 
@@ -85,7 +87,7 @@ export default class User extends Reactive {
       this.update({});
     }
     else {
-      this.connections.remove(conn => conn.connection_id != params.connection_id);
+      this.update({connections: this.connections.filter(c => c.connection_id != params.connection_id)});
     }
   }
 
@@ -112,7 +114,7 @@ export default class User extends Reactive {
     events.on('update', events => {
       if (events.ready) return;
       this.getUserOp.update({status: 'pending'});
-      this.connections.map(conn => conn.update({frozen: 'Unreachable.'}));
+      this.connections.forEach(c => c.update({frozen: 'Unreachable.'}));
     });
 
     return events;
@@ -130,7 +132,7 @@ export default class User extends Reactive {
   }
 
   _parseGetUser(body) {
-    this.connections.clear();
+    this.update({connections: []});
     this.notifications.addMessages('set', body.notifications || []);
     this.notifications.update({unread: body.unread || 0});
     (body.connections || []).forEach(c => this.ensureDialog(c));

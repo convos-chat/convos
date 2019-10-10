@@ -9,8 +9,7 @@ import {activeMenu, gotoUrl} from '../store/router';
 import {l} from '../js/i18n';
 
 const user = getContext('user');
-const connections = user.connections;
-const notifications = user.notifications;
+const notifications = $user.notifications;
 
 let activeLinkIndex = 0;
 let filter = '';
@@ -140,9 +139,9 @@ function onSearchKeydown(e) {
     </form>
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
-      {#if $connections.length}
+      {#if $user.connections.length}
         <h3>{l('Group conversations')}</h3>
-        {#each $connections.all() as connection}
+        {#each $user.connections as connection}
           <SidebarItem dialog="{connection}"/>
           {#each connection.publicDialogs as dialog}
             <SidebarItem {dialog}/>
@@ -150,7 +149,7 @@ function onSearchKeydown(e) {
         {/each}
 
         <h3>{l('Private conversations')}</h3>
-        {#each $connections.all() as connection}
+        {#each $user.connections as connection}
           {#if connection.privateDialogs.length}
             <SidebarItem dialog="{connection}"/>
             {#each connection.privateDialogs as dialog}
