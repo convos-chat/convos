@@ -27,6 +27,7 @@ export default class Dialog extends Reactive {
     this._updateableAttr('last_read', new Time(params.last_read));
     this._updateableAttr('messages', []);
     this._updateableAttr('name', params.name || 'Unknown');
+    this._updateableAttr('status', 'loading');
     this._updateableAttr('topic', params.topic || '');
     this._updateableAttr('unread', params.unread || 0);
 
@@ -65,6 +66,7 @@ export default class Dialog extends Reactive {
       case 'unshift': this.update({messages: messages.concat(this.messages)}); break;
     }
 
+    this.update({status: 'loaded'});
     return this;
   }
 
@@ -89,11 +91,12 @@ export default class Dialog extends Reactive {
     if (status == 'frozen') return this.frozen && true;
     if (status == 'private') return this.is_private;
     if (status == 'unread') return this.unread && true;
-    return this.messagesOp && this.messagesOp.is(status);
+    return this.status == status;
   }
 
   async load() {
     if (!this.messagesOp || this.messagesOp.is('success')) return this;
+    this.update({status: 'loading'});
     await this.messagesOp.perform(this);
     this._loadParticipants();
     return this.addMessages('set', this.messagesOp.res.body.messages || []);
@@ -103,6 +106,7 @@ export default class Dialog extends Reactive {
     const first = this.messages[0];
     if (!first || first.end) return;
 
+    this.update({status: 'loading'});
     await this.messagesOp.perform({
       before: first.ts.toISOString(),
       connection_id: this.connection_id,
@@ -142,6 +146,10 @@ export default class Dialog extends Reactive {
     if (!this.setLastReadOp) return;
     await this.setLastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
     this.update(this.setLastReadOp.res.body); // Update last_read
+  }
+
+  topicOrStatus() {
+    return this.frozen || this.topic || (this.is_private ? 'Private conversation.' : 'No topic is set.');
   }
 
   wsEventMode(params) {

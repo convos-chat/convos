@@ -1,16 +1,16 @@
 <script>
+import ChatHeader from '../components/ChatHeader.svelte';
+import ChatInput from '../components/ChatInput.svelte';
+import ChatMessages from '../components/ChatMessages.svelte';
+import ConnectionSettings from '../components/ConnectionSettings.svelte';
+import DialogSettings from '../components/DialogSettings.svelte';
+import Icon from '../components/Icon.svelte';
+import Link from '../components/Link.svelte';
+import SidebarChat from '../components/SidebarChat.svelte';
 import {afterUpdate, getContext, onDestroy, onMount, tick} from 'svelte';
 import {debounce, q} from '../js/util';
 import {l} from '../js/i18n';
 import {pathParts, currentUrl} from '../store/router';
-import ChatHeader from '../components/ChatHeader.svelte';
-import ChatInput from '../components/ChatInput.svelte';
-import ConnectionSettings from '../components/ConnectionSettings.svelte';
-import DialogSettings from '../components/DialogSettings.svelte';
-import DialogSubject from '../components/DialogSubject.svelte';
-import Icon from '../components/Icon.svelte';
-import Link from '../components/Link.svelte';
-import SidebarChat from '../components/SidebarChat.svelte';
 
 const embedMaker = getContext('embedMaker');
 const user = getContext('user');
@@ -55,15 +55,15 @@ function addDialog(e) {
 }
 
 function calculateDialog(user, pathParts) {
-  if (previousPath == pathParts.join('/')) return;
+  const c = user.findDialog({connection_id: pathParts[1]}) || {};
+  if (c != connection) connection = c;
 
   const d = pathParts.length == 1 ? user.notifications : user.findDialog({connection_id: pathParts[1], dialog_id: $pathParts[2]});
-  if (!d) return;
+  if (!d) return (dialog = user.notifications);
   if (d == dialog && previousPath) return;
   if (unsubscribeDialog) unsubscribeDialog();
   if (previousPath && dialog.setLastRead) dialog.setLastRead();
 
-  connection = user.findDialog({connection_id: pathParts[1]}) || {};
   dialog = d;
   previousPath = pathParts.join('/');
   unsubscribeDialog = dialog.subscribe(d => { dialog = d });
@@ -132,67 +132,31 @@ const onScroll = debounce(e => {
 <div class="main messages-wrapper {scrollingClass}" bind:this="{messagesEl}" on:scroll="{onScroll}">
   <main class="messages-container" bind:offsetHeight="{messagesHeight}">
     <ChatHeader>
-      {#if $pathParts[1]}
-        <h1>{$pathParts[2] || $pathParts[1]}</h1>
-        <small><DialogSubject dialog="{dialog}"/></small>
-      {:else}
-        <h1>{l('Notifications')}</h1>
-      {/if}
+      <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
+      <small>{dialog.topicOrStatus()}</small>
     </ChatHeader>
 
-    {#if dialog.messages.length == 0}
-      {#if !$pathParts[1]}
-        <h2>{l('No notifications.')}</h2>
-      {:else if $pathParts[1] == dialog.connection_id}
-        <h2>{l(dialog.is('loading') ? 'Loading messages...' : 'No messages.')}</h2>
-        <p>{dialog.frozen}</p>
-      {/if}
-    {/if}
-
-    {#if $pathParts[2] && !dialog.dialog_id}
-      <h2>{l('You are not part of this conversation.')}</h2>
-      <p>Do you want to add the conversation?</p>
-      <p>
-        <a href="#add:{$pathParts[2]}" on:click="{addDialog}" class="btn">Yes</a>
-        <Link href="/chat" className="btn">{l('No')}</Link>
-      </p>
+    {#if $user.is('loading') || (dialog.is('loading') && !dialog.messages.length)}
+      <h2>{l('Loading...')}</h2>
     {:else if $pathParts[1] && !connection.connection_id}
       <h2>{l('Connection does not exist.')}</h2>
-      <p>{l('Do you want to make a new connection?')}</p>
+      <p>{l('Do you want to create the connection "%1"?', $pathParts[1])}</p>
       <p>
-        <Link href="/add/connection?server={encodeURIComponent($pathParts[1])}" className="btn">{l('Yes')}</Link>
+        <Link href="/add/connection?server={encodeURIComponent($pathParts[1])}&dialog={encodeURIComponent($pathParts[2])}" className="btn">{l('Yes')}</Link>
         <Link href="/chat" className="btn">{l('No')}</Link>
       </p>
+    {:else if $pathParts[2] && !dialog.connection_id}
+      <h2>{l('You are not part of this conversation.')}</h2>
+      <p>{l('Do you want to chat with "%1"?', $pathParts[2])}</p>
+      <p>
+        <a href="#add:{$pathParts[2]}" on:click|preventDefault="{addDialog}" class="btn">{l('Yes')}</a>
+        <Link href="/chat" className="btn">{l('No')}</Link>
+      </p>
+    {:else if dialog.messages.length}
+      <ChatMessages connection="{connection}" dialog="{dialog}"/>
+    {:else}
+      <h2>{l($pathParts[1] ? 'No messages.' : 'No notifications.')}</h2>
     {/if}
-
-    {#if dialog.is('loading')}
-      <div class="message-status-line for-loading"><span>{l('Loading messages...')}</span></div>
-    {/if}
-
-    {#each dialog.messages as message, i}
-      {#if message.endOfHistory}
-        <div class="message-status-line for-start-of-history"><span>{l('Start of history')}</span></div>
-      {:else if message.dayChanged}
-        <div class="message-status-line for-day-changed"><span>{message.ts.getHumanDate()}</span></div>
-      {/if}
-
-      {#if i && i == dialog.messages.length - dialog.unread}
-        <div class="message-status-line for-last-read"><span>{l('New messages')}</span></div>
-      {/if}
-
-      <div class="message is-type-{message.type || 'notice'}"
-        class:is-sent-by-you="{message.from == connection.nick}"
-        class:is-hightlighted="{message.highlight}"
-        class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
-        class:has-same-from="{message.isSameSender && !message.dayChanged}"
-        data-index="{i}">
-
-        <Icon name="{message.from == connection.nick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
-        <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.toHuman()}</b>
-        <Link className="message__from" href="/chat/{$pathParts[1]}/{message.from}" style="color:{message.color}">{message.from}</Link>
-        <div class="message__text">{@html message.markdown}</div>
-      </div>
-    {/each}
 
     {#if dialog.connection_id}
       <ChatInput dialog="{dialog}"/>
