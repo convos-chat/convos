@@ -34,6 +34,7 @@ let previousPath = '';
 let unsubscribeDialog;
 
 $: calculateDialog($user, $pathParts);
+$: calculateScrollingClass(messagesHeight > containerHeight);
 $: calculateSettingsComponent($currentUrl);
 
 onMount(() => {
