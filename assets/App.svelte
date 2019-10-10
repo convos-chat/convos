@@ -40,14 +40,13 @@ $: if (document) document.title = $notifications.unread ? '(' + $notifications.u
 $: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
 $: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname);
 
-$: if ($loginOp.is('error') || $user.is('error')) {
-  gotoUrl('/login', {replace: true});
-}
+$: if ($user.is('success')) gotoDefaultPage();
+$: if ($user.is('error') || $loginOp.is('error')) gotoUrl('/login', {replace: true});
 
 $: if ($loginOp.is('success')) {
   document.cookie = loginOp.res.headers['Set-Cookie'];
   loginOp.reset();
-  user.load().then(gotoDefaultPage);
+  user.load();
 }
 
 onMount(async () => {
