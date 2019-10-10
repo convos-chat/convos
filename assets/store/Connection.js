@@ -1,16 +1,16 @@
 import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
-import ReactiveList from '../store/ReactiveList.js';
 import {extractErrorMessage} from '../js/util';
+import {sortByName} from '../js/util';
 
 export default class Connection extends Dialog {
   constructor(params) {
     super(params);
 
-    this._readOnlyAttr('dialogs', new ReactiveList());
     this._readOnlyAttr('privateDialogs', () => this.dialogs.filter(d => d.is_private));
     this._readOnlyAttr('publicDialogs', () => this.dialogs.filter(d => !d.is_private));
 
+    this._updateableAttr('dialogs', []);
     this._updateableAttr('on_connect_commands', params.on_connect_commands || '');
     this._updateableAttr('state', params.state || 'queued');
     this._updateableAttr('wanted_state', params.wanted_state || 'connected');
@@ -33,7 +33,9 @@ export default class Connection extends Dialog {
     else {
       dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
       dialog.on('message', params => this.emit('message', params));
-      this.dialogs.add(dialog).sort();
+      this.dialogs.push(dialog);
+      this.dialogs.sort(sortByName);
+      this.update({});
     }
 
     return dialog;
@@ -44,8 +46,7 @@ export default class Connection extends Dialog {
   }
 
   removeDialog(params) {
-    this.dialogs.remove(d => d.dialog_id != params.dialog_id);
-    return this;
+    return this.update({dialogs: this.dialogs.filter(d => d.dialog_id != params.dialog_id)});
   }
 
   topicOrStatus() {
@@ -82,7 +83,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventNickChange(params) {
-    this.dialogs.map(dialog => dialog.wsEventNickChange(params));
+    this.dialogs.forEach(dialog => dialog.wsEventNickChange(params));
   }
 
   wsEventError(params) {

@@ -29,7 +29,6 @@ const Convos = window.Convos || {};
 const api = new Api(Convos.apiUrl, {debug: true});
 const embedMaker = new EmbedMaker({api});
 const user = new User({api});
-const connections = user.connections;
 const notifications = user.notifications;
 const loginOp = user.loginOp;
 
@@ -61,7 +60,7 @@ onMount(async () => {
 
 function gotoDefaultPage() {
   const lastUrl = localStorage.getItem('lastUrl');
-  gotoUrl(lastUrl || ($connections.length ? '/chat' : '/add/connection'), {replace: true});
+  gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'), {replace: true});
 }
 </script>
 

@@ -1,8 +1,8 @@
 import Reactive from '../js/Reactive';
-import ReactiveList from '../store/ReactiveList.js';
 import Time from '../js/Time';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
+import {sortByName} from '../js/util';
 import {str2color} from '../js/util';
 
 const modes = {o: '@'};
@@ -19,7 +19,6 @@ export default class Dialog extends Reactive {
     this._readOnlyAttr('connection_id', params.connection_id || '');
     this._readOnlyAttr('events', params.events);
     this._readOnlyAttr('is_private', params.is_private || false);
-    this._readOnlyAttr('participants', new ReactiveList());
     this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this._updateableAttr('frozen', params.frozen || '');
@@ -27,6 +26,7 @@ export default class Dialog extends Reactive {
     this._updateableAttr('last_read', new Time(params.last_read));
     this._updateableAttr('messages', []);
     this._updateableAttr('name', params.name || 'Unknown');
+    this._updateableAttr('participants', []);
     this._updateableAttr('status', 'loading');
     this._updateableAttr('topic', params.topic || '');
     this._updateableAttr('unread', params.unread || 0);
@@ -76,7 +76,7 @@ export default class Dialog extends Reactive {
     const needleKeys = Object.keys(params);
     const found = [];
 
-    this.participants.map(participant => {
+    this.participants.forEach(participant => {
       for (let ni = 0; ni < needleKeys.length; ni++) {
         const needleKey = params[needleKeys[ni]];
         if (params[needleKey] != participant[needleKey]) return;
@@ -125,11 +125,12 @@ export default class Dialog extends Reactive {
     const participant = this.participants.find(p => p.id == id);
     if (participant) {
       Object.keys(params).forEach(k => { participant[k] = params[k] });
-      this.participants.update({});
+      this.update({});
     }
     else {
-      this.participants.add({...params, id, name: nick, ts: new Time()});
-      this.participants.sort();
+      this.participants.push({...params, id, name: nick, ts: new Time()});
+      this.participants.sort(sortByName);
+      this.update({});
     }
 
     return participant;
@@ -175,7 +176,7 @@ export default class Dialog extends Reactive {
   wsEventNickChange(params) {
     const oldId = this._participantId(params.old_nick);
     const participant = this.participant(params.new_nick, this.participants.find(p => p.nick == oldId) || {});
-    if (participant.id != oldId) this.participants.remove({id: oldId});
+    if (participant.id != oldId) this.update({participants: this.participants(p => p.id != oldId)});
     this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
   }
 
@@ -185,8 +186,7 @@ export default class Dialog extends Reactive {
     this.addMessage(this._partMessage(params));
 
     if (!participant.me) {
-      this.participants.remove({id: participantId});
-      this.update({});
+      this.update({participants: this.participants(p => p.id != participantId)});
     }
   }
 
@@ -223,6 +223,6 @@ export default class Dialog extends Reactive {
 
   _updateParticipants(params) {
     params.stopPropagation();
-    params.participants.map(p => this.participant(p.name, {mode: p.mode}));
+    params.participants.forEach(p => this.participant(p.name, {mode: p.mode}));
   }
 }
