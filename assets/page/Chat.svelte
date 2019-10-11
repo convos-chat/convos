@@ -31,11 +31,13 @@ let scrollPos = 'bottom';
 let connection = {};
 let dialog = user.notifications;
 let previousPath = '';
-let unsubscribeDialog;
+let unsubscribe = [];
 
 $: calculateDialog($user, $pathParts);
 $: calculateScrollingClass(messagesHeight > containerHeight);
 $: calculateSettingsComponent($currentUrl);
+
+$: topicOrStatus = connection.is && !connection.is('connected') ? connection.topicOrStatus() : dialog.topicOrStatus();
 
 onMount(() => {
   // Clean up any embeds added from a previous chat
@@ -48,7 +50,7 @@ afterUpdate(() => {
 });
 
 onDestroy(() =>  {
-  if (unsubscribeDialog) unsubscribeDialog();
+  unsubscribe.forEach(cb => cb());
 });
 
 function addDialog(e) {
@@ -62,12 +64,13 @@ function calculateDialog(user, pathParts) {
   const d = pathParts.length == 1 ? user.notifications : user.findDialog({connection_id: pathParts[1], dialog_id: $pathParts[2]});
   if (!d) return (dialog = user.notifications);
   if (d == dialog && previousPath) return;
-  if (unsubscribeDialog) unsubscribeDialog();
+  if (unsubscribe) unsubscribe.forEach(cb => cb());
   if (previousPath && dialog.setLastRead) dialog.setLastRead();
 
   dialog = d;
   previousPath = pathParts.join('/');
-  unsubscribeDialog = dialog.subscribe(d => { dialog = d });
+  unsubscribe = [connection.subscribe(c => { connection = c })];
+  if (dialog != connection) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
   dialog.load();
   calculateSettingsComponent($currentUrl);
 }
@@ -134,7 +137,7 @@ const onScroll = debounce(e => {
   <main class="messages-container" bind:offsetHeight="{messagesHeight}">
     <ChatHeader>
       <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
-      <small>{dialog.topicOrStatus()}</small>
+      <small>{topicOrStatus}</small>
     </ChatHeader>
 
     {#if $user.is('loading') || (dialog.is('loading') && !dialog.messages.length)}
