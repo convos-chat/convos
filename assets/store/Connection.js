@@ -45,12 +45,16 @@ export default class Connection extends Dialog {
     return this.dialogs.find(dialog => dialog.dialog_id == params.dialog_id);
   }
 
+  is(state) {
+    return this.state == state;
+  }
+
   removeDialog(params) {
     return this.update({dialogs: this.dialogs.filter(d => d.dialog_id != params.dialog_id)});
   }
 
   topicOrStatus() {
-    return this.frozen || 'Connection messages.';
+    return this.state == 'disconnected' ? 'Disconnected.' : this.state == 'queued' ? 'Connecting...' : 'Connection messages.';
   }
 
   update(params) {

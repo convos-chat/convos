@@ -8,6 +8,8 @@ export let connection = {};
 export let dialog = {};
 
 const user = getContext('user');
+
+$: connectionStatus = connection.is && !connection.is('connected') ? connection.topicOrStatus() : '';
 </script>
 
 {#each dialog.messages as message, i}
@@ -34,6 +36,10 @@ const user = getContext('user');
     <div class="message__text">{@html message.markdown}</div>
   </div>
 {/each}
+
+{#if connectionStatus}
+<div class="message-status-line for-connection-status"><span>{l(connectionStatus)}</span></div>
+{/if}
 
 {#if dialog.is('loading')}
   <div class="message-status-line for-loading"><span>{l('Loading...')}</span></div>
