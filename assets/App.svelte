@@ -59,6 +59,7 @@ onMount(async () => {
 });
 
 function gotoDefaultPage() {
+  if (location.href.indexOf('/chat') != -1) return;
   const lastUrl = localStorage.getItem('lastUrl');
   gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'), {replace: true});
 }
