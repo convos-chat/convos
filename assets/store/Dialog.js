@@ -146,7 +146,7 @@ export default class Dialog extends Reactive {
   async setLastRead() {
     if (!this.setLastReadOp) return;
     await this.setLastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
-    this.update(this.setLastReadOp.res.body); // Update last_read
+    this.update({unread: 0, ...this.setLastReadOp.res.body}); // Update last_read
   }
 
   topicOrStatus() {
