@@ -27,7 +27,7 @@ $t->content_like(qr{mode:\s*"development"})->text_is('title', 'Convos - Better g
   ->element_exists(qq(meta[property="og:url"][content="$url"]));
 
 $t->text_like('noscript p', qr{javascript}i);
-$t->text_is('a[href="http://convos.by"]', 'About');
+$t->text_is('a[href="https://convos.by/doc"]', 'Documentation');
 
 $t->text_like('script', qr{apiUrl:\s*"/api"}m,          'apiUrl')
   ->text_like('script', qr{wsUrl:\s*"ws://.*/events"}m, 'wsUrl')

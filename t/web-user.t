@@ -46,7 +46,16 @@ $t->app->core->get_user('superman@example.com')->unread(4);
 $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status_is(200)->json_is(
   '',
   {
-    connections        => [],
+    connections => [{
+      connection_id       => 'irc-freenode',
+      me                  => {},
+      name                => 'freenode',
+      on_connect_commands => [],
+      protocol            => 'irc',
+      state               => 'queued',
+      url                 => 'irc://chat.freenode.net:6697/%23convos?nick=superman',
+      wanted_state        => 'connected',
+    }],
     dialogs            => [],
     highlight_keywords => ['foo'],
     notifications      => [],

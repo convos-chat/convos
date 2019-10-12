@@ -6,7 +6,7 @@ use Mojo::File;
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG E has_many next_tick spurt);
+our @EXPORT_OK = qw(DEBUG E has_many next_tick pretty_connection_name spurt);
 
 sub E {
   my ($msg, $path) = @_;
@@ -32,7 +32,7 @@ sub has_many {
 
   monkey_patch $class => $setter => sub {
     my ($self, $attrs) = @_;
-    my $id = $related->id($attrs);
+    my $id  = $related->id($attrs);
     my $obj = $self->{$accessor}{$id} || $self->$constructor($attrs);
     map { $obj->{$_} = $attrs->{$_} } keys %$attrs if $self->{$accessor}{$id};
     $self->{$accessor}{$id} = $obj;
@@ -56,6 +56,21 @@ sub next_tick {
   my ($obj, $cb, @args) = @_;
   Mojo::IOLoop->next_tick(sub { $obj->$cb(@args) });
   return $obj;
+}
+
+sub pretty_connection_name {
+  my $name = shift;
+
+  return '' unless defined $name;
+  return 'magnet' if $name =~ /\birc\.perl\.org\b/i;    # also match ssl.irc.perl.org
+  return 'efnet'  if $name =~ /\befnet\b/i;
+
+  $name = 'localhost' if $name eq '127.0.0.1';
+  $name =~ s!^(irc|chat)\.!!;                           # remove common prefixes from server name
+  $name =~ s!:\d+$!!;                                   # remove port
+  $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
+  $name =~ s![\W_]+!-!g;                                # make pretty url
+  $name;
 }
 
 sub spurt {
@@ -132,6 +147,12 @@ The definition above results in the following methods:
   $obj = next_tick $obj, sub { my ($obj, @args) = @_ }, @args;
 
 Wrapper around L<Mojo::IOLoop/next_tick>.
+
+=head2 pretty_connection_name
+
+  $str = pretty_connection_name($hostname);
+
+Will turn a given hostname into a nicer connection name.
 
 =head2 spurt
 

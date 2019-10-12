@@ -11,6 +11,9 @@
     <nav class="sidebar__nav">
       <a href="/" class="has-path"><%=l 'Login' %></a>
       <a href="/register"><%=l 'Create account' %></Link>
+      % if (config('organization_url') ne 'http://convos.by') {
+        <a href="<%= config('organization_url') %>"><%= config('organization_name') %></a> -
+      % }
       <a href="https://convos.by/doc"><%=l 'Documentation' %></a>
       <a href="https://github.com/Nordaaker/convos"><%=l 'GitHub' %></a>
     </nav>
