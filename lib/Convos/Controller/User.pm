@@ -109,13 +109,21 @@ sub require_login {
 
 sub register {
   my $self = shift->openapi->valid_input or return;
+  my $user;
 
   $self->delay(
     sub { $self->auth->register($self->req->json, shift->begin) },
     sub {
-      my ($delay, $err, $user) = @_;
+      (my ($delay, $err), $user) = @_;
       return $self->render(openapi => E($err), status => 400) if $err;
-      return $self->session(email => $user->email)->render(openapi => $user);
+      $self->session(email => $user->email);
+      $self->backend->connection_create($self->config('default_connection'), shift->begin);
+    },
+    sub {
+      my ($delay, $err, $connection) = @_;
+      return $self->render(openapi => E($err), status => 500) if $err;
+      $self->app->core->connect($connection);
+      $self->render(openapi => $user);
     },
   );
 }

@@ -54,7 +54,7 @@ $connection->state('disconnected');
 $t->post_ok('/api/connection/irc-localhost',
   json => {url => 'irc://example.com:9999', wanted_state => 'connected'})->status_is(200)
   ->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
-  ->json_is('/url' => 'irc://example.com:9999');
+  ->json_is('/url'  => 'irc://example.com:9999');
 
 $connection->state('connected');
 $t->post_ok(
@@ -68,23 +68,23 @@ $t->post_ok(
   ->json_is('/url' => 'irc://example.com:9999');
 
 $t->post_ok('/api/connection/irc-localhost',
-  json => {url => 'irc://foo:bar@example.com:9999?nick=superman&tls=0'})->status_is(200)
-  ->json_is('/url'   => 'irc://foo:bar@example.com:9999?nick=superman&tls=0')
+  json => {url => 'irc://foo:bar@example.com:9999?tls=0&nick=superman'})->status_is(200)
+  ->json_is('/url'   => 'irc://foo:bar@example.com:9999?tls=0&nick=superman')
   ->json_is('/state' => 'queued');
 
 $connection->state('connected');
 $t->post_ok('/api/connection/irc-localhost',
   json =>
-    {url => 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0', wanted_state => 'connected'})
-  ->status_is(200)->json_is('/url' => 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0')
+    {url => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman', wanted_state => 'connected'})
+  ->status_is(200)->json_is('/url' => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman')
   ->json_is('/state' => 'queued');
 
-is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0',
+is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman',
   'to json url';
 
 $t->post_ok('/api/connection/irc-localhost',
-  json => {url => 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0'})->status_is(200);
-is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?nick=superman&tls=0',
+  json => {url => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman'})->status_is(200);
+is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman',
   'no change with same username';
 
 $t->get_ok('/api/connections')->status_is(200)->json_is('/connections/1/on_connect_commands',

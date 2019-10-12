@@ -105,21 +105,14 @@ sub _config {
 
   $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
   $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
-  $config->{hide}{$_} = 1 for split /,/, +($ENV{CONVOS_HIDE_ELEMENTS} || '');
-  $config->{home} ||= $ENV{CONVOS_HOME}
+  $config->{home}    ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
   $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
-  $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
-  $config->{forced_irc_server} = "irc://$config->{forced_irc_server}"
-    if $config->{forced_irc_server} and $config->{forced_irc_server} !~ m!^\w+://!;
-  $config->{forced_irc_server} = Mojo::URL->new($config->{forced_irc_server});
-  $config->{default_server}
-    ||= $config->{forced_irc_server}->host_port
-    || $ENV{CONVOS_DEFAULT_SERVER}
-    || 'chat.freenode.net:6697';
+  $config->{forced_irc_server}  ||= $ENV{CONVOS_FORCED_IRC_SERVER} ? 1 : 0;
+  $config->{default_connection} ||= $self->_default_connection($config);
 
   if ($config->{log_file} ||= $ENV{CONVOS_LOG_FILE}) {
     $self->log->path($config->{log_file});
@@ -132,15 +125,27 @@ sub _config {
   # public settings
   $config->{settings} = {
     contact           => $config->{contact},
-    default_server    => $config->{default_server},
-    forced_irc_server => $config->{forced_irc_server}->host ? true : false,
-    hide              => $config->{hide} ||= {},
+    forced_irc_server => $config->{forced_irc_server} ? true : false,
     organization_name => $config->{organization_name},
     organization_url  => $config->{organization_url},
     version           => $self->VERSION || '0.01',
   };
 
   $config;
+}
+
+sub _default_connection {
+  my ($self, $config) = @_;
+
+  for my $config_key (qw(forced_irc_server default_connection default_server)) {
+    for my $url ($ENV{uc("CONVOS_$config_key")}, $config->{$config_key}) {
+      next unless $url;
+      $url = "irc://$url" unless $url =~ m!^\w+://!;
+      return Mojo::URL->new($url);
+    }
+  }
+
+  return Mojo::URL->new('irc://chat.freenode.net:6697/%23convos');
 }
 
 sub _home_in_share {

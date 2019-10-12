@@ -21,18 +21,15 @@ has on_connect_commands => sub { +[] };
 has protocol            => 'null';
 
 sub url {
-  my ($self, $url) = @_;
+  my $self = shift;
 
-  if ($url) {
-    $self->{url} = $url;
-    return $self;
-  }
-  elsif (ref $_[0]->{url}) {
-    return $_[0]->{url};
-  }
-  else {
-    return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || sprintf '%s://localhost', $self->protocol);
-  }
+  # Set
+  return $self->_set_url(shift) if @_;
+
+  # Get
+  $self->_set_url($self->{url} || sprintf '%s://localhost', $self->protocol)
+    unless ref $self->{url};
+  return $self->{url};
 }
 
 sub user { shift->{user} }
@@ -110,6 +107,13 @@ sub wanted_state {
 sub _debug {
   my ($self, $msg, @args) = @_;
   warn sprintf "[%s/%s] $msg\n", $self->user->email, $self->id, @args;
+}
+
+sub _set_url {
+  my $self = shift;
+  my $url  = ref $_[0] ? shift : Mojo::URL->new(shift);
+  $self->{url} = $url;
+  return $self;
 }
 
 sub _userinfo {
