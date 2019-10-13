@@ -35,10 +35,11 @@ const loginOp = user.loginOp;
 setContext('embedMaker', embedMaker);
 setContext('user', user);
 
-$: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
-$: currentPage = pages[$pathParts.join('/')] || pages[$pathParts[0]];
+$: defaultPageName = $user.is('success') ? 'chat' : 'login';
+$: pageName = pages[$pathParts.join('/')] ? $pathParts.join('/') : $pathParts[0] || defaultPageName;
 $: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname);
 
+$: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
 $: if ($user.is('success')) gotoDefaultPage();
 $: if ($user.is('error') || $loginOp.is('error')) gotoUrl('/login', {replace: true});
 
@@ -48,11 +49,17 @@ $: if ($loginOp.is('success')) {
   user.load();
 }
 
+$: if ($user) replaceBodyClassName(/(is-logged-)\S+/, $user.is('success') ? 'in' : 'out');
+$: if ($user) replaceBodyClassName(/(page-)\S+/, pageName.replace(/\W+/g, '_'));
+
 onMount(async () => {
   const historyUnlistener = historyListener();
+
   const removeEls = document.querySelectorAll('.js-remove');
   for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
+
   user.load();
+
   return () => {
     historyUnlistener();
   };
@@ -63,8 +70,13 @@ function gotoDefaultPage() {
   const lastUrl = localStorage.getItem('lastUrl');
   gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'), {replace: true});
 }
+
+function replaceBodyClassName(re, replacement) {
+  const body = document.querySelector('body');
+  body.className = body.className.replace(re, (all, prefix) => prefix + replacement);
+}
 </script>
 
-<svelte:component this="{currentPage}"/>
+<svelte:component this="{pages[pageName]}"/>
 
 <div class="overlay" class:is-visible="{$activeMenu}">&nbsp;</div>

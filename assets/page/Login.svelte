@@ -27,6 +27,6 @@ const user = getContext('user');
     <OperationStatus op="{user.loginOp}"/>
   </form>
   <article>
-    <p>{l('Welcome message. Vivamus congue mauris eu aliquet pharetra. Nulla sit amet dictum.')}</p>
+    <p>{l('Convos is the simplest way to use IRC and it keeps you always online.')}</p>
   </article>
 </main>

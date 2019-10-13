@@ -6,7 +6,7 @@
     <h1 class="sidebar__logo">
       <Link href="/"><span><%=l 'Convos' %></span></Link>
     </h1>
-    <p class="sidebar__about">A multiuser chat application.</p>
+    <p class="sidebar__about"><%=l 'A multiuser chat application.' %></p>
 
     <nav class="sidebar__nav">
       <a href="/" class="has-path"><%=l 'Login' %></a>
@@ -21,6 +21,8 @@
 </div>
 
 <main class="main align-content-middle js-remove">
+  <h1><%=l 'Log in' %></h1>
+
   <div>
     <p class="if-js"><%=l 'Initializing the application...' %></p>
     <p class="if-js"><%=l 'This should not take too long.' %></p>
@@ -30,7 +32,7 @@
     </noscript>
 
     <article>
-      <p><%=l 'Welcome message. Vivamus congue mauris eu aliquet pharetra. Nulla sit amet dictum.' %></p>
+      <p><%=l 'Convos is the simplest way to use IRC and it keeps you always online.' %></p>
     </article>
   </div>
 </main>

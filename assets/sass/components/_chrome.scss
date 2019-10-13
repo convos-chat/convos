@@ -30,7 +30,7 @@ body.no-js .if-js {
   }
 }
 
-@include if_screen(">full") {
+@include if_screen(">side-by-side") {
   .main {
     padding: 0 calc(var(--gutter) * 2);
     margin-left: var(--sidebar-width);

@@ -4,13 +4,13 @@
       @content;
     }
   }
-  @else if $size == "<=full" {
-    @media (max-width: $breakpoint-full) {
+  @else if $size == ">small" {
+    @media (min-width: ($breakpoint-small + 1)) {
       @content;
     }
   }
-  @else if $size == ">small" {
-    @media (min-width: ($breakpoint-small + 1)) {
+  @else if $size == "<=full" {
+    @media (max-width: $breakpoint-full) {
       @content;
     }
   }
@@ -19,8 +19,18 @@
       @content;
     }
   }
+  @else if $size == "<=side-by-side" {
+    @media (max-width: $breakpoint-side-by-side) {
+      @content;
+    }
+  }
+  @else if $size == ">side-by-side" {
+    @media (min-width: $breakpoint-side-by-side + 1) {
+      @content;
+    }
+  }
   @else {
-    @media #{$size} {
+    @media (#{$size}) {
       @content
     }
   }
