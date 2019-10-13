@@ -125,8 +125,8 @@ function onSearchKeydown(e) {
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
 
-<div class="sidebar-wrapper {$activeMenu ? 'is-visible' : ''}">
-  <div class="sidebar is-chatting">
+<div class="sidebar-wrapper" class:is-visible="{$activeMenu == 'nav'}">
+  <div class="sidebar">
     <form class="sidebar__header">
       <input type="text"
         placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"

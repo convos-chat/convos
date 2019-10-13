@@ -32,7 +32,4 @@ const user = getContext('user');
     </div>
     <OperationStatus op="{user.registerOp}"/>
   </form>
-  <article>
-    <p>{l('By creating an account, you agree to the use of cookies.')}</p>
-  </article>
 </main>

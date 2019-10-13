@@ -23,7 +23,7 @@
     <link rel="preload"  href="<%= $c->url_for("/font/material-design-icons/MaterialIcons-Regular.woff2")%>">
     %= include 'javascript' if 200 == (stash('status') // 200)
   </head>
-  <body class="no-js">
+  <body class="no-js page-loading is-logged-out">
     %= content
     %= asset 'convos.js' if 200 == (stash('status') // 200);
   </body>
