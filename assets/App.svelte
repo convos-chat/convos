@@ -30,7 +30,6 @@ const api = new Api(Convos.apiUrl, {debug: true});
 const embedMaker = new EmbedMaker({api});
 const user = new User({api});
 const notifications = user.notifications;
-const loginOp = user.loginOp;
 
 setContext('embedMaker', embedMaker);
 setContext('user', user);
@@ -41,13 +40,7 @@ $: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname
 
 $: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
 $: if ($user.is('success')) gotoDefaultPage();
-$: if ($user.is('error') || $loginOp.is('error')) gotoUrl('/login', {replace: true});
-
-$: if ($loginOp.is('success')) {
-  document.cookie = loginOp.res.headers['Set-Cookie'];
-  loginOp.reset();
-  user.load();
-}
+$: if ($user.is('error')) gotoUrl(pageName == 'register' ? '/register' : '/login', {replace: true});
 
 $: if ($user) replaceBodyClassName(/(is-logged-)\S+/, $user.is('success') ? 'in' : 'out');
 $: if ($user) replaceBodyClassName(/(page-)\S+/, pageName.replace(/\W+/g, '_'));
