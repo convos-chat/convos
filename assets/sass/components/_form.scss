@@ -60,7 +60,6 @@ textarea {
     padding: 0.2em 0.5em;
     border: var(--input-border);
     border-radius: var(--input-border-radius);
-    box-shadow: inset -1px 1px 3px rgba(0, 0, 0, 0.1), -1px 1px 2px rgba(0, 0, 0, 0.1);
     width: 100%;
     display: block;
 
@@ -75,15 +74,8 @@ textarea {
     }
 
     &:focus {
-      outline: var(--input-border);
+      outline: var(--input-focus-outline);
       outline-width: 2px;
-      outline-offset: -2px;
-    }
-  }
-
-  &:hover {
-    input {
-      outline: 2px solid var(--input-hover-outline);
       outline-offset: -2px;
     }
   }
@@ -152,7 +144,7 @@ textarea {
 .inputs-side-by-side {
   margin-bottom: var(--input-gutter);
   display: flex;
-  align-items: end;
+  align-items: flex-end;
 
   button {
     margin-left: var(--input-gutter);

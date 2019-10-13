@@ -4,7 +4,7 @@ $breakpoint-full: 970px !default;
 $breakpoint-max-width: 800px !default;
 
 :root {
-  --body-bg: #fefefe;
+  --body-bg: #f8f9f8;
   --font-family: PT Sans, Helvetica, Arial, sans-serif;
   --font-size: 16px;
   --text-color: #333;
@@ -28,9 +28,9 @@ $breakpoint-max-width: 800px !default;
   --input-bg: #fff;
   --input-gutter: 0.8rem;
   --input-border: 1px solid #888;
-  --input-border-radius: 2px;
+  --input-border-radius: 0;
   --input-color: #555;
-  --input-hover-outline: #a2a2a2;
+  --input-focus-outline: 1px solid #999;
   --input-disabled-bg: #fcfcfc;
   --input-disabled-color: #6f6f6f;
   --input-placeholder-color: #8e8e8e;
