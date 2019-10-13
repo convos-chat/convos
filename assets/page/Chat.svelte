@@ -69,7 +69,8 @@ function calculateDialog(user, pathParts) {
 
   dialog = d;
   previousPath = pathParts.join('/');
-  unsubscribe = [connection.subscribe(c => { connection = c })];
+  unsubscribe = [];
+  if (connection.subscribe) unsubscribe.push(connection.subscribe(c => { connection = c }));
   if (dialog != connection) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
   dialog.load();
   calculateSettingsComponent($currentUrl);
