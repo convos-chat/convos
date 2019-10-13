@@ -15,14 +15,17 @@ import Register from './page/Register.svelte';
 import Settings from './page/Settings.svelte';
 
 // Routing
-const pages = {
+const loggedInPages = {
   'add/connection': ConnectionAdd,
   'add/conversation': DialogAdd,
-  chat: Chat,
-  help: Help,
-  login: Login,
-  register: Register,
-  settings: Settings,
+  'chat': Chat,
+  'help': Help,
+  'settings': Settings,
+};
+
+const loggedOutPages = {
+  'login': Login,
+  'register': Register,
 };
 
 const Convos = window.Convos || {};
@@ -31,19 +34,13 @@ const embedMaker = new EmbedMaker({api});
 const user = new User({api});
 const notifications = user.notifications;
 
-setContext('embedMaker', embedMaker);
-setContext('user', user);
-
-$: defaultPageName = $user.is('success') ? 'chat' : 'login';
-$: pageName = pages[$pathParts.join('/')] ? $pathParts.join('/') : $pathParts[0] || defaultPageName;
-$: $pathname.indexOf('/chat') != -1 && localStorage.setItem('lastUrl', $pathname);
+let pageComponent = Login;
 
 $: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
-$: if ($user.is('success')) gotoDefaultPage();
-$: if ($user.is('error')) gotoUrl(pageName == 'register' ? '/register' : '/login', {replace: true});
+$: calculatePage($pathParts, $user);
 
-$: if ($user) replaceBodyClassName(/(is-logged-)\S+/, $user.is('success') ? 'in' : 'out');
-$: if ($user) replaceBodyClassName(/(page-)\S+/, pageName.replace(/\W+/g, '_'));
+setContext('embedMaker', embedMaker);
+setContext('user', user);
 
 onMount(async () => {
   const historyUnlistener = historyListener();
@@ -58,10 +55,30 @@ onMount(async () => {
   };
 });
 
-function gotoDefaultPage() {
-  if (location.href.indexOf('/chat') != -1) return;
-  const lastUrl = localStorage.getItem('lastUrl');
-  gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'), {replace: true});
+function calculatePage(pathParts, user) {
+
+  // Remember last chat
+  if (pathParts.indexOf('chat') != -1) localStorage.setItem('lastUrl', $pathname);
+
+  // Figure out current page
+  const pages = user.is('success') ? loggedInPages : loggedOutPages;
+  const nextPageComponent = pages[pathParts.join('/')] || pages[pathParts[0]];
+
+  // Goto a valid page
+  if (nextPageComponent) {
+    if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
+  }
+  else if (user.is('success')) {
+    const lastUrl = localStorage.getItem('lastUrl');
+    gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'), {replace: true});
+  }
+  else if (user.is('error')) {
+    gotoUrl('/login', {replace: true});
+  }
+
+  // Enable complex styling
+  replaceBodyClassName(/(is-logged-)\S+/, user.is('success') ? 'in' : 'out');
+  replaceBodyClassName(/(page-)\S+/, pathParts.join('_').replace(/\W+/g, '_'));
 }
 
 function replaceBodyClassName(re, replacement) {
@@ -70,6 +87,6 @@ function replaceBodyClassName(re, replacement) {
 }
 </script>
 
-<svelte:component this="{pages[pageName]}"/>
+<svelte:component this="{pageComponent}"/>
 
 <div class="overlay" class:is-visible="{$activeMenu}">&nbsp;</div>
