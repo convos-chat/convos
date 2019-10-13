@@ -48,6 +48,7 @@ sub _backend_connection_create {
   Mojo::IOLoop->delay(
     sub {
       $connection = $user->connection({name => $name, protocol => $url->scheme, url => $url});
+      $connection->dialog({name => $url->path->[0]}) if $url->path->[0];
       $connection->save(shift->begin);
     },
     sub {

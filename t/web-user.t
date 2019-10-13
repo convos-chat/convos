@@ -2,7 +2,8 @@
 use lib '.';
 use t::Helper;
 
-$ENV{CONVOS_BACKEND}     = 'Convos::Core::Backend';
+$ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
+$ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://localhost:6123/%23convos';
 $ENV{CONVOS_INVITE_CODE} = '';
 my $t = t::Helper->t;
 
@@ -42,21 +43,38 @@ $t->get_ok('/api/user')->status_is(200)->json_is(
   }
 );
 
-$t->app->core->get_user('superman@example.com')->unread(4);
+my $user = $t->app->core->get_user('superman@example.com');
+$user->unread(4);
+
+my $last_active = Mojo::Date->new(1471623050)->to_datetime;
+my $last_read   = Mojo::Date->new(1471623058)->to_datetime;
+$user->connection({name => 'localhost', protocol => 'irc'})->dialog({name => '#convos'})
+  ->last_read($last_read)->last_active($last_active);
 $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status_is(200)->json_is(
   '',
   {
     connections => [{
-      connection_id       => 'irc-freenode',
+      connection_id       => 'irc-localhost',
       me                  => {},
-      name                => 'freenode',
+      name                => 'localhost',
       on_connect_commands => [],
       protocol            => 'irc',
-      state               => 'queued',
-      url                 => 'irc://chat.freenode.net:6697/%23convos?nick=superman',
+      state               => 'disconnected',
+      url                 => 'irc://localhost:6123/%23convos?nick=superman',
       wanted_state        => 'connected',
     }],
-    dialogs            => [],
+    dialogs => [{
+      connection_id => 'irc-localhost',
+      dialog_id     => '#convos',
+      frozen        => 'Not connected.',
+      is_private    => 0,
+      last_active   => '2016-08-19T16:10:50Z',
+      last_read     => '2016-08-19T16:10:58Z',
+      name          => '#convos',
+      stash         => {},
+      topic         => '',
+      unread        => 0,
+    }],
     highlight_keywords => ['foo'],
     notifications      => [],
     email              => 'superman@example.com',
