@@ -17,12 +17,7 @@ export default class User extends Reactive {
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
 
-    // Add operations that will affect the "User" object
-    // TODO: Make operations bubble into the User object. Require changes in App.svelte
     this._readOnlyAttr('getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
-    this._readOnlyAttr('loginOp', api.operation('loginUser'));
-    this._readOnlyAttr('registerOp', api.operation('registerUser'));
-
     this._readOnlyAttr('notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
   }
 

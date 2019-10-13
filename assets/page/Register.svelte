@@ -9,13 +9,20 @@ import TextField from '../components/form/TextField.svelte';
 
 const inviteCodeRequired = true;
 const user = getContext('user');
+const registerOp = user.api.operation('registerUser');
+
+$: if ($registerOp.is('success')) {
+  document.cookie = registerOp.res.headers['Set-Cookie'];
+  registerOp.reset();
+  user.load();
+}
 </script>
 
 <SidebarLoggedout/>
 
 <main class="main align-content-middle">
   <h1>{l('Create account')}</h1>
-  <form method="post" on:submit|preventDefault="{e => user.registerOp.perform(e.target)}">
+  <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}">
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>
@@ -28,8 +35,8 @@ const user = getContext('user');
     </TextField>
   {/if}
     <div class="form-actions">
-      <button class="btn" op="{user.registerOp}">{l('Register')}</button>
+      <button class="btn" op="{registerOp}">{l('Register')}</button>
     </div>
-    <OperationStatus op="{user.registerOp}"/>
+    <OperationStatus op="{registerOp}"/>
   </form>
 </main>
