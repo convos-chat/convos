@@ -8,7 +8,7 @@ export let dialog = {};
 
 let linkEl;
 
-onMount(() => linkEl.focus());
+$: if (linkEl) linkEl.focus();
 </script>
 
 <Link href="/chat/{dialog.path}" className="sidebar__header for-settings" bind:this="{linkEl}">
