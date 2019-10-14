@@ -27,7 +27,19 @@
     display: none;
   }
 
-  .participant i {
-    width: 1.2em;
+  h3 {
+    margin-top: calc(var(--gutter) * 2);
+  }
+
+  .participant {
+    background: var(--body-bg);
+
+    &:hover {
+      filter: brightness(0.95);
+    }
+
+    i {
+      width: 1.2em;
+    }
   }
 }

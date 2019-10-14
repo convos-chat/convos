@@ -130,14 +130,14 @@ export default class Dialog extends Reactive {
     let participant = this.participants.find(p => p.id == id);
     if (participant) {
       Object.keys(params).forEach(k => { participant[k] = params[k] });
-      this.update({});
     }
     else {
-      participant = {...params, color: str2color(id), id, name: nick, ts: new Time()};
+      participant = {mode: '', ...params, color: str2color(id), id, name: nick, ts: new Time()};
       this.participants.push(participant);
       this.participants.sort(sortParticipants);
-      this.update({});
     }
+
+    this.update({});
 
     return participant;
   }

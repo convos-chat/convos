@@ -11,9 +11,9 @@ export const focus = () => el.focus();
 let classNames = [];
 let el;
 
-$: calculateClassNames(href, $pathname);
+$: calculateClassNames(className, href, $pathname);
 
-function calculateClassNames(href, $pathname) {
+function calculateClassNames(className, href, $pathname) {
   classNames = className ? [className] : [];
   if ($pathname == href.replace(/(#|\?).*/, '')) classNames = [...classNames, 'has-path'];
 }
