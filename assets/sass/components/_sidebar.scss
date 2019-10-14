@@ -19,11 +19,11 @@
     padding-bottom: 8rem;
   }
 
-  @include if_screen(">full") {
+  @include if_screen(">two-columns") {
     padding-right: calc(var(--gutter) * 2);
   }
 
-  @include if_screen("<=side-by-side") {
+  @include if_screen("<=two-columns") {
     width: 0;
     max-width: var(--sidebar-width);
     top: 2.6rem; // TODO: Should be a dynamic value

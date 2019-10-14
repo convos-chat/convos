@@ -23,7 +23,7 @@ h3 {
 h1 {
   font-size: 2rem;
 
-  @include if_screen(">full") {
+  @include if_screen(">two-columns") {
     font-size: 2.4rem;
   }
 }
