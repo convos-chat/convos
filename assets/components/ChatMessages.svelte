@@ -1,11 +1,11 @@
 <script>
 import Icon from '../components/Icon.svelte';
-import Link from '../components/Link.svelte';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 
-export let connection = {};
-export let dialog = {};
+export let connection;
+export let dialog;
+export let input;
 
 const user = getContext('user');
 
@@ -32,7 +32,7 @@ $: connectionStatus = connection.is && !connection.is('connected') ? connection.
 
     <Icon name="{message.from == connection.nick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
     <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.toHuman()}</b>
-    <Link className="message__from" href="/chat/{connection.connection_id}/{message.from}" style="color:{message.color}">{message.from}</Link>
+    <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}">{message.from}</a>
     <div class="message__text">{@html message.markdown}</div>
   </div>
 {/each}

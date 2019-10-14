@@ -17,6 +17,7 @@ const embedMaker = getContext('embedMaker');
 const user = getContext('user');
 
 // Elements
+let chatInput;
 let messagesEl;
 let settingsComponent = null;
 
@@ -159,13 +160,13 @@ const onScroll = debounce(e => {
         <Link href="/chat" className="btn">{l('No')}</Link>
       </p>
     {:else if dialog.messages.length}
-      <ChatMessages connection="{connection}" dialog="{dialog}"/>
+      <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
     {:else}
       <h2>{l($pathParts[1] ? 'No messages.' : 'No notifications.')}</h2>
     {/if}
 
     {#if dialog.connection_id}
-      <ChatInput dialog="{dialog}"/>
+      <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
     {/if}
   </main>
 </div>

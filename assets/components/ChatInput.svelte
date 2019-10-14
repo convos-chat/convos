@@ -17,6 +17,13 @@ $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
 $: connection = user.findDialog({connection_id: dialog.connection_id});
 $: inputParts = pos && calculateInputParts(pos) || ['', '', '', ''];
 
+export function add(str, params = {}) {
+  const space = params.space || '';
+  inputEl.value = inputParts[0] + str + space + inputParts[3];
+  inputEl.selectionStart = inputEl.selectionEnd = (inputParts[0] + str + space).length;
+  if (space.length) pos = inputEl.selectionStart;
+}
+
 function calculateAutocompleteOptions([before, key, afterKey, after]) {
   autocompleteCategory =
       key == ':' && afterKey.length ? 'emojis'
@@ -43,12 +50,9 @@ function calculateInputParts(pos) {
   return [before, key, afterKey, inputEl.value.substring(pos)];
 }
 
-function fillinAutocompeteOption({space}) {
+function fillinAutocompeteOption(params) {
   const autocompleteOpt = autocompleteOptions[activeAutocompleteIndex];
-  if (!autocompleteOpt) return;
-  inputEl.value = inputParts[0] + autocompleteOpt.val + space + inputParts[3];
-  inputEl.selectionStart = inputEl.selectionEnd = (inputParts[0] + autocompleteOpt.val + space).length;
-  if (space.length) pos = inputEl.selectionStart;
+  if (autocompleteOpt) add(autocompleteOpt.val, params);
 }
 
 function focusAutocompleteItem(e, moveBy) {
