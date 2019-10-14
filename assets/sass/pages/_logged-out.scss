@@ -11,7 +11,7 @@ body.is-logged-out {
     }
   }
 
-  @include if_screen("<=side-by-side") {
+  @include if_screen("<=two-columns") {
     .sidebar-wrapper {
       padding: var(--gutter-big);
       width: 100%;

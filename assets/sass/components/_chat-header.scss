@@ -37,7 +37,7 @@
     clear: both;
   }
 
-  @include if_screen("<=side-by-side") {
+  @include if_screen("<=two-columns") {
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
     border-bottom: 0;
@@ -62,7 +62,7 @@
 .chat-header__hamburger {
   display: none;
 
-  @include if_screen("<=side-by-side") {
+  @include if_screen("<=two-columns") {
     display: block;
     top: 0.7rem;
   }

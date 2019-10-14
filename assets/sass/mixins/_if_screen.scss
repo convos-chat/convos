@@ -1,37 +1,23 @@
 @mixin if_screen($size) {
-  @if $size == "<=small" {
-    @media (max-width: $breakpoint-small) {
-      @content;
-    }
+  @if $size == "<=one-column" {
+    @media (max-width: $breakpoint-one-column) { @content; }
   }
-  @else if $size == ">small" {
-    @media (min-width: ($breakpoint-small + 1)) {
-      @content;
-    }
+  @else if $size == ">one-column" {
+    @media (min-width: ($breakpoint-one-column + 1)) { @content; }
   }
-  @else if $size == "<=full" {
-    @media (max-width: $breakpoint-full) {
-      @content;
-    }
+  @else if $size == "<=two-columns" {
+    @media (max-width: $breakpoint-two-columns) { @content; }
   }
-  @else if $size == ">full" {
-    @media (min-width: ($breakpoint-full + 1)) {
-      @content;
-    }
+  @else if $size == ">two-columns" {
+    @media (min-width: $breakpoint-two-columns + 1) { @content; }
   }
-  @else if $size == "<=side-by-side" {
-    @media (max-width: $breakpoint-side-by-side) {
-      @content;
-    }
+  @else if $size == "<=three-columns" {
+    @media (max-width: $breakpoint-three-columns) { @content; }
   }
-  @else if $size == ">side-by-side" {
-    @media (min-width: $breakpoint-side-by-side + 1) {
-      @content;
-    }
+  @else if $size == ">three-columns" {
+    @media (min-width: $breakpoint-three-columns + 1) { @content; }
   }
   @else {
-    @media (#{$size}) {
-      @content
-    }
+    @media (#{$size}) { @content; }
   }
 }

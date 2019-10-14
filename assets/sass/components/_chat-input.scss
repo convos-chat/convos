@@ -7,7 +7,7 @@
   bottom: 0;
   z-index: 1;
 
-  @include if_screen("<=full") {
+  @include if_screen("<=two-columns") {
     margin-left: calc(-1 * var(--gutter));
     margin-right: calc(-1 * var(--gutter));
   }
@@ -21,7 +21,7 @@
     display: block;
     resize: none;
 
-    @include if_screen("<=full") {
+    @include if_screen("<=two-columns") {
       padding: var(--gutter-small) var(--gutter);
     }
 
@@ -45,7 +45,7 @@
     padding: 0.5em var(--gutter-small);
     display: block;
 
-    @include if_screen("<=full") {
+    @include if_screen("<=two-columns") {
       padding-right: var(--gutter);
     }
   }
