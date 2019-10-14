@@ -11,6 +11,15 @@ body.no-js .if-js {
 
 .main {
   padding: 0 var(--gutter);
+
+  @include if_screen(">two-columns") {
+    padding: 0 calc(var(--gutter) * 2);
+    margin-left: var(--sidebar-width);
+  }
+
+  @include if_screen(">three-columns") {
+    margin-right: var(--sidebar-width);
+  }
 }
 
 .overlay {
@@ -27,13 +36,5 @@ body.no-js .if-js {
 
   &.is-visible {
     opacity: 0.3;
-  }
-}
-
-@include if_screen(">two-columns") {
-  .main {
-    padding: 0 calc(var(--gutter) * 2);
-    margin-left: var(--sidebar-width);
-    max-width: $breakpoint-max-width;
   }
 }

@@ -5,7 +5,12 @@ import {md} from '../js/md';
 import {sortByName} from '../js/util';
 import {str2color} from '../js/util';
 
-const modes = {o: '@'};
+const modes = {o: '@', v: '+'};
+const modeVals = {o: 10, v: 9};
+
+const sortParticipants = (a, b) => {
+  return (modeVals[b.mode] || 0) - (modeVals[a.mode] || 0) || a.name.localeCompare(b.name);
+};
 
 export default class Dialog extends Reactive {
   constructor(params) {
@@ -52,7 +57,7 @@ export default class Dialog extends Reactive {
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
       if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
 
-      msg.color = str2color(msg.from);
+      msg.color = str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
       msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
       msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/([.!?])?$/, ''));
@@ -122,14 +127,15 @@ export default class Dialog extends Reactive {
     const id = this._participantId(nick);
     params.nick = nick;
 
-    const participant = this.participants.find(p => p.id == id);
+    let participant = this.participants.find(p => p.id == id);
     if (participant) {
       Object.keys(params).forEach(k => { participant[k] = params[k] });
       this.update({});
     }
     else {
-      this.participants.push({...params, id, name: nick, ts: new Time()});
-      this.participants.sort(sortByName);
+      participant = {...params, color: str2color(id), id, name: nick, ts: new Time()};
+      this.participants.push(participant);
+      this.participants.sort(sortParticipants);
       this.update({});
     }
 
@@ -174,9 +180,10 @@ export default class Dialog extends Reactive {
   }
 
   wsEventNickChange(params) {
+    if (params.old_nick == params.new_nick) return;
     const oldId = this._participantId(params.old_nick);
     const participant = this.participant(params.new_nick, this.participants.find(p => p.nick == oldId) || {});
-    if (participant.id != oldId) this.update({participants: this.participants(p => p.id != oldId)});
+    if (participant.id != oldId) this.update({participants: this.participants.filter(p => p.id != oldId)});
     this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
   }
 
@@ -186,7 +193,7 @@ export default class Dialog extends Reactive {
     this.addMessage(this._partMessage(params));
 
     if (!participant.me) {
-      this.update({participants: this.participants(p => p.id != participantId)});
+      this.update({participants: this.participants.filter(p => p.id != participantId)});
     }
   }
 

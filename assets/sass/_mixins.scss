@@ -1,1 +1,16 @@
 @import "mixins/if_screen";
+
+%sidebar-wrapper-chrome {
+  padding: 0 var(--gutter);
+  width: var(--sidebar-width);
+  overflow: auto;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 900;
+  -webkit-overflow-scrolling: touch;
+
+  > :last-child {
+    padding-bottom: 8rem;
+  }
+}

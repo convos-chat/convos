@@ -1,22 +1,10 @@
 .sidebar-wrapper {
+  @extend %sidebar-wrapper-chrome;
   background: var(--sidebar-bg);
-  padding: 0 var(--gutter);
-  width: var(--sidebar-width);
-  overflow: auto;
-  position: fixed;
-  top: 0;
-  bottom: 0;
   left: 0;
-  z-index: 900;
-  -webkit-overflow-scrolling: touch;
 
   &, a {
     color: var(--sidebar-text);
-    text-decoration: none;
-  }
-
-  > :last-child {
-    padding-bottom: 8rem;
   }
 
   @include if_screen(">two-columns") {
@@ -42,20 +30,11 @@
       transform: translateX(0);
     }
   }
-}
 
-.sidebar__nav {
-  a {
-    line-height: 1.2rem;
-    padding: $sidebar-item-indent 0.3rem;
-    display: block;
-    transition: background-color 0.15s ease-in-out;
-
+  .sidebar__nav a {
     &:focus,
     &:hover {
       background: var(--sidebar-search-focus-bg);
-      text-decoration: none;
-      filter: brightness(0.9);
     }
 
     &.has-path {
@@ -68,6 +47,28 @@
 
     &.has-focus {
       background: var(--sidebar-search-focus-bg);
+    }
+
+  }
+}
+
+// Generic for both left and right sidebar__nav
+.sidebar__nav {
+  a {
+    text-decoration: none;
+    line-height: 1.2rem;
+    padding: $sidebar-item-indent 0.3rem;
+    display: block;
+    transition: background-color 0.15s ease-in-out;
+
+    &:focus,
+    &:hover {
+      text-decoration: none;
+      filter: brightness(0.9);
+    }
+
+    &.has-focus {
+      text-decoration: underline;
     }
   }
 

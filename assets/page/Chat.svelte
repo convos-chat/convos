@@ -3,6 +3,7 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../components/ChatMessages.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
+import DialogParticipants from '../components/DialogParticipants.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
@@ -168,3 +169,12 @@ const onScroll = debounce(e => {
     {/if}
   </main>
 </div>
+
+{#if dialog.dialog_id}
+  <div class="sidebar-participants-wrapper">
+    <div class="sidebar__nav">
+      <h3>{l('Participants (%1)', dialog.participants.length)}</h3>
+      <DialogParticipants dialog="{dialog}"/>
+    </div>
+  </div>
+{/if}
