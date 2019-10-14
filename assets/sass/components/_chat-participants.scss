@@ -1,0 +1,33 @@
+.participant {
+
+  // Mode order is significant
+  &.has-mode-v span:before {
+    content: '+';
+  }
+
+  &.has-mode-o span:before {
+    content: '@';
+  }
+
+}
+
+.sidebar-wrapper .participant {
+  i {
+    display: none;
+  }
+}
+
+.sidebar-participants-wrapper {
+  @extend %sidebar-wrapper-chrome;
+  background: var(--body-bg);
+  padding-left: 0;
+  right: 0;
+
+  @include if_screen("<=three-columns") {
+    display: none;
+  }
+
+  .participant i {
+    width: 1.2em;
+  }
+}

@@ -33,6 +33,7 @@ export default class Connection extends Dialog {
     else {
       dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
       dialog.on('message', params => this.emit('message', params));
+      this._addDefaultParticipants(dialog);
       this.dialogs.push(dialog);
       this.dialogs.sort(sortByName);
       this.update({});
@@ -58,6 +59,7 @@ export default class Connection extends Dialog {
   }
 
   update(params) {
+    if (params.nick && params.nick != this.nick) this.wsEventNickChange({new_nick: params.nick, old_nick: this.nick});
     if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
     return super.update(params);
   }
@@ -119,9 +121,14 @@ export default class Connection extends Dialog {
 
   wsEventTopic(params) {
     this.ensureDialog(params).addMessage(params.topic
-      ? {message: 'Topic is: %1', vars: [params.topic]}
+      ? {message: 'Topic changed to: %1', vars: [params.topic]}
       : {message: 'No topic is set.', vars: []}
     );
+  }
+
+  _addDefaultParticipants(dialog) {
+    dialog.participant(this.nick);
+    if (dialog.is_private) dialog.participant(dialog.name);
   }
 
   _addOperations() {

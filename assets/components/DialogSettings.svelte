@@ -1,10 +1,10 @@
 <script>
-import {getContext} from 'svelte';
-import {l} from '../js/i18n';
 import Button from '../components/form/Button.svelte';
-import Link from '../components/Link.svelte';
+import DialogParticipants from '../components/DialogParticipants.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
+import {getContext} from 'svelte';
+import {l} from '../js/i18n';
 
 export let dialog = {};
 
@@ -24,7 +24,7 @@ function updateDialogFromForm(e) {
 </script>
 
 <div class="sidebar-wrapper is-visible">
-  <SettingsHeader {dialog}/>
+  <SettingsHeader dialog="{dialog}"/>
 
   <p>
     {#if dialog.is('private')}
@@ -54,12 +54,6 @@ function updateDialogFromForm(e) {
 
   <nav class="sidebar__nav">
     <h3>{l('Participants (%1)', $dialog.participants.length)}</h3>
-    {#if $dialog.participants.length}
-      {#each $dialog.participants as participant}
-        <Link href="/chat/{dialog.connection_id}/{participant.id}">{participant.mode}{participant.nick}</Link>
-      {/each}
-    {:else}
-      <p>{l('No participants.')}</p>
-    {/if}
+    <DialogParticipants dialog="{dialog}"/>
   </nav>
 </div>
