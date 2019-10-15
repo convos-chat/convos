@@ -5,6 +5,7 @@ import {md} from '../js/md';
 import {sortByName} from '../js/util';
 import {str2color} from '../js/util';
 
+const channelRe = new RegExp('^[#&]');
 const modes = {o: '@', v: '+'};
 const modeVals = {o: 10, v: 9};
 
@@ -23,7 +24,7 @@ export default class Dialog extends Reactive {
     this._readOnlyAttr('api', params.api);
     this._readOnlyAttr('connection_id', params.connection_id || '');
     this._readOnlyAttr('events', params.events);
-    this._readOnlyAttr('is_private', params.is_private || false);
+    this._readOnlyAttr('is_private', () => !channelRe.test(this.name));
     this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this._updateableAttr('frozen', params.frozen || '');
@@ -100,6 +101,7 @@ export default class Dialog extends Reactive {
   }
 
   async load() {
+    if (this.is_private && this.dialog_id) this.send('/ison', '_noop'); // Check if user is active
     if (!this.messagesOp || this.messagesOp.is('success')) return this;
     this.update({status: 'loading'});
     await this.messagesOp.perform(this);
@@ -207,6 +209,9 @@ export default class Dialog extends Reactive {
     if (!this.events.ready || this._participantsLoaded) return;
     if (this.dialog_id && !this.is('private') && !this.is('frozen')) this.send('/names', '_updateParticipants');
     this._participantsLoaded = true;
+  }
+
+  _noop() {
   }
 
   _participantId(name) {

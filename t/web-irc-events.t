@@ -46,8 +46,8 @@ $irc->run(
     $ws->message_ok->json_message_is('/connection_id', $c->id)
       ->json_message_is('/connection_id', 'irc-test')->json_message_is('/dialog_id', '#convos')
       ->json_message_is('/event', 'state')->json_message_is('/frozen', '')
-      ->json_message_is('/is_private', 0)->json_message_is('/name', '#Convos')
-      ->json_message_is('/topic', '')->json_message_has('/ts')->json_message_is('/type', 'frozen');
+      ->json_message_is('/name', '#Convos')->json_message_is('/topic', '')->json_message_has('/ts')
+      ->json_message_is('/type', 'frozen');
     $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
       ->json_message_is('/event', 'sent')->json_message_is('/message', '/join #Convos')
       ->json_message_is('/dialog_id', '#convos');
@@ -126,7 +126,7 @@ $irc->run(
 );
 
 $ws->send_ok({
-    json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
+  json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
 });
 $ws->message_ok;
 {

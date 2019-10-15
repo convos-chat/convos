@@ -140,7 +140,7 @@ sub send {
   return $self->_send(split(/\s+/, $message, 2), $cb) if $cmd eq 'MSG';
   return $self->wanted_state(connected    => $cb) if $cmd eq 'CONNECT';
   return $self->wanted_state(disconnected => $cb) if $cmd eq 'DISCONNECT';
-  return $self->_is_online($message, $cb) if $cmd eq 'ISON';
+  return $self->_is_online($message =~ /\w/ ? $message : $target, $cb) if $cmd eq 'ISON';
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN';
   return $self->_query_dialog($message, $cb) if $cmd eq 'QUERY';
   return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
@@ -271,9 +271,7 @@ sub _query_dialog {
   return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
 
   # New dialog
-  $dialog ||= $self->dialog({name => $name});
-  $dialog->frozen('Not active in this room.') if !$dialog->is_private and !$dialog->frozen;
-  return next_tick $self, $cb, '', $dialog;
+  return next_tick $self, $cb, '', $dialog || $self->dialog({name => $name});
 }
 
 sub _kick {
@@ -641,7 +639,7 @@ sub _event_quit {
 
 sub _event_rpl_list {
   my ($self, $msg) = @_;
-  my $dialog = {is_private => 0, n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
+  my $dialog = {n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
 
   $dialog->{name}      = $msg->{params}[1];
   $dialog->{dialog_id} = lc $dialog->{name};
@@ -670,20 +668,27 @@ sub _event_rpl_myinfo {
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 sub _event_rpl_welcome {
   my ($self, $msg) = @_;
-  my ($write, @commands);
-
-  push @commands, map  { $_->is_private ? "/ison $_->{name}" : $_ } @{$self->dialogs};
-  push @commands, grep {/\S/} @{$self->on_connect_commands};
 
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(state => me => $self->{myinfo});
 
+  my @commands = (
+    (grep {/\S/} @{$self->on_connect_commands}),
+    (
+      map {
+            $_->is_private ? "/ison $_->{name}"
+          : $_->password   ? "/join $_->{name} $_->{password}"
+          : "/join $_->{name}"
+      } @{$self->dialogs}
+    ),
+  );
+
   Scalar::Util::weaken($self);
+  my $write;
   $write = sub {
-    my $cmd = $self && shift @commands || return;
-    return $self->_join_dialog(join(' ', $cmd->name, $cmd->password), $write) if ref $cmd;
-    return $self->send('', $cmd, $write);
+    my $cmd = shift @commands;
+    $self->send('', $cmd, $write) if $self and defined $cmd;
   };
 
   next_tick $self, $write;
