@@ -33,6 +33,6 @@ function loadingState(loading) {
 </script>
 
 <button class="{classNames.join(' ')}" disabled="{disabledProp}" {type} on:click>
-  <slot/>
   <Icon {animation} name="{icon}"/>
+  <slot/>
 </button>
