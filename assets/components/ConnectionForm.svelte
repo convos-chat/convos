@@ -1,14 +1,15 @@
 <script>
-import {getContext, onMount, tick} from 'svelte';
-import {gotoUrl, urlToForm} from '../store/router';
-import {l} from '../js/i18n';
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
+import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {getContext, onMount, tick} from 'svelte';
+import {gotoUrl, urlToForm} from '../store/router';
+import {l} from '../js/i18n';
 
 export let dialog = {};
 
@@ -16,6 +17,12 @@ const user = getContext('user');
 const createConnectionOp = user.api.operation('createConnection');
 const removeConnectionOp = user.api.operation('removeConnection');
 const updateConnectionOp = user.api.operation('updateConnection');
+
+[createConnectionOp, updateConnectionOp].forEach(op => {
+  op.on('start', req => {
+    req.body.on_connect_commands = req.body.on_connect_commands.split('\n').map(str => str.trim());
+  });
+});
 
 let connection = {};
 let formEl;
@@ -44,6 +51,7 @@ function connectionToForm() {
   if (!connection.url) return; // Could not find connection
   formEl.server.value = connection.url.host;
   formEl.nick.value = connection.url.searchParams.get('nick') || '';
+  formEl.on_connect_commands.value = connection.on_connect_commands.join('\n');
   formEl.password.value = connection.url.password;
   formEl.username.value = connection.url.username;
   formEl.url.value = connection.url.toString();
@@ -111,6 +119,9 @@ async function submitForm(e) {
   <PasswordField name="password" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Password')}</span>
   </PasswordField>
+  <TextArea name="on_connect_commands" hidden="{!showAdvancedSettings}">
+    <span slot="label">{l('On-connect commands')}</span>
+  </TextArea>
   <div class="form-actions">
     {#if connection.url}
       <Button icon="save" op="{updateConnectionOp}">{l('Update')}</Button>
