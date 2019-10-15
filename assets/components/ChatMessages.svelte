@@ -12,6 +12,10 @@ const user = getContext('user');
 $: connectionStatus = connection.is && !connection.is('connected') ? connection.topicOrStatus() : '';
 </script>
 
+{#if !dialog.messages.length}
+  <h2>{l(dialog.dialog_id == 'notifications' ? 'No notifications.' : 'No messages.')}</h2>
+{/if}
+
 {#each dialog.messages as message, i}
   {#if message.endOfHistory}
     <div class="message-status-line for-start-of-history"><span>{l('Start of history')}</span></div>
@@ -37,8 +41,8 @@ $: connectionStatus = connection.is && !connection.is('connected') ? connection.
   </div>
 {/each}
 
-{#if connectionStatus}
-<div class="message-status-line for-connection-status"><span>{l(connectionStatus)}</span></div>
+{#if connectionStatus || dialog.frozen}
+  <div class="message-status-line for-connection-status"><span>{l(connectionStatus || dialog.frozen)}</span></div>
 {/if}
 
 {#if dialog.is('loading')}

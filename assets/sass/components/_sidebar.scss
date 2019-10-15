@@ -81,6 +81,12 @@
   }
 }
 
+.sidebar__item {
+  &.is-frozen a {
+    color: var(--sidebar-frozen-color);
+  }
+}
+
 .sidebar__header {
   background: var(--sidebar-bg);
   padding-top: var(--gutter);

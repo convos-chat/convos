@@ -6,17 +6,18 @@ use Mojo::Date;
 
 my $CHANNEL_RE = qr{[#&]};
 
-has frozen     => '';
-has is_private => sub { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 };
-has name       => sub { Carp::confess('name required in constructor') };
-has password   => '';
-has topic      => '';
+has frozen   => '';
+has name     => sub { Carp::confess('name required in constructor') };
+has password => '';
+has topic    => '';
 
 sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
-sub id { $_[1] ? $_[1]->{name} : ($_[0]->{id} //= lc $_[0]->{name}) }
+sub id         { $_[1] ? $_[1]->{name} : ($_[0]->{id} //= lc $_[0]->{name}) }
 
 has last_active => sub { Mojo::Date->new->to_datetime };
 has last_read   => sub { Mojo::Date->new->to_datetime };
+
+sub is_private { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 }
 
 sub messages {
   my ($self, $query, $cb) = @_;
@@ -41,7 +42,7 @@ sub stash { Convos::Util::_stash(stash => @_) }
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(frozen is_private name last_active last_read topic);
+  my %json = map { ($_, $self->$_) } qw(frozen name last_active last_read topic);
   $json{connection_id} = $self->connection->id;
   $json{dialog_id}     = $self->id;
   $json{password}      = $self->password if $persist;
@@ -83,13 +84,6 @@ no longer part of it.
 
 Returns a unique identifier for a dialog.
 
-=head2 is_private
-
-  $bool = $self->is_private;
-
-Returns true if you are only talking to a single user and no other
-participants can join the dialog.
-
 =head2 name
 
   $str = $self->name;
@@ -123,6 +117,13 @@ The password used to join this dialog.
 The topic (subject) of the dialog.
 
 =head1 METHODS
+
+=head2 is_private
+
+  $bool = $self->is_private;
+
+Returns true if you are only talking to a single user and no other
+participants can join the dialog.
 
 =head2 messages
 

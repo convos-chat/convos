@@ -67,7 +67,6 @@ $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status
       connection_id => 'irc-localhost',
       dialog_id     => '#convos',
       frozen        => 'Not connected.',
-      is_private    => 0,
       last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
       name          => '#convos',

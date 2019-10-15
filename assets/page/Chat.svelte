@@ -74,6 +74,7 @@ function calculateDialog(user, pathParts) {
   unsubscribe = [];
   if (connection.subscribe) unsubscribe.push(connection.subscribe(c => { connection = c }));
   if (dialog != connection) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
+
   dialog.load();
   calculateSettingsComponent($currentUrl);
 }
@@ -159,10 +160,8 @@ const onScroll = debounce(e => {
         <a href="#add:{$pathParts[2]}" on:click|preventDefault="{addDialog}" class="btn">{l('Yes')}</a>
         <Link href="/chat" className="btn">{l('No')}</Link>
       </p>
-    {:else if dialog.messages.length}
-      <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
     {:else}
-      <h2>{l($pathParts[1] ? 'No messages.' : 'No notifications.')}</h2>
+      <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
     {/if}
 
     {#if dialog.connection_id}
