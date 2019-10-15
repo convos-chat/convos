@@ -66,12 +66,14 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Expand URL to media')}</span>
     </Checkbox>
 
-    <PasswordField name="password" placeholder="{l('It is optional to change passwords')}">
+    <PasswordField name="password">
       <span slot="label">{l('Password')}</span>
     </PasswordField>
     <PasswordField name="password_again">
       <span slot="label">{l('Repeat password')}</span>
     </PasswordField>
+
+    <p>{l('Leave the password fields empty to keep the current password.')}</p>
 
     <div class="form-actions">
       <Button icon="save" op="{updateUserOp}">{l('Save settings')}</Button>

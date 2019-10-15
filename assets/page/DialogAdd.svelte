@@ -85,9 +85,9 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
     {#if availableDialogs.done !== null}
       <p>
         {#if availableDialogs.done}
-          {l('Showing %1 of %2 dialogs.', availableDialogs.dialogs.length, availableDialogs.n_dialogs)}
+          {l('Showing %1 of %2 conversations.', availableDialogs.dialogs.length, availableDialogs.n_dialogs)}
         {:else}
-          {l('Showing %1 of %2 dialogs, but dialogs are still loading.', availableDialogs.dialogs.length, availableDialogs.n_dialogs)}
+          {l('Showing %1 of %2 conversations, but the list is still loading.', availableDialogs.dialogs.length, availableDialogs.n_dialogs)}
         {/if}
       </p>
 
