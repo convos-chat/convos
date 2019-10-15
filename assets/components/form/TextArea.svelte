@@ -2,6 +2,7 @@
 import {uuidv4} from '../../js/util';
 
 export let className = '';
+export let hidden = false;
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let placeholder = '';
@@ -18,7 +19,7 @@ $: if (inputEl && !inputEl.syncValue) {
 }
 </script>
 
-<div class="{classNames.join(' ')}">
+<div class="{classNames.join(' ')}" hidden="{hidden}">
   <label for="{id}"><slot name="label">Label</slot></label>
   <textarea {name} {placeholder} {id} {readonly} bind:this="{inputEl}" bind:value></textarea>
 </div>

@@ -38,6 +38,8 @@ export default class Operation extends Reactive {
 
       this.update({status: 'loading'});
       const [url, req] = await this._paramsToRequest(opSpec, params || this.defaultParams);
+      this.emit('start', req);
+      if (typeof req.body == 'object') req.body = JSON.stringify(req.body);
       const res = await fetch(url, req);
       delete this._promise;
       res.json().then(json => resolve(this.parse(res, json)));
@@ -126,10 +128,6 @@ export default class Operation extends Reactive {
         throw '[Api] Parameter in:' + p.in + ' is not supported.';
       }
     });
-
-    if (fetchParams.hasOwnProperty('body')) {
-      fetchParams.body = JSON.stringify(fetchParams.body);
-    }
 
     return [url, fetchParams];
   }

@@ -81,6 +81,10 @@ textarea {
   }
 }
 
+.text-area textarea {
+  line-height: 1.5em;
+}
+
 .text-area {
   textarea {
     min-height: 4rem;
