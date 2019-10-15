@@ -242,7 +242,7 @@ sub _join_dialog {
     sub {
       my ($delay, $dialog, $err, $res) = @_;
 
-      $err = 'Password protected' if $err =~ /\+k\b/;
+      $err = 'Password protected.' if $err and $err =~ /\+k\b/;
       $res->{name} //= $name;
 
       unless ($self->get_dialog($res->{name})) {
@@ -270,8 +270,10 @@ sub _query_dialog {
   my $dialog = $self->get_dialog($name);
   return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
 
-  # New dialog
-  return next_tick $self, $cb, '', $dialog || $self->dialog({name => $name});
+  # New dialog. Note that it needs to be frozen, so join_channel will be issued
+  $dialog ||= $self->dialog({name => $name});
+  $dialog->frozen('Not active in this room.') if !$dialog->is_private and !$dialog->frozen;
+  return next_tick $self, $cb, '', $dialog;
 }
 
 sub _kick {
