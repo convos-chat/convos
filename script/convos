@@ -111,7 +111,7 @@ sub ensure_dependencies {
     push @missing, [$module, $version, $e, $cpanfile_mode];
   };
 
-  if ($action eq 'install' and $mode ne '--develop') {
+  if ($action eq 'install' and $mode eq '--help') {
     die "Usage: $0 install [--develop]\n";
   }
 
