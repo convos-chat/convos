@@ -120,7 +120,7 @@ export default class Dialog extends Reactive {
 
     const messages = this.messagesOp.res.body.messages || [];
     if (!messages.length && this.messages.length) first.endOfHistory = true;
-    return this.addMessages('unshift', messsages);
+    return this.addMessages('unshift', messages);
   }
 
   participant(nick, params = {}) {
