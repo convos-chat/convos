@@ -21,7 +21,7 @@ const version = '1.0.0'; // TODO: Extract version from package.json
   <h2>{l('Shortcuts')}</h2>
   <dl>
     <dt>shift+enter</dt>
-    <dd>Shift focus between chat input and dialog sidebar.</dd>
+    <dd>Shift focus between chat input and search in sidebar.</dd>
     <dt>tab (When writing a message)</dt>
     <dd>Will autocomplete a command, nick or channel name.</dd>
   </dl>
