@@ -34,7 +34,7 @@ const embedMaker = new EmbedMaker({api});
 const user = new User({api});
 const notifications = user.notifications;
 
-let pageComponent = Login;
+let pageComponent = null;
 
 $: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
 $: calculatePage($pathParts, $user);
@@ -44,15 +44,8 @@ setContext('user', user);
 
 onMount(async () => {
   const historyUnlistener = historyListener();
-
-  const removeEls = document.querySelectorAll('.js-remove');
-  for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-
   user.load();
-
-  return () => {
-    historyUnlistener();
-  };
+  return historyUnlistener;
 });
 
 function calculatePage(pathParts, user) {
@@ -79,6 +72,12 @@ function calculatePage(pathParts, user) {
   // Enable complex styling
   replaceBodyClassName(/(is-logged-)\S+/, user.is('success') ? 'in' : 'out');
   replaceBodyClassName(/(page-)\S+/, pathParts.join('_').replace(/\W+/g, '_'));
+
+  // Remove original components
+  if (pageComponent) {
+    const removeEls = document.querySelectorAll('.js-remove');
+    for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
+  }
 }
 
 function replaceBodyClassName(re, replacement) {

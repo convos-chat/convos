@@ -5,7 +5,11 @@ body {
   margin: 0;
 }
 
-body.no-js .if-js {
+body.no-js .has-js {
+  display: none;
+}
+
+body.has-js .no-js {
   display: none;
 }
 
