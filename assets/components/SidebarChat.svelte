@@ -1,5 +1,6 @@
 <script>
 import Icon from './Icon.svelte';
+import SidebarDialogItem from '../components/SidebarDialogItem.svelte';
 import SidebarItem from '../components/SidebarItem.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
@@ -142,18 +143,18 @@ function onSearchKeydown(e) {
       {#if $user.connections.length}
         <h3>{l('Group conversations')}</h3>
         {#each $user.connections as connection}
-          <SidebarItem dialog="{connection}"/>
+          <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
           {#each connection.publicDialogs as dialog}
-            <SidebarItem {dialog}/>
+            <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
           {/each}
         {/each}
 
         <h3>{l('Private conversations')}</h3>
         {#each $user.connections as connection}
           {#if connection.privateDialogs.length}
-            <SidebarItem dialog="{connection}"/>
+            <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
             {#each connection.privateDialogs as dialog}
-              <SidebarItem {dialog}/>
+              <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
             {/each}
           {/if}
         {/each}
@@ -176,12 +177,9 @@ function onSearchKeydown(e) {
       <SidebarItem href="/help" icon="question-circle">
         <span>{l('Help')}</span>
       </SidebarItem>
-      <div class="sidebar__item">
-        <a href="/api/user/logout.html" class="sidebar__item__link">
-          <Icon name="power-off"/>
-          <span>{l('Log out')}</span>
-        </a>
-      </div>
+      <SidebarItem href="/api/user/logout.html" icon="power-off">
+        <span>{l('Log out')}</span>
+      </SidebarItem>
     </nav>
   </div>
 </div>

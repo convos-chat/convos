@@ -7,6 +7,7 @@ let el;
 
 export {className as class};
 export let href = '/';
+export let native = false;
 export let replace = false;
 export let style = '';
 
@@ -20,7 +21,7 @@ function calculateClassNames(className, href, $pathname) {
 }
 
 function onClick(event) {
-  gotoUrl(event.target.closest('a').href, {event, replace});
+  if (!native) gotoUrl(event.target.closest('a').href, {event, replace});
 }
 </script>
 
