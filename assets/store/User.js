@@ -24,17 +24,12 @@ export default class User extends Reactive {
   ensureDialog(params) {
     // Ensure channel or private dialog
     if (params.dialog_id) {
-      const dialog = this.ensureDialog({connection_id: params.connection_id}).ensureDialog(params);
-      this.update({});
-      return dialog;
+      return this.ensureDialog({connection_id: params.connection_id}).ensureDialog(params);
     }
 
     // Find connection
     let conn = this.findDialog(params);
-    if (conn) {
-      this.update({});
-      return conn.update(params);
-    }
+    if (conn) return conn.update(params);
 
     // Create connection
     conn = new Connection({...params, api: this.api, events: this.events});
@@ -79,7 +74,6 @@ export default class User extends Reactive {
     if (params.dialog_id) {
       const conn = this.findDialog({connection_id: params.connection_id});
       if (conn) conn.removeDialog(params);
-      this.update({});
     }
     else {
       this.update({connections: this.connections.filter(c => c.connection_id != params.connection_id)});
@@ -132,6 +126,5 @@ export default class User extends Reactive {
     this.notifications.update({unread: body.unread || 0});
     (body.connections || []).forEach(c => this.ensureDialog(c));
     (body.dialogs || []).forEach(d => this.ensureDialog(d));
-    return this.update({});
   }
 }

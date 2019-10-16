@@ -25,20 +25,15 @@ export default class Connection extends Dialog {
 
   ensureDialog(params) {
     let dialog = this.dialogs.find(dialog => dialog.dialog_id == params.dialog_id);
+    if (dialog) return dialog.update(params);
 
-    if (dialog) {
-      dialog.update(params);
-      this.update({});
-    }
-    else {
-      dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
-      dialog.on('message', params => this.emit('message', params));
-      this._addDefaultParticipants(dialog);
-      this.dialogs.push(dialog);
-      this.dialogs.sort(sortByName);
-      this.update({});
-    }
-
+    dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
+    dialog.on('message', params => this.emit('message', params));
+    dialog.on('update', () => this.update({}));
+    this._addDefaultParticipants(dialog);
+    this.dialogs.push(dialog);
+    this.dialogs.sort(sortByName);
+    this.update({});
     return dialog;
   }
 
@@ -54,10 +49,6 @@ export default class Connection extends Dialog {
     return this.update({dialogs: this.dialogs.filter(d => d.dialog_id != params.dialog_id)});
   }
 
-  topicOrStatus() {
-    return this.state == 'disconnected' ? 'Disconnected.' : this.state == 'queued' ? 'Connecting...' : 'Connection messages.';
-  }
-
   update(params) {
     if (params.nick && params.nick != this.nick) this.wsEventNickChange({new_nick: params.nick, old_nick: this.nick});
     if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
@@ -65,7 +56,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventConnection(params) {
-    this.update({frozen: params.message || '', state: params.state});
+    this.update({frozen: params.state == 'connected' ? '' : (params.message || ''), state: params.state});
     this.addMessage(params.message
         ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
         : {message: 'Connection state changed to %1.', vars: [params.state]}
@@ -134,5 +125,13 @@ export default class Connection extends Dialog {
   _addOperations() {
     this._readOnlyAttr('setLastReadOp', this.api.operation('setConnectionLastRead'));
     this._readOnlyAttr('messagesOp', this.api.operation('connectionMessages'));
+  }
+
+  _calculateFrozen() {
+    switch (this.state) {
+      case 'connected': return '';
+      case 'disconnected': return 'Disconnected.';
+      default: return 'Connecting...';
+    }
   }
 }

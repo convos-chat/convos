@@ -27,7 +27,6 @@ export default class Dialog extends Reactive {
     this._readOnlyAttr('is_private', () => !channelRe.test(this.name));
     this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
 
-    this._updateableAttr('frozen', params.frozen || '');
     this._updateableAttr('last_active', new Time(params.last_active));
     this._updateableAttr('last_read', new Time(params.last_read));
     this._updateableAttr('messages', []);
@@ -39,7 +38,10 @@ export default class Dialog extends Reactive {
 
     if (params.hasOwnProperty('dialog_id')) {
       this._readOnlyAttr('dialog_id', params.dialog_id);
-      Object.defineProperty(this, 'state', {get: () => this._reactive.frozen});
+      this._updateableAttr('frozen', params.frozen || '');
+    }
+    else {
+      this._readOnlyAttr('frozen', () => this._calculateFrozen());
     }
 
     this.events.on('update', this._loadParticipants.bind(this));
@@ -157,11 +159,8 @@ export default class Dialog extends Reactive {
     this.update({unread: 0, ...this.setLastReadOp.res.body}); // Update last_read
   }
 
-  topicOrStatus() {
-    return this.frozen || this.topic || (this.is_private ? 'Private conversation.' : 'No topic is set.');
-  }
-
   wsEventMode(params) {
+    if (!params.nick) return; // Channel mode
     this.participant(params.nick, {mode: params.mode});
     this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
   }
@@ -202,6 +201,10 @@ export default class Dialog extends Reactive {
   _addOperations() {
     this._readOnlyAttr('setLastReadOp', this.api.operation('setDialogLastRead'));
     this._readOnlyAttr('messagesOp', this.api.operation('dialogMessages'));
+  }
+
+  _calculateFrozen() {
+    return '';
   }
 
   _loadParticipants() {

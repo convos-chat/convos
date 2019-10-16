@@ -10,7 +10,7 @@ import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import {afterUpdate, getContext, onDestroy, onMount, tick} from 'svelte';
 import {debounce, q} from '../js/util';
-import {l} from '../js/i18n';
+import {l, topicOrStatus} from '../js/i18n';
 import {pathParts, currentUrl} from '../store/router';
 
 const embedMaker = getContext('embedMaker');
@@ -38,8 +38,6 @@ let unsubscribe = [];
 $: calculateDialog($user, $pathParts);
 $: calculateScrollingClass(messagesHeight > containerHeight);
 $: calculateSettingsComponent($currentUrl);
-
-$: topicOrStatus = connection.is && !connection.is('connected') ? connection.topicOrStatus() : dialog.topicOrStatus();
 
 onMount(() => {
   // Clean up any embeds added from a previous chat
@@ -141,7 +139,7 @@ const onScroll = debounce(e => {
   <main class="messages-container" bind:offsetHeight="{messagesHeight}">
     <ChatHeader>
       <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
-      <small>{topicOrStatus}</small>
+      <small>{topicOrStatus(connection, dialog)}</small>
     </ChatHeader>
 
     {#if $user.is('loading') || (dialog.is('loading') && !dialog.messages.length)}

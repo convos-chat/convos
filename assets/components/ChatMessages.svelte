@@ -1,15 +1,13 @@
 <script>
 import Icon from '../components/Icon.svelte';
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
+import {l, topicOrStatus} from '../js/i18n';
 
 export let connection;
 export let dialog;
 export let input;
 
 const user = getContext('user');
-
-$: connectionStatus = connection.is && !connection.is('connected') ? connection.topicOrStatus() : '';
 </script>
 
 {#if !dialog.messages.length}
@@ -41,8 +39,8 @@ $: connectionStatus = connection.is && !connection.is('connected') ? connection.
   </div>
 {/each}
 
-{#if connectionStatus || dialog.frozen}
-  <div class="message-status-line for-connection-status"><span>{l(connectionStatus || dialog.frozen)}</span></div>
+{#if connection.frozen || dialog.frozen}
+  <div class="message-status-line for-connection-status"><span>{topicOrStatus(connection, dialog)}</span></div>
 {/if}
 
 {#if dialog.is('loading')}
