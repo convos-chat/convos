@@ -30,17 +30,17 @@ function clicked(e) {
 
 <div class="{classNames.join(' ')}" on:click="{clicked}">
   {#if settingsIcon}
-    <Link href="/chat/{dialog.path}#settings" className="sidebar__item__settings">
+    <Link href="/chat/{dialog.path}#settings" class="sidebar__item__settings">
       <Icon name="{settingsIcon}"/>
     </Link>
   {/if}
   {#if href}
-    <Link href="{href}" className="sidebar__item__link">
+    <Link href="{href}" class="sidebar__item__link">
       <Icon name="{icon}"/>
       <slot/>
     </Link>
   {:else}
-    <Link href="/chat/{dialog.path}" className="sidebar__item__link">
+    <Link href="/chat/{dialog.path}" class="sidebar__item__link">
       <span>{l(dialog.name.replace(/^\W/, ''))}</span>
       <Unread unread="{dialog.unread}"/>
     </Link>

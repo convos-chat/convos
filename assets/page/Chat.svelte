@@ -150,15 +150,15 @@ const onScroll = debounce(e => {
       <h2>{l('Connection does not exist.')}</h2>
       <p>{l('Do you want to create the connection "%1"?', $pathParts[1])}</p>
       <p>
-        <Link href="/add/connection?server={encodeURIComponent($pathParts[1])}&dialog={encodeURIComponent($pathParts[2])}" className="btn">{l('Yes')}</Link>
-        <Link href="/chat" className="btn">{l('No')}</Link>
+        <Link href="/add/connection?server={encodeURIComponent($pathParts[1])}&dialog={encodeURIComponent($pathParts[2])}" class="btn">{l('Yes')}</Link>
+        <Link href="/chat" class="btn">{l('No')}</Link>
       </p>
     {:else if $pathParts[2] && !dialog.connection_id}
       <h2>{l('You are not part of this conversation.')}</h2>
       <p>{l('Do you want to chat with "%1"?', $pathParts[2])}</p>
       <p>
         <a href="#add:{$pathParts[2]}" on:click|preventDefault="{addDialog}" class="btn">{l('Yes')}</a>
-        <Link href="/chat" className="btn">{l('No')}</Link>
+        <Link href="/chat" class="btn">{l('No')}</Link>
       </p>
     {:else}
       <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>

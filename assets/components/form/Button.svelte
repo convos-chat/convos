@@ -3,12 +3,6 @@ import Icon from '../Icon.svelte';
 import Operation from '../../store/Operation';
 import Time from '../../js/Time';
 
-export let className = '';
-export let disabled = false;
-export let icon = '';
-export let op = new Operation({api: false, id: ''});
-export let type = '';
-
 const minLoadingTime = 700;
 
 let animation = '';
@@ -16,14 +10,16 @@ let classNames = [];
 let forceDisable = false;
 let t0 = 0;
 
+export let disabled = false;
+export let icon = '';
+export let op = new Operation({api: false, id: ''});
+export let type = '';
+
 $: $op.is('loading') && loadingState(true);
 $: $op.is('loading') || setTimeout(() => loadingState(false), minLoadingTime - (new Time().toEpoch() - t0));
-$: disabledProp = disabled || forceDisable;
 
-$: {
-  classNames = ['btn'];
-  classNames.push('for-' + (icon || 'default'));
-}
+$: classNames = ['btn', 'for-' + (icon || 'default')];
+$: disabledProp = disabled || forceDisable;
 
 function loadingState(loading) {
   if (loading) t0 = new Time().toEpoch();
