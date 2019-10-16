@@ -3,15 +3,6 @@ import {closestEl, uuidv4} from '../../js/util';
 import {onMount, tick} from 'svelte';
 import {regexpEscape} from '../../js/util';
 
-export let className = '';
-export let hidden = false;
-export let name = '';
-export let id = name ? 'form_' + name : uuidv4();
-export let options = [];
-export let placeholder = '';
-export let readonly = false;
-export let value = '';
-
 const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
 let activeIndex = 0;
@@ -21,7 +12,14 @@ let typed = '';
 let visible = false;
 let wrapperEl;
 
-$: classNames = ['select-field', 'text-field', className].filter(c => c.length).concat(visible ? 'is-open' : 'is-closed');
+export let hidden = false;
+export let name = '';
+export let id = name ? 'form_' + name : uuidv4();
+export let options = [];
+export let placeholder = '';
+export let readonly = false;
+export let value = '';
+
 $: visibleOptions = filterOptions(options, typed);
 $: if (visible == true) activeIndex = 0;
 $: if (visible == false) typed = '';
@@ -96,7 +94,7 @@ function toggle() {
 }
 </script>
 
-<div class="{classNames.join(' ')}" hidden="{hidden}" bind:this="{wrapperEl}" on:click|preventDefault="{toggle}">
+<div class="select-field text-field" hidden="{hidden}" bind:this="{wrapperEl}" on:click|preventDefault="{toggle}">
   <label for="{id}"><slot name="label">Label</slot></label>
   <input type="hidden" {name} bind:this="{hiddenEl}" bind:value on:keydown="{keydown}"/>
   <input type="text" {placeholder} {id} {readonly} autocomplete="off"

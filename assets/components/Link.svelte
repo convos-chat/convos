@@ -1,15 +1,16 @@
 <script>
 import {gotoUrl, pathname} from '../store/router';
 
-export let className = '';
+let className = '';
+let classNames = [];
+let el;
+
+export {className as class};
 export let href = '/';
 export let replace = false;
 export let style = '';
 
 export const focus = () => el.focus();
-
-let classNames = [];
-let el;
 
 $: calculateClassNames(className, href, $pathname);
 

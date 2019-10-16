@@ -1,11 +1,5 @@
 <script>
-export let animation = '';
-export let className = '';
-export let family = '';
-export let name;
-export let style = '';
-export let title = '';
-
+const familyToClassName = {regular: 'far', solid: 'fas'};
 const randomIcons = [
   'atom',
   'balance-scale',
@@ -36,9 +30,15 @@ const randomIcons = [
   'walking',
 ];
 
-const familyToClassName = {regular: 'far', solid: 'fas'};
-
+let className = '';
 let classNames = [];
+
+export {className as class};
+export let animation = '';
+export let family = '';
+export let name;
+export let style = '';
+export let title = '';
 
 $: {
   classNames = [familyToClassName[family] || 'fa'];
