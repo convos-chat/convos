@@ -116,6 +116,28 @@ export default class Connection extends Dialog {
     );
   }
 
+  wsEventSentWhois(params) {
+    const channels = Object.keys(params.channels);
+    let message = '%1 (%2)';
+    let vars = [params.nick, params.host];
+
+    if (params.idle_for && channels.length) {
+      message += ' has been idle for %3 in %4.';
+      vars.push(params.idle_for);
+      vars.push(channels.join(', '));
+    }
+    else if (params.idle_for && !channels.length) {
+      message += 'has been idle for %3, and is not active in any channels.';
+      vars.push(params.idle_for);
+    }
+    else {
+      message += 'is active in %3.';
+      vars.push(channels.join(', '));
+    }
+
+    this.addMessage({message, vars});
+  }
+
   _addDefaultParticipants(dialog) {
     dialog.participant(this.nick);
     if (dialog.is_private) dialog.participant(dialog.name);
