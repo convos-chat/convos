@@ -7,6 +7,7 @@ export default class Events extends Reactive {
   constructor() {
     super();
     this.notificationIcon = ''; // TODO
+    this.queue = [];
     this.waiting = {}; // Add logic to clean up old callbacks
 
     this._localStorageAttr('notificationCloseDelay', 5000);
@@ -40,15 +41,15 @@ export default class Events extends Reactive {
     setTimeout(() => notification.close(), this.notificationCloseDelay);
   }
 
-  async send(msg, cb) {
-    const ws = await this._ws();
+  send(msg, cb) {
     if (!msg.id && msg.method != 'ping') msg.id = ++msgId;
     if (!msg.method && msg.message) msg.method = 'send';
     if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] || '' });
     delete msg.dialog;
     if (this.debugEvents) this._debug('send', msg);
     if (cb) this.waiting[msg.id] = cb;
-    ws.send(JSON.stringify(msg));
+    this.queue.push(msg);
+    this._dequeue();
   }
 
   update(params) {
@@ -87,38 +88,41 @@ export default class Events extends Reactive {
     return '';
   }
 
-  _ping() {
-    if (this.ws && this.ws.readyState == 1) this.send({method: 'ping'});
+  _dequeue() {
+    // Send messages in the queue
+    this.queue = this.queue.filter(msg => !this._send(msg));
+
+    // Do not connect unless we are disconnected and have queued messages
+    if (this.queue.length == 0 || this.ws) return;
+
+    // Make sure the connection does not turn inactive
+    if (!this._keepaliveTid) this._keepaliveTid = setInterval(() => this._send({method: 'ping'}), 10000);
+
+    // Cancel scheduled reconnect
+    if (this._wsReconnectTid) clearTimeout(this._wsReconnectTid);
+    delete this._wsReconnectTid;
+
+    // Connect and keep track of connection state
+    this.ws = new WebSocket(this.wsUrl);
+    this.ws.onopen = () => {
+      this.update({ready: true});
+      this._dequeue();
+    };
+
+    this.ws.onclose = this._reconnect.bind(this);
+    this.ws.onerror = this._reconnect.bind(this);
+    this.ws.onmessage = (e) => this.dispatch(JSON.parse(e.data));
   }
 
-  async _ws() {
-    if (this._wsPromise) return this._wsPromise;
-    if (this._wsReconnectTid) clearTimeout(this._wsReconnectTid);
+  _reconnect(e) {
+    if (!this._wsReconnectTid) this._wsReconnectTid = setTimeout(() => this._dequeue(), 5000);
+    this.update({ready: false});
+    this.ws = null;
+  }
 
-    const ws = new WebSocket(this.wsUrl);
-    if (!this._keepaliveTid) this._keepaliveTid = setInterval(() => this._ping(), 5000);
-
-    let handled = false;
-    const p = new Promise((resolve, reject) => {
-      ws.onopen = () => {
-        if (![handled, (handled = true)][0]) resolve((this.ws = ws));
-        this.update({ready: true});
-      };
-
-      ws.onclose = (e) => {
-        delete this._wsPromise;
-        this._wsReconnectTid = setTimeout(() => this._ws(), 20000);
-        this.update({ready: false});
-        if (![handled, (handled = true)][0]) reject(e);
-      };
-
-      ws.onerror = (e) => {
-        if (![handled, (handled = true)][0]) reject(e);
-      };
-
-      ws.onmessage = (e) => this.dispatch(JSON.parse(e.data));
-    });
-
-    return (this._wsPromise = p);
+  _send(msg) {
+    const ws = this.ws && this.ws.readyState == 1 && this.ws;
+    if (ws) ws.send(JSON.stringify(msg));
+    return !!ws;
   }
 }
