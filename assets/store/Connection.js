@@ -56,6 +56,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventConnection(params) {
+    this.update({state: params.state});
     this.addMessage(params.message
         ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
         : {message: 'Connection state changed to %1.', vars: [params.state]}
