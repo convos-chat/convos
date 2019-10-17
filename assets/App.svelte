@@ -60,6 +60,10 @@ function calculatePage(pathParts, user) {
   // Goto a valid page
   if (nextPageComponent) {
     if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
+
+    // Enable complex styling
+    replaceBodyClassName(/(is-logged-)\S+/, user.is('success') ? 'in' : 'out');
+    replaceBodyClassName(/(page-)\S+/, pathParts.join('_').replace(/\W+/g, '_'));
   }
   else if (user.is('success')) {
     const lastUrl = localStorage.getItem('lastUrl');
@@ -68,10 +72,6 @@ function calculatePage(pathParts, user) {
   else if (user.is('error')) {
     gotoUrl('/login', {replace: true});
   }
-
-  // Enable complex styling
-  replaceBodyClassName(/(is-logged-)\S+/, user.is('success') ? 'in' : 'out');
-  replaceBodyClassName(/(page-)\S+/, pathParts.join('_').replace(/\W+/g, '_'));
 
   // Remove original components
   if (pageComponent) {

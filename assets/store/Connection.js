@@ -56,7 +56,6 @@ export default class Connection extends Dialog {
   }
 
   wsEventConnection(params) {
-    this.update({frozen: params.state == 'connected' ? '' : (params.message || ''), state: params.state});
     this.addMessage(params.message
         ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
         : {message: 'Connection state changed to %1.', vars: [params.state]}
@@ -131,6 +130,7 @@ export default class Connection extends Dialog {
     switch (this.state) {
       case 'connected': return '';
       case 'disconnected': return 'Disconnected.';
+      case 'unreachable': return 'Unreachable.';
       default: return 'Connecting...';
     }
   }

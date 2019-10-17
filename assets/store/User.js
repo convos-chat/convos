@@ -66,7 +66,7 @@ export default class User extends Reactive {
     if (this.getUserOp.is('success')) return this;
     await this.getUserOp.perform();
     this._parseGetUser(this.getUserOp.res.body);
-    if (this.email) await this.send({method: 'ping'});
+    if (this.email) this.send({method: 'ping'});
     return this;
   }
 
@@ -101,9 +101,13 @@ export default class User extends Reactive {
     });
 
     events.on('update', events => {
-      if (events.ready) return;
-      this.getUserOp.update({status: 'pending'});
-      this.connections.forEach(c => c.update({frozen: 'Unreachable.'}));
+      if (events.ready) {
+        return this.getUserOp.is('pending') ? this.load() : false;
+      }
+      else {
+        this.getUserOp.update({status: 'pending'});
+        this.connections.forEach(c => c.update({state: 'unreachable'}));
+      }
     });
 
     return events;
