@@ -54,7 +54,21 @@ export default class Dialog extends Reactive {
   }
 
   addMessages(method, messages) {
-    for (let i = 0; i < messages.length; i++) {
+    let start = 0;
+    let stop = messages.length;
+
+    switch (method) {
+      case 'push':
+        start = this.messages.length;
+        messages = this.messages.concat(messages);
+        stop = messages.length;
+        break;
+      case 'unshift':
+        messages = messages.concat(this.messages);
+        break;
+    }
+
+    for (let i = start; i < stop; i++) {
       const msg = messages[i];
       if (msg.hasOwnProperty('markdown')) continue; // Already processed
       if (!msg.from) msg.from = this.connection_id || 'Convos';
@@ -69,13 +83,7 @@ export default class Dialog extends Reactive {
       msg.markdown = md(msg.message);
     }
 
-    switch (method) {
-      case 'push': this.update({messages: this.messages.concat(messages)}); break;
-      case 'set': this.update({messages}); break;
-      case 'unshift': this.update({messages: messages.concat(this.messages)}); break;
-    }
-
-    this.update({status: 'loaded'});
+    this.update({messages, status: 'loaded'});
     return this;
   }
 
