@@ -64,6 +64,12 @@ function focusAutocompleteItem(e, moveBy) {
   fillinAutocompeteOption({space: ''});
 }
 
+function onClick(e) {
+  activeAutocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
+  fillinAutocompeteOption({space: ''});
+  inputEl.focus();
+}
+
 function sendMessage() {
   const msg = {message: inputEl.value, method: 'send', dialog};
   const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
@@ -108,7 +114,7 @@ const keys = {
 
   <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
     {#each autocompleteOptions as opt, i}
-      <a href="#{opt.value}" class:has-focus="{i == activeAutocompleteIndex}" tabindex="-1" on:click|preventDefault="{e => fillinAutocompeteOption({space: ''})}">{@html opt.text || opt.val}</a>
+      <a href="#index:{i}" class:has-focus="{i == activeAutocompleteIndex}" tabindex="-1" on:click|preventDefault="{onClick}">{@html opt.text || opt.val}</a>
     {/each}
   </div>
 </div>
