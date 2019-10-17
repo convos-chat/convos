@@ -49,6 +49,7 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
+    this.update({unread: this.unread + 1});
     return this.addMessages('push', [msg]);
   }
 
