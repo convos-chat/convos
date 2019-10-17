@@ -53,7 +53,7 @@ function updateDialogFromForm(e) {
   </form>
 
   <nav class="sidebar__nav">
-    <h3>{l('Participants (%1)', $dialog.participants.length)}</h3>
+    <h3>{l('Participants (%1)', $dialog.participants.size)}</h3>
     <DialogParticipants dialog="{dialog}"/>
   </nav>
 </div>

@@ -10,8 +10,8 @@ function participantClassNames(str) {
 }
 </script>
 
-{#if dialog.participants.length}
-  {#each dialog.participants as participant}
+{#if dialog.participants.size}
+  {#each dialog.participants.toArray() as participant}
     <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {participantClassNames(participant.mode)}">
       <Icon name="random:{participant.id}" family="solid" style="color:{participant.color}"/>
       <span>{participant.nick}</span>

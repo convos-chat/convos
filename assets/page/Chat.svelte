@@ -168,10 +168,10 @@ const onScroll = debounce(e => {
   </main>
 </div>
 
-{#if dialog.participants.length}
+{#if dialog.participants.size}
   <div class="sidebar-participants-wrapper">
     <div class="sidebar__nav">
-      <h3>{l('Participants (%1)', dialog.participants.length)}</h3>
+      <h3>{l('Participants (%1)', dialog.participants.size)}</h3>
       <DialogParticipants dialog="{dialog}"/>
     </div>
   </div>
