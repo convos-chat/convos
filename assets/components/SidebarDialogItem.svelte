@@ -8,10 +8,10 @@ import {topicOrStatus} from '../js/i18n';
 export let connection;
 export let dialog;
 
-$: classNames = calculateClassNames($dialog);
-$: settingsIcon = !$dialog.connection_id ? null
-                : !$dialog.dialog_id     ? 'network-wired'
-                : $dialog.is('private')  ? 'user'
+$: classNames = calculateClassNames(dialog);
+$: settingsIcon = !dialog.connection_id ? null
+                : !dialog.dialog_id     ? 'network-wired'
+                : dialog.is('private')  ? 'user'
                 :                         'user-friends';
 
 function calculateClassNames(dialog) {
@@ -30,11 +30,11 @@ function clicked(e) {
 </script>
 
 <div class="sidebar__item {classNames.join(' ')}" on:click="{clicked}" title="{topicOrStatus(connection, dialog)}">
-  <Link href="/chat/{$dialog.path}#settings" class="sidebar__item__settings">
+  <Link href="/chat/{dialog.path}#settings" class="sidebar__item__settings">
     <Icon name="{settingsIcon}"/>
   </Link>
-  <Link href="/chat/{$dialog.path}" class="sidebar__item__link">
-    <span>{$dialog.name.replace(/^\W/, '')}</span>
-    <Unread unread="{$dialog.unread}"/>
+  <Link href="/chat/{dialog.path}" class="sidebar__item__link">
+    <span>{dialog.name.replace(/^\W/, '')}</span>
+    <Unread unread="{dialog.unread}"/>
   </Link>
 </div>
