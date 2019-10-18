@@ -49,7 +49,14 @@ export default class Reactive {
       }
     }
 
-    return updated || paramNames.length == 0 ? this.emit('update', this) : this;
+    if (!this._updatedTid && updated || paramNames.length == 0) {
+      this._updatedTid = setTimeout(() => {
+        delete this._updatedTid;
+        this.emit('update', this);
+      }, 1);
+    }
+
+    return this;
   }
 
   _localStorageAttr(name, val) {
