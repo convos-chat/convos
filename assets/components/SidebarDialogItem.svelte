@@ -34,7 +34,7 @@ function clicked(e) {
     <Icon name="{settingsIcon}"/>
   </Link>
   <Link href="/chat/{dialog.path}" class="sidebar__item__link">
-    <span>{dialog.name.replace(/^\W/, '')}</span>
+    <span>{dialog.name}</span>
     <Unread unread="{dialog.unread}"/>
   </Link>
 </div>

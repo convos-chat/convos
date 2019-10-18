@@ -141,22 +141,15 @@ function onSearchKeydown(e) {
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
       {#if $user.connections.size}
-        <h3>{l('Group conversations')}</h3>
+        <h3>{l('Conversations')}</h3>
         {#each $user.connections.toArray() as connection}
           <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
           {#each connection.dialogs.filter(d => !d.is_private) as dialog}
             <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
           {/each}
-        {/each}
-
-        <h3>{l('Private conversations')}</h3>
-        {#each $user.connections.toArray() as connection}
-          {#if connection.dialogs.size}
-            <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
-            {#each connection.dialogs.filter(d => d.is_private) as dialog}
-              <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
-            {/each}
-          {/if}
+          {#each connection.dialogs.filter(d => d.is_private) as dialog}
+            <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
+          {/each}
         {/each}
       {/if}
 
