@@ -1,5 +1,6 @@
 import joypixels from 'emoji-toolkit';
-import {md} from '../js/md';
+import {md} from './md';
+import {regexpEscape} from './util';
 
 const commands = [];
 const emojis = {};
@@ -49,7 +50,16 @@ autocomplete.emojis = ({query}) => {
 };
 
 autocomplete.nicks = ({dialog, query}) => {
-  return []; // TODO
+  const participants = dialog.participants.values();
+  const re = new RegExp('^' + regexpEscape(query.slice(1)), 'i');
+  const opts = [];
+
+  for (let p of participants) {
+    if (opts.length >= maxNumMatches) break;
+    if (p.nick.match(re)) opts.push({val: p.nick});
+  }
+
+  return opts;
 };
 
 // TODO: Allow user to select tone in settings
