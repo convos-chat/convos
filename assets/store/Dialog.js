@@ -31,6 +31,7 @@ export default class Dialog extends Reactive {
     this._updateableAttr('last_active', new Time(params.last_active));
     this._updateableAttr('last_read', new Time(params.last_read));
     this._updateableAttr('messages', []);
+    this._updateableAttr('mode', '');
     this._updateableAttr('name', params.name || 'Unknown');
     this._updateableAttr('status', 'loading');
     this._updateableAttr('topic', params.topic || '');
@@ -168,24 +169,9 @@ export default class Dialog extends Reactive {
   }
 
   wsEventMode(params) {
-    if (!params.nick) return; // Channel mode
+    if (!params.nick) return this.update({mode: params.mode}); // Channel mode
     this.participant(params.nick, {mode: params.mode});
     this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
-  }
-
-  wsEventSentNames(params) {
-    this._updateParticipants(params);
-
-    const msg = {message: 'Participants (%1): %2', vars: []};
-    const participants = this.participants.map(p => (modes[p.mode] || '') + p.name);
-    if (participants.length > 1) {
-      msg.message += ' and %3.';
-      msg.vars[2] = participants.pop();
-    }
-
-    msg.vars[0] = participants.length;
-    msg.vars[1] = participants.join(', ');
-    this.addMessage(msg);
   }
 
   wsEventNickChange(params) {
@@ -204,6 +190,21 @@ export default class Dialog extends Reactive {
     if (participant.me) return;
     this.participants.delete(id);
     this.update({});
+  }
+
+  wsEventSentNames(params) {
+    this._updateParticipants(params);
+
+    const msg = {message: 'Participants (%1): %2', vars: []};
+    const participants = this.participants.map(p => (modes[p.mode] || '') + p.name);
+    if (participants.length > 1) {
+      msg.message += ' and %3.';
+      msg.vars[2] = participants.pop();
+    }
+
+    msg.vars[0] = participants.length;
+    msg.vars[1] = participants.join(', ');
+    this.addMessage(msg);
   }
 
   _addOperations() {
