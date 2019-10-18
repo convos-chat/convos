@@ -2,7 +2,7 @@ import Connection from './Connection';
 import Events from '../js/Events';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
-import {sortByName} from '../js/util';
+import SortedMap from '../js/SortedMap';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -10,10 +10,10 @@ export default class User extends Reactive {
 
     const api = params.api;
     this._readOnlyAttr('api', () => api);
+    this._readOnlyAttr('connections', new SortedMap());
     this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
     this._readOnlyAttr('events', this._createEvents());
 
-    this._updateableAttr('connections', []);
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
 
@@ -37,16 +37,14 @@ export default class User extends Reactive {
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('update', () => this.update({}));
 
-    this.connections.push(conn);
-    this.connections.sort(sortByName);
+    this.connections.set(conn.connection_id, conn);
     this.update({});
     return conn;
   }
 
   findDialog(params) {
-    if (!params.dialog_id) return this.connections.find(conn => conn.connection_id == params.connection_id);
-    const conn = this.findDialog({connection_id: params.connection_id});
-    return conn && conn.findDialog(params);
+    const conn = this.connections.get(params.connection_id);
+    return !params.dialog_id ? conn : conn && conn.findDialog(params);
   }
 
   is(status) {
@@ -76,7 +74,8 @@ export default class User extends Reactive {
       if (conn) conn.removeDialog(params);
     }
     else {
-      this.update({connections: this.connections.filter(c => c.connection_id != params.connection_id)});
+      this.connections.delete(params.connection_id);
+      this.update({});
     }
   }
 
@@ -106,7 +105,7 @@ export default class User extends Reactive {
       }
       else {
         this.getUserOp.update({status: 'pending'});
-        this.connections.forEach(c => c.update({state: 'unreachable'}));
+        this.connections.forEach(conn => conn.update({state: 'unreachable'}));
       }
     });
 
@@ -128,7 +127,7 @@ export default class User extends Reactive {
     this.update({connections: []});
     this.notifications.addMessages('set', body.notifications || []);
     this.notifications.update({unread: body.unread || 0});
-    (body.connections || []).forEach(c => this.ensureDialog(c));
-    (body.dialogs || []).forEach(d => this.ensureDialog(d));
+    (body.connections || []).forEach(conn => this.ensureDialog(conn));
+    (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));
   }
 }

@@ -1,16 +1,16 @@
 import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
+import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
-import {sortByName} from '../js/util';
 
 export default class Connection extends Dialog {
   constructor(params) {
     super(params);
 
-    this._readOnlyAttr('privateDialogs', () => this.dialogs.filter(d => d.is_private));
-    this._readOnlyAttr('publicDialogs', () => this.dialogs.filter(d => !d.is_private));
+    this._readOnlyAttr('dialogs', new SortedMap());
+    this._readOnlyAttr('privateDialogs', () => this.dialogs.toArray().filter(d => d.is_private));
+    this._readOnlyAttr('publicDialogs', () => this.dialogs.toArray().filter(d => !d.is_private));
 
-    this._updateableAttr('dialogs', []);
     this._updateableAttr('on_connect_commands', params.on_connect_commands || '');
     this._updateableAttr('state', params.state || 'queued');
     this._updateableAttr('wanted_state', params.wanted_state || 'connected');
@@ -24,21 +24,20 @@ export default class Connection extends Dialog {
   }
 
   ensureDialog(params) {
-    let dialog = this.dialogs.find(dialog => dialog.dialog_id == params.dialog_id);
+    let dialog = this.dialogs.get(params.dialog_id);
     if (dialog) return dialog.update(params);
 
     dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
     dialog.on('message', params => this.emit('message', params));
     dialog.on('update', () => this.update({}));
     this._addDefaultParticipants(dialog);
-    this.dialogs.push(dialog);
-    this.dialogs.sort(sortByName);
+    this.dialogs.set(dialog.dialog_id, dialog);
     this.update({});
     return dialog;
   }
 
   findDialog(params) {
-    return this.dialogs.find(dialog => dialog.dialog_id == params.dialog_id);
+    return this.dialogs.get(params.dialog_id);
   }
 
   is(state) {
@@ -46,7 +45,8 @@ export default class Connection extends Dialog {
   }
 
   removeDialog(params) {
-    return this.update({dialogs: this.dialogs.filter(d => d.dialog_id != params.dialog_id)});
+    this.dialogs.delete(params.dialog_id);
+    return this.update({});
   }
 
   update(params) {

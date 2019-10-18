@@ -140,9 +140,9 @@ function onSearchKeydown(e) {
     </form>
 
     <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
-      {#if $user.connections.length}
+      {#if $user.connections.size}
         <h3>{l('Group conversations')}</h3>
-        {#each $user.connections as connection}
+        {#each $user.connections.toArray() as connection}
           <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
           {#each connection.publicDialogs as dialog}
             <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
@@ -150,7 +150,7 @@ function onSearchKeydown(e) {
         {/each}
 
         <h3>{l('Private conversations')}</h3>
-        {#each $user.connections as connection}
+        {#each $user.connections.toArray() as connection}
           {#if connection.privateDialogs.length}
             <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
             {#each connection.privateDialogs as dialog}

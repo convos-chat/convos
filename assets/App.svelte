@@ -67,7 +67,7 @@ function calculatePage(pathParts, user) {
   }
   else if (user.is('success')) {
     const lastUrl = localStorage.getItem('lastUrl');
-    gotoUrl(lastUrl || (user.connections.length ? '/chat' : '/add/connection'), {replace: true});
+    gotoUrl(lastUrl || (user.connections.size ? '/chat' : '/add/connection'), {replace: true});
   }
   else if (user.is('error')) {
     gotoUrl('/login', {replace: true});
