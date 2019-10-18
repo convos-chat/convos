@@ -18,7 +18,7 @@ let connectionId = '';
 let dialogId = '';
 let formEl;
 
-$: connectionOptions = $user.connections.keys();
+$: connectionOptions = Array.from($user.connections.keys());
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
 
 onMount(() => urlToForm(formEl));
