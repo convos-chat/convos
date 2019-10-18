@@ -13,7 +13,7 @@ function clicked(e) {
 </script>
 
 <div class="sidebar__item" on:click="{clicked}">
-  <Link href="{href}" class="sidebar__item__link" native="{!!href.indexOf('.html')}">
+  <Link href="{href}" class="sidebar__item__link" native="{href.indexOf('.html') != -1}">
     <Icon name="{icon}"/>
     <slot/>
   </Link>
