@@ -8,8 +8,6 @@ export default class Connection extends Dialog {
     super(params);
 
     this._readOnlyAttr('dialogs', new SortedMap());
-    this._readOnlyAttr('privateDialogs', () => this.dialogs.toArray().filter(d => d.is_private));
-    this._readOnlyAttr('publicDialogs', () => this.dialogs.toArray().filter(d => !d.is_private));
 
     this._updateableAttr('on_connect_commands', params.on_connect_commands || '');
     this._updateableAttr('state', params.state || 'queued');

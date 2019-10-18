@@ -29,7 +29,7 @@ function calculateAutocompleteOptions([before, key, afterKey, after]) {
       key == ':' && afterKey.length ? 'emojis'
     : key == '/' && !before.length  ? 'commands'
     : key == '@' && afterKey.length ? 'nicks'
-    : key == '#' || key == '&'      ? 'channels'
+    : key == '#' || key == '&'      ? 'dialogs'
     :                                 'none';
 
   activeAutocompleteIndex = 0;
