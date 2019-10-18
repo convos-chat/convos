@@ -1,9 +1,9 @@
 <script>
-import {activeMenu, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
-import {onMount, setContext} from 'svelte';
 import Api from './js/Api';
 import EmbedMaker from './js/EmbedMaker';
 import User from './store/User';
+import {activeMenu, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
+import {onMount, setContext} from 'svelte';
 
 // Pages
 import Chat from './page/Chat.svelte';
@@ -43,10 +43,29 @@ setContext('embedMaker', embedMaker);
 setContext('user', user);
 
 onMount(async () => {
+  const dialogEventUnlistener = user.on('dialogEvent', calculateNewPath);
   const historyUnlistener = historyListener();
   user.load();
-  return historyUnlistener;
+
+  return () => {
+    dialogEventUnlistener();
+    historyUnlistener();
+  };
 });
+
+function calculateNewPath(params) {
+  let path = ['', 'chat'];
+  if (params.connection_id) path.push(params.connection_id);
+
+  if (params.type == 'part') {
+    const el = document.querySelector('.sidebar-wrapper [href$="' + path.map(encodeURIComponent).join('/') + '"]');
+    gotoUrl(el ? el.href : '/chat');
+  }
+  else {
+    if (params.dialog_id) path.push(params.dialog_id);
+    gotoUrl(path.map(encodeURIComponent).join('/'));
+  }
+}
 
 function calculatePage(pathParts, user) {
 

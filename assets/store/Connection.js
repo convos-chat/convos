@@ -69,12 +69,6 @@ export default class Connection extends Dialog {
     if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
   }
 
-  wsEventJoin(params) {
-    const dialog = this.findDialog(params);
-    dialog.addMessage({message: '%1 joined.', vars: [params.nick]});
-    dialog.participant(params.nick, {});
-  }
-
   wsEventMessage(params) {
     return params.dialog_id ? this.ensureDialog(params).addMessage(params) : this.addMessage(params);
   }
@@ -98,6 +92,12 @@ export default class Connection extends Dialog {
     this.wsEventPart(params);
   }
 
+  wsEventSentJoin(params) {
+    const dialog = this.findDialog(params);
+    dialog.addMessage({message: '%1 joined.', vars: [params.nick]});
+    dialog.participant(this.nick, {});
+  }
+
   wsEventSentList(params) {
     const args = params.args || '/*/';
     this.addMessage(params.done
@@ -108,13 +108,6 @@ export default class Connection extends Dialog {
 
   wsEventSentQuery(params) {
     this.ensureDialog(params);
-  }
-
-  wsEventTopic(params) {
-    this.ensureDialog(params).addMessage(params.topic
-      ? {message: 'Topic changed to: %1', vars: [params.topic]}
-      : {message: 'No topic is set.', vars: []}
-    );
   }
 
   wsEventSentWhois(params) {
@@ -137,6 +130,13 @@ export default class Connection extends Dialog {
     }
 
     this.addMessage({message, vars});
+  }
+
+  wsEventTopic(params) {
+    this.ensureDialog(params).addMessage(params.topic
+      ? {message: 'Topic changed to: %1', vars: [params.topic]}
+      : {message: 'No topic is set.', vars: []}
+    );
   }
 
   _addDefaultParticipants(dialog) {

@@ -87,8 +87,16 @@ export default class User extends Reactive {
     this.ensureDialog({connection_id: params.connection_id}).update(params);
   }
 
+  wsEventPart(params) {
+    this.emit('dialogEvent', params);
+  }
+
   wsEventPong(params) {
     this.wsPongTimestamp = params.ts;
+  }
+
+  wsEventSentJoin(params) {
+    this.emit('dialogEvent', params);
   }
 
   _createEvents() {
