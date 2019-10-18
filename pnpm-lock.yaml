@@ -2,8 +2,8 @@ dependencies:
   '@babel/plugin-transform-runtime': 7.6.2_@babel+core@7.6.2
   '@babel/runtime': 7.6.2
   '@fortawesome/fontawesome-free': 5.11.2
-  emoji-toolkit: 5.0.5
   highlight.js: 9.15.10
+  twemoji: 12.1.3
 devDependencies:
   '@babel/core': 7.6.2
   '@babel/preset-env': 7.6.2_@babel+core@7.6.2
@@ -1539,10 +1539,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-CwBLREIQ7LvYFB0WyRvwhq5N5qPhc6PMjD6bYggFlI5YyDgl+0vxq5VHbMOFqLg7hfWzmu8T5Z1QofhmTIhItA==
-  /emoji-toolkit/5.0.5:
-    dev: false
-    resolution:
-      integrity: sha512-I57/yzEll8mIczqUCv2DaBhF61eBKtOwUN/7bxFPjwtwoVB9FnkRoabQRLZS6+KeSZNscw0av8o/N7tfy59PUg==
   /emojis-list/2.1.0:
     dev: true
     engines:
@@ -1824,6 +1820,16 @@ packages:
       node: '>= 0.12'
     resolution:
       integrity: sha512-1lLKB2Mu3aGP1Q/2eCOx0fNbRMe7XdwktwOruhfqqd0rIJWwN4Dh+E3hrPSlDCXnSR7UtZ1N38rVXm+6+MEhJQ==
+  /fs-extra/8.1.0:
+    dependencies:
+      graceful-fs: 4.2.2
+      jsonfile: 4.0.0
+      universalify: 0.1.2
+    dev: false
+    engines:
+      node: '>=6 <7 || >=8'
+    resolution:
+      integrity: sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==
   /fs.realpath/1.0.0:
     dev: true
     resolution:
@@ -1917,7 +1923,6 @@ packages:
     resolution:
       integrity: sha512-g7QtgWF4uYSL5/dn71WxubOrS7JVGCnFPEnoeChJmBnyR9Mw8nGoEwOgJL/RC2Te0WhbsEUCejfH8SZNJ+adYQ==
   /graceful-fs/4.2.2:
-    dev: true
     resolution:
       integrity: sha512-IItsdsea19BoLC7ELy13q1iJFNmd7ofZH5+X/pJr90/nRoPEX0DJo1dHDbgtYWOhJhcCgMDTOw84RZ72q6lB+Q==
   /har-schema/2.0.0:
@@ -2367,6 +2372,20 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-l+3HXD0GEI3huGq1njuqtzYK8OYJyXMkOLtQ53pjWh89tvWS2h6l+1zMkYWqlb57+SiQodKZyvMEFb2X+KrFhQ==
+  /jsonfile/4.0.0:
+    dev: false
+    optionalDependencies:
+      graceful-fs: 4.2.2
+    resolution:
+      integrity: sha1-h3Gq4HmbZAdrdmQPygWPnBDjPss=
+  /jsonfile/5.0.0:
+    dependencies:
+      universalify: 0.1.2
+    dev: false
+    optionalDependencies:
+      graceful-fs: 4.2.2
+    resolution:
+      integrity: sha512-NQRZ5CRo74MhMMC3/3r5g2k4fjodJ/wh8MxjFbCViWKFjxrnudWSY5vomh+23ZaXzAS7J3fBZIR2dV6WbmfM0w==
   /jsprim/1.4.1:
     dependencies:
       assert-plus: 1.0.0
@@ -4443,6 +4462,19 @@ packages:
     dev: true
     resolution:
       integrity: sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
+  /twemoji-parser/12.1.0:
+    dev: false
+    resolution:
+      integrity: sha512-jaHYltumP/E8nR+YzRrY753j9dEpL3zH8+pDXgf9h/10wHeW/9IIjs6mZ1Z/Syh8rIaOQObev1BAX/AinFmuOg==
+  /twemoji/12.1.3:
+    dependencies:
+      fs-extra: 8.1.0
+      jsonfile: 5.0.0
+      twemoji-parser: 12.1.0
+      universalify: 0.1.2
+    dev: false
+    resolution:
+      integrity: sha512-Y5mC7vVovHZvCzdXDepJaU6FHPd7PaW6ZTBMWy9sGYafLBn1x0h2T6aGA3cpnz3WgWWg2QI+3D+9Rn4Z/ViitQ==
   /type-check/0.3.2:
     dependencies:
       prelude-ls: 1.1.2
@@ -4486,6 +4518,12 @@ packages:
     dev: true
     resolution:
       integrity: sha1-/+3ks2slKQaW5uFl1KWe25mOawI=
+  /universalify/0.1.2:
+    dev: false
+    engines:
+      node: '>= 4.0.0'
+    resolution:
+      integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==
   /unquote/1.1.1:
     dev: true
     resolution:
@@ -4614,7 +4652,6 @@ specifiers:
   '@babel/runtime': ^7.6.2
   '@fortawesome/fontawesome-free': ^5.8.2
   cssnano: ^4.1.10
-  emoji-toolkit: ^5.0.5
   eslint-plugin-svelte3: ^1.2.3
   highlight.js: ^9.15.10
   node-sass: ^4.12.0
@@ -4631,3 +4668,4 @@ specifiers:
   rollup-plugin-terser: ^5.1.2
   rollup-plugin-visualizer: ^2.6.0
   svelte: ^3.12.1
+  twemoji: ^12.1.3

@@ -41,6 +41,15 @@ export function hidden(bool) {
   return bool ? 'hidden' : '';
 }
 
+export function loadScript(src) {
+  const d = document;
+  const id = src.replace(/\W/g, '_');
+  if (d.getElementById(id)) return;
+  const el = d.createElement('script');
+  [el.id, el.src] = [id, src];
+  d.getElementsByTagName('head')[0].appendChild(el);
+}
+
 export function q(parentEl, sel, cb) {
   const els = parentEl.querySelectorAll(sel);
   if (!cb) return [].slice.call(els, 0);

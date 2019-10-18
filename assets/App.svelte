@@ -3,6 +3,7 @@ import Api from './js/Api';
 import EmbedMaker from './js/EmbedMaker';
 import User from './store/User';
 import {activeMenu, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
+import {loadScript} from './js/util';
 import {onMount, setContext} from 'svelte';
 
 // Pages
@@ -91,6 +92,9 @@ function calculatePage(pathParts, user) {
   else if (user.is('error')) {
     gotoUrl('/login', {replace: true});
   }
+
+  // Get list of emojis after logging in
+  if (user.is('success')) loadScript('/images/emojis.js');
 
   // Remove original components
   if (pageComponent) {
