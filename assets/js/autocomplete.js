@@ -9,19 +9,6 @@ export default function autocomplete(category, params) {
   return autocomplete[category] ? autocomplete[category](params) : [];
 }
 
-autocomplete.channels = ({dialog, query, user}) => {
-  const channels = user.findDialog({connection_id: dialog.connection_id}).publicDialogs;
-  const opts = [];
-
-  for (let i = 0; i < channels.length; i++) {
-    if (opts.length >= maxNumMatches) break;
-    if (channels[i].name.toLowerCase().indexOf(query) == -1) continue;
-    opts.push({text: channels[i].name, val: channels[i].dialog_id});
-  }
-
-  return opts;
-};
-
 autocomplete.commands = ({query}) => {
   const opts = [];
 
@@ -30,6 +17,19 @@ autocomplete.commands = ({query}) => {
     const val = commands[i].alias || commands[i].cmd;
     const text = commands[i].example.replace(/</g, '&lt;');
     opts.push({text, val});
+  }
+
+  return opts;
+};
+
+autocomplete.dialogs = ({dialog, query, user}) => {
+  const dialogs = user.findDialog({connection_id: dialog.connection_id}).dialogs.toArray();
+  const opts = [];
+
+  for (let i = 0; i < dialogs.length; i++) {
+    if (opts.length >= maxNumMatches) break;
+    if (dialogs[i].name.toLowerCase().indexOf(query) == -1) continue;
+    opts.push({text: dialogs[i].name, val: dialogs[i].dialog_id});
   }
 
   return opts;

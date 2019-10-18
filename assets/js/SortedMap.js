@@ -7,6 +7,10 @@ export default class SortedMap extends Map {
     this._sort();
   }
 
+  filter(cb) {
+    return Array.from(this.values()).filter(cb);
+  }
+
   set(key, val) {
     super.set.call(this, key, val);
     this._sort();

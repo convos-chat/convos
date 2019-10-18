@@ -144,16 +144,16 @@ function onSearchKeydown(e) {
         <h3>{l('Group conversations')}</h3>
         {#each $user.connections.toArray() as connection}
           <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
-          {#each connection.publicDialogs as dialog}
+          {#each connection.dialogs.filter(d => !d.is_private) as dialog}
             <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
           {/each}
         {/each}
 
         <h3>{l('Private conversations')}</h3>
         {#each $user.connections.toArray() as connection}
-          {#if connection.privateDialogs.length}
+          {#if connection.dialogs.size}
             <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
-            {#each connection.privateDialogs as dialog}
+            {#each connection.dialogs.filter(d => d.is_private) as dialog}
               <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
             {/each}
           {/if}
