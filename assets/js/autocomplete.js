@@ -1,9 +1,7 @@
-import joypixels from 'emoji-toolkit';
-import {md} from './md';
+import {emojis, md} from './md';
 import {regexpEscape} from './util';
 
 const commands = [];
-const emojis = {};
 const maxNumMatches = 20;
 
 export default function autocomplete(category, params) {
@@ -28,9 +26,9 @@ autocomplete.dialogs = ({dialog, query, user}) => {
   const opts = [];
 
   for (let i = 0; i < dialogs.length; i++) {
-    if (opts.length >= maxNumMatches) break;
     if (dialogs[i].name.toLowerCase().indexOf(query) == -1) continue;
     opts.push({text: dialogs[i].name, val: dialogs[i].dialog_id});
+    if (opts.length >= maxNumMatches) break;
   }
 
   return opts;
@@ -39,10 +37,11 @@ autocomplete.dialogs = ({dialog, query, user}) => {
 autocomplete.emojis = ({query}) => {
   const opts = [];
 
-  [':', '_'].map(p => p + query.substring(1, 2)).filter(group => emojis[group]).forEach(group => {
-    for (let i = 0; i < emojis[group].length; i++) {
+  [':', '_'].map(p => p + query.slice(1, 2)).forEach(group => {
+    const emojiList = emojis(group, 'group');
+    for (let i = 0; i < emojiList.length; i++) {
+      if (emojiList[i].shortname.indexOf(query) >= 0) opts.push({val: emojiList[i].emoji, text: md(emojiList[i].emoji)});
       if (opts.length >= maxNumMatches) break;
-      if (emojis[group][i].indexOf(query) >= 0) opts.push({val: emojis[group][i], text: md(emojis[group][i])});
     }
   });
 
@@ -61,14 +60,6 @@ autocomplete.nicks = ({dialog, query}) => {
 
   return opts;
 };
-
-// TODO: Allow user to select tone in settings
-Object.keys(joypixels.emojiList).filter(i => !i.match(/_tone/)).sort().forEach(emoji => {
-  emoji.match(/(_|:)\w/g).forEach(k => {
-    if (!emojis[k]) emojis[k] = [];
-    emojis[k].push(emoji);
-  });
-});
 
 commands.push({cmd: '/me', example: '/me <msg>', description: 'Send message as an action.'});
 commands.push({cmd: '/say', example: '/say <msg>', description: 'Used when you want to send a message starting with '/'.'});

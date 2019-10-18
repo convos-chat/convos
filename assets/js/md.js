@@ -3,13 +3,66 @@
 // ***foo*** or ___foo___ = <em><strong>foo</strong></em>
 // \*foo*    or \_foo_    = *foo* or _foo_
 
-import joypixels from 'emoji-toolkit';
+import twemoji from 'twemoji';
 
 const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
+const emojiByGroup = {};
+const emojiByName = {};
 const linkRe = new RegExp('https?://\\S+', 'g');
 const mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+|_+)(\\w[^<]*?)\\3', 'g');
-const text2emojiMap = {};
-let text2emojiRe;
+
+const emojiAliases = {
+  ':confused:': ':/',
+  ':disappointed:': ':(',
+  ':grin:': ';D',
+  ':heart:': '&lt;3',
+  ':slight_smile:': ':)',
+  ':smiley:': ':D',
+  ':stuck_out_tongue:': ':P',
+  ':wink:': ';)',
+};
+
+const emojiRe = new RegExp('(^|\\s)(:\\w+:|:[()/DP]|;[)D]|&lt;3)(?=\\W|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
+
+const xmlEscapeMap = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  "'": '&apos;',
+  '"': '&quot;',
+};
+
+export function emojis(lookup, type = 'emoji') {
+  if (window.__emojiList) {
+    window.__emojiList.forEach(entry => {
+      if ((entry.shortname || '')[0] != ':') return;
+
+      if (emojiAliases[entry.shortname]) emojiByName[emojiAliases[entry.shortname]] = entry;
+      emojiByName[entry.shortname] = entry;
+
+      if (entry.category) {
+        const category = ':' + entry.category;
+        if (!emojiByGroup[category]) emojiByGroup[category] = [];
+        emojiByGroup[category].push(entry);
+      }
+
+      entry.shortname.match(/(_|:)\w/g).forEach(k => {
+        if (!emojiByGroup[k]) emojiByGroup[k] = [];
+        emojiByGroup[k].push(entry);
+      });
+
+      // Use a bit less memory. (Not sure if it matters)
+      delete entry.category;
+      delete entry.html;
+      delete entry.order;
+      delete entry.unicode;
+    });
+
+    delete window.__emojiList;
+  }
+
+  return type == 'group' ? (emojiByGroup[lookup] || []) : (emojiByName[lookup] || {})[type];
+}
 
 export function md(str, params = {}) {
   if (params.escape !== false) str = xmlEscape(str);
@@ -37,37 +90,12 @@ export function md(str, params = {}) {
   }
 
   if (params.emoji !== false) {
-    str = str.replace(text2emojiRe, (all, pre, emoji) => pre + (text2emojiMap[emoji] || emoji));
-    str = joypixels.toImage(str);
+    str = twemoji.parse(str.replace(emojiRe, (all, pre, emoji) => pre + (emojis(emoji) || emoji)));
   }
 
   return str;
 }
 
-export function text2emoji(str, emoji) {
-  text2emojiMap[str] = emoji;
-  text2emojiRe = Object.keys(text2emojiMap).map(s => s.replace(/([()])/g, '\\$1')).join('|');
-  text2emojiRe = new RegExp('(^|\\s)(' + text2emojiRe + ')(?=\\s|$)', 'i');
-}
-
-const xmlEscapeMap = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  "'": '&quot;',
-  '"': '&quot;',
-};
-
 export function xmlEscape(str) {
   return str.replace(/[&<>"']/g, m => xmlEscapeMap[m]);
 }
-
-text2emoji('&lt;3', ':heart:');
-text2emoji(':(', ':disappointed:');
-text2emoji(':)', ':slight_smile:');
-text2emoji(':/', ':confused:');
-text2emoji(':D', ':smiley:');
-text2emoji(':P', ':stuck_out_tongue:');
-text2emoji(';)', ':wink:');
-text2emoji(';D', ':wink:');
-text2emoji('<3', ':heart:');

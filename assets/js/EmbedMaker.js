@@ -1,7 +1,5 @@
 import hljs from './hljs';
-import {ensureChildNode, q, removeChildNodes} from './util';
-
-const d = document;
+import {ensureChildNode, loadScript, q, removeChildNodes} from './util';
 
 export default class EmbedMaker {
   constructor(params) {
@@ -32,7 +30,7 @@ export default class EmbedMaker {
   renderInstagram(embedEl) {
     if (this.disableInstagram) return;
     if (window.instgrm) return window.instgrm.Embeds.process();
-    this._loadScript('//platform.instagram.com/en_US/embeds.js');
+    loadScript('//platform.instagram.com/en_US/embeds.js');
   }
 
   renderPasteEl(embedEl) {
@@ -49,11 +47,11 @@ export default class EmbedMaker {
   renderTwitter(embedEl) {
     if (this.disableTwitter) return;
     if (window.twttr) window.twttr.widgets.load();
-    this._loadScript('//platform.twitter.com/widgets.js');
+    loadScript('//platform.twitter.com/widgets.js');
   }
 
   showMedia(el) {
-    const mediaWrapper = ensureChildNode(d.querySelector('body'), 'fullscreen-media-wrapper', el => {
+    const mediaWrapper = ensureChildNode(document.querySelector('body'), 'fullscreen-media-wrapper', el => {
       el.addEventListener('click', e => { e.target == el && el.setAttribute('hidden', '') });
       el.setAttribute('hidden', '');
     });
@@ -84,13 +82,5 @@ export default class EmbedMaker {
 
       q(embedEl, '.le-photo, .le-thumbnail', el => this.renderPhoto(embedEl));
     });
-  }
-
-  _loadScript(src) {
-    const id = src.replace(/\W/g, '_');
-    if (d.getElementById(id)) return;
-    const el = d.createElement('script');
-    [el.id, el.src] = [id, src];
-    d.getElementsByTagName('head')[0].appendChild(el);
   }
 }
