@@ -8,8 +8,8 @@ const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 let activeIndex = 0;
 let hiddenEl;
 let humanEl;
+let open = false;
 let typed = '';
-let visible = false;
 let wrapperEl;
 
 export let hidden = false;
@@ -21,8 +21,8 @@ export let readonly = false;
 export let value = '';
 
 $: visibleOptions = filterOptions(options, typed);
-$: if (visible == true) activeIndex = 0;
-$: if (visible == false) typed = '';
+$: if (open == true) activeIndex = 0;
+$: if (open == false) typed = '';
 
 $: if (hiddenEl && !hiddenEl.syncValue) {
   hiddenEl.syncValue = function() { value = this.value };
@@ -35,7 +35,7 @@ $: if (humanEl && !humanEl.value && humanEl != document.activeElement) {
 }
 
 onMount(() => {
-  humanEl.addEventListener('blur', () => setTimeout(() => { visible = false }, 100));
+  humanEl.addEventListener('blur', () => setTimeout(() => { open = false }, 100));
   value = hiddenEl.value;
 });
 
@@ -51,12 +51,12 @@ function keydown(e) {
   if (preventKeys.indexOf(e.key) != -1) e.preventDefault();
 
   if (e.key == 'Tab') {
-    if (visible) selectOption(e);
+    if (open) selectOption(e);
     return;
   }
 
-  if (!visible) {
-    visible = true;
+  if (!open) {
+    open = true;
     return;
   }
 
@@ -86,15 +86,15 @@ async function selectOption(e) {
   humanEl.value = opt.length > 1 ? opt[1] : opt[0];
   await tick();
   humanEl.setSelectionRange(0, 9999);
-  visible = false;
+  open = false;
 }
 
 function toggle() {
-  visible = !visible;
+  open = !open;
 }
 </script>
 
-<div class="select-field text-field" hidden="{hidden}" bind:this="{wrapperEl}" on:click|preventDefault="{toggle}">
+<div class="select-field text-field" class:is-open="{open}" hidden="{hidden}" bind:this="{wrapperEl}" on:click|preventDefault="{toggle}">
   <label for="{id}"><slot name="label">Label</slot></label>
   <input type="hidden" {name} bind:this="{hiddenEl}" bind:value on:keydown="{keydown}"/>
   <input type="text" {placeholder} {id} {readonly} autocomplete="off"
