@@ -79,7 +79,7 @@ async function submitForm(e) {
   else {
     await createConnectionOp.perform(e.target);
     const conn = user.ensureDialog(createConnectionOp.res.body);
-    gotoUrl('/chat/' + conn.path);
+    gotoUrl(conn.path);
   }
 }
 </script>
