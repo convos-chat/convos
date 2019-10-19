@@ -17,7 +17,7 @@ export default class Dialog extends Reactive {
   constructor(params) {
     super();
 
-    const path = [];
+    const path = ['', 'chat'];
     if (params.connection_id) path.push(params.connection_id);
     if (params.dialog_id) path.push(params.dialog_id);
 

@@ -10,8 +10,8 @@ import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import {afterUpdate, getContext, onDestroy, onMount, tick} from 'svelte';
 import {debounce, q} from '../js/util';
+import {gotoUrl, pathParts, currentUrl} from '../store/router';
 import {l, topicOrStatus} from '../js/i18n';
-import {pathParts, currentUrl} from '../store/router';
 
 const embedMaker = getContext('embedMaker');
 const user = getContext('user');
@@ -121,6 +121,10 @@ const onScroll = debounce(e => {
     messagesHeightLast = messagesHeight;
   }
 }, 20);
+
+function showSettings() {
+  gotoUrl(dialog.connection_id ? dialog.path + '#settings' : '/settings');
+}
 </script>
 
 <svelte:window bind:innerHeight="{containerHeight}"/>
@@ -130,7 +134,7 @@ const onScroll = debounce(e => {
 <svelte:component this="{settingsComponent}" dialog="{dialog}"/>
 
 <ChatHeader>
-  <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
+  <h1 class="is-link" on:click="{showSettings}">{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
   <small>{topicOrStatus(connection, dialog)}</small>
 </ChatHeader>
 

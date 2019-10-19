@@ -30,10 +30,10 @@ function clicked(e) {
 </script>
 
 <div class="sidebar__item {classNames.join(' ')}" on:click="{clicked}" title="{topicOrStatus(connection, dialog)}">
-  <Link href="/chat/{dialog.path}#settings" class="sidebar__item__settings">
+  <Link href="{dialog.path}#settings" class="sidebar__item__settings">
     <Icon name="{settingsIcon}"/>
   </Link>
-  <Link href="/chat/{dialog.path}" class="sidebar__item__link">
+  <Link href="{dialog.path}" class="sidebar__item__link">
     <span>{dialog.name}</span>
     <Unread unread="{dialog.unread}"/>
   </Link>

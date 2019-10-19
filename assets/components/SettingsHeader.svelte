@@ -11,7 +11,7 @@ let linkEl;
 $: if (linkEl) linkEl.focus();
 </script>
 
-<Link href="/chat/{dialog.path}" class="sidebar__header for-settings" bind:this="{linkEl}">
+<Link href="{dialog.path}" class="sidebar__header for-settings" bind:this="{linkEl}">
   <h2>{l(dialog.dialog_id ? 'Conversation' : 'Connection')}</h2>
   <Icon name="times-circle"/>
 </Link>
