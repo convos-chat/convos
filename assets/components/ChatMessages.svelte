@@ -15,14 +15,14 @@ const user = getContext('user');
 {/if}
 
 {#each dialog.messages as message, i}
+  {#if i && i == dialog.messages.length - dialog.unread}
+    <div class="message-status-line for-last-read"><span>{l('New messages')}</span></div>
+  {/if}
+
   {#if message.endOfHistory}
     <div class="message-status-line for-start-of-history"><span>{l('Start of history')}</span></div>
   {:else if message.dayChanged}
     <div class="message-status-line for-day-changed"><span>{message.ts.getHumanDate()}</span></div>
-  {/if}
-
-  {#if i && i == dialog.messages.length - dialog.unread}
-    <div class="message-status-line for-last-read"><span>{l('New messages')}</span></div>
   {/if}
 
   <div class="message is-type-{message.type || 'notice'}"
