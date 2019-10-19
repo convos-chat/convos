@@ -9,19 +9,19 @@ import PasswordField from '../components/form/PasswordField.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 
+const Notification = window.Notification || {permission: 'denied'};
 const user = getContext('user');
-const events = user.events;
 const updateUserOp = user.api.operation('updateUser');
 
 let formEl;
 let notificationsDisabled = Notification.permission == 'denied';
-let wantNotifications = events.wantNotifications;
+let wantNotifications = user.events.wantNotifications;
 
 function updateUserFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
-  if (wantNotifications && Notification.permission != 'granted') {
+  if (wantNotifications && window.Notification && Notification.permission != 'granted') {
     Notification.requestPermission(status => {
       if (status != 'denied') return;
       wantNotifications = false;
@@ -33,7 +33,7 @@ function updateUserFromForm(e) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  events.update({wantNotifications});
+  user.events.update({wantNotifications});
   user.update({expandUrlToMedia: form.expand_url.checked});
   updateUserOp.perform(e.target);
 }
@@ -59,7 +59,7 @@ function updateUserFromForm(e) {
     </Checkbox>
 
     {#if notificationsDisabled}
-      <p class="error">{l('You cannot receive notifications, because it is denied in your browser settings.')}</p>
+      <p class="error">{l('You cannot receive notifications, because it is denied by your browser.')}</p>
     {/if}
 
     <Checkbox name="expand_url">
