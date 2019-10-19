@@ -2,21 +2,21 @@
 
 %next-to-sidebar {
   position: absolute;
+  padding-right: var(--gutter);
+  padding-left: var(--gutter);
 
   @include if_screen("<=two-columns") {
-    padding-right: var(--gutter);
-    padding-left: var(--gutter);
     right: 0;
     left: 0;
   }
 
   @include if_screen(">two-columns") {
-    right: calc(var(--gutter) * 2);
-    left: calc(var(--sidebar-width) + var(--gutter) * 2);
+    right: var(--gutter);
+    left: calc(var(--gutter) + var(--sidebar-width));
   }
 
   @include if_screen(">three-columns") {
-    right: calc(var(--sidebar-width) + var(--gutter) * 2);
+    right: calc(var(--gutter) + var(--sidebar-width));
   }
 }
 
