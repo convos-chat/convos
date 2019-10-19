@@ -83,6 +83,7 @@ export default class Events extends Reactive {
 
   _notificationRejectReason() {
     if (!this.wantNotifications) return 'wantNotifications == false';
+    if (!window.Notification) return 'window.Notification';
     if (Notification.permission != 'granted') return Notification.permission;
     if (document.hasFocus()) return 'document.hasFocus';
     return '';
