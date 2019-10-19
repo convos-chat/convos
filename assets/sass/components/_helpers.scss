@@ -6,7 +6,7 @@ body.with-grid::after {
   height: 100vh;
   width: 100vw;
   pointer-events: none;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   z-index: 2000;

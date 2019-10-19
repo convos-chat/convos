@@ -1,16 +1,11 @@
 .chat-input {
+  @extend %next-to-sidebar;
   background: var(--body-bg);
   border-top: var(--input-border);
   margin-top: var(--gutter);
   display: flex;
-  position: sticky;
   bottom: 0;
   z-index: 1;
-
-  @include if_screen("<=two-columns") {
-    margin-left: calc(-1 * var(--gutter));
-    margin-right: calc(-1 * var(--gutter));
-  }
 
   textarea {
     background: transparent;
@@ -20,10 +15,6 @@
     width: 100%;
     display: block;
     resize: none;
-
-    @include if_screen("<=two-columns") {
-      padding: var(--gutter-small) var(--gutter);
-    }
 
     &::placeholder {
       color: var(--input-placeholder-color);
@@ -83,17 +74,5 @@
     &:first-of-type {
       display: block;
     }
-  }
-}
-
-.messages-wrapper.has-no-scrolling {
-  .chat-input {
-    position: absolute;
-    right: 0;
-    left: 0;
-  }
-
-  .messages-container {
-    padding-bottom: 4rem; // Enough for the height of the .chat-input
   }
 }

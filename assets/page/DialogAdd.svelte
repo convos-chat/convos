@@ -51,11 +51,11 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
 
 <SidebarChat/>
 
-<main class="main">
-  <ChatHeader>
-    <h1>{l('Add conversation')}</h1>
-  </ChatHeader>
+<ChatHeader>
+  <h1>{l('Add conversation')}</h1>
+</ChatHeader>
 
+<main class="main">
   <p>
     {l('Enter the name of an exising conversation, or create a new conversation.')}
     {l('It is also possible to load in all existing conversations for a given connection.')}

@@ -26,7 +26,6 @@ let containerHeight = 0;
 let messagesHeight = 0;
 let messagesHeightLast = 0;
 let observer;
-let scrollingClass = 'has-no-scrolling';
 let scrollPos = 'bottom';
 
 // Variables for calculating active connection and dialog
@@ -36,7 +35,6 @@ let previousPath = '';
 let unsubscribe = [];
 
 $: calculateDialog($user, $pathParts);
-$: calculateScrollingClass(messagesHeight > containerHeight);
 $: calculateSettingsComponent($currentUrl);
 
 onMount(() => {
@@ -86,10 +84,6 @@ function calculateSettingsComponent(currentUrl) {
   }
 }
 
-const calculateScrollingClass = debounce(hasScrolling => {
-  scrollingClass = hasScrolling ? 'has-scrolling' : 'has-no-scrolling';
-}, 100);
-
 function keepScrollPosition() {
   if (scrollPos == 'bottom') {
     messagesEl.scrollTop = messagesHeight;
@@ -135,13 +129,13 @@ const onScroll = debounce(e => {
 
 <svelte:component this="{settingsComponent}" dialog="{dialog}"/>
 
-<div class="main messages-wrapper {scrollingClass}" bind:this="{messagesEl}" on:scroll="{onScroll}">
-  <main class="messages-container" bind:offsetHeight="{messagesHeight}">
-    <ChatHeader>
-      <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
-      <small>{topicOrStatus(connection, dialog)}</small>
-    </ChatHeader>
+<ChatHeader>
+  <h1>{$pathParts[2] || $pathParts[1] || l('Notifications')}</h1>
+  <small>{topicOrStatus(connection, dialog)}</small>
+</ChatHeader>
 
+<main class="main messages-wrapper" bind:this="{messagesEl}" on:scroll="{onScroll}">
+  <div class="messages-container" bind:offsetHeight="{messagesHeight}">
     {#if $user.is('loading') || (dialog.is('loading') && !dialog.messages.length)}
       <h2>{l('Loading...')}</h2>
     {:else if $pathParts[1] && !connection.connection_id}
@@ -161,12 +155,12 @@ const onScroll = debounce(e => {
     {:else}
       <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
     {/if}
+  </div>
+</main>
 
-    {#if dialog.connection_id}
-      <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
-    {/if}
-  </main>
-</div>
+{#if dialog.connection_id}
+  <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
+{/if}
 
 {#if dialog.participants.size}
   <div class="sidebar-participants-wrapper">

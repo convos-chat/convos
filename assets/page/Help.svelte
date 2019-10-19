@@ -8,11 +8,11 @@ const version = '1.0.0'; // TODO: Extract version from package.json
 
 <SidebarChat/>
 
-<main class="main">
-  <ChatHeader>
-    <h1>{l('Help')}</h1><small>v{version}</small>
-  </ChatHeader>
+<ChatHeader>
+  <h1>{l('Help')}</h1><small>v{version}</small>
+</ChatHeader>
 
+<main class="main">
   <p>
     {@html lmd('Got any questions? Come and talk to us in the "#convos" channel on http://freenode.net.')}
     {@html lmd('More information can also be found on http://convos.by.')}

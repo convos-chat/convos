@@ -12,22 +12,13 @@
   }
 
   @include if_screen("<=two-columns") {
-    width: 0;
-    max-width: var(--sidebar-width);
-    top: 2.6rem; // TODO: Should be a dynamic value
+    width: var(--sidebar-width);
+    top: 3.1rem; // TODO: Should be a dynamic value
     right: 0;
     left: auto;
-    overflow: hidden;
-    transform: translateX(100%);
-    transition: transform .2s ease-in-out, width .2s ease-in-out;
 
     .sidebar__header {
       display: none;
-    }
-
-    &.is-visible {
-      width: 100vw;
-      transform: translateX(0);
     }
   }
 
@@ -57,7 +48,7 @@
   a {
     text-decoration: none;
     line-height: 1.2rem;
-    padding: $sidebar-item-indent 0.3rem;
+    padding: 0.35rem;
     display: block;
     transition: background-color 0.15s ease-in-out;
 

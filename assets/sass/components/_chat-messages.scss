@@ -1,14 +1,3 @@
-.messages-wrapper {
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.messages-container {
-  min-height: 100vh;
-}
-
 .message {
   position: relative;
   padding: 4px 2px;

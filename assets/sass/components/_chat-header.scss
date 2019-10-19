@@ -1,16 +1,16 @@
 .chat-header {
+  @extend %next-to-sidebar;
+
   background: var(--body-bg);
   border-bottom: 1px solid #aaa;
   box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
   padding-top: var(--gutter);
-  margin-bottom: var(--gutter);
+  padding-bottom: var(--gutter-small);
   overflow: hidden;
-  position: relative;
   display: flex;
   align-items: baseline;
-  position: sticky;
   top: 0;
-  z-index: 801;
+  z-index: 900;
 
   h1 {
     margin: 0;
@@ -40,10 +40,8 @@
   @include if_screen("<=two-columns") {
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
+    padding-top: var(--gutter-small);
     border-bottom: 0;
-    padding: 0.2rem var(--gutter);
-    margin-left: calc(-1 * var(--gutter));
-    margin-right: calc(-1 * var(--gutter));
   }
 }
 
@@ -52,18 +50,15 @@
   font-size: 1.4rem;
   position: absolute;
   right: var(--gutter);
-  top: 1.8rem;
-
-  i {
-    transition: transform 0.3s;
-  }
-}
-
-.chat-header__hamburger {
+  top: 1rem;
   display: none;
+  z-index: 2;
 
   @include if_screen("<=two-columns") {
     display: block;
-    top: 0.7rem;
+  }
+
+  i {
+    transition: transform 0.3s;
   }
 }

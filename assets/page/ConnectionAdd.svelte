@@ -7,9 +7,10 @@ import SidebarChat from '../components/SidebarChat.svelte';
 
 <SidebarChat/>
 
+<ChatHeader>
+  <h1>{l('Add connection')}</h1>
+</ChatHeader>
+
 <main class="main">
-  <ChatHeader>
-    <h1>{l('Add connection')}</h1>
-  </ChatHeader>
   <ConnectionForm/>
 </main>
