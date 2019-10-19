@@ -3,6 +3,9 @@ body {
   background: var(--body-bg);
   padding: 0;
   margin: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 body.no-js .has-js {
@@ -14,22 +17,20 @@ body.has-js .no-js {
 }
 
 .main {
-  padding: 0 var(--gutter);
-
-  @include if_screen(">two-columns") {
-    padding: 0 calc(var(--gutter) * 2);
-    margin-left: var(--sidebar-width);
-  }
-
-  @include if_screen(">three-columns") {
-    margin-right: var(--sidebar-width);
-  }
+  @extend %next-to-sidebar;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  top: 3rem;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .overlay {
   background: #000;
   z-index: 800;
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   bottom: 0;

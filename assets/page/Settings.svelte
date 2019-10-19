@@ -41,11 +41,11 @@ function updateUserFromForm(e) {
 
 <SidebarChat/>
 
-<main class="main">
-  <ChatHeader>
-    <h1>{l('Settings')}</h1>
-  </ChatHeader>
+<ChatHeader>
+  <h1>{l('Settings')}</h1>
+</ChatHeader>
 
+<main class="main">
   <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
     <TextField name="email" value="{$user.email}" readonly>
       <span slot="label">{l('Email')}</span>

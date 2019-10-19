@@ -75,7 +75,8 @@ function calculatePage(pathParts, user) {
 
   // Figure out current page
   const pages = user.is('success') ? loggedInPages : loggedOutPages;
-  const nextPageComponent = pages[pathParts.join('/')] || pages[pathParts[0]];
+  const pageName = pages[pathParts.join('/')] ? pathParts.join('/') : pathParts[0];
+  const nextPageComponent = pages[pageName];
 
   // Goto a valid page
   if (nextPageComponent) {
@@ -83,7 +84,7 @@ function calculatePage(pathParts, user) {
 
     // Enable complex styling
     replaceBodyClassName(/(is-logged-)\S+/, user.is('success') ? 'in' : 'out');
-    replaceBodyClassName(/(page-)\S+/, pathParts.join('_').replace(/\W+/g, '_'));
+    replaceBodyClassName(/(page-)\S+/, pageName.replace(/\W+/g, '_'));
   }
   else if (user.is('success')) {
     const lastUrl = localStorage.getItem('lastUrl');
