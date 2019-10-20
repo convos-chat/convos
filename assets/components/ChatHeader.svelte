@@ -8,7 +8,7 @@ $: if (!$activeMenu && location.href.indexOf('#settings') != -1) {
 }
 
 function toggleMenu() {
-  $activeMenu = $activeMenu == 'nav' ? '' : 'nav';
+  $activeMenu = $activeMenu ? '' : 'nav';
 }
 </script>
 

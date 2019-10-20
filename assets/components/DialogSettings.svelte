@@ -3,6 +3,8 @@ import Button from '../components/form/Button.svelte';
 import DialogParticipants from '../components/DialogParticipants.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
+import {container} from '../store/router';
+import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 
@@ -12,6 +14,7 @@ const user = getContext('user');
 
 let formEl;
 
+$: flyTransitionParameters = {duration: $container.small ? 250 : 0, x: $container.width};
 $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
 function partDialog(e) {
@@ -23,7 +26,7 @@ function updateDialogFromForm(e) {
 }
 </script>
 
-<div class="sidebar-wrapper is-visible">
+<div class="sidebar-wrapper is-visible" transition:fly="{flyTransitionParameters}">
   <SettingsHeader dialog="{dialog}"/>
 
   <p>
