@@ -4,32 +4,25 @@ import SidebarDialogItem from '../components/SidebarDialogItem.svelte';
 import SidebarItem from '../components/SidebarItem.svelte';
 import TextField from './form/TextField.svelte';
 import Unread from './Unread.svelte';
-import {closestEl, q, regexpEscape, tagNameIs} from '../js/util';
+import {activeMenu, container, gotoUrl} from '../store/router';
 import {fly} from 'svelte/transition';
-import {getContext, onMount} from 'svelte';
-import {activeMenu, gotoUrl} from '../store/router';
+import {getContext} from 'svelte';
 import {l} from '../js/i18n';
+import {q, regexpEscape, tagNameIs} from '../js/util';
 
 const user = getContext('user');
 const notifications = $user.notifications;
 
 let activeLinkIndex = 0;
-let containerWidth = 0;
 let filter = '';
 let navEl;
 let searchHasFocus = false;
 let searchInput;
 let visibleLinks = [];
 
-$: wideEnough = containerWidth >= 800;
-$: flyTransitionParameters = {duration: wideEnough ? 0 : 250, x: containerWidth};
+$: flyTransitionParameters = {duration: $container.small ? 250 : 0, x: $container.width};
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
-
-onMount(() => {
-  document.addEventListener('click', hideMenu);
-  return () => document.removeEventListener('click', hideMenu);
-});
 
 function clearFilter() {
   searchHasFocus = false;
@@ -83,12 +76,6 @@ function filterNav() {
   });
 }
 
-function hideMenu(e) {
-  if (closestEl(e.target, '.chat-header')) return;
-  if (closestEl(e.target, '.sidebar-wrapper')) return;
-  $activeMenu = '';
-}
-
 function onGlobalKeydown(e) {
   if (e.shiftKey && e.keyCode == 13) { // Shift+Enter
     e.preventDefault();
@@ -127,9 +114,9 @@ function onSearchKeydown(e) {
 }
 </script>
 
-<svelte:window bind:innerWidth="{containerWidth}" on:keydown="{onGlobalKeydown}"/>
+<svelte:window on:keydown="{onGlobalKeydown}"/>
 
-{#if wideEnough || $activeMenu == 'nav'}
+{#if !$container.small || $activeMenu == 'nav'}
   <div class="sidebar-wrapper" transition:fly="{flyTransitionParameters}">
     <div class="sidebar">
       <form class="sidebar__header">

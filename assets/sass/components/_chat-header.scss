@@ -15,7 +15,7 @@
   h1 {
     margin: 0;
     white-space: pre;
-  }
+ }
 
   small {
     font-size: 0.9rem;
@@ -29,6 +29,10 @@
     &::before {
       content: '';
       padding-right: 1rem;
+    }
+
+    @include if_screen("<=two-columns") {
+      display: none;
     }
   }
 

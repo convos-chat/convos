@@ -8,9 +8,9 @@ import DialogSettings from '../components/DialogSettings.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
+import {activeMenu, gotoUrl, pathParts, currentUrl} from '../store/router';
 import {afterUpdate, getContext, onDestroy, onMount, tick} from 'svelte';
 import {debounce, q} from '../js/util';
-import {gotoUrl, pathParts, currentUrl} from '../store/router';
 import {l, topicOrStatus} from '../js/i18n';
 
 const embedMaker = getContext('embedMaker');
@@ -123,6 +123,7 @@ const onScroll = debounce(e => {
 }, 20);
 
 function showSettings() {
+  $activeMenu = $activeMenu == 'settings' ? '' : 'settings';
   gotoUrl(dialog.connection_id ? dialog.path + '#settings' : '/settings');
 }
 </script>

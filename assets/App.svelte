@@ -3,8 +3,8 @@ import Api from './js/Api';
 import EmbedMaker from './js/EmbedMaker';
 import hljs from './js/hljs';
 import User from './store/User';
-import {activeMenu, baseUrl, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
-import {loadScript} from './js/util';
+import {activeMenu, baseUrl, container, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
+import {closestEl, loadScript} from './js/util';
 import {onMount, setContext} from 'svelte';
 
 // Pages
@@ -38,8 +38,10 @@ const embedMaker = new EmbedMaker({api});
 const user = new User({api, wsUrl: settings.wsUrl});
 const notifications = user.notifications;
 
+let containerWidth = 0;
 let pageComponent = null;
 
+$: container.set({small: containerWidth < 800, width: containerWidth});
 $: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
 $: calculatePage($pathParts, $user);
 
@@ -55,8 +57,10 @@ onMount(async () => {
   const dialogEventUnlistener = user.on('dialogEvent', calculateNewPath);
   const historyUnlistener = historyListener();
   user.load();
+  document.addEventListener('click', hideMenu);
 
   return () => {
+    document.removeEventListener('click', hideMenu);
     dialogEventUnlistener();
     historyUnlistener();
   };
@@ -89,6 +93,7 @@ function calculatePage(pathParts, user) {
   // Goto a valid page
   if (nextPageComponent) {
     if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
+    $activeMenu = '';
 
     // Enable complex styling
     replaceBodyClassName(/(is-logged-)\S+/, user.is('success') ? 'in' : 'out');
@@ -112,12 +117,19 @@ function calculatePage(pathParts, user) {
   }
 }
 
+function hideMenu(e) {
+  if (closestEl(e.target, '.chat-header')) return;
+  if (closestEl(e.target, '.sidebar-wrapper')) return;
+  $activeMenu = '';
+}
+
 function replaceBodyClassName(re, replacement) {
   const body = document.querySelector('body');
   body.className = body.className.replace(re, (all, prefix) => prefix + replacement);
 }
 </script>
 
+<svelte:window bind:innerWidth="{containerWidth}"/>
 <svelte:component this="{pageComponent}"/>
 
-<div class="overlay" class:is-visible="{$activeMenu}">&nbsp;</div>
+<div class="overlay" class:is-visible="{$activeMenu && $container.small}">&nbsp;</div>

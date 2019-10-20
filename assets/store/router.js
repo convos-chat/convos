@@ -51,6 +51,7 @@ export function urlToForm(formEl, url = get(currentUrl)) {
 }
 
 export const activeMenu = writable('');
+export const container = writable({wideEnough: false, width: 0});
 export const baseUrl = writable('//' + location.host);
 export const docTitle = writable(document.title);
 export const pathname = writable(location.pathname);
