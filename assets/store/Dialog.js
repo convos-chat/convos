@@ -22,6 +22,7 @@ export default class Dialog extends Reactive {
     if (params.dialog_id) path.push(params.dialog_id);
 
     this._readOnlyAttr('api', params.api);
+    this._readOnlyAttr('color', str2color(params.dialog_id || params.connection_id || ''));
     this._readOnlyAttr('connection_id', params.connection_id || '');
     this._readOnlyAttr('events', params.events);
     this._readOnlyAttr('is_private', () => !channelRe.test(this.name));

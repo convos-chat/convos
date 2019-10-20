@@ -1,13 +1,21 @@
 <script>
 import Icon from '../components/Icon.svelte';
+import Link from '../components/Link.svelte';
+import Time from '../js/Time';
 import {getContext} from 'svelte';
-import {l, topicOrStatus} from '../js/i18n';
+import {l, lmd, topicOrStatus} from '../js/i18n';
 
 export let connection;
 export let dialog;
 export let input;
 
+const now = new Time();
 const user = getContext('user');
+
+function ensureConnected(e) {
+  e.preventDefault();
+  user.events.ensureConnected();
+}
 </script>
 
 {#if !dialog.messages.length}
@@ -40,7 +48,24 @@ const user = getContext('user');
 {/each}
 
 {#if connection.frozen || dialog.frozen}
-  <div class="message-status-line for-connection-status"><span>{topicOrStatus(connection, dialog)}</span></div>
+  <div class="message-status-line for-connection-status"><span>{topicOrStatus(connection, dialog).replace(/\.$/, '')}</span></div>
+{/if}
+
+{#if connection.frozen}
+  <div class="message is-type-notice is-hightlighted has-not-same-from">
+    <Icon name="cog" style="color:{connection.color}"/>
+    <b class="message__ts" title="{now.toLocaleString()}">{now.toHuman()}</b>
+    <Link href="{connection.path}#settings" class="message__from" style="color:{connection.color}">{connection.name}</Link>
+    {#if connection.state == 'unreachable'}
+      <div class="message__text" on:click="{ensureConnected}">
+        {@html lmd('You will be [reconnected](#reconnect) soon...')}
+      </div>
+    {:else}
+      <div class="message__text">
+        {@html lmd('Your connection %1 can be edited in [settings](%2).', connection.name, connection.path + '#settings')}
+      </div>
+    {/if}
+  </div>
 {/if}
 
 {#if dialog.is('loading')}

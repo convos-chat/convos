@@ -123,13 +123,17 @@ function hideMenu(e) {
   $activeMenu = '';
 }
 
+function onFocus(e) {
+  user.events.ensureConnected();
+}
+
 function replaceBodyClassName(re, replacement) {
   const body = document.querySelector('body');
   body.className = body.className.replace(re, (all, prefix) => prefix + replacement);
 }
 </script>
 
-<svelte:window bind:innerWidth="{containerWidth}"/>
+<svelte:window on:focus="{onFocus}" bind:innerWidth="{containerWidth}"/>
 <svelte:component this="{pageComponent}"/>
 
 <div class="overlay" class:is-visible="{$activeMenu && $container.small}">&nbsp;</div>
