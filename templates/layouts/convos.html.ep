@@ -25,6 +25,6 @@
   </head>
   <body class="no-js page-loading is-logged-out">
     %= content
-    %= asset 'convos.js' if 200 == (stash('status') // 200);
+    %= asset 'convos.js' if 200 == (stash('status') // 200)
   </body>
 </html>

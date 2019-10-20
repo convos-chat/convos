@@ -64,9 +64,10 @@ sub _backend_connection_create {
 sub _settings {
   my $c        = shift;
   my %settings = %{$c->app->config('settings') || {}};
-  $settings{apiUrl}  = $c->url_for('api');
-  $settings{baseUrl} = $c->app->core->base_url->to_string;
-  $settings{wsUrl}   = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+  $settings{chatMode} = $c->stash('chat_mode') ? 1 : 0;
+  $settings{apiUrl}   = $c->url_for('api');
+  $settings{baseUrl}  = $c->app->core->base_url->to_string;
+  $settings{wsUrl}    = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
   return \%settings;
 }
 

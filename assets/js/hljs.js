@@ -25,4 +25,20 @@ import diff from 'highlight.js/lib/languages/diff';
 import http from 'highlight.js/lib/languages/http';
 import yaml from 'highlight.js/lib/languages/yaml';
 
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('diff', diff);
+hljs.registerLanguage('dockerfile', dockerfile);
+hljs.registerLanguage('go', go);
+hljs.registerLanguage('http', http);
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('markdown', markdown);
+hljs.registerLanguage('mojolicious', mojolicious);
+hljs.registerLanguage('nginx', nginx);
+hljs.registerLanguage('perl', perl);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('scss', scss);
+hljs.registerLanguage('shell', shell);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('yaml', yaml);
+
 export default hljs;

@@ -1,24 +1,7 @@
 % layout 'convos';
 % title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
 
-<div class="sidebar-wrapper js-remove">
-  <div class="sidebar is-logged-out">
-    <h1 class="sidebar__logo">
-      <Link href="/"><span><%=l 'Convos' %></span></Link>
-    </h1>
-    <p class="sidebar__about"><%=l 'A multiuser chat application.' %></p>
-
-    <nav class="sidebar__nav">
-      <a href="/login"><%=l 'Login' %></a>
-      <a href="/register"><%=l 'Create account' %></Link>
-      % if (config('organization_url') ne 'http://convos.by') {
-        <a href="<%= config('organization_url') %>"><%= config('organization_name') %></a> -
-      % }
-      <a href="https://convos.by/doc"><%=l 'Documentation' %></a>
-      <a href="https://github.com/Nordaaker/convos"><%=l 'GitHub' %></a>
-    </nav>
-  </div>
-</div>
+%= include 'partial/sidebar'
 
 <main class="main align-content-middle js-remove">
   <div>
