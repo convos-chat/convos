@@ -6,6 +6,7 @@ let msgId = 0;
 export default class Events extends Reactive {
   constructor() {
     super();
+    this.keepaliveTid = setInterval(() => this._send({method: 'ping'}), 10000);
     this.notificationIcon = ''; // TODO
     this.queue = [];
     this.waiting = {}; // Add logic to clean up old callbacks
@@ -49,7 +50,7 @@ export default class Events extends Reactive {
     if (this.debugEvents) this._debug('send', msg);
     if (cb) this.waiting[msg.id] = cb;
     this.queue.push(msg);
-    this._dequeue();
+    this._ws('dequeue');
   }
 
   update(params) {
@@ -89,41 +90,37 @@ export default class Events extends Reactive {
     return '';
   }
 
-  _dequeue() {
-    // Send messages in the queue
-    this.queue = this.queue.filter(msg => !this._send(msg));
-
-    // Do not connect unless we are disconnected and have queued messages
-    if (this.queue.length == 0 || this.ws) return;
-
-    // Make sure the connection does not turn inactive
-    if (!this._keepaliveTid) this._keepaliveTid = setInterval(() => this._send({method: 'ping'}), 10000);
-
-    // Cancel scheduled reconnect
-    if (this._wsReconnectTid) clearTimeout(this._wsReconnectTid);
-    delete this._wsReconnectTid;
-
-    // Connect and keep track of connection state
-    this.ws = new WebSocket(this.wsUrl);
-    this.ws.onopen = () => {
-      this.update({ready: true});
-      this._dequeue();
-    };
-
-    this.ws.onclose = this._reconnect.bind(this);
-    this.ws.onerror = this._reconnect.bind(this);
-    this.ws.onmessage = (e) => this.dispatch(JSON.parse(e.data));
-  }
-
-  _reconnect(e) {
-    if (!this._wsReconnectTid) this._wsReconnectTid = setTimeout(() => this._dequeue(), 5000);
-    this.update({ready: false});
-    this.ws = null;
-  }
-
   _send(msg) {
     const ws = this.ws && this.ws.readyState == 1 && this.ws;
     if (ws) ws.send(JSON.stringify(msg));
     return !!ws;
+  }
+
+  _ws(action) {
+    if (action == 'dequeue' && this._wsReconnectTid) {
+      clearTimeout(this._wsReconnectTid);
+      delete this._wsReconnectTid;
+    }
+
+    if (action == 'start') {
+      this.update({ready: true});
+    }
+
+    if (action == 'stop') {
+      const waitFor = document.hasFocus() ? 3000 : 5000;
+      if (!this._wsReconnectTid) this._wsReconnectTid = setTimeout(() => this._ws('dequeue'), waitFor);
+      this.update({ready: false});
+      delete this.ws;
+    }
+    else if (this.ws) {
+      this.queue = this.queue.filter(msg => !this._send(msg));
+    }
+    else {
+      this.ws = new WebSocket(this.wsUrl);
+      this.ws.onopen = () => this._ws('start');
+      this.ws.onclose = () => this._ws('stop');
+      this.ws.onerror = () => this._ws('stop');
+      this.ws.onmessage = (e) => this.dispatch(JSON.parse(e.data));
+    }
   }
 }
