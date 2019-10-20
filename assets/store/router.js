@@ -24,7 +24,7 @@ export function gotoUrl(url, params = {}) {
 }
 
 function parseUrl(url) {
-  const $baseUrl = get(baseUrl);
+  const $baseUrl = get(baseUrl).replace(/\/+$/, '');
   const pathnameStart = url.indexOf('/') == 0 ? 0 : url.indexOf($baseUrl) + $baseUrl.length;
   const hashPos = indexOfNull(url, '#');
   const queryPos = indexOfNull(url, '?');
