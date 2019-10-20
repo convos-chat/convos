@@ -135,8 +135,8 @@ function showSettings() {
   <small>{topicOrStatus(connection, dialog)}</small>
 </ChatHeader>
 
-<main class="main messages-wrapper" bind:this="{messagesEl}" on:scroll="{onScroll}">
-  <div class="messages-container" bind:offsetHeight="{messagesHeight}">
+<main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">
+  <div class="messages-container" class:has-notifications="{$pathParts.length == 1}" bind:offsetHeight="{messagesHeight}">
     {#if $user.is('loading') || (dialog.is('loading') && !dialog.messages.length)}
       <h2>{l('Loading...')}</h2>
     {:else if $pathParts[1] && !connection.connection_id}
