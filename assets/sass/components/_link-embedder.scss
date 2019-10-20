@@ -77,6 +77,14 @@
   max-width: 100%;
   overflow: hidden;
 
+  &.without-frame {
+    border: 0;
+
+    .hljs {
+      padding: 0;
+    }
+  }
+
   .hljs {
     background: transparent;
     margin: 0;

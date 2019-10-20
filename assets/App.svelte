@@ -1,6 +1,7 @@
 <script>
 import Api from './js/Api';
 import EmbedMaker from './js/EmbedMaker';
+import hljs from './js/hljs';
 import User from './store/User';
 import {activeMenu, baseUrl, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
 import {loadScript} from './js/util';
@@ -14,6 +15,8 @@ import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
 import Settings from './page/Settings.svelte';
+
+window.hljs = hljs; // Required by paste plugin
 
 // Routing
 const loggedInPages = {
@@ -29,9 +32,7 @@ const loggedOutPages = {
   'register': Register,
 };
 
-const settings = window.__convos;
-delete window.__convos;
-
+const settings = [window.__convos, delete window.__convos][0];
 const api = new Api(settings.apiUrl, {debug: true});
 const embedMaker = new EmbedMaker({api});
 const user = new User({api, wsUrl: settings.wsUrl});
@@ -49,6 +50,8 @@ setContext('user', user);
 baseUrl.set(settings.baseUrl);
 
 onMount(async () => {
+  if (!settings.chatMode) return;
+
   const dialogEventUnlistener = user.on('dialogEvent', calculateNewPath);
   const historyUnlistener = historyListener();
   user.load();

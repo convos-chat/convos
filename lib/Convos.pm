@@ -52,14 +52,14 @@ sub startup {
 
   # Add basic routes
   my $r = $self->routes;
-  $r->get('/')->to(template => 'index')->name('index');
-  $r->get("/$_")->to(template => 'index')->name($_) for qw(login logout register);
+  $r->get('/')->to(chat_mode => 1, template => 'index')->name('index');
+  $r->get("/$_")->to(chat_mode => 1, template => 'index')->name($_) for qw(login logout register);
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/sw' => [format => 'js']);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
 
-  my $auth_r = $r->under('/')->to('user#require_login');
+  my $auth_r = $r->under('/')->to('user#require_login', chat_mode => 1);
   $auth_r->websocket('/events')->to('events#start')->name('events');
   $auth_r->get("/$_")->to(template => 'index')->name($_)     for (qw(help join settings));
   $auth_r->get("/add/$_")->to(template => 'index')->name($_) for (qw(connection conversation));
