@@ -4,7 +4,7 @@ import {camelize} from '../js/util';
 let msgId = 0;
 
 export default class Events extends Reactive {
-  constructor() {
+  constructor(params) {
     super();
     this.keepaliveTid = setInterval(() => this._send({method: 'ping'}), 10000);
     this.notificationIcon = ''; // TODO
@@ -14,7 +14,7 @@ export default class Events extends Reactive {
     this._localStorageAttr('notificationCloseDelay', 5000);
     this._localStorageAttr('debugEvents', navigator.userAgent.indexOf('Mozilla') != -1 ? 1 : 0);
     this._localStorageAttr('wantNotifications', false);
-    this._readOnlyAttr('wsUrl', Convos.wsUrl); // TODO: Should probably be input parameter
+    this._readOnlyAttr('wsUrl', params.wsUrl); // TODO: Should probably be input parameter
     this._updateableAttr('ready', false);
   }
 

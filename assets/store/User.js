@@ -12,7 +12,7 @@ export default class User extends Reactive {
     this._readOnlyAttr('api', () => api);
     this._readOnlyAttr('connections', new SortedMap());
     this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
-    this._readOnlyAttr('events', this._createEvents());
+    this._readOnlyAttr('events', this._createEvents(params));
 
     this._updateableAttr('expandUrlToMedia', true);
     this._updateableAttr('icon', 'user-circle');
@@ -99,8 +99,8 @@ export default class User extends Reactive {
     this.emit('dialogEvent', params);
   }
 
-  _createEvents() {
-    const events = new Events();
+  _createEvents(params) {
+    const events = new Events(params);
 
     events.on('message', params => {
       this._dispatchMessageToDialog(params);

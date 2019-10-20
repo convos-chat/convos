@@ -16,18 +16,20 @@ export function historyListener() {
 }
 
 export function gotoUrl(url, params = {}) {
+  if (url.slice(0, 1) == '/') url = get(baseUrl).replace(/\/+$/, '') + url;
   if (!parseUrl(url)) return (location.href = url);
   if (params.event) params.event.preventDefault();
   history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
   currentUrl.set(new URL(location.href));
 }
 
-function parseUrl(href) {
-  const pathnameStart = href.indexOf('/') == 0 ? 0 : href.indexOf(baseUrl) + baseUrl.length;
-  const hashPos = indexOfNull(href, '#');
-  const queryPos = indexOfNull(href, '?');
-  if (pathnameStart == baseUrl.length - 1) return false;
-  const pathpart = href.substring(pathnameStart, queryPos || hashPos || href.length);
+function parseUrl(url) {
+  const $baseUrl = get(baseUrl);
+  const pathnameStart = url.indexOf('/') == 0 ? 0 : url.indexOf($baseUrl) + $baseUrl.length;
+  const hashPos = indexOfNull(url, '#');
+  const queryPos = indexOfNull(url, '?');
+  if (pathnameStart == $baseUrl.length - 1) return false;
+  const pathpart = url.substring(pathnameStart, queryPos || hashPos || url.length);
   setTimeout(() => pathname.set(pathpart), 0);
   return true;
 }
@@ -49,7 +51,7 @@ export function urlToForm(formEl, url = get(currentUrl)) {
 }
 
 export const activeMenu = writable('');
-export const baseUrl = '//' + location.host; // TODO: Add support for example.com/whatever/convos/
+export const baseUrl = writable('//' + location.host);
 export const docTitle = writable(document.title);
 export const pathname = writable(location.pathname);
 

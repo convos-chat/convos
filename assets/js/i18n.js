@@ -8,8 +8,8 @@ export function l(lexicon, ...vars) {
   return translated.replace(/%(\d+)/g, (a, i) => { return vars[i - 1] });
 }
 
-export function lmd(str, params) {
-  return md(l(str));
+export function lmd(str, ...params) {
+  return md(l(str, ...params));
 }
 
 export function topicOrStatus(connection, dialog) {

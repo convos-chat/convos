@@ -11,6 +11,7 @@ sub register {
   $app->helper('backend.user'              => \&_backend_user);
   $app->helper('backend.connection_create' => \&_backend_connection_create);
   $app->helper('linkembedder'              => sub { state $l = LinkEmbedder->new });
+  $app->helper('settings'                  => \&_settings);
   $app->helper('unauthorized'              => \&_unauthorized);
 }
 
@@ -58,6 +59,15 @@ sub _backend_connection_create {
   )->catch(sub {
     return $c->$cb(pop, undef);
   });
+}
+
+sub _settings {
+  my $c        = shift;
+  my %settings = %{$c->app->config('settings') || {}};
+  $settings{apiUrl}  = $c->url_for('api');
+  $settings{baseUrl} = $c->app->core->base_url->to_string;
+  $settings{wsUrl}   = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+  return \%settings;
 }
 
 sub _unauthorized {

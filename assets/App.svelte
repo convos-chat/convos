@@ -2,7 +2,7 @@
 import Api from './js/Api';
 import EmbedMaker from './js/EmbedMaker';
 import User from './store/User';
-import {activeMenu, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
+import {activeMenu, baseUrl, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
 import {loadScript} from './js/util';
 import {onMount, setContext} from 'svelte';
 
@@ -29,10 +29,12 @@ const loggedOutPages = {
   'register': Register,
 };
 
-const Convos = window.Convos || {};
-const api = new Api(Convos.apiUrl, {debug: true});
+const settings = window.__convos;
+delete window.__convos;
+
+const api = new Api(settings.apiUrl, {debug: true});
 const embedMaker = new EmbedMaker({api});
-const user = new User({api});
+const user = new User({api, wsUrl: settings.wsUrl});
 const notifications = user.notifications;
 
 let pageComponent = null;
@@ -41,7 +43,10 @@ $: if (document) document.title = $notifications.unread ? '(' + $notifications.u
 $: calculatePage($pathParts, $user);
 
 setContext('embedMaker', embedMaker);
+setContext('settings', settings);
 setContext('user', user);
+
+baseUrl.set(settings.baseUrl);
 
 onMount(async () => {
   const dialogEventUnlistener = user.on('dialogEvent', calculateNewPath);

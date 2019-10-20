@@ -28,7 +28,7 @@
     </p>
     <p class="has-js">
       <i class="fa fa-spinner has-js fa-spin"></i>
-      %=l 'Initializing Convos...'
+      %=l 'Starting Convos...'
     </p>
 
     <noscript>

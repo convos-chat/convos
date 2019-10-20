@@ -1,15 +1,16 @@
 <script>
-import {l, lmd} from '../js/i18n';
 import ChatHeader from '../components/ChatHeader.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
+import {getContext} from 'svelte';
+import {l, lmd} from '../js/i18n';
 
-const version = '1.0.0'; // TODO: Extract version from package.json
+const settings = getContext('settings');
 </script>
 
 <SidebarChat/>
 
 <ChatHeader>
-  <h1>{l('Help')}</h1><small>v{version}</small>
+  <h1>{l('Help')}</h1><small>v{settings.version}</small>
 </ChatHeader>
 
 <main class="main">
