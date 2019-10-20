@@ -66,13 +66,15 @@
 .message blockquote {
   quotes: "\201C" "\201D";
   font-style: italic;
+  line-height: 1em;
   margin: 0;
   padding: 0.4em 0.4em 0.1em 1.1em;
   position: relative;
 
   &:before {
-    color: #ccc;
     content: open-quote;
+    color: var(--quote-color);
+    line-height: 1em;
     font-size: 3em;
     position: absolute;
     top: 0.1rem;
