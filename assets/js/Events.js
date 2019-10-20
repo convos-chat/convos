@@ -30,6 +30,10 @@ export default class Events extends Reactive {
     if (params.bubbles) this.emit('message', {...params, dispatchTo});
   }
 
+  ensureConnected() {
+    this._ws('dequeue');
+  }
+
   notifyUser(title, body, params = {}) {
     const rejectReason = this._notificationRejectReason();
     if (rejectReason) {
@@ -107,8 +111,7 @@ export default class Events extends Reactive {
     }
 
     if (action == 'stop') {
-      const waitFor = document.hasFocus() ? 3000 : 5000;
-      if (!this._wsReconnectTid) this._wsReconnectTid = setTimeout(() => this._ws('dequeue'), waitFor);
+      if (!this._wsReconnectTid) this._wsReconnectTid = setTimeout(() => this._ws('dequeue'), 3000);
       this.update({ready: false});
       delete this.ws;
     }
