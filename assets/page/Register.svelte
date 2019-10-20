@@ -1,13 +1,13 @@
 <script>
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
+import {l, lmd} from '../js/i18n';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
 
-const inviteCodeRequired = true;
+const settings = getContext('settings');
 const user = getContext('user');
 const registerOp = user.api.operation('registerUser');
 
@@ -26,13 +26,17 @@ $: if ($registerOp.is('success')) {
     <TextField name="email" placeholder="{l('Ex: john@doe.com')}">
       <span slot="label">{l('E-mail')}</span>
     </TextField>
+    <p class="help">{l('Your email will be used if you forget your password.')}</p>
+
     <PasswordField name="password">
       <span slot="label">{l('Password')}</span>
     </PasswordField>
-  {#if inviteCodeRequired}
+    <p class="help">{l('Hint: Use a phrase from a book.')}</p>
+  {#if settings.invite_code}
     <TextField name="invite_code">
       <span slot="label">{l('Invite code')}</span>
     </TextField>
+    <p class="help">{@html lmd('Ask %1 for an invite code.', settings.contact)}</p>
   {/if}
     <div class="form-actions">
       <button class="btn" op="{registerOp}">{l('Register')}</button>

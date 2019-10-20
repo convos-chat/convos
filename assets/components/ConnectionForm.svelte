@@ -9,10 +9,11 @@ import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount, tick} from 'svelte';
 import {gotoUrl, urlToForm} from '../store/router';
-import {l} from '../js/i18n';
+import {l, lmd} from '../js/i18n';
 
 export let dialog = {};
 
+const settings = getContext('settings');
 const user = getContext('user');
 const createConnectionOp = user.api.operation('createConnection');
 const removeConnectionOp = user.api.operation('removeConnection');
@@ -41,6 +42,7 @@ onMount(async () => {
 });
 
 function defaultsToForm() {
+  if (settings.forced_connection) formEl.server.value = settings.default_connection;
   formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   useTls = true;
   wantToBeConnected = true;
@@ -91,9 +93,14 @@ async function submitForm(e) {
   <input type="hidden" name="url">
   <input type="hidden" name="wanted_state">
 
-  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}">
+  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{settings.forced_connection}">
     <span slot="label">{l('Host and port')}</span>
   </TextField>
+
+  {#if settings.forced_connection}
+    <p>{@html lmd('Connection is locked by %1.', settings.contact)}</p>
+  {/if}
+
   <TextField name="nick" placeholder="{l('Ex: your-name')}">
     <span slot="label">{l('Nickname')}</span>
   </TextField>
