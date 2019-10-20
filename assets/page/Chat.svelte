@@ -9,7 +9,7 @@ import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import {activeMenu, gotoUrl, pathParts, currentUrl} from '../store/router';
-import {afterUpdate, getContext, onDestroy, onMount, tick} from 'svelte';
+import {afterUpdate, getContext, onDestroy} from 'svelte';
 import {debounce, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 
@@ -37,11 +37,6 @@ let unsubscribe = [];
 $: calculateDialog($user, $pathParts);
 $: calculateSettingsComponent($currentUrl);
 
-onMount(() => {
-  // Clean up any embeds added from a previous chat
-  q(document, '.message__embed', embedEl => embedEl.remove());
-});
-
 afterUpdate(() => {
   observeMessages();
   keepScrollPosition();
@@ -65,6 +60,7 @@ function calculateDialog(user, pathParts) {
   if (unsubscribe) unsubscribe.forEach(cb => cb());
   if (previousPath && dialog.setLastRead) dialog.setLastRead();
 
+  q(document, '.message__embed', embedEl => embedEl.remove());
   dialog = d;
   previousPath = pathParts.join('/');
   unsubscribe = [];
