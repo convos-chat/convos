@@ -4,6 +4,7 @@ import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {getContext} from 'svelte';
 import {l, lmd, topicOrStatus} from '../js/i18n';
+import {gotoUrl} from '../store/router';
 
 export let connection;
 export let dialog;
@@ -15,6 +16,16 @@ const user = getContext('user');
 function ensureConnected(e) {
   e.preventDefault();
   user.events.ensureConnected();
+}
+
+function gotoDialog(e) {
+  if (dialog.connection_id) return;
+  const target = e.target.closest('.message');
+  const message = dialog.messages[target.dataset.index];
+  if (!message) return;
+  e.preventDefault();
+  const path = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
+  gotoUrl(path + '#' + message.ts.toISOString());
 }
 </script>
 
@@ -38,11 +49,16 @@ function ensureConnected(e) {
     class:is-hightlighted="{message.highlight}"
     class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
     class:has-same-from="{message.isSameSender && !message.dayChanged}"
+    on:click="{gotoDialog}"
     data-index="{i}">
 
     <Icon name="{message.from == connection.nick ? user.icon : 'random:' + message.from}" family="solid" style="color:{message.color}"/>
     <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.toHuman()}</b>
-    <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}">{message.from}</a>
+    {#if dialog.connection_id}
+      <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}">{message.from}</a>
+    {:else}
+      <a href="#see" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
+    {/if}
     <div class="message__text">{@html message.markdown}</div>
   </div>
 {/each}

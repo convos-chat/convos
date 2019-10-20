@@ -116,6 +116,8 @@
   font-weight: normal;
   padding: 0.1rem;
   float: right;
+  position: relative;
+  z-index: 2;
 }
 
 .message-status-line {
@@ -141,5 +143,23 @@
 
   &.for-loading {
     color: var(--success);
+  }
+}
+
+.messages-container.has-notifications {
+  .message__text {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--body-bg);
+      filter: brightness(0.97);
+    }
+  }
+
+  .message,
+  .message.has-same-from {
+    .message__ts {
+      opacity: 1;
+    }
   }
 }
