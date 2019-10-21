@@ -23,6 +23,7 @@ export default class User extends Reactive {
 
     this._proxyAttr('expandUrlToMedia', 'embedMaker');
     this._proxyAttr('wantNotifications', 'events');
+    this._proxyAttr('status', 'getUserOp');
   }
 
   ensureDialog(params) {
