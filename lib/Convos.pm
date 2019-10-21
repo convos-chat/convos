@@ -54,6 +54,9 @@ sub startup {
   my $r = $self->routes;
   $r->get('/')->to(chat_mode => 1, template => 'index')->name('index');
   $r->get("/$_")->to(chat_mode => 1, template => 'index')->name($_) for qw(login logout register);
+  $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
+    ->to(template => 'asset/browserconfig');
+  $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/sw' => [format => 'js']);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
