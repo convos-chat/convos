@@ -16,6 +16,7 @@ const updateUserOp = user.api.operation('updateUser');
 let formEl;
 let notificationsDisabled = Notification.permission == 'denied';
 let wantNotifications = user.events.wantNotifications;
+let expandUrlToMedia = user.expandUrlToMedia;
 
 function updateUserFromForm(e) {
   const form = e.target;
@@ -33,8 +34,7 @@ function updateUserFromForm(e) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  user.events.update({wantNotifications});
-  user.update({expandUrlToMedia: form.expand_url.checked});
+  user.update({expandUrlToMedia, wantNotifications});
   updateUserOp.perform(e.target);
 }
 </script>
@@ -62,7 +62,7 @@ function updateUserFromForm(e) {
       <p class="error">{l('You cannot receive notifications, because it is denied by your browser.')}</p>
     {/if}
 
-    <Checkbox name="expand_url">
+    <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">
       <span slot="label">{l('Expand URL to media')}</span>
     </Checkbox>
 

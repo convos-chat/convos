@@ -1,6 +1,5 @@
 <script>
 import Api from './js/Api';
-import EmbedMaker from './js/EmbedMaker';
 import hljs from './js/hljs';
 import User from './store/User';
 import {activeMenu, baseUrl, container, docTitle, gotoUrl, historyListener, pathname, pathParts} from './store/router';
@@ -34,7 +33,6 @@ const loggedOutPages = {
 
 const settings = [window.__convos, delete window.__convos][0];
 const api = new Api(settings.apiUrl, {debug: true});
-const embedMaker = new EmbedMaker({api});
 const user = new User({api, wsUrl: settings.wsUrl});
 const notifications = user.notifications;
 
@@ -45,7 +43,6 @@ $: container.set({small: containerWidth < 800, width: containerWidth});
 $: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
 $: calculatePage($pathParts, $user);
 
-setContext('embedMaker', embedMaker);
 setContext('settings', settings);
 setContext('user', user);
 
@@ -83,7 +80,7 @@ function calculateNewPath(params) {
 function calculatePage(pathParts, user) {
 
   // Remember last chat
-  if (pathParts.indexOf('chat') != -1) localStorage.setItem('lastUrl', $pathname);
+  if (pathParts.indexOf('chat') != -1) user.update({lastUrl: $pathname});
 
   // Figure out current page
   const pages = user.is('success') ? loggedInPages : loggedOutPages;
@@ -100,7 +97,7 @@ function calculatePage(pathParts, user) {
     replaceBodyClassName(/(page-)\S+/, pageName.replace(/\W+/g, '_'));
   }
   else if (user.is('success')) {
-    const lastUrl = localStorage.getItem('lastUrl');
+    const lastUrl = user.lastUrl;
     gotoUrl(lastUrl || (user.connections.size ? '/chat' : '/add/connection'), {replace: true});
   }
   else if (user.is('error')) {

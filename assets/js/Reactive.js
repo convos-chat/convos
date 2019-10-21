@@ -1,7 +1,8 @@
 export default class Reactive {
   constructor() {
     this._on = {};
-    this._reactive = {};
+    this._proxyTo = {};
+    this._reactiveAttr = {};
     this._syncWithLocalStorage = {};
   }
 
@@ -39,13 +40,19 @@ export default class Reactive {
     for (let i = 0; i < paramNames.length; i++) {
       const name = paramNames[i];
 
-      if (this._reactive.hasOwnProperty(name) && this._reactive[name] !== params[name]) {
-        this._reactive[name] = params[name];
-        updated++;
+      if (this._proxyTo[name]) {
+        this[this._proxyTo[name]].update({[name]: params[name]});
+      }
+      else if (this._reactiveAttr.hasOwnProperty(name)) {
+        if (this._reactiveAttr[name] !== params[name]) updated++;
+        this._reactiveAttr[name] = params[name];
+      }
+      else if (!this.hasOwnProperty(name)) {
+        throw 'Not an updateable attribute: ' + name;
       }
 
       if (this._syncWithLocalStorage[name]) {
-        localStorage.setItem(name, JSON.stringify(this._reactive[name]));
+        this._localStorage(name, this._reactiveAttr[name]);
       }
     }
 
@@ -59,10 +66,22 @@ export default class Reactive {
     return this;
   }
 
+  _localStorage(name, val) {
+    name = 'convos:' + name;
+    return arguments.length == 2 ? localStorage.setItem(name, JSON.stringify(val)) : localStorage.getItem(name);
+  }
+
   _localStorageAttr(name, val) {
-    this._updateableAttr(name, val);
+    const inStorage = localStorage.hasOwnProperty(name);
+    this._updateableAttr(name, inStorage ? this._localStorage(name) : val);
     this._syncWithLocalStorage[name] = true;
-    if (localStorage.hasOwnProperty(name)) this._reactive[name] = JSON.parse(localStorage.getItem(name));
+    if (!inStorage) this._localStorage(name, val);
+  }
+
+  _proxyAttr(name, to) {
+    // TODO: Add support for _readOnlyAttr
+    this._proxyTo[name] = to;
+    Object.defineProperty(this, name, {get: () => this[to]._reactiveAttr[name]});
   }
 
   _readOnlyAttr(name, val) {
@@ -72,7 +91,7 @@ export default class Reactive {
   }
 
   _updateableAttr(name, val) {
-    this._reactive[name] = val;
-    Object.defineProperty(this, name, {get: () => this._reactive[name]});
+    this._reactiveAttr[name] = val;
+    Object.defineProperty(this, name, {get: () => this._reactiveAttr[name]});
   }
 }

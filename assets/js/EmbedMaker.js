@@ -1,19 +1,20 @@
 import hljs from './hljs';
+import Reactive from './Reactive';
 import {ensureChildNode, loadScript, q, removeChildNodes} from './util';
 
-export default class EmbedMaker {
+export default class EmbedMaker extends Reactive {
   constructor(params) {
-    this.api = params.api;
-    this.embeds = {};
-
-    // TODO: Allow providers to be disabled
-    this.disableAll = params.disableAll || false;
-    this.disableInstagram = params.disableInstagram || false;
-    this.disableTwitter = params.disableTwitter || false;
+    super();
+    this.name = 'EmbedMaker';
+    this._localStorageAttr('disableInstagram', false);
+    this._localStorageAttr('disableTwitter', false);
+    this._localStorageAttr('expandUrlToMedia', true);
+    this._readOnlyAttr('api', params.api);
+    this._readOnlyAttr('embeds', {});
   }
 
   async render(urls, targetEl) {
-    if (this.disableAll) return;
+    if (!this.expandUrlToMedia) return;
 
     const existingEls = {};
     q(targetEl, '.message__embed', el => { existingEls[el.dataset.url] = el });
