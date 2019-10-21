@@ -47,9 +47,6 @@ export default class Reactive {
         if (this._reactiveAttr[name] !== params[name]) updated++;
         this._reactiveAttr[name] = params[name];
       }
-      else if (!this.hasOwnProperty(name)) {
-        throw 'Not an updateable attribute: ' + name;
-      }
 
       if (this._syncWithLocalStorage[name]) {
         this._localStorage(name, this._reactiveAttr[name]);
