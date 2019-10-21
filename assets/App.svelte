@@ -36,6 +36,7 @@ const api = new Api(settings.apiUrl, {debug: true});
 const user = new User({api, wsUrl: settings.wsUrl});
 const notifications = user.notifications;
 
+let calculatePageLock = '';
 let containerWidth = 0;
 let pageComponent = null;
 
@@ -78,6 +79,10 @@ function calculateNewPath(params) {
 }
 
 function calculatePage(pathParts, user) {
+  // Make sure we don't run the logic too often
+  const lock = [user.status].concat(pathParts).join(':');
+  if (lock == calculatePageLock) return;
+  calculatePageLock = lock;
 
   // Remember last chat
   if (pathParts.indexOf('chat') != -1) user.update({lastUrl: $pathname});

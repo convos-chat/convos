@@ -52,9 +52,11 @@
 .chat-header__hamburger {
   color: inherit;
   font-size: 1.4rem;
+  line-height: 1.4rem;
+  padding: 1rem var(--gutter);
   position: absolute;
-  right: var(--gutter);
-  top: 1rem;
+  right: 0;
+  top: 0;
   display: none;
   z-index: 2;
 
