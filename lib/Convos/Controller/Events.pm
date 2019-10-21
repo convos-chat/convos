@@ -50,6 +50,11 @@ sub _err {
   $self->send({json => $res});
 }
 
+sub _event_debug {
+  my ($self, $data) = @_;
+  $self->log->debug(Mojo::Util::dumper($data));
+}
+
 sub _event_get_user {
   my ($self, $data) = @_;
   my $user = $self->backend->user

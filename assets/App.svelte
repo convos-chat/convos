@@ -114,6 +114,11 @@ function calculatePage(pathParts, user) {
   }
 }
 
+function debugClick(e) {
+  // This is useful if you want to see on server side what is being clicked on
+  // user.events.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
+}
+
 function hideMenu(e) {
   if (closestEl(e.target, '.chat-header')) return;
   if (closestEl(e.target, '.sidebar-wrapper')) return;
@@ -130,7 +135,7 @@ function replaceBodyClassName(re, replacement) {
 }
 </script>
 
-<svelte:window on:focus="{onFocus}" bind:innerWidth="{containerWidth}"/>
+<svelte:window on:focus="{onFocus}" on:click="{debugClick}" bind:innerWidth="{containerWidth}"/>
 <svelte:component this="{pageComponent}"/>
 
 <div class="overlay" class:is-visible="{$activeMenu && $container.small}">&nbsp;</div>
