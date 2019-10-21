@@ -1,4 +1,5 @@
 import Connection from './Connection';
+import EmbedMaker from '../js/EmbedMaker';
 import Events from '../js/Events';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
@@ -12,13 +13,16 @@ export default class User extends Reactive {
     this._readOnlyAttr('api', () => api);
     this._readOnlyAttr('connections', new SortedMap());
     this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
+    this._readOnlyAttr('embedMaker', new EmbedMaker({api}));
     this._readOnlyAttr('events', this._createEvents(params));
-
-    this._updateableAttr('expandUrlToMedia', true);
-    this._updateableAttr('icon', 'user-circle');
-
     this._readOnlyAttr('getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this._readOnlyAttr('notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
+
+    this._updateableAttr('icon', 'user-circle');
+    this._updateableAttr('lastUrl', '');
+
+    this._proxyAttr('expandUrlToMedia', 'embedMaker');
+    this._proxyAttr('wantNotifications', 'events');
   }
 
   ensureDialog(params) {

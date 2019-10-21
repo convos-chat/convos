@@ -13,7 +13,6 @@ import {afterUpdate, getContext, onDestroy} from 'svelte';
 import {debounce, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 
-const embedMaker = getContext('embedMaker');
 const user = getContext('user');
 
 // Elements
@@ -93,7 +92,7 @@ function keepScrollPosition() {
 function observed(entries, observer) {
   entries.forEach(({isIntersecting, target}) => {
     if (!isIntersecting) return;
-    embedMaker.render((dialog.messages[target.dataset.index] || {}).embeds || [], target);
+    user.embedMaker.render((dialog.messages[target.dataset.index] || {}).embeds || [], target);
   });
 }
 
