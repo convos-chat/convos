@@ -26,6 +26,10 @@
     margin: 0;
     white-space: pre;
 
+    a {
+      color: inherit;
+    }
+
     .fa {
       font-size: 0.7em;
 
@@ -36,7 +40,7 @@
 
       @include if_screen(">two-columns") {
         position: absolute;
-        top: var(--gutter);
+        top: calc(var(--gutter) + 0.1em);
         right: var(--gutter);
       }
     }
