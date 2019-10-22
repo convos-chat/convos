@@ -10,6 +10,7 @@ export let href = '/';
 export let native = false;
 export let replace = false;
 export let style = '';
+export let title = '';
 
 export const focus = () => el.focus();
 
@@ -20,4 +21,4 @@ function onClick(event) {
 }
 </script>
 
-<a href="{absoluteHref}" on:click="{onClick}" class="{className}" class:has-path="{$currentUrl == absoluteHref.replace(/(#|\?).*/, '')}" style="{style}" bind:this="{el}"><slot/></a>
+<a href="{absoluteHref}" on:click="{onClick}" class="{className}" class:has-path="{$currentUrl == absoluteHref.replace(/(#|\?).*/, '')}" style="{style}" title="{title}" bind:this="{el}"><slot/></a>

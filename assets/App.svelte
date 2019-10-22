@@ -70,8 +70,11 @@ function calculateNewPath(params) {
   let path = ['', 'chat'];
   if (params.connection_id) path.push(params.connection_id);
 
+  // Do not want to show settings for the new dialog
+  $activeMenu = '';
+
   if (params.type == 'part') {
-    const el = document.querySelector('.sidebar-wrapper [href$="' + path.map(encodeURIComponent).join('/') + '"]');
+    const el = document.querySelector('.sidebar-left [href$="' + path.map(encodeURIComponent).join('/') + '"]');
     gotoUrl(el ? el.href : '/chat');
   }
   else {
@@ -127,7 +130,7 @@ function replaceBodyClassName(re, replacement) {
 
 function toggleMenu(e) {
   const linkEl = closestEl(e.target, 'a');
-  if (closestEl(e.target, '.sidebar-wrapper') && !linkEl) return;
+  if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
 
   const toggle = linkEl && linkEl.href.match(/#(activeMenu):(\w*)/) || ['', '', ''];
   if (toggle[1] || $activeMenu) e.preventDefault();

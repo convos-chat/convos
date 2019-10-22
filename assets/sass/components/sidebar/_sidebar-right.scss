@@ -1,0 +1,27 @@
+.sidebar-right {
+  @extend %sidebar-wrapper-chrome;
+  background: var(--sidebar-right-bg);
+  padding-top: var(--gutter);
+  width: var(--sidebar-right-width);
+  right: 0;
+
+  @include if_screen("<=three-columns") {
+    display: none;
+  }
+
+  &, a {
+    color: var(--sidebar-right-text);
+  }
+
+  h3 {
+    padding-bottom: 4px;
+  }
+}
+
+.sidebar-right__nav a {
+  background: var(--sidebar-right-bg);
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+}

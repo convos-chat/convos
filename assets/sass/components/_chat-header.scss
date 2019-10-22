@@ -13,13 +13,13 @@
   z-index: 900;
 
   @include if_screen("<=two-columns") {
-    background: var(--sidebar-bg);
-    color: var(--sidebar-text);
+    background: var(--sidebar-left-bg);
+    color: var(--sidebar-left-text);
     padding-top: var(--gutter-small);
     border-bottom: 0;
 
     a {
-      color: var(--sidebar-text);
+      color: var(--sidebar-left-text);
     }
 
     .fa {

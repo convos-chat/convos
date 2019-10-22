@@ -3,14 +3,11 @@ import Link from './Link.svelte';
 import {l} from '../js/i18n';
 </script>
 
-<div class="sidebar-wrapper">
-  <h1 class="sidebar__logo">
-    <Link href="/"><span>{l('Convos')}</span></Link>
-  </h1>
+<div class="sidebar-left">
+  <h1><Link href="/"><span>{l('Convos')}</span></Link></h1>
+  <p>{l('A multiuser chat application.')}</p>
 
-  <p class="sidebar__about">{l('A multiuser chat application.')}</p>
-
-  <nav class="sidebar__nav">
+  <nav class="sidebar-left__nav">
     <Link href="/login">{l('Login')}</Link>
     <Link href="/register">{l('Create account')}</Link>
     <Link href="https://convos.by/doc">{l('Documentation')}</Link>

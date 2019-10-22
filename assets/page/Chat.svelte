@@ -3,14 +3,13 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../components/ChatMessages.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
-import DialogParticipants from '../components/DialogParticipants.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import {activeMenu, currentUrl, gotoUrl} from '../store/router';
 import {afterUpdate, getContext, onDestroy} from 'svelte';
-import {debounce, q} from '../js/util';
+import {debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 
 const user = getContext('user');
@@ -156,10 +155,15 @@ const onScroll = debounce(e => {
 {/if}
 
 {#if dialog.participants.size}
-  <div class="sidebar-participants-wrapper">
-    <div class="sidebar__nav">
+  <div class="sidebar-right">
+    <nav class="sidebar-right__nav">
       <h3>{l('Participants (%1)', dialog.participants.size)}</h3>
-      <DialogParticipants dialog="{dialog}"/>
-    </div>
+      {#each dialog.participants.toArray() as participant}
+        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
+          <Icon name="random:{participant.id}" family="solid" style="color:{participant.color}"/>
+          <span>{participant.nick}</span>
+        </Link>
+      {/each}
+    <nav>
   </div>
 {/if}
