@@ -65,14 +65,15 @@ export default class Reactive {
 
   _localStorage(name, val) {
     name = 'convos:' + name;
-    return arguments.length == 2 ? localStorage.setItem(name, JSON.stringify(val)) : localStorage.getItem(name);
+    if (arguments.length == 2) return localStorage.setItem(name, JSON.stringify(val));
+    return localStorage.hasOwnProperty(name) ? JSON.parse(localStorage.getItem(name)) : undefined;
   }
 
   _localStorageAttr(name, val) {
-    const inStorage = localStorage.hasOwnProperty(name);
-    this._updateableAttr(name, inStorage ? this._localStorage(name) : val);
+    const fromStorage = this._localStorage(name);
+    this._updateableAttr(name, typeof fromStorage == 'undefined' ? val : fromStorage);
     this._syncWithLocalStorage[name] = true;
-    if (!inStorage) this._localStorage(name, val);
+    if (typeof fromStorage == 'undefined') this._localStorage(name, val);
   }
 
   _proxyAttr(name, to) {
