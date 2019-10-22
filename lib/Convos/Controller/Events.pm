@@ -52,7 +52,7 @@ sub _err {
 
 sub _event_debug {
   my ($self, $data) = @_;
-  $self->log->debug(Mojo::Util::dumper($data));
+  $self->log->debug(Mojo::Util::dumper($data)) if DEBUG;
 }
 
 sub _event_get_user {
