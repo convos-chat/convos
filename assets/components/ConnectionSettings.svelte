@@ -21,7 +21,7 @@ onMount(async () => {
 });
 </script>
 
-<div class="sidebar-wrapper" transition:fly="{flyTransitionParameters}">
+<div class="sidebar-left" transition:fly="{flyTransitionParameters}">
   <SettingsHeader {dialog}/>
 
   {#if !connection.url}

@@ -3,11 +3,15 @@ import Dialog from './Dialog';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
 
+const sortDialogs = (a, b) => {
+  return (a.is_private || 0) - (b.is_private || 0) || a.name.localeCompare(b.name);
+};
+
 export default class Connection extends Dialog {
   constructor(params) {
     super(params);
 
-    this._readOnlyAttr('dialogs', new SortedMap());
+    this._readOnlyAttr('dialogs', new SortedMap([], {sorter: sortDialogs}));
 
     this._updateableAttr('on_connect_commands', params.on_connect_commands || '');
     this._updateableAttr('state', params.state || 'queued');

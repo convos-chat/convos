@@ -26,6 +26,11 @@ body.has-js .no-js {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+
+  &.align-content-middle {
+    padding-bottom: 2rem;
+    top: 0;
+  }
 }
 
 @include if_screen("<=two-columns") {

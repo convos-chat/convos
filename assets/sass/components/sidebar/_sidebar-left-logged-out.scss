@@ -1,0 +1,28 @@
+body.is-logged-out .sidebar-left {
+  @include if_screen("<=two-columns") {
+    padding: var(--gutter-big);
+    width: 100%;
+    max-width: none;
+    height: auto;
+    position: static;
+    transform: translateX(0);
+
+    h1 {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  @include if_screen(">two-columns") {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    > :last-child {
+      padding-bottom: 4rem;
+    }
+  }
+}

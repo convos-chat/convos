@@ -1,13 +1,11 @@
 <script>
 import Icon from './Icon.svelte';
-import SidebarDialogItem from '../components/SidebarDialogItem.svelte';
-import SidebarItem from '../components/SidebarItem.svelte';
+import Link from './Link.svelte';
 import TextField from './form/TextField.svelte';
-import Unread from './Unread.svelte';
 import {activeMenu, container, gotoUrl} from '../store/router';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
+import {l, topicOrStatus} from '../js/i18n';
 import {q, regexpEscape, tagNameIs} from '../js/util';
 
 const user = getContext('user');
@@ -29,10 +27,17 @@ function clearFilter() {
   setTimeout(() => {filter = ''}, 100);
 }
 
+function dialogClassNames(connection, dialog) {
+  const cn = [dialog.dialog_id ? 'for-dialog' : 'for-connection'];
+  if (dialog.frozen || connection.state != 'connected') cn.push('is-frozen');
+  return cn.join(' ');
+}
+
 function filterNav() {
   if (!navEl) return;
 
-  const filterRe = new RegExp('\\b\\W*' + regexpEscape(filter), 'i');
+  const prefix = filter.match(/^\W+/) ? '' : '\\b\\W*';
+  const filterRe = new RegExp(prefix + regexpEscape(filter), 'i');
   const hasVisibleLinks = {};
   const seen = {};
 
@@ -41,15 +46,14 @@ function filterNav() {
   visibleLinks = [];
 
   // Show and hide navigation links
-  q(navEl, '.sidebar__item__link', (aEl, i) => {
+  q(navEl, 'a', (aEl, i) => {
     const aClassList = aEl.classList;
     if (!filter.length && aClassList.contains('has-path')) activeLinkIndex = i;
     aClassList.remove('has-focus');
 
-    const listItem = aEl.parentNode;
     const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
     if (makeVisible) visibleLinks.push(aEl);
-    makeVisible ? listItem.removeAttribute('hidden') : listItem.setAttribute('hidden', '');
+    makeVisible ? aEl.removeAttribute('hidden') : aEl.setAttribute('hidden', '');
     seen[aEl.href] = true;
   });
 
@@ -89,6 +93,11 @@ function onGlobalKeydown(e) {
   }
 }
 
+function navItemClicked(e) {
+  const className = e.target.className || '';
+  if (className.match(/network|user/)) setTimeout(() => { $activeMenu = 'settings' }, 50);
+}
+
 function onSearchKeydown(e) {
   // Go to the active link when Enter is pressed
   if (e.keyCode == 13) {
@@ -117,8 +126,8 @@ function onSearchKeydown(e) {
 <svelte:window on:keydown="{onGlobalKeydown}"/>
 
 {#if $activeMenu == 'nav' || !$container.small}
-  <div class="sidebar-wrapper" transition:fly="{flyTransitionParameters}">
-    <form class="sidebar__header">
+  <div class="sidebar-left" transition:fly="{flyTransitionParameters}">
+    <form class="sidebar__header" on:submit="{e => e.preventDefault()}">
       <input type="text"
         placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
         bind:this="{searchInput}"
@@ -129,40 +138,49 @@ function onSearchKeydown(e) {
       <Icon name="search" on:click="{() => searchInput.focus()}"/>
     </form>
 
-    <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
-      {#if $user.connections.size}
-        <h3>{l('Conversations')}</h3>
-        {#each $user.connections.toArray() as connection}
-          <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
-          {#each connection.dialogs.filter(d => !d.is_private) as dialog}
-            <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
-          {/each}
-          {#each connection.dialogs.filter(d => d.is_private) as dialog}
-            <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
-          {/each}
+    <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{navItemClicked}">
+      <h3>{l('Conversations')}</h3>
+      {#each $user.connections.toArray() as connection}
+        <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" title="{topicOrStatus(connection, connection)}">
+          <Icon name="network-wired"/>
+          <span>{connection.name}</span>
+          <b class="unread" hidden="{!connection.unread}">{connection.unread}</b>
+        </Link>
+        {#each connection.dialogs.toArray() as dialog}
+          <Link href="{dialog.path}" class="{dialogClassNames(connection, dialog)}" title="{topicOrStatus(connection, dialog)}">
+            <Icon name="{dialog.is_private ? 'user' : 'user-friends'}"/>
+            <span>{dialog.name}</span>
+            <b class="unread" hidden="{!dialog.unread}">{dialog.unread}</b>
+          </Link>
         {/each}
-      {/if}
+      {/each}
 
       <h3>{$user.email || l('Account')}</h3>
-      <SidebarItem href="/chat" icon="{$notifications.unread ? 'bell' : 'bell-slash'}">
+      <Link href="/chat">
+        <Icon name="{$notifications.unread ? 'bell' : 'bell-slash'}"/>
         <span>{l('Notifications')}</span>
-        <Unread unread="{$notifications.unread}"/>
-      </SidebarItem>
-      <SidebarItem href="/add/conversation" icon="comment">
+        <b class="unread" hidden="{!$notifications.unread}">{$notifications.unread}</b>
+      </Link>
+      <Link href="/add/conversation">
+        <Icon name="comment"/>
         <span>{l('Add conversation')}</span>
-      </SidebarItem>
-      <SidebarItem href="/add/connection" icon="network-wired">
+      </Link>
+      <Link href="/add/connection">
+        <Icon name="network-wired"/>
         <span>{l('Add connection')}</span>
-      </SidebarItem>
-      <SidebarItem href="/settings" icon="cog">
+      </Link>
+      <Link href="/settings">
+        <Icon name="cog"/>
         <span>{l('Settings')}</span>
-      </SidebarItem>
-      <SidebarItem href="/help" icon="question-circle">
+      </Link>
+      <Link href="/help">
+        <Icon name="question-circle"/>
         <span>{l('Help')}</span>
-      </SidebarItem>
-      <SidebarItem href="/api/user/logout.html" icon="power-off">
+      </Link>
+      <Link href="/api/user/logout.html" native="{true}">
+        <Icon name="power-off"/>
         <span>{l('Log out')}</span>
-      </SidebarItem>
+      </Link>
     </nav>
   </div>
 {/if}

@@ -1,12 +1,13 @@
 <script>
-import Button from '../components/form/Button.svelte';
-import DialogParticipants from '../components/DialogParticipants.svelte';
+import Button from './form/Button.svelte';
+import Link from './Link.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import {container} from '../store/router';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
+import {modeClassNames} from '../js/util';
 
 export let dialog = {};
 
@@ -26,7 +27,7 @@ function updateDialogFromForm(e) {
 }
 </script>
 
-<div class="sidebar-wrapper" transition:fly="{flyTransitionParameters}">
+<div class="sidebar-left" transition:fly="{flyTransitionParameters}">
   <SettingsHeader dialog="{dialog}"/>
 
   <p>
@@ -39,7 +40,7 @@ function updateDialogFromForm(e) {
     {/if}
   </p>
 
-  <form method="post" bind:this="{formEl}" on:submit|preventDefault="{updateDialogFromForm}">
+  <form method="post" on:submit|preventDefault="{updateDialogFromForm}" bind:this="{formEl}">
     {#if !dialog.is('private')}
       <input type="hidden" name="connection_id" value="{dialog.connection_id}">
       <input type="hidden" name="dialog_id" value="{dialog.dialog_id}">
@@ -55,8 +56,12 @@ function updateDialogFromForm(e) {
     </div>
   </form>
 
-  <nav class="sidebar__nav">
+  <nav class="sidebar-left__nav">
     <h3>{l('Participants (%1)', dialog.participants.size)}</h3>
-    <DialogParticipants dialog="{dialog}"/>
+    {#each dialog.participants.toArray() as participant}
+      <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
+        <span>{participant.nick}</span>
+      </Link>
+    {/each}
   </nav>
 </div>

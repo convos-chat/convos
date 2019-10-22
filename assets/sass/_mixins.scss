@@ -12,17 +12,16 @@
 
   @include if_screen(">two-columns") {
     right: var(--gutter);
-    left: calc(var(--gutter) + var(--sidebar-width));
+    left: calc(var(--gutter) + var(--sidebar-left-width));
   }
 
   @include if_screen(">three-columns") {
-    right: calc(var(--gutter) + var(--sidebar-width));
+    right: calc(var(--gutter) + var(--sidebar-right-width));
   }
 }
 
 %sidebar-wrapper-chrome {
   padding: 0 var(--gutter);
-  width: var(--sidebar-width);
   overflow: auto;
   position: absolute;
   top: 0;

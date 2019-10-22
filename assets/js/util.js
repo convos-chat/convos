@@ -10,6 +10,10 @@ export function debounce(cb, delay) {
   };
 }
 
+export function modeClassNames(mode) {
+  return (mode || '').split('').map(m => { return 'has-mode-' + m });
+}
+
 export function camelize(str) {
   return str.replace(/_(\w)/g, (a, b) => b.toUpperCase());
 }
