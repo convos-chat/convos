@@ -26,7 +26,7 @@ function parseUrl(url) {
   if (url.indexOf(baseUrl) == -1) return false;
 
   const nextUrl = new URL(url);
-  const path = url.substring(baseUrl.length, indexOrNull(url, '?') || indexOrNull(url, '#') || url.length);
+  const path = url.substring(baseUrl.length + 1, indexOrNull(url, '?') || indexOrNull(url, '#') || url.length);
   Object.defineProperty(nextUrl, 'path', {value: path, writable: false});
 
   const pathParts = path.split('/').filter(p => p.length).map(decodeURIComponent);
