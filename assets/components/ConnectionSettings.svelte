@@ -13,7 +13,7 @@ const user = getContext('user');
 let connection = {};
 
 $: connectionHost = connection.url && connection.url.host;
-$: flyTransitionParameters = {duration: $container.small ? 250 : 0, x: $container.width};
+$: flyTransitionParameters = {duration: 250, x: $container.small ? $container.width : 0};
 
 onMount(async () => {
   await user.load();
@@ -21,7 +21,7 @@ onMount(async () => {
 });
 </script>
 
-<div class="sidebar-wrapper is-visible" transition:fly="{flyTransitionParameters}">
+<div class="sidebar-wrapper" transition:fly="{flyTransitionParameters}">
   <SettingsHeader {dialog}/>
 
   {#if !connection.url}

@@ -71,14 +71,14 @@ function gotoDialog(e) {
   <div class="message is-type-notice is-hightlighted has-not-same-from">
     <Icon name="cog" style="color:{connection.color}"/>
     <b class="message__ts" title="{now.toLocaleString()}">{now.toHuman()}</b>
-    <Link href="{connection.path}#settings" class="message__from" style="color:{connection.color}">{connection.name}</Link>
+    <Link href="#activeMenu:settings" class="message__from" style="color:{connection.color}">{connection.name}</Link>
     {#if connection.state == 'unreachable'}
       <div class="message__text" on:click="{ensureConnected}">
         {@html lmd('You will be [reconnected](#reconnect) soon...')}
       </div>
     {:else}
       <div class="message__text">
-        {@html lmd('Your connection %1 can be edited in [settings](%2).', connection.name, connection.path + '#settings')}
+        {@html lmd('Your connection %1 can be edited in [settings](%2).', connection.name, '#activeMenu:settings')}
       </div>
     {/if}
   </div>

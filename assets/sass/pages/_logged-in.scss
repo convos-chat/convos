@@ -18,23 +18,9 @@ body.is-logged-in {
   .sidebar__item {
     position: relative;
 
-    &.has-settings {
-      .sidebar__item__link {
-        padding-left: $sidebar-item-icon-width + $sidebar-item-indent;
-      }
-
-      &:hover .sidebar__item__settings i:before {
-        content: fa-content($fa-var-ellipsis-h);
-      }
-    }
-
     &.for-dialog {
       .sidebar__item__link {
-        padding-left: $sidebar-item-icon-width + $sidebar-item-indent + $sidebar-item-dialog-indent;
-      }
-
-      .sidebar__item__settings {
-        left: $sidebar-item-dialog-indent;
+        padding-left: $sidebar-item-indent + $sidebar-item-dialog-indent;
       }
     }
 

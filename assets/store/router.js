@@ -1,37 +1,38 @@
-import {derived, get, writable} from 'svelte/store';
+import {get, writable} from 'svelte/store';
 
-function indexOfNull(str, searchValue) {
+let baseUrl = location.href.replace(/\/+$/, '');
+
+function indexOrNull(str, searchValue) {
   const i = str.indexOf(searchValue);
   return i == -1 ? null : i;
 }
 
-function handleHistoryChange(e) {
-  parseUrl(location.href);
-  currentUrl.set(new URL(location.href));
-}
-
 export function historyListener() {
+  const handleHistoryChange = () => currentUrl.set(parseUrl(location.href));
   window.addEventListener('popstate', handleHistoryChange);
   return () => window.removeEventListener('popstate', handleHistoryChange);
 }
 
 export function gotoUrl(url, params = {}) {
-  if (url.slice(0, 1) == '/') url = get(baseUrl).replace(/\/+$/, '') + url;
-  if (!parseUrl(url)) return (location.href = url);
+  const nextUrl = parseUrl(url);
+  if (!nextUrl) return (location.href = url);
   if (params.event) params.event.preventDefault();
-  history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
-  currentUrl.set(new URL(location.href));
+  history[params.replace ? 'replaceState' : 'pushState']({}, document.title, nextUrl.toString());
+  setTimeout(() => currentUrl.set(nextUrl), 0);
 }
 
 function parseUrl(url) {
-  const $baseUrl = get(baseUrl).replace(/\/+$/, '');
-  const pathnameStart = url.indexOf('/') == 0 ? 0 : url.indexOf($baseUrl) + $baseUrl.length;
-  const hashPos = indexOfNull(url, '#');
-  const queryPos = indexOfNull(url, '?');
-  if (pathnameStart == $baseUrl.length - 1) return false;
-  const pathpart = url.substring(pathnameStart, queryPos || hashPos || url.length);
-  setTimeout(() => pathname.set(pathpart), 0);
-  return true;
+  url = url.slice(0, 1) == '/' ? baseUrl + url : url;
+  if (url.indexOf(baseUrl) == -1) return false;
+
+  const nextUrl = new URL(url);
+  const path = url.substring(baseUrl.length, indexOrNull(url, '?') || indexOrNull(url, '#') || url.length);
+  Object.defineProperty(nextUrl, 'path', {value: path, writable: false});
+
+  const pathParts = path.split('/').filter(p => p.length).map(decodeURIComponent);
+  Object.defineProperty(nextUrl, 'pathParts', {value: pathParts, writable: false});
+
+  return nextUrl;
 }
 
 export function urlToForm(formEl, url = get(currentUrl)) {
@@ -52,12 +53,13 @@ export function urlToForm(formEl, url = get(currentUrl)) {
 
 export const activeMenu = writable('');
 export const container = writable({wideEnough: false, width: 0});
-export const baseUrl = writable('//' + location.host);
+export const currentUrl = writable(parseUrl(location.href));
 export const docTitle = writable(document.title);
-export const pathname = writable(location.pathname);
 
-export const pathParts = derived(pathname, ($pathname) => {
-  return $pathname.split('/').filter(p => p.length).map(decodeURIComponent);
+Object.defineProperty(currentUrl, 'base', {
+  get() { return baseUrl },
+  set(val) {
+    baseUrl = val.replace(/\/+$/, '');
+    currentUrl.set(get(currentUrl));
+  },
 });
-
-export const currentUrl = writable(new URL(location.href));

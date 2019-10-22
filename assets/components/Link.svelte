@@ -1,5 +1,5 @@
 <script>
-import {gotoUrl, pathname} from '../store/router';
+import {gotoUrl, currentUrl} from '../store/router';
 
 let className = '';
 let classNames = [];
@@ -13,16 +13,11 @@ export let style = '';
 
 export const focus = () => el.focus();
 
-$: calculateClassNames(className, href, $pathname);
-
-function calculateClassNames(className, href, $pathname) {
-  classNames = className ? [className] : [];
-  if ($pathname == href.replace(/(#|\?).*/, '')) classNames = [...classNames, 'has-path'];
-}
+$: absoluteHref = href.slice(0, 1) == '/' ? currentUrl.base + href : href;
 
 function onClick(event) {
   if (!native) gotoUrl(event.target.closest('a').href, {event, replace});
 }
 </script>
 
-<a {href} on:click="{onClick}" class="{classNames.join(' ')}" style="{style}" bind:this="{el}"><slot/></a>
+<a href="{absoluteHref}" on:click="{onClick}" class="{className}" class:has-path="{$currentUrl == absoluteHref.replace(/(#|\?).*/, '')}" style="{style}" bind:this="{el}"><slot/></a>
