@@ -116,55 +116,53 @@ function onSearchKeydown(e) {
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
 
-{#if !$container.small || $activeMenu == 'nav'}
+{#if $activeMenu == 'nav' || !$container.small}
   <div class="sidebar-wrapper" transition:fly="{flyTransitionParameters}">
-    <div class="sidebar">
-      <form class="sidebar__header">
-        <input type="text"
-          placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
-          bind:this="{searchInput}"
-          bind:value="{filter}"
-          on:blur="{clearFilter}"
-          on:focus="{filterNav}"
-          on:keydown="{onSearchKeydown}">
-        <Icon name="search" on:click="{() => searchInput.focus()}"/>
-      </form>
+    <form class="sidebar__header">
+      <input type="text"
+        placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
+        bind:this="{searchInput}"
+        bind:value="{filter}"
+        on:blur="{clearFilter}"
+        on:focus="{filterNav}"
+        on:keydown="{onSearchKeydown}">
+      <Icon name="search" on:click="{() => searchInput.focus()}"/>
+    </form>
 
-      <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
-        {#if $user.connections.size}
-          <h3>{l('Conversations')}</h3>
-          {#each $user.connections.toArray() as connection}
-            <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
-            {#each connection.dialogs.filter(d => !d.is_private) as dialog}
-              <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
-            {/each}
-            {#each connection.dialogs.filter(d => d.is_private) as dialog}
-              <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
-            {/each}
+    <nav class="sidebar__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
+      {#if $user.connections.size}
+        <h3>{l('Conversations')}</h3>
+        {#each $user.connections.toArray() as connection}
+          <SidebarDialogItem connection="{connection}" dialog="{connection}"/>
+          {#each connection.dialogs.filter(d => !d.is_private) as dialog}
+            <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
           {/each}
-        {/if}
+          {#each connection.dialogs.filter(d => d.is_private) as dialog}
+            <SidebarDialogItem connection="{connection}" dialog="{dialog}"/>
+          {/each}
+        {/each}
+      {/if}
 
-        <h3>{$user.email || l('Account')}</h3>
-        <SidebarItem href="/chat" icon="{$notifications.unread ? 'bell' : 'bell-slash'}">
-          <span>{l('Notifications')}</span>
-          <Unread unread="{$notifications.unread}"/>
-        </SidebarItem>
-        <SidebarItem href="/add/conversation" icon="comment">
-          <span>{l('Add conversation')}</span>
-        </SidebarItem>
-        <SidebarItem href="/add/connection" icon="network-wired">
-          <span>{l('Add connection')}</span>
-        </SidebarItem>
-        <SidebarItem href="/settings" icon="cog">
-          <span>{l('Settings')}</span>
-        </SidebarItem>
-        <SidebarItem href="/help" icon="question-circle">
-          <span>{l('Help')}</span>
-        </SidebarItem>
-        <SidebarItem href="/api/user/logout.html" icon="power-off">
-          <span>{l('Log out')}</span>
-        </SidebarItem>
-      </nav>
-    </div>
+      <h3>{$user.email || l('Account')}</h3>
+      <SidebarItem href="/chat" icon="{$notifications.unread ? 'bell' : 'bell-slash'}">
+        <span>{l('Notifications')}</span>
+        <Unread unread="{$notifications.unread}"/>
+      </SidebarItem>
+      <SidebarItem href="/add/conversation" icon="comment">
+        <span>{l('Add conversation')}</span>
+      </SidebarItem>
+      <SidebarItem href="/add/connection" icon="network-wired">
+        <span>{l('Add connection')}</span>
+      </SidebarItem>
+      <SidebarItem href="/settings" icon="cog">
+        <span>{l('Settings')}</span>
+      </SidebarItem>
+      <SidebarItem href="/help" icon="question-circle">
+        <span>{l('Help')}</span>
+      </SidebarItem>
+      <SidebarItem href="/api/user/logout.html" icon="power-off">
+        <span>{l('Log out')}</span>
+      </SidebarItem>
+    </nav>
   </div>
 {/if}

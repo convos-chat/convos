@@ -114,13 +114,14 @@ const onScroll = debounce(e => {
 
 <SidebarChat/>
 
-<svelte:component this="{$activeMenu == 'settings' && settingsComponent}" dialog="{dialog}"/>
+{#if $activeMenu == 'settings'}
+  <svelte:component this="{settingsComponent}" dialog="{dialog}"/>
+{/if}
 
 <ChatHeader>
   <h1>
     <a href="#activeMenu:{dialog.connection_id ? 'settings' : ''}">
-      <Icon name="{dialog.connection_id ? 'cog' : 'bell'}"/>
-      <span>{pathParts[2] || pathParts[1] || l('Notifications')}</span>
+      <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{pathParts[2] || pathParts[1] || l('Notifications')}</span>
     </a>
   </h1>
   <small>{topicOrStatus(connection, dialog)}</small>

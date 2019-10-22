@@ -57,6 +57,7 @@ onMount(async () => {
   const historyUnlistener = historyListener();
   user.load();
   document.addEventListener('click', toggleMenu);
+  if (user.showGrid) document.querySelector('body').classList.add('with-grid');
 
   return () => {
     document.removeEventListener('click', toggleMenu);
@@ -105,14 +106,9 @@ function calculatePage($url, getUserOp) {
     gotoUrl('/login', {replace: true});
   }
 
-  // Get list of emojis after logging in
-  if (getUserOp.is('success'))
-
   // Remove original components
-  if (pageComponent) {
-    const removeEls = document.querySelectorAll('.js-remove');
-    for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-  }
+  const removeEls = document.querySelectorAll('.js-remove');
+  for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
 }
 
 function debugClick(e) {

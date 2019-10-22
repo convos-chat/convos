@@ -162,6 +162,7 @@ textarea {
 }
 
 .select-field {
+  line-height: 1.2em;
   height: calc(2.2em + var(--font-size) * 0.9 * 1.5);
   position: relative;
   overflow: visible;

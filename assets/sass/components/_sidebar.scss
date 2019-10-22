@@ -21,8 +21,17 @@
       display: none;
     }
   }
+}
 
-  .sidebar__nav a {
+// Generic for both left and right sidebar__nav
+.sidebar__nav {
+  a {
+    text-decoration: none;
+    line-height: 1.2rem;
+    padding: 0.35rem;
+    display: block;
+    transition: background-color 0.15s ease-in-out;
+
     &:focus,
     &:hover {
       background: var(--sidebar-search-focus-bg);
@@ -40,26 +49,10 @@
       background: var(--sidebar-search-focus-bg);
     }
 
-  }
-}
-
-// Generic for both left and right sidebar__nav
-.sidebar__nav {
-  a {
-    text-decoration: none;
-    line-height: 1.2rem;
-    padding: 0.35rem;
-    display: block;
-    transition: background-color 0.15s ease-in-out;
-
     &:focus,
     &:hover {
       text-decoration: none;
       filter: brightness(0.9);
-    }
-
-    &.has-focus {
-      text-decoration: underline;
     }
   }
 
@@ -72,9 +65,42 @@
   }
 }
 
+.sidebar__nav.is-filtering {
+  a.has-path {
+    background: transparent;
+  }
+
+  a.has-focus {
+    background: var(--sidebar-search-focus-bg);
+  }
+}
+
 .sidebar__item {
+  position: relative;
+
   &.is-frozen a {
     color: var(--sidebar-frozen-color);
+  }
+
+  &.for-dialog {
+    .sidebar__item__link {
+      padding-left: $sidebar-item-indent + $sidebar-item-dialog-indent;
+    }
+  }
+
+  .fa {
+    text-align: center;
+    width: $sidebar-item-icon-width;
+  }
+
+  .unread {
+    font-size: 0.9rem;
+    line-height: 0.9rem;
+    border-radius: 0.5em;
+    padding: 0.15em 0.4em;
+    position: absolute;
+    top: 0.4em;
+    right: 0.3em;
   }
 }
 
@@ -91,9 +117,9 @@
   input {
     background: transparent;
     color: var(--sidebar-text);
-    font-size: 2rem;
-    line-height: 2.2rem;
-    height: 2.2rem;
+    font-size: var(--h1-font-size);
+    line-height: var(--h1-font-size);
+    height: var(--h1-font-size);
     width: 100%;
     border: 0;
     border-bottom: 2px solid transparent;
@@ -120,21 +146,40 @@
     }
   }
 
-  i {
+  .fa {
     font-size: 1.8rem;
     position: absolute;
     right: 0;
     top: calc(var(--gutter) + 0.2rem);
     cursor: pointer;
   }
+}
 
-  &.for-settings {
-    &:focus {
-      outline: 0;
+body.is-logged-out .sidebar-wrapper {
+  @include if_screen("<=two-columns") {
+    padding: var(--gutter-big);
+    width: 100%;
+    max-width: none;
+    height: auto;
+    position: static;
+    transform: translateX(0);
 
-      i:before {
-        outline: var(--sidebar-outline);
-      }
+    h1 {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  @include if_screen(">two-columns") {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    > :last-child {
+      padding-bottom: 4rem;
     }
   }
 }

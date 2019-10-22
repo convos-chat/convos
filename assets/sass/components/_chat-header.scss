@@ -4,7 +4,7 @@
   background: var(--body-bg);
   border-bottom: 1px solid #aaa;
   box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
-  padding-top: var(--gutter-small);
+  padding-top: var(--gutter);
   padding-bottom: var(--gutter-small);
   overflow: hidden;
   display: flex;
@@ -15,15 +15,22 @@
   @include if_screen("<=two-columns") {
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
+    padding-top: var(--gutter-small);
     border-bottom: 0;
 
     a {
       color: var(--sidebar-text);
     }
+
+    .fa {
+      padding-right: 0.3em;
+    }
   }
 
   h1 {
     margin: 0;
+    line-height: var(--h1-font-size);
+    height: var(--h1-font-size);
     white-space: pre;
 
     a {
@@ -40,7 +47,7 @@
 
       @include if_screen(">two-columns") {
         position: absolute;
-        top: calc(var(--gutter) + 0.1em);
+        top: calc(var(--gutter) + 0.35em);
         right: var(--gutter);
       }
     }
