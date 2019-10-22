@@ -74,7 +74,7 @@ function gotoDialog(e) {
     <Link href="#activeMenu:settings" class="message__from" style="color:{connection.color}">{connection.name}</Link>
     {#if connection.state == 'unreachable'}
       <div class="message__text" on:click="{ensureConnected}">
-        {@html lmd('You will be [reconnected](#reconnect) soon...')}
+        {@html lmd('Trying to [reconnect](#reconnect) to Convos...')}
       </div>
     {:else}
       <div class="message__text">

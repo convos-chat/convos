@@ -18,7 +18,7 @@ body.has-js .no-js {
 
 .main {
   @extend %next-to-sidebar;
-  line-height: 1.4em;
+  line-height: 1.5em;
   padding-top: 2rem;
   padding-bottom: 4rem;
   top: 3rem;
@@ -26,6 +26,18 @@ body.has-js .no-js {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+}
+
+@include if_screen("<=two-columns") {
+  body.is-logged-out {
+    overflow: auto;
+
+    .main {
+      position: static;
+      padding: var(--gutter-big);
+      min-height: auto;
+    }
+  }
 }
 
 .overlay {
