@@ -9,13 +9,13 @@ export let dialog = {};
 let activeAutocompleteIndex = 0;
 let autocompleteCategory = 'none';
 let inputEl;
-let pos;
+let pos = 0;
 
 const user = getContext('user');
 
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
 $: connection = user.findDialog({connection_id: dialog.connection_id});
-$: inputParts = pos && calculateInputParts(pos) || ['', '', '', ''];
+$: inputParts = pos ? calculateInputParts(pos) : ['', '', '', ''];
 
 export function add(str, params = {}) {
   const space = params.space || '';
@@ -111,6 +111,7 @@ const keys = {
   <textarea
     placeholder="{l('What is on your mind %1?', $connection.nick)}"
     bind:this="{inputEl}"
+    on:change="{e => {pos = inputEl.selectionStart}}"
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
     on:keyup="{e => keys.Release(e)}"></textarea>
 
