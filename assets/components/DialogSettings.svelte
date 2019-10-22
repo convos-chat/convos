@@ -14,7 +14,7 @@ const user = getContext('user');
 
 let formEl;
 
-$: flyTransitionParameters = {duration: $container.small ? 250 : 0, x: $container.width};
+$: flyTransitionParameters = {duration: 250, x: $container.small ? $container.width : 0};
 $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
 function partDialog(e) {
@@ -26,7 +26,7 @@ function updateDialogFromForm(e) {
 }
 </script>
 
-<div class="sidebar-wrapper is-visible" transition:fly="{flyTransitionParameters}">
+<div class="sidebar-wrapper" transition:fly="{flyTransitionParameters}">
   <SettingsHeader dialog="{dialog}"/>
 
   <p>
