@@ -51,6 +51,7 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
+    if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
     this.update({unread: this.unread + 1});
     return this.addMessages('push', [msg]);
   }
@@ -75,7 +76,6 @@ export default class Dialog extends Reactive {
       if (msg.hasOwnProperty('markdown')) continue; // Already processed
       if (!msg.from) msg.from = this.connection_id || 'Convos';
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
-      if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
 
       msg.color = str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
