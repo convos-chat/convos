@@ -15,7 +15,6 @@ let activeLinkIndex = 0;
 let filter = '';
 let navEl;
 let searchHasFocus = false;
-let searchInput;
 let visibleLinks = [];
 
 $: flyTransitionParameters = {duration: $container.small ? 250 : 0, x: $container.width};
@@ -80,20 +79,7 @@ function filterNav() {
   });
 }
 
-function onGlobalKeydown(e) {
-  if (e.shiftKey && e.keyCode == 13) { // Shift+Enter
-    e.preventDefault();
-    const targetEl = document.activeElement || searchInput;
-    if (targetEl == searchInput || tagNameIs(targetEl, 'body')) {
-      searchInput.focus(); // TODO: Focus chat text input
-    }
-    else {
-      searchInput.focus();
-    }
-  }
-}
-
-function navItemClicked(e) {
+function onNavItemClicked(e) {
   const className = e.target.className || '';
   if (className.match(/network|user/)) setTimeout(() => { $activeMenu = 'settings' }, 50);
 }
@@ -127,22 +113,19 @@ function renderUnread(dialog) {
 }
 </script>
 
-<svelte:window on:keydown="{onGlobalKeydown}"/>
-
 {#if $activeMenu == 'nav' || !$container.small}
   <div class="sidebar-left" transition:fly="{flyTransitionParameters}">
     <form class="sidebar__header" on:submit="{e => e.preventDefault()}">
-      <input type="text"
+      <input type="text" id="sidebar_left_search_input"
         placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
-        bind:this="{searchInput}"
         bind:value="{filter}"
         on:blur="{clearFilter}"
         on:focus="{filterNav}"
         on:keydown="{onSearchKeydown}">
-      <Icon name="search" on:click="{() => searchInput.focus()}"/>
+      <label for="sidebar_left_search_input"><Icon name="search"/></label>
     </form>
 
-    <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{navItemClicked}">
+    <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
       <h3>{l('Conversations')}</h3>
       {#each $user.connections.toArray() as connection}
         <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" title="{topicOrStatus(connection, connection)}">
