@@ -121,6 +121,10 @@ function onSearchKeydown(e) {
   if (activeLinkIndex < 0) activeLinkIndex = visibleLinks.length - 1;
   if (activeLinkIndex >= visibleLinks.length) activeLinkIndex = 0;
 }
+
+function renderUnread(dialog) {
+  return dialog.unread > 60 ? '60+' : dialog.unread || 0;
+}
 </script>
 
 <svelte:window on:keydown="{onGlobalKeydown}"/>
@@ -144,13 +148,13 @@ function onSearchKeydown(e) {
         <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" title="{topicOrStatus(connection, connection)}">
           <Icon name="network-wired"/>
           <span>{connection.name}</span>
-          <b class="unread" hidden="{!connection.unread}">{connection.unread}</b>
+          <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
         </Link>
         {#each connection.dialogs.toArray() as dialog}
           <Link href="{dialog.path}" class="{dialogClassNames(connection, dialog)}" title="{topicOrStatus(connection, dialog)}">
             <Icon name="{dialog.is_private ? 'user' : 'user-friends'}"/>
             <span>{dialog.name}</span>
-            <b class="unread" hidden="{!dialog.unread}">{dialog.unread}</b>
+            <b class="unread" hidden="{!dialog.unread}">{renderUnread(dialog)}</b>
           </Link>
         {/each}
       {/each}
@@ -159,7 +163,7 @@ function onSearchKeydown(e) {
       <Link href="/chat">
         <Icon name="{$notifications.unread ? 'bell' : 'bell-slash'}"/>
         <span>{l('Notifications')}</span>
-        <b class="unread" hidden="{!$notifications.unread}">{$notifications.unread}</b>
+        <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
       </Link>
       <Link href="/add/conversation">
         <Icon name="comment"/>

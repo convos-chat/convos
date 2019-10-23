@@ -29,7 +29,7 @@ sub messages {
 sub calculate_unread {
   my ($self, $cb) = @_;
   $self->messages(
-    {after => $self->last_read},
+    {after => $self->last_read, limit => 61},
     sub {
       my ($self, $err, $messages) = @_;
       $self->{unread} = $messages ? @$messages : 0;
