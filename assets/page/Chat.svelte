@@ -160,7 +160,7 @@ const onScroll = debounce(e => {
       <h3>{l('Participants (%1)', dialog.participants.size)}</h3>
       {#each dialog.participants.toArray() as participant}
         <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
-          <Icon name="random:{participant.id}" family="solid" style="color:{participant.color}"/>
+          <Icon name="pick:{participant.id}" family="solid" style="color:{participant.color}"/>
           <span>{participant.nick}</span>
         </Link>
       {/each}

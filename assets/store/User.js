@@ -18,7 +18,6 @@ export default class User extends Reactive {
     this._readOnlyAttr('getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this._readOnlyAttr('notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
 
-    this._localStorageAttr('icon', 'user-circle');
     this._localStorageAttr('lastUrl', '');
     this._localStorageAttr('showGrid', false);
 
