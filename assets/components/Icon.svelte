@@ -42,7 +42,7 @@ export let title = '';
 
 $: {
   classNames = [familyToClassName[family] || 'fa'];
-  classNames.push('fa-' + (name && name.indexOf('random:') == 0 ? randomIcon(name) : name));
+  classNames.push('fa-' + (name && name.indexOf('pick:') == 0 ? randomIcon(name) : name));
   if (animation) classNames = classNames.concat(animation.split(' ').map(a => 'fa-' + a));
   if (className) classNames = classNames.concat(className.split(' '));
 }
