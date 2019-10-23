@@ -14,11 +14,14 @@ textarea {
 
 .checkbox {
   display: flex;
+  text-align: center;
 
   i {
     cursor: pointer;
     font-size: 1.2rem;
-    padding-right: 0.3rem;
+    margin-right: 0.3rem;
+    height: 1.2rem;
+    width: 1.2rem;
   }
 
   label {
@@ -37,6 +40,12 @@ textarea {
     label {
       color: var(--input-disabled-color);
       cursor: not-allowed;
+    }
+  }
+
+  &.has-focus {
+    i {
+      outline: var(--input-focus-outline);
     }
   }
 }
