@@ -1,0 +1,30 @@
+.json-item .json-item {
+  border-left: 1px solid #666;
+  margin-left: 0.2rem;
+  padding-left: 0.3rem;
+}
+
+.json-boolean {
+  color: #228dad;
+}
+
+.json-key {
+  font-weight: bold;
+}
+
+.json-key:after {
+  content: ': ';
+  color: #222;
+}
+
+.json-null {
+  color: #222;
+}
+
+.json-number {
+  color: #cc4638;
+}
+
+.json-string {
+  color: #0d9256;
+}

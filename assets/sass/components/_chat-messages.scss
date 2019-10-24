@@ -11,19 +11,6 @@
     vertical-align: bottom;
   }
 
-  &.is-type-error .message__text,
-  &.is-hightlighted .message__text {
-    background-color: var(--highlight-color);
-    border: 3px solid var(--highlight-color);
-    margin: 0 -3px;
-  }
-
-  &.is-type-error .message__text,
-  &.is-type-notice .message__text {
-    font-size: 0.9rem;
-    font-style: italic;
-  }
-
   &.has-same-from {
     .message__from {
       display: none;
@@ -37,6 +24,23 @@
     &:hover .message__ts {
       opacity: 0.8;
     }
+  }
+
+  &.is-type-error .message__text,
+  &.is-hightlighted .message__text {
+    background-color: var(--highlight-color);
+    border: 3px solid var(--highlight-color);
+    margin: 0 -3px;
+  }
+
+  &.is-type-error .message__text,
+  &.is-type-notice .message__text {
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  &.is-type-error .fa-exclamation-circle {
+    cursor: pointer;
   }
 
   &.is-type-action {
@@ -98,6 +102,14 @@
 
     &:hover {
       filter: brightness(0.97);
+    }
+  }
+
+  &.has-message-details {
+    font-size: 0.9rem;
+
+    > .json-type {
+      display: none;
     }
   }
 }
