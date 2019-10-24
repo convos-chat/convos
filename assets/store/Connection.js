@@ -80,10 +80,10 @@ export default class Connection extends Dialog {
   }
 
   wsEventError(params) {
-    this.addMessage({
-      message: extractErrorMessage(params) || 'Unknown error from %1.',
-      vars: params.command || params.message,
-    });
+    const dialog = this.findDialog(params) || this;
+    const message = extractErrorMessage(params) || 'Unknown error from %1.';
+    dialog.update({errors: this.errors + 1});
+    dialog.addMessage({message, type: 'error', vars: params.command || params.message});
   }
 
   wsEventPart(params) {

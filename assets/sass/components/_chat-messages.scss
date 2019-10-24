@@ -11,10 +11,17 @@
     vertical-align: bottom;
   }
 
+  &.is-type-error .message__text,
   &.is-hightlighted .message__text {
     background-color: var(--highlight-color);
     border: 3px solid var(--highlight-color);
     margin: 0 -3px;
+  }
+
+  &.is-type-error .message__text,
+  &.is-type-notice .message__text {
+    font-size: 0.9rem;
+    font-style: italic;
   }
 
   &.has-same-from {

@@ -29,6 +29,7 @@ export default class Dialog extends Reactive {
     this._readOnlyAttr('participants', new SortedMap([], {sorter: sortParticipants}));
     this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
 
+    this._updateableAttr('errors', 0);
     this._updateableAttr('last_active', new Time(params.last_active));
     this._updateableAttr('last_read', new Time(params.last_read));
     this._updateableAttr('messages', []);
@@ -166,7 +167,7 @@ export default class Dialog extends Reactive {
   async setLastRead() {
     if (!this.setLastReadOp) return;
     await this.setLastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
-    this.update({unread: 0, ...this.setLastReadOp.res.body}); // Update last_read
+    this.update({errors: 0, unread: 0, ...this.setLastReadOp.res.body}); // Update last_read
   }
 
   wsEventMode(params) {

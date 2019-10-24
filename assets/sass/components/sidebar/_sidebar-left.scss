@@ -46,6 +46,10 @@
     padding-left: 0.6em;
   }
 
+  &.has-errors {
+    font-style: italic;
+  }
+
   &.is-frozen {
     color: var(--sidebar-left-frozen-color);
   }
@@ -57,6 +61,7 @@
 
   &.has-path {
     background: var(--sidebar-left-search-focus-bg);
+    font-style: inherit;
 
     .unread {
       display: none;

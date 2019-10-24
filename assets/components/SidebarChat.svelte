@@ -29,6 +29,7 @@ function clearFilter() {
 function dialogClassNames(connection, dialog) {
   const cn = [dialog.dialog_id ? 'for-dialog' : 'for-connection'];
   if (dialog.frozen || connection.state != 'connected') cn.push('is-frozen');
+  if (dialog.errors) cn.push('has-errors');
   return cn.join(' ');
 }
 
