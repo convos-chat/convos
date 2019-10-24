@@ -3,6 +3,7 @@ dependencies:
   '@babel/runtime': 7.6.3
   '@fortawesome/fontawesome-free': 5.11.2
   highlight.js: 9.15.10
+  jsonhtmlify: 0.0.1
   twemoji: 12.1.3
 devDependencies:
   '@babel/core': 7.6.4
@@ -2380,6 +2381,10 @@ packages:
       graceful-fs: 4.2.2
     resolution:
       integrity: sha512-NQRZ5CRo74MhMMC3/3r5g2k4fjodJ/wh8MxjFbCViWKFjxrnudWSY5vomh+23ZaXzAS7J3fBZIR2dV6WbmfM0w==
+  /jsonhtmlify/0.0.1:
+    dev: false
+    resolution:
+      integrity: sha512-KW5eYE/c5/N36MxGQtaB1DrvRCUpIZhzJmuldhv6TLWMh05apZzCJph6bGGI8hyZxk7iELExFGmk+/2nT4CDcA==
   /jsprim/1.4.1:
     dependencies:
       assert-plus: 1.0.0
@@ -4638,6 +4643,7 @@ specifiers:
   cssnano: ^4.1.10
   eslint-plugin-svelte3: ^1.2.3
   highlight.js: ^9.15.10
+  jsonhtmlify: ^0.0.1
   node-sass: ^4.12.0
   postcss: ^7.0.18
   postcss-preset-env: ^6.7.0
