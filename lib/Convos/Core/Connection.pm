@@ -51,10 +51,7 @@ sub disconnect {
   $self->tap($cb, 'Method "disconnect" not implemented.');
 }
 
-sub id {
-  return lc join '-', @{$_[1]}{qw(protocol name)} if $_[1];
-  return lc join '-', @{$_[0]}{qw(protocol name)};
-}
+sub id { my $from = $_[1] || $_[0]; lc join '-', @$from{qw(protocol name)} }
 
 sub new {
   my $self = shift->SUPER::new(@_);

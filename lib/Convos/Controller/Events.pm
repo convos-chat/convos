@@ -9,7 +9,8 @@ use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 30;
 
 sub start {
   my $self = shift->inactivity_timeout(INACTIVE_TIMEOUT);
-  my $user = $self->backend->user or return $self->_err('Need to log in first.', {})->finish;
+
+  return $self->_err('Need to log in first.', {})->finish unless my $user = $self->backend->user;
 
   Scalar::Util::weaken($self);
 

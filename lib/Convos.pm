@@ -62,8 +62,11 @@ sub startup {
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
 
+  # Event channel
+  $r->websocket('/events')->to('events#start')->name('events');
+
+  # Require authentication
   my $auth_r = $r->under('/')->to('user#require_login', chat_mode => 1);
-  $auth_r->websocket('/events')->to('events#start')->name('events');
   $auth_r->get("/$_")->to(template => 'index')->name($_)     for (qw(help join settings));
   $auth_r->get("/add/$_")->to(template => 'index')->name($_) for (qw(connection conversation));
   $auth_r->get('/chat/*rest', {rest => ''})->to(template => 'index')->name('chat');

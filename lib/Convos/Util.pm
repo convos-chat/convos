@@ -16,13 +16,14 @@ sub E {
 }
 
 sub has_many {
+  my ($accessor, $many_class, $constructor) = @_;
   my $class = caller;
-  my ($accessor, $related, $constructor) = @_;
-  my ($setter,   $getter,  $remover)     = ($accessor);
 
+  my $setter = $accessor;
   $setter =~ s!s$!!;
-  $getter  = "get_$setter";
-  $remover = "remove_$setter";
+
+  my $getter  = "get_$setter";
+  my $remover = "remove_$setter";
 
   warn "[Convos::Util] Adding $accessor(), $setter() and $getter() to $class\n" if DEBUG >= 2;
 
@@ -32,7 +33,7 @@ sub has_many {
 
   monkey_patch $class => $setter => sub {
     my ($self, $attrs) = @_;
-    my $id  = $related->id($attrs);
+    my $id  = $many_class->id($attrs);
     my $obj = $self->{$accessor}{$id} || $self->$constructor($attrs);
     map { $obj->{$_} = $attrs->{$_} } keys %$attrs if $self->{$accessor}{$id};
     $self->{$accessor}{$id} = $obj;
@@ -40,14 +41,14 @@ sub has_many {
 
   monkey_patch $class => $getter => sub {
     my ($self, $attrs) = @_;
-    my $id = ref $attrs ? $attrs->{id} || $related->id($attrs) : $attrs;
+    my $id = ref $attrs ? $attrs->{id} || $many_class->id($attrs) : $attrs;
     Carp::confess("Could not build 'id' for $class") unless defined $id;
     return $self->{$accessor}{lc($id)};
   };
 
   $class->can($remover) or monkey_patch $class => $remover => sub {
     my ($self, $attrs) = @_;
-    my $id = lc(ref $attrs ? $attrs->{id} || $related->id($attrs) : $attrs);
+    my $id = lc(ref $attrs ? $attrs->{id} || $many_class->id($attrs) : $attrs);
     return delete $self->{$accessor}{$id};
   };
 }
@@ -113,9 +114,9 @@ L<Convos::Util> is a utily module for L<Convos>.
 
 =head2 has_many
 
-  has_many $attribute => $related_class => sub {
+  has_many $attribute => $many_class_class => sub {
     my ($self, $attrs) = @_;
-    return $related_class->new($attrs);
+    return $many_class_class->new($attrs);
   };
 
 Used to automatically define a create/update, get and list method to the

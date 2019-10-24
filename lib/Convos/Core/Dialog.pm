@@ -12,7 +12,7 @@ has password => '';
 has topic    => '';
 
 sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
-sub id         { $_[1] ? $_[1]->{name} : ($_[0]->{id} //= lc $_[0]->{name}) }
+sub id         { my $from = $_[1] || $_[0]; lc($from->{id} // $from->{name}) }
 
 has last_active => sub { Mojo::Date->new->to_datetime };
 has last_read   => sub { Mojo::Date->new->to_datetime };

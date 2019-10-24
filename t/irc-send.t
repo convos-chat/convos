@@ -198,10 +198,10 @@ Mojo::IOLoop->start;
 ok $connection->get_dialog('#q1'), 'query #q1';
 is $connection->get_dialog('#q1')->frozen, 'Not active in this room.', 'not in the room';
 
-$connection->send('#whatever' => '/query query_man', sub { Mojo::IOLoop->stop });
+$connection->send('#whatever' => '/query MixedCasing', sub { Mojo::IOLoop->stop });
 Mojo::IOLoop->start;
-ok $connection->get_dialog('query_man'), 'query query_man';
-is $connection->get_dialog('query_man')->frozen, '', 'query_man is not frozen';
+ok $connection->get_dialog('MixedCasing'), 'query MixedCasing';
+is $connection->get_dialog('mixedcasing')->frozen, '', 'MixedCasing is not frozen';
 
 done_testing;
 

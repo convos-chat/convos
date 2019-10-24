@@ -75,7 +75,7 @@ export default class Dialog extends Reactive {
     for (let i = start; i < stop; i++) {
       const msg = messages[i];
       if (msg.hasOwnProperty('markdown')) continue; // Already processed
-      if (!msg.from) msg.from = this.connection_id || 'Convos';
+      if (!msg.from) msg.from = msg.connection_id || 'Convos';
       if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
@@ -83,6 +83,7 @@ export default class Dialog extends Reactive {
       msg.ts = new Time(msg.ts);
       msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
       msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/([.!?])?$/, ''));
+      msg.fromId = msg.from.toLowerCase();
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
     }
