@@ -3,6 +3,7 @@ const familyToClassName = {regular: 'far', solid: 'fas'};
 
 const contributorIcons = {
   batman: 'https://www.gravatar.com/avatar/806800a3aeddbad6af673dade958933b',
+  marcusr: 'https://www.gravatar.com/avatar/6c056546d802b1a9ac186ab63f9fb632',
 };
 
 const pickIcons = [
