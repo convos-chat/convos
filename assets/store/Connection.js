@@ -116,6 +116,7 @@ export default class Connection extends Dialog {
     this.ensureDialog(params);
   }
 
+  // TODO: Reply should be shown in the active dialog instead
   wsEventSentWhois(params) {
     const channels = Object.keys(params.channels);
     let message = '%1 (%2)';
@@ -135,7 +136,8 @@ export default class Connection extends Dialog {
       vars.push(channels.join(', '));
     }
 
-    this.addMessage({message, vars});
+    const dialog = this.findDialog(params) || this;
+    dialog.addMessage({message, vars});
   }
 
   wsEventTopic(params) {
