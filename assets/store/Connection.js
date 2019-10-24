@@ -86,6 +86,12 @@ export default class Connection extends Dialog {
     dialog.addMessage({message, type: 'error', sent: params, vars: params.command || params.message});
   }
 
+  wsEventJoin(params) {
+    const dialog = this.ensureDialog(params);
+    dialog.addMessage({message: '%1 joined.', vars: [params.nick]});
+    dialog.participant(this.nick, {});
+  }
+
   wsEventPart(params) {
     if (params.nick == this.nick) this.removeDialog(params);
   }
@@ -95,9 +101,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventSentJoin(params) {
-    const dialog = this.findDialog(params);
-    dialog.addMessage({message: '%1 joined.', vars: [params.nick]});
-    dialog.participant(this.nick, {});
+    this.wsEventJoin(params);
   }
 
   wsEventSentList(params) {
