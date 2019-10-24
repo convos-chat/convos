@@ -83,7 +83,7 @@ export default class Connection extends Dialog {
     const dialog = this.findDialog(params) || this;
     const message = extractErrorMessage(params) || 'Unknown error from %1.';
     dialog.update({errors: this.errors + 1});
-    dialog.addMessage({message, type: 'error', vars: params.command || params.message});
+    dialog.addMessage({message, type: 'error', sent: params, vars: params.command || params.message});
   }
 
   wsEventPart(params) {

@@ -27,7 +27,7 @@ export function closestEl(el, needle) {
 }
 
 export function ensureChildNode(parent, className, cb) {
-  let childNode = parent && parent.querySelector(className);
+  let childNode = parent && parent.querySelector('.' + className.split(' ').join('.'));
   if (childNode) return childNode;
   childNode = document.createElement('div');
   childNode.className = className;

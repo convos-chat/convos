@@ -76,6 +76,7 @@ export default class Dialog extends Reactive {
       const msg = messages[i];
       if (msg.hasOwnProperty('markdown')) continue; // Already processed
       if (!msg.from) msg.from = this.connection_id || 'Convos';
+      if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
       msg.color = str2color(msg.from.toLowerCase());
