@@ -6,7 +6,7 @@ import {activeMenu, container, gotoUrl} from '../store/router';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, topicOrStatus} from '../js/i18n';
-import {q, regexpEscape, tagNameIs} from '../js/util';
+import {q, regexpEscape, showEl, tagNameIs} from '../js/util';
 
 const user = getContext('user');
 const notifications = $user.notifications;
@@ -53,7 +53,7 @@ function filterNav() {
 
     const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
     if (makeVisible) visibleLinks.push(aEl);
-    makeVisible ? aEl.removeAttribute('hidden') : aEl.setAttribute('hidden', '');
+    showEl(aEl, makeVisible);
     seen[aEl.href] = true;
   });
 
@@ -62,8 +62,8 @@ function filterNav() {
     let el = connEl;
     while ((el = el.nextElementSibling)) {
       if (!el.classList.contains('for-dialog')) break;
-      if (el.hasAttribute('hidden')) continue;
-      return connEl.removeAttribute('hidden');
+      if (!showEl(el, 'is-visible')) continue;
+      return showEl(connEl, true);
     }
   });
 
@@ -72,11 +72,11 @@ function filterNav() {
     let el = h3;
     while ((el = el.nextElementSibling)) {
       if (tagNameIs(el, 'h3')) break;
-      if (el.hasAttribute('hidden')) continue;
-      return h3.removeAttribute('hidden');
+      if (!showEl(el, 'is-visible')) continue;
+      return showEl(h3, true);
     }
 
-    h3.setAttribute('hidden', '');
+    showEl(h3, false);
   });
 }
 

@@ -41,10 +41,6 @@ export function extractErrorMessage(params) {
   return errors && errors[0] ? errors[0].message || 'Unknown error.' : '';
 }
 
-export function hidden(bool) {
-  return bool ? 'hidden' : '';
-}
-
 export function loadScript(src) {
   const d = document;
   const id = src.replace(/\W/g, '_');
@@ -68,6 +64,12 @@ export function regexpEscape(str) {
 
 export function removeChildNodes(node) {
   while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+export function showEl(el, show) {
+  if (show === 'is-visible') return !el.hasAttribute('hidden');
+  if (show === 'toggle') show = el.hasAttribute('hidden');
+  return show ? el.removeAttribute('hidden') : el.setAttribute('hidden', '');
 }
 
 export function sortByName(a, b) {

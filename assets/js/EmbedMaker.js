@@ -1,6 +1,6 @@
 import hljs from './hljs';
 import Reactive from './Reactive';
-import {ensureChildNode, loadScript, q, removeChildNodes} from './util';
+import {ensureChildNode, loadScript, q, removeChildNodes, showEl} from './util';
 
 export default class EmbedMaker extends Reactive {
   constructor(params) {
@@ -52,14 +52,13 @@ export default class EmbedMaker extends Reactive {
   }
 
   showMedia(el) {
-    const mediaWrapper = ensureChildNode(document.querySelector('body'), 'fullscreen-media-wrapper', el => {
-      el.addEventListener('click', e => { e.target == el && el.setAttribute('hidden', '') });
-      el.setAttribute('hidden', '');
+    const mediaWrapper = ensureChildNode(document.querySelector('body'), 'fullscreen-media-wrapper', mediaWrapper => {
+      mediaWrapper.addEventListener('click', e => showEl(mediaWrapper, e.target != mediaWrapper));
     });
 
     removeChildNodes(mediaWrapper);
     mediaWrapper.appendChild(el.cloneNode());
-    mediaWrapper.removeAttribute('hidden');
+    showEl(mediaWrapper, true);
   }
 
   _ensureEmbedEl(url) {
