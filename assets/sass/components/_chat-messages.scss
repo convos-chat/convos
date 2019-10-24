@@ -26,6 +26,10 @@
     }
   }
 
+  &.is-not-present .message__from {
+    text-decoration: line-through;
+  }
+
   &.is-type-error .message__text,
   &.is-hightlighted .message__text {
     background-color: var(--highlight-color);

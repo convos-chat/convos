@@ -31,6 +31,10 @@ function gotoDialog(e) {
   gotoUrl(path + '#' + message.ts.toISOString());
 }
 
+function senderIsPresent(message) {
+  return dialog.participants.has(message.from) || message.from == connection.connection_id;
+}
+
 function toggleDetails(e) {
   const targetEl = e.target.closest('.message');
   const index = targetEl.dataset.index;
@@ -63,6 +67,7 @@ function toggleDetails(e) {
   {/if}
 
   <div class="message is-type-{message.type}"
+    class:is-not-present="{!senderIsPresent(message)}"
     class:is-sent-by-you="{message.from == connection.nick}"
     class:is-hightlighted="{message.highlight}"
     class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
