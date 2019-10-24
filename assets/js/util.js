@@ -11,7 +11,7 @@ export function debounce(cb, delay) {
 }
 
 export function modeClassNames(mode) {
-  return (mode || '').split('').map(m => { return 'has-mode-' + m });
+  return (mode || '').split('').map(m => { return 'has-mode-' + m }).join(' ');
 }
 
 export function camelize(str) {
