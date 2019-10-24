@@ -1,6 +1,11 @@
 <script>
 const familyToClassName = {regular: 'far', solid: 'fas'};
-const randomIcons = [
+
+const contributorIcons = {
+  batman: 'https://www.gravatar.com/avatar/806800a3aeddbad6af673dade958933b',
+};
+
+const pickIcons = [
   'atom',
   'award fa-solid',
   'balance-scale',
@@ -65,7 +70,6 @@ const randomIcons = [
 ];
 
 let className = '';
-let classNames = [];
 
 export {className as class};
 export let animation = '';
@@ -74,14 +78,31 @@ export let name;
 export let style = '';
 export let title = '';
 
-$: {
-  classNames = [familyToClassName[family] || 'fa'];
-  classNames.push('fa-' + (name && name.indexOf('pick:') == 0 ? randomIcon(name) : name));
-  if (animation) classNames = classNames.concat(animation.split(' ').map(a => 'fa-' + a));
-  if (className) classNames = classNames.concat(className.split(' '));
+function calculateClassName(name, family) {
+  const pick = name.match(/^pick:(.+)$/);
+  if (pick && contributorIcons[pick[1]]) return 'fa fa-contributor';
+
+  const cn = [className, familyToClassName[family] || 'fa'];
+  cn.push('fa-' + (name && name.indexOf('pick:') == 0 ? pickIcon(name) : name));
+  if (animation) cn.push(animation.split(' ').map(a => 'fa-' + a));
+  if (className) cn.push(className.split(' '));
+
+  return cn.join(' ');
 }
 
-function randomIcon(str) {
+function calculateStyle(name, family, style) {
+  const rules = [];
+  if (style) rules.push(style);
+
+  const pick = name.match(/^pick:(.+)$/);
+  if (pick && contributorIcons[pick[1]]) {
+    rules.push('background-image:url("' + contributorIcons[pick[1]] + '")');
+  }
+
+  return rules.join(';');
+}
+
+function pickIcon(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -89,8 +110,12 @@ function randomIcon(str) {
   }
 
   hash = Math.abs(hash);
-  return randomIcons[hash % randomIcons.length];
+  return pickIcons[hash % pickIcons.length];
 }
 </script>
 
-<i class="{classNames.join(' ')}" {title} on:click hidden="{!name}" style="{style}"/>
+<i class="{calculateClassName(name, family)}"
+  style="{calculateStyle(name, family, style)}"
+  title="{title}"
+  hidden="{!name}"
+  on:click/>

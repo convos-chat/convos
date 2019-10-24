@@ -4,3 +4,15 @@
     bottom: 3.5rem;
   }
 }
+
+.fa-contributor {
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 1.3rem;
+  width: 1.3rem;
+  vertical-align: text-bottom;
+
+  &:after {
+    display: none;
+  }
+}
