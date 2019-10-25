@@ -6,6 +6,12 @@
     font-size: 1.2rem;
   }
 
+  code {
+    background: var(--body-bg);
+    filter: brightness(0.92);
+    padding: 0.15em 0.25em;
+  }
+
   .emoji {
     height: 1.5rem;
     vertical-align: bottom;
@@ -35,6 +41,10 @@
     background-color: var(--highlight-color);
     border: 3px solid var(--highlight-color);
     margin: 0 -3px;
+
+    code {
+      background-color: var(--highlight-color);
+    }
   }
 
   &.is-type-error .message__text,
