@@ -11,7 +11,6 @@ export let value = 1;
 let inputEl;
 let hasFocus = false;
 
-$: console.log(hasFocus);
 $: icon = checked ? 'check-square' : 'square';
 
 $: if (inputEl && !inputEl.syncValue) {
