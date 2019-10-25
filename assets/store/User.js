@@ -56,15 +56,6 @@ export default class User extends Reactive {
     return this.getUserOp.is(status);
   }
 
-  isDialogOperator(params) {
-    // TODO: No idea if this actually works
-    const conn = this.findDialog({connection_id: params.connection_id});
-    const dialog = this.findDialog(params);
-    if (!conn || !dialog) return false;
-    const myself = dialog.findParticipants({nick: conn.nick})[0];
-    return myself && myself.mode && myself.mode.indexOf('o') != -1;
-  }
-
   async load() {
     if (this.getUserOp.is('success')) return this;
     await this.getUserOp.perform();

@@ -92,23 +92,6 @@ export default class Dialog extends Reactive {
     return this;
   }
 
-  findParticipants(params) {
-    if (!params) return this.participants.toArray();
-
-    const needleKeys = Object.keys(params);
-    const found = [];
-
-    this.participants.forEach(participant => {
-      for (let ni = 0; ni < needleKeys.length; ni++) {
-        const needleKey = params[needleKeys[ni]];
-        if (params[needleKey] != participant[needleKey]) return;
-      }
-      found.push(participant);
-    });
-
-    return found;
-  }
-
   is(status) {
     if (status == 'frozen') return this.frozen && true;
     if (status == 'private') return this.is_private;

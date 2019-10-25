@@ -15,8 +15,16 @@ const user = getContext('user');
 
 let formEl;
 
+$: isOperator = calculateIsOperator(dialog);
 $: flyTransitionParameters = {duration: 250, x: $container.small ? $container.width : 0};
 $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
+
+function calculateIsOperator(dialog) {
+  const connection = user.findDialog({connection_id: dialog.connection_id});
+  const currentNickId = (connection && connection.nick || '').toLowerCase();
+  const participant = dialog.participants.get(currentNickId);
+  return participant && participant.mode.indexOf('o') != -1;
+}
 
 function partDialog(e) {
   user.send({message: '/part', dialog});
@@ -33,7 +41,7 @@ function updateDialogFromForm(e) {
   <p>
     {#if dialog.is('private')}
       {l('Private conversation with %1.', dialog.name)}
-    {:else if user.isDialogOperator(dialog)}
+    {:else if isOperator}
       {l('You are a channel operator in %1.', dialog.name)}
     {:else}
       {l('You are not a channel operator in %1.', dialog.name)}
@@ -44,13 +52,13 @@ function updateDialogFromForm(e) {
     {#if !dialog.is('private')}
       <input type="hidden" name="connection_id" value="{dialog.connection_id}">
       <input type="hidden" name="dialog_id" value="{dialog.dialog_id}">
-      <TextArea name="topic" placeholder="{l('No topic is set.')}" readonly="{!user.isDialogOperator(dialog)}">
+      <TextArea name="topic" placeholder="{l('No topic is set.')}" readonly="{!isOperator}">
         <span slot="label">{l('Topic')}</span>
       </TextArea>
     {/if}
     <div class="form-actions">
       {#if !dialog.is('private')}
-        <Button icon="save" disabled="{!user.isDialogOperator(dialog)}">{l('Update')}</Button>
+        <Button icon="save" disabled="{!isOperator}">{l('Update')}</Button>
       {/if}
       <Button type="button" on:click="{partDialog}" icon="sign-out-alt">{l('Part')}</Button>
     </div>
