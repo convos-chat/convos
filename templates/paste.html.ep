@@ -1,7 +1,7 @@
 % layout 'convos';
 % title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
 
-%= include 'partial/sidebar'
+%= include 'partial/sidebar', js_remove => 0
 
 <header class="chat-header">
   <h1>Paste</h1>

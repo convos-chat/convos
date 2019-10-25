@@ -134,6 +134,10 @@ function onGlobalKeydown(e) {
   }
 }
 
+function onWindowFocus() {
+  if (settings.chatMode) user.events.ensureConnected();
+}
+
 function replaceBodyClassName(re, replacement) {
   const body = document.querySelector('body');
   body.className = body.className.replace(re, (all, prefix) => prefix + replacement);
@@ -151,7 +155,7 @@ function toggleMenu(e) {
 
 <svelte:window
   on:click="{debugClick}"
-  on:focus="{() => user.events.ensureConnected()}"
+  on:focus="{onWindowFocus}"
   on:keydown="{onGlobalKeydown}"
   bind:innerWidth="{containerWidth}"/>
 
