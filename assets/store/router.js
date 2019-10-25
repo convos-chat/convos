@@ -60,6 +60,6 @@ Object.defineProperty(currentUrl, 'base', {
   get() { return baseUrl },
   set(val) {
     baseUrl = val.replace(/\/+$/, '');
-    currentUrl.set(get(currentUrl));
+    currentUrl.set(parseUrl(get(currentUrl).toString()));
   },
 });
