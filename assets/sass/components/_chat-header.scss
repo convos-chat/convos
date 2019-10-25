@@ -22,7 +22,7 @@
       color: var(--sidebar-left-text);
     }
 
-    .fa {
+    .fas {
       padding-right: 0.3em;
     }
   }
@@ -37,7 +37,7 @@
       color: inherit;
     }
 
-    .fa {
+    .fas {
       font-size: 0.7em;
 
       @include if_screen("<=two-columns") {

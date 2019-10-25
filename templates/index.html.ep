@@ -6,11 +6,11 @@
 <main class="main align-content-middle js-remove">
   <div>
     <p class="no-js">
-      <i class="fa fa-download no-js"></i>
+      <i class="fas fa-download no-js"></i>
       %=l 'Downloading Convos...'
     </p>
     <p class="has-js">
-      <i class="fa fa-spinner has-js fa-spin"></i>
+      <i class="fas fa-spinner has-js fa-spin"></i>
       %=l 'Starting Convos...'
     </p>
 

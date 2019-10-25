@@ -7,67 +7,65 @@ const contributorIcons = {
 };
 
 const pickIcons = [
-  'atom',
-  'award fa-solid',
-  'balance-scale',
-  'baseball-ball',
-  'basketball-ball fa-solid',
-  'bicycle',
-  'bolt fa-solid',
-  'book-reader',
-  'candy-cane fa-solid',
-  'carrot fa-solid',
-  'cat',
-  'chess-knight',
-  'child',
-  'coffee fa-solid',
-  'cookie-bite fa-solid',
-  'crow fa-solid',
-  'dice fa-solid',
-  'dog fa-solid',
-  'dove',
-  'feather fa-solid',
-  'fish',
-  'fly',
-  'gem fa-solid',
-  'ghost fa-solid',
-  'hard-hat fa-solid',
-  'hat-cowboy fa-solid',
-  'hat-wizard fa-solid',
-  'hiking',
-  'horse fa-solid',
-  'horse-head fa-solid',
-  'id-badge',
-  'igloo fa-solid',
-  'mask fa-solid',
-  'meteor fa-solid',
-  'paint-brush fa-solid',
-  'paw',
-  'pepper-hot fa-solid',
-  'pied-piper-hat fa-solid',
-  'pizza-slice fa-solid',
-  'portrait',
-  'puzzle-piece fa-solid',
-  'rainbow fa-solid',
-  'redhat',
-  'robot fa-solid',
-  'rocket fa-solid',
-  'running',
-  'seedling fa-solid',
-  'skating fa-solid',
-  'skiing',
-  'smile',
-  'snowboarding',
-  'snowflake fa-solid',
-  'snowman fa-solid',
-  'swimmer fa-solid',
-  'umbrella fa-solid',
-  'user-astronaut',
-  'user-graduate',
-  'user-ninja',
-  'user-secret',
-  'walking',
-  'yin-yang fa-solid',
+  'fas fa-anchor',
+  'fas fa-atom',
+  'fas fa-award',
+  'fas fa-balance-scale',
+  'fas fa-baseball-ball',
+  'fas fa-basketball-ball',
+  'fas fa-bicycle',
+  'fas fa-bolt',
+  'fas fa-book-reader',
+  'fas fa-candy-cane',
+  'fas fa-carrot',
+  'fas fa-cat',
+  'fas fa-chess-knight',
+  'fas fa-child',
+  'fas fa-coffee',
+  'fas fa-cookie-bite',
+  'fas fa-crow',
+  'fas fa-dice',
+  'fas fa-dog',
+  'fas fa-dove',
+  'fas fa-feather',
+  'fas fa-fish',
+  'fas fa-gem',
+  'fas fa-ghost',
+  'fas fa-hard-hat',
+  'fas fa-hat-cowboy',
+  'fas fa-hat-wizard',
+  'fas fa-hiking',
+  'fas fa-horse-head',
+  'fas fa-horse',
+  'fas fa-id-badge',
+  'fas fa-igloo',
+  'fas fa-mask',
+  'fas fa-meteor',
+  'fas fa-paint-brush',
+  'fas fa-paw',
+  'fas fa-pepper-hot',
+  'fas fa-pizza-slice',
+  'fas fa-portrait',
+  'fas fa-puzzle-piece',
+  'fas fa-rainbow',
+  'fas fa-robot',
+  'fas fa-rocket',
+  'fas fa-running',
+  'fas fa-seedling',
+  'fas fa-skating',
+  'fas fa-skiing',
+  'fas fa-smile',
+  'fas fa-snowboarding',
+  'fas fa-snowflake',
+  'fas fa-snowman',
+  'fas fa-swimmer',
+  'fas fa-umbrella',
+  'fas fa-user-astronaut',
+  'fas fa-user-graduate',
+  'fas fa-user-ninja',
+  'fas fa-user-secret',
+  'fas fa-walking',
+  'fas fa-yin-yang',
 ];
 
 let className = '';
@@ -80,11 +78,18 @@ export let style = '';
 export let title = '';
 
 function calculateClassName(name, family) {
+  const cn = [];
   const pick = name.match(/^pick:(.+)$/);
-  if (pick && contributorIcons[pick[1]]) return 'fa fa-contributor';
 
-  const cn = [className, familyToClassName[family] || 'fa'];
-  cn.push('fa-' + (name && name.indexOf('pick:') == 0 ? pickIcon(name) : name));
+  if (pick) {
+    if (contributorIcons[pick[1]]) return 'fas fa-contributor';
+    cn.push(pickIcon(pick[1]));
+  }
+  else {
+    cn.push(familyToClassName[family] || 'fas');
+    cn.push('fa-' + name);
+  }
+
   if (animation) cn.push(animation.split(' ').map(a => 'fa-' + a));
   if (className) cn.push(className.split(' '));
 
@@ -104,6 +109,9 @@ function calculateStyle(name, family, style) {
 }
 
 function pickIcon(str) {
+  if (str.match(/^\d+$/)) console.log(pickIcons[str]);
+  if (str.match(/^\d+$/)) return pickIcons[str];
+
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
