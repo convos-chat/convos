@@ -1,8 +1,8 @@
 import {emojis, md} from './md';
 import {regexpEscape} from './util';
 
-const commands = [];
-const maxNumMatches = 20;
+export const commands = [];
+export const maxNumMatches = 20;
 
 export default function autocomplete(category, params) {
   return autocomplete[category] ? autocomplete[category](params) : [];
