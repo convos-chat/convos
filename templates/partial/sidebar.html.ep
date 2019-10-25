@@ -1,4 +1,4 @@
-<div class="sidebar-left<%= stash 'js_remove' ? ' js-remove' : '' %>">
+<div class="sidebar-left<%= stash('js_remove') ? ' js-remove' : '' %>">
   <h1><Link href="/"><span><%=l 'Convos' %></span></Link></h1>
   <p><%=l 'A multiuser chat application.' %></p>
 
