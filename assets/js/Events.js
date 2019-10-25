@@ -13,7 +13,7 @@ export default class Events extends Reactive {
 
     this._localStorageAttr('debugEvents', navigator.userAgent.indexOf('Mozilla') != -1 ? 1 : 0);
     this._localStorageAttr('notificationCloseDelay', 5000);
-    this._localStorageAttr('wantNotifications', false);
+    this._localStorageAttr('wantNotifications', null);
     this._readOnlyAttr('wsUrl', params.wsUrl); // TODO: Should probably be input parameter
     this._updateableAttr('ready', false);
   }
