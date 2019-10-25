@@ -31,7 +31,7 @@
   }
 
   &.is-type-error .message__text,
-  &.is-hightlighted .message__text {
+  &.is-highlighted .message__text {
     background-color: var(--highlight-color);
     border: 3px solid var(--highlight-color);
     margin: 0 -3px;

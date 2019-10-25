@@ -69,7 +69,7 @@ function toggleDetails(e) {
   <div class="message is-type-{message.type}"
     class:is-not-present="{!senderIsPresent(message)}"
     class:is-sent-by-you="{message.from == connection.nick}"
-    class:is-hightlighted="{message.highlight}"
+    class:is-highlighted="{message.highlight}"
     class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
     class:has-same-from="{message.isSameSender && !message.dayChanged}"
     on:click="{gotoDialog}"
