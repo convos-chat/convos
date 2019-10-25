@@ -67,7 +67,7 @@ sub connect {
       my ($delay, $err) = @_;
 
       $self->_debug('connect(%s) == %s', $self->_irc->server, $err || 'Success') if DEBUG or $err;
-      $self->_notice($err) if $err;
+      $self->_notice($err, type => 'error') if $err;
 
       if ($self->_irc->tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
         $self->url->query->param(tls => 0);
@@ -172,7 +172,7 @@ sub _event_close {
 # Unhandled/unexpected error
 sub _event_error {
   my ($self, $msg) = @_;
-  $self->_notice(join ' ', @{$msg->{params}});
+  $self->_notice(join(' ', @{$msg->{params}}), type => 'error');
 }
 
 sub _event_rpl_ison {
@@ -336,6 +336,12 @@ sub _maybe_reconnect {
   }
 }
 
+sub _message_type {
+  return 'private' if $_[0]->{event} =~ /privmsg/i;
+  return 'action'  if $_[0]->{event} =~ /action/i;
+  return 'notice';
+}
+
 sub _mode {
   my ($self, $target, $mode, $cb) = @_;
 
@@ -488,13 +494,13 @@ sub _topic {
 
 sub _event_err_cannotsendtochan {
   my ($self, $msg) = @_;
-  $self->_notice("Cannot send to channel $msg->{params}[1].");
+  $self->_notice("Cannot send to channel $msg->{params}[1].", type => 'error');
 }
 
 sub _event_err_erroneusnickname {
   my ($self, $msg) = @_;
   my $nick = $msg->{params}[1] || 'unknown';
-  $self->_notice("Invalid nickname $nick.");
+  $self->_notice("Invalid nickname $nick.", type => 'error');
 }
 
 sub _event_err_nicknameinuse {
@@ -502,12 +508,13 @@ sub _event_err_nicknameinuse {
   my $nick = $msg->{params}[1];
 
   # do not want to flod frontend with these messages
-  $self->_notice("Nickname $nick is already in use.") unless $self->{err_nicknameinuse}{$nick}++;
+  $self->_notice("Nickname $nick is already in use.", type => 'error')
+    unless $self->{err_nicknameinuse}{$nick}++;
 }
 
 sub _event_err_unknowncommand {
   my ($self, $msg) = @_;
-  $self->_notice('Unknown command.');
+  $self->_notice("Unknown command: $msg->{params}[1]", type => 'error');
 }
 
 sub _event_join {
@@ -619,9 +626,7 @@ sub _event_privmsg {
       highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
       message   => $msg->{params}[1],
       ts        => time,
-      type      => $msg->{event} =~ /privmsg/i ? 'private'
-      : $msg->{event} =~ /action/i ? 'action'
-      :                              'notice',
+      type      => _message_type($msg),
     }
   );
 }

@@ -200,7 +200,7 @@ will contain:
   {
     from    => $str,
     message => $str,
-    type    => {action|notice|privmsg},
+    type    => {action|error|notice|privmsg},
   }
 
 =head2 state

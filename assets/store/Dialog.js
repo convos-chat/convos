@@ -53,8 +53,8 @@ export default class Dialog extends Reactive {
 
   addMessage(msg) {
     if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
-    this.update({unread: this.unread + 1});
-    return this.addMessages('push', [msg]);
+    this.addMessages('push', [msg]);
+    if (['action', 'error', 'private'].indexOf(msg.type) != -1) this.update({unread: this.unread + 1});
   }
 
   addMessages(method, messages) {
@@ -122,7 +122,7 @@ export default class Dialog extends Reactive {
     this.update({status: 'loading'});
     await this.messagesOp.perform(this);
     this._loadParticipants();
-    return this.addMessages('set', this.messagesOp.res.body.messages || []);
+    return this.addMessages('unshift', this.messagesOp.res.body.messages || []);
   }
 
   async loadHistoric() {
