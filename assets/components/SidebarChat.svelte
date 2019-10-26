@@ -131,7 +131,7 @@ function renderUnread(dialog) {
       {#each $user.connections.toArray() as connection}
         <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" title="{topicOrStatus(connection, connection)}">
           <Icon name="network-wired"/>
-          <span>{connection.name}</span>
+          <span>{connection.connection_id}</span>
           <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
         </Link>
         {#each connection.dialogs.toArray() as dialog}
