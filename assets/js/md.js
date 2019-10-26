@@ -4,6 +4,7 @@
 // \*foo*    or \_foo_    = *foo* or _foo_
 
 import twemoji from 'twemoji';
+import {regexpEscape} from './util';
 
 const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
 const emojiByGroup = {};
@@ -12,7 +13,8 @@ const linkRe = new RegExp('https?://\\S+', 'g');
 const mdLinkRe = new RegExp('\\[([^]+)\\]\\(([^)]+)\\)');
 const mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+|_+)(\\w[^<]*?)\\3', 'g');
 
-const emojiAliases = {
+// Modifying this from the outside will break emojiRe below
+export const emojiAliases = {
   ':confused:': ':/',
   ':disappointed:': ':(',
   ':grin:': ';D',
@@ -23,7 +25,7 @@ const emojiAliases = {
   ':wink:': ';)',
 };
 
-const emojiRe = new RegExp('(^|\\s)(:\\w+:|:[()/DP]|;[)D]|&lt;3)(?=\\W|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
+const emojiRe = new RegExp('(^|\\s)(:\\w+:|' + Object.keys(emojiAliases).map(k => regexpEscape(emojiAliases[k])).join('|') + ')(?=\\W|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
 
 const xmlEscapeMap = {
   '&': '&amp;',
@@ -78,9 +80,7 @@ export function md(str, params = {}) {
     return all;
   }).replace(mdLinkRe, (all, text, href) => {
     return '<a href="' + href + '">' + text + '</a>';
-  });
-
-  str = str.replace(codeToHtmlRe, (all, esc, text) => {
+  }).replace(codeToHtmlRe, (all, esc, text) => {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });
 
