@@ -1,0 +1,57 @@
+html,
+body {
+  background: var(--body-bg);
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body.no-js .has-js {
+  display: none;
+}
+
+body.has-js .no-js {
+  display: none;
+}
+
+.main {
+  @extend %next-to-sidebar;
+  line-height: 1.5em;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  top: 3rem;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  &.align-content-middle {
+    padding-bottom: 2rem;
+    top: 0;
+  }
+}
+
+@include if_screen("<=two-columns") {
+  body.is-logged-out {
+    overflow: auto;
+
+    .main {
+      position: static;
+      padding: var(--gutter-big);
+      min-height: auto;
+    }
+  }
+}
+
+.overlay {
+  background: #000;
+  z-index: 800;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0.3;
+}

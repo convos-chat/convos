@@ -1,23 +1,35 @@
-@mixin input-placeholder-color($color) {
-  ::-webkit-input-placeholder { color: $color; }
-  :-moz-placeholder { color: $color; }
-  ::-moz-placeholder { color: $color; }
-  :-ms-input-placeholder { color: $color; }
+@import "mixins/if_screen";
+
+%next-to-sidebar {
+  position: absolute;
+  padding-right: var(--gutter);
+  padding-left: var(--gutter);
+
+  @include if_screen("<=two-columns") {
+    right: 0;
+    left: 0;
+  }
+
+  @include if_screen(">two-columns") {
+    right: var(--gutter);
+    left: calc(var(--gutter) + var(--sidebar-left-width));
+  }
+
+  @include if_screen(">three-columns") {
+    right: calc(var(--gutter) + var(--sidebar-right-width));
+  }
 }
 
-@mixin overflow() {
-  -webkit-overflow-scrolling: touch;
+%sidebar-wrapper-chrome {
+  padding: 0 var(--gutter);
   overflow: auto;
-}
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 900;
+  -webkit-overflow-scrolling: touch;
 
-@mixin progress-bar($bg, $bgShade) {
-  background: repeating-linear-gradient(-45deg, $bg, $bg 10px, $bgShade 10px, $bgShade 20px, $bg 20px) top left;
-  background-position: 0 0;
-  background-size: 394px 100%;
-  animation: background-position 14s infinite linear;
-}
-
-@keyframes background-position {
-  0% { background-position: 0 0; }
-  100% { background-position: 100% 0; }
+  > :last-child {
+    padding-bottom: 8rem;
+  }
 }

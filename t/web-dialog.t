@@ -2,7 +2,7 @@
 use lib '.';
 use t::Helper;
 
-my $t = t::Helper->t;
+my $t    = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/participants')->status_is(401);
@@ -43,7 +43,6 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
       connection_id => 'irc-localhost',
       dialog_id     => '#convos',
       frozen        => '',
-      is_private    => 0,
       name          => '#Convos',
       last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
@@ -53,7 +52,6 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
     },
   ]
 );
-note explain $t->tx->res->json;
 
 $user->connection({name => 'example', protocol => 'irc'})
   ->dialog({name => '#superheroes', frozen => ''})->last_read($last_read)
@@ -90,7 +88,6 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       connection_id => 'irc-localhost',
       dialog_id     => '#convos',
       frozen        => '',
-      is_private    => 0,
       name          => '#Convos',
       last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
@@ -102,7 +99,6 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       connection_id => 'irc-example',
       dialog_id     => '#superheroes',
       frozen        => '',
-      is_private    => 0,
       last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
       name          => '#superheroes',

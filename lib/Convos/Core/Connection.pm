@@ -10,29 +10,26 @@ use Mojo::URL;
 $IO::Socket::SSL::DEBUG = $ENV{CONVOS_SSL_DEBUG} if $ENV{CONVOS_SSL_DEBUG};
 
 has messages => sub {
-  my $self = shift;
-  my $dialog = Convos::Core::Dialog->new(id => '', name => '');
+  my $self   = shift;
+  my $dialog = Convos::Core::Dialog->new(id => '', name => $self->name);
   Scalar::Util::weaken($dialog->{connection} = $self);
   return $dialog;
 };
 
 sub name { shift->{name} }
 has on_connect_commands => sub { +[] };
-has protocol => 'null';
+has protocol            => 'null';
 
 sub url {
-  my ($self, $url) = @_;
+  my $self = shift;
 
-  if ($url) {
-    $self->{url} = $url;
-    return $self;
-  }
-  elsif (ref $_[0]->{url}) {
-    return $_[0]->{url};
-  }
-  else {
-    return $_[0]->{url} = Mojo::URL->new($_[0]->{url} || sprintf '%s://localhost', $self->protocol);
-  }
+  # Set
+  return $self->_set_url(shift) if @_;
+
+  # Get
+  $self->_set_url($self->{url} || sprintf '%s://localhost', $self->protocol)
+    unless ref $self->{url};
+  return $self->{url};
 }
 
 sub user { shift->{user} }
@@ -54,10 +51,7 @@ sub disconnect {
   $self->tap($cb, 'Method "disconnect" not implemented.');
 }
 
-sub id {
-  return lc join '-', @{$_[1]}{qw(protocol name)} if $_[1];
-  return lc join '-', @{$_[0]}{qw(protocol name)};
-}
+sub id { my $from = $_[1] || $_[0]; lc join '-', @$from{qw(protocol name)} }
 
 sub new {
   my $self = shift->SUPER::new(@_);
@@ -68,11 +62,6 @@ sub new {
 sub participants {
   my ($self, $cb) = (shift, pop);
   $self->tap($cb, 'Method "participants" not implemented.', []);
-}
-
-sub rooms {
-  my ($self, $cb) = (shift, pop);
-  $self->tap($cb, 'Method "rooms" not implemented.', []);
 }
 
 sub save {
@@ -117,13 +106,15 @@ sub _debug {
   warn sprintf "[%s/%s] $msg\n", $self->user->email, $self->id, @args;
 }
 
-sub _rooms {
-  my ($self, $rooms) = @_;
-  return [splice @$rooms, 0, 60];
+sub _set_url {
+  my $self = shift;
+  my $url  = ref $_[0] ? shift : Mojo::URL->new(shift);
+  $self->{url} = $url;
+  return $self;
 }
 
 sub _userinfo {
-  my $self = shift;
+  my $self     = shift;
   my @userinfo = split /:/, $self->url->userinfo // '';
 
   unless ($userinfo[0]) {
@@ -137,7 +128,7 @@ sub _userinfo {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my $url = $self->url;
+  my $url  = $self->url;
   my %json = map { ($_, $self->$_) } qw(name protocol wanted_state);
 
   $json{connection_id}       = $self->id;
@@ -209,7 +200,7 @@ will contain:
   {
     from    => $str,
     message => $str,
-    type    => {action|notice|privmsg},
+    type    => {action|error|notice|privmsg},
   }
 
 =head2 state
@@ -321,13 +312,6 @@ Creates a new connection object.
   $self = $self->participants("#target" => sub { my ($self, $err, $participants) = @_; });
 
 Retrieves a list of participants in a room.
-
-=head2 rooms
-
-  $self = $self->rooms({match => "name"}, sub { my ($self, $err, $list) = @_; });
-
-Used to retrieve a list of L<Convos::Core::Dialog> objects for the
-given connection.
 
 =head2 save
 

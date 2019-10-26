@@ -16,9 +16,9 @@ for my $t ($th, $ws) {
 $ws->websocket_ok('/events');
 
 # Note: tls=0 is to avoid reconnecting to the test irc server
-$th->post_ok('/api/connections',
-  json => {name => 'test', url => sprintf('irc://%s?tls=0', $irc->server)})->status_is(200);
-my $c = $th->app->core->get_user('superman@example.com')->get_connection('irc-test');
+$th->post_ok('/api/connections', json => {url => sprintf('irc://%s?tls=0', $irc->server)})
+  ->status_is(200);
+my $c = $th->app->core->get_user('superman@example.com')->get_connection('irc-localhost');
 
 # flush connect messages
 while ($ws->message_ok) {
@@ -29,7 +29,7 @@ note 'simple message';
 $ws->send_ok(
   {json => {method => 'send', message => '/msg supergirl too cool', connection_id => $c->id}});
 $ws->message_ok->json_message_is('/event',         'sent');
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_is('/dialog_id', 'supergirl')->json_message_is('/event', 'message')
   ->json_message_is('/from',    'superman')->json_message_is('/highlight', false)
   ->json_message_is('/message', 'too cool')->json_message_is('/name',      'supergirl')
@@ -39,9 +39,9 @@ note 'message with newline';
 $ws->send_ok(
   {json => {method => 'send', message => "/msg supergirl with\nnewline", connection_id => $c->id}});
 $ws->message_ok->json_message_is('/event',         'sent');
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_is('/event', 'message')->json_message_is('/message', 'with', '/message with');
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_is('/event', 'message')
   ->json_message_is('/message', 'newline', '/message newline');
 

@@ -8,10 +8,9 @@ use Mojo::JSON;
 use Parse::IRC ();
 use Time::HiRes 'time';
 
-use constant MAX_BULK_MESSAGE_SIZE => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3;
-use constant ROOMS_CACHE_TIMER     => $ENV{CONVOS_ROOMS_CACHE_TIMER}     || 60 * 30;
-use constant ROOMS_REPLY_DELAY     => $ENV{CONVOS_ROOMS_REPLY_DELAY}     || 1;
-use constant STEAL_NICK_INTERVAL   => $ENV{CONVOS_STEAL_NICK_INTERVAL}   || 60;
+use constant DIALOG_SEARCH_INTERVAL => $ENV{CONVOS_DIALOG_SEARCH_INTERVAL} || 0.5;
+use constant MAX_BULK_MESSAGE_SIZE  => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE}  || 3;
+use constant STEAL_NICK_INTERVAL    => $ENV{CONVOS_STEAL_NICK_INTERVAL}    || 60;
 
 require Convos;
 
@@ -28,7 +27,7 @@ my %IRC_PROXY_METHOD = (
 
 has _irc => sub {
   my $self = shift;
-  my $irc = Mojo::IRC::UA->new(debug_key => join ':', $self->user->email, $self->name);
+  my $irc  = Mojo::IRC::UA->new(debug_key => join ':', $self->user->email, $self->name);
 
   Scalar::Util::weaken($self);
   $irc->name("Convos v$Convos::VERSION");
@@ -51,9 +50,6 @@ has _irc => sub {
   return $self->_setup_irc($irc);                               # make sure irc nick is correct
 };
 
-# room list is shared between all connections
-has _room_cache => sub { state $cache = {} };
-
 sub connect {
   my ($self, $cb) = @_;
   return $self->_maybe_reconnect($cb) if $self->state eq 'connected';
@@ -71,7 +67,7 @@ sub connect {
       my ($delay, $err) = @_;
 
       $self->_debug('connect(%s) == %s', $self->_irc->server, $err || 'Success') if DEBUG or $err;
-      $self->_notice($err) if $err;
+      $self->_notice($err, type => 'error') if $err;
 
       if ($self->_irc->tls and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
         $self->url->query->param(tls => 0);
@@ -122,52 +118,6 @@ sub participants {
   );
 }
 
-sub rooms {
-  my ($self, $args, $cb) = @_;
-  my $match = $args->{match};
-  my $host  = $self->url->host;
-  my $store = $self->_room_cache->{$host} ||= {rooms => {}, end => Mojo::JSON->false};
-  my ($generate, @rooms, @by_topic);
-
-  if ($match) {
-    $generate = sub {
-      $match = qr{$match}i;
-
-      for my $room (sort { $a->{name} cmp $b->{name} } values %{$store->{rooms}}) {
-        push @rooms,    $room and next if $room->{name} =~ $match;
-        push @by_topic, $room and next if $room->{topic} =~ $match;
-      }
-
-      push @rooms, @by_topic;
-      $self->$cb('',
-        {end => $store->{end}, n_rooms => int(@rooms), rooms => $self->_rooms(\@rooms)});
-    };
-  }
-  else {
-    $generate = sub {
-      @rooms = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{rooms}};
-      $self->$cb('',
-        {end => $store->{end}, n_rooms => int(@rooms), rooms => $self->_rooms(\@rooms)});
-    };
-  }
-
-  if (!$store->{ts} or $store->{ts} + ROOMS_CACHE_TIMER < time) {
-    $store->{ts} = time - ROOMS_CACHE_TIMER + 20;    # should get some data within 20 seconds
-    Mojo::IOLoop->delay(
-      sub { $self->_irc->write(LIST => shift->begin) },
-      sub {
-        my ($delay, $err) = @_;
-        return Mojo::IOLoop->timer(ROOMS_REPLY_DELAY, $generate) unless $err;
-        delete $store->{ts};
-        $self->$cb($err, {});
-      },
-    );
-    return $self;
-  }
-
-  return next_tick $self, $generate;
-}
-
 sub send {
   my ($self, $target, $message, $cb) = @_;
 
@@ -184,17 +134,24 @@ sub send {
   return $self->_send(split(/\s+/, $message, 2), $cb) if $cmd eq 'MSG';
   return $self->wanted_state(connected    => $cb) if $cmd eq 'CONNECT';
   return $self->wanted_state(disconnected => $cb) if $cmd eq 'DISCONNECT';
-  return $self->_is_online($message, $cb) if $cmd eq 'ISON';
+  return $self->_is_online($message =~ /\w/ ? $message : $target, $cb) if $cmd eq 'ISON';
   return $self->_join_dialog($message, $cb) if $cmd eq 'JOIN';
   return $self->_query_dialog($message, $cb) if $cmd eq 'QUERY';
   return $self->_kick($target, $message, $cb) if $cmd eq 'KICK';
   return $self->_mode($target, $message, $cb) if $cmd eq 'MODE';
   return $self->participants($target, $cb) if $cmd eq 'NAMES';
   return $self->nick($message, $cb) if $cmd eq 'NICK';
+  return $self->_list_dialogs($message, $cb) if $cmd eq 'LIST';
   return $self->_part_dialog($message || $target, $cb) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_topic($target, $message, $cb) if $cmd eq 'TOPIC';
   return $self->_proxy(whois => $message, $cb) if $cmd eq 'WHOIS';
   return $self->_proxy(write => "$cmd $message", sub { $self->$cb($_[1], {}); });
+}
+
+sub _available_dialogs {
+  my $self = shift;
+  state $cache = {};    # Rooms are shared between users
+  return $cache->{$self->url->host} ||= {};
 }
 
 sub _event_close {
@@ -215,7 +172,7 @@ sub _event_close {
 # Unhandled/unexpected error
 sub _event_error {
   my ($self, $msg) = @_;
-  $self->_notice(join ' ', @{$msg->{params}});
+  $self->_notice(join(' ', @{$msg->{params}}), type => 'error');
 }
 
 sub _event_rpl_ison {
@@ -279,7 +236,7 @@ sub _join_dialog {
     sub {
       my ($delay, $dialog, $err, $res) = @_;
 
-      $err = 'Password protected' if $err =~ /\+k\b/;
+      $err = 'Password protected.' if $err and $err =~ /\+k\b/;
       $res->{name} //= $name;
 
       unless ($self->get_dialog($res->{name})) {
@@ -307,7 +264,7 @@ sub _query_dialog {
   my $dialog = $self->get_dialog($name);
   return next_tick $self, $cb, '', $dialog if $dialog and !$dialog->frozen;
 
-  # New dialog
+  # New dialog. Note that it needs to be frozen, so join_channel will be issued
   $dialog ||= $self->dialog({name => $name});
   $dialog->frozen('Not active in this room.') if !$dialog->is_private and !$dialog->frozen;
   return next_tick $self, $cb, '', $dialog;
@@ -318,6 +275,51 @@ sub _kick {
   my ($nick, $reason) = split /\s/, $command, 2;
 
   return $self->_proxy(kick => "$target $nick :$reason", sub { $self->$cb(@_[1, 2]) });
+}
+
+sub _list_dialogs {
+  my ($self, $extra, $cb) = @_;
+  my $store = $self->_available_dialogs;
+  my @found;
+
+  if ($self->state ne 'connected') {
+    return next_tick $self, $cb, 'Cannot fetch dialogs when not connected.', {};
+  }
+
+  # Refresh dialog list
+  if ($extra =~ m!\brefresh\b! or !$store->{ts}) {
+    $store->{dialogs} = {};
+    $store->{done}    = Mojo::JSON->false;
+    $store->{ts}      = time;
+    $self->_irc->write('LIST');
+  }
+
+  # Search for a specific channel - only works for cached channels
+  # IMPORTANT! Make sure the filter cannot execute code inside the regex!
+  if ($extra =~ m!/(\W?[\w-]+)/(\S*)!) {
+    my ($filter, $re_modifiers, $by, @by_name, @by_topic) = ($1, $2);
+
+    $re_modifiers = 'i' unless $re_modifiers;
+    $by           = $re_modifiers =~ s!([nt])!! ? $1 : 'nt';    # name or topic
+    $filter       = qr{(?$re_modifiers:$filter)} if $filter;    # (?i:foo_bar)
+
+    for my $dialog (sort { $a->{name} cmp $b->{name} } values %{$store->{dialogs}}) {
+      push @by_name,  $dialog and next if $dialog->{name} =~ $filter;
+      push @by_topic, $dialog and next if $dialog->{topic} =~ $filter;
+    }
+
+    @found = ($by =~ /n/ ? @by_name : (), $by =~ /t/ ? @by_topic : ());
+  }
+  else {
+    @found = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{dialogs}};
+  }
+
+  return next_tick $self, $cb, '', {
+    n_dialogs => int(keys %{$store->{dialogs}}),
+    dialogs   => [splice @found, 0, 200],          # TODO: Figure out a good max result number
+    done      => $store->{done},
+    ts        => $store->{ts},
+  };
 }
 
 sub _maybe_reconnect {
@@ -332,6 +334,12 @@ sub _maybe_reconnect {
     $self->_debug("connect(%s) Reconnect", $irc->server) if DEBUG;
     return $self->disconnect(sub { shift->connect($cb) });
   }
+}
+
+sub _message_type {
+  return 'private' if $_[0]->{event} =~ /privmsg/i;
+  return 'action'  if $_[0]->{event} =~ /action/i;
+  return 'notice';
 }
 
 sub _mode {
@@ -359,13 +367,13 @@ sub _part_dialog {
   return next_tick $self, $cb, 'Command missing arguments.', undef unless $name and $name =~ /\S/;
 
   my $dialog = $self->get_dialog($name);
-  return $self->tap(remove_dialog => $name)->save($cb) if $dialog and $dialog->is_private;
-  return $self->tap(remove_dialog => $name)->save($cb) if $self->state eq 'disconnected';
+  return $self->_remove_dialog($name)->save($cb) if $dialog and $dialog->is_private;
+  return $self->_remove_dialog($name)->save($cb) if $self->state eq 'disconnected';
   return $self->_proxy(
     part_channel => $name,
     sub {
       my ($irc, $err) = @_;
-      $self->tap(remove_dialog => $name)->save($cb);
+      $self->_remove_dialog($name)->save($cb);
     }
   );
 }
@@ -374,6 +382,13 @@ sub _proxy {
   my ($self, $method) = (shift, shift);
   $self->_irc->$method(@_);
   $self;
+}
+
+sub _remove_dialog {
+  my ($self, $name) = @_;
+  my $dialog = $self->remove_dialog($name);
+  $self->emit(state => part => {dialog_id => lc $name, nick => $self->_irc->nick});
+  return $self;
 }
 
 sub _send {
@@ -422,7 +437,7 @@ sub _send {
         my ($irc, $err) = @_;
         return $self->$cb($err) if $err and !$cb_called++;
         $msg->{prefix} = sprintf '%s!%s@%s', $irc->nick, $irc->user, $irc->server;
-        $msg->{event} = lc $msg->{command};
+        $msg->{event}  = lc $msg->{command};
         next_tick $self, _event_privmsg => $msg;
         $self->$cb('') unless $cb_called++;
       }
@@ -479,13 +494,13 @@ sub _topic {
 
 sub _event_err_cannotsendtochan {
   my ($self, $msg) = @_;
-  $self->_notice("Cannot send to channel $msg->{params}[1].");
+  $self->_notice("Cannot send to channel $msg->{params}[1].", type => 'error');
 }
 
 sub _event_err_erroneusnickname {
   my ($self, $msg) = @_;
   my $nick = $msg->{params}[1] || 'unknown';
-  $self->_notice("Invalid nickname $nick.");
+  $self->_notice("Invalid nickname $nick.", type => 'error');
 }
 
 sub _event_err_nicknameinuse {
@@ -493,12 +508,13 @@ sub _event_err_nicknameinuse {
   my $nick = $msg->{params}[1];
 
   # do not want to flod frontend with these messages
-  $self->_notice("Nickname $nick is already in use.") unless $self->{err_nicknameinuse}{$nick}++;
+  $self->_notice("Nickname $nick is already in use.", type => 'error')
+    unless $self->{err_nicknameinuse}{$nick}++;
 }
 
 sub _event_err_unknowncommand {
   my ($self, $msg) = @_;
-  $self->_notice('Unknown command');
+  $self->_notice("Unknown command: $msg->{params}[1]", type => 'error');
 }
 
 sub _event_join {
@@ -518,9 +534,9 @@ sub _event_join {
 sub _event_kick {
   my ($self, $msg) = @_;
   my ($kicker) = IRC::Utils::parse_user($msg->{prefix});
-  my $dialog = $self->dialog({name => $msg->{params}[0]});
-  my $nick   = $msg->{params}[1];
-  my $reason = $msg->{params}[2] || '';
+  my $dialog   = $self->dialog({name => $msg->{params}[0]});
+  my $nick     = $msg->{params}[1];
+  my $reason   = $msg->{params}[2] || '';
 
   $self->emit(state => part =>
       {dialog_id => $dialog->id, kicker => $kicker, nick => $nick, message => $reason});
@@ -589,7 +605,7 @@ sub _event_privmsg {
   if ($user) {
     $target = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
     $target = $self->get_dialog($target) || $self->dialog({name => $target});
-    $from = $nick;
+    $from   = $nick;
   }
 
   $target ||= $self->messages;
@@ -610,9 +626,7 @@ sub _event_privmsg {
       highlight => $highlight ? Mojo::JSON->true : Mojo::JSON->false,
       message   => $msg->{params}[1],
       ts        => time,
-      type      => $msg->{event} =~ /privmsg/i ? 'private'
-      : $msg->{event} =~ /action/i ? 'action'
-      :                              'notice',
+      type      => _message_type($msg),
     }
   );
 }
@@ -626,21 +640,21 @@ sub _event_quit {
 
 sub _event_rpl_list {
   my ($self, $msg) = @_;
-  my $host = $self->url->host;
-  my $store = $self->_room_cache->{$host} ||= {};
-  my $room
-    = {name => $msg->{params}[1], n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
+  my $dialog = {n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
 
-  $room->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
-  $store->{ts} = time;
-  $store->{rooms}{$room->{name}} = $room;
+  $dialog->{name}      = $msg->{params}[1];
+  $dialog->{dialog_id} = lc $dialog->{name};
+  $dialog->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
+  $self->_available_dialogs->{dialogs}{$dialog->{name}} = $dialog;
 }
 
 sub _event_rpl_listend {
   my ($self, $msg) = @_;
-  my $host = $self->url->host;
-  $self->_room_cache->{$host}{end} = Mojo::JSON->true;
+  $self->_available_dialogs->{done} = Mojo::JSON->true;
 }
+
+# Prevent _fallback() to be called
+sub _event_rpl_liststart { }
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
 sub _event_rpl_myinfo {
@@ -655,20 +669,27 @@ sub _event_rpl_myinfo {
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
 sub _event_rpl_welcome {
   my ($self, $msg) = @_;
-  my ($write, @commands);
-
-  push @commands, map { $_->is_private ? "/ison $_->{name}" : $_ } @{$self->dialogs};
-  push @commands, grep {/\S/} @{$self->on_connect_commands};
 
   $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->{myinfo}{nick} = $msg->{params}[0];
   $self->emit(state => me => $self->{myinfo});
 
+  my @commands = (
+    (grep {/\S/} @{$self->on_connect_commands}),
+    (
+      map {
+            $_->is_private ? "/ison $_->{name}"
+          : $_->password   ? "/join $_->{name} $_->{password}"
+          : "/join $_->{name}"
+      } @{$self->dialogs}
+    ),
+  );
+
   Scalar::Util::weaken($self);
+  my $write;
   $write = sub {
-    my $cmd = $self && shift @commands || return;
-    return $self->_join_dialog(join(' ', $cmd->name, $cmd->password), $write) if ref $cmd;
-    return $self->send('', $cmd, $write);
+    my $cmd = shift @commands;
+    $self->send('', $cmd, $write) if $self and defined $cmd;
   };
 
   next_tick $self, $write;
@@ -687,7 +708,7 @@ sub _event_topic {
 }
 
 sub DESTROY {
-  my $self = shift;
+  my $self   = shift;
   my $ioloop = $self->{_irc}{ioloop} or return;
   my $tid;
   $ioloop->remove($tid) if $tid = $self->{steal_nick_tid};
@@ -747,10 +768,6 @@ L</nick>.
 =head2 participants
 
 See L<Convos::Core::Connection/participants>.
-
-=head2 rooms
-
-See L<Convos::Core::Connection/rooms>.
 
 =head2 send
 

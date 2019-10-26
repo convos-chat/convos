@@ -1,0 +1,119 @@
+.le-photo img {
+  cursor: zoom-in;
+}
+
+.le-rich,
+.le-photo {
+  overflow: hidden;
+  display: block;
+  max-width: 100%; // required to contain iframes on iphone
+  max-height: 20rem;
+  margin: 6px 0;
+}
+
+.le-card,
+.le-rich {
+  .le-thumbnail-placeholder {
+    display: none;
+  }
+
+  .le-thumbnail {
+    float: left;
+    img {
+      max-height: 50px;
+      margin-right: 8px;
+      border: 0;
+      box-shadow: none;
+      vertical-align: bottom;
+    }
+  }
+
+  h3 {
+    font-size: 1em;
+    line-height: 1em;
+    display: block;
+    margin: 0;
+  }
+
+  p {
+    font-size: 0.9em;
+    line-height: 1.2em;
+    margin: 4px 0;
+    display: table-cell;
+  }
+}
+
+.le-provider-link ~ .le-goto-link:before,
+.le-author-link ~ .le-goto-link:before {
+  content: "\2013\00a0";
+}
+
+.le-paste .le-provider-link:before {
+  content: "Hosted by ";
+}
+
+.le-video video {
+  background: var(--body-bg);
+  border: var(--hr-border);
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.le-image-card .le-goto-link {
+  display: none;
+}
+
+.le-photo img {
+  max-height: 220px;
+  max-width: 100%;
+}
+
+.le-paste {
+  background: var(--body-bg);
+  font-size: 0.9rem;
+  border: var(--hr-border);
+  max-height: 80px;
+  max-width: 100%;
+  overflow: hidden;
+
+  &.without-frame {
+    border: 0;
+
+    .hljs {
+      padding: 0;
+    }
+  }
+
+  .hljs {
+    background: transparent;
+    margin: 0;
+  }
+
+  .le-meta {
+    background: var(--body-bg);
+    color: var(--text-color);
+    padding: var(--gutter-small);
+    margin: 0;
+    filter: brightness(0.95);
+    cursor: zoom-in;
+  }
+
+  ol {
+    margin: 0.2rem 0;
+  }
+
+  &.is-expanded {
+    max-height: none;
+    overflow-x: auto;
+
+    .le-meta {
+      cursor: zoom-out;
+    }
+  }
+}
+
+.instagram-media {
+  box-shadow: none !important;
+  max-width: 400px !important;
+}

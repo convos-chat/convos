@@ -1,0 +1,9 @@
+.participant {
+  // Mode order is significant
+  &.has-mode-v span:before { content: '+'; }
+  &.has-mode-o span:before { content: '@'; }
+
+  i {
+    width: 1.2em;
+  }
+}

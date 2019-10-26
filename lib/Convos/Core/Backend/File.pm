@@ -130,13 +130,13 @@ sub messages {
   # Set "after" to 12 months before "before"
   elsif ($query->{before} and !$query->{after}) {
     $args{before} = _strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
-    $args{after} = $args{before}->add_months(-12);
+    $args{after}  = $args{before}->add_months(-12);
   }
 
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
   elsif (!$query->{before} and $query->{after}) {
-    $args{after} = _strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
+    $args{after}  = _strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
     $args{before} = $args{after}->add_months(12);
   }
 
@@ -188,7 +188,7 @@ sub notifications {
   while (my $line = $FH->getline) {
     next unless $line =~ $re;
     my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
-    my $ts = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    my $ts      = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
     $self->_message_type_from($message);
     unshift @notifications, $message;
     last if @notifications == $query->{limit};
@@ -236,10 +236,10 @@ sub users {
 }
 
 sub _format {
-  my ($self, $key) = @_;
-  my $format = $FORMAT{$key};
+  my ($self, $type) = @_;
+  my $format = $FORMAT{$type};
   return @$format if $format;
-  warn "[Convos::Core::Backend::File] No format defined for $key\n" if DEBUG;
+  warn "[Convos::Core::Backend::File] No format defined for $type\n" if $type ne 'error' and DEBUG;
   return;
 }
 
@@ -290,7 +290,7 @@ sub _messages {
   $args->{cursor} = $args->{cursor}->add_months(-1) while $cursor->mon == $args->{cursor}->mon;
 
   my $file = $self->_log_file($obj, $cursor);
-  my $FH = File::ReadBackwards->new($file);
+  my $FH   = File::ReadBackwards->new($file);
   unless ($FH) {
     warn "[@{[$obj->id]}] $!: $file\n" if DEBUG >= 2;
     return $self->_messages($obj, $args);
@@ -300,9 +300,9 @@ sub _messages {
   while (my $line = $FH->getline) {
     $line = Mojo::Util::decode('UTF-8', $line);
     next unless $line =~ $args->{re};
-    my $flag = $2 || '0';
+    my $flag    = $2 || '0';
     my $message = {message => $3, ts => $1};
-    my $ts = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    my $ts      = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
     next unless $ts < $args->{before} and $ts > $args->{after};
     $self->_message_type_from($message);
     $message->{highlight}
@@ -344,9 +344,14 @@ sub _setup {
       $connection->on(
         message => sub {
           my ($connection, $target, $msg) = @_;
+
+          $self->emit("user:$uid",
+            message =>
+              {connection_id => $cid, dialog_id => $target->id, name => $target->name, %$msg});
+
           my ($format, @keys) = $self->_format($msg->{type}) or return;
           my $message = sprintf $format, map { $msg->{$_} } @keys;
-          my $flag = FLAG_NONE;
+          my $flag    = FLAG_NONE;
 
           if ($msg->{highlight} and $target->id and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
@@ -355,9 +360,6 @@ sub _setup {
             $flag |= FLAG_HIGHLIGHT;
           }
 
-          $self->emit("user:$uid",
-            message =>
-              {connection_id => $cid, dialog_id => $target->id, name => $target->name, %$msg});
           $message = sprintf "%c %s", $flag + FLAG_OFFSET, $message;
           $self->_log($target, $msg->{ts}, $message);
         }

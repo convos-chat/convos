@@ -1,11 +1,25 @@
 % layout 'convos';
 % title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
-<component :is="user.currentPage" :current-page.sync="currentPage" :user="user">
-  <div class="row not-logged-in-wrapper">
-    <div class="col s12 m6 offset-m3">
-      %= include 'partial/header'
-      %= include 'partial/loader'
-      %= include 'partial/footer'
-    </div>
+
+%= include 'partial/sidebar', js_remove => 1
+
+<main class="main align-content-middle js-remove">
+  <div>
+    <p class="no-js">
+      <i class="fas fa-download no-js"></i>
+      %=l 'Downloading Convos...'
+    </p>
+    <p class="has-js">
+      <i class="fas fa-spinner has-js fa-spin"></i>
+      %=l 'Starting Convos...'
+    </p>
+
+    <noscript>
+      <p><%=l 'Javascript is disabled, so Convos will never load. Please enable Javascript and try again.' %></p>
+    </noscript>
+
+    <article>
+      <p><%=l 'Convos is the simplest way to use IRC and it keeps you always online.' %></p>
+    </article>
   </div>
-</component>
+</main>

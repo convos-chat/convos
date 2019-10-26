@@ -61,14 +61,17 @@ sub login {
 }
 
 sub logout {
-  my $self = shift;
+  my $self   = shift->openapi->valid_input or return;
+  my $format = $self->stash('format') || 'json';
 
   $self->delay(
     sub { $self->auth->logout({}, shift->begin) },
     sub {
       my ($delay, $err) = @_;
-      return $self->render(openapi => E($err), status => 400) if $err;
-      return $self->session({expires => 1})->redirect_to('index');
+      return $self->render(openapi => E($err), status => 500) if $err;
+      $self->session({expires => 1});
+      return $self->redirect_to('/') if $format eq 'html';
+      return $self->render(openapi => {message => 'Logged out.'});
     },
   );
 }
@@ -95,15 +98,32 @@ sub recover {
   $self->session(email => $email)->redirect_to($redirect_url);
 }
 
+sub require_login {
+  my $self = shift;
+  my $user = $self->backend->user;
+
+  return $self->stash(user => $user) if $user;
+  $self->redirect_to('index');
+  return undef;
+}
+
 sub register {
   my $self = shift->openapi->valid_input or return;
+  my $user;
 
   $self->delay(
     sub { $self->auth->register($self->req->json, shift->begin) },
     sub {
-      my ($delay, $err, $user) = @_;
+      (my ($delay, $err), $user) = @_;
       return $self->render(openapi => E($err), status => 400) if $err;
-      return $self->session(email => $user->email)->render(openapi => $user);
+      $self->session(email => $user->email);
+      $self->backend->connection_create($self->config('default_connection'), shift->begin);
+    },
+    sub {
+      my ($delay, $err, $connection) = @_;
+      return $self->render(openapi => E($err), status => 500) if $err;
+      $self->app->core->connect($connection);
+      $self->render(openapi => $user);
     },
   );
 }
@@ -172,6 +192,10 @@ See L<Convos::Manual::API/logoutUser>.
 =head2 recover
 
 Will log in a user from a recovery link.
+
+=head2 require_login
+
+TODO
 
 =head2 register
 

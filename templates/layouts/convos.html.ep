@@ -17,29 +17,33 @@
     <meta property="og:site_name" content="<%= config 'organization_name' %>">
     <meta property="og:title" content="<%= title %>">
     <meta property="og:url" content="<%= $c->req->url->to_abs %>">
-    <noscript><style>.if-js { display: none; }</style></noscript>
-    %= asset 'favicon.ico'
+    <noscript><style>.has-js { display: none; }</style></noscript>
+
+    <link rel="apple-touch-icon" sizes="57x57" href="<%= url_for('/asset/apple-touch-icon-57x57.e024a83e.png') %>">
+    <link rel="apple-touch-icon" sizes="60x60" href="<%= url_for('/asset/apple-touch-icon-60x60.51c5a95b.png') %>">
+    <link rel="apple-touch-icon" sizes="72x72" href="<%= url_for('/asset/apple-touch-icon-72x72.231a66c9.png') %>">
+    <link rel="apple-touch-icon" sizes="76x76" href="<%= url_for('/asset/apple-touch-icon-76x76.5e14b7a1.png') %>">
+    <link rel="apple-touch-icon" sizes="114x114" href="<%= url_for('/asset/apple-touch-icon-114x114.913c43db.png') %>">
+    <link rel="apple-touch-icon" sizes="120x120" href="<%= url_for('/asset/apple-touch-icon-120x120.52c691a9.png') %>">
+    <link rel="apple-touch-icon" sizes="144x144" href="<%= url_for('/asset/apple-touch-icon-144x144.eb857b3e.png') %>">
+    <link rel="apple-touch-icon" sizes="152x152" href="<%= url_for('/asset/apple-touch-icon-152x152.be6c9e4f.png') %>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= url_for('/asset/apple-touch-icon-180x180.c1fe73dd.png') %>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<%= url_for('/asset/favicon-32x32.2447df68.png') %>">
+    <link rel="icon" type="image/png" sizes="194x194" href="<%= url_for('/asset/favicon-194x194.77dd0ed4.png') %>">
+    <link rel="icon" type="image/png" sizes="192x192" href="<%= url_for('/asset/android-chrome-192x192.02ee7244.png') %>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<%= url_for('/asset/favicon-16x16.9e1affe1.png') %>">
+    <link rel="manifest" href="<%= url_for('/asset/site.e3ea726b.webmanifest') %>">
+    <link rel="mask-icon" href="<%= url_for('/asset/safari-pinned-tab.cb98a0d7.svg') %>" color="#00451D">
+    <meta name="msapplication-TileImage" content="<%= url_for('/asset/mstile-144x144.a653fdfa.png') %>">
+    <meta name="msapplication-config" content="<%= url_for('/asset/browserconfig.f80fd3df.xml') %>">
+    <meta name="msapplication-TileColor" content="#00451D">
+    <meta name="theme-color" content="#00451D">
+
     %= asset 'convos.css'
-    <link rel="preload"  href="<%= $c->url_for("/font/material-design-icons/MaterialIcons-Regular.woff2")%>">
     %= include 'javascript' if 200 == (stash('status') // 200)
   </head>
-  <body>
+  <body class="no-js page-loading is-logged-out">
     %= content
-    <div id="vue_tooltip"><span></span></div>
     %= asset 'convos.js' if 200 == (stash('status') // 200)
-    % if(200 == (stash('status') // 200)) {
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(registration) {
-            // Registration was successful
-          }, function(err) {
-            // registration failed :(
-              console.log('ServiceWorker registration failed: ', err);
-            });
-          });
-      }
-    </script>
-    % }
   </body>
 </html>

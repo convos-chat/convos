@@ -9,7 +9,7 @@ See [convos.by](http://convos.by) for more details.
 
 The backend is powered by [Mojolicious](http://mojolicious.org), while the
 frontend is held together by the progressive JavaScript framework
-[Vue](https://vuejs.org/).
+[Svelte](https://svelte.dev/).
 
 # Quick start guide
 

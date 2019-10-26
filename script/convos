@@ -20,20 +20,22 @@ use strict;
 use Config;
 my %seen;
 
+$ENV{MOJO_NPM_BINARY} = 'pnpm';
+
 if ($ARGV[0] and -r $ARGV[0] and -f $ARGV[0]) {
   $ENV{MOJO_CONFIG} = shift @ARGV;
   unshift @ARGV, 'daemon' unless $ARGV[0] and $ARGV[0] eq 'daemon';
 }
 
 my $command = $ARGV[0] || '';
-$ENV{MOJO_LOG_LEVEL} ||= 'fatal' if grep { $command eq $_ } qw(get version);
-$ENV{MOJO_MODE} ||= 'production' if $command eq 'daemon';
+$ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if grep { $command eq $_ } qw(get version);
+$ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
 $ENV{CONVOS_COMMAND_LINE} //= 1 if $command eq 'get';
 
 unless ($ENV{CONVOS_SETUP}++) {
   eval "require $_;1" or die $@ for qw(FindBin File::Spec);
-  my $bin = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local', 'bin');
-  my $cpanfile = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
+  my $bin       = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local', 'bin');
+  my $cpanfile  = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
   my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
 
   # Extra helper programs
@@ -87,12 +89,14 @@ else {
 sub ensure_dependencies {
   return if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK};
   my ($cpanfile, $action, $mode) = @_;
-  my @cpanm = ($^X, File::Spec->catfile($FindBin::Bin, 'cpanm'));
+  my @cpanm     = ($^X, File::Spec->catfile($FindBin::Bin, 'cpanm'));
   my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
   my ($n, @missing) = (0);
 
+  $mode ||= '';
+
   our $cpanfile_mode = 'default';
-  local *main::on = sub { local $cpanfile_mode = shift; shift->() };
+  local *main::on            = sub { local $cpanfile_mode = shift; shift->() };
   local *main::test_requires = sub { };
   local *main::requires = sub {
     my ($module, $version) = @_;
@@ -107,9 +111,10 @@ sub ensure_dependencies {
     push @missing, [$module, $version, $e, $cpanfile_mode];
   };
 
-  if ($action eq 'install' and $mode and $mode ne '--develop') {
-    die "Usage: $0 install [--develop]\n" if $mode and $mode ne '--develop';
+  if ($action eq 'install' and $mode eq '--help') {
+    die "Usage: $0 install [--develop]\n";
   }
+
   if (!-r $cpanm[1]) {
     main::requires('App::cpanminus', '1.7016');    # cpanm -M ... is required
     @cpanm = qw(cpanm);
@@ -131,6 +136,8 @@ sub ensure_dependencies {
       qq(or run "CONVOS_DEBUG=1 $0 @ARGV" for more information.\n\n);
     die join "", map {"\n$_"} @msg;
   }
+
+  $ENV{MOJO_WEBPACK_REINSTALL} //= $action eq 'install' && $mode eq '--develop' ? 1 : 0;
 
   for my $m (@missing) {
     $ENV{CPAN_MIRROR} //= 'https://cpan.metacpan.org' if eval 'require IO::Socket::SSL;1';

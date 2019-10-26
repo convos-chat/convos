@@ -1,23 +1,60 @@
 Revision history for perl distribution Convos
 
-0.99_40 2019-02-08T23:05:00+0100
+1.00 Not Released
+ - Changed frontend to use https://svelte.dev/ from Vuejs.
+ - Changed to using URLs, so you can link directly to conversations and pages
+   when chatting.
+ - Changed sidebar design to a tree view, where conversations are listed under
+   connections.
+ - Changed "unread" logic to reset to zero when conversations looses focus.
+ - Changed notifications to be rendered as a conversation, with the latest
+   notifications in the bottom.
+ - Changed notifications to be marked as read, when notifications conversation
+   looses focus.
+ - Changed from using Material Design Icons to Font Awesome.
+ - Changed twemoji, after emojione/joypixels changed their design.
+ - Changed autocomplete dropdown to show when trigger character is seen. This
+   makes it work on phones as well.
+ - Changed autocomplete for nicks: Nick has to be prefixed with "@".
+ - Changed sidebar design for register/login pages, like we do on
+   https://convos.by.
+ - Replaced Mojolicious::Plugin::AssetPack with Mojolicious::Plugin::Webpack.
+ - Add number of unread to document title #382
+ - Add "New messages" indicator.
+ - Add support for rendering quotes.
+ - Add icons before nicks. The icon is calculated from the nick, so it does not
+   change between installations or reloads.
+ - Add "Autocomplete" and "Text formatting" to /help.
+ - Add toggle for error message details.
+ - Improved filtering logic in sidebar.
+ - Fix not including ")" (or other special characters) when rendering links.
+ - Fix rendering in Safari on iOS.
+ - Fix handling of nicks with MixedCaps.
+ - Fix reacting to window focus #383
+ - Fix for ZNC integration: Connection name based on ZNC usernames #316
+ - Removed the ShareDialog plugin.
+ - Removed "Create connection" when registering. Will instead connect to the
+   default connection.
+ - Removed custom styling support.
+ - Bumped LinkEmbedder version to 1.06
+ - Using "pnpm" (instead of "npm") to install node modules.
 
-- Switch order of isconnect and ison to allow authentication with nickserv before join
-- Remove POD plugin which has been deprecated from Mojo core.
-- Update Alpine image
-- Fix duplicate key in schema
+0.99_40 2019-02-08T23:05:00+0100
+ - Switch order of isconnect and ison to allow authentication with nickserv before join
+ - Remove POD plugin which has been deprecated from Mojo core.
+ - Update Alpine image
+ - Fix duplicate key in schema
 
 0.99_39 2018-08-30T10:40:39+0200
-
-- Only keep one conversation open at a time.
+ - Only keep one conversation open at a time.
 
 0.99_38 2018-08-20 15:09:00
-- Add support for disabling tls verification per connection (jberger)
+ - Add support for disabling tls verification per connection (jberger)
 
 0.99_37 2018-08-16 11:43:00
-- Added -wn to perltidy for superior welding
-- Make convos a PWA
-- Add a delay helper until we can convert convos to promises
+ - Added -wn to perltidy for superior welding
+ - Make convos a PWA
+ - Add a delay helper until we can convert convos to promises
 
 0.99_36 2017-11-28T08:25:51+0200
  - Fix TLS detection when creating a connection #344
@@ -364,4 +401,3 @@ Revision history for perl distribution Convos
 
 0.99_00 2015-02-02T15:40:40+0200
  - Started rewriting Convos
-

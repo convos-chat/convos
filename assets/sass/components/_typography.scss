@@ -1,0 +1,74 @@
+html,
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  color: var(--text-color);
+}
+
+a {
+  color: var(--link-color);
+}
+
+h1,
+h2,
+h3 {
+  padding: 0;
+  margin: 0.8em 0 0.6em 0;
+
+  a {
+    text-decoration: none;
+  }
+}
+
+h1 {
+  font-size: calc(var(--h1-font-size) * 0.8);
+
+  @include if_screen(">two-columns") {
+    font-size: var(--h1-font-size);
+  }
+}
+
+h2 {
+  font-size: var(--h2-font-size);
+}
+
+h2, h3, h4, h5, h6 {
+  line-height: 1;
+}
+
+dl,
+ol,
+ul,
+p {
+  margin: 0.5rem 0 1rem 0;
+  line-height: 1.5;
+}
+
+dt {
+  font-weight: 400;
+}
+
+dd {
+  margin: 0 0 0.3rem 1.5rem;
+}
+
+ol,
+ul {
+  padding-left: 1.5rem;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-family-monospace);
+}
+
+.is-link {
+  cursor: pointer;
+}
+
+.help {
+  font-size: 0.9rem;
+  margin-top: -0.3rem;
+}

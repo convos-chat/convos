@@ -1,0 +1,99 @@
+.chat-header {
+  @extend %next-to-sidebar;
+
+  background: var(--body-bg);
+  border-bottom: 1px solid #aaa;
+  box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
+  padding-top: var(--gutter);
+  padding-bottom: var(--gutter-small);
+  overflow: hidden;
+  display: flex;
+  align-items: baseline;
+  top: 0;
+  z-index: 900;
+
+  @include if_screen("<=two-columns") {
+    background: var(--sidebar-left-bg);
+    color: var(--sidebar-left-text);
+    padding-top: var(--gutter-small);
+    border-bottom: 0;
+
+    a {
+      color: var(--sidebar-left-text);
+    }
+
+    .fas {
+      padding-right: 0.3em;
+    }
+  }
+
+  h1 {
+    margin: 0;
+    line-height: var(--h1-font-size);
+    height: var(--h1-font-size);
+    white-space: pre;
+
+    a {
+      color: inherit;
+    }
+
+    .fas {
+      font-size: 0.7em;
+
+      @include if_screen("<=two-columns") {
+        position: relative;
+        top: -0.1em;
+      }
+
+      @include if_screen(">two-columns") {
+        position: absolute;
+        top: calc(var(--gutter) + 0.35em);
+        right: var(--gutter);
+      }
+    }
+  }
+
+  small {
+    font-size: 0.9rem;
+    font-style: italic;
+    text-overflow: ellipsis;
+    white-space: pre;
+    margin-right: 2rem;
+    overflow: hidden;
+    display: block;
+
+    &::before {
+      content: '';
+      padding-right: 1rem;
+    }
+
+    @include if_screen("<=two-columns") {
+      display: none;
+    }
+  }
+
+  form {
+    padding: var(--gutter) 0;
+    clear: both;
+  }
+}
+
+.chat-header__hamburger {
+  color: inherit;
+  font-size: 1.4rem;
+  line-height: 1.4rem;
+  padding: 1rem var(--gutter);
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: none;
+  z-index: 2;
+
+  @include if_screen("<=two-columns") {
+    display: block;
+  }
+
+  i {
+    transition: transform 0.3s;
+  }
+}

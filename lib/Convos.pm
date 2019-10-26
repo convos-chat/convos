@@ -11,7 +11,7 @@ use Mojo::Util;
 
 $ENV{CONVOS_PLUGINS} //= 'Convos::Plugin::Paste';
 
-our $VERSION = '0.99_40';
+our $VERSION = '1.00';
 
 my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
 
@@ -22,42 +22,13 @@ has core => sub {
   return Convos::Core->new(backend => $self->config('backend'), home => path(split '/', $home));
 };
 
-has _api_spec => sub {
-  my $self = shift;
-  my $file = $self->static->file('convos-api.json');
-  die "Could not find convos-api.json in static=@{$self->static->paths}, home=@{[$self->home]})"
-    unless $file;
-  return Mojo::JSON::decode_json($file->slurp);
-};
-
-has _custom_assets => sub { Mojolicious::Static->new };
 has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
-
-sub extend_api_spec {
-  my ($self, $path) = (shift, shift);
-
-  while (@_) {
-    my ($method, $op) = (shift, shift);
-
-    eval "package $ANON_API_CONTROLLER; use Mojo::Base 'Mojolicious::Controller'; 1"
-      unless $ANON_API_CONTROLLER->can('new');
-    Mojo::Util::monkey_patch($ANON_API_CONTROLLER => $op->{operationId} => delete $op->{cb});
-
-    $op->{'x-mojo-to'} = sprintf 'anon#%s', $op->{operationId};
-    $op->{responses}{default}
-      ||= {description => 'Error.', schema => {'$ref' => '#/definitions/Error'}};
-
-    $self->_api_spec->{paths}{$path}{$method} = $op;
-  }
-
-  return $self;
-}
 
 sub startup {
   my $self   = shift;
   my $config = $self->_config;
-  my $r      = $self->routes;
 
+  $self->helper(l => sub { $_[1] });    # TODO
 
   $self->helper(
     delay => sub {
@@ -67,6 +38,7 @@ sub startup {
       $delay->catch(sub { $c->helpers->reply->exception(pop) and undef $tx })->wait;
     }
   );
+
   $self->_home_in_share unless -d $self->home->rel_file('public');
   $self->defaults(debug => $self->mode eq 'development' ? ['info'] : []);
   $self->routes->namespaces(['Convos::Controller']);
@@ -75,23 +47,41 @@ sub startup {
   $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
+  # Autogenerate routes from the OpenAPI specification
+  $self->plugin(OpenAPI => {url => $self->static->file('convos-api.json')->path});
+
   # Add basic routes
-  $r->get('/')->to(template => 'index')->name('index');
+  my $r = $self->routes;
+  $r->get('/')->to(chat_mode => 1, template => 'index')->name('index');
+  $r->get("/$_")->to(chat_mode => 1, template => 'index')->name($_) for qw(login logout register);
+  $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
+    ->to(template => 'asset/browserconfig');
+  $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/sw' => [format => 'js']);
-  $r->get('/custom/asset/*file' => \&_action_custom_asset);
   $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
   $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
+
+  # Event channel
   $r->websocket('/events')->to('events#start')->name('events');
 
-  $self->_api_spec;
+  # Require authentication
+  my $auth_r = $r->under('/')->to('user#require_login', chat_mode => 1);
+  $auth_r->get("/$_")->to(template => 'index')->name($_)     for (qw(help join settings));
+  $auth_r->get("/add/$_")->to(template => 'index')->name($_) for (qw(connection conversation));
+  $auth_r->get('/chat/*rest', {rest => ''})->to(template => 'index')->name('chat');
+
   $self->_plugins;
   $self->_setup_secrets;
-  $self->_assets;
 
-  # Autogenerate routes from the OpenAPI specification
-  $self->plugin(OpenAPI => {url => delete $self->{_api_spec}});
-
+  # Process svelte assets using rollup.js
+  $ENV{MOJO_WEBPACK_CONFIG} = 'rollup.config.js';
+  $self->plugin(
+    Webpack => {
+      process      => ['svelte'],
+      dependencies => {core => 'rollup', svelte => [qw(rollup-plugin-svelte svelte)]}
+    }
+  );
 
   $self->hook(
     before_dispatch => sub {
@@ -111,74 +101,6 @@ sub startup {
   $self->core->start;
 }
 
-# Used internally to generate dynamic SASS files
-sub _action_custom_asset {
-  my $c      = shift;
-  my $static = $c->app->_custom_assets;
-  my $asset  = $static->file(Mojo::Path->new($c->stash('file'))->canonicalize);
-
-  # Can never render 404, since that will make AssetPack croak
-  return $c->render(text => "// not found\n", status => 200) unless $asset;
-  $c->app->log->info('Loading custom asset: ' . $asset->path);
-  $static->serve_asset($c, $asset);
-  $c->rendered;
-}
-
-sub _assets {
-  my $self          = shift;
-  my $custom_assets = $self->core->home->child('assets');
-
-  # Skip building on travis
-  if ($ENV{TRAVIS_BUILD_ID} or $ENV{CONVOS_COMMAND_LINE}) {
-    return $self->helper(asset => sub { });
-  }
-
-  $self->plugin(AssetPack => {pipes => [qw(Favicon Vuejs JavaScript Sass Css Combine)]});
-
-  if (-d $custom_assets) {
-    $self->log->info("Including files from $custom_assets when building frontend.");
-    $self->_custom_assets->paths([$custom_assets]);
-    unshift @{$self->asset->store->paths}, $custom_assets;
-  }
-
-  $self->asset->pipe('Favicon')
-    ->api_key($ENV{REALFAVICONGENERATOR_API_KEY} || 'REALFAVICONGENERATOR_API_KEY=is_not_set')
-    ->design({
-    desktop_browser => {},
-    android_chrome  => {
-      picture_aspect => 'shadow',
-      manifest       => {name => 'Convos', display => 'standalone', orientation => 'portrait'},
-      theme_color    => '#00451D'
-    },
-    firefox_app => {
-      picture_aspect         => 'circle',
-      keep_picture_in_circle => 'true',
-      circle_inner_margin    => '5',
-      background_color       => '#ffffff',
-      manifest               => {
-        app_name        => 'Convos',
-        app_description => 'A better way to IRC',
-        developer_name  => 'Nordaaker',
-        developer_url   => 'http://nordaaker.com',
-      }
-    },
-    ios =>
-      {picture_aspect => 'background_and_margin', margin => '4', background_color => '#ffffff'},
-    safari_pinned_tab =>
-      {picture_aspect => 'black_and_white', threshold => 60, theme_color => '#00451D'},
-    windows => {
-      picture_aspect   => "white_silhouette",
-      background_color => "#00451D",
-      assets           => {
-        windows_80_ie_10_tile       => \1,
-        windows_10_ie_11_edge_tiles => {small => \0, medium => \1, big => \1, rectangle => \0}
-      }
-    },
-    });
-  $self->asset->process('favicon.ico' => 'images/icon.svg');
-  $self->asset->process;
-}
-
 sub _config {
   my $self   = shift;
   my $config = $self->config;
@@ -189,21 +111,13 @@ sub _config {
 
   $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
   $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
-  $config->{hide}{$_} = 1 for split /,/, +($ENV{CONVOS_HIDE_ELEMENTS} || '');
-  $config->{home} ||= $ENV{CONVOS_HOME}
+  $config->{home}    ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
   $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
-  $config->{forced_irc_server} ||= $ENV{CONVOS_FORCED_IRC_SERVER} || '';
-  $config->{forced_irc_server} = "irc://$config->{forced_irc_server}"
-    if $config->{forced_irc_server} and $config->{forced_irc_server} !~ m!^\w+://!;
-  $config->{forced_irc_server} = Mojo::URL->new($config->{forced_irc_server});
-  $config->{default_server}
-    ||= $config->{forced_irc_server}->host_port
-    || $ENV{CONVOS_DEFAULT_SERVER}
-    || 'chat.freenode.net:6697';
+  $self->_default_connection($config);
 
   if ($config->{log_file} ||= $ENV{CONVOS_LOG_FILE}) {
     $self->log->path($config->{log_file});
@@ -215,16 +129,33 @@ sub _config {
 
   # public settings
   $config->{settings} = {
-    contact           => $config->{contact},
-    default_server    => $config->{default_server},
-    forced_irc_server => $config->{forced_irc_server}->host ? true : false,
-    hide              => $config->{hide} ||= {},
-    organization_name => $config->{organization_name},
-    organization_url  => $config->{organization_url},
-    version           => $self->VERSION || '0.01',
+    contact            => $config->{contact},
+    default_connection => $config->{default_connection},
+    forced_connection  => $config->{forced_connection} ? true : false,
+    organization_name  => $config->{organization_name},
+    organization_url   => $config->{organization_url},
+    version            => $self->VERSION || '0.01',
   };
 
-  $config;
+  return $config;
+}
+
+sub _default_connection {
+  my ($self, $config) = @_;
+
+  my @urls = map { $config->{$_} = $ENV{uc("CONVOS_$_")} || $config->{$_} }
+    qw(forced_connection forced_irc_server default_connection default_server);
+  $config->{forced_connection}
+    = $config->{forced_irc_server} || $config->{forced_connection} ? 1 : 0;
+  delete $config->{$_} for qw(default_connection default_server forced_irc_server);
+
+  for my $url (grep {$_} @urls) {
+    next unless 3 < length $url;    # skip "0", "1" and "yes"
+    $url = "irc://$url" unless $url =~ m!^\w+://!;
+    return ($config->{default_connection} = Mojo::URL->new($url));
+  }
+
+  return ($config->{default_connection} = Mojo::URL->new('irc://chat.freenode.net:6697/%23convos'));
 }
 
 sub _home_in_share {
@@ -254,7 +185,7 @@ sub _plugins {
   unshift @plugins, qw(Convos::Plugin::Auth Convos::Plugin::Helpers);
 
   while (@plugins) {
-    my $name = shift @plugins or last;
+    my $name   = shift @plugins or last;
     my $config = ref $plugins[0] ? shift @plugins : $self->config;
     $self->plugin($name => $config) unless $uniq{$name}++;
   }
@@ -289,7 +220,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-0.99_40
+1.00
 
 =head1 DESCRIPTION
 
@@ -374,13 +305,6 @@ Holds a L<Convos::Core> object.
 
 L<Convos> inherits all methods from L<Mojolicious> and implements
 the following new ones.
-
-=head2 extend_api_spec
-
-  $self->extend_api_spec($path => \%spec);
-
-Used to add more paths to the OpenAPI specification. This is useful
-for plugins.
 
 =head2 startup
 

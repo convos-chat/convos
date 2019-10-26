@@ -8,8 +8,9 @@ use Mojo::Util;
 use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 30;
 
 sub start {
-  my $self = shift;
-  my $user = $self->backend->user or return $self->_err('Need to log in first.', {})->finish;
+  my $self = shift->inactivity_timeout(INACTIVE_TIMEOUT);
+
+  return $self->_err('Need to log in first.', {})->finish unless my $user = $self->backend->user;
 
   Scalar::Util::weaken($self);
 
@@ -24,13 +25,13 @@ sub start {
     }
   );
 
-  $self->inactivity_timeout(INACTIVE_TIMEOUT);
   $self->on(
     finish => sub {
       warn "[Convos::Controller::Events] !!! Finish\n" if DEBUG == 2;
       $backend->unsubscribe("user:$uid" => $cb);
     }
   );
+
   $self->on(
     json => sub {
       my ($self, $data) = @_;
@@ -48,6 +49,11 @@ sub _err {
   $res->{$_} = $data->{$_} for grep { $data->{$_} } qw(connection_id message id);
   $res->{event} = 'sent';
   $self->send({json => $res});
+}
+
+sub _event_debug {
+  my ($self, $data) = @_;
+  $self->log->debug(Mojo::Util::dumper($data)) if DEBUG;
 }
 
 sub _event_get_user {
@@ -77,7 +83,7 @@ sub _event_send {
       $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
       $res ||= {};
       $res->{errors} = E($err)->{errors} if $err;
-      $res->{event} = 'sent';
+      $res->{event}  = 'sent';
       $res->{$_} ||= $data->{$_} for keys %$data;
       $self->send({json => $res});
     },

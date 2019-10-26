@@ -21,12 +21,12 @@ $ws->websocket_ok('/events');
 # Note: tls=0 is to avoid reconnecting to the test irc server
 $th->post_ok('/api/connections',
   json => {name => 'test', url => sprintf('irc://%s?tls=0', $irc->server)})->status_is(200);
-my $c = $th->app->core->get_user('superman@example.com')->get_connection('irc-test');
+my $c = $th->app->core->get_user('superman@example.com')->get_connection('irc-localhost');
 
 note 'connected';
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_like('/message', qr{Connecting soon})->json_message_is('/state', 'queued');
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_like('/message', qr{Connected to})->json_message_is('/state', 'connected')
   ->json_message_is('/type', 'connection');
 
@@ -44,11 +44,11 @@ $irc->run(
     note 'join';
     $ws->send_ok({json => {method => 'send', message => '/join #Convos', connection_id => $c->id}});
     $ws->message_ok->json_message_is('/connection_id', $c->id)
-      ->json_message_is('/connection_id', 'irc-test')->json_message_is('/dialog_id', '#convos')
-      ->json_message_is('/event', 'state')->json_message_is('/frozen', '')
-      ->json_message_is('/is_private', 0)->json_message_is('/name', '#Convos')
+      ->json_message_is('/connection_id', 'irc-localhost')
+      ->json_message_is('/dialog_id',     '#convos')->json_message_is('/event', 'state')
+      ->json_message_is('/frozen',        '')->json_message_is('/name', '#Convos')
       ->json_message_is('/topic', '')->json_message_has('/ts')->json_message_is('/type', 'frozen');
-    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
+    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-localhost')
       ->json_message_is('/event', 'sent')->json_message_is('/message', '/join #Convos')
       ->json_message_is('/dialog_id', '#convos');
 
@@ -64,7 +64,7 @@ $irc->run(
       {json => {method => 'send', message => '/nick supergirl', connection_id => $c->id}});
     $ws->message_ok->json_message_has('/id')->json_message_is('/message', '/nick supergirl');
     $ws->message_ok->json_message_is('/event', 'state')
-      ->json_message_is('/connection_id', 'irc-test')->json_message_is('/nick', 'supergirl')
+      ->json_message_is('/connection_id', 'irc-localhost')->json_message_is('/nick', 'supergirl')
       ->json_message_has('/ts')->json_message_is('/type', 'me');
   }
 );
@@ -86,7 +86,7 @@ $irc->run(
       json =>
         {method => 'send', message => '/topic', connection_id => $c->id, dialog_id => '#convos'}
     });
-    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
+    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-localhost')
       ->json_message_is('/message', '/topic')->json_message_is('/topic', 'Some cool topic');
   }
 );
@@ -105,28 +105,31 @@ $ws->message_ok->json_message_is('/message',
 
 note 'part event';
 $c->_event_part({params => ['#convos', 'Bye'], prefix => 'batman!super.girl@i.love.debian.org'});
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_is('/dialog_id', '#convos')->json_message_is('/message', 'Bye')
   ->json_message_is('/nick', 'batman')->json_message_is('/type', 'part');
-
-note 'quit event';
-$c->_event_quit({params => ['So long!'], prefix => 'batman!super.girl@i.love.debian.org'});
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
-  ->json_message_is('/dialog_id', undef)->json_message_is('/nick', 'batman')
-  ->json_message_is('/message', 'So long!')->json_message_is('/type', 'quit');
 
 note 'part command';
 $irc->run(
   [qr{PART}, ['part.irc']],
   sub {
     $ws->send_ok({json => {method => 'send', message => '/part #convos', connection_id => $c->id}});
-    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
+    $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
+      ->json_message_is('/dialog_id', '#convos')->json_message_is('/event', 'state')
+      ->json_message_is('/nick', 'supergirl')->json_message_is('/type', 'part');
+    $ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-localhost')
       ->json_message_is('/message', '/part #convos');
   }
 );
 
+note 'quit event';
+$c->_event_quit({params => ['So long!'], prefix => 'batman!super.girl@i.love.debian.org'});
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
+  ->json_message_is('/dialog_id', undef)->json_message_is('/nick', 'batman')
+  ->json_message_is('/message', 'So long!')->json_message_is('/type', 'quit');
+
 $ws->send_ok({
-    json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
+  json => {method => 'send', message => '/nope', connection_id => $c->id, dialog_id => '#convos'}
 });
 $ws->message_ok;
 {
@@ -136,11 +139,11 @@ $ws->message_ok;
 
 note 'disconnect command';
 $ws->send_ok({json => {method => 'send', message => '/disconnect', connection_id => $c->id}});
-$ws->message_ok->json_message_is('/connection_id', 'irc-test')
-  ->json_message_is('/state', 'disconnected')->json_message_is('/type', 'connection')
-  ->json_message_like('/message', qr{have quit});
-$ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-test')
-  ->json_message_is('/message', '/disconnect');
+$ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
+  ->json_message_is('/event', 'state')->json_message_is('/state', 'disconnected')
+  ->json_message_is('/type', 'connection')->json_message_like('/message', qr{have quit});
+$ws->message_ok->json_message_has('/id')->json_message_is('/connection_id', 'irc-localhost')
+  ->json_message_is('/event', 'sent')->json_message_is('/message', '/disconnect');
 
 # Test to make sure we don't leak events.
 # The get_ok() is just a hack to make sure the server has

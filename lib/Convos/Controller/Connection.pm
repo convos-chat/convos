@@ -7,39 +7,31 @@ use Mojo::Util 'trim';
 sub create {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
+
   my $json = $self->req->json;
-  my $url  = $self->_validate_url($json->{url})
-    or return $self->render(openapi => E('Missing "host" in URL'), status => 400);
-  my $name = $json->{name} || $self->_pretty_connection_name($url);
-  my $connection;
+  my $url  = Mojo::URL->new($json->{url} || '');
 
-  if (!$name) {
-    return $self->render(openapi => E('URL need a valid host.', '/body/url'), status => 400);
-  }
-  if ($user->get_connection({protocol => $url->scheme, name => $name})) {
-    return $self->render(openapi => E('Connection already exists.'), status => 400);
+  if ($self->app->config('forced_connection')) {
+    my $default_connection = $self->app->config('default_connection');
+    return $self->render(openapi => E('Will only accept forced connection URL.'), status => 400)
+      if $url->host_port ne $default_connection->host_port;
   }
 
-  eval {
-    $connection = $user->connection({
-      name                => $name,
-      on_connect_commands => $json->{on_connect_commands} || [],
-      protocol            => $url->scheme,
-    });
-    $connection->url($url);
-    $self->delay(
-      sub { $connection->save(shift->begin) },
-      sub {
-        my ($delay, $err) = @_;
-        die $err if $err;
-        $self->app->core->connect($connection);
-        $self->render(openapi => $connection);
-      },
-    );
-    1;
-  } or do {
-    $self->render(openapi => E($@ || 'Unknown error'), status => 400);
-  };
+  return $self->render(openapi => E('Missing "host" in URL'), status => 400) unless $url->host;
+
+  $self->delay(
+    sub {
+      $self->backend->connection_create($url, shift->begin);
+    },
+    sub {
+      my ($delay, $err, $connection) = @_;
+      return $self->render(openapi => E($err || 'Could not create connection.'), status => 400)
+        if $err or !$connection;
+      $connection->on_connect_commands($json->{on_connect_commands} || []);
+      $self->app->core->connect($connection);
+      $self->render(openapi => $connection);
+    },
+  );
 }
 
 sub list {
@@ -70,25 +62,6 @@ sub remove {
   );
 }
 
-sub rooms {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
-  my $connection = $user->get_connection($self->stash('connection_id'));
-
-  unless ($connection) {
-    return $self->render(openapi => E('Connection not found.'), status => 404);
-  }
-
-  $self->delay(
-    sub { $connection->rooms({match => $self->param('match')}, shift->begin) },
-    sub {
-      my ($delay, $err, $res) = @_;
-      return $self->render(openapi => $res) unless $err;
-      return $self->render(openapi => E($err), status => 500);
-    },
-  );
-}
-
 sub update {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
@@ -98,7 +71,7 @@ sub update {
 
   eval {
     $connection = $user->get_connection($self->stash('connection_id'));
-    $connection->url->host or die 'Connection not found';
+    $connection->url->host or die 'Connection not found.';
     $connection->wanted_state($state) if $state;
     1;
   } or do {
@@ -109,10 +82,13 @@ sub update {
     $cmds = [map { trim $_} @$cmds];
     $connection->on_connect_commands($cmds);
   }
-  if (my $url = $self->_validate_url($json->{url})) {
+
+  my $url = Mojo::URL->new($json->{url} || '');
+  $url = $connection->url unless $url->host;
+
+  if (!$self->app->config('forced_connection')) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
     $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnected';
-    $connection->nick($url->query->param("nick"), sub { }) if $url->query->param("nick");
     $connection->url($url);
   }
 
@@ -120,6 +96,7 @@ sub update {
     sub {
       my ($delay) = @_;
       $state = '' if $connection->state eq 'connected' and $state eq 'connected';
+      $connection->nick($url->query->param('nick'), sub { }) if $url->query->param('nick');
       $connection->save($delay->begin);
       $connection->disconnect($delay->begin) if $state eq 'disconnected' or $state eq 'reconnect';
     },
@@ -140,7 +117,12 @@ sub _pretty_connection_name {
 
   # Support ZNC style logins
   # <user>@<useragent>/<network>
-  if (defined($username) && ($username =~ /^(?<name>[a-z0-9_\+-]+)@(?<useragent>[a-z0-9_\+-]+)\/(?<network>[a-z0-9_\+-]+)/i)) {
+  if (
+    defined($username)
+    && ($username
+      =~ /^(?<name>[a-z0-9_\+-]+)@(?<useragent>[a-z0-9_\+-]+)\/(?<network>[a-z0-9_\+-]+)/i)
+    )
+  {
     return $+{network} if ($+{network});
   }
 
@@ -162,21 +144,6 @@ sub _same_url {
   return 0 unless +($u1->query->param('tls') || '0') eq +($u2->query->param('tls') || '0');
   return 0 unless +($u1->userinfo // '') eq +($u2->userinfo // '');
   return 1;
-}
-
-sub _validate_url {
-  my ($self, $url) = @_;
-
-  $url = Mojo::URL->new($url || '');
-
-  my $f = $self->app->config('forced_irc_server');
-  if ($f->host) {
-    $url->host_port($f->host_port);
-    $url->userinfo(defined $f->password ? join ':', $url->username // '', $f->password : undef);
-    $url->query->param(forced => 1);
-  }
-
-  return $url->host ? $url : undef;
 }
 
 1;
@@ -205,10 +172,6 @@ See L<Convos::Manual::API/listConnections>.
 =head2 remove
 
 See L<Convos::Manual::API/removeConnection>.
-
-=head2 rooms
-
-See L<Convos::Manual::API/roomsForConnection>.
 
 =head2 update
 

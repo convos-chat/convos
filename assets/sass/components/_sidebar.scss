@@ -1,0 +1,45 @@
+.sidebar-left__nav,
+.sidebar-right__nav {
+  a {
+    text-decoration: none;
+    line-height: 1.2rem;
+    padding: 0.35rem 0;
+    display: block;
+    position: relative;
+    transition: all 0.15s ease-in-out;
+
+    &:focus,
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  h3 {
+    font-size: 0.9rem;
+    font-weight: normal;
+    margin-bottom: 0.3rem;
+    margin-top: var(--gutter);
+  }
+}
+
+.sidebar__header {
+  text-decoration: none;
+  padding-top: var(--gutter);
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  .fas {
+    font-size: 1.8rem;
+    position: absolute;
+    right: 0;
+    top: calc(var(--gutter) + 0.2rem);
+    cursor: pointer;
+  }
+}
+
+@import './sidebar/sidebar-left';
+@import './sidebar/sidebar-left-search-form';
+@import './sidebar/sidebar-left-logged-out';
+@import './sidebar/sidebar-right';

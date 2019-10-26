@@ -1,2 +1,5 @@
---ignore-dir=assets/cache
+--ignore-dir=public/asset
+--ignore-dir=public/docs
+--ignore-dir=public/fonts
+--ignore-dir=public/images
 --ignore-dir=local

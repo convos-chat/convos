@@ -16,6 +16,7 @@
 .perl-version
 assets/sass/.sass-cache/
 node_modules/
+pnpm-debug.log
 .DS_Store
 
 # snapcraft directories
@@ -24,3 +25,4 @@ convos*_source.tar.bz2
 /parts/
 /prime/
 /stage/
+/public/asset/*.development.*

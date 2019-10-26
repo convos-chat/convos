@@ -1,0 +1,17 @@
+import './sass/convos.scss';
+import App from './App.svelte';
+
+console.log('[Convos] Initializing application.');
+
+const body = document.querySelector('body');
+const app = new App({target: document.body});
+body.classList = body.className.replace(/no-js/, 'has-js');
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', e => {
+    navigator.serviceWorker.register('/sw.js').then(
+      (reg) => window.updateServiceWorker && reg.update(),
+      (err) => console.log('[Convos] ServiceWorker registration failed:', err),
+    );
+  });
+}

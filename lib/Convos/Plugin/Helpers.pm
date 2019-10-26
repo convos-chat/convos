@@ -1,21 +1,23 @@
 package Convos::Plugin::Helpers;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util 'E';
+use Convos::Util qw(E pretty_connection_name);
 use LinkEmbedder;
 
 sub register {
   my ($self, $app, $config) = @_;
 
-  $app->helper('backend.dialog' => \&_backend_dialog);
-  $app->helper('backend.user'   => \&_backend_user);
-  $app->helper('linkembedder'   => sub { state $l = LinkEmbedder->new });
-  $app->helper('unauthorized'   => \&_unauthorized);
+  $app->helper('backend.dialog'            => \&_backend_dialog);
+  $app->helper('backend.user'              => \&_backend_user);
+  $app->helper('backend.connection_create' => \&_backend_connection_create);
+  $app->helper('linkembedder'              => sub { state $l = LinkEmbedder->new });
+  $app->helper('settings'                  => \&_settings);
+  $app->helper('unauthorized'              => \&_unauthorized);
 }
 
 sub _backend_dialog {
   my ($c, $args) = @_;
-  my $user = $c->backend->user($args->{email}) or return;
+  my $user      = $c->backend->user($args->{email}) or return;
   my $dialog_id = $args->{dialog_id} || $c->stash('dialog_id');
 
   my $connection = $user->get_connection($args->{connection_id} || $c->stash('connection_id'));
@@ -29,6 +31,44 @@ sub _backend_user {
   my $c = shift;
   return undef unless my $email = shift || $c->session('email');
   return $c->app->core->get_user({email => $email});
+}
+
+sub _backend_connection_create {
+  my ($c, $url, $cb) = @_;
+  my $user = $c->backend->user;
+  my $name = pretty_connection_name($url->host);
+  my $connection;
+
+  if (!$name) {
+    return $c->$cb('URL need a valid host.', undef);
+  }
+  if ($user->get_connection({protocol => $url->scheme, name => $name})) {
+    return $c->$cb('Connection already exists.', undef);
+  }
+
+  Mojo::IOLoop->delay(
+    sub {
+      $connection = $user->connection({name => $name, protocol => $url->scheme, url => $url});
+      $connection->dialog({name => $url->path->[0]}) if $url->path->[0];
+      $connection->save(shift->begin);
+    },
+    sub {
+      my ($delay, $err) = @_;
+      return $c->$cb($err, $connection);
+    },
+  )->catch(sub {
+    return $c->$cb(pop, undef);
+  });
+}
+
+sub _settings {
+  my $c        = shift;
+  my %settings = %{$c->app->config('settings') || {}};
+  $settings{chatMode} = $c->stash('chat_mode') ? 1 : 0;
+  $settings{apiUrl}   = $c->url_for('api');
+  $settings{baseUrl}  = $c->app->core->base_url->to_string;
+  $settings{wsUrl}    = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+  return \%settings;
 }
 
 sub _unauthorized {
