@@ -16,7 +16,7 @@ import html from 'rollup-plugin-bundle-html';
 
 // The output file need to contain a hash for M::P::Webpack to find it
 const dest = process.env.WEBPACK_OUT_DIR || 'public/asset';
-const development = process.env.ROLLUP_WATCH ? true : false;
+const development = process.env.NODE_ENV == 'development' || (process.env.ROLLUP_WATCH ? true : false);
 const ts = parseInt((new Date().getTime() / 1000), 10).toString(16);
 
 function outPath(name) {

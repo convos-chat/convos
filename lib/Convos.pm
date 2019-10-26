@@ -117,8 +117,7 @@ sub _config {
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
 
-  $config->{default_connection} ||= $self->_default_connection($config);
-  $config->{forced_connection} = $config->{forced_connection} ? 1 : 0;
+  $self->_default_connection($config);
 
   if ($config->{log_file} ||= $ENV{CONVOS_LOG_FILE}) {
     $self->log->path($config->{log_file});
@@ -144,16 +143,19 @@ sub _config {
 sub _default_connection {
   my ($self, $config) = @_;
 
-  for my $config_key (qw(forced_connection forced_irc_server default_connection default_server)) {
-    my $env_key = uc "CONVOS_$config_key";
-    $config->{$config_key} = $ENV{$env_key} if $ENV{$env_key};
-    next unless my $url = $config->{$config_key};
+  my @urls = map { $config->{$_} = $ENV{uc("CONVOS_$_")} || $config->{$_} }
+    qw(forced_connection forced_irc_server default_connection default_server);
+  $config->{forced_connection}
+    = $config->{forced_irc_server} || $config->{forced_connection} ? 1 : 0;
+  delete $config->{$_} for qw(default_connection default_server forced_irc_server);
+
+  for my $url (grep {$_} @urls) {
     next unless 3 < length $url;    # skip "0", "1" and "yes"
     $url = "irc://$url" unless $url =~ m!^\w+://!;
-    return Mojo::URL->new($url);
+    return ($config->{default_connection} = Mojo::URL->new($url));
   }
 
-  return Mojo::URL->new('irc://chat.freenode.net:6697/%23convos');
+  return ($config->{default_connection} = Mojo::URL->new('irc://chat.freenode.net:6697/%23convos'));
 }
 
 sub _home_in_share {

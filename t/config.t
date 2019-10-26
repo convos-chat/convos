@@ -30,21 +30,21 @@ Mojo::Util::monkey_patch(
   }
 );
 
-$ENV{CONVOS_PLUGINS}           = 'PluginX';
-$ENV{CONVOS_BACKEND}           = 'Convos::Core::Backend';
-$ENV{CONVOS_DEFAULT_SERVER}    = 'irc.example.com';
-$ENV{CONVOS_FRONTEND_PID_FILE} = 'pidfile.pid';
-$ENV{CONVOS_ORGANIZATION_NAME} = 'cool.org';
-$ENV{CONVOS_ORGANIZATION_URL}  = 'http://thorsen.pm';
-$ENV{CONVOS_SECRETS}           = 'super,duper,secret';
-$ENV{CONVOS_SECURE_COOKIES}    = 1;
+$ENV{CONVOS_PLUGINS}            = 'PluginX';
+$ENV{CONVOS_BACKEND}            = 'Convos::Core::Backend';
+$ENV{CONVOS_DEFAULT_CONNECTION} = 'irc.example.com';
+$ENV{CONVOS_FRONTEND_PID_FILE}  = 'pidfile.pid';
+$ENV{CONVOS_ORGANIZATION_NAME}  = 'cool.org';
+$ENV{CONVOS_ORGANIZATION_URL}   = 'http://thorsen.pm';
+$ENV{CONVOS_SECRETS}            = 'super,duper,secret';
+$ENV{CONVOS_SECURE_COOKIES}     = 1;
 delete $ENV{CONVOS_HOME};
 $i++;
 $convos = Convos->new;
 is $convos->config->{backend}, 'Convos::Core::Backend',          'env backend';
 like $convos->config->{home},  qr{\W+\.local\W+share\W+convos$}, 'default home';
 is $convos->config->{default_connection}, 'irc://irc.example.com', 'env default_connection';
-is $convos->config->{forced_irc_server},  0,                       'default forced_irc_server';
+is $convos->config->{forced_connection},  0,                       'default forced_connection';
 is $convos->config->{organization_name},  'cool.org',              'env organization_name';
 is $convos->config->{organization_url},   'http://thorsen.pm',     'env organization_url';
 ok $convos->sessions->secure, 'secure sessions';
@@ -93,7 +93,11 @@ $ENV{CONVOS_FORCED_IRC_SERVER} = 'irc://localhost:1234/%23cool_channel';
 $convos = Convos->new;
 is $convos->config->{default_connection}, 'irc://localhost:1234/%23cool_channel',
   'forced default_connection';
-is $convos->config->{forced_irc_server}, 1, 'env forced_irc_server';
-is $convos->config->{settings}{forced_irc_server}, true, 'settings forced_irc_server';
+is $convos->config->{forced_connection}, 1, 'env CONVOS_FORCED_IRC_SERVER';
+is $convos->config->{settings}{forced_connection}, true, 'settings forced_connection';
+
+# deprecated
+is $convos->config->{default_server},    undef, 'config default_server';
+is $convos->config->{forced_irc_server}, undef, 'config forced_irc_server';
 
 done_testing;

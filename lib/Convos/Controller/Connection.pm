@@ -11,7 +11,7 @@ sub create {
   my $json = $self->req->json;
   my $url  = Mojo::URL->new($json->{url} || '');
 
-  if ($self->app->config('forced_irc_server')) {
+  if ($self->app->config('forced_connection')) {
     my $default_connection = $self->app->config('default_connection');
     return $self->render(openapi => E('Will only accept forced connection URL.'), status => 400)
       if $url->host_port ne $default_connection->host_port;
@@ -25,8 +25,9 @@ sub create {
     },
     sub {
       my ($delay, $err, $connection) = @_;
-      $connection->on_connect_commands($json->{on_connect_commands} || []) if $connection;
-      $self->render(openapi => E($err), status => 400) if $err;
+      return $self->render(openapi => E($err || 'Could not create connection.'), status => 400)
+        if $err or !$connection;
+      $connection->on_connect_commands($json->{on_connect_commands} || []);
       $self->app->core->connect($connection);
       $self->render(openapi => $connection);
     },
@@ -85,7 +86,7 @@ sub update {
   my $url = Mojo::URL->new($json->{url} || '');
   $url = $connection->url unless $url->host;
 
-  if (!$self->app->config('forced_irc_server')) {
+  if (!$self->app->config('forced_connection')) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
     $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnected';
     $connection->url($url);
@@ -116,7 +117,12 @@ sub _pretty_connection_name {
 
   # Support ZNC style logins
   # <user>@<useragent>/<network>
-  if (defined($username) && ($username =~ /^(?<name>[a-z0-9_\+-]+)@(?<useragent>[a-z0-9_\+-]+)\/(?<network>[a-z0-9_\+-]+)/i)) {
+  if (
+    defined($username)
+    && ($username
+      =~ /^(?<name>[a-z0-9_\+-]+)@(?<useragent>[a-z0-9_\+-]+)\/(?<network>[a-z0-9_\+-]+)/i)
+    )
+  {
     return $+{network} if ($+{network});
   }
 

@@ -21,7 +21,6 @@ $t->get_ok(substr $url, 0, -1)->status_is(400);
 $t->get_ok('/api/user')->status_is(401);
 
 $t->get_ok($url)->status_is(302)->header_is(Location => '/');
-$t->get_ok('/')->status_is(200)
-  ->content_like(qr{window\.Convos\.settings\.main = "\#profile";}, 'main is set');
+$t->get_ok('/')->status_is(200);
 
 done_testing;
