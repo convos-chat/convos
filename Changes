@@ -1,8 +1,43 @@
 Revision history for perl distribution Convos
 
 1.00 Not Released
- - Changed frontend to use Sveltejs
- - Removed the ShareDialog plugin
+ - Changed frontend to use https://svelte.dev/ from Vuejs.
+ - Changed to using URLs, so you can link directly to conversations and pages
+   when chatting.
+ - Changed sidebar design to a tree view, where conversations are listed under
+   connections.
+ - Changed "unread" logic to reset to zero when conversations looses focus.
+ - Changed notifications to be rendered as a conversation, with the latest
+   notifications in the bottom.
+ - Changed notifications to be marked as read, when notifications conversation
+   looses focus.
+ - Changed from using Material Design Icons to Font Awesome.
+ - Changed twemoji, after emojione/joypixels changed their design.
+ - Changed autocomplete dropdown to show when trigger character is seen. This
+   makes it work on phones as well.
+ - Changed autocomplete for nicks: Nick has to be prefixed with "@".
+ - Changed sidebar design for register/login pages, like we do on
+   https://convos.by.
+ - Replaced Mojolicious::Plugin::AssetPack with Mojolicious::Plugin::Webpack.
+ - Add number of unread to document title #382
+ - Add "New messages" indicator.
+ - Add support for rendering quotes.
+ - Add icons before nicks. The icon is calculated from the nick, so it does not
+   change between installations or reloads.
+ - Add "Autocomplete" and "Text formatting" to /help.
+ - Add toggle for error message details.
+ - Improved filtering logic in sidebar.
+ - Fix not including ")" (or other special characters) when rendering links.
+ - Fix rendering in Safari on iOS.
+ - Fix handling of nicks with MixedCaps.
+ - Fix reacting to window focus #383
+ - Fix for ZNC integration: Connection name based on ZNC usernames #316
+ - Removed the ShareDialog plugin.
+ - Removed "Create connection" when registering. Will instead connect to the
+   default connection.
+ - Removed custom styling support.
+ - Bumped LinkEmbedder version to 1.06
+ - Using "pnpm" (instead of "npm") to install node modules.
 
 0.99_40 2019-02-08T23:05:00+0100
  - Switch order of isconnect and ison to allow authentication with nickserv before join
