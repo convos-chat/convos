@@ -88,21 +88,23 @@ function calculatePage($url, getUserOp) {
   if ($url.pathParts[0] == 'chat') user.update({lastUrl: $url.toString()});
 
   // Figure out current page
-  const pages = getUserOp.is('success') ? loggedInPages : loggedOutPages;
+  const loggedIn = getUserOp.is('success');
+  const pages = loggedIn ? loggedInPages : loggedOutPages;
   const pageName = pages[$url.path] ? $url.path : $url.pathParts[0] || '';
   const nextPageComponent = pages[pageName];
+
+  if (loggedIn) loadScript(currentUrl.base + '/images/emojis.js');
 
   // Goto a valid page
   if (nextPageComponent) {
     if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
 
     // Enable complex styling
-    replaceBodyClassName(/(is-logged-)\S+/, getUserOp.is('success') ? 'in' : 'out');
+    replaceBodyClassName(/(is-logged-)\S+/, loggedIn ? 'in' : 'out');
     replaceBodyClassName(/(page-)\S+/, pageName.replace(/\W+/g, '_') || 'loading');
   }
-  else if (getUserOp.is('success')) {
+  else if (loggedIn) {
     const lastUrl = user.lastUrl;
-    loadScript('/images/emojis.js');
     gotoUrl(lastUrl || (user.connections.size ? '/chat' : '/add/connection'), {replace: true});
   }
   else if (getUserOp.is('error')) {
