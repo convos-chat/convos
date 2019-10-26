@@ -16,6 +16,8 @@ Learn more about how to install and configure Convos in the
 <pre class="highlight"><code>$ curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
 $ ./convos/script/convos daemon</code></pre>
 
+<a href="/2019/10/26/convos-one-point-oh.html"><img src="/public/screenshots/2019-10-26-conversation.jpg" alt="Picture of Convos conversation"></a>
+
 ## Demo
 
 There is an online demo running at [demo.convos.by](http://demo.convos.by).

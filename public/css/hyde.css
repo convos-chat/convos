@@ -176,7 +176,7 @@ a.sidebar-nav-item:focus {
 /* Base16 (http://chriskempson.github.io/base16/#default) */
 
 .theme-base-convos .sidebar {
-  background-color: #388E3C;
+  background-color: #5f8961;
 }
 
 .theme-base-convos .content .toc,
@@ -187,7 +187,7 @@ a.sidebar-nav-item:focus {
 
 .theme-base-convos .content a,
 .theme-base-convos .related-posts li a:hover {
-  color: #388E3C;
+  color: #456747;
   text-decoration: underline;
 }
 .theme-base-convos .content a:hover,

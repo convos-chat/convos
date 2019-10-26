@@ -122,17 +122,16 @@ Setting this variable to a true value will print extra debug information to
 STDERR. Another useful debug variable is `MOJO_IRC_DEBUG` which gives you
 IRC level debug information.
 
-### CONVOS_DEFAULT_SERVER
+### CONVOS_DEFAULT_CONNECTION
 
 Used to declare which server should be pre-filled when a user creates a new
 connection.
 
-Default: `localhost`
+Default: `irc://chat.freenode.net:6697/%23convos`
 
-### CONVOS_FORCED_IRC_SERVER
+### CONVOS_FORCED_CONNECTION
 
-Will force any connection made to use this server. Note that this
-environment variable also overrride `CONVOS_DEFAULT_SERVER`.
+Will force any connection made to use the "CONVOS_DEFAULT_CONNECTION".
 
 There is no forced IRC server by default.
 
