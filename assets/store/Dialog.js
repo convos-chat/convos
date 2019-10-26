@@ -82,7 +82,7 @@ export default class Dialog extends Reactive {
       msg.color = str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
       msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
-      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/([.!?])?$/, ''));
+      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/(\W)?$/, ''));
       msg.fromId = msg.from.toLowerCase();
       msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
