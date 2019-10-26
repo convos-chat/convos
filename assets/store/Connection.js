@@ -91,7 +91,7 @@ export default class Connection extends Dialog {
 
   wsEventJoin(params) {
     const dialog = this.ensureDialog(params);
-    const nick = params.nick || connection.nick;
+    const nick = params.nick || this.nick;
     dialog.addMessage({message: '%1 joined.', vars: [nick]});
     dialog.participant(nick, {});
   }

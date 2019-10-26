@@ -93,7 +93,7 @@ function observeMessages() {
 }
 
 const onScroll = debounce(e => {
-  if (!dialog.dialog_id) return;
+  if (!messagesEl || !dialog.dialog_id) return;
 
   const offsetHeight = messagesEl.offsetHeight;
   const scrollTop = messagesEl.scrollTop;

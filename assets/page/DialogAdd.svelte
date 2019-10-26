@@ -17,6 +17,7 @@ let availableDialogs = {dialogs: [], done: null, n_dialogs: 0};
 let connectionId = '';
 let dialogId = '';
 let formEl;
+let loadConversationsTid;
 
 $: connectionOptions = Array.from($user.connections.keys()).map(id => [id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
@@ -30,19 +31,17 @@ function addDialog(e) {
 }
 
 function loadConversations(e) {
-  let message = '/list';
-
-  if (e) {
-    message += dialogId.length ? ' /' + dialogId + '/' : '';
-  }
-  else if (availableDialogs.dialogs.length) {
-    message += ' refresh';
-  }
+  let message = '/list' + (dialogId.length ? ' /' + dialogId + '/' : '');
+  if (e.type == 'click' && availableDialogs.done) message += ' refresh';
+  if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
   user.send({connection_id: connectionId, message}, (params) => {
     const error = extractErrorMessage(params);
-    availableDialogs = error ? {dialogs: [], done: null, n_dialogs: 0, error} : params;
-    if (!error && !params.done) setTimeout(loadConversations, 500);
+    availableDialogs = error ? {dialogs: [], done: true, n_dialogs: 0, error} : params;
+
+    let interval = e.interval ? e.interval + 500 : 500;
+    if (interval > 2000) interval = 2000;
+    if (!error && !params.done) loadConversationsTid = setTimeout(() => loadConversations({interval}), interval);
   });
 }
 
@@ -66,7 +65,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
       <SelectField name="connection_id" options="{connectionOptions}" placeholder="{l('Select...')}" bind:value="{connectionId}">
         <span slot="label">{l('Connection')}</span>
       </SelectField>
-      <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId}">{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</Button>
+      <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableDialogs.done === false}">{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</Button>
     </div>
 
     <div class="inputs-side-by-side">
