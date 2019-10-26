@@ -80,7 +80,9 @@ export default class User extends Reactive {
   }
 
   wsEventMe(params) {
-    this.ensureDialog({connection_id: params.connection_id}).update(params);
+    const conn = this.ensureDialog({connection_id: params.connection_id});
+    conn.wsEventNickChange(params);
+    conn.update(params);
   }
 
   wsEventPart(params) {

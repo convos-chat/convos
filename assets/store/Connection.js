@@ -18,6 +18,8 @@ export default class Connection extends Dialog {
     this._updateableAttr('wanted_state', params.wanted_state || 'connected');
     this._updateableAttr('url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
     this._updateableAttr('nick', params.nick || this.url.searchParams.get('nick') || '');
+
+    this.participant(this.nick, {});
   }
 
   addDialog(dialogId) {
@@ -52,7 +54,6 @@ export default class Connection extends Dialog {
   }
 
   update(params) {
-    if (params.nick && params.nick != this.nick) this.wsEventNickChange({new_nick: params.nick, old_nick: this.nick});
     if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
     return super.update(params);
   }
@@ -76,7 +77,9 @@ export default class Connection extends Dialog {
   }
 
   wsEventNickChange(params) {
-    this.dialogs.forEach(dialog => dialog.wsEventNickChange(params));
+    const nickChangeParams = {old_nick: this.nick, new_nick: params.nick, type: params.type};
+    super.wsEventNickChange(nickChangeParams);
+    this.dialogs.forEach(dialog => dialog.wsEventNickChange(nickChangeParams));
   }
 
   wsEventError(params) {

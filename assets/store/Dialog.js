@@ -75,7 +75,7 @@ export default class Dialog extends Reactive {
     for (let i = start; i < stop; i++) {
       const msg = messages[i];
       if (msg.hasOwnProperty('markdown')) continue; // Already processed
-      if (!msg.from) msg.from = msg.connection_id || 'Convos';
+      if (!msg.from) msg.from = this.connection_id || 'Convos';
       if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
@@ -167,7 +167,8 @@ export default class Dialog extends Reactive {
     if (params.old_nick == params.new_nick) return;
     this.participants.delete(oldId);
     this.participant(params.new_nick, params);
-    this.addMessage({message: '%1 changed nick to %2.', vars: [params.old_nick, params.new_nick]});
+    const message = params.type == 'me' ? 'You (%1) changed nick to %2.' : '%1 changed nick to %2.';
+    this.addMessage({message, vars: [params.old_nick, params.new_nick]});
   }
 
   wsEventPart(params) {
