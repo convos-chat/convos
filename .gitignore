@@ -4,6 +4,7 @@
 !.gitignore
 !.perltidyrc
 .DS_Store
+.jekyll-cache/
 .sass-cache
 blib
 pm_to_blib
