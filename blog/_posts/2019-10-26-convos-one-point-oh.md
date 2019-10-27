@@ -8,7 +8,7 @@ It sure did take way too long time, but I've finally managed to release Convos
 
 A new shiny tool for building webapps called [Svelte](https://svelte.dev) had a
 [major release](https://github.com/sveltejs/svelte/commit/7382a9f811c830502e96aaad7fad7976def93d22)
-in April, which fueld me with a new drive to give Convos a well deserved
+in April, which fueled me with a new drive to give Convos a well deserved
 overhaul. Svelte changes everything by moving the heavy lifting from your
 browser to compile time &mdash; making web applications such as Convos more
 snappy than ever!
@@ -27,29 +27,29 @@ but here are some highlights:
 The old sidebar was pretty nice for the simple cases, but it got very hard to
 understand which conversation you were in when you had multiple connections.
 The new design fixes this by using a more traditional tree-view design, where
-each conversation is group underneath a connection.
+each conversation is grouped underneath its connection.
 
 <a href=""><img src="/public/screenshots/2019-10-26-conversation.jpg" alt="Picture of Convos conversation"></a>
 
 ### Icons and colors for nicks
 
-Each nick has a custom icon and color. The icon and color is calculate from the
+Each nick has a custom icon and color. The icon and color is calculated from the
 actual nick, so it will be the same in each conversation and will not change.
 
-Future version of Convos will also allow you to customize your own icon. Also if
+A future version of Convos will also allow you to customize your own icon. Also if
 you are recognized as a developer, you will get your own icon which will be
 visible across all installations of Convos.
 
 ### Fixes for Safari on iOS
 
 Running Convos inside Safari on iOS has been very annoying the last year,
-because of some bugs regarding "fixed positioning" of elements, such as the
+because of some bugs related to `fixed` positioning set on elements such as the
 text field where you write your messages. All this have been fixed in 1.00, by
-using absolute positioning instead.
+using `absolute` positioning instead.
 
 ### Simpler registration process for new users
 
-Earlier on, you had to create a connection during the registration process.
+Before you had to create a connection during the registration process.
 This could be very confusing for new users, that are not familiar with how IRC
 works, but rather just wanted to chat. In 1.00, a new user will automatically
 get the [default connection](/doc/config.html#convos_default_connection)
@@ -62,7 +62,7 @@ formatting support and autocomplete. Check it out for new features and changes!
 
 ### Nicks with MixedCaps
 
-Nicks that had Mixed Caps had many issues in the earlier versions of Convos.
+Nicks with mixed casing had many issues in the earlier versions of Convos.
 One of the worst issue was that users might appear offline, even if they were
 not. This is fixed in 1.00.
 
