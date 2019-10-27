@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: store/Operation.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: store/Operation.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Operation is a class for fetching data from an OpenAPI powered server.
+ *
+ * @exports Operation
+ * @class Operation
+ * @extends Reactive
+ * @property {Api} api An {@link Api} object.
+ * @property {Array} err A list of errors, if any.
+ * @property {Null} err If no errors.
+ * @property {Object} defaultParams An Object holding default "Operation" parameters. (optional)
+ * @property {Object} req The requested data.
+ * @property {Object} res The response from the OpenAPI server.
+ * @property {String} id The name of the operation ID.
+ * @property {String} status Either "error", "loading", "pending" or "success".
+ * @see Api
+ */
+
+import Reactive from '../js/Reactive';
+import {regexpEscape} from '../js/util';
+
+const validStatus = ['error', 'loading', 'pending', 'success'];
+
+export default class Operation extends Reactive {
+  constructor(params) {
+    super();
+
+    this.prop('ro', 'api', params.api);
+    this.prop('ro', 'defaultParams', params.defaultParams || {});
+    this.prop('ro', 'id', params.id);
+    this.prop('ro', 'req', {body: null, headers: {}});
+    this.prop('ro', 'res', {body: {}, headers: {}});
+    this.prop('rw', 'err', null);
+    this.prop('rw', 'status', 'pending');
+  }
+
+  /**
+   * error() can be used to get or set the "err" property.
+   *
+   * @example
+   * op = op.err('Some error');
+   * const err = op.err(); // "Some error"
+   *
+   * op = op.err([{message: 'Complex stuff', path: '/foo'}]);
+   * const err = op.err(); // "foo: Complex stuff"
+   *
+   * @memberof Operation
+   * @param {Array} err A list of error objects.
+   * @param {String} err A descriptive error string.
+   * @returns {String} A descriptive error string.
+   */
+  error(err) {
+    // Set error
+    if (err) return this.update({err: Array.isArray(err) ? err : [{message: err}], status: 'error'});
+
+    // Get error
+    if (!this.err || !this.err.length) return '';
+    const first = this.err[0];
+    const path = first.path &amp;&amp; first.path.match(/\w$/) &amp;&amp; first.path.split('/').pop();
+    return path ? path + ': ' + first.message : first.message;
+  }
+
+  /**
+   * perform() is used to send/receive data with the OpenAPI server.
+   *
+   * @example
+   * await op.perform({email: 'jhthorsen@cpan.org'});
+   * console.log(op.res.body);
+   *
+   * @memberof Operation
+   * @param {Object} params Mapping between request parameter names and values.
+   * @param {HTMLFormElement} params A form with parameter names and values.
+   * @returns {Promise} The promise will be resolved on error and success.
+   */
+  perform(params) {
+    // this._promise is used as a locking mechanism so you can only call perform() once
+    return this._promise || (this._promise = new Promise(async (resolve) => {
+      const opSpec = await this.api.spec(this.id);
+      if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".'));
+
+      this.update({status: 'loading'});
+      const [url, req] = await this._paramsToRequest(opSpec, params || this.defaultParams);
+      this.emit('start', req);
+      if (typeof req.body == 'object') req.body = JSON.stringify(req.body);
+      const res = await fetch(url, req);
+      delete this._promise;
+      res.json().then(json => resolve(this._parse(res, json)));
+    }));
+  }
+
+  /**
+   * is() can be used to check if the Operation is in a given state.
+   *
+   * @memberof Operation
+   * @param {String} status Either "error", "loading", "pending" or "success".
+   * @retuns {Boolean} True/false if the "status" property matches the input "status".
+   */
+  is(status) {
+    if (validStatus.indexOf(status) == -1) throw 'Invalid status: ' + status;
+    return this.status == status;
+  }
+
+  /**
+   * reset() can be used to clear the response with any data previously fetched.
+   *
+   * @memberof Operation
+   */
+  reset() {
+    this.res.body = {};
+    this.res.headers = {};
+    this.res.status = 0;
+    return this.update({err: null, status: 'pending'});
+  }
+
+  _extractValue(params, p) {
+    if (p.schema &amp;&amp; (params.tagName || '').toLowerCase() == 'form' ) {
+      const body = {};
+      Object.keys(p.schema.properties).forEach(k => { body[k] = params[k] &amp;&amp; params[k].value });
+      return body;
+    }
+    else if (params[p.name] &amp;&amp; params[p.name].tagName) {
+      return params[p.name].value;
+    }
+    else if (p.schema) {
+      const body = {};
+      Object.keys(p.schema.properties).forEach(k => { body[k] = params[k] });
+      return body;
+    }
+    else {
+      return params[p.name];
+    }
+  }
+
+  _hasProperty(params, p) {
+    if (p.in == 'body') {
+      return true;
+    }
+    else if ((params.tagName || '').toLowerCase() == 'form') {
+      return params[p.name] ? true : false;
+    }
+    else {
+      return params.hasOwnProperty(p.name);
+    }
+  }
+
+  _paramsToRequest(opSpec, params) {
+    const fetchParams = {headers: this.req.headers, method: opSpec.method};
+    const url = new URL(opSpec.url);
+
+    (opSpec.parameters || []).forEach(p => {
+      if (!this._hasProperty(params, p) &amp;&amp; !p.required) {
+        return;
+      }
+      else if (p.in == 'path') {
+        const re = new RegExp('(%7B|\\{)' + regexpEscape(p.name) + '(%7D|\\})', 'i');
+        url.pathname = url.pathname.replace(re, encodeURIComponent(this._extractValue(params, p)));
+      }
+      else if (p.in == 'query') {
+        url.searchParams.set(p.name, this._extractValue(params, p));
+      }
+      else if (p.in == 'body') {
+        fetchParams.body = this._extractValue(params, p);
+      }
+      else if (p.in == 'header') {
+        fetchParams.header[p.name] = this._extractValue(params, p.name);
+      }
+      else {
+        throw '[Api] Parameter in:' + p.in + ' is not supported.';
+      }
+    });
+
+    return [url, fetchParams];
+  }
+
+  _parse(res, body = res.body) {
+    this.res.body = body || res;
+    this.res.status = res.status || '201';
+    this.res.statusText = res.statusText;
+    if (res.headers) this.res.headers = res.headers;
+
+    let err = null;
+    if (!String(this.res.status).match(/^[23]/)) {
+      err = body &amp;&amp; body.errors ? body.errors : [{message: res.statusText || 'Unknown error.'}];
+    }
+
+    return this.update({err, status: err ? 'error' : 'success'});
+  }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-i18n.html">i18n</a></li><li><a href="module-md.html">md</a></li><li><a href="module-util.html">util</a></li></ul><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="ConnURL.html">ConnURL</a></li><li><a href="Operation.html">Operation</a></li><li><a href="Reactive.html">Reactive</a></li><li><a href="SortedMap.html">SortedMap</a></li><li><a href="Time.html">Time</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Oct 28 2019 10:36:26 GMT+0900 (Japan Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

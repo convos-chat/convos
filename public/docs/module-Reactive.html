@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Reactive - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a><ul class='methods'><li data-type='method'><a href="Api.html#.operation">operation</a></li><li data-type='method'><a href="Api.html#.spec">spec</a></li></ul></li><li><a href="ConnURL.html">ConnURL</a></li><li><a href="Operation.html">Operation</a><ul class='methods'><li data-type='method'><a href="Operation.html#.error">error</a></li><li data-type='method'><a href="Operation.html#.is">is</a></li><li data-type='method'><a href="Operation.html#.perform">perform</a></li><li data-type='method'><a href="Operation.html#.reset">reset</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-md.html">md</a><ul class='methods'><li data-type='method'><a href="module-md.html#.emojis">emojis</a></li><li data-type='method'><a href="module-md.html#.md">md</a></li></ul></li><li><a href="module-Reactive.html">Reactive</a><ul class='methods'><li data-type='method'><a href="module-Reactive.html#prop">prop</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#fromForm">fromForm</a></li><li><a href="global.html#toString">toString</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Reactive</h1>
+    
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Reactive is a class that can be useful for objects that you want to observe.
+It also contains some helper methods to define properties.</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_Reactive.js.html">js/Reactive.js</a>, <a href="js_Reactive.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>Dialog</li>
+        
+            <li>EmbedMaker</li>
+        
+            <li>Events</li>
+        
+            <li><a href="Operation.html">Operation</a></li>
+        
+            <li>User</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+            <div class="subsection-item">
+                
+
+    
+
+    <h4 class="name" id="prop"><span class="type-signature"></span>prop<span class="signature">(type, name, val)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>prop() can be used to define a new property.</p>
+<p>The following types are allowed:</p>
+<ol>
+<li>&quot;persist&quot; is a property that will be stored in the browser's localStorage.
+It can be changed by calling update().</li>
+<li>&quot;proxy&quot; is a property that belongs to a child object.</li>
+<li>&quot;ro&quot; is a property that cannot be changed.</li>
+<li>&quot;rw&quot; is a property that can be changed by the &quot;update()&quot; method.</li>
+</ol>
+<p>The code below cannot be used to update any prop() property. A change must
+go through update().</p>
+<pre><code>this.some_property = 'new value';</code></pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>either &quot;persist&quot;, &quot;proxy&quot;, &quot;ro&quot; or &quot;rw&quot;.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the property</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>val</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Any</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Either a function or default value.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_Reactive.js.html">js/Reactive.js</a>, <a href="js_Reactive.js.html#line77">line 77</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Mon Oct 28 2019 09:34:33 GMT+0900 (Japan Standard Time) using the Toast theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

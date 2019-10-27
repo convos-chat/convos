@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/md.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/md.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * A collection of markdown utitities.
+ *
+ * @module md
+ * @exports emojiAliases
+ * @exports emojis
+ * @exports md
+ * @exports xmlEscape
+ */
+
+import twemoji from 'twemoji';
+import {regexpEscape} from './util';
+
+const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
+const emojiByGroup = {};
+const emojiByName = {};
+const linkRe = new RegExp('https?://\\S+', 'g');
+const mdLinkRe = new RegExp('\\[([^]+)\\]\\(([^)]+)\\)');
+const mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+|_+)(\\w[^&lt;]*?)\\3', 'g');
+
+// Modifying this from the outside will break emojiRe below
+export const emojiAliases = {
+  ':confused:': ':/',
+  ':disappointed:': ':(',
+  ':grin:': ';D',
+  ':heart:': '&amp;lt;3',
+  ':slight_smile:': ':)',
+  ':smiley:': ':D',
+  ':stuck_out_tongue:': ':P',
+  ':wink:': ';)',
+};
+
+const emojiRe = new RegExp('(^|\\s)(:\\w+:|' + Object.keys(emojiAliases).map(k => regexpEscape(emojiAliases[k])).join('|') + ')(?=\\W|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, &lt;3
+
+const xmlEscapeMap = {
+  '&amp;': '&amp;amp;',
+  '&lt;': '&amp;lt;',
+  '>': '&amp;gt;',
+  "'": '&amp;apos;',
+  '"': '&amp;quot;',
+};
+
+/**
+ * emojis() is a function to return either a single emoji or a list of emojis
+ * by group.
+ *
+ * @param {String} lookup Either an emoji name or an emoji group.
+ * @param {String} type Can be "group" or "emoji"
+ * @return {Array} Returns a list of emojis if type is "group"
+ * @return {Object} Return s single emoji or empty object if no emoji was matched.
+ */
+export function emojis(lookup, type = 'single') {
+  if (window.__emojiList) {
+    window.__emojiList.forEach(entry => {
+      if ((entry.shortname || '')[0] != ':') return;
+
+      if (emojiAliases[entry.shortname]) emojiByName[emojiAliases[entry.shortname]] = entry;
+      emojiByName[entry.shortname] = entry;
+
+      if (entry.category) {
+        const category = ':' + entry.category;
+        if (!emojiByGroup[category]) emojiByGroup[category] = [];
+        emojiByGroup[category].push(entry);
+      }
+
+      entry.shortname.match(/(_|:)\w/g).forEach(k => {
+        if (!emojiByGroup[k]) emojiByGroup[k] = [];
+        emojiByGroup[k].push(entry);
+      });
+
+      // Use a bit less memory. (Not sure if it matters)
+      delete entry.category;
+      delete entry.html;
+      delete entry.order;
+      delete entry.unicode;
+    });
+
+    delete window.__emojiList;
+  }
+
+  return type == 'group' ? (emojiByGroup[lookup] || []) : (emojiByName[lookup] || {});
+}
+
+/**
+ * md() can convert a (subset) of markdown rules into a HTML string.
+ *
+ * @example
+ * // Hey &lt;em>foo&lt;/em> &lt;em>foo&lt;/em> &lt;strong>bar&lt;/strong> &lt;strong>bar&lt;/strong> &lt;em>&lt;strong>baz&lt;/strong>&lt;/em> &lt;em>&lt;strong>baz&lt;/strong>&lt;/em>
+ * md("Hey *foo* _foo_ **bar** __baz__ ***baz***!");
+ *
+ * // A &lt;a href="https://convos.by">link&lt;/a>
+ * md("A [link](https://convos.by)");
+ *
+ * // A link to &lt;a href="https://convos.by" target="_blank">convos.by&lt;/a>
+ * md('A link to https://convos.by');
+ *
+ * // A link to &lt;a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org&lt;/a>
+ * md('A link to mailto:jhthorsen@cpan.org');
+ *
+ * // Example &lt;code>snippet&lt;/code>
+ * md("Example `snippet`");
+ *
+ * // &lt;img class="emoji" draggable="false" alt="🙂" src="..."> ...
+ * md(':) :/ :( ;D &amp;lt;3 :D :P ;) :heart:');
+ *
+ * @param {String} str A markdown formatter string.
+ * @return {String} A string that might contain HTML tags.
+ */
+export function md(str) {
+  str = str.replace(/[&amp;&lt;>"']/g, m => xmlEscapeMap[m]);
+
+  str = str.replace(/^&amp;gt;\s(.*)/, (all, quote) => {
+    return '&lt;blockquote>' + quote + '&lt;/blockquote>';
+  }).replace(mdToHtmlRe, (all, b, esc, md, text) => {
+    if (md.match(/^_/) &amp;&amp; text.match(/^[A-Z]+$/)) return all; // Avoid turning __DATA__ into &lt;strong>DATA&lt;/strong>
+    if (md.length == 1) return esc ? all.replace(/^\\/, '') : b + '&lt;em>' + text + '&lt;/em>';
+    if (md.length == 2) return esc ? all.replace(/^\\/, '') : b + '&lt;strong>' + text + '&lt;/strong>';
+    if (md.length == 3) return esc ? all.replace(/^\\/, '') : b + '&lt;em>&lt;strong>' + text + '&lt;/strong>&lt;/em>';
+    return all;
+  }).replace(mdLinkRe, (all, text, href) => {
+    return '&lt;a href="' + href + '">' + text + '&lt;/a>';
+  }).replace(codeToHtmlRe, (all, esc, text) => {
+    return esc ? all.replace(/^\\/, '') : '&lt;code>' + text + '&lt;/code>';
+  });
+
+  str = str.replace(linkRe, url => {
+    const parts = url.match(/^(.*?)(&amp;\w+;|\W)?$/);
+    return '&lt;a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '&lt;/a>' + (parts[2] || '');
+  }).replace(/mailto:(\S+)/, (all, email) => {
+    return '&lt;a href="' + all + '" target="_blank">' + email + '&lt;/a>';
+  });
+
+  str = twemoji.parse(str.replace(emojiRe, (all, pre, emoji) => pre + (emojis(emoji).emoji || emoji)));
+
+  return str;
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-i18n.html">i18n</a></li><li><a href="module-md.html">md</a></li><li><a href="module-util.html">util</a></li></ul><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="ConnURL.html">ConnURL</a></li><li><a href="Operation.html">Operation</a></li><li><a href="Reactive.html">Reactive</a></li><li><a href="SortedMap.html">SortedMap</a></li><li><a href="Time.html">Time</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Oct 28 2019 10:36:26 GMT+0900 (Japan Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
