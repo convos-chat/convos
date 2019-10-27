@@ -44,7 +44,15 @@ function filterOptions(options, needle) {
   let found = [];
   if (!found.length) found = options.filter(opt => opt[0] == needle);
   if (!found.length) found = options.filter(opt => opt[0].match(re));
-  return found.concat(options.filter(opt => opt.length > 1 && found.indexOf(opt) != -1 && opt[1].match(re)));
+
+  for (let i = 0; i < options.length; i++) {
+    const opt = options[i];
+    if (opt.length > 1 && found.indexOf(opt) != -1 && opt[1].match(re)) {
+      if (options.map(o => o[0]).indexOf(opt[0]) == -1) options.push(opt);
+    }
+  }
+
+  return options;
 }
 
 function keydown(e) {
