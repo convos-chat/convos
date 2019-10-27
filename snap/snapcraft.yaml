@@ -52,4 +52,6 @@ apps:
   convos:
     command: script/snap.sh
     plugs:
+      - home
+      - network
       - network-bind
