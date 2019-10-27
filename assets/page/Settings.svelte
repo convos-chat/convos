@@ -6,17 +6,20 @@ import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
+import SelectField from '../components/form/SelectField.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 
 const Notification = window.Notification || {permission: 'denied'};
+const themes = [['auto', 'Auto'], ['dark', 'Dark'], ['light', 'Light']];
 const user = getContext('user');
 const updateUserOp = user.api.operation('updateUser');
 
 let formEl;
-let notificationsDisabled = Notification.permission == 'denied';
-let wantNotifications = user.events.wantNotifications;
 let expandUrlToMedia = user.expandUrlToMedia;
+let notificationsDisabled = Notification.permission == 'denied';
+let theme = user.theme;
+let wantNotifications = user.wantNotifications;
 
 function updateUserFromForm(e) {
   const form = e.target;
@@ -34,7 +37,7 @@ function updateUserFromForm(e) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  user.update({expandUrlToMedia, wantNotifications});
+  user.update({expandUrlToMedia, theme, wantNotifications});
   updateUserOp.perform(e.target);
 }
 </script>
@@ -65,6 +68,10 @@ function updateUserFromForm(e) {
     <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">
       <span slot="label">{l('Expand URL to media')}</span>
     </Checkbox>
+
+    <SelectField name="theme" options="{themes}" bind:value="{theme}">
+      <span slot="label">{l('Theme')}</span>
+    </SelectField>
 
     <PasswordField name="password">
       <span slot="label">{l('Password')}</span>

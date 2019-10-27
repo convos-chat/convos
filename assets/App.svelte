@@ -42,6 +42,7 @@ let containerWidth = 0;
 let pageComponent = null;
 
 $: container.set({small: containerWidth < 800, width: containerWidth});
+$: replaceClassName('html', /(theme-)\S+/, $user.theme);
 $: calculatePage($currentUrl, $getUserOp);
 $: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
 
@@ -100,8 +101,8 @@ function calculatePage($url, getUserOp) {
     if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
 
     // Enable complex styling
-    replaceBodyClassName(/(is-logged-)\S+/, loggedIn ? 'in' : 'out');
-    replaceBodyClassName(/(page-)\S+/, pageName.replace(/\W+/g, '_') || 'loading');
+    replaceClassName('body', /(is-logged-)\S+/, loggedIn ? 'in' : 'out');
+    replaceClassName('body', /(page-)\S+/, pageName.replace(/\W+/g, '_') || 'loading');
   }
   else if (loggedIn) {
     const lastUrl = user.lastUrl;
@@ -140,9 +141,9 @@ function onWindowFocus() {
   if (settings.chatMode) user.events.ensureConnected();
 }
 
-function replaceBodyClassName(re, replacement) {
-  const body = document.querySelector('body');
-  body.className = body.className.replace(re, (all, prefix) => prefix + replacement);
+function replaceClassName(sel, re, replacement) {
+  const tag = document.querySelector(sel);
+  tag.className = tag.className.replace(re, (all, prefix) => prefix + replacement);
 }
 
 function toggleMenu(e) {

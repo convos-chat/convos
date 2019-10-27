@@ -20,6 +20,7 @@ export default class User extends Reactive {
 
     this._localStorageAttr('lastUrl', '');
     this._localStorageAttr('showGrid', false);
+    this._localStorageAttr('theme', 'auto');
 
     this._proxyAttr('expandUrlToMedia', 'embedMaker');
     this._proxyAttr('wantNotifications', 'events');
