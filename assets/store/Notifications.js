@@ -10,7 +10,7 @@ export default class Notifications extends Dialog {
       name: 'Notifications',
     });
 
-    this._readOnlyAttr('messagesOp', params.messagesOp);
+    this.prop('ro', 'messagesOp', params.messagesOp);
   }
 
   // Disabled
@@ -18,6 +18,6 @@ export default class Notifications extends Dialog {
   async loadHistoric() { }
 
   _addOperations() {
-    this._readOnlyAttr('setLastReadOp', this.api.operation('readNotifications'));
+    this.prop('ro', 'setLastReadOp', this.api.operation('readNotifications'));
   }
 }

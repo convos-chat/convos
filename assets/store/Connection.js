@@ -11,13 +11,13 @@ export default class Connection extends Dialog {
   constructor(params) {
     super(params);
 
-    this._readOnlyAttr('dialogs', new SortedMap([], {sorter: sortDialogs}));
+    this.prop('ro', 'dialogs', new SortedMap([], {sorter: sortDialogs}));
 
-    this._updateableAttr('on_connect_commands', params.on_connect_commands || '');
-    this._updateableAttr('state', params.state || 'queued');
-    this._updateableAttr('wanted_state', params.wanted_state || 'connected');
-    this._updateableAttr('url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
-    this._updateableAttr('nick', params.nick || this.url.searchParams.get('nick') || '');
+    this.prop('rw', 'on_connect_commands', params.on_connect_commands || '');
+    this.prop('rw', 'state', params.state || 'queued');
+    this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
+    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
+    this.prop('rw', 'nick', params.nick || this.url.searchParams.get('nick') || '');
 
     this.participant(this.nick, {});
   }
@@ -157,8 +157,8 @@ export default class Connection extends Dialog {
   }
 
   _addOperations() {
-    this._readOnlyAttr('setLastReadOp', this.api.operation('setConnectionLastRead'));
-    this._readOnlyAttr('messagesOp', this.api.operation('connectionMessages'));
+    this.prop('ro', 'setLastReadOp', this.api.operation('setConnectionLastRead'));
+    this.prop('ro', 'messagesOp', this.api.operation('connectionMessages'));
   }
 
   _calculateFrozen() {

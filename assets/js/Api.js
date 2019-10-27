@@ -1,3 +1,12 @@
+/**
+ * Api is a class for loading an OpenAPI spec that you can fetch operations from.
+ *
+ * @exports Api
+ * @class Api
+ * @property {String} url An URL to the OpenAPI specification.
+ * @see Operation
+ */
+
 import Operation from '../store/Operation';
 
 export default class Api {
@@ -6,19 +15,44 @@ export default class Api {
     this.url = url;
   }
 
+  /**
+   * operation() is used to create a new {@link Operation} object by operation
+   * ID.
+   *
+   * @example
+   * const getUserOp = api.operation('getUser');
+   * const getUserOp = api.operation('getUser', {connections: true});
+   *
+   * @memberof Api
+   * @param {String} operationId An operation ID in the spec.
+   * @param {Object} defaultParams An Object holding default "Operation" parameters. (optional)
+   * @returns An Operation object.
+   */
   operation(operationId, defaultParams) {
     const op = new Operation({api: this, id: operationId, defaultParams});
     op.req.headers = {'Content-Type': 'application/json'};
     return op;
   }
 
+  /**
+   * spec() will return the specification for a given operation Id or the whole
+   * spec, if no operation is specified.
+   *
+   * @example
+   * const apiSpec = await api.spec();
+   * const getUserOpSpec = await api.spec('getUser');
+   *
+   * @memberof Api
+   * @param {String} operationId An operation ID in the spec.
+   * @returns {Object} Either the complete API spec or the spec for a single operation.
+   */
   async spec(operationId) {
-    if (this._op && operationId) return this._op[operationId];
+    if (this._ops && operationId) return this._ops[operationId];
     if (this._spec) return this._spec;
 
     const res = await fetch(this.url);
     const spec = await res.json();
-    this._op = {};
+    this._ops = {};
     this._spec = spec;
 
     Object.keys(spec.paths).forEach(path => {
@@ -37,11 +71,11 @@ export default class Api {
           return ref;
         });
 
-        this._op[operationId] = op;
+        this._ops[operationId] = op;
       });
     });
 
-    if (this._op && operationId) return this._op[operationId];
+    if (this._ops && operationId) return this._ops[operationId];
     if (this._spec) return this._spec;
   }
 }

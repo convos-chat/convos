@@ -1,7 +1,12 @@
-// *foo*     or _foo_     = <em>foo</em>
-// **foo**   or __foo__   = <strong>foo</strong>
-// ***foo*** or ___foo___ = <em><strong>foo</strong></em>
-// \*foo*    or \_foo_    = *foo* or _foo_
+/**
+ * A collection of markdown utitities.
+ *
+ * @module md
+ * @exports emojiAliases
+ * @exports emojis
+ * @exports md
+ * @exports xmlEscape
+ */
 
 import twemoji from 'twemoji';
 import {regexpEscape} from './util';
@@ -35,7 +40,16 @@ const xmlEscapeMap = {
   '"': '&quot;',
 };
 
-export function emojis(lookup, type = 'emoji') {
+/**
+ * emojis() is a function to return either a single emoji or a list of emojis
+ * by group.
+ *
+ * @param {String} lookup Either an emoji name or an emoji group.
+ * @param {String} type Can be "group" or "emoji"
+ * @return {Array} Returns a list of emojis if type is "group"
+ * @return {Object} Return s single emoji or empty object if no emoji was matched.
+ */
+export function emojis(lookup, type = 'single') {
   if (window.__emojiList) {
     window.__emojiList.forEach(entry => {
       if ((entry.shortname || '')[0] != ':') return;
@@ -64,11 +78,36 @@ export function emojis(lookup, type = 'emoji') {
     delete window.__emojiList;
   }
 
-  return type == 'group' ? (emojiByGroup[lookup] || []) : (emojiByName[lookup] || {})[type];
+  return type == 'group' ? (emojiByGroup[lookup] || []) : (emojiByName[lookup] || {});
 }
 
-export function md(str, params = {}) {
-  if (params.escape !== false) str = xmlEscape(str);
+/**
+ * md() can convert a (subset) of markdown rules into a HTML string.
+ *
+ * @example
+ * // Hey <em>foo</em> <em>foo</em> <strong>bar</strong> <strong>bar</strong> <em><strong>baz</strong></em> <em><strong>baz</strong></em>
+ * md("Hey *foo* _foo_ **bar** __baz__ ***baz***!");
+ *
+ * // A <a href="https://convos.by">link</a>
+ * md("A [link](https://convos.by)");
+ *
+ * // A link to <a href="https://convos.by" target="_blank">convos.by</a>
+ * md('A link to https://convos.by');
+ *
+ * // A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>
+ * md('A link to mailto:jhthorsen@cpan.org');
+ *
+ * // Example <code>snippet</code>
+ * md("Example `snippet`");
+ *
+ * // <img class="emoji" draggable="false" alt="🙂" src="..."> ...
+ * md(':) :/ :( ;D &lt;3 :D :P ;) :heart:');
+ *
+ * @param {String} str A markdown formatter string.
+ * @return {String} A string that might contain HTML tags.
+ */
+export function md(str) {
+  str = str.replace(/[&<>"']/g, m => xmlEscapeMap[m]);
 
   str = str.replace(/^&gt;\s(.*)/, (all, quote) => {
     return '<blockquote>' + quote + '</blockquote>';
@@ -84,22 +123,14 @@ export function md(str, params = {}) {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });
 
-  if (params.links !== false) {
-    str = str.replace(linkRe, url => {
-      const parts = url.match(/^(.*?)(&\w+;|\W)?$/);
-      return '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '</a>' + (parts[2] || '');
-    }).replace(/mailto:(\S+)/, (all, email) => {
-      return '<a href="' + all + '" target="_blank">' + email + '</a>';
-    });
-  }
+  str = str.replace(linkRe, url => {
+    const parts = url.match(/^(.*?)(&\w+;|\W)?$/);
+    return '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '</a>' + (parts[2] || '');
+  }).replace(/mailto:(\S+)/, (all, email) => {
+    return '<a href="' + all + '" target="_blank">' + email + '</a>';
+  });
 
-  if (params.emoji !== false) {
-    str = twemoji.parse(str.replace(emojiRe, (all, pre, emoji) => pre + (emojis(emoji) || emoji)));
-  }
+  str = twemoji.parse(str.replace(emojiRe, (all, pre, emoji) => pre + (emojis(emoji).emoji || emoji)));
 
   return str;
-}
-
-export function xmlEscape(str) {
-  return str.replace(/[&<>"']/g, m => xmlEscapeMap[m]);
 }

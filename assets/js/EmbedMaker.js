@@ -6,11 +6,11 @@ export default class EmbedMaker extends Reactive {
   constructor(params) {
     super();
     this.name = 'EmbedMaker';
-    this._localStorageAttr('disableInstagram', false);
-    this._localStorageAttr('disableTwitter', false);
-    this._localStorageAttr('expandUrlToMedia', true);
-    this._readOnlyAttr('api', params.api);
-    this._readOnlyAttr('embeds', {});
+    this.prop('persist', 'disableInstagram', false);
+    this.prop('persist', 'disableTwitter', false);
+    this.prop('persist', 'expandUrlToMedia', true);
+    this.prop('ro', 'api', params.api);
+    this.prop('ro', 'embeds', {});
   }
 
   async render(urls, targetEl) {

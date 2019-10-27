@@ -10,21 +10,21 @@ export default class User extends Reactive {
     super();
 
     const api = params.api;
-    this._readOnlyAttr('api', () => api);
-    this._readOnlyAttr('connections', new SortedMap());
-    this._readOnlyAttr('email', () => this.getUserOp.res.body.email || '');
-    this._readOnlyAttr('embedMaker', new EmbedMaker({api}));
-    this._readOnlyAttr('events', this._createEvents(params));
-    this._readOnlyAttr('getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
-    this._readOnlyAttr('notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
+    this.prop('ro', 'api', () => api);
+    this.prop('ro', 'connections', new SortedMap());
+    this.prop('ro', 'email', () => this.getUserOp.res.body.email || '');
+    this.prop('ro', 'embedMaker', new EmbedMaker({api}));
+    this.prop('ro', 'events', this._createEvents(params));
+    this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
+    this.prop('ro', 'notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
 
-    this._localStorageAttr('lastUrl', '');
-    this._localStorageAttr('showGrid', false);
-    this._localStorageAttr('theme', 'auto');
+    this.prop('persist', 'lastUrl', '');
+    this.prop('persist', 'showGrid', false);
+    this.prop('persist', 'theme', 'auto');
 
-    this._proxyAttr('expandUrlToMedia', 'embedMaker');
-    this._proxyAttr('wantNotifications', 'events');
-    this._proxyAttr('status', 'getUserOp');
+    this.prop('proxy', 'expandUrlToMedia', 'embedMaker');
+    this.prop('proxy', 'wantNotifications', 'events');
+    this.prop('proxy', 'status', 'getUserOp');
   }
 
   ensureDialog(params) {

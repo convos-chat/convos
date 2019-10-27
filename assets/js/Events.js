@@ -11,11 +11,11 @@ export default class Events extends Reactive {
     this.queue = [];
     this.waiting = {}; // Add logic to clean up old callbacks
 
-    this._localStorageAttr('debugEvents', navigator.userAgent.indexOf('Mozilla') != -1 ? 1 : 0);
-    this._localStorageAttr('notificationCloseDelay', 5000);
-    this._localStorageAttr('wantNotifications', null);
-    this._readOnlyAttr('wsUrl', params.wsUrl); // TODO: Should probably be input parameter
-    this._updateableAttr('ready', false);
+    this.prop('persist', 'debugEvents', navigator.userAgent.indexOf('Mozilla') != -1 ? 1 : 0);
+    this.prop('persist', 'notificationCloseDelay', 5000);
+    this.prop('persist', 'wantNotifications', null);
+    this.prop('ro', 'wsUrl', params.wsUrl); // TODO: Should probably be input parameter
+    this.prop('rw', 'ready', false);
   }
 
   dispatch(params) {

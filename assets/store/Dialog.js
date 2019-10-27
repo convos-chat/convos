@@ -21,30 +21,30 @@ export default class Dialog extends Reactive {
     if (params.connection_id) path.push(params.connection_id);
     if (params.dialog_id) path.push(params.dialog_id);
 
-    this._readOnlyAttr('api', params.api);
-    this._readOnlyAttr('color', str2color(params.dialog_id || params.connection_id || ''));
-    this._readOnlyAttr('connection_id', params.connection_id || '');
-    this._readOnlyAttr('events', params.events);
-    this._readOnlyAttr('is_private', () => !channelRe.test(this.name));
-    this._readOnlyAttr('participants', new SortedMap([], {sorter: sortParticipants}));
-    this._readOnlyAttr('path', path.map(p => encodeURIComponent(p)).join('/'));
+    this.prop('ro', 'api', params.api);
+    this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
+    this.prop('ro', 'connection_id', params.connection_id || '');
+    this.prop('ro', 'events', params.events);
+    this.prop('ro', 'is_private', () => !channelRe.test(this.name));
+    this.prop('ro', 'participants', new SortedMap([], {sorter: sortParticipants}));
+    this.prop('ro', 'path', path.map(p => encodeURIComponent(p)).join('/'));
 
-    this._updateableAttr('errors', 0);
-    this._updateableAttr('last_active', new Time(params.last_active));
-    this._updateableAttr('last_read', new Time(params.last_read));
-    this._updateableAttr('messages', []);
-    this._updateableAttr('mode', '');
-    this._updateableAttr('name', params.name || 'Unknown');
-    this._updateableAttr('status', 'loading');
-    this._updateableAttr('topic', params.topic || '');
-    this._updateableAttr('unread', params.unread || 0);
+    this.prop('rw', 'errors', 0);
+    this.prop('rw', 'last_active', new Time(params.last_active));
+    this.prop('rw', 'last_read', new Time(params.last_read));
+    this.prop('rw', 'messages', []);
+    this.prop('rw', 'mode', '');
+    this.prop('rw', 'name', params.name || 'Unknown');
+    this.prop('rw', 'status', 'loading');
+    this.prop('rw', 'topic', params.topic || '');
+    this.prop('rw', 'unread', params.unread || 0);
 
     if (params.hasOwnProperty('dialog_id')) {
-      this._readOnlyAttr('dialog_id', params.dialog_id);
-      this._updateableAttr('frozen', params.frozen || '');
+      this.prop('ro', 'dialog_id', params.dialog_id);
+      this.prop('rw', 'frozen', params.frozen || '');
     }
     else {
-      this._readOnlyAttr('frozen', () => this._calculateFrozen());
+      this.prop('ro', 'frozen', () => this._calculateFrozen());
     }
 
     this.events.on('update', this._loadParticipants.bind(this));
@@ -196,8 +196,8 @@ export default class Dialog extends Reactive {
   }
 
   _addOperations() {
-    this._readOnlyAttr('setLastReadOp', this.api.operation('setDialogLastRead'));
-    this._readOnlyAttr('messagesOp', this.api.operation('dialogMessages'));
+    this.prop('ro', 'setLastReadOp', this.api.operation('setDialogLastRead'));
+    this.prop('ro', 'messagesOp', this.api.operation('dialogMessages'));
   }
 
   _calculateFrozen() {

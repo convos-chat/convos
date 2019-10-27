@@ -1,0 +1,29 @@
+{
+  "plugins": ["plugins/markdown"],
+  "recurseDepth": 10,
+  "opts": {
+    "destination": "./public/docs/",
+    "encoding": "utf8",
+    "private": true,
+    "recurse": true,
+    "template": "./node_modules/toast-jsdoc"
+  },
+  "source": {
+    "include": [
+      "assets/js",
+      "assets/store"
+    ],
+    "includePattern": ".+\\.js$",
+    "excludePattern": "node_modules"
+  },
+  "sourceType": "module",
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "templates": {
+    "disableSort": false,
+    "cleverLinks": false,
+    "monospaceLinks": false
+  }
+}

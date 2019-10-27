@@ -1,3 +1,20 @@
+/**
+ * Operation is a class for fetching data from an OpenAPI powered server.
+ *
+ * @exports Operation
+ * @class Operation
+ * @extends Reactive
+ * @property {Api} api An {@link Api} object.
+ * @property {Array} err A list of errors, if any.
+ * @property {Null} err If no errors.
+ * @property {Object} defaultParams An Object holding default "Operation" parameters. (optional)
+ * @property {Object} req The requested data.
+ * @property {Object} res The response from the OpenAPI server.
+ * @property {String} id The name of the operation ID.
+ * @property {String} status Either "error", "loading", "pending" or "success".
+ * @see Api
+ */
+
 import Reactive from '../js/Reactive';
 import {regexpEscape} from '../js/util';
 
@@ -7,29 +24,53 @@ export default class Operation extends Reactive {
   constructor(params) {
     super();
 
-    this._readOnlyAttr('api', params.api);
-    this._readOnlyAttr('defaultParams', params.defaultParams || {});
-    this._readOnlyAttr('id', params.id);
-    this._readOnlyAttr('req', {body: null, headers: {}});
-    this._readOnlyAttr('res', {body: {}, headers: {}});
-    this._updateableAttr('err', null);
-    this._updateableAttr('status', 'pending');
+    this.prop('ro', 'api', params.api);
+    this.prop('ro', 'defaultParams', params.defaultParams || {});
+    this.prop('ro', 'id', params.id);
+    this.prop('ro', 'req', {body: null, headers: {}});
+    this.prop('ro', 'res', {body: {}, headers: {}});
+    this.prop('rw', 'err', null);
+    this.prop('rw', 'status', 'pending');
   }
 
+  /**
+   * error() can be used to get or set the "err" property.
+   *
+   * @example
+   * op = op.err('Some error');
+   * const err = op.err(); // "Some error"
+   *
+   * op = op.err([{message: 'Complex stuff', path: '/foo'}]);
+   * const err = op.err(); // "foo: Complex stuff"
+   *
+   * @memberof Operation
+   * @param {Array} err A list of error objects.
+   * @param {String} err A descriptive error string.
+   * @returns {String} A descriptive error string.
+   */
   error(err) {
-    if (err) { // Set error
-      return this.update({err: Array.isArray(err) ? err : [{message: err}], status: 'error'});
-    }
-    else if (!this.err || !this.err.length) { // No error
-      return '';
-    }
-    else { // Get error
-      const first = this.err[0];
-      const path = first.path && first.path.match(/\w$/) && first.path.split('/').pop();
-      return path ? path + ': ' + first.message : first.message;
-    }
+    // Set error
+    if (err) return this.update({err: Array.isArray(err) ? err : [{message: err}], status: 'error'});
+
+    // Get error
+    if (!this.err || !this.err.length) return '';
+    const first = this.err[0];
+    const path = first.path && first.path.match(/\w$/) && first.path.split('/').pop();
+    return path ? path + ': ' + first.message : first.message;
   }
 
+  /**
+   * perform() is used to send/receive data with the OpenAPI server.
+   *
+   * @example
+   * await op.perform({email: 'jhthorsen@cpan.org'});
+   * console.log(op.res.body);
+   *
+   * @memberof Operation
+   * @param {Object} params Mapping between request parameter names and values.
+   * @param {HTMLFormElement} params A form with parameter names and values.
+   * @returns {Promise} The promise will be resolved on error and success.
+   */
   perform(params) {
     // this._promise is used as a locking mechanism so you can only call perform() once
     return this._promise || (this._promise = new Promise(async (resolve) => {
@@ -42,29 +83,27 @@ export default class Operation extends Reactive {
       if (typeof req.body == 'object') req.body = JSON.stringify(req.body);
       const res = await fetch(url, req);
       delete this._promise;
-      res.json().then(json => resolve(this.parse(res, json)));
+      res.json().then(json => resolve(this._parse(res, json)));
     }));
   }
 
+  /**
+   * is() can be used to check if the Operation is in a given state.
+   *
+   * @memberof Operation
+   * @param {String} status Either "error", "loading", "pending" or "success".
+   * @retuns {Boolean} True/false if the "status" property matches the input "status".
+   */
   is(status) {
     if (validStatus.indexOf(status) == -1) throw 'Invalid status: ' + status;
     return this.status == status;
   }
 
-  parse(res, body = res.body) {
-    this.res.body = body || res;
-    this.res.status = res.status || '201';
-    this.res.statusText = res.statusText;
-    if (res.headers) this.res.headers = res.headers;
-
-    let err = null;
-    if (!String(this.res.status).match(/^[23]/)) {
-      err = body && body.errors ? body.errors : [{message: res.statusText || 'Unknown error.'}];
-    }
-
-    return this.update({err, status: err ? 'error' : 'success'});
-  }
-
+  /**
+   * reset() can be used to clear the response with any data previously fetched.
+   *
+   * @memberof Operation
+   */
   reset() {
     this.res.body = {};
     this.res.headers = {};
@@ -130,5 +169,19 @@ export default class Operation extends Reactive {
     });
 
     return [url, fetchParams];
+  }
+
+  _parse(res, body = res.body) {
+    this.res.body = body || res;
+    this.res.status = res.status || '201';
+    this.res.statusText = res.statusText;
+    if (res.headers) this.res.headers = res.headers;
+
+    let err = null;
+    if (!String(this.res.status).match(/^[23]/)) {
+      err = body && body.errors ? body.errors : [{message: res.statusText || 'Unknown error.'}];
+    }
+
+    return this.update({err, status: err ? 'error' : 'success'});
   }
 }
