@@ -4,10 +4,10 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-my $t = t::Helper->t;
+my $t    = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $channel = $connection->dialog({name => '#convos'});
+my $dialog     = $connection->dialog({name => '#convos'});
 
 # trick to make Devel::Cover track calls to _messages()
 $t->app->core->backend->_fc(bless {}, 'NoForkCall');
@@ -21,7 +21,7 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-
   ->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 0, 'no messages';
 
-$connection->emit(message => $channel => $_) for t::Helper->messages;
+$connection->emit(message => $dialog => $_) for t::Helper->messages;
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00')
   ->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 60, 'got max limit messages';
@@ -75,7 +75,7 @@ $t->get_ok('/api/notifications')->status_is(200)->json_is(
 );
 
 $connection->emit(
-  message => $channel => {
+  message => $dialog => {
     from      => 'someone',
     highlight => false,
     message   => q(the character æ is unicode),
@@ -87,8 +87,8 @@ $connection->emit(
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=1&match=æ')
   ->status_is(200)->json_is('/messages/0/message', q(the character æ is unicode));
 
-$channel = $connection->dialog({name => '#subtracting_months'});
-$connection->emit(message => $channel => $_) for t::Helper->messages('2016-10-30T23:40:03', 130);
+$dialog = $connection->dialog({name => '#subtracting_months'});
+$connection->emit(message => $dialog => $_) for t::Helper->messages('2016-10-30T23:40:03', 130);
 $t->get_ok(
   '/api/connection/irc-localhost/dialog/%23subtracting_months/messages?before=2016-10-31T00:02:03')
   ->status_is(200);
@@ -101,5 +101,8 @@ is int(grep { $_ != 1 } values %uniq), 0,
 $connection->emit(message => $connection->messages => $_) for t::Helper->messages(time - 3600, 130);
 $t->get_ok('/api/connection/irc-localhost/messages')->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 28, 'server messages';
+
+$dialog = $connection->dialog({name => '#with/slash'});
+$t->get_ok('/api/connection/irc-localhost/dialog/%23with%2Fslash/messages.json')->status_is(200);
 
 done_testing;

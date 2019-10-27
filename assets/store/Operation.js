@@ -113,7 +113,7 @@ export default class Operation extends Reactive {
       }
       else if (p.in == 'path') {
         const re = new RegExp('(%7B|\\{)' + regexpEscape(p.name) + '(%7D|\\})', 'i');
-        url.pathname = url.pathname.replace(re, this._extractValue(params, p));
+        url.pathname = url.pathname.replace(re, encodeURIComponent(this._extractValue(params, p)));
       }
       else if (p.in == 'query') {
         url.searchParams.set(p.name, this._extractValue(params, p));

@@ -87,6 +87,16 @@ sub startup {
     before_dispatch => sub {
       my $c = shift;
 
+      # Handle /whatever/with%2Fslash/...
+      my $path     = $c->req->url->path;
+      my $path_str = "$path";
+      $path_str =~ s/%([0-9a-fA-F]{2})/{my $h = hex $1; $h == 47 ? '%2F' : chr $h}/ge;
+      $path->leading_slash(1)  if $path_str =~ s!^/!!;
+      $path->trailing_slash(1) if $path_str =~ s!/$!!;
+      $path->parts([
+        split '/', $path->charset ? Mojo::Util::decode($path->charset, $path_str) : $path_str
+      ]);
+
       if (my $base = $c->req->headers->header('X-Request-Base')) {
         $base = Mojo::URL->new($base);
         $c->req->url->base($base);

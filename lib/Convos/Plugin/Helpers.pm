@@ -3,6 +3,7 @@ use Mojo::Base 'Convos::Plugin';
 
 use Convos::Util qw(E pretty_connection_name);
 use LinkEmbedder;
+use Mojo::Util 'url_unescape';
 
 sub register {
   my ($self, $app, $config) = @_;
@@ -18,7 +19,7 @@ sub register {
 sub _backend_dialog {
   my ($c, $args) = @_;
   my $user      = $c->backend->user($args->{email}) or return;
-  my $dialog_id = $args->{dialog_id} || $c->stash('dialog_id');
+  my $dialog_id = url_unescape $args->{dialog_id} || $c->stash('dialog_id') || '';
 
   my $connection = $user->get_connection($args->{connection_id} || $c->stash('connection_id'));
   return unless $connection;

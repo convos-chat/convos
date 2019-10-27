@@ -7,7 +7,7 @@ use File::ReadBackwards;
 use Mojo::File;
 use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
-use Mojo::Util;
+use Mojo::Util qw(encode decode url_escape);
 use Symbol;
 use Time::Piece;
 use Time::Seconds;
@@ -250,7 +250,7 @@ sub _log {
   my $file = $self->_log_file($obj, $ym);
   my $dir  = $file->dirname;
 
-  $message = Mojo::Util::encode('UTF-8', $message) if utf8::is_utf8($message);
+  $message = encode 'UTF-8', $message if utf8::is_utf8($message);
 
   $dir->make_path unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
@@ -265,7 +265,7 @@ sub _log_file {
   my @path = ($obj->connection->user->id, $obj->connection->id);
 
   push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
-  push @path, $obj->id if $obj->id;
+  push @path, url_escape $obj->id if $obj->id;
 
   my $leaf = pop @path;
   return $self->home->child(@path, "$leaf.log");
@@ -298,7 +298,7 @@ sub _messages {
 
   warn "[@{[$obj->id]}] Gettings messages from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
-    $line = Mojo::Util::decode('UTF-8', $line);
+    $line = decode 'UTF-8', $line;
     next unless $line =~ $args->{re};
     my $flag    = $2 || '0';
     my $message = {message => $3, ts => $1};

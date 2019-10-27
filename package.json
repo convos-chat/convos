@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "rollup -c",
-    "dev": "MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 PERL5LIB=$PWD/lib ./script/convos webpack --listen http://*:4000",
+    "dev": "MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 PERL5LIB=$PWD/lib ./script/convos webpack --listen http://*:4000 -w lib/ -w public/convos-api.json",
     "lint": "ROLLUP_WATCH=yes rollup -c"
   },
   "browserslist": [
