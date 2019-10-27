@@ -39,15 +39,16 @@ of the email type, then send an email to
 The backend of Convos is written in [Perl](https://www.perl.org/) and
 [Mojolicious](http://mojolicious.org/), while the frontend is written
 with [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-and [Vue](https://vuejs.org/).
+and [Svelte](https://svelte.dev/).
 
-| Language        | Files |  Code | Comment                 |
-|-----------------|-------|-------|-------------------------|
-| Perl            |    21 |  2430 | Without counting tests  |
-| JavaScript      |    21 |  1628 | jQuery and vanilla      |
-| Vuejs Component |    30 |  1539 | Reactive web components |
-| Sass            |    12 |   993 | CSS / Sass              |
-| JSON            |     1 |   684 | OpenAPI specification   |
-| Total           |    85 |  7274 |                         |
+| Language   | Files | Lines |
+|------------|-------|-------|
+| Perl       |    20 |  2294 |
+| Sass       |    27 |  1607 |
+| Svelte     |    26 |  1547 |
+| JavaScript |    19 |  1341 |
+| SVG        |     1 |    11 |
+|------------|-------|-------|
+| SUM:       |    93 |  6800 |
 
-Updated 2019-09-14 using `cloc assets/{js,vue,sass}/ lib/`
+Updated 2019-10-27 using `cloc assets/ lib/ --force-lang=CoffeeScript,svelte`
