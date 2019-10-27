@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 1.01 Not Released
  - Add support for channels with "/" #365
+ - Fix HTML entities at the end of links #362
  - Fix "Not Found" page #391
 
 1.00 2019-10-26T13:29:41+0900

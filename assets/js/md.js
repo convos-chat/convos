@@ -86,7 +86,7 @@ export function md(str, params = {}) {
 
   if (params.links !== false) {
     str = str.replace(linkRe, url => {
-      const parts = url.match(/^(.*?)(\W)?$/);
+      const parts = url.match(/^(.*?)(&\w+;|\W)?$/);
       return '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '</a>' + (parts[2] || '');
     }).replace(/mailto:(\S+)/, (all, email) => {
       return '<a href="' + all + '" target="_blank">' + email + '</a>';
