@@ -1,0 +1,21 @@
+$breakpoint-one-column: 400px !default;
+$breakpoint-two-columns: 800px !default;
+$breakpoint-three-columns: 1200px !default;
+
+$sidebar-item-indent: 0.3rem;
+$sidebar-item-dialog-indent: 0.6rem;
+$sidebar-item-icon-width: 1.5rem;
+
+@import 'themes/light';
+
+html[data-theme=light] {
+  @import 'themes/light';
+}
+
+html[data-theme=dark] {
+  @import 'themes/dark';
+}
+
+@media (prefers-color-scheme: dark) {
+  @import 'themes/dark';
+}

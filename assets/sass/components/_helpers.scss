@@ -28,13 +28,6 @@ body.with-grid::after {
 }
 
 .error {
-  background: #f7eaea;
-  color: #900;
-  border-color: #a26464;
-}
-
-.loading {
-  background: #eceeff;
-  color: #009;
-  border-color: #b6b9d2;
+  background: var(--button-danger-bg);
+  color: var(--button-danger-color);
 }
