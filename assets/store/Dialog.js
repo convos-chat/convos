@@ -222,7 +222,7 @@ export default class Dialog extends Reactive {
     const msg = {message: '%1 parted.', vars: [params.nick]};
     if (params.kicker) {
       msg.message = '%1 was kicked by %2' + (params.message ? ': %3' : '');
-      msg.vars.push(params.kicked);
+      msg.vars.push(params.kicker);
       msg.vars.push(params.message);
     }
     else if (params.message) {
