@@ -53,6 +53,7 @@ sub startup {
   # Add basic routes
   my $r = $self->routes;
   $r->get('/')->to(chat_mode => 1, template => 'index')->name('index');
+  $r->get('/docs/*doc_name', {doc_name => ''})->to('user#docs');
   $r->get("/$_")->to(chat_mode => 1, template => 'index')->name($_) for qw(login logout register);
   $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
     ->to(template => 'asset/browserconfig');

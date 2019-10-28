@@ -64,6 +64,24 @@ samp {
   font-family: var(--font-family-monospace);
 }
 
+table {
+  width: 100%;
+}
+
+td,
+th {
+  text-align: left;
+  vertical-align: top;
+
+  p {
+    margin: 0;
+  }
+}
+
+th {
+  border-bottom: var(--hr-border);
+}
+
 .is-link {
   cursor: pointer;
 }
