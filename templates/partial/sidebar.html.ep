@@ -1,10 +1,10 @@
 <div class="sidebar-left<%= stash('js_remove') ? ' js-remove' : '' %>">
-  <h1><Link href="/"><span><%=l 'Convos' %></span></Link></h1>
+  <h1><a href="/"><span><%=l 'Convos' %></span></a></h1>
   <p><%=l 'A multiuser chat application.' %></p>
 
   <nav class="sidebar-left__nav">
     <a href="/login"><%=l 'Login' %></a>
-    <a href="/register"><%=l 'Create account' %></Link>
+    <a href="/register"><%=l 'Create account' %></a>
     % if (config('organization_url') ne 'http://convos.by') {
       <a href="<%= config('organization_url') %>"><%= config('organization_name') %></a> -
     % }

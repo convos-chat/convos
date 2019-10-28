@@ -37,6 +37,7 @@
     "@babel/runtime": "^7.6.2",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "highlight.js": "^9.15.10",
+    "jsdoc": "^3.6.3",
     "jsonhtmlify": "^0.0.1",
     "twemoji": "^12.1.3"
   }

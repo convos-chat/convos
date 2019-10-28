@@ -2,6 +2,7 @@ package Convos::Controller::User;
 use Mojo::Base 'Mojolicious::Controller';
 
 use Convos::Util 'E';
+use Mojo::DOM;
 
 use constant RECOVERY_LINK_VALID_FOR => $ENV{CONVOS_RECOVERY_LINK_VALID_FOR} || 3600 * 6;
 
@@ -22,6 +23,24 @@ sub delete {
       $self->render(openapi => {message => 'You have been erased.'});
     },
   );
+}
+
+sub docs {
+  my $self = shift;
+
+  my $file = $self->app->static->file(sprintf 'docs/%s.html', $self->stash('doc_name'));
+  return $self->redirect_to('/docs/module-util') unless $file;
+
+  my $doc = Mojo::DOM->new($file->slurp);
+  $doc->find('a[href]')->each(sub { $_[0]->{href} =~ s!^([/\w].*)\.html$!$1! });
+
+  my %sections = (h1 => $doc->at('#main h1'), main => $doc->at('#main'), nav => $doc->at('nav'),);
+
+  $sections{main}->at('h1')->remove;
+  $sections{nav}->at('h2')->remove;
+
+  $self->title($doc->at('title')->text);
+  $self->render('user/docs', %sections);
 }
 
 sub generate_recover_link {
