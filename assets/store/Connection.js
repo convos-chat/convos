@@ -77,7 +77,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventNickChange(params) {
-    const nickChangeParams = {old_nick: this.nick, new_nick: params.nick, type: params.type};
+    const nickChangeParams = {old_nick: params.old_nick || this.nick, new_nick: params.new_nick || params.nick, type: params.type};
     super.wsEventNickChange(nickChangeParams);
     this.dialogs.forEach(dialog => dialog.wsEventNickChange(nickChangeParams));
   }
