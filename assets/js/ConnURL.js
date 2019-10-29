@@ -4,14 +4,28 @@
  *
  * @exports ConnURL
  * @class ConnURL
- * @extends URL
  */
 
-export default class ConnURL extends URL {
-  constructor(str) {
-    const protocol = str.match(/^\w+:/)[0];
-    super(str.replace(/^\w+:/, 'http:')); // new URL() does not understand "irc:" protocol
-    this.connProtocol = protocol;
+export default class ConnURL {
+  constructor(href) {
+    this._url = new URL('http://localhost');
+
+    Object.defineProperty(this, 'href', {
+      get: () => this._url.href.replace(/^http:/, this.protocol),
+      set: (href) => {
+        this._url.href = href.replace(/^\w+:/, 'http:');
+        this.protocol = href.match(/^\w+:/)[0];
+      },
+    });
+
+    ['host', 'password', 'searchParams', 'username'].forEach(name => {
+      Object.defineProperty(this, name, {
+        get: () => this._url[name],
+        set: (val) => {this._url[name] = val},
+      });
+    });
+
+    this.href = href;
   }
 
   /**
