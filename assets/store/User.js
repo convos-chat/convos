@@ -18,6 +18,8 @@ export default class User extends Reactive {
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this.prop('ro', 'notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
 
+    this.prop('rw', 'highlight_keywords', []);
+
     this.prop('persist', 'lastUrl', '');
     this.prop('persist', 'showGrid', false);
     this.prop('persist', 'theme', 'auto');
@@ -136,6 +138,6 @@ export default class User extends Reactive {
     this.notifications.update({unread: body.unread || 0});
     (body.connections || []).forEach(conn => this.ensureDialog(conn));
     (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));
-    this.update({}); // Force update on error
+    this.update({highlight_keywords: body.highlight_keywords}); // Force update on error
   }
 }

@@ -20,6 +20,11 @@ let expandUrlToMedia = user.expandUrlToMedia;
 let notificationsDisabled = Notification.permission == 'denied';
 let theme = user.theme;
 let wantNotifications = user.wantNotifications;
+let highlight_keywords = user.highlight_keywords.join(', ');
+
+updateUserOp.on('start', req => {
+  req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
+});
 
 function updateUserFromForm(e) {
   const form = e.target;
@@ -53,7 +58,8 @@ function updateUserFromForm(e) {
     <TextField name="email" value="{$user.email}" readonly>
       <span slot="label">{l('Email')}</span>
     </TextField>
-    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}">
+
+    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}" value="{highlight_keywords}">
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 

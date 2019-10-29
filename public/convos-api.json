@@ -449,6 +449,7 @@
             "schema": {
               "type": "object",
               "properties": {
+                "highlight_keywords": { "type": "array", "items": { "type": "string" }, "description": "Extra keywords to highlight on" },
                 "password": { "type": "string", "description": "User password" }
               }
             }
