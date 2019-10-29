@@ -51,7 +51,15 @@ currentUrl.base = settings.baseUrl;
 setContext('settings', settings);
 setContext('user', user);
 
-onMount(async () => {
+window.addEventListener('error', ({colno, error, filename, lineno, message, type, timeStamp}) => {
+  user.events.send({method: 'debug', type, colno, error, filename, lineno, message, timeStamp});
+});
+
+window.addEventListener('unhandledrejection', ({type, reason, returnValue, timeStamp}) => {
+  user.events.send({method: 'debug', type, reason, returnValue, timeStamp});
+});
+
+onMount(() => {
   if (!settings.chatMode) return;
 
   const dialogEventUnlistener = user.on('dialogEvent', calculateNewPath);
