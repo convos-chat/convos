@@ -17,8 +17,8 @@ const settings = getContext('settings');
 
 <main class="main">
   <p>
-    {@html lmd('Got any questions? Come and talk to us in the "#convos" channel on http://freenode.net.')}
-    {@html lmd('More information can also be found on http://convos.by.')}
+    {@html lmd('Got any questions? Come and talk to us in the "#convos" channel on https://freenode.net.')}
+    {@html lmd('More information can also be found on https://convos.by.')}
   </p>
 
   <h2>{l('Shortcuts')}</h2>
@@ -61,7 +61,7 @@ const settings = getContext('settings');
 
   <h2>{l('Resources')}</h2>
   <ul>
-    <li><a href="http://convos.by" target="_blank">{l('Project homepage')}</a></li>
+    <li><a href="https://convos.by" target="_blank">{l('Project homepage')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos/issues" target="_blank">{l('Bug/issue tracker')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos" target="_blank">{l('Source code')}</a></li>
   </ul>
