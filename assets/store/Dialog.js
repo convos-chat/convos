@@ -129,23 +129,17 @@ export default class Dialog extends Reactive {
   }
 
   participants(participants = []) {
-    participants.forEach(participant => {
-      // TODO: Just use "name"?
-      if (!participant.nick) participant.nick = participant.name;
-      if (!participant.name) participant.name = participant.nick;
-
-      const id = this._participantId(participant.nick);
+    participants.forEach(p => {
+      if (!p.nick) p.nick = p.name; // TODO: Just use "name"?
+      const id = this._participantId(p.nick);
       const existing = this._participants.get(id);
 
       if (existing) {
-        Object.keys(existing).forEach(k => { existing[k] = participant[k] });
-        participant = existing;
-      }
-      else {
-        participant = {mode: '', ...participant, color: str2color(id), id, ts: new Time()};
+        Object.keys(p).forEach(k => { existing[k] = p[k] });
+        p = existing;
       }
 
-      this._participants.set(id, participant);
+      this._participants.set(id, {mode: '', name: p.nick, ...p, color: str2color(id), id, ts: new Time()});
     });
 
     if (participants.length) this.update({participants: this._participants.size});
