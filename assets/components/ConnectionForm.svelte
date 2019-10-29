@@ -35,7 +35,6 @@ let wantToBeConnected = false;
 $: if (formEl) formEl.wanted_state.value = wantToBeConnected ? 'connected' : 'disconnected';
 
 onMount(async () => {
-  await user.load();
   if (!formEl) return; // if unMounted while loading user data
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
   return connection.url ? connectionToForm() : defaultsToForm();

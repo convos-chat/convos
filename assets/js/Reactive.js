@@ -113,8 +113,8 @@ export default class Reactive {
    * @param {Object} params A map between property name and value.
    */
   update(params) {
-    let paramNames = Object.keys(params);
-    let updated = 0;
+    const paramNames = Object.keys(params);
+    let updated = paramNames.length;
 
     for (let i = 0; i < paramNames.length; i++) {
       const name = paramNames[i];
@@ -123,7 +123,7 @@ export default class Reactive {
         this[this._proxyTo[name]].update({[name]: params[name]});
       }
       else if (this._reactiveProp.hasOwnProperty(name)) {
-        if (this._reactiveProp[name] !== params[name]) updated++;
+        if (this._reactiveProp[name] === params[name]) updated--;
         this._reactiveProp[name] = params[name];
       }
 
@@ -132,11 +132,8 @@ export default class Reactive {
       }
     }
 
-    if (!this._updatedTid && updated || paramNames.length == 0) {
-      this._updatedTid = setTimeout(() => {
-        delete this._updatedTid;
-        this.emit('update', this);
-      }, 1);
+    if (updated && !this._updatedTid) {
+      this._updatedTid = setTimeout(() => { delete this._updatedTid; this.emit('update', this) }, 1);
     }
 
     return this;

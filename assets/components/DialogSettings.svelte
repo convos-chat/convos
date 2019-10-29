@@ -21,8 +21,7 @@ $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
 function calculateIsOperator(dialog) {
   const connection = user.findDialog({connection_id: dialog.connection_id});
-  const currentNickId = (connection && connection.nick || '').toLowerCase();
-  const participant = dialog.participants.get(currentNickId);
+  const participant = dialog.participant(connection && connection.nick);
   return participant && participant.mode.indexOf('o') != -1;
 }
 
@@ -65,8 +64,8 @@ function updateDialogFromForm(e) {
   </form>
 
   <nav class="sidebar-left__nav">
-    <h3>{l('Participants (%1)', dialog.participants.size)}</h3>
-    {#each dialog.participants.toArray() as participant}
+    <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
+    {#each dialog.participants() as participant}
       <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
         <span>{participant.nick}</span>
       </Link>

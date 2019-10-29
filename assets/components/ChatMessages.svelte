@@ -32,7 +32,7 @@ function gotoDialog(e) {
 }
 
 function senderIsPresent(message) {
-  return dialog.participants.has(message.fromId) || message.fromId == connection.connection_id;
+  return dialog.participant(message.fromId) || message.fromId == connection.connection_id;
 }
 
 function toggleDetails(e) {

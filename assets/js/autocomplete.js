@@ -49,7 +49,7 @@ autocomplete.emojis = ({query}) => {
 };
 
 autocomplete.nicks = ({dialog, query}) => {
-  const participants = dialog.participants.values();
+  const participants = dialog.participants();
   const re = new RegExp('^' + regexpEscape(query.slice(1)), 'i');
   const opts = [];
 

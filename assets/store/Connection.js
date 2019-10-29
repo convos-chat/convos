@@ -19,7 +19,7 @@ export default class Connection extends Dialog {
     this.prop('rw', 'url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
     this.prop('rw', 'nick', params.nick || this.url.searchParams.get('nick') || '');
 
-    this.participant(this.nick, {});
+    this.participants([{nick: this.nick}]);
   }
 
   addDialog(dialogId) {
@@ -33,10 +33,10 @@ export default class Connection extends Dialog {
 
     dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
     dialog.on('message', params => this.emit('message', params));
-    dialog.on('update', () => this.update({}));
+    dialog.on('update', () => this.update({dialogs: this.dialogs.size}));
     this._addDefaultParticipants(dialog);
     this.dialogs.set(dialog.dialog_id, dialog);
-    this.update({});
+    this.update({dialogs: this.dialogs.size});
     return dialog;
   }
 
@@ -50,7 +50,7 @@ export default class Connection extends Dialog {
 
   removeDialog(params) {
     this.dialogs.delete(params.dialog_id);
-    return this.update({});
+    return this.update({dialogs: this.dialogs.size});
   }
 
   update(params) {
@@ -68,7 +68,7 @@ export default class Connection extends Dialog {
 
   wsEventFrozen(params) {
     const existing = this.findDialog(params);
-    this.ensureDialog(params).participant(this.nick, {me: true});
+    this.ensureDialog(params).participants([{nick: this.nick, me: true}]);
     if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
   }
 
@@ -93,7 +93,7 @@ export default class Connection extends Dialog {
     const dialog = this.ensureDialog(params);
     const nick = params.nick || this.nick;
     dialog.addMessage({message: '%1 joined.', vars: [nick]});
-    dialog.participant(nick, {});
+    dialog.participants([{nick}]);
   }
 
   wsEventPart(params) {
@@ -152,8 +152,9 @@ export default class Connection extends Dialog {
   }
 
   _addDefaultParticipants(dialog) {
-    dialog.participant(this.nick);
-    if (dialog.is_private) dialog.participant(dialog.name);
+    const participants = [{nick: this.nick, me: true}];
+    if (dialog.is_private) participants.push({nick: dialog.name});
+    dialog.participants(participants);
   }
 
   _addOperations() {

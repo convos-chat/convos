@@ -152,11 +152,11 @@ const onScroll = debounce(e => {
   <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
 {/if}
 
-{#if dialog.participants.size}
+{#if dialog.participants().length}
   <div class="sidebar-right">
     <nav class="sidebar-right__nav">
-      <h3>{l('Participants (%1)', dialog.participants.size)}</h3>
-      {#each dialog.participants.toArray() as participant}
+      <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
+      {#each dialog.participants() as participant}
         <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
           <Icon name="pick:{participant.id}" family="solid" style="color:{participant.color}"/>
           <span>{participant.nick}</span>
