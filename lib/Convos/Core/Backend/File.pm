@@ -7,7 +7,7 @@ use File::ReadBackwards;
 use Mojo::File;
 use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
-use Mojo::Util qw(encode decode url_escape);
+use Mojo::Util qw(encode decode);
 use Symbol;
 use Time::Piece;
 use Time::Seconds;
@@ -265,7 +265,11 @@ sub _log_file {
   my @path = ($obj->connection->user->id, $obj->connection->id);
 
   push @path, ref $t ? sprintf '%s/%02s', $t->year, $t->mon : $t;
-  push @path, url_escape $obj->id if $obj->id;
+
+  if (my $id = $obj->id) {
+    $id =~ s!/!%2F!g;
+    push @path, $id;
+  }
 
   my $leaf = pop @path;
   return $self->home->child(@path, "$leaf.log");

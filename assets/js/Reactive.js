@@ -133,6 +133,7 @@ export default class Reactive {
     }
 
     if (updated && !this._updatedTid) {
+      //console.log({type: 'update', id: this.name || this.email, paramNames: paramNames.join(','), updated});
       this._updatedTid = setTimeout(() => { delete this._updatedTid; this.emit('update', this) }, 1);
     }
 
