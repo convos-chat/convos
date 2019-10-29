@@ -84,12 +84,12 @@ function calculateNewPath(params) {
   }
 }
 
-function calculatePage($url, getUserOp) {
+function calculatePage($url, $getUserOp) {
   // Remember last chat
   if ($url.pathParts[0] == 'chat') user.update({lastUrl: $url.toString()});
 
   // Figure out current page
-  const loggedIn = getUserOp.is('success');
+  const loggedIn = $getUserOp.is('success');
   const pages = loggedIn ? loggedInPages : loggedOutPages;
   const pageName = pages[$url.path] ? $url.path : $url.pathParts[0] || '';
   const nextPageComponent = pages[pageName];
@@ -108,7 +108,7 @@ function calculatePage($url, getUserOp) {
     const lastUrl = user.lastUrl;
     gotoUrl(lastUrl || (user.connections.size ? '/chat' : '/add/connection'), {replace: true});
   }
-  else if (getUserOp.is('error')) {
+  else if ($getUserOp.is('error')) {
     gotoUrl('/login', {replace: true});
   }
 

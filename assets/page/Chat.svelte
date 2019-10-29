@@ -36,8 +36,21 @@ let unsubscribe = [];
 $: calculateDialog($user, $currentUrl);
 
 afterUpdate(() => {
-  observeMessages();
-  keepScrollPosition();
+  // Load embeds when message gets into viewport
+  observer = observer || new IntersectionObserver(messageElObserved, {rootMargin: '0px'});
+  q(document, '.message', messageEl => {
+    if (!messageEl.classList.contains('is-observed')) observer.observe(messageEl);
+    messageEl.classList.add('is-observed');
+  });
+
+  // Keep the scroll position
+  if (scrollPos == 'bottom') {
+    messagesEl.scrollTop = messagesHeight;
+  }
+  else if (messagesHeightLast && messagesHeightLast < messagesHeight) {
+    messagesEl.scrollTop = messagesHeight - messagesHeightLast;
+    messagesHeightLast = 0;
+  }
 });
 
 onDestroy(() =>  {
@@ -48,20 +61,20 @@ function addDialog(e) {
   if (connection.connection_id) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
 }
 
-function calculateDialog(user, currentUrl) {
-  pathParts = currentUrl.pathParts;
-  const c = user.findDialog({connection_id: pathParts[1]}) || {};
+function calculateDialog($user, $currentUrl) {
+  pathParts = $currentUrl.pathParts;
+  const c = $user.findDialog({connection_id: pathParts[1]}) || {};
   if (c != connection) connection = c;
 
-  const d = pathParts.length == 1 ? user.notifications : user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});
-  if (!d) return (dialog = user.notifications);
+  const d = pathParts.length == 1 ? $user.notifications : $user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});
+  if (!d) return (dialog = $user.notifications);
   if (d == dialog && previousPath) return;
   if (unsubscribe) unsubscribe.forEach(cb => cb());
   if (previousPath && dialog.setLastRead) dialog.setLastRead();
 
   q(document, '.message__embed', embedEl => embedEl.remove());
   dialog = d;
-  previousPath = currentUrl.path;
+  previousPath = $currentUrl.path;
   unsubscribe = [];
   if (connection.subscribe) unsubscribe.push(connection.subscribe(c => { connection = c }));
   if (dialog != connection) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
@@ -70,26 +83,11 @@ function calculateDialog(user, currentUrl) {
   settingsComponent = !dialog.connection_id ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
 }
 
-function keepScrollPosition() {
-  if (scrollPos == 'bottom') {
-    messagesEl.scrollTop = messagesHeight;
-  }
-  else if (messagesHeightLast && messagesHeightLast < messagesHeight) {
-    messagesEl.scrollTop = messagesHeight - messagesHeightLast;
-    messagesHeightLast = 0;
-  }
-}
-
-function observed(entries, observer) {
+function messageElObserved(entries, observer) {
   entries.forEach(({isIntersecting, target}) => {
     if (!isIntersecting) return;
     user.embedMaker.render((dialog.messages[target.dataset.index] || {}).embeds || [], target);
   });
-}
-
-function observeMessages() {
-  observer = observer || new IntersectionObserver(observed, {rootMargin: '0px'});
-  q(document, '.message', messageEl => observer.observe(messageEl));
 }
 
 const onScroll = debounce(e => {
