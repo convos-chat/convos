@@ -45,7 +45,28 @@ function defaultsToForm() {
   formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   useTls = true;
   wantToBeConnected = true;
-  urlToForm(formEl);
+
+  const url = new URL(location.href);
+  if (!url.searchParams.get('uri')) return urlToForm(formEl, url);
+
+  const connURL = new ConnURL(url.searchParams.get('uri'));
+  const connParams = connURL.searchParams;
+
+  const host = (connURL.host || '').split(':')[0];
+  const dialogName = connURL.pathname && decodeURIComponent(connURL.pathname.split('/').filter(p => p.length)[0]);
+  const existingConnection = connURL.host && user.connections.filter(conn => conn.url.host.indexOf(host) == 0)[0];
+  const existingDialog = existingConnection && dialogName && existingConnection.findDialog({dialog_id: dialogName.toLowerCase()});
+
+  if (existingDialog) return gotoUrl(existingDialog.path);
+  if (existingConnection) return gotoUrl('/add/conversation?connection_id=' + existingConnection.connection_id + '&dialog_id=' + encodeURIComponent(dialogName || ''));
+
+  if (connURL.host) formEl.server.value = connURL.host;
+  if (connURL.password) formEl.password.value = connURL.password;
+  if (connURL.username) formEl.username.value = connURL.username;
+  if (connParams.get('nick')) formEl.nick.value = connParams.get('nick');
+  if (dialogName && formEl.dialog) formEl.dialog.value = dialogName;
+  if (Number(connParams.get('tls') || 0)) useTls = true;
+  if (Number(connParams.get('tls_verify') || 0)) verifyTls = true;
 }
 
 function connectionToForm() {
@@ -103,11 +124,17 @@ async function submitForm(e) {
   <TextField name="nick" placeholder="{l('Ex: your-name')}">
     <span slot="label">{l('Nickname')}</span>
   </TextField>
+
   {#if connection.url}
     <Checkbox bind:checked="{wantToBeConnected}">
       <span slot="label">{l('Want to be connected')}</span>
     </Checkbox>
+  {:else}
+    <TextField name="dialog" placeholder="{l('Ex: #convos')}">
+      <span slot="label">{l('Conversation name')}</span>
+    </TextField>
   {/if}
+
   <Checkbox name="tls" bind:checked="{useTls}">
     <span slot="label">{l('Secure connection (TLS)')}</span>
   </Checkbox>

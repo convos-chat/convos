@@ -14,7 +14,7 @@ import {regexpEscape} from './util';
 const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
 const emojiByGroup = {};
 const emojiByName = {};
-const linkRe = new RegExp('https?://\\S+', 'g');
+const linkRe = new RegExp('\\b[a-z]{2,5}://\\S+', 'g');
 const mdLinkRe = new RegExp('\\[([^]+)\\]\\(([^)]+)\\)');
 const mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+|_+)(\\w[^<]*?)\\3', 'g');
 
