@@ -109,7 +109,7 @@ const onScroll = debounce(e => {
 function registerUrlHandler(connection) {
   if (!connection.url) return;
   const protocol = connection.url.protocol.replace(/:$/, '');
-  navigator.registerProtocolHandler(protocol, currentUrl.base + '/register?uri=%s', 'Convos ' + protocol + ' handler');
+  if (navigator.registerProtocolHandler) navigator.registerProtocolHandler(protocol, currentUrl.base + '/register?uri=%s', 'Convos ' + protocol + ' handler');
 }
 </script>
 
