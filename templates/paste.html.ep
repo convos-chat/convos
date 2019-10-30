@@ -4,7 +4,7 @@
 %= include 'partial/sidebar', js_remove => 0
 
 <header class="chat-header">
-  <h1>Paste</h1>
+  <h1><%=l 'Paste' %></h1>
   <small class="ts"><%= $file->{created_at} %></small>
 </header>
 

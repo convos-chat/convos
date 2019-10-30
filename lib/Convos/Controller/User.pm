@@ -250,6 +250,10 @@ user related actions.
 
 See L<Convos::Manual::API/deleteUser>.
 
+=head2 docs
+
+Will render docs built with C<pnpm run generate-docs>.
+
 =head2 generate_recover_link
 
 Used to generate a recover link when running Convos from the command line.
@@ -277,6 +281,10 @@ TODO
 =head2 register
 
 See L<Convos::Manual::API/registerUser>.
+
+=head2 register_html
+
+Will handle the "uri" that can hold "irc://...." URLs.
 
 =head2 update
 

@@ -1,20 +1,23 @@
 % my $message = Mojo::Message::Response->new->default_message($status);
 % layout 'convos';
-% title "$message ($status)";
+% title join ' ', l($message), "($status)";
 
 %= include 'partial/sidebar', js_remove => 0
 
 <main class="main align-content-middle js-remove">
   <div>
-    <h2><%= $message %> (<%= $status %>)</h2>
+    <h2><%=l $message %> (<%= $status %>)</h2>
     % if ($status == 404) {
-      <p>Could not find the page you are looking for. Maybe you entered an invalid URL?</p>
+      <p><%=l 'Could not find the page you are looking for. Maybe you entered an invalid URL?' %></p>
     % } else {
       <p>
-        This should not happen.
+        %=l 'This should not happen.'
         Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
         if the problem does not go away.
       </p>
     % }
+      <p>
+        %= link_to l('Go to landing page'), 'index', class => 'btn'
+      </p>
   </div>
 </main>

@@ -4,7 +4,7 @@ use Mojo::File 'path';
 use Test::More;
 use Convos;
 
-plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
+plan skip_all => 'TEST_ALL=1'            unless $ENV{TEST_ALL};
 plan skip_all => 'Changes was not found' unless -r 'Changes';
 
 my ($wanted_version) = path('Changes')->slurp =~ /^(\d+\.\d+\w*)\s/m;
