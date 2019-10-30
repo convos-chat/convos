@@ -20,6 +20,7 @@ use strict;
 use Config;
 my %seen;
 
+$ENV{LINK_EMBEDDER_FORCE_SECURE} //= 1;    # Make sure LinkEmbedder upgrade http to https
 $ENV{MOJO_NPM_BINARY} = 'pnpm';
 
 if ($ARGV[0] and -r $ARGV[0] and -f $ARGV[0]) {
