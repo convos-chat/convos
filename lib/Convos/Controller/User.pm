@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Convos::Util 'E';
 use Mojo::DOM;
+use Socket qw(inet_aton AF_INET);
 
 use constant RECOVERY_LINK_VALID_FOR => $ENV{CONVOS_RECOVERY_LINK_VALID_FOR} || 3600 * 6;
 
@@ -117,15 +118,6 @@ sub recover {
   $self->session(email => $email)->redirect_to($redirect_url);
 }
 
-sub require_login {
-  my $self = shift;
-  my $user = $self->backend->user;
-
-  return $self->stash(user => $user) if $user;
-  $self->redirect_to('index');
-  return undef;
-}
-
 sub register {
   my $self = shift->openapi->valid_input or return;
   my $user;
@@ -145,6 +137,48 @@ sub register {
       $self->render(openapi => $user);
     },
   );
+}
+
+sub register_html {
+  my $self     = shift;
+  my $user     = $self->backend->user;
+  my $conn_url = $self->param('uri') && Mojo::URL->new($self->param('uri'));
+
+  if ($user and $conn_url) {
+    my $existing_connection = $self->_existing_connection($conn_url, $user);
+    my $existing_dialog
+      = $existing_connection && $self->_existing_dialog($conn_url, $existing_connection);
+
+    if ($existing_connection and $existing_dialog) {
+      my $redirect_url = $self->url_for('/chat');
+      push @{$redirect_url->path}, $existing_connection->id if $existing_connection;
+      push @{$redirect_url->path}, $existing_dialog->id     if $existing_dialog;
+      return $self->redirect_to($redirect_url);
+    }
+    elsif ($existing_connection) {
+      my $redirect_url = $self->url_for('/add/conversation');
+      $redirect_url->query->param(connection_id => $existing_connection->id);
+      $redirect_url->query->param(dialog_id     => $conn_url->path->[0] || '');
+      return $self->redirect_to($redirect_url);
+    }
+    else {
+      my $redirect_url = $self->url_for('/add/connection');
+      $redirect_url->query->param(uri => $conn_url);
+      return $self->redirect_to($redirect_url);
+    }
+  }
+
+  $self->settings(conn_url => $conn_url->to_string) if $conn_url;
+  $self->render('index');
+}
+
+sub require_login {
+  my $self = shift;
+  my $user = $self->backend->user;
+
+  return $self->stash(user => $user) if $user;
+  $self->redirect_to('index');
+  return undef;
 }
 
 sub update {
@@ -171,6 +205,30 @@ sub update {
       $self->render(openapi => $user);
     },
   );
+}
+
+sub _existing_connection {
+  my ($self, $url, $user) = @_;
+  return undef unless my $host = $url->host;
+
+  my @hosts;
+  push @hosts, sub {$host};
+  push @hosts, sub { my $addr = inet_aton $host; $addr && gethostbyaddr $addr, AF_INET };
+
+  for my $host (@hosts) {
+    for my $conn (@{$user->connections}) {
+      return unless my $url_host = $host->();
+      return $conn if index($conn->url->host, $url_host) >= 0;
+    }
+  }
+
+  return undef;
+}
+
+sub _existing_dialog {
+  my ($self, $url, $conn) = @_;
+  return undef unless my $dialog_name = $url->path->[0];
+  return $conn->get_dialog(lc $dialog_name);
 }
 
 1;

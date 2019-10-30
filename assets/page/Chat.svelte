@@ -64,7 +64,7 @@ function addDialog(e) {
 function calculateDialog($user, $currentUrl) {
   pathParts = $currentUrl.pathParts;
   const c = $user.findDialog({connection_id: pathParts[1]}) || {};
-  if (c != connection) connection = c;
+  if (c != connection) registerUrlHandler(connection = c);
 
   const d = pathParts.length == 1 ? $user.notifications : $user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});
   if (!d) return (dialog = $user.notifications);
@@ -105,6 +105,12 @@ const onScroll = debounce(e => {
     messagesHeightLast = messagesHeight;
   }
 }, 20);
+
+function registerUrlHandler(connection) {
+  if (!connection.url) return;
+  const protocol = connection.url.protocol.replace(/:$/, '');
+  navigator.registerProtocolHandler(protocol, currentUrl.base + '/register?uri=%s', 'Convos ' + protocol + ' handler');
+}
 </script>
 
 <svelte:window bind:innerHeight="{containerHeight}"/>

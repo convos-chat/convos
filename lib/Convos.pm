@@ -54,7 +54,8 @@ sub startup {
   my $r = $self->routes;
   $r->get('/')->to(chat_mode => 1, template => 'index')->name('index');
   $r->get('/docs/*doc_name', {doc_name => ''})->to('user#docs');
-  $r->get("/$_")->to(chat_mode => 1, template => 'index')->name($_) for qw(login logout register);
+  $r->get('/register')->to('user#register_html', chat_mode => 1);
+  $r->get("/$_")->to(chat_mode => 1, template => 'index')->name($_) for qw(login logout);
   $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
     ->to(template => 'asset/browserconfig');
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');

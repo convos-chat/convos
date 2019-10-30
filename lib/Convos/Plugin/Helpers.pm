@@ -63,12 +63,16 @@ sub _backend_connection_create {
 }
 
 sub _settings {
-  my $c        = shift;
+  my $c = shift;
+  return $c->stash->{'convos.settings'}{$_[0]} = $_[1] if @_ == 2;
+
+  my $extra    = $c->stash('convos.settings') || {};
   my %settings = %{$c->app->config('settings') || {}};
   $settings{chatMode} = $c->stash('chat_mode') ? 1 : 0;
   $settings{apiUrl}   = $c->url_for('api');
   $settings{baseUrl}  = $c->app->core->base_url->to_string;
   $settings{wsUrl}    = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+  $settings{$_}       = $extra->{$_} for keys %$extra;
   return \%settings;
 }
 

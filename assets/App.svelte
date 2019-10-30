@@ -103,7 +103,13 @@ function calculatePage($url, $getUserOp) {
   const pageName = pages[$url.path] ? $url.path : $url.pathParts[0] || '';
   const nextPageComponent = pages[pageName];
 
-  if (loggedIn) loadScript(currentUrl.base + '/images/emojis.js');
+  if (loggedIn && settings.conn_url) {
+    return (location.href = currentUrl.base + '/register?uri=' + encodeURIComponent(settings.conn_url));
+  }
+
+  if (loggedIn) {
+    loadScript(currentUrl.base + '/images/emojis.js');
+  }
 
   // Goto a valid page
   if (nextPageComponent) {

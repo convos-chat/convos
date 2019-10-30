@@ -18,7 +18,7 @@ export default class ConnURL {
       },
     });
 
-    ['host', 'password', 'searchParams', 'username'].forEach(name => {
+    ['host', 'pathname', 'password', 'searchParams', 'username'].forEach(name => {
       Object.defineProperty(this, name, {
         get: () => this._url[name],
         set: (val) => {this._url[name] = val},
