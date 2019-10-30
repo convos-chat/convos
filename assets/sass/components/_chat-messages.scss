@@ -1,6 +1,7 @@
 .message {
   position: relative;
   padding: 2px;
+  overflow: hidden;
 
   > i {
     font-size: 1.2rem;
@@ -172,12 +173,8 @@
 
   &.for-connection-status,
   &.for-last-read,
-  &.for-start-of-history {
-    color: var(--error-color);
-  }
-
   &.for-loading {
-    color: var(--success);
+    color: var(--error-color);
   }
 }
 

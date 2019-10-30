@@ -35,7 +35,7 @@ export default class Dialog extends Reactive {
     this.prop('rw', 'messages', []);
     this.prop('rw', 'mode', '');
     this.prop('rw', 'name', params.name || 'Unknown');
-    this.prop('rw', 'status', 'loading');
+    this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
 
@@ -88,7 +88,7 @@ export default class Dialog extends Reactive {
       msg.markdown = md(msg.message);
     }
 
-    this.update({messages, status: 'loaded'});
+    this.update({messages, status: 'success'});
     return this;
   }
 
@@ -99,29 +99,25 @@ export default class Dialog extends Reactive {
     return this.status == status;
   }
 
-  async load() {
-    if (this.is_private && this.dialog_id) this.send('/ison', '_noop'); // Check if user is active
-    if (!this.messagesOp || this.messagesOp.is('success')) return this;
+  async load({before}) {
+    if (!this.messagesOp || this.is('loading')) return this;
+
+    const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id};
+    if (before && before.endOfHistory) return;
+    if (before && before.ts) before = before.ts.toISOString();
+    if (before) opParams.before = before;
+
     this.update({status: 'loading'});
-    await this.messagesOp.perform(this);
+    this.events.send({method: 'debug', type: 'load', opParams});
+    console.log('load', opParams);
+    await this.messagesOp.perform(opParams);
     this._loadParticipants();
-    return this.addMessages('unshift', this.messagesOp.res.body.messages || []);
-  }
 
-  async loadHistoric() {
-    const first = this.messages[0];
-    if (!first || first.end) return;
+    const body = this.messagesOp.res.body;
+    this.addMessages('unshift', body.messages || []);
+    if (body.end && this.messages.length) this.messages[0].endOfHistory = true;
 
-    this.update({status: 'loading'});
-    await this.messagesOp.perform({
-      before: first.ts.toISOString(),
-      connection_id: this.connection_id,
-      dialog_id: this.dialog_id,
-    });
-
-    const messages = this.messagesOp.res.body.messages || [];
-    if (!messages.length && this.messages.length) first.endOfHistory = true;
-    return this.addMessages('unshift', messages);
+    return this;
   }
 
   participant(nick) {
@@ -211,8 +207,9 @@ export default class Dialog extends Reactive {
   _loadParticipants() {
     if (!this.messagesOp || !this.messagesOp.is('success')) return;
     if (!this.events.ready || this._participantsLoaded) return;
-    if (this.dialog_id && !this.is('private') && !this.is('frozen')) this.send('/names', '_updateParticipants');
+    if (!this.dialog_id || this.is('frozen')) return;
     this._participantsLoaded = true;
+    return this.is_private ? this.send('/ison', '_noop') : this.send('/names', '_updateParticipants');
   }
 
   _noop() {

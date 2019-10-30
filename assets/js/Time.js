@@ -34,7 +34,7 @@ export default class Time extends Date {
    * @returns {String} Example "15. Sept"
    */
   getHumanDate() {
-    return this.getDate() + '. ' + this.getMonthAbbr();
+    return this.getMonthAbbr() + ' ' + this.getDate();
   }
 
   /**

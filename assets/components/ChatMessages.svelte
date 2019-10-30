@@ -1,6 +1,7 @@
 <script>
-import Icon from '../components/Icon.svelte';
-import Link from '../components/Link.svelte';
+import ChatMessagesStatusLine from './ChatMessagesStatusLine.svelte';
+import Icon from './Icon.svelte';
+import Link from './Link.svelte';
 import Time from '../js/Time';
 import {ensureChildNode} from '../js/util';
 import {getContext} from 'svelte';
@@ -40,19 +41,23 @@ function toggleDetails(e) {
 }
 </script>
 
-{#if !dialog.messages.length}
+{#if dialog.messages.length == 0}
   <h2>{l(dialog.dialog_id == 'notifications' ? 'No notifications.' : 'No messages.')}</h2>
+{/if}
+
+{#if dialog.messages.length > 40 && dialog.is('loading')}
+  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin">{l('Loading...')}</ChatMessagesStatusLine>
 {/if}
 
 {#each dialog.messages as message, i}
   {#if i && i == dialog.messages.length - dialog.unread}
-    <div class="message-status-line for-last-read"><span>{l('New messages')}</span></div>
+    <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
   {/if}
 
   {#if message.endOfHistory}
-    <div class="message-status-line for-start-of-history"><span>{l('Start of history')}</span></div>
+    <ChatMessagesStatusLine class="for-start-of-history" icon="calendar-alt">{l('Started chatting on %1', message.ts.getHumanDate())}</ChatMessagesStatusLine>
   {:else if message.dayChanged}
-    <div class="message-status-line for-day-changed"><span>{message.ts.getHumanDate()}</span></div>
+    <ChatMessagesStatusLine class="for-day-changed" icon="calendar-alt">{message.ts.getHumanDate()}</ChatMessagesStatusLine>
   {/if}
 
   <div class="message is-type-{message.type}"
@@ -81,7 +86,7 @@ function toggleDetails(e) {
 {/each}
 
 {#if connection.frozen || dialog.frozen}
-  <div class="message-status-line for-connection-status"><span>{topicOrStatus(connection, dialog).replace(/\.$/, '')}</span></div>
+  <ChatMessagesStatusLine class="for-connection-status" icon="exclamation-triangle">{topicOrStatus(connection, dialog).replace(/\.$/, '')}</ChatMessagesStatusLine>
 {/if}
 
 {#if connection.frozen}
@@ -111,5 +116,5 @@ function toggleDetails(e) {
 {/if}
 
 {#if dialog.is('loading')}
-  <div class="message-status-line for-loading"><span>{l('Loading...')}</span></div>
+  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin">{l('Loading...')}</ChatMessagesStatusLine>
 {/if}

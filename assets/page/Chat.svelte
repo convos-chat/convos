@@ -49,7 +49,7 @@ afterUpdate(() => {
   }
   else if (messagesHeightLast && messagesHeightLast < messagesHeight) {
     messagesEl.scrollTop = messagesHeight - messagesHeightLast;
-    messagesHeightLast = 0;
+    if (scrollPos != 'top') messagesHeightLast = 0;
   }
 });
 
@@ -73,14 +73,18 @@ function calculateDialog($user, $currentUrl) {
   if (previousPath && dialog.setLastRead) dialog.setLastRead();
 
   q(document, '.message__embed', embedEl => embedEl.remove());
+
   dialog = d;
+  messagesHeightLast = 0;
   previousPath = $currentUrl.path;
+  scrollPos = 'bottom';
+  settingsComponent = !dialog.connection_id ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
+
   unsubscribe = [];
   if (connection.subscribe) unsubscribe.push(connection.subscribe(c => { connection = c }));
-  if (dialog != connection) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
+  if (dialog.subscribe) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
 
-  dialog.load();
-  settingsComponent = !dialog.connection_id ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
+  dialog.load({before: dialog.messages[0]});
 }
 
 function messageElObserved(entries, observer) {
@@ -92,7 +96,7 @@ function messageElObserved(entries, observer) {
 }
 
 const onScroll = debounce(e => {
-  if (!messagesEl || !dialog.dialog_id) return;
+  if (!messagesEl || !dialog.connection_id) return;
 
   const offsetHeight = messagesEl.offsetHeight;
   const scrollTop = messagesEl.scrollTop;
@@ -102,7 +106,7 @@ const onScroll = debounce(e => {
             : 'middle';
 
   if (scrollPos == 'top' && !dialog.is('loading')) {
-    if (dialog.messages.length && !dialog.messages[0].endOfHistory) dialog.loadHistoric();
+    if (dialog.messages.length) dialog.load({before: dialog.messages[0]});
     messagesHeightLast = messagesHeight;
   }
 }, 20);
@@ -133,9 +137,7 @@ function registerUrlHandler(connection) {
 
 <main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">
   <div class="messages-container" class:has-notifications="{pathParts.length == 1}" bind:offsetHeight="{messagesHeight}">
-    {#if $user.is('loading') || (dialog.is('loading') && !dialog.messages.length)}
-      <h2>{l('Loading...')}</h2>
-    {:else if pathParts[1] && !connection.connection_id}
+    {#if pathParts[1] && !connection.connection_id}
       <h2>{l('Connection does not exist.')}</h2>
       <p>{l('Do you want to create the connection "%1"?', pathParts[1])}</p>
       <p>

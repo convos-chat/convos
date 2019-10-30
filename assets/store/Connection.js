@@ -44,8 +44,8 @@ export default class Connection extends Dialog {
     return this.dialogs.get(params.dialog_id);
   }
 
-  is(state) {
-    return this.state == state;
+  is(status) {
+    return this.state == status || super.is(status);
   }
 
   removeDialog(params) {
