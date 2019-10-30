@@ -5,7 +5,6 @@ import Time from '../js/Time';
 import {ensureChildNode} from '../js/util';
 import {getContext} from 'svelte';
 import {gotoUrl} from '../store/router';
-import {jsonhtmlify} from 'jsonhtmlify';
 import {l, lmd, topicOrStatus} from '../js/i18n';
 import {showEl} from '../js/util';
 
@@ -21,7 +20,7 @@ function ensureConnected(e) {
   user.events.ensureConnected();
 }
 
-function gotoDialog(e) {
+function gotoDialogFromNotifications(e) {
   if (dialog.connection_id) return;
   const target = e.target.closest('.message');
   const message = dialog.messages[target.dataset.index];
@@ -31,23 +30,13 @@ function gotoDialog(e) {
   gotoUrl(path + '#' + message.ts.toISOString());
 }
 
-function senderIsPresent(message) {
+function senderIsOnline(message) {
   return dialog.participant(message.fromId) || message.fromId == connection.connection_id;
 }
 
 function toggleDetails(e) {
-  const targetEl = e.target.closest('.message');
-  const index = targetEl.dataset.index;
-
-  let detailsEl = targetEl.querySelector('.has-message-details');
-  if (detailsEl) return showEl(detailsEl, 'toggle');
-
-  const message = dialog.messages[index];
-  const details = {...(message.sent || message)};
-  ['bubbles', 'stopPropagation'].forEach(k => delete details[k]);
-  detailsEl = jsonhtmlify(details.sent || details);
-  detailsEl.className = ['message__embed', 'has-message-details', detailsEl.className].join(' ');
-  targetEl.appendChild(detailsEl);
+  const messageEl = e.target.closest('.message');
+  user.embedMaker.toggleDetails(messageEl, dialog.messages[messageEl.dataset.index]);
 }
 </script>
 
@@ -67,12 +56,12 @@ function toggleDetails(e) {
   {/if}
 
   <div class="message is-type-{message.type}"
-    class:is-not-present="{!senderIsPresent(message)}"
+    class:is-not-present="{!senderIsOnline(message)}"
     class:is-sent-by-you="{message.from == connection.nick}"
     class:is-highlighted="{message.highlight}"
     class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
     class:has-same-from="{message.isSameSender && !message.dayChanged}"
-    on:click="{gotoDialog}"
+    on:click="{gotoDialogFromNotifications}"
     data-index="{i}">
 
     <Icon name="pick:{message.from}" style="color:{message.color}"/>

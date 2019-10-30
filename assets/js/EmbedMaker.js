@@ -1,6 +1,7 @@
 import hljs from './hljs';
 import Reactive from './Reactive';
 import {ensureChildNode, loadScript, q, removeChildNodes, showEl} from './util';
+import {jsonhtmlify} from 'jsonhtmlify';
 
 export default class EmbedMaker extends Reactive {
   constructor(params) {
@@ -13,15 +14,15 @@ export default class EmbedMaker extends Reactive {
     this.prop('ro', 'embeds', {});
   }
 
-  async render(urls, targetEl) {
+  render(messageEl, urls) {
     if (!this.expandUrlToMedia) return;
 
     const existingEls = {};
-    q(targetEl, '.message__embed', el => { existingEls[el.dataset.url] = el });
+    q(messageEl, '.message__embed', el => { existingEls[el.dataset.url] = el });
 
     urls.forEach(url => {
       if (!this.embeds[url]) this._loadAndRender(url);
-      if (!existingEls[url]) targetEl.appendChild(this._ensureEmbedEl(url));
+      if (!existingEls[url]) messageEl.appendChild(this._ensureEmbedEl(url));
       delete existingEls[url];
     });
 
@@ -59,6 +60,17 @@ export default class EmbedMaker extends Reactive {
     removeChildNodes(mediaWrapper);
     mediaWrapper.appendChild(el.cloneNode());
     showEl(mediaWrapper, true);
+  }
+
+  toggleDetails(messageEl, message) {
+    let detailsEl = messageEl.querySelector('.has-message-details');
+    if (detailsEl) return showEl(detailsEl, 'toggle');
+
+    const details = {...(message.sent || message)};
+    ['bubbles', 'stopPropagation'].forEach(k => delete details[k]);
+    detailsEl = jsonhtmlify(details.sent || details);
+    detailsEl.className = ['message__embed', 'has-message-details', detailsEl.className].join(' ');
+    messageEl.appendChild(detailsEl);
   }
 
   _ensureEmbedEl(url) {

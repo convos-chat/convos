@@ -84,9 +84,10 @@ function calculateDialog($user, $currentUrl) {
 }
 
 function messageElObserved(entries, observer) {
-  entries.forEach(({isIntersecting, target}) => {
-    if (!isIntersecting) return;
-    user.embedMaker.render((dialog.messages[target.dataset.index] || {}).embeds || [], target);
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const message = dialog.messages[e.target.dataset.index] || {};
+    if (message.embeds) user.embedMaker.render(e.target, message.embeds);
   });
 }
 
