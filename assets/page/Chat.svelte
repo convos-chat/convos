@@ -121,7 +121,7 @@ const onScroll = debounce(e => {
       <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{pathParts[2] || pathParts[1] || l('Notifications')}</span>
     </a>
   </h1>
-  <small>{topicOrStatus(connection, dialog)}</small>
+  <i class="chat-header__topic">{topicOrStatus(connection, dialog)}</i>
 </ChatHeader>
 
 <main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">

@@ -44,7 +44,8 @@ let pageComponent = null;
 $: container.set({small: containerWidth < 800, width: containerWidth});
 $: replaceClassName('html', /(theme-)\S+/, $user.theme);
 $: calculatePage($currentUrl, $getUserOp);
-$: if (document) document.title = $notifications.unread ? '(' + $notifications.unread + ') ' + $docTitle : $docTitle;
+$: unread = $user.unread;
+$: if (document) document.title = unread ? '(' + unread + ') ' + $docTitle : $docTitle;
 
 currentUrl.base = settings.baseUrl;
 

@@ -83,7 +83,7 @@ export default class Reactive {
       case 'rw': return this._updateableProp(name, val);
     }
 
-    throw 'Unkown prop type "' + type + '" for prop "' + name + '".';
+    throw 'Unknown prop type "' + type + '" for prop "' + name + '".';
   }
 
   /**

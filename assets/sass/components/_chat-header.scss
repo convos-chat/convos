@@ -53,9 +53,8 @@
     }
   }
 
-  small {
+  .chat-header__topic {
     font-size: 0.9rem;
-    font-style: italic;
     text-overflow: ellipsis;
     white-space: pre;
     margin-right: 2rem;
@@ -95,5 +94,20 @@
 
   i {
     transition: transform 0.3s;
+  }
+
+  .chat-header__unread {
+    background: var(--sidebar-left-bg);
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1.4em;
+    border-radius: 50%;
+    box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
+    width: 1.2em;
+    height: 1.2em;
+    display: block;
+    position: absolute;
+    bottom: 0.65rem;
+    right: 1rem;
   }
 }

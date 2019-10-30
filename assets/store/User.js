@@ -17,6 +17,7 @@ export default class User extends Reactive {
     this.prop('ro', 'events', this._createEvents(params));
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
     this.prop('ro', 'notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
+    this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('rw', 'highlight_keywords', []);
 
@@ -27,6 +28,18 @@ export default class User extends Reactive {
     this.prop('proxy', 'expandUrlToMedia', 'embedMaker');
     this.prop('proxy', 'wantNotifications', 'events');
     this.prop('proxy', 'status', 'getUserOp');
+  }
+
+  dialogs(cb) {
+    const dialogs = [];
+
+    this.connections.toArray().forEach(conn => {
+      conn.dialogs.toArray().forEach(dialog => {
+        if (!cb || cb(dialog)) dialogs.push(dialog);
+      });
+    })
+
+    return dialogs;
   }
 
   ensureDialog(params) {
@@ -98,6 +111,11 @@ export default class User extends Reactive {
 
   wsEventSentJoin(params) {
     this.emit('dialogEvent', params);
+  }
+
+  _calculateUnread() {
+    return this.notifications.unread
+      + this.dialogs(dialog => dialog.is_private).reduce((t, d) => { return t + d.unread }, 0);
   }
 
   _createEvents(params) {
