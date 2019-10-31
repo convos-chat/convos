@@ -101,7 +101,8 @@ export default class Connection extends Dialog {
   }
 
   wsEventPart(params) {
-    if (params.nick == this.nick) this.removeDialog(params);
+    if (params.nick == this.nick) return this.removeDialog(params);
+    if (!params.dialog_id) this.dialogs.forEach(dialog => dialog.wsEventPart(params));
   }
 
   wsEventQuit(params) {

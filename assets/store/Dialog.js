@@ -174,10 +174,10 @@ export default class Dialog extends Reactive {
 
   wsEventPart(params) {
     const participant = this.participant(params.nick);
-    this.addMessage(this._partMessage(params));
-    if (participant.me) return;
+    if (!participant || participant.me) return;
     this._participants.delete(id);
     this.update({participants: this._participants.size});
+    this.addMessage(this._partMessage(params));
   }
 
   wsEventSentNames(params) {
