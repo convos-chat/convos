@@ -13,18 +13,46 @@ export let connection;
 export let dialog;
 export let input;
 
-const now = new Time();
 const user = getContext('user');
 
-function ensureConnected(e) {
-  e.preventDefault();
-  user.events.ensureConnected();
+$: messages = calculateMessages(dialog);
+
+function calculateMessages(dialog) {
+  const messages = dialog.messages.slice(0);
+
+  if (connection.frozen) {
+    const unreachable = connection.is('unreachable');
+    messages.push(convosMessage({
+      message: unreachable ? 'Trying to [reconnect](%1)...' : 'Your connection %1 can be edited in [settings](%2).',
+      vars: unreachable ? ['#call:user:ensureConnected'] : [connection.name, '#activeMenu:settings'],
+    }));
+  }
+
+  if (user.wantNotifications === null) {
+    messages.push(convosMessage({
+      message: 'Please go to [settings](%1) to enable notifications.',
+      vars: ['/settings'],
+    }));
+  }
+
+  return messages;
+}
+
+function convosMessage(message) {
+  return {
+    color: connection.color,
+    from: 'Convos',
+    markdown: lmd(message.message, ...message.vars),
+    ts: new Time(),
+    type: 'error',
+    ...message,
+  };
 }
 
 function gotoDialogFromNotifications(e) {
   if (dialog.connection_id) return;
   const target = e.target.closest('.message');
-  const message = dialog.messages[target.dataset.index];
+  const message = messages[target.dataset.index];
   if (!message) return;
   e.preventDefault();
   const path = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
@@ -32,25 +60,25 @@ function gotoDialogFromNotifications(e) {
 }
 
 function senderIsOnline(message) {
-  return dialog.participant(message.fromId) || message.fromId == connection.connection_id;
+  return !message.dialog_id || dialog.participant(message.fromId);
 }
 
 function toggleDetails(e) {
   const messageEl = e.target.closest('.message');
-  user.embedMaker.toggleDetails(messageEl, dialog.messages[messageEl.dataset.index]);
+  user.embedMaker.toggleDetails(messageEl, messages[messageEl.dataset.index]);
 }
 </script>
 
-{#if dialog.messages.length == 0}
+{#if messages.length == 0}
   <h2>{l(dialog.dialog_id == 'notifications' ? 'No notifications.' : 'No messages.')}</h2>
 {/if}
 
-{#if dialog.messages.length > 40 && dialog.is('loading')}
+{#if messages.length > 40 && dialog.is('loading')}
   <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin">{l('Loading...')}</ChatMessagesStatusLine>
 {/if}
 
-{#each dialog.messages as message, i}
-  {#if i && i == dialog.messages.length - dialog.unread}
+{#each messages as message, i}
+  {#if i && i == messages.length - dialog.unread}
     <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
   {/if}
 
@@ -87,32 +115,6 @@ function toggleDetails(e) {
 
 {#if connection.frozen || dialog.frozen}
   <ChatMessagesStatusLine class="for-connection-status" icon="exclamation-triangle">{topicOrStatus(connection, dialog).replace(/\.$/, '')}</ChatMessagesStatusLine>
-{/if}
-
-{#if connection.frozen}
-  <div class="message is-type-error">
-    <Icon name="cog" style="color:{connection.color}"/>
-    <b class="message__ts" title="{now.toLocaleString()}">{now.getHM()}</b>
-    <Link href="#activeMenu:settings" class="message__from" style="color:{connection.color}">Convos</Link>
-    {#if connection.state == 'unreachable'}
-      <div class="message__text" on:click="{ensureConnected}">
-        {@html lmd('Trying to [reconnect](#reconnect)...')}
-      </div>
-    {:else}
-      <div class="message__text">
-        {@html lmd('Your connection %1 can be edited in [settings](%2).', connection.name, '#activeMenu:settings')}
-      </div>
-    {/if}
-  </div>
-{/if}
-
-{#if user.wantNotifications === null}
-  <div class="message is-type-error">
-    <Icon name="cog" style="color:{connection.color}"/>
-    <b class="message__ts" title="{now.toLocaleString()}">{now.getHM()}</b>
-    <Link href="/settings" class="message__from" style="color:{connection.color}">Convos</Link>
-    <div class="message__text">{@html lmd('Please go to [settings](/settings) to enable notifications.')}</div>
-  </div>
 {/if}
 
 {#if dialog.is('loading')}

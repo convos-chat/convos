@@ -66,11 +66,9 @@ onMount(() => {
   const dialogEventUnlistener = user.on('dialogEvent', calculateNewPath);
   const historyUnlistener = historyListener();
   user.load();
-  document.addEventListener('click', toggleMenu);
   if (user.showGrid) document.querySelector('body').classList.add('with-grid');
 
   return () => {
-    document.removeEventListener('click', toggleMenu);
     dialogEventUnlistener();
     historyUnlistener();
   };
@@ -132,11 +130,6 @@ function calculatePage($url, $getUserOp) {
   for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
 }
 
-function debugClick(e) {
-  // This is useful if you want to see on server side what is being clicked on
-  // user.events.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
-}
-
 function onGlobalKeydown(e) {
   if (!(e.shiftKey && e.keyCode == 13)) return; // Shift+Enter
   e.preventDefault();
@@ -152,6 +145,27 @@ function onGlobalKeydown(e) {
   }
 }
 
+function onWindowClick(e) {
+  // This is useful if you want to see on server side what is being clicked on
+  // user.events.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
+
+  const linkEl = closestEl(e.target, 'a');
+  const action = linkEl && linkEl.href.match(/#(call:user):(\w+)/) || ['', '', ''];
+  if (action[2]) {
+    e.preventDefault();
+    user[action[2]]();
+    return;
+  }
+
+  if (closestEl(e.target, '.sidebar-left') && !linkEl) {
+    return;
+  }
+
+  const toggle = linkEl && linkEl.href.match(/#(activeMenu):(\w*)/) || ['', '', ''];
+  if (toggle[1] || $activeMenu) e.preventDefault();
+  $activeMenu = toggle[2] == $activeMenu ? '' : toggle[2];
+}
+
 function onWindowFocus() {
   if (settings.chatMode) user.events.ensureConnected();
 }
@@ -160,19 +174,10 @@ function replaceClassName(sel, re, replacement) {
   const tag = document.querySelector(sel);
   tag.className = tag.className.replace(re, (all, prefix) => prefix + replacement);
 }
-
-function toggleMenu(e) {
-  const linkEl = closestEl(e.target, 'a');
-  if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
-
-  const toggle = linkEl && linkEl.href.match(/#(activeMenu):(\w*)/) || ['', '', ''];
-  if (toggle[1] || $activeMenu) e.preventDefault();
-  $activeMenu = toggle[2] == $activeMenu ? '' : toggle[2];
-}
 </script>
 
 <svelte:window
-  on:click="{debugClick}"
+  on:click="{onWindowClick}"
   on:focus="{onWindowFocus}"
   on:keydown="{onGlobalKeydown}"
   bind:innerWidth="{containerWidth}"/>

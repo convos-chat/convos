@@ -42,6 +42,10 @@ export default class User extends Reactive {
     return dialogs;
   }
 
+  ensureConnected() {
+    this.events.ensureConnected();
+  }
+
   ensureDialog(params) {
     // Ensure channel or private dialog
     if (params.dialog_id) {
