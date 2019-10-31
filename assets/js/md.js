@@ -124,6 +124,7 @@ export function md(str) {
   });
 
   str = str.replace(linkRe, url => {
+    if (url.indexOf('</a>') != -1) return url;
     const parts = url.match(/^(.*?)(&\w+;|\W)?$/);
     return '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '</a>' + (parts[2] || '');
   }).replace(/mailto:(\S+)/, (all, email) => {
