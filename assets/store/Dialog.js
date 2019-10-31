@@ -159,7 +159,7 @@ export default class Dialog extends Reactive {
 
   wsEventMode(params) {
     if (!params.nick) return this.update({mode: params.mode}); // Channel mode
-    this.participant(params.nick, {mode: params.mode});
+    this.participants([{nick: params.nick, mode: params.mode}]);
     this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
   }
 
@@ -168,7 +168,6 @@ export default class Dialog extends Reactive {
     if (!this._participants.has(oldId)) return;
     if (params.old_nick == params.new_nick) return;
     this._participants.delete(oldId);
-    this.participant(params.new_nick, params);
     const message = params.type == 'me' ? 'You (%1) changed nick to %2.' : '%1 changed nick to %2.';
     this.addMessage({message, vars: [params.old_nick, params.new_nick]});
   }
