@@ -6,9 +6,12 @@ $sidebar-item-indent: 0.3rem;
 $sidebar-item-dialog-indent: 0.6rem;
 $sidebar-item-icon-width: 1.5rem;
 
+@import '../../node_modules/highlight.js/scss/atom-one-light.scss';
+
 @import 'themes/dark';
 @import 'themes/light';
 
 @media (prefers-color-scheme: dark) {
+  @import '../../node_modules/highlight.js/scss/atom-one-dark.scss';
   @import 'themes/dark';
 }

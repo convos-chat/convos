@@ -1,3 +1,7 @@
+html.theme-light {
+  @import '../../../node_modules/highlight.js/scss/atom-one-light.scss';
+}
+
 html.theme-light,
 :root {
   --body-bg: #f8f9f8;

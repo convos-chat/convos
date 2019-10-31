@@ -37,7 +37,7 @@ export default class User extends Reactive {
       conn.dialogs.toArray().forEach(dialog => {
         if (!cb || cb(dialog)) dialogs.push(dialog);
       });
-    })
+    });
 
     return dialogs;
   }
