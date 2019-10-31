@@ -47,7 +47,6 @@ export default class Dialog extends Reactive {
       this.prop('ro', 'frozen', () => this._calculateFrozen());
     }
 
-    this.events.on('update', this._loadParticipants.bind(this));
     this._addOperations();
   }
 
@@ -109,7 +108,6 @@ export default class Dialog extends Reactive {
 
     this.update({status: 'loading'});
     await this.messagesOp.perform(opParams);
-    this._loadParticipants();
 
     const body = this.messagesOp.res.body;
     this.addMessages('unshift', body.messages || []);
@@ -152,6 +150,11 @@ export default class Dialog extends Reactive {
     if (!this.setLastReadOp) return;
     await this.setLastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
     this.update({errors: 0, unread: 0, ...this.setLastReadOp.res.body}); // Update last_read
+  }
+
+  update(params) {
+    this._loadParticipants();
+    return super.update(params);
   }
 
   wsEventMode(params) {
@@ -203,10 +206,9 @@ export default class Dialog extends Reactive {
   }
 
   _loadParticipants() {
-    if (!this.messagesOp || !this.messagesOp.is('success')) return;
-    if (!this.events.ready || this._participantsLoaded) return;
-    if (!this.dialog_id || this.is('frozen')) return;
-    this._participantsLoaded = true;
+    if (this.participantsLoaded || !this.dialog_id || !this.events.ready || !this.messagesOp) return;
+    if (this.is('frozen') || !this.messagesOp.is('success')) return;
+    this.participantsLoaded = true;
     return this.is_private ? this.send('/ison', '_noop') : this.send('/names', '_updateParticipants');
   }
 
