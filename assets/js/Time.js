@@ -31,10 +31,14 @@ export default class Time extends Date {
    * getHumanDate() will return the date and month.
    *
    * @memberof Time
-   * @returns {String} Example "15. Sept"
+   * @returns {String} Example "Sept 15"
    */
   getHumanDate() {
-    return this.getMonthAbbr() + ' ' + this.getDate();
+    let str = this.getMonthAbbr() + ' ' + this.getDate();
+    const now = new Time();
+    const sameYear = this.getYear() == now.getYear();
+    if (!sameYear) str += ', ' + this.getFullYear();
+    return str;
   }
 
   /**
@@ -65,33 +69,5 @@ export default class Time extends Date {
    */
   toEpoch() {
     return this.getTime() / 1000;
-  }
-
-  /**
-   * toHuman() generates a short version of the date and time, dependent on how
-   * long it is ago. Examples:
-   *
-   * 1. In the future: "31. Dec 21:10"
-   * 2. One day ago: "14:02"
-   * 3. Earlier than one day ago, but this year: "14. Apr 15:00"
-   * 4. Last year: "14. Apr 2018"
-   *
-   * @memberof Time
-   * @returns {String} A human readable short version of the date and time.
-   */
-  toHuman() {
-    const now = new Time();
-    const s = this.toEpoch();
-
-    const tomorrow = now.toEpoch() + ONE_DAY - (now.toEpoch() % ONE_DAY);
-    if (s > tomorrow + ONE_DAY) return this.getDate() + '. ' + this.getMonthAbbr() + ' ' + this.getHM();
-
-    const yesterday = now.toEpoch() - (now.toEpoch() % ONE_DAY);
-    if (s > yesterday) return this.getHM();
-
-    const sameYear = this.getYear() == now.getYear();
-    if (sameYear) return this.getDate() + '. ' + this.getMonthAbbr() + ' ' + this.getHM();
-
-    return this.getDate() + '. ' + this.getMonthAbbr() + ' ' + this.getFullYear();
   }
 }

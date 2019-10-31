@@ -70,7 +70,7 @@ function toggleDetails(e) {
     data-index="{i}">
 
     <Icon name="pick:{message.from}" style="color:{message.color}"/>
-    <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.toHuman()}</b>
+    <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.getHM()}</b>
     {#if dialog.connection_id}
       <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}">{message.from}</a>
     {:else}
@@ -92,7 +92,7 @@ function toggleDetails(e) {
 {#if connection.frozen}
   <div class="message is-type-error">
     <Icon name="cog" style="color:{connection.color}"/>
-    <b class="message__ts" title="{now.toLocaleString()}">{now.toHuman()}</b>
+    <b class="message__ts" title="{now.toLocaleString()}">{now.getHM()}</b>
     <Link href="#activeMenu:settings" class="message__from" style="color:{connection.color}">Convos</Link>
     {#if connection.state == 'unreachable'}
       <div class="message__text" on:click="{ensureConnected}">
@@ -109,7 +109,7 @@ function toggleDetails(e) {
 {#if user.wantNotifications === null}
   <div class="message is-type-error">
     <Icon name="cog" style="color:{connection.color}"/>
-    <b class="message__ts" title="{now.toLocaleString()}">{now.toHuman()}</b>
+    <b class="message__ts" title="{now.toLocaleString()}">{now.getHM()}</b>
     <Link href="/settings" class="message__from" style="color:{connection.color}">Convos</Link>
     <div class="message__text">{@html lmd('Please go to [settings](/settings) to enable notifications.')}</div>
   </div>
