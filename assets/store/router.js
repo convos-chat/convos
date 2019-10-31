@@ -35,6 +35,10 @@ function parseUrl(url) {
   return nextUrl;
 }
 
+export function urlFor(path) {
+  return currentUrl.base + path;
+}
+
 export function urlToForm(formEl, url = get(currentUrl)) {
   url.searchParams.forEach((val, name) => {
     const inputEl = formEl[name];

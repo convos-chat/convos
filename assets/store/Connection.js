@@ -68,8 +68,10 @@ export default class Connection extends Dialog {
 
   wsEventFrozen(params) {
     const existing = this.findDialog(params);
+    const wasFrozen = existing && existing.frozen;
     this.ensureDialog(params).participants([{nick: this.nick, me: true}]);
     if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
+    if (wasFrozen && !params.frozen) existing.addMessage({message: 'Connected.', vars: []});
   }
 
   wsEventMessage(params) {
@@ -83,9 +85,11 @@ export default class Connection extends Dialog {
   }
 
   wsEventError(params) {
-    const dialog = this.findDialog(params) || this;
-    const message = extractErrorMessage(params) || 'Unknown error from %1.';
+    const dialog = (params.dialog_id && params.frozen) ? this.ensureDialog(params) : (this.findDialog(params) || this);
     dialog.update({errors: this.errors + 1});
+
+    let message = extractErrorMessage(params) || params.frozen || 'Unknown error from %1.';
+    if (message == 'Password protected.') message = 'Invalid password.';
     dialog.addMessage({message, type: 'error', sent: params, vars: params.command || params.message});
   }
 

@@ -1,6 +1,7 @@
 <script>
 import Button from './form/Button.svelte';
 import Link from './Link.svelte';
+import PasswordField from '../components/form/PasswordField.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import {container} from '../store/router';
@@ -13,6 +14,8 @@ export let dialog = {};
 
 const user = getContext('user');
 
+let dialogPassword = '';
+let dialogTopic = dialog.topic;
 let formEl;
 
 $: isOperator = calculateIsOperator(dialog);
@@ -29,8 +32,16 @@ function partDialog(e) {
   user.send({message: '/part', dialog});
 }
 
-function updateDialogFromForm(e) {
-  user.send({message: '/topic ' + formEl.topic.value, dialog});
+function saveDialogSettings(e) {
+  if (dialogPassword) {
+    const message = isOperator ? '/mode +k ' + dialogPassword : '/join ' + dialog.name + ' ' + dialogPassword;
+    user.send({message, dialog});
+    dialogPassword = '';
+  }
+
+  if (isOperator && dialogTopic != dialog.topic) {
+    user.send({message: '/topic ' + dialogTopic, dialog});
+  }
 }
 </script>
 
@@ -38,7 +49,9 @@ function updateDialogFromForm(e) {
   <SettingsHeader dialog="{dialog}"/>
 
   <p>
-    {#if dialog.is('private')}
+    {#if dialog.frozen}
+      {l('Conversation with %1 is frozen. Reason: %2', dialog.name, l(dialog.frozen))}
+    {:else if dialog.is('private')}
       {l('Private conversation with %1.', dialog.name)}
     {:else if isOperator}
       {l('You are a channel operator in %1.', dialog.name)}
@@ -47,28 +60,36 @@ function updateDialogFromForm(e) {
     {/if}
   </p>
 
-  <form method="post" on:submit|preventDefault="{updateDialogFromForm}" bind:this="{formEl}">
+  <form method="post" on:submit|preventDefault="{saveDialogSettings}" bind:this="{formEl}">
     {#if !dialog.is('private')}
       <input type="hidden" name="connection_id" value="{dialog.connection_id}">
       <input type="hidden" name="dialog_id" value="{dialog.dialog_id}">
-      <TextArea name="topic" placeholder="{l('No topic is set.')}" readonly="{!isOperator}">
+
+      <TextArea name="topic" placeholder="{l('No topic is set.')}" bind:value="{dialogTopic}" readonly="{!isOperator}">
         <span slot="label">{l('Topic')}</span>
       </TextArea>
+
+      <PasswordField name="password" bind:value="{dialogPassword}">
+        <span slot="label">{l('Password')}</span>
+      </PasswordField>
     {/if}
+
     <div class="form-actions">
       {#if !dialog.is('private')}
-        <Button icon="save" disabled="{!isOperator}">{l('Update')}</Button>
+        <Button icon="save">{l('Update')}</Button>
       {/if}
       <Button type="button" on:click="{partDialog}" icon="sign-out-alt">{l('Part')}</Button>
     </div>
   </form>
 
-  <nav class="sidebar-left__nav">
-    <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
-    {#each dialog.participants() as participant}
-      <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
-        <span>{participant.nick}</span>
-      </Link>
-    {/each}
-  </nav>
+  {#if !dialog.frozen}
+    <nav class="sidebar-left__nav">
+      <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
+      {#each dialog.participants() as participant}
+        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
+          <span>{participant.nick}</span>
+        </Link>
+      {/each}
+    </nav>
+  {/if}
 </div>

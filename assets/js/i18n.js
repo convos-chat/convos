@@ -49,7 +49,7 @@ export function lmd(str, ...vars) {
  */
 export function topicOrStatus(connection, dialog) {
   if (connection.frozen) return l(connection.frozen);
-  if (connection == dialog) return 'Connection messages.';
+  if (connection == dialog) return l('Connection messages.');
   const str = dialog.frozen ? l(dialog.frozen) : dialog.topic;
   return str || (dialog.is_private && l('Private conversation.')) || l('No topic is set.');
 }

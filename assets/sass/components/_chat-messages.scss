@@ -79,7 +79,7 @@
 
   &.has-same-from,
   &.is-type-action {
-    i {
+    > i {
       display: none;
     }
   }
@@ -171,7 +171,6 @@
     top: 0.3rem;
   }
 
-  &.for-connection-status,
   &.for-last-read,
   &.for-loading {
     color: var(--error-color);

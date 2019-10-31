@@ -236,10 +236,13 @@ sub _join_dialog {
     sub {
       my ($delay, $dialog, $err, $res) = @_;
 
-      $err = 'Password protected.' if $err and $err =~ /\+k\b/;
+      $err //= '';
       $res->{name} //= $name;
 
-      unless ($self->get_dialog($res->{name})) {
+      if ($err =~ /\+k\b/) {
+        $err = 'Password protected.';
+      }
+      elsif (!$self->get_dialog($res->{name})) {
         $self->remove_dialog($name);
         $dialog = $self->dialog({name => $res->{name}});
       }

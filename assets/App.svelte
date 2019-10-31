@@ -157,11 +157,12 @@ function onWindowClick(e) {
     return;
   }
 
-  const toggle = linkEl && linkEl.href.match(/#(activeMenu):(\w*)/) || ['', '', ''];
+  const toggle = linkEl && linkEl.href.match(/(.*)#(activeMenu):(\w*)/) || ['', '', '', ''];
+  if (toggle[1].indexOf('http') == 0 && $currentUrl.toString() != toggle[1]) gotoUrl(toggle[1]);
   if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
-  if (closestEl(e.target, '.main') && !toggle[2]) return;
-  if (toggle[1] || $activeMenu) e.preventDefault();
-  $activeMenu = toggle[2] == $activeMenu ? '' : toggle[2];
+  if (closestEl(e.target, '.main') && !toggle[3]) return;
+  if (toggle[2] || $activeMenu) e.preventDefault();
+  $activeMenu = toggle[3] == $activeMenu ? '' : toggle[3];
 }
 
 function onWindowFocus() {

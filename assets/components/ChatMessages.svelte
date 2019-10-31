@@ -5,7 +5,7 @@ import Link from './Link.svelte';
 import Time from '../js/Time';
 import {ensureChildNode} from '../js/util';
 import {getContext} from 'svelte';
-import {gotoUrl} from '../store/router';
+import {gotoUrl, urlFor} from '../store/router';
 import {l, lmd, topicOrStatus} from '../js/i18n';
 import {showEl} from '../js/util';
 
@@ -15,27 +15,40 @@ export let input;
 
 const user = getContext('user');
 
-$: messages = calculateMessages(dialog);
+let messages = [];
+let unreadFrom = 0;
+
+$: calculateMessages(dialog);
 
 function calculateMessages(dialog) {
-  const messages = dialog.messages.slice(0);
+  const extraMessages = [];
 
-  if (connection.frozen) {
-    const unreachable = connection.is('unreachable');
-    messages.push(convosMessage({
-      message: unreachable ? 'Trying to [reconnect](%1)...' : 'Your connection %1 can be edited in [settings](%2).',
-      vars: unreachable ? ['#call:user:ensureConnected'] : [connection.name, '#activeMenu:settings'],
+  if (dialog.frozen == 'Password protected.') {
+    extraMessages.push(convosMessage({
+      message: 'Conversation is password protected. Go to [settings](%1) to enter the password.',
+      vars: ['#activeMenu:settings'],
     }));
+  }
+  else if (connection.frozen) {
+    const unreachable = connection.is('unreachable');
+    extraMessages.push(convosMessage({
+      message: unreachable ? 'Trying to [reconnect](%1)...' : 'Disconnected. Your connection %1 can be edited in [settings](%2).',
+      vars: unreachable ? ['#call:user:ensureConnected'] : [connection.name, urlFor('/chat/' + connection.connection_id + '#activeMenu:settings')],
+    }));
+  }
+  else if (dialog.frozen) {
+    extraMessages.push(convosMessage({message: topicOrStatus(connection, dialog).replace(/\.$/, ''), vars: []}));
   }
 
   if (user.wantNotifications === null) {
-    messages.push(convosMessage({
+    extraMessages.push(convosMessage({
       message: 'Please go to [settings](%1) to enable notifications.',
       vars: ['/settings'],
     }));
   }
 
-  return messages;
+  messages = extraMessages.length ? dialog.messages.concat(extraMessages) : dialog.messages;
+  unreadFrom = dialog.unread + extraMessages.length;
 }
 
 function convosMessage(message) {
@@ -78,7 +91,7 @@ function toggleDetails(e) {
 {/if}
 
 {#each messages as message, i}
-  {#if i && i == messages.length - dialog.unread}
+  {#if i && i == messages.length - unreadFrom}
     <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
   {/if}
 
@@ -112,10 +125,6 @@ function toggleDetails(e) {
     </div>
   </div>
 {/each}
-
-{#if connection.frozen || dialog.frozen}
-  <ChatMessagesStatusLine class="for-connection-status" icon="exclamation-triangle">{topicOrStatus(connection, dialog).replace(/\.$/, '')}</ChatMessagesStatusLine>
-{/if}
 
 {#if dialog.is('loading')}
   <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin">{l('Loading...')}</ChatMessagesStatusLine>

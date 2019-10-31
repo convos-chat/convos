@@ -108,7 +108,6 @@ export default class Dialog extends Reactive {
     if (before) opParams.before = before;
 
     this.update({status: 'loading'});
-    this.events.send({method: 'debug', type: 'load', opParams});
     await this.messagesOp.perform(opParams);
     this._loadParticipants();
 
