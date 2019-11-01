@@ -118,8 +118,8 @@ function toggleDetails(e) {
       <a href="#see" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
     {/if}
     <div class="message__text">
-      {#if message.type == 'error'}
-        <Icon name="exclamation-circle" on:click="{toggleDetails}"/>
+      {#if message.type == 'error' || message.type == 'notice'}
+        <Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}" on:click="{toggleDetails}"/>
       {/if}
       {@html message.markdown}
     </div>

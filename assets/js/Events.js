@@ -77,7 +77,7 @@ export default class Events extends Reactive {
     if (params.event == 'state') return params.type;
 
     if (params.event == 'sent' && params.message.match(/\/\S+/)) {
-      params.command = params.message.split(/\s+/);
+      params.command = params.message.split(/\s+/).filter(s => s.length);
       params.command[0] = params.command[0].substring(1);
       return 'sent_' + params.command[0];
     }

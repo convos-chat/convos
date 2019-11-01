@@ -54,7 +54,8 @@
     font-style: italic;
   }
 
-  &.is-type-error .fa-exclamation-circle {
+  &.is-type-error .fa-exclamation-circle,
+  &.is-type-notice .fa-info-circle {
     cursor: pointer;
   }
 
@@ -122,6 +123,9 @@
 
   &.has-message-details {
     font-size: 0.9rem;
+    line-height: 1.3rem;
+    padding-left: 0.2rem;
+    margin-top: 0;
 
     > .json-type {
       display: none;

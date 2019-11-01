@@ -67,7 +67,12 @@ export default class EmbedMaker extends Reactive {
     if (detailsEl) return showEl(detailsEl, 'toggle');
 
     const details = {...(message.sent || message)};
-    ['bubbles', 'stopPropagation'].forEach(k => delete details[k]);
+    [
+      'bubbles', 'color', 'command', 'dayChanged', 'dispatchTo', 'embeds',
+      'event', 'fromId', 'id', 'isSameSender', 'markdown', 'method', 'stopPropagation',
+    ].forEach(k => delete details[k]);
+
+    details.ts = message.ts.toLocaleString();
     detailsEl = jsonhtmlify(details.sent || details);
     detailsEl.className = ['message__embed', 'has-message-details', detailsEl.className].join(' ');
     messageEl.appendChild(detailsEl);

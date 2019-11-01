@@ -129,9 +129,11 @@ export default class Connection extends Dialog {
 
   // TODO: Reply should be shown in the active dialog instead
   wsEventSentWhois(params) {
-    const channels = Object.keys(params.channels);
     let message = '%1 (%2)';
     let vars = [params.nick, params.host];
+
+    const channels = Object.keys(params.channels).sort().map(name => (params.channels[name].mode || '') + name);
+    params.channels = channels;
 
     if (params.idle_for && channels.length) {
       message += ' has been idle for %3 in %4.';
@@ -148,7 +150,7 @@ export default class Connection extends Dialog {
     }
 
     const dialog = this.findDialog(params) || this;
-    dialog.addMessage({message, vars});
+    dialog.addMessage({message, vars, sent: params});
   }
 
   wsEventTopic(params) {
