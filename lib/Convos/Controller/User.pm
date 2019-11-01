@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Convos::Util 'E';
 use Mojo::DOM;
+use Mojo::Util 'trim';
 use Socket qw(inet_aton AF_INET);
 
 use constant RECOVERY_LINK_VALID_FOR => $ENV{CONVOS_RECOVERY_LINK_VALID_FOR} || 3600 * 6;
@@ -71,7 +72,7 @@ sub login {
   my $self = shift->openapi->valid_input or return;
 
   $self->delay(
-    sub { $self->auth->login($self->req->json, shift->begin) },
+    sub { $self->auth->login($self->_clean_json, shift->begin) },
     sub {
       my ($delay, $err, $user) = @_;
       return $self->render(openapi => E($err), status => 400) if $err;
@@ -123,7 +124,7 @@ sub register {
   my $user;
 
   $self->delay(
-    sub { $self->auth->register($self->req->json, shift->begin) },
+    sub { $self->auth->register($self->_clean_json, shift->begin) },
     sub {
       (my ($delay, $err), $user) = @_;
       return $self->render(openapi => E($err), status => 400) if $err;
@@ -183,16 +184,13 @@ sub require_login {
 
 sub update {
   my $self = shift->openapi->valid_input or return;
-  my $json = $self->req->json;
+  my $json = $self->_clean_json;
   my $user = $self->backend->user or return $self->unauthorized;
 
   # TODO: Add support for changing email
 
-  unless (%$json) {
-    return $self->render(openapi => $user);
-  }
-
-  $self->delay(
+  return $self->render(openapi => $user) unless %$json;
+  return $self->delay(
     sub {
       my ($delay) = @_;
       $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
@@ -223,6 +221,21 @@ sub _existing_connection {
   }
 
   return undef;
+}
+
+sub _clean_json {
+  return {} unless my $json = shift->req->json;
+
+  for my $k (qw(email invite_code password)) {
+    next unless defined $json->{$k};
+    $json->{$k} = trim $json->{$k};
+    delete $json->{$k} unless length $json->{$k};
+  }
+
+  $json->{highlight_keywords} = [grep {/\w/} map { trim $_ } @{$json->{highlight_keywords}}]
+    if $json->{highlight_keywords};
+
+  return $json;
 }
 
 sub _existing_dialog {
