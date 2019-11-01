@@ -1,15 +1,23 @@
-sudo: false
 language: perl
-perl:
-  - "5.20"
-  - "5.16"
-  - "5.10"
+
+matrix:
+  include:
+  - perl: "5.28"
+  - perl: "5.26"
+  - perl: "5.22"
+  - perl: "5.20"
+    dist: trusty
+  - perl: "5.16"
+    dist: trusty
+
 env:
   - "HARNESS_OPTIONS=j1 TEST_POD=1"
+
 install:
   - "cpanm -n EV Test::Pod Test::Pod::Coverage"
   - "cpanm -n https://github.com/jhthorsen/mojo-irc/archive/master.tar.gz"
   - "cpanm -n --installdeps ."
+
 notifications:
   email:
     recipients:
