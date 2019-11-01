@@ -53,35 +53,34 @@ setContext('settings', settings);
 setContext('user', user);
 
 window.addEventListener('error', ({colno, error, filename, lineno, message, type, timeStamp}) => {
-  user.events.send({method: 'debug', type, colno, error, filename, lineno, message, timeStamp});
+  user.send({method: 'debug', type, colno, error, filename, lineno, message, timeStamp});
 });
 
 window.addEventListener('unhandledrejection', ({type, reason, returnValue, timeStamp}) => {
-  user.events.send({method: 'debug', type, reason, returnValue, timeStamp});
+  user.send({method: 'debug', type, reason, returnValue, timeStamp});
 });
 
 onMount(() => {
   if (!settings.chatMode) return;
 
-  const dialogEventUnlistener = user.on('dialogEvent', calculateNewPath);
-  const historyUnlistener = historyListener();
+  const unsubscribe = [];
+  unsubscribe.push(historyListener());
+  unsubscribe.push(user.on('wsEventSentJoin', calculateNewPath))
+  unsubscribe.push(user.on('wsEventSentPart', calculateNewPath))
+
   user.load();
   if (user.showGrid) document.querySelector('body').classList.add('with-grid');
 
-  return () => {
-    dialogEventUnlistener();
-    historyUnlistener();
-  };
+  return () => unsubscribe.forEach(cb => cb());
 });
 
 function calculateNewPath(params) {
-  let path = ['', 'chat'];
-  if (params.connection_id) path.push(params.connection_id);
+  let path = ['', 'chat', params.connection_id];
 
   // Do not want to show settings for the new dialog
   $activeMenu = '';
 
-  if (params.type == 'part') {
+  if (params.command[0] == 'part') {
     const el = document.querySelector('.sidebar-left [href$="' + path.map(encodeURIComponent).join('/') + '"]');
     gotoUrl(el ? el.href : '/chat');
   }
@@ -147,7 +146,7 @@ function onGlobalKeydown(e) {
 
 function onWindowClick(e) {
   // This is useful if you want to see on server side what is being clicked on
-  // user.events.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
+  // user.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
 
   const linkEl = closestEl(e.target, 'a');
   const action = linkEl && linkEl.href.match(/#(call:user):(\w+)/) || ['', '', ''];

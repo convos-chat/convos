@@ -1,16 +1,18 @@
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
 import Time from '../js/Time';
+import {channelModeCharToModeName, userModeCharToModeName} from '../js/constants';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {str2color} from '../js/util';
 
 const channelRe = new RegExp('^[#&]');
-const modes = {o: '@', v: '+'};
-const modeVals = {o: 10, v: 9};
+const humanMode = {o: '@', v: '+'};
 
 const sortParticipants = (a, b) => {
-  return (modeVals[b.mode] || 0) - (modeVals[a.mode] || 0) || a.name.localeCompare(b.name);
+  return b.modes.operator || false - a.modes.operator || false
+      || b.modes.voice || false - a.modes.voice || false
+      || a.name.localeCompare(b.name);
 };
 
 export default class Dialog extends Reactive {
@@ -33,7 +35,7 @@ export default class Dialog extends Reactive {
     this.prop('rw', 'last_active', new Time(params.last_active));
     this.prop('rw', 'last_read', new Time(params.last_read));
     this.prop('rw', 'messages', []);
-    this.prop('rw', 'mode', '');
+    this.prop('rw', 'modes', {});
     this.prop('rw', 'name', params.name || 'Unknown');
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
@@ -116,7 +118,7 @@ export default class Dialog extends Reactive {
     return this;
   }
 
-  participant(nick) {
+  findParticipant(nick) {
     return this._participants.get(this._participantId(typeof nick == 'undefined' ? '' : nick));
   }
 
@@ -131,7 +133,11 @@ export default class Dialog extends Reactive {
         p = existing;
       }
 
-      this._participants.set(id, {mode: '', name: p.nick, ...p, color: str2color(id), id, ts: new Time()});
+      if (!p.modes) p.modes = {};
+      this._calculateModes(userModeCharToModeName, p.mode, p.modes);
+      delete p.mode;
+
+      this._participants.set(id, {name: p.nick, ...p, color: str2color(id), id, ts: new Time()});
     });
 
     if (participants.length) this.update({participants: this._participants.size});
@@ -158,9 +164,13 @@ export default class Dialog extends Reactive {
   }
 
   wsEventMode(params) {
-    if (!params.nick) return this.update({mode: params.mode}); // Channel mode
-    this.participants([{nick: params.nick, mode: params.mode}]);
-    this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
+    if (params.nick) {
+      this.participants([{nick: params.nick, mode: params.mode}]);
+      this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
+    }
+    else {
+      this.update({modes: this._calculateModes(channelModeCharToModeName, params.mode, this.modes)});
+    }
   }
 
   wsEventNickChange(params) {
@@ -173,9 +183,9 @@ export default class Dialog extends Reactive {
   }
 
   wsEventPart(params) {
-    const participant = this.participant(params.nick);
+    const participant = this.findParticipant(params.nick);
     if (!participant || participant.me) return;
-    this._participants.delete(id);
+    this._participants.delete(this._participantId(params.nick));
     this.update({participants: this._participants.size});
     this.addMessage(this._partMessage(params));
   }
@@ -184,7 +194,7 @@ export default class Dialog extends Reactive {
     this._updateParticipants(params);
 
     const msg = {message: 'Participants (%1): %2', vars: []};
-    const participants = this._participants.map(p => (modes[p.mode] || '') + p.name);
+    const participants = this._participants.map(p => (humanMode[p.mode] || '') + p.name);
     if (participants.length > 1) {
       msg.message += ' and %3.';
       msg.vars[2] = participants.pop();
@@ -200,12 +210,19 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'messagesOp', this.api.operation('dialogMessages'));
   }
 
+  _calculateModes(modeMap, modeStr, target) {
+    const [all, addRemove, modeList] = (modeStr || '').match(/^(\+|-)?(.*)/) || ['', '+', ''];
+    modeList.split('').forEach(char => {
+      target[modeMap[char] || char] = addRemove != '-';
+    });
+  }
+
   _calculateFrozen() {
     return '';
   }
 
   _loadParticipants() {
-    if (this.participantsLoaded || !this.dialog_id || !this.events.ready || !this.messagesOp) return;
+    if (this.participantsLoaded || !this.dialog_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
     return this.is_private ? this.send('/ison', '_noop') : this.send('/names', '_updateParticipants');

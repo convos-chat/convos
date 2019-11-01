@@ -1,7 +1,7 @@
 .participant {
   // Mode order is significant
-  &.has-mode-v span:before { content: '+'; }
-  &.has-mode-o span:before { content: '@'; }
+  &.has-mode-voice span:before { content: '+'; }
+  &.has-mode-operator span:before { content: '@'; }
 
   i {
     width: 1.2em;

@@ -90,19 +90,21 @@ export default class Connection extends Dialog {
 
     let message = extractErrorMessage(params) || params.frozen || 'Unknown error from %1.';
     if (message == 'Password protected.') message = 'Invalid password.';
-    dialog.addMessage({message, type: 'error', sent: params, vars: params.command || params.message});
+    dialog.addMessage({message, type: 'error', sent: params, vars: params.command || [params.message]});
   }
 
   wsEventJoin(params) {
     const dialog = this.ensureDialog(params);
     const nick = params.nick || this.nick;
-    dialog.addMessage({message: '%1 joined.', vars: [nick]});
+    if (nick != this.nick) dialog.addMessage({message: '%1 joined.', vars: [nick]});
     dialog.participants([{nick}]);
   }
 
   wsEventPart(params) {
     if (params.nick == this.nick) return this.removeDialog(params);
-    if (!params.dialog_id) this.dialogs.forEach(dialog => dialog.wsEventPart(params));
+    if (params.dialog_id) return;
+    this.dialogs.forEach(dialog => dialog.wsEventPart(params));
+    params.stopPropagation();
   }
 
   wsEventQuit(params) {

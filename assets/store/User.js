@@ -105,16 +105,8 @@ export default class User extends Reactive {
     conn.update(params);
   }
 
-  wsEventPart(params) {
-    this.emit('dialogEvent', params);
-  }
-
   wsEventPong(params) {
     this.wsPongTimestamp = params.ts;
-  }
-
-  wsEventSentJoin(params) {
-    this.emit('dialogEvent', params);
   }
 
   _calculateUnread() {
@@ -127,6 +119,7 @@ export default class User extends Reactive {
 
     events.on('message', params => {
       this._dispatchMessageToDialog(params);
+      this.emit(params.dispatchTo, params);
       if (this[params.dispatchTo]) this[params.dispatchTo](params);
     });
 

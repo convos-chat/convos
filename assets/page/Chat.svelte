@@ -166,7 +166,7 @@ function registerUrlHandler(connection) {
     <nav class="sidebar-right__nav">
       <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
       {#each dialog.participants() as participant}
-        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
+        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
           <Icon name="pick:{participant.id}" family="solid" style="color:{participant.color}"/>
           <span>{participant.nick}</span>
         </Link>

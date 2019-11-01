@@ -142,11 +142,11 @@ export function loadScript(src) {
 /**
  * Used to take a participant mode string and turn it into CSS class names.
  *
- * @param {String} mode Example: "ov"
- * @returns {String} Example: "has-mode-o has-mode-v"
+ * @param {Object} modes Example: {operator: true}
+ * @returns {String} Example: "has-mode-operator has-mode-voice"
  */
-export function modeClassNames(mode) {
-  return (mode || '').split('').map(m => { return 'has-mode-' + m }).join(' ');
+export function modeClassNames(modes) {
+  return Object.keys(modes).filter(m => modes[m]).map(m => { return 'has-mode-' + m }).join(' ');
 }
 
 /**

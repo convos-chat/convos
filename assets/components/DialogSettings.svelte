@@ -24,8 +24,8 @@ $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
 function calculateIsOperator(dialog) {
   const connection = user.findDialog({connection_id: dialog.connection_id});
-  const participant = dialog.participant(connection && connection.nick);
-  return participant && participant.mode.indexOf('o') != -1;
+  const participant = dialog.findParticipant(connection && connection.nick);
+  return participant && participant.modes.operator;
 }
 
 function partDialog(e) {
@@ -86,7 +86,7 @@ function saveDialogSettings(e) {
     <nav class="sidebar-left__nav">
       <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
       {#each dialog.participants() as participant}
-        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.mode)}">
+        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
           <span>{participant.nick}</span>
         </Link>
       {/each}

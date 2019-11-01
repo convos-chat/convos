@@ -74,7 +74,8 @@ function sendMessage() {
   const msg = {message: inputEl.value, method: 'send', dialog};
 
   // Aliases
-  msg.message = msg.message.replace(/^\/j\s/, '/join ');
+  msg.message = msg.message.replace(/^\/close/i, '/part');
+  msg.message = msg.message.replace(/^\/j\b/i, '/join');
 
   const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
 

@@ -73,7 +73,7 @@ function gotoDialogFromNotifications(e) {
 }
 
 function senderIsOnline(message) {
-  return !message.dialog_id || dialog.participant(message.fromId);
+  return !message.dialog_id || dialog.findParticipant(message.fromId);
 }
 
 function toggleDetails(e) {
