@@ -84,6 +84,7 @@ if ($command eq 'version') {
   print STDOUT $stdout;
 }
 else {
+  print_root_warning() unless $< && $>;
   Mojolicious::Commands->start_app('Convos');
 }
 
@@ -156,4 +157,31 @@ sub ensure_dependencies {
   }
 
   return 0;
+}
+
+sub print_root_warning {
+  $ENV{USER} ||= 'root';
+  warn <<"HERE";
+
+  UID  = $<
+  EUID = $>
+  USER = $ENV{USER}
+
+  --------------------------------------------------------------------
+  WARNING!
+  --------------------------------------------------------------------
+
+  You should NOT run Convos as root!
+
+  It is not considered a good security practice to run servers as the
+  root user.
+
+  Note that if you used to run Convos as root, then you have to change
+  ownership to files in your "\$CONVOS_HOME" directory.
+
+  We strongly encourage you to change to a less privileged user.
+
+  --------------------------------------------------------------------
+
+HERE
 }
