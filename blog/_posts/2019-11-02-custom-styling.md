@@ -84,16 +84,12 @@ html.theme-blue {
 ```
 
 In addition you have to make the theme available in the "settings" page.
-This is done by adding a new item to the `themes` array in
-[Settings.svelte](https://github.com/Nordaaker/convos/blob/1.01/assets/page/Settings.svelte#L14):
+This is done by running the [latest version](https://github.com/Nordaaker/convos/issues/404)
+of `t/production-resources.t`:
 
-```javascript
-const themes = [['auto', 'Auto'], ['blue', 'Blue'], ['dark', 'Dark'], ['light', 'Light']];
+```bash
+$ prove -vl t/production-resources.t
 ```
-
-Note that changing `Settings.svelte` will not be needed in the future, since
-new theme files will be detected automatically.
-[#404](https://github.com/Nordaaker/convos/issues/404)
 
 ## Change the highlight colors
 
