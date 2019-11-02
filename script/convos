@@ -84,7 +84,7 @@ if ($command eq 'version') {
   print STDOUT $stdout;
 }
 else {
-  print_root_warning() unless $< && $>;
+  maybe_warn_about_root();
   Mojolicious::Commands->start_app('Convos');
 }
 
@@ -159,7 +159,10 @@ sub ensure_dependencies {
   return 0;
 }
 
-sub print_root_warning {
+sub maybe_warn_about_root {
+  return if $ENV{CONVOS_NO_ROOT_WARNING};
+  return if $< && $>;
+
   $ENV{USER} ||= 'root';
   warn <<"HERE";
 
