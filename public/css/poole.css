@@ -370,7 +370,7 @@ tbody tr:nth-child(odd) th {
   text-decoration: none;
 }
 
-.theme-base-convos .content .post-more a:hover {
+.theme-base-convos .content .posts .post-more a {
   text-decoration: underline;
 }
 
