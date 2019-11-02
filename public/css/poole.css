@@ -171,8 +171,7 @@ pre {
   white-space: pre-wrap;
   word-break: break-all;
   word-wrap: break-word;
-  background-color: #f0f6f0;
-  border: 1px solid #bbdebb;
+  background-color: #eff1ef;
 }
 pre code {
   padding: 0;
@@ -348,10 +347,42 @@ tbody tr:nth-child(odd) th {
 
 /* Meta data line below post title */
 .post-date {
-  display: block;
+  color: #9a9a9a;
   margin-top: -.5rem;
   margin-bottom: 1rem;
-  color: #9a9a9a;
+  display: block;
+}
+
+.post-more {
+  position: relative;
+  z-index: 2;
+  margin-top: 1rem;
+}
+
+.post-more:before {
+  content: '';
+  box-shadow: 0px -20px 20px 35px rgba(247, 247, 247, 0.82);
+  display: block;
+}
+
+.theme-base-convos .content .posts a {
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.theme-base-convos .content .post-more a:hover {
+  text-decoration: underline;
+}
+
+.posts .post-excerpt h2,
+.posts .post-excerpt p {
+  margin-bottom: 0.4rem;
+}
+
+.posts .post-excerpt h2 {
+  font-size: 1rem;
+  font-weight: normal;
+  margin: 0;
 }
 
 /* Related posts */

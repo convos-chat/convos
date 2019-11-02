@@ -10,6 +10,8 @@ latest version!
 
 ## IRC servers with credentials
 
+<!--more-->
+
 A Convos user [reported in](https://github.com/Nordaaker/convos/issues/334)
 that username/password was not handled correctly when you click "Save". The
 existing logic at the time was very complicated and therefor also very buggy.

@@ -13,6 +13,8 @@ these commands:
     # Run
     $ docker run -it --rm -p 8080:3000 -v /var/convos/data:/data nordaaker/convos
 
+<!--more-->
+
 `8080` is the port where you want Convos to be exposed and `/var/convos/data`
 is where you want to store settings and logs on the host machine.
 

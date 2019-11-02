@@ -12,6 +12,8 @@ to modify the source code. Please have a look at the
 build on top of that guide with an example on how to make your own
 custom theme.
 
+<!--more-->
+
 To be able to define a new theme, you must get Convos version 1.01 or
 later.
 

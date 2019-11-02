@@ -6,7 +6,9 @@ title: Add participants list and more
 The [stable](https://github.com/Nordaaker/convos/tree/stable) branch has now
 been updated. Want the updates? Run the [install](/doc/install.html) command!
 
-### Who am I talking to?
+## Who am I talking to?
+
+<!--more-->
 
 * [23bb5efabfaf30e6625256eda4b004999f110369](https://github.com/Nordaaker/convos/commit/23bb5efabfaf30e6625256eda4b004999f110369)
 * Author: Jan Henning Thorsen <jhthorsen@cpan.org>
@@ -19,7 +21,7 @@ list for a channel. This is now changed: A "cog wheel" button, next to the
 
 [![Participants](/public/screenshots/2016-09-01-participants.png)](/public/screenshots/2016-09-01-participants.png)
 
-### Why can't I install this awesome application?
+## Why can't I install this awesome application?
 
 * [5878ae229c431e4e6acc31f839f4b1ebd32672fd](https://github.com/Nordaaker/convos/commit/5878ae229c431e4e6acc31f839f4b1ebd32672fd)
 * Author: Jan Henning Thorsen <jhthorsen@cpan.org>
@@ -32,7 +34,7 @@ but that doesn't help much when the module is required to install itself...
 The fix is to install modules over HTTP instead of HTTPS, until
 `IO::Socket::SSL` is installed.
 
-### But wait! There's more!
+## But wait! There's more!
 
 Check out the
 [Changes](https://github.com/Nordaaker/convos/blob/master/Changes) or have

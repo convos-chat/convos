@@ -16,6 +16,8 @@ screen was quite cumbersome, especially seen from a mobile perspective: We
 wanted an web interface that was responsive and therefore fit on any medium we
 would carry around.
 
+<!--more-->
+
 We have both been using Convos for a long time, but the project itself lost
 traction after we found some non-fixable issues in the backend that are seen
 when the load on the server goes up. The issue comes from the lack of error

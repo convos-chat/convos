@@ -13,6 +13,8 @@ overhaul. Svelte changes everything by moving the heavy lifting from your
 browser to compile time &mdash; making web applications such as Convos more
 snappy than ever!
 
+<!--more-->
+
 Svelte is truly a joy to work with. It's so much easier to predict when your
 code will use CPU and render time.
 

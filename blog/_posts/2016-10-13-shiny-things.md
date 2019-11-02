@@ -11,7 +11,9 @@ with a bunch of updates. Run the
 [install](/doc/getting-started.html#quick-start-guide) command to get up and
 running!
 
-### New shiny things
+<!--more-->
+
+## New shiny things
 
 The user interface has a lot of improvements: Among other things, we now support 
 emojis! Type in a smiley or an UTF-8 emoji, and it will render correctly using 
@@ -26,7 +28,7 @@ The menu bar has fewer icons now. The "edit profile" and "help" icons are
 removed, and the functionality moved to the left side menu, below
 the dialog list.
 
-### Major bug fix by a new contributor
+## Major bug fix by a new contributor
 
 [@alilles](https://github.com/alilles) had an issue where Convos would
 truncate setting files when the disk was full. We tracked down the issue
@@ -35,7 +37,7 @@ instead of nuking all the settings for the users.
 
 Thanks Anders, for helping out!
 
-### Support for channel redirects
+## Support for channel redirects
 
 There are some IRC servers that support channel redirects – if
 you join a channel called `#cool_channel`, then you might end up in
@@ -43,7 +45,7 @@ you join a channel called `#cool_channel`, then you might end up in
 where you could‘t part the origin channel. This is now fixed, and Convos
 will correctly track channel redirects.
 
-### More?
+## More?
 
 Want more details? Check out the
 [Changelog](https://github.com/Nordaaker/convos/blob/master/Changes), or come

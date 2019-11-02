@@ -11,6 +11,8 @@ pastebin implementation stores the data in
 [CONVOS_HOME](https://convos.by/doc/config.html#convos_home), meaning you are
 in full control of the data shared.
 
+<!--more-->
+
 The pastebin works like this:
 
 1. Copy a chunk of multiline text

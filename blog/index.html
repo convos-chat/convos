@@ -8,7 +8,8 @@ title: Blog
   <div class="post">
     <h2 class="post-title">{{ post.title }}</h2>
     <span class="post-date"><a href="{{ post.url }}">{{ post.date | date_to_string }}</a></span>
-    {{ post.content }}
+    <div class="post-excerpt">{{ post.excerpt }}</div>
+    <p class="post-more"><a href="{{ post.url }}">Read more</a></span>
   </div>
   {% endfor %}
 </div>
