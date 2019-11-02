@@ -3,7 +3,7 @@
 # Install dependencies:
 # $ script/convos install
 # Same as above, but also install dependencies required for development
-# $ script/convos install develop
+# $ script/convos install --develop
 
 BEGIN {
   if ($ENV{SNAP} and $ENV{SNAP_USER_COMMON}) {
@@ -65,11 +65,12 @@ unless ($ENV{CONVOS_SETUP}++) {
 pop @INC if @INC[-1] eq '.';          # don't care about current dir
 
 if ($command eq 'dev') {
-  $ENV{$_} = 1 for qw(MOJO_ASSETPACK_LAZY MOJO_IRC_DEBUG CONVOS_DEBUG);
+  $ENV{$_} //= 1 for qw(MOJO_ASSETPACK_LAZY MOJO_IRC_DEBUG CONVOS_DEBUG);
   $ENV{PERL5LIB} = join ':', @INC;
-  shift @ARGV;
-  warn "\$ morbo script/convos @ARGV\n";
-  exec qw(morbo script/convos), @ARGV;
+  $ARGV[0] = 'webpack';
+  push @ARGV, qw(-w lib -w public/convos-api.json -w templates) unless grep {/^-?-w/} @ARGV;
+  warn "\$ script/convos @ARGV\n";
+  exec $^X => qw(script/convos), @ARGV;
   die "Could not exec morbo @ARGV: $!\n";
 }
 
