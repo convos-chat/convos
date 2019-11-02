@@ -10,6 +10,7 @@ use Time::HiRes 'time';
 
 use constant DIALOG_SEARCH_INTERVAL => $ENV{CONVOS_DIALOG_SEARCH_INTERVAL} || 0.5;
 use constant MAX_BULK_MESSAGE_SIZE  => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE}  || 3;
+use constant MAX_MESSAGE_LENGTH     => $ENV{CONVOS_MAX_MESSAGE_LENGTH}     || 512;
 use constant STEAL_NICK_INTERVAL    => $ENV{CONVOS_STEAL_NICK_INTERVAL}    || 60;
 
 require Convos;
@@ -397,7 +398,6 @@ sub _remove_dialog {
 sub _send {
   my $cb = pop;
   my ($self, $target, $message) = @_;
-  my $msg = $message;
 
   if (!$target) {    # err_norecipient and err_notexttosend
     return next_tick $self, $cb => 'Cannot send without target.';
@@ -409,12 +409,31 @@ sub _send {
   my @messages = split /\r?\n/, ($message // '');
   return next_tick $self, $cb => 'Cannot send empty message.' unless @messages;
 
+  my $n = 0;
+  while ($n < @messages) {
+    if (MAX_MESSAGE_LENGTH <= length $messages[$n]) {
+      my @chunks = split /(\s)/, $messages[$n];
+      $messages[$n] = '';
+      while (@chunks) {
+        my $chunk = shift @chunks;
+        if (MAX_MESSAGE_LENGTH > length($messages[$n] . $chunk)) {
+          $messages[$n] .= $chunk;
+        }
+        else {
+          splice @messages, $n + 1, 0, join '', $chunk, @chunks;
+        }
+      }
+    }
+
+    $n++;
+  }
+
   for (@messages) {
     $_ = $self->_irc->parser->parse(sprintf ':%s PRIVMSG %s :%s', $self->_irc->nick, $target, $_);
     return next_tick $self, $cb => 'Unable to construct PRIVMSG.' unless ref $_;
   }
 
-  if (MAX_BULK_MESSAGE_SIZE < @messages) {
+  if (MAX_BULK_MESSAGE_SIZE <= @messages) {
     $self->user->core->backend->emit_single(
       multiline_message => $self,
       \$message,
