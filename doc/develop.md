@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Developing
+title: Developement guide
 ---
 
 <ul class="toc"></ul>
@@ -8,20 +8,6 @@ title: Developing
 ## Overview
 
 This guide is for people who want to hack on Convos.
-
-## API
-
-Convos has an OpenAPI powered REST API. The specification is used to both
-generate perl code for validation, and to generate documentation. Resources:
-
-* [Documentation](http://demo.convos.by/api.html)
-* [Specification](https://github.com/nordaaker/convos/blob/master/public/convos-api.json)
-* [OpenAPI](https://www.openapis.org/)
-* [Mojolicious::Plugin::OpenAPI](https://metacpan.org/pod/Mojolicious::Plugin::OpenAPI)
-
-TODO: Need to document the WebSocket API as well.
-
-## Tutorial
 
 It is helpful if you are familiar with [git](http://git-scm.com).
 [Mojolicious](http://mojolicious.org) and basic [Perl](http://perl.org) tools,
@@ -31,7 +17,7 @@ and [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm).
 The JavaScript is compiled using [rollupjs](https://rollupjs.org/) and the
 JavaScript dependency tree is maintained using [pnpm](https://pnpm.js.org/).
 
-### Getting the source code
+## Getting the source code
 
 The first step is to clone the Convos repository. You can either do this
 directly on [github](https://github.com/nordaaker/convos) or by running the
@@ -45,7 +31,7 @@ The command above will create a "convos" directory in the current working
 directory. The following steps need to be run from the project root, meaning
 you should `cd ./convos` first.
 
-### Installing dependencies
+## Installing dependencies
 
 Once you have the source code you should install the dependencies:
 
@@ -63,12 +49,12 @@ dependencies are installed in `local/lib/`. If you want to install them
 globally or in your `$HOME/perl5` directy, then use one of these command
 instead:
 
-```
+```bash
 $ perl ./script/cpanm --installdeps --sudo .
 $ perl ./script/cpanm --installdeps .
 ```
 
-### Installing an IRC daemon
+## Installing an IRC daemon
 
 It is highly suggested that you install an IRC daemon, since many networks
 will ban you if you reconnect too often. Any IRC compatible server will work,
@@ -79,10 +65,10 @@ $ sudo apt-get install ircd-hybrid # ubuntu
 $ brew install ircd-hybrid         # osx
 ```
 
-Please ask in [#convos on freenode.net](irc://chat.freenode.net/#convos) if
+Please ask in [#convos on freenode.net](irc://chat.freenode.net/%23convos) if
 you want to use the [demo](/#demo) IRC server instead of installing your own.
 
-### Starting the application
+## Starting the application
 
 The basics of getting the application running in development mode is the
 command below:
@@ -94,16 +80,25 @@ $ ./script/convos dev
 The command above is the same as:
 
 ```bash
-$ MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 morbo script/convos \
-    -w assets -w lib -w public/convos-api.json
+$ MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 script/convos webpack \
+    -w lib -w public/convos-api.json -w templates
 ```
 
 `MOJO_IRC_DEBUG` and `CONVOS_DEBUG` will print extra low level debug
 information to STDERR, which is useful to discover bugs. The `-w` switch is
 for watching different files and directories for changes and reload
-[morbo](https://metacpan.org/pod/Mojo::Server::Morbo) automatically.
+the web server automatically.
 
-### Directory structure
+## Building production assets
+
+The command below will create production assets, which will be used when you
+start the [production](/doc/getting-started.html#git-clone) version of Convos:
+
+```bash
+BUILD_ASSETS=1 prove -l t/production-resources.t
+````
+
+## Directory structure
 
 * ./assets/
 
@@ -144,7 +139,7 @@ for watching different files and directories for changes and reload
 
   TODO: Add JavaScript tests.
 
-### Convos frontend
+## Convos frontend
 
                     .------.
                 ____| Core |
@@ -166,7 +161,7 @@ powered JSON API with a thin logical layer inside the controllers:
 * [Convos::Controller::Notifications](https://github.com/nordaaker/convos/blob/master/lib/Convos/Controller/Notifications.pm)
 * [Convos::Controller::User](https://github.com/nordaaker/convos/blob/master/lib/Convos/Controller/User.pm)
 
-### Convos core
+## Convos core
 
                  .---------.
               ___| Backend |
@@ -190,6 +185,18 @@ or dialog can emit new events that the Backend can choose to persist to
 storage. The default backend is a file-based backend, which enables Convos to
 be started without any external database.
 
+## API
+
+Convos has an OpenAPI powered REST API. The specification is used to both
+generate perl code for validation, and to generate documentation. Resources:
+
+* [Documentation](http://demo.convos.by/api.html)
+* [Specification](https://github.com/nordaaker/convos/blob/master/public/convos-api.json)
+* [OpenAPI](https://www.openapis.org/)
+* [Mojolicious::Plugin::OpenAPI](https://metacpan.org/pod/Mojolicious::Plugin::OpenAPI)
+
+TODO: Need to document the WebSocket API as well.
+
 ## Contribute
 
 Any contribution is more than welcome! Examples: If you find typos on this web
@@ -200,17 +207,8 @@ form of patches are better than nothing. The pull request does not need to be
 complete either, but it is more likely to get merged if it includes tests and
 documentation updates.
 
-### Ideas
-
 Check out [the issues](https://github.com/nordaaker/convos/issues) for open
-issues. Below is a list of additional ideas:
-
-* User defined avatars.
-
-* Support for arrow up/down in "user input field" for historical commands.
-
-* Support file (image, text, ...) upload.
-
-* Kiosk mode, meaning Convos can act as a support chat on a web page.
-
-* Loopback connection for self hosting Convos, without an IRC backend.
+issues. Some of the issues are put into planned
+[milestones](https://github.com/Nordaaker/convos/milestones), but any of the
+[backlog](https://github.com/Nordaaker/convos/milestone/7) issues are for grabs
+at any time.
