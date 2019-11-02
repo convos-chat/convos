@@ -13,8 +13,10 @@ very easy to get started, but you can also tweak many
 
 The two commands below will download and start Convos:
 
-<pre class="highlight"><code>$ curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
-$ ./convos/script/convos daemon</code></pre>
+```bash
+curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
+./convos/script/convos daemon
+```
 
 That's it! After the commands above, you can point your browser to
 [http://localhost:3000](http://localhost:3000) and start chatting.
@@ -26,9 +28,6 @@ screen as you start convos:
 
 The invite code can be set to anything you like. Check out the
 [configuration](./config.html) guide for more details.
-
-Have a look at [this blog post](/2016/12/4/convos-loves-docker.html) if you want to
-run Convos inside Docker.
 
 ## Running convos
 
@@ -77,15 +76,6 @@ which makes Convos faster. It can be installed with the command below:
 ```bash
 $ perl ./script/cpanm --sudo EV
 ```
-
-## Snap Install
-
-Install Convos in seconds on [Ubuntu and other snap supported Linux distributions](https://snapcraft.io/docs/core/install) with:
-
-    snap install convos
-
-Installing a snap is very quick. Snaps are secure. They are isolated with all of their dependencies. Snaps also auto update when a new version is released.
- 
 ## Hypnotoad and Prefork
 
 It is *not* possible to run Convos with hypnotoad nor the prefork server. The
@@ -96,6 +86,70 @@ requires shared memory, which a forked environment contradicts.
 You need to run Convos in single process, using the
 "[daemon](https://metacpan.org/pod/Mojo::Server::Daemon)" sub command shown
 above.
+
+## Alternative install methods
+
+### Docker
+
+You can use the command below to pull and run convos:
+
+```bash
+docker pull nordaaker/convos:stable
+
+docker run -it -p 8080:3000 \
+  -v $HOME/convos/data:/data \
+  nordaaker/convos:stable
+```
+
+The last command will make Convos available on http://localhost:8080, and
+persist data in `$HOME/convos/data`.
+
+There are some [alternative tags](https://hub.docker.com/r/nordaaker/convos/tags)
+available, but we suggest using the "stable" release.
+
+### Git clone
+
+Git can be used to get full flexibility. The command below will only clone the
+[stable](https://github.com/Nordaaker/convos/tree/stable) branch. Omit the
+`--single-branch --no-tags` to get everything
+
+```bash
+# Get the code and install dependencies
+git clone https://github.com/Nordaaker/convos.git \
+  --branch stable --single-branch --no-tags
+
+./convos/script/convos install
+
+# Start the server
+./convos/script/convos daemon
+
+# Update and restart
+git pull origin stable
+kill $(pgrep convos)
+./convos/script/convos daemon
+```
+
+Using the git repo allows you to make changes and build your own frontend.
+See the [developement guide](/doc/develop) for more details.
+
+### Snap Install
+
+IMPORTANT! Snap is currently very outdated, since we have
+[problems](https://github.com/Nordaaker/convos/issues/366) building
+the latest version.
+
+Install Convos in seconds on [Ubuntu and other snap supported Linux distributions](https://snapcraft.io/docs/core/install) with:
+
+```bash
+snap install convos
+```
+
+Installing a snap is very quick. Snaps are secure. They are isolated with all of their dependencies. Snaps also auto update when a new version is released.
+
+
+
+Alternative install methods are documented in the
+[install](/doc/install) guide.
 
 ## Next
 
