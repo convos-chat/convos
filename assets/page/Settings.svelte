@@ -9,9 +9,9 @@ import PasswordField from '../components/form/PasswordField.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {themes} from '../settings';
 
 const Notification = window.Notification || {permission: 'denied'};
-const themes = [['auto', 'Auto'], ['dark', 'Dark'], ['light', 'Light']];
 const user = getContext('user');
 const updateUserOp = user.api.operation('updateUser');
 

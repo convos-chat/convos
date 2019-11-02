@@ -1,6 +1,8 @@
 #!perl
 use lib '.';
 use t::Helper;
+use Mojo::File 'curfile';
+use Mojo::JSON 'encode_json';
 
 plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
 
@@ -17,6 +19,8 @@ SKIP: {
 
 my $t = t::Helper->t;
 
+detect_themes();
+
 test_defaults('/' => 200);
 
 $t->get_ok('/')->status_is(200)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"])
@@ -31,6 +35,39 @@ test_defaults('/err/500' => 500)
   ->text_is('h2', 'Internal Server Error (500)');
 
 done_testing;
+
+sub detect_themes {
+  my @theme_options = (['auto', 'Auto']);
+  curfile->dirname->sibling(qw(assets sass themes))->list->each(sub {
+    my $theme_file = shift;
+    my $fh         = $theme_file->open;
+    my ($id, $name) = ('', '');
+
+    while (my $line = readline $fh) {
+      $id   = $1 if $line =~ m!html.theme-(\S+)!;
+      $name = $1 if $line =~ m!Name:\s*(.+)!;
+    }
+
+    $id =~ s!,$!!;
+    $name ||= ucfirst $id;
+
+    unless ($id and $name) {
+      diag "Theme $theme_file has invalid structure";
+      return;
+    }
+
+    push @theme_options, [$id => $name];
+  });
+
+  my $settings_file = curfile->dirname->sibling(qw(assets settings.js));
+  my @settings      = split /\n/, $settings_file->slurp;
+  for my $line (@settings) {
+    $line = sprintf 'export const themes = %s;', encode_json \@theme_options
+      if $line =~ m!export const themes!;
+  }
+
+  $settings_file->spurt(join '', map {"$_\n"} @settings);
+}
 
 sub test_defaults {
   my ($path, $status) = @_;
