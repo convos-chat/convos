@@ -14,7 +14,7 @@ very easy to get started, but you can also tweak many
 The two commands below will download and start Convos:
 
 ```bash
-curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
+curl https://convos.by/install.sh | sh -
 ./convos/script/convos daemon
 ```
 
