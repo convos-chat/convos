@@ -16,6 +16,23 @@ body.has-js .no-js {
   display: none;
 }
 
+body .is-loading,
+body .is-offline {
+  display: none;
+}
+
+body.page-loading .is-loading {
+  display: block;
+}
+
+body.page-offline .is-offline {
+  display: block;
+}
+
+body.page-offline .is-online {
+  display: none;
+}
+
 .main {
   @extend %next-to-sidebar;
   line-height: 1.5em;

@@ -46,11 +46,12 @@ export default class Operation extends Reactive {
    * @memberof Operation
    * @param {Array} err A list of error objects.
    * @param {String} err A descriptive error string.
+   * @param {String} source A name of where the error occured.
    * @returns {String} A descriptive error string.
    */
-  error(err) {
+  error(err, source) {
     // Set error
-    if (err) return this.update({err: Array.isArray(err) ? err : [{message: err}], status: 'error'});
+    if (err) return this.update({err: Array.isArray(err) ? err : [{message: err, source: source}], status: 'error'});
 
     // Get error
     if (!this.err || !this.err.length) return '';
@@ -75,7 +76,7 @@ export default class Operation extends Reactive {
     // this._promise is used as a locking mechanism so you can only call perform() once
     return this._promise || (this._promise = new Promise(resolve => {
       this.api.spec(this.id).then(opSpec => {
-        if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".'));
+        if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".', 'spec'));
         this.update({status: 'loading'});
         const [url, req] = this._paramsToRequest(opSpec, params || this.defaultParams);
         this.emit('start', req);
@@ -88,7 +89,7 @@ export default class Operation extends Reactive {
         resolve(this.parse(res, json));
       }).catch(err => {
         delete this._promise;
-        resolve(this.error('Failed fetching operationId "' + this.id + '": ' + err));
+        resolve(this.error('Failed fetching operationId "' + this.id + '": ' + err, 'fetch'));
       });
     }));
   }

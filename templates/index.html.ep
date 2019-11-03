@@ -9,16 +9,22 @@
       <i class="fas fa-download no-js"></i>
       %=l 'Downloading Convos...'
     </p>
-    <p class="has-js">
-      <i class="fas fa-spinner has-js fa-spin"></i>
+
+    <p class="has-js is-loading">
+      <i class="fas fa-spinner fa-spin"></i>
       %=l 'Starting Convos...'
     </p>
+
+    <div class="has-js is-offline">
+      <p><i class="fas fa-exclamation-triangle"></i> <%=l 'You seem to be offline.' %></p>
+      <p><%= link_to l('Reload'), '/', class => 'btn' %></p>
+    </div>
 
     <noscript>
       <p><%=l 'Javascript is disabled, so Convos will never load. Please enable Javascript and try again.' %></p>
     </noscript>
 
-    <article>
+    <article class="is-online">
       <p><%=l 'Convos is the simplest way to use IRC and it keeps you always online.' %></p>
     </article>
   </div>

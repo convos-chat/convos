@@ -60,6 +60,18 @@ window.addEventListener('unhandledrejection', ({type, reason, returnValue, timeS
   user.send({method: 'debug', type, reason, returnValue, timeStamp});
 });
 
+if ('serviceWorker' in navigator) {
+  Promise.all([user.on('update'), navigator.serviceWorker.register('/sw.js')]).then(([user, reg]) => {
+    if (user.version != settings.version) {
+      console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.version);
+      user.update({version: settings.version});
+      reg.update();
+    }
+  }).catch(err => {
+    console.log('[Convos] ServiceWorker registration failed:', err);
+  });
+}
+
 onMount(() => {
   if (!settings.chatMode) return;
 
@@ -108,25 +120,29 @@ function calculatePage($url, $getUserOp) {
     loadScript(currentUrl.base + '/images/emojis.js');
   }
 
-  // Goto a valid page
   if (nextPageComponent) {
-    if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
-
     // Enable complex styling
     replaceClassName('body', /(is-logged-)\S+/, loggedIn ? 'in' : 'out');
     replaceClassName('body', /(page-)\S+/, pageName.replace(/\W+/g, '_') || 'loading');
+
+    // Remove original components
+    const removeEls = document.querySelectorAll('.js-remove');
+    for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
+
+    // Show a page
+    if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
   }
   else if (loggedIn) {
     const lastUrl = user.lastUrl;
     gotoUrl(lastUrl || (user.connections.size ? '/chat' : '/add/connection'), {replace: true});
   }
+  else if ($getUserOp.is('error') && $getUserOp.err[0].source == 'fetch') {
+    replaceClassName('body', /(is-logged-)\S+/, 'out');
+    replaceClassName('body', /(page-)\S+/, 'offline');
+  }
   else if ($getUserOp.is('error')) {
     gotoUrl('/login', {replace: true});
   }
-
-  // Remove original components
-  const removeEls = document.querySelectorAll('.js-remove');
-  for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
 }
 
 function onGlobalKeydown(e) {

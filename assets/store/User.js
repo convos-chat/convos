@@ -24,6 +24,7 @@ export default class User extends Reactive {
     this.prop('persist', 'lastUrl', '');
     this.prop('persist', 'showGrid', false);
     this.prop('persist', 'theme', 'auto');
+    this.prop('persist', 'version', 0);
 
     this.prop('proxy', 'expandUrlToMedia', 'embedMaker');
     this.prop('proxy', 'wantNotifications', 'events');
