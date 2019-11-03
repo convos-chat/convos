@@ -89,6 +89,29 @@ information to STDERR, which is useful to discover bugs. The `-w` switch is
 for watching different files and directories for changes and reload
 the web server automatically.
 
+## Secure connection
+
+Running `convos dev` will automatically pick up any certificated files in the
+root of your project. This can be useful if you want to work on some features
+that require "https". A self-signed certificate is often not enough, so we
+suggest using [mkcert](https://github.com/FiloSottile/mkcert) to set up local
+development certificates.
+
+After you have installed `mkcert` you can simply run the following commands to
+get a secure connection:
+
+```bash
+$ mkcert localhost
+$ ./script/convos dev
+```
+
+The default address for the secure server will be
+[https://localhost:3443/](localhost:3443/), but you can change that:
+
+```bash
+$ ./script/convos dev --listen https://localhost:8443
+```
+
 ## Building production assets
 
 The command below will create production assets, which will be used when you
