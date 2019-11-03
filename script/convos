@@ -69,6 +69,7 @@ if ($command eq 'dev') {
   $ENV{PERL5LIB} = join ':', @INC;
   $ARGV[0] = 'webpack';
   push @ARGV, qw(-w lib -w public/convos-api.json -w templates) unless grep {/^-?-w/} @ARGV;
+  secure_listen(@ARGV);
   warn "\$ script/convos @ARGV\n";
   exec $^X => qw(script/convos), @ARGV;
   die "Could not exec morbo @ARGV: $!\n";
@@ -188,4 +189,30 @@ sub maybe_warn_about_root {
   --------------------------------------------------------------------
 
 HERE
+}
+
+sub secure_listen {
+  require Mojo::File;
+  require Mojo::URL;
+
+  my $url;
+  my $i = 0;
+  while ($i < @ARGV) {
+    $url = Mojo::URL->new($ARGV[$i]) if $ARGV[$i] =~ m!^https?:!;
+    $i++;
+  }
+
+  $i = @ARGV unless $url;
+  $url ||= Mojo::URL->new('https://localhost:3443');
+  return if $url->scheme eq 'http';
+
+  my @certs;
+  Mojo::File::curfile()->dirname->dirname->list->each(sub {
+    my $file  = shift->to_string;
+    my $param = $file =~ m!-key\.pem$! ? 'key' : $file =~ m!\.pem$! ? 'cert' : '';
+    $url->query->param($param => $file) if $param;
+  });
+
+  return unless $url->query->param('cert') and $url->query->param('key');
+  splice @ARGV, $i, 0, ($i == @ARGV ? ('--listen') : ()), $url->to_string;
 }

@@ -1,6 +1,7 @@
 ~$
 *.bak
 *.old
+*.pem
 *.swp
 /blib/
 /cover_db
