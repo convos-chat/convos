@@ -73,17 +73,23 @@ export default class Operation extends Reactive {
    */
   perform(params) {
     // this._promise is used as a locking mechanism so you can only call perform() once
-    return this._promise || (this._promise = new Promise(async (resolve) => {
-      const opSpec = await this.api.spec(this.id);
-      if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".'));
-
-      this.update({status: 'loading'});
-      const [url, req] = await this._paramsToRequest(opSpec, params || this.defaultParams);
-      this.emit('start', req);
-      if (typeof req.body == 'object') req.body = JSON.stringify(req.body);
-      const res = await fetch(url, req);
-      delete this._promise;
-      res.json().then(json => resolve(this._parse(res, json)));
+    return this._promise || (this._promise = new Promise(resolve => {
+      this.api.spec(this.id).then(opSpec => {
+        if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".'));
+        this.update({status: 'loading'});
+        const [url, req] = this._paramsToRequest(opSpec, params || this.defaultParams);
+        this.emit('start', req);
+        if (typeof req.body == 'object') req.body = JSON.stringify(req.body);
+        return fetch(url, req);
+      }).then(res => {
+        return Promise.all([res, res.json()]);
+      }).then(([res, json]) => {
+        delete this._promise;
+        resolve(this._parse(res, json));
+      }).catch(err => {
+        delete this._promise;
+        resolve(this.error('Failed fetching operationId "' + this.id + '": ' + err));
+      });
     }));
   }
 
