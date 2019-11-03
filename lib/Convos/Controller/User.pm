@@ -177,8 +177,24 @@ sub require_login {
   my $self = shift;
   my $user = $self->backend->user;
 
-  return $self->stash(user => $user) if $user;
-  $self->redirect_to('index');
+  unless ($user) {
+    $self->redirect_to('index');
+    return undef;
+  }
+
+  Mojo::IOLoop->delay(
+    sub {
+      my %get = map { ($_ => 1) } qw(connections dialogs notifications);
+      $user->get(\%get, shift->begin);
+    },
+    sub {
+      my ($delay, $err, $res) = @_;
+      return $self->helpers->reply->exception($err) if $err;
+      $self->settings(user => $res);
+      $self->continue;
+    },
+  );
+
   return undef;
 }
 

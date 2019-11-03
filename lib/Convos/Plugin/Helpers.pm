@@ -64,8 +64,14 @@ sub _backend_connection_create {
 
 sub _settings {
   my $c = shift;
-  return $c->stash->{'convos.settings'}{$_[0]} = $_[1] if @_ == 2;
 
+  # Set
+  if (@_ == 2) {
+    $c->stash->{'convos.settings'}{$_[0]} = $_[1];
+    return $c;
+  }
+
+  # Get
   my $extra    = $c->stash('convos.settings') || {};
   my %settings = %{$c->app->config('settings') || {}};
   $settings{chatMode} = $c->stash('chat_mode') ? 1 : 0;

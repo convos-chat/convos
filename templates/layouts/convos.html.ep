@@ -42,7 +42,7 @@
     %= asset 'convos.css'
     %= include 'javascript' if 200 == (stash('status') // 200)
   </head>
-  <body class="no-js page-loading is-logged-out">
+  <body class="no-js page-loading is-logged-<%= settings->{user} ? 'in' : 'out' %>">
     %= content
     %= asset 'convos.js' if 200 == (stash('status') // 200)
   </body>

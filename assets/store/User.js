@@ -76,9 +76,17 @@ export default class User extends Reactive {
     return this.getUserOp.is(status);
   }
 
-  async load() {
-    if (this.getUserOp.is('success')) return this;
-    await this.getUserOp.perform();
+  async load(user) {
+    if (user) {
+      this.getUserOp.parse({status: 200}, user);
+    }
+    else if (this.getUserOp.is('success')) {
+      return this;
+    }
+    else {
+      await this.getUserOp.perform();
+    }
+
     this._parseGetUser(this.getUserOp.res.body);
     if (this.email) this.send({method: 'ping'});
     return this;

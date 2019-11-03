@@ -15,6 +15,7 @@ export default class Notifications extends Dialog {
 
   // Disabled
   async load() { }
+  send() { }
 
   _addOperations() {
     this.prop('ro', 'setLastReadOp', this.api.operation('readNotifications'));

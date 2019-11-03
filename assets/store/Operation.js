@@ -85,7 +85,7 @@ export default class Operation extends Reactive {
         return Promise.all([res, res.json()]);
       }).then(([res, json]) => {
         delete this._promise;
-        resolve(this._parse(res, json));
+        resolve(this.parse(res, json));
       }).catch(err => {
         delete this._promise;
         resolve(this.error('Failed fetching operationId "' + this.id + '": ' + err));
@@ -103,6 +103,25 @@ export default class Operation extends Reactive {
   is(status) {
     if (validStatus.indexOf(status) == -1) throw 'Invalid status: ' + status;
     return this.status == status;
+  }
+
+  /**
+   * Used to parse a response body
+   *
+   * @param {Response} res
+   * @param {Object} body
+   */
+  parse(res, body = res.body) {
+    this.res.body = body || res;
+    this.res.status = res.status || '201';
+    if (res.headers) this.res.headers = res.headers;
+
+    let err = null;
+    if (!String(this.res.status).match(/^[23]/)) {
+      err = body && body.errors ? body.errors : [{message: res.statusText || 'Unknown error.'}];
+    }
+
+    return this.update({err, status: err ? 'error' : 'success'});
   }
 
   /**
@@ -175,19 +194,5 @@ export default class Operation extends Reactive {
     });
 
     return [url, fetchParams];
-  }
-
-  _parse(res, body = res.body) {
-    this.res.body = body || res;
-    this.res.status = res.status || '201';
-    this.res.statusText = res.statusText;
-    if (res.headers) this.res.headers = res.headers;
-
-    let err = null;
-    if (!String(this.res.status).match(/^[23]/)) {
-      err = body && body.errors ? body.errors : [{message: res.statusText || 'Unknown error.'}];
-    }
-
-    return this.update({err, status: err ? 'error' : 'success'});
   }
 }

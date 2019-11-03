@@ -68,7 +68,7 @@ onMount(() => {
   unsubscribe.push(user.on('wsEventSentJoin', calculateNewPath));
   unsubscribe.push(user.on('wsEventSentPart', calculateNewPath));
 
-  user.load();
+  user.load(settings.user);
   if (user.showGrid) document.querySelector('body').classList.add('with-grid');
 
   return () => unsubscribe.forEach(cb => cb());
