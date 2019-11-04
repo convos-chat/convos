@@ -10,7 +10,7 @@ use Mojo::Util 'trim';
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
-  my $nul = 'a';
+  my $nul  = 'a';
   join '', '$2', $nul, '$', $cost, '$';
 };
 
@@ -75,6 +75,12 @@ sub get {
 }
 
 sub id { trim lc +($_[1] || $_[0])->{email} }
+
+sub new {
+  my $class = shift;
+  my $self  = bless @_ ? @_ > 1 ? {@_} : {%{$_[0]}} : {}, ref $class || $class;
+  return $self->_normalize_attributes;
+}
 
 sub notifications {
   my ($self, $query, $cb) = @_;
@@ -142,6 +148,12 @@ sub _bcrypt {
   }
 
   Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
+}
+
+sub _normalize_attributes {
+  my $self = shift;
+  $self->{highlight_keywords} = [grep {/\w/} map { trim $_ } @{$self->{highlight_keywords} || []}];
+  return $self;
 }
 
 sub TO_JSON {
@@ -246,6 +258,12 @@ Used to retrive information about the current user.
   $str = $class->id(\%attr);
 
 Returns a unique identifier for a user.
+
+=head2 new
+
+  $self = Convos::Core::User->new(\%attributes);
+
+Used to construct a new object.
 
 =head2 notifications
 

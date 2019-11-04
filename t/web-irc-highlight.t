@@ -18,7 +18,7 @@ $ws->websocket_ok('/events');
 $ws->tx->on(json => sub { push(@events, $_[1]) >= $stop_at_n_events and Mojo::IOLoop->stop });
 
 $t->get_ok('/api/notifications')->status_is(200);
-my $n = @{$t->tx->res->json->{notifications}};
+my $n  = @{$t->tx->res->json->{notifications}};
 my $pm = $connection->dialog({name => 'batgirl'});
 
 $connection->_event_privmsg({
@@ -55,7 +55,12 @@ is @{$t->tx->res->json->{notifications}}, $n + 1, 'only one new notification';
 is int(grep { $_->{highlight} } @events),  2, 'marked as highlight';
 is int(grep { !$_->{highlight} } @events), 3, 'not marked as highlight';
 
-$user->highlight_keywords(['normal', 'yikes']);
+$user->highlight_keywords(['normal', 'yikes', ' '])->_normalize_attributes;
+$connection->_event_privmsg({
+  event  => 'privmsg',
+  prefix => 'batgirl!batgirl@i.love.debian.org',
+  params => ['#convos', 'Or what about a message with space in a channel?'],
+});
 $connection->_event_privmsg({
   event  => 'privmsg',
   prefix => 'batgirl!batgirl@i.love.debian.org',
