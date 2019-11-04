@@ -18,7 +18,10 @@ $wanted_version .= '.0' unless $wanted_version =~ s!_0*(\d+)!.$1!;
 my ($node_version) = path('package.json')->slurp =~ /"version":\s*"([^"]+)/m;
 is $node_version, $wanted_version, 'correct version in package.json';
 
-my ($snap_version) = path('snap/snapcraft.yaml')->slurp =~ /^version:\s*'([^']+)/m;
+my ($snap_version) = path(qw(snap snapcraft.yaml))->slurp =~ /^version:\s*'([^']+)/m;
 is $snap_version, $wanted_version, 'correct version in snap/snapcraft.yaml';
+
+my ($api_version) = path(qw(public convos-api.json))->slurp =~ /\s"version":\s*"([^"]+)/m;
+is $api_version, $wanted_version, 'correct version in public/convos-api.json';
 
 done_testing;
