@@ -23,6 +23,11 @@ export default class Dialog extends Reactive {
     if (params.connection_id) path.push(params.connection_id);
     if (params.dialog_id) path.push(params.dialog_id);
 
+    // TODO: Figure out why this happens for some users
+    if (params.connection_id && !params.name) {
+      console.trace('[Convos] Invalid params was passed on to new Dialog(', params, ')');
+    }
+
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
     this.prop('ro', 'api', params.api);
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
@@ -36,7 +41,7 @@ export default class Dialog extends Reactive {
     this.prop('rw', 'last_read', new Time(params.last_read));
     this.prop('rw', 'messages', []);
     this.prop('rw', 'modes', {});
-    this.prop('rw', 'name', params.name || 'Unknown');
+    this.prop('rw', 'name', params.name || params.dialog_id || '#unknown');
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
