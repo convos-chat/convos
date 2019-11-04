@@ -9,17 +9,14 @@ plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 
+detect_themes();
+
 SKIP: {
   skip 'rollup -c --environment production', 1 unless $ENV{BUILD_ASSETS};
-  opendir(my $ASSETS, 'public/asset');
-  /^convos\.[0-9a-f]{8}\.(css|js)\b/ and unlink "public/asset/$_" while $_ = readdir $ASSETS;
-  system 'rollup -c --environment production';
-  ok 1, 'rollup -c --environment production';
+  build_assets();
 }
 
 my $t = t::Helper->t;
-
-detect_themes();
 
 test_defaults('/' => 200);
 
@@ -35,6 +32,13 @@ test_defaults('/err/500' => 500)
   ->text_is('h2', 'Internal Server Error (500)');
 
 done_testing;
+
+sub build_assets {
+  opendir(my $ASSETS, 'public/asset');
+  /^convos\.[0-9a-f]{8}\.(css|js)\b/ and unlink "public/asset/$_" while $_ = readdir $ASSETS;
+  system 'rollup -c --environment production';
+  ok 1, 'rollup -c --environment production';
+}
 
 sub detect_themes {
   my @theme_options = (['auto', 'Auto']);
