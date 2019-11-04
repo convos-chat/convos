@@ -211,8 +211,8 @@ export default class Dialog extends Reactive {
   }
 
   _addOperations() {
-    this.prop('ro', 'setLastReadOp', this.api.operation('setDialogLastRead'));
     this.prop('ro', 'messagesOp', this.api.operation('dialogMessages'));
+    this.prop('ro', 'setLastReadOp', this.api.operation('setDialogLastRead'));
   }
 
   _calculateModes(modeMap, modeStr, target) {

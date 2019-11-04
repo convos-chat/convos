@@ -116,7 +116,7 @@
         }
       }
     },
-    "/connection/{connection_id}/last-read": {
+    "/connection/{connection_id}/read": {
       "post": {
         "tags": [ "connection" ],
         "summary": "Set 'last_read' for a connection dialog.",
@@ -173,7 +173,7 @@
         }
       }
     },
-    "/connection/{connection_id}/dialog/{dialog_id}/last-read": {
+    "/connection/{connection_id}/dialog/{dialog_id}/read": {
       "post": {
         "tags": [ "dialog" ],
         "summary": "Set 'last_read' for a dialog.",
@@ -357,15 +357,15 @@
         "tags": [ "chat" ],
         "summary": "Get list of notications.",
         "description": "A notification is added once your name is mentioned in a chat.",
-        "operationId": "listNotifications",
-        "x-mojo-to": "notifications#list",
+        "operationId": "notificationMessages",
+        "x-mojo-to": "notifications#messages",
         "responses": {
           "200": {
             "description": "List of notifications.",
             "schema": {
               "type": "object",
               "properties": {
-                "notifications": { "type": "array", "items": { "$ref": "#/definitions/Notification" } }
+                "messages": { "type": "array", "items": { "$ref": "#/definitions/Notification" } }
               }
             }
           },

@@ -15,8 +15,8 @@ export default class User extends Reactive {
     this.prop('ro', 'email', () => this.getUserOp.res.body.email || '');
     this.prop('ro', 'embedMaker', new EmbedMaker({api}));
     this.prop('ro', 'events', this._createEvents(params));
-    this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true, notifications: true}));
-    this.prop('ro', 'notifications', new Notifications({api, events: this.events, messagesOp: this.getUserOp}));
+    this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
+    this.prop('ro', 'notifications', new Notifications({api, events: this.events}));
     this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('rw', 'highlight_keywords', []);
@@ -158,7 +158,6 @@ export default class User extends Reactive {
 
   _parseGetUser(body) {
     this.connections.clear();
-    this.notifications.addMessages('set', body.notifications || []);
     this.notifications.update({unread: body.unread || 0});
     (body.connections || []).forEach(conn => this.ensureDialog(conn));
     (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));

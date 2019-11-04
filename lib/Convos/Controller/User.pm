@@ -184,7 +184,7 @@ sub require_login {
 
   Mojo::IOLoop->delay(
     sub {
-      my %get = map { ($_ => 1) } qw(connections dialogs notifications);
+      my %get = map { ($_ => 1) } qw(connections dialogs);
       $user->get(\%get, shift->begin);
     },
     sub {

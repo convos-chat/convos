@@ -9,15 +9,13 @@ export default class Notifications extends Dialog {
       is_private: true,
       name: 'Notifications',
     });
-
-    this.prop('ro', 'messagesOp', params.messagesOp);
   }
 
   // Disabled
-  async load() { }
   send() { }
 
   _addOperations() {
+    this.prop('ro', 'messagesOp', this.api.operation('notificationMessages'));
     this.prop('ro', 'setLastReadOp', this.api.operation('readNotifications'));
   }
 }

@@ -7,8 +7,11 @@ Revision history for perl distribution Convos
  - Fix loading messages should not be done each time the conversation gain focus
  - Will split messages that are too long, closes #386
  - Will auto detect available themes, closes #404
- - Add support for picking up certificate files in development mode
+ - Will postpone loading notification messages
  - Add "Nord" theme - https://www.nordtheme.com #405
+ - Add support for picking up certificate files in development mode
+ - Renamed "last-read" in the API to "read"
+ - Renamed "listNotifications" in the API to "notificationMessages"
 
 1.01 2019-11-01T13:00:41+0900
  - Add handling for connection protocols #311
