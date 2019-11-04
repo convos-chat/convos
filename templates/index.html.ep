@@ -16,7 +16,8 @@
     </p>
 
     <div class="has-js is-offline">
-      <p><i class="fas fa-exclamation-triangle"></i> <%=l 'You seem to be offline.' %></p>
+      <h2><%=l 'Offline' %></h2>
+      <p><i class="fas fa-exclamation-triangle"></i> <%=l 'You seem to have lost connection to the internet.' %></p>
       <p><%= link_to l('Reload'), '/', class => 'btn' %></p>
     </div>
 

@@ -62,9 +62,9 @@ window.addEventListener('unhandledrejection', ({type, reason, returnValue, timeS
 
 if ('serviceWorker' in navigator) {
   Promise.all([user.on('update'), navigator.serviceWorker.register('/sw.js')]).then(([user, reg]) => {
-    if (user.version != settings.version) {
-      console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.version);
-      user.update({version: settings.version});
+    if (user.version != settings.assetVersion) {
+      console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.assetVersion);
+      user.update({version: settings.assetVersion});
       reg.update();
     }
   }).catch(err => {

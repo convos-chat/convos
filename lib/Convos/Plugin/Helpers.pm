@@ -8,12 +8,33 @@ use Mojo::Util 'url_unescape';
 sub register {
   my ($self, $app, $config) = @_;
 
+  $app->helper('asset_version'             => \&_asset_version);
   $app->helper('backend.dialog'            => \&_backend_dialog);
   $app->helper('backend.user'              => \&_backend_user);
   $app->helper('backend.connection_create' => \&_backend_connection_create);
   $app->helper('linkembedder'              => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                  => \&_settings);
   $app->helper('unauthorized'              => \&_unauthorized);
+}
+
+sub _asset_version {
+  my $app = shift->app;
+  return $app->config->{asset_version} if $app->config->{asset_version};
+
+  my $mode  = $app->mode eq 'development' ? 'development' : 'production';
+  my @paths = (
+    $app->static->file("asset/webpack.$mode.html")->path,
+    $app->renderer->template_path({template => 'sw', format => 'js', handler => 'ep'}),
+  );
+
+  my $version = 0;
+  for my $path (@paths) {
+    my $mtime = (stat $path)[9];
+    $version = $mtime if $mtime > $version;
+  }
+
+  return $version if $mode eq 'development';
+  return $app->config->{asset_version} = $version;
 }
 
 sub _backend_dialog {
@@ -75,12 +96,12 @@ sub _settings {
   my $app      = $c->app;
   my $extra    = $c->stash('convos.settings') || {};
   my %settings = %{$c->app->config('settings') || {}};
-  $settings{chatMode} = $c->stash('chat_mode') ? 1 : 0;
-  $settings{apiUrl}   = $c->url_for('api');
-  $settings{baseUrl}  = $c->app->core->base_url->to_string;
-  $settings{version}  = $app->mode eq 'development' ? time : $app->VERSION;
-  $settings{wsUrl}    = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
-  $settings{$_}       = $extra->{$_} for keys %$extra;
+  $settings{assetVersion} = $c->asset_version;
+  $settings{chatMode}     = $c->stash('chat_mode') ? 1 : 0;
+  $settings{apiUrl}       = $c->url_for('api');
+  $settings{baseUrl}      = $c->app->core->base_url->to_string;
+  $settings{wsUrl}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+  $settings{$_}           = $extra->{$_} for keys %$extra;
   return \%settings;
 }
 

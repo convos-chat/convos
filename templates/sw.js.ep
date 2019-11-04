@@ -1,5 +1,5 @@
 const APP_MODE = '<%= $c->app->mode %>';
-const CACHE_NAME = 'convos-<%= $c->app->VERSION %>';
+const CACHE_NAME = 'convos-<%= $c->asset_version %>';
 const BASE_PATH = '<%= url_for("/")->path->to_string %>';
 
 // Cache strategies
@@ -25,22 +25,20 @@ const CACHE_RULES = [
 self.addEventListener('install', event => {
   const preCache = ['<%= url_for("/") %>'];
   self.skipWaiting();
-  event.waitUntil(openCache().then(cache => cache.addAll(preCache)));
+  openCache().then(cache => cache.addAll(preCache));
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => Promise.all(cacheNames.map(cacheName => {
-      // console.log('[Convos] Cleanup cache "' + cacheName + '": ' + (cacheName != CACHE_NAME));
-      return cacheName != CACHE_NAME && caches.delete(cacheName);
-    })))
-  );
+  caches.keys().then(cacheNames => Promise.all(cacheNames.map(cacheName => {
+    // console.log('[Convos] Cleanup cache "' + cacheName + '": ' + (cacheName != CACHE_NAME));
+    return cacheName != CACHE_NAME && caches.delete(cacheName);
+  })));
 });
 
 self.addEventListener('fetch', event => {
   const cacheStrategy = calculateCacheStrategy(event);
   const cacheFunction = CACHE_FUNCTIONS[cacheStrategy];
-  if (APP_MODE == 'development') console.log('[Convos] Cache strategy "' + cacheStrategy + '" for ' + event.request.url.toString());
+  // console.log('[Convos] Cache strategy "' + cacheStrategy + '" for ' + event.request.url.toString());
   if (cacheFunction) event.respondWith(openCache().then(cache => cacheFunction(event, cache)));
 });
 
@@ -49,7 +47,8 @@ function calculateCacheStrategy(event) {
 
   if (url.origin == location.origin) {
     for (let i = 0; i < CACHE_RULES.length; i++) {
-      if (CACHE_RULES[i][0].test(url.pathname)) return CACHE_RULES[i][1];
+      if (!CACHE_RULES[i][0].test(url.pathname)) continue;
+      return CACHE_RULES[i][1];
     }
   }
 
