@@ -141,35 +141,13 @@ sub register {
 }
 
 sub register_html {
-  my $self     = shift;
-  my $user     = $self->backend->user;
-  my $conn_url = $self->param('uri') && Mojo::URL->new($self->param('uri'));
+  my $self = shift;
 
-  if ($user and $conn_url) {
-    my $existing_connection = $self->_existing_connection($conn_url, $user);
-    my $existing_dialog
-      = $existing_connection && $self->_existing_dialog($conn_url, $existing_connection);
-
-    if ($existing_connection and $existing_dialog) {
-      my $redirect_url = $self->url_for('/chat');
-      push @{$redirect_url->path}, $existing_connection->id if $existing_connection;
-      push @{$redirect_url->path}, $existing_dialog->id     if $existing_dialog;
-      return $self->redirect_to($redirect_url);
-    }
-    elsif ($existing_connection) {
-      my $redirect_url = $self->url_for('/add/conversation');
-      $redirect_url->query->param(connection_id => $existing_connection->id);
-      $redirect_url->query->param(dialog_id     => $conn_url->path->[0] || '');
-      return $self->redirect_to($redirect_url);
-    }
-    else {
-      my $redirect_url = $self->url_for('/add/connection');
-      $redirect_url->query->param(uri => $conn_url);
-      return $self->redirect_to($redirect_url);
-    }
+  if (my $conn_url = $self->param('uri')) {
+    return if $self->_register_html_conn_url_redirect($conn_url);
+    $self->settings(conn_url => $conn_url);
   }
 
-  $self->settings(conn_url => $conn_url->to_string) if $conn_url;
   $self->render('index');
 }
 
@@ -202,6 +180,21 @@ sub update {
   );
 }
 
+sub _clean_json {
+  return {} unless my $json = shift->req->json;
+
+  for my $k (qw(email invite_code password)) {
+    next unless defined $json->{$k};
+    $json->{$k} = trim $json->{$k};
+    delete $json->{$k} unless length $json->{$k};
+  }
+
+  $json->{highlight_keywords} = [grep {/\w/} map { trim $_ } @{$json->{highlight_keywords}}]
+    if $json->{highlight_keywords};
+
+  return $json;
+}
+
 sub _existing_connection {
   my ($self, $url, $user) = @_;
   return undef unless my $host = $url->host;
@@ -220,25 +213,40 @@ sub _existing_connection {
   return undef;
 }
 
-sub _clean_json {
-  return {} unless my $json = shift->req->json;
-
-  for my $k (qw(email invite_code password)) {
-    next unless defined $json->{$k};
-    $json->{$k} = trim $json->{$k};
-    delete $json->{$k} unless length $json->{$k};
-  }
-
-  $json->{highlight_keywords} = [grep {/\w/} map { trim $_ } @{$json->{highlight_keywords}}]
-    if $json->{highlight_keywords};
-
-  return $json;
-}
-
 sub _existing_dialog {
   my ($self, $url, $conn) = @_;
   return undef unless my $dialog_name = $url->path->[0];
   return $conn->get_dialog(lc $dialog_name);
+}
+
+sub _register_html_conn_url_redirect {
+  my $self     = shift;
+  my $conn_url = Mojo::URL->new(shift);
+  my $user     = $self->backend->user or return;
+
+  my $existing_connection = $self->_existing_connection($conn_url, $user);
+  my $existing_dialog
+    = $existing_connection && $self->_existing_dialog($conn_url, $existing_connection);
+
+  if ($existing_connection and $existing_dialog) {
+    my $redirect_url = $self->url_for('/chat');
+    push @{$redirect_url->path}, $existing_connection->id if $existing_connection;
+    push @{$redirect_url->path}, $existing_dialog->id     if $existing_dialog;
+    return $self->redirect_to($redirect_url);
+  }
+  elsif ($existing_connection) {
+    my $redirect_url = $self->url_for('/add/conversation');
+    $redirect_url->query->param(connection_id => $existing_connection->id);
+    $redirect_url->query->param(dialog_id     => $conn_url->path->[0] || '');
+    return $self->redirect_to($redirect_url);
+  }
+  else {
+    my $redirect_url = $self->url_for('/add/connection');
+    $redirect_url->query->param(uri => $conn_url);
+    return $self->redirect_to($redirect_url);
+  }
+
+  return;
 }
 
 1;
