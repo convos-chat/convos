@@ -10,7 +10,7 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 
 SKIP: {
-  skip 'rollup -c --environment production', 1 unless $ENV{BUILD_ASSETS};
+  skip 'BUILD_ASSETS=1 to run "pnpm run build"', 1 unless $ENV{BUILD_ASSETS};
   detect_themes();
   build_assets();
 }
@@ -35,8 +35,8 @@ done_testing;
 sub build_assets {
   opendir(my $ASSETS, 'public/asset');
   /^convos\.[0-9a-f]{8}\.(css|js)\b/ and unlink "public/asset/$_" while $_ = readdir $ASSETS;
-  system 'rollup -c --environment production';
-  ok 1, 'rollup -c --environment production';
+  system 'pnpm run build';
+  ok 1, 'pnpm run build';
 }
 
 sub detect_themes {
