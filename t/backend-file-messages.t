@@ -63,7 +63,7 @@ is int @{$t->tx->res->json->{messages} || []}, 3, 'after and before';
 
 
 $t->get_ok('/api/notifications')->status_is(200)->json_is(
-  '/notifications',
+  '/messages',
   [{
     connection_id => 'irc-localhost',
     dialog_id     => '#convos',
