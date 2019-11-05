@@ -46,7 +46,6 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
       name          => '#Convos',
       last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
-      stash         => {},
       topic         => '',
       unread        => 0,
     },
@@ -91,7 +90,6 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       name          => '#Convos',
       last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
-      stash         => {},
       topic         => '',
       unread        => 0,
     },
@@ -102,7 +100,6 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       last_active   => '2016-08-19T16:10:50Z',
       last_read     => '2016-08-19T16:10:58Z',
       name          => '#superheroes',
-      stash         => {},
       topic         => '',
       unread        => 0,
     }

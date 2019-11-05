@@ -9,10 +9,9 @@ plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 
-detect_themes();
-
 SKIP: {
   skip 'rollup -c --environment production', 1 unless $ENV{BUILD_ASSETS};
+  detect_themes();
   build_assets();
 }
 

@@ -38,15 +38,12 @@ sub calculate_unread {
   );
 }
 
-sub stash { Convos::Util::_stash(stash => @_) }
-
 sub TO_JSON {
   my ($self, $persist) = @_;
   my %json = map { ($_, $self->$_) } qw(frozen name last_active last_read topic);
   $json{connection_id} = $self->connection->id;
   $json{dialog_id}     = $self->id;
   $json{password}      = $self->password if $persist;
-  $json{stash}         = $self->stash;
   $json{unread}        = $self->{unread} || 0;
   return \%json;
 }
@@ -138,15 +135,6 @@ See also L<Convos::Core::Backend/messages>.
   $self = $self->calculate_unread(sub { my ($self, $err) = @_; });
 
 Used to find the number of unread messages after L</last_read>.
-
-This method is EXPERIMENTAL.
-
-=head2 stash
-
-  $hash = $self->stash;
-  $self->stash->{"plugin.foo"} = 42;
-
-The stash can be used by plugins to store extra information on a dialog object.
 
 This method is EXPERIMENTAL.
 

@@ -82,17 +82,6 @@ sub spurt {
   return $content;
 }
 
-# See also Mojo::Util::_stash()
-sub _stash {
-  my ($name, $object) = (shift, shift);
-  return $object->{$name} ||= {} unless @_;
-  return $object->{$name}{$_[0]} unless @_ > 1 || ref $_[0];
-
-  my $values = ref $_[0] ? $_[0] : {@_};
-  @{$object->{$name}}{keys %$values} = values %$values;
-  return $object;
-}
-
 1;
 
 =encoding utf8
