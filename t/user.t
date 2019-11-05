@@ -13,7 +13,7 @@ no warnings qw(once redefine);
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 
 # test trim and lower case
-my $user = $core->user({email => ' JhtHorsen@cpan.org  '});
+my $user          = $core->user({email => ' JhtHorsen@cpan.org  '});
 my $settings_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'user.json');
 is $user->email, 'jhthorsen@cpan.org', 'email';
 is $user->password, '', 'password';
@@ -28,6 +28,7 @@ is_deeply(
     email              => 'jhthorsen@cpan.org',
     highlight_keywords => [],
     registered         => Mojo::Date->new($main::time)->to_datetime,
+    roles              => [],
     unread             => 0
   },
   'TO_JSON'

@@ -17,7 +17,9 @@ use constant BCRYPT_BASE_SETTINGS => do {
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 has highlight_keywords => sub { +[] };
-sub password { shift->{password} ||= '' }
+sub password   { shift->{password} ||= '' }
+sub registered { shift->{registered} }
+has roles  => sub { +[] };
 has unread => sub {0};
 
 has_many connections => 'Convos::Core::Connection' => sub {
@@ -72,6 +74,21 @@ sub get {
       return $self->$cb('', $res);
     }
   );
+}
+
+sub role {
+  my ($self, $action, $role) = @_;
+
+  if ($action eq 'give') {
+    my %roles = map { ($_ => 1) } @{$self->roles}, $role;
+    return $self->roles([sort keys %roles]);
+  }
+  elsif ($action eq 'take') {
+    return $self->roles([grep { $_ ne $role } @{$self->roles}]);
+  }
+  else {
+    return !!grep { $_ eq $role } @{$self->roles};
+  }
 }
 
 sub id { trim lc +($_[1] || $_[0])->{email} }
@@ -153,15 +170,18 @@ sub _bcrypt {
 sub _normalize_attributes {
   my $self = shift;
   $self->{highlight_keywords} = [grep {/\w/} map { trim $_ } @{$self->{highlight_keywords} || []}];
+  $self->{registered}         = $self->{registered}
+    && !ref $self->{registered} ? Mojo::Date->new($self->{registered}) : Mojo::Date->new;
   return $self;
 }
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  $self->{registered} ||= Mojo::Date->new->to_datetime;
-  my $json = {map { ($_, $self->{$_} // '') } qw(email password registered)};
+  my $json = {map { ($_, $self->{$_} // '') } qw(email password)};
   delete $json->{password} unless $persist;
   $json->{highlight_keywords} = $self->highlight_keywords;
+  $json->{registered}         = $self->registered->to_datetime;
+  $json->{roles}              = $self->roles;
   $json->{unread}             = $self->unread;
   $json;
 }
@@ -207,6 +227,12 @@ L</validate_password> for password authentication.
   $str = $self->public_id;
 
 Returns an anonymous ID for this user.
+
+=head2 roles
+
+  $array_ref = $self->roles;
+
+Holds a list of roles that the user has. See L</role> for changing this attribute.
 
 =head2 unread
 
@@ -278,6 +304,20 @@ L<Convos::Core::Backend/notifications>.
 
 Will remove a connection created by L</connection>. Removing a connection that
 does not exist is perfectly valid, and will not set C<$err>.
+
+=head2 registered
+
+  $mojo_date = $self->registered;
+
+Holds a L<Mojo::Date> object for when the user was registered.
+
+=head2 role
+
+  $bool = $self->role(has => "admin");
+  $self = $self->role(give => "admin");
+  $self = $self->role(take => "admin");
+
+Used to modify L</roles> for a given user.
 
 =head2 save
 
