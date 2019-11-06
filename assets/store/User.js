@@ -4,6 +4,7 @@ import Events from '../js/Events';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
+import {extractErrorMessage} from '../js/util';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -31,6 +32,14 @@ export default class User extends Reactive {
     this.prop('proxy', 'status', 'getUserOp');
   }
 
+  calculateLastUrl() {
+    if (this.is('error')) return '/login';
+    if (!this.is('success')) return null;
+    if (this.lastUrl) return this.lastUrl;
+    if (this.connections.size) return '/chat';
+    return '/add/connection';
+  }
+
   dialogs(cb) {
     const dialogs = [];
 
@@ -44,7 +53,7 @@ export default class User extends Reactive {
   }
 
   ensureConnected() {
-    this.events.ensureConnected();
+    if (this.getUserOp.is('success')) this.events.ensureConnected();
   }
 
   ensureDialog(params) {
@@ -74,20 +83,14 @@ export default class User extends Reactive {
   }
 
   is(status) {
+    if (Array.isArray(status)) return !!status.filter(s => this.is(s)).length;
+    if (status == 'offline') return extractErrorMessage(this.getUserOp.err || [], 'source') == 'fetch';
     return this.getUserOp.is(status);
   }
 
-  async load(user) {
-    if (user) {
-      this.getUserOp.parse({status: 200}, user);
-    }
-    else if (this.getUserOp.is('success')) {
-      return this;
-    }
-    else {
-      await this.getUserOp.perform();
-    }
-
+  async load() {
+    if (this.getUserOp.is('success')) return this;
+    await this.getUserOp.perform();
     this._parseGetUser(this.getUserOp.res.body);
     if (this.email) this.send({method: 'ping'});
     return this;

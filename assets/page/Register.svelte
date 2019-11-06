@@ -1,21 +1,18 @@
 <script>
-import {getContext} from 'svelte';
-import {l, lmd} from '../js/i18n';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {getContext} from 'svelte';
+import {l, lmd} from '../js/i18n';
+import {redirectAfterLogin} from '../store/router';
 
 const settings = getContext('settings');
 const user = getContext('user');
 const registerOp = user.api.operation('registerUser');
 
-$: if ($registerOp.is('success')) {
-  document.cookie = registerOp.res.headers['Set-Cookie'];
-  registerOp.reset();
-  user.load();
-}
+$: if ($registerOp.is('success')) redirectAfterLogin(user, registerOp);
 </script>
 
 <SidebarLoggedout/>

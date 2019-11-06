@@ -3,6 +3,7 @@ use Mojo::Base 'Convos::Plugin';
 
 use Convos::Util qw(E pretty_connection_name);
 use LinkEmbedder;
+use Mojo::JSON qw(false true);
 use Mojo::Util 'url_unescape';
 
 sub register {
@@ -97,9 +98,9 @@ sub _settings {
   my $extra    = $c->stash('convos.settings') || {};
   my %settings = %{$c->app->config('settings') || {}};
   $settings{assetVersion} = $c->asset_version;
-  $settings{chatMode}     = $c->stash('chat_mode') ? 1 : 0;
   $settings{apiUrl}       = $c->url_for('api');
   $settings{baseUrl}      = $c->app->core->base_url->to_string;
+  $settings{loadUser}     = $c->stash('load_user') ? true : false;
   $settings{wsUrl}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
   $settings{$_}           = $extra->{$_} for keys %$extra;
   return \%settings;

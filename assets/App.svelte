@@ -2,92 +2,56 @@
 import Api from './js/Api';
 import hljs from './js/hljs';
 import User from './store/User';
-import {activeMenu, container, currentUrl, docTitle, gotoUrl, historyListener} from './store/router';
+import {activeMenu, calculateCurrentPageComponent, container, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
 import {closestEl, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {onMount, setContext} from 'svelte';
 import {setTheme} from './store/themes';
 
-// Pages
-import Chat from './page/Chat.svelte';
-import ConnectionAdd from './page/ConnectionAdd.svelte';
-import DialogAdd from './page/DialogAdd.svelte';
-import Help from './page/Help.svelte';
-import Login from './page/Login.svelte';
-import Register from './page/Register.svelte';
-import Settings from './page/Settings.svelte';
-
 window.hljs = hljs; // Required by paste plugin
-
-// Routing
-const loggedInPages = {
-  'add/connection': ConnectionAdd,
-  'add/conversation': DialogAdd,
-  'chat': Chat,
-  'help': Help,
-  'settings': Settings,
-};
-
-const loggedOutPages = {
-  'login': Login,
-  'register': Register,
-};
 
 const settings = [window.__convos, delete window.__convos][0];
 const api = new Api(settings.apiUrl, {debug: true});
 const user = new User({api, wsUrl: settings.wsUrl});
-const getUserOp = user.getUserOp;
 const notifications = user.notifications;
 
 let containerWidth = 0;
-let pageComponent = null;
-
-$: container.set({small: containerWidth < 800, width: containerWidth});
-$: calculatePage($currentUrl, $getUserOp);
-$: setTheme($user.theme);
-$: unread = $user.unread;
-$: if (document) document.title = unread ? '(' + unread + ') ' + $docTitle : $docTitle;
 
 currentUrl.base = settings.baseUrl;
-
+user.events.listenToGlobalEvents();
 setContext('settings', settings);
 setContext('user', user);
 
-window.addEventListener('error', ({colno, error, filename, lineno, message, type, timeStamp}) => {
-  user.send({method: 'debug', type, colno, error, filename, lineno, message, timeStamp});
-});
-
-window.addEventListener('unhandledrejection', ({type, reason, returnValue, timeStamp}) => {
-  user.send({method: 'debug', type, reason, returnValue, timeStamp});
-});
+$: container.set({small: containerWidth < 800, width: containerWidth});
+$: calculateCurrentPageComponent($currentUrl, $user);
+$: setTheme($user.theme);
+$: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $docTitle : $docTitle;
 
 if ('serviceWorker' in navigator) {
-  Promise.all([user.on('update'), navigator.serviceWorker.register('/sw.js')]).then(([user, reg]) => {
-    if (user.version != settings.assetVersion) {
-      console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.assetVersion);
-      user.update({version: settings.assetVersion});
-      reg.update();
-    }
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    if (user.version == settings.assetVersion) return;
+    console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.assetVersion);
+    user.update({version: settings.assetVersion});
+    reg.update();
   }).catch(err => {
     console.log('[Convos] ServiceWorker registration failed:', err);
   });
 }
 
 onMount(() => {
-  if (!settings.chatMode) return;
+  loadScript(currentUrl.base + '/images/emojis.js');
+  if (settings.loadUser) user.load();
+  if (user.showGrid) document.querySelector('body').classList.add('with-grid');
 
   const unsubscribe = [];
   unsubscribe.push(historyListener());
-  unsubscribe.push(user.on('wsEventSentJoin', calculateNewPath));
-  unsubscribe.push(user.on('wsEventSentPart', calculateNewPath));
-
-  user.load(settings.user);
-  if (user.showGrid) document.querySelector('body').classList.add('with-grid');
+  unsubscribe.push(user.on('wsEventSentJoin', onChannelListChange));
+  unsubscribe.push(user.on('wsEventSentPart', onChannelListChange));
 
   return () => unsubscribe.forEach(cb => cb());
 });
 
-function calculateNewPath(params) {
+function onChannelListChange(params) {
   let path = ['', 'chat', params.connection_id];
 
   // Do not want to show settings for the new dialog
@@ -100,49 +64,6 @@ function calculateNewPath(params) {
   else {
     if (params.dialog_id) path.push(params.dialog_id);
     gotoUrl(path.map(encodeURIComponent).join('/'));
-  }
-}
-
-function calculatePage($url, $getUserOp) {
-  // Remember last chat
-  if ($url.pathParts[0] == 'chat') user.update({lastUrl: $url.toString()});
-
-  // Figure out current page
-  const loggedIn = $getUserOp.is('success');
-  const pages = loggedIn ? loggedInPages : loggedOutPages;
-  const pageName = pages[$url.path] ? $url.path : $url.pathParts[0] || '';
-  const nextPageComponent = pages[pageName];
-
-  if (loggedIn && settings.conn_url) {
-    return (location.href = currentUrl.base + '/register?uri=' + encodeURIComponent(settings.conn_url));
-  }
-
-  if (loggedIn) {
-    loadScript(currentUrl.base + '/images/emojis.js');
-  }
-
-  if (nextPageComponent) {
-    // Enable complex styling
-    replaceClassName('body', /(is-logged-)\S+/, loggedIn ? 'in' : 'out');
-    replaceClassName('body', /(page-)\S+/, pageName.replace(/\W+/g, '_') || 'loading');
-
-    // Remove original components
-    const removeEls = document.querySelectorAll('.js-remove');
-    for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-
-    // Show a page
-    if (nextPageComponent != pageComponent) pageComponent = nextPageComponent;
-  }
-  else if (loggedIn) {
-    const lastUrl = user.lastUrl;
-    gotoUrl(lastUrl || (user.connections.size ? '/chat' : '/add/connection'), {replace: true});
-  }
-  else if ($getUserOp.is('error') && $getUserOp.err[0].source == 'fetch') {
-    replaceClassName('body', /(is-logged-)\S+/, 'out');
-    replaceClassName('body', /(page-)\S+/, 'offline');
-  }
-  else if ($getUserOp.is('error')) {
-    gotoUrl('/login', {replace: true});
   }
 }
 
@@ -182,12 +103,7 @@ function onWindowClick(e) {
 }
 
 function onWindowFocus() {
-  if (settings.chatMode) user.events.ensureConnected();
-}
-
-function replaceClassName(sel, re, replacement) {
-  const tag = document.querySelector(sel);
-  tag.className = tag.className.replace(re, (all, prefix) => prefix + replacement);
+  user.ensureConnected();
 }
 </script>
 
@@ -197,7 +113,7 @@ function replaceClassName(sel, re, replacement) {
   on:keydown="{onGlobalKeydown}"
   bind:innerWidth="{containerWidth}"/>
 
-<svelte:component this="{pageComponent}"/>
+<svelte:component this="{$pageComponent}"/>
 
 {#if $activeMenu && $container.small}
   <div class="overlay" transition:fade="{{duration: 200}}">&nbsp;</div>

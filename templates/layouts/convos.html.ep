@@ -1,3 +1,4 @@
+% use Mojo::JSON 'to_json';
 % my $description = "A chat application that runs in your web browser";
 <!DOCTYPE html>
 <html class="theme-dark" lang="en">
@@ -40,10 +41,10 @@
     <meta name="theme-color" content="#00451D">
 
     %= asset 'convos.css'
-    %= include 'javascript' if 200 == (stash('status') // 200)
+    <script>window.__convos = <%== to_json $c->settings %>;</script>
   </head>
-  <body class="no-js page-loading is-logged-<%= settings->{user} ? 'in' : 'out' %>">
+  <body class="no-js page-loading is-logged-out">
     %= content
-    %= asset 'convos.js' if 200 == (stash('status') // 200)
+    %= asset 'convos.js'
   </body>
 </html>

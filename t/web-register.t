@@ -27,18 +27,12 @@ is $json->{apiUrl},            '/api',                  'settings.apiUrl';
 is $json->{contact},           'mailto:root@localhost', 'settings.contact';
 is $json->{organization_name}, 'Convos',                'settings.organization_name';
 is $json->{organization_url},  'http://convos.by',      'settings.organization_url';
-is $json->{user}{email}, 'superman@example.com', 'settings.user.email';
-is $json->{user}{unread}, '0', 'settings.user.unread';
-is @{$json->{user}{connections}},        1, 'settings.user.connections';
-is @{$json->{user}{dialogs}},            1, 'settings.user.dialogs';
-is @{$json->{user}{highlight_keywords}}, 0, 'settings.user.highlight_keywords';
-is @{$json->{user}{notifications}},      0, 'settings.user.notifications';
-ok $json->{baseUrl},            'settings.baseUrl';
-ok $json->{chatMode},           'settings.chatMode';
+ok $json->{baseUrl},           'settings.baseUrl';
 ok $json->{default_connection}, 'settings.default_connection';
+ok $json->{version},            'settings.version';
+ok $json->{wsUrl},              'settings.wsUrl';
 ok exists $json->{invite_code}, 'settings.invite_code';
-ok $json->{version}, 'settings.version';
-ok $json->{wsUrl},   'settings.wsUrl';
+ok !$json->{user}, 'the user should not be part of the settings';
 
 my $url = url_escape $ENV{CONVOS_DEFAULT_CONNECTION};
 $t->get_ok("/register?uri=$url")->status_is(302)

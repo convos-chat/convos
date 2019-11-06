@@ -52,10 +52,10 @@ sub startup {
 
   # Add basic routes
   my $r = $self->routes;
-  $r->get('/')->to(chat_mode => 1, template => 'index')->name('index');
+  $r->get('/')->to(load_user => 1, template => 'index')->name('index');
   $r->get('/docs/*doc_name', {doc_name => ''})->to('user#docs');
-  $r->get('/register')->to('user#register_html', chat_mode => 1);
-  $r->get("/$_")->to(chat_mode => 1, template => 'index')->name($_) for qw(login logout);
+  $r->get('/register')->to('user#register_html');
+  $r->get("/$_")->to(template => 'index')->name($_) for qw(login logout);
   $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
     ->to(template => 'asset/browserconfig');
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
@@ -68,7 +68,7 @@ sub startup {
   $r->websocket('/events')->to('events#start')->name('events');
 
   # Require authentication
-  my $auth_r = $r->under('/')->to('user#require_login', chat_mode => 1);
+  my $auth_r = $r->under('/')->to('user#require_login');
   $auth_r->get("/$_")->to(template => 'index')->name($_)     for (qw(help join settings));
   $auth_r->get("/add/$_")->to(template => 'index')->name($_) for (qw(connection conversation));
   $auth_r->get('/chat/*rest', {rest => ''})->to(template => 'index')->name('chat');

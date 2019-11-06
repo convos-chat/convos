@@ -88,9 +88,9 @@ export function ensureChildNode(parent, className, cb) {
 /**
  * TODO: Probably move extractErrorMessage() to Operation.
  */
-export function extractErrorMessage(params) {
-  const errors = params.errors;
-  return errors && errors[0] ? errors[0].message || 'Unknown error.' : '';
+export function extractErrorMessage(params, from = 'message') {
+  const errors = params.errors || params;
+  return errors && errors[0] ? errors[0][from] || 'Unknown error.' : '';
 }
 
 /**
@@ -185,6 +185,22 @@ export function regexpEscape(str) {
  */
 export function removeChildNodes(el) {
   while (el.firstChild) el.removeChild(el.firstChild);
+}
+
+/**
+ * replaceClassName() will replace a className by doing search and replace.
+ *
+ * @example
+ * // Will replace what is currently the class with "is-logged-out"
+ * replaceClassName('body', /is-logged-(\S+)/, 'out');
+ *
+ * @param {String} sel A CSS selector
+ * @param {RegExp} re A RegExp to search for an existing class name
+ * @param {String} replacement The value to replace
+ */
+export function replaceClassName(sel, re, replacement) {
+  const tag = document.querySelector(sel);
+  tag.className = tag.className.replace(re, (all, prefix) => prefix + replacement);
 }
 
 /**

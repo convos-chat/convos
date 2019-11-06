@@ -1,4 +1,0 @@
-% use Mojo::JSON 'to_json';
-%= javascript begin
-  window.__convos = <%== to_json $c->settings %>;
-% end

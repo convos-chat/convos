@@ -74,8 +74,6 @@ sub detect_themes {
 
 sub test_defaults {
   my ($path, $status) = @_;
-  $t->get_ok($path)->status_is($status)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"]);
-
-  my $test_method = $status == 200 ? 'content_like' : 'content_unlike';
-  $t->$test_method(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]);
+  $t->get_ok($path)->status_is($status)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"])
+    ->content_like(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]);
 }

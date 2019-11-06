@@ -1,6 +1,42 @@
+import {replaceClassName} from '../js/util';
 import {get, writable} from 'svelte/store';
+import {routingRules} from '../settings';
 
 let baseUrl = location.href.replace(/\/+$/, '');
+let calculateCurrentPageComponentLock = '';
+
+export const activeMenu = writable('');
+export const container = writable({wideEnough: false, width: 0});
+export const currentUrl = writable(parseUrl(location.href));
+export const docTitle = writable(document.title);
+export const pageComponent = writable(null);
+
+export function calculateCurrentPageComponent($currentUrl, $user) {
+  let path = $currentUrl.path;
+
+  const lock = [$user.status, path].join(':');
+  if (lock == calculateCurrentPageComponentLock) return;
+
+  for (let i = 0; i < routingRules.length; i++) {
+    const [routeRe, component, options] = routingRules[i];
+    if (!routeRe.test(path)) continue;
+
+    // Check matching route rules
+    if (options.user && !$user.is(options.user)) continue; // Not ready yet
+    if (options.gotoLast) return gotoUrl($user.calculateLastUrl());
+
+    // Render matching route
+    switchPageComponent(component);
+    replaceClassName('body', /(is-logged-)\S+/, $user.is('success') ? 'in' : 'out');
+    replaceClassName('body', /(page-)\S+/, options.name || $currentUrl.pathParts[0]);
+    path = null;
+
+    if (options.user) $user.update({lastUrl: $currentUrl.toString()});
+    break;
+  }
+
+  calculateCurrentPageComponentLock = lock;
+}
 
 function indexOrNull(str, searchValue) {
   const i = str.indexOf(searchValue);
@@ -14,6 +50,7 @@ export function historyListener() {
 }
 
 export function gotoUrl(url, params = {}) {
+  if (url === null) return;
   const nextUrl = parseUrl(url);
   if (!nextUrl) return (location.href = url);
   if (params.event) params.event.preventDefault();
@@ -26,13 +63,35 @@ function parseUrl(url) {
   if (url.indexOf(baseUrl) == -1) return false;
 
   const nextUrl = new URL(url);
-  const path = url.substring(baseUrl.length + 1, indexOrNull(url, '?') || indexOrNull(url, '#') || url.length);
+  const path = url.substring(baseUrl.length, indexOrNull(url, '?') || indexOrNull(url, '#') || url.length);
   Object.defineProperty(nextUrl, 'path', {value: path, writable: false});
 
   const pathParts = path.split('/').filter(p => p.length).map(decodeURIComponent);
   Object.defineProperty(nextUrl, 'pathParts', {value: pathParts, writable: false});
 
   return nextUrl;
+}
+
+export async function redirectAfterLogin(user, op) {
+  document.cookie = op.res.headers['Set-Cookie'];
+  op.reset();
+  await user.load();
+  gotoUrl(user.calculateLastUrl());
+}
+
+function switchPageComponent(nextPageComponent) {
+  // Only switch if the page has actually changed
+  const currentPageComponent = get(pageComponent);
+  if (nextPageComponent == currentPageComponent) return;
+
+  // Remove original components before doing the switch
+  if (!currentPageComponent) {
+    const removeEls = document.querySelectorAll('.js-remove');
+    for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
+  }
+
+  // Switch the page
+  pageComponent.set(nextPageComponent);
 }
 
 export function urlFor(path) {
@@ -54,11 +113,6 @@ export function urlToForm(formEl, url = get(currentUrl)) {
     if (inputEl.syncValue) inputEl.syncValue();
   });
 }
-
-export const activeMenu = writable('');
-export const container = writable({wideEnough: false, width: 0});
-export const currentUrl = writable(parseUrl(location.href));
-export const docTitle = writable(document.title);
 
 Object.defineProperty(currentUrl, 'base', {
   get() { return baseUrl },

@@ -34,6 +34,16 @@ export default class Events extends Reactive {
     this._ws('dequeue');
   }
 
+  listenToGlobalEvents() {
+    window.addEventListener('error', ({colno, error, filename, lineno, message, type, timeStamp}) => {
+      this.send({method: 'debug', type, colno, error, filename, lineno, message, timeStamp});
+    });
+
+    window.addEventListener('unhandledrejection', ({type, reason, returnValue, timeStamp}) => {
+      this.send({method: 'debug', type, reason, returnValue, timeStamp});
+    });
+  }
+
   notifyUser(title, body, params = {}) {
     const rejectReason = this._notificationRejectReason();
     if (rejectReason) {

@@ -175,27 +175,8 @@ sub register_html {
 
 sub require_login {
   my $self = shift;
-  my $user = $self->backend->user;
-
-  unless ($user) {
-    $self->redirect_to('index');
-    return undef;
-  }
-
-  Mojo::IOLoop->delay(
-    sub {
-      my %get = map { ($_ => 1) } qw(connections dialogs);
-      $user->get(\%get, shift->begin);
-    },
-    sub {
-      my ($delay, $err, $res) = @_;
-      return $self->helpers->reply->exception($err) if $err;
-      $self->settings(user => $res);
-      $self->continue;
-    },
-  );
-
-  return undef;
+  return $self->redirect_to('/login') unless my $user = $self->backend->user;
+  return $self->stash(load_user => 1, user => $user);
 }
 
 sub update {
