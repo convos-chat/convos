@@ -6,6 +6,8 @@ use LinkEmbedder;
 use Mojo::JSON qw(false true);
 use Mojo::Util 'url_unescape';
 
+my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} || '127.0.0.1,::1');
+
 sub register {
   my ($self, $app, $config) = @_;
 
@@ -16,6 +18,7 @@ sub register {
   $app->helper('linkembedder'              => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                  => \&_settings);
   $app->helper('unauthorized'              => \&_unauthorized);
+  $app->helper('user_has_admin_rights'     => \&_user_has_admin_rights);
 }
 
 sub _asset_version {
@@ -97,10 +100,11 @@ sub _settings {
   my $app      = $c->app;
   my $extra    = $c->stash('convos.settings') || {};
   my %settings = %{$c->app->config('settings') || {}};
-  $settings{assetVersion} = $c->asset_version;
   $settings{apiUrl}       = $c->url_for('api');
+  $settings{assetVersion} = $c->asset_version;
   $settings{baseUrl}      = $c->app->core->base_url->to_string;
   $settings{loadUser}     = $c->stash('load_user') ? true : false;
+  $settings{status}       = int($c->stash('status') || 200);
   $settings{wsUrl}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
   $settings{$_}           = $extra->{$_} for keys %$extra;
   return \%settings;
@@ -108,6 +112,24 @@ sub _settings {
 
 sub _unauthorized {
   shift->render(json => E('Need to log in first.'), status => 401);
+}
+
+sub _user_has_admin_rights {
+  my $c              = shift;
+  my $x_local_secret = $c->req->headers->header('X-Local-Secret');
+
+  # Normal request from web
+  unless ($x_local_secret) {
+    my $admin_user = $c->backend->user;
+    return +($admin_user && $admin_user->role(has => 'admin')) ? 'user' : '';
+  }
+
+  # Special request for forgotten password
+  my $remote_address = $c->tx->original_remote_address;
+  my $valid          = $x_local_secret eq $c->app->config->{local_secret} ? 1 : 0;
+  my $valid_str      = $valid ? 'Valid' : 'Invalid';
+  $c->app->log->warn("$valid_str X-Local-Secret from $remote_address (@LOCAL_ADMIN_REMOTE_ADDR)");
+  return +($valid && grep { $remote_address eq $_ } @LOCAL_ADMIN_REMOTE_ADDR) ? 'local' : '';
 }
 
 1;

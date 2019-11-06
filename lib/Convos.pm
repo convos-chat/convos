@@ -125,6 +125,7 @@ sub _config {
   $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
   $config->{home}    ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
+  $config->{local_secret}      ||= $ENV{CONVOS_LOCAL_SECRET}      || $self->_generate_local_secret;
   $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
@@ -168,6 +169,14 @@ sub _default_connection {
   }
 
   return ($config->{default_connection} = Mojo::URL->new('irc://chat.freenode.net:6697/%23convos'));
+}
+
+sub _generate_local_secret {
+  my $self   = shift;
+  my $secret = Mojo::Util::md5_sum(join ':', $self->home->to_string, $<, $(, $0);
+  $self->log->info(
+    qq(CONVOS_LOCAL_SECRET="$secret" # https://convos.by/doc/config.html#convos_local_secret));
+  return $secret;
 }
 
 sub _home_in_share {

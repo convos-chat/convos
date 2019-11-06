@@ -31,7 +31,6 @@ if ($ARGV[0] and -r $ARGV[0] and -f $ARGV[0]) {
 my $command = $ARGV[0] || '';
 $ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if grep { $command eq $_ } qw(get version);
 $ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
-$ENV{CONVOS_COMMAND_LINE} //= 1 if $command eq 'get';
 
 unless ($ENV{CONVOS_SETUP}++) {
   eval "require $_;1" or die $@ for qw(FindBin File::Spec);
