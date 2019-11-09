@@ -1,16 +1,15 @@
 #!perl
 use lib '.';
+use Mojo::Base -strict;
 use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
+
 
 my $t    = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $dialog     = $connection->dialog({name => '#convos'});
-
-# trick to make Devel::Cover track calls to _messages()
-$t->app->core->backend->_fc(bless {}, 'NoForkCall');
 
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages')->status_is(401);
 $t->get_ok('/api/notifications')->status_is(401);

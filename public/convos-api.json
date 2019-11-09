@@ -398,6 +398,33 @@
         }
       }
     },
+    "/search": {
+      "get": {
+        "tags": [ " search" ],
+        "summary": "Search through messages",
+        "description": "Search all the things",
+        "operationId": "searchMessages",
+        "x-mojo-to": "search#messages",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "type": "string", "description": "Search Query" }
+        ],
+      "responses": {
+        "200": {
+          "description": "List of found messages.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "messages": { "type": "array", "items": { "$ref": "#/definitions/Notification" } }
+            }
+          }
+        },
+        "default": {
+          "description": "Error.",
+          "schema": { "$ref": "#/definitions/Error" }
+        }
+      }
+      }
+    },
     "/user": {
       "delete": {
         "tags": [ "user" ],

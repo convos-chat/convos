@@ -5,7 +5,6 @@ use Convos::Util qw(next_tick spurt DEBUG);
 use Fcntl ':flock';
 use File::ReadBackwards;
 use Mojo::File;
-use Mojo::IOLoop::ForkCall ();
 use Mojo::JSON;
 use Mojo::Util qw(encode decode);
 use Symbol;
@@ -30,11 +29,6 @@ my %FORMAT = (
 
 has home => sub { Carp::confess('home() cannot be built') };
 
-has _fc => sub {
-  my $fc = Mojo::IOLoop::ForkCall->new;
-  $fc->on(error => sub { warn "[fc] $_[1]" });
-  $fc;
-};
 
 sub connections {
   my ($self, $user, $cb) = @_;
@@ -67,7 +61,7 @@ sub delete_object {
 
   Mojo::IOLoop->delay(
     sub {
-      $self->_fc->run(
+      Mojo::IOLoop->subprocess(
         sub {
           my $path = $self->home->child(@{$obj->uri});
           $path = $path->dirname
@@ -157,7 +151,7 @@ sub messages {
   warn "[@{[$obj->id]}] Searching $args{after} - $args{before}\n" if DEBUG;
   Mojo::IOLoop->delay(
     sub {
-      $self->_fc->run(sub { $self->_messages($obj, \%args) }, shift->begin);
+      Mojo::IOLoop->subprocess(sub { $self->_messages($obj, \%args) }, shift->begin);
     },
     sub {
       my ($delay, $err, $messages) = @_;
@@ -166,6 +160,22 @@ sub messages {
   );
 
   return $self;
+}
+
+sub messages_all {
+  my ($self, $query, $cb) = @_;
+   Mojo::IOLoop->subprocess(
+      sub {
+        my $subprocess = shift;
+        my $match = $query->{match};
+        $match =~ s/\W//g;
+        return `rg -C1 --sortr modified  -t log $ENV{CONVOS_HOME}/ -- $match`;
+      },
+      sub {
+        my ($subprocess, $err, @results) = @_;
+        $self->$cb($err, $messages || []);
+      }
+  );
 }
 
 sub notifications {
@@ -300,7 +310,7 @@ sub _messages {
     return $self->_messages($obj, $args);
   }
 
-  warn "[@{[$obj->id]}] Gettings messages from $file...\n" if DEBUG;
+  warn "[@{[$obj->id]}] Getting messages from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
     $line = decode 'UTF-8', $line;
     next unless $line =~ $args->{re};
@@ -459,6 +469,10 @@ See L<Convos::Core::Backend/delete_object>.
 See L<Convos::Core::Backend/load_object>.
 
 =head2 messages
+
+See L<Convos::Core::Backend/messages>.
+
+=head2 messages_all
 
 See L<Convos::Core::Backend/messages>.
 

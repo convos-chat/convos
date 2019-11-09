@@ -83,16 +83,6 @@ END {
   }
 }
 
-BEGIN {
-
-  package NoForkCall;
-
-  sub run {
-    my ($self, $fork, $cb) = @_;
-    $self->$cb('', $fork->());
-  }
-}
-
 1;
 
 __DATA__

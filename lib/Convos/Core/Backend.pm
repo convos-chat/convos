@@ -36,6 +36,11 @@ sub messages {
   $self->tap($cb, '', []);
 }
 
+sub messages_all {
+    my ($self, $query, $cb) = @_;
+    $self->tap($cb, '', []);
+}
+
 sub new { shift->SUPER::new(@_)->tap('_setup') }
 
 sub notifications {
@@ -141,10 +146,27 @@ This method will load C<$data> for C<$obj>.
 
 =head2 messages
 
-  $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
+  $self->messages($obj, \%query, sub { my ($self, $err, $messages) = @_; });
 
 Used to search for messages stored in backend. The callback will be called
 with the messages found.
+
+Possible C<%query>:
+
+  {
+    after  => $datetime, # find messages after a given ISO 8601 timestamp
+    before => $datetime, # find messages before a given ISO 8601 timestamp
+    level  => $str,      # debug, info (default), warn, error
+    limit  => $int,      # max number of messages to retrieve
+    match  => $regexp,   # filter messages by a regexp
+  }
+
+=head2 messages_all
+
+  $self->messages_all( \%query, sub { my ($self, $err, $messages) = @_; });
+
+Used to search for messages stored in all dialogs of backend. The callback
+will be called with the messages found.
 
 Possible C<%query>:
 

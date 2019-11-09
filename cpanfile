@@ -5,7 +5,6 @@ requires "File::HomeDir"                  => "1.00";
 requires "File::ReadBackwards"            => "1.05";
 requires "JSON::Validator"                => "3.16";
 requires "LinkEmbedder"                   => "1.07";
-requires "Mojo::IOLoop::ForkCall"         => "0.17";
 requires "Mojo::IRC"                      => "0.45";
 requires "Mojolicious"                    => "8.25";
 requires "Mojolicious::Plugin::OpenAPI"   => "2.18";
