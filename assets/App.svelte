@@ -6,6 +6,7 @@ import {activeMenu, container, currentUrl, docTitle, gotoUrl, historyListener} f
 import {closestEl, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {onMount, setContext} from 'svelte';
+import {setTheme} from './store/themes';
 
 // Pages
 import Chat from './page/Chat.svelte';
@@ -42,8 +43,8 @@ let containerWidth = 0;
 let pageComponent = null;
 
 $: container.set({small: containerWidth < 800, width: containerWidth});
-$: replaceClassName('html', /(theme-)\S+/, $user.theme);
 $: calculatePage($currentUrl, $getUserOp);
+$: setTheme($user.theme);
 $: unread = $user.unread;
 $: if (document) document.title = unread ? '(' + unread + ') ' + $docTitle : $docTitle;
 

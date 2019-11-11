@@ -2,10 +2,7 @@
 
 html.theme-dark {
   @import '../../../node_modules/highlight.js/scss/atom-one-dark.scss';
-}
 
-html.theme-dark,
-:root {
   --body-bg: #1f2122;
   --text-color: #d1cfca;
   --link-color: #d1cfca;
