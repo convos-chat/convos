@@ -85,8 +85,10 @@ export default class EmbedMaker extends Reactive {
   _loadAndRender(url) {
     this.embeds[url] = {};
     return this.api.operation('embed', {url}).perform().then(op => {
-      const embedEl = this._ensureEmbedEl(url);
       const embed = op.res.body;
+      if (!embed.html) return;
+
+      const embedEl = this._ensureEmbedEl(url);
       embedEl.innerHTML = embed.html;
       q(embedEl, 'a', aEl => { aEl.target = '_blank' });
 

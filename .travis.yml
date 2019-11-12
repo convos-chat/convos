@@ -15,6 +15,7 @@ env:
 
 install:
   - "cpanm -n EV Test::Pod Test::Pod::Coverage"
+  - "cpanm -n https://github.com/jhthorsen/linkembedder/archive/master.tar.gz"
   - "cpanm -n https://github.com/jhthorsen/mojo-irc/archive/master.tar.gz"
   - "cpanm -n --installdeps ."
 

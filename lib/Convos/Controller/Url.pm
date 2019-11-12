@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub info {
   my $self = shift->openapi->valid_input or return;
-  my $url = $self->param('url');
+  my $url  = $self->param('url');
 
   if (!$self->backend->user) {
     return $self->stash(status => 401)
@@ -19,14 +19,17 @@ sub info {
     sub {
       my ($delay, $link) = @_;
 
-      if ($link->error) {
-        $self->stash(status => $link->error->{code} || 500);
-      }
-      else {
-        $self->app->_link_cache->set($url => $link);
-        $self->res->headers->cache_control('max-age=600');
+      if (my $err = $link->error) {
+        $self->stash(status => $err->{code} || 500);
+        $self->respond_to(
+          json => {json => {errors => [$err]}},
+          any  => {text => $err->{message} || 'Unknown error.'}
+        );
+        return;
       }
 
+      $self->app->_link_cache->set($url => $link);
+      $self->res->headers->cache_control('max-age=600');
       $self->respond_to(json => {json => $link}, any => {text => $link->html});
     },
   );
