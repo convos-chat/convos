@@ -94,7 +94,7 @@ export default class Dialog extends Reactive {
       msg.markdown = md(msg.message);
     }
 
-    this.update({messages, status: 'success'});
+    this.update({messages});
     return this;
   }
 
@@ -118,6 +118,7 @@ export default class Dialog extends Reactive {
 
     const body = this.messagesOp.res.body;
     this.addMessages('unshift', body.messages || []);
+    this.update({status: 'success'});
     if (body.end && this.messages.length) this.messages[0].endOfHistory = true;
 
     return this;
