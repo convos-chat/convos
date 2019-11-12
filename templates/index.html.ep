@@ -15,12 +15,6 @@
       %=l 'Starting Convos...'
     </p>
 
-    <div class="has-js is-offline">
-      <h2><%=l 'Offline' %></h2>
-      <p><i class="fas fa-exclamation-triangle"></i> <%=l 'You seem to have lost connection to the internet.' %></p>
-      <p><%= link_to l('Reload'), '/', class => 'btn' %></p>
-    </div>
-
     <noscript>
       <p><%=l 'Javascript is disabled, so Convos will never load. Please enable Javascript and try again.' %></p>
     </noscript>

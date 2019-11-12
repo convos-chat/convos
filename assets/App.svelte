@@ -7,6 +7,7 @@ import {closestEl, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {onMount, setContext} from 'svelte';
 import {setTheme} from './store/themes';
+import {urlFor} from './store/router';
 
 window.hljs = hljs; // Required by paste plugin
 
@@ -33,6 +34,7 @@ if ('serviceWorker' in navigator) {
     console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.assetVersion);
     user.update({version: settings.assetVersion});
     reg.update();
+    location.href = urlFor('/'); // Refresh offline page
   }).catch(err => {
     console.log('[Convos] ServiceWorker registration failed:', err);
   });

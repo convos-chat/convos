@@ -19,6 +19,7 @@ const CACHE_RULES = [
   [new RegExp('^' + BASE_PATH + 'asset/'), STRATEGY_CACHE_FIRST],
   [new RegExp('^' + BASE_PATH + 'images/'), STRATEGY_CACHE_FIRST],
   [new RegExp('^' + BASE_PATH + 'font/'), STRATEGY_CACHE_FIRST],
+  [new RegExp('^' + BASE_PATH + '?$'), STRATEGY_NETWORK_FIRST],
   [new RegExp('/[^.]+$'), STRATEGY_PAGE],
 ];
 
