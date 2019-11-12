@@ -9,7 +9,30 @@ import {onMount, setContext} from 'svelte';
 import {setTheme} from './store/themes';
 import {urlFor} from './store/router';
 
-window.hljs = hljs; // Required by paste plugin
+// Routing
+import Chat from './page/Chat.svelte';
+import ConnectionAdd from './page/ConnectionAdd.svelte';
+import DialogAdd from './page/DialogAdd.svelte';
+import Fallback from './page/Fallback.svelte';
+import Help from './page/Help.svelte';
+import Login from './page/Login.svelte';
+import Register from './page/Register.svelte';
+import Settings from './page/Settings.svelte';
+
+export const routingRules = [
+  [new RegExp('.*'), Fallback, {user: 'offline'}],
+  [new RegExp('^/help'), Help, {}],
+  [new RegExp('^/login'), Login, {}],
+  [new RegExp('^/register'), Register, {}],
+  [new RegExp('^/add/connection'), ConnectionAdd, {user: 'success'}],
+  [new RegExp('^/add/conversation'), DialogAdd, {user: 'success'}],
+  [new RegExp('^/chat'), Chat, {user: 'success'}],
+  [new RegExp('^/settings'), Settings, {user: 'success'}],
+  [new RegExp('^/docs'), null, {}],
+  [new RegExp('^/paste'), null, {}],
+  [new RegExp('^/$'), null, {user: ['error', 'success'], gotoLast: true}],
+  [new RegExp('.*'), Fallback, {}],
+];
 
 const settings = [window.__convos, delete window.__convos][0];
 const api = new Api(settings.apiUrl, {debug: true});
@@ -18,13 +41,14 @@ const notifications = user.notifications;
 
 let containerWidth = 0;
 
+window.hljs = hljs; // Required by paste plugin
 currentUrl.base = settings.baseUrl;
 user.events.listenToGlobalEvents();
 setContext('settings', settings);
 setContext('user', user);
 
 $: container.set({small: containerWidth < 800, width: containerWidth});
-$: calculateCurrentPageComponent($currentUrl, $user);
+$: calculateCurrentPageComponent($currentUrl, $user, routingRules);
 $: setTheme($user.theme);
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $docTitle : $docTitle;
 

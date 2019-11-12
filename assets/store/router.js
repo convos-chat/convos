@@ -1,6 +1,5 @@
 import {replaceClassName} from '../js/util';
 import {get, writable} from 'svelte/store';
-import {routingRules} from '../settings';
 
 let baseUrl = location.href.replace(/\/+$/, '');
 let calculateCurrentPageComponentLock = '';
@@ -11,9 +10,8 @@ export const currentUrl = writable(parseUrl(location.href));
 export const docTitle = writable(document.title);
 export const pageComponent = writable(null);
 
-export function calculateCurrentPageComponent($currentUrl, $user) {
-  let path = $currentUrl.path;
-
+export function calculateCurrentPageComponent($currentUrl, $user, routingRules) {
+  const path = $currentUrl.path;
   const lock = [$user.status, path].join(':');
   if (lock == calculateCurrentPageComponentLock) return;
 
@@ -29,9 +27,8 @@ export function calculateCurrentPageComponent($currentUrl, $user) {
     switchPageComponent(component);
     replaceClassName('body', /(is-logged-)\S+/, $user.is('success') ? 'in' : 'out');
     replaceClassName('body', /(page-)\S+/, options.name || $currentUrl.pathParts[0]);
-    path = null;
 
-    if (options.user) $user.update({lastUrl: $currentUrl.toString()});
+    if (options.user == 'success') $user.update({lastUrl: $currentUrl.toString()});
     break;
   }
 

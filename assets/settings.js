@@ -3,28 +3,3 @@
 
 // Themes
 export const themes = [["auto","Auto"],["dark","Dark mode"],["light","Light"]];
-
-// Routing
-import Chat from './page/Chat.svelte';
-import ConnectionAdd from './page/ConnectionAdd.svelte';
-import DialogAdd from './page/DialogAdd.svelte';
-import Fallback from './page/Fallback.svelte';
-import Help from './page/Help.svelte';
-import Login from './page/Login.svelte';
-import Register from './page/Register.svelte';
-import Settings from './page/Settings.svelte';
-
-export const routingRules = [
-  [new RegExp('.*'), Fallback, {user: 'offline'}],
-  [new RegExp('^/help'), Help, {}],
-  [new RegExp('^/login'), Login, {}],
-  [new RegExp('^/register'), Register, {}],
-  [new RegExp('^/add/connection'), ConnectionAdd, {user: 'success'}],
-  [new RegExp('^/add/conversation'), DialogAdd, {user: 'success'}],
-  [new RegExp('^/chat'), Chat, {user: 'success'}],
-  [new RegExp('^/settings'), Settings, {user: 'success'}],
-  [new RegExp('^/docs'), null, {}],
-  [new RegExp('^/paste'), null, {}],
-  [new RegExp('^/$'), null, {user: ['error', 'success'], gotoLast: true}],
-  [new RegExp('.*'), Fallback, {}],
-];

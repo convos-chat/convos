@@ -5,14 +5,18 @@ import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
 import {replaceClassName} from '../js/util';
 
+const settings = getContext('settings');
 const user = getContext('user');
+const loadingStatus = settings.loadUser ? ['loading', 'pending'] : ['loading'];
 
-const status = user.is('offline') ? 'offline' : user.is('loading') ? 'loading' : 'not_found';
 const messages = {
   'loading': 'Loading',
   'not_found': 'Not found',
   'offline': 'You appear to be offline',
 };
+
+
+$: status = $user.is('offline') ? 'offline' : $user.is(loadingStatus) ? 'loading' : 'not_found';
 
 onMount(() => {
   replaceClassName('body', /(is-logged-)\S+/, 'out');
