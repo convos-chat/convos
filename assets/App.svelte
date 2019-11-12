@@ -3,9 +3,9 @@ import Api from './js/Api';
 import hljs from './js/hljs';
 import User from './store/User';
 import {activeMenu, calculateCurrentPageComponent, container, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
-import {closestEl, loadScript, tagNameIs} from './js/util';
+import {afterUpdate, onMount, setContext} from 'svelte';
+import {closestEl, debounce, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
-import {onMount, setContext} from 'svelte';
 import {setTheme} from './store/themes';
 import {urlFor} from './store/router';
 
@@ -63,6 +63,18 @@ if ('serviceWorker' in navigator) {
     console.log('[Convos] ServiceWorker registration failed:', err);
   });
 }
+
+afterUpdate(debounce(() => {
+  // This is a hack to clean up elements that should be removed that should be
+  const seen = {};
+  const rootEls = document.querySelector('body').childNodes;
+  for (let i = 0; i < rootEls.length; i++) {
+    const id = (rootEls[i].className || '').split(' ')[0];
+    if (!id) continue;
+    if (seen[id]) console.log('[cleanup]', seen[id], seen[id].remove());
+    seen[id] = rootEls[i];
+  }
+}, 100));
 
 onMount(() => {
   loadScript(currentUrl.base + '/images/emojis.js');
