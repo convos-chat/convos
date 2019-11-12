@@ -1,19 +1,18 @@
 <script>
 import ConnectionForm from '../components/ConnectionForm.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
-import {container} from '../store/router';
 import {fly} from 'svelte/transition';
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
 
 export let dialog = {};
+export let transition;
 
 const user = getContext('user');
 
 let connection = {};
 
 $: connectionHost = connection.url && connection.url.host;
-$: flyTransitionParameters = {duration: 250, x: $container.small ? $container.width : 0};
 
 onMount(async () => {
   await user.load();
@@ -21,7 +20,7 @@ onMount(async () => {
 });
 </script>
 
-<div class="sidebar-left" transition:fly="{flyTransitionParameters}">
+<div class="sidebar-left" transition:fly="{transition}">
   <SettingsHeader {dialog}/>
 
   {#if !connection.url}

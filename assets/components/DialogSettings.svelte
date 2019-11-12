@@ -4,13 +4,13 @@ import Link from './Link.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
-import {container} from '../store/router';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 import {modeClassNames} from '../js/util';
 
 export let dialog = {};
+export let transition;
 
 const user = getContext('user');
 
@@ -19,7 +19,6 @@ let dialogTopic = dialog.topic;
 let formEl;
 
 $: isOperator = calculateIsOperator(dialog);
-$: flyTransitionParameters = {duration: 250, x: $container.small ? $container.width : 0};
 $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
 function calculateIsOperator(dialog) {
@@ -45,7 +44,7 @@ function saveDialogSettings(e) {
 }
 </script>
 
-<div class="sidebar-left" transition:fly="{flyTransitionParameters}">
+<div class="sidebar-left" transition:fly="{transition}">
   <SettingsHeader dialog="{dialog}"/>
 
   <p>

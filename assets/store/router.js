@@ -1,14 +1,22 @@
+import {derived, get, writable} from 'svelte/store';
 import {replaceClassName} from '../js/util';
-import {get, writable} from 'svelte/store';
 
 let baseUrl = location.href.replace(/\/+$/, '');
 let calculateCurrentPageComponentLock = '';
 
 export const activeMenu = writable('');
-export const container = writable({wideEnough: false, width: 0});
+export const container = writable({wideScreen: false, width: 0});
 export const currentUrl = writable(parseUrl(location.href));
 export const docTitle = writable(document.title);
 export const pageComponent = writable(null);
+
+export const sidebarSettings = derived([activeMenu, container], ([$activeMenu, $container]) => {
+  const transition = $activeMenu == 'nav'
+      ? {duration: $container.wideScreen ? 0 : 250, x: $container.width}
+      : {duration: 250, x: $container.wideScreen ? 0 : $container.width};
+
+  return {show: $activeMenu, transition, wideScreen: $container.wideScreen};
+});
 
 export function calculateCurrentPageComponent($currentUrl, $user, routingRules) {
   const path = $currentUrl.path;

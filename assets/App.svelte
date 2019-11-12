@@ -3,9 +3,9 @@ import Api from './js/Api';
 import hljs from './js/hljs';
 import User from './store/User';
 import {activeMenu, calculateCurrentPageComponent, container, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
-import {afterUpdate, onMount, setContext} from 'svelte';
-import {closestEl, debounce, loadScript, tagNameIs} from './js/util';
+import {closestEl, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
+import {onMount, setContext} from 'svelte';
 import {setTheme} from './store/themes';
 import {urlFor} from './store/router';
 
@@ -47,7 +47,7 @@ user.events.listenToGlobalEvents();
 setContext('settings', settings);
 setContext('user', user);
 
-$: container.set({small: containerWidth < 800, width: containerWidth});
+$: container.set({wideScreen: containerWidth > 800, width: containerWidth});
 $: calculateCurrentPageComponent($currentUrl, $user, routingRules);
 $: setTheme($user.theme);
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $docTitle : $docTitle;
@@ -63,18 +63,6 @@ if ('serviceWorker' in navigator) {
     console.log('[Convos] ServiceWorker registration failed:', err);
   });
 }
-
-afterUpdate(debounce(() => {
-  // This is a hack to clean up elements that should be removed that should be
-  const seen = {};
-  const rootEls = document.querySelector('body').childNodes;
-  for (let i = 0; i < rootEls.length; i++) {
-    const id = (rootEls[i].className || '').split(' ')[0];
-    if (!id) continue;
-    if (seen[id]) console.log('[cleanup]', seen[id], seen[id].remove());
-    seen[id] = rootEls[i];
-  }
-}, 100));
 
 onMount(() => {
   loadScript(currentUrl.base + '/images/emojis.js');
@@ -124,6 +112,7 @@ function onWindowClick(e) {
   // This is useful if you want to see on server side what is being clicked on
   // user.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
 
+  // Call methods on user, such as user.ensureConnected() with href="#call:user:ensureConnected"
   const linkEl = closestEl(e.target, 'a');
   const action = linkEl && linkEl.href.match(/#(call:user):(\w+)/) || ['', '', ''];
   if (action[2]) {
@@ -132,6 +121,7 @@ function onWindowClick(e) {
     return;
   }
 
+  // Toggle activeMenu with href="#activeMenu:nav", where "nav" can be "", "nav" or "settings"
   const toggle = linkEl && linkEl.href.match(/(.*)#(activeMenu):(\w*)/) || ['', '', '', ''];
   if (toggle[1].indexOf('http') == 0 && $currentUrl.toString() != toggle[1]) gotoUrl(toggle[1]);
   if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
@@ -153,6 +143,6 @@ function onWindowFocus() {
 
 <svelte:component this="{$pageComponent}"/>
 
-{#if $activeMenu && $container.small}
+{#if $activeMenu && !$container.wideScreen}
   <div class="overlay" transition:fade="{{duration: 200}}">&nbsp;</div>
 {/if}

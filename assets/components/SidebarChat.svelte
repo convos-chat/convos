@@ -2,11 +2,13 @@
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import TextField from './form/TextField.svelte';
-import {activeMenu, container, gotoUrl} from '../store/router';
+import {activeMenu, gotoUrl} from '../store/router';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, topicOrStatus} from '../js/i18n';
 import {q, regexpEscape, showEl, tagNameIs} from '../js/util';
+
+export let transition;
 
 const user = getContext('user');
 const notifications = $user.notifications;
@@ -17,7 +19,6 @@ let navEl;
 let searchHasFocus = false;
 let visibleLinks = [];
 
-$: flyTransitionParameters = {duration: $container.small ? 250 : 0, x: $container.width};
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
@@ -114,61 +115,59 @@ function renderUnread(dialog) {
 }
 </script>
 
-{#if $activeMenu == 'nav' || !$container.small}
-  <div class="sidebar-left" transition:fly="{flyTransitionParameters}">
-    <form class="sidebar__header" on:submit="{e => e.preventDefault()}">
-      <input type="text" id="sidebar_left_search_input"
-        placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
-        bind:value="{filter}"
-        on:blur="{clearFilter}"
-        on:focus="{filterNav}"
-        on:keydown="{onSearchKeydown}">
-      <label for="sidebar_left_search_input"><Icon name="search"/></label>
-    </form>
+<div class="sidebar-left" transition:fly="{transition}">
+  <form class="sidebar__header" on:submit="{e => e.preventDefault()}">
+    <input type="text" id="sidebar_left_search_input"
+      placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
+      bind:value="{filter}"
+      on:blur="{clearFilter}"
+      on:focus="{filterNav}"
+      on:keydown="{onSearchKeydown}">
+    <label for="sidebar_left_search_input"><Icon name="search"/></label>
+  </form>
 
-    <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
-      <h3>{l('Conversations')}</h3>
-      {#each $user.connections.toArray() as connection}
-        <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" title="{topicOrStatus(connection, connection)}">
-          <Icon name="network-wired"/>
-          <span>{connection.connection_id}</span>
-          <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
-        </Link>
-        {#each connection.dialogs.toArray() as dialog}
-          <Link href="{dialog.path}" class="{dialogClassNames(connection, dialog)}" title="{topicOrStatus(connection, dialog)}">
-            <Icon name="{dialog.is_private ? 'user' : 'user-friends'}"/>
-            <span>{dialog.name}</span>
-            <b class="unread" hidden="{!dialog.unread}">{renderUnread(dialog)}</b>
-          </Link>
-        {/each}
-      {/each}
-
-      <h3>{$user.email || l('Account')}</h3>
-      <Link href="/chat">
-        <Icon name="{$notifications.unread ? 'bell' : 'bell-slash'}"/>
-        <span>{l('Notifications')}</span>
-        <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
-      </Link>
-      <Link href="/add/conversation">
-        <Icon name="comment"/>
-        <span>{l('Add conversation')}</span>
-      </Link>
-      <Link href="/add/connection">
+  <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
+    <h3>{l('Conversations')}</h3>
+    {#each $user.connections.toArray() as connection}
+      <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" title="{topicOrStatus(connection, connection)}">
         <Icon name="network-wired"/>
-        <span>{l('Add connection')}</span>
+        <span>{connection.connection_id}</span>
+        <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
       </Link>
-      <Link href="/settings">
-        <Icon name="cog"/>
-        <span>{l('Settings')}</span>
-      </Link>
-      <Link href="/help">
-        <Icon name="question-circle"/>
-        <span>{l('Help')}</span>
-      </Link>
-      <Link href="/api/user/logout.html" native="{true}">
-        <Icon name="power-off"/>
-        <span>{l('Log out')}</span>
-      </Link>
-    </nav>
-  </div>
-{/if}
+      {#each connection.dialogs.toArray() as dialog}
+        <Link href="{dialog.path}" class="{dialogClassNames(connection, dialog)}" title="{topicOrStatus(connection, dialog)}">
+          <Icon name="{dialog.is_private ? 'user' : 'user-friends'}"/>
+          <span>{dialog.name}</span>
+          <b class="unread" hidden="{!dialog.unread}">{renderUnread(dialog)}</b>
+        </Link>
+      {/each}
+    {/each}
+
+    <h3>{$user.email || l('Account')}</h3>
+    <Link href="/chat">
+      <Icon name="{$notifications.unread ? 'bell' : 'bell-slash'}"/>
+      <span>{l('Notifications')}</span>
+      <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
+    </Link>
+    <Link href="/add/conversation">
+      <Icon name="comment"/>
+      <span>{l('Add conversation')}</span>
+    </Link>
+    <Link href="/add/connection">
+      <Icon name="network-wired"/>
+      <span>{l('Add connection')}</span>
+    </Link>
+    <Link href="/settings">
+      <Icon name="cog"/>
+      <span>{l('Settings')}</span>
+    </Link>
+    <Link href="/help">
+      <Icon name="question-circle"/>
+      <span>{l('Help')}</span>
+    </Link>
+    <Link href="/api/user/logout.html" native="{true}">
+      <Icon name="power-off"/>
+      <span>{l('Log out')}</span>
+    </Link>
+  </nav>
+</div>
