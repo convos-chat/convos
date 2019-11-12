@@ -84,6 +84,7 @@ export default class User extends Reactive {
 
   is(status) {
     if (Array.isArray(status)) return !!status.filter(s => this.is(s)).length;
+    if (status == 'loggedIn') return this.email && true;
     if (status == 'offline') return extractErrorMessage(this.getUserOp.err || [], 'source') == 'fetch';
     return this.getUserOp.is(status);
   }

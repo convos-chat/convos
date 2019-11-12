@@ -25,7 +25,7 @@ export function calculateCurrentPageComponent($currentUrl, $user, routingRules) 
 
     // Render matching route
     switchPageComponent(component);
-    replaceClassName('body', /(is-logged-)\S+/, $user.is('success') ? 'in' : 'out');
+    replaceClassName('body', /(is-logged-)\S+/, $user.is('loggedIn') ? 'in' : 'out');
     replaceClassName('body', /(page-)\S+/, options.name || $currentUrl.pathParts[0]);
 
     if (options.user == 'success') $user.update({lastUrl: $currentUrl.toString()});
