@@ -110,7 +110,7 @@ function toggleDetails(e) {
     on:click="{gotoDialogFromNotifications}"
     data-index="{i}">
 
-    <Icon name="pick:{message.from}" style="color:{message.color}"/>
+    <Icon name="pick:{message.from}" color="{message.color}"/>
     <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.getHM()}</b>
     {#if dialog.connection_id}
       <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}">{message.from}</a>

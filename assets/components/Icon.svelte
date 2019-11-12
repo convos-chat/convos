@@ -72,9 +72,9 @@ let className = '';
 
 export {className as class};
 export let animation = '';
+export let color = '';
 export let family = '';
 export let name;
-export let style = '';
 export let title = '';
 
 function calculateClassName(name, family) {
@@ -96,13 +96,18 @@ function calculateClassName(name, family) {
   return cn.join(' ');
 }
 
-function calculateStyle(name, family, style) {
+function calculateStyle(name, family, color) {
   const rules = [];
-  if (style) rules.push(style);
+  let colorRuleName = 'color:';
 
   const pick = name.match(/^pick:(.+)$/);
   if (pick && contributorIcons[pick[1]]) {
+    colorRuleName = 'background-color:';
     rules.push('background-image:url("' + contributorIcons[pick[1]] + '")');
+  }
+
+  if (color) {
+    rules.push(colorRuleName + color);
   }
 
   return rules.join(';');
@@ -124,7 +129,7 @@ function pickIcon(str) {
 </script>
 
 <i class="{calculateClassName(name, family)}"
-  style="{calculateStyle(name, family, style)}"
+  style="{calculateStyle(name, family, color)}"
   title="{title}"
   hidden="{!name}"
   on:click/>
