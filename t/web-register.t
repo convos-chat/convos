@@ -8,19 +8,16 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://localhost:6123/%23convos';
 $ENV{CONVOS_INVITE_CODE} = '';
 
-my $has_user_re = qr/window\.__convos\s*=.*"user":\{/;
-my $t           = t::Helper->t;
+my $t = t::Helper->t;
 
-$t->get_ok('/register')->status_is(200)->element_exists('body.is-logged-out')
-  ->content_unlike($has_user_re);
+$t->get_ok('/register')->status_is(200);
 $t->get_ok('/register?uri=' . url_escape 'irc://irc.example.com:6123/%23convos')->status_is(200)
   ->content_like(qr{"conn_url":"irc:\\/\\/irc.example.com:6123\\/%23convos"});
 
 $t->post_ok('/api/user/register', json => {email => 'superman@example.com', password => 's3cret'})
   ->status_is(200);
 
-$t->get_ok('/chat')->status_is(200)->element_exists('body.is-logged-in')
-  ->content_like($has_user_re);
+$t->get_ok('/chat')->status_is(200);
 
 my $json = decode_json($t->tx->res->text =~ m!window\.__convos\s*=\s*([^;]+)!m ? $1 : '{}');
 is $json->{apiUrl},            '/api',                  'settings.apiUrl';
