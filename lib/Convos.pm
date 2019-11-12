@@ -61,8 +61,6 @@ sub startup {
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/sw' => [format => 'js']);
-  $r->get('/user/recover/*email/:exp/:check')->to('user#recover')->name('recover');
-  $r->get('/user/recover/*email')->to('user#generate_recover_link') if $ENV{CONVOS_COMMAND_LINE};
 
   # Event channel
   $r->websocket('/events')->to('events#start')->name('events');
@@ -126,6 +124,7 @@ sub _config {
   $config->{home}    ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
   $config->{local_secret}      ||= $ENV{CONVOS_LOCAL_SECRET}      || $self->_generate_local_secret;
+  $config->{open_to_public}    ||= $ENV{CONVOS_OPEN_TO_PUBLIC}    || 0;
   $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
   $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
   $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;

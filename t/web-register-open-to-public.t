@@ -6,7 +6,7 @@ use t::Helper;
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://localhost:6123/%23convos';
-$ENV{CONVOS_INVITE_CODE} = '';
+$ENV{CONVOS_OPEN_TO_PUBLIC} = 1;
 
 my $t = t::Helper->t;
 
@@ -14,21 +14,21 @@ $t->get_ok('/register')->status_is(200);
 $t->get_ok('/register?uri=' . url_escape 'irc://irc.example.com:6123/%23convos')->status_is(200)
   ->content_like(qr{"conn_url":"irc:\\/\\/irc.example.com:6123\\/%23convos"});
 
-$t->post_ok('/api/user/register', json => {email => 'superman@example.com', password => 's3cret'})
-  ->status_is(200);
+$t->post_ok('/api/user/register',
+  json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
 
 $t->get_ok('/chat')->status_is(200);
 
 my $json = decode_json($t->tx->res->text =~ m!window\.__convos\s*=\s*([^;]+)!m ? $1 : '{}');
-is $json->{apiUrl},            '/api',                  'settings.apiUrl';
-is $json->{contact},           'mailto:root@localhost', 'settings.contact';
-is $json->{organization_name}, 'Convos',                'settings.organization_name';
-is $json->{organization_url},  'http://convos.by',      'settings.organization_url';
+is $json->{apiUrl}, '/api', 'settings.apiUrl';
+is $json->{contact}, 'mailto:root@localhost', 'settings.contact';
+is $json->{openToPublic}, true, 'openToPublic';
+is $json->{organization_name}, 'Convos',           'settings.organization_name';
+is $json->{organization_url},  'http://convos.by', 'settings.organization_url';
 ok $json->{baseUrl},           'settings.baseUrl';
 ok $json->{default_connection}, 'settings.default_connection';
 ok $json->{version},            'settings.version';
 ok $json->{wsUrl},              'settings.wsUrl';
-ok exists $json->{invite_code}, 'settings.invite_code';
 ok !$json->{user}, 'the user should not be part of the settings';
 
 my $url = url_escape $ENV{CONVOS_DEFAULT_CONNECTION};

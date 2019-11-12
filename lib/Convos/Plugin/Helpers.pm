@@ -104,6 +104,7 @@ sub _settings {
   $settings{assetVersion} = $c->asset_version;
   $settings{baseUrl}      = $c->app->core->base_url->to_string;
   $settings{loadUser}     = $c->stash('load_user') ? true : false;
+  $settings{openToPublic} = $c->app->config('open_to_public') ? true : false;
   $settings{status}       = int($c->stash('status') || 200);
   $settings{wsUrl}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
   $settings{$_}           = $extra->{$_} for keys %$extra;
@@ -111,7 +112,7 @@ sub _settings {
 }
 
 sub _unauthorized {
-  shift->render(json => E('Need to log in first.'), status => 401);
+  shift->render(json => E(shift || 'Need to log in first.'), status => 401);
 }
 
 sub _user_has_admin_rights {
