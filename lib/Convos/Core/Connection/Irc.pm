@@ -216,9 +216,9 @@ sub _fallback {
 sub _is_current_nick { lc $_[0]->_irc->nick eq lc $_[1] }
 
 sub _is_online {
-  my ($self, $dialog_id, $cb) = @_;
-  $self->{wait_for}{ison}{$dialog_id}++;
-  return $self->_proxy(write => "ISON $dialog_id", sub { $self->$cb($_[1], {}); });
+  my ($self, $nick, $cb) = @_;
+  $self->{wait_for}{ison}{lc($nick)}++;
+  return $self->_proxy(write => "ISON $nick", sub { $self->$cb($_[1], {}); });
 }
 
 sub _join_dialog {

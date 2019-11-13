@@ -158,22 +158,22 @@ $t->run(
 );
 
 $t->run(
-  [qr{ISON batgirl}, ['main', 'ison1.irc'], qr{ISON wonderwoman}, ['main', 'ison2.irc']],
+  [qr{ISON BatGirl}, ['main', 'ison1.irc'], qr{ISON wonderwoman}, ['main', 'ison2.irc']],
   sub {
     my $i           = 0;
-    my $batgirl     = $connection->dialog({frozen => 'Not connected.', name => 'batgirl'});
+    my $batgirl     = $connection->dialog({frozen => 'Not connected.', name => 'BatGirl'});
     my $someone     = $connection->dialog({frozen => 'Not connected.', name => 'someone'});
     my $superman    = $connection->dialog({frozen => 'Whatever.', name => 'superman'});
     my $wonderwoman = $connection->dialog({frozen => 'Not connected.', name => 'wonderwoman'});
     my $stop        = sub { ++$i == 5 and Mojo::IOLoop->stop };
-    $connection->send('' => '/ison batgirl',     sub { });
+    $connection->send('' => '/ison BatGirl',     sub { });
     $connection->send('' => '/ison someone',     sub { });
     $connection->send('' => '/ison superman',    sub { });
     $connection->send('' => '/ison wonderwoman', sub { });
     $connection->on(state => $stop);
     Mojo::IOLoop->start;
     is $err, '', 'cmd /ison someone';
-    is $batgirl->frozen,     '',                 'batgirl is online';
+    is $batgirl->frozen,     '',                 'BatGirl is online';
     is $someone->frozen,     'User is offline.', 'someone is offline';
     is $superman->frozen,    '',                 'superman is online';
     is $wonderwoman->frozen, 'User is offline.', 'wonderwoman is offline';
