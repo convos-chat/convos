@@ -2,7 +2,6 @@
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
-import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext} from 'svelte';
 import {redirectAfterLogin} from '../store/router';
@@ -13,8 +12,6 @@ const loginOp = user.api.operation('loginUser');
 
 $: if ($loginOp.is('success')) redirectAfterLogin(user, loginOp);
 </script>
-
-<SidebarLoggedout/>
 
 <main class="main align-content-middle">
   <h1>{l('Log in')}</h1>

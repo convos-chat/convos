@@ -1,18 +1,12 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
-import SidebarChat from '../components/SidebarChat.svelte';
 import {commands} from '../js/autocomplete';
 import {emojiAliases} from '../js/md';
 import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
-import {sidebarSettings} from '../store/router';
 
 const settings = getContext('settings');
 </script>
-
-{#if $sidebarSettings.show == 'nav' || $sidebarSettings.wideScreen}
-  <SidebarChat transition="{$sidebarSettings.transition}"/>
-{/if}
 
 <ChatHeader>
   <h1>{l('Help')}</h1><small>v{settings.version}</small>

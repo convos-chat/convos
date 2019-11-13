@@ -3,12 +3,11 @@ import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import Link from '../components/Link.svelte';
 import SelectField from '../components/form/SelectField.svelte';
-import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {debounce, extractErrorMessage} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
-import {sidebarSettings, urlToForm} from '../store/router';
+import {urlToForm} from '../store/router';
 
 const user = getContext('user');
 
@@ -46,10 +45,6 @@ function loadConversations(e) {
 
 const debouncedLoadConversations = debounce(loadConversations, 250);
 </script>
-
-{#if $sidebarSettings.show == 'nav' || $sidebarSettings.wideScreen}
-  <SidebarChat transition="{$sidebarSettings.transition}"/>
-{/if}
 
 <ChatHeader>
   <h1>{l('Add conversation')}</h1>

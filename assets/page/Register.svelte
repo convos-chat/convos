@@ -2,7 +2,6 @@
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
-import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
@@ -14,8 +13,6 @@ const registerOp = user.api.operation('registerUser');
 
 $: if ($registerOp.is('success')) redirectAfterLogin(user, registerOp);
 </script>
-
-<SidebarLoggedout/>
 
 <main class="main align-content-middle">
   <h1>{l('Create account')}</h1>

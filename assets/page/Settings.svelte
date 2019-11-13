@@ -5,11 +5,9 @@ import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SelectField from '../components/form/SelectField.svelte';
-import SidebarChat from '../components/SidebarChat.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
-import {sidebarSettings} from '../store/router';
 import {themes} from '../settings';
 
 const Notification = window.Notification || {permission: 'denied'};
@@ -47,10 +45,6 @@ function updateUserFromForm(e) {
   updateUserOp.perform(e.target);
 }
 </script>
-
-{#if $sidebarSettings.show == 'nav' || $sidebarSettings.wideScreen}
-  <SidebarChat transition="{$sidebarSettings.transition}"/>
-{/if}
 
 <ChatHeader>
   <h1>{l('Settings')}</h1>

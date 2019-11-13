@@ -1,6 +1,5 @@
 <script>
 import Link from '../components/Link.svelte';
-import SidebarLoggedout from '../components/SidebarLoggedout.svelte';
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
 import {replaceClassName} from '../js/util';
@@ -23,8 +22,6 @@ onMount(() => {
   replaceClassName('body', /(page-)\S+/, status);
 });
 </script>
-
-<SidebarLoggedout/>
 
 <main class="main align-content-middle">
   <div>

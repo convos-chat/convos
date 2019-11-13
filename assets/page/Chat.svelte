@@ -6,9 +6,8 @@ import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
-import SidebarChat from '../components/SidebarChat.svelte';
+import {activeMenu, container, currentUrl} from '../store/router';
 import {afterUpdate, getContext, onDestroy} from 'svelte';
-import {currentUrl, sidebarSettings} from '../store/router';
 import {debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 
@@ -119,12 +118,8 @@ function registerUrlHandler(connection) {
 
 <svelte:window bind:innerHeight="{containerHeight}"/>
 
-{#if $sidebarSettings.show == 'nav' || $sidebarSettings.wideScreen}
-  <SidebarChat transition="{$sidebarSettings.transition}"/>
-{/if}
-
-{#if $sidebarSettings.show == 'settings'}
-  <svelte:component this="{settingsComponent}" dialog="{dialog}" transition="{$sidebarSettings.transition}"/>
+{#if $activeMenu == 'settings'}
+  <svelte:component this="{settingsComponent}" dialog="{dialog}" transition="{{duration: 250, x: $container.wideScreen ? 0 : $container.width}}"/>
 {/if}
 
 <ChatHeader>

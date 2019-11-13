@@ -1,6 +1,8 @@
 <script>
 import Api from './js/Api';
 import hljs from './js/hljs';
+import SidebarChat from './components/SidebarChat.svelte';
+import SidebarLoggedOut from './components/SidebarLoggedOut.svelte';
 import User from './store/User';
 import {activeMenu, calculateCurrentPageComponent, container, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
 import {closestEl, loadScript, tagNameIs} from './js/util';
@@ -140,6 +142,12 @@ function onWindowFocus() {
   on:focus="{onWindowFocus}"
   on:keydown="{onGlobalKeydown}"
   bind:innerWidth="{containerWidth}"/>
+
+{#if !$user.is('loggedIn')}
+  <SidebarLoggedOut/>
+{:else if $activeMenu == 'nav' || $container.wideScreen}
+  <SidebarChat transition="{{duration: $container.wideScreen ? 0 : 250, x: $container.width}}"/>
+{/if}
 
 <svelte:component this="{$pageComponent}"/>
 
