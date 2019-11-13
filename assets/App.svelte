@@ -23,12 +23,12 @@ import Settings from './page/Settings.svelte';
 
 export const routingRules = [
   [new RegExp('.*'), Fallback, {user: 'offline'}],
-  [new RegExp('^/help'), Help, {}],
   [new RegExp('^/login'), Login, {}],
   [new RegExp('^/register'), Register, {}],
   [new RegExp('^/add/connection'), ConnectionAdd, {user: 'loggedIn'}],
   [new RegExp('^/add/conversation'), DialogAdd, {user: 'loggedIn'}],
   [new RegExp('^/chat'), Chat, {user: 'loggedIn'}],
+  [new RegExp('^/help'), Help, {user: 'loggedIn'}],
   [new RegExp('^/settings'), Settings, {user: 'loggedIn'}],
   [new RegExp('^/docs'), null, {}],
   [new RegExp('^/paste'), null, {}],
