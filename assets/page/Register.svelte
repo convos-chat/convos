@@ -1,4 +1,5 @@
 <script>
+import Button from '../components/form/Button.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
@@ -14,7 +15,10 @@ const registerOp = user.api.operation('registerUser');
 
 let formEl;
 
-$: if ($registerOp.is('success')) redirectAfterLogin(user, registerOp);
+$: if ($registerOp.is('success')) {
+  user.lastUrl(''); // Make sure the old value is forgotten
+  redirectAfterLogin(user, registerOp);
+}
 
 onMount(() => {
   if (formEl) urlToForm(formEl);
@@ -32,7 +36,7 @@ onMount(() => {
       <input type="hidden" name="exp">
       <input type="hidden" name="token">
 
-      <TextField name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}">
+      <TextField name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}" bind:value="{user.formEmail}">
         <span slot="label">{l('E-mail')}</span>
       </TextField>
 
@@ -46,8 +50,11 @@ onMount(() => {
       <p class="help">{l('Hint: Use a phrase from a book.')}</p>
 
       <div class="form-actions">
-        <button class="btn" op="{registerOp}">{l(settings.existingUser ? 'Set new password' : 'Register')}</button>
+        <Button icon="save" op="{registerOp}">{l(settings.existingUser ? 'Set new password' : 'Register')}</Button>
       </div>
+
+      <p>{@html lmd('Go to [login](/login) if you already have an account.')}</p>
+
       <OperationStatus op="{registerOp}"/>
     </form>
   {:else}

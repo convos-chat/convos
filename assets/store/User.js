@@ -5,6 +5,7 @@ import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
+import {urlFor} from './router';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -33,11 +34,15 @@ export default class User extends Reactive {
   }
 
   calculateLastUrl() {
-    if (this.is('error')) return '/login';
+    if (this.is('error')) return urlFor('/register');
     if (!this.is('success')) return null;
     if (this.lastUrl) return this.lastUrl;
-    if (this.connections.size) return '/chat';
-    return '/add/connection';
+
+    const conn = this.connections.toArray()[0];
+    if (!conn) return urlFor('/add/connection');
+
+    const dialog = conn.dialogs.toArray()[0];
+    return urlFor(dialog ? dialog.path : conn.path);
   }
 
   dialogs(cb) {
