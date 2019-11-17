@@ -157,9 +157,9 @@ function renderUnread(dialog) {
       <Icon name="network-wired"/>
       <span>{l('Add connection')}</span>
     </Link>
-    <Link href="/settings">
-      <Icon name="cog"/>
-      <span>{l('Settings')}</span>
+    <Link href="/settings/account">
+      <Icon name="user-cog"/>
+      <span>{l('Account')}</span>
     </Link>
     <Link href="/help">
       <Icon name="question-circle"/>
