@@ -5,7 +5,7 @@ import PasswordField from '../components/form/PasswordField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
-import {redirectAfterLogin} from '../store/router';
+import {redirectAfterLogin, urlToForm} from '../store/router';
 
 const emailFromParams = location.href.indexOf('email=') != -1;
 const settings = getContext('settings');
@@ -26,7 +26,7 @@ onMount(() => {
     <h1>{l('Invalid invite/recover URL')}</h1>
     <p>{l(settings.status == 410 ? 'The invite URL has expired.' : 'The invite token is invalid.')}</p>
     <p>{@html lmd('Please ask your [Convos admin](%1) for a new link.', settings.contact)}</p>
-  {:else if emailFromParams || settings.openToPublic}
+  {:else if emailFromParams || settings.openToPublic || settings.firstUser}
     <h1>{l(settings.existingUser ? 'Recover account' : 'Create account')}</h1>
     <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
       <input type="hidden" name="exp">

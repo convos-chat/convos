@@ -115,18 +115,22 @@ sub register {
   my $json = $self->_clean_json;
   my $user = $self->app->core->get_user($json->{email});
 
-  # Validate input
-  return $self->unauthorized('Convos registration is not open to public.')
-    if !$json->{token} and !$self->app->config('open_to_public');
+  # The first user can join without invite link
+  if ($self->app->core->n_users) {
 
-  # TODO: Add test
-  return $self->unauthorized('Email is taken.') if !$json->{token} and $user;
+    # Validate input
+    return $self->unauthorized('Convos registration is not open to public.')
+      if !$json->{token} and !$self->app->config('open_to_public');
 
-  return $self->unauthorized('Invalid token. You have to ask your Convos admin for a new link.')
-    if $json->{token} and !$self->_is_valid_invite_token($user, {%$json});
+    # TODO: Add test
+    return $self->unauthorized('Email is taken.') if !$json->{token} and $user;
 
-  # Update existing user
-  return $self->_update_user($json, $user) if $user;
+    return $self->unauthorized('Invalid token. You have to ask your Convos admin for a new link.')
+      if $json->{token} and !$self->_is_valid_invite_token($user, {%$json});
+
+    # Update existing user
+    return $self->_update_user($json, $user) if $user;
+  }
 
   # Register new user
   return $self->delay(
@@ -185,7 +189,7 @@ sub _add_invite_token_to_params {
 sub _clean_json {
   return {} unless my $json = shift->req->json;
 
-  for my $k (qw(email invite_code password)) {
+  for my $k (qw(email password)) {
     next unless defined $json->{$k};
     $json->{$k} = trim $json->{$k};
     delete $json->{$k} unless length $json->{$k};

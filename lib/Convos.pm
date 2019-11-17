@@ -87,6 +87,9 @@ sub startup {
     before_dispatch => sub {
       my $c = shift;
 
+      # Used when registering the first user
+      $c->settings(firstUser => true) if !$c->session('email') and !$c->app->core->n_users;
+
       # Handle /whatever/with%2Fslash/...
       my $path     = $c->req->url->path;
       my $path_str = "$path";
@@ -97,6 +100,7 @@ sub startup {
         split '/', $path->charset ? Mojo::Util::decode($path->charset, $path_str) : $path_str
       ]);
 
+      # Handle mount point like /apps/convos
       if (my $base = $c->req->headers->header('X-Request-Base')) {
         $base = Mojo::URL->new($base);
         $c->req->url->base($base);

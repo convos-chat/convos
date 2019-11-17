@@ -13,6 +13,14 @@ $t->post_ok('/api/user/invite/superman@example.com')->status_is(401)
 $t->post_ok('/api/user/invite/superman@example.com', {'X-Local-Secret' => 'abc'})->status_is(401)
   ->json_is('/errors/0/message', 'Need to log in first.');
 
+note 'first user does not need invite link';
+$t->get_ok('/register')->status_is(200)->content_like(qr{"firstUser":true});
+my %register = (email => 'first@convos.by', password => 'firstpassword');
+$t->post_ok('/api/user/register', json => \%register)->status_is(200);
+$t->get_ok('/api/user/logout.html')->status_is(302);
+
+note 'second user needs invite link';
+$t->get_ok('/register')->status_is(200)->content_unlike(qr{"firstUser"});
 $t->get_ok(
   "/register?email=superman\@example.com&exp=1572900000&token=27c4e74740ce492d24ff843f7e788baab010d24"
 )->status_is(410);
@@ -29,8 +37,6 @@ $url = Mojo::URL->new($url);
 is $url->query->param('email'), 'superman@example.com', 'register url email';
 ok $url->query->param('exp'),   'register url exp';
 ok $url->query->param('token'), 'register url token';
-
-warn sprintf "(%s)\n", $url->query->param('token');
 
 note "url=$url";
 $t->get_ok(substr $url, 0, -1)->status_is(400)->content_like(qr{"status":400})
