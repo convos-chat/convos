@@ -19,7 +19,7 @@ import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
 import Register from './page/Register.svelte';
-import Settings from './page/Settings.svelte';
+import SettingsAccount from './page/SettingsAccount.svelte';
 
 export const routingRules = [
   [new RegExp('.*'), Fallback, {user: 'offline'}],
@@ -29,7 +29,7 @@ export const routingRules = [
   [new RegExp('^/add/conversation'), DialogAdd, {user: 'loggedIn'}],
   [new RegExp('^/chat'), Chat, {user: 'loggedIn'}],
   [new RegExp('^/help'), Help, {user: 'loggedIn'}],
-  [new RegExp('^/settings'), Settings, {user: 'loggedIn'}],
+  [new RegExp('^/settings/account'), SettingsAccount, {user: 'loggedIn'}],
   [new RegExp('^/docs'), null, {}],
   [new RegExp('^/paste'), null, {}],
   [new RegExp('^/$'), null, {user: ['error', 'success'], gotoLast: true}],

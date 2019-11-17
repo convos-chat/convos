@@ -47,7 +47,7 @@ function updateUserFromForm(e) {
 </script>
 
 <ChatHeader>
-  <h1>{l('Settings')}</h1>
+  <h1>{l('Account')}</h1>
 </ChatHeader>
 
 <main class="main">
