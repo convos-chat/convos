@@ -70,7 +70,7 @@ $user->roles([])->save;
 undef $core;    # Fresh start
 $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 $core->start;
-s_deeply(
+is_deeply(
   {map { ($_->email => $_->roles) } @{$core->users}},
   {
     'bbb@bbb.com'        => ['admin'],
