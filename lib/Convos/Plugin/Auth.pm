@@ -36,7 +36,7 @@ sub _register {
   my $user;
 
   if ($core->get_user($args)) {
-    return $c->$cb('Email is taken.', '/body/email', undef);
+    return $c->$cb('Email is taken.', undef);
   }
 
   $c->delay(

@@ -28,7 +28,7 @@ is_deeply(
     email              => 'jhthorsen@cpan.org',
     highlight_keywords => [],
     registered         => Mojo::Date->new($main::time)->to_datetime,
-    roles              => [],
+    roles              => ['admin'],
     unread             => 0
   },
   'TO_JSON'

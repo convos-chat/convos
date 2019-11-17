@@ -46,7 +46,7 @@ $t->get_ok($url)->status_is(200)->content_like(qr{"existingUser":false})
   ->content_like(qr{"status":200})->content_like(qr{"openToPublic":false})
   ->content_unlike(qr{"password"}, 'password is not part of window.__convos');
 
-my %register = (email => $url->query->param('email'), password => 'tooshort0');
+%register = (email => $url->query->param('email'), password => 'tooshort0');
 $t->post_ok('/api/user/register', json => \%register)->status_is(400)
   ->json_is('/errors/0/path', '/body/password');
 

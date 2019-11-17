@@ -138,6 +138,7 @@ sub register {
     sub {
       (my ($delay, $err), $user) = @_;
       return $self->render(openapi => E($err), status => 400) if $err;
+      $user->role(give => 'admin') if $self->app->core->n_users == 1;
       $self->session(email => $user->email);
       $self->backend->connection_create($self->config('default_connection'), $delay->begin);
     },
