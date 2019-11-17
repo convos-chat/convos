@@ -228,8 +228,12 @@ sub users {
       my $settings = $home->child($email, 'user.json');
       next unless $email =~ /.\@./ and -e $settings;    # poor mans regex
       push @users, Mojo::JSON::decode_json($settings->slurp);
+      $users[-1]{registered} ||= Mojo::Date->new($settings->stat->mtime)->to_datetime;
     }
   }
+
+  # Return users in a predictable order
+  @users = sort { $a->{registered} cmp $b->{registered} || $a->{email} cmp $b->{email} } @users;
 
   return next_tick $self, $cb, '', \@users if $cb;
   return \@users;

@@ -12,7 +12,7 @@ no warnings qw(once redefine);
 
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 
-# test trim and lower case
+note 'trim and lower case';
 my $user          = $core->user({email => ' JhtHorsen@cpan.org  '});
 my $settings_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'user.json');
 is $user->email, 'jhthorsen@cpan.org', 'email';
@@ -34,6 +34,7 @@ is_deeply(
   'TO_JSON'
 );
 
+note 'password';
 eval { $user->set_password('') };
 like $@, qr{Usage:.*plain}, 'set_password() require plain string';
 ok !$user->password, 'no password';
@@ -46,9 +47,21 @@ ok $user->validate_password('s3cret'), 'validate_password';
 $user->save;
 is $core->get_user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
 
-
+note 'unread';
 $user->{unread} = 3;
 $user->save;
 is $core->get_user('jhthorsen@cpan.org')->unread, 3, 'Unseen is persisted correctly';
+
+note 'users order';
+$main::time++;
+$core->user({email => 'aaa@bbb.com'})->save;
+$core->user({email => 'bbb@bbb.com', registered => '1983-02-24T01:23:00Z'})->save;
+$core->user({email => 'ccc@bbb.com'})->save;
+
+is_deeply(
+  [map { $_->{email} } @{$core->backend->users}],
+  [qw(bbb@bbb.com jhthorsen@cpan.org aaa@bbb.com ccc@bbb.com)],
+  'got users in the right order',
+);
 
 done_testing;

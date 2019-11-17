@@ -17,8 +17,8 @@ use constant BCRYPT_BASE_SETTINGS => do {
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 has highlight_keywords => sub { +[] };
-sub password   { shift->{password} ||= '' }
-sub registered { shift->{registered} }
+sub password   { shift->{password}   ||= '' }
+sub registered { shift->{registered} ||= Mojo::Date->new }
 has roles  => sub { +[] };
 has unread => sub {0};
 
