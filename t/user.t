@@ -28,7 +28,7 @@ is_deeply(
     email              => 'jhthorsen@cpan.org',
     highlight_keywords => [],
     registered         => Mojo::Date->new($main::time)->to_datetime,
-    roles              => ['admin'],
+    roles              => [],
     unread             => 0
   },
   'TO_JSON'
@@ -62,6 +62,23 @@ is_deeply(
   [map { $_->{email} } @{$core->backend->users}],
   [qw(bbb@bbb.com jhthorsen@cpan.org aaa@bbb.com ccc@bbb.com)],
   'got users in the right order',
+);
+
+note 'first registered user gets admin - bbb@bbb.com (back compat)';
+$ENV{CONVOS_SKIP_CONNECT} = 1;
+$user->roles([])->save;
+undef $core;    # Fresh start
+$core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
+$core->start;
+s_deeply(
+  {map { ($_->email => $_->roles) } @{$core->users}},
+  {
+    'bbb@bbb.com'        => ['admin'],
+    'jhthorsen@cpan.org' => [],
+    'aaa@bbb.com'        => [],
+    'ccc@bbb.com'        => [],
+  },
+  'first registered user gets to be admin'
 );
 
 done_testing;

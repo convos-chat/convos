@@ -55,19 +55,24 @@ sub new {
 
 sub start {
   my $self = shift;
-
   return $self if !@_ and $self->{started}++;
 
   # Want this method to be blocking to make sure everything is ready
   # before processing web requests.
+  my ($first_user, $has_admin) = (undef, 0);
   for (@{$self->backend->users}) {
     my $user = $self->user($_);
+    $first_user ||= $user;
+    $has_admin++ if $user->role(has => 'admin');
     for (@{$self->backend->connections($user)}) {
       my $connection = $user->connection($_);
       $self->connect($connection)
         if !$ENV{CONVOS_SKIP_CONNECT} and $connection->wanted_state eq 'connected';
     }
   }
+
+  # Upgrade the first registered user (back compat)
+  $first_user->role(give => 'admin') if $first_user and !$has_admin;
 
   Scalar::Util::weaken($self);
   my $delay = $ENV{CONVOS_CONNECT_DELAY} || 3;
