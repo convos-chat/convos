@@ -16,7 +16,7 @@ is $convos->config->{organization_name}, 'Convos',           'default organizati
 is $convos->config->{organization_url},  'http://convos.by', 'default organization_url';
 is $convos->config->{hypnotoad}{pid_file}, undef, 'default pid_file';
 ok !$convos->sessions->secure, 'insecure sessions';
-like $convos->config->{invite_code}, qr/^\w{32}$/, 'generated invite_code';
+like $convos->config->{local_secret}, qr/^\w{32}$/, 'generated local_secret';
 like $secret, qr/^[a-z0-9]{40}$/, 'default secrets';
 
 is(Convos->new->secrets->[0], $secret, 'reusing generated secret');
@@ -57,7 +57,7 @@ $i++;
 $convos = Convos->new;
 is $convos->config->{organization_name}, 'Team JSON',             'json config name';
 is $convos->config->{contact},           'mailto:json@localhost', 'json config contact';
-is $convos->config->{invite_code},       'json_example',          'invite_code from config file';
+is $convos->config->{local_secret},      'json_example',          'local_secret from config file';
 is_deeply($convos->secrets, [qw(signed-json-secret)], 'config secrets');
 is $plugins[10], 'Plugin3', 'Plugin3';
 

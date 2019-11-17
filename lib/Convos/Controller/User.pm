@@ -3,10 +3,11 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Convos::Util 'E';
 use Mojo::DOM;
-use Mojo::Util 'trim';
+use Mojo::JSON qw(false true);
+use Mojo::Util qw(hmac_sha1_sum trim);
 use Socket qw(inet_aton AF_INET);
 
-use constant RECOVERY_LINK_VALID_FOR => $ENV{CONVOS_RECOVERY_LINK_VALID_FOR} || 3600 * 6;
+use constant RECOVERY_LINK_VALID_FOR => $ENV{CONVOS_RECOVERY_LINK_VALID_FOR} || 3600 * 12;
 
 sub delete {
   my $self = shift->openapi->valid_input or return;
@@ -45,13 +46,25 @@ sub docs {
   $self->render('user/docs', %sections);
 }
 
-sub generate_recover_link {
-  my $self  = shift;
-  my $email = $self->stash('email');
-  my $exp   = time - int(rand 3600) + RECOVERY_LINK_VALID_FOR + 1800;
-  my $check = Mojo::Util::hmac_sha1_sum("$email/$exp", $self->app->secrets->[0]);
+sub generate_invite_link {
+  my $self = shift->openapi->valid_input or return;
+  return $self->unauthorized unless my $admin_from = $self->user_has_admin_rights;
 
-  $self->render(text => $self->url_for(recover => {check => $check, exp => $exp}));
+  my $exp      = time + RECOVERY_LINK_VALID_FOR;
+  my $user     = $self->app->core->get_user($self->stash('email'));
+  my $password = $user ? $user->password : $self->app->config('local_secret');
+
+  my $params
+    = $self->_add_invite_token_to_params(
+    {email => $self->stash('email'), exp => $exp, password => $password},
+    $self->app->secrets->[0]);
+
+  my $invite_url = $self->url_for('register');
+  $invite_url->query->param($_ => $params->{$_}) for qw(email exp token);
+  $invite_url = $invite_url->to_abs->to_string;
+
+  return $self->render(text    => "---\nInvite URL:\n  $invite_url\n") if $admin_from eq 'local';
+  return $self->render(openapi => {url => $invite_url});
 }
 
 sub get {
@@ -97,39 +110,32 @@ sub logout {
   );
 }
 
-sub recover {
-  my $self  = shift;
-  my $email = $self->stash('email');
-  my $exp   = $self->stash('exp');
-  my $redirect_url;
-
-  # expired
-  return $self->render('index', status => 410) if $exp < time;
-
-  for my $secret (@{$self->app->secrets}) {
-    my $check = Mojo::Util::hmac_sha1_sum("$email/$exp", $secret);
-    next if $check ne $self->stash('check');
-    $redirect_url = $self->url_for('index');
-    last;
-  }
-
-  return $self->render('index', status => 400) unless $redirect_url;
-
-  $self->flash(main => '#profile');
-  $self->session(email => $email)->redirect_to($redirect_url);
-}
-
 sub register {
   my $self = shift->openapi->valid_input or return;
-  my $user;
+  my $json = $self->_clean_json;
+  my $user = $self->app->core->get_user($json->{email});
 
-  $self->delay(
-    sub { $self->auth->register($self->_clean_json, shift->begin) },
+  # Validate input
+  return $self->unauthorized('Convos registration is not open to public.')
+    if !$json->{token} and !$self->app->config('open_to_public');
+
+  # TODO: Add test
+  return $self->unauthorized('Email is taken.') if !$json->{token} and $user;
+
+  return $self->unauthorized('Invalid token. You have to ask your Convos admin for a new link.')
+    if $json->{token} and !$self->_is_valid_invite_token($user, {%$json});
+
+  # Update existing user
+  return $self->_update_user($json, $user) if $user;
+
+  # Register new user
+  return $self->delay(
+    sub { $self->auth->register($json, shift->begin) },
     sub {
       (my ($delay, $err), $user) = @_;
       return $self->render(openapi => E($err), status => 400) if $err;
       $self->session(email => $user->email);
-      $self->backend->connection_create($self->config('default_connection'), shift->begin);
+      $self->backend->connection_create($self->config('default_connection'), $delay->begin);
     },
     sub {
       my ($delay, $err, $connection) = @_;
@@ -148,6 +154,7 @@ sub register_html {
     $self->settings(conn_url => $conn_url);
   }
 
+  $self->_register_html_handle_invite_url;
   $self->render('index');
 }
 
@@ -165,19 +172,14 @@ sub update {
   # TODO: Add support for changing email
 
   return $self->render(openapi => $user) unless %$json;
-  return $self->delay(
-    sub {
-      my ($delay) = @_;
-      $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
-      $user->set_password($json->{password})                 if $json->{password};
-      $user->save($delay->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->render(openapi => $user);
-    },
-  );
+  return $self->_update_user($json, $user);
+}
+
+sub _add_invite_token_to_params {
+  my ($self, $params, $secret) = @_;
+  $params->{token}
+    = hmac_sha1_sum join(':', map { $_ => $params->{$_} // '' } qw(email exp password)), $secret;
+  return $params;
 }
 
 sub _clean_json {
@@ -199,13 +201,13 @@ sub _existing_connection {
   my ($self, $url, $user) = @_;
   return undef unless my $host = $url->host;
 
-  my @hosts;
-  push @hosts, sub {$host};
-  push @hosts, sub { my $addr = inet_aton $host; $addr && gethostbyaddr $addr, AF_INET };
+  my @hosts_cb;
+  push @hosts_cb, sub {$host};
+  push @hosts_cb, sub { my $addr = inet_aton $host; $addr && gethostbyaddr $addr, AF_INET };
 
-  for my $host (@hosts) {
+  for my $host_cb (@hosts_cb) {
     for my $conn (@{$user->connections}) {
-      return unless my $url_host = $host->();
+      return unless my $url_host = $host_cb->();
       return $conn if index($conn->url->host, $url_host) >= 0;
     }
   }
@@ -217,6 +219,18 @@ sub _existing_dialog {
   my ($self, $url, $conn) = @_;
   return undef unless my $dialog_name = $url->path->[0];
   return $conn->get_dialog(lc $dialog_name);
+}
+
+sub _is_valid_invite_token {
+  my ($self, $user, $params) = @_;
+
+  $params->{password} = $user ? $user->password : $self->app->config('local_secret');
+  for my $secret (@{$self->app->secrets}) {
+    my $generated = $self->_add_invite_token_to_params({%$params}, $secret);
+    return 1 if $generated->{token} eq $params->{token};
+  }
+
+  return 0;
 }
 
 sub _register_html_conn_url_redirect {
@@ -249,6 +263,40 @@ sub _register_html_conn_url_redirect {
   return;
 }
 
+sub _register_html_handle_invite_url {
+  my $self = shift;
+
+  my $params
+    = {token => $self->param('token'), email => $self->param('email'), exp => $self->param('exp')};
+
+  return unless $params->{token} and $params->{email} and $params->{exp};
+  return $self->stash(status => 410) if $params->{exp} =~ m!\D! or $params->{exp} < time;
+
+  my $user = $self->app->core->get_user($params->{email});
+  return $self->stash(status => 400) unless $self->_is_valid_invite_token($user, $params);
+
+  $self->settings(existingUser => $user ? true : false);
+}
+
+sub _update_user {
+  my ($self, $json, $user) = @_;
+
+  $self->delay(
+    sub {
+      my ($delay) = @_;
+      $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
+      $user->set_password($json->{password})                 if $json->{password};
+      $user->save($delay->begin);
+    },
+    sub {
+      my ($delay, $err) = @_;
+      die $err if $err;
+      $self->session(email => $user->email);
+      $self->render(openapi => $user);
+    },
+  );
+}
+
 1;
 
 =encoding utf8
@@ -272,9 +320,9 @@ See L<Convos::Manual::API/deleteUser>.
 
 Will render docs built with C<pnpm run generate-docs>.
 
-=head2 generate_recover_link
+=head2 generate_invite_link
 
-Used to generate a recover link when running Convos from the command line.
+See L<Convos::Manual::API/inviteUser>.
 
 =head2 get
 

@@ -33,14 +33,12 @@ $t->text_like('noscript p', qr{javascript}i);
 $t->text_is('a[href="https://convos.by/doc"]', 'Documentation');
 
 $t->text_like('script', qr{"apiUrl":"\\/api"}m,      'apiUrl')
-  ->text_like('script', qr{"wsUrl":"ws:.*/events"}m, 'wsUrl')
-  ->text_like('script', qr{"invite_code":\s*true}m,  'invite_code');
+  ->text_like('script', qr{"wsUrl":"ws:.*/events"}m, 'wsUrl');
 
 unless ($ENV{TRAVIS_BUILD_ID}) {
   $t->element_exists('link[rel="stylesheet"]')->element_exists('script');
 }
 
-$ENV{CONVOS_INVITE_CODE}       = '';
 $ENV{CONVOS_ORGANIZATION_NAME} = 'Example';
 $ENV{CONVOS_ORGANIZATION_URL}  = 'http://example.com';
 
@@ -51,8 +49,6 @@ $t->content_like(qr{window.__convos\s*=})->text_is('title', 'Convos for Example'
   ->element_exists(qq(meta[property="og:title"][content="Convos for Example"]));
 
 $t->text_is('a[href="http://example.com"]', 'Example');
-
-$t->text_like('script', qr{"invite_code":\s*false}m, 'invite_code');
 
 SKIP: {
   skip 'TEST_ONLINE=1 must be set', 2 unless $ENV{TEST_ONLINE} or $ENV{TRAVIS_BUILD_ID};

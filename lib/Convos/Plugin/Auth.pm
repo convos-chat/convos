@@ -7,22 +7,9 @@ use Mojo::Util;
 sub register {
   my ($self, $app, $config) = @_;
 
-  $self->{invite_code} = $config->{invite_code}
-    // ($ENV{CONVOS_INVITE_CODE} //= $self->_generate_invite_code($app));
-  $app->config->{settings}{invite_code} = $self->{invite_code} ? true : false;
-
   $app->helper('auth.login'    => \&_login);
   $app->helper('auth.logout'   => \&_logout);
   $app->helper('auth.register' => sub { $self->_register(@_) });
-}
-
-sub _generate_invite_code {
-  my ($self, $app) = @_;
-  my $code = Mojo::Util::md5_sum(join ':', $<, $(, $^X, $0);
-  $app->log->info(
-    qq(CONVOS_INVITE_CODE="$code" # https://convos.by/doc/config.html#convos_invite_code));
-  $app->config(invite_code => $code);
-  return $code;
 }
 
 sub _login {
@@ -48,11 +35,6 @@ sub _register {
   my $core = $c->app->core;
   my $user;
 
-  if ($self->{invite_code}) {
-    if (!$args->{invite_code} or $args->{invite_code} ne $self->{invite_code}) {
-      return $c->$cb('Invalid invite code.', undef);
-    }
-  }
   if ($core->get_user($args)) {
     return $c->$cb('Email is taken.', '/body/email', undef);
   }
@@ -108,7 +90,7 @@ Used to log out a user.
   $c->auth->register(\%credentials, sub { my ($c, $err, $user) = @_; });
 
 Used to register a user. C<%credentials> normally contains an C<email> and
-C<password>. There is also EXPERIMENTAL support for an C<invite_code>.
+C<password>.
 
 =head1 METHODS
 
