@@ -16,40 +16,40 @@ sub E {
 }
 
 sub has_many {
-  my ($accessor, $many_class, $constructor) = @_;
+  my ($plural_accessor, $many_class, $constructor) = @_;
   my $class = caller;
 
-  my $setter = $accessor;
-  $setter =~ s!s$!!;
+  my $singular_accessor = $plural_accessor;
+  $singular_accessor =~ s!s$!!;
 
-  my $getter  = "get_$setter";
-  my $remover = "remove_$setter";
-
-  warn "[Convos::Util] Adding $accessor(), $setter() and $getter() to $class\n" if DEBUG >= 2;
-
-  monkey_patch $class => $accessor => sub {
-    return [values %{$_[0]->{$accessor} || {}}];
+  monkey_patch $class => $plural_accessor => sub {
+    return [values %{$_[0]->{$plural_accessor} || {}}];
   };
 
-  monkey_patch $class => $setter => sub {
+  monkey_patch $class => "n_$plural_accessor" => sub {
+    return int values %{$_[0]->{$plural_accessor} || {}};
+  };
+
+  monkey_patch $class => $singular_accessor => sub {
     my ($self, $attrs) = @_;
     my $id  = $many_class->id($attrs);
-    my $obj = $self->{$accessor}{$id} || $self->$constructor($attrs);
-    map { $obj->{$_} = $attrs->{$_} } keys %$attrs if $self->{$accessor}{$id};
-    $self->{$accessor}{$id} = $obj;
+    my $obj = $self->{$plural_accessor}{$id} || $self->$constructor($attrs);
+    map { $obj->{$_} = $attrs->{$_} } keys %$attrs if $self->{$plural_accessor}{$id};
+    $self->{$plural_accessor}{$id} = $obj;
   };
 
-  monkey_patch $class => $getter => sub {
+  monkey_patch $class => "get_$singular_accessor" => sub {
     my ($self, $attrs) = @_;
     my $id = ref $attrs ? $attrs->{id} || $many_class->id($attrs) : $attrs;
     Carp::confess("Could not build 'id' for $class") unless defined $id;
-    return $self->{$accessor}{lc($id)};
+    return $self->{$plural_accessor}{lc($id)};
   };
 
+  my $remover = "remove_$singular_accessor";
   $class->can($remover) or monkey_patch $class => $remover => sub {
     my ($self, $attrs) = @_;
     my $id = lc(ref $attrs ? $attrs->{id} || $many_class->id($attrs) : $attrs);
-    return delete $self->{$accessor}{$id};
+    return delete $self->{$plural_accessor}{$id};
   };
 }
 
