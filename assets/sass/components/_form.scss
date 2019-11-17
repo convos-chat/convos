@@ -117,6 +117,7 @@ textarea {
   text-decoration: none;
   padding: 0.5em 1em;
   height: 2.2em;
+  line-height: 1.2em;
   border: var(--button-border);
   border-radius: var(--input-border-radius);
   box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.1);
@@ -146,6 +147,13 @@ textarea {
 
   &.for-trash {
     background: var(--button-danger-bg);
+  }
+
+  &.is-hallow {
+    background: transparent;
+    color: var(--link-color);
+    border: var(--input-border);
+    box-shadow: none;
   }
 
   .fas {
