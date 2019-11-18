@@ -15,7 +15,7 @@
     <meta property="og:type" content="object">
     <meta property="og:description" content="<%= $description %>">
     <meta property="og:image" content="https://convos.by/public/screenshots/2016-09-01-participants.png">
-    <meta property="og:site_name" content="<%= config 'organization_name' %>">
+    <meta property="og:site_name" content="<%= settings 'organization_name' %>">
     <meta property="og:title" content="<%= title %>">
     <meta property="og:url" content="<%= $c->req->url->to_abs %>">
     <noscript><style>.has-js { display: none; }</style></noscript>

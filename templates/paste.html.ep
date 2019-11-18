@@ -1,5 +1,5 @@
 % layout 'convos';
-% title config('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . config('organization_name');
+% title settings('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . settings('organization_name');
 
 %= include 'partial/sidebar', js_remove => 0
 

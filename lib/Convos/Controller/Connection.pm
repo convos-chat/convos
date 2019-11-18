@@ -11,8 +11,8 @@ sub create {
   my $json = $self->req->json;
   my $url  = Mojo::URL->new($json->{url} || '');
 
-  if ($self->app->config('forced_connection')) {
-    my $default_connection = $self->app->config('default_connection');
+  if ($self->settings('forced_connection')) {
+    my $default_connection = Mojo::URL->new($self->settings('default_connection'));
     return $self->render(openapi => E('Will only accept forced connection URL.'), status => 400)
       if $url->host_port ne $default_connection->host_port;
   }
@@ -86,7 +86,7 @@ sub update {
   my $url = Mojo::URL->new($json->{url} || '');
   $url = $connection->url unless $url->host;
 
-  if (!$self->app->config('forced_connection')) {
+  if (!$self->settings('forced_connection')) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
     $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnected';
     $connection->url($url);

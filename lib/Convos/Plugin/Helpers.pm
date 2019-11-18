@@ -88,27 +88,40 @@ sub _backend_connection_create {
 }
 
 sub _settings {
-  my $c = shift;
+  my $c        = shift;
+  my $settings = $c->stash->{'convos.settings'} ||= _setup_settings($c);
 
   # Set
   if (@_ == 2) {
-    $c->stash->{'convos.settings'}{$_[0]} = $_[1];
+    $settings->{$_[0]} = $_[1];
     return $c;
   }
 
-  # Get
+  # Get single key
+  if (@_ == 1) {
+    my $key = shift;
+    return exists $settings->{$key} ? $settings->{$key} : $c->app->core->settings->$key;
+  }
+
+  # Get all public settings
+  $settings->{load_user} = $c->stash('load_user') ? true : false;
+  $settings->{status}    = int($c->stash('status') || 200);
+
+  return $settings;
+}
+
+sub _setup_settings {
+  my $c        = shift;
   my $app      = $c->app;
-  my $extra    = $c->stash('convos.settings') || {};
-  my %settings = %{$c->app->config('settings') || {}};
-  $settings{apiUrl}       = $c->url_for('api');
-  $settings{assetVersion} = $c->asset_version;
-  $settings{baseUrl}      = $c->app->core->base_url->to_string;
-  $settings{loadUser}     = $c->stash('load_user') ? true : false;
-  $settings{openToPublic} = $c->app->config('open_to_public') ? true : false;
-  $settings{status}       = int($c->stash('status') || 200);
-  $settings{wsUrl}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
-  $settings{$_}           = $extra->{$_} for keys %$extra;
-  return \%settings;
+  my $settings = $c->app->core->settings->TO_JSON;
+
+  $settings->{api_url}       = $c->url_for('api');
+  $settings->{asset_version} = $c->asset_version;
+  $settings->{base_url}      = $app->core->base_url->to_string;
+  $settings->{version}       = $app->VERSION;
+  $settings->{ws_url}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+
+  return $settings;
 }
 
 sub _unauthorized {
@@ -127,7 +140,7 @@ sub _user_has_admin_rights {
 
   # Special request for forgotten password
   my $remote_address = $c->tx->original_remote_address;
-  my $valid          = $x_local_secret eq $c->app->config->{local_secret} ? 1 : 0;
+  my $valid          = $x_local_secret eq $c->settings('local_secret') ? 1 : 0;
   my $valid_str      = $valid ? 'Valid' : 'Invalid';
   $c->app->log->warn("$valid_str X-Local-Secret from $remote_address (@LOCAL_ADMIN_REMOTE_ADDR)");
   return +($valid && grep { $remote_address eq $_ } @LOCAL_ADMIN_REMOTE_ADDR) ? 'local' : '';

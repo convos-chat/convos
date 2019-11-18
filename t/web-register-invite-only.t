@@ -14,13 +14,13 @@ $t->post_ok('/api/user/invite/superman@example.com', {'X-Local-Secret' => 'abc'}
   ->json_is('/errors/0/message', 'Need to log in first.');
 
 note 'first user does not need invite link';
-$t->get_ok('/register')->status_is(200)->content_like(qr{"firstUser":true});
+$t->get_ok('/register')->status_is(200)->content_like(qr{"first_user":true});
 my %register = (email => 'first@convos.by', password => 'firstpassword');
 $t->post_ok('/api/user/register', json => \%register)->status_is(200);
 $t->get_ok('/api/user/logout.html')->status_is(302);
 
 note 'second user needs invite link';
-$t->get_ok('/register')->status_is(200)->content_unlike(qr{"firstUser"});
+$t->get_ok('/register')->status_is(200)->content_unlike(qr{"first_user"});
 $t->get_ok(
   "/register?email=superman\@example.com&exp=1572900000&token=27c4e74740ce492d24ff843f7e788baab010d24"
 )->status_is(410);
@@ -30,7 +30,7 @@ $t->get_ok(
   ->status_is(410);
 
 $t->post_ok('/api/user/invite/superman@example.com',
-  {'X-Local-Secret' => $t->app->config('local_secret')})->status_is(200);
+  {'X-Local-Secret' => $t->app->settings('local_secret')})->status_is(200);
 my $url = $t->tx->res->text;
 $url = $url =~ s!(http.*)!$1! ? $1 : 'http://invalid';
 $url = Mojo::URL->new($url);
@@ -42,8 +42,8 @@ note "url=$url";
 $t->get_ok(substr $url, 0, -1)->status_is(400)->content_like(qr{"status":400})
   ->content_unlike(qr{"password"}, 'password is not part of window.__convos');
 
-$t->get_ok($url)->status_is(200)->content_like(qr{"existingUser":false})
-  ->content_like(qr{"status":200})->content_like(qr{"openToPublic":false})
+$t->get_ok($url)->status_is(200)->content_like(qr{"existing_user":false})
+  ->content_like(qr{"status":200})->content_like(qr{"open_to_public":false})
   ->content_unlike(qr{"password"}, 'password is not part of window.__convos');
 
 %register = (email => $url->query->param('email'), password => 'tooshort0');

@@ -2,6 +2,7 @@ package Convos::Core;
 use Mojo::Base -base;
 
 use Convos::Core::Backend;
+use Convos::Core::Settings;
 use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
 use Mojo::File;
@@ -12,6 +13,13 @@ use Mojolicious::Plugins;
 has backend  => sub { Convos::Core::Backend->new };
 has base_url => sub { Mojo::URL->new };
 has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
+
+has settings => sub {
+  my $self     = shift;
+  my $settings = Convos::Core::Settings->new;
+  Scalar::Util::weaken($settings->{core} = $self);
+  return $settings;
+};
 
 sub connect {
   my ($self, $connection, $cb) = @_;

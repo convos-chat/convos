@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col s12 about">
-  % if (config('organization_url') ne 'http://convos.by') {
-    <a href="<%= config('organization_url') %>"><%= config('organization_name') %></a> -
+  % if (settings('organization_url') ne 'http://convos.by') {
+    <a href="<%= settings('organization_url') %>"><%= settings('organization_name') %></a> -
   % }
     <a href="http://convos.by">About</a> -
     <a href="http://convos.by/doc">Documentation</a> -

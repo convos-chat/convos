@@ -5,7 +5,7 @@ import {replaceClassName} from '../js/util';
 
 const settings = getContext('settings');
 const user = getContext('user');
-const loadingStatus = settings.loadUser ? ['loading', 'pending'] : ['loading'];
+const loadingStatus = settings.load_user ? ['loading', 'pending'] : ['loading'];
 
 const messages = {
   'loading': 'Loading',
