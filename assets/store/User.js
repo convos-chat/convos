@@ -19,6 +19,7 @@ export default class User extends Reactive {
     this.prop('ro', 'events', this._createEvents(params));
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
     this.prop('ro', 'notifications', new Notifications({api, events: this.events}));
+    this.prop('ro', 'roles', new Set());
     this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('rw', 'highlight_keywords', []);
@@ -167,9 +168,11 @@ export default class User extends Reactive {
 
   _parseGetUser(body) {
     this.connections.clear();
+    this.roles.clear();
     this.notifications.update({unread: body.unread || 0});
     (body.connections || []).forEach(conn => this.ensureDialog(conn));
     (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));
-    this.update({highlight_keywords: body.highlight_keywords}); // Force update on error
+    (body.roles || []).forEach(role => this.roles.add(role));
+    this.update({highlight_keywords: body.highlight_keywords});
   }
 }

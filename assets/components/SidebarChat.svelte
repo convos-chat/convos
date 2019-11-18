@@ -165,6 +165,12 @@ function renderUnread(dialog) {
       <Icon name="question-circle"/>
       <span>{l('Help')}</span>
     </Link>
+    {#if $user.roles.has('admin')}
+      <Link href="/settings">
+        <Icon name="tools"/>
+        <span>{l('Settings')}</span>
+      </Link>
+    {/if}
     <Link href="/api/user/logout.html" native="{true}">
       <Icon name="power-off"/>
       <span>{l('Log out')}</span>

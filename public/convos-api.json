@@ -407,6 +407,48 @@
         }
       }
     },
+    "/settings": {
+      "get": {
+        "tags": [ "settings" ],
+        "summary": "Get settings for Convos.",
+        "operationId": "getSettings",
+        "x-mojo-to": "admin#settings_get",
+        "responses": {
+          "200": {
+            "description": "ServerSettings.",
+            "schema": { "$ref": "#/definitions/ServerSettings" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      },
+      "post": {
+        "tags": [ "settings" ],
+        "summary": "Update settings for Convos.",
+        "operationId": "updateSettings",
+        "x-mojo-to": "admin#settings_update",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ServerSettings" }
+          }
+        ],
+        "responses": {
+            "200": {
+            "description": "User profile.",
+            "schema": { "$ref": "#/definitions/ServerSettings" }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/user": {
       "delete": {
         "tags": [ "user" ],
@@ -647,6 +689,15 @@
         "from": { "type": "string", "description": "Identifier for who sent this message" },
         "message": { "type": "string", "description": "The message" },
         "ts": { "type": "string", "format": "date-time", "description": "Example: 2015-09-06T13:49:37Z" }
+      }
+    },
+    "ServerSettings": {
+      "properties": {
+        "contact": { "type": "string", "minLength": 3 },
+        "default_connection": { "type": "string", "format": "uri" },
+        "open_to_public": { "type": "boolean" },
+        "organization_name": { "type": "string", "minLength": 2 },
+        "organization_url": { "type": "string", "format": "uri" }
       }
     },
     "Success": {
