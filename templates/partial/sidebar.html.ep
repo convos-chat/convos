@@ -5,8 +5,8 @@
   <nav class="sidebar-left__nav">
     <a href="/login"><%=l 'Login' %></a>
     <a href="/register"><%=l 'Create account' %></a>
-    % if (config('organization_url') ne 'http://convos.by') {
-      <a href="<%= config('organization_url') %>"><%= config('organization_name') %></a> -
+    % if (settings('organization_url') ne 'http://convos.by') {
+      <a href="<%= settings('organization_url') %>"><%= settings('organization_name') %></a> -
     % }
     <a href="https://convos.by/doc"><%=l 'Documentation' %></a>
     <a href="https://github.com/Nordaaker/convos"><%=l 'GitHub' %></a>

@@ -10,7 +10,7 @@ $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 $t->get_ok('/api/user')->status_is(401);
 
 $t->post_ok('/api/user/invite/superman@example.com',
-  {'X-Local-Secret' => $t->app->config('local_secret')})->status_is(200);
+  {'X-Local-Secret' => $t->app->settings('local_secret')})->status_is(200);
 
 my $url = $t->tx->res->text;
 $url = $url =~ s!(http.*)!$1! ? $1 : 'http://invalid';
@@ -18,7 +18,7 @@ $url = Mojo::URL->new($url);
 
 $t->get_ok(substr $url, 0, -1)->status_is(400)->content_like(qr{"status":400});
 
-$t->get_ok($url)->status_is(200)->content_like(qr{"existingUser":true})
+$t->get_ok($url)->status_is(200)->content_like(qr{"existing_user":true})
   ->content_like(qr{"status":200});
 
 my %register = (email => $url->query->param('email'), password => 'tooshort0');

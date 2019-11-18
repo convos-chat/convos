@@ -30,8 +30,8 @@ onMount(() => {
     <h1>{l('Invalid invite/recover URL')}</h1>
     <p>{l(settings.status == 410 ? 'The invite URL has expired.' : 'The invite token is invalid.')}</p>
     <p>{@html lmd('Please ask your [Convos admin](%1) for a new link.', settings.contact)}</p>
-  {:else if emailFromParams || settings.openToPublic || settings.firstUser}
-    <h1>{l(settings.existingUser ? 'Recover account' : 'Create account')}</h1>
+  {:else if emailFromParams || settings.open_to_public || settings.first_user}
+    <h1>{l(settings.existing_user ? 'Recover account' : 'Create account')}</h1>
     <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
       <input type="hidden" name="exp">
       <input type="hidden" name="token">
@@ -54,7 +54,7 @@ onMount(() => {
       </PasswordField>
 
       <div class="form-actions">
-        <Button icon="save" op="{registerOp}">{l(settings.existingUser ? 'Set new password' : 'Register')}</Button>
+        <Button icon="save" op="{registerOp}">{l(settings.existing_user ? 'Set new password' : 'Register')}</Button>
       </div>
 
       <p>{@html lmd('Go to [login](/login) if you already have an account.')}</p>

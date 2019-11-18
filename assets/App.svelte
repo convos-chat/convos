@@ -37,14 +37,14 @@ export const routingRules = [
 ];
 
 const settings = [window.__convos, delete window.__convos][0];
-const api = new Api(settings.apiUrl, {debug: true});
-const user = new User({api, wsUrl: settings.wsUrl});
+const api = new Api(settings.api_url, {debug: true});
+const user = new User({api, wsUrl: settings.ws_url});
 const notifications = user.notifications;
 
 let containerWidth = 0;
 
 window.hljs = hljs; // Required by paste plugin
-currentUrl.base = settings.baseUrl;
+currentUrl.base = settings.base_url;
 user.events.listenToGlobalEvents();
 setContext('settings', settings);
 setContext('user', user);
@@ -56,9 +56,9 @@ $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $do
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
-    if (user.version == settings.assetVersion) return;
-    console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.assetVersion);
-    user.update({version: settings.assetVersion});
+    if (user.version == settings.asset_version) return;
+    console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.asset_version);
+    user.update({version: settings.asset_version});
     reg.update();
     location.href = urlFor('/'); // Refresh offline page
   }).catch(err => {
@@ -68,7 +68,7 @@ if ('serviceWorker' in navigator) {
 
 onMount(() => {
   loadScript(currentUrl.base + '/images/emojis.js');
-  if (settings.loadUser) user.load();
+  if (settings.load_user) user.load();
   if (user.showGrid) document.querySelector('body').classList.add('with-grid');
 
   const unsubscribe = [];

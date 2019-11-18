@@ -23,11 +23,6 @@ my %seen;
 $ENV{LINK_EMBEDDER_FORCE_SECURE} //= 1;    # Make sure LinkEmbedder upgrade http to https
 $ENV{MOJO_NPM_BINARY} = 'pnpm';
 
-if ($ARGV[0] and -r $ARGV[0] and -f $ARGV[0]) {
-  $ENV{MOJO_CONFIG} = shift @ARGV;
-  unshift @ARGV, 'daemon' unless $ARGV[0] and $ARGV[0] eq 'daemon';
-}
-
 my $command = $ARGV[0] || '';
 $ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if grep { $command eq $_ } qw(get version);
 $ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';

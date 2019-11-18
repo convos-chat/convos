@@ -5,10 +5,11 @@ use lib '.';
 use t::Helper;
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
-$ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://localhost:6123/%23convos';
-$ENV{CONVOS_OPEN_TO_PUBLIC} = 1;
 
-my $t = t::Helper->t;
+my $t                  = t::Helper->t;
+my $default_connection = 'irc://localhost:6123/%23convos';
+$t->app->core->settings->default_connection(Mojo::URL->new($default_connection));
+$t->app->core->settings->open_to_public(true);
 
 $t->get_ok('/register')->status_is(200);
 $t->get_ok('/register?uri=' . url_escape 'irc://irc.example.com:6123/%23convos')->status_is(200)
@@ -20,18 +21,18 @@ $t->post_ok('/api/user/register',
 $t->get_ok('/chat')->status_is(200);
 
 my $json = decode_json($t->tx->res->text =~ m!window\.__convos\s*=\s*([^;]+)!m ? $1 : '{}');
-is $json->{apiUrl}, '/api', 'settings.apiUrl';
+is $json->{api_url}, '/api', 'settings.api_url';
 is $json->{contact}, 'mailto:root@localhost', 'settings.contact';
-is $json->{openToPublic}, true, 'openToPublic';
-is $json->{organization_name}, 'Convos',           'settings.organization_name';
-is $json->{organization_url},  'http://convos.by', 'settings.organization_url';
-ok $json->{baseUrl},           'settings.baseUrl';
+is $json->{open_to_public}, true, 'open_to_public';
+is $json->{organization_name}, 'Convos',            'settings.organization_name';
+is $json->{organization_url},  'https://convos.by', 'settings.organization_url';
+ok $json->{base_url},          'settings.base_url';
 ok $json->{default_connection}, 'settings.default_connection';
 ok $json->{version},            'settings.version';
-ok $json->{wsUrl},              'settings.wsUrl';
+ok $json->{ws_url},             'settings.ws_url';
 ok !$json->{user}, 'the user should not be part of the settings';
 
-my $url = url_escape $ENV{CONVOS_DEFAULT_CONNECTION};
+my $url = url_escape $default_connection;
 $t->get_ok("/register?uri=$url")->status_is(302)
   ->header_is(Location => '/chat/irc-localhost/%23convos');
 

@@ -52,7 +52,7 @@ sub generate_invite_link {
 
   my $exp      = time + RECOVERY_LINK_VALID_FOR;
   my $user     = $self->app->core->get_user($self->stash('email'));
-  my $password = $user ? $user->password : $self->app->config('local_secret');
+  my $password = $user ? $user->password : $self->settings('local_secret');
 
   my $params
     = $self->_add_invite_token_to_params(
@@ -120,7 +120,7 @@ sub register {
 
     # Validate input
     return $self->unauthorized('Convos registration is not open to public.')
-      if !$json->{token} and !$self->app->config('open_to_public');
+      if !$json->{token} and !$self->settings('open_to_public');
 
     # TODO: Add test
     return $self->unauthorized('Email is taken.') if !$json->{token} and $user;
@@ -140,7 +140,8 @@ sub register {
       return $self->render(openapi => E($err), status => 400) if $err;
       $user->role(give => 'admin') if $self->app->core->n_users == 1;
       $self->session(email => $user->email);
-      $self->backend->connection_create($self->config('default_connection'), $delay->begin);
+      $self->backend->connection_create(Mojo::URL->new($self->settings('default_connection')),
+        $delay->begin);
     },
     sub {
       my ($delay, $err, $connection) = @_;
@@ -229,7 +230,7 @@ sub _existing_dialog {
 sub _is_valid_invite_token {
   my ($self, $user, $params) = @_;
 
-  $params->{password} = $user ? $user->password : $self->app->config('local_secret');
+  $params->{password} = $user ? $user->password : $self->settings('local_secret');
   for my $secret (@{$self->app->secrets}) {
     my $generated = $self->_add_invite_token_to_params({%$params}, $secret);
     return 1 if $generated->{token} eq $params->{token};
@@ -280,7 +281,7 @@ sub _register_html_handle_invite_url {
   my $user = $self->app->core->get_user($params->{email});
   return $self->stash(status => 400) unless $self->_is_valid_invite_token($user, $params);
 
-  $self->settings(existingUser => $user ? true : false);
+  $self->settings(existing_user => $user ? true : false);
 }
 
 sub _update_user {

@@ -44,7 +44,6 @@ sub startup {
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
-  $self->sessions->secure(1) if $config->{secure_cookies};
   push @{$self->renderer->classes}, __PACKAGE__;
 
   # Autogenerate routes from the OpenAPI specification
@@ -73,7 +72,6 @@ sub startup {
   $auth_r->get('/settings/*rest', {rest => ''})->to(template => 'index');
 
   $self->_plugins;
-  $self->_setup_secrets;
 
   # Process svelte assets using rollup.js
   $ENV{MOJO_WEBPACK_CONFIG} = 'rollup.config.js';
@@ -89,7 +87,7 @@ sub startup {
       my $c = shift;
 
       # Used when registering the first user
-      $c->settings(firstUser => true) if !$c->session('email') and !$c->app->core->n_users;
+      $c->settings(first_user => true) if !$c->session('email') and !$c->app->core->n_users;
 
       # Handle /whatever/with%2Fslash/...
       my $path     = $c->req->url->path;
@@ -102,14 +100,18 @@ sub startup {
       ]);
 
       # Handle mount point like /apps/convos
+      my $base_url;
       if (my $base = $c->req->headers->header('X-Request-Base')) {
-        $base = Mojo::URL->new($base);
-        $c->req->url->base($base);
-        $c->app->core->base_url($base);
+        $base_url = Mojo::URL->new($base);
+        $c->req->url->base($base_url);
       }
       else {
-        $c->app->core->base_url($c->req->url->to_abs->query(Mojo::Parameters->new)->path('/'));
+        $base_url = $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
       }
+
+      $c->app->core->base_url($base_url);
+      $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES}
+          || $base_url->scheme eq 'https' ? 1 : 0);
     }
   );
 
@@ -120,21 +122,9 @@ sub _config {
   my $self   = shift;
   my $config = $self->config;
 
-  if (my $path = $ENV{MOJO_CONFIG}) {
-    $config = $path =~ /\.json$/ ? $self->plugin('JSONConfig') : $self->plugin('Config');
-  }
-
   $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
-  $config->{contact} ||= $ENV{CONVOS_CONTACT} || 'mailto:root@localhost';
   $config->{home}    ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
-  $config->{local_secret}      ||= $ENV{CONVOS_LOCAL_SECRET}      || $self->_generate_local_secret;
-  $config->{open_to_public}    ||= $ENV{CONVOS_OPEN_TO_PUBLIC}    || 0;
-  $config->{organization_url}  ||= $ENV{CONVOS_ORGANIZATION_URL}  || 'http://convos.by';
-  $config->{organization_name} ||= $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos';
-  $config->{secure_cookies}    ||= $ENV{CONVOS_SECURE_COOKIES}    || 0;
-
-  $self->_default_connection($config);
 
   if ($config->{log_file} ||= $ENV{CONVOS_LOG_FILE}) {
     $self->log->path($config->{log_file});
@@ -142,45 +132,14 @@ sub _config {
   }
 
   $self->log->info(
-    qq(CONVOS_HOME="$ENV{CONVOS_HOME}" # https://convos.by/doc/config.html#convos_home"));
+    qq(CONVOS_HOME="$config->{home}" # https://convos.by/doc/config.html#convos_home"));
 
-  # public settings
-  $config->{settings} = {
-    contact            => $config->{contact},
-    default_connection => $config->{default_connection},
-    forced_connection  => $config->{forced_connection} ? true : false,
-    organization_name  => $config->{organization_name},
-    organization_url   => $config->{organization_url},
-    version            => $self->VERSION || '0.01',
-  };
+  my $settings = $self->core->settings;
+  $settings->load;
+  $self->secrets($settings->session_secrets);
+  $settings->save;
 
   return $config;
-}
-
-sub _default_connection {
-  my ($self, $config) = @_;
-
-  my @urls = map { $config->{$_} = $ENV{uc("CONVOS_$_")} || $config->{$_} }
-    qw(forced_connection forced_irc_server default_connection default_server);
-  $config->{forced_connection}
-    = $config->{forced_irc_server} || $config->{forced_connection} ? 1 : 0;
-  delete $config->{$_} for qw(default_connection default_server forced_irc_server);
-
-  for my $url (grep {$_} @urls) {
-    next unless 3 < length $url;    # skip "0", "1" and "yes"
-    $url = "irc://$url" unless $url =~ m!^\w+://!;
-    return ($config->{default_connection} = Mojo::URL->new($url));
-  }
-
-  return ($config->{default_connection} = Mojo::URL->new('irc://chat.freenode.net:6697/%23convos'));
-}
-
-sub _generate_local_secret {
-  my $self   = shift;
-  my $secret = Mojo::Util::md5_sum(join ':', $self->home->to_string, $<, $(, $0);
-  $self->log->info(
-    qq(CONVOS_LOCAL_SECRET="$secret" # https://convos.by/doc/config.html#convos_local_secret));
-  return $secret;
 }
 
 sub _home_in_share {
@@ -216,25 +175,6 @@ sub _plugins {
   }
 }
 
-sub _setup_secrets {
-  my $self    = shift;
-  my $secrets = $self->config('secrets') || [split /,/, $ENV{CONVOS_SECRETS} || ''];
-  my $file    = $self->core->home->child('secrets');
-
-  unless (@$secrets) {
-    $secrets = [split /‚/, $file->slurp] if -e $file;
-  }
-  unless (@$secrets) {
-    $secrets = [Mojo::Util::sha1_sum(join ':', rand(), $$, $<, $(, $^X, Time::HiRes::time())];
-    path($file->dirname)->make_path unless -d $file->dirname;
-    $file->spurt(join ',', @$secrets);
-    $self->log->info(
-      "CONVOS_SECRETS written to $file # https://convos.by/doc/config.html#convos_secrets");
-  }
-
-  $self->secrets($secrets);
-}
-
 1;
 
 =encoding utf8
@@ -263,7 +203,7 @@ starting points for Convos:
 
 =item * L<Development guide|https://convos.by/doc/develop.html>
 
-=item * L<REST API reference|http://demo.convos.by/api.html>
+=item * L<REST API reference|https://demo.convos.by/api.html>
 
 =back
 
