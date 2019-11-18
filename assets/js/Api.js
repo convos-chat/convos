@@ -63,13 +63,7 @@ export default class Api {
 
         op.method = method.toUpperCase();
         op.url = this.protocol + '//' + spec.host + spec.basePath + path + '.json';
-        op.parameters = (op.parameters || []).map(p => {
-          if (!p['$ref']) return p;
-          const refPath = p['$ref'].replace(/^#\//, '').split('/');
-          let ref = spec;
-          while (refPath.length) ref = ref[refPath.shift()];
-          return ref;
-        });
+        op.parameters = (op.parameters || []).map(p => this._resolveRef(p));
 
         this._ops[operationId] = op;
       });
@@ -77,5 +71,23 @@ export default class Api {
 
     if (this._ops && operationId) return this._ops[operationId];
     if (this._spec) return this._spec;
+  }
+
+  _resolveRef(p) {
+    let res = p;
+
+    if (p['$ref']) {
+      const refPath = p['$ref'].replace(/^#\//, '').split('/');
+      res = this._spec;
+      while (refPath.length) res = res[refPath.shift()];
+    }
+
+    if (typeof res == 'object') {
+      Object.keys(res).forEach(k => {
+        res[k] = this._resolveRef(res[k]);
+      });
+    }
+
+    return res;
   }
 }
