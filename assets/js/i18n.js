@@ -25,7 +25,9 @@ export let lang = 'en';
  */
 export function l(lexicon, ...vars) {
   const translated = String(dict[lexicon] && dict[lexicon][lang] || lexicon);
-  return translated.replace(/%(\d+)/g, (a, i) => { return vars[i - 1] });
+  return translated.replace(/(%?)%(\d+)/g, (a, escaped, i) => {
+    return escaped == '%' ? escaped + i : vars[i - 1];
+  });
 }
 
 /**
