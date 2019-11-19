@@ -1,5 +1,8 @@
 import Reactive from './Reactive';
 import {camelize} from '../js/util';
+import {l} from '../js/i18n';
+
+const Notification = window.Notification || {permission: 'denied'};
 
 let msgId = 0;
 
@@ -14,6 +17,7 @@ export default class Events extends Reactive {
     this.prop('persist', 'debugEvents', navigator.userAgent.indexOf('Mozilla') != -1 ? 1 : 0);
     this.prop('persist', 'notificationCloseDelay', 5000);
     this.prop('persist', 'wantNotifications', null);
+    this.prop('ro', 'browserNotifyPermission', () => Notification.permission);
     this.prop('ro', 'wsUrl', params.wsUrl); // TODO: Should probably be input parameter
     this.prop('rw', 'ready', false);
   }
@@ -45,15 +49,40 @@ export default class Events extends Reactive {
   }
 
   notifyUser(title, body, params = {}) {
-    const rejectReason = this._notificationRejectReason();
+    const rejectReason
+      = !this.wantNotifications ? 'wantNotifications == false'
+      : Notification.permission != 'granted' ? Notification.permission
+      : !params.force && document.hasFocus() ? 'document.hasFocus'
+      : '';
+
     if (rejectReason) {
-      if (this.debugEvents) console.log('[Events:notifyUser] ' + rejectReason, title, body, params);
-      return;
+      console.log('[Events:notifyUser] Rejected: ' + rejectReason, [title, body, params]);
+      return this;
     }
 
     const notification = new Notification(title, {icon: this.notificationIcon, ...params, body});
     notification.onclick = (e) => { notification.cancel(); window.focus() };
     setTimeout(() => notification.close(), this.notificationCloseDelay);
+    return this;
+  }
+
+  rejectNotifications() {
+    return this.update({wantNotifications: false});
+  }
+
+  requestPermissionToNotify(cb) {
+    if (Notification.permission == 'granted' || !Notification.requestPermission) {
+      this.update({wantNotifications: Notification.permission == 'granted'});
+      if (cb) cb(Notification.permission);
+      return this;
+    }
+
+    Notification.requestPermission(permission => {
+      this.update({wantNotifications: permission == 'granted'});
+      if (cb) cb(permission);
+    });
+
+    return this;
   }
 
   send(msg, cb) {
@@ -69,7 +98,7 @@ export default class Events extends Reactive {
 
   update(params) {
     super.update(params);
-    if (params.wantNotifications) this.notifyUser('Convos', 'You have enabled notifications!');
+    if (params.wantNotifications) this.notifyUser('Convos', l('You have enabled notifications!'), {force: true});
     return this;
   }
 
@@ -93,14 +122,6 @@ export default class Events extends Reactive {
     }
 
     return params.event;
-  }
-
-  _notificationRejectReason() {
-    if (!this.wantNotifications) return 'wantNotifications == false';
-    if (!window.Notification) return 'window.Notification';
-    if (Notification.permission != 'granted') return Notification.permission;
-    if (document.hasFocus()) return 'document.hasFocus';
-    return '';
   }
 
   _send(msg) {

@@ -14,13 +14,14 @@ export let dialog;
 export let input;
 
 const user = getContext('user');
+const events = user.events;
 
 let messages = [];
 let unreadFrom = 0;
 
-$: calculateMessages(dialog);
+$: calculateMessages(dialog, $events);
 
-function calculateMessages(dialog) {
+function calculateMessages(dialog, $events) {
   const extraMessages = [];
 
   if (dialog.frozen == 'Password protected.') {
@@ -40,10 +41,10 @@ function calculateMessages(dialog) {
     extraMessages.push(convosMessage({message: topicOrStatus(connection, dialog).replace(/\.$/, ''), vars: []}));
   }
 
-  if (user.wantNotifications === null) {
+  if ($events.wantNotifications === null) {
     extraMessages.push(convosMessage({
-      message: 'Please go to [settings](%1) to enable notifications.',
-      vars: ['/settings'],
+      message: 'Do you want notifications when someone sends you a private message? [Yes](%1) / [No](%2)',
+      vars: ['#call:events:requestPermissionToNotify', '#call:events:rejectNotifications'],
     }));
   }
 

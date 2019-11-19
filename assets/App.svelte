@@ -116,10 +116,13 @@ function onWindowClick(e) {
 
   // Call methods on user, such as user.ensureConnected() with href="#call:user:ensureConnected"
   const linkEl = closestEl(e.target, 'a');
-  const action = linkEl && linkEl.href.match(/#(call:user):(\w+)/) || ['', '', ''];
+  const action = linkEl && linkEl.href.match(/#call:(\w+):(\w+)/) || ['', '', ''];
   if (action[2]) {
     e.preventDefault();
-    user[action[2]]();
+    switch(action[1]) {
+      case 'events': return user.events[action[2]]();
+      case 'user': return user[action[2]]();
+    }
     return;
   }
 

@@ -33,7 +33,7 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'events', params.events);
-    this.prop('ro', 'is_private', () => !channelRe.test(this.name));
+    this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
     this.prop('ro', 'path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this.prop('rw', 'errors', 0);
@@ -58,9 +58,16 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
-    if (msg.highlight) this.events.notifyUser(msg.from, msg.message);
-    this.addMessages('push', [msg]);
-    if (['action', 'error', 'private'].indexOf(msg.type) != -1) this.update({unread: this.unread + 1});
+    if (msg.from && ['action', 'error', 'private'].indexOf(msg.type) != -1) {
+      if (msg.highlight || this.is_private || this.wantNotifications) {
+        const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
+        this.events.notifyUser(title, msg.message);
+      }
+
+      this.update({unread: this.unread + 1});
+    }
+
+    return this.addMessages('push', [msg]);
   }
 
   addMessages(method, messages) {

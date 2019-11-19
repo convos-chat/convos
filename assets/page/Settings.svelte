@@ -10,13 +10,12 @@ import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 import {themes} from '../settings';
 
-const Notification = window.Notification || {permission: 'denied'};
 const user = getContext('user');
 const updateUserOp = user.api.operation('updateUser');
 
 let formEl;
 let expandUrlToMedia = user.expandUrlToMedia;
-let notificationsDisabled = Notification.permission == 'denied';
+let notificationsDisabled = user.events.browserNotifyPermission == 'denied';
 let theme = user.theme;
 let wantNotifications = user.wantNotifications;
 let highlight_keywords = user.highlight_keywords.join(', ');
@@ -30,8 +29,8 @@ function updateUserFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
-  if (wantNotifications && window.Notification && Notification.permission != 'granted') {
-    Notification.requestPermission(status => {
+  if (wantNotifications) {
+    user.events.requestPermissionToNotify(status => {
       if (status != 'denied') return;
       wantNotifications = false;
       notificationsDisabled = true;
@@ -42,7 +41,7 @@ function updateUserFromForm(e) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  user.update({expandUrlToMedia, theme, wantNotifications});
+  user.update({expandUrlToMedia, theme});
   updateUserOp.perform(e.target);
 }
 </script>
@@ -61,12 +60,10 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 
-    <Checkbox name="notifications" bind:checked="{wantNotifications}">
-      <span slot="label">{l('Enable notifications')}</span>
-    </Checkbox>
-
-    {#if notificationsDisabled}
-      <p class="error">{l('You cannot receive notifications, because it is denied by your browser.')}</p>
+    {#if !notificationsDisabled}
+      <Checkbox name="notifications" bind:checked="{wantNotifications}">
+        <span slot="label">{l('Enable notifications')}</span>
+      </Checkbox>
     {/if}
 
     <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">
@@ -91,5 +88,9 @@ function updateUserFromForm(e) {
     </div>
 
     <OperationStatus op="{updateUserOp}"/>
+
+    {#if notificationsDisabled}
+      <p class="error">{l('You cannot receive notifications, because it is denied by your browser.')}</p>
+    {/if}
   </form>
 </main>
