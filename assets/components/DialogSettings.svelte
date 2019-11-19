@@ -77,7 +77,7 @@ function saveDialogSettings(e) {
       {#if !dialog.is('private')}
         <Button icon="save">{l('Update')}</Button>
       {/if}
-      <Button type="button" on:click="{partDialog}" icon="sign-out-alt">{l('Part')}</Button>
+      <Button type="button" on:click="{partDialog}" icon="sign-out-alt">{l('Leave')}</Button>
     </div>
   </form>
 
