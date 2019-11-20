@@ -22,6 +22,7 @@ let wantNotifications = user.wantNotifications;
 let highlight_keywords = user.highlight_keywords.join(', ');
 
 updateUserOp.on('start', req => {
+  if (!req.body.password) delete req.body.password;
   req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
 });
 
