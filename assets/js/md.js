@@ -15,7 +15,7 @@ const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
 const emojiByGroup = {};
 const emojiByName = {};
 const linkRe = new RegExp('\\b[a-z]{2,5}://\\S+', 'g');
-const mdLinkRe = new RegExp('\\[([^]+)\\]\\(([^)]+)\\)');
+const mdLinkRe = new RegExp('\\[([^\\]]+)\\]\\(([^)]+)\\)', 'g');
 const mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+|_+)(\\w[^<]*?)\\3', 'g');
 
 // Modifying this from the outside will break emojiRe below
