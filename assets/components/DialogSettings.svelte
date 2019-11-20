@@ -68,7 +68,7 @@ function saveDialogSettings(e) {
         <span slot="label">{l('Topic')}</span>
       </TextArea>
 
-      <PasswordField name="password" bind:value="{dialogPassword}">
+      <PasswordField name="password" bind:value="{dialogPassword}" readonly="{dialog.frozen != 'Password protected.' && !isOperator}">
         <span slot="label">{l('Password')}</span>
       </PasswordField>
     {/if}
