@@ -14,9 +14,8 @@
 export default class Reactive {
   constructor() {
     this._on = {};
-    this._proxyTo = {};
+    this._props = {};
     this._reactiveProp = {};
-    this._syncWithLocalStorage = {};
   }
 
   /**
@@ -75,7 +74,9 @@ export default class Reactive {
    * @param {String} name The name of the property
    * @param {Any} val Either a function or default value.
    */
-  prop(type, name, val) {
+  prop(type, name, val, params = {}) {
+    this._props[name] = params;
+
     switch (type) {
       case 'persist': return this._localStorageProp(name, val);
       case 'proxy': return this._proxyProp(name, val);
@@ -118,18 +119,23 @@ export default class Reactive {
 
     for (let i = 0; i < paramNames.length; i++) {
       const name = paramNames[i];
+      const prop = this._props[name];
+      if (!prop) continue;
 
-      if (this._proxyTo[name]) {
-        this[this._proxyTo[name]].update({[name]: params[name]});
+      let changed = false;
+      if (prop.proxyTo) {
+        this[prop.proxyTo].update({[name]: params[name]});
       }
       else if (this._reactiveProp.hasOwnProperty(name)) {
-        if (this._reactiveProp[name] === params[name]) updated--;
+        if (this._reactiveProp[name] !== params[name]) changed = true;
         this._reactiveProp[name] = params[name];
       }
 
-      if (this._syncWithLocalStorage[name]) {
+      if (prop.localStorage && changed) {
         this._localStorage(name, this._reactiveProp[name]);
       }
+
+      if (changed) updated--;
     }
 
     if (updated && !this._updatedTid) {
@@ -141,20 +147,20 @@ export default class Reactive {
   }
 
   _localStorage(name, val) {
-    name = 'convos:' + name;
-    if (arguments.length == 2) return localStorage.setItem(name, JSON.stringify(val));
-    return localStorage.hasOwnProperty(name) ? JSON.parse(localStorage.getItem(name)) : undefined;
+    const key = 'convos:' + (this._props[name].key || name);
+    if (arguments.length == 2) return localStorage.setItem(key, JSON.stringify(val));
+    return localStorage.hasOwnProperty(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
   }
 
   _localStorageProp(name, val) {
     const fromStorage = this._localStorage(name);
     this._updateableProp(name, typeof fromStorage == 'undefined' ? val : fromStorage);
-    this._syncWithLocalStorage[name] = true;
-    if (typeof fromStorage == 'undefined') this._localStorage(name, val);
+    this._props[name].localStorage = true;
+    if (typeof fromStorage == 'undefined' && !this._props[name].lazy) this._localStorage(name, val);
   }
 
   _proxyProp(name, to) {
-    this._proxyTo[name] = to;
+    this._props[name].proxyTo = to;
     Object.defineProperty(this, name, {get: () => this[to]._reactiveProp[name]});
   }
 

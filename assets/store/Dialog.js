@@ -54,6 +54,10 @@ export default class Dialog extends Reactive {
       this.prop('ro', 'frozen', () => this._calculateFrozen());
     }
 
+    if (params.dialog_id) {
+      this.prop('persist', 'wantNotifications', false, {key: params.dialog_id +  ':wantNotifications', lazy: true});
+    }
+
     this._addOperations();
   }
 

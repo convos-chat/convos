@@ -1,5 +1,6 @@
 <script>
 import Button from './form/Button.svelte';
+import Checkbox from './form/Checkbox.svelte';
 import Link from './Link.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
@@ -17,8 +18,10 @@ const user = getContext('user');
 let dialogPassword = '';
 let dialogTopic = dialog.topic;
 let formEl;
+let wantNotifications = dialog.wantNotifications;
 
 $: isOperator = calculateIsOperator(dialog);
+$: dialog.update({wantNotifications});
 $: if (formEl && formEl.topic) formEl.topic.value = dialog.topic || '';
 
 function calculateIsOperator(dialog) {
@@ -71,6 +74,12 @@ function saveDialogSettings(e) {
       <PasswordField name="password" bind:value="{dialogPassword}" readonly="{dialog.frozen != 'Password protected.' && !isOperator}">
         <span slot="label">{l('Password')}</span>
       </PasswordField>
+
+      {#if dialog.hasOwnProperty('wantNotifications')}
+        <Checkbox bind:checked="{wantNotifications}">
+          <span slot="label">{l('Send me notifications')}</span>
+        </Checkbox>
+      {/if}
     {/if}
 
     <div class="form-actions">
