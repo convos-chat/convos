@@ -52,9 +52,7 @@ afterUpdate(() => {
   }
 });
 
-onDestroy(() =>  {
-  unsubscribe.forEach(cb => cb());
-});
+onDestroy(onClose);
 
 function addDialog(e) {
   if (connection.connection_id) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
@@ -68,8 +66,7 @@ function calculateDialog($user, $currentUrl) {
   const d = pathParts.length == 1 ? $user.notifications : $user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});
   if (!d) return (dialog = $user.notifications);
   if (d == dialog && previousPath) return;
-  if (unsubscribe) unsubscribe.forEach(cb => cb());
-  if (previousPath && dialog.setLastRead) dialog.setLastRead();
+  if (previousPath) onClose();
 
   q(document, '.message__embed', embedEl => embedEl.remove());
 
@@ -91,6 +88,11 @@ function messageElObserved(entries, observer) {
     const message = dialog.messages[e.target.dataset.index] || {};
     if (message.embeds) user.embedMaker.render(e.target, message.embeds);
   });
+}
+
+function onClose() {
+  if (dialog && dialog.setLastRead) dialog.setLastRead();
+  unsubscribe.forEach(cb => cb());
 }
 
 const onScroll = debounce(e => {
