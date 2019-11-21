@@ -12,7 +12,6 @@ export default class Connection extends Dialog {
     super(params);
 
     this.prop('ro', 'dialogs', new SortedMap([], {sorter: sortDialogs}));
-
     this.prop('rw', 'on_connect_commands', params.on_connect_commands || '');
     this.prop('rw', 'state', params.state || 'queued');
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
@@ -33,10 +32,10 @@ export default class Connection extends Dialog {
 
     dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
     dialog.on('message', params => this.emit('message', params));
-    dialog.on('update', () => this.update({dialogs: this.dialogs.size}));
+    dialog.on('update', () => this.update({force: true}));
     this._addDefaultParticipants(dialog);
     this.dialogs.set(dialog.dialog_id, dialog);
-    this.update({dialogs: this.dialogs.size});
+    this.update({force: true});
     return dialog;
   }
 
@@ -50,7 +49,7 @@ export default class Connection extends Dialog {
 
   removeDialog(params) {
     this.dialogs.delete(params.dialog_id);
-    return this.update({dialogs: this.dialogs.size});
+    return this.update({force: true});
   }
 
   update(params) {

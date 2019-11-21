@@ -73,10 +73,9 @@ export default class User extends Reactive {
     conn = new Connection({...params, api: this.api, events: this.events});
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
-    conn.on('update', () => this.update({connections: this.connections.size}));
-
+    conn.on('update', () => this.update({force: true}));
     this.connections.set(conn.connection_id, conn);
-    this.update({connections: this.connections.size});
+    this.update({force: true});
     return conn;
   }
 
@@ -118,7 +117,7 @@ export default class User extends Reactive {
     }
     else {
       this.connections.delete(params.connection_id);
-      this.update({connections: this.connections.size});
+      this.update({force: true});
     }
   }
 

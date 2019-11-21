@@ -157,7 +157,7 @@ export default class Dialog extends Reactive {
       this._participants.set(id, {name: p.nick, ...p, color: str2color(id), id, ts: new Time()});
     });
 
-    if (participants.length) this.update({participants: this._participants.size});
+    if (participants.length) this.update({force: true});
 
     return this._participants.toArray();
   }
@@ -203,7 +203,7 @@ export default class Dialog extends Reactive {
     const participant = this.findParticipant(params.nick);
     if (!participant || participant.me) return;
     this._participants.delete(this._participantId(params.nick));
-    this.update({participants: this._participants.size});
+    this.update({force: true});
     this.addMessage(this._partMessage(params));
   }
 
