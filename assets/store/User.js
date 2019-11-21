@@ -23,15 +23,12 @@ export default class User extends Reactive {
     this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('rw', 'highlight_keywords', []);
+    this.prop('rw', 'status', 'pending');
 
     this.prop('persist', 'lastUrl', '');
     this.prop('persist', 'showGrid', false);
     this.prop('persist', 'theme', 'auto');
     this.prop('persist', 'version', '0');
-
-    this.prop('proxy', 'expandUrlToMedia', 'embedMaker');
-    this.prop('proxy', 'wantNotifications', 'events');
-    this.prop('proxy', 'status', 'getUserOp');
   }
 
   calculateLastUrl() {
@@ -92,14 +89,25 @@ export default class User extends Reactive {
     if (Array.isArray(status)) return !!status.filter(s => this.is(s)).length;
     if (status == 'loggedIn') return this.email && true;
     if (status == 'offline') return extractErrorMessage(this.getUserOp.err || [], 'source') == 'fetch';
-    return this.getUserOp.is(status);
+    return this.status == status;
   }
 
   async load() {
-    if (this.getUserOp.is('success')) return this;
+    if (this.is('loading')) return this;
+
+    this.update({status: 'loading'});
     await this.getUserOp.perform();
-    this._parseGetUser(this.getUserOp.res.body);
+
+    const body = this.getUserOp.res.body;
+    this.connections.clear();
+    this.notifications.update({unread: body.unread || 0});
+    this.roles.clear();
+    (body.connections || []).forEach(conn => this.ensureDialog(conn));
+    (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));
+    (body.roles || []).forEach(role => this.roles.add(role));
+    this.update({highlight_keywords: body.highlight_keywords || [], status: this.getUserOp.status});
     if (this.email) this.send({method: 'ping'});
+
     return this;
   }
 
@@ -147,7 +155,7 @@ export default class User extends Reactive {
         return this.getUserOp.is('pending') ? this.load() : false;
       }
       else {
-        this.getUserOp.update({status: 'pending'});
+        this.update({status: 'pending'});
         this.connections.forEach(conn => conn.update({state: 'unreachable'}));
       }
     });
@@ -164,15 +172,5 @@ export default class User extends Reactive {
     const dialog = conn.findDialog(params);
     if (!dialog) return;
     if (dialog[params.dispatchTo]) dialog[params.dispatchTo](params);
-  }
-
-  _parseGetUser(body) {
-    this.connections.clear();
-    this.roles.clear();
-    this.notifications.update({unread: body.unread || 0});
-    (body.connections || []).forEach(conn => this.ensureDialog(conn));
-    (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));
-    (body.roles || []).forEach(role => this.roles.add(role));
-    this.update({highlight_keywords: body.highlight_keywords});
   }
 }

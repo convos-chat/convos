@@ -60,9 +60,8 @@ export default class Reactive {
    *
    * 1. "persist" is a property that will be stored in the browser's localStorage.
    *    It can be changed by calling update().
-   * 2. "proxy" is a property that belongs to a child object.
-   * 3. "ro" is a property that cannot be changed.
-   * 4. "rw" is a property that can be changed by the "update()" method.
+   * 2. "ro" is a property that cannot be changed.
+   * 3. "rw" is a property that can be changed by the "update()" method.
    *
    * The code below cannot be used to update any prop() property. A change must
    * go through update().
@@ -70,7 +69,7 @@ export default class Reactive {
    *     this.some_property = 'new value';
    *
    * @memberof Reactive
-   * @param {String} type either "persist", "proxy", "ro" or "rw".
+   * @param {String} type either "persist", "ro" or "rw".
    * @param {String} name The name of the property
    * @param {Any} val Either a function or default value.
    */
@@ -79,7 +78,6 @@ export default class Reactive {
 
     switch (type) {
       case 'persist': return this._localStorageProp(name, val);
-      case 'proxy': return this._proxyProp(name, val);
       case 'ro': return this._readOnlyProp(name, val);
       case 'rw': return this._updateableProp(name, val);
     }
@@ -115,7 +113,7 @@ export default class Reactive {
    */
   update(params) {
     const paramNames = Object.keys(params);
-    let updated = paramNames.length;
+    let nUpdated = paramNames.length;
 
     for (let i = 0; i < paramNames.length; i++) {
       const name = paramNames[i];
@@ -123,10 +121,7 @@ export default class Reactive {
       if (!prop) continue;
 
       let changed = false;
-      if (prop.proxyTo) {
-        this[prop.proxyTo].update({[name]: params[name]});
-      }
-      else if (this._reactiveProp.hasOwnProperty(name)) {
+      if (this._reactiveProp.hasOwnProperty(name)) {
         if (this._reactiveProp[name] !== params[name]) changed = true;
         this._reactiveProp[name] = params[name];
       }
@@ -135,11 +130,11 @@ export default class Reactive {
         this._localStorage(name, this._reactiveProp[name]);
       }
 
-      if (changed) updated--;
+      if (!changed) nUpdated--;
     }
 
-    if (updated && !this._updatedTid) {
-      //console.log({type: 'update', id: this.name || this.email, paramNames: paramNames.join(','), updated});
+    if (nUpdated && !this._updatedTid) {
+      //console.log({type: 'update', id: this.name || this.email || this.constructor.name, paramNames: paramNames.join(','), updated});
       this._updatedTid = setTimeout(() => { delete this._updatedTid; this.emit('update', this) }, 1);
     }
 
@@ -157,11 +152,6 @@ export default class Reactive {
     this._updateableProp(name, typeof fromStorage == 'undefined' ? val : fromStorage);
     this._props[name].localStorage = true;
     if (typeof fromStorage == 'undefined' && !this._props[name].lazy) this._localStorage(name, val);
-  }
-
-  _proxyProp(name, to) {
-    this._props[name].proxyTo = to;
-    Object.defineProperty(this, name, {get: () => this[to]._reactiveProp[name]});
   }
 
   _readOnlyProp(name, val) {

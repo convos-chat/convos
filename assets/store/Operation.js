@@ -18,8 +18,6 @@
 import Reactive from '../js/Reactive';
 import {regexpEscape} from '../js/util';
 
-const validStatus = ['error', 'loading', 'pending', 'success'];
-
 export default class Operation extends Reactive {
   constructor(params) {
     super();
@@ -102,7 +100,6 @@ export default class Operation extends Reactive {
    * @retuns {Boolean} True/false if the "status" property matches the input "status".
    */
   is(status) {
-    if (validStatus.indexOf(status) == -1) throw 'Invalid status: ' + status;
     return this.status == status;
   }
 

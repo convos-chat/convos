@@ -14,10 +14,10 @@ const user = getContext('user');
 const updateUserOp = user.api.operation('updateUser');
 
 let formEl;
-let expandUrlToMedia = user.expandUrlToMedia;
+let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
 let notificationsDisabled = user.events.browserNotifyPermission == 'denied';
 let theme = user.theme;
-let wantNotifications = user.wantNotifications;
+let wantNotifications = user.events.wantNotifications;
 let highlight_keywords = user.highlight_keywords.join(', ');
 
 updateUserOp.on('start', req => {
@@ -41,7 +41,8 @@ function updateUserFromForm(e) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  user.update({expandUrlToMedia, theme});
+  user.embedMaker.update({expandUrlToMedia});
+  user.update({theme});
   updateUserOp.perform(e.target);
 }
 </script>

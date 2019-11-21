@@ -129,7 +129,7 @@ export default class Dialog extends Reactive {
 
     const body = this.messagesOp.res.body;
     this.addMessages('unshift', body.messages || []);
-    this.update({status: 'success'});
+    this.update({status: this.messagesOp.status});
     if (body.end && this.messages.length) this.messages[0].endOfHistory = true;
 
     return this;

@@ -64,6 +64,6 @@ onMount(() => {
   {:else}
     <h1>{l('Create account')}</h1>
     <p>{l('Convos is not open for public registration.')}</p>
-    <p>{@html lmd('Please ask your [Convos admin](%1) for an invite link.', settings.contact)}</p>
+    <p>{@html lmd('Please ask your [Convos admin](%1) for an invite link to register, or [login](/login) if you already have an account.', settings.contact)}</p>
   {/if}
 </main>
