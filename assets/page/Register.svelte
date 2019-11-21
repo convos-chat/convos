@@ -38,16 +38,20 @@ onMount(() => {
 
       <TextField name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}" bind:value="{user.formEmail}">
         <span slot="label">{l('E-mail')}</span>
-      </TextField>
 
-      {#if !emailFromParams}
-        <p class="help">{l('Your email will be used if you forget your password.')}</p>
-      {/if}
+        <p slot="help">
+          {#if emailFromParams}
+            {l('Your email is taken from the invite link.')}
+          {:else}
+            {l('Your email will be used if you forget your password.')}
+          {/if}
+        </p>
+      </TextField>
 
       <PasswordField name="password">
         <span slot="label">{l('Password')}</span>
+        <p slot="help">{l('Hint: Use a phrase from a book.')}</p>
       </PasswordField>
-      <p class="help">{l('Hint: Use a phrase from a book.')}</p>
 
       <div class="form-actions">
         <Button icon="save" op="{registerOp}">{l(settings.existingUser ? 'Set new password' : 'Register')}</Button>

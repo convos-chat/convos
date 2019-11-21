@@ -20,4 +20,5 @@ $: if (inputEl && !inputEl.syncValue) {
 <div class="text-field" hidden="{hidden}">
   <label for="{id}"><slot name="label">Label</slot></label>
   <input type="text" {autocomplete} {name} {placeholder} {id} {readonly} bind:this="{inputEl}" bind:value on:keyup/>
+  <slot name="help"></slot>
 </div>
