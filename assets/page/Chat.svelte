@@ -79,7 +79,13 @@ function calculateDialog($user, $currentUrl) {
   unsubscribe = [];
   if (connection.subscribe) unsubscribe.push(connection.subscribe(c => { connection = c }));
   if (dialog.subscribe) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
-  if (dialog.is('pending')) dialog.load({before: dialog.messages[0]});
+
+  if (!dialog.connection_id) {
+    dialog.load({});
+  }
+  else if (dialog.is('pending')) {
+    dialog.load({before: dialog.messages[0]});
+  }
 }
 
 function messageElObserved(entries, observer) {
