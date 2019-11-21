@@ -123,6 +123,12 @@ function onWindowClick(e) {
       case 'events': return user.events[action[2]]();
       case 'user': return user[action[2]]();
     }
+  }
+
+  // Internal link
+  if (linkEl && linkEl.target == '_self') {
+    e.preventDefault();
+    gotoUrl(linkEl.href);
     return;
   }
 

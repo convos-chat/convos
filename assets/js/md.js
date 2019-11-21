@@ -10,6 +10,7 @@
 
 import twemoji from 'twemoji';
 import {regexpEscape} from './util';
+import {urlFor} from '../store/router';
 
 const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
 const emojiByGroup = {};
@@ -109,6 +110,7 @@ export function emojis(lookup, type = 'single') {
 export function md(str) {
   str = str.replace(/[&<>"']/g, m => xmlEscapeMap[m]);
 
+  let mdLinks = 0;
   str = str.replace(/^&gt;\s(.*)/, (all, quote) => {
     return '<blockquote>' + quote + '</blockquote>';
   }).replace(mdToHtmlRe, (all, b, esc, md, text) => {
@@ -118,19 +120,23 @@ export function md(str) {
     if (md.length == 3) return esc ? all.replace(/^\\/, '') : b + '<em><strong>' + text + '</strong></em>';
     return all;
   }).replace(mdLinkRe, (all, text, href) => {
-    return '<a href="' + href + '">' + text + '</a>';
+    mdLinks++;
+    const target = href.indexOf('/') == 0 ? '_self' : '_blank';
+    if (target == '_self') href = urlFor(href);
+    return '<a href="' + href + '" target="' + target + '">' + text + '</a>';
   }).replace(codeToHtmlRe, (all, esc, text) => {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });
 
-  str = str.replace(linkRe, url => {
-    if (url.indexOf('</a>') != -1) return url;
-    const parts = url.match(/^(.*?)(&\w+;|\W)?$/);
-    return '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '</a>' + (parts[2] || '');
-  }).replace(/mailto:(\S+)/, (all, email) => {
-    if (all.indexOf('">') != -1) return all;
-    return '<a href="' + all + '" target="_blank">' + email + '</a>';
-  });
+  if (!mdLinks) {
+    str = str.replace(linkRe, url => {
+      const parts = url.match(/^(.*?)(&\w+;|\W)?$/);
+      return '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^https:\/\//, '') + '</a>' + (parts[2] || '');
+    }).replace(/mailto:(\S+)/, (all, email) => {
+      if (all.indexOf('">') != -1) return all;
+      return '<a href="' + all + '" target="_blank">' + email + '</a>';
+    });
+  }
 
   str = twemoji.parse(str.replace(emojiRe, (all, pre, emoji) => pre + (emojis(emoji).emoji || emoji)));
 
