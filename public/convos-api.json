@@ -587,6 +587,8 @@
               "type": "object",
               "required": ["url"],
               "properties": {
+                "existing": { "type": "boolean" },
+                "expires": { "type": "string", "format": "date-time" },
                 "url": { "type": "string" }
               }
             }

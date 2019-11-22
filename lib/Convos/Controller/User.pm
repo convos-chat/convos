@@ -7,7 +7,7 @@ use Mojo::JSON qw(false true);
 use Mojo::Util qw(hmac_sha1_sum trim);
 use Socket qw(inet_aton AF_INET);
 
-use constant RECOVERY_LINK_VALID_FOR => $ENV{CONVOS_RECOVERY_LINK_VALID_FOR} || 3600 * 12;
+use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
 
 sub delete {
   my $self = shift->openapi->valid_input or return;
@@ -50,7 +50,7 @@ sub generate_invite_link {
   my $self = shift->openapi->valid_input or return;
   return $self->unauthorized unless my $admin_from = $self->user_has_admin_rights;
 
-  my $exp      = time + RECOVERY_LINK_VALID_FOR;
+  my $exp      = time + ($self->param('exp') || INVITE_LINK_VALID_FOR) * 3600;
   my $user     = $self->app->core->get_user($self->stash('email'));
   my $password = $user ? $user->password : $self->settings('local_secret');
 
@@ -63,8 +63,11 @@ sub generate_invite_link {
   $invite_url->query->param($_ => $params->{$_}) for qw(email exp token);
   $invite_url = $invite_url->to_abs->to_string;
 
-  return $self->render(text    => "---\nInvite URL:\n  $invite_url\n") if $admin_from eq 'local';
-  return $self->render(openapi => {url => $invite_url});
+  my $existing = $user ? true : false;
+  my $expires  = Mojo::Date->new($exp)->to_datetime;
+  return $self->render(text => "---\nExisting: $existing\nExpires: $expires\nURL: $invite_url\n\n")
+    if $admin_from eq 'local';
+  return $self->render(openapi => {existing => $existing, expires => $expires, url => $invite_url});
 }
 
 sub get {

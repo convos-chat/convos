@@ -41,7 +41,7 @@ onMount(() => {
 
         <p slot="help">
           {#if emailFromParams}
-            {l('Your email is from the invite link.')}
+            {l('Your email is taken from the invite link.')}
           {:else}
             {l('Your email will be used if you forget your password.')}
           {/if}

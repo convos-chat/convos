@@ -30,7 +30,7 @@ $t->get_ok(
   ->status_is(410);
 
 $t->post_ok(
-  '/api/user/superman@example.com/invite.json',
+  '/api/user/superman@example.com/invite.html',
   {'X-Local-Secret' => $t->app->settings('local_secret')}
 )->status_is(200);
 my $url = $t->tx->res->text;
