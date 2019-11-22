@@ -56,7 +56,7 @@ export default class User extends Reactive {
   }
 
   ensureConnected() {
-    if (this.getUserOp.is('success')) this.events.ensureConnected();
+    if (this.email) this.send({method: 'ping'});
   }
 
   ensureDialog(params) {
@@ -105,7 +105,7 @@ export default class User extends Reactive {
     (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));
     (body.roles || []).forEach(role => this.roles.add(role));
     this.update({highlight_keywords: body.highlight_keywords || [], status: this.getUserOp.status});
-    if (this.email) this.send({method: 'ping'});
+    this.ensureConnected();
 
     return this;
   }

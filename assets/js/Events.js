@@ -34,10 +34,6 @@ export default class Events extends Reactive {
     if (params.bubbles) this.emit('message', {...params, dispatchTo});
   }
 
-  ensureConnected() {
-    this._ws('dequeue');
-  }
-
   listenToGlobalEvents() {
     window.addEventListener('error', ({colno, error, filename, lineno, message, type, timeStamp}) => {
       this.send({method: 'debug', type, colno, error, filename, lineno, message, timeStamp});
