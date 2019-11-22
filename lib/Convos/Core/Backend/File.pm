@@ -186,6 +186,7 @@ sub notifications {
 
   warn "[@{[$user->id]}] Gettings notifications from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
+    $line = decode 'UTF-8', $line;
     next unless $line =~ $re;
     my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
     my $ts      = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
