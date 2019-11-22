@@ -57,7 +57,7 @@ export default class Events extends Reactive {
     }
 
     const notification = new Notification(title, {icon: this.notificationIcon, ...params, body});
-    notification.onclick = (e) => { notification.cancel(); window.focus() };
+    notification.onclick = (e) => { window.focus(); notification.close() };
     setTimeout(() => notification.close(), this.notificationCloseDelay);
     return this;
   }
