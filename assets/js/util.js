@@ -4,6 +4,7 @@
  * @module util
  * @exports camelize
  * @exports closestEl
+ * @exports copyToClipboard
  * @exports debounce
  * @exports ensureChildNode
  * @exports extractErrorMessage
@@ -46,6 +47,31 @@ export function closestEl(el, needle) {
     el = el.parentNode;
   }
   return null;
+}
+
+/**
+ * copyToClipboard() can be used to copy text from an element to the clipboard.
+ *
+ * @param {HTMLElement} el A DOM node
+ */
+export function copyToClipboard(el) {
+  const ta = document.createElement('textarea');
+  ta.value = el.textContent || el.value;
+  ta.style.opacity = 0;
+  ta.style.position = 'absolute';
+  document.body.appendChild(ta);
+
+  try {
+    ta.focus();
+    ta.select();
+    document.execCommand('copy');
+  } catch(err) {
+    ta.value = '';
+    console.log('copyToClipboard() failed:', err);
+  }
+
+  document.body.removeChild(ta);
+  return ta.value;
 }
 
 /**

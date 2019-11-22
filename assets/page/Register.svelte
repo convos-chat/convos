@@ -16,7 +16,7 @@ const registerOp = user.api.operation('registerUser');
 let formEl;
 
 $: if ($registerOp.is('success')) {
-  user.lastUrl(''); // Make sure the old value is forgotten
+  user.update({lastUrl: ''}); // Make sure the old value is forgotten
   redirectAfterLogin(user, registerOp);
 }
 
@@ -41,7 +41,7 @@ onMount(() => {
 
         <p slot="help">
           {#if emailFromParams}
-            {l('Your email is taken from the invite link.')}
+            {l('Your email is from the invite link.')}
           {:else}
             {l('Your email will be used if you forget your password.')}
           {/if}

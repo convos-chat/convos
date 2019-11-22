@@ -4,19 +4,32 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {copyToClipboard} from '../js/util';
 import {getContext, onMount} from 'svelte';
-import {l} from '../js/i18n';
+import {l, lmd} from '../js/i18n';
 
 const user = getContext('user');
 const getSettingsOp = user.api.operation('getSettings');
+const inviteLinkOp = user.api.operation('inviteUser');
 const updateSettingsOp = user.api.operation('updateSettings');
 
 let settings = {};
+
+$: invite = $inviteLinkOp.res.body || {};
 
 updateSettingsOp.on('start', req => {
   req.body.contact = 'mailto:' + req.body.contact;
   req.body.open_to_public = req.body.open_to_public ? true : false;
 });
+
+function generateInviteLink(e) {
+  inviteLinkOp.perform(e.target);
+}
+
+function copyInviteLink(e) {
+  const copied = copyToClipboard(e.target);
+  if (copied) user.events.notifyUser('Invite link copied', copied, {force: true});
+}
 
 function updateSettingsFromForm(e) {
   updateSettingsOp.perform(e.target);
@@ -35,7 +48,32 @@ onMount(async () => {
 </ChatHeader>
 
 <main class="main">
+  <form method="post" on:submit|preventDefault="{generateInviteLink}">
+    <h2>{l('Recover or invite')}</h2>
+    <p>{l('Using this form, you can generate an invite link for new users, or a recover password link for existing users.')}</p>
+    <TextField name="email" placeholder="{l('user@example.com')}">
+      <span slot="label">{l('User email')}</span>
+    </TextField>
+
+    {#if invite.url}
+      <h3>{l('A link was generated')}</h3>
+      <p>
+        {@html lmd(invite.existing ? 'Copy and send the link to your *existing* user.' : 'Copy and send the link to your *new* user.')}
+        {@html lmd('The link is valid until **%1**.', new Date(invite.expires).toLocaleString())}
+      </p>
+      <a href="{invite.url}" on:click|preventDefault="{copyInviteLink}">{invite.url}</a>
+      <p><small>{l('Tip: Clicking on the link will copy it to your clipboard.')}</small></p>
+    {/if}
+
+    <div class="form-actions">
+      <Button icon="save" op="{inviteLinkOp}">{l('Generate link')}</Button>
+    </div>
+
+    <OperationStatus op="{inviteLinkOp}"/>
+  </form>
+
   <form method="post" on:submit|preventDefault="{updateSettingsFromForm}">
+    <h2>{l('Server settings')}</h2>
     <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{settings.organization_name}">
       <span slot="label">{l('Organization name')}</span>
       <p slot="help">{l('Can be changed if you want to add a touch of your organization.')}</p>
@@ -60,7 +98,7 @@ onMount(async () => {
     </TextField>
 
     <Checkbox name="open_to_public" checked="{settings.open_to_public}">
-      <span slot="label">{l('Open to public')}</span>
+      <span slot="label">{l('Registration is open to public')}</span>
       <p slot="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
     </Checkbox>
 
