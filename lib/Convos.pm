@@ -11,7 +11,7 @@ use Mojo::Util;
 
 $ENV{CONVOS_PLUGINS} //= 'Convos::Plugin::Paste';
 
-our $VERSION = '1.02';
+our $VERSION = '1.10';
 
 my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
 
@@ -185,7 +185,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-1.02
+1.10
 
 =head1 DESCRIPTION
 

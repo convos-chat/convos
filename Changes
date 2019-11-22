@@ -1,5 +1,41 @@
 Revision history for perl distribution Convos
 
+1.10 Not Released
+ - Add roles() and role() to Convos::Core::User #99 #407 #411
+   * The first user will get the admin role
+   * Will automatically upgrade the first registered user for legacy reasons
+
+ - Can now generate invite/recovery links from the web #361 #407 #411
+   * Add /user/#email/invite API endpoint
+   * Replaced invite_code and recover logic with invite links
+   * The first user does not need an invite link
+   * Changed "Register" is now the default screen, instead of "Login"
+   * Removed support for CONVOS_INVITE_CODE
+   * Removed /user/recover/*email/:exp/:check resource
+   * Removed /user/recover/*email resource
+
+ - Add Convos::Core::Settings, and removed support for many environment
+   settings, since they can now be changed through the web interface:
+   * CONVOS_CONTACT
+   * CONVOS_DEFAULT_CONNECTION / CONVOS_DEFAULT_SERVER
+   * CONVOS_FORCED_CONNECTION / CONVOS_FORCED_IRC_SERVER
+   * CONVOS_OPEN_TO_PUBLIC
+   * CONVOS_ORGANIZATION_NAME
+   * CONVOS_ORGANIZATION_URL
+   * MOJO_CONFIG
+
+ - Add support for desktop notifications for all activities in a channel, closes #388
+ - Fix calling setLastRead when going from conversation to a non-conversation
+ - Fix getting desktop notifications from private messages
+ - Fix showing initial desktop notification, when notifications have been enabled
+ - Fix unicode issue when reading notifications, closes #412
+ - Fix users are loaded in a predictable order on startup
+ - Cannot edit dialog password if joined and not an operator #358
+ - Changed "Part" button to "Leave" in conversation settings
+ - Changed $app->sessions->secure(...) to be set on each request
+ - Mention a quicker way to get to conversation settings in "Help"
+ - Renamed /settings to /settings/account
+
 1.02 2019-11-13T16:02:05+0900
  - Fix Docker builds for master and tags #401
    https://hub.docker.com/r/nordaaker/convos
