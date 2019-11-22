@@ -7,10 +7,10 @@ my $t = t::Helper->t;
 
 $t->get_ok('/api/user')->status_is(401);
 
-$t->post_ok('/api/user/invite/superman@example.com')->status_is(401)
+$t->post_ok('/api/user/superman@example.com/invite')->status_is(401)
   ->json_is('/errors/0/message', 'Need to log in first.');
 
-$t->post_ok('/api/user/invite/superman@example.com', {'X-Local-Secret' => 'abc'})->status_is(401)
+$t->post_ok('/api/user/superman@example.com/invite', {'X-Local-Secret' => 'abc'})->status_is(401)
   ->json_is('/errors/0/message', 'Need to log in first.');
 
 note 'first user does not need invite link';
@@ -29,8 +29,10 @@ $t->get_ok(
   "/register?email=superman\@example.com&exp=xyz&token=27c4e74740ce492d24ff843f7e788baab010d24")
   ->status_is(410);
 
-$t->post_ok('/api/user/invite/superman@example.com',
-  {'X-Local-Secret' => $t->app->settings('local_secret')})->status_is(200);
+$t->post_ok(
+  '/api/user/superman@example.com/invite.json',
+  {'X-Local-Secret' => $t->app->settings('local_secret')}
+)->status_is(200);
 my $url = $t->tx->res->text;
 $url = $url =~ s!(http.*)!$1! ? $1 : 'http://invalid';
 $url = Mojo::URL->new($url);

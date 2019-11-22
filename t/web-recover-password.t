@@ -9,8 +9,10 @@ $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
 $t->get_ok('/api/user')->status_is(401);
 
-$t->post_ok('/api/user/invite/superman@example.com',
-  {'X-Local-Secret' => $t->app->settings('local_secret')})->status_is(200);
+$t->post_ok(
+  '/api/user/superman@example.com/invite.json',
+  {'X-Local-Secret' => $t->app->settings('local_secret')}
+)->status_is(200);
 
 my $url = $t->tx->res->text;
 $url = $url =~ s!(http.*)!$1! ? $1 : 'http://invalid';

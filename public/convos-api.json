@@ -570,7 +570,7 @@
         }
       }
     },
-    "/user/invite/{email}": {
+    "/user/{email}/invite": {
       "post": {
         "tags": [ "user" ],
         "summary": "Generate invite link for an existing / new user.",
