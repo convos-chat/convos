@@ -58,11 +58,8 @@ $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $do
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
-    if (user.version == settings.asset_version) return;
-    console.log('[Convos] Version changed from ' + user.version + ' to ' + settings.asset_version);
-    user.update({version: settings.asset_version});
+    user.update({latestVersion: settings.asset_version});
     reg.update();
-    location.href = urlFor('/'); // Refresh offline page
   }).catch(err => {
     console.log('[Convos] ServiceWorker registration failed:', err);
   });
