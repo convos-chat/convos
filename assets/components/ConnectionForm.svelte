@@ -87,7 +87,7 @@ async function submitForm(e) {
 
   if (connection.connection_id) {
     await updateConnectionOp.perform(e.target);
-    user.ensureDialog(updateConnectionOp.res.body);
+    connection = user.ensureDialog(updateConnectionOp.res.body);
     connectionToForm();
   }
   else {
