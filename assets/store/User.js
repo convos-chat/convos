@@ -151,7 +151,7 @@ export default class User extends Reactive {
 
     events.on('update', events => {
       if (events.ready) {
-        return this.getUserOp.is('pending') ? this.load() : false;
+        return this.is('pending') ? this.load() : false;
       }
       else {
         this.update({status: 'pending'});
