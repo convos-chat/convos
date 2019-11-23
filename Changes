@@ -1,10 +1,9 @@
 Revision history for perl distribution Convos
 
-1.10 Not Released
+2.00 2019-11-23T10:23:35+0900
  - Add roles() and role() to Convos::Core::User #99 #407 #411
    * The first user will get the admin role
    * Will automatically upgrade the first registered user for legacy reasons
-
  - Can now generate invite/recovery links from the web #361 #407 #411
    * Add /user/#email/invite API endpoint
    * Replaced invite_code and recover logic with invite links
@@ -13,7 +12,6 @@ Revision history for perl distribution Convos
    * Removed support for CONVOS_INVITE_CODE
    * Removed /user/recover/*email/:exp/:check resource
    * Removed /user/recover/*email resource
-
  - Add Convos::Core::Settings, and removed support for many environment
    settings, since they can now be changed through the web interface:
    * CONVOS_CONTACT
@@ -23,7 +21,6 @@ Revision history for perl distribution Convos
    * CONVOS_ORGANIZATION_NAME
    * CONVOS_ORGANIZATION_URL
    * MOJO_CONFIG
-
  - Add support for desktop notifications for all activities in a channel, closes #388
  - Fix calling setLastRead when going from conversation to a non-conversation
  - Fix getting desktop notifications from private messages

@@ -1,7 +1,7 @@
 {
   "name": "convos",
   "description": "",
-  "version": "1.10.0",
+  "version": "2.0.0",
   "scripts": {
     "build": "rollup -c --environment production",
     "dev": "./script/convos dev",
