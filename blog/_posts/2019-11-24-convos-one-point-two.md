@@ -16,6 +16,24 @@ of these needs.
 You can see a list of all the changes and bug fixes on
 [GitHub](https://github.com/Nordaaker/convos/blob/2.00/Changes#L3).
 
+## Administration user
+
+One of the main reasons why this is a major release, is the introduction of
+user roles. Currently a user can be either "admin" or just a regular user.
+
+The first user to register will become the "admin", so that means that if you
+have an existing Convos installation then we try to guess who to upgrade to
+"admin":
+
+1. If the `user.json` file has a "registered" key then that will be used to
+   see if you are the first to register.
+2. If you have a very old Convos installation and there's no "registered" key,
+   then the created timestamp of the `user.json` file will be used instead.
+
+This means that if you are upgrading, you might want to double check which
+`user.json` file has `roles:["admin"]` inside it. If the wrong user is upgraded
+then you have to edit the files in [CONVOS_HOME](/doc/config.html) manually.
+
 ## A new settings page
 
 We used to support many [environment variables](/doc/config.html) and/or the
