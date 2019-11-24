@@ -22,7 +22,7 @@ const settings = getContext('settings');
   <dl>
     <dt>{l('shift+enter')}</dt>
     <dd>{l('Shift focus between chat input and search in sidebar.')}</dd>
-    <dt>{l('Getting to conversation or connection settings')}</dt>
+    <dt>{l('Open conversation or connection settings')}</dt>
     <dd>{l('Clicking on the icon next to the conversation name will take you to settings.')}</dd>
   </dl>
 
