@@ -110,30 +110,11 @@ a permanent ban if you "flood connect".
 
 Default: `3`
 
-### CONVOS_CONTACT
-
-Used when rendering "Contact" links in the frontend.
-
-Default: `mailto:root@localhost`
-
 ### CONVOS_DEBUG
 
 Setting this variable to a true value will print extra debug information to
 STDERR. Another useful debug variable is `MOJO_IRC_DEBUG` which gives you
 IRC level debug information.
-
-### CONVOS_DEFAULT_CONNECTION
-
-Used to declare which server should be pre-filled when a user creates a new
-connection.
-
-Default: `irc://chat.freenode.net:6697/%23convos`
-
-### CONVOS_FORCED_CONNECTION
-
-Will force any connection made to use the "CONVOS_DEFAULT_CONNECTION".
-
-There is no forced IRC server by default.
 
 ### CONVOS_HOME
 
@@ -143,34 +124,11 @@ to figure out where to store settings and log files.
 
 Default: `$HOME/.local/share/convos/`
 
-### CONVOS_INVITE_CODE
-
-Anyone who wishes to register as a user will have to use the value of this
-setting to create an account. It can be disabled by setting
-`CONVOS_INVITE_CODE=""`. Check out the [running](/doc/running.html) guide for
-more details.
-
-The default value is a semi-random string.
-
 ### CONVOS_LOG_FILE
 
 This value can be used to specify where Convos should write the log messages
 to. This settings has no default value which makes Convos write the log to
 STDERR.
-
-### CONVOS_ORGANIZATION_NAME
-
-Should be set to the name of the organization running this instance of
-Convos.
-
-Default: `Nordaaker`
-
-### CONVOS_ORGANIZATION_URL
-
-This variable will change the URL to the organization running this instance of
-Convos.
-
-Default: [http://nordaaker.com](http://nordaaker.com)
 
 ### CONVOS_PLUGINS
 
@@ -178,23 +136,6 @@ A list (comma separated) of perl modules that can be loaded into the backend
 for optional functionality.
 
 There are currently no plugins loaded by default.
-
-### CONVOS_SECRETS
-
-Should be set to a comma-separated list of random strings. These values will
-be used to secure the Cookies written to the client.
-
-The default value is a semi-random secret.
-
-### CONVOS_SECURE_COOKIES
-
-Should be set to true if Convos is served over HTTPS.
-
-### MOJO_CONFIG
-
-Can hold the path to a config file, which is read by Convos instead of using
-the environment variables. See also the [running](/doc/running.html) guide
-for more details.
 
 ### MOJO_LISTEN
 
