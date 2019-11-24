@@ -67,7 +67,6 @@ sub startup {
   # Require authentication
   my $auth_r = $r->under('/')->to('user#require_login');
   $auth_r->get('/help')->to(template => 'index');
-  $auth_r->get("/add/$_")->to(template => 'index') for (qw(connection conversation));
   $auth_r->get('/chat/*rest',     {rest => ''})->to(template => 'index');
   $auth_r->get('/settings/*rest', {rest => ''})->to(template => 'index');
 
