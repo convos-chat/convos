@@ -84,6 +84,21 @@ it's hard to put that into this tutorial as well. If you want a domain name,
 we suggest [Cloudflare](https://www.cloudflare.com/) or
 [Gandi](https://www.gandi.net/).
 
+## Upgrading Convos
+
+If a new Convos version is available, you can upgrade Convos by following these
+instructions:
+
+```bash
+# Replace 178.62.18.95 with your Droplets' IP address
+ssh root@178.62.18.95
+cd /opt/convos && git pull && ./script/convos install
+systemctl restart convos
+```
+
+Doing a refresh in your browser afterwards should give you the latest version
+of Convos. You can check the current version number in the "Help" page.
+
 ## Got any issues or questions?
 
 If you run into any issues, then don't hesitate to as us on either
