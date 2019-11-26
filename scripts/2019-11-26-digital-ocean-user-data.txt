@@ -1,0 +1,64 @@
+#!/bin/sh
+PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH";
+
+# Create swapfile
+SWAPFILE_PATH="/swapfile";
+fallocate -l 4G $SWAPFILE_PATH \
+  && chmod 600 $SWAPFILE_PATH \
+  && mkswap $SWAPFILE_PATH \
+  && swapon $SWAPFILE_PATH \
+  && echo "$SWAPFILE_PATH none swap sw 0 0" >> /etc/fstab;
+
+# Make sure the system is up to date
+apt-get -y update && apt-get -y upgrade && apt-get -y autoremove;
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections;
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections;
+apt-get -y -q install git curl fail2ban gcc iptables-persistent libio-socket-ssl-perl make perl-doc ufw;
+
+# Set up firewall rules
+ufw allow 22;
+ufw allow 80;
+ufw allow 443;
+ufw allow 8443;
+ufw allow 8000;
+ufw --force enable;
+
+# Get and install Convos
+useradd -M -U www
+mkdir /var/convos && chown www.www -R /var/convos
+mkdir -p /opt && cd /opt && git clone https://github.com/Nordaaker/convos.git
+cd /opt/convos && perl ./script/convos install
+
+mkdir /var/convos/certs
+openssl genrsa -out /var/convos/certs/convos.key 8096
+openssl req -new -sha256 -x509 -extensions v3_ca -days 3650 -key /var/convos/certs/convos.key -out /var/convos/certs/convos.cert -subj "/CN=example.convos.by"
+chown www -R /var/convos/certs
+
+# Make sure Convos starts on boot
+cat <<HERE > /etc/systemd/system/convos.service
+[Unit]
+Description=Convos
+After=network.target
+
+[Service]
+Environment=CONVOS_HOME=/var/convos
+Environment=MOJO_LOG_LEVEL=info
+
+User=www
+ExecStart=/opt/convos/script/convos daemon --listen http://*:8000 --listen https://*:8443?cert=/var/convos/certs/convos.cert&key=/var/convos/certs/convos.key
+KillMode=process
+Restart=on-failure
+SyslogIdentifier=convos
+
+[Install]
+WantedBy=multi-user.target
+HERE
+
+# Start Convos
+systemctl daemon-reload && systemctl restart convos
+
+# Forward ports
+sysctl net.ipv4.ip_forward=1
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8000
+iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8443
+netfilter-persistent save
