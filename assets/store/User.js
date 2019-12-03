@@ -37,7 +37,7 @@ export default class User extends Reactive {
     if (this.lastUrl) return this.lastUrl;
 
     const conn = this.connections.toArray()[0];
-    if (!conn) return urlFor('/add/connection');
+    if (!conn) return urlFor('/settings/connection');
 
     const dialog = conn.dialogs.toArray()[0];
     return urlFor(dialog ? dialog.path : conn.path);

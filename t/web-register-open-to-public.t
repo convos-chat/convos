@@ -42,11 +42,12 @@ $t->get_ok("/register?uri=$url")->status_is(302)
 
 $url =~ s!convos$!superduper!;
 $t->get_ok("/register?uri=$url")->status_is(302)
-  ->header_is(Location => '/add/conversation?connection_id=irc-localhost&dialog_id=%23superduper');
+  ->header_is(
+  Location => '/settings/conversation?connection_id=irc-localhost&dialog_id=%23superduper');
 
 $url =~ s!127.0.0.1!irc.example.com!;
 $t->get_ok("/register?uri=$url")->status_is(302)
   ->header_is(
-  Location => '/add/connection?uri=irc%3A%2F%2Firc.example.com%3A6123%2F%2523superduper');
+  Location => '/settings/connection?uri=irc%3A%2F%2Firc.example.com%3A6123%2F%2523superduper');
 
 done_testing;

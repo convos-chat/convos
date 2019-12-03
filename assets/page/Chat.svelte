@@ -145,7 +145,7 @@ function registerUrlHandler(connection) {
       <h2>{l('Connection does not exist.')}</h2>
       <p>{l('Do you want to create the connection "%1"?', pathParts[1])}</p>
       <p>
-        <Link href="/add/connection?server={encodeURIComponent(pathParts[1])}&dialog={encodeURIComponent(pathParts[2])}" class="btn">{l('Yes')}</Link>
+        <Link href="/settings/connection?server={encodeURIComponent(pathParts[1])}&dialog={encodeURIComponent(pathParts[2])}" class="btn">{l('Yes')}</Link>
         <Link href="/chat" class="btn">{l('No')}</Link>
       </p>
     {:else if pathParts[2] && !dialog.connection_id}

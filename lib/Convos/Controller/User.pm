@@ -258,13 +258,13 @@ sub _register_html_conn_url_redirect {
     return $self->redirect_to($redirect_url);
   }
   elsif ($existing_connection) {
-    my $redirect_url = $self->url_for('/add/conversation');
+    my $redirect_url = $self->url_for('/settings/conversation');
     $redirect_url->query->param(connection_id => $existing_connection->id);
     $redirect_url->query->param(dialog_id     => $conn_url->path->[0] || '');
     return $self->redirect_to($redirect_url);
   }
   else {
-    my $redirect_url = $self->url_for('/add/connection');
+    my $redirect_url = $self->url_for('/settings/connection');
     $redirect_url->query->param(uri => $conn_url);
     return $self->redirect_to($redirect_url);
   }

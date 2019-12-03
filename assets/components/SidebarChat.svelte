@@ -149,11 +149,11 @@ function renderUnread(dialog) {
       <span>{l('Notifications')}</span>
       <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
     </Link>
-    <Link href="/add/conversation">
+    <Link href="/settings/conversation">
       <Icon name="comment"/>
       <span>{l('Add conversation')}</span>
     </Link>
-    <Link href="/add/connection">
+    <Link href="/settings/connection">
       <Icon name="network-wired"/>
       <span>{l('Add connection')}</span>
     </Link>
