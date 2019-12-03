@@ -11,10 +11,21 @@ my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} |
 sub register {
   my ($self, $app, $config) = @_;
 
+  # TODO: Replace with promises
+  $app->helper(
+    delay => sub {
+      my $c     = shift;
+      my $tx    = $c->render_later->tx;
+      my $delay = Mojo::IOLoop->delay(@_);
+      $delay->catch(sub { $c->helpers->reply->exception(pop) and undef $tx })->wait;
+    }
+  );
+
   $app->helper('asset_version'             => \&_asset_version);
   $app->helper('backend.dialog'            => \&_backend_dialog);
   $app->helper('backend.user'              => \&_backend_user);
   $app->helper('backend.connection_create' => \&_backend_connection_create);
+  $app->helper('l'                         => \&_l);
   $app->helper('linkembedder'              => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                  => \&_settings);
   $app->helper('unauthorized'              => \&_unauthorized);
@@ -87,6 +98,12 @@ sub _backend_connection_create {
   });
 }
 
+sub _l {
+  my ($self, $lexicon, @args) = @_;
+  $lexicon =~ s!%(\d+)!{$args[$1 - 1] // $1}!ge;
+  return $lexicon;
+}
+
 sub _settings {
   my $c        = shift;
   my $settings = $c->stash->{'convos.settings'} ||= _setup_settings($c);
@@ -113,15 +130,19 @@ sub _settings {
 sub _setup_settings {
   my $c        = shift;
   my $app      = $c->app;
-  my $settings = $c->app->core->settings->TO_JSON;
+  my $settings = $app->core->settings;
 
-  $settings->{api_url}       = $c->url_for('api');
-  $settings->{asset_version} = $c->asset_version;
-  $settings->{base_url}      = $app->core->base_url->to_string;
-  $settings->{version}       = $app->VERSION;
-  $settings->{ws_url}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+  my $defaults = $settings->defaults;
+  my $defined  = $settings->TO_JSON;
+  $defined->{$_} ||= $defaults->{$_} for keys %$defaults;
 
-  return $settings;
+  $defined->{api_url}       = $c->url_for('api');
+  $defined->{asset_version} = $c->asset_version;
+  $defined->{base_url}      = $app->core->base_url->to_string;
+  $defined->{version}       = $app->VERSION;
+  $defined->{ws_url}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
+
+  return $defined;
 }
 
 sub _unauthorized {

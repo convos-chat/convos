@@ -28,17 +28,6 @@ sub startup {
   my $self   = shift;
   my $config = $self->_config;
 
-  $self->helper(l => sub { $_[1] });    # TODO
-
-  $self->helper(
-    delay => sub {
-      my $c     = shift;
-      my $tx    = $c->render_later->tx;
-      my $delay = Mojo::IOLoop->delay(@_);
-      $delay->catch(sub { $c->helpers->reply->exception(pop) and undef $tx })->wait;
-    }
-  );
-
   $self->_home_in_share unless -d $self->home->rel_file('public');
   $self->defaults(debug => $self->mode eq 'development' ? ['info'] : []);
   $self->routes->namespaces(['Convos::Controller']);
