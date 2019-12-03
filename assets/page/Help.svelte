@@ -76,5 +76,11 @@ $: scrollTo($currentUrl.hash || 0);
     <li><a href="https://convos.by" target="_blank">{l('Project homepage')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos/issues" target="_blank">{l('Bug/issue tracker')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos" target="_blank">{l('Source code')}</a></li>
+
+    {#if settings.organization_name != 'Convos' && settings.organization_url != 'https://convos.by'}
+      <li><a href="{settings.organization_url}" target="_blank">{settings.organization_name}</a></li>
+    {/if}
+
+    <li><a href="{settings.contact}" target="_blank">{l('Contact admin')}</a></li>
   </ul>
 </main>

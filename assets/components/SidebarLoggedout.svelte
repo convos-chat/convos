@@ -1,10 +1,23 @@
 <script>
 import Link from './Link.svelte';
-import {l} from '../js/i18n';
+import {getContext} from 'svelte';
+import {l, lmd} from '../js/i18n';
+
+const settings = getContext('settings');
 </script>
 
 <div class="sidebar-left">
-  <h1><Link href="/"><span>{l('Convos')}</span></Link></h1>
+  <h1>
+    <Link href="/"><span>{l('Convos')}</span></Link>
+    {#if settings.organization_name != 'Convos'}
+      {#if settings.organization_url != 'https://convos.by'}
+        <small class="subtitle">{@html lmd('for [%1](%1)', settings.organization_name)}</small>
+      {:else}
+        <small class="subtitle">{l('for %1', settings.organization_name)}</small>
+      {/if}
+    {/if}
+  </h1>
+
   <p>{l('A multiuser chat application.')}</p>
 
   <nav class="sidebar-left__nav">

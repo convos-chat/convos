@@ -48,7 +48,7 @@ $t->content_like(qr{window.__convos\s*=})->text_is('title', 'Convos for Example'
   ->element_exists(qq(meta[property="og:site_name"][content="Example"]))
   ->element_exists(qq(meta[property="og:title"][content="Convos for Example"]));
 
-$t->text_is('a[href="http://example.com"]', 'Example');
+$t->text_is('a[href="http://example.com"]', 'for Example');
 
 SKIP: {
   skip 'TEST_ONLINE=1 must be set', 2 unless $ENV{TEST_ONLINE} or $ENV{TRAVIS_BUILD_ID};
