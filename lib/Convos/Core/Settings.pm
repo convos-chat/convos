@@ -12,11 +12,12 @@ has default_connection => \&_build_default_connection;
 has forced_connection =>
   sub { $ENV{CONVOS_FORCED_CONNECTION} || $ENV{CONVOS_FORCED_IRC_SERVER} ? true : false };
 sub id {'settings'}
-has local_secret      => \&_build_local_secret;
-has open_to_public    => sub {false};
-has organization_name => sub { $ENV{CONVOS_ORGANIZATION_NAME} || 'Convos' };
+has local_secret   => \&_build_local_secret;
+has open_to_public => sub {false};
+has organization_name =>
+  sub { $ENV{CONVOS_ORGANIZATION_NAME} || shift->defaults->{organization_name} };
 has organization_url =>
-  sub { Mojo::URL->new($ENV{CONVOS_ORGANIZATION_URL} || 'https://convos.by') };
+  sub { Mojo::URL->new($ENV{CONVOS_ORGANIZATION_URL} || shift->defaults->{organization_url}) };
 
 sub public_attributes {
   return [
@@ -26,6 +27,10 @@ sub public_attributes {
 }
 
 has session_secrets => \&_build_session_secrets;
+
+sub defaults {
+  return {organization_name => 'Convos', organization_url => 'https://convos.by'};
+}
 
 sub load {
   my ($self, $cb) = @_;
@@ -225,6 +230,12 @@ Holds a L<Mojo::Path> object, with the URI to where this object should be
 stored.
 
 =head1 METHODS
+
+=head2 defaults
+
+  $hash_ref = $self->defaults;
+
+Returns default settings.
 
 =head2 id
 

@@ -19,7 +19,7 @@ let convosSettings = {};
 $: invite = $inviteLinkOp.res.body || {};
 
 updateSettingsOp.on('start', req => {
-  req.body.contact = 'mailto:' + req.body.contact;
+  if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
   req.body.open_to_public = req.body.open_to_public ? true : false;
 });
 

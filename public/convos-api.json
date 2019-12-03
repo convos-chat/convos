@@ -698,8 +698,8 @@
         "contact": { "type": "string", "minLength": 3 },
         "default_connection": { "type": "string", "format": "uri" },
         "open_to_public": { "type": "boolean" },
-        "organization_name": { "type": "string", "minLength": 2 },
-        "organization_url": { "type": "string", "format": "uri" }
+        "organization_name": { "type": "string" },
+        "organization_url": { "type": "string" }
       }
     },
     "Success": {

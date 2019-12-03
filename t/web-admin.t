@@ -5,6 +5,9 @@ use t::Helper;
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
 
+note 'default settings';
+$t->get_ok('/')->status_is(200)->element_exists_not('h1 .subtitle');
+
 note 'need to log in first';
 $t->post_ok('/api/settings', json => {open_to_public => true})->status_is(401);
 
@@ -48,14 +51,24 @@ $t->post_ok(
     forced_connection  => true,
     local_secret       => 's3cret',
     open_to_public     => true,
-    organization_name  => 'Mojolicious',
-    organization_url   => 'https://mojolicious.org',
+    organization_name  => 'Superheroes',
+    organization_url   => 'https://metacpan.org',
     session_secrets    => ['s3cret'],
   }
 )->status_is(200);
 
+$t->get_ok('/')->status_is(200)->element_exists('h1 .subtitle')
+  ->element_exists('h1 .subtitle[href="https://metacpan.org"]')
+  ->text_is('h1 .subtitle', 'for Superheroes');
+
 is $settings->local_secret,    $before_post->{local_secret},    'local_secret was not changed';
 is $settings->session_secrets, $before_post->{session_secrets}, 'session_secrets was not changed';
+
+note 'test clearing config';
+$t->post_ok('/api/settings', json => {organization_url => ''})->status_is(200);
+$t->get_ok('/')->status_is(200)->element_exists('h1 .subtitle')
+  ->element_exists_not('h1 .subtitle[href="https://metacpan.org"]')
+  ->text_is('h1 .subtitle', 'for Superheroes');
 
 note 'only admins change settings';
 $t->app->core->get_user('superman@example.com')->role(take => 'admin');

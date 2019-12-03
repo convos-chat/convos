@@ -34,12 +34,12 @@ sub _clean_json {
 
   my $json  = $self->req->json;
   my %clean = map { ($_ => $json->{$_}) }
-    grep { $json->{$_} } @{$self->app->core->settings->public_attributes};
+    grep { defined $json->{$_} } @{$self->app->core->settings->public_attributes};
 
   my @err;
   if ($clean{contact}) {
     push @err, {message => 'Contact URL need to start with "mailto:".', path => '/email'}
-      unless $clean{contact} =~ m!^mailto:.*@\w!;
+      unless $clean{contact} =~ m!^mailto:.*!;
   }
 
   if ($clean{default_connection}) {
