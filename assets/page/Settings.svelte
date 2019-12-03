@@ -8,12 +8,13 @@ import {copyToClipboard} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 
+const settings = getContext('settings');
 const user = getContext('user');
 const getSettingsOp = user.api.operation('getSettings');
 const inviteLinkOp = user.api.operation('inviteUser');
 const updateSettingsOp = user.api.operation('updateSettings');
 
-let settings = {};
+let convosSettings = {};
 
 $: invite = $inviteLinkOp.res.body || {};
 
@@ -39,7 +40,7 @@ onMount(async () => {
   await getSettingsOp.perform();
   const body = getSettingsOp.res.body;
   body.contact = body.contact.replace(/mailto:/, '');
-  settings = body;
+  convosSettings = body;
 });
 </script>
 
@@ -73,23 +74,25 @@ onMount(async () => {
   </form>
 
   <form method="post" on:submit|preventDefault="{updateSettingsFromForm}">
-    <h2>{l('Server settings')}</h2>
-    <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{settings.organization_name}">
+    <h2>{l('Convos settings')}</h2>
+    <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', settings.base_url)}</p>
+
+    <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
       <span slot="label">{l('Organization name')}</span>
       <p slot="help">{l('Can be changed if you want to add a touch of your organization.')}</p>
     </TextField>
 
-    <TextField name="organization_url" placeholder="{l('https://convos.by')}" bind:value="{settings.organization_url}">
+    <TextField name="organization_url" placeholder="{l('https://convos.by')}" bind:value="{convosSettings.organization_url}">
       <span slot="label">{l('Organization URL')}</span>
       <p slot="help">{l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
     </TextField>
 
-    <TextField name="contact" placeholder="{l('Ex: jhthorsen@cpan.org')}" bind:value="{settings.contact}">
+    <TextField name="contact" placeholder="{l('Ex: jhthorsen@cpan.org')}" bind:value="{convosSettings.contact}">
       <span slot="label">{l('Admin email')}</span>
       <p slot="help">{l('This email can be used by users to get in touch with the Convos admin.')}</p>
     </TextField>
 
-    <TextField name="default_connection" placeholder="{l('irc://chat.freenode.net:6697/%%23convos')}" bind:value="{settings.default_connection}">
+    <TextField name="default_connection" placeholder="{l('irc://chat.freenode.net:6697/%%23convos')}" bind:value="{convosSettings.default_connection}">
       <span slot="label">{l('Default connection URL')}</span>
       <p slot="help">
         {l('This is the default connection new users will connect to.')}
@@ -97,7 +100,7 @@ onMount(async () => {
       </p>
     </TextField>
 
-    <Checkbox name="open_to_public" checked="{settings.open_to_public}">
+    <Checkbox name="open_to_public" checked="{convosSettings.open_to_public}">
       <span slot="label">{l('Registration is open to public')}</span>
       <p slot="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
     </Checkbox>
