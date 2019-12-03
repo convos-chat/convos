@@ -1,11 +1,15 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import {commands} from '../js/autocomplete';
+import {currentUrl} from '../store/router';
 import {emojiAliases} from '../js/md';
 import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
+import {scrollTo} from '../js/util';
 
 const settings = getContext('settings');
+
+$: scrollTo($currentUrl.hash || 0);
 </script>
 
 <ChatHeader>
@@ -13,12 +17,21 @@ const settings = getContext('settings');
 </ChatHeader>
 
 <main class="main">
+  <p on:click="{scrollTo}">
+    {l('Jump to:')}
+    <a href="#shortcuts">{l('Shortcuts')}</a>,
+    <a href="#autocomplete">{l('Autocomplete')}</a>,
+    <a href="#formatting">{l('Text formatting')}</a>,
+    <a href="#commands">{l('Available commands')}</a>,
+    <a href="#resources">{l('Other resources')}</a>.
+  </p>
+
   <p>
     {@html lmd('Got any questions? Come and talk to us in the "#convos" channel on https://freenode.net.')}
     {@html lmd('More information can also be found on https://convos.by.')}
   </p>
 
-  <h2>{l('Shortcuts')}</h2>
+  <h2 id="shortcuts">{l('Shortcuts')}</h2>
   <dl>
     <dt>{l('shift+enter')}</dt>
     <dd>{l('Shift focus between chat input and search in sidebar.')}</dd>
@@ -26,7 +39,7 @@ const settings = getContext('settings');
     <dd>{l('Clicking on the icon next to the conversation name will take you to settings.')}</dd>
   </dl>
 
-  <h2>{l('Autocomplete')}</h2>
+  <h2 id="autocomplete">{l('Autocomplete')}</h2>
   <p>{l('The following rules apply when typing a message:')}</p>
   <dl>
     <dt>@nick</dt><dd>{l('"@" followed by a character will show matching nicks in the current conversation.')}</dd>
@@ -35,7 +48,7 @@ const settings = getContext('settings');
     <dt>#conversation</dt><dd>{l('"#" will show the matching conversation names.')}</dd>
   </dl>
 
-  <h2>{l('Text formatting')}</h2>
+  <h2 id="formatting">{l('Text formatting')}</h2>
   <p>{l('Convos supports some special way of formatting text:')}</p>
   <dl>
     <dt>{Object.keys(emojiAliases).sort().map(k => emojiAliases[k]).join(', ')}</dt>
@@ -50,7 +63,7 @@ const settings = getContext('settings');
     <dd>{l('URLs will be converted to links, and might be embedded in the chat.')}</dd>
   </dl>
 
-  <h2>{l('Available commands')}</h2>
+  <h2 id="commands">{l('Available commands')}</h2>
   <dl>
     {#each commands as command}
       <dt>{command.example}</dt>
@@ -58,7 +71,7 @@ const settings = getContext('settings');
     {/each}
   </dl>
 
-  <h2>{l('Resources')}</h2>
+  <h2 id="resources">{l('Other resources')}</h2>
   <ul>
     <li><a href="https://convos.by" target="_blank">{l('Project homepage')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos/issues" target="_blank">{l('Bug/issue tracker')}</a></li>

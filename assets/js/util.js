@@ -230,6 +230,46 @@ export function replaceClassName(sel, re, replacement) {
 }
 
 /**
+ * scrollTo() can be used as a convenient method for scrolling to an element
+ * inside the `.main` eleement.
+ *
+ * The main reason why this function exists is that `href="#target"` does not
+ * work, becasue of the sticky header element.
+ *
+ * @example
+ * // Scroll to a given position
+ * scrollTo(40);
+ *
+ * // Scroll to a given element
+ * scrollTo('.some[css=selector]');
+ * scrollTo(document.querySelector('#whatever'));
+ *
+ * // Scroll to the "href" target
+ * scrollTo(document.querySelector('a[href="#whatever"]'));
+ * <a href="#foo" on:click="{scrollTo}">...</a>
+ *
+ * @param {Any} to A number, string, Event object or HTMLElement
+ */
+export function scrollTo(to) {
+  const mainEl = document.querySelector('.main');
+  if (!mainEl) return setTimeout(() => scrollTo(to), 10);
+
+  if (typeof to == 'number') return (mainEl.scrollTop = to);
+  if (typeof to == 'string') return scrollTo(document.querySelector(to));
+
+  if (to.href && to.href.indexOf('#') != -1) {
+    location.hash = to.href.replace(/.*#/, '#');
+    return scrollTo(location.hash);
+  }
+
+  if (to.tagName) return scrollTo(to.offsetTop - 30); // Cannot scroll all the way to element, because of header
+  if (to.preventDefault) to.preventDefault();
+  if (to.target && to.target.tagName) return scrollTo(to.target.closest('[href]'));
+
+  throw 'Cannot scroll to ' + to;
+}
+
+/**
  * Used to show/hide an element or query the state of the element.
  *
  * @example
