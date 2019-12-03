@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+2.01 Not Released
+ - Fix indicating that user is offline in chat messages
+
 2.00 2019-11-23T10:23:35+0900
  - Add roles() and role() to Convos::Core::User #99 #407 #411
    * The first user will get the admin role
