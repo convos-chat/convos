@@ -70,40 +70,67 @@ sub startup {
     }
   );
 
-  $self->hook(
-    before_dispatch => sub {
-      my $c = shift;
-
-      # Used when registering the first user
-      $c->settings(first_user => true) if !$c->session('email') and !$c->app->core->n_users;
-
-      # Handle /whatever/with%2Fslash/...
-      my $path     = $c->req->url->path;
-      my $path_str = "$path";
-      $path_str =~ s/%([0-9a-fA-F]{2})/{my $h = hex $1; $h == 47 ? '%2F' : chr $h}/ge;
-      $path->leading_slash(1)  if $path_str =~ s!^/!!;
-      $path->trailing_slash(1) if $path_str =~ s!/$!!;
-      $path->parts([
-        split '/', $path->charset ? Mojo::Util::decode($path->charset, $path_str) : $path_str
-      ]);
-
-      # Handle mount point like /apps/convos
-      my $base_url;
-      if (my $base = $c->req->headers->header('X-Request-Base')) {
-        $base_url = Mojo::URL->new($base);
-        $c->req->url->base($base_url);
-      }
-      else {
-        $base_url = $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
-      }
-
-      $c->app->core->base_url($base_url);
-      $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES}
-          || $base_url->scheme eq 'https' ? 1 : 0);
-    }
-  );
-
+  $self->hook(around_action   => \&_around_action);
+  $self->hook(before_dispatch => \&_before_dispatch);
   $self->core->start;
+}
+
+sub _around_action {
+  my ($next, $c, $action, $last) = @_;
+  my $wantarray = wantarray;
+  my @args      = $wantarray ? $c->$next : (scalar $c->$next);
+
+  if (Scalar::Util::blessed($args[0]) && $args[0]->can('then')) {
+    my $tx = $c->tx;
+    my $p  = Mojo::Promise->resolve($args[0]);
+    $c->render_later if $last;
+    $p->then(
+      $last || sub { $c->continue if $_[0] },
+      sub {
+        if ($c->openapi->spec) {
+          $c->log->error($_[0]);
+          $c->render(openapi => {errors => [{message => $_[0], path => '/'}]}, status => 500);
+        }
+        else {
+          $c->reply->exception($_[0]);
+        }
+        undef $tx;
+      },
+    )->wait;
+    return unless $last;
+  }
+
+  return $wantarray ? @args : $args[0];
+}
+
+sub _before_dispatch {
+  my $c = shift;
+
+  # Used when registering the first user
+  $c->settings(first_user => true) if !$c->session('email') and !$c->app->core->n_users;
+
+  # Handle /whatever/with%2Fslash/...
+  my $path     = $c->req->url->path;
+  my $path_str = "$path";
+  $path_str =~ s/%([0-9a-fA-F]{2})/{my $h = hex $1; $h == 47 ? '%2F' : chr $h}/ge;
+  $path->leading_slash(1)  if $path_str =~ s!^/!!;
+  $path->trailing_slash(1) if $path_str =~ s!/$!!;
+  $path->parts([
+    split '/', $path->charset ? Mojo::Util::decode($path->charset, $path_str) : $path_str
+  ]);
+
+  # Handle mount point like /apps/convos
+  my $base_url;
+  if (my $base = $c->req->headers->header('X-Request-Base')) {
+    $base_url = Mojo::URL->new($base);
+    $c->req->url->base($base_url);
+  }
+  else {
+    $base_url = $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
+  }
+
+  $c->app->core->base_url($base_url);
+  $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
 }
 
 sub _config {
@@ -123,9 +150,9 @@ sub _config {
     qq(CONVOS_HOME="$config->{home}" # https://convos.by/doc/config.html#convos_home"));
 
   my $settings = $self->core->settings;
-  $settings->load;
+  $settings->load_p->wait;
   $self->secrets($settings->session_secrets);
-  $settings->save;
+  $settings->save_p->wait;
 
   return $config;
 }
@@ -277,7 +304,7 @@ Copyright (C) 2012-2015, Nordaaker.
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 

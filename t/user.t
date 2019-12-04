@@ -19,7 +19,7 @@ is $user->email, 'jhthorsen@cpan.org', 'email';
 is $user->password, '', 'password';
 
 ok !-e $settings_file, 'no storage file';
-is $user->save, $user, 'save';
+$user->save_p->$wait_success('save_p');
 ok -e $settings_file, 'created storage file';
 
 is_deeply(
@@ -44,29 +44,32 @@ ok $user->password, 'password';
 ok !$user->validate_password('s3crett'), 'invalid password';
 ok $user->validate_password('s3cret'), 'validate_password';
 
-$user->save;
+$user->save_p->$wait_success('save_p');
 is $core->get_user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';
 
 note 'unread';
 $user->{unread} = 3;
-$user->save;
+$user->save_p->$wait_success('save_p');
 is $core->get_user('jhthorsen@cpan.org')->unread, 3, 'Unseen is persisted correctly';
 
 note 'users order';
 $main::time++;
-$core->user({email => 'aaa@bbb.com'})->save;
-$core->user({email => 'bbb@bbb.com', registered => '1983-02-24T01:23:00Z'})->save;
-$core->user({email => 'ccc@bbb.com'})->save;
+$core->user({email => 'aaa@bbb.com'})->save_p->$wait_success('save_p');
+$core->user({email => 'bbb@bbb.com', registered => '1983-02-24T01:23:00Z'})
+  ->save_p->$wait_success('save_p');
+$core->user({email => 'ccc@bbb.com'})->save_p->$wait_success('save_p');
 
+my $users;
+$core->backend->users_p->then(sub { $users = shift })->$wait_success('users_p');
 is_deeply(
-  [map { $_->{email} } @{$core->backend->users}],
+  [map { $_->{email} } @$users],
   [qw(bbb@bbb.com jhthorsen@cpan.org aaa@bbb.com ccc@bbb.com)],
   'got users in the right order',
 );
 
 note 'first registered user gets admin - bbb@bbb.com (back compat)';
 $ENV{CONVOS_SKIP_CONNECT} = 1;
-$user->roles([])->save;
+$user->roles([])->save_p->$wait_success('save_p');
 undef $core;    # Fresh start
 $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 $core->start;

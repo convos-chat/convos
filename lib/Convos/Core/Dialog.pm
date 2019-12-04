@@ -19,23 +19,18 @@ has last_read   => sub { Mojo::Date->new->to_datetime };
 
 sub is_private { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 }
 
-sub messages {
-  my ($self, $query, $cb) = @_;
-  Scalar::Util::weaken($self);
-  $self->connection->user->core->backend->messages($self, $query, sub { $self->$cb(@_[1, 2]) });
-  $self;
+sub messages_p {
+  my ($self, $query) = @_;
+  return $self->connection->user->core->backend->messages_p($self, $query);
 }
 
-sub calculate_unread {
-  my ($self, $cb) = @_;
-  $self->messages(
-    {after => $self->last_read, limit => 61},
-    sub {
-      my ($self, $err, $messages) = @_;
-      $self->{unread} = $messages ? @$messages : 0;
-      $self->$cb($err);
-    }
-  );
+sub calculate_unread_p {
+  my $self = shift;
+
+  return $self->messages_p({after => $self->last_read, limit => 61})->then(sub {
+    my $messages = shift;
+    return $self->{unread} = int @$messages;
+  });
 }
 
 sub TO_JSON {
@@ -122,24 +117,24 @@ The topic (subject) of the dialog.
 Returns true if you are only talking to a single user and no other
 participants can join the dialog.
 
-=head2 messages
+=head2 messages_p
 
-  $self = $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
+  $p = $self->messages_p(\%query)->then(sub { my $messages = shift; });
 
 Will fetch messages from persistent backend.
 
 See also L<Convos::Core::Backend/messages>.
 
-=head2 calculate_unread
+=head2 calculate_unread_p
 
-  $self = $self->calculate_unread(sub { my ($self, $err) = @_; });
+  $p = $self->calculate_unread_p;
 
 Used to find the number of unread messages after L</last_read>.
 
 This method is EXPERIMENTAL.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos::Core>.
 
 =cut

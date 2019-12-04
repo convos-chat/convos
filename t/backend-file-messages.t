@@ -4,13 +4,14 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
+t::Helper->subprocess_in_main_process;
+
 my $t    = t::Helper->t;
-my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret')->save;
+my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
+$user->save_p->$wait_success('save_p');
+
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my $dialog     = $connection->dialog({name => '#convos'});
-
-# trick to make Devel::Cover track calls to _messages()
-$t->app->core->backend->_fc(bless {}, 'NoForkCall');
 
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages')->status_is(401);
 $t->get_ok('/api/notifications')->status_is(401);

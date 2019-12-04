@@ -17,16 +17,7 @@ sub settings_update {
 
   my ($err, $json) = $self->_clean_json($self->req->json);
   return $self->render(openapi => {errors => $err}, status => 400) if @$err;
-
-  my $settings = $self->app->core->settings;
-  $self->delay(
-    sub { $settings->save($json, shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->render(openapi => $settings);
-    }
-  );
+  return $self->app->core->settings->save_p($json)->then(sub { $self->render(openapi => shift) });
 }
 
 sub _clean_json {

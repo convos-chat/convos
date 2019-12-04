@@ -3,15 +3,15 @@ requires "IO::Socket::SSL"                => "2.009"; # Need to installed first,
 requires "Crypt::Eksblowfish"             => "0.009";
 requires "File::HomeDir"                  => "1.00";
 requires "File::ReadBackwards"            => "1.05";
+requires "IRC::Utils"                     => "0.12";
 requires "JSON::Validator"                => "3.16";
 requires "LinkEmbedder"                   => "1.08";
-requires "Mojo::IOLoop::ForkCall"         => "0.17";
-requires "Mojo::IRC"                      => "0.45";
 requires "Mojolicious"                    => "8.25";
 requires "Mojolicious::Plugin::OpenAPI"   => "2.18";
 requires "Mojolicious::Plugin::Webpack"   => "0.12";
 requires "Parse::IRC"                     => "1.20";
 requires "Time::Piece"                    => "1.20";
+requires "Unicode::UTF8"                  => "0.62";
 
 on develop => sub {
   requires "Test::Deep"                 => "0.11";

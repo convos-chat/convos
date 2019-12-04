@@ -6,25 +6,8 @@ use Mojo::Date;
 
 sub register {
   my ($self, $app, $config) = @_;
-
-  $app->core->backend->on(multiline_message => sub { $self->_save(@_) });
+  $app->core->backend->on(multiline_message => 'Convos::Plugin::Paste::File');
   $app->routes->get('/paste/:user_id/:paste_id' => sub { $self->_serve(@_) });
-}
-
-sub _save {
-  my ($self, $backend, $connection, $text, $cb) = @_;
-  my $file = Convos::Plugin::Paste::File->new(content => $$text, user => $connection->user);
-
-  Mojo::IOLoop->delay(
-    sub { $backend->save_object($file, shift->begin) },
-    sub {
-      my ($self, $err) = @_;
-      return $backend->$cb($err, undef) if $err;
-      return $backend->$cb('', $file->user->core->web_url($file->public_uri)->to_abs->to_string);
-    },
-  );
-
-  return $backend;
 }
 
 sub _serve {
@@ -33,16 +16,12 @@ sub _serve {
   my $file = Convos::Plugin::Paste::File->new(id => $c->stash('paste_id'), user => $user);
 
   return $c->reply->not_found unless $file->user;
-  return $c->delay(
-    sub { $c->app->core->backend->load_object($file, shift->begin) },
-    sub {
-      my ($delay, $err, $data) = @_;
-      die $err if $err;
-      return $c->reply->not_found unless $data->{created_at};
-      $data->{created_at} = Mojo::Date->new($data->{created_at})->to_datetime;
-      $c->render(paste => file => $data, render_js => 0);
-    }
-  );
+  return $c->app->core->backend->load_object_p($file)->then(sub {
+    my $data = shift;
+    return $c->reply->not_found unless $data->{created_at};
+    $data->{created_at} = Mojo::Date->new($data->{created_at})->to_datetime;
+    $c->render(paste => file => $data);
+  });
 }
 
 1;

@@ -7,9 +7,8 @@ use Mojo::Util 'trim';
 sub create {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
-
   my $json = $self->req->json;
-  my $url  = Mojo::URL->new($json->{url} || '');
+  my $url = Mojo::URL->new($json->{url} || '');
 
   if ($self->settings('forced_connection')) {
     my $default_connection = Mojo::URL->new($self->settings('default_connection'));
@@ -19,17 +18,15 @@ sub create {
 
   return $self->render(openapi => E('Missing "host" in URL'), status => 400) unless $url->host;
 
-  $self->delay(
+  return $self->backend->connection_create_p($url)->then(
     sub {
-      $self->backend->connection_create($url, shift->begin);
-    },
-    sub {
-      my ($delay, $err, $connection) = @_;
-      return $self->render(openapi => E($err || 'Could not create connection.'), status => 400)
-        if $err or !$connection;
+      my $connection = shift;
       $connection->on_connect_commands($json->{on_connect_commands} || []);
       $self->app->core->connect($connection);
       $self->render(openapi => $connection);
+    },
+    sub {
+      $self->render(openapi => E(shift || 'Could not create connection.'), status => 400);
     },
   );
 }
@@ -50,16 +47,9 @@ sub remove {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
 
-  $self->delay(
-    sub {
-      $user->remove_connection($self->stash('connection_id'), shift->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->render(openapi => {});
-    },
-  );
+  return $user->remove_connection_p($self->stash('connection_id'))->then(sub {
+    $self->render(openapi => {});
+  });
 }
 
 sub update {
@@ -72,7 +62,7 @@ sub update {
   eval {
     $connection = $user->get_connection($self->stash('connection_id'));
     $connection->url->host or die 'Connection not found.';
-    $connection->wanted_state($state) if $state;
+    $connection->set_wanted_state_p($state) if $state;
     1;
   } or do {
     return $self->render(openapi => E('Connection not found.'), status => 404);
@@ -92,21 +82,18 @@ sub update {
     $connection->url($url);
   }
 
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $state = '' if $connection->state eq 'connected' and $state eq 'connected';
-      $connection->nick($url->query->param('nick'), sub { }) if $url->query->param('nick');
-      $connection->save($delay->begin);
-      $connection->disconnect($delay->begin) if $state eq 'disconnected' or $state eq 'reconnect';
-    },
-    sub {
-      my ($delay, $err, $disconnected) = @_;
-      die $err if $err;
-      $self->app->core->connect($connection) if $state eq 'connected' or $state eq 'reconnect';
-      $self->render(openapi => $connection);
-    },
-  );
+  $state = '' if $connection->state eq 'connected' and $state eq 'connected';
+  $connection->send_p('', sprintf '/nick %s', $url->query->param('nick'))
+    if $url->query->param('nick');
+
+  my @p;
+  push @p, $connection->save_p;
+  push @p, $connection->disconnect_p if $state eq 'disconnected' or $state eq 'reconnect';
+
+  return Mojo::Promise->all(@p)->then(sub {
+    $self->app->core->connect($connection) if $state eq 'connected' or $state eq 'reconnect';
+    $self->render(openapi => $connection);
+  });
 }
 
 sub _pretty_connection_name {

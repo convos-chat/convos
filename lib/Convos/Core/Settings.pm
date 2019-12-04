@@ -32,36 +32,22 @@ sub defaults {
   return {organization_name => 'Convos', organization_url => 'https://convos.by'};
 }
 
-sub load {
-  my ($self, $cb) = @_;
-
-  # Blocking
-  return $self->_set_attributes($self->core->backend->load_object($self), 1) unless $cb;
-
-  # Non-blocking
-  Mojo::IOLoop->delay(
-    sub { $self->core->backend->load_object($self, shift->begin) },
-    sub {
-      my ($delay, $err, $params) = @_;
-      $self->_set_attributes($params, 1) if $params and !$err;
-      $self->$cb($err);
-    }
-  );
-
-  return $self;
+sub load_p {
+  my $self = shift;
+  return $self->core->backend->load_object_p($self)->then(sub { $self->_set_attributes(shift, 1) });
 }
 
-sub save {
+sub save_p {
   my $self = shift;
 
   $self->_set_attributes(shift, 0) if ref $_[0] eq 'HASH';
-  $self->core->backend->save_object($self, @_);
+  my $p = $self->core->backend->save_object_p($self, @_);
 
   # Remove legacy secrets file
   my $file = $self->_legacy_session_secrets_file;
   $file->remove if -e $file;
 
-  $self;
+  return $p;
 }
 
 sub uri { Mojo::Path->new('settings.json') }
@@ -243,18 +229,16 @@ Returns default settings.
 
 Always returns "settings". Used by L<Convos::Core::Backend::File> and friends.
 
-=head2 load
+=head2 load_p
 
-  $self = $self->save(sub { my ($self, $err) = @_; });
-  $self = $self->save;
+  $p = $self->load_p;
 
 Will save L</ATTRIBUTES> to persistent storage.
 See L<Convos::Core::Backend/save_object> for details.
 
-=head2 save
+=head2 save_p
 
-  $self = $self->save(\%attributes, sub { my ($self, $err) = @_; });
-  $self = $self->save;
+  $p = $self->save_p(\%attributes);
 
 Will save L</ATTRIBUTES> to persistent storage. C<%attributes> is optional,
 but willl be used to change the public L</ATTRIBUTES>.

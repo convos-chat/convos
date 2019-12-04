@@ -17,17 +17,8 @@ sub add_backend_helpers {
   $prefix =~ s!\.json$!!;
   $app->log->debug("Adding backend helpers \$c->$prefix->load() and \$c->$prefix->save()") if DEBUG;
 
-  $app->helper(
-    "$prefix.load" => sub {
-      return shift->app->core->backend->load_object($self, @_) || {};
-    }
-  );
-
-  $app->helper(
-    "$prefix.save" => sub {
-      return shift->app->core->backend->save_object($self, @_);
-    }
-  );
+  $app->helper("$prefix.load_p" => sub { shift->app->core->backend->load_object_p($self, @_) });
+  $app->helper("$prefix.save_p" => sub { shift->app->core->backend->save_object_p($self, @_) });
 }
 
 1;
@@ -72,7 +63,7 @@ stored.
 
   $self->add_backend_helpers($app);
 
-Can be used to add "load" and "save" helpers for the given plugin.
+Can be used to add "load_p" and "save_p" helpers for the given plugin.
 
 =head1 SEE ALSO
 

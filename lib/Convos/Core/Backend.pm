@@ -1,58 +1,55 @@
 package Convos::Core::Backend;
 use Mojo::Base 'Mojo::EventEmitter';
 
-sub connections {
-  return [] if @_ == 1;
-  $_[0]->tap($_[2], '', []);
+use Mojo::Promise;
+
+sub connections_p {
+  return Mojo::Promise->resolve([]);
 }
 
-sub delete_object {
-  $_[0]->tap($_[2], '');
+sub delete_object_p {
+  my ($self, $obj) = @_;
+  return Mojo::Promise->resolve($obj);
 }
 
-sub emit_single {
-  my ($self, $event, @args) = @_;
-  my $cb = ref $args[-1] eq 'CODE' ? pop : sub { die $_[1] };
-  my $subscribers = $self->subscribers($event);
-
-  if (@$subscribers == 1) {
-    $self->emit($event => @args);
-  }
-  else {
-    $self->$cb(qq(Unable to handle "$event".));
-  }
-
-  return $self;
+sub handle_event_p {
+  my ($self, $name, @args) = @_;
+  return Mojo::Promise->reject("No event handler for $name.")
+    unless my $class = $self->{event_to_class}{$name};
+  return $class->handle_event_p(@args);
 }
 
-sub load_object {
-  my ($self, $obj, $cb) = @_;
-  return undef unless $cb;
-  return $self->tap($cb, '', []);
+sub load_object_p {
+  my ($self, $obj) = @_;
+  return Mojo::Promise->resolve($obj);
 }
 
-sub messages {
-  my ($self, $obj, $query, $cb) = @_;
-  $self->tap($cb, '', []);
+sub messages_p {
+  my ($self, $obj, $query) = @_;
+  return Mojo::Promise->resolve([]);
 }
 
 sub new { shift->SUPER::new(@_)->tap('_setup') }
 
-sub notifications {
-  my ($self, $user, $query, $cb) = @_;
-  $self->$cb('', []);
-  $self;
+sub on {
+  my ($self, $name, $target) = @_;
+  return $self->SUPER::on($name, $target) if ref $target eq 'CODE';
+  $self->{event_to_class}{$name} = $target;
+  return $self;
 }
 
-sub save_object {
-  my ($self, $obj, $cb) = @_;
-  $obj->$cb('') if $cb;
-  $self;
+sub notifications_p {
+  my ($self, $user, $query) = @_;
+  return Mojo::Promise->resolve([]);
 }
 
-sub users {
-  return [] if @_ == 1;
-  $_[0]->tap($_[1], '', []);
+sub save_object_p {
+  my ($self, $obj) = @_;
+  return Mojo::Promise->resolve($obj);
+}
+
+sub users_p {
+  return Mojo::Promise->resolve([]);
 }
 
 sub _setup {
@@ -112,36 +109,37 @@ implements the following new ones.
 L<Convos::Core::Backend> inherits all methods from L<Mojo::EventEmitter> and
 implements the following new ones.
 
-=head2 connections
+=head2 connections_p
 
-  $self = $self->connections($user, sub { my ($self, $err, $connections) = @_ });
+  $p = $backend->connections($user)->then(sub { my $connections = shift });
 
 Used to find a list of connection names for a given L<$user|Convos::Core::User>.
 
-=head2 emit_single
+=head2 delete_object_p
 
-  $self = $self->emit_single($event => @args, sub { my ($self, $err) = @_; });
-  $self = $self->emit_single($event => @args);
-
-Will L<Mojo::EventEmitter/emit> C<$event> to a single subscriber, if any. This
-method willC<die()> or pass an error to the callback, if none or more than one
-listens to C<$event>.
-
-=head2 delete_object
-
-  $self = $self->delete_object($obj, sub { my ($self, $err) = @_ });
+  $p = $backend->delete_object_p($obj)->then(sub { my $obj = shift });
 
 This method is called to remove a given object from persistent storage.
 
-=head2 load_object
+=head2 handle_event_p
 
-  $self = $self->load_object($obj, sub { my ($self, $err, $data) = @_ });
+  $self->handle_event_p($name => @params);
+
+TODO.
+
+=head2 load_object_p
+
+  $p = $backend->load_object_p($obj)->then(sub { my $obj = shift });
 
 This method will load C<$data> for C<$obj>.
 
-=head2 messages
+=head2 on
 
-  $self->messages(\%query, sub { my ($self, $err, $messages) = @_; });
+TODO.
+
+=head2 messages_p
+
+  $p = $backend->messages_p(\%query)->then(sub { my $messages = shift; });
 
 Used to search for messages stored in backend. The callback will be called
 with the messages found.
@@ -160,26 +158,26 @@ Possible C<%query>:
 
 Will also call C<_setup()> after the object is created.
 
-=head2 notifications
+=head2 notifications_p
 
-  $self->notifications($user, \%query, sub { my ($self, $err, $notifications) = @_; });
+  $p = $backend->notifications_p($user, \%query)->then(sub { my $notifications = shift; });
 
 This method will return notifications, in the same structure as L</messages>.
 
-=head2 save_object
+=head2 save_object_p
 
-  $self->save_object($obj, sub { my ($self, $err) = @_; });
+  $backend->save_object_p($obj)->then(sub { my $obj = shift });
 
 This method is called to save a given object to persistent storage.
 
-=head2 users
+=head2 users_p
 
-  $self = $self->users(sub { my ($self, $err, $users) = @_ });
+  $backend = $backend->users_p->then(sub { my $users = shift });
 
 Used to find a list of user emails.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos::Core>
 
 =cut

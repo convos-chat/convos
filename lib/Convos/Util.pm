@@ -6,7 +6,7 @@ use Mojo::File;
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG E has_many next_tick pretty_connection_name spurt);
+our @EXPORT_OK = qw(DEBUG E has_many pretty_connection_name spurt);
 
 sub E {
   my ($msg, $path) = @_;
@@ -51,12 +51,6 @@ sub has_many {
     my $id = lc(ref $attrs ? $attrs->{id} || $many_class->id($attrs) : $attrs);
     return delete $self->{$plural_accessor}{$id};
   };
-}
-
-sub next_tick {
-  my ($obj, $cb, @args) = @_;
-  Mojo::IOLoop->next_tick(sub { $obj->$cb(@args) });
-  return $obj;
 }
 
 sub pretty_connection_name {
@@ -131,12 +125,6 @@ The definition above results in the following methods:
   # Remove a user
   $user = $class->remove_user($id);
   $user = $class->remove_user(\%attrs);
-
-=head2 next_tick
-
-  $obj = next_tick $obj, sub { my ($obj, @args) = @_ }, @args;
-
-Wrapper around L<Mojo::IOLoop/next_tick>.
 
 =head2 pretty_connection_name
 
