@@ -33,7 +33,7 @@ export const routingRules = [
   [new RegExp('^/chat'), Chat, {user: 'loggedIn'}],
   [new RegExp('^/help'), Help, {user: 'loggedIn'}],
   [new RegExp('^/docs'), null, {}],
-  [new RegExp('^/paste'), null, {}],
+  [new RegExp('^/(file|paste)'), null, {}],
   [new RegExp('^/$'), null, {user: ['error', 'success'], gotoLast: true}],
   [new RegExp('.*'), Fallback, {}],
 ];

@@ -4,14 +4,20 @@
 %= include 'partial/sidebar', js_remove => 0
 
 <header class="chat-header">
-  <h1><%=l 'Paste' %></h1>
-  <small class="ts"><%= $file->{created_at} %></small>
+  <h1><%=l $file->filename %></h1>
+  <small class="ts"><%= $file->saved %></small>
 </header>
 
-<main class="main paste">
-  <div class="le-paste is-expanded without-frame">
-    <pre class="paste"><%= $file->{content} %></pre>
-  </div>
+<main class="main">
+  % if ($file->mime_type =~ m!^image!) {
+    %= link_to $file->public_url(1), begin
+      %= image $file->public_url(1), alt => $file->filename
+    % end
+  % } else {
+    <div class="le-paste is-expanded without-frame">
+      <pre><%= $file->{content} || $file->asset->slurp %></pre>
+    </div>
+  % }
 </main>
 
 <script>
