@@ -78,7 +78,7 @@ export default class Operation extends Reactive {
         this.update({status: 'loading'});
         const [url, req] = this._paramsToRequest(opSpec, params || this.defaultParams);
         this.emit('start', req);
-        if (typeof req.body == 'object') req.body = JSON.stringify(req.body);
+        if (typeof req.body == 'object' && typeof req.body.has != 'function') req.body = JSON.stringify(req.body);
         return fetch(url, req);
       }).then(res => {
         return Promise.all([res, res.json()]);
@@ -162,6 +162,9 @@ export default class Operation extends Reactive {
     if (p.in == 'body') {
       return true;
     }
+    else if (p.in == 'formData') {
+      return params.formData.has(p.name);
+    }
     else if ((params.tagName || '').toLowerCase() == 'form') {
       return params[p.name] ? true : false;
     }
@@ -184,6 +187,10 @@ export default class Operation extends Reactive {
       }
       else if (p.in == 'query') {
         url.searchParams.set(p.name, this._extractValue(params, p));
+      }
+      else if (p.in == 'formData') {
+        delete fetchParams.headers['Content-Type']; // Set by fetch()
+        fetchParams.body = params.formData;
       }
       else if (p.in == 'body') {
         fetchParams.body = this._extractValue(params, p);
