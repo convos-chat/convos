@@ -323,6 +323,70 @@
         }
       }
     },
+    "/file": {
+      "post": {
+        "tags": [ "files" ],
+        "summary": "Upload file.",
+        "operationId": "uploadFile",
+        "x-mojo-to": "files#upload",
+        "parameters": [
+          { "name": "file", "in": "formData", "type": "file", "required": "true" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully uploaded.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [ "ext", "filename", "id", "saved", "uid", "url" ],
+                    "properties": {
+                      "ext": { "type": "string" },
+                      "filename": { "type": "string" },
+                      "id": { "type": "string" },
+                      "saved": { "type": "string", "format": "date-time" },
+                      "uid": { "type": "string" },
+                      "url": { "type": "string", "format": "uri" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
+    "/file/:uid/:fid": {
+      "get": {
+        "tags": [ "files" ],
+        "summary": "Retrieve uploaded file.",
+        "operationId": "getFile",
+        "x-mojo-to": "files#get",
+        "parameters": [
+          {"name": "fid", "in": "path", "type": "string", "required": true},
+          {"name": "uid", "in": "path", "type": "string", "required": true}
+        ],
+        "responses": {
+          "200": {
+            "description": "File found and served.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": { "$ref": "#/definitions/Error" }
+          }
+        }
+      }
+    },
     "/notifications": {
       "get": {
         "tags": [ "chat" ],
@@ -418,7 +482,7 @@
         "operationId": "deleteUser",
         "x-mojo-to": "user#delete",
         "responses": {
-            "200": {
+          "200": {
             "description": "Successfully deleted.",
             "schema": { "$ref": "#/definitions/Success" }
           },
