@@ -91,6 +91,7 @@ export default class EmbedMaker extends Reactive {
       const embedEl = this._ensureEmbedEl(url);
       embedEl.innerHTML = embed.html;
       q(embedEl, 'a', aEl => { aEl.target = '_blank' });
+      q(embedEl, 'img', img => img.addEventListener('error', () => (embedEl.style.display = 'none')));
 
       const provider = (embed.provider_name || '').toLowerCase();
       if (provider == 'instagram') return this.renderInstagram(embedEl);

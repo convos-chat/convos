@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Fix being able to clear organization_name and organization_url in
    updateSettings endpoint
  - Improved user experience on the Settings page
+ - Will hide embeds that doesn't render correct images
 
 2.00 2019-11-23T10:23:35+0900
  - Add roles() and role() to Convos::Core::User #99 #407 #411
