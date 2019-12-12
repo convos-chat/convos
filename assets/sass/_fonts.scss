@@ -2,7 +2,7 @@
 @import 'fonts/sans';
 
 // https://fontawesome.com/icons
-$fa-font-path: "../../font/fa";
+$fa-font-path: "../font/fa";
 
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/variables";
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/mixins";
