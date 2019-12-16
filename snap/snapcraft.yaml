@@ -6,6 +6,7 @@ description: |
   See http://convos.by for more details.
 icon: assets/images/convos-icon.svg
 
+base: core18
 type: app
 grade: stable
 confinement: strict # devmode or strict
@@ -24,9 +25,6 @@ parts:
       - -.ship.conf
       - -Dockerfile
       - -script/parse-irc-message.pl
-      - -parts
-      - -prime
-      - -stage
       - -t
     build-packages:
       - gcc
@@ -34,23 +32,25 @@ parts:
       - make
       - libnet-ssleay-perl
       - libio-socket-ssl-perl
-      - libperl5.26
       - perl-base
-      - perl-modules-5.26
+      - perl-modules
     stage-packages:
       - libnet-ssleay-perl
       - libio-socket-ssl-perl
-      - libperl5.26
       - perl-base
-      - perl-modules-5.26
-    prepare: |
+      - perl-modules
+    override-build: |
       set -x
-      chmod +x script/snap.sh
       perl ./script/convos install
+
+      chmod +x script/snap.sh
+      cp script/snap.sh $SNAPCRAFT_PART_INSTALL/.
+
+      snapcraftctl build
 
 apps:
   convos:
-    command: script/snap.sh
+    command: snap.sh
     plugs:
       - home
       - network

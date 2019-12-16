@@ -7,9 +7,9 @@
 
 # Building and testing the snap
 
-Make sure that Convos is checked out in your `$HOME` directory:
-
-    $ ./snap/build.sh
+    - Install snapcraft `sudo snap install snapcraft --classic`
+    - Clone convos repo
+    - Run `snapcraft` to build the snap (this will install multipass for vm based building)
 
 Other (unsorted) commands:
 
