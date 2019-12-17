@@ -9,8 +9,6 @@ use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
-$ENV{CONVOS_PLUGINS} //= 'Convos::Plugin::Paste';
-
 our $VERSION = '2.00';
 
 my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
@@ -174,19 +172,14 @@ sub _home_in_share {
 }
 
 sub _plugins {
-  my $self    = shift;
-  my $plugins = $self->config('plugins');
-  my @plugins = !$plugins ? () : ref $plugins eq 'ARRAY' ? @$plugins : %$plugins;
-  my %uniq;
-
+  my $self = shift;
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
-  unshift @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
-  unshift @plugins, qw(Convos::Plugin::Auth Convos::Plugin::Helpers);
 
-  while (@plugins) {
-    my $name   = shift @plugins or last;
-    my $config = ref $plugins[0] ? shift @plugins : $self->config;
-    $self->plugin($name => $config) unless $uniq{$name}++;
+  my @plugins = qw(Convos::Plugin::Auth Convos::Plugin::Paste Convos::Plugin::Helpers);
+  push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
+  for (@plugins) {
+    my ($name, $config) = split '\?', $_, 2;
+    $self->plugin($name => Mojo::Parameters->new($config // '')->to_hash);
   }
 }
 
