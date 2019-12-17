@@ -1,7 +1,7 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
-use Convos::Util qw(spurt DEBUG);
+use Convos::Util 'DEBUG';
 use Fcntl ':flock';
 use File::ReadBackwards;
 use Mojo::File;

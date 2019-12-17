@@ -6,7 +6,7 @@ use Mojo::File;
 use Mojo::Util 'monkey_patch';
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG E has_many pretty_connection_name spurt);
+our @EXPORT_OK = qw(DEBUG E has_many pretty_connection_name);
 
 sub E {
   my ($msg, $path) = @_;
@@ -68,14 +68,6 @@ sub pretty_connection_name {
   $name;
 }
 
-sub spurt {
-  my ($content, $path) = @_;
-  Mojo::File->new("$path.tmp")->spurt($content);
-  unlink $path or die "Can't delete old file: $path" if -e $path;
-  rename "$path.tmp" => $path;
-  return $content;
-}
-
 1;
 
 =encoding utf8
@@ -131,14 +123,6 @@ The definition above results in the following methods:
   $str = pretty_connection_name($hostname);
 
 Will turn a given hostname into a nicer connection name.
-
-=head2 spurt
-
-  $bytes = spurt $bytes => $path;
-
-Write all C<$bytes> at to a temp file, and then replace C<$path> with the temp
-file. This is almost the same as L<Mojo::Util/spurt>, but will not truncate
-existing files, if the disk is full.
 
 =head1 SEE ALSO
 
