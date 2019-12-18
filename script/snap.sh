@@ -1,2 +1,2 @@
 #!/bin/sh
-$SNAP/usr/bin/perl $SNAP/script/convos $*
+MOJO_MODE=production $SNAP/usr/bin/perl $SNAP/script/convos $*
