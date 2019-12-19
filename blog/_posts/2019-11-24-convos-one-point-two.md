@@ -99,9 +99,12 @@ are posted.
 ## Shortcut for getting to conversation settings
 
 Tired of moving all over the screen to get to the connection or conversation
-settings? There used to be a hidden feature where you could click on the
+settings? You can click on the icon next to the conversation name to get to
+the settings.
 
 <a href="/public/screenshots/2019-11-24-settings-shortcut.jpg"><img src="/public/screenshots/2019-11-24-settings-shortcut.jpg" alt="Picture of Convos settings shortcut"></a>
+
+(Clicking on the conversation title and the "sliders" icon still works)
 
 ## Moving onwards
 
