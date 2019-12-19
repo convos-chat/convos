@@ -134,22 +134,17 @@ See the [developement guide](/doc/develop) for more details.
 
 ### Snap Install
 
-IMPORTANT! Snap is currently very outdated, since we have
-[problems](https://github.com/Nordaaker/convos/issues/366) building
-the latest version.
-
 Install Convos in seconds on [Ubuntu and other snap supported Linux distributions](https://snapcraft.io/docs/core/install) with:
 
 ```bash
 snap install convos
 ```
 
-Installing a snap is very quick. Snaps are secure. They are isolated with all of their dependencies. Snaps also auto update when a new version is released.
+Installing a snap is very quick. Snaps are secure. They are isolated with all
+of their dependencies. Snaps also auto update when a new version is released.
 
-
-
-Alternative install methods are documented in the
-[install](/doc/install) guide.
+Check out the official page in the [snap store](https://snapcraft.io/convos)
+for more information.
 
 ## Next
 

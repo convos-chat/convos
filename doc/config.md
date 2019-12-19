@@ -7,60 +7,13 @@ title: Configuration
 
 ## Introduction
 
-Convos can be configured with either a config file or environment variables.
-
-Any of the settings below can be specified either in a configuration file or
-as environment variables. Here is an example on how to specify environment
-variables:
-
-You might want to check out the [FAQ](./faq.html) for example configurations
-as well.
+Most of the configuration is available from ["Settings"](https://convos.by/2019/11/24/convos-one-point-two.html)
+after you have logged in as an admin user. Even so, there are some settings
+that can be tweaked when starting Convos.
 
 ```bash
-$ CONVOS_INVITE_CODE=s3cret ./script/convos daemon
+$ CONVOS_HOME=/var/convos ./script/convos daemon
 ```
-
-One way of setting a bunch of environment variables is by putting them all in
-a shell script:
-
-```bash
-#!/bin/sh
-export CONVOS_CONTACT=jhthorsen@cpan.org
-export CONVOS_HOME=/var/convos
-export CONVOS_INVITE_CODE=s3cret
-export MOJO_LOG_LEVEL=debug
-
-exec /home/www/convos-stable/script/convos \
-  daemon --listen http://*:8000            \
-  1>>/home/www/log/convos.log              \
-  2>>/home/www/log/convos.log
-```
-
-Instead of using environment variables, you can specify configuration settings
-in a JSON config file. Note that all the settings below are optional, just like
-the environment variables.
-
-```bash
-$ /home/www/convos-stable/script/convos /path/to/convos.conf.json \
-    --listen http://*:8000
-
-$ cat /path/to/convos.conf.json
-{
-  "backend":           "Convos::Core::Backend::File",
-  "contact":           "mailto:root@localhost",
-  "default_server":    "localhost:6667",
-  "log_file":          "/var/log/convos.log",
-  "forced_irc_server": "localhost:6667",
-  "invite_code":       "s3cret",
-  "organization_name": "Awesome hackers",
-  "plugins":           {},
-  "secure_cookies":    0,
-  "secrets":           ["signed-cookie-secret"]
-}
-```
-
-Note: A config file can also be a plain Perl hash. If you want to use the perl
-format instead of JSON, then just drop the ".json" suffix on the file.
 
 ## Listen
 
@@ -136,15 +89,6 @@ A list (comma separated) of perl modules that can be loaded into the backend
 for optional functionality.
 
 There are currently no plugins loaded by default.
-
-### MOJO_LISTEN
-
-Can be used to set the address Convos will [listen](#listen) to from an
-environment variable.
-
-Example:
-
-    MOJO_LISTEN="http://127.0.0.1:8080,http://[::1]:8080"
 
 ### MOJO_REVERSE_PROXY
 
