@@ -29,6 +29,7 @@ is_deeply(
     highlight_keywords => [],
     registered         => Mojo::Date->new($main::time)->to_datetime,
     roles              => [],
+    uid                => 1,
     unread             => 0
   },
   'TO_JSON'

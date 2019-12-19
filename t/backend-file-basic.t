@@ -7,7 +7,7 @@ use Convos::Core::User;
 t::Helper->subprocess_in_main_process;
 
 my $backend = Convos::Core::Backend::File->new(home => Mojo::File->new($ENV{CONVOS_HOME}));
-my $user    = Convos::Core::User->new(email => 'jhthorsen@cpan.org');
+my $user    = Convos::Core::User->new(email => 'jhthorsen@cpan.org', uid => 42);
 
 my $users;
 $backend->users_p->then(sub { $users = shift })->$wait_success('users_p');

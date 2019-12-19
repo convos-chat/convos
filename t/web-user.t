@@ -26,6 +26,7 @@ $t->get_ok('/api/user')->status_is(200)->json_is(
     highlight_keywords => [],
     registered         => $registered,
     roles              => ['admin'],
+    uid                => 1,
     unread             => 0
   }
 );
@@ -39,6 +40,7 @@ $t->get_ok('/api/user')->status_is(200)->json_is(
     highlight_keywords => ['foo'],
     registered         => $registered,
     roles              => ['admin'],
+    uid                => 1,
     unread             => 0
   }
 );
@@ -78,6 +80,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status
     email              => 'superman@example.com',
     registered         => $registered,
     roles              => ['admin'],
+    uid                => 1,
     unread             => 4,
   }
 );
