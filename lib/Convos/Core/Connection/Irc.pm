@@ -12,14 +12,14 @@ use Time::HiRes 'time';
 use constant DIALOG_SEARCH_INTERVAL => $ENV{CONVOS_DIALOG_SEARCH_INTERVAL} || 0.5;
 use constant IS_TESTING             => $ENV{HARNESS_ACTIVE}                || 0;
 use constant MAX_BULK_MESSAGE_SIZE  => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE}  || 3;
-use constant MAX_MESSAGE_LENGTH     => $ENV{CONVOS_MAX_MESSAGE_LENGTH}     || 512;
 use constant PERIDOC_INTERVAL       => $ENV{CONVOS_IRC_PERIDOC_INTERVAL}   || 60;
 
 require Convos;
 our $VERSION = Convos->VERSION;
 
 my %CLASS_DATA;
-my %CTCP_QUOTE = ("\012" => 'n', "\015" => 'r', "\0" => '0', "\cP" => "\cP");
+my %CTCP_QUOTE         = ("\012" => 'n', "\015" => 'r', "\0" => '0', "\cP" => "\cP");
+my $MAX_MESSAGE_LENGTH = $ENV{CONVOS_MAX_MESSAGE_LENGTH} || 512;
 
 sub _available_dialogs { $CLASS_DATA{dialogs}{$_[0]->url->host} ||= {} }
 
@@ -766,12 +766,19 @@ sub _split_message {
   my $n        = 0;
 
   while ($n < @messages) {
-    if (MAX_MESSAGE_LENGTH <= length $messages[$n]) {
+    if ($MAX_MESSAGE_LENGTH <= length $messages[$n]) {
       my @chunks = split /(\s)/, $messages[$n];
       $messages[$n] = '';
       while (@chunks) {
         my $chunk = shift @chunks;
-        if (MAX_MESSAGE_LENGTH > length($messages[$n] . $chunk)) {
+
+        # Force break, in case it's just one long word
+        if ($MAX_MESSAGE_LENGTH < length $chunk) {
+          unshift @chunks, substr($chunk, 0, $MAX_MESSAGE_LENGTH - 1, ''), $chunk;
+          next;
+        }
+
+        if ($MAX_MESSAGE_LENGTH > length($messages[$n] . $chunk)) {
           $messages[$n] .= $chunk;
         }
         else {
