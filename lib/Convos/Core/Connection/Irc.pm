@@ -602,9 +602,8 @@ sub _send_message_p {
   }
 
   if (MAX_BULK_MESSAGE_SIZE <= @messages) {
-    return $self->user->core->backend->handle_event_p(multiline_message => \$message)->then(sub {
-      return $self->_send_message_p($target, shift->to_message);
-    });
+    return $self->user->core->backend->emit_to_class_p(multiline_message => $self, $message)
+      ->then(sub { $self->_send_message_p($target, shift->to_message) });
   }
 
   # Seems like there is no way to know if a message is delivered

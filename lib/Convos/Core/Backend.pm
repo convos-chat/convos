@@ -12,11 +12,12 @@ sub delete_object_p {
   return Mojo::Promise->resolve($obj);
 }
 
-sub handle_event_p {
+sub emit_to_class_p {
   my ($self, $name, @args) = @_;
   return Mojo::Promise->reject("No event handler for $name.")
     unless my $class = $self->{event_to_class}{$name};
-  return $class->handle_event_p(@args);
+  my $method = "handle_${name}_p";
+  return $class->$method($self, @args);
 }
 
 sub load_object_p {
@@ -121,9 +122,9 @@ Used to find a list of connection names for a given L<$user|Convos::Core::User>.
 
 This method is called to remove a given object from persistent storage.
 
-=head2 handle_event_p
+=head2 emit_to_class_p
 
-  $self->handle_event_p($name => @params);
+  $p = $backend->emit_to_class_p($name => @params);
 
 TODO.
 
