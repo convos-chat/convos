@@ -17,7 +17,7 @@ note 'first user does not need invite link';
 $t->get_ok('/register')->status_is(200)->content_like(qr{"first_user":true});
 my %register = (email => 'first@convos.by', password => 'firstpassword');
 $t->post_ok('/api/user/register', json => \%register)->status_is(200);
-$t->get_ok('/api/user/logout.html')->status_is(302);
+$t->get_ok('/api/user/logout.html')->status_is(302)->header_is(Location => '/login');
 
 note 'second user needs invite link';
 $t->get_ok('/register')->status_is(200)->content_unlike(qr{"first_user"});

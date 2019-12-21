@@ -17,7 +17,8 @@ export const focus = () => el.focus();
 $: absoluteHref = href.slice(0, 1) == '/' ? currentUrl.base + href : href;
 
 function onClick(event) {
-  if (!native) gotoUrl(event.target.closest('a').href, {event, replace});
+  const href = event.target.closest('a').href;
+  return native ? (location.href = href) : gotoUrl(href, {event, replace});
 }
 </script>
 

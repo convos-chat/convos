@@ -93,7 +93,7 @@ sub logout {
 
   return $self->auth->logout_p({})->then(sub {
     $self->session({expires => 1});
-    return $self->redirect_to('/') if $format eq 'html';
+    return $self->redirect_to('/login') if $format eq 'html';
     return $self->render(openapi => {message => 'Logged out.'});
   });
 }
