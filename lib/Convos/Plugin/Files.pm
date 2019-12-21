@@ -53,6 +53,13 @@ sub _serve {
 sub _save_p {
   my ($c, $asset, $meta) = @_;
   $asset = $asset->to_file unless $asset->is_file;
+
+  # The iPhone uploads every photo as "image.jpg"
+  if ($meta->{filename} =~ /^image.jpe?g$/i) {
+    my $n = time % 10000;
+    $meta->{filename} = "IMG_$n.jpg";
+  }
+
   return Convos::Plugin::Files::File->new(%$meta, asset => $asset, user => $c->backend->user)
     ->save_p;
 }

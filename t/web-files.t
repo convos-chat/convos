@@ -64,6 +64,10 @@ $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200)->text_is('header
 ok !-e $paste, 'legacy paste was moved';
 $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200, '200 OK after moved');
 
+note 'iPhone default image name';
+$t->post_ok('/api/file', form => {file => {file => 't/data/image.jpg'}})->status_is(200)
+  ->json_like('/files/0/filename', qr{^IMG_\d+\.jpg$});
+
 done_testing;
 
 __DATA__
