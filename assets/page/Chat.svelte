@@ -4,6 +4,7 @@ import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../components/ChatMessages.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
+import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import {activeMenu, container, currentUrl} from '../store/router';
@@ -28,11 +29,13 @@ let scrollPos = 'bottom';
 // Variables for calculating active connection and dialog
 let connection = {};
 let dialog = user.notifications;
+let dragAndDrop = new DragAndDrop();
 let previousPath = '';
 let pathParts = $currentUrl.pathParts;
 let unsubscribe = [];
 
 $: calculateDialog($user, $currentUrl);
+$: dragAndDrop.attach(document, messagesEl, chatInput && chatInput.getUploadEl());
 
 afterUpdate(() => {
   // Load embeds when message gets into viewport
@@ -98,6 +101,7 @@ function messageElObserved(entries, observer) {
 
 function onClose() {
   if (dialog && dialog.setLastRead) dialog.setLastRead();
+  dragAndDrop.detach();
   unsubscribe.forEach(cb => cb());
 }
 

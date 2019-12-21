@@ -1,21 +1,27 @@
 <script>
-import {getContext} from 'svelte';
-import {l} from '../js/i18n';
 import autocomplete from '../js/autocomplete';
 import Icon from '../components/Icon.svelte';
+import {getContext, onMount} from 'svelte';
+import {l} from '../js/i18n';
 
 export let dialog = {};
+export function getUploadEl() { return uploadEl }
 
 let activeAutocompleteIndex = 0;
 let autocompleteCategory = 'none';
 let inputEl;
 let pos = 0;
+let uploadEl;
 
 const user = getContext('user');
 
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
 $: connection = user.findDialog({connection_id: dialog.connection_id});
 $: inputParts = pos ? calculateInputParts(pos) : ['', '', '', ''];
+
+onMount(() => {
+  uploadEl.uploader = uploadFiles;
+});
 
 export function add(str, params = {}) {
   const space = params.space || '';
@@ -83,6 +89,19 @@ function sendMessage() {
   inputEl.value = '';
 }
 
+function uploadFiles(e) {
+  const files = (e.target && e.target.files) || (e.dataTransfer && e.dataTransfer.files);
+  if (!files || !files.length) return;
+  if (files.length > 1) return console.log('Cannot upload more than one file.');
+
+  const formData = new FormData();
+  formData.append('file', files[0]);
+  user.api.operation('uploadFile').perform({formData}).then(op => {
+    const files = op.res.body.files;
+    if (files && files.length) add(files[0].url);
+  });
+}
+
 const keys = {
   ArrowDown: (e) => focusAutocompleteItem(e, e.shiftKey ? 4 : 1),
   ArrowUp: (e) => focusAutocompleteItem(e, e.shiftKey ? -4 : -1),
@@ -108,7 +127,7 @@ const keys = {
 };
 </script>
 
-<div class="chat-input">
+<form class="chat-input" on:submit|preventDefault>
   <textarea id="chat_input_textarea"
     placeholder="{l('What is on your mind %1?', $connection.nick)}"
     bind:this="{inputEl}"
@@ -116,11 +135,16 @@ const keys = {
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
     on:keyup="{e => keys.Release(e)}"></textarea>
 
-  <a href="#send" on:click|preventDefault="{sendMessage}" class="btn-send"><Icon name="paper-plane"/></a>
+  <div class="chat-input__upload-wrapper">
+    <span></span>
+    <input type="file" on:change="{uploadFiles}" bind:this="{uploadEl}">
+  </div>
+
+  <a href="#send" on:click|preventDefault="{sendMessage}" class="chat-input__send"><Icon name="paper-plane"/></a>
 
   <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
     {#each autocompleteOptions as opt, i}
       <a href="#index:{i}" class:has-focus="{i == activeAutocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
     {/each}
   </div>
-</div>
+</form>

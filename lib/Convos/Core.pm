@@ -41,9 +41,9 @@ sub connect {
   return $self;
 }
 
-sub get_user_by_public_id {
-  my ($self, $public_id) = @_;
-  return +(grep { $_->public_id eq $public_id } @{$self->users})[0];
+sub get_user_by_uid {
+  my ($self, $uid) = @_;
+  return +(grep { $_->uid eq $uid } @{$self->users})[0];
 }
 
 sub new {
@@ -63,7 +63,7 @@ sub start {
 
   # Want this method to be blocking to make sure everything is ready
   # before processing web requests.
-  my ($first_user, $has_admin) = (undef, 0);
+  my ($first_user, $has_admin, $uid) = (undef, 0, 0);
   $self->backend->users_p->then(sub {
     my $users = shift;
 
@@ -106,6 +106,8 @@ sub start {
 has_many users => 'Convos::Core::User' => sub {
   my ($self, $attrs) = @_;
   $attrs->{email} = trim lc $attrs->{email} || '';
+  $attrs->{uid}   = $self->n_users + 1;
+  $attrs->{uid}++ while $self->get_user_by_uid($attrs->{uid});
   my $user = Convos::Core::User->new($attrs);
   die "Invalid email $user->{email}. Need to match /.\@./." unless $user->email =~ /.\@./;
   Scalar::Util::weaken($user->{core} = $self);
@@ -248,11 +250,11 @@ L<Convos::Core::Connection/connect> if defined.
 
 Returns a L<Convos::Core::User> object or undef.
 
-=head2 get_user_by_public_id
+=head2 get_user_by_uid
 
-  $user = $self->get_user_by_public_id($id);
+  $user = $self->get_user_by_uid($uid);
 
-Returns a L<Convos::Core::User> object or undef.
+Returns a L<Convos::Core::User> object or C<undef>.
 
 =head2 new
 

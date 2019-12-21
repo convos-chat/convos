@@ -3,10 +3,10 @@ use Mojo::Base 'Exporter';
 
 use JSON::Validator::Error;
 use Mojo::File;
-use Mojo::Util 'monkey_patch';
+use Mojo::Util qw(b64_encode md5_sum monkey_patch);
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG E has_many pretty_connection_name);
+our @EXPORT_OK = qw(DEBUG E has_many pretty_connection_name short_checksum);
 
 sub E {
   my ($msg, $path) = @_;
@@ -68,6 +68,13 @@ sub pretty_connection_name {
   $name;
 }
 
+sub short_checksum {
+  my $checksum = 32 == length $_[0] && $_[0] =~ /^[a-z0-9]{32}$/ ? shift : md5_sum shift;
+  my $short    = b64_encode pack 'H*', $checksum;
+  $short =~ s![aeiouAEIOU+=/\n]!!g;
+  return substr $short, 0, 16;
+}
+
 1;
 
 =encoding utf8
@@ -123,6 +130,15 @@ The definition above results in the following methods:
   $str = pretty_connection_name($hostname);
 
 Will turn a given hostname into a nicer connection name.
+
+=head2 short_checksum
+
+  $str = short_checksum($md5_sum);
+
+Will take a MD5 or SHA1 string and shorten it.
+
+  # "7Mvfktc4v4MZ8q68"
+  short_checksum "eccbc87e4b5ce2fe28308fd9f2a7baf3";
 
 =head1 SEE ALSO
 

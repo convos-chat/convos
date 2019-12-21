@@ -115,3 +115,11 @@
     right: 1rem;
   }
 }
+
+@include if_screen("<=two-columns") {
+  .is-logged-out .chat-header {
+    position: static;
+    padding: var(--gutter-big);
+    padding-top: 0;
+  }
+}

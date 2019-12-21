@@ -175,7 +175,7 @@ sub _plugins {
   my $self = shift;
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
 
-  my @plugins = qw(Convos::Plugin::Auth Convos::Plugin::Paste Convos::Plugin::Helpers);
+  my @plugins = qw(Convos::Plugin::Auth Convos::Plugin::Files Convos::Plugin::Helpers);
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
   for (@plugins) {
     my ($name, $config) = split '\?', $_, 2;

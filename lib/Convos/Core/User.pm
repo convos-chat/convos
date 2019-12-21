@@ -21,6 +21,7 @@ has highlight_keywords => sub { +[] };
 sub password   { shift->{password}   ||= '' }
 sub registered { shift->{registered} ||= Mojo::Date->new }
 has roles  => sub { +[] };
+has uid    => sub { die 'uid() cannot be built' };
 has unread => sub {0};
 
 has_many connections => 'Convos::Core::Connection' => sub {
@@ -94,8 +95,6 @@ sub notifications_p {
   return $self->core->backend->notifications_p($self, $query);
 }
 
-sub public_id { substr Mojo::Util::sha1_sum(shift->email), 0, 20; }
-
 sub remove_connection_p {
   my ($self, $id) = @_;
 
@@ -159,6 +158,7 @@ sub TO_JSON {
   $json->{registered}         = $self->registered->to_datetime;
   $json->{roles}              = $self->roles;
   $json->{unread}             = $self->unread;
+  $json->{uid}                = $self->uid;
   $json;
 }
 
@@ -198,17 +198,17 @@ Email address of user.
 Encrypted password. See L</set_password> for how to change the password and
 L</validate_password> for password authentication.
 
-=head2 public_id
-
-  $str = $user->public_id;
-
-Returns an anonymous ID for this user.
-
 =head2 roles
 
   $array_ref = $user->roles;
 
 Holds a list of roles that the user has. See L</role> for changing this attribute.
+
+=head2 uid
+
+  $str = $user->uid;
+
+Returns the UID for this user.
 
 =head2 unread
 
