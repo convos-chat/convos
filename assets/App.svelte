@@ -23,6 +23,8 @@ import Settings from './page/Settings.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 
 export const routingRules = [
+  [new RegExp('^/(file|paste)'), null, {}],
+  [new RegExp('^/docs'), null, {}],
   [new RegExp('.*'), Fallback, {user: 'offline'}],
   [new RegExp('^/login'), Login, {}],
   [new RegExp('^/register'), Register, {}],
@@ -32,8 +34,6 @@ export const routingRules = [
   [new RegExp('^/settings'), Settings, {user: 'loggedIn'}],
   [new RegExp('^/chat'), Chat, {user: 'loggedIn'}],
   [new RegExp('^/help'), Help, {user: 'loggedIn'}],
-  [new RegExp('^/docs'), null, {}],
-  [new RegExp('^/(file|paste)'), null, {}],
   [new RegExp('^/$'), null, {user: ['error', 'success'], gotoLast: true}],
   [new RegExp('.*'), Fallback, {}],
 ];
@@ -151,14 +151,16 @@ function onWindowFocus() {
   on:keydown="{onGlobalKeydown}"
   bind:innerWidth="{containerWidth}"/>
 
-{#if !$user.is('loggedIn')}
-  <SidebarLoggedout/>
-{:else if $activeMenu == 'nav' || $container.wideScreen}
-  <SidebarChat transition="{{duration: $container.wideScreen ? 0 : 250, x: $container.width}}"/>
-{/if}
+{#if $pageComponent}
+  {#if !$user.is('loggedIn')}
+    <SidebarLoggedout/>
+  {:else if $activeMenu == 'nav' || $container.wideScreen}
+    <SidebarChat transition="{{duration: $container.wideScreen ? 0 : 250, x: $container.width}}"/>
+  {/if}
 
-<svelte:component this="{$pageComponent}"/>
+  <svelte:component this="{$pageComponent}"/>
 
-{#if $activeMenu && !$container.wideScreen}
-  <div class="overlay" transition:fade="{{duration: 200}}">&nbsp;</div>
+  {#if $activeMenu && !$container.wideScreen}
+    <div class="overlay" transition:fade="{{duration: 200}}">&nbsp;</div>
+  {/if}
 {/if}

@@ -79,7 +79,7 @@ export async function redirectAfterLogin(user, op) {
 function switchPageComponent(nextPageComponent) {
   // Only switch if the page has actually changed
   const currentPageComponent = get(pageComponent);
-  if (nextPageComponent == currentPageComponent) return;
+  if (!nextPageComponent || nextPageComponent == currentPageComponent) return;
 
   // Remove original components before doing the switch
   if (!currentPageComponent) {
