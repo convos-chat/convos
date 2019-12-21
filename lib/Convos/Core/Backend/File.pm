@@ -1,11 +1,11 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
-use Convos::Util qw(next_tick spurt DEBUG);
+use Convos::Util qw(spurt DEBUG);
 use Fcntl ':flock';
 use File::ReadBackwards;
 use Mojo::File;
-use Mojo::IOLoop::ForkCall ();
+use Mojo::IOLoop::Subprocess;
 use Mojo::JSON;
 use Mojo::Util qw(encode decode);
 use Symbol;
@@ -30,22 +30,13 @@ my %FORMAT = (
 
 has home => sub { Carp::confess('home() cannot be built') };
 
-has _fc => sub {
-  my $fc = Mojo::IOLoop::ForkCall->new;
-  $fc->on(error => sub { warn "[fc] $_[1]" });
-  $fc;
-};
-
-sub connections {
-  my ($self, $user, $cb) = @_;
+sub connections_p {
+  my ($self, $user) = @_;
   my $user_dir = $self->home->child(@{$user->uri})->dirname;
-  my ($CONNECTIONS, @connections);
 
-  unless (opendir $CONNECTIONS, $user_dir) {
-    return next_tick $self, $cb, $!, [] if $cb;
-    die $!;
-  }
+  return Mojo::Promise->reject($!) unless opendir(my ($CONNECTIONS), $user_dir);
 
+  my @connections;
   while (my $id = readdir $CONNECTIONS) {
     next unless $id =~ /^\w+/;
     my $settings = $user_dir->child($id, 'connection.json');
@@ -54,62 +45,40 @@ sub connections {
     delete $connections[-1]{state};    # should not be stored in connection.json
   }
 
-  return next_tick $self, $cb, '', \@connections if $cb;
-  return \@connections;
+  return Mojo::Promise->resolve(\@connections);
 }
 
-sub delete_object {
-  my ($self, $obj, $cb) = @_;
+sub delete_object_p {
+  my ($self, $obj) = @_;
 
   if ($obj->isa('Convos::Core::Connection')) {
     $obj->unsubscribe($_) for qw(dialog message state);
   }
 
-  Mojo::IOLoop->delay(
-    sub {
-      $self->_fc->run(
-        sub {
-          my $path = $self->home->child(@{$obj->uri});
-          $path = $path->dirname
-            if grep { $obj->isa($_) } qw(Convos::Core::Connection Convos::Core::User);
-          if (-d $path) {
-            $path->remove_tree({verbose => DEBUG});
-          }
-          else {
-            unlink $path or die "unlink $path: $!";
-          }
-        },
-        shift->begin,
-      );
-    },
-    sub {
-      my ($delay, $err) = @_;
-      warn "[@{[$obj->id]}] Delete object: @{[$err || 'Success']}\n" if DEBUG;
-      $self->$cb($err || '');
-    },
+  my $p = Mojo::Promise->new;
+  Mojo::IOLoop::Subprocess->new->run(
+    sub { $self->_delete_object($obj) },
+    sub { $_[1] ? $p->reject($_[1]) : $p->resolve($obj) },
   );
 
-  return $self;
+  return $p;
 }
 
-sub load_object {
-  my ($self, $obj, $cb) = @_;
-  my $storage_file = $self->home->child(@{$obj->uri});
-  my $data         = {};
-  my $err          = '';
+sub load_object_p {
+  my ($self, $obj) = @_;
+  my $data = {};
 
+  my $storage_file = $self->home->child(@{$obj->uri});
   if (-e $storage_file) {
     eval { $data = Mojo::JSON::decode_json($storage_file->slurp); };
-    $err = $@ || 'Unknown error' unless $data;
+    return Mojo::Promise->reject($@ || 'Unknown error.') unless $data;
   }
 
-  return next_tick $self, $cb, $err, $data if $cb;
-  return $data unless $err;
-  die $err;
+  return Mojo::Promise->resolve($data);
 }
 
-sub messages {
-  my ($self, $obj, $query, $cb) = @_;
+sub messages_p {
+  my ($self, $obj, $query) = @_;
   my $re = $query->{match} || qr{.};
   my %args;
 
@@ -149,27 +118,25 @@ sub messages {
 
   # Do not search if the difference between "before" and "after" is more than 12 months
   # This limits the amount of time that could be spent searching and it also prevents DoS attacks
-  return $self if $args{before} - $args{after} > $args{before} - $args{before}->add_months(-12);
+  return Mojo::IOLoop->resolve([])
+    if $args{before} - $args{after} > $args{before} - $args{before}->add_months(-12);
 
   # The {cursor} is used to walk through the month-hashed log files
   $args{cursor} = $args{before};
 
   warn "[@{[$obj->id]}] Searching $args{after} - $args{before}\n" if DEBUG;
-  Mojo::IOLoop->delay(
-    sub {
-      $self->_fc->run(sub { $self->_messages($obj, \%args) }, shift->begin);
-    },
-    sub {
-      my ($delay, $err, $messages) = @_;
-      $self->$cb($err, $messages || []);
-    },
+
+  my $p = Mojo::Promise->new;
+  Mojo::IOLoop::Subprocess->new->run(
+    sub { $self->_messages($obj, \%args) },
+    sub { $_[1] ? $p->reject($_[1]) : $p->resolve($_[2]) },
   );
 
-  return $self;
+  return $p;
 }
 
-sub notifications {
-  my ($self, $user, $query, $cb) = @_;
+sub notifications_p {
+  my ($self, $user, $query) = @_;
   my $file = $self->_notifications_file($user);
   my ($FH, $re, @notifications);
 
@@ -177,7 +144,7 @@ sub notifications {
 
   unless ($FH = File::ReadBackwards->new($file)) {
     warn "[@{[$user->id]}] Read $file: $!\n" if DEBUG;
-    return next_tick $self, $cb, '', [];
+    return Mojo::Promise->resolve([]);
   }
 
   $re = $query->{match} || qr{.};
@@ -195,32 +162,30 @@ sub notifications {
     last if @notifications == $query->{limit};
   }
 
-  return next_tick $self, $cb, '', \@notifications;
+  return Mojo::Promise->resolve(\@notifications);
 }
 
-sub save_object {
-  my ($self, $obj, $cb) = @_;
+sub save_object_p {
+  my ($self, $obj) = @_;
   my $storage_file = $self->home->child(@{$obj->uri});
-  my $err          = '';
 
+  my $p = Mojo::Promise->new;
   eval {
     my $dir = $storage_file->dirname;
     $dir->make_path($dir) unless -d $dir;
     $storage_file->spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')));
     warn "[@{[$obj->id]}] Save success. ($storage_file)\n" if DEBUG;
-    1;
+    $p->resolve($obj);
   } or do {
-    $err = $@;
-    warn "[@{[$obj->id]}] Save $err ($storage_file)\n" if DEBUG;
+    warn "[@{[$obj->id]}] Save $@ ($storage_file)\n" if DEBUG;
+    $p->reject($@ || 'Unknown error.');
   };
 
-  return next_tick $self, $cb, $err if $cb;
-  return $self unless $err;
-  die $err;
+  return $p;
 }
 
-sub users {
-  my ($self, $cb) = @_;
+sub users_p {
+  my $self = shift;
   my $home = $self->home;
   my @users;
 
@@ -236,8 +201,23 @@ sub users {
   # Return users in a predictable order
   @users = sort { $a->{registered} cmp $b->{registered} || $a->{email} cmp $b->{email} } @users;
 
-  return next_tick $self, $cb, '', \@users if $cb;
-  return \@users;
+  return Mojo::Promise->resolve(\@users);
+}
+
+sub _delete_object {
+  my ($self, $obj) = @_;
+  my $path = $self->home->child(@{$obj->uri});
+
+  if (grep { $obj->isa($_) } qw(Convos::Core::Connection Convos::Core::User)) {
+    $path = $path->dirname;
+  }
+
+  if (-d $path) {
+    $path->remove_tree({verbose => DEBUG});
+  }
+  else {
+    unlink $path or die "unlink $path: $!";
+  }
 }
 
 sub _format {
@@ -365,7 +345,7 @@ sub _setup {
           if ($msg->{highlight} and $target->id and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
             $connection->user->{unread}++;
-            $connection->user->save;
+            $connection->user->save_p;
             $flag |= FLAG_HIGHLIGHT;
           }
 
@@ -451,36 +431,36 @@ See L<Convos::Core/home>.
 L<Convos::Core::Backend::File> inherits all methods from
 L<Convos::Core::Backend> and implements the following new ones.
 
-=head2 connections
+=head2 connections_p
 
-See L<Convos::Core::Backend/connections>.
+See L<Convos::Core::Backend/connections_p>.
 
-=head2 delete_object
+=head2 delete_object_p
 
-See L<Convos::Core::Backend/delete_object>.
+See L<Convos::Core::Backend/delete_object_p>.
 
-=head2 load_object
+=head2 load_object_p
 
-See L<Convos::Core::Backend/load_object>.
+See L<Convos::Core::Backend/load_object_p>.
 
-=head2 messages
+=head2 messages_p
 
-See L<Convos::Core::Backend/messages>.
+See L<Convos::Core::Backend/messages_p>.
 
-=head2 notifications
+=head2 notifications_p
 
-See L<Convos::Core::Backend/notifications>.
+See L<Convos::Core::Backend/notifications_p>.
 
-=head2 save_object
+=head2 save_object_p
 
-See L<Convos::Core::Backend/save_object>.
+See L<Convos::Core::Backend/save_object_p>.
 
-=head2 users
+=head2 users_p
 
-See L<Convos::Core::Backend/users>.
+See L<Convos::Core::Backend/users_p>.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos::Core>.
 
 =cut

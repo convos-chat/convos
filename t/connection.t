@@ -15,12 +15,10 @@ my $dialog = $connection->get_dialog('#foo');
 ok $connection->{dialogs}{'#foo'}, 'dialog on create/update';
 
 $connection = Convos::Core::Connection->new({});
-for my $method (qw(connect disconnect participants send)) {
-  my $err;
-  eval {
-    $connection->$method(sub { $err = $_[1] });
-  };
-  is $err, qq(Method "$method" not implemented.), $method;
-}
+eval { $connection->disconnect_p };
+like $@, qr(^Method "disconnect_p" not implemented), 'disconnect_p';
+
+eval { $connection->send_p };
+like $@, qr(^Method "send_p" not implemented), 'send_p';
 
 done_testing;

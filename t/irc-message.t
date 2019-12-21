@@ -7,113 +7,149 @@ BEGIN {
 
 use lib '.';
 use t::Helper;
-use Test::Mojo::IRC -basic;
 use Mojo::IOLoop;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-my @date       = split '-', Time::Piece->new->strftime('%Y-%m');
 my $core       = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $t          = t::Helper->connect_to_irc($connection);
 
-$connection->_irc->emit(
-  message => {
-    event  => 'privmsg',
-    prefix => 'Supergirl!super.girl@i.love.debian.org',
-    params => ['#convos', 'not a superdupersuperman?']
-  }
+my $err;
+$connection->send_p('', 'whatever')->catch(sub { $err = shift })->$wait_success('send_p');
+like $err, qr{without target}, 'send: without target';
+
+$connection->send_p('#test_convos' => '0')->catch(sub { $err = shift })->$wait_success('send_p');
+like $err, qr{Not connected}i, 'send: not connected';
+
+t::Helper->irc_server_connect($connection);
+
+t::Helper->irc_server_messages(
+  qr{NICK}    => ['welcome.irc'],
+  qr{USER}    => ":Supergirl!sg\@example.com PRIVMSG #convos :not a superdupersuperman?\r\n",
+  $connection => '_irc_event_privmsg',
 );
-is($user->unread, 0, 'No unread messages');
+
+note 'notifications';
+is $user->unread, 0, 'notifications';
 like slurp_log('#convos'), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
-$connection->_irc->emit(
-  message => {
-    event  => 'privmsg',
-    prefix => 'Supergirl!super.girl@i.love.debian.org',
-    params => ['#convos', 'Hey SUPERMAN!']
-  }
+t::Helper->irc_server_messages(
+  from_server =>
+    ":Supergirl!sg\@example.com PRIVMSG superman :Hey! Do you get any notifications?\r\n",
+  $connection => '_irc_event_privmsg',
+  from_server => ":Supergirl!sg\@example.com PRIVMSG superman :Yikes! how are you?\r\n",
+  $connection => '_irc_event_privmsg',
+  from_server =>
+    ":superman!sm\@example.com PRIVMSG #convos :What if I mention myself as superman?\r\n",
+  $connection => '_irc_event_privmsg',
+  from_server =>
+    ":Supergirl!sg\@example.com PRIVMSG #convos :But... SUPERMAN, what about in a channel?\r\n",
+  $connection => '_irc_event_privmsg',
+  from_server =>
+    ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a normal message in a channel?\r\n",
+  $connection => '_irc_event_privmsg',
 );
-like slurp_log('#convos'), qr{\Q<Supergirl> Hey SUPERMAN!\E}m, 'notification';
+like slurp_log('#convos'), qr{\Q<Supergirl> But... SUPERMAN, what about in a channel?\E}m,
+  'notification';
 
-my ($err, $notifications);
-$core->get_user('superman@example.com')
-  ->notifications({}, sub { $notifications = pop; Mojo::IOLoop->stop; });
-Mojo::IOLoop->start;
+my $notifications;
+$core->get_user('superman@example.com')->notifications_p({})->then(sub { $notifications = pop; })
+  ->$wait_success('notifications');
 ok delete $notifications->[0]{ts}, 'notifications has timestamp';
-is($user->unread, 1, 'One unread messages');
-is_deeply $notifications,
+is $user->unread, 1, 'One unread messages';
+is_deeply(
+  $notifications,
   [{
-  connection_id => 'irc-localhost',
-  dialog_id     => '#convos',
-  from          => 'Supergirl',
-  message       => 'Hey SUPERMAN!',
-  type          => 'private'
+    connection_id => 'irc-localhost',
+    dialog_id     => '#convos',
+    from          => 'Supergirl',
+    message       => 'But... SUPERMAN, what about in a channel?',
+    type          => 'private'
   }],
-  'notifications';
+  'notifications'
+);
 
-$connection->_irc->emit(
-  message => {
-    event  => 'privmsg',
-    prefix => 'Supergirl!super.girl@i.love.debian.org',
-    params => ['superman', 'does this work?']
-  }
+note 'highlight_keywords';
+$user->highlight_keywords(['normal', 'Yikes', ' '])->_normalize_attributes;
+
+t::Helper->irc_server_messages(
+  from_server =>
+    ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a message with space in a channel?\r\n",
+  $connection => '_irc_event_privmsg',
+  from_server => ":Supergirl!sg\@example.com PRIVMSG #convos :Yikes! yikes:/\r\n",
+  $connection => '_irc_event_privmsg',
+  from_server =>
+    ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a NORMAL message in a channel?\r\n",
+  $connection => '_irc_event_privmsg',
+  from_server => ":Supergirl!sg\@example.com PRIVMSG #convos :Some other random message\r\n",
+  $connection => '_irc_event_privmsg',
+);
+$core->get_user('superman@example.com')->notifications_p({})->then(sub { $notifications = pop; })
+  ->$wait_success('notifications');
+delete $_->{ts} for @$notifications;
+is_deeply(
+  $notifications,
+  [
+    map {
+      +{
+        connection_id => 'irc-localhost',
+        dialog_id     => '#convos',
+        from          => 'Supergirl',
+        message       => $_,
+        type          => 'private'
+      }
+    } 'But... SUPERMAN, what about in a channel?',
+    'Yikes! yikes:/',
+    'Or what about a NORMAL message in a channel?',
+  ],
+  'notifications'
+);
+is $user->unread, 3, 'One unread messages';
+
+t::Helper->irc_server_messages(
+  from_server => ":Supergirl!sg\@example.com PRIVMSG superman :does this work?!\r\n",
+  $connection => '_irc_event_privmsg',
 );
 like slurp_log("supergirl"), qr{\Q<Supergirl> does this work?\E}m, 'private message';
 
-$connection->_irc->emit(
-  message => {
-    event  => 'ctcp_action',
-    prefix => 'jhthorsen!jhthorsen@i.love.debian.org',
-    params => ['#convos', "convos rocks"]
-  }
+t::Helper->irc_server_messages(
+  from_server =>
+    ":jhthorsen!jhthorsen\@example.com PRIVMSG #convos :\x{1}ACTION convos rocks!\x{1}\r\n",
+  $connection => '_irc_event_ctcp_action',
 );
 like slurp_log('#convos'), qr{\Q* jhthorsen convos rocks\E}m, 'ctcp_action';
 
-# test stripping away invalid characters in a message
-$connection->send('#convos' => "\n/me will be\a back\n", sub { $err = $_[1] });
-$connection->once(message => sub { Mojo::IOLoop->next_tick(\&Mojo::IOLoop::stop) });
-Mojo::IOLoop->start;
-is $err, '', 'invalid characters was filtered';
+note 'test stripping away invalid characters in a message';
+$connection->send_p('#convos' => "\n/me will be\a back\n")->$wait_success('send_p action');
 like slurp_log('#convos'), qr{\Q* superman will be back\E}m, 'loopback ctcp_action';
 
-$connection->send('#convos' => "some regular message", sub { });
-$connection->once(message => sub { Mojo::IOLoop->next_tick(\&Mojo::IOLoop::stop) });
-Mojo::IOLoop->start;
+$connection->send_p('#convos' => "some regular message")->$wait_success('send_p regular');
 like slurp_log('#convos'), qr{\Q<superman> some regular message\E}m, 'loopback private';
 
-$connection->_irc->emit(
-  message => {
-    event  => 'notice',
-    prefix => 'Supergirl!super.girl@i.love.debian.org',
-    params => ['superman', "notice this?"]
-  }
+$connection->send_p('#convos' => "/say /me is a command")->$wait_success('send_p /say');
+like slurp_log('#convos'), qr{\Q<superman> /me is a command\E}m, 'me is a command';
+
+t::Helper->irc_server_messages(
+  from_server => ":Supergirl!sg\@example.com NOTICE superman :notice this?\r\n",
+  $connection => '_irc_event_notice',
 );
 like slurp_log("supergirl"), qr{\Q-Supergirl- notice this?\E}m, 'irc_notice';
 
-$connection->_irc->emit(
-  message => {
-    event  => 'privmsg',
-    prefix => 'superduper!super.duper@i.love.debian.org',
-    params => ['#convos', 'foo-bar-baz, yes?']
-  }
+t::Helper->irc_server_messages(
+  from_server => ":superduper!sd\@example.com PRIVMSG #convos foo-bar-baz, yes?\r\n",
+  $connection => '_irc_event_privmsg',
 );
 like slurp_log('#convos'), qr{\Q<superduper> foo-bar-baz, yes?\E}m, 'superduper';
 
-my @messages;
-my $subscriber = $connection->on(
-  message => sub {
-    my ($connection, $dialog, $msg) = @_;
-    push @messages, $msg->{message} if $msg->{from} eq 'superman';
-    Mojo::IOLoop->next_tick(\&Mojo::IOLoop::stop) if @messages == 4;
-  }
-);
-$connection->send('#convos' => join("\n", long_message(), long_message()), sub { });
-Mojo::IOLoop->start;
-is_deeply [map { length $_ } @messages], [508, 5, 508, 5], 'split long messages';
-
-$connection->unsubscribe(message => $subscriber);
+$connection->send_p('#convos' => join "\n", long_message(), long_message())
+  ->$wait_success('send_p long x2');
+like slurp_log('#convos'), qr{
+  .*<superman>\sPhasellus.*rhoncus\r?\n
+  .*<superman>\samet\.\r?\n
+  .*<superman>\sPhasellus.*rhoncus\r?\n
+  .*<superman>\samet\.\r?\n
+}sx, 'split long message';
 
 done_testing;
 
@@ -128,6 +164,7 @@ sub long_message {
 }
 
 sub slurp_log {
+  my @date = split '-', Time::Piece->new->strftime('%Y-%m');
   Mojo::File->new(qw(local test-irc-message-t superman@example.com irc-localhost),
     @date, "$_[0].log")->slurp;
 }

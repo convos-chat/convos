@@ -7,50 +7,29 @@ use Mojo::Util;
 sub register {
   my ($self, $app, $config) = @_;
 
-  $app->helper('auth.login'    => \&_login);
-  $app->helper('auth.logout'   => \&_logout);
-  $app->helper('auth.register' => sub { $self->_register(@_) });
+  $app->helper('auth.login_p'    => \&_login_p);
+  $app->helper('auth.logout_p'   => \&_logout_p);
+  $app->helper('auth.register_p' => \&_register_p);
 }
 
-sub _login {
-  my ($c, $args, $cb) = @_;
+sub _login_p {
+  my ($c, $args) = @_;
   my $user = $c->app->core->get_user($args);
-
-  if ($user and $user->validate_password($args->{password})) {
-    $c->$cb('', $user);
-  }
-  else {
-    $c->$cb('Invalid email or password.', undef);
-  }
+  return Mojo::Promise->resolve($user) if $user and $user->validate_password($args->{password});
+  return Mojo::Promise->reject('Invalid email or password.');
 }
 
-sub _logout {
-  my ($c, $args, $cb) = @_;
-  my $err = '';
-  $c->$cb($err);
+sub _logout_p {
+  my ($c, $args) = @_;
+  return Mojo::Promise->resolve;
 }
 
-sub _register {
-  my ($self, $c, $args, $cb) = @_;
+sub _register_p {
+  my ($c, $args) = @_;
   my $core = $c->app->core;
-  my $user;
 
-  if ($core->get_user($args)) {
-    return $c->$cb('Email is taken.', undef);
-  }
-
-  $c->delay(
-    sub {
-      my ($delay) = @_;
-      $user = $core->user($args);
-      $user->set_password($args->{password});
-      $user->save($delay->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      $self->$cb($err, $user);
-    },
-  );
+  return Mojo::Promise->reject('Email is taken.') if $core->get_user($args);
+  return $core->user($args)->set_password($args->{password})->save_p;
 }
 
 1;
@@ -72,22 +51,22 @@ created a custom plugin.
 
 =head1 HELPERS
 
-=head2 auth.login
+=head2 auth.login_p
 
-  $c->auth->login(\%credentials, sub { my ($c, $err, $user) = @_; });
+  $p = $c->auth->login_p(\%credentials)->then(sub { my $user = shift });
 
 Used to login a user. C<%credentials> normally contains an C<email> and
 C<password>.
 
 =head2 auth.logout
 
-  $c->auth->logout({}, sub { my ($c, $err) = @_; });
+  $p = $c->auth->logout_p({});
 
 Used to log out a user.
 
 =head2 auth.register
 
-  $c->auth->register(\%credentials, sub { my ($c, $err, $user) = @_; });
+  $p = $c->auth->register(\%credentials)->then(sub { my $user = shift });
 
 Used to register a user. C<%credentials> normally contains an C<email> and
 C<password>.

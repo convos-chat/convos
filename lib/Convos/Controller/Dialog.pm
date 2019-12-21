@@ -14,18 +14,10 @@ sub last_read {
     return $self->render(openapi => E('Dialog not found.'), status => 404);
   }
 
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $dialog->last_read($last_read);
-      $self->stash('connection')->save($delay->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->render(openapi => {last_read => $last_read});
-    }
-  );
+  $dialog->last_read($last_read);
+  $self->stash('connection')->save_p->then(sub {
+    $self->render(openapi => {last_read => $last_read});
+  });
 }
 
 sub list {
@@ -33,28 +25,22 @@ sub list {
   my $user = $self->backend->user        or return $self->unauthorized;
   my @dialogs;
 
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $delay->pass;    # make sure we go to the next step even if there are no dialogs
+  my @p;
+  for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
+    for my $dialog (sort { $a->id cmp $b->id } @{$connection->dialogs}) {
+      push @dialogs, $dialog;
+      push @p,       $dialog->calculate_unread_p;
+    }
+  }
 
-      for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-        for my $dialog (sort { $a->id cmp $b->id } @{$connection->dialogs}) {
-          push @dialogs, $dialog;
-          $dialog->calculate_unread($delay->begin);
-        }
-      }
-    },
-    sub {
-      my ($delay, @err) = @_;
-      die $err[0] if $err[0] = grep {$_} @err;
-      $self->render(openapi => {dialogs => \@dialogs});
-    },
-  );
+  push @p, Mojo::Promise->resolve unless @p;
+  Mojo::Promise->all(@p)->then(sub {
+    $self->render(openapi => {dialogs => \@dialogs});
+  });
 }
 
 sub messages {
-  my $self = shift->openapi->valid_input or return;
+  my $self   = shift->openapi->valid_input or return;
   my $dialog = $self->backend->dialog({});
   my %query;
 
@@ -69,34 +55,11 @@ sub messages {
   $query{limit} ||= 60;
   $query{limit} = 200 if $query{limit} > 200;    # TODO: is this a good max?
 
-  $self->delay(
-    sub { $dialog->messages(\%query, shift->begin) },
-    sub {
-      my ($delay, $err, $messages) = @_;
-      die $err if $err;
-      $self->render(
-        openapi => {messages => $messages, end => @$messages < $query{limit} ? true : false});
-    },
-  );
-}
-
-sub participants {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
-  my $connection = $user->get_connection($self->stash('connection_id'));
-
-  unless ($connection) {
-    return $self->render(openapi => E('Connection not found.'), status => 404);
-  }
-
-  $self->delay(
-    sub { $connection->participants($self->stash('dialog_id'), shift->begin); },
-    sub {
-      my ($delay, $err, $res) = @_;
-      return $self->render(openapi => E($err), status => 500) if $err;
-      return $self->render(openapi => $res);
-    },
-  );
+  return $dialog->messages_p(\%query)->then(sub {
+    my $messages = shift;
+    $self->render(
+      openapi => {messages => $messages, end => @$messages < $query{limit} ? true : false});
+  });
 }
 
 1;
@@ -125,10 +88,6 @@ See L<Convos::Manual::API/listDialogs>.
 =head2 messages
 
 See L<Convos::Manual::API/messagesForDialog>.
-
-=head2 participants
-
-See L<Convos::Manual::API/participantsInDialog>.
 
 =head1 SEE ALSO
 

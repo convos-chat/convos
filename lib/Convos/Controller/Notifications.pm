@@ -9,28 +9,17 @@ sub messages {
   # TODO:
   $query{$_} = $self->param($_) for grep { defined $self->param($_) } qw(limit match);
 
-  $self->delay(
-    sub { $user->notifications(\%query, shift->begin) },
-    sub {
-      my ($delay, $err, $messages) = @_;
-      die $err if $err;
-      $self->render(openapi => {messages => $messages});
-    },
-  );
+  return $user->notifications_p(\%query)->then(sub {
+    my $messages = shift;
+    $self->render(openapi => {messages => $messages});
+  });
 }
 
 sub read {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
 
-  $self->delay(
-    sub { $user->unread(0)->save(shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->render(openapi => {});
-    }
-  );
+  return $user->unread(0)->save_p->then(sub { $self->render(openapi => {}) });
 }
 
 1;

@@ -17,15 +17,10 @@ sub delete {
     return $self->render(openapi => E('You are the only user left.'), status => 400);
   }
 
-  $self->delay(
-    sub { $self->app->core->backend->delete_object($user, shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      delete $self->session->{email};
-      $self->render(openapi => {message => 'You have been erased.'});
-    },
-  );
+  return $self->app->core->backend->delete_object_p($user)->then(sub {
+    delete $self->session->{email};
+    $self->render(openapi => {message => 'You have been erased.'});
+  });
 }
 
 sub docs {
@@ -74,25 +69,20 @@ sub get {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
 
-  $self->delay(
-    sub { $user->get($self->req->url->query->to_hash, shift->begin); },
-    sub {
-      my ($delay, $err, $res) = @_;
-      die $err if $err;
-      $self->render(openapi => $res);
-    }
-  );
+  return $user->get_p($self->req->url->query->to_hash)
+    ->then(sub { $self->render(openapi => shift) });
 }
 
 sub login {
   my $self = shift->openapi->valid_input or return;
 
-  $self->delay(
-    sub { $self->auth->login($self->_clean_json, shift->begin) },
+  return $self->auth->login_p($self->_clean_json)->then(
     sub {
-      my ($delay, $err, $user) = @_;
-      return $self->render(openapi => E($err), status => 400) if $err;
-      return $self->session(email => $user->email)->render(openapi => $user);
+      my $user = shift;
+      $self->session(email => $user->email)->render(openapi => $user);
+    },
+    sub {
+      $self->render(openapi => {errors => [{message => shift, path => '/'}]}, status => 400);
     },
   );
 }
@@ -101,16 +91,11 @@ sub logout {
   my $self   = shift->openapi->valid_input or return;
   my $format = $self->stash('format') || 'json';
 
-  $self->delay(
-    sub { $self->auth->logout({}, shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      return $self->render(openapi => E($err), status => 500) if $err;
-      $self->session({expires => 1});
-      return $self->redirect_to('/') if $format eq 'html';
-      return $self->render(openapi => {message => 'Logged out.'});
-    },
-  );
+  return $self->auth->logout_p({})->then(sub {
+    $self->session({expires => 1});
+    return $self->redirect_to('/') if $format eq 'html';
+    return $self->render(openapi => {message => 'Logged out.'});
+  });
 }
 
 sub register {
@@ -136,23 +121,16 @@ sub register {
   }
 
   # Register new user
-  return $self->delay(
-    sub { $self->auth->register($json, shift->begin) },
-    sub {
-      (my ($delay, $err), $user) = @_;
-      return $self->render(openapi => E($err), status => 400) if $err;
-      $user->role(give => 'admin') if $self->app->core->n_users == 1;
-      $self->session(email => $user->email);
-      $self->backend->connection_create(Mojo::URL->new($self->settings('default_connection')),
-        $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $connection) = @_;
-      return $self->render(openapi => E($err), status => 500) if $err;
-      $self->app->core->connect($connection);
-      $self->render(openapi => $user);
-    },
-  );
+  return $self->auth->register_p($json)->then(sub {
+    $user = shift;
+    $user->role(give => 'admin') if $self->app->core->n_users == 1;
+    $self->session(email => $user->email);
+    $self->backend->connection_create_p(Mojo::URL->new($self->settings('default_connection')));
+  })->then(sub {
+    my $connection = shift;
+    $self->app->core->connect($connection);
+    $self->render(openapi => $user);
+  });
 }
 
 sub register_html {
@@ -290,20 +268,12 @@ sub _register_html_handle_invite_url {
 sub _update_user {
   my ($self, $json, $user) = @_;
 
-  $self->delay(
-    sub {
-      my ($delay) = @_;
-      $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
-      $user->set_password($json->{password})                 if $json->{password};
-      $user->save($delay->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      die $err if $err;
-      $self->session(email => $user->email);
-      $self->render(openapi => $user);
-    },
-  );
+  $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
+  $user->set_password($json->{password})                 if $json->{password};
+  $user->save_p->then(sub {
+    $self->session(email => $user->email);
+    $self->render(openapi => $user);
+  });
 }
 
 1;

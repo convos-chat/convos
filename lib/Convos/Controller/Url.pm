@@ -14,25 +14,22 @@ sub info {
     return $self->respond_to(json => {json => $link}, any => {text => $link->html});
   }
 
-  $self->delay(
-    sub { $self->linkembedder->get($self->param('url'), shift->begin) },
-    sub {
-      my ($delay, $link) = @_;
+  return $self->linkembedder->get_p($self->param('url'))->then(sub {
+    my $link = shift;
 
-      if (my $err = $link->error) {
-        $self->stash(status => $err->{code} || 500);
-        $self->respond_to(
-          json => {json => {errors => [$err]}},
-          any  => {text => $err->{message} || 'Unknown error.'}
-        );
-        return;
-      }
+    if (my $err = $link->error) {
+      $self->stash(status => $err->{code} || 500);
+      $self->respond_to(
+        json => {json => {errors => [$err]}},
+        any  => {text => $err->{message} || 'Unknown error.'}
+      );
+      return;
+    }
 
-      $self->app->_link_cache->set($url => $link);
-      $self->res->headers->cache_control('max-age=600');
-      $self->respond_to(json => {json => $link}, any => {text => $link->html});
-    },
-  );
+    $self->app->_link_cache->set($url => $link);
+    $self->res->headers->cache_control('max-age=600');
+    $self->respond_to(json => {json => $link}, any => {text => $link->html});
+  });
 }
 
 1;

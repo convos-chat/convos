@@ -11,25 +11,15 @@ my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} |
 sub register {
   my ($self, $app, $config) = @_;
 
-  # TODO: Replace with promises
-  $app->helper(
-    delay => sub {
-      my $c     = shift;
-      my $tx    = $c->render_later->tx;
-      my $delay = Mojo::IOLoop->delay(@_);
-      $delay->catch(sub { $c->helpers->reply->exception(pop) and undef $tx })->wait;
-    }
-  );
-
-  $app->helper('asset_version'             => \&_asset_version);
-  $app->helper('backend.dialog'            => \&_backend_dialog);
-  $app->helper('backend.user'              => \&_backend_user);
-  $app->helper('backend.connection_create' => \&_backend_connection_create);
-  $app->helper('l'                         => \&_l);
-  $app->helper('linkembedder'              => sub { state $l = LinkEmbedder->new });
-  $app->helper('settings'                  => \&_settings);
-  $app->helper('unauthorized'              => \&_unauthorized);
-  $app->helper('user_has_admin_rights'     => \&_user_has_admin_rights);
+  $app->helper('asset_version'               => \&_asset_version);
+  $app->helper('backend.dialog'              => \&_backend_dialog);
+  $app->helper('backend.user'                => \&_backend_user);
+  $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
+  $app->helper('l'                           => \&_l);
+  $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
+  $app->helper('settings'                    => \&_settings);
+  $app->helper('unauthorized'                => \&_unauthorized);
+  $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
 }
 
 sub _asset_version {
@@ -70,32 +60,23 @@ sub _backend_user {
   return $c->app->core->get_user({email => $email});
 }
 
-sub _backend_connection_create {
-  my ($c, $url, $cb) = @_;
+sub _backend_connection_create_p {
+  my ($c, $url) = @_;
   my $user = $c->backend->user;
-  my $name = pretty_connection_name($url->host);
-  my $connection;
 
-  if (!$name) {
-    return $c->$cb('URL need a valid host.', undef);
-  }
-  if ($user->get_connection({protocol => $url->scheme, name => $name})) {
-    return $c->$cb('Connection already exists.', undef);
-  }
+  return Mojo::Promise->reject('URL need a valid host.')
+    unless my $name = pretty_connection_name($url->host);
 
-  Mojo::IOLoop->delay(
-    sub {
-      $connection = $user->connection({name => $name, protocol => $url->scheme, url => $url});
-      $connection->dialog({name => $url->path->[0]}) if $url->path->[0];
-      $connection->save(shift->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      return $c->$cb($err, $connection);
-    },
-  )->catch(sub {
-    return $c->$cb(pop, undef);
-  });
+  return Mojo::Promise->reject('Connection already exists.')
+    if $user->get_connection({protocol => $url->scheme, name => $name});
+
+  eval {
+    my $connection = $user->connection({name => $name, protocol => $url->scheme, url => $url});
+    $connection->dialog({name => $url->path->[0]}) if $url->path->[0];
+    return $connection->save_p;
+  } or do {
+    return Mojo::Promise->reject($@);
+  };
 }
 
 sub _l {

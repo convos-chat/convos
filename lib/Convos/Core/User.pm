@@ -6,6 +6,7 @@ use Convos::Util qw(DEBUG has_many);
 use Crypt::Eksblowfish::Bcrypt ();
 use File::Path                 ();
 use Mojo::Date;
+use Mojo::Promise;
 use Mojo::Util 'trim';
 
 use constant BCRYPT_BASE_SETTINGS => do {
@@ -39,41 +40,30 @@ has_many connections => 'Convos::Core::Connection' => sub {
   return $connection;
 };
 
-sub get {
-  my ($self, $args, $cb) = @_;
+sub get_p {
+  my ($self, $args) = @_;
   my $res = $self->TO_JSON;
 
-  Mojo::IOLoop->delay(
-    sub {
-      my ($delay) = @_;
-      return $delay->pass unless $args->{notifications};
-      return $self->notifications({}, $delay->begin);
-    },
-    sub {
-      my ($delay, $err, $notifications) = @_;
-      my (@connections, @dialogs);
-      return $self->$cb($err, $res) if $err;
+  my @connections;
+  if ($args->{connections} or $args->{dialogs}) {
+    @connections = sort { $a->name cmp $b->name } @{$self->connections};
+    $res->{connections} = \@connections;
+  }
 
-      $res->{notifications} = $notifications if $notifications;
+  if ($args->{dialogs}) {
+    $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
+  }
 
-      if ($args->{connections} or $args->{dialogs}) {
-        @connections = sort { $a->name cmp $b->name } @{$self->connections};
-        $res->{connections} = \@connections if $args->{connections};
-      }
+  my @p;
+  push @p, $self->notifications_p if $args->{notifications};
+  push @p, map { $_->calculate_unread_p } @{$res->{dialogs} || []};
+  push @p, Mojo::Promise->resolve unless @p;
 
-      if ($args->{dialogs}) {
-        $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
-        $_->calculate_unread($delay->begin) for @{$res->{dialogs}};
-      }
-
-      $delay->pass;    # make sure we go to the next step even if there are no dialogs
-    },
-    sub {
-      my ($delay, @err);
-      return $self->$cb($err[0], $res) if $err[0] = grep {$_} @err;
-      return $self->$cb('', $res);
-    }
-  );
+  return Mojo::Promise->all(@p)->then(sub {
+    my $notifications = shift->[0];
+    $res->{notifications} = $notifications if $notifications;
+    return $res;
+  });
 }
 
 sub role {
@@ -99,51 +89,37 @@ sub new {
   return $self->_normalize_attributes;
 }
 
-sub notifications {
-  my ($self, $query, $cb) = @_;
-  $self->core->backend->notifications($self, $query, $cb);
-  $self;
+sub notifications_p {
+  my ($self, $query) = @_;
+  return $self->core->backend->notifications_p($self, $query);
 }
 
 sub public_id { substr Mojo::Util::sha1_sum(shift->email), 0, 20; }
 
-sub remove_connection {
-  my ($self, $id, $cb) = @_;
+sub remove_connection_p {
+  my ($self, $id) = @_;
+
   my $connection = $self->{connections}{$id};
+  return Mojo::Promise->resolve(undef) unless $connection;
 
-  unless ($connection) {
-    Mojo::IOLoop->next_tick(sub { $self->$cb(''); });
-    return $self;
-  }
-
-  Scalar::Util::weaken($self);
-  Mojo::IOLoop->delay(
-    sub { $connection->disconnect(shift->begin) },
-    sub {
-      my ($delay, $err) = @_;
-      return $self->$cb($err) if $err;
-      return $self->core->backend->delete_object($connection, $delay->begin);
-    },
-    sub {
-      my ($delay, $err) = @_;
-      delete $self->{connections}{$id} unless $err;
-      $self->$cb($err);
-    }
-  );
-
-  return $self;
+  return $connection->disconnect_p->then(sub {
+    return $self->core->backend->delete_object_p($connection);
+  })->then(sub {
+    delete $self->{connections}{$id};
+    return $connection;
+  });
 }
 
-sub save {
+sub save_p {
   my $self = shift;
-  $self->core->backend->save_object($self, @_);
-  $self;
+  return $self->core->backend->save_object_p($self);
 }
 
 sub set_password {
-  die 'Usage: Convos::Core::User->set_password($plain)' unless $_[1];
-  $_[0]->{password} = $_[0]->_bcrypt($_[1]);
-  $_[0];
+  my ($self, $plain) = @_;
+  die 'Usage: Convos::Core::User->set_password($plain)' unless $plain;
+  $self->{password} = $self->_bcrypt($plain);
+  $self;
 }
 
 sub uri { Mojo::Path->new(sprintf '%s/user.json', $_[0]->email) }
@@ -205,45 +181,45 @@ the following new ones.
 
 =head2 core
 
-  $obj = $self->core;
+  $obj = $user->core;
 
 Holds a L<Convos::Core> object.
 
 =head2 email
 
-  $str = $self->email;
+  $str = $user->email;
 
 Email address of user.
 
 =head2 password
 
-  $str = $self->password;
+  $str = $user->password;
 
 Encrypted password. See L</set_password> for how to change the password and
 L</validate_password> for password authentication.
 
 =head2 public_id
 
-  $str = $self->public_id;
+  $str = $user->public_id;
 
 Returns an anonymous ID for this user.
 
 =head2 roles
 
-  $array_ref = $self->roles;
+  $array_ref = $user->roles;
 
 Holds a list of roles that the user has. See L</role> for changing this attribute.
 
 =head2 unread
 
-  $int = $self->unread;
-  $self = $self->unread(4);
+  $int = $user->unread;
+  $user = $user->unread(4);
 
 Number of unread notifications for user.
 
 =head2 uri
 
-  $path = $self->uri;
+  $path = $user->uri;
 
 Holds a L<Mojo::Path> object, with the URI to where this object should be
 stored.
@@ -255,74 +231,73 @@ the following new ones.
 
 =head2 connection
 
-  $connection = $self->connection(\%attrs);
+  $connection = $user->connection(\%attrs);
 
 Returns a new L<Convos::Core::Connection> object or updates an existing object.
 
 =head2 connections
 
-  $objs = $self->connections;
+  $objs = $user->connections;
 
 Returns an array-ref of of L<Convos::Core::Connection> objects.
 
 =head2 get_connection
 
-  $connection = $self->connection($id);
-  $connection = $self->connection(\%attrs);
+  $connection = $user->get_connection($id);
+  $connection = $user->get_connection(\%attrs);
 
 Returns a L<Convos::Core::Connection> object or undef.
 
-=head2 get
+=head2 get_p
 
-  $self = $self->get(\%args, sub { my ($self, $err, $res) = @_; });
+  my $p = $user->get_p(\%args)->then(sub { my $json = shift });
 
 Used to retrive information about the current user.
 
 =head2 id
 
-  $str = $self->id;
+  $str = $user->id;
   $str = $class->id(\%attr);
 
 Returns a unique identifier for a user.
 
 =head2 new
 
-  $self = Convos::Core::User->new(\%attributes);
+  $user = Convos::Core::User->new(\%attributes);
 
 Used to construct a new object.
 
-=head2 notifications
+=head2 notifications_p
 
-  $self = $self->notifications($query, sub { my ($self, $err, $notifications) = @_; });
+  $p = $user->notifications_p($query)->then(sub { my $notifications = shift });
 
 Used to retrieve a list of notifications. See also
 L<Convos::Core::Backend/notifications>.
 
-=head2 remove_connection
+=head2 remove_connection_p
 
-  $self = $self->remove_connection($id, sub { my ($self, $err) = @_; });
+  $p = $user->remove_connection_p($id)->then(sub { my $connection = shift });
 
 Will remove a connection created by L</connection>. Removing a connection that
 does not exist is perfectly valid, and will not set C<$err>.
 
 =head2 registered
 
-  $mojo_date = $self->registered;
+  $mojo_date = $user->registered;
 
 Holds a L<Mojo::Date> object for when the user was registered.
 
 =head2 role
 
-  $bool = $self->role(has => "admin");
-  $self = $self->role(give => "admin");
-  $self = $self->role(take => "admin");
+  $bool = $user->role(has => "admin");
+  $user = $user->role(give => "admin");
+  $user = $user->role(take => "admin");
 
 Used to modify L</roles> for a given user.
 
-=head2 save
+=head2 save_p
 
-  $self = $self->save(sub { my ($self, $err) = @_; });
-  $self = $self->save;
+  $p = $user->save_p;
 
 Will save L</ATTRIBUTES> to persistent storage.
 See L<Convos::Core::Backend/save_object> for details.
@@ -339,8 +314,8 @@ Will set L</password> to a crypted version of C<$plain>.
 
 Will verify C<$plain> text password against L</password>.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos::Core>.
 
 =cut

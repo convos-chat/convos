@@ -4,7 +4,7 @@ use Mojo::Base -base;
 use Mojo::Path;
 use Time::HiRes 'time';
 
-has content => '';
+has content    => '';
 has created_at => sub {time};
 
 has id => sub {
@@ -14,9 +14,21 @@ has id => sub {
 };
 
 has user => undef;
+has url  => undef;
 
-sub public_uri { Mojo::Path->new(join '/', 'paste', $_[0]->user->public_id, $_[0]->id); }
-sub uri { Mojo::Path->new(join '/', $_[0]->user->email, 'upload', $_[0]->id); }
+sub handle_event_p {
+  my ($class, $backend, $connection, $message_ref) = @_;
+  my $self = $class->new(content => $$message_ref, user => $connection->user);
+
+  return $backend->save_object_p($self)->then(sub {
+    $self->url($self->user->core->web_url($self->public_uri)->to_abs);
+    return $self;
+  });
+}
+
+sub public_uri { Mojo::Path->new(join '/', 'paste',            $_[0]->user->public_id, $_[0]->id); }
+sub to_message { shift->url->to_string }
+sub uri        { Mojo::Path->new(join '/', $_[0]->user->email, 'upload',               $_[0]->id); }
 
 sub TO_JSON {
   my ($self, $private) = @_;
@@ -62,11 +74,23 @@ A L<Convos::Core::User> object.
 
 =head1 METHODS
 
+=head2 handle_event_p
+
+  $self->handle_event_p($backend, $connection, $message_ref);
+
+This method will be called when a C<$connection> wants to create a paste.
+
 =head2 public_uri
 
-  $path = $self->uri;
+  $path = $self->public_uri;
 
 Returns a L<Mojo::Path> object useful for making a public URL.
+
+=head2 to_message
+
+  $str = $self->to_message;
+
+Converts this objcet into a message you can send to a channel or user.
 
 =head2 uri
 

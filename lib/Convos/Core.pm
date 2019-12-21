@@ -22,24 +22,20 @@ has settings => sub {
 };
 
 sub connect {
-  my ($self, $connection, $cb) = @_;
+  my ($self, $connection, $reason) = @_;
   my $host = $connection->url->host;
 
-  Scalar::Util::weaken($self);
-  $connection->state('queued', 'Connecting soon...');
+  $connection->state(queued => $reason || 'Connecting soon...');
 
-  if ($host eq 'localhost' and !$cb) {
-    $connection->connect(sub {
-      my ($connection, $err) = @_;
-      push @{$self->{connect_queue}{$host}}, [$connection, undef] if $err;
-    });
+  if ($host eq 'localhost') {
+    $connection->connect;
   }
   elsif ($self->{connect_queue}{$host}) {
-    push @{$self->{connect_queue}{$host}}, [$connection, $cb];
+    push @{$self->{connect_queue}{$host}}, $connection;
   }
   else {
     $self->{connect_queue}{$host} = [];
-    $connection->connect($cb || sub { });
+    $connection->connect;
   }
 
   return $self;
@@ -68,23 +64,41 @@ sub start {
   # Want this method to be blocking to make sure everything is ready
   # before processing web requests.
   my ($first_user, $has_admin) = (undef, 0);
-  for (@{$self->backend->users}) {
-    my $user = $self->user($_);
-    $first_user ||= $user;
-    $has_admin++ if $user->role(has => 'admin');
-    for (@{$self->backend->connections($user)}) {
-      my $connection = $user->connection($_);
-      $self->connect($connection)
-        if !$ENV{CONVOS_SKIP_CONNECT} and $connection->wanted_state eq 'connected';
-    }
-  }
+  $self->backend->users_p->then(sub {
+    my $users = shift;
 
-  # Upgrade the first registered user (back compat)
-  $first_user->role(give => 'admin') if $first_user and !$has_admin;
+    my (@p, @users);
+    for (@$users) {
+      my $user = $self->user($_);
+      $first_user ||= $user;
+      $has_admin++ if $user->role(has => 'admin');
+      push @p,     $self->backend->connections_p($user);
+      push @users, $user;
+    }
+
+    return Mojo::Promise->all(Mojo::Promise->resolve(\@users), @p);
+  })->then(sub {
+    my ($users, @connections_for_users) = map { $_->[0] } @_;
+
+    for my $connections (@connections_for_users) {
+      my $user = shift @$users;
+
+      for (@$connections) {
+        my $connection = $user->connection($_);
+        $self->connect($connection)
+          if !$ENV{CONVOS_SKIP_CONNECT} and $connection->wanted_state eq 'connected';
+      }
+    }
+
+    # Upgrade the first registered user (back compat)
+    $first_user->role(give => 'admin') if $first_user and !$has_admin;
+  })->catch(sub {
+    warn "start() FAILED $_[0]\n";
+  })->wait;
 
   Scalar::Util::weaken($self);
-  my $delay = $ENV{CONVOS_CONNECT_DELAY} || 3;
-  $self->{connect_tid} = Mojo::IOLoop->recurring($delay => sub { $self->_dequeue });
+  $self->{connect_tid}
+    = Mojo::IOLoop->recurring($ENV{CONVOS_CONNECT_DELAY} || 4, sub { $self->_dequeue });
 
   return $self;
 }
@@ -114,13 +128,8 @@ sub _dequeue {
   my $self = shift;
 
   for my $host (keys %{$self->{connect_queue} || {}}) {
-    my $args = shift @{$self->{connect_queue}{$host}} or next;
-    my ($connection, $cb) = @$args;
-    $connection->wanted_state eq 'connected' and $connection->connect(sub {
-      my ($connection, $err) = @_;
-      push @{$self->{connect_queue}{$host}}, [$connection, undef] if $err;
-      $connection->$cb($err) if $cb;
-    });
+    next unless my $connection = shift @{$self->{connect_queue}{$host}};
+    $connection->connect if $connection->wanted_state eq 'connected';
   }
 }
 
@@ -219,7 +228,7 @@ the following new ones.
 
 =head2 connect
 
-  $self->connect($connection, $cb);
+  $self->connect($connection);
 
 This method will call L<Convos::Core::Connection/connect> either at once
 or add the connection to a queue which will connect after an interval.
@@ -279,8 +288,8 @@ Takes a path, or complete URL, merges it with L</base_url> and returns a new
 L<Mojo::URL> object. Note that you need to call L</to_abs> on that object
 for an absolute URL.
 
-=head1 AUTHOR
+=head1 SEE ALSO
 
-Jan Henning Thorsen - C<jhthorsen@cpan.org>
+L<Convos>.
 
 =cut
