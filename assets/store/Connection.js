@@ -140,12 +140,15 @@ export default class Connection extends Dialog {
       vars.push(channels.join(', '));
     }
     else if (params.idle_for && !channels.length) {
-      message += 'has been idle for %3, and is not active in any channels.';
+      message += 'has been idle for %3, and is not in any channels.';
       vars.push(params.idle_for);
     }
-    else {
-      message += 'is active in %3.';
+    else if (channels.length) {
+      message += ' is active in %3.';
       vars.push(channels.join(', '));
+    }
+    else {
+      message += ' is not in any channels.';
     }
 
     const dialog = this.findDialog(params) || this;
