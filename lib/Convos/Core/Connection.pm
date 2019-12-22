@@ -191,21 +191,7 @@ sub _set_url {
 
 sub _stream {
   my ($self, $loop, $err, $stream) = @_;
-  $self->_notice($err, type => 'error') if $err;
-
-  my $url = $self->url;
-  if ($url->query->param('tls') and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
-    delete $self->{stream_id};
-    $url->query->param(tls => 0);
-    $self->save_p;
-    $self->user->core->connect($self, $err);    # let's queue up to make irc admins happy
-    return;
-  }
-  elsif ($err) {
-    delete $self->{stream_id};
-    $self->state(disconnected => $err);
-    return;
-  }
+  return $self->_stream_on_error($stream, $err) if $err;
 
   $stream->timeout(0);
   $self->{buffer}  = '';
@@ -231,8 +217,19 @@ sub _stream_on_close {
 
 sub _stream_on_error {
   my ($self, $stream, $err) = @_;
-  Mojo::IOLoop->remove(delete $self->{stream_id}) if $self->{stream_id};
+
   $self->_notice($err, type => 'error');
+  Mojo::IOLoop->remove(delete $self->{stream_id}) if $self->{stream_id};
+
+  my $url = $self->url;
+  if ($url->query->param('tls') and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
+    $url->query->param(tls => 0);
+    $self->save_p;
+    $self->user->core->connect($self, $err);    # let's queue up to make irc admins happy
+  }
+  else {
+    $self->state(disconnected => $err);
+  }
 }
 
 sub _stream_on_read {
