@@ -62,7 +62,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true&notifications=true')->status
       on_connect_commands => [],
       protocol            => 'irc',
       state               => 'disconnected',
-      url                 => 'irc://localhost:6123/%23convos?user=convos&nick=superman&tls=1',
+      url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',
       wanted_state        => 'connected',
     }],
     dialogs => [{

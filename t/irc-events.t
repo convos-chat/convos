@@ -17,6 +17,8 @@ $connection->on(state   => sub { push @state, [@_[1, 2]] });
 
 note 'error handlers';
 t::Helper->irc_server_messages(
+  from_server => "ERROR :Trying to reconnect too fast.\r\n",
+  $connection, '_irc_event_error',
   from_server => ":localhost 404 superman #nopechan :Cannot send to channel\r\n",
   $connection, '_irc_event_err_cannotsendtochan',
   from_server => ":localhost 421 superman cool_cmd :Unknown command\r\n",
@@ -40,6 +42,7 @@ ok delete $_->{ts}, 'got timestamp' for @messages;
 is_deeply(
   [map { $_->{message} } @messages],
   [
+    'Trying to reconnect too fast.',
     'Cannot send to channel #nopechan.',
     'Unknown command: cool_cmd',
     'Invalid nickname nopeman.',

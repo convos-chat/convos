@@ -76,7 +76,6 @@ sub _connect_args {
 
   $self->_periodic_events;
   $url->port($params->param('tls') ? 6669 : 6667) unless $url->port;
-  $params->param(user => 'convos')     unless $params->param('user');
   $params->param(nick => $self->_nick) unless $params->param('nick');
   $self->{myinfo}{nick} = $params->param('nick');
 
@@ -149,7 +148,7 @@ sub _irc_event_fallback {
       highlight => false,
       message   => join(' ', @params),
       ts        => time,
-      type      => 'notice',
+      type      => $msg->{command} =~ m!err! ? 'error' : 'notice',
     }
   );
 }
@@ -312,6 +311,15 @@ sub _irc_event_rpl_myinfo {
 
   $self->{myinfo}{$_} = $msg->{params}[$i++] // '' for @keys;
   $self->emit(state => me => $self->{myinfo});
+}
+
+# Ignore this event
+sub _irc_event_rpl_namreply { }
+
+sub _irc_event_rpl_topic {
+  my ($self, $msg) = @_;
+  my $dialog = $self->get_dialog($msg->{params}[0]);
+  $dialog->topic($msg->{params}[2]) if $dialog;
 }
 
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
@@ -611,11 +619,12 @@ sub _send_message_p {
   # err_cannotsendtochan, err_nosuchnick, err_notoplevel, err_toomanytargets,
   # err_wildtoplevel, irc_rpl_away
 
+  my $nick = $self->_nick;
+  my $user = $self->url->username || $nick;
   return Mojo::Promise->all(map { $self->_write_p($_->{raw_line}) } @messages)->then(sub {
     for my $msg (@messages) {
-      $msg->{prefix} = sprintf '%s!%s@%s', $self->_nick, $self->url->query->param('user'),
-        $self->url->host;
-      $msg->{event} = lc $msg->{command};
+      $msg->{prefix} = sprintf '%s!%s@%s', $nick, $user, $self->url->host;
+      $msg->{event}  = lc $msg->{command};
       $self->_irc_event_privmsg($msg);
     }
     return {};
@@ -800,7 +809,7 @@ sub _stream {
   unless ($err) {
     my $url  = $self->url;
     my $nick = $self->_nick;
-    my $user = $url->query->param('user') || $nick;
+    my $user = $url->username || $nick;
     my $mode = $url->query->param('mode') || 0;
     $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
     $self->_write("NICK $nick\r\n");
