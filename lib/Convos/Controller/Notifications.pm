@@ -4,10 +4,7 @@ use Mojo::Base 'Mojolicious::Controller';
 sub messages {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
-  my %query;
-
-  # TODO:
-  $query{$_} = $self->param($_) for grep { defined $self->param($_) } qw(limit match);
+  my %query = map { defined $self->param($_) ? ($_, $self->param($_)) : () } qw(limit match);
 
   return $user->notifications_p(\%query)->then(sub {
     my $messages = shift;

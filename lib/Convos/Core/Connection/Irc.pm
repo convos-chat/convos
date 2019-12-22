@@ -582,7 +582,7 @@ sub _send_list_p {
 
   return Mojo::Promise->resolve({
     n_dialogs => int(keys %{$store->{dialogs}}),
-    dialogs   => [splice @found, 0, 200],          # TODO: Figure out a good max result number
+    dialogs   => [splice @found, 0, 200],
     done      => $store->{done},
   });
 }

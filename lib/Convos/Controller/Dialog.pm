@@ -49,11 +49,10 @@ sub messages {
     return $self->render(openapi => {messages => [], end => true});
   }
 
-  # TODO:
   $query{$_} = $self->param($_)
     for grep { defined $self->param($_) } qw(after before level limit match);
   $query{limit} ||= 60;
-  $query{limit} = 200 if $query{limit} > 200;    # TODO: is this a good max?
+  $query{limit} = 200 if $query{limit} > 200;
 
   return $dialog->messages_p(\%query)->then(sub {
     my $messages = shift;
