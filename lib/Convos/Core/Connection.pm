@@ -10,7 +10,7 @@ use Mojo::URL;
 use Mojo::Util qw(term_escape url_escape);
 use Unicode::UTF8;
 
-$IO::Socket::SSL::DEBUG = $ENV{CONVOS_SSL_DEBUG} if $ENV{CONVOS_SSL_DEBUG};
+$IO::Socket::SSL::DEBUG = $ENV{CONVOS_TLS_DEBUG} if $ENV{CONVOS_TLS_DEBUG};
 
 has messages => sub {
   my $self   = shift;
@@ -131,25 +131,29 @@ sub _connect_args {
   $args{address}       = $url->host;
   $args{local_address} = $params->param('local_address') if $params->param('local_address');
   $args{port}          = $url->port;
-  $args{timeout}       = 20;                                                                  # TODO
+  $args{timeout}       = 20;
 
-  # TODO: tls_ca, tls_cet, tls_key
   $params->param(tls => 1) unless defined $params->param('tls');
   if ($params->param('tls')) {
     $args{tls}        = 1;
+    $args{tls_ca}     = $ENV{CONVOS_TLS_CA} if $ENV{CONVOS_TLS_CA};
+    $args{tls_cert}   = $ENV{CONVOS_TLS_CERT} if $ENV{CONVOS_TLS_CERT};
+    $args{tls_key}    = $ENV{CONVOS_TLS_KEY} if $ENV{CONVOS_TLS_KEY};
     $args{tls_verify} = 0x00 unless $params->param('tls_verify');
   }
+
+  $self->_debug('connect = %s', Mojo::JSON::encode_json(\%args)) if DEBUG;
 
   return \%args;
 }
 
 sub _debug {
-  my ($self, $msg, @args) = @_;
+  my ($self, $format, @args) = @_;
   chomp for @args;
-  warn sprintf "[%s/%s] $msg\n", $self->user->email, $self->id, @args;
+  warn sprintf "[%s/%s] $format\n", $self->user->email, $self->id, @args;
 
-  #my @caller = caller 1;
-  #warn sprintf "[%s/%s] $msg at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
+#my @caller = caller 1;
+#warn sprintf "[%s/%s] $format at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
 }
 
 # The active nick
