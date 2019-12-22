@@ -98,6 +98,12 @@ sub logout {
   });
 }
 
+sub redirect_if_not_logged_in {
+  my $self = shift;
+  return $self->redirect_to('/login') unless my $user = $self->backend->user;
+  return $self->stash(load_user => 1, user => $user);
+}
+
 sub register {
   my $self = shift->openapi->valid_input or return;
   my $json = $self->_clean_json;
@@ -143,12 +149,6 @@ sub register_html {
 
   $self->_register_html_handle_invite_url;
   $self->render('index');
-}
-
-sub require_login {
-  my $self = shift;
-  return $self->redirect_to('/login') unless my $user = $self->backend->user;
-  return $self->stash(load_user => 1, user => $user);
 }
 
 sub update {
@@ -315,13 +315,10 @@ See L<Convos::Manual::API/loginUser>.
 
 See L<Convos::Manual::API/logoutUser>.
 
-=head2 recover
+=head2 redirect_if_not_logged_in
 
-Will log in a user from a recovery link.
-
-=head2 require_login
-
-TODO
+Used in a L<Mojolicious::Routes::Route/under> to respond with 302, if the user
+does not have a valid session cookie.
 
 =head2 register
 

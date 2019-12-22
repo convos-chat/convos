@@ -52,7 +52,7 @@ sub startup {
   $r->websocket('/events')->to('events#start')->name('events');
 
   # Require authentication
-  my $auth_r = $r->under('/')->to('user#require_login');
+  my $auth_r = $r->under('/')->to('user#redirect_if_not_logged_in');
   $auth_r->get('/help')->to(template => 'index');
   $auth_r->get('/chat/*rest',     {rest => ''})->to(template => 'index');
   $auth_r->get('/settings/*rest', {rest => ''})->to(template => 'index');
