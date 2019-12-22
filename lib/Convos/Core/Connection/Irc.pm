@@ -798,10 +798,13 @@ sub _stream {
   $self->SUPER::_stream($loop, $err, $stream);
 
   unless ($err) {
-    my $url = $self->url;
+    my $url  = $self->url;
+    my $nick = $self->_nick;
+    my $user = $url->query->param('user') || $nick;
+    my $mode = $url->query->param('mode') || 0;
     $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
-    $self->_write(sprintf "NICK %s\r\n", $self->_nick);
-    $self->_write(sprintf "USER %s 0 * :%s\r\n", $url->query->param('user'), 'https://convos.by/');
+    $self->_write("NICK $nick\r\n");
+    $self->_write("USER $user $mode * :https://convos.by/\r\n");
   }
 }
 
