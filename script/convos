@@ -16,9 +16,20 @@ BEGIN {
   }
 }
 
+# IMPORTANT!
+# Cannot load Mojo::File or any other module before they are installed
+use feature 'state';
 use strict;
+use warnings;
 use Config;
+use File::Spec;
+use FindBin;
 my %seen;
+
+sub path_to {
+  state $home = File::Spec->catdir($FindBin::Bin, File::Spec->updir);
+  return File::Spec->catfile($home, @_);
+}
 
 $ENV{LINK_EMBEDDER_FORCE_SECURE} //= 1;    # Make sure LinkEmbedder upgrade http to https
 $ENV{MOJO_NPM_BINARY} = 'pnpm';
@@ -28,22 +39,20 @@ $ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if grep { $command eq $_ } qw(get version)
 $ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
 
 unless ($ENV{CONVOS_SETUP}++) {
-  eval "require $_;1" or die $@ for qw(FindBin File::Spec);
-  my $bin       = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local', 'bin');
-  my $cpanfile  = File::Spec->catfile($FindBin::Bin, File::Spec->updir, 'cpanfile');
-  my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+  my $bin       = path_to 'local', 'bin';
+  my $cpanfile  = path_to 'cpanfile';
+  my $local_lib = path_to 'local';
 
   # Extra helper programs
   $ENV{PATH} = join ':', grep {$_} $bin, $ENV{PATH} if -d $bin;
 
   # Where cpanm might have installed dependencies to
   unshift @INC,
-    grep {-d}
-    map { File::Spec->catdir($FindBin::Bin, File::Spec->updir, qw(local lib perl5), @$_) }
-    [$Config{version}, $Config{archname}], [$Config{version}], [$Config{archname}], [];
+    grep {-d} map { path_to 'local', 'lib', 'perl5', @$_ }[$Config{version}, $Config{archname}],
+    [$Config{version}], [$Config{archname}], [];
 
   # Where Convos lives
-  unshift @INC, File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'lib');
+  unshift @INC, path_to 'lib';
 
   # Force PERL5LIB to be loaded before the custom @INC directories above
   unshift @INC, split /:/, $ENV{PERL5LIB} if $ENV{PERL5LIB};
@@ -56,7 +65,7 @@ unless ($ENV{CONVOS_SETUP}++) {
 }
 
 @INC = grep { !$seen{$_}++ } @INC;    # duplicates are caused by "dev" command
-pop @INC if @INC[-1] eq '.';          # don't care about current dir
+pop @INC if $INC[-1] eq '.';          # don't care about current dir
 
 if ($command eq 'dev') {
   $ENV{$_} //= 1 for qw(MOJO_ASSETPACK_LAZY MOJO_IRC_DEBUG CONVOS_DEBUG);
@@ -88,13 +97,14 @@ else {
 sub ensure_dependencies {
   return if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK};
   my ($cpanfile, $action, $mode) = @_;
-  my @cpanm     = ($^X, File::Spec->catfile($FindBin::Bin, 'cpanm'));
-  my $local_lib = File::Spec->catdir($FindBin::Bin, File::Spec->updir, 'local');
+  my @cpanm     = ($^X, path_to 'script', 'cpanm');
+  my $local_lib = path_to 'local';
   my ($n, @missing) = (0);
 
   $mode ||= '';
 
   our $cpanfile_mode = 'default';
+  no warnings 'once';
   local *main::on            = sub { local $cpanfile_mode = shift; shift->() };
   local *main::test_requires = sub { };
   local *main::requires = sub {
@@ -157,11 +167,12 @@ sub ensure_dependencies {
 }
 
 sub load_certs {
-  Mojo::File::curfile->dirname->dirname->list->each(sub {
-    my $file = shift->to_string;
-    return $ENV{CONVOS_TLS_KEY}  = $file if $file =~ m!-key\.pem$!;
-    return $ENV{CONVOS_TLS_CERT} = $file if $file =~ m!\.pem$!;
-  });
+  return unless opendir my $DH, path_to;
+  while (my $file = readdir $DH) {
+    my $file = path_to $file;
+    $ENV{CONVOS_TLS_KEY}  = $file and next if $file =~ m!-key\.pem$!;
+    $ENV{CONVOS_TLS_CERT} = $file and next if $file =~ m!\.pem$!;
+  }
 }
 
 sub maybe_warn_about_root {
@@ -195,7 +206,6 @@ HERE
 }
 
 sub secure_listen {
-  require Mojo::File;
   require Mojo::URL;
 
   my $url;
@@ -209,12 +219,9 @@ sub secure_listen {
   $url ||= Mojo::URL->new('https://localhost:3443');
   return if $url->scheme eq 'http';
 
-  my @certs;
-  Mojo::File::curfile->dirname->dirname->list->each(sub {
-    my $file  = shift->to_string;
-    my $param = $file =~ m!-key\.pem$! ? 'key' : $file =~ m!\.pem$! ? 'cert' : '';
-    $url->query->param($param => $file) if $param;
-  });
+  load_certs();
+  $url->query->param(cert => $ENV{CONVOS_TLS_CERT}) if $ENV{CONVOS_TLS_CERT};
+  $url->query->param(key  => $ENV{CONVOS_TLS_KEY})  if $ENV{CONVOS_TLS_KEY};
 
   return unless $url->query->param('cert') and $url->query->param('key');
   splice @ARGV, $i, 0, ($i == @ARGV ? ('--listen') : ()), $url->to_string;
