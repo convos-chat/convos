@@ -4,7 +4,10 @@ use t::Helper;
 use Mojo::IOLoop;
 use Convos::Core;
 
-my $core       = Convos::Core->new(backend => 'Convos::Core::Backend');
+$ENV{CONVOS_CONNECT_DELAY} = 0.5;
+my $core = Convos::Core->new(backend => 'Convos::Core::Backend');
+$core->start;
+
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my ($err, $res);
@@ -60,7 +63,7 @@ $connection->send_p('', '/query superwoman')->$wait_success('query');
 ok $connection->get_dialog('superwoman'), 'superwoman exist';
 
 note 'disconnect and connect';
-t::Helper->irc_server_connect($connection);
+my $irc_server = t::Helper->irc_server_connect($connection);
 $connection->send_p('', '/disconnect')->$wait_success('disconnect');
 $connection->send_p('', '/connect')->$wait_success('connect');
 t::Helper->irc_server_messages(
@@ -204,6 +207,10 @@ is $err, 'You are not on that channel', 'close #foo';
 $res = $connection->send_p('#convos', '/part')
   ->$wait_success(from_server => ":localhost PART #convos\r\n");
 is_deeply($res, {}, 'part #convos');
+
+note 'server disconnect';
+$irc_server->emit('close_stream');
+t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome',);
 
 done_testing;
 

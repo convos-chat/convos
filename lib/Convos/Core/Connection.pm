@@ -44,10 +44,9 @@ sub connect {
   my $self = shift;
 
   # Reconnect
-  return $self->disconnect_p->then(sub { $self->user->core->connect($self) })
-    if $self->{stream_id}
-    and $self->{host_port}
-    and $self->{host_port} ne $self->url->host_port;
+  return $self->disconnect_p->then(
+    sub { $self->user->core->connect($self, 'Reconnect on connection change.') })
+    if $self->{stream_id} and ($self->{host_port} || '') ne $self->url->host_port;
 
   # Already connected/connecting
   return if $self->{stream_id};
@@ -98,7 +97,7 @@ sub set_wanted_state_p {
   return $self->disconnect_p if $state eq 'disconnected';
 
   # Cannot connect instantly
-  $self->user->core->connect($self, '');
+  $self->user->core->connect($self, "State changed to $state.");
   return Mojo::Promise->resolve({});
 }
 
@@ -109,9 +108,10 @@ sub state {
   return $self->{state} ||= $self->wanted_state eq 'connected' ? 'queued' : 'disconnected'
     unless $state;
 
-  # Set
+  # Set to same value
   return $self if +($self->{state} || '') eq $state;
 
+  # Set to new value
   die "Invalid state: $state" unless grep { $state eq $_ } qw(connected queued disconnected);
   $self->_debug('state = %s (%s)', $state, $message) if DEBUG;
   $self->{state} = $state;
@@ -211,8 +211,8 @@ sub _stream_on_close {
   my ($self, $stream) = @_;
   my $state = delete $self->{disconnect} ? 'disconnected' : 'queued';
   delete @$self{qw(stream stream_id)};
-  $self->state($state, sprintf 'You disconnected from %s.', $self->url->host);
-  $self->user->core->connect($self) if $state eq 'queued';
+  $self->user->core->connect($self, sprintf 'You got disconnected from %s.', $self->url->host)
+    if $state eq 'queued';
 }
 
 sub _stream_on_error {

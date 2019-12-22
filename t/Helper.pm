@@ -134,6 +134,7 @@ sub _on_irc_server_connect {
   my ($ioloop, $stream) = @_;
   my $concat_buf = '';
 
+  $stream->timeout(0);
   $stream->on(
     read => sub {
       $concat_buf .= $_[1];
@@ -141,7 +142,8 @@ sub _on_irc_server_connect {
     }
   );
 
-  $IRC_SERVER->on(write => sub { _stream_write($stream, $_[1]) });
+  $IRC_SERVER->on(close_stream => sub { $stream->close });
+  $IRC_SERVER->on(write        => sub { _stream_write($stream, $_[1]) });
   $IRC_SERVER->emit(write => data_section qw(t::Helper start.irc));
 }
 
