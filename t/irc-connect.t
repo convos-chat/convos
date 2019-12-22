@@ -7,9 +7,17 @@ use Convos::Core::Backend::File;
 my $core       = Convos::Core->new;
 my $connection = $core->user({email => 'test.user@example.com'})
   ->connection({name => 'example', protocol => 'irc'});
-my @state;
 
-is $connection->url->query->param('tls'), undef, 'initiaal tls value';
+my (@connection_state, @state);
+$connection->on(
+  state => sub {
+    shift;
+    push @connection_state, $_[1]->{state} if $_[0] eq 'connection';
+    push @state, [@_];
+  }
+);
+
+is $connection->url->query->param('tls'), undef, 'initial tls value';
 
 note 'on_connect_commands';
 my @on_connect_commands = ('/msg NickServ identify s3cret', '/msg superwoman you are too cool');
@@ -36,11 +44,29 @@ t::Helper->irc_server_messages(
 is_deeply($connection->on_connect_commands,
   [@on_connect_commands], 'on_connect_commands still has the same elements');
 
+cmp_deeply(
+  [shift @state, shift @state],
+  superbagof(
+    [frozen => superhashof({dialog_id => '#convos',      frozen => 'Not connected.'})],
+    [frozen => superhashof({dialog_id => 'private_ryan', frozen => 'Not connected.'})],
+  ),
+  'frozen'
+);
+
+cmp_deeply(
+  [pop @state, pop @state],
+  superbagof(
+    [frozen => superhashof({dialog_id => '#convos',      frozen => ''})],
+    [frozen => superhashof({dialog_id => 'private_ryan', frozen => ''})],
+  ),
+  'unfroze'
+);
+
 $connection->disconnect_p->$wait_success('disconnect_p');
 $connection->url(Mojo::URL->new('irc://irc.example.com'));
-$connection->on(state => sub { push @state, $_[2]->{state} if $_[1] eq 'connection' });
 
 note 'reconnect on ssl error';
+@connection_state = ();
 mock_connect(
   errors => [
     'SSL connect attempt failed error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol',
@@ -49,7 +75,7 @@ mock_connect(
   sub {
     my $connect_args = shift;
     $connection->connect;
-    Mojo::IOLoop->one_tick until @state == 2;
+    Mojo::IOLoop->one_tick until @connection_state == 2;
 
     is_deeply $connect_args->[0],
       {address => 'irc.example.com', port => 6667, timeout => 20, tls => 1, tls_verify => 0x00},
@@ -65,10 +91,11 @@ mock_connect(
   sub {
     $connection->url->query->remove('tls');
     $connection->connect;
-    Mojo::IOLoop->one_tick until @state == 3;
+    Mojo::IOLoop->one_tick until @connection_state == 3;
 
     is $connection->url->query->param('tls'), 0, 'tls off after missing module';
-    is_deeply \@state, [qw(queued disconnected queued)], 'queued because of connect_queue';
+    is_deeply \@connection_state, [qw(queued disconnected queued)],
+      'queued because of connect_queue';
   }
 );
 
@@ -79,13 +106,13 @@ mock_connect(
     my $tid = Mojo::IOLoop->recurring(
       0.1 => sub {
         $core->_dequeue;
-        Mojo::IOLoop->stop if @state == 4;
+        Mojo::IOLoop->stop if @connection_state == 4;
       }
     );
     cmp_deeply [values %{$core->{connect_queue}}], [[$connection]], 'connect_queue';
     Mojo::IOLoop->start;
     Mojo::IOLoop->remove($tid);
-    is_deeply \@state, [qw(queued disconnected queued connected)], 'connected';
+    is_deeply \@connection_state, [qw(queued disconnected queued connected)], 'connected';
   }
 );
 

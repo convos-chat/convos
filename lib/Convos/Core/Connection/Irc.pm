@@ -333,11 +333,7 @@ sub _irc_event_rpl_welcome {
 
   Scalar::Util::weaken($self);
   my $write;
-  $write = sub {
-    my $cmd = shift @commands;
-    $self->send_p('', $cmd)->then($write) if $self and defined $cmd;
-  };
-
+  $write = sub { $self->send_p('', shift @commands)->then($write) if $self and @commands };
   $self->$write;
 }
 
@@ -379,6 +375,10 @@ sub _make_ison_response {
   my ($self, $msg, $res, $p) = @_;    # No need to get ($res, $p) here
   $msg->{ison} ||= {map { (lc($_) => $_) } split /\s+/, +($msg->{params}[1] || '')};
   $res->{online} = $msg->{ison}{lc($res->{nick})} ? true : false;
+
+  my $dialog = $self->get_dialog($res->{nick});
+  $self->emit(state => frozen => $dialog->frozen('')->TO_JSON) if $dialog;
+
   $p->resolve($res);
 }
 
@@ -819,12 +819,10 @@ CHUNK:
       if $msg->{command} =~ /^\d+$/;
     $msg->{command} = lc $msg->{command};
     my $method = "_irc_event_$msg->{command}";
-    $self->_debug('->%s(...)', $method) if DEBUG;
-
-    $self->can($method) ? $self->$method($msg) : $self->_irc_event_fallback($msg);
 
     # @wait_for is to avoid "Use of freed value in iteration"
     my @wait_for = values %{$self->{wait_for}{$msg->{command}} || {}};
+    my $handled  = 0;
 
   WAIT_FOR:
     for (@wait_for) {
@@ -835,7 +833,18 @@ CHUNK:
         next WAIT_FOR unless lc $v eq lc $rules->{$k};
       }
 
+      $self->_debug('->%s(...)', $make_response_method) if DEBUG;
       $self->$make_response_method($msg, $res, $p);
+      $handled++;
+    }
+
+    if (my $cb = $self->can($method)) {
+      $self->_debug('->%s(...)', $method) if DEBUG;
+      $self->$cb($msg);
+    }
+    elsif (!$handled) {
+      $self->_debug('->%s(...) (fallback)', $method) if DEBUG;
+      $self->_irc_event_fallback($msg);
     }
 
     $self->emit(irc_message => $msg)->emit($method => $msg) if IS_TESTING;
