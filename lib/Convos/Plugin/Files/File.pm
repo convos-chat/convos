@@ -16,7 +16,7 @@ has id => sub {
   my $self  = shift;
   my $asset = $self->asset;
   confess "Cannot create id() from empty file" unless $asset->path and -s $asset->path;
-  return short_checksum(Digest::MD5->new->addfile($asset->handle)->hexdigest);
+  return short_checksum(Digest::MD5->new->add($asset->slurp)->hexdigest);
 };
 
 has path => sub {

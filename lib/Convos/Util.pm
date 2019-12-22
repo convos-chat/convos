@@ -71,7 +71,7 @@ sub pretty_connection_name {
 sub short_checksum {
   my $checksum = 32 == length $_[0] && $_[0] =~ /^[a-z0-9]{32}$/ ? shift : md5_sum shift;
   my $short    = b64_encode pack 'H*', $checksum;
-  $short =~ s![aeiouAEIOU+=/\n]!!g;
+  $short =~ s![eioEIO+=/\n]!!g;
   return substr $short, 0, 16;
 }
 

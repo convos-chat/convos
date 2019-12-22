@@ -47,6 +47,7 @@ $t->websocket_ok('/events')->send_ok({json => \%send})
 
 my $msg = Mojo::JSON::decode_json($t->message->[1]);
 my $url = Mojo::URL->new($msg->{message});
+isnt $url->path->[-1], $fid, 'paste does not have the same id as file';
 $t->get_ok($url->path->to_string)->status_is(200)->text_is('header h1', 'paste.txt')
   ->text_like('header small', qr{^\d+-\d+-\d+})->content_like(qr{\<pre\>xxxxxxxx}s);
 
