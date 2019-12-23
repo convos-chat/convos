@@ -5,7 +5,6 @@ use Mojo::File 'tempfile';
 
 my $tmp = tempfile;
 $ENV{CONVOS_LOG_FILE} = "$tmp";
-diag "CONVOS_LOG_FILE=$ENV{CONVOS_LOG_FILE}";
 $$tmp->close;
 my $convos = Convos->new;
 

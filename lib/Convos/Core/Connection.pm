@@ -98,8 +98,8 @@ sub state {
 
   # Set to new value
   die "Invalid state: $state" unless grep { $state eq $_ } qw(connected queued disconnected);
-  $self->_debug('state = %s (%s)', $state, $message) if DEBUG;
   $self->{state} = $state;
+  $self->_debug('state = %s (%s)', $state, $message) if DEBUG;
   $self->emit(state => connection => {state => $state, message => $message});
 
   return $self;
@@ -135,7 +135,7 @@ sub _connect_args {
 sub _debug {
   my ($self, $format, @args) = @_;
   chomp for @args;
-  warn sprintf "[%s/%s] $format\n", $self->user->email, $self->id, @args;
+  warn sprintf "[%s/%s] t=%s $format\n", $self->user->email, $self->id, (time - $^T), @args;
 
 #my @caller = caller 1;
 #warn sprintf "[%s/%s] $format at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
@@ -186,19 +186,19 @@ sub _stream {
 
   Scalar::Util::weaken($self);
   Scalar::Util::weaken($self->{stream} = $stream);
-  for my $event (qw(close error read)) {
-    my $method = $self->can("_stream_on_$event");
-    $stream->on($event => sub { $self and $self->$method(@_) });
-  }
+  $stream->on(read => sub { $self and $self->_stream_on_read(@_) });
+  $stream->once(close   => sub { $self and $self->_stream_on_close(@_) });
+  $stream->once(error   => sub { $self and $self->_stream_on_error(@_) });
+  $stream->once(timeout => sub { $self and $self->_stream_on_error($_[0], 'Timeout!') });
 }
 
 sub _stream_on_close {
   my ($self, $stream) = @_;
   my $state = delete $self->{disconnecting} ? 'disconnected' : 'queued';
   delete @$self{qw(stream stream_id)};
-  $self->state(disconnected => 'Closed.');
-  $self->user->core->connect($self, sprintf 'You got disconnected from %s.', $self->url->host)
-    if $state eq 'queued';
+  return $self->state(disconnected => 'Closed.') if $state eq 'disconnected';
+  return $self->user->core->connect($self, sprintf 'You got disconnected from %s.',
+    $self->url->host);
 }
 
 sub _stream_on_error {

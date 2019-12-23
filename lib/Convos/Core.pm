@@ -130,8 +130,8 @@ sub _dequeue {
   my $self = shift;
 
   for my $host (keys %{$self->{connect_queue} || {}}) {
-    next unless my $connection = shift @{$self->{connect_queue}{$host}};
-    $connection->connect if $connection->wanted_state eq 'connected';
+    my $connection = shift @{$self->{connect_queue}{$host}};
+    $connection->connect if $connection and $connection->wanted_state eq 'connected';
   }
 }
 

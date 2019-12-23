@@ -4,13 +4,16 @@ use t::Helper;
 use Mojo::IOLoop;
 use Convos::Core;
 
-$ENV{CONVOS_CONNECT_DELAY} = 0.5;
+$ENV{CONVOS_CONNECT_DELAY} = 0.2;
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend');
 $core->start;
 
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my ($err, $res);
+
+my @state;
+$connection->on(state => sub { push @state, $_[2]->{state} if $_[1] eq 'connection' });
 
 ok !$connection->get_dialog('#convos'), 'convos channel does not exist';
 
@@ -209,8 +212,18 @@ $res = $connection->send_p('#convos', '/part')
 is_deeply($res, {}, 'part #convos');
 
 note 'server disconnect';
+my $id = $connection->{stream_id};
+ok !!Mojo::IOLoop->stream($id), 'got stream';
+$connection->once(state => sub { Mojo::IOLoop->stop });
 $irc_server->emit('close_stream');
+Mojo::IOLoop->start;
+ok !Mojo::IOLoop->stream($id), 'stream was removed';
+
 t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome',);
+isnt $connection->{stream_id}, $id, 'got new stream id';
+ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
+
+is_deeply \@state, [qw(connected queued connected)], 'got correct state';
 
 done_testing;
 
