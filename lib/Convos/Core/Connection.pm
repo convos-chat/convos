@@ -197,6 +197,15 @@ sub _stream_on_close {
   my $state = delete $self->{disconnecting} ? 'disconnected' : 'queued';
   delete @$self{qw(stream stream_id)};
   return $self->state(disconnected => 'Closed.') if $state eq 'disconnected';
+
+  if ($self->{failed_to_connect}) {
+    my $n = 1 + $self->{failed_to_connect};
+    return Mojo::IOLoop->timer(
+      ($n > 10 ? 10 : $n) * ($ENV{CONVOS_CONNECT_DELAY} || 4),
+      sub { $self and $self->user->core->connect($self, sprintf 'You got disconnected from %s.') }
+    );
+  }
+
   return $self->user->core->connect($self, sprintf 'You got disconnected from %s.',
     $self->url->host);
 }

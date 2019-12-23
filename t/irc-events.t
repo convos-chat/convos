@@ -7,8 +7,8 @@ use Convos::Core;
 my $core       = Convos::Core->new(backend => 'Convos::Core::Backend');
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $irc_server = t::Helper->irc_server_connect($connection);
 
-t::Helper->irc_server_connect($connection);
 t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome');
 
 my (@messages, @state);
@@ -17,8 +17,6 @@ $connection->on(state   => sub { push @state, [@_[1, 2]] });
 
 note 'error handlers';
 t::Helper->irc_server_messages(
-  from_server => "ERROR :Trying to reconnect too fast.\r\n",
-  $connection, '_irc_event_error',
   from_server => ":localhost 404 superman #nopechan :Cannot send to channel\r\n",
   $connection, '_irc_event_err_cannotsendtochan',
   from_server => ":localhost 421 superman cool_cmd :Unknown command\r\n",
@@ -42,7 +40,6 @@ ok delete $_->{ts}, 'got timestamp' for @messages;
 is_deeply(
   [map { $_->{message} } @messages],
   [
-    'Trying to reconnect too fast.',
     'Cannot send to channel #nopechan.',
     'Unknown command: cool_cmd',
     'Invalid nickname nopeman.',
@@ -150,6 +147,20 @@ cmp_deeply(
   'got noticed',
 ) or diag explain \@messages;
 
-# sub _irc_event_mode {
+is $connection->{failed_to_connect}, 0, 'failed_to_connect = 0';
+t::Helper->irc_server_messages(
+  from_server => "ERROR :Trying to reconnect too fast.\r\n",
+  $connection, '_irc_event_error',
+);
+is $connection->{failed_to_connect}, 1, 'failed_to_connect = 1';
+
+{
+  no warnings 'redefine';
+  my $delay;
+  local *Mojo::IOLoop::timer = sub { $delay = $_[1]; Mojo::IOLoop->stop; };
+  $irc_server->emit('close_stream');
+  Mojo::IOLoop->start;
+  is $delay, 8, 'delayed reconnect';
+}
 
 done_testing;

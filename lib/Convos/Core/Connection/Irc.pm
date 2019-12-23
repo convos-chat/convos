@@ -129,6 +129,12 @@ sub _irc_event_err_unknowncommand {
   $self->_notice("Unknown command: $msg->{params}[1]", type => 'error');
 }
 
+sub _irc_event_error {
+  my ($self, $msg) = @_;
+  $self->_irc_event_fallback($msg);
+  $self->{failed_to_connect}++ if $msg->{params}[0] =~ m!Trying to reconnect too fast!i;
+}
+
 sub _irc_event_fallback {
   my ($self, $msg) = @_;
 
@@ -320,8 +326,9 @@ sub _irc_event_rpl_topic {
 sub _irc_event_rpl_welcome {
   my ($self, $msg) = @_;
 
-  $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
+  $self->{failed_to_connect} = 0;
   $self->{myinfo}{nick} = $msg->{params}[0];
+  $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
   $self->emit(state => me => $self->{myinfo});
 
   my @commands = (
