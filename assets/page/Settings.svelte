@@ -20,6 +20,7 @@ $: invite = $inviteLinkOp.res.body || {};
 
 updateSettingsOp.on('start', req => {
   if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
+  req.body.max_message_size = parseInt((req.body.max_message_size || 0) * 1e6, 10);
   req.body.open_to_public = req.body.open_to_public ? true : false;
 });
 
@@ -40,6 +41,7 @@ onMount(async () => {
   await getSettingsOp.perform();
   const body = getSettingsOp.res.body;
   body.contact = body.contact.replace(/mailto:/, '');
+  body.max_message_size = (body.max_message_size || 0) / 1e6;
   convosSettings = body;
 });
 </script>
@@ -104,6 +106,11 @@ onMount(async () => {
       <span slot="label">{l('Registration is open to public')}</span>
       <p slot="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
     </Checkbox>
+
+    <TextField name="max_message_size" placeholder="{l('Ex: 30')}" bind:value="{convosSettings.max_message_size}">
+      <span slot="label">{l('Max upload size')}</span>
+      <p slot="help">{l('This is the max size in mega bytes (MB) that can be uploaded.')}</p>
+    </TextField>
 
     <div class="form-actions">
       <Button icon="save" op="{updateSettingsOp}">{l('Save settings')}</Button>

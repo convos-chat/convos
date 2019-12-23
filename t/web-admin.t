@@ -50,12 +50,18 @@ $t->post_ok(
     default_connection => 'irc://chat.freenode.net:6697/%23mojo',
     forced_connection  => true,
     local_secret       => 's3cret',
+    max_message_size   => 10,
     open_to_public     => true,
     organization_name  => 'Superheroes',
     organization_url   => 'https://metacpan.org',
     session_secrets    => ['s3cret'],
   }
-)->status_is(200);
+)->status_is(200)->json_is('/contact' => 'mailto:jhthorsen@cpan.org')
+  ->json_is('/default_connection' => 'irc://chat.freenode.net:6697/%23mojo')
+  ->json_is('/forced_connection'  => true)->json_is('/local_secret' => undef)
+  ->json_is('/max_message_size'   => 10)->json_is('/open_to_public' => true)
+  ->json_is('/organization_name'  => 'Superheroes')
+  ->json_is('/organization_url'   => 'https://metacpan.org')->json_is('/session_secrets' => undef);
 
 $t->get_ok('/')->status_is(200)->element_exists('h1 .subtitle')
   ->element_exists('h1 .subtitle[href="https://metacpan.org"]')

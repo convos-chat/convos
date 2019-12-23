@@ -12,8 +12,9 @@ has default_connection => \&_build_default_connection;
 has forced_connection =>
   sub { $ENV{CONVOS_FORCED_CONNECTION} || $ENV{CONVOS_FORCED_IRC_SERVER} ? true : false };
 sub id {'settings'}
-has local_secret   => \&_build_local_secret;
-has open_to_public => sub {false};
+has local_secret     => \&_build_local_secret;
+has max_message_size => 30_000_000;
+has open_to_public   => sub {false};
 has organization_name =>
   sub { $ENV{CONVOS_ORGANIZATION_NAME} || shift->defaults->{organization_name} };
 has organization_url =>
@@ -21,7 +22,7 @@ has organization_url =>
 
 sub public_attributes {
   return [
-    qw(contact default_connection forced_connection),
+    qw(contact default_connection forced_connection max_message_size),
     qw(open_to_public organization_name organization_url),
   ];
 }
@@ -95,7 +96,7 @@ sub _set_attributes {
 
   $self->$_($params->{$_})
     for grep { defined $params->{$_} }
-    qw(contact forced_connection open_to_public organization_name);
+    qw(contact forced_connection open_to_public max_message_size organization_name);
 
   $self->$_(Mojo::URL->new($params->{$_}))
     for grep { defined $params->{$_} } qw(default_connection organization_url);
@@ -169,6 +170,13 @@ True if this instance of Convos can only connect to the L</default_connection>.
 
 Holds a local password/secret that can be used to run admin actions from
 localhost.
+
+=head2 max_message_size
+
+  $int = $self->max_message_size;
+  $self = $self->max_message_size(30000000);
+
+Used to set the max file upload size.
 
 =head2 open_to_public
 

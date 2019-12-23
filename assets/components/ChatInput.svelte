@@ -110,8 +110,9 @@ function uploadFiles(e) {
   const formData = new FormData();
   formData.append('file', files[0]);
   user.api.operation('uploadFile').perform({formData}).then(op => {
-    const files = op.res.body.files;
-    if (files && files.length) add(files[0].url);
+    const res = op.res.body;
+    if (res.files && res.files.length) return add(res.files[0].url);
+    if (res.errors) dialog.addMessage({message: 'Could not upload file: %1', vars: [l(extractErrorMessage(res.errors))], type: 'error'});
   });
 }
 

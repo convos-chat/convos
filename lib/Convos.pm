@@ -68,9 +68,15 @@ sub startup {
     }
   );
 
+  $self->hook(after_build_tx  => \&_after_build_tx);
   $self->hook(around_action   => \&_around_action);
   $self->hook(before_dispatch => \&_before_dispatch);
   $self->core->start;
+}
+
+sub _after_build_tx {
+  my ($tx, $app) = @_;
+  $tx->req->max_message_size($app->core->settings->max_message_size);
 }
 
 sub _around_action {
