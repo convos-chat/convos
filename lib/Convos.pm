@@ -11,7 +11,7 @@ use Mojo::Util;
 
 our $VERSION = '2.00';
 
-my $ANON_API_CONTROLLER = "Convos::Controller::Anon";
+$ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY} || 0;
 
 has core => sub {
   my $self = shift;
@@ -125,14 +125,19 @@ sub _before_dispatch {
 
   # Handle mount point like /apps/convos
   my $base_url;
-  if (my $base = $c->req->headers->header('X-Request-Base')) {
-    $base_url = Mojo::URL->new($base);
-    $c->req->url->base($base_url);
-  }
-  else {
-    $base_url = $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
+  if ($ENV{CONVOS_REVERSE_PROXY}) {
+    if (my $base = $c->req->headers->header('X-Request-Base')) {
+      $base_url = Mojo::URL->new($base);
+      $c->req->url->base($base_url);
+    }
+    elsif (!$c->app->{convos_reverse_proxy_warn}++) {
+      $c->app->log->warn(
+        'You should set X-Request-Base: https://convos.by/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server'
+      );
+    }
   }
 
+  $base_url ||= $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
   $c->app->core->base_url($base_url);
   $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
 }

@@ -1,4 +1,5 @@
 #!perl
+BEGIN { $ENV{MOJO_REVERSE_PROXY} = 1 }
 use lib '.';
 use t::Helper;
 
@@ -32,5 +33,9 @@ $t->get_ok('/t/base-url?x=1', {'X-Request-Base' => 'http://example.com/sub'})->s
 $t->get_ok('/t/base-url?x=1')->status_is(200)->json_like('/base_url', qr{^http://.*:\d+/$})
   ->json_is('/url_for', '/foo/bar')->json_like('/web_url', qr{^http://.*:\d+/foo/bar$})
   ->json_is('/web_url_rel', '/foo/bar');
+
+$ENV{CONVOS_REVERSE_PROXY} = 0;
+$t->get_ok('/t/base-url?x=1', {'X-Request-Base' => 'http://example.com/sub'})->status_is(200)
+  ->json_is('/url_for', '/foo/bar')->json_is('/web_url_rel', '/foo/bar');
 
 done_testing;

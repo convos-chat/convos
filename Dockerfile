@@ -17,9 +17,6 @@ ENV CONVOS_ORGANIZATION_NAME Nordaaker
 ENV CONVOS_ORGANIZATION_URL http://nordaaker.com
 ENV CONVOS_SECURE_COOKIES 0
 
-# https://convos.by/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server
-ENV MOJO_REVERSE_PROXY 0
-
 RUN mkdir /app && \
   apk add --no-cache perl perl-io-socket-ssl wget && \
   apk add --no-cache --virtual builddeps build-base perl-dev
