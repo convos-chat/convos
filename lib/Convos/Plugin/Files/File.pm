@@ -6,6 +6,7 @@ use Convos::Util qw(DEBUG short_checksum);
 use Digest::MD5 ();
 use Mojo::Asset::File;
 use Mojo::File;
+use Mojo::JSON qw(false true);
 use Mojo::Path;
 use Time::HiRes 'time';
 
@@ -29,6 +30,7 @@ has path => sub {
 has saved => sub { Mojo::Date->new->to_datetime };
 has types => sub { Mojolicious::Types->new };
 has user  => undef;
+has write_only => sub {false};
 
 sub handle_multiline_message_p {
   my ($class, $backend, $connection, $message) = @_;
@@ -110,7 +112,7 @@ sub _move_legacy_p {
 
 sub _parse_attrs {
   my ($self, $attrs) = @_;
-  $self->$_($attrs->{$_} // '') for qw(filename id saved);
+  $self->$_($attrs->{$_} // '') for qw(filename id saved write_only);
   $self->asset->path($self->path) if $attrs->{id};
   return $self;
 }
@@ -118,11 +120,12 @@ sub _parse_attrs {
 sub TO_JSON {
   my ($self, $persist) = @_;
   my $json = {
-    ext      => $self->_ext,
-    id       => $self->id,
-    filename => $self->filename,
-    saved    => $self->saved,
-    uid      => '' . $self->user->uid,    # force to string
+    ext        => $self->_ext,
+    id         => $self->id,
+    filename   => $self->filename,
+    saved      => $self->saved,
+    uid        => '' . $self->user->uid,    # force to string
+    write_only => $self->write_only,
   };
 
   $json->{url}    = $self->public_url->to_string unless $persist;
@@ -187,6 +190,14 @@ Holds a L<Mojolicious::Types> object, used by L</mime_type>.
   $user = $file->user;
 
 Holds a L<Convos::Core::User> object.
+
+=head2 write_only
+
+  $bool = $file->write_only;
+  $file = $file->write_only(true);
+
+Used to write files that should only be used internally by L<Convos>, instead
+of read by visitors on the web.
 
 =head1 METHODS
 

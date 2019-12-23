@@ -91,6 +91,16 @@ $name = $t->tx->res->json('/files/0/filename');
 $t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
   ->header_is('Content-Disposition', 'attachment; filename="binary.bin"');
 
+note 'write_only';
+$t->post_ok('/api/file',
+  form => {id => 'irc-localhost-key', file => {file => $asset}, write_only => true})
+  ->status_is(200);
+$fid = $t->tx->res->json('/files/0/id');
+is $fid, 'irc-localhost-key', 'forced id';
+ok -e $t->app->core->home->child(qw(superman@example.com upload irc-localhost-key.data)),
+  'file was uploaded';
+$t->get_ok("/file/1/$fid")->status_is(404);
+
 note 'max_message_size';
 $ENV{CONVOS_MAX_UPLOAD_SIZE} = 10;
 $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(400)

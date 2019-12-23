@@ -44,6 +44,7 @@ sub _serve {
   return $c->reply->not_found unless $file->user;    # invalid uid
   return $file->load_p->then(sub {
     return $c->reply->not_found unless eval { $file->filename };    # invalid fid
+    return $c->reply->not_found if $file->write_only;
 
     my $h = $c->res->headers;
     $h->cache_control('max-age=86400');

@@ -32,9 +32,11 @@ sub upload {
   return $self->render(openapi => E($err, '/file'), status => 400)
     if $err = !$upload ? 'No upload.' : !$upload->filename ? 'Unknown filename.' : '';
 
-  return $self->files->save_p($upload->asset, {filename => $upload->filename})->then(sub {
-    $self->render(openapi => {files => [shift]});
-  });
+  my %args = (filename => $upload->filename);
+  $args{id}         = $self->param('id')         if defined $self->param('id');
+  $args{write_only} = $self->param('write_only') if defined $self->param('write_only');
+  return $self->files->save_p($upload->asset, \%args)
+    ->then(sub { $self->render(openapi => {files => [shift]}) });
 }
 
 1;
