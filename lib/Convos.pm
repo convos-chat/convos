@@ -76,7 +76,7 @@ sub startup {
 
 sub _after_build_tx {
   my ($tx, $app) = @_;
-  $tx->req->max_message_size($app->core->settings->max_message_size);
+  $tx->req->max_message_size($ENV{CONVOS_MAX_UPLOAD_SIZE} // 40_000_000);
 }
 
 sub _around_action {

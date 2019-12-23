@@ -92,7 +92,7 @@ $t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
   ->header_is('Content-Disposition', 'attachment; filename="binary.bin"');
 
 note 'max_message_size';
-$t->app->core->settings->max_message_size(10);
+$ENV{CONVOS_MAX_UPLOAD_SIZE} = 10;
 $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(400)
   ->json_is('/errors/0/message', 'Maximum message size exceeded');
 

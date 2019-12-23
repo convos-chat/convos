@@ -24,8 +24,8 @@ sub upload {
   my $error = $self->req->error;
   $self->render(openapi => E($error->{message}, '/file'), status => 400) if $error;
 
-  my $self = $self->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  return unless $self->openapi->valid_input;
+  return $self->unauthorized unless my $user = $self->backend->user;
 
   my $upload = $self->req->upload('file');
   my $err;
