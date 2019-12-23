@@ -16,7 +16,6 @@ env:
 install:
   - "cpanm https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/EV-4.27.tar.gz"
   - "cpanm -n https://github.com/jhthorsen/linkembedder/archive/master.tar.gz"
-  - "cpanm -n https://github.com/jhthorsen/mojo-irc/archive/master.tar.gz"
   - "cpanm -n Test::Pod Test::Pod::Coverage"
   - "cpanm -n --installdeps ."
 
