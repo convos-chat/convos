@@ -32,6 +32,9 @@
     line-height: var(--h1-font-size);
     height: var(--h1-font-size);
     white-space: pre;
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     a {
       color: inherit;
