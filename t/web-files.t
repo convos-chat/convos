@@ -25,10 +25,12 @@ $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(200)
   ->json_like('/files/0/url',   qr{^http.*/file/1/$fid_re$});
 
 my $fid = $t->tx->res->json('/files/0/id');
-$t->get_ok("/file/1/$fid")->status_is(200)->text_is('header h1', 'web-files.t')
-  ->text_like('header small', qr{^\d+-\d+-\d+})->content_like(qr{\<pre\>.*use t::Helper}s);
+$t->get_ok("/file/1/$fid")->status_is(200)
+  ->element_exists('.le-paste > pre.paste', 'pre.paste so LinkEmbedder can do the right thing')
+  ->text_is('header h1', 'web-files.t')->text_like('header small', qr{^\d+-\d+-\d+})
+  ->content_like(qr{\<pre class="paste"\>.*use t::Helper}s);
 $t->get_ok("/file/1/$fid.t")->status_is(200)->header_is('Cache-Control', 'max-age=86400')
-  ->content_like(qr{use t::Helper}s)->content_unlike(qr{\<pre\>.*use t::Helper}s);
+  ->content_like(qr{use t::Helper}s)->content_unlike(qr{\<pre class="paste"\>.*use t::Helper}s);
 
 $t->get_ok("/api/file/1/1000000000000000")->status_is(404);
 $t->get_ok("/file/1/1000000000000000")->status_is(404);
@@ -49,7 +51,7 @@ my $msg = Mojo::JSON::decode_json($t->message->[1]);
 my $url = Mojo::URL->new($msg->{message});
 isnt $url->path->[-1], $fid, 'paste does not have the same id as file';
 $t->get_ok($url->path->to_string)->status_is(200)->text_is('header h1', 'paste.txt')
-  ->text_like('header small', qr{^\d+-\d+-\d+})->content_like(qr{\<pre\>xxxxxxxx}s);
+  ->text_like('header small', qr{^\d+-\d+-\d+})->content_like(qr{\<pre class="paste"\>xxxxxxxx}s);
 
 note 'back compat paste route';
 my $paste = $user->core->home->child(qw(superman@example.com upload 149545306873033))
@@ -61,7 +63,7 @@ $t->get_ok("/paste/10000000000000000000/149545306873033")->status_is(404);
 $t->get_ok("/paste/$user_sha1/100000000000000")->status_is(404);
 $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200)
   ->header_is('Cache-Control', 'max-age=86400')->text_is('header h1', 'paste.txt')
-  ->content_like(qr{\<pre\>.*curl -s www}s);
+  ->content_like(qr{\<pre class="paste"\>.*curl -s www}s);
 
 ok !-e $paste, 'legacy paste was moved';
 $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200, '200 OK after moved');
@@ -72,14 +74,22 @@ $t->post_ok('/api/file', form => {file => {file => 't/data/image.jpg'}})->status
 isnt $t->tx->res->json('/files/0/id'), $fid, 'image does not have the same id as file';
 
 note 'embedded image';
-my ($image, $name);
-$fid   = $t->tx->res->json('/files/0/id');
-$image = $t->tx->res->json('/files/0/url');
-$name  = $t->tx->res->json('/files/0/filename');
+my $name;
+$fid  = $t->tx->res->json('/files/0/id');
+$url  = $t->tx->res->json('/files/0/url');
+$name = $t->tx->res->json('/files/0/filename');
 $t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
   ->element_exists(qq(meta[property="og:description"][content="$name"]))
-  ->element_exists(qq(meta[property="og:image"][content="$image.jpg"]))
-  ->element_exists(qq(main a[href="$image.jpg"]))->element_exists(qq(main a img[src="$image.jpg"]));
+  ->element_exists(qq(meta[property="og:image"][content="$url.jpg"]))
+  ->element_exists(qq(main a[href="$url.jpg"]))->element_exists(qq(main a img[src="$url.jpg"]));
+
+note 'binary';
+$t->post_ok('/api/file', form => {file => {file => 't/data/binary.bin'}})->status_is(200);
+$fid  = $t->tx->res->json('/files/0/id');
+$url  = $t->tx->res->json('/files/0/url');
+$name = $t->tx->res->json('/files/0/filename');
+$t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
+  ->header_is('Content-Disposition', 'attachment; filename="binary.bin"');
 
 note 'max_message_size';
 $t->app->core->settings->max_message_size(10);

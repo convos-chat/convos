@@ -45,9 +45,12 @@ sub _serve {
   return $file->load_p->then(sub {
     return $c->reply->not_found unless eval { $file->filename };    # invalid fid
 
-    $c->res->headers->cache_control('max-age=86400');
+    my $h = $c->res->headers;
+    $h->cache_control('max-age=86400');
     return $c->reply->asset($file->asset) if $params->{format};                                # raw
     return $c->render(file => file => $file) if $file->mime_type =~ m!$type_can_be_embedded!;
+
+    $h->content_disposition(qq[attachment; filename="@{[$file->filename]}"]);
     return $c->reply->asset($file->asset);
   });
 }

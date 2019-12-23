@@ -19,7 +19,7 @@
     % end
   % } else {
     <div class="le-paste is-expanded without-frame">
-      <pre><%= $file->{content} || $file->asset->slurp %></pre>
+      <pre class="paste"><%= $file->{content} || $file->asset->slurp %></pre>
     </div>
   % }
 </main>
