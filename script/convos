@@ -216,7 +216,7 @@ sub secure_listen {
   }
 
   $i = @ARGV unless $url;
-  $url ||= Mojo::URL->new('https://localhost:3443');
+  $url ||= Mojo::URL->new('https://*:3443');
   return if $url->scheme eq 'http';
 
   load_certs();

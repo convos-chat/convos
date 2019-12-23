@@ -135,7 +135,7 @@ sub _connect_args {
 sub _debug {
   my ($self, $format, @args) = @_;
   chomp for @args;
-  warn sprintf "[%s/%s] t=%s $format\n", $self->user->email, $self->id, (time - $^T), @args;
+  warn sprintf "[%s/%s] [$$/%s] $format\n", $self->user->email, $self->id, (time - $^T), @args;
 
 #my @caller = caller 1;
 #warn sprintf "[%s/%s] $format at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
@@ -179,6 +179,7 @@ sub _stream {
   return $self->_stream_on_error($stream, $err) if $err;
 
   $stream->timeout(0);
+  $self->{pid} //= $$;
   $self->{buffer}  = '';
   $self->{delayed} = 0;
   $self->{myinfo} ||= {};
@@ -186,14 +187,16 @@ sub _stream {
 
   Scalar::Util::weaken($self);
   Scalar::Util::weaken($self->{stream} = $stream);
-  $stream->on(read => sub { $self and $self->_stream_on_read(@_) });
-  $stream->once(close   => sub { $self and $self->_stream_on_close(@_) });
-  $stream->once(error   => sub { $self and $self->_stream_on_error(@_) });
-  $stream->once(timeout => sub { $self and $self->_stream_on_error($_[0], 'Timeout!') });
+  $stream->on(read    => sub { $self and $self->_stream_on_read(@_) });
+  $stream->on(close   => sub { $self and $self->_stream_on_close(@_) });
+  $stream->on(error   => sub { $self and $self->_stream_on_error(@_) });
+  $stream->on(timeout => sub { $self and $self->_stream_on_error($_[0], 'Timeout!') });
 }
 
 sub _stream_on_close {
   my ($self, $stream) = @_;
+  return unless $self->{pid} == $$;
+
   my $state = delete $self->{disconnecting} ? 'disconnected' : 'queued';
   delete @$self{qw(stream stream_id)};
   return $self->state(disconnected => 'Closed.') if $state eq 'disconnected';
