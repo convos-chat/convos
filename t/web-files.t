@@ -68,6 +68,16 @@ $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200, '200 OK after mo
 note 'iPhone default image name';
 $t->post_ok('/api/file', form => {file => {file => 't/data/image.jpg'}})->status_is(200)
   ->json_like('/files/0/filename', qr{^IMG_\d+\.jpg$});
+isnt $t->tx->res->json('/files/0/id'), $fid, 'image does not have the same id as file';
+
+note 'embedded image';
+my ($image, $name);
+$fid   = $t->tx->res->json('/files/0/id');
+$image = $t->tx->res->json('/files/0/url');
+$name  = $t->tx->res->json('/files/0/filename');
+$t->get_ok("/file/1/$fid")->element_exists(qq(meta[property="og:description"][content="$name"]))
+  ->element_exists(qq(meta[property="og:image"][content="$image.jpg"]))
+  ->element_exists(qq(main a[href="$image.jpg"]))->element_exists(qq(main a img[src="$image.jpg"]));
 
 done_testing;
 

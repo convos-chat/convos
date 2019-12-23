@@ -18,6 +18,7 @@ sub register {
   $app->helper('l'                           => \&_l);
   $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                    => \&_settings);
+  $app->helper('social'                      => \&_social);
   $app->helper('unauthorized'                => \&_unauthorized);
   $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
 }
@@ -124,6 +125,23 @@ sub _setup_settings {
   $defined->{ws_url}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
 
   return $defined;
+}
+
+sub _social {
+  my $c      = shift;
+  my $social = $c->stash->{social} ||= {};
+
+  # Defaults
+  $social->{description} ||= 'A chat application that runs in your web browser';
+  $social->{image}       ||= $c->url_for('/images/convos_screenshot.jpg')->to_abs;
+  $social->{url}         ||= $c->url_for('/')->to_abs;
+
+  # Get
+  return $social unless @_;
+
+  # Set
+  $social->{$_[0]} = $_[1];
+  return $c;
 }
 
 sub _unauthorized {

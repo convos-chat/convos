@@ -1,6 +1,10 @@
 % layout 'convos';
 % title settings('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . settings('organization_name');
 
+% social description => $file->filename;
+% social image => $file->public_url(1) if $file->mime_type =~ m!^image!;
+% social url => $c->req->url->to_abs;
+
 %= include 'partial/sidebar', js_remove => 0
 
 <header class="chat-header">
