@@ -43,7 +43,10 @@ export default class EmbedMaker extends Reactive {
   }
 
   renderPhoto(embedEl) {
-    q(embedEl, 'img', img => img.addEventListener('click', () => this.showMedia(img)));
+    q(embedEl, 'img', img => img.addEventListener('click', e => {
+      e.preventDefault();
+      this.showMedia(img);
+    }));
   }
 
   renderTwitter(embedEl) {

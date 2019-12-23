@@ -14,6 +14,10 @@ sub info {
     return $self->respond_to(json => {json => $link}, any => {text => $link->html});
   }
 
+  # Some websites will not render complete pages without a proper User-Agent
+  my $user_agent = $self->req->headers->user_agent;
+  $self->linkembedder->ua->transactor->name($user_agent) if $user_agent;
+
   return $self->linkembedder->get_p($self->param('url'))->then(sub {
     my $link = shift;
 
