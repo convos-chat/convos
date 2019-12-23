@@ -342,7 +342,7 @@ sub _irc_event_rpl_welcome {
 
   Scalar::Util::weaken($self);
   my $write;
-  $write = sub { $self->send_p('', shift @commands)->then($write) if $self and @commands };
+  $write = sub { $self->send_p('', shift @commands)->finally($write) if $self and @commands };
   $self->$write;
 }
 
