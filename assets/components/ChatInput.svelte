@@ -17,7 +17,7 @@ const user = getContext('user');
 
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
 $: connection = user.findDialog({connection_id: dialog.connection_id});
-$: inputParts = pos ? calculateInputParts(pos) : ['', '', '', ''];
+$: inputParts = calculateInputParts(pos);
 
 onMount(() => {
   uploadEl.uploader = uploadFiles;
@@ -45,6 +45,8 @@ function calculateAutocompleteOptions([before, key, afterKey, after]) {
 }
 
 function calculateInputParts(pos) {
+  if (!inputEl) return ['', '', '', ''];
+
   let key = '';
   let afterKey = '';
   const before = inputEl.value.substring(0, pos).replace(/(\S)(\S*)$/, (a, b, c) => {
@@ -87,6 +89,7 @@ function sendMessage() {
 
   if (msg.message.length) user.send(msg);
   inputEl.value = '';
+  pos = 0;
 }
 
 function uploadFiles(e) {
