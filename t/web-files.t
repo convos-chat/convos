@@ -27,8 +27,8 @@ $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(200)
 my $fid = $t->tx->res->json('/files/0/id');
 $t->get_ok("/file/1/$fid")->status_is(200)->text_is('header h1', 'web-files.t')
   ->text_like('header small', qr{^\d+-\d+-\d+})->content_like(qr{\<pre\>.*use t::Helper}s);
-$t->get_ok("/file/1/$fid.t")->status_is(200)->content_like(qr{use t::Helper}s)
-  ->content_unlike(qr{\<pre\>.*use t::Helper}s);
+$t->get_ok("/file/1/$fid.t")->status_is(200)->header_is('Cache-Control', 'max-age=86400')
+  ->content_like(qr{use t::Helper}s)->content_unlike(qr{\<pre\>.*use t::Helper}s);
 
 $t->get_ok("/api/file/1/1000000000000000")->status_is(404);
 $t->get_ok("/file/1/1000000000000000")->status_is(404);
@@ -59,7 +59,8 @@ my $user_sha1 = substr Mojo::Util::sha1_sum('superman@example.com'), 0, 20;
 ok -e $paste, 'legacy paste exists';
 $t->get_ok("/paste/10000000000000000000/149545306873033")->status_is(404);
 $t->get_ok("/paste/$user_sha1/100000000000000")->status_is(404);
-$t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200)->text_is('header h1', 'paste.txt')
+$t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200)
+  ->header_is('Cache-Control', 'max-age=86400')->text_is('header h1', 'paste.txt')
   ->content_like(qr{\<pre\>.*curl -s www}s);
 
 ok !-e $paste, 'legacy paste was moved';
@@ -75,7 +76,8 @@ my ($image, $name);
 $fid   = $t->tx->res->json('/files/0/id');
 $image = $t->tx->res->json('/files/0/url');
 $name  = $t->tx->res->json('/files/0/filename');
-$t->get_ok("/file/1/$fid")->element_exists(qq(meta[property="og:description"][content="$name"]))
+$t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
+  ->element_exists(qq(meta[property="og:description"][content="$name"]))
   ->element_exists(qq(meta[property="og:image"][content="$image.jpg"]))
   ->element_exists(qq(main a[href="$image.jpg"]))->element_exists(qq(main a img[src="$image.jpg"]));
 

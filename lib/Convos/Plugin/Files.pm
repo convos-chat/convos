@@ -44,6 +44,8 @@ sub _serve {
   return $c->reply->not_found unless $file->user;    # invalid uid
   return $file->load_p->then(sub {
     return $c->reply->not_found unless eval { $file->filename };    # invalid fid
+
+    $c->res->headers->cache_control('max-age=86400');
     return $c->reply->asset($file->asset) if $params->{format};                                # raw
     return $c->render(file => file => $file) if $file->mime_type =~ m!$type_can_be_embedded!;
     return $c->reply->asset($file->asset);
