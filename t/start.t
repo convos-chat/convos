@@ -29,8 +29,7 @@ $user->save_p->$wait_success('save_p');
 
 # 0: will not be connected
 my $conn_0 = $user->connection({name => 'localhost', protocol => 'Irc'});
-$conn_0->url->parse('irc://127.0.0.1');
-$conn_0->set_wanted_state_p('disconnected')->$wait_success('set_wanted_state_p');
+$conn_0->wanted_state('disconnected')->url->parse('irc://127.0.0.1');
 $conn_0->save_p->$wait_success('save_p');
 
 # 2: instant or queued

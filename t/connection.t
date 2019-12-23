@@ -15,8 +15,7 @@ my $dialog = $connection->get_dialog('#foo');
 ok $connection->{dialogs}{'#foo'}, 'dialog on create/update';
 
 $connection = Convos::Core::Connection->new({});
-eval { $connection->disconnect_p };
-like $@, qr(^Method "disconnect_p" not implemented), 'disconnect_p';
+$connection->disconnect_p->$wait_success('disconnect_p');
 
 eval { $connection->send_p };
 like $@, qr(^Method "send_p" not implemented), 'send_p';

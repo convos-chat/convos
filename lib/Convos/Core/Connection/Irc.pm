@@ -25,17 +25,11 @@ sub _available_dialogs { $CLASS_DATA{dialogs}{$_[0]->url->host} ||= {} }
 
 sub disconnect_p {
   my $self = shift;
+  my $p    = Mojo::Promise->new;
+  return $p->resolve({}) unless $self->{stream};
 
-  $self->{disconnect} = 1;    # Prevent getting queued
-
-  my $p = Mojo::Promise->new;
-  $self->_write_p("QUIT :https://convos.by")->finally(sub {
-    my $stream = delete $self->{stream};
-    $stream->close if $stream;
-    Mojo::IOLoop->remove(delete $self->{stream_id}) if $self->{stream_id};
-    $p->resolve({});
-  });
-
+  $self->{disconnecting} = 1;    # Prevent getting queued
+  $self->_write("QUIT :https://convos.by", sub { $self->_stream_remove($p) });
   return $p;
 }
 
@@ -61,11 +55,11 @@ sub send_p {
   return $self->_send_mode_p($target, $message) if $cmd eq 'MODE';
   return $self->_send_part_p($message || $target) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_send_topic_p($target, $message) if $cmd eq 'TOPIC';
-  return $self->_send_whois_p($message)            if $cmd eq 'WHOIS';
-  return $self->_send_names_p($target)             if $cmd eq 'NAMES';
-  return $self->_send_nick_p($message)             if $cmd eq 'NICK';
-  return $self->set_wanted_state_p('connected')    if $cmd eq 'CONNECT';
-  return $self->set_wanted_state_p('disconnected') if $cmd eq 'DISCONNECT';
+  return $self->_send_whois_p($message)             if $cmd eq 'WHOIS';
+  return $self->_send_names_p($target)              if $cmd eq 'NAMES';
+  return $self->_send_nick_p($message)              if $cmd eq 'NICK';
+  return $self->_set_wanted_state_p('connected')    if $cmd eq 'CONNECT';
+  return $self->_set_wanted_state_p('disconnected') if $cmd eq 'DISCONNECT';
   return $self->_send_message_p($target, "/$cmd $message");
 }
 
@@ -769,6 +763,14 @@ sub _send_whois_p {
   );
 }
 
+sub _set_wanted_state_p {
+  my ($self, $state) = @_;
+  $self->user->core->connect($self, '') if $state eq 'connected';
+  $self->disconnect_p if $state eq 'disconnected';
+  $self->wanted_state($state);
+  return Mojo::Promise->resolve({});
+}
+
 sub _split_message {
   my $self     = shift;
   my @messages = split /\r?\n/, shift;
@@ -805,16 +807,15 @@ sub _split_message {
 sub _stream {
   my ($self, $loop, $err, $stream) = @_;
   $self->SUPER::_stream($loop, $err, $stream);
+  return if $err;
 
-  unless ($err) {
-    my $url  = $self->url;
-    my $nick = $self->_nick;
-    my $user = $url->username || $nick;
-    my $mode = $url->query->param('mode') || 0;
-    $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
-    $self->_write("NICK $nick\r\n");
-    $self->_write("USER $user $mode * :https://convos.by/\r\n");
-  }
+  my $url  = $self->url;
+  my $nick = $self->_nick;
+  my $user = $url->username || $nick;
+  my $mode = $url->query->param('mode') || 0;
+  $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
+  $self->_write("NICK $nick\r\n");
+  $self->_write("USER $user $mode * :https://convos.by/\r\n");
 }
 
 sub _stream_on_read {

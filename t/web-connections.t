@@ -43,12 +43,13 @@ $t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.c
   ->status_is(404);
 $t->post_ok('/api/connection/irc-example', json => {})->status_is(200);
 
-my $connection = $user->get_connection('irc-localhost')->state(connected => '');
+my $connection = $user->get_connection('irc-localhost');
 $t->post_ok('/api/connection/irc-localhost', json => {url => "irc://localhost:$port"})
-  ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connected');
+  ->status_is(200)->json_is('/name' => 'localhost')
+  ->json_like('/state' => qr{^(connected|queued)$});
 $t->post_ok('/api/connection/irc-localhost', json => {url => 'irc://example.com:9999'})
-  ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
-  ->json_like('/url' => qr{irc://example\.com:9999\?nick=superman&tls=1});
+  ->status_is(200)->json_is('/name' => 'localhost')
+  ->json_like('/url' => qr{irc://example\.com:9999});
 
 $connection->state(disconnected => '');
 $t->post_ok('/api/connection/irc-localhost',

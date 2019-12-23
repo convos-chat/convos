@@ -22,7 +22,7 @@ has messages => sub {
 sub name { shift->{name} }
 has on_connect_commands => sub { +[] };
 has protocol            => 'null';
-sub wanted_state { $_[0]->{wanted_state} ||= 'connected' }
+has wanted_state        => 'connected';
 
 sub url {
   my $self = shift;
@@ -51,7 +51,7 @@ sub connect {
   # Already connected/connecting
   return if $self->{stream_id};
 
-  delete $self->{disconnect};
+  delete $self->{disconnecting};
   $self->emit(state => frozen => $_->frozen('Not connected.')->TO_JSON)
     for grep { !$_->frozen } @{$self->dialogs};
 
@@ -69,7 +69,7 @@ has_many dialogs => 'Convos::Core::Dialog' => sub {
   return $dialog;
 };
 
-sub disconnect_p { die 'Method "disconnect_p" not implemented.' }
+sub disconnect_p { shift->_stream_remove(Mojo::Promise->new) }
 
 sub id { my $from = $_[1] || $_[0]; lc join '-', @$from{qw(protocol name)} }
 
@@ -85,21 +85,6 @@ sub save_p {
 }
 
 sub send_p { die 'Method "send_p" not implemented.' }
-
-sub set_wanted_state_p {
-  my ($self, $state) = @_;
-  return Mojo::Promise->resolve({}) if +($self->{wanted_state} || '') eq $state;
-
-  $self->_debug('wanted_state = %s', $state) if DEBUG;
-  $self->{wanted_state} = $state;
-
-  # Disconnect now
-  return $self->disconnect_p if $state eq 'disconnected';
-
-  # Cannot connect instantly
-  $self->user->core->connect($self, "State changed to $state.");
-  return Mojo::Promise->resolve({});
-}
 
 sub state {
   my ($self, $state, $message) = @_;
@@ -209,8 +194,9 @@ sub _stream {
 
 sub _stream_on_close {
   my ($self, $stream) = @_;
-  my $state = delete $self->{disconnect} ? 'disconnected' : 'queued';
+  my $state = delete $self->{disconnecting} ? 'disconnected' : 'queued';
   delete @$self{qw(stream stream_id)};
+  $self->state(disconnected => 'Closed.');
   $self->user->core->connect($self, sprintf 'You got disconnected from %s.', $self->url->host)
     if $state eq 'queued';
 }
@@ -223,6 +209,7 @@ sub _stream_on_error {
 
   my $url = $self->url;
   if ($url->query->param('tls') and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
+    $self->state(disconnected => $err);
     $url->query->param(tls => 0);
     $self->user->core->connect($self, $err);    # let's queue up to make irc admins happy
   }
@@ -236,6 +223,13 @@ sub _stream_on_read {
   die 'Method "_stream_on_read" not implemented.';
 }
 
+sub _stream_remove {
+  my ($self, $p) = @_;
+  my $stream = delete $self->{stream};
+  $stream->close if $stream;
+  $p->resolve({});
+}
+
 sub _write_p {
   my ($self, @data) = @_;
 
@@ -244,6 +238,7 @@ sub _write_p {
   return $p->resolve({})                  unless length $buf;
   return $p->reject('Not connected.')     unless $self->{stream_id};
   return $p->reject('Not yet connected.') unless $self->{stream};
+  return $p->reject('Disconnecting.') if $self->{disconnecting};
 
   $self->_write("$buf\r\n", sub { $p->resolve({}) });
 
@@ -398,10 +393,12 @@ Holds a L<Convos::Core::User> object that owns this connection.
 
 =head2 wanted_state
 
+  $conn = $conn->wanted_state("disconnected");
   $str = $conn->wanted_state;
 
-Used to retrieve the state that the user I<want> the connection to be in. Use
-L</set_wanted_state_p> to change the value.
+Used to change the state that the user I<want> the connection to be in. Note
+that it is also required to call L</connect> and L</disconnect> to actually
+change the state.
 
 =head1 METHODS
 
@@ -460,14 +457,6 @@ Used to send a C<$message> to C<$target>. C<$message> is a plain string and
 C<$target> can be a user or room/channel name.
 
 Meant to be overloaded in a subclass.
-
-=head2 set_wanted_state_p
-
-  $p = $conn->set_wanted_state_p("connected");
-  $p = $conn->set_wanted_state_p("disconnected");
-
-The state that this connection should be in. L</state> on the other hand
-reflects which state the connection is actually in.
 
 =head2 state
 

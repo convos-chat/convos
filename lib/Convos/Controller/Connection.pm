@@ -56,13 +56,13 @@ sub update {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
-  my $state = $json->{wanted_state} || '';
+  my $wanted_state = $json->{wanted_state} || '';
   my $connection;
 
   eval {
     $connection = $user->get_connection($self->stash('connection_id'));
     $connection->url->host or die 'Connection not found.';
-    $connection->set_wanted_state_p($state) if $state;
+    $connection->wanted_state($wanted_state) if $wanted_state;
     1;
   } or do {
     return $self->render(openapi => E('Connection not found.'), status => 404);
@@ -76,22 +76,25 @@ sub update {
   my $url = Mojo::URL->new($json->{url} || '');
   $url = $connection->url unless $url->host;
 
-  if (!$self->settings('forced_connection')) {
+  unless ($self->settings('forced_connection')) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
-    $state = 'reconnect' if not _same_url($url, $connection->url) and $state ne 'disconnected';
+    $wanted_state = 'reconnect'
+      if $wanted_state ne 'disconnected' and not _same_url($url, $connection->url);
     $connection->url($url);
   }
 
-  $state = '' if $connection->state eq 'connected' and $state eq 'connected';
-  $connection->send_p('', sprintf '/nick %s', $url->query->param('nick'))
-    if $url->query->param('nick');
-
-  my @p;
-  push @p, $connection->save_p;
-  push @p, $connection->disconnect_p if $state eq 'disconnected' or $state eq 'reconnect';
+  my @p = ($connection->save_p);
+  $wanted_state = '' if $connection->state eq 'connected' and $wanted_state eq 'connected';
+  if ($wanted_state eq 'disconnected' or $wanted_state eq 'reconnect') {
+    push @p, $connection->disconnect_p;
+  }
+  elsif ($url->query->param('nick')) {
+    $connection->send_p('', sprintf '/nick %s', $url->query->param('nick'));
+  }
 
   return Mojo::Promise->all(@p)->then(sub {
-    $self->app->core->connect($connection) if $state eq 'connected' or $state eq 'reconnect';
+    $self->app->core->connect($connection)
+      if $wanted_state eq 'connected' or $wanted_state eq 'reconnect';
     $self->render(openapi => $connection);
   });
 }
