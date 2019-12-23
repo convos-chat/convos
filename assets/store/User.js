@@ -169,7 +169,6 @@ export default class User extends Reactive {
     if (!params.bubbles) return;
 
     const dialog = conn.findDialog(params);
-    if (!dialog) return;
-    if (dialog[params.dispatchTo]) dialog[params.dispatchTo](params);
+    if (dialog && dialog[params.dispatchTo]) dialog[params.dispatchTo](params);
   }
 }

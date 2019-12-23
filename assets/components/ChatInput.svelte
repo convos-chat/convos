@@ -2,6 +2,7 @@
 import autocomplete from '../js/autocomplete';
 import Icon from '../components/Icon.svelte';
 import {getContext, onMount} from 'svelte';
+import {extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
 
 export let dialog = {};
@@ -87,7 +88,16 @@ function sendMessage() {
 
   const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
 
-  if (msg.message.length) user.send(msg);
+  if (msg.message.length) {
+    user.send(msg, res => {
+      if (!res.errors || !dialog) return;
+      res.stopPropagation();
+      res.vars = [res.message, extractErrorMessage(res.errors)];
+      res.message = 'Could not send message "%1": %2';
+      dialog.addMessage(res);
+    });
+  }
+
   inputEl.value = '';
   pos = 0;
 }
