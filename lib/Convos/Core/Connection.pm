@@ -224,7 +224,6 @@ sub _stream_on_error {
   my $url = $self->url;
   if ($url->query->param('tls') and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/)) {
     $url->query->param(tls => 0);
-    $self->save_p;
     $self->user->core->connect($self, $err);    # let's queue up to make irc admins happy
   }
   else {

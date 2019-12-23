@@ -1,12 +1,18 @@
 #!perl
+BEGIN { $ENV{CONVOS_SKIP_CONNECT} = 1 }
 use lib '.';
 use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-my $core       = Convos::Core->new;
-my $connection = $core->user({email => 'test.user@example.com'})
-  ->connection({name => 'example', protocol => 'irc'});
+my $core = core();
+my $user = $core->user({email => 'test.user@example.com'});
+$user->save_p->$wait_success;
+
+my $connection = $user->connection({name => 'example', protocol => 'irc'});
+$connection->dialog({name => '#convos'});
+$connection->dialog({name => 'private_ryan'});
+$connection->save_p->$wait_success;
 
 my (@connection_state, @state);
 $connection->on(
@@ -22,9 +28,6 @@ is $connection->url->query->param('tls'), undef, 'initial tls value';
 note 'on_connect_commands';
 my @on_connect_commands = ('/msg NickServ identify s3cret', '/msg superwoman you are too cool');
 $connection->on_connect_commands([@on_connect_commands]);
-
-$connection->dialog({name => '#convos'});
-$connection->dialog({name => 'private_ryan'});
 
 t::Helper->irc_server_connect($connection);
 
@@ -116,7 +119,13 @@ mock_connect(
   }
 );
 
+is_deeply [map { $_->frozen }
+    @{core()->start->get_user('test.user@example.com')->get_connection('irc-example')->dialogs}],
+  ['', ''], 'did not save frozen state on accident';
+
 done_testing;
+
+sub core { Convos::Core->new(backend => 'Convos::Core::Backend::File') }
 
 sub mock_connect {
   my ($cb, %args) = (pop, @_);

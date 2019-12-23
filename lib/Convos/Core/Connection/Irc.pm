@@ -351,7 +351,7 @@ sub _irc_event_topic {
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
   my $dialog = $self->dialog({name => $msg->{params}[0], topic => $msg->{params}[1]});
 
-  $self->emit(state => topic => $dialog->TO_JSON)->save_p;
+  $self->emit(state => topic => $dialog->TO_JSON);
 }
 
 sub _is_current_nick { lc $_[0]->_nick eq lc $_[1] }
