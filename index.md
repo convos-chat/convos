@@ -16,6 +16,11 @@ Learn more about how to install and configure Convos in the
 <pre class="highlight"><code>$ curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
 $ ./convos/script/convos daemon</code></pre>
 
+[![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
+[![Docker Build Status](https://img.shields.io/docker/build/nordaaker/convos)](https://hub.docker.com/r/nordaaker/convos)
+[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
+[![GitHub issues](https://img.shields.io/github/issues/nordaaker/convos)](https://github.com/nordaaker/convos/issues)
+
 <a href="/2019/10/26/convos-one-point-oh.html"><img src="/public/screenshots/2019-10-26-conversation.jpg" alt="Picture of Convos conversation"></a>
 
 ## Demo
