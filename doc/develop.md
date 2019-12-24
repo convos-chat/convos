@@ -80,14 +80,13 @@ $ ./script/convos dev
 The command above is the same as:
 
 ```bash
-$ MOJO_IRC_DEBUG=1 CONVOS_DEBUG=1 script/convos webpack \
+$ CONVOS_DEBUG=1 script/convos webpack \
     -w lib -w public/convos-api.json -w templates
 ```
 
-`MOJO_IRC_DEBUG` and `CONVOS_DEBUG` will print extra low level debug
-information to STDERR, which is useful to discover bugs. The `-w` switch is
-for watching different files and directories for changes and reload
-the web server automatically.
+`CONVOS_DEBUG` will print extra low level debug information to STDERR, which is
+useful to discover bugs. The `-w` switch is for watching different files and
+directories for changes and reload the web server automatically.
 
 ## Secure connection
 

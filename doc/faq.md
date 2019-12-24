@@ -23,7 +23,7 @@ Yes, but Convos and the web server need to be configured properly and
 chain.
 
 The first thing is that the environment variable
-[MOJO_REVERSE_PROXY](/doc/config.html#MOJO_REVERSE_PROXY) must be set to a
+[CONVOS_REVERSE_PROXY](/doc/config.html#CONVOS_REVERSE_PROXY) must be set to a
 true value.
 
 The other thing is that the reverse proxy needs to pass on some HTTP headers to
@@ -40,7 +40,7 @@ or Apache:
 
 Start convos behind a reverse proxy:
 
-    $ MOJO_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8080
+    $ CONVOS_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8080
 
 Example nginx config:
 
@@ -63,6 +63,9 @@ Example nginx config:
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+
+        # http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
+        client_max_body_size 0;
 
         # Enable Convos to construct correct URLs by passing on custom
         # headers. X-Request-Base is only required if "location" above
@@ -89,6 +92,9 @@ Example Apache config:
       ProxyRequests Off
       ProxyPreserveHost On
       RequestHeader set X-Forwarded-Proto "http"
+
+      # http://httpd.apache.org/docs/2.0/mod/core.html#limitrequestbody
+      LimitRequestBody 0;
 
       # Pass requests on to Convos
       ProxyPass /events ws://localhost:8080/events
