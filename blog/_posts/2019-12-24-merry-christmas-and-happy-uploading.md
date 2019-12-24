@@ -28,19 +28,19 @@ Uploading a file can be done in two ways:
 
 <a href="/public/screenshots/2019-12-24-upload.png"><img src="/public/screenshots/2019-12-24-upload.png" alt="Picture of Convos upload icon"></a>
 
-Either will result in a link being inserted into the message input. Clicking on
-send afterwards will share the file with the person/people in the conversation.
-The link will work for anyone who has it, meaning it's not password protected.
-The reason for that is to make sure non-convos-users can see it as well.
+Either will result in a link being inserted into the message input field.
+Clicking on send afterwards will share the file with the person/people in the
+conversation. The link is not password protected, so non-convos users can see
+it as well.
 
-Uploading text files will result in a paste being created, just like how it
-works when you paste long messages or many lines into the message input.
+Uploading text files will create a paste, just like when you insert a long
+message or many lines into the message input field.
 
-Uploading an image will result in a small thumbnail that you can click on to
-see it in full size.
+Uploading an image will result in a clickable thumbnail.
 
-See the [config page](/doc/config.html#convos_max_upload_size) to see how to
-configure the max upload size, in case 40MB (the default) is not what you want.
+The maximum upload size is 40MB by default. The
+[config page](/doc/config.html#convos_max_upload_size) has details on how to
+change this value
 
 ## A codebase full of promises
 
