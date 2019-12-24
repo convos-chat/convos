@@ -1,3 +1,9 @@
+[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
+[![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
+![Docker Build Status](https://img.shields.io/docker/build/nordaaker/convos)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/nordaaker/convos)
+![GitHub issues](https://img.shields.io/github/issues/nordaaker/convos)
+
 # Convos - Multiuser chat application
 
 Convos is a multiuser chat application that runs in your web browser.
