@@ -28,11 +28,10 @@ Uploading a file can be done in two ways:
 
 <a href="/public/screenshots/2019-12-24-upload.png"><img src="/public/screenshots/2019-12-24-upload.png" alt="Picture of Convos upload icon"></a>
 
-Either way you choose, will result in a link being inserted into the message
-input. Clicking on send afterwards will share the file with the person/people
-in the conversation. The link will work for anyone who have it, so it's not
-password protected or anything like that. The reason for that is to make sure
-non-convos-users can see it as well.
+Either will result in a link being inserted into the message input. Clicking on
+send afterwards will share the file with the person/people in the conversation.
+The link will work for anyone who has it, meaning it's not password protected.
+The reason for that is to make sure non-convos-users can see it as well.
 
 Uploading text files will result in a paste being created, just like how it
 works when you paste long messages or many lines into the message input.
@@ -54,8 +53,8 @@ getting rid of the [Mojo::IRC](https://github.com/jhthorsen/mojo-irc)
 dependency.
 
 Please see [#423](https://github.com/Nordaaker/convos/pull/423) for all the
-major changes. There was some bugfixes after that PR was merged as well, but
-most is there.
+major changes. There were some bugfixes after that PR was merged as well, but
+most of the changes are there.
 
 ## Snap build
 
