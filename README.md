@@ -1,8 +1,7 @@
-[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
 [![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
-![Docker Build Status](https://img.shields.io/docker/build/nordaaker/convos)
-![GitHub closed issues](https://img.shields.io/github/issues-closed/nordaaker/convos)
-![GitHub issues](https://img.shields.io/github/issues/nordaaker/convos)
+[![Docker Build Status](https://img.shields.io/docker/build/nordaaker/convos)](https://hub.docker.com/r/nordaaker/convos)
+[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
+[![GitHub issues](https://img.shields.io/github/issues/nordaaker/convos)](https://github.com/nordaaker/convos/issues)
 
 # Convos - Multiuser chat application
 
