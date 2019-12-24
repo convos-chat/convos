@@ -6,7 +6,7 @@ use Mojo::JSON 'encode_json';
 use Mojo::Util;
 use Time::HiRes 'time';
 
-use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 30;
+use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 60;
 
 sub start {
   my $self = shift->inactivity_timeout(INACTIVE_TIMEOUT);

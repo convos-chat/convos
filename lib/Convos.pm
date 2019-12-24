@@ -3,13 +3,12 @@ use Mojo::Base 'Mojolicious';
 
 use Cwd ();
 use Convos::Core;
-use Convos::Util;
 use File::HomeDir ();
 use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
 
-our $VERSION = '2.00';
+our $VERSION = '3.00';
 
 $ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY} || 0;
 
@@ -19,8 +18,6 @@ has core => sub {
 
   return Convos::Core->new(backend => $self->config('backend'), home => path(split '/', $home));
 };
-
-has _link_cache => sub { Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100) };
 
 sub startup {
   my $self   = shift;
@@ -204,7 +201,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-2.00
+3.00
 
 =head1 DESCRIPTION
 

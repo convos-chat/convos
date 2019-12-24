@@ -1,11 +1,35 @@
 Revision history for perl distribution Convos
 
-2.01 Not Released
+3.00 2019-12-24T10:15:35+0900
+ - Breaking change: The Perl code changed from callback based API to promises #420 #423
+   * Removed Mojo::IRC as a dependency #392
+   * Removed Convos::Core::Connection->set_wanted_state()
+   * Removed "get_user" WebSocket event
+   * Removed "participants" API endpoint
+   * Removed all blocking APIs
+   * Replaced CONVOS_STEAL_NICK_INTERVAL with CONVOS_IRC_PERIDOC_INTERVAL
+ - Add support for file upload #244 #424
+   * Add back compat URL handling for /paste/:user_public_id/:paste_id
+   * Replaced Convos::Plugin::Paste with Convos::Plugin::Files
+ - Add handling of "Trying to reconnect too fast" #410
+ - Add organization_name and organization_url to sidebar and help page
+ - Add removal of embeds that doesn't render correct images
+ - Add message errors to the active conversation, instead of connection conversation
+ - Fix using connection URL "username" when sending "USER ... 0 * :Name"
  - Fix indicating that user is offline in chat messages
+ - Fix duplicate text in <ChatInput/> when clicking on a nick
  - Fix being able to clear organization_name and organization_url in
    updateSettings endpoint
+ - Fix $fa-font-path when behind reverse proxy #419
+   Contributor: Andreas Voegele
+ - Fix snap builds #366 #421
+   Contributor: Adam Stokes
+ - Changed default CONVOS_CONNECT_DELAY from 3 to 4
+ - Bumped LinkEmbedder to 1.10 which fixes handling of Google links
+ - Removed Convos::Plugin->add_backend_helpers()
+ - Replaced Convos::Core::User->public_id() with uid()
+ - Replaced MOJO_REVERSE_PROXY with CONVOS_REVERSE_PROXY
  - Improved user experience on the Settings page
- - Will hide embeds that doesn't render correct images
 
 2.00 2019-11-23T10:23:35+0900
  - Add roles() and role() to Convos::Core::User #99 #407 #411

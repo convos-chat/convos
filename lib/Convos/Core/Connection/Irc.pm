@@ -9,10 +9,9 @@ use Mojo::Util qw(term_escape trim);
 use Parse::IRC ();
 use Time::HiRes 'time';
 
-use constant DIALOG_SEARCH_INTERVAL => $ENV{CONVOS_DIALOG_SEARCH_INTERVAL} || 0.5;
-use constant IS_TESTING             => $ENV{HARNESS_ACTIVE}                || 0;
-use constant MAX_BULK_MESSAGE_SIZE  => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE}  || 3;
-use constant PERIDOC_INTERVAL       => $ENV{CONVOS_IRC_PERIDOC_INTERVAL}   || 60;
+use constant IS_TESTING            => $ENV{HARNESS_ACTIVE}               || 0;
+use constant MAX_BULK_MESSAGE_SIZE => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3;
+use constant PERIDOC_INTERVAL      => $ENV{CONVOS_IRC_PERIDOC_INTERVAL}  || 60;
 
 require Convos;
 our $VERSION = Convos->VERSION;

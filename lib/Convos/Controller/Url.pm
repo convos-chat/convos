@@ -9,7 +9,7 @@ sub info {
     return $self->stash(status => 401)
       ->respond_to(json => {json => {errors => []}}, any => {text => ''});
   }
-  if (my $link = $self->app->_link_cache->get($url)) {
+  if (my $link = $self->_link_cache->get($url)) {
     $self->res->headers->header('X-Cached' => 1);    # for testing
     return $self->respond_to(json => {json => $link}, any => {text => $link->html});
   }
@@ -30,10 +30,14 @@ sub info {
       return;
     }
 
-    $self->app->_link_cache->set($url => $link);
+    $self->_link_cache->set($url => $link);
     $self->res->headers->cache_control('max-age=600');
     $self->respond_to(json => {json => $link}, any => {text => $link->html});
   });
+}
+
+sub _link_cache {
+  state $cache = Mojo::Cache->new->max_keys($ENV{CONVOS_MAX_LINK_CACHE_SIZE} || 100);
 }
 
 1;

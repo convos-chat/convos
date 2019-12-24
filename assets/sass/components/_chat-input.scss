@@ -97,6 +97,7 @@
   span:after {
     @extend .fas;
     content: fa-content($fa-var-cloud-upload-alt);
+    color: var(--link-color);
     text-align: center;
     display: block;
     position: absolute;
