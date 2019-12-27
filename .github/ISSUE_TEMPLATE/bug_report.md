@@ -27,6 +27,7 @@ If applicable, add screenshots to help explain your problem.
  - OS: [e.g. iOS, Ubuntu, Windows 10, ...]
  - Browser [e.g. chrome, firefox, ...]
  - Version [e.g. 2.0]
+ - IRC server software, name and/or version.
 
 **Additional context**
 Add any other context about the problem here.
