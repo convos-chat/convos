@@ -189,13 +189,6 @@ export default class Connection extends Dialog {
     dialog.addMessage({message, vars, sent: params});
   }
 
-  wsEventTopic(params) {
-    this.ensureDialog(params).addMessage(params.topic
-      ? {message: 'Topic changed to: %1', vars: [params.topic]}
-      : {message: 'No topic is set.', vars: []}
-    );
-  }
-
   _addDefaultParticipants(dialog) {
     const participants = [{nick: this.nick, me: true}];
     if (dialog.is_private) participants.push({nick: dialog.name});

@@ -168,6 +168,7 @@ sub _irc_event_join {
   if ($self->_is_current_nick($nick)) {
     my $dialog = $self->dialog({name => $channel, frozen => ''});
     $self->emit(state => frozen => $dialog->TO_JSON);
+    $self->_write("TOPIC $channel\r\n");    # Topic is not part of the join response
   }
   elsif (my $dialog = $self->get_dialog($channel)) {
     $self->emit(state => join => {dialog_id => $dialog->id, nick => $nick});
@@ -323,13 +324,16 @@ sub _irc_event_rpl_myinfo {
   $self->emit(state => me => $self->{myinfo});
 }
 
-# Ignore this event
-sub _irc_event_rpl_namreply { }
+sub _irc_event_rpl_notopic {
+  my ($self, $msg) = @_;
+  $self->_irc_event_rpl_topic({%$msg, params => [$msg->{params}[0], $msg->{params}[0], '']});
+}
 
 sub _irc_event_rpl_topic {
   my ($self, $msg) = @_;
-  my $dialog = $self->get_dialog($msg->{params}[0]);
-  $dialog->topic($msg->{params}[2]) if $dialog;
+  return unless my $dialog = $self->get_dialog($msg->{params}[1]);
+  return if $dialog->topic eq $msg->{params}[2];
+  $self->emit(state => frozen => $dialog->topic($msg->{params}[2])->TO_JSON);
 }
 
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
@@ -356,14 +360,15 @@ sub _irc_event_rpl_welcome {
   $self->$write;
 }
 
-# :superman!superman@i.love.debian.org TOPIC #convos :cool
 sub _irc_event_topic {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
-  my $dialog = $self->dialog({name => $msg->{params}[0], topic => $msg->{params}[1]});
-
-  $self->emit(state => topic => $dialog->TO_JSON);
+  $self->_irc_event_rpl_topic({%$msg, params => [$nick, $msg->{params}[0], $msg->{params}[1]]});
 }
+
+# Ignore these events
+sub _irc_event_rpl_namreply     { }
+sub _irc_event_rpl_topicwhotime { }
 
 sub _is_current_nick { lc $_[0]->_nick eq lc $_[1] }
 
@@ -460,10 +465,15 @@ sub _make_part_response {
 sub _make_topic_response {
   my ($self, $msg, $res, $p) = @_;
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
-  return $p->resolve($res) if $msg->{command} eq 'rpl_notopic';
+
+  $res->{topic} = '' if $msg->{command} eq 'rpl_notopic';
   $res->{topic} = $msg->{params}[2] // '' if $msg->{command} eq 'rpl_topic';
   $res->{topic} = $msg->{params}[1] // '' if $msg->{command} eq 'topic';
-  return $p->resolve($res);
+  $p->resolve($res);
+
+  my $dialog = $self->get_dialog($msg->{params}[0]);
+  $self->emit(state => frozen => $dialog->topic($res->{topic})->TO_JSON)
+    if $dialog and $dialog->topic ne $res->{topic};
 }
 
 sub _make_whois_response {

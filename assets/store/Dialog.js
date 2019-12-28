@@ -221,6 +221,12 @@ export default class Dialog extends Reactive {
     this.addMessage(msg);
   }
 
+  wsEventSentTopic(params) {
+    const message = params.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.';
+    this.addMessage({message, vars: [this.name, params.topic]});
+    this.update({topic: params.topic});
+  }
+
   _addOperations() {
     this.prop('ro', 'messagesOp', this.api.operation('dialogMessages'));
     this.prop('ro', 'setLastReadOp', this.api.operation('setDialogLastRead'));

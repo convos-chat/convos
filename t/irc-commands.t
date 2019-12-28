@@ -13,7 +13,7 @@ my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 my ($err, $res);
 
 my @state;
-$connection->on(state => sub { push @state, $_[2]->{state} if $_[1] eq 'connection' });
+$connection->on(state => sub { push @state, [@_[1, 2]] });
 
 ok !$connection->get_dialog('#convos'), 'convos channel does not exist';
 
@@ -63,6 +63,8 @@ is $connection->url->query->param('nick'), 'superduper', 'change nick offline';
 ok !$connection->get_dialog('superwoman'), 'superwoman does not exist';
 $connection->send_p('', '/query superwoman')->$wait_success('query');
 ok $connection->get_dialog('superwoman'), 'superwoman exist';
+
+is_deeply \@state, [], 'zero events changes so far';
 
 note 'disconnect and connect';
 my $irc_server = t::Helper->irc_server_connect($connection);
@@ -144,7 +146,8 @@ is_deeply(
 );
 
 note 'topic';
-$res = $connection->send_p('#convos', '/topic')
+@state = ();
+$res   = $connection->send_p('#convos', '/topic')
   ->$wait_success(from_server => ":localhost 331 superman #convos :No topic is set\r\n");
 is_deeply($res, {dialog_id => '#convos', topic => ''}, 'topic');
 
@@ -155,6 +158,15 @@ is_deeply($res, {dialog_id => '#convos', topic => 'cool topic'}, 'topic');
 $res = $connection->send_p('#convos', '/topic Some cool stuff')
   ->$wait_success(from_server => ":localhost TOPIC #convos :Some cool\r\n");
 is_deeply($res, {dialog_id => '#convos', topic => 'Some cool'}, 'set topic');
+
+cmp_deeply(
+  \@state,
+  [
+    [frozen => superhashof({name => '#convos', topic => 'cool topic'})],
+    [frozen => superhashof({name => '#convos', topic => 'Some cool'})],
+  ],
+  'topic events'
+) or diag explain \@state;
 
 note 'ison';
 $res
@@ -258,6 +270,7 @@ $connection->send_p('', '/raw FOO some stuff')->$wait_success(
 );
 
 note 'server disconnect';
+@state = ();
 my $id = $connection->{stream_id};
 ok !!Mojo::IOLoop->stream($id), 'got stream';
 $connection->once(state => sub { Mojo::IOLoop->stop });
@@ -269,7 +282,15 @@ t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_e
 isnt $connection->{stream_id}, $id, 'got new stream id';
 ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
 
-is_deeply \@state, [qw(connected queued connected)], 'got correct state';
+cmp_deeply(
+  \@state,
+  [
+    [connection => superhashof({state => 'queued'})],
+    [connection => superhashof({state => 'connected'})],
+    [me         => superhashof({nick  => 'superman'})],
+  ],
+  'connection states'
+) or diag explain \@state;
 
 done_testing;
 

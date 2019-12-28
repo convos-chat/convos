@@ -54,6 +54,7 @@ is_deeply(
   'got state changes',
 );
 
+@state = ();
 t::Helper->irc_server_messages(
   'from_server' => ":supergirl!u2\@example.com PRIVMSG mojo_irc :\x{1}PING 1393007660\x{1}\r\n",
   $connection   => '_irc_event_ctcp_ping',
@@ -65,6 +66,7 @@ t::Helper->irc_server_messages(
     ":supergirl!u2\@example.com PRIVMSG superman :\x{1}ACTION msg1\x{1}\r\n",
   $connection => '_irc_event_ctcp_action',
 );
+is_deeply \@state, [], 'basic commands does not cause events';
 
 @state = ();
 $connection->dialog({name => '#convos'});
@@ -111,7 +113,7 @@ cmp_deeply(
       }
     ],
     [
-      topic => {
+      frozen => {
         connection_id => 'irc-localhost',
         dialog_id     => '#convos',
         frozen        => '',

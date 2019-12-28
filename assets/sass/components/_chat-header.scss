@@ -62,9 +62,11 @@
 
   .chat-header__topic {
     font-size: 0.9rem;
+    font-style: italic;
     text-overflow: ellipsis;
     white-space: pre;
     margin-right: 2rem;
+    padding-right: 0.2rem; // Fix that weird cutoff becuase of italic font-style and overflow rules
     overflow: hidden;
     display: block;
 
