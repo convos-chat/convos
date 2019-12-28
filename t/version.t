@@ -15,6 +15,7 @@ is $pod_version, $wanted_version, 'correct version in Convos.pm pod';
 
 $wanted_version =~ s!\.0+!.0!g;
 $wanted_version .= '.0' unless $wanted_version =~ s!_0*(\d+)!.$1!;
+$wanted_version =~ s!\.0([1-9])!.$1!g;
 my ($node_version) = path('package.json')->slurp =~ /"version":\s*"([^"]+)/m;
 is $node_version, $wanted_version, 'correct version in package.json';
 

@@ -1,5 +1,12 @@
 Revision history for perl distribution Convos
 
+3.01 Not Released
+ - Fix not send command as message by acciden #428
+ - Fix removing dialog when sending PART
+ - Fix /names logic both in JavaScript and Connection::IRC
+ - Improved autocomplete documentation for /mode #430
+ - Improved MODE handling, especially related to ban lists #431 #432
+
 3.00 2019-12-24T10:15:35+0900
  - Breaking change: The Perl code changed from callback based API to promises #420 #423
    * Removed Mojo::IRC as a dependency #392
