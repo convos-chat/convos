@@ -59,7 +59,8 @@ sub send_p {
   return $self->_send_nick_p($message)              if $cmd eq 'NICK';
   return $self->_set_wanted_state_p('connected')    if $cmd eq 'CONNECT';
   return $self->_set_wanted_state_p('disconnected') if $cmd eq 'DISCONNECT';
-  return $self->_send_message_p($target, "/$cmd $message");
+  return $self->_write_p($message)                  if $cmd eq 'RAW';
+  return Mojo::Promise->reject('Unknown command.');
 }
 
 sub _connect_args {

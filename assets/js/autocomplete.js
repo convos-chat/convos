@@ -79,3 +79,4 @@ commands.push({cmd: '/cs', example: '/cs <msg>', description: 'Short for "/msg c
 commands.push({cmd: '/ns', example: '/ns <msg>', description: 'Short for "/msg nickserv ...".', alias: '/msg nickserv'});
 commands.push({cmd: '/hs', example: '/hs <msg>', description: 'Short for "/msg hostserv ...".', alias: '/msg hostserv'});
 commands.push({cmd: '/bs', example: '/bs <msg>', description: 'Short for "/msg botserv ...".', alias: '/msg botserv'});
+commands.push({cmd: '/raw', example: '/raw <msg>', description: 'Allow you to send any RFC 2812 message".'});

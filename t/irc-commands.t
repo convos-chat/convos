@@ -182,7 +182,7 @@ ok $res->{done}, 'list done';
 
 note 'whois';
 $res = $connection->send_p('', '/whois superwoman')
-  ->$wait_success(from_server => [__PACKAGE__, 'whois-superwoman.irc']);
+  ->$wait_success(qr{WHOIS}, [__PACKAGE__, 'whois-superwoman.irc']);
 is_deeply(
   $res,
   {
@@ -204,12 +204,21 @@ $res = $connection->send_p('#convos', '/close superwoman')->$wait_success;
 is_deeply($res, {}, 'close superwoman response');
 
 $connection->send_p('#convos', '/close #foo')->catch(sub { $err = shift })
-  ->$wait_success(from_server => ":localhost 442 superman #foo :You are not on that channel\r\n");
+  ->$wait_success(qr{PART}, ":localhost 442 superman #foo :You are not on that channel\r\n");
 is $err, 'You are not on that channel', 'close #foo';
 
 $res = $connection->send_p('#convos', '/part')
-  ->$wait_success(from_server => ":localhost PART #convos\r\n");
+  ->$wait_success(qr{PART} => ":localhost PART #convos\r\n");
 is_deeply($res, {}, 'part #convos');
+
+note 'unknown commands';
+$connection->send_p('', '/foo')->catch(sub { $err = shift })->$wait_success;
+like $err, qr{Unknown command}, 'Unknown command';
+
+$connection->send_p('', '/raw FOO some stuff')->$wait_success(
+  qr{FOO} => ":localhost 421 superman FOO :Unknown command\r\n",
+  $connection, '_irc_event_err_unknowncommand',
+);
 
 note 'server disconnect';
 my $id = $connection->{stream_id};
