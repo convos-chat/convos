@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-3.01 Not Released
+3.01 2019-12-28T13:30:36+0900
  - Fix not send command as message by acciden #428
  - Fix removing dialog when sending PART
  - Fix /names logic both in JavaScript and Connection::IRC

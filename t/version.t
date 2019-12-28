@@ -7,7 +7,8 @@ use Convos;
 plan skip_all => 'TEST_ALL=1'            unless $ENV{TEST_ALL};
 plan skip_all => 'Changes was not found' unless -r 'Changes';
 
-my ($wanted_version) = path('Changes')->slurp =~ /^(\d+\.\d+\w*)\s/m;
+my ($wanted_version, $date) = path('Changes')->slurp =~ /^(\d+\.\d+\w*)\s+(.*)/m;
+like $date, qr/^\d{4}-/, 'correct date in Changes';
 is $Convos::VERSION, $wanted_version, 'correct version in Convos.pm code';
 
 my ($pod_version) = path($INC{'Convos.pm'})->slurp =~ /^(\d+\.\d+\w*)\s/m;
