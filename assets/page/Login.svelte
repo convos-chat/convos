@@ -21,7 +21,7 @@ $: if ($loginOp.is('success')) redirectAfterLogin(user, loginOp);
       <span slot="label">{l('E-mail')}</span>
     </TextField>
 
-    <PasswordField name="password">
+    <PasswordField autocomplete="on" name="password">
       <span slot="label">{l('Password')}</span>
     </PasswordField>
 
