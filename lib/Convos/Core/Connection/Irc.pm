@@ -443,6 +443,14 @@ sub _make_names_response {
     if $msg->{command} eq 'rpl_namreply';
 }
 
+sub _make_part_response {
+  my ($self, $msg, $res, $p) = @_;
+  $self->_remove_dialog(delete $res->{target})->save_p if $res->{target};
+
+  return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
+  return $p->resolve($res);
+}
+
 sub _make_topic_response {
   my ($self, $msg, $res, $p) = @_;
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
@@ -719,12 +727,12 @@ sub _send_part_p {
     if $self->state eq 'disconnected';
 
   return $self->_write_and_wait_p(
-    "PART $target", {},
+    "PART $target", {target => $target},
     479               => {1 => $target},   # Illegal channel name
     err_nosuchchannel => {1 => $target},   # :hybrid8.debian.local 403 nick #convos :No such channel
     err_notonchannel  => {1 => $target},
     part              => {0 => $target},
-    '_make_default_response',
+    '_make_part_response',
   );
 }
 

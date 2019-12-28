@@ -230,9 +230,12 @@ $connection->send_p('#convos', '/close #foo')->catch(sub { $err = shift })
   ->$wait_success(qr{PART}, ":localhost 442 superman #foo :You are not on that channel\r\n");
 is $err, 'You are not on that channel', 'close #foo';
 
+$connection->dialog({name => '#convos'});
+ok $connection->get_dialog('#convos'), 'has convos dialog';
 $res = $connection->send_p('#convos', '/part')
   ->$wait_success(qr{PART} => ":localhost PART #convos\r\n");
 is_deeply($res, {}, 'part #convos');
+ok !$connection->get_dialog('#convos'), 'convos dialog was removed';
 
 note 'unknown commands';
 $connection->send_p('', '/foo')->catch(sub { $err = shift })->$wait_success;
