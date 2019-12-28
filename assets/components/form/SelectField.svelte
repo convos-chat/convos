@@ -97,8 +97,9 @@ async function selectOption(e) {
   open = false;
 }
 
-function toggle() {
-  open = !open;
+function toggle(e) {
+  const optionsEl = e && e.target && closestEl(e.target, '.select-field__options');
+  if (!optionsEl) open = !open;
 }
 </script>
 
