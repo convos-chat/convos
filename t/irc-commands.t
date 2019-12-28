@@ -87,12 +87,35 @@ is_deeply($res, {}, 'kick response');
 
 note 'mode';
 $connection->send_p('#nope', '/mode superwoman')->catch(sub { $err = shift })
-  ->$wait_success(from_server => ":localhost 461 superman #nope :Not enough parameters\r\n");
+  ->$wait_success(qr{MODE} => ":localhost 461 superman #nope :Not enough parameters\r\n");
 is $err, 'Not enough parameters', 'mode superwoman';
 
+$res = $connection->send_p('#convos', '/mode')
+  ->$wait_success(qr{MODE} => ":localhost 324 superman #convos +intu\r\n");
+is_deeply($res, {mode => '+intu'}, 'mode response');
+
 $res = $connection->send_p('#convos', '/mode +k secret')
-  ->$wait_success(from_server => ":localhost MODE #convos +k :secret\r\n");
-is_deeply($res, {}, 'mode response');
+  ->$wait_success(qr{MODE} => ":localhost MODE #convos +k :secret\r\n");
+is_deeply($res, {}, 'mode +k response');
+
+$res = $connection->send_p('#convos', '/mode b')->$wait_success(
+  qr{MODE} =>
+    ":localhost 367 superman #convos x!*@* superman!~superman@125-12-219-233.rev.home.ne.jp 1577498687\r\n",
+  from_server => ":localhost 368 superman #convos :End of Channel Ban List\r\n",
+);
+is_deeply(
+  $res,
+  {
+    banlist => [
+      {
+        by   => 'superman!~superman@125-12-219-233.rev.home.ne.jp',
+        mask => 'x!*@*',
+        ts   => 1577498687,
+      },
+    ],
+  },
+  'mode b response'
+);
 
 note 'names';
 $res = $connection->send_p('#convos', '/names')

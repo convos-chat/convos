@@ -184,11 +184,14 @@ sub _irc_event_kick {
 # :hybrid8.debian.local MODE #no_such_room +nt
 sub _irc_event_mode {
   my ($self, $msg) = @_;
-  my ($from) = IRC::Utils::parse_user($msg->{prefix});
-  my $dialog = $self->get_dialog({name => $msg->{params}[0]}) or return;
-  my $mode = $msg->{params}[1] || '';
-  my $nick = $msg->{params}[2] || '';
 
+  my $mode = $msg->{params}[1] || '';
+  return if $mode =~ /(b|k)$/;    # set key or change ban mask
+
+  return unless my $nick   = $msg->{params}[2];
+  return unless my $dialog = $self->get_dialog({name => $msg->{params}[0]});
+
+  my ($from) = IRC::Utils::parse_user($msg->{prefix});
   $self->emit(
     state => mode => {dialog_id => $dialog->id, from => $from, mode => $mode, nick => $nick});
 }
@@ -415,6 +418,23 @@ sub _make_join_response {
   }
 }
 
+sub _make_mode_response {
+  my ($self, $msg, $res, $p) = @_;
+  return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
+  return $p->resolve($res)              if $msg->{command} =~ m!^rpl_endof!;
+  return $p->resolve($res)              if $msg->{command} eq 'mode';
+
+  if ($msg->{command} =~ /^rpl_(\w+list)$/) {
+    push @{$res->{$1}},
+      {by => $msg->{params}[3] // '', mask => $msg->{params}[2], ts => $msg->{params}[4] || 0},;
+  }
+
+  if ($msg->{command} eq 'rpl_channelmodeis') {
+    $res->{mode} = $msg->{params}[2];
+    return $p->resolve($res);
+  }
+}
+
 sub _make_names_response {
   my ($self, $msg, $res, $p) = @_;
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
@@ -636,17 +656,12 @@ sub _send_message_p {
 sub _send_mode_p {
   my ($self, $target, $mode) = @_;
 
-  my $res = {
-    banlist    => [],
-    exceptlist => [],
-    invitelist => [],
-    uniqopis   => [],
-    mode       => $mode,
-    params     => ''
-  };
+  my $res = {};
+  $res->{banlist}    = [] if $mode eq 'b';
+  $res->{exceptlist} = [] if $mode eq 'e';
 
   return $self->_write_and_wait_p(
-    "MODE $target $mode", {},
+    "MODE $target $mode", $res,
     err_chanoprivsneeded => {1 => $target},
     err_keyset           => {1 => $target},
     err_needmoreparams   => {1 => $target},
@@ -657,12 +672,12 @@ sub _send_mode_p {
     rpl_endofbanlist     => {1 => $target},
     rpl_endofexceptlist  => {1 => $target},
     rpl_endofinvitelist  => {1 => $target},
-    rpl_channelmodeis => {},    #sub { @$res{qw(mode params)} = @{$_[1]->{params}}[1, 2] },
-    rpl_banlist       => {},    #sub { push @{$res->{banlist}}, $_[1]->{params}[1] },
-    rpl_exceptlist    => {},    #sub { push @{$res->{exceptlist}}, $_[1]->{params}[1] },
-    rpl_invitelist    => {},    #sub { push @{$res->{invitelist}}, $_[1]->{params}[1] },
-    rpl_uniqopis      => {},    #sub { push @{$res->{uniqopis}}, $_[1]->{params}[1] },
-    '_make_default_response',
+    rpl_channelmodeis    => {1 => $target},
+    rpl_banlist          => {1 => $target},
+    rpl_exceptlist       => {1 => $target},
+    rpl_invitelist       => {1 => $target},
+    rpl_uniqopis         => {1 => $target},
+    '_make_mode_response',
   );
 }
 

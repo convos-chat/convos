@@ -123,6 +123,39 @@ export default class Connection extends Dialog {
     );
   }
 
+  wsEventSentMode(params) {
+    const dialog = this.findDialog(params) || this;
+
+    const modeSent = (params.command[1] || '').match(/(\W*)(\w)$/);
+    console.log(modeSent);
+    if (!modeSent) return console.log('[wsEventSentMode] Unable to handle message:', params);
+    modeSent.shift();
+
+    switch (modeSent[1]) {
+      case '':
+        return dialog.addMessage({message: '%s has mode %s', vars: [params.dialog_id, params.mode]});
+      case 'k':
+        return dialog.addMessage({message: modeSent[0] == '+' ? 'Key was set.' : 'Key was unset.'});
+      case 'b':
+        return this._wsEventSentModeB(params, modeSent);
+    }
+  }
+
+  _wsEventSentModeB(params, modeSent) {
+    const dialog = this.findDialog(params) || this;
+
+    if (params.banlist) {
+      if (!params.banlist.length) dialog.addMessage({message: 'Ban list is empty.'});
+      params.banlist.forEach(ban => {
+        dialog.addMessage({message: 'Ban mask %1 set by %2 at %3.', vars: [ban.mask, ban.by, new Date(ban.ts * 1000).toLocaleString()]});
+      });
+    }
+    else {
+      const action = modeSent[0] == '+' ? 'set' : 'removed';
+      dialog.addMessage({message: `Ban mask %1 ${action}.`, vars: [params.command[2]]});
+    }
+  }
+
   wsEventSentQuery(params) {
     this.ensureDialog(params);
   }
