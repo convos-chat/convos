@@ -47,20 +47,26 @@ sub send_p {
   return $self->_send_message_p($target, "\x{1}ACTION $message\x{1}") if $cmd eq 'ME';
   return $self->_send_message_p($target, $message) if $cmd eq 'SAY';
   return $self->_send_message_p(split /\s+/, $message, 2) if $cmd eq 'MSG';
+
   return $self->_send_query_p($message) if $cmd eq 'QUERY';
-  return $self->_send_ison_p($message)  if $cmd eq 'ISON';
   return $self->_send_join_p($message)  if $cmd eq 'JOIN';
+  return $self->_send_list_p($message)  if $cmd eq 'LIST';
+  return $self->_send_nick_p($message)  if $cmd eq 'NICK';
+  return $self->_send_whois_p($message) if $cmd eq 'WHOIS';
+
+  return $self->_send_names_p($target) if $cmd eq 'NAMES';
+
   return $self->_send_kick_p($target, $message) if $cmd eq 'KICK';
-  return $self->_send_list_p($message) if $cmd eq 'LIST';
   return $self->_send_mode_p($target, $message) if $cmd eq 'MODE';
-  return $self->_send_part_p($message || $target) if $cmd eq 'CLOSE' or $cmd eq 'PART';
   return $self->_send_topic_p($target, $message) if $cmd eq 'TOPIC';
-  return $self->_send_whois_p($message)             if $cmd eq 'WHOIS';
-  return $self->_send_names_p($target)              if $cmd eq 'NAMES';
-  return $self->_send_nick_p($message)              if $cmd eq 'NICK';
+
+  return $self->_send_ison_p($message || $target) if $cmd eq 'ISON';
+  return $self->_send_part_p($message || $target) if $cmd eq 'CLOSE' or $cmd eq 'PART';
+
   return $self->_set_wanted_state_p('connected')    if $cmd eq 'CONNECT';
   return $self->_set_wanted_state_p('disconnected') if $cmd eq 'DISCONNECT';
   return $self->_write_p($message)                  if $cmd eq 'RAW';
+
   return Mojo::Promise->reject('Unknown command.');
 }
 

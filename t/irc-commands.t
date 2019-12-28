@@ -24,7 +24,6 @@ for my $cmd (
   ['',          '/say'],                # SAY
   ['',          '/topic'],              # TOPIC get
   ['',          '/topic New topic'],    # TOPIC set
-  ['#whatever', '/ison'],               # ISON
   ['#whatever', '/join'],               # JOIN
   ['#whatever', '/msg'],                # MSG
   ['#whatever', '/whois'],              # WHOIS
@@ -47,7 +46,7 @@ for my $cmd (
   ['#convos',   '/names'],                          # NAMES
   ['#convos',   '/topic'],                          # TOPIC get
   ['#convos',   '/topic New topic'],                # TOPIC set
-  ['#whatever', '/ison superwoman'],                # ISON
+  ['whatever',  '/ison'],                           # ISON
   ['#whatever', '/join #convos s3cret'],            # JOIN
   ['#whatever', '/msg superwoman how are you?'],    # MSG
   ['#whatever', '/list'],                           # LIST
@@ -169,8 +168,12 @@ is_deeply(
     {nick => 'superwoman', online => false},
     {nick => 'SUPERBAD',   online => true},
   ],
-  'ison'
+  'ison nick',
 );
+
+$res = $connection->send_p('Superduper', '/ison')
+  ->$wait_success(from_server => ":localhost 303 test21362 :superduper\r\n");
+is_deeply $res, {nick => 'Superduper', online => true}, 'ison';
 
 note 'join';
 $res = $connection->send_p('', '/join #redirected')->$wait_success(
