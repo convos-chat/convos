@@ -73,6 +73,6 @@ commands.push({cmd: '/nick', example: '/nick <nick>', description: 'Change your 
 commands.push({cmd: '/part', example: '/part', description: 'Leave channel, and close window.'});
 commands.push({cmd: '/close', example: '/close <nick>', description: 'Close conversation with nick, defaults to current active.'});
 commands.push({cmd: '/kick', example: '/kick <nick>', description: 'Kick a user from the current channel.'});
-commands.push({cmd: '/mode', example: '/mode +o #channel nick', description: 'Change mode of yourself or a user'});
+commands.push({cmd: '/mode', example: '/mode [+|-][b|o|v] <user>', description: 'Change mode of yourself or a user'});
 commands.push({cmd: '/reconnect', example: '/reconnect', description: 'Restart the current connection.'});
 commands.push({cmd: '/raw', example: '/raw <msg>', description: 'Allow you to send any RFC 2812 message".'});
