@@ -75,8 +75,4 @@ commands.push({cmd: '/close', example: '/close <nick>', description: 'Close conv
 commands.push({cmd: '/kick', example: '/kick <nick>', description: 'Kick a user from the current channel.'});
 commands.push({cmd: '/mode', example: '/mode +o #channel nick', description: 'Change mode of yourself or a user'});
 commands.push({cmd: '/reconnect', example: '/reconnect', description: 'Restart the current connection.'});
-commands.push({cmd: '/cs', example: '/cs <msg>', description: 'Short for "/msg chanserv ...".', alias: '/msg chanserv'});
-commands.push({cmd: '/ns', example: '/ns <msg>', description: 'Short for "/msg nickserv ...".', alias: '/msg nickserv'});
-commands.push({cmd: '/hs', example: '/hs <msg>', description: 'Short for "/msg hostserv ...".', alias: '/msg hostserv'});
-commands.push({cmd: '/bs', example: '/bs <msg>', description: 'Short for "/msg botserv ...".', alias: '/msg botserv'});
 commands.push({cmd: '/raw', example: '/raw <msg>', description: 'Allow you to send any RFC 2812 message".'});
