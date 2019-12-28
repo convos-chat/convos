@@ -96,7 +96,15 @@ is_deeply($res, {mode => '+intu'}, 'mode response');
 
 $res = $connection->send_p('#convos', '/mode +k secret')
   ->$wait_success(qr{MODE} => ":localhost MODE #convos +k :secret\r\n");
-is_deeply($res, {}, 'mode +k response');
+is_deeply($res, {}, 'mode +k response - current channel');
+
+$res = $connection->send_p('', '/mode #otherchan +k secret')
+  ->$wait_success(qr{MODE} => ":localhost MODE #otherchan +k :secret\r\n");
+is_deeply($res, {}, 'mode +k response - with no dialog_id');
+
+$res = $connection->send_p('#convos', '/mode #otherchan +k secret')
+  ->$wait_success(qr{MODE} => ":localhost MODE #otherchan +k :secret\r\n");
+is_deeply($res, {}, 'mode +k response - with custom channel');
 
 $res = $connection->send_p('#convos', '/mode b')->$wait_success(
   qr{MODE} =>

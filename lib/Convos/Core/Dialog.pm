@@ -1,10 +1,8 @@
 package Convos::Core::Dialog;
 use Mojo::Base -base;
 
-use Convos::Util;
+use Convos::Util '$CHANNEL_RE';
 use Mojo::Date;
-
-my $CHANNEL_RE = qr{[#&]};
 
 has frozen   => '';
 has name     => sub { Carp::confess('name required in constructor') };

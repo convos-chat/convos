@@ -6,7 +6,8 @@ use Mojo::File;
 use Mojo::Util qw(b64_encode md5_sum monkey_patch);
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
-our @EXPORT_OK = qw(DEBUG E has_many pretty_connection_name short_checksum);
+our $CHANNEL_RE = qr{[#&]};
+our @EXPORT_OK  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name short_checksum);
 
 sub E {
   my ($msg, $path) = @_;

@@ -2,7 +2,7 @@ package Convos::Core::Connection::Irc;
 use Mojo::Base 'Convos::Core::Connection';
 
 no warnings 'utf8';
-use Convos::Util 'DEBUG';
+use Convos::Util qw($CHANNEL_RE DEBUG);
 use IRC::Utils ();
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(term_escape trim);
@@ -662,14 +662,21 @@ sub _send_message_p {
 }
 
 sub _send_mode_p {
-  my ($self, $target, $mode) = @_;
+  my ($self, $target) = (shift, shift);
+  my @args = split /\s+/, shift;
+
+  $target ||= shift @args // '';
+  $target = shift @args if $args[0] and $args[0] =~ $CHANNEL_RE;
+  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  return $invalid_target_p if $invalid_target_p;
 
   my $res = {};
-  $res->{banlist}    = [] if $mode eq 'b';
-  $res->{exceptlist} = [] if $mode eq 'e';
+  $res->{banlist}    = [] if $args[0] and $args[0] eq 'b';
+  $res->{exceptlist} = [] if $args[0] and $args[0] eq 'e';
 
+  unshift @args, $target if $target;
   return $self->_write_and_wait_p(
-    "MODE $target $mode", $res,
+    join(' ', MODE => @args), $res,
     err_chanoprivsneeded => {1 => $target},
     err_keyset           => {1 => $target},
     err_needmoreparams   => {1 => $target},
