@@ -2,6 +2,7 @@ import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
+import {modeMoniker} from '../js/constants';
 
 const sortDialogs = (a, b) => {
   return (a.is_private || 0) - (b.is_private || 0) || a.name.localeCompare(b.name);
@@ -131,7 +132,7 @@ export default class Connection extends Dialog {
     let message = '%1 (%2)';
     let vars = [params.nick, params.host];
 
-    const channels = Object.keys(params.channels).sort().map(name => (params.channels[name].mode || '') + name);
+    const channels = Object.keys(params.channels).sort().map(name => (modeMoniker[params.channels[name].mode] || '') + name);
     params.channels = channels;
 
     if (params.idle_for && channels.length) {

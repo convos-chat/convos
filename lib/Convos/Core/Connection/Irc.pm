@@ -11,15 +11,16 @@ use Time::HiRes 'time';
 
 use constant IS_TESTING            => $ENV{HARNESS_ACTIVE}               || 0;
 use constant MAX_BULK_MESSAGE_SIZE => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3;
+use constant MAX_MESSAGE_LENGTH    => $ENV{CONVOS_MAX_MESSAGE_LENGTH}    || 512;
 use constant PERIDOC_INTERVAL      => $ENV{CONVOS_IRC_PERIDOC_INTERVAL}  || 60;
 
 require Convos;
 our $VERSION = Convos->VERSION;
 
-my %CLASS_DATA;
-my %CTCP_QUOTE         = ("\012" => 'n', "\015" => 'r', "\0" => '0', "\cP" => "\cP");
-my $MAX_MESSAGE_LENGTH = $ENV{CONVOS_MAX_MESSAGE_LENGTH} || 512;
+our %CTCP_QUOTE = ("\012" => 'n', "\015" => 'r', "\0" => '0', "\cP" => "\cP");
+our %MODES      = ('@'    => 'o', '+'    => 'v');
 
+my %CLASS_DATA;
 sub _available_dialogs { $CLASS_DATA{dialogs}{$_[0]->url->host} ||= {} }
 
 sub disconnect_p {
@@ -446,7 +447,7 @@ sub _make_whois_response {
   if ($msg->{command} eq 'rpl_whoischannels') {
     for (split /\s+/, $msg->{params}[2] || '') {
       my ($mode, $channel) = /^([+@]?)(.+)$/;
-      $res->{channels}{$channel} = {mode => $mode};
+      $res->{channels}{$channel} = {mode => $MODES{$mode} || $mode};
     }
   }
 }
@@ -456,7 +457,7 @@ sub _make_users_response {
 
   for (split /\s+/, $msg->{params}[3]) {
     my ($mode, $nick) = m!^([@+])(.+)$! ? ($1, $2) : ('', $_);
-    push @$users, {nick => $nick, mode => $mode};
+    push @$users, {nick => $nick, mode => $MODES{$mode} || $mode};
   }
 }
 
@@ -784,19 +785,19 @@ sub _split_message {
   my $n        = 0;
 
   while ($n < @messages) {
-    if ($MAX_MESSAGE_LENGTH <= length $messages[$n]) {
+    if (MAX_MESSAGE_LENGTH <= length $messages[$n]) {
       my @chunks = split /(\s)/, $messages[$n];
       $messages[$n] = '';
       while (@chunks) {
         my $chunk = shift @chunks;
 
         # Force break, in case it's just one long word
-        if ($MAX_MESSAGE_LENGTH < length $chunk) {
-          unshift @chunks, substr($chunk, 0, $MAX_MESSAGE_LENGTH - 1, ''), $chunk;
+        if (MAX_MESSAGE_LENGTH < length $chunk) {
+          unshift @chunks, substr($chunk, 0, MAX_MESSAGE_LENGTH - 1, ''), $chunk;
           next;
         }
 
-        if ($MAX_MESSAGE_LENGTH > length($messages[$n] . $chunk)) {
+        if (MAX_MESSAGE_LENGTH > length($messages[$n] . $chunk)) {
           $messages[$n] .= $chunk;
         }
         else {

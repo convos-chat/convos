@@ -23,6 +23,11 @@ export const channelModeCharToModeName = {
   t: 'ops_topic',
 };
 
+export const modeMoniker = {
+  o: '@',
+  v: '+',
+};
+
 export const userModeCharToModeName = {
   a: 'admin',
   B: 'bot',

@@ -1,13 +1,12 @@
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
 import Time from '../js/Time';
-import {channelModeCharToModeName, userModeCharToModeName} from '../js/constants';
+import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {str2color} from '../js/util';
 
 const channelRe = new RegExp('^[#&]');
-const humanMode = {o: '@', v: '+'};
 
 const sortParticipants = (a, b) => {
   return b.modes.operator || false - a.modes.operator || false
@@ -150,10 +149,9 @@ export default class Dialog extends Reactive {
         p = existing;
       }
 
+      // Do not delete p.mode, since it is used by wsEventSentNames()
       if (!p.modes) p.modes = {};
       this._calculateModes(userModeCharToModeName, p.mode, p.modes);
-      delete p.mode;
-
       this._participants.set(id, {name: p.nick, ...p, color: str2color(id), id, ts: new Time()});
     });
 
@@ -212,7 +210,7 @@ export default class Dialog extends Reactive {
     this._updateParticipants(params);
 
     const msg = {message: 'Participants (%1): %2', vars: []};
-    const participants = this._participants.map(p => (humanMode[p.mode] || '') + p.name);
+    const participants = this._participants.toArray().map(p => (modeMoniker[p.mode] || p.mode || '') + p.name);
     if (participants.length > 1) {
       msg.message += ' and %3.';
       msg.vars[2] = participants.pop();
