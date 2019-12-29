@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-3.02 Not Released
+3.02 2019-12-29T11:02:36+0900
  - Fix getting topic on connect #433
  - Fix clicking on dropdown options #434
  - Fix "/ison" without arguments
