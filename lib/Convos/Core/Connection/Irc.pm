@@ -980,17 +980,6 @@ See L<Convos::Core::Connection/connect>.
 
 See L<Convos::Core::Connection/disconnect_p>.
 
-=head2 nick
-
-  $self = $self->nick($nick => sub { my ($self, $err) = @_; });
-  $self = $self->nick(sub { my ($self, $err, $nick) = @_; });
-  $nick = $self->nick;
-
-Used to set or get the nick for this connection. Setting this nick will change
-L</nick> and try to change the nick on server if connected. Getting this nick
-will retrieve the active nick on server if connected and fall back to returning
-L</nick>.
-
 =head2 send_p
 
 See L<Convos::Core::Connection/send>.

@@ -75,7 +75,7 @@ C<password>.
 
 =head2 register
 
-  $self->register($app, \%config);
+  $auth->register($app, \%config);
 
 =head1 SEE ALSO
 

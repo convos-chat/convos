@@ -62,47 +62,47 @@ Holds a L<Convos::Core::Connection> object.
 
 =head2 frozen
 
-  $str = $self->frozen;
+  $str = $dialog->frozen;
 
 Will be set to a description if the dialog is "frozen", which means you are
 no longer part of it.
 
 =head2 id
 
-  $str = $self->id;
+  $str = $dialog->id;
   $str = $class->id(\%attr);
 
 Returns a unique identifier for a dialog.
 
 =head2 name
 
-  $str = $self->name;
+  $str = $dialog->name;
 
 The name of this dialog.
 
 =head2 last_active
 
-  $datetime = $self->last_active;
-  $self = $self->last_active($datetime);
+  $datetime = $dialog->last_active;
+  $dialog = $dialog->last_active($datetime);
 
 Holds an datetime timestring of last time this dialog received a message.
 
 =head2 last_read
 
-  $datetime = $self->last_read;
-  $self = $self->last_read($datetime);
+  $datetime = $dialog->last_read;
+  $dialog = $dialog->last_read($datetime);
 
 Holds an datetime timestring of last time this dialog was active in frontend.
 
 =head2 password
 
-  $str = $self->password;
+  $str = $dialog->password;
 
 The password used to join this dialog.
 
 =head2 topic
 
-  $str = $self->topic;
+  $str = $dialog->topic;
 
 The topic (subject) of the dialog.
 
@@ -110,14 +110,14 @@ The topic (subject) of the dialog.
 
 =head2 is_private
 
-  $bool = $self->is_private;
+  $bool = $dialog->is_private;
 
 Returns true if you are only talking to a single user and no other
 participants can join the dialog.
 
 =head2 messages_p
 
-  $p = $self->messages_p(\%query)->then(sub { my $messages = shift; });
+  $p = $dialog->messages_p(\%query)->then(sub { my $messages = shift; });
 
 Will fetch messages from persistent backend.
 
@@ -125,7 +125,7 @@ See also L<Convos::Core::Backend/messages>.
 
 =head2 calculate_unread_p
 
-  $p = $self->calculate_unread_p;
+  $p = $dialog->calculate_unread_p;
 
 Used to find the number of unread messages after L</last_read>.
 

@@ -137,64 +137,64 @@ L<Convos::Core::Settings> is a class used to model Convos server settings.
 
 =head2 contact
 
-  $str = $self->contact;
-  $self = $self->contact("mailto:root@localhost");
+  $str = $settings->contact;
+  $settings = $settings->contact("mailto:root@localhost");
 
 Holds a string with an URL to where the Convos admin can be contacted.
 
 =head2 core
 
-  $obj = $self->core;
+  $obj = $settings->core;
 
 Holds a L<Convos::Core> object.
 
 =head2 default_connection
 
-  $url = $self->default_connection;
-  $self = $self->default_connection(Mojo::URL->new("irc://..."));
+  $url = $settings->default_connection;
+  $settings = $settings->default_connection(Mojo::URL->new("irc://..."));
 
 Holds a L<Mojo::URL> object with the default connection URL. Default value
 is "irc://chat.freenode.net:6697/%23convos". (Subject to change)
 
 =head2 forced_connection
 
-  $bool = $self->forced_connection;
-  $self = $self->forced_connection(Mojo::JSON::true);
+  $bool = $settings->forced_connection;
+  $settings = $settings->forced_connection(Mojo::JSON::true);
 
 True if this instance of Convos can only connect to the L</default_connection>.
 
 =head2 local_secret
 
-  $str = $self->local_secret;
+  $str = $settings->local_secret;
 
 Holds a local password/secret that can be used to run admin actions from
 localhost.
 
 =head2 open_to_public
 
-  $bool = $self->open_to_public;
-  $self = $self->open_to_public(Mojo::JSON::true);
+  $bool = $settings->open_to_public;
+  $settings = $settings->open_to_public(Mojo::JSON::true);
 
 True if users can register without an invite link.
 
 =head2 organization_name
 
-  $str = $self->organization_name;
-  $self = $self->organization_name("Convos");
+  $str = $settings->organization_name;
+  $settings = $settings->organization_name("Convos");
 
 Can be used to customize the title and sidebars.
 
 =head2 organization_url
 
-  $url = $self->organization_url;
-  $self = $self->organization_url(Mojo::URL->new("https://..."));
+  $url = $settings->organization_url;
+  $settings = $settings->organization_url(Mojo::URL->new("https://..."));
 
 Will be used together with a custom L</organization_name> to add links to your
 organization in the Convos UI.
 
 =head2 public_attributes
 
-  $array_ref = $self->public_attributes;
+  $array_ref = $settings->public_attributes;
 
 Returns a list of L</ATTRIBUTES> that are considered open_to_public.
 Currently that is: L</contact>, L</default_connection>,
@@ -203,14 +203,14 @@ L</organization_url>.
 
 =head2 session_secrets
 
-  $array_ref = $self->session_secrets;
+  $array_ref = $settings->session_secrets;
 
 A list of strings used to make the session cookie safe. See also
 L<Mojolicious/secrets> for a longer description.
 
 =head2 uri
 
-  $path = $self->uri;
+  $path = $settings->uri;
 
 Holds a L<Mojo::Path> object, with the URI to where this object should be
 stored.
@@ -219,26 +219,26 @@ stored.
 
 =head2 defaults
 
-  $hash_ref = $self->defaults;
+  $hash_ref = $settings->defaults;
 
 Returns default settings.
 
 =head2 id
 
-  $str = $self->id;
+  $str = $settings->id;
 
 Always returns "settings". Used by L<Convos::Core::Backend::File> and friends.
 
 =head2 load_p
 
-  $p = $self->load_p;
+  $p = $settings->load_p;
 
 Will save L</ATTRIBUTES> to persistent storage.
 See L<Convos::Core::Backend/save_object> for details.
 
 =head2 save_p
 
-  $p = $self->save_p(\%attributes);
+  $p = $settings->save_p(\%attributes);
 
 Will save L</ATTRIBUTES> to persistent storage. C<%attributes> is optional,
 but willl be used to change the public L</ATTRIBUTES>.

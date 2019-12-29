@@ -87,7 +87,7 @@ serving user assets.
 
 =head2 register
 
-  $self->register($app, \%config);
+  $files->register($app, \%config);
 
 Used to register this plugin i L<Convos>.
 

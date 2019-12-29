@@ -213,7 +213,7 @@ Used to render an OpenAPI response with status code 401.
 
 =head2 register
 
-  $self->register($app, \%config);
+  $plugin->register($app, \%config);
 
 Called by L<Convos>, when registering this plugin.
 

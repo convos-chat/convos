@@ -218,7 +218,7 @@ Used to load meta information from disk.
 
 =head2 mime_type
 
-  $str = $self->mime_type;
+  $str = $file->mime_type;
 
 Used to get the mime type of this file. Defaults to "application/octet-stream".
 

@@ -98,7 +98,7 @@ L<Convos::Util> is a utily module for L<Convos>.
 =head2 has_many
 
   has_many $attribute => $many_class_class => sub {
-    my ($self, $attrs) = @_;
+    my ($obj, $attrs) = @_;
     return $many_class_class->new($attrs);
   };
 
@@ -106,7 +106,7 @@ Used to automatically define a create/update, get and list method to the
 caller class. Example:
 
   has_many users => "Convos::Core::User" => sub {
-    my ($self, $attrs) = @_;
+    my ($obj, $attrs) = @_;
     return Convos::Core::User->new($attrs);
   };
 

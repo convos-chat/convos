@@ -304,13 +304,13 @@ See L<Convos::Core::Backend/save_object> for details.
 
 =head2 set_password
 
-  $self = $self->set_password($plain);
+  $user = $user->set_password($plain);
 
 Will set L</password> to a crypted version of C<$plain>.
 
 =head2 validate_password
 
-  $bool = $self->validate_password($plain);
+  $bool = $user->validate_password($plain);
 
 Will verify C<$plain> text password against L</password>.
 

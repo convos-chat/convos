@@ -205,21 +205,21 @@ the following new ones.
 
 =head2 backend
 
-  $obj = $self->backend;
+  $obj = $core->backend;
 
 Holds a L<Convos::Core::Backend> object.
 
 =head2 base_url
 
-  $url = $self->base_url;
+  $url = $core->base_url;
 
 Holds a L<Mojo::URL> object that holds the public location of this Convos
 instance.
 
 =head2 home
 
-  $obj = $self->home;
-  $self = $self->home(Mojo::File->new($ENV{CONVOS_HOME});
+  $obj = $core->home;
+  $core = $core->home(Mojo::File->new($ENV{CONVOS_HOME});
 
 Holds a L<Mojo::File> object pointing to where Convos store data.
 
@@ -230,7 +230,7 @@ the following new ones.
 
 =head2 connect
 
-  $self->connect($connection);
+  $core->connect($connection);
 
 This method will call L<Convos::Core::Connection/connect> either at once
 or add the connection to a queue which will connect after an interval.
@@ -245,46 +245,46 @@ L<Convos::Core::Connection/connect> if defined.
 
 =head2 get_user
 
-  $user = $self->get_user(\%attrs);
-  $user = $self->get_user($email);
+  $user = $core->get_user(\%attrs);
+  $user = $core->get_user($email);
 
 Returns a L<Convos::Core::User> object or undef.
 
 =head2 get_user_by_uid
 
-  $user = $self->get_user_by_uid($uid);
+  $user = $core->get_user_by_uid($uid);
 
 Returns a L<Convos::Core::User> object or C<undef>.
 
 =head2 new
 
-  $self = Convos::Core->new(%attrs);
-  $self = Convos::Core->new(\%attrs);
+  $core = Convos::Core->new(%attrs);
+  $core = Convos::Core->new(\%attrs);
 
 Object constructor. Builds L</backend> if a classname is provided.
 
 =head2 start
 
-  $self = $self->start;
+  $core = $core->start;
 
 Will start the backend. This means finding all users and start connections
 if state is not "disconnected".
 
 =head2 user
 
-  $user = $self->user(\%attrs);
+  $user = $core->user(\%attrs);
 
 Returns a new L<Convos::Core::User> object or updates an existing object.
 
 =head2 users
 
-  $users = $self->users;
+  $users = $core->users;
 
 Returns an array-ref of of L<Convos::Core::User> objects.
 
 =head2 web_url
 
-  $url = $self->web_url($url);
+  $url = $core->web_url($url);
 
 Takes a path, or complete URL, merges it with L</base_url> and returns a new
 L<Mojo::URL> object. Note that you need to call L</to_abs> on that object
