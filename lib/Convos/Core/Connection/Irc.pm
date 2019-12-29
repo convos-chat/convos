@@ -253,7 +253,7 @@ sub _irc_event_notice {
 
 sub _irc_event_privmsg {
   my ($self, $msg) = @_;
-  my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
+  my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
   my ($from, $highlight, $target);
 
   my ($dialog_id, @message) = @{$msg->{params}};
@@ -362,7 +362,7 @@ sub _irc_event_rpl_welcome {
 
 sub _irc_event_topic {
   my ($self, $msg) = @_;
-  my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix} || '');
+  my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
   $self->_irc_event_rpl_topic({%$msg, params => [$nick, $msg->{params}[0], $msg->{params}[1]]});
 }
 

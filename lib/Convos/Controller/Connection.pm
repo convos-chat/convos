@@ -22,6 +22,7 @@ sub create {
     sub {
       my $connection = shift;
       $connection->on_connect_commands($json->{on_connect_commands} || []);
+      $connection->wanted_state($json->{wanted_state}) if $json->{wanted_state};
       $self->app->core->connect($connection);
       $self->render(openapi => $connection);
     },

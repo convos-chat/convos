@@ -14,8 +14,10 @@ $t->post_ok('/api/connections', json => {url => "irc://localhost:$port"})->statu
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
   ->status_is(200);
 $t->get_ok('/api/connections')->status_is(200)->json_is('/connections', []);
-$t->post_ok('/api/connections', json => {url => "irc://localhost:$port"})->status_is(200);
-$t->post_ok('/api/connections', json => {url => 'irc://irc.example.com:6667'})->status_is(200);
+$t->post_ok('/api/connections',
+  json => {url => "irc://localhost:$port", wanted_state => 'disconnected'})->status_is(200);
+$t->post_ok('/api/connections',
+  json => {url => 'irc://irc.example.com:6667', wanted_state => 'disconnected'})->status_is(200);
 
 $t->post_ok('/api/connections', json => {url => 'irc://irc.example.com:6667'})->status_is(400)
   ->json_is('/errors/0/message', 'Connection already exists.');
@@ -33,11 +35,12 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
     protocol            => 'irc',
     state               => 'disconnected',
     url                 => 'irc://irc.example.com:6667?nick=superman&tls=1',
-    wanted_state        => 'connected',
+    wanted_state        => 'disconnected',
   }
 )->json_is('/connections/1/connection_id', 'irc-localhost')
-  ->json_is('/connections/1/name', 'localhost')
-  ->json_is('/connections/1/url',  "irc://localhost:$port?nick=superman&tls=0");
+  ->json_is('/connections/1/name',         'localhost')
+  ->json_is('/connections/1/url',          "irc://localhost:$port?nick=superman&tls=1")
+  ->json_is('/connections/1/wanted_state', 'disconnected');
 
 $t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.com:9999'})
   ->status_is(404);
