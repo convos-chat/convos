@@ -1,7 +1,7 @@
 package Convos::Controller::Url;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async;
 
-sub info {
+async sub info {
   my $self = shift->openapi->valid_input or return;
   my $url  = $self->param('url');
 
@@ -18,22 +18,20 @@ sub info {
   my $user_agent = $self->req->headers->user_agent;
   $self->linkembedder->ua->transactor->name($user_agent) if $user_agent;
 
-  return $self->linkembedder->get_p($self->param('url'))->then(sub {
-    my $link = shift;
+  my $link = await $self->linkembedder->get_p($self->param('url'));
 
-    if (my $err = $link->error) {
-      $self->stash(status => $err->{code} || 500);
-      $self->respond_to(
-        json => {json => {errors => [$err]}},
-        any  => {text => $err->{message} || 'Unknown error.'}
-      );
-      return;
-    }
+  if (my $err = $link->error) {
+    $self->stash(status => $err->{code} || 500);
+    $self->respond_to(
+      json => {json => {errors => [$err]}},
+      any  => {text => $err->{message} || 'Unknown error.'}
+    );
+    return;
+  }
 
-    $self->_link_cache->set($url => $link);
-    $self->res->headers->cache_control('max-age=600');
-    $self->respond_to(json => {json => $link}, any => {text => $link->html});
-  });
+  $self->_link_cache->set($url => $link);
+  $self->res->headers->cache_control('max-age=600');
+  $self->respond_to(json => {json => $link}, any => {text => $link->html});
 }
 
 sub _link_cache {

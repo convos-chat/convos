@@ -1,10 +1,10 @@
 package Convos::Controller::Connection;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async;
 
 use Convos::Util 'E';
 use Mojo::Util 'trim';
 
-sub create {
+async sub create {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
@@ -18,17 +18,17 @@ sub create {
 
   return $self->render(openapi => E('Missing "host" in URL'), status => 400) unless $url->host;
 
-  return $self->backend->connection_create_p($url)->then(
-    sub {
-      my $connection = shift;
-      $connection->on_connect_commands($json->{on_connect_commands} || []);
-      $self->app->core->connect($connection);
-      $self->render(openapi => $connection);
-    },
-    sub {
-      $self->render(openapi => E(shift || 'Could not create connection.'), status => 400);
-    },
-  );
+  eval {
+    my $connection = await $self->backend->connection_create_p($url);
+    return $self->render(openapi => E(shift || 'Could not create connection.'), status => 400)
+      unless $connection;
+    $connection->on_connect_commands($json->{on_connect_commands} || []);
+    $self->app->core->connect($connection);
+    $self->render(openapi => $connection);
+  };
+  if ($@) {
+    $self->render(openapi => E($@ || 'Could not create connection.'), status => 400);
+  }
 }
 
 sub list {
@@ -43,16 +43,15 @@ sub list {
   $self->render(openapi => {connections => \@connections});
 }
 
-sub remove {
+async sub remove {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
 
-  return $user->remove_connection_p($self->stash('connection_id'))->then(sub {
-    $self->render(openapi => {});
-  });
+  await $user->remove_connection_p($self->stash('connection_id'));
+  $self->render(openapi => {});
 }
 
-sub update {
+async sub update {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my $json = $self->req->json;
@@ -92,11 +91,10 @@ sub update {
     $connection->send_p('', sprintf '/nick %s', $url->query->param('nick'));
   }
 
-  return Mojo::Promise->all(@p)->then(sub {
-    $self->app->core->connect($connection)
-      if $wanted_state eq 'connected' or $wanted_state eq 'reconnect';
-    $self->render(openapi => $connection);
-  });
+  await Mojo::Promise->all(@p);
+  $self->app->core->connect($connection)
+    if $wanted_state eq 'connected' or $wanted_state eq 'reconnect';
+  $self->render(openapi => $connection);
 }
 
 sub _pretty_connection_name {

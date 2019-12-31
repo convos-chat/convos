@@ -1,5 +1,5 @@
 package Convos::Controller::Events;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async;
 
 use Convos::Util qw(DEBUG E);
 use Mojo::JSON 'encode_json';
@@ -58,7 +58,7 @@ sub _event_debug {
   $self->send({json => {event => 'debug'}});
 }
 
-sub _event_send {
+async sub _event_send {
   my ($self, $data) = @_;
 
   return $self->_err('Invalid input.', $data)
@@ -67,16 +67,17 @@ sub _event_send {
   return $self->_err('Connection not found.', $data)
     unless my $connection = $self->backend->user->get_connection($data->{connection_id});
 
-  return $connection->send_p($data->{dialog_id} // '', $data->{message})->then(sub {
-    my $res = shift;
+  eval {
+    my $res = await $connection->send_p($data->{dialog_id} // '', $data->{message});
     $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
     $res ||= {};
     $res->{event} = 'sent';
     $res->{$_} ||= $data->{$_} for keys %$data;
     $self->send({json => $res});
-  })->catch(sub {
-    $self->_err(shift, $data);
-  });
+  };
+  if ($@) {
+    $self->_err($@, $data);
+  }
 }
 
 sub _event_ping {

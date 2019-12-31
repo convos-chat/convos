@@ -1,5 +1,5 @@
 package Convos::Controller::User;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async;
 
 use Convos::Util 'E';
 use Mojo::DOM;
@@ -9,7 +9,7 @@ use Socket qw(inet_aton AF_INET);
 
 use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
 
-sub delete {
+async sub delete {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
 
@@ -17,10 +17,9 @@ sub delete {
     return $self->render(openapi => E('You are the only user left.'), status => 400);
   }
 
-  return $self->app->core->backend->delete_object_p($user)->then(sub {
-    delete $self->session->{email};
-    $self->render(openapi => {message => 'You have been erased.'});
-  });
+  await $self->app->core->backend->delete_object_p($user);
+  delete $self->session->{email};
+  $self->render(openapi => {message => 'You have been erased.'});
 }
 
 sub docs {
@@ -65,37 +64,33 @@ sub generate_invite_link {
   return $self->render(openapi => {existing => $existing, expires => $expires, url => $invite_url});
 }
 
-sub get {
+async sub get {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
 
-  return $user->get_p($self->req->url->query->to_hash)
-    ->then(sub { $self->render(openapi => shift) });
+  $self->render(openapi => await $user->get_p($self->req->url->query->to_hash));
 }
 
-sub login {
+async sub login {
   my $self = shift->openapi->valid_input or return;
 
-  return $self->auth->login_p($self->_clean_json)->then(
-    sub {
-      my $user = shift;
-      $self->session(email => $user->email)->render(openapi => $user);
-    },
-    sub {
-      $self->render(openapi => {errors => [{message => shift, path => '/'}]}, status => 400);
-    },
-  );
+  eval {
+    my $user = await $self->auth->login_p($self->_clean_json);
+    $self->session(email => $user->email)->render(openapi => $user);
+  };
+  if ($@) {
+    $self->render(openapi => {errors => [{message => $@, path => '/'}]}, status => 400);
+  }
 }
 
-sub logout {
-  my $self   = shift->openapi->valid_input or return;
+async sub logout {
+  my $self = shift->openapi->valid_input or return;
   my $format = $self->stash('format') || 'json';
 
-  return $self->auth->logout_p({})->then(sub {
-    $self->session({expires => 1});
-    return $self->redirect_to('/login') if $format eq 'html';
-    return $self->render(openapi => {message => 'Logged out.'});
-  });
+  await $self->auth->logout_p({});
+  $self->session({expires => 1});
+  return $self->redirect_to('/login') if $format eq 'html';
+  return $self->render(openapi => {message => 'Logged out.'});
 }
 
 sub redirect_if_not_logged_in {
@@ -104,7 +99,7 @@ sub redirect_if_not_logged_in {
   return $self->stash(load_user => 1, user => $user);
 }
 
-sub register {
+async sub register {
   my $self = shift->openapi->valid_input or return;
   my $json = $self->_clean_json;
   my $user = $self->app->core->get_user($json->{email});
@@ -127,16 +122,13 @@ sub register {
   }
 
   # Register new user
-  return $self->auth->register_p($json)->then(sub {
-    $user = shift;
-    $user->role(give => 'admin') if $self->app->core->n_users == 1;
-    $self->session(email => $user->email);
-    $self->backend->connection_create_p(Mojo::URL->new($self->settings('default_connection')));
-  })->then(sub {
-    my $connection = shift;
-    $self->app->core->connect($connection);
-    $self->render(openapi => $user);
-  });
+  my $new_user = await $self->auth->register_p($json);
+  $new_user->role(give => 'admin') if $self->app->core->n_users == 1;
+  $self->session(email => $new_user->email);
+  my $connection = await $self->backend->connection_create_p(Mojo::URL->new($self->settings(
+    'default_connection')));
+  $self->app->core->connect($connection);
+  $self->render(openapi => $new_user);
 }
 
 sub register_html {
@@ -265,15 +257,14 @@ sub _register_html_handle_invite_url {
   $self->settings(existing_user => $user ? true : false);
 }
 
-sub _update_user {
+async sub _update_user {
   my ($self, $json, $user) = @_;
 
   $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
   $user->set_password($json->{password})                 if $json->{password};
-  $user->save_p->then(sub {
-    $self->session(email => $user->email);
-    $self->render(openapi => $user);
-  });
+  await $user->save_p;
+  $self->session(email => $user->email);
+  $self->render(openapi => $user);
 }
 
 1;

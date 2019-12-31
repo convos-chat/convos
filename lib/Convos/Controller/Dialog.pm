@@ -1,10 +1,10 @@
 package Convos::Controller::Dialog;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async;
 
 use Convos::Util 'E';
 use Mojo::JSON qw(false true);
 
-sub last_read {
+async sub last_read {
   my $self      = shift->openapi->valid_input or return;
   my $dialog    = $self->backend->dialog({});
   my $last_read = Mojo::Date->new->to_datetime;
@@ -15,12 +15,11 @@ sub last_read {
   }
 
   $dialog->last_read($last_read);
-  $self->stash('connection')->save_p->then(sub {
-    $self->render(openapi => {last_read => $last_read});
-  });
+  await $self->stash('connection')->save_p;
+  $self->render(openapi => {last_read => $last_read});
 }
 
-sub list {
+async sub list {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
   my @dialogs;
@@ -34,12 +33,11 @@ sub list {
   }
 
   push @p, Mojo::Promise->resolve unless @p;
-  Mojo::Promise->all(@p)->then(sub {
-    $self->render(openapi => {dialogs => \@dialogs});
-  });
+  await Mojo::Promise->all(@p);
+  $self->render(openapi => {dialogs => \@dialogs});
 }
 
-sub messages {
+async sub messages {
   my $self   = shift->openapi->valid_input or return;
   my $dialog = $self->backend->dialog({});
   my %query;
@@ -54,11 +52,9 @@ sub messages {
   $query{limit} ||= 60;
   $query{limit} = 200 if $query{limit} > 200;
 
-  return $dialog->messages_p(\%query)->then(sub {
-    my $messages = shift;
-    $self->render(
-      openapi => {messages => $messages, end => @$messages < $query{limit} ? true : false});
-  });
+  my $messages = await $dialog->messages_p(\%query);
+  $self->render( openapi =>
+    {messages => $messages, end => @$messages < $query{limit} ? true : false});
 }
 
 1;

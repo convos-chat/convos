@@ -1,5 +1,5 @@
 package Convos::Controller::Files;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async;
 
 use Convos::Util 'E';
 
@@ -16,7 +16,7 @@ sub get {
   });
 }
 
-sub upload {
+async sub upload {
   my $self = shift;
 
   # TODO: Move this to Mojolicious::Plugin::OpenAPI
@@ -35,8 +35,7 @@ sub upload {
   my %args = (filename => $upload->filename);
   $args{id}         = $self->param('id')         if defined $self->param('id');
   $args{write_only} = $self->param('write_only') if defined $self->param('write_only');
-  return $self->files->save_p($upload->asset, \%args)
-    ->then(sub { $self->render(openapi => {files => [shift]}) });
+  $self->render(openapi => {files => [await $self->files->save_p($upload->asset, \%args)]});
 }
 
 1;
