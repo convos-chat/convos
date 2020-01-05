@@ -6,14 +6,11 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
-}
 
-body.no-js .has-js {
-  display: none;
-}
-
-body.has-js .no-js {
-  display: none;
+  &.is-logged-out {
+    overflow: auto;
+    scroll-behavior: smooth;
+  }
 }
 
 body .is-loading,
@@ -33,6 +30,14 @@ body.page-offline .is-online {
   display: none;
 }
 
+body.no-js .has-js {
+  display: none;
+}
+
+body.has-js .no-js {
+  display: none;
+}
+
 .main {
   @extend %next-to-sidebar;
   line-height: 1.5em;
@@ -43,11 +48,6 @@ body.page-offline .is-online {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-
-  &.align-content-middle {
-    padding-bottom: 2rem;
-    top: 0;
-  }
 }
 
 @include if_screen("<=two-columns") {

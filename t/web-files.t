@@ -17,7 +17,7 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
 note 'upload';
 $t->post_ok('/api/file')->status_is(400)->json_is('/errors/0/path', '/file');
 
-my $fid_re = qr/\w{16}/;
+my $fid_re = qr/\w{14,16}/;
 $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(200)
   ->json_is('/files/0/ext', 't')->json_is('/files/0/filename', 'web-files.t')
   ->json_is('/files/0/uid', 1)->json_like('/files/0/id', qr{^$fid_re$})

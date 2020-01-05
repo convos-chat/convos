@@ -31,3 +31,12 @@ body.with-grid::after {
   background: var(--button-danger-bg);
   color: var(--button-danger-color);
 }
+
+.fade-in {
+  opacity: 0.2;
+  transition: opacity 250ms ease-in-out;
+
+  &.is-visible {
+    opacity: 1;
+  }
+}

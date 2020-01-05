@@ -2,11 +2,9 @@
 % layout 'convos';
 % title join ' ', l($message), "($status)";
 
-%= include 'partial/sidebar', js_remove => 0
-
-<main class="main align-content-middle js-remove">
-  <div>
-    <h2><%=l $message %> (<%= $status %>)</h2>
+<main class="welcome-screen js-remove">
+  <article class="welcome-screen_fallback align-content-middle">
+    <h1><%=l $message %> (<%= $status %>)</h1>
     % if ($status == 404) {
       <p><%=l 'Could not find the page you are looking for. Maybe you entered an invalid URL?' %></p>
     % } else {
@@ -19,5 +17,5 @@
       <p>
         %= link_to l('Go to landing page'), 'index', class => 'btn'
       </p>
-  </div>
+  </article>
 </main>

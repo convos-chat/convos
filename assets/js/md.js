@@ -121,8 +121,9 @@ export function md(str) {
     return all;
   }).replace(mdLinkRe, (all, text, href) => {
     mdLinks++;
-    const target = href.indexOf('/') == 0 ? '_self' : '_blank';
-    if (target == '_self') href = urlFor(href);
+    const first = href.substring(0, 1);
+    const target = ['/', '#'].indexOf(first) != -1 ? '_self' : '_blank';
+    if (target == '_self' && first != '#') href = urlFor(href);
     return '<a href="' + href + '" target="' + target + '">' + text + '</a>';
   }).replace(codeToHtmlRe, (all, esc, text) => {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';

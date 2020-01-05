@@ -32,7 +32,7 @@ export default class User extends Reactive {
   }
 
   calculateLastUrl() {
-    if (this.is('error')) return urlFor('/register');
+    if (this.is('error')) return urlFor('/login');
     if (!this.is('success')) return null;
     if (this.lastUrl) return this.lastUrl;
 

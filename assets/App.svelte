@@ -2,7 +2,6 @@
 import Api from './js/Api';
 import hljs from './js/hljs';
 import SidebarChat from './components/SidebarChat.svelte';
-import SidebarLoggedout from './components/SidebarLoggedout.svelte';
 import User from './store/User';
 import {activeMenu, calculateCurrentPageComponent, container, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
 import {closestEl, loadScript, tagNameIs} from './js/util';
@@ -18,16 +17,15 @@ import DialogAdd from './page/DialogAdd.svelte';
 import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
-import Register from './page/Register.svelte';
 import Settings from './page/Settings.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 
 export const routingRules = [
   [new RegExp('^/(file|paste)'), null, {}],
   [new RegExp('^/docs'), null, {}],
+  [new RegExp('^/$'), Login, {user: 'pending'}],
   [new RegExp('.*'), Fallback, {user: 'offline'}],
-  [new RegExp('^/login'), Login, {}],
-  [new RegExp('^/register'), Register, {}],
+  [new RegExp('^/(login|register)'), Login, {}],
   [new RegExp('^/settings/connection'), ConnectionAdd, {user: 'loggedIn'}],
   [new RegExp('^/settings/conversation'), DialogAdd, {user: 'loggedIn'}],
   [new RegExp('^/settings/account'), SettingsAccount, {user: 'loggedIn'}],
@@ -152,9 +150,7 @@ function onWindowFocus() {
   bind:innerWidth="{containerWidth}"/>
 
 {#if $pageComponent}
-  {#if !$user.is('loggedIn')}
-    <SidebarLoggedout/>
-  {:else if $activeMenu == 'nav' || $container.wideScreen}
+  {#if $user.is('loggedIn') && ($activeMenu == 'nav' || $container.wideScreen)}
     <SidebarChat transition="{{duration: $container.wideScreen ? 0 : 250, x: $container.width}}"/>
   {/if}
 

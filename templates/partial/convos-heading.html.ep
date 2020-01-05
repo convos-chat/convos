@@ -1,0 +1,10 @@
+<h1>
+  <a href="/"><span><%=l 'Convos' %></span></a>
+  % if (settings('organization_name') ne 'Convos') {
+    % if (settings('organization_url') ne 'http://convos.by') {
+      <a class="subtitle" href="<%= settings('organization_url') %>"><%=l 'for %1', settings('organization_name') %></a>
+    % } else {
+      <small class="subtitle"><%=l 'for %1', settings('organization_name') %></small>
+    % }
+  % }
+</h1>

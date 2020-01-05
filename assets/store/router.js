@@ -69,13 +69,6 @@ function parseUrl(url) {
   return nextUrl;
 }
 
-export async function redirectAfterLogin(user, op) {
-  document.cookie = op.res.headers['Set-Cookie'];
-  op.reset();
-  await user.load();
-  gotoUrl(user.calculateLastUrl());
-}
-
 function switchPageComponent(nextPageComponent) {
   // Only switch if the page has actually changed
   const currentPageComponent = get(pageComponent);

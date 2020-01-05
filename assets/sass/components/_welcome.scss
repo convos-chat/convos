@@ -1,0 +1,67 @@
+.welcome-screen {
+  background: var(--sidebar-left-bg);
+  min-height: 100vh;
+
+  &, a {
+    color: var(--sidebar-left-text);
+  }
+
+  h1,
+  h2 {
+    margin-top: 0;
+  }
+
+  .btn.is-hallow {
+    color: var(--sidebar-left-text);
+    border-color: var(--sidebar-left-bg);
+  }
+
+  article,
+  footer,
+  section {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 4rem;
+    width: 42rem;
+    max-width: 100%;
+
+    @media (max-width: 42rem) {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  section {
+    min-height: 60vh;
+  }
+}
+
+.welcome-screen__about {
+  h1 {
+    font-size: 2.4rem;
+  }
+}
+
+.welcome-screen__footer {
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.welcome-screen__signin {
+  form {
+    background: var(--sidebar-left-bg);
+    filter: brightness(0.95);
+    outline: 4rem solid var(--sidebar-left-bg);
+    outline-offset: 0;
+  }
+}
+
+.welcome-screen__signup {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}

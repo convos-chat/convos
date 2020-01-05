@@ -1,12 +1,16 @@
 % layout 'convos';
 % title settings('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . settings('organization_name');
 
-%= include 'partial/sidebar', js_remove => 1
+<main class="welcome-screen js-remove">
+  <article class="welcome-screen__about">
+    %= include 'partial/convos-heading'
 
-<main class="main align-content-middle js-remove">
-  <div>
-    <p class="no-js">
-      <i class="fas fa-download no-js"></i>
+    <p class="is-online">
+      %=l 'Convos is the simplest way to use IRC, and it keeps you always online.'
+    </p>
+
+    <p class="has-js">
+      <i class="fas fa-download"></i>
       %=l 'Downloading Convos...'
     </p>
 
@@ -16,11 +20,27 @@
     </p>
 
     <noscript>
-      <p><%=l 'Javascript is disabled, so Convos will never load. Please enable Javascript and try again.' %></p>
+      <p class="error">
+        %=l 'Javascript is disabled, so Convos cannot start. Please enable Javascript and try again.'
+      </p>
+      <p>
+        %= link_to l('Try again'), '/', class => 'btn'
+        %= link_to l('Contact admin'), settings('contact'), class => 'btn is-hallow'
+      </p>
     </noscript>
 
-    <article class="is-online">
-      <p><%=l 'Convos is the simplest way to use IRC and it keeps you always online.' %></p>
-    </article>
-  </div>
+    <p class="has-js">
+      %= link_to l('Contact admin'), settings('contact'), class => 'btn'
+    </p>
+  </article>
+
+  <footer class="welcome-screen__footer">
+    <a href="https://convos.by/">Convos</a>
+    &mdash;
+    <a href="https://convos.by/blog"><%=l 'Blog' %></a>
+    &mdash;
+    <a href="https://convos.by/doc"><%=l 'Documentation' %></a>
+    &mdash;
+    <a href="https://github.com/Nordaaker/convos"><%=l 'GitHub' %></a>
+  </footer>
 </main>
