@@ -78,10 +78,12 @@ my $name;
 $fid  = $t->tx->res->json('/files/0/id');
 $url  = $t->tx->res->json('/files/0/url');
 $name = $t->tx->res->json('/files/0/filename');
-$t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
-  ->element_exists(qq(meta[property="og:description"][content="$name"]))
+$t->get_ok("/file/1/$fid")->element_exists(qq(meta[property="og:description"][content="$name"]))
   ->element_exists(qq(meta[property="og:image"][content="$url.jpg"]))
   ->element_exists(qq(main a[href="$url.jpg"]))->element_exists(qq(main a img[src="$url.jpg"]));
+
+$t->get_ok("/file/1/$fid.jpg")->header_is('Cache-Control', 'max-age=86400')
+  ->header_is('Content-Type' => 'image/jpeg');
 
 note 'binary';
 $t->post_ok('/api/file', form => {file => {file => 't/data/binary.bin'}})->status_is(200);
