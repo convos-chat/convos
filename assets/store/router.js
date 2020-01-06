@@ -22,6 +22,7 @@ export function calculateCurrentPageComponent($currentUrl, $user, routingRules) 
     // Check matching route rules
     if (options.user && !$user.is(options.user)) continue; // Not ready yet
     if (options.gotoLast) return gotoUrl($user.calculateLastUrl());
+    component.routerOptions = options;
 
     // Render matching route
     switchPageComponent(component);

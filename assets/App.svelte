@@ -53,6 +53,7 @@ $: container.set({wideScreen: containerWidth > 800, width: containerWidth});
 $: calculateCurrentPageComponent($currentUrl, $user, routingRules);
 $: setTheme($user.theme);
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $docTitle : $docTitle;
+$: showSidebarChat = $pageComponent.routerOptions.user == 'loggedIn';
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
@@ -150,7 +151,7 @@ function onWindowFocus() {
   bind:innerWidth="{containerWidth}"/>
 
 {#if $pageComponent}
-  {#if $user.is('loggedIn') && ($activeMenu == 'nav' || $container.wideScreen)}
+  {#if showSidebarChat && ($activeMenu == 'nav' || $container.wideScreen)}
     <SidebarChat transition="{{duration: $container.wideScreen ? 0 : 250, x: $container.width}}"/>
   {/if}
 
