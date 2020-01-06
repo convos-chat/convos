@@ -94,7 +94,7 @@ export default class Events extends Reactive {
 
   update(params) {
     super.update(params);
-    if (params.wantNotifications) this.notifyUser('Convos', l('You have enabled notifications!'), {force: true});
+    if (params.wantNotifications && !this.wantNotifications) this.notifyUser('Convos', l('You have enabled notifications!'), {force: true});
     return this;
   }
 
