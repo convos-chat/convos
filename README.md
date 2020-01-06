@@ -41,18 +41,11 @@ Notes for developers so a new release is made in a proper way.
 # Update with the recent changes and make sure the timestamp is proper
 $EDITOR Changes
 
-# Check that all the files have the correct version information
-TEST_ALL=1 prove -vl t/version.t
-
 # Build the production assets
 BUILD_ASSETS=1 prove -vl t/production-resources.t
 
-# Make the release
-git commit -a -m "Released 2.00"
-git tag 2.00
-git push origin master:master
-git push origin master:stable
-git push origin --tags
+# Update and check that all the files have the correct version information
+RELEASE=1 prove -vl t/version.t
 ```
 
 ## Branch overview

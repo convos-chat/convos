@@ -1,5 +1,13 @@
 Revision history for perl distribution Convos
 
+3.04 2020-01-06T22:07:36+0900
+ - Add custom title for all pages
+ - Fix bugs in Dark and Nord theme
+ - Fix showing <SidebarChat/> only on pages that wants it
+ - Fix clearning activeMenu when changing page
+ - Fix not reloading User from <ConnectionSettings/>
+ - Fix not notifying the user when the user has already accepted notifications
+
 3.03 2020-01-06T14:21:36+0900
  - Fix serving uploaded files with correct Content-Type #435
  - Fix offset for hamburger menu
