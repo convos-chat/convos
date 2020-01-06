@@ -104,10 +104,19 @@ export function urlToForm(formEl, url = get(currentUrl)) {
   });
 }
 
+// Make sure we always clear activeMenu when changing page
+const currentUrlSet = currentUrl.set;
+currentUrl.set = function(url, force) {
+  if (get(this).toString() == url.toString() && !force) return;
+  activeMenu.set('');
+  return currentUrlSet.call(this, url);
+};
+
+
 Object.defineProperty(currentUrl, 'base', {
   get() { return baseUrl },
   set(val) {
     baseUrl = val.replace(/\/+$/, '');
-    currentUrl.set(parseUrl(get(currentUrl).toString()));
+    currentUrl.set(parseUrl(get(currentUrl).toString()), true);
   },
 });
