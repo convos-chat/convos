@@ -115,8 +115,9 @@ export default class Dialog extends Reactive {
     return this.status == status;
   }
 
-  async load({before}) {
+  async load({before, maybe}) {
     if (!this.messagesOp || this.is('loading')) return this;
+    if (maybe && this.messagesOp.status == 'success') return this;
 
     const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id};
     if (before && before.endOfHistory) return;
