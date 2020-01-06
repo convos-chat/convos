@@ -15,7 +15,6 @@ let connection = {};
 $: connectionHost = connection.url && connection.url.host;
 
 onMount(async () => {
-  await user.load();
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
 });
 </script>
