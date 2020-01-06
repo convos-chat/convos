@@ -13,13 +13,6 @@ body.with-grid::after {
   opacity: 0.4;
 }
 
-.align-content-middle {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
 .error,
 .loading {
   border: 1px solid transparent;

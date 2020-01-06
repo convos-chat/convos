@@ -23,7 +23,7 @@ onMount(() => {
 </script>
 
 <main class="welcome-screen">
-  <article class="welcome-screen_fallback align-content-middle">
+  <article class="welcome-screen_fallback">
     <h1>{l(messages[status])}</h1>
     {#if status == 'offline'}
       <p><i class="fas fa-exclamation-triangle"></i> {l('You seem to have lost connection to the internet.')}</p>
