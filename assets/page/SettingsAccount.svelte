@@ -6,6 +6,7 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import PasswordField from '../components/form/PasswordField.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {docTitle} from '../store/router';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 import {themes} from '../settings';
@@ -19,6 +20,8 @@ let notificationsDisabled = user.events.browserNotifyPermission == 'denied';
 let theme = user.theme;
 let wantNotifications = user.events.wantNotifications;
 let highlight_keywords = user.highlight_keywords.join(', ');
+
+$docTitle = l('%1 - Convos', l('Account'));
 
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;

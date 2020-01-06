@@ -5,9 +5,9 @@ import Link from '../components/Link.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {debounce, extractErrorMessage} from '../js/util';
+import {docTitle, urlToForm} from '../store/router';
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
-import {urlToForm} from '../store/router';
 
 const user = getContext('user');
 
@@ -16,6 +16,8 @@ let connectionId = '';
 let dialogId = '';
 let formEl;
 let loadConversationsTid;
+
+$docTitle = l('%1 - Convos', l('Add conversation'));
 
 $: connectionOptions = Array.from($user.connections.keys()).map(id => [id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';

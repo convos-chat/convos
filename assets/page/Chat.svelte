@@ -7,7 +7,7 @@ import DialogSettings from '../components/DialogSettings.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
-import {activeMenu, container, currentUrl} from '../store/router';
+import {activeMenu, container, currentUrl, docTitle} from '../store/router';
 import {afterUpdate, getContext, onDestroy} from 'svelte';
 import {debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
@@ -84,6 +84,9 @@ function calculateDialog($user, $currentUrl) {
   if (dialog.subscribe) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
 
   dialog.load({before: dialog.messages[0], maybe: true});
+  $docTitle = connection == dialog ? l('%1 - Convos', connection.name)
+            : connection.name ? l('%1/%2 - Convos', connection.name, dialog.name)
+            : l('%1 - Convos', dialog.name);
 }
 
 function messageElObserved(entries, observer) {

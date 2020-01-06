@@ -127,7 +127,6 @@ export default class Connection extends Dialog {
     const dialog = this.findDialog(params) || this;
 
     const modeSent = (params.command[1] || '').match(/(\W*)(\w)$/);
-    console.log(modeSent);
     if (!modeSent) return console.log('[wsEventSentMode] Unable to handle message:', params);
     modeSent.shift();
 

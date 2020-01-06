@@ -1,5 +1,6 @@
 <script>
 import Link from '../components/Link.svelte';
+import {docTitle} from '../store/router';
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
 import {replaceClassName} from '../js/util';
@@ -15,6 +16,7 @@ const messages = {
 };
 
 $: status = $user.is('offline') ? 'offline' : $user.is(loadingStatus) ? 'loading' : 'not_found';
+$: $docTitle = l('%1 - Convos', l(messages[status]));
 
 onMount(() => {
   replaceClassName('body', /(is-logged-)\S+/, 'out');

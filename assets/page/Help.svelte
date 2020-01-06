@@ -1,13 +1,15 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import {commands} from '../js/autocomplete';
-import {currentUrl} from '../store/router';
+import {currentUrl, docTitle} from '../store/router';
 import {emojiAliases} from '../js/md';
 import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {scrollTo} from '../js/util';
 
 const settings = getContext('settings');
+
+$docTitle = l('%1 - Convos', l('Help'));
 
 $: scrollTo($currentUrl.hash || 0);
 </script>

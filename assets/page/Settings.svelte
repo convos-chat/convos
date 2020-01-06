@@ -5,6 +5,7 @@ import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {copyToClipboard} from '../js/util';
+import {docTitle} from '../store/router';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 
@@ -15,6 +16,8 @@ const inviteLinkOp = user.api.operation('inviteUser');
 const updateSettingsOp = user.api.operation('updateSettings');
 
 let convosSettings = {};
+
+$docTitle = l('%1 - Convos', l('Settings'));
 
 $: invite = $inviteLinkOp.res.body || {};
 
