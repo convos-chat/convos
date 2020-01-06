@@ -53,7 +53,8 @@ sub _serve {
       if !$params->{format} and $ct =~ m!$type_can_be_embedded!;
 
     $h->content_type($ct);
-    $h->content_disposition(qq[attachment; filename="@{[$file->filename]}"]);
+    $h->content_disposition(qq[attachment; filename="@{[$file->filename]}"])
+      unless $ct =~ m!$type_can_be_embedded!;
     return $c->reply->asset($file->asset);
   });
 }

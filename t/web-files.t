@@ -83,7 +83,7 @@ $t->get_ok("/file/1/$fid")->element_exists(qq(meta[property="og:description"][co
   ->element_exists(qq(main a[href="$url.jpg"]))->element_exists(qq(main a img[src="$url.jpg"]));
 
 $t->get_ok("/file/1/$fid.jpg")->header_is('Cache-Control', 'max-age=86400')
-  ->header_is('Content-Type' => 'image/jpeg');
+  ->header_is('Content-Type' => 'image/jpeg')->header_exists_not('Content-Disposition');
 
 note 'binary';
 $t->post_ok('/api/file', form => {file => {file => 't/data/binary.bin'}})->status_is(200);
@@ -91,7 +91,8 @@ $fid  = $t->tx->res->json('/files/0/id');
 $url  = $t->tx->res->json('/files/0/url');
 $name = $t->tx->res->json('/files/0/filename');
 $t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
-  ->header_is('Content-Disposition', 'attachment; filename="binary.bin"');
+  ->header_is('Content-Disposition', 'attachment; filename="binary.bin"')
+  ->header_is('Content-Type' => 'application/octet-stream');
 
 note 'write_only';
 $t->post_ok('/api/file',
