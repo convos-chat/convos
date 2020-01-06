@@ -11,6 +11,11 @@ export default class Notifications extends Dialog {
     });
   }
 
+  async load(params = {}) {
+    if (Object.keys(params) == 0) this.update({messages: []});
+    await super.load(params);
+  }
+
   // Disabled
   send() { }
 
