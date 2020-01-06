@@ -1,5 +1,15 @@
 Revision history for perl distribution Convos
 
+3.03 2020-01-06T14:21:36+0900
+ - Fix serving uploaded files with correct Content-Type #435
+ - Fix offset for hamburger menu
+ - Fix not duplicating notification messages
+ - Designed new login/register screen, where they are on the same page
+ - Renamed "Login" and "Register" to "Sign in" and "Sign up"
+ - Will display connection name in sidebar
+ - Changed Dark theme: Less dark inputs and darker buttons
+ - Changed Nord theme: Made the inputs visible on blue background
+
 3.02 2019-12-29T11:02:36+0900
  - Fix getting topic on connect #433
  - Fix clicking on dropdown options #434
