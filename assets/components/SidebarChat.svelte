@@ -2,7 +2,7 @@
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import TextField from './form/TextField.svelte';
-import {activeMenu, gotoUrl} from '../store/router';
+import {activeMenu, currentUrl, gotoUrl} from '../store/router';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, topicOrStatus} from '../js/i18n';
@@ -20,11 +20,13 @@ let searchHasFocus = false;
 let visibleLinks = [];
 
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
+$: if (navEl) clearFilter($currentUrl);
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
 function clearFilter() {
   searchHasFocus = false;
   setTimeout(() => {filter = ''}, 100);
+  q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
 }
 
 function dialogClassNames(connection, dialog) {
