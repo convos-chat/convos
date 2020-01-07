@@ -35,6 +35,7 @@
     max-width: 80%;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-shrink: 0;
 
     a {
       color: inherit;
