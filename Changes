@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 3.06 Not Released
  - Fix link color inside pseudo form elements
  - Fix not focusing the last element in the sidebar
+ - Fix timestamp color for the Nord theme
 
 3.05 2020-01-07T11:32:36+0900
  - Fix autocomplete text color
