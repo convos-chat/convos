@@ -3,10 +3,10 @@ import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import TextField from './form/TextField.svelte';
 import {activeMenu, currentUrl, gotoUrl} from '../store/router';
+import {closestEl, q, regexpEscape, showEl, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, topicOrStatus} from '../js/i18n';
-import {q, regexpEscape, showEl, tagNameIs} from '../js/util';
 
 export let transition;
 
@@ -27,6 +27,9 @@ function clearFilter() {
   searchHasFocus = false;
   setTimeout(() => {filter = ''}, 100);
   q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
+
+  const el = document.activeElement;
+  if (el && closestEl(el, navEl)) q(navEl, 'a.has-path', aEl => aEl.focus());
 }
 
 function dialogClassNames(connection, dialog) {
