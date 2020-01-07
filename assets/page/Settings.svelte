@@ -17,7 +17,7 @@ const updateSettingsOp = user.api.operation('updateSettings');
 
 let convosSettings = {};
 
-$docTitle = l('%1 - Convos', l('Settings'));
+$docTitle = l('%1 - Convos', l('Convos settings'));
 
 $: invite = $inviteLinkOp.res.body || {};
 
