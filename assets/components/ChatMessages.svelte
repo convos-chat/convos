@@ -69,8 +69,12 @@ function gotoDialogFromNotifications(e) {
   const message = messages[target.dataset.index];
   if (!message) return;
   e.preventDefault();
-  const path = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
-  gotoUrl(path + '#' + message.ts.toISOString());
+  gotoUrl(notififactionUrl(message));
+}
+
+function notififactionUrl(message) {
+  const url = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
+  return url + '#' + message.ts.toISOString();
 }
 
 function senderIsOnline(message) {
@@ -114,9 +118,9 @@ function toggleDetails(e) {
     <Icon name="pick:{message.from}" color="{message.color}"/>
     <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.getHM()}</b>
     {#if dialog.connection_id}
-      <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}">{message.from}</a>
+      <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
     {:else}
-      <a href="#see" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
+      <a href="{notififactionUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
     {/if}
     <div class="message__text">
       {#if message.type == 'error' || message.type == 'notice'}

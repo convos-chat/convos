@@ -134,7 +134,7 @@ function registerUrlHandler(connection) {
 
 <ChatHeader>
   <h1>
-    <a href="#activeMenu:{dialog.connection_id ? 'settings' : ''}">
+    <a href="#activeMenu:{dialog.connection_id ? 'settings' : ''}" tabindex="-1">
       <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{pathParts[2] || pathParts[1] || l('Notifications')}</span>
     </a>
   </h1>
