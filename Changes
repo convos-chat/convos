@@ -1,5 +1,14 @@
 Revision history for perl distribution Convos
 
+3.05 2020-01-07T11:32:36+0900
+ - Fix autocomplete text color
+ - Fix not focusing two nav items after going back/forward in history after searching
+ - Fix changing focus in navbar when the URL changes
+ - Fix channel name not getting collapsed in heading
+ - Render readonly topic as html in settings and made the topic clickable as well
+ - Better transition between different loading states
+ - Bumped LinkEmbedder to 1.11
+
 3.04 2020-01-06T22:07:36+0900
  - Add custom title for all pages
  - Fix bugs in Dark and Nord theme
