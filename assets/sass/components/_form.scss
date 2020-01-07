@@ -7,6 +7,10 @@ textarea {
   color: var(--input-color);
 }
 
+textarea {
+  resize: vertical;
+}
+
 .checkbox,
 .text-area,
 .text-field {
