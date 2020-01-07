@@ -117,13 +117,13 @@ function renderUnread(dialog) {
 
 <div class="sidebar-left" transition:fly="{transition}">
   <form class="sidebar__header" on:submit="{e => e.preventDefault()}">
-    <input type="text" id="sidebar_left_search_input"
+    <input type="text" id="search_input"
       placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
       bind:value="{filter}"
       on:blur="{clearFilter}"
       on:focus="{filterNav}"
       on:keydown="{onSearchKeydown}">
-    <label for="sidebar_left_search_input"><Icon name="search"/></label>
+    <label for="search_input"><Icon name="search"/></label>
   </form>
 
   <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">

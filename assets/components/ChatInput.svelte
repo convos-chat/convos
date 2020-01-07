@@ -142,7 +142,7 @@ const keys = {
 </script>
 
 <form class="chat-input" on:submit|preventDefault>
-  <textarea id="chat_input_textarea"
+  <textarea id="chat_input"
     placeholder="{l('What is on your mind %1?', $connection.nick)}"
     bind:this="{inputEl}"
     on:change="{e => {pos = inputEl.selectionStart}}"

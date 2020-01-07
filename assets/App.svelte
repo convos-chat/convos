@@ -97,11 +97,11 @@ function onGlobalKeydown(e) {
   if (!(e.shiftKey && e.keyCode == 13)) return; // Shift+Enter
   e.preventDefault();
 
-  const searchInput = document.getElementById('sidebar_left_search_input');
+  const searchInput = document.getElementById('search_input');
   const targetEl = document.activeElement;
   if (targetEl != searchInput && !tagNameIs(targetEl, 'body')) return searchInput.focus();
 
-  const selectors = ['#chat_input_textarea', '.main input[type="text"]', '.main a', '#sidebar_left_search_input'];
+  const selectors = ['#chat_input', '.main input[type="text"]', '.main a', '#search_input'];
   for (let i = 0; i < selectors.length; i++) {
     const el = document.querySelector(selectors[i]);
     if (el) return el.focus();
