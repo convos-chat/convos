@@ -10,7 +10,7 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 
 SKIP: {
-  skip 'BUILD_ASSETS=1 to run "pnpm run build"', 1 unless $ENV{BUILD_ASSETS};
+  skip 'BUILD_ASSETS=1 to run "pnpm run build"', 1 unless $ENV{BUILD_ASSETS} or $ENV{RELEASE};
   detect_themes();
   build_assets();
 }

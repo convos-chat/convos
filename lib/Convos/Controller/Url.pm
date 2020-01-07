@@ -1,6 +1,14 @@
 package Convos::Controller::Url;
 use Mojo::Base 'Mojolicious::Controller';
 
+sub err {
+  my $self = shift;
+  my $code = $self->stash('code') || '404';
+
+  return $self->reply->not_found if $code eq '404';
+  return $self->render('index', load_user => 1, status => $code =~ m!^\d+$! ? $code : 200);
+}
+
 sub info {
   my $self = shift->openapi->valid_input or return;
   my $url  = $self->param('url');
@@ -54,6 +62,10 @@ L<Convos::Controller::Url> is a L<Mojolicious::Controller> that can retrieve
 information about resources online.
 
 =head1 METHODS
+
+=head2 err
+
+Render error/status pages.
 
 =head2 info
 

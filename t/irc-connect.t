@@ -40,9 +40,9 @@ t::Helper->irc_server_messages(
   $connection, '_irc_event_join', $connection, '_irc_event_rpl_topic', $connection,
   '_irc_event_rpl_topicwhotime', $connection, '_irc_event_rpl_namreply', $connection,
   '_irc_event_rpl_endofnames',
-  qr{ISON} => ['ison.irc'],
-  $connection, '_irc_event_rpl_ison',
 );
+
+t::Helper->irc_server_messages(qr{ISON} => ['ison.irc'], $connection, '_irc_event_rpl_ison');
 
 is_deeply($connection->on_connect_commands,
   [@on_connect_commands], 'on_connect_commands still has the same elements');

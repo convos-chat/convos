@@ -41,11 +41,9 @@ Notes for developers so a new release is made in a proper way.
 # Update with the recent changes and make sure the timestamp is proper
 $EDITOR Changes
 
-# Build the production assets
-BUILD_ASSETS=1 prove -vl t/production-resources.t
-
-# Update and check that all the files have the correct version information
-RELEASE=1 prove -vl t/version.t
+# Build the production assets and update and check that all the files
+# have the correct version information
+RELEASE=1 prove -vl t/production-resources.t t/version.t
 ```
 
 ## Branch overview

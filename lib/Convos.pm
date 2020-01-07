@@ -43,7 +43,7 @@ sub startup {
     ->to(template => 'asset/browserconfig');
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
-  $r->get('/err/:code')->to(load_user => 1, template => 'index');
+  $r->get('/err/:code')->to('url#err');
   $r->get('/sw' => [format => 'js']);
 
   # Event channel
