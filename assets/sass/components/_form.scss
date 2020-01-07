@@ -104,11 +104,14 @@ textarea {
 
   .input {
     background: var(--input-disabled-bg);
-    color: var(--input-disabled-color);
     line-height: 1.8em;
     height: auto;
     max-height: none;
     cursor: not-allowed;
+
+    &, a {
+      color: var(--input-disabled-color);
+    }
   }
 }
 
