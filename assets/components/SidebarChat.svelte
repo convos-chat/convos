@@ -25,11 +25,13 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
 
 function clearFilter() {
   searchHasFocus = false;
-  setTimeout(() => {filter = ''}, 100);
   q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
 
-  const el = document.activeElement;
-  if (el && closestEl(el, navEl)) q(navEl, 'a.has-path', aEl => aEl.focus());
+  setTimeout(() => {
+    filter = '';
+    const el = document.activeElement;
+    if (el && closestEl(el, navEl)) q(navEl, 'a.has-path', aEl => aEl.focus());
+  }, 100);
 }
 
 function dialogClassNames(connection, dialog) {
