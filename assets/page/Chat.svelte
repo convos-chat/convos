@@ -138,7 +138,7 @@ function registerUrlHandler(connection) {
       <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{pathParts[2] || pathParts[1] || l('Notifications')}</span>
     </a>
   </h1>
-  <i class="chat-header__topic">{topicOrStatus(connection, dialog)}</i>
+  <a href="#activeMenu:{dialog.connection_id ? 'settings' : ''}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
 <main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">

@@ -7,7 +7,7 @@ import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
+import {l, lmd} from '../js/i18n';
 import {modeClassNames} from '../js/util';
 
 export let dialog = {};
@@ -67,9 +67,16 @@ function saveDialogSettings(e) {
       <input type="hidden" name="connection_id" value="{dialog.connection_id}">
       <input type="hidden" name="dialog_id" value="{dialog.dialog_id}">
 
-      <TextArea name="topic" placeholder="{l('No topic is set.')}" bind:value="{dialogTopic}" readonly="{!isOperator}">
-        <span slot="label">{l('Topic')}</span>
-      </TextArea>
+      {#if isOperator}
+        <TextArea name="topic" placeholder="{l('No topic is set.')}" bind:value="{dialogTopic}">
+          <span slot="label">{l('Topic')}</span>
+        </TextArea>
+      {:else}
+        <div class="text-field">
+          <label>{l('Topic')}</label>
+          <div class="input">{@html lmd(dialogTopic || 'No topic is set.')}</div>
+        </div>
+      {/if}
 
       <PasswordField name="password" bind:value="{dialogPassword}" readonly="{dialog.frozen != 'Password protected.' && !isOperator}">
         <span slot="label">{l('Password')}</span>

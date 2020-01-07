@@ -72,9 +72,11 @@ textarea {
 
 .text-area,
 .text-field {
+  .input,
   input,
   textarea {
     background: var(--input-bg);
+    color: var(--input-color);
     line-height: 2.2em;
     height: 2.2em;
     padding: 0.2em 0.5em;
@@ -98,6 +100,15 @@ textarea {
       outline-width: 2px;
       outline-offset: -2px;
     }
+  }
+
+  .input {
+    background: var(--input-disabled-bg);
+    color: var(--input-disabled-color);
+    line-height: 1.8em;
+    height: auto;
+    max-height: none;
+    cursor: not-allowed;
   }
 }
 
