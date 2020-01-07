@@ -32,6 +32,10 @@
   h3 {
     border-bottom: 1px solid var(--sidebar-left-border-bottom);
   }
+
+  .sidebar__header {
+    background: var(--sidebar-left-bg);
+  }
 }
 
 .sidebar-left__nav a {
