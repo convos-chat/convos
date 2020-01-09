@@ -21,6 +21,8 @@ sub register {
   $app->helper('social'                      => \&_social);
   $app->helper('unauthorized'                => \&_unauthorized);
   $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
+
+  $app->linkembedder->ua->insecure(1) if $ENV{LINK_EMBEDDER_ALLOW_INSECURE_SSL};
 }
 
 sub _asset_version {

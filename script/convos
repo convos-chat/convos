@@ -68,7 +68,8 @@ unless ($ENV{CONVOS_SETUP}++) {
 pop @INC if $INC[-1] eq '.';          # don't care about current dir
 
 if ($command eq 'dev') {
-  $ENV{$_} //= 1 for qw(MOJO_ASSETPACK_LAZY MOJO_IRC_DEBUG CONVOS_DEBUG);
+  $ENV{$_} //= 1
+    for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL MOJO_ASSETPACK_LAZY MOJO_IRC_DEBUG CONVOS_DEBUG);
   $ENV{PERL5LIB} = join ':', @INC;
   $ARGV[0] = 'webpack';
   push @ARGV, qw(-w lib -w public/convos-api.json -w templates) unless grep {/^-?-w/} @ARGV;
