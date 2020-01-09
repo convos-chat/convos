@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-3.06 Not Released
+3.06 2020-01-09T14:08:36+0900
  - Fix link color inside pseudo form elements
  - Fix not focusing the last element in the sidebar
  - Fix timestamp color for the Nord theme
