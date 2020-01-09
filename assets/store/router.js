@@ -56,7 +56,7 @@ export function gotoUrl(url, params = {}) {
   setTimeout(() => currentUrl.set(nextUrl), 0);
 }
 
-function parseUrl(url) {
+export function parseUrl(url) {
   url = url.slice(0, 1) == '/' ? baseUrl + url : url;
   if (url.indexOf(baseUrl) == -1) return false;
 

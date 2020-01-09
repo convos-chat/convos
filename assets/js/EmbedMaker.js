@@ -2,6 +2,7 @@ import hljs from './hljs';
 import Reactive from './Reactive';
 import {ensureChildNode, loadScript, q, removeChildNodes, showEl} from './util';
 import {jsonhtmlify} from 'jsonhtmlify';
+import {parseUrl} from '../store/router';
 
 export default class EmbedMaker extends Reactive {
   constructor(params) {
@@ -81,6 +82,11 @@ export default class EmbedMaker extends Reactive {
     messageEl.appendChild(detailsEl);
   }
 
+  _bufAsBase64(buf) {
+    const bin = new Uint8Array(buf).reduce((bin, byte) => bin + String.fromCharCode(byte), '');
+    return window.btoa(bin);
+  }
+
   _ensureEmbedEl(url) {
     return this.embeds[url].el || (this.embeds[url].el = ensureChildNode(null, 'message__embed', el => { el.dataset.url = url }));
   }
@@ -94,7 +100,7 @@ export default class EmbedMaker extends Reactive {
       const embedEl = this._ensureEmbedEl(url);
       embedEl.innerHTML = embed.html;
       q(embedEl, 'a', aEl => { aEl.target = '_blank' });
-      q(embedEl, 'img', img => img.addEventListener('error', () => (embedEl.style.display = 'none')));
+      q(embedEl, 'img', img => this._processImage(img));
 
       const provider = (embed.provider_name || '').toLowerCase();
       if (provider == 'instagram') return this.renderInstagram(embedEl);
@@ -105,5 +111,48 @@ export default class EmbedMaker extends Reactive {
 
       q(embedEl, '.le-photo, .le-thumbnail', el => this.renderPhoto(embedEl));
     });
+  }
+
+  _processImage(img) {
+    if (!parseUrl(img.src)) return img.addEventListener('error', () => (img.style.display = 'none'));
+
+    img.originalSource = img.src;
+    img.src = '';
+    img.style.visibility = 'hidden';
+    fetch(img.originalSource).then(res => {
+      const contentType = res.headers.get('Content-Type');
+      return !contentType ? this._renderImage(img, new ArrayBuffer(0), {})
+       : res.arrayBuffer().then(buf => this._renderImage(img, buf, {contentType}));
+    });
+  }
+
+  _renderImage(img, buf, {contentType}) {
+    const dv = new DataView(buf);
+    if (!contentType || buf.length < 2 || dv.getUint16(0) != 0xffd8) {
+      img.src = img.originalSource;
+      img.style.visibility = 'visible';
+      return;
+    }
+
+    let maxBytes = dv.byteLength;
+    let pos = 2;
+    while (pos < maxBytes - 2 && !img.orientation) {
+      const uint16 = dv.getUint16(pos);
+      pos += 2;
+      switch (uint16) {
+        case 0xffe1: // Start of EXIF
+          maxBytes = dv.getUint16(pos) + pos;
+          pos += 2;
+          break;
+        case 0x0112: // Orientation tag
+          const exifRotation = {1: 0, 3: 180, 6: 90, 8: 270};
+          img.orientation = exifRotation[dv.getUint16(pos + 6, false)];
+          break;
+      }
+    }
+
+    if (img.orientation !== undefined) img.style.transform = 'rotate(' + img.orientation + 'deg)';
+    img.src = 'data:' + contentType + ';base64,' + this._bufAsBase64(buf);
+    img.style.visibility = 'visible';
   }
 }
