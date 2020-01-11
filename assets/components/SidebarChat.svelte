@@ -136,13 +136,13 @@ function renderUnread(dialog) {
   <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
     <h3>{l('Conversations')}</h3>
     {#each $user.connections.toArray() as connection}
-      <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" title="{topicOrStatus(connection, connection)}">
+      <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}" label="{topicOrStatus(connection, connection)}">
         <Icon name="network-wired"/>
         <span>{connection.name || connection.connection_id}</span>
         <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
       </Link>
       {#each connection.dialogs.toArray() as dialog}
-        <Link href="{dialog.path}" class="{dialogClassNames(connection, dialog)}" title="{topicOrStatus(connection, dialog)}">
+        <Link href="{dialog.path}" class="{dialogClassNames(connection, dialog)}" label="{topicOrStatus(connection, dialog)}">
           <Icon name="{dialog.is_private ? 'user' : 'user-friends'}"/>
           <span>{dialog.name}</span>
           <b class="unread" hidden="{!dialog.unread}">{renderUnread(dialog)}</b>

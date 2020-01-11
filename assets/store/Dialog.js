@@ -14,6 +14,8 @@ const sortParticipants = (a, b) => {
       || a.name.localeCompare(b.name);
 };
 
+let nMessages = 0;
+
 export default class Dialog extends Reactive {
   constructor(params) {
     super();
@@ -95,6 +97,7 @@ export default class Dialog extends Reactive {
       if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
+      msg.id = 'msg_' + (++nMessages);
       msg.color = str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
       msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();

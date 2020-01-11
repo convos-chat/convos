@@ -1,3 +1,7 @@
+<script context="module">
+let nAriaLabels = 0;
+</script>
+
 <script>
 import {gotoUrl, currentUrl} from '../store/router';
 
@@ -7,14 +11,16 @@ let el;
 
 export {className as class};
 export let href = '/';
+export let label = '';
 export let native = false;
 export let replace = false;
 export let style = '';
-export let title = '';
 
 export const focus = () => el.focus();
 
 $: absoluteHref = href.slice(0, 1) == '/' ? currentUrl.base + href : href;
+$: ariaLabelledBy = label.length && 'link_label_' + (++nAriaLabels);
+$: hasPath = $currentUrl == absoluteHref.replace(/(#|\?).*/, '');
 
 function onClick(event) {
   const href = event.target.closest('a').href;
@@ -22,4 +28,7 @@ function onClick(event) {
 }
 </script>
 
-<a href="{absoluteHref}" on:click="{onClick}" class="{className}" class:has-path="{$currentUrl == absoluteHref.replace(/(#|\?).*/, '')}" style="{style}" title="{title}" bind:this="{el}"><slot/></a>
+<a href="{absoluteHref}" on:click="{onClick}" class="{className}" class:has-path="{hasPath}" style="{style}" aria-labelledby="{ariaLabelledBy}" bind:this="{el}"><slot/></a>
+{#if ariaLabelledBy}
+<div role="tooltip" id="{ariaLabelledBy}">{label}</div>
+{/if}

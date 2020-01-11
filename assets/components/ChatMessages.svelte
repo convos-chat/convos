@@ -116,7 +116,8 @@ function toggleDetails(e) {
     data-index="{i}">
 
     <Icon name="pick:{message.from}" color="{message.color}"/>
-    <b class="message__ts" title="{message.ts.toLocaleString()}">{message.ts.getHM()}</b>
+    <b class="message__ts" aria-labelledby="{message.id + '_ts'}">{message.ts.getHM()}</b>
+    <div role="tooltip" id="{message.id + '_ts'}">{message.ts.toLocaleString()}</div>
     {#if dialog.connection_id}
       <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
     {:else}

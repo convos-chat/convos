@@ -33,3 +33,39 @@ body.with-grid::after {
     opacity: 1;
   }
 }
+
+[role="tooltip"] {
+  font-size: 0.9rem;
+  line-height: 1.1em;
+  border-radius: 3px;
+  max-width: 300px;
+  max-height: 5.1rem;
+  padding: 3px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+  position: absolute;
+  left: -1000px;
+  transition: opacity 250ms ease-in-out;
+
+  &:after {
+    content: "";
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.9) 50%);
+    text-align: right;
+    position: absolute;
+    top: 4.5em;
+    right: 0;
+    width: 60%;
+    height: 1.1em;
+    opacity: 0.85;
+  }
+}
+
+[aria-labelledby]:hover + [role="tooltip"],
+[aria-labelledby]:focus + [role="tooltip"] {
+  background: var(--tooltip-background);
+  color: var(--tooltip-color);
+  opacity: 0.85;
+  left: auto;
+  z-index: 1000;
+}

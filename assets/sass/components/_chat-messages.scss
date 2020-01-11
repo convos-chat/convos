@@ -26,6 +26,12 @@
     .message__ts {
       opacity: 0;
       transition: opacity 0.3s;
+
+      & + [role="tooltip"],
+      &:focus + [role="tooltip"],
+      &:hover + [role="tooltip"] {
+        display: none;
+      }
     }
 
     &:hover .message__ts {
@@ -158,6 +164,12 @@
   float: right;
   position: relative;
   z-index: 2;
+
+  &:focus + [role="tooltip"],
+  &:hover + [role="tooltip"] {
+    left: auto;
+    right: 0;
+  }
 }
 
 .message-status-line {

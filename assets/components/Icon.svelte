@@ -75,7 +75,6 @@ export let animation = '';
 export let color = '';
 export let family = '';
 export let name;
-export let title = '';
 
 function calculateClassName(name, family) {
   const cn = [];
@@ -130,6 +129,5 @@ function pickIcon(str) {
 
 <i class="{calculateClassName(name, family)}"
   style="{calculateStyle(name, family, color)}"
-  title="{title}"
   hidden="{!name}"
   on:click/>

@@ -38,6 +38,17 @@
   }
 }
 
+.sidebar-left__nav {
+  position: relative;
+
+  [role="tooltip"] {
+    padding-left: 0.6rem;
+    margin-top: -5px;
+    right: 0 !important;
+    left: 0 !important;
+  }
+}
+
 .sidebar-left__nav a {
   position: relative;
 
