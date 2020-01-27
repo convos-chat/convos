@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-3.07 Not Released
+3.07 2020-01-27T10:00:00+0900
  - Fix not nuking files on disk if no more disk space
  - Add visible tooltips #436
  - Will try to rotate uploaded JPEG images
