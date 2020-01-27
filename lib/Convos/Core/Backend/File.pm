@@ -168,12 +168,15 @@ sub notifications_p {
 sub save_object_p {
   my ($self, $obj) = @_;
   my $storage_file = $self->home->child(@{$obj->uri});
+  my $swap_file    = $storage_file->sibling(sprintf '.%s.swap', $storage_file->basename);
 
   my $p = Mojo::Promise->new;
   eval {
     my $dir = $storage_file->dirname;
     $dir->make_path($dir) unless -d $dir;
-    $storage_file->spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')));
+    $swap_file->spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')));
+    die "Failed to write $swap_file" unless -s $swap_file;
+    $swap_file->move_to($storage_file);
     warn "[@{[$obj->id]}] Save success. ($storage_file)\n" if DEBUG;
     $p->resolve($obj);
   } or do {
