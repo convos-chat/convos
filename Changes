@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+3.08 Not Released
+ - Removed support for underscore markdown formatting #438
+
 3.07 2020-01-27T10:00:00+0900
  - Fix not nuking files on disk if no more disk space
  - Add visible tooltips #436

@@ -17,7 +17,7 @@ const emojiByGroup = {};
 const emojiByName = {};
 const linkRe = new RegExp('\\b[a-z]{2,5}://\\S+', 'g');
 const mdLinkRe = new RegExp('\\[([^\\]]+)\\]\\(([^)]+)\\)', 'g');
-const mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+|_+)(\\w[^<]*?)\\3', 'g');
+const mdToHtmlRe = new RegExp('(^|\\s)(\\\\?)(\\*+)(\\w[^<]*?)\\3', 'g');
 
 // Modifying this from the outside will break emojiRe below
 export const emojiAliases = {
@@ -114,7 +114,6 @@ export function md(str) {
   str = str.replace(/^&gt;\s(.*)/, (all, quote) => {
     return '<blockquote>' + quote + '</blockquote>';
   }).replace(mdToHtmlRe, (all, b, esc, md, text) => {
-    if (md.match(/^_/) && text.match(/^[A-Z]+$/)) return all; // Avoid turning __DATA__ into <strong>DATA</strong>
     if (md.length == 1) return esc ? all.replace(/^\\/, '') : b + '<em>' + text + '</em>';
     if (md.length == 2) return esc ? all.replace(/^\\/, '') : b + '<strong>' + text + '</strong>';
     if (md.length == 3) return esc ? all.replace(/^\\/, '') : b + '<em><strong>' + text + '</strong></em>';
