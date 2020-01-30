@@ -13,6 +13,10 @@ requires "Parse::IRC"                     => "1.20";
 requires "Time::Piece"                    => "1.20";
 requires "Unicode::UTF8"                  => "0.62";
 
+suggests "Cpanel::JSON::XS"  => "4.09";
+suggests "EV"                => "4.0";
+suggests "IO::Socket::Socks" => "0.64";
+
 on develop => sub {
   requires "Test::Deep"                 => "0.11";
   requires "Test::Mojo::Role::Selenium" => "0.09";

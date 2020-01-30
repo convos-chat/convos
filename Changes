@@ -4,6 +4,11 @@ Revision history for perl distribution Convos
  - Fix keeping track when changing nick
  - Fix not having strike-through for Convos messages
  - Avoid reloading conversation when reconnecting to WebSocket
+ - Add custom "help" and "version" commands
+ - Add "--all" switch to "install" sub command, which also installs suggested deps
+ - Add "cpanm" sub command
+ - Add "exec" sub command
+ - Documented sub commands that used to be hidden
 
 3.08 2020-01-30T11:24:00+0900
  - Removed support for underscore markdown formatting #438
