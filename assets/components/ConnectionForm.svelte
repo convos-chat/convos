@@ -3,7 +3,6 @@ import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
 import OperationStatus from '../components/OperationStatus.svelte';
-import PasswordField from '../components/form/PasswordField.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
@@ -141,9 +140,9 @@ async function submitForm(e) {
   <TextField name="username" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Username')}</span>
   </TextField>
-  <PasswordField name="password" hidden="{!showAdvancedSettings}">
+  <TextField type="password" name="password" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Password')}</span>
-  </PasswordField>
+  </TextField>
   <TextArea name="on_connect_commands" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('On-connect commands')}</span>
   </TextArea>

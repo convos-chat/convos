@@ -3,7 +3,6 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
-import PasswordField from '../components/form/PasswordField.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {docTitle} from '../store/router';
@@ -56,7 +55,7 @@ function updateUserFromForm(e) {
 
 <main class="main">
   <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
-    <TextField name="email" value="{$user.email}" readonly>
+    <TextField type="email" name="email" value="{$user.email}" readonly>
       <span slot="label">{l('Email')}</span>
     </TextField>
 
@@ -78,12 +77,12 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Theme')}</span>
     </SelectField>
 
-    <PasswordField name="password">
+    <TextField type="password" name="password" autocomplete="new-password">
       <span slot="label">{l('Password')}</span>
-    </PasswordField>
-    <PasswordField name="password_again">
+    </TextField>
+    <TextField type="password" name="password_again" autocomplete="new-password">
       <span slot="label">{l('Repeat password')}</span>
-    </PasswordField>
+    </TextField>
 
     <p>{l('Leave the password fields empty to keep the current password.')}</p>
 

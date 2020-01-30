@@ -2,7 +2,6 @@
 import Button from '../components/form/Button.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
-import PasswordField from '../components/form/PasswordField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {currentUrl, gotoUrl, urlToForm} from '../store/router';
 import {getContext, onMount} from 'svelte';
@@ -74,13 +73,13 @@ function sectionObserved(entries, observer) {
   <section id="signin" class="welcome-screen__signin fade-in">
     <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
       <h2>{l('Sign in')}</h2>
-      <TextField name="email" placeholder="{l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
+      <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
         <span slot="label">{l('E-mail')}</span>
       </TextField>
 
-      <PasswordField autocomplete="on" name="password">
+      <TextField type="password" name="password" autocomplete="current-password">
         <span slot="label">{l('Password')}</span>
-      </PasswordField>
+      </TextField>
 
       <div class="form-actions">
         <Button icon="sign-in-alt" op="{loginOp}">{l('Sign in')}</Button>
@@ -107,7 +106,7 @@ function sectionObserved(entries, observer) {
         <input type="hidden" name="exp">
         <input type="hidden" name="token">
 
-        <TextField name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}" bind:value="{user.formEmail}">
+        <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}" bind:value="{user.formEmail}">
           <span slot="label">{l('E-mail')}</span>
 
           <p slot="help">
@@ -119,10 +118,10 @@ function sectionObserved(entries, observer) {
           </p>
         </TextField>
 
-        <PasswordField name="password">
+        <TextField type="password" name="password">
           <span slot="label">{l('Password')}</span>
           <p slot="help">{l('Hint: Use a phrase from a book.')}</p>
-        </PasswordField>
+        </TextField>
 
         <div class="form-actions">
           <Button icon="save" op="{registerOp}">{l(settings.existing_user ? 'Set new password' : 'Sign up')}</Button>

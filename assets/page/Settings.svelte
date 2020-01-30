@@ -55,7 +55,7 @@ onMount(async () => {
   <form method="post" on:submit|preventDefault="{generateInviteLink}">
     <h2>{l('Recover or invite')}</h2>
     <p>{l('Using this form, you can generate an invite link for new users, or a recover password link for existing users.')}</p>
-    <TextField name="email" placeholder="{l('user@example.com')}">
+    <TextField type="email" name="email" placeholder="{l('user@example.com')}">
       <span slot="label">{l('User email')}</span>
     </TextField>
 

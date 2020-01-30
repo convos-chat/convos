@@ -2,9 +2,9 @@
 import Button from './form/Button.svelte';
 import Checkbox from './form/Checkbox.svelte';
 import Link from './Link.svelte';
-import PasswordField from '../components/form/PasswordField.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
+import TextField from '../components/form/TextField.svelte';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
@@ -78,9 +78,9 @@ function saveDialogSettings(e) {
         </div>
       {/if}
 
-      <PasswordField name="password" bind:value="{dialogPassword}" readonly="{dialog.frozen != 'Password protected.' && !isOperator}">
+      <TextField type="password" name="password" bind:value="{dialogPassword}" readonly="{dialog.frozen != 'Password protected.' && !isOperator}">
         <span slot="label">{l('Password')}</span>
-      </PasswordField>
+      </TextField>
 
       {#if dialog.hasOwnProperty('wantNotifications')}
         <Checkbox bind:checked="{wantNotifications}">
