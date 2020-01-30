@@ -158,6 +158,6 @@ function onWindowFocus() {
   <svelte:component this="{$pageComponent}"/>
 
   {#if $activeMenu && !$container.wideScreen}
-    <div class="overlay" transition:fade="{{duration: 200}}">&nbsp;</div>
+    <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => ($activeMenu = '')}">&nbsp;</div>
   {/if}
 {/if}

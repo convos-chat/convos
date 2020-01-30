@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Removed support for underscore markdown formatting #438
  - Removed tooltip for dialogs in <SidebarChat/>
  - Improved rendering of login screen on small screens
+ - Will hide the active menu when clicking on the overlay
 
 3.07 2020-01-27T10:00:00+0900
  - Fix not nuking files on disk if no more disk space
