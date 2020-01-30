@@ -127,6 +127,8 @@ export default class EmbedMaker extends Reactive {
   }
 
   _renderImage(img, buf, {contentType}) {
+    const exifRotation = {1: 0, 3: 180, 6: 90, 8: 270};
+
     const dv = new DataView(buf);
     if (!contentType || buf.length < 2 || dv.getUint16(0) != 0xffd8) {
       img.src = img.originalSource;
@@ -145,7 +147,6 @@ export default class EmbedMaker extends Reactive {
           pos += 2;
           break;
         case 0x0112: // Orientation tag
-          const exifRotation = {1: 0, 3: 180, 6: 90, 8: 270};
           img.orientation = exifRotation[dv.getUint16(pos + 6, false)];
           break;
       }
