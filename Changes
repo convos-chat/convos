@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 3.09 Not Released
+ - Fix not having strike-through for Convos messages
  - Avoid reloading conversation when reconnecting to WebSocket
 
 3.08 2020-01-30T11:24:00+0900

@@ -79,7 +79,7 @@ function notififactionUrl(message) {
 }
 
 function senderIsOnline(message) {
-  return !dialog.dialog_id || message.fromId == dialog.connection_id || dialog.findParticipant(message.fromId);
+  return message.fromId == dialog.connection_id || !dialog.dialog_id || dialog.findParticipant(message.fromId);
 }
 
 function toggleDetails(e) {
