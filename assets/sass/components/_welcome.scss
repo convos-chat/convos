@@ -21,13 +21,13 @@
   section {
     margin-left: auto;
     margin-right: auto;
-    padding: 4rem;
+    padding: 1rem;
+    padding-top: 4rem;
     width: 42rem;
     max-width: 100%;
 
-    @media (max-width: 42rem) {
-      padding-left: 1rem;
-      padding-right: 1rem;
+    @include if_screen(">two-columns") {
+      padding-bottom: 4rem;
     }
   }
 
@@ -54,14 +54,12 @@
 
 .welcome-screen__signin {
   form {
-    background: var(--sidebar-left-bg);
     filter: brightness(0.95);
-    outline: 4rem solid var(--sidebar-left-bg);
     outline-offset: 0;
-  }
-}
 
-.welcome-screen__signup {
-  padding-top: 6rem;
-  padding-bottom: 6rem;
+    @include if_screen(">two-columns") {
+      outline: 4rem solid var(--sidebar-left-bg);
+      background: var(--sidebar-left-bg);
+    }
+  }
 }
