@@ -31,11 +31,12 @@ function calculateMessages(dialog, $events) {
     }));
   }
   else if (connection.frozen) {
-    const unreachable = connection.is('unreachable');
-    extraMessages.push(convosMessage({
-      message: unreachable ? 'Trying to [reconnect](%1)...' : 'Disconnected. Your connection %1 can be edited in [settings](%2).',
-      vars: unreachable ? ['#call:user:ensureConnected'] : [connection.name, urlFor('/chat/' + connection.connection_id + '#activeMenu:settings')],
-    }));
+    if (!connection.is('unreachable')) {
+      extraMessages.push(convosMessage({
+        message: 'Disconnected. Your connection %1 can be edited in [settings](%2).',
+        vars: [connection.name, urlFor('/chat/' + connection.connection_id + '#activeMenu:settings')],
+      }));
+    }
   }
   else if (dialog.frozen) {
     extraMessages.push(convosMessage({message: topicOrStatus(connection, dialog).replace(/\.$/, ''), vars: []}));
@@ -132,6 +133,6 @@ function toggleDetails(e) {
   </div>
 {/each}
 
-{#if dialog.is('loading')}
-  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin">{l('Loading...')}</ChatMessagesStatusLine>
+{#if connection.is('unreachable') || !dialog.is('success')}
+  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="">{l('Loading...')}</a></ChatMessagesStatusLine>
 {/if}

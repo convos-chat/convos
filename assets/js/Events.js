@@ -133,11 +133,13 @@ export default class Events extends Reactive {
     }
 
     if (action == 'start') {
+      this._wsReconnectDelay = 0;
       this.update({ready: true});
     }
 
     if (action == 'stop') {
-      if (!this._wsReconnectTid) this._wsReconnectTid = setTimeout(() => this._ws('dequeue'), 3000);
+      this._wsReconnectDelay = this._wsReconnectDelay > 5000 ? 500 : (this._wsReconnectDelay || 0) + 500;
+      if (!this._wsReconnectTid) this._wsReconnectTid = setTimeout(() => this._ws('dequeue'), this._wsReconnectDelay);
       this.update({ready: false});
       delete this.ws;
     }

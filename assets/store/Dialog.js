@@ -118,22 +118,30 @@ export default class Dialog extends Reactive {
     return this.status == status;
   }
 
-  async load({before, maybe}) {
+  async load({after, before, limit, maybe}) {
     if (!this.messagesOp || this.is('loading')) return this;
-    if (maybe && this.messagesOp.status == 'success') return this;
+    if (maybe && this.is('success')) return this;
 
-    const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id};
+    const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id, limit};
+
+    if (after || maybe == 'after') opParams.after = maybe || after == 'last' ? this.messages.slice(-1)[0] : after;
+    if (opParams.after && opParams.after.ts) opParams.after = opParams.after.ts.toISOString();
+    if (opParams.after && !opParams.limit) opParams.limit = 200;
+
     if (before && before.endOfHistory) return;
-    if (before && before.ts) before = before.ts.toISOString();
-    if (before) opParams.before = before;
+    if (before || maybe == 'before') opParams.before = maybe || before == 'first' ? this.messages[0] : before;
+    if (opParams.before && opParams.before.ts) opParams.before = opParams.before.ts.toISOString();
 
+    Object.keys(opParams).forEach(k => (typeof opParams[k] == 'undefined' && delete opParams[k]));
     this.update({status: 'loading'});
     await this.messagesOp.perform(opParams);
 
     const body = this.messagesOp.res.body;
-    this.addMessages('unshift', body.messages || []);
+    this.addMessages(after ? 'push' : 'unshift', body.messages || []);
     this.update({status: this.messagesOp.status});
-    if (body.end && this.messages.length) this.messages[0].endOfHistory = true;
+
+    if (before && body.end && this.messages.length) this.messages[0].endOfHistory = true;
+    if (maybe == 'after' && !body.end) await this.load({}); // Reload the whole conversation if we are not at the end
 
     return this;
   }

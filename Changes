@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+3.09 Not Released
+ - Avoid reloading conversation when reconnecting to WebSocket
+
 3.08 2020-01-30T11:24:00+0900
  - Removed support for underscore markdown formatting #438
  - Removed tooltip for dialogs in <SidebarChat/>

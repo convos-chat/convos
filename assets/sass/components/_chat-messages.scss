@@ -180,6 +180,10 @@
   margin: 0 0 0.8rem 0;
   height: 0.8rem;
 
+  a {
+    text-decoration: none;
+  }
+
   span {
     background: var(--body-bg);
     padding: 0 var(--gutter);

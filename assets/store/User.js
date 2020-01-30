@@ -29,6 +29,9 @@ export default class User extends Reactive {
     this.prop('persist', 'showGrid', false);
     this.prop('persist', 'theme', 'auto');
     this.prop('persist', 'version', '0');
+
+    // Used to test WebSocket reconnect logic
+    // setInterval(() => (this.events.ws && this.events.ws.close()), 3000);
   }
 
   calculateLastUrl() {
@@ -98,12 +101,21 @@ export default class User extends Reactive {
     await this.getUserOp.perform();
 
     const body = this.getUserOp.res.body;
-    this.connections.clear();
+    const keep = {};
+    body.connections.forEach(conn => (keep[this.ensureDialog({...conn, status: 'pending'}).path] = true));
+    body.dialogs.forEach(dialog => (keep[this.ensureDialog({...dialog, status: 'pending'}).path] = true));
+
+    // Remove connections and dialogs that is not part of the new response
+    this.connections.forEach(conn => {
+      if (!keep[conn.path]) return this.connections.delete(conn.connection_id);
+      conn.dialogs.forEach(dialog => {
+        if (!keep[dialog.path]) conn.dialogs.delete(dialog.dialog_id);
+      });
+    });
+
     this.notifications.update({unread: body.unread || 0});
     this.roles.clear();
-    (body.connections || []).forEach(conn => this.ensureDialog(conn));
-    (body.dialogs || []).forEach(dialog => this.ensureDialog(dialog));
-    (body.roles || []).forEach(role => this.roles.add(role));
+    body.roles.forEach(role => this.roles.add(role));
     this.update({highlight_keywords: body.highlight_keywords || [], status: this.getUserOp.status});
     this.ensureConnected();
 

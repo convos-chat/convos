@@ -19,6 +19,7 @@ const user = getContext('user');
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
 $: connection = user.findDialog({connection_id: dialog.connection_id});
 $: inputParts = calculateInputParts(pos);
+$: placeholder = connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', $connection.nick);
 
 onMount(() => {
   uploadEl.uploader = uploadFiles;
@@ -143,7 +144,7 @@ const keys = {
 
 <form class="chat-input" on:submit|preventDefault>
   <textarea id="chat_input"
-    placeholder="{l('What is on your mind %1?', $connection.nick)}"
+    placeholder="{placeholder}"
     bind:this="{inputEl}"
     on:change="{e => {pos = inputEl.selectionStart}}"
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
