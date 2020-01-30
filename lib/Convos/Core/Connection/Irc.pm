@@ -128,7 +128,8 @@ sub _irc_event_err_nicknameinuse {
     unless $self->{err_nicknameinuse}{$nick}++;
 
   $self->{myinfo}{nick} = "${nick}_";
-  $self->_write("NICK $self->{myinfo}{nick}\r\n");
+  $self->emit(state => me => $self->{myinfo});
+  Mojo::IOLoop->timer(0.2 => sub { $self and $self->_write("NICK $self->{myinfo}{nick}\r\n") });
 }
 
 sub _irc_event_err_unknowncommand {
@@ -728,11 +729,13 @@ sub _send_names_p {
 }
 
 sub _send_nick_p {
-  my ($self, $target) = @_;
-  return Mojo::Promise->reject('Cannot send without target.') unless $target;
+  my ($self, $nick) = @_;
+  return Mojo::Promise->reject('Missing or invalid nick.') unless $nick;
 
-  $self->url->query->param(nick => $target);
-  return $self->_write_p("NICK $target\r\n") if $self->{stream};
+  $self->{myinfo}{nick} = $nick;
+  $self->url->query->param(nick => $nick);
+  $self->emit(state => me => $self->{myinfo});
+  return $self->_write_p("NICK $nick\r\n") if $self->{stream};
   return Mojo::Promise->resolve({});
 }
 

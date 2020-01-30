@@ -64,7 +64,7 @@ ok !$connection->get_dialog('superwoman'), 'superwoman does not exist';
 $connection->send_p('', '/query superwoman')->$wait_success('query');
 ok $connection->get_dialog('superwoman'), 'superwoman exist';
 
-is_deeply \@state, [], 'zero events changes so far';
+is_deeply \@state, [[me => {nick => 'superduper'}]], 'nick event so far' or diag explain \@state;
 
 note 'disconnect and connect';
 my $irc_server = t::Helper->irc_server_connect($connection);

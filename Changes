@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 3.09 Not Released
+ - Fix keeping track when changing nick
  - Fix not having strike-through for Convos messages
  - Avoid reloading conversation when reconnecting to WebSocket
 

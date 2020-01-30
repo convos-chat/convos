@@ -50,7 +50,7 @@ is_deeply(
 
 is_deeply(
   \@state,
-  [[quit => {message => 'Gone to lunch', nick => 'superwoman'}]],
+  [[me => {nick => 'nopeman_'}], [quit => {message => 'Gone to lunch', nick => 'superwoman'}]],
   'got state changes',
 );
 

@@ -206,6 +206,7 @@ export default class Dialog extends Reactive {
     if (!this._participants.has(oldId)) return;
     if (params.old_nick == params.new_nick) return;
     this._participants.delete(oldId);
+    this.participants([{nick: params.new_nick}]);
     const message = params.type == 'me' ? 'You (%1) changed nick to %2.' : '%1 changed nick to %2.';
     this.addMessage({message, vars: [params.old_nick, params.new_nick]});
   }
