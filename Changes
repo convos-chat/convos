@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-3.08 Not Released
+3.08 2020-01-30T11:24:00+0900
  - Removed support for underscore markdown formatting #438
  - Removed tooltip for dialogs in <SidebarChat/>
  - Improved rendering of login screen on small screens
