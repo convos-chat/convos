@@ -1,5 +1,10 @@
 .welcome-screen {
   background: var(--sidebar-left-bg);
+  background-image: url(../../images/20090119-nordaaker.jpg);
+  background-attachment: fixed;
+  background-position: 50% 100%;
+  background-repeat: no-repeat;
+  background-size: contain;
   min-height: 100vh;
 
   &, a {
@@ -25,14 +30,14 @@
     padding-top: 4rem;
     width: 42rem;
     max-width: 100%;
-
-    @include if_screen(">two-columns") {
-      padding-bottom: 4rem;
-    }
   }
 
   section {
     min-height: 60vh;
+  }
+
+  .welcome-screen__signup {
+    min-height: 80vh;
   }
 }
 
@@ -48,18 +53,6 @@
 
     &:hover {
       text-decoration: underline;
-    }
-  }
-}
-
-.welcome-screen__signin {
-  form {
-    filter: brightness(0.95);
-    outline-offset: 0;
-
-    @include if_screen(">two-columns") {
-      outline: 4rem solid var(--sidebar-left-bg);
-      background: var(--sidebar-left-bg);
     }
   }
 }
