@@ -2,6 +2,7 @@
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../components/ChatMessages.svelte';
+import Connection from '../store/Connection';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import DialogSettings from '../components/DialogSettings.svelte';
 import DragAndDrop from '../js/DragAndDrop';
@@ -13,6 +14,7 @@ import {debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 
 const user = getContext('user');
+const noConnection = new Connection({api: user.api, events: user.events, state: 'connected', url: 'int://'});
 
 // Elements
 let chatInput;
@@ -27,7 +29,7 @@ let observer;
 let scrollPos = 'bottom';
 
 // Variables for calculating active connection and dialog
-let connection = {};
+let connection = noConnection;
 let dialog = user.notifications;
 let dragAndDrop = new DragAndDrop();
 let previousPath = '';
@@ -63,7 +65,7 @@ function addDialog(e) {
 
 function calculateDialog($user, $currentUrl) {
   pathParts = $currentUrl.pathParts;
-  const c = $user.findDialog({connection_id: pathParts[1]}) || {};
+  const c = $user.findDialog({connection_id: pathParts[1]}) || noConnection;
   if (c != connection) registerUrlHandler(connection = c);
 
   const d = pathParts.length == 1 ? $user.notifications : $user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});
@@ -120,9 +122,10 @@ const onScroll = debounce(e => {
 }, 20);
 
 function registerUrlHandler(connection) {
-  if (!connection.url) return;
+  if (!connection.url || !navigator.registerProtocolHandler) return;
   const protocol = connection.url.protocol.replace(/:$/, '');
-  if (navigator.registerProtocolHandler) navigator.registerProtocolHandler(protocol, currentUrl.base + '/register?uri=%s', 'Convos ' + protocol + ' handler');
+  if (['irc'].indexOf(protocol) == -1) return;
+  navigator.registerProtocolHandler(protocol, currentUrl.base + '/register?uri=%s', 'Convos ' + protocol + ' handler');
 }
 </script>
 
@@ -134,11 +137,11 @@ function registerUrlHandler(connection) {
 
 <ChatHeader>
   <h1>
-    <a href="#activeMenu:{dialog.connection_id ? 'settings' : ''}" tabindex="-1">
+    <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">
       <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{pathParts[2] || pathParts[1] || l('Notifications')}</span>
     </a>
   </h1>
-  <a href="#activeMenu:{dialog.connection_id ? 'settings' : ''}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
+  <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
 <main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">

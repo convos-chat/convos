@@ -152,7 +152,7 @@ export default class Dialog extends Reactive {
 
   participants(participants = []) {
     participants.forEach(p => {
-      if (!p.nick) p.nick = p.name; // TODO: Just use "name"?
+      if (!p.nick) p.nick = p.name || ''; // TODO: Just use "name"?
       const id = this._participantId(p.nick);
       const existing = this._participants.get(id);
 

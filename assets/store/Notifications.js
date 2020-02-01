@@ -12,11 +12,10 @@ export default class Notifications extends Dialog {
   }
 
   async load(params = {}) {
-    if (params.maybe) {
-      this.messagesOp.update({status: 'pending'});
-      this.update({messages: []});
-    }
-
+    if (!this.messagesOp || this.is('loading')) return this;
+    if (params.maybe && this.is('success')) return this;
+    this.messagesOp.update({status: 'pending'});
+    this.update({messages: []});
     await super.load(params);
   }
 
