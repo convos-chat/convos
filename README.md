@@ -43,7 +43,7 @@ $EDITOR Changes
 
 # Build the production assets and update and check that all the files
 # have the correct version information
-RELEASE=1 prove -vl t/production-resources.t t/version.t
+./script/convos build release
 ```
 
 ## Branch overview

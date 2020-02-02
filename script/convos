@@ -27,6 +27,15 @@ sub path_to {
   return File::Spec->catfile($home, @_);
 }
 
+sub command_build {
+  my ($script, @cmd) = @_;
+  $ENV{BUILD_ASSETS} = 1;
+  $ENV{RELEASE} //= @cmd && $cmd[0] eq 'release';
+  my @tests = qw(t/production-resources.t);
+  push @tests, 't/version.t' if $ENV{RELEASE};
+  $script->command_exec(qw(prove -l), @tests);
+}
+
 sub command_cpanm {
   my ($script, @cmd) = @_;
   state $cpanm
@@ -73,6 +82,8 @@ Examples:
   convos version
 
 For developers:
+  convos build
+  convos build release
   convos cpanm
   convos dev
   convos dev --help
