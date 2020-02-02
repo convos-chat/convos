@@ -18,7 +18,8 @@ $t->get_ok('/api/notifications')->status_is(401);
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
   ->status_is(200);
 
-$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00')
+$t->get_ok(
+  '/api/connection/irc-localhost/dialog/%23convos/messages?before=2015-06-09T08:39:00.123Z')
   ->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 0, 'no messages';
 
@@ -53,7 +54,7 @@ $t->get_ok(
   }]
 );
 
-$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51')
+$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51.000Z')
   ->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 56, 'after';
 

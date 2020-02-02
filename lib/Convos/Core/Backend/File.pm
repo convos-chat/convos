@@ -91,21 +91,21 @@ sub messages_p {
 
   # If both "before" and "after" are provided
   if ($query->{before} and $query->{after}) {
-    $args{before} = _strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
-    $args{after}  = _strptime($query->{after},  '%Y-%m-%dT%H:%M:%S');
+    $args{before} = _tp($query->{before});
+    $args{after}  = _tp($query->{after});
   }
 
   # If "before" is provided but not "after"
   # Set "after" to 12 months before "before"
   elsif ($query->{before} and !$query->{after}) {
-    $args{before} = _strptime($query->{before}, '%Y-%m-%dT%H:%M:%S');
+    $args{before} = _tp($query->{before});
     $args{after}  = $args{before}->add_months(-12);
   }
 
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
   elsif (!$query->{before} and $query->{after}) {
-    $args{after}  = _strptime($query->{after}, '%Y-%m-%dT%H:%M:%S');
+    $args{after}  = _tp($query->{after});
     $args{before} = $args{after}->add_months(12);
   }
 
@@ -124,7 +124,7 @@ sub messages_p {
   # The {cursor} is used to walk through the month-hashed log files
   $args{cursor} = $args{before};
 
-  warn "[@{[$obj->id]}] Searching $args{after} - $args{before}\n" if DEBUG;
+  warn "[@{[$obj->id]}] Searching $args{after} - $args{before} ($args{limit})\n" if DEBUG;
 
   my $p = Mojo::Promise->new;
   Mojo::IOLoop::Subprocess->new->run(
@@ -156,7 +156,7 @@ sub notifications_p {
     $line = decode 'UTF-8', $line;
     next unless $line =~ $re;
     my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
-    my $ts      = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    my $ts      = _tp($message->{ts});
     $self->_message_type_from($message);
     unshift @notifications, $message;
     last if @notifications == $query->{limit};
@@ -284,7 +284,7 @@ sub _messages {
   my $file = $self->_log_file($obj, $cursor);
   my $FH   = File::ReadBackwards->new($file);
   unless ($FH) {
-    warn "[@{[$obj->id]}] $!: $file\n" if DEBUG >= 2;
+    warn "[@{[$obj->id]}] $!: $file\n" if DEBUG;
     return $self->_messages($obj, $args);
   }
 
@@ -294,7 +294,7 @@ sub _messages {
     next unless $line =~ $args->{re};
     my $flag    = $2 || '0';
     my $message = {message => $3, ts => $1};
-    my $ts      = _strptime($message->{ts}, '%Y-%m-%dT%H:%M:%S');
+    my $ts      = _tp($message->{ts});
     next unless $ts < $args->{before} and $ts > $args->{after};
     $self->_message_type_from($message);
     $message->{highlight}
@@ -366,9 +366,10 @@ sub _setup {
   );
 }
 
-sub _strptime {
+sub _tp {
   local $_ = shift;
-  $_ =~ s!\.?0*Z$!!;
+  $_ =~ s!Z$!!;
+  $_ =~ s!\.\d*$!!;
   Time::Piece->strptime($_, '%Y-%m-%dT%H:%M:%S');
 }
 

@@ -93,7 +93,7 @@ export default class Dialog extends Reactive {
     for (let i = start; i < stop; i++) {
       const msg = messages[i];
       if (msg.hasOwnProperty('markdown')) continue; // Already processed
-      if (!msg.from) msg.from = this.connection_id || 'Convos';
+      if (!msg.from) [msg.internal, msg.from] = [true, this.connection_id || 'Convos'];
       if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
@@ -124,12 +124,12 @@ export default class Dialog extends Reactive {
 
     const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id, limit};
 
-    if (after || maybe == 'after') opParams.after = maybe || after == 'last' ? this.messages.slice(-1)[0] : after;
+    if (after || maybe == 'after') opParams.after = maybe || after == 'last' ? this._realMessage(-1) : after;
     if (opParams.after && opParams.after.ts) opParams.after = opParams.after.ts.toISOString();
     if (opParams.after && !opParams.limit) opParams.limit = 200;
 
     if (before && before.endOfHistory) return;
-    if (before || maybe == 'before') opParams.before = maybe || before == 'first' ? this.messages[0] : before;
+    if (before || maybe == 'before') opParams.before = maybe || before == 'first' ? this._realMessage(0) : before;
     if (opParams.before && opParams.before.ts) opParams.before = opParams.before.ts.toISOString();
 
     Object.keys(opParams).forEach(k => (typeof opParams[k] == 'undefined' && delete opParams[k]));
@@ -283,6 +283,19 @@ export default class Dialog extends Reactive {
     }
 
     return msg;
+  }
+
+  _realMessage(start) {
+    const incBy = start == -1 ? -1 : 1;
+    const messages = this.messages;
+    let i = start == -1 ? this.messages.length - 1 : 0;
+
+    while (messages[i]) {
+      if (!messages[i].internal) return messages[i];
+      i += incBy;
+    }
+
+    return null;
   }
 
   _updateParticipants(params) {
