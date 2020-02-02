@@ -14,7 +14,6 @@ import {debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 
 const user = getContext('user');
-const noConnection = new Connection({api: user.api, events: user.events, state: 'connected', url: 'int://'});
 
 // Elements
 let chatInput;
@@ -29,7 +28,7 @@ let observer;
 let scrollPos = 'bottom';
 
 // Variables for calculating active connection and dialog
-let connection = noConnection;
+let connection = {};
 let dialog = user.notifications;
 let dragAndDrop = new DragAndDrop();
 let previousPath = '';
@@ -65,7 +64,7 @@ function addDialog(e) {
 
 function calculateDialog($user, $currentUrl) {
   pathParts = $currentUrl.pathParts;
-  const c = $user.findDialog({connection_id: pathParts[1]}) || noConnection;
+  const c = $user.findDialog({connection_id: pathParts[1]}) || {};
   if (c != connection) registerUrlHandler(connection = c);
 
   const d = pathParts.length == 1 ? $user.notifications : $user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});

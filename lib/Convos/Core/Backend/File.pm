@@ -284,7 +284,7 @@ sub _messages {
   my $file = $self->_log_file($obj, $cursor);
   my $FH   = File::ReadBackwards->new($file);
   unless ($FH) {
-    warn "[@{[$obj->id]}] $!: $file\n" if DEBUG;
+    warn "[@{[$obj->id]}] $!: $file\n" if DEBUG >= 2;
     return $self->_messages($obj, $args);
   }
 

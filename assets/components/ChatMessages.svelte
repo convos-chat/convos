@@ -133,6 +133,6 @@ function toggleDetails(e) {
   </div>
 {/each}
 
-{#if connection.is('unreachable') || !dialog.is('success')}
-  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="">{l('Loading...')}</a></ChatMessagesStatusLine>
+{#if (connection.is && connection.is('unreachable')) || !dialog.is('success')}
+  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="{urlFor('/')}">{l('Loading...')}</a></ChatMessagesStatusLine>
 {/if}

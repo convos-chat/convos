@@ -54,7 +54,7 @@ sub _err {
 
 sub _event_debug {
   my ($self, $data) = @_;
-  $self->log->debug('[ws] <<< ' . encode_json $data) if DEBUG;
+  $self->log->warn('[ws] <<< ' . encode_json $data) if DEBUG;
   $self->send({json => {event => 'debug'}});
 }
 
