@@ -4,18 +4,8 @@
 #
 # BUILD: docker build --no-cache --rm -t nordaaker/convos .
 # RUN:   docker run -it --rm -p 8080:3000 -v /var/convos/data:/data nordaaker/convos
-FROM alpine:3.10
+FROM alpine:3.11
 MAINTAINER jhthorsen@cpan.org
-
-# ENV CONVOS_INVITE_CODE some_super_long_and_secret_string
-# ENV CONVOS_SECRETS some_other_super_long_and_secret_string
-# ENV CONVOS_DEFAULT_SERVER chat.freenode.net:6697
-# ENV CONVOS_FORCED_IRC_SERVER 0
-# ENV CONVOS_PLUGINS ShareDialog,OtherCustomPlugin
-ENV CONVOS_CONTACT mailto:root@localhost
-ENV CONVOS_ORGANIZATION_NAME Nordaaker
-ENV CONVOS_ORGANIZATION_URL http://nordaaker.com
-ENV CONVOS_SECURE_COOKIES 0
 
 RUN mkdir /app && \
   apk add --no-cache perl perl-io-socket-ssl wget && \
@@ -29,6 +19,7 @@ COPY public /app/public
 COPY script /app/script
 COPY templates /app/templates
 
+ENV CONVOS_CPAN_FILE /app/cpanfile
 RUN /app/script/convos install
 RUN apk del builddeps && rm -rf /root/.cpanm /var/cache/apk/*
 

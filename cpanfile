@@ -1,4 +1,4 @@
-# You can install this projct with ./script/convos install
+# You can install dependencies with ./script/convos install [--all|--prod]
 requires "IO::Socket::SSL"                => "2.009"; # Need to installed first, so "cpanm -M" works
 requires "Crypt::Eksblowfish"             => "0.009";
 requires "File::HomeDir"                  => "1.00";
