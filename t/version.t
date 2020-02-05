@@ -26,6 +26,10 @@ if ($ENV{RELEASE}) {
   s!^(\d+\.\d+$)!$perl_wanted! or s!VERSION\s*=\s*'\d+\.\d+'!VERSION='$perl_wanted'! for @f;
   untie @f;
 
+  tie @f, 'Tie::File', 'script/convos' or die $!;
+  s!^(\d+\.\d+$)!$perl_wanted! or s!VERSION\s*=\s*'\d+\.\d+'!VERSION='$perl_wanted'! for @f;
+  untie @f;
+
   tie @f, 'Tie::File', 'package.json' or die $!;
   s!:\s*"\d+\.\d+.\d+"!: "$node_wanted"! for @f;
   untie @f;
@@ -45,6 +49,9 @@ $failed += is($Convos::VERSION, $perl_wanted, 'correct version in Convos.pm code
 
 my ($pod_version) = path($INC{'Convos.pm'})->slurp =~ /^(\d+\.\d+\w*)\s/m;
 $failed += is($pod_version, $perl_wanted, 'correct version in Convos.pm pod') ? 0 : 1;
+
+my ($script_version) = path($INC{'Convos.pm'})->slurp =~ /^(\d+\.\d+\w*)\s/m;
+$failed += is($script_version, $perl_wanted, 'correct version in script/convos') ? 0 : 1;
 
 my ($node_version) = path('package.json')->slurp =~ /"version":\s*"([^"]+)/m;
 $failed += is($node_version, $node_wanted, 'correct version in package.json') ? 0 : 1;

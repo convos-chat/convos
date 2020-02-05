@@ -13,13 +13,12 @@ RUN mkdir /app && \
 
 COPY Changes /app/
 COPY cpanfile /app/
-COPY assets /app/assets/
-COPY lib /app/lib/
-COPY public /app/public/
-COPY script /app/script/
-COPY templates /app/templates/
+COPY assets /app/assets
+COPY lib /app/lib
+COPY public /app/public
+COPY script /app/script
+COPY templates /app/templates
 
-ENV CONVOS_CPAN_FILE /app/cpanfile
 RUN /app/script/convos install
 RUN apk del builddeps && rm -rf /root/.cpanm /var/cache/apk/*
 

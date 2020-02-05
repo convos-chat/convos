@@ -18,6 +18,8 @@ use Config;
 use File::Spec;
 use FindBin;
 
+our $VERSION = '3.08';
+
 # Run the program
 (bless {}, __PACKAGE__)->run(@ARGV);
 
@@ -131,7 +133,8 @@ sub command_version {
     = map { $_->[3] ||= $_->[1]->VERSION; [$_->[0], sprintf "  %-30s %-10s (%s)\n", @$_[1, 3, 2]] }
     sort { $a->[1] cmp $b->[1] } $script->_dependencies;
 
-  unshift @deps, [requires => sprintf "  %-30s %-10s (%s)\n", 'Perl', $^V, '5.16'];
+  unshift @deps, [requires => sprintf "  %-30s %-10s (%s)\n", 'Perl',   $^V,      '5.16'];
+  unshift @deps, [requires => sprintf "  %-30s %-10s (%s)\n", 'Convos', $VERSION, $VERSION];
 
   my $dev_deps = join '', map { $_->[1] } grep { $_->[0] eq 'develop' } @deps;
   my $req_deps = join '', map { $_->[1] } grep { $_->[0] eq 'requires' } @deps;
@@ -196,7 +199,7 @@ sub _dependencies {
 
   my $load = sub {
     my ($mode, $module, $version) = @_;
-    local $@ = '';
+    local ($@, $!) = ('', 0);
     eval "use $module $version;1";
     my $err = $@;
     $err =~ s! at .*!!s;
@@ -204,8 +207,6 @@ sub _dependencies {
     $err =~ s!$module.*--.*?([\d\._]+).*!You have version $1!;
     push @{$script->{dependencies}}, [$script->{cpanfile_mode} || $mode, $module, $version, $err];
   };
-
-  $load->(requires => Convos => '3.00');
 
   no warnings 'once';
   local $script->{cpanfile_mode};
