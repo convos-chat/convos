@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix keeping track when changing nick
  - Fix not having strike-through for Convos messages
  - Avoid reloading conversation when reconnecting to WebSocket
+ - Add LDAP support to Convos #65 #418
  - Add custom "help" and "version" commands
  - Add "--all" switch to "install" sub command, which also installs suggested deps
  - Add "cpanm" sub command
