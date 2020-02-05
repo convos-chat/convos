@@ -7,7 +7,8 @@ use Mojo::Util qw(b64_encode md5_sum monkey_patch);
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
-our @EXPORT_OK  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module short_checksum);
+our @EXPORT_OK
+  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module short_checksum);
 
 sub E {
   my ($msg, $path) = @_;
@@ -85,7 +86,7 @@ sub require_module {
 
   You need to install $name to use $required_by:
 
-  \$ perl ./script/convos cpanm $name
+  \$ ./script/convos cpanm -n $name
 
 HERE
 }
@@ -145,6 +146,12 @@ The definition above results in the following methods:
   $str = pretty_connection_name($hostname);
 
 Will turn a given hostname into a nicer connection name.
+
+=head2 require_module
+
+  require_module "Some::Module";
+
+Will load the module or C<die()> with a message for how to install it.
 
 =head2 short_checksum
 

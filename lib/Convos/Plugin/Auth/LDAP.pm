@@ -104,7 +104,7 @@ Convos::Plugin::Auth::LDAP - Convos plugin for logging in users from LDAP
 =head1 SYNOPSIS
 
   $ CONVOS_PLUGINS=Convos::Plugin::Auth::LDAP \
-    CONVOS_AUTH_LDAP_URL="dap://localhost:389" \
+    CONVOS_AUTH_LDAP_URL="ldap://localhost:389" \
     CONVOS_AUTH_LDAP_DN="uid=%uid,dc=%domain,dc=%tld" \
     ./script/convos daemon
 
