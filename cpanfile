@@ -1,4 +1,4 @@
-# You can install this projct with curl -L http://cpanmin.us | perl - https://github.com/jhthorsen/convos/archive/master.tar.gz
+# You can install this projct with ./script/convos install
 requires "IO::Socket::SSL"                => "2.009"; # Need to installed first, so "cpanm -M" works
 requires "Crypt::Eksblowfish"             => "0.009";
 requires "File::HomeDir"                  => "1.00";
