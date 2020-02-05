@@ -112,7 +112,7 @@ sub command_install {
 
   # @missing = ([mode, name, version, error], ...)
   my @missing = grep { $_->[3] } $script->_dependencies;
-  @missing = grep { $_->[0] ne 'suggests' } @missing if $mode =~ /^--?all/;
+  @missing = grep { $_->[0] ne 'develop' } @missing  if $mode =~ /^--?all/;
   @missing = grep { $_->[0] eq 'requires' } @missing if $mode =~ /^--?prod/;
   $script->command_cpanm(-n => $_->[1]) or die "cpanm failed: $?\n" for @missing;
 
