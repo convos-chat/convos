@@ -16,6 +16,7 @@ requires "Unicode::UTF8"                  => "0.62";
 suggests "Cpanel::JSON::XS"  => "4.09";
 suggests "EV"                => "4.0";
 suggests "IO::Socket::Socks" => "0.64";
+suggests "Net::LDAP"         => "0.66";
 
 on develop => sub {
   requires "Test::Deep"                 => "0.11";

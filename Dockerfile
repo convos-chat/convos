@@ -19,7 +19,7 @@ COPY public /app/public
 COPY script /app/script
 COPY templates /app/templates
 
-RUN /app/script/convos install
+RUN /app/script/convos install --all
 RUN apk del builddeps && rm -rf /root/.cpanm /var/cache/apk/*
 
 # Do not change these variables unless you know what you're doing

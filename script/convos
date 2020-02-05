@@ -112,7 +112,7 @@ sub command_install {
 
   # @missing = ([mode, name, version, error], ...)
   my @missing = grep { $_->[3] } $script->_dependencies;
-  @missing = grep { $_->[0] ne 'suggests' } @missing if $mode =~ /^--?dev/;
+  @missing = grep { $_->[0] ne 'suggests' } @missing if $mode =~ /^--?all/;
   @missing = grep { $_->[0] eq 'requires' } @missing if $mode =~ /^--?prod/;
   $script->command_cpanm(-n => $_->[1]) or die "cpanm failed: $?\n" for @missing;
 
@@ -129,6 +129,8 @@ HERE
 
 sub command_version {
   my $script = shift;
+  delete $script->{dependencies};
+
   my @deps
     = map { $_->[3] ||= $_->[1]->VERSION; [$_->[0], sprintf "  %-30s %-10s (%s)\n", @$_[1, 3, 2]] }
     sort { $a->[1] cmp $b->[1] } $script->_dependencies;
@@ -251,6 +253,7 @@ sub _exit {
 
 sub _setup_env {
   my ($script, $command) = @_;
+  local ($@, $!) = ('', 0);
 
   $ENV{CONVOS_CPAN_FILE} ||= path_to 'cpanfile';
   $ENV{CONVOS_LOCAL_LIB} ||= path_to 'local';
@@ -273,6 +276,7 @@ sub _setup_env {
 
 sub _setup_inc {
   my $script = shift;
+  local ($@, $!) = ('', 0);
 
   # Where cpanm might have installed dependencies to
   unshift @INC,
