@@ -158,7 +158,7 @@ sub run {
   $script->_setup_inc;
   $script->_setup_env($command => @_);
   $script->_exit($method => @_) if $method;
-  $script->_ensure_dependencies_are_installed(@_);
+  $script->_exit(1) unless $script->_dependencies_are_installed;
 
   # Start Convos
   require Mojolicious::Commands;
@@ -222,11 +222,11 @@ sub _dependencies {
   return @{$script->{dependencies}};
 }
 
-sub _ensure_dependencies_are_installed {
+sub _dependencies_are_installed {
   my $script = shift;
-  return 0 if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK}++;
-  return 0 unless -e $ENV{CONVOS_CPAN_FILE};
-  return 0 unless grep { $_->[3] } $script->_dependencies;
+  return 1 if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK}++;
+  return 1 unless -e $ENV{CONVOS_CPAN_FILE};
+  return 1 unless grep { $_->[3] } $script->_dependencies;
 
   $script->command_version;
   print <<"HERE";
@@ -238,12 +238,13 @@ Run "$0 install" to install the missing dependencies above.
 
 HERE
 
-  return 1;
+  return 0;
 }
 
 sub _exit {
   my ($script, $method, @params) = @_;
-  $script->$method(@params);
+  exit $method              if $method =~ m!^\d+$!;
+  $script->$method(@params) if $method;
   exit 0 + ($? || $!);
 }
 
