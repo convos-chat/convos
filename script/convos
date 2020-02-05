@@ -129,8 +129,6 @@ HERE
 
 sub command_version {
   my $script = shift;
-  delete $script->{dependencies};
-
   my @deps
     = map { $_->[3] ||= $_->[1]->VERSION; [$_->[0], sprintf "  %-30s %-10s (%s)\n", @$_[1, 3, 2]] }
     sort { $a->[1] cmp $b->[1] } $script->_dependencies;
@@ -196,9 +194,8 @@ sub _cmd_with_secure_listen {
 
 sub _dependencies {
   my $script = shift;
-  return @{$script->{dependencies}} if $script->{dependencies};
-  $script->{dependencies} = [];
 
+  my @dependencies;
   my $load = sub {
     my ($mode, $module, $version) = @_;
     local ($@, $!) = ('', 0);
@@ -207,7 +204,7 @@ sub _dependencies {
     $err =~ s! at .*!!s;
     $err =~ s! in \@INC.*!!s;
     $err =~ s!$module.*--.*?([\d\._]+).*!You have version $1!;
-    push @{$script->{dependencies}}, [$script->{cpanfile_mode} || $mode, $module, $version, $err];
+    push @dependencies, [$script->{cpanfile_mode} || $mode, $module, $version, $err];
   };
 
   no warnings 'once';
@@ -222,7 +219,7 @@ sub _dependencies {
   my $err = $@ || $!;
   die "Could not source $ENV{CONVOS_CPAN_FILE}: $err\n" if $err;
 
-  return @{$script->{dependencies}};
+  return @dependencies;
 }
 
 sub _dependencies_are_installed {
