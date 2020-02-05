@@ -28,14 +28,14 @@ sub _bind_params {
   my ($self, $params) = @_;
 
   # Convert "user@example.com" into (uid => "user", domain => "example", tld => "com");
-  my %dn;
+  my %dn = (email => $params->{email});
   @dn{qw(uid domain)} = split '@', $params->{email};
   $dn{tld} = $dn{domain} =~ s!\.(\w+)$!! ? $1 : '';
 
   # Place email values into the DN string
   my $dn = $ENV{CONVOS_AUTH_LDAP_DN};
   $dn ||= $dn{tld} ? 'uid=%uid,dc=%domain,dc=%tld' : 'uid=%uid,dc=%domain';
-  $dn =~ s!%(domain|tld|uid)!{$dn{$1} || ''}!ge;
+  $dn =~ s!%(domain|email|tld|uid)!{$dn{$1} || ''}!ge;
 
   return ($dn, password => $params->{password});
 }
@@ -105,7 +105,7 @@ Convos::Plugin::Auth::LDAP - Convos plugin for logging in users from LDAP
 
   $ CONVOS_PLUGINS=Convos::Plugin::Auth::LDAP \
     CONVOS_AUTH_LDAP_URL="dap://localhost:389" \
-    CONVOS_AUTH_LDAP_DN="UID=%uid,DC=%domain,DC=%tld" \
+    CONVOS_AUTH_LDAP_DN="uid=%uid,dc=%domain,dc=%tld" \
     ./script/convos daemon
 
 =head1 DESCRIPTION
@@ -117,18 +117,25 @@ an LDAP database.
 
 =head2 CONVOS_AUTH_LDAP_DN
 
-C<CONVOS_AUTH_LDAP_DN> defaults to "UID=%uid,DC=%domain,DC=%tld" (EXPERIMENTAL),
-but can be set to any value you like. The important parts of the variables is
+C<CONVOS_AUTH_LDAP_DN> defaults to "uid=%uid,dc=%domain,dc=%tld" (EXPERIMENTAL),
+but can be set to any value you like. The "%named" parameters can be "%email",
 "%uid", "%domain" and "%tld", which will be extracted from the email address of
 the user. Example:
 
-  CONVOS_AUTH_LDAP_DN = "UID=%uid,DC=%domain,DC=%tld"
+  CONVOS_AUTH_LDAP_DN = "uid=%uid,dc=%domain,dc=%tld"
   email = "superwoman@example.com"
-  dn = "UID=superwoman,DC=example,DC=com"
+  dn = "uid=superwoman,dc=example,dc=com"
 
 =head2 CONVOS_AUTH_LDAP_URL
 
 The URL to the LDAP server. Default is "ldap://localhost:389". (EXPERIMENTAL)
+
+You can add LDAP config parameters to the URL. See L<Net::LDAP> for more
+information.
+
+  ldap://ldap.example.com?debug=1&timeout=10
+
+Want to connect securily? Change "ldap://" to "ldaps://"
 
 =head1 METHODS
 
