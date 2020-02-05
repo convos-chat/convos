@@ -7,7 +7,7 @@ use Mojo::Util qw(b64_encode md5_sum monkey_patch);
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
-our @EXPORT_OK  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name short_checksum);
+our @EXPORT_OK  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module short_checksum);
 
 sub E {
   my ($msg, $path) = @_;
@@ -74,6 +74,20 @@ sub short_checksum {
   my $short    = b64_encode pack 'H*', $checksum;
   $short =~ s![eioEIO+=/\n]!!g;
   return substr $short, 0, 16;
+}
+
+sub require_module {
+  my $name        = pop;
+  my $required_by = shift || caller;
+
+  return $name if eval "require $name; 1";
+  die <<"HERE";
+
+  You need to install $name to use $required_by:
+
+  \$ perl ./script/convos cpanm $name
+
+HERE
 }
 
 1;
