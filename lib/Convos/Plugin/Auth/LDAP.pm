@@ -21,7 +21,7 @@ sub register {
   require_module('Net::LDAP');
 
   $app->helper('auth.login_p' => sub { $self->_login_p(@_) });
-  $app->log->debug("Loaded Convos::Plugin::Auth $ldap_url");
+  $app->log->debug("Loaded Convos::Plugin::Auth::LDAP $ldap_url");
 }
 
 sub _bind_params {
@@ -110,7 +110,7 @@ Convos::Plugin::Auth::LDAP - Convos plugin for logging in users from LDAP
 
 =head1 DESCRIPTION
 
-L<Convos::Plugin::Auth::LDAP> allows convos to register and login users from
+L<Convos::Plugin::Auth::LDAP> allows Convos to register and login users from
 an LDAP database.
 
 =head1 ENVIRONMENT VARIABLES
