@@ -104,6 +104,12 @@ docker run -it -p 8080:3000 \
 The last command will make Convos available on http://localhost:8080, and
 persist data in `$HOME/convos/data`.
 
+For Linux distributions with SELinux Enforcing policy (e.g. CentOS, Fedora or RHEL) append `:z` to volumes:
+
+```bash
+-v $HOME/convos/data:/data:z
+```
+
 There are some [alternative tags](https://hub.docker.com/r/nordaaker/convos/tags)
 available, but we suggest using the "stable" release.
 
