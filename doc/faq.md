@@ -32,8 +32,7 @@ setting up Convos behind nginx or Apache. Here are the important headers:
 
 * "Host" header must be set to the original request's "Host" header.
 * "X-Forwarded-Proto" header must be set to either "http" or "https".
-* "X-Request-Base" header must be set if your application is not available
-  from the root of your domain.
+* "X-Request-Base" header must be set to the root URL for Convos.
 
 Here is a complete example on how to start Convos, and configur either nginx
 or Apache:
@@ -92,9 +91,13 @@ Example Apache config:
       ProxyRequests Off
       ProxyPreserveHost On
       RequestHeader set X-Forwarded-Proto "http"
+      RequestHeader set X-Request-Base "http://your-domain.com/"
+
+      # https://httpd.apache.org/docs/current/mod/mod_remoteip.html
+      RemoteIPHeader X-Forwarded-For
 
       # http://httpd.apache.org/docs/2.0/mod/core.html#limitrequestbody
-      LimitRequestBody 0;
+      LimitRequestBody 0
 
       # Pass requests on to Convos
       ProxyPass /events ws://localhost:8080/events
