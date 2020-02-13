@@ -102,8 +102,8 @@ export default class User extends Reactive {
 
     const body = this.getUserOp.res.body;
     const keep = {};
-    body.connections.forEach(conn => (keep[this.ensureDialog({...conn, status: 'pending'}).path] = true));
-    body.dialogs.forEach(dialog => (keep[this.ensureDialog({...dialog, status: 'pending'}).path] = true));
+    (body.connections || []).forEach(conn => (keep[this.ensureDialog({...conn, status: 'pending'}).path] = true));
+    (body.dialogs || []).forEach(dialog => (keep[this.ensureDialog({...dialog, status: 'pending'}).path] = true));
 
     // Remove connections and dialogs that is not part of the new response
     this.connections.forEach(conn => {
@@ -115,7 +115,7 @@ export default class User extends Reactive {
 
     this.notifications.update({unread: body.unread || 0});
     this.roles.clear();
-    body.roles.forEach(role => this.roles.add(role));
+    (body.roles || []).forEach(role => this.roles.add(role));
     this.update({highlight_keywords: body.highlight_keywords || [], status: this.getUserOp.status});
     this.ensureConnected();
 
