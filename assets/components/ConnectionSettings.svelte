@@ -12,7 +12,7 @@ const user = getContext('user');
 
 let connection = {};
 
-$: connectionHost = connection.url && connection.url.host;
+$: connectionHost = connection.real_host || connection.url && connection.url.host;
 
 onMount(async () => {
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
@@ -33,4 +33,8 @@ onMount(async () => {
   {/if}
 
   <ConnectionForm {dialog}/>
+
+  {#if connection.version}
+    <p><small>{l('Server version: %2', connection.version)}</small></p>
+  {/if}
 </div>

@@ -17,9 +17,13 @@ export default class Connection extends Dialog {
     this.prop('rw', 'state', params.state || 'queued');
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
     this.prop('rw', 'url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
-    this.prop('rw', 'nick', params.nick || this.url.searchParams.get('nick') || '');
 
-    this.participants([{nick: this.nick}]);
+    const me = params.me || {};
+    const nick = me.nick || this.url.searchParams.get('nick') || '';
+    this.prop('rw', 'nick', nick);
+    this.prop('rw', 'real_host', me.real_host || this.url.hostname);
+    this.prop('rw', 'version', me.version || '');
+    this.participants([{nick}]);
   }
 
   addDialog(dialogId) {
