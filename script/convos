@@ -226,7 +226,7 @@ sub _dependencies_are_installed {
   my $script = shift;
   return 1 if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK}++;
   return 1 unless -e $ENV{CONVOS_CPAN_FILE};
-  return 1 unless grep { $_->[3] } $script->_dependencies;
+  return 1 unless grep { $_->[0] eq 'requires' and $_->[3] } $script->_dependencies;
 
   $script->command_version;
   print <<"HERE";
