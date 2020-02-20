@@ -192,7 +192,7 @@ export function loadScript(src) {
  * @returns {String} Example: "has-mode-operator has-mode-voice"
  */
 export function modeClassNames(modes) {
-  return Object.keys(modes).filter(m => modes[m]).map(m => { return 'has-mode-' + m }).join(' ');
+  return Object.keys(modes).filter(m => modes[m]).sort().map(m => { return 'has-mode-' + m }).join(' ');
 }
 
 /**
@@ -343,7 +343,7 @@ export function str2color(str, nColors = 100) {
  * @returns {Boolean} True if the tag name matches.
  */
 export function tagNameIs(el, tagName) {
-  return el && el.tagName && el.tagName.toLowerCase() === tagName;
+  return el && el.tagName && el.tagName.toLowerCase() === tagName || false;
 }
 
 /**

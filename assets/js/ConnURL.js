@@ -52,6 +52,6 @@ export default class ConnURL {
    * @memberof ConnURL
    */
   toString() {
-    return this.href.replace(/^http:/, this.connProtocol);
+    return this.href.replace(/^http:/, this.protocol);
   }
 }

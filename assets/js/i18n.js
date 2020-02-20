@@ -10,8 +10,9 @@
  */
 import {md} from './md';
 
-export const dict = {en: {}};
-export let lang = 'en';
+let LANG = 'en';
+
+export const dict = {en: {'Test %1': 'Test %1'}};
 
 /**
  * l() is used to translate strings. The strings can contain "%1", "%2", ...
@@ -24,10 +25,19 @@ export let lang = 'en';
  * @param  {...String} vars A list of variables to put into the translated string.
  */
 export function l(lexicon, ...vars) {
-  const translated = String(dict[lexicon] && dict[lexicon][lang] || lexicon);
+  const translated = String(dict[LANG][lexicon] || lexicon);
   return translated.replace(/(%?)%(\d+)/g, (a, escaped, i) => {
     return escaped == '%' ? escaped + i : vars[i - 1];
   });
+}
+
+/**
+ * lang() can read or set the active langauge.
+ */
+export function lang(val) {
+  if (!val) return LANG;
+  if (!dict[val]) throw 'Invalid language "' + val + '".';
+  return (LANG = val);
 }
 
 /**
