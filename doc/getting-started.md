@@ -8,8 +8,8 @@ title: Getting started
 ## Quick start guide
 
 This guide will give an introduction on how to install and run Convos. It is
-very easy to get started, but you can also tweak many
-[settings](./config.html) afterwards to make Convos fit your needs.
+very easy to get started, but you can also tweak many [settings](./config.html)
+to make Convos fit your needs.
 
 The two commands below will download and start Convos:
 
@@ -19,15 +19,10 @@ curl https://convos.by/install.sh | sh -
 ```
 
 That's it! After the commands above, you can point your browser to
-[http://localhost:3000](http://localhost:3000) and start chatting.
+[http://localhost:3000](http://localhost:3000) to sign up, and start chatting.
 
-Note that to register, you need a invitation code. This code is printed to
-screen as you start convos:
-
-    [Sun Aug 21 11:18:03 2016] [info] Generated CONVOS_INVITE_CODE="b34b0ab873e80419b9a2170de8ca8190"
-
-The invite code can be set to anything you like. Check out the
-[configuration](./config.html) guide for more details.
+You can invite new users to Convos, by sharing an
+[invite link](https://convos.by/2019/11/24/convos-one-point-two.html).
 
 ## Running convos
 
