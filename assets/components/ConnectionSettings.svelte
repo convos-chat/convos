@@ -33,8 +33,4 @@ onMount(async () => {
   {/if}
 
   <ConnectionForm {dialog}/>
-
-  {#if connection.version}
-    <p><small>{l('Server version: %2', connection.version)}</small></p>
-  {/if}
 </div>

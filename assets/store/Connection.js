@@ -22,7 +22,6 @@ export default class Connection extends Dialog {
     const nick = me.nick || this.url.searchParams.get('nick') || '';
     this.prop('rw', 'nick', nick);
     this.prop('rw', 'real_host', me.real_host || this.url.hostname);
-    this.prop('rw', 'version', me.version || '');
     this.participants([{nick}]);
   }
 
@@ -76,6 +75,11 @@ export default class Connection extends Dialog {
     this.ensureDialog(params).participants([{nick: this.nick, me: true}]);
     if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
     if (wasFrozen && !params.frozen) existing.addMessage({message: 'Connected.', vars: []});
+  }
+
+  wsEventMe(params) {
+    this.wsEventNickChange(params);
+    this.update(params);
   }
 
   wsEventMessage(params) {

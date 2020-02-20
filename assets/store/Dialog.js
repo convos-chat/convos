@@ -132,7 +132,7 @@ export default class Dialog extends Reactive {
     if (before || maybe == 'before') opParams.before = maybe || before == 'first' ? this._realMessage(0) : before;
     if (opParams.before && opParams.before.ts) opParams.before = opParams.before.ts.toISOString();
 
-    Object.keys(opParams).forEach(k => { if (!opParams[k]) delete opParams[k] });
+    Object.keys(opParams).forEach(k => { if (!opParams[k]) delete opParams[k]; });
     this.update({status: 'loading'});
     await this.messagesOp.perform(opParams);
 
