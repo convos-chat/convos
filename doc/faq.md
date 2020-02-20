@@ -105,6 +105,11 @@ Example Apache config:
       ProxyPassReverse / http://localhost:8080/
     </VirtualHost>
 
+## Is Convos supported on my flavor of Linux?
+
+Yes, Convos runs on all flavors of Linux, but Redhat based (Centos, Fedora)
+Linux distros might need the extra "perl-core" package to be installed.
+
 ## Why does Convos stop when I close putty/xterm/some terminal?
 
 Convos does not daemonize. It runs in foreground, so if you close a terminal
