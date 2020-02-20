@@ -64,6 +64,10 @@ function convosMessage(message) {
   };
 }
 
+function dayChanged(i) {
+  return i == 0 ? false : messages[i].ts.getDate() != messages[i - 1].ts.getDate();
+}
+
 function gotoDialogFromNotifications(e) {
   if (dialog.connection_id) return;
   const target = e.target.closest('.message');
@@ -71,6 +75,10 @@ function gotoDialogFromNotifications(e) {
   if (!message) return;
   e.preventDefault();
   gotoUrl(notififactionUrl(message));
+}
+
+function isSameSender(i) {
+  return i == 0 ? false : messages[i].fromId == messages[i - 1].fromId;
 }
 
 function notififactionUrl(message) {
@@ -103,7 +111,7 @@ function toggleDetails(e) {
 
   {#if message.endOfHistory}
     <ChatMessagesStatusLine class="for-start-of-history" icon="calendar-alt">{l('Started chatting on %1', message.ts.getHumanDate())}</ChatMessagesStatusLine>
-  {:else if message.dayChanged}
+  {:else if dayChanged(i)}
     <ChatMessagesStatusLine class="for-day-changed" icon="calendar-alt">{message.ts.getHumanDate()}</ChatMessagesStatusLine>
   {/if}
 
@@ -111,8 +119,8 @@ function toggleDetails(e) {
     class:is-not-present="{!senderIsOnline(message)}"
     class:is-sent-by-you="{message.from == connection.nick}"
     class:is-highlighted="{message.highlight}"
-    class:has-not-same-from="{!message.isSameSender && !message.dayChanged}"
-    class:has-same-from="{message.isSameSender && !message.dayChanged}"
+    class:has-not-same-from="{!isSameSender(i) && !dayChanged(i)}"
+    class:has-same-from="{isSameSender(i) && !dayChanged(i)}"
     on:click="{gotoDialogFromNotifications}"
     data-index="{i}">
 

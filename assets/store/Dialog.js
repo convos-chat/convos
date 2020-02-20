@@ -24,11 +24,6 @@ export default class Dialog extends Reactive {
     if (params.connection_id) path.push(params.connection_id);
     if (params.dialog_id) path.push(params.dialog_id);
 
-    // TODO: Figure out why this happens for some users
-    if (params.connection_id && !params.name) {
-      console.trace('[Convos] Invalid params was passed on to new Dialog(', params, ')');
-    }
-
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
     this.prop('ro', 'api', params.api);
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
@@ -42,7 +37,7 @@ export default class Dialog extends Reactive {
     this.prop('rw', 'last_read', new Time(params.last_read));
     this.prop('rw', 'messages', []);
     this.prop('rw', 'modes', {});
-    this.prop('rw', 'name', params.name || params.dialog_id || '#unknown');
+    this.prop('rw', 'name', params.name || params.dialog_id || params.connection_id || 'ERR');
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
@@ -100,10 +95,8 @@ export default class Dialog extends Reactive {
       msg.id = 'msg_' + (++nMessages);
       msg.color = str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
-      msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
       msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/(\W)?$/, ''));
       msg.fromId = msg.from.toLowerCase();
-      msg.isSameSender = i == 0 ? false : messages[i].from == messages[i - 1].from;
       msg.markdown = md(msg.message);
     }
 
@@ -118,30 +111,46 @@ export default class Dialog extends Reactive {
     return this.status == status;
   }
 
-  async load({after, before, limit, maybe}) {
+  async load(params = {}) {
     if (!this.messagesOp || this.is('loading')) return this;
+
+    const maybe = params.after == 'maybe' ? 'after' : params.before == 'maybe' ? 'before' : '';
     if (maybe && this.is('success')) return this;
+    if (maybe == 'after') delete this.participantsLoaded;
 
-    const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id, limit};
+    // params = {after, before, limit}
+    const opParams = {...params, connection_id: this.connection_id, dialog_id: this.dialog_id};
 
-    if (after || maybe == 'after') opParams.after = maybe || after == 'last' ? this._realMessage(-1) : after;
-    if (opParams.after && opParams.after.ts) opParams.after = opParams.after.ts.toISOString();
-    if (opParams.after && !opParams.limit) opParams.limit = 200;
+    // Try to load as much as possible into the future
+    if (opParams.after == 'maybe' && !opParams.limit) opParams.limit = 200;
 
-    if (before && before.endOfHistory) return;
-    if (before || maybe == 'before') opParams.before = maybe || before == 'first' ? this._realMessage(0) : before;
-    if (opParams.before && opParams.before.ts) opParams.before = opParams.before.ts.toISOString();
+    // Normalize "after" and "before"
+    ['after', 'before'].forEach(k => {
+      if (opParams[k] == 'maybe') opParams[k] = this._realMessage(k == 'before' ? 0 : -1);
+      if (typeof opParams[k] == 'number') opParams[k] = this._realMessage(opParams[k]);
+      if (typeof opParams[k] == 'object') opParams[k] = opParams[k].ts.toISOString();
+      if (typeof opParams[k] == 'undefined') return delete opParams[k];
+    });
 
-    Object.keys(opParams).forEach(k => { if (!opParams[k]) delete opParams[k]; });
+    // All of the history is loaded
+    const hasMessages = this.messages.length;
+    if (hasMessages && opParams.before && this.messages[0].endOfHistory) return;
+
+    // Load messages
     this.update({status: 'loading'});
     await this.messagesOp.perform(opParams);
-
     const body = this.messagesOp.res.body;
     this.addMessages(opParams.before ? 'unshift' : 'push', body.messages || []);
     this.update({status: this.messagesOp.status});
 
-    if (before && body.end && this.messages.length) this.messages[0].endOfHistory = true;
-    if (maybe == 'after' && !body.end) await this.load({}); // Reload the whole conversation if we are not at the end
+    // End of history
+    if (hasMessages && opParams.before && body.end) this.messages[0].endOfHistory = true;
+
+    // Reload the whole conversation if we are not at the end
+    if (maybe == 'after' && !body.end) {
+      this.update({messages: []});
+      await this.load({});
+    }
 
     return this;
   }

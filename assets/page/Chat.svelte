@@ -69,7 +69,7 @@ function calculateDialog($user, $currentUrl) {
 
   const d = pathParts.length == 1 ? $user.notifications : $user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});
   if (!d) return (dialog = $user.notifications);
-  if (d == dialog && previousPath) return dialog.load({maybe: 'after'});
+  if (d == dialog && previousPath) return dialog.load({after: 'maybe'});
   if (previousPath) onClose();
 
   q(document, '.message__embed', embedEl => embedEl.remove());
@@ -84,7 +84,7 @@ function calculateDialog($user, $currentUrl) {
   if (connection.subscribe) unsubscribe.push(connection.subscribe(c => { connection = c }));
   if (dialog.subscribe) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
 
-  dialog.load({maybe: 'before'});
+  dialog.load({before: 'maybe'});
   $docTitle = connection == dialog ? l('%1 - Convos', connection.name)
             : connection.name ? l('%1/%2 - Convos', connection.name, dialog.name)
             : l('%1 - Convos', dialog.name);
@@ -115,7 +115,7 @@ const onScroll = debounce(e => {
             : 'middle';
 
   if (scrollPos == 'top' && !dialog.is('loading')) {
-    if (dialog.messages.length) dialog.load({before: 'first'});
+    if (dialog.messages.length) dialog.load({before: 0});
     messagesHeightLast = messagesHeight;
   }
 }, 20);

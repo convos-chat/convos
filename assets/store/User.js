@@ -156,13 +156,9 @@ export default class User extends Reactive {
     });
 
     events.on('update', events => {
-      if (events.ready) {
-        return this.is('pending') ? this.load() : false;
-      }
-      else {
-        this.update({status: 'pending'});
-        this.connections.forEach(conn => conn.update({state: 'unreachable'}));
-      }
+      if (events.ready) return this.is('pending') && this.load();
+      this.update({status: 'pending'});
+      this.connections.forEach(conn => conn.update({state: 'unreachable'}));
     });
 
     return events;
