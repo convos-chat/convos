@@ -70,25 +70,27 @@ function sectionObserved(entries, observer) {
     <p>{l('Convos is the simplest way to use IRC, and it keeps you always online.')}</p>
   </article>
 
-  <section id="signin" class="welcome-screen__signin fade-in">
-    <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
-      <h2>{l('Sign in')}</h2>
-      <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
-        <span slot="label">{l('E-mail')}</span>
-      </TextField>
+  {#if !settings.first_user}
+    <section id="signin" class="welcome-screen__signin fade-in">
+      <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
+        <h2>{l('Sign in')}</h2>
+        <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
+          <span slot="label">{l('E-mail')}</span>
+        </TextField>
 
-      <TextField type="password" name="password" autocomplete="current-password">
-        <span slot="label">{l('Password')}</span>
-      </TextField>
+        <TextField type="password" name="password" autocomplete="current-password">
+          <span slot="label">{l('Password')}</span>
+        </TextField>
 
-      <div class="form-actions">
-        <Button icon="sign-in-alt" op="{loginOp}">{l('Sign in')}</Button>
-        <a class="btn is-hallow" on:click="{scrollTo}" href="#signup">{l('Sign up')}</a>
-      </div>
+        <div class="form-actions">
+          <Button icon="sign-in-alt" op="{loginOp}">{l('Sign in')}</Button>
+          <a class="btn is-hallow" on:click="{scrollTo}" href="#signup">{l('Sign up')}</a>
+        </div>
 
-      <OperationStatus op="{loginOp}"/>
-    </form>
-  </section>
+        <OperationStatus op="{loginOp}"/>
+      </form>
+    </section>
+  {/if}
 
   <section id="signup" class="welcome-screen__signup fade-in">
     {#if settings.status >= 400}
@@ -102,6 +104,9 @@ function sectionObserved(entries, observer) {
       </p>
     {:else if emailFromParams || settings.open_to_public || settings.first_user}
       <h2>{l(settings.existing_user ? 'Recover account' : 'Sign up')}</h2>
+      {#if settings.first_user}
+        <p>{l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
+      {/if}
       <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
         <input type="hidden" name="exp">
         <input type="hidden" name="token">
@@ -127,7 +132,7 @@ function sectionObserved(entries, observer) {
           <Button icon="save" op="{registerOp}">{l(settings.existing_user ? 'Set new password' : 'Sign up')}</Button>
         </div>
 
-        {#if !emailFromParams}
+        {#if !emailFromParams && !settings.first_user}
           <p on:click="{scrollTo}">{@html lmd('Go and [sign in](%1) if you already have an account.', '#signin')}</p>
         {/if}
 
