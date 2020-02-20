@@ -8,6 +8,7 @@
  */
 
 import Operation from '../store/Operation';
+import {isType} from '../js/util';
 
 export default class Api {
   constructor(url) {
@@ -82,7 +83,7 @@ export default class Api {
       while (refPath.length) res = res[refPath.shift()];
     }
 
-    if (typeof res == 'object') {
+    if (isType(res, 'object')) {
       Object.keys(res).forEach(k => {
         res[k] = this._resolveRef(res[k]);
       });

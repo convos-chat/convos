@@ -9,6 +9,7 @@
  * @exports ensureChildNode
  * @exports extractErrorMessage
  * @exports hsvToRgb
+ * @exports isType
  * @exports loadScript
  * @exports modeClassNames
  * @exports q
@@ -147,6 +148,25 @@ export function hsvToRgb(hue = 0, saturation = 0.5, value = 0.95) {
   }
 
   return [Math.floor(red * 255), Math.floor(green * 255), Math.floor(blue * 255)];
+}
+
+/**
+ * isType is used to check if a value is a given type.
+ *
+ * - "array" will check if val is an array
+ * - "object" will check if typeof is "object" and val is not null.
+ * - "undef" will check for either typeof "undefined", or null.
+ *
+ * @param {Any} val Any value, including null
+ * @param {String} type Either "object" or "undef"
+ * @return {Boolean} True if val is an object
+ */
+
+export function isType(val, type) {
+  return type == 'array'  ? Array.isArray(val)
+       : type == 'object' ? typeof val == 'object' && val !== null
+       : type == 'undef'  ? typeof val == 'undefined' || val === null
+       : typeof val == type;
 }
 
 /**

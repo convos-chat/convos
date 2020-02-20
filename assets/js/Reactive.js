@@ -11,6 +11,8 @@
  * @see User
  */
 
+import {isType} from '../js/util';
+
 export default class Reactive {
   constructor() {
     this._on = {};
@@ -149,9 +151,9 @@ export default class Reactive {
 
   _localStorageProp(name, val) {
     const fromStorage = this._localStorage(name);
-    this._updateableProp(name, typeof fromStorage == 'undefined' ? val : fromStorage);
+    this._updateableProp(name, isType(fromStorage, 'undef') ? val : fromStorage);
     this._props[name].localStorage = true;
-    if (typeof fromStorage == 'undefined' && !this._props[name].lazy) this._localStorage(name, val);
+    if (isType(fromStorage, 'undef') && !this._props[name].lazy) this._localStorage(name, val);
   }
 
   _readOnlyProp(name, val) {

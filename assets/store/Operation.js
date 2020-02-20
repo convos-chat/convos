@@ -16,7 +16,7 @@
  */
 
 import Reactive from '../js/Reactive';
-import {regexpEscape} from '../js/util';
+import {isType, regexpEscape} from '../js/util';
 
 export default class Operation extends Reactive {
   constructor(params) {
@@ -78,7 +78,7 @@ export default class Operation extends Reactive {
         this.update({status: 'loading'});
         const [url, req] = this._paramsToRequest(opSpec, params || this.defaultParams);
         this.emit('start', req);
-        if (typeof req.body == 'object' && typeof req.body.has != 'function') req.body = JSON.stringify(req.body);
+        if (isType(req.body, 'object') && typeof req.body.has != 'function') req.body = JSON.stringify(req.body);
         return fetch(url, req);
       }).then(res => {
         return Promise.all([res, res.json()]);

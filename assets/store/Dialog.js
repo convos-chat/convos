@@ -2,9 +2,9 @@ import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
 import Time from '../js/Time';
 import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
+import {isType, str2color} from '../js/util';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
-import {str2color} from '../js/util';
 
 const channelRe = new RegExp('^[#&]');
 
@@ -128,8 +128,8 @@ export default class Dialog extends Reactive {
     ['after', 'before'].forEach(k => {
       if (opParams[k] == 'maybe') opParams[k] = this._realMessage(k == 'before' ? 0 : -1);
       if (typeof opParams[k] == 'number') opParams[k] = this._realMessage(opParams[k]);
-      if (typeof opParams[k] == 'object') opParams[k] = opParams[k].ts.toISOString();
-      if (typeof opParams[k] == 'undefined') return delete opParams[k];
+      if (isType(opParams[k], 'object')) opParams[k] = opParams[k].ts.toISOString();
+      if (isType(opParams[k], 'undef')) return delete opParams[k];
     });
 
     // All of the history is loaded
@@ -156,7 +156,7 @@ export default class Dialog extends Reactive {
   }
 
   findParticipant(nick) {
-    return this._participants.get(this._participantId(typeof nick == 'undefined' ? '' : nick));
+    return this._participants.get(this._participantId(isType(nick, 'undef') ? '' : nick));
   }
 
   participants(participants = []) {
