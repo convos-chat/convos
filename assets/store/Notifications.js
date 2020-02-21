@@ -13,10 +13,13 @@ export default class Notifications extends Dialog {
 
   async load(params = {}) {
     if (!this.messagesOp || this.is('loading')) return this;
-    if (params.maybe && this.is('success')) return this;
+
+    const maybe = params.after == 'maybe' ? 'after' : params.before == 'maybe' ? 'before' : '';
+    if (maybe == 'after' && this.is('success')) return this;
+
     this.messagesOp.update({status: 'pending'});
     this.update({messages: []});
-    await super.load(params);
+    await super.load();
   }
 
   // Disabled

@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+3.10 2020-02-21T15:52:00+0900
+ - Fix loading notifications
+
 3.09 2020-02-21T15:40:00+0900
  - Fix compatibility with old versions of Edge/IE #441
  - Fix handling very long messages #443
