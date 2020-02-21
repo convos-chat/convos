@@ -643,22 +643,24 @@ sub _send_list_p {
 }
 
 sub _send_message_p {
-  my ($self, $target, $message) = @_;
+  my $self    = shift;
+  my $target  = shift;
+  my $message = shift // '';
 
   my $invalid_target_p = $self->_make_invalid_target_p($target);
   return $invalid_target_p if $invalid_target_p;
 
-  my @messages = $self->_split_message($message // '');
-  return Mojo::Promise->reject('Cannot send empty message.') unless @messages;
+  my $messages = $self->_split_message($message);
+  return Mojo::Promise->reject('Cannot send empty message.') unless @$messages;
 
-  for (@messages) {
-    $_ = $self->_parse(sprintf ':%s PRIVMSG %s :%s', $self->_nick, $target, $_);
-    return Mojo::Promise->reject('Unable to construct PRIVMSG.') unless ref $_;
+  if (MAX_BULK_MESSAGE_SIZE <= @$messages or MAX_MESSAGE_LENGTH < length $messages->[0]) {
+    return $self->user->core->backend->emit_to_class_p(message_to_paste => $self, $message)
+      ->then(sub { $self->_send_message_p($target, shift->to_message) });
   }
 
-  if (MAX_BULK_MESSAGE_SIZE <= @messages) {
-    return $self->user->core->backend->emit_to_class_p(multiline_message => $self, $message)
-      ->then(sub { $self->_send_message_p($target, shift->to_message) });
+  for (@$messages) {
+    $_ = $self->_parse(sprintf ':%s PRIVMSG %s :%s', $self->_nick, $target, $_);
+    return Mojo::Promise->reject('Unable to construct PRIVMSG.') unless ref $_;
   }
 
   # Seems like there is no way to know if a message is delivered
@@ -668,8 +670,8 @@ sub _send_message_p {
 
   my $nick = $self->_nick;
   my $user = $self->url->username || $nick;
-  return Mojo::Promise->all(map { $self->_write_p($_->{raw_line}) } @messages)->then(sub {
-    for my $msg (@messages) {
+  return Mojo::Promise->all(map { $self->_write_p($_->{raw_line}) } @$messages)->then(sub {
+    for my $msg (@$messages) {
       $msg->{prefix} = sprintf '%s!%s@%s', $nick, $user, $self->url->host;
       $msg->{event}  = lc $msg->{command};
       $self->_irc_event_privmsg($msg);
@@ -829,36 +831,46 @@ sub _set_wanted_state_p {
 }
 
 sub _split_message {
-  my $self     = shift;
-  my @messages = split /\r?\n/, shift;
-  my $n        = 0;
+  my ($self, $message) = @_;
+  return [$message] if length($message) < MAX_MESSAGE_LENGTH;
 
-  while ($n < @messages) {
-    if (MAX_MESSAGE_LENGTH <= length $messages[$n]) {
-      my @chunks = split /(\s)/, $messages[$n];
-      $messages[$n] = '';
-      while (@chunks) {
-        my $chunk = shift @chunks;
+  my @messages;
+  while (length $message) {
+    $message =~ s!^\r*\n*!!s;
+    $message =~ s!^(.*)!!m;
+    my $line = $1;
 
-        # Force break, in case it's just one long word
-        if (MAX_MESSAGE_LENGTH < length $chunk) {
-          unshift @chunks, substr($chunk, 0, MAX_MESSAGE_LENGTH - 1, ''), $chunk;
-          next;
-        }
+    # No need to check anymore, since we are going to make a paste anyways
+    return \@messages if @messages >= MAX_BULK_MESSAGE_SIZE;
 
-        if (MAX_MESSAGE_LENGTH > length($messages[$n] . $chunk)) {
-          $messages[$n] .= $chunk;
-        }
-        else {
-          splice @messages, $n + 1, 0, join '', $chunk, @chunks;
-        }
+    # Line is short
+    push @messages, $line, next if length($line) < MAX_MESSAGE_LENGTH;
+
+    # Split long lines into multiple lines
+    my @chunks = split /(\s)/, $line;
+    $line = '';
+    while (@chunks) {
+      my $chunk = shift @chunks;
+
+      # Force break, in case it's just one long word
+      if (MAX_MESSAGE_LENGTH < length $chunk) {
+        unshift @chunks, substr($chunk, 0, MAX_MESSAGE_LENGTH - 1, ''), $chunk;
+        next;
+      }
+
+      $line .= $chunk;
+      my $next = @chunks && $chunks[0] || '';
+      if (MAX_MESSAGE_LENGTH < length "$line$next") {
+        push @messages, trim $line;
+        $line = '';
       }
     }
 
-    $n++;
+    # Add remaining chunk
+    push @messages, trim $line if length $line;
   }
 
-  return map { trim $_ } @messages;
+  return \@messages;
 }
 
 sub _stream {

@@ -1,12 +1,9 @@
 #!perl
-
-BEGIN {
-  # To enable the long_message() test below
-  $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} = 5;
-}
+BEGIN { $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} = 5 }
 
 use lib '.';
 use t::Helper;
+use Mojo::File 'path';
 use Mojo::IOLoop;
 use Convos::Core;
 use Convos::Core::Backend::File;
@@ -142,29 +139,39 @@ t::Helper->irc_server_messages(
 );
 like slurp_log('#convos'), qr{\Q<superduper> foo-bar-baz, yes?\E}m, 'superduper';
 
-$connection->send_p('#convos' => join "\n", long_message(), long_message())
+note 'split messages';
+my $message_514 = path('t/data/long-message-514.txt')->slurp;
+chomp $message_514;
+$connection->send_p('#convos' => join "\n", $message_514, $message_514)
   ->$wait_success('send_p long x2');
 like slurp_log('#convos'), qr{
-  .*<superman>\sPhasellus.*rhoncus\r?\n
+  .*<superman>\sPhasellus.*?rhoncus\r?\n
   .*<superman>\samet\.\r?\n
-  .*<superman>\sPhasellus.*rhoncus\r?\n
+  .*<superman>\sPhasellus.*?rhoncus\r?\n
   .*<superman>\samet\.\r?\n
 }sx, 'split long message';
 
-done_testing;
+$connection->send_p('#convos' => join ' ', 'cool beans', ('xyz' x 171), 'a b c ')
+  ->$wait_success('send_p long x2');
+like slurp_log('#convos'), qr{
+  .*<superman>\scool\sbeans\r?\n
+  .*<superman>\s(xyz)+x\r?\n
+  .*<superman>\syz\sa\sb\sc\r?\n
+}sx, 'split long word';
 
-sub long_message {
-  return join ' ', 'Phasellus imperdiet mollis nibh, ut venenatis sem fringilla ut.',
-    'Maecenas nulla massa, pulvinar in scelerisque ut, commodo et purus.',
-    'Nunc nec libero leo. Pellentesque habitant morbi tristique senectus et',
-    'netus et malesuada fames ac turpis egestas. Sed fermentum erat quis dolor',
-    'aliquam mattis. Donec sodales nisl sagittis nunc ultrices porta.',
-    'Aenean id facilisis mauris. Vestibulum vulputate magna a libero semper facilisis.',
-    'Cras vitae leo lacus. Curabitur blandit, massa et interdum egestas, diam mi rhoncus amet.';
-}
+my $message_34243 = path('t/data/long-message-34243.txt')->slurp;
+require Convos::Plugin::Files::File;
+$core->backend->on(message_to_paste => 'Convos::Plugin::Files::File');
+$connection->send_p('#convos' => $message_34243)->$wait_success('send_p super long message');
+like slurp_log('#convos'), qr{file/1/ktGW3DYcdBw5nB54}, 'created paste from long message';
+chomp $message_34243;
+is $core->home->child('superman@example.com/upload/ktGW3DYcdBw5nB54.data')->slurp, $message_34243,
+  'paste matches';
+
+done_testing;
 
 sub slurp_log {
   my @date = split '-', Time::Piece->new->strftime('%Y-%m');
-  Mojo::File->new(qw(local test-irc-message-t superman@example.com irc-localhost),
-    @date, "$_[0].log")->slurp;
+  return path(qw(local test-irc-message-t superman@example.com irc-localhost), @date, "$_[0].log")
+    ->slurp;
 }

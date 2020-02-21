@@ -130,14 +130,14 @@ Used instead of L<Mojo::EventEmitter/emit> when you want to call a method in a
 class, registered with L</on>.
 
   # Register a handler
-  $backend->on(multiline_message => "Convos::Plugin::Files::File");
+  $backend->on(message_to_paste => "Convos::Plugin::Files::File");
 
   # Dispatch to the handler
-  # Will call Convos::Plugin::Files::File->handle_multiline_message_p()
+  # Will call Convos::Plugin::Files::File->handle_message_to_paste_p()
   # with arguments ("Convos::Plugin::Files::File", $backend, @args)
-  $backend->emit_to_class(multiline_message => @args);
+  $backend->emit_to_class_p(message_to_paste => @args);
 
-See L<Convos::Plugin::Files::File/handle_multiline_message_p> for example
+See L<Convos::Plugin::Files::File/handle_message_to_paste_p> for example
 handler.
 
 =head2 load_object_p
@@ -153,7 +153,7 @@ This method will load C<$data> for C<$obj>.
 
 Used to register either a class or callback to be used on an event.
 
-See L<Mojo::EventEmitter/on> for the callback version, and L</emit_to_class>
+See L<Mojo::EventEmitter/on> for the callback version, and L</emit_to_class_p>
 for the class version.
 
 =head2 messages_p

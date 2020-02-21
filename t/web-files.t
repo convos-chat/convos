@@ -40,7 +40,7 @@ my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 t::Helper->irc_server_connect($connection);
 t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome');
 
-note 'handle_multiline_message_p';
+note 'handle_message_to_paste_p';
 my %send = (connection_id => $connection->id, dialog_id => 'superwoman', method => 'send');
 $send{message} = 'x' x (512 * 3);
 $t->websocket_ok('/events')->send_ok({json => \%send})

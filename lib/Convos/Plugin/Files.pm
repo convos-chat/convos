@@ -13,7 +13,7 @@ sub register {
   $app->routes->get('/file/:uid/:fid')->to('files#get');
 
   # Upgrade message to paste
-  $app->core->backend->on(multiline_message => 'Convos::Plugin::Files::File');
+  $app->core->backend->on(message_to_paste => 'Convos::Plugin::Files::File');
 
   # Back compat from Convos::Plugin::Paste
   $app->routes->get('/paste/:email_hash/:file_hash' => \&_back_compat);

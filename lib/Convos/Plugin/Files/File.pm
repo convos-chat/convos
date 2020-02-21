@@ -32,7 +32,7 @@ has types => sub { Mojolicious::Types->new };
 has user  => undef;
 has write_only => sub {false};
 
-sub handle_multiline_message_p {
+sub handle_message_to_paste_p {
   my ($class, $backend, $connection, $message) = @_;
   my $self = $class->new(user => $connection->user);
 
@@ -201,10 +201,10 @@ of read by visitors on the web.
 
 =head1 METHODS
 
-=head2 handle_multiline_message_p
+=head2 handle_message_to_paste_p
 
   $p = Convos::Plugin::Files::File
-        ->handle_multiline_message_p($backend, $connection, $message)
+        ->handle_message_to_paste_p($backend, $connection, $message)
         ->then(sub { my $file = shift });
 
 This method will be called when a L<Convos::Core::Connection> wants to create a
