@@ -1,9 +1,9 @@
 import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
+import commonjs from '@rollup/plugin-commonjs';
 import cssnano from 'cssnano';
 import postcss from 'rollup-plugin-postcss'
 import postcssPresetEnv from 'postcss-preset-env';
-import resolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import svelte from 'rollup-plugin-svelte';
 import visualizer from 'rollup-plugin-visualizer';
 import {eslint} from 'rollup-plugin-eslint';
@@ -32,20 +32,19 @@ const plugins = [
   postcss({extract: true, plugins: [postcssPresetEnv(), cssnano()]}),
 ];
 
-// Define development/production plugins
-if (development) {
-  plugins.unshift(eslint({exclude: ['assets/sass/**', 'node_modules/**']}));
-}
-else {
-  plugins.push(babel({
-    exclude: 'node_modules/**',
-    plugins: ['@babel/plugin-transform-runtime'],
-    presets: ['@babel/env'],
-    runtimeHelpers: true,
-  }));
+if (development) plugins.unshift(eslint({exclude: ['assets/sass/**', 'node_modules/**']}));
 
-  plugins.push(terser());
+plugins.push(babel({
+  //exclude: 'node_modules/**',
+  extensions: ['.html', '.js', '.mjs', '.svelte'],
+  presets: [['@babel/preset-env', {corejs: 3, debug: false, useBuiltIns: 'entry'}]],
+  runtimeHelpers: true,
+  plugins: ['@babel/plugin-transform-runtime'],
+}));
+
+if (!development) {
   plugins.push(visualizer({filename: 'public/docs/js-modules-visualized.html', title: 'Convos JavaScript modules visualized'}));
+  plugins.push(terser());
 }
 
 plugins.push(html({
