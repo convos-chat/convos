@@ -39,7 +39,8 @@ sub send_p {
   $target  //= '';
   $message //= '';
   $message =~ s![\x00-\x09\x0b-\x1f]!!g;    # remove invalid characters
-  $message = Mojo::Util::trim($message);    # required for kick, mode, ...
+  $message =~ s!\s*/!/!s;
+  $message =~ s![\r\n]+$!!s;
 
   return $self->_send_message_p($target, $message) unless $message =~ s!^/([A-Za-z]+)\s*!!;
   my $cmd = uc $1;

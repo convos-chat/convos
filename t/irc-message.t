@@ -152,7 +152,7 @@ like slurp_log('#convos'), qr{
 }sx, 'split long message';
 
 $connection->send_p('#convos' => join ' ', 'cool beans', ('xyz' x 171), 'a b c ')
-  ->$wait_success('send_p long x2');
+  ->$wait_success('send_p long word');
 like slurp_log('#convos'), qr{
   .*<superman>\scool\sbeans\r?\n
   .*<superman>\s(xyz)+x\r?\n
@@ -167,6 +167,10 @@ like slurp_log('#convos'), qr{file/1/ktGW3DYcdBw5nB54}, 'created paste from long
 chomp $message_34243;
 is $core->home->child('superman@example.com/upload/ktGW3DYcdBw5nB54.data')->slurp, $message_34243,
   'paste matches';
+
+note 'single space';
+$connection->send_p('#convos' => ' ')->$wait_success('send_p single space');
+like slurp_log('#convos'), qr{<superman>\s\s\r?\n}, 'single space in log';
 
 done_testing;
 
