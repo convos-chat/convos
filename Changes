@@ -1,15 +1,19 @@
 Revision history for perl distribution Convos
 
-3.09 Not Released
+3.09 2020-02-21T15:40:00+0900
+ - Fix compatibility with old versions of Edge/IE #441
+ - Fix handling very long messages #443
+ - Fix sending a single space #446
  - Fix keeping track when changing nick
  - Fix not having strike-through for Convos messages
- - Avoid reloading conversation when reconnecting to WebSocket
  - Add LDAP support to Convos #65 #418
  - Add custom "help" and "version" commands
  - Add "--all" switch to "install" sub command, which also installs suggested deps
  - Add "cpanm" sub command
  - Add "exec" sub command
+ - Avoid reloading conversation when reconnecting to WebSocket (EXPERIMENTAL)
  - Documented sub commands that used to be hidden
+ - Made it easier for the first user to sign up
 
 3.08 2020-01-30T11:24:00+0900
  - Removed support for underscore markdown formatting #438
