@@ -45,7 +45,7 @@ sub send_p {
   my $cmd = uc $1;
 
   return $self->_send_message_p($target, "\x{1}ACTION $message\x{1}") if $cmd eq 'ME';
-  return $self->_send_message_p($target, $message) if $cmd eq 'SAY';
+  return $self->_send_message_p($target, $message)                    if $cmd eq 'SAY';
   return $self->_send_message_p(split /\s+/, $message, 2) if $cmd eq 'MSG';
 
   return $self->_send_query_p($message) if $cmd eq 'QUERY';
@@ -56,8 +56,8 @@ sub send_p {
 
   return $self->_send_names_p($target) if $cmd eq 'NAMES';
 
-  return $self->_send_kick_p($target, $message) if $cmd eq 'KICK';
-  return $self->_send_mode_p($target, $message) if $cmd eq 'MODE';
+  return $self->_send_kick_p($target, $message)  if $cmd eq 'KICK';
+  return $self->_send_mode_p($target, $message)  if $cmd eq 'MODE';
   return $self->_send_topic_p($target, $message) if $cmd eq 'TOPIC';
 
   return $self->_send_ison_p($message || $target) if $cmd eq 'ISON';
@@ -265,7 +265,7 @@ sub _irc_event_privmsg {
   $message[0] =~ s/[\x00-\x1f]//g;
 
   if ($user) {
-    $target   = $self->_is_current_nick($dialog_id) ? $nick : $dialog_id,
+    $target = $self->_is_current_nick($dialog_id) ? $nick : $dialog_id,
       $target = $self->get_dialog($target) || $self->dialog({name => $target});
     $from = $nick;
   }
@@ -450,7 +450,7 @@ sub _make_mode_response {
 sub _make_names_response {
   my ($self, $msg, $res, $p) = @_;
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
-  return $p->resolve($res) if $msg->{command} eq 'rpl_endofnames';
+  return $p->resolve($res)              if $msg->{command} eq 'rpl_endofnames';
   return $self->_make_users_response($msg, $res->{participants} ||= [])
     if $msg->{command} eq 'rpl_namreply';
 }
@@ -480,9 +480,9 @@ sub _make_topic_response {
 sub _make_whois_response {
   my ($self, $msg, $res, $p) = @_;
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
-  return $p->resolve($res) if $msg->{command} eq 'rpl_endofwhois';
+  return $p->resolve($res)              if $msg->{command} eq 'rpl_endofwhois';
 
-  return $res->{away} = true if $msg->{command} eq 'rpl_away';
+  return $res->{away}     = true                         if $msg->{command} eq 'rpl_away';
   return $res->{idle_for} = 0 + ($msg->{params}[2] // 0) if $msg->{command} eq 'rpl_whoisidle';
   return @$res{qw(server server_info)} = @{$msg->{params}}[2, 3]
     if $msg->{command} eq 'rpl_whoisserver';
@@ -548,7 +548,7 @@ sub _send_ison_p {
 }
 
 sub _send_join_p {
-  my ($self, $command) = @_;
+  my ($self,      $command)  = @_;
   my ($dialog_id, $password) = (split(/\s/, ($command || ''), 2), '', '');
 
   return $self->_send_query_p($dialog_id)->then(sub {
@@ -625,7 +625,7 @@ sub _send_list_p {
     $filter       = qr{(?$re_modifiers:$filter)} if $filter;    # (?i:foo_bar)
 
     for my $dialog (sort { $a->{name} cmp $b->{name} } values %{$store->{dialogs}}) {
-      push @by_name,  $dialog and next if $dialog->{name} =~ $filter;
+      push @by_name,  $dialog and next if $dialog->{name}  =~ $filter;
       push @by_topic, $dialog and next if $dialog->{topic} =~ $filter;
     }
 
@@ -823,7 +823,7 @@ sub _send_whois_p {
 sub _set_wanted_state_p {
   my ($self, $state) = @_;
   $self->user->core->connect($self, '') if $state eq 'connected';
-  $self->disconnect_p if $state eq 'disconnected';
+  $self->disconnect_p                   if $state eq 'disconnected';
   $self->wanted_state($state);
   return Mojo::Promise->resolve({});
 }
