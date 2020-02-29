@@ -118,7 +118,7 @@ sub messages_p {
 
   # Do not search if the difference between "before" and "after" is more than 12 months
   # This limits the amount of time that could be spent searching and it also prevents DoS attacks
-  return Mojo::IOLoop->resolve([])
+  return Mojo::Promise->resolve([])
     if $args{before} - $args{after} > $args{before} - $args{before}->add_months(-12);
 
   # The {cursor} is used to walk through the month-hashed log files

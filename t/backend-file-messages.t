@@ -107,4 +107,9 @@ is int @{$t->tx->res->json->{messages} || []}, 28, 'server messages';
 $dialog = $connection->dialog({name => '#with/slash'});
 $t->get_ok('/api/connection/irc-localhost/dialog/%23with%2Fslash/messages.json')->status_is(200);
 
+$t->get_ok(
+  '/api/connection/irc-localhost/dialog/%23convos/messages?after=2015-06-09T02:39:51&before=2016-06-09T02:39:58'
+)->status_is(200);
+is int @{$t->tx->res->json->{messages} || []}, 0, 'after and before greater than 12 months';
+
 done_testing;
