@@ -1,4 +1,5 @@
 <script>
+import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../components/ChatMessages.svelte';
@@ -8,6 +9,7 @@ import DialogSettings from '../components/DialogSettings.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
+import TextField from '../components/form/TextField.svelte';
 import {activeMenu, container, currentUrl, docTitle} from '../store/router';
 import {afterUpdate, getContext, onDestroy} from 'svelte';
 import {debounce, modeClassNames, q} from '../js/util';
@@ -30,6 +32,7 @@ let scrollPos = 'bottom';
 // Variables for calculating active connection and dialog
 let connection = {};
 let dialog = user.notifications;
+let dialogPasssword = '';
 let dragAndDrop = new DragAndDrop();
 let previousPath = '';
 let pathParts = $currentUrl.pathParts;
@@ -59,7 +62,17 @@ afterUpdate(() => {
 onDestroy(onClose);
 
 function addDialog(e) {
-  if (connection.connection_id) connection.addDialog(e.target.closest('a').href.replace(/.*#add:/, ''));
+  if (!connection.connection_id) return;
+
+  const linkEl = e.target.closest('a');
+  if (linkEl) {
+    connection.addDialog(linkEl.href.replace(/.*#add:/, ''));
+  }
+  else {
+    connection.addDialog([dialog.dialog_id, dialogPasssword].filter(p => p.length).join(' '));
+  }
+
+  dialogPasssword = '';
 }
 
 function calculateDialog($user, $currentUrl) {
@@ -161,6 +174,17 @@ function registerUrlHandler(connection) {
       </p>
     {:else}
       <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
+    {/if}
+
+    {#if dialog.is('locked')}
+      <form class="inputs-side-by-side" on:submit|preventDefault="{addDialog}">
+        <TextField type="password" name="dialog_password" bind:value="{dialogPasssword}" placeholder="{l('Enter password')}" autocomplete="off">
+          <span slot="label">{l('This conversation needs a password')}</span>
+        </TextField>
+        <div class="has-remaining-space">
+          <Button icon="comment" disabled="{!dialogPasssword.length}">{l('Join')}</Button>
+        </div>
+      </form>
     {/if}
   </div>
 </main>

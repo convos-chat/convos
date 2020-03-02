@@ -47,7 +47,7 @@ for my $cmd (
   ['#convos',   '/topic'],                          # TOPIC get
   ['#convos',   '/topic New topic'],                # TOPIC set
   ['whatever',  '/ison'],                           # ISON
-  ['#whatever', '/join #convos s3cret'],            # JOIN
+  ['#whatever', '/jOIN #Convos s3cret'],            # JOIN
   ['#whatever', '/msg superwoman how are you?'],    # MSG
   ['#whatever', '/list'],                           # LIST
   ['#whatever', '/whois superwoman'],               # WHOIS
@@ -56,6 +56,8 @@ for my $cmd (
   $connection->send_p(@$cmd)->catch(sub { $err = shift })->$wait_success($cmd->[1]);
   like $err, qr{Not connected.}, "$cmd->[1] - not connected";
 }
+
+is $connection->get_dialog('#convos')->password, 's3cret', 'password is set';
 
 $connection->send_p('', '/nick superduper')->$wait_success('nick');
 is $connection->url->query->param('nick'), 'superduper', 'change nick offline';
@@ -192,7 +194,19 @@ $res = $connection->send_p('', '/join #redirected')->$wait_success(
   from_server             => [__PACKAGE__, 'join-redirected-1.irc'],
   qr{JOIN \#\#redirected} => [__PACKAGE__, 'join-redirected-2.irc'],
 );
-is_deeply($res, {dialog_id => '##redirected', topic => '', topic_by => '', users => {}}, 'join');
+is_deeply(
+  $res,
+  {dialog_id => '##redirected', topic => '', topic_by => '', users => {}},
+  'join redirected'
+);
+
+$res = $connection->send_p('', '/join #protected S3cret')
+  ->$wait_success(qr{JOIN \#protected S3cret} => [__PACKAGE__, 'join-protected.irc'],);
+is_deeply(
+  $res,
+  {dialog_id => '#protected', topic => '', topic_by => '', users => {}},
+  'join protected'
+);
 
 note 'list';
 $res = $connection->send_p('', '/list')
@@ -295,6 +309,8 @@ cmp_deeply(
 done_testing;
 
 __DATA__
+@@ join-protected.irc
+:localhost 366 superman #protected :End of /NAMES list.
 @@ join-redirected-1.irc
 :localhost 470 superman #redirected ##redirected :Forwarding to another channel
 @@ join-redirected-2.irc

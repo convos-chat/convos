@@ -25,9 +25,9 @@ export default class Connection extends Dialog {
     this.participants([{nick}]);
   }
 
-  addDialog(dialogId) {
-    const isPrivate = dialogId.match(/^[a-z]/i);
-    this.send(isPrivate ? `/query ${dialogId}` : `/join ${dialogId}`);
+  addDialog(joinCommand) {
+    const isPrivate = joinCommand.match(/^[a-z]/i);
+    this.send(isPrivate ? `/query ${joinCommand}` : `/join ${joinCommand}`);
   }
 
   ensureDialog(params) {
@@ -40,6 +40,7 @@ export default class Connection extends Dialog {
     this._addDefaultParticipants(dialog);
     this.dialogs.set(dialog.dialog_id, dialog);
     this.update({force: true});
+    this.emit('channelListChange', dialog);
     return dialog;
   }
 
@@ -52,7 +53,9 @@ export default class Connection extends Dialog {
   }
 
   removeDialog(params) {
-    this.dialogs.delete(params.dialog_id);
+    const dialog = this.findDialog(params) || params;
+    this.dialogs.delete(dialog.dialog_id);
+    this.emit('channelListChange', dialog);
     return this.update({force: true});
   }
 
@@ -94,12 +97,21 @@ export default class Connection extends Dialog {
   }
 
   wsEventError(params) {
+    const msg = {
+      message: extractErrorMessage(params) || params.frozen || 'Unknown error from %1.',
+      sent: params,
+      type: 'error',
+      vars: params.command || [params.message],
+    };
+
+    // Could not join
+    const joinCommand = (params.message || '').match(/^\/j(oin)? (\S+)/);
+    if (joinCommand) return this.ensureDialog({...params, dialog_id: joinCommand[2]});
+
+    // Generic errors
     const dialog = (params.dialog_id && params.frozen) ? this.ensureDialog(params) : (this.findDialog(params) || this);
     dialog.update({errors: this.errors + 1});
-
-    let message = extractErrorMessage(params) || params.frozen || 'Unknown error from %1.';
-    if (message == 'Password protected.') message = 'Invalid password.';
-    dialog.addMessage({message, type: 'error', sent: params, vars: params.command || [params.message]});
+    dialog.addMessage(msg);
   }
 
   wsEventJoin(params) {

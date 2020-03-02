@@ -416,6 +416,12 @@ sub _make_join_response {
     return $self->_send_join_p("$msg->{params}[2]")->then(sub { $p->resolve($_[0]) });
   }
 
+  if ($msg->{command} eq 'err_badchannelkey') {
+    my $dialog = $self->dialog({name => $msg->{params}[1]});
+    $self->emit(state => frozen => $dialog->frozen('Invalid password.')->TO_JSON);
+    return $p->reject($msg->{params}[2]);
+  }
+
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
 
   return $self->_make_users_response($msg, $res->{participants} ||= [])
@@ -554,8 +560,10 @@ sub _send_join_p {
 
   return $self->_send_query_p($dialog_id)->then(sub {
     my $dialog = shift;
+    $dialog->password($password) if length $password;
+
     return !$dialog->frozen ? $dialog : $self->_write_and_wait_p(
-      "JOIN $dialog_id", {dialog_id => lc $dialog_id},
+      "JOIN $command", {dialog_id => lc $dialog_id},
       470                 => {1 => $dialog_id},    # Link channel
       479                 => {1 => $dialog_id},    # Illegal channel name
       err_badchanmask     => {1 => $dialog_id},

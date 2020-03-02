@@ -106,6 +106,7 @@ export default class Dialog extends Reactive {
 
   is(status) {
     if (status == 'frozen') return this.frozen && true;
+    if (status == 'locked') return this.frozen == 'Invalid password.';
     if (status == 'private') return this.is_private;
     if (status == 'unread') return this.unread && true;
     return this.status == status;

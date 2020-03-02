@@ -38,7 +38,7 @@ function calculateMessages(dialog, $events) {
       }));
     }
   }
-  else if (dialog.frozen) {
+  else if (dialog.frozen && !dialog.is('locked')) {
     extraMessages.push(convosMessage({message: topicOrStatus(connection, dialog).replace(/\.$/, ''), vars: []}));
   }
 

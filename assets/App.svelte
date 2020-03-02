@@ -71,25 +71,25 @@ onMount(() => {
 
   const unsubscribe = [];
   unsubscribe.push(historyListener());
-  unsubscribe.push(user.on('wsEventSentJoin', onChannelListChange));
-  unsubscribe.push(user.on('wsEventSentPart', onChannelListChange));
+  unsubscribe.push(user.on('channelListChange', onChannelListChange));
 
   return () => unsubscribe.forEach(cb => cb());
 });
 
 function onChannelListChange(params) {
+  if (user.is('loading')) return;
   let path = ['', 'chat', params.connection_id];
 
   // Do not want to show settings for the new dialog
   $activeMenu = '';
 
-  if (params.command[0] == 'part') {
-    const el = document.querySelector('.sidebar-left [href$="' + path.map(encodeURIComponent).join('/') + '"]');
-    gotoUrl(el ? el.href : '/chat');
-  }
-  else {
+  if (user.findDialog(params)) {
     if (params.dialog_id) path.push(params.dialog_id);
     gotoUrl(path.map(encodeURIComponent).join('/'));
+  }
+  else {
+    const el = document.querySelector('.sidebar-left [href$="' + path.map(encodeURIComponent).join('/') + '"]');
+    gotoUrl(el ? el.href : '/chat');
   }
 }
 

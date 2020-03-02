@@ -77,6 +77,7 @@ export default class User extends Reactive {
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('update', () => this.update({force: true}));
+    conn.on('channelListChange', (dialog) => this.emit('channelListChange', dialog));
     this.connections.set(conn.connection_id, conn);
     this.update({force: true});
     return conn;
