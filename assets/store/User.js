@@ -25,6 +25,7 @@ export default class User extends Reactive {
     this.prop('rw', 'highlight_keywords', []);
     this.prop('rw', 'status', 'pending');
 
+    this.prop('persist', 'experimentalLoad', false);
     this.prop('persist', 'lastUrl', '');
     this.prop('persist', 'showGrid', false);
     this.prop('persist', 'theme', 'auto');
@@ -103,6 +104,7 @@ export default class User extends Reactive {
 
     const body = this.getUserOp.res.body;
     const keep = {};
+    if (!this.experimentalLoad) this.connections.clear();
     (body.connections || []).forEach(conn => (keep[this.ensureDialog({...conn, status: 'pending'}).path] = true));
     (body.dialogs || []).forEach(dialog => (keep[this.ensureDialog({...dialog, status: 'pending'}).path] = true));
 
