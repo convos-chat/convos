@@ -56,7 +56,7 @@ function saveDialogSettings(e) {
     {:else if dialog.is('private')}
       {l('Private conversation with %1.', dialog.name)}
     {:else if isOperator}
-      {l('You are a channel operator in %1.', dialog.name)}
+      {l('You are channel operator in %1.', dialog.name)}
     {:else}
       {l('You are not a channel operator in %1.', dialog.name)}
     {/if}
@@ -78,7 +78,7 @@ function saveDialogSettings(e) {
         </div>
       {/if}
 
-      <TextField type="password" name="password" bind:value="{dialogPassword}" readonly="{dialog.frozen != 'Password protected.' && !isOperator}">
+      <TextField type="password" name="password" bind:value="{dialogPassword}" readonly="{!dialog.is('locked') && !isOperator}">
         <span slot="label">{l('Password')}</span>
       </TextField>
 

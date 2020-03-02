@@ -88,15 +88,15 @@ export default class Dialog extends Reactive {
     for (let i = start; i < stop; i++) {
       const msg = messages[i];
       if (msg.hasOwnProperty('markdown')) continue; // Already processed
-      if (!msg.from) [msg.internal, msg.from] = [true, this.connection_id || 'Convos'];
+      if (!msg.from) [msg.internal, msg.from, msg.fromId] = [true, this.connection_id || 'Convos', 'Convos'];
+      if (!msg.fromId) msg.fromId = msg.from.toLowerCase();
       if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
       if (msg.vars) msg.message = l(msg.message, ...msg.vars);
 
       msg.id = 'msg_' + (++nMessages);
-      msg.color = str2color(msg.from.toLowerCase());
+      msg.color = msg.fromId == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
       msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/(\W)?$/, ''));
-      msg.fromId = msg.from.toLowerCase();
       msg.markdown = md(msg.message);
     }
 

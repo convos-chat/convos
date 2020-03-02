@@ -24,17 +24,24 @@ $: calculateMessages(dialog, $events);
 function calculateMessages(dialog, $events) {
   const extraMessages = [];
 
-  if (dialog.frozen == 'Password protected.') {
+  if (dialog.messages.length == 0 && dialog.dialog_id && dialog.dialog_id != 'notifications') {
     extraMessages.push(convosMessage({
-      message: 'Conversation is password protected. Go to [settings](%1) to enter the password.',
-      vars: ['#activeMenu:settings'],
+      message: 'There are %1 [users](%2) in this conversation.',
+      type: 'notice',
+      vars: [dialog.participants.length, urlFor(dialog.path + '#activeMenu:settings')],
+    }));
+    extraMessages.push(convosMessage({
+      message: 'Start chatting by writing a message in the input field, or click on the conversation name ([%1](%2)) to see further details.',
+      type: 'notice',
+      vars: [dialog.name, urlFor(dialog.path + '#activeMenu:settings')],
     }));
   }
-  else if (connection.frozen) {
+
+  if (connection.frozen) {
     if (!connection.is('unreachable')) {
       extraMessages.push(convosMessage({
         message: 'Disconnected. Your connection %1 can be edited in [settings](%2).',
-        vars: [connection.name, urlFor('/chat/' + connection.connection_id + '#activeMenu:settings')],
+        vars: [connection.name, urlFor(connection.path + '#activeMenu:settings')],
       }));
     }
   }
@@ -55,8 +62,9 @@ function calculateMessages(dialog, $events) {
 
 function convosMessage(message) {
   return {
-    color: connection.color,
+    color: 'inherit',
     from: 'Convos',
+    fromId: 'Convos',
     markdown: lmd(message.message, ...message.vars),
     ts: new Time(),
     type: 'error',
@@ -87,7 +95,7 @@ function notififactionUrl(message) {
 }
 
 function senderIsOnline(message) {
-  return message.fromId == dialog.connection_id || !dialog.dialog_id || dialog.findParticipant(message.fromId);
+  return message.fromId == 'Convos' || message.fromId == dialog.connection_id || !dialog.dialog_id || dialog.findParticipant(message.fromId);
 }
 
 function toggleDetails(e) {
@@ -96,8 +104,8 @@ function toggleDetails(e) {
 }
 </script>
 
-{#if messages.length == 0}
-  <h2>{l(dialog.dialog_id == 'notifications' ? 'No notifications.' : 'No messages.')}</h2>
+{#if dialog.messages.length == 0}
+  <h2>{l(dialog.dialog_id == 'notifications' ? 'No notifications.' : 'Welcome!')}</h2>
 {/if}
 
 {#if messages.length > 40 && dialog.is('loading')}
@@ -124,7 +132,7 @@ function toggleDetails(e) {
     on:click="{gotoDialogFromNotifications}"
     data-index="{i}">
 
-    <Icon name="pick:{message.from}" color="{message.color}"/>
+    <Icon name="pick:{message.fromId}" color="{message.color}"/>
     <b class="message__ts" aria-labelledby="{message.id + '_ts'}">{message.ts.getHM()}</b>
     <div role="tooltip" id="{message.id + '_ts'}">{message.ts.toLocaleString()}</div>
     {#if dialog.connection_id}

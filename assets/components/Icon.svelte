@@ -1,7 +1,8 @@
-<script>
+<script context="module">
 const familyToClassName = {regular: 'far', solid: 'fas'};
 
 const contributorIcons = {
+  Convos: '', // Uppercase "C" is not a typo
   batman: 'https://www.gravatar.com/avatar/ab1839667863f31e359d98364cfdef61',
   marcusr: 'https://www.gravatar.com/avatar/6c056546d802b1a9ac186ab63f9fb632',
 };
@@ -67,7 +68,12 @@ const pickIcons = [
   'fas fa-walking',
   'fas fa-yin-yang',
 ];
+</script>
 
+<script>
+import {onMount} from 'svelte';
+
+let initialized = false;
 let className = '';
 
 export {className as class};
@@ -76,12 +82,20 @@ export let color = '';
 export let family = '';
 export let name;
 
-function calculateClassName(name, family) {
+onMount(() => {
+  initialized = contributorIcons.Convos ? true : false;
+  if (initialized) return;
+  const icon = document.querySelector('[rel=icon][type="image/png"][sizes="32x32"]')
+    || document.querySelector('[rel=icon][type="image/png"]');
+  if (icon) contributorIcons.Convos = icon.href;
+});
+
+function calculateClassName(name, family, initialized) {
   const cn = [];
   const pick = name.match(/^pick:(.+)$/);
 
   if (pick) {
-    if (contributorIcons[pick[1]]) return 'fas fa-contributor';
+    if (contributorIcons[pick[1]]) return 'fas fa-contributor for-' + pick[1].toLowerCase();
     cn.push(pickIcon(pick[1]));
   }
   else {
@@ -95,7 +109,7 @@ function calculateClassName(name, family) {
   return cn.join(' ');
 }
 
-function calculateStyle(name, family, color) {
+function calculateStyle(name, family, color, initialized) {
   const rules = [];
   let colorRuleName = 'color:';
 
@@ -127,7 +141,7 @@ function pickIcon(str) {
 }
 </script>
 
-<i class="{calculateClassName(name, family)}"
-  style="{calculateStyle(name, family, color)}"
+<i class="{calculateClassName(name, family, initialized)}"
+  style="{calculateStyle(name, family, color, initialized)}"
   hidden="{!name}"
   on:click/>
