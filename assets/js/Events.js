@@ -84,6 +84,7 @@ export default class Events extends Reactive {
   send(msg, cb) {
     if (!msg.id && msg.method != 'ping') msg.id = ++msgId;
     if (!msg.method && msg.message) msg.method = 'send';
+    if (msg.connection) ['connection_id'].forEach(k => { msg[k] = msg.dialog[k] || '' });
     if (msg.dialog) ['connection_id', 'dialog_id'].forEach(k => { msg[k] = msg.dialog[k] || '' });
     delete msg.dialog;
     if (this.debugEvents) this._debug('send', msg);

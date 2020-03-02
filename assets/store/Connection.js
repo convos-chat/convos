@@ -25,11 +25,6 @@ export default class Connection extends Dialog {
     this.participants([{nick}]);
   }
 
-  addDialog(joinCommand) {
-    const isPrivate = joinCommand.match(/^[a-z]/i);
-    this.send(isPrivate ? `/query ${joinCommand}` : `/join ${joinCommand}`);
-  }
-
   ensureDialog(params) {
     let dialog = this.dialogs.get(params.dialog_id);
     if (dialog) return dialog.update(params);

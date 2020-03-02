@@ -12,7 +12,7 @@ import Link from '../components/Link.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {activeMenu, container, currentUrl, docTitle} from '../store/router';
 import {afterUpdate, getContext, onDestroy} from 'svelte';
-import {debounce, modeClassNames, q} from '../js/util';
+import {closestEl, debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 
 const user = getContext('user');
@@ -62,16 +62,7 @@ afterUpdate(() => {
 onDestroy(onClose);
 
 function addDialog(e) {
-  if (!connection.connection_id) return;
-
-  const linkEl = e.target.closest('a');
-  if (linkEl) {
-    connection.addDialog(linkEl.href.replace(/.*#add:/, ''));
-  }
-  else {
-    connection.addDialog([dialog.dialog_id, dialogPasssword].filter(p => p.length).join(' '));
-  }
-
+  chatInput.sendMessage(['/join', dialog.dialog_id, dialogPasssword].filter(p => p.length).join(' '));
   dialogPasssword = '';
 }
 
@@ -101,6 +92,15 @@ function calculateDialog($user, $currentUrl) {
   $docTitle = connection == dialog ? l('%1 - Convos', connection.name)
             : connection.name ? l('%1/%2 - Convos', connection.name, dialog.name)
             : l('%1 - Convos', dialog.name);
+}
+
+function maybeSendMessage(e) {
+  const linkEl = closestEl(e.target, 'a');
+  const message = linkEl && linkEl.href.match(/#send:(.+)/);
+  if (!message) return;
+  e.preventDefault();
+  return chatInput ? chatInput.sendMessage({message: decodeURIComponent(message[1])})
+    : connection.send(decodeURIComponent(message[1]));
 }
 
 function messageElObserved(entries, observer) {
@@ -156,7 +156,7 @@ function registerUrlHandler(connection) {
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
-<main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">
+<main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}" on:click="{maybeSendMessage}">
   <div class="messages-container" class:has-notifications="{pathParts.length == 1}" bind:offsetHeight="{messagesHeight}">
     {#if pathParts[1] && !connection.connection_id}
       <h2>{l('Connection does not exist.')}</h2>
@@ -169,7 +169,7 @@ function registerUrlHandler(connection) {
       <h2>{l('You are not part of this conversation.')}</h2>
       <p>{l('Do you want to chat with "%1"?', pathParts[2])}</p>
       <p>
-        <a href="#add:{pathParts[2]}" on:click|preventDefault="{addDialog}" class="btn">{l('Yes')}</a>
+        <a href="#send:/join {pathParts[2]}" class="btn">{l('Yes')}</a>
         <Link href="/chat" class="btn">{l('No')}</Link>
       </p>
     {:else}
@@ -189,7 +189,7 @@ function registerUrlHandler(connection) {
   </div>
 </main>
 
-{#if dialog.connection_id}
+{#if !dialog.is('notifications')}
   <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
 {/if}
 

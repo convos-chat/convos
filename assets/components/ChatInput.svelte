@@ -80,8 +80,10 @@ function selectOption(e) {
   inputEl.focus();
 }
 
-function sendMessage() {
-  const msg = {message: inputEl.value, method: 'send', dialog};
+export function sendMessage(e) {
+  if (e.preventDefault) e.preventDefault();
+  const msg = {method: 'send', dialog};
+  msg.message = e.preventDefault ? inputEl.value : e.message;
 
   // Aliases
   msg.message = msg.message.replace(/^\/close/i, '/part');
@@ -128,8 +130,7 @@ const keys = {
       fillinAutocompeteOption({space: ' '});
     }
     else if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+      sendMessage(e);
     }
   },
   Fallback(e) {
@@ -155,7 +156,7 @@ const keys = {
     <input type="file" on:change="{uploadFiles}" bind:this="{uploadEl}">
   </div>
 
-  <a href="#send" on:click|preventDefault="{sendMessage}" class="chat-input__send"><Icon name="paper-plane"/></a>
+  <a href="#send" on:click="{sendMessage}" class="chat-input__send"><Icon name="paper-plane"/></a>
 
   <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
     {#each autocompleteOptions as opt, i}

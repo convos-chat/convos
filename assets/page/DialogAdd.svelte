@@ -27,7 +27,7 @@ onMount(() => urlToForm(formEl));
 function addDialog(e) {
   const aEl = e && e.target && e.target.closest('a');
   if (aEl && aEl.href) dialogId = aEl.href.replace(/.*#add:/, '');
-  if (connectionId && dialogId) user.findDialog({connection_id: connectionId}).addDialog(dialogId);
+  if (connectionId && dialogId) user.findDialog({connection_id: connectionId}).send('/join ' + dialogId);
 }
 
 function loadConversations(e) {

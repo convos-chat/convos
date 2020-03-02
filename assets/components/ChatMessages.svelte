@@ -1,76 +1,19 @@
 <script>
 import ChatMessagesStatusLine from './ChatMessagesStatusLine.svelte';
 import Icon from './Icon.svelte';
-import Link from './Link.svelte';
-import Time from '../js/Time';
-import {ensureChildNode} from '../js/util';
+import internalMessages from '../js/internalMessages';
 import {getContext} from 'svelte';
 import {gotoUrl, urlFor} from '../store/router';
-import {l, lmd, topicOrStatus} from '../js/i18n';
-import {showEl} from '../js/util';
+import {l} from '../js/i18n';
 
 export let connection;
 export let dialog;
 export let input;
 
 const user = getContext('user');
-const events = user.events;
 
-let messages = [];
-let unreadFrom = 0;
-
-$: calculateMessages(dialog, $events);
-
-function calculateMessages(dialog, $events) {
-  const extraMessages = [];
-
-  if (dialog.messages.length == 0 && dialog.dialog_id && dialog.dialog_id != 'notifications') {
-    extraMessages.push(convosMessage({
-      message: 'There are %1 [users](%2) in this conversation.',
-      type: 'notice',
-      vars: [dialog.participants.length, urlFor(dialog.path + '#activeMenu:settings')],
-    }));
-    extraMessages.push(convosMessage({
-      message: 'Start chatting by writing a message in the input field, or click on the conversation name ([%1](%2)) to see further details.',
-      type: 'notice',
-      vars: [dialog.name, urlFor(dialog.path + '#activeMenu:settings')],
-    }));
-  }
-
-  if (connection.frozen) {
-    if (!connection.is('unreachable')) {
-      extraMessages.push(convosMessage({
-        message: 'Disconnected. Your connection %1 can be edited in [settings](%2).',
-        vars: [connection.name, urlFor(connection.path + '#activeMenu:settings')],
-      }));
-    }
-  }
-  else if (dialog.frozen && !dialog.is('locked')) {
-    extraMessages.push(convosMessage({message: topicOrStatus(connection, dialog).replace(/\.$/, ''), vars: []}));
-  }
-
-  if ($events.wantNotifications === null) {
-    extraMessages.push(convosMessage({
-      message: 'Do you want notifications when someone sends you a private message? [Yes](%1) / [No](%2)',
-      vars: ['#call:events:requestPermissionToNotify', '#call:events:rejectNotifications'],
-    }));
-  }
-
-  messages = extraMessages.length ? dialog.messages.concat(extraMessages) : dialog.messages;
-  unreadFrom = dialog.unread + extraMessages.length;
-}
-
-function convosMessage(message) {
-  return {
-    color: 'inherit',
-    from: 'Convos',
-    fromId: 'Convos',
-    markdown: lmd(message.message, ...message.vars),
-    ts: new Time(),
-    type: 'error',
-    ...message,
-  };
-}
+$: messages = internalMessages.mergeWithMessages(user, connection, dialog);
+$: unreadFrom = dialog.unread;
 
 function dayChanged(i) {
   return i == 0 ? false : messages[i].ts.getDate() != messages[i - 1].ts.getDate();
@@ -104,8 +47,8 @@ function toggleDetails(e) {
 }
 </script>
 
-{#if dialog.messages.length == 0}
-  <h2>{l(dialog.dialog_id == 'notifications' ? 'No notifications.' : 'Welcome!')}</h2>
+{#if dialog.messages.length == 0 && dialog.is('notifications')}
+  <h2>{l('No notifications.')}</h2>
 {/if}
 
 {#if messages.length > 40 && dialog.is('loading')}

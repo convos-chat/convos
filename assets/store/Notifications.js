@@ -11,6 +11,10 @@ export default class Notifications extends Dialog {
     });
   }
 
+  is(status) {
+    return status == 'notifications' ? true : super.is(status);
+  }
+
   async load(params = {}) {
     if (!this.messagesOp || this.is('loading')) return this;
 

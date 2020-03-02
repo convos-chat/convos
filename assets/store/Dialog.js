@@ -33,6 +33,7 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this.prop('rw', 'errors', 0);
+    this.prop('rw', 'first_time', false);
     this.prop('rw', 'last_active', new Time(params.last_active));
     this.prop('rw', 'last_read', new Time(params.last_read));
     this.prop('rw', 'messages', []);
@@ -105,8 +106,11 @@ export default class Dialog extends Reactive {
   }
 
   is(status) {
+    if (status == 'connection') return !this.dialog_id;
+    if (status == 'conversation') return this.dialog_id && !this.is('notifications');
     if (status == 'frozen') return this.frozen && true;
     if (status == 'locked') return this.frozen == 'Invalid password.';
+    if (status == 'notifications') return false;
     if (status == 'private') return this.is_private;
     if (status == 'unread') return this.unread && true;
     return this.status == status;
@@ -143,6 +147,7 @@ export default class Dialog extends Reactive {
     const body = this.messagesOp.res.body;
     this.addMessages(opParams.before ? 'unshift' : 'push', body.messages || []);
     this.update({status: this.messagesOp.status});
+    if (this.messages.length <= 10) this.update({first_time: true});
 
     // End of history
     if (hasMessages && opParams.before && body.end) this.messages[0].endOfHistory = true;
