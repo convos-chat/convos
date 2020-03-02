@@ -196,13 +196,17 @@ textarea {
   align-items: flex-end;
 
   button {
+    white-space: pre;
     margin-left: var(--input-gutter);
   }
 
   .checkbox,
   .text-field {
-    flex: 1 1 0;
     margin-bottom: 0;
+  }
+
+  .has-remaining-space {
+    flex: 1 1 0;
   }
 }
 

@@ -63,7 +63,9 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
       <SelectField name="connection_id" options="{connectionOptions}" placeholder="{l('Select...')}" bind:value="{connectionId}">
         <span slot="label">{l('Connection')}</span>
       </SelectField>
-      <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableDialogs.done === false}">{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</Button>
+      <div class="has-remaining-space">
+        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableDialogs.done === false}">{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</Button>
+      </div>
     </div>
 
     <div class="inputs-side-by-side">
@@ -72,7 +74,9 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
         on:keyup="{debouncedLoadConversations}">
         <span slot="label">{l('Conversation name')}</span>
       </TextField>
-      <Button icon="comment" disabled="{!connectionId || !dialogId}">{l('Add')}</Button>
+      <div class="has-remaining-space">
+        <Button icon="comment" disabled="{!connectionId || !dialogId}">{l('Add')}</Button>
+      </div>
     </div>
 
     {#if availableDialogs.error}
