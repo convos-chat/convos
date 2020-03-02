@@ -62,7 +62,7 @@ autocomplete.nicks = ({dialog, query}) => {
 };
 
 commands.push({cmd: '/me', example: '/me <msg>', description: 'Send message as an action.'});
-commands.push({cmd: '/say', example: '/say <msg>', description: 'Used when you want to send a message starting with '/'.'});
+commands.push({cmd: '/say', example: '/say <msg>', description: 'Used when you want to send a message starting with "/".'});
 commands.push({cmd: '/topic', example: '/topic or /topic <new topic>', description: 'Show current topic, or set a new one.'});
 commands.push({cmd: '/whois', example: '/whois <nick>', description: 'Show information about a user.'});
 commands.push({cmd: '/query', example: '/query <nick>', description: 'Open up a new chat window with nick.'});
