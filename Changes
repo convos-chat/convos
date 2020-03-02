@@ -1,5 +1,14 @@
 Revision history for perl distribution Convos
 
+3.11 2020-03-02T15:11:00+0900
+ - Fix exception when searching too long a period #448
+   Contributor: Doug Bellk
+ - Add support for pasting images #437
+ - Add a welcome message when joining a new conversation
+ - Fix handling err_badchannelkey #268
+ - Fix button alignment in <DialogAdd>
+ - Rollback "Avoid reloading conversation when reconnecting to WebSocket"
+
 3.10 2020-02-21T16:09:00+0900
  - Fix loading notifications
 

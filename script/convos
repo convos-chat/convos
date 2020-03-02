@@ -18,7 +18,7 @@ use Config;
 use File::Spec;
 use FindBin;
 
-our $VERSION = '3.10';
+our $VERSION = '3.11';
 
 # Run the program
 (bless {}, __PACKAGE__)->run(@ARGV);
