@@ -12,6 +12,10 @@ export default class dragAndDrop {
       drop: this.drop.bind(this),
     };
 
+    this.pasteEvents = {
+      paste: this.paste.bind(this),
+    };
+
     this.removeDragOverDebounced = debounce(() => this._removeDragOver(), 100);
   }
 
@@ -25,17 +29,34 @@ export default class dragAndDrop {
     Object.keys(this.dragAndDropEvents).forEach(name => {
       targetEl.addEventListener(name, this.dragAndDropEvents[name]);
     });
+
+    Object.keys(this.pasteEvents).forEach(name => {
+      document.addEventListener(name, this.pasteEvents[name]);
+    });
   }
 
   detach() {
     Object.keys(this.dragAndDropEvents).forEach(name => {
       this.targetEl.removeEventListener(name, this.dragAndDropEvents[name]);
     });
+    Object.keys(this.pasteEvents).forEach(name => {
+      document.removeEventListener(name, this.pasteEvents[name]);
+    });
   }
 
   drop(e) {
     this.stop(e);
     if (this.uploadEl) this.uploadEl.uploader(e);
+  }
+
+  paste(e) {
+    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    if (!this.uploadEl) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].kind != 'file') continue;
+      return this.uploadEl.uploader({dataTransfer: {files: [items[i].getAsFile()]}});
+    }
   }
 
   stop(e) {
