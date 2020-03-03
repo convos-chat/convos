@@ -258,10 +258,16 @@ sub _write_p {
 }
 
 sub _write {
-  my @cb = ref $_[-1] eq 'CODE' ? (pop) : ();
+  my $cb = ref $_[-1] eq 'CODE' ? pop : undef;
   my ($self, $buf) = @_;
+
+  unless ($self->{stream}) {
+    Mojo::IOLoop->next_tick(sub { $self->$cb('Not connected.') }) if $cb;
+    return;
+  }
+
   $self->_debug('<<< %s', term_escape $buf) if DEBUG;
-  $self->{stream}->write(Unicode::UTF8::encode_utf8($buf, sub { $_[0] }), @cb);
+  $self->{stream}->write(Unicode::UTF8::encode_utf8($buf, sub { $_[0] }), $cb ? ($cb) : ());
 }
 
 sub TO_JSON {
