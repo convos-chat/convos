@@ -1,5 +1,15 @@
 Revision history for perl distribution Convos
 
+3.12 2020-03-04T11:28:00+0900
+ - Add /clear history [name] command #150
+ - Fix NaN in the help page, for "/say" command
+ - Fix Timer failed: Can't call method "write" on an undefined value in Irc.pm
+ - Fix showing "day changed" indicator
+ - Add "s" after seconds in wsEventSentWhois()
+ - Add JOIN as alias for QUERY (EXPERIMENTAL)
+ - Made the welcome messages less annoying
+ - Bumped node dependencies
+
 3.11 2020-03-02T15:11:00+0900
  - Fix exception when searching too long a period #448
    Contributor: Doug Bell
