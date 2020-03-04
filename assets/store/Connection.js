@@ -189,12 +189,12 @@ export default class Connection extends Dialog {
     params.channels = channels;
 
     if (params.idle_for && channels.length) {
-      message += ' has been idle for %3 in %4.';
+      message += ' has been idle for %3s in %4.';
       vars.push(params.idle_for);
       vars.push(channels.join(', '));
     }
     else if (params.idle_for && !channels.length) {
-      message += 'has been idle for %3, and is not in any channels.';
+      message += 'has been idle for %3s, and is not in any channels.';
       vars.push(params.idle_for);
     }
     else if (channels.length) {
