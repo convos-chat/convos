@@ -84,9 +84,19 @@ sub t {
   Test::Mojo->new($_[1] || 'Convos');
 }
 
+sub wait_reject {
+  my ($p, $err, $desc) = (shift, shift, @_ % 2 ? pop : 'promise rejected');
+  my $got;
+  __PACKAGE__->irc_server_messages(@_) if @_;
+  $p->then(sub { }, sub { $got = shift // ''; })->wait;
+  local $Test::Builder::Level = $Test::Builder::Level + 1;
+  Test::More::is($got, $err, $desc);
+  return $p;
+}
+
 sub wait_success {
-  my ($p, $desc) = (shift, @_ % 2 ? pop : 'promise resolved');
-  my ($err, @res) = (undef);
+  my ($p,   $desc) = (shift, @_ % 2 ? pop : 'promise resolved');
+  my ($err, @res)  = (undef);
   __PACKAGE__->irc_server_messages(@_) if @_;
   $p->then(sub { @res = @_ }, sub { $err = shift // ''; })->wait;
   local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -118,7 +128,9 @@ HERE
     = File::Spec->catdir($FindBin::Bin, File::Spec->updir, "local", "test-$script");
   File::Path::remove_tree($CONVOS_HOME) if -d $CONVOS_HOME;
   no strict 'refs';
+  my $wait_reject  = \&wait_reject;
   my $wait_success = \&wait_success;
+  *{"$caller\::wait_reject"}  = \$wait_reject;
   *{"$caller\::wait_success"} = \$wait_success;
 }
 

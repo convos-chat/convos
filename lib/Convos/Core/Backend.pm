@@ -7,6 +7,11 @@ sub connections_p {
   return Mojo::Promise->resolve([]);
 }
 
+sub delete_messages_p {
+  my ($self, $obj) = @_;
+  return Mojo::Promise->resolve($obj);
+}
+
 sub delete_object_p {
   my ($self, $obj) = @_;
   return Mojo::Promise->resolve($obj);
@@ -115,6 +120,12 @@ implements the following new ones.
   $p = $backend->connections($user)->then(sub { my $connections = shift });
 
 Used to find a list of connection names for a given L<$user|Convos::Core::User>.
+
+=head2 delete_messages_p
+
+  $p = $backend->delete_object_p($obj)->then(sub { my $obj = shift });
+
+This method will delete all messages for a given dialog.
 
 =head2 delete_object_p
 

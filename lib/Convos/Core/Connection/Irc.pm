@@ -49,11 +49,12 @@ sub send_p {
   return $self->_send_message_p($target, $message)                    if $cmd eq 'SAY';
   return $self->_send_message_p(split /\s+/, $message, 2) if $cmd eq 'MSG';
 
-  return $self->_send_query_p($message) if $cmd eq 'QUERY';
-  return $self->_send_join_p($message)  if $cmd eq 'JOIN';
-  return $self->_send_list_p($message)  if $cmd eq 'LIST';
-  return $self->_send_nick_p($message)  if $cmd eq 'NICK';
-  return $self->_send_whois_p($message) if $cmd eq 'WHOIS';
+  return $self->_send_clear_p(split /\s+/, $message) if $cmd eq 'CLEAR';
+  return $self->_send_query_p($message)              if $cmd eq 'QUERY';
+  return $self->_send_join_p($message)               if $cmd eq 'JOIN';
+  return $self->_send_list_p($message)               if $cmd eq 'LIST';
+  return $self->_send_nick_p($message)               if $cmd eq 'NICK';
+  return $self->_send_whois_p($message)              if $cmd eq 'WHOIS';
 
   return $self->_send_names_p($target) if $cmd eq 'NAMES';
 
@@ -542,6 +543,20 @@ sub _periodic_events {
       $self->_write("PING => $self->{myinfo}{real_host}\r\n") if $self->{myinfo}{real_host};
     }
   );
+}
+
+sub _send_clear_p {
+  my ($self, $what, $target) = @_;
+
+  if (!$what or $what ne 'history' or !$target) {
+    return Mojo::Promise->reject(
+      'WARNING! /clear history [name] will delete all messages in the backend!');
+  }
+
+  my $dialog = $self->get_dialog($target);
+  return $target
+    ? $self->user->core->backend->delete_messages_p($dialog)
+    : Mojo::Promise->reject('Unknown conversation.');
 }
 
 sub _send_ison_p {

@@ -48,6 +48,19 @@ sub connections_p {
   return Mojo::Promise->resolve(\@connections);
 }
 
+sub delete_messages_p {
+  my ($self, $obj) = @_;
+  return Mojo::Promise->reject('Unknown target.') unless $obj and $obj->connection;
+
+  my $p = Mojo::Promise->new;
+  Mojo::IOLoop::Subprocess->new->run(
+    sub { $self->_delete_messages($obj) },
+    sub { $_[1] ? $p->reject($_[1]) : $p->resolve($obj) },
+  );
+
+  return $p;
+}
+
 sub delete_object_p {
   my ($self, $obj) = @_;
 
@@ -207,6 +220,14 @@ sub users_p {
   return Mojo::Promise->resolve(\@users);
 }
 
+sub _delete_messages {
+  my ($self, $obj) = @_;
+  my $basename = sprintf '%s.log', $obj->id;
+  $self->home->child($obj->connection->user->id, $obj->connection->id)->list_tree->each(sub {
+    $_[0]->remove if $_[0]->basename eq $basename;
+  });
+}
+
 sub _delete_object {
   my ($self, $obj) = @_;
   my $path = $self->home->child(@{$obj->uri});
@@ -226,7 +247,7 @@ sub _delete_object {
 sub _format {
   my ($self, $type) = @_;
   my $format = $FORMAT{$type};
-  return @$format if $format;
+  return @$format                                                    if $format;
   warn "[Convos::Core::Backend::File] No format defined for $type\n" if $type ne 'error' and DEBUG;
   return;
 }
@@ -277,7 +298,7 @@ sub _messages {
   my ($self, $obj, $args) = @_;
   my $cursor = $args->{cursor};
 
-  return [] if $args->{after} > $args->{before};
+  return []                if $args->{after} > $args->{before};
   return $args->{messages} if $cursor < $args->{after};
   $args->{cursor} = $args->{cursor}->add_months(-1) while $cursor->mon == $args->{cursor}->mon;
 
@@ -438,6 +459,10 @@ L<Convos::Core::Backend> and implements the following new ones.
 =head2 connections_p
 
 See L<Convos::Core::Backend/connections_p>.
+
+=head2 delete_messages_p
+
+See L<Convos::Core::Backend/delete_messages_p>.
 
 =head2 delete_object_p
 

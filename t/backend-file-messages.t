@@ -112,4 +112,13 @@ $t->get_ok(
 )->status_is(200);
 is int @{$t->tx->res->json->{messages} || []}, 0, 'after and before greater than 12 months';
 
+note 'clear';
+$connection->send_p('#whatever', '/clear #convos')
+  ->$wait_reject('WARNING! /clear history [name] will delete all messages in the backend!');
+$connection->send_p('#whatever', '/clear history #foo')->$wait_reject('Unknown target.');
+$connection->send_p('#whatever', '/clear history #convos')
+  ->$wait_success('deleted convos messages');
+$t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages')->status_is(200)
+  ->json_is('/messages', []);
+
 done_testing;

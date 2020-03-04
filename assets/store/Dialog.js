@@ -235,6 +235,12 @@ export default class Dialog extends Reactive {
     this.addMessage(this._partMessage(params));
   }
 
+  wsEventSentClear(params) {
+    if (params.errors) return;
+    this.update({messages: []});
+    this.addMessage({message: 'History was cleared for %1.', vars: [this.name]});
+  }
+
   wsEventSentNames(params) {
     this._updateParticipants(params);
 
