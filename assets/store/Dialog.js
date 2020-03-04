@@ -32,6 +32,7 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
     this.prop('ro', 'path', path.map(p => encodeURIComponent(p)).join('/'));
 
+    this.prop('rw', 'endOfHistory', false);
     this.prop('rw', 'errors', 0);
     this.prop('rw', 'first_time', false);
     this.prop('rw', 'last_active', new Time(params.last_active));
@@ -139,7 +140,7 @@ export default class Dialog extends Reactive {
 
     // All of the history is loaded
     const hasMessages = this.messages.length;
-    if (hasMessages && opParams.before && this.messages[0].endOfHistory) return;
+    if (hasMessages && opParams.before && this.endOfHistory) return;
 
     // Load messages
     this.update({status: 'loading'});
@@ -150,7 +151,7 @@ export default class Dialog extends Reactive {
     if (this.messages.length <= 10) this.update({first_time: true});
 
     // End of history
-    if (hasMessages && opParams.before && body.end) this.messages[0].endOfHistory = true;
+    if (hasMessages && opParams.before && body.end) this.update({endOfHistory: true});
 
     // Reload the whole conversation if we are not at the end
     if (maybe == 'after' && !body.end) {

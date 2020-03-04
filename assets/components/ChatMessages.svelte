@@ -12,11 +12,14 @@ export let input;
 
 const user = getContext('user');
 
-$: messages = internalMessages.mergeWithMessages(user, connection, dialog);
+$: messages = addMeta(internalMessages.mergeWithMessages(user, connection, dialog));
 $: unreadFrom = dialog.unread;
 
-function dayChanged(i) {
-  return i == 0 ? false : messages[i].ts.getDate() != messages[i - 1].ts.getDate();
+function addMeta(messages) {
+  return messages.map((msg, i) => {
+    msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
+    return msg;
+  });
 }
 
 function gotoDialogFromNotifications(e) {
@@ -60,9 +63,9 @@ function toggleDetails(e) {
     <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
   {/if}
 
-  {#if message.endOfHistory}
+  {#if i == 0 && dialog.endOfHistory}
     <ChatMessagesStatusLine class="for-start-of-history" icon="calendar-alt">{l('Started chatting on %1', message.ts.getHumanDate())}</ChatMessagesStatusLine>
-  {:else if dayChanged(i)}
+  {:else if message.dayChanged}
     <ChatMessagesStatusLine class="for-day-changed" icon="calendar-alt">{message.ts.getHumanDate()}</ChatMessagesStatusLine>
   {/if}
 
@@ -70,8 +73,8 @@ function toggleDetails(e) {
     class:is-not-present="{!senderIsOnline(message)}"
     class:is-sent-by-you="{message.from == connection.nick}"
     class:is-highlighted="{message.highlight}"
-    class:has-not-same-from="{!isSameSender(i) && !dayChanged(i)}"
-    class:has-same-from="{isSameSender(i) && !dayChanged(i)}"
+    class:has-not-same-from="{!isSameSender(i) && !message.dayChanged}"
+    class:has-same-from="{isSameSender(i) && !message.dayChanged}"
     on:click="{gotoDialogFromNotifications}"
     data-index="{i}">
 
