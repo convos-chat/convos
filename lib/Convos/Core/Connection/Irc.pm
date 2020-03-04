@@ -561,8 +561,9 @@ sub _send_join_p {
   return $self->_send_query_p($dialog_id)->then(sub {
     my $dialog = shift;
     $dialog->password($password) if length $password;
+    return $dialog->TO_JSON if $command =~ m!^\w!;    # A bit more sloppy than is_private
 
-    return !$dialog->frozen ? $dialog : $self->_write_and_wait_p(
+    return !$dialog->frozen ? $dialog->TO_JSON : $self->_write_and_wait_p(
       "JOIN $command", {dialog_id => lc $dialog_id},
       470                 => {1 => $dialog_id},    # Link channel
       479                 => {1 => $dialog_id},    # Illegal channel name

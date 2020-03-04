@@ -208,6 +208,10 @@ is_deeply(
   'join protected'
 );
 
+$res = $connection->send_p('', '/join some_user')->$wait_success;
+is $res->{dialog_id}, 'some_user', 'join alias for query';
+$connection->send_p('', '/part some_user')->$wait_success('clean up for state test later on');
+
 note 'list';
 $res = $connection->send_p('', '/list')
   ->$wait_success(from_server => ":localhost 321 superman Channel :Users  Name\r\n");
