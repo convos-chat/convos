@@ -8,12 +8,20 @@ import TextField from '../components/form/TextField.svelte';
 import {docTitle} from '../store/router';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
-import {themes} from '../settings';
 
+const colorSchemeOptions = [['auto', 'Auto'], ['dark', 'Dark'], ['light', 'Light']];
 const user = getContext('user');
 const updateUserOp = user.api.operation('updateUser');
 
+const themes = Object.keys(user.themes).map(id => {
+  let name = user.themes[id].name;
+  const colorSchemes = Object.keys(user.themes[id].color_schemes || {}).filter(cs => cs != 'default');
+  if (colorSchemes.length) name += ' (' + colorSchemes.sort().join('/') + ')';
+  return [id, name];
+});
+
 let formEl;
+let colorScheme = user.colorScheme;
 let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
 let notificationsDisabled = user.events.browserNotifyPermission == 'denied';
 let theme = user.theme;
@@ -44,7 +52,7 @@ function updateUserFromForm(e) {
   }
 
   user.embedMaker.update({expandUrlToMedia});
-  user.update({theme});
+  user.update({colorScheme, theme});
   updateUserOp.perform(e.target);
 }
 </script>
@@ -75,6 +83,10 @@ function updateUserFromForm(e) {
 
     <SelectField name="theme" options="{themes}" bind:value="{theme}">
       <span slot="label">{l('Theme')}</span>
+    </SelectField>
+
+    <SelectField name="color_scheme" options="{colorSchemeOptions}" bind:value="{colorScheme}">
+      <span slot="label">{l('Color scheme')}</span>
     </SelectField>
 
     <TextField type="password" name="password" autocomplete="new-password">

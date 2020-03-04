@@ -1,5 +1,5 @@
+@import 'variables';
 @import 'fonts';
-@import 'themes';
 @import 'animations';
 @import 'mixins';
 
@@ -22,6 +22,7 @@
 @import 'components/chat-participants';
 
 @import 'components/json';
+@import 'components/hljs';
 @import 'components/link-embedder';
 @import 'components/fullscreen-media';
 

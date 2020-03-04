@@ -1,0 +1,196 @@
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: var(--syntax-hl-base);
+  background: var(--syntax-hl-base-bg);
+}
+
+.hljs-comment,
+.hljs-emphasis,
+.hljs-quote {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-link {
+  text-decoration: underline;
+}
+
+.hljs-addition {
+  background: var(--syntax-hl-addition-bg);
+  color: var(--syntax-hl-addition);
+}
+
+.hljs-attr {
+  background: var(--syntax-hl-attr-bg);
+  color: var(--syntax-hl-attr);
+}
+
+.hljs-attribute {
+  background: var(--syntax-hl-attribute-bg);
+  color: var(--syntax-hl-attribute);
+}
+
+.hljs-built_in {
+  background: var(--syntax-hl-built-in-bg);
+  color: var(--syntax-hl-built-in);
+}
+
+.hljs-bullet {
+  background: var(--syntax-hl-bullet-bg);
+  color: var(--syntax-hl-bullet);
+}
+
+.hljs-code {
+  background: var(--syntax-hl-code-bg);
+  color: var(--syntax-hl-code);
+}
+
+.hljs-comment {
+  background: var(--syntax-hl-comment-bg);
+  color: var(--syntax-hl-comment);
+}
+
+.hljs-deletion {
+  background: var(--syntax-hl-deletion-bg);
+  color: var(--syntax-hl-deletion);
+}
+
+.hljs-doctag {
+  background: var(--syntax-hl-doctag-bg);
+  color: var(--syntax-hl-doctag);
+}
+
+.hljs-formula {
+  background: var(--syntax-hl-formula-bg);
+  color: var(--syntax-hl-formula);
+}
+
+.hljs-function {
+  background: var(--syntax-hl-function-bg);
+  color: var(--syntax-hl-function);
+}
+
+.hljs-keyword {
+  background: var(--syntax-hl-keyword-bg);
+  color: var(--syntax-hl-keyword);
+}
+
+.hljs-link {
+  background: var(--syntax-hl-link-bg);
+  color: var(--syntax-hl-link);
+}
+
+.hljs-literal {
+  background: var(--syntax-hl-literal-bg);
+  color: var(--syntax-hl-literal);
+}
+
+.hljs-meta {
+  background: var(--syntax-hl-meta-bg);
+  color: var(--syntax-hl-meta);
+}
+
+.hljs-meta-keyword {
+  background: var(--syntax-hl-meta-keyword-bg);
+  color: var(--syntax-hl-meta-keyword);
+}
+
+.hljs-meta-string {
+  background: var(--syntax-hl-meta-string-bg);
+  color: var(--syntax-hl-meta-string);
+}
+
+.hljs-name {
+  background: var(--syntax-hl-name-bg);
+  color: var(--syntax-hl-name);
+}
+
+.hljs-number {
+  background: var(--syntax-hl-number-bg);
+  color: var(--syntax-hl-number);
+}
+
+.hljs-params {
+  background: var(--syntax-hl-params-bg);
+  color: var(--syntax-hl-params);
+}
+
+.hljs-quote {
+  background: var(--syntax-hl-quote-bg);
+  color: var(--syntax-hl-quote);
+}
+
+.hljs-regexp {
+  background: var(--syntax-hl-regexp-bg);
+  color: var(--syntax-hl-regexp);
+}
+
+.hljs-section {
+  background: var(--syntax-hl-section-bg);
+  color: var(--syntax-hl-section);
+}
+
+.hljs-selector-attr {
+  background: var(--syntax-hl-selector-attr-bg);
+  color: var(--syntax-hl-selector-attr);
+}
+
+.hljs-selector-class {
+  background: var(--syntax-hl-selector-class-bg);
+  color: var(--syntax-hl-selector-class);
+}
+
+.hljs-selector-id {
+  background: var(--syntax-hl-selector-id-bg);
+  color: var(--syntax-hl-selector-id);
+}
+
+.hljs-selector-pseudo {
+  background: var(--syntax-hl-selector-pseudo-bg);
+  color: var(--syntax-hl-selector-pseudo);
+}
+
+.hljs-selector-tag {
+  background: var(--syntax-hl-selector-tag-bg);
+  color: var(--syntax-hl-selector-tag);
+}
+
+.hljs-string {
+  background: var(--syntax-hl-string-bg);
+  color: var(--syntax-hl-string);
+}
+
+.hljs-subst {
+  background: var(--syntax-hl-subst-bg);
+  color: var(--syntax-hl-subst);
+}
+
+.hljs-symbol {
+  background: var(--syntax-hl-symbol-bg);
+  color: var(--syntax-hl-symbol);
+}
+
+.hljs-template-variable {
+  background: var(--syntax-hl-template-variable-bg);
+  color: var(--syntax-hl-template-variable);
+}
+
+.hljs-title {
+  background: var(--syntax-hl-title-bg);
+  color: var(--syntax-hl-title);
+}
+
+.hljs-type {
+  background: var(--syntax-hl-type-bg);
+  color: var(--syntax-hl-type);
+}
+
+.hljs-variable {
+  background: var(--syntax-hl-variable-bg);
+  color: var(--syntax-hl-variable);
+}

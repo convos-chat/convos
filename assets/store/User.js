@@ -20,19 +20,37 @@ export default class User extends Reactive {
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
     this.prop('ro', 'notifications', new Notifications({api, events: this.events}));
     this.prop('ro', 'roles', new Set());
+    this.prop('ro', 'themes', params.themes || {});
     this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('rw', 'highlight_keywords', []);
     this.prop('rw', 'status', 'pending');
 
+    this.prop('persist', 'colorScheme', 'auto');
     this.prop('persist', 'experimentalLoad', false);
     this.prop('persist', 'lastUrl', '');
     this.prop('persist', 'showGrid', false);
-    this.prop('persist', 'theme', 'auto');
+    this.prop('persist', 'theme', 'convos');
     this.prop('persist', 'version', '0');
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    if (matchMedia.matches) this._osColorScheme = 'dark';
+    matchMedia.addListener(e => { this._osColorScheme = e.matches ? 'dark' : 'light' });
 
     // Used to test WebSocket reconnect logic
     // setInterval(() => (this.events.ws && this.events.ws.close()), 3000);
+  }
+
+  activateTheme() {
+    const colorScheme = this.colorScheme == 'auto' ? this._osColorScheme : this.colorScheme;
+    const theme = this.themes[this.theme];
+    if (!theme) return console.error('[Convos] Invalid theme: ' + this.theme);
+
+    const file = theme.color_schemes[colorScheme] || theme.color_schemes.default;
+    document.getElementById('link_selected_theme').setAttribute('href', urlFor('/themes/' + file));
+
+    const htmlEl = document.documentElement;
+    htmlEl.className = htmlEl.className.replace(/theme-\S+/, () => 'theme-' + theme.id);
   }
 
   calculateLastUrl() {
@@ -138,6 +156,12 @@ export default class User extends Reactive {
 
   send(msg, cb) {
     return this.events.send(msg, cb);
+  }
+
+  update(params) {
+    super.update(params);
+    if (params.colorScheme || params.theme) this.activateTheme();
+    return this;
   }
 
   wsEventPong(params) {

@@ -11,7 +11,6 @@ $ENV{MOJO_MODE}      = 'production';
 
 SKIP: {
   skip 'BUILD_ASSETS=1 to run "pnpm run build"', 1 unless $ENV{BUILD_ASSETS} or $ENV{RELEASE};
-  detect_themes();
   build_assets();
 }
 
@@ -37,39 +36,6 @@ sub build_assets {
   /^convos\.[0-9a-f]{8}\.(css|js)\b/ and unlink "public/asset/$_" while $_ = readdir $ASSETS;
   system 'pnpm run build';
   ok 1, 'pnpm run build';
-}
-
-sub detect_themes {
-  my @theme_options = (['auto', 'Auto']);
-  curfile->dirname->sibling(qw(assets sass themes))->list->each(sub {
-    my $theme_file = shift;
-    my $fh         = $theme_file->open;
-    my ($id, $name) = ('', '');
-
-    while (my $line = readline $fh) {
-      $id   = $1 if $line =~ m!html.theme-(\S+)!;
-      $name = $1 if $line =~ m!Name:\s*(.+)!;
-    }
-
-    $id =~ s!,$!!;
-    $name ||= ucfirst $id;
-
-    unless ($id and $name) {
-      diag "Theme $theme_file has invalid structure";
-      return;
-    }
-
-    push @theme_options, [$id => $name];
-  });
-
-  my $settings_file = curfile->dirname->sibling(qw(assets settings.js));
-  my @settings      = split /\n/, $settings_file->slurp;
-  for my $line (@settings) {
-    $line = sprintf 'export const themes = %s;', encode_json \@theme_options
-      if $line =~ m!export const themes!;
-  }
-
-  $settings_file->spurt(join '', map {"$_\n"} @settings);
 }
 
 sub test_defaults {

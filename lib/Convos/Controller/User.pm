@@ -162,6 +162,18 @@ sub update {
   return $self->_update_user($json, $user);
 }
 
+sub theme {
+  my $self  = shift;
+  my $theme = $self->param('theme');
+
+  for my $path ($self->app->core->home, @{$self->app->static->paths}) {
+    my $file = Mojo::File->new($path, themes => "$theme.css");
+    return $self->reply->file($file) if -e $file;
+  }
+
+  return $self->render(text => "/* $theme.css not found */\n", status => 404);
+}
+
 sub _add_invite_token_to_params {
   my ($self, $params, $secret) = @_;
   $params->{token}
@@ -327,6 +339,10 @@ See L<Convos::Manual::API/registerUser>.
 =head2 register_html
 
 Will handle the "uri" that can hold "irc://...." URLs.
+
+=head2 theme
+
+Render custom themes.
 
 =head2 update
 

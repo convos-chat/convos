@@ -1,0 +1,90 @@
+/*
+ * name: Nord
+ */
+
+:root {
+  --body-bg: #2e3440;
+  --text-color: #d8dee9;
+  --link-color: #88c0d0;
+  --quote-color: #88c0d0;
+  --error-color: #bf616a;
+  --success-color: #a3be8c;
+  --highlight-color: #434c5e;
+  --hr-border: 1px solid #4e4e4e;
+  --button-bg: #5E81AC;
+  --button-color: #ECEFF4;
+  --button-border: 1px solid #434C5E;
+  --button-focus-outline: 2px solid #97b799;
+  --button-disabled-bg: #4c566a;
+  --button-disabled-color: #86a980;
+  --button-disabled-border: #373737;
+  --button-danger-bg: #bf616a;
+  --button-danger-color: #fff;
+  --input-bg: #b2bcd0;
+  --input-border: 1px solid #4e4e4e;
+  --input-color: #263754;
+  --input-focus-outline: 2px solid #e4ecf9;
+  --input-disabled-bg: #3B4252;
+  --input-disabled-color: #D8DEE9;
+  --input-placeholder-color: #4C566A;
+  --autocomplete-bg: #cbd3e4;
+  --autocomplete-border: 1px solid #888;
+  --autocomplete-focus-bg: #a9b5d0;
+  --ts-color: #b7bdc8;
+  --sidebar-left-bg: #4C566A;
+  --sidebar-left-frozen-color: #88C0D0;
+  --sidebar-left-text: #D8DEE9;
+  --sidebar-left-outline: #8ece93 auto 3px;
+  --sidebar-left-border-bottom: #5E81AC;
+  --sidebar-left-search-placeholder-color: @ECEFF4;
+  --sidebar-left-search-focus-bg: #434C5E;
+  --sidebar-right-bg: var(--body-bg);
+  --sidebar-right-text: var(--text-color);
+
+  /*
+   * Copyright (c) 2017-present Arctic Ice Studio <development@arcticicestudio.com>
+   * Copyright (c) 2017-present Sven Greb <development@svengreb.de>
+   *
+   * Project:    Nord highlight.js
+   * Version:    0.1.0
+   * Repository: https://github.com/arcticicestudio/nord-highlightjs
+   * License:    MIT
+   */
+  --syntax-hl-base: #D8DEE9;
+  --syntax-hl-base-bg: #2E3440;
+  --syntax-hl-addition-bg: rgba(163, 190, 140, 0.5);
+  --syntax-hl-deletion-bg: rgba(191, 97, 106, 0.5);
+  --syntax-hl-attr: #8FBCBB;
+  --syntax-hl-attribute: #D8DEE9;
+  --syntax-hl-built-in: #8FBCBB;
+  --syntax-hl-bullet: #81A1C1;
+  --syntax-hl-comment: #4C566A;
+  --syntax-hl-doctag: #8FBCBB;
+  --syntax-hl-class: #8FBCBB;
+  --syntax-hl-code: #8FBCBB;
+  --syntax-hl-formula: #8FBCBB;
+  --syntax-hl-function: #88C0D0;
+  --syntax-hl-keyword: #81A1C1;
+  --syntax-hl-literal: #81A1C1;
+  --syntax-hl-meta: #5E81AC;
+  --syntax-hl-meta-keyword: #5E81AC;
+  --syntax-hl-meta-string: #A3BE8C;
+  --syntax-hl-name: #81A1C1;
+  --syntax-hl-number: #B48EAD;
+  --syntax-hl-params: #D8DEE9;
+  --syntax-hl-quote: #4C566A;
+  --syntax-hl-regexp: #EBCB8B;
+  --syntax-hl-section: #88C0D0;
+  --syntax-hl-selector-attr: #8FBCBB;
+  --syntax-hl-selector-class: #8FBCBB;
+  --syntax-hl-selector-id: #8FBCBB;
+  --syntax-hl-selector-pseudo: #88C0D0;
+  --syntax-hl-selector-tag: #D8DEE9;
+  --syntax-hl-string: #A3BE8C;
+  --syntax-hl-subst: #D8DEE9;
+  --syntax-hl-symbol: #81A1C1;
+  --syntax-hl-template-variable: #D8DEE9;
+  --syntax-hl-title: #8FBCBB;
+  --syntax-hl-type: #8FBCBB;
+  --syntax-hl-variable: #D8DEE9;
+}

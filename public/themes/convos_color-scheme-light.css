@@ -1,0 +1,46 @@
+/*
+ * name: Convos
+ * color-scheme: light
+ */
+
+:root {
+  /* Defaults defined in https://github.com/Nordaaker/convos/blob/master/assets/sass/_variables.scss */
+
+  /*
+   * Atom One Light by Daniel Gamage
+   * Original One Light Syntax theme from https://github.com/atom/one-light-syntax
+   */
+  --syntax-hl-base: #383a42;
+  --syntax-hl-base-bg: #fafafa;
+  --syntax-hl-addition: #50a14f;
+  --syntax-hl-attr: #986801;
+  --syntax-hl-attribute: #50a14f;
+  --syntax-hl-built-in: #c18401;
+  --syntax-hl-bullet: #4078f2;
+  --syntax-hl-comment: #a0a1a7;
+  --syntax-hl-deletion: #e45649;
+  --syntax-hl-doctag: #a626a4;
+  --syntax-hl-formula: #a626a4;
+  --syntax-hl-keyword: #a626a4;
+  --syntax-hl-link: #4078f2;
+  --syntax-hl-literal: #0184bb;
+  --syntax-hl-meta-string: #50a14f;
+  --syntax-hl-meta: #4078f2;
+  --syntax-hl-name: #e45649;
+  --syntax-hl-number: #986801;
+  --syntax-hl-quote: #a0a1a7;
+  --syntax-hl-regexp: #50a14f;
+  --syntax-hl-section: #e45649;
+  --syntax-hl-selector-attr: #986801;
+  --syntax-hl-selector-class: #986801;
+  --syntax-hl-selector-id: #4078f2;
+  --syntax-hl-selector-pseudo: #986801;
+  --syntax-hl-selector-tag: #e45649;
+  --syntax-hl-string: #50a14f;
+  --syntax-hl-subst: #e45649;
+  --syntax-hl-symbol: #4078f2;
+  --syntax-hl-template-variable: #986801;
+  --syntax-hl-title: #4078f2;
+  --syntax-hl-type: #986801;
+  --syntax-hl-variable: #986801;
+}

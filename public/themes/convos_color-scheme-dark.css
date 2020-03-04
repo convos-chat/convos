@@ -1,8 +1,9 @@
-// Name: Dark
+/*
+ * name: Convos
+ * color-scheme: dark
+ */
 
-html.theme-dark {
-  @import '../../../node_modules/highlight.js/scss/atom-one-dark.scss';
-
+:root {
   --body-bg: #1f2122;
   --text-color: #d1cfca;
   --link-color: #d1cfca;
@@ -41,4 +42,42 @@ html.theme-dark {
   --sidebar-left-search-focus-bg: #2d3c2c;
   --sidebar-right-bg: var(--body-bg);
   --sidebar-right-text: var(--text-color);
+
+  /*
+   * Atom One Dark by Daniel Gamage
+   * Original One Dark Syntax theme from https://github.com/atom/one-dark-syntax
+   */
+  --syntax-hl-base: #abb2bf;
+  --syntax-hl-base-bg: #282c34;
+  --syntax-hl-addition: #98c379;
+  --syntax-hl-attr: #d19a66;
+  --syntax-hl-attribute: #98c379;
+  --syntax-hl-built-in: #e6c07b;
+  --syntax-hl-bullet: #61aeee;
+  --syntax-hl-comment: #5c6370;
+  --syntax-hl-deletion: var(--syntax-hl-base);
+  --syntax-hl-doctag: #c678dd;
+  --syntax-hl-formula: #c678dd;
+  --syntax-hl-keyword: #c678dd;
+  --syntax-hl-link: #61aeee;
+  --syntax-hl-literal: #56b6c2;
+  --syntax-hl-meta-string: #98c379;
+  --syntax-hl-meta: #61aeee;
+  --syntax-hl-name: #e06c75;
+  --syntax-hl-number: #d19a66;
+  --syntax-hl-quote: #5c6370;
+  --syntax-hl-regexp: #98c379;
+  --syntax-hl-section: #e06c75;
+  --syntax-hl-selector-attr: #d19a66;
+  --syntax-hl-selector-class: #d19a66;
+  --syntax-hl-selector-id: #61aeee;
+  --syntax-hl-selector-pseudo: #d19a66;
+  --syntax-hl-selector-tag: #e06c75;
+  --syntax-hl-string: #98c379;
+  --syntax-hl-subst: #e06c75;
+  --syntax-hl-symbol: #61aeee;
+  --syntax-hl-template-variable: #d19a66;
+  --syntax-hl-title: #61aeee;
+  --syntax-hl-type: #d19a66;
+  --syntax-hl-variable: #d19a66;
 }

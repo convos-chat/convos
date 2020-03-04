@@ -7,7 +7,6 @@ import {activeMenu, calculateCurrentPageComponent, container, currentUrl, docTit
 import {closestEl, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {onMount, setContext} from 'svelte';
-import {setTheme} from './store/themes';
 import {urlFor} from './store/router';
 
 // Routing
@@ -38,20 +37,20 @@ export const routingRules = [
 
 const settings = [window.__convos, delete window.__convos][0];
 const api = new Api(settings.api_url, {debug: true});
-const user = new User({api, wsUrl: settings.ws_url});
+const user = new User({api, wsUrl: settings.ws_url, themes: settings.themes});
 const notifications = user.notifications;
 
 let containerWidth = 0;
 
 window.hljs = hljs; // Required by paste plugin
 currentUrl.base = settings.base_url;
+user.activateTheme();
 user.events.listenToGlobalEvents();
 setContext('settings', settings);
 setContext('user', user);
 
 $: container.set({wideScreen: containerWidth > 800, width: containerWidth});
 $: calculateCurrentPageComponent($currentUrl, $user, routingRules);
-$: setTheme($user.theme);
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $docTitle : $docTitle;
 $: showSidebarChat = $pageComponent.routerOptions.user == 'loggedIn';
 
