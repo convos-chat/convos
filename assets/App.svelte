@@ -16,6 +16,7 @@ import DialogAdd from './page/DialogAdd.svelte';
 import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
+import Search from './page/Search.svelte';
 import Settings from './page/Settings.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 
@@ -31,6 +32,7 @@ export const routingRules = [
   [new RegExp('^/settings'), Settings, {user: 'loggedIn'}],
   [new RegExp('^/chat'), Chat, {user: 'loggedIn'}],
   [new RegExp('^/help'), Help, {user: 'loggedIn'}],
+  [new RegExp('^/search'), Search, {user: 'loggedIn'}],
   [new RegExp('^/$'), null, {user: ['error', 'success'], gotoLast: true}],
   [new RegExp('.*'), Fallback, {}],
 ];

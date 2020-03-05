@@ -55,6 +55,7 @@ sub startup {
   $auth_r->get('/help')->to(template => 'index');
   $auth_r->get('/chat/*rest',     {rest => ''})->to(template => 'index');
   $auth_r->get('/settings/*rest', {rest => ''})->to(template => 'index');
+  $auth_r->get('/search')->to(template => 'index');
 
   $self->_plugins;
   $self->_detect_themes;

@@ -3,6 +3,7 @@ import EmbedMaker from '../js/EmbedMaker';
 import Events from '../js/Events';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
+import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
 import {urlFor} from './router';
@@ -19,6 +20,7 @@ export default class User extends Reactive {
     this.prop('ro', 'events', this._createEvents(params));
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
     this.prop('ro', 'notifications', new Notifications({api, events: this.events}));
+    this.prop('ro', 'search', new Search({api, events: this.events}));
     this.prop('ro', 'roles', new Set());
     this.prop('ro', 'themes', params.themes || {});
     this.prop('ro', 'unread', () => this._calculateUnread());

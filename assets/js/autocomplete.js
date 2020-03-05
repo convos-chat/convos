@@ -22,7 +22,8 @@ autocomplete.commands = ({query}) => {
 };
 
 autocomplete.dialogs = ({dialog, query, user}) => {
-  const dialogs = user.findDialog({connection_id: dialog.connection_id}).dialogs.toArray();
+  const connection = user.findDialog({connection_id: dialog.connection_id});
+  const dialogs = connection ? connection.dialogs.toArray() : user.dialogs();
   const opts = [];
 
   for (let i = 0; i < dialogs.length; i++) {

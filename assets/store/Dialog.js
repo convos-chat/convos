@@ -113,6 +113,7 @@ export default class Dialog extends Reactive {
     if (status == 'locked') return this.frozen == 'Invalid password.';
     if (status == 'notifications') return false;
     if (status == 'private') return this.is_private;
+    if (status == 'search') return false;
     if (status == 'unread') return this.unread && true;
     return this.status == status;
   }

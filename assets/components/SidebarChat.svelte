@@ -156,6 +156,10 @@ function renderUnread(dialog) {
       <span>{l('Notifications')}</span>
       <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
     </Link>
+    <Link href="/search">
+      <Icon name="search"/>
+      <span>{l('Search')}</span>
+    </Link>
     <Link href="/settings/conversation">
       <Icon name="comment"/>
       <span>{l('Add conversation')}</span>

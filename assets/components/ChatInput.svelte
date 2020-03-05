@@ -19,7 +19,8 @@ const user = getContext('user');
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
 $: connection = user.findDialog({connection_id: dialog.connection_id});
 $: inputParts = calculateInputParts(pos);
-$: placeholder = connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', $connection.nick);
+$: nick = connection && connection.nick;
+$: placeholder = dialog.is('search') ? 'Enter search terms' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
 
 onMount(() => {
   uploadEl.uploader = uploadFiles;
@@ -92,7 +93,8 @@ export function sendMessage(e) {
   const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
 
   if (msg.message.length) {
-    user.send(msg, res => {
+    const sender = dialog.is('search') ? dialog : user;
+    sender.send(msg, res => {
       if (!res.errors || !dialog) return;
       res.stopPropagation();
       res.vars = [res.message, extractErrorMessage(res.errors)];

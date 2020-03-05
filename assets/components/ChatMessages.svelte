@@ -12,12 +12,16 @@ export let input;
 
 const user = getContext('user');
 
-$: messages = addMeta(internalMessages.mergeWithMessages(user, connection, dialog));
+$: messages = addMeta(internalMessages.mergeWithMessages(user, connection, $dialog));
 $: unreadFrom = dialog.unread;
 
 function addMeta(messages) {
   return messages.map((msg, i) => {
-    msg.dayChanged = i == 0 ? false : msg.ts.getDate() != messages[i - 1].ts.getDate();
+    msg.dayChanged
+      = i == 0 && dialog.is('search') ? true
+      : i == 0 ? false
+      : msg.ts.getDate() != messages[i - 1].ts.getDate();
+
     return msg;
   });
 }
@@ -50,8 +54,12 @@ function toggleDetails(e) {
 }
 </script>
 
-{#if dialog.messages.length == 0 && dialog.is('notifications')}
+{#if $dialog.messages.length == 0 && dialog.is('notifications')}
   <h2>{l('No notifications.')}</h2>
+{/if}
+
+{#if $dialog.messages.length == 0 && dialog.is('search')}
+  <h2>{l('No search results.')}</h2>
 {/if}
 
 {#if messages.length > 40 && dialog.is('loading')}
@@ -63,7 +71,7 @@ function toggleDetails(e) {
     <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
   {/if}
 
-  {#if i == 0 && dialog.endOfHistory}
+  {#if i == 0 && $dialog.endOfHistory}
     <ChatMessagesStatusLine class="for-start-of-history" icon="calendar-alt">{l('Started chatting on %1', message.ts.getHumanDate())}</ChatMessagesStatusLine>
   {:else if message.dayChanged}
     <ChatMessagesStatusLine class="for-day-changed" icon="calendar-alt">{message.ts.getHumanDate()}</ChatMessagesStatusLine>
