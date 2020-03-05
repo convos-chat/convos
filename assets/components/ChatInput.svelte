@@ -21,6 +21,7 @@ $: connection = user.findDialog({connection_id: dialog.connection_id});
 $: inputParts = calculateInputParts(pos);
 $: nick = connection && connection.nick;
 $: placeholder = dialog.is('search') ? 'Enter search terms' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
+$: sendIcon = dialog.is('search') ? 'search' : 'paper-plane';
 
 onMount(() => {
   uploadEl.uploader = uploadFiles;
@@ -153,12 +154,12 @@ const keys = {
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
     on:keyup="{e => keys.Release(e)}"></textarea>
 
-  <div class="chat-input__upload-wrapper">
+  <div class="chat-input__upload-wrapper" hidden="{!dialog.is('conversation')}">
     <span></span>
     <input type="file" on:change="{uploadFiles}" bind:this="{uploadEl}">
   </div>
 
-  <a href="#send" on:click="{sendMessage}" class="chat-input__send"><Icon name="paper-plane"/></a>
+  <a href="#send" on:click="{sendMessage}" class="chat-input__send"><Icon name="{sendIcon}"/></a>
 
   <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
     {#each autocompleteOptions as opt, i}

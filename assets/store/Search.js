@@ -14,7 +14,9 @@ export default class Search extends Dialog {
   }
 
   is(status) {
-    return status == 'search' ? true : super.is(status);
+    if (status == 'conversation') return false;
+    if (status == 'search') return true;
+    return super.is(status);
   }
 
   async load(params) {
@@ -34,7 +36,7 @@ export default class Search extends Dialog {
       return ' ';
     });
 
-    opParams.match.trim();
+    opParams.match = opParams.match.trim();
     if (!opParams.match.match(/\S/)) return this;
 
     // Load messages
