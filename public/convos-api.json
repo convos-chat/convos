@@ -435,7 +435,35 @@
         }
       }
     },
-    "/settings": {
+    "/search": {
+      "get": {
+        "tags": [ "search" ],
+        "summary": "Search for historic messages.",
+        "operationId": "searchMessages",
+        "x-mojo-to": "search#messages",
+        "parameters": [
+          { "name": "connection_id", "in": "query", "type": "string", "description": "An ID for a connection" },
+          { "name": "dialog_id", "in": "query", "type": "string", "description": "An ID for a dialog" },
+          { "name": "after", "in": "query", "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
+          { "name": "before", "in": "query", "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
+          { "name": "limit", "in": "query", "type": "integer", "description": "Max number of messages to retrieve" },
+          { "name": "match", "in": "query", "type": "string", "description": "Messages must match this string" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "end": { "type": "boolean", "description": "Indicates if historic messages can be received." },
+                "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
+              }
+            }
+          }
+        }
+      }
+    },
+     "/settings": {
       "get": {
         "tags": [ "settings" ],
         "summary": "Get settings for Convos.",
