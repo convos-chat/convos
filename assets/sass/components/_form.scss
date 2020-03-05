@@ -109,6 +109,7 @@ textarea {
   .input {
     background: var(--input-disabled-bg);
     line-height: 1.8em;
+    word-break: break-word;
     height: auto;
     max-height: none;
     cursor: not-allowed;
