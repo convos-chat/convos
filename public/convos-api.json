@@ -64,10 +64,6 @@
         "responses": {
           "200": {
             "description": "Information about resource."
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -85,10 +81,6 @@
           "200": {
             "description": "Remove a connection.",
             "schema": { "$ref": "#/definitions/Success" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       },
@@ -117,10 +109,6 @@
           "200": {
             "description": "Update a connection.",
             "schema": { "$ref": "#/definitions/Connection" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -143,10 +131,6 @@
                 "last_read": { "type": "string", "format": "date-time" }
               }
             }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -174,10 +158,6 @@
                 "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
               }
             }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -201,10 +181,6 @@
                 "last_read": { "type": "string", "format": "date-time" }
               }
             }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -233,10 +209,6 @@
                 "messages": { "type": "array", "items": { "$ref": "#/definitions/Message" } }
               }
             }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -256,10 +228,6 @@
                 "connections": { "type": "array", "items": { "$ref": "#/definitions/Connection" } }
               }
             }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       },
@@ -290,10 +258,6 @@
             "schema": {
               "$ref": "#/definitions/Connection"
             }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -315,10 +279,6 @@
                 }
               }
             }
-          },
-          "default": {
-            "description": "Internal server error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -357,10 +317,6 @@
                 }
               }
             }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -381,10 +337,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -405,10 +357,6 @@
                 "messages": { "type": "array", "items": { "$ref": "#/definitions/Notification" } }
               }
             }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -427,10 +375,6 @@
               "type": "object",
               "properties": {}
             }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -473,10 +417,6 @@
           "200": {
             "description": "ServerSettings.",
             "schema": { "$ref": "#/definitions/ServerSettings" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       },
@@ -494,13 +434,9 @@
           }
         ],
         "responses": {
-            "200": {
+          "200": {
             "description": "User profile.",
             "schema": { "$ref": "#/definitions/ServerSettings" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -515,10 +451,6 @@
           "200": {
             "description": "Successfully deleted.",
             "schema": { "$ref": "#/definitions/Success" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       },
@@ -536,10 +468,6 @@
           "200": {
             "description": "User profile.",
             "schema": { "$ref": "#/definitions/User" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       },
@@ -563,13 +491,9 @@
           }
         ],
         "responses": {
-            "200": {
+          "200": {
             "description": "User profile.",
             "schema": { "$ref": "#/definitions/User" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -599,10 +523,6 @@
           "200": {
             "description": "User profile.",
             "schema": { "$ref": "#/definitions/User" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -618,10 +538,6 @@
           "200": {
             "description": "Successfully logged out.",
             "schema": { "$ref": "#/definitions/Success" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
@@ -679,10 +595,6 @@
           "200": {
             "description": "User profile.",
             "schema": { "$ref": "#/definitions/User" }
-          },
-          "default": {
-            "description": "Error.",
-            "schema": { "$ref": "#/definitions/Error" }
           }
         }
       }
