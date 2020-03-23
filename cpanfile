@@ -4,12 +4,12 @@ requires "Crypt::Eksblowfish"             => "0.009";
 requires "File::HomeDir"                  => "1.00";
 requires "File::ReadBackwards"            => "1.05";
 requires "IRC::Utils"                     => "0.12";
-requires "JSON::Validator"                => "3.16";
+requires "JSON::Validator"                => "3.24";
 requires "LinkEmbedder"                   => "1.11";
-requires "Mojolicious"                    => "8.25";
-requires "Mojolicious::Plugin::OpenAPI"   => "2.18";
+requires "Mojolicious"                    => "8.35";
+requires "Mojolicious::Plugin::OpenAPI"   => "3.30";
 requires "Mojolicious::Plugin::Webpack"   => "0.12";
-requires "Parse::IRC"                     => "1.20";
+requires "Parse::IRC"                     => "1.22";
 requires "Time::Piece"                    => "1.20";
 requires "Unicode::UTF8"                  => "0.62";
 
