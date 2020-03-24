@@ -24,7 +24,6 @@ for my $cmd (
   ['',          '/say'],                # SAY
   ['',          '/topic'],              # TOPIC get
   ['',          '/topic New topic'],    # TOPIC set
-  ['#whatever', '/join'],               # JOIN
   ['#whatever', '/msg'],                # MSG
   ['#whatever', '/whois'],              # WHOIS
   )
@@ -190,6 +189,10 @@ $res = $connection->send_p('Superduper', '/ison')
 is_deeply $res, {nick => 'Superduper', online => true}, 'ison';
 
 note 'join';
+is $connection->n_dialogs, 2, 'number of dialogs before list join';
+$connection->send_p('', '/join #foo,#bar,#baz')->$wait_success;
+is $connection->n_dialogs, 2, 'number of dialogs did not change';
+
 $res = $connection->send_p('', '/join #redirected')->$wait_success(
   from_server             => [__PACKAGE__, 'join-redirected-1.irc'],
   qr{JOIN \#\#redirected} => [__PACKAGE__, 'join-redirected-2.irc'],

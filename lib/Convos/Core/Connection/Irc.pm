@@ -394,7 +394,8 @@ sub _make_invalid_target_p {
 
   # err_norecipient and err_notexttosend
   return Mojo::Promise->reject('Cannot send without target.') unless $target;
-  return Mojo::Promise->reject('Cannot send message to target with spaces.') if $target =~ /\s/;
+  return Mojo::Promise->reject('Cannot send message to target with spaces or comma.')
+    if $target =~ /[,\s]/;
   return;
 }
 
@@ -573,31 +574,35 @@ sub _send_join_p {
   my ($self,      $command)  = @_;
   my ($dialog_id, $password) = (split(/\s/, ($command || ''), 2), '', '');
 
-  return $self->_send_query_p($dialog_id)->then(sub {
-    my $dialog = shift;
-    $dialog->password($password) if length $password;
-    return $dialog->TO_JSON if $command =~ m!^\w!;    # A bit more sloppy than is_private
-
-    return !$dialog->frozen ? $dialog->TO_JSON : $self->_write_and_wait_p(
-      "JOIN $command", {dialog_id => lc $dialog_id},
-      470                 => {1 => $dialog_id},    # Link channel
-      479                 => {1 => $dialog_id},    # Illegal channel name
-      err_badchanmask     => {1 => $dialog_id},
-      err_badchannelkey   => {1 => $dialog_id},
-      err_bannedfromchan  => {1 => $dialog_id},
-      err_channelisfull   => {1 => $dialog_id},
-      err_inviteonlychan  => {1 => $dialog_id},
-      err_nosuchchannel   => {1 => $dialog_id},
-      err_toomanychannels => {1 => $dialog_id},
-      err_toomanytargets  => {1 => $dialog_id},
-      err_unavailresource => {1 => $dialog_id},
-      rpl_endofnames      => {1 => $dialog_id},
-      rpl_namreply        => {1 => $dialog_id},
-      rpl_topic           => {2 => $dialog_id},
-      rpl_topicwhotime    => {1 => $dialog_id},
-      '_make_join_response',
-    );
-  });
+  return $self->_send_query_p($dialog_id)->then(
+    sub {
+      my $dialog = shift;
+      $dialog->password($password) if $dialog and length $password;
+      return $dialog->TO_JSON if $command =~ m!^\w!;    # A bit more sloppy than is_private
+      return !$dialog->frozen ? $dialog->TO_JSON : $self->_write_and_wait_p(
+        "JOIN $command", {dialog_id => lc $dialog_id},
+        470                 => {1 => $dialog_id},       # Link channel
+        479                 => {1 => $dialog_id},       # Illegal channel name
+        err_badchanmask     => {1 => $dialog_id},
+        err_badchannelkey   => {1 => $dialog_id},
+        err_bannedfromchan  => {1 => $dialog_id},
+        err_channelisfull   => {1 => $dialog_id},
+        err_inviteonlychan  => {1 => $dialog_id},
+        err_nosuchchannel   => {1 => $dialog_id},
+        err_toomanychannels => {1 => $dialog_id},
+        err_toomanytargets  => {1 => $dialog_id},
+        err_unavailresource => {1 => $dialog_id},
+        rpl_endofnames      => {1 => $dialog_id},
+        rpl_namreply        => {1 => $dialog_id},
+        rpl_topic           => {2 => $dialog_id},
+        rpl_topicwhotime    => {1 => $dialog_id},
+        '_make_join_response',
+      );
+    },
+    sub {
+      return $self->_write_p("JOIN $command\r\n");
+    }
+  );
 }
 
 sub _send_kick_p {
