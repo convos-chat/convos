@@ -123,8 +123,8 @@ note 'test stripping away invalid characters in a message';
 $connection->send_p('#convos' => "\n/me will be\a back\n")->$wait_success('send_p action');
 like slurp_log('#convos'), qr{\Q* superman will be back\E}m, 'loopback ctcp_action';
 
-$connection->send_p('#convos' => "some regular message")->$wait_success('send_p regular');
-like slurp_log('#convos'), qr{\Q<superman> some regular message\E}m, 'loopback private';
+$connection->send_p('#convos' => "some regular / message")->$wait_success('send_p regular');
+like slurp_log('#convos'), qr{\Q<superman> some regular / message\E}m, 'loopback private';
 
 $connection->send_p('#convos' => "/say /me is a command")->$wait_success('send_p /say');
 like slurp_log('#convos'), qr{\Q<superman> /me is a command\E}m, 'me is a command';

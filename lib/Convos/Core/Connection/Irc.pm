@@ -39,7 +39,7 @@ sub send_p {
   $target  //= '';
   $message //= '';
   $message =~ s![\x00-\x09\x0b-\x1f]!!g;    # remove invalid characters
-  $message =~ s!\s*/!/!s;
+  $message =~ s!^\s*/!/!s;                  # Remove space in front of command
   $message =~ s![\r\n]+$!!s;
 
   return $self->_send_message_p($target, $message) unless $message =~ s!^/([A-Za-z]+)\s*!!;
