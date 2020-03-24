@@ -174,8 +174,9 @@ export default class Dialog extends Reactive {
   }
 
   send(message, methodName) {
+    if (typeof message == 'string') message = {message};
     this.omnibus.send(
-      {connection_id: this.connection_id, dialog_id: this.dialog_id || '', message},
+      {connection_id: this.connection_id, dialog_id: this.dialog_id || '', ...message},
       typeof methodName == 'function' ? methodName : methodName ? this[methodName].bind(this) : null,
     );
   }
@@ -190,6 +191,12 @@ export default class Dialog extends Reactive {
   update(params) {
     this._loadParticipants();
     return super.update(params);
+  }
+
+  wsEventRtc(params) {
+    if (params.type == 'call') this.addMessage({message: '%1 is calling.', vars: [params.from]});
+    if (params.type == 'hangup') this.addMessage({message: '%1 ended the call.', vars: [params.from]});
+    this.emit('rtc', params);
   }
 
   wsEventMode(params) {

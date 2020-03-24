@@ -2,7 +2,7 @@ package Convos::Core::Connection::Irc;
 use Mojo::Base 'Convos::Core::Connection';
 
 no warnings 'utf8';
-use Convos::Util qw($CHANNEL_RE DEBUG);
+use Convos::Util qw($CHANNEL_RE DEBUG sdp_compress sdp_decompress);
 use IRC::Utils ();
 use Mojo::JSON qw(false true);
 use Mojo::Parameters;
@@ -72,10 +72,10 @@ sub _rtc_signal_p {
     $write->(ICE => $payload->to_string);
   }
   elsif ($msg->{answer}) {
-    $write->(ANS => $msg->{answer});
+    $write->(ANS => sdp_compress $msg->{answer});
   }
   elsif ($msg->{offer}) {
-    $write->(OFR => $msg->{offer});
+    $write->(OFR => sdp_compress $msg->{offer});
   }
 
   return Mojo::Promise->resolve({});
@@ -150,8 +150,8 @@ sub _irc_event_ctcpreply_rtcz {
 
     my $dialog = $self->dialog({name => $dialog_id});
     my $event
-      = $type eq 'ANS' ? {answer => $payload}
-      : $type eq 'OFR' ? {offer => $payload}
+      = $type eq 'ANS' ? {answer => sdp_decompress $payload}
+      : $type eq 'OFR' ? {offer => sdp_decompress $payload}
       :                  Mojo::Parameters->new($payload)->to_hash;
 
     $event->{from} = $nick;

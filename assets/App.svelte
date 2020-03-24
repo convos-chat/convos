@@ -7,6 +7,7 @@ import hljs from './js/hljs';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 import User from './store/User';
+import WebRTC from './store/WebRTC';
 import {focusMainInputElements, loadScript, q, showEl, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {l} from './js/i18n';
@@ -16,16 +17,19 @@ import {setupRouting} from './routes';
 import {viewport} from './store/Viewport';
 
 const api = new Api(process.env.api_url, {debug: true});
+const rtc = new WebRTC();
 const user = new User({api, isFirst: process.env.first_user, themes: process.env.themes});
 
 let [innerHeight, innerWidth] = [0, 0];
 
+setContext('rtc', rtc);
 setContext('user', user);
 
 window.hljs = hljs; // Required by paste plugin
 route.update({baseUrl: process.env.base_url});
 setupRouting(route, user);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
+user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
 user.omnibus.start({route, wsUrl: process.env.ws_url}); // Must be called after "baseUrl" is set
 
 $: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;

@@ -29,6 +29,7 @@ export default class User extends Reactive {
 
     this.prop('rw', 'activeDialog', this.notifications);
     this.prop('rw', 'highlight_keywords', []);
+    this.prop('rw', 'rtc', {});
     this.prop('rw', 'status', 'pending');
 
     this.prop('persist', 'assetVersion', 0);
@@ -142,6 +143,7 @@ export default class User extends Reactive {
     this.update({
       highlight_keywords: body.highlight_keywords || [],
       roles: true,
+      rtc: body.rtc || {},
       status: this.getUserOp.status,
     });
 

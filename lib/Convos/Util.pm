@@ -10,8 +10,10 @@ use Time::Piece ();
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
-our @EXPORT_OK
-  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module short_checksum tp);
+our @EXPORT_OK  = (
+  qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module),
+  qw(sdp_compress sdp_decompress short_checksum tp),
+);
 
 sub E {
   my ($msg, $path) = @_;
@@ -176,6 +178,18 @@ Will turn a given hostname into a nicer connection name.
   require_module "Some::Module";
 
 Will load the module or C<die()> with a message for how to install it.
+
+=head2 sdp_compress
+
+  $sdp = sdp_compress "v=0\r\n...";
+
+Will filter off some lines from the SDP message, which is not required.
+
+=head2 sdp_decompress
+
+  $sdp = sdp_decompress "v=0\n...";
+
+Used to decompress the C<$sdp> created by L</sdp_compress>.
 
 =head2 tp
 

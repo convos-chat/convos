@@ -46,6 +46,7 @@
     "jsdoc": "^3.6.3",
     "jsonhtmlify": "^0.0.1",
     "querystring": "^0.2.0",
-    "twemoji": "^12.1.5"
+    "twemoji": "^12.1.5",
+    "webrtc-adapter": "^7.6.0"
   }
 }
