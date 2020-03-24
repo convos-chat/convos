@@ -14,6 +14,7 @@ our ($CONVOS_HOME, $IRC_SERVER);
 
 $ENV{CONVOS_SECRETS} = 'not-very-secret';
 $ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
+$ENV{MOJO_MODE} //= 'test';
 
 sub irc_server_connect {
   my ($class, $connection) = @_;
