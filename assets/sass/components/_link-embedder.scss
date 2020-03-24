@@ -7,7 +7,7 @@
   overflow: hidden;
   display: block;
   max-width: 100%; // required to contain iframes on iphone
-  max-height: 20rem;
+  max-height: 50vh;
   margin: 6px 0;
 }
 
@@ -21,7 +21,7 @@
     float: left;
 
     img {
-      max-height: 50px;
+      max-height: 60px;
       margin-right: 8px;
       border: 0;
       box-shadow: none;
@@ -44,9 +44,16 @@
   }
 }
 
-.le-card.le-provider-convos .le-thumbnail img {
-  max-height: 30vh;
-  max-width: 40vw;
+.le-card.le-provider-convos {
+  h3,
+  p {
+    display: none;
+  }
+
+  .le-thumbnail img {
+    max-height: 40vh;
+    max-width: 100%;
+  }
 }
 
 .le-provider-link ~ .le-goto-link:before,
