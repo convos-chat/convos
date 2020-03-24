@@ -12,6 +12,8 @@ my $core       = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 
+my $user_home = $core->home->child('superman@example.com');
+
 my $err;
 $connection->send_p('', 'whatever')->catch(sub { $err = shift })->$wait_success('send_p');
 like $err, qr{without target}, 'send: without target';
@@ -165,17 +167,49 @@ $core->backend->on(message_to_paste => 'Convos::Plugin::Files::File');
 $connection->send_p('#convos' => $message_34243)->$wait_success('send_p super long message');
 like slurp_log('#convos'), qr{file/1/ktGW3DYcdBw5nB54}, 'created paste from long message';
 chomp $message_34243;
-is $core->home->child('superman@example.com/upload/ktGW3DYcdBw5nB54.data')->slurp, $message_34243,
-  'paste matches';
+is $user_home->child('upload/ktGW3DYcdBw5nB54.data')->slurp, $message_34243, 'paste matches';
 
 note 'single space';
 $connection->send_p('#convos' => ' ')->$wait_success('send_p single space');
 like slurp_log('#convos'), qr{<superman>\s\s\r?\n}, 'single space in log';
 
+note 'paste';
+my $long_line            = join '', map {$_} 0 .. 150;
+my $long_line_with_space = "$long_line $long_line";
+$long_line = "$long_line$long_line";
+my @sent = (
+  "a\nb\nc\nd\ne\nf\ng",
+  "abc\n$long_line\nghi\n$long_line_with_space" x 5,
+  "abc\ndef\nghi\n" x 200,
+);
+my @msg;
+local *Convos::Core::Connection::Irc::_irc_event_privmsg = sub { push @msg, pop(@_)->{raw_line} };
+$connection->send_p('#convos' => $sent[0])->$wait_success('short paste message');
+
+$connection->send_p('#convos' => $sent[1])->$wait_success('long paste message');
+$connection->send_p('#convos' => $sent[2])->$wait_success('many short lines paste message');
+
+is_deeply(
+  \@msg,
+  [
+    ':superman PRIVMSG #convos :file/1/Yf317MsGajxcw0Kj',
+    ':superman PRIVMSG #convos :file/1/4vprpCqxzuY25LVx',
+    ':superman PRIVMSG #convos :file/1/NaqVcgy4F1292BqA',
+  ],
+  'created paste messages',
+);
+
+for my $msg (@msg) {
+  my $basename = $msg =~ m!/(\w+)$! ? $1 : 'unknown';
+  my $file     = path $user_home, 'upload', split '/', "$basename.data";
+  my $sent     = shift @sent;
+  chomp $sent;    # TODO: Is this correct?
+  is $file->slurp, $sent, "paste file $basename match sent data";
+}
+
 done_testing;
 
 sub slurp_log {
   my @date = split '-', Time::Piece->new->strftime('%Y-%m');
-  return path(qw(local test-irc-message-t superman@example.com irc-localhost), @date, "$_[0].log")
-    ->slurp;
+  return path($user_home, 'irc-localhost', @date, "$_[0].log")->slurp;
 }

@@ -857,7 +857,7 @@ sub _set_wanted_state_p {
 
 sub _split_message {
   my ($self, $message) = @_;
-  return [$message] if length($message) < MAX_MESSAGE_LENGTH;
+  return [split /\n\r?/, $message] if length($message) < MAX_MESSAGE_LENGTH;
 
   my @messages;
   while (length $message) {
@@ -869,7 +869,10 @@ sub _split_message {
     return \@messages if @messages >= MAX_BULK_MESSAGE_SIZE;
 
     # Line is short
-    push @messages, $line, next if length($line) < MAX_MESSAGE_LENGTH;
+    if (length($line) < MAX_MESSAGE_LENGTH) {
+      push @messages, $line;
+      next;
+    }
 
     # Split long lines into multiple lines
     my @chunks = split /(\s)/, $line;
