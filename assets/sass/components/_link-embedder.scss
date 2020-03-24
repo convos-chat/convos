@@ -19,6 +19,7 @@
 
   .le-thumbnail {
     float: left;
+
     img {
       max-height: 50px;
       margin-right: 8px;
@@ -41,6 +42,11 @@
     margin: 4px 0;
     display: table-cell;
   }
+}
+
+.le-card.le-provider-convos .le-thumbnail img {
+  max-height: 30vh;
+  max-width: 40vw;
 }
 
 .le-provider-link ~ .le-goto-link:before,

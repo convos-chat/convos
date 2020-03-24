@@ -142,6 +142,7 @@ sub _before_dispatch {
   $base_url ||= $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
   $c->app->core->base_url($base_url);
   $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
+  $c->res->headers->header('X-Provider-Name', 'Convos');
 }
 
 sub _config {
