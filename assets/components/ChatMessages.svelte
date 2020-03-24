@@ -27,10 +27,10 @@ function addMeta(messages) {
 }
 
 function gotoDialogFromNotifications(e) {
-  if (dialog.connection_id) return;
+  if (dialog.is('conversation')) return;
   const target = e.target.closest('.message');
   const message = messages[target.dataset.index];
-  if (!message) return;
+  if (!message || !message.dialog_id) return;
   e.preventDefault();
   gotoUrl(notififactionUrl(message));
 }
@@ -56,10 +56,6 @@ function toggleDetails(e) {
 
 {#if $dialog.messages.length == 0 && dialog.is('notifications')}
   <h2>{l('No notifications.')}</h2>
-{/if}
-
-{#if $dialog.messages.length == 0 && dialog.is('search')}
-  <h2>{l('No search results.')}</h2>
 {/if}
 
 {#if messages.length > 40 && dialog.is('loading')}
@@ -89,8 +85,8 @@ function toggleDetails(e) {
     <Icon name="pick:{message.fromId}" color="{message.color}"/>
     <b class="message__ts" aria-labelledby="{message.id + '_ts'}">{message.ts.getHM()}</b>
     <div role="tooltip" id="{message.id + '_ts'}">{message.ts.toLocaleString()}</div>
-    {#if dialog.connection_id}
-      <a href="#input:{message.from}" on:click|preventDefault="{() => input.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
+    {#if dialog.connection_id || !message.dialog_id}
+      <a href="#input:{message.from}" on:click|preventDefault="{() => input && input.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
     {:else}
       <a href="{notififactionUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
     {/if}
@@ -103,6 +99,6 @@ function toggleDetails(e) {
   </div>
 {/each}
 
-{#if (connection.is && connection.is('unreachable')) || !dialog.is('success')}
+{#if (connection.is && connection.is('unreachable')) || !$dialog.is('success')}
   <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="{urlFor('/')}">{l('Loading...')}</a></ChatMessagesStatusLine>
 {/if}

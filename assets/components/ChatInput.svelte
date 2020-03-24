@@ -20,7 +20,7 @@ $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
 $: connection = user.findDialog({connection_id: dialog.connection_id});
 $: inputParts = calculateInputParts(pos);
 $: nick = connection && connection.nick;
-$: placeholder = dialog.is('search') ? 'Enter search terms' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
+$: placeholder = dialog.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
 $: sendIcon = dialog.is('search') ? 'search' : 'paper-plane';
 
 onMount(() => {
@@ -104,7 +104,8 @@ export function sendMessage(e) {
     });
   }
 
-  inputEl.value = '';
+  if (dialog.is('conversation')) inputEl.value = '';
+
   pos = 0;
 }
 

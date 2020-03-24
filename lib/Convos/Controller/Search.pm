@@ -6,6 +6,8 @@ use Mojo::JSON qw(false true);
 use Mojo::Util 'url_unescape';
 use Time::Piece ();
 
+use constant DEFAULT_AFTER => $ENV{CONVOS_DEFAULT_SEARCH_AFTER} || 86400 * 90;
+
 sub messages {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
@@ -40,17 +42,12 @@ sub messages {
   });
 }
 
-sub _default_after {
-  my $tp = Time::Piece->new;
-  $tp = $tp - 86400 * 90;    # 90 days back
-  return $tp->datetime;
-}
-
 sub _make_query {
   my $self = shift;
+  my $tp   = Time::Piece->new;
 
   my %query = (
-    after  => $self->param('after') || $self->_default_after,
+    after  => $self->param('after') || ($tp - DEFAULT_AFTER)->datetime,
     before => $self->param('before'),
     limit  => $self->param('limit') || 60,
     match  => $self->param('match'),

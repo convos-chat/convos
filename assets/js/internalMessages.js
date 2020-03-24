@@ -38,7 +38,7 @@ internalMessages.firstTime = (user, dialog) => {
   if (!dialog.is_private) {
     messages.push(fillIn({
       message: dialog.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.',
-      type: 'message',
+      type: 'notice',
       vars: [dialog.name, dialog.topic],
     }));
   }
@@ -46,7 +46,7 @@ internalMessages.firstTime = (user, dialog) => {
   if (dialog.is_private) {
     messages.push(fillIn({
       message: 'This is a private conversation with [%1](%2).',
-      type: 'message',
+      type: 'notice',
       vars: [dialog.name, urlFor(dialog.path + '#send:' + encodeURIComponent('/whois ' + dialog.name))],
     }));
   }
@@ -54,7 +54,7 @@ internalMessages.firstTime = (user, dialog) => {
     const nParticipants = dialog.participants().length;
     messages.push(fillIn({
       message: nParticipants == 1 ? 'You are the only participant in this conversation.' : 'There are %1 [participants](%2) in this conversation.',
-      type: 'message',
+      type: 'notice',
       vars: [nParticipants, urlFor(dialog.path + '#activeMenu:settings')],
     }));
   }
@@ -62,7 +62,7 @@ internalMessages.firstTime = (user, dialog) => {
   if (user.dialogs().length <= 3) {
     messages.push(fillIn({
       message: 'Start chatting by writing a message in the input field, or click on the conversation name ([%1](%2)) to get more information.',
-      type: 'message',
+      type: 'notice',
       vars: [dialog.name, urlFor(dialog.path + '#activeMenu:settings')],
     }));
   }
@@ -87,8 +87,36 @@ internalMessages.connectionDialogStatus = (connection, dialog) => {
   return messages;
 };
 
+internalMessages.emptySearch = (user, dialog) => {
+  const messages = [];
+  if (!dialog.is('search')) return messages;
+
+  if (dialog.query === null) {
+    messages.push(fillIn({
+      message: 'Search for messages sent by you or others the last %1 days by writing a message in the input field below.',
+      type: 'notice',
+      vars: [90],
+    }));
+    messages.push(fillIn({
+      message: 'You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.',
+      type: 'notice',
+      vars: [dialog.name, urlFor(dialog.path + '#activeMenu:settings')],
+    }));
+   }
+  else if (!dialog.messages.length && dialog.is('success')) {
+    messages.push(fillIn({
+      message: 'No search results for "%1".',
+      type: 'notice',
+      vars: [dialog.query],
+    }));
+   }
+
+  return messages;
+};
+
 internalMessages.mergeWithMessages = (user, connection, dialog) => {
-  return internalMessages.firstTime(user, dialog)
+  return internalMessages.emptySearch(user, dialog)
+    .concat(internalMessages.firstTime(user, dialog))
     .concat(dialog.messages)
     .concat(internalMessages.connectionDialogStatus(connection, dialog))
     .concat(internalMessages.askForNotifications(user));

@@ -10,6 +10,8 @@ export default class Search extends Dialog {
       name: 'Search',
     });
 
+    this.prop('rw', 'query', null);
+
     this.update({status: 'success'});
   }
 
@@ -28,25 +30,20 @@ export default class Search extends Dialog {
     if (opParams.match == undefined) opParams.match = '';
 
     // Find dialog
-    opParams.match = opParams.match.replace(/\s*([&#]\S+)\s*/, (all, dialog_id) => {
-      opParams.dialog_id = dialog_id;
-      return ' ';
-    }).replace(/\s*conversation:(\S+)\s*/, (all, dialog_id) => {
-      opParams.dialog_id = dialog_id;
-      return ' ';
-    });
+    opParams.match = opParams.match
+      .replace(/\s*conversation:(\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0])
+      .replace(/\s*([&#]\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0]);
 
     opParams.match = opParams.match.trim();
     if (!opParams.match.match(/\S/)) return this;
 
     // Load messages
-    this.update({messages: [], status: 'loading'});
+    this.update({messages: [], query: opParams.match, status: 'loading'});
     await this.messagesOp.perform(opParams);
     const body = this.messagesOp.res.body;
     this.addMessages(opParams.before ? 'unshift' : 'push', body.messages || []);
-    this.update({status: this.messagesOp.status});
 
-    return this;
+    return this.update({status: this.messagesOp.status});
   }
 
   send(msg) {
