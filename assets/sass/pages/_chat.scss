@@ -1,7 +1,8 @@
-.page-chat {
-  .main {
-    padding-bottom: 1rem;
-    bottom: 3.5rem;
+.page-chat .main {
+  bottom: 3.5rem;
+
+  &:after {
+    height: 1rem;
   }
 }
 
