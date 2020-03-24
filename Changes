@@ -1,5 +1,17 @@
 Revision history for perl distribution Convos
 
+4.00 2020-03-24T16:00:00+0900
+ - Add custom styling for image previews from Convos #450
+ - Add checkbox for "forced_connection" in "settings" #456
+ - Add search to frontend #187
+ - Made the theming support more flexible #394
+ - Fix not sending /query before sending a list of channels to the server #442
+ - Fix issue in firefox where padding-bottom is ignored
+ - Fix not removing space from sent message before "/"
+ - Fix creating paste from multiline messages
+ - Syncronized Makefile.PL and cpanfile, and bumped dependencies
+ - Travis runs the test suite successfully again
+
 3.12 2020-03-04T11:28:00+0900
  - Add /clear history [name] command #150
  - Fix NaN in the help page, for "/say" command
