@@ -106,11 +106,10 @@ async function submitForm(e) {
 
   <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{settings.forced_connection}">
     <span slot="label">{l('Host and port')}</span>
+    <p class="help" slot="help">
+      {@html lmd(settings.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'irc://chat.freenode.net:6697')}
+    </p>
   </TextField>
-
-  {#if settings.forced_connection}
-    <p>{@html lmd('Connection is locked by %1.', settings.contact)}</p>
-  {/if}
 
   <TextField name="nick" placeholder="{l('Ex: your-name')}">
     <span slot="label">{l('Nickname')}</span>

@@ -665,6 +665,7 @@
       "properties": {
         "contact": { "type": "string", "minLength": 3 },
         "default_connection": { "type": "string", "format": "uri" },
+        "forced_connection": { "type": "boolean" },
         "open_to_public": { "type": "boolean" },
         "organization_name": { "type": "string" },
         "organization_url": { "type": "string" }

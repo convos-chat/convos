@@ -58,6 +58,11 @@ textarea {
       outline: var(--input-focus-outline);
     }
   }
+
+  & + p.help {
+    margin-top: calc(-1 * var(--input-gutter));
+    margin-left: 1.1rem;
+  }
 }
 
 .text-area,
@@ -66,11 +71,6 @@ textarea {
     font-size: inherit;
     padding: 0.1rem 0.4em;
     display: block;
-  }
-
-  p {
-    font-size: 0.9rem;
-    padding: 0 0.4em;
   }
 }
 
@@ -271,4 +271,9 @@ textarea {
       background: var(--autocomplete-focus-bg);
     }
   }
+}
+
+p.help {
+  font-size: 0.9rem;
+  padding: 0 0.4em;
 }

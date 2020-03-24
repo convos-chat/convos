@@ -23,6 +23,7 @@ $: invite = $inviteLinkOp.res.body || {};
 
 updateSettingsOp.on('start', req => {
   if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
+  req.body.forced_connection = req.body.forced_connection ? true : false;
   req.body.open_to_public = req.body.open_to_public ? true : false;
 });
 
@@ -82,31 +83,36 @@ onMount(async () => {
 
     <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
       <span slot="label">{l('Organization name')}</span>
-      <p slot="help">{l('Can be changed if you want to add a touch of your organization.')}</p>
+      <p class="help" slot="help">{l('Can be changed if you want to add a touch of your organization.')}</p>
     </TextField>
 
     <TextField name="organization_url" placeholder="{l('https://convos.by')}" bind:value="{convosSettings.organization_url}">
       <span slot="label">{l('Organization URL')}</span>
-      <p slot="help">{l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
+      <p class="help" slot="help">{l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
     </TextField>
 
     <TextField name="contact" placeholder="{l('Ex: jhthorsen@cpan.org')}" bind:value="{convosSettings.contact}">
       <span slot="label">{l('Admin email')}</span>
-      <p slot="help">{l('This email can be used by users to get in touch with the Convos admin.')}</p>
+      <p class="help" slot="help">{l('This email can be used by users to get in touch with the Convos admin.')}</p>
     </TextField>
 
     <TextField name="default_connection" placeholder="{l('irc://chat.freenode.net:6697/%%23convos')}" bind:value="{convosSettings.default_connection}">
       <span slot="label">{l('Default connection URL')}</span>
-      <p slot="help">
+      <p class="help" slot="help">
         {l('This is the default connection new users will connect to.')}
         {l('The path part is the default channel to join. "%%23convos" means "#convos".')}
       </p>
     </TextField>
 
+    <Checkbox name="forced_connection" checked="{convosSettings.forced_connection}">
+      <span slot="label">{l('Force default connection')}</span>
+    </Checkbox>
+    <p class="help">{l('Tick this box if you want to prevent users from creating custom connections.')}</p>
+
     <Checkbox name="open_to_public" checked="{convosSettings.open_to_public}">
       <span slot="label">{l('Registration is open to public')}</span>
-      <p slot="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
     </Checkbox>
+    <p class="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
 
     <div class="form-actions">
       <Button icon="save" op="{updateSettingsOp}">{l('Save settings')}</Button>

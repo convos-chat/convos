@@ -114,7 +114,7 @@ function sectionObserved(entries, observer) {
         <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}" bind:value="{user.formEmail}">
           <span slot="label">{l('E-mail')}</span>
 
-          <p slot="help">
+          <p class="help" slot="help">
             {#if emailFromParams}
               {l('Your email is from the invite link.')}
             {:else}
@@ -125,7 +125,7 @@ function sectionObserved(entries, observer) {
 
         <TextField type="password" name="password">
           <span slot="label">{l('Password')}</span>
-          <p slot="help">{l('Hint: Use a phrase from a book.')}</p>
+          <p class="help" slot="help">{l('Hint: Use a phrase from a book.')}</p>
         </TextField>
 
         <div class="form-actions">
