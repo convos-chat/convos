@@ -31,10 +31,10 @@ export default class Connection extends Dialog {
 
     dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
     dialog.on('message', params => this.emit('message', params));
-    dialog.on('update', () => this.update({force: true}));
+    dialog.on('update', () => this.update({dialogs: true}));
     this._addDefaultParticipants(dialog);
     this.dialogs.set(dialog.dialog_id, dialog);
-    this.update({force: true});
+    this.update({dialogs: true});
     this.emit('channelListChange', dialog);
     return dialog;
   }
@@ -51,7 +51,7 @@ export default class Connection extends Dialog {
     const dialog = this.findDialog(params) || params;
     this.dialogs.delete(dialog.dialog_id);
     this.emit('channelListChange', dialog);
-    return this.update({force: true});
+    return this.update({dialogs: true});
   }
 
   update(params) {

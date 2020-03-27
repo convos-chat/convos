@@ -17,7 +17,8 @@ export default class Reactive {
   constructor() {
     this._on = {};
     this._props = {};
-    this._reactiveProp = {};
+    this._reactiveValue = {};
+    this._updatedProps = {};
   }
 
   /**
@@ -27,10 +28,10 @@ export default class Reactive {
    * @param {String} event The name of the event to emit.
    * @param {Any} params Any data that will be passed on to the listeners.
    */
-  emit(event, params) {
+  emit(event, ...params) {
     const subscribers = this._on[event];
     if (!subscribers) return this;
-    for (let i = 0; i < subscribers.length; i++) subscribers[i][0](params);
+    for (let i = 0; i < subscribers.length; i++) subscribers[i][0](...params);
     return this;
   }
 
@@ -75,8 +76,8 @@ export default class Reactive {
    * @param {String} name The name of the property
    * @param {Any} val Either a function or default value.
    */
-  prop(type, name, val, params = {}) {
-    this._props[name] = params;
+  prop(type, name, val) {
+    this._props[name] = {type};
 
     switch (type) {
       case 'persist': return this._localStorageProp(name, val);
@@ -115,29 +116,42 @@ export default class Reactive {
    */
   update(params) {
     const paramNames = Object.keys(params);
-    let nUpdated = paramNames.length;
+    if (!this._updatedTid) this._updatedProps = {};
 
+    let nUpdated = 0;
     for (let i = 0; i < paramNames.length; i++) {
       const name = paramNames[i];
       const prop = this._props[name];
-      if (!prop) continue;
+
+      if (!prop) {
+        // console.warn('Unknown prop: ' + name, this);
+        continue;
+      }
 
       let changed = false;
-      if (this._reactiveProp.hasOwnProperty(name)) {
-        if (this._reactiveProp[name] !== params[name]) changed = true;
-        this._reactiveProp[name] = params[name];
+      if (this._reactiveValue.hasOwnProperty(name)) {
+        if (this._reactiveValue[name] !== params[name]) changed = true;
+        this._reactiveValue[name] = params[name];
       }
 
       if (prop.localStorage && changed) {
-        this._localStorage(name, this._reactiveProp[name]);
+        this._localStorage(name, this._reactiveValue[name]);
       }
 
-      if (!changed) nUpdated--;
+      if (changed || prop.type == 'ro') {
+        this._updatedProps[name] = prop.type == 'ro' ? false : true;
+        nUpdated++;
+      }
     }
 
     if (nUpdated && !this._updatedTid) {
-      // console.log({type: 'update', nUpdated, id: this.name || this.email || this.constructor.name, paramNames: paramNames.join(',')});
-      this._updatedTid = setTimeout(() => { delete this._updatedTid; this.emit('update', this) }, 1);
+      // console.log({nUpdated, paramNames: paramNames.join(','), params, update: this.name || this.email || this.constructor.name});
+      // if (!this._nUpdated) this._nUpdated = 0; if (this._nUpdated++ > 30) throw this;
+
+      this._updatedTid = setTimeout(() => {
+        delete this._updatedTid;
+        this.emit('update', this, this._updatedProps);
+      }, 1);
     }
 
     return this;
@@ -169,7 +183,7 @@ export default class Reactive {
   }
 
   _updateableProp(name, val) {
-    this._reactiveProp[name] = val;
-    Object.defineProperty(this, name, {get: () => this._reactiveProp[name]});
+    this._reactiveValue[name] = val;
+    Object.defineProperty(this, name, {get: () => this._reactiveValue[name]});
   }
 }
