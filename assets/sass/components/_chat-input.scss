@@ -1,8 +1,8 @@
 .chat-input {
   @extend %next-to-sidebar;
   background: var(--body-bg);
-  border-top: var(--input-border);
   margin-top: var(--gutter);
+  box-shadow: 0 -4px 5px -3px rgba(0, 0, 0, 0.1);
   display: flex;
   bottom: 0;
   z-index: 1;

@@ -2,10 +2,9 @@
   @extend %next-to-sidebar;
 
   background: var(--body-bg);
-  border-bottom: 1px solid #aaa;
-  box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
   padding-top: var(--gutter);
   padding-bottom: var(--gutter-small);
+  box-shadow: 0 4px 5px -3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   align-items: baseline;
