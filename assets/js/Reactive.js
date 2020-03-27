@@ -146,7 +146,13 @@ export default class Reactive {
   _localStorage(name, val) {
     const key = 'convos:' + (this._props[name].key || name);
     if (arguments.length == 2) return localStorage.setItem(key, JSON.stringify(val));
-    return localStorage.hasOwnProperty(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
+
+    try {
+      return localStorage.hasOwnProperty(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
+    } catch(err) {
+      console.error('[Reactive:localStorage]', {[key]: localStorage.getItem(key)}, err);
+      return undefined;
+    }
   }
 
   _localStorageProp(name, val) {
