@@ -32,7 +32,13 @@ $: if ($registerOp.is('success')) {
 
 onMount(() => {
   if (!observer) {
-    observer = new IntersectionObserver(sectionObserved, {rootMargin: '-30px 0px 80px 0px', threshold: 0.8});
+    const threshold = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8];
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const ratio = entry.intersectionRatio;
+        entry.target.style.opacity = ratio <= 0.1 ? 0 : ratio ? (ratio + 0.2) : 1;
+      });
+    }, {threshold});
     q(document, '.fade-in', el => observer.observe(el));
   }
 
@@ -44,13 +50,6 @@ async function redirectAfterLogin(op) {
   op.reset();
   await user.load();
   gotoUrl(user.calculateLastUrl());
-}
-
-function sectionObserved(entries, observer) {
-  entries.forEach(entry => {
-    const classListMethod = entry.isIntersecting ? 'add' : 'remove';
-    entry.target.classList[classListMethod]('is-visible');
-  });
 }
 </script>
 
@@ -103,11 +102,11 @@ function sectionObserved(entries, observer) {
         <a class="btn is-hallow" on:click="{scrollTo}" href="#top">{l('Home')}</a>
       </p>
     {:else if emailFromParams || settings.open_to_public || settings.first_user}
-      <h2>{l(settings.existing_user ? 'Recover account' : 'Sign up')}</h2>
-      {#if settings.first_user}
-        <p>{l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
-      {/if}
       <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
+        <h2>{l(settings.existing_user ? 'Recover account' : 'Sign up')}</h2>
+        {#if settings.first_user}
+          <p>{l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
+        {/if}
         <input type="hidden" name="exp">
         <input type="hidden" name="token">
 
