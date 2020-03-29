@@ -32,11 +32,11 @@ $: if ($registerOp.is('success')) {
 
 onMount(() => {
   if (!observer) {
-    const threshold = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8];
+    const threshold = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const ratio = entry.intersectionRatio;
-        entry.target.style.opacity = ratio <= 0.1 ? 0 : ratio ? (ratio + 0.2) : 1;
+        entry.target.style.opacity = ratio > 0.9 ? 1 : ratio ? (ratio - 0.25) : 1;
       });
     }, {threshold});
     q(document, '.fade-in', el => observer.observe(el));

@@ -3,9 +3,10 @@
   background-position: 50% 100%;
   min-height: 100vh;
 
-  @include if_screen(">three-columns") {
-    background-position: left 50% bottom -30px;
-  }
+  // TODO: Tried to make it dynamic with vw, but I couldn't make it work
+  @media (min-width: 1024px) { background-position: left 50% bottom -50px; }
+  @media (min-width: 1280px) { background-position: left 50% bottom -90px; }
+  @media (min-width: 1440px) { background-position: left 50% bottom -130px; }
 
   @supports (background-blend-mode: darken) {
     background-image: url(../../images/20200328-nordaaker.jpg);
@@ -35,42 +36,46 @@
     margin-left: auto;
     margin-right: auto;
     padding: 1rem;
-    padding-top: 4rem;
     width: 42rem;
     max-width: 100%;
+
+    @include if_screen(">two-columns") {
+      padding-top: 4rem;
+    }
   }
 
   section {
-    min-height: 80vh;
+    min-height: 70vh;
   }
 
-  .welcome-screen__signin + .welcome-screen__signup {
-    min-height: 80vh;
-  }
-}
-
-.welcome-screen__about {
-  h1 {
+  .welcome-screen__about h1 {
     font-size: 2.4rem;
+    padding-top: 1rem;
     margin-bottom: 0;
   }
-}
 
-.welcome-screen__footer {
-  a {
-    text-decoration: none;
+  .welcome-screen__about + .welcome-screen__signup {
+    min-height: auto;
+  }
 
-    &:hover {
-      text-decoration: underline;
+  .welcome-screen__footer {
+    padding-bottom: 3rem;
+
+    a {
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
-}
 
-@include if_screen(">two-columns") {
-  .welcome-screen section:nth-of-type(1) form {
-    background: rgba(0, 0, 0, 0.1);
-    outline-offset: 0;
-    overflow: hidden;
-    outline: 3rem solid rgba(0, 0, 0, 0.1);
+  @include if_screen(">two-columns") {
+    & section:nth-of-type(1) form {
+      background: rgba(0, 0, 0, 0.18);
+      box-shadow: 0 0 0 3.5rem rgba(0,0,0,0.18);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
   }
 }
