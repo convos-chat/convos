@@ -54,7 +54,7 @@ test('load', async () => {
   await d.load({after: 'maybe'});
   expect(d.messagesOp.performed).toEqual({after: '2020-01-20T09:01:50.001Z', limit: 200, connection_id: 'irc-freenode', dialog_id: '#convos'});
   expect(d.status).toBe('success');
-  expect(d.messages[0].endOfHistory).toBe(undefined);
+  expect(d.endOfHistory).toBe(false);
   expect(d.events.sent.length).toBe(2);
   expect(d.events.sent[1][0]).toEqual({connection_id: 'irc-freenode', dialog_id: '#convos', message: '/names'});
 
@@ -78,13 +78,12 @@ test('load', async () => {
     return m;
   });
 
+  expect(d.endOfHistory).toBe(true);
   expect(messages).toEqual([
-    {fromId: 'supergirl', id: 'msg_3', markdown: 'Something old', type: 'action', endOfHistory: true},
+    {fromId: 'supergirl', id: 'msg_3', markdown: 'Something old', type: 'action'},
     {fromId: 'supergirl', id: 'msg_1', markdown: 'Cool beans', type: 'private'},
     {fromId: 'supergirl', id: 'msg_2', markdown: 'Something new', type: 'private'},
   ]);
-
-  expect(d.messages[0].endOfHistory).toBe(true);
 });
 
 function dialog(params) {
