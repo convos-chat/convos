@@ -270,15 +270,16 @@ export function replaceClassName(sel, re, replacement) {
  *
  * @param {Any} to A number, string, Event object or HTMLElement
  */
-export function scrollTo(to) {
+export function scrollTo(to, guard = 0) {
+  if (guard >= 5) return; // Give up
   const mainEl = document.querySelector('.main') || document.querySelector('body');
-  if (!mainEl) return setTimeout(() => scrollTo(to), 10);
+  if (!mainEl) return setTimeout(() => scrollTo(to, guard + 1), 20);
 
-  if (typeof to == 'number') return (mainEl.scrollTop = to);
+  if (typeof to == 'number') return mainEl.scrollTo(0, to);
 
   if (typeof to == 'string') {
     const el = document.querySelector(to);
-    return el ? scrollTo(el) : setTimeout(() => scrollTo(to), 100);
+    return el ? scrollTo(el) : setTimeout(() => scrollTo(to, guard + 1), 20);
   }
 
   if (to.href && to.href.indexOf('#') != -1) {
