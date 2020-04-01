@@ -20,15 +20,15 @@ test('prop persist', () => {
   r.prop('persist', 'num', undefined);
   expect(localStorage.getItem('convos:num')).toBe('undefined');
 
-  r.update({num: 42});
+  r.update({num: 42})._delayedUpdate();
   expect(r.num).toBe(42);
   expect(localStorage.getItem('convos:num')).toBe('42');
 
-  r.update({num: '42'});
+  r.update({num: '42'})._delayedUpdate();
   expect(localStorage.getItem('convos:num')).toBe('"42"');
 });
 
-test('on', () => {
+test('on callback', () => {
   const r = reactive('On');
 
   const got = [];
@@ -65,18 +65,18 @@ test('update() tracking props', () => {
   const r = reactive('Superman');
 
   r.update({age: 30});
-  expect(r._updatedProps).toEqual({});
+  expect(r._delayedUpdate()).toEqual({});
 
   r.update({age: '30'});
-  expect(r._updatedProps).toEqual({age: true});
+  expect(r._delayedUpdate()).toEqual({age: true});
 
-  r._updatedProps = {};
-  r.update({name: 'Superman', age: 31, whatever: 'whatever'});
-  r.update({name: 'Superman', address: 'Metropolis'});
-  expect(r._updatedProps).toEqual({address: true, age: true, name: false});
+  Object.keys(r._props).forEach(n => delete r._props[n].next);
+  r.update({name: 'Superduper', age: 31});
+  r.update({name: 'Superduper', address: 'Metropolis'});
+  expect(r._delayedUpdate()).toEqual({address: true, age: true, name: false});
 });
 
-test('update() emit', (done) => {
+test('update() emit updated', (done) => {
   const r = reactive('Superwoman');
 
   r.on('update', (obj, updated) => {
@@ -86,7 +86,7 @@ test('update() emit', (done) => {
   });
 
   r.update({name: 'Superwoman', age: 30});
-  r.update({name: 'Superman', age: 31, whatever: 'whatever'});
+  r.update({name: 'Superman', age: 31});
   r.update({name: 'Superman', address: 'Metropolis'});
 });
 
@@ -101,14 +101,13 @@ test('subscribe()', (done) => {
     if (++n == 2) obj.update({name: true});
 
     // Will be ignored
-    r.update({age: 31, unknown: 'foo'});
+    r.update({age: 31});
   });
 
   // Will cause subscribe() callback to be called once
   r.update({name: 'Superwoman', age: 30});
-  r.update({name: 'Superman', age: 31, whatever: 'whatever'});
+  r.update({name: 'Superman', age: 31});
   r.update({name: 'Superman', address: 'Metropolis'});
-  r.update({force: 1});
 
   setTimeout(() => {
     expect(n).toBe(3);

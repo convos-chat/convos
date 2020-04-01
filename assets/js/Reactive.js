@@ -17,8 +17,6 @@ export default class Reactive {
   constructor() {
     this._on = {};
     this._props = {};
-    this._reactiveValue = {};
-    this._updatedProps = {};
   }
 
   /**
@@ -30,8 +28,7 @@ export default class Reactive {
    */
   emit(event, ...params) {
     const subscribers = this._on[event];
-    if (!subscribers) return this;
-    for (let i = 0; i < subscribers.length; i++) subscribers[i][0](...params);
+    for (let i = 0; i < (subscribers || []).length; i++) subscribers[i][0](...params);
     return this;
   }
 
@@ -74,18 +71,19 @@ export default class Reactive {
    * @memberof Reactive
    * @param {String} type either "persist", "ro" or "rw".
    * @param {String} name The name of the property
-   * @param {Any} val Either a function or default value.
+   * @param {Any} value Either a function or default value.
+   * @param {Object} params Extra property instructions.
    */
-  prop(type, name, val) {
-    this._props[name] = {type};
+  prop(type, name, value, params = {}) {
+    this._props[name] = {...params, type, value};
 
     switch (type) {
-      case 'persist': return this._localStorageProp(name, val);
-      case 'ro': return this._readOnlyProp(name, val);
-      case 'rw': return this._updateableProp(name, val);
+      case 'persist': return this._localStorageProp(name);
+      case 'ro': return this._readOnlyProp(name);
+      case 'rw': return this._updateableProp(name);
     }
 
-    throw 'Unknown prop type "' + type + '" for prop "' + name + '".';
+    throw '[' + this.constructor.name + '] Unknown prop type "' + type + '" for prop "' + name + '".';
   }
 
   /**
@@ -115,51 +113,37 @@ export default class Reactive {
    * @param {Object} params A map between property name and value.
    */
   update(params) {
-    const paramNames = Object.keys(params);
-    if (!this._updatedTid) this._updatedProps = {};
-
-    let nUpdated = 0;
-    for (let i = 0; i < paramNames.length; i++) {
-      const name = paramNames[i];
+    Object.keys(params).forEach(name => {
       const prop = this._props[name];
+      if (!prop) return console.log('[' + this.constructor.name + '] Unknown prop "' + name + '".');
+      if (!prop.hasOwnProperty('prev')) prop.prev = prop.type == 'ro' ? undefined : prop.value;
+      if (prop.type == 'persist' || prop.type == 'rw') prop.value = params[name];
+    });
 
-      if (!prop) {
-        // console.warn('Unknown prop: ' + name, this);
-        continue;
-      }
-
-      let changed = false;
-      if (this._reactiveValue.hasOwnProperty(name)) {
-        if (this._reactiveValue[name] !== params[name]) changed = true;
-        this._reactiveValue[name] = params[name];
-      }
-
-      if (prop.localStorage && changed) {
-        this._localStorage(name, this._reactiveValue[name]);
-      }
-
-      if (changed || prop.type == 'ro') {
-        this._updatedProps[name] = prop.type == 'ro' ? false : true;
-        nUpdated++;
-      }
-    }
-
-    if (nUpdated && !this._updatedTid) {
-      // console.log({nUpdated, paramNames: paramNames.join(','), params, update: this.name || this.email || this.constructor.name});
-      // if (!this._nUpdated) this._nUpdated = 0; if (this._nUpdated++ > 30) throw this;
-
-      this._updatedTid = setTimeout(() => {
-        delete this._updatedTid;
-        this.emit('update', this, this._updatedProps);
-      }, 1);
-    }
-
+    if (!this._updatedTid) this._updatedTid = setTimeout(this._delayedUpdate.bind(this), 1);
     return this;
   }
 
-  _localStorage(name, val) {
+  _delayedUpdate() {
+    const changed = {};
+    Object.keys(this._props).forEach(name => {
+      const prop = this._props[name];
+      if (!prop.hasOwnProperty('prev')) return;
+      const prev = prop.prev;
+      delete prop.prev;
+      if (prop.value === prev) return;
+      if (prop.type == 'persist') this._localStorage(name, prop.value);
+      changed[name] = prop.type != 'ro';
+    });
+
+    delete this._updatedTid;
+    if (Object.keys(changed).length) this.emit('update', this, changed);
+    return changed; // Used by unit test
+  }
+
+  _localStorage(name, value) {
     const key = 'convos:' + (this._props[name].key || name);
-    if (arguments.length == 2) return localStorage.setItem(key, JSON.stringify(val));
+    if (arguments.length == 2) return localStorage.setItem(key, JSON.stringify(value));
 
     try {
       return localStorage.hasOwnProperty(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
@@ -169,21 +153,23 @@ export default class Reactive {
     }
   }
 
-  _localStorageProp(name, val) {
+  _localStorageProp(name) {
+    const prop = this._props[name];
     const fromStorage = this._localStorage(name);
-    this._updateableProp(name, isType(fromStorage, 'undef') ? val : fromStorage);
-    this._props[name].localStorage = true;
-    if (isType(fromStorage, 'undef') && !this._props[name].lazy) this._localStorage(name, val);
+    if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
+    if (isType(fromStorage, 'undef') && !this._props[name].lazy) this._localStorage(name, prop.value);
+    this._updateableProp(name);
   }
 
-  _readOnlyProp(name, val) {
-    if (val === undefined) throw 'Read-only attribute "' + name + '" cannot be undefined for ' + this.constructor.name;
-    const descriptor = typeof val == 'function' ? {get: val} : {value: val, writable: false};
-    Object.defineProperty(this, name, descriptor);
+  _readOnlyProp(name) {
+    const prop = this._props[name];
+    if (prop.value === undefined) throw '[' + this.constructor.name + '] Read-only attribute "' + name + '" cannot be undefined';
+    const get = typeof prop.value == 'function' ? prop.value : () => prop.value;
+    Object.defineProperty(this, name, {get});
   }
 
-  _updateableProp(name, val) {
-    this._reactiveValue[name] = val;
-    Object.defineProperty(this, name, {get: () => this._reactiveValue[name]});
+  _updateableProp(name) {
+    const prop = this._props[name];
+    Object.defineProperty(this, name, {get: () => prop.value});
   }
 }
