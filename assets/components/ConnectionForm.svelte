@@ -12,7 +12,6 @@ import {l, lmd} from '../js/i18n';
 
 export let dialog = {};
 
-const settings = getContext('settings');
 const user = getContext('user');
 const createConnectionOp = user.api.operation('createConnection');
 const removeConnectionOp = user.api.operation('removeConnection');
@@ -40,7 +39,7 @@ onMount(async () => {
 });
 
 function defaultsToForm() {
-  if (settings.forced_connection) formEl.server.value = settings.default_connection;
+  if (process.env.forced_connection) formEl.server.value = process.env.default_connection;
   formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   useTls = true;
   wantToBeConnected = true;
@@ -104,10 +103,10 @@ async function submitForm(e) {
   <input type="hidden" name="url">
   <input type="hidden" name="wanted_state">
 
-  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{settings.forced_connection}">
+  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{process.env.forced_connection}">
     <span slot="label">{l('Host and port')}</span>
     <p class="help" slot="help">
-      {@html lmd(settings.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'irc://chat.freenode.net:6697')}
+      {@html lmd(process.env.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'irc://chat.freenode.net:6697')}
     </p>
   </TextField>
 

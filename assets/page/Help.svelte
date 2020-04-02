@@ -7,15 +7,13 @@ import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {scrollTo} from '../js/util';
 
-const settings = getContext('settings');
-
 $docTitle = l('%1 - Convos', l('Help'));
 
 $: scrollTo($currentUrl.hash || 0);
 </script>
 
 <ChatHeader>
-  <h1>{l('Help')}</h1><small>v{settings.version}</small>
+  <h1>{l('Help')}</h1><small>v{process.env.version}</small>
 </ChatHeader>
 
 <main class="main">
@@ -79,10 +77,10 @@ $: scrollTo($currentUrl.hash || 0);
     <li><a href="https://github.com/Nordaaker/convos/issues" target="_blank">{l('Bug/issue tracker')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos" target="_blank">{l('Source code')}</a></li>
 
-    {#if settings.organization_name != 'Convos' && settings.organization_url != 'https://convos.by'}
-      <li><a href="{settings.organization_url}" target="_blank">{settings.organization_name}</a></li>
+    {#if process.env.organization_name != 'Convos' && process.env.organization_url != 'https://convos.by'}
+      <li><a href="{process.env.organization_url}" target="_blank">{process.env.organization_name}</a></li>
     {/if}
 
-    <li><a href="{settings.contact}" target="_blank">{l('Contact admin')}</a></li>
+    <li><a href="{process.env.contact}" target="_blank">{l('Contact admin')}</a></li>
   </ul>
 </main>

@@ -123,6 +123,7 @@ sub _setup_settings {
   $defined->{api_url}       = $c->url_for('api');
   $defined->{asset_version} = $c->asset_version;
   $defined->{base_url}      = $app->core->base_url->to_string;
+  $defined->{mode}          = $app->mode;
   $defined->{themes}        = $app->defaults('themes');
   $defined->{version}       = $app->VERSION;
   $defined->{ws_url}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;

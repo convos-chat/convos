@@ -9,7 +9,6 @@ import {l, lmd} from '../js/i18n';
 import {q, scrollTo} from '../js/util';
 
 const emailFromParams = location.href.indexOf('email=') != -1;
-const settings = getContext('settings');
 const user = getContext('user');
 
 const loginOp = user.api.operation('loginUser');
@@ -57,11 +56,11 @@ async function redirectAfterLogin(op) {
   <article class="welcome-screen__about">
     <h1>
       <Link href="/"><span>{l('Convos')}</span></Link>
-      {#if settings.organization_name != 'Convos'}
-        {#if settings.organization_url != 'https://convos.by'}
-          <small class="subtitle">{@html lmd('for [%1](%2)', settings.organization_name, settings.organization_url)}</small>
+      {#if process.env.organization_name != 'Convos'}
+        {#if process.env.organization_url != 'https://convos.by'}
+          <small class="subtitle">{@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
         {:else}
-          <small class="subtitle">{l('for %1', settings.organization_name)}</small>
+          <small class="subtitle">{l('for %1', process.env.organization_name)}</small>
         {/if}
       {/if}
     </h1>
@@ -69,7 +68,7 @@ async function redirectAfterLogin(op) {
     <p>{l('Convos is the simplest way to use IRC, and it keeps you always online.')}</p>
   </article>
 
-  {#if !settings.first_user}
+  {#if !process.env.first_user}
     <section id="signin" class="welcome-screen__signin fade-in">
       <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
         <h2>{l('Sign in')}</h2>
@@ -92,19 +91,19 @@ async function redirectAfterLogin(op) {
   {/if}
 
   <section id="signup" class="welcome-screen__signup fade-in">
-    {#if settings.status >= 400}
+    {#if process.env.status >= 400}
       <h2>{l('Invalid invite/recover URL')}</h2>
-      <p>{l(settings.status == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
+      <p>{l(process.env.status == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
       <p>{l('Please ask your Convos admin for a new link.')}</p>
       <p>
-        <a class="btn" href="{settings.contact}">{l('Contact admin')}</a>
+        <a class="btn" href="{process.env.contact}">{l('Contact admin')}</a>
         <a class="btn is-hallow" on:click="{scrollTo}" href="#signin">{l('Sign in')}</a>
         <a class="btn is-hallow" on:click="{scrollTo}" href="#top">{l('Home')}</a>
       </p>
-    {:else if emailFromParams || settings.open_to_public || settings.first_user}
+    {:else if emailFromParams || process.env.open_to_public || process.env.first_user}
       <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
-        <h2>{l(settings.existing_user ? 'Recover account' : 'Sign up')}</h2>
-        {#if settings.first_user}
+        <h2>{l(process.env.existing_user ? 'Recover account' : 'Sign up')}</h2>
+        {#if process.env.first_user}
           <p>{l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
         {/if}
         <input type="hidden" name="exp">
@@ -128,10 +127,10 @@ async function redirectAfterLogin(op) {
         </TextField>
 
         <div class="form-actions">
-          <Button icon="save" op="{registerOp}">{l(settings.existing_user ? 'Set new password' : 'Sign up')}</Button>
+          <Button icon="save" op="{registerOp}">{l(process.env.existing_user ? 'Set new password' : 'Sign up')}</Button>
         </div>
 
-        {#if !emailFromParams && !settings.first_user}
+        {#if !emailFromParams && !process.env.first_user}
           <p on:click="{scrollTo}">{@html lmd('Go and [sign in](%1) if you already have an account.', '#signin')}</p>
         {/if}
 
@@ -142,7 +141,7 @@ async function redirectAfterLogin(op) {
       <p>{l('Convos is not open for public registration.')}</p>
       <p on:click="{scrollTo}">{l('Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account.')}</p>
       <div class="form-actions">
-        <a class="btn" href="{settings.contact}">{l('Contact admin')}</a>
+        <a class="btn" href="{process.env.contact}">{l('Contact admin')}</a>
         <a class="btn is-hallow" on:click="{scrollTo}" href="#signin">{l('Sign in')}</a>
         <a class="btn is-hallow" on:click="{scrollTo}" href="#top">{l('Home')}</a>
       </div>

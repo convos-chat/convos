@@ -12,7 +12,7 @@ my $t     = t::Helper->t->get_ok('/');
 my $url   = $t->ua->server->url;
 my $image = '/images/convos_screenshot.jpg';
 
-$t->content_like(qr{window.__convos\s*=})->text_is('title', 'Convos - Better group chat')
+$t->content_like(qr{window.process.env\s*=})->text_is('title', 'Convos - Better group chat')
   ->element_exists(
   qq(meta[name="viewport"][content="width=device-width, initial-scale=1, maximum-scale=1"]))
   ->element_exists(qq(meta[name="apple-mobile-web-app-capable"][content="yes"]))
@@ -43,7 +43,7 @@ $ENV{CONVOS_ORGANIZATION_NAME} = 'Example';
 $ENV{CONVOS_ORGANIZATION_URL}  = 'http://example.com';
 
 $t = t::Helper->t->get_ok('/');
-$t->content_like(qr{window.__convos\s*=})->text_is('title', 'Convos for Example')
+$t->content_like(qr{window.process.env\s*=})->text_is('title', 'Convos for Example')
   ->element_exists(qq(meta[name="twitter:title"][content="Convos for Example"]))
   ->element_exists(qq(meta[property="og:site_name"][content="Example"]))
   ->element_exists(qq(meta[property="og:title"][content="Convos for Example"]));

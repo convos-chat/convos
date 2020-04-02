@@ -1,0 +1,8 @@
+<script>
+  (function(w) {
+    const settings = <%== to_json $c->settings %>;
+    if (window && !window.process) window.process = {};
+    if (!window.process.env) window.process.env = {};
+    Object.keys(settings).forEach(k => (process.env[k] = settings[k]));
+  })(window);
+</script>

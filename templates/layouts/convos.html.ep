@@ -42,7 +42,7 @@
 
     %= asset 'convos.css'
     <link rel="stylesheet" type="text/css" href="<%= url_for '/themes/convos_color-scheme-light.css' %>" id="link_selected_theme">
-    <script>window.__convos = <%== to_json $c->settings %>;</script>
+    %= include 'partial/process_js';
   </head>
   <body class="no-js page-loading is-logged-out">
     %= content

@@ -5,9 +5,8 @@ import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {replaceClassName} from '../js/util';
 
-const settings = getContext('settings');
 const user = getContext('user');
-const loadingStatus = settings.load_user ? ['loading', 'pending'] : ['loading'];
+const loadingStatus = process.env.load_user ? ['loading', 'pending'] : ['loading'];
 
 const messages = {
   'loading': 'Loading',
@@ -35,11 +34,11 @@ function calculateStatus($user, $currentUrl) {
   <article class="welcome-screen_fallback">
     <h1>
       <Link href="/"><span>{l(status == 'loading' ? 'Convos' : messages[status])}</span></Link>
-      {#if settings.organization_name != 'Convos'}
-        {#if settings.organization_url != 'https://convos.by'}
-          <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {@html lmd('for [%1](%2)', settings.organization_name, settings.organization_url)}</small>
+      {#if process.env.organization_name != 'Convos'}
+        {#if process.env.organization_url != 'https://convos.by'}
+          <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
         {:else}
-          <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {l('for %1', settings.organization_name)}</small>
+          <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {l('for %1', process.env.organization_name)}</small>
         {/if}
       {/if}
     </h1>
@@ -52,7 +51,7 @@ function calculateStatus($user, $currentUrl) {
       <p><i class="fas fa-download"></i> {l('Downloading Convos...')}</p>
       <p><i class="fas fa-rocket"></i> {l('Starting Convos...')}</p>
       <p><i class="fas fa-spinner fa-spin"></i> {l('Loading user data...')}</p>
-      <p><a class="btn" href="{settings.contact}">{l('Contact admin')}</a></p>
+      <p><a class="btn" href="{process.env.contact}">{l('Contact admin')}</a></p>
     {:else if status == 'not_found'}
       <p>{l('Could not find the page you are looking for. Maybe you entered an invalid URL?')}</p>
       <p><a href="/" class="btn">{l('Go to landing page')}</a></p>

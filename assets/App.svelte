@@ -37,18 +37,16 @@ export const routingRules = [
   [new RegExp('.*'), Fallback, {}],
 ];
 
-const settings = [window.__convos, delete window.__convos][0];
-const api = new Api(settings.api_url, {debug: true});
-const user = new User({api, wsUrl: settings.ws_url, themes: settings.themes});
+const api = new Api(process.env.api_url, {debug: true});
+const user = new User({api, wsUrl: process.env.ws_url, themes: process.env.themes});
 const notifications = user.notifications;
 
 let containerWidth = 0;
 
 window.hljs = hljs; // Required by paste plugin
-currentUrl.base = settings.base_url;
+currentUrl.base = process.env.base_url;
 user.activateTheme();
 user.events.listenToGlobalEvents();
-setContext('settings', settings);
 setContext('user', user);
 
 $: container.set({wideScreen: containerWidth > 800, width: containerWidth});
@@ -58,7 +56,7 @@ $: showSidebarChat = $pageComponent.routerOptions.user == 'loggedIn';
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
-    user.update({latestVersion: settings.asset_version});
+    user.update({latestVersion: process.env.asset_version});
     reg.update();
   }).catch(err => {
     console.log('[Convos] ServiceWorker registration failed:', err);
@@ -67,7 +65,7 @@ if ('serviceWorker' in navigator) {
 
 onMount(() => {
   loadScript(currentUrl.base + '/images/emojis.js');
-  if (settings.load_user) user.load();
+  if (process.env.load_user) user.load();
   if (user.showGrid) document.querySelector('body').classList.add('with-grid');
 
   const unsubscribe = [];

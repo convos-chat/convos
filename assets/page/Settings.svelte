@@ -9,7 +9,6 @@ import {docTitle} from '../store/router';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 
-const settings = getContext('settings');
 const user = getContext('user');
 const getSettingsOp = user.api.operation('getSettings');
 const inviteLinkOp = user.api.operation('inviteUser');
@@ -79,7 +78,7 @@ onMount(async () => {
 
   <form method="post" on:submit|preventDefault="{updateSettingsFromForm}">
     <h2>{l('Convos settings')}</h2>
-    <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', settings.base_url)}</p>
+    <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', process.env.base_url)}</p>
 
     <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
       <span slot="label">{l('Organization name')}</span>

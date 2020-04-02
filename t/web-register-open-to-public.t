@@ -20,8 +20,8 @@ $t->post_ok('/api/user/register',
 
 $t->get_ok('/chat')->status_is(200);
 
-my $json = decode_json($t->tx->res->text =~ m!window\.__convos\s*=\s*([^;]+)!m ? $1 : '{}');
-is $json->{api_url}, '/api', 'settings.api_url';
+my $json = decode_json($t->tx->res->text =~ m!const settings\s*=\s*([^;]+)!m ? $1 : '{}');
+is $json->{api_url}, '/api',                  'settings.api_url';
 is $json->{contact}, 'mailto:root@localhost', 'settings.contact';
 is $json->{open_to_public}, true, 'open_to_public';
 is $json->{organization_name}, 'Convos',            'settings.organization_name';
