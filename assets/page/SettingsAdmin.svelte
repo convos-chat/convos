@@ -39,7 +39,7 @@ function generateInviteLink(e) {
 
 function copyInviteLink(e) {
   const copied = copyToClipboard(e.target);
-  if (copied) user.events.notifyUser('Invite link copied', copied, {force: true});
+  if (copied) user.omnibus.notify('Invite link copied', copied, {force: true});
 }
 
 function updateSettingsFromForm(e) {

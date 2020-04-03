@@ -15,7 +15,7 @@ import {setupRouting} from './routes';
 import {viewport} from './store/Viewport';
 
 const api = new Api(process.env.api_url, {debug: true});
-const user = new User({api, isFirst: process.env.first_user, wsUrl: process.env.ws_url, themes: process.env.themes});
+const user = new User({api, isFirst: process.env.first_user, themes: process.env.themes});
 
 let [innerHeight, innerWidth] = [0, 0];
 
@@ -25,21 +25,12 @@ window.hljs = hljs; // Required by paste plugin
 route.update({baseUrl: process.env.base_url});
 setupRouting(route);
 user.activateTheme();
-user.events.listenToGlobalEvents();
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
+user.omnibus.start({route, wsUrl: process.env.ws_url}); // Must be called after "baseUrl" is set
 
 $: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;
 $: viewport.update({height: innerHeight, width: innerWidth});
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $route.title : $route.title;
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(reg => {
-    user.update({latestVersion: process.env.asset_version});
-    reg.update();
-  }).catch(err => {
-    console.log('[Convos] ServiceWorker registration failed:', err);
-  });
-}
 
 onMount(() => {
   loadScript(route.urlFor('/images/emojis.js'));
@@ -64,7 +55,7 @@ function onGlobalKeydown(e) {
 
 function onWindowClick(e) {
   // This is useful if you want to see on server side what is being clicked on
-  // user.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
+  // user.omnibus.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
 
   // Toggle activeMenu with href="#activeMenu:..."
   const linkEl = e.target && e.target.closest('a');
@@ -75,15 +66,11 @@ function onWindowClick(e) {
     e.preventDefault();
   }
 }
-
-function onWindowFocus() {
-  user.ensureConnected();
-}
 </script>
 
 <svelte:window
   on:click="{onWindowClick}"
-  on:focus="{onWindowFocus}"
+  on:focus="{() => user.email && user.omnibus.send('ping')}"
   on:keydown="{onGlobalKeydown}"
   bind:innerHeight="{innerHeight}"
   bind:innerWidth="{innerWidth}"/>

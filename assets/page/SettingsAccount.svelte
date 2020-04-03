@@ -23,9 +23,9 @@ const themes = Object.keys(user.themes).map(id => {
 let formEl;
 let colorScheme = user.colorScheme;
 let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
-let notificationsDisabled = user.events.browserNotifyPermission == 'denied';
+let notificationsDisabled = user.omnibus.notifyPermission == 'denied';
 let theme = user.theme;
-let wantNotifications = user.events.wantNotifications;
+let wantNotifications = user.omnibus.wantNotifications;
 let highlight_keywords = user.highlight_keywords.join(', ');
 
 route.update({title: l('Account')});
@@ -40,7 +40,7 @@ function updateUserFromForm(e) {
   const passwords = [form.password.value, form.password_again.value];
 
   if (wantNotifications) {
-    user.events.requestPermissionToNotify(status => {
+    user.omnibus.requestPermissionToNotify(status => {
       if (status != 'denied') return;
       wantNotifications = false;
       notificationsDisabled = true;

@@ -31,18 +31,18 @@ function calculateIsOperator(dialog) {
 }
 
 function partDialog(e) {
-  user.send({message: '/part', dialog});
+  user.omnibus.send({message: '/part', dialog});
 }
 
 function saveDialogSettings(e) {
   if (dialogPassword) {
     const message = isOperator ? '/mode +k ' + dialogPassword : '/join ' + dialog.name + ' ' + dialogPassword;
-    user.send({message, dialog});
+    user.omnibus.send({message, dialog});
     dialogPassword = '';
   }
 
   if (isOperator && dialogTopic != dialog.topic) {
-    user.send({message: '/topic ' + dialogTopic, dialog});
+    user.omnibus.send({message: '/topic ' + dialogTopic, dialog});
   }
 }
 </script>

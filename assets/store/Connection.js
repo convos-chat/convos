@@ -29,7 +29,7 @@ export default class Connection extends Dialog {
     let dialog = this.dialogs.get(params.dialog_id);
     if (dialog) return dialog.update(params);
 
-    dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api, events: this.events});
+    dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api});
     dialog.on('message', params => this.emit('message', params));
     dialog.on('update', () => this.update({dialogs: true}));
     this._addDefaultParticipants(dialog);
@@ -118,7 +118,6 @@ export default class Connection extends Dialog {
     if (params.nick == this.nick) return this.removeDialog(params);
     if (params.dialog_id) return;
     this.dialogs.forEach(dialog => dialog.wsEventPart(params));
-    params.stopPropagation();
   }
 
   wsEventQuit(params) {

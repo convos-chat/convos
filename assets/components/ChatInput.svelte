@@ -94,7 +94,7 @@ export function sendMessage(e) {
   const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
 
   if (msg.message.length) {
-    const sender = dialog.is('search') ? dialog : user;
+    const sender = dialog.is('search') ? dialog : user.omnibus;
     sender.send(msg, res => {
       if (!res.errors || !dialog) return;
       res.stopPropagation();

@@ -1,12 +1,12 @@
 import Connection from './Connection';
 import Dialog from './Dialog';
 import EmbedMaker from '../js/EmbedMaker';
-import Events from '../js/Events';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
+import {omnibus} from '../store/Omnibus';
 import {route} from './Route';
 
 export default class User extends Reactive {
@@ -18,11 +18,11 @@ export default class User extends Reactive {
     this.prop('ro', 'connections', new SortedMap());
     this.prop('ro', 'email', () => this.getUserOp.res.body.email || '');
     this.prop('ro', 'embedMaker', new EmbedMaker({api}));
-    this.prop('ro', 'events', this._createEvents(params));
     this.prop('ro', 'isFirst', params.isFirst || false);
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
-    this.prop('ro', 'notifications', new Notifications({api, events: this.events}));
-    this.prop('ro', 'search', new Search({api, events: this.events}));
+    this.prop('ro', 'notifications', new Notifications({api}));
+    this.prop('ro', 'omnibus', params.omnibus || omnibus);
+    this.prop('ro', 'search', new Search({api}));
     this.prop('ro', 'roles', new Set());
     this.prop('ro', 'themes', params.themes || {});
     this.prop('ro', 'unread', () => this._calculateUnread());
@@ -41,8 +41,10 @@ export default class User extends Reactive {
     if (matchMedia.matches) this._osColorScheme = 'dark';
     matchMedia.addListener(e => { this._osColorScheme = e.matches ? 'dark' : 'light' });
 
+    this._listenToOmnibus();
+
     // Used to test WebSocket reconnect logic
-    // setInterval(() => (this.events.ws && this.events.ws.close()), 3000);
+    // setInterval(() => (this.omnibus.ws && this.omnibus.ws.close()), 3000);
   }
 
   activateTheme() {
@@ -69,11 +71,6 @@ export default class User extends Reactive {
     return dialogs;
   }
 
-  ensureConnected() {
-    if (this.email) this.send({method: 'ping'});
-    return this;
-  }
-
   ensureDialog(params) {
     // Ensure channel or private dialog
     if (params.dialog_id) {
@@ -85,7 +82,7 @@ export default class User extends Reactive {
     if (conn) return conn.update(params);
 
     // Create connection
-    conn = new Connection({...params, api: this.api, events: this.events});
+    conn = new Connection({...params, api: this.api});
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('update', () => this.update({connections: true}));
@@ -136,6 +133,7 @@ export default class User extends Reactive {
     this.roles.clear();
     this.roles.add(body.email ? 'authenticated' : 'anonymous');
     (body.roles || []).forEach(role => this.roles.add(role));
+    if (this.email) this.omnibus.send('ping');
 
     this.update({
       highlight_keywords: body.highlight_keywords || [],
@@ -143,7 +141,7 @@ export default class User extends Reactive {
       status: this.getUserOp.status,
     });
 
-    return this.ensureConnected();
+    return this;
   }
 
   removeDialog(params) {
@@ -157,10 +155,6 @@ export default class User extends Reactive {
     }
   }
 
-  send(msg, cb) {
-    return this.events.send(msg, cb);
-  }
-
   setActiveDialog(params) {
     let activeDialog = !params.connection_id && !params.dialog_id && this.notifications;
     if (activeDialog) return this.update({activeDialog});
@@ -168,7 +162,7 @@ export default class User extends Reactive {
     activeDialog = this.findDialog(params);
     if (activeDialog) return this.update({activeDialog});
 
-    activeDialog = new Dialog({...params, api: this.api, events: this.events});
+    activeDialog = new Dialog({...params, api: this.api, frozen: 'Not found'});
     return this.update({activeDialog});
   }
 
@@ -187,24 +181,6 @@ export default class User extends Reactive {
       + this.dialogs(dialog => dialog.is_private).reduce((t, d) => { return t + d.unread }, 0);
   }
 
-  _createEvents(params) {
-    const events = new Events(params);
-
-    events.on('message', params => {
-      this._dispatchMessageToDialog(params);
-      this.emit(params.dispatchTo, params);
-      if (this[params.dispatchTo]) this[params.dispatchTo](params);
-    });
-
-    events.on('update', events => {
-      if (events.ready) return this.is('pending') && this.load();
-      this.update({status: 'pending'});
-      this.connections.forEach(conn => conn.update({state: 'unreachable'}));
-    });
-
-    return events;
-  }
-
   _dispatchMessageToDialog(params) {
     const conn = this.findDialog({connection_id: params.connection_id});
     if (!conn) return;
@@ -213,5 +189,22 @@ export default class User extends Reactive {
 
     const dialog = conn.findDialog(params);
     if (dialog && dialog[params.dispatchTo]) dialog[params.dispatchTo](params);
+  }
+
+  _listenToOmnibus() {
+    this.omnibus.on('close', () => {
+      this.update({status: 'pending'});
+      this.connections.forEach(conn => conn.update({state: 'unreachable'}));
+    });
+
+    this.omnibus.on('open', () => {
+      if (this.is('pending') && this.email) return this.load();
+    });
+
+    this.omnibus.on('message', params => {
+      this._dispatchMessageToDialog(params);
+      this.emit(params.dispatchTo, params);
+      if (this[params.dispatchTo]) this[params.dispatchTo](params);
+    });
   }
 }

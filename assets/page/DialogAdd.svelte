@@ -34,7 +34,7 @@ function loadConversations(e) {
   if (e.type == 'click' && availableDialogs.done) message += ' refresh';
   if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
-  user.send({connection_id: connectionId, message}, (params) => {
+  user.omnibus.send({connection_id: connectionId, message}, (params) => {
     const error = extractErrorMessage(params);
     availableDialogs = error ? {dialogs: [], done: true, n_dialogs: 0, error} : params;
 

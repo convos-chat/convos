@@ -5,6 +5,7 @@ import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '..
 import {isType, str2color} from '../js/util';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
+import {omnibus} from '../store/Omnibus';
 
 const channelRe = new RegExp('^[#&]');
 
@@ -28,8 +29,8 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'api', params.api);
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
-    this.prop('ro', 'events', params.events);
     this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
+    this.prop('ro', 'omnibus', params.omnibus || omnibus);
     this.prop('ro', 'path', path.map(p => encodeURIComponent(p)).join('/'));
 
     this.prop('rw', 'endOfHistory', false);
@@ -65,7 +66,7 @@ export default class Dialog extends Reactive {
     if (msg.from && ['action', 'error', 'private'].indexOf(msg.type) != -1) {
       if (msg.highlight || this.is_private || this.wantNotifications) {
         const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
-        this.events.notifyUser(title, msg.message);
+        this.omnibus.notify(title, msg.message);
       }
 
       this.update({unread: this.unread + 1});
@@ -192,9 +193,9 @@ export default class Dialog extends Reactive {
   }
 
   send(message, methodName) {
-    this.events.send(
+    this.omnibus.send(
       {connection_id: this.connection_id, dialog_id: this.dialog_id || '', message},
-      methodName ? this[methodName].bind(this) : null,
+      typeof methodName == 'function' ? methodName : methodName ? this[methodName].bind(this) : null,
     );
   }
 
