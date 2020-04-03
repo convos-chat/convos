@@ -1,5 +1,5 @@
 <script>
-import Link from '../components/Link.svelte';
+import Icon from '../components/Icon.svelte';
 import {currentUrl, docTitle} from '../store/router';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
@@ -12,6 +12,7 @@ const messages = {
   'loading': 'Loading',
   'not_found': 'Not Found',
   'offline': 'You appear to be offline',
+  'unknown': 'Unknown error!',
 };
 
 $: status = calculateStatus($user, $currentUrl);
@@ -33,7 +34,7 @@ function calculateStatus($user, $currentUrl) {
 <main class="welcome-screen">
   <article class="welcome-screen_fallback">
     <h1>
-      <Link href="/"><span>{l(status == 'loading' ? 'Convos' : messages[status])}</span></Link>
+      <a href="{currentUrl}"><span>{l(status == 'loading' ? 'Convos' : messages[status])}</span></a>
       {#if process.env.organization_name != 'Convos'}
         {#if process.env.organization_url != 'https://convos.by'}
           <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
@@ -44,8 +45,8 @@ function calculateStatus($user, $currentUrl) {
     </h1>
 
     {#if status == 'offline'}
-      <p><i class="fas fa-exclamation-triangle"></i> {l('You seem to have lost connection to the internet.')}</p>
-      <p><a href="/" class="btn">{l('Reload')}</a></p>
+      <p><i class="fas fa-exclamation-triangle"></i> {l('Seems like we got disconnected from the internet.')}</p>
+      <p><a href="{$currentUrl}" class="btn">{l('Reload')}</a></p>
     {:else if status == 'loading'}
       <p>{l('Convos is the simplest way to use IRC, and it keeps you always online.')}</p>
       <p><i class="fas fa-download"></i> {l('Downloading Convos...')}</p>
@@ -53,25 +54,21 @@ function calculateStatus($user, $currentUrl) {
       <p><i class="fas fa-spinner fa-spin"></i> {l('Loading user data...')}</p>
       <p><a class="btn" href="{process.env.contact}">{l('Contact admin')}</a></p>
     {:else if status == 'not_found'}
-      <p>{l('Could not find the page you are looking for. Maybe you entered an invalid URL?')}</p>
-      <p><a href="/" class="btn">{l('Go to landing page')}</a></p>
+      <p>{l('The Convos Team have been searching and searching, but the requested page could not be found.')}</p>
+      <p><a href="{$currentUrl.base}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
     {:else}
-      <p>
-        {l('This should not happen.')}
-        Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
-        if the problem does not go away.
-      </p>
-      <p><a href="/" class="btn">{l('Go to landing page')}</a></p>
+      <p>{@html lmd('Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away.', 'https://github.com/nordaaker/convos/issues')}</p>
+      <p><a href="{$currentUrl.base}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
     {/if}
   </article>
 
   <footer class="welcome-screen__footer">
-    <Link href="https://convos.by/">Convos</Link>
+    <a href="https://convos.by/">Convos</a>
     &mdash;
-    <Link href="https://convos.by/blog">{l('Blog')}</Link>
+    <a href="https://convos.by/blog">{l('Blog')}</a>
     &mdash;
-    <Link href="https://convos.by/doc">{l('Documentation')}</Link>
+    <a href="https://convos.by/doc">{l('Documentation')}</a>
     &mdash;
-    <Link href="https://github.com/Nordaaker/convos">{l('GitHub')}</Link>
+    <a href="https://github.com/Nordaaker/convos">{l('GitHub')}</a>
   </footer>
 </main>

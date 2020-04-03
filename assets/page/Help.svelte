@@ -1,5 +1,6 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
+import Link from '../components/Link.svelte';
 import {commands} from '../js/autocomplete';
 import {currentUrl, docTitle} from '../store/router';
 import {emojiAliases} from '../js/md';
@@ -82,5 +83,13 @@ $: scrollTo($currentUrl.hash || 0);
     {/if}
 
     <li><a href="{process.env.contact}" target="_blank">{l('Contact admin')}</a></li>
+  </ul>
+
+  <h2 id="fallback">{l('See fallback pages')}</h2>
+  <ul>
+    <li><Link href="/err/loading">Loading</Link></li>
+    <li><Link href="/err/not_found">Not found</Link></li>
+    <li><Link href="/err/offline">Offline</Link></li>
+    <li><Link href="/err/unknown">Unknown</Link></li>
   </ul>
 </main>
