@@ -1,0 +1,46 @@
+import Time from '../assets/js/Time';
+
+test('constructor', () => {
+  const t = new Time('2020-02-24T13:31:00');
+  expect(t.toEpoch()).toBe(1582551060);
+
+  const tz = new Time('2020-02-24T13:31:00Z');
+  expect(tz.toEpoch()).toBe(1582551060);
+});
+
+test('getHM', () => {
+  const t0 = new Time('2021-02-24T13:31:00');
+  expect(t0.getHM()).toBe(t0.getHours() + ':31');
+});
+
+test('getHumanDate', () => {
+  const year = new Time().getFullYear();
+  const t0 = new Time(year + '-02-24T13:31:00');
+
+  expect(t0.getHumanDate()).toBe('Feb 24');
+
+  const t1 = new Time((year - 1) + '-02-24T13:31:00');
+  expect(t1.getHumanDate()).toBe('Feb 24, ' + (year - 1));
+});
+
+test('getMonthAbbr', () => {
+  const expected = ['Jan', 'Feb', 'March', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+
+  for (let i = 1; i <= 12; i++) {
+    const m = i < 10 ? '0' + i : i;
+    const t0 = new Time('2009-' + m + '-24T13:31:00');
+    expect(t0.getMonthAbbr()).toBe(expected.shift());
+  }
+});
+
+test('logic', () => {
+  const t0 = new Time('2020-02-24T13:31:00');
+  const t1 = new Time('2020-02-24T13:31:12');
+
+  expect(t1 - t0).toBe(12000);
+  expect(t1 < t0).toBe(false);
+  expect(t1 > t0).toBe(true);
+  expect(t1 - 12000).toBe(t0.valueOf());
+  expect(t1.toEpoch() - t0.toEpoch()).toBe(12);
+  expect(t1 == t0).toBe(false);
+});
