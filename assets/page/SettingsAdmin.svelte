@@ -48,11 +48,11 @@ onMount(async () => {
 </script>
 
 <ChatHeader>
-  <h1>{l('Settings')}</h1>
+  <h1>{l('Admin')}</h1>
 </ChatHeader>
 
 <main class="main">
-  <form method="post" on:submit|preventDefault="{generateInviteLink}">
+  <form id="recover-or-invite" method="post" on:submit|preventDefault="{generateInviteLink}">
     <h2>{l('Recover or invite')}</h2>
     <p>{l('Using this form, you can generate an invite link for new users, or a recover password link for existing users.')}</p>
     <TextField type="email" name="email" placeholder="{l('user@example.com')}">
@@ -76,7 +76,7 @@ onMount(async () => {
     <OperationStatus op="{inviteLinkOp}"/>
   </form>
 
-  <form method="post" on:submit|preventDefault="{updateSettingsFromForm}">
+  <form id="convos-settings" method="post" on:submit|preventDefault="{updateSettingsFromForm}">
     <h2>{l('Convos settings')}</h2>
     <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', process.env.base_url)}</p>
 

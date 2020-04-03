@@ -17,8 +17,8 @@ import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
 import Search from './page/Search.svelte';
-import Settings from './page/Settings.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
+import SettingsAdmin from './page/SettingsAdmin.svelte';
 
 export const routingRules = [
   [new RegExp('^/(file|paste)'), null, {}],
@@ -29,7 +29,7 @@ export const routingRules = [
   [new RegExp('^/settings/connection'), ConnectionAdd, {user: 'loggedIn'}],
   [new RegExp('^/settings/conversation'), DialogAdd, {user: 'loggedIn'}],
   [new RegExp('^/settings/account'), SettingsAccount, {user: 'loggedIn'}],
-  [new RegExp('^/settings'), Settings, {user: 'loggedIn'}],
+  [new RegExp('^/settings'), SettingsAdmin, {user: 'loggedIn'}],
   [new RegExp('^/chat'), Chat, {user: 'loggedIn'}],
   [new RegExp('^/help'), Help, {user: 'loggedIn'}],
   [new RegExp('^/search'), Search, {user: 'loggedIn'}],
