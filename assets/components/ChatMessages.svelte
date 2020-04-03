@@ -21,8 +21,8 @@ $: unreadFrom = $dialog.unread;
 function addMeta(messages) {
   return messages.map((msg, i) => {
     msg.dayChanged
-      = i == 0 && dialog.is('search') ? true
-      : i == 0 ? false
+      = !dialog.messages.length ? false
+      : i == 0 ? dialog.is('search')
       : msg.ts.getDate() != messages[i - 1].ts.getDate();
 
     return msg;
