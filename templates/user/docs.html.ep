@@ -3,25 +3,13 @@
 <div class="sidebar-left">
   <h1><a href="/"><span><%=l 'Convos' %></span></a></h1>
   <p><%=l 'A multiuser chat application.' %></p>
-
-  <nav class="sidebar-left__nav">
-    %== $nav
-  </nav>
+  <nav class="sidebar-left__nav"><%== $nav %></nav>
 </div>
 
-<header class="chat-header">
-  %== $h1
-  <a href="#activeMenu:{$activeMenu ? '' : 'nav'}" class="chat-header__hamburger"><Icon name="{$activeMenu ? 'times-circle' : 'bars'}"/></a>
-</header>
-
-<main class="main">
-  %== $main
-</main>
+<header class="chat-header"><%== $h1 %></header>
+<main class="main"><%== $main %></main>
 
 <script>
-document.addEventListener('DOMContentLoaded', function(e) {
-  document.querySelectorAll('pre').forEach(el => {
-    hljs.highlightBlock(el);
-  })
-});
+document.addEventListener('DOMContentLoaded',
+  e => document.querySelectorAll('pre').forEach(el => hljs.highlightBlock(el)));
 </script>

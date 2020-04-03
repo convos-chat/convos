@@ -20,4 +20,3 @@ $: if (inputEl && !inputEl.syncValue) {
   <label for="{id}"><slot name="label">Label</slot></label>
   <textarea {name} {placeholder} {id} {readonly} bind:this="{inputEl}" bind:value></textarea>
 </div>
-
