@@ -44,6 +44,8 @@
     "jest": "^25.1.0",
     "jsdoc": "^3.6.3",
     "jsonhtmlify": "^0.0.1",
+    "page": "^1.11.5",
+    "querystring": "^0.2.0",
     "twemoji": "^12.1.5"
   }
 }

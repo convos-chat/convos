@@ -15,10 +15,10 @@
  * @exports q
  * @exports regexpEscape
  * @exports removeChildNodes
+ * @exports sameOrigin
  * @exports showEl
  * @exports str2color
  * @exports tagNameIs
- * @exports timer
  * @exports uuidv4
  */
 const goldenRatio = 0.618033988749;
@@ -247,6 +247,18 @@ export function removeChildNodes(el) {
 export function replaceClassName(sel, re, replacement) {
   const tag = document.querySelector(sel);
   tag.className = tag.className.replace(re, (all, prefix) => prefix + replacement);
+}
+
+/**
+ * sameOrigin() can be used to check if and URL is from the same domain as the
+ * current document, or an optional URL.
+ *
+ * @param {String} url An URL to check
+ * @param {Object} loc An URL to check against. Default to window.location.
+ * @return {Boolean} True if `url` is from same origin as `loc`.
+ */
+export function sameOrigin(url, loc = location) {
+  return url.indexOf('/') == 0 || url.indexOf('://' + loc.hostname) != -1;
 }
 
 /**

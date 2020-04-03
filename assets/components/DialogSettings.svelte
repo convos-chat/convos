@@ -10,7 +10,7 @@ import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {modeClassNames} from '../js/util';
 
-export let dialog = {};
+export let dialog;
 export let transition;
 
 const user = getContext('user');

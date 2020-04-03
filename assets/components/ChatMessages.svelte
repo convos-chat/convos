@@ -3,8 +3,8 @@ import ChatMessagesStatusLine from './ChatMessagesStatusLine.svelte';
 import Icon from './Icon.svelte';
 import internalMessages from '../js/internalMessages';
 import {getContext} from 'svelte';
-import {gotoUrl, urlFor} from '../store/router';
 import {l} from '../js/i18n';
+import {route} from '../store/Route';
 
 export let connection;
 export let dialog;
@@ -13,7 +13,7 @@ export let input;
 const user = getContext('user');
 
 $: messages = addMeta(internalMessages.mergeWithMessages(user, connection, $dialog));
-$: unreadFrom = dialog.unread;
+$: unreadFrom = $dialog.unread;
 
 function addMeta(messages) {
   return messages.map((msg, i) => {
@@ -32,7 +32,7 @@ function gotoDialogFromNotifications(e) {
   const message = messages[target.dataset.index];
   if (!message || !message.dialog_id) return;
   e.preventDefault();
-  gotoUrl(notififactionUrl(message));
+  route.go(notififactionUrl(message)); // TODO
 }
 
 function isSameSender(i) {
@@ -54,11 +54,11 @@ function toggleDetails(e) {
 }
 </script>
 
-{#if $dialog.messages.length == 0 && dialog.is('notifications')}
+{#if $dialog.messages.length == 0 && $dialog.is('notifications')}
   <h2>{l('No notifications.')}</h2>
 {/if}
 
-{#if messages.length > 40 && dialog.is('loading')}
+{#if messages.length > 40 && $dialog.is('loading')}
   <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin">{l('Loading...')}</ChatMessagesStatusLine>
 {/if}
 
@@ -85,7 +85,7 @@ function toggleDetails(e) {
     <Icon name="pick:{message.fromId}" color="{message.color}"/>
     <b class="message__ts" aria-labelledby="{message.id + '_ts'}">{message.ts.getHM()}</b>
     <div role="tooltip" id="{message.id + '_ts'}">{message.ts.toLocaleString()}</div>
-    {#if dialog.connection_id || !message.dialog_id}
+    {#if $dialog.connection_id || !message.dialog_id}
       <a href="#input:{message.from}" on:click|preventDefault="{() => input && input.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
     {:else}
       <a href="{notififactionUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
@@ -100,5 +100,5 @@ function toggleDetails(e) {
 {/each}
 
 {#if (connection.is && connection.is('unreachable')) || !$dialog.is('success')}
-  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="{urlFor('/')}">{l('Loading...')}</a></ChatMessagesStatusLine>
+  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="{route.baseUrl}">{l('Loading...')}</a></ChatMessagesStatusLine>
 {/if}

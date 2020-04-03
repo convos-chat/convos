@@ -1,6 +1,6 @@
 import Time from '../js/Time';
 import {lmd, topicOrStatus} from '../js/i18n';
-import {urlFor} from '../store/router';
+import {route} from '../store/Route';
 
 function fillIn(message) {
   return {
@@ -15,18 +15,6 @@ function fillIn(message) {
 }
 
 const internalMessages = {};
-
-internalMessages.askForNotifications = (user) => {
-  const messages = [];
-  if (user.events.wantNotifications !== null) return messages;
-
-  messages.push(fillIn({
-    message: 'Do you want notifications when someone sends you a private message? [Yes](%1) / [No](%2)',
-    vars: ['#call:events:requestPermissionToNotify', '#call:events:rejectNotifications'],
-  }));
-
-  return messages;
-};
 
 internalMessages.fillIn = fillIn;
 
@@ -45,9 +33,9 @@ internalMessages.firstTime = (user, dialog) => {
 
   if (dialog.is_private) {
     messages.push(fillIn({
-      message: 'This is a private conversation with [%1](%2).',
+      message: 'This is a private conversation with %1.',
       type: 'notice',
-      vars: [dialog.name, urlFor(dialog.path + '#send:' + encodeURIComponent('/whois ' + dialog.name))],
+      vars: [dialog.name],
     }));
   }
   else {
@@ -55,7 +43,7 @@ internalMessages.firstTime = (user, dialog) => {
     messages.push(fillIn({
       message: nParticipants == 1 ? 'You are the only participant in this conversation.' : 'There are %1 [participants](%2) in this conversation.',
       type: 'notice',
-      vars: [nParticipants, urlFor(dialog.path + '#activeMenu:settings')],
+      vars: [nParticipants, route.urlFor(dialog.path + '#activeMenu:settings')],
     }));
   }
 
@@ -63,7 +51,7 @@ internalMessages.firstTime = (user, dialog) => {
     messages.push(fillIn({
       message: 'Start chatting by writing a message in the input field, or click on the conversation name ([%1](%2)) to get more information.',
       type: 'notice',
-      vars: [dialog.name, urlFor(dialog.path + '#activeMenu:settings')],
+      vars: [dialog.name, route.urlFor(dialog.path + '#activeMenu:settings')],
     }));
   }
 
@@ -77,7 +65,7 @@ internalMessages.connectionDialogStatus = (connection, dialog) => {
   if (connection.frozen) {
     messages.push(fillIn({
       message: 'Disconnected. Your connection %1 can be edited in [settings](%2).',
-      vars: [connection.name, urlFor(connection.path + '#activeMenu:settings')],
+      vars: [connection.name, route.urlFor(connection.path + '#activeMenu:settings')],
     }));
   }
   else if (dialog.frozen && !dialog.is('locked')) {
@@ -100,7 +88,7 @@ internalMessages.emptySearch = (user, dialog) => {
     messages.push(fillIn({
       message: 'You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.',
       type: 'notice',
-      vars: [dialog.name, urlFor(dialog.path + '#activeMenu:settings')],
+      vars: [dialog.name, route.urlFor(dialog.path + '#activeMenu:settings')],
     }));
    }
   else if (!dialog.messages.length && dialog.is('success')) {
@@ -118,8 +106,7 @@ internalMessages.mergeWithMessages = (user, connection, dialog) => {
   return internalMessages.emptySearch(user, dialog)
     .concat(internalMessages.firstTime(user, dialog))
     .concat(dialog.messages)
-    .concat(internalMessages.connectionDialogStatus(connection, dialog))
-    .concat(internalMessages.askForNotifications(user));
+    .concat(internalMessages.connectionDialogStatus(connection, dialog));
 };
 
 export default internalMessages;

@@ -9,8 +9,8 @@
  */
 
 import twemoji from 'twemoji';
+import {route} from '../store/Route';
 import {regexpEscape} from './util';
-import {urlFor} from '../store/router';
 
 const codeToHtmlRe = new RegExp('(\\\\?)`([^`]+)`', 'g');
 const emojiByGroup = {};
@@ -121,9 +121,8 @@ export function md(str) {
   }).replace(mdLinkRe, (all, text, href) => {
     mdLinks++;
     const first = href.substring(0, 1);
-    const target = ['/', '#'].indexOf(first) != -1 ? '_self' : '_blank';
-    if (target == '_self' && first != '#') href = urlFor(href);
-    return '<a href="' + href + '" target="' + target + '">' + text + '</a>';
+    const target = ['/', '#'].indexOf(first) != -1 ? '' : '_blank';
+    return '<a href="' + route.urlFor(href) + '" target="' + target + '">' + text + '</a>';
   }).replace(codeToHtmlRe, (all, esc, text) => {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });

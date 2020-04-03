@@ -14,7 +14,7 @@ our ($CONVOS_HOME, $IRC_SERVER);
 
 $ENV{CONVOS_SECRETS} = 'not-very-secret';
 $ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
-$ENV{MOJO_MODE} //= 'test';
+$ENV{MOJO_MODE} ||= 'test';
 
 sub irc_server_connect {
   my ($class, $connection) = @_;
@@ -82,7 +82,24 @@ sub messages {
 
 sub t {
   require Test::Mojo;
-  Test::Mojo->new($_[1] || 'Convos');
+  return Test::Mojo->new($_[1] || 'Convos');
+}
+
+sub t_selenium {
+  my ($class, $app) = @_;
+  Test::More::plan(skip_all => './script/convos cpanm Test::Mojo::Role::Selenium')
+    unless eval 'require Test::Mojo::Role::Selenium;1';
+
+  $ENV{CONVOS_BACKEND}            ||= 'Convos::Core::Backend';
+  $ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://irc.convos.by/%23convos';
+  $ENV{MOJO_SELENIUM_DRIVER}      ||= 'Selenium::Firefox';
+  $ENV{MOJO_MODE} = 'development' if $ENV{MOJO_MODE} eq 'test';
+
+  require Test::Mojo;
+  my $t = Test::Mojo->with_roles('+Selenium')->new($app || 'Convos')->setup_or_skip_all;
+  $t->set_window_size([1024, 768])->navigate_ok('/')->status_is(200);
+
+  return $t;
 }
 
 sub wait_reject {

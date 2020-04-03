@@ -1,12 +1,11 @@
 <script>
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
-import TextField from './form/TextField.svelte';
-import {activeMenu, currentUrl, gotoUrl} from '../store/router';
 import {closestEl, q, regexpEscape, showEl, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
+import {route} from '../store/Route';
 
 export let transition;
 
@@ -20,7 +19,7 @@ let searchHasFocus = false;
 let visibleLinks = [];
 
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
-$: if (navEl) clearFilter($currentUrl);
+$: if (navEl) clearFilter($route);
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
 function clearFilter() {
@@ -28,6 +27,7 @@ function clearFilter() {
   q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
 
   setTimeout(() => {
+    if (!navEl) return;
     filter = '';
     const el = document.activeElement;
     if (el && closestEl(el, navEl)) q(navEl, 'a.has-path', aEl => aEl.focus());
@@ -89,8 +89,8 @@ function filterNav() {
 }
 
 function onNavItemClicked(e) {
-  const className = e.target.className || '';
-  if (className.match(/network|user/)) setTimeout(() => { $activeMenu = 'settings' }, 50);
+  const iconName = (e.target.className || '').match(/(network|user)/);
+  if (iconName) setTimeout(() => route.update({activeMenu: 'settings'}), 50);
 }
 
 function onSearchKeydown(e) {
@@ -98,7 +98,7 @@ function onSearchKeydown(e) {
   if (e.keyCode == 13) {
     e.preventDefault();
     clearFilter();
-    if (visibleLinks[activeLinkIndex]) gotoUrl(visibleLinks[activeLinkIndex].href);
+    if (visibleLinks[activeLinkIndex]) route.go(visibleLinks[activeLinkIndex].href);
     return;
   }
 
@@ -176,13 +176,13 @@ function renderUnread(dialog) {
       <Icon name="question-circle"/>
       <span>{l('Help')}</span>
     </Link>
-    {#if $user.roles.has('admin')}
+    {#if $user.is('admin')}
       <Link href="/settings">
         <Icon name="tools"/>
         <span>{l('Settings')}</span>
       </Link>
     {/if}
-    <Link href="/api/user/logout.html" native="{true}">
+    <Link href="/api/user/logout.html">
       <Icon name="power-off"/>
       <span>{l('Log out')}</span>
     </Link>

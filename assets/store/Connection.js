@@ -35,7 +35,6 @@ export default class Connection extends Dialog {
     this._addDefaultParticipants(dialog);
     this.dialogs.set(dialog.dialog_id, dialog);
     this.update({dialogs: true});
-    this.emit('channelListChange', dialog);
     return dialog;
   }
 
@@ -50,7 +49,6 @@ export default class Connection extends Dialog {
   removeDialog(params) {
     const dialog = this.findDialog(params) || params;
     this.dialogs.delete(dialog.dialog_id);
-    this.emit('channelListChange', dialog);
     return this.update({dialogs: true});
   }
 

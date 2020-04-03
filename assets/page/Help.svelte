@@ -2,15 +2,14 @@
 import ChatHeader from '../components/ChatHeader.svelte';
 import Link from '../components/Link.svelte';
 import {commands} from '../js/autocomplete';
-import {currentUrl, docTitle} from '../store/router';
 import {emojiAliases} from '../js/md';
-import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
+import {route} from '../store/Route';
 import {scrollTo} from '../js/util';
 
-$docTitle = l('%1 - Convos', l('Help'));
+$: scrollTo($route.hash || 0);
 
-$: scrollTo($currentUrl.hash || 0);
+route.update({title: l('Help')});
 </script>
 
 <ChatHeader>
@@ -85,7 +84,7 @@ $: scrollTo($currentUrl.hash || 0);
     <li><a href="{process.env.contact}" target="_blank">{l('Contact admin')}</a></li>
   </ul>
 
-  <h2 id="fallback">{l('See fallback pages')}</h2>
+  <h2 id="fallback">{l('Demo error pages')}</h2>
   <ul>
     <li><Link href="/err/loading">Loading</Link></li>
     <li><Link href="/err/not_found">Not found</Link></li>

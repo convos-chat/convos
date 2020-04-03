@@ -7,8 +7,8 @@ import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount, tick} from 'svelte';
-import {gotoUrl, urlToForm} from '../store/router';
 import {l, lmd} from '../js/i18n';
+import {route} from '../store/Route';
 
 export let dialog = {};
 
@@ -44,10 +44,9 @@ function defaultsToForm() {
   useTls = true;
   wantToBeConnected = true;
 
-  const url = new URL(location.href);
-  if (!url.searchParams.get('uri')) return urlToForm(formEl, url);
+  if (!route.query.uri) return route.urlToForm(formEl);
 
-  const connURL = new ConnURL(url.searchParams.get('uri'));
+  const connURL = new ConnURL(route.query.uri);
   const connParams = connURL.searchParams;
 
   if (connURL.host) formEl.server.value = connURL.host;
@@ -75,7 +74,7 @@ function connectionToForm() {
 async function removeConnection(e) {
   await removeConnectionOp.perform(connection);
   user.removeDialog(connection);
-  gotoUrl('/chat');
+  route.go('/chat');
 }
 
 async function submitForm(e) {
@@ -91,7 +90,7 @@ async function submitForm(e) {
   else {
     await createConnectionOp.perform(e.target);
     const conn = user.ensureDialog(createConnectionOp.res.body);
-    gotoUrl(conn.path);
+    route.go(conn.path);
   }
 }
 </script>

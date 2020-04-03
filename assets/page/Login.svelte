@@ -3,29 +3,28 @@ import Button from '../components/form/Button.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {currentUrl, gotoUrl, urlToForm} from '../store/router';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {q, scrollTo} from '../js/util';
+import {route} from '../store/Route';
 
 const emailFromParams = location.href.indexOf('email=') != -1;
 const user = getContext('user');
-
 const loginOp = user.api.operation('loginUser');
 const registerOp = user.api.operation('registerUser');
 
 let formEl;
 let observer;
 
-$: defaultPos = $currentUrl.path.indexOf('register') == -1 ? 0 : '#signup';
-$: scrollTo($currentUrl.hash || defaultPos);
+$: defaultPos = $route.pathParts[0] == 'register' ? '#signup' : 0;
+$: scrollTo($route.hash || defaultPos);
 
 $: if ($loginOp.is('success')) {
   redirectAfterLogin(loginOp);
 }
 
 $: if ($registerOp.is('success')) {
-  user.update({lastUrl: ''}); // Make sure the old value is forgotten
+  route.update({lastUrl: ''}); // Make sure the old value is forgotten
   redirectAfterLogin(registerOp);
 }
 
@@ -41,14 +40,14 @@ onMount(() => {
     q(document, '.fade-in', el => observer.observe(el));
   }
 
-  if (formEl) urlToForm(formEl);
+  if (formEl) route.urlToForm(formEl);
 });
 
 async function redirectAfterLogin(op) {
   document.cookie = op.res.headers['Set-Cookie'];
   op.reset();
   await user.load();
-  gotoUrl(user.calculateLastUrl());
+  route.go('/');
 }
 </script>
 
@@ -68,7 +67,7 @@ async function redirectAfterLogin(op) {
     <p>{l('Convos is the simplest way to use IRC, and it keeps you always online.')}</p>
   </article>
 
-  {#if !process.env.first_user}
+  {#if !$user.isFirst}
     <section id="signin" class="welcome-screen__signin fade-in">
       <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
         <h2>{l('Sign in')}</h2>
@@ -100,10 +99,10 @@ async function redirectAfterLogin(op) {
         <a class="btn is-hallow" on:click="{scrollTo}" href="#signin">{l('Sign in')}</a>
         <a class="btn is-hallow" on:click="{scrollTo}" href="#top">{l('Home')}</a>
       </p>
-    {:else if emailFromParams || process.env.open_to_public || process.env.first_user}
+    {:else if emailFromParams || process.env.open_to_public || $user.isFirst}
       <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
         <h2>{l(process.env.existing_user ? 'Recover account' : 'Sign up')}</h2>
-        {#if process.env.first_user}
+        {#if $user.isFirst}
           <p>{l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
         {/if}
         <input type="hidden" name="exp">
@@ -111,7 +110,6 @@ async function redirectAfterLogin(op) {
 
         <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}" bind:value="{user.formEmail}">
           <span slot="label">{l('E-mail')}</span>
-
           <p class="help" slot="help">
             {#if emailFromParams}
               {l('Your email is from the invite link.')}
@@ -130,7 +128,7 @@ async function redirectAfterLogin(op) {
           <Button icon="save" op="{registerOp}">{l(process.env.existing_user ? 'Set new password' : 'Sign up')}</Button>
         </div>
 
-        {#if !emailFromParams && !process.env.first_user}
+        {#if !emailFromParams && !$user.isFirst}
           <p on:click="{scrollTo}">{@html lmd('Go and [sign in](%1) if you already have an account.', '#signin')}</p>
         {/if}
 

@@ -5,9 +5,9 @@ import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {docTitle} from '../store/router';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
+import {route} from '../store/Route';
 
 const colorSchemeOptions = [['auto', 'Auto'], ['dark', 'Dark'], ['light', 'Light']];
 const user = getContext('user');
@@ -28,7 +28,7 @@ let theme = user.theme;
 let wantNotifications = user.events.wantNotifications;
 let highlight_keywords = user.highlight_keywords.join(', ');
 
-$docTitle = l('%1 - Convos', l('Account'));
+route.update({title: l('Account')});
 
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;

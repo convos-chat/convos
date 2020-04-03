@@ -46,10 +46,12 @@ export default class Dialog extends Reactive {
 
     if (params.hasOwnProperty('dialog_id')) {
       this.prop('ro', 'dialog_id', params.dialog_id);
+      this.prop('ro', 'title', () => [this.name, this.connection_id].join(' - '));
       this.prop('rw', 'frozen', params.frozen || '');
     }
     else {
       this.prop('ro', 'frozen', () => this._calculateFrozen());
+      this.prop('ro', 'title', () => this.name);
     }
 
     if (params.dialog_id) {

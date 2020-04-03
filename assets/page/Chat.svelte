@@ -3,42 +3,35 @@ import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../components/ChatMessages.svelte';
-import Connection from '../store/Connection';
-import ConnectionSettings from '../components/ConnectionSettings.svelte';
-import DialogSettings from '../components/DialogSettings.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {activeMenu, currentUrl, docTitle} from '../store/router';
 import {afterUpdate, getContext, onDestroy} from 'svelte';
 import {closestEl, debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
-import {viewport} from '../store/Viewport';
+import {route} from '../store/Route';
 
+const dragAndDrop = new DragAndDrop();
 const user = getContext('user');
 
 // Elements
 let chatInput;
 let messagesEl;
-let settingsComponent = null;
 
 // Variables for scrolling
-let messagesHeight = 0;
-let messagesHeightLast = 0;
+let [messagesHeight, messagesHeightLast] = [0, 0];
 let observer;
 let scrollPos = 'bottom';
 
 // Variables for calculating active connection and dialog
 let connection = {};
 let dialog = user.notifications;
-let dialogPasssword = '';
-let dragAndDrop = new DragAndDrop();
-let previousPath = '';
-let pathParts = $currentUrl.pathParts;
-let unsubscribe = [];
+let previousDialog = null;
+let unsubscribe = {};
 
-$: calculateDialog($user, $currentUrl);
+$: setDialogFromRoute($route);
+$: setDialogFromUser($user);
 $: dragAndDrop.attach(document, messagesEl, chatInput && chatInput.getUploadEl());
 
 afterUpdate(() => {
@@ -61,46 +54,26 @@ afterUpdate(() => {
 
 onDestroy(onClose);
 
-function addDialog(e) {
-  chatInput.sendMessage(['/join', dialog.dialog_id, dialogPasssword].filter(p => p.length).join(' '));
-  dialogPasssword = '';
+function setDialogFromRoute(route) {
+  const [connection_id, dialog_id] = ['connection_id', 'dialog_id'].map(k => route.param(k));
+  if (dialog.connection_id == connection_id && dialog.dialog_id == dialog_id) return;
+  user.setActiveDialog({connection_id, dialog_id}); // Triggers setDialogFromUser()
 }
 
-function calculateDialog($user, $currentUrl) {
-  pathParts = $currentUrl.pathParts;
-  const c = $user.findDialog({connection_id: pathParts[1]}) || {};
-  if (c != connection) registerUrlHandler(connection = c);
+function setDialogFromUser(user) {
+  if (user.activeDialog == previousDialog) return;
+  if (unsubscribe.dialog) onClose();
 
-  const d = pathParts.length == 1 ? $user.notifications : $user.findDialog({connection_id: pathParts[1], dialog_id: pathParts[2]});
-  if (!d) return (dialog = $user.notifications);
-  if (d == dialog && previousPath) return dialog.load({after: 'maybe'});
-  if (previousPath) onClose();
+  dialog = user.activeDialog;
+  connection = user.findDialog({connection_id: dialog.connection_id}) || {};
+  messagesHeightLast = 0;
+  previousDialog = dialog;
+  scrollPos = 'bottom';
 
   q(document, '.message__embed', embedEl => embedEl.remove());
-
-  dialog = d;
-  messagesHeightLast = 0;
-  previousPath = $currentUrl.path;
-  scrollPos = 'bottom';
-  settingsComponent = !dialog.connection_id ? null : dialog.dialog_id ? DialogSettings : ConnectionSettings;
-
-  unsubscribe = [];
-  if (connection.subscribe) unsubscribe.push(connection.subscribe(c => { connection = c }));
-  if (dialog.subscribe) unsubscribe.push(dialog.subscribe(d => { dialog = d }));
-
   dialog.load({before: 'maybe'});
-  $docTitle = connection == dialog ? l('%1 - Convos', connection.name)
-            : connection.name ? l('%1/%2 - Convos', connection.name, dialog.name)
-            : l('%1 - Convos', dialog.name);
-}
-
-function maybeSendMessage(e) {
-  const linkEl = closestEl(e.target, 'a');
-  const message = linkEl && linkEl.href.match(/#send:(.+)/);
-  if (!message) return;
-  e.preventDefault();
-  return chatInput ? chatInput.sendMessage({message: decodeURIComponent(message[1])})
-    : connection.send(decodeURIComponent(message[1]));
+  route.update({title: dialog.title});
+  unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
 }
 
 function messageElObserved(entries, observer) {
@@ -112,13 +85,13 @@ function messageElObserved(entries, observer) {
 }
 
 function onClose() {
-  if (dialog && dialog.setLastRead) dialog.setLastRead();
+  if (dialog.setLastRead) dialog.setLastRead();
+  if (unsubscribe.dialog) unsubscribe.dialog();
   dragAndDrop.detach();
-  unsubscribe.forEach(cb => cb());
 }
 
 const onScroll = debounce(e => {
-  if (!messagesEl || !dialog.connection_id) return;
+  if (!messagesEl) return;
 
   const offsetHeight = messagesEl.offsetHeight;
   const scrollTop = messagesEl.scrollTop;
@@ -132,57 +105,23 @@ const onScroll = debounce(e => {
     messagesHeightLast = messagesHeight;
   }
 }, 20);
-
-function registerUrlHandler(connection) {
-  if (!connection.url || !navigator.registerProtocolHandler) return;
-  const protocol = connection.url.protocol.replace(/:$/, '');
-  if (['irc'].indexOf(protocol) == -1) return;
-  navigator.registerProtocolHandler(protocol, currentUrl.base + '/register?uri=%s', 'Convos ' + protocol + ' handler');
-}
 </script>
-
-{#if $activeMenu == 'settings'}
-  <svelte:component this="{settingsComponent}" dialog="{dialog}" transition="{{duration: 250, x: $viewport.isWide ? 0 : $viewport.width}}"/>
-{/if}
 
 <ChatHeader>
   <h1>
     <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">
-      <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{pathParts[2] || pathParts[1] || l('Notifications')}</span>
+      <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{l(dialog.name)}</span>
     </a>
   </h1>
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
-<main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}" on:click="{maybeSendMessage}">
-  <div class="messages-container" class:has-notifications="{pathParts.length == 1}" bind:offsetHeight="{messagesHeight}">
-    {#if pathParts[1] && !connection.connection_id}
-      <h2>{l('Connection does not exist.')}</h2>
-      <p>{l('Do you want to create the connection "%1"?', pathParts[1])}</p>
-      <p>
-        <Link href="/settings/connection?server={encodeURIComponent(pathParts[1])}&dialog={encodeURIComponent(pathParts[2])}" class="btn">{l('Yes')}</Link>
-        <Link href="/chat" class="btn">{l('No')}</Link>
-      </p>
-    {:else if pathParts[2] && !dialog.connection_id}
-      <h2>{l('You are not part of this conversation.')}</h2>
-      <p>{l('Do you want to chat with "%1"?', pathParts[2])}</p>
-      <p>
-        <a href="#send:/join {pathParts[2]}" class="btn">{l('Yes')}</a>
-        <Link href="/chat" class="btn">{l('No')}</Link>
-      </p>
-    {:else}
+<main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">
+  <div class="messages-container" class:has-notifications="{dialog.is('notifications')}" bind:offsetHeight="{messagesHeight}">
+    {#if !dialog.connection_id || user.findDialog(dialog)}
       <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
-    {/if}
-
-    {#if dialog.is('locked')}
-      <form class="inputs-side-by-side" on:submit|preventDefault="{addDialog}">
-        <TextField type="password" name="dialog_password" bind:value="{dialogPasssword}" placeholder="{l('Enter password')}" autocomplete="off">
-          <span slot="label">{l('This conversation needs a password')}</span>
-        </TextField>
-        <div class="has-remaining-space">
-          <Button icon="comment" disabled="{!dialogPasssword.length}">{l('Join')}</Button>
-        </div>
-      </form>
+    {:else}
+      <!-- TODO -->
     {/if}
   </div>
 </main>

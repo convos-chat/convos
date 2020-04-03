@@ -1,4 +1,5 @@
 import Connection from './Connection';
+import Dialog from './Dialog';
 import EmbedMaker from '../js/EmbedMaker';
 import Events from '../js/Events';
 import Notifications from './Notifications';
@@ -6,7 +7,7 @@ import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
-import {urlFor} from './router';
+import {route} from './Route';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -18,6 +19,7 @@ export default class User extends Reactive {
     this.prop('ro', 'email', () => this.getUserOp.res.body.email || '');
     this.prop('ro', 'embedMaker', new EmbedMaker({api}));
     this.prop('ro', 'events', this._createEvents(params));
+    this.prop('ro', 'isFirst', params.isFirst || false);
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
     this.prop('ro', 'notifications', new Notifications({api, events: this.events}));
     this.prop('ro', 'search', new Search({api, events: this.events}));
@@ -25,12 +27,12 @@ export default class User extends Reactive {
     this.prop('ro', 'themes', params.themes || {});
     this.prop('ro', 'unread', () => this._calculateUnread());
 
+    this.prop('rw', 'activeDialog', this.notifications);
     this.prop('rw', 'highlight_keywords', []);
     this.prop('rw', 'status', 'pending');
 
     this.prop('persist', 'colorScheme', 'auto');
     this.prop('persist', 'experimentalLoad', false);
-    this.prop('persist', 'lastUrl', '');
     this.prop('persist', 'showGrid', false);
     this.prop('persist', 'theme', 'convos');
     this.prop('persist', 'version', '0');
@@ -49,22 +51,10 @@ export default class User extends Reactive {
     if (!theme) return console.error('[Convos] Invalid theme: ' + this.theme);
 
     const file = theme.color_schemes[colorScheme] || theme.color_schemes.default;
-    document.getElementById('link_selected_theme').setAttribute('href', urlFor('/themes/' + file));
+    document.getElementById('link_selected_theme').setAttribute('href', route.urlFor('/themes/' + file));
 
     const htmlEl = document.documentElement;
     htmlEl.className = htmlEl.className.replace(/theme-\S+/, () => 'theme-' + theme.id);
-  }
-
-  calculateLastUrl() {
-    if (this.is('error')) return urlFor('/login');
-    if (!this.is('success')) return null;
-    if (this.lastUrl) return this.lastUrl;
-
-    const conn = this.connections.toArray()[0];
-    if (!conn) return urlFor('/settings/connection');
-
-    const dialog = conn.dialogs.toArray()[0];
-    return urlFor(dialog ? dialog.path : conn.path);
   }
 
   dialogs(cb) {
@@ -81,6 +71,7 @@ export default class User extends Reactive {
 
   ensureConnected() {
     if (this.email) this.send({method: 'ping'});
+    return this;
   }
 
   ensureDialog(params) {
@@ -98,7 +89,6 @@ export default class User extends Reactive {
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('update', () => this.update({connections: true}));
-    conn.on('channelListChange', (dialog) => this.emit('channelListChange', dialog));
     this.connections.set(conn.connection_id, conn);
     this.update({connections: true});
     return conn;
@@ -109,14 +99,20 @@ export default class User extends Reactive {
     return !params.dialog_id ? conn : conn && conn.findDialog(params);
   }
 
-  is(status) {
-    if (Array.isArray(status)) return !!status.filter(s => this.is(s)).length;
-    if (status == 'loggedIn') return this.email && true;
-    if (status == 'offline') return extractErrorMessage(this.getUserOp.err || [], 'source') == 'fetch';
-    return this.status == status;
+  is(statusOrRole) {
+    if (Array.isArray(statusOrRole)) return !!statusOrRole.filter(sr => this.is(sr)).length;
+    if (this.roles.has(statusOrRole)) return true;
+    if (statusOrRole == 'offline') return extractErrorMessage(this.getUserOp.err || [], 'source') == 'fetch';
+    return this.status == statusOrRole;
   }
 
-  async load() {
+  async load(load) {
+    if (load === false) {
+      this.roles.add('anonymous');
+      this.update({roles: true});
+      return this;
+    }
+
     if (this.is('loading')) return this;
 
     this.update({status: 'loading'});
@@ -138,11 +134,16 @@ export default class User extends Reactive {
 
     this.notifications.update({unread: body.unread || 0});
     this.roles.clear();
+    this.roles.add(body.email ? 'authenticated' : 'anonymous');
     (body.roles || []).forEach(role => this.roles.add(role));
-    this.update({highlight_keywords: body.highlight_keywords || [], status: this.getUserOp.status});
-    this.ensureConnected();
 
-    return this;
+    this.update({
+      highlight_keywords: body.highlight_keywords || [],
+      roles: true,
+      status: this.getUserOp.status,
+    });
+
+    return this.ensureConnected();
   }
 
   removeDialog(params) {
@@ -158,6 +159,17 @@ export default class User extends Reactive {
 
   send(msg, cb) {
     return this.events.send(msg, cb);
+  }
+
+  setActiveDialog(params) {
+    let activeDialog = !params.connection_id && !params.dialog_id && this.notifications;
+    if (activeDialog) return this.update({activeDialog});
+
+    activeDialog = this.findDialog(params);
+    if (activeDialog) return this.update({activeDialog});
+
+    activeDialog = new Dialog({...params, api: this.api, events: this.events});
+    return this.update({activeDialog});
   }
 
   update(params) {

@@ -1,9 +1,8 @@
 <script>
 import Icon from '../components/Icon.svelte';
-import {currentUrl, docTitle} from '../store/router';
-import {getContext, onMount} from 'svelte';
+import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
-import {replaceClassName} from '../js/util';
+import {route} from '../store/Route';
 
 const user = getContext('user');
 const loadingStatus = process.env.load_user ? ['loading', 'pending'] : ['loading'];
@@ -15,18 +14,13 @@ const messages = {
   'unknown': 'Unknown error!',
 };
 
-$: status = calculateStatus($user, $currentUrl);
+$: status = calculateStatus($user, $route.pathParts);
 
-onMount(() => {
-  replaceClassName('body', /(is-logged-)\S+/, 'out');
-  replaceClassName('body', /(page-)\S+/, status);
-});
+function calculateStatus(user, pathParts) {
+  const fromPath = pathParts.slice(-1)[0] || '';
+  const status = messages[fromPath] ? fromPath : user.is('offline') ? 'offline' : user.is(loadingStatus) ? 'loading' : 'not_found';
 
-function calculateStatus($user, $currentUrl) {
-  const fromPath = $currentUrl.pathParts[$currentUrl.pathParts.length - 1] || '';
-  const status = messages[fromPath] ? fromPath : $user.is('offline') ? 'offline' : $user.is(loadingStatus) ? 'loading' : 'not_found';
-
-  $docTitle = l('%1 - Convos', l(messages[status]));
+  route.update({title: l(messages[status])});
   return status;
 }
 </script>
@@ -34,7 +28,7 @@ function calculateStatus($user, $currentUrl) {
 <main class="welcome-screen">
   <article class="welcome-screen_fallback">
     <h1>
-      <a href="{currentUrl}"><span>{l(status == 'loading' ? 'Convos' : messages[status])}</span></a>
+      <a href="{$route.baseUrl}"><span>{l(status == 'loading' ? 'Convos' : messages[status])}</span></a>
       {#if process.env.organization_name != 'Convos'}
         {#if process.env.organization_url != 'https://convos.by'}
           <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
@@ -46,7 +40,7 @@ function calculateStatus($user, $currentUrl) {
 
     {#if status == 'offline'}
       <p><i class="fas fa-exclamation-triangle"></i> {l('Seems like we got disconnected from the internet.')}</p>
-      <p><a href="{$currentUrl}" class="btn">{l('Reload')}</a></p>
+      <p><a href="{$route.canonicalPath}" class="btn">{l('Reload')}</a></p>
     {:else if status == 'loading'}
       <p>{l('Convos is the simplest way to use IRC, and it keeps you always online.')}</p>
       <p><i class="fas fa-download"></i> {l('Downloading Convos...')}</p>
@@ -55,20 +49,20 @@ function calculateStatus($user, $currentUrl) {
       <p><a class="btn" href="{process.env.contact}">{l('Contact admin')}</a></p>
     {:else if status == 'not_found'}
       <p>{l('The Convos Team have been searching and searching, but the requested page could not be found.')}</p>
-      <p><a href="{$currentUrl.base}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
+      <p><a href="{$route.baseUrl}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
     {:else}
       <p>{@html lmd('Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away.', 'https://github.com/nordaaker/convos/issues')}</p>
-      <p><a href="{$currentUrl.base}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
+      <p><a href="{$route.baseUrl}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
     {/if}
   </article>
 
   <footer class="welcome-screen__footer">
-    <a href="https://convos.by/">Convos</a>
+    <a href="https://convos.by/" target="_blank">Convos</a>
     &mdash;
-    <a href="https://convos.by/blog">{l('Blog')}</a>
+    <a href="https://convos.by/blog" target="_blank">{l('Blog')}</a>
     &mdash;
-    <a href="https://convos.by/doc">{l('Documentation')}</a>
+    <a href="https://convos.by/doc" target="_blank">{l('Documentation')}</a>
     &mdash;
-    <a href="https://github.com/Nordaaker/convos">{l('GitHub')}</a>
+    <a href="https://github.com/Nordaaker/convos" target="_blank">{l('GitHub')}</a>
   </footer>
 </main>

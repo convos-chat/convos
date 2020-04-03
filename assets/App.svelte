@@ -1,59 +1,36 @@
 <script>
 import Api from './js/Api';
+import ConnectionSettings from './components/ConnectionSettings.svelte';
+import DialogSettings from './components/DialogSettings.svelte';
 import hljs from './js/hljs';
+import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 import User from './store/User';
-import {activeMenu, calculateCurrentPageComponent, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
 import {closestEl, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
+import {l} from './js/i18n';
 import {onMount, setContext} from 'svelte';
-import {urlFor} from './store/router';
+import {route} from './store/Route';
+import {setupRouting} from './routes';
 import {viewport} from './store/Viewport';
 
-// Routing
-import Chat from './page/Chat.svelte';
-import ConnectionAdd from './page/ConnectionAdd.svelte';
-import DialogAdd from './page/DialogAdd.svelte';
-import Fallback from './page/Fallback.svelte';
-import Help from './page/Help.svelte';
-import Login from './page/Login.svelte';
-import Search from './page/Search.svelte';
-import SettingsAccount from './page/SettingsAccount.svelte';
-import SettingsAdmin from './page/SettingsAdmin.svelte';
-
-export const routingRules = [
-  [new RegExp('^/(file|paste)'), null, {}],
-  [new RegExp('^/docs'), null, {}],
-  [new RegExp('^/$'), Login, {user: 'pending'}],
-  [new RegExp('.*'), Fallback, {user: 'offline'}],
-  [new RegExp('^/(login|register)'), Login, {}],
-  [new RegExp('^/settings/connection'), ConnectionAdd, {user: 'loggedIn'}],
-  [new RegExp('^/settings/conversation'), DialogAdd, {user: 'loggedIn'}],
-  [new RegExp('^/settings/account'), SettingsAccount, {user: 'loggedIn'}],
-  [new RegExp('^/settings'), SettingsAdmin, {user: 'loggedIn'}],
-  [new RegExp('^/chat'), Chat, {user: 'loggedIn'}],
-  [new RegExp('^/help'), Help, {user: 'loggedIn'}],
-  [new RegExp('^/search'), Search, {user: 'loggedIn'}],
-  [new RegExp('^/$'), null, {user: ['error', 'success'], gotoLast: true}],
-  [new RegExp('.*'), Fallback, {}],
-];
-
 const api = new Api(process.env.api_url, {debug: true});
-const user = new User({api, wsUrl: process.env.ws_url, themes: process.env.themes});
-const notifications = user.notifications;
+const user = new User({api, isFirst: process.env.first_user, wsUrl: process.env.ws_url, themes: process.env.themes});
 
 let [innerHeight, innerWidth] = [0, 0];
 
-window.hljs = hljs; // Required by paste plugin
-currentUrl.base = process.env.base_url;
-user.activateTheme();
-user.events.listenToGlobalEvents();
 setContext('user', user);
 
-$: calculateCurrentPageComponent($currentUrl, $user, routingRules);
+window.hljs = hljs; // Required by paste plugin
+route.update({baseUrl: process.env.base_url});
+setupRouting(route);
+user.activateTheme();
+user.events.listenToGlobalEvents();
+user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
+
+$: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;
 $: viewport.update({height: innerHeight, width: innerWidth});
-$: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $docTitle : $docTitle;
-$: showSidebarChat = $pageComponent.routerOptions.user == 'loggedIn';
+$: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $route.title : $route.title;
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
@@ -65,33 +42,10 @@ if ('serviceWorker' in navigator) {
 }
 
 onMount(() => {
-  loadScript(currentUrl.base + '/images/emojis.js');
-  if (process.env.load_user) user.load();
+  loadScript(route.urlFor('/images/emojis.js'));
   if (user.showGrid) document.querySelector('body').classList.add('with-grid');
-
-  const unsubscribe = [];
-  unsubscribe.push(historyListener());
-  unsubscribe.push(user.on('channelListChange', onChannelListChange));
-
-  return () => unsubscribe.forEach(cb => cb());
+  user.load(process.env.load_user);
 });
-
-function onChannelListChange(params) {
-  if (user.is('loading')) return;
-  let path = ['', 'chat', params.connection_id];
-
-  // Do not want to show settings for the new dialog
-  $activeMenu = '';
-
-  if (user.findDialog(params)) {
-    if (params.dialog_id) path.push(params.dialog_id);
-    gotoUrl(path.map(encodeURIComponent).join('/'));
-  }
-  else {
-    const el = document.querySelector('.sidebar-left [href$="' + path.map(encodeURIComponent).join('/') + '"]');
-    gotoUrl(el ? el.href : '/chat');
-  }
-}
 
 function onGlobalKeydown(e) {
   if (!(e.shiftKey && e.keyCode == 13)) return; // Shift+Enter
@@ -112,31 +66,14 @@ function onWindowClick(e) {
   // This is useful if you want to see on server side what is being clicked on
   // user.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
 
-  // Call methods on user, such as user.ensureConnected() with href="#call:user:ensureConnected"
-  const linkEl = closestEl(e.target, 'a');
-  const action = linkEl && linkEl.href.match(/#call:(\w+):(\w+)/) || ['', '', ''];
-  if (action[2]) {
+  // Toggle activeMenu with href="#activeMenu:..."
+  const linkEl = e.target && e.target.closest('a');
+  const activeMenu = linkEl && linkEl.href.match(/#activeMenu:(\w*)/);
+  if (activeMenu) {
+    if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
+    route.update({activeMenu: activeMenu[1] == route.activeMenu ? '' : activeMenu[1]});
     e.preventDefault();
-    switch(action[1]) {
-      case 'events': return user.events[action[2]]();
-      case 'user': return user[action[2]]();
-    }
   }
-
-  // Internal link
-  if (linkEl && linkEl.target == '_self') {
-    e.preventDefault();
-    gotoUrl(linkEl.href);
-    return;
-  }
-
-  // Toggle activeMenu with href="#activeMenu:nav", where "nav" can be "", "nav" or "settings"
-  const toggle = linkEl && linkEl.href.match(/(.*)#(activeMenu):(\w*)/) || ['', '', '', ''];
-  if (toggle[1].indexOf('http') == 0 && $currentUrl.toString() != toggle[1]) gotoUrl(toggle[1]);
-  if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
-  if (closestEl(e.target, '.main') && !toggle[3]) return;
-  if (toggle[2] || $activeMenu) e.preventDefault();
-  $activeMenu = toggle[3] == $activeMenu ? '' : toggle[3];
 }
 
 function onWindowFocus() {
@@ -151,14 +88,31 @@ function onWindowFocus() {
   bind:innerHeight="{innerHeight}"
   bind:innerWidth="{innerWidth}"/>
 
-{#if $pageComponent}
-  {#if showSidebarChat && ($activeMenu == 'nav' || $viewport.isWide)}
+{#if $route.component}
+  <!--
+    IMPORTANT! Looks like transition="..." inside <svelte:component/>,
+    and a lot of $route updates prevents the <SidebarChat/> and/or
+    $route.component from being destroyed.
+    I (jhthorsen) really wanted to move the sidebars into the components,
+    but it does not seem to be possible at this point.
+    Not sure if this is a svelte issue or a problem with how Convos sue
+    Reactive.js. Wild guess: A bad combination.
+  -->
+  {#if ($route.activeMenu == 'nav' || $viewport.isWide) && $route.activeMenu != 'default'}
     <SidebarChat transition="{{duration: $viewport.isWide ? 0 : 250, x: $viewport.width}}"/>
   {/if}
 
-  <svelte:component this="{$pageComponent}"/>
+  {#if $route.activeMenu == 'settings'}
+    <svelte:component this="{settingsComponent}" dialog="{$user.activeDialog}" transition="{{duration: 250, x: $viewport.isWide ? 0 : $viewport.width}}"/>
+  {/if}
 
-  {#if $activeMenu && !$viewport.isWide}
-    <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => ($activeMenu = '')}">&nbsp;</div>
+  {#if !$route.requireLogin || ($route.requireLogin && $user.is('authenticated'))}
+    <svelte:component this="{$route.component}"/>
+  {:else}
+    <svelte:component this="{Login}"/>
+  {/if}
+
+  {#if $route.activeMenu && !$viewport.isWide}
+    <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
   {/if}
 {/if}

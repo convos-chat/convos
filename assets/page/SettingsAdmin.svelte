@@ -5,9 +5,9 @@ import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {copyToClipboard} from '../js/util';
-import {docTitle} from '../store/router';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
+import {route} from '../store/Route';
 
 const user = getContext('user');
 const getSettingsOp = user.api.operation('getSettings');
@@ -16,14 +16,21 @@ const updateSettingsOp = user.api.operation('updateSettings');
 
 let convosSettings = {};
 
-$docTitle = l('%1 - Convos', l('Convos settings'));
-
 $: invite = $inviteLinkOp.res.body || {};
 
 updateSettingsOp.on('start', req => {
   if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
   req.body.forced_connection = req.body.forced_connection ? true : false;
   req.body.open_to_public = req.body.open_to_public ? true : false;
+});
+
+route.update({title: l('Global settings')});
+
+onMount(async () => {
+  await getSettingsOp.perform();
+  const body = getSettingsOp.res.body;
+  body.contact = body.contact.replace(/mailto:/, '');
+  convosSettings = body;
 });
 
 function generateInviteLink(e) {
@@ -38,17 +45,10 @@ function copyInviteLink(e) {
 function updateSettingsFromForm(e) {
   updateSettingsOp.perform(e.target);
 }
-
-onMount(async () => {
-  await getSettingsOp.perform();
-  const body = getSettingsOp.res.body;
-  body.contact = body.contact.replace(/mailto:/, '');
-  convosSettings = body;
-});
 </script>
 
 <ChatHeader>
-  <h1>{l('Admin')}</h1>
+  <h1>{l('Global settings')}</h1>
 </ChatHeader>
 
 <main class="main">

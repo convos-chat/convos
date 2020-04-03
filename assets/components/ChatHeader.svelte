@@ -1,18 +1,16 @@
 <script>
 import Icon from '../components/Icon.svelte';
-import {activeMenu} from '../store/router';
 import {getContext} from 'svelte';
+import {route} from '../store/Route';
 
 const user = getContext('user');
-
-$: unread = $user.unread;
 </script>
 
 <header class="chat-header">
   <slot/>
-  <a href="#activeMenu:{$activeMenu ? '' : 'nav'}" class="chat-header__hamburger">
-    <Icon name="{$activeMenu ? 'times-circle' : 'bars'}"/>
-    <small class="chat-header__unread" hidden="{!unread}">{unread}</small>
+  <a href="#activeMenu:{$route.activeMenu ? '' : 'nav'}" class="chat-header__hamburger">
+    <Icon name="{$route.activeMenu ? 'times-circle' : 'bars'}"/>
+    <small class="chat-header__unread" hidden="{!$user.unread}">{$user.unread}</small>
   </a>
 </header>
 

@@ -2,7 +2,7 @@ import hljs from './hljs';
 import Reactive from './Reactive';
 import {ensureChildNode, loadScript, q, removeChildNodes, showEl} from './util';
 import {jsonhtmlify} from 'jsonhtmlify';
-import {parseUrl} from '../store/router';
+import {sameOrigin} from './util';
 
 export default class EmbedMaker extends Reactive {
   constructor(params) {
@@ -114,7 +114,7 @@ export default class EmbedMaker extends Reactive {
   }
 
   _processImage(img) {
-    if (!parseUrl(img.src)) return img.addEventListener('error', () => (img.style.display = 'none'));
+    if (!sameOrigin(img.src)) return img.addEventListener('error', () => (img.style.display = 'none')); // TODO
 
     img.originalSource = img.src;
     img.src = '';
@@ -122,7 +122,7 @@ export default class EmbedMaker extends Reactive {
     fetch(img.originalSource).then(res => {
       const contentType = res.headers.get('Content-Type');
       return !contentType ? this._renderImage(img, new ArrayBuffer(0), {})
-       : res.arrayBuffer().then(buf => this._renderImage(img, buf, {contentType}));
+        : res.arrayBuffer().then(buf => this._renderImage(img, buf, {contentType}));
     });
   }
 
