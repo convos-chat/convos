@@ -10,10 +10,11 @@ import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {activeMenu, container, currentUrl, docTitle} from '../store/router';
+import {activeMenu, currentUrl, docTitle} from '../store/router';
 import {afterUpdate, getContext, onDestroy} from 'svelte';
 import {closestEl, debounce, modeClassNames, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
+import {viewport} from '../store/Viewport';
 
 const user = getContext('user');
 
@@ -23,7 +24,6 @@ let messagesEl;
 let settingsComponent = null;
 
 // Variables for scrolling
-let containerHeight = 0;
 let messagesHeight = 0;
 let messagesHeightLast = 0;
 let observer;
@@ -141,10 +141,8 @@ function registerUrlHandler(connection) {
 }
 </script>
 
-<svelte:window bind:innerHeight="{containerHeight}"/>
-
 {#if $activeMenu == 'settings'}
-  <svelte:component this="{settingsComponent}" dialog="{dialog}" transition="{{duration: 250, x: $container.wideScreen ? 0 : $container.width}}"/>
+  <svelte:component this="{settingsComponent}" dialog="{dialog}" transition="{{duration: 250, x: $viewport.isWide ? 0 : $viewport.width}}"/>
 {/if}
 
 <ChatHeader>

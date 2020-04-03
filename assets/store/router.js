@@ -5,7 +5,6 @@ let baseUrl = location.href.replace(/\/+$/, '');
 let calculateCurrentPageComponentLock = '';
 
 export const activeMenu = writable('');
-export const container = writable({wideScreen: false, width: 0});
 export const currentUrl = writable(parseUrl(location.href));
 export const docTitle = writable(document.title);
 export const pageComponent = writable(null);

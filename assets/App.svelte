@@ -3,11 +3,12 @@ import Api from './js/Api';
 import hljs from './js/hljs';
 import SidebarChat from './components/SidebarChat.svelte';
 import User from './store/User';
-import {activeMenu, calculateCurrentPageComponent, container, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
+import {activeMenu, calculateCurrentPageComponent, currentUrl, docTitle, gotoUrl, historyListener, pageComponent} from './store/router';
 import {closestEl, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {onMount, setContext} from 'svelte';
 import {urlFor} from './store/router';
+import {viewport} from './store/Viewport';
 
 // Routing
 import Chat from './page/Chat.svelte';
@@ -41,7 +42,7 @@ const api = new Api(process.env.api_url, {debug: true});
 const user = new User({api, wsUrl: process.env.ws_url, themes: process.env.themes});
 const notifications = user.notifications;
 
-let containerWidth = 0;
+let [innerHeight, innerWidth] = [0, 0];
 
 window.hljs = hljs; // Required by paste plugin
 currentUrl.base = process.env.base_url;
@@ -49,8 +50,8 @@ user.activateTheme();
 user.events.listenToGlobalEvents();
 setContext('user', user);
 
-$: container.set({wideScreen: containerWidth > 800, width: containerWidth});
 $: calculateCurrentPageComponent($currentUrl, $user, routingRules);
+$: viewport.update({height: innerHeight, width: innerWidth});
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $docTitle : $docTitle;
 $: showSidebarChat = $pageComponent.routerOptions.user == 'loggedIn';
 
@@ -147,16 +148,17 @@ function onWindowFocus() {
   on:click="{onWindowClick}"
   on:focus="{onWindowFocus}"
   on:keydown="{onGlobalKeydown}"
-  bind:innerWidth="{containerWidth}"/>
+  bind:innerHeight="{innerHeight}"
+  bind:innerWidth="{innerWidth}"/>
 
 {#if $pageComponent}
-  {#if showSidebarChat && ($activeMenu == 'nav' || $container.wideScreen)}
-    <SidebarChat transition="{{duration: $container.wideScreen ? 0 : 250, x: $container.width}}"/>
+  {#if showSidebarChat && ($activeMenu == 'nav' || $viewport.isWide)}
+    <SidebarChat transition="{{duration: $viewport.isWide ? 0 : 250, x: $viewport.width}}"/>
   {/if}
 
   <svelte:component this="{$pageComponent}"/>
 
-  {#if $activeMenu && !$container.wideScreen}
+  {#if $activeMenu && !$viewport.isWide}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => ($activeMenu = '')}">&nbsp;</div>
   {/if}
 {/if}
