@@ -12,6 +12,10 @@ global.WebSocket = window.WebSocket = function(url) {
   this.url = url;
 }
 
+navigator.registerProtocolHandler = (protocol, url, message) => {
+  navigator.registerProtocolHandler.last = {message, protocol, url};
+};
+
 test('constructor', () => {
   const bus = new Omnibus();
 
@@ -19,6 +23,23 @@ test('constructor', () => {
   expect(bus.wantNotifications).toBe(null);
   expect(bus.wantNotifications).toBe(null);
   expect(bus.wsUrl).toBe('');
+});
+
+test('registerProtocol', () => {
+  const bus = new Omnibus();
+  bus.update({route: new Route()});
+  bus.route.update({baseUrl: 'http://convos.example.com'});
+
+  bus.registerProtocol('irc', false);
+  expect(bus.protocols.irc).toBe(false);
+
+  bus.registerProtocol('irc', true);
+  expect(bus.protocols.irc).toBe(true);
+  expect(navigator.registerProtocolHandler.last).toEqual({
+    message: 'Convos wants to handle "irc" links',
+    protocol: 'irc',
+    url: 'http://convos.example.com/register?uri=%s',
+  });
 });
 
 test('start', async () => {
@@ -135,7 +156,7 @@ test('websocket dispatch', () => {
   expect(messages.shift()).toEqual({bubbles: false, command: ['kick', 'robin'], dispatchTo: 'wsEventSentKick', event: 'sent', id: '1', message: '/kick robin'});
 });
 
-test('websocket requestPermissionToNotify', done => {
+test('requestPermissionToNotify', done => {
   const bus = new Omnibus();
   bus.update({defaultTitle: 'RequestTest', wantNotifications: null});
 
@@ -154,6 +175,11 @@ test('websocket requestPermissionToNotify', done => {
   expect(removeCallbacks(Notification.last))
     .toEqual({params: {body: 'You have enabled notifications.', force: true}, title: 'RequestTest'});
 
+  [false, true].forEach(bool => {
+    bus.requestPermissionToNotify(bool);
+    expect(bus.wantNotifications).toBe(bool);
+  });
+
   delete Notification.requestPermission;
   bus.requestPermissionToNotify(status => {
     expect(status).toBe('granted');
@@ -161,7 +187,7 @@ test('websocket requestPermissionToNotify', done => {
   });
 });
 
-test('websocket notify', done => {
+test('notify', done => {
   const bus = new Omnibus();
   bus._hasFocus = () => false;
 

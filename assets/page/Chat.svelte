@@ -1,5 +1,4 @@
 <script>
-import Button from '../components/form/Button.svelte';
 import ChatDialogAdd from '../components/ChatDialogAdd.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';

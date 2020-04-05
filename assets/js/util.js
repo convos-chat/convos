@@ -3,6 +3,7 @@
  *
  * @module util
  * @exports camelize
+ * @exports clone
  * @exports closestEl
  * @exports copyToClipboard
  * @exports debounce
@@ -31,6 +32,10 @@ const goldenRatio = 0.618033988749;
  */
 export function camelize(str) {
   return str.replace(/_(\w)/g, (a, b) => b.toUpperCase());
+}
+
+export function clone(any) {
+  return JSON.parse(JSON.stringify(any));
 }
 
 /**

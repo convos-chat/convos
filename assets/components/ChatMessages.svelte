@@ -1,4 +1,6 @@
 <script>
+import Button from './form/Button.svelte';
+import ChatMessage from './ChatMessage.svelte';
 import ChatMessagesStatusLine from './ChatMessagesStatusLine.svelte';
 import Icon from './Icon.svelte';
 import internalMessages from '../js/internalMessages';
@@ -11,6 +13,7 @@ export let dialog;
 export let input;
 
 const user = getContext('user');
+const omnibus = user.omnibus;
 
 $: messages = addMeta(internalMessages.mergeWithMessages(user, connection, $dialog));
 $: unreadFrom = $dialog.unread;
@@ -24,6 +27,10 @@ function addMeta(messages) {
 
     return msg;
   });
+}
+
+function canToggleDetails(message) {
+  return message.fromId != 'Convos' && (message.type == 'error' || message.type == 'notice');
 }
 
 function gotoDialogFromNotifications(e) {
@@ -91,13 +98,29 @@ function toggleDetails(e) {
       <a href="{notififactionUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
     {/if}
     <div class="message__text">
-      {#if message.type == 'error' || message.type == 'notice'}
+      {#if canToggleDetails(message)}
         <Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}" on:click="{toggleDetails}"/>
       {/if}
       {@html message.markdown}
     </div>
   </div>
 {/each}
+
+{#if $omnibus.wantNotifications === null}
+  <ChatMessage>
+    {l('Do you want to be notified when someone sends you a private message?')}
+    <br>
+    <Button type="button" icon="thumbs-up" on:click="{() => omnibus.requestPermissionToNotify()}">{l('Yes')}</Button>
+    <Button type="button" icon="thumbs-down" on:click="{() => omnibus.requestPermissionToNotify(false)}">{l('No')}</Button>
+  </ChatMessage>
+{:else if typeof $omnibus.protocols.irc == 'undefined'}
+  <ChatMessage>
+    {l('Do you want %1 to handle "irc://" links?', l('Convos'))}
+    <br>
+    <Button type="button" icon="thumbs-up" on:click="{() => omnibus.registerProtocol('irc')}">{l('Yes')}</Button>
+    <Button type="button" icon="thumbs-down" on:click="{() => omnibus.registerProtocol('irc', false)}">{l('No')}</Button>
+  </ChatMessage>
+{/if}
 
 {#if (connection.is && connection.is('unreachable')) || !$dialog.is('success')}
   <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="{route.baseUrl}">{l('Loading...')}</a></ChatMessagesStatusLine>

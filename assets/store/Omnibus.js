@@ -1,15 +1,18 @@
 import Reactive from '../js/Reactive';
-import {camelize} from '../js/util';
+import {camelize, clone} from '../js/util';
 import {l} from '../js/i18n';
+import {route} from '../store/Route';
 
 export default class Omnibus extends Reactive {
   constructor() {
     super();
     this.prop('persist', 'debugEvents', navigator.userAgent.indexOf('Mozilla') != -1 ? 1 : 0);
     this.prop('persist', 'notificationCloseDelay', 5000);
+    this.prop('persist', 'protocols', {});
     this.prop('persist', 'wantNotifications', null);
     this.prop('ro', 'notifyPermission', () => this._notification().permission);
     this.prop('rw', 'defaultTitle', 'Convos');
+    this.prop('rw', 'route', route);
     this.prop('rw', 'wsUrl', '');
 
     this.msgId = 0;
@@ -37,17 +40,30 @@ export default class Omnibus extends Reactive {
     return notification;
   }
 
-  requestPermissionToNotify(cb) {
+  registerProtocol(protocol, register) {
+    this.protocols[protocol] = register;
+    this.update({protocols: clone(this.protocols)});
+
+    if (register && navigator.registerProtocolHandler) {
+      navigator.registerProtocolHandler(protocol, this.route.baseUrl + '/register?uri=%s', 'Convos wants to handle "' + protocol + '" links');
+    }
+
+    return this;
+  }
+
+  requestPermissionToNotify(param) {
+    if (typeof param == 'boolean') return this.update({wantNotifications: param});
+
     const notification = this._notification();
     if (notification.permission == 'granted' || !notification.requestPermission) {
       this.update({wantNotifications: notification.permission == 'granted'});
-      if (cb) cb(notification.permission);
+      if (param) param(notification.permission);
       return this;
     }
 
     notification.requestPermission(permission => {
       this.update({wantNotifications: permission == 'granted'});
-      if (cb) cb(permission);
+      if (param) param(permission);
     });
 
     return this;
@@ -68,6 +84,7 @@ export default class Omnibus extends Reactive {
   }
 
   start({route, wsUrl}) {
+    if (route) this.update({route});
     if (wsUrl) this.update({wsUrl});
     this.keepaliveTid = setInterval(() => this._keepalive(), 10000);
     this._listenToGlobalExceptions(route);
