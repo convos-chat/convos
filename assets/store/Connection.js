@@ -16,7 +16,7 @@ export default class Connection extends Dialog {
     this.prop('rw', 'on_connect_commands', params.on_connect_commands || '');
     this.prop('rw', 'state', params.state || 'queued');
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
-    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url);
+    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url || new ConnURL('convos://loopback'));
 
     const me = params.me || {};
     const nick = me.nick || this.url.searchParams.get('nick') || '';
@@ -35,11 +35,12 @@ export default class Connection extends Dialog {
     this._addDefaultParticipants(dialog);
     this.dialogs.set(dialog.dialog_id, dialog);
     this.update({dialogs: true});
+    this.emit('dialogadd', dialog);
     return dialog;
   }
 
   findDialog(params) {
-    return this.dialogs.get(params.dialog_id);
+    return this.dialogs.get(params.dialog_id) || null;
   }
 
   is(status) {
@@ -49,6 +50,7 @@ export default class Connection extends Dialog {
   removeDialog(params) {
     const dialog = this.findDialog(params) || params;
     this.dialogs.delete(dialog.dialog_id);
+    this.emit('dialogremove', dialog);
     return this.update({dialogs: true});
   }
 

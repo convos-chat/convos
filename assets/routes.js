@@ -13,7 +13,7 @@ import Search from './page/Search.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 import SettingsAdmin from './page/SettingsAdmin.svelte';
 
-export function setupRouting(route) {
+export function setupRouting(route, user) {
   page('*', beforeDispatch(route));
 
   page('/', render(route, RedirectToLast));
@@ -38,6 +38,8 @@ export function setupRouting(route) {
   page('/paste/*', noop);
 
   page('*', render(route, Fallback));
+
+  listenToDialogEvents(route, user);
 }
 
 function beforeDispatch(route) {
@@ -47,6 +49,19 @@ function beforeDispatch(route) {
     route.update({ctx, query: qs.parse(location.search.slice(1))});
     next();
   };
+}
+
+function listenToDialogEvents(route, user) {
+  user.omnibus.on('wsEventSentJoin', e => {
+    route.go(route.dialogPath(e));
+  });
+
+  user.omnibus.on('wsEventSentPart', e => {
+    const conn = user.findDialog({connection_id: e.connection_id});
+    if (!conn) return route.go('/settings/connection');
+    const dialog = conn.dialogs.toArray()[0];
+    route.go(dialog ? dialog.path : '/settings/conversation');
+  });
 }
 
 function render(route, component) {

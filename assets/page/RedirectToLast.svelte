@@ -8,7 +8,7 @@ $: redirect($user);
 
 function redirect(user) {
   const dialog = user.dialogs()[0];
-  const defaultPath = dialog ? dialog.path : '/chat';
+  const defaultPath = dialog ? dialog.path : '/settings/connection';
 
   return user.is('loading') ? null
     : !user.is('authenticated') ? route.go('/login')

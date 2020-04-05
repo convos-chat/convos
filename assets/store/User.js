@@ -37,7 +37,7 @@ export default class User extends Reactive {
     this.prop('persist', 'theme', 'convos');
     this.prop('persist', 'version', '0');
 
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    const matchMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : {addListener: function() {}};
     if (matchMedia.matches) this._osColorScheme = 'dark';
     matchMedia.addListener(e => { this._osColorScheme = e.matches ? 'dark' : 'light' });
 
@@ -71,10 +71,11 @@ export default class User extends Reactive {
     return dialogs;
   }
 
-  ensureDialog(params) {
+  ensureDialog(params, _lock) {
     // Ensure channel or private dialog
     if (params.dialog_id) {
-      return this.ensureDialog({connection_id: params.connection_id}).ensureDialog(params);
+      const conn = this.ensureDialog({connection_id: params.connection_id}, true);
+      return this._maybeUpgradeActiveDialog(conn.ensureDialog(params));
     }
 
     // Find connection
@@ -85,15 +86,17 @@ export default class User extends Reactive {
     conn = new Connection({...params, api: this.api});
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
-    conn.on('update', () => this.update({connections: true}));
+    conn.on('dialogadd', (dialog) => this._maybeUpgradeActiveDialog(dialog));
+    conn.on('dialogremove', (dialog) => (dialog == this.activeDialog && this.setActiveDialog(dialog)));
+    conn.on('update', (conn) => this.update({connections: true}));
     this.connections.set(conn.connection_id, conn);
     this.update({connections: true});
-    return conn;
+    return _lock ? conn : this._maybeUpgradeActiveDialog(conn);
   }
 
   findDialog(params) {
     const conn = this.connections.get(params.connection_id);
-    return !params.dialog_id ? conn : conn && conn.findDialog(params);
+    return !params.dialog_id ? conn : conn && conn.findDialog(params) || null;
   }
 
   is(statusOrRole) {
@@ -145,14 +148,11 @@ export default class User extends Reactive {
   }
 
   removeDialog(params) {
-    if (params.dialog_id) {
-      const conn = this.findDialog({connection_id: params.connection_id});
-      if (conn) conn.removeDialog(params);
-    }
-    else {
-      this.connections.delete(params.connection_id);
-      this.update({connections: true});
-    }
+    const conn = this.findDialog({connection_id: params.connection_id});
+    if (params.dialog_id) return conn && conn.removeDialog(params);
+    this.connections.delete(params.connection_id);
+    if (conn == this.activeDialog) this.setActiveDialog(conn);
+    this.update({connections: true});
   }
 
   setActiveDialog(params) {
@@ -162,8 +162,10 @@ export default class User extends Reactive {
     activeDialog = this.findDialog(params);
     if (activeDialog) return this.update({activeDialog});
 
-    activeDialog = new Dialog({...params, api: this.api, frozen: 'Not found'});
-    return this.update({activeDialog});
+    // Need to expand params manually, in case we are passing in a reactive object
+    const props = {...params, connection_id: params.connection_id || '', api: this.api, frozen: 'Not found.'};
+    ['dialog_id', 'name'] .forEach(k => params.hasOwnProperty(k) && (props[k] = params[k]));
+    return this.update({activeDialog: props.dialog_id ? new Dialog(props) : new Connection(props)});
   }
 
   update(params) {
@@ -206,5 +208,13 @@ export default class User extends Reactive {
       this.emit(params.dispatchTo, params);
       if (this[params.dispatchTo]) this[params.dispatchTo](params);
     });
+  }
+
+  _maybeUpgradeActiveDialog(dialog) {
+    const active = this.activeDialog;
+    if (dialog.connection_id && dialog.connection_id != active.connection_id) return dialog;
+    if (dialog.dialog_id && dialog.dialog_id != active.dialog_id) return dialog;
+    this.update({activeDialog: dialog});
+    return dialog;
   }
 }

@@ -102,6 +102,13 @@ sub t_selenium {
   return $t;
 }
 
+sub t_selenium_register {
+  my ($class, $t) = @_;
+  $t->wait_for('#signup')->send_keys_ok('#signup [name=email]', 'jhthorsen@cpan.org')
+    ->send_keys_ok('#signup [name=password]', 'superduper')->click_ok('#signup .btn.for-save')
+    ->wait_for(0.2)->wait_for('.messages-container');
+}
+
 sub wait_reject {
   my ($p, $err, $desc) = (shift, shift, @_ % 2 ? pop : 'promise rejected');
   my $got;

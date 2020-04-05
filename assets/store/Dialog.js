@@ -6,6 +6,7 @@ import {isType, str2color} from '../js/util';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {omnibus} from '../store/Omnibus';
+import {route} from '../store/Route';
 
 const channelRe = new RegExp('^[#&]');
 
@@ -21,17 +22,13 @@ export default class Dialog extends Reactive {
   constructor(params) {
     super();
 
-    const path = ['', 'chat'];
-    if (params.connection_id) path.push(params.connection_id);
-    if (params.dialog_id) path.push(params.dialog_id);
-
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
     this.prop('ro', 'api', params.api);
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
     this.prop('ro', 'omnibus', params.omnibus || omnibus);
-    this.prop('ro', 'path', path.map(p => encodeURIComponent(p)).join('/'));
+    this.prop('ro', 'path', route.dialogPath(params));
 
     this.prop('rw', 'endOfHistory', false);
     this.prop('rw', 'errors', 0);

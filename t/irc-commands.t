@@ -65,7 +65,15 @@ ok !$connection->get_dialog('superwoman'), 'superwoman does not exist';
 $connection->send_p('', '/query superwoman')->$wait_success('query');
 ok $connection->get_dialog('superwoman'), 'superwoman exist';
 
-is_deeply \@state, [[me => {nick => 'superduper'}]], 'nick event so far' or diag explain \@state;
+cmp_deeply(
+  \@state,
+  [
+    [frozen => superhashof({dialog_id => '#convos', frozen => 'Not active in this room.'})],
+    [me     => {nick => 'superduper'}],
+    [frozen => superhashof({dialog_id => 'superwoman', frozen => ''})],
+  ],
+  'nick and frozen event so far'
+) or diag explain \@state;
 
 note 'disconnect and connect';
 my $irc_server = t::Helper->irc_server_connect($connection);
@@ -306,9 +314,10 @@ ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
 cmp_deeply(
   \@state,
   [
-    [connection => superhashof({state => 'queued'})],
-    [connection => superhashof({state => 'connected'})],
-    [me         => superhashof({nick  => 'superman'})],
+    [connection => superhashof({state     => 'queued'})],
+    [connection => superhashof({state     => 'connected'})],
+    [me         => superhashof({nick      => 'superman'})],
+    [frozen     => superhashof({dialog_id => '##redirected'})],
   ],
   'connection states'
 ) or diag explain \@state;

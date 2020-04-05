@@ -1,5 +1,6 @@
 <script>
 import Button from '../components/form/Button.svelte';
+import ChatDialogAdd from '../components/ChatDialogAdd.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../components/ChatMessages.svelte';
@@ -121,7 +122,7 @@ const onScroll = debounce(e => {
     {#if !dialog.connection_id || user.findDialog(dialog)}
       <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
     {:else}
-      <!-- TODO -->
+      <ChatDialogAdd dialog="{dialog}"/>
     {/if}
   </div>
 </main>

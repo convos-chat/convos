@@ -74,7 +74,7 @@ function connectionToForm() {
 async function removeConnection(e) {
   await removeConnectionOp.perform(connection);
   user.removeDialog(connection);
-  route.go('/chat');
+  route.go('/settings/connection');
 }
 
 async function submitForm(e) {

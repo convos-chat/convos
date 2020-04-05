@@ -23,7 +23,7 @@ setContext('user', user);
 
 window.hljs = hljs; // Required by paste plugin
 route.update({baseUrl: process.env.base_url});
-setupRouting(route);
+setupRouting(route, user);
 user.activateTheme();
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.omnibus.start({route, wsUrl: process.env.ws_url}); // Must be called after "baseUrl" is set

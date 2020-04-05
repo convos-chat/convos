@@ -26,6 +26,14 @@ export default class Route extends Reactive {
     this._started = false;
   }
 
+  dialogPath(params) {
+    const path = ['', 'chat'];
+    if (params.connection_id) path.push(params.connection_id);
+    if (params.dialog_id) path.push(params.dialog_id);
+
+    return path.map(p => encodeURIComponent(p)).join('/');
+  }
+
   go(path, state, replace = false) {
     if (!this._started) return console.log('[Route] Cannot go(' + path + ',...) before router is started.');
     if (path.indexOf(this.baseUrl) == 0) path = path.substr(this.baseUrl.length);

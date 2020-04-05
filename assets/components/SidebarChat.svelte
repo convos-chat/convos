@@ -135,6 +135,12 @@ function renderUnread(dialog) {
 
   <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
     <h3>{l('Conversations')}</h3>
+    {#if !$user.connections.size}
+      <Link href="/settings/connection">
+        <Icon name="exclamation-circle"/>
+        <span>{l('No conversations')}</span>
+      </Link>
+    {/if}
     {#each $user.connections.toArray() as connection}
       <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}">
         <Icon name="network-wired"/>

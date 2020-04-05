@@ -101,6 +101,7 @@ export default class Omnibus extends Reactive {
     params.stopPropagation = () => { params.bubbles = false };
     if (cb) cb(params);
     if (params.bubbles) this.emit('message', params);
+    this.emit(dispatchTo, params);
   }
 
   _getEventNameFromParam(params) {

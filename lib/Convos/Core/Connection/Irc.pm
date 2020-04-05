@@ -809,6 +809,7 @@ sub _send_query_p {
   # New dialog. Note that it needs to be frozen, so join_channel will be issued
   $dialog ||= $self->dialog({name => $target});
   $dialog->frozen('Not active in this room.') if !$dialog->is_private and !$dialog->frozen;
+  $self->emit(state => frozen => $dialog->TO_JSON);
   return $p->resolve($dialog);
 }
 
