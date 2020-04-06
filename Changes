@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.02 Not Released
+4.02 2020-04-06T22:10:00+0800
  - Fix not being able to subscribe to store
  - Fix not showing the nav menu by default on small screens
  - Made the chat input look more like an input
