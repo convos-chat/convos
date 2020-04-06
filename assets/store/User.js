@@ -31,11 +31,11 @@ export default class User extends Reactive {
     this.prop('rw', 'highlight_keywords', []);
     this.prop('rw', 'status', 'pending');
 
+    this.prop('persist', 'assetVersion', 0);
     this.prop('persist', 'colorScheme', 'auto');
     this.prop('persist', 'experimentalLoad', false);
     this.prop('persist', 'showGrid', false);
     this.prop('persist', 'theme', 'convos');
-    this.prop('persist', 'version', '0');
 
     const matchMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : {addListener: function() {}};
     if (matchMedia.matches) this._osColorScheme = 'dark';
@@ -207,6 +207,14 @@ export default class User extends Reactive {
       this._dispatchMessageToDialog(params);
       this.emit(params.dispatchTo, params);
       if (this[params.dispatchTo]) this[params.dispatchTo](params);
+    });
+
+    this.omnibus.on('serviceWorker', (reg) => {
+      const assetVersion = process.env.asset_version;
+      if (this.omnibus.debug) console.log('[serviceWorker]', [this.assetVersion, assetVersion].join(' == '));
+      if (this.assetVersion == assetVersion) return;
+      reg.update();
+      this.update({assetVersion});
     });
   }
 
