@@ -6,7 +6,7 @@ import hljs from './js/hljs';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 import User from './store/User';
-import {closestEl, focusMainInputElements, loadScript, tagNameIs} from './js/util';
+import {closestEl, focusMainInputElements, loadScript, q, showEl, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {l} from './js/i18n';
 import {onMount, setContext} from 'svelte';
@@ -39,7 +39,11 @@ onMount(() => {
 });
 
 function onGlobalKeydown(e) {
-  if (!(e.shiftKey && e.keyCode == 13)) return; // Shift+Enter
+  // Esc
+  if (e.keyCode == 27) return q(document, '.fullscreen-media-wrapper', el => showEl(el, false));
+
+  // Shift+Enter
+  if (!(e.shiftKey && e.keyCode == 13)) return;
   e.preventDefault();
   focusMainInputElements();
 }
