@@ -1,5 +1,16 @@
 Revision history for perl distribution Convos
 
+4.01 Not Released
+ - Add Nordaaker as background image to login screen #439
+ - Fix rendering convos images on small screen #450
+ - Fix not allowing injected "#call:" and "#send:" links
+ - Fix not looping through all dialogs and marking them as read on reconnect
+ - Fix not showing "date changed" in <Search/> before search is performed
+ - Fix not asking for protocol handling all the time in Firefox
+ - Extended the webmanifest
+ - Changed to pagejs for routing on client side
+ - Replaced "settings" in svelte context with process.env
+
 4.00 2020-03-24T16:00:00+0900
  - Add custom styling for image previews from Convos #450
  - Add checkbox for "forced_connection" in "settings" #456
