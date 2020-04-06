@@ -6,7 +6,7 @@ import {route} from '../store/Route';
 export default class Omnibus extends Reactive {
   constructor() {
     super();
-    this.prop('persist', 'debugEvents', navigator.userAgent.indexOf('Mozilla') != -1 ? 1 : 0);
+    this.prop('persist', 'debug', 0);
     this.prop('persist', 'notificationCloseDelay', 5000);
     this.prop('persist', 'protocols', {});
     this.prop('persist', 'wantNotifications', null);
@@ -29,7 +29,7 @@ export default class Omnibus extends Reactive {
       : '';
 
     if (rejectReason) {
-      console.log('[Events:notify] Rejected: ' + rejectReason, [title, body, params]);
+      if (this.debug) console.log('[notify] Rejected: ' + rejectReason, [title, body, params]);
       return null;
     }
 
@@ -78,7 +78,7 @@ export default class Omnibus extends Reactive {
     delete msg.connection;
     delete msg.dialog;
     if (cb) this.messageCb[msg.id] = cb;
-    if (this.debugEvents) this._debug('send', msg);
+    if (this.debug >= 2) console.log('[send]', msg);
     this.wsSendQueue.push(msg);
     this._ws();
   }
@@ -98,18 +98,9 @@ export default class Omnibus extends Reactive {
     return this;
   }
 
-  _debug(method, params) {
-    if (this.debugEvents == 1 && method != 'wsEventPong' && params.method != 'ping') {
-      console.log('[Events:' + (method || 'data') + ']', params);
-    }
-    else if (this.debugEvents >= 2) {
-      console.log('[Events:' + (method || 'data') + ']', params);
-    }
-  }
-
   _dispatch(params) {
     const dispatchTo = camelize('wsEvent_' + this._getEventNameFromParam(params));
-    if (this.debugEvents) this._debug(dispatchTo, params);
+    if (this.debug >= 2) console.log('[dispatch:' + dispatchTo + ']', params);
     if (dispatchTo != 'wsEventError') this._wsReconnectDelay = 0;
 
     const cb = this.messageCb[params.id];
