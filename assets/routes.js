@@ -68,7 +68,7 @@ function listenToDialogEvents(route, user) {
 function render(path, route, component) {
   page(path, (ctx, next) => {
     const requireLogin = [Fallback, Login, RedirectToLast].indexOf(component) == -1;
-    const activeMenu = requireLogin ? 'nav' : 'default';
+    const activeMenu = requireLogin ? '' : 'default';
     replaceClassName('body', /(is-logged-)\S+/, requireLogin ? 'in' : 'out');
     replaceClassName('body', /(page-)\S+/, (component.name || route.pathParts[0]).toLowerCase());
     route.update({activeMenu, component, requireLogin});
