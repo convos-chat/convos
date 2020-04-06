@@ -129,7 +129,7 @@ export function focusMainInputElements(id) {
   if (id && 'ontouchstart' in window) return;
 
   if (id) {
-    const el = document.getElementById(id).focus();
+    const el = document.getElementById(id);
     return el && el.focus();
   }
 

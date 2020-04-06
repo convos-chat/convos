@@ -34,7 +34,7 @@ function load(route, changed) {
 
 <main class="main">
   <div class="messages-container" class:has-notifications="{$search.messages.length}">
-    <ChatMessages connection="{user}" dialog="{search}" input="{null}"/>
+    <ChatMessages dialog="{search}" input="{null}"/>
   </div>
 </main>
 

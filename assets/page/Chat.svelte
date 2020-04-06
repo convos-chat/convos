@@ -123,7 +123,7 @@ const onScroll = debounce(e => {
 <main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">
   <div class="messages-container" class:has-notifications="{dialog.is('notifications')}" bind:offsetHeight="{messagesHeight}">
     {#if !dialog.connection_id || user.findDialog(dialog)}
-      <ChatMessages connection="{connection}" dialog="{dialog}" input="{chatInput}"/>
+      <ChatMessages dialog="{dialog}" input="{chatInput}"/>
     {:else}
       <ChatDialogAdd dialog="{dialog}"/>
     {/if}
