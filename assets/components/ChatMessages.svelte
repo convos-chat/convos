@@ -15,7 +15,7 @@ export let input;
 const user = getContext('user');
 const omnibus = user.omnibus;
 
-$: messages = addMeta(internalMessages.mergeWithMessages(user, connection, $dialog));
+$: messages = addMeta(internalMessages.mergeWithMessages($user, $connection, $dialog));
 $: unreadFrom = $dialog.unread;
 
 function addMeta(messages) {
@@ -82,7 +82,7 @@ function toggleDetails(e) {
 
   <div class="message is-type-{message.type}"
     class:is-not-present="{!senderIsOnline(message)}"
-    class:is-sent-by-you="{message.from == connection.nick}"
+    class:is-sent-by-you="{message.from == $connection.nick}"
     class:is-highlighted="{message.highlight}"
     class:has-not-same-from="{!isSameSender(i) && !message.dayChanged}"
     class:has-same-from="{isSameSender(i) && !message.dayChanged}"
@@ -122,6 +122,6 @@ function toggleDetails(e) {
   </ChatMessage>
 {/if}
 
-{#if (connection.is && connection.is('unreachable')) || !$dialog.is('success')}
-  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="{route.baseUrl}">{l('Loading...')}</a></ChatMessagesStatusLine>
+{#if ($connection.is && $connection.is('unreachable')) || !$dialog.is('success')}
+  <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin"><a href="{route.baseUrl}" target="_self">{l('Loading...')}</a></ChatMessagesStatusLine>
 {/if}

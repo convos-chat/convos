@@ -2,6 +2,7 @@
 import Api from './js/Api';
 import ConnectionSettings from './components/ConnectionSettings.svelte';
 import DialogSettings from './components/DialogSettings.svelte';
+import Fallback from './page/Fallback.svelte';
 import hljs from './js/hljs';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
@@ -74,7 +75,11 @@ function onWindowClick(e) {
   bind:innerHeight="{innerHeight}"
   bind:innerWidth="{innerWidth}"/>
 
-{#if $route.component}
+{#if $user.is('offline')}
+  <Fallback status="offline"/>
+{:else if !$route.component}
+  <Fallback status="loading"/>
+{:else if $route.requireLogin && $user.is('authenticated')}
   <!--
     IMPORTANT! Looks like transition="..." inside <svelte:component/>,
     and a lot of $route updates prevents the <SidebarChat/> and/or
@@ -84,6 +89,7 @@ function onWindowClick(e) {
     Not sure if this is a svelte issue or a problem with how Convos sue
     Reactive.js. Wild guess: A bad combination.
   -->
+
   {#if ($route.activeMenu == 'nav' || $viewport.isWide) && $route.activeMenu != 'default'}
     <SidebarChat transition="{{duration: $viewport.isWide ? 0 : 250, x: $viewport.width}}"/>
   {/if}
@@ -92,13 +98,11 @@ function onWindowClick(e) {
     <svelte:component this="{settingsComponent}" dialog="{$user.activeDialog}" transition="{{duration: 250, x: $viewport.isWide ? 0 : $viewport.width}}"/>
   {/if}
 
-  {#if !$route.requireLogin || ($route.requireLogin && $user.is('authenticated'))}
-    <svelte:component this="{$route.component}"/>
-  {:else}
-    <svelte:component this="{Login}"/>
-  {/if}
+  <svelte:component this="{$route.component}"/>
 
   {#if $route.activeMenu && !$viewport.isWide}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
   {/if}
+{:else}
+  <svelte:component this="{$route.component}"/>
 {/if}

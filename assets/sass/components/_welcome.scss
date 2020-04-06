@@ -25,6 +25,11 @@
     margin-top: 0;
   }
 
+  h1 {
+    font-size: 2.4rem;
+    padding-top: 1rem;
+  }
+
   .btn.is-hallow {
     color: var(--sidebar-left-text);
     border-color: var(--sidebar-left-bg);
@@ -46,12 +51,6 @@
 
   section {
     min-height: 70vh;
-  }
-
-  .welcome-screen__about h1 {
-    font-size: 2.4rem;
-    padding-top: 1rem;
-    margin-bottom: 0;
   }
 
   .welcome-screen__about + .welcome-screen__signup {

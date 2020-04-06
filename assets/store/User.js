@@ -195,8 +195,8 @@ export default class User extends Reactive {
 
   _listenToOmnibus() {
     this.omnibus.on('close', () => {
-      this.update({status: 'pending'});
       this.connections.forEach(conn => conn.update({state: 'unreachable'}));
+      this.update({status: 'pending'});
     });
 
     this.omnibus.on('open', () => {

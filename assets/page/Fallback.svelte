@@ -4,55 +4,51 @@ import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
+export let status = route.pathParts.slice(0).pop() || 'not_found';
+
 const user = getContext('user');
 const loadingStatus = process.env.load_user ? ['loading', 'pending'] : ['loading'];
 
 const messages = {
   'loading': 'Loading',
   'not_found': 'Not Found',
-  'offline': 'You appear to be offline',
+  'offline': 'Oops! You appear to be offline',
   'unknown': 'Unknown error!',
 };
 
-$: status = calculateStatus($user, $route.pathParts);
+$: realStatus = messages[status] ? status : 'unknown';
 
-function calculateStatus(user, pathParts) {
-  const fromPath = pathParts.slice(-1)[0] || '';
-  const status = messages[fromPath] ? fromPath : user.is('offline') ? 'offline' : user.is(loadingStatus) ? 'loading' : 'not_found';
-
-  route.update({title: l(messages[status])});
-  return status;
-}
+route.update({title: l(messages[realStatus])});
 </script>
 
 <main class="welcome-screen">
   <article class="welcome-screen_fallback">
     <h1>
-      <a href="{$route.baseUrl}"><span>{l(status == 'loading' ? 'Convos' : messages[status])}</span></a>
+      <a href="{$route.baseUrl}"><span>{l(realStatus == 'loading' ? 'Convos' : messages[realStatus])}</span></a>
       {#if process.env.organization_name != 'Convos'}
         {#if process.env.organization_url != 'https://convos.by'}
-          <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
+          <small class="subtitle">{realStatus == 'loading' ? '' : l('Convos')} {@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
         {:else}
-          <small class="subtitle">{status == 'loading' ? '' : l('Convos')} {l('for %1', process.env.organization_name)}</small>
+          <small class="subtitle">{realStatus == 'loading' ? '' : l('Convos')} {l('for %1', process.env.organization_name)}</small>
         {/if}
       {/if}
     </h1>
 
-    {#if status == 'offline'}
-      <p><i class="fas fa-exclamation-triangle"></i> {l('Seems like we got disconnected from the internet.')}</p>
-      <p><a href="{$route.canonicalPath}" class="btn">{l('Reload')}</a></p>
-    {:else if status == 'loading'}
+    {#if realStatus == 'loading'}
       <p>{l('Convos is the simplest way to use IRC, and it keeps you always online.')}</p>
       <p><i class="fas fa-download"></i> {l('Downloading Convos...')}</p>
       <p><i class="fas fa-rocket"></i> {l('Starting Convos...')}</p>
       <p><i class="fas fa-spinner fa-spin"></i> {l('Loading user data...')}</p>
       <p><a class="btn" href="{process.env.contact}">{l('Contact admin')}</a></p>
-    {:else if status == 'not_found'}
+    {:else if realStatus == 'not_found'}
       <p>{l('The Convos Team have been searching and searching, but the requested page could not be found.')}</p>
-      <p><a href="{$route.baseUrl}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
+      <p><a href="{$route.baseUrl}" target="_self" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
+    {:else if realStatus == 'offline'}
+      <p><i class="fas fa-exclamation-triangle"></i> {l('Unable to connect to Convos. Please try again later or check your network connection.')}</p>
+      <p><a href="{$route.canonicalPath}" target="_self" class="btn"><Icon name="sync-alt"/> {l('Retry')}</a></p>
     {:else}
       <p>{@html lmd('Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away.', 'https://github.com/nordaaker/convos/issues')}</p>
-      <p><a href="{$route.baseUrl}" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
+      <p><a href="{$route.baseUrl}" target="_self" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
     {/if}
   </article>
 
