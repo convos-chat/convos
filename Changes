@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.01 Not Released
+4.01 2020-04-06T21:39:00+0800
  - Add Nordaaker as background image to login screen #439
  - Add support for searching for anything from main search input #457
  - Fix rendering convos images on small screen #450
