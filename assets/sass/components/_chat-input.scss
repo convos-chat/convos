@@ -9,11 +9,20 @@
   bottom: 0;
   z-index: 3;
 
+  @include if_screen("<=two-columns") {
+    margin-bottom: 0;
+    border-radius: 2px;
+  }
+
+  @include if_screen(">two-columns") {
+    padding-right: 0.5rem;
+  }
+
   textarea {
     background: transparent;
     color: var(--text-color);
     border: 0;
-    height: 3.5em;
+    height: 3.2em;
     padding: var(--gutter-small) 0;
     width: 100%;
     display: block;
