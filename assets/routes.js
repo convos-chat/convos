@@ -70,7 +70,7 @@ function render(path, route, component) {
     const requireLogin = [Fallback, Login, RedirectToLast].indexOf(component) == -1;
     const activeMenu = requireLogin ? '' : 'default';
     replaceClassName('body', /(is-logged-)\S+/, requireLogin ? 'in' : 'out');
-    replaceClassName('body', /(page-)\S+/, (component.name || route.pathParts[0]).toLowerCase());
+    replaceClassName('body', /(page-)\S+/, route.pathParts[0].toLowerCase());
     route.update({activeMenu, component, requireLogin});
     if (omnibus.debug) console.log('[render:' + component.name + ']', path, JSON.stringify(route.pathParts));
     if (requireLogin) route.update({lastUrl: ctx.canonicalPath});

@@ -29,17 +29,13 @@
     resize: none;
 
     &::placeholder {
-      color: var(--input-placeholder-color);
-      font-size: 1.2rem;
+      color: var(--text-color);
+      font-size: 1.1rem;
       font-weight: 400;
     }
 
     &:focus {
       outline: 0;
-
-      &::placeholder {
-        color: var(--input-focus-placeholder-color);
-      }
     }
   }
 }
