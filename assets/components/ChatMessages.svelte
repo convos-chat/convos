@@ -117,7 +117,7 @@ function toggleDetails(e) {
   <ChatMessage>
     {l('Do you want %1 to handle "irc://" links?', l('Convos'))}
     <br>
-    <Button type="button" icon="thumbs-up" on:click="{() => omnibus.registerProtocol('irc')}">{l('Yes')}</Button>
+    <Button type="button" icon="thumbs-up" on:click="{() => omnibus.registerProtocol('irc', true)}">{l('Yes')}</Button>
     <Button type="button" icon="thumbs-down" on:click="{() => omnibus.registerProtocol('irc', false)}">{l('No')}</Button>
   </ChatMessage>
 {/if}
