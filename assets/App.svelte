@@ -6,7 +6,7 @@ import hljs from './js/hljs';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 import User from './store/User';
-import {closestEl, loadScript, tagNameIs} from './js/util';
+import {closestEl, focusMainInputElements, loadScript, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {l} from './js/i18n';
 import {onMount, setContext} from 'svelte';
@@ -41,16 +41,7 @@ onMount(() => {
 function onGlobalKeydown(e) {
   if (!(e.shiftKey && e.keyCode == 13)) return; // Shift+Enter
   e.preventDefault();
-
-  const searchInput = document.getElementById('search_input');
-  const targetEl = document.activeElement;
-  if (targetEl != searchInput && !tagNameIs(targetEl, 'body')) return searchInput.focus();
-
-  const selectors = ['#chat_input', '.main input[type="text"]', '.main a', '#search_input'];
-  for (let i = 0; i < selectors.length; i++) {
-    const el = document.querySelector(selectors[i]);
-    if (el) return el.focus();
-  }
+  focusMainInputElements();
 }
 
 function onWindowClick(e) {

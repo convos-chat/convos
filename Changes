@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 4.01 Not Released
  - Add Nordaaker as background image to login screen #439
+ - Add support for searching for anything from main search input #457
  - Fix rendering convos images on small screen #450
  - Fix not allowing injected "#call:" and "#send:" links
  - Fix not looping through all dialogs and marking them as read on reconnect

@@ -7,8 +7,9 @@ import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {afterUpdate, getContext, onDestroy} from 'svelte';
+import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
 import {closestEl, debounce, modeClassNames, q} from '../js/util';
+import {focusMainInputElements} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
 import {route} from '../store/Route';
 
@@ -52,6 +53,7 @@ afterUpdate(() => {
   }
 });
 
+onMount(() => focusMainInputElements('chat_input'));
 onDestroy(onClose);
 
 function setDialogFromRoute(route) {

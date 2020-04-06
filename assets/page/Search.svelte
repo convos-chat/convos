@@ -3,13 +3,29 @@ import ChatMessages from '../components/ChatMessages.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
+import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
+import {route} from '../store/Route';
 
 const user = getContext('user');
 const search = user.search;
 
-onMount(() => search.load({}));
+let chatInput;
+
+onMount(() => {
+  load(route, {query: true});
+  return route.on('update', load);
+});
+
+function load(route, changed) {
+  const match = route.param('q');
+  if (!changed.query || typeof match != 'string') return;
+  chatInput.setValue(match);
+  search.load({match});
+  focusMainInputElements('chat_input');
+  route.update({title: l('Search for "%1"', match)});
+}
 </script>
 
 <ChatHeader>
@@ -22,4 +38,4 @@ onMount(() => search.load({}));
   </div>
 </main>
 
-<ChatInput dialog="{search}"/>
+<ChatInput dialog="{search}" bind:this="{chatInput}"/>

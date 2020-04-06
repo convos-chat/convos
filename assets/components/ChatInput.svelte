@@ -7,6 +7,7 @@ import {l} from '../js/i18n';
 
 export let dialog = {};
 export function getUploadEl() { return uploadEl }
+export function setValue(val) { inputEl.value = val }
 
 let activeAutocompleteIndex = 0;
 let autocompleteCategory = 'none';

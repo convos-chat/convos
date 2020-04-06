@@ -125,6 +125,21 @@ export function extractErrorMessage(params, from = 'message') {
   return errors && errors[0] ? errors[0][from] || 'Unknown error.' : '';
 }
 
+export function focusMainInputElements(id) {
+  if (id && 'ontouchstart' in window) return;
+  if (id) return document.getElementById(id).focus();
+
+  const searchInput = document.getElementById('search_input');
+  const targetEl = document.activeElement;
+  if (targetEl != searchInput && !tagNameIs(targetEl, 'body')) return searchInput.focus();
+
+  const selectors = ['#chat_input', '.main input[type="text"]', '.main a', '#search_input'];
+  for (let i = 0; i < selectors.length; i++) {
+    const el = document.querySelector(selectors[i]);
+    if (el) return el.focus();
+  }
+}
+
 /**
  * Used to generate a color.
  *

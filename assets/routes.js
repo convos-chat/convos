@@ -47,7 +47,7 @@ function beforeDispatch(route) {
   return (ctx, next) => {
     const removeEls = document.querySelectorAll('.js-remove');
     for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-    route.update({ctx, query: qs.parse(location.search.slice(1))});
+    route.update({ctx, query: qs.parse(ctx.querystring)});
     next();
   };
 }

@@ -1,7 +1,7 @@
 <script>
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
-import {closestEl, q, regexpEscape, showEl, tagNameIs} from '../js/util';
+import {closestEl, q, regexpEscape, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../js/i18n';
@@ -19,6 +19,7 @@ let searchHasFocus = false;
 let visibleLinks = [];
 
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
+$: searchQuery = filter.replace(/^\//, '');
 $: if (navEl) clearFilter($route);
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
@@ -60,9 +61,9 @@ function filterNav() {
       if (!filter.length && aClassList.contains('has-path')) activeLinkIndex = i;
       aClassList.remove('has-focus');
 
-      const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
+      const makeVisible = !filter.length || (!aEl.href.match(/\/search$/) && !seen[aEl.href] && aEl.textContent.match(filterRe));
       if (makeVisible) visibleLinks.push(aEl);
-      showEl(aEl, makeVisible);
+      aEl.classList[makeVisible ? 'remove' : 'add']('hidden');
       seen[aEl.href] = true;
     });
 
@@ -74,21 +75,24 @@ function filterNav() {
     let el = connEl;
     while ((el = el.nextElementSibling)) {
       if (!el.classList.contains('for-dialog')) break;
-      if (!showEl(el, 'is-visible')) continue;
-      return showEl(connEl, true);
+      if (!el.classList.contains('hidden')) return connEl.classList.remove('hidden');
     }
   });
+
+  // Allow search in chat history
+  const searchEl = navEl.querySelector('.for-search');
+  searchEl.classList[filter ? 'remove' : 'add']('hidden');
+  if (!searchEl.classList.contains('hidden')) visibleLinks.push(searchEl);
 
   // Show headings
   q(navEl, 'h3', h3 => {
     let el = h3;
     while ((el = el.nextElementSibling)) {
       if (tagNameIs(el, 'h3')) break;
-      if (!showEl(el, 'is-visible')) continue;
-      return showEl(h3, true);
+      if (!el.classList.contains('hidden')) return h3.classList.remove('hidden');
     }
 
-    showEl(h3, false);
+    h3.classList.add('hidden');
   });
 }
 
@@ -195,6 +199,10 @@ function renderUnread(dialog) {
     <Link href="/api/user/logout.html">
       <Icon name="power-off"/>
       <span>{l('Log out')}</span>
+    </Link>
+    <Link href="/search?q={encodeURIComponent(searchQuery)}" class="for-search hidden">
+      <Icon name="search"/>
+      <span>{l('Search for "%1"', searchQuery)}</span>
     </Link>
   </nav>
 </div>
