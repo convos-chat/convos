@@ -44,26 +44,30 @@ function dialogClassNames(connection, dialog) {
 function filterNav() {
   if (!navEl) return;
 
-  const prefix = filter.match(/^\W+/) ? '' : '\\b\\W*';
-  const filterRe = new RegExp(prefix + regexpEscape(filter), 'i');
-  const hasVisibleLinks = {};
-  const seen = {};
-
   activeLinkIndex = 0;
   searchHasFocus = true;
   visibleLinks = [];
 
-  // Show and hide navigation links
-  q(navEl, 'a', (aEl, i) => {
-    const aClassList = aEl.classList;
-    if (!filter.length && aClassList.contains('has-path')) activeLinkIndex = i;
-    aClassList.remove('has-focus');
+  const prefix = [filter.match(/^\W+/) ? '' : '\\b\\W*'];
+  if (prefix[0]) prefix.push('');
 
-    const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
-    if (makeVisible) visibleLinks.push(aEl);
-    showEl(aEl, makeVisible);
-    seen[aEl.href] = true;
-  });
+  // Show and hide navigation links
+  for (let p = 0; p < prefix.length; p++) {
+    const filterRe = new RegExp(prefix[p] + regexpEscape(filter), 'i');
+    const seen = {};
+    q(navEl, 'a', (aEl, i) => {
+      const aClassList = aEl.classList;
+      if (!filter.length && aClassList.contains('has-path')) activeLinkIndex = i;
+      aClassList.remove('has-focus');
+
+      const makeVisible = !filter.length || !seen[aEl.href] && aEl.textContent.match(filterRe);
+      if (makeVisible) visibleLinks.push(aEl);
+      showEl(aEl, makeVisible);
+      seen[aEl.href] = true;
+    });
+
+    if (visibleLinks.length) break;
+  }
 
   // Show connections
   q(navEl, '.for-connection', connEl => {
