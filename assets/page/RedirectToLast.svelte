@@ -8,10 +8,11 @@ $: redirect($user);
 
 function redirect(user) {
   const dialog = user.dialogs()[0];
-  const defaultPath = dialog ? dialog.path : '/settings/connection';
+  const url = route.lastUrl ? route.lastUrl : dialog ? dialog.path : '/settings/connection';
 
   return user.is('loading') ? null
     : !user.is('authenticated') ? route.go('/login')
-    : route.go(!route.lastUrl || route.lastUrl == route.canonicalPath ? defaultPath : route.lastUrl, {}, true);
+    : route.lastUrl == route.canonicalPath ? null
+    : route.go(url);
 }
 </script>

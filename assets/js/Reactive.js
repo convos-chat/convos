@@ -115,7 +115,7 @@ export default class Reactive {
   update(params) {
     Object.keys(params).forEach(name => {
       const prop = this._props[name];
-      if (!prop) return console.log('[' + this.constructor.name + '] Unknown prop "' + name + '".');
+      if (!prop) return; // console.log('[' + this.constructor.name + '] Unknown prop "' + name + '".');
       if (!prop.hasOwnProperty('prev')) prop.prev = prop.type == 'ro' ? undefined : prop.value;
       if (prop.type == 'persist' || prop.type == 'rw') prop.value = params[name];
     });
