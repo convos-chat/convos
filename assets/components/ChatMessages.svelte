@@ -30,7 +30,7 @@ function addMeta(messages) {
 }
 
 function canToggleDetails(message) {
-  return message.fromId != 'Convos' && (message.type == 'error' || message.type == 'notice');
+  return message.type == 'error' || message.type == 'notice';
 }
 
 function gotoDialogFromNotifications(e) {
