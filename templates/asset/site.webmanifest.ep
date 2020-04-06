@@ -1,6 +1,9 @@
 {
   "name": "Convos",
   "short_name": "Convos",
+  "start_url": "<%= app->core->base_url %>?standalone=true",
+  "description": "<%= $social->{description} %>",
+  "categories": ["social"],
   "theme_color": "#00451D",
   "background_color": "#00451D",
   "display": "standalone",
@@ -15,5 +18,8 @@
     { "src": "<%= url_for '/asset/android-chrome-256x256.d4140f8e.png' %>", "sizes": "256x256", "type": "image/png" },
     { "src": "<%= url_for '/asset/android-chrome-384x384.cb0d9eae.png' %>", "sizes": "384x384", "type": "image/png" },
     { "src": "<%= url_for '/asset/android-chrome-512x512.81649762.png' %>", "sizes": "512x512", "type": "image/png" }
+  ],
+  "screenshots": [
+    { "src": "<%= url_for '/images/convos_screenshot.jpg' %>", "sizes": "2045x1530", "type": "image/jpeg" }
   ]
 }
