@@ -40,7 +40,11 @@ onMount(() => {
 
 function onGlobalKeydown(e) {
   // Esc
-  if (e.keyCode == 27) return q(document, '.fullscreen-media-wrapper', el => showEl(el, false));
+  if (e.keyCode == 27) {
+    focusMainInputElements('chat_input');
+    q(document, '.fullscreen-media-wrapper', el => showEl(el, false));
+    return;
+  }
 
   // Shift+Enter
   if (!(e.shiftKey && e.keyCode == 13)) return;

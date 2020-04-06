@@ -127,7 +127,11 @@ export function extractErrorMessage(params, from = 'message') {
 
 export function focusMainInputElements(id) {
   if (id && 'ontouchstart' in window) return;
-  if (id) return document.getElementById(id).focus();
+
+  if (id) {
+    const el = document.getElementById(id).focus();
+    return el && el.focus();
+  }
 
   const searchInput = document.getElementById('search_input');
   const targetEl = document.activeElement;
