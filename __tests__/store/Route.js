@@ -3,13 +3,19 @@ import Route from '../../assets/store/Route';
 test('defaults', () => {
   const r = new Route({});
 
+  r._location = {hash: '#foo', href: 'https://demo.convos.by/chat'};
+
+  expect(r.activeMenu).toBe('');
   expect(r.basePath).toBe('');
   expect(r.baseUrl).toBe('');
-  expect(r.canonicalPath).toBe('/');
   expect(r.component).toBe(null);
-  expect(r.lastUrl).toBe('');
-  expect(r.pathParts).toEqual([]);
+  expect(r.hash).toBe('foo');
+  expect(r.params).toEqual({});
+  expect(r.path).toBe('/');
   expect(r.query).toEqual({});
+  expect(r.requireLogin).toBe(false);
+  expect(r.state).toEqual({});
+  expect(r.title).toBe('');
 });
 
 test('baseUrl', () => {
@@ -20,42 +26,69 @@ test('baseUrl', () => {
   expect(r.basePath).toBe('/whatever');
 });
 
-test('go', () => {
+test('routing', () => {
   const r = new Route({});
+  r.update({baseUrl: 'https://demo.convos.by///'});
 
-  let show = [];
-  r._page.show = (path, state, ...params) => {
-    r.ctx.state = state;
-    show = [path, state].concat(params);
+  r._location = {href: ''};
+
+  const history = [];
+  const hist = (name) => {
+    return (...params) => {
+      history.push([name, ...params]);
+      r._location.href = params.pop();
+      r._location.hash = (r._location.href.match(/#(.+)/) || ['', ''])[1];
+    };
   };
 
-  let replace = [];
-  r._history = {replaceState: (...params) => (replace = params)};
+  r._history = {pushState: hist('pushState'), replaceState: hist('replaceState')};
 
-  r.go('/foo');
-  expect(show).toEqual([]);
+  let matched = [];
+  const cb = (route) => matched.push({...route.params, ...route.query, hash: route.hash});
 
-  r._started = true;
-  r.go('/foo');
-  expect(show).toEqual(['/foo', {}, true, true]);
+  r.to('/chat/:connection_id', cb);
+  r.to('/chat/:connection_id/:dialog_id', cb);
+  r.to('/help', cb);
+  r.to('*', cb);
 
-  r.go('https://demo.convos.by');
-  expect(show).toEqual(['https://demo.convos.by', {}, true, true]);
+  expect(r._routes).toEqual([
+    {re: /^\/chat\/([^/]+)$/, names: ['connection_id'], path: '/chat/:connection_id', cb},
+    {re: /^\/chat\/([^/]+)\/([^/]+)$/, names: ['connection_id', 'dialog_id'], path: '/chat/:connection_id/:dialog_id', cb},
+    {re: /^\/help$/, names: [], path: '/help', cb},
+    {re: /^(.*)$/, names: ['0'], path: '*', cb},
+  ]);
 
-  r.update({baseUrl: 'https://demo.convos.by/whatever///'});
-  r.go('https://demo.convos.by/whatever/foo');
-  expect(show).toEqual(['/foo', {}, true, true]);
+  r.go('/?x=2&y=3#0');
+  expect(r.path).toBe('/');
+  r.go('/chat/irc-foo?ts=2020');
+  expect(r.path).toBe('/chat/irc-foo');
 
-  r.go('/whatever/foo', {too: 'cool'});
-  expect(show).toEqual(['/foo', {too: 'cool'}, true, true]);
+  r.update({title: 'cool beans'});
+  r.go('/chat/irc-foo/%23x%2Fbar#cool_beans');
+  expect(r.path).toBe('/chat/irc-foo/%23x%2Fbar');
+  r.go('https://demo.convos.by/not/found');
+  r.go('https://demo.convos.by/not/found'); // noop
+  expect(r.path).toBe('/not/found');
 
-  r.go('/whatever/replace', null, true);
-  expect(replace).toEqual([{too: 'cool'}, '', '/whatever/replace']);
-  expect(show).toEqual(['/replace', {too: 'cool'}, true, false]);
+  r.update({baseUrl: 'https://demo.convos.by/whatever/', title: 'abs'});
+  r.go('/help', {foo: 'bar'}, true);
+  expect(r.path).toBe('/help');
 
-  r.go('/replace/cooler', {too: 'cooler'}, true);
-  expect(replace).toEqual([{too: 'cooler'}, '', '/whatever/replace/cooler']);
-  expect(show).toEqual(['/replace/cooler', {too: 'cooler'}, true, false]);
+  expect(matched).toEqual([
+    {hash: '0', '0': '/', x: '2', y: '3'},
+    {hash: '', connection_id: 'irc-foo', ts: '2020'},
+    {hash: 'cool_beans', connection_id: 'irc-foo', dialog_id: '#x/bar'},
+    {hash: '', '0': '/not/found'},
+    {hash: '', },
+  ]);
+
+  expect(history).toEqual([
+    ['pushState', {}, '', 'https://demo.convos.by/?x=2&y=3#0'],
+    ['pushState', {}, '', 'https://demo.convos.by/chat/irc-foo?ts=2020'],
+    ['pushState', {}, 'cool beans', 'https://demo.convos.by/chat/irc-foo/%23x%2Fbar#cool_beans'],
+    ['pushState', {}, 'cool beans', 'https://demo.convos.by/not/found'],
+    ['replaceState', {foo: 'bar'}, 'abs', 'https://demo.convos.by/whatever/help'],
+  ]);
 });
 
 test('param', () => {
@@ -67,7 +100,7 @@ test('param', () => {
   r.query.foo = 'bar';
   expect(r.param('foo')).toBe('bar');
 
-  r.ctx.params.foo = 'foo';
+  r.params.foo = 'foo';
   expect(r.param('foo')).toBe('foo');
 });
 

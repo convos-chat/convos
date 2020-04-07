@@ -16,7 +16,7 @@ const registerOp = user.api.operation('registerUser');
 let formEl;
 let observer;
 
-$: defaultPos = $route.pathParts[0] == 'register' ? '#signup' : 0;
+$: defaultPos = $route.path.indexOf('register') == -1 ? 0 : '#signup';
 $: scrollTo($route.hash || defaultPos);
 
 $: if ($loginOp.is('success')) {

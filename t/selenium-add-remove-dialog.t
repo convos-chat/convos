@@ -7,14 +7,14 @@ t::Helper->t_selenium_register($t);
 
 note 'Go to unknown conversation';
 my $join_btn      = '.messages-container .btn';
-my $too_cool_path = '/chat/irc-convos/%23too_cool';
+my $too_cool_path = '/chat/irc-convos/%23too%2Fcool';
 $t->navigate_ok($too_cool_path)->wait_for('.messages-container')->live_text_is($join_btn, 'Yes')
   ->live_text_is('.messages-container a[href="/chat"]', 'No');
 
-note 'Join #too_cool';
+note 'Join #too/cool';
 $t->click_ok($join_btn)->wait_for('a.message__from');
 
-note 'Open up settings for #too_cool and leave conversation';
+note 'Open up settings for #too/cool and leave conversation';
 my $leave_btn     = qq(.sidebar-left .form-actions .btn.for-sign-out-alt);
 my $convos_link   = qq(.sidebar-left a[href="/chat/irc-convos/%23convos"]);
 my $too_cool_link = qq(.sidebar-left a[href="$too_cool_path"]);
@@ -26,7 +26,7 @@ $t->click_ok(qq($convos_link i))->wait_for($leave_btn);
 $t->click_ok($leave_btn)->wait_for(qq(a[href="/settings/conversation"].has-path));
 
 note 'Add conversation dialog';
-$t->send_keys_ok('main [name="dialog_id"]', '#too_cool')->click_ok('main .btn.for-comment')
+$t->send_keys_ok('main [name="dialog_id"]', '#too/cool')->click_ok('main .btn.for-comment')
   ->wait_for($too_cool_link);
 
 note 'Part with command';

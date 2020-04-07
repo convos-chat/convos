@@ -10,7 +10,6 @@ dependencies:
   jest: 25.1.0
   jsdoc: 3.6.3
   jsonhtmlify: 0.0.1
-  page: 1.11.5
   querystring: 0.2.0
   twemoji: 12.1.5
 devDependencies:
@@ -3500,10 +3499,6 @@ packages:
     optional: true
     resolution:
       integrity: sha512-umZHcSrwlDHo2TGMXv0DZ8dIUGunZ2Iv68YZnrmCiBPkZ4aaOhtv7pXJKeki9k3qJ3RJr0cDyitcl5wEH3AYog==
-  /isarray/0.0.1:
-    dev: false
-    resolution:
-      integrity: sha1-ihis/Kmo9Bd+Cav8YDiTmwXR7t8=
   /isarray/1.0.0:
     resolution:
       integrity: sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=
@@ -4868,12 +4863,6 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==
-  /page/1.11.5:
-    dependencies:
-      path-to-regexp: 1.2.1
-    dev: false
-    resolution:
-      integrity: sha512-0JXUHc7Y8p1cPJQbhZSwaKO3p+bU3Rgny+OM5gJMKHWHvJKan/fsE5RUzEjRQolv9DzPOSVWfSOHz0lLxK19eA==
   /parent-module/1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -4958,12 +4947,6 @@ packages:
   /path-parse/1.0.6:
     resolution:
       integrity: sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
-  /path-to-regexp/1.2.1:
-    dependencies:
-      isarray: 0.0.1
-    dev: false
-    resolution:
-      integrity: sha1-szcFwUAjTYc8hyHHuf2LVB7Tr/k=
   /path-type/1.1.0:
     dependencies:
       graceful-fs: 4.2.3
@@ -7370,7 +7353,6 @@ specifiers:
   jsdoc: ^3.6.3
   jsonhtmlify: ^0.0.1
   node-sass: ^4.13.1
-  page: ^1.11.5
   postcss: ^7.0.27
   postcss-preset-env: ^6.7.0
   querystring: ^0.2.0

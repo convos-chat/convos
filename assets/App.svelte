@@ -7,7 +7,7 @@ import hljs from './js/hljs';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 import User from './store/User';
-import {closestEl, focusMainInputElements, loadScript, q, showEl, tagNameIs} from './js/util';
+import {focusMainInputElements, loadScript, q, showEl, tagNameIs} from './js/util';
 import {fade} from 'svelte/transition';
 import {l} from './js/i18n';
 import {onMount, setContext} from 'svelte';
@@ -52,24 +52,9 @@ function onGlobalKeydown(e) {
   e.preventDefault();
   focusMainInputElements();
 }
-
-function onWindowClick(e) {
-  // This is useful if you want to see on server side what is being clicked on
-  // user.omnibus.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
-
-  // Toggle activeMenu with href="#activeMenu:..."
-  const linkEl = e.target && e.target.closest('a');
-  const activeMenu = linkEl && linkEl.href.match(/#activeMenu:(\w*)/);
-  if (activeMenu) {
-    if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
-    route.update({activeMenu: activeMenu[1] == route.activeMenu ? '' : activeMenu[1]});
-    e.preventDefault();
-  }
-}
 </script>
 
 <svelte:window
-  on:click="{onWindowClick}"
   on:focus="{() => user.email && user.omnibus.send('ping')}"
   on:keydown="{onGlobalKeydown}"
   bind:innerHeight="{innerHeight}"

@@ -120,7 +120,7 @@ const onScroll = debounce(e => {
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
-<main class="main" bind:this="{messagesEl}" on:scroll="{onScroll}">
+<main class="main for-chat" bind:this="{messagesEl}" on:scroll="{onScroll}">
   <div class="messages-container" class:has-notifications="{dialog.is('notifications')}" bind:offsetHeight="{messagesHeight}">
     {#if !dialog.connection_id || user.findDialog(dialog)}
       <ChatMessages dialog="{dialog}" input="{chatInput}"/>

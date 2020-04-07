@@ -4,7 +4,7 @@ import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
-export let status = route.pathParts.slice(0).pop() || 'not_found';
+export let status = route.path.split('/').pop() || 'not_found';
 
 const user = getContext('user');
 const loadingStatus = process.env.load_user ? ['loading', 'pending'] : ['loading'];
@@ -16,7 +16,7 @@ const messages = {
   'unknown': 'Unknown error!',
 };
 
-$: realStatus = messages[status] ? status : 'unknown';
+$: realStatus = messages[status] ? status : 'not_found';
 
 route.update({title: l(messages[realStatus])});
 </script>
@@ -45,7 +45,7 @@ route.update({title: l(messages[realStatus])});
       <p><a href="{$route.baseUrl}" target="_self" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
     {:else if realStatus == 'offline'}
       <p><i class="fas fa-exclamation-triangle"></i> {l('Unable to connect to Convos. Please try again later or check your network connection.')}</p>
-      <p><a href="{$route.canonicalPath}" target="_self" class="btn"><Icon name="sync-alt"/> {l('Retry')}</a></p>
+      <p><a href="{location.href}" target="_self" class="btn"><Icon name="sync-alt"/> {l('Retry')}</a></p>
     {:else}
       <p>{@html lmd('Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away.', 'https://github.com/nordaaker/convos/issues')}</p>
       <p><a href="{$route.baseUrl}" target="_self" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>

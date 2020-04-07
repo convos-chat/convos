@@ -1,6 +1,3 @@
-import page from 'page';
-import qs from 'qs';
-import {omnibus} from './store/Omnibus';
 import {replaceClassName} from './js/util';
 
 import Chat from './page/Chat.svelte';
@@ -15,41 +12,31 @@ import SettingsAccount from './page/SettingsAccount.svelte';
 import SettingsAdmin from './page/SettingsAdmin.svelte';
 
 export function setupRouting(route, user) {
-  page('*', beforeDispatch(route));
+  route.to('/login', render(Login));
+  route.to('/register', render(Login));
 
-  render('/', route, RedirectToLast);
-  render('/login', route, Login);
-  render('/register', route, Login);
-  page('/api/user/logout.html', refresh(route));
+  const reload = (route) => location.reload();
+  route.to('/api/user/logout.html', reload);
 
-  render('/help', route, Help);
-  render('/settings/account', route, SettingsAccount);
-  render('/settings/connection', route, ConnectionAdd);
-  render('/settings/conversation', route, DialogAdd);
-  render('/settings', route, SettingsAdmin);
-  render('/search', route, Search);
+  route.to('/help', render(Help));
+  route.to('/settings/account', render(SettingsAccount));
+  route.to('/settings/connection', render(ConnectionAdd));
+  route.to('/settings/conversation', render(DialogAdd));
+  route.to('/settings', render(SettingsAdmin));
+  route.to('/search', render(Search));
 
-  render('/chat', route, Chat);
-  render('/chat/:connection_id', route, Chat);
-  render('/chat/:connection_id/:dialog_id', route, Chat);
+  route.to('/chat', render(Chat));
+  route.to('/chat/:connection_id', render(Chat));
+  route.to('/chat/:connection_id/:dialog_id', render(Chat));
 
-  const noop = (ctx, next) => {};
-  page('/docs/*', noop);
-  page('/file/*', noop);
-  page('/paste/*', noop);
+  const noop = () => {};
+  route.to('/docs/*', noop);
+  route.to('/file/*', noop);
+  route.to('/paste/*', noop);
 
-  render('*', route, Fallback);
+  route.to('*', render(Fallback));
 
   listenToDialogEvents(route, user);
-}
-
-function beforeDispatch(route) {
-  return (ctx, next) => {
-    const removeEls = document.querySelectorAll('.js-remove');
-    for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-    route.update({ctx, query: qs.parse(ctx.querystring)});
-    next();
-  };
 }
 
 function listenToDialogEvents(route, user) {
@@ -65,18 +52,13 @@ function listenToDialogEvents(route, user) {
   });
 }
 
-function render(path, route, component) {
-  page(path, (ctx, next) => {
-    const requireLogin = [Fallback, Login, RedirectToLast].indexOf(component) == -1;
-    const activeMenu = requireLogin ? '' : 'default';
+function render(component) {
+  return (route) => {
+    const removeEls = document.querySelectorAll('.js-remove');
+    for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
+    const requireLogin = [Fallback, Login].indexOf(component) == -1;
     replaceClassName('body', /(is-logged-)\S+/, requireLogin ? 'in' : 'out');
-    replaceClassName('body', /(page-)\S+/, route.pathParts[0].toLowerCase());
-    route.update({activeMenu, component, requireLogin});
-    if (omnibus.debug) console.log('[render:' + component.name + ']', path, JSON.stringify(route.pathParts));
-    if (requireLogin) route.update({lastUrl: ctx.canonicalPath});
-  });
-}
-
-function refresh(route) {
-  return (ctx, next) => (location.href = route.baseUrl + ctx.path);
+    route.update({component: route.match.match(/^\W*$/) ? RedirectToLast : component, requireLogin});
+    if (requireLogin) route.update({lastUrl: location.href});
+  };
 }

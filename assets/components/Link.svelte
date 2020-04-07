@@ -1,5 +1,4 @@
 <script>
-import {getContext} from 'svelte';
 import {route} from '../store/Route';
 
 let className = '';
@@ -12,8 +11,8 @@ export let style = '';
 
 export const focus = () => el.focus();
 
-$: absoluteHref = href.slice(0, 1) == '/' ? $route.basePath + href : href;
-$: hasPath = $route.canonicalPath.replace(/(#|\?).*/, '') == absoluteHref.replace(/(#|\?).*/, '');
+$: absoluteHref = href.indexOf('/') == 0 ? $route.basePath + href : href;
+$: hasPath = $route.path == absoluteHref.replace(/(#|\?).*/, '');
 </script>
 
 <a href="{absoluteHref}" class="{className}" class:has-path="{hasPath}" style="{style}" bind:this="{el}"><slot/></a>

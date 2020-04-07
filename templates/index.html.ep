@@ -5,7 +5,7 @@
   <article class="welcome-screen__about">
     %= include 'partial/convos-heading'
 
-    <p class="is-online">
+    <p>
       %=l 'Convos is the simplest way to use IRC, and it keeps you always online.'
     </p>
 
@@ -14,7 +14,7 @@
       %=l 'Downloading Convos...'
     </p>
 
-    <p class="has-js is-loading">
+    <p class="has-js">
       <i class="fas fa-spinner fa-spin"></i>
       %=l 'Starting Convos...'
     </p>
