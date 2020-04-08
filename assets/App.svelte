@@ -77,9 +77,7 @@ function onWindowClick(e) {
 
 {#if $user.is('offline')}
   <Fallback status="offline"/>
-{:else if !$route.component}
-  <Fallback status="loading"/>
-{:else if $route.requireLogin && $user.is('authenticated')}
+{:else if $route.component && $route.requireLogin && $user.is('authenticated')}
   <!--
     IMPORTANT! Looks like transition="..." inside <svelte:component/>,
     and a lot of $route updates prevents the <SidebarChat/> and/or

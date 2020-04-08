@@ -14,7 +14,7 @@
 
 <main class="main">
   % if ($file->mime_type =~ m!^image!) {
-    %= link_to $file->public_url(1), begin
+    %= link_to $file->public_url(1), download => 'download', begin
       %= image $file->public_url(1), alt => $file->filename
     % end
   % } else {
