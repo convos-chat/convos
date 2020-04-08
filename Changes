@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.03 2020-04-07T11:32:00+0800
+ - Fix parsing routes such as /chat/irc-convos/%23x%2Fbar
+ - Fix rendering of /file/1/lNqUVc43p0h4jaj5 paths
+
 4.02 2020-04-06T22:10:00+0800
  - Fix not being able to subscribe to store
  - Fix not showing the nav menu by default on small screens
