@@ -7,6 +7,7 @@ use File::HomeDir ();
 use Mojo::File 'path';
 use Mojo::JSON qw(false true);
 use Mojo::Util;
+use Scalar::Util 'blessed';
 
 our $VERSION = '4.03';
 
@@ -70,8 +71,8 @@ sub startup {
     }
   );
 
-  $self->hook(after_build_tx  => \&_after_build_tx);
   $self->hook(around_action   => \&_around_action);
+  $self->hook(after_build_tx  => \&_after_build_tx);
   $self->hook(before_dispatch => \&_before_dispatch);
   $self->core->start;
 }
@@ -83,30 +84,9 @@ sub _after_build_tx {
 
 sub _around_action {
   my ($next, $c, $action, $last) = @_;
-  my $wantarray = wantarray;
-  my @args      = $wantarray ? $c->$next : (scalar $c->$next);
-
-  if (Scalar::Util::blessed($args[0]) && $args[0]->can('then')) {
-    my $tx = $c->tx;
-    my $p  = Mojo::Promise->resolve($args[0]);
-    $c->render_later if $last;
-    $p->then(
-      $last || sub { $c->continue if $_[0] },
-      sub {
-        if ($c->openapi->spec) {
-          $c->log->error($_[0]);
-          $c->render(openapi => {errors => [{message => $_[0], path => '/'}]}, status => 500);
-        }
-        else {
-          $c->reply->exception($_[0]);
-        }
-        undef $tx;
-      },
-    )->wait;
-    return unless $last;
-  }
-
-  return $wantarray ? @args : $args[0];
+  my $res = $c->$next;
+  $c->render_later if blessed $res and $res->can('then');
+  return $res;
 }
 
 sub _before_dispatch {

@@ -7,9 +7,12 @@ use Mojo::JSON qw(false true);
 use Mojo::Util 'url_unescape';
 
 my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} || '127.0.0.1,::1');
+my $EXCEPTION_HELPER;
 
 sub register {
   my ($self, $app, $config) = @_;
+
+  $EXCEPTION_HELPER = $app->renderer->get_helper('reply.exception');
 
   $app->helper('asset_version'               => \&_asset_version);
   $app->helper('backend.dialog'              => \&_backend_dialog);
@@ -18,6 +21,7 @@ sub register {
   $app->helper('l'                           => \&_l);
   $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                    => \&_settings);
+  $app->helper('reply.exception'             => \&_exception);
   $app->helper('social'                      => \&_social);
   $app->helper('unauthorized'                => \&_unauthorized);
   $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
@@ -80,6 +84,14 @@ sub _backend_connection_create_p {
   } or do {
     return Mojo::Promise->reject($@);
   };
+}
+
+sub _exception {
+  my ($c, $err) = @_;
+  return $EXCEPTION_HELPER->($c, $err) unless $c->openapi->spec;
+  $c->app->log->err($err);
+  $err =~ s!\sat\s\S+.*!!s;
+  return $c->render(openapi => {errors => [{message => "$err", path => '/'}]}, status => 500);
 }
 
 sub _l {
