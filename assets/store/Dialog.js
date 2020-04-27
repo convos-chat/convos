@@ -30,7 +30,6 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'omnibus', params.omnibus || omnibus);
     this.prop('ro', 'path', route.dialogPath(params));
 
-    this.prop('rw', 'endOfHistory', false);
     this.prop('rw', 'errors', 0);
     this.prop('rw', 'first_time', false);
     this.prop('rw', 'last_active', new Time(params.last_active));
@@ -38,6 +37,7 @@ export default class Dialog extends Reactive {
     this.prop('rw', 'messages', []);
     this.prop('rw', 'modes', {});
     this.prop('rw', 'name', params.name || params.dialog_id || params.connection_id || 'ERR');
+    this.prop('rw', 'startOfHistory', null);
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
@@ -141,7 +141,7 @@ export default class Dialog extends Reactive {
 
     // All of the history is loaded
     const hasMessages = this.messages.length;
-    if (hasMessages && opParams.before && this.endOfHistory) return;
+    if (hasMessages && opParams.before && this.startOfHistory) return;
 
     // Load messages
     this.update({status: 'loading'});
@@ -152,7 +152,7 @@ export default class Dialog extends Reactive {
     if (this.messages.length <= 10) this.update({first_time: true});
 
     // End of history
-    if (hasMessages && opParams.before && body.end) this.update({endOfHistory: true});
+    if (hasMessages && opParams.before && body.end) this.update({startOfHistory: this.messages[0].ts});
 
     // Reload the whole conversation if we are not at the end
     if (maybe == 'after' && !body.end) {

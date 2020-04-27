@@ -1,18 +1,19 @@
 <script>
-import ChatDialogAdd from '../components/ChatDialogAdd.svelte';
+import ChatMessages from '../js/ChatMessages';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatMessages from '../components/ChatMessages.svelte';
+import ChatMessagesContainer from '../components/ChatMessagesContainer.svelte';
+import ChatMessagesStatusLine from '../components/ChatMessagesStatusLine.svelte';
+import ChatParticipants from '../components/ChatParticipants.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
-import Link from '../components/Link.svelte';
-import TextField from '../components/form/TextField.svelte';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
-import {closestEl, debounce, modeClassNames, q} from '../js/util';
 import {focusMainInputElements} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
+import {q} from '../js/util';
 import {route} from '../store/Route';
 
+const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
 const user = getContext('user');
 
@@ -21,40 +22,36 @@ let chatInput;
 let messagesEl;
 
 // Variables for scrolling
-let [messagesHeight, messagesHeightLast] = [0, 0];
+let messagesHeight = 0;
 let observer;
-let scrollPos = 'bottom';
 
 // Variables for calculating active connection and dialog
 let connection = {};
 let dialog = user.notifications;
-let previousDialog = null;
 let unsubscribe = {};
+
+chatMessages.attach({connection, dialog, user});
 
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
 $: dragAndDrop.attach(document, messagesEl, chatInput && chatInput.getUploadEl());
+$: messages = chatMessages.merge($dialog.messages);
 
 afterUpdate(() => {
-  // Load embeds when message gets into viewport
   observer = observer || new IntersectionObserver(messageElObserved, {rootMargin: '0px'});
   q(document, '.message', messageEl => {
     if (!messageEl.classList.contains('is-observed')) observer.observe(messageEl);
     messageEl.classList.add('is-observed');
   });
-
-  // Keep the scroll position
-  if (scrollPos == 'bottom') {
-    messagesEl.scrollTop = messagesHeight;
-  }
-  else if (messagesHeightLast && messagesHeightLast < messagesHeight) {
-    messagesEl.scrollTop = messagesHeight - messagesHeightLast;
-    if (scrollPos != 'top') messagesHeightLast = 0;
-  }
 });
 
 onMount(() => focusMainInputElements('chat_input'));
 onDestroy(onClose);
+
+function toggleDetails(e) {
+  const messageEl = e.target.closest('.message');
+  user.embedMaker.toggleDetails(messageEl, messages[messageEl.dataset.index]);
+}
 
 function setDialogFromRoute(route) {
   const [connection_id, dialog_id] = ['connection_id', 'dialog_id'].map(k => route.param(k));
@@ -64,15 +61,13 @@ function setDialogFromRoute(route) {
 }
 
 function setDialogFromUser(user) {
-  if (user.activeDialog == previousDialog) return;
+  if (user.activeDialog == chatMessages.dialog) return;
   if (unsubscribe.dialog) onClose();
   if (user.omnibus.debug > 1) console.log('[setDialogFromUser]', user.activeDialog.name);
 
   dialog = user.activeDialog;
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
-  messagesHeightLast = 0;
-  previousDialog = dialog;
-  scrollPos = 'bottom';
+  chatMessages.attach({connection, dialog, user});
 
   q(document, '.message__embed', embedEl => embedEl.remove());
   dialog.load({before: 'maybe'});
@@ -93,57 +88,43 @@ function onClose() {
   if (unsubscribe.dialog) unsubscribe.dialog();
   dragAndDrop.detach();
 }
-
-const onScroll = debounce(e => {
-  if (!messagesEl) return;
-
-  const offsetHeight = messagesEl.offsetHeight;
-  const scrollTop = messagesEl.scrollTop;
-
-  scrollPos = offsetHeight > messagesHeight || scrollTop + 20 > messagesHeight - offsetHeight ? 'bottom'
-            : scrollTop < 100 ? 'top'
-            : 'middle';
-
-  if (scrollPos == 'top' && !dialog.is('loading')) {
-    if (dialog.messages.length) dialog.load({before: 0});
-    messagesHeightLast = messagesHeight;
-  }
-}, 20);
 </script>
 
 <ChatHeader>
   <h1>
     <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">
-      <Icon name="{dialog.connection_id ? 'sliders-h' : 'bell'}"/><span>{l(dialog.name)}</span>
+      <Icon name="sliders-h"/><span>{l(dialog.name)}</span>
     </a>
   </h1>
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
-<main class="main for-chat" bind:this="{messagesEl}" on:scroll="{onScroll}">
-  <div class="messages-container" class:has-notifications="{dialog.is('notifications')}" bind:offsetHeight="{messagesHeight}">
-    {#if !dialog.connection_id || user.findDialog(dialog)}
-      <ChatMessages dialog="{dialog}" input="{chatInput}"/>
-    {:else}
-      <ChatDialogAdd dialog="{dialog}"/>
-    {/if}
-  </div>
+<main class="main for-chat" bind:this="{messagesEl}">
+  <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
+    {#each messages as message, i}
+      {#if chatMessages.dayChanged(messages, i)}
+        <ChatMessagesStatusLine class="for-day-changed" icon="calendar-alt">{message.ts.getHumanDate()}</ChatMessagesStatusLine>
+      {/if}
+
+      {#if i && i == messages.length - $dialog.unread}
+        <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
+      {/if}
+
+      <div class="{chatMessages.classNames(messages, i)}" data-index="{i}" data-ts="{message.ts.toISOString()}">
+        <Icon name="pick:{message.fromId}" color="{message.color}"/>
+        <b class="message__ts" aria-labelledby="{message.id + '_ts'}">{message.ts.getHM()}</b>
+        <div role="tooltip" id="{message.id + '_ts'}">{message.ts.toLocaleString()}</div>
+        <a href="#input:{message.from}" on:click|preventDefault="{() => chatInput.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
+        <div class="message__text">
+          {#if chatMessages.canToggleDetails(message)}
+            <Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}" on:click="{toggleDetails}"/>
+          {/if}
+          {@html message.markdown}
+        </div>
+      </div>
+    {/each}
+  </ChatMessagesContainer>
 </main>
 
-{#if !dialog.is('notifications')}
-  <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
-{/if}
-
-{#if dialog.participants().length}
-  <div class="sidebar-right">
-    <nav class="sidebar-right__nav">
-      <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
-      {#each dialog.participants() as participant}
-        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
-          <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>
-          <span>{participant.nick}</span>
-        </Link>
-      {/each}
-    <nav>
-  </div>
-{/if}
+<ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
+<ChatParticipants dialog="{dialog}"/>

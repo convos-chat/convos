@@ -11,7 +11,6 @@ export default class Search extends Dialog {
     });
 
     this.prop('rw', 'query', null);
-
     this.update({status: 'success'});
   }
 

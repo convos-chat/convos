@@ -25,7 +25,7 @@ export function setupRouting(route, user) {
   route.to('/settings', render(SettingsAdmin));
   route.to('/search', render(Search));
 
-  route.to('/chat', render(Chat));
+  route.to('/chat', render(Search));
   route.to('/chat/:connection_id', render(Chat));
   route.to('/chat/:connection_id/:dialog_id', render(Chat));
 
