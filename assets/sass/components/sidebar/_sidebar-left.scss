@@ -1,6 +1,7 @@
 .sidebar-left {
   @extend %sidebar-wrapper-chrome;
   background: var(--sidebar-left-bg);
+  border-right: var(--sidebar-left-border);
   width: var(--sidebar-left-width);
   left: 0;
 
