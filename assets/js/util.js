@@ -90,13 +90,15 @@ export function copyToClipboard(el) {
  * @returns {Function} A debounced version of "cb".
  */
 export function debounce(cb, delay) {
-  let timeout;
-
-  return function(...args) {
+  const db = function(...args) {
     const self = this; // eslint-disable-line no-invalid-this
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(function() { cb.apply(self, args) }, delay);
+    db.isQueued = true;
+    if (db.debounceTid) clearTimeout(db.debounceTid);
+    db.debounceTid = setTimeout(function() { cb.apply(self, args); db.debounceTid = 0 }, delay);
   };
+
+  db.debounceTid = 0;
+  return db;
 }
 
 /**

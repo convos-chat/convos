@@ -21,6 +21,8 @@ const MONTH_ABBR = {
 
 const ONE_DAY = 60 * 60 * 24;
 
+export const isISOTimeString = str => !!String(str || '').match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+
 export default class Time extends Date {
   constructor(params) {
     if (typeof params == 'string' && !params.match(/Z$/)) params += 'Z';
@@ -60,6 +62,16 @@ export default class Time extends Date {
   getMonthAbbr() {
     return MONTH_ABBR[this.getMonth()] || '';
   }
+
+  setDate(param, setUTC) { return [setUTC ? super.setUTCDate(param) : super.setDate(param), this][1] }
+  setFullYear(param, setUTC) { return [setUTC ? super.setUTCFullYear(param) : super.setFullYear(param), this][1] }
+  setHours(param, setUTC) { return [setUTC ? super.setUTCHours(param) : super.setHours(param), this][1] }
+  setMilliseconds(param, setUTC) { return [setUTC ? super.setUTCMilliseconds(param) : super.setMilliseconds(param), this][1] }
+  setMinutes(param, setUTC) { return [setUTC ? super.setUTCMinutes(param) : super.setMinutes(param), this][1] }
+  setMonth(param, setUTC) { return [setUTC ? super.setUTCMonth(param) : super.setMonth(param), this][1] }
+  setSeconds(param, setUTC) { return [setUTC ? super.setUTCSeconds(param) : super.setSeconds(param), this][1] }
+  setTime(param) { return [super.setTime(param), this][1] }
+  setYear(param) { return [this.setYear(param), this][1] }
 
   /**
    * toEpoch() returns getItem() devided by 1000.

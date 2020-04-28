@@ -8,11 +8,14 @@ import ChatParticipants from '../components/ChatParticipants.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import Scrollspy from '../js/Scrollspy';
+import Time from '../js/Time';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
 import {focusMainInputElements, q} from '../js/util';
+import {isISOTimeString} from '../js/Time';
 import {l, topicOrStatus} from '../js/i18n';
 import {route} from '../store/Route';
 
+const before = {}; // Holds values so we can compare before/after changes
 const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
 const scrollSpy = new Scrollspy();
@@ -30,35 +33,32 @@ let connection = {};
 let dialog = user.notifications;
 let unsubscribe = {};
 
-chatMessages.attach({connection, dialog, user});
-
-unsubscribe.observed = scrollSpy.on('observed', entry => {
-  if (!entry.isIntersecting) return;
-  const message = dialog.messages[entry.target.dataset.index] || {};
-  if (message.embeds) user.embedMaker.render(entry.target, message.embeds);
-});
-
+$: maybeReloadMessages($route);
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
-$: dragAndDrop.attach(document, mainEl, chatInput && chatInput.getUploadEl());
 $: messages = chatMessages.merge($dialog.messages);
+$: window.M = messages;
+$: dragAndDrop.attach(document, mainEl, chatInput && chatInput.getUploadEl());
+
+chatMessages.attach({connection, dialog, user});
+
+onMount(() => {
+  focusMainInputElements('chat_input');
+});
 
 afterUpdate(() => {
 
   // Remove already embedded elements when scrolling back in history
   const firstTs = messages.length && messages[0].ts.toISOString();
-  if (firstTs && mainEl.firstTs != firstTs) {
-    mainEl.firstTs = firstTs;
-    q(document, '.message__embed', embedEl => embedEl.remove());
-  }
+  if (firstTs && before.chatFirstTs != firstTs) q(document, '.message__embed', embedEl => embedEl.remove());
+  before.chatFirstTs = firstTs;
 
   // Make sure we observe all message elements
   scrollSpy.wrapper = mainEl;
   scrollSpy.observe('.message');
-});
-
-onMount(() => {
-  focusMainInputElements('chat_input');
+  if (messagesHeight != before.chatMessagesHeight) scrollSpy.keepPos(messagesHeight);
+  before.chatMessagesHeight = messagesHeight;
+  q(mainEl, '.message', el => el.classList[el.dataset.ts == $route.hash ? 'add' : 'remove']('has-focus'));
 });
 
 onDestroy(() => {
@@ -66,6 +66,36 @@ onDestroy(() => {
   Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
   dragAndDrop.detach();
 });
+
+unsubscribe.observed = scrollSpy.on('observed', entry => {
+  if (!entry.isIntersecting) return;
+  const message = dialog.messages[entry.target.dataset.index] || {};
+  if (message.embeds) user.embedMaker.render(entry.target, message.embeds);
+});
+
+unsubscribe.scroll = scrollSpy.on('scroll', entry => {
+  if (!dialog.messages.length || dialog.is('loading')) return;
+
+  if (scrollSpy.pos == 'top') {
+    const before = dialog.messages[0].ts.toISOString();
+    route.go(dialog.path + '#' + before, {replace: true});
+    if (!dialog.startOfHistory) dialog.load({before});
+  }
+  else if (scrollSpy.pos == 'bottom') {
+    const after = dialog.messages.slice(-1)[0].ts.toISOString();
+    route.go(dialog.path + '#' + after, {replace: true});
+    if (!dialog.endOfHistory) dialog.load({after});
+  }
+  else {
+    const els = scrollSpy.findVisibleElements('.message[data-ts]', 1);
+    route.go(dialog.path + '#' + els[0].dataset.ts, {replace: true});
+  }
+});
+
+function maybeReloadMessages(route) {
+  if (before.hasHash && !route.hash && !dialog.endOfHistory) dialog.load({});
+  before.hasHash = route.hash ? true : false;
+}
 
 function toggleDetails(e) {
   const messageEl = e.target.closest('.message');
@@ -79,7 +109,7 @@ function setDialogFromRoute(route) {
   user.setActiveDialog({connection_id, dialog_id}); // Triggers setDialogFromUser()
 }
 
-function setDialogFromUser(user) {
+async function setDialogFromUser(user) {
   if (user.activeDialog == chatMessages.dialog) return;
 
   if (unsubscribe.dialog) {
@@ -92,10 +122,15 @@ function setDialogFromUser(user) {
   dialog = user.activeDialog;
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
   chatMessages.attach({connection, dialog, user});
-
-  dialog.load({before: 'maybe'});
   route.update({title: dialog.title});
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
+
+  let after = isISOTimeString(route.hash) && new Time(route.hash);
+  await dialog.load({after: after ? after.setSeconds(after.getSeconds() - 5).toISOString() : 'maybe'});
+  if (after && dialog.messages.length < dialog.chunkSize) {
+    const before = dialog.messages[0] && dialog.messages[0].ts.toISOString() || new Time().toISOString();
+    await dialog.load({before});
+  }
 }
 </script>
 
@@ -108,7 +143,7 @@ function setDialogFromUser(user) {
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
-<main class="main for-chat" bind:this="{mainEl}">
+<main class="main for-chat" bind:this="{mainEl}"  on:scroll="{scrollSpy.onScroll}">
   <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
     {#each messages as message, i}
       {#if chatMessages.dayChanged(messages, i)}

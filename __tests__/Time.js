@@ -1,4 +1,13 @@
 import Time from '../assets/js/Time';
+import {isISOTimeString} from '../assets/js/Time';
+
+test('isISOTimeString', () => {
+  expect(isISOTimeString(42)).toBe(false);
+  expect(isISOTimeString(false)).toBe(false);
+  expect(isISOTimeString(null)).toBe(false);
+  expect(isISOTimeString('2019-10-18T06:34:49')).toBe(true);
+  expect(isISOTimeString('2019-10-18T06:34:49.000Z')).toBe(true);
+});
 
 test('constructor', () => {
   const t = new Time('2020-02-24T13:31:00');

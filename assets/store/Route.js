@@ -43,6 +43,7 @@ export default class Route extends Reactive {
   }
 
   go(path, state = {}, replace = false) {
+    if (state.replace) [replace, state] = [true, this.state];
     if (path.indexOf(this.baseUrl) == 0) path = path.substr(this.baseUrl.length);
     const url = this.baseUrl + path;
     if (url == this._location.href) return this;

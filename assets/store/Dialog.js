@@ -24,12 +24,14 @@ export default class Dialog extends Reactive {
 
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
     this.prop('ro', 'api', params.api);
+    this.prop('ro', 'chunkSize', 60);
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
     this.prop('ro', 'omnibus', params.omnibus || omnibus);
     this.prop('ro', 'path', route.dialogPath(params));
 
+    this.prop('rw', 'endOfHistory', null);
     this.prop('rw', 'errors', 0);
     this.prop('rw', 'first_time', false);
     this.prop('rw', 'last_active', new Time(params.last_active));
@@ -125,23 +127,9 @@ export default class Dialog extends Reactive {
     if (maybe && this.is('success')) return this;
     if (maybe == 'after') delete this.participantsLoaded;
 
-    // params = {after, before, limit}
-    const opParams = {...params, connection_id: this.connection_id, dialog_id: this.dialog_id};
-
-    // Try to load as much as possible into the future
-    if (opParams.after == 'maybe' && !opParams.limit) opParams.limit = 200;
-
-    // Normalize "after" and "before"
-    ['after', 'before'].forEach(k => {
-      if (opParams[k] == 'maybe') opParams[k] = this._realMessage(k == 'before' ? 0 : -1);
-      if (typeof opParams[k] == 'number') opParams[k] = this._realMessage(opParams[k]);
-      if (isType(opParams[k], 'object')) opParams[k] = opParams[k].ts.toISOString();
-      if (isType(opParams[k], 'undef')) return delete opParams[k];
-    });
-
-    // All of the history is loaded
-    const hasMessages = this.messages.length;
-    if (hasMessages && opParams.before && this.startOfHistory) return;
+    const opParams = this._loadOpParams(params);
+    if (this._hasEndOfStream(opParams)) return this;
+    if (this._shouldClearMessages(opParams)) this.update({messages: []});
 
     // Load messages
     this.update({status: 'loading'});
@@ -152,7 +140,9 @@ export default class Dialog extends Reactive {
     if (this.messages.length <= 10) this.update({first_time: true});
 
     // End of history
+    const hasMessages = this.messages.length;
     if (hasMessages && opParams.before && body.end) this.update({startOfHistory: this.messages[0].ts});
+    if (hasMessages && !opParams.before && body.end) this.update({endOfHistory: this.messages.slice(-1)[0].ts});
 
     // Reload the whole conversation if we are not at the end
     if (maybe == 'after' && !body.end) {
@@ -279,6 +269,29 @@ export default class Dialog extends Reactive {
     return '';
   }
 
+  _hasEndOfStream(opParams) {
+    if (!this.messages.length) return false;
+    return (opParams.before && this.startOfHistory) || (!opParams.before && this.endOfHistory);
+  }
+
+  _loadOpParams(params) {
+    const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id};
+
+    // Try to load as much as possible into the future
+    opParams.limit = params.after == 'maybe' && !params.limit ? 200 : this.chunkSize;
+
+    // Normalize "after" and "before"
+    ['after', 'before'].forEach(k => {
+      if (params.hasOwnProperty(k)) opParams[k] = params[k];
+      if (opParams[k] == 'maybe') opParams[k] = this._realMessage(k == 'before' ? 0 : -1);
+      if (typeof opParams[k] == 'number') opParams[k] = this._realMessage(opParams[k]);
+      if (isType(opParams[k], 'object')) opParams[k] = opParams[k].ts.toISOString();
+      if (isType(opParams[k], 'undef')) return delete opParams[k];
+    });
+
+    return opParams;
+  }
+
   _loadParticipants() {
     if (this.participantsLoaded || !this.dialog_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
@@ -319,6 +332,18 @@ export default class Dialog extends Reactive {
     }
 
     return null;
+  }
+
+  _shouldClearMessages(opParams) {
+    const firstMessage = this.messages[0];
+    if (!firstMessage) return false;
+    if (opParams.before && opParams.before != firstMessage.ts.toISOString()) return true;
+
+    const lastMessage = this.messages.slice(-1)[0];
+    if (opParams.after && opParams.after != lastMessage.ts.toISOString()) return true;
+    if (!opParams.after && !opParams.before && !this.endOfHistory) return true;
+
+    return false;
   }
 
   _updateParticipants(params) {

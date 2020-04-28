@@ -93,6 +93,11 @@
   &.has-not-same-from {
     margin-top: 0.5rem;
   }
+
+  &.has-focus .message__ts {
+    font-weight: bold;
+    opacity: 1;
+  }
 }
 
 .message blockquote {
