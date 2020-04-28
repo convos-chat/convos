@@ -34,6 +34,7 @@ export function setupRouting(route, user) {
   route.to('/file/*', noop);
   route.to('/paste/*', noop);
 
+  route.to('/', render(RedirectToLast));
   route.to('*', render(Fallback));
 
   listenToDialogEvents(route, user);
@@ -56,9 +57,9 @@ function render(component) {
   return (route) => {
     const removeEls = document.querySelectorAll('.js-remove');
     for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-    const requireLogin = [Fallback, Login].indexOf(component) == -1;
+    const requireLogin = [Fallback, Login, RedirectToLast].indexOf(component) == -1;
     replaceClassName('body', /(is-logged-)\S+/, requireLogin ? 'in' : 'out');
-    route.update({component: route.match.match(/^\W*$/) ? RedirectToLast : component, requireLogin});
+    route.update({component, requireLogin});
     if (requireLogin) route.update({lastUrl: location.href});
   };
 }
