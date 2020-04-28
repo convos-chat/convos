@@ -7,23 +7,23 @@ import ChatMessagesStatusLine from '../components/ChatMessagesStatusLine.svelte'
 import ChatParticipants from '../components/ChatParticipants.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
+import Scrollspy from '../js/Scrollspy';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
-import {focusMainInputElements} from '../js/util';
+import {focusMainInputElements, q} from '../js/util';
 import {l, topicOrStatus} from '../js/i18n';
-import {q} from '../js/util';
 import {route} from '../store/Route';
 
 const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
+const scrollSpy = new Scrollspy();
 const user = getContext('user');
 
 // Elements
 let chatInput;
-let messagesEl;
+let mainEl;
 
 // Variables for scrolling
 let messagesHeight = 0;
-let observer;
 
 // Variables for calculating active connection and dialog
 let connection = {};
@@ -32,21 +32,40 @@ let unsubscribe = {};
 
 chatMessages.attach({connection, dialog, user});
 
+unsubscribe.observed = scrollSpy.on('observed', entry => {
+  if (!entry.isIntersecting) return;
+  const message = dialog.messages[entry.target.dataset.index] || {};
+  if (message.embeds) user.embedMaker.render(entry.target, message.embeds);
+});
+
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
-$: dragAndDrop.attach(document, messagesEl, chatInput && chatInput.getUploadEl());
+$: dragAndDrop.attach(document, mainEl, chatInput && chatInput.getUploadEl());
 $: messages = chatMessages.merge($dialog.messages);
 
 afterUpdate(() => {
-  observer = observer || new IntersectionObserver(messageElObserved, {rootMargin: '0px'});
-  q(document, '.message', messageEl => {
-    if (!messageEl.classList.contains('is-observed')) observer.observe(messageEl);
-    messageEl.classList.add('is-observed');
-  });
+
+  // Remove already embedded elements when scrolling back in history
+  const firstTs = messages.length && messages[0].ts.toISOString();
+  if (firstTs && mainEl.firstTs != firstTs) {
+    mainEl.firstTs = firstTs;
+    q(document, '.message__embed', embedEl => embedEl.remove());
+  }
+
+  // Make sure we observe all message elements
+  scrollSpy.wrapper = mainEl;
+  scrollSpy.observe('.message');
 });
 
-onMount(() => focusMainInputElements('chat_input'));
-onDestroy(onClose);
+onMount(() => {
+  focusMainInputElements('chat_input');
+});
+
+onDestroy(() => {
+  if (dialog.setLastRead) dialog.setLastRead();
+  Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
+  dragAndDrop.detach();
+});
 
 function toggleDetails(e) {
   const messageEl = e.target.closest('.message');
@@ -62,31 +81,21 @@ function setDialogFromRoute(route) {
 
 function setDialogFromUser(user) {
   if (user.activeDialog == chatMessages.dialog) return;
-  if (unsubscribe.dialog) onClose();
+
+  if (unsubscribe.dialog) {
+    unsubscribe.dialog();
+    if (dialog.setLastRead) dialog.setLastRead();
+  }
+
   if (user.omnibus.debug > 1) console.log('[setDialogFromUser]', user.activeDialog.name);
 
   dialog = user.activeDialog;
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
   chatMessages.attach({connection, dialog, user});
 
-  q(document, '.message__embed', embedEl => embedEl.remove());
   dialog.load({before: 'maybe'});
   route.update({title: dialog.title});
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
-}
-
-function messageElObserved(entries, observer) {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    const message = dialog.messages[e.target.dataset.index] || {};
-    if (message.embeds) user.embedMaker.render(e.target, message.embeds);
-  });
-}
-
-function onClose() {
-  if (dialog.setLastRead) dialog.setLastRead();
-  if (unsubscribe.dialog) unsubscribe.dialog();
-  dragAndDrop.detach();
 }
 </script>
 
@@ -99,7 +108,7 @@ function onClose() {
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
 </ChatHeader>
 
-<main class="main for-chat" bind:this="{messagesEl}">
+<main class="main for-chat" bind:this="{mainEl}">
   <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
     {#each messages as message, i}
       {#if chatMessages.dayChanged(messages, i)}
