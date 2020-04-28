@@ -16,6 +16,7 @@ const CACHE_RULES = [
   [new RegExp('^' + BASE_PATH + 'api/'), STRATEGY_BYPASS],
   [new RegExp('^' + BASE_PATH + 'api$'), STRATEGY_NETWORK_FIRST],
   [new RegExp('\\.development\\.(css|js)$'), STRATEGY_NETWORK_FIRST],
+  [new RegExp('^' + BASE_PATH + 'themes/'), STRATEGY_NETWORK_FIRST],
   [new RegExp('^' + BASE_PATH + 'asset/'), STRATEGY_CACHE_FIRST],
   [new RegExp('^' + BASE_PATH + 'images/'), STRATEGY_CACHE_FIRST],
   [new RegExp('^' + BASE_PATH + 'font/'), STRATEGY_CACHE_FIRST],
